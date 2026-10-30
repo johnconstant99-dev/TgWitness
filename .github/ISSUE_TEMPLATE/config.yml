@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Investigation handbook and troubleshooting
+    url: https://github.com/phishdestroy/TgWitness/wiki
+    about: Start with account setup, collection, verified handoffs, the FAQ and troubleshooting.
+  - name: Security reports
+    url: https://github.com/phishdestroy/TgWitness/blob/main/.github/SECURITY.md
+    about: Use the private reporting process for suspected vulnerabilities.

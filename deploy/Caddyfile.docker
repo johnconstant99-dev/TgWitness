@@ -1,0 +1,11 @@
+# TGWITNESS_DOMAIN is a hostname, without https:// or a path.
+{$TGWITNESS_DOMAIN} {
+    request_body {
+        max_size 12MB
+    }
+    reverse_proxy tgwitness:8787 {
+        transport http {
+            response_header_timeout 10m
+        }
+    }
+}

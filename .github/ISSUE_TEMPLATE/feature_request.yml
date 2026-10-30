@@ -1,0 +1,17 @@
+name: Feature request
+description: Describe a workflow that TgWitness could support better.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe your workflow without private account or source information.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain the expected result and any effect on collection scope or evidence interpretation.
+    validations:
+      required: true

@@ -1,0 +1,15 @@
+<p class="guide-outcome">Start with the symptom. Check one layer at a time.</p>
+<h2 id="panel">The panel asks for a token</h2>
+<p>Use the panel token from the local file shown by the launcher. For Docker, run <code>docker compose exec tgwitness cat /data/panel-token.txt</code>. A Telegram login code, BotFather token and read-only witness token serve different purposes.</p>
+<h2 id="network">Telegram does not connect</h2>
+<p>Open connection settings and run the connection check. If using a public proxy, try another entry and save the route explicitly. Check the proxy type and supported secret format. Refreshing a public list does not switch the account’s route.</p>
+<h2 id="messages">Connected, but no new messages</h2>
+<ol><li>Check that observation is running in the right workspace.</li><li>Confirm the source is selected and visible to that account.</li><li>Send a unique new message in a controlled group and look for that exact text.</li><li>Review the operational journal for interruptions, delayed work or Telegram errors.</li></ol>
+<p>Historical snapshots and new-message events are different. A quiet source can be connected without producing new messages. Use a controlled delivery test when completeness matters.</p>
+<h2 id="wait">FloodWait or a gap after a restart</h2>
+<p>FloodWait means Telegram requires a pause. Wait for the indicated period and review collection workload; repeated reconnects do not remove the limit. Saved update state helps catch up after a restart, but expired updates and some interruption windows remain limitations. Record the gap rather than treating the journal as complete.</p>
+<h2 id="bot">The bot is configured but posts nothing</h2>
+<p>Make sure the witness process is actually running, the bot can post in the channel and the witness can reach the collector and Bot API. Inspect its journal for failed publications. A successful collector poll alone does not confirm a channel post.</p>
+<h2 id="github">Where is GitHub token integration?</h2>
+<p><strong>Planned.</strong> Extras describes the proposed fork and build verification workflow. There is currently no GitHub token form or automated attestation that a running installation matches a repository. See the <a href="@@REPO_URL@@/blob/@@BRANCH@@/docs/PRODUCT.md">current feature status</a>.</p>
+<p>When reporting a problem, include the version, operating system, steps and a redacted error. Keep sessions, tokens, private messages and the data directory out of public issues.</p>

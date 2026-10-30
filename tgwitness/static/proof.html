@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark"><meta name="theme-color" content="#0b1120">
+  <title>TgWitness · Proof</title><link rel="icon" href="mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="proof.css"><script src="proof.js" defer></script>
+</head>
+<body>
+  <header class="wrap"><a class="brand" href="./"><img src="mark.svg" width="34" height="34" alt="">TgWitness <span>PROOF</span></a><button id="language" type="button" aria-label="Switch language">EN</button></header>
+  <main class="wrap">
+    <noscript><p class="boundary">Для загрузки подписанных ответов нужен JavaScript. Enable JavaScript to load the signed collector replies.</p></noscript>
+    <section class="intro"><p class="eyebrow" data-copy="eyebrow">НЕЗАВИСИМЫЙ ПРОЦЕСС НАБЛЮДЕНИЯ</p><h1 data-copy="heading">Сбор виден.<br>Историю можно проверить.</h1><p class="lead" data-copy="lead">Подписанные ответы коллекторов, счётчики сообщений и контрольные хеши. Без публикации переписки.</p><p id="title" class="instance"></p></section>
+    <div class="status-line" role="status"><span class="status-dot"></span><span id="connection" data-copy="loading">Получаем первый ответ…</span><span id="updated"></span></div>
+    <section class="totals" aria-label="Overview"><div><span data-copy="workspaces">Аккаунтов на стенде</span><strong id="total-accounts">—</strong></div><div><span data-copy="collecting">Сейчас собирают</span><strong id="total-active">—</strong></div><div><span data-copy="delta">Новых между проверками</span><strong id="total-delta">—</strong></div></section>
+    <div class="section-label"><h2 data-copy="accounts">Коллекторы</h2><p data-copy="intervalNote">Каждый аккаунт — отдельный журнал и ключ.</p></div>
+    <section id="accounts" class="accounts" aria-label="Collectors"></section>
+    <section class="explanation"><div><span class="step">01</span><h2 data-copy="checkTitle">Скачайте доказательство</h2><p data-copy="checkBody">JSON содержит подписанный ответ коллектора и подпись witness. Сверьте отпечатки ключей по отдельному доверенному каналу.</p></div><div><span class="step">02</span><h2 data-copy="compareTitle">Сверьте с журналом</h2><p data-copy="compareBody">Независимый verifier проверит подписи, хеш и счётчики по ZIP-экспорту. Контрольное сообщение в тестовой группе позволяет отдельно проверить доставку.</p></div></section>
+    <aside class="boundary"><strong data-copy="boundaryTitle">Что подтверждает эта страница</strong><p data-copy="boundaryBody">Witness проверяет подписи ответов. Счётчики и состояние сообщает коллектор; пересчёт по экспорту — отдельная проверка. Растущий хеш не доказывает полноту или происхождение сообщений. Witness на том же сервере остаётся под контролем того же оператора.</p></aside>
+    <p class="command-label" data-copy="command">Проверить скачанный JSON и соответствующий экспорт:</p><pre><code>python verify.py proof-account-a.json --fingerprint COLLECTOR_SHA256 \
+  --witness-fingerprint WITNESS_SHA256 --evidence tgwitness-evidence.zip</code></pre>
+  </main>
+  <footer class="wrap"><span>TgWitness · Proof</span><span data-copy="footer">Только чтение · Никаких сообщений и сессий</span></footer>
+</body>
+</html>

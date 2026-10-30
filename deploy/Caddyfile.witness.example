@@ -1,0 +1,11 @@
+# Native Caddy on the collector host. Expose only the witness read endpoint.
+# Requests still require the workspace's scoped witness token.
+witness.example.org {
+    @head path /api/witness/head /profiles/*/api/witness/head
+    handle @head {
+        reverse_proxy 127.0.0.1:8787
+    }
+    handle {
+        respond "Not found" 404
+    }
+}

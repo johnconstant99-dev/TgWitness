@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TgWitness · Setup guide</title><meta name="color-scheme" content="light dark"><link rel="stylesheet" href="/guide.css"><link rel="icon" href="/mark.svg"><script src="/theme.js"></script><script src="/guide-locale.js"></script><script defer src="/i18n.js"></script><script defer src="/guide.js"></script></head>
+<body>
+<svg aria-hidden="true" class="icon-sprite" focusable="false">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8 7.5 9.5 4.3-1.5 7.5-4.9 7.5-9.5V6Z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3Z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.6A8.2 8.2 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6Z"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12.5" rx="2"/><path d="M8.5 20.5h7M12 16.5v4"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3.5 13.8 9l5.7 1.8-5.7 1.9L12 18.5l-1.8-5.8-5.7-1.9L10.2 9Z"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.7-8.7M16.5 6.5 19 9M14 9l2 2"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0Z"/><path d="M12 17v4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 5.6A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-3.1 3.9M6.2 6.9A16.6 16.6 0 0 0 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H16a3.5 3.5 0 0 0 0-7H8a3.5 3.5 0 0 1 0-7h7.5"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 3v12m-4.5-4.5L12 15l4.5-4.5M5 16v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m7 9.5 3 2.5-3 2.5M12.5 15H17"/></symbol>
+  <symbol id="i-telegram" viewBox="0 0 24 24"><path d="M21.5 3.5 2.8 10.7c-.8.3-.8 1.4 0 1.7l4.7 1.7 1.8 5.6c.2.6 1 .8 1.5.3l2.6-2.5 4.6 3.4c.6.4 1.4.1 1.6-.6l3-15.6c.2-.8-.5-1.4-1.1-1.2Z"/><path d="m7.5 14.1 10.3-7.3-7.6 8.6"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="7" rx="2"/><rect x="3.5" y="13" width="17" height="7" rx="2"/><path d="M7.5 7.5h.01M7.5 16.5h.01M11 7.5h5M11 16.5h5"/></symbol>
+  <symbol id="i-journal" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+  <symbol id="i-seal" viewBox="0 0 24 24"><circle cx="12" cy="9.5" r="6"/><path d="m9.5 9.6 1.7 1.7 3.3-3.4"/><path d="m8.4 14.6-1.6 6.4 5.2-2.6 5.2 2.6-1.6-6.4"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.2"/><path d="M14 14h2.5v2.5H14ZM18 18h2.5v2.5H18ZM14 20.5h1M20.5 14v1.5"/></symbol>
+  <symbol id="i-files" viewBox="0 0 24 24"><path d="M9 3h6.5L20 7.5V17a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M15 3v5h5"/><path d="M4 7.5V19a2 2 0 0 0 2 2h9"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-text" viewBox="0 0 24 24"><path d="M4.5 6h15M4.5 10h15M4.5 14h10M4.5 18h6.5"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.8"/><path d="M5 6v12c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6"/><path d="M5 12c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8"/></symbol>
+  <symbol id="i-zip" viewBox="0 0 24 24"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="M11 3v1.5h2V6h-2v1.5h2V9h-2v1.5h2"/><rect x="10" y="13" width="4" height="4.5" rx="1"/></symbol>
+  <symbol id="i-braces" viewBox="0 0 24 24"><path d="M8.5 4C6.5 4 6 5 6 6.5v3C6 10.7 5.3 11.5 4 12c1.3.5 2 1.3 2 2.5v3C6 19 6.5 20 8.5 20M15.5 4C17.5 4 18 5 18 6.5v3c0 1.2.7 2 2 2.5-1.3.5-2 1.3-2 2.5v3c0 1.5-.5 2.5-2.5 2.5"/></symbol>
+  <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 4.2 2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z"/><path d="M12 9.5v4M12 17h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8h.01"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5.5 3.5-5.5 3.5Z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20v-.5A5.5 5.5 0 0 1 8.5 14h1a5.5 5.5 0 0 1 5.5 5.5v.5M18 8v6M21 11h-6"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3.5 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M20 14.5a2 2 0 0 1-2 2H8.5L4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M13 20h7M16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1 1-4Z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M18 7l-.8 12.1a2 2 0 0 1-2 1.9H8.8a2 2 0 0 1-2-1.9L6 7M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-tab-x" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M10 12.5l4 4M14 12.5l-4 4"/></symbol>
+  <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.6-4.4L4 8M4 4v4h4M4 13a8 8 0 0 0 14.6 4.4L20 16M20 20v-4h-4"/></symbol>
+  <symbol id="i-fingerprint" viewBox="0 0 24 24"><path d="M12 11.5v3a6.5 6.5 0 0 0 1.6 4.3"/><path d="M8.6 12.6a3.4 3.4 0 0 1 6.8-.6v2"/><path d="M5.6 15.6a11 11 0 0 1-.1-3.6 6.5 6.5 0 0 1 12.4-2.4"/><path d="M18.5 12.6v1.5a10 10 0 0 1-.6 3.4"/><path d="M8.7 16.7a10 10 0 0 0 1 3"/><path d="M7 5.3a8.5 8.5 0 0 1 10.6.4"/></symbol>
+  <symbol id="i-hdd" viewBox="0 0 24 24"><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M5.5 13 8 5h8l2.5 8"/><path d="M7 16.5h.01M10.5 16.5h.01"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4.5V8M9 13h.01M15 13h.01M9.5 16h5"/><circle cx="12" cy="3.5" r="1"/></symbol>
+  <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1Z"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12"/></symbol>
+  <symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="5.5" r="2.5"/><circle cx="6" cy="18.5" r="2.5"/><circle cx="18" cy="8.5" r="2.5"/><path d="M6 8v8M18 11c0 3.5-3 4.5-6 4.5H8.4"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.4 1.4 0 0 1 0 2l-6.7 6.7a1.4 1.4 0 0 1-2 0Z"/><circle cx="8" cy="8" r="1.4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="12" height="12" rx="2"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+</svg>
+<div aria-hidden="true" class="read-progress"><span></span></div>
+<header class="topbar">
+  <a class="brand" data-no-translate href="/"><img src="/mark.svg" alt="" width="28" height="28"> TgWitness <span class="version">0.7.0</span></a>
+  <nav aria-label="Pages" class="top-nav">
+    <a href="/dedicated-account.html"><svg aria-hidden="true" class="i"><use href="#i-shield"/></svg>Dedicated account guide</a>
+    <a class="top-button" href="/"><svg aria-hidden="true" class="i flip"><use href="#i-back"/></svg>Back to panel</a>
+  </nav>
+  <div class="prefs">
+    <label class="language-pick"><svg aria-hidden="true" class="i"><use href="#i-globe"/></svg><span class="sr-only">Language</span><select class="language-select" data-no-translate></select></label>
+    <div aria-label="Theme" class="theme-pick" role="group"><button aria-label="Light theme" data-theme-choice="light" title="Light theme" type="button"><svg aria-hidden="true" class="i"><use href="#i-sun"/></svg></button><button aria-label="Dark theme" data-theme-choice="dark" title="Dark theme" type="button"><svg aria-hidden="true" class="i"><use href="#i-moon"/></svg></button><button aria-label="System theme" data-theme-choice="system" title="System theme" type="button"><svg aria-hidden="true" class="i"><use href="#i-monitor"/></svg></button></div>
+    <button aria-label="Animations always on" aria-pressed="false" class="motion-pick" data-motion-toggle title="Animations always on" type="button"><svg aria-hidden="true" class="i"><use href="#i-sparkle"/></svg></button>
+  </div>
+</header>
+<main id="top">
+
+<div class="hero guide-hero">
+  <div aria-hidden="true" class="hero-orbs"><i></i><i></i><i></i></div>
+  <p class="eyebrow">GETTING STARTED</p>
+  <h1>From account connection to a verifiable journal</h1>
+  <p class="lead">The collector runs as a separate process. Your browser controls it and displays saved observations.</p>
+  <ol aria-label="How TgWitness works" class="pipeline scene">
+    <li class="pipe-node"><span aria-hidden="true" class="pipe-icon tone-blue"><svg class="i"><use href="#i-telegram"/></svg></span><strong>Telegram account</strong><span>Phone, QR code or session file</span><span aria-hidden="true" class="pipe-wire"><i></i></span></li>
+    <li class="pipe-node"><span aria-hidden="true" class="pipe-icon tone-violet"><svg class="i"><use href="#i-server"/></svg></span><strong>Collector</strong><span>Runs on your computer or server</span><span aria-hidden="true" class="pipe-wire"><i></i></span></li>
+    <li class="pipe-node"><span aria-hidden="true" class="pipe-icon tone-teal"><svg class="i"><use href="#i-journal"/></svg><b class="pipe-stamp"><svg class="i"><use href="#i-check"/></svg></b></span><strong>Signed journal</strong><span>Every change becomes a signed record</span><span aria-hidden="true" class="pipe-wire"><i></i></span></li>
+    <li class="pipe-node"><span aria-hidden="true" class="pipe-icon tone-green"><svg class="i"><use href="#i-seal"/></svg></span><strong>Export and verify</strong><span>Signatures can be checked independently</span></li>
+  </ol>
+</div>
+
+<nav aria-label="Guide sections" class="section-nav">
+  <a href="#formats"><svg aria-hidden="true" class="i"><use href="#i-key"/></svg>Account formats</a>
+  <a href="#connect"><svg aria-hidden="true" class="i"><use href="#i-plug"/></svg>Connect</a>
+  <a href="#workflow"><svg aria-hidden="true" class="i"><use href="#i-eye"/></svg>Observe</a>
+  <a href="#proxy"><svg aria-hidden="true" class="i"><use href="#i-route"/></svg>Proxies</a>
+  <a href="#export"><svg aria-hidden="true" class="i"><use href="#i-export"/></svg>Export</a>
+  <a href="#storage"><svg aria-hidden="true" class="i"><use href="#i-lock"/></svg>Storage</a>
+  <a href="#trouble"><svg aria-hidden="true" class="i"><use href="#i-terminal"/></svg>Troubleshooting</a>
+  <a href="#extras"><svg aria-hidden="true" class="i"><use href="#i-sparkle"/></svg>Extras</a>
+  <a href="#access"><svg aria-hidden="true" class="i"><use href="#i-globe"/></svg>Open to everyone</a>
+</nav>
+
+<section id="formats">
+  <div class="block-head"><span aria-hidden="true" class="block-icon tone-blue"><svg class="i"><use href="#i-key"/></svg></span><div><h2>Choose a sign-in method</h2><p class="block-lead">Four ways in. Use the one that matches what you already have.</p></div></div>
+  <ul class="methods">
+    <li class="method scene">
+      <div aria-hidden="true" class="method-art art-phone"><span class="phone-shell"><span class="phone-code"><i></i><i></i><i></i><i></i><i></i></span><span class="phone-ok"><svg class="i"><use href="#i-check"/></svg></span></span></div>
+      <h3>Phone</h3>
+      <p>Your number, the login code and, if set, your two-step verification password.</p>
+    </li>
+    <li class="method scene">
+      <div aria-hidden="true" class="method-art art-qr"><span class="qr-frame"><svg class="qr" viewBox="0 0 21 21"><path d="M0 0h7v1h-7zM8 0h2v1h-2zM11 0h1v1h-1zM14 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h2v1h-2zM11 1h2v1h-2zM14 1h1v1h-1zM20 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h3v1h-3zM12 2h1v1h-1zM14 2h1v1h-1zM16 2h3v1h-3zM20 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM16 3h3v1h-3zM20 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM11 4h2v1h-2zM14 4h1v1h-1zM16 4h3v1h-3zM20 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM11 5h1v1h-1zM14 5h1v1h-1zM20 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h7v1h-7zM9 7h1v1h-1zM11 7h2v1h-2zM0 8h1v1h-1zM2 8h2v1h-2zM5 8h3v1h-3zM10 8h1v1h-1zM15 8h1v1h-1zM17 8h2v1h-2zM20 8h1v1h-1zM1 9h1v1h-1zM7 9h1v1h-1zM11 9h1v1h-1zM16 9h1v1h-1zM0 10h2v1h-2zM3 10h6v1h-6zM10 10h3v1h-3zM14 10h2v1h-2zM20 10h1v1h-1zM0 11h2v1h-2zM4 11h2v1h-2zM7 11h2v1h-2zM11 11h4v1h-4zM0 12h1v1h-1zM5 12h4v1h-4zM10 12h11v1h-11zM10 13h5v1h-5zM17 13h1v1h-1zM19 13h2v1h-2zM0 14h7v1h-7zM8 14h2v1h-2zM11 14h2v1h-2zM15 14h1v1h-1zM17 14h1v1h-1zM0 15h1v1h-1zM6 15h1v1h-1zM9 15h3v1h-3zM15 15h2v1h-2zM0 16h1v1h-1zM2 16h3v1h-3zM6 16h1v1h-1zM10 16h1v1h-1zM12 16h5v1h-5zM19 16h1v1h-1zM0 17h1v1h-1zM2 17h3v1h-3zM6 17h1v1h-1zM10 17h5v1h-5zM0 18h1v1h-1zM2 18h3v1h-3zM6 18h1v1h-1zM8 18h1v1h-1zM14 18h1v1h-1zM16 18h1v1h-1zM19 18h2v1h-2zM0 19h1v1h-1zM6 19h1v1h-1zM10 19h3v1h-3zM15 19h1v1h-1zM19 19h1v1h-1zM0 20h7v1h-7zM8 20h2v1h-2zM14 20h1v1h-1zM17 20h4v1h-4z"/></svg><span class="qr-scan"></span></span></div>
+      <h3>QR code</h3>
+      <p>Scan it with a Telegram app that is already signed in.</p>
+    </li>
+    <li class="method scene">
+      <div aria-hidden="true" class="method-art art-files" data-no-translate><span class="drop-zone"></span><span class="file-chip f1">.session</span><span class="file-chip f2">.json</span><span class="file-chip f3">.zip</span></div>
+      <h3>Files</h3>
+      <p>A session file, TData ZIP or session text, plus its JSON if you have one.</p>
+    </li>
+    <li class="method scene">
+      <div aria-hidden="true" class="method-art art-key" data-no-translate><span class="key-icon"><svg class="i"><use href="#i-key"/></svg></span><span class="hex-window"><span class="hex-run">9f2c 41ab e07d 5c13 a8f0 33d9 7b6e 0c42 9f2c 41ab e07d 5c13 a8f0 33d9 7b6e 0c42</span></span><span class="dc-chip">DC 2</span></div>
+      <h3>Auth key</h3>
+      <p>The complete 512-character hex key with its DC ID, from 1 to 5.</p>
+    </li>
+  </ul>
+
+  <div class="api-explainer">
+    <div aria-hidden="true" class="api-visual scene">
+      <div class="api-own"><span class="api-pill"><svg class="i"><use href="#i-key"/></svg>Your own pair</span><small>optional</small></div>
+      <span class="api-or">or</span>
+      <div class="api-pool">
+        <span class="api-pool-title">Built-in pool</span>
+        <span class="api-slot s1"><svg class="i"><use href="#i-key"/></svg><b class="api-mark no"><svg class="i"><use href="#i-x"/></svg></b><small>refused</small></span>
+        <span class="api-slot s2"><svg class="i"><use href="#i-key"/></svg><b class="api-mark ok"><svg class="i"><use href="#i-check"/></svg></b><small>accepted</small></span>
+        <span class="api-slot s3"><svg class="i"><use href="#i-key"/></svg></span>
+      </div>
+      <p class="api-caption">The pair names the application. It never unlocks an account.</p>
+    </div>
+    <div class="api-text">
+      <h3>API ID and API hash are optional</h3>
+      <p>Your own <strong>API ID and API hash</strong> are optional. When no pair is entered, imported or saved in the workspace, TgWitness picks one from a built-in pool of public pairs and tries the next if Telegram refuses it. API settings identify the application; they do not replace account authorization. The TgWitness panel token opens the panel and is separate from Telegram login.</p>
+      <p>Open <strong>Account</strong> and select <strong>Phone</strong>, <strong>QR code</strong>, <strong>Files</strong>, or <strong>Auth key</strong>. To use your own application, open <strong>API ID + Hash</strong> in the form and enter its credentials. You can paste one <code>app_id:app_hash</code> pair into API ID. This workspace reuses its saved pair or falls back to the built-in pool.</p>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Supported formats</h3>
+  <dl class="format-grid">
+    <div class="format"><dt><span aria-hidden="true" class="format-icon"><svg class="i"><use href="#i-phone"/></svg></span>Phone number, code, and optional two-step verification</dt><dd>Sign in directly in Account. Telegram chooses how the code is delivered; SMS is not guaranteed.</dd></div>
+    <div class="format"><dt><span aria-hidden="true" class="format-icon"><svg class="i"><use href="#i-qr"/></svg></span>QR login</dt><dd>Select QR code, press Show QR code and confirm in an already-authorized Telegram app under Settings → Devices → Link Desktop Device. Enter two-step verification if requested. Expired codes can be regenerated.</dd></div>
+    <div class="format"><dt><span aria-hidden="true" class="format-icon"><svg class="i"><use href="#i-text"/></svg></span>Telethon StringSession</dt><dd>Paste an authorized session string or load a plain-text <code>.tgwitness-session</code> or <code>.txt</code> file, up to 4 KiB.</dd></div>
+    <div class="format"><dt><span aria-hidden="true" class="format-icon"><svg class="i"><use href="#i-db"/></svg></span>Telethon SQLite .session</dt><dd>Load a closed, consistent schema 7/8 file directly. The optional Telethon-only CLI converter also accepts files up to 64 MiB.</dd></div>
+    <div class="format"><dt><span aria-hidden="true" class="format-icon"><svg class="i"><use href="#i-db"/></svg></span>Pyrogram SQLite .session</dt><dd>Load a schema 2/3 production user session. The panel detects its contents; renaming a file is not conversion.</dd></div>
+    <div class="format"><dt><span aria-hidden="true" class="format-icon"><svg class="i"><use href="#i-zip"/></svg></span>Telegram Desktop TData ZIP</dt><dd>Quit Telegram Desktop, then ZIP only <code>key_datas</code> and the 16-character file ending in <code>s</code> beside it (usually <code>D877F783D5D3EF8Cs</code>) from the <code>tdata</code> folder; the whole folder with its cache is usually too large. Supply the Desktop local passcode if one is set. One account per archive; legacy layouts, multi-account folders, and encrypted ZIP containers are unsupported.</dd></div>
+    <div class="format"><dt><span aria-hidden="true" class="format-icon"><svg class="i"><use href="#i-files"/></svg></span>Session + JSON pair</dt><dd>Accounts are often supplied as <code>name.session</code> plus <code>name.json</code>. Select both together: the JSON supplies <code>app_id</code>/<code>app_hash</code>; other fields such as phone, device or a stored 2FA password are ignored, and TgWitness asks for 2FA when Telegram requires it.</dd></div>
+    <div class="format"><dt><span aria-hidden="true" class="format-icon"><svg class="i"><use href="#i-braces"/></svg></span>Account JSON</dt><dd>Supported fields include api_id/app_id, api_hash/app_hash, Telethon StringSession, or complete 512-character Auth Key HEX with dc_id. A companion JSON may contain only API metadata; load it with a session or use phone/QR login.</dd></div>
+    <div class="format unsupported"><dt><span aria-hidden="true" class="format-icon"><svg class="i"><use href="#i-ban"/></svg></span>Other formats</dt><dd>TDLib, Pyrogram StringSession, CSV/JSON bulk account lists, and bots are unsupported. Add each account in its own workspace.</dd></div>
+  </dl>
+
+  <aside class="callout warning session-warning" id="session-warning" aria-labelledby="session-warning-title">
+    <svg aria-hidden="true" class="i"><use href="#i-alert"/></svg>
+    <div>
+      <h3 id="session-warning-title">Parallel session warning</h3>
+      <p>Importing TData, a session file, StringSession or Auth Key HEX reuses an existing authorization key. If Telegram detects parallel use of that key, it invalidates the authorization with <code>AUTH_KEY_DUPLICATED</code>. Both copies stop working and need a new login.</p>
+      <ul>
+        <li>Fully quit Telegram Desktop, including its tray process, before copying or importing TData. Keep that copy of Desktop closed while TgWitness uses the imported session. The same rule applies to any other client whose session you import.</li>
+        <li>Quit the application; do not log out or terminate the imported session in Telegram. Logging out or revoking that authorization also invalidates the copy used by TgWitness.</li>
+        <li>For parallel use, sign in to TgWitness by phone or QR to create a separate authorization. Other separately authorized Telegram clients can remain signed in.</li>
+      </ul>
+      <p>A dedicated account is still recommended. It does not make parallel use of a copied key safe.</p>
+      <p><a href="https://core.telegram.org/api/errors#406-not-acceptable" target="_blank" rel="noopener noreferrer">Telegram: duplicated authorization keys</a></p>
+    </div>
+  </aside>
+
+  <h3 class="sub-title">Limits at a glance</h3>
+  <ul class="limits">
+    <li><div class="limit-num" data-no-translate>4</div><span>files per connection</span></li>
+    <li><div class="limit-num" data-no-translate>8 MiB</div><span>in total</span></li>
+    <li><div class="limit-num" data-no-translate>64 KiB</div><span>per JSON object</span></li>
+    <li><div class="limit-num" data-no-translate>4 KiB</div><span>per session text file</span></li>
+    <li><div class="limit-num" data-no-translate>32 MiB</div><span>TData ZIP, expanded</span></li>
+    <li><div class="limit-num" data-no-translate>64 MiB</div><span>SQLite via the CLI converter</span></li>
+  </ul>
+
+  <div class="details-stack">
+    <details><summary>Files: what to select and how they are checked</summary>
+      <p>In <strong>Files</strong>, choose one session format: Telethon/Pyrogram <code>.session</code>, TData ZIP, or Telethon StringSession text. Add its companion JSON if supplied; you do not need every session format. Select up to four matching files, totaling at most 8 MiB, then press <strong>Connect account</strong>. Use <strong>Passcode or session text</strong> for a protected TData archive or a session string. Conversion runs in memory on your own TgWitness server without saving uploads, extracting ZIPs, or contacting a conversion service. The Connect button then checks the account with Telegram. To read files without authorization, use <strong>Passcode or session text → Read files without signing in</strong>. Conflicting files are rejected; imported user IDs are checked online.</p>
+      <p>JSON is limited to one object of 64 KiB. TData ZIPs are limited to 512 entries and 32 MiB expanded size, with 64 KiB authorization files. Close the original SQLite client and create a consistent copy; do not discard an unfinished WAL to bypass validation.</p>
+    </details>
+    <details><summary>I only have an API ID and API Hash</summary><p>Enter them under <strong>API ID + Hash</strong>, then sign in with your phone number and login code, scan a QR code with an already-signed-in Telegram app, or import a session. API credentials identify your application; they do not provide access to an account by themselves.</p></details>
+    <details id="auth-key-format"><summary>I have an Auth Key (HEX) and DC ID</summary><p>Select <strong>Auth key</strong>, paste the complete key, and choose the supplied DC ID (1–5). Optionally enter User ID to check the account identity. Your own API ID and Hash are optional. Press <strong>Connect account</strong>. An Auth Key contains 512 hexadecimal characters; an API Hash contains 32. Shortened keys containing <code>...</code> cannot work.</p><p>You can also save an account JSON with the fields below and select it in <strong>Files</strong>, replacing the example values with your own:</p><pre><code>{
+  "auth_key": "REPLACE_WITH_ALL_512_HEXADECIMAL_CHARACTERS",
+  "dc_id": 2
+}</code></pre><p>Replace the example DC ID with the supplied value, from 1 to 5. An optional numeric <code>user_id</code> is checked during authorization. Keep this JSON private; it grants account access. A JSON containing only <code>app_id</code> and <code>app_hash</code> supplies app settings and still needs a session or phone/QR login.</p></details>
+  </div>
+  <div class="callout danger"><svg aria-hidden="true" class="i"><use href="#i-alert"/></svg><p>A session grants account access. Keep original and converted files private. Conversion transfers authorization, not message history, and cannot restore a revoked login.</p></div>
+</section>
+
+<section id="connect">
+  <div class="block-head"><span aria-hidden="true" class="block-icon tone-violet"><svg class="i"><use href="#i-plug"/></svg></span><div><h2>1. Connect an account</h2><p class="block-lead">Sign in, choose your chats and start observing.</p></div></div>
+  <div class="callout"><svg aria-hidden="true" class="i"><use href="#i-shield"/></svg><p>Connect a dedicated account, never your main one. <a href="/dedicated-account.html" rel="noopener" target="_blank">Why, and how to get one ↗</a></p></div>
+  <div class="connect-grid">
+    <ol class="timeline">
+      <li>Open <strong>Account</strong>. If needed, configure a proxy first under <strong>Settings → Connection settings → Change connection route</strong>.</li>
+      <li>Enter your phone number and press <strong>Continue</strong>, select <strong>Files → Connect account</strong>, or choose <strong>QR code → Show QR code</strong>.</li>
+      <li>Optionally enter your own API ID/hash from <a href="https://my.telegram.org" rel="noreferrer">my.telegram.org</a>; otherwise a pair from the built-in pool is used. Complete code/2FA or QR confirmation in an already-signed-in Telegram app. Saved API credentials are reused within this workspace.</li>
+      <li>Check the displayed account ID. Open <strong>Sources</strong>: your chats load automatically. Add the sources your account can access.</li>
+      <li>In <strong>Sources → Capture settings → Choose which changes to preserve</strong>, select event categories or use <strong>Messages, edits &amp; deletions</strong>, then save monitoring settings.</li>
+      <li>Set the attachment policy separately, then press <strong>Start observation</strong>.</li>
+    </ol>
+    <div aria-hidden="true" class="mock scene">
+      <div class="mock-bar" data-no-translate><i></i><i></i><i></i><span class="mock-brand">TgWitness</span></div>
+      <div class="mock-body">
+        <div class="mock-side"><div class="mock-nav n1">Account</div><div class="mock-nav n2">Sources</div><div class="mock-nav n3">Journal</div></div>
+        <div class="mock-stage">
+          <div class="mock-frame m1">
+            <div class="mock-tabs"><div class="on">Phone</div><div>QR code</div><div>Files</div><div>Auth key</div></div>
+            <div class="mock-field" data-no-translate><span class="typed">+1 555 0100</span><i class="caret"></i></div>
+            <span class="mock-button">Continue</span>
+          </div>
+          <div class="mock-frame m2">
+            <div class="mock-source s1"><span class="tick"><svg class="i"><use href="#i-check"/></svg></span><span>Team chat</span></div>
+            <div class="mock-source s2"><span class="tick"><svg class="i"><use href="#i-check"/></svg></span><span>News channel</span></div>
+            <div class="mock-source s3"><span class="tick"><svg class="i"><use href="#i-check"/></svg></span><span>Support group</span></div>
+            <span class="mock-button">Start observation</span>
+          </div>
+          <div class="mock-frame m3">
+            <span class="mock-live">Observing</span>
+            <div class="mock-row r1"><svg class="i"><use href="#i-message"/></svg><span>New message</span><b class="mock-seal"><svg class="i"><use href="#i-check"/></svg></b></div>
+            <div class="mock-row r2"><svg class="i"><use href="#i-edit"/></svg><span>Edited</span><b class="mock-seal"><svg class="i"><use href="#i-check"/></svg></b></div>
+            <div class="mock-row r3"><svg class="i"><use href="#i-trash"/></svg><span>Deleted</span><b class="mock-seal"><svg class="i"><use href="#i-check"/></svg></b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ul class="info-cards">
+    <li><span aria-hidden="true" class="info-icon tone-blue"><svg class="i"><use href="#i-play"/></svg></span><h3>Demo mode</h3><p><strong>scripts\Demo.cmd</strong> opens a local fictional workspace without copying a token. Real workspaces still need their panel token because the panel controls account authorizations and private records. This is separate from Telegram login.</p></li>
+    <li><span aria-hidden="true" class="info-icon tone-teal"><svg class="i"><use href="#i-settings"/></svg></span><h3>Monitoring settings</h3><p>Monitoring settings apply to the selected sources in the current account, survive restart, and record signed before/after changes. Keep new messages enabled for comparison context. Re-enabling a category does not recover missed events. Explicit history snapshots and operational diagnostics remain separate.</p></li>
+    <li><span aria-hidden="true" class="info-icon tone-violet"><svg class="i"><use href="#i-users"/></svg></span><h3>Several accounts</h3><p>Add accounts with the <strong>+</strong> button beside the account selector or through <strong>Workspaces</strong>. Other collectors keep running when you switch views.</p></li>
+  </ul>
+  <details><summary>I have a .session file or TData ZIP</summary><p>Load supported Telethon/Pyrogram SQLite or TData ZIP directly with its optional JSON companion. A separate API pair is optional; imported or saved settings take precedence over the built-in pool. For an offline Telethon-only conversion, close its original client and use a consistent copy:</p><pre><code>python -m tgwitness.sessions account.session --out account.tgwitness-session</code></pre><p>The result grants account access. Do not run concurrent clients using cloned authorizations. QR attempts are cancelled by lock, workspace switch, route change, or a new login; a closed/reloaded tab may leave an attempt pending until expiry.</p></details>
+</section>
+
+<section id="workflow">
+  <div class="block-head"><span aria-hidden="true" class="block-icon tone-teal"><svg class="i"><use href="#i-eye"/></svg></span><div><h2>How observation works</h2><p class="block-lead">Every change becomes its own signed record. Nothing captured is overwritten.</p></div></div>
+  <div aria-hidden="true" class="story scene">
+    <div class="story-chat">
+      <p class="story-title"><svg class="i"><use href="#i-telegram"/></svg>In Telegram</p>
+      <div class="chat-head"><div class="chat-avatar"></div><span>Team chat</span></div>
+      <div class="chat-area">
+        <div class="bubble b-mine"><p>Where do we meet?</p></div>
+        <div class="bubble b-orig"><p>Meet at 10:00</p></div>
+        <div class="bubble b-edit"><p>Meet at 11:00</p><small>edited</small></div>
+        <div class="bubble b-gone"><svg class="i"><use href="#i-trash"/></svg><span>Message deleted</span></div>
+      </div>
+    </div>
+    <div class="story-link"><i></i></div>
+    <div class="story-journal">
+      <p class="story-title"><svg class="i"><use href="#i-journal"/></svg>Signed journal</p>
+      <ol class="records">
+        <li class="record r1"><span class="record-n" data-no-translate>#1</span><div class="record-body"><strong>New message</strong><p class="excerpt">Meet at 10:00</p></div><span class="seal"><svg class="i"><use href="#i-check"/></svg>signed</span></li>
+        <li class="record r2"><span class="record-n" data-no-translate>#2</span><div class="record-body"><strong>Edit · version 2</strong><p class="excerpt">Meet at 11:00</p></div><span class="seal"><svg class="i"><use href="#i-check"/></svg>signed</span></li>
+        <li class="record r3"><span class="record-n" data-no-translate>#3</span><div class="record-body"><strong>Deletion notice</strong><p class="excerpt">Both versions stay in the journal</p></div><span class="seal"><svg class="i"><use href="#i-check"/></svg>signed</span></li>
+      </ol>
+    </div>
+  </div>
+  <ol class="flow-cards">
+    <li><span aria-hidden="true" class="flow-icon tone-blue"><svg class="i"><use href="#i-layers"/></svg></span><p><strong>Choose the workspace and scope.</strong> Each workspace belongs to one Telegram account and has its own sources, settings, journal, queue, and signing key. Add as many workspaces as you need.</p></li>
+    <li><span aria-hidden="true" class="flow-icon tone-violet"><svg class="i"><use href="#i-settings"/></svg></span><p><strong>Save the collection policy.</strong> Select new messages, edits, deletions, reactions, and membership events as needed. Settings apply to the workspace's selected sources. Re-enabling a category does not recover missed events.</p></li>
+    <li><span aria-hidden="true" class="flow-icon tone-teal"><svg class="i"><use href="#i-play"/></svg></span><p><strong>Start observation.</strong> Updates from the active account client become separate signed records. An edit adds a version; a deletion notice does not erase text already captured. Unknown editors and deletion actors stay unknown.</p></li>
+    <li><span aria-hidden="true" class="flow-icon tone-orange"><svg class="i"><use href="#i-eye"/></svg></span><p><strong>Review outcomes and gaps.</strong> Attachments download separately when enabled. A queued attachment is not yet preserved. An explicit history snapshot saves current visible messages and cannot reconstruct missed changes.</p></li>
+  </ol>
+  <h3 class="sub-title">What keeps collecting</h3>
+  <ul class="states">
+    <li class="state stop"><span aria-hidden="true" class="state-icon"><svg class="i"><use href="#i-pause"/></svg></span><strong>Pause observation</strong><span class="state-tag">Collection stops</span></li>
+    <li class="state go"><span aria-hidden="true" class="state-icon"><svg class="i"><use href="#i-lock"/></svg></span><strong>Lock</strong><span class="state-tag">Collection continues</span></li>
+    <li class="state go"><span aria-hidden="true" class="state-icon"><svg class="i"><use href="#i-tab-x"/></svg></span><strong>Close the tab</strong><span class="state-tag">Collection continues</span></li>
+    <li class="state go"><span aria-hidden="true" class="state-icon"><svg class="i"><use href="#i-layers"/></svg></span><strong>Switch workspace</strong><span class="state-tag">Only the view changes</span></li>
+    <li class="state stop"><span aria-hidden="true" class="state-icon"><svg class="i"><use href="#i-power"/></svg></span><strong>Stop the Python process</strong><span class="state-tag">All workspaces stop</span></li>
+    <li class="state go"><span aria-hidden="true" class="state-icon"><svg class="i"><use href="#i-refresh"/></svg></span><strong>Restart</strong><span class="state-tag">Missed updates are requested</span></li>
+  </ul>
+  <details><summary>Service events, pausing and the panel token</summary>
+    <p>Operational records and other group service events remain separate from the event switches. Captured messages can retain embedded reaction or membership metadata. Some deletion notices do not identify a chat; they are saved as unscoped account-level notices without guessing a source.</p>
+    <p><strong>Pause observation</strong> stops that collector. <strong>Lock</strong> and closing a tab do not stop collection; switching workspaces only changes the view. Stopping the Python process stops all workspaces. After a restart, observation resumes and asks Telegram for the updates missed while it was off.</p>
+    <p>One panel token controls every workspace. Account separation is not a separate-user permission system. An existing journal cannot be reassigned to another Telegram account.</p>
+  </details>
+</section>
+
+<section id="proxy">
+  <div class="block-head"><span aria-hidden="true" class="block-icon tone-orange"><svg class="i"><use href="#i-route"/></svg></span><div><h2>2. Check the connection route</h2><p class="block-lead">Choose how this workspace reaches Telegram, then test it before signing in.</p></div></div>
+  <div aria-hidden="true" class="route scene">
+    <div class="route-end"><span class="route-icon tone-violet"><svg class="i"><use href="#i-server"/></svg></span><span>Collector</span></div>
+    <div class="route-lanes">
+      <div class="lane l1"><div class="lane-line"><i></i></div><b>Direct</b></div>
+      <div class="lane l2"><div class="lane-line"><i></i></div><b data-no-translate>SOCKS5</b></div>
+      <div class="lane l3"><div class="lane-line"><i></i></div><b data-no-translate>HTTP CONNECT</b></div>
+      <div class="lane l4"><div class="lane-line"><i></i></div><b>MTProxy · experimental</b></div>
+    </div>
+    <div class="route-end"><span class="route-icon tone-blue"><svg class="i"><use href="#i-telegram"/></svg></span><span>Telegram</span></div>
+  </div>
+  <ul class="fact-chips">
+    <li class="warn"><svg aria-hidden="true" class="i"><use href="#i-x"/></svg><span>A failed proxy never falls back to a direct connection</span></li>
+    <li><svg aria-hidden="true" class="i"><use href="#i-globe"/></svg><span>Public MTProxy lists are built in</span></li>
+    <li><svg aria-hidden="true" class="i"><use href="#i-lock"/></svg><span>Saved proxy passwords and secrets are never shown again</span></li>
+    <li><svg aria-hidden="true" class="i"><use href="#i-info"/></svg><span>Only Telegram traffic uses it: this is not a system VPN</span></li>
+  </ul>
+  <details><summary>Proxy formats, public lists and testing</summary>
+    <p>Each workspace supports Direct, SOCKS5, HTTP CONNECT and experimental MTProxy. MTProxy accepts a 16-byte hex key or dd + key. Fake TLS ee secrets are unsupported. Stored proxy passwords/secrets are never returned to the panel.</p>
+    <p>Public MTProxy lists are included. Open Account → Settings → Connection settings → Change connection route, choose a server and save it. Update public lists downloads fresh addresses while keeping your selected route.</p>
+    <p>Open Where the list comes from for providers, saved dates and the download route. Unavailable sources keep their previous entries. You can also enter your own proxy or use an operator catalog.</p>
+    <p>A failed proxy does not trigger a direct fallback. Pause observation before changing routes; saving cancels unfinished login. <strong>Test Telegram connection</strong> can run before sign-in; it checks transport, not complete update delivery.</p>
+    <p>This configures the Telegram client, not a system VPN. Remote access to the web panel needs HTTPS or an SSH tunnel.</p>
+  </details>
+</section>
+
+<section id="export">
+  <div class="block-head"><span aria-hidden="true" class="block-icon tone-green"><svg class="i"><use href="#i-export"/></svg></span><div><h2>3. Export and verify</h2><p class="block-lead">Download the journal and let others check that nothing was changed.</p></div></div>
+  <div aria-hidden="true" class="export-visual scene">
+    <div class="ex-source"><span class="ex-journal"><svg class="i"><use href="#i-journal"/></svg></span><span>Signed journal</span></div>
+    <div class="ex-tiles">
+      <div class="ex-tile t1" data-no-translate>ZIP</div><div class="ex-tile t2" data-no-translate>JSONL</div><div class="ex-tile t3" data-no-translate>CSV</div><div class="ex-tile t4" data-no-translate>HTML</div><div class="ex-tile t5">Checkpoint</div><div class="ex-tile t6">Run receipt</div>
+    </div>
+    <div class="verify-flow">
+      <div class="vf-inputs"><span class="vf-chip"><svg class="i"><use href="#i-zip"/></svg><code data-no-translate>evidence.zip</code></span><span class="vf-chip"><svg class="i"><use href="#i-fingerprint"/></svg>Trusted fingerprint</span><span class="vf-chip"><svg class="i"><use href="#i-file"/></svg><code data-no-translate>checkpoint.json</code></span></div>
+      <span class="vf-arrow"><i></i></span>
+      <span class="vf-engine" data-no-translate><code>tgwitness.verify</code></span>
+      <span class="vf-arrow"><i></i></span>
+      <span class="vf-result"><svg class="i"><use href="#i-check"/></svg>Integrity confirmed</span>
+    </div>
+  </div>
+  <ol class="step-cards">
+    <li>
+      <h3>Download</h3>
+      <p><strong>Exports</strong> provides ZIP, JSONL, CSV, HTML, a checkpoint and a signed run receipt. Exports cover a full journal prefix for the selected workspace, regardless of search filters.</p>
+      <p>Browsers with file-streaming support ask you to choose a destination first and write data as it arrives. Other browsers buffer at most 128 MiB. For larger files, use the streaming CLI while the server is running:</p>
+      <pre><code>python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip</code></pre>
+      <details><summary>Other workspaces, remote servers and limits</summary>
+        <p>For another workspace, add <code>--profile PROFILE_ID</code>. The ID appears at the top of <strong>Exports → Workspace ID</strong>. See all command options with:</p>
+        <pre><code>python -m tgwitness.download --help</code></pre>
+        <p>The token is sent in an HTTP header, not in the URL or command arguments. For a remote server, add <code>--url https://your-server</code>. The default transfer limit is 5 GiB, configurable with <code>--max-mib</code>. Signed ZIP content has a separate 4 GiB uncompressed limit. Existing output files are not overwritten.</p>
+      </details>
+    </li>
+    <li>
+      <h3>Verify</h3>
+      <p>Verify using a trusted copy of the program:</p>
+      <pre><code>python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --checkpoint checkpoint.json</code></pre>
+    </li>
+    <li>
+      <h3>Keep the fingerprint</h3>
+      <p>A signature establishes integrity relative to the trusted key, not Telegram origin. Retain the fingerprint and checkpoint independently. An RFC 3161 request alone is not a trusted timestamp; obtain and verify the authority's reply.</p>
+    </li>
+  </ol>
+</section>
+
+<section id="storage">
+  <div class="block-head"><span aria-hidden="true" class="block-icon tone-red"><svg class="i"><use href="#i-lock"/></svg></span><div><h2>4. Protect storage</h2><p class="block-lead">Secrets are encrypted for you. Messages and files need an encrypted disk.</p></div></div>
+  <div class="vault scene">
+    <div class="vault-card safe">
+      <div class="vault-head"><span aria-hidden="true" class="vault-icon"><svg class="i"><use href="#i-lock"/></svg></span><strong>Encrypted by TgWitness</strong></div>
+      <ul><li>Sessions</li><li>Secrets</li></ul>
+    </div>
+    <div class="vault-card disk">
+      <div class="vault-head"><span aria-hidden="true" class="vault-icon"><svg class="i"><use href="#i-hdd"/></svg></span><strong>Needs an encrypted disk</strong></div>
+      <ul><li>Messages</li><li>Attachments</li><li>Exports</li></ul>
+    </div>
+  </div>
+  <div class="callout danger"><svg aria-hidden="true" class="i"><use href="#i-alert"/></svg><p>Never delete or replace <code>vault.key</code>: you would lose access to sessions and signing keys.</p></div>
+  <ul class="info-cards">
+    <li><span aria-hidden="true" class="info-icon tone-blue"><svg class="i"><use href="#i-shield"/></svg></span><h3>Vault mode</h3><p><strong>Storage protection</strong> shows the vault mode. Sessions and secrets are encrypted. Messages, attachments and exports require protected storage such as an encrypted disk/volume. An evidence ZIP is not an encrypted application backup.</p></li>
+    <li><span aria-hidden="true" class="info-icon tone-violet"><svg class="i"><use href="#i-key"/></svg></span><h3>External master key</h3><p>New installations may use an external master key through <code>TGWITNESS_VAULT_KEY_FILE</code>. Do not delete vault.key or replace an existing installation's key: doing so can destroy access to sessions and signing keys.</p></li>
+    <li><span aria-hidden="true" class="info-icon tone-teal"><svg class="i"><use href="#i-hdd"/></svg></span><h3>Backups</h3><p>For backup, stop the process cleanly and preserve the whole data directory, all workspaces and required keys. Temporary exports use each workspace's <code>temporary-exports/</code>; interrupted export files are cleaned on the next startup.</p></li>
+  </ul>
+</section>
+
+<section id="trouble">
+  <div class="block-head"><span aria-hidden="true" class="block-icon tone-slate"><svg class="i"><use href="#i-terminal"/></svg></span><div><h2>Troubleshoot startup</h2><p class="block-lead">Three commands answer most startup questions.</p></div></div>
+  <p>From the project directory, run:</p>
+  <div class="terminal scene">
+    <div aria-hidden="true" class="term-bar"><i></i><i></i><i></i></div>
+    <pre class="term"><code><span class="t-cmd c1"><span aria-hidden="true" class="t-prompt">$ </span><span class="t-type">python start.py --setup-only</span></span>
+<span class="t-cmd c2"><span aria-hidden="true" class="t-prompt">$ </span><span class="t-type">python start.py --check</span></span>
+<span aria-hidden="true" class="t-out o1">[PASS] python · fastapi · telethon · cryptography</span>
+<span aria-hidden="true" class="t-out o2">[PASS] signing_backend: Ed25519 sign/verify available</span>
+<span aria-hidden="true" class="t-out o3">[PASS] storage: Write probe passed</span>
+<span aria-hidden="true" class="t-out o4">[PASS] listen_address: Address and port available at check time</span>
+<span aria-hidden="true" class="t-out o5">Ready to attempt startup.</span>
+<span class="t-cmd c3"><span aria-hidden="true" class="t-prompt">$ </span><span class="t-type">python start.py</span></span></code></pre>
+  </div>
+  <ul class="fix-cards">
+    <li><span aria-hidden="true" class="info-icon tone-green"><svg class="i"><use href="#i-check"/></svg></span><div><h3>What the check tests</h3><p>The check tests dependencies, signing support, disk writes, the address/port and key configuration without Telegram login. An occupied port may mean another instance is running. Choose another <code>--port</code> or stop the previous process.</p></div></li>
+    <li><span aria-hidden="true" class="info-icon tone-blue"><svg class="i"><use href="#i-terminal"/></svg></span><div><h3>Commands need the project environment</h3><p>Auxiliary <code>python -m tgwitness…</code> commands need the project environment: replace <code>python</code> with <code>.venv\Scripts\python.exe</code> on Windows or <code>.venv/bin/python</code> on Linux/macOS, or activate .venv first.</p></div></li>
+    <li><span aria-hidden="true" class="info-icon tone-orange"><svg class="i"><use href="#i-pause"/></svg></span><div><h3>Pause, lock and downtime</h3><p><strong>Pause observation</strong> stops collection. <strong>Lock</strong> only closes browser access. Closing the tab does not stop the process. Events may be missed during downtime; a current-history snapshot cannot reconstruct every deletion or intermediate edit.</p></div></li>
+    <li><span aria-hidden="true" class="info-icon tone-violet"><svg class="i"><use href="#i-server"/></svg></span><div><h3>Server deployment</h3><p>Server examples are included under <code>deploy/</code>, with full instructions in <code>docs/DEPLOYMENT.md</code>. Platform qualification and live Telegram acceptance are documented separately; TgWitness does not guarantee universal compatibility or complete capture.</p></div></li>
+  </ul>
+</section>
+
+<section class="extras-intro" id="extras">
+  <p class="eyebrow">OPTIONAL EXTRAS</p><h2>Start simple. Add what you need.</h2>
+  <div class="guide-extras">
+    <a href="#witness"><span aria-hidden="true" class="extra-icon tone-violet"><svg class="i"><use href="#i-bot"/></svg></span><strong id="guide-bot-label">A bot in your channel</strong><span>Keep signed checks outside the collector.</span></a>
+    <a href="#github"><span aria-hidden="true" class="extra-icon tone-slate"><svg class="i"><use href="#i-git"/></svg></span><strong id="guide-github-label">GitHub &amp; verified builds</strong><span>Planned · approved versions and proof copies.</span></a>
+  </div>
+</section>
+
+<section id="witness">
+  <div class="block-head"><span aria-hidden="true" class="block-icon tone-violet"><svg class="i"><use href="#i-bot"/></svg></span><div><h2>Your bot, in three steps.</h2><p class="block-lead">Open Extras in the panel and choose Set up a bot. The form prepares the files for a separate witness process.</p></div></div>
+  <div aria-hidden="true" class="chain scene">
+    <div class="chain-node"><span class="chain-icon tone-violet"><svg class="i"><use href="#i-server"/></svg></span><strong>Collector</strong><span class="chain-wire"><i></i></span></div>
+    <div class="chain-node"><span class="chain-icon tone-teal"><svg class="i"><use href="#i-seal"/></svg></span><strong>Witness host</strong><small>checks and signs</small><span class="chain-wire"><i></i></span></div>
+    <div class="chain-node"><span class="chain-icon tone-blue"><svg class="i"><use href="#i-bot"/></svg></span><strong>Your bot</strong><small>publishes</small><span class="chain-wire"><i></i></span></div>
+    <div class="chain-node"><span class="chain-icon tone-green"><svg class="i"><use href="#i-megaphone"/></svg></span><strong>Your channel</strong><small>signed post</small></div>
+  </div>
+  <ol class="num-cards">
+    <li>Create read-only access for the selected account and save its access file.</li>
+    <li>Choose your channel and check interval, then save the configuration.</li>
+    <li>Install TgWitness on the witness host, add your BotFather token and follow the launch commands in step 3.</li>
+  </ol>
+  <p>After launch, check the first signed post in your channel. The host runs the checks; the bot publishes their result. Another host and operator make the witness more independent.</p>
+  <details><summary>What does the bot actually prove?</summary><p>A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.</p></details>
+</section>
+
+<section class="planned" id="github">
+  <p class="eyebrow">PLANNED</p><h2>Know which software made the record.</h2>
+  <p>This connection is planned and cannot be enabled yet. Its purpose is to record the approved source version, check the installed build and retain signed proof copies in a repository you control.</p>
+  <div aria-hidden="true" class="chain dashed">
+    <div class="chain-node"><span class="chain-icon tone-slate"><svg class="i"><use href="#i-git"/></svg></span><strong>Your fork</strong><span class="chain-wire"></span></div>
+    <div class="chain-node"><span class="chain-icon tone-slate"><svg class="i"><use href="#i-tag"/></svg></span><strong>Approved version</strong><span class="chain-wire"></span></div>
+    <div class="chain-node"><span class="chain-icon tone-slate"><svg class="i"><use href="#i-check"/></svg></span><strong>Build check</strong><span class="chain-wire"></span></div>
+    <div class="chain-node"><span class="chain-icon tone-slate"><svg class="i"><use href="#i-files"/></svg></span><strong>Proof copies</strong></div>
+  </div>
+  <ol class="num-cards">
+    <li>Choose your fork and approve a specific version.</li>
+    <li>Check that the installed build matches that version.</li>
+    <li>Keep signed proof copies through an independent witness.</li>
+  </ol>
+  <p>A GitHub token grants repository access; it does not prove that the running server is unchanged. Build verification and independent witnesses provide different checks. No GitHub token is needed on this page.</p>
+</section>
+
+<section id="access">
+  <div class="block-head"><span aria-hidden="true" class="block-icon tone-blue"><svg class="i"><use href="#i-globe"/></svg></span><div><h2>Open to everyone</h2><p class="block-lead">Mathematics and cryptographic truth belong to everyone across the globe.</p></div></div>
+  <p>Many expect standard geographic or political blocks, such as OFAC lists or regional bans against Russia. TgWitness enforces none of them: it is released under the MIT License for everyone, in every country.</p>
+  <p>The only incompatibility we name is <strong>Taylor Wessing</strong> and anyone who believes their words or authority stand above mathematics: those who enable or defend corporatocracy, privatized or commercial justice, plutocracy, kleptocracy and institutional corruption. Truth is available to all, except to those who think their signature under a lie turns it into reality.</p>
+  <p>This is our position as the authors of TgWitness, not a licence condition. <a href="https://phishdestroy.github.io/TgWitness/docs/reference/license/">Read our full notice</a></p>
+</section>
+
+</main>
+<a aria-label="Back to top" class="to-top" href="#top" title="Back to top"><svg aria-hidden="true" class="i"><use href="#i-arrow-up"/></svg></a>
+<footer><img src="/mark.svg" alt="" width="20" height="20"> This guide ships with the application. No external scripts, fonts or analytics.</footer>
+</body></html>

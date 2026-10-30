@@ -1,0 +1,54 @@
+<p class="guide-outcome">A message can change. The record of what you observed should remain checkable.</p>
+<p>Explore two small experiments below. They use fictional messages, stay in your browser and never connect to Telegram.</p>
+
+<h2 id="journey">One message, three observations</h2>
+<p>When Telegram delivers a new message, an edit and a deletion notice, the collector appends three separate observations. The edit does not replace the first record. A deletion notice does not erase it.</p>
+<figure class="lab journey-lab" data-lab="journey" aria-labelledby="journey-caption">
+  <div class="lab-top"><span class="lab-kicker">01 / MESSAGE JOURNEY</span><span class="sample-tag">Illustrative sequence</span></div>
+  <svg class="journey-route" viewBox="0 0 600 92" role="img" aria-labelledby="journey-route-title"><title id="journey-route-title">Telegram delivers an update to the collector, which appends a journal record.</title>
+    <path class="route-track" d="M156 36H238M386 36H468"/><path class="route-pulse" d="M156 36H238M386 36H468"/>
+    <rect x="2" y="12" width="154" height="48" rx="10"/><rect x="238" y="12" width="148" height="48" rx="10"/><rect x="468" y="12" width="130" height="48" rx="10"/>
+    <text x="79" y="41">Telegram</text><text x="312" y="41">Collector</text><text x="533" y="41">Journal</text>
+    <text class="route-label" x="195" y="84">update →</text><text class="route-label" x="425" y="84">append →</text>
+  </svg>
+  <div class="journey-panels">
+    <div class="chat-example"><div class="panel-caption">CURRENT CHAT VIEW <span>Message #42</span></div><div class="message-bubble" data-chat-message>Message deleted</div><p class="chat-note" data-chat-note>The message has disappeared from the chat view.</p></div>
+    <div class="journal-example"><div class="panel-caption"><span class="caption-text">OBSERVATION JOURNAL</span> <span data-record-count>3 records</span></div><ol class="event-stack">
+      <li data-event="1"><span class="event-index">01</span><div><code>message.new</code><p>Meet at 10:00</p></div><span class="event-check">✓</span></li>
+      <li data-event="2"><span class="event-index">02</span><div><code>message.edited</code><p>Meet at 11:00</p></div><span class="event-check">✓</span></li>
+      <li data-event="3"><span class="event-index">03</span><div><code>message.deleted</code><p>Deletion notice for #42</p></div><span class="event-check">✓</span></li>
+    </ol></div>
+  </div>
+  <div class="lab-controls" data-enhanced hidden><button type="button" class="lab-primary" data-play>Play sequence</button><button type="button" data-next>Next event →</button><button type="button" data-reset>Reset</button><span data-step-label>Ready / 0 of 3</span></div>
+  <p class="lab-status" data-journey-status role="status">All three received observations remain in the journal.</p>
+  <figcaption id="journey-caption">Simplified path for one already selected source. Operational records also share the real journal. Capture depends on what the account can see and what Telegram delivers.</figcaption>
+</figure>
+<p>A deletion notice supplies neither a reliable deletion time nor the person who deleted the message. Keeping those values unknown preserves the distinction between an observation and a guess.</p>
+
+<h2 id="chain">Change a record. Follow the hash.</h2>
+<p>Each record contains the previous record’s hash. Its own hash covers the event fields, including that link. An externally retained checkpoint pins a specific journal length and head hash.</p>
+<figure class="lab hash-lab" data-lab="hash" aria-labelledby="hash-caption">
+  <div class="lab-top"><span class="lab-kicker">02 / HASH-CHAIN SANDBOX</span><span class="sample-tag">Real SHA-256 · sample records</span></div>
+  <div class="lab-controls scenario-controls" data-enhanced hidden role="group" aria-label="Change the sample journal">
+    <button type="button" data-hash-mode="original" aria-pressed="true">Original</button><button type="button" data-hash-mode="edited" aria-pressed="false">Alter record 2</button><button type="button" data-hash-mode="rebuilt" aria-pressed="false">Rebuild its hashes</button><button type="button" data-hash-mode="truncated" aria-pressed="false">Remove the tail</button>
+  </div>
+  <div class="hash-chain">
+    <div class="hash-node" data-hash-node="1"><span class="panel-caption">RECORD 01</span><strong>Message received</strong><code data-hash-value>h₁ = SHA-256(e₁)</code><span class="hash-verdict">Links to 64 zeroes</span></div>
+    <div class="hash-node" data-hash-node="2"><span class="panel-caption">RECORD 02</span><strong data-hash-text>Meet at 11:00</strong><code data-hash-value>h₂ = SHA-256(e₂)</code><span class="hash-verdict">Includes h₁</span></div>
+    <div class="hash-node" data-hash-node="3"><span class="panel-caption">RECORD 03</span><strong>Deletion observed</strong><code data-hash-value>h₃ = SHA-256(e₃)</code><span class="hash-verdict">Includes h₂</span></div>
+  </div>
+  <div class="retained-boundary"><span>RETAINED ELSEWHERE</span><strong>3 records · head <code data-retained-head>h₃</code></strong><span data-boundary-verdict>Compare this fixed boundary with the supplied journal.</span></div>
+  <p class="lab-status" data-hash-status role="status">Altering an event changes its hash. Rebuilding the chain changes its head. Removing the tail makes it shorter than the retained checkpoint.</p>
+  <details class="lab-detail" data-hash-detail hidden><summary>Inspect record 2 and the full hashes</summary><p>This is the exact UTF-8 JSON hashed in this example. Values are fictional; the nine fields and serialization match the journal format.</p><pre><code data-canonical></code></pre><dl class="digest-list"><dt>Saved record 2 hash</dt><dd><code data-stored-digest></code></dd><dt>Recalculated record 2 hash</dt><dd><code data-calculated-digest></code></dd></dl></details>
+  <figcaption id="hash-caption">This sandbox computes hashes, not signatures. The real verifier also checks every event’s Ed25519 signature, sequence and link. Rebuilding hashes alone cannot create valid signatures under the trusted key.</figcaption>
+</figure>
+
+<h2 id="formulas">The actual rules, in a few lines</h2>
+<div class="formula-card"><span class="lab-kicker">HASH + SIGNATURE</span><div class="formula" translate="no" role="math" aria-label="h zero is sixty-four hexadecimal zeroes. h i is the hexadecimal SHA-256 of canonical event i. Signature i is Ed25519 over the raw bytes of h i.">h<sub>0</sub> = 0<sup>64</sup><br>h<sub>i</sub> = hex(SHA-256(C(e<sub>i</sub>)))<br>σ<sub>i</sub> = Ed25519.Sign(sk, unhex(h<sub>i</sub>))</div><p><strong>C</strong> serializes the nine event fields as UTF-8 JSON: sorted keys, no extra whitespace, no ASCII escaping and no NaN/infinity. The event’s <code>previous_hash</code> is h<sub>i−1</sub>. The displayed h<sub>0</sub> means 64 zero characters; signatures cover the 32 raw digest bytes.</p></div>
+<p>The nine fields are <code>seq</code>, <code>observed_at</code>, <code>source_at</code>, <code>kind</code>, <code>chat_id</code>, <code>message_id</code>, <code>actor_id</code>, <code>payload</code> and <code>previous_hash</code>. This is TgWitness’s <a href="@@REPO_URL@@/blob/@@BRANCH@@/docs/EVIDENCE.md#event-canonicalization">documented JSON encoding</a>; the hash and signature themselves are not hash-input fields.</p>
+<div class="formula-card"><span class="lab-kicker">RETAINED CHECKPOINT</span><div class="formula" translate="no" role="math" aria-label="Export count is at least checkpoint count, and the exported hash at the checkpoint position equals the retained head hash.">N<sub>export</sub> ≥ N<sub>checkpoint</sub><br>h<sub>export</sub>[N<sub>checkpoint</sub>] = H<sub>checkpoint</sub></div><p>Verify the checkpoint signature under the pinned collector key, then compare its boundary with the verified journal. A later export may contain more records; it must still agree at the earlier checkpoint.</p></div>
+
+<h2 id="layers">Three questions, three different checks</h2>
+<div class="evidence-layers"><a href="@@GUIDE_EXPORTS@@"><span>01 / INTEGRITY</span><strong>Did this record change?</strong><p>Verify hashes and signatures against a separately trusted key.</p></a><a href="@@GUIDE_WITNESS@@"><span>02 / CONTINUITY</span><strong>What was retained earlier?</strong><p>Compare a signed export with checkpoints kept by a separate witness.</p></a><a href="@@GUIDE_CASES@@"><span>03 / DELIVERY</span><strong>Did these test events arrive?</strong><p>Match controlled send, edit and delete actions against each account’s journal.</p></a></div>
+<p class="callout">A matching hash chain answers an integrity question. It does not establish complete Telegram delivery, the truth of a message or an independently trusted observation time.</p>
+<p>Follow the <a href="@@GUIDE_CASES@@">whole-account investigation</a> from acquisition to case package.</p>

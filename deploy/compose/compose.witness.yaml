@@ -1,0 +1,41 @@
+# An independent witness on a server of its own (ideally run by someone else):
+#   docker compose --project-directory . -f deploy/compose/compose.witness.yaml up -d
+# Needs in .env: TGWITNESS_WITNESS_COLLECTOR (the collector's HTTPS address), TGWITNESS_WITNESS_TOKEN
+# (a read-only token from the collector's Witness page), TGWITNESS_WITNESS_BOT_TOKEN and
+# TGWITNESS_WITNESS_CHANNEL. It never receives the collector's session, vault or panel token.
+name: tgwitness-witness
+services:
+  witness:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    command: ["python", "-m", "tgwitness.witness", "run"]
+    environment:
+      TGWITNESS_WITNESS_DATA: /witness
+      TGWITNESS_WITNESS_COLLECTOR: ${TGWITNESS_WITNESS_COLLECTOR:?Set TGWITNESS_WITNESS_COLLECTOR to the collector address in .env}
+      TGWITNESS_WITNESS_TOKEN: ${TGWITNESS_WITNESS_TOKEN:?Set TGWITNESS_WITNESS_TOKEN to the witness token in .env}
+      TGWITNESS_WITNESS_BOT_TOKEN: ${TGWITNESS_WITNESS_BOT_TOKEN:-}
+      TGWITNESS_WITNESS_CHANNEL: ${TGWITNESS_WITNESS_CHANNEL:-}
+      TGWITNESS_WITNESS_INTERVAL: ${TGWITNESS_WITNESS_INTERVAL:-}
+      TGWITNESS_WITNESS_TIMEOUT: ${TGWITNESS_WITNESS_TIMEOUT:-}
+      TGWITNESS_WITNESS_POST: ${TGWITNESS_WITNESS_POST:-}
+      TGWITNESS_WITNESS_TITLE: ${TGWITNESS_WITNESS_TITLE:-}
+      TGWITNESS_WITNESS_COLLECTOR_FINGERPRINT: ${TGWITNESS_WITNESS_COLLECTOR_FINGERPRINT:-}
+      TGWITNESS_WITNESS_PROXY: ${TGWITNESS_WITNESS_PROXY:-}
+      TGWITNESS_WITNESS_BOT_API: ${TGWITNESS_WITNESS_BOT_API:-}
+    volumes:
+      - witness-data:/witness
+    healthcheck:
+      disable: true
+    init: true
+    stop_grace_period: 15s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+volumes:
+  witness-data:

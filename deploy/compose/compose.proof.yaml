@@ -1,0 +1,33 @@
+# Overlay: docker compose -f compose.yaml -f deploy/compose/compose.proof.yaml up -d --build
+# Copy deploy/proof.config.example to proof-config/proof.json and set real key fingerprints.
+services:
+  proof:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    command: ["python", "-m", "tgwitness.proof", "--config", "/proof-config/proof.json", "--host", "0.0.0.0", "--port", "8790"]
+    ports:
+      - "127.0.0.1:${TGWITNESS_PROOF_PORT:-8790}:8790"
+    volumes:
+      - ./proof-config:/proof-config:ro
+      - proof-data:/witness
+    depends_on:
+      tgwitness:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8790/healthz', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    init: true
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+volumes:
+  proof-data:

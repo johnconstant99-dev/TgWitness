@@ -1,0 +1,25 @@
+# Add to either compose.yaml or deploy/compose/compose.image.yaml with a second -f argument.
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      TGWITNESS_DOMAIN: ${TGWITNESS_DOMAIN:?Set TGWITNESS_DOMAIN to your public DNS hostname in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile.docker:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      tgwitness:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+volumes:
+  caddy-data:
+  caddy-config:

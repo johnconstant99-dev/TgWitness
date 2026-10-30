@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="@@LANG@@" dir="@@DIR@@" class="home-page">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1120">
+  <title>@@TITLE@@</title>
+  <meta name="description" content="@@DESCRIPTION@@">
+  <link rel="canonical" href="@@CANONICAL@@">
+  @@EXTRA_HEAD@@
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="@@TITLE@@">
+  <meta property="og:site_name" content="TgWitness">
+  <meta property="og:locale" content="@@OG_LOCALE@@">
+  <meta property="og:description" content="@@OG_DESCRIPTION@@">
+  <meta property="og:url" content="@@CANONICAL@@">
+  <meta property="og:image" content="@@BASE_URL@@/assets/tgwitness-social.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="@@OG_IMAGE_ALT@@">
+  <meta name="twitter:card" content="summary_large_image">
+  <script>@@THEME_SCRIPT@@</script>
+  <link rel="icon" href="@@ROOT@@assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="@@ROOT@@style.css">
+  <script src="@@ROOT@@site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header"><div class="header wrap">
+    <a class="brand" href="#" aria-label="TgWitness home"><img src="@@ROOT@@assets/mark.svg" width="34" height="34" alt="">TgWitness</a>
+    <nav aria-label="Main navigation">
+      <a href="guides/modes.html">Capabilities</a><a href="#workspace">Workspace</a><a href="#start">Install</a><a href="docs/">Docs</a>
+      <a class="nav-source" href="@@REPO_URL@@">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+    <div class="header-tools">@@LANGUAGE_MENU@@@@THEME_TOGGLE@@</div>
+  </div></header>
+  <main id="main">
+    <div class="hero-shell">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <a class="release-label" href="@@REPO_URL@@/blob/@@BRANCH@@/docs/CHANGELOG.md"><span class="status-dot"></span> Open source <span class="label-divider">/</span> v@@VERSION@@ <span aria-hidden="true">→</span></a>
+        <h1 id="hero-title">Messages change.<br><span>Keep what<br>you saw.</span></h1>
+        <p class="hero-description">Capture Telegram messages, preserve their changes, and export a signed record.</p>
+        <div class="actions"><a class="button primary" data-home-action="demo" href="@@ROOT@@demo/?lang=@@LANG_CODE@@">Open demo <span aria-hidden="true">→</span></a><a class="button secondary" data-home-action="setup" href="@@ROOT@@demo/guide.html?lang=@@LANG_CODE@@">Setup guide <span aria-hidden="true">↗</span></a></div>
+        <p class="hero-footnote">The demo uses fictional data. No Telegram sign-in required.</p>
+        <a class="hero-retention-link" href="#s3">S3 off-site copy: setup and recovery <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="record" aria-label="Illustrated example of a message history, using fictional data">
+        <div class="record-heading"><span><span class="record-dot"></span> A MESSAGE, THROUGH TIME</span><span class="mono">#0042</span></div>
+        <div class="record-source"><span class="source-icon" aria-hidden="true">N</span><div>Northstar · Research<small>Fictional source / message 42</small></div></div>
+        <ol class="record-events">
+          <li><div class="event-line"><strong>Message observed</strong><time>09:41:02</time></div><p>The briefing starts at <span class="old-time">14:00</span>.</p></li>
+          <li><div class="event-line"><strong>Edit preserved</strong><time>09:43:18</time></div><p>The briefing starts at <span class="new-time">15:00</span>.</p><small>Previous version retained</small></li>
+          <li><div class="event-line"><strong>Deletion notice</strong><time>10:06:45</time></div><p class="deletion-text">Captured content stays in your journal.</p></li>
+        </ol>
+        <div class="record-footer"><span aria-hidden="true">⌁</span> Three observations. One history.<span class="sample-label">EXAMPLE</span></div>
+        <div class="record-controls" hidden><div role="group" aria-label="Explore the fictional message history"><button type="button" data-record-step="0" aria-pressed="false">01 <span>Message</span></button><button type="button" data-record-step="1" aria-pressed="false">02 <span>Edit</span></button><button type="button" data-record-step="2" aria-pressed="true">03 <span>Deletion</span></button></div><button class="motion-toggle" type="button" aria-label="Pause example animation">Pause <span aria-hidden="true">Ⅱ</span></button></div>
+        <p class="record-caption" id="record-caption">The message disappears. The captured history remains.</p>
+      </div>
+    </section>
+
+    <nav class="workflow wrap" aria-label="Choose your next step">
+      <p class="workflow-label">CHOOSE YOUR NEXT STEP</p>
+      <ol>
+        <li><a href="guides/modes.html"><span class="workflow-number" aria-hidden="true">01</span><div><strong>Explore capabilities</strong><small>Modes, events and limits</small></div><span class="workflow-arrow" aria-hidden="true">↗</span></a></li>
+        <li><a href="@@ROOT@@demo/?lang=@@LANG_CODE@@"><span class="workflow-number" aria-hidden="true">02</span><div><strong>Try the workspace</strong><small>Open the fictional case</small></div><span class="workflow-arrow" aria-hidden="true">↗</span></a></li>
+        <li><a href="#start"><span class="workflow-number" aria-hidden="true">03</span><div><strong>Set up locally</strong><small>Windows, macOS, Linux or Docker</small></div><span class="workflow-arrow" aria-hidden="true">↓</span></a></li>
+        <li><a href="docs/exports/"><span class="workflow-number" aria-hidden="true">04</span><div><strong>Verify an export</strong><small>Check a signed handoff</small></div><span class="workflow-arrow" aria-hidden="true">↗</span></a></li>
+      </ol>
+    </nav>
+    </div>
+
+    <section class="workspace wrap" id="workspace" aria-labelledby="workspace-title">
+      <div class="section-heading"><div><p class="eyebrow"><span class="section-index">01</span> THE WORKSPACE</p><h2 id="workspace-title">Every captured change.<br>Right where you need it.</h2></div><p>Browse the interface with fictional demonstration data.</p></div>
+      <div class="switcher" data-tabs aria-label="Workspace screenshots">
+        <div class="tab-buttons" data-tab-buttons>
+          <button type="button" id="tour-chats" aria-controls="panel-chats">01 <span>Saved chats</span></button>
+          <button type="button" id="tour-journal" aria-controls="panel-journal">02 <span>Journal</span></button>
+          <button type="button" id="tour-edits" aria-controls="panel-edits">03 <span>Edit history</span></button>
+          <button type="button" id="tour-exports" aria-controls="panel-exports">04 <span>Exports &amp; S3</span></button>
+        </div>
+        <figure id="panel-chats" aria-labelledby="tour-chats" data-tab-panel><div class="screen-frame screen-dark"><div class="screen-bar"><span class="window-dots" aria-hidden="true">● ● ●</span><span>TgWitness / Saved chats</span><span class="screen-mode">YOUR OBSERVATION WORKSPACE</span></div><img src="@@ROOT@@assets/chats-dark.png" width="1440" height="900" alt="Saved Telegram conversations in the dark theme, with captured edits and deleted messages kept in context" loading="lazy"></div><figcaption><span>01 / Saved chats</span> A familiar conversation view, with captured edits and deletion notices alongside the messages.</figcaption></figure>
+        <figure id="panel-journal" aria-labelledby="tour-journal" data-tab-panel><div class="screen-frame"><div class="screen-bar"><span class="window-dots" aria-hidden="true">● ● ●</span><span>TgWitness / Journal</span><span class="screen-mode">LOCAL WORKSPACE</span></div><img src="@@ROOT@@assets/workspace.png" width="1440" height="900" alt="Journal with observed messages, edits, deletion notices and coverage events" fetchpriority="high"></div><figcaption><span>02 / Journal</span> A searchable timeline of what your account observed, including interruptions.</figcaption></figure>
+        <figure id="panel-edits" aria-labelledby="tour-edits" data-tab-panel><div class="screen-frame"><div class="screen-bar"><span class="window-dots" aria-hidden="true">● ● ●</span><span>TgWitness / Edit history</span><span class="screen-mode">LOCAL WORKSPACE</span></div><img src="@@ROOT@@assets/detail.png" width="1440" height="900" alt="Detail drawer comparing the captured previous and edited versions of a message" loading="lazy"></div><figcaption><span>03 / Edit history</span> Compare captured versions without overwriting the earlier observation.</figcaption></figure>
+        <figure id="panel-exports" aria-labelledby="tour-exports" data-tab-panel><div class="screen-frame"><div class="screen-bar"><span class="window-dots" aria-hidden="true">● ● ●</span><span>TgWitness / Signed exports</span><span class="screen-mode">LOCAL WORKSPACE</span></div><img src="@@ROOT@@assets/exports.png" width="1440" height="900" alt="Export workspace offering a signed ZIP, JSONL, CSV and an offline HTML report" loading="lazy"></div><figcaption><span>04 / Signed exports</span> Take the journal with you, with a manifest and an independent verifier.</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="principles wrap" aria-label="Designed around your observations">
+      <article><svg class="feature-illustration" viewBox="0 0 300 112" fill="none" aria-hidden="true"><path d="M69 29h62l32 27h66M69 83h62l32-27" stroke="#b5c7e5" stroke-width="2"/><rect x="19" y="11" width="52" height="36" rx="9" fill="#edf3ff" stroke="#acc2ee"/><rect x="19" y="65" width="52" height="36" rx="9" fill="#edf3ff" stroke="#acc2ee"/><path d="M33 24h24M33 32h16M33 78h24M33 86h16" stroke="#5b7fbe" stroke-width="2" stroke-linecap="round"/><rect x="173" y="22" width="105" height="68" rx="12" fill="#fff" stroke="#b5c7e5"/><circle cx="193" cy="45" r="5" fill="#2563eb"/><path d="M207 44h48M207 53h33M188 71h67" stroke="#adc0df" stroke-width="3" stroke-linecap="round"/><circle class="route-signal" cx="145" cy="41" r="4" fill="#2563eb"/></svg><span class="feature-number">01 / CAPTURE</span><h3>You choose the scope.</h3><p>Chosen chats, a Telegram folder or the whole account. A separate workspace for each account.</p><a class="text-link" href="guides/modes.html#scope">Compare collection modes <span aria-hidden="true">→</span></a></article>
+      <article><svg class="feature-illustration" viewBox="0 0 300 112" fill="none" aria-hidden="true"><rect x="31" y="10" width="168" height="78" rx="10" fill="#eff2f7" stroke="#c8d3e3"/><path d="M47 28h89M47 41h124M47 54h76" stroke="#aabbd3" stroke-width="3" stroke-linecap="round"/><rect class="version-layer" x="77" y="30" width="190" height="74" rx="10" fill="#fff" stroke="#adc3ea"/><path d="M94 48h103" stroke="#aabbd3" stroke-width="3" stroke-linecap="round"/><rect x="94" y="60" width="63" height="12" rx="3" fill="#f6e9e8"/><path d="M100 66h51" stroke="#b97770"/><rect x="164" y="60" width="77" height="12" rx="3" fill="#dcefe5"/><path d="M170 66h65" stroke="#2c7c56"/><path d="M94 86h92" stroke="#aabbd3" stroke-width="3" stroke-linecap="round"/></svg><span class="feature-number">02 / PRESERVE</span><h3>Changes add to the story.</h3><p>Captured versions, deletion notices and observation gaps stay in the journal.</p><a class="text-link" href="guides/modes.html#events">See the event matrix <span aria-hidden="true">→</span></a></article>
+      <article><svg class="feature-illustration" viewBox="0 0 300 112" fill="none" aria-hidden="true"><rect x="35" y="19" width="59" height="75" rx="8" fill="#fff" stroke="#c1cde0"/><path d="M49 36h30M49 46h23M49 56h30" stroke="#afbed5" stroke-width="3" stroke-linecap="round"/><path d="M106 57h60m-8-8 8 8-8 8" stroke="#7896c8" stroke-width="2" stroke-linecap="round"/><rect x="178" y="15" width="88" height="82" rx="12" fill="#edf3ff" stroke="#acc2ee"/><path d="M222 31v28m-7-5 7 7 7-7M206 72h32" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="259" cy="85" r="14" fill="#e0f1e8" stroke="#98c5ae"/><path class="verified-tick" d="m252 85 5 5 9-10" stroke="#23734b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="feature-number">03 / HAND OVER</span><h3>A record that travels.</h3><p>Signed ZIP, preserved files and an offline report. Optional password protection.</p><a class="text-link" href="docs/exports/">Export and verify <span aria-hidden="true">→</span></a></article>
+    </section>
+
+    <section class="proof wrap" id="proof" aria-labelledby="proof-title">
+      <div class="section-heading"><div><p class="eyebrow">HOW THE RECORD HOLDS TOGETHER</p><h2 id="proof-title">Change one byte.<br>The chain tells you.</h2></div><p>Each event links to the previous hash and carries an Ed25519 signature.</p></div>
+      <div class="switcher" data-tabs aria-label="Evidence explanations">
+        <div class="tab-buttons" data-tab-buttons>
+          <button type="button" id="proof-chain" aria-controls="panel-chain">01 <span>Linked records</span></button>
+          <button type="button" id="proof-tamper" aria-controls="panel-tamper">02 <span>A changed record</span></button>
+          <button type="button" id="proof-checkpoint" aria-controls="panel-checkpoint">03 <span>A retained checkpoint</span></button>
+        </div>
+        <figure id="panel-chain" aria-labelledby="proof-chain" data-tab-panel><picture><source media="(prefers-reduced-motion: reduce)" srcset="@@ROOT@@assets/evidence-chain-static.svg"><img src="@@ROOT@@assets/evidence-chain-animated.svg" width="1200" height="560" loading="lazy" alt="Captured events link to previous hashes, carry signatures and travel in a verifiable export."></picture></figure>
+        <figure id="panel-tamper" aria-labelledby="proof-tamper" data-tab-panel><picture><source media="(prefers-reduced-motion: reduce)" srcset="@@ROOT@@assets/evidence-tamper-static.svg"><img src="@@ROOT@@assets/evidence-tamper-animated.svg" width="1200" height="560" loading="lazy" alt="Changing a captured record changes its hash and breaks verification of the linked record."></picture></figure>
+        <figure id="panel-checkpoint" aria-labelledby="proof-checkpoint" data-tab-panel><picture><source media="(prefers-reduced-motion: reduce)" srcset="@@ROOT@@assets/evidence-checkpoint-static.svg"><img src="@@ROOT@@assets/evidence-checkpoint-animated.svg" width="1200" height="560" loading="lazy" alt="A separately retained checkpoint lets a recipient compare the exported journal with an earlier observation."></picture></figure>
+      </div>
+      <div class="section-actions"><p>See what each verification mechanism establishes, and where its limits remain.</p><a class="button outline" href="guides/modes.html#levels">Explore eight evidence levels <span aria-hidden="true">→</span></a></div>
+    </section>
+
+    <section class="integrity" aria-labelledby="integrity-title"><div class="wrap integrity-layout">
+      <div><p class="eyebrow">BUILT FOR REVIEW</p><h2 id="integrity-title">Ready for<br>another pair<br><span>of eyes.</span></h2><p>Hand over observations, files and an offline HTML report in one signed bundle.</p><a class="text-link" href="@@REPO_URL@@/blob/@@BRANCH@@/docs/EVIDENCE.md">Read the evidence model <span aria-hidden="true">↗</span></a></div>
+      <div class="bundle"><div class="bundle-heading"><span class="mono">tgwitness-evidence.zip</span><span class="bundle-tag">SIGNED BUNDLE</span></div><ul><li><span>01</span><div>Original observations<small>JSONL records + CSV table</small></div></li><li><span>02</span><div>Readable context<small>Offline HTML report + preserved media</small></div></li><li><span>03</span><div>Independent verification<small>Signed manifest + standalone verifier</small></div></li></ul><p class="bundle-note">Signatures detect tampering relative to a trusted key. They do not prove Telegram origin or guarantee complete capture. Journal content and media need encrypted storage provided by you.</p></div>
+    </div></section>
+
+    <section class="retention wrap" id="retention" aria-labelledby="retention-title">
+      <div class="section-heading"><div><p class="eyebrow">STORAGE, CONTINUITY AND VERIFICATION</p><h2 id="retention-title">S3 copies.<br>External checks.</h2></div><p>Keep encrypted copies and add independent checks.</p></div>
+      <article class="s3-overview" id="s3" aria-labelledby="s3-title">
+        <div class="s3-overview-heading"><p class="eyebrow">EXPORTS → OFF-SITE COPY</p><span class="retention-badge">Off by default</span></div>
+        <h3 id="s3-title">Copy everything to S3-compatible storage</h3>
+        <div class="s3-layout">
+          <div class="s3-copy">
+            <p>Journal, files, timestamped checkpoints and chat exports — encrypted before upload to AWS S3 or compatible storage.</p>
+            <details class="presentation-details"><summary>Storage settings and recovery</summary>
+            <dl class="s3-features">
+              <div><dt>Client-side encryption</dt><dd><code>AES-256-GCM</code> encrypts objects on this machine. The provider receives encrypted objects.</dd></div>
+              <div><dt>Scheduled or manual copies</dt><dd>Copy now, or choose an interval from 1 to 1,440 minutes. Check progress in the panel.</dd></div>
+              <div><dt>Object Lock</dt><dd>Choose retention days and a mode when the bucket supports it. The panel reports whether retention was confirmed on an uploaded object.</dd></div>
+              <div><dt>Verified recovery</dt><dd>Download the encryption key and keep it separately. Restore on another machine; files are published only after verification.</dd></div>
+            </dl>
+            </details>
+          </div>
+          <figure class="s3-preview"><div class="screen-frame"><img src="@@ROOT@@assets/off-site-copy.png" width="1136" height="825" alt="Complete Off-site copy panel: endpoint, region, bucket, access keys, schedule, Object Lock and recovery key controls" loading="lazy"></div><figcaption>The complete panel with advanced options expanded. No storage credentials are shown.</figcaption></figure>
+        </div>
+        <div class="replica-flow" aria-label="Data is encrypted before upload"><span>Journal and media</span><span aria-hidden="true">→</span><code translate="no">AES-256-GCM</code><span aria-hidden="true">→</span><span>S3-compatible storage</span></div>
+        <div class="s3-actions"><a class="button primary" href="docs/exports/#s3">Configure S3 and restore a copy <span aria-hidden="true">→</span></a><a class="text-link" href="docs/reference/evidence/#off-site-copy-and-restore-s3">Read the verification details <span aria-hidden="true">↗</span></a></div>
+        <p class="retention-limit"><strong>Does not do</strong> It does not restore without the exported decryption key or replace an independent witness.</p>
+      </article>
+      <div class="retention-grid">
+        <article class="retention-card notification-overview" id="notifications" aria-labelledby="notifications-title">
+          <div class="retention-heading"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3 id="notifications-title">Notifications · Apprise</h3>
+          <p>Problem alerts, chat changes and daily summaries via Apprise: messengers, email or your own JSON webhook.</p>
+          <p class="retention-limit"><strong>Does not do</strong> It does not send message text unless you enable excerpts.</p>
+          <a class="text-link" href="docs/reference/operations/#notifications">Configure notification destinations <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="retention-card">
+          <div class="retention-heading"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3" stroke-linecap="round"/></svg></div>
+          <h3>External timestamps</h3>
+          <p>Timestamp checkpoint hashes with RFC 3161 and OpenTimestamps.</p>
+          <p class="retention-limit"><strong>Does not do</strong> It does not treat a pending calendar receipt as a confirmed Bitcoin timestamp.</p>
+          <a class="text-link" href="docs/reference/timestamp/">Check timestamp proofs <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="retention-card">
+          <div class="retention-heading"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z"/><path d="m8 12 3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Independent witness</h3>
+          <p>A separate host keeps signed observations and can publish <code>TGW1</code> checkpoints.</p>
+          <p class="retention-limit"><strong>Does not do</strong> It does not make two workspaces on one collector host into independent witnesses.</p>
+          <a class="text-link" href="docs/witness/">Set up a witness <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="retention-card">
+          <div class="retention-heading"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 12h6m6 0h6M12 7v3m0 4v3" stroke-linecap="round"/><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></div>
+          <h3>Recovery and visible gaps</h3>
+          <p>Resume after restart. Rechecks and <code>coverage.json</code> show recovered messages and gaps.</p>
+          <p class="retention-limit"><strong>Does not do</strong> It does not reconstruct every missed edit or vanished message.</p>
+          <a class="text-link" href="guides/modes.html#continuity">Inspect continuity and gaps <span aria-hidden="true">→</span></a>
+        </article>
+      </div>
+    </section>
+
+    <section class="start wrap" id="start" aria-labelledby="start-title">
+      <div class="section-heading"><div><p class="eyebrow">ON YOUR MACHINE</p><h2 id="start-title">Your first workspace starts here.</h2></div><div class="section-intro"><p>Explore the demo first. Connect a dedicated account when you’re ready.<br>Windows, Linux, macOS, or Docker.</p><a class="text-link" href="@@ROOT@@demo/guide.html?lang=@@LANG_CODE@@">Read the setup guide <span aria-hidden="true">→</span></a></div></div>
+      <aside class="session-warning" id="session-warning" aria-labelledby="session-warning-title"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.2 2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z"/><path d="M12 9.5v4M12 17h.01"/></svg><div><strong id="session-warning-title">One imported session, one running client.</strong><p>Do not run an imported TData/session key in Telegram Desktop and TgWitness at the same time. Telegram can invalidate the shared authorization (AUTH_KEY_DUPLICATED). For parallel use, create a separate TgWitness login by phone or QR.</p><a href="@@ROOT@@demo/guide.html?lang=@@LANG_CODE@@#session-warning">Read the session import warning</a></div></aside>
+      <div class="demo-callout"><span class="demo-symbol" aria-hidden="true">↗</span><div><strong>Take a look before you connect.</strong><p>Try the fictional workspace without a Telegram account.</p><p><a class="demo-link" href="@@ROOT@@demo/?lang=@@LANG_CODE@@">Open the online demo →</a></p></div><div class="demo-commands"><span>Windows <code>scripts\Demo.cmd</code></span><span>Linux / macOS <code>sh start.sh --demo</code></span></div></div>
+      <details class="presentation-details installation-details"><summary>Local installation commands</summary>
+      <div class="start-layout">
+        <div class="start-intro"><span class="step-label">STEP 01</span><h3>Get the source.</h3><p><a class="download-link" href="@@REPO_URL@@/archive/refs/heads/@@BRANCH@@.zip">Download the source ZIP</a> and extract it, or clone the repository:</p><div class="code-block"><pre><code id="clone-command">git clone @@REPO_URL@@.git
+cd @@REPO_NAME@@</code></pre><button class="copy-button" type="button" data-copy="clone-command" hidden>Copy</button></div><p class="small-note">Source launch needs Python 3.11+. The Windows launcher offers installation if Python is missing.</p><a class="text-link" href="@@REPO_URL@@/releases">Browse releases <span aria-hidden="true">↗</span></a><p class="small-note">No Python on Windows? <a href="@@REPO_URL@@/releases/download/v@@VERSION@@/TgWitness-@@VERSION@@-windows-amd64-portable.zip">Download the portable package</a>, extract it and double-click <code>TgWitness.cmd</code>.</p></div>
+        <div class="start-run"><span class="step-label">STEP 02</span><h3>Choose how to run.</h3><div data-tabs aria-label="Installation platform">
+          <div class="tab-buttons platform-tabs" data-tab-buttons><button type="button" id="tab-windows" aria-controls="setup-windows">Windows</button><button type="button" id="tab-unix" aria-controls="setup-unix">Linux / macOS</button><button type="button" id="tab-docker" aria-controls="setup-docker">Docker</button></div>
+          <div id="setup-windows" aria-labelledby="tab-windows" data-tab-panel><p>Double-click <code>Start.cmd</code>, or run in PowerShell:</p><div class="code-block"><pre><code id="windows-command">.\Start.cmd</code></pre><button class="copy-button" type="button" data-copy="windows-command" hidden>Copy</button></div><p>Just exploring? Double-click <code>scripts\Demo.cmd</code> for an isolated demo. No Telegram login needed.</p></div>
+          <div id="setup-unix" aria-labelledby="tab-unix" data-tab-panel><p>With Python 3.11+ and <code>venv</code> available:</p><div class="code-block"><pre><code id="unix-command">sh start.sh</code></pre><button class="copy-button" type="button" data-copy="unix-command" hidden>Copy</button></div><p>To open the fictional journal instead, run <code>sh start.sh --demo</code>.</p></div>
+          <div id="setup-docker" aria-labelledby="tab-docker" data-tab-panel><p>With Docker running and Compose 2.20+ installed:</p><div class="code-block"><pre><code id="docker-command">docker compose up -d --build --wait
+docker compose exec tgwitness cat /data/panel-token.txt</code></pre><button class="copy-button" type="button" data-copy="docker-command" hidden>Copy</button></div><p>The second command shows your private panel token. Keep it on your machine.</p></div>
+        </div><p class="panel-address">Open <a href="http://127.0.0.1:8787">127.0.0.1:8787 <span aria-hidden="true">↗</span></a> after launch.</p><p class="small-note">For source installs, the token is in <code>data/live/panel-token.txt</code>. Telegram sign-in can use the built-in API settings or your own pair from <a href="https://my.telegram.org">my.telegram.org</a>. <a href="@@REPO_URL@@/blob/@@BRANCH@@/QUICKSTART.md">Full setup guide ↗</a></p></div>
+      </div>
+      </details>
+      <p class="release-note"><strong>TgWitness @@VERSION@@</strong> <a href="@@REPO_URL@@/blob/@@BRANCH@@/docs/CHANGELOG.md">What’s new →</a> · <a href="@@REPO_URL@@/blob/@@BRANCH@@/docs/PRODUCT.md">Features and known limits →</a></p>
+    </section>
+
+    <section class="docs wrap" id="docs" aria-labelledby="docs-title"><div class="section-heading"><div><p class="eyebrow">ONE TASK AT A TIME</p><h2 id="docs-title">Clear instructions.<br>A useful next step.</h2></div><a class="text-link" href="docs/">Explore the guides ↗</a></div><a class="capability-link" href="guides/modes.html"><svg viewBox="0 0 32 32" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="2"/><rect x="19" y="3" width="10" height="10" rx="2"/><rect x="3" y="19" width="10" height="10" rx="2"/><path d="m19 25 4 4 7-10" stroke-linecap="round" stroke-linejoin="round"/></svg><div><h3>Modes, scenarios and evidence levels</h3><p>Four collection modes. Eight verification levels. Find the workflow for your case.</p></div><span aria-hidden="true">↗</span></a><div class="doc-links"><a href="docs/accounts/"><span>01</span><div><h3>Connect an account</h3><p>Phone, QR, and supported session imports.</p></div><span aria-hidden="true">↗</span></a><a href="docs/proxies/"><span>02</span><div><h3>Choose a proxy</h3><p>Public MTProxy lists or your own route.</p></div><span aria-hidden="true">↗</span></a><a href="docs/witness/"><span>03</span><div><h3>Set up a witness bot</h3><p>Signed checkpoints in your Telegram channel.</p></div><span aria-hidden="true">↗</span></a><a href="docs/exports/"><span>04</span><div><h3>Export and verify</h3><p>Share captured history and check its integrity.</p></div><span aria-hidden="true">↗</span></a></div></section>
+
+    <section class="faq wrap" aria-labelledby="faq-title"><h2 id="faq-title">Before you start.</h2><div><details><summary>Does this page connect to Telegram?</summary><p>No. This is a static project page with fictional examples and screenshots. The actual application runs on your computer or server; sign-in happens there.</p></details><details><summary>Can it recover messages deleted before capture?</summary><p>No. TgWitness retains content your account observed while collection was running. A later history snapshot cannot reconstruct missed edits or deleted messages.</p></details><details><summary>Is my whole journal encrypted?</summary><p>Account credentials and signing secrets are stored in an encrypted vault. Local messages and attachments need an encrypted disk or volume. Exports can optionally use a password-protected AES-256 ZIP.</p></details><details><summary>Is this affiliated with Telegram?</summary><p>No. TgWitness is an independent project using Telethon, distributed under the MIT License. You authorize your own accounts, using the built-in API settings or your own API pair.</p></details></div></section>
+    <section class="operator-notice wrap" aria-labelledby="operator-notice-title" lang="en" dir="ltr" translate="no">
+      <div class="operator-notice-copy">
+        <p class="operator-notice-label">PROJECT NOTICE / LICENCE</p>
+        <h2 id="operator-notice-title">Operator incompatibility.</h2>
+        <p><strong>Taylor Wessing PartG mbB — German core, Hamburg office.</strong></p>
+        <p>Our statement as the authors of TgWitness. It adds no condition to the MIT License. Read the complete notice and its source record.</p>
+      </div>
+      <div class="operator-notice-actions">
+        <a href="@@ROOT@@docs/reference/notice/">Read the complete notice <span aria-hidden="true">→</span></a>
+        <a href="@@ROOT@@NOTICE">Original text</a>
+      </div>
+    </section>
+    <section class="closing wrap" aria-labelledby="closing-title"><div><p class="eyebrow">YOUR NEXT STEP</p><h2 id="closing-title">Explore first.<br>Set up when ready.</h2></div><div class="closing-actions"><a class="button primary" href="@@ROOT@@demo/?lang=@@LANG_CODE@@">Open demo <span aria-hidden="true">→</span></a><a class="button outline" href="@@ROOT@@demo/guide.html?lang=@@LANG_CODE@@">Setup guide <span aria-hidden="true">↗</span></a></div></section>
+  </main>
+  <footer class="footer wrap"><a class="brand" href="#"><img src="@@ROOT@@assets/mark.svg" width="26" height="26" alt="">TgWitness</a><span>A self-hosted observation journal.</span><nav aria-label="Footer navigation"><a href="@@REPO_URL@@">Source</a><a href="@@REPO_URL@@/blob/@@BRANCH@@/LICENSE">MIT license</a><a href="@@ROOT@@docs/reference/notice/">Operator notice</a><a href="@@REPO_URL@@/blob/@@BRANCH@@/.github/SECURITY.md">Security</a></nav></footer>
+  <div class="sr-only" id="copy-status" role="status" aria-live="polite"></div>
+<script id="site-dict" type="application/json">@@SITE_DICT@@</script>
+</body>
+</html>

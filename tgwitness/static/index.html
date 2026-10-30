@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<meta name="color-scheme" content="light dark">
+<title>TgWitness · Observation workspace</title>
+<link rel="icon" type="image/svg+xml" href="/mark.svg">
+<link rel="stylesheet" href="/style.css?v=0.7.0">
+<script src="/theme.js?v=0.7.0"></script>
+<script defer src="/locale.js"></script>
+<script defer src="/i18n.js?v=0.7.0"></script>
+<script defer src="/app.js?v=0.7.0"></script>
+</head>
+<body>
+<svg class="icon-sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-journal" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+  <symbol id="i-sources" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/><path d="M8 8h8M8 12h5"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 3v12m-4.5-4.5L12 15l4.5-4.5M5 16v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></symbol>
+  <symbol id="i-account" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m-4.5-4.5L12 15l4.5-4.5M5 20h14"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66L20 8.5M20 4v4.5h-4.5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8 7.5 9.5 4.3-1.5 7.5-4.9 7.5-9.5V6Z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 0 1 5 .9c0 1.8-2.5 2.3-2.5 3.6M12 17h.01"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.3-4.3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m-4.5 4.5L12 4l4.5 4.5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></symbol>
+  <symbol id="i-braces" viewBox="0 0 24 24"><path d="M8 4H7a2 2 0 0 0-2 2v3.5a2.5 2.5 0 0 1-2 2.5 2.5 2.5 0 0 1 2 2.5V18a2 2 0 0 0 2 2h1M16 4h1a2 2 0 0 1 2 2v3.5a2.5 2.5 0 0 0 2 2.5 2.5 2.5 0 0 0-2 2.5V18a2 2 0 0 1-2 2h-1"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M3.5 15h17M9.5 9.5V20"/></symbol>
+  <symbol id="i-report" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-fingerprint" viewBox="0 0 24 24"><path d="M12 11v3c0 2.5-.6 4.6-1.8 6.5M8.4 6.6A6 6 0 0 1 18 11.5c0 1.6-.1 3.1-.4 4.5M6 11.5c0 1.5-.2 2.8-.6 4M15 13.5c0 2.6-.5 4.8-1.6 6.6M9 12a3 3 0 0 1 6-.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z"/><path d="M9 8h6M9 12h6"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5l1.5-3h5"/><path d="M5.5 5h13L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Z"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M20 14.5a2 2 0 0 1-2 2H8.5L4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M13 20h7M16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1 1-4Z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M18 7l-.8 12.1a2 2 0 0 1-2 1.9H8.8a2 2 0 0 1-2-1.9L6 7M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19.5 5.5a4.8 4.8 0 0 0-6.8 0L12 6.2l-.7-.7a4.8 4.8 0 0 0-6.8 6.8l.7.7L12 19.8l6.8-6.8.7-.7a4.8 4.8 0 0 0 0-6.8Z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20v-.5A5.5 5.5 0 0 1 8.5 14h1a5.5 5.5 0 0 1 5.5 5.5v.5M18 8v6M21 11h-6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 4.2 2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z"/><path d="M12 9.5v4M12 17h.01"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M21 12h-3.5l-2.5 7-6-14-2.5 7H3"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></symbol>
+  <symbol id="i-question" viewBox="0 0 24 24"><path d="M9 9.2a3 3 0 0 1 5.8 1c0 2-3 2.6-3 4.3M12 18h.01"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5.5 3.5-5.5 3.5Z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><rect x="9" y="9" width="6" height="6" rx="1"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="m20.5 11.5-8.3 8.3a5.4 5.4 0 0 1-7.6-7.6l8.3-8.3a3.6 3.6 0 0 1 5.1 5.1l-8.3 8.3a1.8 1.8 0 0 1-2.5-2.5l7.6-7.6"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 4.5-9 4.5-9-4.5Z"/><path d="m3 12 9 4.5 9-4.5M3 16.5 12 21l9-4.5"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3.5 13.8 9l5.7 1.8-5.7 1.9L12 18.5l-1.8-5.8-5.7-1.9L10.2 9Z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.6A8.2 8.2 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6Z"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12.5" rx="2"/><path d="M8.5 20.5h7M12 16.5v4"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15Z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+</svg>
+
+<section class="gate" id="gate">
+<div class="gate-story">
+  <p class="gate-eyebrow">YOUR TELEGRAM OBSERVATION WORKSPACE</p>
+  <h1><span id="gate-story-title">Messages change.</span><span class="gate-accent" id="gate-story-promise">Keep what you saw.</span></h1>
+  <p class="gate-intro">Preserve captured messages, follow their edits, and take a signed history with you. Your accounts. Your infrastructure.</p>
+  <ol class="gate-proof">
+    <li><span class="gate-proof-icon"><svg aria-hidden="true" class="icon"><use href="#i-message"/></svg></span><div><strong id="gate-proof-capture">Capture the conversation</strong><span>Choose the chats and events to observe.</span></div></li>
+    <li><span class="gate-proof-icon"><svg aria-hidden="true" class="icon"><use href="#i-layers"/></svg></span><div><strong id="gate-proof-versions">Keep the changes in context</strong><span>Captured versions stay alongside deletion notices.</span></div></li>
+    <li><span class="gate-proof-icon"><svg aria-hidden="true" class="icon"><use href="#i-fingerprint"/></svg></span><div><strong id="gate-proof-export">Hand over a verifiable record</strong><span>Signed exports with an independent verifier.</span></div></li>
+  </ol>
+  <p class="gate-local"><svg aria-hidden="true" class="icon"><use href="#i-shield"/></svg><span>Self-hosted. No telemetry. You control the data.</span></p>
+</div>
+<div class="gate-form"><div class="login-card">
+  <a class="brand" data-no-translate href="/"><img alt="" height="36" src="/mark.svg" width="36"> TgWitness</a>
+  <h2>Open your workspace</h2>
+  <p id="gate-description">Paste your panel access token to continue.</p>
+  <form id="unlock-form">
+    <label for="panel-token">Panel access token</label>
+    <input autocomplete="current-password" id="panel-token" placeholder="Paste your access token" required type="password">
+    <button class="primary full" type="submit">Open workspace</button>
+  </form>
+  <button class="primary full" hidden id="open-demo" type="button">Explore demo</button>
+  <details class="gate-token-help"><summary>Where is my access token?</summary><p class="hint" id="gate-help">Find it in <code>data/live/panel-token.txt</code>.<br>Demo mode uses <code>data/demo/panel-token.txt</code>.<br>For a custom directory, follow the path printed at startup.</p></details>
+  <p id="login-error" role="alert"></p>
+  <div class="preferences">
+    <label class="language-pick"><span>Language</span><select class="language-select" data-no-translate></select></label>
+    <div aria-label="Theme" class="theme-pick" role="group"><button aria-label="Light theme" data-theme-choice="light" title="Light theme" type="button"><svg aria-hidden="true" class="icon"><use href="#i-sun"/></svg></button><button aria-label="Dark theme" data-theme-choice="dark" title="Dark theme" type="button"><svg aria-hidden="true" class="icon"><use href="#i-moon"/></svg></button><button aria-label="System theme" data-theme-choice="system" title="System theme" type="button"><svg aria-hidden="true" class="icon"><use href="#i-monitor"/></svg></button></div>
+    <button aria-label="Animations always on" aria-pressed="false" class="motion-pick" data-motion-toggle title="Animations always on" type="button"><svg aria-hidden="true" class="icon"><use href="#i-sparkle"/></svg></button>
+  </div>
+</div></div>
+</section>
+
+<div class="workspace" hidden id="workspace">
+<aside class="sidebar">
+  <a class="brand" data-no-translate href="/"><img alt="" height="32" src="/mark.svg" width="32"> TgWitness</a>
+  <div class="sidebar-caption">Observation workspace</div>
+  <button class="quick-open" id="quick-open" data-quick-open type="button" aria-haspopup="dialog" aria-controls="quick-dialog" aria-keyshortcuts="Control+k Meta+k"><svg aria-hidden="true" class="icon"><use href="#i-search"/></svg><span>Go to…</span><kbd data-no-translate id="quick-shortcut">Ctrl K</kbd></button>
+  <nav aria-label="Main navigation">
+    <button class="nav" data-view="chats"><svg aria-hidden="true" class="nav-icon"><use href="#i-message"/></svg> Chats</button>
+    <button class="nav active" data-view="observations"><svg aria-hidden="true" class="nav-icon"><use href="#i-journal"/></svg> Journal <b id="nav-count">0</b></button>
+    <button class="nav" data-view="sources"><svg aria-hidden="true" class="nav-icon"><use href="#i-sources"/></svg> Sources</button>
+    <button class="nav" data-view="evidence"><svg aria-hidden="true" class="nav-icon"><use href="#i-export"/></svg> Exports</button>
+    <button class="nav" data-view="witness"><svg aria-hidden="true" class="nav-icon"><use href="#i-sparkle"/></svg> Extras</button>
+    <button class="nav" data-view="parameters"><svg aria-hidden="true" class="nav-icon"><use href="#i-settings"/></svg> Parameters</button>
+    <button class="nav" data-view="connection"><svg aria-hidden="true" class="nav-icon"><use href="#i-account"/></svg> Account</button>
+    <button class="nav" data-view="accounts"><svg aria-hidden="true" class="nav-icon"><use href="#i-users"/></svg> Accounts <b id="nav-accounts">1</b></button>
+  </nav>
+  <div class="sidebar-bottom">
+    <a class="sidebar-help" href="/guide.html" target="_blank" rel="noopener"><svg aria-hidden="true" class="nav-icon"><use href="#i-help"/></svg> Help &amp; documentation</a>
+    <a class="sidebar-help" href="/dedicated-account.html" target="_blank" rel="noopener"><svg aria-hidden="true" class="nav-icon"><use href="#i-shield"/></svg> Dedicated account guide</a>
+    <button class="quiet" id="lock-panel"><svg aria-hidden="true" class="nav-icon"><use href="#i-lock"/></svg> Lock workspace</button>
+    <div class="preferences">
+      <label class="language-pick"><span>Language</span><select class="language-select" data-no-translate></select></label>
+      <div aria-label="Theme" class="theme-pick" role="group"><button aria-label="Light theme" data-theme-choice="light" title="Light theme" type="button"><svg aria-hidden="true" class="icon"><use href="#i-sun"/></svg></button><button aria-label="Dark theme" data-theme-choice="dark" title="Dark theme" type="button"><svg aria-hidden="true" class="icon"><use href="#i-moon"/></svg></button><button aria-label="System theme" data-theme-choice="system" title="System theme" type="button"><svg aria-hidden="true" class="icon"><use href="#i-monitor"/></svg></button></div>
+      <button aria-label="Animations always on" aria-pressed="false" class="motion-pick" data-motion-toggle title="Animations always on" type="button"><svg aria-hidden="true" class="icon"><use href="#i-sparkle"/></svg></button>
+    </div>
+    <span class="sidebar-version" id="app-version"></span>
+  </div>
+</aside>
+
+<main>
+<header class="topbar">
+  <div class="profile-switch">
+    <label for="profile-select">Workspace</label>
+    <select aria-label="Workspace" id="profile-select"><option value="default">Main account</option></select>
+    <button aria-label="Manage workspaces" class="quiet" id="manage-profiles" title="Add or switch accounts"><svg aria-hidden="true" class="icon"><use href="#i-plus"/></svg></button>
+    <span class="slash" aria-hidden="true">/</span><span id="view-label">Observations</span>
+  </div>
+  <div class="top-actions">
+    <button class="quiet quick-mobile" data-quick-open type="button" aria-label="Go to a section" aria-haspopup="dialog" aria-controls="quick-dialog"><svg aria-hidden="true" class="icon"><use href="#i-search"/></svg></button>
+    <div class="notify-wrap">
+      <button aria-controls="notify-panel" aria-expanded="false" aria-label="Notifications" class="quiet notify-button" id="notify-toggle" title="Notifications" type="button"><svg aria-hidden="true" class="icon"><use href="#i-bell"/></svg><b hidden id="notify-count">0</b></button>
+      <div aria-label="Notifications" class="notify-panel" hidden id="notify-panel" role="dialog">
+        <div class="notify-head"><h2>Notifications</h2><button class="text-link" id="notify-read" type="button">Mark all as read</button></div>
+        <div id="notify-list"></div>
+      </div>
+    </div>
+    <span class="status-chip" id="status-chip">Offline</span>
+    <button class="secondary" id="collector-toggle">Start observation</button>
+    <button aria-label="Lock workspace" class="quiet" id="top-lock"><svg aria-hidden="true" class="icon"><use href="#i-lock"/></svg><span>Lock</span></button>
+  </div>
+</header>
+
+<div class="content">
+<div class="context-bar">
+  <div class="notice demo" hidden id="demo-banner"><svg aria-hidden="true" class="icon"><use href="#i-sparkle"/></svg><span><strong>Demo workspace</strong> · Fictional records for exploring the interface. Telegram is not connected.</span></div>
+  <details class="health-details"><summary>Collector health <span>Storage &amp; attachment queue</span></summary><div aria-live="polite" class="health-strip" id="health-strip"></div></details>
+</div>
+<div class="notice error" hidden id="collector-error"></div>
+
+<div class="setup-card" hidden id="setup-card">
+  <div class="setup-copy"><span class="eyebrow" id="setup-stage">GET STARTED</span><h2 id="setup-title">Connect your Telegram account</h2><p id="setup-description">Sign in, choose your sources, then start observation.</p></div>
+  <button class="primary" id="setup-action" type="button">Connect account →</button>
+  <ol aria-label="Setup progress" class="setup-progress"><li id="setup-account"><span>1</span> Connect account</li><li id="setup-sources"><span>2</span> Choose sources</li><li id="setup-observe"><span>3</span> Start observation</li></ol>
+</div>
+
+<section class="view" id="view-observations">
+  <div class="page-heading">
+    <div><h1>Journal</h1><p class="page-description">Captured messages. Preserved changes. One record.</p></div>
+    <button class="primary" data-export="zip"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Export signed ZIP</button>
+  </div>
+  <details class="journal-overview" id="journal-overview"><summary>Overview</summary><div class="stats">
+    <div class="stat"><span>Messages observed</span><strong id="stat-messages">0</strong><small>Live messages + history snapshots</small></div>
+    <div class="stat"><span>Edits recorded</span><strong id="stat-edits">0</strong><small>Observed versions, preserved</small></div>
+    <div class="stat"><span>Deletion notices</span><strong id="stat-deletes">0</strong><small>Scoped Telegram notifications</small></div>
+    <div class="stat"><span>Selected sources</span><strong id="stat-sources">0</strong><small id="sources-footnote">Ready for observation</small></div>
+  </div></details>
+  <div class="journal card">
+    <div class="card-heading">
+      <h2>Event timeline <span class="subtle" id="event-total"></span></h2>
+      <button class="quiet" id="refresh"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Refresh</button>
+    </div>
+    <div class="filters">
+      <div aria-label="Event type" class="filter-tabs" role="group">
+        <button class="filter active" data-filter="">All events</button>
+        <button class="filter" data-filter="message.edited">Edits</button>
+        <button class="filter" data-filter="message.deleted">Deletions</button>
+        <button class="filter" data-filter="reaction.snapshot">Reactions</button>
+        <button class="filter" data-filter="membership">Membership</button>
+        <button class="filter" data-filter="coverage">Coverage</button>
+      </div>
+      <div class="search-row">
+        <div class="search-wrap"><svg aria-hidden="true" class="icon"><use href="#i-search"/></svg><input aria-label="Search recorded content" id="event-search" maxlength="200" placeholder="Search recorded content…" type="search"></div>
+        <select aria-label="Filter by source" id="source-filter"><option value="">All sources</option></select>
+      </div>
+    </div>
+    <div class="table-wrap"><table class="events-table"><thead><tr><th>Event / observation</th><th>Source</th><th>Observed · UTC</th><th><span class="visually-hidden">Open</span></th></tr></thead><tbody id="events-body"></tbody></table></div>
+    <div class="empty" hidden id="empty-events"><div class="empty-mark"><svg aria-hidden="true" class="icon"><use href="#i-inbox"/></svg></div><h3>No observations here yet</h3><p id="empty-copy">Connect an account, choose your sources, then start observation.</p><button class="secondary" id="empty-action" type="button">Connect account →</button></div>
+    <div class="table-footer"><span id="shown-count">0 events shown</span><button class="quiet" hidden id="load-more">Load earlier events ↓</button><span class="subtle">Append-only journal</span></div>
+  </div>
+  <div class="coverage-note"><button class="text-link" data-open="evidence" type="button">About this record</button></div>
+</section>
+
+<section class="view" hidden id="view-sources">
+  <div class="page-heading">
+    <div><h1 id="sources-title">Choose chats</h1><p class="page-description" id="sources-description">Pick the groups and channels this account should observe.</p></div>
+    <button class="primary" id="load-dialogs">Load chats</button>
+  </div>
+  <form class="card padded scope-card" id="scope-form"><div class="eyebrow">Observation scope</div><h2>What this account records</h2>
+    <div class="investigation-preset"><button class="secondary" id="scope-investigation" type="button"><svg aria-hidden="true" class="icon"><use href="#i-eye"/></svg> Investigation mode</button><p class="hint">For a dedicated account that joins teams and talks to bots: records every chat, group, private chat and bot it sees, its own messages and button presses, and for each new chat or bot saves its profile and earlier visible messages at once. Review and press Save scope.</p><a class="format-help" href="/dedicated-account.html" rel="noopener" target="_blank">Why never your main account ↗</a></div>
+    <div aria-label="Observation scope" class="scope-modes" role="radiogroup">
+      <label><input name="scope-mode" type="radio" value="selected"><span><strong>Chosen chats</strong><small>Only the chats you add below.</small></span></label>
+      <label><input name="scope-mode" type="radio" value="folder"><span><strong>Telegram folder</strong><small>Chats in one of the account's folders, including chats added to it later.</small></span></label>
+      <label><input name="scope-mode" type="radio" value="account"><span><strong>Whole account</strong><small>Every chat the account sees, and every new chat, group, private chat or bot as it appears.</small></span></label>
+    </div>
+    <div hidden id="scope-folder-field"><label for="scope-folder">Folder</label><select id="scope-folder"></select><p class="hint" id="scope-folder-hint"></p></div>
+    <fieldset class="scope-types" hidden id="scope-types"><legend>Source types</legend>
+      <label class="check-label"><input id="scope-channels" type="checkbox"> Channels</label>
+      <label class="check-label"><input id="scope-groups" type="checkbox"> Groups</label>
+      <label class="check-label"><input id="scope-private" type="checkbox"> Private chats</label>
+      <label class="check-label"><input id="scope-bots" type="checkbox"> Bots</label>
+    </fieldset>
+    <label class="check-label"><input id="scope-own" type="checkbox"> Own actions: messages this account sends, its edits and reply-keyboard button presses</label>
+    <fieldset class="scope-new" hidden id="scope-new"><legend>When a new chat or bot appears</legend>
+      <label class="check-label"><input id="scope-new-profile" type="checkbox"> Save its profile: bot description and commands, group or channel description, members, invite link</label>
+      <div class="scope-new-history"><label for="scope-new-history">Save its latest visible messages, up to</label><input id="scope-new-history" max="1000" min="0" required step="1" type="number" value="0"><span class="unit">messages · 0 = none</span></div>
+      <p class="hint">Saved right after the chat appears: earlier messages of a team chat you just joined, the greeting a bot sent before observation noticed it. Messages already saved live are not repeated.</p>
+    </fieldset>
+    <div class="scope-exclude" id="scope-exclude"></div>
+    <p class="notice warning" hidden id="scope-warning"></p>
+    <div class="scope-actions"><button class="primary" type="submit">Save scope</button><span id="scope-unsaved" role="status"></span></div>
+    <details class="scope-limits"><summary>Limits of folder and whole-account modes</summary><p class="hint">Secret chats are end-to-end encrypted between two devices and never reach TgWitness. Nothing is recorded while TgWitness is not running: after a restart it catches up only what Telegram still returns, and the report shows the gap. Chats beyond the chat list limit (1,000 dialogs unless changed in Parameters) are added when they next become active, and the earlier history of an added chat is not fetched. Muted or read state of a folder is not applied: such chats stay observed. Inline bot buttons pressed in another app are invisible to TgWitness; the bot's reply or edit is recorded.</p></details>
+  </form>
+  <div class="card padded"><h2 id="target-list-title">Selected chats</h2><div id="target-list"></div></div>
+  <div class="card padded" hidden id="available-card"><h2>Available chats</h2><div class="dialog-filters"><input aria-label="Find an available chat" id="dialog-search" placeholder="Find a chat…" type="search"><select aria-label="Chat type" id="dialog-kind"><option value="">All types</option><option value="channels">Channels</option><option value="groups">Groups</option><option value="private">Private chats</option><option value="bots">Bots</option></select></div><p class="hint" id="dialog-limit"></p><div id="dialog-list"></div><button class="primary" id="finish-source-selection" type="button">Done</button></div>
+  <details class="source-options" id="source-options"><summary>Recording settings · what to save, photos &amp; files, history</summary>
+  <form class="card padded monitoring-card" id="monitoring-form">
+    <div class="eyebrow">Monitoring policy</div><h2>Choose which changes to preserve</h2>
+    <p class="muted">Applies to all selected sources in this workspace. Keep original messages to compare later changes.</p>
+    <div class="monitoring-presets"><button class="secondary" data-monitor-preset="all" type="button">All visible activity</button><button class="secondary" data-monitor-preset="changes" type="button">Messages, edits &amp; deletions</button></div>
+    <div class="monitoring-options">
+      <label><input checked id="monitor-messages" type="checkbox"><span><strong>New messages</strong><small>Preserve original text, sender metadata and reply context.</small></span></label>
+      <label><input checked id="monitor-edits" type="checkbox"><span><strong>Message edits</strong><small>Keep each delivered version and compare with saved content.</small></span></label>
+      <label><input checked id="monitor-deletions" type="checkbox"><span><strong>Deletion notices</strong><small>Retain the notice and any content already captured.</small></span></label>
+      <label><input checked id="monitor-reactions" type="checkbox"><span><strong>Visible reactions</strong><small>Save delivered counts and recent identities when supplied.</small></span></label>
+      <label><input checked id="monitor-membership" type="checkbox"><span><strong>Joins, leaves &amp; removals</strong><small>Record delivered membership updates and service messages.</small></span></label>
+    </div>
+    <p class="hint" id="monitoring-note"></p><p class="hint" id="monitoring-current"></p>
+    <details class="monitoring-details"><summary>What these settings affect</summary><p class="hint">Changes apply to future live updates. Turning a category back on does not recover missed events. Operational records, other group service events and explicitly requested history snapshots remain separate. These switches do not remove metadata embedded in captured messages.</p></details>
+    <div class="monitoring-actions"><button class="primary" type="submit">Save monitoring settings</button><span id="monitoring-unsaved" role="status"></span></div>
+  </form>
+  <div class="two-columns">
+    <form class="card padded" id="capture-form"><div class="eyebrow">Attachments</div><h2>Preserve media when available</h2><p class="muted">Downloads happen after message capture. Deleted or unavailable files may be missed; every attempt gets a recorded outcome.</p><label class="check-label"><input id="download-media" type="checkbox"> Download visible attachments</label><label for="max-media">Maximum file size, MiB</label><input id="max-media" max="2000" min="1" required step="1" type="number"><details class="media-rules-details"><summary>Limits by type</summary><p class="hint">Changing the maximum size above sets every type; adjust single types here, 1 to 2,000 MiB.</p><div class="media-rules" id="media-rules"></div></details><button class="secondary" type="submit">Save media settings</button><p id="capture-unsaved" role="status"></p></form>
+    <form class="card padded" id="snapshot-form"><div class="eyebrow">History snapshot</div><h2>Start with visible context</h2><p class="muted">Save the latest visible messages as a labeled snapshot. This cannot reconstruct deleted messages or changes missed while offline.</p><label for="snapshot-source">Selected source</label><select id="snapshot-source" required></select><label for="snapshot-limit">Most recent messages</label><input id="snapshot-limit" max="500" min="1" required step="1" type="number" value="100"><p class="hint" id="snapshot-limit-hint"></p><button class="secondary" type="submit">Capture history snapshot</button></form>
+  </div>
+  <form class="card padded" id="recheck-form"><div class="eyebrow">Recheck</div><h2>Ask Telegram again for missed changes</h2>
+    <p class="muted">Rechecks recover missed messages and edits and mark messages Telegram no longer returns. Priority chats are rechecked often, the rest rarely, so the account stays clear of Telegram's rate limits (FloodWait). Mark priority chats with the star in the list above.</p>
+    <div class="recheck-fields"><div><label for="recheck-priority">Priority chats, every … minutes</label><input id="recheck-priority" max="1440" min="0" required step="1" type="number"></div>
+    <div><label for="recheck-other">Other chats, every … minutes</label><input id="recheck-other" max="10080" min="0" required step="1" type="number"></div></div>
+    <p class="hint">0 turns rechecks of that group off. How many chats a pass takes and the pause between them are under Parameters.</p>
+    <button class="secondary" type="submit">Save recheck settings</button>
+  </form>
+  <form class="card padded" id="chat-export-form"><div class="eyebrow">Full chat export</div><h2>Export a whole chat, signed</h2><p class="muted">Download the entire visible history of one chat as a signed bundle: <code>chat.json</code> (Telegram-style) and a readable <code>chat.html</code>, with an Ed25519 signature so a copy can be checked for changes against your key. Private chats work when the account is a member. A current snapshot only: deleted or past-edited messages are not reconstructed. Large chats can take a long time and depend on Telegram's rate limits.</p><label for="chat-export-source">Selected source</label><select id="chat-export-source" required></select><div class="chat-export-actions"><button class="secondary" type="submit">Export full chat</button><button class="quiet" hidden id="chat-export-cancel" type="button">Cancel</button><button class="primary" hidden id="chat-export-download" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Download signed bundle</button></div><p id="chat-export-progress" role="status"></p></form>
+  </details>
+  <p class="hint">Notifications, evidence mode and a 24/7 server are under <a data-go-extra="alerts" href="#">Extras</a>.</p>
+</section>
+
+<section class="view" hidden id="view-evidence">
+  <div class="page-heading">
+    <div><h1>Export records</h1><p class="page-description">Workspace ID: <code id="export-profile-id">default</code> · <a href="/guide.html#export" rel="noopener" target="_blank">Large downloads &amp; verification</a></p></div>
+    <button class="secondary" id="verify-journal"><svg aria-hidden="true" class="icon"><use href="#i-shield"/></svg> Verify journal</button>
+  </div>
+  <div class="evidence-hero card">
+    <div class="evidence-symbol"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg></div>
+    <div class="evidence-body">
+      <h2>Signed archive</h2>
+      <p>Journal, report, attachments and verification tools.</p>
+      <button class="primary" data-export="zip"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Download signed ZIP</button>
+      <small>Includes all sources through a fixed journal boundary, regardless of filters. Streaming export · ZIP limit: 4 GiB uncompressed unless changed in Parameters.</small>
+    </div>
+  </div>
+  <div class="export-grid">
+    <button class="card export-card" data-export="jsonl"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-braces"/></svg></span><h3>JSONL journal</h3><p>Original event records and individual signatures. One event per line.</p><span>Download .jsonl</span></button>
+    <button class="card export-card" data-export="csv"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-table"/></svg></span><h3>Spreadsheet</h3><p>Review observations in your analysis tools. Formula-safe cells.</p><span>Download .csv</span></button>
+    <button class="card export-card" data-export="html"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-report"/></svg></span><h3>Readable report</h3><p>A self-contained report for offline review, sharing, and printing to PDF.</p><span>Download .html</span></button>
+  </div>
+  <div class="card padded" id="export-encrypt">
+    <label class="check-label"><input id="export-encrypt-on" type="checkbox"> Encrypt the downloads above with a password</label>
+    <div hidden id="export-password-field"><label for="export-password">Password, at least 12 characters</label><input autocomplete="new-password" id="export-password" maxlength="256" spellcheck="false" type="password"></div>
+    <p class="hint">The file is saved as an AES-256 ZIP that 7-Zip or WinRAR opens with this password. Inside is the unchanged signed file, so <code>verify.py</code> works as before. The password is not stored; without it the file cannot be opened.</p>
+  </div>
+  <p class="hint">Automatic timestamps and an encrypted off-site copy: <a data-go-extra="evidence" href="#">Extras → Evidence that holds up</a>.</p>
+  <details class="verification-details" id="verification-details"><summary>Verification &amp; limitations</summary>
+    <div class="card padded">
+      <div class="card-heading compact"><div><h2>Your signing identity</h2><p>Ed25519 · SHA-256 public-key fingerprint</p></div><button class="secondary" id="save-checkpoint"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Save checkpoint</button></div>
+      <code class="fingerprint" id="fingerprint"></code>
+      <p class="hint">Retain this fingerprint and signed checkpoints outside the collector. A self-contained archive can verify its internal consistency; independently retained records help detect replacement or truncation.</p>
+      <div id="verification-result" role="status"></div>
+    </div>
+    <div class="two-columns">
+      <div class="card padded"><h2>Acquisition process receipt</h2><p class="muted">The signed journal records program hashes, dependency versions, starting scope, account, settings, run identifier, and periodic heartbeats. Local checkpoints are saved at startup, every five minutes while observing (changeable in Parameters), and on orderly stop.</p><button class="secondary" id="save-run-receipt"><svg aria-hidden="true" class="icon"><use href="#i-receipt"/></svg> Download signed run receipt</button><p class="hint">This is a collector-signed process record. It is not independent attestation or a trusted timestamp. Copy checkpoints to a separately controlled location for a stronger chain of custody.</p></div>
+      <div class="card padded"><h2>External time anchoring</h2><p class="muted">Prepare an RFC 3161 request for a signed checkpoint. Submit it to a timestamp authority you trust, then verify its response against independently obtained CA certificates.</p><button class="secondary" id="save-anchor-request"><svg aria-hidden="true" class="icon"><use href="#i-clock"/></svg> Prepare timestamp request</button><p class="hint">No external service is contacted by this button. A prepared request is not a timestamp proof. The package includes instructions for checking a TSA response with OpenSSL.</p></div>
+    </div>
+    <div class="card padded"><h2>Clear boundaries make stronger evidence</h2><div class="limits-table">
+      <div><strong>Message edits</strong><p>Versions are preserved when received. Intermediate changes during downtime may be missing. The sender is not necessarily the editor.</p></div>
+      <div><strong>Deletions</strong><p>Earlier captured content remains. Telegram usually does not supply the deleter or exact deletion time. Unscoped notices remain account-level observations.</p></div>
+      <div><strong>Reactions &amp; membership</strong><p>Counts, recent reactors, service messages, and participant updates are recorded when delivered. These are not guaranteed complete lists.</p></div>
+      <div><strong>Coverage &amp; time</strong><p>Collector starts, stops, detected disconnects, and heartbeats are recorded. Brief outages can escape detection. Times depend on the collector's clock.</p></div>
+      <div><strong>Integrity &amp; authenticity</strong><p>Signatures bind saved bytes to this collector's key. They do not establish Telegram origin, truthfulness, trusted time, or protection from an operator controlling the signing key.</p></div>
+    </div></div>
+  </details>
+</section>
+
+<section class="view" hidden id="view-witness">
+  <div class="extra-panel" id="extras-evidence" hidden role="region" aria-labelledby="extras-evidence-title">
+    <div class="extra-panel-heading"><div><span class="eyebrow">EVIDENCE MODE</span><h2 id="extras-evidence-title" tabindex="-1">Evidence that holds up.</h2><p>Timestamps show the journal existed at a given time; an off-site copy keeps it if this machine is lost or seized.</p></div><button class="quiet" data-extra-close="evidence" type="button">Back to extras</button></div>
+  <form class="card padded" id="evidence-form"><div class="eyebrow">Evidence mode</div><h2>Independent timestamps for this journal</h2>
+    <p class="muted">Sends only the SHA-256 of each signed checkpoint to timestamp services, through this workspace's connection route. Their answers are kept with the checkpoints, included in evidence exports and checked by <code>verify.py</code>.</p>
+    <label class="check-label"><input id="evidence-enabled" type="checkbox"> Anchor checkpoints automatically</label>
+    <label for="evidence-interval">How often, every … minutes (5 to 1,440)</label><input id="evidence-interval" max="1440" min="5" required step="1" type="number">
+    <details><summary>Timestamp services</summary>
+      <label for="evidence-tsa">RFC 3161 timestamp authorities, one address per line</label><textarea id="evidence-tsa" rows="3" spellcheck="false"></textarea>
+      <label for="evidence-ots">OpenTimestamps calendars, one address per line</label><textarea id="evidence-ots" rows="4" spellcheck="false"></textarea>
+    </details>
+    <button class="secondary" type="submit">Save evidence mode</button> <button class="quiet" id="evidence-anchor" type="button">Anchor now</button>
+    <p class="hint" id="evidence-status" role="status"></p>
+  </form>
+  <form class="card padded" id="replica-form"><div class="eyebrow">Off-site copy</div><h2>Copy everything to S3-compatible storage</h2>
+    <p class="muted">The journal, photos &amp; files, checkpoints with their timestamps and chat exports are encrypted on this machine before upload, so the provider stores only encrypted objects. Works with AWS S3 and other S3-compatible services. Download the encryption key and keep it apart: without it the copy cannot be read.</p>
+    <label class="check-label"><input id="replica-enabled" type="checkbox"> Keep an off-site copy</label>
+    <div class="replica-fields">
+      <div><label for="replica-endpoint">Endpoint</label><input id="replica-endpoint" placeholder="https://s3.eu-central-1.amazonaws.com" spellcheck="false" autocomplete="off"></div>
+      <div><label for="replica-region">Region</label><input id="replica-region" placeholder="us-east-1" spellcheck="false" autocomplete="off"></div>
+      <div><label for="replica-bucket">Bucket</label><input id="replica-bucket" spellcheck="false" autocomplete="off"></div>
+      <div><label for="replica-prefix">Folder in the bucket</label><input id="replica-prefix" spellcheck="false" autocomplete="off"></div>
+      <div><label for="replica-access">Access key ID</label><input id="replica-access" spellcheck="false" autocomplete="off"></div>
+      <div><label for="replica-secret">Secret access key</label><input id="replica-secret" type="password" autocomplete="new-password"></div>
+    </div>
+    <details><summary>More options</summary>
+      <label class="check-label"><input id="replica-path-style" type="checkbox"> Path-style addresses (endpoint/bucket). Turn off for bucket.endpoint addresses.</label>
+      <label for="replica-interval">How often, every … minutes (1 to 1,440)</label><input id="replica-interval" max="1440" min="1" required step="1" type="number">
+      <label for="replica-retention">Object Lock retention in days (0 uses the bucket's default)</label><input id="replica-retention" type="number" min="0" max="36500">
+      <label for="replica-mode">Object Lock mode</label><select id="replica-mode"><option value="GOVERNANCE">Governance</option><option value="COMPLIANCE">Compliance: nobody can delete or shorten it, including the bucket owner</option></select>
+    </details>
+    <button class="secondary" type="submit">Save off-site copy</button> <button class="quiet" id="replica-test" type="button">Test connection</button> <button class="quiet" id="replica-sync" type="button">Copy now</button> <button class="quiet" id="replica-key" type="button">Download encryption key</button>
+    <p class="hint" id="replica-status" role="status"></p>
+  </form>
+  </div>
+
+  <div class="extra-panel" id="extras-alerts" hidden role="region" aria-labelledby="extras-alerts-title">
+    <div class="extra-panel-heading"><div><span class="eyebrow">NOTIFICATIONS</span><h2 id="extras-alerts-title" tabindex="-1">Know when something happens.</h2><p>Choose a service, fill in one or two fields and send a test.</p></div><button class="quiet" data-extra-close="alerts" type="button">Back to extras</button></div>
+  <form class="card padded" id="alerts-form">
+    <p class="muted">Sent through Apprise to Matrix, Telegram, Discord, Slack, ntfy, email and many other services. Notifications contain chat names and counts; message text only if you turn on excerpts below.</p>
+    <label class="check-label"><input id="alerts-enabled" type="checkbox"> Send notifications</label>
+    <div class="alerts-builder">
+      <label for="alerts-service">Add a destination</label>
+      <select id="alerts-service"><option value="">Choose a service…</option><option value="tgram">Telegram bot</option><option value="discord">Discord webhook</option><option value="slack">Slack webhook</option><option value="ntfy">ntfy push</option><option value="mailto">Email</option></select>
+      <div class="alerts-service-fields" hidden id="alerts-service-fields"></div>
+      <button class="secondary" hidden id="alerts-service-add" type="button">Add to destinations</button>
+    </div>
+    <p class="hint" id="alerts-saved"></p>
+    <details id="alerts-advanced"><summary>Destinations as Apprise addresses · Matrix, Pushover and 100+ other services</summary>
+      <label for="alerts-urls">Destinations, one Apprise address per line (<a href="https://github.com/caronc/apprise/wiki" rel="noopener noreferrer" target="_blank">formats ↗</a>)</label>
+      <textarea id="alerts-urls" placeholder="matrixs://user:password@matrix.example.org/#room" rows="3" spellcheck="false"></textarea>
+    </details>
+    <h3 class="alerts-kinds">What to send</h3>
+    <label class="check-label"><input id="alerts-problems" type="checkbox"> Problems: disk almost full, account signed out, collection, copy or timestamp errors</label>
+    <p class="hint" hidden id="alerts-host">This collector runs on a sealed server: an opened SSH port or a login there is sent as a problem.</p>
+    <label class="check-label"><input id="alerts-changes" type="checkbox"> Changes: deleted, edited and missing messages in observed chats, grouped into one notification per check (every minute unless changed in Parameters)</label>
+    <label class="check-label"><input id="alerts-text" type="checkbox"> Include short excerpts of deleted and edited messages. Off by default: with it on, message text leaves this machine.</label>
+    <div class="alerts-daily"><label class="check-label"><input id="alerts-daily" type="checkbox"> Daily summary of observed chats at</label><select aria-label="Hour of the daily summary, server time" id="alerts-hour"></select><span class="hint">server time</span></div>
+    <button class="secondary" type="submit">Save notifications</button> <button class="quiet" id="alerts-test" type="button">Send test</button> <button class="quiet" id="alerts-clear" type="button">Remove destinations</button>
+    <p class="hint" id="alerts-status" role="status"></p>
+  </form>
+  </div>
+
+  <div class="extra-panel card padded" id="extras-cloud" hidden role="region" aria-labelledby="extras-cloud-title">
+    <div class="extra-panel-heading"><div><span class="eyebrow">24/7 SERVER</span><h2 id="extras-cloud-title" tabindex="-1">A sealed server, set up by commands you can check.</h2><p>The server has no SSH and no open ports: the panel is reached through a Cloudflare Tunnel, and anyone with a read-only token can check how it was created.</p></div><button class="quiet" data-extra-close="cloud" type="button">Back to extras</button></div>
+    <p class="notice" hidden id="cloud-active"></p>
+    <form class="cloud-form" id="cloud-form">
+      <div class="replica-fields">
+        <div><label for="cloud-provider">Provider</label><select id="cloud-provider"></select></div>
+        <div><label for="cloud-name">Server name</label><input data-no-translate id="cloud-name" maxlength="63" placeholder="tgwitness-1" spellcheck="false" autocomplete="off"></div>
+        <div><label for="cloud-type">Server type</label><input id="cloud-type" spellcheck="false" autocomplete="off"></div>
+        <div><label for="cloud-location">Location</label><input id="cloud-location" spellcheck="false" autocomplete="off"></div>
+        <div><label for="cloud-zone">Cloudflare zone</label><input data-no-translate id="cloud-zone" placeholder="example.org" spellcheck="false" autocomplete="off"></div>
+        <div><label for="cloud-account">Cloudflare account ID</label><input id="cloud-account" spellcheck="false" autocomplete="off"></div>
+        <div><label for="cloud-panel">Panel address</label><input data-no-translate id="cloud-panel" placeholder="panel.example.org" spellcheck="false" autocomplete="off"></div>
+        <div><label for="cloud-ref">Version: release tag or commit</label><input data-no-translate id="cloud-ref" placeholder="v1.0.0" spellcheck="false" autocomplete="off"></div>
+      </div>
+      <details><summary>Public check address for a witness · optional</summary>
+        <label for="cloud-witness">Hostname that exposes only the witness and assurance endpoints</label><input data-no-translate id="cloud-witness" placeholder="check.example.org" spellcheck="false" autocomplete="off">
+      </details>
+    </form>
+    <p class="hint">Run these on your own computer in a checkout of TgWitness. Provider and Cloudflare tokens are read from files there; this panel never asks for them.</p>
+    <pre id="cloud-commands"></pre>
+    <button class="quiet" id="cloud-copy" type="button">Copy commands</button>
+    <a class="text-link" href="https://github.com/phishdestroy/TgWitness/blob/main/docs/HIGH-ASSURANCE.md" rel="noopener noreferrer" target="_blank">Tokens, costs and what the check proves ↗</a>
+  </div>
+
+  <div id="extras-overview">
+  <div class="extras-intro">
+    <span class="eyebrow">MAKE IT YOURS</span>
+    <h1>A little more confidence.</h1>
+    <span class="extras-note"><svg aria-hidden="true" class="icon"><use href="#i-check"/></svg> Optional · your account and sources are enough to start collecting.</span>
+  </div>
+  <div class="extras-grid">
+    <article class="extra-card extra-alerts">
+      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span><span class="extra-badge" id="extra-alerts-badge">Off</span></div>
+      <h2>Alerts on your phone</h2><p>Problems, deleted and edited messages and a daily summary in Telegram, Discord, email or another service.</p>
+      <p class="extra-requires">A bot, a webhook or a mailbox</p>
+      <button class="secondary" id="extras-open-alerts" data-extra="alerts" aria-expanded="false" aria-controls="extras-alerts" type="button">Set up alerts <span aria-hidden="true">→</span></button>
+    </article>
+    <article class="extra-card extra-evidence">
+      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-archive"/></svg></span><span class="extra-badge" id="extra-evidence-badge">Off</span></div>
+      <h2>Evidence that holds up</h2><p>Independent timestamps for the journal and an encrypted copy in storage that nobody can quietly delete.</p>
+      <p class="extra-requires">Timestamps work at once · the copy needs S3 storage</p>
+      <button class="secondary" id="extras-open-evidence" data-extra="evidence" aria-expanded="false" aria-controls="extras-evidence" type="button">Turn on evidence mode <span aria-hidden="true">→</span></button>
+    </article>
+    <article class="extra-card extra-cloud">
+      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></span><span class="extra-badge" id="extra-cloud-badge">Available</span></div>
+      <h2>A sealed 24/7 server</h2><p>Collect around the clock on a cloud server without SSH, with a provider log anyone can check.</p>
+      <p class="extra-requires">Hetzner, DigitalOcean, Linode, Vultr, AWS or your own server + Cloudflare</p>
+      <button class="secondary" id="extras-open-cloud" data-extra="cloud" aria-expanded="false" aria-controls="extras-cloud" type="button">Prepare the server <span aria-hidden="true">→</span></button>
+    </article>
+    <article class="extra-card extra-bot">
+      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span><span class="extra-badge">Available</span></div>
+      <h2>A bot in your channel</h2><p>Keep signed checks in Telegram so you can compare your saved history later.</p>
+      <p class="extra-requires">Your bot + a channel + a witness host</p>
+      <button class="secondary" id="extras-open-bot" data-extra="bot" aria-expanded="false" aria-controls="extras-bot" type="button">Set up a bot <span id="extra-bot-arrow" aria-hidden="true">→</span></button>
+    </article>
+    <article class="extra-card extra-github">
+      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><span class="extra-badge planned">Planned</span></div>
+      <h2>GitHub &amp; verified builds</h2><p>Connect a run to an approved software version and keep an extra copy of its proofs.</p>
+      <p class="extra-requires">Design ready · connection not available yet</p>
+      <button class="quiet" id="extras-open-github" data-extra="github" aria-expanded="false" aria-controls="extras-github" type="button">Explore the plan <span id="extra-github-arrow" aria-hidden="true">→</span></button>
+    </article>
+  </div>
+  <p class="extras-footnote">Only the option you choose opens its settings. Nothing is connected automatically.</p>
+  </div>
+
+  <div class="extra-panel" id="extras-bot" hidden role="region" aria-labelledby="extras-bot-title">
+    <div class="extra-panel-heading"><div><span class="eyebrow">TELEGRAM BOT</span><h2 id="extras-bot-title" tabindex="-1">Your bot, in three steps.</h2><p>A separate witness checks the journal and your bot publishes the result.</p></div><button class="quiet" data-extra-close="bot" type="button">Back to extras</button></div>
+  <div class="card padded extra-step"><div class="extra-step-heading"><span class="step-number" aria-hidden="true">1</span><div><h3>Give the witness read-only access</h3><p>Create an access token for this account. It cannot read conversations or control collection.</p></div></div>
+    <form class="witness-create" id="witness-form"><label for="witness-label">Name this connection</label><input id="witness-label" maxlength="80" placeholder="e.g. My proof bot" required><button class="secondary" type="submit">Create read-only token</button></form>
+    <div class="notice witness-new" hidden id="witness-new"><strong>Save this token; it is shown only once.</strong><code id="witness-token"></code><button class="secondary" id="witness-token-download" type="button" disabled>Save access file</button><button class="quiet" id="witness-copy" type="button">Copy</button></div>
+    <details class="extra-detail"><summary>Existing connections</summary><div class="extra-manage"><div id="witness-list"></div><button class="quiet" id="witness-refresh" type="button"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Refresh</button></div></details>
+  </div>
+  <div class="card padded witness-setup extra-step"><div class="extra-step-heading"><span class="step-number" aria-hidden="true">2</span><div><h3>Choose where to publish</h3><p>Create your bot with @BotFather and allow it to post in your channel.</p></div></div>
+    <form id="witness-setup-form">
+      <div class="witness-fields">
+        <label for="witness-channel">Your Telegram channel<input id="witness-channel" maxlength="64" required placeholder="@your_proof_channel or -100…"></label>
+        <label for="witness-interval">Check every · minutes<input id="witness-interval" type="number" min="1" max="1440" value="10" required></label>
+      </div>
+      <p id="witness-volume" class="hint" role="status"></p>
+      <label for="witness-address">Collector address reachable from the witness</label><input id="witness-address" type="url" maxlength="2048" required placeholder="https://collector.example.org">
+      <p class="hint">For a witness on another server, replace a local address with your collector's reachable HTTPS address.</p>
+      <details class="witness-advanced"><summary>Advanced settings · publication &amp; network</summary>
+        <label for="witness-policy">Publish</label><select id="witness-policy"><option value="all">Every check · regular evidence trail</option><option value="changes">Changed heads and problems</option><option value="problems">Problems only · no regular anchors</option></select>
+        <label for="witness-proxy">Witness HTTP / SOCKS5 proxy · optional</label><input id="witness-proxy" type="url" maxlength="2048" autocomplete="off" placeholder="socks5://proxy.example.org:1080">
+        <label for="witness-bot-api">Bot API address</label><input id="witness-bot-api" type="url" maxlength="2048" value="https://api.telegram.org" required>
+        <p class="hint">The witness uses HTTPS for the collector and Bot API. Telegram MTProxy settings belong to the collecting account and cannot route Bot API requests.</p>
+      </details>
+      <button class="primary" type="submit">Save configuration</button>
+    </form>
+    <p id="witness-setup-result" class="hint" role="status"></p>
+  </div>
+  <details class="card padded extra-step witness-launch" id="witness-launch"><summary><span class="step-number" aria-hidden="true">3</span><span id="witness-launch-title">Start it on the witness host</span></summary>
+    <p>The saved configuration is a setup file. Run it on the witness host to begin checks and publication.</p>
+    <p class="hint">On the witness host, save the read-only token in witness-token.txt and the BotFather token in bot-token.txt next to witness.json. The bot token is never entered into this collector panel.</p>
+    <pre id="witness-start-command"></pre>
+    <p class="hint">Keep the witness key fingerprint separately. Confirm the first signed post in your channel; a downloaded file does not mean the bot is running.</p>
+  </details>
+  <details class="card padded witness-explainer extra-detail"><summary>What does the bot actually prove?</summary>
+    <div class="witness-flow" aria-label="How the witness works"><span id="witness-step-collector">Collector signs a checkpoint</span><b aria-hidden="true">→</b><span id="witness-step-verify">Witness verifies and signs</span><b aria-hidden="true">→</b><span id="witness-step-post">Bot publishes to your channel</span></div>
+    <p class="hint">Run the witness on another host, ideally with another operator. Its bot token and signing key stay there. The bot is the publisher; the separate witness process performs verification.</p>
+  </details>
+  <details class="card padded witness-guide"><summary>Deployment and verification commands</summary>
+    <p class="muted">You need a Telegram bot (create one with @BotFather) that is an administrator of a channel, and this panel's address reachable from the witness — over HTTPS outside a private network. Any Telegram account can watch the channel; its posts carry Telegram's own times.</p>
+    <h3>Docker, next to this collector</h3><pre id="witness-docker"></pre>
+    <h3>On another server</h3><pre id="witness-remote"></pre>
+    <h3>Check it later</h3><pre id="witness-verify"></pre>
+    <p class="hint">A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.</p>
+    <h3>Witness options</h3><pre id="witness-options"></pre>
+    <p class="hint">How often it checks, how long it waits, which checks it posts (all, only a new head or a problem, only problems) and the words of its posts are options of the witness itself: on its command line, in its environment or in a JSON file given with <code>--config</code>. Wording never affects verification: verify.py checks the signed token at the end of every post.</p>
+  </details>
+  </div>
+
+  <div class="extra-panel card padded" id="extras-github" hidden role="region" aria-labelledby="extras-github-title">
+    <div class="extra-panel-heading"><div><span class="extra-badge planned">Planned</span><h2 id="extras-github-title" tabindex="-1">Know which software made the record.</h2></div><button class="quiet" data-extra-close="github" type="button">Back to extras</button></div>
+    <p>The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.</p>
+    <ol class="extra-checklist"><li>Choose your fork and approve a specific version.</li><li>Check that the installed build matches that version.</li><li>Keep signed proof copies through an independent witness.</li></ol>
+    <div class="extra-outcome"><strong>Not connected yet</strong><p>This integration is a roadmap item. No GitHub token is needed on this page.</p></div>
+    <a class="text-link" href="/guide.html#github" target="_blank" rel="noopener">Read what will be checked ↗</a>
+  </div>
+</section>
+
+<section class="view" hidden id="view-parameters">
+  <div class="page-heading">
+    <div><h1>Parameters</h1><p class="page-description">Limits and pace of collection, rechecks, downloads, people profiles, notifications and exports for this workspace. Each change applies from the next use of the value and is recorded in the signed journal.</p></div>
+    <button class="secondary" id="parameters-reset" type="button"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Restore all defaults</button>
+  </div>
+  <form class="parameters-form" id="parameters-form" novalidate>
+    <div id="parameters-groups"></div>
+    <div class="parameters-actions"><button class="primary" type="submit">Save parameters</button><span id="parameters-unsaved" role="status"></span></div>
+  </form>
+</section>
+
+<section class="view" hidden id="view-connection">
+<div class="connection-simple">
+  <div class="page-heading">
+    <div><span class="page-kicker">Workspace</span><h1 id="account-heading">Add account</h1></div>
+    <div class="entry-header" hidden id="entry-header"><span hidden id="entry-demo">Demo</span><button class="quiet quick-mobile" data-quick-open type="button" aria-label="Go to a section" aria-haspopup="dialog" aria-controls="quick-dialog"><svg aria-hidden="true" class="icon"><use href="#i-search"/></svg></button><button aria-expanded="false" aria-label="Settings" class="quiet" id="entry-settings" title="Account settings" type="button"><svg aria-hidden="true" class="icon"><use href="#i-settings"/></svg><span>Settings</span></button><button aria-label="Lock workspace" class="quiet" id="entry-lock" title="Lock workspace" type="button"><svg aria-hidden="true" class="icon"><use href="#i-lock"/></svg><span>Lock</span></button></div>
+  </div>
+  <div class="notice" hidden id="account-summary"></div>
+  <div class="auth-card">
+    <div hidden id="demo-account-state"><span class="eyebrow">Sample workspace</span><h2>Try TgWitness with your account</h2><p>Stop the demo with Ctrl+C, then run from your project folder:</p><code class="start-command">python start.py</code><p class="hint">On Windows, you can double-click <strong>Start.cmd</strong> instead. Open the panel address printed in the terminal.</p><a class="format-help" href="/guide.html#trouble" rel="noopener" target="_blank">Installation help ↗</a><button class="primary full" data-open="observations" type="button">Back to sample journal</button></div>
+    <form id="credentials-form" novalidate>
+      <div aria-label="Sign-in method" class="login-methods" role="group">
+        <button aria-pressed="true" class="login-method active" data-auth-method="phone" type="button">Phone</button>
+        <button aria-pressed="false" class="login-method" data-auth-method="qr" type="button">QR code</button>
+        <button aria-pressed="false" class="login-method" data-auth-method="files" type="button">Files</button>
+        <button aria-pressed="false" class="login-method" data-auth-method="key" type="button">Auth key</button>
+      </div>
+      <p class="method-description" id="method-description">Receive a login code in Telegram. Enter your 2FA password if asked.</p>
+      <p class="hint" id="login-note" role="status"></p>
+      <div id="phone-fields"><label for="phone">Phone number</label><input autocomplete="tel" id="phone" pattern="\+[0-9]{7,16}" placeholder="+1 234 567 8900" required type="tel"></div>
+      <div hidden id="qr-intro"><div class="qr-instructions"><span>1</span><p>Open Telegram on your phone.</p><span>2</span><p>Settings → Devices → Link Desktop Device.</p><span>3</span><p>Scan the code shown here.</p></div></div>
+      <div hidden id="auth-key-fields">
+        <label for="auth-key">Auth Key (HEX)</label><input aria-describedby="auth-key-hint" autocomplete="off" id="auth-key" maxlength="1024" placeholder="Paste the complete key" spellcheck="false" type="password">
+        <p class="hint" id="auth-key-hint">512 hexadecimal characters; no “…” or missing characters.</p>
+        <div class="key-metadata"><div><label for="auth-dc">DC ID</label><select id="auth-dc"><option value="">Select DC</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div><label for="auth-user-id">User ID <span class="subtle">· optional</span></label><input autocomplete="off" id="auth-user-id" inputmode="numeric" maxlength="19" placeholder="User ID" type="text"></div></div>
+      </div>
+      <div hidden id="import-details">
+        <label class="account-file-picker" for="session-file"><svg aria-hidden="true" class="icon"><use href="#i-upload"/></svg><strong id="file-picker-title">Choose account files</strong><span id="file-picker-caption">One account · up to 4 files · 8 MiB total</span><input accept=".session,.zip,.json,.tgwitness-session,.tgwatch-session,.txt" aria-label="Choose account files" id="session-file" multiple type="file"></label>
+        <p class="hint selected-files" hidden id="selected-files" role="status"></p>
+        <dl class="import-formats" aria-label="Supported account files">
+          <div><dt><code>.session</code></dt><dd><strong>Telethon or Pyrogram</strong></dd></div>
+          <div><dt><code>.zip</code></dt><dd><strong>Telegram Desktop · TData</strong></dd></div>
+          <div><dt><code>.json</code></dt><dd><strong>Settings or authorization</strong><span>Often only API settings. Add it with the session.</span></dd></div>
+          <div><dt><code>.txt</code></dt><dd><strong>Telethon StringSession</strong></dd></div>
+        </dl>
+        <details class="import-advanced"><summary>Passcode or session text</summary>
+          <label for="tdata-passcode">TData local passcode</label><input autocomplete="off" id="tdata-passcode" maxlength="512" type="password">
+          <label for="session-string">Telethon StringSession</label><textarea autocomplete="off" id="session-string" maxlength="4096" placeholder="Paste a StringSession" rows="3" spellcheck="false"></textarea>
+          <button class="quiet" id="import-account" type="button">Read files without signing in</button>
+        </details>
+        <p class="hint" id="import-result" role="status"></p>
+        <a class="format-help" href="/guide.html#formats" rel="noopener" target="_blank">Format details &amp; examples ↗</a>
+      </div>
+      <details id="api-details"><summary>API ID + Hash <span id="api-state">Built-in</span></summary>
+        <p class="hint" id="api-required">Optional. Leave empty: TgWitness picks a working pair from its built-in pool, or uses the pair from your account file. To use your own app, <a href="https://my.telegram.org" rel="noopener noreferrer" target="_blank">get it at my.telegram.org ↗</a></p>
+        <div class="api-fields"><div><label for="api-id">API ID</label><input autocomplete="off" id="api-id" inputmode="numeric" pattern="[0-9]{1,10}" placeholder="API ID or ID:Hash" type="text"></div>
+        <div><label for="api-hash">API Hash</label><input autocomplete="off" id="api-hash" pattern="[a-fA-F0-9]{32}" placeholder="32-character hash" type="password"></div></div>
+        <p class="hint" id="api-pair-help">Have <code>app_id:app_hash</code>? Paste the pair into API ID.</p><p class="hint api-purpose">These identify your app. To access an account, also use phone, QR or a session. An API Hash is different from an Auth Key.</p><p class="hint" id="api-pair-result" role="status"></p>
+      </details>
+      <div class="auth-actions"><button class="primary" id="auth-continue" type="submit">Continue</button><button class="primary" hidden id="start-qr" type="button">Show QR code</button></div>
+      <p class="auth-progress hint" hidden id="auth-progress" role="status"></p>
+    </form>
+    <div hidden id="qr-state"><h2>Scan with Telegram</h2><p class="hint">Settings → Devices → Link Desktop Device</p><img alt="Telegram sign-in QR code" class="qr-image" height="256" id="qr-image" width="256"><p id="qr-status" role="status"></p><div class="auth-actions"><button class="primary" hidden id="qr-retry" type="button">Generate another QR code</button><button class="quiet" id="qr-cancel" type="button">Back</button></div></div>
+    <form hidden id="code-form"><h2>Enter your login code</h2><label for="code">Code from Telegram</label><input autocomplete="one-time-code" id="code" inputmode="numeric" pattern="[0-9 -]{3,12}" required><button class="primary" type="submit">Confirm code</button></form>
+    <form hidden id="password-form"><h2>Two-step verification</h2><label for="password">Telegram password</label><input autocomplete="off" id="password" required type="password"><button class="primary" type="submit">Sign in</button></form>
+    <button class="quiet auth-back" hidden id="auth-back" type="button">← Change sign-in method</button>
+    <div hidden id="authorized-state"><span class="success-mark" id="authorized-mark"><svg aria-hidden="true" class="icon"><use href="#i-check"/></svg></span><span class="avatar xl" hidden id="authorized-avatar"></span><h2>Account connected</h2><p class="account-id" hidden id="authorized-account"></p><p class="muted">Choose the groups and channels to observe.</p><button class="primary" data-open="sources">Choose sources →</button><button class="quiet" id="change-account">Sign in again</button><button class="quiet sign-out" id="sign-out" type="button">Sign out of Telegram</button></div>
+    <div class="route-line" hidden id="route-line"><svg aria-hidden="true" class="icon"><use href="#i-link"/></svg><span id="route-line-text"></span><button class="text-link" id="route-open" type="button">Proxy settings</button></div>
+  </div>
+  <aside aria-label="How TgWitness works" class="account-guide">
+    <div class="guide-label"><svg aria-hidden="true" class="icon"><use href="#i-shield"/></svg> Built for observation</div>
+    <h2>Every change.<br>In context.</h2>
+    <p>A dedicated workspace for the messages your account can see — and the changes you need to keep.</p>
+    <ol class="account-flow">
+      <li><span>01</span><div><strong>Connect your account</strong><p>Phone, QR code or an existing session.</p></div></li>
+      <li><span>02</span><div><strong>Choose your sources</strong><p>Select the groups and channels to observe.</p></div></li>
+      <li><span>03</span><div><strong>Keep the record</strong><p>Review captured changes and export a signed archive.</p></div></li>
+    </ol>
+    <p class="account-warning"><svg aria-hidden="true" class="icon"><use href="#i-alert"/></svg><span>Connect a dedicated account, never your main one. <a href="/dedicated-account.html" rel="noopener" target="_blank">Why, and how to get one ↗</a></span></p>
+    <div class="guide-foot"><svg aria-hidden="true" class="icon"><use href="#i-lock"/></svg> Your installation. Your records.</div>
+  </aside>
+  <details hidden id="connection-options"><summary>Connection settings</summary>
+    <div class="card padded route-card"><div class="eyebrow">Connection route</div><h2 id="route-summary">Direct connection</h2><p class="muted" id="route-detail">Choose a route before signing in.</p>
+      <details id="network-details"><summary>Change connection route</summary>
+        <p class="notice route-running" hidden id="network-running">Pause observation to change the route. Until then, observation keeps using the current one.</p>
+        <div class="proxy-catalog"><h3>Public MTProxy lists</h3>
+          <p class="hint" id="proxy-catalog-status" role="status"></p>
+          <label for="proxy-catalog-select">Available public servers</label><select id="proxy-catalog-select" disabled></select>
+          <div class="route-actions"><button class="secondary" id="proxy-catalog-apply" type="button" disabled>Save selected public route</button><button class="quiet" id="proxy-catalog-refresh" type="button">Update public lists</button></div>
+          <p class="hint">Choose a proxy, save it and test the Telegram connection before signing in. Your own proxy can be entered below.</p>
+          <details class="proxy-sources"><summary>Where the list comes from</summary><div id="proxy-catalog-sources"></div><p class="hint" id="proxy-catalog-download"></p><p class="hint">Only compatible public addresses are included. Fake TLS ee entries are skipped. A listed server has not necessarily been tested from your network.</p></details>
+        </div>
+        <form id="network-form">
+          <div class="proxy-link"><label for="network-link">Your MTProxy link · optional</label><input id="network-link" type="password" autocomplete="off" maxlength="2048" placeholder="tg://proxy?server=… or https://t.me/proxy?…">
+          <button class="quiet" id="network-import" type="button">Fill fields from link</button><p class="hint" id="network-link-result" role="status"></p></div><label for="network-kind">Connection route</label><select id="network-kind"><option value="direct">Direct connection</option><option value="socks5">SOCKS5 proxy</option><option value="http">HTTP CONNECT proxy</option><option value="mtproxy">MTProxy · experimental</option></select><div hidden id="network-endpoint"><label for="network-host">Proxy host or IP</label><input autocomplete="off" id="network-host" maxlength="253" placeholder="proxy.example.org"><label for="network-port">Port</label><input id="network-port" max="65535" min="1" type="number" value="1080"><div id="network-login"><label for="network-username">Username · optional</label><input autocomplete="off" id="network-username" maxlength="255"><label for="network-password">Password · optional</label><input autocomplete="off" id="network-password" maxlength="255" type="password"></div><div hidden id="network-mtproxy"><label for="network-secret">MTProxy secret</label><input autocomplete="off" id="network-secret" maxlength="512" type="password"><p class="hint">32 hex digits or dd + 32 digits. Fake TLS ee secrets are unsupported by this transport.</p></div></div><p class="hint">Saving replaces this workspace's route and cancels unfinished login. Re-enter any proxy credentials when changing it. No automatic fallback to a direct connection.</p><div class="route-actions"><button class="secondary" type="submit">Save connection route</button><button class="quiet" id="network-test" type="button">Test Telegram connection</button></div><p class="hint" id="network-result" role="status"></p></form></details>
+    </div>
+    <details class="card padded protection-card" id="protection-details"><summary>Storage protection</summary><div class="protection-summary" id="protection-summary"></div><p class="hint">Use an encrypted disk or volume for message content, attachments, temporary exports and backups. Signatures detect changes; they do not hide content. A proxy routes Telegram traffic and does not protect the web panel.</p></details>
+    <details class="card padded accounts-card" id="profiles-details"><summary>Workspaces · add or switch accounts</summary><div id="profiles-list"></div><form class="profile-create" id="profile-create-form"><label for="profile-label">New workspace</label><input id="profile-label" maxlength="80" placeholder="e.g. Research account 2" required><button class="secondary" type="submit">Add workspace</button></form><p class="hint">Add as many workspaces as you need. Use a distinct Telegram account per workspace: the same session in two places makes Telegram revoke it (AUTH_KEY_DUPLICATED).</p></details>
+  </details>
+  <button class="text-link entry-return" hidden id="entry-return" type="button">View sample messages →</button>
+</div>
+</section>
+
+<section class="view" hidden id="view-chats">
+  <div class="chats-shell">
+    <aside class="chats-sidebar card">
+      <div class="chats-sidebar-head"><h2>Chats</h2><button class="quiet" id="chats-manage" type="button" title="Add or remove chats to watch"><svg aria-hidden="true" class="icon"><use href="#i-plus"/></svg> Choose</button></div>
+      <details class="chat-open"><summary>Open Telegram link</summary>
+        <form id="chat-open-form"><label for="chat-link">Username or invite link</label><input id="chat-link" maxlength="512" placeholder="https://t.me/…" required><button class="secondary" id="chat-preview-button" type="submit">Save preview</button></form>
+        <div id="chat-link-preview" aria-live="polite"></div>
+      </details>
+      <div id="chats-list"></div>
+    </aside>
+    <section class="chat-pane card">
+      <div class="chat-empty" id="chat-empty"></div>
+      <div hidden id="chat-main">
+        <header class="chat-header">
+          <div class="chat-title"><span class="avatar lg" id="chat-avatar"></span><div><h2 id="chat-name"></h2><p id="chat-sub"></p></div></div>
+          <div class="chat-actions">
+            <select aria-label="How many recent messages to load" id="chat-history-limit"><option value="100">Last 100</option><option value="250">Last 250</option><option value="500">Last 500</option></select>
+            <button class="secondary" id="chat-load-history" title="Download recent messages from Telegram into this view" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> <span class="label">Load history</span></button>
+            <button class="secondary" id="chat-export-start" title="Download the whole chat as a signed archive (chat.json + chat.html)" type="button"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg> <span class="label" id="chat-export-label">Export chat</span></button>
+            <button class="primary" hidden id="chat-export-get" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Save export</button>
+          </div>
+        </header>
+        <div class="chat-status" id="chat-status" role="status"></div>
+        <div class="export-box" hidden id="export-box" role="status"></div>
+        <div class="chat-feed" id="chat-feed"></div>
+        <form class="chat-compose" id="chat-compose">
+          <p class="hint" id="chat-compose-account"></p>
+          <div hidden id="chat-reply"><span id="chat-reply-label"></span> <button class="text-link" id="chat-reply-cancel" type="button">Cancel</button></div>
+          <label class="visually-hidden" for="chat-message">Message</label>
+          <div class="chat-compose-row"><textarea id="chat-message" rows="1" maxlength="4096" placeholder="Write a message…" required></textarea><button class="primary" id="chat-send" type="submit">Send</button></div>
+          <p class="hint" id="chat-compose-hint">Panel actions and their results are saved in the signed journal. Start observation to capture replies live.</p>
+        </form>
+      </div>
+      <div class="interaction-result" id="interaction-result" hidden role="status" aria-live="polite"></div>
+    </section>
+  </div>
+</section>
+
+<dialog aria-labelledby="export-dialog-title" class="export-dialog" id="export-dialog">
+  <form method="dialog" id="export-dialog-form">
+    <h2 id="export-dialog-title">Export the whole chat</h2>
+    <div id="export-dialog-facts"></div>
+    <fieldset class="export-accounts"><legend>Accounts that download it</legend><div id="export-dialog-accounts"></div>
+      <button class="text-link" id="export-select-all" type="button">Select all connected accounts</button></fieldset>
+    <p class="export-estimate" id="export-dialog-estimate"></p>
+    <p class="hint">Each account downloads its own share of message numbers with its own connection, so more accounts finish sooner. Every account must be able to open the chat (member, or a public chat). Each account signs the part it downloaded; the account that starts the export signs the whole archive. Observation keeps running.</p>
+    <div class="export-dialog-actions"><button class="secondary" type="button" value="cancel" id="export-dialog-cancel">Cancel</button><button class="primary" id="export-dialog-start" type="submit" value="start">Start export</button></div>
+  </form>
+</dialog>
+
+<section class="view" hidden id="view-accounts">
+  <div class="page-heading">
+    <div><h1>Accounts</h1><p class="page-description">Isolated workspaces — add as many as you need. Each has its own session, sources, journal and signing key, and runs its own collector. Several accounts can export one chat together.</p></div>
+    <button class="secondary" id="accounts-refresh"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Refresh</button>
+  </div>
+  <div id="accounts-list" class="accounts-grid"></div>
+  <form class="card padded profile-create" id="account-add-form"><div class="eyebrow">Add account</div><h2>New workspace</h2><p class="muted">Create an isolated workspace, then connect a distinct Telegram account inside it. Importing the same session into two workspaces can disrupt update delivery.</p><label for="account-add-label">Workspace name</label><input id="account-add-label" maxlength="80" placeholder="e.g. Research account 2" required><button class="secondary" type="submit">Add workspace</button><p class="hint" id="accounts-limit"></p></form>
+</section>
+</div>
+<footer><a href="/guide.html" rel="noopener" target="_blank">Help &amp; setup guide</a></footer>
+</main>
+</div>
+
+<dialog aria-labelledby="quick-title" class="quick-dialog" id="quick-dialog">
+  <div class="quick-heading"><h2 id="quick-title">Go to a section</h2><button aria-label="Close navigation" class="icon-button" id="quick-close" type="button"><svg aria-hidden="true" class="icon"><use href="#i-x"/></svg></button></div>
+  <div class="quick-search"><svg aria-hidden="true" class="icon"><use href="#i-search"/></svg><input aria-label="Find a section" aria-autocomplete="list" aria-controls="quick-results" aria-expanded="true" autocomplete="off" id="quick-search" maxlength="100" placeholder="Find a section…" role="combobox" type="text"></div>
+  <div aria-label="Sections" id="quick-results" role="listbox"></div>
+  <p class="quick-empty" hidden id="quick-empty" role="status">No matching sections. Try another name.</p>
+  <div class="quick-footer"><span><kbd data-no-translate>↑ ↓</kbd> <span id="quick-hint-navigation">to navigate</span></span><span><kbd data-no-translate>Enter</kbd> <span id="quick-hint-open">to open</span></span><span><kbd data-no-translate>Esc</kbd> <span id="quick-hint-close">to close</span></span></div>
+</dialog>
+
+<div class="drawer-backdrop" hidden id="drawer-backdrop"></div>
+<aside aria-labelledby="detail-title" aria-modal="true" class="detail-drawer" hidden id="detail-drawer" role="dialog">
+  <div class="drawer-top"><span class="eyebrow">Observation detail</span><button aria-label="Close detail" class="icon-button" id="close-detail"><svg aria-hidden="true" class="icon"><use href="#i-x"/></svg></button></div>
+  <div id="detail-content"></div>
+</aside>
+<div aria-live="polite" class="toast" hidden id="toast" role="status"></div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "title": "TgWitness · public collection pilot",
+  "data_dir": "/witness",
+  "interval": 5,
+  "timeout": 20,
+  "workspaces": [
+    {
+      "id": "account-a",
+      "label": "Account A · test group",
+      "collector": "http://tgwitness:8787",
+      "collector_fingerprint": "REPLACE_WITH_64_HEX_COLLECTOR_FINGERPRINT_A",
+      "token_file": "account-a-token.txt"
+    },
+    {
+      "id": "account-b",
+      "label": "Account B · test group",
+      "collector": "http://tgwitness:8787/profiles/REPLACE_WORKSPACE_ID",
+      "collector_fingerprint": "REPLACE_WITH_64_HEX_COLLECTOR_FINGERPRINT_B",
+      "token_file": "account-b-token.txt"
+    }
+  ]
+}

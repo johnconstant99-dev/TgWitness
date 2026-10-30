@@ -1,0 +1,14 @@
+<p class="guide-outcome">Keep the collector available and its data intact across restarts.</p>
+<h2 id="launch">Choose a launch method</h2>
+<p>For a native installation, use the <a href="@@GUIDE_START@@">launcher</a> and the service examples in <a href="@@REPO_URL@@/blob/@@BRANCH@@/deploy/README.md">deploy/</a>. For Docker, install Docker with Compose and run from the project directory:</p>
+<pre><code>docker compose up -d --build --wait
+docker compose exec tgwitness cat /data/panel-token.txt</code></pre>
+<p>The default panel listens on the host’s loopback address, port 8787. Open it locally or through an SSH tunnel. Use the token from the second command to unlock the panel.</p>
+<h2 id="storage">Keep the whole data directory</h2>
+<p>Native installations use <code>data/live</code>. Docker uses the persistent <code>tgwitness-data</code> volume. Keep journals, account sessions, keys and operational state together. A signed export is useful evidence, but it is not a full installation backup.</p>
+<ol><li>Stop collection before taking a consistent backup.</li><li>Copy the full private data directory to protected storage outside the host.</li><li>Test restoration into an isolated installation before relying on the backup.</li></ol>
+<h2 id="check">Check after a restart</h2>
+<p>Confirm the expected workspace and key, Telegram connection, selected sources and new message capture. Saved MTProto state and catch-up help recover updates that Telegram still retains. They cannot reconstruct every expired update or an edit deleted before capture.</p>
+<p class="callout">Container health means the web server responds. Use a controlled message and a witness check to assess collection and external publication.</p>
+<h2 id="public">Publish only what you intend</h2>
+<p>The deployment reference includes HTTPS examples, persistent-volume commands, updates and restore steps. Docker commands are provided for deployment; the current <a href="@@REPO_URL@@/blob/@@BRANCH@@/docs/VERIFICATION.md">validation record</a> identifies the environments actually tested.</p>

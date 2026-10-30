@@ -1,0 +1,15 @@
+<p class="guide-outcome">First, explore a working example. Then connect your own account.</p>
+<h2 id="demo">Look around without an account</h2>
+<p>Download or clone the project, install <strong>Python 3.11 or later</strong>, and run the demo. The launcher creates a local environment and installs the pinned dependencies.</p>
+<pre><code>git clone @@REPO_URL@@.git
+cd @@REPO_NAME@@</code></pre>
+<div class="platforms"><section><h3>Windows</h3><pre><code>.\scripts\Demo.cmd</code></pre></section><section><h3>Linux / macOS</h3><pre><code>sh start.sh --demo</code></pre></section></div>
+<p>The browser opens a workspace with fictional messages. Open a conversation, compare an edit and inspect an export. Demo mode does not connect to Telegram.</p>
+<figure><img src="@@ROOT@@assets/chats-dark.png" width="1440" height="1000" alt="TgWitness conversation view with sample messages" loading="lazy"><figcaption>A sample workspace. Your own journal starts separately.</figcaption></figure>
+<h2 id="live">Start your own workspace</h2>
+<p>Close the demo process, then use the normal launcher:</p>
+<div class="platforms"><section><h3>Windows</h3><pre><code>.\Start.cmd</code></pre></section><section><h3>Linux / macOS</h3><pre><code>sh start.sh</code></pre></section></div>
+<p>Open the local address shown by the launcher. If asked, enter the <strong>panel access token</strong> from the local file named in the terminal. This unlocks TgWitness; it is separate from Telegram sign-in.</p>
+<h2 id="next">Capture your first message</h2>
+<ol><li><a href="@@GUIDE_ACCOUNTS@@">Connect a dedicated Telegram account.</a></li><li>Select a group or channel the account can access, then start observation.</li><li>Send a new message in a test group you control and check that it appears in the journal.</li></ol>
+<p class="callout">For a server installation, follow <a href="@@GUIDE_SERVER@@">Keep it running</a>.</p>

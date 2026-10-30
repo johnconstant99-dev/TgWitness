@@ -1,0 +1,50 @@
+name: Wiki bundle
+on:
+  push:
+    paths:
+      - docs/**
+      - README.md
+      - docs/QUICKSTART.md
+      - .github/SUPPORT.md
+      - .github/SECURITY.md
+      - .github/CONTRIBUTING.md
+      - pyproject.toml
+      - tools/build_wiki.py
+      - tools/build_source.py
+      - tests/test_wiki.py
+      - .github/workflows/wiki.yml
+  pull_request:
+    paths:
+      - docs/**
+      - README.md
+      - docs/QUICKSTART.md
+      - .github/SUPPORT.md
+      - .github/SECURITY.md
+      - .github/CONTRIBUTING.md
+      - pyproject.toml
+      - tools/build_wiki.py
+      - tools/build_source.py
+      - tests/test_wiki.py
+      - .github/workflows/wiki.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: python tools/build_wiki.py
+      - uses: actions/upload-artifact@v7
+        with:
+          name: tgwitness-wiki
+          path: |
+            dist/wiki/
+            dist/*-wiki.zip
+            dist/*-wiki.zip.sha256
+            dist/wiki-manifest.json
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,62 @@
+name: tgwitness
+services:
+  tgwitness:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    environment:
+      TGWITNESS_PROXY_FEED_PROXY: ${TGWITNESS_PROXY_FEED_PROXY:-}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${TGWITNESS_PORT:-8787}:8787"
+    volumes:
+      - tgwitness-data:/data
+    init: true
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+  # Optional independent witness: docker compose --profile witness up -d
+  # Its own key and journal in its own volume; only a read-only witness token for the collector.
+  witness:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    profiles: ["witness"]
+    restart: unless-stopped
+    command: ["python", "-m", "tgwitness.witness", "run"]
+    environment:
+      TGWITNESS_WITNESS_DATA: /witness
+      TGWITNESS_WITNESS_COLLECTOR: ${TGWITNESS_WITNESS_COLLECTOR:-http://tgwitness:8787}
+      TGWITNESS_WITNESS_TOKEN: ${TGWITNESS_WITNESS_TOKEN:-}
+      TGWITNESS_WITNESS_BOT_TOKEN: ${TGWITNESS_WITNESS_BOT_TOKEN:-}
+      TGWITNESS_WITNESS_CHANNEL: ${TGWITNESS_WITNESS_CHANNEL:-}
+      TGWITNESS_WITNESS_INTERVAL: ${TGWITNESS_WITNESS_INTERVAL:-}
+      TGWITNESS_WITNESS_TIMEOUT: ${TGWITNESS_WITNESS_TIMEOUT:-}
+      TGWITNESS_WITNESS_POST: ${TGWITNESS_WITNESS_POST:-}
+      TGWITNESS_WITNESS_TITLE: ${TGWITNESS_WITNESS_TITLE:-}
+      TGWITNESS_WITNESS_COLLECTOR_FINGERPRINT: ${TGWITNESS_WITNESS_COLLECTOR_FINGERPRINT:-}
+      TGWITNESS_WITNESS_PROXY: ${TGWITNESS_WITNESS_PROXY:-}
+      TGWITNESS_WITNESS_BOT_API: ${TGWITNESS_WITNESS_BOT_API:-}
+    volumes:
+      - witness-data:/witness
+    depends_on:
+      tgwitness:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+volumes:
+  tgwitness-data:
+  witness-data:

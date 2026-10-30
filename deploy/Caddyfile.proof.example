@@ -1,0 +1,5 @@
+# Native Caddy on the same host. Use a separate hostname for the public read-only monitor.
+proof.example.org {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:8790
+}

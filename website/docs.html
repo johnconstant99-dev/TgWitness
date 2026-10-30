@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="@@LANG@@" dir="@@DIR@@" class="@@PAGE_CLASS@@">
+<head>@@HEAD@@
+<script>@@THEME_SCRIPT@@</script>
+<link rel="icon" href="@@ROOT@@assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="@@ROOT@@docs.css">
+<link rel="stylesheet" href="@@ROOT@@learn.css">
+<script src="@@ROOT@@docs.js" defer></script>
+<script src="@@ROOT@@learn.js" defer></script>
+</head>
+<body class="docs-page">
+<a class="skip-link" href="#main">@@SKIP@@</a>
+<div class="read-progress" aria-hidden="true"><span></span></div>
+<header class="docs-header"><div class="header-inner">
+<a class="brand" href="@@HOME@@"><img src="@@ROOT@@assets/mark.svg" width="30" height="30" alt="">TgWitness<span> / @@DOCS@@</span></a>
+<nav aria-label="@@NAV@@"><a href="@@GUIDE_CONCEPTS@@">@@VISUAL@@</a><a href="@@HUB@@">@@INDEX@@</a><a href="@@WIKI_HUB@@">@@WIKI@@</a><a href="@@REPO_URL@@">GitHub <span aria-hidden="true">↗</span></a></nav>
+<div class="header-tools">@@LANGUAGE_MENU@@@@THEME_TOGGLE@@</div>
+</div></header>
+<div class="docs-layout">
+<aside class="sidebar"><nav aria-label="@@NAV@@">@@SIDEBAR@@</nav><nav class="wiki-nav" aria-label="@@WIKI@@">@@WIKI_NAV@@</nav><p class="sidebar-note">v@@VERSION@@<br>@@ABOUT@@</p></aside>
+<main id="main" class="docs-main">
+<nav class="breadcrumbs" aria-label="@@NAV@@">@@BREADCRUMBS@@</nav>
+<div class="search" data-index="@@SEARCH_URL@@" hidden><label for="guide-search">@@SEARCH@@</label><div class="search-field"><span aria-hidden="true">⌕</span><input id="guide-search" type="search" placeholder="@@PLACEHOLDER@@" autocomplete="off" spellcheck="false" aria-controls="search-results"><kbd class="search-key" aria-hidden="true">/</kbd><button type="button" class="search-clear" aria-label="@@CLEAR@@" hidden>×</button></div><p class="search-status" role="status" aria-live="polite">@@PROMPT@@</p><div id="search-results" hidden></div></div>
+<article class="guide-content">@@NOTICE@@@@CONTENT@@</article>
+<footer class="guide-footer">@@GUIDE_FOOTER@@<p>@@NOTE@@ <a href="@@REPO_URL@@/blob/@@BRANCH@@/docs/VERIFICATION.md">@@VERIFICATION@@ @@ARROW@@</a></p></footer>
+</main>
+<aside class="toc" aria-label="@@TOC@@">@@CONTENTS@@</aside>
+</div>
+<footer class="docs-bottom"><a class="brand" href="@@HOME@@">TgWitness</a><span>@@ABOUT@@</span><a href="@@REPO_URL@@/blob/@@BRANCH@@/LICENSE">@@LICENCE_LINK@@</a><a href="@@OPERATOR_URL@@">@@OPERATOR_LINK@@</a><a href="@@REPO_URL@@/blob/@@BRANCH@@/.github/SECURITY.md">@@SECURITY@@</a></footer>
+<script id="site-dict" type="application/json">@@SITE_DICT@@</script>
+</body></html>

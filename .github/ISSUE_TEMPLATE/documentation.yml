@@ -1,0 +1,32 @@
+name: Documentation issue
+description: Report missing, incorrect or unclear instructions.
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Use fictional examples. Do not attach sessions, tokens, keys, real messages
+        or evidence archives. Security reports follow SECURITY.md.
+  - type: input
+    id: page
+    attributes:
+      label: Page or section
+      description: Link the wiki page, source document or in-app guide.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is incorrect or unclear?
+      description: Explain where the instructions stopped helping and what you expected.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Version and installation
+      description: For command or setup problems, include TgWitness version, OS and installation method.
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement
+      description: A corrected example or clearer wording, if you have one.

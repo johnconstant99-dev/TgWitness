@@ -1,0 +1,34 @@
+# Adapt /opt/tgwitness and create a dedicated tgwitness user before installing.
+[Unit]
+Description=TgWitness observation journal
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=tgwitness
+Group=tgwitness
+WorkingDirectory=/opt/tgwitness
+StateDirectory=tgwitness
+StateDirectoryMode=0700
+UMask=0077
+Environment=TGWITNESS_DATA=/var/lib/tgwitness
+Environment=PYTHONDONTWRITEBYTECODE=1
+# For a NEW external-key installation only:
+# Environment=TGWITNESS_VAULT_KEY_FILE=/etc/tgwitness/master.key
+ExecStart=/opt/tgwitness/.venv/bin/python -m tgwitness --host 127.0.0.1 --port 8787
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=180
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictSUIDSGID=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ReadWritePaths=/var/lib/tgwitness
+
+[Install]
+WantedBy=multi-user.target

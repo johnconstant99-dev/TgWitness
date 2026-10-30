@@ -1,0 +1,94 @@
+name: Project website
+on:
+  push:
+    branches: [main]
+    paths:
+      - NOTICE
+      - LICENSE
+      - tools/sync_notice.py
+      - website/**
+      - tools/build_site.py
+      - tools/site_content.py
+      - tools/site_wiki.py
+      - tools/site_diagrams.py
+      - tools/site_i18n.py
+      - docs/*.md
+      - docs/QUICKSTART.md
+      - .github/SECURITY.md
+      - docs/CHANGELOG.md
+      - tools/check_site.py
+      - tools/check_docs_site.py
+      - tests/test_site.py
+      - docs/assets/**
+      - tgwitness/static/**
+      - tgwitness/locales/**
+      - tgwitness/english_fallbacks.json
+      - pyproject.toml
+      - .github/workflows/pages.yml
+  pull_request:
+    paths:
+      - NOTICE
+      - LICENSE
+      - tools/sync_notice.py
+      - website/**
+      - tools/build_site.py
+      - tools/site_content.py
+      - tools/site_wiki.py
+      - tools/site_diagrams.py
+      - tools/site_i18n.py
+      - docs/*.md
+      - docs/QUICKSTART.md
+      - .github/SECURITY.md
+      - docs/CHANGELOG.md
+      - tools/check_site.py
+      - tools/check_docs_site.py
+      - tests/test_site.py
+      - docs/assets/**
+      - tgwitness/static/**
+      - tgwitness/locales/**
+      - tgwitness/english_fallbacks.json
+      - pyproject.toml
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: python tools/sync_notice.py --check
+      - run: python -m pip install 'pytest>=8,<10' 'playwright>=1.48,<2' 'markdown==3.11.2'
+      - run: python -m playwright install --with-deps chromium
+      - run: python -m pytest --noconftest -q tests/test_site.py
+      - name: Build the isolated public site
+        env:
+          TGWITNESS_SITE_URL: ${{ vars.TGWITNESS_SITE_URL }}
+        run: python tools/build_site.py
+      - run: python tools/check_site.py
+      - run: python tools/check_docs_site.py
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/site
+  deploy:
+    if: github.event_name != 'pull_request' && vars.TGWITNESS_PAGES_DEPLOYMENT == 'actions'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+      - name: Deploy the checked artifact
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,73 @@
+<p class="guide-outcome">Nothing leaves your machine except the connection to Telegram until you switch it on. Know what each secret unlocks, what the protections cover and what they leave to you.</p>
+<div class="fact-strip" role="list"><div role="listitem"><strong translate="no">127.0.0.1</strong><span>panel address by default</span></div><div role="listitem"><strong>256-bit</strong><span>random panel token</span></div><div role="listitem"><strong translate="no">0</strong><span>CDNs, analytics or remote fonts</span></div><div role="listitem"><strong translate="no">Ed25519</strong><span>signature on every record</span></div></div>
+<h2 id="map">Where everything lives</h2>
+<p>The collector, its panel and every saved record stay on the computer or server you run it on. Telegram is the only destination by default; each other one is a separate switch.</p>
+<figure class="lab security-lab" data-lab="security" data-flows="" aria-labelledby="security-lab-caption">
+<div class="lab-top"><span class="lab-kicker">06 / WHAT LEAVES THE MACHINE</span><span class="sample-tag">Your installation</span></div>
+<div class="lab-controls scenario-controls" data-enhanced hidden role="group" aria-label="Switch optional destinations on or off"><button type="button" data-flow-toggle="replica" aria-pressed="false">Off-site copy</button><button type="button" data-flow-toggle="alerts" aria-pressed="false">Notifications</button><button type="button" data-flow-toggle="timestamp" aria-pressed="false">Timestamps</button><button type="button" data-flow-toggle="witness" aria-pressed="false">Witness</button></div>
+<div class="security-map">
+<div class="machine"><span class="panel-caption">YOUR COMPUTER OR SERVER</span>
+<div class="machine-part"><strong>Panel</strong><span>127.0.0.1:8787 · bearer token</span></div>
+<div class="machine-part"><strong>Collector</strong><span>one Telegram client per workspace</span></div>
+<div class="machine-store"><span class="panel-caption">DATA DIRECTORY</span>
+<div class="store-row"><span class="store-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 3h9l3 3v15H6z M9 9h6 M9 13h6 M9 17h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><strong>Journal</strong><span>SQLite · hash-chained · signed</span></div></div>
+<div class="store-row"><span class="store-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><rect x="3.5" y="5" width="17" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 17l5-5 4 4 2-2 3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="16" cy="9" r="1.6" fill="currentColor"/></svg></span><div><strong>Media</strong><span>files named by SHA-256</span></div></div>
+<div class="store-row is-locked"><span class="store-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg></span><div><strong>Vault</strong><span>Fernet · session, API pair, signing key, proxy</span></div></div>
+</div></div>
+<ul class="routes">
+<li class="route is-on" data-flow="telegram"><span class="wire" aria-hidden="true"><i></i></span><div><strong>Telegram</strong><span class="route-state">Always · through your route</span><p>The account's MTProto connection: direct, SOCKS5, HTTP or MTProxy. A failed proxy never falls back to a direct connection.</p></div></li>
+<li class="route" data-flow="replica"><span class="wire" aria-hidden="true"><i></i></span><div><strong>Off-site copy</strong><span class="route-state" data-state-label>Optional · off by default</span><p>Journal, files and checkpoints encrypted with AES-GCM before upload to S3-compatible storage. The key stays with you; attachments are named by keyed hashes, not their content hash.</p></div></li>
+<li class="route" data-flow="alerts"><span class="wire" aria-hidden="true"><i></i></span><div><strong>Notifications</strong><span class="route-state" data-state-label>Optional · off by default</span><p>Problems and change counts with chat titles. Message excerpts are sent only if you turn them on.</p></div></li>
+<li class="route" data-flow="timestamp"><span class="wire" aria-hidden="true"><i></i></span><div><strong>Timestamp authority</strong><span class="route-state" data-state-label>Optional · off by default</span><p>Only the SHA-256 of a signed checkpoint and a random nonce. No messages, no chat names.</p></div></li>
+<li class="route" data-flow="witness"><span class="wire" aria-hidden="true"><i></i></span><div><strong>Witness</strong><span class="route-state" data-state-label>Optional · off by default</span><p>Pulls signed checkpoints and capture counters with a read-only token. It cannot read conversations or change settings.</p></div></li>
+</ul>
+</div>
+<p class="lab-status" data-security-status role="status">Default: only the Telegram connection leaves this machine.</p>
+<figcaption id="security-lab-caption">Optional destinations are configured per workspace. Message text and media are stored unencrypted in the data directory: protect it with disk encryption and file permissions.</figcaption>
+</figure>
+<h2 id="secrets">What each secret unlocks</h2>
+<div class="table-wrap" tabindex="0"><table class="secret-table">
+<thead><tr><th>Secret</th><th>Where it is kept</th><th>What it unlocks</th><th>If it leaks</th></tr></thead>
+<tbody>
+<tr><td><strong>Panel token</strong></td><td><code>panel-token.txt</code> in the data directory; the browser keeps it for the tab only</td><td>Everything in every workspace: read and export, change scope, sign in accounts</td><td>Stop TgWitness, delete <code>panel-token.txt</code>, start it again: a new token is created</td></tr>
+<tr><td><strong>Telegram session</strong></td><td>Vault, encrypted (<code>credentials.enc</code>)</td><td>The Telegram account itself</td><td>End the session in Telegram under <em>Settings → Devices</em></td></tr>
+<tr><td><strong>Signing key</strong></td><td>Vault, encrypted (<code>signing.enc</code>)</td><td>Signing records that verify under your fingerprint</td><td>Checkpoints kept elsewhere, a witness and timestamps show what existed before</td></tr>
+<tr><td><strong>Vault key</strong></td><td><code>vault.key</code> beside the data, or an external master key for a new data directory</td><td>Decrypting the vault</td><td>Treat the session and signing key as leaked too</td></tr>
+<tr><td><strong>Witness token</strong></td><td>On the witness host</td><td>Read-only: signed checkpoints and health</td><td>Delete it on the Witness page; create a new one</td></tr>
+<tr><td><strong>Off-site copy key</strong></td><td>Vault; download it once for recovery</td><td>Decrypting the off-site copy</td><td>Whoever also holds the stored objects can decrypt them: treat that copy as exposed</td></tr>
+</tbody></table></div>
+<h2 id="threats">What the protections cover</h2>
+<div class="threat-grid">
+<section class="threat-card is-covered" aria-labelledby="covered-title"><h3 id="covered-title"><span aria-hidden="true">✓</span> Covered</h3><ul>
+<li>A changed, removed or reordered record in an export: the hash chain or a signature no longer verifies.</li>
+<li>A journal cut back or rebuilt after a checkpoint was kept elsewhere: the retained checkpoint no longer matches.</li>
+<li>Guessing the panel token: 256 random bits, compared in constant time; after 15 failures a minute an address is refused.</li>
+<li>Hostile chat content: text is inserted as text, never as HTML; attachments download as files; the panel loads nothing from other sites.</li>
+<li>A copied data directory with an external vault key: sessions and signing keys stay encrypted without the master key.</li>
+</ul></section>
+<section class="threat-card is-open" aria-labelledby="open-title"><h3 id="open-title"><span aria-hidden="true">!</span> Left to you</h3><ul>
+<li>Anyone with the panel token has full control. There are no roles or per-user permissions.</li>
+<li>An administrator of the machine can read everything and rewrite and re-sign the journal. Keep the fingerprint and checkpoints on another system.</li>
+<li>Message text and media are not encrypted by TgWitness. Use disk encryption and strict permissions.</li>
+<li>Plain HTTP beyond localhost shows the token on the network. Use HTTPS or an SSH tunnel.</li>
+<li>Signatures prove what was recorded was not changed, not that every Telegram event was recorded.</li>
+</ul></section>
+</div>
+<h2 id="hardening">Harden an installation</h2>
+<div class="checklist" data-lab="hardening">
+<div class="checklist-meter" data-enhanced hidden><span data-checklist-count>0 of 8 done</span><span class="meter" aria-hidden="true" translate="no"><i></i></span></div>
+<ol class="checklist-items">
+<li><span class="check-text"><strong>Use a dedicated Telegram account</strong> — never your main one. The panel token and the session give full control of it.</span></li>
+<li><span class="check-text"><strong>Keep the panel on 127.0.0.1.</strong> Reach it remotely only through HTTPS (the bundled Caddy configuration) or an SSH tunnel.</span></li>
+<li><span class="check-text"><strong>Encrypt the disk</strong> that holds the data directory: message text and media are stored as they arrived.</span></li>
+<li><span class="check-text"><strong>Restrict the data directory</strong> to the service account. New directories get mode 0700 on Unix; on Windows, set the folder's permissions.</span></li>
+<li><span class="check-text"><strong>Keep the vault master key elsewhere</strong> on servers: set <code>TGWITNESS_VAULT_KEY_FILE</code> before creating the data directory.</span></li>
+<li><span class="check-text"><strong>Save the signing-key fingerprint and checkpoints</strong> on another system, and add a witness on another host.</span></li>
+<li><span class="check-text"><strong>Never upload</strong> <code>data/</code>, sessions, <code>panel-token.txt</code> or vault keys to GitHub or a chat.</span></li>
+<li><span class="check-text"><strong>Do not log</strong> <code>Authorization</code> headers or request bodies at a reverse proxy.</span></li>
+</ol>
+</div>
+<details><summary>Can I change the panel token without losing data?</summary><p>Yes. The token only opens the panel. Stop TgWitness, delete <code>panel-token.txt</code> from the data directory and start it again; the journal, sessions and keys are untouched. With <code>TGWITNESS_TOKEN</code> set, the environment value is used instead of the file.</p></details>
+<details><summary>Why are messages not encrypted at rest?</summary><p>The collector must read them to search, compare versions and export. Encrypting them with a key on the same machine would add little against someone who can read that machine. Disk encryption protects a stopped or stolen disk; strict permissions protect a running one.</p></details>
+<h2 id="report">Report a vulnerability</h2>
+<p>Use <strong>Security → Report a vulnerability</strong> in the GitHub repository. Include the version, the impact and a minimal synthetic reproduction. Never send credentials, account directories or real evidence archives. If private reporting is unavailable, open an issue asking for a private channel without exploit details.</p>
