@@ -179,7 +179,7 @@ class Witness:
             "Authorization": "Bearer " + self.token, "Accept": "application/json",
             "X-TgWitness-Witness": self.fingerprint, "X-TgWitness-Interval": str(self.interval),
             "X-TgWitness-Challenge": challenge},
-            timeout=self.timeout, limit=64 * 1024)
+            timeout=self.timeout, limit=64 * 1024, private=True)  # its operator chose the collector, often next door
         answer = json.loads(data)
         if answer.get("capture") and answer["capture"].get("statement", {}).get("challenge") != challenge:
             raise InvalidAnswer("capture answer did not echo this check's challenge")
@@ -188,7 +188,8 @@ class Witness:
     async def bot_send(self, text):
         body = json.dumps({"chat_id": self.channel, "text": text, "disable_web_page_preview": True}).encode()
         _, _, data = await request("POST", self.bot_api + "/bot" + self.bot_token + "/sendMessage", self.network,
-                                   {"Content-Type": "application/json"}, body, timeout=self.timeout, limit=256 * 1024)
+                                   {"Content-Type": "application/json"}, body, timeout=self.timeout, limit=256 * 1024,
+                                   private=True)  # a self-hosted Bot API server may be local
         answer = json.loads(data)
         if not answer.get("ok"):
             raise InvalidAnswer(answer.get("description") or "The Bot API refused the message.")

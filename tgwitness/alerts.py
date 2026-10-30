@@ -6,15 +6,17 @@ the same wording.
 """
 import asyncio
 import re
+import socket
 import threading
 from contextlib import contextmanager, suppress
 from datetime import datetime, timedelta, timezone
 from typing import Literal
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 from pydantic import BaseModel, Field
 
 from . import i18n
+from . import netclient
 from . import tuning
 from .store import utcnow
 
@@ -82,6 +84,59 @@ def proxy_url(network):
     return ("socks5h" if network.kind == "socks5" else "http") + "://" + login + host + ":" + str(network.port)
 
 
+# While a notification is sent (under _send_lock), destinations inside this machine or its network
+# are refused, as in netclient. Apprise sends from its own threads, so the switch is not per thread;
+# only requests (urllib3) and smtplib connections are checked, which nothing else in the server uses.
+_guard = {"on": False, "allowed": set(), "refused": None}
+
+
+class Refused(OSError):
+    """An internal destination; an OSError, so the services report it as a failed connection."""
+
+
+def _checked(host, port):
+    """The addresses to connect to, checked once and then used (no second lookup); None: unchecked."""
+    if not _guard["on"] or host in _guard["allowed"]:
+        return None
+    addresses = list(dict.fromkeys(info[4][0] for info in socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)))
+    try:
+        netclient.refuse_internal(host, addresses)
+    except netclient.RouteError as error:
+        _guard["refused"] = str(error)
+        raise Refused(str(error)) from None
+    return addresses
+
+
+def _install_guard():
+    import smtplib
+    import urllib3.util.connection as connection
+    if getattr(connection.create_connection, "guarded", False):
+        return
+    plain = connection.create_connection
+
+    def create_connection(address, *args, **kwargs):
+        addresses = _checked(address[0], address[1])
+        if addresses is None:
+            return plain(address, *args, **kwargs)
+        failure = OSError("No address for " + str(address[0]))
+        for checked in addresses:
+            try:
+                return plain((checked, address[1]), *args, **kwargs)
+            except OSError as exc:
+                failure = exc
+        raise failure
+    create_connection.guarded = True
+    connection.create_connection = create_connection
+
+    def smtp(original):
+        def get_socket(self, host, port, timeout):
+            addresses = _checked(host, port)  # TLS keeps verifying self._host, the name
+            return original(self, addresses[0] if addresses else host, port, timeout)
+        return get_socket
+    smtplib.SMTP._get_socket = smtp(smtplib.SMTP._get_socket)
+    smtplib.SMTP_SSL._get_socket = smtp(smtplib.SMTP_SSL._get_socket)
+
+
 @contextmanager
 def _routed(proxy):
     """Apprise sends through requests; for this send its proxy settings are the workspace route only."""
@@ -89,6 +144,13 @@ def _routed(proxy):
     original = requests.Session.merge_environment_settings
 
     def merge(self, url, proxies, stream, verify, cert):
+        host = urlsplit(url).hostname or ""
+        if proxy and _guard["on"] and netclient.literal(host):  # through a proxy only an address can be checked
+            try:
+                netclient.refuse_internal(host, [netclient.literal(host)])
+            except netclient.RouteError as error:
+                _guard["refused"] = str(error)
+                raise requests.exceptions.ConnectionError(str(error)) from None
         settings = original(self, url, {}, stream, verify, cert)
         settings["proxies"] = {"http": proxy, "https": proxy} if proxy else {}
         return settings
@@ -105,18 +167,25 @@ def deliver(urls, title, body, network):
     problem = route_problem(urls, network)
     if problem:
         return {"sent": 0, "failed": len(urls), "error": problem}
+    _install_guard()
     with _send_lock, _routed(proxy_url(network)):
-        bundle = apprise.Apprise()
-        for url in urls:
-            bundle.add(url)
-        result = bundle.notify(body=body, title=title)
+        _guard.update(on=not netclient.private_allowed(), refused=None,
+                      allowed={network.host} if network.kind != "direct" else set())  # the proxy itself
+        try:
+            bundle = apprise.Apprise()
+            for url in urls:
+                bundle.add(url)
+            result = bundle.notify(body=body, title=title)
+        finally:
+            _guard["on"] = False
+        refused = _guard["refused"]
     if isinstance(result, bool):  # Apprise 1.x reports only whether every destination accepted it
         return {"sent": len(urls) if result else 0, "failed": 0 if result else len(urls),
-                "error": None if result else "The service did not accept the notification."}
+                "error": None if result else refused or "The service did not accept the notification."}
     errors = [entry.message for entry in result.logs() if str(entry.level).upper() in ("ERROR", "WARNING")]
     error = None
     if result.failed_count or not result.success_count:
-        error = (errors[0] if errors else "The service did not accept the notification.")[:300]
+        error = (refused or (errors[0] if errors else "The service did not accept the notification."))[:300]
     return {"sent": result.success_count, "failed": result.failed_count, "error": error}
 
 

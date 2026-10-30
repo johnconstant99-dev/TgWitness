@@ -217,6 +217,23 @@ RestrictSUIDSGID=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
+ProtectKernelLogs=true
+ProtectClock=true
+ProtectHostname=true
+PrivateDevices=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+RestrictNamespaces=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+# The tunnel credentials stay with cloudflared, out of the collector's reach. /proc stays visible:
+# the host measurement counts SSH processes there.
+InaccessiblePaths=-/etc/cloudflared -/etc/systemd/system/cloudflared.service
 ReadWritePaths=/var/lib/tgwitness
 
 [Install]
@@ -263,7 +280,11 @@ git -C /opt/tgwitness/source fetch -q --depth 1 "$REPOSITORY" "$COMMIT"
 git -C /opt/tgwitness/source checkout -q --detach FETCH_HEAD
 test "$(git -C /opt/tgwitness/source rev-parse HEAD)" = "$COMMIT"
 python3 -m venv /opt/tgwitness/.venv
-/opt/tgwitness/.venv/bin/pip install --no-cache-dir -c /opt/tgwitness/source/deploy/constraints.txt /opt/tgwitness/source
+# Every package must match a SHA-256 in the commit's locks; builds use the hashed setuptools only.
+PIP="/opt/tgwitness/.venv/bin/pip install --no-cache-dir"
+$PIP --require-hashes -r /opt/tgwitness/source/deploy/build.lock
+$PIP --require-hashes --no-build-isolation -r /opt/tgwitness/source/deploy/requirements.lock
+$PIP --no-deps --no-build-isolation /opt/tgwitness/source
 """
 
 START = """\

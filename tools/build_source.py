@@ -10,7 +10,7 @@ FILES = [
     "README.md", "docs/QUICKSTART.md", "LICENSE", "NOTICE", ".github/SECURITY.md", ".github/SUPPORT.md", ".github/CONTRIBUTING.md", "docs/CHANGELOG.md", "pyproject.toml",
     "start.py", "start.sh", "Start.cmd",
     "deploy/Dockerfile", "compose.yaml", "deploy/compose/compose.image.yaml", "deploy/compose/compose.https.yaml", "deploy/compose/compose.witness.yaml", "deploy/compose/compose.proof.yaml", "deploy/compose/compose.proxies.yaml",
-    ".gitignore", ".gitattributes", ".dockerignore", "deploy/env.example", "deploy/constraints.txt",
+    ".gitignore", ".gitattributes", ".dockerignore", "deploy/env.example", "deploy/constraints.txt", "deploy/requirements.lock", "deploy/build.lock",
 ]
 DIRECTORIES = {
     "tgwitness": {".md", ".py", ".html", ".css", ".js", ".svg", ".json"},

@@ -76,3 +76,41 @@ def test_small_chunked_response_and_broken_terminator():
     assert ok[2] == b"abcde"
     broken, _ = asyncio.run(fetch(b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n3\r\nabcXY0\r\n\r\n"))
     assert isinstance(broken, ValueError) and "Malformed" in str(broken)
+
+
+@pytest.mark.parametrize("address", ["127.0.0.1", "10.1.2.3", "172.17.0.2", "192.168.1.10", "169.254.169.254",
+                                     "100.64.0.1", "0.0.0.0", "::1", "fe80::1", "fd00::1", "::ffff:127.0.0.1", "224.0.0.1"])
+def test_internal_addresses_include_metadata_services_and_private_networks(address):
+    assert netclient.internal(address)
+
+
+@pytest.mark.parametrize("address", ["1.1.1.1", "8.8.8.8", "2606:4700:4700::1111"])
+def test_public_addresses_are_not_internal(address):
+    assert not netclient.internal(address)
+
+
+@pytest.mark.parametrize("url", ["http://127.0.0.1:9/", "http://169.254.169.254/hetzner/v1/userdata",
+                                 "http://localhost:8787/api/status", "http://[::1]:9/", "http://2130706433/"])
+def test_panel_requests_never_reach_this_machine_or_its_network(monkeypatch, url):
+    monkeypatch.delenv(netclient.PRIVATE_OPT_IN, raising=False)
+    # glibc resolves the one-number form 2130706433 to 127.0.0.1 (then refused); Windows does not resolve it.
+    expected = (netclient.RouteError, OSError) if "2130706433" in url else netclient.RouteError
+    with pytest.raises(expected) as caught:
+        asyncio.run(netclient.request("GET", url, NetworkConfig(), timeout=5))
+    assert "public internet" in str(caught.value) or "2130706433" in url
+
+
+def test_through_a_proxy_an_internal_address_is_refused_before_connecting(monkeypatch):
+    monkeypatch.delenv(netclient.PRIVATE_OPT_IN, raising=False)
+    proxy = NetworkConfig(kind="socks5", host="203.0.113.9", port=1080)  # never routed: a connection would hang
+    with pytest.raises(netclient.RouteError):
+        asyncio.run(netclient.request("GET", "http://169.254.169.254/", proxy, timeout=5))
+
+
+def test_the_server_environment_or_the_witness_may_allow_internal_addresses(monkeypatch):
+    monkeypatch.delenv(netclient.PRIVATE_OPT_IN, raising=False)
+    result, _ = asyncio.run(fetch(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok", private=True))
+    assert result[2] == b"ok"
+    monkeypatch.setenv(netclient.PRIVATE_OPT_IN, "1")
+    result, _ = asyncio.run(fetch(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok"))
+    assert result[2] == b"ok"

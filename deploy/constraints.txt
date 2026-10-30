@@ -1,5 +1,6 @@
 # Runtime version constraints qualified on Windows/Python 3.12.
-# Version pinning is not a package-hash lock or qualification on every platform.
+# Servers and the Docker image install from the hash locks deploy/requirements.lock and deploy/build.lock;
+# after changing a version here, run python tools/lock_requirements.py.
 annotated-doc==0.0.5
 annotated-types==0.8.0
 anyio==4.15.1

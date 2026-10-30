@@ -590,8 +590,10 @@ The source tests used FastAPI 0.159.1, Uvicorn 0.54.0, Telethon 1.45.0,
 cryptography 50.0.2, pytest 9.1.1, and Playwright 1.62.0.
 The pinned runtime uses FastAPI 0.162.0, Starlette 1.10.0,
 Uvicorn 0.54.0, Telethon 1.45.0, and cryptography 50.0.2.
-deploy/constraints.txt records runtime version pins. This is not a package-hash lock or
-evidence of compatibility on every configured CI platform. Remote CI has not run.
+deploy/constraints.txt records runtime version pins; deploy/requirements.lock and
+deploy/build.lock add the SHA-256 of every package file, and Docker and high-assurance
+servers install only from them (pip --require-hashes). Neither is evidence of compatibility
+on every configured CI platform. Remote CI has not run.
 
 ## Synthetic local capacity measurement
 

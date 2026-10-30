@@ -5,9 +5,12 @@ LABEL org.opencontainers.image.title="TgWitness" \
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_DISABLE_PIP_VERSION_CHECK=1 TGWITNESS_DATA=/data
 WORKDIR /app
 COPY pyproject.toml README.md LICENSE NOTICE ./
-COPY deploy/constraints.txt ./constraints.txt
+COPY deploy/build.lock deploy/requirements.lock ./
 COPY tgwitness ./tgwitness
-RUN pip install --no-cache-dir -c constraints.txt . && useradd --uid 10001 --create-home collector \
+# Every package must match a SHA-256 in the locks; builds use the hashed setuptools only.
+RUN pip install --no-cache-dir --require-hashes -r build.lock \
+    && pip install --no-cache-dir --require-hashes --no-build-isolation -r requirements.lock \
+    && pip install --no-cache-dir --no-deps --no-build-isolation . && useradd --uid 10001 --create-home collector \
     && mkdir /data /witness && chown collector:collector /data /witness
 USER collector
 VOLUME ["/data"]

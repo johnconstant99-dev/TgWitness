@@ -180,9 +180,11 @@ stopped until you start it again.
 The /tmp volume is capped at 512 MiB in the example configuration. Export construction
 uses each workspace's `temporary-exports/` on persistent /data instead. Reserve space
 there for simultaneous exports, journal/WAL growth, media and backups.
-The launcher and Docker use deploy/constraints.txt to pin qualified runtime dependency
-versions. This is not a hash-locked supply chain: the Python base image and package
-artifacts still require independent release qualification.
+The launcher uses deploy/constraints.txt to pin qualified runtime dependency versions.
+Docker and high-assurance servers install from deploy/requirements.lock and
+deploy/build.lock with pip --require-hashes: every package file must match a SHA-256
+recorded in the commit, so a file replaced on PyPI or a mirror is refused. The Python base
+image and operating-system packages still require independent release qualification.
 
 Do not use docker compose down -v unless you intend to destroy the journal and keys.
 Container health reports web-server availability, not successful Telegram capture.
