@@ -41,6 +41,8 @@ from .monitoring import Capture, Monitoring, capture_settings, monitoring_settin
 from .scope import (EXCLUDE_LIMIT, WIDE_WARNING, Recheck, ScopeUpdate, recheck_settings, scope_settings,
                     unexclude)
 from . import assurance
+from . import netclient
+from . import source_check
 from . import dossier
 from . import tuning
 from . import witness_api
@@ -86,6 +88,11 @@ class Code(BaseModel):
 
 class Password(BaseModel):
     password: str = Field(min_length=1, max_length=512)
+
+
+class SourceCheck(BaseModel):
+    repository: str = Field(min_length=3, max_length=200)
+    ref: str = Field(min_length=1, max_length=200)
 
 
 class AlertUpdate(alerts.AlertSettings):
@@ -695,6 +702,39 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             raise HTTPException(409, "Turn on evidence mode first.")
         request_anchor(app.state.store, app.state.vault, app.state.anchor_wakeup)
         return evidence_state()
+
+    def source_state():
+        last, receipt = app.state.store.get_setting("source_check", None), app.state.run_receipt
+        return {"last": last, "version": __version__, "source_tree_sha256": receipt["source_tree_sha256"],
+                "files": len(receipt["source_files"]), "route": app.state.collector.network_config().kind,
+                # A check describes the code that ran then; a later start may run other code.
+                "current": bool(last) and last["source_tree_sha256"] == receipt["source_tree_sha256"]}
+
+    @app.get("/api/source-check", dependencies=[Depends(authenticate)])
+    async def get_source_check():
+        return source_state()
+
+    @app.post("/api/source-check", dependencies=[Depends(authenticate)])
+    async def run_source_check(body: SourceCheck):
+        require_live()
+        try:
+            result = await source_check.check(body.repository, body.ref.strip(), app.state.collector.network_config())
+        except source_check.NotFound:
+            raise HTTPException(422, "GitHub has no such public repository or version. Check the address and the tag, branch or commit.")
+        except source_check.Limited:
+            raise HTTPException(503, "GitHub is limiting requests from this address. Try again in an hour.")
+        except netclient.HTTPError:
+            raise HTTPException(502, "GitHub could not be reached through this workspace's connection route.")
+        except ValueError:
+            raise HTTPException(422, "Enter a GitHub repository as github.com/owner/name.")
+        except (netclient.RouteError, OSError, asyncio.TimeoutError):
+            raise HTTPException(502, "GitHub could not be reached through this workspace's connection route.")
+        store = app.state.store
+        with store.transaction():
+            store.set_setting("source_check", result)
+            store.append("source.checked", {**result, "meaning": "git blob ids of the running program files "
+                                            "compared with the files of this commit on GitHub"})
+        return source_state()
 
     def replica_state():
         store, vault = app.state.store, app.state.vault

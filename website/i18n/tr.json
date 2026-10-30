@@ -2510,7 +2510,7 @@
 "modes.levels.boundary": "Hiçbir seviyenin kanıtlayamadığı şey",
 "modes.levels.boundary.body": "Her Telegram güncellemesinin iletilmesi; metnin doğruluğu; gönderen kimliğinin gerçek bir kişiyi tanımlaması; kayıt öncesinde toplayıcının güvenliğinin ihlal edilmemesi; mahkemede delil olarak kabul edilebilirlik.",
 "modes.levels.intro": "Her mekanizma sınırlı bir soruyu yanıtlar. Harici hizmetleri ayrı ayrı yapılandırın ve güven dayanaklarını toplayıcının dışında tutun.",
-"modes.levels.title": "Sekiz seviye. Farklı sorular.",
+"modes.levels.title": "Yedi seviye. Farklı sorular.",
 "modes.limit": "Ne yapmaz",
 "modes.limits.account": "Ana hesabınızı değil, bu iş için ayrılmış bir hesap kullanın.",
 "modes.limits.intro": "Doğrulama, kapsamı açıkça belirtildiğinde yararlıdır.",

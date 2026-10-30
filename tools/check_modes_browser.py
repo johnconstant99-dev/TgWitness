@@ -33,10 +33,11 @@ def check_modes(browser, url, output, errors, external, failed):
         page.on("response", lambda response: failed.append(response.url) if response.status >= 400 else None)
         page.goto(url + ("" if lang == "en" else lang + "/") + "guides/modes.html", wait_until="networkidle")
         assert not page.evaluate("document.documentElement.scrollWidth > innerWidth"), (lang, width, theme)
-        assert page.locator(".m-ladder>li").count() == 8
+        assert page.locator(".m-ladder>li").count() == 7
         assert page.locator(".m-scope").count() == 4
-        assert page.locator(".m-scenarios>article").count() == 6
-        assert page.locator(".m-limit").count() == 26
+        assert page.locator(".m-scenarios>article").count() == 5
+        assert page.locator(".m-limit").count() == 24
+        assert page.locator(".m-section-head .m-number").all_text_contents() == [f"{n:02d}" for n in range(1, 11)]
         assert page.locator(".lang-list a").count() == len(LANGUAGES)
         assert not page.evaluate("document.body.innerText.includes('{{modes.') || document.body.innerText.includes('@@')")
         assert page.evaluate("getComputedStyle(document.querySelector('.m-flow-pulse')).animationName") == "none"

@@ -1,19 +1,7 @@
 name: Wiki bundle
 on:
   push:
-    paths:
-      - docs/**
-      - README.md
-      - docs/QUICKSTART.md
-      - .github/SUPPORT.md
-      - .github/SECURITY.md
-      - .github/CONTRIBUTING.md
-      - pyproject.toml
-      - tools/build_wiki.py
-      - tools/build_source.py
-      - tests/test_wiki.py
-      - .github/workflows/wiki.yml
-  pull_request:
+    branches: [main]
     paths:
       - docs/**
       - README.md
@@ -29,14 +17,26 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: wiki-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - run: python tools/build_wiki.py
       - uses: actions/upload-artifact@v7
         with:
@@ -47,4 +47,4 @@ jobs:
             dist/*-wiki.zip.sha256
             dist/wiki-manifest.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 3

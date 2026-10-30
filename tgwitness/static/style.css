@@ -1331,6 +1331,7 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
   footer { padding: 4px 14px 16px; }
   .context-bar { margin-bottom: 14px; }
   .page-heading { flex-wrap: wrap; align-items: flex-start; margin-bottom: 18px; }
+  .page-heading > button { flex-shrink: 1; max-width: 100%; padding-block: 8px; }
   .page-heading h1 { font-size: 23px; }
   .page-description { font-size: 13.5px; }
   .setup-card { grid-template-columns: 1fr; padding: 18px 18px 0; }
@@ -1402,6 +1403,11 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
   .nav .nav-icon { display: none; }
   .nav { font-size: 12.5px; }
   .profile-switch select { max-width: none; }
+}
+/* Phone tab bar: the icon above its label, so a long label never runs into the next button. */
+@media (max-width: 520px) {
+  .sidebar nav .nav { flex-direction: column; gap: 3px; min-height: 50px; padding: 6px 2px; font-size: 12px;
+    line-height: 1.15; text-align: center; white-space: normal; overflow-wrap: break-word; }
 }
 @media (max-width: 430px) {
   .sidebar-bottom .language-pick { display: none; }
@@ -1532,6 +1538,16 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
 .extra-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; color: var(--text-2); background: var(--surface-2); font-size: 11px; line-height: 1.4; font-weight: 600; }
 .extra-badge.planned { color: var(--muted); background: var(--surface-3); }
 .extra-badge.on { color: var(--success); background: var(--success-soft); }
+.extra-badge.warn { color: var(--warning); background: var(--warning-soft); }
+.github-form > button { margin-top: 12px; }
+.github-result { margin: 16px 0 8px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); }
+.github-result.ok { background: var(--success-soft); border-color: var(--success-border); }
+.github-result.warn { background: var(--warning-soft); border-color: var(--warning-border); }
+.github-result p { margin: 0 0 6px; }
+.github-verdict { font-weight: 600; }
+.github-result.ok .github-verdict { color: var(--success); }
+.github-result.warn .github-verdict { color: var(--warning); }
+.github-files code { overflow-wrap: anywhere; }
 .extra-evidence .extra-icon { color: var(--success); background: var(--success-soft); }
 .alerts-builder { margin: 14px 0 6px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
 .alerts-builder > label:first-child { margin-top: 0; }

@@ -9,15 +9,24 @@ concurrency:
   cancel-in-progress: false
 jobs:
   version:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    timeout-minutes: 30
     outputs:
       version: ${{ steps.version.outputs.version }}
       image: ${{ steps.version.outputs.image }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - id: version
         name: Match the release tag to the package version
         env:
@@ -36,16 +45,27 @@ jobs:
   checks:
     needs: version
     uses: ./.github/workflows/checks.yml
+    with:
+      full_platforms: true
   portable:
     needs: [version, checks]
     runs-on: windows-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - run: python tools/build_portable.py
       - name: Attach the Windows portable package to the release
         shell: bash
@@ -55,15 +75,24 @@ jobs:
         run: gh release upload "$RELEASE_TAG" dist/*-portable.zip dist/*-portable.zip.sha256 --clobber
   packages:
     needs: [version, checks]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    timeout-minutes: 30
     permissions:
       contents: write
       packages: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - name: Build release downloads
         run: |
           python -m pip install "setuptools>=75" wheel

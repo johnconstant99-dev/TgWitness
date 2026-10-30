@@ -425,10 +425,10 @@
       <button class="secondary" id="extras-open-bot" data-extra="bot" aria-expanded="false" aria-controls="extras-bot" type="button">Set up a bot <span id="extra-bot-arrow" aria-hidden="true">→</span></button>
     </article>
     <article class="extra-card extra-github">
-      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><span class="extra-badge planned">Planned</span></div>
-      <h2>GitHub &amp; verified builds</h2><p>Connect a run to an approved software version and keep an extra copy of its proofs.</p>
-      <p class="extra-requires">Design ready · connection not available yet</p>
-      <button class="quiet" id="extras-open-github" data-extra="github" aria-expanded="false" aria-controls="extras-github" type="button">Explore the plan <span id="extra-github-arrow" aria-hidden="true">→</span></button>
+      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><span class="extra-badge" id="extra-github-badge">Not checked</span></div>
+      <h2>Verified code from GitHub</h2><p>Prove that this program is exactly one commit of your fork or of the official repository.</p>
+      <p class="extra-requires">A public GitHub repository · no token</p>
+      <button class="secondary" id="extras-open-github" data-extra="github" aria-expanded="false" aria-controls="extras-github" type="button">Check the code <span id="extra-github-arrow" aria-hidden="true">→</span></button>
     </article>
   </div>
   <p class="extras-footnote">Only the option you choose opens its settings. Nothing is connected automatically.</p>
@@ -482,11 +482,17 @@
   </div>
 
   <div class="extra-panel card padded" id="extras-github" hidden role="region" aria-labelledby="extras-github-title">
-    <div class="extra-panel-heading"><div><span class="extra-badge planned">Planned</span><h2 id="extras-github-title" tabindex="-1">Know which software made the record.</h2></div><button class="quiet" data-extra-close="github" type="button">Back to extras</button></div>
-    <p>The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.</p>
-    <ol class="extra-checklist"><li>Choose your fork and approve a specific version.</li><li>Check that the installed build matches that version.</li><li>Keep signed proof copies through an independent witness.</li></ol>
-    <div class="extra-outcome"><strong>Not connected yet</strong><p>This integration is a roadmap item. No GitHub token is needed on this page.</p></div>
-    <a class="text-link" href="/guide.html#github" target="_blank" rel="noopener">Read what will be checked ↗</a>
+    <div class="extra-panel-heading"><div><span class="eyebrow">VERIFIED CODE</span><h2 id="extras-github-title" tabindex="-1">Know which software made the record.</h2><p>Every program file is compared with the same file in the commit on GitHub. The result is saved in the signed journal, so anyone holding an export sees which public code was running.</p></div><button class="quiet" data-extra-close="github" type="button">Back to extras</button></div>
+    <ol class="extra-checklist"><li>Fork the repository on GitHub and review the code, or use the official one.</li><li>Enter the repository and a release tag or commit: a commit cannot change later, a branch can.</li><li>Check again after every update; the badge shows when the running code is no longer the checked one.</li></ol>
+    <form class="github-form" id="github-form">
+      <div class="replica-fields">
+        <div><label for="github-repository">Repository</label><input data-no-translate id="github-repository" maxlength="200" placeholder="github.com/phishdestroy/TgWitness" required spellcheck="false" autocomplete="off"></div>
+        <div><label for="github-ref">Tag, branch or commit</label><input data-no-translate id="github-ref" maxlength="200" placeholder="v0.7.0" required spellcheck="false" autocomplete="off"></div>
+      </div>
+      <button class="primary" type="submit">Check now</button>
+    </form>
+    <div class="github-result" hidden id="github-result" role="status"></div>
+    <p class="hint" id="github-running"></p>
   </div>
 </section>
 

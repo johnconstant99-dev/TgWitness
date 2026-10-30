@@ -49,13 +49,12 @@ def main():
             expect(page.locator("#witness-form")).to_be_hidden()
             expect(page.locator(".extra-card")).to_have_count(5)
             before = len(writes)
-            for name in ("github",):
+            for name in ("alerts", "evidence", "cloud", "github"):
                 opener = page.locator("#extras-open-" + name)
                 opener.focus()
                 page.keyboard.press("Enter")
                 expect(page.locator("#extras-" + name + "-title")).to_be_focused()
                 expect(opener).to_have_attribute("aria-expanded", "true")
-                expect(page.locator("#extras-" + name + " input")).to_have_count(0)
                 page.locator('[data-extra-close="' + name + '"]').click()
                 expect(opener).to_be_focused()
             assert len(writes) == before, "Opening an extra must not connect a service"

@@ -251,7 +251,7 @@
 "modes.levels.boundary": "Was keine Stufe beweist",
 "modes.levels.boundary.body": "Übermittlung jedes Telegram-Updates; die Richtigkeit des Textes; dass eine Absender-ID eine reale Person identifiziert; das Fehlen einer Kompromittierung des Erfassers vor der Aufzeichnung; die Zulässigkeit vor Gericht.",
 "modes.levels.intro": "Jeder Mechanismus beantwortet eine klar abgegrenzte Frage. Konfigurieren Sie externe Dienste separat und bewahren Sie deren Vertrauensanker außerhalb des Collectors auf.",
-"modes.levels.title": "Acht Ebenen. Unterschiedliche Fragen.",
+"modes.levels.title": "Sieben Ebenen. Unterschiedliche Fragen.",
 "modes.limit": "Tut nicht",
 "modes.limits.account": "Verwenden Sie ein eigens dafür vorgesehenes Konto, nicht Ihr Hauptkonto.",
 "modes.limits.intro": "Eine Verifizierung ist dann sinnvoll, wenn ihr Umfang eindeutig definiert bleibt.",

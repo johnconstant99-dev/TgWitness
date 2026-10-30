@@ -2511,7 +2511,7 @@
 "modes.levels.boundary": "Điều mà không cấp độ nào có thể chứng minh",
 "modes.levels.boundary.body": "Việc truyền tải mọi bản cập nhật của Telegram; tính xác thực của văn bản; việc ID người gửi xác định một cá nhân thực sự; việc không có sự xâm phạm đối với người thu thập dữ liệu trước khi ghi lại; tính hợp lệ trước tòa án.",
 "modes.levels.intro": "Mỗi cơ chế giải quyết một câu hỏi có giới hạn. Hãy cấu hình các dịch vụ bên ngoài một cách riêng biệt và duy trì các điểm neo tin cậy của chúng bên ngoài bộ thu thập dữ liệu.",
-"modes.levels.title": "Tám cấp độ. Các câu hỏi khác nhau.",
+"modes.levels.title": "Bảy cấp độ. Các câu hỏi khác nhau.",
 "modes.limit": "Những điều không thực hiện",
 "modes.limits.account": "Hãy sử dụng một tài khoản chuyên dụng, không phải tài khoản chính của quý vị.",
 "modes.limits.intro": "Việc xác minh sẽ hữu ích khi phạm vi của nó được xác định rõ ràng.",

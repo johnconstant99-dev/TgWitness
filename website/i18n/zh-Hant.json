@@ -251,7 +251,7 @@
 "modes.levels.boundary": "無任何層級能證明",
 "modes.levels.boundary.body": "每則 Telegram 更新的送達；文字內容的真實性；發送者 ID 確實識別真實人士；記錄前未發生資料蒐集者遭入侵的情況；以及在法庭上的可採納性。",
 "modes.levels.intro": "每個機制皆用於解答特定範圍的問題。應分別配置外部服務，並將其信任錨點保留在收集器之外。",
-"modes.levels.title": "八個層級。不同的問題。",
+"modes.levels.title": "七個層級。不同的問題。",
 "modes.limit": "不執行",
 "modes.limits.account": "請使用專用帳號，而非您的主要帳號。",
 "modes.limits.intro": "當驗證範圍保持明確時，驗證才具有實用價值。",

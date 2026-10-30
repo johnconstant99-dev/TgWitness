@@ -165,7 +165,7 @@
 "modes.levels.boundary": "What no level proves",
 "modes.levels.boundary.body": "Delivery of every Telegram update; the truth of the text; that a sender ID identifies a real person; absence of collector compromise before recording; admissibility in court.",
 "modes.levels.intro": "Each mechanism answers a bounded question. Configure external services separately and retain their trust anchors outside the collector.",
-"modes.levels.title": "Eight levels. Different questions.",
+"modes.levels.title": "Seven levels. Different questions.",
 "modes.limit": "Does not do",
 "modes.limits.account": "Use a dedicated account, not your primary account.",
 "modes.limits.intro": "Verification is useful when its scope stays explicit.",

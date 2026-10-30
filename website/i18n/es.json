@@ -2512,7 +2512,7 @@
 "modes.levels.boundary": "Lo que ningún nivel demuestra",
 "modes.levels.boundary.body": "Entrega de cada actualización de Telegram; la veracidad del texto; que el identificador del remitente identifique a una persona real; la ausencia de compromiso del recopilador antes del registro; la admisibilidad ante los tribunales.",
 "modes.levels.intro": "Cada mecanismo responde a una pregunta delimitada. Configure los servicios externos por separado y mantenga sus anclajes de confianza fuera del recopilador.",
-"modes.levels.title": "Ocho niveles. Diferentes preguntas.",
+"modes.levels.title": "Siete niveles. Diferentes preguntas.",
 "modes.limit": "Qué no hace",
 "modes.limits.account": "Utilice una cuenta específica, no su cuenta principal.",
 "modes.limits.intro": "La verificación resulta útil cuando su ámbito de aplicación se mantiene explícito.",

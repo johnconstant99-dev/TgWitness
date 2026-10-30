@@ -251,7 +251,7 @@
 "modes.levels.boundary": "Czego żaden poziom nie potwierdza",
 "modes.levels.boundary.body": "Dostarczenie każdej aktualizacji serwisu Telegram; prawdziwość treści; fakt, że identyfikator nadawcy identyfikuje rzeczywistą osobę; brak naruszenia bezpieczeństwa urządzenia zbierającego dane przed rozpoczęciem rejestracji; dopuszczalność dowodowa w sądzie.",
 "modes.levels.intro": "Każdy mechanizm odpowiada na konkretne pytanie. Usługi zewnętrzne należy konfigurować oddzielnie, a ich kotwice zaufania należy przechowywać poza kolektorem.",
-"modes.levels.title": "Osiem poziomów. Różne pytania.",
+"modes.levels.title": "Siedem poziomów. Różne pytania.",
 "modes.limit": "Nie wykonuje",
 "modes.limits.account": "Proszę korzystać z dedykowanego konta, a nie z konta głównego.",
 "modes.limits.intro": "Weryfikacja jest przydatna, gdy jej zakres pozostaje jednoznaczny.",

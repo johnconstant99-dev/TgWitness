@@ -251,7 +251,7 @@
 "modes.levels.boundary": "どのレベルでも証明されないこと",
 "modes.levels.boundary.body": "すべてのTelegramアップデートの配信；テキストの真実性；送信者IDが実在の人物を特定すること；記録前の収集者の侵害がないこと；法廷での証拠能力。",
 "modes.levels.intro": "各メカニズムは、限定された質問に答えるものです。外部サービスは個別に設定し、その信頼アンカーはコレクターの外に保持してください。",
-"modes.levels.title": "8つのレベル。それぞれ異なる質問。",
+"modes.levels.title": "7つのレベル。それぞれ異なる質問。",
 "modes.limit": "行わないこと",
 "modes.limits.account": "メインアカウントではなく、専用のアカウントを使用してください。",
 "modes.limits.intro": "検証は、その範囲が明確に定義されている場合に有用です。",

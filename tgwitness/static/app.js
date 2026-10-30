@@ -20,6 +20,7 @@ const labels = {
   "recheck.completed": [tr("Recheck completed"), "refresh", "system"],
   "replica.completed": [tr("Off-site copy"), "export", "system"], "replica.changed": [tr("Off-site copy settings changed"), "settings", "system"],
   "alerts.changed": [tr("Notification settings changed"), "settings", "system"],
+  "source.checked": [tr("Code checked against GitHub"), "shield", "system"],
   "anchor.completed": [tr("Checkpoint timestamped"), "clock", "system"], "evidence.changed": [tr("Evidence mode changed"), "settings", "system"],
   "storage.low": [tr("Disk almost full"), "alert", "coverage"], "storage.ok": [tr("Disk space available again"), "refresh", "system"],
   "reaction.snapshot": [tr("Reactions observed"), "heart", "reaction"], "membership.service": [tr("Membership service event"), "users", "member"],
@@ -549,6 +550,7 @@ function excerpt(e) {
   if (e.kind==="alerts.changed") return p.enabled?tr("On · {n} destination(s)",{n:p.destinations}):tr("Off");
   if (e.kind==="replica.changed") return p.enabled?tr("On · {bucket} · every {n} min",{bucket:p.bucket,n:p.interval_minutes}):tr("Off");
   if (e.kind==="anchor.completed") return tr("{ok} of {total} services answered for the checkpoint of {n} records",{ok:p.results.filter(r=>r.ok).length,total:p.results.length,n:p.checkpoint.event_count});
+  if (e.kind==="source.checked") return (p.matches?tr("Matches"):tr("Differs"))+" · "+p.repository.replace("https://github.com/","")+" @ "+p.commit.slice(0,12);
   if (e.kind==="evidence.changed") return p.enabled?tr("On · every {n} min · {services} services",{n:p.interval_minutes,services:p.tsa_urls.length+p.ots_calendars.length}):tr("Off");
   if (e.kind==="storage.low") return tr("Photo & file downloads paused at {size} free; queued files are kept.",{size:humanSize(p.free_bytes)});
   if (e.kind==="storage.ok") return tr("Photo & file downloads resumed · {size} free",{size:humanSize(p.free_bytes)});
@@ -1395,8 +1397,44 @@ async function loadAssurance(){
     {provider:CLOUD[s.host?.mode]?.[0]||s.host?.mode||"",fingerprint:s.fingerprint});
 }
 async function loadExtras(){
-  await Promise.all([loadWitness(),loadAlerts(),loadEvidence(),loadReplica(),loadAssurance()]);
+  await Promise.all([loadWitness(),loadAlerts(),loadEvidence(),loadReplica(),loadAssurance(),loadSourceCheck()]);
 }
+// ---- Verified code: the running program compared with one commit on GitHub ----
+async function loadSourceCheck(){
+  if(!state.status)return;
+  const profile=state.profile,r=await json("source-check");
+  if(profile===state.profile)renderSourceCheck(r);
+}
+function renderSourceCheck(r){
+  const l=r.last,box=$("github-result"),badge=$("extra-github-badge"),good=!!l&&r.current&&l.matches;
+  $("github-form").querySelectorAll("input,button").forEach(n=>n.disabled=!!state.status?.demo);
+  badge.textContent=tr(!l?"Not checked":!r.current?"Check again":l.matches?"Matches":"Differs");
+  badge.classList.toggle("on",good);badge.classList.toggle("warn",!!l&&!good);
+  if(l&&!state.githubDirty){$("github-repository").value=l.repository.replace("https://","");$("github-ref").value=l.ref;}
+  $("github-running").textContent=tr("Running: version {version}, {n} program files, source hash {hash}.",
+    {version:r.version,n:r.files,hash:r.source_tree_sha256.slice(0,16)+"…"});
+  box.replaceChildren();show("github-result",!!l);
+  if(!l)return;
+  const vars={repository:l.repository.replace("https://github.com/",""),commit:l.commit.slice(0,12),ref:l.ref,n:l.matches?l.files:l.differences};
+  box.className="github-result "+(good?"ok":"warn");
+  box.append(node("p","github-verdict",l.matches?tr("The code matches {repository} at {commit} ({ref}): all {n} program files are identical.",vars)
+    :tr("The code differs from {repository} at {commit} ({ref}): {n} file(s) are not the same.",vars)));
+  box.append(node("p","hint",r.current?tr("Checked {time} and saved in the signed journal.",{time:fmtFull(l.checked_at)})
+    :tr("The program has changed since this check of {time}. Check again to cover the running code.",{time:fmtFull(l.checked_at)})));
+  for(const [key,label] of [["changed","Changed"],["extra","Only here"],["missing","Only on GitHub"]]){
+    if(!l[key].length)continue;
+    const p=node("p","github-files");p.append(node("strong","",tr(label)+": "),node("code","",l[key].join(", ")));box.append(p);
+  }
+  const link=node("a","text-link",tr("Open the commit on GitHub ↗"));
+  link.href=l.repository+"/commit/"+l.commit;link.target="_blank";link.rel="noopener noreferrer";box.append(link);
+}
+$("github-form").addEventListener("input",()=>{state.githubDirty=true;});
+$("github-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
+  const r=await json("source-check",{repository:$("github-repository").value.trim(),ref:$("github-ref").value.trim()});
+  state.githubDirty=false;renderSourceCheck(r);
+  toast(tr(r.last.matches?"The code matches the commit. The check is saved in the signed journal."
+    :"The code differs from the commit. The check is saved in the signed journal."),!r.last.matches);
+});});
 // ---- 24/7 server: the panel writes the commands; tokens stay on the operator's computer ----
 const CLOUD={hetzner:["Hetzner Cloud","cpx22","nbg1"],digitalocean:["DigitalOcean","s-1vcpu-2gb","fra1"],
   linode:["Akamai Cloud (Linode)","g6-standard-1","eu-central"],vultr:["Vultr","vc2-1c-2gb","fra"],

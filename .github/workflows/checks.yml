@@ -1,19 +1,57 @@
 name: Checks
 on:
   push:
-  pull_request:
+    branches: [main]
+    paths:
+      - tgwitness/**
+      - tests/**
+      - tools/**
+      - scripts/**
+      - deploy/**
+      - compose.yaml
+      - pyproject.toml
+      - start.py
+      - start.sh
+      - Start.cmd
+      - .dockerignore
+      - .gitattributes
+      - .gitignore
+      - .github/workflows/checks.yml
+      - .github/workflows/release.yml
+      - '!**/*.md'
+  workflow_dispatch:
+    inputs:
+      full_platforms:
+        description: Also test Windows/macOS and build Windows portable (uses GitHub compute)
+        type: boolean
+        default: false
   workflow_call:
+    inputs:
+      full_platforms:
+        type: boolean
+        default: false
 permissions:
   contents: read
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'release' }}
 jobs:
   dependencies:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - run: python -m pip install "pip-audit==2.10.1"
       - name: Audit pinned runtime dependencies against the advisory database
         run: python -m pip_audit -r deploy/constraints.txt --no-deps --disable-pip --strict --progress-spinner off --format json --output dependency-audit.json
@@ -23,27 +61,46 @@ jobs:
           name: dependency-audit
           path: dependency-audit.json
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 3
   lint:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - run: python -m pip install "ruff>=0.15,<1"
       - run: python -m ruff check .
   python:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python: ["3.11", "3.12", "3.13"]
-    runs-on: ${{ matrix.os }}
+        os: ${{ fromJSON(inputs.full_platforms && '["linux", "windows-latest", "macos-latest"]' || '["linux"]') }}
+        python: ${{ fromJSON(inputs.full_platforms && '["3.11", "3.12", "3.13"]' || '["3.12"]') }}
+    runs-on: ${{ matrix.os == 'linux' && fromJSON('["self-hosted", "Linux", "X64", "tgwitness-ci"]') || matrix.os }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - run: python -m pip install -c deploy/constraints.txt -e ".[dev]"
       - run: python -m pytest -q
       - run: python -m tgwitness --check --json --data-dir readiness-probe
@@ -53,14 +110,23 @@ jobs:
           python start.py --setup-only
           python start.py --check --json --data-dir installer-readiness-probe
   browser:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - run: python -m pip install -c deploy/constraints.txt -e ".[dev]"
-      - run: python -m playwright install --with-deps chromium
+      - run: python -m playwright install chromium
       - run: python tools/check_browser.py
       - run: python tools/check_account_browser.py
       - run: python tools/check_interactions_browser.py
@@ -70,28 +136,48 @@ jobs:
       - run: python tools/check_setup_browser.py
       - run: python tools/check_public_proxies_browser.py
   source:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - run: python tools/check_publication.py --git-index
       - run: python tools/build_source.py
       - uses: actions/upload-artifact@v7
+        if: github.event_name == 'workflow_dispatch' || inputs.full_platforms
         with:
           name: tgwitness-source
           path: |
             dist/*-source.zip
             dist/*-source.zip.sha256
-          retention-days: 7
+          retention-days: 3
   portable:
+    if: inputs.full_platforms
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - name: Build the Windows portable package and check its embedded runtime
         run: python tools/build_portable.py
       - uses: actions/upload-artifact@v7
@@ -100,14 +186,23 @@ jobs:
           path: |
             dist/*-portable.zip
             dist/*-portable.zip.sha256
-          retention-days: 7
+          retention-days: 3
   docker:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - run: sh -n start.sh scripts/docker-start.sh
       - name: Validate source and image configurations with HTTPS
         env:

@@ -14,3 +14,10 @@ first, so they work when double-clicked or run from any directory.
 | [`docker-start.sh`](docker-start.sh) | Linux/macOS: the same Docker start, `sh scripts/docker-start.sh` |
 
 Docker launchers need Docker with Compose 2.20 or newer; host Python is not required.
+
+## CI host provisioning
+
+[`install-ci-runner.sh`](install-ci-runner.sh) prepares a dedicated Ubuntu 24.04
+machine for repository checks. It is an administrator tool, separate from the
+application launchers. Follow the [runner operations guide](../docs/internal/CI-RUNNER.md)
+to register the host, start the service or replace a failed server.

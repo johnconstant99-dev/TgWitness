@@ -2511,7 +2511,7 @@
 "modes.levels.boundary": "任何级别都无法证明的内容",
 "modes.levels.boundary.body": "每次 Telegram 更新的送达；文本的真实性；发件人 ID 代表真实个人；记录前收集者未遭入侵；法庭可采纳性。",
 "modes.levels.intro": "每种机制都针对一个有限的问题提供解答。请单独配置外部服务，并将它们的信任锚点保留在收集器之外。",
-"modes.levels.title": "八个层次。不同的问题。",
+"modes.levels.title": "七个层次。不同的问题。",
 "modes.limit": "不具备的能力",
 "modes.limits.account": "请使用专用账户，而非您的主账户。",
 "modes.limits.intro": "当验证范围保持明确时，验证才具有实用价值。",

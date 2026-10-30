@@ -415,19 +415,19 @@
   <details><summary>What does the bot actually prove?</summary><p>A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.</p></details>
 </section>
 
-<section class="planned" id="github">
-  <p class="eyebrow">PLANNED</p><h2>Know which software made the record.</h2>
-  <p>This connection is planned and cannot be enabled yet. Its purpose is to record the approved source version, check the installed build and retain signed proof copies in a repository you control.</p>
-  <div aria-hidden="true" class="chain dashed">
-    <div class="chain-node"><span class="chain-icon tone-slate"><svg class="i"><use href="#i-git"/></svg></span><strong>Your fork</strong><span class="chain-wire"></span></div>
-    <div class="chain-node"><span class="chain-icon tone-slate"><svg class="i"><use href="#i-tag"/></svg></span><strong>Approved version</strong><span class="chain-wire"></span></div>
-    <div class="chain-node"><span class="chain-icon tone-slate"><svg class="i"><use href="#i-check"/></svg></span><strong>Build check</strong><span class="chain-wire"></span></div>
-    <div class="chain-node"><span class="chain-icon tone-slate"><svg class="i"><use href="#i-files"/></svg></span><strong>Proof copies</strong></div>
+<section id="github">
+  <p class="eyebrow">VERIFIED CODE</p><h2>Know which software made the record.</h2>
+  <p>In Extras, open Verified code from GitHub and enter your fork or the official repository with a release tag or commit. TgWitness compares every program file with that commit and saves the result in the signed journal, so an export shows which public code was running. No GitHub token is needed.</p>
+  <div aria-hidden="true" class="chain">
+    <div class="chain-node"><span class="chain-icon tone-violet"><svg class="i"><use href="#i-git"/></svg></span><strong>Your fork</strong><span class="chain-wire"></span></div>
+    <div class="chain-node"><span class="chain-icon tone-blue"><svg class="i"><use href="#i-tag"/></svg></span><strong>Approved version</strong><span class="chain-wire"></span></div>
+    <div class="chain-node"><span class="chain-icon tone-green"><svg class="i"><use href="#i-check"/></svg></span><strong>Build check</strong><span class="chain-wire"></span></div>
+    <div class="chain-node"><span class="chain-icon tone-teal"><svg class="i"><use href="#i-files"/></svg></span><strong>Signed journal</strong></div>
   </div>
   <ol class="num-cards">
-    <li>Choose your fork and approve a specific version.</li>
-    <li>Check that the installed build matches that version.</li>
-    <li>Keep signed proof copies through an independent witness.</li>
+    <li>Fork the repository on GitHub and review the code, or use the official one.</li>
+    <li>Enter the repository and a release tag or commit: a commit cannot change later, a branch can.</li>
+    <li>Check again after every update; the badge shows when the running code is no longer the checked one.</li>
   </ol>
   <p>A GitHub token grants repository access; it does not prove that the running server is unchanged. Build verification and independent witnesses provide different checks. No GitHub token is needed on this page.</p>
 </section>
