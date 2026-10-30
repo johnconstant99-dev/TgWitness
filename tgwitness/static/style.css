@@ -1399,15 +1399,17 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
   #connection-options .card { padding: 16px; }
 }
 
-@media (max-width: 380px) {
-  .nav .nav-icon { display: none; }
-  .nav { font-size: 12.5px; }
-  .profile-switch select { max-width: none; }
-}
 /* Phone tab bar: the icon above its label, so a long label never runs into the next button. */
 @media (max-width: 520px) {
   .sidebar nav .nav { flex-direction: column; gap: 3px; min-height: 50px; padding: 6px 2px; font-size: 12px;
     line-height: 1.15; text-align: center; white-space: normal; overflow-wrap: break-word; }
+}
+@media (max-width: 380px) {
+  .nav .nav-icon { display: none; }
+  /* Text-only tabs do not need the extra height reserved for an icon. */
+  .sidebar nav .nav { min-height: 38px; }
+  .nav { font-size: 12.5px; }
+  .profile-switch select { max-width: none; }
 }
 @media (max-width: 430px) {
   .sidebar-bottom .language-pick { display: none; }
