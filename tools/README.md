@@ -10,7 +10,7 @@ Run from the repo root after [dev setup](../.github/CONTRIBUTING.md#development-
 | --- | --- |
 | `python tools/build_source.py` | Source ZIP + checksums in `dist/` |
 | `python tools/build_wiki.py` | Wiki bundle in `dist/` |
-| `python tools/build_site.py` | Static site |
+| `python tools/build_site.py` | Static site, Markdown editions, `llms.txt` and `llms-full.txt` |
 | `python tools/build_portable.py` | Windows portable ZIP; see `--help` |
 | `python tools/sync_notice.py --check` | Check NOTICE copies; omit `--check` to sync |
 
@@ -37,6 +37,7 @@ Account, workspace, navigation, interaction and proxy checks have their own
 - [site_wiki.py](site_wiki.py): Markdown rendering.
 - [site_diagrams.py](site_diagrams.py): interactive diagrams.
 - [site_i18n.py](site_i18n.py) / [i18n_keys.py](i18n_keys.py): site and panel translations.
+- [site_llms.py](site_llms.py): task index and text editions of the public handbook. Generated from the same page inventory; no account data or application imports.
 - [verify_live_probe.py](verify_live_probe.py): verify an existing probe export.
 - [check_capacity.py](check_capacity.py): local benchmark.
 - [research_sources.py](research_sources.py): fetch upstream API docs.

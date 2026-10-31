@@ -9,8 +9,10 @@ or opening account data.
 
 ## Languages
 
-Every page names all its language versions (`hreflang`, plus `x-default` for English)
-and the sitemap lists them. Arabic, Persian, Urdu and Hebrew pages are right-to-left; the
+Translated pages name their language versions (`hreflang`, plus `x-default` for English)
+and the sitemap lists their canonical URLs. The English-only changelog keeps working
+inside each language's navigation, but those copies canonicalize to the English page
+and are excluded from language alternates and the sitemap. Arabic, Persian, Urdu and Hebrew pages are right-to-left; the
 stylesheets use logical properties and pick fonts that carry each script. A language
 menu in the header leads to the same page in another language, and a theme button
 switches light and dark (the system's choice until the reader picks one, kept in
@@ -29,8 +31,9 @@ the machine translation of the site's navigation and titles.
 
 - `/`: product overview, demo entry point and guide links.
 - `/docs/`: task-based index with local search.
-- The index links to `start/`, `accounts/`, `proxies/`, `exports/`, `concepts/`,
-  `cases/`, `security/`, `witness/`, `proof/`, `server/` and `troubleshooting/`.
+- The current guide inventory is `tools/site_content.py`: setup, dedicated accounts,
+  proxies, collection, capture, exports, investigations, archive integrations, access,
+  witnesses, security, server operation and troubleshooting.
 - `/docs/reference/`: the repository's Markdown documents (listed in
   `tools/site_content.py`) rendered by `tools/site_wiki.py`. Links between them stay on
   the site; Mermaid blocks become SVG diagrams (`tools/site_diagrams.py`) that draw
@@ -52,14 +55,38 @@ The [Markdown companion](../HOW-IT-WORKS.md) uses native Mermaid and math for Gi
 
 ## Implemented metadata
 
-Each page has a distinct title and description, a self-referencing HTTPS canonical,
-Open Graph metadata with the page's `og:locale` and a social image. Every page lists
-its 13 language versions as `hreflang` alternates, and no others.
+Each canonical page has a distinct title and description, an HTTPS canonical,
+Open Graph metadata and a 1200 × 630 social image. Language alternates come from
+the page's actual language inventory. English-only copies use English metadata.
 
-JSON-LD describes `WebSite`, `WebPage` and guide `BreadcrumbList` entries. It does
-not invent reviews, ratings or user counts. The sitemap includes every canonical
-HTML page, and `robots.txt` points to it. All assets and navigation work under a
-GitHub project subpath or a custom domain.
+JSON-LD describes `WebSite`, `WebPage`, guide `BreadcrumbList` entries and the
+homepage's `SoftwareSourceCode`: repository, language, runtime, author and MIT license.
+The sitemap includes canonical HTML pages; text editions and the synthetic demo
+are not separate sitemap entries. HTML heads link to the sitemap, text edition and
+LLM index. All assets and navigation work under a project subpath or a custom domain.
+
+The generated `robots.txt` advertises the sitemap when served at the host root.
+On GitHub project Pages, `/TgWitness/robots.txt` does not control crawling:
+crawlers read `https://phishdestroy.github.io/robots.txt`. Submit the project sitemap
+directly in Search Console; don't mistake a subdirectory file for a host-wide rule.
+
+## Text editions and LLM discovery
+
+`llms.txt` is a task index, built from the public guide inventory. `llms-full.txt`
+combines the English handbook into one file. Every indexed HTML route also has
+a Markdown edition: `/docs/accounts/index.md`, for example, or `/guides/modes.md`.
+Translations retain their own text editions. Each names its canonical HTML source.
+
+The exporter keeps commands, lists, tables, source links and diagram labels while
+omitting navigation and scripts. Capture instructions are rendered from the existing
+English/Russian source documents, so the wizard's setup procedure is also readable
+without JavaScript. Other capture language editions retain the English reference.
+These are public documentation exports, not an MCP endpoint or an account-data API.
+
+The files are regenerated with the site, checked against the publication allowlist,
+and advertised with `rel=alternate` (`text/markdown`) and `rel=describedby` links.
+The [llms.txt proposal](https://llmstxt.org/) describes reader discovery; Google
+[does not require a special AI file](https://developers.google.com/search/docs/appearance/ai-features).
 
 These choices follow Google's documentation on [page titles](https://developers.google.com/search/docs/appearance/title-link),
 [descriptions](https://developers.google.com/search/docs/appearance/snippet),
@@ -79,13 +106,14 @@ particular snippet, a rich result or a ranking.
 | Documentation introduction | `website/guide_intro.html` |
 | Homepage | `website/index.html` |
 | Metadata, relative URLs, sitemap and publication allowlist | `tools/build_site.py` |
+| LLM task index and Markdown extraction | `tools/site_llms.py` |
 
 Add a guide to the explicit guide inventory and its navigation group. Do not copy
 private files into these presentation directories. The builder rejects linked
 inputs and unexpected output files; it does not recursively copy the repository.
 
 ```sh
-python -m pytest --noconftest -q tests/test_site.py
+python -m pytest --noconftest -q tests/test_site.py tests/test_site_llms.py
 python tools/build_site.py
 python tools/check_site.py
 python tools/check_docs_site.py

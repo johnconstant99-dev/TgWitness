@@ -14,11 +14,11 @@ from pathlib import Path
 import posixpath
 import re
 import tomllib
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 if __package__:
     from .site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
-    from . import site_diagrams, site_i18n, site_wiki, site_modes, site_account
+    from . import site_diagrams, site_i18n, site_wiki, site_modes, site_account, site_llms
 else:
     from site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
     import site_diagrams
@@ -26,6 +26,7 @@ else:
     import site_wiki
     import site_modes
     import site_account
+    import site_llms
 
 ROOT = Path(__file__).resolve().parents[1]
 LANGS = tuple(site_i18n.LANGUAGES)
@@ -79,8 +80,9 @@ DEMO_LOCALES = {f"demo/locales/{lang}.js": lang for lang in LANGS}
 DEMO_GUIDE_LOCALES = {f"demo/guide-locales/{lang}.js": lang for lang in site_modes.LANGUAGES}
 DEMO_DICTIONARIES = ("tgwitness/english_fallbacks.json", *(f"tgwitness/locales/{lang}.json" for lang in LANGS if lang != "en"))
 GUIDE_DICTIONARIES = ("tgwitness/guide_locales/keys.json", *(f"tgwitness/guide_locales/{lang}.json" for lang in site_modes.EXTRA_LANGUAGES))
+CAPTURE_DOCS = {"en": "docs/SEALED-ACTIONS.md", "ru": "docs/ru/SEALED-ACTIONS.md"}
 INPUTS = ("website/index.html", "website/docs.html", "website/guide_intro.html", site_modes.SOURCE, *STATIC.values(),
-          *DEMO_STATIC.values(), *DEMO_PAGES.values(), *DEMO_DICTIONARIES, *GUIDE_DICTIONARIES,
+          *DEMO_STATIC.values(), *DEMO_PAGES.values(), *DEMO_DICTIONARIES, *GUIDE_DICTIONARIES, *CAPTURE_DOCS.values(),
           *(f"website/guides/en/{slug}.html" for slug in GUIDES if slug != "dedicated-account"),
           *dict.fromkeys(entry[3] for entry in REFERENCE.values()))
 WIKI_HUB = "docs/reference/"
@@ -90,6 +92,9 @@ PAGE_LOCALES = tuple((lang, local) for lang in NOTICE_LANGUAGES
                      for local in (LOCAL_PAGES if lang in LANGS else NOTICE_PAGES))
 PAGES = tuple(("" if lang == "en" else lang + "/") + local for lang, local in PAGE_LOCALES)
 SEARCH_FILES = tuple(("" if lang == "en" else lang + "/") + "docs/search.json" for lang in NOTICE_LANGUAGES)
+MARKDOWN_PAGES = {path + "index.html": site_llms.markdown_path(path) for path in PAGES}
+MARKDOWN_PAGES.update({path: site_llms.markdown_path(path) for path in MODES_PAGES})
+LLM_FILES = ("llms.txt", "llms-full.txt", *MARKDOWN_PAGES.values())
 SEARCH_TEXT = 4000
 HOME_TITLE = "Telegram message history & signed exports | TgWitness"
 HOME_DESCRIPTION = ("A self-hosted Telegram observation journal. Preserve observed messages, compare edits, "
@@ -116,6 +121,12 @@ def prefix(lang):
 def page_languages(local):
     """Full documentation languages, plus the existing Amharic notices."""
     return NOTICE_LANGUAGES if local in NOTICE_PAGES else site_i18n.LANGUAGES
+
+
+def canonical_path(path):
+    """Keep translated navigation, but consolidate untranslated reference copies."""
+    local = path.split("/", 1)[1] if path.split("/", 1)[0] in LANGS and "/" in path else path
+    return local if local in {WIKI_HUB + slug + "/" for slug in site_i18n.ENGLISH_ONLY} else path
 
 
 def render(template, values):
@@ -160,14 +171,26 @@ class PlainText(HTMLParser):
         return " ".join(" ".join(self.parts).split())
 
 
-def seo(base_url, path, title, description, lang, alternates, *, crumbs=(), extra_only=False, languages=site_i18n.LANGUAGES):
-    canonical = base_url + "/" + path
+def seo(base_url, path, title, description, lang, alternates, *, crumbs=(), extra_only=False, languages=site_i18n.LANGUAGES, software=None):
+    canonical = base_url + "/" + canonical_path(path)
+    if canonical_path(path) != path or path in {WIKI_HUB + slug + "/" for slug in site_i18n.ENGLISH_ONLY}:
+        lang = "en"
+        alternates = [("en", canonical_path(path))]
+        slug = canonical_path(path).split("/")[-2]
+        title, description = REFERENCE[slug][0] + " | TgWitness", REFERENCE[slug][1]
     code = languages[lang][1]
     graph = [{"@type": "WebPage", "@id": canonical, "url": canonical, "name": title,
               "description": description, "inLanguage": code, "isPartOf": {"@id": base_url + "/#website"}}]
     if not path:
         graph.append({"@type": "WebSite", "@id": base_url + "/#website", "url": base_url + "/",
                       "name": "TgWitness", "inLanguage": "en"})
+    if software:
+        graph[0]["mainEntity"] = {"@id": base_url + "/#software"}
+        graph.append({"@type": "SoftwareSourceCode", "@id": base_url + "/#software", "name": "TgWitness",
+                      "url": base_url + "/", "codeRepository": software, "description": HOME_DESCRIPTION,
+                      "programmingLanguage": ["Python", "JavaScript"], "runtimePlatform": "Python 3.11+",
+                      "license": "https://spdx.org/licenses/MIT.html", "isAccessibleForFree": True,
+                      "author": {"@type": "Organization", "name": "PhishDestroy", "url": "https://phishdestroy.io/"}})
     if crumbs:
         graph.append({"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": i + 1, "name": name, "item": base_url + "/" + url}
@@ -176,6 +199,9 @@ def seo(base_url, path, title, description, lang, alternates, *, crumbs=(), extr
                     f'href="{html.escape(base_url + "/" + other_path, quote=True)}">'
                     for other, other_path in alternates)
     links += f'<link rel="alternate" hreflang="x-default" href="{html.escape(base_url + "/" + alternates[0][1], quote=True)}">'
+    links += (f'<link rel="alternate" type="text/markdown" href="{html.escape(base_url + "/" + site_llms.markdown_path(path), quote=True)}">'
+              f'<link rel="describedby" href="{html.escape(base_url, quote=True)}/llms.txt" type="text/plain">'
+              f'<link rel="sitemap" type="application/xml" href="{html.escape(base_url, quote=True)}/sitemap.xml">')
     extra = links + '<script type="application/ld+json">' + json_script({"@context": "https://schema.org", "@graph": graph}) + '</script>'
     if extra_only:
         return extra
@@ -263,7 +289,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
 
 
     expected = {*(path + "index.html" for path in PAGES), *SEARCH_FILES, *STATIC, ".nojekyll", "robots.txt", "sitemap.xml",
-                *DEMO_STATIC, *DEMO_PAGES, *DEMO_LOCALES, *DEMO_GUIDE_LOCALES, *MODES_PAGES}
+                *DEMO_STATIC, *DEMO_PAGES, *DEMO_LOCALES, *DEMO_GUIDE_LOCALES, *MODES_PAGES, *LLM_FILES}
     if output.resolve() != output:
         raise ValueError("Site output must not be a linked directory")
     if output.exists():
@@ -281,10 +307,17 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
             raise ValueError("Site input must be an ordinary repository file: " + relative_path)
         return source.read_bytes()
 
+    markdown_documents = {}
+
     def write(path, content):
         target = output / path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content.replace("\r\n", "\n"), encoding="utf-8", newline="\n")
+        if path in MARKDOWN_PAGES:
+            url = base_url + "/" + (path.removesuffix("index.html") if path.endswith("index.html") else path)
+            plain = site_llms.markdown(content, url)
+            markdown_documents[path] = plain
+            (output / MARKDOWN_PAGES[path]).write_text(plain, encoding="utf-8", newline="\n")
 
     translations = {}
     for lang in NOTICE_LANGUAGES:
@@ -304,6 +337,14 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     fragments = {slug: read_public(f"website/guides/en/{slug}.html").decode("utf-8")
                  for slug in GUIDES if slug != "dedicated-account"}
     account_template = read_public(site_account.SOURCE).decode("utf-8")
+    capture_instructions = {}
+    for code, source in CAPTURE_DOCS.items():
+        body = site_wiki.to_html(site_wiki.split_title(read_public(source).decode("utf-8"))[1])[0]
+        source_url = repo_url + "/blob/" + branch + "/" + source
+        # Relative source links still resolve correctly outside GitHub's Markdown renderer.
+        body = re.sub(r'href="([^"#][^"]*)"', lambda m: 'href="' + html.escape(
+            urljoin(source_url, html.unescape(m[1])), quote=True) + '"', body)
+        capture_instructions[code] = body
     script_keys = []
     for script in ("website/learn.js", "website/docs.js", "website/site.js"):
         script_keys += site_i18n.script_strings(read_public(script).decode("utf-8"))
@@ -437,7 +478,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                 "OG_LOCALE": site_i18n.LANGUAGES[lang][3], "OG_DESCRIPTION": html.escape(t(HOME_OG), quote=True),
                 "OG_IMAGE_ALT": html.escape(t(HOME_IMAGE_ALT), quote=True),
                 "LANGUAGE_MENU": language_menu(base, ""), "THEME_TOGGLE": theme_toggle(),
-                "EXTRA_HEAD": seo(base_url, base, t(HOME_TITLE), t(HOME_DESCRIPTION), lang, alternates(""), extra_only=True)}), base))
+                "EXTRA_HEAD": seo(base_url, base, t(HOME_TITLE), t(HOME_DESCRIPTION), lang, alternates(""), extra_only=True, software=repo_url)}), base))
 
         texts = {}
 
@@ -450,6 +491,11 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
         for slug in (GUIDES if full_site else ()):
             translated, missing = ((site_account.main_content(account_page), 0) if slug == "dedicated-account"
                                    else localize(fragments[slug]))
+            if slug == "capture":
+                source_lang = lang if lang in CAPTURE_DOCS else "en"
+                translated += (f'<details class="detail-block"><summary>{labels["reference"]}</summary>'
+                               f'<div class="wiki-body" lang="{source_lang}" dir="ltr">'
+                               + capture_instructions[source_lang] + '</div></details>')
             guide_html[slug], guide_missing[slug] = translated, missing
             texts[hub + slug + "/"] = PlainText(render(translated, guide_values(hub + slug + "/"))).text
         for slug in page_slugs:
@@ -610,6 +656,10 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(read_public(source))
     build_demo(read_public, write)
+    llms_index = site_llms.index(base_url, repo_url, branch, version, GUIDES, REFERENCE)
+    write("llms.txt", llms_index)
+    write("llms-full.txt", site_llms.full(llms_index, [markdown_documents[path + "index.html"] for path in LOCAL_PAGES]
+                                        + [markdown_documents[site_modes.LOCAL]]))
     (output / ".nojekyll").write_text("", encoding="utf-8")
     (output / "robots.txt").write_text("User-agent: *\nAllow: /\nSitemap: " + base_url + "/sitemap.xml\n", encoding="utf-8")
     (output / "sitemap.xml").write_text(
@@ -617,8 +667,9 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
         + ''.join('<url><loc>' + html.escape(base_url + '/' + prefix(lang) + local) + '</loc>' + ''.join(
             f'<xhtml:link rel="alternate" hreflang="{page_languages(local)[other][1]}" '
-            f'href="{html.escape(base_url + "/" + prefix(other) + local)}"/>' for other in page_languages(local)) + '</url>\n'
-            for lang, local in PAGE_LOCALES)
+            f'href="{html.escape(base_url + "/" + prefix(other) + local)}"/>' for other in page_languages(local)
+            if canonical_path(prefix(other) + local) == prefix(other) + local) + '</url>\n'
+            for lang, local in PAGE_LOCALES if canonical_path(prefix(lang) + local) == prefix(lang) + local)
         + ''.join('<url><loc>' + html.escape(base_url + '/' + path) + '</loc>' + ''.join(
             f'<xhtml:link rel="alternate" hreflang="{site_modes.LANGUAGES[other][1]}" '
             f'href="{html.escape(base_url + "/" + ("" if other == "en" else other + "/") + site_modes.LOCAL)}"/>'

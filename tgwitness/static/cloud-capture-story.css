@@ -4,7 +4,7 @@
 .story-start { flex:none; }
 .story-player { border:1px solid var(--border-strong); border-radius:var(--radius-xl); background:var(--surface); overflow:hidden; box-shadow:var(--shadow-sm); }
 .story-tabs { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); border-bottom:1px solid var(--border); }
-.story-tabs button { position:relative; display:flex; align-items:center; justify-content:center; gap:10px; padding:20px 8px; border:0; background:transparent; color:var(--muted); font-size:12px; font-weight:600; }
+.story-tabs button { position:relative; display:flex; align-items:center; justify-content:center; gap:10px; padding:20px 8px; border:0; background:transparent; color:var(--muted); font-size:12px; font-weight:600; min-width:0; overflow-wrap:anywhere; }
 .story-tabs button > span { font:11px var(--mono); opacity:.65; }
 .story-tabs button[aria-pressed=true] { background:var(--accent-soft); color:var(--accent-text); }
 .story-tabs button[data-complete=true] { color:var(--text-2); }

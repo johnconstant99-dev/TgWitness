@@ -11,8 +11,8 @@ import xml.etree.ElementTree as ET
 import pytest
 
 from tools.build_site import (DEMO_GUIDE_LOCALES, DEMO_LOCALES, DEMO_PAGES, DEMO_STATIC, INPUTS, LANGS, LOCAL_PAGES, MODES_PAGES,
-                              NOTICE_LANGUAGES, NOTICE_PAGES, PAGES, ROOT, SEARCH_FILES,
-                              STATIC, TRANSLATIONS, build_site, page_languages)
+                              NOTICE_LANGUAGES, NOTICE_PAGES, PAGES, ROOT, SEARCH_FILES, LLM_FILES,
+                              STATIC, TRANSLATIONS, build_site, canonical_path, page_languages)
 from tools import site_modes
 from tools import site_i18n
 from tools.build_site import inventory
@@ -54,7 +54,7 @@ def test_pages_uses_only_presentation_files_and_project_relative_assets(site_roo
     output = build_site(site_root, repository="example/Journal")
     assert {p.relative_to(output).as_posix() for p in output.rglob("*") if p.is_file()} == {
         *(page + "index.html" for page in PAGES), *SEARCH_FILES, *STATIC, ".nojekyll", "sitemap.xml", "robots.txt",
-        *DEMO_STATIC, *DEMO_PAGES, *DEMO_LOCALES, *DEMO_GUIDE_LOCALES, *MODES_PAGES,
+        *DEMO_STATIC, *DEMO_PAGES, *DEMO_LOCALES, *DEMO_GUIDE_LOCALES, *MODES_PAGES, *LLM_FILES,
     }
     content = (output / "index.html").read_text(encoding="utf-8")
     assert "https://example.github.io/Journal/" in content
@@ -63,6 +63,17 @@ def test_pages_uses_only_presentation_files_and_project_relative_assets(site_roo
     assert "https://github.com/example/Journal.git" in content
     assert "@@" not in content
     assert all(b"synthetic-private-data" not in p.read_bytes() for p in output.rglob("*") if p.is_file())
+    llms = (output / "llms.txt").read_text(encoding="utf-8")
+    assert llms.startswith("# TgWitness\n") and "## Start here" in llms
+    for url in re.findall(r'\]\((https://example.github.io/Journal/[^)]+)\)', llms):
+        path = url.removeprefix("https://example.github.io/Journal/")
+        assert (output / (path + "index.html" if path.endswith("/") else path)).is_file(), url
+    full = (output / "llms-full.txt").read_text(encoding="utf-8")
+    assert "python -m tgwitness.mcp_server --api-url http://127.0.0.1:8787" in full
+    assert "# Use a separate account. Never your main one." in full
+    assert "## User flow" in full and "sealed-connection" in full
+    assert '<script' not in full and "@@" not in full
+    assert all("Canonical page:" in (output / path).read_text(encoding="utf-8") for path in LLM_FILES if path.endswith(".md"))
 
 
 def test_existing_unexpected_output_blocks_publication(site_root):
@@ -200,22 +211,33 @@ def test_every_page_has_distinct_metadata_and_valid_links(site_root, base_url):
         assert page.h1, url
         assert len(page.find("h1")) == 1, url
         assert len(page.ids) == len(set(page.ids)), url
-        assert page.find("link", rel="canonical") == [{"rel": "canonical", "href": url}]
-        assert page.find("meta", property="og:url")[0]["content"] == url
+        canonical = base_url + "/" + canonical_path(path)
+        assert page.find("link", rel="canonical") == [{"rel": "canonical", "href": canonical}]
+        assert page.find("meta", property="og:url")[0]["content"] == canonical
         html_tag = page.find("html")[0]
         assert html_tag["lang"] == languages[lang][1] and html_tag["dir"] == languages[lang][2], url
 
-        alternates = {a["hreflang"]: a["href"] for a in page.find("link", rel="alternate")}
-        assert set(alternates) == {value[1] for value in languages.values()} | {"x-default"}, url
+        alternates = {a["hreflang"]: a["href"] for a in page.find("link", rel="alternate") if "hreflang" in a}
+        expected_languages = {"en"} if local == "docs/reference/changelog/" else {value[1] for value in languages.values()}
+        assert set(alternates) == expected_languages | {"x-default"}, url
         assert alternates["x-default"] == base_url + "/" + local
         assert all(href in pages for href in alternates.values()), url
+        plain_link = page.find("link", rel="alternate", type="text/markdown")
+        assert len(plain_link) == 1
+        assert page.find("link", rel="describedby")[0]["href"] == base_url + "/llms.txt"
         graphs = [script["@graph"] for script in page.scripts if "@graph" in script]
         assert len(graphs) == 1
-        assert graphs[0][0]["@id"] == url
+        assert graphs[0][0]["@id"] == canonical
         for item in graphs[0]:
             assert "aggregateRating" not in item and "review" not in item
             for crumb in item.get("itemListElement", []):
                 assert crumb["item"] in pages
+        if not local:
+            software = next(item for item in graphs[0] if item["@type"] == "SoftwareSourceCode")
+            assert software["codeRepository"] == "https://github.com/example/Journal"
+            assert software["license"] == "https://spdx.org/licenses/MIT.html"
+        if local == "docs/capture/":
+            assert "sealed-connection" in (output / path / "index.html").read_text(encoding="utf-8")
         for tag, attrs in page.tags:
             for attr in ("href", "src"):
                 href = attrs.get(attr)
@@ -244,7 +266,12 @@ def test_every_page_has_distinct_metadata_and_valid_links(site_root, base_url):
 
             assert entry["text"].strip(), entry["url"]
     sitemap = ET.parse(output / "sitemap.xml")
-    assert {node.text for node in sitemap.findall(".//{*}loc")} == set(pages)
+    assert {node.text for node in sitemap.findall(".//{*}loc")} == {
+        url for url in pages if canonical_path(url.removeprefix(base_url + "/")) == url.removeprefix(base_url + "/")}
+    for entry in sitemap.getroot():
+        for alternate in entry.findall("{*}link"):
+            path = alternate.attrib["href"].removeprefix(base_url + "/")
+            assert canonical_path(path) == path
 
 
 def test_unlisted_guide_is_not_published(site_root):

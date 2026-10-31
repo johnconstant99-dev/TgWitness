@@ -70,6 +70,12 @@ def neutralize(answers):
     access = answers.get("/api/demo-access")
     if access:
         access["text"] = json.dumps({"available": True, "token": "online-demo"})
+    if "/api/access" in answers:
+        console = {"type": "application/json", "text": json.dumps({"lines": [], "last": 0})}
+        answers["/api/access/console"] = console
+        for key in list(answers):
+            if key.startswith("/api/access/console?"):
+                answers[key] = console
     catalog = answers.get("/api/network/catalog")
     if catalog:
 
@@ -100,7 +106,8 @@ def walk(page):
                 summary.click()
                 settle(page, 250)
 
-    for view in ("observations", "sources", "evidence", "witness", "parameters", "connection", "accounts", "chats"):
+    views = page.locator('.sidebar [data-view]:visible').evaluate_all('nodes=>nodes.map(n=>n.dataset.view)')
+    for view in dict.fromkeys([*views, "chats"]):
         page.locator(f'[data-view="{view}"]').first.click()
         settle(page)
         if view == "observations":
