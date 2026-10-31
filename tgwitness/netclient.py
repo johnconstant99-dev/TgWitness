@@ -210,5 +210,11 @@ async def request(method, url, network, headers=None, body=b"", length=None, sin
         return status, fields, data
     finally:
         writer.close()
-        with suppress(Exception):
-            await writer.wait_closed()
+        closed = False
+        try:
+            with suppress(Exception):
+                await asyncio.wait_for(writer.wait_closed(), min(timeout, 2))
+                closed = True
+        finally:
+            if not closed:
+                writer.transport.abort()

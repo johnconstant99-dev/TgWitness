@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Serve read-only MCP at the panel's `/mcp` endpoint. Connections select their
+  tools and scope, support token rotation and report recent use. Client setup
+  uses `tgwitness.mcp_server` and `TGWITNESS_MCP_TOKEN`; the runtime check provides
+  an installation command when the optional SDK is absent. Setup forms keep
+  their drafts, and protocol checks list tools without reading messages.
+- Keep report settings separate when switching workspaces. Cancelled exports
+  finish their file worker before releasing the lock and remove temporary data;
+  failed downloads clean up too. Scoped source actions return only allowed chats.
+- Refuse account/connection replacement during exports; roll back interrupted
+  collector startup and bound TLS shutdown. Local export write failures stop
+  immediately instead of skipping records. Verify signed attachment and avatar
+  references during export checks and backup restore, and reject invalid TSA
+  certificate constraints and broken storage pagination.
+
 - Kept disabled AI out of the sidebar and attachment actions. Provider setup lives
   in Integrations; local recognition appears only when its worker is configured.
   Connection settings now show the fields for the selected route, with the

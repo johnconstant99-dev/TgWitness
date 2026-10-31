@@ -203,6 +203,7 @@ async function busy(button, work) {
 }
 function lock() {
   selectedSources.clear();selectedDialogs.clear();sourceBatchBusy=false;
+  resetReportSettings();
   window.dispatchEvent(new Event("tgwitness:lock"));
   $("quick-dialog").close();
   $("workspace").inert=false;
@@ -769,6 +770,8 @@ function renderAccounts(){
 }
 async function switchProfile(id){
   selectedSources.clear();selectedDialogs.clear();sourceBatchBusy=false;
+  resetReportSettings();
+  window.TgWitnessIntegrations?.clear(true);
   window.TgWitnessLive?.stop();window.TgWitnessReview?.clear();
   window.TgWitnessProxies?.clear?.();
   window.TgWitnessAnalysis?.clear();
@@ -799,6 +802,7 @@ async function switchProfile(id){
   if(state.view==="sources")await loadScope();
   if(state.view==="witness")await loadExtras();
   if(state.view==="parameters")await loadParameters();
+  if(state.view==="evidence")await loadReportSettings();
   if(state.view==="analysis")await window.TgWitnessAnalysis?.load();
   if(state.view==="integrations"){window.TgWitnessWebhooks?.clear();await window.TgWitnessIntegrations?.load();}
   await loadNotifications().catch(()=>{});
@@ -1364,30 +1368,60 @@ document.querySelectorAll("[data-export]").forEach(b=>b.addEventListener("click"
 const REPORT_FIELDS={"report-language":"language","report-theme":"theme","report-case-title":"case_title",
   "report-case-id":"case_id","report-examiner":"examiner","report-organization":"organization","report-notes":"notes"};
 const REPORT_CHECKS={"report-timeline":"timeline","report-raw":"raw_records","report-media":"media_previews"};
+let reportOwner=null,reportReady=false,reportDirty=false,reportRequest=0,reportLoading=null,reportSaving=false;
+const reportKey=()=>state.workspaceRevision+":"+state.profile;
+function resetReportSettings(){
+  reportOwner=null;reportReady=false;reportDirty=false;reportRequest++;reportLoading=null;reportSaving=false;
+  $("report-form").reset();$("report-fields").disabled=true;$("report-status").replaceChildren();
+  $("report-form").querySelectorAll(".form-error").forEach(el=>el.remove());
+}
+function reportControls(){
+  $("report-fields").disabled=!reportReady||reportOwner!==reportKey()||reportSaving||!!window.TGW_ONLINE_DEMO;
+  syncReportParts();
+}
 async function loadReportSettings(){
   if(!state.status)return;
-  const profile=state.profile,options=await json("report-options"),select=$("report-language");
-  if(profile!==state.profile)return;
-  if(!select.options.length){
-    select.append(new Option(tr("Same as the panel"),"auto"));
-    for(const [code,name] of Object.entries(PANEL_LANGUAGES)){const o=new Option(name,code);o.lang=code;select.append(o);}
-  }
-  for(const [id,key] of Object.entries(REPORT_FIELDS))$(id).value=options[key];
-  for(const [id,key] of Object.entries(REPORT_CHECKS))$(id).checked=options[key];
-  syncReportParts();$("report-status").textContent="";
-  if(window.TGW_ONLINE_DEMO){
-    $("report-form").querySelectorAll("input,select,textarea,button").forEach(control=>control.disabled=true);
-    $("report-status").textContent=tr("Sample data");
-  }
+  const owner=reportKey();
+  if(reportOwner!==owner){resetReportSettings();reportOwner=owner;}
+  if(reportSaving||reportReady&&reportDirty)return;
+  if(reportLoading)return reportLoading;
+  const request=++reportRequest,current=()=>reportOwner===owner&&reportKey()===owner&&request===reportRequest;
+  reportReady=false;reportControls();$("report-status").textContent=tr("Loading…");
+  const pending=(async()=>{
+    try{
+      const options=await json("report-options");if(!current())return;
+      const select=$("report-language");
+      if(!select.options.length){
+        select.append(new Option(tr("Same as the panel"),"auto"));
+        for(const [code,name] of Object.entries(PANEL_LANGUAGES)){const o=new Option(name,code);o.lang=code;select.append(o);}
+      }
+      for(const [id,key] of Object.entries(REPORT_FIELDS))$(id).value=options[key];
+      for(const [id,key] of Object.entries(REPORT_CHECKS))$(id).checked=options[key];
+      reportReady=true;reportDirty=false;$("report-status").textContent=window.TGW_ONLINE_DEMO?tr("Sample data"):"";
+    }catch(error){
+      if(!current()||error instanceof StaleView)return;
+      const retry=node("button","text-link",tr("Retry"));retry.type="button";
+      retry.addEventListener("click",()=>loadReportSettings());
+      $("report-status").replaceChildren(node("span","",tr("Could not load data")+": "+error.message+" "),retry);
+    }finally{if(current())reportControls();}
+  })();
+  reportLoading=pending;
+  try{await pending;}finally{if(reportLoading===pending)reportLoading=null;}
 }
 function syncReportParts(){$("report-raw").disabled=$("report-media").disabled=!$("report-timeline").checked;}
 $("report-timeline").addEventListener("change",syncReportParts);
+$("report-form").addEventListener("input",()=>{if(reportReady){reportDirty=true;$("report-status").replaceChildren();}});
 $("report-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
+  if(!reportReady||reportOwner!==reportKey()||reportSaving||window.TGW_ONLINE_DEMO)return;
+  const owner=reportOwner;
   const body={};
   for(const [id,key] of Object.entries(REPORT_FIELDS))body[key]=$(id).value;
   for(const [id,key] of Object.entries(REPORT_CHECKS))body[key]=$(id).checked;
-  await json("report-options",body);
-  $("report-status").textContent=tr("Saved. The next export uses these settings.");toast(tr("Report settings saved."));
+  reportSaving=true;reportControls();
+  try{
+    await json("report-options",body);if(reportOwner!==owner||reportKey()!==owner)return;
+    reportDirty=false;$("report-status").textContent=tr("Saved. The next export uses these settings.");toast(tr("Report settings saved."));
+  }finally{if(reportOwner===owner&&reportKey()===owner){reportSaving=false;reportControls();}}
 });});
 document.querySelectorAll("[data-go-reports]").forEach(link=>link.addEventListener("click",event=>{
   event.preventDefault();navigate("evidence");$("report-form").scrollIntoView({block:"start"});

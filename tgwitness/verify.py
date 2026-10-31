@@ -352,6 +352,21 @@ def timestamp_signature(reply, roots):
     for certificate in chain:
         if not certificate.not_valid_before_utc <= when <= certificate.not_valid_after_utc:
             raise ValueError("A certificate in the timestamp chain was not valid at the stamped time")
+        for extension in certificate.extensions:
+            if extension.critical and not isinstance(extension.value, (
+                    x509.BasicConstraints, x509.KeyUsage, x509.ExtendedKeyUsage)):
+                raise ValueError("Unsupported critical timestamp certificate extension: " + extension.oid.dotted_string)
+    for index, certificate in enumerate(chain[1:], 1):
+        try:
+            usage = certificate.extensions.get_extension_for_class(x509.KeyUsage).value
+        except x509.ExtensionNotFound:
+            usage = None
+        if usage is not None and not usage.key_cert_sign:
+            raise ValueError("A timestamp CA certificate does not permit signing certificates")
+        constraints = certificate.extensions.get_extension_for_class(x509.BasicConstraints).value
+        below = sum(child.subject != child.issuer for child in chain[1:index])
+        if constraints.path_length is not None and below > constraints.path_length:
+            raise ValueError("The timestamp certificate chain exceeds a CA path length constraint")
     root = chain[-1]
     return {"signer": signer.subject.rfc4514_string(), "root": root.subject.rfc4514_string(),
             "root_sha256": root.fingerprint(hashes.SHA256()).hex()}
@@ -839,6 +854,18 @@ def verify_events(events, public_key):
     return {"events": count, "head_hash": previous, "fingerprint": fingerprint(public_key)}
 
 
+def media_reference(event):
+    if event["kind"] not in ("media.saved", "actor.avatar_saved"):
+        return None
+    payload = event["payload"]
+    digest, size = payload.get("media_sha256"), payload.get("size")
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+        raise ValueError("Invalid media reference in the signed journal")
+    if size is not None and (type(size) is not int or size < 0):
+        raise ValueError("Invalid media size in the signed journal")
+    return digest, size
+
+
 def verify_checkpoint(checkpoint, public_key, event_count, hash_at):
     statement = checkpoint["statement"]
     if not is_format(statement["format"], "checkpoint-v1") or statement["public_key"] != public_key:
@@ -931,8 +958,8 @@ def verify_report(path, expected_fingerprint=None, evidence=None):
             checked = verify_bundle(evidence, expected_fingerprint)
             count = subject.get("event_count")
             # A report of an earlier export describes a prefix of a later journal.
-            matches = type(count) is int and 0 < count <= checked["events"] \
-                and bundle_hashes(evidence, [count]).get(count) == subject.get("head_hash")
+            matches = type(count) is int and 0 <= count <= checked["events"] \
+                and ("0" * 64 if count == 0 else bundle_hashes(evidence, [count]).get(count)) == subject.get("head_hash")
         if checked["fingerprint"] != seal["fingerprint"] or not matches:
             raise ValueError("The report describes a different archive")
         result["evidence_checked"] = True
@@ -967,6 +994,14 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None)
         def measured(lines):
             for line in lines:
                 event = json.loads(line)
+                media = media_reference(event)
+                if media:
+                    digest, size = media
+                    name = "media/" + digest
+                    if manifest["files"].get(name) != digest:
+                        raise ValueError("Preserved media is missing or differs from the signed journal: " + digest)
+                    if size is not None and archive.getinfo(name).file_size != size:
+                        raise ValueError("Preserved media size differs from the signed journal: " + digest)
                 observed.add(event)
                 yield event
         with archive.open("events.jsonl") as stream:

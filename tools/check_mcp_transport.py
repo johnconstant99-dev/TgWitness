@@ -44,17 +44,25 @@ def main():
                                json={"name": "Protocol test", "workspaces": {"default": [-1001]},
                                      "expires_at": time.time() + 3600}).json()
         token = issued["token"]
-        checked = requests.post(app.url + "/api/integrations/mcp/check", headers=admin, timeout=25,
+        checked = requests.post(app.url + "/api/integrations/mcp/check", headers=admin, timeout=50,
                                 json={"token": token, "transport": "stdio"})
         assert checked.status_code == 200 and checked.json()["messages_read"] == 0, checked.text
 
-        async def stdio():
+        async def stdio(legacy=False):
             params = StdioServerParameters(command=sys.executable,
-                                           args=["-m", "tgwitness.mcp_server", "--api-url", app.url],
-                                           env={**os.environ, "TGWITNESS_ARCHIVE_TOKEN": token}, cwd=str(ROOT))
-            async with Client(params, read_timeout_seconds=15) as client:
+                                           args=["-m", "tgwitness.mcp_server", "--api-url" if legacy else "--url",
+                                                 app.url if legacy else app.url + "/mcp"],
+                                           env={**os.environ, "TGWITNESS_MCP_TOKEN": token}, cwd=str(ROOT))
+            async with Client(params, read_timeout_seconds=30) as client:
                 await check(client)
         asyncio.run(stdio())
+        asyncio.run(stdio(legacy=True))
+
+        async def embedded():
+            async with httpx2.AsyncClient(headers={"Authorization": "Bearer " + token}, timeout=15, trust_env=False) as http:
+                async with Client(streamable_http_client(app.url + "/mcp", http_client=http), read_timeout_seconds=15) as client:
+                    await check(client)
+        asyncio.run(embedded())
 
         api = ArchiveAPI(app.url)
         protocol = build_server(api).streamable_http_app(stateless_http=True, json_response=True)

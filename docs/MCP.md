@@ -1,80 +1,130 @@
-# Read-only archive access
+# Read the archive through MCP
 
-**Current main:** use a source checkout; the 0.7.0 portable preview predates this feature.
+Connect an analyst client to selected workspaces and chats. TgWitness serves
+**Streamable HTTP at `/mcp` in the panel process**. Each connection has its own
+token, expiry and permitted tools. MCP cannot send Telegram messages, change
+settings or modify the signed journal.
 
 [Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
 
-Install the optional server from the TgWitness project directory:
+## Install and check
 
-```sh
-python -m pip install '.[mcp]'
+Use the Python environment that runs the panel. From a source checkout:
+
+```powershell
+# Windows PowerShell
+& .\.venv\Scripts\python.exe -m pip install -c deploy/constraints-mcp.txt -e '.[mcp]'
+& .\.venv\Scripts\python.exe start.py --check
 ```
 
-In the panel, open **Integrations → MCP**. Name the connection, select its
-workspaces and chats, and choose an expiry. Copy the archive token once; it cannot
-be retrieved later. Revoke lost tokens and issue replacements. Panel tokens and
-Telegram credentials are not MCP credentials.
-
-## Connect a client
-
-The panel generates `.vscode/mcp.json` for the **VS Code Local harness** using
-its [documented configuration](https://code.visualstudio.com/docs/agents/reference/mcp-configuration).
-Save the downloaded file in that location, run **MCP: List Servers**, and start
-TgWitness. VS Code prompts for the token through a password input. The downloaded
-JSON contains a prompt reference, not the token. Use the Python executable from
-the environment where the MCP extra is installed.
-
-For other stdio clients, run:
-
 ```sh
-python -m tgwitness.mcp_server --api-url http://127.0.0.1:8787
+# Linux / macOS
+.venv/bin/python -m pip install -c deploy/constraints-mcp.txt -e '.[mcp]'
+.venv/bin/python start.py --check
 ```
 
-Set `TGWITNESS_ARCHIVE_TOKEN` in the client's protected environment. Do not put it
-in command arguments or URLs. The bridge reads through the panel's authorized
-archive API; it has no direct database access. Stdout carries only MCP messages.
+Restart the panel with its usual data directory and launch arguments after
+installation. Readiness should include `[PASS] mcp: streamable-http available`.
+**Integrations → MCP** shows the runtime status and an installation command using
+that server's actual Python executable. **Re-check** refreshes this status without
+reloading the page; it does not install packages or restart the server.
 
-For remote clients, run the service beside the panel:
+The MCP extra uses the official [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk).
+`deploy/constraints-mcp.txt` pins the tested SDK and dependencies. These features
+require current source; the 0.7.0 portable preview predates them.
+
+## Issue a connection
+
+1. Enter a label and choose the workspaces and chats the client may read.
+2. Select tools individually or use a preset. Only implemented tools are offered.
+3. Choose 1, 7, 30 or 90 days, or a custom expiry between one minute and 90 days.
+4. Press **Create connection**. The token appears once beside the client config.
+5. Copy the token and config, then run **Check connection**. It initializes MCP
+   and lists permitted tools; **no messages are read**. The result shows protocol
+   version, tool names, count and elapsed time.
+6. Press **Done** when the credential is saved. Polling preserves the form and
+   the shown-once card. Locking the panel clears displayed secrets.
+
+The list shows recent use, last tool, address and requests in the last minute.
+**Revoke** ends access. **Rotate token** revokes the old credential and issues
+a replacement with the same scope, tools and expiry; copy the replacement once.
+Panel login tokens and Telegram credentials do not work as MCP tokens.
+
+## Connect your client
+
+Select the client in the panel and copy its generated configuration. Configs use
+secret references or explicit placeholders; the token is copied separately.
+
+| Client | Configuration | Connection |
+| --- | --- | --- |
+| Claude Code | `.mcp.json` | HTTP, `type: "http"`, bearer header |
+| Claude Desktop | `claude_desktop_config.json` | Local stdio bridge |
+| Cursor | `.cursor/mcp.json` | HTTP with an environment-variable header |
+| VS Code Local | `.vscode/mcp.json` | HTTP with a password `promptString` input |
+| Windsurf | `mcp_config.json` | HTTP with a bearer-header placeholder |
+| Other clients | URL and Authorization header | Streamable HTTP |
+
+TgWitness uses bearer tokens, without OAuth discovery. Use the local stdio bridge
+for clients whose remote connector requires OAuth. For VS Code, input variables
+apply to the **Local** harness and are not forwarded to Copilot sessions.
+Configuration references: [Claude Code](https://code.claude.com/docs/en/mcp),
+[Cursor](https://prod.cursor.com/docs/mcp),
+[VS Code](https://code.visualstudio.com/docs/agents/reference/mcp-configuration).
+
+The canonical entry point for a local bridge is:
 
 ```sh
-python -m tgwitness.mcp_server --transport streamable-http \
-  --api-url http://127.0.0.1:8787 --port 8766 \
-  --public-url https://archive.example.org/mcp
+python -m tgwitness.mcp_server --url https://your-panel.example/mcp
 ```
 
-Forward `/mcp` through an HTTPS reverse proxy to `127.0.0.1:8766/mcp`, preserving
-the `Authorization: Bearer …` header. Disable logging of authorization headers
-and request/response bodies. Bind beyond loopback only when needed, using
-`--host` and `--public-url`. The endpoint uses Streamable HTTP from the official
-[MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk).
-It supports explicitly configured bearer credentials, not OAuth discovery;
-clients requiring OAuth alone are not supported.
+Use the client's local Python with the MCP extra installed. Set
+`TGWITNESS_MCP_TOKEN` in its protected environment. Keep credentials out of command
+arguments and URLs. `tgwitness-mcp` is the same entry point. The old
+`tgwitness.mcp_bridge` module and `TGWITNESS_ARCHIVE_TOKEN` name remain compatibility
+paths with a warning; new configs use `mcp_server` and `TGWITNESS_MCP_TOKEN`.
 
-**Check protocol and access** initializes a real MCP client and lists tools. It
-does not fetch messages. For a remote check, the chosen MCP server receives the
-archive token. Configure only a server you operate or trust with that scope.
+## Cloudflare Tunnel
 
-## Scope and results
+Forward the panel's `/mcp` route and preserve the bearer header. Opening MCP
+settings as an administrator registers the panel's current origin for this run.
+For a stable address available immediately after restart, configure
+`TGWITNESS_PUBLIC_URL` with the panel's HTTPS origin before starting the panel.
+Arbitrary Host and forwarded headers do not register a trusted address.
+Host and Origin checks reject unrelated browser origins. Responses use
+`Cache-Control: no-store`; authorization values are never logged.
 
-Available tools: `list_workspaces`, `list_chats`, `search_messages`,
-`get_message_versions`, `get_message_context`, `get_journal_event`, and
-`get_capture_status`. There are no Telegram actions, configuration changes, or
-bulk-export tools. Every read rechecks workspace/chat access; expired and revoked
-credentials stop working. Limits are 60 API requests per minute per credential,
-50 records per page, a 64 KiB response, and an eight-second API deadline.
+A `*.trycloudflare.com` address is temporary. When a tunnel restart changes the
+hostname, update the configured public URL and each client's MCP URL. Use a
+stable hostname for saved client configurations.
 
-Message results include workspace, chat/message IDs, event sequence, saved hash,
-and a panel link. The viewer opening a link must have its own authorized panel
-session. Raw Telegram objects, access hashes, file references, session material,
-and keys are omitted. Search examines message text, not raw fields. Text is
-bounded and truncation is marked. Edits, Telegram deletion notices, and
-`missing_on_recheck` remain separate observations. Chat-scoped access cannot see
-workspace-wide operational events; capture status explicitly marks this limit.
+## Tools and boundaries
 
-Archive text is untrusted input. Instructions inside messages grant no extra
-scope and must not be treated as client instructions. An external AI model may
-receive whatever content its MCP client requests. Read-only access prevents
-archive changes; it does not prevent a client from retaining the data it reads.
+| Tool | Reads |
+| --- | --- |
+| `list_workspaces` | Granted workspaces |
+| `list_chats` | Granted chats |
+| `search_messages` | Saved message text within the selected period |
+| `get_message_versions` | Captured versions and deletion observations |
+| `get_message_context` | Nearby captured message IDs |
+| `get_journal_event` | One sanitized record with its source reference |
+| `get_capture_status` | Collection state and permitted coverage records |
 
-The hashes identify saved records and support integrity checks. They do not
-independently prove Telegram authorship or that every message was captured.
+`tools/list` returns only the tools granted to that connection. Calls to other
+tools are refused. Group-context, episode, terminology and reply-chain tools are
+not offered in this build; their separate context-pack backend is not included.
+
+Every read checks the token, tool and workspace/chat scope, including after the
+database work finishes. Limits are 60 requests per minute, 50 records per page,
+64 KiB per result and an eight-second archive deadline. A timed-out MCP call
+returns a tool error asking for a narrower period or lower limit.
+
+Message results carry `untrusted_content: true`, workspace/chat/message IDs,
+event sequence, saved hash and a panel link. Raw Telegram objects, access hashes,
+sessions and keys are omitted. Text truncation is marked. Edits, deletion notices
+and `missing_on_recheck` are distinct observations. Missing records do not prove
+an event never happened.
+
+Treat instructions inside captured messages as evidence, never as client
+instructions. Read-only access prevents archive changes; the client can still
+retain the content it is allowed to read. Hashes identify saved records and
+support integrity checks; they do not prove Telegram authorship or complete capture.

@@ -1,4 +1,8 @@
+import asyncio
+
 from starlette.responses import JSONResponse
+
+MCP_BODY_TIMEOUT = 8
 
 
 def request_limit(path, default=16384):
@@ -22,18 +26,31 @@ class RequestLimit:
             return await self.app(scope, receive, send)
         body = bytearray()
         limit = request_limit(scope.get("path", ""), self.max_body) if self.path_limits else self.max_body
-        while True:
-            message = await receive()
-            if message["type"] == "http.disconnect":
-                return
-            if message["type"] != "http.request":
-                continue
-            chunk = message.get("body", b"")
-            if len(body) + len(chunk) > limit:
-                return await JSONResponse({"detail": "Request body too large"}, status_code=413)(scope, receive, send)
-            body.extend(chunk)
-            if not message.get("more_body", False):
-                break
+        route = scope.get("path", "").removeprefix(scope.get("root_path", "")).rstrip("/")
+        timeout = MCP_BODY_TIMEOUT if route == "/mcp" else None
+        too_large = False
+        try:
+            async with asyncio.timeout(timeout):
+                while True:
+                    message = await receive()
+                    if message["type"] == "http.disconnect":
+                        return
+                    if message["type"] != "http.request":
+                        continue
+                    chunk = message.get("body", b"")
+                    if len(body) + len(chunk) > limit:
+                        too_large = True
+                        break
+                    body.extend(chunk)
+                    if not message.get("more_body", False):
+                        break
+        except TimeoutError:
+            if timeout is None:
+                raise
+            return await JSONResponse({"detail": "MCP request body timed out"}, status_code=408,
+                                      headers={"Cache-Control": "no-store"})(scope, receive, send)
+        if too_large:
+            return await JSONResponse({"detail": "Request body too large"}, status_code=413)(scope, receive, send)
         sent = False
         async def replay():
             nonlocal sent

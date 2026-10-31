@@ -38,7 +38,7 @@ from .netclient import RouteError
 from .network import NetworkConfig
 from .s3 import S3
 from .store import canonical, utcnow
-from .verify import fingerprint, verify_checkpoint, verify_events
+from .verify import fingerprint, media_reference, verify_checkpoint, verify_events
 
 MAGIC = b"TGWR1"
 CHUNK = 1024 * 1024
@@ -484,14 +484,12 @@ async def restore_objects(s3, keyinfo, key, base, out):
         verify_checkpoint(json.loads(path.read_bytes()), public, result["events"], hashes.get)
     media = set()
     for event in events:
-        if event["kind"] != "media.saved":
+        reference = media_reference(event)
+        if reference is None:
             continue
-        payload = event["payload"]
-        digest, size = payload.get("media_sha256"), payload.get("size")
-        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
-            raise ValueError("Invalid media reference in the signed journal")
+        digest, size = reference
         path = out / "media" / digest
-        if not path.is_file() or (size is not None and (type(size) is not int or path.stat().st_size != size)):
+        if not path.is_file() or (size is not None and path.stat().st_size != size):
             raise ValueError("Preserved media is missing or differs from the signed journal: " + digest)
         media.add(digest)
     return {**result, "objects": counts, "checkpoints_verified": len(checkpoints), "media_verified": len(media)}

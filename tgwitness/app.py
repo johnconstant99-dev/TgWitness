@@ -18,11 +18,11 @@ from fastapi.responses import FileResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, model_validator
-from starlette.background import BackgroundTask
 from telethon.errors import FloodWaitError, RPCError
 
 from . import __version__
 from .workers import complete_in_thread
+from .downloads import TemporaryDownload, build_file
 from .access import POLICY, AccessControl, AdminSettings, Console, GrantSettings, Refused, check as access_check
 from .collector import Collector
 from .demo import seed_demo
@@ -344,9 +344,14 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 app.state.profiles = profiles
                 await profiles.open()
                 app.state.multi_export = MultiExport(profiles)
+                from .archive_api import startup as start_mcp
+                await start_mcp(app)
             yield
         finally:
             try:
+                if allow_profiles:
+                    from .archive_api import shutdown as stop_mcp
+                    await stop_mcp(app)
                 if getattr(app.state, "media_analysis", None):
                     await app.state.media_analysis.close()
                 if getattr(app.state, "multi_export", None):
@@ -492,6 +497,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     def visible_chats(request):
         """None for every chat of this workspace, otherwise the chat IDs the access opens."""
         return request.state.principal.chats(profile_id)
+
+    def visible_targets(request):
+        allowed = visible_chats(request)
+        return [t for t in app.state.store.targets() if allowed is None or t["chat_id"] in allowed]
 
     def require_chat(request, chat_id):
         allowed = visible_chats(request)
@@ -716,8 +725,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             path = app.state.multi_export.result_path(export_id) if multi_visible(request) else None
             if not path:
                 raise HTTPException(404, "No finished export is available to download.")
-            return FileResponse(path, filename="tgwitness-chat-export.zip", media_type="application/zip",
-                                background=BackgroundTask(path.unlink, missing_ok=True))
+            return TemporaryDownload(path, filename="tgwitness-chat-export.zip", media_type="application/zip")
 
         @app.patch("/api/profiles/{profile_id}", dependencies=[Depends(authenticate)])
         async def profiles_rename(profile_id: str, body: ProfileCreate):
@@ -1009,7 +1017,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                                **({"removed_from_scope_exclusions": True} if included else {}),
                                                "coverage": "No observations promised while target is disabled."},
                              body.chat_id)
-        return {"targets": store.targets()}
+        return {"targets": visible_targets(request)}
 
     @app.post("/api/targets/batch", dependencies=[Depends(authenticate)])
     async def targets_batch(request: Request, body: TargetBatch):
@@ -1032,8 +1040,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     store.append("target.changed", {"title": entry["title"], "enabled": enabled,
                                                    "priority": body.priority, "batch": True,
                                                    **({"removed_from_scope_exclusions": True} if included else {})}, chat_id)
-        allowed = visible_chats(request)
-        return {"targets": [t for t in store.targets() if allowed is None or t["chat_id"] in allowed], "updated": len(ids)}
+        return {"targets": visible_targets(request), "updated": len(ids)}
 
     @app.post("/api/targets/priority", dependencies=[Depends(authenticate)])
     async def target_priority(request: Request, body: TargetPriority):
@@ -1048,10 +1055,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                              priority=body.priority)
             store.append("target.priority", {"title": existing["title"], "priority": body.priority,
                                             "recheck": recheck_settings(store)}, body.chat_id)
-        return {"targets": store.targets()}
+        return {"targets": visible_targets(request)}
 
     @app.delete("/api/targets/{chat_id}", dependencies=[Depends(authenticate)])
-    async def target_remove(chat_id: int):
+    async def target_remove(request: Request, chat_id: int):
         require_live()
         store = app.state.store
         async with op_lock:
@@ -1073,7 +1080,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     "title": existing["title"], "dossier_removed": removed_dossier,
                     "excluded_from_scope": scope["mode"] != "selected",
                     "journal": "records already saved for this chat stay in the append-only journal"}, chat_id)
-        return {"targets": store.targets()}
+        return {"targets": visible_targets(request)}
 
     @app.post("/api/capture", dependencies=[Depends(authenticate)])
     async def capture(body: Capture):
@@ -1478,10 +1485,12 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return next((t["title"] for t in app.state.store.targets() if t["chat_id"] == chat_id), None)
 
     @app.post("/api/chats/{chat_id}/dossier", dependencies=[Depends(authenticate)])
-    async def dossier_switch(chat_id: int, body: DossierSwitch):
+    async def dossier_switch(request: Request, chat_id: int, body: DossierSwitch):
         require_live()
         dossier.set_enabled(app.state.store, chat_id, body.enabled)
-        return {"enabled": body.enabled, "dossiers": dossier.enabled_chats(app.state.store)}
+        allowed = visible_chats(request)
+        return {"enabled": body.enabled, "dossiers": [chat for chat in dossier.enabled_chats(app.state.store)
+                                                      if allowed is None or chat in allowed]}
 
     @app.get("/api/chats/{chat_id}/dossier", dependencies=[Depends(authenticate)])
     async def dossier_view(chat_id: int):
@@ -1490,27 +1499,37 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     async def dossier_file(chat_id, password=None):
         title = dossier_title(chat_id)
-        value = await asyncio.to_thread(dossier.signed, app.state.store, app.state.vault, chat_id, title, producer())
-        directory = root / "temporary-exports"
-        directory.mkdir(mode=0o700, exist_ok=True)
-        path = directory / ("tgwitness-export-dossier-" + secrets.token_hex(8) + ".json")
-        path.write_bytes(json.dumps(value, ensure_ascii=False, indent=1).encode("utf-8"))
-        if password is not None:
-            path = await asyncio.to_thread(encrypt_export, path, "json", password,
-                                           "tgwitness-dossier-" + str(chat_id) + ".json")
-        return path
+
+        def build():
+            value = dossier.signed(app.state.store, app.state.vault, chat_id, title, producer())
+            directory = root / "temporary-exports"
+            directory.mkdir(mode=0o700, exist_ok=True)
+            if directory.resolve().parent != root:
+                raise ValueError("Temporary export directory must belong to this profile")
+            path = directory / ("tgwitness-export-dossier-" + secrets.token_hex(8) + ".json")
+            try:
+                with path.open("xb") as out:
+                    out.write(json.dumps(value, ensure_ascii=False, indent=1).encode("utf-8"))
+                if password is not None:
+                    path = encrypt_export(path, "json", password, "tgwitness-dossier-" + str(chat_id) + ".json")
+                return path
+            except BaseException:
+                path.unlink(missing_ok=True)
+                raise
+
+        async with export_lock:
+            return await build_file(build)
 
     @app.get("/api/chats/{chat_id}/dossier/export", dependencies=[Depends(authenticate)])
     async def dossier_export(chat_id: int):
         path = await dossier_file(chat_id)
-        return FileResponse(path, filename="tgwitness-dossier-" + str(chat_id) + ".json", media_type="application/json",
-                            background=BackgroundTask(path.unlink, missing_ok=True))
+        return TemporaryDownload(path, filename="tgwitness-dossier-" + str(chat_id) + ".json", media_type="application/json")
 
     @app.post("/api/chats/{chat_id}/dossier/export", dependencies=[Depends(authenticate)])
     async def dossier_export_encrypted(chat_id: int, body: ExportPassword):
         path = await dossier_file(chat_id, body.password)
-        return FileResponse(path, filename="tgwitness-dossier-" + str(chat_id) + "-encrypted.zip",
-                            media_type="application/zip", background=BackgroundTask(path.unlink, missing_ok=True))
+        return TemporaryDownload(path, filename="tgwitness-dossier-" + str(chat_id) + "-encrypted.zip",
+                                 media_type="application/zip")
 
     @app.get("/api/witness", dependencies=[Depends(authenticate)])
     async def witness_state():
@@ -1595,8 +1614,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         path = app.state.collector.export_result_path(export_id) if export_visible(request) else None
         if not path:
             raise HTTPException(404, "No finished chat export is available to download.")
-        return FileResponse(path, filename="tgwitness-chat-export.zip", media_type="application/zip",
-                            background=BackgroundTask(path.unlink, missing_ok=True))
+        return TemporaryDownload(path, filename="tgwitness-chat-export.zip", media_type="application/zip")
 
     @app.get("/api/checkpoint", dependencies=[Depends(authenticate)])
     async def get_checkpoint():
@@ -1636,17 +1654,26 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     async def build_export(fmt, request, password=None):
         options = report.resolved(app.state.store, panel_language(request))
+
+        def build():
+            path = export_file(app.state.store, app.state.vault, fmt, options)
+            if password is not None:
+                path = encrypt_export(path, fmt, password)
+            return path
+
         async with export_lock:
             try:
-                path = await asyncio.to_thread(export_file, app.state.store, app.state.vault, fmt, options)
-                if password is not None:
-                    path = await asyncio.to_thread(encrypt_export, path, fmt, password)
+                path = await build_file(build)
             except Exception as exc:
                 app.state.store.append("export.failed", {"format": fmt, "error_type": type(exc).__name__})
                 raise HTTPException(409, "Export failed integrity, size, or file checks. Inspect local data and limits.") from None
-        from .webhooks import export_completed
-        await export_completed(app.state.store, app.state.vault, profile_id)
-        app.state.alert_wakeup.set()
+        try:
+            from .webhooks import export_completed
+            await export_completed(app.state.store, app.state.vault, profile_id)
+            app.state.alert_wakeup.set()
+        except BaseException:
+            path.unlink(missing_ok=True)
+            raise
         return path
 
     @app.get("/api/export/{fmt}", dependencies=[Depends(authenticate)])
@@ -1654,15 +1681,13 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         path = await build_export(fmt, request)
         media_types = {"zip": "application/zip", "jsonl": "application/x-ndjson",
                        "csv": "text/csv", "html": "text/html"}
-        return FileResponse(path, filename="tgwitness-evidence." + fmt, media_type=media_types[fmt],
-                            background=BackgroundTask(path.unlink, missing_ok=True))
+        return TemporaryDownload(path, filename="tgwitness-evidence." + fmt, media_type=media_types[fmt])
 
     @app.post("/api/export/{fmt}", dependencies=[Depends(authenticate)])
     async def export_encrypted(request: Request, fmt: Literal["zip", "jsonl", "csv", "html"], body: ExportPassword):
 
         path = await build_export(fmt, request, body.password)
-        return FileResponse(path, filename="tgwitness-evidence-" + fmt + "-encrypted.zip", media_type="application/zip",
-                            background=BackgroundTask(path.unlink, missing_ok=True))
+        return TemporaryDownload(path, filename="tgwitness-evidence-" + fmt + "-encrypted.zip", media_type="application/zip")
 
     @app.get("/api/media/{digest}", dependencies=[Depends(authenticate)])
     async def media(request: Request, digest: str, inline: bool = False):

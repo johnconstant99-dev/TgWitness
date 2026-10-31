@@ -114,3 +114,54 @@ def test_the_server_environment_or_the_witness_may_allow_internal_addresses(monk
     monkeypatch.setenv(netclient.PRIVATE_OPT_IN, "1")
     result, _ = asyncio.run(fetch(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok"))
     assert result[2] == b"ok"
+
+
+@pytest.mark.parametrize("cancel", [False, True])
+def test_request_does_not_wait_forever_for_a_tls_close(monkeypatch, cancel):
+    async def run():
+        reader, ready = asyncio.StreamReader(), asyncio.Event()
+
+        class Writer:
+            closed, aborted = False, False
+
+            def __init__(self):
+                self.transport = self
+
+            def write(self, _):
+                pass
+
+            async def drain(self):
+                ready.set()
+
+            def close(self):
+                self.closed = True
+
+            async def wait_closed(self):
+                await asyncio.Event().wait()
+
+            def abort(self):
+                self.aborted = True
+
+        writer = Writer()
+
+        async def opened(*args):
+            return reader, writer
+
+        monkeypatch.setattr(netclient, "open_stream", opened)
+        if not cancel:
+            reader.feed_data(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok")
+        task = asyncio.create_task(netclient.request("GET", "https://example.test/", NetworkConfig(kind="direct"), timeout=.02))
+        await ready.wait()
+        try:
+            if cancel:
+                task.cancel()
+                with pytest.raises(asyncio.CancelledError):
+                    await asyncio.wait_for(task, .5)
+            else:
+                result = await asyncio.wait_for(task, .5)
+                assert result[2] == b"ok"
+            assert writer.closed and writer.aborted
+        finally:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+    asyncio.run(run())

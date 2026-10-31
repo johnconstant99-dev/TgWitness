@@ -58,11 +58,18 @@ class RunningApp:
 
     def __enter__(self):
         self.thread.start()
-        deadline = time.monotonic() + 15
-        while not self.server.started:
-            if time.monotonic() > deadline:
-                raise RuntimeError("Local test server failed to start")
-            time.sleep(.05)
+        # A cold optional MCP SDK import is slower on Windows CI.
+        deadline = time.monotonic() + 45
+        try:
+            while not self.server.started:
+                if not self.thread.is_alive() or time.monotonic() > deadline:
+                    raise RuntimeError("Local test server failed to start")
+                time.sleep(.05)
+        except BaseException:
+            self.server.should_exit = True
+            self.thread.join(timeout=30)
+            self.sock.close()
+            raise
         return self
 
     def __exit__(self, *args):

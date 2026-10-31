@@ -32,7 +32,14 @@ report. Your notes and revisions stay separate from captured events.
 | Recognize saved images or audio | **Recognize attachment** on a `media.saved` record | [Local OCR / transcription](../MEDIA-ANALYSIS.md) |
 | Send events to another service | **Integrations → Outgoing webhooks** | [HMAC, retries and n8n](../WEBHOOKS.md) |
 
-MCP uses its own read-only token. OCR/transcription needs the local Docker worker.
+MCP is served at the panel's `/mcp` route. Choose a client, permitted tools,
+workspaces and expiry in Integrations; copy the shown-once token and config.
+**Check connection** reports the protocol and tools without reading messages.
+Setup drafts survive background refreshes. Use `TGWITNESS_MCP_TOKEN` for the
+`tgwitness.mcp_server` stdio bridge. The panel provides an exact install command
+if the optional SDK is missing. [Installation and client setup](../MCP.md).
+
+OCR/transcription needs the local Docker worker.
 Webhook receivers verify the signature and deduplicate `event_id` before acting.
 
 ## Hand over the case

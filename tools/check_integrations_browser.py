@@ -43,7 +43,7 @@ def main():
             config = json.loads(data)
             assert token not in data
             assert config["inputs"][0]["password"] is True
-            assert config["servers"]["tgwitness"]["type"] == "stdio"
+            assert config["servers"]["tgwitness"]["type"] == "http"
             for theme in ("light", "dark"):
                 page.evaluate("theme=>document.documentElement.dataset.theme=theme", theme)
                 page.wait_for_timeout(350)
@@ -58,6 +58,7 @@ def main():
             assert page.locator("#mcp-token").input_value() == ""
             page.locator('[data-view="integrations"]').click()
             expect(page.locator("#mcp-list")).to_contain_text("Synthetic client")
+            page.once("dialog", lambda dialog: dialog.accept())
             page.locator('#mcp-list button', has_text="Revoke").click()
             expect(page.locator("#mcp-list")).to_contain_text("Revoked")
             page.goto(app.url + "/?workspace=default&event=" + str(record["seq"]) + "#journal")

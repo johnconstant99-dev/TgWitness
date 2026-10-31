@@ -55,6 +55,23 @@ MEMBERSHIP_ACTIONS = (types.MessageActionChatAddUser, types.MessageActionChatDel
                       types.MessageActionChatJoinedByLink, types.MessageActionChatJoinedByRequest)
 
 
+def connection_change(call):
+    """An export and an account change must never own the same connection."""
+    @wraps(call)
+    async def guarded(self, *args, **kwargs):
+        if self.export_busy() or self.export_claim:
+            raise ValueError("An export is using this account. Wait for it or cancel it before changing its connection.")
+        previous, current = self.connection_change_task, asyncio.current_task()
+        if previous is not None and previous is not current:
+            raise ValueError("This account's connection is already being changed. Wait for it to finish.")
+        self.connection_change_task = current
+        try:
+            return await call(self, *args, **kwargs)
+        finally:
+            self.connection_change_task = previous
+    return guarded
+
+
 def recovered_source(update):
     """Telethon hands over messages fetched through getDifference (after a gap or restart) with pts=0."""
     return "update_recovery" if getattr(update, "pts", None) == 0 else None
@@ -190,6 +207,7 @@ class Collector:
         self.export_state = None
         self.export_path = None
         self.export_claim = None
+        self.connection_change_task = None
         self.people = {}
         self.avatar_lock = asyncio.Lock()
         self.avatar_failures = {}
@@ -569,6 +587,7 @@ class Collector:
         if candidate and candidate is not self.client:
             await candidate.disconnect()
 
+    @connection_change
     async def sign_out(self):
         """End this workspace's Telegram session and forget it here. The journal, sources, settings and
         signing key stay; the workspace still belongs to its account, so only that account can connect again."""
@@ -882,6 +901,7 @@ class Collector:
                     self.pool().succeeded(client.route_id)
                 return
 
+    @connection_change
     async def set_network(self, config):
         if self.running:
             raise ValueError("Pause observation before changing the Telegram route.")
@@ -953,6 +973,7 @@ class Collector:
         return await self.with_api_pair(api_id, api_hash, lambda pair_id, pair_hash:
                                         self.connect_login(pair_id, pair_hash, session, expected_user_id))
 
+    @connection_change
     async def connect_login(self, api_id, api_hash, session="", expected_user_id=None):
         if self.running:
             raise ValueError("Pause observation before changing accounts.")
@@ -1074,6 +1095,7 @@ class Collector:
         await self.authorized()
         return {"step": "authorized"}
 
+    @connection_change
     async def authorized(self):
         if self.running:
             raise ValueError("Pause observation before completing an account change.")
@@ -1183,6 +1205,24 @@ class Collector:
     async def start(self):
         if self.running:
             return
+        try:
+            await self.start_observation()
+        except BaseException:
+            self.buffered, self.buffering = [], False
+            if self.running:
+                # Buffered handlers and catch-up can yield after running was set.
+                # A timeout there must not leave a collector without workers.
+                with suppress(Exception):
+                    await self.stop()
+                self.running = False
+                await self.cancel_workers()
+                await self.avatar_history.close()
+                if self.client and not (self.export_busy() or self.export_claim):
+                    with suppress(Exception):
+                        await self.client.disconnect()
+            raise
+
+    async def start_observation(self):
         if self.watchdog or self.media_worker or self.urgent_media_worker or self.reconciler or self.intake_worker:
             await self.stop()
         if scope_settings(self.store)["mode"] == "selected" and not self.store.targets(True):
@@ -1806,7 +1846,7 @@ class Collector:
     def reserve_export(self, owner):
         """One export per account, individual or multi-account. Checked and taken with no await in
         between, before the owner's first await; only the owner releases it."""
-        if self.export_busy() or self.export_claim:
+        if self.export_busy() or self.export_claim or self.connection_change_task is not None:
             return False
         self.export_claim = owner
         return True
@@ -1912,18 +1952,27 @@ class Collector:
         """Newest to oldest; after FloodWait or a brief connection loss, resume below the last message seen."""
         failures = 0
         while True:
+            writing = False
             try:
                 async for message in self.client.iter_messages(entity, offset_id=offset_id, min_id=min_id):
-                    offset_id, failures = message.id, 0
+                    writing = True
                     await on_message(message)
+                    writing = False
+                    offset_id, failures = message.id, 0
                 return
             except FloodWaitError as exc:
+                if writing:
+                    raise
                 wait = min(exc.seconds + 1, 3600)
                 self.store.append("telegram.backoff", {"seconds": wait, "context": "chat_export"})
                 if on_wait:
                     on_wait(wait)
                 await asyncio.sleep(wait)
             except (OSError, ConnectionError, TimeoutError):
+                if writing:
+                    # A local write/flush failure is not a retryable Telegram
+                    # disconnect. Never skip that record and sign the remainder.
+                    raise
                 failures += 1
                 if failures > 8:
                     raise

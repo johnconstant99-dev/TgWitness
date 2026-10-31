@@ -1,0 +1,17 @@
+# Tested MCP runtime; includes the panel's pinned dependencies.
+-c constraints.txt
+attrs==26.1.0
+httpcore==1.0.9
+httpcore2==2.16.0
+httpx==0.28.1
+httpx2==2.16.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+mcp==2.3.0
+mcp-types==2.3.0
+pyjwt==2.15.1
+python-multipart==0.0.32
+pywin32==312; sys_platform == 'win32'
+referencing==0.37.0
+rpds-py==2026.9.1
+sse-starlette==3.6.0

@@ -99,6 +99,7 @@ class S3:
     async def list(self, prefix):
         """Every (key, size) under prefix, following continuation tokens (ListObjectsV2)."""
         token = None
+        seen = set()
         while True:
             query = "list-type=2&prefix=" + quote(prefix, safe="-_.~") + (
                 "&continuation-token=" + quote(token, safe="-_.~") if token else "")
@@ -110,3 +111,6 @@ class S3:
             if root.findtext(ns + "IsTruncated") != "true":
                 return
             token = root.findtext(ns + "NextContinuationToken")
+            if not token or token in seen:
+                raise ValueError("Object storage returned a missing or repeated continuation token")
+            seen.add(token)

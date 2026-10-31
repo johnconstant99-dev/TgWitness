@@ -28,6 +28,7 @@ class ConnectionSettings(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     workspaces: dict[str, list[int] | None] = Field(min_length=1, max_length=100)
     expires_at: float
+    tools: list[Literal[TOOLS]] = Field(default_factory=lambda: list(TOOLS), min_length=1, max_length=len(TOOLS))
 
     @field_validator("name")
     @classmethod
@@ -77,7 +78,9 @@ class Connections:
 
     @staticmethod
     def public(entry):
-        return {k: v for k, v in entry.items() if k != "sha256"} | {"tools": list(TOOLS)}
+        return {k: v for k, v in entry.items() if k not in ("sha256", "usage_saved_at")} | {
+            "tools": list(entry.get("tools", TOOLS)), "uses": entry.get("uses", 0),
+            "last_address": entry.get("last_address"), "last_tool": entry.get("last_tool")}
 
     def issue(self, settings):
         now = time.time()
@@ -90,6 +93,8 @@ class Connections:
             token = "tgw_mcp_" + secrets.token_urlsafe(32)
             entry = {"id": secrets.token_hex(16), "name": settings.name, "workspaces": scope,
                      "expires_at": settings.expires_at, "created_at": now, "last_used_at": None,
+                     "tools": [tool for tool in TOOLS if tool in settings.tools], "uses": 0,
+                     "last_address": None, "last_tool": None,
                      "revoked_at": None, "sha256": hashlib.sha256(token.encode()).hexdigest()}
             self.entries.append(entry)
             self.save()
@@ -104,14 +109,29 @@ class Connections:
             self.requests.pop(connection_id, None)
             self.save()
 
-    def resolve(self, token, *, count=True):
-        if not token.startswith("tgw_mcp_") or len(token) > 128:
+    def rotate(self, connection_id):
+        with self.lock:
+            entry = next((e for e in self.entries if e["id"] == connection_id), None)
+            if entry is None:
+                raise KeyError(connection_id)
+            if entry["revoked_at"] or entry["expires_at"] <= time.time():
+                raise Refused("Issue a new connection after access expires or is revoked.")
+            token = "tgw_mcp_" + secrets.token_urlsafe(32)
+            entry.update(sha256=hashlib.sha256(token.encode()).hexdigest(), rotated_at=time.time())
+            self.save()
+            return token, self.public(entry)
+
+    def resolve(self, token, *, count=True, address=None, tool=None):
+        if not isinstance(token, str) or not token.startswith("tgw_mcp_") or len(token) > 128:
             raise Refused("Invalid archive credential.")
         digest, now = hashlib.sha256(token.encode()).hexdigest(), time.time()
         with self.lock:
             entry = next((e for e in self.entries if secrets.compare_digest(e["sha256"], digest)), None)
             if not entry or entry["revoked_at"] or entry["expires_at"] <= now:
                 raise Refused("Archive access has expired or been revoked.")
+            tools = entry.get("tools", TOOLS)
+            if tool is not None and tool not in tools:
+                raise Refused("This connection does not allow that archive tool.")
             if count:
                 recent = self.requests.setdefault(entry["id"], deque())
                 while recent and recent[0] < now - 60:
@@ -119,11 +139,18 @@ class Connections:
                 if len(recent) >= 60:
                     raise RateLimited("Archive request limit reached. Retry in one minute.")
                 recent.append(now)
-                if not entry["last_used_at"] or now - entry["last_used_at"] >= 60:
-                    entry["last_used_at"] = now
+                save_due = not entry["last_used_at"] or now - entry.get("usage_saved_at", 0) >= 60
+                entry["last_used_at"] = now
+                entry["uses"] = entry.get("uses", 0) + 1
+                if address is not None:
+                    entry["last_address"] = address
+                if save_due:
+                    entry["usage_saved_at"] = now
                     self.save()
+            if tool is not None:
+                entry["last_tool"] = tool
             grant = {"id": entry["id"], "workspaces": entry["workspaces"], "all_workspaces": False,
-                     "permissions": ["view"], "expires_at": entry["expires_at"]}
+                     "permissions": ["view"], "expires_at": entry["expires_at"], "tools": list(tools)}
             return Principal(False, entry["name"], grant)
 
 

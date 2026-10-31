@@ -698,6 +698,8 @@ form > .health-detail { margin-top: 14px; }
 .alerts-daily .hint { margin-top: 18px; }
 #export-encrypt input[type=password] { max-width: 420px; }
 .report-settings { margin-top: 18px; }
+.report-fields { min-width: 0; border: 0; padding: 0; margin: 0; }
+#report-status:empty { display: none; }
 .report-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
 .report-parts { border: 0; padding: 0; margin: 18px 0 0; min-width: 0; }
 .report-parts legend { padding: 0; font-weight: 600; }
@@ -1555,6 +1557,27 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
 .witness-new code { flex: 1 1 100%; padding: 8px 10px; overflow-wrap: anywhere; user-select: all; }
 .access-group { margin: 22px 0 0; padding: 0; border: 0; min-width: 0; }
 .access-group legend { padding: 0; font-weight: 600; }
+.mcp-fields { margin: 0; padding: 0; border: 0; min-width: 0; }
+.mcp-fields > button { margin-top: 20px; }
+.mcp-tools { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px 20px; margin-top: 12px; }
+.mcp-tools .check-label { align-items: flex-start; margin-top: 8px; }
+.mcp-tools input { margin-top: 4px; }
+.mcp-tools span { min-width: 0; }
+.mcp-tools code { display: block; margin-top: 2px; font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.mcp-config, #mcp-install-command { max-width: 100%; padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); font: 12px/1.6 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.mcp-config { max-height: 320px; overflow: auto; }
+.mcp-connection { align-items: flex-start; }
+.mcp-connection > div:first-child { flex: 1; }
+.mcp-connection > .route-actions { flex-shrink: 0; }
+.mcp-connection details { margin-top: 10px; }
+.mcp-tool-names { display: block; margin-top: 6px; white-space: normal; overflow-wrap: anywhere; }
+#mcp-created { border-color: var(--accent-border); scroll-margin-top: 80px; }
+#mcp-created .two-columns { margin-top: 24px; }
+#mcp-check-result > span { display: block; margin: 6px 0; }
+#mcp-form-status { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+#mcp-form-status:empty { display: none; }
+#mcp-scope .access-chats { grid-template-columns: repeat(auto-fit,minmax(min(220px,100%),1fr)); padding-inline-start: 14px; }
+@media(max-width:600px){.mcp-tools{grid-template-columns:1fr}.mcp-connection>div:first-child{flex-basis:100%}.mcp-connection>.route-actions{width:100%}}
 .access-workspace { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 6px 0; border-top: 1px solid var(--border-soft); }
 .access-workspace .check-label { margin: 0; flex: 1 1 220px; }
 .access-workspace select { width: auto; margin: 0; }

@@ -58,3 +58,15 @@ def test_invalid_port_environment_uses_parser_error(monkeypatch, capsys):
         main()
     assert exc.value.code == 2
     assert "invalid int value" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("available", [False, True])
+def test_mcp_readiness_reports_optional_transport_without_network(tmp_path, monkeypatch, available):
+    from tgwitness import mcp_server
+    monkeypatch.setattr(mcp_server, "runtime_status", lambda: {
+        "available": available, "install_command": "python -m pip install '.[mcp]'"})
+    report = inspect_environment(tmp_path / "unused")
+    result = check(report, "mcp")
+    assert result["status"] == ("pass" if available else "warning")
+    assert ("streamable-http available" if available else ".[mcp]") in result["detail"]
+    assert not (tmp_path / "unused").exists()

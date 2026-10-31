@@ -26,6 +26,8 @@ DYNAMIC_SCRIPT_KEYS = (
     "All", "Priority", "Paused", "Unconfirmed access", "Enable selected", "Pause selected",
     "Mark priority", "Add selected", "Add all matching", "SHA-256", "Message ID", "Sender ID",
     "Link to this record",
+    "Install MCP support in this Python environment and restart TgWitness.",
+    "MCP support is installed. Restart TgWitness to activate the endpoint.",
 )
 
 

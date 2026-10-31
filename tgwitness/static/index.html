@@ -7,13 +7,13 @@
 <meta name="color-scheme" content="light dark">
 <title>TgWitness · Observation workspace</title>
 <link rel="icon" type="image/svg+xml" href="/mark.svg">
-<link rel="stylesheet" href="/style.css?v=0.7.0-analyst1">
+<link rel="stylesheet" href="/style.css?v=0.7.0-mcp2">
 <link rel="stylesheet" href="/cloud-capture.css?v=5"><link rel="stylesheet" href="/cloud-capture-story.css?v=3">
 <script src="/theme.js?v=0.7.0"></script>
 <script src="/guide-locale.js" data-scope="panel"></script>
 <script defer src="/i18n.js?v=0.7.0"></script>
-<script defer src="/app.js?v=0.7.0-analyst1"></script>
-<script defer src="/integrations.js?v=1"></script>
+<script defer src="/app.js?v=0.7.0-mcp2"></script>
+<script defer src="/integrations.js?v=2"></script>
 <script defer src="/analysis.js?v=3"></script>
 <script defer src="/media-analysis.js?v=2"></script>
 <script defer src="/webhooks.js?v=1"></script>
@@ -333,6 +333,7 @@
   <form class="card padded report-settings" id="report-form">
     <div class="eyebrow">Readable reports</div><h2>Report settings</h2>
     <p class="muted">Language, case details and contents of the report in every signed archive and chat export. Case details are signed into the export; leave a field empty to omit it.</p>
+    <fieldset class="report-fields" id="report-fields" disabled>
     <div class="report-grid">
       <div><label for="report-language">Report language</label><select data-no-translate id="report-language"></select></div>
       <div><label for="report-theme">Report colours</label><select id="report-theme"><option value="auto">Follow the reader's system</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
@@ -347,7 +348,9 @@
       <label class="check-label"><input id="report-raw" type="checkbox"> Full record data under each record</label>
       <label class="check-label"><input id="report-media" type="checkbox"> Photo previews from the archive</label>
     </fieldset>
-    <div class="report-actions"><button class="secondary" type="submit">Save report settings</button><span class="hint" id="report-status" role="status"></span></div>
+    <div class="report-actions"><button class="secondary" type="submit">Save report settings</button></div>
+    </fieldset>
+    <p class="hint" id="report-status" role="status"></p>
     <p class="hint">Every report is sealed: a signature inside the file covers each of its bytes. Readers check it in the browser by dropping the file onto the report, or with <code>python verify.py report.html --fingerprint …</code>. The archive also carries <code>custody.json</code> and <code>SHA256SUMS</code>.</p>
   </form>
   <p class="hint">Automatic timestamps and an encrypted off-site copy: <a data-go-extra="evidence" href="#">Extras → Evidence that holds up</a>.</p>
@@ -859,26 +862,30 @@
   </details>
   <p class="notice">The external model can receive messages requested by its client. Choose the workspaces and chats you want to share.</p>
   <p class="hint"><a id="mcp-help" data-site-doc="mcp" href="https://phishdestroy.github.io/TgWitness/docs/reference/mcp/" target="_blank" rel="noopener noreferrer">Help &amp; documentation</a></p>
+  <section class="notice" id="mcp-unavailable" hidden aria-live="polite"><strong>MCP setup required</strong><p id="mcp-problem"></p><pre id="mcp-install-command" data-no-translate></pre><div class="route-actions"><button class="secondary" id="mcp-copy-install" type="button">Copy install command</button><button class="secondary" id="mcp-recheck" type="button">Recheck availability</button></div></section>
   <form class="card padded" id="mcp-form">
     <h2>Connect an MCP client</h2>
-    <div class="two-columns"><div><label for="mcp-name">Connection name</label><input id="mcp-name" required maxlength="80" autocomplete="off"></div><div><label for="mcp-duration">Access duration</label><select id="mcp-duration"><option value="24">24 hours</option><option value="168">7 days</option><option value="720">30 days</option></select></div></div>
+    <fieldset class="mcp-fields" id="mcp-fields" disabled>
+    <div class="two-columns"><div><label for="mcp-name">Connection name</label><input id="mcp-name" required maxlength="80" autocomplete="off"></div><div><label for="mcp-duration">Access duration</label><select id="mcp-duration"><option value="24">24 hours</option><option value="168">7 days</option><option value="720">30 days</option><option value="2160">90 days</option></select></div></div>
     <fieldset class="access-group"><legend>Workspaces and chats</legend><div id="mcp-scope"></div></fieldset>
-    <div class="two-columns"><div><label for="mcp-mode">Connection type</label><select id="mcp-mode"><option value="stdio">Local · stdio</option><option value="http">Remote · Streamable HTTP</option></select></div><div><label for="mcp-client">Client</label><select id="mcp-client"><option value="vscode">VS Code · Local harness</option></select></div></div>
-    <div id="mcp-local"><label for="mcp-command">Python executable on the client device</label><input id="mcp-command" value="python" autocomplete="off"><p class="hint">From the TgWitness project folder on that device, install MCP support: <code>python -m pip install '.[mcp]'</code></p></div>
-    <div id="mcp-remote" hidden><label for="mcp-url">MCP server URL</label><input id="mcp-url" type="url" placeholder="https://archive.example.org/mcp"><p class="hint">Run the MCP service beside TgWitness and publish it through your HTTPS reverse proxy.</p></div>
-    <p class="hint">Seven tools, read-only. No Telegram actions or bulk exports.</p>
+    <fieldset class="access-group"><legend>Allowed tools</legend><label for="mcp-preset">Tool preset</label><select id="mcp-preset"><option value="all">Messages and evidence</option><option value="overview">Archive overview only</option><option value="custom">Custom</option></select><div class="mcp-tools" id="mcp-tools"></div><p class="hint">Only saved records. No Telegram actions or bulk exports.</p></fieldset>
     <button class="primary" type="submit">Create connection</button>
+    </fieldset><p class="hint" id="mcp-form-status" role="status"></p>
   </form>
   <section class="card padded" id="mcp-created" hidden>
-    <h2>Save your connection</h2><p>The token is shown only here. Save it now; it cannot be retrieved later.</p>
+    <div class="eyebrow">Shown once</div><h2 id="mcp-created-name">Save your connection</h2><p>The token is shown only here. Save it now; it cannot be retrieved later.</p>
     <label for="mcp-token">Archive access token</label><input id="mcp-token" type="password" readonly autocomplete="off" data-sensitive>
-    <div class="route-actions"><button class="secondary" id="mcp-copy-token" type="button">Copy token</button><button class="quiet" id="mcp-hide-token" type="button">Hide and forget token</button></div>
+    <div class="route-actions"><button class="secondary" id="mcp-copy-token" type="button">Copy token</button></div>
     <p class="hint">The copied token grants access to the selected archive. Keep it out of repositories, logs and shared screenshots.</p>
-    <ol><li>Download the configuration to <code>.vscode/mcp.json</code> in your client workspace.</li><li>In VS Code, run “MCP: List Servers” and start “tgwitness”.</li><li>Paste the saved token when VS Code prompts for it. Use a Local harness session.</li></ol>
-    <div class="route-actions"><button class="primary" id="mcp-download" type="button">Download client configuration</button><button class="secondary" id="mcp-check" type="button">Check protocol and access</button></div>
-    <p class="hint">The configuration contains a secret input prompt, not the token. A connection check reads no messages.</p>
+    <div class="two-columns"><div><label for="mcp-client">Client</label><select id="mcp-client"><option value="vscode">VS Code · Local harness</option><option value="cursor" data-no-translate>Cursor</option><option value="claude-code" data-no-translate>Claude Code</option><option value="claude-desktop" data-no-translate>Claude Desktop</option><option value="windsurf" data-no-translate>Windsurf</option><option value="other">Another MCP client</option></select></div><div><label for="mcp-mode">Connection type</label><select id="mcp-mode"><option value="http">Remote · Streamable HTTP</option><option value="stdio">Local · stdio</option></select></div></div>
+    <div id="mcp-local" hidden><label for="mcp-command">Python executable on the client device</label><input id="mcp-command" value="python" autocomplete="off"><p class="hint">Install TgWitness with MCP support on the client device. The local relay connects to this panel; the panel must stay running.</p></div>
+    <label for="mcp-url">MCP server URL</label><input id="mcp-url" type="url" placeholder="https://archive.example.org/mcp" autocomplete="off">
+    <p class="access-warning" id="mcp-url-warning" hidden></p><p class="hint" id="mcp-config-where"></p>
+    <pre class="mcp-config" id="mcp-config" data-no-translate tabindex="0"></pre>
+    <p class="hint">The configuration never includes your token. Add the saved token only in your MCP client's settings or environment.</p>
+    <div class="route-actions"><button class="primary" id="mcp-copy-config" type="button">Copy configuration</button><button class="secondary" id="mcp-download" type="button">Download client configuration</button><button class="secondary" id="mcp-check" type="button">Check protocol and access</button></div>
     <p id="mcp-check-result" role="status"></p>
-    <a href="https://code.visualstudio.com/docs/agents/reference/mcp-configuration" target="_blank" rel="noopener noreferrer">VS Code configuration reference</a>
+    <div class="route-actions"><button class="quiet" id="mcp-hide-token" type="button">Done, hide the token</button><a id="mcp-client-help" href="https://code.visualstudio.com/docs/agents/reference/mcp-configuration" target="_blank" rel="noopener noreferrer">Client configuration reference</a></div>
   </section>
   <section class="card padded"><div class="card-heading compact"><h2>Archive connections</h2><button class="quiet" id="mcp-refresh" type="button">Refresh</button></div><div id="mcp-list"></div></section>
   <section class="card padded"><h2>Outgoing webhooks</h2><p class="hint" id="webhook-workspace"></p><p class="hint">Structured notifications for n8n and SIEM. Metadata is sent by default; message text requires a separate choice.</p>

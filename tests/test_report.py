@@ -107,6 +107,22 @@ def test_a_standalone_html_export_matches_a_later_archive_as_a_prefix(journal, t
         archive_path.unlink()
 
 
+@pytest.mark.parametrize("later_event", (False, True))
+def test_empty_report_is_a_valid_signed_journal_prefix(journal, later_event):
+    store, vault = journal
+    page = export_file(store, vault, "html")
+    if later_event:
+        store.append("message.new", {"text": "later"}, CHAT, 1)
+    bundle = export_file(store, vault, "zip")
+    try:
+        result = verify_report(page, fingerprint(vault.public_key), bundle)
+        assert result["evidence_checked"]
+        assert result["report_seal"]["subject"]["event_count"] == 0
+    finally:
+        page.unlink()
+        bundle.unlink()
+
+
 def test_chat_report_is_chronological_sealed_and_bound_to_chat_json(journal):
     store, vault = journal
     scratch = store.root / "scratch.jsonl"
