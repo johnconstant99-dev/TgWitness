@@ -18,7 +18,9 @@ frontend downloads are needed.
 | evidence.py | Complete-journal export, derivatives, checkpoints, attachment verification |
 | verify.py | Standalone, read-only verifier (stdlib + cryptography): archives, coverage, witness journals and channel posts, profile files |
 | app.py | Authenticated API, lifecycle, request validation, static panel |
-| profiles.py | Multiple isolated account collectors, shared panel token, per-workspace lifecycle |
+| profiles.py | Multiple account collectors, shared access controller, per-workspace lifecycle |
+| access.py | Scoped grants, permission checks, IP restrictions, session limits and administrator console |
+| proxy_catalog.py | Public feed snapshots, transport checks, shared proxy pool and health-based selection |
 | provenance.py | Signed acquisition-run identity, code and dependency measurements |
 | network.py | Validated per-workspace routes; redacted status and evidence; Telethon transport options |
 | sessions.py | Offline read-only conversion of reviewed Telethon SQLite schemas |

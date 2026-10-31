@@ -22,9 +22,13 @@ import subprocess
 import sys
 import tempfile
 import zipfile
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
+from cryptography import x509
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ec, padding, rsa
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 FIELDS = ("seq", "observed_at", "source_at", "kind", "chat_id", "message_id",
@@ -112,33 +116,241 @@ def der(data, offset):
     return tag, start, start + length
 
 
-def timestamp_reply_summary(reply, digest, query=None):
-    """Status, covered hash, nonce and time of an RFC 3161 reply. OpenSSL checks its signature."""
+def children(data, start, end):
+    """(tag, offset, value start, value end) of each DER element between start and end."""
+    found, offset = [], start
+    while offset < end:
+        tag, value_start, value_end = der(data, offset)
+        if value_end > end:
+            raise ValueError("Truncated DER")
+        found.append((tag, offset, value_start, value_end))
+        offset = value_end
+    return found
+
+
+def oid(data, start, end):
+    parts, value = [], 0
+    for byte in data[start:end]:
+        value = (value << 7) | (byte & 0x7F)
+        if not byte & 0x80:
+            parts.append(value)
+            value = 0
+    if not parts:
+        raise ValueError("Empty object identifier")
+    first = min(parts[0] // 40, 2)
+    return ".".join(map(str, [first, parts[0] - 40 * first] + parts[1:]))
+
+
+SIGNED_DATA, TST_INFO = "1.2.840.113549.1.7.2", "1.2.840.113549.1.9.16.1.4"
+CONTENT_TYPE, MESSAGE_DIGEST = "1.2.840.113549.1.9.3", "1.2.840.113549.1.9.4"
+SIGNING_CERTIFICATE, SIGNING_CERTIFICATE_V2 = "1.2.840.113549.1.9.16.2.12", "1.2.840.113549.1.9.16.2.47"
+DIGESTS = {"2.16.840.1.101.3.4.2.1": hashes.SHA256, "2.16.840.1.101.3.4.2.2": hashes.SHA384,
+           "2.16.840.1.101.3.4.2.3": hashes.SHA512}
+RSA_SIGNATURES = {"1.2.840.113549.1.1.1": None, "1.2.840.113549.1.1.11": hashes.SHA256,
+                  "1.2.840.113549.1.1.12": hashes.SHA384, "1.2.840.113549.1.1.13": hashes.SHA512}
+ECDSA_SIGNATURES = {"1.2.840.10045.4.3.2": hashes.SHA256, "1.2.840.10045.4.3.3": hashes.SHA384,
+                    "1.2.840.10045.4.3.4": hashes.SHA512}
+
+
+def timestamp_token(reply):
+    """The parts of an RFC 3161 reply, read strictly: status, the TSTInfo bytes, the certificates and
+    the one SignerInfo of the signed data around them."""
     tag, start, end = der(reply, 0)
-    status_tag, status_start, status_end = der(reply, start)
-    int_tag, int_start, int_end = der(reply, status_start)
-    if tag != 0x30 or status_tag != 0x30 or int_tag != 0x02:
+    if tag != 0x30 or end != len(reply):
         raise ValueError("Not an RFC 3161 timestamp reply")
-    status = int.from_bytes(reply[int_start:int_end], "big")
+    parts = children(reply, start, end)
+    status_info = children(reply, parts[0][2], parts[0][3]) if parts and parts[0][0] == 0x30 else []
+    if not status_info or status_info[0][0] != 0x02:
+        raise ValueError("Not an RFC 3161 timestamp reply")
+    status = int.from_bytes(reply[status_info[0][2]:status_info[0][3]], "big")
     if status not in (0, 1):
         raise ValueError("The timestamp authority refused the request (status " + str(status) + ")")
-    token = reply[status_end:end]
-    at = token.find(digest)
-    if at < 0:
+    if len(parts) != 2 or parts[1][0] != 0x30:
+        raise ValueError("The timestamp reply carries no token")
+    content = children(reply, parts[1][2], parts[1][3])
+    if len(content) != 2 or content[0][0] != 0x06 or oid(reply, *content[0][2:]) != SIGNED_DATA or content[1][0] != 0xA0:
+        raise ValueError("The timestamp token is not signed data")
+    signed_tag, signed_start, signed_end = der(reply, content[1][2])
+    signed = children(reply, signed_start, signed_end) if signed_tag == 0x30 else []
+    if len(signed) < 4 or signed[2][0] != 0x30 or signed[-1][0] != 0x31:
+        raise ValueError("The timestamp token is not signed data")
+    encapsulated = children(reply, signed[2][2], signed[2][3])
+    if len(encapsulated) != 2 or oid(reply, *encapsulated[0][2:]) != TST_INFO or encapsulated[1][0] != 0xA0:
+        raise ValueError("The timestamp token does not hold a TSTInfo")
+    info_tag, info_start, info_end = der(reply, encapsulated[1][2])
+    if info_tag != 0x04:
+        raise ValueError("The timestamp token does not hold a TSTInfo")
+    certificates = []
+    for tag, _, value_start, value_end in signed[3:-1]:
+        if tag == 0xA0:
+            certificates += [reply[offset:stop] for _, offset, _, stop in children(reply, value_start, value_end)]
+    signers = children(reply, signed[-1][2], signed[-1][3])
+    if len(signers) != 1:
+        raise ValueError("The timestamp token must have exactly one signer")
+    return {"status": status, "tst": reply[info_start:info_end], "certificates": certificates,
+            "signer": signers[0], "reply": reply}
+
+
+def generalized_time(raw):
+    found = re.fullmatch(rb"(\d{14})(?:\.\d{1,6})?Z", raw)
+    if not found:
+        raise ValueError("The timestamp time is not a UTC GeneralizedTime")
+    return datetime.strptime(found[1].decode(), "%Y%m%d%H%M%S").replace(tzinfo=timezone.utc)
+
+
+def tst_info(tst):
+    """Imprint algorithm and hash, time and nonce of a TSTInfo, by position as RFC 3161 defines it."""
+    tag, start, end = der(tst, 0)
+    items = children(tst, start, end) if tag == 0x30 and end == len(tst) else []
+    if len(items) < 5 or [t for t, *_ in items[:5]] != [0x02, 0x06, 0x30, 0x02, 0x18]:
+        raise ValueError("Malformed TSTInfo")
+    imprint = children(tst, items[2][2], items[2][3])
+    algorithm = children(tst, imprint[0][2], imprint[0][3])
+    if len(imprint) != 2 or imprint[1][0] != 0x04 or not algorithm or algorithm[0][0] != 0x06:
+        raise ValueError("Malformed TSTInfo")
+    nonce = next((int.from_bytes(tst[s:e], "big", signed=True) for t, _, s, e in items[5:] if t == 0x02), None)
+    return {"algorithm": oid(tst, *algorithm[0][2:]), "hash": tst[imprint[1][2]:imprint[1][3]],
+            "time": generalized_time(tst[items[4][2]:items[4][3]]), "nonce": nonce}
+
+
+def query_nonce(query):
+    _, start, end = der(query, 0)
+    return next((int.from_bytes(query[s:e], "big", signed=True) for t, _, s, e in children(query, start, end)[2:]
+                 if t == 0x02), None)
+
+
+def timestamp_reply_summary(reply, digest, query=None):
+    """Status and time of an RFC 3161 reply whose TSTInfo stamps exactly this SHA-256 (and the request's nonce).
+    The signature is checked by timestamp_signature, or by OpenSSL with --tsa-ca."""
+    token = timestamp_token(reply)
+    info = tst_info(token["tst"])
+    if info["algorithm"] != "2.16.840.1.101.3.4.2.1" or info["hash"] != digest:
         raise ValueError("The timestamp does not cover this checkpoint")
-    if query is not None:
-        _, query_start, _ = der(query, 0)
-        version_end = der(query, query_start)[2]
-        imprint_end = der(query, version_end)[2]
-        nonce_tag, _, nonce_end = der(query, imprint_end)
-        if nonce_tag != 0x02 or query[imprint_end:nonce_end] not in token[at:]:
-            raise ValueError("The timestamp nonce differs from the request")
-    found = re.search(rb"\x18[\x0f-\x18](\d{14})(?:\.\d{1,6})?Z", token[at:])
-    when = None
-    if found:
-        t = found[1].decode()
-        when = t[0:4] + "-" + t[4:6] + "-" + t[6:8] + "T" + t[8:10] + ":" + t[10:12] + ":" + t[12:14] + "Z"
-    return {"status": status, "time": when}
+    if query is not None and info["nonce"] != query_nonce(query):
+        raise ValueError("The timestamp nonce differs from the request")
+    return {"status": token["status"], "time": info["time"].strftime("%Y-%m-%dT%H:%M:%SZ")}
+
+
+def signed_attributes(reply, start, end):
+    found = {}
+    for _, _, s, e in children(reply, start, end):
+        parts = children(reply, s, e)
+        if len(parts) != 2 or parts[0][0] != 0x06 or parts[1][0] != 0x31:
+            raise ValueError("Malformed signed attribute")
+        kind, values = parts
+        name = oid(reply, *kind[2:])
+        if name in found:
+            raise ValueError("Repeated signed attribute")
+        found[name] = children(reply, values[2], values[3])
+    return found
+
+
+def signing_certificate_hash(reply, attributes):
+    """The hash algorithm and the hash of the signer's certificate named in the ESS attribute."""
+    if SIGNING_CERTIFICATE_V2 in attributes:
+        name, default = SIGNING_CERTIFICATE_V2, hashes.SHA256
+    elif SIGNING_CERTIFICATE in attributes:
+        name, default = SIGNING_CERTIFICATE, hashes.SHA1
+    else:
+        raise ValueError("The timestamp does not name its signing certificate")
+    value = attributes[name][0]
+    certificates = children(reply, value[2], value[3])
+    first = children(reply, certificates[0][2], certificates[0][3])[0]
+    identifiers = children(reply, first[2], first[3])
+    algorithm = default
+    if identifiers[0][0] == 0x30:
+        algorithm = DIGESTS.get(oid(reply, *children(reply, identifiers[0][2], identifiers[0][3])[0][2:]))
+        identifiers = identifiers[1:]
+    if algorithm is None or identifiers[0][0] != 0x04:
+        raise ValueError("Unsupported signing certificate reference")
+    return algorithm, reply[identifiers[0][2]:identifiers[0][3]]
+
+
+def timestamp_signature(reply, roots):
+    """Who signed an RFC 3161 reply, checked: the hash of the TSTInfo in the signed attributes, the
+    signature over them, the certificate the ESS attribute names, its critical time-stamping key usage
+    as its only use, and a chain valid at the stamped time up to one of the given root certificates."""
+    token = timestamp_token(reply)
+    when = tst_info(token["tst"])["time"]
+    _, _, start, end = token["signer"]
+    items = children(reply, start, end)
+    if len(items) < 6 or items[3][0] != 0xA0 or items[4][0] != 0x30 or items[5][0] != 0x04:
+        raise ValueError("The timestamp signer has no signed attributes")
+    digest = DIGESTS.get(oid(reply, *children(reply, items[2][2], items[2][3])[0][2:]))
+    if digest is None:
+        raise ValueError("Unsupported timestamp digest algorithm")
+    attributes = signed_attributes(reply, items[3][2], items[3][3])
+    content_type, message_digest = attributes.get(CONTENT_TYPE), attributes.get(MESSAGE_DIGEST)
+    if not content_type or oid(reply, *content_type[0][2:]) != TST_INFO:
+        raise ValueError("The signed attributes do not describe a TSTInfo")
+    hasher = hashes.Hash(digest())
+    hasher.update(token["tst"])
+    if not message_digest or reply[message_digest[0][2]:message_digest[0][3]] != hasher.finalize():
+        raise ValueError("The signature does not cover this TSTInfo")
+    algorithm, named = signing_certificate_hash(reply, attributes)
+    raw = {}
+    for data in token["certificates"]:
+        raw[data] = x509.load_der_x509_certificate(data)
+    signer_data = None
+    for data in raw:
+        hasher = hashes.Hash(algorithm())
+        hasher.update(data)
+        if hasher.finalize() == named:
+            signer_data = data
+    if signer_data is None:
+        raise ValueError("The reply does not carry the certificate the signature names")
+    signer = raw[signer_data]
+    try:
+        usage = signer.extensions.get_extension_for_class(x509.ExtendedKeyUsage)
+    except x509.ExtensionNotFound:
+        usage = None
+    if not usage or not usage.critical or list(usage.value) != [x509.oid.ExtendedKeyUsageOID.TIME_STAMPING]:
+        raise ValueError("The signing certificate is not for time stamping only")
+    signed = b"\x31" + reply[items[3][1] + 1:items[3][3]]
+    signature = reply[items[5][2]:items[5][3]]
+    method = oid(reply, *children(reply, items[4][2], items[4][3])[0][2:])
+    key = signer.public_key()
+    try:
+        if isinstance(key, rsa.RSAPublicKey) and method in RSA_SIGNATURES:
+            key.verify(signature, signed, padding.PKCS1v15(), (RSA_SIGNATURES[method] or digest)())
+        elif isinstance(key, ec.EllipticCurvePublicKey) and method in ECDSA_SIGNATURES:
+            key.verify(signature, signed, ec.ECDSA(ECDSA_SIGNATURES[method]()))
+        else:
+            raise ValueError("Unsupported timestamp signature algorithm " + method)
+    except InvalidSignature:
+        raise ValueError("The timestamp signature is invalid") from None
+    trusted = {root.fingerprint(hashes.SHA256()): root for root in roots}
+    chain, current = [signer], signer
+    while not (len(chain) > 1 and chain[-1].fingerprint(hashes.SHA256()) in trusted):
+        if len(chain) > 8:
+            raise ValueError("The timestamp certificate chain is too long")
+        candidates = list(trusted.values()) + [c for c in raw.values() if c not in chain]
+        issuer = None
+        for candidate in candidates:
+            if candidate.subject != current.issuer:
+                continue
+            try:
+                current.verify_directly_issued_by(candidate)
+            except (ValueError, TypeError, InvalidSignature):
+                continue
+            issuer = candidate
+            break
+        if issuer is None:
+            raise ValueError("The timestamp certificate does not chain to a trusted root")
+        try:
+            constraints = issuer.extensions.get_extension_for_class(x509.BasicConstraints).value
+        except x509.ExtensionNotFound:
+            constraints = None
+        if not constraints or not constraints.ca:
+            raise ValueError("A certificate in the timestamp chain is not a certificate authority")
+        chain.append(issuer)
+        current = issuer
+    for certificate in chain:
+        if not certificate.not_valid_before_utc <= when <= certificate.not_valid_after_utc:
+            raise ValueError("A certificate in the timestamp chain was not valid at the stamped time")
+    root = chain[-1]
+    return {"signer": signer.subject.rfc4514_string(), "root": root.subject.rfc4514_string(),
+            "root_sha256": root.fingerprint(hashes.SHA256()).hex()}
 
 
 def ots_summary(proof, digest):
@@ -222,6 +434,161 @@ def canonical(value):
 
 def fingerprint(public_key):
     return hashlib.sha256(base64.b64decode(public_key, validate=True)).hexdigest()
+
+
+# RFC 9162 section 2.1: leaves are the 32 raw bytes of journal event hashes.
+# Kept here so the verifier shipped in each ZIP needs no TgWitness installation.
+MERKLE_EMPTY = hashlib.sha256(b"").digest()
+
+
+def merkle_leaf(event_hash):
+    return hashlib.sha256(b"\x00" + bytes.fromhex(event_hash)).digest()
+
+
+def merkle_node(left, right):
+    return hashlib.sha256(b"\x01" + left + right).digest()
+
+
+def hash_bytes(value):
+    if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
+        raise ValueError("Malformed SHA-256 commitment")
+    return bytes.fromhex(value)
+
+
+class MerkleFrontier:
+    """Streaming tree root using O(log n) memory, recomputed from exported events."""
+    def __init__(self):
+        self.nodes = []
+        self.count = 0
+
+    def append(self, event_hash):
+        node, level, count = merkle_leaf(event_hash), 0, self.count
+        while count & 1:
+            node = merkle_node(self.nodes[level], node)
+            self.nodes[level] = None
+            count >>= 1
+            level += 1
+        if level == len(self.nodes):
+            self.nodes.append(node)
+        else:
+            self.nodes[level] = node
+        self.count += 1
+
+    def root(self):
+        result = None
+        for node in self.nodes:
+            if node is not None:
+                result = node if result is None else merkle_node(node, result)
+        return result if result is not None else MERKLE_EMPTY
+
+
+def merkle_path(value):
+    if not isinstance(value, list) or len(value) > 64:
+        raise ValueError("Malformed or excessive Merkle proof")
+    return [hash_bytes(node) for node in value]
+
+
+def verify_inclusion(event_hash, index, size, root, path):
+    """RFC 9162 section 2.1.3.2; all unused/extra nodes are rejected."""
+    if not 0 <= index < size:
+        raise ValueError("Merkle leaf outside tree")
+    fn, sn, calculated = index, size - 1, merkle_leaf(event_hash)
+    for node in merkle_path(path):
+        if sn == 0:
+            raise ValueError("Excess Merkle inclusion nodes")
+        if fn & 1 or fn == sn:
+            calculated = merkle_node(node, calculated)
+            while fn and not fn & 1:
+                fn >>= 1
+                sn >>= 1
+        else:
+            calculated = merkle_node(calculated, node)
+        fn >>= 1
+        sn >>= 1
+    if sn != 0 or calculated != root:
+        raise ValueError("Event is not included in committed tree")
+
+
+def verify_consistency(first, second, first_root, second_root, path):
+    """RFC 9162 section 2.1.4.2, plus explicit empty/equal tree cases."""
+    nodes = merkle_path(path)
+    if not 0 <= first <= second:
+        raise ValueError("Invalid Merkle tree sizes")
+    if first == 0:
+        if nodes or first_root != MERKLE_EMPTY or (second == 0 and second_root != MERKLE_EMPTY):
+            raise ValueError("Invalid empty-tree consistency proof")
+        return
+    if first == second:
+        if nodes or first_root != second_root:
+            raise ValueError("Equal-size Merkle trees differ")
+        return
+    if not nodes:
+        raise ValueError("Missing Merkle consistency proof")
+    if first & (first - 1) == 0:
+        nodes.insert(0, first_root)
+    fn, sn = first - 1, second - 1
+    while fn & 1:
+        fn >>= 1
+        sn >>= 1
+    fr = sr = nodes[0]
+    for node in nodes[1:]:
+        if sn == 0:
+            raise ValueError("Excess Merkle consistency nodes")
+        if fn & 1 or fn == sn:
+            fr, sr = merkle_node(node, fr), merkle_node(node, sr)
+            while fn and not fn & 1:
+                fn >>= 1
+                sn >>= 1
+        else:
+            sr = merkle_node(sr, node)
+        fn >>= 1
+        sn >>= 1
+    if sn != 0 or fr != first_root or sr != second_root:
+        raise ValueError("Journal does not extend the previously committed tree")
+
+
+def verify_continuity(value, checkpoint, previous=None, challenge=None):
+    """Authenticate the tree, its journal head and its extension of a retained boundary."""
+    statement, proof = value["statement"], value["proof"]
+    if (set(value) != {"statement", "signature", "proof"}
+            or set(statement) != {"format", "public_key", "event_count", "head_hash", "root", "challenge"}
+            or set(proof) != {"from_count", "consistency", "head_path", "previous_head_path"}
+            or statement["format"] != "tgwitness-continuity-v1"):
+        raise ValueError("Unexpected continuity proof fields")
+    count, start = statement["event_count"], proof["from_count"]
+    if any(type(n) is not int or not 0 <= n < 2**63 for n in (count, start)) or start > count:
+        raise ValueError("Invalid continuity boundary")
+    root = hash_bytes(statement["root"])
+    hash_bytes(statement["head_hash"])
+    if not isinstance(statement["challenge"], str) or not re.fullmatch(r"[0-9a-f]{32}", statement["challenge"]):
+        raise ValueError("Missing continuity challenge")
+    if statement["challenge"] != challenge:
+        raise ValueError("Continuity challenge differs from this check")
+    for field in ("public_key", "event_count", "head_hash"):
+        if statement[field] != checkpoint[field]:
+            raise ValueError("Continuity proof differs from checkpoint: " + field)
+    Ed25519PublicKey.from_public_bytes(base64.b64decode(statement["public_key"], validate=True)).verify(
+        base64.b64decode(value["signature"], validate=True), canonical(statement))
+    if count:
+        verify_inclusion(statement["head_hash"], count - 1, count, root, proof["head_path"])
+    elif root != MERKLE_EMPTY or statement["head_hash"] != "0" * 64 or proof["head_path"]:
+        raise ValueError("Invalid empty journal commitment")
+    expected = previous["event_count"] if previous else 0
+    if start != expected:
+        raise ValueError("Continuity proof starts at a different retained boundary")
+    if start:
+        verify_inclusion(previous["head_hash"], start - 1, count, root, proof["previous_head_path"])
+    elif proof["previous_head_path"]:
+        raise ValueError("Unexpected previous-head proof for empty journal")
+    if previous and previous.get("root"):
+        verify_consistency(start, count, hash_bytes(previous["root"]), root, proof["consistency"])
+    elif start == 0:
+        verify_consistency(0, count, MERKLE_EMPTY, root, proof["consistency"])
+    else:
+        # Upgrading an old witness: the previous chain head is included, but no
+        # old Merkle root was retained. This is a baseline, not retroactive proof.
+        merkle_path(proof["consistency"])
+    return statement
 
 
 LIVENESS_GAP_SECONDS = 180  # an observing collector writes a heartbeat every minute
@@ -578,9 +945,11 @@ def verify_capture(value, checkpoint):
 
 def bundle_capture_prefixes(bundle_path, boundaries):
     wanted, result = set(boundaries), {}
+    tree = MerkleFrontier()
     counts, last = dict.fromkeys(CAPTURE_KINDS, 0), None
     if 0 in wanted:
-        result[0] = {"head_hash": "0" * 64, "counts": dict(counts), "last_message_at": None}
+        result[0] = {"head_hash": "0" * 64, "counts": dict(counts), "last_message_at": None,
+                     "root": tree.root().hex()}
     if not wanted:
         return result
     limit = max(wanted)
@@ -589,12 +958,14 @@ def bundle_capture_prefixes(bundle_path, boundaries):
             event = json.loads(line)
             if event["seq"] > limit:
                 break
+            tree.append(event["hash"])
             if event["kind"] in counts:
                 counts[event["kind"]] += 1
                 if event["kind"].startswith("message."):
                     last = max(last or event["observed_at"], event["observed_at"])
             if event["seq"] in wanted:
-                result[event["seq"]] = {"head_hash": event["hash"], "counts": dict(counts), "last_message_at": last}
+                result[event["seq"]] = {"head_hash": event["hash"], "counts": dict(counts), "last_message_at": last,
+                                        "root": tree.root().hex()}
     return result
 
 
@@ -657,6 +1028,7 @@ def verify_witness(path, expected_fingerprint=None):
             if member_digest(archive, name) != digest:
                 raise ValueError("File hash mismatch: " + name)
         anchors, silent, posted, failures, statements, interval = [], [], {}, [], {}, None
+        retained = {}
 
         def observed(stream):
             """One pass: each event is read when the chain check asks for it, then summarised."""
@@ -680,6 +1052,20 @@ def verify_witness(path, expected_fingerprint=None):
                                 or captured["head_hash"] != payload["head_hash"]):
                             raise ValueError("Witness capture proof differs from its anchor")
                         anchors[-1]["capture"] = payload["capture"]
+                    collector_key = payload.get("collector_fingerprint")
+                    if payload.get("status") == "ok":
+                        prior = retained.get(collector_key)
+                        if payload.get("continuity") is not None:
+                            if not payload.get("capture"):
+                                raise ValueError("Continuity proof has no matching capture proof")
+                            committed = verify_continuity(payload["continuity"], payload["checkpoint"]["statement"],
+                                                          prior, captured["challenge"])
+                            anchors[-1]["continuity"] = payload["continuity"]
+                            anchors[-1]["root"] = committed["root"]
+                        elif prior and prior.get("root"):
+                            raise ValueError("Witness accepted a continuity downgrade")
+                        retained[collector_key] = {k: anchors[-1][k] for k in ("event_count", "head_hash", "root")
+                                                  if k in anchors[-1]}
                     statements[event["seq"]] = post_statement(event, fp)
                 elif kind == "witness.no_response":
                     silent.append({"seq": event["seq"], "at": event["observed_at"], "error": payload.get("error")})
@@ -731,28 +1117,48 @@ def cross_check_witness(witness, bundle_path, bundle_result):
                                          if a["status"] == "ok" and 0 < (a["event_count"] or 0) <= count})
     prefixes = bundle_capture_prefixes(bundle_path, {a["event_count"] for a in mine
                                                     if a.get("capture") and a["status"] == "ok" and a["event_count"] <= count})
-    consistent, conflicts, later, anomalies = 0, [], 0, []
+    consistent, conflicts, later, anomalies, matched = 0, [], 0, [], []
     for anchor in mine:
         if anchor["status"] != "ok":
             anomalies.append(anchor)
         elif anchor["event_count"] > count:
             later += 1
-        elif anchor["event_count"] == 0 or hashes.get(anchor["event_count"]) == anchor["head_hash"]:
+        elif ("0" * 64 if anchor["event_count"] == 0 else hashes.get(anchor["event_count"])) == anchor["head_hash"]:
             capture = anchor.get("capture", {}).get("statement")
             prefix = prefixes.get(anchor["event_count"])
-            if capture and (not prefix or any(prefix[k] != capture[k] for k in ("counts", "last_message_at"))):
+            if (capture and (not prefix or any(prefix[k] != capture[k] for k in ("counts", "last_message_at")))
+                    or anchor.get("root") and (not prefix or prefix["root"] != anchor["root"])):
                 conflicts.append(anchor)
             else:
                 consistent += 1
+                matched.append(anchor)
         else:
             conflicts.append(anchor)
-    periods, gaps = witnessed_periods(witness, key)
+    # A later head cannot be checked against an earlier export. Do not describe
+    # it, or a conflicting head, as a witnessed period of this particular file.
+    matching_sequences = {a["seq"] for a in matched}
+    timeline = []
+    for anchor in witness["anchors"]:
+        if anchor["collector_fingerprint"] == key and anchor["status"] == "ok":
+            if anchor["event_count"] > count:
+                continue
+            if anchor["seq"] not in matching_sequences:
+                anchor = {**anchor, "status": "conflict"}
+        timeline.append(anchor)
+    periods, gaps = witnessed_periods({**witness, "anchors": timeline}, key)
+    verified_through = max((a["event_count"] for a in matched), default=0)
+    continuity_through = max((a["event_count"] for a in matched if a.get("root")), default=0)
     invalid = sum(1 for a in witness["anchors"] if a["status"] == "invalid")
     return {"witness_fingerprint": witness["fingerprint"], "anchors_for_this_key": len(mine),
             "other_keys": len(witness["anchors"]) - len(mine) - invalid, "invalid_answers": invalid,
             "consistent": consistent, "conflicts": conflicts,
             "after_export": later, "anomalies": anomalies, "no_response": len(witness["no_response"]),
-            "witnessed": periods, "witness_gaps": gaps}
+            "witnessed": periods, "witness_gaps": gaps,
+            "verified_through_event": verified_through, "unwitnessed_events": count - verified_through,
+            "continuity_verified_through_event": continuity_through,
+            "export_head_witnessed": any(a["event_count"] == count for a in matched),
+            "export_head_witness_records": [a["seq"] for a in matched if a["event_count"] == count],
+            "witness_key_pinned": bool(witness.get("key_pinned"))}
 
 
 def channel_texts(source):
@@ -811,11 +1217,13 @@ def check_channel(witness, source):
                 if date:
                     dates[statement["seq"]] = date
     posted = set(witness["posted"])
-    return {"matching": len(matching), "invalid_signatures": invalid, "differ_from_journal": differing,
+    return {"matching": len(matching), "matching_records": sorted(matching),
+            "invalid_signatures": invalid, "differ_from_journal": differing,
             "other_witnesses": foreign,
             "posted_but_not_found": sorted(posted - matching),
             "never_posted": sorted(set(witness["statements"]) - posted),
-            "telegram_post_dates": dates}
+            "telegram_post_dates": dates,
+            "post_date_verification": "not-performed"}
 
 
 def verify_dossier(path, expected_fingerprint=None, bundle=None):
@@ -897,11 +1305,15 @@ def main():
     parser.add_argument("--tsa-ca", type=Path, help="Root certificate of the timestamp authority (PEM)")
     parser.add_argument("--witness", type=Path, help="Witness journal export to cross-check an evidence ZIP against")
     parser.add_argument("--witness-fingerprint", help="Witness key fingerprint retained independently")
+    parser.add_argument("--require-witness", action="store_true",
+                        help="Require a pinned witness checkpoint matching the full evidence ZIP's final record")
     parser.add_argument("--channel", help="Witness channel posts: Telegram Desktop result.json, saved page or t.me/s URL")
     parser.add_argument("--evidence", type=Path, help="With a profile/proof JSON: independently verify the matching evidence ZIP")
     parser.add_argument("--max-gib", type=int, default=MAX_UNCOMPRESSED_GIB,
                         help="Largest uncompressed archive to read, in GiB (default 4)")
     args = parser.parse_args()
+    if args.require_witness and (not args.witness or not args.witness_fingerprint):
+        parser.error("--require-witness requires --witness and --witness-fingerprint")
     globals()["MAX_UNCOMPRESSED_GIB"] = max(1, args.max_gib)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="backslashreplace")  # chat titles on legacy Windows consoles
@@ -942,11 +1354,31 @@ def main():
                 notes += ["Witnessed from " + p["from"] + " to " + p["to"] for p in result["witness"]["witnessed"]]
                 if not result["witness"]["consistent"]:
                     notes.append("The witness has no answer signed by this export's key: nothing here is witnessed.")
+                notes.append("Witness checkpoints match through record "
+                             + str(result["witness"]["verified_through_event"]) + " of " + str(result["events"]) + ".")
+                if result["witness"]["unwitnessed_events"]:
+                    notes.append(str(result["witness"]["unwitnessed_events"])
+                                 + " trailing record(s) have no matching witness checkpoint.")
                 # A pinned witness that saw this key answering vouches for the key it saw.
                 pinned = pinned or bool(args.witness_fingerprint and result["witness"]["consistent"])
         check = result.get("channel_check") or (result.get("witness") or {}).get("channel_check")
         if check and (check["invalid_signatures"] or check["differ_from_journal"]):
             raise ValueError("Channel posts do not match the witness journal")
+        if check and check["telegram_post_dates"]:
+            notes.append("Channel dates are supplied metadata; witness signatures do not authenticate publication times.")
+        if args.require_witness:
+            witnessed = result.get("witness")
+            if not witnessed:
+                raise ValueError("--require-witness requires a full evidence ZIP and its witness journal")
+            if not witnessed["witness_key_pinned"] or not witnessed["export_head_witnessed"]:
+                raise ValueError("No pinned witness checkpoint matches the exported journal head; "
+                                 "retain a witness checkpoint at the export boundary")
+            if witnessed["witness_fingerprint"] == result["fingerprint"]:
+                raise ValueError("Collector and independent witness must use different trusted signing keys")
+            if check and (check["posted_but_not_found"] or not
+                          set(check["matching_records"]).intersection(witnessed["export_head_witness_records"])):
+                raise ValueError("Requested channel evidence is missing signed witness posts at the export boundary")
+            result["witness_required"] = True
     except Exception as exc:
         parser.exit(1, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + str(exc) + "\n")
     print(json.dumps(result, indent=2))

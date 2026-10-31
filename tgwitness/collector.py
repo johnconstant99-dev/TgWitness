@@ -9,8 +9,10 @@ from contextlib import suppress
 from datetime import datetime, timezone
 from functools import wraps
 
+from collections import deque
+
 from telethon import events, utils
-from telethon.errors import SessionPasswordNeededError, FloodWaitError
+from telethon.errors import SessionPasswordNeededError, FloodWaitError, InvalidBufferError, RPCError
 from telethon.extensions import BinaryReader
 from telethon.sessions import StringSession
 from telethon.tl import functions, types
@@ -21,11 +23,14 @@ from . import keyboard
 from . import message_content
 from . import replica
 from . import tuning
+from .account_import import validate_string
 from .telegram_client import WitnessClient
 from .workers import complete_in_thread
 from .store import canonical, utcnow
 from .evidence import retain_checkpoint
-from .network import NetworkConfig
+from .netclient import RouteError, proxy_address
+from .network import NetworkConfig, NoRoute, RoutePolicy, saved_route
+from .proxy_catalog import NoProxyAvailable, ProxyPool, PublicCatalog
 from .monitoring import capture_settings, media_kind, monitoring_settings
 from .scope import allowed, folder_rule, in_folder, kind_of, recheck_settings, scope_settings
 from .verify import fingerprint
@@ -34,6 +39,16 @@ from .verify import fingerprint
 # limits and pace (dialogs, rechecks, downloads, heartbeats, client timeouts) are panel parameters
 # in tuning.PARAMETERS.
 STORAGE_RECHECK_SECONDS = 30
+# Automatic MTProxy routes: transport failures that move an account to another proxy
+# (thresholds are the "proxies" parameters).
+ROUTE_ERRORS = (OSError, TimeoutError, asyncio.IncompleteReadError, InvalidBufferError)
+EXPOSURE_MEANING = {
+    "hide": "Telegram is contacted only through a proxy; requests outside Telegram only through a proxy set for them.",
+    "fallback": "Automatic MTProxy; after the set minutes without a working proxy Telegram is contacted directly "
+                "and sees this server's address until a listed proxy answers again.",
+    "tunnel": "Direct connections are allowed: Telegram and other services may see this server's address "
+              "(or that of the tunnel or VPN it uses).",
+}
 MEMBERSHIP_ACTIONS = (types.MessageActionChatAddUser, types.MessageActionChatDeleteUser,
                       types.MessageActionChatJoinedByLink, types.MessageActionChatJoinedByRequest)
 
@@ -139,6 +154,8 @@ class Collector:
         self.login_client = None
         self.pending_credentials = None
         self.pending_account_id = None
+        self.pending_key_origin = None
+        self.pinned_proxy = None  # (name, checked address) of a listed proxy, see pin_proxy
         self.qr_task = None
         self.qr_state = None
         self.export_task = None
@@ -165,6 +182,12 @@ class Collector:
         self.account_guard = None
         self.reconnect_attempts = 0
         self.next_reconnect_at = 0
+        self.proxy_pool = None    # shared by the workspaces of one process; set by the app
+        self.auto_route = None    # (proxy id, pinned route) in automatic MTProxy mode
+        self.route_drops = deque()
+        self.direct_fallback = False  # automatic mode connected directly (the IP mode allows it)
+        self.unavailable_since = None  # since when no listed proxy has answered
+        self.pool_retry_at = 0
         self.target_ids = set()
         self.known_ids = set()
         self.target_revision = -1
@@ -186,7 +209,7 @@ class Collector:
     def status(self):
         credentials = self.vault.read("credentials")
         return {
-            "network": self.network_config().public(),
+            "network": self.route_status(),
             "phase": self.phase, "running": self.running,
             "connected": bool(self.client and self.client.is_connected()),
             "has_session": bool(credentials.get("session")),
@@ -424,7 +447,7 @@ class Collector:
                                      request_retries=self.param("telegram_request_retries"),
                                      connection_retries=self.param("telegram_connection_retries"),
                                      timeout=self.param("telegram_timeout_seconds"), catch_up=True,
-                                     **device, **self.network_config().client_options())
+                                     **device, **self.route_options())
         for handler, builder in ((self.on_new, events.NewMessage()),
                                  (self.on_edit, events.MessageEdited()),
                                  (self.on_delete, events.MessageDeleted()),
@@ -443,6 +466,7 @@ class Collector:
                     else:
                         self.buffer_overflow = True
             client.add_event_handler(active_client_only, builder)
+        client.route_id = self.current_route_id() if self.automatic() else None
         return client
 
     def save_update_state(self):
@@ -525,9 +549,10 @@ class Collector:
         ended, error = False, None
         try:
             if client is None:
+                await self.ensure_route()
                 client = self.make_client(credentials["api_id"], credentials["api_hash"], credentials["session"])
             if not client.is_connected():
-                await asyncio.wait_for(client.connect(), 25)
+                await self.connect_client(client)
             # auth.logOut: Telegram ends the session, so it also disappears from the account's devices.
             ended = bool(await asyncio.wait_for(client.log_out(), 25))
         except Exception as exc:
@@ -548,20 +573,301 @@ class Collector:
         return {"telegram_session_ended": ended, **({"error_type": error} if error else {})}
 
     def network_config(self):
-        return NetworkConfig.model_validate(self.vault.read("network"))
+        return saved_route(self.vault.read("network"))
+
+    def automatic(self):
+        return self.network_config().kind == "mtproxy_auto"
+
+    def pool(self):
+        if self.proxy_pool is None:
+            self.proxy_pool = ProxyPool(PublicCatalog(self.store.root))
+        return self.proxy_pool
+
+    @property
+    def route_owner(self):
+        return str(self.store.root)
+
+    # ---- IP mode and requests outside Telegram ----
+    def route_policy(self):
+        """This workspace's IP mode; a workspace that chose a direct route before the modes existed keeps it."""
+        saved = self.store.get_setting("route_policy", None)
+        if saved is None:
+            return RoutePolicy(exposure="tunnel" if self.network_config().kind == "direct" else "hide").model_dump()
+        return RoutePolicy.model_validate(saved).model_dump()
+
+    def outside_proxy(self):
+        saved = self.vault.read("outside_proxy")
+        return saved_route(saved) if saved else None
+
+    def outside_route(self):
+        """The route for requests outside Telegram (timestamps, notifications, off-site copy, source check,
+        proxy lists): the proxy set for them, this workspace's SOCKS5/HTTP route, or direct where the IP mode allows."""
+        policy = self.route_policy()
+        if not policy["outside_enabled"]:
+            return NoRoute(RouteError("Requests outside Telegram are turned off for this workspace. "
+                                      "Turn them on under Account → Connection settings."))
+        proxy = self.outside_proxy()
+        if proxy:
+            return proxy
+        network = self.network_config()
+        if network.kind in ("socks5", "http"):
+            return network
+        if policy["exposure"] == "hide":
+            return NoRoute(RouteError("Hide IP mode sends requests outside Telegram only through a proxy. Set a "
+                                      "SOCKS5 or HTTP proxy for them under Account → Connection settings."))
+        return NetworkConfig(kind="direct")
+
+    def policy_state(self):
+        proxy, route = self.outside_proxy(), self.outside_route()
+        return {**self.route_policy(), "outside_proxy": proxy.public() if proxy else None,
+                "outside_route": route.kind, "outside_problem": str(route.error) if route.kind == "none" else None,
+                "direct_fallback": self.direct_fallback}
+
+    async def set_route_policy(self, policy, outside=None, remove_outside=False):
+        if policy.exposure != "tunnel" and self.network_config().kind == "direct":
+            raise ValueError("This workspace connects to Telegram directly. Choose a proxy route first, "
+                             "then change the IP mode.")
+        if outside is not None and outside.kind not in ("socks5", "http"):
+            raise ValueError("Requests outside Telegram use a SOCKS5 or HTTP proxy.")
+        if outside is not None:
+            self.vault.save("outside_proxy", outside.model_dump())
+        elif remove_outside:
+            self.vault.save("outside_proxy", {})
+        proxy = self.outside_proxy()
+        with self.store.transaction():
+            self.store.set_setting("route_policy", policy.model_dump())
+            self.store.append("network.policy_changed", {
+                **policy.model_dump(), "outside_proxy": proxy.receipt() if proxy else None,
+                "outside_route": self.outside_route().kind, "meaning": EXPOSURE_MEANING[policy.exposure]})
+        if policy.exposure == "hide" and self.direct_fallback:
+            # Hide IP: leave the direct connection at once; reconnecting waits for a listed proxy.
+            self.direct_fallback = False
+            if self.client:
+                await self.client.disconnect()
+        return self.policy_state()
+
+    # ---- automatic MTProxy ----
+    def share(self):
+        return self.param("proxy_max_accounts")
+
+    def current_route_id(self):
+        return "direct" if self.direct_fallback else self.auto_route[0] if self.auto_route else None
+
+    def route_options(self):
+        """Telethon connection options of this workspace's route; automatic mode uses its chosen proxy."""
+        if not self.automatic():
+            config = self.network_config()
+            if self.pinned_proxy and self.pinned_proxy[0] == config.host:
+                config = config.model_copy(update={"host": self.pinned_proxy[1]})
+            return config.client_options()
+        if self.direct_fallback:
+            return {}
+        if not self.auto_route:
+            raise NoProxyAvailable("No automatic MTProxy has been chosen yet.")
+        return self.auto_route[1].client_options()
+
+    def route_receipt(self):
+        receipt = self.network_config().receipt(self.direct_fallback)
+        if receipt["kind"] == "mtproxy_auto":
+            receipt["proxy_id"] = self.auto_route[0] if self.auto_route else None
+        receipt["exposure"] = self.route_policy()["exposure"]
+        return receipt
+
+    def route_status(self):
+        public = self.network_config().public(self.direct_fallback)
+        if public["kind"] == "mtproxy_auto":
+            public.update(self.pool().describe(self.route_owner))
+        public["exposure"] = self.route_policy()["exposure"]
+        return public
+
+    def fallback_due(self):
+        """Whether the IP mode now lets this workspace reach Telegram directly, as no listed proxy answers."""
+        exposure = self.route_policy()["exposure"]
+        if exposure == "hide":
+            return False
+        if self.unavailable_since is None:
+            self.unavailable_since = time.time()
+        wait = 0 if exposure == "tunnel" else self.param("proxy_fallback_minutes") * 60
+        return time.time() - self.unavailable_since >= wait
+
+    def use_direct(self, reason):
+        self.pool_retry_at = time.time() + 120
+        self.pool().waiting.add(self.route_owner)  # the pool keeps checking proxies for this workspace
+        if self.direct_fallback:
+            return
+        self.direct_fallback, self.auto_route = True, None
+        self.store.append("network.route_fallback", {
+            "kind": "mtproxy_auto", "to": "direct", "reason": reason, "exposure": self.route_policy()["exposure"],
+            "without_proxy_seconds": round(time.time() - (self.unavailable_since or time.time())),
+            "fallback_to_direct": True,
+            "meaning": "No listed MTProxy answered; Telegram sees this server's address until one answers again."})
+
+    async def ensure_route(self):
+        """Automatic mode: choose this workspace's proxy (the same one as before while it works); where the
+        IP mode allows, connect directly while no listed proxy answers."""
+        if not self.automatic():
+            await self.pin_proxy()
+            return
+        if self.auto_route:
+            return
+        if self.direct_fallback and time.time() < self.pool_retry_at:
+            return  # stays direct until the next look at the pool
+        try:
+            alias, route = await self.pool().acquire(
+                self.route_owner, preferred=self.store.get_setting("auto_route", None), share=self.share())
+        except NoProxyAvailable:
+            if self.direct_fallback or self.fallback_due():
+                self.use_direct("no_working_proxy")
+                return
+            raise
+        returned = self.direct_fallback
+        self.direct_fallback, self.unavailable_since = False, None
+        self.pool().waiting.discard(self.route_owner)
+        self.auto_route = (alias, route)
+        with self.store.transaction():
+            self.store.set_setting("auto_route", alias)
+            self.store.set_setting("auto_route_since", time.time())
+            self.store.append("network.route_assigned", {
+                "kind": "mtproxy_auto", "proxy_id": alias, "source": self.proxy_source(alias),
+                **({"returned_from_direct": True} if returned else {}), "fallback_to_direct": False,
+                "meaning": "Telegram traffic of this account goes through this listed MTProxy until it fails."})
+
+    async def pin_proxy(self):
+        """A listed proxy is resolved and checked once here, and Telethon connects to that address: a name
+        cannot later resolve inside this machine or its network unless the main administrator set it."""
+        config = self.network_config()
+        self.pinned_proxy = None
+        if config.kind in ("socks5", "http", "mtproxy"):
+            try:
+                self.pinned_proxy = (config.host, await proxy_address(config))
+            except RouteError as exc:
+                raise ValueError(str(exc)) from None
+
+    async def align(self, client):
+        """Point a client at the workspace's current automatic route before it connects."""
+        wanted = self.current_route_id()
+        if wanted and getattr(client, "route_id", None) != wanted:
+            await client.switch_route(self.route_options())
+            client.route_id = wanted
+
+    def proxy_source(self, alias):
+        try:
+            return self.pool().entries()[1][alias]["label"]
+        except (KeyError, ValueError):
+            return None
+
+    def record_route(self, alias, route, old, reason, exc=None, cooldown=0):
+        self.auto_route, self.unavailable_since = (alias, route), None
+        with self.store.transaction():
+            self.store.set_setting("auto_route", alias)
+            self.store.set_setting("auto_route_since", time.time())
+            self.store.append("network.route_rotated", {
+                "kind": "mtproxy_auto", "from_proxy_id": old, "to_proxy_id": alias,
+                "source": self.proxy_source(alias), "reason": reason,
+                **({"error_type": type(exc).__name__} if exc else {}),
+                "previous_cooldown_seconds": cooldown, "fallback_to_direct": False})
+
+    async def rotate_route(self, client, reason, exc=None):
+        """Automatic mode: rest the client's failing proxy and move this account to the next working one;
+        where the IP mode allows, connect directly when none answers."""
+        old = getattr(client, "route_id", None)
+        if old == "direct" or (self.auto_route and self.auto_route[0] != old):
+            return  # a direct fallback is not rotated / another connection already moved the workspace
+        cooldown = self.pool().degrade(old, type(exc).__name__ if exc else reason,
+                                       self.param("proxy_cooldown_minutes") * 60,
+                                       self.param("proxy_cooldown_max_hours") * 3600) if old else 0
+        self.auto_route = None
+        self.route_drops.clear()
+        try:
+            alias, route = await self.pool().acquire(self.route_owner, avoid={old} if old else (), share=self.share())
+        except NoProxyAvailable:
+            fallback = self.fallback_due()
+            self.store.append("network.route_unavailable", {
+                "kind": "mtproxy_auto", "previous_proxy_id": old, "reason": reason,
+                **({"error_type": type(exc).__name__} if exc else {}), "fallback_to_direct": fallback,
+                "meaning": "No listed MTProxy answered; Telegram is contacted directly, as the IP mode allows."
+                           if fallback else "No listed MTProxy answered; Telegram is not contacted until one does."})
+            if fallback:
+                self.use_direct("no_working_proxy")
+                return
+            with suppress(Exception):
+                await client.disconnect()
+            raise
+        self.record_route(alias, route, old, reason, exc, cooldown)
+
+    async def planned_rotation(self):
+        """Move to another working proxy after the set hours although the current one works."""
+        hours, since = self.param("proxy_rotate_hours"), self.store.get_setting("auto_route_since", None)
+        if not hours or not self.auto_route or self.direct_fallback or since is None or time.time() - since < hours * 3600:
+            return
+        old = self.auto_route[0]
+        try:
+            alias, route = await self.pool().acquire(self.route_owner, avoid={old}, share=self.share())
+        except NoProxyAvailable:
+            self.pool().keep(self.route_owner, old)  # no other proxy answers: stay, ask again after the interval
+            self.store.set_setting("auto_route_since", time.time())
+            return
+        self.record_route(alias, route, old, "planned")
+        await self.client.disconnect()  # the monitor reconnects through the new proxy
+
+    async def review_route(self):
+        """Automatic mode while connected: leave a direct fallback once a listed proxy answers again,
+        and switch proxies on the planned schedule."""
+        if self.direct_fallback:
+            if time.time() >= self.pool_retry_at and (self.route_policy()["exposure"] == "hide"
+                                                      or self.pool().available(self.route_owner, self.share())):
+                self.pool_retry_at = 0
+                await self.client.disconnect()  # reconnecting goes through ensure_route, a proxy first
+            return
+        await self.planned_rotation()
+
+    async def connect_client(self, client):
+        """Connect; in automatic mode a proxy that fails is set aside and the next one is tried."""
+        attempts = self.param("proxy_connect_attempts")
+        for attempt in range(1, attempts + 1):
+            automatic = self.automatic()
+            if automatic:
+                await self.ensure_route()
+                await self.align(client)
+            try:
+                await asyncio.wait_for(client.connect(), 25)
+            except RPCError:
+                raise
+            except Exception as exc:
+                # Something that is not a working proxy can answer with garbage (ValueError, parse
+                # errors); that is a failed route, never a lost authorization.
+                proxied = automatic and getattr(client, "route_id", None) not in (None, "direct")
+                if proxied:
+                    await self.rotate_route(client, "connect_failed", exc)
+                if not proxied or attempt == attempts:
+                    if isinstance(exc, ROUTE_ERRORS):
+                        raise
+                    raise ConnectionError("Telegram transport failed: " + type(exc).__name__) from exc
+            else:
+                if automatic and not self.direct_fallback:
+                    self.pool().succeeded(client.route_id)
+                return
 
     async def set_network(self, config):
         if self.running:
             raise ValueError("Pause observation before changing the Telegram route.")
+        if config.kind == "direct" and self.route_policy()["exposure"] != "tunnel":
+            raise ValueError("A direct route is allowed only in the mode for a server behind a tunnel or VPN. "
+                             "Change the IP mode first.")
         # Cancel pending login and discard clients so no old route can be reused.
         await self.cancel_login()
         if self.client:
             await self.client.disconnect()
         self.client = None
         self.dialog_cache = {}
+        self.pool().release(self.route_owner)
+        self.pool().waiting.discard(self.route_owner)
+        self.auto_route, self.direct_fallback, self.unavailable_since = None, False, None
+        self.pinned_proxy = None
         self.vault.save("network", config.model_dump())
         with self.store.transaction():
             self.store.set_setting("resume", False)
+            self.store.set_setting("auto_route", None)
             self.store.append("network.changed", config.receipt())
         self.phase = "offline"
         self.last_error = None
@@ -572,18 +878,21 @@ class Collector:
         credentials = self.vault.read("credentials")
         api_id, api_hash = ((credentials["api_id"], credentials["api_hash"]) if credentials.get("api_id")
                             else api_pool.login_order()[0])
-        client = self.make_client(api_id, api_hash)
+        client = None
         try:
-            await asyncio.wait_for(client.connect(), 25)
-            self.store.append("network.probe", {**self.network_config().receipt(), "connected": True,
+            await self.ensure_route()
+            client = self.make_client(api_id, api_hash)
+            await self.connect_client(client)
+            self.store.append("network.probe", {**self.route_receipt(), "connected": True,
                               "meaning": "Telegram transport connected; capture completeness is not tested"})
-            return {"connected": True, "route": self.network_config().public()}
+            return {"connected": True, "route": self.route_status()}
         except Exception as exc:
-            self.store.append("network.probe", {**self.network_config().receipt(), "connected": False,
+            self.store.append("network.probe", {**self.route_receipt(), "connected": False,
                                                "error_type": type(exc).__name__})
             raise
         finally:
-            await client.disconnect()
+            if client:
+                await client.disconnect()
 
     def login_pairs(self, api_id, api_hash):
         """An entered, imported or own saved pair is used as is; otherwise rotate through the built-in pool."""
@@ -614,12 +923,17 @@ class Collector:
         if self.running:
             raise ValueError("Pause observation before changing accounts.")
         await self.cancel_login()
+        # A session brought from elsewhere connects only to its DC's reference address.
+        session = validate_string(session) if session else ""
+        await self.ensure_route()
         candidate = self.make_client(api_id, api_hash, session)
         self.login_client = candidate
         self.pending_credentials = {"api_id": api_id, "api_hash": api_hash}
         self.pending_account_id = expected_user_id
+        # An imported key is also known outside this server; a sign-in creates one here.
+        self.pending_key_origin = "imported" if session else "created"
         try:
-            await asyncio.wait_for(candidate.connect(), 25)
+            await self.connect_client(candidate)
             is_authorized = await candidate.is_user_authorized()
             if session and not is_authorized:
                 raise ValueError("This session is not authorized.")
@@ -750,8 +1064,9 @@ class Collector:
                 await self.client.disconnect()
             self.vault.save("credentials", credentials)
             with self.store.transaction():
-                self.store.set_setting("account", {"id": me.id, "username": me.username})
-                self.store.append("account.authorized", {"account_id": me.id})
+                self.store.set_setting("account", {"id": me.id, "username": me.username,
+                                                   "key_origin": self.pending_key_origin})
+                self.store.append("account.authorized", {"account_id": me.id, "key_origin": self.pending_key_origin})
         except BaseException:
             await self.cancel_login()
             self.phase = "ready" if self.vault.read("credentials").get("session") else "offline"
@@ -771,9 +1086,10 @@ class Collector:
         if not credentials.get("session"):
             raise ValueError("Connect a Telegram account first.")
         if not self.client:
+            await self.ensure_route()
             self.client = self.make_client(credentials["api_id"], credentials["api_hash"], credentials["session"])
         if not self.client.is_connected():
-            await asyncio.wait_for(self.client.connect(), 25)
+            await self.connect_client(self.client)
         if not await self.client.is_user_authorized():
             self.phase = "login_required"
             raise ValueError("Telegram authorization expired. Sign in again.")
@@ -932,6 +1248,9 @@ class Collector:
         # A running export shares this client; pausing observation must not cut it off.
         if self.client and (shutdown or not (self.export_busy() or self.export_claim)):
             await self.client.disconnect()
+        if shutdown and self.proxy_pool:  # a closed or deleted workspace no longer holds or waits for a proxy
+            self.proxy_pool.release(self.route_owner)
+            self.proxy_pool.waiting.discard(self.route_owner)
         await self.cancel_login()
         self.phase = "paused"
 
@@ -954,8 +1273,12 @@ class Collector:
                     "completeness": "unknown; intermediate events may be missing"})
                 if connected:
                     self.recheck_wakeup.set()
+                else:
+                    await self.note_drop()
             previous = connected
             self.phase = "observing" if connected else "reconnecting"
+            if connected and self.automatic():
+                await self.review_route()
             if not connected:
                 await self.reconnect()
                 if not self.running:
@@ -973,6 +1296,18 @@ class Collector:
                 checkpoint_at = now
                 retain_checkpoint(self.store, self.vault)
             await asyncio.sleep(min(10, interval))
+
+    async def note_drop(self):
+        """Automatic mode: a proxy that keeps losing the connection is replaced before reconnecting."""
+        if not self.automatic() or self.direct_fallback:
+            return
+        now = time.monotonic()
+        self.route_drops.append(now)
+        while self.route_drops and now - self.route_drops[0] > self.param("proxy_drop_window_minutes") * 60:
+            self.route_drops.popleft()
+        if len(self.route_drops) >= self.param("proxy_drop_limit"):
+            with suppress(NoProxyAvailable):  # reconnect() then records the failure and retries later
+                await self.rotate_route(self.client, "repeated_disconnect")
 
     async def reconnect(self):
         now = time.time()

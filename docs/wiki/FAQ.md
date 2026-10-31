@@ -59,7 +59,7 @@ They are optional in the normal sign-in flow. The workspace can reuse saved/impo
 
 ## Can several people have separate access permissions?
 
-Not in the current single-operator model. The panel token controls every workspace. A witness token has a separate, read-only capability; it is not a general user role.
+Yes. Issue a token under **Access**, choose its workspaces/chats and permissions, then set limits if needed. The main panel token remains unrestricted; a witness token is separate. See [access and permissions](Access.md).
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
@@ -81,7 +81,7 @@ They may have different access, membership dates and visibility. Each workspace 
 
 ## Does a public proxy failure switch me to a direct connection?
 
-No automatic direct fallback is configured. Other network functions, such as witness HTTP requests or feed downloads, have separate route settings.
+Hide IP mode does not fall back to Direct. The explicitly selected fallback mode can connect directly after its configured delay; tunnel/VPN mode permits direct routes. External HTTP requests and the independent witness have their own routing rules. See [connection routes](Proxies.md).
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>

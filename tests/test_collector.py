@@ -39,6 +39,12 @@ class FakeClient:
     async def disconnect(self):
         self.connected = False
 
+    async def switch_route(self, options):
+        self.connected = False
+        self.options.pop("connection", None)
+        self.options.pop("proxy", None)
+        self.options.update(options)
+
     def is_connected(self):
         return self.connected
 
@@ -105,6 +111,8 @@ def test_authorize_2fa_restore_and_no_codes_on_disk(journal, tmp_path):
         assert await collector.confirm_password("not-persisted-password") == {"step": "authorized"}
         saved = vault.read("credentials")
         assert set(saved) == {"api_id", "api_hash", "session"}
+        authorized = [e for e in store.all_events() if e["kind"] == "account.authorized"]
+        assert authorized[-1]["payload"]["key_origin"] == "created" == store.get_setting("account")["key_origin"]
         collector2 = Collector(store, vault, FakeClient)
         await collector2.restore()
         assert collector2.client.is_connected()

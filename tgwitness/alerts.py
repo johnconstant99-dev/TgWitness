@@ -36,6 +36,12 @@ SUMMARY_KINDS = ("message.new", "message.recovered", "message.edited", "message.
 # These services open their own sockets (SMTP, IRC, MQTT, XMPP...), so they cannot use the workspace proxy.
 DIRECT_SOCKET = {"amqp", "amqps", "aprs", "deltachat", "deltachats", "growl", "irc", "ircs", "mailto", "mailtos",
                  "mqtt", "mqtts", "rsyslog", "smpp", "smpps", "xmpp", "xmpps"}
+# Of those, all but email bypass the destination check below (raw sockets, paho, UDP syslog).
+OWN_SOCKET = DIRECT_SOCKET - {"mailto", "mailtos"}
+
+
+def own_socket(url):
+    return url.split("://", 1)[0].lower() in OWN_SOCKET
 _send_lock = threading.Lock()
 
 
@@ -67,7 +73,9 @@ def describe(url):
 
 
 def route_problem(urls, network):
-    if network.kind == "mtproxy":
+    if network.kind == "none":  # the workspace allows no requests outside Telegram (network.NoRoute)
+        return str(network.error)
+    if network.telegram_only:
         return "Notifications are not sent over MTProxy. Choose Direct, SOCKS5 or HTTP in Account → Connection settings."
     if network.kind != "direct" and any(url.split("://", 1)[0].lower() in DIRECT_SOCKET for url in urls):
         return ("A destination connects without HTTP (email, IRC, MQTT, XMPP and similar) and cannot use this "
@@ -75,11 +83,13 @@ def route_problem(urls, network):
     return None
 
 
-def proxy_url(network):
+def proxy_url(network, address=None):
+    """address: the proxy's resolved and checked address, connected instead of its name."""
     if network.kind == "direct":
         return None
     login = (quote(network.username, safe="") + ":" + quote(network.password, safe="") + "@") if network.username else ""
-    host = "[" + network.host + "]" if ":" in network.host else network.host
+    host = address or network.host
+    host = "[" + host + "]" if ":" in host else host
     # socks5h: names are resolved by the proxy, so lookups do not leave through the local network.
     return ("socks5h" if network.kind == "socks5" else "http") + "://" + login + host + ":" + str(network.port)
 
@@ -167,10 +177,18 @@ def deliver(urls, title, body, network):
     problem = route_problem(urls, network)
     if problem:
         return {"sent": 0, "failed": len(urls), "error": problem}
+    address = None
+    if network.kind != "direct":
+        # The SOCKS library connects the proxy itself, past the guard: checked and pinned here.
+        try:
+            address = netclient.checked_proxy(network, list(dict.fromkeys(
+                info[4][0] for info in socket.getaddrinfo(network.host, network.port, type=socket.SOCK_STREAM))))
+        except (netclient.RouteError, OSError) as exc:
+            return {"sent": 0, "failed": len(urls), "error": str(exc)[:300]}
     _install_guard()
-    with _send_lock, _routed(proxy_url(network)):
+    with _send_lock, _routed(proxy_url(network, address)):
         _guard.update(on=not netclient.private_allowed(), refused=None,
-                      allowed={network.host} if network.kind != "direct" else set())  # the proxy itself
+                      allowed={address} if address else set())  # the proxy itself, already checked
         try:
             bundle = apprise.Apprise()
             for url in urls:

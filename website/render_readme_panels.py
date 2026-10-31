@@ -281,6 +281,8 @@ def handbook(mobile, still):
 
 
 BUTTONS = (
+    ("access", "ACCESS", "PERMISSIONS", BUTTON_BLUE, 70, 117),
+    ("routes", "PROXIES", "IP MODES", BUTTON_STEEL, 79, 89),
     ("apprise", "APPRISE", "SETUP", BUTTON_BLUE, 70, 58),
     ("s3", "S3", "SETUP & RECOVERY", BUTTON_GOLD, 36, 138),
     ("backup", "BACKUP", "GUIDE", BUTTON_STEEL, 67, 58),

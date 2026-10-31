@@ -101,7 +101,8 @@ def test_witness_counts_deltas_and_rejects_replayed_challenge(journal, tmp_path,
         post = witness.post_text(third)
         assert "Captured: 1 new" in post and "do not publish" not in post and len(post) < 4096
         async def request(method, url, network, headers, **kwargs):
-            answer = capture_head(store, vault, {}, headers["X-TgWitness-Challenge"])
+            answer = capture_head(store, vault, {}, headers["X-TgWitness-Challenge"],
+                                  int(headers["X-TgWitness-Consistency-From"]))
             answers.append(answer)
             return 200, {}, canonical(answer)
         monkeypatch.setattr("tgwitness.witness.request", request)

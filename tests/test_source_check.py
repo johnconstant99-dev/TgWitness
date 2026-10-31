@@ -45,7 +45,7 @@ def test_the_running_code_matches_the_commit_even_with_windows_line_endings(tmp_
     repo, calls = github
     repo["files"] = {"app.py": b"print(1)\nprint(2)\n", "static/app.js": b"x();\n", "locales/ru.json": b"{}\n"}
     root = package(tmp_path, {"app.py": b"print(1)\r\nprint(2)\r\n", "static/app.js": b"x();\n"})
-    result = asyncio.run(source_check.check("https://github.com/someone/TgWitness-fork", "v1.0", NetworkConfig(), root))
+    result = asyncio.run(source_check.check("https://github.com/someone/TgWitness-fork", "v1.0", NetworkConfig(kind="direct"), root))
     assert result["matches"] and result["files"] == 2 and result["commit"] == "c" * 40
     assert result["repository"] == "https://github.com/someone/TgWitness-fork"
     assert calls[0] == "someone/TgWitness-fork/commits/v1.0"
@@ -55,7 +55,7 @@ def test_a_changed_added_or_missing_program_file_is_a_difference(tmp_path, githu
     repo, _ = github
     repo["files"] = {"app.py": b"print(1)\n", "gone.py": b"pass\n"}
     root = package(tmp_path, {"app.py": b"print('changed')\n", "new.py": b"pass\n"})
-    result = asyncio.run(source_check.check("someone/fork", "main", NetworkConfig(), root))
+    result = asyncio.run(source_check.check("someone/fork", "main", NetworkConfig(kind="direct"), root))
     assert not result["matches"] and result["differences"] == 3
     assert (result["changed"], result["extra"], result["missing"]) == (["app.py"], ["new.py"], ["gone.py"])
 

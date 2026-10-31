@@ -433,14 +433,16 @@ The panel displays queued/failed media, oldest pending media, free disk, Telegra
 request pauses, and sources whose access is unconfirmed. These diagnostics are not
 a complete end-to-end delivery monitor. Workspaces share a process; a noisy account can
 still affect others. Separate worker processes, retention/rotation, durable update
-recovery, remote checkpoint anchoring, roles, and full deployment qualification remain.
+recovery and full deployment qualification remain. Scoped panel access is documented
+in [access and permissions](ACCESS.md); independent checkpoints are covered by the
+[witness guide](WITNESS.md).
 
 ## Connection and protection options
 
 Connection routes are per workspace and should be configured before authorization.
 SOCKS5/HTTP CONNECT use the pinned python-socks dependency. MTProxy uses Telethon's
 experimental randomized intermediate transport; Fake TLS ee secrets are unsupported.
-No automatic direct fallback is configured. This is not a system-wide network route.
+Direct fallback depends on the selected [IP mode](CONNECTION-SECURITY.md#ip-modes): Hide IP refuses it; the explicit fallback mode permits it after a delay. Tunnel/VPN mode permits direct routes but does not create a VPN. This is not a system-wide network policy.
 
 For new installations, TGWITNESS_VAULT_KEY_FILE points to a separately protected random
 master-key file. Mount it read-only outside /data in a container. Preserve the public

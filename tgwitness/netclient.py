@@ -7,7 +7,8 @@ Addresses entered in the panel reach only the public internet: a request to this
 network or a cloud metadata service (169.254.169.254) is refused, checked on the resolved address
 that is then connected (no second lookup). Storage or services in the operator's own network are
 allowed only by TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 in the server's environment, which the
-panel cannot set.
+panel cannot set. A proxy is held to the same rule unless the main administrator set it
+(NetworkConfig.local_proxy), for a local SOCKS5 proxy such as Tor.
 """
 import asyncio
 import ipaddress
@@ -23,6 +24,7 @@ from python_socks.async_.asyncio import Proxy
 
 PIECE = 64 * 1024  # largest single read from the peer
 PRIVATE_OPT_IN = "TGWITNESS_ALLOW_PRIVATE_DESTINATIONS"
+NAT64 = ipaddress.ip_network("64:ff9b::/96")
 
 
 class RouteError(Exception):
@@ -40,11 +42,14 @@ def private_allowed():
 
 
 def internal(address):
-    """Loopback, private, link-local (cloud metadata), shared, reserved and multicast addresses."""
+    """Loopback, private, link-local (cloud metadata), shared, reserved and multicast addresses, also
+    inside IPv4-mapped, NAT64 (64:ff9b::/96) and 6to4 IPv6 addresses; IPv4-compatible ::a.b.c.d is reserved."""
     ip = ipaddress.ip_address(str(address).split("%", 1)[0])
-    if ip.version == 6 and ip.ipv4_mapped:
-        ip = ip.ipv4_mapped
-    return not ip.is_global or ip.is_multicast
+    if ip.version == 6:
+        embedded = ip.ipv4_mapped or ip.sixtofour or (
+            ipaddress.IPv4Address(int(ip) & 0xFFFFFFFF) if ip in NAT64 else None)
+        ip = embedded or ip
+    return not ip.is_global or ip.is_multicast or ip.is_reserved
 
 
 def refuse_internal(host, addresses):
@@ -64,10 +69,29 @@ def literal(host):
     return None
 
 
+async def resolve(host, port):
+    infos = await asyncio.get_running_loop().getaddrinfo(host, port, type=socket.SOCK_STREAM)
+    return list(dict.fromkeys(info[4][0] for info in infos))
+
+
+def checked_proxy(network, addresses, private=False):
+    """The address to connect the proxy at. Inside this machine or its network only for a proxy the
+    main administrator set, or with the server's opt-in."""
+    blocked = [a for a in addresses if internal(a)]
+    if blocked and not (private or private_allowed() or getattr(network, "local_proxy", False)):
+        raise RouteError("The proxy " + network.host + " resolves to " + str(blocked[0]) + ", inside this machine "
+                         "or its network. Only the main administrator can set such a proxy.")
+    return addresses[0]
+
+
+async def proxy_address(network, private=False):
+    """The proxy's address, resolved once and connected as is."""
+    return checked_proxy(network, await resolve(network.host, network.port), private)
+
+
 async def connect_public(host, port, tls, private):
     """Resolve once, check every address, then connect to those same addresses."""
-    infos = await asyncio.get_running_loop().getaddrinfo(host, port, type=socket.SOCK_STREAM)
-    addresses = list(dict.fromkeys(info[4][0] for info in infos))
+    addresses = await resolve(host, port)
     if not private:
         refuse_internal(host, addresses)
     failure = OSError("No address for " + host)
@@ -87,12 +111,15 @@ async def open_stream(url, network, timeout, private=False):
     private = private or private_allowed()
     if network.kind == "direct":
         return await asyncio.wait_for(connect_public(host, port, tls, private), timeout)
-    if network.kind == "mtproxy":
+    if network.kind == "none":  # the workspace allows no such request (network.NoRoute)
+        raise RouteError(str(network.error))
+    if network.telegram_only:
         raise RouteError("MTProxy carries only Telegram traffic; choose Direct, SOCKS5 or HTTP in "
                          "Connection settings for this request.")
     if not private and literal(host):
         refuse_internal(host, [literal(host)])  # names are resolved by the proxy, out of reach here
-    proxy = Proxy(ProxyType.SOCKS5 if network.kind == "socks5" else ProxyType.HTTP, network.host,
+    address = await asyncio.wait_for(proxy_address(network, private), timeout)
+    proxy = Proxy(ProxyType.SOCKS5 if network.kind == "socks5" else ProxyType.HTTP, address,
                   network.port, network.username or None, network.password or None, rdns=True)
     sock = await proxy.connect(dest_host=host, dest_port=port, timeout=timeout)
     return await asyncio.wait_for(

@@ -197,12 +197,38 @@ python verify.py tgwitness-evidence.zip --fingerprint COLLECTOR_SHA256 \
 witness saw is part of the exported journal**: the record at that count must have exactly
 that hash. A head that does not match fails verification — the journal was changed after
 the witness saw it. It also reports heads seen after the export, anomalies the witness
-recorded, answers that failed, periods the witness saw without interruption ("Witnessed
-from X to Y") and gaps. Only answers signed by the export's own key count: an export signed
+recorded, answers that failed, periods whose matching checkpoints are present in this
+export ("Witnessed from X to Y") and gaps. Later checkpoints do not extend those periods.
+The result includes the last matched record number and the number of trailing records
+without a matching checkpoint. Only answers signed by the export's own key count: an export signed
 by a key the witness never saw is reported as not witnessed, and without `--fingerprint` its
 signer stays unpinned. With `--channel` every signed post must match the witness journal
-record by record: changed posts fail verification, missing posts are listed. Dates of
-channel posts come from Telegram, an independent clock.
+record by record: changed posts fail verification, missing posts are listed. A date in a
+supplied Telegram JSON export is editable metadata, outside the signed witness token.
+Matching the token does not authenticate the publication date; the result explicitly
+reports that publication-time verification was not performed.
+
+### Require a witnessed export boundary
+
+For a handover that must include a witnessed final record, add `--require-witness`:
+
+```sh
+python verify.py tgwitness-evidence.zip --fingerprint COLLECTOR_SHA256 \
+    --witness witness.zip --witness-fingerprint WITNESS_SHA256 --require-witness
+```
+
+This requires the independently retained witness fingerprint and a matching checkpoint
+at the exact end of this export. A checkpoint covering only an earlier prefix is
+insufficient. Pause collection, let the witness observe the final state, and export
+before further journal writes; if the journal changes, retain another checkpoint and
+export that state. A later checkpoint alone cannot verify a shorter export's final hash.
+When `--channel` is also supplied, missing claimed posts or an empty match set fail this
+strict check. Without the flag, ordinary integrity checks still report unwitnessed
+records without rejecting an otherwise intact archive.
+
+The flag enforces consistency with the supplied, pinned witness records. The operator
+must still establish the witness's independence and preserve its records separately.
+It does not establish message truth, complete collection or an independently measured runtime.
 
 A witness shows what the collector reported at those times and that later exports agree
 with it. It does not show that the collector recorded everything Telegram delivered, or

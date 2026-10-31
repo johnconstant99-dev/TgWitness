@@ -1,4 +1,6 @@
 """Explicit per-account Telegram route; credentials never belong in journal events."""
+import base64
+import binascii
 import ipaddress
 import json
 import os
@@ -10,21 +12,66 @@ from urllib.parse import parse_qs, urlsplit
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from telethon.network.connection import ConnectionTcpMTProxyRandomizedIntermediate
 
+# Routes that carry only Telegram's own protocol; HTTP requests are refused on them.
+TELEGRAM_ONLY = ("mtproxy", "mtproxy_auto")
+# How much a workspace may reveal this server's address:
+#   hide     - Telegram never directly; requests outside Telegram only through a proxy
+#   fallback - automatic MTProxy, direct to Telegram after some minutes without a working proxy
+#   tunnel   - the server is behind a tunnel or VPN: direct connections are allowed
+EXPOSURES = ("hide", "fallback", "tunnel")
+
+
+class NoRoute:
+    """No route for requests outside Telegram: netclient and notifications refuse them with this error."""
+    kind, telegram_only = "none", True
+
+    def __init__(self, error):
+        self.error = error
+
+
+class RoutePolicy(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    exposure: Literal[EXPOSURES] = "hide"
+    outside_enabled: bool = True  # timestamps, notifications, off-site copy, source check, proxy lists
+
+
+def hex_secret(value):
+    """Telegram links carry an MTProxy key as hex or as base64url; keep the hex form."""
+    if re.fullmatch(r"(?:[a-fA-F0-9]{2})+", value):
+        return value.lower()
+    if not re.fullmatch(r"[A-Za-z0-9_+/-]{22,}={0,2}", value):
+        return value
+    try:
+        return base64.urlsafe_b64decode(value.replace("+", "-").replace("/", "_").rstrip("=") +
+                                        "=" * (-len(value.rstrip("=")) % 4)).hex()
+    except (binascii.Error, ValueError):
+        return value
+
 
 class NetworkConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    kind: Literal["direct", "socks5", "http", "mtproxy"] = "direct"
+    # Automatic public MTProxy unless the operator chooses a route: a server's own address
+    # is never used for Telegram by default.
+    kind: Literal["direct", "socks5", "http", "mtproxy", "mtproxy_auto"] = "mtproxy_auto"
     host: str = Field(default="", max_length=253)
     port: int = Field(default=1080, ge=1, le=65535)
     username: str = Field(default="", max_length=255)
     password: str = Field(default="", max_length=255)
     secret: str = Field(default="", max_length=512)
+    # Set by the server, never taken from a request: the main administrator saved this proxy although
+    # it resolves inside this machine or its network (a local Tor or SOCKS5 proxy). Saved routes from
+    # before this field could be saved only by that administrator and load as approved.
+    local_proxy: bool = False
 
     @model_validator(mode="after")
     def check_route(self):
         if self.kind == "direct":
             if any((self.host, self.username, self.password, self.secret)):
                 raise ValueError("Direct mode must not include proxy credentials.")
+            return self
+        if self.kind == "mtproxy_auto":
+            if any((self.host, self.username, self.password, self.secret)):
+                raise ValueError("Automatic MTProxy mode chooses its own proxies; leave the proxy fields empty.")
             return self
         self.host = self.host.strip()
         try:
@@ -34,7 +81,7 @@ class NetworkConfig(BaseModel):
                                         for p in self.host.split(".")):
                 raise ValueError("Enter a host name or IP address without a URL, path or credentials.")
         if self.kind == "mtproxy":
-            self.secret = self.secret.strip().lower()
+            self.secret = hex_secret(self.secret.strip())
             if self.username or self.password:
                 raise ValueError("MTProxy uses a secret, not a username/password.")
             if not re.fullmatch(r"(?:dd)?[a-fA-F0-9]{32}", self.secret):
@@ -43,16 +90,23 @@ class NetworkConfig(BaseModel):
             raise ValueError("SOCKS5/HTTP do not use an MTProxy secret.")
         return self
 
-    def public(self):
-        return {"kind": self.kind, "host": self.host, "port": self.port if self.kind != "direct" else None,
-                "has_credentials": bool(self.username or self.password or self.secret),
-                "fallback_to_direct": False, "scope": "Telegram client traffic only"}
+    @property
+    def telegram_only(self):
+        return self.kind in TELEGRAM_ONLY
 
-    def receipt(self):
+    def public(self, fallback=False):
+        return {"kind": self.kind, "host": self.host,
+                "port": self.port if self.kind not in ("direct", "mtproxy_auto") else None,
+                "has_credentials": bool(self.username or self.password or self.secret),
+                "fallback_to_direct": fallback, "scope": "Telegram client traffic only"}
+
+    def receipt(self, fallback=False):
         return {"kind": self.kind, "has_credentials": bool(self.username or self.password or self.secret),
-                "fallback_to_direct": False}
+                "fallback_to_direct": fallback}
 
     def client_options(self):
+        if self.kind == "mtproxy_auto":
+            raise RuntimeError("An automatic route is resolved to one proxy by the collector.")
         if self.kind == "direct":
             return {}
         if self.kind == "mtproxy":
@@ -64,6 +118,13 @@ class NetworkConfig(BaseModel):
                     "proxy": (self.host, self.port, secret)}
         return {"proxy": {"proxy_type": self.kind, "addr": self.host, "port": self.port,
                           "rdns": True, "username": self.username or None, "password": self.password or None}}
+
+
+def saved_route(raw):
+    """A route read back from the vault."""
+    if raw and raw.get("host") and "local_proxy" not in raw:
+        raw = {**raw, "local_proxy": True}  # saved before delegated access existed, by the main administrator
+    return NetworkConfig.model_validate(raw)
 
 
 def parse_mtproxy_link(link):

@@ -46,6 +46,16 @@ Follow people and shared links across your recorded chats.
 
 - **[Hand over a verifiable record](docs/wiki/Exports-and-Verification.md).** Export a **signed evidence ZIP** with the journal and preserved files. The recipient can check hashes and signatures against a separately trusted key and checkpoint.
 
+**Share the case, keep control.** Give reviewers or analysts their own access to
+selected accounts and chats. Choose permissions, IP restrictions, expiry and session
+limits; revoke access when the job is done.
+
+<p><a href="docs/ACCESS.md"><img src="docs/assets/presentation/readme-button-access.svg" height="34" alt="Access and permissions — setup guide"></a> <a href="docs/wiki/Proxies.md"><img src="docs/assets/presentation/readme-button-routes.svg" height="34" alt="Proxy routes and IP modes — setup guide"></a></p>
+
+**Keep accounts connected.** Automatic MTProxy checks public lists, retains working
+routes and replaces failed ones. Choose the IP mode explicitly: wait for a proxy,
+allow a delayed direct fallback, or use the network of your VPN/tunnel host.
+
 **Choose your scope:** selected chats, a Telegram folder or the whole account.
 [Investigation mode](docs/COLLECTION.md#investigation-mode-joining-teams-and-talking-to-bots)
 also prepares profile capture and recent-history snapshots for newly discovered sources.

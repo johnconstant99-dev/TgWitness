@@ -23,7 +23,19 @@ Authorization, transport connectivity, access to a group and completeness of
 delivery are different properties. A green connection status does not imply all
 events have been captured.
 
-## Modes
+## Share work without sharing the main key
+
+Open **Access** to give a reviewer or analyst their own token. Choose the accounts
+and chats they can open, then allow viewing, export or operational actions.
+An operator who starts/stops collection needs whole-workspace access; a reviewer
+can be limited to a single chat. Session limits, expiry and IP rules are separate
+from Telegram account authorization. See [access and permissions](ACCESS.md).
+
+Use **Open sessions** to end a connection or revoke the access to end all of its
+sessions. The administrator console combines current-process activity across
+workspaces. Session closure leaves collection running.
+
+## Runtime modes
 
 | Mode | Action | Behavior |
 | --- | --- | --- |
@@ -257,6 +269,7 @@ Priority rechecks already exist: starred sources are rechecked every 15 minutes 
 others every 6 hours (see [recheck tiers](COLLECTION.md#recheck-tiers)). Password-protected
 exports exist as described above. Live Telegram/proxy acceptance, durable replay,
 admin-log and reaction polling, isolated workers, encryption of the local journal and media
-by TgWitness itself, user roles and independent review remain separate work. See
+by TgWitness itself and independent review remain separate work. Scoped access is
+documented in [access and permissions](ACCESS.md). See
 [READINESS.md](internal/READINESS.md), [LIVE_ACCEPTANCE.md](internal/LIVE_ACCEPTANCE.md) and
 [VERIFICATION.md](VERIFICATION.md).

@@ -1119,6 +1119,7 @@ button.pill { cursor: pointer; font-family: inherit; }
 #connection-options .card:last-child { border-bottom: 0; }
 #connection-options .eyebrow { margin-bottom: 4px; }
 .route-card h2 { font-size: 16px; }
+.policy-card h3 { margin-top: 20px; font-size: 15px; }
 #route-detail { margin: 4px 0 0; font-size: 13.5px; overflow-wrap: anywhere; }
 #network-details { margin-top: 12px; }
 #network-details > summary { min-height: 34px; color: var(--accent-text); font-size: 13.5px; font-weight: 600; }
@@ -1524,6 +1525,32 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
 .witness-create input { flex: 1 1 240px; margin: 0; }
 .witness-new { flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
 .witness-new code { flex: 1 1 100%; padding: 8px 10px; overflow-wrap: anywhere; user-select: all; }
+.access-group { margin: 22px 0 0; padding: 0; border: 0; min-width: 0; }
+.access-group legend { padding: 0; font-weight: 600; }
+.access-workspace { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 6px 0; border-top: 1px solid var(--border-soft); }
+.access-workspace .check-label { margin: 0; flex: 1 1 220px; }
+.access-workspace select { width: auto; margin: 0; }
+.access-chats { flex: 1 1 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0 14px; max-height: 260px; overflow: auto; padding-left: 26px; }
+.access-chats .check-label { margin-top: 8px; font-weight: 400; overflow-wrap: anywhere; }
+.access-permissions { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 18px; }
+.access-permission { align-items: flex-start; }
+.access-permission input { margin-top: 3px; }
+.access-permission span { display: flex; flex-direction: column; gap: 2px; }
+.access-permission small { color: var(--muted); font-weight: 400; }
+.access-limits { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0 16px; }
+.access-new { margin-top: 16px; }
+.access-new:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.access-new p { flex-basis: 100%; margin: 0; }
+.access-new code { flex: 1 1 320px; padding: 8px 10px; overflow-wrap: anywhere; user-select: all; }
+.access-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid var(--border-soft); }
+.access-row > div:first-child { min-width: 0; }
+.access-row h3 { overflow-wrap: anywhere; }
+.access-row p { margin-top: 2px; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.access-actions { display: flex; flex-shrink: 0; gap: 8px; }
+.access-console { height: 420px; overflow: auto; margin-top: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); color: var(--text-2); }
+.console-line.warning { color: var(--warning); }
+.console-line.error, .console-line.critical { color: var(--danger); }
+@media (max-width: 700px) { .access-row { flex-wrap: wrap; } }
 .witness-guide h3 { margin: 16px 0 6px; }
 .witness-guide pre { padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); color: var(--text-2); }
 .extras-intro { max-width: 740px; padding: 8px 0 28px; }

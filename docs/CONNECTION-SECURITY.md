@@ -83,12 +83,31 @@ MTProxy is a Telegram transport proxy; SOCKS5 and HTTP CONNECT provide general
 tunnels. None replaces account authentication.
 
 Save the route for each workspace in **Account → Settings → Connection settings → Change connection route** before
-signing in if you need a proxy. The default is Direct.
+signing in. New workspaces default to **Automatic MTProxy · public lists** with Hide IP behavior.
+Existing workspaces that explicitly used Direct retain a mode permitting it.
+
+## IP modes
+
+The route chooses the connection. The IP mode determines when the server's address
+may be exposed. These controls do not install a VPN or route all machine traffic.
+
+| Mode | Telegram | External requests |
+| --- | --- | --- |
+| Hide IP (`hide`) | Use a proxy; wait if none works. No direct fallback. | Require SOCKS5/HTTP; refuse requests without an applicable proxy. |
+| Allow fallback (`fallback`) | Automatic MTProxy may use Direct after the configured delay, then return to a working proxy. | Prefer a configured external proxy or the account's SOCKS5/HTTP route; otherwise Direct is allowed. |
+| Tunnel / VPN (`tunnel`) | Direct routes and immediate automatic-pool fallback are permitted. | Direct is permitted when no applicable proxy is configured. |
+
+Tunnel/VPN mode assumes you manage that network separately. Without a working
+tunnel, destinations can see the server's own address. Select the mode according
+to your actual network, not the name of the option.
+
+### Choose a route
 
 | Route | Settings | Boundary |
 | --- | --- | --- |
-| Direct | None | Telethon connects directly to Telegram |
-| SOCKS5 | Host, port, optional username/password | python-socks 2.8.2, rdns enabled |
+| Automatic MTProxy | Built-in lists or an operator catalog | Maintains a working Telegram route; direct fallback depends on the IP mode |
+| Direct | Tunnel/VPN mode | Telethon uses the host's network route |
+| SOCKS5 | Host, port, optional username/password | python-socks, remote destination DNS enabled |
 | HTTP CONNECT | Host, port, optional username/password | Plain HTTP CONNECT; TLS to the proxy itself is not implemented |
 | MTProxy | Host, port, secret | Experimental Telethon transport; 32 hex digits or `dd` + 32 hex digits |
 
@@ -100,33 +119,72 @@ route separately. Manual fields remain available. See [Telegram proxy links](htt
 
 ### Public proxies supplied by your installation
 
-The connection settings include a ready-made public list from
-[SoliSpirit/mtproto](https://github.com/SoliSpirit/mtproto) and
-[zakky8/mtproto-proxy-pro](https://github.com/zakky8/mtproto-proxy-pro). The bundled snapshot
-contains public endpoint facts, source attribution and download dates, not either
-project's verification claims. It works without fetching anything on startup. Choose
-an entry, save the route, then test the Telegram connection before signing in.
+The built-in list combines four sources:
+[SoliSpirit/mtproto](https://github.com/SoliSpirit/mtproto),
+[zakky8/mtproto-proxy-pro](https://github.com/zakky8/mtproto-proxy-pro),
+[kort0881/telegram-proxy-collector](https://github.com/kort0881/telegram-proxy-collector)
+and [3yed-61/MTP-Collector](https://github.com/3yed-61/MTP-Collector).
+The bundled snapshot contains endpoint facts, source attribution and download dates.
+A provider's listing is not proof that the proxy works or delivers every Telegram update.
 
-**Update public lists** fetches the two fixed HTTPS feeds on request. Each response is
-limited to 1 MiB and 20 seconds; redirects are rejected. At most 64 compatible entries
-per source are retained, deduplicated across sources. Invalid links, private/reserved
-IP literals, local hostnames and unsupported Fake TLS `ee` entries are skipped. Public
-hostnames are resolved on selection; every answer must be globally routable and the
-selected IP is pinned in the saved route. This prevents a feed hostname from later
-redirecting a saved connection to a private address. Reapply an entry to resolve it again.
+**Automatic MTProxy** checks Telegram transport connectivity, keeps a working proxy
+and switches to another when it fails. Workspaces prefer different proxies when enough
+working entries are available; a unique exit address is not guaranteed. Failed proxies
+rest before another attempt. If none works, the IP mode determines whether collection
+must wait or may use a direct connection. Changing proxies does not change the account
+or erase its journal. Route choices and changes are recorded in the signed journal.
 
-Each workspace retains its last good source snapshots in `public-proxies.json`. Failed,
-empty or incompatible source responses keep that source's previous entries and timestamp.
+While automatic routes are active, lists refresh hourly and transport checks run
+every ten minutes by default. These intervals are configurable. **Update public lists**
+requests a refresh; viewing the list alone does not change a saved manual route.
+
+Each feed response is limited to 1 MiB with an eight-second request timeout and a
+20-second overall download deadline; redirects
+are rejected. Up to 64 compatible entries per source are retained and deduplicated.
+The parser accepts supported hexadecimal and base64url secrets and the JSON feed.
+Fake TLS `ee`, invalid links, private/reserved IP literals and local hostnames are
+skipped. Hostnames are resolved and checked before use, and the chosen IP is pinned
+for that connection. Automatic reacquisition resolves a hostname again; reapply a
+manual entry to resolve it again.
+
+Failed, empty or incompatible feed responses retain the previous source snapshot.
 Updates are atomic, serialized and limited to one attempt per minute per workspace.
-Neither updating nor viewing a list changes the selected route. Availability still
-requires a transport test; a provider's listing is not evidence of complete Telegram delivery.
+A successful transport probe establishes connectivity, not anonymity or capture completeness.
 
-List downloads use a separate HTTPS connection, direct by default. Set
-`TGWITNESS_PROXY_FEED_PROXY` to an HTTP/SOCKS5 URL to route these requests through a download
-proxy; both collector Compose variants forward it. No Telegram session, API credentials,
-panel token or bot token is sent to the providers. The workspace's MTProxy cannot carry
-these HTTP downloads. Provider names, saved dates and the download route are disclosed
-under **Where the list comes from**.
+**Telegram traffic and HTTPS requests use different routes.** List downloads use a
+separate HTTPS connection and the supplied external-request route.
+`TGWITNESS_PROXY_FEED_PROXY` explicitly overrides that route with an HTTP/SOCKS5 proxy;
+both collector Compose variants forward it. The background pool follows the main workspace.
+No Telegram session, API credentials, panel token or bot token is sent to feed providers.
+Provider names, snapshot dates and the download route appear under **Where the list comes from**.
+
+An MTProxy carries Telegram traffic only. Workspace HTTP operations such as timestamps,
+notifications, off-site copies and source checks use a separate SOCKS5/HTTP proxy when
+configured, then the account's SOCKS5/HTTP route. Without either, Hide IP refuses the
+request; the other modes permit Direct. External requests can be disabled. An explicitly
+configured feed-download proxy remains a separate operator override.
+The independent witness service keeps its own route.
+
+<details>
+<summary><strong>Automatic pool parameters</strong></summary>
+
+Under **Parameters → Automatic MTProxy**, configure the failure threshold, cooldown,
+planned rotation, proxy sharing and permitted fallback delay.
+
+| Control | Default |
+| --- | --- |
+| Disconnects before replacement | 3 within 10 minutes |
+| Proxies tried per connection attempt | 3 |
+| First / maximum rest after failure | 10 minutes / 6 hours |
+| Planned rotation | Disabled; switch on failure |
+| Accounts per proxy | 0: prefer separate entries, share when needed. Set 1 to wait for an exclusive entry. |
+| Delay before permitted Direct fallback | 10 minutes; Hide IP still refuses Direct |
+| Feed refresh / transport checks | 60 / 10 minutes; main workspace values apply to the shared pool |
+
+Different proxies do not guarantee different exit addresses. These settings do not
+override Telegram limits or prove anonymity.
+
+</details>
 
 To replace the public list with your own operator catalog, configure the override below.
 It disables external subscriptions entirely, including when its `proxies` array is empty.
@@ -157,7 +215,7 @@ That directory is excluded from Git, Docker build context and source archives. T
 catalog configures the collecting accounts; [the witness bot](WITNESS.md) uses its own
 HTTP/SOCKS5 route, not MTProxy.
 
-If the proxy fails, TgWitness does not fall back to Direct. Pause observation before
+Direct fallback is governed by the IP mode above. Pause observation before
 changing a route. Saving disconnects old clients and cancels unfinished login; a
 new client uses the saved route. The account's journal/session binding remains.
 Settings replace the previous route: re-enter proxy credentials when editing it.
@@ -195,8 +253,9 @@ are cloud chats; MTProto does not turn them into end-to-end encrypted Secret Cha
 | Provenance and time | Signed journal, process receipt, RFC 3161 tools | Trusted key, independent checkpoints/TSA and custody procedure |
 
 **Storage protection** in Account shows these states. The panel token is an
-access secret, not an encryption password. One token controls all workspaces;
-workspaces are not separate users or isolated tenants.
+access secret, not an encryption password. It grants administrator access;
+[issued tokens](ACCESS.md) can be scoped to accounts and chats. Workspaces share
+the host process and are not isolated tenants.
 
 An explicitly started, isolated synthetic demo can open automatically over a direct
 loopback connection. This uses a separate process-lifetime capability; it neither

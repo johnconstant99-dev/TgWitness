@@ -64,6 +64,7 @@ def test_update_position_survives_restart_and_turns_on_catch_up(journal):
     store, vault = journal
     store.set_setting("account", {"id": 44, "username": "synthetic"})
     collector = Collector(store, vault, RecheckClient)
+    asyncio.run(collector.ensure_route())
     client = collector.make_client(123, "a" * 32, saved_session())
     assert client.options["catch_up"] is True
     # What Telethon writes into the in-memory session about once a minute.
@@ -79,6 +80,7 @@ def test_update_position_survives_restart_and_turns_on_catch_up(journal):
     assert saved["channels"] == [{"id": 123, "pts": 18244, "access_hash": 777}]
 
     restarted = Collector(store, vault, RecheckClient)
+    asyncio.run(restarted.ensure_route())
     session = restarted.make_client(123, "a" * 32, saved_session()).session
     states = dict(session.get_update_states())
     assert (states[0].pts, states[0].qts, states[0].seq) == (500, 7, 3) and states[123].pts == 18244
@@ -87,7 +89,9 @@ def test_update_position_survives_restart_and_turns_on_catch_up(journal):
 
     # A different account's journal never resumes this position.
     store.set_setting("account", {"id": 45, "username": "other"})
-    other = Collector(store, vault, RecheckClient).make_client(123, "a" * 32, saved_session())
+    other = Collector(store, vault, RecheckClient)
+    asyncio.run(other.ensure_route())
+    other = other.make_client(123, "a" * 32, saved_session())
     assert not dict(other.session.get_update_states())
 
 

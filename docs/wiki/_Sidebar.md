@@ -21,6 +21,7 @@
 
 **04 · Run and protect**
 
+- [Access and permissions](Access.md)
 - [Server and Docker](Server-and-Docker.md)
 - [Notifications](Notifications.md)
 - [Encrypted off-site copy](Off-site-Copy.md)

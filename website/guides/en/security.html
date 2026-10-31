@@ -1,4 +1,4 @@
-<p class="guide-outcome">Nothing leaves your machine except the connection to Telegram until you switch it on. Know what each secret unlocks, what the protections cover and what they leave to you.</p>
+<p class="guide-outcome">Know the routes for Telegram, public proxy lists and optional external services. Know what each secret unlocks, what the protections cover and what they leave to you.</p>
 <div class="fact-strip" role="list"><div role="listitem"><strong translate="no">127.0.0.1</strong><span>panel address by default</span></div><div role="listitem"><strong>256-bit</strong><span>random panel token</span></div><div role="listitem"><strong translate="no">0</strong><span>CDNs, analytics or remote fonts</span></div><div role="listitem"><strong translate="no">Ed25519</strong><span>signature on every record</span></div></div>
 <h2 id="map">Where everything lives</h2>
 <p>The collector, its panel and every saved record stay on the computer or server you run it on. Telegram is the only destination by default; each other one is a separate switch.</p>
@@ -15,7 +15,7 @@
 <div class="store-row is-locked"><span class="store-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg></span><div><strong>Vault</strong><span>Fernet · session, API pair, signing key, proxy</span></div></div>
 </div></div>
 <ul class="routes">
-<li class="route is-on" data-flow="telegram"><span class="wire" aria-hidden="true"><i></i></span><div><strong>Telegram</strong><span class="route-state">Always · through your route</span><p>The account's MTProto connection: direct, SOCKS5, HTTP or MTProxy. A failed proxy never falls back to a direct connection.</p></div></li>
+<li class="route is-on" data-flow="telegram"><span class="wire" aria-hidden="true"><i></i></span><div><strong>Telegram</strong><span class="route-state">Always · through your route</span><p>The account's MTProto connection: direct, SOCKS5, HTTP or MTProxy. Hide IP mode waits for a working proxy. Direct fallback requires a mode that explicitly permits it.</p></div></li>
 <li class="route" data-flow="replica"><span class="wire" aria-hidden="true"><i></i></span><div><strong>Off-site copy</strong><span class="route-state" data-state-label>Optional · off by default</span><p>Journal, files and checkpoints encrypted with AES-GCM before upload to S3-compatible storage. The key stays with you; attachments are named by keyed hashes, not their content hash.</p></div></li>
 <li class="route" data-flow="alerts"><span class="wire" aria-hidden="true"><i></i></span><div><strong>Notifications</strong><span class="route-state" data-state-label>Optional · off by default</span><p>Problems and change counts with chat titles. Message excerpts are sent only if you turn them on.</p></div></li>
 <li class="route" data-flow="timestamp"><span class="wire" aria-hidden="true"><i></i></span><div><strong>Timestamp authority</strong><span class="route-state" data-state-label>Optional · off by default</span><p>Only the SHA-256 of a signed checkpoint and a random nonce. No messages, no chat names.</p></div></li>
@@ -46,13 +46,14 @@
 <li>A copied data directory with an external vault key: sessions and signing keys stay encrypted without the master key.</li>
 </ul></section>
 <section class="threat-card is-open" aria-labelledby="open-title"><h3 id="open-title"><span aria-hidden="true">!</span> Left to you</h3><ul>
-<li>Anyone with the panel token has full control. There are no roles or per-user permissions.</li>
+<li>The main panel token has full control. Give other people scoped access to the accounts, chats and actions they need; keep the main key private.</li>
 <li>An administrator of the machine can read everything and rewrite and re-sign the journal. Keep the fingerprint and checkpoints on another system.</li>
 <li>Message text and media are not encrypted by TgWitness. Use disk encryption and strict permissions.</li>
 <li>Plain HTTP beyond localhost shows the token on the network. Use HTTPS or an SSH tunnel.</li>
 <li>Signatures prove what was recorded was not changed, not that every Telegram event was recorded.</li>
 </ul></section>
 </div>
+<p><a href="@@GUIDE_ACCESS@@">Share access to a case</a> with permissions, expiry and session limits. A witness token remains a separate credential.</p>
 <h2 id="hardening">Harden an installation</h2>
 <div class="checklist" data-lab="hardening">
 <div class="checklist-meter" data-enhanced hidden><span data-checklist-count>0 of 8 done</span><span class="meter" aria-hidden="true" translate="no"><i></i></span></div>

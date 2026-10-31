@@ -46,7 +46,7 @@ def test_replica_destination_change_copies_the_whole_journal(journal, tmp_path, 
             configure(store, vault, endpoint)
             event = store.append("message.new", {"text": "must reach both backups"}, CHAT, 1)
             retain_checkpoint(store, vault)
-            copied = await replica.sync(store, vault, NetworkConfig())
+            copied = await replica.sync(store, vault, NetworkConfig(kind="direct"))
             assert copied["error"] is None
             assert copied["objects"] >= 2
             settings = replica.replica_settings(store)
@@ -55,7 +55,7 @@ def test_replica_destination_change_copies_the_whole_journal(journal, tmp_path, 
             if change == "bucket":
                 # This minimal fake server has one active bucket; switch its backing map.
                 objects.clear()
-            copied = await replica.sync(store, vault, NetworkConfig())
+            copied = await replica.sync(store, vault, NetworkConfig(kind="direct"))
             assert copied["error"] is None and copied["objects"] >= 2
             # The second destination needs the beginning of the journal, not just its tail.
             target = new_objects if change == "endpoint" else objects
@@ -86,11 +86,11 @@ def test_replica_does_not_skip_missing_or_corrupt_media(journal, local):
             media.parent.mkdir(exist_ok=True)
             if local is not None:
                 media.write_bytes(local)
-            failed = await replica.sync(store, vault, NetworkConfig())
+            failed = await replica.sync(store, vault, NetworkConfig(kind="direct"))
             assert failed["error"]
             assert not any("/media/" in name for name in objects)
             media.write_bytes(data)
-            assert (await replica.sync(store, vault, NetworkConfig()))["error"] is None
+            assert (await replica.sync(store, vault, NetworkConfig(kind="direct")))["error"] is None
             assert sum("/media/" in name for name in objects) == 1
         finally:
             server.close()
@@ -205,12 +205,12 @@ def test_copy_does_not_publish_a_checkpoint_ahead_of_its_journal(journal, tmp_pa
             return size
         monkeypatch.setattr(replica, "upload", append_during_media)
         try:
-            copied = await replica.sync(store, vault, NetworkConfig())
+            copied = await replica.sync(store, vault, NetworkConfig(kind="direct"))
             assert copied["error"] is None and copied["journal_seq"] == 1
             assert not any("checkpoint-000000000002" in name for name in objects)
             restored = await replica.restore(replica.key_file(store, vault), AK, SK, tmp_path / "first")
             assert restored["events"] == 1 and restored["media_verified"] == 1
-            await replica.sync(store, vault, NetworkConfig())
+            await replica.sync(store, vault, NetworkConfig(kind="direct"))
             restored = await replica.restore(replica.key_file(store, vault), AK, SK, tmp_path / "second")
             assert restored["events"] >= 2
         finally:

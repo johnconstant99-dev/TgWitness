@@ -74,6 +74,8 @@ records the earlier baseline.
 
 ## Built-in public MTProxy lists · 29 October 2026
 
+This is the historical test record of the original manual-selection build. For the current automatic pool and IP modes, see [connection settings](CONNECTION-SECURITY.md#ip-modes). Counts and unsupported features below belong to that tested revision.
+
 Added a bundled public snapshot and explicit HTTPS refresh from SoliSpirit/mtproto and
 zakky8/mtproto-proxy-pro. On this host, the application downloader fetched both feeds
 successfully on 29 October 2026 at 12:58 UTC: **118 unique compatible endpoints** after

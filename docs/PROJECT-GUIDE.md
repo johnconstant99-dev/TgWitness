@@ -34,6 +34,8 @@
 </picture>
 <p align="center"><sub>The conversation, its changes, and the record behind it. Light and dark themes. Fictional demo data.</sub></p>
 
+**Working with someone else?** [Access and permissions](ACCESS.md) covers scoped tokens, sessions and the administrator console. [Connection routes](CONNECTION-SECURITY.md#ip-modes) covers automatic proxies and IP modes.
+
 ## Features
 
 <table>

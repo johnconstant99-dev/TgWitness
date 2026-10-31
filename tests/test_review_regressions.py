@@ -98,7 +98,9 @@ def test_background_scope_excludes_outgoing_but_advances_recheck(journal):
 def test_callback_rpc_has_one_attempt_without_changing_concurrent_read_retries(journal):
     async def run():
         store, vault = journal
-        assert isinstance(Collector(store, vault).make_client(123, "a" * 32), WitnessClient)
+        collector = Collector(store, vault)
+        await collector.ensure_route()
+        assert isinstance(collector.make_client(123, "a" * 32), WitnessClient)
         client = WitnessClient(StringSession(), 123, "a" * 32, request_retries=1, raise_last_call_error=True)
         entered, release = asyncio.Event(), asyncio.Event()
 

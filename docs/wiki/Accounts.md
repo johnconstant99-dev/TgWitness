@@ -20,7 +20,7 @@
 
 
 
-Use a dedicated Telegram user account. Each workspace keeps its own authorization, journal, signing key, sources, proxy settings and attachment queue. One panel token controls all workspaces; they are not separate user roles.
+Use a dedicated Telegram user account. Each workspace keeps its own authorization, journal, signing key, sources, proxy settings and attachment queue. The administrator can [issue access](Access.md) to selected workspaces and chats, with separate permissions for viewing, exporting and operations.
 
 ## Choose a sign-in method
 

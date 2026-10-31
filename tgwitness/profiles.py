@@ -15,6 +15,7 @@ class Profiles:
         self.app, self.root, self.factory = app, root, factory
         label = app.state.store.get_setting("profile_label", "Main account")
         self.entries = {"default": {"id": "default", "label": label, "app": app, "cm": None}}
+        self.opening = {}  # labels of workspaces still starting (the administrator's console names them)
         self.lock = asyncio.Lock()
         app.state.collector.account_guard = self.check_account
 
@@ -46,6 +47,7 @@ class Profiles:
                              token_override=self.app.state.vault.token, allow_profiles=False,
                              account_guard=self.check_account)
         cm = child.router.lifespan_context(child)
+        self.opening[entry["id"]] = entry["label"]
         try:
             await cm.__aenter__()
         except Exception as exc:
@@ -54,6 +56,8 @@ class Profiles:
             self.app.state.store.append("profile.unavailable", {
                 "profile_id": entry["id"], "error_type": type(exc).__name__})
             return
+        finally:
+            self.opening.pop(entry["id"], None)
         self.entries[entry["id"]] = {**entry, "app": child, "cm": cm}
 
     async def create(self, label):

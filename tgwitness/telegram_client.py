@@ -2,7 +2,9 @@
 from contextvars import ContextVar
 
 from telethon import TelegramClient, utils
-from telethon.tl import functions
+from telethon.network.connection import ConnectionTcpFull
+from telethon.network.connection.tcpmtproxy import TcpMTProxy
+from telethon.tl import functions, types
 
 _single_attempt = ContextVar("telegram_single_attempt", default=False)
 _ACTIONS = (functions.messages.GetBotCallbackAnswerRequest,
@@ -19,6 +21,20 @@ class WitnessClient(TelegramClient):
     @_request_retries.setter
     def _request_retries(self, value):
         self._read_retries = value
+
+    async def switch_route(self, options):
+        """Use another route (Telethon connection options: an MTProxy, a SOCKS5/HTTP proxy or none)
+        from the next connect.
+
+        Telethon's set_proxy updates only the address of a live transport, not an MTProxy secret
+        or the transport kind; after a full disconnect, connect() builds a new transport from these
+        values. The connection request names an MTProxy only when one is used.
+        """
+        await self.disconnect()
+        self._connection = options.get("connection", ConnectionTcpFull)
+        self._proxy = options.get("proxy")
+        self._init_request.proxy = (types.InputClientProxy(*self._connection.address_info(self._proxy))
+                                    if issubclass(self._connection, TcpMTProxy) else None)
 
     async def _call(self, sender, request, ordered=False, flood_sleep_threshold=None):
         if utils.is_list_like(request):

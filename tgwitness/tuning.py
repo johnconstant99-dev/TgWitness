@@ -49,6 +49,8 @@ GROUPS = (
     ("exports", "Exports & history", "Size limits of history snapshots, signed archives and browser downloads."),
     ("connection", "Telegram connection", "Timeouts and retries. Request timeouts and retries apply the next "
                                           "time the account connects."),
+    ("proxies", "Automatic MTProxy", "When this account's listed proxy is replaced. List downloads and checks are "
+                                     "shared by all accounts and follow the main workspace's values."),
 )
 
 PARAMETERS = (
@@ -114,6 +116,25 @@ PARAMETERS = (
     Parameter("telegram_request_retries", "connection", 2, 0, 20, "times", "Request retries"),
     Parameter("telegram_connection_retries", "connection", 5, 0, 100, "times", "Connection retries"),
     Parameter("reconnect_max_seconds", "connection", 300, 10, 3600, "seconds", "Longest wait between reconnect attempts"),
+    Parameter("proxy_drop_limit", "proxies", 3, 1, 50, "disconnects", "Disconnects before the proxy is replaced",
+              "Counted within the window below."),
+    Parameter("proxy_drop_window_minutes", "proxies", 10, 1, 1440, "minutes", "Window for counting disconnects"),
+    Parameter("proxy_connect_attempts", "proxies", 3, 1, 20, "proxies", "Proxies tried for one connection",
+              "After that many failures the connection waits for the next reconnect attempt."),
+    Parameter("proxy_cooldown_minutes", "proxies", 10, 1, 1440, "minutes", "First rest of a failed proxy",
+              "Each further failure of the same proxy doubles its rest, up to the longest rest below."),
+    Parameter("proxy_cooldown_max_hours", "proxies", 6, 1, 168, "hours", "Longest rest of a failing proxy"),
+    Parameter("proxy_rotate_hours", "proxies", 0, 0, 720, "hours", "Planned switch to another proxy every",
+              "0: only when the proxy fails. Frequent address changes can make Telegram distrust an account."),
+    Parameter("proxy_max_accounts", "proxies", 0, 0, 100, "accounts", "Maximum accounts per proxy",
+              "0: accounts get different proxies while enough work and share one otherwise. 1: every account its "
+              "own proxy; when none is free, the account waits."),
+    Parameter("proxy_fallback_minutes", "proxies", 10, 1, 1440, "minutes", "Direct connection after … without a working proxy",
+              "Only in the mode that allows a direct fallback. A working proxy is used again as soon as one answers."),
+    Parameter("proxy_lists_minutes", "proxies", 60, 15, 1440, "minutes", "Download the proxy lists every",
+              "Main workspace only; shared by all accounts."),
+    Parameter("proxy_probe_minutes", "proxies", 10, 2, 1440, "minutes", "Check every listed proxy every",
+              "Main workspace only; shared by all accounts."),
 )
 BY_KEY = {p.key: p for p in PARAMETERS}
 

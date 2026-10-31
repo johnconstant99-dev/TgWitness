@@ -52,6 +52,8 @@ that sequence, not every possible Telegram event.
 <details>
 <summary><strong>Workspace setup and advanced guides</strong></summary>
 
+**Share an investigation:** [issue scoped access](Access.md) to chosen accounts and chats, with separate permissions, expiry and revocable sessions. [Choose proxy routes and IP modes](Proxies.md) for collection and external requests.
+
 <picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-handbook-mobile-static.svg">
   <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-handbook-static.svg">

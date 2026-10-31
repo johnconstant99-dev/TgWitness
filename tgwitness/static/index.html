@@ -109,6 +109,7 @@
     <button class="nav" data-view="parameters"><svg aria-hidden="true" class="nav-icon"><use href="#i-settings"/></svg> Parameters</button>
     <button class="nav" data-view="connection"><svg aria-hidden="true" class="nav-icon"><use href="#i-account"/></svg> Account</button>
     <button class="nav" data-view="accounts"><svg aria-hidden="true" class="nav-icon"><use href="#i-users"/></svg> Accounts <b id="nav-accounts">1</b></button>
+    <button class="nav" data-view="access" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-lock"/></svg> Access</button>
   </nav>
   <div class="sidebar-bottom">
     <a class="sidebar-help" href="/guide.html" target="_blank" rel="noopener"><svg aria-hidden="true" class="nav-icon"><use href="#i-help"/></svg> Help &amp; documentation</a>
@@ -590,8 +591,29 @@
         </div>
         <form id="network-form">
           <div class="proxy-link"><label for="network-link">Your MTProxy link · optional</label><input id="network-link" type="password" autocomplete="off" maxlength="2048" placeholder="tg://proxy?server=… or https://t.me/proxy?…">
-          <button class="quiet" id="network-import" type="button">Fill fields from link</button><p class="hint" id="network-link-result" role="status"></p></div><label for="network-kind">Connection route</label><select id="network-kind"><option value="direct">Direct connection</option><option value="socks5">SOCKS5 proxy</option><option value="http">HTTP CONNECT proxy</option><option value="mtproxy">MTProxy · experimental</option></select><div hidden id="network-endpoint"><label for="network-host">Proxy host or IP</label><input autocomplete="off" id="network-host" maxlength="253" placeholder="proxy.example.org"><label for="network-port">Port</label><input id="network-port" max="65535" min="1" type="number" value="1080"><div id="network-login"><label for="network-username">Username · optional</label><input autocomplete="off" id="network-username" maxlength="255"><label for="network-password">Password · optional</label><input autocomplete="off" id="network-password" maxlength="255" type="password"></div><div hidden id="network-mtproxy"><label for="network-secret">MTProxy secret</label><input autocomplete="off" id="network-secret" maxlength="512" type="password"><p class="hint">32 hex digits or dd + 32 digits. Fake TLS ee secrets are unsupported by this transport.</p></div></div><p class="hint">Saving replaces this workspace's route and cancels unfinished login. Re-enter any proxy credentials when changing it. No automatic fallback to a direct connection.</p><div class="route-actions"><button class="secondary" type="submit">Save connection route</button><button class="quiet" id="network-test" type="button">Test Telegram connection</button></div><p class="hint" id="network-result" role="status"></p></form></details>
+          <button class="quiet" id="network-import" type="button">Fill fields from link</button><p class="hint" id="network-link-result" role="status"></p></div><label for="network-kind">Connection route</label><select id="network-kind"><option value="mtproxy_auto">Automatic MTProxy · public lists</option><option value="direct">Direct connection</option><option value="socks5">SOCKS5 proxy</option><option value="http">HTTP CONNECT proxy</option><option value="mtproxy">MTProxy · experimental</option></select><div hidden id="network-endpoint"><label for="network-host">Proxy host or IP</label><input autocomplete="off" id="network-host" maxlength="253" placeholder="proxy.example.org"><label for="network-port">Port</label><input id="network-port" max="65535" min="1" type="number" value="1080"><div id="network-login"><label for="network-username">Username · optional</label><input autocomplete="off" id="network-username" maxlength="255"><label for="network-password">Password · optional</label><input autocomplete="off" id="network-password" maxlength="255" type="password"></div><div hidden id="network-mtproxy"><label for="network-secret">MTProxy secret</label><input autocomplete="off" id="network-secret" maxlength="512" type="password"><p class="hint">32 hex digits or dd + 32 digits. Fake TLS ee secrets are unsupported by this transport.</p></div></div><p class="hint">Automatic MTProxy, the default, picks a working proxy from the public lists, keeps it while it works and moves to the next one when it fails; different workspaces get different proxies. When it moves on is set in Parameters → Automatic MTProxy.</p><p class="hint">Saving replaces this workspace's route and cancels unfinished login. Re-enter any proxy credentials when changing it. A direct connection is used only where IP protection below allows it.</p><div class="route-actions"><button class="secondary" type="submit">Save connection route</button><button class="quiet" id="network-test" type="button">Test Telegram connection</button></div><p class="hint" id="network-result" role="status"></p></form></details>
     </div>
+    <form class="card padded route-card policy-card" id="policy-form"><div class="eyebrow">IP protection</div><h2 id="policy-summary">Hide this server's address</h2>
+      <p class="muted">Who may see the address of the machine TgWitness runs on: Telegram, and the services outside Telegram it contacts.</p>
+      <div aria-label="IP protection" class="scope-modes" role="radiogroup">
+        <label><input name="exposure" type="radio" value="hide"><span><strong>Hide the address</strong><small>Telegram only through a proxy; when none works, observation waits. Requests outside Telegram go only through the proxy set below.</small></span></label>
+        <label><input name="exposure" type="radio" value="fallback"><span><strong>Direct as a last resort</strong><small>Automatic MTProxy first. After the minutes set in Parameters without a working proxy, Telegram is reached directly and sees this address until a proxy answers again. Requests outside Telegram go directly unless a proxy is set below.</small></span></label>
+        <label><input name="exposure" type="radio" value="tunnel"><span><strong>Server behind a tunnel or VPN</strong><small>Its address may be seen: a direct route is allowed, and automatic MTProxy connects directly at once when no proxy works. Requests outside Telegram go directly unless a proxy is set below.</small></span></label>
+      </div>
+      <h3>Requests outside Telegram</h3>
+      <p class="muted">Timestamps, notifications, the off-site copy, the code check against GitHub and downloads of the public proxy lists. They never carry Telegram account data.</p>
+      <label class="check-label"><input id="outside-enabled" type="checkbox"> Allow requests outside Telegram</label>
+      <div class="replica-fields">
+        <div><label for="outside-kind">Proxy for these requests</label><select id="outside-kind"><option value="">No proxy</option><option value="socks5">SOCKS5 proxy</option><option value="http">HTTP CONNECT proxy</option></select></div>
+        <div><label for="outside-host">Proxy host or IP</label><input autocomplete="off" id="outside-host" maxlength="253" placeholder="proxy.example.org"></div>
+        <div><label for="outside-port">Port</label><input id="outside-port" max="65535" min="1" type="number" value="1080"></div>
+        <div><label for="outside-username">Username · optional</label><input autocomplete="off" id="outside-username" maxlength="255"></div>
+        <div><label for="outside-password">Password · optional</label><input autocomplete="new-password" id="outside-password" maxlength="255" type="password"></div>
+      </div>
+      <p class="hint" id="policy-status" role="status"></p>
+      <div class="route-actions"><button class="secondary" type="submit">Save IP protection</button></div>
+      <p class="hint">A saved proxy password is never shown again; re-enter it when you change the proxy. How often proxies are replaced, rested and checked is set in Parameters → Automatic MTProxy.</p>
+    </form>
     <details class="card padded protection-card" id="protection-details"><summary>Storage protection</summary><div class="protection-summary" id="protection-summary"></div><p class="hint">Use an encrypted disk or volume for message content, attachments, temporary exports and backups. Signatures detect changes; they do not hide content. A proxy routes Telegram traffic and does not protect the web panel.</p></details>
     <details class="card padded accounts-card" id="profiles-details"><summary>Workspaces · add or switch accounts</summary><div id="profiles-list"></div><form class="profile-create" id="profile-create-form"><label for="profile-label">New workspace</label><input id="profile-label" maxlength="80" placeholder="e.g. Research account 2" required><button class="secondary" type="submit">Add workspace</button></form><p class="hint">Add as many workspaces as you need. Use a distinct Telegram account per workspace: the same session in two places makes Telegram revoke it (AUTH_KEY_DUPLICATED).</p></details>
   </details>
@@ -656,6 +678,51 @@
   </div>
   <div id="accounts-list" class="accounts-grid"></div>
   <form class="card padded profile-create" id="account-add-form"><div class="eyebrow">Add account</div><h2>New workspace</h2><p class="muted">Create an isolated workspace, then connect a distinct Telegram account inside it. Importing the same session into two workspaces can disrupt update delivery.</p><label for="account-add-label">Workspace name</label><input id="account-add-label" maxlength="80" placeholder="e.g. Research account 2" required><button class="secondary" type="submit">Add workspace</button><p class="hint" id="accounts-limit"></p></form>
+</section>
+
+<section class="view" hidden id="view-access">
+  <div class="page-heading">
+    <div><h1>Access</h1><p class="page-description">Who opens this panel and what they can do there. Your panel token stays the main key; everyone else gets their own access, limited to chosen workspaces and chats.</p></div>
+    <button class="secondary" id="access-refresh"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Refresh</button>
+  </div>
+  <form class="card padded access-form" id="access-form"><div class="eyebrow" id="access-form-mode">New access</div><h2>Give someone access</h2>
+    <label for="access-label">Name</label><input id="access-label" maxlength="80" placeholder="e.g. Lawyer, analyst on the Harbor case" required>
+    <fieldset class="access-group"><legend>Workspaces and chats</legend>
+      <label class="check-label"><input id="access-all" type="checkbox"> All workspaces, including ones added later</label>
+      <div class="access-workspaces" id="access-workspaces"></div>
+    </fieldset>
+    <fieldset class="access-group"><legend>What this access may do</legend><div class="access-permissions" id="access-permissions"></div>
+      <p class="hint">Where only chosen chats are open, actions on the whole workspace stay closed: connecting the account, the source list, full exports, settings and parameters.</p></fieldset>
+    <fieldset class="access-group"><legend>Limits</legend>
+      <div class="access-limits">
+        <div><label for="access-sessions">Parallel sessions</label><input id="access-sessions" max="100" min="1" required type="number" value="1"></div>
+        <div><label for="access-on-limit">When the limit is reached</label><select id="access-on-limit"><option value="refuse">Refuse the new sign-in</option><option value="replace">End the oldest session</option></select></div>
+        <div><label for="access-uses">Sign-ins allowed (empty: no limit)</label><input id="access-uses" min="1" type="number"></div>
+        <div><label for="access-expires">Valid until (empty: no end date)</label><input id="access-expires" type="datetime-local"></div>
+        <div><label for="access-idle">A session ends after … minutes without activity</label><input id="access-idle" max="43200" min="5" required type="number" value="720"></div>
+      </div>
+      <label for="access-ips">Allowed addresses, one IP address or subnet per line (empty: any address)</label><textarea id="access-ips" placeholder="203.0.113.7" rows="2" spellcheck="false"></textarea>
+      <label class="check-label"><input id="access-bind" type="checkbox"> Bind to the address of the first sign-in</label>
+    </fieldset>
+    <button class="primary" id="access-submit" type="submit">Create access</button> <button class="quiet" hidden id="access-cancel" type="button">Cancel editing</button>
+    <div class="access-new" hidden id="access-new"><p><strong>Token of this access.</strong> It is shown only now. Send it over a private channel; the person enters it on this panel's sign-in page.</p><code data-no-translate id="access-token"></code><button class="secondary" id="access-copy" type="button">Copy token</button></div>
+  </form>
+  <div class="card padded"><div class="eyebrow">Issued</div><h2>Accesses</h2><div class="access-list" id="access-list"></div></div>
+  <div class="card padded"><div class="eyebrow">Now</div><h2>Open sessions</h2><div class="access-list" id="access-sessions-list"></div>
+    <details><summary>Limits for your own sign-ins with the panel token</summary>
+      <form id="access-admin-form"><div class="access-limits">
+        <div><label for="admin-sessions">Parallel sessions (0: no limit)</label><input id="admin-sessions" max="100" min="0" required type="number"></div>
+        <div><label for="admin-on-limit">When the limit is reached</label><select id="admin-on-limit"><option value="replace">End the oldest session</option><option value="refuse">Refuse the new sign-in</option></select></div>
+        <div><label for="admin-idle">A session ends after … minutes without activity</label><input id="admin-idle" max="43200" min="5" required type="number"></div>
+      </div><button class="secondary" type="submit">Save limits</button>
+      <p class="hint">Signing in on this page starts a session. Scripts that send the panel token itself are not counted as sessions; keep that token private.</p></form>
+    </details>
+  </div>
+  <div class="card padded"><div class="eyebrow">Console</div><h2>Log since this start</h2>
+    <p class="muted">What this TgWitness process logs: its start, Telegram connections, proxy changes, sign-ins, refusals and changes made by anyone, and the journal records of every workspace. Message records are left out; they stay in the journal.</p>
+    <label class="check-label"><input checked id="console-follow" type="checkbox"> Follow new lines</label>
+    <pre class="access-console" id="access-console" tabindex="0"></pre>
+  </div>
 </section>
 </div>
 <footer><a href="/guide.html" rel="noopener" target="_blank">Help &amp; setup guide</a></footer>

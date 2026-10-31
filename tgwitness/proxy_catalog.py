@@ -1,19 +1,26 @@
-"""Public MTProxy lists: bundled seed, explicit HTTPS refresh and a last-good cache.
+"""Public MTProxy lists: bundled seed, HTTPS refresh, a last-good cache and the automatic pool.
 
 Remote lists supply data only. They cannot change feed URLs or the selected route.
 Operator catalogs keep their existing, exclusive override semantics.
 """
 import asyncio
+from collections import Counter
 from contextlib import suppress
 from datetime import datetime, timezone
 import hashlib
 import ipaddress
 import json
+import logging
 import os
 from pathlib import Path
 import socket
 import tempfile
+import time
 from urllib.parse import unquote, urlencode, urlsplit
+
+from telethon.network import MTProtoPlainSender
+from telethon.tl.functions import ReqPqMultiRequest
+from telethon.tl.types import ResPQ
 
 from . import netclient
 from .network import NetworkConfig, parse_mtproxy_link, proxy_catalog as operator_catalog
@@ -26,13 +33,51 @@ SOURCES = (
     {"id": "zakky8", "label": "zakky8/mtproto-proxy-pro",
      "url": "https://zakky8.github.io/mtproto-proxy-pro/all_proxies.txt",
      "homepage": "https://github.com/zakky8/mtproto-proxy-pro"},
+    {"id": "kort0881", "label": "kort0881/telegram-proxy-collector",
+     "url": "https://raw.githubusercontent.com/kort0881/telegram-proxy-collector/main/verified/proxy_all_verified.txt",
+     "homepage": "https://github.com/kort0881/telegram-proxy-collector"},
+    {"id": "mtp-collector", "label": "3yed-61/MTP-Collector",
+     "url": "https://raw.githubusercontent.com/3yed-61/MTP-Collector/main/proxy/mtproto.json",
+     "homepage": "https://github.com/3yed-61/MTP-Collector", "format": "json"},
+    {"id": "therealwh", "label": "Therealwh/MTPproxyLIST",
+     "url": "https://raw.githubusercontent.com/Therealwh/MTPproxyLIST/main/verified/proxy_all_verified.txt",
+     "homepage": "https://github.com/Therealwh/MTPproxyLIST"},
+    {"id": "khodejav", "label": "KhodeJav/telegram-proxy-collector",
+     "url": "https://raw.githubusercontent.com/KhodeJav/telegram-proxy-collector/main/output/proxies.txt",
+     "homepage": "https://github.com/KhodeJav/telegram-proxy-collector"},
 )
 SOURCE_IDS = {source["id"] for source in SOURCES}
 SEED = Path(__file__).with_name("public_proxies.json")
 FORMAT = "tgwitness-public-proxies-v1"
 MAX_BYTES = 1024 * 1024
-MAX_PER_SOURCE = 64
+MAX_PER_SOURCE = 400  # the largest list holds about 200 usable proxies
 REFRESH_SECONDS = 60
+
+# Automatic routes (NetworkConfig kind "mtproxy_auto").
+FEED_SECONDS = 3600          # lists are downloaded again hourly while a workspace uses automatic routes
+PROBE_SECONDS = 600          # every listed proxy is checked this often
+PROBE_TIMEOUT = 8
+PROBE_PARALLEL = 16
+PICK_BATCH = 8               # proxies checked at once when a workspace needs one now
+PICK_LIMIT = 48              # at most this many checks for one choice
+COOLDOWN_SECONDS = 600       # a failed proxy rests, doubling per repeated failure
+COOLDOWN_MAX = 6 * 3600
+PROBE_DC = (2, "149.154.167.51", 443)  # the DC asked for in the probe handshake
+
+
+class NoProxyAvailable(ConnectionError):
+    """No listed proxy works now; only a workspace whose IP mode allows it then connects directly."""
+
+
+class _Loggers(dict):
+    def __missing__(self, key):
+        return PROBE_LOG
+
+
+# Broken proxies make Telethon's transport log tracebacks; a failed check is already recorded as such.
+PROBE_LOG = logging.getLogger("tgwitness.proxy_probe")
+PROBE_LOG.addHandler(logging.NullHandler())
+PROBE_LOG.propagate = False
 
 
 def public_ip(address):
@@ -78,17 +123,33 @@ def parse_feed(text):
     return rows, skipped
 
 
+def feed_text(source, text):
+    """Proxy links, one per line; a JSON feed lists the parts of each t.me link."""
+    if source.get("format") != "json":
+        return text
+    data = json.loads(text)
+    if not isinstance(data, list):
+        raise ValueError("not a list")
+    lines = []
+    for item in data:
+        query = item.get("query") if isinstance(item, dict) else None
+        if isinstance(query, dict) and all(isinstance(query.get(k), (str, int)) for k in ("server", "port", "secret")):
+            lines.append("tg://proxy?" + urlencode({k: query[k] for k in ("server", "port", "secret")}))
+    return "\n".join(lines)
+
+
 def source_data(source, text, now):
-    rows, skipped = parse_feed(text)
+    rows, skipped = parse_feed(feed_text(source, text))
     return {"id": source["id"], "fetched_at": now, "skipped": skipped, "proxies": [
         "tg://proxy?" + urlencode({"server": row["route"].host, "port": row["route"].port,
                                    "secret": row["route"].secret}) for row in rows]}
 
 
 def feed_network():
+    """The proxy set for list downloads in the environment, or None."""
     value = os.environ.get("TGWITNESS_PROXY_FEED_PROXY", "").strip()
     if not value:
-        return NetworkConfig()
+        return None
     try:
         parts = urlsplit(value)
         if (parts.scheme not in ("http", "socks5", "socks5h") or not parts.hostname
@@ -169,14 +230,17 @@ class PublicCatalog:
         return {**catalog, "proxies": [{"id": row["id"], "label": row["label"],
                 "host": row["route"].host, "port": row["route"].port} for row in catalog["proxies"]]}
 
-    async def refresh(self):
+    async def refresh(self, network=None):
+        """Download the lists through the environment's proxy, else the given route (direct by default)."""
         async with self.lock:
             if self.catalog()["mode"] == "operator":
                 return self.public()  # The local override disables external subscriptions.
             loop = asyncio.get_running_loop()
             if self.last_attempt and loop.time() - self.last_attempt < REFRESH_SECONDS:
                 return {**self.public(), "refresh": self.last_result, "throttled": True}
-            network = feed_network()
+            network = feed_network() or network or NetworkConfig(kind="direct")
+            if network.kind == "none":  # this installation sends no requests outside Telegram this way
+                raise ValueError(str(network.error))
             self.last_attempt = loop.time()
             previous, _ = self.snapshot()
             saved = {entry["id"]: entry for entry in previous["sources"]}
@@ -187,7 +251,11 @@ class PublicCatalog:
                 if isinstance(response, BaseException):
                     failed.append(source["id"])
                     continue
-                entry = source_data(source, response, now)
+                try:
+                    entry = source_data(source, response, now)
+                except ValueError:  # includes malformed JSON
+                    failed.append(source["id"])
+                    continue
                 if not entry["proxies"]:
                     failed.append(source["id"])
                     continue
@@ -220,22 +288,228 @@ class PublicCatalog:
         row = next((row for row in catalog["proxies"] if row["id"] == alias), None)
         if row is None:
             raise ValueError("Unknown public proxy. Refresh the list.")
-        route = row["route"]
-        if catalog["mode"] == "operator":
-            return route
-        # Pin a public IP so a downloaded hostname cannot rebind to a local service
-        # between validation and a later Telegram connection. Manual routes are separate.
+        return await pinned(row["route"], catalog["mode"] == "operator")
+
+
+async def pinned(route, operator=False):
+    """Pin a public IP so a downloaded hostname cannot rebind to a local service
+    between validation and a later Telegram connection. Manual and operator routes are separate."""
+    if operator:
+        return route
+    try:
+        address = ipaddress.ip_address(route.host)
+        addresses = [str(address)]
+    except ValueError:
         try:
-            address = ipaddress.ip_address(route.host)
-            addresses = [str(address)]
+            answers = await asyncio.wait_for(asyncio.get_running_loop().getaddrinfo(
+                route.host, route.port, type=socket.SOCK_STREAM), 8)
+            addresses = [answer[4][0] for answer in answers]
+        except (OSError, TimeoutError):
+            raise ValueError("Public proxy address could not be resolved. Choose another server.") from None
+    if not addresses or not all(public_ip(address) for address in addresses):
+        raise ValueError("Public proxy lists cannot select a local or reserved address.")
+    addresses.sort(key=lambda address: ipaddress.ip_address(address).version)
+    return route.model_copy(update={"host": addresses[0]})
+
+
+async def probe(route):
+    """Milliseconds for an MTProto handshake (req_pq_multi) through the proxy to Telegram.
+
+    The same obfuscated transport the client uses; no account, session or authorization key is involved.
+    Telethon's MTProxy connect always waits 2 s for a refusal, so only the exchange itself is timed.
+    """
+    options = route.client_options()
+    connection = options["connection"](PROBE_DC[1], PROBE_DC[2], PROBE_DC[0], loggers=_Loggers(),
+                                       proxy=options["proxy"])
+    try:
+        await asyncio.wait_for(connection.connect(timeout=PROBE_TIMEOUT), PROBE_TIMEOUT + 3)
+        nonce = int.from_bytes(os.urandom(16), "big", signed=True)
+        started = time.monotonic()
+        answer = await asyncio.wait_for(MTProtoPlainSender(connection, loggers=_Loggers()).send(
+            ReqPqMultiRequest(nonce)), PROBE_TIMEOUT)
+    finally:
+        await connection.disconnect()
+    if not isinstance(answer, ResPQ) or answer.nonce != nonce:
+        raise ConnectionError("unexpected handshake answer")
+    return max(1, round((time.monotonic() - started) * 1000))
+
+
+class ProxyPool:
+    """Automatic MTProxy routes shared by every workspace of one process.
+
+    A workspace keeps its proxy while it works (Telegram distrusts accounts that hop between
+    addresses); different workspaces get different proxies while enough work; a proxy that fails
+    rests for a cooldown and the workspace moves to the next healthy one. The pool itself never
+    connects directly; the workspace's IP mode decides whether a direct fallback is allowed.
+    """
+
+    # Network steps, replaceable in tests.
+    pin = staticmethod(pinned)
+    probe = staticmethod(probe)
+
+    def __init__(self, catalog):
+        self.catalog = catalog
+        self.health = {}      # proxy id -> {"latency_ms", "checked_at", "failures", "cooldown_until", "error_type"}
+        self.assigned = {}    # workspace key -> proxy id
+        self.lock = asyncio.Lock()
+        self.wakeup = asyncio.Event()
+        self.probed_at = 0.0
+        self.refreshed_at = 0.0
+        self.exhausted = False
+        # Set by the main panel: its list and check intervals, and the route for list downloads.
+        self.intervals = lambda: {"lists": FEED_SECONDS, "probe": PROBE_SECONDS}
+        self.outside = None
+        self.lists_blocked = None
+        self.waiting = set()  # workspaces without a proxy now (waiting or connected directly)
+
+    def entries(self):
+        catalog = self.catalog.catalog()
+        return catalog["mode"] == "operator", {row["id"]: row for row in catalog["proxies"]}
+
+    def resting(self, alias, now):
+        return self.health.get(alias, {}).get("cooldown_until", 0) > now
+
+    def healthy(self, alias, now):
+        state = self.health.get(alias, {})
+        return bool(state.get("latency_ms")) and now - state.get("checked_at", 0) < 2 * self.intervals()["probe"]
+
+    def degrade(self, alias, error_type, first=COOLDOWN_SECONDS, longest=COOLDOWN_MAX):
+        """Set a failed proxy aside; repeated failures rest longer."""
+        state = self.health.setdefault(alias, {"failures": 0})
+        state["failures"] = state.get("failures", 0) + 1
+        cooldown = min(longest, first * 2 ** (state["failures"] - 1))
+        state.update(latency_ms=None, checked_at=time.time(), cooldown_until=time.time() + cooldown,
+                     error_type=error_type)
+        return cooldown
+
+    def succeeded(self, alias, latency_ms=None):
+        state = self.health.setdefault(alias, {})
+        state.update(failures=0, cooldown_until=0, error_type=None, checked_at=time.time(),
+                     latency_ms=latency_ms or state.get("latency_ms") or 1)
+
+    async def check(self, alias, row, operator, quick=False):
+        """The pinned route after a successful handshake (quick: recently checked, only resolve), or None;
+        a failed proxy then rests."""
+        try:
+            route = await self.pin(row["route"], operator)
+            latency = None if quick else await self.probe(route)
+        except Exception as exc:  # any failure only means: not this proxy now
+            self.degrade(alias, type(exc).__name__)
+            return None
+        if not quick:
+            self.succeeded(alias, latency)
+        return route
+
+    def order(self, owner, entries, avoid, now, share=0):
+        """Candidates: least shared first, then measured latency, then list order; share caps the
+        accounts on one proxy (0: no cap)."""
+        load = Counter(v for k, v in self.assigned.items() if k != owner)
+        position = {alias: number for number, alias in enumerate(entries)}
+        usable = [a for a in entries if a not in avoid and not self.resting(a, now) and not (share and load[a] >= share)]
+        return sorted(usable, key=lambda a: (load[a], not self.healthy(a, now),
+                                             self.health.get(a, {}).get("latency_ms") or 0, position[a]))
+
+    def available(self, owner, share=0):
+        """Whether a checked proxy could serve this workspace now, without checking anything."""
+        try:
+            _, entries = self.entries()
         except ValueError:
+            return False
+        now = time.time()
+        return any(self.healthy(a, now) for a in self.order(owner, list(entries), set(), now, share))
+
+    async def acquire(self, owner, preferred=None, avoid=(), share=0):
+        """(proxy id, pinned route) for a workspace; raises NoProxyAvailable."""
+        async with self.lock:
             try:
-                answers = await asyncio.wait_for(asyncio.get_running_loop().getaddrinfo(
-                    route.host, route.port, type=socket.SOCK_STREAM), 8)
-                addresses = [answer[4][0] for answer in answers]
-            except (OSError, TimeoutError):
-                raise ValueError("Public proxy address could not be resolved. Choose another server.") from None
-        if not addresses or not all(public_ip(address) for address in addresses):
-            raise ValueError("Public proxy lists cannot select a local or reserved address.")
-        addresses.sort(key=lambda address: ipaddress.ip_address(address).version)
-        return route.model_copy(update={"host": addresses[0]})
+                operator, entries = self.entries()
+            except ValueError:
+                raise NoProxyAvailable("The proxy catalog is unavailable.") from None
+            now = time.time()
+            current = self.assigned.get(owner) or preferred
+            others = {v for k, v in self.assigned.items() if k != owner}
+            # Stay on the same proxy while it works: an account should not hop between addresses.
+            if (current in entries and current not in avoid and not self.resting(current, now)
+                    and current not in others):
+                route = await self.check(current, entries[current], operator, quick=self.healthy(current, now))
+                if route:
+                    self.assigned[owner] = current
+                    return current, route
+            candidates = self.order(owner, list(entries), set(avoid), now, share)[:PICK_LIMIT]
+            for alias in [a for a in candidates if self.healthy(a, now)][:PICK_BATCH]:
+                route = await self.check(alias, entries[alias], operator, quick=True)
+                if route:
+                    self.assigned[owner] = alias
+                    return alias, route
+            untested = [a for a in candidates if not self.healthy(a, now)]
+            for start in range(0, len(untested), PICK_BATCH):
+                batch = untested[start:start + PICK_BATCH]
+                routes = await asyncio.gather(*(self.check(a, entries[a], operator) for a in batch))
+                found = sorted((self.health[a]["latency_ms"], number, a, r)
+                               for number, (a, r) in enumerate(zip(batch, routes)) if r)
+                if found:
+                    _, _, alias, route = found[0]
+                    self.assigned[owner] = alias
+                    return alias, route
+            self.assigned.pop(owner, None)
+            self.exhausted = True
+            self.wakeup.set()  # the background task downloads the lists again sooner
+            raise NoProxyAvailable("No listed MTProxy answered.")
+
+    def release(self, owner):
+        self.assigned.pop(owner, None)
+
+    def keep(self, owner, alias):
+        """Leave a workspace on its proxy after a planned switch found no other."""
+        self.assigned[owner] = alias
+
+    def describe(self, owner):
+        alias = self.assigned.get(owner)
+        try:
+            _, entries = self.entries()
+        except ValueError:
+            entries = {}
+        now = time.time()
+        row, state = entries.get(alias), self.health.get(alias, {})
+        current = {"id": alias, "host": row["route"].host, "port": row["route"].port, "source": row["label"],
+                   "latency_ms": state.get("latency_ms"), "checked_at": state.get("checked_at")} if row else None
+        return {"current": current, "pool": {
+            "listed": len(entries), "healthy": sum(self.healthy(a, now) for a in entries),
+            "resting": sum(self.resting(a, now) for a in entries),
+            "probed_at": self.probed_at or None, "lists_refreshed_at": self.refreshed_at or None,
+            "lists_blocked": self.lists_blocked}}
+
+    async def probe_all(self):
+        operator, entries = self.entries()
+        now = time.time()
+        gate = asyncio.Semaphore(PROBE_PARALLEL)
+
+        async def one(alias):
+            async with gate:
+                await self.check(alias, entries[alias], operator)
+        await asyncio.gather(*(one(a) for a in entries if not self.resting(a, now)))
+        for alias in set(self.health) - set(entries):
+            del self.health[alias]
+        self.exhausted = False
+
+    async def run(self):
+        """Background upkeep while any workspace uses automatic routes: hourly lists, regular checks."""
+        while True:
+            with suppress(TimeoutError):
+                await asyncio.wait_for(self.wakeup.wait(), 60)
+            self.wakeup.clear()
+            if not self.assigned and not self.exhausted and not self.waiting:
+                continue
+            now, intervals = time.time(), self.intervals()
+            if now - self.refreshed_at >= intervals["lists"] or (self.exhausted and now - self.refreshed_at >= REFRESH_SECONDS * 10):
+                self.refreshed_at = now
+                route = self.outside() if self.outside else None
+                # Without a route for requests outside Telegram the pool keeps the lists it has.
+                self.lists_blocked = str(route.error) if route is not None and route.kind == "none" else None
+                if not self.lists_blocked:
+                    with suppress(Exception):
+                        await self.catalog.refresh(route)
+            if self.exhausted or now - self.probed_at >= intervals["probe"]:
+                self.probed_at = now
+                with suppress(Exception):
+                    await self.probe_all()

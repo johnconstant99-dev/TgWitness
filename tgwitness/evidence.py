@@ -174,6 +174,10 @@ def export_file(store, vault, fmt):
                 write_member("README.txt", [("\n".join(LIMITS) +
                     "\n\nUse a verifier from a trusted checkout, not solely from an untrusted ZIP.\n"
                     "Verify: python verify.py evidence.zip --fingerprint TRUSTED_SHA256\n"
+                    "Require a witnessed export boundary: add --witness witness.zip\n"
+                    "  --witness-fingerprint TRUSTED_WITNESS_SHA256 --require-witness\n"
+                    "The witness must have retained the exact exported head. This verifies consistency\n"
+                    "with its retained records, not the truth of the recorded messages.\n"
                     "Archives above 4 GiB uncompressed also need --max-gib with their size in GiB.\n"
                     "Requires Python 3.11+ and cryptography. CSV cells are formula-escaped.\n"
                     "events.jsonl is authoritative. Export is a stable journal prefix.\n"

@@ -4,6 +4,7 @@ import subprocess
 import time
 import zipfile
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 from cryptography import x509
@@ -13,15 +14,18 @@ from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
+from tgwitness import anchoring
 from tgwitness.anchor import find_openssl
-from tgwitness.anchoring import EvidenceMode, anchor_latest
+from tgwitness.anchoring import EvidenceMode, anchor_latest, evidence_settings
 from tgwitness.app import create_app
 from tgwitness.evidence import export_file, retain_checkpoint
 from tgwitness.network import NetworkConfig
-from tgwitness.verify import (OTS_PENDING, der, fingerprint, ots_summary, timestamp_reply_summary,
-                              verify_anchors, verify_bundle)
+from tgwitness.tsa_roots import trusted_roots
+from tgwitness.verify import (OTS_PENDING, children, der, fingerprint, ots_summary, timestamp_reply_summary,
+                              timestamp_signature, timestamp_token, verify_anchors, verify_bundle)
 from test_collector import FakeClient
 
+REAL = Path(__file__).resolve().parent / "tsa"  # answers from the real authorities, 2026-10-31
 OTS_ANSWER = b"\xf0\x10" + bytes(range(16)) + b"\x08\x00" + OTS_PENDING + b"\x1a\x19https://cal.example/digest"
 
 
@@ -97,24 +101,32 @@ async def local_services(tsa_reply):
     return server, server.sockets[0].getsockname()[1], seen
 
 
-def test_checkpoint_is_timestamped_exported_and_verified(journal, tmp_path):
+def test_checkpoint_is_timestamped_exported_and_verified(journal, tmp_path, monkeypatch):
     tsa_reply, ca_path = synthetic_tsa(tmp_path)
     store, vault = journal
+    (tmp_path / "other").mkdir()
+    _, wrong_ca = synthetic_tsa(tmp_path / "other")
+    roots = [(x509.load_pem_x509_certificate(wrong_ca.read_bytes()),)]
+    monkeypatch.setattr(anchoring, "trusted_roots", lambda: roots[0])
 
     async def run():
         server, port, seen = await local_services(tsa_reply)
-        base = "http://127.0.0.1:" + str(port)
-        settings = EvidenceMode(enabled=True, tsa_urls=[base + "/tsr"],
-                                ots_calendars=[base + "/cal-a", base + "/cal-chunked", base + "/broken"]).model_dump()
+        base = "http://127.0.0.1:" + str(port)  # a local test server: the settings model accepts only https://
+        settings = {"tsa_urls": [base + "/tsr"],
+                    "ots_calendars": [base + "/cal-a", base + "/cal-chunked", base + "/broken"]}
         store.append("test", {"n": 1})
         retain_checkpoint(store, vault)
-        first = await anchor_latest(store, NetworkConfig(), settings)
-        second = await anchor_latest(store, NetworkConfig(), settings)  # only the failed service is retried
+        untrusted = await anchor_latest(store, NetworkConfig(kind="direct"), {**settings, "ots_calendars": []})
+        roots[0] = (x509.load_pem_x509_certificate(ca_path.read_bytes()),)
+        first = await anchor_latest(store, NetworkConfig(kind="direct"), settings)
+        second = await anchor_latest(store, NetworkConfig(kind="direct"), settings)  # only the failed service is retried
         server.close()
-        return first, second, seen
-    first, second, seen = asyncio.run(run())
+        return untrusted, first, second, seen
+    untrusted, first, second, seen = asyncio.run(run())
+    assert not untrusted["results"][0]["ok"] and "trusted root" in untrusted["results"][0]["error"]
     ok = {r["service"].rsplit("/", 1)[1]: r for r in first["results"]}
     assert ok["tsr"]["ok"] and ok["tsr"]["time"] and ok["cal-a"]["status"] == "pending"
+    assert ok["tsr"]["signer"] == "CN=Synthetic test TSA only" and ok["tsr"]["root"] == "CN=Synthetic test CA only"
     assert ok["cal-chunked"]["ok"] and not ok["broken"]["ok"] and ok["broken"]["error"] == "HTTP 500"
     assert [r["service"].rsplit("/", 1)[1] for r in second["results"]] == ["broken"]
     checkpoint_bytes = (store.root / "checkpoints" / first["checkpoint"]["file"]).read_bytes()
@@ -130,8 +142,6 @@ def test_checkpoint_is_timestamped_exported_and_verified(journal, tmp_path):
     assert tsa["signature"] == "checked against the given root" and tsa["time"]
 
     # An unrelated root is refused; a reply for other bytes or with another nonce is refused.
-    (tmp_path / "other").mkdir()
-    _, wrong_ca = synthetic_tsa(tmp_path / "other")
     hashes = {0: "0" * 64, **{e["seq"]: e["hash"] for e in store.all_events()}}
     with zipfile.ZipFile(path) as archive:
         names = archive.namelist()
@@ -150,31 +160,57 @@ def test_checkpoint_is_timestamped_exported_and_verified(journal, tmp_path):
         ots_summary((store.root / "checkpoints" / "anchors").glob("*.ots").__next__().read_bytes(), bytes(32))
 
 
+def test_real_authorities_chain_to_the_shipped_roots_and_tampering_fails():
+    digest = hashlib.sha256((REAL / "data.bin").read_bytes()).digest()
+    for name, root in (("freetsa", "CN=www.freetsa.org"), ("digicert-http", "CN=DigiCert Trusted Root G4"),
+                       ("sectigo", "CN=USERTrust RSA Certification Authority")):
+        reply, query = (REAL / (name + ".tsr")).read_bytes(), (REAL / (name + ".tsq")).read_bytes()
+        assert timestamp_reply_summary(reply, digest, query)["time"].startswith("2026-10-31T")
+        assert root in timestamp_signature(reply, trusted_roots())["root"]
+    with pytest.raises(ValueError, match="trusted root"):  # DFN's root is in neither set
+        timestamp_signature((REAL / "dfn.tsr").read_bytes(), trusted_roots())
+    reply = (REAL / "sectigo.tsr").read_bytes()
+    _, _, start, end = timestamp_token(reply)["signer"]
+    signature = children(reply, start, end)[5]
+    for at, message in ((signature[2] + 7, "signature is invalid"), (reply.find(digest) + 3, "does not cover this TSTInfo")):
+        tampered = bytearray(reply)
+        tampered[at] ^= 1
+        with pytest.raises(ValueError, match=message):
+            timestamp_signature(bytes(tampered), trusted_roots())
+
+
 def test_mtproxy_route_never_sends_timestamp_requests(journal):
     store, vault = journal
     retain_checkpoint(store, vault)
     route = NetworkConfig(kind="mtproxy", host="proxy.example", port=443, secret="dd" + "a" * 32)
-    settings = EvidenceMode(enabled=True, tsa_urls=["http://127.0.0.1:9/tsr"], ots_calendars=[]).model_dump()
+    settings = EvidenceMode(enabled=True, tsa_urls=["https://127.0.0.1:9/tsr"], ots_calendars=[]).model_dump()
     result = asyncio.run(anchor_latest(store, route, settings))
     assert not result["results"][0]["ok"] and "MTProxy" in result["results"][0]["error"]
     assert not list((store.root / "checkpoints" / "anchors").iterdir())
 
 
 def test_evidence_settings_validation_and_api(tmp_path, monkeypatch):
-    with pytest.raises(ValidationError):
-        EvidenceMode(tsa_urls=["ftp://tsa.example"])
-    with pytest.raises(ValidationError):
-        EvidenceMode(ots_calendars=["https://user:secret@cal.example"])
+    for bad in ({"tsa_urls": ["ftp://tsa.example"]}, {"tsa_urls": ["http://timestamp.digicert.com"]},
+                {"ots_calendars": ["http://cal.example"]}, {"ots_calendars": ["https://user:secret@cal.example"]}):
+        with pytest.raises(ValidationError):
+            EvidenceMode(**bad)
     assert EvidenceMode().model_dump()["enabled"] is False  # nothing leaves the machine by default
+    assert all(url.startswith("https://") for url in EvidenceMode().model_dump()["tsa_urls"])
     monkeypatch.delenv("TGWITNESS_TOKEN", raising=False)
     app = create_app(tmp_path, client_factory=FakeClient)
     with TestClient(app) as c:
         c.headers["Authorization"] = "Bearer " + app.state.vault.token
+        # Saved while plain HTTP was accepted: the old default moves to an HTTPS authority, others to https://.
+        app.state.store.set_setting("evidence", {"tsa_urls": ["http://timestamp.digicert.com", "http://tsa.example/x"],
+                                                 "ots_calendars": ["http://cal.example"]})
+        assert evidence_settings(app.state.store)["tsa_urls"] == ["https://timestamp.sectigo.com", "https://tsa.example/x"]
+        assert evidence_settings(app.state.store)["ots_calendars"] == ["https://cal.example"]
         assert c.post("/api/evidence/anchor", json={}).status_code == 409
-        body = {"enabled": True, "interval_minutes": 10, "tsa_urls": ["http://127.0.0.1:9/tsr"], "ots_calendars": []}
+        body = {"enabled": True, "interval_minutes": 10, "tsa_urls": ["https://127.0.0.1:9/tsr"], "ots_calendars": []}
         state = c.post("/api/evidence", json=body).json()
         assert state["settings"]["enabled"] and state["defaults"]["tsa_urls"][0] == "https://freetsa.org/tsr"
         assert c.post("/api/evidence", json={**body, "tsa_urls": ["javascript:alert(1)"]}).status_code == 422
+        assert c.post("/api/evidence", json={**body, "tsa_urls": ["http://127.0.0.1:9/tsr"]}).status_code == 422
         deadline = time.time() + 30
         while not c.get("/api/evidence").json()["last"] and time.time() < deadline:
             time.sleep(0.2)

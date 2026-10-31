@@ -72,7 +72,8 @@ remains separate. This does not remove the live-service/platform blockers below.
 - Independent security, attribution and evidence-handoff review.
 
 Admin-log polling, extra reactor lists, priority polling, isolated workers, whole-store
-application encryption and user roles remain separate features. Supported TData
+application encryption remain separate features. Scoped panel permissions are
+documented in [access and permissions](../ACCESS.md). Supported TData
 import and QR login are implemented in 0.6; see [account formats](../ACCOUNTS.md).
 Their absence must not be inferred away from a successful panel launch.
 

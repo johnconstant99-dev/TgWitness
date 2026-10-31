@@ -41,7 +41,7 @@ async def fetch(response, **options):
         port = server.sockets[0].getsockname()[1]
         with patch.object(asyncio.StreamReader, "readexactly", exact), patch.object(asyncio.StreamReader, "read", read):
             try:
-                result = await netclient.request("GET", f"http://127.0.0.1:{port}/", NetworkConfig(), **options)
+                result = await netclient.request("GET", f"http://127.0.0.1:{port}/", NetworkConfig(kind="direct"), **options)
             except Exception as exc:  # returned for the assertions below
                 result = exc
     return result, max(requested, default=0)
@@ -96,7 +96,7 @@ def test_panel_requests_never_reach_this_machine_or_its_network(monkeypatch, url
     # glibc resolves the one-number form 2130706433 to 127.0.0.1 (then refused); Windows does not resolve it.
     expected = (netclient.RouteError, OSError) if "2130706433" in url else netclient.RouteError
     with pytest.raises(expected) as caught:
-        asyncio.run(netclient.request("GET", url, NetworkConfig(), timeout=5))
+        asyncio.run(netclient.request("GET", url, NetworkConfig(kind="direct"), timeout=5))
     assert "public internet" in str(caught.value) or "2130706433" in url
 
 

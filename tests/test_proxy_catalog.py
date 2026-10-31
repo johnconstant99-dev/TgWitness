@@ -3,6 +3,7 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
+from tgwitness import collector as collector_module
 from tgwitness.app import create_app
 from tgwitness.network import parse_mtproxy_link
 from test_collector import FakeClient, CHAT, saved_session
@@ -36,6 +37,10 @@ def test_proxy_links_reject_ambiguous_or_unsupported_input_without_echoing_secre
 def test_catalog_authentication_manual_import_isolation_and_secret_exclusion(tmp_path, monkeypatch):
     catalog = tmp_path / "proxies.json"
     monkeypatch.setenv("TGWITNESS_PROXY_CATALOG", str(catalog))
+
+    async def resolved(config):  # offline: the listed proxy names resolve nowhere
+        return "198.51.100.7"
+    monkeypatch.setattr(collector_module, "proxy_address", resolved)
     app = create_app(tmp_path / "data", client_factory=FakeClient)
     with TestClient(app) as client:
         assert client.get("/api/network/catalog").status_code == 401
@@ -47,12 +52,12 @@ def test_catalog_authentication_manual_import_isolation_and_secret_exclusion(tmp
         assert listing.json()["proxies"][0]["host"] == "proxy.example.org" and SECRET not in listing.text
         imported = client.post("/api/network/parse-link", json={"link": "https://t.me/proxy?server=own.example.org&port=8443&secret=" + SECRET})
         assert imported.json()["secret"] == SECRET
-        assert app.state.collector.network_config().kind == "direct"  # Preview does not apply it.
+        assert app.state.collector.network_config().kind == "mtproxy_auto"  # Preview does not apply it.
         assert client.post("/api/network/catalog/absent", json={}).status_code == 404
         assert client.post("/api/network/catalog/project-a", json={}).status_code == 200
         assert app.state.collector.network_config().secret == SECRET
         child = client.post("/api/profiles", json={"label": "Separate"}).json()["id"]
-        assert client.get("/profiles/" + child + "/api/status").json()["collector"]["network"]["kind"] == "direct"
+        assert client.get("/profiles/" + child + "/api/status").json()["collector"]["network"]["kind"] == "mtproxy_auto"
         assert SECRET not in json.dumps(app.state.store.all_events()) + client.get("/api/status").text
         assert SECRET.encode() not in (tmp_path / "data/network.enc").read_bytes()
         token = client.post("/api/witness/tokens", json={"label": "Reader"}).json()["token"]

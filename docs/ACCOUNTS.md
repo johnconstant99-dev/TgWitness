@@ -284,7 +284,7 @@ sign in.
 - A journal stays bound to the account that created it. Signing in as a different
   account requires another workspace, and one account cannot be assigned to two
   workspaces.
-- All workspaces share one panel token; they are not separate users.
+- The main panel token controls all workspaces. [Issued access](ACCESS.md) can restrict other people to selected accounts and chats, with separate permissions and session limits.
 - **Accounts** renames a workspace and deletes an added one, with its session, journal,
   sources and signing key. The main workspace cannot be deleted from the panel.
 
@@ -339,7 +339,7 @@ makes no network request and refuses to overwrite an existing output file.
 | Account ID does not match the imported account | The file's user ID differs from what Telegram reports; the file is for another account. |
 | Account already belongs to another workspace | Open that workspace instead of adding the account twice. |
 | Connected, but a private group is missing from the chat list in **Sources** | Check membership. The picker inspects the first 1,000 dialogs; raise the limit under **Parameters**. |
-| Proxy connection fails | Check host, port and credentials. TgWitness never falls back to a direct connection. |
+| Proxy connection fails | Check the route and IP mode. Automatic MTProxy tries another working entry. Hide IP mode waits; the explicitly selected fallback mode can connect directly after its configured delay. See [routing modes](CONNECTION-SECURITY.md#ip-modes). |
 
 See also: [connection and security](CONNECTION-SECURITY.md) for proxies and encryption,
 and [how collection works](COLLECTION.md) for what is captured after sign-in.

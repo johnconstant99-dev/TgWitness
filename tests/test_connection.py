@@ -48,7 +48,7 @@ def test_route_survives_restart_isolated_and_redacted(tmp_path):
         secret_dump = json.dumps(client.get("/api/status").json()) + json.dumps(app.state.store.all_events())
         assert "private-proxy-password" not in secret_dump and "private-proxy-user" not in secret_dump
         child = client.post("/api/profiles", json={"label":"Other account"}).json()["id"]
-        assert client.get("/profiles/"+child+"/api/status").json()["collector"]["network"]["kind"] == "direct"
+        assert client.get("/profiles/"+child+"/api/status").json()["collector"]["network"]["kind"] == "mtproxy_auto"
         client.get("/api/dialogs")
         client.post("/api/targets", json={"chat_id":CHAT,"enabled":True})
         client.post("/api/collector/start", json={})

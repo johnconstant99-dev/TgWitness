@@ -18,26 +18,26 @@ DC_ADDRESSES = {1: "149.154.175.53", 2: "149.154.167.51", 3: "149.154.175.100",
                 4: "149.154.167.91", 5: "149.154.171.5"}
 
 
-def string_session(dc, key, address=None, port=443):
+def string_session(dc, key):
+    """Always the reference address of the DC: an address from an untrusted file could be a server
+    that answers with the key it handed over and stands in for Telegram."""
     if type(dc) is not int or dc not in DC_ADDRESSES or not isinstance(key, bytes) or len(key) != 256:
         raise ValueError("Expected a production Telegram DC (1–5) and a complete 256-byte authorization key.")
-    if type(port) is not int or not 1 <= port <= 65535:
-        raise ValueError("Invalid session port.")
     session = StringSession()
-    session.set_dc(dc, address or DC_ADDRESSES[dc], port)
+    session.set_dc(dc, DC_ADDRESSES[dc], 443)
     session.auth_key = AuthKey(key)
     return session.save()
 
 
 def validate_string(value):
+    """The StringSession rebuilt from its DC and key alone; its address and port are ignored."""
     if not isinstance(value, str) or len(value) > 4096:
         raise ValueError("Expected a Telethon StringSession of at most 4 KiB.")
     try:
         session = StringSession(value.strip())
         if not session.auth_key:
             raise ValueError()
-        string_session(session.dc_id, session.auth_key.key, session.server_address, session.port)
-        return session.save()
+        return string_session(session.dc_id, session.auth_key.key)
     except (ValueError, TypeError, binascii.Error, OSError, struct.error):
         raise ValueError("Invalid Telethon StringSession.") from None
 
@@ -57,7 +57,7 @@ def sqlite_session(payload):
         if {"server_address", "port", "dc_id", "auth_key"} <= columns:
             if db.execute("SELECT version FROM version LIMIT 2").fetchall() not in ([(7,)], [(8,)]):
                 raise ValueError("Supported Telethon SQLite schemas: 7 and 8.")
-            rows = db.execute("SELECT dc_id,auth_key,server_address,port FROM sessions LIMIT 2").fetchall()
+            rows = db.execute("SELECT dc_id,auth_key FROM sessions LIMIT 2").fetchall()
             if len(rows) != 1:
                 raise ValueError("Expected exactly one authorized Telethon session.")
             return {"session": string_session(*rows[0]), "format": "Telethon SQLite"}

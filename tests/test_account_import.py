@@ -20,14 +20,15 @@ def upload(name, content):
     return {"name": name, "content": base64.b64encode(content).decode()}
 
 
-def sqlite_fixture(kind="telethon", version=None, bot=0, test=0):
+def sqlite_fixture(kind="telethon", version=None, bot=0, test=0, address=None, port=None):
     source = StringSession(saved_session())
     with sqlite3.connect(":memory:") as db:
         if kind == "telethon":
             db.executescript("CREATE TABLE version(version INTEGER); CREATE TABLE sessions "
                              "(dc_id INTEGER,server_address TEXT,port INTEGER,auth_key BLOB);")
             db.execute("INSERT INTO version VALUES (?)", (version or 8,))
-            db.execute("INSERT INTO sessions VALUES (?,?,?,?)", (source.dc_id, source.server_address, source.port, source.auth_key.key))
+            db.execute("INSERT INTO sessions VALUES (?,?,?,?)", (source.dc_id, address or source.server_address,
+                                                                 port or source.port, source.auth_key.key))
         else:
             db.executescript("CREATE TABLE version(number INTEGER); CREATE TABLE sessions "
                              "(dc_id INTEGER,auth_key BLOB,test_mode INTEGER,user_id INTEGER,is_bot INTEGER);")
@@ -104,6 +105,35 @@ def test_json_metadata_key_and_session_variants():
                    {"string_session": saved_session()}):
         result = import_accounts([upload("account.json", json.dumps(record).encode())])
         assert identity(result["session"]) == identity(saved_session())
+
+
+def test_session_address_from_a_file_is_never_used(tmp_path):
+    """A file pointing at another server would let that server answer as Telegram with the key it supplied."""
+    def address(value):
+        session = StringSession(value)
+        return session.server_address, session.port
+    reference = ("149.154.167.51", 443)
+    forged = StringSession(saved_session())
+    forged.set_dc(forged.dc_id, "203.0.113.7", 8443)
+    forged = forged.save()
+    for files in ([upload("account.session", sqlite_fixture(address="attacker.example", port=8443))],
+                  [upload("session.txt", forged.encode())],
+                  [upload("account.json", json.dumps({"string_session": forged}).encode())]):
+        assert address(import_accounts(files)["session"]) == reference
+    seen = []
+
+    class Recording(FakeClient):
+        def __init__(self, session, *args, **kwargs):
+            seen.append((session.server_address, session.port))
+            super().__init__(session, *args, **kwargs)
+    app = create_app(tmp_path, client_factory=Recording)
+    with TestClient(app) as client:
+        client.headers["Authorization"] = "Bearer " + app.state.vault.token
+        response = client.post("/api/auth/configure", json={"api_id": 123, "api_hash": "a" * 32, "session": forged})
+        assert response.status_code == 200, response.text
+        authorized = [e for e in app.state.store.all_events() if e["kind"] == "account.authorized"]
+        assert authorized[-1]["payload"]["key_origin"] == "imported"
+    assert seen == [reference]
 
 
 @pytest.mark.parametrize("payload", [b'{"auth_key":"ab...cd","dc_id":2}', b'[]', b'{"api_id":123,"api_id":456}',

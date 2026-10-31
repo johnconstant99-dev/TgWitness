@@ -19,6 +19,19 @@ collector, and the extent to which delivery completeness is established. None of
 the first three automatically proves the fourth. A quiet group is not necessarily
 a failed collector.
 
+## Shared investigations
+
+An administrator can issue [access tokens](ACCESS.md) scoped to workspaces and
+individual chats, with seven permissions, IP restrictions, expiry, sign-in limits
+and session control. A read-only reviewer can inspect a case without receiving
+Telegram authorization or the main panel key. Chat-limited access stays separate
+from account-wide settings and full-journal exports.
+
+Automatic MTProxy maintains working Telegram routes from four public sources or
+an operator catalog. [IP modes](CONNECTION-SECURITY.md#ip-modes) determine whether
+failure must wait for another proxy or may use an explicitly permitted direct route.
+External HTTP requests have a separate route and off switch.
+
 ## Optional extras
 
 Everyday setup is account → sources → observation. **Extras** is a separate destination
@@ -227,7 +240,8 @@ Before a stable release, qualify:
 7. Independent review of security, signatures and attribution/evidence claims.
 
 Admin-log polling, additional reactor lists, priority polling, separate workers,
-application-wide encryption and user roles remain future work. Version 0.6 supports
+application-wide encryption remain future work. Scoped panel access is described
+in [access and permissions](ACCESS.md). Version 0.6 supports
 the bounded single-account TData and account-file import described in [ACCOUNTS.md](ACCOUNTS.md).
 Review Telegram API terms before publication. Research references and platform
 findings are in [RESEARCH.md](internal/RESEARCH.md).

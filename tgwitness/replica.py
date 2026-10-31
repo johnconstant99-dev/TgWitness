@@ -116,8 +116,9 @@ class MediaUnavailable(ValueError):
 
 
 async def upload(s3, key, name, opener, extra, expected_digest=None):
-    """Encrypt twice (same nonce prefix): first for Content-MD5/SHA-256, then streaming the upload."""
-    prefix = os.urandom(8)
+    """Encrypt twice (same nonce prefix): first for Content-MD5/SHA-256, then streaming the upload. The
+    second pass refuses any chunk that differs from the first, so one nonce never covers two plaintexts."""
+    prefix, chunks = os.urandom(8), []
 
     def digests():
         md5, sha, plain_hash, length = hashlib.md5(), hashlib.sha256(), hashlib.sha256(), 0
@@ -125,6 +126,7 @@ async def upload(s3, key, name, opener, extra, expected_digest=None):
             def read(size):
                 data = source.read(size)
                 plain_hash.update(data)
+                chunks.append(hashlib.sha256(data).digest())
                 return data
             for piece in encrypt(key, name, read, prefix):
                 md5.update(piece)
@@ -137,7 +139,14 @@ async def upload(s3, key, name, opener, extra, expected_digest=None):
 
     async def body():
         with opener() as source:
-            for piece in encrypt(key, name, source.read, prefix):
+            seen = iter(chunks)
+
+            def read(size):
+                data = source.read(size)
+                if hashlib.sha256(data).digest() != next(seen, None):
+                    raise MediaUnavailable("The file changed while it was being copied; it is copied on a later pass")
+                return data
+            for piece in encrypt(key, name, read, prefix):
                 yield piece
                 await asyncio.sleep(0)
     await s3.put(name, body(), length, sha, md5, extra)
@@ -371,7 +380,7 @@ def key_file(store, vault):
 async def restore(keyinfo, access_key, secret_key, out, network=None):
     """Download, decrypt and verify a copy into out/ (events.jsonl, media/, checkpoints/, exports/)."""
     s3 = S3(keyinfo["endpoint"], keyinfo["region"], keyinfo["bucket"], access_key, secret_key,
-            network or NetworkConfig(), keyinfo["path_style"])
+            network or NetworkConfig(kind="direct"), keyinfo["path_style"])
     key, base, out = base64.b64decode(keyinfo["key"]), keyinfo["prefix"], Path(out)
     if filesystem_link(out):
         raise ValueError("Restore requires an ordinary empty output directory")

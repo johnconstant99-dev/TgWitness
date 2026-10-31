@@ -1,13 +1,13 @@
 # Security and data handling
 
-TgWitness runs on your own computer or server. By default the only connection that leaves
-it is the account's connection to Telegram; notifications, timestamps, an off-site copy and
-a witness are separate switches. This page lists what is protected, how, and what is left
+TgWitness runs on your own computer or server. Account connections, public proxy-list upkeep and optional external services have
+explicit routing policies. Notifications, timestamps, off-site copies and a witness
+are separately configured. This page lists what is protected, how, and what is left
 to the operator.
 
 | Area | In short |
 | --- | --- |
-| Access | One panel token controls every workspace; the panel listens on 127.0.0.1 by default |
+| Access | Administrator key plus scoped access to accounts/chats, seven permissions and revocable sessions; localhost by default |
 | Secrets at rest | Session, API pair, signing key and proxy settings are encrypted with Fernet |
 | Messages and media | Stored unencrypted: use disk encryption and strict permissions |
 | Integrity | SHA-256 hash chain and an Ed25519 signature on every record |
@@ -17,19 +17,26 @@ For vulnerability reports, see the [security policy](../.github/SECURITY.md).
 
 ## Access model
 
-TgWitness is a single-operator collector. Anyone holding the panel token can read and
-export the journal, change collection scope, and authorize a Telegram account.
-There are no roles, per-user permissions, or tenant isolation. Workspaces isolate
-sessions and evidence storage, but the same panel token controls every workspace.
+The main panel token grants full control. Other people can receive their own
+[scoped access](ACCESS.md): chosen workspaces and chats, permissions, expiry,
+IP restrictions, sign-in limits and revocable sessions. A chat-limited access
+cannot perform whole-workspace operations even if their permission is ticked.
+Workspaces share a process and do not isolate data from the host administrator.
 
-The panel listens on localhost by default. Data and control API endpoints require
-a bearer token. No authentication cookie is used. The token is kept in the browser's
-sessionStorage and removed by Lock workspace. A closed browser or locked panel does
-not pause the collector. Use Pause observation to stop it.
+The panel listens on localhost by default. Browser sign-in exchanges an access
+token for a session credential; the browser sends it as a bearer token. It is kept
+in sessionStorage rather than an authentication cookie. Lock/sign-out clears the
+browser session. Closing a browser or ending a session does not stop collection.
 
-Failed token requests are limited per client address. Valid panel and witness tokens
-remain usable when another client at the same proxy address reaches that limit. The
-panel token and witness tokens still grant separate capabilities.
+Issued tokens and session credentials are kept as hashes in the encrypted vault.
+Revocation ends the associated sessions; permission changes affect subsequent
+requests. Downloaded files cannot be recalled. The administrator can limit their
+own browser sessions too, but scripts using the main panel token directly retain
+full access and bypass those browser-session limits.
+
+Failed authentication is rate-limited by client address. IP restrictions use the
+address seen by the application; check reverse-proxy behavior before relying on
+it. Witness credentials remain separate read-only checkpoint/health credentials.
 
 ### Demo access
 
@@ -75,12 +82,21 @@ for the full threat model.
 
 ## Proxies and network routes
 
-Proxy configuration is encrypted in network.enc. Proxy passwords, usernames and
-MTProxy secrets are not returned by the API or written to evidence events. Each
-workspace has its own route. No automatic direct fallback is configured. This applies
-to Telegram transport, not all machine traffic or DNS resolution of the proxy host.
-SOCKS and ordinary HTTP CONNECT proxy authentication are not TLS-protected by
-the proxy protocol itself. Fake TLS MTProxy secrets are rejected.
+Proxy configuration is encrypted in the vault. Passwords and MTProxy secrets are
+not returned by the API or written to evidence records. Each workspace chooses
+its Telegram route and an [IP mode](CONNECTION-SECURITY.md#ip-modes).
+
+Hide IP mode refuses direct Telegram fallback and requires a proxy for external
+HTTP requests. The explicitly selected fallback mode permits direct Telegram
+access after its delay; tunnel/VPN mode permits direct routes. Choosing tunnel
+mode does not install or verify a VPN. These settings do not control all machine
+traffic, browsers, package managers or local proxy-host DNS resolution.
+
+MTProxy carries Telegram traffic only. External requests can use a separate
+SOCKS5/HTTP proxy, the workspace's SOCKS5/HTTP route, or an allowed direct route;
+they can also be disabled. The independent witness has its own transport settings.
+Ordinary SOCKS5/HTTP CONNECT authentication is not encrypted by those proxy
+protocols themselves. Fake TLS MTProxy secrets remain unsupported.
 
 ## Sign-in and session imports
 

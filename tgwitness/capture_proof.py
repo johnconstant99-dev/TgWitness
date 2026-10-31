@@ -1,9 +1,10 @@
 """Signed, content-free collection counters bound to one immutable journal prefix."""
 from .store import ZERO, canonical, utcnow
 from .verify import CAPTURE_KINDS, fingerprint
+from . import continuity
 
 
-def capture_head(store, vault, status, challenge=None):
+def capture_head(store, vault, status, challenge=None, consistency_from=None):
     with store.snapshot() as snapshot:
         head = snapshot.head
         boundary = {"created_at": utcnow(), "public_key": vault.public_key,
@@ -16,6 +17,7 @@ def capture_head(store, vault, status, challenge=None):
             counts[kind] = count
             if kind.startswith("message.") and at:
                 last = max(last or at, at)
+        proof = continuity.answer(snapshot, vault, challenge, consistency_from) if consistency_from is not None else None
     checkpoint = {"format": "tgwitness-checkpoint-v1", **boundary}
     statement = {"format": "tgwitness-capture-v1", **boundary, "challenge": challenge, "counts": counts,
                  "last_message_at": last, "health": {
@@ -26,4 +28,5 @@ def capture_head(store, vault, status, challenge=None):
                      "backoff_until": status.get("rpc_backoff_until", 0)}}
     return {"checkpoint": {"statement": checkpoint, "signature": vault.sign(canonical(checkpoint)),
                            "fingerprint": fingerprint(vault.public_key)},
-            "capture": {"statement": statement, "signature": vault.sign(canonical(statement))}}
+            "capture": {"statement": statement, "signature": vault.sign(canonical(statement))},
+            **({"continuity": proof} if proof is not None else {})}

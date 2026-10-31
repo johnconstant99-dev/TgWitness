@@ -22,6 +22,7 @@ def link(host="8.8.8.8", secret=KEY, port=443):
 def seed(tmp_path, monkeypatch):
     monkeypatch.delenv("TGWITNESS_PROXY_CATALOG", raising=False)
     monkeypatch.delenv("TGWITNESS_PROXY_FEED_PROXY", raising=False)
+    monkeypatch.setattr(catalogs, "SOURCES", catalogs.SOURCES[:2])  # two text feeds; JSON feeds have their own test
     path = tmp_path / "seed.json"
     snapshot = {"format": catalogs.FORMAT, "sources": [
         catalogs.source_data(source, link(host), DATE)
@@ -191,10 +192,11 @@ def test_fixed_https_downloads_are_bounded_and_use_only_the_download_route(monke
 
 def test_catalog_api_refresh_is_authenticated_isolated_and_does_not_switch_route(tmp_path, monkeypatch):
     seed(tmp_path, monkeypatch)
-    calls = []
+    calls, routes = [], []
 
     async def fetch(source, network):
         calls.append(source["id"])
+        routes.append(network)
         return link("9.9.9.9")
     monkeypatch.setattr(catalogs, "download", fetch)
     app = create_app(tmp_path / "data", client_factory=FakeClient)
@@ -203,9 +205,16 @@ def test_catalog_api_refresh_is_authenticated_isolated_and_does_not_switch_route
         client.headers["Authorization"] = "Bearer " + app.state.vault.token
         before = app.state.collector.network_config()
         initial = client.get("/api/network/catalog").json()
-        assert initial["mode"] == "bundled" and not calls
+        assert initial["mode"] == "bundled" and not calls and initial["download_route"] == "none"
+        # Hide IP, the default, downloads the lists only through a proxy set for requests outside Telegram.
+        blocked = client.post("/api/network/catalog/refresh", json={})
+        assert blocked.status_code == 400 and "Hide IP" in blocked.text and not calls
+        proxy = {"kind": "socks5", "host": "127.0.0.1", "port": 1080}
+        assert client.post("/api/network/policy", json={"exposure": "hide", "outside_enabled": True,
+                                                        "outside_proxy": proxy}).status_code == 200
         refreshed = client.post("/api/network/catalog/refresh", json={})
-        assert refreshed.status_code == 200 and len(calls) == 2
+        assert refreshed.status_code == 200 and len(calls) == 2 and refreshed.json()["download_route"] == "proxy"
+        assert {(r.kind, r.host, r.port) for r in routes} == {("socks5", "127.0.0.1", 1080)}
         assert app.state.collector.network_config() == before == NetworkConfig()
         assert KEY not in refreshed.text
         alias = refreshed.json()["proxies"][0]["id"]
@@ -216,7 +225,7 @@ def test_catalog_api_refresh_is_authenticated_isolated_and_does_not_switch_route
         child = client.post("/api/profiles", json={"label": "Other"}).json()["id"]
         other = client.get("/profiles/" + child + "/api/network/catalog").json()
         assert other["mode"] == "bundled"
-        assert client.get("/profiles/" + child + "/api/status").json()["collector"]["network"]["kind"] == "direct"
+        assert client.get("/profiles/" + child + "/api/status").json()["collector"]["network"]["kind"] == "mtproxy_auto"
         reader = client.post("/api/witness/tokens", json={"label": "Read only"}).json()["token"]
         assert client.post("/api/network/catalog/refresh", json={}, headers={"Authorization": "Bearer " + reader}).status_code == 401
     demo = create_app(tmp_path / "demo", demo=True)

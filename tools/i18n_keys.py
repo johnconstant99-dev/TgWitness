@@ -15,7 +15,8 @@ STATIC = PACKAGE / "static"
 LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
 # Modules whose fixed error messages reach the panel; command-line tools keep English output.
 PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "sessions.py", "network.py",
-                 "profiles.py", "multi_export.py", "alerts.py", "witness_api.py", "tuning.py", "interactions.py")
+                 "profiles.py", "multi_export.py", "alerts.py", "witness_api.py", "tuning.py", "interactions.py",
+                 "access.py")
 
 
 def calls(source):
@@ -67,7 +68,7 @@ def server_keys():
             texts = []
             if isinstance(node, ast.Call):
                 func = getattr(node.func, "id", None) or getattr(node.func, "attr", "")
-                if func in ("HTTPException", "ValueError", "RouteError"):
+                if func in ("HTTPException", "ValueError", "RouteError", "Refused"):
                     texts = node.args
                 elif func in ("tr", "Invalid") and len(node.args) > 1:
                     texts = node.args[1:2]

@@ -1,4 +1,5 @@
 """Synthetic end-to-end browser acceptance. Never connects to Telegram."""
+import asyncio
 import json
 import hashlib
 import os
@@ -19,8 +20,25 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests"))
 from tgwitness import api_pool, i18n
 from tgwitness.app import create_app
+from tgwitness.proxy_catalog import ProxyPool
 from tgwitness.verify import verify_bundle
 from test_collector import FakeClient, saved_session
+
+
+# Automatic MTProxy, the default route, would resolve and check public proxies; this check stays offline.
+async def _listed(route, operator=False):
+    return route
+
+
+async def _answers(route):
+    return 40
+
+
+async def _idle(self):
+    await asyncio.Event().wait()
+
+
+ProxyPool.pin, ProxyPool.probe, ProxyPool.run = staticmethod(_listed), staticmethod(_answers), _idle
 
 
 def launch_browser(p):
@@ -483,7 +501,7 @@ def main():
             expect(page.locator("#collector-toggle")).to_have_text("Start observation")
             # Parameters: every limit is editable in the panel and each change is journaled.
             page.locator('[data-view="parameters"]').click()
-            expect(page.locator("#parameters-groups .parameters-group")).to_have_count(7)
+            expect(page.locator("#parameters-groups .parameters-group")).to_have_count(8)
             page.locator("#parameter-recheck_max_chats").fill("0")
             page.locator('#parameters-form button[type="submit"]').click()
             expect(page.locator("#parameters-form .form-error")).to_contain_text("Chats per recheck pass")
@@ -517,7 +535,7 @@ def main():
             expect(page.locator("#profile-select")).not_to_have_value("default")
             second_profile = page.locator("#profile-select").input_value()
             expect(page.locator("#credentials-form")).to_be_visible()
-            expect(page.locator("#route-summary")).to_have_text("Direct connection")
+            expect(page.locator("#route-summary")).to_have_text("Automatic MTProxy")
             expect(page.locator("#monitor-reactions")).to_be_checked()
             page.locator('[data-auth-method="files"]').click()
             session_path = run / "synthetic.tgwitness-session"

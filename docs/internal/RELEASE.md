@@ -59,6 +59,6 @@ verified. See the [live test](../VERIFICATION.md#live-telegram-test--27-to-29-oc
 - Independent security review, operator-resistant capture, legal admissibility and guaranteed
   event completeness. Signatures verify the journal; they do not certify Telegram's content.
 
-TgWitness is a single-operator tool: the panel token controls all workspaces. Keep dedicated
+The main panel token controls all workspaces. Issue scoped tokens for reviewers and analysts; see [access and permissions](../ACCESS.md). Keep dedicated
 account credentials and collected data out of the repository. See [readiness](READINESS.md)
 and [live acceptance](LIVE_ACCEPTANCE.md) for the remaining qualification work.

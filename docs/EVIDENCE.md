@@ -45,6 +45,11 @@ bytes or independently establish that the entire observed journal was supplied.
 
    Successful output reports `key_pinned: true` and `checkpoint_checked: true`
    when both inputs are supplied and accepted. Preserve the verification result.
+
+    For a handover requiring the final exported record to be witnessed, use
+    `--witness witness.zip --witness-fingerprint TRUSTED_WITNESS_SHA256 --require-witness`.
+    This refuses an export with an unwitnessed tail. See the
+    [witness handover procedure](WITNESS.md#require-a-witnessed-export-boundary).
 5. Record the archive's SHA-256, export boundary, transfer date, sender, and
    recipient in your custody record. Keep the original package intact and work
    from copies. Share evidence files rather than the application's private data
@@ -61,6 +66,13 @@ Successful verification establishes integrity relative to the trusted collector
 key and retained boundary. Source truth, complete Telegram delivery, trusted time,
 and legal admissibility require separate evidence. This version has not completed
 live Telegram qualification or an independent forensic/security assessment.
+
+A copied collector key can sign a fabricated replacement journal. Verification against
+an independently retained checkpoint or witness record detects a changed earlier prefix;
+signature verification alone cannot. A witness fixes what the collector presented, so it
+does not independently establish the truth of records fabricated before their first
+external checkpoint. Cloud deployment reports check configuration and collector-reported
+measurements; they do not establish that a private key was never copied during bootstrap.
 
 Notifications sent through Apprise contain workspace and chat names and counts; short
 excerpts of deleted and edited messages are added only when the operator turns them on

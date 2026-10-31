@@ -21,21 +21,31 @@
 
 
 
-Each account workspace has its own route. Configure it before signing in if direct access is unavailable.
+Each account workspace has its own Telegram route. Its IP mode determines when it may use the host's direct network connection.
 
 ## Choose a route
 
 Open **Account → Settings → Connection settings → Change connection route**.
 
+| IP mode | When a proxy is unavailable |
+| --- | --- |
+| Hide IP | Wait for a working proxy; no direct Telegram fallback |
+| Allow fallback | Permit Direct after the configured delay; return to a proxy when one works |
+| Tunnel / VPN | Permit Direct through the host network; this option does not install or verify a VPN |
+
+New workspaces use automatic MTProxy with Hide IP behavior. The pool checks entries,
+retains working routes and moves accounts away from failing proxies.
+
 | Route | Inputs |
 | --- | --- |
-| Direct | No proxy |
+| Automatic MTProxy | Public lists or an operator catalog |
+| Direct | No proxy; requires tunnel/VPN mode |
 | SOCKS5 / HTTP CONNECT | Host, port and optional username/password |
 | MTProxy | Host, port and compatible secret |
 | Telegram proxy link | A supported `tg://proxy` or `https://t.me/proxy` link |
 | Included public list | Select a listed server, then save |
 
-MTProxy accepts a 32-digit hexadecimal secret or `dd` plus 32 digits. Fake TLS `ee` secrets are unsupported.
+MTProxy accepts compatible hexadecimal/base64url keys and the `dd` form. Fake TLS `ee` secrets are unsupported.
 
 ## Save and test
 
@@ -45,14 +55,21 @@ MTProxy accepts a 32-digit hexadecimal secret or `dd` plus 32 digits. Fake TLS `
 4. Run **Test Telegram connection**.
 5. Sign in if necessary, restart observation and check a new controlled message.
 
-There is no automatic direct fallback after a proxy failure. A successful transport test is not proof of authorization or complete collection.
+Direct fallback depends on the selected IP mode. A successful transport test is not proof of authorization, anonymity or complete collection.
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Public lists
 
-A bundled list is available without downloading a new feed. **Update public lists** refreshes addresses and retains the existing selection. Unavailable sources keep their previous entries.
+A snapshot from four public sources is bundled. The active pool refreshes lists and
+checks transport in the background; failed downloads keep the last usable entries.
+**Update public lists** requests a refresh without rewriting a manual route.
+
+Under **Parameters → Automatic MTProxy**, configure rotation, failure thresholds,
+cooldowns, sharing and retry intervals. Separate proxies are preferred when enough
+work. A sharing limit of one makes an account wait instead of sharing an entry;
+different entries do not guarantee different exit addresses.
 
 Open **Where the list comes from** for providers, saved dates and download-route information. Public availability changes; an entry is not an endorsement or a promise that the server is reachable.
 
@@ -60,7 +77,11 @@ An operator can provide a local catalog using `TGWITNESS_PROXY_CATALOG`. Feed do
 
 ## Other network traffic
 
-The account route applies to its Telegram client. Witness polling, Telegram's HTTPS Bot API, feed downloads, timestamp services and off-site copies have their own transport behavior. In particular, MTProxy is not an HTTPS proxy for the witness bot.
+MTProxy carries Telegram traffic only. External requests use a separate SOCKS5/HTTP
+proxy when configured, then the workspace's SOCKS5/HTTP route. Without either,
+Hide IP refuses the request; the other modes permit Direct. External requests can
+be disabled. An explicit feed-download proxy overrides the feed route; the
+independent witness keeps its own settings. These controls do not route your browser.
 
 Proxy credentials are saved in the encrypted vault. Ordinary HTTP CONNECT and SOCKS authentication do not themselves provide TLS protection to the proxy.
 

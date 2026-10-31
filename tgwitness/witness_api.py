@@ -66,8 +66,14 @@ def head(store, vault, entry, headers, address, status=None):
                                           "meaning": "an independent witness began fetching the signed journal head"})
     challenge = headers.get("x-tgwitness-challenge") or ""
     challenge = challenge if re.fullmatch(r"[0-9a-f]{32}", challenge) else None
+    start = headers.get("x-tgwitness-consistency-from")
+    if start is not None:
+        if not re.fullmatch(r"0|[1-9][0-9]{0,18}", start) or int(start) >= 2**63 or challenge is None:
+            from fastapi import HTTPException
+            raise HTTPException(400, "A bounded record count and challenge are required for continuity proofs")
+        start = int(start)
     return {"format": "tgwitness-witness-head-v1",
-            **capture_head(store, vault, status or {}, challenge), "producer": producer()}
+            **capture_head(store, vault, status or {}, challenge, consistency_from=start), "producer": producer()}
 
 
 def state(vault, store):

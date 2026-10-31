@@ -3,6 +3,7 @@ import base64
 import io
 import ipaddress
 import json
+import logging
 import secrets
 from secrets import token_bytes as secrets_token
 import time
@@ -21,6 +22,7 @@ from starlette.background import BackgroundTask
 from telethon.errors import FloodWaitError, RPCError
 
 from . import __version__
+from .access import POLICY, AccessControl, AdminSettings, Console, GrantSettings, Refused, check as access_check
 from .collector import Collector
 from .demo import seed_demo
 from .evidence import LIMITS, checkpoint, encrypt_export, export_file, producer, retain_checkpoint, cleanup_exports
@@ -35,8 +37,8 @@ from .anchor import request_archive
 from .anchoring import EvidenceMode, anchor_loop, evidence_settings, request_anchor
 from . import replica
 from . import alerts
-from .network import NetworkConfig, parse_mtproxy_link
-from .proxy_catalog import PublicCatalog
+from .network import NetworkConfig, RoutePolicy, parse_mtproxy_link
+from .proxy_catalog import ProxyPool, PublicCatalog, feed_network
 from .monitoring import Capture, Monitoring, capture_settings, monitoring_settings
 from .scope import (EXCLUDE_LIMIT, WIDE_WARNING, Recheck, ScopeUpdate, recheck_settings, scope_settings,
                     unexclude)
@@ -159,17 +161,33 @@ class ProfileCreate(BaseModel):
     label: str = Field(min_length=1, max_length=80)
 
 
+class RoutePolicyUpdate(RoutePolicy):
+    # Write-only: null keeps the saved proxy for requests outside Telegram; its password is never sent back.
+    outside_proxy: NetworkConfig | None = None
+    remove_outside_proxy: bool = False
+
+
+class AccessLogin(BaseModel):
+    token: str = Field(min_length=1, max_length=512)
+
+
 def create_app(data_dir=None, demo=False, client_factory=None, token_override=None, allow_profiles=True,
-               account_guard=None):
+               account_guard=None, proxy_pool=None, access=None, profile_id="default"):
     root = Path(data_dir or "data").resolve()
     failures = defaultdict(deque)
     bearer = HTTPBearer(auto_error=False)
     op_lock = asyncio.Lock()
     export_lock = asyncio.Lock()
     public_proxies = PublicCatalog(root)
+    # One automatic MTProxy pool per process: workspaces are spread over different proxies.
+    shared_pool = proxy_pool or ProxyPool(public_proxies)
+    # The main panel keeps the installation's accesses and console; workspaces use the same.
+    console = None if access else Console()
 
     @asynccontextmanager
     async def lifespan(app):
+        if console:
+            console.attach()
         instance = InstanceLock(root)
         store = None
         resume_task = None
@@ -177,6 +195,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         replica_task = None
         alert_task = None
         host_task = None
+        pool_task = None
         collector = None
         journal_ready = False
         profiles = None
@@ -194,7 +213,21 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 seed_demo(store)
             collector = Collector(store, vault, **({"client_factory": client_factory} if client_factory else {}))
             collector.account_guard = account_guard
+            collector.proxy_pool = shared_pool
             app.state.store, app.state.vault, app.state.collector = store, vault, collector
+            app.state.access = access or AccessControl(vault, store, console)
+            if not access:
+                def workspace_label(pid):
+                    registry = getattr(app.state, "profiles", None)
+                    if registry and pid in registry.entries:
+                        return registry.entries[pid]["label"]
+                    if registry and pid in registry.opening:
+                        return registry.opening[pid]
+                    if pid == "default":
+                        return store.get_setting("profile_label", "Main account")
+                    return next((p["label"] for p in store.get_setting("profiles", []) if p["id"] == pid), pid)
+                app.state.access.labels = workspace_label
+            store.listeners.append(app.state.access.journal_listener(profile_id))
             # This capability never exposes the real panel token (including an env override).
             # It is accepted only for a directly accessed, isolated synthetic demo.
             app.state.local_demo_token = secrets.token_urlsafe(32)
@@ -219,15 +252,21 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             app.state.replica_wakeup, app.state.replica_status = asyncio.Event(), {"busy": False}
             app.state.alert_wakeup = asyncio.Event()
             if not store.get_setting("demo", False):
+                # Requests outside Telegram follow the workspace's IP mode (Collector.outside_route).
                 alert_task = asyncio.create_task(alerts.alert_loop(
-                    store, vault, collector.network_config, app.state.alert_wakeup))
+                    store, vault, collector.outside_route, app.state.alert_wakeup))
                 anchor_task = asyncio.create_task(anchor_loop(
-                    store, collector.network_config, app.state.anchor_wakeup, app.state.anchor_status))
+                    store, collector.outside_route, app.state.anchor_wakeup, app.state.anchor_status))
                 replica_task = asyncio.create_task(replica.replica_loop(
-                    store, vault, collector.network_config, app.state.replica_wakeup, app.state.replica_status))
+                    store, vault, collector.outside_route, app.state.replica_wakeup, app.state.replica_status))
                 if app.state.assurance:
                     host_task = asyncio.create_task(assurance.assurance_loop(
                         store, app.state.assurance["mode"], app.state.assurance["provider"]))
+                if proxy_pool is None:  # the process's main app keeps the shared pool up to date
+                    shared_pool.intervals = lambda: {"lists": tuning.value(store, "proxy_lists_minutes") * 60,
+                                                     "probe": tuning.value(store, "proxy_probe_minutes") * 60}
+                    shared_pool.outside = collector.outside_route
+                    pool_task = asyncio.create_task(shared_pool.run())
 
             async def resume():
                 try:
@@ -241,7 +280,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 resume_task = asyncio.create_task(resume())
             if allow_profiles:
                 def child_factory(path, **options):
-                    return create_app(path, client_factory=client_factory, **options)
+                    return create_app(path, client_factory=client_factory, proxy_pool=shared_pool,
+                                      access=app.state.access, profile_id=Path(path).name, **options)
                 profiles = Profiles(app, root, child_factory)
                 app.state.profiles = profiles
                 await profiles.open()
@@ -253,7 +293,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     await app.state.multi_export.close()
                 if profiles:
                     await profiles.close()
-                for task in (resume_task, anchor_task, replica_task, alert_task, host_task):
+                for task in (resume_task, anchor_task, replica_task, alert_task, host_task, pool_task):
                     if task:
                         task.cancel()
                         await asyncio.gather(task, return_exceptions=True)
@@ -266,6 +306,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 if store:
                     store.close()
                 instance.close()
+                if console:
+                    console.detach()
 
     app = FastAPI(title="TgWitness", version=__version__, lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
@@ -277,6 +319,15 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             from fastapi.responses import JSONResponse
             return JSONResponse({"detail": "Request body too large"}, status_code=413)
         response = await call_next(request)
+        audit = getattr(request.state, "audit", None)
+        if audit and audit[0] is app:
+            # Changes, downloads and refusals go to the administrator's console; routine reading does not.
+            path = request.url.path
+            if (request.method != "GET" or response.status_code == 403
+                    or any(part in path for part in ("/export", "/download", "/media/", "/replica/key", "/anchor-request"))):
+                logging.getLogger("tgwitness.access").info(
+                    "%s · %s %s → %d · %s", audit[1].label, request.method, path, response.status_code,
+                    request.client.host if request.client else "unknown")
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["X-Frame-Options"] = "DENY"
@@ -347,12 +398,44 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         queue.append(now)
         raise HTTPException(401, detail, headers={"WWW-Authenticate": "Bearer"})
 
-    async def authenticate(request: Request, credential: HTTPAuthorizationCredentials = Depends(bearer)):
-        accepted = credential and (secrets.compare_digest(credential.credentials.encode(), app.state.vault.token.encode())
-                    or (local_demo_access(request) and secrets.compare_digest(
-                        credential.credentials.encode(), app.state.local_demo_token.encode())))
-        if not accepted:
+    def client_address(request):
+        return request.client.host if request.client else "unknown"
+
+    async def identify(request: Request, credential: HTTPAuthorizationCredentials = Depends(bearer)):
+        """Who is asking: the panel token, a session started with any token, or the local demo."""
+        principal = None
+        if credential:
+            if local_demo_access(request) and secrets.compare_digest(
+                    credential.credentials.encode(), app.state.local_demo_token.encode()):
+                principal = app.state.access.principal({"owner": "admin", "id": None})
+            else:
+                try:
+                    principal = app.state.access.resolve(credential.credentials, client_address(request))
+                except Refused as exc:
+                    raise HTTPException(403, str(exc)) from None
+        if principal is None:
             reject_access(request, "Enter the panel access token from panel-token.txt in your data directory.")
+        request.state.principal, request.state.audit = principal, (app, principal)
+        return principal
+
+    async def authenticate(request: Request, principal=Depends(identify)):
+        """An issued access may use only the routes, workspaces and chats it was given."""
+        route = request.scope.get("route")
+        rule = POLICY.get(request.method + " " + route.path) if route else None
+        try:
+            access_check(principal, profile_id, rule, request.path_params)
+        except Refused as exc:
+            raise HTTPException(403, str(exc)) from None
+        return principal
+
+    def visible_chats(request):
+        """None for every chat of this workspace, otherwise the chat IDs the access opens."""
+        return request.state.principal.chats(profile_id)
+
+    def require_chat(request, chat_id):
+        allowed = visible_chats(request)
+        if allowed is not None and chat_id not in allowed:
+            raise HTTPException(403, "This chat is not open to this access.")
 
     async def authenticate_witness(request: Request, credential: HTTPAuthorizationCredentials = Depends(bearer)):
         """Witness tokens open only the signed journal head; the panel token is not accepted here."""
@@ -383,23 +466,34 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 raise HTTPException(503, "Connection unavailable: " + type(exc).__name__) from None
 
     @app.get("/api/status", dependencies=[Depends(authenticate)])
-    async def status():
+    async def status(request: Request):
         store, vault = app.state.store, app.state.vault
+        allowed = visible_chats(request)
         return {"version": __version__, "demo": store.get_setting("demo", False),
-                "collector": app.state.collector.status(), "stats": store.stats(),
-                "targets": store.targets(), "capture": capture_settings(store),
+                "collector": app.state.collector.status(), "stats": store.stats(allowed),
+                "targets": [t for t in store.targets() if allowed is None or t["chat_id"] in allowed],
+                "capture": capture_settings(store),
                 "monitoring": monitoring_settings(store), "scope": scope_settings(store),
-                "recheck": recheck_settings(store), "dossiers": dossier.enabled_chats(store),
+                "recheck": recheck_settings(store),
+                "dossiers": [c for c in dossier.enabled_chats(store) if allowed is None or c in allowed],
                 "parameters": tuning.values(store),
                 "fingerprint": fingerprint(vault.public_key), "limitations": LIMITS,
                 "protection": {"vault_key_mode": vault.key_mode, "secrets_encrypted": True,
                                "journal_encrypted_by_app": False, "media_encrypted_by_app": False},
-                "run_id": app.state.run_receipt["run_id"]}
+                "run_id": app.state.run_receipt["run_id"], "chats_limited": allowed is not None}
 
     if allow_profiles:
         @app.get("/api/profiles", dependencies=[Depends(authenticate)])
-        async def profiles_list():
-            return {"profiles": app.state.profiles.summary(), "limit": Profiles.MAX_PROFILES,
+        async def profiles_list(request: Request):
+            principal, listed = request.state.principal, []
+            for entry in app.state.profiles.summary():
+                if not principal.opens(entry["id"]):
+                    continue
+                if principal.chats(entry["id"]) is not None:  # counts of the whole workspace stay closed
+                    entry = {**entry, "stats": None, "sources_enabled": None,
+                             "sources_total": len(principal.chats(entry["id"]))}
+                listed.append(entry)
+            return {"profiles": listed, "limit": Profiles.MAX_PROFILES,
                     "model": "independent account collectors and signing identities"}
 
         @app.post("/api/profiles", dependencies=[Depends(authenticate)])
@@ -412,25 +506,39 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             except ValueError as exc:
                 raise HTTPException(400, str(exc)) from None
 
+        def opens_chat_everywhere(principal, chat_id, profile_ids):
+            return all(principal.opens(pid) and (principal.chats(pid) is None or chat_id in principal.chats(pid))
+                       for pid in profile_ids)
+
+        def multi_visible(request):
+            """An issued access sees a multi-account export only if it opens that chat in each of its accounts."""
+            state = app.state.multi_export.state
+            return not state or opens_chat_everywhere(request.state.principal, state["chat_id"],
+                                                      [state["lead"], *(w["profile_id"] for w in state["workers"])])
+
         @app.post("/api/multi-export/start", dependencies=[Depends(authenticate)])
-        async def multi_export_start(body: MultiExportStart):
+        async def multi_export_start(request: Request, body: MultiExportStart):
+            if not opens_chat_everywhere(request.state.principal, body.chat_id, [body.lead, *body.profiles]):
+                raise HTTPException(403, "This access does not open this chat in every chosen account.")
             return await operation(app.state.multi_export.start, body.chat_id, body.profiles, body.lead)
 
         @app.get("/api/multi-export/current", dependencies=[Depends(authenticate)])
-        async def multi_export_current():
-            return app.state.multi_export.public()
+        async def multi_export_current(request: Request):
+            return app.state.multi_export.public() if multi_visible(request) else {"phase": "none"}
 
         @app.get("/api/multi-export/{export_id}", dependencies=[Depends(authenticate)])
-        async def multi_export_poll(export_id: str):
-            return app.state.multi_export.poll(export_id)
+        async def multi_export_poll(request: Request, export_id: str):
+            return app.state.multi_export.poll(export_id) if multi_visible(request) else {"phase": "unknown"}
 
         @app.post("/api/multi-export/{export_id}/cancel", dependencies=[Depends(authenticate)])
-        async def multi_export_cancel(export_id: str):
+        async def multi_export_cancel(request: Request, export_id: str):
+            if not multi_visible(request):
+                raise HTTPException(403, "This access does not open this chat in every chosen account.")
             return await app.state.multi_export.cancel(export_id)
 
         @app.get("/api/multi-export/{export_id}/download", dependencies=[Depends(authenticate)])
-        async def multi_export_download(export_id: str):
-            path = app.state.multi_export.result_path(export_id)
+        async def multi_export_download(request: Request, export_id: str):
+            path = app.state.multi_export.result_path(export_id) if multi_visible(request) else None
             if not path:
                 raise HTTPException(404, "No finished export is available to download.")
             return FileResponse(path, filename="tgwitness-chat-export.zip", media_type="application/zip",
@@ -455,12 +563,15 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 raise HTTPException(400, str(exc)) from None
 
     @app.get("/api/events", dependencies=[Depends(authenticate)])
-    async def get_events(chat_id: int | None = None, message_id: int | None = None,
+    async def get_events(request: Request, chat_id: int | None = None, message_id: int | None = None,
                          kind: str | None = None, before: int | None = None,
                          search: str | None = None, limit: int = 100):
         if not 1 <= limit <= 500 or (search and len(search) > 200):
             raise HTTPException(422, "Limit must be 1–500; search must be at most 200 characters.")
-        records = app.state.store.events(chat_id, message_id, kind, before, limit, search)
+        if chat_id is not None:
+            require_chat(request, chat_id)
+        records = app.state.store.events(chat_id, message_id, kind, before, limit, search,
+                                         chat_ids=visible_chats(request))
         return {"events": records, "next_before": records[-1]["seq"] if len(records) == limit else None}
 
     @app.post("/api/auth/configure", dependencies=[Depends(authenticate)])
@@ -500,20 +611,52 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     async def cancel_qr(login_id: str):
         return await operation(app.state.collector.cancel_qr, login_id)
 
+    async def approved_route(request, config):
+        """A proxy resolving inside this machine or its network (a local Tor or SOCKS5 proxy) may be set only
+        by the main administrator; the saved route remembers that. A request's own local_proxy is ignored."""
+        if config is None or config.kind not in ("socks5", "http", "mtproxy"):
+            return config and config.model_copy(update={"local_proxy": False})
+        try:
+            addresses = await netclient.resolve(config.host, config.port)
+        except OSError:
+            addresses = []  # not resolvable now: every connection checks it again
+        inside = any(netclient.internal(a) for a in addresses)
+        if inside and not (request.state.principal.admin or netclient.private_allowed()):
+            raise HTTPException(403, "This proxy is inside this machine or its network. Only the main administrator can set it.")
+        return config.model_copy(update={"local_proxy": inside})
+
     @app.post("/api/network", dependencies=[Depends(authenticate)])
-    async def network(body: NetworkConfig):
-        return await operation(app.state.collector.set_network, body)
+    async def network(request: Request, body: NetworkConfig):
+        return await operation(app.state.collector.set_network, await approved_route(request, body))
+
+    @app.get("/api/network/policy", dependencies=[Depends(authenticate)])
+    async def network_policy():
+        return app.state.collector.policy_state()
+
+    @app.post("/api/network/policy", dependencies=[Depends(authenticate)])
+    async def network_policy_set(request: Request, body: RoutePolicyUpdate):
+        return await operation(app.state.collector.set_route_policy,
+                               RoutePolicy(exposure=body.exposure, outside_enabled=body.outside_enabled),
+                               await approved_route(request, body.outside_proxy), body.remove_outside_proxy)
+
+    def download_route():
+        if feed_network():
+            return {"download_route": "proxy", "download_problem": None}
+        route = app.state.collector.outside_route()
+        return {"download_route": "proxy" if route.kind in ("socks5", "http") else route.kind,
+                "download_problem": str(route.error) if route.kind == "none" else None}
 
     @app.get("/api/network/catalog", dependencies=[Depends(authenticate)])
     async def network_catalog():
         try:
-            return public_proxies.public()
+            return {**public_proxies.public(), **download_route()}
         except ValueError as exc:
             raise HTTPException(503, str(exc)) from None
 
     @app.post("/api/network/catalog/refresh", dependencies=[Depends(authenticate)])
     async def network_catalog_refresh():
-        return await operation(public_proxies.refresh)
+        result = await operation(public_proxies.refresh, app.state.collector.outside_route())
+        return {**result, **download_route()}
 
     @app.post("/api/network/catalog/{proxy_id}", dependencies=[Depends(authenticate)])
     async def network_catalog_apply(proxy_id: str):
@@ -562,8 +705,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return await operation(app.state.collector.dialogs)
 
     @app.post("/api/targets", dependencies=[Depends(authenticate)])
-    async def target(body: Target):
+    async def target(request: Request, body: Target):
         require_live()
+        require_chat(request, body.chat_id)
         collector, store = app.state.collector, app.state.store
         async with op_lock:
             existing = next((t for t in store.targets() if t["chat_id"] == body.chat_id), None)
@@ -582,8 +726,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return {"targets": store.targets()}
 
     @app.post("/api/targets/priority", dependencies=[Depends(authenticate)])
-    async def target_priority(body: TargetPriority):
+    async def target_priority(request: Request, body: TargetPriority):
         require_live()
+        require_chat(request, body.chat_id)
         store = app.state.store
         existing = next((t for t in store.targets() if t["chat_id"] == body.chat_id), None)
         if not existing:
@@ -673,10 +818,15 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                              "priority sources and of every other source; 0 turns a tier off"})
         return scope_state()
 
+    def outside_state():
+        """How requests outside Telegram leave this workspace, and why not when they cannot."""
+        route = app.state.collector.outside_route()
+        return {"route": route.kind, "route_problem": str(route.error) if route.kind == "none" else None}
+
     def evidence_state():
         store = app.state.store
         return {"settings": evidence_settings(store), "last": store.get_setting("evidence_last", None),
-                "busy": app.state.anchor_status["busy"], "route": app.state.collector.network_config().kind,
+                "busy": app.state.anchor_status["busy"], **outside_state(),
                 "defaults": EvidenceMode().model_dump(exclude={"enabled"})}
 
     @app.get("/api/evidence", dependencies=[Depends(authenticate)])
@@ -706,7 +856,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     def source_state():
         last, receipt = app.state.store.get_setting("source_check", None), app.state.run_receipt
         return {"last": last, "version": __version__, "source_tree_sha256": receipt["source_tree_sha256"],
-                "files": len(receipt["source_files"]), "route": app.state.collector.network_config().kind,
+                "files": len(receipt["source_files"]), **outside_state(),
                 # A check describes the code that ran then; a later start may run other code.
                 "current": bool(last) and last["source_tree_sha256"] == receipt["source_tree_sha256"]}
 
@@ -718,7 +868,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     async def run_source_check(body: SourceCheck):
         require_live()
         try:
-            result = await source_check.check(body.repository, body.ref.strip(), app.state.collector.network_config())
+            result = await source_check.check(body.repository, body.ref.strip(), app.state.collector.outside_route())
         except source_check.NotFound:
             raise HTTPException(422, "GitHub has no such public repository or version. Check the address and the tag, branch or commit.")
         except source_check.Limited:
@@ -741,7 +891,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         settings, secrets = replica.replica_settings(store), vault.read("replica")
         return {"settings": settings, "has_credentials": bool(secrets.get("access_key")),
                 "has_key": bool(secrets.get("key")), "last": store.get_setting("replica_last", None),
-                "busy": app.state.replica_status["busy"], "route": app.state.collector.network_config().kind,
+                "busy": app.state.replica_status["busy"], **outside_state(),
                 "location": replica.workspace_prefix(settings, vault.public_key)}
 
     @app.get("/api/replica", dependencies=[Depends(authenticate)])
@@ -773,22 +923,28 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         urls = app.state.vault.read("alerts").get("urls", [])
         return {"settings": alerts.alert_settings(app.state.store), "destinations": [alerts.describe(u) or "?" for u in urls],
                 "last": app.state.store.get_setting("alerts_last", None),
-                "route": app.state.collector.network_config().kind}
+                **outside_state()}
 
     @app.get("/api/alerts", dependencies=[Depends(authenticate)])
     async def get_alerts():
         return alert_state()
 
     @app.post("/api/alerts", dependencies=[Depends(authenticate)])
-    async def set_alerts(body: AlertUpdate):
+    async def set_alerts(request: Request, body: AlertUpdate):
         require_live()
         store, vault = app.state.store, app.state.vault
-        urls = vault.read("alerts").get("urls", []) if body.urls is None else [u.strip() for u in body.urls if u.strip()]
+        saved = vault.read("alerts").get("urls", [])
+        urls = list(saved) if body.urls is None else [u.strip() for u in body.urls if u.strip()]
         urls += [u for u in dict.fromkeys(u.strip() for u in body.add_urls) if u and u not in urls]
         for url in urls:
             if len(url) > 2048 or not alerts.describe(url):
                 raise HTTPException(422, "Apprise does not recognise one of the destination addresses. Check it against the Apprise wiki.")
-        problem = alerts.route_problem(urls, app.state.collector.network_config())
+        # Their own sockets pass no destination check (alerts.OWN_SOCKET): only the main administrator adds them.
+        if (any(alerts.own_socket(u) for u in urls if u not in saved)
+                and not (request.state.principal.admin or netclient.private_allowed())):
+            raise HTTPException(403, "Only the main administrator can add destinations that connect without HTTP "
+                                     "(IRC, MQTT, XMPP, syslog and similar).")
+        problem = alerts.route_problem(urls, app.state.collector.outside_route())
         if body.enabled and problem:
             raise HTTPException(422, problem)
         if body.enabled and not urls:
@@ -814,7 +970,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         words = i18n.words(alerts.alert_settings(store)["language"])
         result = await asyncio.to_thread(
             alerts.deliver, urls, alerts.tr(words, "TgWitness · {name}: test", name=alerts.workspace_name(store)),
-            alerts.tr(words, "Notifications from this workspace reach this destination."), app.state.collector.network_config())
+            alerts.tr(words, "Notifications from this workspace reach this destination."), app.state.collector.outside_route())
         if result["error"]:
             raise HTTPException(502, result["error"])
         return result
@@ -834,7 +990,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         settings, secrets = replica.replica_settings(store), vault.read("replica")
         if not (settings["endpoint"] and settings["bucket"] and secrets.get("access_key")):
             raise HTTPException(409, "Save the endpoint, bucket and access keys first.")
-        s3 = replica.client(settings, secrets, app.state.collector.network_config())
+        s3 = replica.client(settings, secrets, app.state.collector.outside_route())
         name = replica.workspace_prefix(settings, vault.public_key) + "/connection-test.tgwr"
         try:
             # With retention set, the test object is locked for one day only, then read back.
@@ -883,7 +1039,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return collector.status()
 
     @app.post("/api/snapshot", dependencies=[Depends(authenticate)])
-    async def snapshot(body: Snapshot):
+    async def snapshot(request: Request, body: Snapshot):
+        require_chat(request, body.chat_id)
         if body.limit > tuning.value(app.state.store, "snapshot_max"):
             raise HTTPException(422, "The snapshot is larger than this workspace allows. Raise the limit in Parameters.")
         return await operation(app.state.collector.snapshot, body.chat_id, body.limit)
@@ -911,20 +1068,25 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return tuning.described(store)
 
     @app.get("/api/chats", dependencies=[Depends(authenticate)])
-    async def chats():
+    async def chats(request: Request):
         store = app.state.store
         overview = store.chat_overview()
         listed = [{**t, "enabled": bool(t["enabled"]), **overview.pop(t["chat_id"], {})} for t in store.targets()]
         listed += [{"chat_id": chat_id, "title": None, "kind": None, "enabled": False, **extra}
                    for chat_id, extra in overview.items()]
-        return {"chats": listed}
+        allowed = visible_chats(request)
+        return {"chats": [c for c in listed if allowed is None or c["chat_id"] in allowed]}
 
     @app.post("/api/interactions/preview", dependencies=[Depends(authenticate)])
     async def interaction_preview(body: interactions.Preview):
         return await operation(interactions.preview, app.state.collector, body)
 
     @app.post("/api/interactions", dependencies=[Depends(authenticate)])
-    async def interaction_action(body: interactions.Action):
+    async def interaction_action(request: Request, body: interactions.Action):
+        if visible_chats(request) is not None:
+            if body.action == "open":  # joins or opens a new chat: a change to the whole account
+                raise HTTPException(403, "This access opens only chosen chats; this part of the workspace is closed to it.")
+            require_chat(request, body.chat_id)
         return await operation(interactions.execute, app.state.collector, body)
 
     @app.get("/api/chats/{chat_id}/messages", dependencies=[Depends(authenticate)])
@@ -1021,16 +1183,20 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.get("/api/notifications", dependencies=[Depends(authenticate)])
     async def notifications(request: Request):
         lang = i18n.pick(request.cookies.get(i18n.COOKIE), request.headers.get("accept-language"))
-        return {"items": alerts.panel_items(app.state.store, i18n.words(lang),
-                                            tuning.value(app.state.store, "panel_notifications"))}
+        items, allowed = alerts.panel_items(app.state.store, i18n.words(lang),
+                                            tuning.value(app.state.store, "panel_notifications")), visible_chats(request)
+        return {"items": [i for i in items if allowed is None or i.get("chat_id") in allowed]}
 
     @app.get("/api/chats/{chat_id}/scale", dependencies=[Depends(authenticate)])
     async def chat_scale(chat_id: int):
         return await operation(app.state.collector.chat_scale, chat_id)
 
     @app.get("/api/avatar/{peer_id}", dependencies=[Depends(authenticate)])
-    async def avatar(peer_id: int):
+    async def avatar(request: Request, peer_id: int):
         if app.state.store.get_setting("demo", False):
+            raise HTTPException(404)
+        allowed = visible_chats(request)
+        if allowed is not None and peer_id not in allowed and not app.state.store.sender_in_chats(peer_id, allowed):
             raise HTTPException(404)
         path = await app.state.collector.avatar(peer_id)
         if not path:
@@ -1038,20 +1204,27 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return FileResponse(path, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=3600"})
 
     @app.post("/api/chat-export/start", dependencies=[Depends(authenticate)])
-    async def chat_export_start(body: ChatExport):
+    async def chat_export_start(request: Request, body: ChatExport):
+        require_chat(request, body.chat_id)
         return await operation(app.state.collector.start_export, body.chat_id)
 
+    def export_visible(request):
+        state, allowed = app.state.collector.export_state, visible_chats(request)
+        return allowed is None or not state or state["chat_id"] in allowed
+
     @app.get("/api/chat-export/{export_id}", dependencies=[Depends(authenticate)])
-    async def chat_export_poll(export_id: str):
-        return app.state.collector.poll_export(export_id)
+    async def chat_export_poll(request: Request, export_id: str):
+        return app.state.collector.poll_export(export_id) if export_visible(request) else {"phase": "unknown"}
 
     @app.post("/api/chat-export/{export_id}/cancel", dependencies=[Depends(authenticate)])
-    async def chat_export_cancel(export_id: str):
+    async def chat_export_cancel(request: Request, export_id: str):
+        if not export_visible(request):
+            raise HTTPException(403, "This chat is not open to this access.")
         return await operation(app.state.collector.cancel_export, export_id)
 
     @app.get("/api/chat-export/{export_id}/download", dependencies=[Depends(authenticate)])
-    async def chat_export_download(export_id: str):
-        path = app.state.collector.export_result_path(export_id)
+    async def chat_export_download(request: Request, export_id: str):
+        path = app.state.collector.export_result_path(export_id) if export_visible(request) else None
         if not path:
             raise HTTPException(404, "No finished chat export is available to download.")
         return FileResponse(path, filename="tgwitness-chat-export.zip", media_type="application/zip",
@@ -1120,8 +1293,11 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                             background=BackgroundTask(path.unlink, missing_ok=True))
 
     @app.get("/api/media/{digest}", dependencies=[Depends(authenticate)])
-    async def media(digest: str):
+    async def media(request: Request, digest: str):
         if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+            raise HTTPException(404)
+        allowed = visible_chats(request)
+        if allowed is not None and not app.state.store.media_in_chats(digest, allowed):
             raise HTTPException(404)
         path = root / "media" / digest
         if not path.is_file():
@@ -1130,6 +1306,86 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return FileResponse(path, media_type="application/octet-stream", filename=digest)
 
     if allow_profiles:
+        # ---- Access: sessions for every token, issued accesses and the administrator's console ----
+        @app.post("/api/access/login")
+        async def access_login(request: Request, body: AccessLogin):
+            try:
+                result = app.state.access.login(body.token.strip(), client_address(request),
+                                                request.headers.get("user-agent"))
+            except Refused as exc:
+                raise HTTPException(403, str(exc)) from None
+            if result is None:
+                reject_access(request, "Unknown access token. Use the panel token from panel-token.txt "
+                                       "or a token issued by the administrator.")
+            session, principal = result
+            return {"session": session, "me": principal.public()}
+
+        @app.post("/api/access/logout")
+        async def access_logout(principal=Depends(identify)):
+            if principal.session_id:
+                app.state.access.end(principal.session_id, "signed out")
+            return {"signed_out": True}
+
+        @app.get("/api/access/me")
+        async def access_me(principal=Depends(identify)):
+            return principal.public()
+
+        def known_workspaces(settings):
+            unknown = set(settings.workspaces) - set(app.state.profiles.entries)
+            if unknown:
+                raise HTTPException(422, "Unknown workspace.")
+            return settings
+
+        def access_state(request):
+            return app.state.access.state(request.state.principal.session_id)
+
+        @app.get("/api/access", dependencies=[Depends(authenticate)])
+        async def access_overview(request: Request):
+            return access_state(request)
+
+        @app.post("/api/access/grants", dependencies=[Depends(authenticate)])
+        async def access_issue(request: Request, body: GrantSettings):
+            try:
+                token, grant = app.state.access.issue(known_workspaces(body))
+            except Refused as exc:
+                raise HTTPException(422, str(exc)) from None
+            return {"token": token, "id": grant["id"], **access_state(request)}
+
+        @app.patch("/api/access/grants/{grant_id}", dependencies=[Depends(authenticate)])
+        async def access_change(request: Request, grant_id: str, body: GrantSettings):
+            try:
+                app.state.access.change(grant_id, known_workspaces(body))
+            except Refused as exc:
+                raise HTTPException(422, str(exc)) from None
+            return access_state(request)
+
+        @app.delete("/api/access/grants/{grant_id}", dependencies=[Depends(authenticate)])
+        async def access_revoke(request: Request, grant_id: str):
+            try:
+                app.state.access.revoke(grant_id)
+            except Refused as exc:
+                raise HTTPException(404, str(exc)) from None
+            return access_state(request)
+
+        @app.delete("/api/access/sessions/{session_id}", dependencies=[Depends(authenticate)])
+        async def access_end_session(request: Request, session_id: str):
+            if not app.state.access.end(session_id, "ended by the administrator"):
+                raise HTTPException(404, "This session has already ended.")
+            return access_state(request)
+
+        @app.post("/api/access/admin", dependencies=[Depends(authenticate)])
+        async def access_admin(request: Request, body: AdminSettings):
+            app.state.access.set_admin(body)
+            return access_state(request)
+
+        @app.get("/api/access/console", dependencies=[Depends(authenticate)])
+        async def access_console(after: int = 0):
+            console = app.state.access.console
+            if after > console.counter:  # the process restarted since the console last asked
+                after = 0
+            lines = console.after(after)
+            return {"lines": lines, "last": lines[-1]["n"] if lines else after}
+
         app.mount("/profiles", ProfileDispatch(app), name="profiles")
     app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="panel")
     return app

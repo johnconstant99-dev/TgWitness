@@ -6,8 +6,21 @@ const state = {token: sessionStorage.getItem("tgwitness-token") || "",
   profile: sessionStorage.getItem("tgwitness-profile") || "default", profiles: [], demoToken: "", monitoringDirty: false,
   captureDirty: false, workspaceRevision: 0, verification: null, opened:false, connectionSettings:false,
   chat: null, chats: [], chatMessages: [], chatNextBefore: null, chatInfo: null, chatFilter: "all", chatAuthor: null,
-  scope: null, scopeDirty: false, dossier: null, notifications: [], witnessToken: null, parameters: null, parametersDirty: false};
+  scope: null, scopeDirty: false, dossier: null, notifications: [], witnessToken: null, parameters: null, parametersDirty: false,
+  me: null, access: null, accessEdit: null, accessChats: {}, consoleAfter: 0};
 const monitoringFields=["messages","edits","deletions","reactions","membership"];
+// What an issued access may do: [name, explanation]; the server checks every request against the same list.
+const permissionLabels={
+  view:[tr("Read"),tr("Chats, journal, messages, attachments and settings. Always included.")],
+  export:[tr("Exports"),tr("Download signed exports, chat exports and people profiles.")],
+  sources:[tr("Sources"),tr("Choose chats, the observation scope, rechecks and history snapshots.")],
+  collect:[tr("Observation"),tr("Start and pause observation.")],
+  interact:[tr("Act in Telegram"),tr("Send messages, press buttons and open links as the account.")],
+  settings:[tr("Settings"),tr("Attachments, monitoring, evidence mode, off-site copy, notifications, parameters and witnesses.")],
+  account:[tr("Account"),tr("Connect or sign out the Telegram account and change its connection route.")]};
+const sessionEndReasons={"signed out":tr("signed out"),"replaced by a newer session":tr("replaced by a newer session"),
+  "ended by the administrator":tr("ended by the administrator"),"access revoked":tr("access revoked"),
+  "access changed":tr("access changed"),"access expired":tr("access expired")};
 // [title, icon from the index.html sprite, tone class]
 const labels = {
   "interaction.preview": [tr("Telegram link preview saved"), "link", "system"],
@@ -41,6 +54,10 @@ const labels = {
   "connection.retry": [tr("Reconnecting to Telegram"), "refresh", "system"], "connection.retry_failed": [tr("Reconnect attempt failed"), "alert", "coverage"],
   "telegram.backoff": [tr("Telegram rate limit"), "clock", "coverage"], "export.failed": [tr("Export failed"), "alert", "coverage"],
   "network.changed": [tr("Connection route changed"), "link", "system"], "network.probe": [tr("Connection test"), "link", "system"],
+  "network.route_assigned": [tr("Proxy assigned"), "link", "system"], "network.route_rotated": [tr("Proxy replaced"), "refresh", "coverage"],
+  "network.route_unavailable": [tr("No working proxy"), "alert", "coverage"],
+  "network.route_fallback": [tr("Connected directly without a proxy"), "alert", "coverage"],
+  "network.policy_changed": [tr("IP protection changed"), "shield", "system"],
   "profile.created": [tr("Workspace created"), "plus", "system"], "profile.unavailable": [tr("Workspace unavailable"), "alert", "coverage"],
   "snapshot.started": [tr("History snapshot started"), "layers", "system"], "snapshot.completed": [tr("History snapshot completed"), "layers", "system"],
   "snapshot.interrupted": [tr("History snapshot interrupted"), "alert", "coverage"],
@@ -54,6 +71,10 @@ const labels = {
   "source.profile": [tr("Chat profile saved"), "account", "system"],
   "witness.token_created": [tr("Witness token created"), "eye", "system"], "witness.token_revoked": [tr("Witness token revoked"), "eye", "system"],
   "witness.seen": [tr("Witness began checking"), "eye", "system"],
+  "access.granted": [tr("Access issued"), "lock", "system"], "access.changed": [tr("Access changed"), "lock", "system"],
+  "access.revoked": [tr("Access revoked"), "lock", "system"], "access.session_started": [tr("Signed in to the panel"), "account", "system"],
+  "access.session_ended": [tr("Panel session ended"), "account", "system"],
+  "access.admin_changed": [tr("Administrator session limits changed"), "settings", "system"],
 };
 function node(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
 function icon(name) {
@@ -131,6 +152,10 @@ function lock() {
   resetInteractions();
   cancelQR();
   state.workspaceRevision++;state.monitoringDirty=false;state.captureDirty=false;state.parametersDirty=false;clearVerification();
+  // Locking ends this browser's session on the server too.
+  if(state.token.startsWith("tgws_"))fetch("/api/access/logout",{method:"POST",headers:{Authorization:"Bearer "+state.token}}).catch(()=>{});
+  state.me=null;state.access=null;state.accessEdit=null;state.accessChats={};state.consoleAfter=0;$("access-console").textContent="";
+  $("access-token").textContent="";show("access-new",false);
   state.token=""; sessionStorage.removeItem("tgwitness-token"); closeDetail();
   $("export-dialog").close("cancel");stopExportPoll();clearTimeout(multiPoll);multiPoll=null;state.multiChecked=false;
   clearSecrets();resetWitnessSetup();selectExtra(null);
@@ -138,13 +163,17 @@ function lock() {
 }
 async function unlock() {
   accessStarted=true;
+  state.me = await json("access/me",undefined,{root:true});
   await loadProfiles();
-  if(!state.profiles.some(p=>p.id===state.profile && !p.error_type))state.profile="default";
+  if(!state.profiles.some(p=>p.id===state.profile && !p.error_type))
+    state.profile=state.profiles.find(p=>!p.error_type)?.id||"default";
   state.status = await json("status");
+  applyAccess();
   if(!state.opened&&!location.hash){
-    state.view=state.status.demo?"chats":!state.status.collector.has_session?"connection":
-      hasSources(state.status)?"chats":"sources";
+    state.view=state.status.demo?"chats":!state.status.collector.has_session&&viewAllowed("connection")?"connection":
+      hasSources(state.status)||!viewAllowed("sources")?"chats":"sources";
   }
+  if(!viewAllowed(state.view))state.view="chats";
   state.opened=true;
   sessionStorage.setItem("tgwitness-token", state.token);
   show("gate",false); show("workspace",true); $("panel-token").value="";
@@ -154,13 +183,41 @@ async function unlock() {
   await refreshEvents();
   loadNotifications().catch(()=>{});
   if(state.view!=="parameters")loadParameters().catch(()=>{});  // names of parameters in journal records
-  if(!state.status.demo&&!state.status.collector.has_session)navigate("connection");
+  if(!state.status.demo&&!state.status.collector.has_session&&viewAllowed("connection"))navigate("connection");
 }
 $("unlock-form").addEventListener("submit", async event => {
-  event.preventDefault(); state.token = $("panel-token").value.trim(); $("login-error").textContent="";
+  event.preventDefault(); $("login-error").textContent="";
   const button = event.submitter; button.disabled=true;
-  try { await unlock(); } catch (e) { $("login-error").textContent=e.message; } finally { button.disabled=false; }
+  try {
+    // Any token (the panel token or an issued one) is exchanged for a session; only the session is kept.
+    const entered=$("panel-token").value.trim();
+    state.token=(await json("access/login",{token:entered},{root:true,token:""})).session;
+    await unlock();
+  } catch (e) { state.token="";$("login-error").textContent=e.message; } finally { button.disabled=false; }
 });
+function may(permission){return !!state.me&&(state.me.admin||state.me.permissions.includes(permission));}
+// Sections an access may open; parts of the whole workspace stay closed where only chosen chats are open.
+function viewAllowed(view){
+  const limited=!!state.status?.chats_limited;
+  return {sources:may("sources")&&!limited,evidence:may("export")&&!limited,witness:may("settings")&&!limited,
+    parameters:may("settings")&&!limited,connection:may("account")&&!limited,accounts:!!state.me?.admin,
+    access:!!state.me?.admin}[view]??true;
+}
+function applyAccess(){
+  document.querySelectorAll(".sidebar .nav[data-view]").forEach(n=>n.hidden=!viewAllowed(n.dataset.view));
+  document.querySelectorAll("[data-open]").forEach(n=>n.hidden=!viewAllowed(n.dataset.open));
+  $("collector-toggle").hidden=!may("collect")||!!state.status?.chats_limited;
+  $("manage-profiles").hidden=!state.me?.admin;
+  document.querySelectorAll("[data-export]").forEach(n=>n.hidden=!viewAllowed("evidence"));
+  // The chat view: controls this access may not use are hidden (the server refuses them anyway).
+  const limited=!!state.status?.chats_limited;
+  $("chats-manage").hidden=!viewAllowed("sources");
+  document.querySelector(".chat-open").hidden=!may("interact")||limited;
+  $("chat-load-history").hidden=$("chat-history-limit").hidden=!may("sources");
+  $("chat-export-start").hidden=!may("export");
+  $("chat-compose").hidden=!may("interact");
+  $("workspace").dataset.access=state.me?.admin?"admin":"issued";
+}
 $("lock-panel").addEventListener("click",lock);
 $("top-lock").addEventListener("click",lock);
 $("entry-lock").addEventListener("click",lock);
@@ -179,6 +236,7 @@ $("open-demo").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   state.token=state.demoToken;state.profile="default";await unlock();
 }));
 function navigate(view) {
+  if(!viewAllowed(view))view="chats";
   state.view=view;
   $("workspace").dataset.currentView=view;
   document.querySelectorAll(".view").forEach(n=>n.hidden=n.id !== "view-"+view);
@@ -186,7 +244,7 @@ function navigate(view) {
     n.classList.toggle("active",n.dataset.view===view);
     if(n.dataset.view===view)n.setAttribute("aria-current","page");else n.removeAttribute("aria-current");
   });
-  $("view-label").textContent=tr({chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts"}[view]);
+  $("view-label").textContent=tr({chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",access:"Access"}[view]);
   show("entry-header",view==="connection");
   if(view==="connection")connectionSettings(false);
   if (view==="sources") {renderTargets();loadScope().catch(e=>toast(e.message,true));}
@@ -194,6 +252,7 @@ function navigate(view) {
   if (view==="parameters") loadParameters().catch(e=>toast(e.message,true));
   if (view==="accounts") {renderAccounts();loadProfiles().catch(e=>toast(e.message,true));}
   if (view==="chats") refreshChats().catch(e=>toast(e.message,true));
+  if (view==="access") loadAccess().catch(e=>toast(e.message,true));
 }
 $("manage-profiles").addEventListener("click",()=>{
   navigate("connection");connectionSettings(true);$("profiles-details").open=true;$("profiles-details").scrollIntoView({block:"start"});
@@ -220,6 +279,7 @@ function renderQuick(){
   quickResults.replaceChildren();
   const query=quickSearch.value.trim().toLocaleLowerCase();
   for(const nav of document.querySelectorAll(".sidebar .nav")){
+    if(nav.hidden)continue;
     const title=[...nav.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join("").trim();
     const keywords=nav.dataset.view==="witness"?tr("bot Telegram proof GitHub witness"):
       nav.dataset.view==="connection"?tr("proxy MTProxy SOCKS5 HTTP connection route"):"";
@@ -349,7 +409,7 @@ function renderStatus() {
 function hasSources(s){return s.targets.some(t=>t.enabled)||(s.scope?.mode||"selected")!=="selected";}
 function renderSetup(){
   const s=state.status,c=s.collector;
-  show("setup-card",!s.demo&&!c.running);
+  show("setup-card",!s.demo&&!c.running&&viewAllowed("connection")&&viewAllowed("sources")&&may("collect"));
   const stage=!c.has_session?0:!hasSources(s)?1:2;
   const steps=[
     [tr("GET STARTED · STEP 1 OF 3"),tr("Connect your Telegram account"),tr("Use your phone number, scan a QR code, or import account files."),tr("Connect account →")],
@@ -385,7 +445,8 @@ function fillSourceSelect(id,value,all=false) {
 async function refreshStatus() {
   const revision=state.workspaceRevision,result=await json("status");
   if(revision!==state.workspaceRevision)return;
-  state.status=result;renderStatus();
+  state.status=result;applyAccess();renderStatus();
+  if(!viewAllowed(state.view))navigate("chats");
 }
 async function loadProfiles(){
   const result=await json("profiles",undefined,{root:true});state.profiles=result.profiles;
@@ -569,7 +630,14 @@ function excerpt(e) {
     case "connection.retry_failed": return tr("Attempt {n}",{n:p.attempt})+failure;
     case "telegram.backoff": return tr("Telegram asked to wait {n} s",{n:p.retry_after_seconds});
     case "export.failed": return (p.format||"export").toUpperCase()+failure;
-    case "network.changed": return tr({direct:"Direct connection",socks5:"SOCKS5 proxy",http:"HTTP proxy",mtproxy:"MTProxy"}[p.kind]||p.kind);
+    case "network.changed": return tr({direct:"Direct connection",socks5:"SOCKS5 proxy",http:"HTTP proxy",mtproxy:"MTProxy",mtproxy_auto:"Automatic MTProxy"}[p.kind]||p.kind);
+    case "network.route_assigned": return (p.returned_from_direct?tr("Back on a proxy after a direct connection")+" · ":"")+(p.source||"");
+    case "network.route_rotated": return tr({connect_failed:"The proxy stopped answering",repeated_disconnect:"The proxy kept dropping the connection",
+      planned:"Planned switch to another proxy"}[p.reason]||p.reason)+(p.source?" · "+p.source:"")+failure;
+    case "network.route_unavailable": return (p.fallback_to_direct?tr("Telegram is contacted directly, as the IP protection allows"):
+      tr("Telegram is not contacted until a listed proxy answers"))+failure;
+    case "network.route_fallback": return tr("Telegram sees this server's address until a listed proxy answers");
+    case "network.policy_changed": return exposureNames[p.exposure]||p.exposure;
     case "network.probe": return p.connected ? tr("Telegram transport connected") : tr("Connection failed")+failure;
     case "profile.created": return p.label||p.id;
     case "profile.unavailable": return p.profile_id+failure;
@@ -586,6 +654,10 @@ function excerpt(e) {
     case "source.profile": return [p.title||"",p.bot?tr("bot"):"",String(p.bot?.description||p.about||"").slice(0,120)].filter(Boolean).join(" · ");
     case "parameters.changed": return Object.keys(p.after||{}).map(key=>parameterLabel(key)+": "+parameterValue(p.after[key])).join(" · ");
     case "witness.token_created": return p.label||"";
+    case "access.granted": case "access.changed": return (p.label||"")+" · "+(p.permissions||[]).map(x=>permissionLabels[x]?.[0]||x).join(", ");
+    case "access.revoked": return p.label||"";
+    case "access.session_started": return (p.label==="Main administrator"?tr("Main administrator"):p.label||"")+" · "+(p.address||"");
+    case "access.session_ended": return (p.label==="Main administrator"?tr("Main administrator"):p.label||"")+" · "+(sessionEndReasons[p.reason]||p.reason||"");
     case "witness.seen": return (p.label||"")+" · "+String(p.witness_fingerprint||"").slice(0,16);
   }
   if (p.reason) return p.reason;
@@ -995,7 +1067,7 @@ async function loadEvidence(){
 const hostOf=url=>{try{return new URL(url).hostname;}catch{return url;}};
 function evidenceText(e){
   if(!e.settings.enabled)return tr("Off — checkpoints stay on this machine only.");
-  if(e.route==="mtproxy")return tr("Timestamp requests are not sent over MTProxy. Choose Direct, SOCKS5 or HTTP in Account → Connection settings.");
+  if(e.route_problem)return tr(e.route_problem);
   if(e.busy)return tr("Sending the checkpoint hash to timestamp services…");
   const l=e.last;if(!l)return tr("On — the first checkpoint will be anchored within a minute.");
   const ok=l.results.filter(r=>r.ok),bad=l.results.filter(r=>!r.ok);
@@ -1039,7 +1111,7 @@ async function loadReplica(){
 function replicaText(r){
   const s=r.settings;
   if(!s.enabled)return tr(r.has_credentials?"Off.":"Off — enter your storage details to keep a copy away from this machine.");
-  if(r.route==="mtproxy")return tr("Not sent over MTProxy. Choose Direct, SOCKS5 or HTTP in Account → Connection settings.");
+  if(r.route_problem)return tr(r.route_problem);
   if(r.busy)return tr("Copying…");
   const l=r.last,where=tr("Copies to {bucket}/{location}. ",{bucket:s.bucket,location:r.location});
   if(!l)return where+tr("The first copy starts within a minute.");
@@ -1099,7 +1171,7 @@ async function loadAlerts(){
 function alertsText(a){
   const s=a.settings,l=a.last;
   if(!s.enabled)return tr(a.destinations.length?"Off.":"Off — add a destination to receive alerts.");
-  if(a.route==="mtproxy")return tr("Notifications are not sent over MTProxy. Choose Direct, SOCKS5 or HTTP in Account → Connection settings.");
+  if(a.route_problem)return tr(a.route_problem);
   if(!l)return tr("On. Nothing has needed a notification yet.");
   return tr("Last notification {time}.",{time:fmtFull(l.at)})+(l.error?" "+tr("Not delivered: {error} — retried within a minute.",{error:l.error}):"");
 }
@@ -1713,21 +1785,30 @@ function clearSecrets(){
 }
 function routeFields(){
   const kind=$("network-kind").value;
-  show("network-endpoint",kind!=="direct");show("network-login",kind!=="mtproxy");show("network-mtproxy",kind==="mtproxy");
-  $("network-host").required=kind!=="direct";$("network-secret").required=kind==="mtproxy";
+  const endpoint=kind!=="direct"&&kind!=="mtproxy_auto";
+  show("network-endpoint",endpoint);show("network-login",kind!=="mtproxy");show("network-mtproxy",kind==="mtproxy");
+  $("network-host").required=endpoint;$("network-secret").required=kind==="mtproxy";
 }
 function renderConnection(){
   renderApiState();
-  const c=state.status.collector,r=c.network||{kind:"direct"},p=state.status.protection||{};
-  const route=tr({direct:"Direct connection",socks5:"SOCKS5 proxy",http:"HTTP CONNECT proxy",mtproxy:"MTProxy · experimental"}[r.kind]);
+  const c=state.status.collector,r=c.network||{kind:"mtproxy_auto"},p=state.status.protection||{};
+  const route=tr({direct:"Direct connection",socks5:"SOCKS5 proxy",http:"HTTP CONNECT proxy",mtproxy:"MTProxy · experimental",
+    mtproxy_auto:"Automatic MTProxy"}[r.kind]);
+  const auto=r.kind==="mtproxy_auto",now=auto&&r.current,pool=(auto&&r.pool)||{};
   $("route-summary").textContent=route;
-  $("route-line-text").textContent=tr("Connection: {route}",{route:r.kind==="direct"?route:route+" · "+r.host+":"+r.port});
+  $("route-line-text").textContent=tr("Connection: {route}",{route:r.kind==="direct"||(auto&&!now)?route:route+" · "+(now||r).host+":"+(now||r).port});
   show("route-line",!state.status.demo);show("network-running",!state.status.demo&&c.running);
+  const fallback=r.fallback_to_direct?tr("Connected directly now: no listed proxy answers. A proxy is used again as soon as one does."):
+    auto&&r.exposure==="fallback"?tr("Direct connection after {n} minutes without a working proxy.",{n:state.status.parameters?.proxy_fallback_minutes??10}):
+    auto&&r.exposure==="tunnel"?tr("Direct connection while no proxy works."):tr("Direct fallback disabled.");
   $("route-detail").textContent=r.kind==="direct"?tr("Telegram client connects directly. Other applications have their own network settings."):
+    auto?(now?now.host+":"+now.port+" · "+now.source+" · ":"")+tr("{healthy} of {listed} listed proxies answer; a failing proxy is replaced by the next working one.",
+      {healthy:pool.healthy||0,listed:pool.listed||0})+" "+fallback:
     r.host+":"+r.port+" · "+(r.has_credentials?tr("Credentials stored in encrypted vault.")+" ":"")+tr("Direct fallback disabled.");
   if(networkLoadedFor!==state.profile){
     $("network-kind").value=r.kind;$("network-host").value=r.host||"";$("network-port").value=String(r.port||1080);
     networkLoadedFor=state.profile;routeFields();loadProxyCatalog();
+    if(!state.status.demo)loadPolicy().catch(e=>toast(e.message,true));
   }
   $("network-form").querySelector('[type="submit"]').disabled=state.status.demo||c.running;
   $("network-test").disabled=state.status.demo;$("sign-out").disabled=state.status.demo;
@@ -1767,7 +1848,9 @@ async function loadProxyCatalog(refresh=false){
       const row=node("p"),link=node("a","",source.label);link.href=source.homepage;link.target="_blank";link.rel="noopener noreferrer";
       row.append(link,node("span","hint",source.fetched_at?tr("Saved {date} · {n} compatible",{date:formatTime(source.fetched_at),n:source.compatible}):tr("No saved list yet")));sources.append(row);
     }
-    $("proxy-catalog-download").textContent=tr(r.mode==="operator"?"The local operator catalog is reloaded without contacting public list providers.":
+    $("proxy-catalog-download").textContent=r.mode!=="operator"&&r.download_route==="none"?
+      tr(r.download_problem)+" "+tr("Until then the pool uses the lists it already has."):
+      tr(r.mode==="operator"?"The local operator catalog is reloaded without contacting public list providers.":
       r.download_route==="proxy"?"Updates download lists over HTTPS through the operator's download proxy. Telegram account credentials are never sent.":
       "Updates download lists directly over HTTPS from this server. Telegram account credentials are never sent. The operator can configure a separate download proxy.");
     $("proxy-catalog-apply").disabled=!r.proxies.length||state.status.demo||state.status.collector.running;
@@ -1798,9 +1881,50 @@ $("network-import").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   $("network-link").value="";routeFields();
   $("network-link-result").textContent=tr("Fields filled. Review the endpoint, then save the route. No connection has been made.");
 }));
+// IP protection: how much this workspace may reveal the server's address, and the route of requests outside Telegram.
+const exposureNames={hide:tr("Hide this server's address"),fallback:tr("Direct connection as a last resort"),
+  tunnel:tr("Server behind a tunnel or VPN")};
+let policyOutsideDirty=false;
+function renderPolicy(p){
+  state.policy=p;policyOutsideDirty=false;
+  $("policy-summary").textContent=exposureNames[p.exposure];
+  document.querySelectorAll('input[name="exposure"]').forEach(n=>n.checked=n.value===p.exposure);
+  $("outside-enabled").checked=p.outside_enabled;
+  const proxy=p.outside_proxy;
+  $("outside-kind").value=proxy?.kind||"";$("outside-host").value=proxy?.host||"";
+  $("outside-port").value=String(proxy?.port||1080);$("outside-username").value="";$("outside-password").value="";
+  outsideFields();
+  $("policy-status").textContent=(p.direct_fallback?tr("Connected to Telegram directly now: no listed proxy answers.")+" ":"")+
+    (p.outside_route==="none"?tr(p.outside_problem):p.outside_route==="direct"?
+      tr("Requests outside Telegram go directly from this server."):
+      tr("Requests outside Telegram go through {proxy}.",{proxy:(proxy?proxy.host+":"+proxy.port:tr("this workspace's proxy"))}));
+  // A direct Telegram route is offered only for a server behind a tunnel or VPN.
+  $("network-kind").querySelector('[value="direct"]').disabled=p.exposure!=="tunnel"&&$("network-kind").value!=="direct";
+}
+function outsideFields(){
+  const none=!$("outside-kind").value;
+  for(const id of ["outside-host","outside-port","outside-username","outside-password"])$(id).disabled=none||!$("outside-enabled").checked;
+  $("outside-kind").disabled=!$("outside-enabled").checked;
+}
+async function loadPolicy(){
+  const profile=state.profile,p=await json("network/policy");
+  if(profile===state.profile)renderPolicy(p);
+}
+for(const id of ["outside-kind","outside-host","outside-port","outside-username","outside-password"])
+  $(id).addEventListener("input",()=>{policyOutsideDirty=true;outsideFields();});
+$("outside-enabled").addEventListener("change",outsideFields);
+$("policy-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
+  const kind=$("outside-kind").value,body={exposure:document.querySelector('input[name="exposure"]:checked')?.value||"hide",
+    outside_enabled:$("outside-enabled").checked,outside_proxy:null,remove_outside_proxy:false};
+  if(policyOutsideDirty&&kind)body.outside_proxy={kind,host:$("outside-host").value.trim(),port:Number($("outside-port").value),
+    username:$("outside-username").value,password:$("outside-password").value};
+  else if(!kind&&state.policy?.outside_proxy)body.remove_outside_proxy=true;
+  renderPolicy(await json("network/policy",body));await refreshStatus();
+  toast(tr("IP protection saved."));
+});});
 $("network-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
   const kind=$("network-kind").value,body={kind};
-  if(kind!=="direct")Object.assign(body,{host:$("network-host").value.trim(),port:Number($("network-port").value)});
+  if(kind!=="direct"&&kind!=="mtproxy_auto")Object.assign(body,{host:$("network-host").value.trim(),port:Number($("network-port").value)});
   if(kind==="socks5"||kind==="http")Object.assign(body,{username:$("network-username").value,password:$("network-password").value});
   if(kind==="mtproxy")body.secret=$("network-secret").value.trim();
   await json("network",body);
@@ -2114,13 +2238,13 @@ function renderChatStatus(){
   const state_=node("div","chat-state"),say=(cls,text)=>{state_.className="chat-state "+cls;const t=node("span","",text);t.title=text;state_.append(t);};
   const action=(cls,label,work)=>{const b=node("button",cls+" small",label);b.type="button";b.addEventListener("click",()=>busy(b,work));state_.append(b);return b;};
   if(s.demo)say("info",tr("Demo with fictional messages. Deleted messages are red; edited ones keep every saved version."));
-  else if(!info.enabled){say("warn",tr("This chat is paused — nothing in it is being saved."));action("secondary",tr("Choose chats"),async()=>navigate("sources"));}
+  else if(!info.enabled){say("warn",tr("This chat is paused — nothing in it is being saved."));if(viewAllowed("sources"))action("secondary",tr("Choose chats"),async()=>navigate("sources"));}
   else if(!c.running){say("warn",tr("Observation is off — new messages, edits and deletions are not being saved."));
-    action("primary",tr("Start observation"),async()=>{await json("collector/start",{});await refreshStatus();toast(tr("Observation started. New messages, edits and deletions will appear here."));}).disabled=!c.has_session;}
+    if(may("collect")&&!s.chats_limited)action("primary",tr("Start observation"),async()=>{await json("collector/start",{});await refreshStatus();toast(tr("Observation started. New messages, edits and deletions will appear here."));}).disabled=!c.has_session;}
   else if(c.storage_low)say("warn",tr("Observing, but the disk is almost full ({size} free): photos & files are paused until space is freed. Messages are still saved.",{size:humanSize(c.disk_free_bytes)}));
   else say(c.connected?"ok":"warn",c.connected?tr("Observing — new messages, edits and deletions are saved as they happen.")+recheckText(c):tr("Reconnecting to Telegram — missed changes are requested again once connected."));
   const mode=node("div","chat-mode"),summary=node("span","",modeSummary(s));summary.title=summary.textContent;mode.append(summary);
-  if(!s.demo){const change=node("button","text-link",tr("Change"));change.type="button";change.addEventListener("click",()=>{navigate("sources");$("source-options").open=true;$("source-options").scrollIntoView({block:"start"});});mode.append(change);}
+  if(!s.demo&&viewAllowed("sources")){const change=node("button","text-link",tr("Change"));change.type="button";change.addEventListener("click",()=>{navigate("sources");$("source-options").open=true;$("source-options").scrollIntoView({block:"start"});});mode.append(change);}
   const filters=node("div","chat-filters");filters.setAttribute("role","group");filters.setAttribute("aria-label",tr("Show messages"));
   for(const [key,label] of [["all",tr("All")],["deleted",tr("Deleted")],["edited",tr("Edited")],["people",tr("People")]]){
     const f=node("button","filter"+(state.chatFilter===key?" active":""),label);f.type="button";
@@ -2191,7 +2315,7 @@ function messageRow(m,grouped,byId){
   else if(m.edited){const e=node("span","pill pill-edited",tr("Edited"));e.title=tr("Telegram marks this message as edited; the earlier text was not saved.");meta.append(e);}
   if(!m.origins.includes("live")&&m.origins.includes("history")){const o=node("span","origin",tr("from history"));o.title=tr("Loaded from chat history, not seen live");meta.append(o);}
   meta.append(node("span","time",fmtTime(m.sent_at||m.versions[0]?.observed_at)));
-  if(!state.status?.demo&&!m.deleted&&!m.missing){const reply=node("button","text-link",tr("Reply"));reply.type="button";
+  if(!state.status?.demo&&!m.deleted&&!m.missing&&may("interact")){const reply=node("button","text-link",tr("Reply"));reply.type="button";
     const generation=chatGeneration,revision=state.workspaceRevision;
     reply.addEventListener("click",()=>{if(!chatReady||generation!==chatGeneration||revision!==state.workspaceRevision)return;
       composeReply=m.message_id;renderComposer();$("chat-message").focus();});meta.append(reply);}
@@ -2495,6 +2619,7 @@ function profileNode(){
     record.addEventListener("click",()=>openRecord(saved.seq).catch(e=>toast(e.message,true)));box.append(record);
   }
   const save=node("button","secondary small",tr("Save profile now"));save.type="button";save.disabled=!s||s.demo||!s.collector.has_session;
+  save.hidden=!may("sources");
   save.addEventListener("click",()=>busy(save,async()=>{
     const id=state.chat,r=await json("chats/"+encodeURIComponent(id)+"/profile",{});
     if(id!==state.chat)return;
@@ -2619,6 +2744,173 @@ function saveMulti(button){return busy(button,async()=>{
 });}
 $("chat-export-start").addEventListener("click",e=>busy(e.currentTarget,openExportDialog));
 $("chat-export-get").addEventListener("click",e=>saveMulti(e.currentTarget));
+// ---- Access: issued accesses, open sessions and the main administrator's console ----
+function localInput(unix){
+  if(!unix)return "";const d=new Date(unix*1000);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);
+}
+function workspaceName(id){return state.profiles.find(p=>p.id===id)?.label||id;}
+function accessScope(g){
+  if(g.all_workspaces)return tr("All workspaces");
+  return Object.entries(g.workspaces).map(([id,chats])=>chats===null?tr("{workspace}: every chat",{workspace:workspaceName(id)}):
+    trn("{workspace}: {n} chat","{workspace}: {n} chats",chats.length,{workspace:workspaceName(id)})).join("; ");
+}
+function accessLimits(g){
+  const parts=[trn("{n} parallel session","{n} parallel sessions",g.max_sessions)+" · "+
+    (g.on_limit==="refuse"?tr("new sign-ins refused at the limit"):tr("the oldest session ends at the limit"))];
+  parts.push(g.max_uses?tr("sign-ins: {used} of {max}",{used:g.uses,max:g.max_uses}):trn("{n} sign-in","{n} sign-ins",g.uses));
+  if(g.expires_at)parts.push(tr("valid until {time}",{time:formatTime(g.expires_at)}));
+  if(g.ips.length)parts.push(tr("addresses: {list}",{list:g.ips.join(", ")}));
+  if(g.bind_first_ip)parts.push(g.bound_ip?tr("bound to {address}",{address:g.bound_ip}):tr("binds to the first sign-in address"));
+  return parts.join(" · ");
+}
+function renderPermissions(selected){
+  const box=$("access-permissions");box.replaceChildren();
+  for(const [key,[name,about]] of Object.entries(permissionLabels)){
+    const label=node("label","check-label access-permission"),input=document.createElement("input"),text=node("span");
+    input.type="checkbox";input.value=key;input.checked=key==="view"||selected.includes(key);input.disabled=key==="view";
+    text.append(node("strong","",name),node("small","",about));label.append(input,text);box.append(label);
+  }
+}
+async function fillAccessChats(id,box,chosen){
+  if(!state.accessChats[id])state.accessChats[id]=(await json("chats",undefined,{profile:id})).chats;
+  box.replaceChildren();
+  if(!state.accessChats[id].length){box.append(node("p","hint",tr("This workspace has no chats yet. Choose its sources first.")));return;}
+  for(const chat of state.accessChats[id]){
+    const label=node("label","check-label"),input=document.createElement("input");
+    input.type="checkbox";input.value=String(chat.chat_id);input.checked=chosen.includes(chat.chat_id);
+    label.append(input,document.createTextNode(" "+(chat.title||String(chat.chat_id))));box.append(label);
+  }
+}
+function renderAccessWorkspaces(selected){
+  const box=$("access-workspaces");box.replaceChildren();
+  for(const profile of state.profiles){
+    const id=profile.id,chosen=Object.hasOwn(selected,id)?selected[id]:undefined;
+    const row=node("div","access-workspace"),pick=node("label","check-label"),check=document.createElement("input");
+    check.type="checkbox";check.dataset.workspace=id;check.checked=chosen!==undefined;
+    pick.append(check,document.createTextNode(" "+profile.label));
+    const mode=document.createElement("select");mode.dataset.mode=id;
+    mode.setAttribute("aria-label",tr("Chats of {workspace}",{workspace:profile.label}));
+    mode.append(new Option(tr("Every chat"),"all"),new Option(tr("Chosen chats"),"chosen"));
+    mode.value=Array.isArray(chosen)?"chosen":"all";
+    const chats=node("div","access-chats");chats.dataset.chats=id;
+    const sync=async()=>{
+      check.disabled=mode.disabled=$("access-all").checked;mode.hidden=!check.checked;
+      chats.hidden=!(check.checked&&mode.value==="chosen");
+      if(!chats.hidden&&!chats.childElementCount)await fillAccessChats(id,chats,Array.isArray(chosen)?chosen:[]);
+    };
+    for(const input of [check,mode])input.addEventListener("change",()=>sync().catch(e=>toast(e.message,true)));
+    row.append(pick,mode,chats);box.append(row);
+    sync().catch(e=>toast(e.message,true));
+  }
+}
+function renderAccessForm(g){
+  $("access-form-mode").textContent=g?tr("Edit access"):tr("New access");
+  $("access-submit").textContent=g?tr("Save access"):tr("Create access");
+  show("access-cancel",!!g);
+  $("access-label").value=g?.label||"";$("access-all").checked=!!g?.all_workspaces;
+  renderPermissions(g?.permissions||["view"]);
+  $("access-sessions").value=g?.max_sessions??1;$("access-on-limit").value=g?.on_limit||"refuse";
+  $("access-uses").value=g?.max_uses??"";$("access-expires").value=localInput(g?.expires_unix);
+  $("access-idle").value=g?.session_minutes??720;
+  $("access-ips").value=(g?.ips||[]).join("\n");$("access-bind").checked=!!g?.bind_first_ip;
+  renderAccessWorkspaces(g?g.workspaces:{[state.profile]:null});
+}
+function accessSettings(){
+  const workspaces={},box=$("access-workspaces");
+  if(!$("access-all").checked)for(const check of box.querySelectorAll("[data-workspace]:checked")){
+    const id=check.dataset.workspace;
+    workspaces[id]=box.querySelector(`[data-mode="${id}"]`).value==="all"?null:
+      [...box.querySelectorAll(`[data-chats="${id}"] input:checked`)].map(x=>Number(x.value));
+  }
+  const expires=$("access-expires").value,uses=$("access-uses").value;
+  return {label:$("access-label").value.trim(),all_workspaces:$("access-all").checked,workspaces,
+    permissions:[...$("access-permissions").querySelectorAll("input:checked")].map(x=>x.value),
+    ips:$("access-ips").value.split(/\s+/).filter(Boolean),bind_first_ip:$("access-bind").checked,
+    max_uses:uses?Number(uses):null,expires_at:expires?new Date(expires).getTime()/1000:null,
+    max_sessions:Number($("access-sessions").value),on_limit:$("access-on-limit").value,
+    session_minutes:Number($("access-idle").value)};
+}
+function sessionOwner(s){return s.admin?tr("Main administrator"):s.label;}
+function renderAccess(){
+  const a=state.access;if(!a)return;
+  const list=$("access-list");list.replaceChildren();
+  if(!a.grants.length)list.append(node("p","hint",tr("No access issued yet. Only the panel token opens this panel.")));
+  for(const g of a.grants){
+    const row=node("div","access-row"),info=node("div"),actions=node("div","access-actions");
+    const condition=g.expired?tr("expired"):g.used_up?tr("used up"):trn("{n} open session","{n} open sessions",g.sessions);
+    const last=g.last_login_at?" · "+tr("last sign-in {time} from {address}",{time:formatTime(g.last_login_at),address:g.last_address}):"";
+    info.append(node("h3","",g.label+" · "+condition),node("p","",accessScope(g)),
+      node("p","",g.permissions.map(p=>permissionLabels[p]?.[0]||p).join(", ")),node("p","hint",accessLimits(g)+last));
+    const edit=node("button","secondary",tr("Edit")),revoke=node("button","quiet",tr("Revoke"));
+    edit.addEventListener("click",()=>{state.accessEdit=g;show("access-new",false);renderAccessForm(g);$("access-form").scrollIntoView({block:"start"});});
+    revoke.addEventListener("click",()=>busy(revoke,async()=>{
+      if(!window.confirm(tr("Revoke the access of \"{name}\"? Its open sessions end at once.",{name:g.label})))return;
+      state.access=await json("access/grants/"+encodeURIComponent(g.id),undefined,{root:true,method:"DELETE"});
+      if(state.accessEdit?.id===g.id){state.accessEdit=null;renderAccessForm(null);}
+      renderAccess();
+    }));
+    actions.append(edit,revoke);row.append(info,actions);list.append(row);
+  }
+  const sessions=$("access-sessions-list");sessions.replaceChildren();
+  if(!a.sessions.length)sessions.append(node("p","hint",tr("No open sessions.")));
+  for(const s of a.sessions){
+    const row=node("div","access-row"),info=node("div"),end=node("button","quiet",tr("End session"));
+    info.append(node("h3","",sessionOwner(s)+(s.current?" · "+tr("this browser"):"")),
+      node("p","",[s.address,tr("since {time}",{time:formatTime(s.started_at)}),
+        tr("last activity {time}",{time:formatTime(s.last_seen_at)}),trn("{n} request","{n} requests",s.requests)].join(" · ")),
+      node("p","hint",s.agent.slice(0,120)));
+    end.addEventListener("click",()=>busy(end,async()=>{
+      state.access=await json("access/sessions/"+encodeURIComponent(s.id),undefined,{root:true,method:"DELETE"});renderAccess();
+    }));
+    row.append(info,end);sessions.append(row);
+  }
+}
+async function loadConsole(){
+  const r=await json("access/console?after="+state.consoleAfter,undefined,{root:true}),pre=$("access-console");
+  if(r.lines.length&&r.lines[0].n<=state.consoleAfter)pre.replaceChildren();  // the process restarted
+  for(const line of r.lines){
+    const item=node("span","console-line "+line.level.toLowerCase(),
+      line.at.slice(11,19)+" "+line.level.padEnd(7)+" "+line.text+"\n");
+    pre.append(item);
+  }
+  while(pre.childElementCount>3000)pre.firstElementChild.remove();
+  state.consoleAfter=r.last;
+  if(r.lines.length&&$("console-follow").checked)pre.scrollTop=pre.scrollHeight;
+}
+async function loadAccess(quiet=false){
+  if(!state.me?.admin)return;
+  state.access=await json("access",undefined,{root:true});
+  if(!quiet){
+    renderAccessForm(state.accessEdit);
+    $("admin-sessions").value=state.access.admin.max_sessions;$("admin-on-limit").value=state.access.admin.on_limit;
+    $("admin-idle").value=state.access.admin.session_minutes;
+  }
+  renderAccess();
+  await loadConsole();
+}
+$("access-refresh").addEventListener("click",e=>busy(e.currentTarget,()=>loadAccess()));
+$("access-all").addEventListener("change",()=>$("access-workspaces").querySelectorAll("input,select")
+  .forEach(n=>n.disabled=$("access-all").checked));
+$("access-cancel").addEventListener("click",()=>{state.accessEdit=null;renderAccessForm(null);});
+$("access-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
+  const settings=accessSettings(),edit=state.accessEdit;
+  if(edit){
+    state.access=await json("access/grants/"+encodeURIComponent(edit.id),settings,{root:true,method:"PATCH"});
+    toast(tr("Access saved. Its open sessions follow the new settings."));
+  }else{
+    const result=await json("access/grants",settings,{root:true});state.access=result;
+    $("access-token").textContent=result.token;show("access-new",true);toast(tr("Access created. Copy its token now."));
+  }
+  state.accessEdit=null;renderAccessForm(null);renderAccess();
+});});
+$("access-copy").addEventListener("click",e=>busy(e.currentTarget,async()=>{
+  await navigator.clipboard.writeText($("access-token").textContent);toast(tr("Token copied."));
+}));
+$("access-admin-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
+  state.access=await json("access/admin",{max_sessions:Number($("admin-sessions").value),on_limit:$("admin-on-limit").value,
+    session_minutes:Number($("admin-idle").value)},{root:true});
+  renderAccess();toast(tr("Limits saved."));
+});});
 let notifyTick=0;
 setInterval(async()=>{
   if(!state.token||document.hidden||$("workspace").hidden)return;
@@ -2630,6 +2922,7 @@ setInterval(async()=>{
     if(state.view==="chats" && state.status.stats.head?.seq!==head) await refreshChats(true);
     if(state.view==="accounts") await loadProfiles();
     if(state.view==="witness") await loadExtras();
+    if(state.view==="access") await loadAccess(true);
     if(++notifyTick%3===0) await loadNotifications();
   }catch(e){if(!(e instanceof StaleView))$("status-chip").textContent=tr("Panel connection unavailable");}
 },5000);

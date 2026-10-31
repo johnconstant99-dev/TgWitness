@@ -58,14 +58,15 @@ def metadata_request(url, method="GET", headers=None, timeout=2):
 
 def provider_record(selected, request=metadata_request, root=Path("/")):
     """What the provider's metadata service says about this server; read once per process start.
-    The user data itself is never kept, only its hashes."""
+    Of the user data only its hashes and its redacted text are kept: the verifier compares that
+    text byte for byte with the installer the deployed commit builds."""
     record = {"provider": selected}
     try:
         found = get(selected).metadata(request, Path(root))
         user_data = found.pop("user_data", None)
         record.update(found)
         if user_data is not None:
-            record.update(user_data_hashes(user_data))
+            record.update(user_data_hashes(user_data), user_data_redacted=redact_user_data(user_data))
     except (OSError, ValueError, KeyError, TypeError) as exc:
         record["error"] = type(exc).__name__
     return record
@@ -145,7 +146,9 @@ def deployment(root=Path("/")):
 def snapshot(selected, provider, root=Path("/"), detail=False):
     """The measured host. With detail (the signed start record), a hand-installed server adds
     the inventory its installer took before changing anything."""
-    value = {"format": "tgwitness-host-v1", "mode": selected, "measured_at": utcnow(), "provider": provider,
+    # The signed start record keeps the user data hashes; its text goes to the statement only.
+    value = {"format": "tgwitness-host-v1", "mode": selected, "measured_at": utcnow(),
+             "provider": {k: v for k, v in provider.items() if k != "user_data_redacted"},
              "deployment": deployment(root), **host_state(root), "attestation": ATTESTATION}
     if detail and selected == "generic":
         try:
@@ -191,11 +194,11 @@ def statement(vault, receipt, run_event_seq, selected, provider, challenge=None,
 
 def install_record(script, preinstall, out):
     """Run by install.sh on a hand-installed server: the hashes of the installer as it ran (with and
-    without its two secrets) and of the inventory taken before installation."""
+    without its two secrets), its text without them, and the hash of the inventory taken before installation."""
     text = Path(script).read_bytes().decode()
     hashes = user_data_hashes(text)
     value = {"format": "tgwitness-install-v1", "recorded_at": utcnow(), "sha256": hashes["user_data_sha256"],
-             "redacted_sha256": hashes["user_data_redacted_sha256"],
+             "redacted_sha256": hashes["user_data_redacted_sha256"], "redacted": redact_user_data(text),
              "preinstall_sha256": hashlib.sha256(Path(preinstall).read_bytes()).hexdigest()}
     Path(out).write_text(json.dumps(value, sort_keys=True) + "\n")
     return value
@@ -209,7 +212,7 @@ def main(argv=None):
     parser.add_argument("preinstall", type=Path)
     parser.add_argument("out", type=Path)
     args = parser.parse_args(argv)
-    print(json.dumps(install_record(args.script, args.preinstall, args.out)))
+    print(json.dumps({k: v for k, v in install_record(args.script, args.preinstall, args.out).items() if k != "redacted"}))
 
 
 if __name__ == "__main__":

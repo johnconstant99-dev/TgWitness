@@ -278,7 +278,8 @@
   <details><summary>Service events, pausing and the panel token</summary>
     <p>Operational records and other group service events remain separate from the event switches. Captured messages can retain embedded reaction or membership metadata. Some deletion notices do not identify a chat; they are saved as unscoped account-level notices without guessing a source.</p>
     <p><strong>Pause observation</strong> stops that collector. <strong>Lock</strong> and closing a tab do not stop collection; switching workspaces only changes the view. Stopping the Python process stops all workspaces. After a restart, observation resumes and asks Telegram for the updates missed while it was off.</p>
-    <p>One panel token controls every workspace. Account separation is not a separate-user permission system. An existing journal cannot be reassigned to another Telegram account.</p>
+    <p>The administrator can issue access to selected workspaces and chats, with separate permissions, expiry, IP restrictions and session limits. The main panel token remains unrestricted. An existing journal cannot be reassigned to another Telegram account.</p>
+    <p>Open Access to give a reviewer their own token. Keep View for reading; add Export for downloads. Chat-limited access cannot open whole-workspace settings or full journal exports. Revoking access ends its sessions but cannot recall downloaded files.</p>
   </details>
 </section>
 
@@ -295,16 +296,17 @@
     <div class="route-end"><span class="route-icon tone-blue"><svg class="i"><use href="#i-telegram"/></svg></span><span>Telegram</span></div>
   </div>
   <ul class="fact-chips">
-    <li class="warn"><svg aria-hidden="true" class="i"><use href="#i-x"/></svg><span>A failed proxy never falls back to a direct connection</span></li>
+    <li class="warn"><svg aria-hidden="true" class="i"><use href="#i-x"/></svg><span>Hide IP waits for a working proxy; direct fallback requires a mode that permits it</span></li>
     <li><svg aria-hidden="true" class="i"><use href="#i-globe"/></svg><span>Public MTProxy lists are built in</span></li>
     <li><svg aria-hidden="true" class="i"><use href="#i-lock"/></svg><span>Saved proxy passwords and secrets are never shown again</span></li>
-    <li><svg aria-hidden="true" class="i"><use href="#i-info"/></svg><span>Only Telegram traffic uses it: this is not a system VPN</span></li>
+    <li><svg aria-hidden="true" class="i"><use href="#i-info"/></svg><span>Application routes do not configure a system VPN</span></li>
   </ul>
   <details><summary>Proxy formats, public lists and testing</summary>
     <p>Each workspace supports Direct, SOCKS5, HTTP CONNECT and experimental MTProxy. MTProxy accepts a 16-byte hex key or dd + key. Fake TLS ee secrets are unsupported. Stored proxy passwords/secrets are never returned to the panel.</p>
-    <p>Public MTProxy lists are included. Open Account → Settings → Connection settings → Change connection route, choose a server and save it. Update public lists downloads fresh addresses while keeping your selected route.</p>
+    <p>Automatic MTProxy checks built-in public lists, keeps a working route and replaces failing entries. Open Account → Settings → Connection settings to choose the route and IP mode. Parameters controls rotation, sharing, checking intervals and retry delays.</p>
     <p>Open Where the list comes from for providers, saved dates and the download route. Unavailable sources keep their previous entries. You can also enter your own proxy or use an operator catalog.</p>
-    <p>A failed proxy does not trigger a direct fallback. Pause observation before changing routes; saving cancels unfinished login. <strong>Test Telegram connection</strong> can run before sign-in; it checks transport, not complete update delivery.</p>
+    <p>Hide IP refuses direct fallback. Allow fallback can use Direct after the configured delay. Tunnel / VPN permits the host's direct network route but does not create a VPN. Pause observation before changing routes; saving cancels unfinished login. <strong>Test Telegram connection</strong> checks transport, not complete delivery.</p>
+    <p>MTProxy carries Telegram traffic only. External requests need a separate SOCKS5/HTTP proxy, the account's SOCKS5/HTTP route, or Direct where the IP mode permits it. External requests can be disabled; an explicit feed-download proxy is a separate override. The independent witness keeps its own route.</p>
     <p>This configures the Telegram client, not a system VPN. Remote access to the web panel needs HTTPS or an SSH tunnel.</p>
   </details>
 </section>

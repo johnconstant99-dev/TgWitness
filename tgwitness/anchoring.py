@@ -20,9 +20,13 @@ from .netclient import RouteError, request
 from .evidence import retain_checkpoint
 from .security import private_write
 from .store import utcnow
-from .verify import OTS_MAGIC, ots_summary, timestamp_reply_summary
+from .tsa_roots import trusted_roots
+from .verify import OTS_MAGIC, ots_summary, timestamp_reply_summary, timestamp_signature
 
-DEFAULT_TSA = ["https://freetsa.org/tsr", "http://timestamp.digicert.com"]
+# HTTPS only; an answer counts once its signature chains to a root in tsa_roots.
+DEFAULT_TSA = ["https://freetsa.org/tsr", "https://timestamp.sectigo.com"]
+# The earlier default authority answers over plain HTTP only.
+REPLACED_TSA = {"http://timestamp.digicert.com": "https://timestamp.sectigo.com"}
 # The calendars `ots stamp` uses by default (opentimestamps-client).
 DEFAULT_OTS = ["https://a.pool.opentimestamps.org", "https://b.pool.opentimestamps.org",
                "https://a.pool.eternitywall.com", "https://ots.btc.catallaxy.com"]
@@ -43,16 +47,22 @@ class EvidenceMode(BaseModel):
         for value in values:
             value = value.strip().rstrip("/")
             parts = urlsplit(value)
-            if (parts.scheme not in ("http", "https") or not parts.hostname or parts.username
+            if (parts.scheme != "https" or not parts.hostname or parts.username
                     or parts.password or parts.fragment or len(value) > 300):
-                raise ValueError("Use plain http:// or https:// addresses without credentials.")
+                raise ValueError("Use https:// addresses without credentials.")
             if value not in clean:
                 clean.append(value)
         return clean
 
 
 def evidence_settings(store):
-    return EvidenceMode.model_validate(store.get_setting("evidence", {})).model_dump()
+    saved = dict(store.get_setting("evidence", {}) or {})
+    # Saved while plain HTTP was accepted: the same address over HTTPS, which fails visibly if unsupported.
+    for key in ("tsa_urls", "ots_calendars"):
+        if isinstance(saved.get(key), list):
+            saved[key] = [REPLACED_TSA.get(url.strip().rstrip("/"), "https://" + url.strip()[7:])
+                          if isinstance(url, str) and url.strip().startswith("http://") else url for url in saved[key]]
+    return EvidenceMode.model_validate(saved).model_dump()
 
 
 async def post(url, body, headers, network, timeout=30, limit=256 * 1024):
@@ -96,9 +106,10 @@ async def anchor_latest(store, network, settings):
             reply = await post(url, query, {"Content-Type": "application/timestamp-query",
                                             "Accept": "application/timestamp-reply"}, network)
             summary = timestamp_reply_summary(reply, digest, query)
+            signed = timestamp_signature(reply, trusted_roots())
             private_write(folder / (name + "." + service_name(url) + ".tsq"), query)
             private_write(target, reply)
-            results.append({"service": url, "kind": "rfc3161", "ok": True, "time": summary["time"]})
+            results.append({"service": url, "kind": "rfc3161", "ok": True, "time": summary["time"], **signed})
         except Exception as exc:
             results.append({"service": url, "kind": "rfc3161", "ok": False, "error": problem(exc)})
     for url in settings["ots_calendars"]:

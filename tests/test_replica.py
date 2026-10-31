@@ -123,10 +123,10 @@ def test_everything_is_copied_encrypted_and_restores_verified(journal, tmp_path)
         export.write_bytes(b"PK signed chat export")
         replica.outbox(store, export)
 
-        first = await replica.sync(store, vault, NetworkConfig())
-        again = await replica.sync(store, vault, NetworkConfig())
+        first = await replica.sync(store, vault, NetworkConfig(kind="direct"))
+        again = await replica.sync(store, vault, NetworkConfig(kind="direct"))
         store.append("message.new", {"text": "later"}, -100123, 2, 44)
-        third = await replica.sync(store, vault, NetworkConfig())
+        third = await replica.sync(store, vault, NetworkConfig(kind="direct"))
         restored = await replica.restore(replica.key_file(store, vault), AK, SK, tmp_path / "restored")
         server.close()
         return first, again, third, restored, objects, puts, media, digest
@@ -156,7 +156,7 @@ def test_tampered_or_swapped_objects_fail_restore(journal, tmp_path):
         for i in range(3):
             store.append("message.new", {"text": str(i)}, -100123, i, 44)
         retain_checkpoint(store, vault)
-        await replica.sync(store, vault, NetworkConfig())
+        await replica.sync(store, vault, NetworkConfig(kind="direct"))
         journal_key = next(k for k in objects if "/journal/" in k)
         objects[journal_key] = objects[journal_key][:-1] + bytes([objects[journal_key][-1] ^ 1])
         with pytest.raises(InvalidTag):
@@ -182,10 +182,10 @@ def test_missing_file_is_reported_without_stopping_the_rest_of_the_copy(journal)
         for i, (data, digest) in enumerate(zip(files, digests)):
             store.append("media.saved", {"media_sha256": digest, "size": len(data)}, -100123, i)
         retain_checkpoint(store, vault)
-        first = await replica.sync(store, vault, NetworkConfig())
+        first = await replica.sync(store, vault, NetworkConfig(kind="direct"))
         uploaded = sorted(name.split("/")[2] for name in objects)
         (store.root / "media" / digests[0]).write_bytes(files[0])  # put back from a backup
-        second = await replica.sync(store, vault, NetworkConfig())
+        second = await replica.sync(store, vault, NetworkConfig(kind="direct"))
         server.close()
         return first, uploaded, second
     first, uploaded, second = asyncio.run(run())
@@ -227,7 +227,7 @@ def test_storage_that_ignores_object_lock_is_reported(journal):
         server, endpoint, _, puts = await fake_s3(honour_lock=False)
         configure(store, vault, endpoint, retention_days=7, retention_mode="GOVERNANCE")
         store.append("message.new", {"text": "x"}, -100123, 1, 44)
-        status = await replica.sync(store, vault, NetworkConfig())
+        status = await replica.sync(store, vault, NetworkConfig(kind="direct"))
         server.close()
         return status, puts
     status, puts = asyncio.run(run())

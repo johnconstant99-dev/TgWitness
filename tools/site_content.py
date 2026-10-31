@@ -3,11 +3,12 @@
 GUIDES = {
     "start": ("Start in minutes", "Try TgWitness with sample data, then launch your own Telegram observation workspace on Windows, Linux or macOS.", "demo install setup windows linux macos python", "docs/QUICKSTART.md"),
     "accounts": ("Connect an account", "Connect Telegram by QR code, phone number or session import. Choose sources and check that new messages reach your journal.", "qr phone session tdata api id hash account sources", "docs/ACCOUNTS.md"),
-    "proxies": ("Choose a proxy", "Use a public MTProxy list or your own SOCKS5, HTTP or MTProxy route. Test the connection before signing in to Telegram.", "mtproto mtproxy socks5 http network connection public lists", "docs/CONNECTION-SECURITY.md"),
+    "proxies": ("Choose a proxy", "Maintain automatic MTProxy routes or use your own proxy. Choose IP modes, fallback rules and the route for external requests.", "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists", "docs/CONNECTION-SECURITY.md"),
     "exports": ("Export and verify", "Export captured Telegram history, verify signatures and compare a journal with a checkpoint retained by an independent witness.", "evidence signature hash integrity verify zip fingerprint checkpoint s3 backup restore recovery object lock", "docs/EVIDENCE.md"),
     "concepts": ("See how evidence works", "Follow a message from capture to checkpoint. Change a sample record, recalculate its SHA-256 chain and see what a retained checkpoint detects.", "visual animation diagram formula sha256 hash chain canonical signature tamper learn", "docs/HOW-IT-WORKS.md"),
     "cases": ("Investigate across all chats", "Run an end-to-end Telegram investigation across channels, groups, private chats and bots: whole-account capture, history, people, links, files, timelines and verified evidence.", "use cases scenarios investigation all chats whole account history dossier people links files timeline case package", "docs/INVESTIGATION.md"),
     "security": ("Keep it secure", "See where sessions, keys and evidence live, what leaves your machine, what the protections cover and how to harden an installation.", "security threat model secrets vault token encryption hardening privacy vulnerability report", "docs/SECURITY-MODEL.md"),
+    "access": ("Share a case", "Give reviewers and analysts access to selected accounts and chats, with separate permissions, session limits and revocable tokens.", "access permissions roles scope reviewer analyst token sessions IP expiry revoke", "docs/ACCESS.md"),
     "witness": ("Set up a witness bot", "Publish signed journal checkpoints to your Telegram channel with a separate witness, its own key and read-only collector access.", "bot botfather telegram channel continuity checkpoint independent witness", "docs/WITNESS.md"),
     "server": ("Keep it running", "Run TgWitness on a server with persistent storage, private panel access, backups and checks after a restart.", "docker compose deployment vps backup restore update restart operations", "docs/DEPLOYMENT.md"),
     "troubleshooting": ("Find what went wrong", "Check panel access, Telegram connection, missing messages, FloodWait and witness status using the right signals for each problem.", "help error token login disconnected floodwait gap pts qts recovery github", "docs/OPERATIONS.md"),
@@ -16,7 +17,7 @@ GUIDES = {
 GROUPS = (
     ("First steps", "Your first captured message", ("start", "accounts", "proxies", "exports")),
     ("Understand the evidence", "Learn by trying it", ("concepts", "cases", "security")),
-    ("Go further", "Add only what you need", ("witness", "server", "troubleshooting")),
+    ("Go further", "Add only what you need", ("access", "witness", "server", "troubleshooting")),
 )
 
 # The full reference, rendered from the repository's Markdown: slug -> (title, description, keywords, source).
@@ -25,7 +26,8 @@ REFERENCE = {
     "license": ("Licence and architectural incompatibility notice", "TgWitness is MIT-licensed for everyone, and why it is architecturally incompatible with the Taylor Wessing workflow.", "license licence MIT Taylor Wessing position statement", "docs/TAYLOR-WESSING-EXCLUSION.md"),
     "quickstart": ("Quick start", "Every way to install and launch TgWitness: Windows package, Python, Docker and the synthetic demo, with first checks.", "install launch windows linux macos docker demo setup", "docs/QUICKSTART.md"),
     "accounts": ("Accounts and session formats", "Sign in by phone, QR code or auth key, import Telethon, Pyrogram or Telegram Desktop sessions, and run several accounts.", "login phone qr session tdata pyrogram telethon import api pair", "docs/ACCOUNTS.md"),
-    "connection": ("Connection, proxies and data protection", "API pairs, sign-in methods, SOCKS5, HTTP and MTProxy routes, public proxy lists and what each route protects.", "proxy mtproxy socks5 http route api id hash network", "docs/CONNECTION-SECURITY.md"),
+    "access": ("Access and permissions", "Issue scoped access to accounts and chats, choose permissions, limit sessions and IP addresses, and withdraw access.", "access permissions scope token session IP expiry revoke admin console", "docs/ACCESS.md"),
+    "connection": ("Connection, proxies and data protection", "Authentication, automatic proxy pools, IP modes, fallback policy, external requests and secret storage.", "proxy mtproxy pool socks5 http route IP mode fallback api id hash network", "docs/CONNECTION-SECURITY.md"),
     "deployment": ("Deployment", "Run TgWitness as a service on Windows, Linux, macOS or Docker, behind HTTPS, with backups and updates.", "server docker compose systemd launchd https caddy backup update", "docs/DEPLOYMENT.md"),
     "collection": ("How collection works", "Observation scope, live updates, rechecks, attachments, own actions and what a gap means, record by record.", "scope folder account recheck attachments gaps updates floodwait", "docs/COLLECTION.md"),
     "operations": ("Workflows and operations", "Daily operation of the panel: modes, monitoring categories, parameters, notifications, exports, backup and capacity.", "panel operations parameters notifications backup restore capacity", "docs/OPERATIONS.md"),
@@ -42,7 +44,7 @@ REFERENCE = {
 }
 
 REFERENCE_GROUPS = (
-    ("Set up", ("quickstart", "accounts", "connection", "deployment")),
+    ("Set up", ("quickstart", "accounts", "access", "connection", "deployment")),
     ("Collect", ("collection", "operations", "investigation", "features")),
     ("Evidence", ("how-it-works", "evidence", "witness", "timestamp")),
     ("Security & project", ("security", "architecture", "verification", "license", "notice", "changelog")),
@@ -65,6 +67,6 @@ LABELS = {
     "wiki_intro": "Every document of the project, rendered here with its diagrams. The guides are the short path; these pages hold every detail.",
 }
 
-NEXT = {"start": "accounts", "accounts": "exports", "proxies": "accounts", "exports": "concepts",
+NEXT = {"start": "accounts", "accounts": "exports", "access": "security", "proxies": "accounts", "exports": "concepts",
         "concepts": "cases", "cases": "security", "security": "start", "witness": "server",
         "server": "troubleshooting", "troubleshooting": "start"}
