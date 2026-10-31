@@ -291,12 +291,13 @@ class Profiles:
         for profile in self.entries.values():
             app = profile["app"]
             status = app.state.collector.status() if app else None
+            sources = app.state.store.target_counts() if app else None
             result.append({
                 "id": profile["id"], "label": profile["label"], "group": self.group_of(profile["id"]),
                 "collector": status, "health": health.collector_of(app.state, status) if app else None,
                 "stats": app.state.store.stats() if app else None,
-                "sources_enabled": len(app.state.store.targets(True)) if app else None,
-                "sources_total": len(app.state.store.targets()) if app else None,
+                "sources_enabled": sources["enabled"] if sources else None,
+                "sources_total": sources["total"] if sources else None,
                 "error_type": profile.get("error_type"),
             })
         return result

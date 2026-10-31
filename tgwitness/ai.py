@@ -61,6 +61,13 @@ def settings(state):
     return defaults | state.store.get_setting("ai", {})
 
 
+def enabled(state, config=None):
+    """Panel capability only: no provider probe and no secret access."""
+    config = settings(state) if config is None else config
+    return bool(config.get("enabled") and str(config.get("model") or "").strip()
+                and not state.store.get_setting("demo", False))
+
+
 def fingerprint(config):
     return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
 
@@ -107,6 +114,11 @@ class Provider:
         try:
             async with asyncio.timeout(config["timeout_seconds"]):
                 async with self.slots:
+                    current = settings(state)
+                    if not enabled(state, current):
+                        raise ValueError("AI is disabled for this workspace.")
+                    if fingerprint(current) != fingerprint(config):
+                        raise ValueError("AI settings changed. Review the data preview again.")
                     day = datetime.now(timezone.utc).date().isoformat()
                     usage = state.store.get_setting("ai_usage", {})
                     if usage.get("day") != day:

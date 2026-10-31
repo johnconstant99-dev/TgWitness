@@ -65,7 +65,7 @@ def test_partial_credentials_are_rejected_and_missing_ones_use_the_builtin_pool(
         candidate = app.state.collector.login_client
         assert candidate.account_id in api_pool.POOL_IDS
         device = {key: candidate.options[key] for key in api_pool.DESKTOP_DEVICE if key in candidate.options}
-        assert device == (api_pool.DESKTOP_DEVICE if candidate.account_id == api_pool.DESKTOP_ID else {})
+        assert device == api_pool.device_for(candidate.account_id)
         assert not app.state.vault.read("credentials")
         assert client.post("/api/auth/code", json={"code": "22222"}).json()["step"] == "password"
         assert client.post("/api/auth/password", json={"password": "synthetic"}).json()["step"] == "authorized"
@@ -142,3 +142,20 @@ def test_every_pool_pair_is_well_formed():
     assert len(api_pool.POOL) == len(api_pool.POOL_IDS) == 50
     assert all(0 < api_id <= 2147483647 and len(api_hash) == 32 and int(api_hash, 16) >= 0
                for api_id, api_hash in api_pool.POOL)
+
+
+def test_builtin_client_description_is_stable_and_not_shared(journal):
+    store, vault = journal
+    vault.save("network", {"kind": "direct"})
+    collector = Collector(store, vault, QRClient)
+    for api_id, api_hash in api_pool.POOL:
+        client = collector.make_client(api_id, api_hash)
+        restored = collector.make_client(api_id, api_hash, saved_session())
+        for key, value in api_pool.device_for(api_id).items():
+            assert client.options[key] == restored.options[key] == value
+        if api_id != api_pool.DESKTOP_ID:
+            assert client.options["device_model"] == "TgWitness"
+    copied = api_pool.device_for(api_pool.DESKTOP_ID)
+    copied["device_model"] = "changed"
+    assert api_pool.device_for(api_pool.DESKTOP_ID)["device_model"] == "Desktop"
+    assert api_pool.device_for(123) == {}

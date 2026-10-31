@@ -124,10 +124,23 @@ a direct route.
 a deletion opens prior content if available. Unknown attribution remains explicit.
 Counts are available under **Overview**; acquisition details stay in the local guide.
 
+Open an edited message to compare its versions with **Inline diff** or **Side by side**;
+**Raw** shows the saved fields. Changes to hidden links and bot buttons appear
+separately. Open an attachment preview to inspect saved images, audio or video;
+the download button keeps the preserved original available.
+
+**Live** updates the journal and chats as records arrive. Pause it while reviewing,
+or use the new-events button when ready; collection keeps running. **Ctrl/Cmd+K**
+finds panel actions and searches the journal.
+
 **Sources** contains the observation scope (chosen chats, a Telegram folder or the whole
 account), accessible chats of every type, selected sources with priority stars, attachment
 and recheck settings and history snapshots. Private sources are selected by dialog/ID
 without a public link. Access status describes the most recent check, not permanent permissions.
+
+Filter sources, select their checkboxes, then enable, pause or mark them as priority
+together. In the available-chat list, **Add selected** uses your selection;
+**Add all matching** uses the current search and type filter.
 
 **Chats → People** lists everyone with saved messages; with people profiles switched on
 for the chat, a click opens that person's profile with links to the journal records.

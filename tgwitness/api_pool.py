@@ -3,6 +3,8 @@ import random
 
 from telethon.errors import ApiIdInvalidError, ApiIdPublishedFloodError, UpdateAppToLoginError
 
+from . import __version__
+
 
 POOL = (
     (2040, "b18441a1ff607e10a989891a5462e627"), (800812, "db55ad67a98df35667ca788b97f771f5"),
@@ -36,11 +38,20 @@ DESKTOP_ID = 2040
 
 DESKTOP_DEVICE = {"device_model": "Desktop", "system_version": "Windows 10", "app_version": "5.6.3 x64",
                   "lang_code": "en", "system_lang_code": "en-US"}
+APP_DEVICE = {"device_model": "TgWitness", "system_version": "Python", "app_version": __version__,
+              "lang_code": "en", "system_lang_code": "en-US"}
 
 PAIR_ERRORS = (ApiIdInvalidError, ApiIdPublishedFloodError, UpdateAppToLoginError)
 
 ATTEMPTS = 8
 rejected = set()
+
+
+def device_for(api_id):
+    """Stable client description for built-in pairs; custom pairs keep the client's defaults."""
+    if api_id == DESKTOP_ID:
+        return dict(DESKTOP_DEVICE)
+    return dict(APP_DEVICE) if api_id in POOL_IDS else {}
 
 
 def login_order(first=None):

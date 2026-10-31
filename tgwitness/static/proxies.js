@@ -6,8 +6,20 @@
   const draft = new Map();
   const fields = ["pool-github-search", "pool-github-query", "pool-github-max", "pool-countries"];
   const filter = {q: "", country: "", source: "", status: ""};
+  const automatic = () => $("network-kind").value === "mtproxy_auto";
   const active = () => !!state.token && !!state.status && state.view === "connection" &&
-    state.connectionSettings && !$("workspace").hidden && !$("workspace").inert;
+    state.connectionSettings && automatic() && $("proxy-pool").open && !$("workspace").hidden && !$("workspace").inert;
+  function sourceFields() {
+    $("pool-sources").querySelector(".pool-search-fields").hidden =
+      !view?.settings.github_token || !$("pool-github-search").checked;
+    $("pool-github-status").hidden = !$("pool-github-search").checked;
+  }
+  function sync() {
+    $("proxy-pool").hidden = !automatic();
+    if (!automatic()) { stop(); return; }
+    if (view) render();
+    if (active()) load();
+  }
   function stop() { clearTimeout(timer); timer = null; request++; }
   function clear() {
     stop(); generation++; view = null; pending = 0; mutations = Promise.resolve(); sourceKey = ""; draft.clear();
@@ -15,6 +27,7 @@
     $("pool-save-state").textContent = "";
     $("pool-stats").replaceChildren(); $("pool-rows").replaceChildren(); $("pool-count").textContent = "";
     for (const id of fields) if ($(id).type !== "checkbox") $(id).value = "";
+    sourceFields();
   }
   function poll() {
     clearTimeout(timer);
@@ -58,6 +71,7 @@
 
   async function load() {
     clearTimeout(timer);
+    $("proxy-pool").hidden = !automatic();
     if (!active() || pending) return;
     if (state.status.demo) { demo(); return; }
     const profile = state.profile, revision = state.workspaceRevision, serial = ++request;
@@ -78,6 +92,7 @@
     $("pool-rows").replaceChildren();
     $("pool-count").textContent = tr("Available in your own workspace");
     for (const id of ["pool-check", "pool-update", "pool-save", "pool-token-save", "pool-token-remove"]) $(id).disabled = true;
+    sourceFields();
   }
 
   function tile(label, value, tone) {
@@ -106,6 +121,9 @@
   }
 
   function options(select, items, all) {
+    const expected = [["", all], ...items];
+    if (select.options.length === expected.length && expected.every(([value, label], i) =>
+      select.options[i].value === value && select.options[i].text === label)) return;
     const previous = select.value;
     select.replaceChildren(new Option(all, ""));
     for (const [value, label] of items) select.append(new Option(label, value));
@@ -213,6 +231,7 @@
       g.error ? tr("Last search failed: {error}", {error: g.error}) :
       g.last_run ? tr("Last search {date}: {files} files, {n} compatible servers", {date: formatTime(g.last_run), files: g.files, n: g.proxies}) :
       tr("The search runs with the next list update.");
+    sourceFields();
   }
 
   function render() {
@@ -240,6 +259,7 @@
   for (const id of fields) $(id).addEventListener("input", () => {
     const field = $(id); draft.set(id, field.type === "checkbox" ? field.checked : field.value);
     $("pool-save-state").textContent = "";
+    if (id === "pool-github-search") sourceFields();
   });
 
   $("pool-search").addEventListener("input", () => { filter.q = $("pool-search").value; limit = 150; if (view) renderTable(); });
@@ -339,5 +359,6 @@
     $("pool-save-state").textContent = draft.size ? "" : tr("Saved. Applies from the next list update.");
   }); });
   window.addEventListener("tgwitness:lock", clear);
-  window.TgWitnessProxies = {load, stop, clear};
+  $("proxy-pool").addEventListener("toggle", () => { if ($("proxy-pool").open) load(); else stop(); });
+  window.TgWitnessProxies = {load, stop, clear, sync};
 })();

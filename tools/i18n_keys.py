@@ -20,10 +20,18 @@ PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "ses
                  "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py", "proxy_catalog.py",
                  "proxy_sources.py")
 
+# Labels passed through small renderer tables (tr(label)), rather than literal tr() calls.
+DYNAMIC_SCRIPT_KEYS = (
+    "Inline diff", "Side by side", "Raw", "Previously observed", "Newly observed version",
+    "All", "Priority", "Paused", "Unconfirmed access", "Enable selected", "Pause selected",
+    "Mark priority", "Add selected", "Add all matching", "SHA-256", "Message ID", "Sender ID",
+    "Link to this record",
+)
+
 
 def calls(source):
     """Yield the source text of every tr(...)/trn(...) call, including nested calls."""
-    for match in re.finditer(r"(?<![\w.$])trn?\(", source):
+    for match in re.finditer(r"(?<![\w.$])(?:[A-Za-z_$][\w$]*\.)?trn?\(", source):
         depth, i, quote = 1, match.end(), None
         while depth and i < len(source):
             ch = source[i]
@@ -56,8 +64,8 @@ def script_keys(source):
 
 
 def all_script_keys():
-    keys = []
-    for name in ("app.js", "i18n.js", "guide.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js", "fleet.js"):
+    keys = list(DYNAMIC_SCRIPT_KEYS)
+    for name in ("app.js", "i18n.js", "guide.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js", "fleet.js", "review.js", "live.js"):
         keys += script_keys((STATIC / name).read_text(encoding="utf-8"))
     return list(dict.fromkeys(keys))
 

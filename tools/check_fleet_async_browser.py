@@ -60,7 +60,7 @@ def main(fleet_source=None):
           window.restoreGroupFetch=()=>window.fetch=real;
           window.oldGroups=TgWitnessFleet.load();
         }""")
-        page.wait_for_function("window.releaseOldGroups !== null")
+        page.wait_for_function("() => window.releaseOldGroups !== null")
         page.evaluate("async id=>{await json('profile-groups/'+id,{label:'Fresh case name',template:'default'},{root:true,method:'PATCH'});await TgWitnessFleet.load();}", group["id"])
         page.evaluate("async()=>{window.releaseOldGroups();await window.oldGroups;window.restoreGroupFetch();}")
         expect(page.locator(".fleet-group-head h2")).to_contain_text("Fresh case name")
@@ -124,9 +124,30 @@ def main(fleet_source=None):
         page.locator("#panel-token").fill(server.app.state.vault.token)
         page.locator("#unlock-form button").click()
         expect(page.locator("#workspace")).to_be_visible()
+        expect(page.locator("#unlock-form button")).to_be_enabled()
         page.locator('[data-view="accounts"]').click()
         expect(template).to_have_value("default")
         expect(panel).not_to_have_attribute("open", "")
+        page.evaluate("""() => {
+          const real=window.fetch;let held=false;
+          window.releaseGroupCreate=null;
+          window.fetch=async(...args)=>{
+            const result=await real(...args);
+            if(!held&&String(args[0]).endsWith('/api/profile-groups')&&args[1]?.method==='POST'){
+              held=true;await new Promise(resolve=>window.releaseGroupCreate=resolve);
+            }
+            return result;
+          };
+          window.restoreGroupFetch=()=>window.fetch=real;
+        }""")
+        page.once("dialog", lambda dialog: dialog.accept("Queued case"))
+        page.locator("#fleet-group-new").click()
+        page.wait_for_function("() => window.releaseGroupCreate !== null")
+        page.evaluate("loadProfiles()")
+        expect(page.locator("#fleet-group-new")).to_be_disabled()
+        page.evaluate("()=>{window.releaseGroupCreate();window.restoreGroupFetch();}")
+        expect(page.locator("#fleet-group-new")).to_be_enabled()
+        expect(page.locator(".fleet-group-head h2", has_text="Queued case")).to_have_count(1)
         assert not errors, errors
         browser.close()
     print("Fleet async passed: drafts, focus, refresh errors, latest groups, overlapping saves/moves and lock cleanup.")

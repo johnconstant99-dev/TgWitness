@@ -1,26 +1,66 @@
 (() => {
   "use strict";
   let config=null, plan=null, report=null, workspace=null, generation=0;
+  let loaded=false,loading=null,providerPending=null,capabilityKey="";
   const call=(path,body,options={})=>json("analysis/"+path,body,{root:true,...options});
   const scoped=path=>path+(path.includes("?")?"&":"?")+"workspace_id="+encodeURIComponent(workspace);
-  function clear(){generation++;plan=null;report=null;workspace=null;config=null;window.TgWitnessMedia?.clear();$("ai-key").value="";$("ask-consent").checked=false;["ask-preview","ask-answer","ask-report"].forEach(id=>show(id,false));["ask-sources","ask-claims","ask-report-content","ask-reports","ask-transmission"].forEach(id=>$(id).replaceChildren());}
+  function resetResults(){generation++;loaded=false;loading=null;providerPending=null;plan=null;report=null;window.TgWitnessMedia?.clear();$("ask-consent").checked=false;["ask-preview","ask-answer","ask-report"].forEach(id=>show(id,false));["ask-sources","ask-claims","ask-report-content","ask-reports","ask-transmission"].forEach(id=>$(id).replaceChildren());}
+  function clear(){
+    resetResults();workspace=null;config=null;providerPending=null;capabilityKey="";
+    $("ai-settings").open=false;$("ai-settings-form").reset();$("ai-settings-form").inert=true;
+    $("ai-settings-form").querySelector('button[type="submit"]').disabled=true;$("ai-test").disabled=true;
+    for(const id of ["ai-status","ai-key-state","ai-test-result","ask-provider-status","ask-workspace","ask-usage"])$(id).textContent="";
+    $("ask-form").reset();$("ask-report-form").reset();$("ask-chats").replaceChildren();$("ask-coverage").replaceChildren();
+  }
+  function capabilities(status=state.status){return {enabled:!!status?.analysis?.enabled&&!status?.demo,media:!!status?.analysis?.media_available&&!status?.demo};}
+  function current(turn){return turn===generation&&workspace===state.profile&&!!state.me;}
+  function syncStatus(status=state.status){
+    if(workspace!==state.profile){clear();workspace=state.profile;}
+    const flags=capabilities(status),key=workspace+":"+flags.enabled+":"+flags.media;
+    if(key!==capabilityKey){resetResults();capabilityKey=key;}
+    show("ai-settings",!!state.me?.admin&&!status?.demo);show("ask-form",flags.enabled);
+    show("analysis-description",flags.enabled);$("analysis-help").closest("p").hidden=!flags.enabled;
+    if($("ask-provider-status"))show("ask-provider-status",flags.enabled);
+    $("ask-reports").closest("section").hidden=!flags.enabled;
+    show("media-analysis-section",flags.media);
+    return flags;
+  }
   window.addEventListener("tgwitness:lock",clear);
   function providerMode(){if(!config)return;$("ai-endpoint").readOnly=$("ai-provider").value==="ollama";if($("ai-endpoint").readOnly)$("ai-endpoint").value=config.local_endpoint;}
   function settings(data){
     config=data;$("ai-enabled").checked=data.enabled;$("ai-provider").value=data.provider;$("ai-model").value=data.model;$("ai-endpoint").value=data.endpoint;
+    $("ai-settings-form").inert=false;$("ai-settings-form").querySelector('button[type="submit"]').disabled=false;
     for(const [id,key] of Object.entries({context:"context_chars",output:"output_tokens",timeout:"timeout_seconds",budget:"daily_requests","input-price":"input_per_million","output-price":"output_per_million",currency:"currency"}))$("ai-"+id).value=data[key]??"";
     $("ai-key").value="";$("ai-clear-key").checked=false;$("ai-key-state").textContent=data.has_key?tr("A key is stored. Leave blank to keep it."):tr("No API key stored.");
+    $("ai-test").disabled=!data.enabled;
     $("ai-status").textContent=(data.enabled?tr("AI enabled"):tr("AI disabled"))+" · "+data.provider+" · "+data.endpoint+" · "+tr("Workspace route")+": "+data.route;
+    if($("ask-provider-status"))$("ask-provider-status").textContent=$("ai-status").textContent;
     providerMode();
   }
   $("ai-provider").addEventListener("change",providerMode);
   $("ai-settings-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
+    if(!config||workspace!==state.profile)return;
     const body={enabled:$("ai-enabled").checked,provider:$("ai-provider").value,endpoint:$("ai-endpoint").value,model:$("ai-model").value,clear_key:$("ai-clear-key").checked};
     if($("ai-key").value)body.api_key=$("ai-key").value;
     for(const [id,key] of Object.entries({context:"context_chars",output:"output_tokens",timeout:"timeout_seconds",budget:"daily_requests","input-price":"input_per_million","output-price":"output_per_million"}))body[key]=$("ai-"+id).value===""?null:Number($("ai-"+id).value);
-    body.currency=$("ai-currency").value;settings(await call(scoped("provider"),body));plan=null;show("ask-preview",false);toast(tr("Provider settings saved."));
+    body.currency=$("ai-currency").value;const turn=generation,data=await call(scoped("provider"),body);if(!current(turn))return;settings(data);resetResults();await refreshStatus();toast(tr("Provider settings saved."));
   });});
-  $("ai-test").addEventListener("click",event=>busy(event.currentTarget,async()=>{await call(scoped("provider/test"),{});$("ai-test-result").textContent=tr("Connection checked with synthetic text. No messages were read.");}));
+  async function loadProvider(force=false){
+    if(config&&!force)return config;
+    if(providerPending)return providerPending;
+    const turn=generation;
+    const pending=(async()=>{const data=await call(scoped("provider"));if(!current(turn))return null;settings(data);return data;})();
+    providerPending=pending;
+    try{return await pending;}finally{if(providerPending===pending)providerPending=null;}
+  }
+  async function loadSettings(){
+    syncStatus();if(!state.me?.admin||state.status?.demo)return;
+    const turn=generation;
+    $("ai-status").textContent=tr("Loading…");
+    try{await loadProvider(true);}catch(error){if(current(turn))$("ai-status").textContent=error.message;}
+  }
+  $("ai-settings").addEventListener("toggle",()=>{if($("ai-settings").open)loadSettings();});
+  $("ai-test").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(!config?.enabled)return;const turn=generation;await call(scoped("provider/test"),{});if(current(turn))$("ai-test-result").textContent=tr("Connection checked with synthetic text. No messages were read.");}));
   function citation(ref,label){const button=node("button","text-link",label||"#"+ref.event_seq);button.type="button";button.title=tr("Open journal record #{seq}",{seq:ref.event_seq});button.addEventListener("click",()=>busy(button,()=>openRecord(ref.event_seq)));return button;}
   function coverage(data,target){
     target.replaceChildren(node("p","hint",tr("Only saved observations are available. Gaps may exist; absence from the archive does not prove absence in Telegram.")));
@@ -34,6 +74,8 @@
     $("ask-transmission").textContent=JSON.stringify(messages,null,2);$("ask-consent").checked=false;
   }
   function sources(data){
+    const provider=data.provider;
+    if(provider&&$("ask-provider-status"))$("ask-provider-status").textContent=(provider.enabled?tr("AI enabled"):tr("AI disabled"))+" · "+provider.provider+" · "+provider.model+" · "+provider.endpoint;
     const box=$("ask-sources");box.replaceChildren();
     if(data.not_found)box.append(viewState("empty",tr("Not found in the available archive"),tr("Try a different phrase, chat or observation period.")));
     for(const source of data.sources){
@@ -45,9 +87,10 @@
       check.addEventListener("change",transmission);box.append(row);
     }
     if(data.partial)box.append(node("p","notice",tr("The result is bounded. Narrow the search to inspect additional sources.")));
-    coverage(data.coverage,$("ask-coverage"));show("ask-preview",true);$("ask-generate").disabled=!data.sources.length||!config?.enabled;transmission();
+    coverage(data.coverage,$("ask-coverage"));show("ask-preview",true);$("ask-generate").disabled=!data.sources.length||!(provider?.enabled??config?.enabled);transmission();
   }
   $("ask-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
+    if(!capabilities().enabled)return;
     const turn=++generation;show("ask-answer",false);plan=null;$("ask-sources").replaceChildren(viewState("loading",tr("Loading…")));show("ask-preview",true);
     const chats=[...$("ask-chats").querySelectorAll("input:checked")].map(el=>Number(el.value));
     const body={workspace,chats,since:new Date($("ask-since").value).toISOString(),until:new Date($("ask-until").value).toISOString(),question:$("ask-question").value,query:$("ask-query").value,message_id:$("ask-message").value?Number($("ask-message").value):null};
@@ -60,13 +103,13 @@
     for(const item of items){const row=node("article","analysis-source");row.append(node("small","hint",tr("Model inference")),node("p","",item.text));for(const ref of item.citations){row.append(node("blockquote","",ref.quote),citation(ref.source,ref.id+" · #"+ref.source.event_seq));}box.append(row);}
   }
   $("ask-generate").addEventListener("click",event=>busy(event.currentTarget,async()=>{
-    if(!plan)return;if(!$("ask-consent").checked)throw new Error(tr("Review and approve the selected data first."));
+    if(!plan||!capabilities().enabled)return;if(!$("ask-consent").checked)throw new Error(tr("Review and approve the selected data first."));
     const turn=generation,result=await call("generate",{plan_id:plan.plan_id,source_ids:[...$("ask-sources").querySelectorAll("input:checked")].map(el=>el.value),consent:true});
     if(turn!==generation)return;claims(result.claims,$("ask-claims"));show("ask-answer",true);$("ask-generate").dataset.complete="true";
     const meta=result.generation,usage=[];if(meta.tokens.input_tokens!==undefined)usage.push(tr("Input tokens: {n}",{n:meta.tokens.input_tokens}));if(meta.tokens.output_tokens!==undefined)usage.push(tr("Output tokens: {n}",{n:meta.tokens.output_tokens}));if(meta.cost)usage.push(meta.cost.amount.toFixed(4)+" "+meta.cost.currency);
     $("ask-usage").textContent=meta.provider+" · "+meta.model+" · "+usage.join(" · ");
   }));
-  async function reports(){const data=await call(scoped("reports"));const box=$("ask-reports");box.replaceChildren();for(const row of data.reports){const button=node("button","text-link",row.title+" · "+fmtFull(row.created_at));button.type="button";button.addEventListener("click",()=>busy(button,async()=>renderReport(await call(scoped("reports/"+row.id)))));box.append(button);}if(!data.reports.length)box.append(viewState("empty",tr("No analytical reports"),tr("Save a reviewed answer to create a separate report.")));}
+  async function reports(){if(!capabilities().enabled)return;const turn=generation,data=await call(scoped("reports"));if(!current(turn))return;const box=$("ask-reports");box.replaceChildren();for(const row of data.reports){const button=node("button","text-link",row.title+" · "+fmtFull(row.created_at));button.type="button";button.addEventListener("click",()=>busy(button,async()=>{const turn=generation,data=await call(scoped("reports/"+row.id));if(current(turn))renderReport(data);}));box.append(button);}if(!data.reports.length)box.append(viewState("empty",tr("No analytical reports"),tr("Save a reviewed answer to create a separate report.")));}
   function renderReport(data){
     report=data;show("ask-report",true);const box=$("ask-report-content");box.replaceChildren();
     const summary=node("div");claims(data.model_summary,summary);box.append(node("h3","",tr("Model inference")),summary);
@@ -77,16 +120,27 @@
     for(const revision of data.analyst_revisions){box.append(node("h3","",tr("Analyst note")+" · "+fmtFull(revision.at)),node("p","",revision.revised_summary),node("p","",revision.analyst_note));}
     const latest=data.analyst_revisions.at(-1);$("report-title").value=data.title;$("report-summary").value=latest?.revised_summary||"";$("report-note").value=latest?.analyst_note||"";$("report-download").hidden=!may("export");
   }
-  $("ask-save-report").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(plan){renderReport(await call("reports",{plan_id:plan.plan_id}));await reports();}}));
+  $("ask-save-report").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(plan&&capabilities().enabled){const turn=generation,data=await call("reports",{plan_id:plan.plan_id});if(current(turn)){renderReport(data);await reports();}}}));
   $("ask-refresh-reports").addEventListener("click",event=>busy(event.currentTarget,reports));
-  $("ask-report-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{if(report){renderReport(await call(scoped("reports/"+report.id),{title:$("report-title").value,revised_summary:$("report-summary").value,analyst_note:$("report-note").value},{method:"PATCH"}));await reports();}});});
+  $("ask-report-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{if(report&&capabilities().enabled){const turn=generation,data=await call(scoped("reports/"+report.id),{title:$("report-title").value,revised_summary:$("report-summary").value,analyst_note:$("report-note").value},{method:"PATCH"});if(current(turn)){renderReport(data);await reports();}}});});
   $("report-download").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(!report)return;const response=await api("analysis/"+scoped("reports/"+report.id+"/download"),undefined,{root:true});const url=URL.createObjectURL(await response.blob()),link=node("a");link.href=url;link.download="tgwitness-analysis.json";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}));
-  window.TgWitnessAnalysis={clear,load:async()=>{
-    if(workspace===state.profile&&config)return;clear();workspace=state.profile;show("ai-settings",!!state.me?.admin);$("ask-workspace").textContent=tr("Workspace")+": "+(state.profiles.find(p=>p.id===workspace)?.label||workspace);
-    if(state.status?.demo){$("ai-status").textContent=tr("Configure AI in your own installation.");$("ask-form").querySelector('button[type="submit"]').disabled=true;return;}
-    $("ask-form").querySelector('button[type="submit"]').disabled=false;
-    const date=value=>{const d=new Date(value);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);};$("ask-since").value=date(Date.now()-86400000);$("ask-until").value=date(Date.now()+60000);
-    try{const [provider,data]=await Promise.all([call(scoped("provider")),json("chats")]);settings(provider);const box=$("ask-chats");box.replaceChildren();for(const chat of data.chats){const label=node("label","check-label"),input=node("input");input.type="checkbox";input.value=chat.chat_id;input.checked=chat.chat_id===state.chat;label.append(input,node("span","",chat.title||String(chat.chat_id)));box.append(label);}await reports();await window.TgWitnessMedia?.load();}
-    catch(error){config=null;workspace=null;$("ai-status").textContent=error.message;}
-  }};
+  async function load(){
+    const flags=syncStatus();if(!flags.enabled&&!flags.media||loaded)return;if(loading)return loading;
+    const turn=generation;
+    const pending=(async()=>{
+      if(flags.enabled){
+        $("ask-workspace").textContent=tr("Workspace")+": "+(state.profiles.find(p=>p.id===workspace)?.label||workspace);
+        $("ask-form").querySelector('button[type="submit"]').disabled=false;
+        const date=value=>{const d=new Date(value);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);};$("ask-since").value=date(Date.now()-86400000);$("ask-until").value=date(Date.now()+60000);
+        const [,data]=await Promise.all([loadProvider(),json("chats")]);if(!current(turn))return;
+        const box=$("ask-chats");box.replaceChildren();for(const chat of data.chats){const label=node("label","check-label"),input=node("input");input.type="checkbox";input.value=chat.chat_id;input.checked=chat.chat_id===state.chat;label.append(input,node("span","",chat.title||String(chat.chat_id)));box.append(label);}await reports();
+      }
+      if(current(turn)&&flags.media)await window.TgWitnessMedia?.load();
+      if(current(turn))loaded=true;
+    })();
+    loading=pending;
+    try{await pending;}catch(error){if(current(turn)){$("ai-status").textContent=error.message;loaded=false;}}
+    finally{if(loading===pending)loading=null;}
+  }
+  window.TgWitnessAnalysis={clear,syncStatus,loadSettings,load};
 })();

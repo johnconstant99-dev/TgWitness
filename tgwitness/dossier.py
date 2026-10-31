@@ -2,9 +2,9 @@
 
 Nothing here contacts Telegram or writes profile contents to the signed journal. Every fact
 lists the journal records (seq) it comes from, and the export carries the SHA-256 of each
-referenced record, so verify.py can check the facts against an evidence export. Avatar hashes
-come from the panel's local avatar cache and are labelled as such: that cache is not part of
-the journal. Profiles are switched on per chat by the operator, exported as a separate signed
+referenced record, so verify.py can check the facts against an evidence export. Saved avatar
+history cites its signed capture records. The older panel cache is still labelled separately;
+it is not journal evidence. Profiles are switched on per chat by the operator, exported as a separate signed
 file and deleted together with the chat (removing the chat from sources).
 """
 import hashlib
@@ -15,6 +15,7 @@ import secrets
 from datetime import datetime, timezone
 
 from . import tuning
+from .avatar_history import history_events, history_index
 from .security import private_write
 from .store import GONE_KINDS, TEXT_KINDS, canonical, utcnow
 from .verify import fingerprint
@@ -28,7 +29,9 @@ LIMITS = [
     "Names, usernames and flags are the profile Telegram showed when a message was saved; they are mutable.",
     "Deleted and edited counts cover saved messages only. Telegram does not say who deleted a message.",
     "Mentions are found by patterns in saved text and links; they are leads to check, not verified facts.",
-    "Avatar hashes come from the local avatar cache, downloaded when the panel showed the avatar; not journal records.",
+    "The legacy cached avatar field comes from the panel cache, not journal records.",
+    "Avatar history cites saved photos in this source; first/last times describe observations, not upload dates. "
+    "Similar photos are investigation leads, not proof that accounts belong to the same person.",
     "Reply links count replies to saved messages only.",
 ]
 
@@ -189,6 +192,54 @@ def distance(a, b):
     return bin(int(a, 16) ^ int(b, 16)).count("1")
 
 
+class PhotoNeighbors:
+    """Hamming-distance tree over journal photos; no all-pairs comparison for large chats."""
+    def __init__(self, histories):
+        self.root = None
+        for peer, photos in histories.items():
+            for photo in photos:
+                if not photo["phash"]:
+                    continue
+                bits = int(photo["phash"], 16)
+                new = {"bits": bits, "photos": [(peer, photo)], "children": {}}
+                if self.root is None:
+                    self.root = new
+                    continue
+                node = self.root
+                while True:
+                    gap = (bits ^ node["bits"]).bit_count()
+                    if not gap:
+                        node["photos"].append((peer, photo))
+                        break
+                    if gap not in node["children"]:
+                        node["children"][gap] = new
+                        break
+                    node = node["children"][gap]
+
+    def find(self, peer, photos, maximum):
+        matches, seen = [], set()
+        for photo in reversed(photos):
+            if not photo["phash"]:
+                continue
+            bits, queue = int(photo["phash"], 16), [self.root] if self.root else []
+            while queue:
+                node = queue.pop()
+                gap = (bits ^ node["bits"]).bit_count()
+                if gap <= maximum:
+                    for other, candidate in node["photos"]:
+                        key = (other, photo["sha256"], candidate["sha256"])
+                        if other == peer or key in seen:
+                            continue
+                        seen.add(key)
+                        matches.append({"id": other, "distance": gap, "sha256": photo["sha256"],
+                                        "other_sha256": candidate["sha256"], "records": photo["records"],
+                                        "other_records": candidate["records"], "in_this_chat": True})
+                        if len(matches) == 20:
+                            return sorted(matches, key=lambda item: item["distance"])
+                queue.extend(child for step, child in node["children"].items() if gap - maximum <= step <= gap + maximum)
+        return sorted(matches, key=lambda item: item["distance"])
+
+
 def enabled_chats(store):
     return sorted(int(k) for k in store.get_setting("dossiers", {}))
 
@@ -294,6 +345,15 @@ def build(store, chat_id, title=None):
         for category, value, extra in mentions(payload, find, patterns):
             person["mentions"][category].add(value, event, extra)
     avatars = avatar_index(store.root)
+    avatar_records = history_events(store, chat_id)
+    histories = history_index(store, chat_id, avatar_records)
+    avatar_changes = {}
+    for event in avatar_records:
+        payload = event["payload"]
+        avatar_changes.setdefault(payload.get("peer_id"), []).append({
+            "photo_id": payload.get("photo_id"), "sha256": payload.get("media_sha256"),
+            "at": event["observed_at"], "kind": event["kind"], "records": [event["seq"]]})
+    neighbors = PhotoNeighbors({peer: photos for peer, photos in histories.items() if peer in people})
     elsewhere = store.sender_chats(list(people))
     titles = {t["chat_id"]: t["title"] for t in store.targets()}
     result, referenced = [], set()
@@ -317,6 +377,14 @@ def build(store, chat_id, title=None):
         missing_ids = [m for m, events in missing.items() if events and not deleted[m]]
         total = len(ids)
         avatar = avatars.get(person["id"])
+        history = histories.get(person["id"], [])
+        photo_facts = {item["value"]: item for item in person["photo_ids"].out()}
+        for photo in history:
+            fact = photo_facts.get(photo["photo_id"])
+            if fact:
+                photo["first_at"] = min(photo["first_at"], fact["first_at"])
+                photo["last_at"] = max(photo["last_at"], fact["last_at"])
+                photo["records"] = sorted(list(dict.fromkeys(photo["records"] + fact["records"]))[:refs])
         similar = []
         if avatar and avatar.get("phash"):
             for other, entry in avatars.items():
@@ -330,6 +398,9 @@ def build(store, chat_id, title=None):
             "flags": person["flags"],
             "avatar": {"photo_ids": person["photo_ids"].out(),
                        "cached": {**avatar, "source": "local avatar cache (not a journal record)"} if avatar else None,
+                       "history": history,
+                       "changes": avatar_changes.get(person["id"], []),
+                       "history_similar": neighbors.find(person["id"], history, settings["similar_bits"]),
                        "similar": sorted(similar, key=lambda s: s["distance"])[:20]},
             "activity": {
                 "first_message": person["first"], "last_message": person["last"], "messages": total,
@@ -347,10 +418,12 @@ def build(store, chat_id, title=None):
                                       key=lambda r: -r["messages"])},
             "mentions": mentioned,
         }
-        for facts in (profile["names"], profile["usernames"], profile["avatar"]["photo_ids"],
+        for facts in (profile["names"], profile["usernames"], profile["avatar"]["photo_ids"], history, profile["avatar"]["changes"],
                       *mentioned.values(), *(r["records"] for r in profile["relations"]["replies_to"])):
             for item in facts:
                 referenced.update(item["records"] if isinstance(item, dict) else [item])
+        for match in profile["avatar"]["history_similar"]:
+            referenced.update(match["records"] + match["other_records"])
         referenced.update(profile["activity"]["deleted_records"])
         referenced.update(f["since_record"] for f in profile["flags"].values())
         for stamp in (person["first"], person["last"]):

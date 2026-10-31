@@ -760,7 +760,7 @@ def test_debug_deployment_is_never_high_assurance_and_lock_closes_the_firewall(s
     assert world.inbound() == [] and json.loads((out / "deployment.json").read_text())["locks"]
     after = run_verify(world, host, out)
     assert checks(after)["mode"] == "review" and checks(after)["firewall"] in ("pass", "review")
-    assert after["result"] == "review"
+    assert after["result"] == "review", [item for item in after["checks"] if item["status"] == "fail"]
 
 
 def test_deploy_stops_before_creating_anything_when_the_hostname_is_taken(tmp_path, monkeypatch):

@@ -41,17 +41,24 @@ def main(proxy_script=None):
     output.mkdir(parents=True, exist_ok=True)
     errors, loads, saves, uploads = [], [], [], []
     with tempfile.TemporaryDirectory(prefix="proxy-async-") as scratch, RunningApp(Path(scratch)) as server:
+        server.app.state.store.set_setting("route_policy", {"exposure": "tunnel", "outside_enabled": False})
         with sync_playwright() as p:
             browser = launch_browser(p)
             page = browser.new_page(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce")
             if proxy_script is not None:
                 page.route("**/proxies.js*", lambda route: route.fulfill(body=proxy_script, content_type="application/javascript"))
             page.on("pageerror", lambda error: errors.append(str(error)))
+            catalogs = []
+            page.on("request", lambda request: catalogs.append(request.url)
+                    if request.url.endswith("/api/network/catalog") else None)
             unlock(page, server)
             expect(page.locator("#unlock-form button")).to_be_enabled()
-            page.wait_for_function("state.status !== null")
+            expect(page.locator("#login-error")).to_have_text("")
+            page.wait_for_function("()=>state.status !== null")
+            assert not catalogs, "Account setup fetched a hidden fixed-MTProxy catalog"
             snapshot = page.evaluate("json('network/proxies')")
             snapshot["settings"]["github_token"] = True
+            snapshot["settings"]["github"]["enabled"] = True
             snapshot["summary"].update(checking=False, median_ms=40)
             snapshot["rows"] = []
 
@@ -82,6 +89,9 @@ def main(proxy_script=None):
             page.route("**/api/network/github-token", lambda route: route.fulfill(json=copy.deepcopy(snapshot)))
             page.locator('[data-view="connection"]').click()
             page.locator("#entry-settings").click()
+            expect(page.locator("#proxy-pool")).not_to_have_attribute("open", "")
+            assert not loads, "Collapsed automatic catalog loaded before it was requested"
+            page.locator("#proxy-pool > summary").click()
             expect(page.locator("#pool-stats")).to_contain_text("40")
             page.locator("#pool-sources > summary").click()
             query = page.locator("#pool-github-query")
@@ -92,6 +102,67 @@ def main(proxy_script=None):
             expect(query).to_have_value("a query still being edited")
             expect(page.locator("#pool-github-max")).to_have_value("37")
             expect(page.locator("#pool-countries")).not_to_be_checked()
+
+            page.locator("#proxy-pool > summary").click()
+            before = len(loads)
+            page.evaluate("TgWitnessProxies.load()")
+            assert len(loads) == before, "Collapsed automatic catalog continued loading"
+            page.locator("#proxy-pool > summary").click()
+            expect(query).to_have_value("a query still being edited")
+
+            # Disabled GitHub search hides its tuning without deleting the draft.
+            page.locator("#pool-github-search").uncheck()
+            expect(query).to_be_hidden()
+            page.locator("#pool-github-search").check()
+            expect(query).to_be_visible()
+            expect(query).to_have_value("a query still being edited")
+
+            # A route draft controls the visible settings, without changing the saved route.
+            page.locator("#network-details").evaluate("n=>n.open=true")
+            expect(page.locator("#network-endpoint")).to_be_hidden()
+            expect(page.locator("#network-link")).to_be_hidden()
+            expect(page.locator(".proxy-catalog")).to_be_hidden()
+            before = len(loads)
+            for kind in ("socks5", "http", "direct", "mtproxy"):
+                page.locator("#network-kind").select_option(kind)
+                expect(page.locator("#proxy-pool")).to_be_hidden()
+                if kind != "mtproxy":
+                    assert not catalogs, "Non-MTProxy route fetched an irrelevant public catalog"
+                    expect(page.locator("#network-link")).to_be_hidden()
+                    expect(page.locator(".proxy-catalog")).to_be_hidden()
+                if kind == "direct":
+                    expect(page.locator("#network-endpoint")).to_be_hidden()
+                else:
+                    expect(page.locator("#network-host")).to_be_visible()
+                    if kind == "mtproxy":
+                        expect(page.locator("#network-secret")).to_be_visible()
+                        expect(page.locator("#network-username")).to_be_hidden()
+                        expect(page.locator("#network-link")).to_be_visible()
+                    else:
+                        expect(page.locator("#network-username")).to_be_visible()
+                        expect(page.locator("#network-secret")).to_be_hidden()
+                page.evaluate("TgWitnessProxies.load()")
+            assert len(loads) == before, "Custom routes loaded an irrelevant automatic catalog"
+            assert server.app.state.collector.network_config().kind == "mtproxy_auto"
+            page.locator("#network-kind").select_option("mtproxy_auto")
+            expect(page.locator("#proxy-pool")).to_be_visible()
+            expect(query).to_have_value("a query still being edited")
+
+            # Disabled external requests expose no irrelevant proxy fields and retain drafts.
+            expect(page.locator("#outside-kind")).to_be_hidden()
+            page.locator("#outside-enabled").check()
+            expect(page.locator("#outside-kind")).to_be_visible()
+            expect(page.locator("#outside-host")).to_be_hidden()
+            page.locator("#outside-kind").select_option("socks5")
+            page.locator("#outside-host").fill("draft.example")
+            page.locator("#outside-enabled").uncheck()
+            expect(page.locator("#outside-host")).to_be_hidden()
+            page.locator("#outside-enabled").check()
+            expect(page.locator("#outside-host")).to_have_value("draft.example")
+            page.locator("#outside-kind").select_option("")
+            expect(page.locator("#outside-host")).to_be_hidden()
+            assert not server.app.state.collector.route_policy()["outside_enabled"]
+            page.locator("#outside-enabled").uncheck()
 
             # An older HTTP response must not overwrite a later dashboard refresh.
             hold_next(page, "/api/network/proxies")
@@ -172,6 +243,9 @@ def main(proxy_script=None):
         "drafts survive polling", "old responses discarded", "edits during save retained",
         "pending save remains disabled", "hidden dashboard stops polling", "lock clears drafts and secrets",
         "list uploads serialized", "new token input preserved while saving",
+        "route-specific catalog visibility", "hidden search settings keep drafts",
+        "collapsed catalog does not load and preserves drafts",
+        "route and outside-proxy fields match selection without auto-saving",
     ]}
     (output / "receipt.json").write_text(json.dumps(receipt, indent=2), encoding="utf-8")
     print(json.dumps(receipt))

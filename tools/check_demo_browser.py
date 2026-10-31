@@ -19,6 +19,9 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
     expect(page.locator("#chat-feed .sender").first).to_be_visible()
     assert "Unknown" not in page.locator("#chat-feed .sender").all_text_contents()
     assert files_requested == [], "Sample downloads should not slow the initial demo load"
+    page.locator('.sidebar [data-view="integrations"]').click()
+    expect(page.locator("#view-integrations")).to_be_visible()
+    expect(page.locator("#ai-settings")).to_be_hidden()
     page.locator('.sidebar [data-view="evidence"]').click()
     expect(page.locator("#view-evidence")).to_be_visible()
     answers = page.request.get(url + "demo/fixtures.json").json()

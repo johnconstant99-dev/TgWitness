@@ -198,6 +198,7 @@ class Analysis:
                 "provider_fingerprint": ai.fingerprint(config), "expires": now + 600}
         self.plans[ident] = plan
         return {**result, "plan_id": ident, "expires_at": plan["expires"],
+                "provider": {key: config[key] for key in ("enabled", "provider", "endpoint", "model")},
                 "transmission": prompt(body.question, result["sources"], result["coverage"])}
 
     def plan(self, ident, principal):

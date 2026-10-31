@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from tgwitness import alerts, i18n
 from tgwitness.app import create_app
-from tools.i18n_keys import STATIC, all_script_keys, server_keys
+from tools.i18n_keys import STATIC, all_script_keys, script_keys, server_keys
 
 TRANSLATED = [lang for lang in i18n.LANGUAGES if lang != "en"]
 CATEGORIES = {"zero", "one", "two", "few", "many", "other"}
@@ -33,6 +33,12 @@ def test_panel_scripts_and_server_messages_have_dictionary_coverage():
     for lang in TRANSLATED:
         missing = needed - set(i18n.words(lang))
         assert not missing, (lang, sorted(missing)[:5])
+
+
+def test_inventory_covers_live_member_calls_and_table_driven_review_labels():
+    assert script_keys('context.tr("Live: on"); tr("Compare versions")') == ["Live: on", "Compare versions"]
+    assert {"Inline diff", "Side by side", "Raw", "Previously observed", "Enable selected",
+            "Live: reconnecting", "Preview unavailable. Download the preserved file."} <= set(all_script_keys())
 
 
 def test_full_site_and_panel_languages_cannot_drift_apart():

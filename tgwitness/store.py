@@ -3,7 +3,6 @@ import json
 import sqlite3
 import threading
 import time
-import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,16 +10,12 @@ from pathlib import Path
 from . import keyboard
 from . import message_content
 from . import continuity
+from .journal_index import CHAT_KINDS, MEDIA_KINDS, TEXT_KINDS, JournalIndex, migrate_media, search_text
+from .journal_index import GONE_KINDS as GONE_KINDS
 
 ZERO = "0" * 64
 EVENT_FIELDS = ("seq", "observed_at", "source_at", "kind", "chat_id", "message_id",
                 "actor_id", "payload", "previous_hash")
-
-TEXT_KINDS = ("message.new", "message.snapshot", "message.edited", "message.recovered")
-
-GONE_KINDS = ("message.deleted", "message.missing_on_recheck")
-CHAT_KINDS = TEXT_KINDS + GONE_KINDS + ("media.saved",)
-
 
 def utcnow():
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
@@ -33,10 +28,6 @@ def canonical(value):
 
 def event_hash(event):
     return hashlib.sha256(canonical({k: event[k] for k in EVENT_FIELDS})).hexdigest()
-
-
-def search_text(value):
-    return unicodedata.normalize("NFC", value.casefold())
 
 
 class Store:
@@ -90,6 +81,8 @@ class Store:
         self.listeners = []
         with self.transaction():
             continuity.initialize(self.db)
+            migrate_media(self.db)
+            self.read_index = JournalIndex(self.db)
 
     @contextmanager
     def transaction(self):
@@ -127,13 +120,14 @@ class Store:
                             tuple(canonical(event[k]).decode() if k == "payload" else event[k]
                                   for k in (*EVENT_FIELDS, "hash", "signature")))
             continuity.index_event(self.db, event["seq"], event["hash"])
+            self.read_index.append(event)
             if media_job:
                 self.db.execute(
                     "INSERT INTO media_jobs(message_event,account_id,chat_id,message_id,"
-                    "descriptor,descriptor_hash,max_bytes) VALUES (?,?,?,?,?,?,?)",
+                    "descriptor,descriptor_hash,max_bytes,priority,estimated_bytes) VALUES (?,?,?,?,?,?,?,?,?)",
                     (event["seq"], media_job["account_id"], chat_id, message_id,
                      media_job["descriptor"], hashlib.sha256(media_job["descriptor"]).hexdigest(),
-                     media_job["max_bytes"]))
+                     media_job["max_bytes"], media_job.get("priority", 10), media_job.get("estimated_bytes")))
             for listen in self.listeners:
                 try:
                     listen(event)
@@ -149,29 +143,19 @@ class Store:
 
     def chat_overview(self):
         """Per chat: saved messages, edited and deleted counts, and the newest saved text."""
-        marks = ",".join("?" * len(CHAT_KINDS))
-        text_marks = ",".join("?" * len(TEXT_KINDS))
         with self.lock:
             rows = self.db.execute(
-                "SELECT chat_id, count(DISTINCT CASE WHEN kind!='media.saved' THEN message_id END) AS messages,"
-                " count(DISTINCT CASE WHEN kind='message.edited' THEN message_id END) AS edited,"
-                " count(DISTINCT CASE WHEN kind='message.deleted' THEN message_id END) AS deleted,"
-                " count(DISTINCT CASE WHEN kind='message.missing_on_recheck' THEN message_id END) AS missing,"
-                " max(observed_at) AS last_observed_at"
-                " FROM events WHERE chat_id IS NOT NULL AND message_id IS NOT NULL AND kind IN (" + marks + ")"
-                " GROUP BY chat_id", CHAT_KINDS).fetchall()
+                "SELECT c.*,e.payload FROM chat_state_index c LEFT JOIN events e ON e.seq=c.text_seq "
+                "WHERE c.last_observed_at IS NOT NULL").fetchall()
             result = {}
             for row in rows:
-                newest = self.db.execute(
-                    "SELECT payload FROM events WHERE chat_id=? AND kind IN (" + text_marks + ")"
-                    " ORDER BY message_id DESC, seq DESC LIMIT 1", (row["chat_id"], *TEXT_KINDS)).fetchone()
-                payload = json.loads(newest["payload"]) if newest else {}
+                payload = json.loads(row["payload"]) if row["payload"] is not None else {}
                 sender = payload.get("sender_observation") or {}
                 result[row["chat_id"]] = {
                     "messages": row["messages"], "edited": row["edited"], "deleted": row["deleted"],
                     "missing": row["missing"],
                     "last_observed_at": row["last_observed_at"],
-                    "last_text": payload.get("text") if newest else None,
+                    "last_text": payload.get("text"),
                     "last_sender": sender.get("display_name"),
                 }
         return result
@@ -219,56 +203,49 @@ class Store:
 
     def last_message_id(self, chat_id):
         """Highest message ID with saved content in this chat, or None."""
-        marks = ",".join("?" * len(TEXT_KINDS))
         with self.lock:
-            row = self.db.execute("SELECT max(message_id) FROM events WHERE chat_id=? AND kind IN (" + marks + ")",
-                                  (chat_id, *TEXT_KINDS)).fetchone()
-        return row[0]
+            row = self.db.execute("SELECT message_id FROM message_state_index INDEXED BY message_text WHERE chat_id=? "
+                                  "AND text_seq IS NOT NULL ORDER BY message_id DESC LIMIT 1", (chat_id,)).fetchone()
+        return row[0] if row else None
 
     def message_state(self, chat_id, message_id):
         """Latest saved content of one message and whether it is already recorded as gone."""
-        marks = ",".join("?" * len(TEXT_KINDS))
         with self.lock:
             row = self.db.execute(
-                "SELECT seq, hash, json_extract(payload,'$.text') AS text,"
-                " json_extract(payload,'$.edited_at') AS edited_at,"
-                " json_extract(payload,'$.outgoing') AS outgoing,"
-                " payload FROM events"
-                " WHERE chat_id=? AND message_id=? AND kind IN (" + marks + ") ORDER BY seq DESC LIMIT 1",
-                (chat_id, message_id, *TEXT_KINDS)).fetchone()
-            gone = {r[0] for r in self.db.execute(
-                "SELECT DISTINCT kind FROM events WHERE chat_id=? AND message_id=? AND kind IN (?,?)",
-                (chat_id, message_id, *GONE_KINDS))}
-        content = dict(row) if row else None
+                "SELECT e.seq,e.hash,json_extract(e.payload,'$.text') AS text,"
+                "json_extract(e.payload,'$.edited_at') AS edited_at,"
+                "json_extract(e.payload,'$.outgoing') AS outgoing,e.payload,m.deleted,m.missing "
+                "FROM message_state_index m LEFT JOIN events e ON e.seq=m.text_seq "
+                "WHERE m.chat_id=? AND m.message_id=?", (chat_id, message_id)).fetchone()
+        content = {key: row[key] for key in ("seq", "hash", "text", "edited_at", "outgoing", "payload")} \
+            if row and row["seq"] is not None else None
         if content:
             content["observable"] = message_content.of_payload(json.loads(content.pop("payload")))
             content["buttons"] = content["observable"]["buttons"]
         return {"content": content,
-                "deleted": "message.deleted" in gone, "missing": "message.missing_on_recheck" in gone}
+                "deleted": bool(row and row["deleted"]), "missing": bool(row and row["missing"])}
 
     def alive_message_ids(self, chat_id, below=None, limit=200):
         """Saved message IDs not yet recorded as deleted or missing, newest first."""
-        marks = ",".join("?" * len(TEXT_KINDS))
-        where, params = "chat_id=? AND message_id IS NOT NULL AND kind IN (" + marks + ")", [chat_id, *TEXT_KINDS]
+        where, params = "chat_id=? AND text_seq IS NOT NULL AND deleted=0 AND missing=0", [chat_id]
         if below is not None:
             where += " AND message_id<?"
             params.append(below)
         with self.lock:
             return [r[0] for r in self.db.execute(
-                "SELECT DISTINCT message_id FROM events WHERE " + where +
-                " AND message_id NOT IN (SELECT message_id FROM events WHERE chat_id=? AND message_id IS NOT NULL"
-                " AND kind IN (?,?)) ORDER BY message_id DESC LIMIT ?", (*params, chat_id, *GONE_KINDS, limit))]
+                "SELECT message_id FROM message_state_index INDEXED BY message_alive WHERE " + where +
+                " ORDER BY message_id DESC LIMIT ?", (*params, limit))]
 
     def chat_messages(self, chat_id, before_id=None, limit=60):
         """Readable view of one chat: every saved version, deletion and attachment per message."""
         marks = ",".join("?" * len(CHAT_KINDS))
-        where, params = "chat_id=? AND message_id IS NOT NULL AND kind IN (" + marks + ")", [chat_id, *CHAT_KINDS]
+        where, params = "chat_id=?", [chat_id]
         if before_id is not None:
             where += " AND message_id<?"
             params.append(before_id)
         with self.lock:
             ids = [r[0] for r in self.db.execute(
-                "SELECT DISTINCT message_id FROM events WHERE " + where + " ORDER BY message_id DESC LIMIT ?",
+                "SELECT message_id FROM message_state_index WHERE " + where + " ORDER BY message_id DESC LIMIT ?",
                 (*params, limit))]
             if not ids:
                 return {"messages": [], "next_before": None}
@@ -302,9 +279,11 @@ class Store:
                 if origin not in item["origins"]:
                     item["origins"].append(origin)
                 text, buttons = payload.get("text") or "", keyboard.of_payload(payload)
-                content_hash = hashlib.sha256(canonical(message_content.of_payload(payload))).hexdigest()
+                observable = message_content.of_payload(payload)
+                content_hash = hashlib.sha256(canonical(observable)).hexdigest()
                 if not item["versions"] or item["versions"][-1]["content_hash"] != content_hash:
                     item["versions"].append({"text": text, "buttons": buttons, "observed_at": row["observed_at"],
+                                             "entities": observable["entities"],
                                              "content_hash": content_hash,
                                              "edited_at": payload.get("edited_at"), "kind": kind, "seq": row["seq"]})
             elif kind == "message.deleted":
@@ -342,16 +321,17 @@ class Store:
         """(seq, SHA-256) of preserved files recorded after seq."""
         with self.lock:
             return [(r[0], r[1]) for r in self.db.execute(
-                "SELECT seq, json_extract(payload,'$.media_sha256') FROM events WHERE kind='media.saved' AND seq>?"
-                " ORDER BY seq", (seq,)) if r[1]]
+                "SELECT seq, json_extract(payload,'$.media_sha256') FROM events WHERE kind IN (?,?) AND seq>?"
+                " ORDER BY seq", (*MEDIA_KINDS, seq)) if r[1]]
 
     def media_in_chats(self, sha256, chat_ids):
         """Whether a preserved file was saved from one of these chats."""
         marks = ",".join("?" * len(chat_ids))
         with self.lock:
             return self.db.execute(
-                "SELECT 1 FROM events WHERE kind='media.saved' AND chat_id IN (" + marks + ")"
-                " AND json_extract(payload,'$.media_sha256')=? LIMIT 1", (*sorted(chat_ids), sha256)).fetchone() is not None
+                "SELECT 1 FROM events WHERE kind IN (?,?) AND chat_id IN (" + marks + ")"
+                " AND json_extract(payload,'$.media_sha256')=? LIMIT 1",
+                (*MEDIA_KINDS, *sorted(chat_ids), sha256)).fetchone() is not None
 
     def sender_in_chats(self, sender_id, chat_ids):
         """Whether someone wrote a saved message in one of these chats."""
@@ -365,6 +345,7 @@ class Store:
                *, since=None, until=None, message_min=None, message_max=None, timeout_s=None,
                text_only=False, message_only=False):
         filters, params = [], []
+        source, order = "events", "seq"
         if chat_ids is not None:
             filters.append("chat_id IN (" + ",".join("?" * len(chat_ids)) + ")")
             params.extend(sorted(chat_ids))
@@ -386,6 +367,13 @@ class Store:
             filters.append("seq<?")
             params.append(before)
         if search:
+            candidate = self.read_index.candidate(search, text_only=text_only)
+            if candidate is not None:
+                table = "event_text_search" if text_only else "event_payload_search"
+                source = table + " JOIN events ON events.seq=" + table + ".rowid"
+                order = table + ".rowid"
+                filters.append(table + " MATCH ?")
+                params.append(candidate)
             value = "COALESCE(json_extract(payload,'$.text'),'')" if text_only else "payload"
             filters.append("instr(search_text(" + value + "), ?)>0")
             params.append(search_text(search))
@@ -400,16 +388,16 @@ class Store:
             if value is not None:
                 filters.append(comparison)
                 params.append(value)
-        sql = "SELECT * FROM events"
+        sql = "SELECT events.* FROM " + source
         if filters:
             sql += " WHERE " + " AND ".join(filters)
-        sql += " ORDER BY seq DESC LIMIT ?"
+        sql += " ORDER BY " + order + " DESC LIMIT ?"
         return [self.decode(r) for r in self.bounded_read(sql, [*params, limit], timeout_s)]
 
     def archive_chats(self, offset, limit, chat_ids):
         sql = ("WITH known AS (SELECT chat_id,title,kind,enabled FROM targets UNION ALL "
-               "SELECT DISTINCT chat_id,NULL,NULL,0 FROM events WHERE chat_id IS NOT NULL "
-               "AND message_id IS NOT NULL AND chat_id NOT IN (SELECT chat_id FROM targets)) SELECT * FROM known")
+               "SELECT chat_id,NULL,NULL,0 FROM known_chat_index "
+               "WHERE chat_id NOT IN (SELECT chat_id FROM targets)) SELECT * FROM known")
         params = []
         if chat_ids is not None:
             sql += " WHERE chat_id IN (" + ",".join("?" * len(chat_ids)) + ")"
@@ -478,13 +466,18 @@ class Store:
                 "WHERE j.state IN ('queued','retry','running')").fetchone()
         return row[0]
 
-    def claim_media(self, account_id, now=None):
+    def claim_media(self, account_id, now=None, *, min_priority=None, max_priority=None):
+        filters, params = [], [account_id, time.time() if now is None else now]
+        for operator, value in ((">=", min_priority), ("<=", max_priority)):
+            if value is not None:
+                filters.append("j.priority" + operator + "?")
+                params.append(value)
         with self.transaction():
             row = self.db.execute(
                 "SELECT j.* FROM media_jobs j JOIN targets t USING(chat_id) "
                 "WHERE j.account_id=? AND t.enabled=1 AND j.state IN ('queued','retry') "
-                "AND j.next_attempt<=? ORDER BY j.message_event LIMIT 1",
-                (account_id, time.time() if now is None else now)).fetchone()
+                "AND j.next_attempt<=? " + ("AND " + " AND ".join(filters) if filters else "") +
+                " ORDER BY j.priority,j.message_event LIMIT 1", params).fetchone()
             if not row:
                 return None
             self.db.execute("UPDATE media_jobs SET state='running',attempts=attempts+1 WHERE message_event=?",
@@ -514,10 +507,14 @@ class Store:
                             (state, time.time() + delay, payload.get("error_type"), job["message_event"]))
 
     def stats(self, chat_ids=None):
-        where = "" if chat_ids is None else " WHERE chat_id IN (" + ",".join("?" * len(chat_ids)) + ")"
         with self.lock:
-            counts = {r[0]: r[1] for r in self.db.execute(
-                "SELECT kind,count(*) FROM events" + where + " GROUP BY kind", sorted(chat_ids or ()))}
+            if chat_ids is None:
+                rows = self.db.execute("SELECT kind,total FROM event_kind_counts")
+            else:
+                rows = self.db.execute("SELECT kind,sum(total) FROM chat_event_kind_counts "
+                                       "WHERE chat_id IN (" + ",".join("?" * len(chat_ids)) + ") GROUP BY kind",
+                                       sorted(chat_ids))
+            counts = {r[0]: r[1] for r in rows}
             tail = self.db.execute("SELECT seq,hash,observed_at FROM events ORDER BY seq DESC LIMIT 1").fetchone()
         return {"counts": counts, "total": sum(counts.values()), "head": dict(tail) if tail else None}
 
@@ -534,6 +531,11 @@ class Store:
         with self.lock:
             return [dict(r) for r in self.db.execute(
                 "SELECT * FROM targets" + (" WHERE enabled=1" if enabled_only else "") + " ORDER BY title")]
+
+    def target_counts(self):
+        with self.lock:
+            row = self.db.execute("SELECT count(*),coalesce(sum(enabled=1),0) FROM targets").fetchone()
+        return {"total": row[0], "enabled": row[1]}
 
     def set_target(self, chat_id, title, kind, enabled, origin=None, priority=None):
         """Add or update a source. origin/priority keep their saved values unless given."""
@@ -565,11 +567,10 @@ class Store:
 
         Channels and supergroups (IDs below -10^12) number messages per chat and are never matched.
         """
-        marks = ",".join("?" * len(TEXT_KINDS))
         with self.lock:
             chats = [r[0] for r in self.db.execute(
-                "SELECT DISTINCT chat_id FROM events WHERE message_id=? AND chat_id IS NOT NULL"
-                " AND chat_id>-1000000000000 AND kind IN (" + marks + ")", (message_id, *TEXT_KINDS))]
+                "SELECT chat_id FROM message_state_index WHERE message_id=? AND text_seq IS NOT NULL"
+                " AND chat_id>-1000000000000 LIMIT 2", (message_id,))]
         return chats[0] if len(chats) == 1 else None
 
     def latest_reply_keyboard(self, chat_id, window=500, before_message_id=None):
@@ -615,13 +616,17 @@ class Store:
             return {}
         marks = ",".join("?" * len(TEXT_KINDS))
         wanted = set(sender_ids)
+        sender_filter = "json_extract(payload,'$.sender_id') IN (" + ",".join("?" * len(wanted)) + ")"
+        if None in wanted:
+            sender_filter = "(" + sender_filter + " OR json_extract(payload,'$.sender_id') IS NULL)"
         result = {}
         with self.lock:
             for chat_id, sender, count in self.db.execute(
                     "SELECT chat_id, json_extract(payload,'$.sender_id') AS sender, count(DISTINCT message_id) FROM events"
-                    " WHERE kind IN (" + marks + ") AND chat_id IS NOT NULL GROUP BY chat_id, sender", TEXT_KINDS):
-                if sender in wanted:
-                    result.setdefault(sender, {})[chat_id] = count
+                    " WHERE kind IN (" + marks + ") AND chat_id IS NOT NULL"
+                    " AND " + sender_filter +
+                    " GROUP BY chat_id, sender", (*TEXT_KINDS, *wanted)):
+                result.setdefault(sender, {})[chat_id] = count
         return result
 
     def close(self):

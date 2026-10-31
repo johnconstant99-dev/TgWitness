@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Kept disabled AI out of the sidebar and attachment actions. Provider setup lives
+  in Integrations; local recognition appears only when its worker is configured.
+  Connection settings now show the fields for the selected route, with the
+  automatic MTProxy catalog available on demand.
+- Added inline and side-by-side edit comparisons, separate changes to hidden links
+  and bot buttons, attachment previews and image zoom. The preserved original stays
+  downloadable. Preview reads stop at 32 MiB; the browser cache holds at most 40
+  previews and 64 MiB, with three concurrent reads, and is cleared on lock or workspace switch.
+- Added live journal/chat updates with a pause control for the view, batch source
+  selection and actions, and journal search from Ctrl/Cmd+K. Live updates recheck
+  access and chat scope; pausing the view does not pause collection.
+- Indexed saved message state and source summaries. Existing journals build these
+  derived indexes once during their first startup after the update; signed records
+  and their hashes stay unchanged. Small and expiring attachments have a separate
+  download lane so a large file does not hold them up.
+- Preserved observed avatar changes as signed records with content-addressed files,
+  including removal and reuse of an earlier photo. People profiles show scoped
+  history and similarity leads; saved photos travel in evidence ZIPs.
+- Added automatic upgrades for OpenTimestamps receipts older than one hour, with
+  bounded requests through the configured route and the original receipt retained.
+  A Bitcoin attestation remains explicitly unverified until checked independently.
+
 - Reworked the workspace navigation and chat layout, added chat search and kept
   collection warnings visible. The desktop conversation fits the viewport.
 - Rebuilt the online demo around a fictional investigation with named participants,

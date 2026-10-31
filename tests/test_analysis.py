@@ -1,3 +1,4 @@
+import asyncio
 import json
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -193,3 +194,58 @@ def test_a_failed_source_check_does_not_leave_generation_busy(answering, monkeyp
         patch.setattr(analysis_api, "verify_sources", failed)
         assert generate(admin, plan).status_code == 422 and not sent
     assert generate(admin, plan).status_code == 200 and len(sent) == 1
+
+
+def test_analysis_capability_requires_opt_in_and_preserves_disabled_configuration(answering):
+    from tgwitness import ai
+
+    app, admin, sent = answering
+    assert not ai.enabled(app.state)
+    configure(admin, enabled=False, api_key="SYNTHETIC_SAVED_KEY")
+    assert not ai.enabled(app.state)
+    configure(admin)
+    assert ai.enabled(app.state)
+    configure(admin, enabled=False)
+    assert not ai.enabled(app.state)
+    assert app.state.vault.read("ai")["api_key"] == "SYNTHETIC_SAVED_KEY"
+    assert ai.settings(app.state)["model"] == "synthetic-test"
+    assert not sent
+
+
+def test_disabling_provider_stops_requests_waiting_for_a_slot(answering):
+    from tgwitness import ai
+
+    app, admin, sent = answering
+    configure(admin)
+
+    async def run():
+        provider = ai.Provider()
+        provider.slots = asyncio.Semaphore(0)
+        task = asyncio.create_task(provider.complete(app.state, [{"role": "user", "content": "Synthetic"}]))
+        await asyncio.sleep(0)
+        assert provider.busy
+        ai.configure(app.state, ai.ProviderSettings(enabled=False, model="synthetic-test"))
+        provider.slots.release()
+        with pytest.raises(ValueError, match="disabled"):
+            await task
+        assert not provider.busy
+
+    asyncio.run(run())
+    assert not sent and app.state.store.get_setting("ai_usage", {}) == {}
+
+
+def test_preview_provider_snapshot_is_exact_and_changed_endpoint_cannot_receive_it(answering):
+    _, admin, sent = answering
+    configure(admin, provider="compatible", endpoint="https://first.invalid/v1", api_key="SYNTHETIC_KEY")
+    plan = preview(admin)
+    assert plan["provider"] == {"enabled": True, "provider": "compatible", "model": "synthetic-test",
+                                "endpoint": "https://first.invalid/v1"}
+    assert "SYNTHETIC_KEY" not in json.dumps(plan)
+    configure(admin, provider="compatible", endpoint="https://second.invalid/v1")
+    refused = generate(admin, plan)
+    assert refused.status_code == 422 and "settings changed" in refused.json()["detail"]
+    assert not sent
+    fresh = preview(admin)
+    assert fresh["provider"]["endpoint"] == "https://second.invalid/v1"
+    assert generate(admin, fresh).status_code == 200
+    assert sent[0][0] == "https://second.invalid/v1/chat/completions"

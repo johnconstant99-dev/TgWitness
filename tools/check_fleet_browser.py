@@ -100,6 +100,7 @@ def main():
         page.locator('[data-view="connection"]').click()
         if page.locator("#entry-settings").get_attribute("aria-expanded") != "true":
             page.locator("#entry-settings").click()
+        page.locator("#proxy-pool > summary").click()
         page.locator("#pool-sources summary").first.click()
         page.locator(".pool-paste summary").click()
         page.locator("#pool-paste").fill("tg://proxy?server=7.7.7.7&port=443&secret=" + "a7" * 16)

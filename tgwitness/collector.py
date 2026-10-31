@@ -13,6 +13,7 @@ from collections import deque
 
 from telethon import events, utils
 from telethon.errors import SessionPasswordNeededError, FloodWaitError, InvalidBufferError, RPCError
+from telethon.errors import FileReferenceExpiredError
 from telethon.extensions import BinaryReader
 from telethon.sessions import StringSession
 from telethon.tl import functions, types
@@ -25,6 +26,7 @@ from . import replica
 from . import tuning
 from .history import History
 from .account_import import validate_string
+from .avatar_history import AvatarHistory
 from .telegram_client import WitnessClient
 from .workers import complete_in_thread
 from .store import canonical, utcnow
@@ -38,6 +40,7 @@ from .verify import fingerprint
 
 
 STORAGE_RECHECK_SECONDS = 30
+SMALL_MEDIA_BYTES = 2 * 1024**2
 
 
 ROUTE_ERRORS = (OSError, TimeoutError, asyncio.IncompleteReadError, InvalidBufferError)
@@ -55,6 +58,32 @@ MEMBERSHIP_ACTIONS = (types.MessageActionChatAddUser, types.MessageActionChatDel
 def recovered_source(update):
     """Telethon hands over messages fetched through getDifference (after a gap or restart) with pts=0."""
     return "update_recovery" if getattr(update, "pts", None) == 0 else None
+
+
+def media_priority(message, size):
+    ttl = (getattr(message, "ttl_period", None), getattr(message.media, "ttl_seconds", None))
+    if any(isinstance(value, int) and value > 0 for value in ttl):
+        return 0
+    return 1 if isinstance(size, int) and 0 <= size <= SMALL_MEDIA_BYTES else 10
+
+
+def attachment_identity(message):
+    attachment = getattr(message, "photo", None) or getattr(message, "document", None)
+    if isinstance(attachment, (types.Photo, types.Document)):
+        return type(attachment).__name__, attachment.id
+    return None
+
+
+def downloadable_media(message):
+    # A web preview may contain both a photo and a document. Use the file whose size was checked.
+    if isinstance(message.media, types.MessageMediaWebPage):
+        return message.photo or message.document
+    return message.media
+
+
+def file_digest(path):
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def plain(value):
@@ -164,6 +193,7 @@ class Collector:
         self.people = {}
         self.avatar_lock = asyncio.Lock()
         self.avatar_failures = {}
+        self.avatar_history = AvatarHistory(store, lambda: self.client)
         self.running = False
         self.phase = "offline"
         self.last_error = None
@@ -173,6 +203,7 @@ class Collector:
         self.watchdog = None
         self.media_wakeup = asyncio.Event()
         self.media_worker = None
+        self.urgent_media_worker = None
         self.last_heartbeat = None
         self.source_status = {}
         self.last_update_at = None
@@ -364,11 +395,13 @@ class Collector:
             info["invite_link"] = invite
         if getattr(full, "bot_info", None) and not isinstance(entity, types.User):
             info["bots"] = [getattr(b, "user_id", None) for b in full.bot_info]
-        return self.store.append("source.profile", {
+        event = self.store.append("source.profile", {
             "title": utils.get_display_name(entity), "kind": kind_of(entity), "username": getattr(entity, "username", None),
             **info, "raw": plain(full),
             "meaning": "what Telegram returned to this account about the chat at this time; descriptions are mutable"},
             chat_id)
+        self.remember(entity, chat_id=chat_id)
+        return event
 
     async def save_profile(self, chat_id):
         """Panel action: save the current profile of a source now."""
@@ -437,7 +470,7 @@ class Collector:
         return {"added": len(added), "paused": len(paused), "resumed": len(resumed)}
 
     def make_client(self, api_id, api_hash, session=""):
-        device = api_pool.DESKTOP_DEVICE if api_id == api_pool.DESKTOP_ID else {}
+        device = api_pool.device_for(api_id)
         string_session = StringSession(session)
         self.resumed_state_at = self.load_update_state(string_session)
 
@@ -545,6 +578,7 @@ class Collector:
         credentials = self.vault.read("credentials")
         if not credentials.get("session"):
             raise ValueError("No Telegram account is connected.")
+        await self.avatar_history.close()
         client, self.client = self.client, None
         ended, error = False, None
         try:
@@ -1060,6 +1094,7 @@ class Collector:
                 self.account_guard(me.id, self)
             credentials = dict(self.pending_credentials)
             credentials["session"] = candidate.session.save()
+            await self.avatar_history.close()
             if self.client:
                 await self.client.disconnect()
             self.vault.save("credentials", credentials)
@@ -1148,7 +1183,7 @@ class Collector:
     async def start(self):
         if self.running:
             return
-        if self.watchdog or self.media_worker or self.reconciler or self.intake_worker:
+        if self.watchdog or self.media_worker or self.urgent_media_worker or self.reconciler or self.intake_worker:
             await self.stop()
         if scope_settings(self.store)["mode"] == "selected" and not self.store.targets(True):
             raise ValueError("Select at least one group or channel first.")
@@ -1185,7 +1220,9 @@ class Collector:
         for handler, update in pending:
             await handler(update)
         self.watchdog = asyncio.create_task(self.supervise(self.monitor, "connection monitor"))
-        self.media_worker = asyncio.create_task(self.supervise(self.download_worker, "media worker"))
+        self.media_worker = asyncio.create_task(self.supervise(lambda: self.download_worker("bulk"), "media worker"))
+        self.urgent_media_worker = asyncio.create_task(
+            self.supervise(lambda: self.download_worker("urgent"), "urgent media worker"))
         self.reconciler = asyncio.create_task(self.supervise(self.recheck_loop, "recheck"))
         self.intake_worker = asyncio.create_task(self.supervise(self.intake_loop, "new chat intake"))
         catch_up = getattr(self.client, "catch_up", None)
@@ -1220,9 +1257,20 @@ class Collector:
             raise
         except Exception as exc:
             await self.failure(exc, name)
-            self.running, self.phase = False, "collector_error"
+            self.running = False
+            if self.phase != "storage_error":
+                self.phase = "collector_error"
+            await self.cancel_workers()
+            await self.avatar_history.close()
             if self.client:
-                asyncio.create_task(self.client.disconnect())
+                await self.client.disconnect()
+
+    async def cancel_workers(self):
+        tasks = (self.watchdog, self.media_worker, self.urgent_media_worker, self.reconciler, self.intake_worker)
+        tasks = tuple(task for task in tasks if task and task is not asyncio.current_task())
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
 
     async def stop(self, shutdown=False):
         await self.history.pause("process_shutdown" if shutdown else "observation_stopped")
@@ -1234,12 +1282,9 @@ class Collector:
             self.persist_update_state()
         self.running = False
         self.buffered, self.buffering = [], False
-        tasks = (self.watchdog, self.media_worker, self.reconciler, self.intake_worker)
-        for task in tasks:
-            if task:
-                task.cancel()
-        await asyncio.gather(*(t for t in tasks if t), return_exceptions=True)
-        self.watchdog = self.media_worker = self.reconciler = self.intake_worker = None
+        await self.cancel_workers()
+        self.watchdog = self.media_worker = self.urgent_media_worker = self.reconciler = self.intake_worker = None
+        await self.avatar_history.close()
         if not shutdown:
             self.store.set_setting("resume", False)
         if active:
@@ -1348,12 +1393,13 @@ class Collector:
                                                  "coverage": "this update may not have been recorded"})
         except Exception:
             self.running, self.phase = False, "storage_error"
+            await self.cancel_workers()
+            await self.avatar_history.close()
             if self.client:
-                asyncio.create_task(self.client.disconnect())
+                await self.client.disconnect()
 
     async def capture_message(self, message, kind, chat_id, update=None, source=None, history_run_id=None):
         started = time.perf_counter()
-        self.remember(getattr(message, "sender", None))
         payload = describe_message(message)
         payload["source"] = source or ("history_snapshot" if kind == "message.snapshot" else "live_update")
         payload["collector_account_id"] = (self.store.get_setting("account", {}) or {}).get("id")
@@ -1395,16 +1441,20 @@ class Collector:
                 media_skip = "authorized account identity unavailable"
             else:
                 descriptor = bytes(message)
+                size = getattr(message.file, "size", None)
                 job = {"account_id": account["id"], "descriptor": descriptor,
-                       "max_bytes": rule["max_mb"] * 1024**2}
+                       "max_bytes": rule["max_mb"] * 1024**2,
+                       "priority": media_priority(message, size), "estimated_bytes": size}
                 payload["media_capture"] = {
                     "descriptor_sha256": hashlib.sha256(descriptor).hexdigest(),
                     "account_id": account["id"], "max_bytes": job["max_bytes"], "media_type": media_type,
+                    "priority": job["priority"], "estimated_bytes": size,
                     "policy": "original observed descriptor; never substitute a newer message"}
         event = self.store.append(kind, payload, chat_id, message.id,
                                   message.sender_id if kind in ("message.new", "message.recovered") else None,
                                   date_string(getattr(message, "edit_date", None) or message.date),
                                   media_job=job)
+        self.remember(getattr(message, "sender", None), chat_id=chat_id)
         if getattr(message, "action", None):
             self.store.append("membership.service" if isinstance(message.action, (
                 types.MessageActionChatAddUser, types.MessageActionChatDeleteUser,
@@ -1948,7 +1998,7 @@ class Collector:
             return self.export_path
         return None
 
-    def remember(self, entity):
+    def remember(self, entity, *, chat_id=None):
         """Keep full user/chat objects seen in updates; profile photos need the full object."""
         peer = getattr(entity, "id", None)
         if peer is None or not hasattr(entity, "photo"):
@@ -1956,6 +2006,8 @@ class Collector:
         if len(self.people) >= 5000:
             self.people.pop(next(iter(self.people)))
         self.people[utils.get_peer_id(entity)] = entity
+        if chat_id is not None:
+            self.avatar_history.observe(entity, chat_id=chat_id)
 
     async def avatar(self, peer_id):
         """Small profile photo from a local cache; downloaded once, never written to the journal."""
@@ -2010,7 +2062,19 @@ class Collector:
             temporary.replace(path)
             return path
 
-    async def download_worker(self):
+    async def refresh_media_reference(self, message, job):
+        identity = attachment_identity(message)
+        if identity is None:
+            raise ValueError("original_attachment_has_no_stable_id")
+        fresh = await asyncio.wait_for(self.client.get_messages(job["chat_id"], ids=job["message_id"]), 30)
+        if fresh is None or not getattr(fresh, "media", None):
+            raise ValueError("original_attachment_no_longer_available")
+        if (attachment_identity(fresh) != identity or fresh.id != job["message_id"]
+                or fresh.chat_id != job["chat_id"]):
+            raise ValueError("refreshed_attachment_differs_from_signed_observation")
+        return downloadable_media(fresh)
+
+    async def download_worker(self, lane="all"):
         media_root = self.store.root / "media"
         media_root.mkdir(exist_ok=True)
         while self.running:
@@ -2030,7 +2094,8 @@ class Collector:
                 self.storage_low = False
                 self.store.append("storage.ok", {"free_bytes": free, "media_jobs": self.store.media_stats()})
             account = self.store.get_setting("account", {}) or {}
-            job = self.store.claim_media(account.get("id", 0))
+            limits = {"max_priority": 1} if lane == "urgent" else {"min_priority": 2} if lane == "bulk" else {}
+            job = self.store.claim_media(account.get("id", 0), **limits)
             if not job:
                 self.media_wakeup.clear()
                 try:
@@ -2045,6 +2110,8 @@ class Collector:
                 if (hashlib.sha256(job["descriptor"]).hexdigest() != policy.get("descriptor_sha256")
                         or job["max_bytes"] != policy.get("max_bytes")
                         or job["account_id"] != policy.get("account_id")
+                        or ("priority" in policy and job["priority"] != policy["priority"])
+                        or ("estimated_bytes" in policy and job["estimated_bytes"] != policy["estimated_bytes"])
                         or job["chat_id"] != original["chat_id"] or job["message_id"] != original["message_id"]):
                     raise ValueError("queue_descriptor_differs_from_signed_observation")
                 with BinaryReader(job["descriptor"]) as reader:
@@ -2061,32 +2128,31 @@ class Collector:
 
 
                 timeout = self.param("media_timeout_seconds") + size // (self.param("media_min_speed_kbps") * 1024)
-                media = message.media
-                if isinstance(media, types.MessageMediaWebPage):
+                media = downloadable_media(message)
+                refreshed = False
 
+                async def download(media):
+                    with temp.open("wb") as stream:
+                        return await asyncio.wait_for(
+                            self.client.download_media(media, file=stream, progress_callback=progress), timeout)
 
-                    media = message.photo or message.document
-                with temp.open("wb") as stream:
-                    result = await asyncio.wait_for(
-                        self.client.download_media(media, file=stream, progress_callback=progress), timeout)
+                try:
+                    result = await download(media)
+                except FileReferenceExpiredError:
+                    media = await self.refresh_media_reference(message, job)
+                    refreshed = True
+                    result = await download(media)
                 if result is None:
                     raise ValueError("download_unavailable")
-                h = hashlib.sha256()
-                with temp.open("rb") as stream:
-                    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                        h.update(chunk)
-                digest, actual_size = h.hexdigest(), temp.stat().st_size
+                digest = await complete_in_thread(file_digest, temp)
+                actual_size = temp.stat().st_size
                 if actual_size > job["max_bytes"]:
                     raise ValueError("above_limit")
                 if actual_size != size:
                     raise ValueError("download_size_differs_from_observed_attachment")
                 destination = media_root / digest
                 if destination.exists():
-                    existing = hashlib.sha256()
-                    with destination.open("rb") as stream:
-                        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                            existing.update(chunk)
-                    if existing.hexdigest() != digest:
+                    if await complete_in_thread(file_digest, destination) != digest:
                         raise ValueError("existing_content_addressed_file_is_corrupt")
                     temp.unlink()
                 else:
@@ -2095,6 +2161,7 @@ class Collector:
                     "media_sha256": digest, "size": actual_size,
                     "original_name": getattr(message.file, "name", None),
                     "mime_type": getattr(message.file, "mime_type", None),
+                    "file_reference_refreshed": refreshed,
                 })
             except asyncio.CancelledError:
                 self.store.finish_media(job, "retry", {"reason": "collector stopped; durable job retained"})

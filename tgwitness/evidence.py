@@ -176,7 +176,7 @@ def export_file(store, vault, fmt, options=None):
                 write_member("coverage.json", [json.dumps(coverage, ensure_ascii=False, indent=1).encode("utf-8")])
                 write_member("verify.py", [Path(__file__).with_name("verify.py").read_bytes()])
                 for event in snapshot.events():
-                    digest = event["payload"].get("media_sha256") if event["kind"] == "media.saved" else None
+                    digest = event["payload"].get("media_sha256") if event["kind"] in ("media.saved", "actor.avatar_saved") else None
                     if not digest:
                         continue
                     if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):

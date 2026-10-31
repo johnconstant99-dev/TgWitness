@@ -240,7 +240,8 @@ def check_languages(browser, server):
     context = browser.new_context(viewport={"width": 1440, "height": 1060}, reduced_motion="reduce")
     page, errors, keys = context.new_page(), [], []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
-    panel_scripts = ("app.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js", "fleet.js")
+    panel_scripts = ("app.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js",
+                     "fleet.js", "review.js", "live.js")
     for script in panel_scripts:
         page.route("**/" + script + "*", lambda route: route.abort())
     page.goto(server.url + "/")
@@ -378,8 +379,17 @@ def main():
             page.get_by_role("button", name="Edits", exact=True).click()
             expect(page.locator("#events-body tr")).to_have_count(3)
             page.locator("#events-body tr").first.click()
-            expect(page.locator(".detail-block.before")).to_be_visible()
-            expect(page.locator(".detail-block.after")).to_be_visible()
+            comparison = page.locator("#detail-content .review-diff")
+            expect(comparison).to_be_visible()
+            comparison.get_by_role("button", name="Side by side", exact=True).click()
+            columns = comparison.locator(".review-split pre")
+            expect(columns).to_have_count(2)
+            edited = demo.app.state.store.events(kind="message.edited")[0]
+            original = next(e for e in demo.app.state.store.all_events()
+                            if e["kind"] == "message.new" and e["chat_id"] == edited["chat_id"]
+                            and e["message_id"] == edited["message_id"])
+            expect(columns.nth(0)).to_have_text(original["payload"]["text"])
+            expect(columns.nth(1)).to_have_text(edited["payload"]["text"])
             page.screenshot(path=str(output / "detail.png"), full_page=True)
             page.keyboard.press("Escape")
             expect(page.locator("#detail-drawer")).not_to_be_visible()

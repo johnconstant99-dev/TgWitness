@@ -123,6 +123,18 @@ class TargetPriority(BaseModel):
     priority: bool
 
 
+class TargetBatch(BaseModel):
+    chat_ids: list[int] = Field(min_length=1, max_length=500)
+    enabled: bool | None = None
+    priority: bool | None = None
+
+    @model_validator(mode="after")
+    def action_required(self):
+        if self.enabled is None and self.priority is None:
+            raise ValueError("Choose enabled or priority.")
+        return self
+
+
 class DossierSwitch(BaseModel):
     enabled: bool
 
@@ -214,6 +226,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     bearer = HTTPBearer(auto_error=False)
     op_lock = asyncio.Lock()
     export_lock = asyncio.Lock()
+    from .live_stream import StreamSlots
+    stream_slots = StreamSlots()
     public_proxies = PublicCatalog(root)
 
     shared_pool = proxy_pool or ProxyPool(public_proxies)
@@ -241,9 +255,13 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             vault = Vault(root)
             if token_override:
                 vault.token = token_override
-            store = Store(root)
-            store.bind(vault)
-            await asyncio.to_thread(store.verify, vault.public_key)
+            def open_journal():
+                nonlocal store
+                store = Store(root)
+                store.bind(vault)
+
+            await complete_in_thread(open_journal)
+            await complete_in_thread(store.verify, vault.public_key)
             if demo:
                 if store.stats()["total"] and not store.get_setting("demo", False):
                     raise RuntimeError("Refusing to mix synthetic data into a real journal.")
@@ -374,9 +392,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["X-Frame-Options"] = "DENY"
-        response.headers["Content-Security-Policy"] = (
+        response.headers.setdefault("Content-Security-Policy", (
             "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; "
-            "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'")
+            "media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'"))
         response.headers["Cache-Control"] = "no-store"
         return response
 
@@ -510,10 +528,13 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.get("/api/status", dependencies=[Depends(authenticate)])
     async def status(request: Request):
+        from . import ai, media_analysis
         store, vault = app.state.store, app.state.vault
         allowed = visible_chats(request)
         collector_status = app.state.collector.status()
         return {"version": __version__, "demo": store.get_setting("demo", False),
+                "analysis": {"enabled": ai.enabled(app.state) and not store.get_setting("demo", False),
+                             "media_available": media_analysis.available() and not store.get_setting("demo", False)},
                 "collector": collector_status, "stats": store.stats(allowed),
                 "health": health.collector_of(app.state, collector_status),
                 "history": app.state.collector.history.status() if allowed is None else None,
@@ -727,6 +748,35 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         records = app.state.store.events(chat_id, message_id, kind, before, limit, search,
                                          chat_ids=visible_chats(request))
         return {"events": records, "next_before": records[-1]["seq"] if len(records) == limit else None}
+
+    @app.get("/api/stream", dependencies=[Depends(authenticate)])
+    async def journal_stream(request: Request, after: int = 0,
+                             credential: HTTPAuthorizationCredentials = Depends(bearer)):
+        from .live_stream import LimitedStreamingResponse, stream
+        if not 0 <= after <= 9223372036854775807:
+            raise HTTPException(422, "Invalid journal cursor.")
+        token = credential.credentials
+
+        def authorize():
+            if local_demo_access(request) and secrets.compare_digest(token, app.state.local_demo_token):
+                principal = request.state.principal
+            else:
+                principal = app.state.access.resolve(token, client_address(request))
+            if principal is None:
+                raise Refused("Access ended")
+            access_check(principal, profile_id, POLICY["GET /api/stream"], {})
+            return principal.chats(profile_id)
+
+        async def updates():
+            try:
+                yield ": connected\n\n"
+                async for item in stream(app.state.store, after, authorize, request.is_disconnected):
+                    yield item
+            except Refused:
+                yield "event: access-ended\ndata: {}\n\n"
+
+        return LimitedStreamingResponse(updates(), slots=stream_slots, media_type="text/event-stream",
+                                        headers={"X-Accel-Buffering": "no", "Cache-Control": "no-store"})
 
     @app.post("/api/auth/configure", dependencies=[Depends(authenticate)])
     async def configure(body: Credentials):
@@ -960,6 +1010,30 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                                "coverage": "No observations promised while target is disabled."},
                              body.chat_id)
         return {"targets": store.targets()}
+
+    @app.post("/api/targets/batch", dependencies=[Depends(authenticate)])
+    async def targets_batch(request: Request, body: TargetBatch):
+        require_live()
+        collector, store = app.state.collector, app.state.store
+        ids = list(dict.fromkeys(body.chat_ids))
+        for chat_id in ids:
+            require_chat(request, chat_id)
+        async with op_lock:
+            existing = {t["chat_id"]: t for t in store.targets()}
+            entries = {chat_id: existing.get(chat_id) or collector.dialog_cache.get(chat_id) for chat_id in ids}
+            if any(entry is None for entry in entries.values()):
+                raise HTTPException(400, "Refresh the group list and select an available target.")
+            with store.transaction():
+                for chat_id, entry in entries.items():
+                    enabled = body.enabled if body.enabled is not None else bool(entry.get("enabled", True))
+                    store.set_target(chat_id, entry["title"], entry["kind"], enabled,
+                                     origin=entry.get("origin", "manual"), priority=body.priority)
+                    included = enabled and unexclude(store, chat_id)
+                    store.append("target.changed", {"title": entry["title"], "enabled": enabled,
+                                                   "priority": body.priority, "batch": True,
+                                                   **({"removed_from_scope_exclusions": True} if included else {})}, chat_id)
+        allowed = visible_chats(request)
+        return {"targets": [t for t in store.targets() if allowed is None or t["chat_id"] in allowed], "updated": len(ids)}
 
     @app.post("/api/targets/priority", dependencies=[Depends(authenticate)])
     async def target_priority(request: Request, body: TargetPriority):
@@ -1591,16 +1665,22 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                             background=BackgroundTask(path.unlink, missing_ok=True))
 
     @app.get("/api/media/{digest}", dependencies=[Depends(authenticate)])
-    async def media(request: Request, digest: str):
+    async def media(request: Request, digest: str, inline: bool = False):
         if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
             raise HTTPException(404)
         allowed = visible_chats(request)
         if allowed is not None and not app.state.store.media_in_chats(digest, allowed):
             raise HTTPException(404)
         path = root / "media" / digest
-        if not path.is_file():
+        if path.is_symlink() or not path.is_file():
             raise HTTPException(404)
-
+        if inline:
+            from .media_preview import content_type
+            mime = await asyncio.to_thread(content_type, path)
+            return FileResponse(path, media_type=mime, filename=digest,
+                                content_disposition_type="inline" if mime != "application/octet-stream" else "attachment",
+                                headers={"Content-Security-Policy": "default-src 'none'; media-src 'self'; "
+                                         "img-src 'self'; style-src 'unsafe-inline'; sandbox"})
         return FileResponse(path, media_type="application/octet-stream", filename=digest)
 
     from .webhook_api import register as register_webhooks

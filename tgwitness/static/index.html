@@ -7,18 +7,20 @@
 <meta name="color-scheme" content="light dark">
 <title>TgWitness · Observation workspace</title>
 <link rel="icon" type="image/svg+xml" href="/mark.svg">
-<link rel="stylesheet" href="/style.css?v=0.7.0-workspace3">
+<link rel="stylesheet" href="/style.css?v=0.7.0-analyst1">
 <link rel="stylesheet" href="/cloud-capture.css?v=5"><link rel="stylesheet" href="/cloud-capture-story.css?v=3">
 <script src="/theme.js?v=0.7.0"></script>
 <script src="/guide-locale.js" data-scope="panel"></script>
 <script defer src="/i18n.js?v=0.7.0"></script>
-<script defer src="/app.js?v=0.7.0-async1"></script>
+<script defer src="/app.js?v=0.7.0-analyst1"></script>
 <script defer src="/integrations.js?v=1"></script>
-<script defer src="/analysis.js?v=1"></script>
-<script defer src="/media-analysis.js?v=1"></script>
+<script defer src="/analysis.js?v=3"></script>
+<script defer src="/media-analysis.js?v=2"></script>
 <script defer src="/webhooks.js?v=1"></script>
-<script defer src="/proxies.js?v=2"></script>
+<script defer src="/proxies.js?v=3"></script>
 <script defer src="/fleet.js?v=2"></script>
+<script defer src="/review.js?v=1"></script>
+<script defer src="/live.js?v=1"></script>
 <script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=3"></script><script defer src="/cloud-capture.js?v=5"></script>
 </head>
 <body>
@@ -647,9 +649,24 @@
     <div class="guide-foot"><svg aria-hidden="true" class="icon"><use href="#i-lock"/></svg> Your installation. Your records.</div>
   </aside>
   <details hidden id="connection-options"><summary>Connection settings</summary>
-    <section class="card padded proxy-pool" id="proxy-pool">
+
+    <div class="card padded route-card"><div class="eyebrow">Connection route</div><h2 id="route-summary">Direct connection</h2><p class="muted" id="route-detail">Choose a route before signing in.</p>
+      <details id="network-details"><summary>Change connection route</summary>
+        <p class="notice route-running" hidden id="network-running">Pause observation to change the route. Until then, observation keeps using the current one.</p>
+        <div class="proxy-catalog"><h3>Public MTProxy lists</h3>
+          <p class="hint" id="proxy-catalog-status" role="status"></p>
+          <label for="proxy-catalog-select">Available public servers</label><select id="proxy-catalog-select" disabled></select>
+          <div class="route-actions"><button class="secondary" id="proxy-catalog-apply" type="button" disabled>Save selected public route</button><button class="quiet" id="proxy-catalog-refresh" type="button">Update public lists</button></div>
+          <p class="hint">Choose a proxy, save it and test the Telegram connection before signing in. Your own proxy can be entered below.</p>
+          <details class="proxy-sources"><summary>Where the list comes from</summary><div id="proxy-catalog-sources"></div><p class="hint" id="proxy-catalog-download"></p><p class="hint">Only compatible public addresses are included. Fake TLS ee entries are skipped. A listed server has not necessarily been tested from your network.</p></details>
+        </div>
+        <form id="network-form">
+          <label for="network-kind">Connection route</label><select id="network-kind"><option value="mtproxy_auto">Automatic MTProxy · public lists</option><option value="direct">Direct connection</option><option value="socks5">SOCKS5 proxy</option><option value="http">HTTP CONNECT proxy</option><option value="mtproxy">MTProxy · experimental</option></select><div class="proxy-link"><label for="network-link">Your MTProxy link · optional</label><input id="network-link" type="password" autocomplete="off" maxlength="2048" placeholder="tg://proxy?server=… or https://t.me/proxy?…">
+          <button class="quiet" id="network-import" type="button">Fill fields from link</button><p class="hint" id="network-link-result" role="status"></p></div><div hidden id="network-endpoint"><label for="network-host">Proxy host or IP</label><input autocomplete="off" id="network-host" maxlength="253" placeholder="proxy.example.org"><label for="network-port">Port</label><input id="network-port" max="65535" min="1" type="number" value="1080"><div id="network-login"><label for="network-username">Username · optional</label><input autocomplete="off" id="network-username" maxlength="255"><label for="network-password">Password · optional</label><input autocomplete="off" id="network-password" maxlength="255" type="password"></div><div hidden id="network-mtproxy"><label for="network-secret">MTProxy secret</label><input autocomplete="off" id="network-secret" maxlength="512" type="password"><p class="hint">32 hex digits or dd + 32 digits. Fake TLS ee secrets are unsupported by this transport.</p></div></div><p class="hint" id="network-auto-help">Automatic MTProxy, the default, picks a working proxy from the public lists, keeps it while it works and moves to the next one when it fails; different workspaces get different proxies. When it moves on is set in Parameters → Automatic MTProxy.</p><p class="hint">Saving replaces this workspace's route and cancels unfinished login. Re-enter any proxy credentials when changing it. A direct connection is used only where IP protection below allows it.</p><div class="route-actions"><button class="secondary" type="submit">Save connection route</button><button class="quiet" id="network-test" type="button">Test Telegram connection</button></div><p class="hint" id="network-result" role="status"></p></form></details>
+    </div>
+    <details class="card padded proxy-pool" id="proxy-pool"><summary>Proxy servers</summary>
       <div class="pool-head">
-        <div><div class="eyebrow">Automatic MTProxy</div><h2>Proxy servers</h2><p class="muted">Every server the automatic route can use: whether it answers, how fast, its country and list. A workspace keeps its server while it works and moves to the next one when it fails.</p></div>
+        <div><div class="eyebrow">Automatic MTProxy</div><p class="muted">Every server the automatic route can use: whether it answers, how fast, its country and list. A workspace keeps its server while it works and moves to the next one when it fails.</p></div>
         <div class="pool-actions"><button class="secondary" id="pool-check" type="button"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Check all now</button><button class="quiet" id="pool-update" type="button">Update lists</button></div>
       </div>
       <div class="pool-stats" id="pool-stats"></div>
@@ -682,21 +699,7 @@
           <div class="pool-save"><button class="primary" id="pool-save" type="button">Save source settings</button><span class="hint" id="pool-save-state" role="status"></span></div>
         </div>
       </details>
-    </section>
-    <div class="card padded route-card"><div class="eyebrow">Connection route</div><h2 id="route-summary">Direct connection</h2><p class="muted" id="route-detail">Choose a route before signing in.</p>
-      <details id="network-details"><summary>Change connection route</summary>
-        <p class="notice route-running" hidden id="network-running">Pause observation to change the route. Until then, observation keeps using the current one.</p>
-        <div class="proxy-catalog"><h3>Public MTProxy lists</h3>
-          <p class="hint" id="proxy-catalog-status" role="status"></p>
-          <label for="proxy-catalog-select">Available public servers</label><select id="proxy-catalog-select" disabled></select>
-          <div class="route-actions"><button class="secondary" id="proxy-catalog-apply" type="button" disabled>Save selected public route</button><button class="quiet" id="proxy-catalog-refresh" type="button">Update public lists</button></div>
-          <p class="hint">Choose a proxy, save it and test the Telegram connection before signing in. Your own proxy can be entered below.</p>
-          <details class="proxy-sources"><summary>Where the list comes from</summary><div id="proxy-catalog-sources"></div><p class="hint" id="proxy-catalog-download"></p><p class="hint">Only compatible public addresses are included. Fake TLS ee entries are skipped. A listed server has not necessarily been tested from your network.</p></details>
-        </div>
-        <form id="network-form">
-          <div class="proxy-link"><label for="network-link">Your MTProxy link · optional</label><input id="network-link" type="password" autocomplete="off" maxlength="2048" placeholder="tg://proxy?server=… or https://t.me/proxy?…">
-          <button class="quiet" id="network-import" type="button">Fill fields from link</button><p class="hint" id="network-link-result" role="status"></p></div><label for="network-kind">Connection route</label><select id="network-kind"><option value="mtproxy_auto">Automatic MTProxy · public lists</option><option value="direct">Direct connection</option><option value="socks5">SOCKS5 proxy</option><option value="http">HTTP CONNECT proxy</option><option value="mtproxy">MTProxy · experimental</option></select><div hidden id="network-endpoint"><label for="network-host">Proxy host or IP</label><input autocomplete="off" id="network-host" maxlength="253" placeholder="proxy.example.org"><label for="network-port">Port</label><input id="network-port" max="65535" min="1" type="number" value="1080"><div id="network-login"><label for="network-username">Username · optional</label><input autocomplete="off" id="network-username" maxlength="255"><label for="network-password">Password · optional</label><input autocomplete="off" id="network-password" maxlength="255" type="password"></div><div hidden id="network-mtproxy"><label for="network-secret">MTProxy secret</label><input autocomplete="off" id="network-secret" maxlength="512" type="password"><p class="hint">32 hex digits or dd + 32 digits. Fake TLS ee secrets are unsupported by this transport.</p></div></div><p class="hint">Automatic MTProxy, the default, picks a working proxy from the public lists, keeps it while it works and moves to the next one when it fails; different workspaces get different proxies. When it moves on is set in Parameters → Automatic MTProxy.</p><p class="hint">Saving replaces this workspace's route and cancels unfinished login. Re-enter any proxy credentials when changing it. A direct connection is used only where IP protection below allows it.</p><div class="route-actions"><button class="secondary" type="submit">Save connection route</button><button class="quiet" id="network-test" type="button">Test Telegram connection</button></div><p class="hint" id="network-result" role="status"></p></form></details>
-    </div>
+    </details>
     <form class="card padded route-card policy-card" id="policy-form"><div class="eyebrow">IP protection</div><h2 id="policy-summary">Hide this server's address</h2>
       <p class="muted">Who may see the address of the machine TgWitness runs on: Telegram, and the services outside Telegram it contacts.</p>
       <div aria-label="IP protection" class="scope-modes" role="radiogroup">
@@ -802,24 +805,10 @@
 </section>
 
 <section class="view" hidden id="view-analysis">
-  <div class="page-heading"><div><h1>Ask the archive</h1><p class="page-description">Search saved observations, review the sources, then choose whether to use AI.</p></div></div>
-  <p id="ai-status" class="notice" role="status"></p>
+  <div class="page-heading"><div><h1>Ask the archive</h1><p class="page-description" id="analysis-description">Search saved observations, review the sources, then choose whether to use AI.</p></div></div>
+  <p id="ask-provider-status" class="notice" role="status" hidden></p>
   <p class="hint"><a id="analysis-help" data-site-doc="analysis" href="https://phishdestroy.github.io/TgWitness/docs/reference/analysis/" target="_blank" rel="noopener noreferrer">Help &amp; documentation</a></p>
-  <details class="card padded" id="ai-settings"><summary>AI provider settings</summary>
-    <form id="ai-settings-form">
-      <label class="check-label"><input id="ai-enabled" type="checkbox"> Enable AI for this workspace</label>
-      <div class="two-columns"><div><label for="ai-provider">Provider</label><select id="ai-provider"><option value="ollama">Ollama</option><option value="compatible">OpenAI-compatible endpoint</option></select></div><div><label for="ai-model">Model name</label><input id="ai-model" maxlength="160" autocomplete="off"></div></div>
-      <label for="ai-endpoint">Processing endpoint</label><input id="ai-endpoint" type="url" required>
-      <p class="hint">For local Ollama, the server administrator sets TGWITNESS_AI_LOCAL_ENDPOINT. The default is http://127.0.0.1:11434.</p>
-      <label for="ai-key">API key</label><input id="ai-key" type="password" autocomplete="new-password" data-sensitive><p class="hint" id="ai-key-state"></p>
-      <label class="check-label"><input id="ai-clear-key" type="checkbox"> Remove the stored API key</label>
-      <div class="two-columns"><div><label for="ai-context">Maximum context characters</label><input id="ai-context" type="number" min="2000" max="64000" required></div><div><label for="ai-output">Maximum output tokens</label><input id="ai-output" type="number" min="128" max="4096" required></div><div><label for="ai-timeout">Request timeout, seconds</label><input id="ai-timeout" type="number" min="5" max="180" required></div><div><label for="ai-budget">Maximum requests per day</label><input id="ai-budget" type="number" min="1" max="1000" required></div></div>
-      <details><summary>Optional cost estimate</summary><div class="two-columns"><div><label for="ai-input-price">Price per million input tokens</label><input id="ai-input-price" type="number" min="0" max="10000" step="any"></div><div><label for="ai-output-price">Price per million output tokens</label><input id="ai-output-price" type="number" min="0" max="10000" step="any"></div></div><label for="ai-currency">Currency code</label><input id="ai-currency" maxlength="3" pattern="[A-Z]{3}" value="USD"></details>
-      <p class="hint">External providers may retain submitted data according to their own policies. TgWitness does not make a retention guarantee for them.</p>
-      <div class="route-actions"><button type="submit" class="primary">Save provider settings</button><button id="ai-test" type="button" class="secondary">Test with synthetic text</button></div>
-      <p id="ai-test-result" role="status"></p>
-    </form>
-  </details>
+
   <form class="card padded" id="ask-form">
     <h2>Find sources</h2><p class="hint" id="ask-workspace"></p>
     <fieldset class="access-group"><legend>Choose chats</legend><div id="ask-chats" class="access-chats"></div></fieldset>
@@ -850,7 +839,24 @@
 </section>
 
 <section class="view" hidden id="view-integrations">
-  <div class="page-heading"><div><h1>Integrations</h1><p class="page-description">MCP · Read your selected archive from an AI client.</p></div></div>
+  <div class="page-heading"><div><h1>Integrations</h1></div></div>
+  <details class="card padded" id="ai-settings"><summary>AI provider settings</summary>
+  <p id="ai-status" class="notice" role="status"></p>
+
+    <form id="ai-settings-form">
+      <label class="check-label"><input id="ai-enabled" type="checkbox"> Enable AI for this workspace</label>
+      <div class="two-columns"><div><label for="ai-provider">Provider</label><select id="ai-provider"><option value="ollama">Ollama</option><option value="compatible">OpenAI-compatible endpoint</option></select></div><div><label for="ai-model">Model name</label><input id="ai-model" maxlength="160" autocomplete="off"></div></div>
+      <label for="ai-endpoint">Processing endpoint</label><input id="ai-endpoint" type="url" required>
+      <p class="hint">For local Ollama, the server administrator sets TGWITNESS_AI_LOCAL_ENDPOINT. The default is http://127.0.0.1:11434.</p>
+      <label for="ai-key">API key</label><input id="ai-key" type="password" autocomplete="new-password" data-sensitive><p class="hint" id="ai-key-state"></p>
+      <label class="check-label"><input id="ai-clear-key" type="checkbox"> Remove the stored API key</label>
+      <div class="two-columns"><div><label for="ai-context">Maximum context characters</label><input id="ai-context" type="number" min="2000" max="64000" required></div><div><label for="ai-output">Maximum output tokens</label><input id="ai-output" type="number" min="128" max="4096" required></div><div><label for="ai-timeout">Request timeout, seconds</label><input id="ai-timeout" type="number" min="5" max="180" required></div><div><label for="ai-budget">Maximum requests per day</label><input id="ai-budget" type="number" min="1" max="1000" required></div></div>
+      <details><summary>Optional cost estimate</summary><div class="two-columns"><div><label for="ai-input-price">Price per million input tokens</label><input id="ai-input-price" type="number" min="0" max="10000" step="any"></div><div><label for="ai-output-price">Price per million output tokens</label><input id="ai-output-price" type="number" min="0" max="10000" step="any"></div></div><label for="ai-currency">Currency code</label><input id="ai-currency" maxlength="3" pattern="[A-Z]{3}" value="USD"></details>
+      <p class="hint">External providers may retain submitted data according to their own policies. TgWitness does not make a retention guarantee for them.</p>
+      <div class="route-actions"><button type="submit" class="primary">Save provider settings</button><button id="ai-test" type="button" class="secondary">Test with synthetic text</button></div>
+      <p id="ai-test-result" role="status"></p>
+    </form>
+  </details>
   <p class="notice">The external model can receive messages requested by its client. Choose the workspaces and chats you want to share.</p>
   <p class="hint"><a id="mcp-help" data-site-doc="mcp" href="https://phishdestroy.github.io/TgWitness/docs/reference/mcp/" target="_blank" rel="noopener noreferrer">Help &amp; documentation</a></p>
   <form class="card padded" id="mcp-form">
