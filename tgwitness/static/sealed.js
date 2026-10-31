@@ -13,7 +13,7 @@ function translate() {
   $("language").value = lang;
   document.querySelectorAll("[data-en]").forEach(el => {el.textContent = el.dataset[lang];});
 }
-$("language").onchange = () => {lang = $("language").value; translate();};
+$("language").onchange = () => {lang = $("language").value; translate(); poll();};
 translate();
 async function api(path, body) {
   const response = await fetch("/api/" + path, {method: body === undefined ? "GET" : "POST",
@@ -68,6 +68,10 @@ async function poll() {
     $("code-box").hidden = state.login !== "login_required";
     $("password-box").hidden = state.login !== "password_required";
     $("progress").hidden = state.phase !== "collecting";
+    $("complete").hidden = state.phase !== "sealed";
+    $("capture-messages").textContent = String(state.history.captured || 0);
+    $("capture-unavailable").textContent = String(state.history.unavailable || 0);
+    $("capture-remaining").textContent = String(Math.ceil(state.remaining_seconds / 60));
     $("resume").hidden = state.history.phase !== "paused";
     $("cancel").hidden = terminal || state.phase === "sealing";
     $("counts").textContent = JSON.stringify({history: state.history.phase, messages: state.history.captured || 0,
@@ -76,7 +80,10 @@ async function poll() {
     $("status").textContent = state.phase === "sealed" ? tr("Capture finished. Wait for the encrypted result in GitHub Artifacts.", "Сбор завершён. Дождитесь зашифрованного результата в GitHub Artifacts.") :
       state.phase === "cancelled" ? tr("Cancelled. No archive will be published.", "Отменено. Архив не будет опубликован.") :
       state.phase === "failed" ? tr("Capture failed. Check this run in GitHub.", "Ошибка сбора. Проверьте запуск в GitHub.") :
-      tr("Session: ", "Сессия: ") + state.phase;
+      state.phase === "sealing" ? tr("Preparing the archive…", "Готовим архив…") :
+      state.phase === "collecting" ? tr("Capturing available messages and files…", "Собираем доступные сообщения и файлы…") :
+      state.authorized ? tr("Connected. Choose a chat to capture.", "Вход выполнен. Выберите чат для выгрузки.") :
+      tr("Sign in to Telegram to continue.", "Для продолжения войдите в Telegram.");
     if (state.authorized) {$("api-hash").value = ""; $("phone").value = ""; qrId = null;}
     if (state.revocation === "not_confirmed") $("error").textContent = tr("Session revocation was not confirmed. End this session in Telegram Settings > Devices.", "Отзыв сессии не подтверждён. Завершите её в Telegram: Настройки → Устройства.");
     if (terminal) {ended = true; sessionStorage.removeItem("sealed-access");}

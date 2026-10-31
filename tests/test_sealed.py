@@ -112,10 +112,12 @@ def test_http_surface_refuses_imports_overrides_and_unsigned_outputs(tmp_path, r
     with TestClient(sealed.create_app(tmp_path / "data", tmp_path / "out", cfg, CapsuleClient)) as client:
         assert client.get("/api/status").status_code == 401
         assert cfg["token"] not in client.get("/").text
+        for path in ("/style.css", "/theme.js", "/mark.svg"):
+            assert client.get(path).status_code == 200
         for path in ("auth/import", "auth/configure", "network", "parameters", "snapshot", "sign", "export/zip",
                      "profiles", "access/admin", "replica", "source-check"):
             assert client.post("/api/" + path, headers=headers, json={}).status_code == 404
-        for path in ("/api/export/zip", "/data/credentials.enc", "/api/media/abc", "/docs", "/openapi.json"):
+        for path in ("/api/export/zip", "/data/credentials.enc", "/api/media/abc", "/docs", "/openapi.json", "/app.js", "/capture.html"):
             assert client.get(path, headers=headers).status_code == 404
         response = client.post("/api/phone", headers=headers, json={"api_id":123,"api_hash":"a"*32,
             "phone":"+15550001111", "session":"IMPORTED_SECRET"})

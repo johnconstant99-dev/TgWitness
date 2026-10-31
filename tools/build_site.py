@@ -57,7 +57,8 @@ WIKI_ASSETS = {
     "assets/connection.png": "docs/assets/connection.png",
 }
 STATIC = {"style.css": "website/style.css", "site.js": "website/site.js",
-          "sealed.html": "website/sealed.html", "sealed.js": "website/sealed.js", "sealed.css": "website/sealed.css",
+          "sealed.html": "website/sealed.html", "sealed.js": "tgwitness/static/cloud-capture.js", "sealed.css": "tgwitness/static/cloud-capture.css",
+          "sealed-story.js": "tgwitness/static/cloud-capture-story.js", "sealed-story.css": "tgwitness/static/cloud-capture-story.css",
           "LICENSE": "LICENSE", "NOTICE": "NOTICE",
           "docs.css": "website/docs.css", "docs.js": "website/docs.js",
           "learn.css": "website/learn.css", "learn.js": "website/learn.js", **ASSETS, **WIKI_ASSETS}
@@ -66,7 +67,8 @@ MODES_PAGES = site_modes.FILES
 # The read-only online demo: the panel's own files, answered from recorded demo records
 # (website/demo/mock.js, tools/capture_demo.py). Nothing on the website can change data.
 DEMO_STATIC = {"demo/" + name: "tgwitness/static/" + name
-               for name in ("style.css", "theme.js", "i18n.js", "app.js", "mark.svg", "guide.css", "guide.js")}
+               for name in ("style.css", "theme.js", "i18n.js", "app.js", "mark.svg", "guide.css", "guide.js",
+                            "cloud-capture.js", "cloud-capture.css", "cloud-capture-story.js", "cloud-capture-story.css", "capture.html")}
 DEMO_STATIC.update({"demo/mock.js": "website/demo/mock.js", "demo/fixtures.json": "website/demo/fixtures.json"})
 DEMO_PAGES = {"demo/index.html": "tgwitness/static/index.html", "demo/guide.html": "tgwitness/static/guide.html",
               "demo/dedicated-account.html": "tgwitness/static/dedicated-account.html"}
@@ -452,7 +454,8 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
              "keywords": modes_words["modes.title"], "text": PlainText(modes_html).text[:SEARCH_TEXT],
              "url": "../" + site_modes.LOCAL},
             *({"title": labels["wiki"] + " · " + reference[key][0], "description": reference[key][1],
-               "keywords": reference[key][2], "text": texts[f"{wiki_hub}{key}/"][:SEARCH_TEXT],
+               "keywords": reference[key][2] + (" " + REFERENCE[key][2] if lang != "en" else ""),
+               "text": texts[f"{wiki_hub}{key}/"][:SEARCH_TEXT],
                "url": "reference/" + key + "/"} for key in page_slugs)]}
         write(hub + "search.json", json.dumps(search, ensure_ascii=False, separators=(",", ":")))
 

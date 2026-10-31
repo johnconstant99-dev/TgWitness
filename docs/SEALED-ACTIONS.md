@@ -13,15 +13,20 @@ establish historical completeness, or certify that nobody accessed the host.
 
 ## User flow
 
+The helper explains the five stages and lets you try message or collector
+substitution on sample data. **Start my capture** opens the wizard.
+
 1. Choose **GitHub Actions capture (preview)** on the project homepage, the
    workspace login screen, or **Exports → Open capture helper**. You can also
    open the [official helper](https://phishdestroy.github.io/TgWitness/sealed.html?lang=en)
-   or `website/sealed.html` from a trusted checkout in a modern browser.
+   or `tgwitness/static/capture.html` from a trusted checkout in a modern browser.
    The helper makes no network requests for key or
    file processing. It is available in English and Russian.
 2. Generate a key and save **sealed-key.json**. This is the only private
    decryption key. Copy the separate public **recipient** value. Losing the
    private key loses access to both the connection and the archive.
+   Confirm that you saved it to unlock the next step. If you already have a
+   delivery file, load the saved key and choose **I already have an archive**.
 3. Fork TgWitness, enable Actions in the fork, and run **Sealed chat capture**.
    Paste the public recipient and choose 30, 60, or 120 minutes. Never put a
    phone number, login code, Telegram password, private key, or session in
@@ -65,6 +70,13 @@ local journal, export the currently open workspace, or reuse its Telegram sessio
 An unfinished cloud capture cannot resume after its runner is destroyed; a new
 workflow starts a new capture. The helper is English/Russian; its entry points
 are translated with the rest of the interface.
+
+The workspace's **Exports → Open capture helper** opens the complete wizard
+inside the panel. The standalone page uses the same wizard, controls and themes.
+Both keep keys and decryption in your browser. GitHub workflow startup and the
+temporary Telegram panel open in separate tabs; the wizard tells you when to
+return. Locking the workspace clears the wizard's in-memory key. Your saved key
+file remains on your device.
 
 ## What is public, and what must stay private
 

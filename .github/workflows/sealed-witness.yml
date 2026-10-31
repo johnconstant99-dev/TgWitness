@@ -20,7 +20,7 @@ permissions:
 jobs:
   capture:
     # The user owns this caller, but the verifier requires the upstream signer below.
-    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@03f00930a188625fb57b4aed143cd55077ddc3f2
+    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@eab5169e400ff3010d8853f42c8e430fe23ffe6b
     with:
       recipient: ${{ inputs.recipient }}
       session_minutes: ${{ inputs.session_minutes }}

@@ -262,6 +262,18 @@ def create_app(root, output, config, client_factory=WitnessClient):
     async def styles():
         return FileResponse(STATIC / "sealed.css", media_type="text/css")
 
+    @app.get("/style.css")
+    async def workspace_styles():
+        return FileResponse(STATIC / "style.css", media_type="text/css")
+
+    @app.get("/theme.js")
+    async def workspace_theme():
+        return FileResponse(STATIC / "theme.js", media_type="text/javascript")
+
+    @app.get("/mark.svg")
+    async def workspace_mark():
+        return FileResponse(STATIC / "mark.svg", media_type="image/svg+xml")
+
     @app.get("/api/status")
     async def status():
         return app.state.session.status()

@@ -122,8 +122,10 @@ def main():
                 expect(demo.locator("#workspace")).to_be_visible()
                 demo.locator('[data-view="evidence"]').click()
                 expect(demo.locator("#export-sealed")).to_be_visible()
-                expect(demo.locator("#export-sealed")).to_have_attribute("href",
-                    "https://phishdestroy.github.io/TgWitness/sealed.html?lang=ru")
+                demo.locator("#export-sealed").click()
+                expect(demo.locator("#view-sealed")).to_be_visible()
+                expect(demo.locator('[data-capture-action="generate"]')).to_be_visible()
+                assert demo.url.startswith(url + "demo/")
                 demo.locator('[data-view="chats"]').click()
                 expect(demo.locator("#chats-list .chat-item")).to_have_count(3)
                 expect(demo.locator('[data-view="observations"]')).to_contain_text("Журнал")

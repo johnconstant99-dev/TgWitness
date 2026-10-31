@@ -1,28 +1,30 @@
 <!doctype html>
-<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TgWitness · Sealed capture</title><link rel="stylesheet" href="/sealed.css">
-<body><main>
-<header><strong>TgWitness</strong><select id="language" aria-label="Language"><option value="en">English</option><option value="ru">Русский</option></select></header>
-<h1 data-en="Private chat capture" data-ru="Выгрузка закрытого чата"></h1>
-<p data-en="One fresh Telegram login, one selected chat. The encrypted result appears in your GitHub run's Artifacts after collection. Keep your private key." data-ru="Новый вход в Telegram, один выбранный чат. Зашифрованный результат появится в Artifacts вашего запуска GitHub после сбора. Сохраните свой закрытый ключ."></p>
-<p class="notice" data-en="GitHub and the HTTPS tunnel remain trusted infrastructure. This is not confidential hardware. Unseen deletions and earlier edits cannot be recovered; incomplete downloads are recorded." data-ru="GitHub и HTTPS-туннель остаются доверенной инфраструктурой. Это не аппаратный анклав. Удалённое до сбора и прошлые правки не восстанавливаются; пропуски загрузки фиксируются."></p>
-<p id="error" role="alert"></p><p id="status" role="status" aria-live="polite"></p>
-<section id="login" hidden><h2 data-en="1. Sign in to Telegram" data-ru="1. Вход в Telegram"></h2>
-<label>API ID<input id="api-id" inputmode="numeric" autocomplete="off"></label>
-<label>API hash<input id="api-hash" type="password" autocomplete="off"></label>
-<p><a href="https://my.telegram.org/apps" target="_blank" rel="noreferrer" data-en="Get your Telegram API credentials" data-ru="Получить API-данные Telegram"></a></p>
-<button id="qr" data-en="Show QR code" data-ru="Показать QR-код"></button><img id="qr-image" alt="Telegram login QR" hidden>
-<label><span data-en="Or phone number, including country code" data-ru="Или телефон с кодом страны"></span><input id="phone" type="tel" autocomplete="off" placeholder="+…"></label>
-<button id="send-code" data-en="Send login code" data-ru="Получить код входа"></button>
-<div id="code-box" hidden><label data-en="Telegram login code" data-ru="Код входа Telegram"></label><input id="code" autocomplete="one-time-code" inputmode="numeric"><button id="confirm-code" data-en="Confirm code" data-ru="Подтвердить код"></button></div>
-<div id="password-box" hidden><label data-en="Telegram two-step verification password" data-ru="Пароль двухэтапной проверки Telegram"></label><input id="password" type="password" autocomplete="off"><button id="confirm-password" data-en="Confirm password" data-ru="Подтвердить пароль"></button></div></section>
-<section id="selection" hidden><h2 data-en="2. Select the chat" data-ru="2. Выберите чат"></h2>
-<button id="refresh" data-en="Load chats" data-ru="Загрузить чаты"></button><p id="dialog-note"></p>
-<label data-en="Chat" data-ru="Чат"></label><select id="chats"></select>
-<button id="collect" disabled data-en="Collect available history and media" data-ru="Собрать доступную историю и вложения"></button></section>
-<section id="progress" hidden><h2 data-en="Collection" data-ru="Сбор"></h2><pre id="counts"></pre>
-<button id="resume" hidden data-en="Resume paused read" data-ru="Продолжить чтение"></button>
-<button id="finish" data-en="Finish now with available data" data-ru="Завершить с уже собранными данными"></button></section>
-<button id="cancel" hidden data-en="Cancel without exporting" data-ru="Отменить без выгрузки"></button>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark"><title>TgWitness · Private chat capture</title>
+<link rel="icon" href="/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/sealed.css"><script src="/theme.js"></script></head>
+<body>
+<header class="runner-header"><a class="brand" href="/"><img src="/mark.svg" width="32" height="32" alt="">TgWitness</a><div class="preferences">
+<select id="language" aria-label="Language"><option value="en">English</option><option value="ru">Русский</option></select>
+<div class="theme-pick" role="group" aria-label="Theme"><button type="button" data-theme-choice="light" aria-label="Light theme"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1 1m12 12 1 1M5 19l1-1M18 6l1-1"/></svg></button><button type="button" data-theme-choice="dark" aria-label="Dark theme"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15A8 8 0 1 1 9 4a7 7 0 0 0 11 11Z"/></svg></button></div></div></header>
+<main class="runner-page"><span class="eyebrow" data-en="TEMPORARY CAPTURE · GITHUB ACTIONS" data-ru="ВРЕМЕННАЯ ВЫГРУЗКА · GITHUB ACTIONS"></span>
+<h1 data-en="Capture your Telegram chat" data-ru="Выгрузите чат Telegram"></h1>
+<p class="page-description" data-en="Sign in, choose one chat and start capture. When it finishes, return to the wizard to open your encrypted archive." data-ru="Войдите в аккаунт, выберите один чат и начните сбор. После завершения вернитесь в мастер, чтобы открыть зашифрованный архив."></p>
+<p id="error" class="notice error" role="alert"></p><p id="status" class="notice" role="status" aria-live="polite"></p>
+<section class="card padded" id="login" hidden><h2 data-en="Sign in to Telegram" data-ru="Вход в Telegram"></h2>
+<p class="hint" data-en="Use your own API credentials. They are used inside this temporary runner, not entered into the GitHub form." data-ru="Используйте свою API-пару. Она используется внутри временного сборщика, а не вводится в форму GitHub."></p>
+<div class="runner-api"><div><label for="api-id">API ID</label><input id="api-id" inputmode="numeric" autocomplete="off"></div><div><label for="api-hash">API hash</label><input id="api-hash" type="password" autocomplete="off"></div></div>
+<p><a href="https://my.telegram.org/apps" target="_blank" rel="noreferrer" data-en="Get API credentials at my.telegram.org" data-ru="Получить API-пару на my.telegram.org"></a></p>
+<button class="secondary" id="qr" data-en="Sign in with QR" data-ru="Войти по QR-коду"></button><img id="qr-image" alt="Telegram login QR" hidden>
+<div class="runner-phone"><label for="phone" data-en="Or enter your phone number, including country code" data-ru="Или введите телефон с кодом страны"></label><input id="phone" type="tel" autocomplete="off" placeholder="+…"><button class="primary" id="send-code" data-en="Get login code" data-ru="Получить код входа"></button></div>
+<div id="code-box" hidden><label for="code" data-en="Code from Telegram" data-ru="Код из Telegram"></label><input id="code" autocomplete="one-time-code" inputmode="numeric"><button class="primary" id="confirm-code" data-en="Confirm code" data-ru="Подтвердить код"></button></div>
+<div id="password-box" hidden><label for="password" data-en="Telegram two-step verification password" data-ru="Пароль двухэтапной проверки Telegram"></label><input id="password" type="password" autocomplete="off"><button class="primary" id="confirm-password" data-en="Confirm password" data-ru="Подтвердить пароль"></button></div></section>
+<section class="card padded" id="selection" hidden><h2 data-en="Choose one chat" data-ru="Выберите один чат"></h2><p class="hint" data-en="Only this chat will be archived. The selection is fixed once collection starts." data-ru="В архив попадёт только этот чат. После начала сбора заменить его нельзя."></p><button class="secondary" id="refresh" data-en="Load my chats" data-ru="Загрузить мои чаты"></button><p id="dialog-note" class="hint"></p><label for="chats" data-en="Chat" data-ru="Чат"></label><select id="chats"></select><button class="primary" id="collect" disabled data-en="Start capture" data-ru="Начать сбор"></button></section>
+<section class="card padded" id="progress" hidden><h2 data-en="Capturing history and files" data-ru="Собираем историю и файлы"></h2>
+<div class="runner-progress"><div><strong id="capture-messages">0</strong><span data-en="Messages" data-ru="Сообщений"></span></div><div><strong id="capture-unavailable">0</strong><span data-en="Unavailable" data-ru="Недоступно"></span></div><div><strong id="capture-remaining">—</strong><span data-en="Minutes left" data-ru="Минут осталось"></span></div></div>
+<p class="hint" data-en="You can finish early with the data already collected. Missing history and failed downloads remain recorded in the journal." data-ru="Можно завершить раньше с уже собранными данными. Пропуски истории и ошибки загрузки останутся в журнале."></p>
+<div class="runner-actions"><button class="primary" id="resume" hidden data-en="Resume paused capture" data-ru="Продолжить сбор"></button><button class="secondary" id="finish" data-en="Finish with collected data" data-ru="Завершить с собранными данными"></button></div><details><summary data-en="Detailed progress" data-ru="Подробный статус"></summary><pre id="counts"></pre></details></section>
+<section class="card padded runner-complete" id="complete" hidden><h2 data-en="Return to the wizard — step 4" data-ru="Вернитесь в мастер — шаг 4"></h2><p data-en="GitHub is attesting and encrypting your archive. Wait for sealed-result in Artifacts, download and unzip it, then open delivery.tgwsealed in the wizard with your saved key." data-ru="GitHub создаёт аттестацию и шифрует архив. Дождитесь sealed-result в Artifacts, скачайте и распакуйте его, затем откройте delivery.tgwsealed в мастере своим сохранённым ключом."></p></section>
+<button class="quiet" id="cancel" hidden data-en="Cancel without an archive" data-ru="Отменить без создания архива"></button>
+<details><summary data-en="Privacy and capture limits" data-ru="Приватность и ограничения"></summary><p data-en="GitHub and the HTTPS tunnel remain trusted infrastructure. This is not confidential hardware. Messages deleted before capture and earlier edits cannot be recovered." data-ru="GitHub и HTTPS-туннель остаются доверенной инфраструктурой. Это не аппаратный анклав. Удалённые до сбора сообщения и прошлые правки не восстанавливаются."></p></details>
 <details><summary data-en="Session details" data-ru="Сведения о запуске"></summary><pre id="context"></pre></details>
 </main><script src="/sealed.js"></script></body></html>

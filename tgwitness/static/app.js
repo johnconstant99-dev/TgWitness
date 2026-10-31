@@ -1,7 +1,7 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
 const state = {token: sessionStorage.getItem("tgwitness-token") || "",
-  view:({account:"connection",sources:"sources",exports:"evidence",journal:"observations"}[location.hash.slice(1)]||"connection"), status: null,
+  view:({account:"connection",sources:"sources",exports:"evidence",journal:"observations",sealed:"sealed"}[location.hash.slice(1)]||"connection"), status: null,
   events: [], dialogs: [], filter: "", source: "", search: "", cursor: null, request: 0, drawerSeq: null,
   profile: sessionStorage.getItem("tgwitness-profile") || "default", profiles: [], demoToken: "", monitoringDirty: false,
   captureDirty: false, workspaceRevision: 0, verification: null, opened:false, connectionSettings:false,
@@ -147,6 +147,7 @@ async function busy(button, work) {
     if(button.id==="chat-send"||button.id==="chat-preview-button")renderComposer();} }
 }
 function lock() {
+  window.dispatchEvent(new Event("tgwitness:lock"));
   $("quick-dialog").close();
   $("workspace").inert=false;
   resetInteractions();
@@ -183,7 +184,7 @@ async function unlock() {
   await refreshEvents();
   loadNotifications().catch(()=>{});
   if(state.view!=="parameters")loadParameters().catch(()=>{});  // names of parameters in journal records
-  if(!state.status.demo&&!state.status.collector.has_session&&viewAllowed("connection"))navigate("connection");
+  if(state.view!=="sealed"&&!state.status.demo&&!state.status.collector.has_session&&viewAllowed("connection"))navigate("connection");
 }
 $("unlock-form").addEventListener("submit", async event => {
   event.preventDefault(); $("login-error").textContent="";
@@ -199,7 +200,7 @@ function may(permission){return !!state.me&&(state.me.admin||state.me.permission
 // Sections an access may open; parts of the whole workspace stay closed where only chosen chats are open.
 function viewAllowed(view){
   const limited=!!state.status?.chats_limited;
-  return {sources:may("sources")&&!limited,evidence:may("export")&&!limited,witness:may("settings")&&!limited,
+  return {sources:may("sources")&&!limited,evidence:may("export")&&!limited,sealed:may("export")&&!limited,witness:may("settings")&&!limited,
     parameters:may("settings")&&!limited,connection:may("account")&&!limited,accounts:!!state.me?.admin,
     access:!!state.me?.admin}[view]??true;
 }
@@ -241,10 +242,11 @@ function navigate(view) {
   $("workspace").dataset.currentView=view;
   document.querySelectorAll(".view").forEach(n=>n.hidden=n.id !== "view-"+view);
   document.querySelectorAll("[data-view]").forEach(n=>{
-    n.classList.toggle("active",n.dataset.view===view);
-    if(n.dataset.view===view)n.setAttribute("aria-current","page");else n.removeAttribute("aria-current");
+    const selected=n.dataset.view===(view==="sealed"?"evidence":view);
+    n.classList.toggle("active",selected);
+    if(selected)n.setAttribute("aria-current","page");else n.removeAttribute("aria-current");
   });
-  $("view-label").textContent=tr({chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",access:"Access"}[view]);
+  $("view-label").textContent=tr({chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",access:"Access"}[view]);
   show("entry-header",view==="connection");
   if(view==="connection")connectionSettings(false);
   if (view==="sources") {renderTargets();loadScope().catch(e=>toast(e.message,true));}
