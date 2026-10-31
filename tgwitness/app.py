@@ -471,6 +471,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         allowed = visible_chats(request)
         return {"version": __version__, "demo": store.get_setting("demo", False),
                 "collector": app.state.collector.status(), "stats": store.stats(allowed),
+                "history": app.state.collector.history.status() if allowed is None else None,
                 "targets": [t for t in store.targets() if allowed is None or t["chat_id"] in allowed],
                 "capture": capture_settings(store),
                 "monitoring": monitoring_settings(store), "scope": scope_settings(store),
@@ -1044,6 +1045,25 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         if body.limit > tuning.value(app.state.store, "snapshot_max"):
             raise HTTPException(422, "The snapshot is larger than this workspace allows. Raise the limit in Parameters.")
         return await operation(app.state.collector.snapshot, body.chat_id, body.limit)
+
+    @app.get("/api/history", dependencies=[Depends(authenticate)])
+    async def history_status():
+        return app.state.collector.history.status()
+
+    @app.post("/api/history/{action}", dependencies=[Depends(authenticate)])
+    async def history_action(action: str):
+        if action not in ("start", "pause", "resume", "cancel"):
+            raise HTTPException(404, "Unknown history action.")
+        return await operation(getattr(app.state.collector.history, action))
+
+    @app.get("/api/history/report", dependencies=[Depends(authenticate)])
+    async def history_report():
+        try:
+            report = app.state.collector.history.report()
+        except ValueError as exc:
+            raise HTTPException(404, str(exc)) from None
+        return Response(canonical(report), media_type="application/json",
+                        headers={"Content-Disposition": 'attachment; filename="tgwitness-history-report.json"'})
 
     @app.get("/api/parameters", dependencies=[Depends(authenticate)])
     async def get_parameters():

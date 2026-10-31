@@ -2535,7 +2535,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "Toplamaya başladıktan sonra, kontrol edilen mesajın günlüğe ulaştığını kontrol edin.",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "İzinler ve kapsam birlikte kontrol edilir. Bir izni işaretlemek,\ndiğer sohbetleri açmaz veya sohbetle sınırlı erişim durumunda çalışma alanı genelinde bir işlemi etkinleştirmez.\nParalel bir dışa aktarım için, erişim seçilen her\nhesapta dışa aktarılan sohbeti kapsamalıdır. Verilen bir erişim, yeni erişimler oluşturamaz, başkalarının\noturumlarını yönetemez veya yönetici konsolunu açamaz.",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "Bir MTProxy yalnızca Telegram trafiğini taşır. Zaman damgaları,\nbildirimler, site dışı kopyalar ve kaynak kontrolleri gibi çalışma alanı HTTP işlemleri, yapılandırıldığında ayrı bir SOCKS5/HTTP proxy&#x27;si kullanır,\nardından hesabın SOCKS5/HTTP yolunu kullanır. Her ikisi de yoksa, Hide IP isteği reddeder;\ndiğer modlar Doğrudan erişime izin verir. Dış istekler devre dışı bırakılabilir. Açıkça\nyapılandırılmış bir besleme indirme proxy’si, ayrı bir operatör geçersiz kılma seçeneği olarak kalır.\nBağımsız tanık hizmeti kendi rotasını korur.",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy yalnızca Telegram trafiğini taşır. Harici istekler için ayrı bir\nSOCKS5/HTTP proxy&#x27;si, çalışma alanının SOCKS5/HTTP rotası veya izin verilen bir doğrudan rota kullanılabilir;\nayrıca devre dışı bırakılabilirler. Bağımsız tanık, kendi aktarım ayarlarına sahiptir.\nSıradan SOCKS5/HTTP CONNECT kimlik doğrulaması, bu proxy\nprotokollerinin kendisi tarafından şifrelenmez. Sahte TLS MTProxy gizli anahtarları hâlâ desteklenmemektedir."
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy yalnızca Telegram trafiğini taşır. Harici istekler için ayrı bir\nSOCKS5/HTTP proxy&#x27;si, çalışma alanının SOCKS5/HTTP rotası veya izin verilen bir doğrudan rota kullanılabilir;\nayrıca devre dışı bırakılabilirler. Bağımsız tanık, kendi aktarım ayarlarına sahiptir.\nSıradan SOCKS5/HTTP CONNECT kimlik doğrulaması, bu proxy\nprotokollerinin kendisi tarafından şifrelenmez. Sahte TLS MTProxy gizli anahtarları hâlâ desteklenmemektedir.",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "GitHub Actions ile kayıt (önizleme)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "Yeni bir Telegram oturumu, tek sohbet, şifrelenmiş arşiv ve GitHub köken doğrulaması.",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "Kayıt yardımcısını aç",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">GitHub Actions ile kayıt (önizleme)</a>"
 },
 "modes": {
 "modes.actions.body": "Önizleme, istek ve sonuç makbuzları imzalanır. Bir düğmeye basılmadan önce, sunucu mesajı tekrar alır ve değiştirilmiş bir klavyeyi reddeder. Geri dönen geri arama metni ve URL'ler, kaydedilmiş bağlamda kalır.",
@@ -2815,7 +2819,10 @@
 "modes.switch.messages": "Yeni mesajlar",
 "modes.switch.reactions": "Tepkiler",
 "modes.theme": "Açık ve koyu tema arasında geçiş yapın",
-"modes.title": "Tek bir günlük. Dört toplama modu. Sekiz doğrulama seviyesi."
+"modes.title": "Tek bir günlük. Dört toplama modu. Sekiz doğrulama seviyesi.",
+"modes.sealed.title": "GitHub Actions ile kayıt (önizleme)",
+"modes.sealed.body": "Yeni bir Telegram oturumu, tek sohbet, şifrelenmiş arşiv ve GitHub köken doğrulaması.",
+"modes.sealed.open": "Kayıt yardımcısını aç"
 },
 "strings": {
 "0 records": "0 kayıt",
@@ -3218,6 +3225,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "erişim izinleri roller kapsam gözden geçiren analist jeton oturumlar IP süre dolumu iptal",
 "access permissions scope token session IP expiry revoke admin console": "erişim izinleri kapsamı jeton oturum IP son kullanma tarihi iptal etme yönetici konsolu",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http otomatik havuz IP modları yedek ağ genel listeler",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy havuzu socks5 http rota IP modu yedekleme api kimliği hash ağ"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy havuzu socks5 http rota IP modu yedekleme api kimliği hash ağ",
+"GitHub Actions capture (preview)": "GitHub Actions ile kayıt (önizleme)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Yeni bir Telegram oturumu, tek sohbet, şifrelenmiş arşiv ve GitHub köken doğrulaması.",
+"Open capture helper": "Kayıt yardımcısını aç"
 }
 }

@@ -339,6 +339,7 @@ document.addEventListener("keydown",event=>{
 });
 
 function renderStatus() {
+  renderHistory();
   renderComposer();
   const s=state.status,c=s.collector,counts=s.stats.counts;
   show("demo-banner",s.demo);
@@ -937,6 +938,39 @@ function renderCaptureDraft(){
 }
 $("capture-form").addEventListener("change",()=>{state.captureDirty=true;renderCaptureDraft();});
 $("capture-form").addEventListener("input",()=>{state.captureDirty=true;renderCaptureDraft();});
+function renderHistory(){
+  const s=state.status,h=s?.history||{phase:"none"},phase=h.phase;
+  const active=phase==="running",paused=phase==="paused",exists=phase!=="none";
+  show("history-card",may("sources")&&!s?.chats_limited);
+  show("history-start",!active&&!paused);show("history-pause",active);
+  show("history-resume",paused);show("history-cancel",active||paused);
+  show("history-report",exists&&may("export"));
+  $("history-start").disabled=!!s?.demo||!s?.collector.running||!s?.targets.some(x=>x.enabled);
+  $("history-resume").disabled=!!s?.demo||!s?.collector.running;
+  const labels={running:tr("Loading history"),paused:tr("History paused"),complete:tr("History reading finished"),
+    incomplete:tr("History finished with gaps"),cancelled:tr("History run ended")};
+  const counts=h.sources_by_phase||{},finished=(counts.complete||0)+(counts.failed||0)+(counts.skipped||0);
+  $("history-progress").textContent=exists?(labels[phase]||phase)+" · "+tr("{messages} messages · {done} of {total} sources",{
+    messages:h.captured,done:finished,total:h.sources_total})+(h.reason?" · "+tr(h.reason):""):
+    tr("{n} enabled sources. Start observation before loading history.",{n:s?.targets.filter(x=>x.enabled).length||0});
+  $("history-media").textContent=exists?tr("Attachments: {done} saved, {pending} pending, {failed} failed. Unavailable messages: {missing}.",{
+    done:h.media?.done||0,pending:h.media_pending||0,failed:h.media?.failed||0,missing:h.unavailable||0}):"";
+  const list=$("history-sources");list.replaceChildren();
+  const phases={queued:tr("Queued"),reading:tr("Reading history"),complete:tr("History reading finished"),
+    failed:tr("Failed"),skipped:tr("Skipped")};
+  for(const source of h.sources||[]){
+    list.append(node("li","",source.title+" · "+(phases[source.phase]||source.phase)+" · "+source.captured+
+      (source.error?" · "+tr(source.error):"")));
+  }
+  if(h.sources_total>50)list.append(node("li","hint",tr("The signed report lists every source.")));
+}
+for(const action of ["start","pause","resume","cancel"]){
+  $("history-"+action).addEventListener("click",e=>busy(e.currentTarget,async()=>{
+    await json("history/"+action,{});await refreshStatus();await refreshEvents();
+  }));
+}
+$("history-report").addEventListener("click",e=>busy(e.currentTarget,()=>download("history/report","tgwitness-history-report.json")));
+
 $("snapshot-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
   toast(tr("Capturing visible history. This may take a minute."));
   const limit=Number($("snapshot-limit").value),most=state.status?.parameters?.snapshot_max||500;

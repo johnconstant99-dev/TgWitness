@@ -2441,7 +2441,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "Selepas memulakan pengumpulan, semak bahawa mesej terkawal sampai ke jurnal.",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "Kebenaran dan skop disemak serentak. Menandakan kebenaran tidak akan membuka sembang lain atau membuka operasi merentas ruang kerja untuk capaian terhad pada sembang.\nUntuk eksport selari, capaian mesti merangkumi sembang yang dieksport dalam setiap akaun yang dipilih. Capaian yang dikeluarkan tidak boleh mencipta capaian baru, mengurus sesi orang lain atau membuka konsol pentadbir.",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "MTProxy hanya membawa trafik Telegram. Operasi Workspace HTTP seperti cap masa, pemberitahuan, salinan luar tapak dan semakan sumber menggunakan proksi SOCKS5/HTTP berasingan apabila dikonfigurasikan, kemudian laluan SOCKS5/HTTP akaun. Tanpa salah satu daripadanya, Hide IP menolak permintaan; mod lain membenarkan Direct. Permintaan luaran boleh dilumpuhkan. Proksi muat turun suapan yang dikonfigurasikan secara eksplisit kekal sebagai keutamaan pengendali berasingan. Perkhidmatan saksi bebas mengekalkan laluan tersendiri.",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy hanya membawa trafik Telegram. Permintaan luaran boleh menggunakan proksi SOCKS5/HTTP berasingan, laluan SOCKS5/HTTP ruang kerja, atau laluan terus yang dibenarkan; ia juga boleh dilumpuhkan. Saksi bebas mempunyai tetapan pengangkutan tersendiri.\nPengesahan CONNECT SOCKS5/HTTP biasa tidak disulitkan oleh protokol proksi tersebut itu sendiri. Rahsia MTProxy TLS palsu masih tidak disokong."
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy hanya membawa trafik Telegram. Permintaan luaran boleh menggunakan proksi SOCKS5/HTTP berasingan, laluan SOCKS5/HTTP ruang kerja, atau laluan terus yang dibenarkan; ia juga boleh dilumpuhkan. Saksi bebas mempunyai tetapan pengangkutan tersendiri.\nPengesahan CONNECT SOCKS5/HTTP biasa tidak disulitkan oleh protokol proksi tersebut itu sendiri. Rahsia MTProxy TLS palsu masih tidak disokong.",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "Pengumpulan melalui GitHub Actions (pratonton)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "Log masuk Telegram baharu, satu sembang, arkib disulitkan dan bukti asal GitHub.",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "Buka pembantu pengumpulan",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">Pengumpulan melalui GitHub Actions (pratonton)</a>"
 },
 "modes": {
 "modes.actions.body": "Kuitans preview, permintaan dan hasil ditandatangani. Sebelum butang ditekan, pelayan memuat semula mesej dan menolak papan kekunci yang diubah. Teks dan URL callback yang dikembalikan kekal sebagai konteks yang direkodkan.",
@@ -2721,7 +2725,10 @@
 "modes.switch.messages": "Mesej baru",
 "modes.switch.reactions": "Reaksi",
 "modes.theme": "Beralih antara tema gelap dan terang",
-"modes.title": "Satu jurnal. Empat mod pengumpulan. Lapan tahap pengesahan."
+"modes.title": "Satu jurnal. Empat mod pengumpulan. Lapan tahap pengesahan.",
+"modes.sealed.title": "Pengumpulan melalui GitHub Actions (pratonton)",
+"modes.sealed.body": "Log masuk Telegram baharu, satu sembang, arkib disulitkan dan bukti asal GitHub.",
+"modes.sealed.open": "Buka pembantu pengumpulan"
 },
 "strings": {
 "All guides": "Semua panduan",
@@ -3072,6 +3079,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "izin akses peranan skop penyemak penganalisis token sesi IP tamat tempoh batalkan",
 "access permissions scope token session IP expiry revoke admin console": "kebenaran akses skop token sesi IP tamat tempoh batalkan konsol pentadbir",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http kolam automatik IP mod fallback rangkaian awam senarai awam",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proksi mtproxy kolam socks5 http laluan IP mod fallback api id hash rangkaian"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proksi mtproxy kolam socks5 http laluan IP mod fallback api id hash rangkaian",
+"GitHub Actions capture (preview)": "Pengumpulan melalui GitHub Actions (pratonton)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Log masuk Telegram baharu, satu sembang, arkib disulitkan dan bukti asal GitHub.",
+"Open capture helper": "Buka pembantu pengumpulan"
 }
 }

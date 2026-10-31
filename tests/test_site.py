@@ -226,9 +226,12 @@ def test_every_page_has_distinct_metadata_and_valid_links(site_root, base_url):
     for name in SEARCH_FILES:
         index = json.loads((output / name).read_text(encoding="utf-8"))
         hub = base_url + "/" + name.removesuffix("search.json")
-        assert len(index["pages"]) == (3 if name.split('/')[0] in site_modes.EXTRA_LANGUAGES else 31)
+        assert len(index["pages"]) == (4 if name.split('/')[0] in site_modes.EXTRA_LANGUAGES else 32)
+        helper = base_url + "/sealed.html?lang=" + ("ru" if name.startswith("ru/") else "en")
+        assert (output / "sealed.html").is_file()
+        assert sum(urljoin(hub, entry["url"]) == helper for entry in index["pages"]) == 1
         for entry in index["pages"]:
-            assert urljoin(hub, entry["url"]) in pages
+            assert urljoin(hub, entry["url"]) in {*pages, helper}
             # Short notices, especially in CJK languages, are valid search content.
             assert entry["text"].strip(), entry["url"]
     sitemap = ET.parse(output / "sitemap.xml")

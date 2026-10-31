@@ -2441,7 +2441,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "Une fois la collecte lancée, vérifiez qu’un message de contrôle parvient bien au journal.",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "Les autorisations et leur portée sont vérifiées conjointement. Cocher une autorisation n’ouvre pas\nd’autres discussions ni ne débloque une opération à l’échelle de l’espace de travail pour un accès limité à une discussion.\nPour une exportation parallèle, l’accès doit couvrir la conversation exportée dans chaque\ncompte sélectionné. Un accès accordé ne permet pas de créer de nouveaux accès, de gérer les\nsessions d’autres personnes ni d’ouvrir la console d’administration.",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "Un MTProxy achemine uniquement le trafic Telegram. Les opérations HTTP de l’espace de travail, telles que les horodatages,\nles notifications, les copies hors site et les vérifications de source, utilisent un proxy SOCKS5/HTTP distinct lorsqu’il\nest configuré, puis la route SOCKS5/HTTP du compte. En l’absence de l’un ou de l’autre, Hide IP refuse la\ndemande ; les autres modes autorisent le mode Direct. Les requêtes externes peuvent être désactivées. Un proxy de téléchargement de flux explicitement\nconfiguré reste une option de contournement distincte gérée par l’opérateur.\nLe service de témoin indépendant conserve sa propre route.",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy achemine uniquement le trafic Telegram. Les requêtes externes peuvent utiliser un\nproxy SOCKS5/HTTP distinct, la route SOCKS5/HTTP de l’espace de travail ou une route directe autorisée ;\nelles peuvent également être désactivées. Le témoin indépendant dispose de ses propres paramètres de transport.\nL’authentification SOCKS5/HTTP CONNECT standard n’est pas chiffrée par ces protocoles de proxy\neux-mêmes. Les faux secrets TLS MTProxy ne sont toujours pas pris en charge."
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy achemine uniquement le trafic Telegram. Les requêtes externes peuvent utiliser un\nproxy SOCKS5/HTTP distinct, la route SOCKS5/HTTP de l’espace de travail ou une route directe autorisée ;\nelles peuvent également être désactivées. Le témoin indépendant dispose de ses propres paramètres de transport.\nL’authentification SOCKS5/HTTP CONNECT standard n’est pas chiffrée par ces protocoles de proxy\neux-mêmes. Les faux secrets TLS MTProxy ne sont toujours pas pris en charge.",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "Collecte via GitHub Actions (version préliminaire)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "Une nouvelle connexion Telegram, une discussion, une archive chiffrée et une attestation de provenance GitHub.",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "Ouvrir l’assistant de collecte",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">Collecte via GitHub Actions (version préliminaire)</a>"
 },
 "modes": {
 "modes.actions.body": "Les accusés de réception d’aperçu, de requête et de résultat sont signés. Avant qu’un bouton ne soit enfoncé, le serveur récupère à nouveau le message et rejette toute modification apportée au clavier. Le texte et les URL des rappels renvoyés restent enregistrés dans le contexte.",
@@ -2721,7 +2725,10 @@
 "modes.switch.messages": "Nouveaux messages",
 "modes.switch.reactions": "Réactions",
 "modes.theme": "Basculer entre le thème clair et le thème sombre",
-"modes.title": "Un journal. Quatre modes de collecte. Huit niveaux de vérification."
+"modes.title": "Un journal. Quatre modes de collecte. Huit niveaux de vérification.",
+"modes.sealed.title": "Collecte via GitHub Actions (version préliminaire)",
+"modes.sealed.body": "Une nouvelle connexion Telegram, une discussion, une archive chiffrée et une attestation de provenance GitHub.",
+"modes.sealed.open": "Ouvrir l’assistant de collecte"
 },
 "strings": {
 "All guides": "Tous les guides",
@@ -3072,6 +3079,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "droits d’accès, rôles, périmètre, réviseur, analyste, jeton, sessions, adresse IP, expiration, révocation",
 "access permissions scope token session IP expiry revoke admin console": "droit d'accès, portée, jeton, session, adresse IP, expiration, révocation, console d'administration",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http pool automatique modes IP solution de secours réseau listes publiques",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http route IP mode fallback api id hash réseau"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http route IP mode fallback api id hash réseau",
+"GitHub Actions capture (preview)": "Collecte via GitHub Actions (version préliminaire)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Une nouvelle connexion Telegram, une discussion, une archive chiffrée et une attestation de provenance GitHub.",
+"Open capture helper": "Ouvrir l’assistant de collecte"
 }
 }

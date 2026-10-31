@@ -1386,6 +1386,67 @@ def verify_public_proof(path, collector_fingerprint=None, witness_fingerprint=No
     return result
 
 
+def verify_history_report(path, expected_fingerprint=None, bundle=None):
+    value = read_json_file(path)
+    statement = value["statement"]
+    if not is_format(statement.get("format"), "history-report-v1"):
+        raise ValueError("Unsupported history progress report")
+    public = statement["public_key"]
+    fp = fingerprint(public)
+    if expected_fingerprint and fp != expected_fingerprint:
+        raise ValueError("Public key differs from the independently trusted fingerprint")
+    Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True)).verify(
+        base64.b64decode(value["signature"], validate=True), canonical(statement))
+    sources = statement["sources"]
+    ids = [s["chat_id"] for s in sources]
+    if (any(type(cid) is not int for cid in ids) or len(set(ids)) != len(ids)
+            or type(statement["sources_total"]) is not int or len(ids) != statement["sources_total"]):
+        raise ValueError("History report source list is inconsistent")
+    for key in ("captured", "unavailable"):
+        if (type(statement[key]) is not int or any(type(s[key]) is not int or s[key] < 0 for s in sources)
+                or sum(s[key] for s in sources) != statement[key]):
+            raise ValueError("History report counts are inconsistent")
+    checkpoint = statement["checkpoint"]
+    boundary = checkpoint["statement"]["event_count"]
+    if type(boundary) is not int or boundary < 0:
+        raise ValueError("Invalid history report checkpoint")
+    verify_checkpoint(checkpoint, public, boundary, lambda seq: checkpoint["statement"]["head_hash"])
+    checked = False
+    if bundle:
+        verify_bundle(bundle, fp, checkpoint)
+        counts = {cid: {"captured": 0, "unavailable": 0} for cid in ids}
+        observed_sources = None
+        with open_archive(bundle) as archive, archive.open("events.jsonl") as stream:
+            for line in bounded_lines(stream):
+                event = json.loads(line)
+                if event["seq"] > boundary:
+                    break
+                payload = event["payload"]
+                if payload.get("history_run_id") != statement["id"]:
+                    continue
+                if event["kind"] == "history.started":
+                    observed_sources = payload["sources"]
+                    if payload["account_id"] != statement["account_id"]:
+                        raise ValueError("History report account differs from the journal")
+                elif event["kind"] in ("message.snapshot", "history.message.unavailable"):
+                    if event["chat_id"] not in counts:
+                        raise ValueError("History report omits an acquired source")
+                    key = "captured" if event["kind"] == "message.snapshot" else "unavailable"
+                    counts[event["chat_id"]][key] += 1
+        if observed_sources is None or set(observed_sources) != set(ids):
+            raise ValueError("History report source plan differs from the journal")
+        if any(counts[s["chat_id"]] != {key: s[key] for key in ("captured", "unavailable")} for s in sources):
+            raise ValueError("History report counts differ from the journal")
+        checked = True
+    return {"format": statement["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
+            "history_run_id": statement["id"], "phase": statement["phase"], "captured": statement["captured"],
+            "unavailable": statement["unavailable"], "sources_total": statement["sources_total"],
+            "evidence_counts_checked": checked, "checkpoint_event_count": boundary,
+            "limitation": "Journal comparison checks the source plan, account and message counters. "
+                          "Other progress fields are signed statements only. No proof of Telegram origin "
+                          "or historical completeness."}
+
+
 def producer_line(producer):
     if not producer:
         return "Producer: not named in this (older) archive."
@@ -1395,7 +1456,7 @@ def producer_line(producer):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("bundle", type=Path, help="Evidence ZIP, chat export ZIP, witness ZIP, profile or public proof JSON")
+    parser.add_argument("bundle", type=Path, help="Evidence/chat/witness ZIP, profile/proof/history report JSON")
     parser.add_argument("--fingerprint", help="Public key fingerprint retained independently")
     parser.add_argument("--checkpoint", type=Path, help="Previously retained signed checkpoint JSON")
     parser.add_argument("--tsa-ca", type=Path, help="Root certificate of the timestamp authority (PEM)")
@@ -1404,7 +1465,7 @@ def main():
     parser.add_argument("--require-witness", action="store_true",
                         help="Require a pinned witness checkpoint matching the full evidence ZIP's final record")
     parser.add_argument("--channel", help="Witness channel posts: Telegram Desktop result.json, saved page or t.me/s URL")
-    parser.add_argument("--evidence", type=Path, help="With a profile/proof JSON: independently verify the matching evidence ZIP")
+    parser.add_argument("--evidence", type=Path, help="With a profile/proof/history JSON: verify the matching evidence ZIP")
     parser.add_argument("--max-gib", type=int, default=MAX_UNCOMPRESSED_GIB,
                         help="Largest uncompressed archive to read, in GiB (default 4)")
     args = parser.parse_args()
@@ -1422,6 +1483,11 @@ def main():
             kind = read_json_file(args.bundle).get("statement", {}).get("format")
             if is_format(kind, "public-proof-v1"):
                 result = verify_public_proof(args.bundle, args.fingerprint, args.witness_fingerprint, args.evidence)
+            elif is_format(kind, "history-report-v1"):
+                result = verify_history_report(args.bundle, args.fingerprint, args.evidence)
+                pinned = bool(args.fingerprint)
+                if not args.evidence:
+                    notes.append("History report signature only: pass --evidence to cross-check the journal and counts.")
             else:
                 result = verify_dossier(args.bundle, args.fingerprint, args.evidence)
                 pinned = bool(args.fingerprint)

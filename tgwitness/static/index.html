@@ -85,6 +85,7 @@
     <button class="primary full" type="submit">Open workspace</button>
   </form>
   <button class="primary full" hidden id="open-demo" type="button">Explore demo</button>
+  <a class="text-link" id="gate-sealed" data-sealed-helper href="https://phishdestroy.github.io/TgWitness/sealed.html" target="_blank" rel="noopener noreferrer">GitHub Actions capture (preview)</a>
   <details class="gate-token-help"><summary>Where is my access token?</summary><p class="hint" id="gate-help">Find it in <code>data/live/panel-token.txt</code>.<br>Demo mode uses <code>data/demo/panel-token.txt</code>.<br>For a custom directory, follow the path printed at startup.</p></details>
   <p id="login-error" role="alert"></p>
   <div class="preferences">
@@ -229,6 +230,22 @@
   </form>
   <div class="card padded"><h2 id="target-list-title">Selected chats</h2><div id="target-list"></div></div>
   <div class="card padded" hidden id="available-card"><h2>Available chats</h2><div class="dialog-filters"><input aria-label="Find an available chat" id="dialog-search" placeholder="Find a chat…" type="search"><select aria-label="Chat type" id="dialog-kind"><option value="">All types</option><option value="channels">Channels</option><option value="groups">Groups</option><option value="private">Private chats</option><option value="bots">Bots</option></select></div><p class="hint" id="dialog-limit"></p><div id="dialog-list"></div><button class="primary" id="finish-source-selection" type="button">Done</button></div>
+  <section class="card padded" id="history-card" aria-labelledby="history-heading">
+    <div class="eyebrow">Full history</div><h2 id="history-heading">Bring past messages into this workspace</h2>
+    <p class="muted">Load the available history of every enabled source into Chats and the signed journal. Progress survives a restart. Attachments follow your media settings. Deleted messages and unseen past edits cannot be recovered.</p>
+    <p class="hint">For an account archive, choose Whole account above, load and review the source list, then start observation. This run uses the enabled sources listed at its start; new sources are not added to a running job.</p>
+    <div class="chat-export-actions">
+      <button class="primary" id="history-start" type="button">Load full history</button>
+      <button class="secondary" id="history-pause" type="button" hidden>Pause history</button>
+      <button class="primary" id="history-resume" type="button" hidden>Continue history</button>
+      <button class="quiet" id="history-cancel" type="button" hidden>End this history run</button>
+      <button class="quiet" id="history-report" type="button" hidden>Save signed progress report</button>
+    </div>
+    <p id="history-progress" role="status" aria-live="polite"></p>
+    <p class="hint" id="history-media"></p>
+    <ul id="history-sources"></ul>
+    <p class="hint">Use Export evidence to hand over the journal and saved attachments. Finishing history reads does not mean every attachment was downloaded.</p>
+  </section>
   <details class="source-options" id="source-options"><summary>Recording settings · what to save, photos &amp; files, history</summary>
   <form class="card padded monitoring-card" id="monitoring-form">
     <div class="eyebrow">Monitoring policy</div><h2>Choose which changes to preserve</h2>
@@ -275,6 +292,11 @@
       <small>Includes all sources through a fixed journal boundary, regardless of filters. Streaming export · ZIP limit: 4 GiB uncompressed unless changed in Parameters.</small>
     </div>
   </div>
+  <section class="card padded" id="sealed-capture-option">
+    <h2>GitHub Actions capture (preview)</h2>
+    <p>A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.</p>
+    <a class="text-link" id="export-sealed" data-sealed-helper href="https://phishdestroy.github.io/TgWitness/sealed.html" target="_blank" rel="noopener noreferrer">Open capture helper</a>
+  </section>
   <div class="export-grid">
     <button class="card export-card" data-export="jsonl"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-braces"/></svg></span><h3>JSONL journal</h3><p>Original event records and individual signatures. One event per line.</p><span>Download .jsonl</span></button>
     <button class="card export-card" data-export="csv"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-table"/></svg></span><h3>Spreadsheet</h3><p>Review observations in your analysis tools. Formula-safe cells.</p><span>Download .csv</span></button>

@@ -2536,7 +2536,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "开始收集后，请确认一条受控消息已成功写入日志。",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "权限和范围将一并核查。勾选某项权限不会\n打开其他聊天记录，也不会为仅限特定聊天记录的访问权限解锁工作区范围的操作。\n若要进行并行导出，访问权限必须涵盖所有选定\n账户中的被导出聊天。已授予的访问权限无法创建新访问权限、管理他人的\n会话或打开管理员控制台。",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "MTProxy 仅传输 Telegram 流量。工作区中的 HTTP 操作（如时间戳、\n通知、异地副本和源头验证）在\n配置时会使用独立的 SOCKS5/HTTP 代理，随后则使用该账户的 SOCKS5/HTTP 路由。若未配置上述任一设置，Hide IP 将拒绝\n该请求；其他模式则允许直接连接。 外部请求可被禁用。明确\n配置的订阅源下载代理仍由操作员单独控制。\n独立的见证服务保持其自身的路由。",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy 仅传输 Telegram 流量。外部请求可使用独立的\nSOCKS5/HTTP 代理、工作区的 SOCKS5/HTTP 路由，或允许的直连路由；\n也可将其禁用。独立见证器拥有自己的传输设置。\n普通 SOCKS5/HTTP CONNECT 身份验证不会由这些代理\n协议本身进行加密。伪 TLS MTProxy 密钥目前仍不支持。"
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy 仅传输 Telegram 流量。外部请求可使用独立的\nSOCKS5/HTTP 代理、工作区的 SOCKS5/HTTP 路由，或允许的直连路由；\n也可将其禁用。独立见证器拥有自己的传输设置。\n普通 SOCKS5/HTTP CONNECT 身份验证不会由这些代理\n协议本身进行加密。伪 TLS MTProxy 密钥目前仍不支持。",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "通过 GitHub Actions 采集（预览版）",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "新建 Telegram 登录会话、一个聊天、加密归档和 GitHub 来源证明。",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "打开采集助手",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">通过 GitHub Actions 采集（预览版）</a>"
 },
 "modes": {
 "modes.actions.body": "预览、请求和结果回执均经过签名。在按下按钮之前，服务器会再次获取消息，并拒绝已更改的键盘输入。返回的回调文本和 URL 仍作为记录上下文保留。",
@@ -2816,7 +2820,10 @@
 "modes.switch.messages": "新消息",
 "modes.switch.reactions": "反馈",
 "modes.theme": "在浅色和深色主题之间切换",
-"modes.title": "一个日志。四种收集模式。八个验证级别。"
+"modes.title": "一个日志。四种收集模式。八个验证级别。",
+"modes.sealed.title": "通过 GitHub Actions 采集（预览版）",
+"modes.sealed.body": "新建 Telegram 登录会话、一个聊天、加密归档和 GitHub 来源证明。",
+"modes.sealed.open": "打开采集助手"
 },
 "strings": {
 "0 records": "0 条记录",
@@ -3219,6 +3226,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "访问权限 角色 范围 审核员 分析师 令牌 会话 IP 过期 撤销",
 "access permissions scope token session IP expiry revoke admin console": "访问权限 范围 令牌 会话 IP 过期 撤销 管理控制台",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http 自动池 IP 模式 备用网络 公共列表",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "代理 mtproxy 池 socks5 http 路由 IP 模式 备用 api id 哈希 网络"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "代理 mtproxy 池 socks5 http 路由 IP 模式 备用 api id 哈希 网络",
+"GitHub Actions capture (preview)": "通过 GitHub Actions 采集（预览版）",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "新建 Telegram 登录会话、一个聊天、加密归档和 GitHub 来源证明。",
+"Open capture helper": "打开采集助手"
 }
 }

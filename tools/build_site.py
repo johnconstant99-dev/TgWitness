@@ -57,6 +57,7 @@ WIKI_ASSETS = {
     "assets/connection.png": "docs/assets/connection.png",
 }
 STATIC = {"style.css": "website/style.css", "site.js": "website/site.js",
+          "sealed.html": "website/sealed.html", "sealed.js": "website/sealed.js", "sealed.css": "website/sealed.css",
           "LICENSE": "LICENSE", "NOTICE": "NOTICE",
           "docs.css": "website/docs.css", "docs.js": "website/docs.js",
           "learn.css": "website/learn.css", "learn.js": "website/learn.js", **ASSETS, **WIKI_ASSETS}
@@ -442,6 +443,9 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
         for slug in page_slugs:
             texts[f"{wiki_hub}{slug}/"] = PlainText(rendered[slug]).text
         search = {"labels": {k: labels[k] for k in ("empty", "results", "prompt")}, "pages": [
+            {"title": modes_words["modes.sealed.title"], "description": modes_words["modes.sealed.body"],
+             "keywords": "GitHub Actions sealed capture", "text": modes_words["modes.sealed.body"],
+             "url": relative_file(hub, "sealed.html") + "?lang=" + ("ru" if lang == "ru" else "en")},
             *({"title": guides[key][0], "description": guides[key][1], "keywords": guides[key][2],
                "text": texts[hub + key + "/"][:SEARCH_TEXT], "url": key + "/"} for key in (GUIDES if full_site else ())),
             {"title": modes_words["modes.eyebrow"], "description": modes_words["modes.seo"],
@@ -454,6 +458,8 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
 
         def sidebar(path):
             items = [f'<a href="{relative_file(path, base + site_modes.LOCAL)}">{html.escape(modes_words["modes.eyebrow"])}</a>']
+            items.append(f'<a href="{relative_file(path, "sealed.html")}?lang={"ru" if lang == "ru" else "en"}">'
+                         f'{html.escape(modes_words["modes.sealed.title"])}</a>')
             if not full_site:
                 wiki = ''.join(f'<a href="{relative(path, wiki_hub + key + "/")}"'
                                + (' aria-current="page"' if path == wiki_hub + key + '/' else '')
@@ -517,6 +523,10 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                         f'<h2>{html.escape(modes_words["modes.eyebrow"])}</h2>'
                         f'<p>{html.escape(modes_words["modes.seo"])}</p></a>')
             for index, (label, heading, keys) in enumerate(GROUPS):
+                if index == 0:
+                    content += (f'<a class="guide-card" href="{relative_file(hub, "sealed.html")}?lang={"ru" if lang == "ru" else "en"}">'
+                                f'<h2>{html.escape(modes_words["modes.sealed.title"])}</h2>'
+                                f'<p>{html.escape(modes_words["modes.sealed.body"])}</p></a>')
                 content += f'<h2 id="section-{index}">{t(heading)}</h2><div class="guide-grid">'
                 content += "".join(card(hub, hub + key + "/", f"{list(GUIDES).index(key) + 1:02d}", *guides[key][:2]) for key in keys)
                 content += '</div>'

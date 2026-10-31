@@ -2441,7 +2441,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "Po rozpoczęciu gromadzenia danych proszę sprawdzić, czy kontrolowana wiadomość trafiła do dziennika.",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "Uprawnienia i zakres są sprawdzane łącznie. Zaznaczenie uprawnienia nie powoduje otwarcia\ninnych czatów ani odblokowania operacji obejmującej cały obszar roboczy w przypadku dostępu ograniczonego do konkretnego czatu.\nW przypadku eksportu równoległego uprawnienie musi obejmować eksportowany czat na każdym wybranym\nkoncie. Przyznane uprawnienie nie pozwala na tworzenie nowych uprawnień, zarządzanie sesjami innych osób\nani otwieranie konsoli administratora.",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "Proxy MTProxy obsługuje wyłącznie ruch z aplikacji Telegram. Operacje HTTP w obszarze roboczym, takie jak znaczniki czasu,\npowiadomienia, kopie zewnętrzne i weryfikacja źródeł, korzystają z oddzielnego proxy SOCKS5/HTTP, o ile\nzostało ono skonfigurowane, a następnie z trasy SOCKS5/HTTP danego konta. W przypadku braku którejkolwiek z tych opcji usługa Hide IP odrzuca\nżądanie; pozostałe tryby zezwalają na połączenie bezpośrednie. Żądania zewnętrzne można wyłączyć. Wyraźnie\nskonfigurowany serwer proxy do pobierania kanałów pozostaje odrębną opcją nadpisującą ustawienia domyślne.\nNiezależna usługa świadków zachowuje własną trasę.",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy obsługuje wyłącznie ruch z aplikacji Telegram. Żądania zewnętrzne mogą korzystać z oddzielnego\nproxy SOCKS5/HTTP, trasy SOCKS5/HTTP obszaru roboczego lub dozwolonej trasy bezpośredniej;\nmożna je również wyłączyć. Niezależny moduł „witness” posiada własne ustawienia transportowe.\nZwykłe uwierzytelnianie SOCKS5/HTTP CONNECT nie jest szyfrowane przez same protokoły\nproxy. Fałszywe klucze tajne TLS MTProxy nadal nie są obsługiwane."
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy obsługuje wyłącznie ruch z aplikacji Telegram. Żądania zewnętrzne mogą korzystać z oddzielnego\nproxy SOCKS5/HTTP, trasy SOCKS5/HTTP obszaru roboczego lub dozwolonej trasy bezpośredniej;\nmożna je również wyłączyć. Niezależny moduł „witness” posiada własne ustawienia transportowe.\nZwykłe uwierzytelnianie SOCKS5/HTTP CONNECT nie jest szyfrowane przez same protokoły\nproxy. Fałszywe klucze tajne TLS MTProxy nadal nie są obsługiwane.",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "Zbieranie przez GitHub Actions (wersja wstępna)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "Nowe logowanie do Telegrama, jeden czat, zaszyfrowane archiwum i potwierdzenie pochodzenia GitHub.",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "Otwórz asystenta zbierania",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">Zbieranie przez GitHub Actions (wersja wstępna)</a>"
 },
 "modes": {
 "modes.actions.body": "Potwierdzenia podglądu, żądania i wyników są podpisane. Przed naciśnięciem przycisku serwer ponownie pobiera wiadomość i odrzuca zmienioną treść wprowadzoną z klawiatury. Zwrócony tekst wywołania zwrotnego oraz adresy URL pozostają w zarejestrowanym kontekście.",
@@ -2721,7 +2725,10 @@
 "modes.switch.messages": "Nowe wiadomości",
 "modes.switch.reactions": "Reakcje",
 "modes.theme": "Przełączaj między jasnym a ciemnym motywem",
-"modes.title": "Jeden dziennik. Cztery tryby gromadzenia danych. Osiem poziomów weryfikacji."
+"modes.title": "Jeden dziennik. Cztery tryby gromadzenia danych. Osiem poziomów weryfikacji.",
+"modes.sealed.title": "Zbieranie przez GitHub Actions (wersja wstępna)",
+"modes.sealed.body": "Nowe logowanie do Telegrama, jeden czat, zaszyfrowane archiwum i potwierdzenie pochodzenia GitHub.",
+"modes.sealed.open": "Otwórz asystenta zbierania"
 },
 "strings": {
 "All guides": "Wszystkie przewodniki",
@@ -3072,6 +3079,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "uprawnienia dostępu role zakres recenzent analityk token sesje adres IP wygaśnięcie cofnięcie",
 "access permissions scope token session IP expiry revoke admin console": "uprawnienia dostępu, zakres, token, sesja, adres IP, wygaśnięcie, cofnięcie, konsola administracyjna",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http automatyczna pula tryby IP rezerwa sieć publiczne listy",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pula socks5 http trasa IP tryb rezerwowy api id hash sieć"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pula socks5 http trasa IP tryb rezerwowy api id hash sieć",
+"GitHub Actions capture (preview)": "Zbieranie przez GitHub Actions (wersja wstępna)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Nowe logowanie do Telegrama, jeden czat, zaszyfrowane archiwum i potwierdzenie pochodzenia GitHub.",
+"Open capture helper": "Otwórz asystenta zbierania"
 }
 }

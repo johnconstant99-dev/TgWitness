@@ -183,6 +183,15 @@ reported coverage gaps stay alongside the record.
 An operator who holds the signing key can sign fabricated input. A hash chain
 alone cannot establish source truth. [Evidence model and trust boundaries →](docs/EVIDENCE.md)
 
+A [sealed capture preview](docs/SEALED-ACTIONS.md), available from `main`, lets a personal
+fork call a pinned upstream collector workflow and receive an encrypted archive
+with GitHub provenance. It uses a restricted fresh-login panel and does not
+claim confidential hardware or Telegram-signed messages.
+[Инструкция на русском →](docs/ru/SEALED-ACTIONS.md)
+
+[Open the capture helper →](https://phishdestroy.github.io/TgWitness/sealed.html)
+The same option is available on the workspace login screen and under **Exports**.
+
 </details>
 
 <details>

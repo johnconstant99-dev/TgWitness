@@ -1,0 +1,78 @@
+name: Sealed capture validation
+on:
+  push:
+    paths:
+      - 'tgwitness/sealed*'
+      - 'tgwitness/static/sealed*'
+      - 'website/sealed*'
+      - 'scripts/sealed_runner.py'
+      - 'deploy/Dockerfile.sealed'
+      - 'deploy/*.lock'
+      - 'tests/test_sealed*'
+      - 'tools/check_sealed*'
+      - '.github/workflows/sealed*'
+  pull_request:
+    paths:
+      - 'tgwitness/sealed*'
+      - 'tgwitness/static/sealed*'
+      - 'website/sealed*'
+      - 'scripts/sealed_runner.py'
+      - 'deploy/Dockerfile.sealed'
+      - 'deploy/*.lock'
+      - 'tests/test_sealed*'
+      - 'tools/check_sealed*'
+      - '.github/workflows/sealed*'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sealed-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  attestation-binding:
+    if: github.event_name == 'push' && github.repository == 'phishdestroy/TgWitness'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Create a clearly synthetic public test subject
+        run: printf '%s\n' 'TgWitness synthetic attestation integration test. No Telegram content.' > synthetic.txt
+      - name: Generate a real test certificate
+        id: attest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: synthetic.txt
+      - name: Verify the test identity and reject it as a production collector
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+          EXPECTED_SHA: ${{ github.workflow_sha }}
+        run: |
+          gh attestation verify synthetic.txt --bundle "$BUNDLE" --repo phishdestroy/TgWitness \
+            --signer-workflow phishdestroy/TgWitness/.github/workflows/sealed-checks.yml \
+            --signer-digest "$EXPECTED_SHA" --deny-self-hosted-runners
+          if gh attestation verify synthetic.txt --bundle "$BUNDLE" --repo phishdestroy/TgWitness \
+            --signer-workflow phishdestroy/TgWitness/.github/workflows/sealed-collector.yml \
+            --signer-digest 03f00930a188625fb57b4aed143cd55077ddc3f2 --deny-self-hosted-runners; then
+            echo 'ERROR: test signer accepted as production collector'
+            exit 1
+          fi
+  synthetic-and-container:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install test dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/sealed-tests"
+          echo "$RUNNER_TEMP/sealed-tests/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install -c deploy/constraints.txt -e '.[dev]'
+      - run: python -m pytest -q tests/test_sealed.py tests/test_sealed_workflow.py tests/test_history.py
+      - run: python -m playwright install --with-deps chromium
+      - run: python tools/check_sealed_browser.py
+      - run: python tools/check_sealed_container.py

@@ -2536,7 +2536,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "Setelah memulai pengumpulan, pastikan bahwa pesan yang dikendalikan telah tercatat dalam jurnal.",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "Izin dan cakupan diperiksa secara bersamaan. Mencentang suatu izin tidak akan membuka\nobrolan lain atau membuka operasi di seluruh ruang kerja untuk akses yang terbatas pada obrolan tertentu.\nUntuk ekspor paralel, akses harus mencakup obrolan yang diekspor di setiap\nakun yang dipilih. Akses yang diterbitkan tidak dapat membuat akses baru, mengelola\nsesi orang lain, atau membuka konsol administrator.",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "MTProxy hanya mengangkut lalu lintas Telegram. Operasi HTTP Workspace seperti cap waktu,\npemberitahuan, salinan di luar situs, dan pemeriksaan sumber menggunakan proxy SOCKS5/HTTP terpisah saat\ndikonfigurasi, kemudian rute SOCKS5/HTTP akun tersebut. Tanpa keduanya, Hide IP akan menolak\npermintaan; mode lainnya mengizinkan Direct. Permintaan eksternal dapat dinonaktifkan. Proksi unduhan umpan yang\ndikonfigurasi secara eksplisit tetap menjadi pengaturan khusus operator.\nLayanan saksi independen mempertahankan rutenya sendiri.",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy hanya mengangkut lalu lintas Telegram. Permintaan eksternal dapat menggunakan\nproksi SOCKS5/HTTP terpisah, rute SOCKS5/HTTP ruang kerja, atau rute langsung yang diizinkan;\npermintaan tersebut juga dapat dinonaktifkan. Saksi independen memiliki pengaturan transportasi tersendiri.\nOtentikasi SOCKS5/HTTP CONNECT biasa tidak dienkripsi oleh\nprotokol proxy tersebut sendiri. Rahasia TLS MTProxy palsu tetap tidak didukung."
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy hanya mengangkut lalu lintas Telegram. Permintaan eksternal dapat menggunakan\nproksi SOCKS5/HTTP terpisah, rute SOCKS5/HTTP ruang kerja, atau rute langsung yang diizinkan;\npermintaan tersebut juga dapat dinonaktifkan. Saksi independen memiliki pengaturan transportasi tersendiri.\nOtentikasi SOCKS5/HTTP CONNECT biasa tidak dienkripsi oleh\nprotokol proxy tersebut sendiri. Rahasia TLS MTProxy palsu tetap tidak didukung.",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "Pengambilan melalui GitHub Actions (pratinjau)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "Login Telegram baru, satu obrolan, arsip terenkripsi, dan bukti asal GitHub.",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "Buka asisten pengambilan",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">Pengambilan melalui GitHub Actions (pratinjau)</a>"
 },
 "modes": {
 "modes.actions.body": "Tanda terima pratinjau, permintaan, dan hasil ditandatangani. Sebelum tombol ditekan, server mengambil pesan tersebut kembali dan menolak perubahan yang dilakukan melalui keyboard. Teks dan URL callback yang dikembalikan tetap menjadi konteks yang tercatat.",
@@ -2816,7 +2820,10 @@
 "modes.switch.messages": "Pesan baru",
 "modes.switch.reactions": "Reaksi",
 "modes.theme": "Beralih antara tema terang dan gelap",
-"modes.title": "Satu jurnal. Empat mode pengumpulan. Delapan tingkat verifikasi."
+"modes.title": "Satu jurnal. Empat mode pengumpulan. Delapan tingkat verifikasi.",
+"modes.sealed.title": "Pengambilan melalui GitHub Actions (pratinjau)",
+"modes.sealed.body": "Login Telegram baru, satu obrolan, arsip terenkripsi, dan bukti asal GitHub.",
+"modes.sealed.open": "Buka asisten pengambilan"
 },
 "strings": {
 "0 records": "0 catatan",
@@ -3219,6 +3226,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "izin akses peran cakupan peninjau analis token sesi IP masa berlaku pencabutan",
 "access permissions scope token session IP expiry revoke admin console": "ruang lingkup izin akses, token, sesi, IP, masa berlaku, pencabutan, konsol admin",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http mode kolam IP otomatis, mode cadangan, jaringan publik, daftar",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http rute IP mode fallback api id hash jaringan"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http rute IP mode fallback api id hash jaringan",
+"GitHub Actions capture (preview)": "Pengambilan melalui GitHub Actions (pratinjau)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Login Telegram baru, satu obrolan, arsip terenkripsi, dan bukti asal GitHub.",
+"Open capture helper": "Buka asisten pengambilan"
 }
 }

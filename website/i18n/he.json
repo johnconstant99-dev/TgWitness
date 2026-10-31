@@ -2441,7 +2441,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "לאחר תחילת האיסוף, יש לוודא שהודעה מבוקרת מגיעה ליומן.",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "ההרשאות וההיקף נבדקים יחד. סימון הרשאה אינה פותחת\nצ&#x27;אטים אחרים ואינה מבטלת את ההגבלה על גישה לצ&#x27;אט מסוים לכל מרחב העבודה.\nלייצוא מקביל, הגישה חייבת לכסות את הצ&#x27;אט המיוצא בכל\nחשבון שנבחר. גישה שהונפקה אינה יכולה ליצור גישות חדשות, לנהל את\nהפעילויות של משתמשים אחרים או לפתוח את קונסולת המנהל.",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "MTProxy מעביר תעבורת טלגרם בלבד. פעולות HTTP בסביבת העבודה, כגון חותמות זמן,\nהתראות, עותקים מחוץ לאתר ובדיקות מקור, משתמשות בפרוקסי SOCKS5/HTTP נפרד כאשר\nהוא מוגדר, ולאחר מכן במסלול SOCKS5/HTTP של החשבון. ללא אף אחד מהם, Hide IP דוחה את\nהבקשה; המצבים האחרים מאפשרים חיבור ישיר. ניתן להשבית בקשות חיצוניות. פרוקסי להורדת עדכונים שהוגדר במפורש\nנשאר כקיצור דרך נפרד הניתן לעקיפה על ידי המפעיל.\nשירות העדים העצמאי שומר על מסלול משלו.",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy מעביר רק תעבורת טלגרם. בקשות חיצוניות יכולות להשתמש ב-\nפרוקסי SOCKS5/HTTP נפרד, בנתיב SOCKS5/HTTP של סביבת העבודה, או בנתיב ישיר מותר;\nניתן גם להשבית אותן. ל-Witness העצמאי יש הגדרות העברה משלו.\nאימות SOCKS5/HTTP CONNECT רגיל אינו מוצפן על ידי פרוטוקולי הפרוקסי\nעצמם. סודות TLS מזויפים של MTProxy אינם נתמכים."
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy מעביר רק תעבורת טלגרם. בקשות חיצוניות יכולות להשתמש ב-\nפרוקסי SOCKS5/HTTP נפרד, בנתיב SOCKS5/HTTP של סביבת העבודה, או בנתיב ישיר מותר;\nניתן גם להשבית אותן. ל-Witness העצמאי יש הגדרות העברה משלו.\nאימות SOCKS5/HTTP CONNECT רגיל אינו מוצפן על ידי פרוטוקולי הפרוקסי\nעצמם. סודות TLS מזויפים של MTProxy אינם נתמכים.",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "איסוף באמצעות GitHub Actions (גרסה מקדימה)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "כניסה חדשה ל־Telegram, צ׳אט אחד, ארכיון מוצפן ואישור מקור של GitHub.",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "פתיחת עוזר האיסוף",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">איסוף באמצעות GitHub Actions (גרסה מקדימה)</a>"
 },
 "modes": {
 "modes.actions.body": "אישורי תצוגה מקדימה, בקשה ותוצאה חתומים. לפני לחיצה על כפתור, השרת משיג את ההודעה שוב ודוחה מקלדת ששונתה. טקסט ה-callback וה-URLs שהוחזרו נשארים בהקשר המוקלט.",
@@ -2721,7 +2725,10 @@
 "modes.switch.messages": "הודעות חדשות",
 "modes.switch.reactions": "תגובות",
 "modes.theme": "החלף בין ערכת נושא בהירה לכהה",
-"modes.title": "יומן אחד. ארבעה מצבי איסוף. שמונה רמות אימות."
+"modes.title": "יומן אחד. ארבעה מצבי איסוף. שמונה רמות אימות.",
+"modes.sealed.title": "איסוף באמצעות GitHub Actions (גרסה מקדימה)",
+"modes.sealed.body": "כניסה חדשה ל־Telegram, צ׳אט אחד, ארכיון מוצפן ואישור מקור של GitHub.",
+"modes.sealed.open": "פתיחת עוזר האיסוף"
 },
 "strings": {
 "All guides": "כל המדריכים",
@@ -3072,6 +3079,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "הרשאות גישה, תפקידים, היקף, בודק, אנליסט, אסימון, הפעלות, IP, תוקף, ביטול",
 "access permissions scope token session IP expiry revoke admin console": "היקף הרשאות הגישה, אסימון, הפעלה, כתובת IP, תוקף, ביטול, קונסולת מנהל",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http מאגר אוטומטי מצבי IP רשת גיבוי רשימות ציבוריות",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http route IP mode fallback api id hash network"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http route IP mode fallback api id hash network",
+"GitHub Actions capture (preview)": "איסוף באמצעות GitHub Actions (גרסה מקדימה)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "כניסה חדשה ל־Telegram, צ׳אט אחד, ארכיון מוצפן ואישור מקור של GitHub.",
+"Open capture helper": "פתיחת עוזר האיסוף"
 }
 }

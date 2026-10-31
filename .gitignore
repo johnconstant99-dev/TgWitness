@@ -47,3 +47,7 @@ witness-data/
 witness-key.json
 proxy-config/
 deployments/
+# Disposable capture keys and handoffs (never commit user material).
+sealed-key.json
+*.tgwsealed
+delivery.zip

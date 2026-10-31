@@ -2536,7 +2536,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "Sau khi bắt đầu quá trình thu thập, vui lòng kiểm tra xem tin nhắn đã được kiểm soát có được ghi vào sổ chứng cứ hay không.",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "Quyền truy cập và phạm vi sẽ được kiểm tra đồng thời. Việc chọn một quyền truy cập sẽ không mở\ncác cuộc trò chuyện khác hoặc kích hoạt thao tác trên toàn không gian làm việc đối với quyền truy cập bị giới hạn trong một cuộc trò chuyện cụ thể.\nĐể thực hiện xuất song song, quyền truy cập phải bao gồm cuộc trò chuyện được xuất trong mọi\ntài khoản đã chọn. Một quyền truy cập đã được cấp không thể tạo ra các quyền truy cập mới, quản lý các phiên làm việc của người khác\nhoặc mở bảng điều khiển quản trị viên.",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "MTProxy chỉ truyền tải lưu lượng Telegram. Các thao tác HTTP trên Workspace như đóng dấu thời gian,\nthông báo, sao chép ngoài trang web và kiểm tra nguồn sẽ sử dụng một proxy SOCKS5/HTTP riêng biệt khi\nđược cấu hình, sau đó là tuyến SOCKS5/HTTP của tài khoản. Nếu thiếu một trong hai yếu tố này, Hide IP sẽ từ chối\nyêu cầu; các chế độ khác cho phép kết nối Trực tiếp. Các yêu cầu từ bên ngoài có thể bị vô hiệu hóa. Một proxy tải xuống nguồn cấp dữ liệu được\ncấu hình rõ ràng vẫn là một tùy chọn can thiệp riêng biệt của người vận hành.\nDịch vụ chứng thực độc lập duy trì đường dẫn riêng của mình.",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy chỉ truyền tải lưu lượng Telegram. Các yêu cầu bên ngoài có thể sử dụng một\nproxy SOCKS5/HTTP riêng biệt, tuyến SOCKS5/HTTP của không gian làm việc hoặc một tuyến trực tiếp được phép;\ncác yêu cầu này cũng có thể bị vô hiệu hóa. Công cụ chứng thực độc lập có các cài đặt truyền tải riêng.\nQuá trình xác thực SOCKS5/HTTP CONNECT thông thường không được mã hóa bởi chính các giao thức proxy\nnày. Các khóa bí mật TLS giả mạo của MTProxy vẫn chưa được hỗ trợ."
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy chỉ truyền tải lưu lượng Telegram. Các yêu cầu bên ngoài có thể sử dụng một\nproxy SOCKS5/HTTP riêng biệt, tuyến SOCKS5/HTTP của không gian làm việc hoặc một tuyến trực tiếp được phép;\ncác yêu cầu này cũng có thể bị vô hiệu hóa. Công cụ chứng thực độc lập có các cài đặt truyền tải riêng.\nQuá trình xác thực SOCKS5/HTTP CONNECT thông thường không được mã hóa bởi chính các giao thức proxy\nnày. Các khóa bí mật TLS giả mạo của MTProxy vẫn chưa được hỗ trợ.",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "Thu thập qua GitHub Actions (bản xem trước)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "Đăng nhập Telegram mới, một cuộc trò chuyện, tệp lưu trữ được mã hóa và chứng thực nguồn gốc GitHub.",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "Mở trợ lý thu thập",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">Thu thập qua GitHub Actions (bản xem trước)</a>"
 },
 "modes": {
 "modes.actions.body": "Các biên nhận xem trước, yêu cầu và kết quả đều được ký điện tử. Trước khi nhấn nút, máy chủ sẽ truy xuất lại tin nhắn và từ chối bất kỳ thay đổi nào từ bàn phím. Văn bản và các URL được trả về qua hàm callback vẫn được ghi lại trong bối cảnh.",
@@ -2816,7 +2820,10 @@
 "modes.switch.messages": "Tin nhắn mới",
 "modes.switch.reactions": "Phản hồi",
 "modes.theme": "Chuyển đổi giữa chế độ giao diện sáng và tối",
-"modes.title": "Một nhật ký. Bốn chế độ thu thập. Tám cấp độ xác minh."
+"modes.title": "Một nhật ký. Bốn chế độ thu thập. Tám cấp độ xác minh.",
+"modes.sealed.title": "Thu thập qua GitHub Actions (bản xem trước)",
+"modes.sealed.body": "Đăng nhập Telegram mới, một cuộc trò chuyện, tệp lưu trữ được mã hóa và chứng thực nguồn gốc GitHub.",
+"modes.sealed.open": "Mở trợ lý thu thập"
 },
 "strings": {
 "0 records": "0 bản ghi",
@@ -3219,6 +3226,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "quyền truy cập, vai trò, phạm vi, người xem xét, nhà phân tích, mã thông báo, phiên làm việc, địa chỉ IP, thời hạn, thu hồi",
 "access permissions scope token session IP expiry revoke admin console": "phạm vi quyền truy cập, mã thông báo, phiên làm việc, địa chỉ IP, thời hạn hiệu lực, thu hồi quyền, bảng điều khiển quản trị",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http chế độ nhóm IP tự động chế độ dự phòng mạng danh sách công khai",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http route IP mode fallback api id hash network"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http route IP mode fallback api id hash network",
+"GitHub Actions capture (preview)": "Thu thập qua GitHub Actions (bản xem trước)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Đăng nhập Telegram mới, một cuộc trò chuyện, tệp lưu trữ được mã hóa và chứng thực nguồn gốc GitHub.",
+"Open capture helper": "Mở trợ lý thu thập"
 }
 }

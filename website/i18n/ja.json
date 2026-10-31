@@ -2441,7 +2441,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "収集を開始した後、指定したメッセージがジャーナルに正しく記録されているかご確認ください。",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "権限と適用範囲は同時に確認されます。権限にチェックを入れても、\nチャット限定のアクセス権の場合、他のチャットが開かれたり、ワークスペース全体での操作が可能になったりすることはありません。\n並行してエクスポートを行う場合、アクセス権限は、選択されたすべての\nアカウントにおいて、エクスポート対象のチャットをカバーしている必要があります。付与されたアクセス権限では、新しいアクセス権限の作成、他者の\nセッションの管理、または管理者コンソールの起動は行えません。",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "MTProxyはTelegramのトラフィックのみを転送します。タイムスタンプ、\n通知、オフサイトコピー、ソースチェックなどのワークスペースHTTP操作は、\n設定されている場合は別のSOCKS5/HTTPプロキシを使用し、設定されていない場合はアカウントのSOCKS5/HTTPルートを使用します。いずれも設定されていない場合、Hide IPは\nリクエストを拒否します。その他のモードではDirectが許可されます。 外部リクエストは無効にできます。明示的に\n設定されたフィードダウンロードプロキシは、引き続きオペレーターによる個別のオーバーライド対象となります。\n独立したウィットネスサービスは、独自の経路を維持します。",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxyはTelegramのトラフィックのみを転送します。外部リクエストについては、別の\nSOCKS5/HTTPプロキシ、ワークスペースのSOCKS5/HTTPルート、または許可された直接ルートを使用できます。\nまた、これらを無効にすることも可能です。独立したWitnessには独自のトランスポート設定があります。\n通常のSOCKS5/HTTP CONNECT認証は、これらのプロキシ\nプロトコル自体によって暗号化されません。偽のTLS MTProxyシークレットは、引き続きサポートされていません。"
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxyはTelegramのトラフィックのみを転送します。外部リクエストについては、別の\nSOCKS5/HTTPプロキシ、ワークスペースのSOCKS5/HTTPルート、または許可された直接ルートを使用できます。\nまた、これらを無効にすることも可能です。独立したWitnessには独自のトランスポート設定があります。\n通常のSOCKS5/HTTP CONNECT認証は、これらのプロキシ\nプロトコル自体によって暗号化されません。偽のTLS MTProxyシークレットは、引き続きサポートされていません。",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "GitHub Actions で収集（プレビュー）",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "新しい Telegram ログイン、1つのチャット、暗号化アーカイブ、GitHub による出所の証明。",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "収集アシスタントを開く",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">GitHub Actions で収集（プレビュー）</a>"
 },
 "modes": {
 "modes.actions.body": "プレビュー、リクエスト、および結果の受信確認には署名が付与されます。ボタンが押される前に、サーバーはメッセージを再度取得し、変更されたキーボードを拒否します。返されたコールバックのテキストおよびURLは、記録されたコンテキストとして残ります。",
@@ -2721,7 +2725,10 @@
 "modes.switch.messages": "新しいメッセージ",
 "modes.switch.reactions": "反応",
 "modes.theme": "ライトテーマとダークテーマを切り替える",
-"modes.title": "1つのジャーナル。4つの収集モード。8つの検証レベル。"
+"modes.title": "1つのジャーナル。4つの収集モード。8つの検証レベル。",
+"modes.sealed.title": "GitHub Actions で収集（プレビュー）",
+"modes.sealed.body": "新しい Telegram ログイン、1つのチャット、暗号化アーカイブ、GitHub による出所の証明。",
+"modes.sealed.open": "収集アシスタントを開く"
 },
 "strings": {
 "All guides": "すべてのガイド",
@@ -3072,6 +3079,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "アクセス権限、役割、適用範囲、レビュー担当者、アナリスト、トークン、セッション、IP、有効期限、取り消し",
 "access permissions scope token session IP expiry revoke admin console": "アクセス権限、範囲、トークン、セッション、IP、有効期限、取り消し、管理コンソール",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http 自動プール IP モード フォールバック ネットワーク パブリックリスト",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "プロキシ mtproxy プール socks5 http ルート IP モード フォールバック API ID ハッシュ ネットワーク"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "プロキシ mtproxy プール socks5 http ルート IP モード フォールバック API ID ハッシュ ネットワーク",
+"GitHub Actions capture (preview)": "GitHub Actions で収集（プレビュー）",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "新しい Telegram ログイン、1つのチャット、暗号化アーカイブ、GitHub による出所の証明。",
+"Open capture helper": "収集アシスタントを開く"
 }
 }

@@ -2441,7 +2441,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "수집을 시작한 후, 제어 메시지가 저널에 정상적으로 기록되었는지 확인하십시오.",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "권한과 적용 범위는 함께 확인됩니다. 특정 권한을 선택한다고 해서\n다른 채팅이 열리거나, 채팅 제한형 액세스 권한에 대해 워크스페이스 전체에 적용되는 작업이 활성화되지는 않습니다.\n병렬 내보내기의 경우, 선택한 모든 계정에서 내보내려는 채팅에 대한\n접근 권한이 포함되어야 합니다. 부여된 접근 권한으로는 새로운 접근 권한을 생성하거나, 타인의\n세션을 관리하거나, 관리자 콘솔을 열 수 없습니다.",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "MTProxy는 텔레그램 트래픽만 전달합니다. 타임스탬프,\n알림, 외부 복사본 및 소스 확인과 같은 워크스페이스 HTTP 작업은\n구성된 경우 별도의 SOCKS5/HTTP 프록시를 사용하며, 그렇지 않은 경우 계정의 SOCKS5/HTTP 경로를 사용합니다. 둘 중 하나도 설정되지 않은 경우, Hide IP는\n요청을 거부하며, 다른 모드에서는 Direct를 허용합니다. 외부 요청은 비활성화할 수 있습니다. 명시적으로\n구성된 피드 다운로드 프록시는 별도의 운영자 오버라이드로 유지됩니다.\n독립적인 증인 서비스는 자체 경로를 유지합니다.",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy는 텔레그램 트래픽만 처리합니다. 외부 요청은 별도의\nSOCKS5/HTTP 프록시, 워크스페이스의 SOCKS5/HTTP 경로 또는 허용된 직접 경로를 사용할 수 있으며,\n비활성화할 수도 있습니다. 독립적인 위트니스는 자체 전송 설정을 갖습니다.\n일반적인 SOCKS5/HTTP CONNECT 인증은 해당 프록시\n프로토콜 자체에 의해 암호화되지 않습니다. 가짜 TLS MTProxy 비밀 정보는 여전히 지원되지 않습니다."
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy는 텔레그램 트래픽만 처리합니다. 외부 요청은 별도의\nSOCKS5/HTTP 프록시, 워크스페이스의 SOCKS5/HTTP 경로 또는 허용된 직접 경로를 사용할 수 있으며,\n비활성화할 수도 있습니다. 독립적인 위트니스는 자체 전송 설정을 갖습니다.\n일반적인 SOCKS5/HTTP CONNECT 인증은 해당 프록시\n프로토콜 자체에 의해 암호화되지 않습니다. 가짜 TLS MTProxy 비밀 정보는 여전히 지원되지 않습니다.",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "GitHub Actions로 수집 (미리 보기)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "새 Telegram 로그인, 채팅 한 개, 암호화된 아카이브와 GitHub 출처 증명.",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "수집 도우미 열기",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">GitHub Actions로 수집 (미리 보기)</a>"
 },
 "modes": {
 "modes.actions.body": "미리보기, 요청 및 결과 수신 확인은 서명됩니다. 버튼을 누르기 전에 서버는 메시지를 다시 가져오고, 변경된 키보드는 거부합니다. 반환된 콜백 텍스트와 URL은 기록된 컨텍스트로 유지됩니다.",
@@ -2721,7 +2725,10 @@
 "modes.switch.messages": "새 메시지",
 "modes.switch.reactions": "반응",
 "modes.theme": "밝은 테마와 어두운 테마 간 전환",
-"modes.title": "하나의 저널. 네 가지 수집 모드. 여덟 가지 검증 수준."
+"modes.title": "하나의 저널. 네 가지 수집 모드. 여덟 가지 검증 수준.",
+"modes.sealed.title": "GitHub Actions로 수집 (미리 보기)",
+"modes.sealed.body": "새 Telegram 로그인, 채팅 한 개, 암호화된 아카이브와 GitHub 출처 증명.",
+"modes.sealed.open": "수집 도우미 열기"
 },
 "strings": {
 "All guides": "모든 가이드",
@@ -3072,6 +3079,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "접근 권한, 역할, 범위, 검토자, 분석가, 토큰, 세션, IP, 만료, 취소",
 "access permissions scope token session IP expiry revoke admin console": "접근 권한, 범위, 토큰, 세션, IP, 만료, 취소, 관리자 콘솔",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http 자동 풀 IP 모드 폴백 네트워크 공개 목록",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "프록시, mtproxy, 풀, SOCKS5, HTTP, 경로, IP, 모드, 대체, API, ID, 해시, 네트워크"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "프록시, mtproxy, 풀, SOCKS5, HTTP, 경로, IP, 모드, 대체, API, ID, 해시, 네트워크",
+"GitHub Actions capture (preview)": "GitHub Actions로 수집 (미리 보기)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "새 Telegram 로그인, 채팅 한 개, 암호화된 아카이브와 GitHub 출처 증명.",
+"Open capture helper": "수집 도우미 열기"
 }
 }

@@ -1,0 +1,13 @@
+# Immutable base and hash-locked Python dependencies. No caller checkout enters this build.
+FROM python:3.12-slim@sha256:aa943ce411423c7582288f18707ff66eddcbaeb510502d747a72aeb34f30d159
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+WORKDIR /app
+COPY pyproject.toml README.md LICENSE NOTICE ./
+COPY deploy/build.lock deploy/requirements.lock ./
+COPY tgwitness ./tgwitness
+RUN pip install --no-cache-dir --require-hashes -r build.lock \
+    && pip install --no-cache-dir --require-hashes --no-build-isolation -r requirements.lock \
+    && pip install --no-cache-dir --no-deps --no-build-isolation .
+USER 10001
+EXPOSE 8787
+CMD ["python", "-m", "tgwitness.sealed", "--config", "/config/session.json", "--data", "/data", "--out", "/output"]

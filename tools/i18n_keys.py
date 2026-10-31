@@ -16,7 +16,7 @@ LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
 # Modules whose fixed error messages reach the panel; command-line tools keep English output.
 PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "sessions.py", "network.py",
                  "profiles.py", "multi_export.py", "alerts.py", "witness_api.py", "tuning.py", "interactions.py",
-                 "access.py")
+                 "access.py", "history.py")
 
 
 def calls(source):

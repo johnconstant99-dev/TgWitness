@@ -2441,7 +2441,11 @@
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "Ruxsatlar va doirasi birgalikda tekshiriladi. Ruxsatni belgilash boshqa suhbatlarni ochmaydi yoki suhbatga cheklangan kirish uchun ish maydoni bo&#x27;ylab operatsiyani yoqmaydi.\nParalel eksport uchun, kirish har bir tanlangan hisobdagi eksport qilinayotgan suhbatni qamrab olishi kerak. Berilgan kirish yangi kirishlarni yaratishi, boshqa odamlarning sessiyalarini boshqarishi yoki administrator konsolini ochishi mumkin emas.",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "MTProxy faqat Telegram trafigini o&#x27;tkazadi. Ish maydoni HTTP operatsiyalari, masalan, vaqt tamg&#x27;alari, bildirishnomalar, masofaviy nusxalar va manba tekshiruvlari, sozlangan taqdirda alohida SOCKS5/HTTP proksidan, keyin hisobning SOCKS5/HTTP yo&#x27;nalishidan foydalanadi. Ularsiz Hide IP so&#x27;rovni rad etadi; boshqa rejimlar Direct-ni ruxsat etadi. Tashqi so&#x27;rovlar o&#x27;chirib qo&#x27;yilishi mumkin. Aniq sozlangan feed-download proksi alohida operator ustunligi bo&#x27;lib qoladi.\nMustaqil guvoh xizmati o&#x27;z yo&#x27;nalishini saqlab qoladi.",
 "fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy faqat Telegram trafigini uzatadi. Tashqi so&#x27;rovlar alohida SOCKS5/HTTP proksidan, ish maydonining SOCKS5/HTTP yo&#x27;nalishidan yoki ruxsat etilgan to&#x27;g&#x27;ridan-to&#x27;g&#x27;ri yo&#x27;ldan foydalanishi mumkin; ularni o&#x27;chirib qo&#x27;yish ham mumkin. Mustaqil guvoh o&#x27;z transport sozlamalariga ega.\nOddiy SOCKS5/HTTP CONNECT autentifikatsiyasi o&#x27;sha proksi protokollari tomonidan shifrlanmaydi. Soxta TLS MTProxy sirlarini qo&#x27;llab-quvvatlash hali ham mavjud emas.",
-"11aaea3ce2d3da31d12ee8b4eab7fda5447174517bf3914773d6cadd7fbca752": "Ruxsatlar, amal qilish muddati va sessiya cheklovlari bilan <a href=\"@@GUIDE_ACCESS@@\">ishga kirish huquqini ulashing</a>. Guvoh tokeni alohida kirish vositasi bo‘lib qoladi."
+"11aaea3ce2d3da31d12ee8b4eab7fda5447174517bf3914773d6cadd7fbca752": "Ruxsatlar, amal qilish muddati va sessiya cheklovlari bilan <a href=\"@@GUIDE_ACCESS@@\">ishga kirish huquqini ulashing</a>. Guvoh tokeni alohida kirish vositasi bo‘lib qoladi.",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "GitHub Actions orqali yig‘ish (dastlabki versiya)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "Telegram’ga yangi kirish, bitta chat, shifrlangan arxiv va GitHub kelib chiqish tasdig‘i.",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "Yig‘ish yordamchisini ochish",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">GitHub Actions orqali yig‘ish (dastlabki versiya)</a>"
 },
 "modes": {
 "modes.actions.body": "Ko'rinish, so'rov va natija kvitansiyalari imzolanadi. Tugmani bosishdan oldin server xabarni qayta oladi va o'zgartirilgan klaviaturani rad etadi. Qaytarilgan callback matni va URL manzillari kontekstda qayd etilgan bo'lib qoladi.",
@@ -2721,7 +2725,10 @@
 "modes.switch.messages": "Yangi xabarlar",
 "modes.switch.reactions": "Reaksiyalar",
 "modes.theme": "Yorug' va qorong'i mavzular o'rtasida o'tish",
-"modes.title": "Bir jurnal. To'rt yig'ish rejimi. Sakkiz tasdiqlash darajasi."
+"modes.title": "Bir jurnal. To'rt yig'ish rejimi. Sakkiz tasdiqlash darajasi.",
+"modes.sealed.title": "GitHub Actions orqali yig‘ish (dastlabki versiya)",
+"modes.sealed.body": "Telegram’ga yangi kirish, bitta chat, shifrlangan arxiv va GitHub kelib chiqish tasdig‘i.",
+"modes.sealed.open": "Yig‘ish yordamchisini ochish"
 },
 "strings": {
 "All guides": "Barcha qo'llanmalar",
@@ -3072,6 +3079,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "kirish ruxsatnomalari rollar doirasi ko'rib chiquvchi tahlilchi token sessiyalari IP muddati tugashi bekor qilish",
 "access permissions scope token session IP expiry revoke admin console": "kirish ruxsatnomalari doirasi token sessiya IP muddati tugashi bekor qilish admin konsoli",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http avtomatik pool IP rejimlari zaxira tarmog'i ommaviy ro'yxatlar",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http yo'nalish IP rejim zaxira api id hash tarmoq"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http yo'nalish IP rejim zaxira api id hash tarmoq",
+"GitHub Actions capture (preview)": "GitHub Actions orqali yig‘ish (dastlabki versiya)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Telegram’ga yangi kirish, bitta chat, shifrlangan arxiv va GitHub kelib chiqish tasdig‘i.",
+"Open capture helper": "Yig‘ish yordamchisini ochish"
 }
 }

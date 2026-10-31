@@ -277,6 +277,11 @@
 "modes.switch.messages": "New messages",
 "modes.switch.reactions": "Reactions",
 "modes.theme": "Switch between light and dark theme",
-"modes.title": "One journal. Four collection modes. Eight verification levels."
-}
+"modes.title": "One journal. Four collection modes. Eight verification levels.",
+"modes.sealed.title": "GitHub Actions capture (preview)",
+"modes.sealed.body": "A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.",
+"modes.sealed.open": "Open capture helper"
+},
+"blocks": {"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "GitHub Actions capture (preview)", "b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.", "5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "Open capture helper", "11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">GitHub Actions capture (preview)</a>"},
+"strings": {"GitHub Actions capture (preview)": "GitHub Actions capture (preview)", "A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.", "Open capture helper": "Open capture helper"}
 }

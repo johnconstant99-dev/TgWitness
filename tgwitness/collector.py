@@ -23,6 +23,7 @@ from . import keyboard
 from . import message_content
 from . import replica
 from . import tuning
+from .history import History
 from .account_import import validate_string
 from .telegram_client import WitnessClient
 from .workers import complete_in_thread
@@ -205,6 +206,7 @@ class Collector:
         self.buffer_overflow = False
         self.buffer_limit = tuning.BY_KEY["startup_buffer"].default
         self.storage_low = False
+        self.history = History(self)
 
     def status(self):
         credentials = self.vault.read("credentials")
@@ -1225,6 +1227,7 @@ class Collector:
                 asyncio.create_task(self.client.disconnect())
 
     async def stop(self, shutdown=False):
+        await self.history.pause("process_shutdown" if shutdown else "observation_stopped")
         if shutdown and self.export_task:
             self.export_task.cancel()
             await asyncio.gather(self.export_task, return_exceptions=True)
@@ -1350,13 +1353,15 @@ class Collector:
             if self.client:
                 asyncio.create_task(self.client.disconnect())
 
-    async def capture_message(self, message, kind, chat_id, update=None, source=None):
+    async def capture_message(self, message, kind, chat_id, update=None, source=None, history_run_id=None):
         started = time.perf_counter()
         self.remember(getattr(message, "sender", None))
         payload = describe_message(message)
         payload["source"] = source or ("history_snapshot" if kind == "message.snapshot" else "live_update")
         payload["collector_account_id"] = (self.store.get_setting("account", {}) or {}).get("id")
         payload["run_id"] = self.run_id
+        if history_run_id is not None:
+            payload["history_run_id"] = history_run_id
         if update is not None:
             payload["transport_update"] = plain(update)
         # Sender is not necessarily the editor, including channel/admin edits.

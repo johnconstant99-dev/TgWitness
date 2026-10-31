@@ -62,6 +62,9 @@ function setLanguage(lang){
   const url=new URL(location.href);url.searchParams.set("lang",lang);location.assign(url.href);
 }
 translatePage();
+document.querySelectorAll("[data-sealed-helper]").forEach(link=>{
+  const url=new URL(link.href);url.searchParams.set("lang",LANG==="ru"?"ru":"en");link.href=url.href;
+});
 if(window.TGW_SCOPE==="guide")document.querySelectorAll('a[href]:not([href^="#"])').forEach(link=>{
   const url=new URL(link.href,location.href);
   if(url.origin===location.origin&&/\/(?:guide|dedicated-account)\.html$/.test(url.pathname)){

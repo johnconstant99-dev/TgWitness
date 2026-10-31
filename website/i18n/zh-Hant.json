@@ -2441,7 +2441,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "開始收集後，請確認一則受控訊息已成功寫入日誌。",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "權限與範圍會一併進行檢查。勾選某項權限並不會開啟\n其他聊天室，也不會為僅限特定聊天室的存取權限解鎖工作區範圍的操作。\n若要進行並行匯出，存取權限必須涵蓋每個已選取\n帳戶中的匯出聊天室。已授予的存取權限無法建立新的存取權限、管理他人的\n會話，亦無法開啟管理員控制台。",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "MTProxy 僅傳輸 Telegram 流量。工作區的 HTTP 操作（例如時間戳記、\n通知、站外副本及來源檢查）在\n已設定的情況下，會使用獨立的 SOCKS5/HTTP 代理伺服器，\n隨後則使用該帳戶的 SOCKS5/HTTP 路由。若未設定上述任一項，Hide IP 將拒絕\n該請求；其他模式則允許直接連線。 外部請求可被停用。經明確\n設定的資訊源下載代理仍屬操作員可獨立覆寫的項目。\n獨立的見證服務則維持其專屬路由。",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy 僅傳輸 Telegram 流量。外部請求可使用獨立的\nSOCKS5/HTTP 代理、工作區的 SOCKS5/HTTP 路由，或允許的直接路由；\n亦可將其停用。獨立見證器擁有其專屬的傳輸設定。\n一般 SOCKS5/HTTP CONNECT 認證並不會由這些代理\n協定本身進行加密。偽造的 TLS MTProxy 密鑰目前仍不被支援。"
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy 僅傳輸 Telegram 流量。外部請求可使用獨立的\nSOCKS5/HTTP 代理、工作區的 SOCKS5/HTTP 路由，或允許的直接路由；\n亦可將其停用。獨立見證器擁有其專屬的傳輸設定。\n一般 SOCKS5/HTTP CONNECT 認證並不會由這些代理\n協定本身進行加密。偽造的 TLS MTProxy 密鑰目前仍不被支援。",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "透過 GitHub Actions 擷取（預覽版）",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "新的 Telegram 登入工作階段、一個聊天、加密封存和 GitHub 來源證明。",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "開啟擷取助手",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">透過 GitHub Actions 擷取（預覽版）</a>"
 },
 "modes": {
 "modes.actions.body": "預覽、請求及結果回執均經簽署。按下按鈕前，伺服器會再次擷取訊息，並拒絕已變更的鍵盤輸入。回傳的回呼文字與網址仍屬已記錄的上下文。",
@@ -2721,7 +2725,10 @@
 "modes.switch.messages": "新訊息",
 "modes.switch.reactions": "反應",
 "modes.theme": "在淺色與深色主題之間切換",
-"modes.title": "一個日誌。四種收集模式。八個驗證等級。"
+"modes.title": "一個日誌。四種收集模式。八個驗證等級。",
+"modes.sealed.title": "透過 GitHub Actions 擷取（預覽版）",
+"modes.sealed.body": "新的 Telegram 登入工作階段、一個聊天、加密封存和 GitHub 來源證明。",
+"modes.sealed.open": "開啟擷取助手"
 },
 "strings": {
 "All guides": "所有指南",
@@ -3072,6 +3079,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "存取權限、角色、範圍、審核員、分析師、憑證、會話、IP、過期、撤銷",
 "access permissions scope token session IP expiry revoke admin console": "存取權限 範圍 憑證 會話 IP 過期 撤銷 管理主控台",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http 自動池 IP 模式 備用 網路 公開清單",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "代理 mtproxy 代理池 socks5 http 路由 IP 模式 備用選項 API ID 雜湊 網路"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "代理 mtproxy 代理池 socks5 http 路由 IP 模式 備用選項 API ID 雜湊 網路",
+"GitHub Actions capture (preview)": "透過 GitHub Actions 擷取（預覽版）",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "新的 Telegram 登入工作階段、一個聊天、加密封存和 GitHub 來源證明。",
+"Open capture helper": "開啟擷取助手"
 }
 }

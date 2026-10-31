@@ -27,6 +27,12 @@ Release acceptance:
 
 ## Next: connect the external witness controller
 
+Archive usability and feature coverage now have a parallel delivery track:
+[Telegram archive parity plan](ru/ARCHIVE-PARITY.md). The first implementation is
+[resumable history acquisition](HISTORY.md), currently unreleased. Richer review,
+imports, transcription, account administration and measured operating cost remain
+separate acceptance milestones; this roadmap does not claim overall superiority.
+
 The [controller](../services/witness-controller/README.md) is a prototype with
 synthetic adapters. A real collector integration is the next delivery milestone.
 

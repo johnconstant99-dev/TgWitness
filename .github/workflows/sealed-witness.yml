@@ -1,0 +1,26 @@
+name: Sealed chat capture
+on:
+  workflow_dispatch:
+    inputs:
+      recipient:
+        description: Public recipient from website/sealed.html (never your private key)
+        required: true
+        type: string
+      session_minutes:
+        description: Maximum capture time (partial results are labelled)
+        type: choice
+        default: '30'
+        options: ['30', '60', '120']
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  capture:
+    # The user owns this caller, but the verifier requires the upstream signer below.
+    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@03f00930a188625fb57b4aed143cd55077ddc3f2
+    with:
+      recipient: ${{ inputs.recipient }}
+      session_minutes: ${{ inputs.session_minutes }}

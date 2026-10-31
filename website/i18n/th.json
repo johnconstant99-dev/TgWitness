@@ -2441,7 +2441,11 @@
 "fe4fd4cbe445000d77119676e14bfa5ecab0359d94a521c0cfa9e1c026063754": "หลังจากเริ่มการเก็บข้อมูลแล้ว ให้ตรวจสอบว่าข้อความที่ได้รับการควบคุมได้ส่งถึงบันทึกหลักฐานแล้วหรือไม่",
 "fe6d0ee2cbf86d57d7e536e3c69394e72d34b73a83d7c0cbcc152dba0693f64e": "สิทธิ์และขอบเขตจะถูกตรวจสอบร่วมกัน การเลือกสิทธิ์หนึ่งจะไม่เปิด\nแชทอื่น ๆ หรือปลดล็อกการดำเนินการระดับพื้นที่ทำงาน สำหรับสิทธิ์ที่จำกัดเฉพาะแชท\nสำหรับการส่งออกแบบขนาน สิทธิ์การเข้าถึงต้องครอบคลุมการสนทนาที่ส่งออกในทุกบัญชี\nที่เลือกไว้ สิทธิ์การเข้าถึงที่ออกแล้วไม่สามารถสร้างสิทธิ์การเข้าถึงใหม่ จัดการเซสชัน\nของผู้อื่น หรือเปิดคอนโซลผู้ดูแลระบบได้",
 "fea0f6c9490ab6c70f673f4116d9c03f2b8f44bf5f40f19cf1e023879bd966f2": "MTProxy ส่งผ่านเฉพาะการรับส่งข้อมูล Telegram เท่านั้น การดำเนินการ HTTP ใน Workspace เช่น การบันทึกเวลา,\nการแจ้งเตือน, การคัดลอกข้อมูลนอกระบบ และการตรวจสอบแหล่งที่มา จะใช้ proxy SOCKS5/HTTP แยกต่างหากเมื่อ\nได้รับการกำหนดค่าไว้ แล้วจึงใช้เส้นทาง SOCKS5/HTTP ของบัญชี หากไม่มีทั้งสองอย่าง Hide IP จะปฏิเสธ\nคำขอ; โหมดอื่น ๆ อนุญาตให้ใช้ Direct ได้ สามารถปิดการใช้งานคำขอจากภายนอกได้ โปรกซีดาวน์โหลดฟีดที่\nกำหนดค่าอย่างชัดเจนจะยังคงเป็นการตั้งค่าทับของผู้ดำเนินการที่แยกต่างหาก\nบริการพยานอิสระจะรักษาเส้นทางของตัวเอง",
-"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy รับส่งข้อมูลการสื่อสารของ Telegram เท่านั้น คำขอจากภายนอกสามารถใช้\nพร็อกซี SOCKS5/HTTP แยกต่างหาก เส้นทาง SOCKS5/HTTP ของพื้นที่ทำงาน หรือเส้นทางตรงที่ได้รับอนุญาต;\nหรือสามารถปิดการใช้งานได้ ผู้สังเกตการณ์อิสระมีตั้งค่าการส่งข้อมูลของตัวเอง\nการยืนยันตัวตนแบบ SOCKS5/HTTP CONNECT ทั่วไปไม่ได้รับการเข้ารหัสโดย\nโปรโตคอลพร็อกซีเหล่านั้นเอง ความลับ TLS MTProxy ปลอมยังไม่ได้รับการสนับสนุน"
+"fee67d15f6d58817adebd7ad3e35af9cad06297da244575075f6c871d4cdfb7e": "MTProxy รับส่งข้อมูลการสื่อสารของ Telegram เท่านั้น คำขอจากภายนอกสามารถใช้\nพร็อกซี SOCKS5/HTTP แยกต่างหาก เส้นทาง SOCKS5/HTTP ของพื้นที่ทำงาน หรือเส้นทางตรงที่ได้รับอนุญาต;\nหรือสามารถปิดการใช้งานได้ ผู้สังเกตการณ์อิสระมีตั้งค่าการส่งข้อมูลของตัวเอง\nการยืนยันตัวตนแบบ SOCKS5/HTTP CONNECT ทั่วไปไม่ได้รับการเข้ารหัสโดย\nโปรโตคอลพร็อกซีเหล่านั้นเอง ความลับ TLS MTProxy ปลอมยังไม่ได้รับการสนับสนุน",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "รวบรวมผ่าน GitHub Actions (รุ่นทดลอง)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "เข้าสู่ระบบ Telegram ใหม่ หนึ่งแชต ไฟล์เก็บถาวรที่เข้ารหัส และหลักฐานแหล่งที่มาจาก GitHub",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "เปิดตัวช่วยรวบรวม",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">รวบรวมผ่าน GitHub Actions (รุ่นทดลอง)</a>"
 },
 "modes": {
 "modes.actions.body": "ใบยืนยันการดูตัวอย่าง การขอ และผลลัพธ์ได้รับการลงนาม ก่อนที่จะกดปุ่ม เซิร์ฟเวอร์จะดึงข้อความมาอีกครั้งและปฏิเสธการเปลี่ยนข้อมูลจากคีย์บอร์ด ข้อความ callback และ URL ที่ส่งกลับมาจะยังคงถูกบันทึกไว้ในบริบท",
@@ -2721,7 +2725,10 @@
 "modes.switch.messages": "ข้อความใหม่",
 "modes.switch.reactions": "ปฏิกิริยา",
 "modes.theme": "เปลี่ยนระหว่างธีมสีสว่างและสีมืด",
-"modes.title": "หนึ่งสมุดบันทึก สี่โหมดการเก็บรวบรวม แปดระดับการตรวจสอบ"
+"modes.title": "หนึ่งสมุดบันทึก สี่โหมดการเก็บรวบรวม แปดระดับการตรวจสอบ",
+"modes.sealed.title": "รวบรวมผ่าน GitHub Actions (รุ่นทดลอง)",
+"modes.sealed.body": "เข้าสู่ระบบ Telegram ใหม่ หนึ่งแชต ไฟล์เก็บถาวรที่เข้ารหัส และหลักฐานแหล่งที่มาจาก GitHub",
+"modes.sealed.open": "เปิดตัวช่วยรวบรวม"
 },
 "strings": {
 "All guides": "คู่มือทั้งหมด",
@@ -3072,6 +3079,9 @@
 "access permissions roles scope reviewer analyst token sessions IP expiry revoke": "สิทธิ์การเข้าถึง บทบาท ขอบเขต ผู้ตรวจสอบ นักวิเคราะห์ โทเค็น เซสชัน IP ระยะเวลาหมดอายุ การเพิกถอน",
 "access permissions scope token session IP expiry revoke admin console": "สิทธิ์การเข้าถึง ขอบเขต โทเค็น เซสชัน IP วันหมดอายุ การเพิกถอน คอนโซลผู้ดูแลระบบ",
 "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists": "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists",
-"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http route IP mode fallback api id hash network"
+"proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http route IP mode fallback api id hash network",
+"GitHub Actions capture (preview)": "รวบรวมผ่าน GitHub Actions (รุ่นทดลอง)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "เข้าสู่ระบบ Telegram ใหม่ หนึ่งแชต ไฟล์เก็บถาวรที่เข้ารหัส และหลักฐานแหล่งที่มาจาก GitHub",
+"Open capture helper": "เปิดตัวช่วยรวบรวม"
 }
 }

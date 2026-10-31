@@ -10,6 +10,8 @@ that your accounts can access. It runs locally with its own data directory.
 
 ## Install and start
 
+[GitHub Actions capture (preview)](SEALED-ACTIONS.md)
+
 Choose one method. Portable downloads become available after a release build is published:
 
 | Host | Nothing installed | From source: Python 3.11+ | Docker: Engine/Desktop with Compose 2.20+ |

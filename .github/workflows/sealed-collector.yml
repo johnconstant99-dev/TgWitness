@@ -1,0 +1,72 @@
+name: Approved sealed collector
+
+on:
+  workflow_call:
+    inputs:
+      recipient:
+        description: Public RSA recipient from the local setup helper; never a private key
+        required: true
+        type: string
+      session_minutes:
+        description: Capture lifetime, 10 to 120 minutes
+        default: '30'
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      # NEVER use the default checkout here: it would load the caller's fork.
+      - name: Checkout approved upstream collector
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: phishdestroy/TgWitness
+          ref: 7ab1b6ff623f45ef2d5188910fe1791953c095d9
+          path: trusted-source
+          persist-credentials: false
+          submodules: false
+      - name: Start a fresh restricted capsule
+        working-directory: trusted-source
+        env:
+          RECIPIENT: ${{ inputs.recipient }}
+          SESSION_MINUTES: ${{ inputs.session_minutes }}
+        run: python3 -I scripts/sealed_runner.py start
+      - name: Deliver encrypted connection
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: sealed-connection
+          path: ${{ runner.temp }}/tgwitness-sealed-${{ github.run_id }}-${{ github.run_attempt }}/public/connection.tgwsealed
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Wait for capture and stop network-facing processes
+        working-directory: trusted-source
+        run: python3 -I scripts/sealed_runner.py wait
+      - name: Attest the fixed original archive
+        id: attest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/tgwitness-sealed-${{ github.run_id }}-${{ github.run_attempt }}/out/evidence.zip
+      - name: Encrypt evidence and its attestation for the recipient
+        working-directory: trusted-source
+        env:
+          ATTESTATION_BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: python3 -I scripts/sealed_runner.py pack
+      - name: Deliver encrypted result
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: sealed-result
+          path: ${{ runner.temp }}/tgwitness-sealed-${{ github.run_id }}-${{ github.run_attempt }}/public/delivery.tgwsealed
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Remove temporary private state
+        if: always()
+        working-directory: trusted-source
+        run: python3 -I scripts/sealed_runner.py cleanup

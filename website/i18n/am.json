@@ -83,7 +83,11 @@
 "bceece0eadac958a22843adb9f475aa444ddd220864f3654adf8f9596804a721": "ፊርማ ውሸትን ወደ እውነታ አይቀይረውም።",
 "fb4213f83d6b3f11ee0194fd2bc00836b4f0d1731265dd4c05fe7420f7b7a794": "Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (ከ1957 ጀምሮ) → Rüdiger Graf von der Goltz → በ1935 የተሻሻለው አንቀጽ 175",
 "fb75e7786365a9f623581dd72c435e5889475d1e3cb1d0f55084cda216d366a5": "ከስም በፊት «Dr.» መጻፍ ከዚያ የሚከተለውን ሁሉ እውነት እንደሚያደርገው ለሚያምኑ ኮርፖሬሽኖች፣ የሕግ ድርጅቶች ወይም ግለሰቦች TgWitness አይመችም። ማዕረጎች፣ የድርጅት ራስጌዎች እና ፊርማዎች ማስረጃን አይሽሩም።",
-"fc73f1b03c053c862fd6d0003c902d9e5d45918fda304548cfacb2b3b8dfc45c": "የMIT ፈቃድን በትክክል ለማክበር፣ የዚህን ሶፍትዌር አጠቃቀም አንገድብም። ይሁን እንጂ አንድ ነገር ግልጽ ይሁን፦ ከኮርፖሬሽኖች የሚከፈሉ የሕግ አገልግሎት ክፍያዎች፣ በሕግ ስም ማስፈራራት እና ዲጂታል መረጃ እንዲጠፋ የሚቀርቡ ጥያቄዎች ታሪክን ሊሽሩ፣ የዘር ሐረግን እንደገና ሊጽፉ ወይም እውነትን ሊደብቁ አይችሉም።"
+"fc73f1b03c053c862fd6d0003c902d9e5d45918fda304548cfacb2b3b8dfc45c": "የMIT ፈቃድን በትክክል ለማክበር፣ የዚህን ሶፍትዌር አጠቃቀም አንገድብም። ይሁን እንጂ አንድ ነገር ግልጽ ይሁን፦ ከኮርፖሬሽኖች የሚከፈሉ የሕግ አገልግሎት ክፍያዎች፣ በሕግ ስም ማስፈራራት እና ዲጂታል መረጃ እንዲጠፋ የሚቀርቡ ጥያቄዎች ታሪክን ሊሽሩ፣ የዘር ሐረግን እንደገና ሊጽፉ ወይም እውነትን ሊደብቁ አይችሉም።",
+"9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "በGitHub Actions መሰብሰብ (ቅድመ እይታ)",
+"b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "አዲስ የTelegram መግቢያ፣ አንድ ውይይት፣ የተመሰጠረ ማህደር እና የGitHub ምንጭ ማረጋገጫ።",
+"5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "የመሰብሰቢያ ረዳትን ክፈት",
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">በGitHub Actions መሰብሰብ (ቅድመ እይታ)</a>"
 },
 "modes": {
 "modes.actions.body": "የቅድመ እይታ፣ የጥያቄ እና የውጤት ደረሰኞች ይፈረማሉ። አዝራር ከመጫን በፊት አገልጋዩ መልዕክቱን እንደገና ያመጣል፤ ቁልፍ ሰሌዳው ከተቀየረ ይከለክላል። የcallback ምላሽ ጽሑፍ እና URL ይመዘገባሉ።",
@@ -363,7 +367,10 @@
 "modes.switch.messages": "አዲስ መልዕክቶች",
 "modes.switch.reactions": "ምላሾች",
 "modes.theme": "በብርሃን እና በጨለማ ገጽታ መካከል ይቀይሩ",
-"modes.title": "አንድ መዝገብ። አራት የስብስብ ሁነታዎች። ስምንት የማረጋገጫ ደረጃዎች።"
+"modes.title": "አንድ መዝገብ። አራት የስብስብ ሁነታዎች። ስምንት የማረጋገጫ ደረጃዎች።",
+"modes.sealed.title": "በGitHub Actions መሰብሰብ (ቅድመ እይታ)",
+"modes.sealed.body": "አዲስ የTelegram መግቢያ፣ አንድ ውይይት፣ የተመሰጠረ ማህደር እና የGitHub ምንጭ ማረጋገጫ።",
+"modes.sealed.open": "የመሰብሰቢያ ረዳትን ክፈት"
 },
 "modes_translation": {
 "provider": "assistant",
@@ -415,6 +422,9 @@
 "Visual guide": "ሥዕላዊ መመሪያ",
 "What has been tested": "ምን ተፈትኗል",
 "license licence MIT Taylor Wessing position statement": "ፈቃድ MIT Taylor Wessing አቋም መግለጫ",
-"notice operator incompatibility Taylor Wessing statement licence": "ማስታወቂያ ኦፕሬተር አለመጣጣም Taylor Wessing መግለጫ ፈቃድ"
+"notice operator incompatibility Taylor Wessing statement licence": "ማስታወቂያ ኦፕሬተር አለመጣጣም Taylor Wessing መግለጫ ፈቃድ",
+"GitHub Actions capture (preview)": "በGitHub Actions መሰብሰብ (ቅድመ እይታ)",
+"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "አዲስ የTelegram መግቢያ፣ አንድ ውይይት፣ የተመሰጠረ ማህደር እና የGitHub ምንጭ ማረጋገጫ።",
+"Open capture helper": "የመሰብሰቢያ ረዳትን ክፈት"
 }
 }

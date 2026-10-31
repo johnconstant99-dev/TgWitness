@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer"><title>TgWitness · Sealed capture helper</title>
+<link rel="stylesheet" href="sealed.css"><body><main>
+<header><strong>TgWitness</strong><select id="language" aria-label="Language"><option value="en">English</option><option value="ru">Русский</option></select></header>
+<h1 data-en="Run a private capture from your fork" data-ru="Запуск приватной выгрузки из своего форка"></h1>
+<nav><a id="instructions" href="https://github.com/phishdestroy/TgWitness/blob/main/docs/SEALED-ACTIONS.md" target="_blank" rel="noopener noreferrer" data-en="Detailed instructions and troubleshooting" data-ru="Подробная инструкция и решение проблем"></a></nav>
+<p data-en="This helper creates and opens encryption keys locally. It does not send your key or files to a server. Use a trusted copy of this page." data-ru="Этот помощник создаёт ключи и расшифровывает файлы локально. Ключи и файлы не отправляются на сервер. Используйте доверенную копию страницы."></p>
+<p class="notice" data-en="Preview: the capture runs on ordinary GitHub infrastructure. GitHub and the HTTPS tunnel remain trusted. Actions usage rules and time limits apply. The encrypted archive is not a guarantee of complete or Telegram-signed history." data-ru="Предварительная версия: сбор работает на обычной инфраструктуре GitHub. GitHub и HTTPS-туннель остаются доверенными сторонами. Действуют правила и лимиты Actions. Шифрование архива не доказывает полноту истории или наличие подписи Telegram."></p>
+<p id="error" role="alert"></p>
+<section><h2 data-en="1. Save your private key" data-ru="1. Сохраните закрытый ключ"></h2>
+<button id="generate" data-en="Generate and save key" data-ru="Создать и сохранить ключ"></button>
+<p data-en="Keep sealed-key.json. Without it you cannot open the connection or recover the archive. Never paste this private file into GitHub." data-ru="Сохраните sealed-key.json. Без него нельзя открыть подключение или восстановить архив. Никогда не вставляйте этот закрытый файл в GitHub."></p>
+<label><span data-en="Or load an existing private key" data-ru="Или загрузите сохранённый закрытый ключ"></span><input id="key-file" type="file" accept=".json"></label>
+<label><span data-en="Public recipient — paste only this value into the workflow" data-ru="Открытый ключ recipient — только это значение вставляйте в workflow"></span><textarea id="recipient" rows="5" readonly></textarea></label><p id="fingerprint"></p></section>
+<section><h2 data-en="2. Start your GitHub workflow" data-ru="2. Запустите workflow в GitHub"></h2>
+<p data-en="Fork TgWitness, enable Actions, open Sealed chat capture, and choose Run workflow. Paste the public recipient above. Wait for the sealed-connection artifact. Download it and unzip it to get connection.tgwsealed. The job keeps running while you sign in." data-ru="Сделайте форк TgWitness, включите Actions, откройте Sealed chat capture и нажмите Run workflow. Вставьте открытый ключ recipient выше. Дождитесь артефакта sealed-connection. Скачайте и распакуйте его: внутри connection.tgwsealed. Задача продолжит работать, пока вы входите в Telegram."></p>
+<a href="https://github.com/phishdestroy/TgWitness/fork" target="_blank" rel="noreferrer" data-en="Fork TgWitness" data-ru="Создать форк TgWitness"></a></section>
+<section><h2 data-en="3. Open the encrypted connection" data-ru="3. Откройте зашифрованное подключение"></h2>
+<label><span>connection.tgwsealed</span><input id="connection-file" type="file" accept=".tgwsealed"></label>
+<pre id="connection-context"></pre><a id="open-connection" hidden target="_blank" rel="noreferrer noopener" data-en="Open capture panel" data-ru="Открыть панель сбора"></a>
+<p data-en="Sign in with a fresh Telegram QR or phone login, choose one chat, and start collection. Only the selected chat is archived. The job will then publish an encrypted result." data-ru="Войдите в Telegram по новому QR или коду, выберите один чат и начните сбор. Архивируется выбранный чат. Затем задача опубликует зашифрованный результат."></p></section>
+<section><h2 data-en="4. Open your result" data-ru="4. Откройте результат"></h2>
+<p data-en="Download and unzip sealed-result from GitHub Artifacts. Select delivery.tgwsealed below to save delivery.zip, containing evidence.zip and attestation.jsonl. Browser decryption supports up to 256 MiB; use the local command below for larger files." data-ru="Скачайте и распакуйте sealed-result из GitHub Artifacts. Выберите delivery.tgwsealed ниже: помощник сохранит delivery.zip с evidence.zip и attestation.jsonl. Браузер поддерживает файлы до 256 МиБ; для больших файлов используйте локальную команду ниже."></p>
+<input id="result-file" type="file" accept=".tgwsealed" aria-label="Encrypted result">
+<pre>python -m tgwitness.sealed_crypto decrypt delivery.tgwsealed --key sealed-key.json --out delivery.zip</pre>
+<p data-en="Unzip delivery.zip, then verify using an independently trusted TgWitness installation and your fork's repository name:" data-ru="Распакуйте delivery.zip, затем проверьте файлы доверенной установкой TgWitness, указав имя своего форка:"></p>
+<pre>python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo OWNER/TgWitness</pre>
+<small data-en="Decryption alone does not verify who collected the archive. A modified fork must not be accepted merely because it has some GitHub signature." data-ru="Расшифровка сама по себе не проверяет, кто собрал архив. Одной произвольной подписи GitHub недостаточно для доверия изменённому форку."></small></section>
+</main><script src="sealed.js"></script></body></html>

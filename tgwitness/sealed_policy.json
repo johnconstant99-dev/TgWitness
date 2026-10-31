@@ -1,0 +1,10 @@
+{
+  "format": "tgwitness-sealed-policy-v1",
+  "workflow": "phishdestroy/TgWitness/.github/workflows/sealed-collector.yml",
+  "releases": [
+    {
+      "workflow_sha": "03f00930a188625fb57b4aed143cd55077ddc3f2",
+      "collector_sha": "7ab1b6ff623f45ef2d5188910fe1791953c095d9"
+    }
+  ]
+}

@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+- Added entry points for the GitHub Actions capture preview on the workspace
+  login screen, in Exports, on the project homepage and in the documentation.
+  Entry labels are translated; the English/Russian helper preserves the chosen
+  language. Expanded setup, privacy boundaries, mode selection and troubleshooting.
+
+- Added a fork-launched sealed capture preview: restricted fresh-session login,
+  one-chat history and media collection, encrypted connection/result artifacts,
+  pinned reusable-workflow provenance and a fail-closed verifier. English/Russian
+  browser helper keeps the private decryption key local. This uses ordinary GitHub
+  infrastructure, not confidential hardware or Telegram-signed evidence.
+  See [sealed capture](SEALED-ACTIONS.md) for setup, policy and deployment limits.
+- Sources can load the available history of every currently enabled source into
+  Chats and the signed journal. The persistent queue supports pause, resume and
+  explicit continuation after restart, with separate per-source failures and media
+  outcomes. It does not enumerate every account dialog or recover unseen deletions.
+- A signed history progress report can be checked with `verify.py --evidence`:
+  verify the journal prefix, source plan, account and message counters. Other report
+  fields remain signed collector statements; this does not authenticate Telegram origin.
+  See [history acquisition](HISTORY.md) for operation and limits.
+
 ## 0.7.0 preview · 31 October 2026
 
 - OpenTimestamps summaries now parse bounded operation trees and attestation

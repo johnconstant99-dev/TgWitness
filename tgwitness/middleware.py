@@ -10,14 +10,14 @@ def request_limit(path, default=16384):
 
 class RequestLimit:
     """Enforce request size while receiving, including requests without Content-Length."""
-    def __init__(self, app, max_body=16384):
-        self.app, self.max_body = app, max_body
+    def __init__(self, app, max_body=16384, path_limits=True):
+        self.app, self.max_body, self.path_limits = app, max_body, path_limits
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
         body = bytearray()
-        limit = request_limit(scope.get("path", ""), self.max_body)
+        limit = request_limit(scope.get("path", ""), self.max_body) if self.path_limits else self.max_body
         while True:
             message = await receive()
             if message["type"] == "http.disconnect":

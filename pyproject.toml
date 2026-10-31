@@ -68,7 +68,7 @@ tgwitness = [
   "locales/tr.json", "locales/ar.json", "locales/fa.json", "locales/ur.json",
   "locales/hi.json", "locales/id.json", "locales/vi.json", "locales/zh.json",
   "guide_locales/*.json",
-  "english_fallbacks.json", "public_proxies.json",
+  "english_fallbacks.json", "public_proxies.json", "sealed_policy.json",
 ]
 
 [tool.pytest.ini_options]

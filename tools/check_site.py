@@ -120,6 +120,11 @@ def main():
                 demo.on("response", lambda response: failed.append(response.url) if response.status >= 400 else None)
                 demo.goto(url + "demo/?lang=ru", wait_until="networkidle")
                 expect(demo.locator("#workspace")).to_be_visible()
+                demo.locator('[data-view="evidence"]').click()
+                expect(demo.locator("#export-sealed")).to_be_visible()
+                expect(demo.locator("#export-sealed")).to_have_attribute("href",
+                    "https://phishdestroy.github.io/TgWitness/sealed.html?lang=ru")
+                demo.locator('[data-view="chats"]').click()
                 expect(demo.locator("#chats-list .chat-item")).to_have_count(3)
                 expect(demo.locator('[data-view="observations"]')).to_contain_text("Журнал")
                 demo.locator('[data-view="observations"]').click()
