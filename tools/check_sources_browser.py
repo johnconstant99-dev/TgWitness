@@ -7,7 +7,7 @@ from playwright.sync_api import expect, sync_playwright
 
 from check_browser import (ROOT, RunningApp, hold_api_response, launch_browser, navigate_panel,
                            release_api_response, unlock)
-from test_collector import saved_session
+from tools.browser_fixtures import saved_session
 
 
 def seed(server):

@@ -5,7 +5,8 @@ Operator catalogs keep their existing, exclusive override semantics.
 """
 import asyncio
 from collections import Counter
-from contextlib import suppress
+from contextlib import contextmanager, suppress
+from contextvars import ContextVar
 from datetime import datetime, timezone
 import hashlib
 import ipaddress
@@ -17,6 +18,8 @@ from pathlib import Path
 import socket
 import tempfile
 import time
+from threading import get_ident
+from types import MappingProxyType
 from urllib.parse import unquote, urlencode, urlsplit
 
 from telethon.network import MTProtoPlainSender
@@ -473,10 +476,44 @@ class ProxyPool:
         self.lists_blocked = None
         self.waiting = set()
         self.check_task = None
+        self._entry_snapshot = ContextVar("proxy_catalog_entries", default=None)
+
+    @staticmethod
+    def _snapshot_owner():
+        try:
+            task = asyncio.current_task()
+        except RuntimeError:
+            task = None
+        return get_ident(), task
+
+    @contextmanager
+    def read_snapshot(self):
+        """Reuse catalog rows within one synchronous view; health stays live.
+
+        Loading is lazy so describe() still handles invalid operator catalogs.
+        A copied context in another task/thread cannot extend this read scope.
+        """
+        snapshot = {"owner": self._snapshot_owner(), "active": True}
+        token = self._entry_snapshot.set(snapshot)
+        try:
+            yield
+        finally:
+            snapshot["active"] = False
+            snapshot.pop("entries", None)
+            self._entry_snapshot.reset(token)
 
     def entries(self):
+        snapshot = self._entry_snapshot.get()
+        if snapshot is not None and (not snapshot["active"] or snapshot["owner"] != self._snapshot_owner()):
+            snapshot = None
+        if snapshot is not None and "entries" in snapshot:
+            return snapshot["entries"]
         catalog = self.catalog.catalog()
-        return catalog["mode"] == "operator", {row["id"]: row for row in catalog["proxies"]}
+        entries = {row["id"]: row for row in catalog["proxies"]}
+        result = catalog["mode"] == "operator", MappingProxyType(entries) if snapshot is not None else entries
+        if snapshot is not None:
+            snapshot["entries"] = result
+        return result
 
     def resting(self, alias, now):
         return self.health.get(alias, {}).get("cooldown_until", 0) > now

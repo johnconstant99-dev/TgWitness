@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.sync_api import expect, sync_playwright
 
 from check_browser import RunningApp, check_layout, launch_browser, navigate_panel, unlock
-from test_collector import CHAT, FakeClient, media_message, telegram_message
+from tools.browser_fixtures import CHAT, FakeClient, media_message, telegram_message
 from tgwitness import history, i18n
 from tgwitness.verify import verify_history_report
 

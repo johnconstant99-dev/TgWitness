@@ -499,7 +499,7 @@ Read the [contribution guide](../.github/CONTRIBUTING.md) and use fictional data
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -510,12 +510,11 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-The automated test suite uses synthetic Telegram objects and never connects real accounts;
-the live test is described above. CI is configured to run the test matrix on
-Windows, Linux and macOS with Python 3.11–3.13, the browser checks, source packaging, the Windows
-portable build and a Docker build. The release workflow is set up to attach the source ZIP, wheel,
-Windows portable ZIP and multi-architecture GHCR image to a published GitHub Release. Neither
-workflow has run yet. Read [CONTRIBUTING.md](../.github/CONTRIBUTING.md) before opening a pull request.
+Browser checks use synthetic Telegram data. CI checks package installation and readiness
+across the configured Python/platform matrix, browser flows, source packaging and Docker;
+full-platform runs also build the Windows portable package. The release workflow prepares
+the source ZIP, wheel, Windows portable ZIP and GHCR image.
+Read [CONTRIBUTING.md](../.github/CONTRIBUTING.md) before opening a pull request.
 
 </details>
 
@@ -552,7 +551,6 @@ workflow has run yet. Read [CONTRIBUTING.md](../.github/CONTRIBUTING.md) before 
 | --- | --- |
 | [Application](../tgwitness/README.md) | Collectors, journals, evidence exports and the panel |
 | [Documentation](README.md) · [Wiki](wiki/Home.md) | Setup, investigations, operations and verification |
-| [Tests](../tests/README.md) | Synthetic regression checks and qualification entry points |
 | [Tools](../tools/README.md) | Local builds, browser checks, screenshots and packaging |
 | [Deployment](../deploy/README.md) | Service templates and HTTPS configuration |
 | [Website](../website/README.md) | Public pages, practical guides and language catalogues |

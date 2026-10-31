@@ -12,7 +12,7 @@ import uvicorn
 from playwright.sync_api import expect, sync_playwright
 
 from check_browser import ROOT, launch_browser, check_layout, RunningApp
-from test_sealed import CapsuleClient, config
+from tools.browser_fixtures import CapsuleClient, config
 from tgwitness.sealed import create_app
 from tgwitness.sealed_package import connection, package
 from tgwitness.verify import verify_bundle

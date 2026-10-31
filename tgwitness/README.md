@@ -26,7 +26,7 @@ the detailed data model lives in [Architecture](../docs/ARCHITECTURE.md).
 ## Work on the package
 
 Follow the [development setup](../.github/CONTRIBUTING.md#development-setup), then use the
-[tests](../tests/README.md) and [browser checks](../tools/README.md) for the affected
+[browser checks](../tools/README.md) for the affected
 workflow. Keep normalization in presentation/search separate from signed payloads.
 
 Read the [evidence format](../docs/EVIDENCE.md) before changing a journal or export.

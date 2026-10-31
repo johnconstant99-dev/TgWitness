@@ -1,4 +1,5 @@
 """Navigation breakpoints, focus and Russian labels against a synthetic panel."""
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -7,6 +8,83 @@ from playwright.sync_api import expect, sync_playwright
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.check_browser import RunningApp, check_layout, launch_browser, unlock
+
+
+def lifecycle_checks(browser, app, output):
+    context = browser.new_context(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce")
+    context.add_init_script(r"""(() => {
+      const probe=window.shellAcceptance={events:[],resizeQueue:[],policyQueue:[],holdResize:false};
+      const match=window.matchMedia.bind(window);
+      window.matchMedia=query=>{
+        const media=match(query);
+        if(query==='(max-width: 767px)'){
+          const add=media.addEventListener.bind(media);
+          media.addEventListener=(type,listener,options)=>add(type,event=>{
+            const fire=()=>listener.call(media,event);
+            if(type==='change'&&probe.holdResize)probe.resizeQueue.push(fire);else fire();
+          },options);
+        }
+        return media;
+      };
+      const fetch=window.fetch.bind(window);
+      window.fetch=async(...args)=>{
+        const response=await fetch(...args);
+        if(sessionStorage.getItem('acceptance-shell-policy')==='1'&&String(args[0]).endsWith('/api/network/policy'))
+          await new Promise(resolve=>probe.policyQueue.push(resolve));
+        return response;
+      };
+      window.addEventListener('tgwitness:route',event=>probe.events.push(event.detail?.reason));
+    })();""")
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    unlock(page, app)
+    page.wait_for_function("()=>window.TgWitnessRouter?.started")
+    page.evaluate("shellAcceptance.holdResize=true")
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.wait_for_function("()=>shellAcceptance.resizeQueue.length>0")
+    toggle, sidebar = page.locator("#navigation-toggle"), page.locator(".sidebar")
+    destination = page.locator('.sidebar [data-view="witness"]')
+    toggle.click()
+    destination.focus()
+    page.evaluate("shellAcceptance.holdResize=false;shellAcceptance.resizeQueue.splice(0).forEach(f=>f())")
+    expect(toggle).to_have_attribute("aria-expanded", "true")
+    expect(sidebar).to_be_visible()
+    expect(destination).to_be_focused()
+    page.keyboard.press("Escape")
+    expect(sidebar).to_be_hidden()
+    expect(toggle).to_be_focused()
+    toggle.click()
+    page.set_viewport_size({"width": 1440, "height": 1000})
+    expect(toggle).to_have_attribute("aria-expanded", "false")
+    expect(toggle).to_be_hidden()
+    assert not page.locator("#workspace main").evaluate("node=>node.inert")
+
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.evaluate("sessionStorage.setItem('acceptance-shell-policy','1')")
+    page.goto(app.url + "/account?ws=default")
+    expect(page.locator("#workspace")).to_be_visible()
+    page.wait_for_function("()=>shellAcceptance.policyQueue.length>0")
+    toggle.click()
+    destination.focus()
+    page.evaluate("sessionStorage.removeItem('acceptance-shell-policy');shellAcceptance.policyQueue.splice(0).forEach(f=>f())")
+    page.wait_for_function("()=>shellAcceptance.events.includes('initial')")
+    expect(toggle).to_have_attribute("aria-expanded", "true")
+    expect(sidebar).to_be_visible()
+    expect(destination).to_be_focused()
+    destination.click()
+    expect(page.locator("#view-witness")).to_be_visible()
+    expect(sidebar).to_be_hidden()
+    toggle.click()
+    page.evaluate("lock()")
+    expect(page.locator("#gate")).to_be_visible()
+    expect(toggle).to_have_attribute("aria-expanded", "false")
+    assert not page.locator("#workspace main").evaluate("node=>node.inert")
+    assert not errors, errors
+    context.close()
+    (output / "lifecycle.json").write_text(json.dumps({"delayed_resize_keeps_open_menu_and_focus": True,
+        "delayed_initial_route_keeps_open_menu_and_focus": True, "desktop_navigation_and_lock_close_menu": True,
+        "page_errors": errors}, indent=2) + "\n", encoding="utf-8")
 
 
 def main():
@@ -85,8 +163,9 @@ def main():
                 if width < 768:
                     page.keyboard.press("Escape")
             assert not errors, errors
+            lifecycle_checks(browser, app, output)
             browser.close()
-    print("Panel shell passed: five widths, mobile focus/navigation and unclipped Russian labels.")
+    print("Panel shell passed: five widths, mobile focus/navigation, unclipped Russian labels and delayed startup/resize.")
 
 
 if __name__ == "__main__":

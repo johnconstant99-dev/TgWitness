@@ -18,6 +18,6 @@ The static site build publishes `demo/guide-locales/<language>.js`. Both guides
 accept `?lang=de` (or any supported language) and preserve that choice in their
 links. An explicit link takes precedence over the saved language.
 
-Run `tests/test_i18n.py`, `tests/test_site.py` and `tools/check_guide_languages.py`
+Run `python tools/build_site.py` and `python tools/check_guide_languages.py`
 after changing the guides or catalogs. The source archive and wheel must include
 these JSON resources too.

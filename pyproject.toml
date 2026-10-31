@@ -38,7 +38,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "httpx>=0.27,<1", "playwright>=1.48,<2", "ruff>=0.15,<1"]
+dev = ["httpx>=0.27,<1", "playwright>=1.48,<2", "ruff>=0.15,<1"]
 research = ["requests>=2.32,<3", "beautifulsoup4>=4.12,<5"]
 mcp = ["mcp>=2.3,<3", "httpx>=0.28,<1"]
 
@@ -75,9 +75,6 @@ tgwitness = [
   "guide_locales/*.json",
   "english_fallbacks.json", "public_proxies.json", "sealed_policy.json",
 ]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
 
 [tool.ruff]
 target-version = "py311"

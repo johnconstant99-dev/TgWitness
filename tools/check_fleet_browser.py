@@ -7,7 +7,7 @@ from playwright.sync_api import expect, sync_playwright
 
 from check_browser import (ROOT, RunningApp, hold_api_response, launch_browser,
                            release_api_response, unlock)
-from test_collector import saved_session
+from tools.browser_fixtures import saved_session
 from check_fleet_async_browser import main as check_async_groups
 
 

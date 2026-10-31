@@ -17,12 +17,11 @@ from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "tests"))
 from tgwitness import api_pool, i18n
 from tgwitness.app import create_app
 from tgwitness.proxy_catalog import ProxyPool
 from tgwitness.verify import verify_bundle
-from test_collector import FakeClient, saved_session
+from tools.browser_fixtures import FakeClient, saved_session
 
 
 async def _listed(route, operator=False):

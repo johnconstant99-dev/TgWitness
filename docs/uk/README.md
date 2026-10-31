@@ -315,7 +315,7 @@ TgWitness **0.6.1** працює на Windows 11 з Python 3.12. Стан на 2
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -326,7 +326,7 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-Набір автоматизованих тестів використовує синтетичні об’єкти Telegram і ніколи не підключається до реальних акаунтів; тестування в реальному середовищі описано вище. CI налаштовано для виконання матриці тестів на Windows, Linux та macOS із Python 3.11–3.13, перевірок браузера, пакування вихідного коду, портативної збірки для Windows та збірки Docker. Робочий процес релізу налаштований так, щоб додавати ZIP-архів із вихідним кодом, файл wheel, портативний ZIP-архів для Windows та багатоархітектурний образ GHCR до опублікованого релізу на GitHub. Жоден із цих робочих процесів ще не запускався. Перед тим, як відкривати pull-запит, прочитайте [файл CONTRIBUTING.md](../../.github/CONTRIBUTING.md).
+Браузерні перевірки використовують синтетичні дані. Поточні завдання збирання та випуску описані в `.github/workflows/`. Перед pull-запитом прочитайте [CONTRIBUTING.md](../../.github/CONTRIBUTING.md).
 
 ## Документація
 

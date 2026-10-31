@@ -315,7 +315,7 @@ TgWitness **0.6.1** विंडोज 11 पर पाइथन 3.12 के स
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -326,7 +326,7 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-स्वचालित परीक्षण सुइट सिंथेटिक टेलीग्राम ऑब्जेक्ट्स का उपयोग करती है और कभी भी वास्तविक खातों से कनेक्ट नहीं होती; लाइव परीक्षण का वर्णन ऊपर किया गया है। CI को Windows, Linux और macOS पर Python 3.11–3.13 के साथ परीक्षण मैट्रिक्स चलाने के लिए कॉन्फ़िगर किया गया है, जिसमें ब्राउज़र चेक्स, स्रोत पैकेजिंग, Windows पोर्टेबल बिल्ड और एक Docker बिल्ड शामिल हैं। रिलीज़ वर्कफ़्लो को एक प्रकाशित GitHub रिलीज़ में सोर्स ZIP, व्हील, Windows पोर्टेबल ZIP और मल्टी-आर्किटेक्चर GHCR इमेज संलग्न करने के लिए सेट किया गया है। अभी तक कोई भी वर्कफ़्लो नहीं चला है। पुल रिक्वेस्ट खोलने से पहले [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) पढ़ें।
+ब्राउज़र की जाँच में सिंथेटिक डेटा इस्तेमाल होता है। मौजूदा बिल्ड और रिलीज़ के काम `.github/workflows/` में तय हैं। पुल रिक्वेस्ट खोलने से पहले [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) पढ़ें।
 
 ## दस्तावेज़ीकरण
 

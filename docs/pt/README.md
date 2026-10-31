@@ -315,7 +315,7 @@ Detalhes: [registro de verificação](../VERIFICATION.md), [status da versão](.
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -326,7 +326,7 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-O conjunto de testes automatizados utiliza objetos sintéticos do Telegram e nunca se conecta a contas reais; o teste em ambiente real está descrito acima. A integração contínua (CI) está configurada para executar a matriz de testes no Windows, Linux e macOS com Python 3.11–3.13, as verificações de navegador, o empacotamento do código-fonte, a compilação portátil para Windows e uma compilação no Docker. O fluxo de trabalho de lançamento está configurado para anexar o ZIP de código-fonte, o wheel, o ZIP portátil para Windows e a imagem GHCR para múltiplas arquiteturas a um lançamento publicado no GitHub. Nenhum dos fluxos de trabalho foi executado ainda. Leia [o arquivo CONTRIBUTING.md](../../.github/CONTRIBUTING.md) antes de abrir uma solicitação de pull.
+As verificações do navegador usam dados sintéticos. Os processos atuais de compilação e publicação estão definidos em `.github/workflows/`. Leia [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) antes de abrir um pull request.
 
 ## Documentação
 

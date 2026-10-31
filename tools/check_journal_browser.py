@@ -13,7 +13,7 @@ from playwright.sync_api import expect, sync_playwright
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.check_browser import RunningApp, launch_browser, unlock, navigate_panel, check_layout
-from test_collector import saved_session
+from tools.browser_fixtures import saved_session
 from tgwitness import store as store_module
 
 HARBOR, OTHER = -1001, -1002

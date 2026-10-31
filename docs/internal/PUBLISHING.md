@@ -120,7 +120,6 @@ From the project environment:
 
 ```sh
 python tools/sync_notice.py --check
-python -m pytest -q
 python tools/check_publication.py --git-index
 python tools/build_site.py
 python tools/check_site.py

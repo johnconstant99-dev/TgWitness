@@ -315,7 +315,7 @@ Ayrıntılar: [doğrulama kaydı](../VERIFICATION.md), [sürüm durumu](../inter
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -326,7 +326,7 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-Otomatik test paketi, sentetik Telegram nesnelerini kullanır ve hiçbir zaman gerçek hesaplara bağlanmaz; canlı test yukarıda açıklanmıştır. CI, Python 3.11–3.13 ile Windows, Linux ve macOS üzerinde test matrisini çalıştırmak, tarayıcı kontrollerini yapmak, kaynak kod paketlemeyi gerçekleştirmek, Windows taşınabilir derlemesini ve bir Docker derlemesini yapmak üzere yapılandırılmıştır. Sürüm yayınlama iş akışı, kaynak ZIP dosyasını, wheel dosyasını, Windows taşınabilir ZIP dosyasını ve çoklu mimari GHCR görüntüsünü yayınlanmış bir GitHub Sürümüne ekleyecek şekilde ayarlanmıştır. Her iki iş akışı da henüz çalıştırılmamıştır. Bir çekme isteği açmadan önce [CONTRIBUTING.md dosyasını](../../.github/CONTRIBUTING.md) okuyun.
+Tarayıcı kontrolleri sentetik veriler kullanır. Güncel derleme ve yayın işleri `.github/workflows/` altında tanımlıdır. Pull request açmadan önce [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) dosyasını okuyun.
 
 ## Belgeler
 

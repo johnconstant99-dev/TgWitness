@@ -315,7 +315,7 @@ TgWitness **0.6.1** 可在搭载 Python 3.12 的 Windows 11 系统上运行。�
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -326,7 +326,7 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-自动化测试套件使用合成 Telegram 对象，绝不会连接真实账户；实时测试已在上文描述。持续集成（CI）已配置为在 Windows、Linux 和 macOS 系统上运行测试矩阵，涵盖 Python 3.11–3.13 环境、浏览器兼容性检查、源代码打包、Windows 便携版构建以及 Docker 构建。 发布工作流已配置为将源代码 ZIP 包、wheel 包、Windows 便携版 ZIP 包以及多架构 GHCR 镜像附加到已发布的 GitHub 发布中。目前这两个工作流均尚未运行。在提交拉取请求前，请阅读 [CONTRIBUTING.md](../../.github/CONTRIBUTING.md)。
+浏览器检查使用模拟数据。当前的构建和发布任务定义在 `.github/workflows/` 中。提交拉取请求前，请阅读 [CONTRIBUTING.md](../../.github/CONTRIBUTING.md)。
 
 ## 文档
 

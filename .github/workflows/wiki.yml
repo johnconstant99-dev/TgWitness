@@ -12,7 +12,6 @@ on:
       - pyproject.toml
       - tools/build_wiki.py
       - tools/build_source.py
-      - tests/test_wiki.py
       - .github/workflows/wiki.yml
   workflow_dispatch:
 permissions:

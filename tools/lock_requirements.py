@@ -8,7 +8,7 @@ deploy/build.lock: setuptools, which builds this project and the packages publis
 (pyaes), installed first so that no build fetches an unhashed package.
 
 With pip install --require-hashes a file replaced on PyPI or a mirror is refused even when its version
-number is the same. tests/test_requirements_lock.py keeps both locks in step with the constraints.
+number is the same. Regenerate both locks when the constraints change.
 """
 import subprocess
 import sys

@@ -238,7 +238,6 @@ To strictly comply with the MIT License, we do not restrict the use of this soft
 | [`docs/`](docs/README.md) | Guides, Wiki source, screenshots and verification record |
 | [`deploy/`](deploy/README.md) | Compose configurations and service templates |
 | [`scripts/`](scripts/README.md) | Demo, setup and Docker launchers |
-| [`tests/`](tests/README.md) | Synthetic regression tests |
 | [`tools/`](tools/README.md) | Builds, checks and packaging |
 | [`website/`](website/README.md) | Documentation website and translations |
 | [`.github/`](.github/AUTOMATION.md) | Workflows and contribution guides |

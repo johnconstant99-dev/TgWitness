@@ -16,8 +16,8 @@ from playwright.sync_api import expect, sync_playwright
 from telethon.helpers import TotalList
 
 from tools.check_browser import RunningApp, hold_api_response, launch_browser, release_api_response
-from tests.test_collector import CHAT, FakeClient, saved_session, telegram_message
-from tests.test_dossier import ALICE, say
+from tools.browser_fixtures import CHAT, FakeClient, saved_session, telegram_message
+from tools.browser_fixtures import ALICE, say
 from tgwitness import dossier
 
 

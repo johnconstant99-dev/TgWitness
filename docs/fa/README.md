@@ -315,7 +315,7 @@ TgWitness **۰.۶.۱** روی ویندوز ۱۱ با پایتون ۳.۱۲ اجر
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -326,7 +326,7 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-مجموعه تست خودکار از اشیاء مصنوعی تلگرام استفاده می‌کند و هرگز به حساب‌های واقعی متصل نمی‌شود؛ تست زنده در بالا توضیح داده شده است. CI طوری پیکربندی شده است که ماتریس تست را روی ویندوز، لینوکس و macOS با پایتون ۳.۱۱–۳.۱۳، بررسی‌های مرورگر، بسته‌بندی سورس، نسخه قابل حمل ویندوز و یک ساخت Docker اجرا کند. جریان کاری انتشار طوری تنظیم شده است که فایل‌های ZIP منبع، wheel، ZIP قابل حمل ویندوز و تصویر GHCR چندمعماری را به یک Release منتشر شده در گیت‌هاب ضمیمه کند. هیچ‌کدام از این جریان‌های کاری هنوز اجرا نشده‌اند. پیش از ارسال یک pull request، [فایل CONTRIBUTING.md را](../../.github/CONTRIBUTING.md) مطالعه کنید.
+بررسی‌های مرورگر از داده‌های ساختگی استفاده می‌کنند. کارهای فعلی ساخت و انتشار در `.github/workflows/` تعریف شده‌اند. پیش از ارسال درخواست ادغام، [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) را بخوانید.
 
 ## مستندات
 

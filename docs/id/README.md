@@ -315,7 +315,7 @@ Rincian: [catatan verifikasi](../VERIFICATION.md), [status rilis,](../internal/R
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -326,7 +326,7 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-Rangkaian pengujian otomatis ini menggunakan objek Telegram sintetis dan tidak pernah menghubungkan akun asli; pengujian langsung dijelaskan di atas. CI dikonfigurasi untuk menjalankan matriks pengujian di Windows, Linux, dan macOS dengan Python 3.11–3.13, pemeriksaan browser, pengemasan sumber, build portabel Windows, dan build Docker. Alur kerja rilis telah diatur untuk melampirkan ZIP sumber, wheel, ZIP portabel Windows, dan gambar GHCR multi-arsitektur ke Rilis GitHub yang telah dipublikasikan. Kedua alur kerja tersebut belum dijalankan. Bacalah [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) sebelum membuka permintaan pull.
+Pemeriksaan browser menggunakan data sintetis. Proses build dan rilis saat ini ditentukan dalam `.github/workflows/`. Baca [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) sebelum membuka pull request.
 
 ## Dokumentasi
 

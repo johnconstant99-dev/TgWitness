@@ -24,7 +24,7 @@ the original languages.
 
 Preserve placeholders and markup, and check the actual UI in the selected language.
 Account-visible message content and signed journal payloads must stay as captured.
-Use [`test_i18n.py`](../../tests/test_i18n.py) to check catalog behavior.
+Run `python tools/i18n_keys.py` to list the required interface strings.
 
 Public-site translations are maintained separately in
 [`website/i18n/`](../../website/i18n/README.md).

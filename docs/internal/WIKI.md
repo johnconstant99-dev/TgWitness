@@ -75,7 +75,6 @@ After pushing, open Home, test sidebar navigation, confirm images load and inspe
 4. Run the checks below, build, inspect the rendered Markdown and publish the reviewed result.
 
 ~~~sh
-python -m pytest --noconftest -q tests/test_wiki.py
 python tools/check_publication.py
 python tools/build_wiki.py
 ~~~

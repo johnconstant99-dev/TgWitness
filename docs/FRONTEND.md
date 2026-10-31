@@ -49,8 +49,10 @@ Background updates patch keyed rows and status nodes. They must not recreate a
 form, replace a focused control or discard an unsaved value. For save responses,
 compare the submitted snapshot with the current draft: accept normalization when
 there is no newer edit; otherwise retain that edit. Clear write-only credentials
-from both the visible field and the saved Discard baseline. Never persist tokens
-or credentials in browser storage.
+from both the visible field and the saved Discard baseline. Keep newly issued
+access and MCP tokens, and form credentials, out of browser storage. The active
+panel sign-in token uses tab-scoped `sessionStorage` to survive reloads and is
+removed on lock; it must not become a persistent draft or a `localStorage` value.
 
 Use `tr()` for UI text, including labels supplied through controller callbacks.
 Keep `tools/i18n_keys.py` aware of dynamic label catalogs. New module files belong
@@ -77,7 +79,6 @@ and verify archives independently with `python -m tgwitness.verify`.
 Run from the repository root in the project environment:
 
 ```sh
-python -m pytest -q
 python -m ruff check .
 python tools/check_router_browser.py
 python tools/check_polling_browser.py

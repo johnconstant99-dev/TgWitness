@@ -15,10 +15,10 @@ import requests
 from playwright.sync_api import expect, sync_playwright
 
 from tools.check_browser import RunningApp, launch_browser, hold_api_response, release_api_response, lock_panel, navigate_panel, unlock
-from tests.test_interactions import InteractionClient
-from tests.test_collector import CHAT, saved_session
-from tests.test_investigation import offer
-from tests.test_scope import SHOP_BOT
+from tools.browser_fixtures import InteractionClient
+from tools.browser_fixtures import CHAT, saved_session
+from tools.browser_fixtures import offer
+from tools.browser_fixtures import SHOP_BOT
 from tgwitness.evidence import export_file
 from tgwitness.verify import verify_bundle
 

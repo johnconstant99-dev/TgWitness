@@ -98,11 +98,26 @@ def main():
             assert page.evaluate("state.profile") == second
             page.goto(app.url + "/?workspace=default&event=" + str(event["seq"]) + "#journal")
             expect(page.locator("#detail-drawer")).to_contain_text("Invoice revised")
-            assert urlsplit(page.url).path == "/journal/event/" + str(event["seq"])
+            expect(page).to_have_url(app.url + "/journal/event/" + str(event["seq"]) + "?ws=default")
             assert parse_qs(urlsplit(page.url).query)["ws"] == ["default"]
+
+            # The view mounts before its initial fetch completes and the legacy URL is replaced.
+            page.add_init_script("""(() => {
+              const fetch=window.fetch.bind(window);
+              const held=window.acceptanceLegacyRoute={active:location.hash==='#observations',pending:[]};
+              window.fetch=async(...args)=>{
+                const response=await fetch(...args);
+                if(held.active&&new URL(String(args[0]),location.href).pathname.endsWith('/api/events'))
+                  await new Promise(resolve=>held.pending.push(resolve));
+                return response;
+              };
+            })();""")
             page.goto(app.url + "/#observations")
             expect(page.locator("#view-observations")).to_be_visible()
-            assert urlsplit(page.url).path == "/journal"
+            page.wait_for_function("()=>acceptanceLegacyRoute.pending.length>0")
+            expect(page).to_have_url(app.url + "/#observations")
+            page.evaluate("acceptanceLegacyRoute.active=false;acceptanceLegacyRoute.pending.splice(0).forEach(resolve=>resolve())")
+            expect(page).to_have_url(app.url + "/journal?ws=default")
 
             # Back during a delayed workspace restore must win over its late status response.
             page.evaluate("navigate('sources')")

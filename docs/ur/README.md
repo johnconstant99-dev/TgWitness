@@ -316,7 +316,7 @@ TgWitness **0.6.1** ونڈوز 11 پر پائتھن 3.12 کے ساتھ چلتا 
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -327,7 +327,7 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-خودکار ٹیسٹ سوئٹ مصنوعی ٹیلیگرام آبجیکٹس استعمال کرتی ہے اور کبھی بھی حقیقی اکاؤنٹس سے کنکٹ نہیں ہوتی؛ لائیو ٹیسٹ کا ذکر اوپر کیا گیا ہے۔ CI کو ونڈوز، لینکس اور macOS پر Python 3.11–3.13 کے ساتھ ٹیسٹ میٹرکس چلانے کے لیے ترتیب دیا گیا ہے، جس میں براؤزر چیکس، سورس پیکجنگ، ونڈوز پورٹیبل بلڈ اور Docker بلڈ شامل ہیں۔ ریلیز کا ورک فلو اس طرح ترتیب دیا گیا ہے کہ سورس ZIP، WHEEL، Windows Portable ZIP اور ملٹی آرکیٹیکچر GHCR امیج کو شائع شدہ GitHub ریلیز کے ساتھ منسلک کیا جائے۔ ابھی تک کوئی بھی ورک فلو چلایا نہیں گیا ہے۔ پُل ریکویسٹ کھولنے سے پہلے [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) پڑھیں۔
+براؤزر کی جانچ میں مصنوعی ڈیٹا استعمال ہوتا ہے۔ موجودہ بلڈ اور ریلیز کے کام `.github/workflows/` میں متعین ہیں۔ پل ریکویسٹ کھولنے سے پہلے [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) پڑھیں۔
 
 ## دستاویزات
 

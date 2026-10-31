@@ -8,9 +8,9 @@ from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 from check_browser import RunningApp, unlock, check_layout, hold_api_response, release_api_response, launch_browser, navigate_panel
-from test_account_import import sqlite_fixture, tdata_fixture
-from test_qr_login import QRClient
-from test_collector import saved_session
+from tools.browser_fixtures import sqlite_fixture, tdata_fixture
+from tools.browser_fixtures import QRClient
+from tools.browser_fixtures import saved_session
 from telethon.sessions import StringSession
 from playwright.sync_api import sync_playwright, expect
 

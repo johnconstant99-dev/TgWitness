@@ -1,5 +1,6 @@
 """Isolated account collectors behind one authenticated panel."""
 import asyncio
+from contextlib import ExitStack
 import re
 import shutil
 import uuid
@@ -287,20 +288,25 @@ class Profiles:
             return {"group": group, "results": results}
 
     def summary(self):
-        result = []
-        for profile in self.entries.values():
-            app = profile["app"]
-            status = app.state.collector.status() if app else None
-            sources = app.state.store.target_counts() if app else None
-            result.append({
-                "id": profile["id"], "label": profile["label"], "group": self.group_of(profile["id"]),
-                "collector": status, "health": health.collector_of(app.state, status) if app else None,
-                "stats": app.state.store.stats() if app else None,
-                "sources_enabled": sources["enabled"] if sources else None,
-                "sources_total": sources["total"] if sources else None,
-                "error_type": profile.get("error_type"),
-            })
-        return result
+        with ExitStack() as snapshots:
+            result, pools = [], set()
+            for profile in self.entries.values():
+                app = profile["app"]
+                pool = getattr(app.state.collector, "proxy_pool", None) if app else None
+                if pool is not None and id(pool) not in pools:
+                    snapshots.enter_context(pool.read_snapshot())
+                    pools.add(id(pool))
+                status = app.state.collector.status() if app else None
+                sources = app.state.store.target_counts() if app else None
+                result.append({
+                    "id": profile["id"], "label": profile["label"], "group": self.group_of(profile["id"]),
+                    "collector": status, "health": health.collector_of(app.state, status) if app else None,
+                    "stats": app.state.store.stats() if app else None,
+                    "sources_enabled": sources["enabled"] if sources else None,
+                    "sources_total": sources["total"] if sources else None,
+                    "error_type": profile.get("error_type"),
+                })
+            return result
 
     async def close(self):
         for profile_id, entry in list(self.entries.items()):

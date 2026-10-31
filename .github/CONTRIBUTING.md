@@ -17,7 +17,7 @@ Activate it with `.venv\Scripts\Activate.ps1` in PowerShell or
 
 ```sh
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q
+python -m ruff check .
 python -m playwright install chromium
 python tools/check_browser.py
 ```
@@ -25,7 +25,7 @@ python tools/check_browser.py
 On Linux, `python -m playwright install --with-deps chromium` also installs the
 browser's system dependencies and may need administrator access. To use an installed
 browser instead of the Playwright download, set `TGWITNESS_BROWSER_CHANNEL=chrome` or
-`msedge`. The tests and browser acceptance harness use synthetic accounts and fake
+`msedge`. The browser acceptance harness uses synthetic accounts and fake
 Telegram transport. Do not connect a personal account for an ordinary regression test.
 
 After a visible UI change, refresh the README images from synthetic data and review
@@ -89,6 +89,7 @@ packager; files of unexpected types inside source directories are also excluded.
 Review the selected source itself before release: an allowlist cannot detect every
 secret pasted into a source file. This command does not publish anything.
 
-GitHub Actions checks the Python/platform matrix, synthetic browser workflow,
-source packaging and container package. The workflow definitions are not a claim
+GitHub Actions checks package installation across the configured Python/platform
+matrix, synthetic browser workflows, source packaging and the container package.
+The workflow definitions are not a claim
 that those remote jobs have run. See [release readiness](../docs/internal/READINESS.md).

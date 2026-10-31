@@ -192,7 +192,7 @@ def index(base_url, repo_url, branch, version, guides, references):
         "## Optional",
         f"- [Complete English handbook]({base_url}/llms-full.txt): All public guides and reference pages in one text file, including source URLs.",
         f"- [Documentation hub]({base_url}/docs/): Browse the illustrated handbook and its language editions.",
-        f"- [Source code]({repo_url}): Implementation, tests and issue templates.",
+        f"- [Source code]({repo_url}): Implementation, documentation and issue templates.",
         f"- [Releases]({repo_url}/releases): Packages and their release notes.",
         f"- [MIT License]({base_url}/LICENSE): Software license.",
         link("docs/reference/notice/", *references["notice"][:2]),

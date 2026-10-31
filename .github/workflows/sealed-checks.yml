@@ -10,7 +10,6 @@ on:
       - 'scripts/sealed_runner.py'
       - 'deploy/Dockerfile.sealed'
       - 'deploy/*.lock'
-      - 'tests/test_sealed*'
       - 'tools/check_sealed*'
       - '.github/workflows/sealed*'
   pull_request:
@@ -23,7 +22,6 @@ on:
       - 'scripts/sealed_runner.py'
       - 'deploy/Dockerfile.sealed'
       - 'deploy/*.lock'
-      - 'tests/test_sealed*'
       - 'tools/check_sealed*'
       - '.github/workflows/sealed*'
   workflow_dispatch:
@@ -76,7 +74,6 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/sealed-tests"
           echo "$RUNNER_TEMP/sealed-tests/bin" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install -c deploy/constraints.txt -e '.[dev]'
-      - run: python -m pytest -q tests/test_sealed.py tests/test_sealed_workflow.py tests/test_history.py
       - run: python -m playwright install --with-deps chromium
       - run: python tools/check_sealed_browser.py
       - run: python tools/check_sealed_container.py

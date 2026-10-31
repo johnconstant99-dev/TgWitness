@@ -315,7 +315,7 @@ Chi tiết: [bản ghi xác minh](../VERIFICATION.md), [tình trạng phát hàn
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -326,7 +326,7 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-Bộ kiểm thử tự động sử dụng các đối tượng Telegram tổng hợp và tuyệt đối không kết nối với các tài khoản thực; quy trình kiểm thử trực tiếp đã được mô tả ở phần trên. Hệ thống CI được cấu hình để chạy ma trận kiểm thử trên Windows, Linux và macOS với Python phiên bản 3.11–3.13, bao gồm các kiểm tra trình duyệt, đóng gói mã nguồn, bản dựng di động cho Windows và bản dựng Docker. Quy trình phát hành được thiết lập để đính kèm tệp ZIP mã nguồn, tệp wheel, tệp ZIP di động dành cho Windows và hình ảnh GHCR đa kiến trúc vào bản phát hành GitHub đã được công bố. Cả hai quy trình này đều chưa được thực thi. Vui lòng đọc [tệp CONTRIBUTING.md](../../.github/CONTRIBUTING.md) trước khi gửi yêu cầu pull.
+Các kiểm tra trình duyệt sử dụng dữ liệu giả lập. Các tác vụ dựng và phát hành hiện tại được định nghĩa trong `.github/workflows/`. Đọc [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) trước khi mở pull request.
 
 ## Tài liệu hướng dẫn
 

@@ -36,7 +36,7 @@ export function createResponsiveShell({node, icon, tr}) {
     }
   }
   function resize() {
-    setOpen(false, false);
+    if (!mobile.matches || !opened) setOpen(false, false);
     if (mobile.matches) actions.append(status, collector);
     else { statusPlace.after(status); collectorPlace.after(collector); }
   }
@@ -45,7 +45,10 @@ export function createResponsiveShell({node, icon, tr}) {
   sidebar.addEventListener("click", event => {
     if (event.target.closest("[data-view], #lock-panel")) setOpen(false, false);
   });
-  window.addEventListener("tgwitness:route", () => setOpen(false, false));
+  window.addEventListener("tgwitness:route", event => {
+    if (event.detail?.reason !== "initial") setOpen(false, false);
+  });
+  window.addEventListener("tgwitness:lock", () => setOpen(false, false));
   document.addEventListener("keydown", event => {
     if (!opened) return;
     if (event.key === "Escape") { event.preventDefault(); setOpen(false); return; }

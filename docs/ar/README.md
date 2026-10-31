@@ -315,7 +315,7 @@ TgWitness هي أداة. ومن يديرها هو الذي يقرر ما يتم 
 ```sh
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m pytest -q                                    # unit and integration tests
+python -m ruff check .                                 # source checks
 python -m playwright install chromium
 python tools/check_browser.py                          # end-to-end UI acceptance
 python tools/check_account_browser.py                  # sign-in flows
@@ -326,7 +326,7 @@ python tools/build_site.py                             # static project site in 
 python tools/check_site.py                             # website browser acceptance
 ```
 
-تستخدم مجموعة الاختبارات الآلية كائنات Telegram اصطناعية ولا تتصل أبدًا بحسابات حقيقية؛ وقد تم وصف الاختبار المباشر أعلاه. تم تكوين CI لتشغيل مصفوفة الاختبار على أنظمة Windows وLinux وmacOS باستخدام Python 3.11–3.13، وفحوصات المتصفح، وتعبئة المصدر، والإصدار المحمول لنظام Windows، وإصدار Docker. تم إعداد سير عمل الإصدار لإرفاق ملف ZIP المصدر وملف wheel وملف ZIP المحمول لنظام Windows وصورة GHCR متعددة البنى بإصدار GitHub منشور. لم يتم تشغيل أي من سير العمل حتى الآن. اقرأ [ملف CONTRIBUTING.md](../../.github/CONTRIBUTING.md) قبل فتح طلب سحب (pull request).
+تستخدم فحوصات المتصفح بيانات اصطناعية. تُعرّف مهام البناء والنشر الحالية في `.github/workflows/`. اقرأ [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) قبل فتح طلب سحب.
 
 ## التوثيق
 

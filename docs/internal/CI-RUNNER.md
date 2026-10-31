@@ -9,19 +9,19 @@ the jobs. No collecting Telegram account or production evidence belongs on it.
 
 | Workflow | Automatic trigger | Execution |
 | --- | --- | --- |
-| Checks | Program, tests, tooling or deployment changes pushed to `main` | Linux, Python 3.12, dependency audit, browser checks, source and Docker validation |
+| Checks | Program, tooling or deployment changes pushed to `main` | Linux, Python 3.12 package readiness, dependency audit, browser checks, source and Docker validation |
 | Project website | Website and documentation inputs pushed to `main` | Build and browser checks on the Linux runner |
 | Wiki bundle | Handbook inputs pushed to `main` | Build the downloadable Wiki bundle on the Linux runner |
 | Release packages | A published release | Full compatibility checks, release downloads and container publication |
 
-Changes confined to README or prose do not trigger the complete application test
-suite. A newer automatic run replaces an outdated run for the same branch.
+Changes confined to README or prose do not trigger all application checks.
+A newer automatic run replaces an outdated run for the same branch.
 Each allocated job has a timeout and its own Python virtual environment.
 The runner accepts one job at a time, so independent workflows can queue.
 
 In **Actions → Checks → Run workflow**, leave **full_platforms** unchecked for the
-normal Linux checks. Checking it also tests Python 3.11–3.13 across Linux,
-Windows and macOS and builds Windows portable. Windows/macOS use GitHub-hosted
+normal Linux checks. Checking it also verifies package installation and readiness
+with Python 3.11–3.13 across Linux, Windows and macOS and builds Windows portable. Windows/macOS use GitHub-hosted
 runners and consume the account's included compute while this repository is private.
 Published releases explicitly request this complete matrix.
 

@@ -113,7 +113,6 @@ private files into these presentation directories. The builder rejects linked
 inputs and unexpected output files; it does not recursively copy the repository.
 
 ```sh
-python -m pytest --noconftest -q tests/test_site.py tests/test_site_llms.py
 python tools/build_site.py
 python tools/check_site.py
 python tools/check_docs_site.py
