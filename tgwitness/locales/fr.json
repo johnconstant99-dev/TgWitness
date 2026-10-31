@@ -3259,5 +3259,13 @@
 "Country lookups are switched off under Lists and sources.": "La recherche par pays est désactivée dans la section « Listes et sources ».",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "Les mises à jour des listes et les recherches par pays sont en attente ; les vérifications des serveurs eux-mêmes se poursuivent.",
 "Enter a group label.": "Saisissez un nom de groupe.",
-"The new workspace could not start.": "Le nouvel espace de travail n’a pas pu démarrer."
+"The new workspace could not start.": "Le nouvel espace de travail n’a pas pu démarrer.",
+"Investigation": "Enquête",
+"Search chats": "Rechercher des discussions",
+"Chat tools": "Outils de discussion",
+"Fictional messages. No Telegram connection.": "Messages fictifs. Aucune connexion à Telegram.",
+"Review deletions": "Voir les suppressions",
+"Compare edits": "Comparer les modifications",
+"Sample data": "Données d’exemple",
+"No chats match your search.": "Aucune discussion ne correspond à votre recherche."
 }

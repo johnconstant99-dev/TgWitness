@@ -1,5 +1,6 @@
 import shutil
 import subprocess
+import zipfile
 
 import pytest
 
@@ -10,7 +11,11 @@ from tools.check_publication import check_sources
 def public_tree(root):
     for name in FILES:
         (root / name).parent.mkdir(parents=True, exist_ok=True)
-        (root / name).write_text("Synthetic public source\n", encoding="utf-8")
+        if name.endswith(".zip"):
+            with zipfile.ZipFile(root / name, "w") as archive:
+                archive.writestr("README.txt", "Synthetic public source\n")
+        else:
+            (root / name).write_text("Synthetic public source\n", encoding="utf-8")
 
 
 @pytest.mark.parametrize("filename", ["README.md", "deploy/Dockerfile", "deploy/constraints.txt"])
@@ -45,6 +50,24 @@ def test_only_named_public_tsa_fixtures_enter_the_source_package(tmp_path):
     assert tmp_path / "tests/tsa/freetsa.tsr" in sources
     assert private not in sources
     assert not findings
+
+
+def test_only_named_demo_archives_ship_and_their_contents_are_scanned(tmp_path):
+    public_tree(tmp_path)
+    demo = tmp_path / "website/demo/downloads"
+    unreviewed = demo / "private-export.zip"
+    unreviewed.write_bytes(b"not reviewed")
+    secret = "ghp_" + "c" * 36
+    with zipfile.ZipFile(demo / "tgwitness-demo.zip", "w") as archive:
+        archive.writestr("events.jsonl", secret)
+        archive.writestr("../outside.txt", "unsafe path")
+    sources, _, findings = check_sources(tmp_path)
+    assert unreviewed not in sources
+    assert findings == [
+        "website/demo/downloads/tgwitness-demo.zip/events.jsonl:1: possible GitHub token (value withheld)",
+        "website/demo/downloads/tgwitness-demo.zip: unsafe ZIP member path",
+    ]
+    assert all(secret not in finding for finding in findings)
 
 
 @pytest.fixture

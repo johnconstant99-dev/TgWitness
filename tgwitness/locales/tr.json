@@ -3259,5 +3259,13 @@
 "Country lookups are switched off under Lists and sources.": "\"Listeler ve kaynaklar\" bölümünde ülke aramaları devre dışı bırakılmıştır.",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "Liste güncellemeleri ve ülke aramaları biraz bekleyecek; sunucuların kendilerine yönelik kontroller ise hâlâ devam ediyor.",
 "Enter a group label.": "Bir grup adı girin.",
-"The new workspace could not start.": "Yeni çalışma alanı başlatılamadı."
+"The new workspace could not start.": "Yeni çalışma alanı başlatılamadı.",
+"Investigation": "Araştırma",
+"Search chats": "Sohbetleri ara",
+"Chat tools": "Sohbet araçları",
+"Fictional messages. No Telegram connection.": "Kurgusal mesajlar. Telegram bağlantısı yok.",
+"Review deletions": "Silinenleri incele",
+"Compare edits": "Düzenlemeleri karşılaştır",
+"Sample data": "Örnek veriler",
+"No chats match your search.": "Aramanızla eşleşen sohbet yok."
 }

@@ -3291,5 +3291,13 @@
 "Country lookups are switched off under Lists and sources.": "Поиск по странам отключен в разделе «Списки и источники».",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "Обновления списков и поиск по странам — ждите; проверки самих серверов по-прежнему выполняются.",
 "Enter a group label.": "Введите название группы.",
-"The new workspace could not start.": "Не удалось запустить новое рабочее пространство."
+"The new workspace could not start.": "Не удалось запустить новое рабочее пространство.",
+"Investigation": "Расследование",
+"Search chats": "Поиск чатов",
+"Chat tools": "Инструменты чата",
+"Fictional messages. No Telegram connection.": "Вымышленные сообщения. Без подключения к Telegram.",
+"Review deletions": "Удалённые сообщения",
+"Compare edits": "Сравнить правки",
+"Sample data": "Демо-данные",
+"No chats match your search.": "По запросу нет чатов."
 }

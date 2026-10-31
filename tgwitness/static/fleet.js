@@ -2,18 +2,72 @@
   "use strict";
   // Account groups with shared settings, and importing many accounts into their own workspaces.
   let groups = [], sections = [], picked = [], importing = false;
+  let loadSerial = 0, formRevision = -1, restorePoint = null, loadError = "", creating = null;
+  const settings = new Map(), moving = new Map(), writing = new Map();
   const editable = () => !!state.me?.admin && !state.status?.demo;
   const SECTIONS = {parameters: "Parameters", reports: "Report settings", capture: "Capture and monitoring",
                     recheck: "Recheck schedule", route: "IP protection mode"};
   const labelOf = id => (state.profiles || []).find(p => p.id === id)?.label || id;
 
+  function clearForms() {
+    settings.clear(); moving.clear(); writing.clear(); restorePoint = null; creating = null;
+    formRevision = state.workspaceRevision; loadSerial++;
+  }
+
+  function beforeRender() {
+    if (formRevision !== state.workspaceRevision) clearForms();
+    const element = document.activeElement;
+    if (!element?.closest("#fleet-groups, #accounts-list")) { restorePoint = null; return; }
+    restorePoint = {element, profile: element.matches(".fleet-card-group") ? element.closest(".account-card").dataset.profile : null,
+                    x: window.scrollX, y: window.scrollY};
+  }
+
+  function accept(result) {
+    loadSerial++;
+    groups = result.groups;
+    if (result.sections) sections = result.sections;
+  }
+
+  async function acceptWrite(result, serial) {
+    if (serial === loadSerial) accept(result);
+    else await load();
+  }
+
+  function groupControls(id) {
+    const entry = settings.get(id), disabled = !editable() || writing.has(id);
+    if (entry) entry.panel.querySelectorAll("input, select, button").forEach(field => { field.disabled = disabled; });
+    const section = [...$("fleet-groups").children].find(n => n.dataset.group === id);
+    section?.querySelectorAll(".fleet-group-actions button").forEach(button => {
+      button.disabled = disabled || button.dataset.unavailable === "true";
+    });
+  }
+
+  async function writeGroup(id, work) {
+    if (writing.has(id) || !editable()) return;
+    const marker = {}, revision = state.workspaceRevision;
+    writing.set(id, marker); const serial = ++loadSerial; groupControls(id);
+    try { return await work(serial); }
+    finally {
+      if (writing.get(id) === marker) writing.delete(id);
+      if (revision === state.workspaceRevision) groupControls(id);
+    }
+  }
+
   async function load() {
     if (!state.status) return;
-    const revision = state.workspaceRevision;
+    if (formRevision !== state.workspaceRevision) clearForms();
+    const revision = state.workspaceRevision, serial = ++loadSerial;
     try {
       const result = await json("profile-groups", undefined, {root: true});
+      if (revision !== state.workspaceRevision || serial !== loadSerial) return;
       groups = result.groups; sections = result.sections;
-    } catch { if (revision !== state.workspaceRevision) return; groups = []; }
+      loadError = "";
+    } catch (error) {
+      if (revision !== state.workspaceRevision || serial !== loadSerial || error instanceof StaleView) return;
+      if (loadError !== error.message) toast(error.message, true);
+      loadError = error.message;
+      return;
+    }
     fillSelects(); decorate();
   }
 
@@ -33,25 +87,35 @@
     select.setAttribute("aria-label", tr("Group"));
     select.append(new Option(tr("No group"), ""));
     for (const group of groups) select.append(new Option(group.label, group.id));
-    select.value = current || "";
-    select.disabled = !editable();
+    select.value = moving.get(profileId)?.group ?? current ?? "";
+    select.disabled = !editable() || moving.has(profileId);
     select.addEventListener("change", () => busy(null, async () => {
-      const result = await json("profiles/" + encodeURIComponent(profileId) + "/group", {group: select.value || null},
-                               {root: true, method: "PUT"});
-      groups = result.groups; decorate();
-      toast(tr("Workspace moved."));
+      if (!editable() || moving.has(profileId)) return;
+      const marker = {group: select.value}, revision = state.workspaceRevision;
+      moving.set(profileId, marker); select.disabled = true; const serial = ++loadSerial;
+      try {
+        const result = await json("profiles/" + encodeURIComponent(profileId) + "/group", {group: marker.group || null},
+                                 {root: true, method: "PUT"});
+        await acceptWrite(result, serial); toast(tr("Workspace moved."));
+      } finally {
+        if (moving.get(profileId) === marker) moving.delete(profileId);
+        if (revision === state.workspaceRevision) decorate();
+      }
     }));
     return select;
   }
 
   function settingsPanel(group) {
+    let entry = settings.get(group.id);
+    if (entry) {
+      entry.group = group;
+      updateSettings(entry);
+      return entry.panel;
+    }
     const panel = node("details", "fleet-group-settings"), summary = node("summary", "", tr("Shared settings"));
     const body = node("div", "fleet-settings-body");
     const templateLabel = node("label", "", tr("Copy from")), template = node("select");
     template.id = "fleet-template-" + group.id; templateLabel.htmlFor = template.id;
-    template.append(new Option(tr("Choose a workspace"), ""));
-    for (const profile of state.profiles || []) template.append(new Option(profile.label, profile.id));
-    template.value = group.template || "";
     const checks = node("div", "fleet-sections");
     for (const key of sections) {
       const row = node("label", "check-label"), box = node("input");
@@ -59,21 +123,42 @@
       row.append(box, " " + tr(SECTIONS[key] || key)); checks.append(row);
     }
     const save = node("button", "secondary", tr("Save group settings")); save.type = "button";
-    save.addEventListener("click", () => busy(save, async () => {
+    entry = {panel, template, checks, save, group, dirty: false, options: ""};
+    settings.set(group.id, entry);
+    panel.addEventListener("change", () => { entry.dirty = true; });
+    save.addEventListener("click", () => busy(save, () => writeGroup(group.id, async serial => {
       const chosen = [...checks.querySelectorAll("input:checked")].map(i => i.value);
-      const result = await json("profile-groups/" + group.id, {label: group.label, template: template.value || null, sections: chosen},
+      const result = await json("profile-groups/" + group.id, {label: entry.group.label, template: template.value || null, sections: chosen},
                                {root: true, method: "PATCH"});
-      groups = result.groups; decorate();
+      await acceptWrite(result, serial); entry.dirty = false; decorate();
       toast(tr("Group settings saved. Use Apply to copy them to the members."));
-    }));
+    })));
     body.append(templateLabel, template, node("p", "hint", tr("These settings are copied from the chosen workspace to every other member when you press Apply. Each member records what it received in its signed journal; an observing workspace keeps its IP mode until it is paused.")), checks, save);
     for (const field of body.querySelectorAll("input, select, button")) field.disabled = !editable();
     panel.append(summary, body);
+    updateSettings(entry);
     return panel;
+  }
+
+  function updateSettings(entry) {
+    const {template, checks, group} = entry;
+    const options = JSON.stringify((state.profiles || []).map(p => [p.id, p.label]));
+    if (entry.options !== options) {
+      const previous = template.value;
+      template.replaceChildren(new Option(tr("Choose a workspace"), ""));
+      for (const profile of state.profiles || []) template.append(new Option(profile.label, profile.id));
+      template.value = previous; entry.options = options;
+    }
+    if (!entry.dirty) {
+      template.value = group.template || "";
+      checks.querySelectorAll("input").forEach(input => { input.checked = (group.sections || []).includes(input.value); });
+    }
+    groupControls(group.id);
   }
 
   function groupSection(group, cards) {
     const section = node("section", "fleet-group card"), head = node("div", "fleet-group-head");
+    section.dataset.group = group.id;
     const who = node("div"), title = node("h2", "", group.label);
     title.append(node("span", "fleet-count", String(group.members.length)));
     const shares = (group.sections || []).map(key => tr(SECTIONS[key] || key));
@@ -82,30 +167,31 @@
       tr("Choose what the group shares under Shared settings.")));
     const actions = node("div", "fleet-group-actions");
     const apply = node("button", "primary small", tr("Apply to members")); apply.type = "button";
-    apply.disabled = !group.template || !shares.length || !group.members.some(id => id !== group.template) || !editable();
-    apply.addEventListener("click", () => busy(apply, async () => {
+    apply.dataset.unavailable = String(!group.template || !shares.length || !group.members.some(id => id !== group.template));
+    apply.disabled = apply.dataset.unavailable === "true" || !editable() || writing.has(group.id);
+    apply.addEventListener("click", () => busy(apply, () => writeGroup(group.id, async serial => {
       const result = await json("profile-groups/" + group.id + "/apply", {}, {root: true});
-      groups = result.groups; decorate();
+      await acceptWrite(result, serial); decorate();
       const done = result.results.filter(r => r.status === "applied").length;
       const skipped = result.results.filter(r => (r.skipped || []).length).length;
       toast(tr("Settings copied to {n} workspaces.", {n: done}) + (skipped ? " " + tr("{n} kept their IP mode while observing.", {n: skipped}) : ""));
-    }));
+    })));
     const rename = node("button", "quiet small", tr("Rename")); rename.type = "button";
-    rename.addEventListener("click", () => busy(rename, async () => {
+    rename.addEventListener("click", () => busy(rename, () => writeGroup(group.id, async serial => {
       const label = (window.prompt(tr("New name for this group:"), group.label) || "").trim();
       if (!label || label === group.label) return;
       const result = await json("profile-groups/" + group.id, {label, template: group.template, sections: group.sections},
                                {root: true, method: "PATCH"});
-      groups = result.groups; fillSelects(); decorate();
-    }));
+      await acceptWrite(result, serial); fillSelects(); decorate();
+    })));
     const remove = node("button", "quiet small danger-text", tr("Delete group")); remove.type = "button";
-    remove.addEventListener("click", () => busy(remove, async () => {
+    remove.addEventListener("click", () => busy(remove, () => writeGroup(group.id, async serial => {
       if (!window.confirm(tr("Delete the group \"{name}\"? Its workspaces stay and lose only the grouping.", {name: group.label}))) return;
       const result = await json("profile-groups/" + group.id, undefined, {root: true, method: "DELETE"});
-      groups = result.groups; fillSelects(); decorate();
-    }));
+      await acceptWrite(result, serial); fillSelects(); decorate();
+    })));
     actions.append(apply, rename, remove);
-    for (const button of [rename, remove]) button.disabled = !editable();
+    for (const button of [rename, remove]) button.disabled = !editable() || writing.has(group.id);
     head.append(who, actions);
     const grid = node("div", "accounts-grid");
     for (const id of group.members) if (cards.has(id)) grid.append(cards.get(id));
@@ -117,6 +203,9 @@
   function decorate() {
     const list = $("accounts-list"), box = $("fleet-groups");
     if (!list || !box) return;
+    if (formRevision !== state.workspaceRevision) clearForms();
+    if (!restorePoint) beforeRender();
+    for (const id of settings.keys()) if (!groups.some(group => group.id === id)) settings.delete(id);
     const cards = new Map([...document.querySelectorAll(".account-card[data-profile]")].map(card => [card.dataset.profile, card]));
     const membership = new Map(groups.flatMap(group => group.members.map(id => [id, group.id])));
     for (const [id, card] of cards) {
@@ -127,11 +216,20 @@
     }
     box.replaceChildren(...groups.map(group => groupSection(group, cards)));
     for (const [id, card] of cards) if (!membership.has(id)) list.append(card);
-    for (const id of ["fleet-import-open", "fleet-group-new"]) $(id).disabled = !editable();
+    $("fleet-import-open").disabled = !editable();
+    $("fleet-group-new").disabled = !editable() || !!creating;
     let title = $("fleet-ungrouped");
     if (!title) { title = node("h2", "fleet-ungrouped", ""); title.id = "fleet-ungrouped"; list.before(title); }
     title.textContent = tr("Without group");
     title.hidden = !groups.length || !list.children.length;
+    if (restorePoint) {
+      const focus = restorePoint.profile ? [...document.querySelectorAll(".account-card[data-profile]")]
+        .find(card => card.dataset.profile === restorePoint.profile)?.querySelector(".fleet-card-group") : restorePoint.element;
+      if (focus?.isConnected && !focus.disabled) {
+        focus.focus({preventScroll: true}); window.scrollTo({left: restorePoint.x, top: restorePoint.y, behavior: "instant"});
+      }
+      restorePoint = null;
+    }
   }
 
   // Bulk import ---------------------------------------------------------------------------
@@ -189,8 +287,9 @@
     try {
       if (group === "__new") {
         const label = $("fleet-group-name").value.trim() || tr("Imported accounts");
+        const serial = ++loadSerial;
         const result = await json("profile-groups", {label}, {root: true});
-        group = result.groups[result.groups.length - 1].id; groups = result.groups;
+        group = result.groups[result.groups.length - 1].id; await acceptWrite(result, serial);
         fillSelects(); $("fleet-group").value = group;
         $("fleet-group-name").closest("div").hidden = true;
       }
@@ -222,9 +321,9 @@
       passcode = "";
       importing = false;
       fields.forEach(field => { field.disabled = !editable(); });
+      $("fleet-import-start").disabled = !editable() || !picked.some(b => !b.done);
       if (current()) {
         $("fleet-passcode").value = "";
-        $("fleet-import-start").disabled = !editable() || !picked.some(b => !b.done);
       }
     }
   }
@@ -239,16 +338,25 @@
   drop.addEventListener("dragleave", () => drop.classList.remove("over"));
   drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); pick([...e.dataTransfer.files]); });
   $("fleet-group").addEventListener("change", () => { $("fleet-group-name").closest("div").hidden = $("fleet-group").value !== "__new"; });
-  $("fleet-import-start").addEventListener("click", e => busy(e.currentTarget, () => run(e.currentTarget)));
-  $("fleet-group-new").addEventListener("click", e => busy(e.currentTarget, async () => {
+  $("fleet-import-start").addEventListener("click", () => busy(null, run));
+  $("fleet-group-new").addEventListener("click", () => busy(null, async () => {
+    if (!editable() || creating) return;
     const label = (window.prompt(tr("Name of the new group:"), "") || "").trim(); if (!label) return;
-    groups = (await json("profile-groups", {label}, {root: true})).groups; fillSelects(); decorate();
-    toast(tr("Group created. Move workspaces into it or import accounts."));
+    const marker = {}, serial = ++loadSerial;
+    creating = marker; $("fleet-group-new").disabled = true;
+    try {
+      await acceptWrite(await json("profile-groups", {label}, {root: true}), serial); fillSelects(); decorate();
+      toast(tr("Group created. Move workspaces into it or import accounts."));
+    } finally {
+      if (creating === marker) creating = null;
+      $("fleet-group-new").disabled = !editable() || !!creating;
+    }
   }));
   window.addEventListener("tgwitness:lock", () => {
+    clearForms(); loadError = "";
     picked = []; groups = []; sections = [];
     for (const id of ["fleet-passcode", "fleet-api", "fleet-files"]) $(id).value = "";
     $("fleet-groups").replaceChildren(); renderPicked(); show("fleet-import", false);
   });
-  window.TgWitnessFleet = {load, decorate};
+  window.TgWitnessFleet = {load, decorate, beforeRender};
 })();

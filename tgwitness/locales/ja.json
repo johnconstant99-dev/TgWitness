@@ -3243,5 +3243,13 @@
 "Country lookups are switched off under Lists and sources.": "「リストと情報源」の設定では、国名の検索機能がオフになっています。",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "リストの更新や国名の検索機能については、しばらくお待ちください。サーバー自体のチェックは引き続き実行されています。",
 "Enter a group label.": "グループ名を入力してください。",
-"The new workspace could not start.": "新しいワークスペースを起動できませんでした。"
+"The new workspace could not start.": "新しいワークスペースを起動できませんでした。",
+"Investigation": "調査",
+"Search chats": "チャットを検索",
+"Chat tools": "チャットツール",
+"Fictional messages. No Telegram connection.": "架空のメッセージです。Telegramには接続していません。",
+"Review deletions": "削除されたメッセージ",
+"Compare edits": "編集を比較",
+"Sample data": "サンプルデータ",
+"No chats match your search.": "検索に一致するチャットはありません。"
 }

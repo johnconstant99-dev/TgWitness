@@ -3243,5 +3243,13 @@
 "Country lookups are switched off under Lists and sources.": "การค้นหาประเทศถูกปิดไว้ในส่วน \"Lists and sources\"",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "การอัปเดตรายชื่อและการค้นหาประเทศจะตามมาในไม่ช้า; ส่วนการตรวจสอบเซิร์ฟเวอร์เองยังคงดำเนินการอยู่",
 "Enter a group label.": "ป้อนชื่อกลุ่ม",
-"The new workspace could not start.": "ไม่สามารถเริ่มพื้นที่ทำงานใหม่ได้"
+"The new workspace could not start.": "ไม่สามารถเริ่มพื้นที่ทำงานใหม่ได้",
+"Investigation": "การสืบสวน",
+"Search chats": "ค้นหาแชต",
+"Chat tools": "เครื่องมือแชต",
+"Fictional messages. No Telegram connection.": "ข้อความสมมติ ไม่ได้เชื่อมต่อกับ Telegram",
+"Review deletions": "ดูข้อความที่ถูกลบ",
+"Compare edits": "เปรียบเทียบการแก้ไข",
+"Sample data": "ข้อมูลตัวอย่าง",
+"No chats match your search.": "ไม่พบแชตที่ตรงกับการค้นหา"
 }

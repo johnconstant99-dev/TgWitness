@@ -1,8 +1,53 @@
 (() => {
   "use strict";
   // Proxy servers of the automatic MTProxy route: checks, countries, lists and the GitHub search.
-  let view = null, timer = null, limit = 150;
+  let view = null, timer = null, limit = 150, request = 0, generation = 0, pending = 0;
+  let mutations = Promise.resolve(), sourceKey = "";
+  const draft = new Map();
+  const fields = ["pool-github-search", "pool-github-query", "pool-github-max", "pool-countries"];
   const filter = {q: "", country: "", source: "", status: ""};
+  const active = () => !!state.token && !!state.status && state.view === "connection" &&
+    state.connectionSettings && !$("workspace").hidden && !$("workspace").inert;
+  function stop() { clearTimeout(timer); timer = null; request++; }
+  function clear() {
+    stop(); generation++; view = null; pending = 0; mutations = Promise.resolve(); sourceKey = ""; draft.clear();
+    $("pool-token").value = ""; $("pool-paste").value = ""; $("pool-url").value = "";
+    $("pool-save-state").textContent = "";
+    $("pool-stats").replaceChildren(); $("pool-rows").replaceChildren(); $("pool-count").textContent = "";
+    for (const id of fields) if ($(id).type !== "checkbox") $(id).value = "";
+  }
+  function poll() {
+    clearTimeout(timer);
+    if (active() && !pending && view?.summary.checking) timer = setTimeout(load, 4000);
+  }
+  function controls() {
+    const readOnly = !state.me?.admin || !!state.status?.demo;
+    for (const field of $("pool-sources").querySelectorAll("input, select, button")) {
+      const waiting = pending > 0 && (field.tagName === "BUTTON" || field.dataset.source);
+      field.disabled = readOnly || !!waiting;
+    }
+    $("pool-github-search").disabled ||= !view?.settings.github_token;
+    $("pool-token-remove").disabled ||= !view?.settings.github_token;
+    $("pool-check").disabled = !!state.status?.demo || pending > 0 || !!view?.summary.checking;
+    $("pool-update").disabled = readOnly || pending > 0;
+    for (const button of $("pool-rows").querySelectorAll("button"))
+      button.disabled = !!state.status?.demo || pending > 0 || !!state.status?.collector.running;
+  }
+  async function mutate(work) {
+    const owner = generation, revision = state.workspaceRevision;
+    const current = () => owner === generation && revision === state.workspaceRevision && !!state.token;
+    pending++; stop(); controls();
+    const operation = mutations.then(async () => {
+      if (!current()) throw new StaleView();
+      return work();
+    });
+    mutations = operation.catch(() => {});
+    try { return await operation; }
+    finally { if (current()) { pending--; if (view) render(); else controls(); poll(); } }
+  }
+  function runAction(button, work) {
+    return busy(button, () => mutate(work)).finally(controls);
+  }
   const flag = code => /^[A-Z]{2}$/.test(code || "") ? String.fromCodePoint(...[...code].map(c => 127397 + c.charCodeAt(0))) : "";
   function countryName(code) {
     try { return new Intl.DisplayNames([document.documentElement.lang || "en"], {type: "region"}).of(code) || code; }
@@ -13,18 +58,18 @@
 
   async function load() {
     clearTimeout(timer);
-    if (!state.status) return;
+    if (!active() || pending) return;
     if (state.status.demo) { demo(); return; }
-    const profile = state.profile, revision = state.workspaceRevision;
+    const profile = state.profile, revision = state.workspaceRevision, serial = ++request;
     try {
       const result = await json("network/proxies");
-      if (profile !== state.profile) return;
+      if (profile !== state.profile || serial !== request || !active()) return;
       view = result; render();
-      if (result.summary.checking) timer = setTimeout(load, 4000);
+      poll();
     } catch (error) {
-      if (revision !== state.workspaceRevision || error instanceof StaleView) return;
-      $("pool-rows").replaceChildren();
+      if (serial !== request || revision !== state.workspaceRevision || error instanceof StaleView || !active()) return;
       $("pool-count").textContent = error.message;
+      poll();
     }
   }
 
@@ -107,7 +152,7 @@
       const action = node("td"), use = node("button", "text-link", tr("Use"));
       use.type = "button"; use.disabled = state.status.collector.running;
       use.title = tr("Save this server as this workspace's route");
-      use.addEventListener("click", () => busy(use, async () => {
+      use.addEventListener("click", () => runAction(use, async () => {
         await json("network/catalog/" + encodeURIComponent(row.id), {});
         await routeSaved();
       }));
@@ -145,17 +190,24 @@
   function renderSources() {
     const settings = view.settings, own = new Set(settings.custom.map(item => item.id));
     const bundled = $("pool-bundled"), mine = $("pool-own");
-    bundled.replaceChildren(...view.sources.filter(s => s.kind === "builtin").map(s => sourceRow(s, false)));
-    const ownRows = view.sources.filter(s => own.has(s.id)).map(s => sourceRow(s, true));
-    mine.replaceChildren(...(ownRows.length ? ownRows : [node("p", "hint", tr("No lists of your own yet."))]));
+    const nextKey = JSON.stringify([view.sources, [...own]]);
+    if (nextKey !== sourceKey) {
+      bundled.replaceChildren(...view.sources.filter(s => s.kind === "builtin").map(s => sourceRow(s, false)));
+      const ownRows = view.sources.filter(s => own.has(s.id)).map(s => sourceRow(s, true));
+      mine.replaceChildren(...(ownRows.length ? ownRows : [node("p", "hint", tr("No lists of your own yet."))]));
+      sourceKey = nextKey;
+    }
+    for (const toggle of $("pool-sources").querySelectorAll("[data-source]"))
+      toggle.checked = !!view.sources.find(source => source.id === toggle.dataset.source)?.enabled;
     $("pool-token-state").textContent = tr(settings.github_token ? "Token stored" : "No token");
     $("pool-token-state").className = "pool-pill " + (settings.github_token ? "ok" : "untested");
     $("pool-token-remove").disabled = !settings.github_token;
-    $("pool-github-search").checked = settings.github.enabled;
-    $("pool-github-search").disabled = !settings.github_token;
-    $("pool-github-query").value = settings.github.query;
-    $("pool-github-max").value = String(settings.github.max_files);
-    $("pool-countries").checked = settings.countries;
+    const values = [settings.github.enabled, settings.github.query, String(settings.github.max_files), settings.countries];
+    fields.forEach((id, index) => {
+      const field = $(id), key = field.type === "checkbox" ? "checked" : "value";
+      const value = draft.has(id) ? draft.get(id) : values[index];
+      if (field[key] !== value) field[key] = value;
+    });
     const g = settings.github_status;
     $("pool-github-status").textContent = !settings.github_token ? tr("Save a token to search GitHub.") :
       g.error ? tr("Last search failed: {error}", {error: g.error}) :
@@ -164,13 +216,13 @@
   }
 
   function render() {
-    for (const id of ["pool-update", "pool-save", "pool-token-save"]) $(id).disabled = false;
     renderStats();
     options($("pool-country"), [...new Set(view.rows.map(r => r.country).filter(Boolean))].sort()
       .map(code => [code, flag(code) + " " + countryName(code)]), tr("All countries"));
     options($("pool-source"), view.sources.filter(s => s.enabled).map(s => [s.id, s.label]), tr("All lists"));
+    filter.country = $("pool-country").value; filter.source = $("pool-source").value;
     renderTable(); renderSources();
-    if (!state.me?.admin) for (const field of $("pool-sources").querySelectorAll("input, select, button")) field.disabled = true;
+    controls();
   }
 
   function settingsBody(change) {
@@ -185,6 +237,11 @@
     render();
   }
 
+  for (const id of fields) $(id).addEventListener("input", () => {
+    const field = $(id); draft.set(id, field.type === "checkbox" ? field.checked : field.value);
+    $("pool-save-state").textContent = "";
+  });
+
   $("pool-search").addEventListener("input", () => { filter.q = $("pool-search").value; limit = 150; if (view) renderTable(); });
   $("pool-country").addEventListener("change", () => { filter.country = $("pool-country").value; if (view) renderTable(); });
   $("pool-source").addEventListener("change", () => { filter.source = $("pool-source").value; if (view) renderTable(); });
@@ -195,38 +252,38 @@
     if (view) renderTable();
   });
   $("pool-more").addEventListener("click", () => { limit += 300; renderTable(); });
-  $("pool-check").addEventListener("click", e => busy(e.currentTarget, async () => {
+  $("pool-check").addEventListener("click", e => runAction(e.currentTarget, async () => {
     view = await json("network/proxies/check", {}); render();
     toast(tr("Checking every server. Results appear as they come in."));
-    timer = setTimeout(load, 3000);
   }));
-  $("pool-update").addEventListener("click", e => busy(e.currentTarget, async () => {
+  $("pool-update").addEventListener("click", e => runAction(e.currentTarget, async () => {
     const result = await json("network/catalog/refresh", {}, {root: true});
     toast(result.throttled ? tr("The list was refreshed recently. Wait one minute before another download.") :
       tr("Lists updated: {n} sources.", {n: (result.refresh?.updated || []).length}));
-    await load();
+    view = await json("network/proxies"); render();
   }));
   $("pool-sources").addEventListener("change", event => {
     const toggle = event.target.closest("[data-source]"); if (!toggle) return;
-    busy(null, () => saveSettings(body => {
-      if (toggle.dataset.own) body.custom.find(item => item.id === toggle.dataset.source).enabled = toggle.checked;
-      else body.disabled = toggle.checked ? body.disabled.filter(id => id !== toggle.dataset.source) : [...body.disabled, toggle.dataset.source];
+    const enabled = toggle.checked, source = toggle.dataset.source, own = toggle.dataset.own;
+    runAction(null, () => saveSettings(body => {
+      if (own) body.custom.find(item => item.id === source).enabled = enabled;
+      else body.disabled = enabled ? body.disabled.filter(id => id !== source) : [...body.disabled, source];
     }));
   });
   $("pool-sources").addEventListener("click", event => {
     const remove = event.target.closest("[data-remove]"); if (!remove) return;
-    busy(remove, async () => {
+    runAction(remove, async () => {
       await saveSettings(body => { body.custom = body.custom.filter(item => item.id !== remove.dataset.remove); });
       toast(tr("List removed."));
     });
   });
-  $("pool-add-url").addEventListener("submit", e => { e.preventDefault(); busy(e.submitter, async () => {
+  $("pool-add-url").addEventListener("submit", e => { e.preventDefault(); runAction(e.submitter, async () => {
     const url = $("pool-url").value.trim();
     await saveSettings(body => body.custom.push({kind: "url", url, format: $("pool-url-format").value, label: "", enabled: true}));
-    $("pool-url").value = "";
+    if ($("pool-url").value.trim() === url) $("pool-url").value = "";
     toast(tr("List added. It is downloaded with the next list update."));
   }); });
-  async function addLists(files) {
+  async function importLists(files) {
     if (!state.me?.admin || state.status?.demo) return;
     const revision = state.workspaceRevision;
     let added = 0;
@@ -246,34 +303,41 @@
     if (view) render();
     if (added) toast(tr("{n} servers added from your files.", {n: added}));
   }
+  function addLists(files) { return runAction(null, () => importLists(files)); }
   $("pool-files").addEventListener("change", () => { const files = [...$("pool-files").files]; $("pool-files").value = ""; addLists(files); });
   const drop = $("pool-drop");
   drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
   drop.addEventListener("dragleave", () => drop.classList.remove("over"));
   drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); addLists([...e.dataTransfer.files]); });
-  $("pool-paste-add").addEventListener("click", e => busy(e.currentTarget, async () => {
+  $("pool-paste-add").addEventListener("click", e => runAction(e.currentTarget, async () => {
     const text = $("pool-paste").value.trim(); if (!text) throw new Error(tr("Paste at least one proxy link."));
     view = await json("network/sources/list", {label: tr("Pasted links"), text});
-    $("pool-paste").value = ""; render();
+    if ($("pool-paste").value.trim() === text) $("pool-paste").value = "";
+    render();
     toast(tr("{n} servers added.", {n: view.added.compatible}));
   }));
-  $("pool-token-save").addEventListener("click", e => busy(e.currentTarget, async () => {
+  $("pool-token-save").addEventListener("click", e => runAction(e.currentTarget, async () => {
     const token = $("pool-token").value.trim(); if (!token) throw new Error(tr("Paste a GitHub token first."));
-    view = await json("network/github-token", {token}); $("pool-token").value = ""; render();
+    view = await json("network/github-token", {token});
+    if ($("pool-token").value.trim() === token) $("pool-token").value = "";
+    render();
     toast(tr("GitHub token saved in the encrypted vault."));
   }));
-  $("pool-token-remove").addEventListener("click", e => busy(e.currentTarget, async () => {
+  $("pool-token-remove").addEventListener("click", e => runAction(e.currentTarget, async () => {
     view = await json("network/github-token", {token: ""}); render();
     toast(tr("GitHub token removed."));
   }));
-  $("pool-save").addEventListener("click", e => busy(e.currentTarget, async () => {
+  $("pool-save").addEventListener("click", e => {
+    const submitted = new Map(fields.map(id => [id, $(id).type === "checkbox" ? $(id).checked : $(id).value]));
+    runAction(e.currentTarget, async () => {
     await saveSettings(body => {
-      body.github = {enabled: $("pool-github-search").checked, query: $("pool-github-query").value.trim(),
-                     max_files: Number($("pool-github-max").value) || 20};
-      body.countries = $("pool-countries").checked;
+      body.github = {enabled: submitted.get("pool-github-search"), query: submitted.get("pool-github-query").trim(),
+                     max_files: Number(submitted.get("pool-github-max")) || 20};
+      body.countries = submitted.get("pool-countries");
     });
-    $("pool-save-state").textContent = tr("Saved. Applies from the next list update.");
-  }));
-  window.addEventListener("tgwitness:lock", () => { clearTimeout(timer); view = null; $("pool-token").value = ""; });
-  window.TgWitnessProxies = {load};
+    for (const [id, value] of submitted) if (draft.get(id) === value) draft.delete(id);
+    $("pool-save-state").textContent = draft.size ? "" : tr("Saved. Applies from the next list update.");
+  }); });
+  window.addEventListener("tgwitness:lock", clear);
+  window.TgWitnessProxies = {load, stop, clear};
 })();

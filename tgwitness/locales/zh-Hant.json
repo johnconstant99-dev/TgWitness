@@ -3243,5 +3243,13 @@
 "Country lookups are switched off under Lists and sources.": "在「清單與來源」下，國家查詢功能已關閉。",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "清單更新與國家查詢功能即將推出；伺服器本身的檢查仍持續進行中。",
 "Enter a group label.": "請輸入群組名稱。",
-"The new workspace could not start.": "無法啟動新的工作區。"
+"The new workspace could not start.": "無法啟動新的工作區。",
+"Investigation": "調查",
+"Search chats": "搜尋聊天",
+"Chat tools": "聊天工具",
+"Fictional messages. No Telegram connection.": "虛構訊息。未連線至 Telegram。",
+"Review deletions": "檢視已刪除訊息",
+"Compare edits": "比較編輯內容",
+"Sample data": "範例資料",
+"No chats match your search.": "找不到符合搜尋條件的聊天。"
 }

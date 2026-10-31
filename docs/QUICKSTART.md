@@ -19,8 +19,19 @@ Choose one method. Portable downloads become available after a release build is 
 | Windows | Extract `TgWitness-<version>-windows-amd64-portable.zip` from GitHub Releases, double-click `TgWitness.cmd` | Double-click `Start.cmd` | Double-click `scripts\Docker.cmd` |
 | Linux / macOS | — | `sh start.sh` | `sh scripts/docker-start.sh` |
 
-For the source methods, download and extract the source ZIP from GitHub Releases or clone
-the repository. `Start.cmd` offers to install Python 3.12 for your Windows user if no
+For the source methods, [download and extract current `main`](https://github.com/phishdestroy/TgWitness/archive/refs/heads/main.zip)
+or clone the repository:
+
+```sh
+git clone https://github.com/phishdestroy/TgWitness.git
+cd TgWitness
+```
+
+The current source includes batch account import, the MTProxy dashboard and resumable
+history loading. The 0.7.0 portable preview and its release source archive predate
+these additions. See [the changelog](CHANGELOG.md) for the version boundary.
+
+`Start.cmd` offers to install Python 3.12 for your Windows user if no
 suitable Python is found (winget, or the signed python.org installer). `start.sh` prints
 the exact install command for your Linux distribution or macOS if Python is missing.
 The first source launch creates `.venv` and installs dependencies automatically.
@@ -85,7 +96,12 @@ For existing accounts, see [accounts and session formats](ACCOUNTS.md): the
 panel accepts Telethon StringSession, Telethon/Pyrogram SQLite, single-account TData
 ZIP, and supported account JSON. Select a session and its companion JSON together,
 press **Connect account**. QR login is also
-available with the same optional API settings. TDLib, bots, and bulk account lists are unsupported.
+available with the same optional API settings. TDLib, bot sessions and CSV/JSON
+account inventories are unsupported.
+
+For several accounts, use **Accounts → Import accounts** and select their supported
+session files. Companion JSON files are paired by basename; each imported account
+gets its own workspace. See [bulk import and account groups](ACCOUNTS.md#bulk-import-and-account-groups).
 
 To add another account, press **+** beside the account selector or open
 **Account → Settings → Connection settings → Workspaces**, or use **Accounts**. Workspaces have separate sessions,

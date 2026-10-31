@@ -3,6 +3,7 @@
 
 (() => {
   "use strict";
+  window.TGW_ONLINE_DEMO = true;
   const base = new URL(".", document.currentScript.src);
   const realFetch = window.fetch.bind(window);
   const answers = realFetch(new URL("fixtures.json", base), {cache: "no-cache"}).then(r => r.json());
@@ -20,7 +21,14 @@
   const json = (status, value) => new Response(JSON.stringify(value),
     {status, headers: {"Content-Type": "application/json"}});
 
-  function recorded(answer) {
+  async function recorded(answer) {
+    if ("file" in answer) {
+      const response = await realFetch(new URL(answer.file, base));
+      if (!response.ok) return response;
+      return new Response(response.body, {status: 200, headers: {
+        "Content-Type": answer.type, "Content-Length": String(answer.bytes),
+      }});
+    }
     if ("base64" in answer) {
       const bytes = Uint8Array.from(atob(answer.base64), c => c.charCodeAt(0));
       return new Response(bytes, {status: 200, headers: {"Content-Type": answer.type}});
@@ -52,8 +60,13 @@
     const found = url.pathname.match(/\/((?:profiles\/[a-f0-9]{32}\/)?api\/.*)$/);
     if (!found) return realFetch(input, init);
     const method = (init.method || (typeof input === "string" ? "GET" : input.method) || "GET").toUpperCase();
+    const path = "/" + found[1];
+    if (method === "POST" && path === "/api/verify") {
+      const all = await answers;
+      if (all[path]) return recorded(all[path]);
+    }
     if (method !== "GET") return json(403, {detail: READ_ONLY});
-    const all = await answers, path = "/" + found[1];
+    const all = await answers;
     if (all[path + url.search]) return recorded(all[path + url.search]);
     if (path.endsWith("/api/events")) return json(200, events(all, url.searchParams));
     if (all[path]) return recorded(all[path]);

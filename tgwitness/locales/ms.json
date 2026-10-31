@@ -3243,5 +3243,13 @@
 "Country lookups are switched off under Lists and sources.": "Carian negara telah dilumpuhkan di bawah Senarai dan Sumber.",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "Senarai kemas kini dan carian negara sedang menunggu; pemeriksaan pada pelayan itu sendiri masih dijalankan.",
 "Enter a group label.": "Masukkan nama kumpulan.",
-"The new workspace could not start.": "Ruang kerja baharu tidak dapat dimulakan."
+"The new workspace could not start.": "Ruang kerja baharu tidak dapat dimulakan.",
+"Investigation": "Siasatan",
+"Search chats": "Cari sembang",
+"Chat tools": "Alat sembang",
+"Fictional messages. No Telegram connection.": "Mesej rekaan. Tiada sambungan ke Telegram.",
+"Review deletions": "Semak mesej dipadam",
+"Compare edits": "Bandingkan suntingan",
+"Sample data": "Data contoh",
+"No chats match your search.": "Tiada sembang sepadan dengan carian anda."
 }

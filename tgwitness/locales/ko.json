@@ -3243,5 +3243,13 @@
 "Country lookups are switched off under Lists and sources.": "'목록 및 소스' 메뉴에서 국가 조회 기능이 비활성화되어 있습니다.",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "목록 업데이트 및 국가 조회 기능은 잠시만 기다려 주세요. 서버 자체에 대한 점검은 여전히 진행 중입니다.",
 "Enter a group label.": "그룹 이름을 입력하세요.",
-"The new workspace could not start.": "새 작업 공간을 시작할 수 없습니다."
+"The new workspace could not start.": "새 작업 공간을 시작할 수 없습니다.",
+"Investigation": "조사",
+"Search chats": "채팅 검색",
+"Chat tools": "채팅 도구",
+"Fictional messages. No Telegram connection.": "가상의 메시지입니다. Telegram에 연결되어 있지 않습니다.",
+"Review deletions": "삭제된 메시지 보기",
+"Compare edits": "수정 내용 비교",
+"Sample data": "샘플 데이터",
+"No chats match your search.": "검색과 일치하는 채팅이 없습니다."
 }

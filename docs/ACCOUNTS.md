@@ -269,7 +269,7 @@ file. Bulk lists (a JSON array of accounts) are not accepted.
 | Pyrogram session **strings** | Use the Pyrogram `.session` file, or phone/QR |
 | TData with several logged-in accounts | Log out the other accounts in Telegram Desktop, or use each account's own session file |
 | Bot tokens | Not supported: TgWitness observes as a user account |
-| CSV/JSON lists of many accounts | Add one workspace per account |
+| CSV/JSON lists of many accounts | Import supported session files through **Accounts → Import accounts**, or sign in by phone/QR in separate workspaces |
 | Test-DC or bot sessions | Use a production user account |
 
 ## Multiple accounts

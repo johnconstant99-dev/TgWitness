@@ -3259,5 +3259,13 @@
 "Country lookups are switched off under Lists and sources.": "فہرستیں اور ذرائع کے تحت ملک کی تلاش غیر فعال ہے۔",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "فہرست کی تازہ کاریاں اور ملک کی تلاشیں اس کا انتظار کرتی ہیں؛ خود سرورز کی جانچ اب بھی جاری ہے۔",
 "Enter a group label.": "گروپ کا نام درج کریں۔",
-"The new workspace could not start.": "نئی ورک اسپیس شروع نہیں ہو سکی۔"
+"The new workspace could not start.": "نئی ورک اسپیس شروع نہیں ہو سکی۔",
+"Investigation": "تحقیق",
+"Search chats": "چیٹس تلاش کریں",
+"Chat tools": "چیٹ کے ٹولز",
+"Fictional messages. No Telegram connection.": "فرضی پیغامات۔ Telegram سے رابطہ نہیں ہے۔",
+"Review deletions": "حذف شدہ پیغامات دیکھیں",
+"Compare edits": "ترامیم کا موازنہ کریں",
+"Sample data": "نمونہ ڈیٹا",
+"No chats match your search.": "آپ کی تلاش سے کوئی چیٹ مماثل نہیں ہے۔"
 }

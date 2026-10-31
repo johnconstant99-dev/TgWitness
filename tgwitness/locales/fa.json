@@ -3259,5 +3259,13 @@
 "Country lookups are switched off under Lists and sources.": "جستجوی کشورها در بخش فهرست‌ها و منابع غیرفعال است.",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "فهرست به‌روزرسانی‌ها و جستجوی کشور در حال انتظار هستند؛ بررسی‌های خود سرورها همچنان در حال اجرا هستند.",
 "Enter a group label.": "نام گروه را وارد کنید.",
-"The new workspace could not start.": "فضای کاری جدید راه‌اندازی نشد."
+"The new workspace could not start.": "فضای کاری جدید راه‌اندازی نشد.",
+"Investigation": "تحقیق",
+"Search chats": "جستجوی گفتگوها",
+"Chat tools": "ابزارهای گفتگو",
+"Fictional messages. No Telegram connection.": "پیام‌های ساختگی. بدون اتصال به Telegram.",
+"Review deletions": "بررسی پیام‌های حذف‌شده",
+"Compare edits": "مقایسه ویرایش‌ها",
+"Sample data": "داده‌های نمونه",
+"No chats match your search.": "هیچ گفتگویی با جستجوی شما مطابقت ندارد."
 }

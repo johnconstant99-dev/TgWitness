@@ -3323,5 +3323,13 @@
 "Country lookups are switched off under Lists and sources.": "يتم تعطيل البحث عن البلدان ضمن قسم «القوائم والمصادر».",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "تحديثات القوائم وعمليات البحث عن البلدان في انتظار ذلك؛ بينما لا تزال عمليات فحص الخوادم نفسها جارية.",
 "Enter a group label.": "أدخل اسم المجموعة.",
-"The new workspace could not start.": "تعذر بدء مساحة العمل الجديدة."
+"The new workspace could not start.": "تعذر بدء مساحة العمل الجديدة.",
+"Investigation": "التحقيق",
+"Search chats": "البحث في المحادثات",
+"Chat tools": "أدوات المحادثة",
+"Fictional messages. No Telegram connection.": "رسائل تخيلية. لا اتصال بـ Telegram.",
+"Review deletions": "مراجعة المحذوفات",
+"Compare edits": "مقارنة التعديلات",
+"Sample data": "بيانات تجريبية",
+"No chats match your search.": "لا توجد محادثات تطابق بحثك."
 }

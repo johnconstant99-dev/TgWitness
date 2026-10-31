@@ -21,6 +21,9 @@ tgwitness-backup*/
 *.log.*
 *.zip
 *.jsonl
+!website/demo/downloads/tgwitness-demo.zip
+!website/demo/downloads/tgwitness-demo.jsonl
+!website/demo/downloads/tgwitness-demo-timestamp-request.zip
 .instance.lock
 evidence.zip
 evidence.jsonl

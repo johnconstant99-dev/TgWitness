@@ -3259,5 +3259,13 @@
 "Country lookups are switched off under Lists and sources.": "Ro'yxatlar va manbalar bo'limida mamlakat qidiruvlari o'chirilgan.",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "Ro'yxatni yangilash va mamlakatni aniqlash kutilmoqda; serverlarni tekshirish esa hanuz davom etmoqda.",
 "Enter a group label.": "Guruh nomini kiriting.",
-"The new workspace could not start.": "Yangi ish maydonini ishga tushirib bo‘lmadi."
+"The new workspace could not start.": "Yangi ish maydonini ishga tushirib bo‘lmadi.",
+"Investigation": "Tekshiruv",
+"Search chats": "Chatlarni qidirish",
+"Chat tools": "Chat vositalari",
+"Fictional messages. No Telegram connection.": "To‘qima xabarlar. Telegramga ulanmagan.",
+"Review deletions": "O‘chirilganlarni ko‘rish",
+"Compare edits": "Tahrirlarni solishtirish",
+"Sample data": "Namuna ma’lumotlar",
+"No chats match your search.": "Qidiruvga mos chat topilmadi."
 }

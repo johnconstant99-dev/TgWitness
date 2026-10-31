@@ -3291,5 +3291,13 @@
 "Country lookups are switched off under Lists and sources.": "W sekcji „Listy i źródła” wyłączono funkcję wyszukiwania krajów.",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "Czekają Państwo na aktualizacje list i wyszukiwanie krajów; nadal trwają kontrole samych serwerów.",
 "Enter a group label.": "Wpisz nazwę grupy.",
-"The new workspace could not start.": "Nie udało się uruchomić nowego obszaru roboczego."
+"The new workspace could not start.": "Nie udało się uruchomić nowego obszaru roboczego.",
+"Investigation": "Dochodzenie",
+"Search chats": "Szukaj czatów",
+"Chat tools": "Narzędzia czatu",
+"Fictional messages. No Telegram connection.": "Fikcyjne wiadomości. Brak połączenia z Telegramem.",
+"Review deletions": "Zobacz usunięcia",
+"Compare edits": "Porównaj zmiany",
+"Sample data": "Dane przykładowe",
+"No chats match your search.": "Brak czatów pasujących do wyszukiwania."
 }

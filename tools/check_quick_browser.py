@@ -33,13 +33,13 @@ def main():
             page.locator("#quick-open").click()
             expect(dialog).to_be_visible()
             expect(search).to_be_focused()
-            destinations = ["chats", "observations", "sources", "evidence", "witness", "parameters",
-                            "connection", "accounts", "access", "integrations", "analysis"]
+            destinations = ["chats", "observations", "sources", "evidence", "witness", "analysis", "parameters",
+                            "connection", "accounts", "access", "integrations"]
             expect(dialog.get_by_role("option")).to_have_count(len(destinations))
             assert dialog.get_by_role("option").evaluate_all(
                 "nodes=>nodes.map(n=>n.dataset.destination)") == destinations
             page.keyboard.press("ArrowUp")
-            expect(search).to_have_attribute("aria-activedescendant", "quick-option-analysis")
+            expect(search).to_have_attribute("aria-activedescendant", "quick-option-integrations")
             page.keyboard.press("ArrowDown")
             expect(search).to_have_attribute("aria-activedescendant", "quick-option-chats")
             search.fill("access")

@@ -7,6 +7,7 @@ in Chromium and stores each GET answer the interface asked for. The website serv
 real panel files with these answers; nothing on the website can change data.
 """
 import base64
+import hashlib
 import json
 import re
 import sys
@@ -20,8 +21,45 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_browser import ROOT, RunningApp, launch_browser
 
 OUTPUT = ROOT / "website/demo/fixtures.json"
+DOWNLOADS = OUTPUT.parent / "downloads"
 API = re.compile(r"^/(?:profiles/[a-f0-9]{32}/)?api/")
 TEXT_TYPES = ("application/json", "text/", "application/javascript", "image/svg+xml")
+
+
+def answer_of(body, kind):
+    if kind.startswith(TEXT_TYPES):
+        return {"type": kind, "text": body.decode("utf-8")}
+    return {"type": kind, "base64": base64.b64encode(body).decode("ascii")}
+
+
+def capture_downloads(page, demo, answers):
+    """Build real exports once; the online demo downloads these files on demand."""
+    headers = {"Authorization": "Bearer " + demo.app.state.vault.token}
+    DOWNLOADS.mkdir(parents=True, exist_ok=True)
+    paths = {f"/api/export/{fmt}": f"tgwitness-demo.{fmt}" for fmt in ("zip", "jsonl", "csv", "html")}
+    paths.update({"/api/checkpoint": "tgwitness-demo-checkpoint.json",
+                  "/api/run-receipt": "tgwitness-demo-run-receipt.json",
+                  "/api/anchor-request": "tgwitness-demo-timestamp-request.zip"})
+    for path, filename in paths.items():
+        response = page.request.get(demo.url + path, headers=headers)
+        if response.status != 200:
+            raise RuntimeError(f"Could not capture {path}: HTTP {response.status}")
+        body = response.body()
+        (DOWNLOADS / filename).write_bytes(body)
+        answers[path] = {"type": response.headers["content-type"].split(";")[0],
+                         "file": "downloads/" + filename, "bytes": len(body),
+                         "sha256": hashlib.sha256(body).hexdigest()}
+    # This POST only verifies the synthetic journal; it does not change any records.
+    response = page.request.post(demo.url + "/api/verify", headers=headers, data={})
+    if response.status != 200:
+        raise RuntimeError("Could not verify the captured synthetic journal")
+    answers["/api/verify"] = answer_of(response.body(), "application/json")
+    from tgwitness.verify import verify_bundle, verify_report
+    verified = verify_bundle(DOWNLOADS / "tgwitness-demo.zip")
+    verify_report(DOWNLOADS / "tgwitness-demo.html", expected_fingerprint=verified["fingerprint"])
+    if verified["events"] != response.json()["events"]:
+        raise RuntimeError("The sample archive and journal verification cover different records")
+    print("Verified synthetic exports:", verified["events"], "records", flush=True)
 
 
 def main():
@@ -36,20 +74,17 @@ def main():
         kind = (response.headers.get("content-type") or "application/octet-stream").split(";")[0].strip()
         body = response.body()
         key = parts.path + ("?" + parts.query if parts.query else "")
-        if kind.startswith(TEXT_TYPES):
-            answers[key] = {"type": kind, "text": body.decode("utf-8")}
-        else:
-            answers[key] = {"type": kind, "base64": base64.b64encode(body).decode("ascii")}
+        answers[key] = answer_of(body, kind)
 
     with RunningApp(run / "demo", demo=True) as demo, sync_playwright() as p:
         browser = launch_browser(p)
-        for scheme in ("light", "dark"):
-            page = browser.new_page(viewport={"width": 1440, "height": 1000}, color_scheme=scheme, reduced_motion="reduce")
-            page.on("response", record)
-            page.goto(demo.url)
-            expect(page.locator("#chat-feed .msg").first).to_be_visible()
-            walk(page)
-            page.close()
+        page = browser.new_page(viewport={"width": 1440, "height": 1000}, color_scheme="dark", reduced_motion="reduce")
+        page.on("response", record)
+        page.goto(demo.url)
+        expect(page.locator("#chat-feed .msg").first).to_be_visible()
+        walk(page)
+        capture_downloads(page, demo, answers)
+        page.close()
         browser.close()
         root = str((run / "demo").resolve())
     neutralize(answers)
@@ -82,13 +117,13 @@ def neutralize(answers):
         value = json.loads(catalog["text"])
         value.update(sources=[], proxies=[])
         catalog["text"] = json.dumps(value)
-    for answer in answers.values():
-        if "text" in answer:
+    for path, answer in answers.items():
+        if "text" in answer and path in ("/api/status", "/api/profiles"):
+            # A static recording cannot describe the viewer's disk; never alter signed records.
+            answer["text"] = re.sub(r'"disk_free_bytes":\s*\d+', '"disk_free_bytes":null', answer["text"])
 
-            answer["text"] = re.sub(r'"disk_free_bytes":\s*\d+', '"disk_free_bytes":536870912000', answer["text"])
 
-
-def settle(page, ms=500):
+def settle(page, ms=50):
     page.wait_for_load_state("networkidle")
     page.wait_for_timeout(ms)
 
@@ -98,13 +133,13 @@ def walk(page):
     for index in range(page.locator("#chats-list .chat-item").count()):
         page.locator("#chats-list .chat-item").nth(index).click()
         settle(page)
-        for f in range(page.locator("#chat-status .filter").count()):
-            page.locator("#chat-status .filter").nth(f).click()
-            settle(page, 250)
+        page.locator('#chat-status .filter', has_text="People").click()
+        settle(page)
+        page.locator('#chat-status .filter', has_text="All").click()
         for summary in page.locator("#view-chats details > summary").all():
             if summary.is_visible():
                 summary.click()
-                settle(page, 250)
+                settle(page)
 
     views = page.locator('.sidebar [data-view]:visible').evaluate_all('nodes=>nodes.map(n=>n.dataset.view)')
     for view in dict.fromkeys([*views, "chats"]):
@@ -114,13 +149,9 @@ def walk(page):
             for tab in page.locator("#view-observations button.filter").all():
                 if tab.is_visible():
                     tab.click()
-                    settle(page, 300)
-                    for row in range(page.locator("#events-body tr").count()):
-                        page.locator("#events-body tr").nth(row).click()
-                        settle(page, 300)
-                        page.keyboard.press("Escape")
+                    settle(page)
     page.locator("#notify-toggle").click()
-    settle(page, 300)
+    settle(page)
     page.keyboard.press("Escape")
 
 

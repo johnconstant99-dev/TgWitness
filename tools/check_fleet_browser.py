@@ -8,6 +8,7 @@ from playwright.sync_api import expect, sync_playwright
 from check_browser import (ROOT, RunningApp, hold_api_response, launch_browser,
                            release_api_response, unlock)
 from test_collector import saved_session
+from check_fleet_async_browser import main as check_async_groups
 
 
 def account_files(name, api_id):
@@ -113,8 +114,17 @@ def main():
             page.set_viewport_size({"width": width, "height": 1000})
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), width
             page.screenshot(path=str(output / ("proxies-" + str(width) + ".png")), full_page=True)
+        page.set_viewport_size({"width": 1440, "height": 1000})
+        page.locator('[data-view="accounts"]').click()
+        page.locator("#fleet-import-open").click()
+        page.locator("#fleet-files").set_input_files(account_files("finished", 505))
+        page.locator("#fleet-import-start").click()
+        expect(page.locator("#fleet-results .ok")).to_have_count(1)
+        expect(page.locator("#fleet-import-close")).to_be_enabled()
+        expect(page.locator("#fleet-import-start")).to_be_disabled()
         assert not errors, errors
         browser.close()
+    check_async_groups()
     print("Fleet passed: bulk imports, failure cleanup, group settings, fresh cards, lock isolation, shared proxies and mobile layout.")
 
 

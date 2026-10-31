@@ -3259,5 +3259,13 @@
 "Country lookups are switched off under Lists and sources.": "তালিকা ও উৎসসমূহের অধীনে দেশ অনুসন্ধান বন্ধ করা আছে।",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "তালিকা আপডেট এবং দেশ অনুসন্ধান এর জন্য অপেক্ষা করুন; সার্ভারগুলির নিজস্ব পরীক্ষা এখনও চলছে।",
 "Enter a group label.": "গ্রুপের নাম লিখুন।",
-"The new workspace could not start.": "নতুন কর্মক্ষেত্র চালু করা যায়নি।"
+"The new workspace could not start.": "নতুন কর্মক্ষেত্র চালু করা যায়নি।",
+"Investigation": "তদন্ত",
+"Search chats": "চ্যাট খুঁজুন",
+"Chat tools": "চ্যাটের টুল",
+"Fictional messages. No Telegram connection.": "কাল্পনিক বার্তা। Telegram-এ সংযোগ নেই।",
+"Review deletions": "মুছে ফেলা বার্তা দেখুন",
+"Compare edits": "সম্পাদনা তুলনা করুন",
+"Sample data": "নমুনা ডেটা",
+"No chats match your search.": "আপনার অনুসন্ধানে কোনো চ্যাট মেলেনি।"
 }

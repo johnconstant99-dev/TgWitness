@@ -3243,5 +3243,13 @@
 "Country lookups are switched off under Lists and sources.": "Tính năng tra cứu quốc gia đã bị tắt trong phần Danh sách và nguồn.",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "Việc cập nhật danh sách và tra cứu quốc gia sẽ được thực hiện trong thời gian tới; trong khi đó, các quá trình kiểm tra chính các máy chủ vẫn đang diễn ra.",
 "Enter a group label.": "Nhập tên nhóm.",
-"The new workspace could not start.": "Không thể khởi động không gian làm việc mới."
+"The new workspace could not start.": "Không thể khởi động không gian làm việc mới.",
+"Investigation": "Điều tra",
+"Search chats": "Tìm cuộc trò chuyện",
+"Chat tools": "Công cụ trò chuyện",
+"Fictional messages. No Telegram connection.": "Tin nhắn hư cấu. Không kết nối với Telegram.",
+"Review deletions": "Xem tin nhắn đã xóa",
+"Compare edits": "So sánh chỉnh sửa",
+"Sample data": "Dữ liệu mẫu",
+"No chats match your search.": "Không có cuộc trò chuyện nào khớp với tìm kiếm."
 }

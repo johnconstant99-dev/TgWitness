@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Reworked the workspace navigation and chat layout, added chat search and kept
+  collection warnings visible. The desktop conversation fits the viewport.
+- Rebuilt the online demo around a fictional investigation with named participants,
+  edit comparisons and real signed sample downloads. Verification results now stay
+  visible; unavailable online-only actions no longer look usable.
 - Added batch session import and account groups with template settings. Failed
   imports leave no empty workspace; locking or switching stops the remaining queue.
 - Added the MTProxy dashboard: ping, status, countries, filters, shared custom

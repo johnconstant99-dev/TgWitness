@@ -6,8 +6,10 @@ Use --git-index to check the staged contents and require the complete reviewed s
 import argparse
 import io
 from pathlib import Path
+from pathlib import PurePosixPath
 import re
 import subprocess
+import zipfile
 from urllib.parse import unquote, urlsplit
 
 try:
@@ -34,6 +36,34 @@ def secret_findings(content, name):
     return findings
 
 
+def data_findings(data, name):
+    if Path(name).suffix.lower() != ".zip":
+        try:
+            return secret_findings(data.decode("utf-8"), name)
+        except UnicodeError:
+            return [f"{name}: invalid UTF-8 text"]
+    findings = []
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            members = archive.infolist()
+            if len(members) > 1000 or sum(item.file_size for item in members) > 20 * 1024**2:
+                return [f"{name}: ZIP exceeds publication scan limits"]
+            for item in members:
+                path = PurePosixPath(item.filename)
+                if path.is_absolute() or ".." in path.parts or "\\" in item.filename or ":" in item.filename:
+                    findings.append(f"{name}: unsafe ZIP member path")
+                    continue
+                if item.is_dir() or path.suffix.lower() in BINARY:
+                    continue
+                if path.suffix.lower() == ".zip":
+                    findings.append(f"{name}: nested ZIP needs separate review")
+                    continue
+                findings.extend(data_findings(archive.read(item), name + "/" + item.filename))
+    except (zipfile.BadZipFile, RuntimeError):
+        findings.append(f"{name}: ZIP could not be inspected")
+    return findings
+
+
 def check_sources(root):
     root = Path(root).resolve()
     sources = public_sources(root)
@@ -42,11 +72,12 @@ def check_sources(root):
     for source in sources:
         if source.suffix.lower() in BINARY:
             continue
-        content = source.read_text(encoding="utf-8")
         relative = source.relative_to(root).as_posix()
-        findings.extend(secret_findings(content, relative))
+        data = source.read_bytes()
+        findings.extend(data_findings(data, relative))
         if source.suffix != ".md":
             continue
+        content = data.decode("utf-8")
         for match in LINK.finditer(content):
             href = urlsplit(match[1].strip("<>"))
             if href.scheme or href.netloc or not href.path or href.path.startswith("/"):
@@ -114,12 +145,7 @@ def check_git_index(root, sources):
             data = stream.read(int(header[2]))
             if stream.read(1) != b"\n":
                 raise ValueError("Incomplete staged public file")
-            try:
-                content = data.decode("utf-8")
-            except UnicodeError:
-                findings.append(f"Git index contains invalid UTF-8 text: {name}")
-                continue
-            findings.extend(secret_findings(content, "Git index " + name))
+            findings.extend(data_findings(data, "Git index " + name))
     return findings
 
 

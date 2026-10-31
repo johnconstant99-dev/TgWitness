@@ -3243,5 +3243,13 @@
 "Country lookups are switched off under Lists and sources.": "在“列表和来源”下，国家查询功能已被关闭。",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "列表更新和国家查询功能即将推出；对服务器本身的检查仍在进行中。",
 "Enter a group label.": "请输入群组名称。",
-"The new workspace could not start.": "无法启动新的工作区。"
+"The new workspace could not start.": "无法启动新的工作区。",
+"Investigation": "调查",
+"Search chats": "搜索聊天",
+"Chat tools": "聊天工具",
+"Fictional messages. No Telegram connection.": "虚构消息。未连接 Telegram。",
+"Review deletions": "查看已删除消息",
+"Compare edits": "比较编辑内容",
+"Sample data": "示例数据",
+"No chats match your search.": "没有符合搜索条件的聊天。"
 }

@@ -21,6 +21,7 @@ on:
       - .github/SECURITY.md
       - docs/CHANGELOG.md
       - tools/check_site.py
+      - tools/check_demo_browser.py
       - tools/check_docs_site.py
       - tools/check_home_browser.py
       - tools/check_modes_browser.py

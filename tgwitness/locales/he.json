@@ -3275,5 +3275,13 @@
 "Country lookups are switched off under Lists and sources.": "חיפושי מדינות מושבתים תחת \"רשימות ומקורות\".",
 "List updates and country lookups wait for it; checks of the servers themselves still run.": "עדכוני רשימות וחיפושים לפי מדינה – חכו לזה; בדיקות השרתים עצמם עדיין פועלות.",
 "Enter a group label.": "יש להזין שם לקבוצה.",
-"The new workspace could not start.": "לא ניתן להפעיל את סביבת העבודה החדשה."
+"The new workspace could not start.": "לא ניתן להפעיל את סביבת העבודה החדשה.",
+"Investigation": "חקירה",
+"Search chats": "חיפוש צ׳אטים",
+"Chat tools": "כלי צ׳אט",
+"Fictional messages. No Telegram connection.": "הודעות בדיוניות. ללא חיבור ל־Telegram.",
+"Review deletions": "בדיקת מחיקות",
+"Compare edits": "השוואת עריכות",
+"Sample data": "נתונים לדוגמה",
+"No chats match your search.": "לא נמצאו צ׳אטים התואמים לחיפוש."
 }
