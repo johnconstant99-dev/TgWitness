@@ -6,6 +6,8 @@ import uuid
 
 from starlette.responses import JSONResponse
 
+from . import health
+
 
 class Profiles:
 
@@ -142,9 +144,10 @@ class Profiles:
         result = []
         for profile in self.entries.values():
             app = profile["app"]
+            status = app.state.collector.status() if app else None
             result.append({
                 "id": profile["id"], "label": profile["label"],
-                "collector": app.state.collector.status() if app else None,
+                "collector": status, "health": health.collector_of(app.state, status) if app else None,
                 "stats": app.state.store.stats() if app else None,
                 "sources_enabled": len(app.state.store.targets(True)) if app else None,
                 "sources_total": len(app.state.store.targets()) if app else None,

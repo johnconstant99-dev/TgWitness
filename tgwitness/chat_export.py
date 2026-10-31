@@ -5,13 +5,15 @@ The collector streams one JSON record per message into a scratch JSONL file
 downloadable ZIP that contains:
 
   chat.json      Telegram-export-style array of messages.
-  chat.html      Readable rendering of the same messages.
+  chat.html      Readable rendering of the same messages, oldest first, sealed (report.py).
   authors.csv    Everyone who posted: ID, name, username, message count, first/last.
   authors.json   The same list as JSON.
+  custody.json   How the history was acquired and exported, with the standards followed.
+  SHA256SUMS     Every file's SHA-256 for sha256sum -c.
   manifest.json  Metadata plus a SHA-256 for every file in the bundle.
   manifest.sig   Ed25519 signature over manifest.json by the profile key.
   verify.py      A copy of the journal verifier (shares the signature scheme).
-  README.txt     Scope and the verification command.
+  README.txt     Scope and verification, in the report language and in English.
 
 The signature proves the bundle was not changed after export relative to a
 trusted key fingerprint. It does not prove Telegram origin, and the export is a
@@ -20,12 +22,13 @@ reconstructed.
 """
 import csv
 import hashlib
-import html
 import io
 import json
+import uuid
 import zipfile
 from pathlib import Path
 
+from . import report
 from .evidence import producer
 from .store import canonical, utcnow
 from .verify import fingerprint
@@ -95,66 +98,65 @@ def json_chunks(meta, scratch_path):
     yield b"\n ]\n}\n"
 
 
-def _bubble(record):
-    escape = lambda v: html.escape("" if v is None else str(v))
-    who = escape(record.get("from") or ("Service" if record.get("type") == "service" else "Unknown"))
-    when = escape(record.get("date") or "")
-    body = []
-    if record.get("reply_to_message_id"):
-        body.append('<div class="reply">In reply to #' + escape(record["reply_to_message_id"]) + "</div>")
-    if record.get("type") == "service":
-        body.append('<div class="service">' + escape(record.get("action") or "Service event") + "</div>")
-    text = record.get("text") or ""
-    if text:
-        body.append('<div class="text">' + escape(text).replace("\n", "<br>") + "</div>")
-    if record.get("media_type"):
-        body.append('<div class="media">[' + escape(record["media_type"])
-                    + (" · not included in this export]" if not record.get("file") else "]") + "</div>")
-    edited = (' · edited ' + escape(record["edited"])) if record.get("edited") else ""
-    return ('<article id="m' + escape(record.get("id")) + '" class="'
-            + ("service-row" if record.get("type") == "service" else "msg") + '">'
-            + '<header><span class="from">' + who + '</span>'
-            + '<span class="meta">#' + escape(record.get("id")) + ' · ' + when + edited + '</span></header>'
-            + "".join(body) + "</article>")
+def records_backwards(scratch_path, block=1 << 16):
+    """Records from the last line to the first, reading the file from its end in blocks."""
+    with Path(scratch_path).open("rb") as handle:
+        handle.seek(0, 2)
+        position, rest = handle.tell(), b""
+        while position > 0:
+            step = min(block, position)
+            position -= step
+            handle.seek(position)
+            lines = (handle.read(step) + rest).split(b"\n")
+            rest = lines.pop(0)
+            for line in reversed(lines):
+                if line.strip():
+                    yield json.loads(line)
+        if rest.strip():
+            yield json.loads(rest)
 
 
-def html_chunks(meta, scratch_path):
-    escape = lambda v: html.escape("" if v is None else str(v))
-    chat = meta.get("chat", {})
-    yield ('<!doctype html><html lang="en"><meta charset="utf-8">'
-           '<meta name="viewport" content="width=device-width,initial-scale=1">'
-           '<title>TgWitness chat export · ' + escape(chat.get("title")) + '</title>'
-           '<style>body{font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif;max-width:820px;'
-           'margin:0 auto;padding:24px 16px 80px;background:#e7ebf0;color:#17212b}'
-           'h1{font-size:20px;margin:0 0 4px}.sub{color:#5b6b7b;margin:0 0 8px}'
-           '.limits{background:#fff;border:1px solid #d7dee6;border-radius:12px;padding:12px 18px;'
-           'margin:12px 0 20px;font-size:13px;color:#5b6b7b}'
-           'article.msg{background:#fff;border-radius:12px;padding:8px 14px;margin:8px 0;'
-           'box-shadow:0 1px 2px rgba(0,0,0,.06)}'
-           'article.service-row{text-align:center;margin:14px 0;color:#5b6b7b;font-size:13px}'
-           'header{display:flex;justify-content:space-between;gap:12px;align-items:baseline}'
-           '.from{font-weight:600;color:#3a73b8}.meta{color:#8a99a8;font-size:12px;font-family:monospace}'
-           '.text{margin-top:4px;white-space:normal;overflow-wrap:anywhere}'
-           '.reply{border-left:3px solid #3a73b8;padding-left:8px;color:#5b6b7b;font-size:13px;margin-top:4px}'
-           '.media{margin-top:4px;color:#5b6b7b;font-size:13px}.service{font-style:italic}</style>'
-           '<h1>' + escape(chat.get("title")) + '</h1>'
-           '<p class="sub">Chat ' + escape(chat.get("id")) + ' · ' + escape(chat.get("kind"))
-           + ' · ' + escape(chat.get("visibility")) + ' · ' + escape(meta.get("message_count"))
-           + ' messages · exported ' + escape(meta.get("exported_at")) + '</p>'
-           '<div class="limits"><ul><li>'
-           + "</li><li>".join(escape(x) for x in meta.get("limitations", []))
-           + "</li></ul></div>").encode("utf-8")
+def chat_stats(scratch_path):
+    """Counts, first and last dates, and whether Telegram returned the history newest first."""
+    stats = {"text": 0, "media": 0, "edited": 0, "service": 0, "first_at": None, "last_at": None,
+             "first_id": None, "last_id": None}
     for record in records(scratch_path):
-        yield _bubble(record).encode("utf-8")
-    yield b"</html>"
+        if record.get("type") == "service":
+            stats["service"] += 1
+        elif record.get("media_type"):
+            stats["media"] += 1
+        else:
+            stats["text"] += 1
+        stats["edited"] += bool(record.get("edited"))
+        date = record.get("date")
+        if date and (stats["first_at"] is None or date < stats["first_at"]):
+            stats["first_at"] = date
+        if date and (stats["last_at"] is None or date > stats["last_at"]):
+            stats["last_at"] = date
+        stats["first_id"] = record.get("id") if stats["first_id"] is None else stats["first_id"]
+        stats["last_id"] = record.get("id")
+    stats["newest_first"] = isinstance(stats["first_id"], int) and isinstance(stats["last_id"], int) \
+        and stats["first_id"] > stats["last_id"]
+    return stats
 
 
-def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES):
+def html_chunks(meta, scratch_path, context=None):
+    """The readable chat, oldest message first (see report.py); sealed when the context can sign."""
+    context = context or {}
+    stats = context.get("stats") or chat_stats(scratch_path)
+    context = {"producer": producer(), "limits": EXPORT_LIMITS, "people": authors(scratch_path), "files": {},
+               "report_id": "unsealed", "created_at": utcnow(), "fingerprint": "", **context, "stats": stats}
+    ordered = (lambda: records_backwards(scratch_path)) if stats["newest_first"] else (lambda: records(scratch_path))
+    return report.chat_chunks(meta, ordered, context)
+
+
+def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES, options=None):
+    options = options or report.resolved()
     meta = {"format": "tgwitness-chat-export-v1", "exported_at": utcnow(),
             "public_key": vault.public_key, "fingerprint": fingerprint(vault.public_key),
             "source": "Telegram history read by the account; a current snapshot, "
                       "not reconstruction of deleted or past-edited messages.",
-            "producer": producer(), "limitations": EXPORT_LIMITS, **meta}
+            "producer": producer(), "limitations": EXPORT_LIMITS, "case": report.case_of(options), **meta}
     path = Path(out_path)
     hashes, total = {}, 0
     try:
@@ -174,20 +176,34 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             people = authors(scratch_path)
             meta["author_count"] = len(people)
             write_member("chat.json", json_chunks(meta, scratch_path))
-            write_member("chat.html", html_chunks(meta, scratch_path))
             write_member("authors.json", [json.dumps(people, ensure_ascii=False, indent=1).encode("utf-8")])
             write_member("authors.csv", [authors_csv(people)])
             write_member("verify.py", [Path(__file__).with_name("verify.py").read_bytes()])
-            write_member("README.txt", [("\n".join(EXPORT_LIMITS)
-                + "\n\nchat.json is authoritative; chat.html is a readable derivative.\n"
+            context = {"kind": "chat", "options": options, "report_id": str(uuid.uuid4()), "created_at": meta["exported_at"],
+                       "producer": meta["producer"], "limits": EXPORT_LIMITS, "public_key": vault.public_key,
+                       "fingerprint": meta["fingerprint"], "meta": meta, "people": people,
+                       "stats": chat_stats(scratch_path), "chat_json_sha256": hashes["chat.json"],
+                       "account": meta.get("account"), "sign": vault.sign}
+            write_member("custody.json", [json.dumps(report.custody(context), ensure_ascii=False,
+                                                     indent=1).encode("utf-8")])
+            context["files"] = dict(hashes)
+            write_member("chat.html", html_chunks(meta, scratch_path, context))
+            listed = {**hashes, **dict.fromkeys(("README.txt", "SHA256SUMS", "manifest.json", "manifest.sig"), "")}
+            write_member("README.txt", [report.readme(context, listed, "\n".join(EXPORT_LIMITS)
+                + "\n\nchat.json is authoritative; chat.html is a readable derivative sealed with the same key.\n"
                 "authors.csv / authors.json list everyone who posted in the exported history,\n"
                 "with message counts and first/last message; names are the profile at export time.\n"
+                "custody.json records how the history was acquired and exported.\n"
                 "manifest.json lists a SHA-256 for every file; manifest.sig is the Ed25519 signature.\n"
+                "SHA256SUMS repeats those hashes for sha256sum -c.\n"
                 "Verify authenticity with a trusted key fingerprint, using a verifier from a trusted checkout:\n"
                 "  python verify.py chat-export.zip --fingerprint TRUSTED_SHA256\n"
                 "Exports above 4 GiB uncompressed also need --max-gib with their size in GiB.\n"
-                "Requires Python 3.11+ and cryptography. chat.json is authoritative.\n").encode()])
-            manifest = {**meta, "files": hashes}
+                "Requires Python 3.11+ and cryptography. chat.json is authoritative.\n")])
+            write_member("SHA256SUMS", [report.sha256sums(hashes)])
+            manifest = {**meta, "report": {"id": context["report_id"], "file": "chat.html",
+                                           "language": options["language"], "sealed": True, "custody": "custody.json"},
+                        "files": hashes}
             manifest_bytes = canonical(manifest)
             archive.writestr("manifest.json", manifest_bytes)
             archive.writestr("manifest.sig", vault.sign(manifest_bytes))

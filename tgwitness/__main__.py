@@ -38,6 +38,19 @@ def open_when_ready(url, host, port, token_file=None, timeout=60):
     return True
 
 
+def banner(demo, stream=None):
+    """A framed heading for a person starting the panel at a terminal; plain "TgWitness" otherwise."""
+    from . import __version__
+    stream = stream or sys.stdout
+    if not (stream and getattr(stream, "isatty", lambda: False)()):
+        print("TgWitness")
+        return
+    from .verify import Console
+    console = Console(stream, color=not os.environ.get("NO_COLOR"))
+    console.banner("TgWitness " + __version__ + ("  · demo" if demo else ""),
+                   "Telegram evidence workspace · signed · self-hosted")
+
+
 def main():
     parser = argparse.ArgumentParser(description="TgWitness observation journal")
     parser.add_argument("--host", default=os.environ.get("TGWITNESS_HOST", "127.0.0.1"),
@@ -63,8 +76,8 @@ def main():
     import uvicorn
     from .app import create_app
     from .logging_config import server_logging
-    print("TgWitness")
-    host = "127.0.0.1" if args.host == "0.0.0.0" else "[" + args.host + "]" if ":" in args.host else args.host
+    banner(args.demo)
+    host ="127.0.0.1" if args.host == "0.0.0.0" else "[" + args.host + "]" if ":" in args.host else args.host
     url = "http://" + host + ":" + str(args.port)
     print("Panel: " + url)
     print("Data directory:", root)

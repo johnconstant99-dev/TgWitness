@@ -319,6 +319,7 @@ function navigate(view) {
   if (view==="accounts") {renderAccounts();loadProfiles().catch(e=>toast(e.message,true));}
   if (view==="chats") refreshChats().catch(e=>toast(e.message,true));
   if (view==="access") loadAccess().catch(e=>toast(e.message,true));
+  if (view==="evidence") loadReportSettings().catch(e=>toast(e.message,true));
   if (view==="integrations") window.TgWitnessIntegrations?.load();
   else {window.TgWitnessIntegrations?.clear();window.TgWitnessWebhooks?.clear();}
   if(view==="analysis")window.TgWitnessAnalysis?.load();
@@ -407,6 +408,98 @@ document.addEventListener("keydown",event=>{
       &&!$("workspace").hidden&&!$("workspace").inert){event.preventDefault();if(!event.repeat)toggleQuick();}
 });
 
+// ---- Health: what each part does now, apart from whether it is switched on (health.py) ----
+// [label, icon]: the state is always written and drawn, colour only adds to it.
+const healthStates={off:[tr("Off"),"pause"],configured:[tr("Configured"),"settings"],running:[tr("In progress"),"refresh"],
+  working:[tr("Working"),"check"],degraded:[tr("Degraded"),"alert"],failed:[tr("Error"),"x"],unknown:[tr("State unknown"),"question"]};
+const healthKnown=value=>Object.hasOwn(healthStates,value)?value:"unknown";
+const healthWorst=values=>["failed","degraded","unknown","running","configured","working","off"].find(v=>values.includes(v))||"unknown";
+const needsLook=value=>["failed","degraded","unknown"].includes(value);
+const when=value=>value?fmtFull(value):tr("none yet");
+function stateBadge(value,cls="health-badge"){
+  const key=healthKnown(value),badge=node("span",cls+" state-"+key);
+  badge.append(icon(healthStates[key][1]),node("span","",healthStates[key][0]));return badge;
+}
+// Where a part's problem can be looked into; opening it changes no setting and contacts nobody.
+const healthDiagnostics={connection:{view:"connection"},intake:{view:"observations",filter:"coverage"},
+  sources:{view:"sources"},media:{view:"sources",target:"capture-form"},
+  timestamps:{view:"witness",extra:"evidence",target:"evidence-status"},
+  replica:{view:"witness",extra:"evidence",target:"replica-status"},server:{view:"witness",extra:"cloud",target:"cloud-health"}};
+function openDiagnostics(name){
+  const d=healthDiagnostics[name];if(!d||!viewAllowed(d.view))return;
+  if(d.view==="witness")selectExtra(null);
+  navigate(d.view);
+  if(d.extra)$("extras-open-"+d.extra).click();
+  if(d.filter)document.querySelector('[data-filter="'+d.filter+'"]')?.click();
+  if(d.target)$(d.target).scrollIntoView({block:"start"});
+}
+function healthRow(name,title,item,lines){
+  const row=node("div","health-row"),head=node("div","health-row-head");
+  head.append(node("strong","",title),stateBadge(item.state));row.append(head);
+  lines.filter(Boolean).forEach((line,i)=>row.append(node("p",i?"hint":"",line)));
+  const d=healthDiagnostics[name];
+  if(needsLook(item.state)&&d&&viewAllowed(d.view)&&d.view!==state.view){
+    const button=node("button","text-link",tr("Diagnostics"));button.type="button";
+    button.addEventListener("click",()=>openDiagnostics(name));row.append(button);
+  }
+  return row;
+}
+const healthPartNames={connection:tr("Telegram connection"),intake:tr("Event intake"),sources:tr("Sources"),media:tr("Attachment queue")};
+function collectorLines(name,p){
+  const c=p.counts||{};
+  if(name==="connection"){
+    if(p.reason==="connected")return [tr("Connected to Telegram.")];
+    if(p.reason==="reconnecting")return [tr("Connection lost; reconnecting (attempt {n}).",{n:p.attempts}),
+      p.next_reconnect_at&&tr("Next attempt: {time}",{time:fmtFull(p.next_reconnect_at)}),p.error&&tr("Last error: {error}",{error:p.error})];
+    if(p.reason==="telegram_pause")return [tr("Telegram asked to pause requests until {time}.",{time:fmtFull(p.telegram_pause_until)})];
+    if(p.reason==="signed_out")return [tr("Telegram signed this account out. Sign in again to resume observation.")];
+    if(p.reason==="collector_error")return [tr("Observation stopped after an error: {error}",{error:p.error||"?"})];
+    if(p.reason==="storage_error")return [tr("Observation stopped: the journal could not be written.")];
+    if(p.reason==="resume_failed")return [tr("Observation did not resume after the restart: {error}",{error:p.error||"?"})];
+    if(p.reason==="paused")return [tr("Observation is paused.")];
+    return [tr("No Telegram account is connected.")];
+  }
+  if(name==="intake"){
+    const facts=[tr("Collector heartbeat: {time}",{time:when(p.last_heartbeat)}),tr("Last event received: {time}",{time:when(p.last_event_at)})];
+    if(p.reason==="live")return [tr("Events arrive. A quiet chat without new messages is not a fault."),...facts];
+    if(p.reason==="no_heartbeat")return [tr("No collector heartbeat yet."),...facts];
+    if(p.reason==="stale")return [tr("No collector heartbeat for longer than expected; the collector may not be responding."),...facts];
+    if(p.reason==="disconnected")return [tr("No events can arrive while the connection is down."),...facts];
+    return [tr("Observation is paused.")];
+  }
+  if(name==="sources"){
+    const counts=c.checked?tr("Visible: {visible} · added automatically: {added} · not found: {unconfirmed}",c):"";
+    if(p.reason==="visible")return [tr("All checked sources are visible in the account's dialogs."),counts];
+    if(p.reason==="some_unconfirmed")return [tr("Some sources were not found among the account's chats; the others continue."),counts];
+    if(p.reason==="none_visible")return [tr("None of the sources was found among the account's chats."),counts];
+    if(p.reason==="not_checked")return [tr("Sources are checked when observation starts.")];
+    return [tr("No source is selected.")];
+  }
+  const facts=[tr("Waiting: {pending} · retrying: {retry} · not saved: {failed}",c),
+    p.oldest_pending_at&&tr("Oldest pending attachment")+": "+fmtFull(p.oldest_pending_at),
+    p.disk_free_bytes!=null&&tr("Free disk")+": "+humanSize(p.disk_free_bytes)];
+  if(p.reason==="ok")return [tr("Attachments are being saved."),...facts];
+  if(p.reason==="disk_low")return [tr("Disk almost full: downloads are paused until space is free."),...facts];
+  if(p.reason==="paused")return [tr("Downloads continue when observation resumes."),...facts];
+  if(p.reason==="failed_items")return [tr("Some attachments could not be saved; their messages are recorded."),...facts];
+  if(p.reason==="queue_waiting")return [tr("Attachments have been waiting for more than an hour."),...facts];
+  return [tr("Attachment downloads are off."),...facts];
+}
+function renderCollectorHealth(h){
+  const strip=$("health-strip");strip.replaceChildren();
+  const summary=document.querySelector(".health-details > summary");
+  summary.querySelector(".health-badge")?.remove();
+  if(!h)return;
+  const names=["connection","intake","sources","media"];
+  for(const name of names)strip.append(healthRow(name,healthPartNames[name],h[name],collectorLines(name,h[name])));
+  summary.append(stateBadge(h.state));
+  // The rows are rebuilt on every refresh; only a change of a part's state is announced.
+  const states=state.profile+":"+names.map(name=>h[name].state).join(",");
+  if(state.healthStates&&state.healthStates!==states&&state.healthStates.split(":")[0]===state.profile)
+    $("health-announce").textContent=names.map(name=>healthPartNames[name]+" — "+healthStates[healthKnown(h[name].state)][0]).join(" · ");
+  state.healthStates=states;
+}
+
 function renderStatus() {
   renderHistory();
   renderComposer();
@@ -434,17 +527,7 @@ function renderStatus() {
   $("event-total").textContent=s.stats.total.toLocaleString();
   $("fingerprint").textContent=s.fingerprint;
   $("export-profile-id").textContent=state.profile;
-  const health=$("health-strip");health.replaceChildren();
-  const unavailable=Object.values(c.source_status||{}).filter(x=>x.state!=="visible_in_dialogs").length;
-  const items=[
-    [tr("Media queue"),String(c.media_pending||0)],
-    [tr("Failed media"),String(c.media_jobs?.failed||0)],
-    [tr("Free disk"),((c.disk_free_bytes||0)/1024**3).toFixed(1)+" GiB"],
-    [tr("Sources to check"),String(unavailable)],
-  ];
-  if(c.rpc_backoff_until>Date.now()/1000)items.push([tr("Telegram request pause"),formatTime(c.rpc_backoff_until*1000)]);
-  for(const [label,value] of items){const item=node("div");item.append(node("span","",label),node("strong","",value));health.append(item);}
-  if(c.oldest_pending_media_at){const item=node("div");item.append(node("span","",tr("Oldest pending attachment")),node("strong","",formatTime(c.oldest_pending_media_at)));health.append(item);}
+  renderCollectorHealth(s.health);
   show("collector-error",!!c.last_error);
   $("collector-error").textContent=c.last_error ? tr("Collector reported {error}. Review coverage events before relying on completeness.",{error:c.last_error}) : "";
   fillSourceSelect("source-filter",state.source,true);
@@ -562,13 +645,18 @@ function renderAccounts(){
     const card=node("div","card padded account-card"+(current?" current":""));
     const head=node("div","account-head"),who=node("div","account-who"),account=c&&c.account;
     const title=node("div");title.append(node("h2","",p.label));
-    const badge=node("span","account-badge "+(c&&c.running?"on":down?"down":"off"),accountPhaseLabel(p));
+    // The badge sums up every part (health.py); the observation phase alone is listed below it.
+    const badge=!down&&p.health?stateBadge(p.health.state,"account-badge"):
+      node("span","account-badge "+(c&&c.running?"on":down?"down":"off"),accountPhaseLabel(p));
     title.append(node("p","account-id",accountIdentity(p)));
     who.append(avatarNode(account?account.id:null,account&&account.username?account.username:p.label,"lg",p.id),title);
     head.append(who,badge);card.append(head);
     if(!down){
       const meta=node("dl","account-meta");
       const pair=(k,v)=>{meta.append(node("dt","",k),node("dd","",v));};
+      pair(tr("Observation"),accountPhaseLabel(p));
+      const attention=p.health?Object.keys(healthPartNames).filter(name=>needsLook(p.health[name]?.state)):[];
+      if(attention.length)pair(tr("Needs attention"),attention.map(name=>healthPartNames[name]+" — "+healthStates[healthKnown(p.health[name].state)][0]).join(" · "));
       pair(tr("Sources"),tr("{n} active",{n:p.sources_enabled||0})+(p.sources_total?" / "+p.sources_total:""));
       pair(tr("Journal"),trn("{n} event","{n} events",p.stats&&p.stats.total||0));
       pair(tr("Pending media"),String(c.media_pending||0));
@@ -1152,6 +1240,34 @@ document.querySelectorAll("[data-export]").forEach(b=>b.addEventListener("click"
   if(await download("export/"+fmt,"tgwitness-evidence-"+fmt+"-encrypted.zip",true,false,{password}))
     toast(tr("Encrypted export saved. Open it in 7-Zip or WinRAR with the password; the signed file inside is unchanged."));
 })));
+// Report settings: language, case details and contents of the sealed report in every export.
+const REPORT_FIELDS={"report-language":"language","report-theme":"theme","report-case-title":"case_title",
+  "report-case-id":"case_id","report-examiner":"examiner","report-organization":"organization","report-notes":"notes"};
+const REPORT_CHECKS={"report-timeline":"timeline","report-raw":"raw_records","report-media":"media_previews"};
+async function loadReportSettings(){
+  if(!state.status)return;
+  const profile=state.profile,options=await json("report-options"),select=$("report-language");
+  if(profile!==state.profile)return;
+  if(!select.options.length){
+    select.append(new Option(tr("Same as the panel"),"auto"));
+    for(const [code,name] of Object.entries(PANEL_LANGUAGES)){const o=new Option(name,code);o.lang=code;select.append(o);}
+  }
+  for(const [id,key] of Object.entries(REPORT_FIELDS))$(id).value=options[key];
+  for(const [id,key] of Object.entries(REPORT_CHECKS))$(id).checked=options[key];
+  syncReportParts();$("report-status").textContent="";
+}
+function syncReportParts(){$("report-raw").disabled=$("report-media").disabled=!$("report-timeline").checked;}
+$("report-timeline").addEventListener("change",syncReportParts);
+$("report-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
+  const body={};
+  for(const [id,key] of Object.entries(REPORT_FIELDS))body[key]=$(id).value;
+  for(const [id,key] of Object.entries(REPORT_CHECKS))body[key]=$(id).checked;
+  await json("report-options",body);
+  $("report-status").textContent=tr("Saved. The next export uses these settings.");toast(tr("Report settings saved."));
+});});
+document.querySelectorAll("[data-go-reports]").forEach(link=>link.addEventListener("click",event=>{
+  event.preventDefault();navigate("evidence");$("report-form").scrollIntoView({block:"start"});
+}));
 $("export-encrypt-on").addEventListener("change",()=>{
   const on=$("export-encrypt-on").checked;show("export-password-field",on);if(on)$("export-password").focus();else $("export-password").value="";
 });
@@ -1174,23 +1290,48 @@ async function loadEvidence(){
   if(profile===state.profile)renderEvidence(e);
 }
 const hostOf=url=>{try{return new URL(url).hostname;}catch{return url;}};
-function evidenceText(e){
-  if(!e.settings.enabled)return tr("Off — checkpoints stay on this machine only.");
-  if(e.route_problem)return tr(e.route_problem);
-  if(e.busy)return tr("Sending the checkpoint hash to timestamp services…");
-  const l=e.last;if(!l)return tr("On — the first checkpoint will be anchored within a minute.");
-  const ok=l.results.filter(r=>r.ok),bad=l.results.filter(r=>!r.ok);
-  const tsa=ok.filter(r=>r.kind==="rfc3161").map(r=>hostOf(r.service)+(r.time?" ("+fmtFull(r.time)+")":"")),ots=ok.filter(r=>r.kind==="opentimestamps").length;
-  let text=tr("Last anchored {time}: checkpoint of {n} records. ",{time:fmtFull(l.at),n:l.checkpoint.event_count.toLocaleString()});
-  if(tsa.length)text+=tr("Timestamped by {list}. ",{list:tsa.join(", ")});
-  if(ots)text+=tr("{n} OpenTimestamps calendar(s) accepted it; Bitcoin confirmation follows within hours. ",{n:ots});
-  if(bad.length)text+=tr("Not reached: {list}. Retried on the next pass.",{list:bad.map(r=>hostOf(r.service)+" — "+r.error).join("; ")});
-  return text;
+// A state with its reason first, then the facts behind it (health.py).
+function renderHealthDetail(box,item,lead,facts){
+  const head=node("p","health-lead");head.append(stateBadge(item.state),node("span","",lead));
+  box.replaceChildren(head,...facts.filter(Boolean).map(text=>node("p","",text)));
+}
+function timestampsLead(h){
+  switch(h.reason){
+    case "disabled":return tr("Off — checkpoints stay on this machine only.");
+    case "route":return tr(h.route_problem);
+    case "sending":return tr("Sending the checkpoint hash to timestamp services…");
+    case "loop_error":return tr("The timestamp pass stopped with an error: {error}",{error:h.error});
+    case "first_pending":return tr("On — the first checkpoint will be anchored within a minute.");
+    case "no_checkpoint":return tr("No checkpoint to timestamp yet.");
+    case "stale":return tr("No timestamp pass for longer than the interval; the current state is unknown.");
+    case "up_to_date":return tr("Every service has already answered for the latest checkpoint.");
+    case "no_answer":return tr("No timestamp service answered for the latest checkpoint.");
+    case "partial":return tr("Some timestamp services did not answer for the latest checkpoint.");
+    case "unverified":return tr("Only OpenTimestamps proofs were received; no RFC 3161 timestamp was verified.");
+    default:return tr("The latest checkpoint is timestamped.");
+  }
+}
+// An answer that arrived is not yet a verified timestamp; an OpenTimestamps proof waits for Bitcoin.
+function timestampsFacts(e,h){
+  if(!e.settings.enabled)return [];
+  const c=h.counts,l=e.last,facts=[];
+  if(l?.checkpoint)facts.push(tr("Latest checkpoint ({n} records): verified timestamps {verified} · OpenTimestamps proofs awaiting confirmation {pending} · answers rejected by the checks {rejected} · no answer {unreachable}",
+    {n:l.checkpoint.event_count.toLocaleString(),verified:c.verified+c.covered_verified,
+     pending:c.ots_pending+c.ots_bitcoin_unverified+c.covered-c.covered_verified,rejected:c.rejected,unreachable:c.unreachable}));
+  const tsa=(l?.results||[]).filter(r=>r.ok&&r.kind==="rfc3161").map(r=>hostOf(r.service)+(r.time?" ("+fmtFull(r.time)+")":""));
+  if(tsa.length)facts.push(tr("Timestamped by {list}. ",{list:tsa.join(", ")}).trim());
+  const attempts=[h.last_attempt_at,h.last_pass_at].filter(Boolean).sort();
+  facts.push(tr("Last attempt: {time}",{time:when(attempts.at(-1))}));
+  facts.push(tr("Last verified timestamp: {time}",{time:when(h.last_verified_at)}));
+  if(h.last_failure)facts.push(tr("Last failure, {time}: {list}",{time:fmtFull(h.last_failure.at),
+    list:h.last_failure.errors.map(r=>hostOf(r.service)+" — "+r.error).join("; ")}));
+  if(h.next_attempt_at)facts.push(tr("Next attempt: {time}",{time:fmtFull(h.next_attempt_at)}));
+  return facts;
 }
 function renderEvidence(e){
   const form=$("evidence-form"),status=$("evidence-status");
   form.querySelectorAll("input,select,textarea,button").forEach(n=>n.disabled=!e);
-  state.evidenceOn=!!e?.settings.enabled;renderEvidenceBadge();
+  state.timestampsHealth=e?.health||null;renderEvidenceBadge();
   if(!e){status.textContent=tr("Evidence mode works in a real workspace, not in the demo.");return;}
   if(state.evidenceProfile!==state.profile){state.evidenceDirty=false;state.evidenceProfile=state.profile;}
   if(!state.evidenceDirty){
@@ -1198,7 +1339,7 @@ function renderEvidence(e){
     $("evidence-tsa").value=e.settings.tsa_urls.join("\n");$("evidence-ots").value=e.settings.ots_calendars.join("\n");
   }
   $("evidence-anchor").disabled=!e.settings.enabled||e.busy;
-  status.textContent=evidenceText(e);
+  renderHealthDetail(status,e.health,timestampsLead(e.health),timestampsFacts(e,e.health));
 }
 $("evidence-form").addEventListener("input",()=>{state.evidenceDirty=true;});
 $("evidence-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
@@ -1217,16 +1358,26 @@ async function loadReplica(){
   const profile=state.profile,r=await json("replica");
   if(profile===state.profile)renderReplica(r);
 }
-function replicaText(r){
-  const s=r.settings;
-  if(!s.enabled)return tr(r.has_credentials?"Off.":"Off — enter your storage details to keep a copy away from this machine.");
-  if(r.route_problem)return tr(r.route_problem);
-  if(r.busy)return tr("Copying…");
-  const l=r.last,where=tr("Copies to {bucket}/{location}. ",{bucket:s.bucket,location:r.location});
-  if(!l)return where+tr("The first copy starts within a minute.");
-  return where+tr("Last pass {time}: {n} object(s), {size}; journal copied up to record {seq}.",{time:fmtFull(l.at),n:l.objects,
-    size:humanSize(l.bytes),seq:(l.journal_seq||0).toLocaleString()})+(l.error?" "+tr("Stopped: {error} — retried on the next pass.",{error:l.error}):"")+
-    (l.object_lock?" "+lockText(l.object_lock):"");
+function replicaLead(r,h){
+  switch(h.reason){
+    case "disabled":return tr(r.has_credentials?"Off.":"Off — enter your storage details to keep a copy away from this machine.");
+    case "route":return tr(h.route_problem);
+    case "copying":return tr("Copying…");
+    case "loop_error":case "error":return tr("Stopped: {error} — retried on the next pass.",{error:h.error});
+    case "first_pending":return tr("The first copy starts within a minute.");
+    case "stale":return tr("No copy pass for longer than the interval; the current state is unknown.");
+    default:return tr("The last copy pass finished without errors.");
+  }
+}
+function replicaFacts(r,h){
+  const s=r.settings,l=r.last;if(!s.enabled)return [];
+  return [tr("Copies to {bucket}/{location}. ",{bucket:s.bucket,location:r.location}).trim(),
+    l&&tr("Last pass {time}: {n} object(s), {size}; journal copied up to record {seq}.",{time:fmtFull(l.at),n:l.objects,
+      size:humanSize(l.bytes),seq:(l.journal_seq||0).toLocaleString()}),
+    tr("Last successful copy: {time}",{time:when(h.last_success_at)}),
+    h.lag_records!=null&&tr("Journal records not yet copied: {lag} of {head}.",{lag:h.lag_records.toLocaleString(),head:(h.head_seq||0).toLocaleString()}),
+    h.next_attempt_at&&tr("Next attempt: {time}",{time:fmtFull(h.next_attempt_at)}),
+    l?.object_lock&&lockText(l.object_lock)];
 }
 
 function lockText(lock){
@@ -1237,7 +1388,7 @@ function lockText(lock){
 function renderReplica(r){
   const form=$("replica-form"),status=$("replica-status");
   form.querySelectorAll("input,select,button").forEach(n=>n.disabled=!r);
-  state.replicaOn=!!r?.settings.enabled;renderEvidenceBadge();
+  state.replicaHealth=r?.health||null;renderEvidenceBadge();
   if(!r){status.textContent=tr("The off-site copy works in a real workspace, not in the demo.");return;}
   if(state.replicaProfile!==state.profile){state.replicaDirty=false;state.replicaProfile=state.profile;}
   const s=r.settings;
@@ -1249,7 +1400,7 @@ function renderReplica(r){
   }
   for(const id of ["replica-access","replica-secret"])$(id).placeholder=r.has_credentials?tr("Saved — leave empty to keep"):"";
   $("replica-test").disabled=!r.has_credentials;$("replica-sync").disabled=!s.enabled||r.busy;$("replica-key").disabled=!r.has_key;
-  status.textContent=replicaText(r);
+  renderHealthDetail(status,r.health,replicaLead(r,r.health),replicaFacts(r,r.health));
 }
 $("replica-form").addEventListener("input",()=>{state.replicaDirty=true;});
 $("replica-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
@@ -1562,9 +1713,17 @@ document.querySelectorAll("[data-go-extra]").forEach(link=>link.addEventListener
 function extraBadge(name,on,onText,offText){
   const badge=$("extra-"+name+"-badge");badge.textContent=tr(on?onText:offText);badge.classList.toggle("on",on);
 }
+// A card badge from what the parts do (health.py), not from their switches.
+function stateExtraBadge(name,value){
+  const key=healthKnown(value),badge=$("extra-"+name+"-badge");
+  badge.className="extra-badge state-"+key;badge.replaceChildren(icon(healthStates[key][1]),node("span","",healthStates[key][0]));
+}
 function renderEvidenceBadge(){
-  const both=state.evidenceOn&&state.replicaOn;
-  extraBadge("evidence",state.evidenceOn||state.replicaOn,both?"On":state.evidenceOn?"Timestamps on":"Off-site copy on","Off");
+  const t=state.timestampsHealth,r=state.replicaHealth,line=$("extra-evidence-status");
+  stateExtraBadge("evidence",healthWorst([t?.state||"off",r?.state||"off"]));
+  show("extra-evidence-status",!!(t||r));
+  line.textContent=t||r?tr("Timestamps")+": "+healthStates[healthKnown(t?.state||"off")][0]+" · "+
+    tr("Off-site copy")+": "+healthStates[healthKnown(r?.state||"off")][0]:"";
 }
 
 async function loadAssurance(){
@@ -1573,9 +1732,34 @@ async function loadAssurance(){
     state.assurance=r?.ok?(await r.json()).statement:null;
   }
   const s=state.assurance,on=!!s;
-  extraBadge("cloud",on,"Running here","Available");show("alerts-host",on);show("cloud-active",on);
-  if(on)$("cloud-active").textContent=tr("This collector runs on a sealed {provider} server, signing key {fingerprint}. An opened SSH port or a login there is recorded in the journal and sent as a problem notification.",
+  show("alerts-host",on);show("cloud-active",on);
+  if(!on){$("extra-cloud-badge").className="extra-badge";extraBadge("cloud",false,"","Available");renderServerHealth(null);return;}
+  $("cloud-active").textContent=tr("This collector runs on a sealed {provider} server, signing key {fingerprint}. An opened SSH port or a login there is recorded in the journal and sent as a problem notification.",
     {provider:CLOUD[s.host?.mode]?.[0]||s.host?.mode||"",fingerprint:s.fingerprint});
+  const profile=state.profile,h=await json("health");
+  if(profile===state.profile)renderServerHealth(h.server);
+}
+// Deployment and the protection checks are separate: a running server is not a sealed one.
+function renderServerHealth(s){
+  const box=$("cloud-health");box.replaceChildren();
+  show("cloud-health",!!s);if(!s)return;
+  const d=s.deployment,c=s.checks;
+  stateExtraBadge("cloud",healthWorst([d.state,c.state]));
+  box.append(healthRow("server",tr("Deployment"),d,[d.reason==="deployed"?tr("Deployed in high-assurance mode: {mode}.",{mode:CLOUD[d.mode]?.[0]||d.mode}):
+    d.reason==="provider_unavailable"?tr("The provider's metadata service did not answer: {error}",{error:d.error}):tr("This server has no deployment description.")]));
+  const lead={passed:tr("All protection checks passed."),attention:tr("Some protection checks need attention."),
+    partly_unknown:tr("Some values could not be measured.")}[c.reason]||tr("No recent host measurement.");
+  const names={ssh_port:tr("Port 22"),ssh_processes:tr("SSH server processes"),sessions:tr("Logged-in sessions"),new_logins:tr("New login records since start")};
+  const value=i=>i.result==="unknown"?tr("could not be measured"):i.name==="ssh_port"?tr(i.value?"accepts connections":"not listening"):i.value?String(i.value):tr("none");
+  const row=healthRow("server",tr("Protection checks"),c,[lead,c.measured_at&&tr("Measured: {time}",{time:fmtFull(c.measured_at)})]);
+  const list=node("ul","health-checks");
+  for(const i of c.items){
+    const item=node("li","check-"+i.result);
+    item.append(icon(i.result==="pass"?"check":i.result==="attention"?"alert":"question"),node("span","",names[i.name]+": "+value(i)));list.append(item);
+  }
+  row.append(list,node("p","hint",tr("A running SSH process or an open port is not proof of a login.")),
+    node("p","hint",tr("Measured by the collector on its own host; compare with the provider's records.")));
+  box.append(row);
 }
 async function loadExtras(){
   await Promise.all([loadWitness(),loadAlerts(),loadEvidence(),loadReplica(),loadAssurance(),loadSourceCheck()]);

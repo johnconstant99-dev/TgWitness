@@ -9,6 +9,18 @@
 - Connected the new workflows across README, Wiki and translated site reference.
   These additions require current source; the 0.7.0 portable preview predates them.
 
+- Sealed, localized reports. `report.html` and `chat.html` are rebuilt as self-contained
+  case documents in any of the 25 panel languages: case details, integrity and key
+  fingerprint, timestamps with their check commands, coverage, chain of custody with a
+  printable transfer table, verification steps, standards and limitations. Each ends with
+  an Ed25519 seal over its own bytes, checked in the browser or by
+  `verify.py report.html --fingerprint … --evidence …`. Reports carry Dublin Core and
+  schema.org metadata and a Content-Security-Policy that blocks network loads; the chat
+  report shows the history oldest first.
+- Signed archives add `custody.json` and `SHA256SUMS`; README.txt is written in the report
+  language and in English. Case details from **Exports → Report settings** are signed into
+  the manifest. `verify.py` checks the seal and the sums, prints a coloured summary at a
+  terminal (`--lang en|ru|uk`) and offers `--json`.
 - Added a five-stage capture animation and examples of message/collector
   substitution to the helper and Exports.
 

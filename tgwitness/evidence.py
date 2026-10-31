@@ -1,13 +1,14 @@
 import csv
 import hashlib
-import html
 import io
 import json
 import tempfile
+import uuid
 import zipfile
 from pathlib import Path
 
 from . import __version__
+from . import report
 from . import tuning
 from .store import ZERO, canonical, utcnow
 from .verify import Coverage, fingerprint, verify_events, verify_checkpoint
@@ -77,49 +78,41 @@ def csv_chunks(events):
             canonical(e["payload"]).decode(), e["hash"])])
 
 
-def html_bytes(events, coverage=None):
-    return b"".join(html_chunks(events, coverage))
+README = (
+    "\n\nUse a verifier from a trusted checkout, not solely from an untrusted ZIP.\n"
+    "Verify: python verify.py evidence.zip --fingerprint TRUSTED_SHA256\n"
+    "Require a witnessed export boundary: add --witness witness.zip\n"
+    "  --witness-fingerprint TRUSTED_WITNESS_SHA256 --require-witness\n"
+    "The witness must have retained the exact exported head. This verifies consistency\n"
+    "with its retained records, not the truth of the recorded messages.\n"
+    "Archives above 4 GiB uncompressed also need --max-gib with their size in GiB.\n"
+    "Requires Python 3.11+ and cryptography. CSV cells are formula-escaped.\n"
+    "events.jsonl is authoritative. Export is a stable journal prefix.\n"
+    "coverage.json lists continuous observation periods, gaps and message IDs that were\n"
+    "never observed (not evidence of deletion); verify.py recomputes it from events.jsonl.\n"
+    "report.html is a readable derivative sealed with the same key; custody.json records how\n"
+    "the material was acquired and exported; SHA256SUMS repeats the manifest for sha256sum -c.\n"
+    "Produced by TgWitness (PhishDestroy, https://phishdestroy.io); the producer is part of\n"
+    "the signed manifest.\n")
 
 
-def coverage_html(coverage, escape):
-    from .verify import coverage_lines
-    rows = "".join("<li>" + escape(line) + "</li>" for line in coverage_lines(coverage))
-    notes = ("<p>" + escape(coverage["notes_total"]) + " chat-level coverage note(s), listed as coverage events below.</p>"
-             if coverage["notes_total"] else "")
-    return ('<section class="coverage"><h2>Coverage</h2><ul>' + rows + "</ul>" + notes
-            + "<p><small>" + escape(coverage["meaning"]) + "</small></p></section>")
+def html_bytes(events, coverage=None, context=None):
+    return b"".join(html_chunks(events, coverage, context))
 
 
-def html_chunks(events, coverage=None):
-    escape = lambda v: html.escape(str(v) if v is not None else "Unavailable")
-    made = producer()
-    yield ('<!doctype html><html lang="en"><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width"><title>TgWitness · Observation report</title>'
-            '<style>body{font:16px system-ui;max-width:1000px;margin:50px auto;padding:24px;'
-            'background:#f6f7fa;color:#182434}article,section{background:white;padding:24px;margin:16px 0;'
-            'border:1px solid #dce2e9;border-radius:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}'
-            'small{overflow-wrap:anywhere}h2{font-size:18px}li{margin:8px 0}'
-            '.brand{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:#475467;font-size:14px}'
-            '.brand b{color:#182434}</style>'
-            '<header class="brand"><span><b>' + escape(made["software"]) + '</b> ' + escape(made["version"])
-            + ' · ' + escape(made["project"]) + '</span><span>' + escape(made["homepage"]) + ' · '
-            + escape(made["source"]) + '</span></header>'
-            '<h1>TgWitness / Observation report</h1><p>Readable derivative. Verify the signed ZIP for integrity; '
-            'its signed manifest names the producer shown above.</p>'
-            '<ul>' + "".join("<li>" + escape(x) + "</li>" for x in LIMITS) + "</ul>"
-            + (coverage_html(coverage, escape) if coverage else "")).encode("utf-8")
-    for e in events:
-        yield ('<article><h2>#' + str(e["seq"]) + ' · ' + escape(e["kind"]) + '</h2>'
-               '<p>Observed ' + escape(e["observed_at"]) + ' · Chat ' + escape(e["chat_id"])
-               + ' · Message ' + escape(e["message_id"]) + '</p><pre>'
-               + escape(json.dumps(e["payload"], ensure_ascii=False, indent=2))
-               + '</pre><small>SHA-256 ' + e["hash"] + '</small></article>').encode("utf-8")
-    yield b"</html>"
+def html_chunks(events, coverage=None, context=None):
+    """The readable report (see report.py); sealed when the context carries the signing key."""
+    return report.evidence_chunks(events, coverage, {"limits": LIMITS, "producer": producer(), **(context or {})})
 
 
-def export_file(store, vault, fmt):
+def export_file(store, vault, fmt, options=None):
+    """A stable journal prefix as JSONL, CSV, a sealed HTML report, or the signed evidence ZIP.
+
+    options are resolved report options (report.resolved); the case details they carry are
+    signed into the manifest and the report seal."""
     if fmt not in ("jsonl", "csv", "html", "zip"):
         raise ValueError("Unsupported export format")
+    options = options or report.resolved()
     directory = store.root / "temporary-exports"
     directory.mkdir(mode=0o700, exist_ok=True)
     if directory.resolve().parent != store.root.resolve():
@@ -130,21 +123,32 @@ def export_file(store, vault, fmt):
     try:
         retained = store.retained_checkpoint()
         with store.snapshot() as snapshot:
-            observed = Coverage()
+            observed, digest = Coverage(), report.Digest()
 
             def measured(events):
                 for event in events:
                     observed.add(event)
+                    digest.add(event)
                     yield event
             result = verify_events(measured(snapshot.events()), vault.public_key)
             if retained:
                 verify_checkpoint(retained, vault.public_key, result["events"], snapshot.hash_at)
             coverage = observed.result()
+            summary = digest.result()
+            # Titles recorded in the journal win; current source titles fill the rest.
+            summary["titles"] = {**{t["chat_id"]: t["title"] for t in store.targets() if t.get("title")},
+                                 **summary["titles"]}
+            context = {"kind": "evidence", "options": options, "report_id": str(uuid.uuid4()), "created_at": utcnow(),
+                       "producer": producer(), "limits": LIMITS, "public_key": vault.public_key,
+                       "fingerprint": result["fingerprint"], "event_count": result["events"],
+                       "head_hash": result["head_hash"], "digest": summary, "anchors": [], "files": {},
+                       "account": store.get_setting("account", None), "archive": fmt == "zip", "sign": vault.sign}
 
             def chunks(format):
                 events = snapshot.events()
                 return {"jsonl": lambda: (canonical(e) + b"\n" for e in events),
-                        "csv": lambda: csv_chunks(events), "html": lambda: html_chunks(events, coverage)}[format]()
+                        "csv": lambda: csv_chunks(events),
+                        "html": lambda: html_chunks(events, coverage, context)}[format]()
 
             if fmt != "zip":
                 with path.open("wb") as out:
@@ -167,24 +171,10 @@ def export_file(store, vault, fmt):
                     hashes[name] = digest.hexdigest()
                     return digest.hexdigest()
 
-                for format, name in (("jsonl", "events.jsonl"), ("csv", "events.csv"), ("html", "report.html")):
+                for format, name in (("jsonl", "events.jsonl"), ("csv", "events.csv")):
                     write_member(name, chunks(format))
                 write_member("coverage.json", [json.dumps(coverage, ensure_ascii=False, indent=1).encode("utf-8")])
                 write_member("verify.py", [Path(__file__).with_name("verify.py").read_bytes()])
-                write_member("README.txt", [("\n".join(LIMITS) +
-                    "\n\nUse a verifier from a trusted checkout, not solely from an untrusted ZIP.\n"
-                    "Verify: python verify.py evidence.zip --fingerprint TRUSTED_SHA256\n"
-                    "Require a witnessed export boundary: add --witness witness.zip\n"
-                    "  --witness-fingerprint TRUSTED_WITNESS_SHA256 --require-witness\n"
-                    "The witness must have retained the exact exported head. This verifies consistency\n"
-                    "with its retained records, not the truth of the recorded messages.\n"
-                    "Archives above 4 GiB uncompressed also need --max-gib with their size in GiB.\n"
-                    "Requires Python 3.11+ and cryptography. CSV cells are formula-escaped.\n"
-                    "events.jsonl is authoritative. Export is a stable journal prefix.\n"
-                    "coverage.json lists continuous observation periods, gaps and message IDs that were\n"
-                    "never observed (not evidence of deletion); verify.py recomputes it from events.jsonl.\n"
-                    "Produced by TgWitness (PhishDestroy, https://phishdestroy.io); the producer is part of\n"
-                    "the signed manifest.\n").encode()])
                 for event in snapshot.events():
                     digest = event["payload"].get("media_sha256") if event["kind"] == "media.saved" else None
                     if not digest:
@@ -211,11 +201,28 @@ def export_file(store, vault, fmt):
                     if "anchors/" + source.name not in hashes:
                         write_member("anchors/" + source.name, [source.read_bytes()])
                     write_member("anchors/" + proof.name, [proof.read_bytes()])
-                manifest = {"format": "tgwitness-evidence-v1", "created_at": utcnow(),
+                    if proof.suffix in (".tsr", ".ots"):
+                        query = proof.with_suffix(".tsq")
+                        context["anchors"].append(report.describe_anchor(
+                            source.name, source.read_bytes(), proof.name, proof.read_bytes(),
+                            query.read_bytes() if proof.suffix == ".tsr" and query.is_file() else None))
+                # The readable kit: custody record, sealed report, README and SHA256SUMS, in that order.
+                context["events_sha256"] = hashes["events.jsonl"]
+                write_member("custody.json", [json.dumps(report.custody(context), ensure_ascii=False,
+                                                         indent=1).encode("utf-8")])
+                context["files"] = dict(hashes)
+                write_member("report.html", chunks("html"))
+                listed = {**hashes, **dict.fromkeys(("README.txt", "SHA256SUMS", "manifest.json", "manifest.sig"), "")}
+                write_member("README.txt", [report.readme(context, listed, "\n".join(LIMITS) + README)])
+                write_member("SHA256SUMS", [report.sha256sums(hashes)])
+                manifest = {"format": "tgwitness-evidence-v1", "created_at": context["created_at"],
                             "public_key": vault.public_key, "fingerprint": result["fingerprint"],
                             "event_count": result["events"], "head_hash": result["head_hash"],
                             "scope": "Complete stable journal prefix from sequence 1, including operational events",
-                            "producer": producer(), "limitations": LIMITS, "files": hashes}
+                            "producer": producer(), "limitations": LIMITS, "case": report.case_of(options),
+                            "report": {"id": context["report_id"], "file": "report.html",
+                                       "language": options["language"], "sealed": True, "custody": "custody.json"},
+                            "files": hashes}
                 manifest_bytes = canonical(manifest)
                 if total + len(manifest_bytes) + 88 > limit:
                     raise ValueError("Manifest pushes bundle above the verification size limit")

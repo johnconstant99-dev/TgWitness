@@ -43,9 +43,11 @@ from .monitoring import Capture, Monitoring, capture_settings, monitoring_settin
 from .scope import (EXCLUDE_LIMIT, WIDE_WARNING, Recheck, ScopeUpdate, recheck_settings, scope_settings,
                     unexclude)
 from . import assurance
+from . import health
 from . import netclient
 from . import source_check
 from . import dossier
+from . import report
 from . import tuning
 from . import witness_api
 from . import interactions
@@ -171,6 +173,11 @@ class AccessLogin(BaseModel):
     token: str = Field(min_length=1, max_length=512)
 
 
+def panel_language(request):
+    """The language the panel is shown in; reports set to "Same as the panel" use it."""
+    return i18n.pick(request.cookies.get(i18n.COOKIE), request.headers.get("accept-language"))
+
+
 def create_app(data_dir=None, demo=False, client_factory=None, token_override=None, allow_profiles=True,
                account_guard=None, proxy_pool=None, access=None, profile_id="default"):
     root = Path(data_dir or "data").resolve()
@@ -250,6 +257,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             journal_ready = True
             app.state.anchor_wakeup, app.state.anchor_status = asyncio.Event(), {"busy": False}
             app.state.replica_wakeup, app.state.replica_status = asyncio.Event(), {"busy": False}
+            app.state.host_status = {}  # the assurance loop's latest host measurement
             app.state.alert_wakeup = asyncio.Event()
             if not store.get_setting("demo", False):
 
@@ -261,7 +269,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     store, vault, collector.outside_route, app.state.replica_wakeup, app.state.replica_status))
                 if app.state.assurance:
                     host_task = asyncio.create_task(assurance.assurance_loop(
-                        store, app.state.assurance["mode"], app.state.assurance["provider"]))
+                        store, app.state.assurance["mode"], app.state.assurance["provider"],
+                        status=app.state.host_status))
                 if proxy_pool is None:
                     shared_pool.intervals = lambda: {"lists": tuning.value(store, "proxy_lists_minutes") * 60,
                                                      "probe": tuning.value(store, "proxy_probe_minutes") * 60}
@@ -471,8 +480,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     async def status(request: Request):
         store, vault = app.state.store, app.state.vault
         allowed = visible_chats(request)
+        collector_status = app.state.collector.status()
         return {"version": __version__, "demo": store.get_setting("demo", False),
-                "collector": app.state.collector.status(), "stats": store.stats(allowed),
+                "collector": collector_status, "stats": store.stats(allowed),
+                "health": health.collector_of(app.state, collector_status),
                 "history": app.state.collector.history.status() if allowed is None else None,
                 "targets": [t for t in store.targets() if allowed is None or t["chat_id"] in allowed],
                 "capture": capture_settings(store),
@@ -523,7 +534,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         async def multi_export_start(request: Request, body: MultiExportStart):
             if not opens_chat_everywhere(request.state.principal, body.chat_id, [body.lead, *body.profiles]):
                 raise HTTPException(403, "This access does not open this chat in every chosen account.")
-            return await operation(app.state.multi_export.start, body.chat_id, body.profiles, body.lead)
+            return await operation(app.state.multi_export.start, body.chat_id, body.profiles, body.lead,
+                                   panel_language(request))
 
         @app.get("/api/multi-export/current", dependencies=[Depends(authenticate)])
         async def multi_export_current(request: Request):
@@ -826,10 +838,31 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         route = app.state.collector.outside_route()
         return {"route": route.kind, "route_problem": str(route.error) if route.kind == "none" else None}
 
-    def evidence_state():
+    def timestamps_health(outside):
         store = app.state.store
+        last, success = store.get_setting("evidence_last", None), store.get_setting("evidence_success", None)
+        if success is None and last and any(r.get("ok") for r in last.get("results", [])):  # saved before 0.7
+            success = {"at": last["at"], "verified_at": last["at"] if any(
+                r.get("ok") and r.get("kind") == "rfc3161" for r in last["results"]) else None}
+        return health.timestamps(evidence_settings(store), last, success, store.get_setting("evidence_failure", None),
+                                 app.state.anchor_status, outside["route_problem"], health.now_utc())
+
+    def replica_health(outside):
+        store = app.state.store
+        last, success = store.get_setting("replica_last", None), store.get_setting("replica_success", None)
+        if success is None and last and not last.get("error"):  # saved before 0.7
+            success = {"at": last["at"], "journal_seq": last.get("journal_seq")}
+        return health.replica(replica.replica_settings(store), last, success, app.state.replica_status,
+                              outside["route_problem"], (store.stats()["head"] or {}).get("seq", 0), health.now_utc())
+
+    def server_health():
+        return health.server(app.state.assurance, app.state.run_receipt.get("host"), app.state.host_status,
+                             health.now_utc())
+
+    def evidence_state():
+        store, outside = app.state.store, outside_state()
         return {"settings": evidence_settings(store), "last": store.get_setting("evidence_last", None),
-                "busy": app.state.anchor_status["busy"], **outside_state(),
+                "busy": app.state.anchor_status["busy"], **outside, "health": timestamps_health(outside),
                 "defaults": EvidenceMode().model_dump(exclude={"enabled"})}
 
     @app.get("/api/evidence", dependencies=[Depends(authenticate)])
@@ -890,16 +923,24 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return source_state()
 
     def replica_state():
-        store, vault = app.state.store, app.state.vault
+        store, vault, outside = app.state.store, app.state.vault, outside_state()
         settings, secrets = replica.replica_settings(store), vault.read("replica")
         return {"settings": settings, "has_credentials": bool(secrets.get("access_key")),
                 "has_key": bool(secrets.get("key")), "last": store.get_setting("replica_last", None),
-                "busy": app.state.replica_status["busy"], **outside_state(),
+                "busy": app.state.replica_status["busy"], **outside, "health": replica_health(outside),
                 "location": replica.workspace_prefix(settings, vault.public_key)}
 
     @app.get("/api/replica", dependencies=[Depends(authenticate)])
     async def get_replica():
         return replica_state()
+
+    @app.get("/api/health", dependencies=[Depends(authenticate)])
+    async def get_health():
+        """What each part is doing now, apart from whether it is switched on (health.py)."""
+        outside = outside_state()
+        return {"checked_at": health.iso(health.now_utc()), "collector": health.collector_of(app.state),
+                "timestamps": timestamps_health(outside), "replica": replica_health(outside),
+                "server": server_health()}
 
     @app.post("/api/replica", dependencies=[Depends(authenticate)])
     async def set_replica(body: ReplicaUpdate):
@@ -1228,7 +1269,17 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.post("/api/chat-export/start", dependencies=[Depends(authenticate)])
     async def chat_export_start(request: Request, body: ChatExport):
         require_chat(request, body.chat_id)
-        return await operation(app.state.collector.start_export, body.chat_id)
+        return await operation(app.state.collector.start_export, body.chat_id,
+                               report.resolved(app.state.store, panel_language(request)))
+
+    @app.get("/api/report-options", dependencies=[Depends(authenticate)])
+    async def get_report_options():
+        return report.saved(app.state.store).model_dump()
+
+    @app.post("/api/report-options", dependencies=[Depends(authenticate)])
+    async def set_report_options(body: report.ReportOptions):
+        # Recorded, signed, in every export manifest and report seal; not a journal event of its own.
+        return report.save(app.state.store, body).model_dump()
 
     def export_visible(request):
         state, allowed = app.state.collector.export_state, visible_chats(request)
@@ -1288,10 +1339,11 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         except Exception:
             raise HTTPException(409, "Journal integrity verification failed. Preserve the directory for inspection.") from None
 
-    async def build_export(fmt, password=None):
+    async def build_export(fmt, request, password=None):
+        options = report.resolved(app.state.store, panel_language(request))
         async with export_lock:
             try:
-                path = await asyncio.to_thread(export_file, app.state.store, app.state.vault, fmt)
+                path = await asyncio.to_thread(export_file, app.state.store, app.state.vault, fmt, options)
                 if password is not None:
                     path = await asyncio.to_thread(encrypt_export, path, fmt, password)
             except Exception as exc:
@@ -1303,17 +1355,17 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return path
 
     @app.get("/api/export/{fmt}", dependencies=[Depends(authenticate)])
-    async def export(fmt: Literal["zip", "jsonl", "csv", "html"]):
-        path = await build_export(fmt)
+    async def export(request: Request, fmt: Literal["zip", "jsonl", "csv", "html"]):
+        path = await build_export(fmt, request)
         media_types = {"zip": "application/zip", "jsonl": "application/x-ndjson",
                        "csv": "text/csv", "html": "text/html"}
         return FileResponse(path, filename="tgwitness-evidence." + fmt, media_type=media_types[fmt],
                             background=BackgroundTask(path.unlink, missing_ok=True))
 
     @app.post("/api/export/{fmt}", dependencies=[Depends(authenticate)])
-    async def export_encrypted(fmt: Literal["zip", "jsonl", "csv", "html"], body: ExportPassword):
+    async def export_encrypted(request: Request, fmt: Literal["zip", "jsonl", "csv", "html"], body: ExportPassword):
 
-        path = await build_export(fmt, body.password)
+        path = await build_export(fmt, request, body.password)
         return FileResponse(path, filename="tgwitness-evidence-" + fmt + "-encrypted.zip", media_type="application/zip",
                             background=BackgroundTask(path.unlink, missing_ok=True))
 

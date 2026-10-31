@@ -1792,7 +1792,7 @@ class Collector:
                 "pages": pages, "estimate_seconds": round(pages * per_page),
                 "request_seconds": round(request_seconds, 3)}
 
-    async def start_export(self, chat_id):
+    async def start_export(self, chat_id, report_options=None):
 
         export_id = secrets.token_urlsafe(18)
         if not self.reserve_export(export_id):
@@ -1810,7 +1810,7 @@ class Collector:
                       "ready": False, "error": None, "started_at": utcnow()}
             self.export_state = record
             self.export_path = None
-            self.export_task = asyncio.create_task(self.run_export(entity, info, record))
+            self.export_task = asyncio.create_task(self.run_export(entity, info, record, report_options))
 
             self.export_task.add_done_callback(lambda _: self.release_export(export_id))
         except BaseException:
@@ -1819,7 +1819,7 @@ class Collector:
         await asyncio.sleep(0)
         return dict(record)
 
-    async def run_export(self, entity, info, record):
+    async def run_export(self, entity, info, record, report_options=None):
         directory = self.store.root / "temporary-exports"
         scratch = directory / ("tgwitness-export-chat-" + record["id"] + ".jsonl")
         out_path = directory / ("tgwitness-export-chat-" + record["id"] + ".zip")
@@ -1834,7 +1834,7 @@ class Collector:
                              "visibility": info.get("visibility")},
                     "account": self.store.get_setting("account", None), "message_count": count}
             await complete_in_thread(chat_export.build_bundle, scratch, meta, self.vault, out_path,
-                                    self.param("export_max_gib") * 1024**3)
+                                    self.param("export_max_gib") * 1024**3, report_options)
             replica.outbox(self.store, out_path)
             self.export_path = out_path
             record.update(phase="done", captured=count, ready=True)

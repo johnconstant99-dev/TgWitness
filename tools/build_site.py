@@ -18,13 +18,14 @@ from urllib.parse import urlsplit
 
 if __package__:
     from .site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
-    from . import site_diagrams, site_i18n, site_wiki, site_modes
+    from . import site_diagrams, site_i18n, site_wiki, site_modes, site_account
 else:
     from site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
     import site_diagrams
     import site_i18n
     import site_wiki
     import site_modes
+    import site_account
 
 ROOT = Path(__file__).resolve().parents[1]
 LANGS = tuple(site_i18n.LANGUAGES)
@@ -80,7 +81,7 @@ DEMO_DICTIONARIES = ("tgwitness/english_fallbacks.json", *(f"tgwitness/locales/{
 GUIDE_DICTIONARIES = ("tgwitness/guide_locales/keys.json", *(f"tgwitness/guide_locales/{lang}.json" for lang in site_modes.EXTRA_LANGUAGES))
 INPUTS = ("website/index.html", "website/docs.html", "website/guide_intro.html", site_modes.SOURCE, *STATIC.values(),
           *DEMO_STATIC.values(), *DEMO_PAGES.values(), *DEMO_DICTIONARIES, *GUIDE_DICTIONARIES,
-          *(f"website/guides/en/{slug}.html" for slug in GUIDES),
+          *(f"website/guides/en/{slug}.html" for slug in GUIDES if slug != "dedicated-account"),
           *dict.fromkeys(entry[3] for entry in REFERENCE.values()))
 WIKI_HUB = "docs/reference/"
 LOCAL_PAGES = ("", "docs/", *(f"docs/{slug}/" for slug in GUIDES), WIKI_HUB, *(f"{WIKI_HUB}{slug}/" for slug in REFERENCE))
@@ -219,6 +220,8 @@ def inventory(root=ROOT):
     fragments = {"home": home_body((root / "website/index.html").read_text(encoding="utf-8")),
                  "intro": (root / "website/guide_intro.html").read_text(encoding="utf-8")}
     for slug in GUIDES:
+        if slug == "dedicated-account":
+            continue
         fragments["guide:" + slug] = (root / f"website/guides/en/{slug}.html").read_text(encoding="utf-8")
     diagrams = list(site_diagrams.WORDS)
     for slug, entry in REFERENCE.items():
@@ -298,7 +301,9 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     intro_template = read_public("website/guide_intro.html").decode("utf-8")
     modes_template = read_public(site_modes.SOURCE).decode("utf-8")
     modes_english = site_modes.catalogue(read_public, "en")
-    fragments = {slug: read_public(f"website/guides/en/{slug}.html").decode("utf-8") for slug in GUIDES}
+    fragments = {slug: read_public(f"website/guides/en/{slug}.html").decode("utf-8")
+                 for slug in GUIDES if slug != "dedicated-account"}
+    account_template = read_public(site_account.SOURCE).decode("utf-8")
     script_keys = []
     for script in ("website/learn.js", "website/docs.js", "website/site.js"):
         script_keys += site_i18n.script_strings(read_public(script).decode("utf-8"))
@@ -441,8 +446,10 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                     "REF_HISTORY": relative(path, wiki_hub + "history/"),
                     **{"GUIDE_" + key.upper(): relative(path, (hub if full_site else "docs/") + key + "/") for key in GUIDES}}
         guide_html, guide_missing = {}, {}
+        account_page = site_account.translate(account_template, site_account.catalogue(read_public, lang)) if full_site else ""
         for slug in (GUIDES if full_site else ()):
-            translated, missing = localize(fragments[slug])
+            translated, missing = ((site_account.main_content(account_page), 0) if slug == "dedicated-account"
+                                   else localize(fragments[slug]))
             guide_html[slug], guide_missing[slug] = translated, missing
             texts[hub + slug + "/"] = PlainText(render(translated, guide_values(hub + slug + "/"))).text
         for slug in page_slugs:
@@ -544,6 +551,13 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
             for slug in GUIDES:
                 path = hub + slug + "/"
                 title, description = guides[slug][:2]
+                if slug == "dedicated-account":
+                    head = seo(base_url, path, title + " | TgWitness", description, lang,
+                               alternates("docs/dedicated-account/"))
+                    write(path + "index.html", site_account.render_page(
+                        account_page, lang=lang, path=path, relative=relative, relative_file=relative_file,
+                        head=head, docs_label=labels["docs"]))
+                    continue
                 guide = render(guide_html[slug], guide_values(path))
                 content = f'<p class="eyebrow">{labels["docs"]} / {list(GUIDES).index(slug) + 1:02d}</p><h1>{title}</h1>' + guide
                 next_slug = NEXT[slug]
@@ -636,9 +650,6 @@ def redirect_page(target, root):
 def build_demo(read_public, write):
     """Panel pages with relative paths, the request answering script and one dictionary per language."""
     for target, source in DEMO_PAGES.items():
-        if target == "demo/dedicated-account.html":
-            write(target, redirect_page("docs/dedicated-account/", "../"))
-            continue
         page = read_public(source).decode("utf-8").replace('href="/"', 'href="../"')
         page = re.sub(r'\b(src|href)="/(?=[A-Za-z])', r'\1="', page)
         guide = target != "demo/index.html"

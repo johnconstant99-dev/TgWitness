@@ -33,6 +33,7 @@ from urllib.parse import urlsplit
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from .health import next_at
 from .netclient import RouteError
 from .network import NetworkConfig
 from .s3 import S3
@@ -337,10 +338,13 @@ async def sync(store, vault, network):
         store.append("replica.completed", {**status, "destination": settings["endpoint"] + "/" + settings["bucket"]
                                            + "/" + base, "encrypted": True})
     store.set_setting("replica_last", status)
+    if not error:  # kept apart so that a failed pass does not hide the last complete one
+        store.set_setting("replica_success", {"at": status["at"], "journal_seq": journal_seq})
     return status
 
 
 async def replica_loop(store, vault, network_config, wakeup, status):
+    """status: busy, and of the latest pass its time, error and when the next one is due."""
     last = 0.0
     while True:
         with suppress(TimeoutError):
@@ -353,13 +357,14 @@ async def replica_loop(store, vault, network_config, wakeup, status):
             continue
         wakeup.clear()
         last = time.time()
-        status["busy"] = True
+        status.update(busy=True, error=None)
         try:
             await sync(store, vault, network_config())
         except Exception as exc:
+            status["error"] = type(exc).__name__
             store.append("collector.error", {"operation": "off-site copy", "error_type": type(exc).__name__})
         finally:
-            status["busy"] = False
+            status.update(busy=False, last_pass_at=utcnow(), next_at=next_at(settings["interval_minutes"] * 60))
 
 
 def key_file(store, vault):

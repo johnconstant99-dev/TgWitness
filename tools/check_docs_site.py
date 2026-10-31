@@ -210,16 +210,22 @@ def main():
                     page.goto(base + path, wait_until="networkidle")
                     assert page.locator("html").get_attribute("lang") == "en"
                     expect(page.get_by_role("heading", level=1)).to_be_visible()
-                    expect(page.locator("#guide-search")).to_be_visible()
+                    if slug == "dedicated-account":
+                        expect(page.locator(".verdict-card")).to_have_count(2)
+                        expect(page.locator("main > section")).to_have_count(5)
+                        assert page.locator(".service-grid .service").count() >= 40
+                        expect(page.locator('.top-nav a[href="../"]')).to_be_visible()
+                    else:
+                        expect(page.locator("#guide-search")).to_be_visible()
                     if slug != "capture":
                         assert not page.locator('input:not([type="search"]),form').count()
                     expect(page.locator('link[rel=alternate][hreflang]')).to_have_count(len(page_languages(path)) + 1)
                     assert not page.evaluate("document.body.textContent.includes('@@')")
                     assert page.evaluate("getComputedStyle(document.documentElement).scrollBehavior") == "auto"
                     assert not page.locator(".will-reveal, .will-draw").count(), path
-                    if slug:
+                    if slug and slug != "dedicated-account":
                         expect(page.locator('.sidebar [aria-current="page"]')).to_have_count(1)
-                    else:
+                    elif not slug:
                         expect(page.locator(".guide-card")).to_have_count(len(GUIDES) + 1)
                         expect(page.locator('.guide-card[href="../guides/modes.html"]')).to_be_visible()
                     for width in widths:

@@ -469,6 +469,38 @@ footer a:hover { color: var(--text); text-decoration: underline; }
 .health-strip > div { display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; background: var(--surface); }
 .health-strip span { color: var(--muted); font-size: 13px; }
 .health-strip strong { color: var(--text); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---------- Health states: the icon and the word carry the state, colour only adds to them ---------- */
+.health-badge {
+  display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; flex: none;
+  border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface-3);
+  color: var(--text-2); font-size: 13px; font-weight: 600; line-height: 1.5; white-space: nowrap;
+}
+.health-badge .icon, .extra-badge .icon, .account-badge .icon { width: 13px; height: 13px; }
+.health-details > summary .health-badge { display: inline-flex; margin-left: 8px; vertical-align: middle; }
+.health-details > summary .health-badge span, .health-strip .health-badge span { display: inline; color: inherit; font-size: inherit; }
+:is(.health-badge, .account-badge).state-working { color: var(--success); background: var(--success-soft); border-color: var(--success-border); }
+:is(.health-badge, .account-badge).state-running, :is(.health-badge, .account-badge).state-configured { color: var(--accent-text); background: var(--accent-soft); border-color: var(--accent-border); }
+:is(.health-badge, .account-badge).state-degraded, :is(.health-badge, .account-badge).state-unknown { color: var(--warning); background: var(--warning-soft); border-color: var(--warning-border); }
+:is(.health-badge, .account-badge).state-failed { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-border); }
+.account-badge[class*="state-"] { display: inline-flex; align-items: center; gap: 5px; }
+.health-strip:has(> .health-row) { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.health-strip > .health-row { gap: 5px; }
+.health-row-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; }
+.health-strip .health-row-head strong { font-size: 14px; }
+.health-row p { margin: 0; color: var(--text-2); font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
+.health-row p.hint { color: var(--muted); }
+.health-row > .text-link { align-self: flex-start; margin-top: 2px; font-size: 13px; }
+.health-detail { display: grid; gap: 4px; overflow-wrap: anywhere; }
+form > .health-detail { margin-top: 14px; }
+.health-detail p { margin: 0; }
+.health-detail .health-lead { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; color: var(--text); }
+.health-detail .health-row { display: grid; gap: 5px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.health-checks { display: grid; gap: 4px; margin: 2px 0; padding: 0; list-style: none; font-size: 13px; }
+.health-checks li { display: flex; align-items: center; gap: 6px; }
+.health-checks .check-pass .icon { color: var(--success); }
+.health-checks .check-attention .icon { color: var(--warning); }
+.health-checks .check-unknown .icon { color: var(--muted); }
 .setup-card {
   display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px 24px;
   margin-bottom: 22px; padding: 22px 24px 0; overflow: hidden;
@@ -657,6 +689,14 @@ footer a:hover { color: var(--text); text-decoration: underline; }
 .alerts-daily select { width: auto; min-height: 34px; margin-top: 18px; }
 .alerts-daily .hint { margin-top: 18px; }
 #export-encrypt input[type=password] { max-width: 420px; }
+.report-settings { margin-top: 18px; }
+.report-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.report-parts { border: 0; padding: 0; margin: 18px 0 0; min-width: 0; }
+.report-parts legend { padding: 0; font-weight: 600; }
+.report-parts .check-label { margin-top: 10px; }
+.report-parts .check-label:has(input:disabled) { opacity: .55; cursor: default; }
+.report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 18px; }
+@media (max-width: 700px) { .report-grid { grid-template-columns: 1fr; } }
 #replica-form > .secondary { margin-top: 14px; }
 .replica-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
 @media (max-width: 700px) { .replica-fields { grid-template-columns: 1fr; } }
@@ -1502,6 +1542,13 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
 .extra-badge.planned { color: var(--muted); background: var(--surface-3); }
 .extra-badge.on { color: var(--success); background: var(--success-soft); }
 .extra-badge.warn { color: var(--warning); background: var(--warning-soft); }
+.extra-badge[class*="state-"] { display: inline-flex; align-items: center; gap: 5px; }
+.extra-badge.state-working { color: var(--success); background: var(--success-soft); }
+.extra-badge.state-running, .extra-badge.state-configured { color: var(--accent-text); background: var(--accent-soft); }
+.extra-badge.state-degraded, .extra-badge.state-unknown { color: var(--warning); background: var(--warning-soft); }
+.extra-badge.state-failed { color: var(--danger); background: var(--danger-soft); }
+.extra-card > .extra-status { margin: -10px 0 20px; color: var(--text-2); font-size: 13px; }
+#cloud-health { margin: 0 0 16px; }
 .github-form > button { margin-top: 12px; }
 .github-result { margin: 16px 0 8px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); }
 .github-result.ok { background: var(--success-soft); border-color: var(--success-border); }
@@ -1520,7 +1567,8 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
 h3.alerts-kinds { margin: 18px 0 6px; font-size: 15px; }
 #extras-cloud .cloud-form { margin-bottom: 8px; }
 #extras-cloud details { margin: 4px 0 12px; }
-#cloud-active { display: block; margin: 0 0 16px; background: var(--success-soft); border-color: var(--success-border); color: var(--success); }
+/* Neutral: the deployment mode is described here; whether its conditions hold is shown in #cloud-health. */
+#cloud-active { display: block; margin: 0 0 16px; background: var(--surface-2); border-color: var(--border); color: var(--text-2); }
 #cloud-commands { margin: 10px 0 12px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); color: var(--text-2); }
 #extras-cloud .text-link { margin-inline-start: 12px; }
 .extra-card h2 { margin: 0 0 10px; font-size: 19px; line-height: 1.3; }

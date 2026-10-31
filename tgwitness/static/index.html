@@ -159,7 +159,8 @@
 <div class="content">
 <div class="context-bar">
   <div class="notice demo" hidden id="demo-banner"><svg aria-hidden="true" class="icon"><use href="#i-sparkle"/></svg><span><strong>Demo workspace</strong> · Fictional records for exploring the interface. Telegram is not connected.</span></div>
-  <details class="health-details"><summary>Collector health <span>Storage &amp; attachment queue</span></summary><div aria-live="polite" class="health-strip" id="health-strip"></div></details>
+  <details class="health-details"><summary>Collector health <span>Storage &amp; attachment queue</span></summary><div class="health-strip" id="health-strip"></div></details>
+  <span aria-live="polite" class="visually-hidden" id="health-announce"></span>
 </div>
 <div class="notice error" hidden id="collector-error"></div>
 
@@ -281,7 +282,7 @@
     <p class="hint">0 turns rechecks of that group off. How many chats a pass takes and the pause between them are under Parameters.</p>
     <button class="secondary" type="submit">Save recheck settings</button>
   </form>
-  <form class="card padded" id="chat-export-form"><div class="eyebrow">Full chat export</div><h2>Export a whole chat, signed</h2><p class="muted">Download the entire visible history of one chat as a signed bundle: <code>chat.json</code> (Telegram-style) and a readable <code>chat.html</code>, with an Ed25519 signature so a copy can be checked for changes against your key. Private chats work when the account is a member. A current snapshot only: deleted or past-edited messages are not reconstructed. Large chats can take a long time and depend on Telegram's rate limits.</p><label for="chat-export-source">Selected source</label><select id="chat-export-source" required></select><div class="chat-export-actions"><button class="secondary" type="submit">Export full chat</button><button class="quiet" hidden id="chat-export-cancel" type="button">Cancel</button><button class="primary" hidden id="chat-export-download" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Download signed bundle</button></div><p id="chat-export-progress" role="status"></p></form>
+  <form class="card padded" id="chat-export-form"><div class="eyebrow">Full chat export</div><h2>Export a whole chat, signed</h2><p class="muted">Download the entire visible history of one chat as a signed bundle: <code>chat.json</code> (Telegram-style) and a readable <code>chat.html</code>, with an Ed25519 signature so a copy can be checked for changes against your key. Private chats work when the account is a member. A current snapshot only: deleted or past-edited messages are not reconstructed. Large chats can take a long time and depend on Telegram's rate limits.</p><label for="chat-export-source">Selected source</label><select id="chat-export-source" required></select><div class="chat-export-actions"><button class="secondary" type="submit">Export full chat</button><button class="quiet" hidden id="chat-export-cancel" type="button">Cancel</button><button class="primary" hidden id="chat-export-download" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Download signed bundle</button></div><p id="chat-export-progress" role="status"></p><p class="hint">Language and case details of <code>chat.html</code>: <a data-go-reports="settings" href="#">Exports → Report settings</a>.</p></form>
   </details>
   <p class="hint">Notifications, evidence mode and a 24/7 server are under <a data-go-extra="alerts" href="#">Extras</a>.</p>
 </section>
@@ -315,6 +316,26 @@
     <div hidden id="export-password-field"><label for="export-password">Password, at least 12 characters</label><input autocomplete="new-password" id="export-password" maxlength="256" spellcheck="false" type="password"></div>
     <p class="hint">The file is saved as an AES-256 ZIP that 7-Zip or WinRAR opens with this password. Inside is the unchanged signed file, so <code>verify.py</code> works as before. The password is not stored; without it the file cannot be opened.</p>
   </div>
+  <form class="card padded report-settings" id="report-form">
+    <div class="eyebrow">Readable reports</div><h2>Report settings</h2>
+    <p class="muted">Language, case details and contents of the report in every signed archive and chat export. Case details are signed into the export; leave a field empty to omit it.</p>
+    <div class="report-grid">
+      <div><label for="report-language">Report language</label><select data-no-translate id="report-language"></select></div>
+      <div><label for="report-theme">Report colours</label><select id="report-theme"><option value="auto">Follow the reader's system</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+      <div><label for="report-case-title">Case title</label><input autocomplete="off" id="report-case-title" maxlength="200" placeholder="e.g. Fake exchange support group"></div>
+      <div><label for="report-case-id">Case ID</label><input autocomplete="off" id="report-case-id" maxlength="80" placeholder="e.g. PD-2026-0142"></div>
+      <div><label for="report-examiner">Examiner</label><input autocomplete="off" id="report-examiner" maxlength="120"></div>
+      <div><label for="report-organization">Organization</label><input autocomplete="off" id="report-organization" maxlength="160"></div>
+    </div>
+    <label for="report-notes">Notes for the report</label><textarea id="report-notes" maxlength="4000" rows="3"></textarea>
+    <fieldset class="report-parts"><legend>In the journal report</legend>
+      <label class="check-label"><input id="report-timeline" type="checkbox"> Every record, with search and filters</label>
+      <label class="check-label"><input id="report-raw" type="checkbox"> Full record data under each record</label>
+      <label class="check-label"><input id="report-media" type="checkbox"> Photo previews from the archive</label>
+    </fieldset>
+    <div class="report-actions"><button class="secondary" type="submit">Save report settings</button><span class="hint" id="report-status" role="status"></span></div>
+    <p class="hint">Every report is sealed: a signature inside the file covers each of its bytes. Readers check it in the browser by dropping the file onto the report, or with <code>python verify.py report.html --fingerprint …</code>. The archive also carries <code>custody.json</code> and <code>SHA256SUMS</code>.</p>
+  </form>
   <p class="hint">Automatic timestamps and an encrypted off-site copy: <a data-go-extra="evidence" href="#">Extras → Evidence that holds up</a>.</p>
   <details class="verification-details" id="verification-details"><summary>Verification &amp; limitations</summary>
     <div class="card padded">
@@ -351,7 +372,7 @@
       <label for="evidence-ots">OpenTimestamps calendars, one address per line</label><textarea id="evidence-ots" rows="4" spellcheck="false"></textarea>
     </details>
     <button class="secondary" type="submit">Save evidence mode</button> <button class="quiet" id="evidence-anchor" type="button">Anchor now</button>
-    <p class="hint" id="evidence-status" role="status"></p>
+    <div class="hint health-detail" id="evidence-status" role="status"></div>
   </form>
   <form class="card padded" id="replica-form"><div class="eyebrow">Off-site copy</div><h2>Copy everything to S3-compatible storage</h2>
     <p class="muted">The journal, photos &amp; files, checkpoints with their timestamps and chat exports are encrypted on this machine before upload, so the provider stores only encrypted objects. Works with AWS S3 and other S3-compatible services. Download the encryption key and keep it apart: without it the copy cannot be read.</p>
@@ -371,7 +392,7 @@
       <label for="replica-mode">Object Lock mode</label><select id="replica-mode"><option value="GOVERNANCE">Governance</option><option value="COMPLIANCE">Compliance: nobody can delete or shorten it, including the bucket owner</option></select>
     </details>
     <button class="secondary" type="submit">Save off-site copy</button> <button class="quiet" id="replica-test" type="button">Test connection</button> <button class="quiet" id="replica-sync" type="button">Copy now</button> <button class="quiet" id="replica-key" type="button">Download encryption key</button>
-    <p class="hint" id="replica-status" role="status"></p>
+    <div class="hint health-detail" id="replica-status" role="status"></div>
   </form>
   </div>
 
@@ -405,6 +426,7 @@
   <div class="extra-panel card padded" id="extras-cloud" hidden role="region" aria-labelledby="extras-cloud-title">
     <div class="extra-panel-heading"><div><span class="eyebrow">24/7 SERVER</span><h2 id="extras-cloud-title" tabindex="-1">A sealed server, set up by commands you can check.</h2><p>The server has no SSH and no open ports: the panel is reached through a Cloudflare Tunnel, and anyone with a read-only token can check how it was created.</p></div><button class="quiet" data-extra-close="cloud" type="button">Back to extras</button></div>
     <p class="notice" hidden id="cloud-active"></p>
+    <div class="health-detail" hidden id="cloud-health" role="status"></div>
     <form class="cloud-form" id="cloud-form">
       <div class="replica-fields">
         <div><label for="cloud-provider">Provider</label><select id="cloud-provider"></select></div>
@@ -443,6 +465,7 @@
       <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-archive"/></svg></span><span class="extra-badge" id="extra-evidence-badge">Off</span></div>
       <h2>Evidence that holds up</h2><p>Independent timestamps for the journal and an encrypted copy in storage that nobody can quietly delete.</p>
       <p class="extra-requires">Timestamps work at once · the copy needs S3 storage</p>
+      <p class="extra-status" hidden id="extra-evidence-status"></p>
       <button class="secondary" id="extras-open-evidence" data-extra="evidence" aria-expanded="false" aria-controls="extras-evidence" type="button">Turn on evidence mode <span aria-hidden="true">→</span></button>
     </article>
     <article class="extra-card extra-cloud">

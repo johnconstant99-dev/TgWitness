@@ -25,6 +25,7 @@ from contextlib import suppress
 
 from . import chat_export
 from . import replica
+from . import report
 from . import tuning
 from .store import canonical, utcnow
 from .verify import fingerprint
@@ -52,7 +53,7 @@ class MultiExport:
     def public(self):
         return json.loads(json.dumps(self.state, default=str)) if self.state else {"phase": "none"}
 
-    async def start(self, chat_id, profile_ids, lead_id):
+    async def start(self, chat_id, profile_ids, lead_id, language="en"):
         if self.busy():
             raise ValueError("A multi-account export is already running. Wait for it or cancel it.")
         lead_app = self.app_for(lead_id)
@@ -101,7 +102,8 @@ class MultiExport:
                 "eta_seconds": round(pages * (1 if total > 3000 else 0.3) / max(1, active)),
                 "workers": workers, "ready": False, "error": None, "started_at": utcnow()}
             self.path = None
-            self.task = asyncio.create_task(self.run(lead_app, entity, getattr(entity, "username", None), info))
+            self.task = asyncio.create_task(self.run(lead_app, entity, getattr(entity, "username", None), info,
+                                                     report.resolved(lead.store, language)))
         except BaseException:
             self.release(reserved, export_id)
             raise
@@ -121,7 +123,7 @@ class MultiExport:
         return self.busy() and any(w["profile_id"] == profile_id and w["state"] != "skipped"
                                    and (w["state"] != "failed" or w["ranges"]) for w in self.state["workers"])
 
-    async def run(self, lead_app, lead_entity, username, info):
+    async def run(self, lead_app, lead_entity, username, info, report_options=None):
         state, lead = self.state, lead_app.state.collector
         directory = lead.store.root / "temporary-exports"
         stem = "tgwitness-export-multi-" + state["id"]
@@ -214,7 +216,7 @@ class MultiExport:
                                    "scope": "message numbers 1..newest_message_id at export start"},
                     "parts": signed}
             await complete_in_thread(chat_export.build_bundle, scratch, meta, lead.vault, out,
-                                    tuning.value(lead.store, "export_max_gib") * 1024**3)
+                                    tuning.value(lead.store, "export_max_gib") * 1024**3, report_options)
             replica.outbox(lead.store, out)
             self.path = out
             state.update(phase="done", ready=True, captured=message_count, eta_seconds=0)

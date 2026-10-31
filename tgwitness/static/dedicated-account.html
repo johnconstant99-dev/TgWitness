@@ -39,24 +39,217 @@
     <button aria-label="Animations always on" aria-pressed="false" class="motion-pick" data-motion-toggle title="Animations always on" type="button"><svg aria-hidden="true" class="i"><use href="#i-sparkle"/></svg></button>
   </div>
 </header>
-<main id="top" class="account-summary">
-<div class="hero"><h1>Use a separate Telegram account</h1><p>Keep collection separate from personal chats. A separate account can still face Telegram restrictions.</p>
-</div><h2 id="why">Before connecting</h2>
-<ul><li>Keep control of the phone number used for registration.</li><li>Enable two-step verification and add a recovery email.</li><li>Review active sessions in Telegram Settings → Devices.</li></ul>
-<h2 id="api">API credentials</h2>
-<p>The API ID and hash identify the application. Your Telegram authorization is separate.</p>
-<p>For the GitHub capture workflow, use your own API ID and hash.</p>
-<p><a href="https://my.telegram.org/apps" rel="noopener noreferrer" target="_blank">Create API credentials</a></p>
-<h2 id="session-warning">Imported sessions</h2>
-<p>Do not run the same imported authorization in two clients at once. Telegram may revoke it with AUTH_KEY_DUPLICATED. For parallel use, create a separate login by phone or QR.</p>
-<h2 id="setup">Connect the account</h2>
-<ol><li>Open the panel and choose phone or QR login.</li><li>Complete Telegram verification and select your sources.</li><li>Start collection and check that new messages appear.</li></ol>
-<p><a href="/guide.html#connect">Account connection guide</a></p>
-<h2 id="number">Phone numbers</h2>
-<p>Choose a number you can keep. Receiving one login code does not ensure future account recovery.</p>
-<h2 id="services">Telegram documentation</h2>
-<p><a href="https://core.telegram.org/api/obtaining_api_id" rel="noopener noreferrer" target="_blank">Creating an application</a></p>
-<p><a href="https://core.telegram.org/api/errors" rel="noopener noreferrer" target="_blank">Authorization errors</a></p>
+<main id="top">
+<div class="hero">
+  <p class="badge"><svg aria-hidden="true" class="i"><use href="#i-alert"/></svg>Read before you connect an account</p>
+  <h1>Use a separate account. <span class="accent">Never your main one.</span></h1>
+  <p class="lead">Our advice not to use your main account is not a joke. It is reality.</p>
+  <div class="verdict">
+    <div class="verdict-card bad"><div class="verdict-head"><svg aria-hidden="true" class="i"><use href="#i-x"/></svg>Main account</div>
+      <ul><li>Your own app hash: 99% logged out</li><li>Bans just for low trust are frequent</li><li>Using it is a really stupid idea</li></ul></div>
+    <div class="verdict-card good"><div class="verdict-head"><svg aria-hidden="true" class="i"><use href="#i-check"/></svg>Extra account on public pairs</div>
+      <ul><li>Over a million accounts registered through these pairs</li><li>The pairs have been alive for 5+ years</li><li>Nobody can see anything of yours through them</li></ul></div>
+  </div>
+</div>
+<nav aria-label="Guide sections" class="section-nav"><a href="#why">Why not your main account</a><a href="#api">Public app pairs</a><a href="#number">Ways to create an extra account</a><a href="#setup">Creating the account</a><a href="#services">Number services</a></nav>
+
+<section id="why">
+<div class="section-head"><span class="section-icon danger"><svg aria-hidden="true" class="i"><use href="#i-ban"/></svg></span><div><p class="kicker">01</p><h2>Why not your main account</h2><p class="section-lead">This is accurate information. We know exactly where the pitfalls of these problems are.</p></div></div>
+<ol class="reason-grid">
+<li class="reason"><div class="reason-top"><span class="reason-icon"><svg aria-hidden="true" class="i"><use href="#i-key"/></svg></span><h3>Your own app hash: 99% logged out</h3></div><p>Logging in to my.telegram.org from an account you have no access to, to get an app hash, and then any request through that app hash means a 99% chance the account is logged out. You can check it.</p></li>
+<li class="reason"><div class="reason-top"><span class="reason-icon"><svg aria-hidden="true" class="i"><use href="#i-ban"/></svg></span><h3>Bans just for low trust are frequent</h3></div><p>Accounts are banned simply because Telegram does not trust them, and such bans are frequent. You can check this too. Using your own account is a really stupid idea.</p></li>
+<li class="reason" id="session-warning"><div class="reason-top"><span class="reason-icon"><svg aria-hidden="true" class="i"><use href="#i-key"/></svg></span><h3>Copied session keys can be revoked</h3></div><p>Running an imported TData/session key in Telegram Desktop and TgWitness at the same time can trigger <code>AUTH_KEY_DUPLICATED</code>. Telegram invalidates that authorization, so both copies need a new login. A dedicated account does not prevent this.</p><p>Fully quit the original client and keep it closed while using its imported session. For parallel use, sign in to TgWitness by phone or QR to create a separate authorization; other separately authorized clients can remain signed in.</p><p><a href="/guide.html#session-warning">Read the session import warning</a></p></li>
+</ol>
+<div class="sources"><span class="sources-label">Telegram documentation</span><ul class="source-links">
+<li><a href="https://core.telegram.org/api/errors" rel="noopener noreferrer" target="_blank">Logout errors: AUTH_KEY_UNREGISTERED, SESSION_REVOKED<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/api/obtaining_api_id" rel="noopener noreferrer" target="_blank">Creating your own app hash: obtaining api_id<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+</ul></div>
+</section>
+
+<section id="api">
+<div class="section-head"><span class="section-icon accent"><svg aria-hidden="true" class="i"><use href="#i-key"/></svg></span><div><p class="kicker">02</p><h2>Why TgWitness works through public app hash/app ID pairs</h2><p class="section-lead">That is why we built TgWitness on public app hash/app ID pairs. By our logic, bans are less likely with them: more than a million Telegram accounts have been registered through these pairs, and many different programs work through them. By our logic, this is better than working directly with a personal app hash: these pairs have been alive for 5+ years for sure.</p></div></div>
+<div class="split">
+  <div class="split-card no"><h3><svg aria-hidden="true" class="i"><use href="#i-x"/></svg>Your own new pair</h3><p>Created at my.telegram.org from the account.</p><ul><li>About 99% of accounts logged out</li><li>One new application, one account</li></ul></div>
+  <div class="split-card ok"><h3><svg aria-hidden="true" class="i"><use href="#i-check"/></svg>Public pairs of the pool</h3><p>The same pairs many programs use.</p><ul><li>Over a million accounts registered</li><li>Many different programs</li><li>Working for 5+ years</li></ul></div>
+</div>
+<h3>Why nobody can see anything of yours through these pairs</h3>
+<ul class="facts">
+<li><span class="fact-icon"><svg aria-hidden="true" class="i"><use href="#i-check"/></svg></span><div><h4>The pair is a name, not a key</h4><p>Telegram asks for the API ID and API hash when a program connects and when it requests a login code. They identify the application and give no access to any account; Telethon's documentation notes that one pair works with any phone number.</p></div></li>
+<li><span class="fact-icon"><svg aria-hidden="true" class="i"><use href="#i-check"/></svg></span><div><h4>Your session key never leaves your server</h4><p>Signing in creates an authorization key by a Diffie–Hellman exchange between your TgWitness and Telegram; the key itself is never sent. Telegram's documentation: after authorization the key becomes associated with the user, and every call with this key runs as that user. Other programs with the same pair have their own keys and cannot use yours.</p></div></li>
+<li><span class="fact-icon"><svg aria-hidden="true" class="i"><use href="#i-check"/></svg></span><div><h4>Traffic is encrypted with your key</h4><p>Every request and answer is encrypted with the session's authorization key, not with the API hash. Knowing the API hash decrypts nothing.</p></div></li>
+<li><span class="fact-icon"><svg aria-hidden="true" class="i"><use href="#i-check"/></svg></span><div><h4>The owner of a pair sees nothing</h4><p>Telegram has no method that lists accounts, sessions or messages by API ID. The owner of a pair sees only its app settings at my.telegram.org.</p></div></li>
+<li><span class="fact-icon"><svg aria-hidden="true" class="i"><use href="#i-check"/></svg></span><div><h4>Only your account sees which app it is</h4><p>Settings → Devices of your own account lists each session's app name and API ID, device, IP address and dates. Nobody else gets this list.</p></div></li>
+</ul>
+<div class="sources"><span class="sources-label">Telegram documentation</span><ul class="source-links">
+<li><a href="https://core.telegram.org/api/auth" rel="noopener noreferrer" target="_blank">User authorization: the key becomes the user<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/method/auth.sendCode" rel="noopener noreferrer" target="_blank">auth.sendCode: api_id, api_hash<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/method/initConnection" rel="noopener noreferrer" target="_blank">initConnection<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/mtproto/auth_key" rel="noopener noreferrer" target="_blank">Creating an authorization key<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/mtproto/description" rel="noopener noreferrer" target="_blank">MTProto encryption<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/method/account.getAuthorizations" rel="noopener noreferrer" target="_blank">account.getAuthorizations<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/constructor/authorization" rel="noopener noreferrer" target="_blank">What a session record holds<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/api/obtaining_api_id" rel="noopener noreferrer" target="_blank">Obtaining api_id<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://telegram.org/apps#source-code" rel="noopener noreferrer" target="_blank">Telegram apps' open source code<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+</ul></div>
+<div class="sources"><span class="sources-label">Libraries and discussions</span><ul class="source-links">
+<li><a href="https://docs.telethon.dev/en/stable/basic/signing-in.html" rel="noopener noreferrer" target="_blank">Telethon: signing in<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://opentele.readthedocs.io/en/latest/documentation/authorization/api/" rel="noopener noreferrer" target="_blank">opentele: official app APIs<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://opentele.readthedocs.io/en/latest/documentation/telethon/telegramclient/" rel="noopener noreferrer" target="_blank">opentele: TelegramClient<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://stackoverflow.com/questions/49490818/should-telegram-api-hash-be-kept-secret" rel="noopener noreferrer" target="_blank">Stack Overflow: should the api_hash be kept secret?<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+</ul></div>
+
+<h3 class="group-title">The same pairs in other programs <span class="count">7</span></h3>
+<p>The pairs of official Telegram apps are public and built into many independent programs and libraries:</p>
+<ul class="service-grid">
+<li class="service"><a class="service-link" data-no-translate href="https://github.com/anmv/opentele/blob/4df17bd8c443d6452afc5a2d29ec7922fad1a5c3/src/api.py#L575" rel="noopener noreferrer" target="_blank"><span class="service-name">opentele</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">Python · src/api.py</span></a><ul class="tags" data-no-translate><li>Desktop 2040</li><li>Android 6</li><li>Telegram X 21724</li><li>iOS 10840</li><li>macOS 2834</li><li>Web 2496</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://github.com/DedInc/opentele2/blob/7e973bc71cd7a714ad13ac703c0895a90d36a735/crates/opentele2-core/src/api.rs#L641" rel="noopener noreferrer" target="_blank"><span class="service-name">opentele2</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">Rust · opentele2-core/src/api.rs</span></a><ul class="tags" data-no-translate><li>Desktop 2040</li><li>Android 6</li><li>Telegram X 21724</li><li>iOS 10840</li><li>macOS 2834</li><li>Web 2496</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://github.com/abbas-bachari/Grampo/blob/00aa662d853c4ac2180432371c5e0d9444bbfe9e/Grampo/ut/api.py#L526" rel="noopener noreferrer" target="_blank"><span class="service-name">Grampo</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">Python · Grampo/ut/api.py</span></a><ul class="tags" data-no-translate><li>Desktop 2040</li><li>Android 6</li><li>Telegram X 21724</li><li>iOS 10840</li><li>macOS 2834</li><li>Web 2496</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://github.com/xdsnich/tgmanage/blob/f67c46be0ab234bd04526a8663d3936bd98a8597/api/schemas/api_app.py#L47" rel="noopener noreferrer" target="_blank"><span class="service-name">tgmanage</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">Python · api/schemas/api_app.py</span></a><ul class="tags" data-no-translate><li>Android 6</li><li>iOS 8</li><li>Desktop 2040</li><li>macOS 2834</li><li>Telegram X 21724</li><li>Web K 2496</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://github.com/LyoSU/LyChatBot/blob/fac0ae5d5f2cddb8a26312014f51c0f6f40ec191/helpers/tdlib/index.js#L11" rel="noopener noreferrer" target="_blank"><span class="service-name">LyChatBot</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">TDLib · helpers/tdlib/index.js</span></a><ul class="tags" data-no-translate><li>macOS 2834</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://github.com/herobrinovaleksandr-png/hsadasd/blob/6842c74895038c16e219324fcd07dbe8153f37f0/config.py#L68" rel="noopener noreferrer" target="_blank"><span class="service-name">hsadasd</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">Python · config.py</span></a><ul class="tags" data-no-translate><li>Desktop 2040</li><li>Desktop 17349</li><li>Telegram X 21724</li><li>macOS 2834</li><li>iOS 10840</li><li>Web 2496</li><li>+4</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://blb.team/threads/app-hash-app-id-ofitsial-nykh-kliyentov.294/" rel="noopener noreferrer" target="_blank"><span class="service-name">blb.team</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">blb.team/threads/…294</span></a><ul class="tags" data-no-translate><li>Android 4 · 5 · 6</li><li>iOS 8</li><li>Desktop 2040</li><li>Desktop 17349</li><li>macOS 2834</li><li>Telegram X 21724</li></ul><p class="service-note">Forum list of official app pairs, published for registering accounts</p></li>
+</ul>
+</section>
+
+<section id="number">
+<div class="section-head"><span class="section-icon accent"><svg aria-hidden="true" class="i"><use href="#i-sim"/></svg></span><div><p class="kicker">03</p><h2>Ways to create an extra account</h2><p class="section-lead">A Telegram account needs a phone number that receives the login code. Choose by how long the account has to live.</p></div></div>
+<ul class="options">
+<li class="option best"><div class="option-top"><span class="option-icon"><svg aria-hidden="true" class="i"><use href="#i-sim"/></svg></span><span class="tag">Best choice</span></div><h3>Prepaid SIM or eSIM</h3><span aria-label="Reliability: high" class="meter m4" role="img"><i></i><i></i><i></i><i></i></span><dl><dt>Lasts</dt><dd>As long as you keep it topped up</dd><dt>Watch out</dt><dd>The most reliable: Telegram accepts real mobile numbers best. A number the carrier takes back goes to someone else.</dd></dl></li>
+<li class="option"><div class="option-top"><span class="option-icon"><svg aria-hidden="true" class="i"><use href="#i-phone"/></svg></span></div><h3>Virtual number app</h3><span aria-label="Reliability: medium" class="meter m2" role="img"><i></i><i></i><i></i><i></i></span><dl><dt>Lasts</dt><dd>While the app keeps the number</dd><dt>Watch out</dt><dd>Telegram may refuse a virtual number, not deliver the code or limit the new account at once; some apps take back numbers that are not used.</dd></dl></li>
+<li class="option"><div class="option-top"><span class="option-icon"><svg aria-hidden="true" class="i"><use href="#i-clock"/></svg></span></div><h3>Number rental</h3><span aria-label="Reliability: medium" class="meter m2" role="img"><i></i><i></i><i></i><i></i></span><dl><dt>Lasts</dt><dd>The rental period</dd><dt>Watch out</dt><dd>When it ends, the number goes to the next customer.</dd></dl></li>
+<li class="option"><div class="option-top"><span class="option-icon"><svg aria-hidden="true" class="i"><use href="#i-zap"/></svg></span></div><h3>One-time activation</h3><span aria-label="Reliability: low" class="meter m1" role="img"><i></i><i></i><i></i><i></i></span><dl><dt>Lasts</dt><dd>One code</dd><dt>Watch out</dt><dd>The number returns to the pool at once, often with a history of previous owners. Set the cloud password before anything else.</dd></dl></li>
+</ul>
+<div class="tip danger"><svg aria-hidden="true" class="i"><use href="#i-key"/></svg><p>Whoever holds the number later can request a login code. A cloud password (two-step verification) stops them from signing in; without it the account belongs to the next owner of the number.</p></div>
+<div class="sources"><span class="sources-label">Telegram documentation</span><ul class="source-links">
+<li><a href="https://telegram.org/faq_spam" rel="noopener noreferrer" target="_blank">Spam FAQ: virtual numbers and previous owners<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/api/srp" rel="noopener noreferrer" target="_blank">Two-step verification<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+</ul></div>
+<article class="rental-card" id="fragment-rental" aria-labelledby="fragment-rental-title">
+<h3 id="fragment-rental-title">Rented +888 numbers (Fragment)</h3>
+<p>Some marketplaces and services offer temporary rental of Telegram's official +888 numbers from Fragment.</p>
+<p>Approximate price: US $20 per day.</p>
+<ul>
+<li>You can register an account directly in Telegram Web or Telegram Desktop.</li>
+<li>You can delete accounts on the number and create new ones.</li>
+<li>These accounts generally face fewer anti-fraud checks, but they do not provide immunity or special privileges.</li>
+</ul>
+<p>The number is not yours. After the rental ends, the owner can reclaim it. Set a cloud password immediately and do not treat the account as long-term.</p>
+<p>Owning the +888 yourself or using a prepaid SIM you control remains more reliable.</p>
+</article>
+<article class="rental-card" id="marketplace-accounts" aria-labelledby="marketplace-accounts-title">
+<h3 id="marketplace-accounts-title">Ready-made accounts from marketplaces</h3>
+<p>Some marketplaces (for example G2G or Z2U) sell ready-made Telegram accounts — new, aged, or with session files.</p>
+<ul class="source-links">
+<li><a href="https://www.g2g.com/uk/categories/telegram-accounts" target="_blank" rel="noopener noreferrer">G2G: Telegram account listings</a></li>
+<li><a href="https://www.z2u.com/telegram/accounts-5-15140" target="_blank" rel="noopener noreferrer">Z2U: Telegram account listings</a></li>
+</ul>
+<div class="tip danger"><svg aria-hidden="true" class="i"><use href="#i-alert"/></svg><p>NEVER USE YOUR MAIN ACCOUNT! A dedicated account obtained this way is still safer than putting your primary Telegram account into TgWitness.</p></div>
+<h4>Warnings before purchase</h4>
+<ul>
+<li>This violates Telegram's Terms of Service.</li>
+<li>Many accounts are mass-registered (auto-reg) or have an unknown history.</li>
+<li>Some sellers may still have recovery access.</li>
+<li>Accounts from such markets are frequently banned or restricted later.</li>
+<li>Avoid marketplaces that openly sell stealers, phishing tools, or clearly stolen accounts.</li>
+<li>Buying an account — even one advertised as auto-reg — from platforms that openly sell phishing tools, stealers, stolen sessions or accounts violates not only Telegram's Terms of Service but also the laws of most countries. This can later invalidate your evidence. Choose carefully.</li>
+</ul>
+<h4>If you use this option</h4>
+<ol>
+<li>Treat the account as disposable.</li>
+<li>Terminate all other sessions, set a cloud password and change recovery methods immediately.</li>
+<li>Use 2–3 accounts from different providers or accounts you registered yourself.</li>
+</ol>
+<details>
+<summary>Premium, deletion and the seven-day delay</summary>
+<p>If the account has Premium, someone with access to the phone number cannot delete the account immediately. You receive a notification and have seven days before deletion.</p>
+<p>This matters because your investigation depends on the account: you have time to prepare a replacement.</p>
+</details>
+<details>
+<summary>Fresh accounts and API credentials</summary>
+<p>If you obtain and use your own api_id/api_hash from a fresh account you registered yourself using a number from an SMS service, the account will be logged out on the first API request or session authorization. Keep this in mind when planning an investigation.</p>
+</details>
+</article>
+</section>
+
+<section id="setup">
+<div class="section-head"><span class="section-icon teal"><svg aria-hidden="true" class="i"><use href="#i-shield"/></svg></span><div><p class="kicker">04</p><h2>Creating the account</h2><p class="section-lead">From a number to the first recorded chat.</p></div></div>
+<ol class="steps">
+<li><div><h3>Get a number</h3><p>A prepaid SIM or eSIM when the account has to live long; a rental or a one-time activation for a short job. Services are listed below.</p></div></li>
+<li><div><h3>Register apart from your main account</h3><p>Register in the official Telegram app on a separate device, emulator or phone profile, not next to your main account.</p></div></li>
+<li><div><h3>Lock it with a cloud password</h3><p>Right away set a cloud password and a recovery email used nowhere else.</p></div></li>
+<li><div><h3>Close the privacy settings</h3><p>Phone number <strong>Nobody</strong>, find me by my number <strong>My contacts</strong>, last seen, profile photos and bio <strong>Nobody</strong> or <strong>My contacts</strong>; turn contact sync off.</p></div></li>
+<li><div><h3>Keep it from self-destructing</h3><p>Set account self-destruct to the longest period, so a stopped TgWitness does not cost you the account.</p></div></li>
+<li><div><h3>Give it a neutral profile</h3><p>No name, photo, username or bio from your other accounts, no personal contacts.</p></div></li>
+<li><div><h3>Let it warm up</h3><p>Join a few chats a day at first. New accounts that rush are limited first.</p></div></li>
+<li><div><h3>Share nothing with bots</h3><p>Never press “Share phone number” or “Share location” for a bot. Open links and Mini Apps through a VPN or proxy on that device.</p></div></li>
+<li><div><h3>Connect it to TgWitness</h3><p>In its own workspace, connect with <strong>Account → QR code</strong>, then press <strong>Sources → Investigation mode</strong>. The app is where you act, TgWitness is the record.</p></div></li>
+</ol>
+<div class="sources"><span class="sources-label">Telegram documentation</span><ul class="source-links">
+<li><a href="https://core.telegram.org/api/srp" rel="noopener noreferrer" target="_blank">Two-step verification<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/api/privacy" rel="noopener noreferrer" target="_blank">Privacy settings<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+<li><a href="https://core.telegram.org/method/account.setAccountTTL" rel="noopener noreferrer" target="_blank">Account self-destruct<svg aria-hidden="true" class="i"><use href="#i-ext"/></svg></a></li>
+</ul></div>
+</section>
+
+<section id="services">
+<div class="section-head"><span class="section-icon success"><svg aria-hidden="true" class="i"><use href="#i-phone"/></svg></span><div><p class="kicker">05</p><h2>Number services</h2><p class="section-lead">Options to start from. Countries, prices and whether Telegram accepts a number change often; check before paying.</p></div></div>
+
+<h3 class="group-title">Prepaid SIM and eSIM <span class="count">11</span></h3>
+<ul class="service-grid">
+<li class="service"><a class="service-link" data-no-translate href="https://smarty.co.uk" rel="noopener noreferrer" target="_blank"><span class="service-name">SMARTY</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">smarty.co.uk</span></a><ul class="tags"><li data-no-translate>UK</li><li data-no-translate>SIM</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.voxi.co.uk" rel="noopener noreferrer" target="_blank"><span class="service-name">VOXI</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">voxi.co.uk</span></a><ul class="tags"><li data-no-translate>UK</li><li data-no-translate>SIM</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.idmobile.co.uk" rel="noopener noreferrer" target="_blank"><span class="service-name">iD Mobile</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">idmobile.co.uk</span></a><ul class="tags"><li data-no-translate>UK</li><li data-no-translate>SIM</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.three.co.uk" rel="noopener noreferrer" target="_blank"><span class="service-name">Three</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">three.co.uk</span></a><ul class="tags"><li data-no-translate>UK</li><li data-no-translate>SIM</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://mobile.asda.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Asda Mobile</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">mobile.asda.com</span></a><ul class="tags"><li data-no-translate>UK</li><li data-no-translate>SIM</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.ultramobile.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Ultra Mobile</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">ultramobile.com</span></a><ul class="tags"><li data-no-translate>US</li><li>Prepaid</li></ul><p class="service-note">PayGo plan, very cheap</p></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.usmobile.com" rel="noopener noreferrer" target="_blank"><span class="service-name">US Mobile</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">usmobile.com</span></a><ul class="tags"><li data-no-translate>US</li><li>Prepaid</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.mintmobile.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Mint Mobile</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">mintmobile.com</span></a><ul class="tags"><li data-no-translate>US</li><li>Prepaid</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.tracfone.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Tracfone</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">tracfone.com</span></a><ul class="tags"><li data-no-translate>US</li><li>Prepaid</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://esimplus.me" rel="noopener noreferrer" target="_blank"><span class="service-name">eSIM Plus</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">esimplus.me</span></a><ul class="tags"><li data-no-translate>eSIM</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://numeroesim.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Numero eSIM</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">numeroesim.com</span></a><ul class="tags"><li data-no-translate>eSIM</li></ul></li>
+</ul>
+
+<h3 class="group-title">Virtual number apps <span class="count">20</span></h3>
+<ul class="service-grid">
+<li class="service"><a class="service-link" data-no-translate href="https://voice.google.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Google Voice</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">voice.google.com</span></a><ul class="tags"><li data-no-translate>US</li></ul><p class="service-note">US only; registration needs a US number</p></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.textnow.com" rel="noopener noreferrer" target="_blank"><span class="service-name">TextNow</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">textnow.com</span></a><ul class="tags"><li data-no-translate>US</li><li data-no-translate>CA</li></ul><p class="service-note">The number is taken back if you do not use it</p></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.textfree.us" rel="noopener noreferrer" target="_blank"><span class="service-name">TextFree</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">textfree.us</span></a><ul class="tags"><li data-no-translate>US</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.2ndline.co" rel="noopener noreferrer" target="_blank"><span class="service-name">2ndLine</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">2ndline.co</span></a><ul class="tags"><li data-no-translate>US</li><li data-no-translate>CA</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.talkatone.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Talkatone</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">talkatone.com</span></a><ul class="tags"><li data-no-translate>US</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://go-text.me" rel="noopener noreferrer" target="_blank"><span class="service-name">TextMe</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">go-text.me</span></a><ul class="tags"><li data-no-translate>US</li><li data-no-translate>CA</li><li>Other countries</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://textplus.com" rel="noopener noreferrer" target="_blank"><span class="service-name">textPlus</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">textplus.com</span></a><p class="store-links" data-no-translate><a href="https://play.google.com/store/apps/details?id=com.gogii.textplus" rel="noopener noreferrer" target="_blank">Google Play</a></p></li>
+<li class="service"><a class="service-link" data-no-translate href="https://play.google.com/store/apps/details?id=com.textmeinc.freetone" rel="noopener noreferrer" target="_blank"><span class="service-name">FreeTone</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">Google Play</span></a><ul class="tags"><li data-no-translate>US</li></ul><p class="store-links" data-no-translate><a href="https://www.textmeup.com" rel="noopener noreferrer" target="_blank">TextMe Up · textmeup.com</a></p></li>
+<li class="service"><a class="service-link" data-no-translate href="https://nextplus.me" rel="noopener noreferrer" target="_blank"><span class="service-name">Nextplus</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">nextplus.me</span></a><ul class="tags"><li data-no-translate>US</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.dingtone.me" rel="noopener noreferrer" target="_blank"><span class="service-name">Dingtone</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">dingtone.me</span></a><ul class="tags"><li data-no-translate>US</li><li data-no-translate>CA</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.burnerapp.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Burner</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">burnerapp.com</span></a><ul class="tags"><li data-no-translate>US</li><li data-no-translate>CA</li><li>Paid</li></ul><p class="service-note">With a trial period</p></li>
+<li class="service"><a class="service-link" data-no-translate href="https://hushed.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Hushed</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">hushed.com</span></a><ul class="tags"><li>Many countries</li><li>Paid</li></ul><p class="service-note">Cheap</p></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.sideline.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Sideline</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">sideline.com</span></a><ul class="tags"><li data-no-translate>US</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://mysudo.com" rel="noopener noreferrer" target="_blank"><span class="service-name">MySudo</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">mysudo.com</span></a><ul class="tags"><li data-no-translate>US</li><li data-no-translate>CA</li><li data-no-translate>UK</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://play.google.com/store/apps/details?id=com.bpmobile.second.phone" rel="noopener noreferrer" target="_blank"><span class="service-name">2Number</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">Google Play</span></a><p class="store-links" data-no-translate><a href="https://apps.apple.com/app/id1216135390" rel="noopener noreferrer" target="_blank">App Store</a></p></li>
+<li class="service"><a class="service-link" data-no-translate href="https://slynumber.com" rel="noopener noreferrer" target="_blank"><span class="service-name">SLYNUMBER</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">slynumber.com</span></a><p class="store-links" data-no-translate><a href="https://play.google.com/store/apps/details?id=com.dev.slynumber" rel="noopener noreferrer" target="_blank">Google Play</a></p></li>
+<li class="service"><a class="service-link" data-no-translate href="https://phonerapp.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Phoner</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">phonerapp.com</span></a></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.onoff.app" rel="noopener noreferrer" target="_blank"><span class="service-name">Onoff</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">onoff.app</span></a><ul class="tags"><li data-no-translate>EU</li></ul><p class="service-note">European mobile numbers in an app</p></li>
+<li class="service"><a class="service-link" data-no-translate href="https://sonetel.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Sonetel</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">sonetel.com</span></a><ul class="tags"><li>Many countries</li><li>Free number</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://zadarma.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Zadarma</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">zadarma.com</span></a><ul class="tags"><li>Many countries</li></ul><p class="service-note">Virtual numbers</p></li>
+</ul>
+
+<h3 class="group-title">Number rental and activations <span class="count">12</span></h3>
+<p>Rental keeps a number for weeks or months. A one-time activation gives a single code: set the cloud password right after registering.</p>
+<ul class="service-grid">
+<li class="service"><a class="service-link" data-no-translate href="https://onlinesim.io" rel="noopener noreferrer" target="_blank"><span class="service-name">OnlineSim</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">onlinesim.io</span></a><ul class="tags"><li>Rental</li><li>Activations</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://smspva.com" rel="noopener noreferrer" target="_blank"><span class="service-name">SMSPVA</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">smspva.com</span></a><ul class="tags"><li>Rental</li><li>Activations</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://5sim.net" rel="noopener noreferrer" target="_blank"><span class="service-name">5SIM</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">5sim.net</span></a><ul class="tags"><li>Rental</li><li>Activations</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.smspool.net" rel="noopener noreferrer" target="_blank"><span class="service-name">SMSPool</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">smspool.net</span></a><ul class="tags"><li>Rental</li><li>One-time</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://vak-sms.com" rel="noopener noreferrer" target="_blank"><span class="service-name">VAK-SMS</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">vak-sms.com</span></a><ul class="tags"><li>Rental</li><li>Activations</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://www.textverified.com" rel="noopener noreferrer" target="_blank"><span class="service-name">TextVerified</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">textverified.com</span></a><ul class="tags"><li>Rental</li><li>Activations</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://juicysms.com" rel="noopener noreferrer" target="_blank"><span class="service-name">JuicySMS</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">juicysms.com</span></a><ul class="tags"><li>Rental</li><li>Activations</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://365sms.org" rel="noopener noreferrer" target="_blank"><span class="service-name">365SMS</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">365sms.org</span></a><ul class="tags"><li>Rental</li><li>Activations</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://simsms.org" rel="noopener noreferrer" target="_blank"><span class="service-name">SIMSMS</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">simsms.org</span></a><ul class="tags"><li>Rental</li><li>Activations</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://grizzlysms.com" rel="noopener noreferrer" target="_blank"><span class="service-name">GrizzlySMS</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">grizzlysms.com</span></a><ul class="tags"><li>One-time</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://sms-man.com" rel="noopener noreferrer" target="_blank"><span class="service-name">SMS-MAN</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">sms-man.com</span></a><ul class="tags"><li>One-time</li></ul></li>
+<li class="service"><a class="service-link" data-no-translate href="https://tiger-sms.com" rel="noopener noreferrer" target="_blank"><span class="service-name">Tiger SMS</span><svg aria-hidden="true" class="i"><use href="#i-ext"/></svg><span class="service-host">tiger-sms.com</span></a><ul class="tags"><li>One-time</li></ul></li>
+</ul>
+</section>
 </main>
 <a aria-label="Back to top" class="to-top" href="#top" title="Back to top"><svg aria-hidden="true" class="i"><use href="#i-arrow-up"/></svg></a>
 <footer><img src="/mark.svg" alt="" width="20" height="20"> This guide ships with the application. No external scripts, fonts or analytics.</footer></body></html>

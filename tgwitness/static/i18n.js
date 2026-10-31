@@ -59,7 +59,10 @@ function translatePage(){
 function setLanguage(lang){
   if(!Object.hasOwn(LANGUAGES,lang))return;
   document.cookie="tgwitness-lang="+encodeURIComponent(lang)+"; path=/; max-age=31536000; SameSite=Strict";
-  const url=new URL(location.href);url.searchParams.set("lang",lang);location.assign(url.href);
+  const guideRoot=document.body.dataset.guideRoot;
+  const url=guideRoot?new URL(lang==="am"?"demo/dedicated-account.html":(lang==="en"?"":lang+"/")+"docs/dedicated-account/",new URL(guideRoot,location.href)):new URL(location.href);
+  if(!guideRoot||lang==="am")url.searchParams.set("lang",lang);
+  url.hash=location.hash;location.assign(url.href);
 }
 translatePage();
 document.querySelectorAll("[data-site-doc]").forEach(link=>{
@@ -75,7 +78,7 @@ if(window.TGW_SCOPE==="guide")document.querySelectorAll('a[href]:not([href^="#"]
 
 
 
-    url.pathname=new URL(url.pathname.split("/").pop(),location.href).pathname;
+    if(!document.body.dataset.guideRoot)url.pathname=new URL(url.pathname.split("/").pop(),location.href).pathname;
     url.searchParams.set("lang",LANG);link.href=url.href;
   }
 });

@@ -237,7 +237,8 @@ def problem_line(event, titles, words):
         return tr(words, "Chat export stopped ({chat}): {error}", chat=where, error=p["error_type"])
     if kind == "replica.completed" and p.get("error"):
         return tr(words, "Off-site copy stopped: {error}", error=p["error"])
-    if kind == "anchor.completed" and not any(r.get("ok") for r in p.get("results", [])):
+    # A checkpoint another service stamped on an earlier pass is partly covered, as when some answer at once.
+    if kind == "anchor.completed" and not any(r.get("ok") for r in p.get("results", [])) and not p.get("covered"):
         return tr(words, "No timestamp service answered for the latest checkpoint.")
     if kind == "profile.unavailable":
         return tr(words, "Workspace {name} could not start: {error}", name=p.get("profile_id") or "?",
@@ -249,18 +250,23 @@ def problem_line(event, titles, words):
 
 def host_line(state, words):
     """A server deployed with python -m tgwitness.cloud measured SSH or a login; closing them is no problem."""
-    before, found = state.get("before") or {}, []
+    before, found, login = state.get("before") or {}, [], False
     if state.get("ssh_listening") and not before.get("ssh_listening"):
         found.append(tr(words, "port 22 accepts connections"))
     if (state.get("ssh_processes") or 0) > (before.get("ssh_processes") or 0):
         found.append(tr(words, "SSH server processes started"))
     if (state.get("sessions") or 0) > (before.get("sessions") or 0):
         found.append(tr(words, "logged-in sessions: {n}", n=state["sessions"]))
+        login = True
     if (state.get("logins") or 0) > (before.get("logins") or 0):
         found.append(tr(words, "new logins recorded: {n}", n=state["logins"] - (before.get("logins") or 0)))
+        login = True
     if not found:
         return None
-    return tr(words, "Server access detected: {details}", details="; ".join(found))
+    if login:
+        return tr(words, "Server access detected: {details}", details="; ".join(found))
+    # An open port or a started SSH process alone is not a recorded login.
+    return tr(words, "SSH change on the server, no new login recorded: {details}", details="; ".join(found))
 
 
 def change_line(title, counts, words):

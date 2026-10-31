@@ -651,7 +651,7 @@ def main():
                 check_layout(page)
             page.screenshot(path=str(output / "guide-mobile.png"), full_page=True)
             page.goto(live.url + "/dedicated-account.html")
-            expect(page.get_by_role("heading", name="API credentials")).to_be_visible()
+            expect(page.locator("#api h2")).to_have_text("Why TgWitness works through public app hash/app ID pairs")
             for width in (1440,390,320):
                 page.set_viewport_size({"width":width,"height":844})
                 check_layout(page)

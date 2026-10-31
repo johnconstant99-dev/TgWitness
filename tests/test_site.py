@@ -84,7 +84,18 @@ def test_setup_and_account_guides_publish_all_26_language_catalogs(site_root):
     body = (output / "demo/guide.html").read_text(encoding="utf-8")
     assert "guide-locales/" in body and "guide-locale.js" not in body
     body = (output / "demo/dedicated-account.html").read_text(encoding="utf-8")
-    assert 'data-site-target="docs/dedicated-account/"' in body and "site-redirect.js" in body
+    assert "guide-locales/" in body and "site-redirect.js" not in body
+    assert 'class="verdict"' in body and 'class="service-grid"' in body
+    source = (ROOT / "tgwitness/static/dedicated-account.html").read_text(encoding="utf-8")
+    for lang in LANGS:
+        page = output / ("" if lang == "en" else lang) / "docs/dedicated-account/index.html"
+        full = page.read_text(encoding="utf-8")
+        assert 'data-guide-root=' in full and "site-redirect.js" not in full
+        for tag in ("h1", "h2", "h3", "h4", "section", "svg"):
+            assert len(re.findall(r"<" + tag + r"\b", full)) == len(re.findall(r"<" + tag + r"\b", source)), (lang, tag)
+        for anchor in ("why", "api", "number", "setup", "services", "session-warning"):
+            assert f'id="{anchor}"' in full
+        assert "AUTH_KEY_DUPLICATED" in full
     for lang in site_modes.EXTRA_LANGUAGES:
         body = (output / lang / "guides/modes.html").read_text(encoding="utf-8")
         assert 'demo/guide.html?lang=' + lang in body

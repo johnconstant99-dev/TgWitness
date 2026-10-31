@@ -21,7 +21,7 @@ from tools.i18n_keys import script_keys
 
 PAGES = ("guide.html", "dedicated-account.html")
 HEROES = ("From account connection to a verifiable journal",
-          "Use a separate Telegram account")
+          'Use a separate account. <span class="accent">Never your main one.</span>')
 
 
 def check_inventory(browser):
@@ -68,8 +68,12 @@ def check_guides(browser, base, output, label):
                 expect(page.locator("#session-warning h3")).to_have_text(i18n.guide_words(lang).get(warning_title, warning_title))
                 expect(page.locator("#session-warning code")).to_have_text("AUTH_KEY_DUPLICATED")
             else:
-                expect(page.locator("#session-warning")).to_have_text(i18n.guide_words(lang).get("Imported sessions", "Imported sessions"))
-                expect(page.locator("#session-warning + p")).to_contain_text("AUTH_KEY_DUPLICATED")
+                title = "Copied session keys can be revoked"
+                expect(page.locator("#session-warning h3")).to_have_text(i18n.guide_words(lang).get(title, title))
+                expect(page.locator("#session-warning code")).to_have_text("AUTH_KEY_DUPLICATED")
+                expect(page.locator(".verdict-card")).to_have_count(2)
+                expect(page.locator("main > section")).to_have_count(5)
+                assert page.locator(".service-grid .service").count() >= 40
             links = page.locator('a[href*="guide.html"], a[href*="dedicated-account.html"]').evaluate_all("nodes=>nodes.map(n=>n.href)")
             assert links and all(link.startswith(base) and "lang=" + lang in link for link in links), (label, lang, links)
             page.locator("details").evaluate_all("nodes=>nodes.forEach(n=>n.open=true)")
@@ -126,12 +130,20 @@ def check_public_redirects(browser, base):
     page = context.new_page()
     for lang in i18n.LANGUAGES:
         prefix = "" if lang == "en" else lang + "/"
-        for legacy, target in (("sealed.html", "capture"), ("demo/dedicated-account.html", "dedicated-account")):
+        for legacy, target in (("sealed.html", "capture"),):
             page.goto(base + legacy + "?lang=" + lang)
             expect(page).to_have_url(base + prefix + "docs/" + target + "/")
             expect(page.locator(".docs-header")).to_be_visible()
             expect(page.locator(".lang-list a")).to_have_count(25)
             assert page.evaluate("document.documentElement.scrollWidth<=innerWidth"), (lang, target)
+        page.goto(base + prefix + "docs/dedicated-account/")
+        expect(page.locator(".verdict-card")).to_have_count(2)
+        expect(page.locator("main > section")).to_have_count(5)
+        assert page.locator(".service-grid .service").count() >= 40
+        expect(page.locator(".language-select")).to_have_value(lang)
+        page.locator(".language-select").select_option("de" if lang != "de" else "ru")
+        expect(page).to_have_url(base + ("de" if lang != "de" else "ru") + "/docs/dedicated-account/")
+        assert page.evaluate("document.documentElement.scrollWidth<=innerWidth"), (lang, "dedicated-account")
     context.close()
 
 
@@ -149,13 +161,14 @@ def main():
                 browser = launch_browser(pw)
                 check_inventory(browser)
                 check_guides(browser, app.url + "/", output, "application")
+                check_guides(browser, f"http://127.0.0.1:{server.server_port}/TgWitness/demo/", output, "public")
                 check_public_redirects(browser, f"http://127.0.0.1:{server.server_port}/TgWitness/")
                 browser.close()
         finally:
             server.shutdown()
             server.server_close()
             thread.join(timeout=10)
-    print("Guide languages passed: 26 application languages and 25 public page redirects.")
+    print("Guide languages passed: 26 bundled guide languages and 25 complete public account guides.")
 
 
 if __name__ == "__main__":

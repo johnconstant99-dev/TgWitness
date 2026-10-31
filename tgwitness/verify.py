@@ -45,6 +45,10 @@ MAX_SMALL_MEMBER_BYTES = 16 * 1024**2
 MAX_RECORD_BYTES = 64 * 1024**2
 MAX_JSON_BYTES = 256 * 1024**2
 OTS_PENDING, OTS_BITCOIN = bytes.fromhex("83dfe30d2ef90c8e"), bytes.fromhex("0588960d73d71901")
+# A readable report ends with a seal: a signed statement over the SHA-256 of every byte before it.
+SEAL_OPEN = b'<script type="application/tgwitness-seal+json" id="tgwitness-seal">'
+SEAL_CLOSE = b"</script></body></html>\n"
+SEAL_WINDOW = 1024 * 1024  # the seal is always within the last mebibyte of a report
 
 
 def open_archive(path):
@@ -849,6 +853,92 @@ def verify_checkpoint(checkpoint, public_key, event_count, hash_at):
         raise ValueError("Journal disagrees with the retained checkpoint")
 
 
+# Readable reports --------------------------------------------------------------------------
+
+def read_sealed(stream):
+    """(SHA-256 of the bytes before the seal, seal) of a report; None when it has none (older exports)."""
+    digest, window = hashlib.sha256(), b""
+    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+        window += chunk
+        if len(window) > 2 * SEAL_WINDOW:
+            digest.update(window[:-SEAL_WINDOW])
+            window = window[-SEAL_WINDOW:]
+    at = window.rfind(SEAL_OPEN)
+    if at < 0:
+        return None
+    digest.update(window[:at])
+    block = window[at + len(SEAL_OPEN):]
+    if not block.endswith(SEAL_CLOSE):
+        raise ValueError("The report seal is not at the end of the file")
+    return digest.hexdigest(), json.loads(block[:-len(SEAL_CLOSE)])
+
+
+def check_seal(sealed, public_key=None, expected_fingerprint=None):
+    """What a sealed report says it describes, once its signature and its bytes are checked."""
+    content, seal = sealed
+    statement = seal["statement"]
+    if not is_format(statement.get("format"), "report-seal-v1"):
+        raise ValueError("Unsupported report seal")
+    key = statement["public_key"]
+    if public_key is not None and key != public_key:
+        raise ValueError("The report was sealed with a different key than the archive")
+    fp = fingerprint(key)
+    if expected_fingerprint and fp != expected_fingerprint:
+        raise ValueError("Public key differs from the independently trusted fingerprint")
+    Ed25519PublicKey.from_public_bytes(base64.b64decode(key, validate=True)).verify(
+        base64.b64decode(seal["signature"], validate=True), canonical(statement))
+    if statement.get("content_sha256") != content:
+        raise ValueError("The report was changed after it was sealed")
+    return {"report_id": statement.get("report_id"), "created_at": statement.get("created_at"),
+            "language": statement.get("language"), "case": statement.get("case") or {},
+            "subject": statement.get("subject") or {}, "producer": statement.get("producer"), "fingerprint": fp}
+
+
+def archive_seal(archive, name, public_key):
+    with archive.open(name) as stream:
+        sealed = read_sealed(stream)
+    return check_seal(sealed, public_key) if sealed else None
+
+
+def check_sums(archive, manifest):
+    """SHA256SUMS (for sha256sum -c) must repeat the signed manifest's hash of every other file."""
+    if "SHA256SUMS" not in manifest["files"]:
+        return None
+    listed = {}
+    for line in read_member(archive, "SHA256SUMS", MAX_MANIFEST_BYTES).decode("utf-8").splitlines():
+        digest, _, name = line.partition("  ")
+        listed[name] = digest
+    if listed != {name: digest for name, digest in manifest["files"].items() if name != "SHA256SUMS"}:
+        raise ValueError("SHA256SUMS disagrees with the signed manifest")
+    return len(listed)
+
+
+def verify_report(path, expected_fingerprint=None, evidence=None):
+    """A report handed over on its own: its seal and, with --evidence, the archive it describes."""
+    with open(path, "rb") as stream:
+        sealed = read_sealed(stream)
+    if not sealed:
+        raise ValueError("This report has no seal: it was made before seals or not by TgWitness")
+    seal = check_seal(sealed, None, expected_fingerprint)
+    subject = seal["subject"]
+    result = {"format": "tgwitness-report-seal-v1", "fingerprint": seal["fingerprint"], "report_seal": seal,
+              "producer": seal["producer"], "key_pinned": bool(expected_fingerprint), "evidence_checked": False}
+    if evidence:
+        if is_format(bundle_format(evidence), "chat-export-v1"):
+            checked = verify_chat_export(evidence, expected_fingerprint)
+            matches = checked["chat_json_sha256"] == subject.get("chat_json_sha256")
+        else:
+            checked = verify_bundle(evidence, expected_fingerprint)
+            count = subject.get("event_count")
+            # A report of an earlier export describes a prefix of a later journal.
+            matches = type(count) is int and 0 < count <= checked["events"] \
+                and bundle_hashes(evidence, [count]).get(count) == subject.get("head_hash")
+        if checked["fingerprint"] != seal["fingerprint"] or not matches:
+            raise ValueError("The report describes a different archive")
+        result["evidence_checked"] = True
+    return result
+
+
 def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None):
     with open_archive(path) as archive:
         names = archive.namelist()
@@ -866,6 +956,12 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None)
         for name, digest in manifest["files"].items():
             if member_digest(archive, name) != digest:
                 raise ValueError("File hash mismatch: " + name)
+        sums = check_sums(archive, manifest)
+        seal = archive_seal(archive, "report.html", public) if "report.html" in manifest["files"] else None
+        if seal and (seal["subject"].get("event_count") != manifest["event_count"]
+                     or seal["subject"].get("head_hash") != manifest["head_hash"]
+                     or seal["subject"].get("events_sha256") != manifest["files"].get("events.jsonl")):
+            raise ValueError("The report seal describes a different journal")
         observed = Coverage()
 
         def measured(lines):
@@ -879,6 +975,8 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None)
             raise ValueError("Manifest does not match journal")
         result["coverage"] = observed.result()
         result["producer"] = manifest.get("producer")
+        result.update(format=manifest["format"], files_checked=len(manifest["files"]), sha256sums=sums,
+                      report_seal=seal, case=manifest.get("case") or {})
 
         def hash_at(seq):
             if seq == 0:
@@ -915,9 +1013,17 @@ def verify_chat_export(path, expected_fingerprint=None):
             if member_digest(archive, name) != digest:
                 raise ValueError("File hash mismatch: " + name)
         parts = verify_parts(archive, manifest) if manifest.get("parts") else None
+        sums = check_sums(archive, manifest)
+        seal = archive_seal(archive, "chat.html", public) if "chat.html" in manifest["files"] else None
+        if seal and (seal["subject"].get("chat_id") != (manifest.get("chat") or {}).get("id")
+                     or seal["subject"].get("message_count") != manifest.get("message_count")
+                     or seal["subject"].get("chat_json_sha256") != manifest["files"].get("chat.json")):
+            raise ValueError("The report seal describes a different chat export")
         return {"format": manifest["format"], "fingerprint": fp,
                 "message_count": manifest.get("message_count"), "producer": manifest.get("producer"),
-                "chat": manifest.get("chat"), "key_pinned": bool(expected_fingerprint), "parts": parts}
+                "chat": manifest.get("chat"), "key_pinned": bool(expected_fingerprint), "parts": parts,
+                "files_checked": len(manifest["files"]), "chat_json_sha256": manifest["files"].get("chat.json"),
+                "sha256sums": sums, "report_seal": seal, "case": manifest.get("case") or {}}
 
 
 def chat_messages(archive):
@@ -1450,9 +1556,382 @@ def producer_line(producer):
             + str(producer.get("project")) + " - " + str(producer.get("homepage")))
 
 
+def fingerprint_colors(value):
+    """Sixteen (hue, saturation, lightness) blocks drawn from a fingerprint, the same in report and console:
+    two copies whose colours differ were signed by different keys. Compare the full hex to be sure."""
+    data = bytes.fromhex(value)
+    return [(data[i] * 360 // 256, 68, 40 + data[i + 1] % 24) for i in range(0, 32, 2)]
+
+
+# Console -----------------------------------------------------------------------------------
+
+SAY = {
+    "ru": {
+        "TgWitness verifier": "Проверка TgWitness",
+        "Signed Telegram evidence · Ed25519 · SHA-256": "Подписанные доказательства из Telegram · Ed25519 · SHA-256",
+        "File": "Файл", "Type": "Тип", "Signer": "Подписант", "Checks": "Проверки", "Timestamps": "Метки времени",
+        "Coverage": "Покрытие наблюдения", "Case": "Дело", "Notes": "Примечания", "Details": "Подробности",
+        "Evidence archive": "Архив доказательств", "Chat export": "Экспорт чата", "Witness journal": "Журнал свидетеля",
+        "People profiles": "Профили людей", "Public proof": "Публичное доказательство",
+        "Sealed report": "Опечатанный отчёт", "History report": "Отчёт об истории",
+        "Manifest signature": "Подпись манифеста", "Ed25519 · valid": "Ed25519 · верна",
+        "Signature": "Подпись", "File hashes": "Хеши файлов",
+        "{n} files · SHA-256 match": "файлов: {n} · SHA-256 совпадают",
+        "Record chain": "Цепочка записей", "{n} records · head {hash}": "записей: {n} · вершина {hash}",
+        "Messages": "Сообщения", "{n} messages · {title}": "сообщений: {n} · {title}",
+        "Accounts": "Аккаунты", "{n} account(s) signed their message ranges": "аккаунтов: {n}, каждый подписал свои диапазоны",
+        "Report seal": "Печать отчёта", "{name} · intact · language {lang}": "{name} · не изменён · язык {lang}",
+        "not present (older export)": "нет (экспорт старой версии)",
+        "matches the signed manifest": "совпадает с подписанным манифестом",
+        "Retained checkpoint": "Сохранённая контрольная точка", "matches the journal": "совпадает с журналом",
+        "not supplied: removed trailing records would go unnoticed":
+            "не передана: удаление последних записей останется незамеченным",
+        "Key pinning": "Привязка ключа", "matches your trusted fingerprint": "совпадает с вашим доверенным отпечатком",
+        "not pinned: compare the fingerprint with a copy kept elsewhere":
+            "не привязан: сверьте отпечаток с копией, хранящейся отдельно",
+        "Witness": "Свидетель", "checkpoints match through record {a} of {b}": "контрольные точки совпадают до записи {a} из {b}",
+        "Described archive": "Описываемый архив", "verified and matches the seal": "проверен и совпадает с печатью",
+        "not supplied (--evidence)": "не передан (--evidence)",
+        "Describes": "Описывает", "checkpoint #{n}": "точка #{n}",
+        "signature chained to your root": "подпись проверена до вашего корня",
+        "signature not checked: add --tsa-ca": "подпись не проверена: добавьте --tsa-ca",
+        "pending: run ots upgrade, then ots verify": "ожидает: выполните ots upgrade, затем ots verify",
+        "in Bitcoin: confirm with ots verify": "в Bitcoin: подтвердите через ots verify",
+        "No independent timestamps: times come from the collector's clock.":
+            "Независимых меток нет: время — по часам коллектора.",
+        "INTEGRITY VERIFIED": "ЦЕЛОСТНОСТЬ ПОДТВЕРЖДЕНА", "VERIFICATION FAILED": "ПРОВЕРКА НЕ ПРОЙДЕНА",
+        "Source authenticity and clock accuracy are not established by this check.":
+            "Эта проверка не устанавливает подлинность источника и точность часов.",
+        "… and {n} more": "… и ещё {n}", "Checking signatures, hashes and the record chain":
+            "Проверяю подписи, хеши и цепочку записей",
+        "Title": "Название", "Case ID": "Номер дела", "Examiner": "Эксперт", "Organization": "Организация",
+        "Produced by": "Создано",
+    },
+    "uk": {
+        "TgWitness verifier": "Перевірка TgWitness",
+        "Signed Telegram evidence · Ed25519 · SHA-256": "Підписані докази з Telegram · Ed25519 · SHA-256",
+        "File": "Файл", "Type": "Тип", "Signer": "Підписант", "Checks": "Перевірки", "Timestamps": "Мітки часу",
+        "Coverage": "Покриття спостереження", "Case": "Справа", "Notes": "Примітки", "Details": "Подробиці",
+        "Evidence archive": "Архів доказів", "Chat export": "Експорт чату", "Witness journal": "Журнал свідка",
+        "People profiles": "Профілі людей", "Public proof": "Публічний доказ", "Sealed report": "Опечатаний звіт", "History report": "Звіт про історію",
+        "Manifest signature": "Підпис маніфесту", "Ed25519 · valid": "Ed25519 · дійсний",
+        "Signature": "Підпис", "File hashes": "Хеші файлів",
+        "{n} files · SHA-256 match": "файлів: {n} · SHA-256 збігаються",
+        "Record chain": "Ланцюжок записів", "{n} records · head {hash}": "записів: {n} · вершина {hash}",
+        "Messages": "Повідомлення", "{n} messages · {title}": "повідомлень: {n} · {title}",
+        "Accounts": "Акаунти", "{n} account(s) signed their message ranges": "акаунтів: {n}, кожен підписав свої діапазони",
+        "Report seal": "Печатка звіту", "{name} · intact · language {lang}": "{name} · не змінено · мова {lang}",
+        "not present (older export)": "немає (експорт старої версії)",
+        "matches the signed manifest": "збігається з підписаним маніфестом",
+        "Retained checkpoint": "Збережена контрольна точка", "matches the journal": "збігається з журналом",
+        "not supplied: removed trailing records would go unnoticed":
+            "не передано: видалення останніх записів залишиться непоміченим",
+        "Key pinning": "Прив'язка ключа", "matches your trusted fingerprint": "збігається з вашим довіреним відбитком",
+        "not pinned: compare the fingerprint with a copy kept elsewhere":
+            "не прив'язаний: звірте відбиток із копією, що зберігається окремо",
+        "Witness": "Свідок", "checkpoints match through record {a} of {b}": "контрольні точки збігаються до запису {a} з {b}",
+        "Described archive": "Описуваний архів", "verified and matches the seal": "перевірено, збігається з печаткою",
+        "not supplied (--evidence)": "не передано (--evidence)",
+        "Describes": "Описує", "checkpoint #{n}": "точка #{n}",
+        "signature chained to your root": "підпис перевірено до вашого кореня",
+        "signature not checked: add --tsa-ca": "підпис не перевірено: додайте --tsa-ca",
+        "pending: run ots upgrade, then ots verify": "очікує: виконайте ots upgrade, потім ots verify",
+        "in Bitcoin: confirm with ots verify": "у Bitcoin: підтвердіть через ots verify",
+        "No independent timestamps: times come from the collector's clock.":
+            "Незалежних міток немає: час — за годинником колектора.",
+        "INTEGRITY VERIFIED": "ЦІЛІСНІСТЬ ПІДТВЕРДЖЕНО", "VERIFICATION FAILED": "ПЕРЕВІРКУ НЕ ПРОЙДЕНО",
+        "Source authenticity and clock accuracy are not established by this check.":
+            "Ця перевірка не встановлює автентичність джерела і точність годинника.",
+        "… and {n} more": "… і ще {n}", "Checking signatures, hashes and the record chain":
+            "Перевіряю підписи, хеші та ланцюжок записів",
+        "Title": "Назва", "Case ID": "Номер справи", "Examiner": "Експерт", "Organization": "Організація",
+        "Produced by": "Створено",
+    },
+}
+KINDS = {"evidence": "Evidence archive", "chat": "Chat export", "witness": "Witness journal",
+         "dossier": "People profiles", "proof": "Public proof", "report": "Sealed report",
+         "history": "History report"}
+
+
+def console_language(choice=None):
+    """--lang, else the terminal's locale when it is Russian or Ukrainian, else English."""
+    if choice:
+        return choice
+    value = next((os.environ[name] for name in ("LC_ALL", "LC_MESSAGES", "LANG") if os.environ.get(name)), "")
+    if not value:
+        import locale
+        value = locale.getlocale()[0] or ""
+    value = value.lower()
+    return "ru" if value.startswith(("ru", "russian")) else "uk" if value.startswith(("uk", "ukrainian")) else "en"
+
+
+def enable_ansi(stream):
+    """Windows consoles show colours once virtual terminal processing is switched on."""
+    if os.name != "nt":
+        return True
+    try:
+        import ctypes
+        import msvcrt
+        kernel = ctypes.windll.kernel32
+        handle, mode = msvcrt.get_osfhandle(stream.fileno()), ctypes.c_uint32()
+        return bool(kernel.GetConsoleMode(handle, ctypes.byref(mode))
+                    and kernel.SetConsoleMode(handle, mode.value | 0x0004))
+    except Exception:
+        return False
+
+
+class Console:
+    """The verifier's answer for a person at a terminal; scripts and pipes get the plain form."""
+    WIDTH = 66
+    STYLES = {"ok": "1;32", "bad": "1;31", "warn": "1;33", "dim": "2", "bold": "1", "accent": "1;38;5;75",
+              "okbar": "1;97;42", "badbar": "1;97;41"}
+
+    def __init__(self, stream, lang="en", color=True):
+        try:
+            "".join(SAY.get(lang, {}).values()).encode(stream.encoding or "ascii")
+        except (LookupError, UnicodeEncodeError):
+            lang = "en"  # a console that cannot show the language gets English rather than escapes
+        self.stream, self.words, self.lang = stream, SAY.get(lang, {}), lang
+        try:
+            "✔✘⚠◷•─│╭╮╰╯█⠋".encode(stream.encoding or "ascii")
+            self.glyph = dict(ok="✔", bad="✘", warn="!", wait="◷", dot="•", h="─", v="│", tl="╭", tr="╮",
+                              bl="╰", br="╯", block="██", spin="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+        except (LookupError, UnicodeEncodeError):
+            self.glyph = dict(ok="+", bad="x", warn="!", wait="~", dot="*", h="-", v="|", tl="+", tr="+",
+                              bl="+", br="+", block="##", spin="|/-\\")
+        self.color = color and enable_ansi(stream)
+
+    def t(self, text, **values):
+        text = self.words.get(text, text)
+        for name, value in values.items():
+            text = text.replace("{" + name + "}", str(value))
+        return text
+
+    def paint(self, text, style):
+        return "\033[" + self.STYLES[style] + "m" + text + "\033[0m" if self.color and style else text
+
+    def say(self, text=""):
+        self.stream.write(text + "\n")
+
+    def number(self, value):
+        return format(value, ",").replace(",", " " if self.lang in SAY else ",") if type(value) is int else str(value)
+
+    def banner(self, title=None, tagline=None):
+        g, inner = self.glyph, self.WIDTH - 4
+        title, brand = title or self.t("TgWitness verifier"), "PhishDestroy"
+        tagline = tagline or self.t("Signed Telegram evidence · Ed25519 · SHA-256")
+        self.say()
+        self.say("  " + self.paint(g["tl"] + g["h"] * inner + g["tr"], "accent"))
+        self.say("  " + self.paint(g["v"], "accent") + "  " + self.paint(title, "bold")
+                 + " " * max(1, inner - 4 - len(title) - len(brand)) + self.paint(brand, "dim") + "  "
+                 + self.paint(g["v"], "accent"))
+        self.say("  " + self.paint(g["v"], "accent") + "  " + self.paint(tagline[:inner - 4], "dim")
+                 + " " * max(0, inner - 2 - len(tagline[:inner - 4])) + self.paint(g["v"], "accent"))
+        self.say("  " + self.paint(g["bl"] + g["h"] * inner + g["br"], "accent"))
+        self.say()
+
+    def field(self, label, value):
+        self.say("  " + self.paint(self.t(label).ljust(10), "dim") + " " + value)
+
+    def heading(self, label):
+        text = self.t(label).upper()
+        self.say()
+        self.say("  " + self.paint(text, "accent") + " " + self.paint(self.glyph["h"] * (self.WIDTH - 3 - len(text)), "dim"))
+
+    def check(self, state, label, detail=""):
+        mark = {"ok": ("ok", "ok"), "bad": ("bad", "bad"), "warn": ("warn", "warn"), "wait": ("wait", "warn"),
+                "none": ("dot", "dim")}[state]
+        self.say("  " + self.paint(self.glyph[mark[0]], mark[1]) + " " + self.t(label).ljust(24) + " "
+                 + (self.paint(detail, "dim") if state == "none" else detail))
+
+    def signer(self, value):
+        if not value:
+            return
+        groups = [value[i:i + 4] for i in range(0, 64, 4)]
+        self.field("Signer", self.paint(" ".join(groups[:8]), "bold"))
+        self.say("  " + " " * 11 + self.paint(" ".join(groups[8:]), "bold"))
+        if self.color:
+            import colorsys
+            blocks = ""
+            for hue, saturation, lightness in fingerprint_colors(value):
+                r, g, b = colorsys.hls_to_rgb(hue / 360, lightness / 100, saturation / 100)
+                code = 16 + 36 * round(r * 5) + 6 * round(g * 5) + round(b * 5)
+                blocks += "\033[38;5;" + str(code) + "m" + self.glyph["block"]
+            self.say("  " + " " * 11 + blocks + "\033[0m")
+
+    def verdict(self, ok, reason=""):
+        text = " " + (self.glyph["ok"] if ok else self.glyph["bad"]) + "  " \
+               + self.t("INTEGRITY VERIFIED" if ok else "VERIFICATION FAILED") + " "
+        self.say()
+        if self.color:
+            self.say("  " + self.paint(text.ljust(self.WIDTH - 2), "okbar" if ok else "badbar"))
+        else:
+            self.say("  " + self.glyph["tl"] + self.glyph["h"] * (self.WIDTH - 4) + self.glyph["tr"])
+            self.say("  " + self.glyph["v"] + text.ljust(self.WIDTH - 4) + self.glyph["v"])
+            self.say("  " + self.glyph["bl"] + self.glyph["h"] * (self.WIDTH - 4) + self.glyph["br"])
+        if reason:
+            self.say("  " + self.paint(reason, "bad"))
+
+    def spinner(self):
+        return Spinner(sys.stderr, self.t("Checking signatures, hashes and the record chain"), self.glyph["spin"])
+
+    def failure(self, path, exc):
+        self.field("File", str(path))
+        self.verdict(False, type(exc).__name__ + ": " + str(exc))
+        self.say()
+
+    def case(self, case):
+        shown = [(label, case.get(key)) for label, key in (("Title", "title"), ("Case ID", "id"),
+                 ("Examiner", "examiner"), ("Organization", "organization")) if case.get(key)]
+        if shown:
+            self.heading("Case")
+            for label, value in shown:
+                self.say("  " + self.paint(self.t(label).ljust(14), "dim") + " " + str(value))
+
+    def seal(self, result, name):
+        seal = result.get("report_seal")
+        if seal:
+            self.check("ok", "Report seal", self.t("{name} · intact · language {lang}", name=name, lang=seal["language"]))
+        else:
+            self.check("none", "Report seal", self.t("not present (older export)"))
+        if result.get("sha256sums"):
+            self.check("ok", "SHA256SUMS", self.t("matches the signed manifest"))
+        else:
+            self.check("none", "SHA256SUMS", self.t("not present (older export)"))
+
+    def pinning(self, pinned):
+        if pinned:
+            self.check("ok", "Key pinning", self.t("matches your trusted fingerprint"))
+        else:
+            self.check("warn", "Key pinning", self.t("not pinned: compare the fingerprint with a copy kept elsewhere"))
+
+    def timestamps(self, anchors):
+        self.heading("Timestamps")
+        if not anchors:
+            self.say("  " + self.paint(self.t("No independent timestamps: times come from the collector's clock."), "dim"))
+            return
+        for anchor in anchors:
+            point = self.t("checkpoint #{n}", n=self.number(int(anchor["checkpoint"][11:-5]))) \
+                if anchor["checkpoint"][11:-5].isdigit() else anchor["checkpoint"]
+            if anchor.get("kind") == "rfc3161":
+                checked = anchor.get("signature", "").startswith("checked")
+                self.check("ok" if checked else "warn", "RFC 3161 · " + anchor["service"],
+                           point + " · " + anchor.get("time", "?").replace("T", " ").replace("Z", " UTC"))
+                self.say("  " + " " * 27 + self.paint(self.t("signature chained to your root" if checked
+                                                               else "signature not checked: add --tsa-ca"), "dim"))
+            else:
+                pending = anchor.get("status") == "pending"
+                self.check("wait" if pending else "ok", "OpenTimestamps · " + anchor["service"][:10],
+                           point + " · " + self.t("pending: run ots upgrade, then ots verify" if pending
+                                                  else "in Bitcoin: confirm with ots verify"))
+
+    def lines(self, label, lines, limit=8):
+        if not lines:
+            return
+        self.heading(label)
+        for line in lines[:limit]:
+            self.say("  " + self.paint(self.glyph["dot"], "dim") + " " + line)
+        if len(lines) > limit:
+            self.say("  " + self.paint(self.t("… and {n} more", n=len(lines) - limit), "dim"))
+
+    def show(self, shown, path, result, notes, pinned):
+        self.field("File", str(path))
+        self.field("Type", self.t(KINDS[shown]) + self.paint("  " + str(result.get("format") or ""), "dim"))
+        self.signer(result.get("fingerprint"))
+        self.heading("Checks")
+        if shown == "evidence":
+            self.check("ok", "Manifest signature", self.t("Ed25519 · valid"))
+            self.check("ok", "File hashes", self.t("{n} files · SHA-256 match", n=self.number(result["files_checked"])))
+            head = result["head_hash"]
+            self.check("ok", "Record chain", self.t("{n} records · head {hash}", n=self.number(result["events"]),
+                                                    hash=head[:8] + "…" + head[-8:]))
+            self.seal(result, "report.html")
+            if result.get("checkpoint_checked"):
+                self.check("ok", "Retained checkpoint", self.t("matches the journal"))
+            else:
+                self.check("warn", "Retained checkpoint", self.t("not supplied: removed trailing records would go unnoticed"))
+            if result.get("witness"):
+                witness = result["witness"]
+                self.check("ok" if witness["consistent"] else "warn", "Witness",
+                           self.t("checkpoints match through record {a} of {b}",
+                                  a=self.number(witness["verified_through_event"]), b=self.number(result["events"])))
+        elif shown == "chat":
+            self.check("ok", "Manifest signature", self.t("Ed25519 · valid"))
+            self.check("ok", "File hashes", self.t("{n} files · SHA-256 match", n=self.number(result["files_checked"])))
+            self.check("ok", "Messages", self.t("{n} messages · {title}", n=self.number(result.get("message_count")),
+                                                title=(result.get("chat") or {}).get("title") or "?"))
+            if result.get("parts"):
+                self.check("ok", "Accounts", self.t("{n} account(s) signed their message ranges", n=len(result["parts"])))
+            self.seal(result, "chat.html")
+        elif shown == "report":
+            seal = result["report_seal"]
+            subject = seal["subject"]
+            self.check("ok", "Report seal", self.t("{name} · intact · language {lang}", name=path.name, lang=seal["language"]))
+            described = (self.t("{n} records · head {hash}", n=self.number(subject.get("event_count")),
+                                hash=str(subject.get("head_hash"))[:8] + "…") if "event_count" in subject else
+                         self.t("{n} messages · {title}", n=self.number(subject.get("message_count")),
+                                title=subject.get("chat_title") or subject.get("chat_id")))
+            self.check("none", "Describes", described)
+            if result["evidence_checked"]:
+                self.check("ok", "Described archive", self.t("verified and matches the seal"))
+            else:
+                self.check("warn", "Described archive", self.t("not supplied (--evidence)"))
+        else:
+            self.check("ok", "Signature", self.t("Ed25519 · valid"))
+        self.pinning(pinned)
+        if shown == "evidence":
+            self.timestamps(result.get("anchors") or [])
+            self.lines("Coverage", coverage_lines(result["coverage"]))
+            notes = [n for n in notes if n not in coverage_lines(result["coverage"])
+                     and not n.startswith("No retained checkpoint")]
+        elif shown not in ("chat", "report"):
+            facts = [key + ": " + json.dumps(value, ensure_ascii=False) for key, value in result.items()
+                     if isinstance(value, (str, int, bool)) and key != "fingerprint"]
+            self.lines("Details", facts, limit=12)
+        self.lines("Notes", notes)
+        self.case(result.get("case") or (result.get("report_seal") or {}).get("case") or {})
+        self.verdict(True)
+        producer = result.get("producer")
+        if producer:
+            self.say("  " + self.paint(self.t("Produced by") + ": " + str(producer.get("software")) + " "
+                                       + str(producer.get("version")) + " · " + str(producer.get("project")) + " · "
+                                       + str(producer.get("homepage")), "dim"))
+        self.say("  " + self.paint(self.t("Source authenticity and clock accuracy are not established by this check."), "dim"))
+        self.say()
+
+
+class Spinner:
+    """A small animation on stderr while large archives are hashed; gone before the answer is printed."""
+    def __init__(self, stream, text, frames):
+        import threading
+        self.stream, self.text, self.frames = stream, text, frames
+        self.done = threading.Event()
+        self.thread = threading.Thread(target=self.run, daemon=True)
+
+    def run(self):
+        index = 0
+        while not self.done.wait(0.09):
+            self.stream.write("\r  " + self.frames[index % len(self.frames)] + " " + self.text + "…")
+            self.stream.flush()
+            index += 1
+
+    def __enter__(self):
+        if getattr(self.stream, "isatty", lambda: False)():
+            self.thread.start()
+        return self
+
+    def __exit__(self, *exc):
+        self.done.set()
+        if self.thread.is_alive():
+            self.thread.join()
+            self.stream.write("\r" + " " * (len(self.text) + 6) + "\r")
+            self.stream.flush()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("bundle", type=Path, help="Evidence/chat/witness ZIP, profile/proof/history report JSON")
+    parser.add_argument("bundle", type=Path,
+                        help="Evidence/chat/witness ZIP, profile/proof/history report JSON, or a sealed report HTML")
     parser.add_argument("--fingerprint", help="Public key fingerprint retained independently")
     parser.add_argument("--checkpoint", type=Path, help="Previously retained signed checkpoint JSON")
     parser.add_argument("--tsa-ca", type=Path, help="Root certificate of the timestamp authority (PEM)")
@@ -1461,36 +1940,61 @@ def main():
     parser.add_argument("--require-witness", action="store_true",
                         help="Require a pinned witness checkpoint matching the full evidence ZIP's final record")
     parser.add_argument("--channel", help="Witness channel posts: Telegram Desktop result.json, saved page or t.me/s URL")
-    parser.add_argument("--evidence", type=Path, help="With a profile/proof/history JSON: verify the matching evidence ZIP")
+    parser.add_argument("--evidence", type=Path,
+                        help="With a profile/proof/history JSON or a sealed report: verify the matching archive")
     parser.add_argument("--max-gib", type=int, default=MAX_UNCOMPRESSED_GIB,
                         help="Largest uncompressed archive to read, in GiB (default 4)")
+    output = parser.add_mutually_exclusive_group()
+    output.add_argument("--pretty", action="store_true", help="Readable, coloured answer (default at a terminal)")
+    output.add_argument("--plain", action="store_true", help="Plain text answer (default when piped)")
+    output.add_argument("--json", action="store_true", help="Only a JSON answer, for scripts")
+    parser.add_argument("--no-color", action="store_true", help="No colours (also with the NO_COLOR variable)")
+    parser.add_argument("--lang", choices=("en", "ru", "uk"), help="Language of the readable answer")
     args = parser.parse_args()
     if args.require_witness and (not args.witness or not args.witness_fingerprint):
         parser.error("--require-witness requires --witness and --witness-fingerprint")
     globals()["MAX_UNCOMPRESSED_GIB"] = max(1, args.max_gib)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="backslashreplace")
-    print("TgWitness verifier - PhishDestroy - https://github.com/phishdestroy/TgWitness")
+    mode = "json" if args.json else "pretty" if args.pretty or (not args.plain and sys.stdout.isatty()) else "plain"
+    console = Console(sys.stdout, console_language(args.lang), not args.no_color and not os.environ.get("NO_COLOR")) \
+        if mode == "pretty" else None
+    if console:
+        console.banner()
+    elif mode == "plain":
+        print("TgWitness verifier - PhishDestroy - https://github.com/phishdestroy/TgWitness")
     notes = []
 
     pinned = bool(args.fingerprint or args.witness_fingerprint)
+    shown = "evidence"
+    spinner = console.spinner() if console else None
+    if spinner:
+        spinner.__enter__()
     try:
-        if args.bundle.suffix.lower() == ".json":
+        if args.bundle.suffix.lower() in (".html", ".htm"):
+            shown, result = "report", verify_report(args.bundle, args.fingerprint, args.evidence)
+            pinned = bool(args.fingerprint)
+        elif args.bundle.suffix.lower() == ".json":
             kind = read_json_file(args.bundle).get("statement", {}).get("format")
             if is_format(kind, "public-proof-v1"):
+                shown = "proof"
                 result = verify_public_proof(args.bundle, args.fingerprint, args.witness_fingerprint, args.evidence)
             elif is_format(kind, "history-report-v1"):
+                shown = "history"
                 result = verify_history_report(args.bundle, args.fingerprint, args.evidence)
                 pinned = bool(args.fingerprint)
                 if not args.evidence:
                     notes.append("History report signature only: pass --evidence to cross-check the journal and counts.")
             else:
+                shown = "dossier"
                 result = verify_dossier(args.bundle, args.fingerprint, args.evidence)
                 pinned = bool(args.fingerprint)
         elif is_format(bundle_format(args.bundle), "chat-export-v1"):
+            shown = "chat"
             result = verify_chat_export(args.bundle, args.fingerprint)
             pinned = bool(args.fingerprint)
         elif is_format(bundle_format(args.bundle), "witness-v1"):
+            shown = "witness"
             result = verify_witness(args.bundle, args.witness_fingerprint or args.fingerprint)
             if args.channel:
                 result["channel_check"] = check_channel(result, args.channel)
@@ -1545,9 +2049,32 @@ def main():
                 raise ValueError("Requested channel evidence is missing signed witness posts at the export boundary")
             result["witness_required"] = True
     except Exception as exc:
+        if spinner:
+            spinner.__exit__(None, None, None)
+        if console:
+            console.failure(args.bundle, exc)
+            raise SystemExit(1)
+        if mode == "json":
+            print(json.dumps({"verified": False, "error": type(exc).__name__ + ": " + str(exc)}, indent=2))
+            raise SystemExit(1)
         parser.exit(1, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + str(exc) + "\n")
+    if spinner:
+        spinner.__exit__(None, None, None)
+    if console:
+        console.show(shown, args.bundle, result, notes, pinned)
+        return
+    if mode == "json":
+        print(json.dumps({"verified": True, "kind": shown, "signer_pinned": pinned, "notes": notes, "result": result},
+                         indent=2, ensure_ascii=False))
+        return
     print(json.dumps(result, indent=2))
     print(producer_line(result.get("producer")))
+    seal = result.get("report_seal")
+    if seal:
+        print("Report seal verified: " + ("chat.html" if shown == "chat" else "report.html" if shown == "evidence"
+                                          else args.bundle.name) + ", language " + str(seal["language"]) + ".")
+    if result.get("sha256sums"):
+        print("SHA256SUMS matches the signed manifest.")
     for line in notes:
         print(line)
     print("Integrity verified. Source authenticity and clock accuracy are not established.")

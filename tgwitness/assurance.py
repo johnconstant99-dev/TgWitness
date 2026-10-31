@@ -164,11 +164,14 @@ def changes(state):
                                       "wtmp_sha256")}
 
 
-async def assurance_loop(store, selected, provider, interval=60, root=Path("/")):
-    """Append host.state whenever SSH, logins or the boot change; quiet while nothing changes."""
+async def assurance_loop(store, selected, provider, interval=60, root=Path("/"), status=None):
+    """Append host.state whenever SSH, logins or the boot change; quiet while nothing changes.
+    status, when given, holds the latest measurement for the panel (health.server)."""
     last = None
     while True:
         state = await asyncio.to_thread(host_state, root)
+        if status is not None:
+            status.update(state=state, measured_at=utcnow())
         if changes(state) != last:
             if last is not None:
                 store.append("host.state", {"mode": selected, "instance_id": provider.get("instance_id"),
