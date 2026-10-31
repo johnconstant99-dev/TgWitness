@@ -9,15 +9,9 @@ try:
 except ImportError:
     from site_i18n import LANGUAGES as SITE_LANGUAGES
 
-# These additions cover this guide and the two project notices. Other dictionaries are separate.
+# Amharic retains its existing guide and notice translations; DeepL does not support it.
 EXTRA_LANGUAGES = {
-    "fr": ("Français", "fr", "ltr", "fr_FR"), "de": ("Deutsch", "de", "ltr", "de_DE"),
-    "it": ("Italiano", "it", "ltr", "it_IT"), "uz": ("O‘zbekcha", "uz", "ltr", "uz_UZ"),
-    "ko": ("한국어", "ko", "ltr", "ko_KR"), "zh-Hant": ("繁體中文", "zh-Hant", "ltr", "zh_TW"),
-    "ms": ("Bahasa Melayu", "ms", "ltr", "ms_MY"), "pl": ("Polski", "pl", "ltr", "pl_PL"),
-    "ja": ("日本語", "ja", "ltr", "ja_JP"), "th": ("ไทย", "th", "ltr", "th_TH"),
-    "he": ("עברית", "he", "rtl", "he_IL"), "am": ("አማርኛ", "am", "ltr", "am_ET"),
-    "bn": ("বাংলা", "bn", "ltr", "bn_BD"),
+    "am": ("አማርኛ", "am", "ltr", "am_ET"),
 }
 LANGUAGES = {**SITE_LANGUAGES, **EXTRA_LANGUAGES}
 

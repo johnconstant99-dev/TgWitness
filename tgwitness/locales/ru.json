@@ -2128,5 +2128,11 @@
   "GitHub is limiting requests from this address. Try again in an hour.": "GitHub ограничивает количество запросов с этого адреса. Повторите попытку через час.",
   "GitHub could not be reached through this workspace's connection route.": "Не удалось установить соединение с GitHub через маршрут подключения данного рабочего пространства.",
   "Enter a GitHub repository as github.com/owner/name.": "Введите репозиторий GitHub в виде github.com/owner/name.",
-  "In Extras, open Verified code from GitHub and enter your fork or the official repository with a release tag or commit. TgWitness compares every program file with that commit and saves the result in the signed journal, so an export shows which public code was running. No GitHub token is needed.": "В разделе «Дополнительно» откройте «Проверенный код» с GitHub и укажите свой форк или официальный репозиторий с тегом выпуска или коммитом. TgWitness сравнивает каждый файл программы с этим коммитом и сохраняет результат в подписанном журнале, благодаря чему при экспорте будет видно, какой общедоступный код выполнялся. Токен GitHub не требуется."
+  "In Extras, open Verified code from GitHub and enter your fork or the official repository with a release tag or commit. TgWitness compares every program file with that commit and saves the result in the signed journal, so an export shows which public code was running. No GitHub token is needed.": "В разделе «Дополнительно» откройте «Проверенный код» с GitHub и укажите свой форк или официальный репозиторий с тегом выпуска или коммитом. TgWitness сравнивает каждый файл программы с этим коммитом и сохраняет результат в подписанном журнале, благодаря чему при экспорте будет видно, какой общедоступный код выполнялся. Токен GitHub не требуется.",
+  "answerCallbackQuery": "answerCallbackQuery",
+  "challenge must be 32 lowercase hexadecimal characters": "Контрольная строка должна состоять из 32 шестнадцатеричных символов в нижнем регистре",
+  "messages.checkChatInvite": "messages.checkChatInvite",
+  "messages.getBotCallbackAnswer": "messages.getBotCallbackAnswer",
+  "messages.importChatInvite": "messages.importChatInvite",
+  "messages.requestUrlAuth": "messages.requestUrlAuth"
 }

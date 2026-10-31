@@ -165,6 +165,10 @@ def check_languages(browser, server):
     page.goto(server.url)
     english = " ".join(journal.inner_text().split()[:-1])  # without the event counter
     page.unroute("**/app.js*")
+    # A shared panel link must select its language, even with a different saved choice.
+    context.add_cookies([{"name": i18n.COOKIE, "value": "ru", "url": server.url}])
+    page.goto(server.url + "/?lang=de")
+    expect(page.locator("html")).to_have_attribute("lang", "de")
     for lang in i18n.LANGUAGES[1:]:
         words = i18n.words(lang)
         missing = sorted({key for key in keys if key not in words})
@@ -172,7 +176,7 @@ def check_languages(browser, server):
         context.add_cookies([{"name": i18n.COOKIE, "value": lang, "url": server.url}])
         page.goto(server.url)
         expect(page.locator("html")).to_have_attribute("lang", lang)
-        expect(page.locator("html")).to_have_attribute("dir", "rtl" if lang in ("ar", "fa", "ur") else "ltr")
+        expect(page.locator("html")).to_have_attribute("dir", "rtl" if lang in ("ar", "fa", "ur", "he") else "ltr")
         expect(journal).to_contain_text(words[english])
         expect(page.locator("#chat-feed .msg").first).to_be_visible()
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), lang

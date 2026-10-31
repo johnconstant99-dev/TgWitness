@@ -35,6 +35,19 @@ def test_panel_scripts_and_server_messages_have_dictionary_coverage():
         assert not missing, (lang, sorted(missing)[:5])
 
 
+def test_full_site_and_panel_languages_cannot_drift_apart():
+    from tools.site_i18n import LANGUAGES as site_languages
+    assert tuple(site_languages) == i18n.LANGUAGES
+    assert 'de' in i18n.LANGUAGES and 'he' in i18n.LANGUAGES and 'zh-Hant' in i18n.LANGUAGES
+
+
+def test_existing_fallback_keys_have_real_catalogue_entries_in_every_panel_language():
+    fallback = set(json.loads(i18n.ENGLISH_FALLBACKS.read_text(encoding='utf-8')))
+    for lang in TRANSLATED:
+        values = json.loads((i18n.LOCALES / (lang + '.json')).read_text(encoding='utf-8'))
+        assert not fallback - values.keys(), lang
+
+
 def test_fallback_catalog_is_explicit_english_and_preserves_translations():
     fallback = json.loads(i18n.ENGLISH_FALLBACKS.read_text(encoding="utf-8"))
     assert fallback and len(fallback) == len(set(fallback))
@@ -59,7 +72,8 @@ def test_translations_keep_placeholders_and_markup(lang):
 def test_language_picker_lists_exactly_the_supported_languages():
     script = (STATIC / "i18n.js").read_text(encoding="utf-8")
     listed = re.search(r"const PANEL_LANGUAGES=\{(.*?)\};", script, re.S).group(1)
-    assert re.findall(r"(\w+):\"", listed) == list(i18n.LANGUAGES)
+    codes = [a or b for a, b in re.findall(r'(?:"([\w-]+)"|(\w+)):"', listed)]
+    assert codes == list(i18n.LANGUAGES)
     extra = re.search(r"const GUIDE_LANGUAGES=\{\.\.\.PANEL_LANGUAGES,(.*?)\};", script, re.S).group(1)
     codes = [a or b for a, b in re.findall(r'(?:"([\w-]+)"|(\w+)):"', extra)]
     assert (*i18n.LANGUAGES, *codes) == i18n.GUIDE_LANGUAGES
@@ -73,10 +87,10 @@ def test_guide_catalogs_cover_both_pages_and_preserve_commands_and_links():
     for lang in i18n.GUIDE_LANGUAGES[1:]:
         dictionary = i18n.guide_words(lang)
         assert required <= dictionary.keys(), lang
-        if lang in i18n.LANGUAGES:
-            continue  # Existing panel dictionaries have their own markup checks.
-        assert dictionary.keys() == required, lang
-        for key, value in dictionary.items():
+        if lang not in i18n.LANGUAGES:
+            assert dictionary.keys() == required, lang
+        for key in required:
+            value = dictionary[key]
             assert value.strip() and holes(value) == holes(key) and tags(value) == tags(key), (lang, key)
             protected = lambda text: Counter(unescape(x) for x in re.findall(r'<(?:code|kbd)[^>]*>(.*?)</(?:code|kbd)>', text))
             assert protected(value) == protected(key), (lang, key)
@@ -93,9 +107,9 @@ def test_guide_browser_language_and_chinese_script_selection(tag, expected):
 def test_language_choice_order():
     assert i18n.pick("ru", "es-ES,es;q=0.9") == "ru"
     assert i18n.pick("xx", "pt-BR,pt;q=0.9,en;q=0.5") == "pt"
-    assert i18n.pick(None, "de-DE,zh-CN;q=0.8,ru;q=0.5") == "zh"
+    assert i18n.pick(None, "de-DE,zh-CN;q=0.8,ru;q=0.5") == "de"
     assert i18n.pick(None, "uk;q=0.2,es;q=0.7") == "es"
-    assert i18n.pick(None, "de,fr;q=0") == "en"
+    assert i18n.pick(None, "am,fr;q=0") == "en"
     assert i18n.pick(None, None) == "en"
 
 
@@ -132,6 +146,6 @@ def test_guide_locale_endpoint_has_all_translations_and_keeps_panel_scope(tmp_pa
             assert response.content == i18n.script(lang, guide=True)
         # An old cookie cannot override an explicit shared link. Unknown input cannot select a file.
         assert client.get("/locale.js?scope=guide&lang=../private").content == i18n.script("ru", guide=True)
-        assert client.get("/locale.js?lang=de").content == i18n.script("ru")
+        assert client.get("/locale.js?lang=de").content == i18n.script("de")
         client.cookies.clear()
         assert client.get("/locale.js?scope=guide", headers={"Accept-Language": "zh-TW"}).content == i18n.script("zh-Hant", guide=True)

@@ -3,9 +3,10 @@
 // records are never passed through here, so evidence is always shown exactly as saved.
 const LANG=window.TGW_LANG||"en",DICT=window.TGW_DICT||{};
 const PANEL_LANGUAGES={en:"English",ru:"Русский",uk:"Українська",es:"Español",pt:"Português (Brasil)",tr:"Türkçe",
-  ar:"العربية",fa:"فارسی",ur:"اردو",hi:"हिन्दी",id:"Bahasa Indonesia",vi:"Tiếng Việt",zh:"简体中文"};
-const GUIDE_LANGUAGES={...PANEL_LANGUAGES,fr:"Français",de:"Deutsch",it:"Italiano",uz:"O‘zbekcha",ko:"한국어",
-  "zh-Hant":"繁體中文",ms:"Bahasa Melayu",pl:"Polski",ja:"日本語",th:"ไทย",he:"עברית",am:"አማርኛ",bn:"বাংলা"};
+  ar:"العربية",fa:"فارسی",ur:"اردو",hi:"हिन्दी",id:"Bahasa Indonesia",vi:"Tiếng Việt",zh:"简体中文",
+  fr:"Français",de:"Deutsch",it:"Italiano",uz:"O‘zbekcha",ko:"한국어",
+  "zh-Hant":"繁體中文",ms:"Bahasa Melayu",pl:"Polski",ja:"日本語",th:"ไทย",he:"עברית",bn:"বাংলা"};
+const GUIDE_LANGUAGES={...PANEL_LANGUAGES,am:"አማርኛ"};
 const LANGUAGES=window.TGW_SCOPE==="guide"?GUIDE_LANGUAGES:PANEL_LANGUAGES;
 const RTL=new Set(["ar","fa","ur","he"]);
 function fill(text,vars){return vars?text.replace(/\{(\w+)\}/g,(m,k)=>k in vars?String(vars[k]):m):text;}

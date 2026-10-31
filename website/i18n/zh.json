@@ -2343,7 +2343,10 @@
 "a7a80f53ab93d758e801f34dcdb423d6f111632506176758f77be128cfdd1273": "历史快照与新消息事件有所不同。静默源可在不产生新消息的情况下连接。当完整性至关重要时，请使用受控交付测试。",
 "66206db4c21bc488178ea24ddebf1f3ec9d736aef99a78470530b2e196bfbf0f": "该工具会检查收集器报告的日志状态，但不会独立监视每条 Telegram 消息。如需实现此功能，请添加“受控投递测试”。",
 "85a91b6ec544f63dc79f567b61e01a439052aa8295dabc5ba82394975fffed9d": "原 Proof 机器人入口现已改为<strong>“扩展功能”（Extras）</strong>：先简要概述，随后是\n针对所选选项的独立设置页面。Witness 表单分为三个步骤，其中\n连接管理、网络选项和部署详情均以折叠形式呈现。GitHub 支持\n已明确规划，且无需填写凭据表单。<a href=\"ru/EXTRAS.md\">俄语概述</a>。",
-"4d745a5f25498b1c5e03c3e18b675b4babfde1ed66b47fdcc0c0bcc4a8b12ce4": "如需进行服务器安装，请参阅《<a href=\"@@GUIDE_SERVER@@\">保持运行》</a>。"
+"4d745a5f25498b1c5e03c3e18b675b4babfde1ed66b47fdcc0c0bcc4a8b12ce4": "如需进行服务器安装，请参阅《<a href=\"@@GUIDE_SERVER@@\">保持运行》</a>。",
+"775067fa0fdd03036522e388526ce9d98595493f6d75b4c8afcd089c32ff0708": "日常配置流程为：账户 → 数据源 → 监控。<strong>附加功能</strong>是一个独立的配置区域，\n包含两张卡片：Telegram 见证机器人和计划中的\nGitHub 构建验证。每张卡片在显示\n设置前都会说明其可用性和要求。选择卡片会打开操作指南；此操作不会注册或启动服务。",
+"98e3389bd3300070cdfef60aa62fa498e516cb0b1b0fee8797cc78a1d86540e0": "源代码测试使用了 FastAPI 0.159.1、Uvicorn 0.54.0、Telethon 1.45.0、\ncryptography 50.0.2、pytest 9.1.1 以及 Playwright 1.62.0。\n锁定的运行时环境使用 FastAPI 0.162.0、Starlette 1.10.0、\nUvicorn 0.54.0、Telethon 1.45.0 以及 cryptography 50.0.2。\ndeploy/constraints.txt 记录了运行时版本的固定信息；deploy/requirements.lock 和\ndeploy/build.lock 包含每个包文件的 SHA-256 值，Docker 和高保障\n服务器仅从这些文件进行安装（pip --require-hashes）。 这两者均不能作为在\n所有已配置的 CI 平台上兼容性的证据。远程 CI 尚未运行。",
+"e463eb74574c8d89dbcee59739024241bf311a61be3d4a96d58e0c282f7219c8": "在示例配置中，/tmp 分区的上限为 512 MiB。导出构建\n改用每个工作区的 <code>temporary-exports/</code> 路径，将其映射到持久化 /data 分区。请在此处预留空间\n以满足同时导出、日志/WAL 增长、媒体文件及备份的需求。\n启动器使用 deploy/constraints.txt 来锁定符合要求的运行时依赖项版本。\nDocker 和高保障服务器根据 deploy/requirements.lock 和\ndeploy/build.lock 文件，通过 pip --require-hashes 进行安装：每个包文件必须与提交中记录的 SHA-256\n值相匹配，因此若 PyPI 或镜像站点上的文件被替换，则会被拒绝。 Python 基础\n镜像和操作系统软件包仍需通过独立的发布资格认证。"
 },
 "modes": {
 "modes.actions.body": "预览、请求和结果回执均经过签名。在按下按钮之前，服务器会再次获取消息，并拒绝已更改的键盘输入。返回的回调文本和 URL 仍作为记录上下文保留。",

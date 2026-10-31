@@ -38,7 +38,7 @@
 - **Percakapan dengan riwayat.** Baca pesan yang disimpan, bandingkan perubahan yang terekam, dan lihat pemberitahuan penghapusan dalam konteks percakapan.
 - **Pemantauan sesuai keinginan Anda.** Pilih obrolan individu, folder Telegram, atau seluruh akun. Setiap akun memiliki ruang kerja dan pengaturan tersendiri.
 - **Ekspor yang dapat Anda verifikasi.** Berkas ZIP yang ditandatangani, catatan asli, lampiran yang disimpan, dan laporan HTML offline. Perlindungan kata sandi opsional untuk penyerahan.
-- **Dibuat untuk penggunaan sehari-hari.** Tema terang dan gelap, 13 bahasa, fitur pencarian, navigasi dengan Ctrl/Cmd+K, dan tindakan langsung dari Obrolan.
+- **Dibuat untuk penggunaan sehari-hari.** Tema terang dan gelap, 25 bahasa, fitur pencarian, navigasi dengan Ctrl/Cmd+K, dan tindakan langsung dari Obrolan.
 
 <details>
 <summary>Semua fitur dan detail teknis</summary>
@@ -57,7 +57,7 @@
 - **Ekspor yang ditandatangani dan dapat diverifikasi.** Setiap peristiwa dirantai dengan hash (SHA-256) dan ditandatangani (Ed25519). Paket ZIP yang ditandatangani berisi JSONL, CSV, laporan HTML offline, media yang disimpan, dan verifikator mandiri.
 - **Ekspor yang dilindungi kata sandi.** Secara opsional, simpan ekspor apa pun ke dalam ZIP WinZip AES-256, format yang dapat dibaca oleh 7-Zip dan WinRAR; isi yang telah ditandatangani di dalamnya tetap tidak berubah. Arsip uji coba dibuka byte demi byte di libarchive (Windows `tar`) dan kata sandi yang salah ditolak ([model bukti](../EVIDENCE.md#investigation-handoff)).
 - **Pemberitahuan.** Masalah (ruang disk rendah, akun yang sudah logout, kesalahan kolektor, penyalinan, atau cap waktu), perubahan dalam obrolan yang diamati, dan ringkasan harian, dikirim melalui [Apprise](https://github.com/caronc/apprise) ke Matrix, Telegram, Discord, Slack, ntfy, email, dan banyak layanan lainnya — tanpa teks pesan kecuali jika Anda mengaktifkan cuplikan — dan tercantum di panel. Pengiriman telah diuji terhadap titik akhir lokal; layanan-layanan tersebut sendiri belum diuji.
-- **13 bahasa antarmuka.** Bahasa Inggris, Rusia, Ukraina, Spanyol, Portugis (Brasil), Turki, Arab, Persia, Urdu, Hindi, Indonesia, Vietnam, dan Mandarin Sederhana, diterjemahkan secara otomatis menggunakan DeepL. Bagian-bagian yang lebih baru menggunakan teks cadangan dalam bahasa Inggris yang telah dikatalogkan secara eksplisit; kontrol klien mini tetap dalam bahasa Inggris. Konten Telegram dan catatan jurnal selalu ditampilkan persis seperti yang disimpan.
+- **Tersedia dalam 25 bahasa antarmuka.** Panel dan dokumentasi lengkap menggunakan bahasa yang sama, termasuk bahasa Jerman, Prancis, Jepang, dan Ibrani. Terjemahan disiapkan menggunakan DeepL. Konten Telegram dan catatan jurnal selalu ditampilkan persis seperti yang disimpan.
 - **Tema terang dan gelap.** Secara default mengikuti pengaturan sistem; pilihan ini disimpan per browser.
 - **Navigasi yang ramah keyboard.** Tekan **Ctrl+K** (Mac: **⌘K**) atau pilih **"Go to…"** untuk menemukan bagian tertentu. Gunakan tombol panah dan Enter untuk membukanya; tekan Escape untuk menutup menu.
 - **Akun ganda.** Jumlah ruang kerja terisolasi yang tidak terbatas, masing-masing dengan sesi Telegram, jurnal, kunci penandatanganan, rute proxy, dan kebijakan penangkapan data tersendiri.

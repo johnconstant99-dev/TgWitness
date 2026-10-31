@@ -1,6 +1,9 @@
 """Publication boundary checks: the Pages artifact must never include live data."""
 import shutil
 import json
+import re
+from collections import Counter
+from html import unescape
 from html.parser import HTMLParser
 from urllib.parse import unquote, urljoin, urlsplit
 import xml.etree.ElementTree as ET
@@ -11,6 +14,25 @@ from tools.build_site import (DEMO_GUIDE_LOCALES, DEMO_LOCALES, DEMO_PAGES, DEMO
                               NOTICE_LANGUAGES, NOTICE_PAGES, PAGES, ROOT, SEARCH_FILES,
                               STATIC, TRANSLATIONS, build_site, page_languages)
 from tools import site_modes
+from tools import site_i18n
+from tools.build_site import inventory
+
+
+def test_translated_site_blocks_preserve_commands_and_link_targets():
+    _, fragments, _ = inventory(ROOT)
+    blocks = {site_i18n.digest(text): text for fragment in fragments.values()
+              for text in site_i18n.unit_texts(fragment)}
+    protected = lambda text: Counter(unescape(value) for value in re.findall(
+        r'<(?:code|kbd|pre)[^>]*>(.*?)</(?:code|kbd|pre)>', text, re.S))
+    links = lambda text: Counter(re.findall(r'(?:href|src)="([^"]*)"', text))
+    for lang in LANGS:
+        if lang == 'en':
+            continue
+        catalogue = json.loads((ROOT / 'website/i18n' / (lang + '.json')).read_text(encoding='utf-8'))
+        for key, source in blocks.items():
+            value = catalogue['blocks'][key]
+            assert protected(value) == protected(source), (lang, key, 'command changed')
+            assert links(value) == links(source), (lang, key, 'link changed or duplicated')
 
 
 @pytest.fixture
@@ -68,7 +90,7 @@ def test_setup_and_account_guides_publish_all_26_language_catalogs(site_root):
 
 
 def test_missing_guide_translation_blocks_publication(site_root):
-    path = site_root / "tgwitness/guide_locales/de.json"
+    path = site_root / "tgwitness/locales/de.json"
     words = json.loads(path.read_text(encoding="utf-8"))
     words.pop("From account connection to a verifiable journal")
     path.write_text(json.dumps(words), encoding="utf-8")
@@ -268,7 +290,19 @@ def test_notice_navigation_cannot_silently_fall_back_to_english(site_root):
     data = json.loads(path.read_text(encoding='utf-8'))
     del data['strings']['Search the documentation']
     path.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
-    with pytest.raises(ValueError, match='Incomplete notice labels: he'):
+    with pytest.raises(ValueError, match='Incomplete site labels: he'):
+        build_site(site_root)
+
+
+def test_cases_cannot_be_published_with_a_missing_german_translation(site_root):
+    from tools import site_i18n
+    path = site_root / 'website/i18n/de.json'
+    data = json.loads(path.read_text(encoding='utf-8'))
+    fragment = (site_root / 'website/guides/en/cases.html').read_text(encoding='utf-8')
+    first = site_i18n.unit_texts(fragment)[0]
+    del data['blocks'][site_i18n.digest(first)]
+    path.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
+    with pytest.raises(ValueError, match='Incomplete site translation: de/guide:cases'):
         build_site(site_root)
 
 

@@ -11,12 +11,12 @@
   <a href="https://github.com/phishdestroy/TgWitness/wiki"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-nav-wiki-static.svg"><img src="docs/assets/presentation/casework-nav-wiki.svg" width="296" height="76" alt="Open the handbook"></picture></a>
 </p>
 
-<p align="center"><strong>Your Telegram investigation workspace.</strong><br>Capture what you observe. Follow the connections. Hand over a verifiable record.<br>Self-hosted, on your own computer or server.</p>
+<p align="center"><strong>Export chats. Preserve changes. Follow the evidence.</strong><br>Keep conversations, trace people and links, and hand over a verifiable record.<br>Self-hosted, on your own computer or server.</p>
 
 <p align="center">
   <a href="docs/CHANGELOG.md"><img src="docs/assets/presentation/identity-meta-version.svg" width="144" height="30" alt="v0.7.0 · pre-release"></a>
   <a href="docs/VERIFICATION.md"><img src="docs/assets/presentation/identity-meta-verification.svg" width="158" height="30" alt="Tested environments"></a>
-  <img src="docs/assets/presentation/identity-meta-languages.svg" width="279" height="30" alt="13 interface languages · 26 guide languages">
+  <img src="docs/assets/presentation/identity-meta-languages.svg" width="279" height="30" alt="25 interface languages · 26 guide languages">
   <a href="LICENSE"><img src="docs/assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a>
 </p>
 
@@ -24,7 +24,8 @@
 
 ## From a chat to a case.
 
-Export a conversation, follow leads across recorded chats, and keep the changes you observe.
+Take a conversation offline. Keep captured messages when they change or disappear.
+Follow people and shared links across your recorded chats.
 
 <picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-features-mobile-static.svg">
@@ -33,7 +34,25 @@ Export a conversation, follow leads across recorded chats, and keep the changes 
   <img src="docs/assets/presentation/readme-features.svg" width="1200" alt="Export a chat, follow leads across recorded chats and retain observed changes. Three illustrated workflows.">
 </picture>
 
-Illustrated workflows. [Export a chat](docs/wiki/Chat-Export.md) · [Investigate](docs/wiki/Investigations.md) · [Capture changes](docs/wiki/Collection.md)
+- **[Export a chat](docs/wiki/Chat-Export.md).** Save its currently visible history in a signed archive: **HTML for offline reading, JSON for analysis**.
+
+- **[Keep edits and deleted content](docs/COLLECTION.md).** Compare captured versions; saved content stays after a deletion notice. Changed bot keyboards and links are captured too.
+
+- **[Follow people across chats](docs/INVESTIGATION.md#4-connect-observations-across-chats).** Search recorded conversations within a workspace. People profiles connect observed names, usernames, replies and mentioned wallets, phones and links **back to source records**.
+
+- **[Record bot interactions](docs/COLLECTION.md#act-from-the-panel).** Preview Telegram links, join sources, send replies and press supported bot buttons from the panel. Requests and results stay in the signed journal.
+
+- **[Use several accounts](docs/wiki/Accounts.md).** Switch workspaces in one panel. Each account keeps its own session, sources, journal and signing key.
+
+- **[Hand over a verifiable record](docs/wiki/Exports-and-Verification.md).** Export a **signed evidence ZIP** with the journal and preserved files. The recipient can check hashes and signatures against a separately trusted key and checkpoint.
+
+**Choose your scope:** selected chats, a Telegram folder or the whole account.
+[Investigation mode](docs/COLLECTION.md#investigation-mode-joining-teams-and-talking-to-bots)
+also prepares profile capture and recent-history snapshots for newly discovered sources.
+[Compare collection modes →](https://phishdestroy.github.io/TgWitness/guides/modes.html)
+
+Captured versions must have been saved before they disappeared; TgWitness cannot
+recover unseen messages that Telegram no longer returns.
 
 <a name="screenshots"></a>
 
@@ -68,11 +87,6 @@ Captured messages, edits, deletion notices, people and files — linked to their
 All screenshots use fictional demonstration data. Open an image for its full-size view.
 
 </details>
-
-**Collection:** chosen chats · Telegram folder · whole account · investigation mode.
-Profiles, history snapshots and supported bot actions stay with the case.
-
-[Collection & scope](docs/COLLECTION.md) · [Investigation tools](docs/INVESTIGATION.md) · [Modes & evidence](https://phishdestroy.github.io/TgWitness/guides/modes.html)
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 

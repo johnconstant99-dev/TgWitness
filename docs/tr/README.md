@@ -38,7 +38,7 @@
 - **Geçmişi olan sohbetler.** Kaydedilmiş mesajları okuyun, yakalanan düzenlemeleri karşılaştırın ve silme bildirimlerini sohbet bağlamında görüntüleyin.
 - **Kendi şartlarınıza göre gözlem yapın.** Tek tek sohbetleri, bir Telegram klasörünü veya tüm hesabı seçin. Her hesabın kendi çalışma alanı ve ayarları vardır.
 - **Doğrulayabileceğiniz dışa aktarımlar.** İmzalı bir ZIP dosyası, orijinal kayıtlar, korunmuş ekler ve çevrimdışı bir HTML raporu. Devir için isteğe bağlı şifre koruması.
-- **Günlük kullanım için tasarlanmıştır.** Açık ve koyu temalar, 13 dil desteği, arama, Ctrl/Cmd+K ile gezinme ve Sohbetler'den doğrudan eylemler.
+- **Günlük kullanım için tasarlanmıştır.** Açık ve koyu temalar, 25 dil desteği, arama, Ctrl/Cmd+K ile gezinme ve Sohbetler'den doğrudan eylemler.
 
 <details>
 <summary>Tüm özellikler ve teknik ayrıntılar</summary>
@@ -57,7 +57,7 @@
 - **İmzalı, doğrulanabilir dışa aktarımlar.** Her olay, hash zincirine eklenir (SHA-256) ve imzalanır (Ed25519). İmzalı ZIP dosyası, JSONL, CSV, çevrimdışı HTML raporu, korunmuş medya dosyaları ve bağımsız bir doğrulayıcı içerir.
 - **Şifre korumalı dışa aktarımlar.** İsteğe bağlı olarak herhangi bir dışa aktarmayı, 7-Zip ve WinRAR tarafından okunabilen WinZip AES-256 ZIP formatına koyabilirsiniz; içindeki imzalı içerik değişmeden kalır. Bir test arşivi libarchive'da (Windows `tar`) bayt bayt açıldı ve yanlış şifre reddedildi ([kanıt modeli](../EVIDENCE.md#investigation-handoff)).
 - **Bildirimler.** Sorunlar (düşük disk alanı, oturumu kapatılmış hesap, toplayıcı, kopyalama veya zaman damgası hataları), gözlemlenen sohbetlerdeki değişiklikler ve günlük özet, [Apprise](https://github.com/caronc/apprise) aracılığıyla Matrix, Telegram, Discord, Slack, ntfy, e-posta ve diğer birçok hizmete gönderilir — alıntıları etkinleştirmediğiniz sürece mesaj metni içermez — ve panelde listelenir. Teslimat, yerel bir uç noktaya karşı test edilmiştir; hizmetlerin kendisi henüz test edilmemiştir.
-- **13 arayüz dili.** İngilizce, Rusça, Ukraynaca, İspanyolca, Portekizce (Brezilya), Türkçe, Arapça, Farsça, Urduca, Hintçe, Endonezce, Vietnamca ve Basitleştirilmiş Çince; DeepL ile makine çevirisi yapılmıştır. Yeni bölümlerde açıkça kataloglanmış İngilizce yedek metinler kullanılmaktadır; mini istemci kontrolleri İngilizce kalmaktadır. Telegram içeriği ve günlük kayıtları her zaman kaydedildiği şekilde gösterilir.
+- **25 arayüz dili.** Panel ve tam dokümantasyon, Almanca, Fransızca, Japonca ve İbranice dahil olmak üzere aynı dilleri paylaşmaktadır. Çeviriler DeepL ile hazırlanmıştır. Telegram içeriği ve günlük kayıtları her zaman kaydedildiği şekilde aynen görüntülenir.
 - **Açık ve koyu tema.** Varsayılan olarak sistem ayarlarını takip eder; seçim, tarayıcı başına kaydedilir.
 - **Klavyeyle kolay gezinme.** Bir bölümü bulmak için **Ctrl+K** (Mac: **⌘K**) tuşlarına basın veya **"Git..." seçeneğini** seçin. Bölümü açmak için ok tuşlarını ve Enter tuşunu kullanın; Escape tuşu menüyü kapatır.
 - **Birden fazla hesap.** Her biri kendi Telegram oturumu, günlüğü, imzalama anahtarı, proxy rotası ve yakalama politikasına sahip, sınırsız sayıda izole çalışma alanı.

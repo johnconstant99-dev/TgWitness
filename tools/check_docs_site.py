@@ -272,7 +272,7 @@ def main():
 
                 # Every language: its own lang and direction, a working search and a menu of all languages.
                 for lang in [code for code in NOTICE_LANGUAGES if code != "en"]:
-                    locales = ("", "docs/", "docs/security/", "docs/reference/how-it-works/", *NOTICE_PAGES) if lang in LANGUAGES else NOTICE_PAGES
+                    locales = ("", "docs/", "docs/cases/", "docs/security/", "docs/reference/how-it-works/", *NOTICE_PAGES) if lang in LANGUAGES else NOTICE_PAGES
                     for local in locales:
                         path = lang + "/" + local
                         page.set_viewport_size({"width": 1440, "height": 1000})
@@ -286,6 +286,16 @@ def main():
                         expect(page.locator('.lang-list a[aria-current]')).to_have_attribute("hreflang", NOTICE_LANGUAGES[lang][1])
                         if local:
                             expect(page.locator("#guide-search")).to_be_visible()
+                        if local == "docs/cases/":
+                            expect(page.locator('.language-notice')).to_have_count(0)
+                            case = page.locator('[data-lab="investigation"]')
+                            case.locator('[data-case-mode="person"]').click()
+                            expect(case.locator('[data-case-mode="person"]')).to_have_attribute('aria-pressed', 'true')
+                            # Switching languages keeps the investigation page, rather than returning home.
+                            page.locator('.lang-menu > summary').click()
+                            target = 'de' if lang != 'de' else 'fr'
+                            expect(page.locator(f'.lang-list a[hreflang="{target}"]')).to_have_attribute('href', f'../../../{target}/docs/cases/')
+                            page.locator('.lang-menu > summary').click()
                         if local in ("docs/reference/license/", "docs/reference/notice/"):
                             expect(page.locator('.language-notice')).to_have_count(0 if lang in LANGUAGES else 1)
                             expect(page.locator('.wiki-body [translate="no"]')).to_have_count(0)

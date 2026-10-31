@@ -61,7 +61,7 @@ For terminology, use the [glossary](wiki/Glossary.md).
 
 </details>
 
-The project also includes a documentation website in 13 languages, with light and dark
+The project also includes a documentation website in 25 languages, with light and dark
 themes and local search,
 animated message history, an interactive hash-chain sandbox, witness scenarios,
 a delivery chart, a complete investigation across channels, groups, private

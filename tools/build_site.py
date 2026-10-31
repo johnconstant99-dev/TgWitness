@@ -108,7 +108,7 @@ def prefix(lang):
 
 
 def page_languages(local):
-    """Only the two notices share all 26 capability-guide languages."""
+    """Full documentation languages, plus the existing Amharic notices."""
     return NOTICE_LANGUAGES if local in NOTICE_PAGES else site_i18n.LANGUAGES
 
 
@@ -298,6 +298,25 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     for script in ("website/learn.js", "website/docs.js", "website/site.js"):
         script_keys += site_i18n.script_strings(read_public(script).decode("utf-8"))
     images = {}
+
+    # A language in the main selector must have the complete current documentation.
+    # Changed English text must be translated before it can be published under that language.
+    inventory_strings, inventory_fragments, inventory_diagrams = inventory(root)
+    required_strings = set(inventory_strings + inventory_diagrams)
+    for lang in LANGS:
+        if lang == "en":
+            continue
+        data = translations[lang]
+        missing = sorted(text for text in required_strings if not data["strings"].get(text, "").strip())
+        if missing:
+            raise ValueError(f"Incomplete site labels: {lang}: {missing[0]}")
+        for name, fragment in inventory_fragments.items():
+            if name in {"reference:license", "reference:notice"}:
+                continue  # The dedicated notice checks below retain their specific diagnostics.
+            missing = [text for text in site_i18n.unit_texts(fragment)
+                       if not data["blocks"].get(site_i18n.digest(text), "").strip()]
+            if missing:
+                raise ValueError(f"Incomplete site translation: {lang}/{name} ({len(missing)} blocks)")
 
     english_page_ids = {}
     for lang in NOTICE_LANGUAGES:
@@ -603,7 +622,8 @@ def build_demo(read_public, write):
         page = read_public(source).decode("utf-8").replace('href="/"', 'href="../"')
         page = re.sub(r'\b(src|href)="/(?=[A-Za-z])', r'\1="', page)
         guide = target != "demo/index.html"
-        original_loader = '<script src="guide-locale.js"></script>' if guide else '<script defer src="locale.js"></script>'
+        original_loader = ('<script src="guide-locale.js"></script>' if guide
+                           else '<script src="guide-locale.js" data-scope="panel"></script>')
         if original_loader not in page:
             raise ValueError("Demo page no longer loads locale.js where expected: " + source)
         answering = '<script src="mock.js"></script>' if target == "demo/index.html" else ""

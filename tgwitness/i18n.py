@@ -3,8 +3,9 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-LANGUAGES = ("en", "ru", "uk", "es", "pt", "tr", "ar", "fa", "ur", "hi", "id", "vi", "zh")
-GUIDE_LANGUAGES = (*LANGUAGES, "fr", "de", "it", "uz", "ko", "zh-Hant", "ms", "pl", "ja", "th", "he", "am", "bn")
+LANGUAGES = ("en", "ru", "uk", "es", "pt", "tr", "ar", "fa", "ur", "hi", "id", "vi", "zh",
+             "fr", "de", "it", "uz", "ko", "zh-Hant", "ms", "pl", "ja", "th", "he", "bn")
+GUIDE_LANGUAGES = (*LANGUAGES, "am")
 COOKIE = "tgwitness-lang"
 LOCALES = Path(__file__).parent / "locales"
 GUIDE_LOCALES = Path(__file__).parent / "guide_locales"

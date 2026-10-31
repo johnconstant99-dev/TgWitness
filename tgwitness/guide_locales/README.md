@@ -1,8 +1,8 @@
 # Setup and dedicated-account translations
 
-These catalogs extend the two bundled guides to 26 languages. The panel keeps its
-separate catalog in `tgwitness/locales`; adding a guide language does not label the
-panel as translated.
+The two bundled guides support 26 languages. Their 25 full-site languages now use
+the panel catalogs in `tgwitness/locales`; Amharic uses its separate catalog here.
+The other files are retained as translation sources for the guides.
 
 `keys.json` records the English keys from both pages (as visited by `pageKeys()`)
 and the dynamic copy-button labels in `guide.js`. Each extra catalog must cover

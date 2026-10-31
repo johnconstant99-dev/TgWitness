@@ -15,9 +15,9 @@ requests in the browser. `tools/site_modes.py` rejects missing keys and escapes
 translated text. The page uses `style.css`, `learn.css`, `site.js` and the existing
 canonical SHA-256 implementation in `learn.js`.
 
-The 13 additional languages cover this page and its navigation. Their links to the
-setup guide and reference documentation currently open English pages, as disclosed
-on the translated page.
+The 25 full-site languages include these guides, cases, reference documentation
+and the panel. Amharic retains the capability and setup guides and both project
+notices; its other reference links open English, as disclosed on the page.
 
 The guide inventory and next-page order are defined in
 [`tools/site_content.py`](../../tools/site_content.py). The builder combines these

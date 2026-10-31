@@ -62,6 +62,9 @@ include-package-data = false
 tgwitness = [
   "static/*.html", "static/*.css", "static/*.js", "static/*.svg",
   "locales/ru.json", "locales/uk.json", "locales/es.json", "locales/pt.json",
+  "locales/fr.json", "locales/de.json", "locales/it.json", "locales/uz.json",
+  "locales/ko.json", "locales/zh-Hant.json", "locales/ms.json", "locales/pl.json",
+  "locales/ja.json", "locales/th.json", "locales/he.json", "locales/bn.json",
   "locales/tr.json", "locales/ar.json", "locales/fa.json", "locales/ur.json",
   "locales/hi.json", "locales/id.json", "locales/vi.json", "locales/zh.json",
   "guide_locales/*.json",

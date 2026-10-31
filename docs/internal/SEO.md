@@ -1,16 +1,16 @@
 # Website structure and search metadata
 
-The public site is a presentation and documentation center in **13 languages**: English
-at the root and Russian, Ukrainian, Spanish, Brazilian Portuguese, Turkish, Arabic,
-Persian, Urdu, Hindi, Indonesian, Vietnamese and Simplified Chinese under `/<code>/`
-(`tools/site_i18n.py`). Each language has **31 HTML pages** (403 in total): a
-homepage, a guide index, eleven guides, a reference index and 17 reference pages. The
-site can be built locally without importing the collector or opening account data.
+The homepage, documentation, case guides and panel share **25 languages**: English
+at the root and the other languages under `/<code>/` (`tools/site_i18n.py`). The
+builder publishes each full-site language's homepage, guide index, practical guides,
+reference index and reference pages. Amharic retains its existing capability guide
+and project notices. The site can be built locally without importing the collector
+or opening account data.
 
 ## Languages
 
 Every page names all its language versions (`hreflang`, plus `x-default` for English)
-and the sitemap lists them. Arabic, Persian and Urdu pages are right-to-left; the
+and the sitemap lists them. Arabic, Persian, Urdu and Hebrew pages are right-to-left; the
 stylesheets use logical properties and pick fonts that carry each script. A language
 menu in the header leads to the same page in another language, and a theme button
 switches light and dark (the system's choice until the reader picks one, kept in
@@ -21,7 +21,7 @@ Translations live in `website/i18n/<code>.json`: interface strings, and text uni
 SHA-256 of their English. They are made with DeepL by the maintainers' translation script,
 which sends only missing strings and units and refuses a translation whose links, code,
 placeholders or inline tags do not come back intact. When an English unit changes, its
-key changes: the page shows that unit in English with a notice until it is translated
+key changes: publishing a full-site language is blocked until that unit is translated
 again. The changelog stays in English in every language. Hand-checked Russian replaces
 the machine translation of the site's navigation and titles.
 

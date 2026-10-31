@@ -6,8 +6,8 @@ English is the source. website/i18n/<lang>.json holds, per language:
 A text unit is the inner HTML of one paragraph, list item, heading, cell, caption, button, link
 and the like: text with at most inline markup. Structure around it (sections, lists, labs, code,
 SVG) is never sent for translation, so it cannot be changed by it. When an English unit changes
-its hash changes, and the page shows that unit in English until it is translated again
-(test-results/site_translate.py) and says so; nothing stale is shown as current.
+its hash changes. The renderer can report an English fallback during development;
+the publication builder rejects missing translations in a full-site language.
 """
 import hashlib
 import html
@@ -31,6 +31,18 @@ LANGUAGES = {
     "id": ("Bahasa Indonesia", "id", "ltr", "id_ID"),
     "vi": ("Tiếng Việt", "vi", "ltr", "vi_VN"),
     "zh": ("简体中文", "zh-Hans", "ltr", "zh_CN"),
+    "fr": ("Français", "fr", "ltr", "fr_FR"),
+    "de": ("Deutsch", "de", "ltr", "de_DE"),
+    "it": ("Italiano", "it", "ltr", "it_IT"),
+    "uz": ("O‘zbekcha", "uz", "ltr", "uz_UZ"),
+    "ko": ("한국어", "ko", "ltr", "ko_KR"),
+    "zh-Hant": ("繁體中文", "zh-Hant", "ltr", "zh_TW"),
+    "ms": ("Bahasa Melayu", "ms", "ltr", "ms_MY"),
+    "pl": ("Polski", "pl", "ltr", "pl_PL"),
+    "ja": ("日本語", "ja", "ltr", "ja_JP"),
+    "th": ("ไทย", "th", "ltr", "th_TH"),
+    "he": ("עברית", "he", "rtl", "he_IL"),
+    "bn": ("বাংলা", "bn", "ltr", "bn_BD"),
 }
 # Release notes retain their original English. Project notices use the selected language;
 # the canonical MIT LICENSE and NOTICE files remain available through their original links.

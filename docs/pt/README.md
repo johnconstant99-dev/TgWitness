@@ -38,7 +38,7 @@
 - **Conversas com histórico.** Leia mensagens salvas, compare edições capturadas e visualize avisos de exclusão no contexto da conversa.
 - **Observação nos seus termos.** Escolha conversas individuais, uma pasta do Telegram ou toda a conta. Cada conta possui seu próprio espaço de trabalho e configurações.
 - **Exportações que você pode verificar.** Um arquivo ZIP assinado, registros originais, anexos preservados e um relatório HTML offline. Proteção opcional por senha para transferência.
-- **Feito para uso diário.** Temas claro e escuro, 13 idiomas, pesquisa, navegação com Ctrl/Cmd+K e ações diretamente a partir dos chats.
+- **Feito para uso diário.** Temas claro e escuro, 25 idiomas, pesquisa, navegação com Ctrl/Cmd+K e ações diretamente a partir dos chats.
 
 <details>
 <summary>Todos os recursos e detalhes técnicos</summary>
@@ -57,7 +57,7 @@
 - **Exportações assinadas e verificáveis.** Cada evento é encadeado por hash (SHA-256) e assinado (Ed25519). O arquivo ZIP assinado contém JSONL, CSV, um relatório HTML offline, mídia preservada e um verificador independente.
 - **Exportações protegidas por senha.** Opcionalmente, é possível compactar qualquer exportação em um arquivo ZIP com criptografia AES-256 do WinZip, formato compatível com o 7-Zip e o WinRAR; o conteúdo assinado no interior permanece inalterado. Um arquivo de teste foi aberto byte a byte no libarchive (Windows `tar`) e uma senha incorreta foi rejeitada ([modelo de evidência](../EVIDENCE.md#investigation-handoff)).
 - **Notificações.** Problemas (espaço em disco insuficiente, conta desconectada, erros no coletor, na cópia ou no carimbo de data/hora), alterações nos chats observados e um resumo diário, enviados por meio [do Apprise](https://github.com/caronc/apprise) para o Matrix, Telegram, Discord, Slack, ntfy, e-mail e muitos outros serviços — sem o texto da mensagem, a menos que você ative os trechos — e listados no painel. A entrega é testada em relação a um endpoint local; os próprios serviços ainda não foram testados.
-- **13 idiomas de interface:** inglês, russo, ucraniano, espanhol, português (Brasil), turco, árabe, persa, urdu, hindi, indonésio, vietnamita e chinês simplificado, traduzidos automaticamente pelo DeepL. As seções mais recentes utilizam texto alternativo em inglês explicitamente catalogado; os controles do minicliente permanecem em inglês. O conteúdo do Telegram e os registros do diário são sempre exibidos exatamente como foram salvos.
+- **25 idiomas de interface.** O painel e a documentação completa compartilham os mesmos idiomas, incluindo alemão, francês, japonês e hebraico. As traduções foram preparadas com o DeepL. O conteúdo do Telegram e os registros do diário são sempre exibidos exatamente como foram salvos.
 - **Tema claro e escuro.** Por padrão, segue a configuração do sistema; a escolha é lembrada por navegador.
 - **Navegação otimizada para teclado.** Pressione **Ctrl+K** (Mac: **⌘K**) ou selecione **“Ir para…”** para localizar uma seção. Use as setas do teclado e a tecla Enter para abri-la; a tecla Escape fecha o menu.
 - **Contas múltiplas.** Qualquer número de espaços de trabalho isolados, cada um com sua própria sessão do Telegram, diário, chave de assinatura, rota de proxy e política de captura.

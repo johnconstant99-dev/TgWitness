@@ -7,7 +7,7 @@ Windows portable package, the wheel and the source archive, each with its SHA-25
 
 ## Included in this source tree
 
-- A bearer-protected panel with isolated account workspaces, light/dark themes, 13 interface
+- A bearer-protected panel with isolated account workspaces, light/dark themes, 25 interface
   languages and a searchable Ctrl/Cmd+K navigation menu. Newer untranslated strings have
   explicit English fallbacks; quick-navigation labels also have Russian translations.
 - Phone/code/2FA, QR sign-in and bounded import of supported Telethon/Pyrogram sessions,

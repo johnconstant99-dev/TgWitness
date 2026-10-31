@@ -46,7 +46,7 @@
 <td valign="top"><h3>Follow the connections</h3><p>Search across saved conversations. Review cited timelines, people profiles and file connections within a workspace.</p></td>
 </tr>
 <tr>
-<td valign="top"><h3>A workspace for daily use</h3><p>Light and dark themes, 13 interface languages, keyboard navigation and actions directly from Chats.</p></td>
+<td valign="top"><h3>A workspace for daily use</h3><p>Light and dark themes, 25 interface languages, keyboard navigation and actions directly from Chats.</p></td>
 <td valign="top"><h3>Go further when you need to</h3><p>Add a witness, external timestamps, notifications. Each has its own setup guide.</p></td>
 </tr>
 </table>
@@ -108,10 +108,10 @@
   to Matrix, Telegram, Discord, Slack, ntfy, email and many other services — without message
   text unless you turn on excerpts — and listed in the panel. Delivery is tested against a
   local endpoint; the services themselves have not been tested yet.
-- **13 interface languages.** English, Russian, Ukrainian, Spanish, Portuguese (Brazil), Turkish,
-  Arabic, Persian, Urdu, Hindi, Indonesian, Vietnamese and Simplified Chinese, machine-translated
-  with DeepL. Newer sections use explicitly catalogued English fallback text; mini-client
-  controls remain English. Telegram content and journal records are always shown exactly as saved.
+- **25 interface languages.** The panel and documentation share the same language selection,
+  including German, French, Italian, Japanese, Korean, Hebrew and both Chinese scripts.
+  Translations are prepared with DeepL; the bundled guides also retain their separate Amharic
+  translation. Telegram content and journal records are always shown exactly as saved.
 - **Light and dark theme.** Follows the system setting by default; the choice is remembered per browser.
 - **Keyboard-friendly navigation.** Press **Ctrl+K** (Mac: **⌘K**) or select **Go to…** to
   find a section. Use the arrow keys and Enter to open it; Escape closes the menu.

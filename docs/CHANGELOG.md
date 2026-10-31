@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Expanded the panel and complete documentation site to 25 languages, including German,
+  French, Italian, Japanese, Korean and Hebrew. Language switches preserve the current
+  documentation page; the static demo includes the new panel dictionaries. Existing
+  Amharic guides and notices remain available separately.
+- Site publication now rejects missing translations in a full-site language.
+
 ## 0.7.0 · 30 October 2026
 
 - First GitHub release, with the Windows portable package, the wheel and the source archive.

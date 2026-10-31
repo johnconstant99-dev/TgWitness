@@ -17,9 +17,9 @@ format. Add or change a guide key in every language together. Translation text i
 escaped at build time and never inserted as executable markup. Code examples and
 fictional protocol fixtures remain language-neutral.
 
-[`site_modes.py`](../../tools/site_modes.py) defines the additional languages shared
-by the capability guide and both project notices. These do not imply translations
-of the entire site or application.
+The homepage, documentation, cases, reference pages and application panel share
+25 languages. [`site_modes.py`](../../tools/site_modes.py) additionally retains
+Amharic for the capability guide and both project notices.
 Translations were prepared with DeepL, with a separate Amharic translation because
 the configured DeepL API does not offer Amharic. Russian terminology and limitations
 were additionally reviewed. These are not certified or native-speaker-reviewed
@@ -33,8 +33,12 @@ remain unchanged. A missing notice translation stops the site build.
 After updating notice translations, run `python tools/sync_notice_translations.py`
 to regenerate both documents under `docs/<language>/` and links in existing READMEs.
 `python tools/sync_notice_translations.py --check` checks that these copies match
-the website catalogues. The 13 additional languages have translated navigation,
-search and links between the notices; other detailed manuals link to English.
+the website catalogues. Amharic keeps translated notice navigation and search;
+its other documentation links open English. All 25 full-site languages keep
+documentation links, navigation and search in the selected language.
+
+The build rejects missing labels or text blocks in a full-site language. When an
+English source changes, update its translations before publishing the site.
 
 ## Review a catalogue change
 
