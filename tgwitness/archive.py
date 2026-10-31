@@ -160,7 +160,7 @@ class ArchiveReader:
         check(self.principal, query.workspace, ("view", "path" if chat else "filter"),
               {"chat_id": query.chat_id} if chat else {})
         entry = self.registry.entries.get(query.workspace)
-        if entry is None:
+        if entry is None or entry.get("app") is None:
             raise Refused("Workspace is unavailable.")
         return entry["app"].state
 

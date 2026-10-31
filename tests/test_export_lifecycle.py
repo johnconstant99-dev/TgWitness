@@ -3,6 +3,7 @@ import asyncio
 import hashlib
 from unittest.mock import patch
 
+import pytest
 from fastapi.testclient import TestClient
 from telethon.helpers import TotalList
 
@@ -164,3 +165,73 @@ def test_failed_journal_write_still_ends_the_export(tmp_path):
             state = wait_finished(client, "/api/chat-export/" + single.json()["id"])
         assert state["phase"] == "failed" and state["error"] == "OSError"
         assert app.state.collector.export_claim is None
+
+
+@pytest.mark.parametrize("action", ["start", "delete"])
+def test_multi_export_reserves_its_slot_and_workspaces_during_setup(tmp_path, action):
+    app = create_app(tmp_path, client_factory=LifecycleClient)
+    with TestClient(app) as client:
+        profile, child = open_two(app, client)
+        entered = asyncio.Event()
+
+        async def paused(*args):
+            entered.set()
+            await asyncio.Event().wait()
+
+        multi = app.state.multi_export
+        with patch.object(child, "resolve_for_export", paused), \
+                patch.object(app.state.collector, "fetch_range", empty_range):
+            pending = client.portal.start_task_soon(multi.start, CHAT, [], profile)
+            try:
+                client.portal.call(asyncio.wait_for, entered.wait(), 5)
+                if action == "start":
+                    response = client.post("/api/multi-export/start", json={
+                        "chat_id": CHAT, "lead": "default", "profiles": []})
+                    assert response.status_code == 400 and "already running" in response.json()["detail"]
+                else:
+                    response = client.delete("/api/profiles/" + profile)
+                    assert response.status_code == 400 and "multi-account export" in response.json()["detail"]
+            finally:
+                pending.cancel()
+                client.portal.call(asyncio.sleep, 0)
+                client.portal.call(multi.close)
+
+        assert child.export_claim is None and not multi.busy()
+        assert app.state.profiles.entries[profile]["app"] is not None
+        with patch.object(child, "fetch_range", empty_range):
+            retry = client.post("/api/multi-export/start", json={
+                "chat_id": CHAT, "lead": profile, "profiles": []})
+            assert retry.status_code == 200, retry.text
+            assert wait_finished(client, "/api/multi-export/" + retry.json()["id"])["phase"] == "done"
+
+
+def test_failed_lead_still_keeps_its_workspace_until_the_bundle_is_built(tmp_path):
+    app = create_app(tmp_path, client_factory=LifecycleClient)
+    with TestClient(app) as client:
+        profile, child = open_two(app, client)
+        entered, release = asyncio.Event(), asyncio.Event()
+
+        async def failed(*args):
+            raise ConnectionError("Synthetic lead disconnect")
+
+        async def paused(*args):
+            entered.set()
+            await release.wait()
+            return await empty_range(*args)
+
+        with patch.object(child, "fetch_range", failed), \
+                patch.object(app.state.collector, "fetch_range", paused):
+            started = client.post("/api/multi-export/start", json={
+                "chat_id": CHAT, "lead": profile, "profiles": ["default"]})
+            assert started.status_code == 200, started.text
+            try:
+                client.portal.call(asyncio.wait_for, entered.wait(), 5)
+                lead = next(w for w in app.state.multi_export.public()["workers"] if w["profile_id"] == profile)
+                assert lead["state"] == "failed" and lead["ranges"] == 0
+                response = client.delete("/api/profiles/" + profile)
+                assert response.status_code == 400 and "multi-account export" in response.json()["detail"]
+            finally:
+                client.portal.call(release.set)
+            state = wait_finished(client, "/api/multi-export/" + started.json()["id"])
+            assert state["phase"] == "done", state
+        assert client.delete("/api/profiles/" + profile).status_code == 200

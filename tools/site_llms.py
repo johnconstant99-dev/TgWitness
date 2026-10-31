@@ -201,4 +201,4 @@ def index(base_url, repo_url, branch, version, guides, references):
 
 
 def full(index_text, documents):
-    return index_text + "\n---\n\n" + "\n\n---\n\n".join(documents) + "\n"
+    return (index_text + "\n---\n\n" + "\n\n---\n\n".join(documents)).rstrip("\n") + "\n"

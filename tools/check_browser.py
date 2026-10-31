@@ -52,7 +52,8 @@ class RunningApp:
         self.sock = socket.socket()
         self.sock.bind(("127.0.0.1", 0))
         self.url = "http://127.0.0.1:" + str(self.sock.getsockname()[1])
-        self.server = uvicorn.Server(uvicorn.Config(self.app, log_level="error", access_log=False))
+        self.server = uvicorn.Server(uvicorn.Config(self.app, log_level="error", access_log=False,
+                                                   timeout_graceful_shutdown=5))
         self.thread = threading.Thread(target=self.server.run, kwargs={"sockets": [self.sock]}, daemon=True)
 
     def __enter__(self):
@@ -66,7 +67,9 @@ class RunningApp:
 
     def __exit__(self, *args):
         self.server.should_exit = True
-        self.thread.join(timeout=10)
+        self.thread.join(timeout=30)
+        if self.thread.is_alive():
+            raise RuntimeError("Local test server did not finish shutdown")
         self.sock.close()
 
 

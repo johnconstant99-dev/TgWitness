@@ -1,6 +1,9 @@
+import asyncio
 import json
+import threading
 import time
 
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
@@ -102,3 +105,73 @@ def test_saved_chat_is_listed_after_capture_target_is_absent(panel):
     assert response.json()["next_offset"] is None
     assert client.post("/api/archive/query", json={"tool": "search_messages", "since": "2026-10-02T00:00:00Z",
                                                   "until": "2026-10-01T00:00:00Z"}).status_code == 422
+
+
+def test_unavailable_workspace_returns_an_explanation_instead_of_a_server_error(panel):
+    app, admin = panel
+    workspace = "a" * 32
+    app.state.profiles.entries[workspace] = {"app": None, "label": "Unavailable workspace"}
+    result = admin.post("/api/integrations/mcp", json={"name": "Unavailable archive",
+                        "workspaces": {workspace: None}, "expires_at": time.time() + 3600})
+    assert result.status_code == 200, result.text
+    client = TestClient(app, raise_server_exceptions=False,
+                        headers={"Authorization": "Bearer " + result.json()["token"]})
+    response = client.post("/api/archive/query", json={"tool": "list_chats", "workspace": workspace})
+    assert response.status_code == 403, response.text
+    assert response.json()["detail"] == "Workspace is unavailable."
+    response = admin.get("/api/analysis/provider", params={"workspace_id": workspace})
+    assert response.status_code == 403 and response.json()["detail"] == "Workspace is unavailable."
+
+
+@pytest.mark.parametrize("worker_fails", [False, True])
+def test_cancelled_queries_keep_the_read_limit_until_the_workers_finish(panel, monkeypatch, worker_fails):
+    from tgwitness.archive import ArchiveReader
+
+    app, admin = panel
+    _, issued = connect(app, admin)
+    original = ArchiveReader.read
+
+    async def run():
+        loop = asyncio.get_running_loop()
+        entered, finished, release = asyncio.Queue(), asyncio.Queue(), threading.Event()
+        started = []
+
+        def paused(reader, query):
+            started.append(True)
+            index = len(started)
+            loop.call_soon_threadsafe(entered.put_nowait, True)
+            try:
+                assert release.wait(10), "Archive reader was not released"
+                if worker_fails and index <= 2:
+                    raise ValueError("Synthetic cancelled read failure")
+                return original(reader, query)
+            finally:
+                loop.call_soon_threadsafe(finished.put_nowait, True)
+
+        monkeypatch.setattr(ArchiveReader, "read", paused)
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://testserver",
+                                     headers={"Authorization": "Bearer " + issued["token"]}) as client:
+            def query():
+                return asyncio.create_task(client.post("/api/archive/query", json={"tool": "list_chats"}))
+
+            requests = [query(), query()]
+            try:
+                for _ in requests:
+                    await asyncio.wait_for(entered.get(), 5)
+                for task in requests:
+                    task.cancel()
+                await asyncio.gather(*requests, return_exceptions=True)
+                third = query()
+                requests.append(third)
+                with pytest.raises(TimeoutError):
+                    await asyncio.wait_for(entered.get(), 0.1)
+                release.set()
+                response = await asyncio.wait_for(third, 5)
+                assert response.status_code == 200 and response.json()["items"]
+            finally:
+                release.set()
+                await asyncio.gather(*requests, return_exceptions=True)
+                for _ in started:
+                    await asyncio.wait_for(finished.get(), 5)
+
+    asyncio.run(run())

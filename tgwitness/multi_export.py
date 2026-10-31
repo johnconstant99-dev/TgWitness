@@ -40,9 +40,10 @@ class MultiExport:
         self.state = None
         self.task = None
         self.path = None
+        self.preparing = set()
 
     def busy(self):
-        return bool(self.task and not self.task.done())
+        return bool(self.preparing or (self.task and not self.task.done()))
 
     def app_for(self, profile_id):
         entry = self.profiles.entries.get(profile_id)
@@ -64,6 +65,8 @@ class MultiExport:
         if not lead.reserve_export(export_id):
             raise ValueError("The starting account is already exporting. Wait for it or cancel it.")
         reserved = {lead_id: lead}
+        # Reserve the coordinator and selected workspaces before Telegram yields control.
+        self.preparing = {lead_id, *profile_ids}
         try:
             entity = await lead.resolve_for_export(chat_id)
             info = lead.dialog_cache.get(chat_id, {})
@@ -107,6 +110,8 @@ class MultiExport:
         except BaseException:
             self.release(reserved, export_id)
             raise
+        finally:
+            self.preparing.clear()
 
         self.task.add_done_callback(lambda _: self.release(reserved, export_id))
         await asyncio.sleep(0)
@@ -120,8 +125,10 @@ class MultiExport:
     def uses(self, profile_id):
         """Whether a running export still depends on this workspace (its store, client or keys)."""
 
-        return self.busy() and any(w["profile_id"] == profile_id and w["state"] != "skipped"
-                                   and (w["state"] != "failed" or w["ranges"]) for w in self.state["workers"])
+        return profile_id in self.preparing or bool(self.task and not self.task.done() and (
+            profile_id == self.state["lead"] or any(
+                w["profile_id"] == profile_id and w["state"] != "skipped"
+                and (w["state"] != "failed" or w["ranges"]) for w in self.state["workers"])))
 
     async def run(self, lead_app, lead_entity, username, info, report_options=None):
         state, lead = self.state, lead_app.state.collector

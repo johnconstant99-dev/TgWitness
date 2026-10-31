@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, SecretStr
 
 from .access import Refused
 from .archive import ArchiveQuery, ArchiveReader, Connections, ConnectionSettings, MAX_RESPONSE, RateLimited, TOOLS
+from .workers import limited_in_thread
 
 
 class ProtocolCheck(BaseModel):
@@ -95,8 +96,7 @@ def register(app, authenticate):
         who = principal(request)
         try:
             async with asyncio.timeout(8):
-                async with slots:
-                    result = await asyncio.to_thread(ArchiveReader(app.state.profiles, who).read, body)
+                result = await limited_in_thread(slots, ArchiveReader(app.state.profiles, who).read, body)
             principal(request, count=False)
         except Refused as exc:
             raise HTTPException(403, str(exc)) from None

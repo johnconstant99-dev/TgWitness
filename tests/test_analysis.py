@@ -1,4 +1,6 @@
 import json
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -146,3 +148,48 @@ def test_synthetic_check_and_daily_request_budget(answering):
     assert response.status_code == 200 and response.json()["messages_read"] == 0
     assert "example.org" not in json.dumps(sent[0][1])
     assert generate(admin, preview(admin)).status_code == 422 and len(sent) == 1
+
+
+def test_generation_cannot_be_submitted_twice_while_sources_are_checked(answering, monkeypatch):
+    from tgwitness import analysis_api
+
+    _, admin, sent = answering
+    configure(admin)
+    plan = preview(admin)
+    entered, release = threading.Event(), threading.Event()
+    original = analysis_api.verify_sources
+
+    def paused(*args):
+        if not entered.is_set():
+            entered.set()
+            assert release.wait(10), "Source check was not released"
+        return original(*args)
+
+    monkeypatch.setattr(analysis_api, "verify_sources", paused)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        first = pool.submit(generate, admin, plan)
+        try:
+            assert entered.wait(5)
+            duplicate = generate(admin, plan)
+            assert duplicate.status_code == 422 and "already been submitted" in duplicate.json()["detail"]
+            assert not sent
+        finally:
+            release.set()
+        assert first.result(5).status_code == 200
+    assert len(sent) == 1
+
+
+def test_a_failed_source_check_does_not_leave_generation_busy(answering, monkeypatch):
+    from tgwitness import analysis_api
+
+    _, admin, sent = answering
+    configure(admin)
+    plan = preview(admin)
+
+    def failed(*args):
+        raise ValueError("Synthetic source check failure")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(analysis_api, "verify_sources", failed)
+        assert generate(admin, plan).status_code == 422 and not sent
+    assert generate(admin, plan).status_code == 200 and len(sent) == 1

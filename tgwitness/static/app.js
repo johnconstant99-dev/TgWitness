@@ -2455,7 +2455,7 @@ async function refreshChats(refresh=false){
   if(state.chat===null&&state.chats.length){beginChat((state.chats.find(c=>c.enabled)||state.chats[0]).chat_id);refresh=false;}
   renderChatsList();
   if(state.chat===null){renderChatEmpty();return;}
-  await loadChatMessages(refresh?"refresh":"open");
+  return await loadChatMessages(refresh?"refresh":"open");
 }
 function renderChatsList(){
   const list=$("chats-list");list.replaceChildren();
@@ -2482,7 +2482,11 @@ function beginChat(id){
   if(state.chatFilter==="people")state.chatFilter="all";
   renderComposer();renderChat();renderChatsList();
 }
-async function openChat(id){beginChat(id);await loadChatMessages("open");loadChatProfile().catch(()=>{});}
+async function openChat(id){
+  beginChat(id);const loaded=await loadChatMessages("open");
+  if(loaded)loadChatProfile().catch(()=>{});
+  return loaded;
+}
 function fmtDuration(seconds){
   if(seconds===null||seconds===undefined)return tr("unknown");
   if(seconds<60)return tr("under a minute");
@@ -2499,7 +2503,7 @@ async function loadChatMessages(mode){
     feed.querySelector(".refresh-notice")?.remove();
     const notice=viewState("error",tr("Could not load data"),tr("Saved content remains available. Try loading again."),tr("Retry"),()=>loadChatMessages(mode));
     if(state.chatMessages.length){notice.classList.add("refresh-notice");feed.prepend(notice);}else feed.replaceChildren(notice);
-    return;
+    return false;
   }
   if(revision!==state.workspaceRevision||id!==state.chat||generation!==chatGeneration)return;
   const known=state.chatMessages.reduce((last,m)=>Math.max(last,m.message_id),0);
@@ -2514,6 +2518,7 @@ async function loadChatMessages(mode){
   else if(mode==="refresh")state.chatMessages.forEach(m=>{if(m.message_id>known)$("msg-"+m.message_id)?.classList.add("fresh");});
   if(mode==="open"||(mode==="refresh"&&atBottom))feed.scrollTop=feed.scrollHeight;
   else if(mode==="older")feed.scrollTop=feed.scrollHeight-height+top;
+  return true;
 }
 function renderChatEmpty(){
   const box=$("chat-empty"),s=state.status;show("chat-main",false);show("chat-empty",true);box.replaceChildren();
@@ -2857,16 +2862,16 @@ async function panelAction(body,{profile=state.profile,revision=state.workspaceR
     if(result.status==="succeeded"&&body.action==="send"&&body.chat_id===state.chat){$("chat-message").value="";composeReply=null;}
 
     if(body.action==="open"||body.chat_id===state.chat)actionResult(result);
+    let refreshFailed=false;
     try{
       await refreshStatus();
       if(revision!==state.workspaceRevision)return result;
-      await refreshChats(true);
+      refreshFailed=(await refreshChats(true))===false;
 
-      if(result.status!=="unknown")pendingActions.delete(key);
-    }catch{
-      if(revision===state.workspaceRevision&&(body.action==="open"||body.chat_id===state.chat)){
-        actionResult(result);$("interaction-result").append(node("p","hint",tr("The receipt is saved. Chat refresh failed; refresh the view to see the latest messages.")));
-      }
+      if(!refreshFailed&&result.status!=="unknown")pendingActions.delete(key);
+    }catch{refreshFailed=true;}
+    if(refreshFailed&&revision===state.workspaceRevision&&(body.action==="open"||body.chat_id===state.chat)){
+      actionResult(result);$("interaction-result").append(node("p","hint",tr("The receipt is saved. Chat refresh failed; refresh the view to see the latest messages.")));
     }
     return result;
   }finally{actionBusy=false;renderComposer();}
@@ -2893,7 +2898,7 @@ $("chat-open-form").addEventListener("submit",e=>{e.preventDefault();busy($("cha
     if(["succeeded","approval_pending"].includes(result.status)){linkPreview=null;open.remove();}
     if(result.chat_id){
       let refreshFailed=false;
-      try{await openChat(result.chat_id);}catch{refreshFailed=true;}
+      try{refreshFailed=(await openChat(result.chat_id))===false;}catch{refreshFailed=true;}
       if(revision===state.workspaceRevision&&state.chat===result.chat_id){
         actionResult(result);
         if(refreshFailed)$("interaction-result").append(node("p","hint",tr("The receipt is saved. Chat refresh failed; refresh the view to see the latest messages.")));

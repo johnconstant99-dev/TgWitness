@@ -116,6 +116,12 @@ def main():
             expect(page.locator("#chat-link-preview button")).to_have_count(0)
             expect(page.locator("#toast")).to_be_hidden()
             assert len(server.app.state.collector.client.joined) == 1
+            expect(page.locator("#chat-feed")).to_contain_text("Could not load data")
+            expect(page.locator("#chat-send")).to_be_disabled()
+            page.locator("#chat-feed").get_by_role("button", name="Retry", exact=True).click()
+            expect(page.locator("#chat-send")).to_be_enabled()
+            expect(page.locator("#interaction-result")).to_contain_text("Action completed and recorded.")
+            assert len(server.app.state.collector.client.joined) == 1
             page.locator(".chat-item", has_text="Synthetic shop bot").click()
             page.locator("#msg-10 .msg-button", has_text="I paid").get_by_role("button").click()
             expect(page.locator("#interaction-result")).to_contain_text("Recorded answer")

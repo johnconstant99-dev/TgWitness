@@ -1,5 +1,5 @@
 """A text reader must receive the same instructions and sources as a browser."""
-from tools.site_llms import markdown
+from tools.site_llms import full, markdown
 
 
 def test_article_export_keeps_commands_tables_nested_steps_and_absolute_sources():
@@ -31,6 +31,8 @@ if a &lt; b:
     for chrome in ("Menu text", "Footer text", "Copy command", "private chrome", "never include this"):
         assert chrome not in result
     assert all(line == line.rstrip(" \t") for line in result.splitlines())
+    assert full("# Index\n", [result]).endswith("\n")
+    assert not full("# Index\n", [result]).endswith("\n\n")
 
 
 def test_prose_cleanup_preserves_code_whitespace():

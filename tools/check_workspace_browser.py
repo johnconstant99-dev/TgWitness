@@ -32,7 +32,7 @@ def main():
     output = ROOT / "test-results" / "workspace-browser"
     output.mkdir(parents=True, exist_ok=True)
     checks, errors = [], []
-    with tempfile.TemporaryDirectory(dir=output) as temporary, RunningApp(
+    with tempfile.TemporaryDirectory(prefix="workspace-browser-") as temporary, RunningApp(
             Path(temporary), client_factory=WorkspaceClient) as server:
         session = requests.Session()
         session.headers["Authorization"] = "Bearer " + server.app.state.vault.token
@@ -125,7 +125,7 @@ def main():
 
 
             doomed = post("/api/profiles", {"label": "Incomplete deletion"})["id"]
-            directory = Path(temporary) / "profiles" / doomed
+            directory = (Path(temporary) / "profiles" / doomed).resolve()
             page = page_for_case()
             page.locator("#profile-select").select_option(doomed)
             page.locator('[data-view="accounts"]').click()

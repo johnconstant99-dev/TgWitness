@@ -10,6 +10,7 @@ from .access import Refused
 from .analysis import Analysis, Generate, Question, ReportEdit, prompt, report_from, retrieve, verified_claims, verify_sources
 from .archive import ArchiveQuery, ArchiveReader
 from .store import utcnow
+from .workers import limited_in_thread
 
 
 class SaveReport(BaseModel):
@@ -80,8 +81,7 @@ def register(app, authenticate):
             state = workspace(request, body.workspace)
             config = ai.settings(state)
             async with asyncio.timeout(10):
-                async with reads:
-                    result = await asyncio.to_thread(retrieve, scoped, body, config["context_chars"])
+                result = await limited_in_thread(reads, retrieve, scoped, body, config["context_chars"])
             return service.remember(request.state.principal, body, result, config)
         return await execute(search)
 
@@ -91,8 +91,7 @@ def register(app, authenticate):
             if body.tool not in ("get_message_context", "get_message_versions"):
                 raise ValueError("Choose message context or saved versions.")
             async with asyncio.timeout(8):
-                async with reads:
-                    return await asyncio.to_thread(reader(request).read, body)
+                return await limited_in_thread(reads, reader(request).read, body)
         return await execute(read_context)
 
     @app.post("/api/analysis/generate", dependencies=[Depends(authenticate)])
@@ -106,11 +105,11 @@ def register(app, authenticate):
             selected = [s for s in plan["sources"] if s["id"] in body.source_ids]
             if set(body.source_ids) != {s["id"] for s in selected}:
                 raise ValueError("Select only sources from this preview.")
-            await reauthorize(request)
-            await asyncio.to_thread(verify_sources, reader(request), selected + plan["coverage"]["events"])
-            state = workspace(request, plan["workspace"])
             plan["generating"] = True
             try:
+                await reauthorize(request)
+                await asyncio.to_thread(verify_sources, reader(request), selected + plan["coverage"]["events"])
+                state = workspace(request, plan["workspace"])
                 output, generation = await service.provider.complete(state,
                     prompt(plan["question"], selected, plan["coverage"]), plan["provider_fingerprint"])
                 await reauthorize(request)
