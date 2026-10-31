@@ -2306,5 +2306,6 @@
 "MTProxy carries Telegram traffic only. External requests need a separate SOCKS5/HTTP proxy, the account's SOCKS5/HTTP route, or Direct where the IP mode permits it. External requests can be disabled; an explicit feed-download proxy is a separate override. The independent witness keeps its own route.": "MTProxy 仅传输 Telegram 流量。外部请求需要单独的 SOCKS5/HTTP 代理、该账户的 SOCKS5/HTTP 路由，或在 IP 模式允许的情况下使用 Direct 模式。外部请求可以禁用；显式的订阅源下载代理则通过单独的覆盖设置进行配置。独立见证者保留其自身的路由。",
 "Open Access to give a reviewer their own token. Keep View for reading; add Export for downloads. Chat-limited access cannot open whole-workspace settings or full journal exports. Revoking access ends its sessions but cannot recall downloaded files.": "“开放访问”权限可为审阅者分配专属令牌。保留“查看”功能用于阅读；新增“导出”功能用于下载。仅限聊天访问的用户无法打开整个工作区设置或进行完整日志导出。撤销访问权限将终止其会话，但无法收回已下载的文件。",
 "The administrator can issue access to selected workspaces and chats, with separate permissions, expiry, IP restrictions and session limits. The main panel token remains unrestricted. An existing journal cannot be reassigned to another Telegram account.": "管理员可以授予对选定工作区和聊天室的访问权限，并可设置独立的权限、有效期、IP 限制和会话限制。主面板令牌不受任何限制。现有的日志无法重新分配给另一个 Telegram 账户。",
-"Application routes do not configure a system VPN": "应用程序的路由不会配置系统 VPN"
+"Application routes do not configure a system VPN": "应用程序的路由不会配置系统 VPN",
+"A bounded record count and challenge are required for continuity proofs": "连续性证明需要限定记录数量和验证码"
 }

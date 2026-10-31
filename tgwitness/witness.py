@@ -39,8 +39,10 @@ import zipfile
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
-from cryptography.hazmat.primitives import serialization
+from cryptography.fernet import Fernet, InvalidToken
+from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 from . import __version__
 from .evidence import producer
@@ -65,18 +67,48 @@ OPTIONS = ("collector", "token", "token_file", "bot_token", "bot_token_file", "c
            "post", "title", "texts", "collector_fingerprint", "proxy", "bot_api", "data_dir")
 
 
+def key_cipher(root):
+    """Seals the witness key as the collector's vault seals its own: with TGWITNESS_VAULT_KEY_FILE's master
+    key when set (kept away from this directory, the protective form), else a local key file beside it."""
+    external = os.environ.get("TGWITNESS_VAULT_KEY_FILE")
+    if external:
+        source = Path(external).resolve(strict=True)
+        if source.is_relative_to(Path(root).resolve()) or source.stat().st_size > 128:
+            raise RuntimeError("Provide a small master-key file outside the witness data directory.")
+        master = source.read_bytes().strip()
+        Fernet(master)
+        derived = HKDF(algorithm=hashes.SHA256(), length=32, salt=None,
+                       info=b"TgWitness witness key v1").derive(base64.urlsafe_b64decode(master))
+        return Fernet(base64.urlsafe_b64encode(derived))
+    path = Path(root) / "witness-vault.key"
+    if not path.exists():
+        if (Path(root) / "witness-key.enc").exists():
+            raise RuntimeError("The witness key file is sealed with a key that is missing here. Restore "
+                               "witness-vault.key or set TGWITNESS_VAULT_KEY_FILE; a new key is never made over it.")
+        private_write(path, Fernet.generate_key())
+    return Fernet(path.read_bytes())
+
+
 class WitnessKey:
-    """The witness's own signing key, kept in its data directory only."""
+    """The witness's own signing key, encrypted in its data directory (key_cipher)."""
     def __init__(self, root):
         root = Path(root)
         root.mkdir(parents=True, exist_ok=True, mode=0o700)
-        path = root / "witness-key.json"
-        if not path.exists():
+        sealed, plain = root / "witness-key.enc", root / "witness-key.json"
+        cipher = key_cipher(root)
+        if plain.exists() and not sealed.exists():  # kept in the clear by earlier versions
+            private_write(sealed, cipher.encrypt(plain.read_bytes()))
+            plain.write_bytes(b"\0" * plain.stat().st_size)
+            plain.unlink()
+        if not sealed.exists():
             key = Ed25519PrivateKey.generate()
-            private_write(path, json.dumps({"format": "tgwitness-witness-key-v1", "private_key": base64.b64encode(
-                key.private_bytes(serialization.Encoding.Raw, serialization.PrivateFormat.Raw,
-                                  serialization.NoEncryption())).decode()}).encode())
-        data = json.loads(path.read_bytes())
+            private_write(sealed, cipher.encrypt(json.dumps({"format": "tgwitness-witness-key-v1", "private_key":
+                base64.b64encode(key.private_bytes(serialization.Encoding.Raw, serialization.PrivateFormat.Raw,
+                                                   serialization.NoEncryption())).decode()}).encode()))
+        try:
+            data = json.loads(cipher.decrypt(sealed.read_bytes()))
+        except InvalidToken:
+            raise RuntimeError("The witness key cannot be opened with this key; restore the original key file") from None
         self.signer = Ed25519PrivateKey.from_private_bytes(base64.b64decode(data["private_key"]))
         self.public_key = base64.b64encode(self.signer.public_key().public_bytes(
             serialization.Encoding.Raw, serialization.PublicFormat.Raw)).decode()

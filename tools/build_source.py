@@ -20,6 +20,12 @@ FILES.extend("services/witness-controller/" + name for name in (
     "test/actions.test.mjs", "test/engine.test.mjs", "test/helpers.mjs", "test/worker.test.mjs",
     "tools/demo.mjs", "tools/local-keys.mjs", "tools/synthetic.mjs", "tools/verify.mjs",
 ))
+# Public timestamp responses for the synthetic tests/tsa/data.bin digest. Keep
+# this exact allowlist: arbitrary binary fixtures and account data stay excluded.
+FILES.extend("tests/tsa/" + name for name in (
+    "data.bin", "dfn.tsq", "dfn.tsr", "digicert-http.tsq", "digicert-http.tsr",
+    "freetsa.tsq", "freetsa.tsr", "sectigo.tsq", "sectigo.tsr",
+))
 DIRECTORIES = {
     "tgwitness": {".md", ".py", ".html", ".css", ".js", ".svg", ".json"},
     "docs": {".md", ".png", ".webp", ".svg", ".txt", ".gif", ".mp4"}, "tests": {".py", ".md"}, "tools": {".py", ".md"},

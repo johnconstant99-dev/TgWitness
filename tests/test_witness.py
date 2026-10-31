@@ -130,6 +130,9 @@ def test_witness_records_posts_and_cross_checks(collector, tmp_path):
         shown = subprocess.run(verifier, capture_output=True, text=True, errors="replace")
         assert shown.returncode == 0 and "Witnessed from" in shown.stdout
         assert "unpinned" not in shown.stdout  # the pinned witness saw this key answering
+        assert "No retained checkpoint supplied" in shown.stdout and "witness key is not pinned" not in shown.stdout
+        unpinned = subprocess.run(verifier[:5], capture_output=True, text=True, errors="replace")
+        assert unpinned.returncode == 0 and "witness key is not pinned" in unpinned.stdout
         # An export signed by a key the witness never saw is not witnessed, however trusted the witness is.
         impostor_vault = Vault(tmp_path / "impostor-journal")
         impostor = Store(tmp_path / "impostor-journal")

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- OpenTimestamps summaries now parse bounded operation trees and attestation
+  payloads, rejecting truncated, malformed and excessive proofs. Marker bytes in
+  arguments or opaque payloads cannot produce a Bitcoin status. Parsed Bitcoin
+  attestations are explicitly `bitcoin-unverified`; run `ots verify` for validation.
+- Source releases include the exact public TSA fixtures used by the evidence tests.
+  The synthetic calendar fixture now carries correct serialized URI lengths.
+- Added the [delivery roadmap](ROADMAP.md), separating release acceptance, the
+  external controller prototype and future independent-observer integrations.
 - Evidence verification now reports the exact prefix covered by witness checkpoints and
   any unwitnessed tail. `--require-witness` requires a pinned witness and a matching final
   exported record; requested channel checks also reject missing claimed posts.

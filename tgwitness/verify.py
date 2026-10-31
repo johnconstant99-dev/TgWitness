@@ -354,16 +354,111 @@ def timestamp_signature(reply, roots):
 
 
 def ots_summary(proof, digest):
-    """An OpenTimestamps proof for exactly these bytes; `ots verify` checks it against Bitcoin."""
+    """Validate the OTS structure, not its commitment against a Bitcoin block.
+
+    Attestation tags count only at tree leaves, never inside operation arguments
+    or opaque attestation payloads. Keep this standalone and network-free: the
+    recipient must still run `ots verify` to authenticate a Bitcoin timestamp.
+    """
     head = OTS_MAGIC + b"\x01\x08"
-    if proof[:len(head)] != head or proof[len(head):len(head) + 32] != digest:
+    if len(digest) != 32 or proof[:len(head)] != head or proof[len(head):len(head) + 32] != digest:
         raise ValueError("The OpenTimestamps proof is not for this checkpoint")
-    tree = proof[len(head) + 32:]
-    if OTS_BITCOIN in tree:
-        return {"status": "bitcoin"}
-    if OTS_PENDING in tree:
-        return {"status": "pending"}
-    raise ValueError("The OpenTimestamps proof has no attestation")
+    if len(proof) > 1024 * 1024:
+        raise ValueError("The OpenTimestamps proof exceeds the size limit")
+
+    class Reader:
+        def __init__(self, data):
+            self.data, self.pos = data, 0
+
+        def take(self, size):
+            end = self.pos + size
+            if end > len(self.data):
+                raise ValueError("Truncated OpenTimestamps proof")
+            value, self.pos = self.data[self.pos:end], end
+            return value
+
+        def integer(self):
+            value = 0
+            for shift in range(0, 35, 7):
+                byte = self.take(1)[0]
+                value |= (byte & 127) << shift
+                if not byte & 128:
+                    if value > 0xffffffff:
+                        break
+                    return value
+            raise ValueError("OpenTimestamps integer exceeds the limit")
+
+        def blob(self, maximum):
+            size = self.integer()
+            if size > maximum:
+                raise ValueError("OpenTimestamps field exceeds the limit")
+            return self.take(size)
+
+        def finish(self):
+            if self.pos != len(self.data):
+                raise ValueError("Trailing bytes in OpenTimestamps proof")
+
+    reader = Reader(proof[len(head) + 32:])
+    kinds, remaining = set(), 10000
+
+    def node(message_size, depth=0):
+        nonlocal remaining
+        if depth >= 256:
+            raise ValueError("OpenTimestamps tree exceeds the depth limit")
+        operations = set()
+        while True:
+            remaining -= 1
+            if remaining < 0:
+                raise ValueError("OpenTimestamps tree exceeds the operation limit")
+            tag = reader.take(1)[0]
+            more = tag == 255
+            if more:
+                tag = reader.take(1)[0]
+            if tag == 0:
+                kind = reader.take(8)
+                payload = Reader(reader.blob(8192))
+                if kind == OTS_BITCOIN:
+                    payload.integer()  # block height, authenticated only by ots verify
+                    payload.finish()
+                    if message_size != 32:
+                        raise ValueError("OpenTimestamps Bitcoin commitment must be 32 bytes")
+                    kinds.add("bitcoin-unverified")
+                elif kind == OTS_PENDING:
+                    uri = payload.blob(1000)
+                    payload.finish()
+                    if not re.fullmatch(rb"[A-Za-z0-9._/:-]*", uri):
+                        raise ValueError("Invalid OpenTimestamps calendar URI")
+                    kinds.add("pending")
+                else:
+                    kinds.add("unknown")
+            else:
+                argument = b""
+                size = message_size
+                if tag in (0xf0, 0xf1):
+                    argument = reader.blob(4096)
+                    if not argument:
+                        raise ValueError("Empty OpenTimestamps operation argument")
+                    size += len(argument)
+                elif tag == 0xf3:
+                    size *= 2
+                elif tag in (0x02, 0x03, 0x08, 0x67):
+                    size = 20 if tag in (0x02, 0x03) else 32
+                elif tag != 0xf2:
+                    raise ValueError("Unknown OpenTimestamps operation")
+                if size > 4096:
+                    raise ValueError("OpenTimestamps operation result exceeds the limit")
+                operation = (tag, argument)
+                if operation in operations:
+                    raise ValueError("Repeated OpenTimestamps operation")
+                operations.add(operation)
+                node(size, depth + 1)
+            if not more:
+                return
+
+    node(32)
+    reader.finish()
+    status = next(kind for kind in ("bitcoin-unverified", "pending", "unknown") if kind in kinds)
+    return {"status": status, "verification": "structure only; run ots verify"}
 
 
 def find_openssl():
@@ -415,7 +510,8 @@ def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None
                     openssl_verify_timestamp(data, reply, query, tsa_ca)
                 entry["signature"] = "checked against the given root" if tsa_ca else "not checked (use --tsa-ca)"
             elif proof_name.endswith(".ots"):
-                entry.update(kind="opentimestamps", **ots_summary(read_member(archive, proof_name), digest))
+                entry.update(kind="opentimestamps", **ots_summary(read_member(archive, proof_name), digest),
+                             attestation="as the calendar states it; ots verify checks it against Bitcoin")
             else:
                 continue
             results.append(entry)
@@ -1342,6 +1438,13 @@ def main():
                                    read_json_file(args.checkpoint) if args.checkpoint else None, args.tsa_ca)
             notes += coverage_lines(result["coverage"])
             pinned = bool(args.fingerprint)
+            if not args.checkpoint:
+                notes.append("No retained checkpoint supplied: records removed from the end of this journal are not "
+                             "detected. Pass --checkpoint with a checkpoint kept away from the collector.")
+            if any(a.get("kind") == "opentimestamps" for a in result.get("anchors", [])):
+                notes.append("OpenTimestamps structure only: run ots verify to authenticate the Bitcoin timestamp.")
+            if args.witness and not args.witness_fingerprint:
+                notes.append("The witness key is not pinned: the witness journal is checked only against itself.")
             if args.witness:
                 witness = verify_witness(args.witness, args.witness_fingerprint)
                 result["witness"] = cross_check_witness(witness, args.bundle, result)

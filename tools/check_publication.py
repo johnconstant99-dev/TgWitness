@@ -15,7 +15,7 @@ try:
 except ImportError:
     from build_source import ROOT, public_sources
 
-BINARY = {".png", ".webp", ".gif", ".mp4"}
+BINARY = {".png", ".webp", ".gif", ".mp4", ".bin", ".tsq", ".tsr"}
 PATTERNS = {
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----"),
     "GitHub token": re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{60,})\b"),

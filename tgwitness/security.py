@@ -1,7 +1,10 @@
 import base64
+import csv
 import json
+import logging
 import os
 import secrets
+import subprocess
 from pathlib import Path
 
 from cryptography.fernet import Fernet
@@ -10,9 +13,61 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+LOG = logging.getLogger("tgwitness.security")
+
+
+def windows_sid():
+    row = subprocess.run(["whoami", "/user", "/fo", "csv", "/nh"], capture_output=True, text=True,
+                         check=True, timeout=30).stdout
+    return next(csv.reader([row.strip()]))[1]
+
+
+def owner_only(root: Path):
+    """The data directory for this account only, also when it existed before. Unix: mode 0700 (files
+    inside are then unreachable whatever their own modes). Windows: one explicit entry for this account,
+    inherited by everything inside, and no inherited entries for other users; done once per directory."""
+    if os.name != "nt":
+        try:
+            os.chmod(root, 0o700)
+        except OSError:
+            LOG.warning("Could not restrict %s to its owner; doctor reports its permissions", root)
+        return
+    marker = root / ".owner-only"
+    if marker.exists():
+        return
+    try:
+        sid = windows_sid()
+        subprocess.run(["icacls", str(root), "/inheritance:r", "/grant:r", "*" + sid + ":(OI)(CI)F", "/Q"],
+                       capture_output=True, check=True, timeout=60)
+        if any(root.iterdir()):
+            subprocess.run(["icacls", str(root / "*"), "/reset", "/T", "/C", "/Q"], capture_output=True, check=True,
+                           timeout=900)
+        # FAT and exFAT accept the command and keep no permissions at all: read them back.
+        shown = subprocess.run(["icacls", str(root)], capture_output=True, text=True, timeout=60).stdout
+        found = subprocess.run(["icacls", str(root), "/findsid", "*" + sid], capture_output=True, text=True,
+                               timeout=60).stdout
+        if "No permissions are set" in shown or "SID Found" not in found:
+            LOG.warning("%s is on a volume without access control (FAT/exFAT): any local account can read its "
+                        "keys. Keep the data directory on NTFS", root)
+            return
+        marker.write_text("Access to this directory is limited to the account that runs TgWitness.\n")
+    except (OSError, subprocess.SubprocessError, IndexError):
+        LOG.warning("Could not limit %s to this account; other local accounts may read it", root)
+
+
+def owner_only_state(root: Path):
+    """For doctor: whether only this account can read the data directory, as far as it can tell."""
+    if os.name != "nt":
+        mode = root.stat().st_mode & 0o777
+        return mode & 0o077 == 0, "mode " + oct(mode)
+    if (root / ".owner-only").exists():
+        return True, "explicit entry for this account only"
+    return False, "no owner-only entry (a FAT/exFAT volume keeps no permissions)"
+
 
 def private_write(path: Path, data: bytes):
-    """Atomic replacement. Unix permissions are restricted; Windows uses inherited ACLs."""
+    """Atomic replacement. Unix permissions are restricted; on Windows the file inherits the data
+    directory's owner-only entry (owner_only)."""
     temp = path.with_suffix(path.suffix + ".tmp")
     fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(fd, "wb") as stream:
@@ -92,9 +147,9 @@ class Vault:
 class InstanceLock:
     """One process per data directory; the OS releases the lock after a crash."""
     def __init__(self, root: Path):
-        # This runs before Vault. A later mkdir(mode=0700) cannot tighten an
-        # already-created directory, so set the mode at its first creation.
+        # This runs before Vault. mkdir(mode=0700) cannot tighten an already-created directory: owner_only does.
         root.mkdir(parents=True, exist_ok=True, mode=0o700)
+        owner_only(root)
         self.stream = (root / ".instance.lock").open("a+b")
         self.stream.seek(0)
         self.stream.write(b"0")

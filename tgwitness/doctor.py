@@ -49,8 +49,13 @@ def inspect_environment(root, host="127.0.0.1", port=8787):
         free = shutil.disk_usage(parent).free
         add("storage", "pass" if free >= 1024**3 else "warning",
             f"Write probe passed; {free // 1024**2} MiB free. Exports use the profile's private temporary directory.")
-        if os.name != "nt" and root.exists() and root.stat().st_mode & 0o077:
-            add("data_permissions", "warning", "Existing data directory permits group/other access; review permissions.")
+        if root.exists():
+            from .security import owner_only_state
+            limited, how = owner_only_state(root)
+            add("data_permissions", "pass" if limited else "warning",
+                "Only this account can open the data directory (" + how + ")" if limited else
+                "Other local accounts may read the data directory and its keys (" + how + "). TgWitness limits it "
+                "at startup where the file system allows; keep it on NTFS or a Unix file system.")
     except OSError as exc:
         add("storage", "fail", "Data path is not writable: " + type(exc).__name__)
     try:

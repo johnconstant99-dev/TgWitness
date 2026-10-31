@@ -38,9 +38,10 @@ wheel, Windows portable and GHCR packages. Public source and wheel assets use al
 the public site includes only presentation assets. Publication checks and dependency auditing
 run in CI. See [publishing](PUBLISHING.md) for commands and deployment steps.
 
-Version 0.7.0 was published by hand while hosted Actions were unavailable: its source archive,
-wheel and Windows portable package were built locally from the tagged commit with the same
-tools the workflow runs. No GHCR image exists for 0.7.0 yet; Docker users build locally with
+Version 0.7.0 is being prepared as a preview. Its source archive, wheel and Windows
+portable package must be built from the same reviewed commit using the tools the
+workflow runs. A draft release is not a public download. No GHCR image exists for
+0.7.0 yet; Docker users build locally with
 `scripts/Docker.cmd` or `scripts/docker-start.sh`.
 
 The [pre-publication audit](PREPUBLICATION-2026-10-29.md) records the latest local results.

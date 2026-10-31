@@ -1,9 +1,18 @@
 import asyncio
 
 import pytest
+from tgwitness import security
 from tgwitness.proxy_catalog import ProxyPool
 from tgwitness.security import Vault
 from tgwitness.store import Store
+
+REAL_OWNER_ONLY = security.owner_only
+
+
+@pytest.fixture(autouse=True)
+def quick_owner_only(monkeypatch):
+    # Limiting each test directory runs icacls on Windows; test_hardening.py checks owner_only itself.
+    monkeypatch.setattr(security, "owner_only", lambda root: None)
 
 
 @pytest.fixture(autouse=True)

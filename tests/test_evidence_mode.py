@@ -26,7 +26,7 @@ from tgwitness.verify import (OTS_PENDING, children, der, fingerprint, ots_summa
 from test_collector import FakeClient
 
 REAL = Path(__file__).resolve().parent / "tsa"  # answers from the real authorities, 2026-10-31
-OTS_ANSWER = b"\xf0\x10" + bytes(range(16)) + b"\x08\x00" + OTS_PENDING + b"\x1a\x19https://cal.example/digest"
+OTS_ANSWER = b"\xf0\x10" + bytes(range(16)) + b"\x08\x00" + OTS_PENDING + b"\x1b\x1ahttps://cal.example/digest"
 
 
 def synthetic_tsa(tmp_path):

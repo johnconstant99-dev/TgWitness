@@ -177,8 +177,8 @@ checks succeed. The existing release workflow verifies the version, runs checks,
 and builds source, wheel, Windows portable, and GHCR artifacts.
 When hosted Actions are unavailable, build the same downloads locally from the tagged
 commit (`pip wheel --no-deps`, `tools/build_source.py`, `tools/build_portable.py` on
-Windows) and attach them with their `.sha256` files; the first release, `v0.7.0`, was
-published this way. The website provides
+Windows) and attach them with their `.sha256` files to the draft. Inspect all assets
+and record the checks and platform limits before publication. The website provides
 source-install instructions and links to the release listing instead of assuming
 that a `latest` release or a portable binary already exists.
 

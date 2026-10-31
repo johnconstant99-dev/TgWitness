@@ -36,6 +36,17 @@ def test_publication_checks_linked_files_are_actually_shipped(tmp_path):
     assert findings[0].endswith("missing.md") and findings[1].endswith("data/private.md")
 
 
+def test_only_named_public_tsa_fixtures_enter_the_source_package(tmp_path):
+    public_tree(tmp_path)
+    (tmp_path / "tests/tsa/freetsa.tsr").write_bytes(b"\xff\x00public fixture")
+    private = tmp_path / "tests/tsa/unreviewed.bin"
+    private.write_bytes(b"not in the release")
+    sources, _, findings = check_sources(tmp_path)
+    assert tmp_path / "tests/tsa/freetsa.tsr" in sources
+    assert private not in sources
+    assert not findings
+
+
 @pytest.fixture
 def staged_sources(tmp_path):
     if not shutil.which("git"):

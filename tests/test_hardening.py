@@ -1,13 +1,22 @@
-"""Audit findings L-1, M-2, M-3 and L-3: internal addresses inside IPv6 forms, proxies pointing inside the
-network, notification services with their own sockets, and one AES-GCM nonce per plaintext in the copy."""
+"""Audit findings L-1, L-2, L-3, L-4, L-7, M-2 and M-3: internal addresses inside IPv6 forms, data directories
+for their owner only, one AES-GCM nonce per plaintext in the copy, a sealed witness key, proxies pointing
+inside the network and notification services with their own sockets."""
 import asyncio
+import base64
 import io
+import json
+import os
+from types import SimpleNamespace as NS
 
 import pytest
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from tgwitness import alerts, netclient, replica
+from tgwitness import alerts, netclient, replica, security, witness
 from tgwitness.collector import Collector
 from tgwitness.network import NetworkConfig
+from conftest import REAL_OWNER_ONLY
 from test_access import issue, login, panel  # noqa: F401  (panel is a fixture)
 from test_collector import FakeClient
 
@@ -65,6 +74,67 @@ def test_telegram_connects_to_the_checked_proxy_address(journal, no_opt_in):
     assert collector.network_config().local_proxy is True
     asyncio.run(collector.ensure_route())
     assert collector.route_options()["proxy"]["addr"] in ("127.0.0.1", "::1")
+
+
+@pytest.mark.parametrize("shown, found, limited", [
+    ("dir DESKTOP\\analyst:(OI)(CI)(F)\n", "SID Found: dir.\n", True),
+    ("dir No permissions are set. All users have full control.\n", "", False),  # FAT / exFAT
+])
+def test_windows_data_directory_is_limited_to_this_account(tmp_path, monkeypatch, shown, found, limited):
+    calls = []
+
+    def run(command, **options):
+        calls.append(command)
+        if command[:2] == ["whoami", "/user"]:
+            return NS(stdout='"desktop\\analyst","S-1-5-21-1-2-3-1001"\n')
+        if command == ["icacls", str(tmp_path)]:
+            return NS(stdout=shown)
+        if "/findsid" in command:
+            return NS(stdout=found)
+        return NS(stdout="")
+    monkeypatch.setattr(security.os, "name", "nt")
+    monkeypatch.setattr(security.subprocess, "run", run)
+    (tmp_path / "journal.sqlite3").write_bytes(b"")
+    REAL_OWNER_ONLY(tmp_path)
+    assert calls[1] == ["icacls", str(tmp_path), "/inheritance:r", "/grant:r", "*S-1-5-21-1-2-3-1001:(OI)(CI)F", "/Q"]
+    assert calls[2] == ["icacls", str(tmp_path / "*"), "/reset", "/T", "/C", "/Q"]  # the files inherit that entry
+    assert (tmp_path / ".owner-only").exists() is limited
+    assert security.owner_only_state(tmp_path)[0] is limited
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Unix modes")
+def test_unix_data_directory_is_tightened_even_when_it_existed(tmp_path):
+    root = tmp_path / "data"
+    root.mkdir(mode=0o755)
+    REAL_OWNER_ONLY(root)
+    assert root.stat().st_mode & 0o777 == 0o700 and security.owner_only_state(root)[0]
+
+
+def test_witness_key_is_sealed_and_an_old_clear_key_is_moved_into_it(tmp_path, monkeypatch):
+    monkeypatch.delenv("TGWITNESS_VAULT_KEY_FILE", raising=False)
+    root = tmp_path / "witness"
+    root.mkdir()
+    key = Ed25519PrivateKey.generate()
+    raw = key.private_bytes(serialization.Encoding.Raw, serialization.PrivateFormat.Raw, serialization.NoEncryption())
+    (root / "witness-key.json").write_text(json.dumps({"format": "tgwitness-witness-key-v1",
+                                                       "private_key": base64.b64encode(raw).decode()}))
+    first = witness.WitnessKey(root)
+    assert not (root / "witness-key.json").exists() and (root / "witness-key.enc").exists()
+    assert base64.b64encode(raw) not in (root / "witness-key.enc").read_bytes()
+    assert witness.WitnessKey(root).public_key == first.public_key
+    (root / "witness-vault.key").unlink()
+    with pytest.raises(RuntimeError, match="missing"):  # never replaced by a new key
+        witness.WitnessKey(root)
+
+    master = tmp_path / "master.key"
+    master.write_bytes(Fernet.generate_key())
+    monkeypatch.setenv("TGWITNESS_VAULT_KEY_FILE", str(master))
+    external = tmp_path / "external-witness"
+    signer = witness.WitnessKey(external)
+    assert not (external / "witness-vault.key").exists() and witness.WitnessKey(external).public_key == signer.public_key
+    master.write_bytes(Fernet.generate_key())
+    with pytest.raises(RuntimeError, match="cannot be opened"):
+        witness.WitnessKey(external)
 
 
 def test_a_file_changing_between_the_two_passes_is_never_encrypted_twice():
