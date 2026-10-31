@@ -15,7 +15,6 @@ Application screenshots use fictional demonstration data.
 | `connection.png`, `qr-login.png`, `proxy-setup.png`, `public-proxies.png` | Account and connection setup |
 | `extras.png`, `witness-setup.png` | Optional witness workflows |
 | [`presentation/`](presentation/README.md) | Investigation artwork, shared SVG covers, navigation and dividers |
-| [`launch-kit/`](launch-kit/README.md) | Original presentation artwork and its renderer |
 
 ## Refresh screenshots
 

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Added scoped, read-only MCP connections and local archive search with optional
+  AI source review and separate analytical reports.
+- Added local OCR/transcription for saved attachments and signed outgoing webhooks
+  with delivery status, retries and an n8n example.
+- Connected the new workflows across README, Wiki and translated site reference.
+  These additions require current source; the 0.7.0 portable preview predates them.
+
 - Added a five-stage capture animation and examples of message/collector
   substitution to the helper and Exports.
 

@@ -25,7 +25,7 @@ def test_wiki_bundle_has_only_reviewed_pages_and_matching_hashes(wiki_tree):
     extra = wiki_tree / "docs/wiki/unreviewed.md"
     extra.write_text("Do not publish this page", encoding="utf-8")
     result = build_wiki(wiki_tree)
-    assert result["pages"] == len(PAGES) == 18
+    assert result["pages"] == len(PAGES) == 19
     assert result["language"] == "en"
     output = wiki_tree / "dist"
     archive_path = output / result["archive"]

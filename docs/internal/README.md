@@ -19,7 +19,5 @@ For user-facing setup and workflows, start with the
 | [`LIVE_ACCEPTANCE.md`](LIVE_ACCEPTANCE.md) | Live acceptance procedure |
 | [`SEO.md`](SEO.md) | Website structure and metadata |
 
-Dated audit/review files retain their original context. Read the date and scope
-before treating a finding as current behavior. This directory name is not an access
-control: the source packager includes Markdown here, so account secrets and real
+This directory name is not an access control: the source packager includes Markdown here, so account secrets and real
 evidence must not be placed in these documents.

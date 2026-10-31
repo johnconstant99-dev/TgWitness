@@ -121,6 +121,13 @@ details p { font-size:14px; }
 .wiki-body h4 { font-size:15px; margin:24px 0 8px; }
 .anchor { margin-inline-start:10px; color:#9aa8bd; text-decoration:none; font-weight:500; opacity:0; transition:opacity .15s; }
 :is(h2,h3,h4):hover>.anchor,.anchor:focus-visible { opacity:1; }
+.network-map.archive-route { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin:24px 0; padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+.network-map.archive-route > div { min-width:0; padding:8px; border-top:0; }
+.network-map.archive-route strong { display:block; margin-block:10px 8px; font-size:17px; line-height:1.4; }
+.network-map.archive-route p { margin:0; font-size:14px; line-height:1.6; }
+.network-map.archive-route .network-number { position:static; color:var(--blue); font-size:12px; font-weight:700; letter-spacing:.08em; }
+.network-map.archive-route figcaption { grid-column:1/-1; padding-top:14px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+@media(max-width:640px) { .network-map.archive-route { grid-template-columns:1fr; gap:4px; padding:14px; } .network-map.archive-route > div + div { border-top:1px solid var(--line); padding-top:16px; } }
 .table-wrap { overflow-x:auto; margin:24px 0; border:1px solid var(--line); border-radius:12px; background:var(--surface); box-shadow:0 6px 18px #14213506; }
 .table-wrap table { border-collapse:collapse; width:100%; font-size:13px; line-height:1.6; }
 .table-wrap th { text-align:start; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); background:#f2f5fa; padding:12px 14px; border-bottom:1px solid var(--line); white-space:nowrap; }

@@ -1,4 +1,4 @@
-"""Failure cases found by the 2026-10-29 review, using isolated synthetic data."""
+"""Message versions, restore paths and failure recovery."""
 import asyncio
 import base64
 import io

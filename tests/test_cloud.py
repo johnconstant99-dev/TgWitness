@@ -1,8 +1,4 @@
-"""High-assurance deployment against simulated provider and Cloudflare APIs: no network, no real accounts.
-
-Each simulated provider keeps its resources in memory and answers in the shapes of its public API
-reference (Hetzner Cloud, DigitalOcean, Linode, Vultr, EC2 Query XML and CloudTrail JSON).
-"""
+"""Cloud deployment with fake provider and Cloudflare APIs."""
 import base64
 import json
 import re
@@ -551,7 +547,7 @@ def detail(report, check):
 
 
 def build_here(command, input, **options):
-    """What the builder does in a separate interpreter, done in this one with this checkout's code."""
+    """Build the reference installer in-process."""
     spec, tunnel = json.loads(input)
     build = cloud.install_script if spec["provider"] == "generic" else cloud.cloud_init
     return NS(returncode=0, stdout=assurance.redact_user_data(build(spec, tunnel, "x" * 43, "x" * 32)).encode(), stderr=b"")
@@ -559,7 +555,7 @@ def build_here(command, input, **options):
 
 @pytest.fixture
 def real_reference():
-    """Requested by tests that build the reference installer in a separate interpreter, as a verifier does."""
+    """Opt into the real subprocess builder."""
 
 
 @pytest.fixture(autouse=True)

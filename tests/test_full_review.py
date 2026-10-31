@@ -1,4 +1,4 @@
-"""Whole-tool review: failure paths outside the mini-client happy path."""
+"""Recovery, backup and export edge cases."""
 import asyncio
 import hashlib
 import threading

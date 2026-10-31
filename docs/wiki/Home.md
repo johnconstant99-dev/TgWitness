@@ -43,6 +43,7 @@ that sequence, not every possible Telegram event.
 | Choose chats and keep observed changes | [Collection and coverage](Collection.md) |
 | Save one conversation for offline reading | [Export one chat](Chat-Export.md) |
 | Investigate across conversations | [Investigations](Investigations.md) |
+| Load history, search with AI or connect other tools | [Archive and integrations](Archive-and-Integrations.md) |
 | Hand over and verify evidence | [Exports and verification](Exports-and-Verification.md) |
 | Retain an independent checkpoint | [Independent witness](Independent-Witness.md) |
 | Send alerts or keep an encrypted remote copy | [Notifications](Notifications.md) · [Off-site copy](Off-site-Copy.md) |

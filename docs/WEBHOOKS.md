@@ -1,5 +1,9 @@
 # Structured outgoing webhooks
 
+**Current main:** use a source checkout; the 0.7.0 portable preview predates this feature.
+
+[Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
+
 Open **Integrations → Outgoing webhooks** in the selected workspace. Add an HTTPS
 receiver, choose collector/media/export events, and optionally select chats for
 new observations and changes. Message text is off by default. Enabling excerpts

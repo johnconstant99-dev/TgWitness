@@ -19,9 +19,16 @@ def main():
             page = browser.new_page(viewport={"width": 1440, "height": 1000})
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
+            initial_events = []
+            page.route("**/events?*", lambda route: initial_events.append(route)
+                       if not initial_events else route.continue_())
             unlock(page, app)
             page.locator('[data-view="integrations"]').click()
             expect(page.locator("#mcp-list")).to_contain_text("No archive connections")
+            assert initial_events, "Initial journal request was not intercepted"
+            initial_events[0].fulfill(response=initial_events[0].fetch())
+            page.wait_for_timeout(250)
+            expect(page.locator("#view-integrations")).to_be_visible()
             page.locator("#mcp-name").fill("Synthetic client")
             page.locator("#mcp-scope summary").first.click()
             page.locator('#mcp-scope input[value="-1001"]').check()
@@ -56,6 +63,14 @@ def main():
             page.goto(app.url + "/?workspace=default&event=" + str(record["seq"]) + "#journal")
             expect(page.locator("#detail-drawer")).to_be_visible()
             expect(page.locator("#detail-drawer")).to_contain_text("A verifiable source")
+            for language in ("en", "de", "ru", "he"):
+                page.goto(app.url + "/?lang=" + language)
+                prefix = "" if language == "en" else language + "/"
+                links = page.locator("[data-site-doc]")
+                expect(links).to_have_count(4)
+                for link in links.all():
+                    expect(link).to_have_attribute("href", "https://phishdestroy.github.io/TgWitness/"
+                                                  + prefix + "docs/reference/" + link.get_attribute("data-site-doc") + "/")
             assert not errors, errors
             browser.close()
     print("Integration UI passed: scoped credential, secret-free configuration, revocation and source link.")

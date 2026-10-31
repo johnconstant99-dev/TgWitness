@@ -1,4 +1,4 @@
-"""High-assurance host measurements: parsing, change records and the public signed statement."""
+"""Host measurements and signed change records."""
 import asyncio
 import base64
 import struct

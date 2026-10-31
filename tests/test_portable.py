@@ -1,4 +1,4 @@
-"""The portable package ships only its own layout, never files left by an earlier build or instance."""
+"""Keep stale build files out of the portable ZIP."""
 import contextlib
 import io
 import os

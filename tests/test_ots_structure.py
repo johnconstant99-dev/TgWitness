@@ -1,4 +1,4 @@
-"""OTS input validation must never mistake embedded marker bytes for evidence."""
+"""Reject malformed OTS proofs and embedded markers."""
 import pytest
 
 from tgwitness.verify import OTS_BITCOIN, OTS_MAGIC, OTS_PENDING, ots_summary

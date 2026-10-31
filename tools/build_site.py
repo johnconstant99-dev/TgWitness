@@ -427,6 +427,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
             home = home_template[:home_template.index("<body>") + len("<body>")] + body + home_template[home_template.index("</body>"):]
             write(base + "index.html", links(render(home, {
                 **values, **language_values, "ROOT": "" if not base else relative(base, ""), "TITLE": html.escape(t(HOME_TITLE), quote=True),
+                "GUIDE_ARCHIVE": relative(base, hub + "archive/"),
                 "DESCRIPTION": html.escape(t(HOME_DESCRIPTION), quote=True), "CANONICAL": html.escape(base_url + "/" + base, quote=True),
                 "OG_LOCALE": site_i18n.LANGUAGES[lang][3], "OG_DESCRIPTION": html.escape(t(HOME_OG), quote=True),
                 "OG_IMAGE_ALT": html.escape(t(HOME_IMAGE_ALT), quote=True),
@@ -437,6 +438,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
 
         def guide_values(path):
             return {**values, **language_values, "ROOT": relative(path, ""),
+                    "REF_HISTORY": relative(path, wiki_hub + "history/"),
                     **{"GUIDE_" + key.upper(): relative(path, (hub if full_site else "docs/") + key + "/") for key in GUIDES}}
         guide_html, guide_missing = {}, {}
         for slug in (GUIDES if full_site else ()):

@@ -1,6 +1,4 @@
-"""Audit findings L-1, L-2, L-3, L-4, L-7, M-2 and M-3: internal addresses inside IPv6 forms, data directories
-for their owner only, one AES-GCM nonce per plaintext in the copy, a sealed witness key, proxies pointing
-inside the network and notification services with their own sockets."""
+"""SSRF, file permissions, AES-GCM nonce reuse and witness key isolation."""
 import asyncio
 import base64
 import io

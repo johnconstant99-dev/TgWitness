@@ -65,6 +65,13 @@ An unknown action outcome should be checked before retrying. Callback presses in
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
+## Work with the saved archive
+
+Use **Ask the archive** to search saved records and review optional AI answers.
+For MCP clients, local OCR/transcription and outgoing webhooks, start with
+[Archive and integrations](Archive-and-Integrations.md). Analytical reports keep
+source references and revisions separately from the signed journal.
+
 ## Hand over the case
 
 Build a timeline citing saved records, with both source time and observation time where available. Include the source register, scope changes, gaps, signed evidence ZIPs, separate history exports, checkpoints and trusted fingerprints.

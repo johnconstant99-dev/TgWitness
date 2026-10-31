@@ -41,7 +41,8 @@ need; there is no single whole-account historical export.
 | Your task | Use |
 | --- | --- |
 | Read a chat's currently visible history offline | **Full chat export** |
-| Bring earlier visible messages into the workspace journal | **History snapshot** |
+| Load available history across enabled sources into the journal | **Sources → Load full history** on current main; [guide](../HISTORY.md) |
+| Bring a bounded set of recent messages into the journal | **History snapshot** |
 | Keep edits and deletion notices as they arrive | **Start observation** |
 | Hand over captured observations, preserved media and verification data | **Signed evidence ZIP** in Exports |
 

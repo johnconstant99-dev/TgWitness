@@ -1,38 +1,32 @@
-![Tests and verification](../docs/assets/presentation/folder-tests.svg)
+![Tests](../docs/assets/presentation/folder-tests.svg)
 
-# Tests and verification
+# Tests
 
-[Project](../README.md) · [Documentation](../docs/README.md) · [Wiki](../docs/wiki/Home.md) · [Support](../.github/SUPPORT.md)
+Fake Telegram clients and temporary workspaces. No Telegram login needed.
+Live-run results are in [VERIFICATION.md](../docs/VERIFICATION.md).
 
-Automated checks for collection, account isolation, evidence, interface behavior and
-packaging. The suite uses synthetic accounts and fake Telegram transport; live
-qualification is recorded separately in the [verification record](../docs/VERIFICATION.md).
+## Run
 
-## Choose a test area
-
-| Area | Starting points |
-| --- | --- |
-| Evidence and exports | [`test_evidence.py`](test_evidence.py), [`test_chat_export.py`](test_chat_export.py), [`test_multi_export.py`](test_multi_export.py), [`test_export_lifecycle.py`](test_export_lifecycle.py), [`test_verify_limits.py`](test_verify_limits.py) |
-| Collection and coverage | [`test_collector.py`](test_collector.py), [`test_scope.py`](test_scope.py), [`test_coverage.py`](test_coverage.py), [`test_recheck.py`](test_recheck.py) |
-| Accounts and connections | [`test_account_isolation.py`](test_account_isolation.py), [`test_account_import.py`](test_account_import.py), [`test_connection.py`](test_connection.py), [`test_netclient.py`](test_netclient.py) |
-| Investigation and actions | [`test_investigation.py`](test_investigation.py), [`test_dossier.py`](test_dossier.py), [`test_interactions.py`](test_interactions.py) |
-| Witness and recovery | [`test_witness.py`](test_witness.py), [`test_anchor.py`](test_anchor.py), [`test_replica.py`](test_replica.py) |
-| UI and documentation | [`test_i18n.py`](test_i18n.py), [`test_site.py`](test_site.py), [`test_wiki.py`](test_wiki.py), [`test_docs_markup.py`](test_docs_markup.py) |
-| Install and release | [`test_installers.py`](test_installers.py), [`test_release.py`](test_release.py), [`test_publication.py`](test_publication.py), [`test_portable.py`](test_portable.py) |
-
-## Run from the project root
-
-After the [development setup](../.github/CONTRIBUTING.md#development-setup):
+After [dev setup](../.github/CONTRIBUTING.md#development-setup):
 
 ```sh
 python -m pytest -q
 ```
 
-For a focused evidence change:
+For an export fix, start small:
 
 ```sh
 python -m pytest -q tests/test_evidence.py tests/test_chat_export.py
 ```
 
-Browser acceptance scripts live in [`tools/`](../tools/README.md). A passing synthetic
-test establishes the checked behavior, not a live Telegram delivery guarantee.
+| Area | Start here |
+| --- | --- |
+| Evidence / exports | [evidence](test_evidence.py), [chat export](test_chat_export.py), [multi-account](test_multi_export.py), [lifecycle](test_export_lifecycle.py), [ZIP limits](test_verify_limits.py) |
+| Capture | [collector](test_collector.py), [scope](test_scope.py), [coverage](test_coverage.py), [recheck](test_recheck.py) |
+| Accounts / network | [isolation](test_account_isolation.py), [import](test_account_import.py), [connection](test_connection.py), [HTTP](test_netclient.py) |
+| Investigation | [search](test_investigation.py), [dossiers](test_dossier.py), [interactions](test_interactions.py) |
+| Witness / backup | [witness](test_witness.py), [timestamps](test_anchor.py), [S3](test_replica.py) |
+| UI / docs | [i18n](test_i18n.py), [site](test_site.py), [Wiki](test_wiki.py), [markup](test_docs_markup.py) |
+| Packaging | [installers](test_installers.py), [release](test_release.py), [publication](test_publication.py), [portable ZIP](test_portable.py) |
+
+Browser checks live in [tools/](../tools/README.md).

@@ -62,6 +62,10 @@ function setLanguage(lang){
   const url=new URL(location.href);url.searchParams.set("lang",lang);location.assign(url.href);
 }
 translatePage();
+document.querySelectorAll("[data-site-doc]").forEach(link=>{
+  const lang=Object.hasOwn(PANEL_LANGUAGES,LANG)&&LANG!=="en"?LANG+"/":"";
+  link.href="https://phishdestroy.github.io/TgWitness/"+lang+"docs/reference/"+link.dataset.siteDoc+"/";
+});
 document.querySelectorAll("[data-sealed-helper]").forEach(link=>{
   const url=new URL(link.href);url.searchParams.set("lang",LANG);link.href=url.href;
 });

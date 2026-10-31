@@ -117,20 +117,6 @@ def hero(display, text, mobile=False, still=False, wiki=False):
     save(d,name+("-mobile" if mobile else "")+("-static" if still else "")+".svg",title+". Illustrative message, edit and deletion observation; not a live account or screenshot.")
 
 
-def navigation(text, still=False):
-    for index,(name,title,subtitle) in enumerate([
-        ("demo","Explore the workspace","Fictional demonstration records"),
-        ("start","Start your first case","Install, launch and capture"),
-        ("wiki","Open the handbook","The investigation handbook"),
-    ]):
-        d=canvas(text,296,76,title,still,corners=False)
-        d.add(f'<path class="focus delay-{index}" d="M20 75H276" stroke="{BLUE if index==0 else GOLD}" stroke-width="2"/>')
-        d.text(title,20,30,17,INK,700)
-        d.text(subtitle,20,54,12,MUTED)
-        d.add(f'<path class="cursor" d="M266 34h12m-5-5 5 5-5 5" fill="none" stroke="{GOLD}" stroke-width="1.8"/>')
-        save(d,'casework-nav-'+name+('-static' if still else '')+'.svg',title+'. '+subtitle+'.')
-
-
 def diagram_header(d,kicker,title,subtitle,mobile):
     d.text(kicker,32,37,14,BLUE,600,1.2)
     d.text(title,32,85,30 if mobile else 36,INK,700,-.6)
@@ -160,33 +146,6 @@ def chain(text,mobile=False,still=False):
     d.text('Ed25519 signs the 32 digest bytes.',32,y+(119 if mobile else 69),20 if mobile else 17,MUTED)
     if mobile:d.text('Verify with a separately trusted key.',32,883,20,MUTED)
     save(d,'casework-chain'+('-mobile' if mobile else '')+('-static' if still else '')+'.svg','Illustrative records. Each event includes the previous hash. SHA-256 hashes canonical JSON, and Ed25519 signs the digest bytes. C is canonical encoding. Signatures do not establish Telegram origin or complete capture.')
-
-
-def tamper(text,mobile=False,still=False):
-    w,h=(640,790) if mobile else (1200,425)
-    d=canvas(text,w,h,'Change one field. Watch the check fail.',still,corners=False)
-    diagram_header(d,'THE INTEGRITY CHECK','Change one field.','Watch the check fail.',mobile)
-    x,y,cw=32,156,576 if mobile else 548
-    d.add(f'<rect x="{x}" y="{y}" width="{cw}" height="186" rx="10" fill="#102238" stroke="#3b526a"/>')
-    d.text('SAVED EVENT / RECORD 02',x+20,y+30,15,BLUE,600,.7)
-    d.text('Meet at 11:00',x+20,y+78,29,MUTED,600)
-    d.add(f'<path d="M{x+20} {y+68}h190" stroke="{RED}" stroke-width="2"/>')
-    d.text('Meet at 12:00',x+20,y+121,29,INK,600)
-    d.text('The bytes changed.',x+20,y+163,21,RED,600)
-    x,y=(32,371) if mobile else (612,156)
-    d.add(f'<rect class="focus" x="{x}" y="{y}" width="{cw}" height="186" rx="10" fill="#271c2b" stroke="{RED}"/>')
-    d.text('HASH MISMATCH',x+20,y+32,17,RED,700,1)
-    d.text('Saved: 0129367d37...',x+20,y+78,23,MUTED)
-    d.text('New:   bbbeab4467...',x+20,y+117,23,INK,600)
-    d.text('Verification stops at record 02.',x+20,y+162,20,RED,600)
-    y=605 if mobile else 376
-    d.text('Recalculating hashes cannot restore',32,y,23 if mobile else 22,INK,600)
-    d.text('the original signatures.',32 if mobile else 490,y+(33 if mobile else 0),23 if mobile else 22,INK,600)
-    if mobile:
-        d.text('A signing key can sign new input.',32,697,20,MUTED)
-        d.text('Keep independent earlier references.',32,730,20,MUTED)
-    else:d.text('Keep a trusted fingerprint and independent earlier references.',32,407,18,MUTED)
-    save(d,'casework-tamper'+('-mobile' if mobile else '')+('-static' if still else '')+'.svg','Illustration: changing a captured event changes its hash. Rebuilding hashes does not restore original signatures. An operator controlling the signing key can sign fabricated input; independently retained references matter.')
 
 
 def checkpoint(text,mobile=False,still=False):
@@ -230,9 +189,8 @@ def main():
     for mobile in (False,True):
         for still in (False,True):
             for wiki in (False,True):hero(display,text,mobile,still,wiki)
-            for draw in (chain,tamper,checkpoint):draw(text,mobile,still)
-    for still in (False,True):navigation(text,still)
-    print('Rendered 26 casework assets: covers, navigation and responsive evidence diagrams.')
+            for draw in (chain,checkpoint):draw(text,mobile,still)
+    print('Rendered 16 casework covers and evidence diagrams.')
 
 
 if __name__=='__main__':main()

@@ -125,7 +125,9 @@ def check_examples(page, base):
         else:
             expect(case.locator('[data-case-status]')).to_contain_text(phrase)
     expect(page.locator('#history')).to_have_text("2. Acquire history and preserve the files")
-    expect(page.locator('.guide-content')).to_contain_text("Full history acquisition currently runs per chat")
+    history = page.locator('.case-table tbody tr').filter(has_text="History across enabled chats")
+    expect(history).to_contain_text("pause/resume and a signed progress report")
+    expect(history.locator('a')).to_have_attribute("href", "../reference/history/")
     expect(page.locator('.guide-content')).to_contain_text("does not currently provide one global search")
 
     page.goto(base + "docs/security/", wait_until="networkidle")

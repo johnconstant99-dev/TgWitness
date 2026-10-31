@@ -5,8 +5,7 @@ Publish TgWitness **0.7.0** with the project website and release packages. See
 
 The [investigation presentation kit](../assets/presentation/README.md) contains the
 current repository and wiki covers, diagrams and sharing images. Rebuild the
-GitHub and website PNGs with `python website/render_presentation.py`. The earlier
-[launch kit](../assets/launch-kit/README.md) is retained as legacy artwork.
+GitHub and website PNGs with `python website/render_presentation.py`.
 
 The [project wiki](../wiki/Home.md) has its own GitHub repository and a separate
 [build and publishing procedure](WIKI.md). Run `python tools/build_wiki.py` to prepare

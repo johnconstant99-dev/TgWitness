@@ -20,7 +20,7 @@ else:
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGES = (
-    "Home", "Getting-Started", "Accounts", "Access", "Collection", "Investigations",
+    "Home", "Archive-and-Integrations", "Getting-Started", "Accounts", "Access", "Collection", "Investigations",
     "Exports-and-Verification", "Proxies", "Independent-Witness", "Server-and-Docker",
     "Backup-and-Recovery", "Chat-Export", "Notifications", "Off-site-Copy",
     "Troubleshooting", "FAQ", "Glossary", "Operator-Incompatibility",

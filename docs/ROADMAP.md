@@ -33,8 +33,7 @@ Archive usability and feature coverage now have a parallel delivery track:
 imports, transcription, account administration and measured operating cost remain
 separate acceptance milestones; this roadmap does not claim overall superiority.
 
-The [controller](../services/witness-controller/README.md) is a prototype with
-synthetic adapters. A real collector integration is the next delivery milestone.
+A controller with a real collector integration is the next delivery milestone.
 
 - Bind every response to a fresh challenge, the registered collector key and a
   previously witnessed journal head; verify continuation and the final export head.

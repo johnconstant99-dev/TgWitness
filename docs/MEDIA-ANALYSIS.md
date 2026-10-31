@@ -1,5 +1,9 @@
 # Local OCR and transcription
 
+**Current main:** use a source checkout; the 0.7.0 portable preview predates this feature.
+
+[Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
+
 Open a `media.saved` journal record, choose **Recognize attachment**, then select
 OCR or transcription under **Ask the archive**. Processing is manual and local.
 There is no cloud media mode or automatic upload. Original attachment bytes and

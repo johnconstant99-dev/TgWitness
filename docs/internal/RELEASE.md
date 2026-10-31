@@ -45,8 +45,6 @@ are compared with the reviewed source commit recorded in `RELEASE-MANIFEST.json`
 0.7.0 yet; Docker users build locally with
 `scripts/Docker.cmd` or `scripts/docker-start.sh`.
 
-The [pre-publication audit](PREPUBLICATION-2026-10-29.md) records the latest local results.
-Earlier backend and recovery findings are in the [whole-tool review](FULL-REVIEW-2026-10-29.md).
 Local checks do not establish that GitHub-hosted workflows have run successfully.
 
 Local preview validation on 31 October 2026 (Windows, Python 3.12): 735 Python tests

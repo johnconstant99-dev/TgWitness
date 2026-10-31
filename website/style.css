@@ -185,6 +185,9 @@ p code { font-size: .88em; background: #e8edf4; padding: 2px 4px; border-radius:
 .release-note { font-size: 12px; border-inline-start: 2px solid #b8c9e5; padding-inline-start: 18px; margin-top: 25px; max-width: 900px; }
 .release-note strong { color: #354760; margin-inline-end: 9px; }
 .docs { padding-top: 86px; }
+.archive-tools { margin-top: 56px; padding-block: 30px; border-top: 1px solid var(--line); }
+.archive-tools h2 { margin-top: 0; }
+.archive-tools p { max-width: 72ch; }
 .doc-links { display: grid; grid-template-columns: 1fr 1fr; column-gap: 64px; }
 .doc-links > a { display: flex; align-items: center; gap: 21px; padding: 27px 0; border-top: 1px solid var(--line); text-decoration: none; }
 .doc-links > a:hover h3 { color: var(--blue); }

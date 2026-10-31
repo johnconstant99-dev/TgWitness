@@ -32,11 +32,18 @@ an operator catalog. [IP modes](CONNECTION-SECURITY.md#ip-modes) determine wheth
 failure must wait for another proxy or may use an explicitly permitted direct route.
 External HTTP requests have a separate route and off switch.
 
+## Archive tools
+
+Current `main` adds [history acquisition](HISTORY.md), [archive search and analysis](ANALYSIS.md),
+[read-only MCP](MCP.md), [local OCR/transcription](MEDIA-ANALYSIS.md) and
+[outgoing webhooks](WEBHOOKS.md). These are source-checkout features, added after
+the 0.7.0 portable preview. Analytical reports and recognized text stay separate
+from captured events.
+
 ## Optional extras
 
 Everyday setup is account → sources → observation. **Extras** is a separate destination
-with two cards: a Telegram witness bot and planned
-GitHub build verification. Each states its availability and requirements before showing
+with a Telegram witness bot and a GitHub capture preview. Each states its availability and requirements before showing
 settings. Choosing a card opens instructions; it does not enroll or start a service.
 
 Bot setup has three steps: create read-only access, choose publication settings, and
@@ -44,7 +51,8 @@ launch on the witness host. Network and publication options, existing connection
 verification commands are disclosed on demand. Downloaded configuration is distinct
 from a running witness. Switching extras retains the draft; account changes and locking
 clear the temporary token and form. The built-in guide includes launch instructions.
-GitHub remains a marked plan, with no credential form or pretend connection state.
+[GitHub Actions capture](SEALED-ACTIONS.md) launches a pinned collector from your
+fork, captures one chat and produces an encrypted handoff with workflow provenance.
 
 ## Protocol and private sources
 

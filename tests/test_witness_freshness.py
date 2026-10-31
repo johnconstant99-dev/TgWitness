@@ -1,4 +1,4 @@
-"""Network-response replay and downgrade checks using disposable collector keys."""
+"""Reject replayed responses and witness downgrades."""
 import asyncio
 import copy
 

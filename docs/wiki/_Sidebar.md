@@ -13,6 +13,7 @@
 
 - [Export one chat](Chat-Export.md)
 - [Investigations](Investigations.md)
+- [Archive, AI and integrations](Archive-and-Integrations.md)
 - [Exports and verification](Exports-and-Verification.md)
 
 **03 · Independent checks**

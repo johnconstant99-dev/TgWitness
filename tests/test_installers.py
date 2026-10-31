@@ -1,4 +1,4 @@
-"""Launch scripts must preserve arguments and fail before claiming readiness."""
+"""Launcher arguments and startup failures."""
 import json
 import os
 import runpy

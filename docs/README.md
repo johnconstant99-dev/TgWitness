@@ -25,11 +25,16 @@ The proxy and witness bot are separate options.
 
 ## Find your workflow
 
+**New in main:** history loading, archive analysis, MCP, local OCR/transcription
+and webhooks. Use a source checkout for these features; the 0.7.0 portable
+preview predates them. [Start with the workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/).
+
 | I want to… | Start here | What I should see |
 | --- | --- | --- |
 | Try the interface | [Quick start](QUICKSTART.md#explore-the-interface) | Fictional conversations; no Telegram login |
 | Connect my account | [Account setup](ACCOUNTS.md) | A new test message in the journal |
 | Capture one private chat from my fork | [GitHub Actions capture (preview)](SEALED-ACTIONS.md) | An encrypted archive and verification against the approved upstream workflow |
+| Load older messages into the workspace | [Source history](HISTORY.md) | Resumable capture and a signed progress report |
 | Give a reviewer or analyst access | [Access and permissions](ACCESS.md) | Only the chosen accounts, chats and permitted actions |
 | Connect an AI client | [Read-only MCP](MCP.md) | Expiring access to selected workspaces and chats |
 | Ask questions and write a report | [Archive analysis](ANALYSIS.md) | Reviewed sources, verified references and separate analyst revisions |

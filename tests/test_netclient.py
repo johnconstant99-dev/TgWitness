@@ -1,4 +1,4 @@
-"""The HTTP client bounds every read, including chunked bodies, before data arrives (audit A3)."""
+"""HTTP read limits, including chunked responses."""
 import asyncio
 from unittest.mock import patch
 

@@ -1,4 +1,4 @@
-"""The hash locks that servers install from stay in step with the version constraints."""
+"""Keep hash locks in sync with pinned versions."""
 import re
 from pathlib import Path
 

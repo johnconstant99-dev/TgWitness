@@ -1,4 +1,4 @@
-"""Publication boundary checks: the Pages artifact must never include live data."""
+"""Keep live data out of the Pages build."""
 import shutil
 import json
 import re
@@ -227,7 +227,7 @@ def test_every_page_has_distinct_metadata_and_valid_links(site_root, base_url):
     for name in SEARCH_FILES:
         index = json.loads((output / name).read_text(encoding="utf-8"))
         hub = base_url + "/" + name.removesuffix("search.json")
-        assert len(index["pages"]) == (3 if name.split('/')[0] in site_modes.EXTRA_LANGUAGES else 33)
+        assert len(index["pages"]) == (3 if name.split('/')[0] in site_modes.EXTRA_LANGUAGES else 39)
         for entry in index["pages"]:
             assert urljoin(hub, entry["url"]) in pages
 

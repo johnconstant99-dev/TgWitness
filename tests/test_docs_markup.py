@@ -1,4 +1,4 @@
-"""Collapsible sections in Markdown keep their content inside (audit A11)."""
+"""Keep collapsed Markdown sections intact."""
 import re
 from pathlib import Path
 

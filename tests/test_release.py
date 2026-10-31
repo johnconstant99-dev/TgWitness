@@ -27,11 +27,6 @@ def test_public_archive_excludes_runtime_artifacts_even_inside_source_trees(tmp_
                "tgwitness/data/account.json", "tgwitness/data/notes.py",
                "docs/tgwitness-backup-old/report.md", "tools/.venv/helper.py",
                "tgwitness/proof-data/private.py", "docs/proof-config/secret.md", "tools/witness-data/private.py", "docs/proxy-config/private.md"]
-    private.extend("services/witness-controller/" + name for name in (
-        ".dev.vars", "demo-output/access.json", "demo-output/receipts.json",
-        ".wrangler/state/controller.sqlite", "node_modules/example/index.mjs",
-        "build/worker.js", "browser-profile/Preferences", "src/local-credentials.json",
-    ))
     for name in [*public, *private]:
         destination = tmp_path / name
         destination.parent.mkdir(parents=True, exist_ok=True)

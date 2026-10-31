@@ -1,4 +1,4 @@
-"""Adversarial capsule boundaries and encrypted handoff; no real accounts or network."""
+"""Sealed capture boundaries and encrypted handoffs."""
 import asyncio
 import json
 import secrets

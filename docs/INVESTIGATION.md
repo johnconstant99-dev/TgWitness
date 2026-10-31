@@ -73,6 +73,9 @@ Keep a source register with one row per chat:
 
 Use the right acquisition for each source:
 
+- **Load full history** in **Sources** (current `main`) loads available past
+  messages from enabled sources into the workspace journal. It supports pause/resume
+  and a signed progress report. See [history acquisition](HISTORY.md).
 - **History snapshot** saves recent visible messages into the observation journal.
   Its default maximum is 500; **Parameters → Largest history snapshot** can raise
   that to 10,000. These are current history observations, not reconstructed edits.
@@ -87,9 +90,9 @@ Use the right acquisition for each source:
   job, thumbnail or filename is not the preserved attachment.
 
 A full chat export does **not** populate the journal or people profiles with all
-its messages. Use journal snapshots for the history you need to analyze inside
-TgWitness. There is no one-click whole-account historical backfill; full history
-acquisition is per chat. Neither route recovers material Telegram no longer returns.
+its messages. Use **Load full history** or bounded journal snapshots for history you need
+to analyze inside TgWitness. Review the enabled source list before starting
+a history run. Neither route recovers material Telegram no longer returns.
 
 ## 3. Preserve the evolving case and deliberate interactions
 

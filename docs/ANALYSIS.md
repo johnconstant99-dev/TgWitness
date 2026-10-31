@@ -1,5 +1,9 @@
 # Archive analysis
 
+**Current main:** use a source checkout; the 0.7.0 portable preview predates this feature.
+
+[Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
+
 Open **Ask the archive** in the panel. The workspace selector chooses the account;
 the form chooses chats and the observation period. Search runs locally, without
 AI. An exact phrase or domain narrows retrieval; a message ID requests saved

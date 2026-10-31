@@ -1,4 +1,4 @@
-"""Regression checks for the public fork's trust boundary and publication pins."""
+"""Fork isolation and pinned workflow revisions."""
 import importlib.util
 import json
 import re

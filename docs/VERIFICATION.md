@@ -69,8 +69,7 @@ Public files contain only these counts: no account or chat identifiers, messages
 credentials.
 
 Older entries below describe their own runs; most of them used synthetic test clients.
-The latest automated results are below; [the pre-publication audit](internal/PREPUBLICATION-2026-10-29.md)
-records the earlier baseline.
+The latest automated results are below.
 
 ## Built-in public MTProxy lists · 29 October 2026
 

@@ -281,19 +281,11 @@ def handbook(mobile, still):
 
 
 BUTTONS = (
-    ("access", "ACCESS", "PERMISSIONS", BUTTON_BLUE, 70, 117),
-    ("routes", "PROXIES", "IP MODES", BUTTON_STEEL, 79, 89),
-    ("apprise", "APPRISE", "SETUP", BUTTON_BLUE, 70, 58),
-    ("s3", "S3", "SETUP & RECOVERY", BUTTON_GOLD, 36, 138),
-    ("backup", "BACKUP", "GUIDE", BUTTON_STEEL, 67, 58),
     ("accounts", "SET UP", "ACCOUNTS", BUTTON_BLUE, 64, 88),
     ("investigate", "INVESTIGATE", "GUIDE", BUTTON_GOLD, 105, 58),
     ("maintain", "MAINTAIN", "SERVER & DOCKER", BUTTON_STEEL, 86, 137),
     ("wiki", "WIKI", "OPEN", BUTTON_BLUE, 47, 51),
-    ("offline", "HANDBOOK", "OFFLINE", BUTTON_STEEL, 91, 75),
     ("docs", "DOCS", "REFERENCE", BUTTON_STEEL, 51, 97),
-    ("explain", "EVIDENCE", "EXPLORE", BUTTON_BLUE, 83, 80),
-    ("model", "MODEL", "REFERENCE", BUTTON_STEEL, 63, 97),
     ("project", "BY", "PHISHDESTROY", BUTTON_GOLD, 31, 119),
     ("contribute", "CODE", "CONTRIBUTE", BUTTON_BLUE, 51, 105),
     ("support", "HELP", "SUPPORT", BUTTON_BLUE, 48, 80),

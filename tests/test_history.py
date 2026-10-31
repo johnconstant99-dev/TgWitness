@@ -1,4 +1,4 @@
-"""History acquisition: durable cursors, scope isolation and honest partial outcomes. No network."""
+"""History cursors, account isolation and partial downloads."""
 import asyncio
 import base64
 import json

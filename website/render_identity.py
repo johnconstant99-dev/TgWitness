@@ -144,30 +144,15 @@ def hero(font, original, mobile=False, still=False, wiki=False):
          "and a signature is drawn. Fictional records, not a screenshot of the application.")
 
 
-def setup_actions(font, still=False, navigation=False):
-    """Two-line action buttons from the PhishDestroy repository family."""
+def navigation_actions(font, still=False):
     actions = (
-        ("setup", "SETUP GUIDE", "Install, launch & capture", "#a7d7ff"),
-        ("account", "DEDICATED ACCOUNT", "Prepare your Telegram account", "#b9d8d0"),
-        ("deploy", "DOCKER & SERVERS", "Deploy your workspace", "#dcc294"),
+        ("demo", "EXPLORE THE WORKSPACE", "Fictional demonstration records", "#a7d7ff"),
+        ("start", "START YOUR FIRST CASE", "Install, launch & capture", "#b9d8d0"),
+        ("wiki", "OPEN THE HANDBOOK", "The investigation handbook", "#dcc294"),
     )
-    if navigation:
-        actions = (
-            ("demo", "EXPLORE THE WORKSPACE", "Fictional demonstration records", "#a7d7ff"),
-            ("start", "START YOUR FIRST CASE", "Install, launch & capture", "#b9d8d0"),
-            ("wiki", "OPEN THE HANDBOOK", "The investigation handbook", "#dcc294"),
-        )
     icons = {
         "setup": '<path d="M17 19h7q4 0 4 4v18q0-4-4-4h-7Zm22 0h-7q-4 0-4 4v18q0-4 4-4h7Z"/>'
                  '<path class="detail" d="M20 25h4m-4 5h4m8-5h4m-4 5h4"/>',
-        "account": '<path d="m28 17 11 4v9c0 7-11 12-11 12S17 37 17 30v-9Z"/>'
-                   '<circle class="detail" cx="28" cy="26" r="3"/>'
-                   '<path d="M23 35c0-6 10-6 10 0"/>',
-        "deploy": '<rect x="17" y="18" width="22" height="10" rx="2"/>'
-                  '<rect x="17" y="32" width="22" height="10" rx="2"/>'
-                  '<path d="M27 23h8m-8 14h8"/>'
-                  '<circle class="detail" cx="22" cy="23" r="1"/>'
-                  '<circle class="detail" cx="22" cy="37" r="1"/>',
         "demo": '<rect x="16" y="18" width="24" height="20" rx="3"/>'
                 '<path d="M24 43h8m-4-5v5"/><path class="detail" d="m25 23 7 5-7 5Z"/>',
         "start": '<path d="M20 20h14a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H20a3 3 0 0 1-3-3V23a3 3 0 0 1 3-3Z"/>'
@@ -205,8 +190,7 @@ def setup_actions(font, still=False, navigation=False):
 @keyframes sheen{{0%{{transform:translateX(0)}}45%,100%{{transform:translateX(350px)}}}}
 </style>''')
         suffix = "-static" if still else ""
-        prefix = "identity-nav-" if navigation else "identity-action-"
-        save(d, prefix + name + suffix + ".svg", title + ": " + subtitle)
+        save(d, "identity-nav-" + name + suffix + ".svg", title + ": " + subtitle)
 
 
 def separator(font, still=False):
@@ -257,11 +241,10 @@ def main():
         hero(font, original, still=still)
         hero(font, original, mobile=True, still=still)
         hero(font, original, wiki=True, still=still)
-        setup_actions(font, still=still)
-        setup_actions(font, still=still, navigation=True)
+        navigation_actions(font, still=still)
         separator(font, still=still)
     metadata(font)
-    print("Rendered identity covers, navigation and setup buttons, section dividers and metadata badges.")
+    print("Rendered identity covers, navigation, section dividers and metadata badges.")
 
 
 if __name__ == "__main__":

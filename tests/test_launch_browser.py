@@ -1,4 +1,4 @@
-"""A local double-click start opens the panel; services, containers and scripts never do."""
+"""Open the browser on desktop launch, not in services."""
 import socket
 import webbrowser
 

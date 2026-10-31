@@ -1,4 +1,4 @@
-"""Every verifier entry point applies the archive limits before reading members (audit A2)."""
+"""Apply archive limits before reading ZIP entries."""
 import contextlib
 import io
 import json

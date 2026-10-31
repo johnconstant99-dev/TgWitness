@@ -1,4 +1,4 @@
-"""Adversarial continuity checks; synthetic journals, no Telegram or live servers."""
+"""Journal continuity and fork detection."""
 import asyncio
 import hashlib
 import sqlite3

@@ -68,3 +68,9 @@ Rechecks recover some missed current messages and changes. They cannot guarantee
 **Pause observation** stops collection. **Lock** and closing the browser leave the collector running. Stopping the application creates an interval without collection. After restarting, check account identity, observation state, gaps and attachment queues.
 
 **Next:** [Investigations](Investigations.md) · [Exports](Exports-and-Verification.md) · [Collection reference](../COLLECTION.md)
+
+## Load older messages
+
+On current `main`, **Sources → Load full history** reads enabled sources into
+the workspace. It supports pause/resume and a signed progress report. Attachments
+finish separately. See [history acquisition](../HISTORY.md).

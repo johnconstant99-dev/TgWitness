@@ -1,0 +1,24 @@
+<p class="guide-outcome">Find the message. Check the source. Build the case.</p>
+<p class="callout">These tools are available from the current main branch. The 0.7.0 portable preview predates them; use a source checkout for this workflow.</p>
+<figure class="network-map archive-route" aria-labelledby="archive-caption">
+<div><span class="network-number">01</span><strong>Bring in the history</strong><p>Load past messages from your enabled sources into the workspace.</p></div>
+<div><span class="network-number">02</span><strong>Follow the sources</strong><p>Search the archive and open the saved message behind each result.</p></div>
+<div><span class="network-number">03</span><strong>Keep the handoff clear</strong><p>Save your analysis separately and export the signed evidence beside it.</p></div>
+<figcaption id="archive-caption">Captured records, recognized text and analyst conclusions stay distinct.</figcaption>
+</figure>
+<h2 id="history">Load past messages</h2>
+<ol><li>Open <strong>Sources</strong>, review the enabled chats and start observation.</li><li>Choose <strong>Load full history</strong>. The run uses the source list selected at that moment.</li><li>Use <strong>Pause history</strong> and <strong>Continue history</strong> as needed. After a restart, resume explicitly.</li><li>Check the per-source result and attachment queue. Save the signed progress report with the evidence export.</li></ol>
+<p>This fills the workspace with available messages. A per-chat HTML/JSON export is a separate operation. <a href="../reference/history/">History and recovery details</a>.</p>
+<h2 id="search">Search first, then decide about AI</h2>
+<ol><li>Open <strong>Ask the archive</strong>. Choose a workspace, chats and observation period.</li><li>Search a phrase, domain or message ID. Open the matching record and its saved versions.</li><li>For AI analysis, the administrator first configures a provider. Review <strong>Data sent to the model</strong> and uncheck unwanted excerpts before approving the request.</li><li>Check the returned citations. Save the answer as a report and add your own revision or notes.</li></ol>
+<p>Search runs locally without AI. Analytical reports keep source references and revision history; they are separate from the signed journal. <a href="../reference/analysis/">Provider setup and reports</a>.</p>
+<h2 id="tools">Choose the connection you need</h2>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Open</th><th>Setup</th></tr></thead><tbody>
+<tr><td>Read selected chats from an AI client</td><td><strong>Integrations → MCP</strong></td><td><a href="../reference/mcp/">Install the MCP extra, issue a scoped token and connect the client</a></td></tr>
+<tr><td>Recognize text in saved media</td><td>A <code>media.saved</code> record → <strong>Recognize attachment</strong></td><td><a href="../reference/media-analysis/">Set up the local Docker worker and required language/model files</a></td></tr>
+<tr><td>Send events to n8n or a SIEM</td><td><strong>Integrations → Outgoing webhooks</strong></td><td><a href="../reference/webhooks/">Add a receiver, verify HMAC and deduplicate event IDs</a></td></tr>
+</tbody></table></div>
+<details><summary>Which access token goes where?</summary><p>Panel access is for people reviewing the case. MCP connections get separate read-only archive tokens. A webhook receiver uses its own HMAC secret. None needs a Telegram session file.</p><p><a href="@@GUIDE_ACCESS@@">Share panel access</a> or <a href="../reference/mcp/">configure an MCP client</a>.</p></details>
+<h2 id="handoff">Hand over sources and conclusions</h2>
+<p>Keep the reviewed analytical report alongside the signed evidence ZIP. The report explains your reading of the sources; the ZIP lets a recipient check the saved record against an independently trusted fingerprint and checkpoint.</p>
+<p><a href="@@GUIDE_EXPORTS@@">Export and verify</a> · <a href="@@GUIDE_CASES@@">Work through a full investigation</a></p>

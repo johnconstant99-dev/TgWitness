@@ -13,6 +13,7 @@ separate GitHub Wiki; they also remain readable inside the main repository.
 | --- | --- |
 | First capture | [Getting started](Getting-Started.md) → [Accounts](Accounts.md) → [Collection](Collection.md) |
 | Shared case review | [Access and permissions](Access.md) → [Investigation](Investigations.md) |
+| Archive, AI and integrations | [History, search, MCP, OCR and webhooks](Archive-and-Integrations.md) |
 | Investigation and handoff | [Investigations](Investigations.md) → [Exports and verification](Exports-and-Verification.md) |
 | Export one conversation | [Chat export](Chat-Export.md) → [Verification](Exports-and-Verification.md) |
 | Reliable operation | [Proxies](Proxies.md), [Server and Docker](Server-and-Docker.md), [Backup and recovery](Backup-and-Recovery.md) |
@@ -22,7 +23,7 @@ separate GitHub Wiki; they also remain readable inside the main repository.
 
 ## Maintain the wiki
 
-`_Sidebar.md` and `_Footer.md` provide shared navigation. The explicit 18-page bundle
+`_Sidebar.md` and `_Footer.md` provide shared navigation. The explicit 19-page bundle
 is built by [`tools/build_wiki.py`](../../tools/build_wiki.py); this directory README
 is a repository index, not an additional published wiki page.
 

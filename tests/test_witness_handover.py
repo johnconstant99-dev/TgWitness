@@ -1,4 +1,4 @@
-"""Adversarial handovers using disposable journals and keys; no live services."""
+"""Tampered handoffs and witness verification."""
 import asyncio
 import json
 import subprocess

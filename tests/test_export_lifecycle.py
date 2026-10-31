@@ -1,5 +1,4 @@
-"""One export per account, deletion coordinated with multi-account exports, and setup failures that
-end as failed instead of running forever (audit A4, A5, A6). Synthetic accounts only."""
+"""Export concurrency, account deletion and failed setup."""
 import asyncio
 import hashlib
 from unittest.mock import patch

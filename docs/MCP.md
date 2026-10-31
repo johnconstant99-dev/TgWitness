@@ -1,5 +1,9 @@
 # Read-only archive access
 
+**Current main:** use a source checkout; the 0.7.0 portable preview predates this feature.
+
+[Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
+
 Install the optional server from the TgWitness project directory:
 
 ```sh

@@ -1,4 +1,4 @@
-"""The pinned Telethon dependency must reject unauthenticated server data."""
+"""Reject unauthenticated Telegram server responses."""
 import asyncio
 from collections import defaultdict
 import logging

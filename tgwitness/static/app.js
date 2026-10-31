@@ -235,11 +235,12 @@ async function unlock() {
   show("gate",false); show("workspace",true); $("panel-token").value="";
   navigate(state.view);
 
+  const openingView=state.view;
   renderStatus(); setAuthStep(state.status.collector.has_session ? "authorized" : "credentials");
   await refreshEvents();
   loadNotifications().catch(()=>{});
   if(state.view!=="parameters")loadParameters().catch(()=>{});
-  if(state.view!=="sealed"&&!state.status.demo&&!state.status.collector.has_session&&viewAllowed("connection"))navigate("connection");
+  if(state.view===openingView&&state.view!=="sealed"&&!state.status.demo&&!state.status.collector.has_session&&viewAllowed("connection"))navigate("connection");
   if(sourceLink){
     const params=sourceLink;sourceLink=null;
     const workspace=params.get("workspace"),seq=Number(params.get("event"));
