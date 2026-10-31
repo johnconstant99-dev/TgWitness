@@ -6,7 +6,7 @@ import re
 import time
 from collections import OrderedDict, deque
 
-from telethon import utils
+from telethon import types, utils
 from telethon.errors import FloodWaitError
 
 from .security import private_write
@@ -158,8 +158,15 @@ class AvatarHistory:
             client = self.client_getter()
             if client is None or not client.is_connected() or time.time() < self.store.get_setting("rpc_backoff_until", 0):
                 return
+            photo = entity.photo
+            if getattr(photo, "photo_id", None) != key[2]:
+                raise ValueError("Observed profile photo changed before capture")
+            location = types.InputPeerPhotoFileLocation(
+                peer=utils.get_input_peer(entity, check_hash=False), photo_id=key[2], big=False)
+            # download_profile_photo can fall back to a channel's newest photo.
+            # The signed record must describe the exact photo observed above.
             with PhotoBuffer() as stream:
-                await asyncio.wait_for(client.download_profile_photo(entity, file=stream, download_big=False), 20)
+                await asyncio.wait_for(client.download_file(location, file=stream, dc_id=photo.dc_id), 20)
                 data = stream.getvalue()
             if not data:
                 self.failed[key] = time.time() + 600
