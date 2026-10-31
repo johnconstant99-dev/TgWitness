@@ -320,7 +320,25 @@ export function createParameters(context) {
     find("parameters-review-invalid").hidden = true;
     context.setDirty(false); context.saved(null);
   }
-  return {load, enter: load, selectSection, updateStatus() {if (active()) renderDraft();},
+  function searchEntries(data = catalog) {
+    return (data?.groups || []).flatMap(group => group.items.map(item => {
+      const label = tr(item.label), groupLabel = tr(groupNames[group.id] || group.title);
+      return {key: item.key, group: group.id, label, groupLabel,
+        search: [item.key, item.label, label, group.id, group.title, groupLabel].join(' ').toLocaleLowerCase()};
+    }));
+  }
+  function focusParameter(key) {
+    if (!active() || !may('settings')) return false;
+    const entry = fields.get(key); if (!entry) return false;
+    find('parameters-search').value = ''; find('parameters-changed').checked = false;
+    const group = [...groups].find(([, value]) => value.entries.includes(entry));
+    if (group) selectSection(group[0], {scroll: false});
+    entry.row.scrollIntoView({block: 'center', behavior: 'instant'});
+    if (entry.field.disabled) {entry.row.tabIndex = -1; entry.row.focus({preventScroll: true});}
+    else entry.field.focus({preventScroll: true});
+    return true;
+  }
+  return {load, enter: load, selectSection, searchEntries, focusParameter, updateStatus() {if (active()) renderDraft();},
     leave() {request++; find("parameters-reset-dialog").close(); resetPlan = null;}, resetSession,
     destroy() {request++; listeners.abort();}};
 }

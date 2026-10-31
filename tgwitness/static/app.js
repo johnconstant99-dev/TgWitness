@@ -555,7 +555,24 @@ document.querySelectorAll("[data-view],[data-open]").forEach(button=>button.addE
 
 
 const quickDialog=$("quick-dialog"),quickSearch=$("quick-search"),quickResults=$("quick-results");
-let quickIndex=0;
+const quickCatalogHint=node('p','hint');quickCatalogHint.hidden=true;quickCatalogHint.setAttribute('role','status');quickResults.after(quickCatalogHint);
+let quickIndex=0,quickCatalog=[],quickCatalogKey='',quickCatalogPending=null;
+const quickSession=()=>state.workspaceRevision+':'+state.profile;
+async function loadQuickCatalog(){
+  if(!quickDialog.open||!viewAllowed('parameters'))return;
+  const session=quickSession();if(quickCatalogKey===session||quickCatalogPending)return;
+  quickCatalog=[];quickCatalogHint.hidden=true;const controller=new AbortController();quickCatalogPending=controller;
+  try{const parameters=await parametersReady,data=state.parameters||await json('parameters',undefined,{signal:controller.signal});
+    if(controller.signal.aborted||session!==quickSession()||!quickDialog.open||!viewAllowed('parameters'))return;
+    quickCatalog=parameters.searchEntries(data);quickCatalogKey=session;
+    const selected=quickResults.children[quickIndex]?.id;renderQuick();
+    const kept=[...quickResults.children].findIndex(option=>option.id===selected);if(kept>=0)selectQuick(kept);
+  }catch(error){if(!controller.signal.aborted&&session===quickSession()&&quickDialog.open&&!(error instanceof StaleView)){
+    quickCatalogHint.textContent=tr('Parameter search is unavailable. Open Parameters to retry.');quickCatalogHint.hidden=false;
+  }}finally{if(quickCatalogPending===controller)quickCatalogPending=null;}
+}
+quickDialog.addEventListener('close',()=>{quickCatalogPending?.abort();quickCatalogPending=null;quickCatalogHint.hidden=true;});
+window.addEventListener('tgwitness:lock',()=>{quickCatalog=[];quickCatalogKey='';quickCatalogPending?.abort();quickCatalogPending=null;quickResults.replaceChildren();});
 $("quick-shortcut").textContent=/Mac|iPhone|iPad/.test(navigator.platform)?"⌘ K":"Ctrl K";
 function selectQuick(index){
   const options=[...quickResults.children];
@@ -594,7 +611,19 @@ function renderQuick(){
     for(const chat of (state.status?.targets||[]).filter(c=>(c.title+" "+c.chat_id).toLowerCase().includes(query)).slice(0,12))
       option("chat-"+chat.chat_id,chat.title,String(chat.chat_id),async()=>{navigate("chats");await refreshChats();await openChat(chat.chat_id);});
     const text=quickSearch.value.trim().slice(0,200);
+    if(viewAllowed('parameters')&&quickCatalogKey===quickSession())for(const item of quickCatalog.filter(item=>item.search.includes(query)).slice(0,12))
+      option('parameter-'+item.key,item.label,item.groupLabel+' · '+item.key,async()=>{
+        const session=quickSession();await navigate('parameters',{history:false});
+        if(session===quickSession()&&state.view==='parameters'&&viewAllowed('parameters')&&!(await parametersReady).focusParameter(item.key)){
+          window.TgWitnessRouter?.record();toast(tr('Parameter is unavailable in this workspace.'),true);
+        }
+      });
+    const record=/^#([1-9]\d*)$/.exec(text),seq=record?Number(record[1]):null;
+    if(Number.isSafeInteger(seq))option('record-'+seq,tr('Open record #{seq}',{seq}),tr('Journal'),async()=>{
+      const session=quickSession();await navigate('observations');if(session===quickSession()&&state.view==='observations')await openRecord(seq);
+    });
     option("journal",tr("Search journal"),text,async()=>{state.search=text;state.cursor=state.eventBefore=state.eventAfter=null;$("event-search").value=text;navigate("observations");await refreshEvents();});
+
     if(/^(@[a-z0-9_]{3,}|(?:https?:\/\/)?t\.me\/\S+)$/i.test(text)&&may("interact"))
       option("telegram",tr("Open Telegram link"),text,()=>{navigate("chats");$("chat-link").value=text;viewQuery("chats",".chat-open").open=true;$("chat-link").focus();});
   }
@@ -613,7 +642,7 @@ function toggleQuick(){
   if(quickDialog.open){quickDialog.close();return;}
   if($("workspace").hidden||$("workspace").inert||document.querySelector("dialog[open]")||!$("detail-drawer").hidden)return;
   closeNotifications();quickSearch.value="";
-  quickDialog.showModal();renderQuick();quickSearch.focus();
+  quickDialog.showModal();renderQuick();quickSearch.focus();void loadQuickCatalog();
 }
 document.querySelectorAll("[data-quick-open]").forEach(button=>button.addEventListener("click",toggleQuick));
 $("quick-close").addEventListener("click",()=>quickDialog.close());
@@ -1891,7 +1920,7 @@ const parametersReady=import("./views/parameters.js").then(({createParameters})=
     headerOffset:()=>{const header=document.querySelector(".topbar");return header&&["sticky","fixed"].includes(getComputedStyle(header).position)?header.getBoundingClientRect().height:0;},
     sectionHref:id=>window.TgWitnessRouter?.href({view:"parameters",section:id})||"#parameters-group-"+id,
     sectionChanged:id=>{state.parameterSection=id;window.TgWitnessRouter?.record();},
-    setDirty:value=>state.parametersDirty=value,saved:value=>state.parameters=value});
+    setDirty:value=>state.parametersDirty=value,saved:value=>{state.parameters=value;quickCatalogKey='';}});
   return parametersView;
 }).catch(error=>{toast(error.message,true);throw error;});
 async function loadParameters(){if(state.view==="parameters")return (await parametersReady).enter(viewContexts.get("parameters")||{});}

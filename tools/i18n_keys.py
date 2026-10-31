@@ -94,8 +94,12 @@ def script_keys(source):
 
 def all_script_keys():
     keys = list(DYNAMIC_SCRIPT_KEYS)
-    for name in ("app.js", "i18n.js", "guide.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js", "fleet.js", "review.js", "live.js", "components/journal.js"):
-        keys += script_keys((STATIC / name).read_text(encoding="utf-8"))
+    paths = list(STATIC.glob("*.js"))
+    for folder in ("core", "components", "views"):
+        paths.extend((STATIC / folder).glob("*.js"))
+    for path in sorted(paths):
+        keys += script_keys(path.read_text(encoding="utf-8"))
+
     return list(dict.fromkeys(keys))
 
 
