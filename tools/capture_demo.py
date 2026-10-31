@@ -54,7 +54,7 @@ def main():
         root = str((run / "demo").resolve())
     neutralize(answers)
     text = json.dumps(dict(sorted(answers.items())), ensure_ascii=False, indent=0, sort_keys=True)
-    # Local paths of the temporary demo directory must not reach the website.
+
     for form in (root, root.replace("\\", "\\\\"), root.replace("\\", "/")):
         text = text.replace(form, "data/demo")
     leaks = [w for w in ("Administrator", "\\\\Users\\\\", "/Users/", "test-results", "demo-capture-") if w in text]
@@ -72,13 +72,13 @@ def neutralize(answers):
         access["text"] = json.dumps({"available": True, "token": "online-demo"})
     catalog = answers.get("/api/network/catalog")
     if catalog:
-        # The bundled public proxy list is not republished on the website.
+
         value = json.loads(catalog["text"])
         value.update(sources=[], proxies=[])
         catalog["text"] = json.dumps(value)
     for answer in answers.values():
         if "text" in answer:
-            # Free space of the capturing disk, replaced by a round illustrative figure.
+
             answer["text"] = re.sub(r'"disk_free_bytes":\s*\d+', '"disk_free_bytes":536870912000', answer["text"])
 
 
@@ -88,7 +88,7 @@ def settle(page, ms=500):
 
 
 def walk(page):
-    # Every chat, with each message filter.
+
     for index in range(page.locator("#chats-list .chat-item").count()):
         page.locator("#chats-list .chat-item").nth(index).click()
         settle(page)
@@ -99,7 +99,7 @@ def walk(page):
             if summary.is_visible():
                 summary.click()
                 settle(page, 250)
-    # Every view, then the journal filters and a few record details.
+
     for view in ("observations", "sources", "evidence", "witness", "parameters", "connection", "accounts", "chats"):
         page.locator(f'[data-view="{view}"]').first.click()
         settle(page)

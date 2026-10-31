@@ -52,7 +52,7 @@ def check_sources(root):
             if href.scheme or href.netloc or not href.path or href.path.startswith("/"):
                 continue
             target = (source.parent / unquote(href.path)).resolve()
-            # GitHub's ../../releases links intentionally resolve outside the checkout.
+
             if not target.is_relative_to(root):
                 continue
             links += 1
@@ -92,8 +92,7 @@ def check_git_index(root, sources):
             continue
         ordinary.append((name, digest))
 
-    # Rehash instead of trusting Git's cached stat data or assume-unchanged flags.
-    # Git applies .gitattributes filters, including normal Windows line endings.
+
     for offset in range(0, len(ordinary), 64):
         batch = ordinary[offset:offset + 64]
         hashes = git("hash-object", "--", *(name for name, _ in batch)).decode("ascii").splitlines()
@@ -103,8 +102,7 @@ def check_git_index(root, sources):
             if staged != working:
                 findings.append(f"Git index differs from the reviewed working file: {name}")
 
-    # Scan the staged blobs too: cleaning a working file does not remove a secret
-    # already staged for commit, and Git clean filters may transform its contents.
+
     text_entries = [(name, digest) for name, digest in ordinary if Path(name).suffix.lower() not in BINARY]
     if text_entries:
         objects = git("cat-file", "--batch", input="".join(digest + "\n" for _, digest in text_entries).encode())

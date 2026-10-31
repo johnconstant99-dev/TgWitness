@@ -42,7 +42,7 @@ def test_launcher_readonly_modes_never_install(monkeypatch, argument):
     monkeypatch.setattr(sys, "argv", ["start.py", argument])
     monkeypatch.setattr(subprocess, "call", lambda args, **kwargs: calls.append(args) or 0)
     monkeypatch.setattr(subprocess, "run", lambda *args, **kwargs: pytest.fail("Installer must not run"))
-    # Pretend an environment exists: portable across CI and source archives.
+
     monkeypatch.setattr(Path, "exists", lambda self: True)
     with pytest.raises(SystemExit) as exc:
         runpy.run_path(str(Path(__file__).resolve().parents[1] / "start.py"), run_name="__main__")

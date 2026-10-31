@@ -35,7 +35,7 @@ def test_failed_tokens_cannot_lock_out_authorized_requests_at_shared_address(col
     assert client.get(endpoint, headers=invalid).status_code == 429
     assert client.get("/api/status").status_code == 200
     assert client.get("/api/witness/head", headers={"Authorization": "Bearer " + token}).status_code == 200
-    # A valid request does not reset the penalty for further invalid tokens.
+
     assert client.get(endpoint, headers=invalid).status_code == 429
 
 
@@ -44,9 +44,9 @@ def test_witness_token_reads_only_the_journal_head(collector):
     created = c.post("/api/witness/tokens", json={"label": "Partner server"}).json()
     token = created["token"]
     assert token.startswith("tgww_") and token not in json.dumps(app.state.vault.read("witness"))
-    assert c.get("/api/witness/head").status_code == 401                           # the panel token is not enough
+    assert c.get("/api/witness/head").status_code == 401
     witness = {"Authorization": "Bearer " + token, "X-TgWitness-Witness": "ab" * 32, "X-TgWitness-Interval": "10"}
-    assert c.get("/api/status", headers=witness).status_code == 401              # a witness cannot open the panel
+    assert c.get("/api/status", headers=witness).status_code == 401
     assert c.get("/api/export/zip", headers=witness).status_code == 401
     head = c.get("/api/witness/head", headers=witness).json()
     assert head["checkpoint"]["statement"]["format"] == "tgwitness-checkpoint-v1"
@@ -55,7 +55,7 @@ def test_witness_token_reads_only_the_journal_head(collector):
     assert state["tokens"][0]["last_poll"]["witness"] == "ab" * 32 and state["tokens"][0]["overdue"] is False
     assert app.state.store.events(kind="witness.seen")[0]["payload"]["witness_fingerprint"] == "ab" * 32
     c.get("/api/witness/head", headers=witness)
-    assert len(app.state.store.events(kind="witness.seen")) == 1                   # ordinary polls are not journaled
+    assert len(app.state.store.events(kind="witness.seen")) == 1
     assert c.delete("/api/witness/tokens/" + created["id"]).status_code == 200
     assert c.get("/api/witness/head", headers=witness).status_code == 401
 
@@ -86,16 +86,16 @@ def test_witness_records_posts_and_cross_checks(collector, tmp_path):
             first = checkpoint(store, vault)
             for i in range(3):
                 store.append("message.new", {"text": str(i)}, CHAT, i)
-            await witness.tick()                                       # the journal grew: fine
+            await witness.tick()
             answers["next"] = ConnectionError("refused")
-            await witness.tick()                                       # no answer: recorded and posted
+            await witness.tick()
             answers["next"] = {"checkpoint": first}
-            await witness.tick()                                       # an older, shorter head: a rollback
+            await witness.tick()
             other = Vault(tmp_path / "impostor")
             answers["next"] = {"checkpoint": checkpoint(store, other)}
-            await witness.tick()                                       # another collector key
+            await witness.tick()
             answers["next"] = {"checkpoint": {**first, "signature": first["signature"][::-1]}}
-            await witness.tick()                                       # a forged answer
+            await witness.tick()
         finally:
             witness.close()
     asyncio.run(run())
@@ -114,11 +114,11 @@ def test_witness_records_posts_and_cross_checks(collector, tmp_path):
         assert check["consistent"] == 2 and not check["conflicts"] and check["no_response"] == 1
         assert [a["status"] for a in check["anomalies"]] == ["rollback"]
         assert check["other_keys"] == 1 and check["invalid_answers"] == 1
-        # A rewritten journal no longer contains the heads the witness saw.
+
         forged = {**seen, "anchors": [{**seen["anchors"][1], "head_hash": "0" * 64}]}
         assert len(cross_check_witness(forged, bundle, result)["conflicts"]) == 1
 
-        # The channel, as exported by Telegram Desktop: every post matches the witness journal.
+
         channel = tmp_path / "result.json"
         messages = [{"id": 101 + i, "date": "2026-03-01T12:0" + str(i) + ":00", "text": text} for i, text in enumerate(posts)]
         channel.write_text(json.dumps({"messages": messages}), encoding="utf-8")
@@ -129,11 +129,11 @@ def test_witness_records_posts_and_cross_checks(collector, tmp_path):
                     "--witness-fingerprint", seen["fingerprint"], "--channel", str(channel)]
         shown = subprocess.run(verifier, capture_output=True, text=True, errors="replace")
         assert shown.returncode == 0 and "Witnessed from" in shown.stdout
-        assert "unpinned" not in shown.stdout  # the pinned witness saw this key answering
+        assert "unpinned" not in shown.stdout
         assert "No retained checkpoint supplied" in shown.stdout and "witness key is not pinned" not in shown.stdout
         unpinned = subprocess.run(verifier[:5], capture_output=True, text=True, errors="replace")
         assert unpinned.returncode == 0 and "witness key is not pinned" in unpinned.stdout
-        # An export signed by a key the witness never saw is not witnessed, however trusted the witness is.
+
         impostor_vault = Vault(tmp_path / "impostor-journal")
         impostor = Store(tmp_path / "impostor-journal")
         impostor.bind(impostor_vault)
@@ -148,7 +148,7 @@ def test_witness_records_posts_and_cross_checks(collector, tmp_path):
         finally:
             impostor.close()
             foreign.unlink()
-        # An edited or deleted post is caught.
+
         messages[0]["text"] = messages[0]["text"].replace("TGW1.", "TGW1.A")
         del messages[1]
         channel.write_text(json.dumps({"messages": messages}), encoding="utf-8")
@@ -164,7 +164,7 @@ def test_witness_pins_the_collector_key_and_parses_proxies(tmp_path):
         raise ConnectionError("down")
 
     witness = Witness(tmp_path / "w", "http://collector:8787", "t", pinned="aa" * 32, fetch=nothing)
-    assert witness.send is None  # no channel: the journal is still kept
+    assert witness.send is None
     asyncio.run(witness.tick())
     witness.close()
     with pytest.raises(ValueError, match="another collector key"):

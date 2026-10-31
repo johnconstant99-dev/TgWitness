@@ -76,8 +76,6 @@ def workspace_prefix(settings, public_key):
     return settings["prefix"].strip("/") + "/" + fingerprint(public_key)[:16]
 
 
-# Encryption -----------------------------------------------------------------------------
-
 def encrypt(key, name, read, nonce_prefix):
     """Ciphertext pieces for plaintext read in chunks; a shorter (possibly empty) chunk is last."""
     aead, counter, label = AESGCM(key), 0, name.encode()
@@ -153,15 +151,13 @@ async def upload(s3, key, name, opener, extra, expected_digest=None):
     return length
 
 
-# State ----------------------------------------------------------------------------------
-
 class Sent:
     """What has already been copied, kept apart from the append-only journal."""
     def __init__(self, root, namespace):
         self.namespace = namespace
         self.db = sqlite3.connect(root / "replica.sqlite3")
-        # Old unscoped progress cannot prove which destination received the objects.
-        # Keep it intact, but recopy once into the new destination-specific tables.
+
+
         self.db.executescript("CREATE TABLE IF NOT EXISTS sent_v2 (namespace TEXT, name TEXT, bytes INTEGER, at TEXT,"
                               " PRIMARY KEY(namespace,name));"
                               "CREATE TABLE IF NOT EXISTS meta_v2 (namespace TEXT, key TEXT, value INTEGER,"
@@ -200,8 +196,6 @@ def outbox(store, path):
         shutil.copy2(path, target)
 
 
-# Sync -----------------------------------------------------------------------------------
-
 def client(settings, secrets, network):
     return S3(settings["endpoint"], settings["region"], settings["bucket"], secrets["access_key"],
               secrets["secret_key"], network, settings["path_style"])
@@ -236,8 +230,8 @@ async def lock_report(s3, name, settings, requested=None, uploaded_at=None):
     locked = False
     until = None
     try:
-        # Compare with the deadline sent with PUT, not a new deadline after upload.
-        # One second allows a provider to round subsecond timestamps down.
+
+
         now = datetime.now(timezone.utc)
         if settings["retention_days"]:
             headers = requested if requested is not None else lock_headers(settings)
@@ -282,17 +276,17 @@ async def sync(store, vault, network):
         uploaded.append(name)
     error = None
     try:
-        # Journal: consecutive signed records, each segment exactly as events.jsonl lines.
+
         while True:
             seq = sent.get("journal_seq")
             events = store.events_after(seq, SEGMENT_EVENTS)
             if not events or all(e["kind"] == "replica.completed" for e in events):
-                break  # our own status records travel with the next real records, not on their own
+                break
             data = b"".join(canonical(e) + b"\n" for e in events)
             await send(base + "/journal/" + str(events[0]["seq"]).zfill(12) + "-" + str(events[-1]["seq"]).zfill(12)
                        + ".jsonl.tgwr", lambda data=data: io.BytesIO(data))
             sent.set("journal_seq", events[-1]["seq"])
-        # Preserved files: named by a keyed hash so the provider cannot test for known files.
+
         unavailable = None
         for seq, digest in store.media_saved_after(sent.get("media_seq")):
             if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
@@ -305,20 +299,20 @@ async def sync(store, vault, network):
                         raise MediaUnavailable("Preserved media is missing: " + digest)
                     await send(name, lambda source=source: source.open("rb"), digest)
                 except MediaUnavailable as exc:
-                    # Reported and tried again next pass; the files, checkpoints and exports after it still go.
+
                     unavailable = unavailable or exc
             if not unavailable:
                 sent.set("media_seq", seq)
-        # Checkpoints and their timestamp answers.
+
         folder = store.root / "checkpoints"
         for path in sorted([*folder.glob("checkpoint-*.json"), *(folder / "anchors").glob("*")]) if folder.is_dir() else []:
             covered = re.match(r"checkpoint-(\d+)(?:\.|$)", path.name)
             if covered and int(covered[1]) > sent.get("journal_seq"):
-                continue  # A checkpoint created during this upload belongs to the next pass.
+                continue
             name = base + "/checkpoints/" + path.relative_to(folder).as_posix() + ".tgwr"
             if path.is_file() and not sent.has(name):
                 await send(name, lambda path=path: path.open("rb"))
-        # Finished chat exports queued by outbox().
+
         queue = store.root / "replica-outbox"
         for path in sorted(queue.glob("*")) if queue.is_dir() else []:
             name = base + "/exports/" + path.name + ".tgwr"
@@ -368,8 +362,6 @@ async def replica_loop(store, vault, network_config, wakeup, status):
             status["busy"] = False
 
 
-# Restore --------------------------------------------------------------------------------
-
 def key_file(store, vault):
     settings, secrets = replica_settings(store), vault.read("replica")
     return {"format": "tgwitness-replica-key-v1", "key": secrets["key"], "endpoint": settings["endpoint"],
@@ -388,7 +380,7 @@ async def restore(keyinfo, access_key, secret_key, out, network=None):
     if any(out.iterdir()):
         raise ValueError("Restore requires an empty output directory")
     out = out.resolve()
-    # No unverified files are published. Remote names never name download files.
+
     with TemporaryDirectory(prefix=".restore-", dir=out) as scratch:
         stage = Path(scratch)
         result = await restore_objects(s3, keyinfo, key, base, stage)
@@ -493,7 +485,7 @@ async def restore_objects(s3, keyinfo, key, base, out):
         digest, size = payload.get("media_sha256"), payload.get("size")
         if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
             raise ValueError("Invalid media reference in the signed journal")
-        path = out / "media" / digest  # Decryption named this file by its actual SHA-256.
+        path = out / "media" / digest
         if not path.is_file() or (size is not None and (type(size) is not int or path.stat().st_size != size)):
             raise ValueError("Preserved media is missing or differs from the signed journal: " + digest)
         media.add(digest)

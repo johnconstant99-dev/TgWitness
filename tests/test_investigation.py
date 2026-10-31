@@ -50,7 +50,7 @@ def test_buttons_are_read_from_saved_objects():
     assert found["rows"][1] == [{"type": "web_app", "text": "Open shop", "url": "https://shop.example/app"},
                                 {"type": "copy", "text": "Copy code", "copy_text": "PROMO-7"}]
     assert keyboard.keyboard(None) is None and keyboard.keyboard({"_": "ReplyKeyboardHide"}) is None
-    # Records saved under older Telegram layers name the button by its class.
+
     old = {"_": "ReplyInlineMarkup", "rows": [{"_": "KeyboardButtonRow", "buttons": [
         {"_": "KeyboardButtonUrl", "text": "Pay", "url": "https://pay.example/old"},
         {"_": "KeyboardButtonCallback", "text": "Paid", "data": {"bytes_base64": "eA=="}}]}]}
@@ -70,15 +70,15 @@ def test_bot_buttons_are_kept_and_button_only_edits_recorded(journal):
         store.set_setting("scope", {"mode": "account"})
         await collector.start()
         await collector.on_new(NS(chat_id=SHOP_BOT, message=offer()))
-        # The bot swaps the payment link; the text and edit date stay the same.
+
         await collector.on_edit(NS(chat_id=SHOP_BOT, message=offer(url="https://pay.example/b")))
-        await collector.on_edit(NS(chat_id=SHOP_BOT, message=offer(url="https://pay.example/b")))  # resent: no record
+        await collector.on_edit(NS(chat_id=SHOP_BOT, message=offer(url="https://pay.example/b")))
         assert len(kinds(store, "message.edited")) == 1
         shown = store.chat_messages(SHOP_BOT)["messages"][0]
         assert [v["buttons"]["rows"][0][0]["url"] for v in shown["versions"]] == ["https://pay.example/a",
                                                                                  "https://pay.example/b"]
         assert shown["buttons"]["rows"][1][0]["type"] == "web_app" and shown["edited"] is True
-        # A recheck finds a button change that no update reported.
+
         changed = offer(url="https://pay.example/c")
         changed.edit_date = None
 
@@ -113,10 +113,10 @@ def test_a_new_bot_gets_its_profile_and_earlier_messages_saved(journal):
         snapshot = kinds(store, "snapshot.started")[0]["payload"]
         assert snapshot["origin"] == "new_chat" and snapshot["limit"] == 50
         earlier = [e for e in kinds(store, "message.snapshot") if e["chat_id"] == NEW_BOT]
-        assert sorted(e["message_id"] for e in earlier) == [1, 2]                      # message 3 was saved live
+        assert sorted(e["message_id"] for e in earlier) == [1, 2]
         assert all(e["payload"]["source"] == "new_chat_snapshot" for e in earlier)
         assert kinds(store, "snapshot.completed")[0]["payload"]["captured"] == 2
-        # Chats already in the list when the mode is switched on are not snapshotted one by one.
+
         assert not [e for e in kinds(store, "snapshot.started") if e["chat_id"] != NEW_BOT]
         await collector.stop()
     asyncio.run(run())

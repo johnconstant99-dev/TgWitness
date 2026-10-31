@@ -19,7 +19,7 @@ import requests
 from .base import DeployError, Provider, labels, network, parse_time, pause, resource_name
 
 EC2_VERSION = "2016-11-15"
-CANONICAL = "099720109477"  # Canonical's account: official Ubuntu images
+CANONICAL = "099720109477"
 IMAGES = {"ubuntu-24.04": "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-{arch}-server-*"}
 METADATA = "http://169.254.169.254/latest/"
 SESSIONS = ("StartSession", "SendSSHPublicKey", "SendSerialConsoleSSHPublicKey", "SendCommand")
@@ -76,7 +76,7 @@ class Aws(Provider):
     write_access = ("IAM credentials allowed ec2:DescribeVpcs, DescribeImages, CreateSecurityGroup, "
                     "AuthorizeSecurityGroupIngress, RunInstances, CreateTags, DescribeInstances, "
                     "DescribeSecurityGroupRules and RevokeSecurityGroupIngress")
-    # Not ec2:Describe*: DescribeInstanceAttribute returns the user data with its two secrets.
+
     read_access = "IAM credentials allowed only ec2:DescribeInstances, ec2:DescribeSecurityGroups and cloudtrail:LookupEvents"
     log_retention = "CloudTrail event history keeps 90 days of management events per region"
     limits = ("CloudTrail event history keeps 90 days: produce the report within that period, or keep a trail.",
@@ -155,7 +155,7 @@ class Aws(Provider):
             token = data.get("NextToken")
             if not token:
                 return events
-            pause(0.6)  # LookupEvents allows two requests per second
+            pause(0.6)
 
     def image(self, image, instance_type):
         if image.startswith("ami-"):
@@ -263,7 +263,7 @@ class Aws(Provider):
         for value in [server["id"], record["firewall"]["id"], *server["volumes"], *server["interfaces"]]:
             for event in self.lookup("ResourceName", value, start):
                 found[event["EventId"]] = event
-        for name in SESSIONS:  # account-wide event names: keep those naming this instance
+        for name in SESSIONS:
             for event in self.lookup("EventName", name, start):
                 if server["id"] in (event.get("CloudTrailEvent") or ""):
                     found[event["EventId"]] = event

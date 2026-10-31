@@ -42,7 +42,7 @@ async def fetch(response, **options):
         with patch.object(asyncio.StreamReader, "readexactly", exact), patch.object(asyncio.StreamReader, "read", read):
             try:
                 result = await netclient.request("GET", f"http://127.0.0.1:{port}/", NetworkConfig(kind="direct"), **options)
-            except Exception as exc:  # returned for the assertions below
+            except Exception as exc:
                 result = exc
     return result, max(requested, default=0)
 
@@ -93,7 +93,7 @@ def test_public_addresses_are_not_internal(address):
                                  "http://localhost:8787/api/status", "http://[::1]:9/", "http://2130706433/"])
 def test_panel_requests_never_reach_this_machine_or_its_network(monkeypatch, url):
     monkeypatch.delenv(netclient.PRIVATE_OPT_IN, raising=False)
-    # glibc resolves the one-number form 2130706433 to 127.0.0.1 (then refused); Windows does not resolve it.
+
     expected = (netclient.RouteError, OSError) if "2130706433" in url else netclient.RouteError
     with pytest.raises(expected) as caught:
         asyncio.run(netclient.request("GET", url, NetworkConfig(kind="direct"), timeout=5))
@@ -102,7 +102,7 @@ def test_panel_requests_never_reach_this_machine_or_its_network(monkeypatch, url
 
 def test_through_a_proxy_an_internal_address_is_refused_before_connecting(monkeypatch):
     monkeypatch.delenv(netclient.PRIVATE_OPT_IN, raising=False)
-    proxy = NetworkConfig(kind="socks5", host="203.0.113.9", port=1080)  # never routed: a connection would hang
+    proxy = NetworkConfig(kind="socks5", host="203.0.113.9", port=1080)
     with pytest.raises(netclient.RouteError):
         asyncio.run(netclient.request("GET", "http://169.254.169.254/", proxy, timeout=5))
 

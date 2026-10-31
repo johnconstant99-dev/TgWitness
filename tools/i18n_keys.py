@@ -13,10 +13,11 @@ from pathlib import Path
 PACKAGE = Path(__file__).resolve().parents[1] / "tgwitness"
 STATIC = PACKAGE / "static"
 LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
-# Modules whose fixed error messages reach the panel; command-line tools keep English output.
+
 PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "sessions.py", "network.py",
                  "profiles.py", "multi_export.py", "alerts.py", "witness_api.py", "tuning.py", "interactions.py",
-                 "access.py", "history.py")
+                 "access.py", "history.py", "archive.py", "archive_api.py", "ai.py", "analysis.py", "analysis_api.py",
+                 "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py")
 
 
 def calls(source):
@@ -43,10 +44,10 @@ def calls(source):
 def script_keys(source):
     keys = []
     for body in calls(source):
-        # Property names inside {name:value} objects are unquoted, so every quoted word here is text.
+
         for match in LITERAL.finditer(body):
             if re.search(r"[=!]==?\s*$", body[:match.start()]):
-                continue  # compared value such as kind==="deleted", not displayed text
+                continue
             text = json.loads('"' + match.group(1) + '"')
             if re.search(r"[A-Za-z]{2}", text):
                 keys.append(text)
@@ -55,7 +56,7 @@ def script_keys(source):
 
 def all_script_keys():
     keys = []
-    for name in ("app.js", "i18n.js", "guide.js"):
+    for name in ("app.js", "i18n.js", "guide.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js"):
         keys += script_keys((STATIC / name).read_text(encoding="utf-8"))
     return list(dict.fromkeys(keys))
 
@@ -77,7 +78,7 @@ def server_keys():
             for arg in texts:
                 if isinstance(arg, ast.Constant) and isinstance(arg.value, str) and " " in arg.value:
                     keys.append(arg.value)
-    # Labels, units and help of the Parameters page come from the server's parameter list.
+
     if str(PACKAGE.parent) not in sys.path:
         sys.path.insert(0, str(PACKAGE.parent))
     from tgwitness.tuning import texts

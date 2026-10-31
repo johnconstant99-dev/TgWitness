@@ -1,8 +1,8 @@
 'use strict';
 
-// These are local teaching fixtures. No requests, storage, sessions or live counters.
+
 (() => {
-  // Translations for this page's language, embedded by the site build; English is the key and the fallback.
+
   const DICT = (() => { try { return JSON.parse(document.getElementById('site-dict')?.textContent || '{}'); } catch { return {}; } })();
   const T = (text, values = {}) => (DICT[text] || text).replace(/\{(\w+)\}/g, (match, key) => key in values ? values[key] : match);
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -65,8 +65,8 @@
     render();
   }
 
-  // Exact encoding for the fixed fixture's strings, nulls and small integers.
-  // This is not a general replacement for Python's serializer (e.g. float spelling).
+
+
   const canonical = value => {
     if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
     if (value !== null && typeof value === 'object') {
@@ -291,7 +291,7 @@
     render();
   }
 
-  // A private checklist: kept only in this tab, nothing is stored or sent.
+
   function hardening(lab) {
     const items = [...lab.querySelectorAll('.checklist-items li')];
     const count = lab.querySelector('[data-checklist-count]');
@@ -321,7 +321,7 @@
     update();
   }
 
-  // Reuse the same canonical encoder and SHA-256 primitive as the full chain lab.
+
   async function modesHash(lab) {
     const status = lab.querySelector('[data-hash-status]');
     if (!globalThis.crypto?.subtle) {

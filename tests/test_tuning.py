@@ -46,7 +46,7 @@ def test_values_are_validated_saved_as_overrides_and_fall_back_to_defaults(journ
         with pytest.raises(tuning.Invalid):
             tuning.changes(store, wrong)
     store.set_setting("parameters", {"recheck_max_chats": 99999, "dialog_limit": 250})
-    assert tuning.value(store, "recheck_max_chats") == 30       # out of range now: default
+    assert tuning.value(store, "recheck_max_chats") == 30
     assert tuning.value(store, "dialog_limit") == 250
     saved, _, after = tuning.changes(store, {"dialog_limit": None})
     assert "dialog_limit" not in saved and after == {"dialog_limit": 1000}
@@ -66,7 +66,7 @@ def test_parameters_api_records_changes_and_status_carries_them(client):
     assert record["before"] == {"snapshot_max": 500, "dossier_patterns": []}
     assert record["after"] == {"snapshot_max": 50, "dossier_patterns": ["Domain: \\bevil\\.top\\b"]}
     assert c.get("/api/status").json()["parameters"]["snapshot_max"] == 50
-    c.post("/api/parameters", json={"values": {"snapshot_max": 50}})              # no change, no record
+    c.post("/api/parameters", json={"values": {"snapshot_max": 50}})
     assert len(app.state.store.events(kind="parameters.changed")) == 1
     c.post("/api/auth/configure", json={"api_id": 123, "api_hash": "a" * 32})
     c.post("/api/auth/phone", json={"phone": "+15551112222"})
@@ -78,7 +78,7 @@ def test_parameters_api_records_changes_and_status_carries_them(client):
     assert too_many.status_code == 422 and "Parameters" in too_many.json()["detail"]
     assert c.post("/api/snapshot", json={"chat_id": CHAT, "limit": 3}).json()["captured"] == 3
     started = app.state.store.events(kind="observation.started")[0]["payload"]
-    assert started["parameters"]["snapshot_max"] == 50                          # the receipt names the values in force
+    assert started["parameters"]["snapshot_max"] == 50
 
 
 def test_collector_follows_parameters(journal):
@@ -137,9 +137,9 @@ def test_coverage_gap_threshold_follows_the_recorded_heartbeat_interval():
         for event in events:
             coverage.add(event)
         return coverage.result()["gaps"]
-    assert gaps(None)                    # five silent minutes with one-minute heartbeats: gaps
-    assert gaps(300) == []               # five-minute heartbeats: continuous
-    # Raised from 1 to 10 minutes while observing: the next heartbeat ten minutes later is no gap.
+    assert gaps(None)
+    assert gaps(300) == []
+
     coverage = Coverage()
     for event in [record(0, "observation.started", {"parameters": {"heartbeat_seconds": 60}}),
                   record(1, "collector.heartbeat", {"interval_seconds": 60}),
@@ -192,7 +192,7 @@ def test_witness_post_policy_and_texts(tmp_path):
     try:
         for _ in range(3):
             asyncio.run(witness.tick())
-        assert len(posts) == 2                                  # the repeated head was not posted
+        assert len(posts) == 2
         assert posts[0].startswith("Partner #") and "head seen" in posts[0] and "entries" in posts[0]
         assert "TGW1." in posts[0]
         witness.post = "problems"

@@ -26,13 +26,13 @@ def test_text_excerpts_only_when_turned_on_and_new_chats_are_announced(journal, 
 
 def test_busy_chat_is_grouped_and_cannot_push_problems_out_of_the_panel_list(journal, monkeypatch):
     store, vault = journal
-    monkeypatch.setattr("tgwitness.store.utcnow", lambda: "2026-10-29T12:30:00.000+00:00")  # one hour
+    monkeypatch.setattr("tgwitness.store.utcnow", lambda: "2026-10-29T12:30:00.000+00:00")
     store.set_target(-1001, "Harbor Community", "supergroup", True)
     store.append("coverage.gap", {"reason": "authorization_required"})
     for i in range(1, 121):
         store.append("message.deleted", {}, chat_id=-1001, message_id=i)
     store.append("message.edited", {"text": "x"}, chat_id=-1001, message_id=200)
-    for _ in range(40):  # completed copies are not problems and must not hide the sign-out
+    for _ in range(40):
         store.append("replica.completed", {})
     words = alerts.i18n.words("en")
     items = alerts.panel_items(store, words, limit=10)

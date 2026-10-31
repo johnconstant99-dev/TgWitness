@@ -21,7 +21,7 @@ def der(tag, value):
 
 
 def timestamp_request(data):
-    # SHA-256 AlgorithmIdentifier: 2.16.840.1.101.3.4.2.1, NULL parameters.
+
     algorithm = der(0x30, bytes.fromhex("06096086480165030402010500"))
     imprint = der(0x30, algorithm + der(0x04, hashlib.sha256(data).digest()))
     nonce = b"\0" + os.urandom(16)
@@ -87,9 +87,8 @@ def verify_timestamp(checkpoint_path, response_path, ca_path, request_path=None,
     if any(not Path(p).is_file() for p in paths):
         raise ValueError("Every timestamp/CA input must be an existing file.")
     binary = find_openssl(openssl)
-    # Unlike `openssl verify`, `ts` has no -no-CApath/-no-CAstore options.
-    # Its create_cert_store loads only explicitly supplied CAfile/path/store.
-    # Do not provide a CApath or CAstore: trust is limited to this CA file.
+
+
     common = [binary, "ts", "-verify", "-in", str(response_path), "-CAfile", str(ca_path)]
     if intermediates:
         common += ["-untrusted", str(intermediates)]

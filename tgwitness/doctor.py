@@ -61,7 +61,7 @@ def inspect_environment(root, host="127.0.0.1", port=8787):
     try:
         if not 1 <= port <= 65535:
             raise ValueError()
-        # Binding only; no connection or external address lookup is performed.
+
         import ipaddress
         if host == "localhost":
             host = "127.0.0.1"

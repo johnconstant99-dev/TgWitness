@@ -14,11 +14,11 @@ from tgwitness.verify import chat_messages, verify_chat_export
 from test_collector import CHAT, FakeClient, telegram_message
 from test_profiles import authorize
 
-NEWEST = 4500  # three ranges of 2,000 message numbers
+NEWEST = 4500
 
 
 def present(message_id):
-    return message_id % 45 != 0  # every 45th message was deleted before the export
+    return message_id % 45 != 0
 
 
 class RangeClient(FakeClient):
@@ -72,8 +72,8 @@ def test_accounts_split_ranges_and_sign_their_parts(tmp_path):
         assert state["phase"] == "done", state
         assert state["captured"] == expected and state["ranges_done"] == 3
         assert all(w["state"] == "done" for w in state["workers"])
-        assert 125 in RangeClient.flooded  # one account waited out a FloodWait and finished
-        assert client.get("/api/status").json()["collector"]["running"]  # observation was not paused
+        assert 125 in RangeClient.flooded
+        assert client.get("/api/status").json()["collector"]["running"]
         bundle = tmp_path / "multi.zip"
         bundle.write_bytes(client.get("/api/multi-export/" + export_id + "/download").content)
         result = verify_chat_export(bundle, client.get("/api/status").json()["fingerprint"])
@@ -112,7 +112,7 @@ def test_lead_account_cannot_alter_what_others_fetched(tmp_path):
         import hashlib
         manifest["files"]["chat.json"] = hashlib.sha256(items["chat.json"]).hexdigest()
         items["manifest.json"] = canonical(manifest)
-        items["manifest.sig"] = app.state.vault.sign(items["manifest.json"]).encode()  # lead re-signs
+        items["manifest.sig"] = app.state.vault.sign(items["manifest.json"]).encode()
         forged = io.BytesIO()
         with zipfile.ZipFile(forged, "w") as archive:
             for name, data in items.items():

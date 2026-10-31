@@ -60,7 +60,7 @@ def head(store, vault, entry, headers, address, status=None):
     with store.transaction():
         store.set_setting("witness_polls", polls)
         if witness and previous.get("witness") != witness:
-            # A new or replaced witness key: worth a signed record; ordinary polls are not.
+
             store.append("witness.seen", {"token_id": entry["id"], "label": entry["label"],
                                           "witness_fingerprint": witness,
                                           "meaning": "an independent witness began fetching the signed journal head"})

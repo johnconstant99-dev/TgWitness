@@ -22,7 +22,7 @@ def index_event(connection, seq, event_hash):
 def initialize(connection):
     connection.execute("CREATE TABLE IF NOT EXISTS event_tree (start INTEGER NOT NULL, size INTEGER NOT NULL,"
                        "hash BLOB NOT NULL, PRIMARY KEY(start,size)) WITHOUT ROWID")
-    # This migration and subsequent event/index writes share a transaction.
+
     indexed = connection.execute("SELECT coalesce(max(start)+1,0) FROM event_tree WHERE size=1").fetchone()[0]
     for row in connection.execute("SELECT seq,hash FROM events WHERE seq>? ORDER BY seq", (indexed,)):
         if row[0] != indexed + 1:
@@ -72,8 +72,8 @@ class Tree:
 
 def answer(snapshot, vault, challenge, previous_count):
     count = snapshot.head["seq"] if snapshot.head else 0
-    # Rollback is still reported by the ordinary checkpoint. Never try to read
-    # beyond this snapshot, even when the witness remembers a larger journal.
+
+
     previous_count = min(previous_count, count)
     tree = Tree(snapshot.connection)
     statement = {"format": "tgwitness-continuity-v1", "public_key": vault.public_key,

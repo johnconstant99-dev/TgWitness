@@ -30,14 +30,21 @@ PERMISSIONS = ("view", "export", "sources", "collect", "interact", "settings", "
 ADMIN_DEFAULTS = {"max_sessions": 0, "on_limit": "replace", "session_minutes": 720}
 WORKSPACE_ID = re.compile(r"default|[a-f0-9]{32}")
 
-# Every route an issued access may use: (permission, how a chat-limited access is checked).
-#   path   - the {chat_id} in the address must be one of its chats
-#   body   - the route itself checks the chat named in the request
-#   filter - the route answers with the allowed chats only
-#   root   - a route of the main panel that checks each workspace itself
-#   None   - the whole workspace: refused to an access limited to chosen chats
-# A route missing here is open to the main administrator only.
+
 POLICY = {
+    "GET /api/analysis/provider": ("view", "root"),
+    "GET /api/analysis/media": ("view", "root"),
+    "POST /api/analysis/media": ("view", "root"),
+    "GET /api/analysis/media/{job_id}": ("view", "root"),
+    "POST /api/analysis/media/{job_id}/{action}": ("view", "root"),
+    "POST /api/analysis/preview": ("view", "root"),
+    "POST /api/analysis/context": ("view", "root"),
+    "POST /api/analysis/generate": ("view", "root"),
+    "GET /api/analysis/reports": ("view", "root"),
+    "POST /api/analysis/reports": ("view", "root"),
+    "GET /api/analysis/reports/{report_id}": ("view", "root"),
+    "PATCH /api/analysis/reports/{report_id}": ("view", "root"),
+    "GET /api/analysis/reports/{report_id}/download": ("export", "root"),
     "GET /api/status": ("view", "filter"),
     "GET /api/profiles": ("view", "root"),
     "GET /api/events": ("view", "filter"),
@@ -122,7 +129,7 @@ POLICY = {
     "POST /api/network/parse-link": ("account", None),
     "POST /api/network/test": ("account", None),
 }
-# Journal records too frequent for the console; they stay in the journal and the panel.
+
 QUIET_KINDS = ("message.", "reaction.", "membership.", "media.saved", "collector.heartbeat")
 
 
@@ -142,7 +149,7 @@ class GrantSettings(BaseModel):
     label: str = Field(min_length=1, max_length=80)
     permissions: list[Literal[PERMISSIONS]] = Field(default_factory=lambda: ["view"], max_length=len(PERMISSIONS))
     all_workspaces: bool = False
-    # Workspace ID -> null for every chat of it, or the only chat IDs it opens.
+
     workspaces: dict[str, list[int] | None] = Field(default_factory=dict, max_length=1000)
     ips: list[str] = Field(default_factory=list, max_length=100)
     bind_first_ip: bool = False
@@ -186,7 +193,7 @@ class GrantSettings(BaseModel):
 
 
 class AdminSettings(BaseModel):
-    max_sessions: int = Field(default=0, ge=0, le=100)  # 0: no limit
+    max_sessions: int = Field(default=0, ge=0, le=100)
     on_limit: Literal["refuse", "replace"] = "replace"
     session_minutes: int = Field(default=720, ge=5, le=43200)
 
@@ -271,13 +278,13 @@ class Console(logging.Handler):
         root = logging.getLogger()
         self.stderr = None
         if not root.handlers and sys.stderr is not None:
-            # Python prints warnings to stderr only while the root logger has no handler; keep that.
+
             self.stderr = logging.StreamHandler()
             self.stderr.setLevel(logging.WARNING)
             root.addHandler(self.stderr)
         if root.getEffectiveLevel() > logging.INFO:
             root.setLevel(logging.INFO)
-        for name in ("httpx", "httpcore"):  # their INFO lines carry full request addresses
+        for name in ("httpx", "httpcore"):
             if logging.getLogger(name).level == logging.NOTSET:
                 logging.getLogger(name).setLevel(logging.WARNING)
         for name in ("", "uvicorn", "uvicorn.error"):
@@ -301,9 +308,9 @@ class AccessControl:
         self.sessions = {s["sha256"]: {**s, "requests": 0} for s in saved.get("sessions", []) if s["expires"] > now}
         self.lock = threading.RLock()
         self.console = console or Console()
-        self.labels = lambda profile_id: profile_id  # replaced by the panel with workspace names
+        self.labels = lambda profile_id: profile_id
 
-    # ---- storage ----
+
     def save(self):
         sessions = [{k: v for k, v in s.items() if k != "requests"} for s in self.sessions.values()]
         self.vault.save("access", {"grants": self.grants, "sessions": sessions})
@@ -321,12 +328,12 @@ class AccessControl:
                 found = entry
         return found
 
-    # ---- rules ----
+
     @staticmethod
     def address_allowed(grant, address):
         try:
             ip = ipaddress.ip_address(address)
-        except ValueError:  # not an IP address (a local socket or a test client)
+        except ValueError:
             return not grant["ips"] and grant.get("bound_ip") in (None, address)
         if grant["ips"] and not any(ip in ipaddress.ip_network(n) for n in grant["ips"]):
             return False
@@ -350,7 +357,7 @@ class AccessControl:
         return sorted((s for s in self.sessions.values() if s["owner"] == owner and s["expires"] > now),
                       key=lambda s: s["created"])
 
-    # ---- sessions ----
+
     def login(self, token, address, agent):
         """A new session for a valid token, or None for an unknown token. Raises Refused."""
         now = time.time()
@@ -441,7 +448,7 @@ class AccessControl:
         LOG.info("Session %s of %s ended: %s", session_id, label, reason or "expired")
         return True
 
-    # ---- issued accesses ----
+
     def journal_view(self, grant):
         return {"access_id": grant["id"], **{k: grant[k] for k in (
             "label", "permissions", "all_workspaces", "workspaces", "ips", "bind_first_ip", "max_uses",
@@ -499,7 +506,7 @@ class AccessControl:
         LOG.info("Main administrator session settings changed")
         return self.admin_settings()
 
-    # ---- views ----
+
     def state(self, current_session=None):
         now = time.time()
         with self.lock:

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TgWitness webhook v1",
+  "type": "object",
+  "required": ["schema", "event_id", "timestamp", "workspace", "type", "synthetic", "counts"],
+  "properties": {
+    "schema": {"const": "tgwitness.webhook/1"},
+    "event_id": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "workspace": {"type": "string"},
+    "type": {"type": "string"},
+    "synthetic": {"type": "boolean"},
+    "counts": {"type": "object", "required": ["events"], "properties": {"events": {"type": "integer", "minimum": 0}}},
+    "source": {"type": "object", "properties": {"chat_id": {"type": ["integer", "null"]}, "message_id": {"type": ["integer", "null"]}, "event_seq": {"type": ["integer", "null"]}, "hash": {"type": ["string", "null"]}}},
+    "text": {"type": "string", "maxLength": 1000},
+    "text_truncated": {"type": "boolean"},
+    "deletion_notice": {"type": "boolean"},
+    "missing_on_recheck": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

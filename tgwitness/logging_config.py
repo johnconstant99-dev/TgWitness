@@ -10,8 +10,8 @@ def server_logging(root):
     config = copy.deepcopy(LOGGING_CONFIG)
     if sys.stdout is not None and sys.stderr is not None:
         return config
-    # pythonw has no console streams. Keep startup failures visible without
-    # enabling HTTP access logs or logging request bodies/authorization headers.
+
+
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
     directory = root / "logs"
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)

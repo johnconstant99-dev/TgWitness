@@ -46,8 +46,8 @@ def pick(cookie, accept, languages=LANGUAGES):
 def words(lang):
     if lang == "en":
         return {}
-    # Explicitly catalogued English text for sections awaiting translation.
-    # Coverage tests still reject new strings absent from both catalogs.
+
+
     fallback = {text: text for text in json.loads(ENGLISH_FALLBACKS.read_text(encoding="utf-8"))}
     return {**fallback, **json.loads((LOCALES / (lang + ".json")).read_text(encoding="utf-8"))}
 

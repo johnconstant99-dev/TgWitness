@@ -70,14 +70,14 @@ def test_deliver_reaches_an_http_destination(receiver):
 @pytest.mark.parametrize("accepted", [True, False])
 def test_deliver_understands_apprise_1_results(monkeypatch, accepted):
     import apprise
-    monkeypatch.setattr(apprise.Apprise, "notify", lambda self, **kwargs: accepted)  # 1.x returns a bool
+    monkeypatch.setattr(apprise.Apprise, "notify", lambda self, **kwargs: accepted)
     result = alerts.deliver(["json://127.0.0.1:9/a", "json://127.0.0.1:9/b"], "Title", "Body", DIRECT)
     assert result == ({"sent": 2, "failed": 0, "error": None} if accepted else
                       {"sent": 0, "failed": 2, "error": "The service did not accept the notification."})
 
 
 def test_deliver_goes_only_through_the_workspace_proxy(receiver):
-    # 203.0.113.0/24 is never routed; the notification can arrive only through the proxy.
+
     proxy = NetworkConfig(kind="http", host="127.0.0.1", port=receiver.port)
     result = alerts.deliver(["json://203.0.113.9:9/hook"], "Title", "Body", proxy)
     assert result["sent"] == 1
@@ -97,8 +97,8 @@ def test_routes_that_cannot_carry_notifications_are_refused():
 def test_problems_and_changes_are_sent_once_without_message_text(journal, receiver):
     store, vault = journal
     store.set_target(-1001, "Harbor Community", "supergroup", True)
-    store.append("storage.low", {"free_bytes": 1024})  # before notifications were on
-    run(store, vault)  # disabled: only moves the cursor, so history is never replayed
+    store.append("storage.low", {"free_bytes": 1024})
+    run(store, vault)
     enable(store, vault, [receiver.url()])
     store.append("storage.low", {"free_bytes": 512 * 1024 * 1024})
     store.append("message.deleted", {"text": "SECRET MESSAGE TEXT"}, chat_id=-1001, message_id=5)
@@ -174,7 +174,7 @@ def test_api_keeps_destinations_write_only_and_masked(tmp_path, monkeypatch, rec
         assert c.post("/api/alerts", json={"enabled": True, "urls": ["notaservice://x"]}).status_code == 422
         assert c.post("/api/alerts", json={"enabled": True, "urls": []}).status_code == 422
         refused = c.post("/api/alerts", json={"enabled": True, "daily": False, "urls": [secret_url]})
-        # Hide IP, the default, sends nothing outside Telegram without a proxy set for it.
+
         assert refused.status_code == 422 and "Hide IP" in refused.text
         assert c.post("/api/network/policy", json={"exposure": "tunnel", "outside_enabled": True}).status_code == 200
         assert c.post("/api/network", json={"kind": "direct"}).status_code == 200
@@ -184,9 +184,9 @@ def test_api_keeps_destinations_write_only_and_masked(tmp_path, monkeypatch, rec
         assert "supersecret" not in saved.text and "supersecret" not in c.get("/api/alerts").text
         changed = app.state.store.events(kind="alerts.changed")[0]
         assert "supersecret" not in json.dumps(changed) and changed["payload"]["services"] == ["json"]
-        # Saving settings without urls keeps the stored destinations.
+
         assert c.post("/api/alerts", json={"enabled": True, "daily": False}).json()["destinations"] == saved.json()["destinations"]
-        # The panel's destination builder adds to the saved destinations instead of replacing them.
+
         assert c.post("/api/alerts", json={"enabled": True, "add_urls": ["notaservice://x"]}).status_code == 422
         added = c.post("/api/alerts", json={"enabled": True, "daily": False, "add_urls": ["ntfys://tgw-topic", secret_url]})
         assert len(added.json()["destinations"]) == 2 and "add_urls" not in app.state.store.get_setting("alerts")
@@ -200,11 +200,11 @@ def test_notifications_never_reach_this_machine_or_its_network(monkeypatch, rece
     for url in (receiver.url(), "json://localhost:%d/hook" % receiver.port, "json://169.254.169.254/latest"):
         result = alerts.deliver([url], "Title", "Body", DIRECT)
         assert result["sent"] == 0 and "public internet" in result["error"], (url, result)
-    # The proxy itself may be local when the main administrator set it (local_proxy).
+
     proxy = NetworkConfig(kind="http", host="127.0.0.1", port=receiver.port, local_proxy=True)
     result = alerts.deliver(["json://169.254.169.254/latest"], "Title", "Body", proxy)
     assert result["sent"] == 0 and "public internet" in result["error"]
     assert receiver.requests == []
-    # The guard is only on while sending: another connection to a local address afterwards still works.
+
     import requests
     assert requests.post("http://127.0.0.1:%d/after" % receiver.port, json={}).status_code == 200

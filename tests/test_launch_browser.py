@@ -11,9 +11,9 @@ from tgwitness.__main__ import open_when_ready, should_open_browser
     ("127.0.0.1", False, {}, True, True),
     ("localhost", False, {}, True, True),
     ("::1", False, {}, True, True),
-    ("127.0.0.1", False, {}, False, False),          # service, Docker, scheduled task, pipe
-    ("0.0.0.0", False, {}, True, False),            # reachable from elsewhere
-    ("127.0.0.1", True, {}, True, False),           # --no-browser
+    ("127.0.0.1", False, {}, False, False),
+    ("0.0.0.0", False, {}, True, False),
+    ("127.0.0.1", True, {}, True, False),
     ("127.0.0.1", False, {"TGWITNESS_NO_BROWSER": "1"}, True, False),
 ])
 def test_browser_opens_only_for_a_local_interactive_start(host, no_browser, environ, interactive, expected):
@@ -31,7 +31,7 @@ def test_panel_opens_once_it_answers_and_the_token_stays_in_the_console(tmp_path
         port = server.getsockname()[1]
         url = f"http://127.0.0.1:{port}"
         assert open_when_ready(url, "127.0.0.1", port, token, timeout=5)
-    assert opened == [url]  # the address only: the token never enters the address bar
+    assert opened == [url]
     assert "Panel token: synthetic-token" in capsys.readouterr().out
 
 

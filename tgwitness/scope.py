@@ -10,10 +10,10 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool
 from telethon import utils
 from telethon.tl import types
 
-# Source kinds as stored in targets.kind, and the type switch that covers each.
+
 TYPE_OF = {"channel": "channels", "supergroup": "groups", "group": "groups", "private": "private", "bot": "bots"}
 RECHECK_DEFAULTS = {"recheck_minutes": 15, "recheck_other_minutes": 360}
-EXCLUDE_LIMIT = 5000  # chats the scope keeps out at most
+EXCLUDE_LIMIT = 5000
 WIDE_WARNING = ("Folder and whole-account modes record private chats and messages of third parties. "
                 "Use them only on a dedicated account, for a lawful purpose, and keep the data protected.")
 
@@ -29,8 +29,8 @@ class SourceTypes(BaseModel):
 class NewChats(BaseModel):
     """What is saved at once when a chat or bot first appears in folder or whole-account mode."""
     model_config = ConfigDict(extra="forbid")
-    profile: StrictBool = False                       # bot description and commands, group/channel description
-    history: int = Field(default=0, ge=0, le=1000)    # latest visible messages, 0 = none
+    profile: StrictBool = False
+    history: int = Field(default=0, ge=0, le=1000)
 
 
 class Scope(BaseModel):
@@ -44,14 +44,14 @@ class Scope(BaseModel):
 
 
 class ScopeUpdate(Scope):
-    # Required when switching to folder or whole-account mode; recorded in the signed journal.
+
     acknowledged: StrictBool = False
 
 
 class Recheck(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    recheck_minutes: int = Field(default=15, ge=0, le=1440)          # priority sources; 0 turns them off
-    recheck_other_minutes: int = Field(default=360, ge=0, le=10080)  # every other source
+    recheck_minutes: int = Field(default=15, ge=0, le=1440)
+    recheck_other_minutes: int = Field(default=360, ge=0, le=10080)
 
 
 def scope_settings(store):

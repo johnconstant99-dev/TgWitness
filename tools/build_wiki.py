@@ -30,7 +30,7 @@ LINK = re.compile(r'(!?\[[^\]\n]*\]\()(<[^>\n]+>|[^)\s]+)((?:\s+"[^"\n]*")?\))')
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 HTML_IMAGE = re.compile(r"<(?:img|source)\b[^>]*>", re.IGNORECASE)
 IMAGE_URL = re.compile(r'''(?<![\w-])(src|srcset)\s*=\s*(["'])(.*?)\2''', re.IGNORECASE)
-# Bundled into the Wiki repository; GIF carries the silent presentation films inline.
+
 IMAGES = {".svg", ".png", ".webp", ".gif"}
 
 
@@ -57,7 +57,7 @@ def render_links(content, source, root, public, repository, branch, assets):
                     raise ValueError("Wiki image must be a reviewed documentation asset: " + href.path)
                 asset = "assets/" + target.relative_to(asset_root).as_posix()
                 assets[asset] = target.read_bytes()
-                # Bundle inline images and full-size/static image links alike.
+
                 url = repo_url + "/wiki/" + quote(asset, safe="/")
             else:
                 url = repo_url + "/blob/" + branch + "/" + name
@@ -73,8 +73,8 @@ def render_links(content, source, root, public, repository, branch, assets):
             parsed = urlsplit(value)
             if parsed.scheme or parsed.netloc:
                 return attribute[0]
-            # Each picture source supplies one image; avoid silently misreading
-            # a srcset list or density descriptor as a filesystem path.
+
+
             if attribute[1].lower() == "srcset" and ("," in value or any(c.isspace() for c in value)):
                 raise ValueError("Wiki picture srcset must contain one image URL")
             link = LINK.fullmatch("![image](<" + value + ">)")
@@ -123,7 +123,7 @@ def build_wiki(root=ROOT, *, repository="phishdestroy/TgWitness", branch="main")
     archive_path = root / "dist" / ("TgWitness-" + version + "-wiki.zip")
     checksum_path = archive_path.with_suffix(".zip.sha256")
     manifest_path = root / "dist/wiki-manifest.json"
-    # Fail before writing if the output contains unrelated data or filesystem links.
+
     if output.resolve() != output or (output.exists() and not output.is_dir()):
         raise ValueError("Wiki output must be an ordinary directory")
     if output.exists():

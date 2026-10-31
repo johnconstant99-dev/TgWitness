@@ -28,7 +28,7 @@ def test_caller_and_verifier_pin_same_upstream_workflow_and_collector():
                       "inputs.script", "inputs.digest", "inputs.archive", "inputs.repository", "inputs.ref"):
         assert forbidden not in workflow
     uploads = re.findall(r"^\s+path:\s*(.+)", workflow, flags=re.MULTILINE)
-    assert len(uploads) == 3  # checkout destination plus exactly two encrypted artifact paths
+    assert len(uploads) == 3
     assert uploads[1].endswith("/public/connection.tgwsealed")
     assert uploads[2].endswith("/public/delivery.tgwsealed")
     assert workflow.index("sealed_runner.py wait") < workflow.index("id: attest") < workflow.index("sealed_runner.py pack")

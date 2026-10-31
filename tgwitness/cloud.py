@@ -61,7 +61,7 @@ DEPLOYMENT_ID = re.compile(r"[0-9a-f]{16}")
 TUNNEL_ID = re.compile(r"[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}")
 INSTALLER_FIELDS = ("deployment_id", "name", "mode", "provider", "repository", "commit", "panel_host",
                     "witness_host", "ssh")
-# Run by the verifier with a checkout of the deployed commit: that commit's own code builds the installer.
+
 REFERENCE_BUILDER = """\
 import json, sys
 from pathlib import Path
@@ -438,7 +438,7 @@ def binding(statement, server_id, ipv4, cloud):
         problems.append("the collector could not read the metadata service: " + provider["error"])
     if str(provider.get("instance_id")) != str(server_id):
         problems.append("instance ID " + str(provider.get("instance_id")) + " is not server " + str(server_id))
-    if ipv4 and provider.get("public_ipv4") not in (None, ipv4):  # the public statement omits the address
+    if ipv4 and provider.get("public_ipv4") not in (None, ipv4):
         problems.append("public IPv4 " + str(provider.get("public_ipv4")) + " is not " + ipv4)
     for key in ("user_data_sha256", "user_data_redacted_sha256"):
         if provider.get(key) != cloud.get(key):
@@ -833,7 +833,7 @@ def verify_collector(report, record, server, args, fetch, reference=None, refere
                    "The collector reports the recorded server and installer hashes",
                    "; ".join(problems) or "instance " + str(target["id"]) + (", IPv4 " + ipv4 if ipv4 else "")
                    + ", installer hashes match", COLLECTOR)
-    # Reported by the collector: equal bytes say what it was given, not what the provider delivered.
+
     title = "The collector-reported user data equals the installer the deployed commit builds"
     if reference_error:
         report.add("cloud_init", "fail", title, reference_error, COLLECTOR)
@@ -856,7 +856,7 @@ def verify_collector(report, record, server, args, fetch, reference=None, refere
                    "pass --source with a checkout of " + record["commit"], COLLECTOR)
     flags = [(host.get("ssh_listening"), "something listens on port 22"),
              (host.get("ssh_processes"), "SSH server processes running"), (host.get("sessions"), "logged-in sessions now")]
-    if record["provider"] != "generic":  # a hand-installed server keeps the installer's own login in wtmp
+    if record["provider"] != "generic":
         flags.append((host.get("logins"), str(host.get("logins")) + " login(s) in wtmp"))
     problems = [text for flag, text in flags if flag]
     unknown = [k for k in ("sessions", "logins") if host.get(k) is None]
@@ -912,15 +912,15 @@ def verify_journal(report, path, key, server_id, generic=False, reference=None):
                                ("sessions", "sessions")):
                 if host.get(flag):
                     problems.append("record " + str(event["seq"]) + ": " + text)
-            # A hand-installed server keeps the installer's login: only logins after the first start count.
+
             logins = host.get("logins") or 0
             baseline = (logins if baseline is None else baseline) if generic else 0
             if logins > baseline:
                 problems.append("record " + str(event["seq"]) + ": login(s) recorded")
             if host.get("boot_id") and host["boot_id"] not in boots:
                 boots.append(host["boot_id"])
-    # A key imported from a session file also exists outside this server: whoever holds it can answer
-    # for Telegram on the network path. Marked for review, not refused: seized accounts stay usable.
+
+
     notes = ["record " + str(seq) + ": " + (
         "authorized with an imported session; its key also exists outside this server, and whoever holds it "
         "could stand in for Telegram on the network path, so observations also rest on the key's holders"

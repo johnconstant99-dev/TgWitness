@@ -62,7 +62,7 @@ def main():
         assert code == 200
         dictionary = json.loads(body.decode("utf-8").split("window.TGW_DICT=", 1)[1].rstrip().rstrip(";"))
         assert dictionary == i18n.words("es")
-        # The installed package ships the fallback catalog: untranslated entries stay English, never missing.
+
         translated = json.loads((i18n.LOCALES / "es.json").read_text(encoding="utf-8"))
         fallbacks = json.loads(i18n.ENGLISH_FALLBACKS.read_text(encoding="utf-8"))
         assert fallbacks and all(dictionary[text] == translated.get(text, text) for text in fallbacks)

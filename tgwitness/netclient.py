@@ -22,7 +22,7 @@ from python_socks import ProxyType
 from python_socks.async_.asyncio import Proxy
 
 
-PIECE = 64 * 1024  # largest single read from the peer
+PIECE = 64 * 1024
 PRIVATE_OPT_IN = "TGWITNESS_ALLOW_PRIVATE_DESTINATIONS"
 NAT64 = ipaddress.ip_network("64:ff9b::/96")
 
@@ -111,13 +111,13 @@ async def open_stream(url, network, timeout, private=False):
     private = private or private_allowed()
     if network.kind == "direct":
         return await asyncio.wait_for(connect_public(host, port, tls, private), timeout)
-    if network.kind == "none":  # the workspace allows no such request (network.NoRoute)
+    if network.kind == "none":
         raise RouteError(str(network.error))
     if network.telegram_only:
         raise RouteError("MTProxy carries only Telegram traffic; choose Direct, SOCKS5 or HTTP in "
                          "Connection settings for this request.")
     if not private and literal(host):
-        refuse_internal(host, [literal(host)])  # names are resolved by the proxy, out of reach here
+        refuse_internal(host, [literal(host)])
     address = await asyncio.wait_for(proxy_address(network, private), timeout)
     proxy = Proxy(ProxyType.SOCKS5 if network.kind == "socks5" else ProxyType.HTTP, address,
                   network.port, network.username or None, network.password or None, rdns=True)
@@ -156,8 +156,8 @@ async def request(method, url, network, headers=None, body=b"", length=None, sin
         fields = {k.strip().lower(): v.strip() for k, _, v in (h.partition(":") for h in head[1:] if h)}
         ok = 200 <= status < 300
         received, data = 0, b""
-        # Only a successful response with a sink may exceed the limit; everything else is
-        # bounded before it is read, and no single read asks for more than one piece.
+
+
         streaming = bool(sink and ok)
 
         def room(wanted):

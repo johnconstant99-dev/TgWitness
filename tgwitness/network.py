@@ -12,12 +12,10 @@ from urllib.parse import parse_qs, urlsplit
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from telethon.network.connection import ConnectionTcpMTProxyRandomizedIntermediate
 
-# Routes that carry only Telegram's own protocol; HTTP requests are refused on them.
+
 TELEGRAM_ONLY = ("mtproxy", "mtproxy_auto")
-# How much a workspace may reveal this server's address:
-#   hide     - Telegram never directly; requests outside Telegram only through a proxy
-#   fallback - automatic MTProxy, direct to Telegram after some minutes without a working proxy
-#   tunnel   - the server is behind a tunnel or VPN: direct connections are allowed
+
+
 EXPOSURES = ("hide", "fallback", "tunnel")
 
 
@@ -32,7 +30,7 @@ class NoRoute:
 class RoutePolicy(BaseModel):
     model_config = ConfigDict(extra="forbid")
     exposure: Literal[EXPOSURES] = "hide"
-    outside_enabled: bool = True  # timestamps, notifications, off-site copy, source check, proxy lists
+    outside_enabled: bool = True
 
 
 def hex_secret(value):
@@ -50,17 +48,16 @@ def hex_secret(value):
 
 class NetworkConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    # Automatic public MTProxy unless the operator chooses a route: a server's own address
-    # is never used for Telegram by default.
+
+
     kind: Literal["direct", "socks5", "http", "mtproxy", "mtproxy_auto"] = "mtproxy_auto"
     host: str = Field(default="", max_length=253)
     port: int = Field(default=1080, ge=1, le=65535)
     username: str = Field(default="", max_length=255)
     password: str = Field(default="", max_length=255)
     secret: str = Field(default="", max_length=512)
-    # Set by the server, never taken from a request: the main administrator saved this proxy although
-    # it resolves inside this machine or its network (a local Tor or SOCKS5 proxy). Saved routes from
-    # before this field could be saved only by that administrator and load as approved.
+
+
     local_proxy: bool = False
 
     @model_validator(mode="after")
@@ -110,9 +107,8 @@ class NetworkConfig(BaseModel):
         if self.kind == "direct":
             return {}
         if self.kind == "mtproxy":
-            # Telethon strips a leading dd/ee even from a bare 16-byte hex key.
-            # Give its randomized-intermediate transport an explicit dd prefix
-            # so a legitimate key beginning with those bytes stays intact.
+
+
             secret = self.secret if len(self.secret) == 34 else "dd" + self.secret
             return {"connection": ConnectionTcpMTProxyRandomizedIntermediate,
                     "proxy": (self.host, self.port, secret)}
@@ -123,7 +119,7 @@ class NetworkConfig(BaseModel):
 def saved_route(raw):
     """A route read back from the vault."""
     if raw and raw.get("host") and "local_proxy" not in raw:
-        raw = {**raw, "local_proxy": True}  # saved before delegated access existed, by the main administrator
+        raw = {**raw, "local_proxy": True}
     return NetworkConfig.model_validate(raw)
 
 
@@ -142,7 +138,7 @@ def parse_mtproxy_link(link):
         port = fields["port"][0]
         if not re.fullmatch(r"[0-9]{1,5}", port):
             raise ValueError(message)
-        # Validation errors must not echo a proxy secret into logs or error responses.
+
         return NetworkConfig(kind="mtproxy", host=fields["server"][0], port=int(port), secret=fields["secret"][0])
     except (TypeError, ValueError):
         raise ValueError("Invalid MTProxy link. Use a valid host, port 1-65535 and a 32-digit hex or dd secret; Fake TLS ee is unsupported.") from None

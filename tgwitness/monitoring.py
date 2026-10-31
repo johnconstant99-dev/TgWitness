@@ -13,7 +13,6 @@ class Monitoring(BaseModel):
     membership: StrictBool = True
 
 
-# Attachments are saved by default: the point is to keep what may be deleted soon.
 CAPTURE_DEFAULTS = {"download_media": True, "max_media_mb": 20}
 MEDIA_TYPES = ("photo", "video", "animation", "video_note", "voice", "audio", "sticker", "document")
 MEDIA_DEFAULT_MB = {"photo": 20, "video": 100, "animation": 20, "video_note": 50, "voice": 20, "audio": 50,
@@ -29,8 +28,8 @@ class MediaRule(BaseModel):
 class Capture(BaseModel):
     model_config = ConfigDict(extra="forbid")
     download_media: StrictBool = True
-    # The size the panel last set for every type at once. Types without their own rule use their type
-    # default; only policies saved before per-type rules apply this size to every type.
+
+
     max_media_mb: int = Field(default=20, ge=1, le=2000)
     types: dict[Literal[MEDIA_TYPES], MediaRule] = Field(default_factory=dict)
 
@@ -61,5 +60,5 @@ def media_kind(message):
 
 
 def monitoring_settings(store):
-    # Older journals retain their original behavior: all delivered event types.
+
     return Monitoring.model_validate(store.get_setting("monitoring", {})).model_dump()

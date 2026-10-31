@@ -6,14 +6,14 @@ Older Telegram layers name each button by its class (KeyboardButtonUrl); newer o
 button class with a type object (KeyboardInlineButton with InlineButtonTypeUrl). Both are read.
 """
 TYPES = {
-    # Newer layers: the button's type object.
+
     "InlineButtonTypeUrl": "url", "InlineButtonTypeCallback": "callback", "InlineButtonTypeCopy": "copy",
     "InlineButtonTypeSwitchInline": "switch_inline", "InlineButtonTypeUrlAuth": "login_url",
     "InlineButtonTypeUserProfile": "user_profile", "InlineButtonTypeWebView": "web_app", "InlineButtonTypeGame": "game",
     "InlineButtonTypeBuy": "buy", "InlineButtonTypeDisabled": "disabled", "ButtonTypeDefault": "text",
     "ButtonTypeRequestPhone": "request_phone", "ButtonTypeRequestGeoLocation": "request_location",
     "ButtonTypeRequestPeer": "request_chat", "ButtonTypeRequestPoll": "request_poll", "ButtonTypeSimpleWebView": "web_app",
-    # Older layers: the button's own class.
+
     "KeyboardButton": "text", "KeyboardButtonUrl": "url", "KeyboardButtonCallback": "callback",
     "KeyboardButtonUrlAuth": "login_url", "KeyboardButtonWebView": "web_app", "KeyboardButtonSimpleWebView": "web_app",
     "KeyboardButtonSwitchInline": "switch_inline", "KeyboardButtonRequestPhone": "request_phone",
@@ -44,7 +44,7 @@ def keyboard(markup):
                     item[field] = details[field]
             data = details.get("data")
             if isinstance(data, dict) and data.get("bytes_base64"):
-                item["data_base64"] = data["bytes_base64"]  # what a callback button would send to the bot
+                item["data_base64"] = data["bytes_base64"]
             items.append(item)
         if items:
             rows.append(items)

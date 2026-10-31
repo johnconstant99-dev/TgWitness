@@ -63,7 +63,7 @@ class Selection(StrictBody):
 class Session:
     def __init__(self, root, output, config, client_factory):
         self.root, self.output, self.config = Path(root), Path(output), config
-        # Reusing a workspace would allow preloaded data or a previously known auth key.
+
         if self.root.exists() and any(self.root.iterdir()):
             raise ValueError("A sealed capture requires a new empty data directory")
         if self.output.exists() and any(self.output.iterdir()):
@@ -136,7 +136,7 @@ class Session:
         had_capture = self.phase == "collecting"
         self.phase, self.reason = "sealing", reason
         try:
-            # Preserve a pending login client until its session can be revoked.
+
             pending = self.collector.login_client
             before_stop = await self.revoke() if pending is not None else "no_session"
             await self.collector.stop(shutdown=True)
@@ -153,7 +153,7 @@ class Session:
                 private_write(self.output / "result.json", canonical({"phase": self.phase}))
                 return
             archive = await complete_in_thread(export_file, self.store, self.vault, "zip")
-            # No later API action is allowed to change this archive or the observation journal.
+
             shutil.move(str(archive), self.output / "evidence.zip")
             self.phase = "sealed"
             private_write(self.output / "result.json", canonical({"phase": "sealed"}))
@@ -182,7 +182,7 @@ class Session:
         if self.finish_task:
             await asyncio.shield(self.finish_task)
         if self.monitor_task and self.phase == "sealing":
-            # Do not cancel a thread that is finishing the archive and then close its DB.
+
             await asyncio.shield(self.monitor_task)
         if self.monitor_task:
             self.monitor_task.cancel()
@@ -247,7 +247,7 @@ def create_app(root, output, config, client_factory=WitnessClient):
                     raise ValueError("Finish the existing login attempt or cancel this capsule")
                 return await asyncio.wait_for(call(*args), 120)
             except Exception as exc:
-                # Telegram errors can contain phone numbers, inputs and session information.
+
                 raise HTTPException(400, "Operation failed: " + type(exc).__name__) from None
 
     @app.get("/")
@@ -349,7 +349,7 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     config = json.loads(args.config.read_bytes())
-    # No HTTP access logs and no third-party diagnostic logging in public Actions logs.
+
     logging.disable(logging.CRITICAL)
     uvicorn.run(create_app(args.data, args.out, config), host="0.0.0.0", port=8787,
                 access_log=False, log_level="critical", proxy_headers=False)

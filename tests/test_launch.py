@@ -53,8 +53,8 @@ def test_windowless_launch_serves_panel_and_retains_diagnostics(tmp_path):
     process = subprocess.Popen(command, cwd=Path(__file__).resolve().parents[1], env=environment,
                                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
     try:
-        # Match the launcher's readiness window; a cold windowless start can be slow.
-        # Readiness still requires HTTP 200 and the startup diagnostics below.
+
+
         deadline = time.monotonic() + 60
         while True:
             assert process.poll() is None, "Windowless server exited before serving the panel"
@@ -73,7 +73,7 @@ def test_windowless_launch_serves_panel_and_retains_diagnostics(tmp_path):
         log = (root / "logs/server.log").read_text(encoding="utf-8")
         assert "Application startup complete" in log
         assert (root / "panel-token.txt").read_text().strip() not in log
-        assert 'GET / HTTP' not in log  # HTTP access logging stays disabled.
+        assert 'GET / HTTP' not in log
     finally:
         process.terminate()
         try:

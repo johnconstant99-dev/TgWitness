@@ -12,8 +12,8 @@ import math
 import re
 
 LINE, PAD_X, PAD_Y = 18, 14, 11
-CHAR = 6.9                        # average glyph width at 13 px (system UI fonts)
-WIDTH = 720                       # content column available to a diagram
+CHAR = 6.9
+WIDTH = 720
 GAP_TD, GAP_LR, CROSS_GAP, SNAKE_COLUMNS = 44, 54, 18, 3
 NODE_SPEC = r"([A-Za-z]\w*)(?:\s*\[([^\]]*)\]|\s*\(([^)]*)\))?"
 EDGE_SPEC = r"\s*(?:-->\|([^|]*)\||--\s+([^>]+?)\s+-->|-\.\s+(.+?)\s+\.->|(-\.->)|-->)\s*"
@@ -64,8 +64,6 @@ def marker(prefix):
             'markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="flow-arrowhead"/>'
             '</marker></defs>')
 
-
-# ---------- parsing ----------
 
 def parse_flowchart(source):
     lines = [line.strip() for line in source.strip().splitlines() if line.strip()]
@@ -143,8 +141,6 @@ def layers_of(nodes, edges):
     return layer, forward
 
 
-# ---------- geometry ----------
-
 def bezier_point(p, t):
     u = 1 - t
     return (u**3 * p[0][0] + 3 * u * u * t * p[1][0] + 3 * u * t * t * p[2][0] + t**3 * p[3][0],
@@ -198,8 +194,6 @@ def side(item, towards):
     return item["x"], item["y"] + math.copysign(item["h"] / 2, dy)
 
 
-# ---------- layouts ----------
-
 def layered(nodes, edges, groups, layer, forward, horizontal):
     size_nodes(nodes, 17 if horizontal else 26)
     count = max(layer.values()) + 1
@@ -236,7 +230,7 @@ def layered(nodes, edges, groups, layer, forward, horizontal):
         size = max(main_size(nodes[k]) for k in keys)
         for key in keys:
             main[key] = offset + size / 2
-        # Room for the labels of edges leaving this layer, and for a group frame's title.
+
         labelled = [label_size(e["label"])[1] for e in edges if e["label"] and layer[e["from"]] == index]
         crossing = any(nodes[k]["group"] is not None for k in keys) or (
             index + 1 < count and any(nodes[k]["group"] is not None for k in by_layer[index + 1]))
@@ -245,7 +239,7 @@ def layered(nodes, edges, groups, layer, forward, horizontal):
         c = cross[key] - low + margin
         item["x"], item["y"] = (main[key], c) if horizontal else (c, main[key])
     if groups:
-        # A node outside a group must not sit inside that group's frame: move it along the cross axis.
+
         for index in range(len(groups)):
             members = [n for n in nodes.values() if n["group"] == index]
             if not members:
@@ -276,7 +270,7 @@ def layered(nodes, edges, groups, layer, forward, horizontal):
             sx, ex, mid = a["x"] + bend, b["x"] + bend, (sy + ey) / 2
             edge["path"], edge["length"], edge["mid"] = curve([(sx, sy), (sx, mid), (ex, mid), (ex, ey)], spot(edge, edges))
         if bend and edge["label"]:
-            # Two edges between the same nodes: their labels sit side by side, not on top of each other.
+
             w, h = label_size(edge["label"])
             mx, my = edge["mid"]
             edge["mid"] = (mx, my + math.copysign(h / 2 + 3, bend)) if horizontal else (mx + math.copysign(w / 2 + 4, bend), my)
@@ -477,7 +471,6 @@ def figure(number, width, height, body, kind, steps, variant, tr=str):
             + "".join(f"<li>{esc(step)}</li>" for step in steps) + "</ol></details></figure>")
 
 
-# Fixed words of a diagram, translated with its labels.
 WORDS = ("Flow diagram", "Sequence diagram", "Diagram as text", "Note on {name}")
 
 

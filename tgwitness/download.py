@@ -58,8 +58,8 @@ def download_export(url, token, destination, fmt="zip", profile="default", max_b
                 raise ValueError("Incomplete export response.")
             output.flush()
             os.fsync(output.fileno())
-        # Hard-link publication is atomic and refuses to overwrite an existing destination.
-        # Fall back to exclusive creation on filesystems without hard-link support.
+
+
         try:
             os.link(temp, destination)
         except FileExistsError:

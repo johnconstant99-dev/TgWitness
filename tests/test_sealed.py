@@ -72,7 +72,7 @@ def test_full_capture_handoff_and_strict_verifier(tmp_path, recipient):
         assert [e for e in events if e["kind"] == "sealed.finished"][0]["payload"]["revocation"] == "revoked"
     evidence = tmp_path / "out" / "evidence.zip"
     assert verify_bundle(evidence)["events"] >= 3
-    # A mock certificate is used only to exercise packaging; never represents a GitHub signature.
+
     attestation = tmp_path / "synthetic-attestation.jsonl"
     attestation.write_text('{"synthetic":true}\n')
     sealed_package.package(cfg, tmp_path / "out", attestation)
@@ -99,7 +99,7 @@ def test_full_capture_handoff_and_strict_verifier(tmp_path, recipient):
                              run=lambda *a, **k: NS(returncode=1, stdout=""))
     with pytest.raises(ValueError, match="fresh-session"):
         sealed_verify.verify(evidence, attestation, "other/fork", policy=policy, run=approved)
-    # A sealed receipt cannot choose its own trusted workflow version.
+
     policy.write_text(json.dumps({"format": "tgwitness-sealed-policy-v1", "workflow": sealed_verify.WORKFLOW,
                                  "releases": []}))
     with pytest.raises(ValueError, match="No approved"):
@@ -268,6 +268,6 @@ def test_explicit_finish_of_paused_history_and_shutdown_does_not_race_export(tmp
         login(client, headers)
         assert client.post("/api/collect", headers=headers, json={"chat_id":CHAT}).status_code == 200
         assert client.post("/api/finish", headers=headers, json={}).status_code == 202
-        # Exiting immediately waits for the archive worker before closing its journal.
+
     assert (tmp_path / "out" / "evidence.zip").is_file()
     assert verify_bundle(tmp_path / "out" / "evidence.zip")["events"] > 0

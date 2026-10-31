@@ -1,4 +1,3 @@
-/* Public guides: local fonts, readable pages, progressive enhancement. */
 :root { color-scheme: light; --paper:#f7f8fa; --surface:#fff; --ink:#142135; --muted:#566277; --line:#dce2eb; --blue:#245ce5; --night:#0b1120; --mono:"Cascadia Code",Consolas,monospace; --font:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif; }
 *, *::before, *::after { box-sizing:border-box; }
 html { scroll-behavior:smooth; scroll-padding-top:24px; }
@@ -90,15 +89,12 @@ details p { font-size:14px; }
 .docs-bottom .brand { font-size:18px; color:var(--ink); }
 .docs-bottom span { margin-inline-end:auto; }
 .docs-bottom>a { color:var(--ink); }
-/* Reading progress, search hint, active section. */
 .read-progress { position:fixed; inset:0 0 auto; height:3px; z-index:30; pointer-events:none; }
 .read-progress span { display:block; height:100%; background:linear-gradient(90deg,#245ce5,#4fc3a1); transform:scaleX(0); transform-origin:0 50%; }
 .search-key { font:600 11px/1 var(--mono); color:var(--muted); border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:4px 7px; background:var(--paper); }
 .toc a { transition:color .2s,border-color .2s,padding .2s; }
 .toc a.is-active { color:var(--blue); border-inline-start:2px solid var(--blue); padding-inline-start:14px; font-weight:600; }
 .sidebar nav a { transition:background .15s,color .15s,border-color .15s; }
-
-/* Reference navigation in the sidebar. */
 .sidebar .nav-label-link { display:inline; padding:0; margin:0; border:0; border-radius:0; background:none; font:inherit; letter-spacing:inherit; color:inherit; text-decoration:none; }
 .sidebar .nav-label-link:hover,.sidebar .nav-label-link[aria-current] { color:var(--blue); background:none; }
 .wiki-nav .nav-label { margin-top:28px; }
@@ -113,8 +109,6 @@ details p { font-size:14px; }
 .wiki-group a:hover { background:#edf1f7; color:var(--ink); }
 .wiki-group a[aria-current] { border-color:var(--blue); background:#e8efff; color:#194abf; font-weight:600; }
 .wiki-group[open] a { animation:nav-in .25s ease both; }
-
-/* Reference pages: Markdown content. */
 .wiki-index { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; margin-top:20px; }
 .wiki-column { border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:6px 16px 14px; }
 .wiki-column a { display:block; font-size:13px; line-height:1.5; padding:6px 0; text-decoration:none; }
@@ -143,8 +137,6 @@ blockquote.callout { margin:24px 0; }
 blockquote.callout p:last-child { margin:0; }
 .wiki-body img { border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 30px #14213510; margin:28px 0; }
 .wiki-body hr { border:0; border-top:1px solid var(--line); margin:40px 0; }
-
-/* Diagrams rendered from the docs (tools/site_diagrams.py). */
 .flow-figure { margin:32px 0; border:1px solid #2e4563; border-radius:16px; padding:22px; background:radial-gradient(circle at 15% 0,#18304f 0,#101d30 55%); box-shadow:0 18px 40px #10233b14; }
 .flow-canvas { overflow-x:auto; }
 .flow-canvas svg { display:block; max-width:100%; height:auto; margin:auto; font:13px var(--font); overflow:visible; }
@@ -180,8 +172,6 @@ blockquote.callout p:last-child { margin:0; }
 @keyframes flow-draw { to { stroke-dashoffset:0; } }
 @keyframes fade-in { from { opacity:0; } to { opacity:1; } }
 @keyframes nav-in { from { opacity:0; transform:translateX(-4px); } to { opacity:1; transform:none; } }
-
-/* Content eases in once it is reached (docs.js adds these classes only when motion is welcome). */
 .will-reveal { opacity:0; transform:translateY(18px); }
 .will-reveal.is-revealed { opacity:1; transform:none; transition:opacity .7s cubic-bezier(.2,.8,.2,1),transform .7s cubic-bezier(.2,.8,.2,1); }
 .guide-grid.will-reveal.is-revealed .guide-card { animation:card-in .6s cubic-bezier(.2,.8,.2,1) both; }
@@ -194,8 +184,6 @@ blockquote.callout p:last-child { margin:0; }
 .guide-content>h1 { animation-delay:.05s; } .guide-content>.guide-outcome { animation-delay:.12s; }
 @keyframes rise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
 @media print { .will-reveal,.flow-figure.will-draw * { opacity:1!important; transform:none!important; stroke-dashoffset:0!important; } .sidebar,.toc,.search,.read-progress { display:none!important; } }
-
-/* Header tools: language and theme. */
 .header-tools { display:flex; align-items:center; gap:10px; margin-inline-start:22px; }
 .docs-header nav { margin-inline-start:auto; }
 .lang-menu { position:relative; border:0; margin:0; padding:0; background:none; }
@@ -214,8 +202,6 @@ blockquote.callout p:last-child { margin:0; }
 .theme-toggle .icon-moon,[data-theme=dark] .theme-toggle .icon-sun { opacity:0; transform:rotate(-90deg) scale(.6); }
 [data-theme=dark] .theme-toggle .icon-moon { opacity:1; transform:none; }
 .language-notice { margin:0 0 26px; padding:11px 15px; border-inline-start:3px solid #d0904b; border-radius:8px; background:#fdf3e7; color:#7a4a17; font-size:13px; }
-
-/* Dark theme: chosen in the header or taken from the system (docs.html sets data-theme before paint). */
 [data-theme=dark] { color-scheme:dark; --paper:#0a1120; --surface:#111b2d; --ink:#e4ebf7; --muted:#9dadc9; --line:#22314a; --blue:#8aadff; }
 .theme-changing,.theme-changing * { transition:background-color .3s,color .3s,border-color .3s!important; }
 [data-theme=dark] code { background:#1b2842; color:#d8e4fb; }
@@ -237,8 +223,6 @@ blockquote.callout p:last-child { margin:0; }
 [data-theme=dark] .flow-figure { border-color:#26395a; box-shadow:none; }
 [data-theme=dark] .language-notice { background:#2a2114; color:#f2c891; }
 [data-theme=dark] .lang-list { box-shadow:0 18px 50px #0009; }
-
-/* Right-to-left languages: what logical properties do not mirror on their own. */
 [dir=rtl] .read-progress span,[dir=rtl] .guide-card::after { transform-origin:100% 50%; }
 [dir=rtl] :is(.sidebar nav a,.wiki-group a) { border-radius:6px 0 0 6px; }
 [dir=rtl] .callout { border-radius:8px 0 0 8px; }
@@ -250,8 +234,6 @@ pre,.flow-canvas,.lang-list a[dir=ltr] { direction:ltr; text-align:left; }
 code,kbd { unicode-bidi:isolate; }
 @keyframes nav-in-rtl { from { opacity:0; transform:translateX(4px); } to { opacity:1; transform:none; } }
 [dir=rtl] .wiki-group[open] a { animation-name:nav-in-rtl; }
-
-/* Scripts: fonts that carry them, and no tight tracking that would break joined letters. */
 html:lang(ar) { --font:"Segoe UI","Noto Sans Arabic","Noto Naskh Arabic",Tahoma,system-ui,sans-serif; }
 html:lang(fa) { --font:"Segoe UI","Vazirmatn","Noto Sans Arabic",Tahoma,system-ui,sans-serif; }
 html:lang(ur) { --font:"Noto Nastaliq Urdu","Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif; }
@@ -280,7 +262,6 @@ html:is(:lang(ar),:lang(fa),:lang(ur),:lang(hi),:lang(zh-Hans)) :is(.table-wrap 
 @media(max-width:480px) { .wiki-index { grid-template-columns:minmax(0,1fr); } .table-wrap table { font-size:12px; } .table-wrap th,.table-wrap td { padding:9px 10px; } .flow-figure { padding:10px; border-radius:12px; } }
 @media(max-width:800px) { .docs-header .brand { order:1; } .header-tools { order:2; margin-inline-start:auto; } .docs-header nav { order:3; width:100%; } [data-theme=dark] .sidebar nav a { background:var(--surface); } [data-theme=dark] .sidebar .wiki-group a[aria-current] { background:#172a4d; } .lang-list { width:min(330px, calc(100vw - 40px)); } }
 @media(max-width:800px) { .sidebar .wiki-nav>a { white-space:normal; overflow-wrap:anywhere; } }
-/* Notice pages retain the system theme without the inline initializer. */
 @media(prefers-color-scheme:dark) {
   :root.notice-page:not([data-theme]) { color-scheme:dark; --paper:#0a1120; --surface:#111b2d; --ink:#e4ebf7; --muted:#9dadc9; --line:#22314a; --blue:#8aadff; }
   :root.notice-page:not([data-theme]) .docs-header { background:#060b16; }

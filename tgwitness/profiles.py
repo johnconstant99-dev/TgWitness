@@ -8,14 +8,14 @@ from starlette.responses import JSONResponse
 
 
 class Profiles:
-    # No fixed cap: the operator adds as many workspaces as their machine and accounts allow.
+
     MAX_PROFILES = None
 
     def __init__(self, app, root, factory):
         self.app, self.root, self.factory = app, root, factory
         label = app.state.store.get_setting("profile_label", "Main account")
         self.entries = {"default": {"id": "default", "label": label, "app": app, "cm": None}}
-        self.opening = {}  # labels of workspaces still starting (the administrator's console names them)
+        self.opening = {}
         self.lock = asyncio.Lock()
         app.state.collector.account_guard = self.check_account
 
@@ -39,8 +39,8 @@ class Profiles:
         if not re.fullmatch(r"[a-f0-9]{32}", entry["id"]):
             raise ValueError("Invalid stored profile ID")
         if entry.get("deleting"):
-            # Erasure may have removed only part of the vault before a failure or
-            # process stop. Never restart collection or create replacement keys.
+
+
             self.entries[entry["id"]] = {**entry, "app": None, "cm": None, "error_type": "DeletionPending"}
             return
         child = self.factory(self.root / "profiles" / entry["id"],
@@ -51,7 +51,7 @@ class Profiles:
         try:
             await cm.__aenter__()
         except Exception as exc:
-            # One damaged journal must not prevent access to healthy account profiles.
+
             self.entries[entry["id"]] = {**entry, "app": None, "cm": None, "error_type": type(exc).__name__}
             self.app.state.store.append("profile.unavailable", {
                 "profile_id": entry["id"], "error_type": type(exc).__name__})
@@ -100,15 +100,14 @@ class Profiles:
             directory = self.root / "profiles" / profile_id
             if not re.fullmatch(r"[a-f0-9]{32}", profile_id) or directory.resolve() != directory:
                 raise ValueError("Refusing to delete a workspace through a filesystem link. Inspect its data directory.")
-            # A multi-account export run by the main app keeps using this workspace's store,
-            # client and key until it ends; closing them underneath it would break both.
-            # No await separates this check from detaching the app below.
+
+
             multi = getattr(self.app.state, "multi_export", None)
             if multi and multi.uses(profile_id):
                 raise ValueError("This account is part of a running multi-account export. "
                                  "Cancel the export or wait for it to finish, then delete the account.")
-            # Persist intent before closing or removing anything, so interrupted
-            # deletion remains visible and retryable after a process restart.
+
+
             if not entry.get("deleting"):
                 with self.app.state.store.transaction():
                     items = self.app.state.store.get_setting("profiles", [])
@@ -121,7 +120,7 @@ class Profiles:
             cm = entry.get("cm")
             entry.update(app=None, error_type="DeletionPending")
             if cm is not None:
-                # The child app lifespan stops its collector and closes its store.
+
                 await cm.__aexit__(None, None, None)
             entry.update(app=None, cm=None, error_type="DeletionPending")
             try:

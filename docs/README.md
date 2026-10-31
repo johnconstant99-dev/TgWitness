@@ -31,6 +31,10 @@ The proxy and witness bot are separate options.
 | Connect my account | [Account setup](ACCOUNTS.md) | A new test message in the journal |
 | Capture one private chat from my fork | [GitHub Actions capture (preview)](SEALED-ACTIONS.md) | An encrypted archive and verification against the approved upstream workflow |
 | Give a reviewer or analyst access | [Access and permissions](ACCESS.md) | Only the chosen accounts, chats and permitted actions |
+| Connect an AI client | [Read-only MCP](MCP.md) | Expiring access to selected workspaces and chats |
+| Ask questions and write a report | [Archive analysis](ANALYSIS.md) | Reviewed sources, verified references and separate analyst revisions |
+| Read text in saved attachments | [Local OCR and transcription](MEDIA-ANALYSIS.md) | Hash-linked machine recognition, separate from original evidence |
+| Connect n8n or a SIEM | [Signed webhooks](WEBHOOKS.md) | Scoped notifications with delivery status |
 | Investigate across the whole account | [Complete investigation walkthrough](INVESTIGATION.md) | A source register, cited cross-chat timeline, people/file connections and verified evidence per workspace |
 | Choose a connection route | [Proxy settings](CONNECTION-SECURITY.md) | A successful Telegram connection check |
 | Share a verifiable record | [Export and verify](EVIDENCE.md#investigation-handoff) | Valid signatures and the expected key fingerprint |

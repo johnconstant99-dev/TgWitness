@@ -57,7 +57,7 @@ DEFAULT_INTERVAL = 10
 TIMEOUT = 30
 TITLE = "TgWitness witness"
 POST_POLICIES = ("all", "changes", "problems")
-# Words of the channel posts; every one can be replaced with "texts" in the config file.
+
 TEXTS = {"ok": "journal head", "key_changed": "COLLECTOR KEY CHANGED", "rollback": "JOURNAL GOT SHORTER",
          "fork": "SAME LENGTH, DIFFERENT HEAD", "invalid": "ANSWER FAILED VERIFICATION",
          "no_response": "no answer from the collector", "collector": "Collector", "records": "records",
@@ -96,7 +96,7 @@ class WitnessKey:
         root.mkdir(parents=True, exist_ok=True, mode=0o700)
         sealed, plain = root / "witness-key.enc", root / "witness-key.json"
         cipher = key_cipher(root)
-        if plain.exists() and not sealed.exists():  # kept in the clear by earlier versions
+        if plain.exists() and not sealed.exists():
             private_write(sealed, cipher.encrypt(plain.read_bytes()))
             plain.write_bytes(b"\0" * plain.stat().st_size)
             plain.unlink()
@@ -214,7 +214,7 @@ class Witness:
             "X-TgWitness-Witness": self.fingerprint, "X-TgWitness-Interval": str(self.interval),
             "X-TgWitness-Challenge": challenge,
             "X-TgWitness-Consistency-From": str(previous["event_count"])},
-            timeout=self.timeout, limit=64 * 1024, private=True)  # its operator chose the collector, often next door
+            timeout=self.timeout, limit=64 * 1024, private=True)
         answer = json.loads(data)
         capture = answer.get("capture") if isinstance(answer, dict) else None
         statement = capture.get("statement") if isinstance(capture, dict) else None
@@ -230,7 +230,7 @@ class Witness:
         body = json.dumps({"chat_id": self.channel, "text": text, "disable_web_page_preview": True}).encode()
         _, _, data = await request("POST", self.bot_api + "/bot" + self.bot_token + "/sendMessage", self.network,
                                    {"Content-Type": "application/json"}, body, timeout=self.timeout, limit=256 * 1024,
-                                   private=True)  # a self-hosted Bot API server may be local
+                                   private=True)
         answer = json.loads(data)
         if not answer.get("ok"):
             raise InvalidAnswer(answer.get("description") or "The Bot API refused the message.")
@@ -292,7 +292,7 @@ class Witness:
                     raise InvalidAnswer("journal continuity failed verification: " + type(exc).__name__) from None
         if status == "ok":
             if self.pinned is None:
-                self.pinned = key  # Trust on first fully validated answer, unless explicitly pinned.
+                self.pinned = key
                 self.store.set_setting("collector_fingerprint", key)
             self.store.set_setting("last_seen", {"event_count": count, "head_hash": head})
             self.store.set_setting("last_capture_counts", captured["counts"] if capture is not None else None)
@@ -450,8 +450,8 @@ def resolve(args, config):
     config_path = getattr(args, "config", None) or os.environ.get("TGWITNESS_WITNESS_CONFIG")
 
     def file_path(name, value):
-        # File paths supplied by CLI/environment stay relative to the working directory;
-        # paths from JSON are relative to that JSON, including its default data directory.
+
+
         env = os.environ.get("TGWITNESS_WITNESS_" + env_names.get(name, name.upper()))
         base = Path(config_path).resolve().parent if config_path and getattr(args, name, None) is None and not env else Path.cwd()
         return base / value
@@ -564,7 +564,7 @@ def main():
         try:
             asyncio.get_running_loop().add_signal_handler(signal.SIGTERM, task.cancel)
         except (NotImplementedError, RuntimeError, AttributeError):
-            pass  # Windows: Ctrl+C still stops the witness in order
+            pass
         try:
             await witness.run()
         except asyncio.CancelledError:

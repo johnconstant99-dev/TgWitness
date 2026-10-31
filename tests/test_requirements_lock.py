@@ -33,6 +33,6 @@ def test_every_locked_package_has_hashes():
 def test_servers_and_the_image_install_only_hashed_packages():
     for text in (cloud.INSTALL, (ROOT / "deploy/Dockerfile").read_text(encoding="utf-8")):
         assert "--require-hashes -r " in text and "build.lock" in text and "requirements.lock" in text
-        assert "constraints" not in text  # version constraints alone are not a hash lock
-        # The project itself comes from the checked-out commit and brings in nothing else.
+        assert "constraints" not in text
+
         assert "--no-deps --no-build-isolation" in text

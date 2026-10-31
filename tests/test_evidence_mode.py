@@ -25,7 +25,7 @@ from tgwitness.verify import (OTS_PENDING, children, der, fingerprint, ots_summa
                               timestamp_signature, timestamp_token, verify_anchors, verify_bundle)
 from test_collector import FakeClient
 
-REAL = Path(__file__).resolve().parent / "tsa"  # answers from the real authorities, 2026-10-31
+REAL = Path(__file__).resolve().parent / "tsa"
 OTS_ANSWER = b"\xf0\x10" + bytes(range(16)) + b"\x08\x00" + OTS_PENDING + b"\x1b\x1ahttps://cal.example/digest"
 
 
@@ -111,7 +111,7 @@ def test_checkpoint_is_timestamped_exported_and_verified(journal, tmp_path, monk
 
     async def run():
         server, port, seen = await local_services(tsa_reply)
-        base = "http://127.0.0.1:" + str(port)  # a local test server: the settings model accepts only https://
+        base = "http://127.0.0.1:" + str(port)
         settings = {"tsa_urls": [base + "/tsr"],
                     "ots_calendars": [base + "/cal-a", base + "/cal-chunked", base + "/broken"]}
         store.append("test", {"n": 1})
@@ -119,7 +119,7 @@ def test_checkpoint_is_timestamped_exported_and_verified(journal, tmp_path, monk
         untrusted = await anchor_latest(store, NetworkConfig(kind="direct"), {**settings, "ots_calendars": []})
         roots[0] = (x509.load_pem_x509_certificate(ca_path.read_bytes()),)
         first = await anchor_latest(store, NetworkConfig(kind="direct"), settings)
-        second = await anchor_latest(store, NetworkConfig(kind="direct"), settings)  # only the failed service is retried
+        second = await anchor_latest(store, NetworkConfig(kind="direct"), settings)
         server.close()
         return untrusted, first, second, seen
     untrusted, first, second, seen = asyncio.run(run())
@@ -131,7 +131,7 @@ def test_checkpoint_is_timestamped_exported_and_verified(journal, tmp_path, monk
     assert [r["service"].rsplit("/", 1)[1] for r in second["results"]] == ["broken"]
     checkpoint_bytes = (store.root / "checkpoints" / first["checkpoint"]["file"]).read_bytes()
     digest = hashlib.sha256(checkpoint_bytes).digest()
-    assert all(body == digest for path, body in seen if path.endswith("/digest"))  # only the hash left
+    assert all(body == digest for path, body in seen if path.endswith("/digest"))
     assert store.events(kind="anchor.completed")[0]["payload"]["checkpoint"]["sha256"] == digest.hex()
 
     path = export_file(store, vault, "zip")
@@ -141,7 +141,7 @@ def test_checkpoint_is_timestamped_exported_and_verified(journal, tmp_path, monk
     tsa = next(a for a in result["anchors"] if a["kind"] == "rfc3161")
     assert tsa["signature"] == "checked against the given root" and tsa["time"]
 
-    # An unrelated root is refused; a reply for other bytes or with another nonce is refused.
+
     hashes = {0: "0" * 64, **{e["seq"]: e["hash"] for e in store.all_events()}}
     with zipfile.ZipFile(path) as archive:
         names = archive.namelist()
@@ -167,7 +167,7 @@ def test_real_authorities_chain_to_the_shipped_roots_and_tampering_fails():
         reply, query = (REAL / (name + ".tsr")).read_bytes(), (REAL / (name + ".tsq")).read_bytes()
         assert timestamp_reply_summary(reply, digest, query)["time"].startswith("2026-10-31T")
         assert root in timestamp_signature(reply, trusted_roots())["root"]
-    with pytest.raises(ValueError, match="trusted root"):  # DFN's root is in neither set
+    with pytest.raises(ValueError, match="trusted root"):
         timestamp_signature((REAL / "dfn.tsr").read_bytes(), trusted_roots())
     reply = (REAL / "sectigo.tsr").read_bytes()
     _, _, start, end = timestamp_token(reply)["signer"]
@@ -194,13 +194,13 @@ def test_evidence_settings_validation_and_api(tmp_path, monkeypatch):
                 {"ots_calendars": ["http://cal.example"]}, {"ots_calendars": ["https://user:secret@cal.example"]}):
         with pytest.raises(ValidationError):
             EvidenceMode(**bad)
-    assert EvidenceMode().model_dump()["enabled"] is False  # nothing leaves the machine by default
+    assert EvidenceMode().model_dump()["enabled"] is False
     assert all(url.startswith("https://") for url in EvidenceMode().model_dump()["tsa_urls"])
     monkeypatch.delenv("TGWITNESS_TOKEN", raising=False)
     app = create_app(tmp_path, client_factory=FakeClient)
     with TestClient(app) as c:
         c.headers["Authorization"] = "Bearer " + app.state.vault.token
-        # Saved while plain HTTP was accepted: the old default moves to an HTTPS authority, others to https://.
+
         app.state.store.set_setting("evidence", {"tsa_urls": ["http://timestamp.digicert.com", "http://tsa.example/x"],
                                                  "ots_calendars": ["http://cal.example"]})
         assert evidence_settings(app.state.store)["tsa_urls"] == ["https://timestamp.sectigo.com", "https://tsa.example/x"]
@@ -215,6 +215,6 @@ def test_evidence_settings_validation_and_api(tmp_path, monkeypatch):
         while not c.get("/api/evidence").json()["last"] and time.time() < deadline:
             time.sleep(0.2)
         last = c.get("/api/evidence").json()["last"]
-        assert last and not last["results"][0]["ok"]  # unreachable service: recorded, retried later
+        assert last and not last["results"][0]["ok"]
         events = c.get("/api/events?kind=evidence.changed").json()["events"]
         assert events[0]["payload"]["fingerprint"] == fingerprint(app.state.vault.public_key)

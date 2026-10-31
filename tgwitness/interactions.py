@@ -203,7 +203,7 @@ async def execute(collector, body):
                     entity = joined.chats[0]
             else:
                 entity = await collector.client.get_entity(target["username"])
-                # Usernames can change owners between preview and execution.
+
                 if entity.id != prepared["raw"]["id"]:
                     raise ValueError("The link destination changed. Preview it again.")
                 if isinstance(entity, types.Channel):

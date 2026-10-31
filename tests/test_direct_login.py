@@ -45,7 +45,7 @@ def test_saved_api_credentials_work_for_phone_qr_and_import_only_in_their_profil
         prefix = "/profiles/" + child + "/api"
         status = client.get(prefix + "/status").json()["collector"]
         assert not status["has_api_credentials"] and status["builtin_api"]
-        # Another workspace never borrows the saved pair; it falls back to the built-in one.
+
         assert client.post(prefix + "/auth/phone/start", json={"phone": "+15550001111"}).json()["step"] == "code"
         assert QRClient.instances[-1].account_id in api_pool.POOL_IDS
         assert client.post(prefix + "/auth/qr/start", json={}).json()["step"] == "qr"
@@ -66,7 +66,7 @@ def test_partial_credentials_are_rejected_and_missing_ones_use_the_builtin_pool(
         assert candidate.account_id in api_pool.POOL_IDS
         device = {key: candidate.options[key] for key in api_pool.DESKTOP_DEVICE if key in candidate.options}
         assert device == (api_pool.DESKTOP_DEVICE if candidate.account_id == api_pool.DESKTOP_ID else {})
-        assert not app.state.vault.read("credentials")  # Saved only after authorization.
+        assert not app.state.vault.read("credentials")
         assert client.post("/api/auth/code", json={"code": "22222"}).json()["step"] == "password"
         assert client.post("/api/auth/password", json={"password": "synthetic"}).json()["step"] == "authorized"
         assert app.state.vault.read("credentials")["api_id"] == candidate.account_id
@@ -129,7 +129,7 @@ def test_refused_pool_pairs_are_skipped_until_one_works(journal, fresh_pool, mon
 def test_own_pair_is_never_replaced_by_the_pool(journal, fresh_pool):
     async def run():
         store, vault = journal
-        RejectingClient.refused = {44}  # FakeClient maps the own API ID 123 to account 44.
+        RejectingClient.refused = {44}
         collector = Collector(store, vault, RejectingClient)
         with pytest.raises(ApiIdInvalidError):
             await collector.start_phone("+15550001111", 123, "a" * 32)

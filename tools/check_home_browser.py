@@ -29,7 +29,7 @@ def check_home(browser, url, output, route_request, errors):
         assert page.locator('.hero-retention-link').get_attribute('href') == '#s3'
         capture = page.locator('[data-home-action="sealed"]')
         expect(capture).to_be_visible()
-        assert urljoin(page.url, capture.get_attribute('href')) == url + 'sealed.html?lang=' + lang
+        assert urljoin(page.url, capture.get_attribute('href')) == url + prefix + 'docs/capture/'
         assert not page.evaluate('document.documentElement.scrollWidth > innerWidth'), (lang, width, theme)
         for action, path in [('demo', 'demo/'), ('setup', 'demo/guide.html')]:
             button = page.locator(f'[data-home-action="{action}"]')
@@ -40,7 +40,7 @@ def check_home(browser, url, output, route_request, errors):
         assert routes.count() == 4
         assert urljoin(page.url, routes.nth(0).get_attribute('href')) == url + prefix + 'guides/modes.html'
         assert urljoin(page.url, routes.nth(3).get_attribute('href')) == url + prefix + 'docs/exports/'
-        # Opening the language menu must not widen a 320px viewport, including RTL.
+
         page.locator('.lang-menu>summary').click()
         expect(page.locator('.lang-list')).to_be_visible()
         assert not page.evaluate('document.documentElement.scrollWidth > innerWidth'), (lang, 'language menu')

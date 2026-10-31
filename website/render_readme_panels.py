@@ -69,7 +69,7 @@ def centered(text, x, y, size, color=MUTED, weight=400):
 def reveal(body, still, start=.25):
     if still:
         return '<g>' + body + '</g>'
-    # The final state holds long enough to read before the illustrated flow repeats.
+
     return ('<g>'
             f'<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;{start};{start+.08};.91;1" dur="8s" repeatCount="indefinite"/>'
             f'<animateTransform attributeName="transform" type="translate" values="0 12;0 12;0 0;0 0;0 12" keyTimes="0;{start};{start+.08};.91;1" dur="8s" repeatCount="indefinite"/>'
@@ -183,7 +183,7 @@ def card_layouts(names, source_prefix, output_prefix, card_height, title):
             ET.SubElement(root, "{" + ns + "}title").text = title
             for i, name in enumerate(names):
                 card = ET.parse(OUT / (source_prefix + name + ("-static" if still else "") + ".svg")).getroot()
-                # Nested SVGs share the document's ID namespace.
+
                 identifiers = {node.attrib["id"]: name + "-" + node.attrib["id"] for node in card.iter() if "id" in node.attrib}
                 for node in card.iter():
                     for key, value in list(node.attrib.items()):
@@ -265,7 +265,7 @@ def handbook(mobile, still):
     for index, (kicker, title, lines, color) in enumerate(entries):
         x, y = (0, index*230) if mobile else (index*408, 0)
         if mobile:
-            # Keep the same reading order with larger type on a narrow screen.
+
             body = card(640, 200, kicker, title, lines, color, still=still, delay=index)
             body = body.replace('font-size="13"', 'font-size="18"').replace('font-size="27"', 'font-size="34"').replace('font-size="17"', 'font-size="25"')
             body = body.replace('y="145"', 'y="136"')

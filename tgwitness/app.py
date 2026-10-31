@@ -98,13 +98,13 @@ class SourceCheck(BaseModel):
 
 
 class AlertUpdate(alerts.AlertSettings):
-    # Write-only: None keeps the saved destinations; saved addresses are only shown masked.
+
     urls: list[str] | None = Field(default=None, max_length=20)
-    add_urls: list[str] = Field(default=[], max_length=20)  # appended to the saved (or given) destinations
+    add_urls: list[str] = Field(default=[], max_length=20)
 
 
 class ExportPassword(BaseModel):
-    # ZIP AES derives its key with 1,000 PBKDF2-SHA1 rounds, so length is what protects the file.
+
     password: str = Field(min_length=12, max_length=256)
 
 
@@ -132,18 +132,18 @@ class ProxyLink(BaseModel):
 
 
 class ReplicaUpdate(replica.ReplicaSettings):
-    # Write-only: empty keeps the saved keys; saved keys are never sent back to the browser.
+
     access_key: str = Field(default="", max_length=256, pattern=r"^\S*$")
     secret_key: str = Field(default="", max_length=256, pattern=r"^\S*$")
 
 
 class Snapshot(BaseModel):
     chat_id: int
-    limit: int = Field(default=100, ge=1, le=10000)  # the workspace's own maximum is a panel parameter
+    limit: int = Field(default=100, ge=1, le=10000)
 
 
 class ParametersUpdate(BaseModel):
-    # Only the parameters to change; null restores a default.
+
     values: dict[str, bool | int | float | list[str] | None] = Field(max_length=200)
 
 
@@ -162,7 +162,7 @@ class ProfileCreate(BaseModel):
 
 
 class RoutePolicyUpdate(RoutePolicy):
-    # Write-only: null keeps the saved proxy for requests outside Telegram; its password is never sent back.
+
     outside_proxy: NetworkConfig | None = None
     remove_outside_proxy: bool = False
 
@@ -179,9 +179,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     op_lock = asyncio.Lock()
     export_lock = asyncio.Lock()
     public_proxies = PublicCatalog(root)
-    # One automatic MTProxy pool per process: workspaces are spread over different proxies.
+
     shared_pool = proxy_pool or ProxyPool(public_proxies)
-    # The main panel keeps the installation's accesses and console; workspaces use the same.
+
     console = None if access else Console()
 
     @asynccontextmanager
@@ -228,11 +228,11 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     return next((p["label"] for p in store.get_setting("profiles", []) if p["id"] == pid), pid)
                 app.state.access.labels = workspace_label
             store.listeners.append(app.state.access.journal_listener(profile_id))
-            # This capability never exposes the real panel token (including an env override).
-            # It is accepted only for a directly accessed, isolated synthetic demo.
+
+
             app.state.local_demo_token = secrets.token_urlsafe(32)
             app.state.run_receipt = run_receipt(store, vault)
-            # High-assurance deployments only: the host measured into the signed start record.
+
             selected = assurance.mode()
             app.state.assurance = None
             if selected and not demo:
@@ -252,9 +252,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             app.state.replica_wakeup, app.state.replica_status = asyncio.Event(), {"busy": False}
             app.state.alert_wakeup = asyncio.Event()
             if not store.get_setting("demo", False):
-                # Requests outside Telegram follow the workspace's IP mode (Collector.outside_route).
+
                 alert_task = asyncio.create_task(alerts.alert_loop(
-                    store, vault, collector.outside_route, app.state.alert_wakeup))
+                    store, vault, collector.outside_route, app.state.alert_wakeup, profile_id))
                 anchor_task = asyncio.create_task(anchor_loop(
                     store, collector.outside_route, app.state.anchor_wakeup, app.state.anchor_status))
                 replica_task = asyncio.create_task(replica.replica_loop(
@@ -262,7 +262,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 if app.state.assurance:
                     host_task = asyncio.create_task(assurance.assurance_loop(
                         store, app.state.assurance["mode"], app.state.assurance["provider"]))
-                if proxy_pool is None:  # the process's main app keeps the shared pool up to date
+                if proxy_pool is None:
                     shared_pool.intervals = lambda: {"lists": tuning.value(store, "proxy_lists_minutes") * 60,
                                                      "probe": tuning.value(store, "proxy_probe_minutes") * 60}
                     shared_pool.outside = collector.outside_route
@@ -289,6 +289,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             yield
         finally:
             try:
+                if getattr(app.state, "media_analysis", None):
+                    await app.state.media_analysis.close()
                 if getattr(app.state, "multi_export", None):
                     await app.state.multi_export.close()
                 if profiles:
@@ -321,7 +323,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         response = await call_next(request)
         audit = getattr(request.state, "audit", None)
         if audit and audit[0] is app:
-            # Changes, downloads and refusals go to the administrator's console; routine reading does not.
+
             path = request.url.path
             if (request.method != "GET" or response.status_code == 403
                     or any(part in path for part in ("/export", "/download", "/media/", "/replica/key", "/anchor-request"))):
@@ -337,7 +339,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         response.headers["Cache-Control"] = "no-store"
         return response
 
-    # FastAPI's default validation error echoes input, which can contain credentials.
+
     from fastapi.exceptions import RequestValidationError
     from fastapi.responses import JSONResponse
 
@@ -383,8 +385,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return {"available": True, "token": app.state.local_demo_token}
 
     def reject_access(request, detail):
-        # A noisy client behind the same proxy must not lock out valid tokens.
-        # Both authentication paths share this bounded failure accounting.
+
+
         address = request.client.host if request.client else "unknown"
         now = time.monotonic()
         if address not in failures and len(failures) >= 4096:
@@ -490,7 +492,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             for entry in app.state.profiles.summary():
                 if not principal.opens(entry["id"]):
                     continue
-                if principal.chats(entry["id"]) is not None:  # counts of the whole workspace stay closed
+                if principal.chats(entry["id"]) is not None:
                     entry = {**entry, "stats": None, "sources_enabled": None,
                              "sources_total": len(principal.chats(entry["id"]))}
                 listed.append(entry)
@@ -620,7 +622,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         try:
             addresses = await netclient.resolve(config.host, config.port)
         except OSError:
-            addresses = []  # not resolvable now: every connection checks it again
+            addresses = []
         inside = any(netclient.internal(a) for a in addresses)
         if inside and not (request.state.principal.admin or netclient.private_allowed()):
             raise HTTPException(403, "This proxy is inside this machine or its network. Only the main administrator can set it.")
@@ -716,7 +718,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             if not entry:
                 raise HTTPException(400, "Refresh the group list and select an available target.")
             with store.transaction():
-                # An operator's choice is final: the observation scope never re-enables or pauses it.
+
                 store.set_target(body.chat_id, entry["title"], entry["kind"], body.enabled, origin="manual",
                                  priority=body.priority)
                 included = body.enabled and unexclude(store, body.chat_id)
@@ -757,7 +759,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             with store.transaction():
                 store.remove_target(chat_id)
                 if exclude:
-                    # Otherwise folder or account mode would add it again with its next message.
+
                     store.set_setting("scope", {**scope, "exclude": [*scope["exclude"], chat_id]})
                 removed_dossier = dossier.remove(store, chat_id)
                 store.append("target.removed", {
@@ -843,7 +845,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             store.set_setting("evidence", body.model_dump())
             store.append("evidence.changed", {**body.model_dump(), "fingerprint": fingerprint(vault.public_key)})
         if body.enabled and not was:
-            request_anchor(store, vault, app.state.anchor_wakeup)  # the key fingerprint is anchored first
+            request_anchor(store, vault, app.state.anchor_wakeup)
         return evidence_state()
 
     @app.post("/api/evidence/anchor", dependencies=[Depends(authenticate)])
@@ -858,7 +860,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         last, receipt = app.state.store.get_setting("source_check", None), app.state.run_receipt
         return {"last": last, "version": __version__, "source_tree_sha256": receipt["source_tree_sha256"],
                 "files": len(receipt["source_files"]), **outside_state(),
-                # A check describes the code that ran then; a later start may run other code.
+
                 "current": bool(last) and last["source_tree_sha256"] == receipt["source_tree_sha256"]}
 
     @app.get("/api/source-check", dependencies=[Depends(authenticate)])
@@ -940,7 +942,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         for url in urls:
             if len(url) > 2048 or not alerts.describe(url):
                 raise HTTPException(422, "Apprise does not recognise one of the destination addresses. Check it against the Apprise wiki.")
-        # Their own sockets pass no destination check (alerts.OWN_SOCKET): only the main administrator adds them.
+
         if (any(alerts.own_socket(u) for u in urls if u not in saved)
                 and not (request.state.principal.admin or netclient.private_allowed())):
             raise HTTPException(403, "Only the main administrator can add destinations that connect without HTTP "
@@ -994,7 +996,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         s3 = replica.client(settings, secrets, app.state.collector.outside_route())
         name = replica.workspace_prefix(settings, vault.public_key) + "/connection-test.tgwr"
         try:
-            # With retention set, the test object is locked for one day only, then read back.
+
             headers = replica.lock_headers(settings, 1 if settings["retention_days"] else 0)
             started_at = datetime.now(timezone.utc)
             await asyncio.wait_for(replica.upload(s3, base64.b64decode(secrets["key"]), name,
@@ -1104,7 +1106,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.post("/api/interactions", dependencies=[Depends(authenticate)])
     async def interaction_action(request: Request, body: interactions.Action):
         if visible_chats(request) is not None:
-            if body.action == "open":  # joins or opens a new chat: a change to the whole account
+            if body.action == "open":
                 raise HTTPException(403, "This access opens only chosen chats; this part of the workspace is closed to it.")
             require_chat(request, body.chat_id)
         return await operation(interactions.execute, app.state.collector, body)
@@ -1295,6 +1297,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             except Exception as exc:
                 app.state.store.append("export.failed", {"format": fmt, "error_type": type(exc).__name__})
                 raise HTTPException(409, "Export failed integrity, size, or file checks. Inspect local data and limits.") from None
+        from .webhooks import export_completed
+        await export_completed(app.state.store, app.state.vault, profile_id)
+        app.state.alert_wakeup.set()
         return path
 
     @app.get("/api/export/{fmt}", dependencies=[Depends(authenticate)])
@@ -1307,7 +1312,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.post("/api/export/{fmt}", dependencies=[Depends(authenticate)])
     async def export_encrypted(fmt: Literal["zip", "jsonl", "csv", "html"], body: ExportPassword):
-        # The password arrives in the request body and is never stored or written to the journal.
+
         path = await build_export(fmt, body.password)
         return FileResponse(path, filename="tgwitness-evidence-" + fmt + "-encrypted.zip", media_type="application/zip",
                             background=BackgroundTask(path.unlink, missing_ok=True))
@@ -1322,11 +1327,14 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         path = root / "media" / digest
         if not path.is_file():
             raise HTTPException(404)
-        # Send as an attachment, never execute active content inside the panel origin.
+
         return FileResponse(path, media_type="application/octet-stream", filename=digest)
 
+    from .webhook_api import register as register_webhooks
+    register_webhooks(app, authenticate, profile_id)
+
     if allow_profiles:
-        # ---- Access: sessions for every token, issued accesses and the administrator's console ----
+
         @app.post("/api/access/login")
         async def access_login(request: Request, body: AccessLogin):
             try:
@@ -1401,11 +1409,17 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         @app.get("/api/access/console", dependencies=[Depends(authenticate)])
         async def access_console(after: int = 0):
             console = app.state.access.console
-            if after > console.counter:  # the process restarted since the console last asked
+            if after > console.counter:
                 after = 0
             lines = console.after(after)
             return {"lines": lines, "last": lines[-1]["n"] if lines else after}
 
+        from .archive_api import register as register_archive
+        register_archive(app, authenticate)
+        from .analysis_api import register as register_analysis
+        register_analysis(app, authenticate)
+        from .media_analysis_api import register as register_media_analysis
+        register_media_analysis(app, authenticate)
         app.mount("/profiles", ProfileDispatch(app), name="profiles")
     app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="panel")
     return app

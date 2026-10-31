@@ -38,7 +38,7 @@ def test_catalog_authentication_manual_import_isolation_and_secret_exclusion(tmp
     catalog = tmp_path / "proxies.json"
     monkeypatch.setenv("TGWITNESS_PROXY_CATALOG", str(catalog))
 
-    async def resolved(config):  # offline: the listed proxy names resolve nowhere
+    async def resolved(config):
         return "198.51.100.7"
     monkeypatch.setattr(collector_module, "proxy_address", resolved)
     app = create_app(tmp_path / "data", client_factory=FakeClient)
@@ -52,7 +52,7 @@ def test_catalog_authentication_manual_import_isolation_and_secret_exclusion(tmp
         assert listing.json()["proxies"][0]["host"] == "proxy.example.org" and SECRET not in listing.text
         imported = client.post("/api/network/parse-link", json={"link": "https://t.me/proxy?server=own.example.org&port=8443&secret=" + SECRET})
         assert imported.json()["secret"] == SECRET
-        assert app.state.collector.network_config().kind == "mtproxy_auto"  # Preview does not apply it.
+        assert app.state.collector.network_config().kind == "mtproxy_auto"
         assert client.post("/api/network/catalog/absent", json={}).status_code == 404
         assert client.post("/api/network/catalog/project-a", json={}).status_code == 200
         assert app.state.collector.network_config().secret == SECRET
@@ -68,7 +68,7 @@ def test_catalog_authentication_manual_import_isolation_and_secret_exclusion(tmp
         client.post("/api/collector/start", json={})
         assert client.post("/api/network/catalog/project-a", json={}).status_code == 400
         client.post("/api/collector/stop", json={})
-        # A broken catalog never prevents the operator selecting their own route.
+
         catalog.write_text("invalid-json-with-private-data")
         failed = client.get("/api/network/catalog")
         assert failed.status_code == 503 and "private-data" not in failed.text

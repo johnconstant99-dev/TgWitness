@@ -70,7 +70,7 @@ class Hetzner(Provider):
         made = self.call("POST", "/firewalls", {"name": resource_name(spec), "labels": labels(spec), "rules": [
             {"direction": "in", "protocol": r["protocol"], "port": r["port"], "source_ips": [r["source"]],
              "description": "TgWitness debug SSH; remove with python -m tgwitness.cloud lock"} for r in rules]})
-        for action in made.get("actions") or []:  # a firewall with a running action cannot be attached yet
+        for action in made.get("actions") or []:
             self.wait(action)
         firewall = made["firewall"]
         created = self.call("POST", "/servers", {
@@ -127,7 +127,7 @@ class Hetzner(Provider):
         rows = []
         for resource, path in (("server", "/servers/" + str(server["id"])),
                                ("firewall", "/firewalls/" + str(record["firewall"]["id"]))):
-            # A deleted firewall fails the firewall check; its log is gone with it.
+
             for action in self.pages(path + "/actions", "actions", allow=(404,) if resource == "firewall" else ()):
                 rows.append({"resource": resource, "id": action["id"], "command": action["command"],
                              "started": action["started"], "finished": action.get("finished"),

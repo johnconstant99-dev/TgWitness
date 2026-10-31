@@ -2541,7 +2541,30 @@
 "9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "GitHub Actions سے محفوظ کریں (ابتدائی نسخہ)",
 "b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "Telegram میں نیا لاگ ان، ایک چیٹ، خفیہ کردہ آرکائیو اور GitHub سے ماخذ کی تصدیق۔",
 "5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "محفوظ کرنے کا معاون کھولیں",
-"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">GitHub Actions سے محفوظ کریں (ابتدائی نسخہ)</a>"
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">GitHub Actions سے محفوظ کریں (ابتدائی نسخہ)</a>",
+"00e9f682c63d8cc9677c51b47c4e0cf5a0a8abd7d8d9b6360ed3014e1143e2b7": "درآمد شدہ سیشنز",
+"03f7f8759222d8e63f238cae8868630e09e4cbb163b7f882a420074709708652": "ٹیلیگرام دستاویزات",
+"205eee3acbad78d41d9ff34d75795836b9847831b6e59efa92083128cabeb267": "رجسٹریشن کے لیے استعمال ہونے والے فون نمبر پر کنٹرول برقرار رکھیں۔",
+"41b3a4f9944b9efb11cd31646960cd166a004b4af1afe014b646521926da64be": "<a href=\"https://core.telegram.org/api/errors\" rel=\"noopener noreferrer\" target=\"_blank\">تصدیقی غلطیاں</a>",
+"47b9b09aafaf660aaf53e8292d9e98eb6e62dfb303ffdc348f04395221309754": "دو مرحلہ جاتی تصدیق کو فعال کریں اور بحالی کے لیے ایک ای میل شامل کریں۔",
+"5009ab7190d97f6436c45d87c68140bbaa2d2a2a642408aad465cae351d403ab": "اکاؤنٹ کو کنیکٹ کریں",
+"5220b144e2191936311f37b441b375dc5ff96bd965d30ea80fe1915bc4bd7b6e": "<a href=\"https://core.telegram.org/api/obtaining_api_id\" rel=\"noopener noreferrer\" target=\"_blank\">ایک ایپلیکیشن بنانا</a>",
+"83a8f07fbd5d10e81fd49454a6c73f8e5df444527971bf128e21bfd3ce879c4b": "جمع‌آوری شروع کریں اور چیک کریں کہ نئے پیغامات ظاہر ہو رہے ہیں۔",
+"8575096d3ecc863c0ba33adb4617cf3e84208525a1aa38d7afa040265a30079e": "API کی اسناد",
+"862a75a2cd1215f767b571dd9103317313b5fd4003b189943a7c73c1638a80b6": "Telegram کی ترتیبات → ڈیوائسز میں فعال سیشنز کا جائزہ لیں۔",
+"a118a0942ad1b7a1c43b267ec31d2a1d8c191f5d7824be1f8b16917be9f5d8c0": "ایک ہی درآمد شدہ اجازت نامہ ایک ساتھ دو کلائنٹس میں استعمال نہ کریں۔ ٹیلیگرام اسے AUTH_KEY_DUPLICATED کے ساتھ منسوخ کر سکتا ہے۔ متوازی استعمال کے لیے فون یا QR کے ذریعے ایک الگ لاگ ان بنائیں۔",
+"a2756d8df8b146ba781f1593c871131e3f6e1e7bf9b133d4c1845fb6db3710c8": "GitHub کیپچر ورک فلو کے لیے اپنی API ID اور ہیش استعمال کریں۔",
+"a439b7ebbc635437f76d75005cd8a7f28ced6abb0234867fce820856d3b8c2d2": "پینل کھولیں اور فون یا QR لاگ ان منتخب کریں۔",
+"b9724d017783fec0bb79b550546ea04cecefa6b64689c264357458d782536c3f": "<a href=\"@@GUIDE_ACCOUNTS@@\">اکاؤنٹ کنکشن گائیڈ</a>",
+"bd8f623898b9b6fbe1f5bc12a7506abfc84ee9003d891d5cd6f64b87388b9530": "ایک ایسا نمبر منتخب کریں جسے آپ یاد رکھ سکیں۔ ایک لاگ ان کوڈ موصول ہونے سے مستقبل میں اکاؤنٹ کی بحالی کی ضمانت نہیں ملتی۔",
+"c2a195484f492d86026a5c6dc9140e9ee52c60b58d79bab6959f17a6c2c61794": "منسلک کرنے سے پہلے",
+"cb8d1801315e9c63db597c3a5cd461a005ff272842448b113b35185944c83d17": "<a href=\"https://my.telegram.org/apps\" rel=\"noopener noreferrer\" target=\"_blank\">API کی سہولیات بنائیں</a>",
+"d504af6d82ab60d11d5af1a0e8d865cdb66e6fe6db94261f444d287372b47f20": "ایک عارضی GitHub رنر پر ایک ٹیلیگرام چیٹ ایکسپورٹ کریں، پھر انکرپٹ شدہ نتیجہ ڈاؤن لوڈ کر کے اس کی تصدیق کریں۔",
+"e39d2d716506647e4f133118e0aeba1d358adef77384da904c7558b86a6455ee": "کی جنریٹ کرنے اور اپنے آرکائیو کو ڈیکرپٹ کرنے کے لیے جاوا اسکرپٹ فعال کریں۔",
+"ec8ae7171805a6a2d4a7b1f266be5eaad064530b32067d06b0fa5f681d9c9e1a": "ٹیلیگرام کی تصدیق مکمل کریں اور اپنے ذرائع منتخب کریں۔",
+"ece6e50a3c38c2bd9affe9be9dd46e9d73a8745817a203a95e22baccfc51faf4": "فون نمبر",
+"f8590fa728883a6cbb54e79035975ff1f173e8a6d6761d0289f3069999fe862c": "API ID اور ہیش ایپلیکیشن کی شناخت کرتے ہیں۔ آپ کی ٹیلیگرام اجازت الگ ہے۔",
+"fa58a91e7b34ecd514a34e43018e4909b012fb412a06cda12ed00158a0f3551d": "ذاتی چیٹس سے جمع شدہ مواد الگ رکھیں۔ ایک الگ اکاؤنٹ بھی ٹیلیگرام کی پابندیوں کا سامنا کر سکتا ہے۔"
 },
 "modes": {
 "modes.actions.body": "پریویو، درخواست اور نتیجہ رسیدیں دستخط شدہ ہیں۔ بٹن دبانے سے پہلے، سرور پیغام کو دوبارہ حاصل کرتا ہے اور تبدیل شدہ کی بورڈ کو مسترد کر دیتا ہے۔ واپس کردہ کال بیک متن اور یو آر ایلز ریکارڈ شدہ سیاق و سباق میں رہتے ہیں۔",
@@ -3230,6 +3253,12 @@
 "proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "پراکسی mtproxy پول ساکس5 http راستہ IP موڈ فال بیک api id ہیش نیٹ ورک",
 "GitHub Actions capture (preview)": "GitHub Actions سے محفوظ کریں (ابتدائی نسخہ)",
 "A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Telegram میں نیا لاگ ان، ایک چیٹ، خفیہ کردہ آرکائیو اور GitHub سے ماخذ کی تصدیق۔",
-"Open capture helper": "محفوظ کرنے کا معاون کھولیں"
+"Open capture helper": "محفوظ کرنے کا معاون کھولیں",
+"Dedicated account": "وقف شدہ اکاؤنٹ",
+"Export one Telegram chat on a temporary GitHub runner.": "عارضی گٹ ہب رنر پر ایک ٹیلیگرام چیٹ برآمد کریں۔",
+"GitHub Actions capture": "GitHub Actions کی گرفت",
+"Prepare a separate Telegram account for collection.": "جمع کرنے کے لیے ایک الگ ٹیلیگرام اکاؤنٹ تیار کریں۔",
+"dedicated telegram account session api login": "وقف شدہ ٹیلیگرام اکاؤنٹ سیشن API لاگ ان",
+"github actions capture encrypted archive": "گٹ ہب ایکشنز خفیہ شدہ آرکائیو کو محفوظ کرتے ہیں"
 }
 }

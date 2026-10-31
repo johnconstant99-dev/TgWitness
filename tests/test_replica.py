@@ -96,11 +96,11 @@ def test_encryption_round_trip_detects_changes_truncation_and_swaps():
         sealed = b"".join(replica.encrypt(key, "a/b.tgwr", io.BytesIO(data).read, os.urandom(8)))
         assert len(sealed) == replica.encrypted_size(size)
         assert b"".join(replica.decrypt(key, "a/b.tgwr", io.BytesIO(sealed).read)) == data
-    with pytest.raises(InvalidTag):  # one byte changed
+    with pytest.raises(InvalidTag):
         b"".join(replica.decrypt(key, "a/b.tgwr", io.BytesIO(sealed[:40] + bytes([sealed[40] ^ 1]) + sealed[41:]).read))
-    with pytest.raises(InvalidTag):  # cut at a chunk boundary
+    with pytest.raises(InvalidTag):
         b"".join(replica.decrypt(key, "a/b.tgwr", io.BytesIO(sealed[:13 + replica.CHUNK + 16]).read))
-    with pytest.raises(InvalidTag):  # served under another name
+    with pytest.raises(InvalidTag):
         b"".join(replica.decrypt(key, "a/c.tgwr", io.BytesIO(sealed).read))
 
 
@@ -131,12 +131,12 @@ def test_everything_is_copied_encrypted_and_restores_verified(journal, tmp_path)
         server.close()
         return first, again, third, restored, objects, puts, media, digest
     first, again, third, restored, objects, puts, media, digest = asyncio.run(run())
-    # journal segment, file, checkpoint, its timestamp answer, chat export
+
     assert first["error"] is None and first["objects"] == 5 and again["objects"] == 0
     assert first["object_lock"]["verified"] is True and first["object_lock"]["object"]["mode"] == "COMPLIANCE"
     kinds = sorted(name.split("/")[2] for name in objects)
     assert kinds == ["checkpoints", "checkpoints", "exports", "journal", "journal", "media"]
-    assert not any(digest in name for name in objects)  # files are not named by their hash
+    assert not any(digest in name for name in objects)
     assert all(b"bc1qprivatewallet" not in body and b"photo bytes" not in body for body in objects.values())
     assert all(h["x-amz-object-lock-mode"] == "COMPLIANCE" for h in puts)
     assert third["objects"] == 1 and not list((store.root / "replica-outbox").iterdir())
@@ -144,7 +144,7 @@ def test_everything_is_copied_encrypted_and_restores_verified(journal, tmp_path)
     assert restored["events"] == third["journal_seq"] and restored["checkpoints_verified"] == 1
     assert (out / "media" / digest).read_bytes() == media
     assert next((out / "exports").iterdir()).read_bytes() == b"PK signed chat export"
-    assert len(store.events(kind="replica.completed")) == 2  # nothing to copy: nothing recorded
+    assert len(store.events(kind="replica.completed")) == 2
 
 
 def test_tampered_or_swapped_objects_fail_restore(journal, tmp_path):
@@ -162,7 +162,7 @@ def test_tampered_or_swapped_objects_fail_restore(journal, tmp_path):
         with pytest.raises(InvalidTag):
             await replica.restore(replica.key_file(store, vault), AK, SK, tmp_path / "a")
         checkpoint_key = next(k for k in objects if "/checkpoints/" in k)
-        objects[journal_key] = objects[checkpoint_key]  # a valid object served under another name
+        objects[journal_key] = objects[checkpoint_key]
         with pytest.raises(InvalidTag):
             await replica.restore(replica.key_file(store, vault), AK, SK, tmp_path / "b")
         server.close()
@@ -178,20 +178,20 @@ def test_missing_file_is_reported_without_stopping_the_rest_of_the_copy(journal)
         (store.root / "media").mkdir()
         files = [b"first file", b"second file"]
         digests = [hashlib.sha256(data).hexdigest() for data in files]
-        (store.root / "media" / digests[1]).write_bytes(files[1])  # the first one is gone from disk
+        (store.root / "media" / digests[1]).write_bytes(files[1])
         for i, (data, digest) in enumerate(zip(files, digests)):
             store.append("media.saved", {"media_sha256": digest, "size": len(data)}, -100123, i)
         retain_checkpoint(store, vault)
         first = await replica.sync(store, vault, NetworkConfig(kind="direct"))
         uploaded = sorted(name.split("/")[2] for name in objects)
-        (store.root / "media" / digests[0]).write_bytes(files[0])  # put back from a backup
+        (store.root / "media" / digests[0]).write_bytes(files[0])
         second = await replica.sync(store, vault, NetworkConfig(kind="direct"))
         server.close()
         return first, uploaded, second
     first, uploaded, second = asyncio.run(run())
     assert first["error"] == "Preserved media is missing: " + hashlib.sha256(b"first file").hexdigest()
-    assert uploaded == ["checkpoints", "journal", "media"]  # the second file and the checkpoint still went
-    assert second["error"] is None and second["objects"] == 1  # the file put back
+    assert uploaded == ["checkpoints", "journal", "media"]
+    assert second["error"] is None and second["objects"] == 1
 
 
 def test_mtproxy_route_never_uploads(journal):
@@ -209,11 +209,11 @@ def test_replica_api_keeps_keys_write_only(tmp_path, monkeypatch):
     with TestClient(app) as c:
         c.headers["Authorization"] = "Bearer " + app.state.vault.token
         base = {"enabled": True, "endpoint": "https://s3.example.com", "bucket": BUCKET}
-        assert c.post("/api/replica", json=base).status_code == 422  # no keys yet
+        assert c.post("/api/replica", json=base).status_code == 422
         assert c.post("/api/replica", json={**base, "endpoint": "https://s3.example.com/path"}).status_code == 422
         state = c.post("/api/replica", json={**base, "enabled": False, "access_key": AK, "secret_key": SK}).json()
         assert state["has_credentials"] and state["has_key"] and SK not in str(state) and AK not in str(state)
-        state = c.post("/api/replica", json={**base, "interval_minutes": 15}).json()  # keys kept
+        state = c.post("/api/replica", json={**base, "interval_minutes": 15}).json()
         assert state["settings"]["enabled"] and app.state.vault.read("replica")["secret_key"] == SK
         key = c.get("/api/replica/key").json()
         assert key["format"] == "tgwitness-replica-key-v1" and len(base64.b64decode(key["key"])) == 32
@@ -231,7 +231,7 @@ def test_storage_that_ignores_object_lock_is_reported(journal):
         server.close()
         return status, puts
     status, puts = asyncio.run(run())
-    assert puts and all(h["x-amz-object-lock-mode"] == "GOVERNANCE" for h in puts)  # requested...
+    assert puts and all(h["x-amz-object-lock-mode"] == "GOVERNANCE" for h in puts)
     assert status["object_lock"]["verified"] is False and status["object_lock"]["bucket_enabled"] is False
-    assert "did not lock" in status["error"]  # ...but not applied, and that is reported
+    assert "did not lock" in status["error"]
     assert store.events(kind="replica.completed")[-1]["payload"]["error"] == status["error"]

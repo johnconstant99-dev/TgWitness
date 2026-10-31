@@ -159,7 +159,7 @@ def test_zip_paths_are_never_extracted(name):
     output = io.BytesIO()
     with zipfile.ZipFile(output, "w") as archive:
         entry = zipfile.ZipInfo("placeholder")
-        entry.filename = name  # Preserve a backslash even on Windows.
+        entry.filename = name
         archive.writestr(entry, b"data")
     with pytest.raises(ValueError, match="Unsafe"):
         import_accounts([upload("account.zip", output.getvalue())])

@@ -134,7 +134,7 @@ def test_public_monitor_isolated_accounts_no_secrets_and_offline_verification(tm
     evidence = export_file(store, vault, "zip")
     try:
         with TestClient(app) as client:
-            # Wait for both immediate polling tasks, without touching Telegram.
+
             import time
             for _ in range(100):
                 status = client.get("/api/proof").json()
@@ -156,7 +156,7 @@ def test_public_monitor_isolated_accounts_no_secrets_and_offline_verification(tm
             assert checked["evidence_counters_checked"] and checked["counts"]["message.new"] == 1
             with pytest.raises(ValueError, match="trusted fingerprint"):
                 verify_public_proof(proof, "0" * 64)
-            # A collector can sign false counters, but recounting the export exposes them.
+
             value = downloaded.json()
             capture = value["statement"]["capture"]
             capture["statement"]["counts"].update({"message.new": 0, "message.edited": 2})

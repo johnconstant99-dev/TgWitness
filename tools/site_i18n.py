@@ -16,7 +16,7 @@ import re
 from html.parser import HTMLParser
 from pathlib import Path
 
-# code: (native name, html lang, direction, Open Graph locale)
+
 LANGUAGES = {
     "en": ("English", "en", "ltr", "en_US"),
     "ru": ("Русский", "ru", "ltr", "ru_RU"),
@@ -44,15 +44,15 @@ LANGUAGES = {
     "he": ("עברית", "he", "rtl", "he_IL"),
     "bn": ("বাংলা", "bn", "ltr", "bn_BD"),
 }
-# Release notes retain their original English. Project notices use the selected language;
-# the canonical MIT LICENSE and NOTICE files remain available through their original links.
+
+
 ENGLISH_ONLY = {"changelog"}
 ATTRIBUTES = ("aria-label", "title", "alt", "placeholder")
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
-# Inline markup a sentence may carry. <small> is left out: the pages set it as its own line.
+
 INLINE = {"a", "abbr", "b", "br", "cite", "code", "em", "i", "img", "kbd", "mark", "q", "s", "span",
           "strong", "sub", "sup", "time", "u", "wbr"}
-# Containers whose children are translated one by one even when they are all inline (a menu of links).
+
 SPLIT = {"nav", "ul", "ol", "table", "thead", "tbody", "tr", "header", "footer", "main", "section", "article",
          "figure", "aside", "dl", "details", "form", "select"}
 NEVER = {"pre", "script", "style", "code", "kbd", "textarea"}
@@ -124,7 +124,7 @@ def units(fragment):
     found = []
 
     def inline_only(node):
-        # A part marked translate="no" (a number, an address) is kept apart from the words around it.
+
         return all(child.tag in INLINE and child.attrs.get("translate") != "no" and inline_only(child)
                    for child in node.children)
 
@@ -148,7 +148,7 @@ def units(fragment):
         if node.tag != "#root" and node.tag not in SPLIT and inline_only(node) and _has_text(inner):
             own = any(_has_text(fragment[start:end]) for start, end in gaps(node))
             texts = sum(1 for child in node.children if _has_text(fragment[child.open_start:child.close_end]))
-            if own or texts <= 1:  # a sentence, not a row of separate links or labels
+            if own or texts <= 1:
                 found.append((node.open_end, node.close_start))
                 return
         for start, end in gaps(node):

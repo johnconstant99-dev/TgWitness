@@ -82,7 +82,7 @@ def test_publication_scans_staged_secrets_even_after_working_file_is_clean(stage
     (root / "README.md").write_text(secret + "\n", encoding="utf-8")
     git("add", "README.md")
     (root / "README.md").write_text("Clean working copy\n", encoding="utf-8")
-    # Even Git's assume-unchanged hint must not hide the staged version from this check.
+
     git("update-index", "--assume-unchanged", "README.md")
     findings = index_findings(root)
     assert "Git index differs from the reviewed working file: README.md" in findings

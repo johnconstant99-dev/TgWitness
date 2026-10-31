@@ -34,7 +34,7 @@ def scene():
             continue
         item = deepcopy(element)
         if cls.startswith("source-"):
-            # The illustrated tiles tell the story; remove their tiny old labels.
+
             for child in list(item):
                 if child.tag.rsplit("}", 1)[-1] == "g":
                     item.remove(child)
@@ -130,8 +130,8 @@ def hero(font, original, mobile=False, still=False, wiki=False):
     if still:
         d.add('<style>*{animation:none!important}.packet,.scan,.seal-ring{display:none}.flow{opacity:.45}.identity-sign{stroke-dasharray:none;stroke-dashoffset:0}</style>')
     else:
-        # Keep the composition complete at every point in the loop. Records and
-        # connection traces provide the narrative movement; tiles gently float.
+
+
         d.add('''<style>
 .source-private,.source-group,.source-channel,.source-bot,.source-record{opacity:1;animation:identity-source 8s ease-in-out infinite}
 .source-group{animation-delay:-2s}.source-channel{animation-delay:-4s}.source-bot{animation-delay:-6s}

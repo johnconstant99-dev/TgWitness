@@ -81,7 +81,7 @@ def test_real_local_proxy_handshake(kind):
                     assert username == b"fixture-user" and password == b"fixture-password"
                     writer.write(b"\x01\x00"); await writer.drain()
                     command = await reader.readexactly(4)
-                    assert command == b"\x05\x01\x00\x03"  # Hostname resolution at proxy.
+                    assert command == b"\x05\x01\x00\x03"
                     length = (await reader.readexactly(1))[0]
                     seen.append((await reader.readexactly(length)).decode())
                     assert int.from_bytes(await reader.readexactly(2), "big") == 443
@@ -96,7 +96,7 @@ def test_real_local_proxy_handshake(kind):
                 try:
                     await asyncio.wait_for(reader.read(), 1)
                 except (TimeoutError, ConnectionResetError):
-                    pass  # EOF/reset after the successful handshake is an expected client close.
+                    pass
             except Exception as exc:
                 errors.append(exc)
             finally:
@@ -124,7 +124,7 @@ def test_real_local_proxy_handshake(kind):
             await asyncio.sleep(.05)
         assert seen == ["telegram-fixture.invalid"]
         assert not errors, errors
-        # Dead proxy: connection fails; never attempts the destination directly.
+
         with pytest.raises((OSError, ConnectionError)):
             await connection._proxy_connect(timeout=1)
     asyncio.run(run())

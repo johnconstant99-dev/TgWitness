@@ -77,7 +77,7 @@ def test_jobs_survive_restart_and_preserve_original_media_versions(journal):
         abandoned = store.claim_media(44)
         assert abandoned["message_event"] == first["seq"]
         await collector.stop(shutdown=True)
-        # A fresh database connection and collector reconstruct everything from disk.
+
         reopened = Store(store.root)
         reopened.bind(vault)
         seen = []

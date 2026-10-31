@@ -45,7 +45,7 @@ def retain_checkpoint(store, vault):
     directory.mkdir(exist_ok=True, mode=0o700)
     data = canonical(value)
     numbered = directory / ("checkpoint-" + str(value["statement"]["event_count"]).zfill(12) + ".json")
-    if not numbered.exists():  # keep the first one: timestamps may already cover its exact bytes
+    if not numbered.exists():
         private_write(numbered, data)
     private_write(directory / "latest.json", data)
     return value
@@ -199,7 +199,7 @@ def export_file(store, vault, fmt):
                         calculated = write_member(name, iter(lambda: incoming.read(1024 * 1024), b""))
                     if calculated != digest:
                         raise ValueError("Attachment changed: " + digest)
-                # Evidence mode: anchored checkpoints of this journal prefix and every stored answer.
+
                 anchors = store.root / "checkpoints" / "anchors"
                 for proof in sorted(anchors.iterdir()) if anchors.is_dir() else []:
                     stem = proof.name.split(".", 1)[0]
@@ -229,7 +229,7 @@ def export_file(store, vault, fmt):
 
 def encrypt_export(path, fmt, password, inner_name=None):
     """Put a finished export, unchanged, into a WinZip AES-256 ZIP that 7-Zip and WinRAR open."""
-    import pyzipper  # its crypto backend takes seconds to load; only password exports need it
+    import pyzipper
     out = path.with_name(path.name + ".zip")
     try:
         with pyzipper.AESZipFile(out, "w", compression=pyzipper.ZIP_STORED if fmt == "zip" else pyzipper.ZIP_DEFLATED,

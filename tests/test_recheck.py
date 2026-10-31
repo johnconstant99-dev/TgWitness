@@ -29,7 +29,7 @@ class RecheckClient(FakeClient):
         self.caught_up += 1
 
     async def iter_dialogs(self, limit):
-        for event in self.during_start:  # updates that arrive while observation is starting
+        for event in self.during_start:
             await self.handlers[0](event)
         self.during_start = []
         async for dialog in super().iter_dialogs(limit):
@@ -67,7 +67,7 @@ def test_update_position_survives_restart_and_turns_on_catch_up(journal):
     asyncio.run(collector.ensure_route())
     client = collector.make_client(123, "a" * 32, saved_session())
     assert client.options["catch_up"] is True
-    # What Telethon writes into the in-memory session about once a minute.
+
     client.session.set_update_state(0, types.updates.State(
         pts=500, qts=7, date=datetime(2026, 1, 1, tzinfo=timezone.utc), seq=3, unread_count=0))
     client.session.set_update_state(123, types.updates.State(
@@ -84,10 +84,10 @@ def test_update_position_survives_restart_and_turns_on_catch_up(journal):
     session = restarted.make_client(123, "a" * 32, saved_session()).session
     states = dict(session.get_update_states())
     assert (states[0].pts, states[0].qts, states[0].seq) == (500, 7, 3) and states[123].pts == 18244
-    assert session.get_input_entity(CHAT).access_hash == 777  # Telethon needs it to catch up the channel
+    assert session.get_input_entity(CHAT).access_hash == 777
     assert restarted.resumed_state_at == saved["saved_at"]
 
-    # A different account's journal never resumes this position.
+
     store.set_setting("account", {"id": 45, "username": "other"})
     other = Collector(store, vault, RecheckClient)
     asyncio.run(other.ensure_route())
@@ -136,7 +136,7 @@ def test_recheck_recovers_missed_messages_edits_and_silent_removals(journal):
         for i in range(1, 6):
             await collector.capture_message(message(i, "text " + str(i)), "message.new", CHAT)
         saved_2 = kinds(store, "message.new")[1]
-        # While nothing was delivered: #2 removed, #3 edited, #6 and #7 sent.
+
         del RecheckClient.server[2]
         RecheckClient.server[3] = message(3, "text 3 changed", datetime(2026, 1, 2, tzinfo=timezone.utc))
         RecheckClient.server[6] = message(6, "missed one")
@@ -152,9 +152,9 @@ def test_recheck_recovers_missed_messages_edits_and_silent_removals(journal):
         missing = kinds(store, "message.missing_on_recheck")[0]
         assert missing["message_id"] == 2
         assert missing["payload"]["last_saved_event"] == {"seq": saved_2["seq"], "hash": saved_2["hash"]}
-        assert not kinds(store, "message.deleted")  # a missing message is not a deletion notice
+        assert not kinds(store, "message.deleted")
 
-        # A second pass finds nothing new and repeats nothing.
+
         before = len(store.all_events())
         again = await collector.recheck_pass()
         assert (again["recovered"], again["edited"], again["missing"]) == (0, 0, 0)
@@ -179,7 +179,7 @@ def test_recheck_does_not_mark_messages_missing_when_access_was_lost(journal):
         RecheckClient.lost_access = True
         state = await collector.recheck_pass()
         assert state["errors"] == 1 and not kinds(store, "message.missing_on_recheck")
-        RecheckClient.lost_access = False  # still readable, just emptied: a purge is recorded
+        RecheckClient.lost_access = False
         state = await collector.recheck_pass()
         assert state["missing"] == 12 and len(kinds(store, "message.missing_on_recheck")) == 12
     asyncio.run(run())
@@ -193,7 +193,7 @@ def test_recheck_after_a_long_stop_fills_the_gap_below_newer_live_messages(journ
         collector = await observing(store, vault)
         for i in range(1, 6):
             await collector.capture_message(message(i), "message.new", CHAT)
-        # Observation starts again after a stop; live messages arrive before the first recheck.
+
         collector.mark_recheck_start()
         for i in (29, 30):
             await collector.capture_message(message(i), "message.new", CHAT)
@@ -202,15 +202,15 @@ def test_recheck_after_a_long_stop_fills_the_gap_below_newer_live_messages(journ
         first = await collector.recheck_pass()
         assert first["recovered"] == 10
         assert kinds(store, "recheck.completed")[-1]["payload"]["chats"][0]["continues_after"] == 15
-        assert [t["chat_id"] for t in collector.due_targets()] == [CHAT]  # continues on the next tick
+        assert [t["chat_id"] for t in collector.due_targets()] == [CHAT]
         await collector.recheck_pass()
         last = await collector.recheck_pass()
         assert last["recovered"] == 3 and store.get_setting("recheck_walked") == {str(CHAT): 30}
-        assert not collector.due_targets()  # caught up: back to the normal interval
+        assert not collector.due_targets()
         assert (await collector.recheck_pass())["recovered"] == 0
         assert [e["message_id"] for e in kinds(store, "message.recovered")] == list(range(6, 29))
 
-        # 0 turns recovery off: nothing is fetched and the chat waits for its normal interval.
+
         RecheckClient.server[31] = message(31)
         collector.param = lambda key: 0 if key == "recheck_new_limit" else param(key)
         store.set_setting("recheck_last", {})

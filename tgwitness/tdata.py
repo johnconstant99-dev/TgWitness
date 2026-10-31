@@ -104,7 +104,7 @@ def read_tdata_zip(payload, passcode=""):
                 raise ValueError("TData archive exceeds 512 entries or 32 MiB expanded size.")
             names = {}
             for entry in entries:
-                # ZipInfo normalizes backslashes on Windows; validate its original name.
+
                 raw_name = entry.orig_filename
                 path = PurePosixPath(raw_name)
                 if (path.is_absolute() or ".." in path.parts or "\\" in raw_name or "\0" in raw_name

@@ -33,7 +33,7 @@ def main():
             page.on("request", lambda req: external.append(req.url) if urlsplit(req.url).hostname != "127.0.0.1" else None)
             page.on("request", lambda req: writes.append(req.url) if req.method not in ("GET", "HEAD", "OPTIONS") else None)
             unlock(page, server)
-            # Also retain the untranslated static keys for the localization check.
+
             keys = page.evaluate("""async () => {
                 const keys = [];
                 for (const path of ['/', '/guide.html']) {
@@ -87,7 +87,7 @@ def main():
             assert token not in json.dumps(config) and config["post"] == "all"
             expect(page.locator("#witness-setup-result")).to_contain_text("Configuration saved")
             expect(page.locator("#witness-start-command")).to_be_visible()
-            # Locking removes the temporary token from the page and in-memory state.
+
             page.evaluate("lock()")
             assert page.evaluate("state.witnessToken") is None
             assert token not in page.locator("body").inner_text()
@@ -151,7 +151,7 @@ def main():
                     guide.set_viewport_size({"width": width, "height": 1060})
                     for name in ("extras", "witness", "github"):
                         response = guide.goto(server.url + "/guide.html#" + name)
-                        if response is not None:  # changing only the fragment does not reload the document
+                        if response is not None:
                             assert response.status == 200
                         expect(guide.locator("html")).to_have_attribute("lang", lang)
                         expect(guide.locator("#" + name)).to_be_in_viewport()

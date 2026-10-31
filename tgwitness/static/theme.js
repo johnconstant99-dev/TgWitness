@@ -1,7 +1,7 @@
 "use strict";
-// Colour theme and motion. Loaded before the page is painted, so a dark theme never flashes white.
-// "system" follows the operating system and changes together with it. When the system asks for
-// reduced motion, the panel stays still unless "Animations always on" is chosen.
+
+
+
 (()=>{
   const KEY="tgwitness-theme",MOTION="tgwitness-motion",root=document.documentElement;
   const systemDark=matchMedia("(prefers-color-scheme: dark)"),systemStill=matchMedia("(prefers-reduced-motion: reduce)");
@@ -18,7 +18,7 @@
     if(always)root.dataset.motion="always";else delete root.dataset.motion;
     document.querySelectorAll("[data-motion-toggle]").forEach(b=>b.setAttribute("aria-pressed",String(always)));
   }
-  // The new colours spread out from the pressed button; instant with reduced motion or without View Transitions.
+
   function choose(choice,button){
     write(KEY,choice);
     if(resolve(choice)===root.dataset.theme||!document.startViewTransition||window.tgwReducedMotion()){apply(choice);return;}
@@ -34,7 +34,7 @@
   apply(read(KEY,"system"));
   applyMotion();
   systemDark.addEventListener("change",()=>{if(read(KEY,"system")==="system")apply("system");});
-  addEventListener("storage",event=>{if(event.key===KEY)apply(read(KEY,"system"));if(event.key===MOTION)applyMotion();});  // other open tabs
+  addEventListener("storage",event=>{if(event.key===KEY)apply(read(KEY,"system"));if(event.key===MOTION)applyMotion();});
   document.addEventListener("DOMContentLoaded",()=>{
     apply(read(KEY,"system"));
     applyMotion();

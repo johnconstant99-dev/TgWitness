@@ -61,7 +61,7 @@ def main():
                         store.append("message.new", {"text": "Synthetic private content"}, -100123, n + 1)
                     store.append("message.edited", {"text": "Synthetic edit"}, -100123, 1)
                     store.append("message.deleted", {}, -100123, 2)
-                    # Report synthetic collection health; no Telegram connection is opened.
+
                     original = app.state.collector.status
                     app.state.collector.status = lambda original=original: {**original(), "running": True, "connected": True}
                     prefix = "" if profile == "default" else "/profiles/" + profile

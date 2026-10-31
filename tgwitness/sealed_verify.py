@@ -24,7 +24,7 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
             or not releases or any(not re.fullmatch(r"[0-9a-f]{40}", r.get(k, ""))
                                   for r in releases for k in ("workflow_sha", "collector_sha"))):
         raise ValueError("No approved sealed release in the trusted policy")
-    # An envelope's workflow name or commit is never an authority to trust itself.
+
     approved = None
     for release in releases:
         command = ["gh", "attestation", "verify", str(evidence), "--bundle", str(bundle),
@@ -41,8 +41,8 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
             break
     if approved is None:
         raise ValueError("GitHub attestation did not match an approved hosted collector workflow")
-    # The whole ZIP is now externally bound. Its internal signing key is authenticated
-    # by that binding, so a separate user-provided fingerprint is neither needed nor trusted.
+
+
     internal = verify_bundle(evidence)
     started, finished, accounts = [], [], []
     with zipfile.ZipFile(evidence) as archive, archive.open("events.jsonl") as incoming:

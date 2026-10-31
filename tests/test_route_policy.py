@@ -86,7 +86,7 @@ def test_requests_outside_telegram_follow_the_mode_and_their_own_proxy(journal):
     with pytest.raises(ValueError):
         asyncio.run(collector.set_route_policy(RoutePolicy(), NetworkConfig(kind="mtproxy", host="8.8.8.8",
                                                                              port=443, secret=KEY)))
-    # A workspace whose Telegram route is its own SOCKS5/HTTP proxy sends these requests through it.
+
     asyncio.run(collector.set_route_policy(RoutePolicy(exposure="hide")))
     asyncio.run(collector.set_network(SOCKS))
     assert collector.outside_route() == SOCKS
@@ -110,7 +110,7 @@ def test_hide_ip_waits_without_a_proxy_and_tunnel_connects_directly(journal, mon
         assert fallback["exposure"] == "tunnel" and fallback["fallback_to_direct"] is True
         status = collector.route_status()
         assert status["fallback_to_direct"] is True and status["exposure"] == "tunnel" and status["current"] is None
-        assert collector.route_owner in pool.waiting  # the pool keeps checking proxies for it
+        assert collector.route_owner in pool.waiting
         await collector.stop()
     asyncio.run(run())
 
@@ -128,16 +128,16 @@ def test_fallback_mode_waits_the_set_minutes_then_connects_directly_and_returns(
         with pytest.raises(NoProxyAvailable):
             await collector.configure(123, "a" * 32, saved_session())
         assert collector.unavailable_since and not collector.direct_fallback
-        collector.unavailable_since -= 6 * 60  # five minutes without a working proxy have passed
+        collector.unavailable_since -= 6 * 60
         for state in pool.health.values():
             state["cooldown_until"] = 0
         await collector.configure(123, "a" * 32, saved_session())
         assert collector.direct_fallback and collector.client.is_connected()
         assert store.events(kind="network.route_fallback")[0]["payload"]["without_proxy_seconds"] >= 360
-        # A listed proxy answers again: the monitor leaves the direct connection and reconnects through it.
+
         dead.clear()
         for state in pool.health.values():
-            state["cooldown_until"] = 0  # its rest is over; the background check finds it working
+            state["cooldown_until"] = 0
         await pool.probe_all()
         collector.running, collector.pool_retry_at = True, 0
         await collector.review_route()
@@ -165,7 +165,7 @@ def test_switching_to_hide_ip_leaves_a_direct_fallback_at_once(journal, monkeypa
         assert not collector.direct_fallback and not collector.client.is_connected()
         collector.running = True
         await collector.reconnect()
-        assert not collector.client.is_connected()  # waits for a proxy instead of reconnecting directly
+        assert not collector.client.is_connected()
         await collector.stop()
     asyncio.run(run())
 
@@ -179,15 +179,15 @@ def test_rotation_parameters_drops_cooldown_and_shared_proxies(journal, monkeypa
         collector = await connected(store, vault, pool)
         first = collector.auto_route[0]
         collector.running = True
-        await collector.note_drop()  # one drop is enough with this limit
+        await collector.note_drop()
         rotated = store.events(kind="network.route_rotated")[0]["payload"]
         assert rotated["reason"] == "repeated_disconnect" and rotated["previous_cooldown_seconds"] == 120
         assert collector.auto_route[0] != first
-        # One account per proxy: another workspace finds the only other proxy resting and waits.
+
         assert pool.resting(first, time.time())
         with pytest.raises(NoProxyAvailable):
             await pool.acquire("another workspace", share=1)
-        assert (await pool.acquire("another workspace", share=0))[0] == collector.auto_route[0]  # sharing allowed
+        assert (await pool.acquire("another workspace", share=0))[0] == collector.auto_route[0]
         await collector.stop()
     asyncio.run(run())
 
@@ -202,18 +202,18 @@ def test_planned_switch_moves_to_another_working_proxy_or_stays(journal, monkeyp
         collector = await connected(store, vault, pool)
         first = collector.auto_route[0]
         await collector.review_route()
-        assert collector.auto_route[0] == first  # not due yet
+        assert collector.auto_route[0] == first
         store.set_setting("auto_route_since", time.time() - 2 * 3600)
         await collector.review_route()
         planned = store.events(kind="network.route_rotated")[0]["payload"]
         assert planned["reason"] == "planned" and planned["previous_cooldown_seconds"] == 0
-        assert collector.auto_route[0] != first and not pool.resting(first, time.time())  # not a failure
+        assert collector.auto_route[0] != first and not pool.resting(first, time.time())
         assert not collector.client.is_connected()
         second = collector.auto_route[0]
         dead.add("8.8.8.1")
         pool.health.clear()
         store.set_setting("auto_route_since", time.time() - 2 * 3600)
-        await collector.review_route()  # no other proxy answers: stays
+        await collector.review_route()
         assert collector.auto_route[0] == second and pool.assigned[collector.route_owner] == second
         assert time.time() - store.get_setting("auto_route_since") < 60
         await collector.stop()
@@ -251,7 +251,7 @@ def test_list_downloads_use_the_main_workspace_route_and_intervals(tmp_path, mon
         policy = client.post("/api/network/policy", json={"exposure": "hide", "outside_enabled": True,
                                                          "outside_proxy": SOCKS.model_dump()}).json()
         assert policy["outside_route"] == "socks5" and "password" not in str(policy)
-        assert shared.outside() == SOCKS.model_copy(update={"local_proxy": True})  # local, set by the administrator
+        assert shared.outside() == SOCKS.model_copy(update={"local_proxy": True})
         assert client.get("/api/evidence").json()["route"] == "socks5"
 
 
@@ -264,7 +264,7 @@ def test_client_switches_between_mtproxy_and_direct_transports():
     async def run():
         await client.switch_route({})
         assert client._connection is ConnectionTcpFull and client._proxy is None
-        assert client._init_request.proxy is None  # Telegram is not told about a proxy on a direct route
+        assert client._init_request.proxy is None
         await client.switch_route(NetworkConfig(kind="mtproxy", host="8.8.8.2", port=443, secret=KEY).client_options())
         assert client._connection is ConnectionTcpMTProxyRandomizedIntermediate
         assert client._proxy == ("8.8.8.2", 443, secret) and client._init_request.proxy.address == "8.8.8.2"

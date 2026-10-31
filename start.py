@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 
-# Check before importing tomllib, which is unavailable on older interpreters.
+
 if sys.version_info < (3, 11):
     raise SystemExit("Install Python 3.11 or newer.")
 
@@ -45,7 +45,7 @@ def main():
             raise SystemExit("\nCould not create the private Python environment (.venv): " + str(exc)
                              + "\n" + VENV_HINT) from None
     if not marker.exists() or marker.read_text(encoding="utf-8") != VERSION or setup:
-        # Repair an environment whose initial pip bootstrap was interrupted.
+
         step([str(python), "-m", "ensurepip", "--upgrade"], "Could not set up pip in .venv. " + VENV_HINT)
         print("Installing TgWitness dependencies…", flush=True)
         step([str(python), "-m", "pip", "install", "--disable-pip-version-check", "-c", str(ROOT / "deploy/constraints.txt"),
@@ -62,7 +62,7 @@ def serve(command):
     try:
         return process.wait()
     except KeyboardInterrupt:
-        # The server receives the same Ctrl+C and records an orderly stop; let it finish.
+
         try:
             process.wait(timeout=30)
         except (subprocess.TimeoutExpired, KeyboardInterrupt):

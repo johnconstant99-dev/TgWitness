@@ -115,8 +115,8 @@ def main():
             if page.locator("#authorized-state").is_visible():
                 page.locator("#change-account").click()
             expect(page.locator("#credentials-form")).to_be_visible()
-            # API settings are directly accessible in the sign-in form. Inspect
-            # the details state instead of racing a layout change from Settings.
+
+
             if page.locator("#api-details").get_attribute("open") is None:
                 page.locator("#api-details summary").click()
             expect(page.locator("#api-id")).to_be_visible()
@@ -186,7 +186,7 @@ def main():
         child = response.json()["id"]
         page.reload()
         expect(page.locator("#workspace")).to_be_visible()
-        # Reload leaves the backend QR pending only until its expiry; explicit new login cancels it.
+
         assert candidate.connected
         open_account()
         candidate2 = begin_qr()

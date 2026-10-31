@@ -129,7 +129,7 @@ def finish(body, blocks, words=None):
     body = re.sub(r"<table>", '<div class="table-wrap" tabindex="0"><table>', body).replace("</table>", "</table></div>")
     body = re.sub(r"<blockquote>", '<blockquote class="callout">', body)
     label = html.escape((words or {}).get("Link to this section", "Link to this section"), quote=True)
-    # A visible anchor on every section heading.
+
     return re.sub(r'<(h[234]) id="([^"]+)">(.*?)</\1>',
                   lambda m: f'<{m.group(1)} id="{m.group(2)}">{m.group(3)}<a class="anchor" href="#{m.group(2)}" '
                             f'aria-label="{label}">#</a></{m.group(1)}>', body, flags=re.S)

@@ -37,7 +37,7 @@ class History:
                 "PRIMARY KEY(run_id,message_event))",
             ):
                 self.store.db.execute(statement)
-            # A process can die between pages; the committed cursor remains the authority.
+
             self.store.db.execute("UPDATE history_runs SET phase='paused',reason='process_restart',updated_at=? "
                                   "WHERE phase='running'", (utcnow(),))
 
@@ -202,14 +202,14 @@ class History:
                 except RPCError as exc:
                     self.finish_source(job, "failed", type(exc).__name__)
                 except (OSError, TimeoutError) as exc:
-                    # Keep the cursor and let the operator resume after a connection/storage failure.
+
                     self.transition(run_id, "paused", type(exc).__name__)
                     return
                 await asyncio.sleep(0.05)
         except asyncio.CancelledError:
             raise
         except Exception as exc:
-            # Do not convert a corrupt reply or a local write failure to a successful partial run.
+
             self.transition(run_id, "paused", type(exc).__name__)
 
     async def read_page(self, job):
@@ -243,7 +243,7 @@ class History:
                 self.finish_source(job, "skipped", "source_disabled")
                 return
             with self.store.transaction():
-                # capture_message does no network I/O: observation, media job and cursor commit together.
+
                 unavailable = not hasattr(message, "message") or getattr(message, "peer_id", None) is None
                 if unavailable:
                     event = self.store.append("history.message.unavailable", {"history_run_id": run_id},
@@ -255,7 +255,7 @@ class History:
                 self.store.db.execute("UPDATE history_sources SET offset_id=?,captured=captured+?,"
                                       "unavailable=unavailable+? WHERE run_id=? AND chat_id=?",
                                       (message.id, int(not unavailable), int(unavailable), run_id, chat_id))
-            # Let live updates, pause requests and the attachment worker run between committed records.
+
             await asyncio.sleep(0)
 
     def report(self):

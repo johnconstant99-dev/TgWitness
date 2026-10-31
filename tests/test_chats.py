@@ -17,7 +17,7 @@ def seed(store):
     store.append("message.edited", {"text": "Changed", "sender_id": 44, "sender_observation": alice,
                                     "edited_at": "2026-01-01T10:05:00+00:00"}, CHAT, 10)
     store.append("message.deleted", {"deleted_by": None}, CHAT, 10)
-    for _ in range(2):  # a repeated history snapshot is not a new version
+    for _ in range(2):
         store.append("message.snapshot", {"text": "From history", "sender_id": 45, "has_media": True,
                                           "reply_to_message_id": 10}, CHAT, 11)
     store.append("media.saved", {"media_sha256": "a" * 64, "mime_type": "image/png",
@@ -76,10 +76,10 @@ def test_avatars_are_cached_requested_once_and_never_journaled(journal):
         assert await collector.avatar(501) == path and client.calls == 1
         assert await collector.avatar(502) is None and (store.root / "avatars" / "502.none").exists()
         assert await collector.avatar(502) is None and client.calls == 2
-        assert await collector.avatar(999) is None and client.calls == 2  # unseen user: no request
+        assert await collector.avatar(999) is None and client.calls == 2
         client.connected = False
         collector.remember(types.User(id=503, photo=types.UserProfilePhoto(photo_id=2, dc_id=2)))
-        assert await collector.avatar(503) is None and client.calls == 2  # offline: no reconnect for others
+        assert await collector.avatar(503) is None and client.calls == 2
         assert store.stats()["total"] == before
     asyncio.run(run())
 
@@ -135,6 +135,6 @@ def test_chat_scale_counts_missing_ids_and_estimates_time(journal):
         scale = await collector.chat_scale(CHAT)
         assert scale["total"] == 4000 and scale["last_message_id"] == 5000
         assert scale["ids_are_per_chat"] and scale["missing_ids"] == 1000
-        assert scale["pages"] == 40 and scale["estimate_seconds"] == 40  # 1 s between pages above 3,000
+        assert scale["pages"] == 40 and scale["estimate_seconds"] == 40
         await collector.stop(shutdown=True)
     asyncio.run(run())

@@ -41,10 +41,10 @@ def check_modes(browser, url, output, errors, external, failed):
         assert page.locator(".lang-list a").count() == len(LANGUAGES)
         assert not page.evaluate("document.body.innerText.includes('{{modes.') || document.body.innerText.includes('@@')")
         assert page.evaluate("getComputedStyle(document.querySelector('.m-flow-pulse')).animationName") == "none"
-        # System theme also applies before/without scripts.
+
         color = page.evaluate("getComputedStyle(document.body).backgroundColor")
         assert color == ("rgb(10, 17, 32)" if theme == "dark" else "rgb(247, 248, 250)"), (lang, theme, color)
-        # Every essential foreground meets AA against its actual nearest opaque background.
+
         low_contrast = page.evaluate("""() => {
           const rgb=s=>s.match(/[\\d.]+/g).map(Number);
           const lum=c=>c.slice(0,3).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4}).reduce((a,x,i)=>a+x*[.2126,.7152,.0722][i],0);
@@ -71,7 +71,7 @@ def check_modes(browser, url, output, errors, external, failed):
             expect(page.locator('[data-lab="modesHash"]')).to_have_attribute("data-state", "error")
             changed = page.locator("[data-calculated]").text_content()
             assert changed != saved and len(changed) == 64
-            # Cross-check the actual browser result against Python, not against another UI label.
+
             first = {"seq": 1, "observed_at": "2026-01-01T10:00:00.000+00:00", "source_at": None,
                      "kind": "message.new", "chat_id": -100123, "message_id": 42, "actor_id": None,
                      "payload": {"text": "Meet at 10:00"}, "previous_hash": "0" * 64}
@@ -81,7 +81,7 @@ def check_modes(browser, url, output, errors, external, failed):
             assert changed == digest(second)
             field.fill(original)
             expect(page.locator('[data-lab="modesHash"]')).to_have_attribute("data-state", "ok")
-            # Native radio and switch controls work from the keyboard.
+
             selected = page.locator('input[name="scope-example"]').first
             selected.focus()
             page.keyboard.press("ArrowRight")
@@ -90,7 +90,7 @@ def check_modes(browser, url, output, errors, external, failed):
             switch.focus()
             page.keyboard.press("Space")
             expect(switch).not_to_be_checked()
-            # A focused verification disclosure reveals its command, with click fallback.
+
             command = page.locator(".m-command").first
             command.locator("summary").focus()
             expect(command.locator("pre")).to_be_visible()

@@ -67,7 +67,7 @@ def main():
             press = page.locator("#msg-10 .msg-button", has_text="I paid").get_by_role("button")
             expect(press).to_be_enabled()
             callbacks = len(server.app.state.collector.client.callbacks)
-            # A successful action followed by a failed GET still has a visible receipt.
+
             page.evaluate("""() => {
               const original=window.fetch;let arm=true,fail=false;
               window.fetch=async(...args)=>{
@@ -84,7 +84,7 @@ def main():
             expect(page.locator("#interaction-result")).to_contain_text("Chat refresh failed")
             expect(page.locator("#toast")).to_be_hidden()
             assert len(server.app.state.collector.client.callbacks) == callbacks + 1
-            # Repeating the click after that refresh failure only retrieves the receipt.
+
             expect(press).to_be_enabled()
             press.click()
             expect(page.locator("#interaction-result")).to_contain_text("Recorded answer")
@@ -119,7 +119,7 @@ def main():
             page.locator(".chat-item", has_text="Synthetic shop bot").click()
             page.locator("#msg-10 .msg-button", has_text="I paid").get_by_role("button").click()
             expect(page.locator("#interaction-result")).to_contain_text("Recorded answer")
-            # The reply is evidence, shown as text; no remote link is automatically followed.
+
             assert page.locator('#interaction-result a[href^="https:"]').count() == 0
             expect(page.locator("#chat-message")).to_be_enabled()
             page.locator("#chat-message").fill("Draft intended for the bot")
@@ -131,7 +131,7 @@ def main():
             expect(page.locator("#chat-message")).to_have_value("")
             expect(page.locator("#chat-message")).to_be_disabled()
             expect(page.locator("#chat-send")).to_be_disabled()
-            # Even a programmatic submit cannot send an unbound draft.
+
             page.eval_on_selector("#chat-compose", "form=>form.dispatchEvent(new Event('submit',{cancelable:true}))")
             assert len(server.app.state.collector.client.sent) == sent
             release_api_response(page)
@@ -140,7 +140,7 @@ def main():
             page.locator("#chat-send").click()
             expect(page.locator("#chat-send")).to_be_enabled()
             assert server.app.state.collector.client.sent[-1][0] == 123
-            # A stale response must not overwrite a chat opened afterwards.
+
             page.locator(".chat-item", has_text="Synthetic shop bot").click()
             expect(page.locator("#chat-message")).to_be_enabled()
             hold_api_response(page, "/api/chats/" + str(CHAT) + "/messages?limit=60")
@@ -160,12 +160,12 @@ def main():
                     page.locator("#chat-compose").scroll_into_view_if_needed()
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
                     page.screenshot(path=str(output / f"chat-{width}-{theme}.png"), full_page=True)
-            # The operator's draft must not leak to another account or return after locking.
+
             page.locator("#chat-message").fill("private unfinished draft")
             page.locator("#top-lock").click()
             expect(page.locator("#gate")).to_be_visible()
             assert page.locator("#chat-message").input_value() == ""
-            # New controls keep their English text after reloading.
+
             page.reload()
             page.locator("#panel-token").fill(server.app.state.vault.token)
             page.locator("#unlock-form button").click()

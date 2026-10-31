@@ -23,11 +23,11 @@ from .store import utcnow
 from .tsa_roots import trusted_roots
 from .verify import OTS_MAGIC, ots_summary, timestamp_reply_summary, timestamp_signature
 
-# HTTPS only; an answer counts once its signature chains to a root in tsa_roots.
+
 DEFAULT_TSA = ["https://freetsa.org/tsr", "https://timestamp.sectigo.com"]
-# The earlier default authority answers over plain HTTP only.
+
 REPLACED_TSA = {"http://timestamp.digicert.com": "https://timestamp.sectigo.com"}
-# The calendars `ots stamp` uses by default (opentimestamps-client).
+
 DEFAULT_OTS = ["https://a.pool.opentimestamps.org", "https://b.pool.opentimestamps.org",
                "https://a.pool.eternitywall.com", "https://ots.btc.catallaxy.com"]
 LOOP_SECONDS = 30
@@ -57,7 +57,7 @@ class EvidenceMode(BaseModel):
 
 def evidence_settings(store):
     saved = dict(store.get_setting("evidence", {}) or {})
-    # Saved while plain HTTP was accepted: the same address over HTTPS, which fails visibly if unsupported.
+
     for key in ("tsa_urls", "ots_calendars"):
         if isinstance(saved.get(key), list):
             saved[key] = [REPLACED_TSA.get(url.strip().rstrip("/"), "https://" + url.strip()[7:])

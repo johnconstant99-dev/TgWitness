@@ -79,7 +79,7 @@ def test_rebuild_never_reuses_an_earlier_stage_with_a_locked_private_file(tmp_pa
     runtime = tmp_path / "runtime.zip"
     with zipfile.ZipFile(runtime, "w") as archive:
         archive.writestr("python.exe", b"Synthetic runtime; never executed")
-    # The open handle keeps the old file locked on Windows; installation and the runtime probe are stubbed.
+
     with old.open("rb"), patch.object(build_portable, "ROOT", tmp_path), \
             patch.object(build_portable, "embedded_runtime", return_value=runtime), \
             patch.object(build_portable.subprocess, "run", return_value=SimpleNamespace(

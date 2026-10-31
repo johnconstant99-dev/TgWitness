@@ -2445,7 +2445,30 @@
 "9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "Collecte via GitHub Actions (version préliminaire)",
 "b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "Une nouvelle connexion Telegram, une discussion, une archive chiffrée et une attestation de provenance GitHub.",
 "5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "Ouvrir l’assistant de collecte",
-"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">Collecte via GitHub Actions (version préliminaire)</a>"
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">Collecte via GitHub Actions (version préliminaire)</a>",
+"00e9f682c63d8cc9677c51b47c4e0cf5a0a8abd7d8d9b6360ed3014e1143e2b7": "Sessions importées",
+"03f7f8759222d8e63f238cae8868630e09e4cbb163b7f882a420074709708652": "Documentation Telegram",
+"205eee3acbad78d41d9ff34d75795836b9847831b6e59efa92083128cabeb267": "Gardez le contrôle du numéro de téléphone utilisé pour l&#x27;inscription.",
+"41b3a4f9944b9efb11cd31646960cd166a004b4af1afe014b646521926da64be": "<a href=\"https://core.telegram.org/api/errors\" rel=\"noopener noreferrer\" target=\"_blank\">Erreurs d&#x27;autorisation</a>",
+"47b9b09aafaf660aaf53e8292d9e98eb6e62dfb303ffdc348f04395221309754": "Activez la vérification en deux étapes et ajoutez une adresse e-mail de récupération.",
+"5009ab7190d97f6436c45d87c68140bbaa2d2a2a642408aad465cae351d403ab": "Connectez le compte",
+"5220b144e2191936311f37b441b375dc5ff96bd965d30ea80fe1915bc4bd7b6e": "<a href=\"https://core.telegram.org/api/obtaining_api_id\" rel=\"noopener noreferrer\" target=\"_blank\">Création d’une application</a>",
+"83a8f07fbd5d10e81fd49454a6c73f8e5df444527971bf128e21bfd3ce879c4b": "Lancez la collecte et vérifiez que les nouveaux messages s&#x27;affichent.",
+"8575096d3ecc863c0ba33adb4617cf3e84208525a1aa38d7afa040265a30079e": "Identifiants de l&#x27;API",
+"862a75a2cd1215f767b571dd9103317313b5fd4003b189943a7c73c1638a80b6": "Consultez les sessions actives dans les Paramètres de Telegram → Appareils.",
+"a118a0942ad1b7a1c43b267ec31d2a1d8c191f5d7824be1f8b16917be9f5d8c0": "N’utilisez pas la même autorisation importée sur deux clients à la fois. Telegram pourrait la révoquer avec le code d’erreur AUTH_KEY_DUPLICATED. Pour une utilisation en parallèle, créez un compte distinct par numéro de téléphone ou code QR.",
+"a2756d8df8b146ba781f1593c871131e3f6e1e7bf9b133d4c1845fb6db3710c8": "Pour le flux de travail de capture sur GitHub, veuillez utiliser votre propre identifiant API et votre propre hachage.",
+"a439b7ebbc635437f76d75005cd8a7f28ced6abb0234867fce820856d3b8c2d2": "Ouvrez le panneau et choisissez la connexion par téléphone ou par code QR.",
+"b9724d017783fec0bb79b550546ea04cecefa6b64689c264357458d782536c3f": "<a href=\"@@GUIDE_ACCOUNTS@@\">Guide de connexion au compte</a>",
+"bd8f623898b9b6fbe1f5bc12a7506abfc84ee9003d891d5cd6f64b87388b9530": "Choisissez un numéro que vous pourrez conserver. La réception d’un code de connexion ne garantit pas la récupération future de votre compte.",
+"c2a195484f492d86026a5c6dc9140e9ee52c60b58d79bab6959f17a6c2c61794": "Avant de vous connecter",
+"cb8d1801315e9c63db597c3a5cd461a005ff272842448b113b35185944c83d17": "<a href=\"https://my.telegram.org/apps\" rel=\"noopener noreferrer\" target=\"_blank\">Créer des identifiants d&#x27;accès à l&#x27;API</a>",
+"d504af6d82ab60d11d5af1a0e8d865cdb66e6fe6db94261f444d287372b47f20": "Exportez une conversation Telegram vers un runner GitHub temporaire, puis téléchargez et vérifiez le résultat chiffré.",
+"e39d2d716506647e4f133118e0aeba1d358adef77384da904c7558b86a6455ee": "Activez JavaScript pour générer une clé et déchiffrer votre archive.",
+"ec8ae7171805a6a2d4a7b1f266be5eaad064530b32067d06b0fa5f681d9c9e1a": "Effectuez une vérification complète de Telegram et sélectionnez vos sources.",
+"ece6e50a3c38c2bd9affe9be9dd46e9d73a8745817a203a95e22baccfc51faf4": "Numéros de téléphone",
+"f8590fa728883a6cbb54e79035975ff1f173e8a6d6761d0289f3069999fe862c": "L&#x27;identifiant API et le hachage permettent d&#x27;identifier l&#x27;application. Votre autorisation Telegram est distincte.",
+"fa58a91e7b34ecd514a34e43018e4909b012fb412a06cda12ed00158a0f3551d": "Veillez à séparer la collecte des messages des discussions personnelles. Un compte distinct peut tout de même faire l&#x27;objet de restrictions de la part de Telegram."
 },
 "modes": {
 "modes.actions.body": "Les accusés de réception d’aperçu, de requête et de résultat sont signés. Avant qu’un bouton ne soit enfoncé, le serveur récupère à nouveau le message et rejette toute modification apportée au clavier. Le texte et les URL des rappels renvoyés restent enregistrés dans le contexte.",
@@ -3082,6 +3105,12 @@
 "proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http route IP mode fallback api id hash réseau",
 "GitHub Actions capture (preview)": "Collecte via GitHub Actions (version préliminaire)",
 "A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Une nouvelle connexion Telegram, une discussion, une archive chiffrée et une attestation de provenance GitHub.",
-"Open capture helper": "Ouvrir l’assistant de collecte"
+"Open capture helper": "Ouvrir l’assistant de collecte",
+"Dedicated account": "Compte dédié",
+"Export one Telegram chat on a temporary GitHub runner.": "Exporter une conversation Telegram sur un runner GitHub temporaire.",
+"GitHub Actions capture": "Capture GitHub Actions",
+"Prepare a separate Telegram account for collection.": "Préparez un compte Telegram distinct pour la collecte.",
+"dedicated telegram account session api login": "Connexion à l'API de session du compte Telegram dédié",
+"github actions capture encrypted archive": "GitHub Actions : capture d'archives chiffrées"
 }
 }

@@ -143,7 +143,7 @@ def test_setup_failures_end_both_exports_as_failed(tmp_path):
         state = wait_finished(client, "/api/multi-export/" + multi.json()["id"])
         assert state["phase"] == "failed"
         assert app.state.multi_export.task.exception() is None
-        # The account is free again for the next attempt.
+
         assert app.state.collector.export_claim is None
 
 

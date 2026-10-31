@@ -88,7 +88,7 @@ def test_timestamp_ca_nonce_and_data_are_all_checked(tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="verification failed"):
         verify_timestamp(data_path, response_path, ca_path, query_path, openssl=binary)
     data_path.write_bytes(original)
-    query_path.write_bytes(timestamp_request(original))  # same data, different nonce
+    query_path.write_bytes(timestamp_request(original))
     with pytest.raises(ValueError, match="verification failed"):
         verify_timestamp(data_path, response_path, ca_path, query_path, openssl=binary)
     unrelated_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -96,7 +96,7 @@ def test_timestamp_ca_nonce_and_data_are_all_checked(tmp_path, monkeypatch):
         x509.BasicConstraints(ca=True, path_length=1), critical=True).sign(unrelated_key, hashes.SHA256())
     wrong_path = tmp_path / "untrusted-ca.pem"
     wrong_path.write_bytes(wrong_ca.public_bytes(serialization.Encoding.PEM))
-    # Even a valid root in OpenSSL's ambient CA environment must not be trusted.
+
     monkeypatch.setenv("SSL_CERT_FILE", str(ca_path))
     monkeypatch.setenv("SSL_CERT_DIR", str(tmp_path))
     with pytest.raises(ValueError, match="verification failed"):

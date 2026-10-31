@@ -8,12 +8,16 @@
 <title>TgWitness · Observation workspace</title>
 <link rel="icon" type="image/svg+xml" href="/mark.svg">
 <link rel="stylesheet" href="/style.css?v=0.7.0">
-<link rel="stylesheet" href="/cloud-capture.css?v=4"><link rel="stylesheet" href="/cloud-capture-story.css?v=2">
+<link rel="stylesheet" href="/cloud-capture.css?v=5"><link rel="stylesheet" href="/cloud-capture-story.css?v=3">
 <script src="/theme.js?v=0.7.0"></script>
 <script src="/guide-locale.js" data-scope="panel"></script>
 <script defer src="/i18n.js?v=0.7.0"></script>
 <script defer src="/app.js?v=0.7.0-capture2"></script>
-<script defer src="/cloud-capture-story.js?v=2"></script><script defer src="/cloud-capture.js?v=4"></script>
+<script defer src="/integrations.js?v=1"></script>
+<script defer src="/analysis.js?v=1"></script>
+<script defer src="/media-analysis.js?v=1"></script>
+<script defer src="/webhooks.js?v=1"></script>
+<script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=3"></script><script defer src="/cloud-capture.js?v=5"></script>
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
@@ -113,6 +117,8 @@
     <button class="nav" data-view="connection"><svg aria-hidden="true" class="nav-icon"><use href="#i-account"/></svg> Account</button>
     <button class="nav" data-view="accounts"><svg aria-hidden="true" class="nav-icon"><use href="#i-users"/></svg> Accounts <b id="nav-accounts">1</b></button>
     <button class="nav" data-view="access" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-lock"/></svg> Access</button>
+    <button class="nav" data-view="integrations" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-link"/></svg> Integrations</button>
+    <button class="nav" data-view="analysis"><svg aria-hidden="true" class="nav-icon"><use href="#i-search"/></svg> Ask the archive</button>
   </nav>
   <div class="sidebar-bottom">
     <a class="sidebar-help" href="/guide.html" target="_blank" rel="noopener"><svg aria-hidden="true" class="nav-icon"><use href="#i-help"/></svg> Help &amp; documentation</a>
@@ -663,6 +669,7 @@
         <header class="chat-header">
           <div class="chat-title"><span class="avatar lg" id="chat-avatar"></span><div><h2 id="chat-name"></h2><p id="chat-sub"></p></div></div>
           <div class="chat-actions">
+            <button class="quiet" id="chat-pattern" type="button" aria-pressed="false">Dotted background</button>
             <select aria-label="How many recent messages to load" id="chat-history-limit"><option value="100">Last 100</option><option value="250">Last 250</option><option value="500">Last 500</option></select>
             <button class="secondary" id="chat-load-history" title="Download recent messages from Telegram into this view" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> <span class="label">Load history</span></button>
             <button class="secondary" id="chat-export-start" title="Download the whole chat as a signed archive (chat.json + chat.html)" type="button"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg> <span class="label" id="chat-export-label">Export chat</span></button>
@@ -704,6 +711,92 @@
   </div>
   <div id="accounts-list" class="accounts-grid"></div>
   <form class="card padded profile-create" id="account-add-form"><div class="eyebrow">Add account</div><h2>New workspace</h2><p class="muted">Create an isolated workspace, then connect a distinct Telegram account inside it. Importing the same session into two workspaces can disrupt update delivery.</p><label for="account-add-label">Workspace name</label><input id="account-add-label" maxlength="80" placeholder="e.g. Research account 2" required><button class="secondary" type="submit">Add workspace</button><p class="hint" id="accounts-limit"></p></form>
+</section>
+
+<section class="view" hidden id="view-analysis">
+  <div class="page-heading"><div><h1>Ask the archive</h1><p class="page-description">Search saved observations, review the sources, then choose whether to use AI.</p></div></div>
+  <p id="ai-status" class="notice" role="status"></p>
+  <p class="hint"><a id="analysis-help" href="https://github.com/phishdestroy/TgWitness/blob/main/docs/ANALYSIS.md" target="_blank" rel="noopener noreferrer">Help &amp; documentation</a></p>
+  <details class="card padded" id="ai-settings"><summary>AI provider settings</summary>
+    <form id="ai-settings-form">
+      <label class="check-label"><input id="ai-enabled" type="checkbox"> Enable AI for this workspace</label>
+      <div class="two-columns"><div><label for="ai-provider">Provider</label><select id="ai-provider"><option value="ollama">Ollama</option><option value="compatible">OpenAI-compatible endpoint</option></select></div><div><label for="ai-model">Model name</label><input id="ai-model" maxlength="160" autocomplete="off"></div></div>
+      <label for="ai-endpoint">Processing endpoint</label><input id="ai-endpoint" type="url" required>
+      <p class="hint">For local Ollama, the server administrator sets TGWITNESS_AI_LOCAL_ENDPOINT. The default is http://127.0.0.1:11434.</p>
+      <label for="ai-key">API key</label><input id="ai-key" type="password" autocomplete="new-password" data-sensitive><p class="hint" id="ai-key-state"></p>
+      <label class="check-label"><input id="ai-clear-key" type="checkbox"> Remove the stored API key</label>
+      <div class="two-columns"><div><label for="ai-context">Maximum context characters</label><input id="ai-context" type="number" min="2000" max="64000" required></div><div><label for="ai-output">Maximum output tokens</label><input id="ai-output" type="number" min="128" max="4096" required></div><div><label for="ai-timeout">Request timeout, seconds</label><input id="ai-timeout" type="number" min="5" max="180" required></div><div><label for="ai-budget">Maximum requests per day</label><input id="ai-budget" type="number" min="1" max="1000" required></div></div>
+      <details><summary>Optional cost estimate</summary><div class="two-columns"><div><label for="ai-input-price">Price per million input tokens</label><input id="ai-input-price" type="number" min="0" max="10000" step="any"></div><div><label for="ai-output-price">Price per million output tokens</label><input id="ai-output-price" type="number" min="0" max="10000" step="any"></div></div><label for="ai-currency">Currency code</label><input id="ai-currency" maxlength="3" pattern="[A-Z]{3}" value="USD"></details>
+      <p class="hint">External providers may retain submitted data according to their own policies. TgWitness does not make a retention guarantee for them.</p>
+      <div class="route-actions"><button type="submit" class="primary">Save provider settings</button><button id="ai-test" type="button" class="secondary">Test with synthetic text</button></div>
+      <p id="ai-test-result" role="status"></p>
+    </form>
+  </details>
+  <form class="card padded" id="ask-form">
+    <h2>Find sources</h2><p class="hint" id="ask-workspace"></p>
+    <fieldset class="access-group"><legend>Choose chats</legend><div id="ask-chats" class="access-chats"></div></fieldset>
+    <div class="two-columns"><div><label for="ask-since">From</label><input type="datetime-local" id="ask-since" required></div><div><label for="ask-until">To</label><input type="datetime-local" id="ask-until" required></div></div>
+    <label for="ask-question">Question</label><textarea id="ask-question" rows="2" maxlength="1000" required></textarea>
+    <div class="two-columns"><div><label for="ask-query">Exact search text, optional</label><input id="ask-query" maxlength="200"></div><div><label for="ask-message">Message ID, optional</label><input id="ask-message" type="number" min="1"></div></div>
+    <p class="hint">Search uses saved text and the selected observation period. Use an exact phrase or domain to narrow the results.</p>
+    <button type="submit" class="primary">Find sources locally</button>
+  </form>
+  <section class="card padded" id="ask-preview" hidden>
+    <h2>Review selected sources</h2><p class="hint">Edits and deletion notices are separate records. Missing on recheck does not establish that Telegram sent a deletion notice.</p>
+    <div id="ask-sources"></div><div id="ask-coverage"></div>
+    <details><summary>Data sent to the model</summary><pre id="ask-transmission" class="analysis-data"></pre></details>
+    <label class="check-label"><input id="ask-consent" type="checkbox"> Process the checked sources and my question at the endpoint shown above</label>
+    <button id="ask-generate" type="button" class="primary">Generate an answer</button>
+  </section>
+  <section class="card padded" id="ask-answer" hidden><h2>Answer with sources</h2><div id="ask-claims"></div><p id="ask-usage" class="hint"></p><button class="secondary" type="button" id="ask-save-report">Save as an analytical report</button></section>
+  <section class="card padded"><div class="card-heading compact"><h2>Analytical reports</h2><button class="quiet" id="ask-refresh-reports" type="button">Refresh</button></div><div id="ask-reports"></div></section>
+  <section class="card padded" id="ask-report" hidden><h2>Review report</h2><p class="hint">Observed facts, model inferences and analyst notes remain distinct. The original signed events are unchanged.</p><div id="ask-report-content"></div>
+    <form id="ask-report-form"><label for="report-title">Report title</label><input id="report-title" required maxlength="160"><label for="report-summary">Analyst revision of the summary</label><textarea id="report-summary" rows="4" maxlength="6000"></textarea><label for="report-note">Analyst note</label><textarea id="report-note" rows="3" maxlength="6000"></textarea><div class="route-actions"><button type="submit" class="primary">Save analyst revision</button><button id="report-download" class="secondary" type="button">Download reviewed report</button></div></form>
+  </section>
+  <section class="card padded" id="media-analysis-section"><h2>Recognize an attachment</h2><p class="hint">Open a saved attachment's journal record and choose Recognize attachment. Processing runs locally in an isolated worker.</p><p id="media-worker-status" role="status"></p>
+    <p class="hint"><a id="media-analysis-help" href="https://github.com/phishdestroy/TgWitness/blob/main/docs/MEDIA-ANALYSIS.md" target="_blank" rel="noopener noreferrer">Help &amp; documentation</a></p>
+    <form id="media-analysis-form"><p id="media-analysis-target" class="hint"></p><div class="two-columns"><div><label for="media-engine">Recognition type</label><select id="media-engine"><option value="ocr">Image text · OCR</option><option value="transcription">Audio transcription</option></select></div><div><label for="media-language">Language code, optional</label><input id="media-language" maxlength="3" pattern="[a-z]{0,3}" aria-describedby="media-language-help"><p class="hint" id="media-language-help">OCR: eng or rus. Audio: en or ru; leave blank to detect the language.</p></div></div><button class="primary" id="media-start" type="submit" disabled>Process selected attachment locally</button></form>
+    <form id="media-search-form"><div class="two-columns"><div><label for="media-search">Search recognized text</label><input id="media-search" maxlength="200"></div><div><label for="media-filter">Recognition filter</label><select id="media-filter"><option value="">All recognized text</option><option value="ocr">OCR only</option><option value="transcription">Transcripts only</option></select></div></div><button class="secondary" type="submit">Search derived results</button></form>
+    <div id="media-jobs"></div><div class="route-actions"><button class="quiet" id="media-previous" type="button" disabled>Previous</button><button class="quiet" id="media-next" type="button" disabled>Next</button><button class="quiet" id="media-refresh" type="button">Refresh</button></div><div id="media-result"></div>
+  </section>
+</section>
+
+<section class="view" hidden id="view-integrations">
+  <div class="page-heading"><div><h1>Integrations</h1><p class="page-description">MCP · Read your selected archive from an AI client.</p></div></div>
+  <p class="notice">The external model can receive messages requested by its client. Choose the workspaces and chats you want to share.</p>
+  <p class="hint"><a id="mcp-help" href="https://github.com/phishdestroy/TgWitness/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Help &amp; documentation</a></p>
+  <form class="card padded" id="mcp-form">
+    <h2>Connect an MCP client</h2>
+    <div class="two-columns"><div><label for="mcp-name">Connection name</label><input id="mcp-name" required maxlength="80" autocomplete="off"></div><div><label for="mcp-duration">Access duration</label><select id="mcp-duration"><option value="24">24 hours</option><option value="168">7 days</option><option value="720">30 days</option></select></div></div>
+    <fieldset class="access-group"><legend>Workspaces and chats</legend><div id="mcp-scope"></div></fieldset>
+    <div class="two-columns"><div><label for="mcp-mode">Connection type</label><select id="mcp-mode"><option value="stdio">Local · stdio</option><option value="http">Remote · Streamable HTTP</option></select></div><div><label for="mcp-client">Client</label><select id="mcp-client"><option value="vscode">VS Code · Local harness</option></select></div></div>
+    <div id="mcp-local"><label for="mcp-command">Python executable on the client device</label><input id="mcp-command" value="python" autocomplete="off"><p class="hint">From the TgWitness project folder on that device, install MCP support: <code>python -m pip install '.[mcp]'</code></p></div>
+    <div id="mcp-remote" hidden><label for="mcp-url">MCP server URL</label><input id="mcp-url" type="url" placeholder="https://archive.example.org/mcp"><p class="hint">Run the MCP service beside TgWitness and publish it through your HTTPS reverse proxy.</p></div>
+    <p class="hint">Seven tools, read-only. No Telegram actions or bulk exports.</p>
+    <button class="primary" type="submit">Create connection</button>
+  </form>
+  <section class="card padded" id="mcp-created" hidden>
+    <h2>Save your connection</h2><p>The token is shown only here. Save it now; it cannot be retrieved later.</p>
+    <label for="mcp-token">Archive access token</label><input id="mcp-token" type="password" readonly autocomplete="off" data-sensitive>
+    <div class="route-actions"><button class="secondary" id="mcp-copy-token" type="button">Copy token</button><button class="quiet" id="mcp-hide-token" type="button">Hide and forget token</button></div>
+    <p class="hint">The copied token grants access to the selected archive. Keep it out of repositories, logs and shared screenshots.</p>
+    <ol><li>Download the configuration to <code>.vscode/mcp.json</code> in your client workspace.</li><li>In VS Code, run “MCP: List Servers” and start “tgwitness”.</li><li>Paste the saved token when VS Code prompts for it. Use a Local harness session.</li></ol>
+    <div class="route-actions"><button class="primary" id="mcp-download" type="button">Download client configuration</button><button class="secondary" id="mcp-check" type="button">Check protocol and access</button></div>
+    <p class="hint">The configuration contains a secret input prompt, not the token. A connection check reads no messages.</p>
+    <p id="mcp-check-result" role="status"></p>
+    <a href="https://code.visualstudio.com/docs/agents/reference/mcp-configuration" target="_blank" rel="noopener noreferrer">VS Code configuration reference</a>
+  </section>
+  <section class="card padded"><div class="card-heading compact"><h2>Archive connections</h2><button class="quiet" id="mcp-refresh" type="button">Refresh</button></div><div id="mcp-list"></div></section>
+  <section class="card padded"><h2>Outgoing webhooks</h2><p class="hint" id="webhook-workspace"></p><p class="hint">Structured notifications for n8n and SIEM. Metadata is sent by default; message text requires a separate choice.</p>
+    <p class="hint"><a id="webhooks-help" href="https://github.com/phishdestroy/TgWitness/blob/main/docs/WEBHOOKS.md" target="_blank" rel="noopener noreferrer">Help &amp; documentation</a></p>
+    <form id="webhook-form"><div class="two-columns"><div><label for="webhook-name">Destination name</label><input id="webhook-name" maxlength="80" required></div><div><label for="webhook-url">HTTPS destination URL</label><input id="webhook-url" type="url" required></div></div>
+      <fieldset class="access-group"><legend>Events to deliver</legend><label class="check-label"><input type="checkbox" name="hook-event" value="collector" checked> Collector errors and recovery</label><label class="check-label"><input type="checkbox" name="hook-event" value="media" checked> Media download problems</label><label class="check-label"><input type="checkbox" name="hook-event" value="export" checked> Export completed</label><label class="check-label"><input type="checkbox" name="hook-event" value="changes"> New observations in chosen chats</label></fieldset>
+      <fieldset class="access-group"><legend>Chats for change notifications</legend><div id="webhook-chats" class="access-chats"></div></fieldset><label class="check-label"><input id="webhook-text" type="checkbox"> Include message text excerpts in change notifications</label>
+      <button class="primary" type="submit">Add webhook destination</button>
+    </form>
+    <div id="webhook-created" hidden><label for="webhook-secret">HMAC secret · shown once</label><input id="webhook-secret" readonly type="password" data-sensitive><div class="route-actions"><button class="secondary" id="webhook-copy" type="button">Copy signing secret</button><button class="quiet" id="webhook-forget" type="button">Hide and forget secret</button></div><p class="hint">Configure the receiver to verify the signature and timestamp, and deduplicate by event_id.</p></div>
+    <div class="card-heading compact"><h3>Delivery status</h3><button class="quiet" id="webhook-refresh" type="button">Refresh</button></div><p id="webhook-status" role="status"></p><div id="webhook-list"></div><details><summary>Recent delivery attempts</summary><div id="webhook-history"></div></details>
+  </section>
 </section>
 
 <section class="view" hidden id="view-access">

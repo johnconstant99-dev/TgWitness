@@ -22,7 +22,7 @@ def link(host="8.8.8.8", secret=KEY, port=443):
 def seed(tmp_path, monkeypatch):
     monkeypatch.delenv("TGWITNESS_PROXY_CATALOG", raising=False)
     monkeypatch.delenv("TGWITNESS_PROXY_FEED_PROXY", raising=False)
-    monkeypatch.setattr(catalogs, "SOURCES", catalogs.SOURCES[:2])  # two text feeds; JSON feeds have their own test
+    monkeypatch.setattr(catalogs, "SOURCES", catalogs.SOURCES[:2])
     path = tmp_path / "seed.json"
     snapshot = {"format": catalogs.FORMAT, "sources": [
         catalogs.source_data(source, link(host), DATE)
@@ -206,7 +206,7 @@ def test_catalog_api_refresh_is_authenticated_isolated_and_does_not_switch_route
         before = app.state.collector.network_config()
         initial = client.get("/api/network/catalog").json()
         assert initial["mode"] == "bundled" and not calls and initial["download_route"] == "none"
-        # Hide IP, the default, downloads the lists only through a proxy set for requests outside Telegram.
+
         blocked = client.post("/api/network/catalog/refresh", json={})
         assert blocked.status_code == 400 and "Hide IP" in blocked.text and not calls
         proxy = {"kind": "socks5", "host": "127.0.0.1", "port": 1080}
@@ -220,7 +220,7 @@ def test_catalog_api_refresh_is_authenticated_isolated_and_does_not_switch_route
         alias = refreshed.json()["proxies"][0]["id"]
         assert client.post("/api/network/catalog/" + alias, json={}).status_code == 200
         assert app.state.collector.network_config().host == "9.9.9.9"
-        assert client.post("/api/network/test", json={}).json()["connected"]  # also before login
+        assert client.post("/api/network/test", json={}).json()["connected"]
         assert not app.state.collector.status()["has_session"]
         child = client.post("/api/profiles", json={"label": "Other"}).json()["id"]
         other = client.get("/profiles/" + child + "/api/network/catalog").json()

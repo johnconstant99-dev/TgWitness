@@ -11,7 +11,7 @@ DOCUMENTS = sorted(p for p in [ROOT / "README.md", *(ROOT / "docs").rglob("*.md"
 
 @pytest.mark.parametrize("path", DOCUMENTS, ids=lambda p: p.relative_to(ROOT).as_posix())
 def test_every_disclosure_has_content_after_its_summary(path):
-    # Examples in fenced blocks and inline code are text, not markup.
+
     text = re.sub(r"^```.*?^```", "", path.read_text(encoding="utf-8"), flags=re.S | re.M)
     text = re.sub(r"`[^`\n]*`", "", text)
     depth = 0

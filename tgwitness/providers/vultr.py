@@ -99,7 +99,7 @@ class Vultr(Provider):
         iso = (self.call("GET", "/instances/" + instance["id"] + "/iso", allow=(404,)) or {}).get("iso_status") or {}
         flags = [text for flag, text in (("auto_backups" in (instance.get("features") or []), "provider backups enabled"),
                                          (iso.get("state") in ("isomounted", "ismounting"), "ISO attached")) if flag]
-        # Never copied: the console (kvm) address and the default password in the same object.
+
         return {"id": instance["id"], "name": instance["label"], "created": instance["date_created"],
                 "image": instance.get("os"), "type": instance.get("plan"), "location": instance.get("region"),
                 "ipv4": instance.get("main_ip"), "ipv6": ipv6(instance), "flags": flags,
@@ -173,7 +173,7 @@ class Vultr(Provider):
         region = found.get("region")
         public = [i.get("ipv4", {}).get("address") for i in found.get("interfaces") or [] if i.get("network-type") == "public"]
         user_data = found.get("user-data") or ""
-        try:  # the service may return the user data as it was sent: base64
+        try:
             decoded = base64.b64decode(user_data, validate=True).decode()
             user_data = decoded if decoded.startswith("#cloud-config") else user_data
         except ValueError:

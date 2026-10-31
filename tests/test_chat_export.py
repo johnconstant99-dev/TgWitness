@@ -50,7 +50,7 @@ def test_bundle_members_and_signature_verify(journal):
         assert [m["id"] for m in chat["messages"]] == [3, 2, 1]
         assert chat["messages"][0]["text"].startswith("Привет")
         html = archive.read("chat.html").decode("utf-8")
-        # Cyrillic preserved, HTML in message text escaped, newline rendered.
+
         assert "Алиса" in html and "&lt;b&gt;" in html and "<br>" in html
     result = verify_chat_export(out, fingerprint(vault.public_key))
     assert result["message_count"] == 3
@@ -103,7 +103,7 @@ def test_authors_sheet_is_signed_and_counts_posters(journal):
     assert [(p["user_id"], p["messages"]) for p in people] == [(11, 2), (22, 1)]
     assert people[0]["username"] == "alisa" and people[0]["name"] == "Алиса"
     assert people[0]["first_message_id"] == 2 and people[0]["last_message_id"] == 4
-    assert "'=cmd" in sheet and "Алиса" in sheet  # formula cells are escaped
+    assert "'=cmd" in sheet and "Алиса" in sheet
     assert verify_chat_export(out, fingerprint(vault.public_key))["message_count"] == 4
 
 
@@ -114,7 +114,7 @@ def test_archives_and_checkpoints_named_before_the_rename_still_verify(journal):
     with zipfile.ZipFile(out) as archive:
         members = {n: archive.read(n) for n in archive.namelist()}
     manifest = json.loads(members["manifest.json"])
-    manifest["format"] = "tgwatch-chat-export-v1"  # as written by TgWatch
+    manifest["format"] = "tgwatch-chat-export-v1"
     members["manifest.json"] = canonical(manifest)
     members["manifest.sig"] = vault.sign(members["manifest.json"]).encode()
     legacy = out.with_name("legacy.zip")

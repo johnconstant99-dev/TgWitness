@@ -102,7 +102,7 @@ def test_actual_member_bytes_are_bounded_as_well_as_declared_size(tmp_path):
     with zipfile.ZipFile(path, "w") as archive:
         archive.writestr("manifest.json", json.dumps({"format": "x" * 100}))
     with zipfile.ZipFile(path) as archive:
-        archive.getinfo("manifest.json").file_size = 10  # a lying declaration
+        archive.getinfo("manifest.json").file_size = 10
         with pytest.raises((zipfile.BadZipFile, ValueError)):
             verify.read_member(archive, "manifest.json", 20)
 

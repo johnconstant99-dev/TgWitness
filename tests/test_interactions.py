@@ -93,7 +93,7 @@ def test_send_audits_plain_text_and_deduplicates_after_collector_restart(journal
         assert kinds(store, "interaction.result")[0]["payload"]["message_id"] == 101
         restarted = Collector(store, vault, InteractionClient)
         assert await execute(restarted, body) == result
-        assert restarted.client is None  # a replay does not even connect
+        assert restarted.client is None
         with pytest.raises(ValueError):
             await execute(collector, body.model_copy(update={"text": "changed"}))
         await collector.stop()

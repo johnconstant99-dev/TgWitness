@@ -38,8 +38,8 @@ def main():
         return "tg://proxy?server=" + host + "&port=443&secret=" + "a7" * 16
 
     env = {key: value for key, value in os.environ.items() if key not in ("TGWITNESS_PROXY_CATALOG", "TGWITNESS_PROXY_FEED_PROXY")}
-    # The default hide-address policy requires an explicit route outside Telegram.
-    # This proxy is never contacted: download() above is the synthetic transport.
+
+
     env["TGWITNESS_PROXY_FEED_PROXY"] = "socks5://proxy.example:1080"
     with patch.dict(os.environ, env, clear=True), patch.object(catalogs, "download", download), patch.object(catalogs, "REFRESH_SECONDS", 0):
         with tempfile.TemporaryDirectory(prefix="proxy-browser-") as scratch:
@@ -86,7 +86,7 @@ def main():
                 expect(page.locator("#proxy-catalog-status")).to_contain_text("previous list is still available")
                 expect(page.locator("#proxy-catalog-select option")).to_have_count(2)
                 assert server.app.state.collector.network_config() == route_before
-                # A late refresh belongs to the old workspace, including its saved cache.
+
                 child = page.evaluate("async()=>{const p=await json('profiles',{label:'Separate account'});await loadProfiles();return p.id;}")
                 hold_api_response(page, "/api/network/catalog/refresh")
                 page.locator("#proxy-catalog-refresh").click()

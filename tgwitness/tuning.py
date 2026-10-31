@@ -23,7 +23,7 @@ class Invalid(ValueError):
 class Parameter:
     key: str
     group: str
-    default: object       # int, bool, or a tuple of text lines
+    default: object
     low: int | None = None
     high: int | None = None
     unit: str = ""

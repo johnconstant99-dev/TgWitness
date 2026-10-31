@@ -50,19 +50,19 @@ SOURCE_IDS = {source["id"] for source in SOURCES}
 SEED = Path(__file__).with_name("public_proxies.json")
 FORMAT = "tgwitness-public-proxies-v1"
 MAX_BYTES = 1024 * 1024
-MAX_PER_SOURCE = 400  # the largest list holds about 200 usable proxies
+MAX_PER_SOURCE = 400
 REFRESH_SECONDS = 60
 
-# Automatic routes (NetworkConfig kind "mtproxy_auto").
-FEED_SECONDS = 3600          # lists are downloaded again hourly while a workspace uses automatic routes
-PROBE_SECONDS = 600          # every listed proxy is checked this often
+
+FEED_SECONDS = 3600
+PROBE_SECONDS = 600
 PROBE_TIMEOUT = 8
 PROBE_PARALLEL = 16
-PICK_BATCH = 8               # proxies checked at once when a workspace needs one now
-PICK_LIMIT = 48              # at most this many checks for one choice
-COOLDOWN_SECONDS = 600       # a failed proxy rests, doubling per repeated failure
+PICK_BATCH = 8
+PICK_LIMIT = 48
+COOLDOWN_SECONDS = 600
 COOLDOWN_MAX = 6 * 3600
-PROBE_DC = (2, "149.154.167.51", 443)  # the DC asked for in the probe handshake
+PROBE_DC = (2, "149.154.167.51", 443)
 
 
 class NoProxyAvailable(ConnectionError):
@@ -74,7 +74,6 @@ class _Loggers(dict):
         return PROBE_LOG
 
 
-# Broken proxies make Telethon's transport log tracebacks; a failed check is already recorded as such.
 PROBE_LOG = logging.getLogger("tgwitness.proxy_probe")
 PROBE_LOG.addHandler(logging.NullHandler())
 PROBE_LOG.propagate = False
@@ -95,7 +94,7 @@ def public_host(host):
 
 
 def route_id(route):
-    # Both accepted spellings use the same padded transport and the same key.
+
     raw = f"{route.host.lower()}\0{route.port}\0{route.secret[-32:]}"
     return "public-" + hashlib.sha256(raw.encode()).hexdigest()[:24]
 
@@ -163,7 +162,7 @@ def feed_network():
 
 
 async def download(source, network):
-    # Fixed HTTPS endpoints, no redirects, cookies, Telegram credentials or panel token.
+
     async with asyncio.timeout(20):
         _, _, body = await netclient.request("GET", source["url"], network, timeout=8, limit=MAX_BYTES)
     return body.decode("utf-8-sig")
@@ -234,12 +233,12 @@ class PublicCatalog:
         """Download the lists through the environment's proxy, else the given route (direct by default)."""
         async with self.lock:
             if self.catalog()["mode"] == "operator":
-                return self.public()  # The local override disables external subscriptions.
+                return self.public()
             loop = asyncio.get_running_loop()
             if self.last_attempt and loop.time() - self.last_attempt < REFRESH_SECONDS:
                 return {**self.public(), "refresh": self.last_result, "throttled": True}
             network = feed_network() or network or NetworkConfig(kind="direct")
-            if network.kind == "none":  # this installation sends no requests outside Telegram this way
+            if network.kind == "none":
                 raise ValueError(str(network.error))
             self.last_attempt = loop.time()
             previous, _ = self.snapshot()
@@ -253,7 +252,7 @@ class PublicCatalog:
                     continue
                 try:
                     entry = source_data(source, response, now)
-                except ValueError:  # includes malformed JSON
+                except ValueError:
                     failed.append(source["id"])
                     continue
                 if not entry["proxies"]:
@@ -343,24 +342,24 @@ class ProxyPool:
     connects directly; the workspace's IP mode decides whether a direct fallback is allowed.
     """
 
-    # Network steps, replaceable in tests.
+
     pin = staticmethod(pinned)
     probe = staticmethod(probe)
 
     def __init__(self, catalog):
         self.catalog = catalog
-        self.health = {}      # proxy id -> {"latency_ms", "checked_at", "failures", "cooldown_until", "error_type"}
-        self.assigned = {}    # workspace key -> proxy id
+        self.health = {}
+        self.assigned = {}
         self.lock = asyncio.Lock()
         self.wakeup = asyncio.Event()
         self.probed_at = 0.0
         self.refreshed_at = 0.0
         self.exhausted = False
-        # Set by the main panel: its list and check intervals, and the route for list downloads.
+
         self.intervals = lambda: {"lists": FEED_SECONDS, "probe": PROBE_SECONDS}
         self.outside = None
         self.lists_blocked = None
-        self.waiting = set()  # workspaces without a proxy now (waiting or connected directly)
+        self.waiting = set()
 
     def entries(self):
         catalog = self.catalog.catalog()
@@ -393,7 +392,7 @@ class ProxyPool:
         try:
             route = await self.pin(row["route"], operator)
             latency = None if quick else await self.probe(route)
-        except Exception as exc:  # any failure only means: not this proxy now
+        except Exception as exc:
             self.degrade(alias, type(exc).__name__)
             return None
         if not quick:
@@ -428,7 +427,7 @@ class ProxyPool:
             now = time.time()
             current = self.assigned.get(owner) or preferred
             others = {v for k, v in self.assigned.items() if k != owner}
-            # Stay on the same proxy while it works: an account should not hop between addresses.
+
             if (current in entries and current not in avoid and not self.resting(current, now)
                     and current not in others):
                 route = await self.check(current, entries[current], operator, quick=self.healthy(current, now))
@@ -453,7 +452,7 @@ class ProxyPool:
                     return alias, route
             self.assigned.pop(owner, None)
             self.exhausted = True
-            self.wakeup.set()  # the background task downloads the lists again sooner
+            self.wakeup.set()
             raise NoProxyAvailable("No listed MTProxy answered.")
 
     def release(self, owner):
@@ -504,7 +503,7 @@ class ProxyPool:
             if now - self.refreshed_at >= intervals["lists"] or (self.exhausted and now - self.refreshed_at >= REFRESH_SECONDS * 10):
                 self.refreshed_at = now
                 route = self.outside() if self.outside else None
-                # Without a route for requests outside Telegram the pool keeps the lists it has.
+
                 self.lists_blocked = str(route.error) if route is not None and route.kind == "none" else None
                 if not self.lists_blocked:
                     with suppress(Exception):

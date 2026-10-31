@@ -101,9 +101,9 @@ def test_password_protected_export_wraps_the_signed_archive(client, tmp_path):
     outer.write_bytes(response.content)
     with pyzipper.AESZipFile(outer) as archive:
         info = archive.getinfo("tgwitness-evidence.zip")
-        assert info.flag_bits & 1 and response.content[8:10] == (99).to_bytes(2, "little")  # encrypted, WinZip AES
+        assert info.flag_bits & 1 and response.content[8:10] == (99).to_bytes(2, "little")
         field = info.extra[info.extra.index(b"\x01\x99"):]
-        assert field[6:8] == b"AE" and field[8] == 3  # AES-256
+        assert field[6:8] == b"AE" and field[8] == 3
         with pytest.raises(RuntimeError):
             archive.read(info.filename, pwd=b"wrong password, twelve+")
         inner = archive.read(info.filename, pwd=secret.encode())
@@ -178,8 +178,8 @@ def test_sign_out_ends_the_session_and_keeps_the_journal(client):
     record = app.state.store.events(kind="account.signed_out")[0]["payload"]
     assert record["account_id"] == 44 and record["telegram_session_ended"] is True
     assert c.post("/api/verify", json={}).status_code == 200
-    assert c.post("/api/auth/logout", json={}).status_code == 400  # nothing left to sign out
-    # The workspace still belongs to its account: another one is refused, the same one connects again.
+    assert c.post("/api/auth/logout", json={}).status_code == 400
+
     assert sign_in(c, 777).status_code == 400
     assert sign_in(c).json()["step"] == "authorized"
 

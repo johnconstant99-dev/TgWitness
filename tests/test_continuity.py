@@ -84,7 +84,7 @@ def test_event_and_merkle_index_roll_back_together_and_migrate_old_database(jour
     assert store.stats()["total"] == 7
     assert store.db.execute("SELECT max(start) FROM event_tree WHERE size=1").fetchone()[0] == 6
     monkeypatch.setattr("tgwitness.continuity.index_event", original)
-    store.db.execute("DROP TABLE event_tree")  # Represents a database from the previous release.
+    store.db.execute("DROP TABLE event_tree")
     store.db.commit()
     reopened = Store(store.root)
     try:
@@ -109,7 +109,7 @@ def test_rewrite_or_downgrade_never_advances_retained_boundary(journal, tmp_path
     forged_root = tmp_path / "forged"
     forged_root.mkdir()
     forged = Store(forged_root)
-    forged.bind(vault)  # Attacker owns the collector key, but not the witness key.
+    forged.bind(vault)
     for i in range(5):
         forged.append("message.new", {"text": f"fabricated {i}"}, 123, i)
 
@@ -191,7 +191,7 @@ def test_snapshot_proof_is_atomic_and_legacy_key_has_explicit_baseline(journal, 
     store.append("message.new", {})
     witness = Witness(tmp_path / "w", "https://collector.invalid", "synthetic-token")
     try:
-        witness.check(capture_head(store, vault, {}))  # Retained pre-upgrade checkpoint.
+        witness.check(capture_head(store, vault, {}))
         original = store.snapshot
 
         @contextmanager
@@ -216,8 +216,8 @@ def test_merkle_cache_is_not_trusted_when_verifying_export(journal, tmp_path):
     store, vault = journal
     for i in range(3):
         store.append("message.new", {"text": str(i)})
-    # An attacker can edit this cache and sign its root. The real event stream
-    # must nevertheless match that root during offline verification.
+
+
     store.db.execute("UPDATE event_tree SET hash=? WHERE start=0 AND size=2", (b"f" * 32,))
     store.db.commit()
 
@@ -226,7 +226,7 @@ def test_merkle_cache_is_not_trusted_when_verifying_export(journal, tmp_path):
 
     witness = Witness(tmp_path / "w", "https://collector.invalid", "synthetic-token", fetch=fetch)
     try:
-        assert asyncio.run(witness.tick())["payload"]["status"] == "ok"  # First baseline has no prior root.
+        assert asyncio.run(witness.tick())["payload"]["status"] == "ok"
     finally:
         witness.close()
     archive = tmp_path / "witness.zip"

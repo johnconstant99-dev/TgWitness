@@ -85,7 +85,7 @@ def authors_csv(people):
 def json_chunks(meta, scratch_path):
     header = {k: meta[k] for k in ("format", "chat", "account", "exported_at", "message_count",
                                    "author_count", "source", "limitations") if k in meta}
-    prefix = json.dumps(header, ensure_ascii=False, indent=1)[:-2]  # drop closing "\n}"
+    prefix = json.dumps(header, ensure_ascii=False, indent=1)[:-2]
     yield (prefix + ',\n "messages": [').encode("utf-8")
     first = True
     for record in records(scratch_path):

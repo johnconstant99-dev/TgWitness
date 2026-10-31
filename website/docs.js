@@ -1,10 +1,10 @@
 'use strict';
 
-// Translations for this page's language, embedded by the site build; English is the key and the fallback.
+
 const DICT = (() => { try { return JSON.parse(document.getElementById('site-dict')?.textContent || '{}'); } catch { return {}; } })();
 const T = (text, values = {}) => (DICT[text] || text).replace(/\{(\w+)\}/g, (match, key) => key in values ? values[key] : match);
 
-// Search reads one static file of this site (this language's search.json): no queries leave the browser.
+
 const searchBox = document.querySelector('.search');
 const searchInput = document.querySelector('#guide-search');
 const searchResults = document.querySelector('#search-results');
@@ -51,7 +51,7 @@ searchInput.addEventListener('keydown', event => {
   if (event.key === 'Escape') { searchInput.value = ''; search(); }
   if (event.key === 'ArrowDown' && searchResults.firstElementChild) { event.preventDefault(); searchResults.firstElementChild.focus(); }
 });
-// "/" or Ctrl/Cmd+K jumps to search from anywhere outside a text field.
+
 document.addEventListener('keydown', event => {
   const typing = event.target.closest('input, textarea, [contenteditable]');
   if ((event.key === '/' && !typing && !event.ctrlKey && !event.metaKey && !event.altKey)
@@ -62,13 +62,13 @@ document.addEventListener('keydown', event => {
   }
 });
 
-// On a phone the reference groups start folded so the page itself comes first.
+
 if (matchMedia('(max-width: 800px)').matches) document.querySelectorAll('.wiki-group[open]').forEach(group => { group.open = false; });
 
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const observe = 'IntersectionObserver' in window;
 
-// Reading progress along the top edge.
+
 const progress = document.querySelector('.read-progress span');
 if (progress) {
   let queued = false;
@@ -82,7 +82,7 @@ if (progress) {
   update();
 }
 
-// The section being read is marked in "On this page".
+
 const tocLinks = [...document.querySelectorAll('.toc a[href^="#"]')];
 if (observe && tocLinks.length) {
   const sections = tocLinks.map(link => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean);
@@ -94,7 +94,7 @@ if (observe && tocLinks.length) {
   sections.forEach(section => spy.observe(section));
 }
 
-// Content below the first screen eases in as it is reached; nothing is hidden without this script.
+
 if (observe && !motion.matches) {
   const blocks = document.querySelectorAll('.guide-content > :is(h2, .guide-grid, .lab, figure, .table-wrap, .threat-grid, .checklist, .fact-strip, .wiki-index), .wiki-body > :is(h2, .flow-figure, .table-wrap, pre)');
   const reveal = new IntersectionObserver(entries => entries.forEach(entry => {
@@ -110,7 +110,7 @@ if (observe && !motion.matches) {
   });
 }
 
-// Diagrams draw themselves when they come into view; a dot then runs along each connection.
+
 document.querySelectorAll('[data-diagram]').forEach(figure => {
   const svg = figure.querySelector('svg');
   const pulses = [...figure.querySelectorAll('animateMotion')];
@@ -124,7 +124,7 @@ document.querySelectorAll('[data-diagram]').forEach(figure => {
       figure.classList.add('is-drawn');
       setTimeout(() => {
         figure.classList.add('is-live');
-        pulses.forEach(pulse => { try { pulse.beginElement(); } catch { /* SMIL unavailable */ } });
+        pulses.forEach(pulse => { try { pulse.beginElement(); } catch {                        } });
       }, 1300);
     } else if (started && svg.pauseAnimations) {
       if (visible) svg.unpauseAnimations(); else svg.pauseAnimations();
@@ -163,7 +163,7 @@ document.querySelectorAll('pre').forEach(pre => {
   pre.append(button);
 });
 
-// Light or dark: the system's choice until the reader picks one; kept in this browser only.
+
 const themeToggle = document.querySelector('[data-theme-toggle]');
 if (themeToggle) {
   const sync = () => themeToggle.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark'));
@@ -173,12 +173,12 @@ if (themeToggle) {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.classList.add('theme-changing');
     document.documentElement.dataset.theme = next;
-    try { localStorage.setItem('tgw-theme', next); } catch { /* private mode */ }
+    try { localStorage.setItem('tgw-theme', next); } catch {                    }
     sync();
     setTimeout(() => document.documentElement.classList.remove('theme-changing'), 400);
   });
 }
-// The language list closes on Escape or a click elsewhere.
+
 const languageMenu = document.querySelector('.lang-menu');
 if (languageMenu) {
   document.addEventListener('click', event => { if (!languageMenu.contains(event.target)) languageMenu.open = false; });

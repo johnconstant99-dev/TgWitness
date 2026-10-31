@@ -1,6 +1,8 @@
 """Explicit public guide and reference inventory. No runtime application dependency."""
 
 GUIDES = {
+    "capture": ("GitHub Actions capture", "Export one Telegram chat on a temporary GitHub runner.", "github actions capture encrypted archive", "docs/SEALED-ACTIONS.md"),
+    "dedicated-account": ("Dedicated account", "Prepare a separate Telegram account for collection.", "dedicated telegram account session api login", "docs/ACCOUNTS.md"),
     "start": ("Start in minutes", "Try TgWitness with sample data, then launch your own Telegram observation workspace on Windows, Linux or macOS.", "demo install setup windows linux macos python", "docs/QUICKSTART.md"),
     "accounts": ("Connect an account", "Connect Telegram by QR code, phone number or session import. Choose sources and check that new messages reach your journal.", "qr phone session tdata api id hash account sources", "docs/ACCOUNTS.md"),
     "proxies": ("Choose a proxy", "Maintain automatic MTProxy routes or use your own proxy. Choose IP modes, fallback rules and the route for external requests.", "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists", "docs/CONNECTION-SECURITY.md"),
@@ -15,12 +17,12 @@ GUIDES = {
 }
 
 GROUPS = (
-    ("First steps", "Your first captured message", ("start", "accounts", "proxies", "exports")),
+    ("First steps", "Your first captured message", ("start", "dedicated-account", "accounts", "proxies", "exports", "capture")),
     ("Understand the evidence", "Learn by trying it", ("concepts", "cases", "security")),
     ("Go further", "Add only what you need", ("access", "witness", "server", "troubleshooting")),
 )
 
-# The full reference, rendered from the repository's Markdown: slug -> (title, description, keywords, source).
+
 REFERENCE = {
     "notice": ("Operator incompatibility notice", "Our operator notice on Taylor Wessing and its source record.", "notice operator incompatibility Taylor Wessing statement licence", "docs/OPERATOR-INCOMPATIBILITY.md"),
     "license": ("Licence and architectural incompatibility notice", "TgWitness is MIT-licensed for everyone, and why it is architecturally incompatible with the Taylor Wessing workflow.", "license licence MIT Taylor Wessing position statement", "docs/TAYLOR-WESSING-EXCLUSION.md"),
@@ -67,6 +69,6 @@ LABELS = {
     "wiki_intro": "Every document of the project, rendered here with its diagrams. The guides are the short path; these pages hold every detail.",
 }
 
-NEXT = {"start": "accounts", "accounts": "exports", "access": "security", "proxies": "accounts", "exports": "concepts",
+NEXT = {"capture": "exports", "dedicated-account": "accounts", "start": "accounts", "accounts": "exports", "access": "security", "proxies": "accounts", "exports": "concepts",
         "concepts": "cases", "cases": "security", "security": "start", "witness": "server",
         "server": "troubleshooting", "troubleshooting": "start"}

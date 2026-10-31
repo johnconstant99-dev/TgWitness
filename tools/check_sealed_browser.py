@@ -41,7 +41,7 @@ def main():
             page.goto(f"http://127.0.0.1:{files.server_port}/capture.html?lang=ru")
             expect(page.locator("html")).to_have_attribute("lang", "ru")
             expect(page.locator("#instructions")).to_have_attribute("href",
-                "https://github.com/phishdestroy/TgWitness/blob/main/docs/ru/SEALED-ACTIONS.md")
+                "https://phishdestroy.github.io/TgWitness/ru/docs/capture/")
             expect(page.locator("[data-capture-story]")).to_have_attribute("data-running", "false")
             for scene in range(5):
                 page.locator(f'[data-story-frame="{scene}"]').click()

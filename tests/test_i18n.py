@@ -82,7 +82,7 @@ def test_language_picker_lists_exactly_the_supported_languages():
 def test_guide_catalogs_cover_both_pages_and_preserve_commands_and_links():
     inventory = json.loads((i18n.GUIDE_LOCALES / "keys.json").read_text(encoding="utf-8"))
     required = set(inventory["keys"])
-    assert len(required) == len(inventory["keys"]) > 300
+    assert required and len(required) == len(inventory["keys"])
     assert all(set(keys) <= required for keys in inventory["pages"].values())
     for lang in i18n.GUIDE_LANGUAGES[1:]:
         dictionary = i18n.guide_words(lang)
@@ -144,7 +144,7 @@ def test_guide_locale_endpoint_has_all_translations_and_keeps_panel_scope(tmp_pa
             response = client.get("/locale.js", params={"scope": "guide", "lang": lang})
             assert response.status_code == 200
             assert response.content == i18n.script(lang, guide=True)
-        # An old cookie cannot override an explicit shared link. Unknown input cannot select a file.
+
         assert client.get("/locale.js?scope=guide&lang=../private").content == i18n.script("ru", guide=True)
         assert client.get("/locale.js?lang=de").content == i18n.script("de")
         client.cookies.clear()

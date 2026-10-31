@@ -11,8 +11,6 @@ def stable(value):
     return value
 
 
-# Parts of an attachment that Telegram fills in or updates on its own, not the sender:
-# a link preview loading, story views, paid media unlocked by this account.
 GENERATED = {"MessageMediaWebPage": ("webpage",), "MessageMediaStory": ("story",),
              "MessageMediaPaidMedia": ("extended_media",), "MessageMediaInvoice": ("receipt_msg_id",)}
 
@@ -21,7 +19,7 @@ def of_payload(payload):
     raw = payload.get("raw") or {}
     media = stable(raw.get("media"))
     if isinstance(media, dict) and media.get("_") == "MessageMediaPoll":
-        media.pop("results", None)  # Vote counts are observations, not message edits.
+        media.pop("results", None)
     if isinstance(media, dict):
         for key in GENERATED.get(media.get("_"), ()):
             media.pop(key, None)

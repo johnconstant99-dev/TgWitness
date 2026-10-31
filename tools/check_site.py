@@ -24,7 +24,7 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     errors, external, failed = [], [], []
     with tempfile.TemporaryDirectory(prefix="public-site-", dir=ROOT / "test-results") as scratch:
-        # Exercise relative assets under a project subpath, as on GitHub Pages.
+
         shutil.copytree(ROOT / "dist/site", Path(scratch) / "TgWitness")
         server = ThreadingHTTPServer(("127.0.0.1", 0), partial(QuietHandler, directory=scratch))
         thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -35,7 +35,7 @@ def main():
                 browser = playwright.chromium.launch(headless=True, channel=os.environ.get("TGWITNESS_BROWSER_CHANNEL") or None)
                 context = browser.new_context(viewport={"width": 1440, "height": 1060}, reduced_motion="reduce")
                 context.grant_permissions(["clipboard-read", "clipboard-write"])
-                # Fail closed if someone adds a tracker, external font, or API call.
+
                 def route_request(route):
                     if urlsplit(route.request.url).hostname != "127.0.0.1":
                         external.append(route.request.url)
@@ -51,7 +51,7 @@ def main():
                 assert page.evaluate("getComputedStyle(document.documentElement).scrollBehavior") == "auto"
                 assert not page.locator("input, form").count(), "Public page must not solicit account credentials"
                 assert not page.evaluate("document.body.textContent.includes('@@')"), "Unresolved build placeholder"
-                # Every local navigation target and every displayed image must resolve.
+
                 for href in page.locator('a[href^="#"]').evaluate_all("nodes => nodes.map(n => n.getAttribute('href'))"):
                     assert href == "#" or page.locator(href).count() == 1, f"Broken anchor: {href}"
                 for tab, panel in (("tour-chats", "panel-chats"), ("tour-journal", "panel-journal"), ("tour-edits", "panel-edits"), ("tour-exports", "panel-exports")):
@@ -83,7 +83,7 @@ def main():
                     expect(page.locator("#" + panel)).to_be_visible()
                 page.locator('[data-copy="windows-command"]').click()
                 assert page.evaluate("navigator.clipboard.readText()") == ".\\Start.cmd"
-                # A denied clipboard must still leave a usable manual-copy route.
+
                 page.evaluate("() => { navigator.clipboard.writeText = async () => { throw new Error('synthetic denial'); }; }")
                 page.locator('[data-copy="clone-command"]').click()
                 expect(page.locator("#copy-status")).to_contain_text("copy it manually")
@@ -92,7 +92,7 @@ def main():
                 page.get_by_text("Can it recover messages deleted before capture?", exact=True).click()
                 expect(page.locator(".faq details[open]")).to_contain_text("cannot reconstruct")
                 page.get_by_text("Can it recover messages deleted before capture?", exact=True).click()
-                # Capture the normal page, not transient copy/failure test states.
+
                 page.reload(wait_until="networkidle")
                 for width in (1440, 1024, 768, 390, 320):
                     page.set_viewport_size({"width": width, "height": 1000})
@@ -113,8 +113,8 @@ def main():
                 expect(fallback.locator("#s3 .s3-features")).to_be_visible()
                 for panel in ("panel-chats", "panel-journal", "panel-edits", "panel-exports", "setup-windows", "setup-unix", "setup-docker"):
                     expect(fallback.locator("#" + panel)).to_be_visible()
-                # The online demo: the real panel under the project path, answered from recorded
-                # fictional records, translated, and refusing every change.
+
+
                 demo = context.new_page()
                 demo.on("pageerror", lambda error: errors.append("demo: " + str(error)))
                 demo.on("response", lambda response: failed.append(response.url) if response.status >= 400 else None)

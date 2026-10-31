@@ -9,7 +9,7 @@ from tgwitness.app import create_app
 from test_collector import FakeClient
 
 HARBOR, OTHER = -1001, -1002
-# Routes outside the issued-access rules: open without a token, with their own token, or main administrator only.
+
 NOT_IN_POLICY = {
     "GET /locale.js", "GET /api/demo-access", "GET /api/witness/head", "GET /api/assurance",
     "POST /api/access/login", "POST /api/access/logout", "GET /api/access/me",
@@ -17,6 +17,12 @@ NOT_IN_POLICY = {
     "GET /api/access", "POST /api/access/grants", "PATCH /api/access/grants/{grant_id}",
     "DELETE /api/access/grants/{grant_id}", "DELETE /api/access/sessions/{session_id}",
     "POST /api/access/admin", "GET /api/access/console",
+    "GET /api/integrations/mcp", "POST /api/integrations/mcp", "DELETE /api/integrations/mcp/{connection_id}",
+    "POST /api/integrations/mcp/check",
+    "GET /api/archive/identity", "POST /api/archive/query",
+    "POST /api/analysis/provider", "POST /api/analysis/provider/test",
+    "GET /api/integrations/webhooks", "POST /api/integrations/webhooks",
+    "DELETE /api/integrations/webhooks/{hook_id}", "POST /api/integrations/webhooks/{hook_id}/test",
 }
 
 
@@ -69,7 +75,7 @@ def test_panel_token_signs_in_to_a_session_that_can_be_listed_and_ended(panel):
     assert browser.post("/api/access/logout").status_code == 200
     assert browser.get("/api/status").status_code == 401
     assert app.state.store.events(kind="access.session_ended")[0]["payload"]["reason"] == "signed out"
-    # An issued token is not a session: it opens the panel only by signing in.
+
     token, _ = issue(client)
     assert TestClient(app).get("/api/status", headers={"Authorization": "Bearer " + token}).status_code == 401
     assert login(app, "tgwa_wrong")[1].status_code == 401
@@ -122,11 +128,11 @@ def test_an_access_to_one_chat_sees_only_that_chat(panel):
         assert browser.get(path).status_code == 403, path
     assert browser.get("/api/media/" + "a" * 64).status_code == 404
     assert client.get("/api/media/" + "a" * 64).status_code == 200
-    assert browser.get("/api/avatar/7").status_code != 403  # an author of the open chat
+    assert browser.get("/api/avatar/7").status_code != 403
     assert browser.get("/api/avatar/99").status_code == 404
     assert browser.post("/api/chat-export/start", json={"chat_id": OTHER}).status_code == 403
     assert browser.post("/api/targets", json={"chat_id": OTHER, "enabled": False}).status_code == 403
-    # Whole-workspace parts stay closed even with the permission ticked.
+
     for path in ("/api/export/zip", "/api/dialogs", "/api/scope", "/api/parameters"):
         assert browser.get(path).status_code == 403, path
     assert browser.post("/api/interactions", json={"request_id": "r" * 16, "action": "open",
@@ -168,7 +174,7 @@ def test_address_binding_sign_in_limit_and_end_date(panel, monkeypatch):
     later = time.time() + 7200
     monkeypatch.setattr(access.time, "time", lambda: later)
     assert browser.get("/api/status").json()["detail"] == "This access has expired."
-    assert browser.get("/api/status").status_code == 401  # the session ended with it
+    assert browser.get("/api/status").status_code == 401
     assert login(app, dated)[1].status_code == 403
 
 
@@ -188,7 +194,7 @@ def test_parallel_session_limit_refuses_or_replaces(panel):
     assert client.post("/api/access/admin", json={"max_sessions": 1, "on_limit": "refuse"}).status_code == 200
     assert login(app, app.state.vault.token)[1].status_code == 200
     assert login(app, app.state.vault.token)[1].status_code == 403
-    assert client.get("/api/status").status_code == 200  # the panel token itself always opens
+    assert client.get("/api/status").status_code == 200
 
 
 def test_changes_and_revocation_apply_to_open_sessions(panel):
@@ -228,4 +234,4 @@ def test_console_shows_the_process_log_and_journal_records_of_every_workspace(pa
     assert not any("message.new" in t or "Harbor text" in t for t in texts)
     newer = client.get("/api/access/console?after=%d" % result["last"]).json()["lines"]
     assert all(line["n"] > result["last"] for line in newer)
-    assert client.get("/api/access/console?after=99999999").json()["lines"]  # a restarted process starts again
+    assert client.get("/api/access/console?after=99999999").json()["lines"]

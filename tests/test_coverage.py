@@ -25,16 +25,16 @@ def test_continuity_gaps_and_unobserved_ids():
     events = [record(0, "process.started"), record(0, "observation.started", seconds=1)]
     events += [record(m, "collector.heartbeat") for m in range(1, 5)]
     events += [record(2, "message.new", chat_id=CHANNEL, message_id=i) for i in (1, 2, 5, 9)]
-    events += [record(3, "message.new", chat_id=GROUP, message_id=i) for i in (100, 250)]  # account-wide IDs
+    events += [record(3, "message.new", chat_id=GROUP, message_id=i) for i in (100, 250)]
     events += [record(5, "coverage.gap", {"reason": "transport_disconnected"}),
                record(6, "connection.restored", {"reason": "transport_connected"}),
                record(7, "collector.heartbeat"),
-               record(20, "collector.heartbeat"),              # 13 silent minutes while observing
+               record(20, "collector.heartbeat"),
                record(21, "observation.stopped", {"reason": "operator"}),
                record(30, "observation.started"),
                record(30, "coverage.gap", {"reason": "Telegram reported channel updates requiring difference recovery"},
                       chat_id=CHANNEL),
-               record(40, "process.started")]                  # previous run ended without a stop
+               record(40, "process.started")]
     events.sort(key=lambda e: e["observed_at"])
     coverage = Coverage()
     for event in events:
@@ -48,9 +48,9 @@ def test_continuity_gaps_and_unobserved_ids():
     assert reasons[2] == (at(21), at(30), "observation paused by the operator")
     assert reasons[3] == (at(30), at(40), "collector process ended without an orderly stop")
     assert result["gaps"][3]["not_resumed_by_last_record"] is True
-    assert result["notes"][0]["chat_id"] == CHANNEL  # chat-level gaps are notes, not global interruptions
+    assert result["notes"][0]["chat_id"] == CHANNEL
     ids = result["unobserved_ids"]
-    assert [c["chat_id"] for c in ids] == [CHANNEL]  # ordinary groups share one account-wide ID sequence
+    assert [c["chat_id"] for c in ids] == [CHANNEL]
     assert ids[0]["not_observed"] == 5 and ids[0]["ranges"] == [{"low": 3, "high": 4}, {"low": 6, "high": 8}]
     lines = coverage_lines(result)
     assert lines[0].startswith("Continuously observed from " + at(0, 1))

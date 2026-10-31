@@ -42,7 +42,7 @@ def check_examples(page, base):
     expect(journey.locator('li:not(.is-pending)')).to_have_count(3)
     journey.locator('[data-reset]').click()
     journey.locator('[data-play]').click()
-    # Reduced motion completes immediately, with no running timer/animation.
+
     expect(journey).to_have_attribute("data-step", "3")
     assert "is-playing" not in journey.get_attribute("class")
 
@@ -82,7 +82,7 @@ def check_examples(page, base):
     expect(chain).to_have_attribute("data-hash-mode", "original")
     expect(chain.locator('[data-stored-digest]')).to_have_text(original_second)
 
-    # User-triggered playback can pause and resume, and stops when it leaves view.
+
     page.emulate_media(reduced_motion="no-preference")
     journey.locator('[data-reset]').click()
     journey.locator('[data-play]').click()
@@ -152,7 +152,7 @@ def check_examples(page, base):
     expect(toggles.first).to_have_attribute("aria-pressed", "false")
     expect(checklist.locator('[data-checklist-count]')).to_have_text("7 of 8 done")
 
-    # Diagrams from the docs: drawn, described in text, and never hidden when motion is reduced.
+
     page.goto(base + "docs/reference/how-it-works/", wait_until="networkidle")
     figures = page.locator('[data-diagram]')
     expect(figures).to_have_count(3)
@@ -209,15 +209,16 @@ def main():
                     assert page.locator("html").get_attribute("lang") == "en"
                     expect(page.get_by_role("heading", level=1)).to_be_visible()
                     expect(page.locator("#guide-search")).to_be_visible()
-                    assert not page.locator('input:not([type="search"]),form').count()
+                    if slug != "capture":
+                        assert not page.locator('input:not([type="search"]),form').count()
                     expect(page.locator('link[rel=alternate][hreflang]')).to_have_count(len(page_languages(path)) + 1)
                     assert not page.evaluate("document.body.textContent.includes('@@')")
                     assert page.evaluate("getComputedStyle(document.documentElement).scrollBehavior") == "auto"
-                    assert not page.locator(".will-reveal, .will-draw").count(), path  # reduced motion hides nothing
+                    assert not page.locator(".will-reveal, .will-draw").count(), path
                     if slug:
                         expect(page.locator('.sidebar [aria-current="page"]')).to_have_count(1)
                     else:
-                        expect(page.locator(".guide-card")).to_have_count(len(GUIDES) + 2)
+                        expect(page.locator(".guide-card")).to_have_count(len(GUIDES) + 1)
                         expect(page.locator('.guide-card[href="../guides/modes.html"]')).to_be_visible()
                     for width in widths:
                         page.set_viewport_size({"width": width, "height": 1000})
@@ -257,7 +258,7 @@ def main():
 
                 check_examples(page, base)
 
-                # Theme: the toggle switches and the choice survives a reload.
+
                 page.emulate_media(color_scheme="light")
                 page.goto(base + "docs/", wait_until="networkidle")
                 expect(page.locator("html")).to_have_attribute("data-theme", "light")
@@ -270,7 +271,7 @@ def main():
                 page.locator("[data-theme-toggle]").click()
                 expect(page.locator("html")).to_have_attribute("data-theme", "light")
 
-                # Every language: its own lang and direction, a working search and a menu of all languages.
+
                 for lang in [code for code in NOTICE_LANGUAGES if code != "en"]:
                     locales = ("", "docs/", "docs/cases/", "docs/security/", "docs/reference/how-it-works/", *NOTICE_PAGES) if lang in LANGUAGES else NOTICE_PAGES
                     for local in locales:
@@ -291,7 +292,7 @@ def main():
                             case = page.locator('[data-lab="investigation"]')
                             case.locator('[data-case-mode="person"]').click()
                             expect(case.locator('[data-case-mode="person"]')).to_have_attribute('aria-pressed', 'true')
-                            # Switching languages keeps the investigation page, rather than returning home.
+
                             page.locator('.lang-menu > summary').click()
                             target = 'de' if lang != 'de' else 'fr'
                             expect(page.locator(f'.lang-list a[hreflang="{target}"]')).to_have_attribute('href', f'../../../{target}/docs/cases/')
@@ -320,7 +321,7 @@ def main():
                 expect(lab.locator('.route[data-flow="witness"]')).to_have_class(re.compile(r"\bis-on\b"))
                 assert "Telegram" in lab.locator("[data-security-status]").text_content()
 
-                # A browser without Web Crypto keeps the readable explanation.
+
                 unavailable = context.new_page()
                 track(unavailable)
                 unavailable.add_init_script("Object.defineProperty(crypto, 'subtle', {value:undefined});")
@@ -338,7 +339,7 @@ def main():
                     expect(fallback.locator(".search")).to_be_hidden()
                     assert not fallback.locator('[data-enhanced]:visible').count()
                     if not slug:
-                        expect(fallback.locator(".guide-card")).to_have_count(len(GUIDES) + 2)
+                        expect(fallback.locator(".guide-card")).to_have_count(len(GUIDES) + 1)
                     else:
                         expect(fallback.locator(".next-guide")).to_be_visible()
                     if slug == "concepts":

@@ -2445,7 +2445,30 @@
 "9f9a433f721fbe2de236335a46141fc1e9a7b8bca22b2974308c68ba01e382a3": "איסוף באמצעות GitHub Actions (גרסה מקדימה)",
 "b55d4f3124b60bb7d7589292f751aa3d033f07c7451d66dc1737901f1e158f9c": "כניסה חדשה ל־Telegram, צ׳אט אחד, ארכיון מוצפן ואישור מקור של GitHub.",
 "5429f42c1edf125ad2b85b5f586dad1930940a37deb2d90fbe8d908b255ed544": "פתיחת עוזר האיסוף",
-"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">איסוף באמצעות GitHub Actions (גרסה מקדימה)</a>"
+"11b4a6c77118d6a291d05b70da2d42ed55b91d446748e8b02367669ac38922b0": "<a href=\"SEALED-ACTIONS.md\">איסוף באמצעות GitHub Actions (גרסה מקדימה)</a>",
+"00e9f682c63d8cc9677c51b47c4e0cf5a0a8abd7d8d9b6360ed3014e1143e2b7": "הפעלות מיובאות",
+"03f7f8759222d8e63f238cae8868630e09e4cbb163b7f882a420074709708652": "תיעוד טלגרם",
+"205eee3acbad78d41d9ff34d75795836b9847831b6e59efa92083128cabeb267": "שמרו על השליטה במספר הטלפון ששימש לרישום.",
+"41b3a4f9944b9efb11cd31646960cd166a004b4af1afe014b646521926da64be": "<a href=\"https://core.telegram.org/api/errors\" rel=\"noopener noreferrer\" target=\"_blank\">שגיאות אימות</a>",
+"47b9b09aafaf660aaf53e8292d9e98eb6e62dfb303ffdc348f04395221309754": "הפעל אימות דו-שלבי והוסף כתובת דוא&quot;ל לשחזור.",
+"5009ab7190d97f6436c45d87c68140bbaa2d2a2a642408aad465cae351d403ab": "חבר את החשבון",
+"5220b144e2191936311f37b441b375dc5ff96bd965d30ea80fe1915bc4bd7b6e": "<a href=\"https://core.telegram.org/api/obtaining_api_id\" rel=\"noopener noreferrer\" target=\"_blank\">יצירת יישום</a>",
+"83a8f07fbd5d10e81fd49454a6c73f8e5df444527971bf128e21bfd3ce879c4b": "התחל באיסוף ובדוק שהודעות חדשות מופיעות.",
+"8575096d3ecc863c0ba33adb4617cf3e84208525a1aa38d7afa040265a30079e": "פרטי הזדהות ל-API",
+"862a75a2cd1215f767b571dd9103317313b5fd4003b189943a7c73c1638a80b6": "סקור את הפעילויות הנוכחיות בהגדרות טלגרם → מכשירים.",
+"a118a0942ad1b7a1c43b267ec31d2a1d8c191f5d7824be1f8b16917be9f5d8c0": "אין להפעיל את אותה הרשאה מיובאת בשני לקוחות בו-זמנית. Telegram עלולה לבטל אותה עם השגיאה AUTH_KEY_DUPLICATED. לשימוש מקביל, צרו התחברות נפרדת באמצעות טלפון או QR.",
+"a2756d8df8b146ba781f1593c871131e3f6e1e7bf9b133d4c1845fb6db3710c8": "עבור תהליך הלכידה ב-GitHub, השתמשו ב-API ID וב-hash שלכם.",
+"a439b7ebbc635437f76d75005cd8a7f28ced6abb0234867fce820856d3b8c2d2": "פתח את החלונית ובחר בכניסה באמצעות טלפון או QR.",
+"b9724d017783fec0bb79b550546ea04cecefa6b64689c264357458d782536c3f": "<a href=\"@@GUIDE_ACCOUNTS@@\">מדריך לחיבור חשבון</a>",
+"bd8f623898b9b6fbe1f5bc12a7506abfc84ee9003d891d5cd6f64b87388b9530": "בחר מספר שתוכל לזכור. קבלת קוד כניסה אחד אינה מבטיחה שחזור חשבון בעתיד.",
+"c2a195484f492d86026a5c6dc9140e9ee52c60b58d79bab6959f17a6c2c61794": "לפני ההתחברות",
+"cb8d1801315e9c63db597c3a5cd461a005ff272842448b113b35185944c83d17": "<a href=\"https://my.telegram.org/apps\" rel=\"noopener noreferrer\" target=\"_blank\">יצירת פרטי הזדהות ל-API</a>",
+"d504af6d82ab60d11d5af1a0e8d865cdb66e6fe6db94261f444d287372b47f20": "ייצא צ&#x27;אט אחד מ-Telegram ל-GitHub Runner זמני, ולאחר מכן הורד ואמת את התוצאה המוצפנת.",
+"e39d2d716506647e4f133118e0aeba1d358adef77384da904c7558b86a6455ee": "הפעל את JavaScript כדי ליצור מפתח ולפענח את הארכיון שלך.",
+"ec8ae7171805a6a2d4a7b1f266be5eaad064530b32067d06b0fa5f681d9c9e1a": "בצע אימות מלא של טלגרם ובחר את המקורות שלך.",
+"ece6e50a3c38c2bd9affe9be9dd46e9d73a8745817a203a95e22baccfc51faf4": "מספרי טלפון",
+"f8590fa728883a6cbb54e79035975ff1f173e8a6d6761d0289f3069999fe862c": "מזהה ה-API וה-hash מזהים את היישום. ההרשאה שלך ב-Telegram היא נפרדת.",
+"fa58a91e7b34ecd514a34e43018e4909b012fb412a06cda12ed00158a0f3551d": "יש להפריד את האוסף משיחות אישיות. גם חשבון נפרד עלול להיות כפוף למגבלות של טלגרם."
 },
 "modes": {
 "modes.actions.body": "אישורי תצוגה מקדימה, בקשה ותוצאה חתומים. לפני לחיצה על כפתור, השרת משיג את ההודעה שוב ודוחה מקלדת ששונתה. טקסט ה-callback וה-URLs שהוחזרו נשארים בהקשר המוקלט.",
@@ -3082,6 +3105,12 @@
 "proxy mtproxy pool socks5 http route IP mode fallback api id hash network": "proxy mtproxy pool socks5 http route IP mode fallback api id hash network",
 "GitHub Actions capture (preview)": "איסוף באמצעות GitHub Actions (גרסה מקדימה)",
 "A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "כניסה חדשה ל־Telegram, צ׳אט אחד, ארכיון מוצפן ואישור מקור של GitHub.",
-"Open capture helper": "פתיחת עוזר האיסוף"
+"Open capture helper": "פתיחת עוזר האיסוף",
+"Dedicated account": "חשבון ייעודי",
+"Export one Telegram chat on a temporary GitHub runner.": "ייצא צ'אט אחד מ-Telegram ל-GitHub Runner זמני.",
+"GitHub Actions capture": "תיעוד פעולות GitHub",
+"Prepare a separate Telegram account for collection.": "הכינו חשבון טלגרם נפרד לצורך איסוף הנתונים.",
+"dedicated telegram account session api login": "כניסה ל-API של מושב חשבון טלגרם ייעודי",
+"github actions capture encrypted archive": "GitHub Actions לוכד ארכיון מוצפן"
 }
 }

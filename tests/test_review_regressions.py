@@ -36,7 +36,7 @@ def test_observable_message_versions(journal, live, change):
         collector = await observing(store, vault)
         store.set_setting("capture", {"download_media": False})
         old, new = media_message(9, document_id=500), media_message(9, document_id=500)
-        if change == "link_preview_loaded":  # Telegram fills the preview in later; the sender changed nothing
+        if change == "link_preview_loaded":
             when = datetime(2026, 1, 1, tzinfo=timezone.utc)
             old = telegram_message(9, "https://example.org", types.MessageMediaWebPage(
                 webpage=types.WebPagePending(id=1, date=when, url="https://example.org")))
@@ -85,7 +85,7 @@ def test_background_scope_excludes_outgoing_but_advances_recheck(journal):
         assert not store.message_state(CHAT, 11)["content"]
         assert store.get_setting("recheck_floor", {})[str(CHAT)] == 11
         assert (await collector.snapshot(CHAT, 20, origin="new_chat"))["captured"] == 0
-        # Explicit history snapshots remain a deliberate request for visible history.
+
         assert (await collector.snapshot(CHAT, 20))["captured"] == 1
         outgoing.message = "changed but excluded"
         result = await collector.recheck_chat(CHAT, {"messages": False, "edits": True, "deletions": False})
@@ -123,7 +123,7 @@ def test_callback_rpc_has_one_attempt_without_changing_concurrent_read_retries(j
         callback = asyncio.create_task(client._call(action, functions.messages.GetBotCallbackAnswerRequest(
             types.InputPeerUser(SHOP_BOT, 1), 10, data=b"action")))
         await entered.wait()
-        assert client._request_retries == 1  # This task and reads keep their own policy.
+        assert client._request_retries == 1
         reading = asyncio.create_task(client._call(read, functions.help.GetConfigRequest()))
         release.set()
         with pytest.raises(RpcCallFailError):
@@ -140,7 +140,7 @@ class MemoryS3:
         self.objects, self.downloads = objects, []
 
     async def list(self, prefix):
-        # Deliberately allow an untrusted server to violate the requested prefix.
+
         for name, data in sorted(self.objects.items()):
             yield name, len(data)
 
@@ -185,8 +185,8 @@ def test_restore_rejects_existing_output_and_link_escapes(journal, tmp_path, mon
         asyncio.run(replica.restore(info, "fake", "fake", out))
     assert (out / "keep").read_text() == "original"
     assert not storage.downloads
-    # The repository may live on exFAT, which supports neither symlinks nor junctions.
-    # Exercise real filesystem links in the OS temporary directory (NTFS on Windows).
+
+
     with TemporaryDirectory(prefix="tgwitness-restore-links-") as temporary:
         root = Path(temporary).resolve()
         linked, outside = root / "restore", root / "outside"

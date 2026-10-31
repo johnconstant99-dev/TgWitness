@@ -1,5 +1,3 @@
-/* Visual explanations. No remote fonts, image services or animation libraries. */
-/* Capability guide: uses the site's theme tokens; ordinary HTML is the fallback. */
 .modes-page { --m-good:#156347; --m-warn:#805000; --m-bad:#a32732; --m-soft:var(--paper); }
 :root[data-theme="dark"] .modes-page { --m-good:#91ddbd; --m-warn:#e6c785; --m-bad:#ffabb1; }
 @media(prefers-color-scheme:dark) { :root:not([data-theme="light"]) .modes-page { --m-good:#91ddbd; --m-warn:#e6c785; --m-bad:#ffabb1; } }
@@ -117,7 +115,6 @@
 .m-command { margin-top:16px; }
 .m-command summary { font-size:11px; color:var(--muted); cursor:pointer; padding:5px 0; }
 .m-command pre { display:block; margin:10px 0 0; }
-/* Commands remain native disclosures for touch, keyboard and no-JS readers. */
 .m-command:not([open])>pre { display:none; }
 .m-ladder li:hover .m-command>pre,.m-ladder li:focus-within .m-command>pre { display:block; }
 .m-ladder li:hover .m-command::details-content,.m-ladder li:focus-within .m-command::details-content { content-visibility:visible; }
@@ -482,8 +479,6 @@
   .case-table-wrap:focus-visible { outline:3px solid var(--blue); outline-offset:4px; }
 }
 @media(max-width:400px) { .case-questions { grid-template-columns:1fr; } }
-
-/* Security guide: facts, the data map, secrets, threats and the hardening checklist. */
 .fact-strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:8px 0 34px; }
 .fact-strip>div { border:1px solid var(--line); border-radius:12px; background:#fff; padding:16px 16px 14px; position:relative; overflow:hidden; }
 .fact-strip>div::before { content:''; position:absolute; inset:0 0 auto; height:3px; background:linear-gradient(90deg,#245ce5,#4fc3a1); }
@@ -541,15 +536,12 @@
 .checklist.is-complete { border-color:#9fd4c2; box-shadow:0 0 0 4px #e3f6ef; }
 @media(max-width:800px) { .security-map { grid-template-columns:1fr; } .fact-strip { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:600px) { .threat-grid { grid-template-columns:1fr; } .route { grid-template-columns:30px minmax(0,1fr); gap:8px; } .route-state { display:block; margin:4px 0 0; width:max-content; max-width:100%; } .fact-strip strong { font-size:19px; } }
-/* Right-to-left: arrows point the way the page reads. */
 [dir=rtl] .hash-node+.hash-node::before,[dir=rtl] .flow-strip>span+span::before { content:'←'; }
 [dir=rtl] .checklist .check-toggle { margin:0 14px 6px 0; }
 [dir=rtl] .banner-link span { transform:scaleX(-1); }
 [dir=rtl] .learn-banner:hover .banner-link span { transform:scaleX(-1) translate(3px,-3px); }
 .formula,.delivery-chart,.journey-route,.banner-art,.hash-chain code,.checkpoint-pair code { direction:ltr; }
 @media(max-width:600px) { [dir=rtl] .hash-node+.hash-node::before,[dir=rtl] .flow-strip>span+span::before { content:'↓'; } }
-
-/* Dark theme for the light teaching panels (the dark labs stay as they are). */
 [data-theme=dark] .formula-card { border-color:#2b3f5f; background:linear-gradient(130deg,#121d31,#14223b); }
 [data-theme=dark] .formula-card .lab-kicker { color:#8fb0e6; }
 [data-theme=dark] .formula { color:#c9dcff; }

@@ -1,0 +1,11 @@
+{
+  "name": "TgWitness signed notifications",
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "nodes": [
+    {"id": "tgw-hook", "name": "TgWitness webhook", "type": "n8n-nodes-base.webhook", "typeVersion": 2.2, "position": [0, 0], "parameters": {"httpMethod": "POST", "path": "tgwitness-events", "responseMode": "lastNode", "responseData": "firstEntryJson", "options": {"rawBody": true}}},
+    {"id": "tgw-verify", "name": "Verify signature and freshness", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [260, 0], "parameters": {"jsCode": "const crypto = require('crypto');\nconst secret = $env.TGWITNESS_WEBHOOK_SECRET;\nif (!secret) throw new Error('Receiver signing secret is not configured');\nconst item = $input.first();\nconst raw = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst header = item.json.headers['x-tgwitness-signature'] || '';\nconst match = /^t=(\\d+),v1=([a-f0-9]{64})$/.exec(header);\nif (!match || Math.abs(Date.now()/1000 - Number(match[1])) > 300) throw new Error('Expired or invalid signature');\nconst expected = crypto.createHmac('sha256', secret).update(match[1] + '.').update(raw).digest();\nif (!crypto.timingSafeEqual(expected, Buffer.from(match[2], 'hex'))) throw new Error('Signature mismatch');\nconst event = JSON.parse(raw.toString('utf8'));\nif (event.schema !== 'tgwitness.webhook/1' || !/^[a-f0-9]{64}$/.test(event.event_id)) throw new Error('Unsupported event');\nreturn [{json: {accepted: true, event_id: event.event_id, event}}];"}},
+    {"id": "tgw-note", "name": "Receiver setup", "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [0, -260], "parameters": {"content": "Set TGWITNESS_WEBHOOK_SECRET in protected worker configuration. Allow the crypto builtin and environment access for this Code node. This example verifies and acknowledges only. Add atomic durable deduplication by event_id before any downstream side effects. See docs/WEBHOOKS.md.", "height": 200, "width": 540}}
+  ],
+  "connections": {"TgWitness webhook": {"main": [[{"node": "Verify signature and freshness", "type": "main", "index": 0}]]}}
+}

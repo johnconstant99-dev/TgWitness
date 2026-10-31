@@ -40,6 +40,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "httpx>=0.27,<1", "playwright>=1.48,<2", "ruff>=0.15,<1"]
 research = ["requests>=2.32,<3", "beautifulsoup4>=4.12,<5"]
+mcp = ["mcp>=2.3,<3"]
 
 [project.urls]
 Homepage = "https://phishdestroy.github.io/TgWitness/"
@@ -50,6 +51,7 @@ Changelog = "https://github.com/phishdestroy/TgWitness/blob/main/docs/CHANGELOG.
 
 [project.scripts]
 tgwitness = "tgwitness.__main__:main"
+tgwitness-mcp = "tgwitness.mcp_server:main"
 
 [tool.setuptools.packages.find]
 include = ["tgwitness*"]

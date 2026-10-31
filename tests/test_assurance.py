@@ -43,7 +43,7 @@ def test_host_state_counts_logins_listeners_and_ssh_processes(tmp_path):
     root = host_root(tmp_path)
     clean = assurance.host_state(root)
     assert clean["boot_id"] == "boot-1" and clean["ssh_listening"] is False and clean["ssh_processes"] == 0
-    assert clean["sessions"] == 0 and clean["logins"] == 0  # the boot record is not a login
+    assert clean["sessions"] == 0 and clean["logins"] == 0
 
     root = host_root(tmp_path, listening=True, logins=2)
     (root / "proc/123").mkdir()
@@ -119,12 +119,12 @@ def test_assurance_mode_signs_the_host_into_the_start_record_and_a_public_statem
     monkeypatch.setattr(assurance, "provider_record", lambda selected: provider)
     with TestClient(create_app(tmp_path / "data")) as c:
         assert c.get("/api/assurance?challenge=XYZ").status_code == 422
-        answer = c.get("/api/assurance?challenge=" + "ab" * 16).json()  # no panel token needed
+        answer = c.get("/api/assurance?challenge=" + "ab" * 16).json()
         statement = answer["statement"]
         Ed25519PublicKey.from_public_bytes(base64.b64decode(statement["public_key"])).verify(
             base64.b64decode(answer["signature"]), canonical(statement))
         assert statement["challenge"] == "ab" * 16 and statement["host"]["provider"]["instance_id"] == 42
-        # The origin address and login sources stay in the signed journal, off the public endpoint.
+
         assert "public_ipv4" not in statement["host"]["provider"] and "recent_logins" not in statement["host"]
         assert statement["fingerprint"] == fingerprint(c.app.state.vault.public_key)
         [started] = c.app.state.store.events(kind="process.started")

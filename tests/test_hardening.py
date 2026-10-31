@@ -42,15 +42,15 @@ def test_delegated_access_cannot_point_a_proxy_or_raw_socket_inside(panel, no_op
     assert delegate.post("/api/network", json=local).status_code == 403
     assert delegate.post("/api/network/policy", json={"exposure": "hide", "outside_enabled": True,
                                                        "outside_proxy": {**local, "host": "10.0.0.5"}}).status_code == 403
-    # A request cannot approve itself.
+
     assert delegate.post("/api/network", json={**local, "host": "8.8.8.8", "local_proxy": True}).status_code == 200
     assert app.state.collector.network_config().local_proxy is False
-    assert admin.post("/api/network", json=local).status_code == 200  # a local Tor proxy, set by the administrator
+    assert admin.post("/api/network", json=local).status_code == 200
     assert app.state.collector.network_config().local_proxy is True
 
     assert delegate.post("/api/alerts", json={"add_urls": ["rsyslog://10.0.0.5"]}).status_code == 403
     assert admin.post("/api/alerts", json={"add_urls": ["rsyslog://syslog.example.net"]}).status_code == 200
-    assert delegate.post("/api/alerts", json={"daily": False}).status_code == 200  # keeps the administrator's destination
+    assert delegate.post("/api/alerts", json={"daily": False}).status_code == 200
     assert delegate.post("/api/alerts", json={"add_urls": ["json://hooks.example.net/x"]}).status_code == 200
 
 
@@ -58,7 +58,7 @@ def test_proxy_inside_the_network_is_refused_at_connection_unless_approved(no_op
     route = NetworkConfig(kind="socks5", host="127.0.0.1", port=9)
     with pytest.raises(netclient.RouteError, match="main administrator"):
         asyncio.run(netclient.open_stream("https://example.org/", route, 5))
-    with pytest.raises(OSError):  # approved: it is tried, and nothing listens on port 9
+    with pytest.raises(OSError):
         asyncio.run(netclient.open_stream("https://example.org/", route.model_copy(update={"local_proxy": True}), 5))
     result = alerts.deliver(["json://hooks.example.net/x"], "t", "b", route)
     assert result["sent"] == 0 and "main administrator" in result["error"]
@@ -70,7 +70,7 @@ def test_telegram_connects_to_the_checked_proxy_address(journal, no_opt_in):
     vault.save("network", {"kind": "socks5", "host": "localhost", "port": 9050, "local_proxy": False})
     with pytest.raises(ValueError, match="main administrator"):
         asyncio.run(collector.ensure_route())
-    vault.save("network", {"kind": "socks5", "host": "localhost", "port": 9050})  # saved before the approval existed
+    vault.save("network", {"kind": "socks5", "host": "localhost", "port": 9050})
     assert collector.network_config().local_proxy is True
     asyncio.run(collector.ensure_route())
     assert collector.route_options()["proxy"]["addr"] in ("127.0.0.1", "::1")
@@ -78,7 +78,7 @@ def test_telegram_connects_to_the_checked_proxy_address(journal, no_opt_in):
 
 @pytest.mark.parametrize("shown, found, limited", [
     ("dir DESKTOP\\analyst:(OI)(CI)(F)\n", "SID Found: dir.\n", True),
-    ("dir No permissions are set. All users have full control.\n", "", False),  # FAT / exFAT
+    ("dir No permissions are set. All users have full control.\n", "", False),
 ])
 def test_windows_data_directory_is_limited_to_this_account(tmp_path, monkeypatch, shown, found, limited):
     calls = []
@@ -97,7 +97,7 @@ def test_windows_data_directory_is_limited_to_this_account(tmp_path, monkeypatch
     (tmp_path / "journal.sqlite3").write_bytes(b"")
     REAL_OWNER_ONLY(tmp_path)
     assert calls[1] == ["icacls", str(tmp_path), "/inheritance:r", "/grant:r", "*S-1-5-21-1-2-3-1001:(OI)(CI)F", "/Q"]
-    assert calls[2] == ["icacls", str(tmp_path / "*"), "/reset", "/T", "/C", "/Q"]  # the files inherit that entry
+    assert calls[2] == ["icacls", str(tmp_path / "*"), "/reset", "/T", "/C", "/Q"]
     assert (tmp_path / ".owner-only").exists() is limited
     assert security.owner_only_state(tmp_path)[0] is limited
 
@@ -123,7 +123,7 @@ def test_witness_key_is_sealed_and_an_old_clear_key_is_moved_into_it(tmp_path, m
     assert base64.b64encode(raw) not in (root / "witness-key.enc").read_bytes()
     assert witness.WitnessKey(root).public_key == first.public_key
     (root / "witness-vault.key").unlink()
-    with pytest.raises(RuntimeError, match="missing"):  # never replaced by a new key
+    with pytest.raises(RuntimeError, match="missing"):
         witness.WitnessKey(root)
 
     master = tmp_path / "master.key"
@@ -147,5 +147,5 @@ def test_a_file_changing_between_the_two_passes_is_never_encrypted_twice():
                 sent.append(piece)
     with pytest.raises(replica.MediaUnavailable, match="changed while"):
         asyncio.run(replica.upload(S3(), b"k" * 32, "object", lambda: io.BytesIO(next(versions)), {}))
-    # The header and the first chunk, identical to the first pass, went out; the changed chunk did not.
+
     assert len(sent) == 2

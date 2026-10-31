@@ -3,7 +3,7 @@
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
   let host, lang = "en", frame = 0, playing = !motion.matches, visible = false, timer, observer;
   let scenario = "original";
-  const t = (en, ru) => lang === "ru" ? ru : en;
+  const t = (en, ru) => window.TGW_CAPTURE_LOCALES?.[lang]?.[en] ?? (lang === "ru" ? ru : en);
   const icon = name => `<svg viewBox="0 0 24 24" class="icon" aria-hidden="true">${{
     key: '<circle cx="8" cy="9" r="4"/><path d="m11 12 9 9m-4-4 3-3m-6 0 3-3"/>',
     chat: '<path d="M21 11a8 8 0 0 1-8 8H8l-5 3V7a4 4 0 0 1 4-4h6a8 8 0 0 1 8 8Z"/><path d="M7 8h9M7 12h6"/>',

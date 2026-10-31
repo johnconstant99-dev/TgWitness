@@ -2,6 +2,8 @@ from starlette.responses import JSONResponse
 
 
 def request_limit(path, default=16384):
+    if "/api/analysis/reports/" in path:
+        return 65536
     if path.endswith("/api/auth/import"):
         from .account_import import IMPORT_REQUEST_LIMIT
         return IMPORT_REQUEST_LIMIT

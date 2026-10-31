@@ -78,7 +78,7 @@ def route(font, mobile=False, still=False):
         d.text(subtitle, x, y + 40, 18 if mobile else 15, "#b4cee8")
         d.text(caption, x, y + 68, 16 if mobile else 13, "#91abc5")
         if not still:
-            # Only the travelling emphasis changes; all labels remain readable.
+
             d.add(f'<circle cx="{cx}" cy="{cy}" r="18" fill="none" stroke="#b7e1fc" stroke-width="2" opacity="0">'
                   '<animate attributeName="opacity" values="0;1;0;0" '
                   f'keyTimes="0;.1;.25;1" begin="{i*2}s" dur="8s" repeatCount="indefinite"/></circle>')

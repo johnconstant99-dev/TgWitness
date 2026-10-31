@@ -24,7 +24,7 @@ MODES = NAMES
 DEPLOYMENT_FILE = "etc/tgwitness/assurance.json"
 PREINSTALL_FILE = "etc/tgwitness/preinstall.txt"
 SECRET_LINE = re.compile(r"^([ \t]*)(TGWITNESS_TOKEN|TGWITNESS_TUNNEL_TOKEN)=.*$", re.M)
-# glibc struct utmp on 64-bit Linux: type, pid, line, id, user, host, exit, session, tv, addr, reserved.
+
 UTMP = struct.Struct("<h2xi32s4s32s256shhiii16s20s")
 USER_PROCESS = 7
 SSH_PROCESSES = ("sshd", "sshd-session")
@@ -50,7 +50,7 @@ def user_data_hashes(text):
 
 
 def metadata_request(url, method="GET", headers=None, timeout=2):
-    # The link-local service must never be asked through a configured HTTP proxy.
+
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
     with opener.open(urllib.request.Request(url, method=method, headers=headers or {}), timeout=timeout) as response:
         return response.read(256 * 1024).decode()
@@ -146,7 +146,7 @@ def deployment(root=Path("/")):
 def snapshot(selected, provider, root=Path("/"), detail=False):
     """The measured host. With detail (the signed start record), a hand-installed server adds
     the inventory its installer took before changing anything."""
-    # The signed start record keeps the user data hashes; its text goes to the statement only.
+
     value = {"format": "tgwitness-host-v1", "mode": selected, "measured_at": utcnow(),
              "provider": {k: v for k, v in provider.items() if k != "user_data_redacted"},
              "deployment": deployment(root), **host_state(root), "attestation": ATTESTATION}
@@ -177,8 +177,8 @@ async def assurance_loop(store, selected, provider, interval=60, root=Path("/"))
         await asyncio.sleep(interval)
 
 
-PRIVATE_HOST = ("recent_logins",)  # login sources: in the signed journal, not on the public endpoint
-PRIVATE_PROVIDER = ("public_ipv4",)  # the origin address the tunnel keeps out of public view
+PRIVATE_HOST = ("recent_logins",)
+PRIVATE_PROVIDER = ("public_ipv4",)
 
 
 def statement(vault, receipt, run_event_seq, selected, provider, challenge=None, root=Path("/")):

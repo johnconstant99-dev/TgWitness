@@ -49,7 +49,7 @@ def test_public_archive_refuses_symlinked_source(tmp_path):
     outside = tmp_path / "private.txt"
     outside.write_text("Synthetic secret", encoding="utf-8")
     link = root / "tools/linked.py"
-    link.parent.mkdir()
+    link.parent.mkdir(exist_ok=True)
     try:
         link.symlink_to(outside)
     except OSError:

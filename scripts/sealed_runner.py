@@ -67,7 +67,7 @@ def start():
     recipient = os.environ.get("RECIPIENT", "")
     if not re.fullmatch(r"[A-Za-z0-9+/]{500,1500}={0,2}", recipient):
         raise ValueError("Paste the public recipient from the setup helper")
-    directory.mkdir(mode=0o700)  # Refuse a prepopulated workspace, including reruns.
+    directory.mkdir(mode=0o700)
     for part in ("config", "data", "out", "public"):
         (directory / part).mkdir(mode=0o700)
     commit = command(["git", "-C", str(ROOT), "rev-parse", "HEAD"])
@@ -84,7 +84,7 @@ def start():
         *restrictions(), "--mount", f"type=bind,src={directory / 'config'},dst=/config,readonly",
         "--mount", f"type=bind,src={directory / 'data'},dst=/data",
         "--mount", f"type=bind,src={directory / 'out'},dst=/output", name])
-    # Wait for the API to be listening before publishing a connection artifact.
+
     deadline = time.monotonic() + 90
     while True:
         try:
@@ -100,7 +100,7 @@ def start():
         TUNNEL_IMAGE, "tunnel", "--no-autoupdate", "--url", "http://collector:8787"], timeout=180)
     deadline = time.monotonic() + 90
     while True:
-        # cloudflared prints its URL to stderr. Never relay its full logs to GitHub.
+
         result = subprocess.run(["docker", "logs", name + "-tunnel"], capture_output=True, text=True, timeout=10)
         match = re.search(r"https://[a-z0-9-]+\.trycloudflare\.com", result.stdout + result.stderr)
         if match:
@@ -125,7 +125,7 @@ def wait():
         if command(["docker", "inspect", "--format", "{{.State.Running}}", name]) != "true":
             raise RuntimeError("Capture stopped before producing a result")
         time.sleep(2)
-    # All network-facing processes stop BEFORE the attestation step sees the ZIP.
+
     command(["docker", "rm", "--force", name + "-tunnel"], check=False)
     command(["docker", "stop", "--time", "40", name], timeout=60, check=False)
     if json.loads(result.read_bytes()) != {"phase": "sealed"}:
@@ -138,7 +138,7 @@ def wait():
 
 def pack():
     directory, name = location()
-    # This path comes from the pinned attest action's output, never a workflow input.
+
     bundle = Path(os.environ["ATTESTATION_BUNDLE"]).resolve(strict=True)
     parent = Path(os.environ["RUNNER_TEMP"]).resolve(strict=True)
     if not bundle.is_relative_to(parent) or bundle.is_symlink() or bundle.stat().st_size > 16 * 1024**2:
@@ -155,7 +155,7 @@ def cleanup():
     command(["docker", "stop", "--time", "40", name], timeout=60, check=False)
     command(["docker", "rm", "--force", name, name + "-tunnel"], check=False)
     command(["docker", "network", "rm", name], check=False)
-    # Keep only explicitly encrypted public artifacts. No shred/physical-erasure claim.
+
     for part in ("data", "config", "out"):
         target = directory / part
         if target.is_symlink() or target.resolve().parent != directory.resolve():

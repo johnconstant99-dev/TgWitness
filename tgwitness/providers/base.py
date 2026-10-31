@@ -83,15 +83,15 @@ class Provider(Api):
     {resource, id, command, started, finished, status, actor}. metadata() runs on the server.
     """
     key = title = ""
-    location = mode = None  # set from the deployment before any call
-    variables = ()  # environment variables holding the credentials, first is the main one
-    defaults = {}  # location and image when not given
+    location = mode = None
+    variables = ()
+    defaults = {}
     example_type = ""
     ssh_key_help = "name or ID of an SSH key in the provider account"
     user_data_limit = 32 * 1024
-    window = 1800  # seconds after creation in which deployment actions are expected
+    window = 1800
     log_retention = "see the provider's documentation"
-    limits = ()  # what this provider's records cannot show
+    limits = ()
     write_access = read_access = ""
     CREATION, DEPLOYMENT, INTERRUPTIONS, READ_ONLY = (), (), (), ()
     ACCESS, FAIL, REVIEW = {}, {}, {}
@@ -153,7 +153,7 @@ class Provider(Api):
         deadline = time.monotonic() + timeout
         while True:
             value = check()
-            if value is not None and value is not False:  # an XML element without children is falsy
+            if value is not None and value is not False:
                 return value
             if time.monotonic() > deadline:
                 raise DeployError(self.title + ": " + what + " did not finish in time")

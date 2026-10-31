@@ -123,8 +123,7 @@ def main():
             checks.append("late export size response cannot open a dialog for another workspace")
             page.close()
 
-            # A locked data file must leave an actionable error, even when the
-            # account being deleted is the one currently selected in the panel.
+
             doomed = post("/api/profiles", {"label": "Incomplete deletion"})["id"]
             directory = Path(temporary) / "profiles" / doomed
             page = page_for_case()

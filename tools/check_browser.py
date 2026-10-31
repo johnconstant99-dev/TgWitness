@@ -25,7 +25,6 @@ from tgwitness.verify import verify_bundle
 from test_collector import FakeClient, saved_session
 
 
-# Automatic MTProxy, the default route, would resolve and check public proxies; this check stays offline.
 async def _listed(route, operator=False):
     return route
 
@@ -42,8 +41,8 @@ ProxyPool.pin, ProxyPool.probe, ProxyPool.run = staticmethod(_listed), staticmet
 
 
 def launch_browser(p):
-    # TGWITNESS_BROWSER_CHANNEL=msedge or chrome uses an installed browser instead of
-    # the Playwright download, e.g. on filesystems where its installer cannot lock.
+
+
     return p.chromium.launch(headless=True, channel=os.environ.get("TGWITNESS_BROWSER_CHANNEL") or None)
 
 
@@ -76,7 +75,7 @@ def unlock(page, server):
     if server.app.state.store.get_setting("demo",False):
         expect(page.locator("#workspace")).to_be_visible()
         expect(page.locator("#gate")).not_to_be_visible()
-        # The demo opens on the readable chat view: messages, deletions and edits are visible at once.
+
         expect(page.locator("#view-chats")).to_be_visible()
         expect(page.locator("#chats-list .chat-item")).to_have_count(3)
         expect(page.locator("#chat-feed .msg").first).to_be_visible()
@@ -85,7 +84,7 @@ def unlock(page, server):
         page.locator('#chat-status .filter', has_text="Deleted").click()
         expect(page.locator("#chat-feed .msg:not(.deleted)")).to_have_count(0)
         page.locator('#chat-status .filter', has_text="All").click()
-        # People: everyone with saved messages; a row narrows the feed to that person.
+
         page.locator('#chat-status .filter', has_text="People").click()
         expect(page.locator("#chat-feed .people-table tbody tr")).to_have_count(4)
         page.locator("#chat-feed .people-table tbody tr").first.click()
@@ -117,9 +116,8 @@ def check_layout(page, connection=False):
         row = page.locator("#events-body tr").first
         assert row.locator("td").nth(2).is_visible() or row.locator(".event-mobile-meta").is_visible(), \
             "Timeline timestamps disappeared at this width"
-    # Solid-background text contrast, including alpha-composited ancestor backgrounds.
-    # Faint decorative gradients count as the colour beneath them; image backgrounds are skipped.
-    # Not a replacement for a screen-reader/complete WCAG audit.
+
+
     failures = page.evaluate("""() => {
       const rgba=s=>(s.match(/[\\d.]+/g)||[]).map(Number);
       const blend=(fg,bg)=>fg.slice(0,3).map((v,i)=>v*(fg[3]??1)+bg[i]*(1-(fg[3]??1)));
@@ -163,16 +161,60 @@ def release_api_response(page):
     }""")
 
 
+def check_reading_states(browser, server):
+    page = browser.new_page(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce")
+    page.goto(server.url)
+    expect(page.locator("#chat-feed .msg").first).to_be_visible()
+    names = page.locator(".sender-details")
+    expect(names.first.locator(".sender-facts")).to_be_hidden()
+    names.first.locator("summary").click()
+    expect(names.first.locator(".sender-facts")).to_be_visible()
+    expect(page.locator("#chat-feed")).to_have_attribute("data-pattern", "plain")
+    page.locator("#chat-pattern").click()
+    page.reload()
+    expect(page.locator("#chat-feed")).to_have_attribute("data-pattern", "dots")
+    page.locator("#chat-pattern").click()
+    page.route("**/messages?*", lambda route: route.fulfill(status=503, json={"detail": "Synthetic failure"}))
+    page.locator("#chats-list .chat-item").nth(1).click()
+    expect(page.locator('#chat-feed [data-state="error"]')).to_be_visible()
+    page.unroute("**/messages?*")
+    page.locator('#chat-feed .ui-state button').click()
+    expect(page.locator("#chat-feed .msg").first).to_be_visible()
+    original = page.locator("#chat-feed .bubble-text").all_text_contents()
+    page.route("**/messages?*", lambda route: route.fulfill(status=503, json={"detail": "Synthetic failure"}))
+    page.evaluate('loadChatMessages("refresh")')
+    assert page.locator("#chat-feed .bubble-text").all_text_contents() == original
+    expect(page.locator("#chat-feed .refresh-notice")).to_be_visible()
+    page.unroute("**/messages?*")
+    page.locator("#chat-feed .refresh-notice button").click()
+    expect(page.locator("#chat-feed .refresh-notice")).to_have_count(0)
+    page.evaluate('state.chatAuthor=999999;renderChatFeed()')
+    expect(page.locator('#chat-feed [data-state="filtered-empty"]')).to_be_visible()
+    page.locator('#chat-feed .ui-state button').click()
+    assert page.locator("#chat-feed .bubble-text").all_text_contents() == original
+    for theme in ("light", "dark"):
+        page.emulate_media(color_scheme=theme)
+        for view in ("chats", "sources", "parameters"):
+            page.locator(f'[data-view="{view}"]').first.click()
+            if view == "sources":
+                page.locator("#source-options").evaluate("n=>n.open=true")
+                page.locator(".media-rules-details").evaluate("n=>n.open=true")
+            check_layout(page)
+    page.close()
+
+
 def check_languages(browser, server):
     """Every shipped string has a translation or explicit English fallback; language choice works."""
     context = browser.new_context(viewport={"width": 1440, "height": 1060}, reduced_motion="reduce")
     page, errors, keys = context.new_page(), [], []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
-    page.route("**/app.js*", lambda route: route.abort())  # the static markup only, as shipped
+    panel_scripts = ("app.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js")
+    for script in panel_scripts:
+        page.route("**/" + script + "*", lambda route: route.abort())
     page.goto(server.url + "/")
     keys += page.evaluate("pageKeys()")
-    # The guides rewrite their links after translating: list their markup before that, as
-    # tools/check_guide_languages.py does.
+
+
     shipped = (ROOT / "tgwitness/static/i18n.js").read_text(encoding="utf-8").split("translatePage();\n")[0]
     page.route("**/i18n.js*", lambda route: route.fulfill(body=shipped, content_type="text/javascript"))
     for name in ("/guide.html", "/dedicated-account.html"):
@@ -181,9 +223,10 @@ def check_languages(browser, server):
     page.unroute("**/i18n.js*")
     journal = page.locator('[data-view="observations"]').first
     page.goto(server.url)
-    english = " ".join(journal.inner_text().split()[:-1])  # without the event counter
-    page.unroute("**/app.js*")
-    # A shared panel link must select its language, even with a different saved choice.
+    english = " ".join(journal.inner_text().split()[:-1])
+    for script in panel_scripts:
+        page.unroute("**/" + script + "*")
+
     context.add_cookies([{"name": i18n.COOKIE, "value": "ru", "url": server.url}])
     page.goto(server.url + "/?lang=de")
     expect(page.locator("html")).to_have_attribute("lang", "de")
@@ -232,14 +275,14 @@ def check_themes(browser, server):
     expect(html).to_have_attribute("data-theme", "light")
     expect(sidebar.locator('[data-theme-choice="light"]')).to_have_attribute("aria-pressed", "true")
     page.reload()
-    expect(html).to_have_attribute("data-theme", "light")  # the saved choice wins over the dark system setting
+    expect(html).to_have_attribute("data-theme", "light")
     sidebar.locator('[data-theme-choice="system"]').click()
     expect(html).to_have_attribute("data-theme", "dark")
     page.emulate_media(color_scheme="light")
-    expect(html).to_have_attribute("data-theme", "light")  # "system" follows a change of the system setting
+    expect(html).to_have_attribute("data-theme", "light")
     page.emulate_media(color_scheme="dark")
     expect(html).to_have_attribute("data-theme", "dark")
-    # With reduced motion requested, the panel stays still until "Animations always on" is chosen.
+
     motion, view = page.locator(".sidebar [data-motion-toggle]"), page.locator("#view-chats")
     expect(motion).to_have_attribute("aria-pressed", "false")
     assert view.evaluate("n => getComputedStyle(n).animationDuration") != "0.3s"
@@ -252,7 +295,7 @@ def check_themes(browser, server):
     motion.click()
     expect(html).not_to_have_attribute("data-motion", "always")
     page.emulate_media(reduced_motion="no-preference")
-    expect(motion).to_be_hidden()  # offered only when the system asks for less motion
+    expect(motion).to_be_hidden()
     page.emulate_media(reduced_motion="reduce")
     page.locator("#top-lock").click()
     expect(page.locator("#gate")).to_be_visible()
@@ -329,7 +372,7 @@ def main():
             bundle = output / "browser-evidence.zip"
             pending.value.save_as(bundle)
             assert verify_bundle(bundle)["events"] > 25
-            # Native streaming branch: mock only the OS file chooser/writable, keep real API bytes.
+
             page.evaluate("""() => {window.savedChunks=[];window.writerClosed=false;window.writerAborted=false;
               window.showSaveFilePicker=async()=>({createWritable:async()=>({
                 write:async bytes=>window.savedChunks.push(Array.from(bytes)),
@@ -388,7 +431,7 @@ def main():
             assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
             check_layout(page)
             page.screenshot(path=str(output / "mobile.png"), full_page=True)
-            # Saved content is text, including HTML-shaped hostile source strings.
+
             demo.app.state.store.append("message.new", {
                 "text": '<img src=x onerror="window.sourceExecuted=true"><script>window.sourceExecuted=true</script>',
                 "synthetic": True}, -100100001, 999)
@@ -399,9 +442,9 @@ def main():
             expect(page.locator("#gate")).to_be_visible()
             assert page.evaluate("sessionStorage.getItem('tgwitness-token')") is None
             page.set_viewport_size({"width": 1440, "height": 1060})
-            # Real panel onboarding with a fake transport. No Telegram network calls.
+
             unlock(page, live)
-            expect(page.locator("#empty-events")).not_to_be_visible()  # process.start is a real operational event
+            expect(page.locator("#empty-events")).not_to_be_visible()
             expect(page.locator("#view-connection")).to_be_visible()
             expect(page.locator("#protection-summary")).to_contain_text("Not encrypted by TgWitness")
             check_layout(page, connection=True)
@@ -427,7 +470,7 @@ def main():
             page.screenshot(path=str(output / "connection-mobile.png"), full_page=True)
             page.set_viewport_size({"width":1440,"height":1060})
             page.locator("#phone").fill("+15550001111")
-            # Empty API fields use the built-in pair; an incomplete own pair is stopped locally.
+
             expect(page.locator("#api-state")).to_have_text("Built-in")
             page.locator("#api-details > summary").click()
             page.locator("#api-id").fill("123")
@@ -449,10 +492,10 @@ def main():
             page.locator("#network-test").click()
             expect(page.locator("#network-result")).to_contain_text("Telegram transport connected")
             page.get_by_role("button", name="Choose sources").click()
-            # Without enabled sources the chat list loads on its own.
+
             expect(page.locator("#available-card")).to_be_visible()
             expect(page.locator("#load-dialogs")).to_have_text("Reload chats")
-            page.get_by_role("button", name="Add source").first.click()  # the group; private chats are listed too
+            page.get_by_role("button", name="Add source").first.click()
             expect(page.locator("#target-list .target-row")).to_have_count(1)
             page.locator("#finish-source-selection").click()
             expect(page.locator("#available-card")).not_to_be_visible()
@@ -483,7 +526,7 @@ def main():
             expect(page.locator("#capture-unsaved")).to_have_text("")
             saved = live.app.state.store.get_setting("capture")
             assert (saved["download_media"], saved["max_media_mb"]) == (False, 20)
-            # "Maximum file size" sets the limit of every attachment type.
+
             assert len(saved["types"]) == 8 and all(r == {"enabled": True, "max_mb": 20} for r in saved["types"].values())
             check_layout(page)
             expect(page.locator("#toast")).not_to_be_visible(timeout=10000)
@@ -499,7 +542,7 @@ def main():
             expect(page.locator("#toast")).to_contain_text("Saved 3 history observations", timeout=15000)
             page.locator("#collector-toggle").click()
             expect(page.locator("#collector-toggle")).to_have_text("Start observation")
-            # Parameters: every limit is editable in the panel and each change is journaled.
+
             page.locator('[data-view="parameters"]').click()
             expect(page.locator("#parameters-groups .parameters-group")).to_have_count(8)
             page.locator("#parameter-recheck_max_chats").fill("0")
@@ -541,26 +584,26 @@ def main():
             session_path = run / "synthetic.tgwitness-session"
             session_path.write_text(saved_session(), encoding="ascii")
             page.locator("#session-file").set_input_files(session_path)
-            # No API fields: the converted session connects with a built-in pool pair.
+
             page.locator("#auth-continue").click()
             expect(page.locator("#authorized-state")).to_be_visible()
             child_vault = live.app.state.profiles.entries[second_profile]["app"].state.vault
             assert child_vault.read("credentials")["api_id"] in api_pool.POOL_IDS, "Expected a built-in pool pair"
             page.get_by_role("button", name="Choose sources").click()
             expect(page.locator("#available-card")).to_be_visible()
-            page.get_by_role("button", name="Add source").first.click()  # the group; private chats are listed too
+            page.get_by_role("button", name="Add source").first.click()
             page.locator("#collector-toggle").click()
             expect(page.locator("#collector-toggle")).to_have_text("Pause observation")
             page.locator("#profile-select").select_option("default")
             expect(page.locator("#collector-toggle")).to_have_text("Start observation")
             expect(page.locator("#stat-messages")).to_have_text("3")
-            # Accounts panel lists both workspaces with identity, status and per-account actions.
+
             page.locator('[data-view="accounts"]').click()
             expect(page.locator("#nav-accounts")).to_have_text("2")
             expect(page.locator("#accounts-list .account-card")).to_have_count(2)
             expect(page.locator("#accounts-list")).to_contain_text("@synthetic")
             expect(page.locator("#accounts-list")).to_contain_text("Collecting")
-            # Delete is offered only for non-default workspaces.
+
             expect(page.locator("#accounts-list .danger")).to_have_count(1)
             page.locator('[data-view="evidence"]').click()
             if not page.locator("#verification-details").get_attribute("open") == "":
@@ -574,7 +617,7 @@ def main():
             expect(page.locator("#collector-toggle")).to_have_text("Pause observation")
             expect(page.locator("#stat-messages")).to_have_text("0")
             expect(page.locator("#verification-result")).to_have_text("")
-            # A late response must stay invalid even after switching away and back.
+
             hold_api_response(page, "/api/verify")
             page.locator("#verify-journal").click()
             expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
@@ -608,12 +651,13 @@ def main():
                 check_layout(page)
             page.screenshot(path=str(output / "guide-mobile.png"), full_page=True)
             page.goto(live.url + "/dedicated-account.html")
-            expect(page.get_by_role("heading", name="Why TgWitness works through public app hash/app ID pairs")).to_be_visible()
+            expect(page.get_by_role("heading", name="API credentials")).to_be_visible()
             for width in (1440,390,320):
                 page.set_viewport_size({"width":width,"height":844})
                 check_layout(page)
             check_languages(browser, demo)
             check_themes(browser, demo)
+            check_reading_states(browser, demo)
             assert not errors, errors
             receipt = {"passed": True, "page_errors": errors, "external_requests": outbound,
                        "scenarios": ["access gate", "filters", "edit comparison", "deleted content", "membership",

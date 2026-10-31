@@ -42,7 +42,7 @@ def owner_only(root: Path):
         if any(root.iterdir()):
             subprocess.run(["icacls", str(root / "*"), "/reset", "/T", "/C", "/Q"], capture_output=True, check=True,
                            timeout=900)
-        # FAT and exFAT accept the command and keep no permissions at all: read them back.
+
         shown = subprocess.run(["icacls", str(root)], capture_output=True, text=True, timeout=60).stdout
         found = subprocess.run(["icacls", str(root), "/findsid", "*" + sid], capture_output=True, text=True,
                                timeout=60).stdout
@@ -95,13 +95,13 @@ class Vault:
             if source.is_relative_to(root.resolve()) or source.stat().st_size > 128:
                 raise RuntimeError("Provide a small master-key file outside the data directory.")
             master = source.read_bytes().strip()
-            Fernet(master)  # Validate before writing a new salt or vault.
+            Fernet(master)
             if not marker.exists():
                 private_write(marker, json.dumps({"format": "tgwitness-external-vault-v1",
                               "salt": base64.b64encode(os.urandom(32)).decode()}).encode())
             config = json.loads(marker.read_bytes())
             salt = base64.b64decode(config["salt"], validate=True)
-            # tgwatch-*: vaults created before the project was renamed.
+
             if config["format"] not in ("tgwitness-external-vault-v1", "tgwatch-external-vault-v1") or len(salt) != 32:
                 raise RuntimeError("Invalid external vault metadata; restore the original file.")
             key = HKDF(algorithm=hashes.SHA256(), length=32, salt=salt,
@@ -147,7 +147,7 @@ class Vault:
 class InstanceLock:
     """One process per data directory; the OS releases the lock after a crash."""
     def __init__(self, root: Path):
-        # This runs before Vault. mkdir(mode=0700) cannot tighten an already-created directory: owner_only does.
+
         root.mkdir(parents=True, exist_ok=True, mode=0o700)
         owner_only(root)
         self.stream = (root / ".instance.lock").open("a+b")

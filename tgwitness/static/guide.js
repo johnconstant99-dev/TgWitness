@@ -1,14 +1,14 @@
 "use strict";
-// Help pages: reading progress, the current section in the navigation, content that eases in,
-// diagrams that play only while visible, and copy buttons for commands. Nothing is hidden or
-// broken without this script; with reduced motion the diagrams show their still state.
+
+
+
 (()=>{
   const root=document.documentElement,observe="IntersectionObserver" in window;
-  const tr=typeof window.tr==="function"?window.tr:text=>text;  // i18n.js, when it loaded
+  const tr=typeof window.tr==="function"?window.tr:text=>text;
   const still=()=>typeof window.tgwReducedMotion==="function"?window.tgwReducedMotion():matchMedia("(prefers-reduced-motion: reduce)").matches;
   root.classList.add("js");
 
-  // Sections without their own link (the extras' details) belong to the link before them.
+
   const nav=document.querySelector("main > nav"),links=nav?[...nav.querySelectorAll('a[href^="#"]')]:[];
   const sections=[...document.querySelectorAll("main > section[id]")],owner=new Map();
   let last=null,active=null;
@@ -22,7 +22,7 @@
     active=link;
     if(!link)return;
     link.setAttribute("aria-current","true");
-    if(nav.scrollWidth>nav.clientWidth){  // the navigation scrolls sideways on narrow screens
+    if(nav.scrollWidth>nav.clientWidth){
       const box=link.getBoundingClientRect(),area=nav.getBoundingClientRect();
       nav.scrollBy({left:box.left+box.width/2-(area.left+area.width/2),behavior:still()?"auto":"smooth"});
     }
@@ -45,7 +45,7 @@
   addEventListener("resize",update);
   update();
 
-  // Blocks below the first screen ease in once, when they are reached.
+
   if(observe&&!still()){
     const reveal=new IntersectionObserver(entries=>entries.forEach(entry=>{
       if(!entry.isIntersecting)return;
@@ -57,14 +57,14 @@
     });
   }
 
-  // A diagram starts from its beginning when it first comes into view and pauses off screen.
+
   const scenes=document.querySelectorAll(".scene");
   if(observe){
     const play=new IntersectionObserver(entries=>entries.forEach(entry=>entry.target.classList.toggle("playing",entry.isIntersecting)),{threshold:.15});
     scenes.forEach(scene=>play.observe(scene));
   }else scenes.forEach(scene=>scene.classList.add("playing"));
 
-  // Copy buttons. The terminal copies only the commands, without prompts or sample output.
+
   const status=document.createElement("p");
   status.className="sr-only";
   status.setAttribute("role","status");

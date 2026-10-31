@@ -11,7 +11,7 @@ def should_open_browser(host, no_browser, environ=os.environ, interactive=None):
     """Only a person starting the panel on this computer gets a browser tab: never in Docker,
     services, scheduled tasks or scripts, and never for an address reachable from elsewhere."""
     if interactive is None:
-        # Windowless starts (pythonw, scheduled tasks) have no console streams at all.
+
         interactive = all(stream is not None and getattr(stream, "isatty", lambda: False)()
                           for stream in (sys.stdin, sys.stdout))
     return interactive and host in LOOPBACK and not no_browser and not environ.get("TGWITNESS_NO_BROWSER")

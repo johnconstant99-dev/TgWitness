@@ -81,7 +81,7 @@ def test_later_checkpoints_do_not_expand_the_verified_export_period(handover):
     capture()
     _, witness_zip = bundles()
     seen = verify_witness(witness_zip)
-    # Avoid depending on the precision of the local test clock.
+
     for i, anchor in enumerate(seen["anchors"]):
         anchor["at"] = f"2026-10-30T12:0{i}:00+00:00"
     result = cross_check_witness(seen, evidence, verify_bundle(evidence))
@@ -99,12 +99,12 @@ def test_copied_collector_key_cannot_rewrite_a_retained_witness_prefix(handover,
     _, witness_zip = bundles()
     (tmp_path / "forged").mkdir()
     forged_store = Store(tmp_path / "forged")
-    forged_store.bind(vault)  # Model an attacker who already owns the collector's private key.
+    forged_store.bind(vault)
     forged_store.append("message.new", {"text": "fabricated replacement"}, 123, 1)
     forged = export_file(forged_store, vault, "zip")
     try:
         verified = verify_bundle(forged, fingerprint(vault.public_key))
-        assert verified["key_pinned"]  # Signatures alone accept the same compromised key.
+        assert verified["key_pinned"]
         with pytest.raises(ValueError, match="disagrees with the retained checkpoint"):
             verify_bundle(forged, fingerprint(vault.public_key), retained)
         checked = cross_check_witness(verify_witness(witness_zip), forged, verified)
@@ -129,17 +129,11 @@ def test_required_witness_needs_archive_and_independently_pinned_key(handover, m
     assert "requires --witness and --witness-fingerprint" in shown.stderr
 
 
-
-
-
-
-
-
 def test_empty_channel_file_does_not_satisfy_requested_external_posts(handover, tmp_path):
     store, _vault, witness, capture, bundles = handover
     store.append("message.new", {"text": "synthetic"}, 123, 1)
     capture()
-    # A signed claim that a post was sent is not the post itself.
+
     anchor = witness.store.events(kind="witness.anchor")[0]
     witness.store.append("witness.posted", {"record": anchor["seq"], "message_id": 101})
     evidence, witness_zip = bundles()
@@ -181,7 +175,7 @@ def test_collector_cannot_count_its_own_key_as_independent_witness(journal, tmp_
     store.append("message.new", {"text": "synthetic"})
     root = tmp_path / "self-witness"
     root.mkdir()
-    # Disposable key used by this test only: no production credentials.
+
     (root / "witness-key.json").write_text(json.dumps({"format": "tgwitness-witness-key-v1",
                                                     **vault.read("signing")}), encoding="utf-8")
     self_witness = Store(root)

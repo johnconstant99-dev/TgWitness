@@ -9,7 +9,7 @@ try:
 except ImportError:
     from site_i18n import LANGUAGES as SITE_LANGUAGES
 
-# Amharic retains its existing guide and notice translations; DeepL does not support it.
+
 EXTRA_LANGUAGES = {
     "am": ("አማርኛ", "am", "ltr", "am_ET"),
 }
@@ -66,9 +66,9 @@ def render_page(template, words, *, lang, base_url, values, dictionary, render, 
         **values, "LANG": LANGUAGES[lang][1], "DIR": LANGUAGES[lang][2], "HEAD": head,
         "ROOT": relative(".").rstrip("/") + "/", "HOME": relative(base if lang in SITE_LANGUAGES and base else ".") + "/",
         "SETUP": relative("demo/guide.html") + "?lang=" + lang,
-        "DEDICATED": relative("demo/dedicated-account.html") + "?lang=" + lang,
+        "DEDICATED": relative((base if lang in SITE_LANGUAGES else "") + "docs/dedicated-account/") + "/",
         "PANEL": relative("demo/index.html") + "?lang=" + (lang if lang in SITE_LANGUAGES else "en"),
-        "SEALED": relative("sealed.html") + "?lang=" + ("ru" if lang == "ru" else "en"),
+        "SEALED": relative((base if lang in SITE_LANGUAGES else "") + "docs/capture/") + "/",
         "LANGUAGE_MENU": languages, "THEME_TOGGLE": theme, "THEME_SCRIPT": theme_script,
         "LANGUAGE_NOTE": ('<p class="m-note">' + text("linkedEnglish") + '</p>') if lang in EXTRA_LANGUAGES else "",
         "SITE_DICT": json.dumps({**dictionary, **words}, ensure_ascii=False).replace("<", "\\u003c").replace("&", "\\u0026"),

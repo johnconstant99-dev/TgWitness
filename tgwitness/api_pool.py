@@ -3,7 +3,7 @@ import random
 
 from telethon.errors import ApiIdInvalidError, ApiIdPublishedFloodError, UpdateAppToLoginError
 
-# Public application pairs: none entered, none saved and none supplied by an imported account file.
+
 POOL = (
     (2040, "b18441a1ff607e10a989891a5462e627"), (800812, "db55ad67a98df35667ca788b97f771f5"),
     (27097807, "9fd790a9cb1f639c921d941621d2959d"), (1621727, "31350903c528876f79527398c09660ce"),
@@ -33,12 +33,12 @@ POOL = (
 )
 POOL_IDS = frozenset(api_id for api_id, _ in POOL)
 DESKTOP_ID = 2040
-# Client description sent with the Telegram Desktop pair, consistent with the application it identifies.
+
 DESKTOP_DEVICE = {"device_model": "Desktop", "system_version": "Windows 10", "app_version": "5.6.3 x64",
                   "lang_code": "en", "system_lang_code": "en-US"}
-# Telegram refuses the application itself; another pair may still work for the same login.
+
 PAIR_ERRORS = (ApiIdInvalidError, ApiIdPublishedFloodError, UpdateAppToLoginError)
-# Pairs tried per login, so one sign-in never cycles through the whole pool against Telegram.
+
 ATTEMPTS = 8
 rejected = set()
 

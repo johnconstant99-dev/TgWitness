@@ -12,7 +12,7 @@ from tgwitness.verify import verify_dossier
 
 CHAT, OTHER = -1000000000123, -1000000000999
 ALICE, BOB = 70001, 70002
-GENESIS = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"   # a real Bitcoin address (valid checksum)
+GENESIS = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
 EVM = "0x52908400098527886E0F7030069857D2E4169EE7"
 
 
@@ -49,8 +49,8 @@ def test_profiles_cite_records_and_verify_against_an_export(journal, tmp_path):
     avatars = store.root / "avatars"
     avatars.mkdir()
     picture(avatars / (str(ALICE) + ".jpg"), lambda x, y: x * 4)
-    picture(avatars / (str(BOB) + ".jpg"), lambda x, y: min(255, x * 4 + 2))     # nearly the same picture
-    picture(avatars / "70003.jpg", lambda x, y: 255 * ((x // 8 + y // 8) % 2))   # a different one
+    picture(avatars / (str(BOB) + ".jpg"), lambda x, y: min(255, x * 4 + 2))
+    picture(avatars / "70003.jpg", lambda x, y: 255 * ((x // 8 + y // 8) % 2))
 
     value = dossier.signed(store, vault, CHAT, "Harbor", producer())
     people = {p["id"]: p for p in value["statement"]["people"]}
@@ -69,8 +69,8 @@ def test_profiles_cite_records_and_verify_against_an_export(journal, tmp_path):
     assert alice["relations"]["other_chats"] == [{"chat_id": OTHER, "title": None, "messages": 1}]
     cached = alice["avatar"]["cached"]
     assert len(cached["sha256"]) == 64 and len(cached["phash"]) == 16 and "not a journal record" in cached["source"]
-    assert [s["id"] for s in alice["avatar"]["similar"]] == [BOB]  # the checkerboard is not similar
-    # Every cited record is hashed, nothing about profiles entered the journal, and an export confirms the facts.
+    assert [s["id"] for s in alice["avatar"]["similar"]] == [BOB]
+
     assert all(fact["records"] for fact in alice["names"]) and value["statement"]["record_hashes"]
     assert not store.events(search="Alice Ann", kind="dossier.changed")
     bundle = export_file(store, vault, "zip")
@@ -78,7 +78,7 @@ def test_profiles_cite_records_and_verify_against_an_export(journal, tmp_path):
     path.write_text(json.dumps(value), encoding="utf-8")
     result = verify_dossier(path, value["fingerprint"], bundle)
     assert result["people"] == 2 and result["records_checked"] == len(value["statement"]["record_hashes"])
-    # The export is verified too: a record changed behind an unchanged hash field is caught.
+
     tampered = tmp_path / "tampered.zip"
     with zipfile.ZipFile(bundle) as source, zipfile.ZipFile(tampered, "w") as target:
         for item in source.infolist():
@@ -113,7 +113,7 @@ def test_profiles_check_the_export_belongs_to_the_same_workspace(journal, tmp_pa
 
 def test_private_chat_profiles_include_the_other_person(journal):
     store, _ = journal
-    say(store, ALICE, 1, ALICE, "send to " + GENESIS, "Alice")  # a private chat's ID is the person's ID
+    say(store, ALICE, 1, ALICE, "send to " + GENESIS, "Alice")
     say(store, ALICE, 2, BOB, "who is this", "Bob")
     people = {p["id"] for p in dossier.build(store, ALICE)["people"]}
     assert people == {ALICE, BOB}
@@ -137,7 +137,7 @@ def test_repeat_observations_do_not_inflate_reply_and_cross_chat_counts(journal)
     store.append("message.snapshot", dict(other["payload"]), OTHER, 3, BOB)
     repeated, parent = bob()
     assert repeated["replies_to"][0]["count"] == 1 and parent["replied_by"] == [{"id": BOB, "count": 1}]
-    assert len(repeated["replies_to"][0]["records"]) > 1  # every observation is still cited
+    assert len(repeated["replies_to"][0]["records"]) > 1
     assert repeated["other_chats"] == [{"chat_id": OTHER, "title": None, "messages": 1}]
     say(store, CHAT, 4, BOB, "A second, different reply", "Bob", reply=1)
     second, parent = bob()

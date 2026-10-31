@@ -34,7 +34,7 @@ def main():
         browser = launch_browser(p)
         page = browser.new_page(viewport=desktop, reduced_motion="reduce")
 
-        # Chats, journal, detail drawer, sources and exports from the synthetic demo.
+
         unlock(page, demo)
         page.locator('[data-view="chats"]').click()
         expect(page.locator("#chat-feed .msg").first).to_be_visible()
@@ -43,7 +43,7 @@ def main():
         expect(page.locator("#events-body tr").first).to_be_visible()
         page.locator("#journal-overview > summary").click()
         shoot(page, "workspace.png")
-        # The same two views in the dark theme.
+
         dark = browser.new_page(viewport=desktop, reduced_motion="reduce", color_scheme="dark")
         dark.goto(demo.url)
         expect(dark.locator("#chat-feed .msg").first).to_be_visible()
@@ -61,7 +61,7 @@ def main():
         page.get_by_role("button", name="All events", exact=True).click()
         page.locator('[data-view="sources"]').click()
         page.locator("#source-options > summary").click()
-        # Demo controls are read-only; show them as they appear in a live workspace.
+
         page.evaluate("document.querySelectorAll('#view-sources [disabled]').forEach(n => n.disabled = false)")
         shoot(page, "sources.png", full_page=not args.docs)
         page.locator('[data-view="evidence"]').click()
@@ -81,7 +81,7 @@ def main():
         if not args.docs:
             shoot(page, "gate.png")
 
-        # Account entry and QR sign-in against a fake transport with a synthetic token.
+
         unlock(page, live)
         expect(page.locator("#phone")).to_be_visible()
         shoot(page, "connection.png")

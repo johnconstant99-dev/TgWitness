@@ -64,7 +64,7 @@ def test_history_populates_journal_and_signed_export(journal, monkeypatch):
         report_path.write_bytes(canonical(report))
         assert verify_history_report(report_path, fingerprint(journal[1].public_key), bundle)["evidence_counts_checked"]
         assert not verify_history_report(report_path)["evidence_counts_checked"]
-        # A valid signature with fabricated counters must still conflict with the journal.
+
         report["statement"]["captured"] += 1
         report["statement"]["sources"][0]["captured"] += 1
         report["signature"] = journal[1].sign(canonical(report["statement"]))
@@ -92,7 +92,7 @@ def test_pause_restart_resume_does_not_repeat_saved_messages(journal, monkeypatc
         await asyncio.wait_for(entered.wait(), 3)
         assert h.status()["captured"] == 2
         await h.pause("process_shutdown")
-        # New messages after the upper boundary must not leak into the resumed run.
+
         rows.insert(0, telegram_message(99))
         collector.client.get_messages = original
         collector.history = history.History(collector)
@@ -319,7 +319,7 @@ def test_cursor_survives_database_close_and_reopen(tmp_path, monkeypatch):
         await asyncio.wait_for(entered.wait(), 3)
         collector.history.task.cancel()
         await asyncio.gather(collector.history.task, return_exceptions=True)
-        store.close()  # no history pause transition was saved
+        store.close()
         store = Store(tmp_path)
         store.bind(vault)
         try:

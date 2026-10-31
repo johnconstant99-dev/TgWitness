@@ -35,7 +35,7 @@ def export_server():
 
     class Server(ThreadingHTTPServer):
         def handle_error(self, request, client_address):
-            pass  # Clients abort keep-alive connections on purpose in these tests.
+            pass
 
     server = Server(("127.0.0.1", 0), Handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)

@@ -35,7 +35,7 @@ def sign(method, url, headers, payload_hash, access_key, secret_key, region, now
     signature = hmac.new(key, string_to_sign.encode(), hashlib.sha256).hexdigest()
     signed_headers["authorization"] = ("AWS4-HMAC-SHA256 Credential=" + access_key + "/" + scope
                                        + ",SignedHeaders=" + names + ",Signature=" + signature)
-    signed_headers.pop("host")  # the HTTP client writes Host itself
+    signed_headers.pop("host")
     return signed_headers
 
 

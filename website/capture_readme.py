@@ -39,8 +39,8 @@ def capture(page, mobile):
 
 
 def save_sequence(name, states):
-    # Hold each real application state long enough to read it. Short dissolves
-    # connect the screenshots; no content is invented or changed in the panel.
+
+
     frames, durations = [], []
     for index, frame in enumerate(states):
         frames.append(frame)
@@ -52,7 +52,7 @@ def save_sequence(name, states):
     target = OUT / f"{name}.webp"
     frames[0].save(target, save_all=True, append_images=frames[1:], duration=durations,
                    loop=0, quality=86, method=6, minimize_size=True)
-    # The expanded versions are also useful when the reader prefers no motion.
+
     states[1].save(OUT / f"{name}-still.webp", quality=91, method=6)
     with Image.open(target) as result:
         assert result.n_frames == len(frames), (name, result.n_frames)

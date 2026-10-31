@@ -31,7 +31,7 @@ def test_replayed_response_never_advances_or_receives_an_ok_witness_post(journal
             elif attack == "empty_capture":
                 answer["capture"] = {}
             elif attack == "edit_challenge":
-                # Knowing the new challenge is insufficient without a new valid signature.
+
                 answer["capture"]["statement"]["challenge"] = headers["X-TgWitness-Challenge"]
         return 200, {}, canonical(answer)
 
@@ -54,7 +54,7 @@ def test_replayed_response_never_advances_or_receives_an_ok_witness_post(journal
         assert witness.store.get_setting("last_seen") == before
         assert len(posts) == 1 and "ANSWER FAILED VERIFICATION" in posts[0]
 
-        # A later honest answer must recover without resetting the retained key or state.
+
         mode["replay"] = False
         recovered = asyncio.run(witness.tick())
         assert recovered["payload"]["status"] == "ok"

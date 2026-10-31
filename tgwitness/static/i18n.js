@@ -1,6 +1,6 @@
 "use strict";
-// Interface translation. Keys are the English interface strings. Telegram content and journal
-// records are never passed through here, so evidence is always shown exactly as saved.
+
+
 const LANG=window.TGW_LANG||"en",DICT=window.TGW_DICT||{};
 const PANEL_LANGUAGES={en:"English",ru:"Русский",uk:"Українська",es:"Español",pt:"Português (Brasil)",tr:"Türkçe",
   ar:"العربية",fa:"فارسی",ur:"اردو",hi:"हिन्दी",id:"Bahasa Indonesia",vi:"Tiếng Việt",zh:"简体中文",
@@ -11,7 +11,7 @@ const LANGUAGES=window.TGW_SCOPE==="guide"?GUIDE_LANGUAGES:PANEL_LANGUAGES;
 const RTL=new Set(["ar","fa","ur","he"]);
 function fill(text,vars){return vars?text.replace(/\{(\w+)\}/g,(m,k)=>k in vars?String(vars[k]):m):text;}
 function tr(text,vars){const out=DICT[text];return fill(typeof out==="string"?out:text,vars);}
-// One/other English forms; translations of the "other" form may give every plural category.
+
 function trn(one,other,n,vars){
   const all={n:Number(n).toLocaleString(),...vars},forms=DICT[other];
   if(forms&&typeof forms==="object")return fill(forms[new Intl.PluralRules(LANG).select(Number(n))]??forms.other,all);
@@ -22,7 +22,7 @@ const SKIP=new Set(["SCRIPT","STYLE","TEMPLATE","PRE","TEXTAREA"]);
 const normal=s=>s.replace(/\s+/g," ").trim();
 const wordy=s=>/\p{L}/u.test(s);
 function inlineOnly(el){return [...el.children].every(c=>INLINE.has(c.tagName)&&!c.id&&inlineOnly(c));}
-// Visits the static page the same way for translating and for listing keys in tests.
+
 function walkPage(visit,root=document.body){
   const walk=el=>{
     if(el.namespaceURI!=="http://www.w3.org/1999/xhtml"||SKIP.has(el.tagName)||el.hasAttribute("data-no-translate"))return;
@@ -63,14 +63,14 @@ function setLanguage(lang){
 }
 translatePage();
 document.querySelectorAll("[data-sealed-helper]").forEach(link=>{
-  const url=new URL(link.href);url.searchParams.set("lang",LANG==="ru"?"ru":"en");link.href=url.href;
+  const url=new URL(link.href);url.searchParams.set("lang",LANG);link.href=url.href;
 });
 if(window.TGW_SCOPE==="guide")document.querySelectorAll('a[href]:not([href^="#"])').forEach(link=>{
   const url=new URL(link.href,location.href);
   if(url.origin===location.origin&&/\/(?:guide|dedicated-account)\.html$/.test(url.pathname)){
-    // Translated inline HTML keeps application-root links. Resolve both guides beside
-    // the current page so the same dictionary also works under the Pages project path.
-    // In-page links are left alone: with a new query string they would reload the page.
+
+
+
     url.pathname=new URL(url.pathname.split("/").pop(),location.href).pathname;
     url.searchParams.set("lang",LANG);link.href=url.href;
   }

@@ -1,5 +1,5 @@
-// Progressive enhancement: the screenshots and setup instructions work without JS.
-// Translations for this page's language, embedded by the site build; English is the key and the fallback.
+
+
 const DICT = (() => { try { return JSON.parse(document.getElementById('site-dict')?.textContent || '{}'); } catch { return {}; } })();
 const T = (text, values = {}) => (DICT[text] || text).replace(/\{(\w+)\}/g, (match, key) => key in values ? values[key] : match);
 document.querySelectorAll('[data-tabs]').forEach(group => {
@@ -60,8 +60,8 @@ if (navigator.clipboard && window.isSecureContext) {
   });
 }
 
-// The illustrated history is fictional. Automatic motion never announces updates
-// to assistive technology, and stops off screen, in hidden tabs, or on request.
+
+
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
 const record = document.querySelector('.record');
 if (record) {
@@ -121,8 +121,8 @@ if (record) {
   syncMotion();
 }
 
-// Large screenshots remain useful on a phone. Native dialog supplies Escape,
-// focus containment, and focus restoration; no gallery library is needed.
+
+
 if ('HTMLDialogElement' in window && document.querySelector('.screen-frame > img')) {
   const dialog = document.createElement('dialog');
   dialog.className = 'screenshot-dialog';
@@ -166,7 +166,7 @@ if ('HTMLDialogElement' in window && document.querySelector('.screen-frame > img
   });
 }
 
-// Animate only the section heading, never gate access to the page's content.
+
 if ('IntersectionObserver' in window && !motionPreference.matches) {
   const reveal = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -178,7 +178,7 @@ if ('IntersectionObserver' in window && !motionPreference.matches) {
   document.querySelectorAll('.section-heading, .principles article, .bundle, .closing').forEach(element => reveal.observe(element));
 }
 
-// Light or dark: the system's choice until the reader picks one; kept in this browser only.
+
 const themeToggle = document.querySelector('[data-theme-toggle]');
 if (themeToggle) {
   const sync = () => themeToggle.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark'));
@@ -188,12 +188,12 @@ if (themeToggle) {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.classList.add('theme-changing');
     document.documentElement.dataset.theme = next;
-    try { localStorage.setItem('tgw-theme', next); } catch { /* private mode */ }
+    try { localStorage.setItem('tgw-theme', next); } catch {                    }
     sync();
     setTimeout(() => document.documentElement.classList.remove('theme-changing'), 400);
   });
 }
-// The language list closes on Escape or a click elsewhere.
+
 const languageMenu = document.querySelector('.lang-menu');
 if (languageMenu) {
   document.addEventListener('click', event => { if (!languageMenu.contains(event.target)) languageMenu.open = false; });

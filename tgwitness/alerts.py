@@ -20,8 +20,7 @@ from . import netclient
 from . import tuning
 from .store import utcnow
 
-# Pace, lines per notification and excerpt length are panel parameters (tuning.PARAMETERS);
-# these are their defaults.
+
 BATCH = 2000
 MAX_LINES = 25
 EXCERPT_CHARS = 120
@@ -29,14 +28,14 @@ CHANGES = {"message.deleted": "deleted", "message.edited": "edited", "message.mi
 PROBLEM_KINDS = ("storage.low", "storage.ok", "coverage.gap", "collector.error", "connection.retry_failed",
                  "source.access_unconfirmed", "export.failed", "chat_export.interrupted", "replica.completed",
                  "anchor.completed", "profile.unavailable", "host.state")
-# Panel list: newest change records grouped per chat and hour, and pages searched for problems.
+
 CHANGE_SCAN = 5000
 PROBLEM_PAGES = 20
 SUMMARY_KINDS = ("message.new", "message.recovered", "message.edited", "message.deleted", "message.missing_on_recheck")
-# These services open their own sockets (SMTP, IRC, MQTT, XMPP...), so they cannot use the workspace proxy.
+
 DIRECT_SOCKET = {"amqp", "amqps", "aprs", "deltachat", "deltachats", "growl", "irc", "ircs", "mailto", "mailtos",
                  "mqtt", "mqtts", "rsyslog", "smpp", "smpps", "xmpp", "xmpps"}
-# Of those, all but email bypass the destination check below (raw sockets, paho, UDP syslog).
+
 OWN_SOCKET = DIRECT_SOCKET - {"mailto", "mailtos"}
 
 
@@ -52,7 +51,7 @@ class AlertSettings(BaseModel):
     daily: bool = True
     daily_hour: int = Field(default=9, ge=0, le=23)
     language: Literal[i18n.LANGUAGES] = "en"
-    include_text: bool = False  # excerpts of deleted and edited messages in change notifications
+    include_text: bool = False
 
 
 def alert_settings(store):
@@ -67,13 +66,13 @@ def tr(words, text, **values):
 
 def describe(url):
     """Apprise's own masked form of a destination, or None when Apprise cannot use it."""
-    import apprise  # Apprise, requests and their native modules take seconds to load; only notifications need them
+    import apprise
     plugin = apprise.Apprise.instantiate(url)
     return plugin.url(privacy=True) if plugin else None
 
 
 def route_problem(urls, network):
-    if network.kind == "none":  # the workspace allows no requests outside Telegram (network.NoRoute)
+    if network.kind == "none":
         return str(network.error)
     if network.telegram_only:
         return "Notifications are not sent over MTProxy. Choose Direct, SOCKS5 or HTTP in Account → Connection settings."
@@ -90,13 +89,10 @@ def proxy_url(network, address=None):
     login = (quote(network.username, safe="") + ":" + quote(network.password, safe="") + "@") if network.username else ""
     host = address or network.host
     host = "[" + host + "]" if ":" in host else host
-    # socks5h: names are resolved by the proxy, so lookups do not leave through the local network.
+
     return ("socks5h" if network.kind == "socks5" else "http") + "://" + login + host + ":" + str(network.port)
 
 
-# While a notification is sent (under _send_lock), destinations inside this machine or its network
-# are refused, as in netclient. Apprise sends from its own threads, so the switch is not per thread;
-# only requests (urllib3) and smtplib connections are checked, which nothing else in the server uses.
 _guard = {"on": False, "allowed": set(), "refused": None}
 
 
@@ -140,7 +136,7 @@ def _install_guard():
 
     def smtp(original):
         def get_socket(self, host, port, timeout):
-            addresses = _checked(host, port)  # TLS keeps verifying self._host, the name
+            addresses = _checked(host, port)
             return original(self, addresses[0] if addresses else host, port, timeout)
         return get_socket
     smtplib.SMTP._get_socket = smtp(smtplib.SMTP._get_socket)
@@ -155,7 +151,7 @@ def _routed(proxy):
 
     def merge(self, url, proxies, stream, verify, cert):
         host = urlsplit(url).hostname or ""
-        if proxy and _guard["on"] and netclient.literal(host):  # through a proxy only an address can be checked
+        if proxy and _guard["on"] and netclient.literal(host):
             try:
                 netclient.refuse_internal(host, [netclient.literal(host)])
             except netclient.RouteError as error:
@@ -179,7 +175,7 @@ def deliver(urls, title, body, network):
         return {"sent": 0, "failed": len(urls), "error": problem}
     address = None
     if network.kind != "direct":
-        # The SOCKS library connects the proxy itself, past the guard: checked and pinned here.
+
         try:
             address = netclient.checked_proxy(network, list(dict.fromkeys(
                 info[4][0] for info in socket.getaddrinfo(network.host, network.port, type=socket.SOCK_STREAM))))
@@ -188,7 +184,7 @@ def deliver(urls, title, body, network):
     _install_guard()
     with _send_lock, _routed(proxy_url(network, address)):
         _guard.update(on=not netclient.private_allowed(), refused=None,
-                      allowed={address} if address else set())  # the proxy itself, already checked
+                      allowed={address} if address else set())
         try:
             bundle = apprise.Apprise()
             for url in urls:
@@ -197,7 +193,7 @@ def deliver(urls, title, body, network):
         finally:
             _guard["on"] = False
         refused = _guard["refused"]
-    if isinstance(result, bool):  # Apprise 1.x reports only whether every destination accepted it
+    if isinstance(result, bool):
         return {"sent": len(urls) if result else 0, "failed": 0 if result else len(urls),
                 "error": None if result else refused or "The service did not accept the notification."}
     errors = [entry.message for entry in result.logs() if str(entry.level).upper() in ("ERROR", "WARNING")]
@@ -315,7 +311,7 @@ def panel_items(store, words, limit=60):
                 "text": text, "chat_id": event["chat_id"], "message_id": event["message_id"], **extra}
 
     problems, before = [], None
-    for _ in range(PROBLEM_PAGES):  # completed copies and timestamps are not problems: look further back
+    for _ in range(PROBLEM_PAGES):
         batch = store.events_of(PROBLEM_KINDS, limit=limit * 5, before=before)
         for event in batch:
             text = problem_line(event, titles, words)
@@ -325,7 +321,7 @@ def panel_items(store, words, limit=60):
             break
         before = batch[-1]["seq"]
     records, groups = store.events_of(tuple(CHANGES), limit=CHANGE_SCAN), {}
-    # The oldest hour of a full scan may be cut off; it is left out rather than shown with low counts.
+
     partial = records[-1]["observed_at"][:13] if len(records) == CHANGE_SCAN else None
     for event in records:
         hour = event["observed_at"][:13]
@@ -407,7 +403,7 @@ async def alert_pass(store, vault, network, now=None):
     settings, urls = alert_settings(store), vault.read("alerts").get("urls", [])
     head = (store.stats()["head"] or {}).get("seq", 0)
     if not settings["enabled"] or not urls:
-        store.set_setting("alerts_cursor", head)  # turning alerts on never replays old records
+        store.set_setting("alerts_cursor", head)
         return None
     words, name = i18n.words(settings["language"]), workspace_name(store)
     titles = {t["chat_id"]: t["title"] for t in store.targets()}
@@ -444,7 +440,7 @@ async def alert_pass(store, vault, network, now=None):
     return {"notifications": sent, "error": error}
 
 
-async def alert_loop(store, vault, network_config, wakeup):
+async def alert_loop(store, vault, network_config, wakeup, workspace_id="default"):
     while True:
         with suppress(TimeoutError):
             await asyncio.wait_for(wakeup.wait(), tuning.value(store, "alerts_check_seconds"))
@@ -453,3 +449,11 @@ async def alert_loop(store, vault, network_config, wakeup):
             await alert_pass(store, vault, network_config())
         except Exception as exc:
             store.set_setting("alerts_last", {"at": utcnow(), "notifications": 0, "error": type(exc).__name__})
+        from . import webhooks
+        try:
+            await webhooks.pump(store, vault, network_config(), workspace_id)
+        except Exception as exc:
+            async with webhooks.lock(store):
+                data = webhooks.state(store)
+                data["last_error"] = type(exc).__name__
+                store.set_setting("webhook_delivery", data)

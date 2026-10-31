@@ -1,6 +1,6 @@
-/* TgWitness online demo: the real panel, answered from recorded demo records.
-   Loaded before the panel scripts. Every change is refused, so nothing can be stored,
-   sent or connected from the website. Records are fictional (tools/capture_demo.py). */
+
+
+
 (() => {
   "use strict";
   const base = new URL(".", document.currentScript.src);
@@ -9,7 +9,7 @@
   const READ_ONLY = "This online demo is read-only. Run the local demo (scripts\\Demo.cmd or sh start.sh --demo) " +
     "or your own workspace to try actions.";
   const MISSING = "Not included in the online demo. Run the local demo to explore everything.";
-  // Journal categories, as the collector groups them (tgwitness/store.py).
+
   const CATEGORIES = {
     membership: ["membership."],
     coverage: ["coverage.", "connection.", "collector.", "process.", "observation.", "snapshot.", "target.",
@@ -28,7 +28,7 @@
     return new Response(answer.text, {status: 200, headers: {"Content-Type": answer.type}});
   }
 
-  // Answers journal queries that were not recorded verbatim from every recorded record.
+
   function events(all, params) {
     const known = new Map();
     for (const [key, answer] of Object.entries(all)) {

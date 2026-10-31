@@ -36,14 +36,14 @@ FIELDS = ("seq", "observed_at", "source_at", "kind", "chat_id", "message_id",
 
 
 OTS_MAGIC = b"\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94"
-MAX_UNCOMPRESSED_GIB = 4  # archives above this size are refused unless --max-gib allows them
-# Checked before any member is read, for every archive kind: an export holds a journal, media
-# and proofs, a manifest lists one hash per member, and no single record is anywhere near this.
+MAX_UNCOMPRESSED_GIB = 4
+
+
 MAX_MEMBERS = 500_000
 MAX_MANIFEST_BYTES = 64 * 1024**2
-MAX_SMALL_MEMBER_BYTES = 16 * 1024**2  # signatures, checkpoints, timestamp answers
-MAX_RECORD_BYTES = 64 * 1024**2  # one journal line or one chat export message
-MAX_JSON_BYTES = 256 * 1024**2  # profile, public proof and checkpoint files
+MAX_SMALL_MEMBER_BYTES = 16 * 1024**2
+MAX_RECORD_BYTES = 64 * 1024**2
+MAX_JSON_BYTES = 256 * 1024**2
 OTS_PENDING, OTS_BITCOIN = bytes.fromhex("83dfe30d2ef90c8e"), bytes.fromhex("0588960d73d71901")
 
 
@@ -418,7 +418,7 @@ def ots_summary(proof, digest):
                 kind = reader.take(8)
                 payload = Reader(reader.blob(8192))
                 if kind == OTS_BITCOIN:
-                    payload.integer()  # block height, authenticated only by ots verify
+                    payload.integer()
                     payload.finish()
                     if message_size != 32:
                         raise ValueError("OpenTimestamps Bitcoin commitment must be 32 bytes")
@@ -532,8 +532,6 @@ def fingerprint(public_key):
     return hashlib.sha256(base64.b64decode(public_key, validate=True)).hexdigest()
 
 
-# RFC 9162 section 2.1: leaves are the 32 raw bytes of journal event hashes.
-# Kept here so the verifier shipped in each ZIP needs no TgWitness installation.
 MERKLE_EMPTY = hashlib.sha256(b"").digest()
 
 
@@ -681,14 +679,14 @@ def verify_continuity(value, checkpoint, previous=None, challenge=None):
     elif start == 0:
         verify_consistency(0, count, MERKLE_EMPTY, root, proof["consistency"])
     else:
-        # Upgrading an old witness: the previous chain head is included, but no
-        # old Merkle root was retained. This is a baseline, not retroactive proof.
+
+
         merkle_path(proof["consistency"])
     return statement
 
 
-LIVENESS_GAP_SECONDS = 180  # an observing collector writes a heartbeat every minute
-CHANNEL_IDS_BELOW = -1000000000000  # channels and supergroups number their messages per chat
+LIVENESS_GAP_SECONDS = 180
+CHANNEL_IDS_BELOW = -1000000000000
 MESSAGE_KINDS = ("message.new", "message.snapshot", "message.edited", "message.recovered",
                  "message.deleted", "message.missing_on_recheck")
 INTERRUPTIONS = {"transport_disconnected": "connection to Telegram lost",
@@ -743,7 +741,7 @@ class Coverage:
             self.allowed = max(LIVENESS_GAP_SECONDS, 3 * interval)
         changed = (payload.get("after") or {}).get("heartbeat_seconds") if kind == "parameters.changed" else None
         if type(changed) is int and changed > 0:
-            # The heartbeat already waiting may still keep the old pace: allow the longer of the two.
+
             self.allowed = max(self.allowed, 3 * changed)
         if kind == "observation.started":
             self.close(self.alive, "observation restarted")
@@ -990,8 +988,6 @@ def bundle_hashes(path, seqs):
     return found
 
 
-# Independent witness ----------------------------------------------------------------------
-
 CAPTURE_KINDS = ("message.new", "message.edited", "message.deleted", "message.recovered",
                  "message.snapshot", "media.saved", "coverage.gap")
 
@@ -1133,7 +1129,7 @@ def verify_witness(path, expected_fingerprint=None):
                 if not line.strip():
                     continue
                 event = json.loads(line)
-                yield event  # resumed only after verify_events accepted this record
+                yield event
                 payload, kind = event["payload"], event["kind"]
                 if kind == "witness.started":
                     interval = payload.get("interval_minutes")
@@ -1230,8 +1226,8 @@ def cross_check_witness(witness, bundle_path, bundle_result):
                 matched.append(anchor)
         else:
             conflicts.append(anchor)
-    # A later head cannot be checked against an earlier export. Do not describe
-    # it, or a conflicting head, as a witnessed period of this particular file.
+
+
     matching_sequences = {a["seq"] for a in matched}
     timeline = []
     for anchor in witness["anchors"]:
@@ -1264,7 +1260,7 @@ def channel_texts(source):
         import urllib.parse
         import urllib.request
         posts, before = [], None
-        for _ in range(200):  # t.me/s shows about 20 posts per page
+        for _ in range(200):
             url = source + (("&" if "?" in source else "?") + "before=" + str(before) if before else "")
             page = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "TgWitness-verify"}),
                                           timeout=30).read(MAX_SMALL_MEMBER_BYTES).decode("utf-8", "replace")
@@ -1340,7 +1336,7 @@ def verify_dossier(path, expected_fingerprint=None, bundle=None):
         with open_archive(bundle) as archive:
             if read_manifest(archive)["public_key"] != statement["public_key"]:
                 raise ValueError("The evidence export was signed by another workspace key")
-        verify_bundle(bundle, fp)  # signature, hash chain and file hashes of the export itself
+        verify_bundle(bundle, fp)
         wanted = {int(seq): digest for seq, digest in statement.get("record_hashes", {}).items()}
         found = bundle_hashes(bundle, wanted)
         for seq, digest in wanted.items():
@@ -1473,10 +1469,10 @@ def main():
         parser.error("--require-witness requires --witness and --witness-fingerprint")
     globals()["MAX_UNCOMPRESSED_GIB"] = max(1, args.max_gib)
     if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(errors="backslashreplace")  # chat titles on legacy Windows consoles
+        sys.stdout.reconfigure(errors="backslashreplace")
     print("TgWitness verifier - PhishDestroy - https://github.com/phishdestroy/TgWitness")
     notes = []
-    # Whether the key that signed this file was compared with a fingerprint kept independently.
+
     pinned = bool(args.fingerprint or args.witness_fingerprint)
     try:
         if args.bundle.suffix.lower() == ".json":
@@ -1528,7 +1524,7 @@ def main():
                 if result["witness"]["unwitnessed_events"]:
                     notes.append(str(result["witness"]["unwitnessed_events"])
                                  + " trailing record(s) have no matching witness checkpoint.")
-                # A pinned witness that saw this key answering vouches for the key it saw.
+
                 pinned = pinned or bool(args.witness_fingerprint and result["witness"]["consistent"])
         check = result.get("channel_check") or (result.get("witness") or {}).get("channel_check")
         if check and (check["invalid_signatures"] or check["differ_from_journal"]):

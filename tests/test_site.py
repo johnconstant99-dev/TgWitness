@@ -39,7 +39,7 @@ def test_translated_site_blocks_preserve_commands_and_link_targets():
 def site_root(tmp_path):
     for name in ("pyproject.toml", *INPUTS, *TRANSLATIONS):
         if name in TRANSLATIONS and not (ROOT / name).exists():
-            continue  # a language not translated yet falls back to English
+            continue
         target = tmp_path / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / name, target)
@@ -81,9 +81,10 @@ def test_setup_and_account_guides_publish_all_26_language_catalogs(site_root):
         words = json.loads(body.split("window.TGW_DICT=", 1)[1].strip().removesuffix(";"))
         if lang != "en":
             assert words["From account connection to a verifiable journal"] != "From account connection to a verifiable journal"
-    for name in ("guide.html", "dedicated-account.html"):
-        body = (output / "demo" / name).read_text(encoding="utf-8")
-        assert 'guide-locales/' in body and 'guide-locale.js' not in body
+    body = (output / "demo/guide.html").read_text(encoding="utf-8")
+    assert "guide-locales/" in body and "guide-locale.js" not in body
+    body = (output / "demo/dedicated-account.html").read_text(encoding="utf-8")
+    assert 'data-site-target="docs/dedicated-account/"' in body and "site-redirect.js" in body
     for lang in site_modes.EXTRA_LANGUAGES:
         body = (output / lang / "guides/modes.html").read_text(encoding="utf-8")
         assert 'demo/guide.html?lang=' + lang in body
@@ -192,7 +193,7 @@ def test_every_page_has_distinct_metadata_and_valid_links(site_root, base_url):
         assert page.find("meta", property="og:url")[0]["content"] == url
         html_tag = page.find("html")[0]
         assert html_tag["lang"] == languages[lang][1] and html_tag["dir"] == languages[lang][2], url
-        # Every page names all of its language versions, and each of them exists.
+
         alternates = {a["hreflang"]: a["href"] for a in page.find("link", rel="alternate")}
         assert set(alternates) == {value[1] for value in languages.values()} | {"x-default"}, url
         assert alternates["x-default"] == base_url + "/" + local
@@ -211,7 +212,7 @@ def test_every_page_has_distinct_metadata_and_valid_links(site_root, base_url):
                     continue
                 resolved = urlsplit(urljoin(url, href))
                 if resolved.netloc != urlsplit(base_url).netloc:
-                    # Passive assets must stay local, even if navigation is external.
+
                     assert tag not in ("script", "img", "iframe")
                     continue
                 target_url = resolved._replace(fragment="", query="").geturl()
@@ -221,18 +222,15 @@ def test_every_page_has_distinct_metadata_and_valid_links(site_root, base_url):
                 else:
                     relative = resolved.path.removeprefix(urlsplit(base_url).path + "/")
                     if relative.endswith("/"):
-                        relative += "index.html"  # a directory such as the online demo
+                        relative += "index.html"
                     assert (output / relative).is_file(), (url, href)
     for name in SEARCH_FILES:
         index = json.loads((output / name).read_text(encoding="utf-8"))
         hub = base_url + "/" + name.removesuffix("search.json")
-        assert len(index["pages"]) == (4 if name.split('/')[0] in site_modes.EXTRA_LANGUAGES else 32)
-        helper = base_url + "/sealed.html?lang=" + ("ru" if name.startswith("ru/") else "en")
-        assert (output / "sealed.html").is_file()
-        assert sum(urljoin(hub, entry["url"]) == helper for entry in index["pages"]) == 1
+        assert len(index["pages"]) == (3 if name.split('/')[0] in site_modes.EXTRA_LANGUAGES else 33)
         for entry in index["pages"]:
-            assert urljoin(hub, entry["url"]) in {*pages, helper}
-            # Short notices, especially in CJK languages, are valid search content.
+            assert urljoin(hub, entry["url"]) in pages
+
             assert entry["text"].strip(), entry["url"]
     sitemap = ET.parse(output / "sitemap.xml")
     assert {node.text for node in sitemap.findall(".//{*}loc")} == set(pages)
@@ -312,7 +310,7 @@ def test_cases_cannot_be_published_with_a_missing_german_translation(site_root):
 def test_translated_notice_documents_match_the_site_catalogues():
     from tools.sync_notice_translations import outputs
     translated = outputs(ROOT)
-    assert len(translated) == 62  # Two documents in 25 languages, plus the 12 existing translated READMEs.
+    assert len(translated) == 62
     for name, text in translated.items():
         assert (ROOT / name).read_text(encoding='utf-8') == text, name
 
@@ -321,7 +319,7 @@ def test_online_demo_is_read_only_relative_and_translated(site_root):
     output = build_site(site_root, repository="example/Journal")
     panel = (output / "demo/index.html").read_text(encoding="utf-8")
     assert '<script src="mock.js"></script>' in panel and 'name="robots" content="noindex"' in panel
-    assert not __import__("re").search(r'(src|href)="/[A-Za-z]', panel)  # works under the Pages project path
+    assert not __import__("re").search(r'(src|href)="/[A-Za-z]', panel)
     assert panel.index("mock.js") < panel.index('src="app.js')
     mock = (output / "demo/mock.js").read_text(encoding="utf-8")
     assert 'if (method !== "GET") return json(403' in mock

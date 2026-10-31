@@ -26,8 +26,8 @@ def test_unknown_server_key_cannot_establish_a_telegram_session():
 
 
 def test_redirected_endpoint_cannot_supply_arbitrary_encrypted_messages():
-    # A disposable test key, unrelated to any Telegram account. Even knowing the
-    # public key ID does not make arbitrary response bytes authenticate.
+
+
     key = AuthKey(bytes(range(256)))
     state = MTProtoState(key, defaultdict(lambda: logging.getLogger("synthetic-transport")))
     packet = struct.pack("<Q", key.key_id) + bytes(16) + bytes(64)

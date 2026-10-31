@@ -15,7 +15,7 @@ from tgwitness.network import NetworkConfig, parse_mtproxy_link
 from tgwitness.proxy_catalog import NoProxyAvailable, ProxyPool
 from test_collector import FakeClient, saved_session
 
-# Captured before the offline fixture in conftest replaces the pool's network steps.
+
 REAL_PROBE, REAL_RUN = catalogs.probe, ProxyPool.run
 KEY = "a7" * 16
 
@@ -65,7 +65,7 @@ def test_default_route_is_automatic_mtproxy_and_never_direct_or_http():
     with pytest.raises(ValidationError):
         NetworkConfig(kind="mtproxy_auto", host="8.8.8.8")
     with pytest.raises(RuntimeError):
-        config.client_options()  # the collector resolves it to one listed proxy first
+        config.client_options()
     with pytest.raises(netclient.RouteError):
         asyncio.run(netclient.request("GET", "https://example.org/", config))
 
@@ -94,12 +94,12 @@ def test_workspaces_get_different_working_proxies_and_keep_them(monkeypatch):
     async def run():
         first = await pool.acquire("a")
         second = await pool.acquire("b")
-        assert first[1].host == "8.8.8.2" and second[1].host == "8.8.8.3"  # the dead one is skipped
+        assert first[1].host == "8.8.8.2" and second[1].host == "8.8.8.3"
         assert pool.resting(row("8.8.8.1")["id"], time.time())
         assert (await pool.acquire("a"))[0] == first[0]
         pool.release("a")
-        assert (await pool.acquire("a", preferred=first[0]))[0] == first[0]  # the same proxy after a restart
-        third = await pool.acquire("c")  # only two work: the faster one is shared
+        assert (await pool.acquire("a", preferred=first[0]))[0] == first[0]
+        third = await pool.acquire("c")
         assert third[0] == first[0]
     asyncio.run(run())
 
@@ -134,10 +134,10 @@ def test_failed_proxy_rests_and_the_account_moves_to_the_next_one(journal, monke
         rotated = store.events(kind="network.route_rotated")[0]["payload"]
         assert (rotated["from_proxy_id"], rotated["to_proxy_id"], rotated["reason"]) == (first[0], moved[0], "connect_failed")
         assert rotated["fallback_to_direct"] is False and store.get_setting("auto_route") == moved[0]
-        # A proxy that keeps dropping the connection is replaced as well.
+
         for _ in range(3):
             await collector.note_drop()
-        assert store.events(kind="network.route_rotated")[0]["payload"]["reason"] == "repeated_disconnect"  # newest first
+        assert store.events(kind="network.route_rotated")[0]["payload"]["reason"] == "repeated_disconnect"
         assert collector.auto_route[0] not in (moved[0], first[0])
         await collector.stop()
     try:
@@ -161,10 +161,10 @@ def test_when_every_listed_proxy_fails_observation_waits_instead_of_connecting_d
         await collector.client.disconnect()
         await collector.reconnect()
         assert collector.running and not collector.client.is_connected() and collector.auto_route is None
-        assert collector.client.options["proxy"]  # still a proxy route; never a direct client
+        assert collector.client.options["proxy"]
         assert store.events(kind="connection.retry_failed")[0]["payload"]["error_type"] == "NoProxyAvailable"
         assert store.events(kind="network.route_unavailable")[0]["payload"]["fallback_to_direct"] is False
-        # The lists recover: the next attempt after the backoff connects through a listed proxy.
+
         dead.clear()
         for state in pool.health.values():
             state["cooldown_until"] = 0
@@ -184,7 +184,7 @@ def test_garbage_from_a_listed_address_is_a_failed_route_not_a_lost_login(journa
 
     class Garbage(FakeClient):
         async def connect(self):
-            if self.options["proxy"][0] == "8.8.8.1":  # e.g. an HTTPS server instead of an MTProxy
+            if self.options["proxy"][0] == "8.8.8.1":
                 raise ValueError("readexactly size can not be less than zero")
             self.connected = True
 
@@ -194,7 +194,7 @@ def test_garbage_from_a_listed_address_is_a_failed_route_not_a_lost_login(journa
         await collector.configure(123, "a" * 32, saved_session())
         assert collector.client.options["proxy"][0] == "8.8.8.2"
         assert store.events(kind="network.route_rotated")[0]["payload"]["error_type"] == "ValueError"
-        # A pinned route answering garbage is a connection failure too; observation keeps retrying.
+
         await collector.set_network(NetworkConfig(kind="mtproxy", host="8.8.8.1", port=443, secret=KEY))
         collector.running = True
         await collector.reconnect()
@@ -211,7 +211,7 @@ def test_background_upkeep_checks_the_list_and_downloads_it_while_in_use(monkeyp
     async def run():
         task = asyncio.create_task(REAL_RUN(pool))
         await asyncio.sleep(.05)
-        assert pool.catalog.refreshed == 0 and not pool.probed_at  # nothing while no workspace uses it
+        assert pool.catalog.refreshed == 0 and not pool.probed_at
         pool.assigned["a"] = row("8.8.8.1")["id"]
         pool.wakeup.set()
         await asyncio.sleep(.05)
@@ -252,7 +252,7 @@ def test_profiles_share_one_pool_and_get_different_proxies(tmp_path, monkeypatch
         assert main["pool"]["listed"] == 2 and KEY not in json.dumps([main, second])
         assert KEY not in json.dumps(app.state.store.all_events())
         refused = client.post("/api/network", json={"kind": "direct"})
-        assert refused.status_code == 400 and "tunnel" in refused.text  # Hide IP never connects directly
+        assert refused.status_code == 400 and "tunnel" in refused.text
         assert client.post("/api/network/policy", json={"exposure": "tunnel", "outside_enabled": True}).status_code == 200
         assert client.post("/api/network", json={"kind": "direct"}).status_code == 200
         assert client.get("/api/status").json()["collector"]["network"]["kind"] == "direct"

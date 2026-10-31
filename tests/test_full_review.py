@@ -53,11 +53,11 @@ def test_replica_destination_change_copies_the_whole_journal(journal, tmp_path, 
             settings[change] = {"endpoint": new_endpoint, "prefix": "another-copy", "bucket": "another-bucket"}[change]
             store.set_setting("replica", settings)
             if change == "bucket":
-                # This minimal fake server has one active bucket; switch its backing map.
+
                 objects.clear()
             copied = await replica.sync(store, vault, NetworkConfig(kind="direct"))
             assert copied["error"] is None and copied["objects"] >= 2
-            # The second destination needs the beginning of the journal, not just its tail.
+
             target = new_objects if change == "endpoint" else objects
             prefix = replica.workspace_prefix(settings, vault.public_key)
             assert any(name.startswith(prefix + "/journal/000000000001-") for name in target)
@@ -159,7 +159,7 @@ def test_export_cancellation_waits_for_the_file_worker_before_cleanup(journal, m
         def building(scratch, meta, vault, output, limit):
             entered.set()
             assert release.wait(5)
-            assert scratch.exists()  # Cancellation must not remove the worker's input.
+            assert scratch.exists()
             output.write_bytes(b"synthetic completed archive")
         monkeypatch.setattr(chat_export, "build_bundle", building)
         async def history(entity, scratch, record):

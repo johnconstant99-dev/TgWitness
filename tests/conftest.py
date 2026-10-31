@@ -11,20 +11,20 @@ REAL_OWNER_ONLY = security.owner_only
 
 @pytest.fixture(autouse=True)
 def quick_owner_only(monkeypatch):
-    # Limiting each test directory runs icacls on Windows; test_hardening.py checks owner_only itself.
+
     monkeypatch.setattr(security, "owner_only", lambda root: None)
 
 
 @pytest.fixture(autouse=True)
 def local_destinations(monkeypatch):
-    # Test servers listen on 127.0.0.1; refusing internal addresses has its own tests, which unset this.
+
     monkeypatch.setenv("TGWITNESS_ALLOW_PRIVATE_DESTINATIONS", "1")
 
 
 @pytest.fixture(autouse=True)
 def offline_proxy_pool(monkeypatch):
-    # Automatic MTProxy, the default route, resolves and checks listed proxies and refreshes the lists
-    # in the background; tests never contact them. test_proxy_pool.py covers these steps.
+
+
     async def pin(route, operator=False):
         return route
 

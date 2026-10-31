@@ -143,7 +143,7 @@ def test_failed_profile_erasure_stays_visible_and_can_be_retried_after_restart(t
         profiles = {p["id"]: p for p in client.get("/api/profiles").json()["profiles"]}
         assert profiles[pid]["error_type"] == "DeletionPending"
         assert profiles[pid]["collector"] is None
-        # Restart must not reopen a half-erased vault or silently create a replacement journal.
+
         assert {p.relative_to(directory): p.read_bytes() for p in directory.rglob("*") if p.is_file()} == remaining
         assert client.delete("/api/profiles/" + pid).status_code == 200
         assert not directory.exists()

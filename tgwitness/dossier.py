@@ -20,8 +20,8 @@ from .store import GONE_KINDS, TEXT_KINDS, canonical, utcnow
 from .verify import fingerprint
 
 FORMAT = "tgwitness-dossier-v1"
-# Records cited per fact, the similar-avatar threshold, which mentions are looked for and the
-# operator's own patterns are panel parameters (tuning.PARAMETERS, group "people").
+
+
 MENTION_TYPES = ("wallets", "phones", "usernames", "links")
 LIMITS = [
     "Built only from records this workspace saved; people who never wrote in the observed time are absent.",
@@ -46,7 +46,7 @@ WALLETS = [
     ("XMR", re.compile(r"(?<![\w])([48][0-9AB]" + B58 + r"{93})(?![\w])")),
     ("SOL", re.compile(r"(?<![\w])(" + B58 + r"{32,44})(?![\w])")),
 ]
-# Base58Check version bytes that make a match a real address of that network.
+
 VERSIONS = {"BTC": {0x00, 0x05}, "TRON": {0x41}, "LTC": {0x30, 0x32, 0x05}, "DOGE": {0x1e, 0x16}}
 PHONE = re.compile(r"(?<![\w+])(\+\d[\d ()-]{8,18}\d|[78]\d{10})(?![\w])")
 USERNAME = re.compile(r"(?<![\w@/])@([A-Za-z][A-Za-z0-9_]{3,31})(?![\w])")
@@ -111,7 +111,7 @@ def mentions(payload, find=None, patterns=()):
     links = [m.group(1).rstrip(".,;:!?)") for m in LINK.finditer(text)]
     for entity in (payload.get("raw") or {}).get("entities") or []:
         if entity.get("_") == "MessageEntityTextUrl" and entity.get("url"):
-            links.append(entity["url"])  # a link hidden behind other text
+            links.append(entity["url"])
         if entity.get("_") == "MessageEntityMentionName" and entity.get("user_id") and find["usernames"]:
             items.append(("usernames", "id" + str(entity["user_id"]), "mention by name"))
     for link in dict.fromkeys(links):
@@ -138,14 +138,12 @@ def options(store):
             "patterns": values["dossier_patterns"]}
 
 
-# Avatars --------------------------------------------------------------------------------
-
 def phash(path):
     """64-bit perceptual hash (DCT of a 32x32 grey image), the same bits as imagehash.phash."""
-    from PIL import Image  # decoding JPEG needs Pillow; only profiles use it
+    from PIL import Image
     with Image.open(path) as image:
         resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
-        pixels = list(image.convert("L").resize((32, 32), resample).tobytes())  # one byte per grey pixel
+        pixels = list(image.convert("L").resize((32, 32), resample).tobytes())
     cos = [[math.cos(math.pi * u * (2 * x + 1) / 64) for x in range(32)] for u in range(8)]
     rows = [[sum(pixels[y * 32 + x] * cos[u][x] for x in range(32)) for u in range(8)] for y in range(32)]
     low = [sum(rows[y][u] * cos[v][y] for y in range(32)) for v in range(8) for u in range(8)]
@@ -190,8 +188,6 @@ def avatar_index(root):
 def distance(a, b):
     return bin(int(a, 16) ^ int(b, 16)).count("1")
 
-
-# Building -------------------------------------------------------------------------------
 
 def enabled_chats(store):
     return sorted(int(k) for k in store.get_setting("dossiers", {}))
@@ -261,7 +257,7 @@ def build(store, chat_id, title=None):
         observed = payload.get("sender_observation") or {}
         sender = payload.get("sender_id", observed.get("id"))
         if sender is None or (sender == chat_id and chat_id < 0):
-            continue  # channel posts signed by the channel itself (in a private chat this is the other person)
+            continue
         person = people.setdefault(sender, {
             "id": sender, "names": Facts(refs), "usernames": Facts(refs), "photo_ids": Facts(refs), "flags": {},
             "messages": set(), "edited": set(), "first": None, "last": None, "hours": [0] * 24,
@@ -293,7 +289,7 @@ def build(store, chat_id, title=None):
                 pass
         reply = payload.get("reply_to_message_id")
         if reply:
-            # Keyed by the replying message: its snapshots and edits add records, not replies.
+
             person["replies_to"].setdefault(reply, {}).setdefault(message_id, []).append(event["seq"])
         for category, value, extra in mentions(payload, find, patterns):
             person["mentions"][category].add(value, event, extra)
@@ -308,7 +304,7 @@ def build(store, chat_id, title=None):
             if target is not None and target != person["id"]:
                 entry = replies.setdefault(target, {"id": target, "count": 0, "records": []})
                 replying.setdefault(target, set()).update(by_message)
-                entry["count"] = len(replying[target])  # each replying message once
+                entry["count"] = len(replying[target])
                 entry["records"] = (entry["records"] + [seq for seqs in by_message.values() for seq in seqs])[:refs]
         for target, entry in replies.items():
             people[target]["replied_by"][person["id"]] = entry["count"]
@@ -382,7 +378,7 @@ def signed(store, vault, chat_id, title=None, producer=None):
     value = {"statement": statement, "signature": vault.sign(canonical(statement)),
              "fingerprint": fingerprint(vault.public_key)}
     with store.lock:
-        # A worker finishing after disable/remove must not recreate the deleted file.
+
         if enabled and enabled == store.get_setting("dossiers", {}).get(str(chat_id)):
             path = cache_path(store, chat_id)
             path.parent.mkdir(mode=0o700, exist_ok=True)

@@ -21,7 +21,7 @@ from tools.i18n_keys import script_keys
 
 PAGES = ("guide.html", "dedicated-account.html")
 HEROES = ("From account connection to a verifiable journal",
-          'Use a separate account. <span class="accent">Never your main one.</span>')
+          "Use a separate Telegram account")
 
 
 def check_inventory(browser):
@@ -31,7 +31,7 @@ def check_inventory(browser):
         page = browser.new_page()
         page.route("**/*", lambda route: route.abort())
         page.set_content((ROOT / "tgwitness/static" / name).read_text(encoding="utf-8"))
-        # List the original markup before translation rewrites inline links.
+
         source = (ROOT / "tgwitness/static/i18n.js").read_text(encoding="utf-8")
         page.add_script_tag(content=source.split("translatePage();\n")[0])
         keys = page.evaluate("pageKeys()")
@@ -51,7 +51,7 @@ def check_guides(browser, base, output, label):
     page.on("pageerror", lambda exc: errors.append(str(exc)))
     page.on("response", lambda response: failures.append(response.url) if response.status >= 400 else None)
     for lang in i18n.GUIDE_LANGUAGES:
-        # An explicit shared URL must beat a previously selected, different language.
+
         context.add_cookies([{"name": i18n.COOKIE, "value": "ru" if lang != "ru" else "de",
                              "domain": urlsplit(base).hostname, "path": "/"}])
         for name, hero in zip(PAGES, HEROES):
@@ -63,14 +63,13 @@ def check_guides(browser, base, output, label):
             expected = i18n.guide_words(lang).get(hero, hero)
             expected = page.evaluate("s=>{const p=document.createElement('div');p.innerHTML=s;return p.textContent}", expected)
             expect(page.locator("h1")).to_have_text(expected)
-            warning_title = "Parallel session warning" if name == "guide.html" else "Copied session keys can be revoked"
-            expect(page.locator("#session-warning h3")).to_have_text(i18n.guide_words(lang).get(warning_title, warning_title))
-            expect(page.locator("#session-warning code")).to_have_text("AUTH_KEY_DUPLICATED")
-            if name == "dedicated-account.html":
-                rental_title = "Rented +888 numbers (Fragment)"
-                expect(page.locator("#fragment-rental h3")).to_have_text(i18n.guide_words(lang).get(rental_title, rental_title))
-                market_title = "Ready-made accounts from marketplaces"
-                expect(page.locator("#marketplace-accounts h3")).to_have_text(i18n.guide_words(lang).get(market_title, market_title))
+            if name == "guide.html":
+                warning_title = "Parallel session warning"
+                expect(page.locator("#session-warning h3")).to_have_text(i18n.guide_words(lang).get(warning_title, warning_title))
+                expect(page.locator("#session-warning code")).to_have_text("AUTH_KEY_DUPLICATED")
+            else:
+                expect(page.locator("#session-warning")).to_have_text(i18n.guide_words(lang).get("Imported sessions", "Imported sessions"))
+                expect(page.locator("#session-warning + p")).to_contain_text("AUTH_KEY_DUPLICATED")
             links = page.locator('a[href*="guide.html"], a[href*="dedicated-account.html"]').evaluate_all("nodes=>nodes.map(n=>n.href)")
             assert links and all(link.startswith(base) and "lang=" + lang in link for link in links), (label, lang, links)
             page.locator("details").evaluate_all("nodes=>nodes.forEach(n=>n.open=true)")
@@ -78,7 +77,7 @@ def check_guides(browser, base, output, label):
                 page.emulate_media(color_scheme=theme)
                 expect(page.locator("html")).to_have_attribute("data-theme", theme)
                 check_layout(page)
-            anchors = ("session-warning", "fragment-rental", "marketplace-accounts") if name == "dedicated-account.html" else ("session-warning",)
+            anchors = ("session-warning",) if name == "guide.html" else ()
             for anchor in anchors:
                 target = page.locator("#" + anchor)
                 target.evaluate("node=>node.scrollIntoView({block:'start'})")
@@ -86,7 +85,7 @@ def check_guides(browser, base, output, label):
                 assert heading and nav and heading["y"] >= nav["y"] + nav["height"], (label, lang, anchor, "heading hidden by navigation")
             assert page.evaluate("getComputedStyle(document.documentElement).scrollBehavior") == "auto"
         print(label, lang, "both guides: translated, 320 px, light/dark, links", flush=True)
-    # Picker interaction, persistent choice, and a real round trip between the guides.
+
     page.goto(base + "guide.html?lang=en#login")
     page.locator(".language-select").focus()
     page.locator(".language-select").select_option("de")
@@ -106,7 +105,7 @@ def check_guides(browser, base, output, label):
         page.screenshot(path=str(output / f"{label}-{lang}.png"))
     assert not errors and not failures and not external, (errors, failures, external)
     context.close()
-    # Script and region negotiation without either a saved choice or a query string.
+
     for locale, lang in (("de-DE", "de"), ("zh-TW", "zh-Hant"), ("he-IL", "he")):
         context = browser.new_context(locale=locale)
         page = context.new_page()
@@ -119,6 +118,20 @@ def check_guides(browser, base, output, label):
         page.goto(base + name)
         expect(page.locator("h1")).to_be_visible()
         assert page.evaluate("document.documentElement.scrollWidth<=innerWidth"), (label, name, "no JS overflow")
+    context.close()
+
+
+def check_public_redirects(browser, base):
+    context = browser.new_context(viewport={"width": 320, "height": 900})
+    page = context.new_page()
+    for lang in i18n.LANGUAGES:
+        prefix = "" if lang == "en" else lang + "/"
+        for legacy, target in (("sealed.html", "capture"), ("demo/dedicated-account.html", "dedicated-account")):
+            page.goto(base + legacy + "?lang=" + lang)
+            expect(page).to_have_url(base + prefix + "docs/" + target + "/")
+            expect(page.locator(".docs-header")).to_be_visible()
+            expect(page.locator(".lang-list a")).to_have_count(25)
+            assert page.evaluate("document.documentElement.scrollWidth<=innerWidth"), (lang, target)
     context.close()
 
 
@@ -136,13 +149,13 @@ def main():
                 browser = launch_browser(pw)
                 check_inventory(browser)
                 check_guides(browser, app.url + "/", output, "application")
-                check_guides(browser, f"http://127.0.0.1:{server.server_port}/TgWitness/demo/", output, "pages")
+                check_public_redirects(browser, f"http://127.0.0.1:{server.server_port}/TgWitness/")
                 browser.close()
         finally:
             server.shutdown()
             server.server_close()
             thread.join(timeout=10)
-    print("Guide languages passed: 26 languages, both guides, application and Pages; no external requests.")
+    print("Guide languages passed: 26 application languages and 25 public page redirects.")
 
 
 if __name__ == "__main__":

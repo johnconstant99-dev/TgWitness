@@ -194,7 +194,7 @@ def test_start_snapshot_pause_and_restart_intent(journal):
         collector = Collector(store, vault, FakeClient)
         await collector.configure(123, "a"*32, saved_session())
         result = await collector.dialogs()
-        # Private chats are a source type of their own since whole-account observation.
+
         assert [(d["chat_id"], d["kind"]) for d in result["dialogs"]] == [(CHAT, "supergroup"), (55, "private")]
         store.set_target(CHAT, "Synthetic", "supergroup", True)
         await collector.start()
@@ -232,7 +232,7 @@ def test_media_saved_with_linked_hash_and_cancel_cleanup(journal, tmp_path):
 
 class PreviewClient(FakeClient):
     async def download_media(self, media, file, progress_callback):
-        if isinstance(media, types.MessageMediaWebPage):  # as Telethon: the document before the photo
+        if isinstance(media, types.MessageMediaWebPage):
             media = media.webpage.document or media.webpage.photo
         data = b"video" * 2 if isinstance(media, types.Document) else b"jpeg"
         await progress_callback(len(data), len(data))
@@ -286,8 +286,8 @@ def test_full_chat_export_signs_resumes_floodwait_and_runs_alongside_observation
         store.set_target(CHAT, "Synthetic", "supergroup", True)
         started = await collector.start_export(CHAT)
         assert started["phase"] == "running"
-        # Export and observation share the account's one client: starting and pausing
-        # observation during the export neither blocks nor disconnects it.
+
+
         await collector.start()
         assert collector.running
         try:
@@ -300,7 +300,7 @@ def test_full_chat_export_signs_resumes_floodwait_and_runs_alongside_observation
         await asyncio.wait_for(collector.export_task, 10)
         state = collector.poll_export(started["id"])
         assert state["phase"] == "done" and state["ready"] and state["captured"] == 5
-        assert ExportClient.flood_raised  # the FloodWait branch was exercised
+        assert ExportClient.flood_raised
         path = collector.export_result_path(started["id"])
         result = verify_chat_export(path, fingerprint(vault.public_key))
         assert result["message_count"] == 5 and result["chat"]["id"] == CHAT
@@ -318,7 +318,7 @@ def test_chat_export_cancel_records_interruption(journal):
         await collector.configure(123, "a"*32, saved_session())
         await collector.dialogs()
         store.set_target(CHAT, "Synthetic", "supergroup", True)
-        # Hold the export open with a client whose history never ends until cancelled.
+
         class Endless(FakeClient):
             async def iter_messages(self, entity, limit=None, offset_id=0, min_id=0):
                 i = 0
@@ -353,7 +353,7 @@ def test_attachments_are_saved_by_default_and_pause_when_disk_is_low(journal, tm
         await collector.configure(123, "a"*32, saved_session())
         store.set_target(CHAT, "Synthetic", "supergroup", True)
         await collector.start()
-        await collector.capture_message(media_message(), "message.new", CHAT)  # no capture setting saved
+        await collector.capture_message(media_message(), "message.new", CHAT)
         assert not store.events(kind="media.skipped")
         await asyncio.sleep(0.1)
         assert len(store.events(kind="storage.low")) == 1 and collector.status()["storage_low"]

@@ -10,8 +10,7 @@ import certifi
 from cryptography import x509
 from cryptography.utils import CryptographyDeprecationWarning
 
-# https://freetsa.org/files/cacert.pem, SHA-256 of the file 2151b61137ffa86bf664691ba67e7da0b19f98c758e3d228d5d8ebf27e044438
-# as published on freetsa.org; certificate SHA-256 a6379e7cecc05faa3cbf076013d745e327bbbaa38c0b9af22469d4701d18aabc.
+
 FREETSA_ROOT = """\
 -----BEGIN CERTIFICATE-----
 MIIH/zCCBeegAwIBAgIJAMHphhYNqOmAMA0GCSqGSIb3DQEBDQUAMIGVMREwDwYD
@@ -63,8 +62,8 @@ I2MLdq2qjZFDOCXsxBxJpbmLGBx9ow6ZerlUxzws2AWv2pk=
 
 @lru_cache(maxsize=1)
 def trusted_roots():
-    # One by one: a certifi root with a non-positive serial warns now and will be refused by later
-    # cryptography releases; it is skipped then instead of taking every other root with it.
+
+
     roots = []
     for block in re.findall(r"-----BEGIN CERTIFICATE-----.+?-----END CERTIFICATE-----",
                             Path(certifi.where()).read_text(encoding="ascii"), re.S) + [FREETSA_ROOT]:

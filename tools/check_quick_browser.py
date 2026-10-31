@@ -98,7 +98,7 @@ def main():
                 page.keyboard.press("Enter")
                 expect(page.locator("#view-observations")).to_be_visible()
                 page.keyboard.press("Control+k")
-                # Locking via an API failure or another control must close the top-layer dialog.
+
                 page.evaluate("lock()")
                 expect(dialog).not_to_be_visible()
                 expect(page.locator("#gate")).to_be_visible()

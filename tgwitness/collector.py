@@ -36,12 +36,10 @@ from .monitoring import capture_settings, media_kind, monitoring_settings
 from .scope import allowed, folder_rule, in_folder, kind_of, recheck_settings, scope_settings
 from .verify import fingerprint
 
-# Recheck intervals (priority / other sources) are settings with defaults in scope.RECHECK_DEFAULTS;
-# limits and pace (dialogs, rechecks, downloads, heartbeats, client timeouts) are panel parameters
-# in tuning.PARAMETERS.
+
 STORAGE_RECHECK_SECONDS = 30
-# Automatic MTProxy routes: transport failures that move an account to another proxy
-# (thresholds are the "proxies" parameters).
+
+
 ROUTE_ERRORS = (OSError, TimeoutError, asyncio.IncompleteReadError, InvalidBufferError)
 EXPOSURE_MEANING = {
     "hide": "Telegram is contacted only through a proxy; requests outside Telegram only through a proxy set for them.",
@@ -67,8 +65,8 @@ def plain(value):
     if hasattr(value, "to_dict"):
         return plain(value.to_dict())
     if isinstance(value, dict):
-        # Telegram access hashes/file references are preserved as source metadata,
-        # but authorization sessions and API credentials never enter this function.
+
+
         return {str(k): plain(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
         return [plain(v) for v in value]
@@ -156,13 +154,13 @@ class Collector:
         self.pending_credentials = None
         self.pending_account_id = None
         self.pending_key_origin = None
-        self.pinned_proxy = None  # (name, checked address) of a listed proxy, see pin_proxy
+        self.pinned_proxy = None
         self.qr_task = None
         self.qr_state = None
         self.export_task = None
         self.export_state = None
         self.export_path = None
-        self.export_claim = None  # ID of a multi-account export using this account
+        self.export_claim = None
         self.people = {}
         self.avatar_lock = asyncio.Lock()
         self.avatar_failures = {}
@@ -183,11 +181,11 @@ class Collector:
         self.account_guard = None
         self.reconnect_attempts = 0
         self.next_reconnect_at = 0
-        self.proxy_pool = None    # shared by the workspaces of one process; set by the app
-        self.auto_route = None    # (proxy id, pinned route) in automatic MTProxy mode
+        self.proxy_pool = None
+        self.auto_route = None
         self.route_drops = deque()
-        self.direct_fallback = False  # automatic mode connected directly (the IP mode allows it)
-        self.unavailable_since = None  # since when no listed proxy has answered
+        self.direct_fallback = False
+        self.unavailable_since = None
         self.pool_retry_at = 0
         self.target_ids = set()
         self.known_ids = set()
@@ -265,14 +263,14 @@ class Collector:
         if scope["mode"] == "selected" or chat_id in scope["exclude"]:
             return False
         if chat_id in self.known_ids or chat_id in self.scope_rejected:
-            return False  # a source the operator paused, or a chat these rules already declined
+            return False
         entry = self.dialog_cache.get(chat_id) or {}
         entity = entry.get("entity") or entity
         if entity is None:
             entity = await self.lookup_entity(chat_id)
         kind = entry.get("kind") or kind_of(entity)
         if kind is None:
-            return False  # not identified (lookup failed): a later update that carries the chat decides
+            return False
         rule = self.folder_for(scope)
         if not allowed(scope, kind) or (scope["mode"] == "folder" and (
                 rule is None or not in_folder(rule, chat_id, kind, entity, entry.get("archived", False)))):
@@ -286,7 +284,7 @@ class Collector:
         if not get_entity:
             return None
         try:
-            # Telethon answers from the entities that arrived with the update when it can.
+
             return await asyncio.wait_for(get_entity(chat_id), 10)
         except Exception:
             return None
@@ -308,7 +306,7 @@ class Collector:
                                             "meaning": "Added automatically by the observation scope.",
                                             "visibility": "unknown", "role": "unknown"}
         if scope["new_chats"]["profile"] or scope["new_chats"]["history"]:
-            self.intake.put_nowait((chat_id, entity))  # profile and earlier messages, outside the update handler
+            self.intake.put_nowait((chat_id, entity))
 
     async def intake_loop(self):
         """New chats and bots: save their profile and the messages visible when they appeared."""
@@ -413,7 +411,7 @@ class Collector:
                     elif rule.get("all") or chat_id in rule["include"] or chat_id in rule["exclude"]:
                         wanted = in_folder(rule, chat_id, target["kind"])
                     else:
-                        # Outside the enumerated dialogs its folder membership is unknown: it keeps its state.
+
                         wanted = bool(target["enabled"])
                     if bool(target["enabled"]) != wanted:
                         self.store.set_target(chat_id, target["title"], target["kind"], wanted)
@@ -442,8 +440,8 @@ class Collector:
         device = api_pool.DESKTOP_DEVICE if api_id == api_pool.DESKTOP_ID else {}
         string_session = StringSession(session)
         self.resumed_state_at = self.load_update_state(string_session)
-        # catch_up makes Telethon resume from the update state loaded into the session
-        # (if any) and request what happened while this account was not connected.
+
+
         client = self.client_factory(string_session, api_id, api_hash,
                                      sequential_updates=True, flood_sleep_threshold=0,
                                      request_retries=self.param("telegram_request_retries"),
@@ -456,13 +454,13 @@ class Collector:
                                  (self.on_raw, events.Raw())):
             @wraps(handler)
             async def active_client_only(update, handler=handler):
-                # Login, probe and superseded clients must never contribute observations.
+
                 if client is not self.client:
                     return
                 if self.running:
                     await handler(update)
                 elif self.buffering:
-                    # Observation is starting: keep what arrives (catch-up included) until it is on.
+
                     if len(self.buffered) < self.buffer_limit:
                         self.buffered.append((handler, update))
                     else:
@@ -555,7 +553,7 @@ class Collector:
                 client = self.make_client(credentials["api_id"], credentials["api_hash"], credentials["session"])
             if not client.is_connected():
                 await self.connect_client(client)
-            # auth.logOut: Telegram ends the session, so it also disappears from the account's devices.
+
             ended = bool(await asyncio.wait_for(client.log_out(), 25))
         except Exception as exc:
             error = type(exc).__name__
@@ -589,7 +587,7 @@ class Collector:
     def route_owner(self):
         return str(self.store.root)
 
-    # ---- IP mode and requests outside Telegram ----
+
     def route_policy(self):
         """This workspace's IP mode; a workspace that chose a direct route before the modes existed keeps it."""
         saved = self.store.get_setting("route_policy", None)
@@ -642,13 +640,13 @@ class Collector:
                 **policy.model_dump(), "outside_proxy": proxy.receipt() if proxy else None,
                 "outside_route": self.outside_route().kind, "meaning": EXPOSURE_MEANING[policy.exposure]})
         if policy.exposure == "hide" and self.direct_fallback:
-            # Hide IP: leave the direct connection at once; reconnecting waits for a listed proxy.
+
             self.direct_fallback = False
             if self.client:
                 await self.client.disconnect()
         return self.policy_state()
 
-    # ---- automatic MTProxy ----
+
     def share(self):
         return self.param("proxy_max_accounts")
 
@@ -694,7 +692,7 @@ class Collector:
 
     def use_direct(self, reason):
         self.pool_retry_at = time.time() + 120
-        self.pool().waiting.add(self.route_owner)  # the pool keeps checking proxies for this workspace
+        self.pool().waiting.add(self.route_owner)
         if self.direct_fallback:
             return
         self.direct_fallback, self.auto_route = True, None
@@ -713,7 +711,7 @@ class Collector:
         if self.auto_route:
             return
         if self.direct_fallback and time.time() < self.pool_retry_at:
-            return  # stays direct until the next look at the pool
+            return
         try:
             alias, route = await self.pool().acquire(
                 self.route_owner, preferred=self.store.get_setting("auto_route", None), share=self.share())
@@ -774,7 +772,7 @@ class Collector:
         where the IP mode allows, connect directly when none answers."""
         old = getattr(client, "route_id", None)
         if old == "direct" or (self.auto_route and self.auto_route[0] != old):
-            return  # a direct fallback is not rotated / another connection already moved the workspace
+            return
         cooldown = self.pool().degrade(old, type(exc).__name__ if exc else reason,
                                        self.param("proxy_cooldown_minutes") * 60,
                                        self.param("proxy_cooldown_max_hours") * 3600) if old else 0
@@ -806,11 +804,11 @@ class Collector:
         try:
             alias, route = await self.pool().acquire(self.route_owner, avoid={old}, share=self.share())
         except NoProxyAvailable:
-            self.pool().keep(self.route_owner, old)  # no other proxy answers: stay, ask again after the interval
+            self.pool().keep(self.route_owner, old)
             self.store.set_setting("auto_route_since", time.time())
             return
         self.record_route(alias, route, old, "planned")
-        await self.client.disconnect()  # the monitor reconnects through the new proxy
+        await self.client.disconnect()
 
     async def review_route(self):
         """Automatic mode while connected: leave a direct fallback once a listed proxy answers again,
@@ -819,7 +817,7 @@ class Collector:
             if time.time() >= self.pool_retry_at and (self.route_policy()["exposure"] == "hide"
                                                       or self.pool().available(self.route_owner, self.share())):
                 self.pool_retry_at = 0
-                await self.client.disconnect()  # reconnecting goes through ensure_route, a proxy first
+                await self.client.disconnect()
             return
         await self.planned_rotation()
 
@@ -836,8 +834,8 @@ class Collector:
             except RPCError:
                 raise
             except Exception as exc:
-                # Something that is not a working proxy can answer with garbage (ValueError, parse
-                # errors); that is a failed route, never a lost authorization.
+
+
                 proxied = automatic and getattr(client, "route_id", None) not in (None, "direct")
                 if proxied:
                     await self.rotate_route(client, "connect_failed", exc)
@@ -856,7 +854,7 @@ class Collector:
         if config.kind == "direct" and self.route_policy()["exposure"] != "tunnel":
             raise ValueError("A direct route is allowed only in the mode for a server behind a tunnel or VPN. "
                              "Change the IP mode first.")
-        # Cancel pending login and discard clients so no old route can be reused.
+
         await self.cancel_login()
         if self.client:
             await self.client.disconnect()
@@ -876,7 +874,7 @@ class Collector:
         return config.public()
 
     async def test_network(self):
-        # A Telegram connection probe, with no account login or public IP lookup.
+
         credentials = self.vault.read("credentials")
         api_id, api_hash = ((credentials["api_id"], credentials["api_hash"]) if credentials.get("api_id")
                             else api_pool.login_order()[0])
@@ -925,14 +923,14 @@ class Collector:
         if self.running:
             raise ValueError("Pause observation before changing accounts.")
         await self.cancel_login()
-        # A session brought from elsewhere connects only to its DC's reference address.
+
         session = validate_string(session) if session else ""
         await self.ensure_route()
         candidate = self.make_client(api_id, api_hash, session)
         self.login_client = candidate
         self.pending_credentials = {"api_id": api_id, "api_hash": api_hash}
         self.pending_account_id = expected_user_id
-        # An imported key is also known outside this server; a sign-in creates one here.
+
         self.pending_key_origin = "imported" if session else "created"
         try:
             await self.connect_client(candidate)
@@ -984,7 +982,7 @@ class Collector:
                 except asyncio.CancelledError:
                     raise
                 except Exception as exc:
-                    # authorized() may already have cleaned up a rejected identity.
+
                     if self.qr_state is record or self.qr_state is None:
                         record["step"] = "expired" if isinstance(exc, TimeoutError) else "failed"
                         record["error"] = "QR code expired. Generate a new code." if isinstance(exc, TimeoutError) else (
@@ -997,7 +995,7 @@ class Collector:
                         await candidate.disconnect()
 
             self.qr_task = asyncio.create_task(wait_for_scan())
-            # Install Telethon's UpdateLoginToken listener before returning the code.
+
             await asyncio.sleep(0)
             return {**record, "url": qr.url}
         except BaseException:
@@ -1100,7 +1098,7 @@ class Collector:
         await self.restore()
         self.dialog_cache = {}
         count, limit = 0, self.param("dialog_limit")
-        # Fetching a dialog is not joining it. No invite acceptance is performed.
+
         async for dialog in self.client.iter_dialogs(limit=limit):
             count += 1
             entity = getattr(dialog, "entity", None)
@@ -1131,7 +1129,7 @@ class Collector:
         except FloodWaitError:
             raise
         except Exception:
-            if not self.folders:  # after a restart: the folders read last time, so folder mode can still start
+            if not self.folders:
                 self.folders = {f["id"]: f for f in self.store.get_setting("folders_seen", [])}
             return
         filters = getattr(result, "filters", result) or []
@@ -1196,7 +1194,7 @@ class Collector:
 
     async def prepare_start(self):
         await self.restore()
-        # StringSession does not retain the entity cache between process restarts.
+
         await self.dialogs()
         await self.apply_scope(refresh=False)
         self.source_status = {}
@@ -1248,10 +1246,10 @@ class Collector:
             self.store.append("observation.stopped", {"reason": "shutdown" if shutdown else "operator",
                                                     "media_jobs_preserved": self.store.media_stats()})
             retain_checkpoint(self.store, self.vault)
-        # A running export shares this client; pausing observation must not cut it off.
+
         if self.client and (shutdown or not (self.export_busy() or self.export_claim)):
             await self.client.disconnect()
-        if shutdown and self.proxy_pool:  # a closed or deleted workspace no longer holds or waits for a proxy
+        if shutdown and self.proxy_pool:
             self.proxy_pool.release(self.route_owner)
             self.proxy_pool.waiting.discard(self.route_owner)
         await self.cancel_login()
@@ -1309,7 +1307,7 @@ class Collector:
         while self.route_drops and now - self.route_drops[0] > self.param("proxy_drop_window_minutes") * 60:
             self.route_drops.popleft()
         if len(self.route_drops) >= self.param("proxy_drop_limit"):
-            with suppress(NoProxyAvailable):  # reconnect() then records the failure and retries later
+            with suppress(NoProxyAvailable):
                 await self.rotate_route(self.client, "repeated_disconnect")
 
     async def reconnect(self):
@@ -1364,7 +1362,7 @@ class Collector:
             payload["history_run_id"] = history_run_id
         if update is not None:
             payload["transport_update"] = plain(update)
-        # Sender is not necessarily the editor, including channel/admin edits.
+
         if kind == "message.edited":
             payload["editor_id"] = None
             payload["editor_visibility"] = "not supplied by this update"
@@ -1372,8 +1370,8 @@ class Collector:
                 payload["editor_visibility"] = ("outgoing message: in private chats and groups only its author, "
                                                 "this account, can edit it; in channels other admins may edit posts")
         if payload["outgoing"] and payload["text"] and kind == "message.new":
-            # Only a newly sent message, and only a keyboard shown before it; snapshots, recovered
-            # messages and edits are not button presses.
+
+
             keyboard = self.store.latest_reply_keyboard(chat_id, self.param("keyboard_window"), message.id)
             if keyboard and payload["text"] in keyboard[1]:
                 payload["button_press"] = {
@@ -1437,7 +1435,7 @@ class Collector:
             update = getattr(event, "original_update", None)
             source = recovered_source(update)
             if source and self.store.message_state(event.chat_id, event.message.id)["content"]:
-                return  # saved before the restart or gap; Telegram resent it
+                return
             await self.capture_message(event.message, "message.new", event.chat_id, update, source)
         except Exception as exc:
             await self.failure(exc, "message.new")
@@ -1450,7 +1448,7 @@ class Collector:
                 return
             content = self.store.message_state(event.chat_id, event.message.id)["content"]
             if content and content["observable"] == message_content.of_payload(describe_message(event.message)):
-                return  # this exact version is already saved (resent after a restart or gap)
+                return
             await self.capture_message(event.message, "message.edited", event.chat_id,
                                        getattr(event, "original_update", None))
         except Exception as exc:
@@ -1459,7 +1457,7 @@ class Collector:
     def record_deletion(self, chat_id, message_id, raw, resolution=None):
         state = self.store.message_state(chat_id, message_id)
         if state["deleted"]:
-            return  # notice already recorded (resent after a restart or gap)
+            return
         payload = {"deleted_by": None, "deletion_time": None,
                    "meaning": "Telegram deletion notification; observation time is not deletion time", "raw": raw}
         if resolution:
@@ -1475,8 +1473,8 @@ class Collector:
         try:
             raw = plain(event.original_update)
             if event.chat_id is None:
-                # Private chats and ordinary groups number messages per account, so a saved message
-                # with the same ID identifies the chat. Unknown IDs stay unscoped; no deleter is inferred.
+
+
                 unresolved = []
                 for message_id in event.deleted_ids:
                     chat_id = self.store.account_message_chat(message_id)
@@ -1503,7 +1501,7 @@ class Collector:
             settings = monitoring_settings(self.store)
             if isinstance(update, (types.UpdateNewMessage, types.UpdateNewChannelMessage)) and isinstance(
                     update.message, types.MessageService):
-                # Telethon NewMessage deliberately excludes MessageService.
+
                 chat_id = utils.get_peer_id(update.message.peer_id)
                 membership = isinstance(update.message.action, (
                     types.MessageActionChatAddUser, types.MessageActionChatDeleteUser,
@@ -1549,7 +1547,7 @@ class Collector:
         Live updates and catch-up can still lose events (Telethon drops ChannelDifferenceTooLong and
         DifferenceTooLong; long outages; leaving or losing a chat). This is the second layer.
         """
-        # After a start or reconnect, priority sources go first.
+
         delay, forced = self.param("recheck_first_delay_seconds"), True
         while self.running:
             try:
@@ -1566,7 +1564,7 @@ class Collector:
             if (scope_settings(self.store)["mode"] != "selected"
                     and time.time() - self.scope_refreshed_at > self.param("scope_refresh_minutes") * 60):
                 try:
-                    await self.apply_scope()  # folder changes and chats that appeared while offline
+                    await self.apply_scope()
                 except FloodWaitError as exc:
                     self.store.set_setting("rpc_backoff_until", time.time() + exc.seconds)
                     self.store.append("telegram.backoff", {"operation": "scope refresh",
@@ -1614,7 +1612,7 @@ class Collector:
                 result = await self.recheck_chat(target["chat_id"], settings)
                 results.append(result)
                 if "continues_after" not in result:
-                    # A chat still catching up keeps its old time, so the next tick continues it.
+
                     last = self.store.get_setting("recheck_last", {})
                     last[str(target["chat_id"])] = time.time()
                     self.store.set_setting("recheck_last", last)
@@ -1645,13 +1643,13 @@ class Collector:
             floors = self.store.get_setting("recheck_floor", {})
             last = self.store.last_message_id(chat_id)
             if last is None and str(chat_id) not in floors:
-                # Nothing saved yet: remember where observation began instead of fetching all history.
+
                 newest = await self.client.get_messages(entity, limit=1)
                 floors[str(chat_id)] = newest[0].id if newest else 0
                 self.store.set_setting("recheck_floor", floors)
-            elif limit := self.param("recheck_new_limit"):  # 0 turns recovery of missed messages off
-                # Walk up from where the previous pass stopped, not from the newest saved message:
-                # live messages saved after a long stop must not hide the part still missing below them.
+            elif limit := self.param("recheck_new_limit"):
+
+
                 walked = self.store.get_setting("recheck_walked", {})
                 floor = max(walked.get(str(chat_id), last) or 0, floors.get(str(chat_id), 0))
                 seen, reached, stopped = 0, floor, False
@@ -1674,7 +1672,7 @@ class Collector:
                     result["recovered"] += 1
                 walked = self.store.get_setting("recheck_walked", {})
                 if stopped or seen >= limit:
-                    # More may follow: the next pass continues after the last message checked here.
+
                     walked[str(chat_id)] = reached
                     result["continues_after"] = reached
                 else:
@@ -1682,7 +1680,7 @@ class Collector:
                 self.store.set_setting("recheck_walked", walked)
         if not (settings["edits"] or settings["deletions"]):
             return result
-        # The newest saved messages every pass, plus a rolling window that walks down through older ones.
+
         batch = self.param("recheck_batch")
         newest = self.store.alive_message_ids(chat_id, limit=batch)
         older = []
@@ -1701,7 +1699,7 @@ class Collector:
             if message is None:
                 missing.append(message_id)
             elif settings["edits"] and not self.own_skipped(message):
-                # Removed keyboards and replaced attachments need not have an edit date.
+
                 content = self.store.message_state(chat_id, message_id)["content"]
                 if content and content["observable"] != message_content.of_payload(describe_message(message)):
                     await self.capture_message(message, "message.edited", chat_id, source="recheck")
@@ -1709,7 +1707,7 @@ class Collector:
         result.update(checked=len(ids), checked_from=min(ids), checked_to=max(ids))
         if missing and settings["deletions"]:
             if len(missing) == len(ids) and len(ids) >= 10:
-                # Everything gone at once: make sure the chat is still readable (raises if access was lost).
+
                 await self.client.get_messages(entity, limit=1)
             for message_id in missing:
                 state = self.store.message_state(chat_id, message_id)
@@ -1783,10 +1781,10 @@ class Collector:
         request_seconds = time.monotonic() - started
         total = getattr(latest, "total", None) or 0
         last_id = latest[0].id if latest else None
-        # Channel/supergroup IDs are per chat; ordinary groups share an account-wide counter.
+
         per_chat_ids = self.dialog_cache.get(chat_id, {}).get("kind") in ("supergroup", "channel")
         pages = -(-total // 100)
-        # Telethon pages 100 messages and waits 1 s between pages for histories above 3,000.
+
         per_page = max(1.0 if total > 3000 else 0.0, request_seconds)
         return {"chat_id": chat_id, "total": total, "last_message_id": last_id,
                 "ids_are_per_chat": per_chat_ids,
@@ -1795,7 +1793,7 @@ class Collector:
                 "request_seconds": round(request_seconds, 3)}
 
     async def start_export(self, chat_id):
-        # Observation keeps running: export and live updates share this account's single client.
+
         export_id = secrets.token_urlsafe(18)
         if not self.reserve_export(export_id):
             raise ValueError("A chat export is already running on this account. Wait for it or cancel it first.")
@@ -1806,14 +1804,14 @@ class Collector:
             try:
                 total = (await self.client.get_messages(entity, limit=0)).total
             except Exception:
-                total = None  # progress is still reported, just without a percentage
+                total = None
             record = {"id": export_id, "chat_id": chat_id, "title": info.get("title"),
                       "phase": "running", "captured": 0, "total": total, "eta_seconds": None,
                       "ready": False, "error": None, "started_at": utcnow()}
             self.export_state = record
             self.export_path = None
             self.export_task = asyncio.create_task(self.run_export(entity, info, record))
-            # Released however the task ends, even if it is cancelled before its first step.
+
             self.export_task.add_done_callback(lambda _: self.release_export(export_id))
         except BaseException:
             self.release_export(export_id)
@@ -1827,7 +1825,7 @@ class Collector:
         out_path = directory / ("tgwitness-export-chat-" + record["id"] + ".zip")
         chat_id = record["chat_id"]
         try:
-            # Setup is inside the lifecycle: a failure here still ends the export as failed.
+
             directory.mkdir(mode=0o700, exist_ok=True)
             self.store.append("chat_export.started", {"chat_id": chat_id, "title": info.get("title"),
                                                       "meaning": "full visible history snapshot"}, chat_id)
@@ -1973,7 +1971,7 @@ class Collector:
             return None
         account_id = (self.store.get_setting("account", {}) or {}).get("id")
         if not (self.client and self.client.is_connected()):
-            # Only the workspace's own account photo justifies opening a connection.
+
             if peer_id != account_id or not self.vault.read("credentials").get("session"):
                 return None
             try:
@@ -2021,7 +2019,7 @@ class Collector:
                 continue
             free, threshold = shutil.disk_usage(media_root).free, self.param("media_min_free_mb") * 1024**2
             if free < threshold:
-                # Pause instead of failing jobs: queued files stay queued and resume when space is freed.
+
                 if not self.storage_low:
                     self.storage_low = True
                     self.store.append("storage.low", {"free_bytes": free, "threshold_bytes": threshold,
@@ -2061,13 +2059,12 @@ class Collector:
                     if max(current, total) > job["max_bytes"]:
                         raise ValueError("above_limit")
 
-                # A file object avoids Telethon adding a suffix outside our temporary path. Large videos
-                # and documents get extra time at the slowest expected speed.
+
                 timeout = self.param("media_timeout_seconds") + size // (self.param("media_min_speed_kbps") * 1024)
                 media = message.media
                 if isinstance(media, types.MessageMediaWebPage):
-                    # Telethon would fetch a preview's document before its photo; take the file whose
-                    # type and size were checked above (message.file describes the photo first).
+
+
                     media = message.photo or message.document
                 with temp.open("wb") as stream:
                     result = await asyncio.wait_for(

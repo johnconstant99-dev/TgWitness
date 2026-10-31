@@ -18,7 +18,7 @@ API = "https://api.github.com/repos/"
 PACKAGE = Path(__file__).parent
 REPOSITORY = re.compile(r"(?:(?:https?://)?(?:www\.)?github\.com/)?([A-Za-z0-9](?:[A-Za-z0-9-]{0,38}))/([A-Za-z0-9._-]{1,100}?)(?:\.git)?/?")
 REF = re.compile(r"[\w.+/-]{1,200}")
-LISTED = 50  # file names kept per category in the result
+LISTED = 50
 
 
 class NotFound(ValueError):
@@ -63,8 +63,8 @@ async def github(path, network):
 
 def compare(local, remote):
     changed = sorted(p for p in local.keys() & remote.keys() if remote[p] not in local[p])
-    extra = sorted(local.keys() - remote.keys())  # here, not in the commit
-    missing = sorted(remote.keys() - local.keys())  # in the commit, not here
+    extra = sorted(local.keys() - remote.keys())
+    missing = sorted(remote.keys() - local.keys())
     return {"matches": not (changed or extra or missing), "changed": changed[:LISTED],
             "extra": extra[:LISTED], "missing": missing[:LISTED],
             "differences": len(changed) + len(extra) + len(missing)}

@@ -74,7 +74,7 @@ class Linode(Provider):
         if not any(f["id"] == firewall["id"] for f in attached):
             self.call("POST", "/networking/firewalls/" + str(firewall["id"]) + "/devices",
                       {"type": "linode", "id": linode["id"]})
-        # Created switched off: the firewall is in place before the first boot.
+
         self.wait_until(lambda: self.instance(linode["id"])["status"] == "offline", "provisioning")
         self.call("POST", "/linode/instances/" + str(linode["id"]) + "/boot", {})
         linode = self.wait_until(lambda: (lambda found: found if found["status"] == "running" else None)(
@@ -131,7 +131,7 @@ class Linode(Provider):
             page += 1
 
     def actions(self, record, server):
-        # Disk and backup events carry the ID of their Linode, whatever their entity type.
+
         found = {e["id"]: e for query in ({"entity.id": server["id"]},
                                           {"entity.id": record["firewall"]["id"], "entity.type": "firewall"})
                  for e in self.events(query)}
@@ -156,7 +156,7 @@ PRIVATE = [ipaddress.ip_network(n) for n in ("10.0.0.0/8", "172.16.0.0/12", "192
 
 
 def public_ipv4(linode):
-    # Linode lists private 192.168.128.0/17 addresses beside the public one.
+
     found = [a for a in linode.get("ipv4") or [] if not any(ipaddress.ip_address(a) in n for n in PRIVATE)]
     return found[0] if found else None
 

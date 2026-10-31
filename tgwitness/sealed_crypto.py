@@ -78,7 +78,7 @@ def encrypt_file(source, destination, recipient):
     prefix = MAGIC + struct.pack(">I", len(header)) + header
     encryptor = Cipher(algorithms.AES(key), modes.GCM(nonce)).encryptor()
     encryptor.authenticate_additional_data(prefix)
-    # O_EXCL: a failed invocation must never delete or replace another result.
+
     fd = os.open(destination, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     try:
         with os.fdopen(fd, "wb") as outgoing, source.open("rb") as incoming:
@@ -132,7 +132,7 @@ def decrypt_file(source, destination, record):
                         raise ValueError("Truncated sealed package")
                     length -= len(block)
                     out.write(decryptor.update(block))
-                out.write(decryptor.finalize())  # authenticate before exposing the requested output
+                out.write(decryptor.finalize())
         created = False
         try:
             fd = os.open(destination, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
