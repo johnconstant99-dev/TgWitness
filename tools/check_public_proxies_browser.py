@@ -28,13 +28,19 @@ def main():
     fail = [False]
 
     async def download(source, network):
+        assert network.kind == "socks5" and network.host == "proxy.example"
         calls.append(source["id"])
         if fail[0]:
             raise OSError("Synthetic offline source")
         host = "9.9.9.9" if source["id"] == "solispirit" else "8.8.4.4"
+        if source.get("format") == "json":
+            return json.dumps([{"query": {"server": host, "port": 443, "secret": "a7" * 16}}])
         return "tg://proxy?server=" + host + "&port=443&secret=" + "a7" * 16
 
     env = {key: value for key, value in os.environ.items() if key not in ("TGWITNESS_PROXY_CATALOG", "TGWITNESS_PROXY_FEED_PROXY")}
+    # The default hide-address policy requires an explicit route outside Telegram.
+    # This proxy is never contacted: download() above is the synthetic transport.
+    env["TGWITNESS_PROXY_FEED_PROXY"] = "socks5://proxy.example:1080"
     with patch.dict(os.environ, env, clear=True), patch.object(catalogs, "download", download), patch.object(catalogs, "REFRESH_SECONDS", 0):
         with tempfile.TemporaryDirectory(prefix="proxy-browser-") as scratch:
             with RunningApp(Path(scratch)) as server, sync_playwright() as p:
@@ -73,7 +79,8 @@ def main():
                 page.locator("#proxy-catalog-refresh").click()
                 expect(page.locator("#proxy-catalog-status")).to_contain_text("Public lists updated")
                 expect(page.locator("#proxy-catalog-select option")).to_have_count(2)
-                assert len(calls) == 2 and server.app.state.collector.network_config() == route_before
+                assert sorted(calls) == sorted(source["id"] for source in catalogs.SOURCES)
+                assert server.app.state.collector.network_config() == route_before
                 fail[0] = True
                 page.locator("#proxy-catalog-refresh").click()
                 expect(page.locator("#proxy-catalog-status")).to_contain_text("previous list is still available")
@@ -89,7 +96,7 @@ def main():
                 expect(page.locator("#proxy-catalog-status")).to_contain_text("compatible public proxies")
                 release_api_response(page)
                 expect(page.locator("#proxy-catalog-status")).to_contain_text("compatible public proxies")
-                expect(page.locator("#network-kind")).to_have_value("direct")
+                expect(page.locator("#network-kind")).to_have_value("mtproxy_auto")
                 assert page.locator("#proxy-catalog-select option").count() == len(listing["proxies"])
 
                 for lang in ("en", "ru"):
@@ -106,7 +113,7 @@ def main():
                             page.screenshot(path=str(output / f"public-proxies-{lang}-{theme}-{width}.png"), full_page=True)
                             page.locator(".proxy-sources > summary").click()
                             check_layout(page)
-                            expect(page.locator("#proxy-catalog-sources a")).to_have_count(2)
+                            expect(page.locator("#proxy-catalog-sources a")).to_have_count(len(catalogs.SOURCES))
                             assert page.locator("#proxy-catalog-sources").inner_text().find("SoliSpirit") >= 0
                             page.locator(".proxy-sources > summary").click()
                 assert not errors, errors

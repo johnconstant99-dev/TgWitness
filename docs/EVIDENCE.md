@@ -297,10 +297,6 @@ Evidence mode (off by default) sends only the SHA-256 of each signed checkpoint 
 RFC 3161 authorities and OpenTimestamps calendars, over the workspace route and never over MTProxy.
 Answers are kept in `checkpoints/anchors/`, exported, and checked by `verify.py` (`--tsa-ca` checks
 the TSA signature; confirm OpenTimestamps proofs with `ots upgrade` and `ots verify`).
-The standalone verifier parses bounded OTS trees and rejects malformed structures.
-Its `bitcoin-unverified` status means a Bitcoin attestation was parsed, not that the
-commitment was authenticated against a Bitcoin block. `pending` and `unknown` also
-do not establish a verified timestamp.
 
 The panel prepares a request archive containing canonical checkpoint.json bytes,
 a SHA-256 message imprint and random nonce in timestamp.tsq, checksums, and instructions.

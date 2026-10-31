@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0 preview · 31 October 2026
 
 - OpenTimestamps summaries now parse bounded operation trees and attestation
   payloads, rejecting truncated, malformed and excessive proofs. Marker bytes in
@@ -26,7 +26,7 @@
   Amharic guides and notices remain available separately.
 - Site publication now rejects missing translations in a full-site language.
 
-## 0.7.0 · 30 October 2026
+### Initial preview contents · 30 October 2026
 
 - First GitHub release, with the Windows portable package, the wheel and the source archive.
   README and the website link the portable package directly: extract, double-click `TgWitness.cmd`.

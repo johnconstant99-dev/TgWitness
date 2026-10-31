@@ -1,8 +1,8 @@
 # Version 0.7.0
 
 TgWitness is a self-hosted Telegram observation journal under the
-[MIT License](../../LICENSE). Version 0.7.0 is the first GitHub release; later changes are
-listed under **Unreleased** in the [changelog](../CHANGELOG.md). The release carries the
+[MIT License](../../LICENSE). Version 0.7.0 is the first GitHub preview release; its
+contents are listed in the [changelog](../CHANGELOG.md). The release carries the
 Windows portable package, the wheel and the source archive, each with its SHA-256.
 
 ## Included in this source tree
@@ -38,15 +38,27 @@ wheel, Windows portable and GHCR packages. Public source and wheel assets use al
 the public site includes only presentation assets. Publication checks and dependency auditing
 run in CI. See [publishing](PUBLISHING.md) for commands and deployment steps.
 
-Version 0.7.0 is being prepared as a preview. Its source archive, wheel and Windows
-portable package must be built from the same reviewed commit using the tools the
-workflow runs. A draft release is not a public download. No GHCR image exists for
+Version 0.7.0 is a preview. Its source archive, wheel and Windows portable package
+are built locally using the tools the workflow runs. Shipped application files
+are compared with the reviewed source commit recorded in `RELEASE-MANIFEST.json`;
+`SHA256SUMS.txt` covers the three downloads. No GHCR image exists for
 0.7.0 yet; Docker users build locally with
 `scripts/Docker.cmd` or `scripts/docker-start.sh`.
 
 The [pre-publication audit](PREPUBLICATION-2026-10-29.md) records the latest local results.
 Earlier backend and recovery findings are in the [whole-tool review](FULL-REVIEW-2026-10-29.md).
 Local checks do not establish that GitHub-hosted workflows have run successfully.
+
+Local preview validation on 31 October 2026 (Windows, Python 3.12): 735 Python tests
+passed, 2 skipped; all eight browser checks in the checks workflow passed. The
+controller's 21 Node tests passed, including the Worker restart and replay tests.
+Ruff, notice consistency and the staged-publication check passed. The source
+archive contains 795 reviewed files; 111 application files were compared across
+the source tree, wheel and portable package. The installed portable package
+started with synthetic data, exported a 32-event journal and verified both normal
+and streamed downloads. No new live Telegram run was performed for this preview.
+Current Linux/macOS validation and successful completion of the queued GitHub
+checks remain separate qualification work.
 
 TgWitness has run on a real Telegram account: one supergroup from 27 to 29 October 2026,
 1,291 messages, 472 deletions and 12 edits, with the signatures of all 2,385 records
