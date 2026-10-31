@@ -33,9 +33,13 @@ def main():
             page.locator("#quick-open").click()
             expect(dialog).to_be_visible()
             expect(search).to_be_focused()
-            expect(dialog.get_by_role("option")).to_have_count(9)
+            destinations = ["chats", "observations", "sources", "evidence", "witness", "parameters",
+                            "connection", "accounts", "access", "integrations", "analysis"]
+            expect(dialog.get_by_role("option")).to_have_count(len(destinations))
+            assert dialog.get_by_role("option").evaluate_all(
+                "nodes=>nodes.map(n=>n.dataset.destination)") == destinations
             page.keyboard.press("ArrowUp")
-            expect(search).to_have_attribute("aria-activedescendant", "quick-option-access")
+            expect(search).to_have_attribute("aria-activedescendant", "quick-option-analysis")
             page.keyboard.press("ArrowDown")
             expect(search).to_have_attribute("aria-activedescendant", "quick-option-chats")
             search.fill("access")
@@ -50,6 +54,14 @@ def main():
             expect(page.locator("#view-evidence")).to_be_visible()
             expect(page.locator('[data-view="evidence"]')).to_have_attribute("aria-current", "page")
             expect(page.locator("#view-evidence h1")).to_be_focused()
+
+            for query, view in (("integrations", "integrations"), ("archive", "analysis")):
+                page.keyboard.press("Control+k")
+                search.fill(query)
+                expect(dialog.get_by_role("option")).to_have_count(1)
+                page.keyboard.press("Enter")
+                expect(page.locator("#view-" + view)).to_be_visible()
+                expect(dialog).not_to_be_visible()
 
             page.keyboard.press("Control+k")
             search.fill("<img src=x onerror=alert(1)>")

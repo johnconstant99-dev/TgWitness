@@ -291,6 +291,7 @@ function connectionSettings(open){
   state.connectionSettings=open;$("workspace").dataset.connectionSettings=String(open);
   $("entry-settings").setAttribute("aria-expanded",String(open));
   show("connection-options",open);$("connection-options").open=open;
+  if(open)window.TgWitnessProxies?.load();
   $("api-details").open=open;
 }
 $("entry-settings").addEventListener("click",()=>connectionSettings(!state.connectionSettings));
@@ -316,7 +317,7 @@ function navigate(view) {
   if (view==="sources") {renderTargets();loadScope().catch(e=>toast(e.message,true));}
   if (view==="witness") loadExtras().catch(e=>toast(e.message,true));
   if (view==="parameters") loadParameters().catch(e=>toast(e.message,true));
-  if (view==="accounts") {renderAccounts();loadProfiles().catch(e=>toast(e.message,true));}
+  if (view==="accounts") {renderAccounts();loadProfiles().catch(e=>toast(e.message,true));window.TgWitnessFleet?.load();}
   if (view==="chats") refreshChats().catch(e=>toast(e.message,true));
   if (view==="access") loadAccess().catch(e=>toast(e.message,true));
   if (view==="evidence") loadReportSettings().catch(e=>toast(e.message,true));
@@ -620,6 +621,7 @@ async function loadProfiles(){
   }
   select.value=state.profile;
   $("nav-accounts").textContent=String(state.profiles.length);
+  await window.TgWitnessFleet?.load();
   renderAccounts();
 }
 function accountPhaseLabel(p){
@@ -635,14 +637,14 @@ function accountIdentity(p){
   return (a.username?"@"+a.username+" · ":"")+"ID "+a.id;
 }
 function renderAccounts(){
-  const grid=$("accounts-list"),s=state.status;if(!grid||!s)return;grid.replaceChildren();
+  const grid=$("accounts-list"),s=state.status;if(!grid||!s)return;grid.replaceChildren();$("fleet-groups")?.replaceChildren();
   const list=state.profiles||[];
   $("accounts-limit").textContent=trn("{n} workspace. Add as many as you need — each uses its own Telegram account.",
     "{n} workspaces. Add as many as you need — each uses its own Telegram account.",list.length);
   $("account-add-form").querySelector("button").disabled=s.demo;
   for(const p of list){
     const c=p.collector,current=p.id===state.profile,down=!!p.error_type||!c;
-    const card=node("div","card padded account-card"+(current?" current":""));
+    const card=node("div","card padded account-card"+(current?" current":""));card.dataset.profile=p.id;
     const head=node("div","account-head"),who=node("div","account-who"),account=c&&c.account;
     const title=node("div");title.append(node("h2","",p.label));
     // The badge sums up every part (health.py); the observation phase alone is listed below it.
@@ -710,6 +712,7 @@ function renderAccounts(){
     }
     card.append(actions);grid.append(card);
   }
+  window.TgWitnessFleet?.decorate();
 }
 async function switchProfile(id){
   window.TgWitnessAnalysis?.clear();
@@ -758,7 +761,7 @@ $("profile-create-form").addEventListener("submit",event=>{
 });
 $("account-add-form").addEventListener("submit",event=>{
   event.preventDefault();busy(event.submitter,async()=>{
-    const profile=await json("profiles",{label:$("account-add-label").value.trim()},{root:true});
+    const profile=await json("profiles",{label:$("account-add-label").value.trim(),group:$("account-add-group").value||null},{root:true});
     $("account-add-label").value="";await switchProfile(profile.id);navigate("connection");
     toast(tr("Workspace created. Connect a Telegram account to start."));
   });
@@ -1624,10 +1627,14 @@ function setParameterField(item,value){
   if(item.kind==="bool")field.checked=value;else field.value=item.kind==="lines"?value.join("\n"):String(value);
 }
 function renderParameters(){
-  const box=$("parameters-groups"),demo=!!state.status?.demo;box.replaceChildren();
+  const box=$("parameters-groups"),demo=!!state.status?.demo,nav=$("parameters-nav");box.replaceChildren();nav.replaceChildren();
   for(const group of state.parameters.groups){
-    const card=node("section","card padded parameters-group");
-    card.append(node("h2","",tr(group.title)),node("p","muted",tr(group.description)));
+    const card=node("section","card padded parameters-group"),fields=node("div","parameters-grid");card.id="parameters-group-"+group.id;
+    card.append(node("h2","",tr(group.title)),node("p","muted",tr(group.description)),fields);
+    const link=node("a","",tr(group.title)),changedCount=group.items.filter(i=>!sameValue(i.value,i.default)).length;
+    link.href="#parameters-group-"+group.id;link.addEventListener("click",e=>{e.preventDefault();card.scrollIntoView({block:"start",behavior:"smooth"});});
+    if(changedCount)link.append(node("span","parameters-nav-count",String(changedCount)));
+    nav.append(link);
     for(const item of group.items){
       const changed=!sameValue(item.value,item.default),row=node("div","parameter-row"+(changed?" changed":"")),id="parameter-"+item.key;
       let field;
@@ -1649,13 +1656,28 @@ function renderParameters(){
         reset.addEventListener("click",()=>{setParameterField(item,item.default);state.parametersDirty=true;renderParametersDraft();});
         meta.append(" · ",reset);
       }
-      row.append(meta);card.append(row);
+      row.append(meta);row.dataset.search=[item.key,tr(item.label),tr(item.help||""),item.label].join(" ").toLowerCase();fields.append(row);
     }
     box.append(card);
   }
+  filterParameters();
   $("parameters-form").querySelector("button[type=submit]").disabled=demo;$("parameters-reset").disabled=demo;
   renderParametersDraft();
 }
+function filterParameters(){
+  const query=$("parameters-search").value.trim().toLowerCase(),changed=$("parameters-changed").checked;
+  for(const card of $("parameters-groups").querySelectorAll(".parameters-group")){
+    let visible=0;
+    for(const row of card.querySelectorAll(".parameter-row")){
+      const show_=(!query||row.dataset.search.includes(query))&&(!changed||row.classList.contains("changed"));
+      row.hidden=!show_;if(show_)visible++;
+    }
+    card.hidden=!visible;
+    const link=$("parameters-nav").querySelector('a[href="#'+card.id+'"]');if(link)link.hidden=!visible;
+  }
+}
+$("parameters-search").addEventListener("input",filterParameters);
+$("parameters-changed").addEventListener("change",filterParameters);
 function parametersDraft(){
   const changes={};
   for(const item of parameterItems()){

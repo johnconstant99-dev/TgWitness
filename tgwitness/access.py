@@ -47,6 +47,7 @@ POLICY = {
     "GET /api/analysis/reports/{report_id}/download": ("export", "root"),
     "GET /api/status": ("view", "filter"),
     "GET /api/profiles": ("view", "root"),
+    "GET /api/profile-groups": ("view", "root"),
     "GET /api/events": ("view", "filter"),
     "GET /api/chats": ("view", "filter"),
     "GET /api/notifications": ("view", "filter"),
@@ -129,6 +130,9 @@ POLICY = {
     "GET /api/network/catalog": ("account", None),
     "POST /api/network/catalog/refresh": ("account", None),
     "POST /api/network/catalog/{proxy_id}": ("account", None),
+    "GET /api/network/proxies": ("account", None),
+    "POST /api/network/proxies/check": ("account", None),
+    "POST /api/network/github-token": ("account", None),
     "POST /api/network/parse-link": ("account", None),
     "POST /api/network/test": ("account", None),
 }

@@ -18,9 +18,9 @@ from playwright.sync_api import sync_playwright, expect
 def main():
     output = ROOT / "test-results/account-browser"
     output.mkdir(parents=True, exist_ok=True)
-    run = Path(tempfile.mkdtemp(prefix="run-", dir=output))
     errors, outbound, scenarios = [], [], []
-    with RunningApp(run / "live", client_factory=QRClient) as server, sync_playwright() as p:
+    with tempfile.TemporaryDirectory(prefix="account-browser-") as temporary, RunningApp(
+            Path(temporary) / "live", client_factory=QRClient) as server, sync_playwright() as p:
         browser = launch_browser(p)
         context = browser.new_context(viewport={"width":1440,"height":1060}, reduced_motion="reduce")
         context.add_init_script("""(() => {

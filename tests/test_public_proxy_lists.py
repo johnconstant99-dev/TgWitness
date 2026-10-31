@@ -224,7 +224,8 @@ def test_catalog_api_refresh_is_authenticated_isolated_and_does_not_switch_route
         assert not app.state.collector.status()["has_session"]
         child = client.post("/api/profiles", json={"label": "Other"}).json()["id"]
         other = client.get("/profiles/" + child + "/api/network/catalog").json()
-        assert other["mode"] == "bundled"
+        assert other["mode"] == "cache"
+        assert other["proxies"] == refreshed.json()["proxies"]
         assert client.get("/profiles/" + child + "/api/status").json()["collector"]["network"]["kind"] == "mtproxy_auto"
         reader = client.post("/api/witness/tokens", json={"label": "Read only"}).json()["token"]
         assert client.post("/api/network/catalog/refresh", json={}, headers={"Authorization": "Bearer " + reader}).status_code == 401

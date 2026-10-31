@@ -11,9 +11,13 @@ from test_collector import FakeClient
 HARBOR, OTHER = -1001, -1002
 
 NOT_IN_POLICY = {
+    "POST /api/network/sources", "POST /api/network/sources/list",
     "GET /locale.js", "GET /api/demo-access", "GET /api/witness/head", "GET /api/assurance",
     "POST /api/access/login", "POST /api/access/logout", "GET /api/access/me",
     "POST /api/profiles", "PATCH /api/profiles/{profile_id}", "DELETE /api/profiles/{profile_id}",
+    "POST /api/profiles/import", "PUT /api/profiles/{profile_id}/group", "POST /api/profile-groups",
+    "PATCH /api/profile-groups/{group_id}", "DELETE /api/profile-groups/{group_id}",
+    "POST /api/profile-groups/{group_id}/apply",
     "GET /api/access", "POST /api/access/grants", "PATCH /api/access/grants/{grant_id}",
     "DELETE /api/access/grants/{grant_id}", "DELETE /api/access/sessions/{session_id}",
     "POST /api/access/admin", "GET /api/access/console",

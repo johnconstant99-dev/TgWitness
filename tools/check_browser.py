@@ -211,7 +211,7 @@ def check_languages(browser, server):
     context = browser.new_context(viewport={"width": 1440, "height": 1060}, reduced_motion="reduce")
     page, errors, keys = context.new_page(), [], []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
-    panel_scripts = ("app.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js")
+    panel_scripts = ("app.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js", "fleet.js")
     for script in panel_scripts:
         page.route("**/" + script + "*", lambda route: route.abort())
     page.goto(server.url + "/")

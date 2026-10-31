@@ -12,6 +12,7 @@ import ipaddress
 import json
 import logging
 import os
+import re
 from pathlib import Path
 import socket
 import tempfile
@@ -22,7 +23,7 @@ from telethon.network import MTProtoPlainSender
 from telethon.tl.functions import ReqPqMultiRequest
 from telethon.tl.types import ResPQ
 
-from . import netclient
+from . import netclient, proxy_sources
 from .network import NetworkConfig, parse_mtproxy_link, proxy_catalog as operator_catalog
 
 
@@ -51,6 +52,7 @@ SEED = Path(__file__).with_name("public_proxies.json")
 FORMAT = "tgwitness-public-proxies-v1"
 MAX_BYTES = 1024 * 1024
 MAX_PER_SOURCE = 400
+MAX_LARGE_SOURCE = 2000  # uploaded lists and the GitHub search collect from many files
 REFRESH_SECONDS = 60
 
 
@@ -99,7 +101,11 @@ def route_id(route):
     return "public-" + hashlib.sha256(raw.encode()).hexdigest()[:24]
 
 
-def parse_feed(text):
+def source_limit(source_id):
+    return MAX_LARGE_SOURCE if source_id.startswith(("list-", proxy_sources.GITHUB_SEARCH_ID)) else MAX_PER_SOURCE
+
+
+def parse_feed(text, limit=MAX_PER_SOURCE):
     rows, seen, skipped = [], set(), 0
     for line in text.splitlines():
         line = line.strip().lstrip("\ufeff")
@@ -117,7 +123,7 @@ def parse_feed(text):
         if alias in seen:
             continue
         seen.add(alias)
-        if len(rows) < MAX_PER_SOURCE:
+        if len(rows) < limit:
             rows.append({"id": alias, "route": route})
     return rows, skipped
 
@@ -137,8 +143,21 @@ def feed_text(source, text):
     return "\n".join(lines)
 
 
+LINK = re.compile(r"(?:tg://proxy\?|https?://t(?:elegram)?\.me/proxy\?)[^\s\"'<>()\[\]`|]+", re.I)
+
+
+def links_in(text):
+    """MTProxy links anywhere in a file: one per line, inside Markdown or HTML, or a JSON list of t.me parts."""
+    text = text.replace("&amp;", "&")
+    try:
+        found = feed_text({"format": "json"}, text).splitlines()
+    except (ValueError, TypeError, AttributeError):
+        found = []
+    return "\n".join(found + [m.group(0).rstrip(".,;:") for m in LINK.finditer(text)])
+
+
 def source_data(source, text, now):
-    rows, skipped = parse_feed(feed_text(source, text))
+    rows, skipped = parse_feed(feed_text(source, text), source_limit(source["id"]))
     return {"id": source["id"], "fetched_at": now, "skipped": skipped, "proxies": [
         "tg://proxy?" + urlencode({"server": row["route"].host, "port": row["route"].port,
                                    "secret": row["route"].secret}) for row in rows]}
@@ -162,45 +181,83 @@ def feed_network():
 
 
 async def download(source, network):
-
     async with asyncio.timeout(20):
-        _, _, body = await netclient.request("GET", source["url"], network, timeout=8, limit=MAX_BYTES)
+        if source.get("headers"):
+            _, _, body = await netclient.request("GET", source["url"], network, headers=source["headers"],
+                                                 timeout=8, limit=MAX_BYTES)
+        else:
+            _, _, body = await netclient.request("GET", source["url"], network, timeout=8, limit=MAX_BYTES)
     return body.decode("utf-8-sig")
 
 
-def read_snapshot(path):
-    if path.stat().st_size > MAX_BYTES:
+def read_snapshot(path, known=None):
+    if path.stat().st_size > 8 * MAX_BYTES:
         raise ValueError
     data = json.loads(path.read_text(encoding="utf-8"))
     if (not isinstance(data, dict) or data.get("format") != FORMAT
             or not isinstance(data.get("sources"), list) or not data["sources"]):
         raise ValueError
-    seen = set()
+    known = {source["id"] for source in SOURCES} | set(known or ())
+    seen, kept = set(), []
     for entry in data["sources"]:
-        if (not isinstance(entry, dict) or entry.get("id") not in SOURCE_IDS or entry["id"] in seen
-                or not isinstance(entry.get("proxies"), list) or len(entry["proxies"]) > MAX_PER_SOURCE
+        if (isinstance(entry, dict) and entry.get("id") not in known
+                and re.fullmatch(r"(url|list)-[0-9a-f]{12}|" + proxy_sources.GITHUB_SEARCH_ID, str(entry.get("id")))):
+            continue  # an own list or the GitHub search that was removed or switched off since
+        kept.append(entry)
+        if (not isinstance(entry, dict) or entry.get("id") not in known or entry["id"] in seen
+                or not isinstance(entry.get("proxies"), list) or len(entry["proxies"]) > source_limit(entry["id"])
                 or not all(isinstance(link, str) and len(link) <= 2048 for link in entry["proxies"])
                 or not isinstance(entry.get("skipped"), int) or entry["skipped"] < 0):
             raise ValueError
         datetime.fromisoformat(entry["fetched_at"]).astimezone(timezone.utc)
-        rows, skipped = parse_feed("\n".join(entry["proxies"]))
+        rows, skipped = parse_feed("\n".join(entry["proxies"]), source_limit(entry["id"]))
         if not rows or skipped:
             raise ValueError
         seen.add(entry["id"])
-    return data
+    if not kept:
+        raise ValueError
+    return {**data, "sources": kept}
 
 
 class PublicCatalog:
     def __init__(self, root):
-        self.cache = Path(root) / "public-proxies.json"
+        self.root = Path(root)
+        self.cache = self.root / "public-proxies.json"
         self.lock = asyncio.Lock()
         self.last_attempt = 0.0
         self.last_result = None
+        self.vault = None  # the main workspace's vault keeps the GitHub token
+        self.github_status = {"last_run": None, "files": 0, "proxies": 0, "error": None}
+        self.countries = proxy_sources.Countries(self.root)
+
+    def settings(self):
+        return proxy_sources.load(self.root)
+
+    def github_token(self):
+        return (self.vault.read("github") or {}).get("token") if self.vault is not None else None
+
+    def set_github_token(self, token):
+        if self.vault is None:
+            raise ValueError("The GitHub token is kept by the main workspace.")
+        self.vault.save("github", {"token": token} if token else {})
+
+    def sources(self):
+        """Bundled lists, the operator's lists and the GitHub search, each with its switch."""
+        settings, token = self.settings(), self.github_token()
+        result = [{**source, "kind": "builtin", "enabled": source["id"] not in settings.disabled} for source in SOURCES]
+        for item in settings.custom:
+            result.append({"id": item.id, "label": item.label, "url": item.url, "homepage": item.url or None,
+                           "format": item.format, "kind": item.kind, "enabled": item.enabled})
+        if settings.github.enabled or token:
+            result.append({"id": proxy_sources.GITHUB_SEARCH_ID, "label": "GitHub code search", "kind": "github",
+                           "query": settings.github.query, "enabled": settings.github.enabled and bool(token)})
+        return result
 
     def snapshot(self):
+        known = {source["id"] for source in self.sources()}
         for path, mode in ((self.cache, "cache"), (SEED, "bundled")):
             try:
-                return read_snapshot(path), mode
+                return read_snapshot(path, known), mode
             except (OSError, ValueError, TypeError, KeyError):
                 continue
         return {"format": FORMAT, "sources": []}, "bundled"
@@ -212,11 +269,13 @@ class PublicCatalog:
         snapshot, mode = self.snapshot()
         entries, seen, sources = [], set(), []
         saved = {row["id"]: row for row in snapshot["sources"]}
-        for source in SOURCES:
+        for source in self.sources():
             entry = saved.get(source["id"])
-            rows, _ = parse_feed("\n".join(entry["proxies"])) if entry else ([], 0)
+            rows, _ = parse_feed("\n".join(entry["proxies"]), source_limit(source["id"])) if entry else ([], 0)
             sources.append({**source, "fetched_at": entry["fetched_at"] if entry else None,
                             "compatible": len(rows), "skipped": entry["skipped"] if entry else 0})
+            if not source["enabled"]:
+                continue
             for row in rows:
                 if row["id"] not in seen:
                     seen.add(row["id"])
@@ -226,8 +285,9 @@ class PublicCatalog:
 
     def public(self):
         catalog = self.catalog()
-        return {**catalog, "proxies": [{"id": row["id"], "label": row["label"],
-                "host": row["route"].host, "port": row["route"].port} for row in catalog["proxies"]]}
+        return {**catalog, "proxies": [{"id": row["id"], "label": row["label"], "source": row.get("source"),
+                "host": row["route"].host, "port": row["route"].port,
+                "country": self.countries.of(row["route"].host)} for row in catalog["proxies"]]}
 
     async def refresh(self, network=None):
         """Download the lists through the environment's proxy, else the given route (direct by default)."""
@@ -243,15 +303,22 @@ class PublicCatalog:
             self.last_attempt = loop.time()
             previous, _ = self.snapshot()
             saved = {entry["id"]: entry for entry in previous["sources"]}
-            responses = await asyncio.gather(*(download(source, network) for source in SOURCES), return_exceptions=True)
+            token = self.github_token()
+            wanted = []
+            for source in self.sources():
+                if source["enabled"] and source["kind"] in ("builtin", "url"):
+                    headers = proxy_sources.github_headers(source["url"], token)
+                    wanted.append({**source, "headers": headers} if headers else source)
+            responses = await asyncio.gather(*(download(source, network) for source in wanted), return_exceptions=True)
             now = datetime.now(timezone.utc).isoformat(timespec="seconds")
             updated, failed = [], []
-            for source, response in zip(SOURCES, responses):
+            for source, response in zip(wanted, responses):
                 if isinstance(response, BaseException):
                     failed.append(source["id"])
                     continue
                 try:
-                    entry = source_data(source, response, now)
+                    text = links_in(response) if source["kind"] == "url" and source.get("format") != "json" else response
+                    entry = source_data(source, text, now)
                 except ValueError:
                     failed.append(source["id"])
                     continue
@@ -260,11 +327,56 @@ class PublicCatalog:
                     continue
                 saved[source["id"]] = entry
                 updated.append(source["id"])
+            search = self.settings().github
+            if search.enabled and token:
+                try:
+                    found = await proxy_sources.github_search(token, search, network, MAX_BYTES)
+                    text = "\n".join(links_in(body) for _, body in found)
+                    entry = source_data({"id": proxy_sources.GITHUB_SEARCH_ID}, text, now)
+                    self.github_status = {"last_run": now, "files": len(found), "proxies": len(entry["proxies"]),
+                                          "error": None}
+                    if entry["proxies"]:
+                        saved[proxy_sources.GITHUB_SEARCH_ID] = entry
+                        updated.append(proxy_sources.GITHUB_SEARCH_ID)
+                except Exception as exc:
+                    self.github_status = {**self.github_status, "last_run": now, "error": type(exc).__name__}
+                    failed.append(proxy_sources.GITHUB_SEARCH_ID)
             result = {"updated": updated, "retained": failed}
             if updated:
-                self._save({"format": FORMAT, "sources": [saved[source["id"]] for source in SOURCES if source["id"] in saved]})
+                self._store(saved)
             self.last_result = result
             return {**self.public(), "refresh": result, "throttled": False}
+
+    def _store(self, saved):
+        order = [source["id"] for source in self.sources()]
+        self._save({"format": FORMAT, "sources": [saved[i] for i in order if i in saved]})
+
+    def add_list(self, label, text):
+        """Keep an uploaded or pasted list as its own source; returns (source, compatible, skipped)."""
+        if len(text.encode("utf-8")) > proxy_sources.MAX_FILE_BYTES:
+            raise ValueError("A list may have at most 1 MiB.")
+        settings = self.settings()
+        if len(settings.custom) >= proxy_sources.MAX_CUSTOM:
+            raise ValueError("Remove a list first: at most 40 own lists.")
+        item = proxy_sources.CustomSource(kind="list", label=(label or "Uploaded list")[:80])
+        item.id = proxy_sources.source_id("list", item.label + str(time.time_ns()))
+        entry = source_data({"id": item.id}, links_in(text), datetime.now(timezone.utc).isoformat(timespec="seconds"))
+        if not entry["proxies"]:
+            raise ValueError("No compatible MTProxy links were found in this list.")
+        settings.custom.append(item)
+        proxy_sources.save(self.root, settings)
+        previous, _ = self.snapshot()
+        saved = {e["id"]: e for e in previous["sources"]}
+        saved[item.id] = entry
+        self._store(saved)
+        return item, len(entry["proxies"]), entry["skipped"]
+
+    def forget(self, ids):
+        """Drop stored data of sources that were removed."""
+        previous, _ = self.snapshot()
+        saved = {e["id"]: e for e in previous["sources"] if e["id"] not in ids}
+        if len(saved) != len(previous["sources"]):
+            self._store(saved)
 
     def _save(self, snapshot):
         temporary = None
@@ -360,6 +472,7 @@ class ProxyPool:
         self.outside = None
         self.lists_blocked = None
         self.waiting = set()
+        self.check_task = None
 
     def entries(self):
         catalog = self.catalog.catalog()
@@ -478,6 +591,40 @@ class ProxyPool:
             "probed_at": self.probed_at or None, "lists_refreshed_at": self.refreshed_at or None,
             "lists_blocked": self.lists_blocked}}
 
+    def table(self, labels=None):
+        """Every listed proxy with its last check and the workspaces on it, for the panel."""
+        try:
+            _, entries = self.entries()
+        except ValueError:
+            entries = {}
+        now, users = time.time(), {}
+        for owner, alias in self.assigned.items():
+            users.setdefault(alias, []).append((labels or {}).get(owner) or "another workspace")
+        countries = getattr(self.catalog, "countries", None)
+        rows = []
+        for alias, row in entries.items():
+            state = self.health.get(alias, {})
+            status = "resting" if self.resting(alias, now) else "ok" if self.healthy(alias, now) else "untested"
+            rows.append({"id": alias, "host": row["route"].host, "port": row["route"].port,
+                         "source": row.get("source"), "label": row.get("label"),
+                         "country": countries.of(row["route"].host) if countries else None,
+                         "latency_ms": state.get("latency_ms") if status == "ok" else None,
+                         "checked_at": state.get("checked_at"), "failures": state.get("failures", 0),
+                         "error_type": state.get("error_type"), "status": status, "used_by": users.get(alias, [])})
+        return rows
+
+    async def check_all(self, network=None):
+        """Handshake with every listed proxy now, then look up countries through the download route."""
+        try:
+            await self.probe_all()
+            self.probed_at = time.time()
+            countries = getattr(self.catalog, "countries", None)
+            if countries and network is not None and network.kind != "none" and self.catalog.settings().countries:
+                _, entries = self.entries()
+                await countries.locate([row["route"].host for row in entries.values()], network)
+        finally:
+            self.check_task = None
+
     async def probe_all(self):
         operator, entries = self.entries()
         now = time.time()
@@ -508,6 +655,12 @@ class ProxyPool:
                 if not self.lists_blocked:
                     with suppress(Exception):
                         await self.catalog.refresh(route)
+                    countries = getattr(self.catalog, "countries", None)
+                    if countries and self.catalog.settings().countries:
+                        with suppress(Exception):
+                            _, entries = self.entries()
+                            await countries.locate([row["route"].host for row in entries.values()],
+                                                   route or NetworkConfig(kind="direct"))
             if self.exhausted or now - self.probed_at >= intervals["probe"]:
                 self.probed_at = now
                 with suppress(Exception):

@@ -17,6 +17,8 @@
 <script defer src="/analysis.js?v=1"></script>
 <script defer src="/media-analysis.js?v=1"></script>
 <script defer src="/webhooks.js?v=1"></script>
+<script defer src="/proxies.js?v=1"></script>
+<script defer src="/fleet.js?v=1"></script>
 <script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=3"></script><script defer src="/cloud-capture.js?v=5"></script>
 </head>
 <body>
@@ -557,8 +559,9 @@
     <div><h1>Parameters</h1><p class="page-description">Limits and pace of collection, rechecks, downloads, people profiles, notifications and exports for this workspace. Each change applies from the next use of the value and is recorded in the signed journal.</p></div>
     <button class="secondary" id="parameters-reset" type="button"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Restore all defaults</button>
   </div>
+  <div class="parameters-tools"><input aria-label="Search parameters" id="parameters-search" placeholder="Search parameters" type="search"><label class="check-label"><input id="parameters-changed" type="checkbox"> Only changed</label></div>
   <form class="parameters-form" id="parameters-form" novalidate>
-    <div id="parameters-groups"></div>
+    <div class="parameters-layout"><nav aria-label="Parameter groups" class="parameters-nav" id="parameters-nav"></nav><div id="parameters-groups"></div></div>
     <div class="parameters-actions"><button class="primary" type="submit">Save parameters</button><span id="parameters-unsaved" role="status"></span></div>
   </form>
 </section>
@@ -591,12 +594,7 @@
       <div hidden id="import-details">
         <label class="account-file-picker" for="session-file"><svg aria-hidden="true" class="icon"><use href="#i-upload"/></svg><strong id="file-picker-title">Choose account files</strong><span id="file-picker-caption">One account · up to 4 files · 8 MiB total</span><input accept=".session,.zip,.json,.tgwitness-session,.tgwatch-session,.txt" aria-label="Choose account files" id="session-file" multiple type="file"></label>
         <p class="hint selected-files" hidden id="selected-files" role="status"></p>
-        <dl class="import-formats" aria-label="Supported account files">
-          <div><dt><code>.session</code></dt><dd><strong>Telethon or Pyrogram</strong></dd></div>
-          <div><dt><code>.zip</code></dt><dd><strong>Telegram Desktop · TData</strong></dd></div>
-          <div><dt><code>.json</code></dt><dd><strong>Settings or authorization</strong><span>Often only API settings. Add it with the session.</span></dd></div>
-          <div><dt><code>.txt</code></dt><dd><strong>Telethon StringSession</strong></dd></div>
-        </dl>
+
         <details class="import-advanced"><summary>Passcode or session text</summary>
           <label for="tdata-passcode">TData local passcode</label><input autocomplete="off" id="tdata-passcode" maxlength="512" type="password">
           <label for="session-string">Telethon StringSession</label><textarea autocomplete="off" id="session-string" maxlength="4096" placeholder="Paste a StringSession" rows="3" spellcheck="false"></textarea>
@@ -613,6 +611,12 @@
       </details>
       <div class="auth-actions"><button class="primary" id="auth-continue" type="submit">Continue</button><button class="primary" hidden id="start-qr" type="button">Show QR code</button></div>
       <p class="auth-progress hint" hidden id="auth-progress" role="status"></p>
+        <dl class="import-formats" aria-label="Supported account files">
+          <div><dt><code>.session</code></dt><dd><strong>Telethon or Pyrogram</strong></dd></div>
+          <div><dt><code>.zip</code></dt><dd><strong>Telegram Desktop · TData</strong></dd></div>
+          <div><dt><code>.json</code></dt><dd><strong>Settings or authorization</strong><span>Often only API settings. Add it with the session.</span></dd></div>
+          <div><dt><code>.txt</code></dt><dd><strong>Telethon StringSession</strong></dd></div>
+        </dl>
     </form>
     <div hidden id="qr-state"><h2>Scan with Telegram</h2><p class="hint">Settings → Devices → Link Desktop Device</p><img alt="Telegram sign-in QR code" class="qr-image" height="256" id="qr-image" width="256"><p id="qr-status" role="status"></p><div class="auth-actions"><button class="primary" hidden id="qr-retry" type="button">Generate another QR code</button><button class="quiet" id="qr-cancel" type="button">Back</button></div></div>
     <form hidden id="code-form"><h2>Enter your login code</h2><label for="code">Code from Telegram</label><input autocomplete="one-time-code" id="code" inputmode="numeric" pattern="[0-9 -]{3,12}" required><button class="primary" type="submit">Confirm code</button></form>
@@ -634,6 +638,42 @@
     <div class="guide-foot"><svg aria-hidden="true" class="icon"><use href="#i-lock"/></svg> Your installation. Your records.</div>
   </aside>
   <details hidden id="connection-options"><summary>Connection settings</summary>
+    <section class="card padded proxy-pool" id="proxy-pool">
+      <div class="pool-head">
+        <div><div class="eyebrow">Automatic MTProxy</div><h2>Proxy servers</h2><p class="muted">Every server the automatic route can use: whether it answers, how fast, its country and list. A workspace keeps its server while it works and moves to the next one when it fails.</p></div>
+        <div class="pool-actions"><button class="secondary" id="pool-check" type="button"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Check all now</button><button class="quiet" id="pool-update" type="button">Update lists</button></div>
+      </div>
+      <div class="pool-stats" id="pool-stats"></div>
+      <div class="pool-tools">
+        <input aria-label="Search servers" id="pool-search" placeholder="Search server, country or list" type="search">
+        <select aria-label="Country" id="pool-country"></select>
+        <select aria-label="List" id="pool-source"></select>
+        <div aria-label="Status" class="segmented" id="pool-status" role="group"><button aria-pressed="true" data-status="" type="button">All</button><button aria-pressed="false" data-status="ok" type="button">Answering</button><button aria-pressed="false" data-status="resting" type="button">Resting</button><button aria-pressed="false" data-status="untested" type="button">Not checked</button></div>
+      </div>
+      <div class="pool-table-wrap"><table class="pool-table"><thead><tr><th>Country</th><th>Server</th><th>Ping</th><th>Status</th><th>List</th><th>Used by</th><th><span class="sr-only" id="pool-action-heading">Action</span></th></tr></thead><tbody id="pool-rows"></tbody></table></div>
+      <div class="pool-more"><span class="hint" id="pool-count"></span><button class="quiet" hidden id="pool-more" type="button">Show more</button></div>
+      <details class="pool-sources" id="pool-sources"><summary>Lists and sources</summary>
+        <div class="pool-source-grid">
+          <div><h3>Bundled lists</h3><p class="hint">Public lists maintained on GitHub. Switch off the ones you do not trust.</p><div class="pool-source-list" id="pool-bundled"></div></div>
+          <div><h3>Your lists</h3><p class="hint">Add a list address, upload files or paste links. Lists are read for <code>tg://proxy</code> and <code>t.me/proxy</code> links anywhere in the text.</p>
+            <div class="pool-source-list" id="pool-own"></div>
+            <form class="pool-inline" id="pool-add-url"><input aria-label="List address" id="pool-url" placeholder="https://… list of proxy links" required type="url"><select aria-label="List format" id="pool-url-format"><option value="text">Links</option><option value="json">JSON</option></select><button class="secondary" type="submit">Add list</button></form>
+            <label class="pool-drop" id="pool-drop"><input accept=".txt,.json,.md,.csv,.html,.htm" id="pool-files" multiple type="file"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><span>Drop list files here or choose them</span></label>
+            <details class="pool-paste"><summary>Paste links</summary><textarea aria-label="Proxy links" id="pool-paste" placeholder="tg://proxy?server=…" rows="4" spellcheck="false"></textarea><button class="secondary" id="pool-paste-add" type="button">Add pasted links</button></details>
+          </div>
+        </div>
+        <div class="pool-github">
+          <h3>GitHub</h3><p class="hint">With a token, downloads from GitHub are authenticated and TgWitness can search GitHub for newly published MTProxy lists whenever the lists update. The token is kept encrypted and is sent only to GitHub.</p>
+          <div class="pool-inline"><input aria-label="GitHub token" autocomplete="off" id="pool-token" placeholder="ghp_… or github_pat_…" spellcheck="false" type="password"><button class="secondary" id="pool-token-save" type="button">Save token</button><button class="quiet" id="pool-token-remove" type="button">Remove token</button><span class="pool-pill" id="pool-token-state"></span></div>
+          <label class="check-label"><input id="pool-github-search" type="checkbox"> Search GitHub for MTProxy lists</label>
+          <div class="pool-search-fields"><div><label for="pool-github-query">Search query</label><input id="pool-github-query" maxlength="200" spellcheck="false"></div><div><label for="pool-github-max">Files per search</label><input id="pool-github-max" max="60" min="1" type="number"></div></div>
+          <p class="hint" id="pool-github-status" role="status"></p>
+          <label class="check-label"><input id="pool-countries" type="checkbox"> Look up server countries</label>
+          <p class="hint">Country lookups ask a public GeoIP service about the server addresses only, through the same route as list downloads.</p>
+          <div class="pool-save"><button class="primary" id="pool-save" type="button">Save source settings</button><span class="hint" id="pool-save-state" role="status"></span></div>
+        </div>
+      </details>
+    </section>
     <div class="card padded route-card"><div class="eyebrow">Connection route</div><h2 id="route-summary">Direct connection</h2><p class="muted" id="route-detail">Choose a route before signing in.</p>
       <details id="network-details"><summary>Change connection route</summary>
         <p class="notice route-running" hidden id="network-running">Pause observation to change the route. Until then, observation keeps using the current one.</p>
@@ -730,10 +770,23 @@
 <section class="view" hidden id="view-accounts">
   <div class="page-heading">
     <div><h1>Accounts</h1><p class="page-description">Isolated workspaces — add as many as you need. Each has its own session, sources, journal and signing key, and runs its own collector. Several accounts can export one chat together.</p></div>
-    <button class="secondary" id="accounts-refresh"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Refresh</button>
+    <div class="fleet-actions"><button class="primary" id="fleet-import-open" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Import accounts</button><button class="secondary" id="fleet-group-new" type="button">New group</button><button class="secondary" id="accounts-refresh"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Refresh</button></div>
   </div>
+  <section class="card padded fleet-import" hidden id="fleet-import">
+    <div class="fleet-import-head"><div><div class="eyebrow">Bulk import</div><h2>Import many accounts at once</h2><p class="muted">Each account gets its own workspace, signing key and proxy. Files with the same name form one account, for example <code>name.session</code> with <code>name.json</code>. A session that does not sign in is not kept.</p></div><button class="quiet" id="fleet-import-close" type="button">Close</button></div>
+    <label class="pool-drop fleet-drop" id="fleet-drop"><input accept=".session,.json,.zip,.txt" id="fleet-files" multiple type="file"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><span>Drop account files here or choose them: .session, .json, TData .zip, StringSession .txt</span></label>
+    <div class="fleet-import-grid">
+      <div><label for="fleet-group">Put them in</label><select id="fleet-group"></select></div>
+      <div><label for="fleet-group-name">New group name</label><input id="fleet-group-name" maxlength="80" placeholder="e.g. Scam monitors"></div>
+      <div><label for="fleet-passcode">TData passcode · optional</label><input autocomplete="off" id="fleet-passcode" maxlength="512" type="password"></div>
+      <div><label for="fleet-api">API ID:Hash · optional</label><input autocomplete="off" id="fleet-api" placeholder="Built-in pool when empty" spellcheck="false"></div>
+    </div>
+    <div class="fleet-import-run"><button class="primary" disabled id="fleet-import-start" type="button">Import accounts</button><span class="hint" id="fleet-import-summary" role="status"></span></div>
+    <ol class="fleet-results" id="fleet-results"></ol>
+  </section>
+  <div id="fleet-groups"></div>
   <div id="accounts-list" class="accounts-grid"></div>
-  <form class="card padded profile-create" id="account-add-form"><div class="eyebrow">Add account</div><h2>New workspace</h2><p class="muted">Create an isolated workspace, then connect a distinct Telegram account inside it. Importing the same session into two workspaces can disrupt update delivery.</p><label for="account-add-label">Workspace name</label><input id="account-add-label" maxlength="80" placeholder="e.g. Research account 2" required><button class="secondary" type="submit">Add workspace</button><p class="hint" id="accounts-limit"></p></form>
+  <form class="card padded profile-create" id="account-add-form"><div class="eyebrow">Add account</div><h2>New workspace</h2><p class="muted">Create an isolated workspace, then connect a distinct Telegram account inside it. Importing the same session into two workspaces can disrupt update delivery.</p><label for="account-add-label">Workspace name</label><input id="account-add-label" maxlength="80" placeholder="e.g. Research account 2" required><label for="account-add-group">Group · optional</label><select id="account-add-group"></select><button class="secondary" type="submit">Add workspace</button><p class="hint" id="accounts-limit"></p></form>
 </section>
 
 <section class="view" hidden id="view-analysis">

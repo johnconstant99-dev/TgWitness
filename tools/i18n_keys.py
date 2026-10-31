@@ -17,7 +17,8 @@ LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
 PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "sessions.py", "network.py",
                  "profiles.py", "multi_export.py", "alerts.py", "witness_api.py", "tuning.py", "interactions.py",
                  "access.py", "history.py", "archive.py", "archive_api.py", "ai.py", "analysis.py", "analysis_api.py",
-                 "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py")
+                 "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py", "proxy_catalog.py",
+                 "proxy_sources.py")
 
 
 def calls(source):
@@ -56,7 +57,7 @@ def script_keys(source):
 
 def all_script_keys():
     keys = []
-    for name in ("app.js", "i18n.js", "guide.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js"):
+    for name in ("app.js", "i18n.js", "guide.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js", "fleet.js"):
         keys += script_keys((STATIC / name).read_text(encoding="utf-8"))
     return list(dict.fromkeys(keys))
 

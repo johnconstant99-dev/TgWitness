@@ -15,6 +15,7 @@
 - [Choose a sign-in method](#choose-a-sign-in-method)
 - [Connect and confirm](#connect-and-confirm)
 - [Add or remove a workspace](#add-or-remove-a-workspace)
+- [Import accounts and share settings](#import-accounts-and-share-settings)
 
 </details>
 
@@ -31,7 +32,7 @@ Use a dedicated Telegram user account. Each workspace keeps its own authorizatio
 | A supported saved session | **Account → Files**; select the session and companion JSON together |
 | A complete authorization key | **Account → Auth key**; provide the 512 hex characters and its DC ID |
 
-Supported imports include Telethon StringSession, reviewed Telethon/Pyrogram SQLite formats, documented account JSON and modern single-account TData ZIP. TDLib directories and bulk account lists are unsupported. JSON metadata alone may require phone or QR login.
+Supported imports include Telethon StringSession, reviewed Telethon/Pyrogram SQLite formats, documented account JSON and modern single-account TData ZIP. TDLib directories and CSV account inventories are unsupported. JSON metadata alone may require phone or QR login.
 
 API ID and API hash identify an application; they are not an account login. TgWitness can reuse saved/imported credentials or a pair from its built-in pool. You may supply your own pair under **API ID + Hash**.
 
@@ -56,5 +57,19 @@ Use the **+** beside the account selector or **Accounts → Add account**. There
 Switching the selected workspace leaves the other collectors running. **Lock** clears browser access; **Pause** stops observation.
 
 Deleting an additional workspace stops its collector and removes local sessions, journal and keys. If deletion fails, the workspace remains unavailable with **Deletion incomplete**; close programs holding its files and retry. The main workspace cannot be deleted through the panel. Separately exported or backed-up material is not removed with a workspace.
+
+## Import accounts and share settings
+
+**Accounts → Import accounts** accepts multiple accounts at once. Match companion
+files by basename, such as `alpha.session` + `alpha.json`. Choose a group and start
+the queue. Each account accepts up to four files, 8 MiB total; a TData ZIP must
+contain one account. Each account gets a separate workspace; failed logins are rolled back,
+and duplicates are rejected. Locking or switching stops the remaining queue.
+
+Groups keep the account list organized. Open **Shared settings**, choose a template
+and select the settings to copy, then press **Apply to members**. Settings are copied
+once; sessions, signing keys, evidence and proxy credentials stay separate. An
+observing account keeps its IP mode until paused. Deleting a group preserves its
+accounts. See [session formats and limits](../ACCOUNTS.md).
 
 **Next:** [Collection](Collection.md) · [Session formats and limits](../ACCOUNTS.md) · [Backup](Backup-and-Recovery.md)

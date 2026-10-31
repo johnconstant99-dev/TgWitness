@@ -97,7 +97,7 @@ def main():
                 release_api_response(page)
                 expect(page.locator("#proxy-catalog-status")).to_contain_text("compatible public proxies")
                 expect(page.locator("#network-kind")).to_have_value("mtproxy_auto")
-                assert page.locator("#proxy-catalog-select option").count() == len(listing["proxies"])
+                assert page.locator("#proxy-catalog-select option").count() == 2
 
                 for lang in ("en", "ru"):
                     context.add_cookies([{"name": "tgwitness-lang", "value": lang, "url": server.url}])

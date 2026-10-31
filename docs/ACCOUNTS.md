@@ -288,6 +288,14 @@ sign in.
 - **Accounts** renames a workspace and deletes an added one, with its session, journal,
   sources and signing key. The main workspace cannot be deleted from the panel.
 
+### Bulk import and account groups
+
+Use **Accounts → Import accounts** to add several accounts, pair files by basename
+and see each login result. Each account gets its own workspace. Groups can copy
+selected settings from a template without merging sessions, keys or evidence.
+See [the import and groups guide](wiki/Accounts.md#import-accounts-and-share-settings)
+and [the MTProxy pool dashboard](wiki/Proxies.md#pool-dashboard-and-custom-sources).
+
 ## Sign out
 
 **Account → Sign out of Telegram** (with observation paused) asks Telegram to end the

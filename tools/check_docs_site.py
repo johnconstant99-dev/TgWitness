@@ -16,11 +16,11 @@ from playwright.sync_api import expect, sync_playwright
 if __package__:
     from .build_site import NOTICE_LANGUAGES, NOTICE_PAGES, page_languages
     from .site_content import GUIDES, REFERENCE
-    from .site_i18n import LANGUAGES
+    from .site_i18n import ENGLISH_ONLY, LANGUAGES
 else:
     from build_site import NOTICE_LANGUAGES, NOTICE_PAGES, page_languages
     from site_content import GUIDES, REFERENCE
-    from site_i18n import LANGUAGES
+    from site_i18n import ENGLISH_ONLY, LANGUAGES
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -219,7 +219,11 @@ def main():
                         expect(page.locator("#guide-search")).to_be_visible()
                     if slug != "capture":
                         assert not page.locator('input:not([type="search"]),form').count()
-                    expect(page.locator('link[rel=alternate][hreflang]')).to_have_count(len(page_languages(path)) + 1)
+                    alternates = page.locator('link[rel=alternate][hreflang]')
+                    english_only = path.startswith("docs/reference/") and slug in ENGLISH_ONLY
+                    expect(alternates).to_have_count(2 if english_only else len(page_languages(path)) + 1)
+                    if english_only:
+                        assert set(alternates.evaluate_all("nodes=>nodes.map(n=>n.hreflang)")) == {"en", "x-default"}
                     assert not page.evaluate("document.body.textContent.includes('@@')")
                     assert page.evaluate("getComputedStyle(document.documentElement).scrollBehavior") == "auto"
                     assert not page.locator(".will-reveal, .will-draw").count(), path

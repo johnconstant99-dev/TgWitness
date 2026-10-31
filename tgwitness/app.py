@@ -9,7 +9,7 @@ from secrets import token_bytes as secrets_token
 import time
 from datetime import datetime, timezone
 from collections import defaultdict, deque
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from typing import Literal
 
@@ -22,13 +22,14 @@ from starlette.background import BackgroundTask
 from telethon.errors import FloodWaitError, RPCError
 
 from . import __version__
+from .workers import complete_in_thread
 from .access import POLICY, AccessControl, AdminSettings, Console, GrantSettings, Refused, check as access_check
 from .collector import Collector
 from .demo import seed_demo
 from .evidence import LIMITS, checkpoint, encrypt_export, export_file, producer, retain_checkpoint, cleanup_exports
 from . import i18n
 from .security import InstanceLock, Vault
-from .profiles import Profiles, ProfileDispatch
+from .profiles import GROUP_SECTIONS, Profiles, ProfileDispatch
 from .multi_export import MultiExport
 from .provenance import run_receipt
 from .middleware import RequestLimit, request_limit
@@ -38,6 +39,7 @@ from .anchoring import EvidenceMode, anchor_loop, evidence_settings, request_anc
 from . import replica
 from . import alerts
 from .network import NetworkConfig, RoutePolicy, parse_mtproxy_link
+from . import proxy_catalog, proxy_sources
 from .proxy_catalog import ProxyPool, PublicCatalog, feed_network
 from .monitoring import Capture, Monitoring, capture_settings, monitoring_settings
 from .scope import (EXCLUDE_LIMIT, WIDE_WARNING, Recheck, ScopeUpdate, recheck_settings, scope_settings,
@@ -133,6 +135,15 @@ class ProxyLink(BaseModel):
     link: str = Field(min_length=1, max_length=2048)
 
 
+class ProxyListUpload(BaseModel):
+    label: str = Field(default="", max_length=120)
+    text: str = Field(min_length=1, max_length=1024 * 1024)
+
+
+class GitHubToken(BaseModel):
+    token: str = Field(default="", max_length=300)
+
+
 class ReplicaUpdate(replica.ReplicaSettings):
 
     access_key: str = Field(default="", max_length=256, pattern=r"^\S*$")
@@ -161,6 +172,24 @@ class MultiExportStart(BaseModel):
 
 class ProfileCreate(BaseModel):
     label: str = Field(min_length=1, max_length=80)
+    group: str | None = Field(default=None, max_length=40)
+
+
+class ProfileGroup(BaseModel):
+    label: str = Field(min_length=1, max_length=80)
+    template: str | None = Field(default=None, max_length=40)
+    sections: list[str] | None = Field(default=None, max_length=10)
+
+
+class ProfileGroupAssign(BaseModel):
+    group: str | None = Field(default=None, max_length=40)
+
+
+class ProfileImport(AccountImport):
+    label: str = Field(default="", max_length=80)
+    group: str | None = Field(default=None, max_length=40)
+    api_id: int | None = Field(default=None, gt=0)
+    api_hash: str | None = Field(default=None, pattern=r"^[0-9a-f]{32}$")
 
 
 class RoutePolicyUpdate(RoutePolicy):
@@ -188,6 +217,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     public_proxies = PublicCatalog(root)
 
     shared_pool = proxy_pool or ProxyPool(public_proxies)
+    public_proxies = shared_pool.catalog
 
     console = None if access else Console()
 
@@ -275,6 +305,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     shared_pool.intervals = lambda: {"lists": tuning.value(store, "proxy_lists_minutes") * 60,
                                                      "probe": tuning.value(store, "proxy_probe_minutes") * 60}
                     shared_pool.outside = collector.outside_route
+                    shared_pool.catalog.vault = vault
                     pool_task = asyncio.create_task(shared_pool.run())
 
             async def resume():
@@ -304,7 +335,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     await app.state.multi_export.close()
                 if profiles:
                     await profiles.close()
-                for task in (resume_task, anchor_task, replica_task, alert_task, host_task, pool_task):
+                check_task = shared_pool.check_task if proxy_pool is None else None
+                for task in (resume_task, anchor_task, replica_task, alert_task, host_task, pool_task, check_task):
                     if task:
                         task.cancel()
                         await asyncio.gather(task, return_exceptions=True)
@@ -516,9 +548,116 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             if not body.label.strip():
                 raise HTTPException(422, "Enter an account label.")
             try:
-                return await app.state.profiles.create(body.label.strip())
+                return await app.state.profiles.create(body.label.strip(), body.group)
             except ValueError as exc:
                 raise HTTPException(400, str(exc)) from None
+
+        def groups_view(principal=None):
+            registry = app.state.profiles
+            groups = []
+            for group in registry.groups():
+                members = registry.members(group["id"])
+                if principal and not principal.admin:
+                    members = [pid for pid in members if principal.opens(pid)]
+                    if not members:
+                        continue
+                    if not principal.opens(group.get("template") or ""):
+                        group = {**group, "template": None}
+                groups.append({**group, "members": members})
+            return {"groups": groups, "sections": list(GROUP_SECTIONS)}
+
+        @app.get("/api/profile-groups", dependencies=[Depends(authenticate)])
+        async def profile_groups(request: Request):
+            return groups_view(request.state.principal)
+
+        @app.post("/api/profile-groups", dependencies=[Depends(authenticate)])
+        async def profile_group_create(body: ProfileGroup):
+            require_live()
+            try:
+                await app.state.profiles.save_group(None, body.label.strip(), body.template, body.sections)
+            except ValueError as exc:
+                raise HTTPException(400, str(exc)) from None
+            return groups_view()
+
+        @app.patch("/api/profile-groups/{group_id}", dependencies=[Depends(authenticate)])
+        async def profile_group_update(group_id: str, body: ProfileGroup):
+            require_live()
+            try:
+                await app.state.profiles.save_group(group_id, body.label.strip(), body.template, body.sections)
+            except ValueError as exc:
+                raise HTTPException(400, str(exc)) from None
+            return groups_view()
+
+        @app.delete("/api/profile-groups/{group_id}", dependencies=[Depends(authenticate)])
+        async def profile_group_delete(group_id: str):
+            require_live()
+            try:
+                await app.state.profiles.delete_group(group_id)
+            except ValueError as exc:
+                raise HTTPException(400, str(exc)) from None
+            return groups_view()
+
+        @app.post("/api/profile-groups/{group_id}/apply", dependencies=[Depends(authenticate)])
+        async def profile_group_apply(group_id: str):
+            require_live()
+            try:
+                return {**await app.state.profiles.apply_group(group_id), **groups_view()}
+            except ValueError as exc:
+                raise HTTPException(400, str(exc)) from None
+
+        @app.put("/api/profiles/{profile_id}/group", dependencies=[Depends(authenticate)])
+        async def profile_group_assign(profile_id: str, body: ProfileGroupAssign):
+            require_live()
+            try:
+                await app.state.profiles.assign(profile_id, body.group)
+            except ValueError as exc:
+                raise HTTPException(400, str(exc)) from None
+            return groups_view()
+
+        @app.post("/api/profiles/import", dependencies=[Depends(authenticate)])
+        async def profiles_import(body: ProfileImport):
+            """One account per request: convert its files, give it a new workspace and connect the session.
+            A workspace whose session does not log in is removed again; the uploads are never stored."""
+            require_live()
+            if (body.api_id is None) != (body.api_hash is None):
+                raise HTTPException(422, "Provide both API ID and API hash, or leave both empty.")
+            try:
+                account = await asyncio.to_thread(import_accounts, [f.model_dump() for f in body.files], body.passcode)
+            except ValueError as exc:
+                raise HTTPException(400, str(exc)) from None
+            if not account.get("session"):
+                raise HTTPException(400, "These files hold no login session. Add the .session or TData of the account.")
+            registry = app.state.profiles
+            expected = account.get("expected_user_id")
+            for entry in registry.entries.values():
+                known = entry["app"].state.store.get_setting("account", {}) if entry.get("app") else {}
+                if expected and (known or {}).get("id") == expected:
+                    raise HTTPException(409, "This Telegram account already has a workspace: " + entry["label"] + ".")
+            label = body.label.strip() or (body.files[0].name.rsplit(".", 1)[0][:80] or "Imported account")
+            try:
+                entry = await registry.create(label, body.group)
+            except ValueError as exc:
+                raise HTTPException(400, str(exc)) from None
+            try:
+                async with registry.lock:
+                    child = registry.entries[entry["id"]]["app"]
+                    if child is None:
+                        raise ValueError("The new workspace could not start.")
+                    async with op_lock:
+                        await asyncio.wait_for(child.state.collector.configure(
+                            body.api_id or account.get("api_id"), body.api_hash or account.get("api_hash"),
+                            account["session"], expected), tuning.value(app.state.store, "operation_timeout_seconds"))
+                    account_info = child.state.store.get_setting("account", {}) or {}
+            except (Exception, asyncio.CancelledError) as exc:
+                with suppress(Exception):
+                    await registry.delete(entry["id"])
+                if isinstance(exc, asyncio.CancelledError):
+                    raise
+                reason = str(exc) if isinstance(exc, ValueError) else type(exc).__name__
+                raise HTTPException(400, "Not imported: " + reason) from None
+            return {"profile": entry, "account": {"id": account_info.get("id"), "username": account_info.get("username"),
+                                                  "name": account_info.get("name")},
+                    "formats": account.get("formats", [])}
 
         def opens_chat_everywhere(principal, chat_id, profile_ids):
             return all(principal.opens(pid) and (principal.chats(pid) is None or chat_id in principal.chats(pid))
@@ -687,6 +826,88 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             route = await public_proxies.selected_route(proxy_id)
             return await app.state.collector.set_network(route)
         return await operation(apply)
+
+    def proxy_view(principal=None):
+        """The shared automatic pool as the panel shows it: every server, its check and its users."""
+        catalog = shared_pool.catalog
+        labels = {str(app.state.store.root): app.state.store.get_setting("profile_label", "this workspace")}
+        profiles = getattr(app.state, "profiles", None)
+        for entry in (profiles.entries.values() if profiles else ()):
+            if entry.get("app") is not None and (principal is None or principal.opens(entry["id"])):
+                labels[str(entry["app"].state.store.root)] = entry["label"]
+        rows, settings = shared_pool.table(labels), catalog.settings()
+        latencies = sorted(r["latency_ms"] for r in rows if r["latency_ms"])
+        return {"rows": rows, "summary": {
+                    "listed": len(rows), "ok": sum(r["status"] == "ok" for r in rows),
+                    "resting": sum(r["status"] == "resting" for r in rows),
+                    "untested": sum(r["status"] == "untested" for r in rows),
+                    "median_ms": latencies[len(latencies) // 2] if latencies else None,
+                    "countries": len({r["country"] for r in rows if r["country"]}),
+                    "checked_at": shared_pool.probed_at or None, "checking": shared_pool.check_task is not None},
+                "sources": catalog.public()["sources"],
+                "settings": {**settings.model_dump(), "github_token": bool(catalog.github_token()),
+                             "github_status": catalog.github_status},
+                **download_route()}
+
+    @app.get("/api/network/proxies", dependencies=[Depends(authenticate)])
+    async def network_proxies(request: Request):
+        try:
+            return proxy_view(request.state.principal)
+        except ValueError as exc:
+            raise HTTPException(503, str(exc)) from None
+
+    @app.post("/api/network/proxies/check", dependencies=[Depends(authenticate)])
+    async def network_proxies_check(request: Request):
+        require_live()
+        if shared_pool.check_task is None:
+            shared_pool.check_task = asyncio.create_task(shared_pool.check_all(app.state.collector.outside_route()))
+        return proxy_view(request.state.principal)
+
+    @app.post("/api/network/sources", dependencies=[Depends(authenticate)])
+    async def network_sources(body: proxy_sources.SourceSettings):
+        require_live()
+        catalog = shared_pool.catalog
+        async with catalog.lock:
+            before = {item.id for item in catalog.settings().custom}
+            known = {source["id"] for source in proxy_catalog.SOURCES}
+            if set(body.disabled) - known:
+                raise HTTPException(422, "Unknown bundled list.")
+            if any(item.id and item.id not in before for item in body.custom):
+                raise HTTPException(422, "Unknown own list. Reload the page.")
+            try:
+                proxy_sources.save(catalog.root, body)
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from None
+            catalog.forget(before - {item.id for item in body.custom})
+        app.state.store.append("network.sources_changed", {
+            "bundled_off": body.disabled, "own_lists": len(body.custom), "github_search": body.github.enabled})
+        return proxy_view()
+
+    @app.post("/api/network/sources/list", dependencies=[Depends(authenticate)])
+    async def network_sources_list(body: ProxyListUpload):
+        require_live()
+        try:
+            async with shared_pool.catalog.lock:
+                item, compatible, skipped = await complete_in_thread(shared_pool.catalog.add_list, body.label, body.text)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+        app.state.store.append("network.sources_changed", {"own_list_added": item.label, "compatible": compatible})
+        return {**proxy_view(), "added": {"id": item.id, "compatible": compatible, "skipped": skipped}}
+
+    @app.post("/api/network/github-token", dependencies=[Depends(authenticate)])
+    async def network_github_token(request: Request, body: GitHubToken):
+        require_live()
+        if not request.state.principal.admin:
+            raise HTTPException(403, "Only the main administrator can store a GitHub token.")
+        token = body.token.strip()
+        if token and proxy_sources.token_problem(token):
+            raise HTTPException(422, proxy_sources.token_problem(token))
+        try:
+            shared_pool.catalog.set_github_token(token)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from None
+        app.state.store.append("network.github_token", {"stored": bool(token)})
+        return proxy_view()
 
     @app.post("/api/network/parse-link", dependencies=[Depends(authenticate)])
     async def network_parse_link(body: ProxyLink):

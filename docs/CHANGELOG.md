@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added batch session import and account groups with template settings. Failed
+  imports leave no empty workspace; locking or switching stops the remaining queue.
+- Added the MTProxy dashboard: ping, status, countries, filters, shared custom
+  lists and optional GitHub search. Routes remain separate for each account.
 - Added scoped, read-only MCP connections and local archive search with optional
   AI source review and separate analytical reports.
 - Added local OCR/transcription for saved attachments and signed outgoing webhooks
