@@ -18,6 +18,9 @@ on:
       - .github/workflows/checks.yml
       - .github/workflows/release.yml
       - '!**/*.md'
+      - '!deploy/installer/**'
+      - '!tools/build_installer.py'
+      - '!tools/check_installer.py'
   workflow_dispatch:
     inputs:
       full_platforms:

@@ -1,0 +1,18 @@
+# A separate static virtual host. Keep the existing API virtual host unchanged.
+# Point DNS here and configure HTTPS (for example, certbot --nginx -d get.destroy.tools)
+# before advertising HTTPS install commands. Inspect with nginx -t before reloading.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name get.destroy.tools;
+    root /var/www/tgwitness-installer;
+    index index.html;
+    autoindex off;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+    add_header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'" always;
+    location ~ /\. { deny all; }
+    location / { try_files $uri $uri/ =404; }
+    location ~ \.whl$ { default_type application/octet-stream; }
+    location ~ \.(sh|ps1|cmd|sha256)$ { default_type text/plain; }
+}

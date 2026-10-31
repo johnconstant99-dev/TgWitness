@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Install TgWitness on Linux, macOS or Windows. A private Telegram investigation workspace with signed evidence exports.">
+  <meta name="color-scheme" content="dark light">
+  <title>Install TgWitness · PhishDestroy</title>
+  <link rel="icon" href="mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="site.js" defer></script>
+</head>
+<body>
+  <header class="top"><a class="brand" href="https://phishdestroy.github.io/TgWitness/"><img src="mark.svg" alt="" width="32" height="32"><strong>TgWitness</strong><span>INSTALL</span></a><a class="source" href="https://github.com/phishdestroy/TgWitness">Source ↗</a></header>
+  <main>
+    <section class="intro">
+      <p class="eyebrow"><span class="signal"></span> YOUR MACHINE. YOUR EVIDENCE.</p>
+      <h1>From terminal<br>to <span>evidence.</span></h1>
+      <p class="lead">Install your Telegram investigation workspace.<br> Capture changes. Preserve files. Hand over a verifiable record.</p>
+      <div class="facts"><span>Python included</span><span>MCP ready</span><span>SHA-256 checked</span></div>
+    </section>
+    <section class="installer" aria-labelledby="install-title">
+      <div class="installer-heading"><h2 id="install-title">Choose your system.</h2><span class="version">@@VERSION@@ · preview</span></div>
+      <div class="tabs" role="tablist" aria-label="Operating system">
+        <button type="button" role="tab" id="tab-unix" aria-selected="true" aria-controls="unix" tabindex="0">Linux / macOS</button>
+        <button type="button" role="tab" id="tab-windows" aria-selected="false" aria-controls="windows" tabindex="-1">Windows</button>
+      </div>
+      <div class="platform" role="tabpanel" id="unix" aria-labelledby="tab-unix">
+        <div class="command-label"><span>Bash · x64 / ARM64</span><span>No sudo needed</span></div>
+        <div class="command"><pre><code id="unix-command">curl -fsSL @@BASE_URL@@/install.sh | bash</code></pre><button type="button" class="copy" data-copy="unix-command" aria-label="Copy Linux and macOS installation command">Copy</button></div>
+        <p class="hint">Works with glibc and musl Linux, Intel Macs and Apple silicon.</p>
+      </div>
+      <div class="platform" role="tabpanel" id="windows" aria-labelledby="tab-windows" hidden>
+        <div class="command-label"><span>Command Prompt or PowerShell · x64 / ARM64</span><span>No administrator needed</span></div>
+        <div class="command"><pre><code id="windows-command">powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm @@BASE_URL@@/install.ps1 | iex"</code></pre><button type="button" class="copy" data-copy="windows-command" aria-label="Copy Windows installation command">Copy</button></div>
+        <details><summary>Prefer curl?</summary><p class="hint">Paste this alternative into Command Prompt. An existing <code>install.cmd</code> is left untouched.</p><div class="command"><pre><code id="curl-command">if exist install.cmd (echo install.cmd already exists. Choose another folder.) else (curl -fsSL @@BASE_URL@@/install.cmd -o install.cmd &amp;&amp; call install.cmd &amp;&amp; del install.cmd)</code></pre><button type="button" class="copy" data-copy="curl-command" aria-label="Copy alternative Command Prompt installation command">Copy</button></div></details>
+        <p class="hint">Python and dependencies stay inside the TgWitness installation.</p>
+      </div>
+      <p class="ready">Then run the launcher shown in your terminal. The panel opens locally at <code>127.0.0.1:8787</code>.</p>
+      <div role="status" aria-live="polite" id="copy-status"></div>
+    </section>
+    <section class="steps" aria-label="Installation process">
+      <article><span class="step">01</span><h2>Download &amp; check</h2><p>The installer pins its downloads and verifies SHA-256 before running them.</p></article>
+      <article><span class="step">02</span><h2>Keep it private</h2><p>A separate Python environment. No system-wide packages, automatic services or Telegram login.</p></article>
+      <article><span class="step">03</span><h2>Start investigating</h2><p>Open your workspace, connect an account and choose what to observe.</p></article>
+    </section>
+    <details class="verification"><summary>Inspect the download.</summary><p>SHA-256 checks downloaded bytes. It is not an issuer signature. Installer delivery uses HTTPS; hashes for the application and runtime are embedded in the scripts.</p><nav aria-label="Verification files"><a href="install.sh">Bash source</a><a href="install.ps1">PowerShell source</a><a href="SHA256SUMS.txt">Installer checksums</a><a href="manifest.json">Build manifest</a><a href="releases/@@RELEASE_ID@@/@@WHEEL_NAME@@.sha256">Package checksum</a></nav><p class="revision">Source revision <a href="https://github.com/phishdestroy/TgWitness/commit/@@REVISION@@"><code>@@REVISION@@</code></a></p></details>
+  </main>
+  <footer><span>TgWitness by <a href="https://phishdestroy.io/">PhishDestroy</a></span><nav aria-label="Help"><a href="https://phishdestroy.github.io/TgWitness/docs/">Documentation</a><a href="https://github.com/phishdestroy/TgWitness/issues">Report a problem</a></nav></footer>
+</body>
+</html>

@@ -1,0 +1,322 @@
+#!/usr/bin/env bash
+# TgWitness user-local installer. No sudo, global Python, or automatic startup.
+
+fail() { printf 'TgWitness: %s\n' "$*" >&2; exit 1; }
+step() { printf '%s/4 %s\n' "$1" "$2"; }
+
+usage() {
+    cat <<'HELP'
+Install TgWitness with its own Python environment. The application is not started.
+
+Usage: install.sh [--help | --plan]
+  --help  Show this help without changing files or using the network.
+  --plan  Show the destination and release without installing anything.
+
+Default destination: ~/.local/share/tgwitness
+Override with TGWITNESS_INSTALL_DIR=/absolute/path.
+Set TGWITNESS_NO_LINK=1 to skip the optional ~/.local/bin/tgwitness shortcut.
+Existing source checkouts and unrelated directories are not overwritten.
+HELP
+}
+
+platform() {
+    local system machine libc details
+    system=$(uname -s)
+    machine=$(uname -m)
+    case "$machine" in
+        x86_64|amd64) machine=x86_64 ;;
+        aarch64|arm64) machine=aarch64 ;;
+        *) fail "Unsupported architecture: $machine" ;;
+    esac
+    case "$system" in
+        Darwin) TARGET="$machine-apple-darwin" ;;
+        Linux)
+            libc=gnu
+            details=
+            if command -v ldd >/dev/null 2>&1; then details=$(ldd --version 2>&1 || true); fi
+            if [[ "$details" == *musl* ]]; then
+                libc=musl
+            elif compgen -G '/lib/ld-musl-*.so.1' >/dev/null; then
+                libc=musl
+            fi
+            TARGET="$machine-unknown-linux-$libc"
+            ;;
+        *) fail "Unsupported operating system: $system. Use the Windows installer on Windows." ;;
+    esac
+    case "$TARGET" in
+        x86_64-unknown-linux-gnu) UV_SHA256=f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645 ;;
+        aarch64-unknown-linux-gnu) UV_SHA256=229e194255c7958d86d56e8790d969a6f74736592133f0dfd0076f754c642c1d ;;
+        x86_64-unknown-linux-musl) UV_SHA256=5d61f26b6c7213779eda90edc6971ea6b0b796bfb8d49a574c8ad69b59838548 ;;
+        aarch64-unknown-linux-musl) UV_SHA256=819692e404d23e5aae6bc44c0e260f1f5492fd1910ab4693b2c650f926dbe800 ;;
+        x86_64-apple-darwin) UV_SHA256=63ba17fdda55ad1a230d4b37fc6017ffa10c23688c83818bd3bfdf914c652a02 ;;
+        aarch64-apple-darwin) UV_SHA256=60fbd5c8a1ed681845eea28d9d622fcde03c51e91a43465b64a1e17db1ed3472 ;;
+        *) fail "No verified uv archive for $TARGET" ;;
+    esac
+}
+
+configuration() {
+    VERSION='@@VERSION@@'
+    REVISION='@@REVISION@@'
+    RELEASE_ID='@@RELEASE_ID@@'
+    BASE_URL='@@BASE_URL@@'
+    WHEEL_NAME='@@WHEEL_NAME@@'
+    WHEEL_SHA256='@@WHEEL_SHA256@@'
+    CONSTRAINTS_SHA256='@@CONSTRAINTS_SHA256@@'
+    UV_VERSION=0.13.6
+    [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]] || fail 'Invalid release revision.'
+    [[ "$WHEEL_SHA256" =~ ^[0-9a-f]{64}$ && "$CONSTRAINTS_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail 'Invalid release checksums.'
+    [[ "$RELEASE_ID" == "${REVISION:0:12}-${WHEEL_SHA256:0:12}" ]] || fail 'Invalid immutable release ID.'
+    [[ "$VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9.+_-]*$ ]] || fail 'Invalid release version.'
+    [[ "$WHEEL_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*\.whl$ ]] || fail 'Invalid wheel filename.'
+    [[ "$BASE_URL" == https://* && "$BASE_URL" != *'?'* && "$BASE_URL" != *'#'* && "$BASE_URL" != *'@'* &&
+       "$BASE_URL" != *$'\n'* && "$BASE_URL" != *$'\r'* && "$BASE_URL" != *' '* ]] || fail 'Invalid release URL.'
+    BASE_URL=${BASE_URL%/}
+    [[ -n "${HOME:-}" ]] || fail 'HOME is not set.'
+    INSTALL_ROOT=${TGWITNESS_INSTALL_DIR:-"$HOME/.local/share/tgwitness"}
+    [[ "$INSTALL_ROOT" == /* ]] || INSTALL_ROOT="$PWD/$INSTALL_ROOT"
+    [[ "$INSTALL_ROOT" != *$'\n'* && "$INSTALL_ROOT" != *$'\r'* && "$INSTALL_ROOT" != / ]] || fail 'Invalid installation directory.'
+    platform
+}
+
+plan() {
+    printf 'TgWitness %s\nRelease: %s\nSource: %s\nPlatform: %s\n' "$VERSION" "$RELEASE_ID" "$REVISION" "$TARGET"
+    printf 'Install: %s\nPython: private managed Python 3.12\n' "$INSTALL_ROOT"
+    printf 'Download: %s/releases/%s/%s\n' "$BASE_URL" "$RELEASE_ID" "$WHEEL_NAME"
+    printf 'Launch: %s/bin/tgwitness\nData: %s/data\n' "$INSTALL_ROOT" "$INSTALL_ROOT"
+    printf 'No application start, service restart, or PATH changes.\n'
+}
+
+managed_directory() {
+    local path=$1
+    [[ ! -L "$path" ]] || fail "Refusing a linked installer directory: $path"
+    if [[ -e "$path" ]]; then
+        [[ -d "$path" ]] || fail "A file occupies an installer directory: $path"
+    else
+        mkdir -m 700 -- "$path"
+    fi
+}
+
+cleanup() {
+    local status=$?
+    set +e
+    if [[ -n "${STAGING:-}" && "$STAGING" == "$INSTALL_ROOT"/.install.* && ! -L "$STAGING" ]]; then
+        rm -rf -- "$STAGING"
+    fi
+    if [[ "${CREATED_VERSION:-0}" == 1 && ! -e "$VERSION_DIR/.ready" && ! -L "$VERSION_DIR" &&
+          "$VERSION_DIR" == "$INSTALL_ROOT/versions/$RELEASE_ID" && -f "$VERSION_DIR/.incomplete" &&
+          "$(cat "$VERSION_DIR/.incomplete")" == "$RELEASE_ID" ]]; then
+        rm -rf -- "$VERSION_DIR"
+    fi
+    if [[ "${LOCKED:-0}" == 1 ]]; then
+        rmdir -- "$INSTALL_ROOT/.install.lock" 2>/dev/null
+    fi
+    if [[ "$status" != 0 ]]; then
+        printf 'Installation did not complete. Any previous launcher and data were kept.\n' >&2
+    fi
+    return "$status"
+}
+
+prepare_root() {
+    local marker
+    [[ ! -L "$INSTALL_ROOT" ]] || fail "Refusing a linked installation root: $INSTALL_ROOT"
+    if [[ -e "$INSTALL_ROOT" ]]; then
+        [[ -d "$INSTALL_ROOT" && -f "$INSTALL_ROOT/.tgwitness-installer" && ! -L "$INSTALL_ROOT/.tgwitness-installer" ]] ||
+            fail "Destination is not a TgWitness-managed installation: $INSTALL_ROOT. Choose an unused TGWITNESS_INSTALL_DIR."
+        marker=$(cat "$INSTALL_ROOT/.tgwitness-installer")
+        [[ "$marker" == tgwitness-managed-install-v1 ]] || fail 'The installation marker is not recognized.'
+    else
+        mkdir -m 700 -p -- "$INSTALL_ROOT"
+        printf '%s\n' tgwitness-managed-install-v1 > "$INSTALL_ROOT/.tgwitness-installer"
+    fi
+    INSTALL_ROOT=$(cd -P -- "$INSTALL_ROOT" && pwd -P)
+    STAGING= LOCKED=0 CREATED_VERSION=0
+    VERSION_DIR="$INSTALL_ROOT/versions/$RELEASE_ID"
+    trap cleanup EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+    trap 'exit 129' HUP
+    if ! mkdir -m 700 -- "$INSTALL_ROOT/.install.lock" 2>/dev/null; then
+        fail "Another installation may be running. Lock: $INSTALL_ROOT/.install.lock. If interrupted, confirm it has stopped before removing this lock."
+    fi
+    LOCKED=1
+    managed_directory "$INSTALL_ROOT/bin"
+    managed_directory "$INSTALL_ROOT/tools"
+    managed_directory "$INSTALL_ROOT/tools/cache"
+    managed_directory "$INSTALL_ROOT/tools/python"
+    managed_directory "$INSTALL_ROOT/tools/python-bin"
+    managed_directory "$INSTALL_ROOT/versions"
+    LAUNCHER="$INSTALL_ROOT/bin/tgwitness"
+    if [[ -e "$LAUNCHER" || -L "$LAUNCHER" ]]; then
+        [[ -f "$LAUNCHER" && ! -L "$LAUNCHER" ]] && grep -qx '# TgWitness managed launcher v1' "$LAUNCHER" ||
+            fail "Refusing to overwrite an unrelated launcher: $LAUNCHER"
+    fi
+    [[ ! -L "$VERSION_DIR" ]] || fail "Refusing a linked version directory: $VERSION_DIR"
+    READY_CONTENT=$(printf '%s\n%s\n%s\n%s' "$RELEASE_ID" "$REVISION" "$WHEEL_SHA256" "$CONSTRAINTS_SHA256")
+    PYTHON="$VERSION_DIR/venv/bin/python"
+}
+
+download() {
+    curl --fail --location --silent --show-error --proto '=https' --proto-redir '=https' \
+        --tlsv1.2 --retry 3 --connect-timeout 20 --max-time 300 --output "$2" "$1"
+    [[ -s "$2" ]] || fail "The download was empty: $1"
+}
+
+verify() {
+    local actual
+    if command -v sha256sum >/dev/null 2>&1; then
+        actual=$(sha256sum < "$1")
+    else
+        actual=$(shasum -a 256 < "$1")
+    fi
+    actual=${actual%% *}
+    [[ "$actual" == "$2" ]] || fail "Checksum mismatch: ${1##*/}. Nothing from this download was executed."
+}
+
+unpack_uv() {
+    local member kind
+    tar -tzf "$STAGING/uv.tar.gz" > "$STAGING/uv-members"
+    while IFS= read -r member; do
+        case "$member" in
+            "uv-$TARGET/"|"uv-$TARGET/uv"|"uv-$TARGET/uvx") ;;
+            *) fail "Unexpected path in the uv archive: $member" ;;
+        esac
+    done < "$STAGING/uv-members"
+    grep -qx "uv-$TARGET/uv" "$STAGING/uv-members" || fail 'The uv archive has no executable.'
+    tar -tvzf "$STAGING/uv.tar.gz" > "$STAGING/uv-types"
+    while IFS= read -r member; do
+        kind=${member:0:1}
+        [[ "$kind" == - || "$kind" == d ]] || fail 'Linked or special files are not allowed in the uv archive.'
+    done < "$STAGING/uv-types"
+    mkdir -m 700 -- "$STAGING/tools"
+    tar -xzf "$STAGING/uv.tar.gz" -C "$STAGING/tools"
+    UV="$STAGING/tools/uv-$TARGET/uv"
+    [[ -f "$UV" && ! -L "$UV" && -x "$UV" ]] || fail 'The verified uv executable could not be extracted.'
+    [[ "$("$UV" --version)" == "uv $UV_VERSION"* ]] || fail 'Unexpected uv version.'
+}
+
+probe() {
+    [[ -x "$PYTHON" ]] || fail 'The private Python environment is missing.'
+    "$PYTHON" -I -B - "$VERSION" <<'PY'
+import importlib.metadata
+import sqlite3
+import sys
+from pathlib import Path
+
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+import tgwitness
+from tgwitness.app import create_app
+from tgwitness.mcp_server import runtime_status
+
+if sys.version_info[:2] != (3, 12):
+    raise SystemExit("The private environment must use Python 3.12.")
+if importlib.metadata.version("tgwitness") != sys.argv[1] or tgwitness.__version__ != sys.argv[1]:
+    raise SystemExit("The installed package version does not match this release.")
+if not callable(create_app) or not runtime_status()["available"]:
+    raise SystemExit("Required application or MCP dependencies are unavailable.")
+package = Path(tgwitness.__file__).resolve().parent
+for asset in ("static/index.html", "static/app.js", "static/style.css", "locales/ru.json"):
+    if not (package / asset).is_file():
+        raise SystemExit("The package is incomplete: " + asset)
+key = Ed25519PrivateKey.generate()
+key.public_key().verify(key.sign(b"TgWitness readiness"), b"TgWitness readiness")
+with sqlite3.connect(":memory:") as database:
+    if database.execute("SELECT json_extract('{\"ready\":1}', '$.ready')").fetchone()[0] != 1:
+        raise SystemExit("SQLite JSON support is unavailable.")
+PY
+}
+
+activate() {
+    local temporary shortcut
+    temporary=$(mktemp "$INSTALL_ROOT/bin/.tgwitness.XXXXXX")
+    {
+        printf '#!/usr/bin/env bash\n# TgWitness managed launcher v1\nset -e\n'
+        printf 'cd -- %q\n' "$INSTALL_ROOT"
+        printf 'exec %q -I -m tgwitness "$@"\n' "$PYTHON"
+    } > "$temporary"
+    chmod 700 "$temporary"
+    mv -f -- "$temporary" "$LAUNCHER"
+    shortcut="$HOME/.local/bin/tgwitness"
+    if [[ "${TGWITNESS_NO_LINK:-0}" == 1 ]]; then
+        :
+    elif [[ ! -e "$shortcut" && ! -L "$shortcut" ]]; then
+        if mkdir -p -- "$HOME/.local/bin" && ln -s -- "$LAUNCHER" "$shortcut"; then
+            printf 'Shortcut: %s\n' "$shortcut"
+        else
+            printf 'Could not create the optional shortcut; use the launch path below.\n' >&2
+        fi
+    elif [[ -L "$shortcut" && "$(readlink "$shortcut")" == "$LAUNCHER" ]]; then
+        :
+    else
+        printf 'Existing %s was left unchanged.\n' "$shortcut"
+    fi
+    step 4 Ready
+    printf 'Launch: %q\nData: %s/data\n' "$LAUNCHER" "$INSTALL_ROOT"
+    printf 'The application has not been started. PATH was not changed.\n'
+}
+
+install() {
+    local command release
+    for command in curl tar grep uname mktemp; do
+        command -v "$command" >/dev/null 2>&1 || fail "Install the required system tool first: $command"
+    done
+    command -v sha256sum >/dev/null 2>&1 || command -v shasum >/dev/null 2>&1 || fail 'A SHA-256 tool is required (sha256sum or shasum).'
+    prepare_root
+    if [[ -e "$VERSION_DIR/.ready" ]]; then
+        [[ -f "$VERSION_DIR/.ready" && ! -L "$VERSION_DIR/.ready" && "$(cat "$VERSION_DIR/.ready")" == "$READY_CONTENT" ]] ||
+            fail 'The saved release receipt does not match this installer.'
+        printf 'This release is already installed; checking its private environment.\n'
+        probe
+        activate
+        return
+    fi
+    if [[ -e "$VERSION_DIR" ]]; then
+        [[ -d "$VERSION_DIR" && -f "$VERSION_DIR/.incomplete" && ! -L "$VERSION_DIR/.incomplete" &&
+           "$(cat "$VERSION_DIR/.incomplete")" == "$RELEASE_ID" ]] || fail "Refusing an unrelated version directory: $VERSION_DIR"
+        rm -rf -- "$VERSION_DIR"
+    fi
+    STAGING=$(mktemp -d "$INSTALL_ROOT/.install.XXXXXX")
+    step 1 Download
+    release="$BASE_URL/releases/$RELEASE_ID"
+    download "https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-$TARGET.tar.gz" "$STAGING/uv.tar.gz"
+    download "$release/$WHEEL_NAME" "$STAGING/$WHEEL_NAME"
+    download "$release/constraints.txt" "$STAGING/constraints.txt"
+    step 2 Verify
+    verify "$STAGING/uv.tar.gz" "$UV_SHA256"
+    verify "$STAGING/$WHEEL_NAME" "$WHEEL_SHA256"
+    verify "$STAGING/constraints.txt" "$CONSTRAINTS_SHA256"
+    unpack_uv
+    step 3 Install
+    mkdir -m 700 -- "$VERSION_DIR"
+    printf '%s\n' "$RELEASE_ID" > "$VERSION_DIR/.incomplete"
+    CREATED_VERSION=1
+    export UV_CACHE_DIR="$INSTALL_ROOT/tools/cache"
+    export UV_PYTHON_INSTALL_DIR="$INSTALL_ROOT/tools/python"
+    export UV_PYTHON_BIN_DIR="$INSTALL_ROOT/tools/python-bin"
+    export UV_HTTP_TIMEOUT=180
+    "$UV" --no-config venv --python 3.12 --managed-python "$VERSION_DIR/venv"
+    "$UV" --no-config pip install --python "$PYTHON" --constraint "$STAGING/constraints.txt" "$STAGING/$WHEEL_NAME[mcp]"
+    probe
+    printf '%s\n' "$READY_CONTENT" > "$VERSION_DIR/.ready.tmp"
+    mv -- "$VERSION_DIR/.ready.tmp" "$VERSION_DIR/.ready"
+    rm -- "$VERSION_DIR/.incomplete"
+    activate
+}
+
+main() {
+    set -euo pipefail
+    local mode=install
+    if [[ "$#" -gt 1 ]]; then fail 'Use --help or --plan, without other arguments.'; fi
+    if [[ "$#" == 1 ]]; then
+        case "$1" in
+            --help|-h) usage; return ;;
+            --plan) mode=plan ;;
+            *) fail "Unknown argument: $1. Use --help." ;;
+        esac
+    fi
+    configuration
+    if [[ "$mode" == plan ]]; then plan; return; fi
+    umask 077
+    install
+}
+
+main "$@"

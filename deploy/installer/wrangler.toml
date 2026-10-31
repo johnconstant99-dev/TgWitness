@@ -1,0 +1,9 @@
+name = "tgwitness-install"
+compatibility_date = "2026-10-31"
+workers_dev = false
+preview_urls = false
+routes = [{ pattern = "get.destroy.tools", custom_domain = true }]
+
+[assets]
+directory = "../../dist/installer-site"
+not_found_handling = "404-page"

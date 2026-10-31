@@ -1,0 +1,262 @@
+#requires -Version 5.1
+[CmdletBinding()]
+param(
+    [string]$InstallDir,
+    [switch]$Plan,
+    [switch]$Help
+)
+
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version 2
+$Release = '@@RELEASE_ID@@'
+$Revision = '@@REVISION@@'
+$Version = '@@VERSION@@'
+$BaseUrl = '@@BASE_URL@@'.TrimEnd('/')
+$WheelName = '@@WHEEL_NAME@@'
+$WheelHash = '@@WHEEL_SHA256@@'
+$ConstraintsHash = '@@CONSTRAINTS_SHA256@@'
+$UvVersion = '0.13.6'
+$MarkerText = 'TgWitness Windows installer v1'
+
+if ($Help) {
+    Write-Host 'TgWitness installer for Windows (PowerShell 5.1 or later)'
+    Write-Host '  .\install.ps1 [-InstallDir PATH] [-Plan] [-Help]'
+    Write-Host 'Default: %LOCALAPPDATA%\TgWitness; override: TGWITNESS_INSTALL_DIR.'
+    Write-Host 'Installs a private Python 3.12 and TgWitness. It does not start the app.'
+    Write-Host 'Plan and Help make no changes and do not access the network.'
+    exit 0
+}
+
+if (-not $InstallDir) { $InstallDir = $env:TGWITNESS_INSTALL_DIR }
+if (-not $InstallDir) {
+    $LocalAppData = [Environment]::GetFolderPath('LocalApplicationData')
+    if (-not $LocalAppData) { throw 'LOCALAPPDATA is unavailable. Set TGWITNESS_INSTALL_DIR.' }
+    $InstallDir = Join-Path $LocalAppData 'TgWitness'
+}
+if ($InstallDir.IndexOfAny([char[]]"`r`n`0") -ge 0) { throw 'Invalid installation path.' }
+$InstallRoot = [IO.Path]::GetFullPath([Environment]::ExpandEnvironmentVariables($InstallDir)).TrimEnd('\')
+if ($InstallRoot -notmatch '^[A-Za-z]:\\.+' -or $InstallRoot -eq [IO.Path]::GetPathRoot($InstallRoot).TrimEnd('\')) {
+    throw 'Choose a local directory below a drive root.'
+}
+$ReleaseUrl = "$BaseUrl/releases/$Release"
+$Launcher = Join-Path $InstallRoot 'bin\tgwitness.cmd'
+if ($Plan) {
+    Write-Host "TgWitness $Version ($Revision)"
+    Write-Host "Release: $ReleaseUrl"
+    Write-Host "Install: $InstallRoot"
+    Write-Host "Python:  private managed Python 3.12"
+    Write-Host "Data:    $(Join-Path $InstallRoot 'data\live')"
+    Write-Host "Launch:  $Launcher"
+    Write-Host 'Checks SHA-256 before using downloads; switches the launcher only after validation.'
+    Write-Host 'No changes made. The application will not be started automatically.'
+    exit 0
+}
+
+if ($Revision -notmatch '^[a-f0-9]{40}$' -or $Release -notmatch '^[a-f0-9]{12}-[a-f0-9]{12}$' -or
+    $WheelHash -notmatch '^[a-f0-9]{64}$' -or $ConstraintsHash -notmatch '^[a-f0-9]{64}$' -or
+    $WheelName -notmatch '^[A-Za-z0-9_.-]+\.whl$' -or $Version -notmatch '^[A-Za-z0-9.+-]+$') {
+    throw 'Invalid release metadata. Download the installer again from the official site.'
+}
+$BaseUri = [Uri]$BaseUrl
+if (-not $BaseUri.IsAbsoluteUri -or $BaseUri.Scheme -ne 'https' -or $BaseUri.UserInfo -or $BaseUri.Query -or $BaseUri.Fragment) {
+    throw 'The release URL must use HTTPS.'
+}
+$Arch = $env:PROCESSOR_ARCHITEW6432
+if (-not $Arch) { $Arch = $env:PROCESSOR_ARCHITECTURE }
+switch ($Arch.ToUpperInvariant()) {
+    'AMD64' { $UvTarget = 'x86_64-pc-windows-msvc'; $UvHash = 'a2a8820d5eea32f08ef467ef3b7f66883a9b076d5737a2fc2fbb5f458d1bb50f' }
+    'ARM64' { $UvTarget = 'aarch64-pc-windows-msvc'; $UvHash = 'c2426c0c8e28b53d8c440e47a18d96ad4db51e159866c0e81435b196d7f0081c' }
+    default { throw 'This installer supports 64-bit Intel/AMD and ARM Windows.' }
+}
+
+function Assert-OrdinaryPath([string]$Path) {
+    $Candidate = [IO.Path]::GetFullPath($Path)
+    while ($Candidate) {
+        $Item = Get-Item -LiteralPath $Candidate -Force -ErrorAction SilentlyContinue
+        if ($null -ne $Item) {
+            if (($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                throw "Installation paths must not contain junctions or symbolic links: $Candidate"
+            }
+        }
+        $Candidate = [IO.Path]::GetDirectoryName($Candidate)
+    }
+}
+function Ensure-Directory([string]$Path) {
+    Assert-OrdinaryPath $Path
+    if (Test-Path -LiteralPath $Path) {
+        if (-not (Test-Path -LiteralPath $Path -PathType Container)) { throw "Not a directory: $Path" }
+    } else { [void][IO.Directory]::CreateDirectory($Path) }
+}
+function Assert-ManagedLauncher {
+    Assert-OrdinaryPath $Launcher
+    $Existing = Get-Item -LiteralPath $Launcher -Force -ErrorAction SilentlyContinue
+    if ($null -eq $Existing) { return }
+    if ($Existing.PSIsContainer -or $Existing.Length -gt 65536 -or
+        -not ([IO.File]::ReadAllText($Launcher).Replace("`r`n", "`n").StartsWith("@echo off`nrem TgWitness managed launcher v1`n"))) {
+        throw "Refusing to overwrite an unrelated launcher: $Launcher"
+    }
+}
+function Write-NewText([string]$Path, [string]$Text) {
+    $Bytes = (New-Object Text.UTF8Encoding($false)).GetBytes($Text)
+    $Stream = New-Object IO.FileStream($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+    try { $Stream.Write($Bytes, 0, $Bytes.Length); $Stream.Flush() } finally { $Stream.Dispose() }
+}
+function Download-Checked([string]$Url, [string]$Path, [string]$Expected) {
+    Invoke-WebRequest -Uri $Url -OutFile $Path -UseBasicParsing -TimeoutSec 180
+    $Actual = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($Actual -ne $Expected) { throw "SHA-256 mismatch for $([IO.Path]::GetFileName($Path)). Download was not used." }
+}
+function Invoke-Checked([string]$Program, [string[]]$Arguments) {
+    & $Program @Arguments
+    if ($LASTEXITCODE -ne 0) { throw "$([IO.Path]::GetFileName($Program)) failed (exit $LASTEXITCODE)." }
+}
+function Check-Python([string]$Python) {
+    if (-not (Test-Path -LiteralPath $Python -PathType Leaf)) { throw 'The installed Python is missing.' }
+    Assert-OrdinaryPath $Python
+    $Code = "import sys, importlib.metadata as m; import tgwitness, tgwitness.app, tgwitness.mcp_server, mcp; assert sys.version_info[:2] == (3,12); assert m.version('tgwitness') == '$Version'"
+    Invoke-Checked $Python @('-I', '-c', $Code)
+}
+
+$Lock = $null
+$Stage = $null
+$TemporaryFiles = New-Object 'System.Collections.Generic.List[string]'
+$SavedEnvironment = @{}
+$OldTls = [Net.ServicePointManager]::SecurityProtocol
+$OldProgress = $ProgressPreference
+$ExitCode = 1
+try {
+    # A Windows PowerShell child can inherit PowerShell 7's PSModulePath.
+    foreach ($Module in @('Microsoft.PowerShell.Security', 'Microsoft.PowerShell.Utility')) {
+        Import-Module (Join-Path $PSHOME ("Modules\$Module\$Module.psd1")) -ErrorAction Stop
+    }
+    Assert-OrdinaryPath $InstallRoot
+    $Marker = Join-Path $InstallRoot '.tgwitness-installer'
+    if (Test-Path -LiteralPath $InstallRoot) {
+        if (-not (Test-Path -LiteralPath $InstallRoot -PathType Container) -or
+            -not (Test-Path -LiteralPath $Marker -PathType Leaf)) {
+            throw "This directory was not created by the TgWitness installer: $InstallRoot. Choose another path."
+        }
+        Assert-OrdinaryPath $Marker
+        if ([IO.File]::ReadAllText($Marker).Trim() -ne $MarkerText) { throw 'Unrecognized installation marker.' }
+    } else {
+        [void][IO.Directory]::CreateDirectory($InstallRoot)
+        $Acl = New-Object Security.AccessControl.DirectorySecurity
+        $Acl.SetAccessRuleProtection($true, $false)
+        $Inheritance = [Security.AccessControl.InheritanceFlags]'ContainerInherit, ObjectInherit'
+        foreach ($Sid in @([Security.Principal.WindowsIdentity]::GetCurrent().User, (New-Object Security.Principal.SecurityIdentifier('S-1-5-18')))) {
+            $Rule = New-Object Security.AccessControl.FileSystemAccessRule($Sid, 'FullControl', $Inheritance, 'None', 'Allow')
+            $Acl.AddAccessRule($Rule)
+        }
+        Set-Acl -LiteralPath $InstallRoot -AclObject $Acl
+        Write-NewText $Marker $MarkerText
+    }
+    $LockPath = Join-Path $InstallRoot '.install.lock'
+    Assert-OrdinaryPath $LockPath
+    try { $Lock = New-Object IO.FileStream($LockPath, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None) }
+    catch { throw 'Another installation is running, or the installation lock cannot be opened.' }
+    Assert-ManagedLauncher
+    $Versions = Join-Path $InstallRoot 'versions'
+    foreach ($Directory in @($Versions, (Join-Path $InstallRoot 'bin'), (Join-Path $InstallRoot 'data\live'))) { Ensure-Directory $Directory }
+    $Selected = $null
+    foreach ($Candidate in @(Get-ChildItem -LiteralPath $Versions -Directory -Force | Where-Object { $_.Name -match ('^' + [regex]::Escape($Release) + '-[a-f0-9]{8}$') })) {
+        Assert-OrdinaryPath $Candidate.FullName
+        $Complete = Join-Path $Candidate.FullName '.install-complete.json'
+        if (-not (Test-Path -LiteralPath $Complete -PathType Leaf)) { continue }
+        Assert-OrdinaryPath $Complete
+        try { $Metadata = Get-Content -LiteralPath $Complete -Raw | ConvertFrom-Json } catch { continue }
+        if ($Metadata.release -eq $Release -and $Metadata.revision -eq $Revision -and
+            $Metadata.wheel_sha256 -eq $WheelHash -and $Metadata.constraints_sha256 -eq $ConstraintsHash) {
+            try { Check-Python (Join-Path $Candidate.FullName '.venv\Scripts\python.exe'); $Selected = $Candidate; break }
+            catch { Write-Host "Existing environment did not pass validation; preparing a fresh one: $($Candidate.Name)" }
+        }
+    }
+    if (-not $Selected) {
+        $Attempt = [Guid]::NewGuid().ToString('N')
+        $Stage = Join-Path $InstallRoot ('.installer-' + $Attempt)
+        Ensure-Directory $Stage
+        $UvZip = Join-Path $Stage 'uv.zip'
+        $UvExe = Join-Path $Stage 'uv.exe'
+        $Wheel = Join-Path $Stage $WheelName
+        $Constraints = Join-Path $Stage 'constraints.txt'
+        foreach ($File in @($UvZip, $UvExe, $Wheel, $Constraints)) { $TemporaryFiles.Add($File) }
+        $ProgressPreference = 'SilentlyContinue'
+        [Net.ServicePointManager]::SecurityProtocol = $OldTls -bor [Net.SecurityProtocolType]::Tls12
+        Write-Host "Installing TgWitness $Version ($Release)"
+        Download-Checked "$ReleaseUrl/$WheelName" $Wheel $WheelHash
+        Download-Checked "$ReleaseUrl/constraints.txt" $Constraints $ConstraintsHash
+        Download-Checked "https://github.com/astral-sh/uv/releases/download/$UvVersion/uv-$UvTarget.zip" $UvZip $UvHash
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        $Zip = [IO.Compression.ZipFile]::OpenRead($UvZip)
+        try {
+            $Entries = @($Zip.Entries | Where-Object { $_.Name -eq 'uv.exe' })
+            if ($Entries.Count -ne 1 -or $Entries[0].Length -gt 100MB) { throw 'Unexpected uv archive contents.' }
+            $InputStream = $Entries[0].Open()
+            $OutputStream = New-Object IO.FileStream($UvExe, [IO.FileMode]::CreateNew)
+            try { $InputStream.CopyTo($OutputStream) } finally { $OutputStream.Dispose(); $InputStream.Dispose() }
+        } finally { $Zip.Dispose() }
+        $Environment = @{
+            UV_PYTHON_INSTALL_DIR = (Join-Path $InstallRoot 'runtime\python')
+            UV_PYTHON_BIN_DIR = (Join-Path $InstallRoot 'runtime\bin')
+            UV_CACHE_DIR = (Join-Path $InstallRoot 'cache\uv')
+            UV_NO_PROGRESS = '1'
+        }
+        foreach ($Name in $Environment.Keys) {
+            $SavedEnvironment[$Name] = [Environment]::GetEnvironmentVariable($Name, 'Process')
+            [Environment]::SetEnvironmentVariable($Name, $Environment[$Name], 'Process')
+        }
+        foreach ($Directory in @($Environment.UV_PYTHON_INSTALL_DIR, $Environment.UV_PYTHON_BIN_DIR, $Environment.UV_CACHE_DIR)) { Ensure-Directory $Directory }
+        $VersionPath = Join-Path $Versions ($Release + '-' + $Attempt.Substring(0, 8))
+        Ensure-Directory $VersionPath
+        Write-NewText (Join-Path $VersionPath '.install-pending') $Release
+        $Venv = Join-Path $VersionPath '.venv'
+        Invoke-Checked $UvExe @('--no-config', 'venv', '--managed-python', '--python', '3.12', $Venv)
+        $Python = Join-Path $Venv 'Scripts\python.exe'
+        Invoke-Checked $UvExe @('--no-config', 'pip', 'install', '--python', $Python, '--constraint', $Constraints, "$($Wheel)[mcp]")
+        Check-Python $Python
+        $CompleteData = @{release=$Release; revision=$Revision; version=$Version; wheel_sha256=$WheelHash; constraints_sha256=$ConstraintsHash}
+        Write-NewText (Join-Path $VersionPath '.install-complete.json') ($CompleteData | ConvertTo-Json)
+        Remove-Item -LiteralPath (Join-Path $VersionPath '.install-pending') -Force
+        $Selected = Get-Item -LiteralPath $VersionPath
+    } else { Write-Host "TgWitness $Version is already installed and validated." }
+    Assert-ManagedLauncher
+    $LauncherText = @"
+@echo off
+rem TgWitness managed launcher v1
+setlocal DisableDelayedExpansion
+pushd "%~dp0.."
+if errorlevel 1 exit /b 1
+"%~dp0..\versions\$($Selected.Name)\.venv\Scripts\python.exe" -I -m tgwitness %*
+set "TGWITNESS_EXIT=%ERRORLEVEL%"
+popd
+endlocal & exit /b %TGWITNESS_EXIT%
+"@
+    $LauncherTemp = Join-Path (Join-Path $InstallRoot 'bin') ('.tgwitness-' + [Guid]::NewGuid().ToString('N') + '.tmp')
+    $TemporaryFiles.Add($LauncherTemp)
+    Write-NewText $LauncherTemp ($LauncherText.Replace("`r`n", "`n").Replace("`n", "`r`n") + "`r`n")
+    if (Test-Path -LiteralPath $Launcher -PathType Leaf) {
+        $LauncherBackup = Join-Path (Join-Path $InstallRoot 'bin') ('.tgwitness-backup-' + [Guid]::NewGuid().ToString('N') + '.tmp')
+        $TemporaryFiles.Add($LauncherBackup)
+        [IO.File]::Replace($LauncherTemp, $Launcher, $LauncherBackup)
+    }
+    else { [IO.File]::Move($LauncherTemp, $Launcher) }
+    Write-Host ''
+    Write-Host 'Ready. Start TgWitness when you choose:'
+    Write-Host ('  & "' + $Launcher + '"')
+    Write-Host ('CMD: "' + $Launcher + '"')
+    Write-Host "Live data: $(Join-Path $InstallRoot 'data\live'); --demo uses separate data\demo."
+    Write-Host 'The application was not started. Existing sessions were not restarted.'
+    $ExitCode = 0
+} catch {
+    [Console]::Error.WriteLine('TgWitness installation failed: ' + $_.Exception.Message)
+    [Console]::Error.WriteLine('An existing launcher and your data have been left in place. You can retry the installer.')
+} finally {
+    foreach ($Name in $SavedEnvironment.Keys) { [Environment]::SetEnvironmentVariable($Name, $SavedEnvironment[$Name], 'Process') }
+    [Net.ServicePointManager]::SecurityProtocol = $OldTls
+    $ProgressPreference = $OldProgress
+    foreach ($File in $TemporaryFiles) {
+        try { if (Test-Path -LiteralPath $File -PathType Leaf) { Remove-Item -LiteralPath $File -Force } } catch { }
+    }
+    if ($Stage) { try { [IO.Directory]::Delete($Stage, $false) } catch { } }
+    if ($Lock) { $Lock.Dispose() }
+}
+exit $ExitCode

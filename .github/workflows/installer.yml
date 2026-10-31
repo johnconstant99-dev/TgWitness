@@ -1,0 +1,43 @@
+name: Installer
+on:
+  push:
+    branches: [main]
+    paths:
+      - deploy/installer/**
+      - tools/build_installer.py
+      - tools/check_installer.py
+      - .github/workflows/installer.yml
+  workflow_dispatch:
+  release:
+    types: [published]
+permissions:
+  contents: read
+concurrency:
+  group: installer-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Prepare an isolated builder
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-installer-builder"
+          echo "$RUNNER_TEMP/tgwitness-installer-builder/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-installer-builder" >> "$GITHUB_ENV"
+      - run: python -m pip install --require-hashes -r deploy/build.lock
+      - name: Build installers and download page
+        run: python tools/build_installer.py --base-url https://get.destroy.tools
+      - name: Verify artifacts and perform an isolated Linux installation
+        run: python tools/check_installer.py --install
+      - uses: actions/upload-artifact@v7
+        with:
+          name: tgwitness-installer-site
+          path: dist/installer-site/
+          retention-days: 7

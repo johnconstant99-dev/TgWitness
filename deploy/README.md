@@ -117,6 +117,7 @@ Container instructions and backup procedures: [DEPLOYMENT.md](../docs/DEPLOYMENT
 | [Caddyfile.example](Caddyfile.example) | Existing host Caddy service |
 | [Caddyfile.witness.example](Caddyfile.witness.example) | Witness endpoint example |
 | [tgwitness.service](tgwitness.service) | Linux systemd service template |
+| [installer/](installer/README.md) | One-command installers, download page and separate-host deployment |
 | [windows-task.ps1](windows-task.ps1) | Windows logon task script |
 | [org.tgwitness.collector.plist.example](org.tgwitness.collector.plist.example) | macOS launchd user agent |
 | [proxies.config.example](proxies.config.example) | Operator proxy catalogue configuration |

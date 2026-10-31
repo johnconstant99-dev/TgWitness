@@ -1,0 +1,24 @@
+@echo off
+setlocal DisableDelayedExpansion
+if /I "%~1"=="-Help" goto help
+if /I "%~1"=="--help" goto help
+if /I "%~1"=="/?" goto help
+if /I "%~1"=="-Plan" goto plan
+if not "%~1"=="" goto help
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $result=1; $folder=$null; $script=$null; try { Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1') -ErrorAction Stop; Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop; [Net.ServicePointManager]::SecurityProtocol=[Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12; $folder=Join-Path ([IO.Path]::GetTempPath()) ('tgwitness-setup-'+[Guid]::NewGuid().ToString('N')); [void][IO.Directory]::CreateDirectory($folder); $script=Join-Path $folder 'install.ps1'; $ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -TimeoutSec 180 -Uri '@@BASE_URL@@/releases/@@RELEASE_ID@@/install.ps1' -OutFile $script; if ((Get-FileHash -LiteralPath $script -Algorithm SHA256).Hash -ne '@@POWERSHELL_SHA256@@') { throw 'Installer SHA-256 mismatch. The downloaded script was not run.' }; & (Join-Path $PSHOME 'powershell.exe') -NoLogo -NoProfile -ExecutionPolicy Bypass -File $script; $result=$LASTEXITCODE } catch { [Console]::Error.WriteLine('TgWitness setup failed: '+$_.Exception.Message) } finally { if ($script -and (Test-Path -LiteralPath $script -PathType Leaf)) { Remove-Item -LiteralPath $script -Force -ErrorAction SilentlyContinue }; if ($folder) { try { [IO.Directory]::Delete($folder,$false) } catch {} } }; exit $result"
+set "TGWITNESS_SETUP_EXIT=%ERRORLEVEL%"
+endlocal & exit /b %TGWITNESS_SETUP_EXIT%
+:plan
+echo TgWitness @@VERSION@@ ^(@@REVISION@@^)
+echo Downloads and verifies the pinned installer from:
+echo   @@BASE_URL@@/releases/@@RELEASE_ID@@/install.ps1
+echo Installs private Python 3.12 and TgWitness under %%LOCALAPPDATA%%\TgWitness.
+echo TGWITNESS_INSTALL_DIR overrides the installation directory.
+echo No changes made. No network requests made. The app is not started automatically.
+exit /b 0
+:help
+echo TgWitness installer for Windows
+echo Usage: install.cmd [-Plan ^| -Help]
+echo Set TGWITNESS_INSTALL_DIR to choose another installation directory.
+echo The installer checks downloads and does not start the application.
+exit /b 0
