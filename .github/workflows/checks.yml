@@ -184,6 +184,7 @@ jobs:
       - run: python tools/check_journal_browser.py
       - run: python tools/check_exports_browser.py
       - run: python tools/check_controls_browser.py
+      - run: python tools/check_quick_search_browser.py
       - name: Check write-only form drafts
         run: python -c "from playwright._impl._driver import compute_driver_executable; import subprocess; subprocess.run([str(compute_driver_executable()[0]), 'tools/check_writeonly_drafts.mjs'], check=True)"
       - uses: actions/upload-artifact@v7

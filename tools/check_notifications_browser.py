@@ -158,9 +158,16 @@ def check_behavior(page, server, browser):
     server.app.state.store.append("collector.error", {"operation": xss, "error_type": "OSError"}, HARBOR)
     grant = api(page, server, "/api/access/grants", {"label": "Scoped reader", "workspaces": {"default": [HARBOR]}})
     reader = browser.new_page(viewport={"width": 390, "height": 844})
+    reader_requests = []
+    reader.on("request", lambda request: reader_requests.append(request.url))
     reader.goto(server.url)
     reader.locator("#panel-token").fill(grant["token"])
-    reader.get_by_role("button", name="Open workspace", exact=True).click()
+    with reader.expect_response(
+        lambda response: response.url == server.url + "/api/status"
+        and response.request.method == "GET", timeout=20000,
+    ) as ready:
+        reader.get_by_role("button", name="Open workspace", exact=True).click()
+    assert ready.value.ok, ready.value.status
     expect(reader.locator("#workspace")).to_be_visible()
     open_panel(reader)
     expect(reader.locator("#notify-list")).to_contain_text(xss)
@@ -172,6 +179,7 @@ def check_behavior(page, server, browser):
     reader.locator(".notice-card .notice-action", has_text="Open chat").click()
     expect(reader.locator("#chat-feed")).to_contain_text("Updated synthetic observation")
     assert reader.evaluate("state.chat") == HARBOR
+    assert not any("/api/multi-export/current" in url for url in reader_requests), reader_requests
     reader.close()
 
     # A popover near the screen edge flips above its trigger and remains in the viewport.

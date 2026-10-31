@@ -1,5 +1,5 @@
 export function createChatList({root, tr, node, icon, avatarNode, timeNode, getState, getSession,
-  may, json, refreshStatus, openChat, toast}) {
+  may, json, refreshStatus, openChat, toast, viewState, reload}) {
   const find = id => root.querySelector('#' + id), search = find('chat-search'), list = find('chats-list');
   const controls = node('div', 'chat-list-controls'), sortLabel = node('label', 'chat-list-sort');
   const sort = node('select'); sort.id = 'chat-list-sort';
@@ -91,6 +91,7 @@ export function createChatList({root, tr, node, icon, avatarNode, timeNode, getS
   function render() {
     const state = getState(); if (state.view !== 'chats') return;
     if (session !== getSession()) resetSession();
+    list.setAttribute('aria-busy', String(state.chatsLoading));
     const chats = currentChats().filter(matches).sort(compare), existing = new Map([...list.children].map(row => [row.dataset.chat, row]));
     const rows = chats.map(chat => {
       const row = existing.get(String(chat.chat_id)) || makeRow(chat), open = row.querySelector('.chat-choice'), star = row.querySelector('.chat-priority');
@@ -103,7 +104,14 @@ export function createChatList({root, tr, node, icon, avatarNode, timeNode, getS
       const label = tr(chat.priority ? 'Mark regular' : 'Mark priority') + ': ' + (chat.title || chat.chat_id);
       star.title = label; star.setAttribute('aria-label', label); return row;
     });
-    if (!rows.length) {
+    if (!state.chats.length && state.chatsLoading) {
+      const loading = viewState('loading', tr('Loading…')), skeleton = node('div', 'chat-list-skeleton');
+      skeleton.setAttribute('aria-hidden', 'true');
+      for (let index = 0; index < 3; index++) skeleton.append(node('span'));
+      loading.append(skeleton); rows.push(loading);
+    } else if (!state.chats.length && state.chatsError) {
+      rows.push(viewState('error', tr('Could not load data'), '', tr('Retry'), reload));
+    } else if (!rows.length) {
       const empty = node('div', 'chats-none'); empty.append(node('p', 'hint', tr(!state.chats.length ? 'No chats chosen yet.'
         : kind.value || status.value ? 'No chats match these filters.' : 'No chats match your search.')));
       if (state.chats.length) {const clear = node('button', 'text-link', tr('Clear filters')); clear.type = 'button'; clear.addEventListener('click', () => {resetSession(); render(); search.focus();}); empty.append(clear);}
@@ -112,7 +120,7 @@ export function createChatList({root, tr, node, icon, avatarNode, timeNode, getS
     place(list, rows); const selected = Number(!!kind.value) + Number(!!status.value);
     count.hidden = !selected; count.textContent = String(selected); summary.classList.toggle('filtered', !!selected);
   }
-  function resetSession() {session = getSession(); pending.clear(); search.value = ''; sort.value = 'activity'; kind.value = status.value = ''; filters.open = false; list.replaceChildren();}
+  function resetSession() {session = getSession(); pending.clear(); search.value = ''; sort.value = 'activity'; kind.value = status.value = ''; filters.open = false; list.replaceChildren(); list.removeAttribute('aria-busy');}
   search.addEventListener('input', render);
   search.addEventListener('keydown', event => {if (event.key === 'Escape') {search.value = ''; render();}});
   for (const field of [sort, kind, status]) field.addEventListener('change', render);

@@ -70,6 +70,8 @@ def main():
             page.evaluate("async()=>{await navigate('accounts');await navigate('access');}")
             expect(page.locator('#access-label')).to_have_value("Unsaved analyst draft")
             expect(page.locator('#admin-idle')).to_have_value("42")
+            page.locator('[data-access-tab=sessions]').click()
+            expect(page.locator('#access-sessions-list .access-row').first).to_be_visible()
             assert page.evaluate("""async()=>{const row=document.querySelector('#access-sessions-list .access-row'),button=row.querySelector('button');
               button.focus();await loadAccess(true);return row.isConnected&&button.isConnected&&document.activeElement===button;}"""), "Session refresh replaced a live control"
 

@@ -1,5 +1,10 @@
 {
 "blocks": {
+"f9f7bf6fc58697ac3d65b46e67112c85380a719c26b8a8049d5fe8fe8255eff8": "Cari frasa atau domain. Buka catatan yang sesuai beserta versi-versi yang tersimpan.",
+"9ebebf03949f0fb2b0daa54870dcecdd847dda5a5fac16461e427029c6c76841": "Gunakan <strong>Jurnal</strong> untuk pencarian lokal tanpa AI. Untuk <strong>Tanyakan ke arsip</strong>, aktifkan\ndan konfigurasikan terlebih dahulu penyedia di <strong>Integrasi</strong>. Pemilih ruang kerja menentukan\nakun; formulir menentukan chat dan periode pengamatan. Pengambilan data dijalankan\nsecara lokal. Frasa atau domain yang persis mempersempit pengambilan data; ID pesan meminta versi\nyang disimpan. Tinjau cuplikan dan buka catatan jurnal atau konteksnya.\nTidak ada basis data vektor atau tindakan otomatis di Telegram.",
+"82b833f26a2aa9d18158cfe08093cbc4c5d78eb6ba8b59081ca9bc17aa279b05": "Buka <strong>Sumber → Chat dalam cakupan</strong>, tinjau chat yang diaktifkan, lalu mulai pengamatan.",
+"e57428b70741422bf45aa49818846d12bf325b77c727b06d7b060cfdc5124dcd": "Buka <strong>Jurnal</strong> untuk pencarian lokal. Pilih ruang kerja dan gunakan filter sumber serta waktu.",
+"344cb6a46c3e1b8a084a2fa232572cb08c03a4eaeaf59305fb243a7546289854": "Untuk analisis AI, administrator mengaktifkan dan mengonfigurasi penyedia di <strong>Integrasi</strong>. Buka <strong>Tanyakan ke arsip</strong>, lalu pilih chat dan periode. Tinjau <strong>Data yang dikirim ke model</strong> dan hapus centang pada cuplikan yang tidak diinginkan sebelum menyetujui permintaan.",
 "490fddb42a196230b736d392196de043d2d9d49cccc9ea8b30aad95df1b3c110": "Entri-entri lama di bawah ini menjelaskan proses pengujian masing-masing; sebagian besar di antaranya menggunakan klien uji sintetis.\nHasil otomatis terbaru terdapat di bawah ini.",
 "0006f9d0e781dc235432a5002b9e01f4171853f9ee931fe1d1c9d036ec084ba4": "Presentasi fitur tambahan opsional · 29 Oktober 2026",
 "002c7c68468b4f550fbaa7fb8588155c58f8b5760fde69b3fe1773ae2a197ba2": "Langsung",

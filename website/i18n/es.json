@@ -1,5 +1,10 @@
 {
 "blocks": {
+"f9f7bf6fc58697ac3d65b46e67112c85380a719c26b8a8049d5fe8fe8255eff8": "Busca una frase o un dominio. Abre el registro correspondiente y sus versiones guardadas.",
+"9ebebf03949f0fb2b0daa54870dcecdd847dda5a5fac16461e427029c6c76841": "Use <strong>Registro</strong> para realizar búsquedas locales sin IA. Para usar <strong>Consulte el archivo</strong>, primero habilite\ny configure un proveedor en <strong>Integraciones</strong>. El selector de espacio de trabajo elige la\ncuenta; el formulario selecciona los chats y el periodo de observación. La recuperación se realiza\nlocalmente. Una frase exacta o un dominio restringe la recuperación; un ID de mensaje solicita las versiones\nguardadas. Revise los extractos y abra sus registros en el diario o su contexto.\nNo hay ninguna base de datos vectorial ni acción automática en Telegram.",
+"82b833f26a2aa9d18158cfe08093cbc4c5d78eb6ba8b59081ca9bc17aa279b05": "Abra <strong>Fuentes → Chats en alcance</strong>, revise los chats habilitados e inicie la observación.",
+"e57428b70741422bf45aa49818846d12bf325b77c727b06d7b060cfdc5124dcd": "Abra <strong>Registro</strong> para realizar búsquedas locales. Elija un espacio de trabajo y use los filtros de fuente y de tiempo.",
+"344cb6a46c3e1b8a084a2fa232572cb08c03a4eaeaf59305fb243a7546289854": "Para el análisis con IA, el administrador habilita y configura un proveedor en <strong>Integraciones</strong>. Abra <strong>Consulte el archivo</strong> y elija los chats y un periodo. Revise <strong>Datos enviados al modelo</strong> y desmarque los extractos no deseados antes de aprobar la solicitud.",
 "490fddb42a196230b736d392196de043d2d9d49cccc9ea8b30aad95df1b3c110": "Las entradas anteriores que figuran a continuación describen sus propias ejecuciones; en la mayoría de ellas se utilizaron clientes de prueba sintéticos.\nA continuación se muestran los últimos resultados automatizados.",
 "0006f9d0e781dc235432a5002b9e01f4171853f9ee931fe1d1c9d036ec084ba4": "Presentación de extras opcionales · 29 de octubre de 2026",
 "002c7c68468b4f550fbaa7fb8588155c58f8b5760fde69b3fe1773ae2a197ba2": "Directo",

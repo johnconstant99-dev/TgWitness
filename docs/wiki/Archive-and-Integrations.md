@@ -9,19 +9,20 @@ portable preview predates them.
 
 ## Bring in the history
 
-In **Sources**, review enabled chats, start observation and choose **Load full
-history**. Pause or resume as needed. After a restart, resume explicitly.
+In **Sources → Chats in scope**, review enabled chats, start observation and
+choose **Load full history**. Pause or resume as needed. After a restart, resume explicitly.
 Check each source and the attachment queue, then keep the signed progress report.
 [History guide](../HISTORY.md).
 
 ## Search and review
 
-Open **Ask the archive**, choose chats and a period, then search a phrase, domain
-or message ID. Search is local. Open the saved records behind the results.
+Open **Journal** to search saved records and filter by source, event type or
+period. Search is local. Open the records behind the results.
 
-For AI analysis, configure a provider, review **Data sent to the model**, remove
-unwanted excerpts and approve the request. Check the citations before saving a
-report. Your notes and revisions stay separate from captured events.
+For optional AI analysis, enable and configure a provider in **Integrations**,
+then open **Ask the archive**. Choose chats and a period, review **Data sent to
+the model**, remove unwanted excerpts and approve the request. Check citations
+before saving a report. Your notes and revisions stay separate from captured events.
 [Analysis and reports](../ANALYSIS.md).
 
 ## Connect your tools

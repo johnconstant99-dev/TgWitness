@@ -52,6 +52,24 @@ def main():
                     check_layout(page)
                     if width in (1440, 390):
                         page.screenshot(path=str(output / f"journal-{width}-{theme}.png"))
+            # Linux's wider fallback font exposed both a health-bar overflow
+            # and a live-status control clipped inside the journal card.
+            page.set_viewport_size({"width": 320, "height": 844})
+            page.evaluate("document.documentElement.style.setProperty('--font','\"DejaVu Sans\", sans-serif')")
+            page.locator('.journal .live-toggle').evaluate("button=>button.textContent='Live: reconnecting'")
+            check_layout(page)
+            for selector in ('.health-chip', '.journal #refresh', '.journal .live-toggle'):
+                for control in page.locator(selector).all():
+                    rect = control.bounding_box()
+                    assert rect and 0 <= rect['x'] and rect['x'] + rect['width'] <= 320, (selector, rect)
+                    assert rect['height'] >= 44, (selector, rect)
+            heading = page.locator('.journal .card-heading h2').bounding_box()
+            refresh = page.locator('.journal #refresh').bounding_box()
+            live = page.locator('.journal .live-toggle').bounding_box()
+            assert heading['y'] + heading['height'] <= refresh['y'], (heading, refresh)
+            assert abs(refresh['y'] - live['y']) <= 1, (refresh, live)
+            page.screenshot(path=str(output / 'journal-320-linux-font.png'))
+            page.evaluate("document.documentElement.style.removeProperty('--font')")
             page.goto(app.url + "/journal?ws=default&lang=ru")
             expect(page.locator("#workspace")).to_be_visible()
             expect(page.locator("html")).to_have_attribute("lang", "ru")

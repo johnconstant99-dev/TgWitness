@@ -5,7 +5,7 @@ import tempfile
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import RunningApp, launch_browser, unlock
+from check_browser import RunningApp, hold_api_response, launch_browser, release_api_response, unlock
 
 
 def main():
@@ -27,8 +27,19 @@ def main():
             expect(page.locator('#report-fields')).to_be_enabled()
             page.locator('#report-case-title').fill('Unsaved investigation')
             page.locator('#exports-tab-downloads').click()
+            page.evaluate("""()=>{window.showSaveFilePicker=async()=>{
+              throw new DOMException('Synthetic picker cancellation','AbortError');};}""")
+            page.locator('[data-export=jsonl]').click()
+            expect(page.locator('#exports-progress-label')).to_have_text('Download cancelled.')
+            expect(page.locator('#exports-progress-bar')).to_be_hidden()
+            page.evaluate('()=>{window.showSaveFilePicker=undefined;}')
+            hold_api_response(page, '/api/export/jsonl')
             with page.expect_download() as transfer:
                 page.locator('[data-export=jsonl]').click()
+                page.wait_for_function("()=>typeof releaseAcceptanceResponse==='function'")
+                expect(page.locator('#exports-progress-bar')).to_be_visible()
+                assert page.locator('#exports-progress-bar').evaluate('bar=>!bar.hasAttribute("value")')
+                release_api_response(page)
             path = Path(transfer.value.path())
             digest = hashlib.sha256(path.read_bytes()).hexdigest()
             expect(page.locator('#exports-progress-label')).to_have_text('Export saved.')

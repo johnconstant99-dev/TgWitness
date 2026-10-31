@@ -7,7 +7,8 @@ import tempfile
 from playwright.sync_api import sync_playwright, expect
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from tools.check_browser import RunningApp, launch_browser, unlock, check_layout
+from tools.check_browser import (RunningApp, launch_browser, unlock, check_layout,
+                                 hold_api_response, release_api_response, navigate_panel)
 
 
 def main():
@@ -19,15 +20,14 @@ def main():
             page = browser.new_page(viewport={"width": 1440, "height": 1000})
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
-            initial_events = []
-            page.route("**/events?*", lambda route: initial_events.append(route)
-                       if not initial_events else route.continue_())
             unlock(page, app)
-            page.locator('[data-view="integrations"]').click()
+            hold_api_response(page, "/api/events?limit=200&include_count=true&hide_system=true")
+            page.evaluate("()=>{window.pendingIntegrationJournal=navigate('observations');}")
+            expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
+            navigate_panel(page, "integrations")
             expect(page.locator("#mcp-list")).to_contain_text("No archive connections")
-            assert initial_events, "Initial journal request was not intercepted"
-            initial_events[0].fulfill(response=initial_events[0].fetch())
-            page.wait_for_timeout(250)
+            release_api_response(page)
+            page.evaluate("window.pendingIntegrationJournal")
             expect(page.locator("#view-integrations")).to_be_visible()
             page.locator("#mcp-name").fill("Synthetic client")
             page.locator("#mcp-scope summary").first.click()
@@ -54,9 +54,10 @@ def main():
                 dest.mkdir(parents=True, exist_ok=True)
                 page.screenshot(path=str(dest / (theme + ".png")), full_page=True,
                                 mask=[page.locator("#mcp-token")], mask_color="#64748b", animations="disabled")
-            page.locator('[data-view="chats"]').click()
-            assert page.locator("#mcp-token").input_value() == ""
-            page.locator('[data-view="integrations"]').click()
+            navigate_panel(page, "chats")
+            expect(page.locator("#view-integrations")).to_have_count(0)
+            assert page.evaluate("$('mcp-token').value") == ""
+            navigate_panel(page, "integrations")
             expect(page.locator("#mcp-list")).to_contain_text("Synthetic client")
             page.once("dialog", lambda dialog: dialog.accept())
             page.locator('#mcp-list button', has_text="Revoke").click()
@@ -67,11 +68,12 @@ def main():
             for language in ("en", "de", "ru", "he"):
                 page.goto(app.url + "/?lang=" + language)
                 prefix = "" if language == "en" else language + "/"
-                links = page.locator("[data-site-doc]")
-                expect(links).to_have_count(4)
-                for link in links.all():
-                    expect(link).to_have_attribute("href", "https://phishdestroy.github.io/TgWitness/"
-                                                  + prefix + "docs/reference/" + link.get_attribute("data-site-doc") + "/")
+                links = page.evaluate("""async()=>{await viewReady;return [...panelRoots.values()].flatMap(root=>
+                    [...root.querySelectorAll('[data-site-doc]')].map(link=>({key:link.dataset.siteDoc,href:link.getAttribute('href')})));}""")
+                assert len(links) == 4
+                for link in links:
+                    assert link["href"] == ("https://phishdestroy.github.io/TgWitness/"
+                                            + prefix + "docs/reference/" + link["key"] + "/"), (language, link)
             assert not errors, errors
             browser.close()
     print("Integration UI passed: scoped credential, secret-free configuration, revocation and source link.")

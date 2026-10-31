@@ -109,17 +109,44 @@ def unlock(page, server):
         page.locator('#demo-account-state [data-open="observations"]').click()
         return
     page.locator("#panel-token").fill(server.app.state.vault.token)
-    page.get_by_role("button", name="Open workspace").click()
+    with page.expect_response(lambda response: response.request.method == "GET"
+            and urlsplit(response.url).path.endswith("/api/status"), timeout=20000) as authenticated:
+        page.get_by_role("button", name="Open workspace").click()
+    assert authenticated.value.ok, authenticated.value.status
+    authenticated.value.body()
     expect(page.locator("#workspace")).to_be_visible()
 
 
 def navigate_panel(page, view):
     """Use the same navigation on desktop and the mobile menu."""
     button = page.locator(f'.sidebar [data-view="{view}"]')
-    if not button.is_visible():
-        page.locator("#navigation-toggle").click()
+    toggle = page.locator("#navigation-toggle")
+    if page.viewport_size["width"] < 768 and toggle.get_attribute("aria-expanded") != "true":
+        toggle.click()
     button.click()
     expect(page.locator(f"#view-{view}")).to_be_visible()
+
+
+def lock_panel(page):
+    for selector in ("#top-lock", "#entry-lock"):
+        control = page.locator(selector)
+        if control.is_visible():
+            control.click()
+            return
+    if not page.locator("#lock-panel").is_visible():
+        page.locator("#navigation-toggle").click()
+    page.locator("#lock-panel").click()
+
+
+def reload_panel(page):
+    """Wait for authenticated bootstrap, separately from the render assertion."""
+    with page.expect_response(
+        lambda response: response.url.endswith("/api/status")
+        and response.request.method == "GET", timeout=20000,
+    ) as ready:
+        page.reload()
+    assert ready.value.ok, ready.value.status
+    expect(page.locator("#workspace")).to_be_visible()
 
 
 def check_layout(page, connection=False):
@@ -180,9 +207,23 @@ def release_api_response(page):
     }""")
 
 
+def check_journal_messages(page, expected):
+    """Read the dashboard in its active view, then restore the user's screen."""
+    previous = page.evaluate("state.view")
+    page.evaluate("navigate('observations')")
+    expect(page.locator("#view-observations")).to_be_visible()
+    expect(page.locator("#stat-messages")).to_have_text(expected)
+    page.evaluate("view=>navigate(view)", previous)
+
+
 def check_reading_states(browser, server):
     page = browser.new_page(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce")
-    page.goto(server.url)
+    with page.expect_response(lambda response: response.request.method == "GET"
+            and "/api/chats/" in urlsplit(response.url).path
+            and urlsplit(response.url).path.endswith("/messages"), timeout=20000) as first_read:
+        page.goto(server.url)
+    assert first_read.value.ok, first_read.value.status
+    first_read.value.body()
     expect(page.locator("#chat-feed .msg").first).to_be_visible()
     expect(page.locator("#chat-compose")).to_be_hidden()
     expect(page.locator(".health-details")).to_be_hidden()
@@ -219,7 +260,7 @@ def check_reading_states(browser, server):
     expect(names.first.locator(".sender-facts")).to_be_visible()
     expect(page.locator("#chat-feed")).to_have_attribute("data-pattern", "plain")
     page.locator("#chat-pattern").click()
-    page.reload()
+    reload_panel(page)
     expect(page.locator("#chat-feed")).to_have_attribute("data-pattern", "dots")
     page.locator("#chat-pattern").click()
     page.route("**/messages?*", lambda route: route.fulfill(status=503, json={"detail": "Synthetic failure"}))
@@ -323,7 +364,7 @@ def check_themes(browser, server):
     sidebar.locator('[data-theme-choice="light"]').click()
     expect(html).to_have_attribute("data-theme", "light")
     expect(sidebar.locator('[data-theme-choice="light"]')).to_have_attribute("aria-pressed", "true")
-    page.reload()
+    reload_panel(page)
     expect(html).to_have_attribute("data-theme", "light")
     sidebar.locator('[data-theme-choice="system"]').click()
     expect(html).to_have_attribute("data-theme", "dark")
@@ -332,12 +373,12 @@ def check_themes(browser, server):
     page.emulate_media(color_scheme="dark")
     expect(html).to_have_attribute("data-theme", "dark")
 
-    motion, view = page.locator(".sidebar [data-motion-toggle]"), page.locator("#view-chats")
+    motion, view = page.locator(".sidebar [data-motion-toggle]"), page.locator("#view-observations")
     expect(motion).to_have_attribute("aria-pressed", "false")
     assert view.evaluate("n => getComputedStyle(n).animationDuration") != "0.3s"
     motion.click()
     expect(html).to_have_attribute("data-motion", "always")
-    page.reload()
+    reload_panel(page)
     expect(motion).to_have_attribute("aria-pressed", "true")
     expect(view).to_be_visible()
     assert view.evaluate("n => getComputedStyle(n).animationDuration") == "0.3s"
@@ -346,7 +387,7 @@ def check_themes(browser, server):
     page.emulate_media(reduced_motion="no-preference")
     expect(motion).to_be_hidden()
     page.emulate_media(reduced_motion="reduce")
-    page.locator("#top-lock").click()
+    lock_panel(page)
     expect(page.locator("#gate")).to_be_visible()
     check_layout(page)
     page.locator('.login-card [data-theme-choice="dark"]').click()
@@ -387,8 +428,11 @@ def main():
             for width in (850, 768, 601, 600, 390, 320):
                 page.set_viewport_size({"width": width, "height": 1060})
                 check_layout(page)
-                expect(page.locator("#events-body tr").first.locator(".event-mobile-meta")).to_contain_text(
+                timestamp = page.locator("#events-body tr").first.locator(".event-mobile-meta time")
+                expect(timestamp).to_be_visible()
+                assert timestamp.get_attribute("datetime").startswith(
                     demo.app.state.store.stats()["head"]["observed_at"][:10])
+                assert "UTC" in timestamp.get_attribute("title")
                 if width == 768:
                     page.screenshot(path=str(output / "tablet.png"), full_page=True)
             page.set_viewport_size({"width": 1440, "height": 1060})
@@ -409,11 +453,14 @@ def main():
             page.screenshot(path=str(output / "detail.png"), full_page=True)
             page.keyboard.press("Escape")
             expect(page.locator("#detail-drawer")).not_to_be_visible()
+            page.get_by_role("button", name="All events", exact=True).click()
             page.get_by_role("button", name="Deletions", exact=True).click()
+            expect(page.locator("#events-body tr:has(.event-icon.delete)")).to_have_count(3)
             page.locator("#events-body tr").first.click()
             expect(page.locator("#detail-content")).to_contain_text("Last captured content")
             expect(page.locator("#detail-content")).to_contain_text("Deleter not supplied")
             page.keyboard.press("Escape")
+            page.get_by_role("button", name="All events", exact=True).click()
             page.get_by_role("button", name="Membership", exact=True).click()
             expect(page.locator("#events-body tr")).to_have_count(1)
             page.get_by_role("button", name="All events", exact=True).click()
@@ -437,6 +484,7 @@ def main():
                 close:async()=>{window.writerClosed=true},abort:async()=>{window.writerAborted=true}
               })});}""")
             page.get_by_role("button", name="Download signed ZIP").click()
+            page.wait_for_function("()=>window.writerClosed===true")
             expect(page.locator("#toast")).to_have_text("Evidence export saved.")
             assert page.evaluate("window.writerClosed")
             streamed = output / "browser-streamed-evidence.zip"
@@ -481,6 +529,7 @@ def main():
                 verify_bundle(bundle, checkpoint["fingerprint"], json.loads(data))
             page.screenshot(path=str(output / "evidence.png"), full_page=True)
             page.locator('[data-view="sources"]').click()
+            page.locator("#sources-tab-chats").click()
             expect(page.locator("#target-list .target-row")).to_have_count(3)
             expect(page.locator("#load-dialogs")).to_be_disabled()
             page.locator('[data-view="observations"]').click()
@@ -496,7 +545,7 @@ def main():
             page.locator("#refresh").click()
             expect(page.locator("#events-body")).to_contain_text("<img src=x")
             assert not page.evaluate("Boolean(window.sourceExecuted)")
-            page.locator("#top-lock").click()
+            lock_panel(page)
             expect(page.locator("#gate")).to_be_visible()
             assert page.evaluate("sessionStorage.getItem('tgwitness-token')") is None
             page.set_viewport_size({"width": 1440, "height": 1060})
@@ -600,6 +649,7 @@ def main():
             page.locator("#export-chat-tools > summary").click()
             page.locator("#snapshot-form button").click()
             expect(page.locator("#toast")).to_contain_text("Saved 3 history observations", timeout=15000)
+            page.once("dialog", lambda dialog: dialog.accept())
             page.locator("#collector-toggle").click()
             expect(page.locator("#collector-toggle")).to_have_text("Start observation")
 
@@ -628,7 +678,7 @@ def main():
             page.locator("#parameters-save").click()
             expect(page.locator(".parameter-row.changed")).to_have_count(0)
             assert live.app.state.store.get_setting("parameters") == {}
-            page.reload()
+            reload_panel(page)
             expect(page.locator("#workspace")).to_be_visible()
             page.locator('[data-view="connection"]').click()
             page.locator("#entry-settings").click()
@@ -641,13 +691,24 @@ def main():
             second_profile = page.locator("#profile-select").input_value()
             expect(page.locator("#credentials-form")).to_be_visible()
             expect(page.locator("#route-summary")).to_have_text("Automatic MTProxy")
+            page.locator('[data-view="sources"]').click()
+            page.locator("#sources-tab-recording").click()
             expect(page.locator("#monitor-reactions")).to_be_checked()
+            page.locator('[data-view="connection"]').click()
             page.locator('[data-auth-method="files"]').click()
             session_path = run / "synthetic.tgwitness-session"
             session_path.write_text(saved_session(), encoding="ascii")
             page.locator("#session-file").set_input_files(session_path)
 
-            page.locator("#auth-continue").click()
+            started = time.monotonic()
+            with page.expect_response(
+                lambda response: response.url.endswith("/api/auth/configure")
+                and response.request.method == "POST", timeout=20000,
+            ) as connected:
+                page.locator("#auth-continue").click()
+            assert connected.value.ok, connected.value.status
+            assert connected.value.json()["step"] == "authorized"
+            print(f"Synthetic session connected in {time.monotonic() - started:.2f}s", flush=True)
             expect(page.locator("#authorized-state")).to_be_visible()
             child_vault = live.app.state.profiles.entries[second_profile]["app"].state.vault
             assert child_vault.read("credentials")["api_id"] in api_pool.POOL_IDS, "Expected a built-in pool pair"
@@ -658,7 +719,7 @@ def main():
             expect(page.locator("#collector-toggle")).to_have_text("Pause observation")
             page.locator("#profile-select").select_option("default")
             expect(page.locator("#collector-toggle")).to_have_text("Start observation")
-            expect(page.locator("#stat-messages")).to_have_text("3")
+            check_journal_messages(page, "3")
 
             page.locator('[data-view="accounts"]').click()
             expect(page.locator("#nav-accounts")).to_have_text("2")
@@ -677,16 +738,16 @@ def main():
             expect(page.locator("#verification-result")).to_contain_text("journal has changed since this check")
             page.locator("#profile-select").select_option(second_profile)
             expect(page.locator("#collector-toggle")).to_have_text("Pause observation")
-            expect(page.locator("#stat-messages")).to_have_text("0")
+            check_journal_messages(page, "0")
             expect(page.locator("#verification-result")).to_have_text("")
 
             hold_api_response(page, "/api/verify")
             page.locator("#verify-journal").click()
             expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
             page.locator("#profile-select").select_option("default")
-            expect(page.locator("#stat-messages")).to_have_text("3")
+            check_journal_messages(page, "3")
             page.locator("#profile-select").select_option(second_profile)
-            expect(page.locator("#stat-messages")).to_have_text("0")
+            check_journal_messages(page, "0")
             release_api_response(page)
             expect(page.locator("#verify-journal")).to_be_enabled()
             expect(page.locator("#verification-result")).to_have_text("")
@@ -703,6 +764,7 @@ def main():
             from tgwitness.store import canonical
             Ed25519PublicKey.from_public_bytes(base64.b64decode(signed["public_key"])).verify(
                 base64.b64decode(signed["signature"]), canonical(signed["statement"]))
+            page.once("dialog", lambda dialog: dialog.accept())
             page.locator("#collector-toggle").click()
             expect(page.locator("#collector-toggle")).to_have_text("Start observation")
             page.goto(live.url + "/guide.html")

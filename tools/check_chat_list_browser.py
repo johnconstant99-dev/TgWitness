@@ -11,6 +11,106 @@ def ids(page):
     return page.locator('#chats-list .chat-item').evaluate_all('rows=>rows.map(row=>Number(row.dataset.chat))')
 
 
+def check_initial_read_states(browser, server):
+    """A delayed or failed read must not look like an empty configured account."""
+    def open_page(mode):
+        page = browser.new_page(viewport={'width': 1440, 'height': 1000}, reduced_motion='reduce')
+        errors = []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        page.add_init_script("""(() => {
+          const actual = window.fetch.bind(window);
+          window.chatReads = {mode: MODE, held: []};
+          window.fetch = async (...args) => {
+            const response = await actual(...args);
+            if (new URL(String(args[0]), location.href).pathname !== '/api/chats') return response;
+            const reads = window.chatReads;
+            if (reads.mode === 'pass') return response;
+            const value = await response.clone().json();
+            const reply = (body, status = 200) => new Response(JSON.stringify(body),
+              {status, headers: {'Content-Type': 'application/json'}});
+            if (reads.mode === 'error') return reply({detail: 'Synthetic chat-list failure'}, 503);
+            if (reads.mode === 'empty') return reply({...value, chats: []});
+            return new Promise(resolve => reads.held.push({value, release: body => resolve(reply(body || value))}));
+          };
+          window.releaseChatReads = () => {
+            chatReads.mode = 'pass';
+            chatReads.held.splice(0).forEach(read => read.release());
+          };
+        })();""".replace('MODE', repr(mode)))
+        page.goto(server.url)
+        return page, errors
+
+    page, errors = open_page('hold')
+    page.wait_for_function('() => chatReads.held.length > 0')
+    expect(page.locator('#workspace')).to_be_visible()
+    expect(page.locator('#chats-list')).to_have_attribute('aria-busy', 'true')
+    expect(page.locator('#chats-list [data-state="loading"]')).to_be_visible()
+    expect(page.locator('#chat-empty [data-state="loading"]')).to_be_visible()
+    expect(page.locator('#chats-list')).not_to_contain_text('No chats chosen yet.')
+    expect(page.locator('#chat-empty')).not_to_contain_text('Choose chats')
+    page.evaluate('releaseChatReads()')
+    expect(page.locator('#chats-list .chat-item')).to_have_count(3)
+    expect(page.locator('#chat-feed .msg').first).to_be_visible()
+    expect(page.locator('#chats-list')).to_have_attribute('aria-busy', 'false')
+
+    page.evaluate("""() => {
+      window.savedRows = [...document.querySelectorAll('#chats-list .chat-item')];
+      chatReads.mode = 'hold'; window.refreshRead = refreshChats(true);
+    }""")
+    page.wait_for_function('() => chatReads.held.length > 0')
+    expect(page.locator('#chats-list')).to_have_attribute('aria-busy', 'true')
+    assert page.evaluate('savedRows.every(row => row.isConnected)'), 'Refreshing detached existing chat rows'
+    expect(page.locator('#chats-list [data-state="loading"]')).to_have_count(0)
+    page.evaluate('async () => {releaseChatReads(); await refreshRead;}')
+    assert page.evaluate('savedRows.every(row => row.isConnected)'), 'An unchanged read replaced chat rows'
+
+    page.evaluate("() => {chatReads.mode = 'hold'; window.olderRead = refreshChats(true);}")
+    page.wait_for_function('() => chatReads.held.length === 1')
+    page.evaluate('() => {window.newerRead = refreshChats(true);}')
+    page.wait_for_function('() => chatReads.held.length === 2')
+    page.evaluate('async () => {chatReads.mode = "pass"; chatReads.held.pop().release(); await newerRead;}')
+    page.evaluate("""async () => {
+      const older = chatReads.held.shift();
+      older.release({...older.value, chats: [{...older.value.chats[0], title: 'Stale chat read'}]});
+      await olderRead;
+    }""")
+    expect(page.locator('#chats-list .chat-item')).to_have_count(3)
+    expect(page.locator('#chats-list')).not_to_contain_text('Stale chat read')
+    expect(page.locator('#chats-list')).to_have_attribute('aria-busy', 'false')
+
+    page.evaluate("() => {chatReads.mode = 'hold'; window.lockedRead = refreshChats(true);}")
+    page.wait_for_function('() => chatReads.held.length > 0')
+    page.evaluate('async () => {lock(); releaseChatReads(); await lockedRead;}')
+    assert page.evaluate("""() => {
+      const root = panelRoots.get('chats');
+      return !root.isConnected && !root.querySelector('#chats-list').childElementCount
+        && !state.chats.length && !state.chatsLoading;
+    }"""), 'A late read restored chats after locking'
+    assert not errors, errors
+    page.close()
+
+    page, errors = open_page('error')
+    expect(page.locator('#chats-list [data-state="error"]')).to_be_visible()
+    expect(page.locator('#chat-empty [data-state="error"]')).to_be_visible()
+    expect(page.locator('#chats-list')).to_have_attribute('aria-busy', 'false')
+    expect(page.locator('#chats-list')).not_to_contain_text('No chats chosen yet.')
+    page.evaluate('chatReads.mode = "pass"')
+    page.locator('#chats-list').get_by_role('button', name='Retry', exact=True).click()
+    expect(page.locator('#chats-list .chat-item')).to_have_count(3)
+    expect(page.locator('#chat-feed .msg').first).to_be_visible()
+    expect(page.locator('#chats-list [data-state="error"]')).to_have_count(0)
+    assert not errors, errors
+    page.close()
+
+    page, errors = open_page('empty')
+    expect(page.locator('#chats-list')).to_contain_text('No chats chosen yet.')
+    expect(page.locator('#chat-empty')).to_contain_text('Choose chats')
+    expect(page.locator('#chats-list')).to_have_attribute('aria-busy', 'false')
+    expect(page.locator('#chats-list [data-state="loading"], #chats-list [data-state="error"]')).to_have_count(0)
+    assert not errors, errors
+    page.close()
+
+
 def main():
     output = Path('build/ux-review/after/12-chat-list')
     output.mkdir(parents=True, exist_ok=True)
@@ -100,8 +200,11 @@ def main():
             page.evaluate('lock()')
             assert page.evaluate("()=>$('chat-search').value===''&&$('chat-list-state').value===''&&$('chats-list').childElementCount===0")
             assert not errors, errors
+            page.close()
+            with RunningApp(Path(scratch) / 'demo', demo=True) as demo:
+                check_initial_read_states(browser, demo)
             browser.close()
-    print('Chat list passed: search, type/state filters, sorting, keyed controls, shared priority and read-only state.')
+    print('Chat list passed: filters, sorting, shared priority, loading/error/retry/empty states, keyed refresh and stale/lock safety.')
 
 
 if __name__ == '__main__':

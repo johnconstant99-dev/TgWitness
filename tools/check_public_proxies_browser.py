@@ -9,12 +9,13 @@ from urllib.parse import urlsplit
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import ROOT, RunningApp, check_layout, hold_api_response, launch_browser, release_api_response, unlock
+from check_browser import (ROOT, RunningApp, check_layout, hold_api_response, launch_browser,
+                           navigate_panel, release_api_response, unlock)
 from tgwitness import i18n, proxy_catalog as catalogs
 
 
 def settings(page):
-    page.locator('[data-view="connection"]').click()
+    navigate_panel(page, "connection")
     if page.locator("#entry-settings").get_attribute("aria-expanded") != "true":
         page.locator("#entry-settings").click()
     if not page.locator("#network-details").get_attribute("open") == "":
@@ -60,6 +61,9 @@ def main():
                 for lang in i18n.LANGUAGES[1:]:
                     assert not (set(keys) - set(i18n.words(lang))), (lang, sorted(set(keys) - set(i18n.words(lang))))
                 settings(page)
+                expect(page.locator("#network-kind")).to_have_value("mtproxy_auto")
+                expect(page.locator(".proxy-catalog")).to_be_hidden()
+                page.locator("#network-kind").select_option("mtproxy")
                 expect(page.locator("#proxy-catalog-status")).to_contain_text("compatible public proxies")
                 assert not calls, "Opening settings must not fetch external subscriptions"
                 assert page.locator("#proxy-catalog-select option").count() > 0
@@ -93,10 +97,14 @@ def main():
                 expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
                 page.locator("#profile-select").select_option(child)
                 settings(page)
+                expect(page.locator("#network-kind")).to_have_value("mtproxy_auto")
+                expect(page.locator(".proxy-catalog")).to_be_hidden()
+                page.locator("#network-kind").select_option("mtproxy")
                 expect(page.locator("#proxy-catalog-status")).to_contain_text("compatible public proxies")
                 release_api_response(page)
                 expect(page.locator("#proxy-catalog-status")).to_contain_text("compatible public proxies")
-                expect(page.locator("#network-kind")).to_have_value("mtproxy_auto")
+                expect(page.locator("#network-kind")).to_have_value("mtproxy")
+                assert server.app.state.profiles.entries[child]["app"].state.collector.network_config().kind == "mtproxy_auto"
                 assert page.locator("#proxy-catalog-select option").count() == 2
 
                 for lang in ("en", "ru"):
@@ -104,6 +112,8 @@ def main():
                     page.reload()
                     expect(page.locator("#workspace")).to_be_visible()
                     settings(page)
+                    page.locator("#network-kind").select_option("mtproxy")
+                    expect(page.locator("#proxy-catalog-select option")).to_have_count(2)
                     for width in (390, 1440):
                         page.set_viewport_size({"width": width, "height": 1060})
                         for theme in ("light", "dark"):

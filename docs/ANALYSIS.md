@@ -4,10 +4,11 @@
 
 [Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
 
-Open **Ask the archive** in the panel. The workspace selector chooses the account;
-the form chooses chats and the observation period. Search runs locally, without
-AI. An exact phrase or domain narrows retrieval; a message ID requests saved
-versions. Review the returned excerpts and open their journal records or context.
+Use **Journal** for local search without AI. For **Ask the archive**, first enable
+and configure a provider in **Integrations**. The workspace selector chooses the
+account; the form chooses chats and the observation period. Retrieval runs
+locally. An exact phrase or domain narrows retrieval; a message ID requests saved
+versions. Review the excerpts and open their journal records or context.
 There is no vector database or automatic Telegram action.
 
 ## Providers and consent

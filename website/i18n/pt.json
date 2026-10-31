@@ -1,5 +1,10 @@
 {
 "blocks": {
+"f9f7bf6fc58697ac3d65b46e67112c85380a719c26b8a8049d5fe8fe8255eff8": "Pesquise uma frase ou um domínio. Abra o registro correspondente e suas versões salvas.",
+"9ebebf03949f0fb2b0daa54870dcecdd847dda5a5fac16461e427029c6c76841": "Use o <strong>Diário</strong> para pesquisa local sem IA. Para usar <strong>Consulte o arquivo</strong>, primeiro habilite\ne configure um provedor em <strong>Integrações</strong>. O seletor de área de trabalho escolhe a\nconta; o formulário seleciona os chats e o período de observação. A recuperação é executada\nlocalmente. Uma frase exata ou um domínio restringe a recuperação; um ID de mensagem solicita versões\nsalvas. Analise os trechos e abra seus registros no diário ou o contexto.\nNão há banco de dados vetorial nem ação automática no Telegram.",
+"82b833f26a2aa9d18158cfe08093cbc4c5d78eb6ba8b59081ca9bc17aa279b05": "Abra <strong>Fontes → Chats no escopo</strong>, analise os chats habilitados e inicie a observação.",
+"e57428b70741422bf45aa49818846d12bf325b77c727b06d7b060cfdc5124dcd": "Abra o <strong>Diário</strong> para fazer uma pesquisa local. Escolha uma área de trabalho e use os filtros de fonte e de período.",
+"344cb6a46c3e1b8a084a2fa232572cb08c03a4eaeaf59305fb243a7546289854": "Para a análise por IA, o administrador habilita e configura um provedor em <strong>Integrações</strong>. Abra <strong>Consulte o arquivo</strong> e escolha os chats e um período. Revise <strong>Dados enviados ao modelo</strong> e desmarque os trechos indesejados antes de aprovar a solicitação.",
 "490fddb42a196230b736d392196de043d2d9d49cccc9ea8b30aad95df1b3c110": "As entradas mais antigas abaixo descrevem seus próprios testes; a maioria delas utilizou clientes de teste sintéticos.\nOs resultados automatizados mais recentes encontram-se abaixo.",
 "0006f9d0e781dc235432a5002b9e01f4171853f9ee931fe1d1c9d036ec084ba4": "Apresentação de recursos opcionais · 29 de outubro de 2026",
 "002c7c68468b4f550fbaa7fb8588155c58f8b5760fde69b3fe1773ae2a197ba2": "Direto",

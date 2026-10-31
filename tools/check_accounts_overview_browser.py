@@ -28,6 +28,7 @@ def main():
                             sources_enabled=3, sources_total=4, group=None)
                 item['stats']['total'] = 1000 + index
                 item['collector'].update(has_session=index != 0, running=index in (1, 2), connected=index in (1, 2),
+                                         phase='observing' if index in (1, 2) else 'offline',
                                          media_pending=index, account={'id': 1000 + index, 'username': f'observer_{index}'})
                 item['health']['state'] = 'working'
                 for key in ('connection', 'intake', 'sources', 'media'):
@@ -45,6 +46,7 @@ def main():
                 record = next(item for item in profiles if item['id'] == pid)
                 record['collector']['running'] = route.request.url.endswith('/start')
                 record['collector']['connected'] = record['collector']['running']
+                record['collector']['phase'] = 'observing' if record['collector']['running'] else 'paused'
                 route.fulfill(json={'ok': True})
 
             page.route('**/profiles/*/api/collector/*', change)
@@ -63,6 +65,9 @@ def main():
             page.locator('#accounts-sort').select_option('name')
             first = page.locator('.account-card[data-profile=default]')
             expect(first.locator('[data-action=connect]')).to_be_visible()
+            expect(first.locator('[data-field=observation]')).to_be_visible()
+            expect(first.locator('[data-field=observation] dd')).to_have_text('offline')
+            expect(page.locator('.account-card[data-profile="00000000000000000000000000000001"] [data-field=observation] dd')).to_have_text('Collecting')
             assert page.evaluate("""async()=>{const card=document.querySelector('.account-card[data-profile=default]'),
               field=card.querySelector('.fleet-card-group');field.focus();await loadProfiles();
               return field.isConnected&&document.activeElement===field;}"""), 'Poll replaced focused group selector'
@@ -75,6 +80,8 @@ def main():
             page.locator('#accounts-pause').click()
             expect(page.locator('#accounts-result')).to_contain_text('2 workspaces updated.')
             assert len(calls) == 2 and all(url.endswith('/stop') for url in calls)
+            page.locator('#accounts-filter').select_option('all')
+            expect(page.locator('.account-card[data-profile="00000000000000000000000000000001"] [data-field=observation] dd')).to_have_text('paused')
             page.locator('#accounts-filter').select_option('offline')
             page.locator('#accounts-search').fill('Research 01')
             page.locator('#accounts-select-page').check()
@@ -89,7 +96,11 @@ def main():
                 page.evaluate("theme=>{document.documentElement.dataset.theme=theme;}", theme)
                 for width in (1440, 390):
                     page.set_viewport_size({'width': width, 'height': 1000})
-                    page.evaluate('()=>scrollTo(0,0)')
+                    page.evaluate("""async()=>{scrollTo({top:0,left:0,behavior:'instant'});
+                      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}""")
+                    assert page.evaluate('()=>scrollY===0')
+                    expect(first.locator('[data-field=observation]')).to_be_visible()
+                    expect(first.locator('[data-field=observation] dd')).to_have_text('offline')
                     page.screenshot(path=str(output / f'accounts-{theme}-{width}.png'), full_page=True)
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'), (theme, width)
             page.set_viewport_size({'width': 1440, 'height': 1000})

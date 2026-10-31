@@ -1,5 +1,10 @@
 {
 "blocks": {
+"f9f7bf6fc58697ac3d65b46e67112c85380a719c26b8a8049d5fe8fe8255eff8": "Tìm kiếm một cụm từ hoặc tên miền. Mở bản ghi phù hợp và các phiên bản đã lưu của bản ghi đó.",
+"9ebebf03949f0fb2b0daa54870dcecdd847dda5a5fac16461e427029c6c76841": "Dùng <strong>Sổ nhật ký</strong> để tìm kiếm cục bộ mà không cần AI. Để dùng <strong>Hỏi kho lưu trữ</strong>, trước tiên hãy bật\nvà cấu hình một nhà cung cấp trong <strong>Tích hợp</strong>. Trình chọn không gian làm việc dùng để chọn\ntài khoản; biểu mẫu dùng để chọn các cuộc trò chuyện và khoảng thời gian quan sát. Việc truy xuất được thực hiện\ncục bộ. Một cụm từ chính xác hoặc tên miền sẽ thu hẹp phạm vi truy xuất; ID tin nhắn sẽ yêu cầu các phiên bản\nđã lưu. Hãy xem lại các đoạn trích và mở bản ghi nhật ký hoặc ngữ cảnh của chúng.\nKhông có cơ sở dữ liệu vectơ hay hành động tự động nào trên Telegram.",
+"82b833f26a2aa9d18158cfe08093cbc4c5d78eb6ba8b59081ca9bc17aa279b05": "Mở <strong>Nguồn → Trò chuyện trong phạm vi</strong>, xem lại các cuộc trò chuyện đã bật và bắt đầu quan sát.",
+"e57428b70741422bf45aa49818846d12bf325b77c727b06d7b060cfdc5124dcd": "Mở <strong>Sổ nhật ký</strong> để tìm kiếm cục bộ. Chọn một không gian làm việc và sử dụng các bộ lọc nguồn và thời gian.",
+"344cb6a46c3e1b8a084a2fa232572cb08c03a4eaeaf59305fb243a7546289854": "Để phân tích bằng AI, quản trị viên cần bật và cấu hình một nhà cung cấp trong <strong>Tích hợp</strong>. Mở <strong>Hỏi kho lưu trữ</strong> rồi chọn các cuộc trò chuyện và một khoảng thời gian. Xem lại <strong>Dữ liệu được gửi đến mô hình</strong> và bỏ chọn các đoạn trích không mong muốn trước khi phê duyệt yêu cầu.",
 "490fddb42a196230b736d392196de043d2d9d49cccc9ea8b30aad95df1b3c110": "Các mục cũ hơn dưới đây mô tả các lần chạy riêng lẻ; hầu hết trong số đó đều sử dụng các máy khách thử nghiệm tổng hợp.\nKết quả tự động mới nhất được trình bày dưới đây.",
 "0006f9d0e781dc235432a5002b9e01f4171853f9ee931fe1d1c9d036ec084ba4": "Bài thuyết trình về các tính năng bổ sung tùy chọn · Ngày 29 tháng 10 năm 2026",
 "002c7c68468b4f550fbaa7fb8588155c58f8b5760fde69b3fe1773ae2a197ba2": "Trực tiếp",

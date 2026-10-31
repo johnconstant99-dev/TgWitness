@@ -1,6 +1,7 @@
 """Export progress survives network failures without restarting work or crossing sessions."""
 import tempfile
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -15,7 +16,13 @@ def new_case(browser, url):
         delay === 5000 ? 0 : interval(callback, delay, ...args);
     })();""")
     page.route("**/api/multi-export/current", lambda route: route.fulfill(json={"phase": "none"}))
-    page.goto(url)
+    with page.expect_response(
+        lambda response: "/api/chats/" in urlsplit(response.url).path
+        and urlsplit(response.url).path.endswith("/messages")
+        and response.request.method == "GET", timeout=20000,
+    ) as initial_messages:
+        page.goto(url)
+    assert initial_messages.value.ok, initial_messages.value.status
     expect(page.locator("#chat-feed .msg").first).to_be_visible()
     page.evaluate("""() => {
       clearTimeout(multiPoll); multiPoll = null;

@@ -212,8 +212,11 @@ def main():
         page.evaluate("lock()")
         release_api_response(page)
         expect(page.locator("#gate")).to_be_visible()
-        expect(page.locator("#parameters-groups .parameter-row")).to_have_count(0)
-        expect(page.locator("#parameters-save")).to_be_disabled()
+        assert page.evaluate("""()=>{
+          const root=panelRoots.get('parameters');
+          return !root.isConnected&&!root.querySelectorAll('#parameters-groups .parameter-row').length
+            &&root.querySelector('#parameters-save').disabled;
+        }""")
         assert not errors, errors
         server.app.state.store.verify(server.app.state.vault.public_key)
         browser.close()

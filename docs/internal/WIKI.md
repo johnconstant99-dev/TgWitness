@@ -12,7 +12,7 @@ python tools/build_wiki.py
 
 Outputs:
 
-- `dist/wiki/`: 17 English pages, `_Sidebar.md`, `_Footer.md` and their `assets/`.
+- `dist/wiki/`: 19 English pages, `_Sidebar.md`, `_Footer.md` and their `assets/`.
 - `dist/TgWitness-<version>-wiki.zip`: the same pages and assets, ready to copy into a wiki clone.
 - The matching `.zip.sha256` file.
 - `dist/wiki-manifest.json`: destination repository, source branch and file hashes.

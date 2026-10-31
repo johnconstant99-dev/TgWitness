@@ -22,7 +22,7 @@ const state = {token: sessionStorage.getItem("tgwitness-token") || "",
   eventBefore:null,eventAfter:null,eventMatched:null,cursor: null, request: 0, drawerSeq: null,
   profile: sessionStorage.getItem("tgwitness-profile") || "default", profiles: [], demoToken: "", monitoringDirty: false,
   captureDirty: false, workspaceRevision: 0, verification: null, opened:false, connectionSettings:false,
-  chat: null, chats: [], chatMessages: [], chatNextBefore: null, chatNextAfter: null, chatInfo: null, chatFilter: "all", chatView: "messages", chatAuthor: null,
+  chat: null, chats: [], chatsLoading: false, chatsError: false, chatMessages: [], chatNextBefore: null, chatNextAfter: null, chatInfo: null, chatFilter: "all", chatView: "messages", chatAuthor: null,
   scope: null, scopeDirty: false, dossier: null, notifications: [], witnessToken: null, parameters: null, parametersDirty: false,
   me: null, access: null, accessEdit: null, accessChats: {}, consoleAfter: 0};
 let viewHost=null;
@@ -391,7 +391,7 @@ async function busy(button, work) {
 function lock() {
   window.TgWitnessRouter?.invalidate();
   viewHost?.resetSession();formControls?.reset();connectionNotice?.clear();state.permissionsStamp=null;
-  state.events=[];state.chats=[];state.chatMessages=[];state.chatInfo=null;state.chat=null;state.parameters=null;
+  state.events=[];state.chats=[];state.chatsLoading=false;state.chatsError=false;state.chatMessages=[];state.chatInfo=null;state.chat=null;state.parameters=null;
   sourcesView?.resetSession();
   parametersView?.resetSession();
   resetChatExportTools();
@@ -1059,7 +1059,7 @@ async function switchProfile(id,options={}){
   state.profile=id;state.monitoringDirty=false;state.captureDirty=false;sessionStorage.setItem("tgwitness-profile",id);
   state.events=[];state.dialogs=[];state.cursor=null;state.filter="";state.source="";state.search="";state.eventSince="";state.eventUntil="";state.eventSystem=false;
   state.eventBefore=state.eventAfter=state.eventMatched=null;
-  state.chat=null;state.chats=[];state.chatMessages=[];state.chatNextBefore=null;state.chatNextAfter=null;state.chatInfo=null;state.chatFilter="all";state.chatView="messages";state.chatAuthor=null;
+  state.chat=null;state.chats=[];state.chatsLoading=false;state.chatsError=false;state.chatMessages=[];state.chatNextBefore=null;state.chatNextAfter=null;state.chatInfo=null;state.chatFilter="all";state.chatView="messages";state.chatAuthor=null;
   state.scope=null;state.scopeDirty=false;state.dossier=null;state.notifications=[];resetWitnessSetup();
   closeNotifications();renderNotifications();renderExportState(null);
   state.evidenceDirty=false;state.replicaDirty=false;state.alertsDirty=false;
@@ -2717,12 +2717,24 @@ async function openRecordingSettings(){
   await navigate("sources");sourcesView?.showTab('recording');$("capture-form").scrollIntoView({block:"start"});
 }
 const exportRunning=()=>multiRunning()||state.status?.collector.chat_export?.phase==="running";
+let chatListRequest=0;
 async function refreshChats(refresh=false){
   if(!state.status||state.view!=='chats')return;
   void resumeMulti();
-  const revision=state.workspaceRevision,result=await json("chats",undefined,viewOptions('chats'));
-  if(revision!==state.workspaceRevision||state.view!=='chats')return;
-  state.chats=result.chats;
+  const revision=state.workspaceRevision,request=++chatListRequest;
+  const current=()=>request===chatListRequest&&revision===state.workspaceRevision&&state.view==='chats';
+  state.chatsLoading=true;state.chatsError=false;renderChatsList();
+  if(state.chat===null)renderChatEmpty();
+  let result;
+  try{result=await json("chats",undefined,viewOptions('chats'));}
+  catch(error){
+    if(!current()||error instanceof StaleView||error.name==='AbortError')return;
+    state.chatsLoading=false;state.chatsError=true;renderChatsList();
+    if(state.chat===null)renderChatEmpty();
+    throw error;
+  }
+  if(!current())return;
+  state.chats=result.chats;state.chatsLoading=false;state.chatsError=false;
   if(state.chat!==null&&!state.chats.some(c=>c.chat_id===state.chat))beginChat(null);
   if(state.chat===null&&state.chats.length){beginChat((state.chats.find(c=>c.enabled)||state.chats[0]).chat_id);refresh=false;}
   renderChatsList();
@@ -2730,9 +2742,9 @@ async function refreshChats(refresh=false){
   return await loadChatMessages(refresh?"refresh":"open");
 }
 let chatListView=null;
-const chatListReady=import('./views/chat-list.js?v=12').then(({createChatList})=>{
+const chatListReady=import('./views/chat-list.js?v=13').then(({createChatList})=>{
   chatListView=createChatList({root:panelRoots.get('chats'),tr,node,icon,avatarNode,timeNode,getState:()=>state,
-    getSession:()=>state.workspaceRevision+':'+state.profile,may,json,refreshStatus,openChat,toast});
+    getSession:()=>state.workspaceRevision+':'+state.profile,may,json,refreshStatus,openChat,toast,viewState,reload:()=>refreshChats()});
   return chatListView;
 });
 function renderChatsList(){chatListView?.render();}
@@ -2818,6 +2830,8 @@ function renderChatEmpty(){
   viewQuery("chats",".chats-shell").dataset.panel="chat";
   const box=$("chat-empty"),s=state.status;show("chat-main",false);show("chat-empty",true);box.replaceChildren();
   if(!s)return;
+  if(!state.chats.length&&state.chatsLoading){box.append(viewState('loading',tr('Loading…')));return;}
+  if(!state.chats.length&&state.chatsError){box.append(viewState('error',tr('Could not load data'),'',tr('Retry'),()=>refreshChats()));return;}
   const add=(title,text,label,view)=>{box.append(node("h2","",title),node("p","",text));
     if(label){const b=node("button","primary",label);b.type="button";b.addEventListener("click",()=>navigate(view));box.append(b);}};
   if(!s.demo&&!s.collector.has_session)add(tr("Connect a Telegram account"),tr("TgWitness reads chats through an account you control. Connect it with a phone number, QR code or session file."),tr("Connect account"),"connection");
@@ -3456,7 +3470,7 @@ async function pollMulti(id,attempt=0){
   }
 }
 async function resumeMulti(attempt=0){
-  if(state.multiChecked||!state.token||$("workspace").hidden)return;
+  if(state.multiChecked||!state.token||!may("export")||$("workspace").hidden)return;
   if(multiDiscovery&&multiCurrent(multiDiscovery.revision,multiDiscovery.token,multiDiscovery.request))return multiDiscovery.promise;
   clearTimeout(multiPoll);multiPoll=null;
   const request={revision:state.workspaceRevision,token:state.token,request:++multiRequest};

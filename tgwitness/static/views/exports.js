@@ -63,6 +63,7 @@ export function createExports({root, tr, json, getSession, fmtTime, toast}) {
   function begin() {
     const owner=getSession(), mine=++transfer;
     select('downloads');find('exports-progress').hidden=false;
+    find('exports-progress-bar').hidden=false;
     find('exports-progress-label').textContent=tr('Checking journal integrity and preparing the export…');
     find('exports-progress-bar').removeAttribute('value');find('exports-progress-bytes').textContent='';
     return update=>{

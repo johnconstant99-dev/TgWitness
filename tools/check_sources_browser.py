@@ -5,7 +5,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import (ROOT, RunningApp, hold_api_response, launch_browser,
+from check_browser import (ROOT, RunningApp, hold_api_response, launch_browser, navigate_panel,
                            release_api_response, unlock)
 from test_collector import saved_session
 
@@ -118,7 +118,8 @@ def check_targets(page, server):
         page.locator("html").evaluate("(root,theme)=>root.dataset.theme=theme", theme)
         for width in (1440, 390):
             page.set_viewport_size({"width": width, "height": 844})
-            page.evaluate("scrollTo(0,0)")
+            page.evaluate("""async()=>{scrollTo({top:0,left:0,behavior:'instant'});
+              await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}""")
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), (theme, width)
             height = page.locator("#view-sources").bounding_box()["height"]
             assert height <= 3 * 844, (theme, width, height)
@@ -130,7 +131,7 @@ def check_targets(page, server):
 def check_export_location(page):
     output = ROOT / "build" / "ux-review" / "after" / "19"
     output.mkdir(parents=True, exist_ok=True)
-    page.locator('[data-view="evidence"]').click()
+    navigate_panel(page, "evidence")
     expect(page.locator("#view-sources #snapshot-form")).to_have_count(0)
     expect(page.locator("#view-sources #chat-export-form")).to_have_count(0)
     page.locator("#export-chat-tools > summary").click()
@@ -156,7 +157,7 @@ def check_export_location(page):
         page.locator("#export-chat-tools").scroll_into_view_if_needed()
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
         page.locator("#export-chat-tools").screenshot(path=str(output / f"chat-tools-{width}.png"))
-    page.locator('[data-view="sources"]').click()
+    navigate_panel(page, "sources")
 
 
 def check_dialog_refresh(page, server):
@@ -212,10 +213,10 @@ def check_dialog_refresh(page, server):
     hold_api_response(page, "/api/dialogs")
     page.locator("#load-dialogs").click()
     expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
-    page.locator('[data-view="observations"]').click()
+    navigate_panel(page, "observations")
     release_api_response(page)
     expect(page.locator("#view-observations")).to_be_visible()
-    page.locator('[data-view="sources"]').click()
+    navigate_panel(page, "sources")
     expect(page.locator("#available-card")).to_be_visible()
     page.route("**/api/dialogs", lambda route: route.fulfill(status=503,
                content_type="application/json", body='{"detail":"Retry later"}'), times=1)
@@ -228,7 +229,8 @@ def check_dialog_refresh(page, server):
     expect(page.locator("#toast")).not_to_be_visible(timeout=10000)
     for width in (1440, 390):
         page.set_viewport_size({"width": width, "height": 844})
-        page.evaluate("scrollTo(0,0)")
+        page.evaluate("""async()=>{scrollTo({top:0,left:0,behavior:'instant'});
+          await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}""")
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
         assert page.locator("#view-sources").bounding_box()["height"] <= 3 * 844
         page.screenshot(path=str(output / f"refresh-{width}.png"), full_page=True)
@@ -251,7 +253,7 @@ def main():
                         for name in ("recording", "monitoring", "capture", "recheck")) else None)
         unlock(page, server)
         page.evaluate("sourcesReady")
-        page.locator('[data-view="sources"]').click()
+        navigate_panel(page, "sources")
         expect(page.locator("#sources-panel-scope")).to_be_visible()
         expect(page.locator("#sources-tab-count")).to_have_text("21")
         page.locator("#sources-tab-scope").focus()
@@ -313,7 +315,8 @@ def main():
                 page.set_viewport_size({"width": width, "height": 844})
                 for tab in ("scope", "recording"):
                     page.locator("#sources-tab-" + tab).click()
-                    page.evaluate("scrollTo(0,0)")
+                    page.evaluate("""async()=>{scrollTo({top:0,left:0,behavior:'instant'});
+                      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}""")
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), (theme, width, tab)
                     height = page.locator("#view-sources").bounding_box()["height"]
                     assert height <= 3 * 844, (theme, width, tab, height)
@@ -365,7 +368,7 @@ def main():
         limited.get_by_role("button", name="Open workspace").click()
         expect(limited.locator("#workspace")).to_be_visible()
         limited.evaluate("sourcesReady")
-        limited.locator('[data-view="sources"]').click()
+        navigate_panel(limited, "sources")
         limited.locator("#sources-tab-recording").click()
         expect(limited.locator("#monitor-messages")).to_be_disabled()
         expect(limited.locator("#download-media")).to_be_disabled()
@@ -377,8 +380,11 @@ def main():
         limited.locator("#top-lock").click()
         release_api_response(limited)
         expect(limited.locator("#gate")).to_be_visible()
-        expect(limited.locator("#recording-save")).to_be_disabled()
-        assert limited.locator("#target-list").inner_text() == ""
+        assert limited.evaluate("""()=>{
+          const root=panelRoots.get('sources');
+          return !root.isConnected&&root.querySelector('#recording-save').disabled;
+        }""")
+        assert limited.evaluate("()=>panelRoots.get('sources').querySelector('#target-list').textContent") == ""
         assert server.app.state.store.get_setting("recheck_minutes") == 45
         limited.close()
         assert not errors, errors

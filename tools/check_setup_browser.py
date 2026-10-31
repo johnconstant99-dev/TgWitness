@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
-from check_browser import RunningApp, unlock, check_layout, launch_browser
+from check_browser import RunningApp, unlock, check_layout, launch_browser, navigate_panel
 from playwright.sync_api import expect, sync_playwright
 from tgwitness import i18n
 
@@ -23,7 +23,7 @@ def main():
         "label": "Project proxy · synthetic fixture", "link": "tg://proxy?server=proxy.example.org&port=443&secret=" + secret}]}))
     previous = os.environ.get("TGWITNESS_PROXY_CATALOG")
     os.environ["TGWITNESS_PROXY_CATALOG"] = str(catalog)
-    errors, external, writes = [], [], []
+    errors, external, writes, catalog_reads = [], [], [], []
     try:
         with RunningApp(run / "collector") as server, sync_playwright() as p:
             browser = launch_browser(p)
@@ -32,6 +32,8 @@ def main():
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.on("request", lambda req: external.append(req.url) if urlsplit(req.url).hostname != "127.0.0.1" else None)
             page.on("request", lambda req: writes.append(req.url) if req.method not in ("GET", "HEAD", "OPTIONS") else None)
+            page.on("request", lambda req: catalog_reads.append(req.url)
+                    if urlsplit(req.url).path.endswith("/api/network/catalog") else None)
             unlock(page, server)
 
             keys = page.evaluate("""async () => {
@@ -45,7 +47,7 @@ def main():
             for lang in i18n.LANGUAGES[1:]:
                 missing = sorted(set(keys) - set(i18n.words(lang)))
                 assert not missing, (lang, missing)
-            page.locator('[data-view="witness"]').click()
+            navigate_panel(page, "witness")
             expect(page.locator("#witness-form")).to_be_hidden()
             expect(page.locator(".extra-card")).to_have_count(5)
             before = len(writes)
@@ -92,10 +94,16 @@ def main():
             assert page.evaluate("state.witnessToken") is None
             assert token not in page.locator("body").inner_text()
             unlock(page, server)
-            page.locator('[data-view="connection"]').click()
+            navigate_panel(page, "connection")
             page.locator("#entry-settings").click()
             page.locator("#network-details > summary").click()
+            expect(page.locator("#network-kind")).to_have_value("mtproxy_auto")
+            expect(page.locator(".proxy-catalog")).to_be_hidden()
+            assert not catalog_reads, "Automatic routing must not load the fixed MTProxy picker"
+            page.locator("#network-kind").select_option("mtproxy")
+            expect(page.locator(".proxy-catalog")).to_be_visible()
             expect(page.locator("#proxy-catalog-select")).to_have_value("project-a")
+            assert catalog_reads, "Selecting MTProxy must load its catalog"
             assert page.locator("#network-secret").input_value() == ""
             page.locator("#proxy-catalog-apply").click()
             expect(page.locator("#route-detail")).to_contain_text("proxy.example.org:443")
@@ -118,7 +126,7 @@ def main():
                 expect(page.locator("#workspace")).to_be_visible()
                 for width in (390, 1440):
                     page.set_viewport_size({"width": width, "height": 1060})
-                    page.locator('[data-view="witness"]').click()
+                    navigate_panel(page, "witness")
                     for theme in ("light", "dark"):
                         page.emulate_media(color_scheme=theme)
                         page.evaluate("selectExtra(null)")
@@ -132,7 +140,7 @@ def main():
                                 page.evaluate("window.scrollTo(0,0)")
                                 page.screenshot(path=str(output / f"witness-{lang}-{theme}-{width}.png"), full_page=True)
                             page.locator('[data-extra-close="' + name + '"]').click()
-                    page.locator('[data-view="connection"]').click()
+                    navigate_panel(page, "connection")
                     if page.locator("#entry-settings").get_attribute("aria-expanded") != "true":
                         page.locator("#entry-settings").click()
                     if not page.locator("#network-link").is_visible():

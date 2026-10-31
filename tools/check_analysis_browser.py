@@ -146,7 +146,8 @@ def main():
                 release_api_response(page)
                 page.evaluate("window.pendingMediaList")
                 expect(page.locator('[data-view="analysis"]')).to_be_hidden()
-                expect(page.locator("#media-jobs")).to_be_empty()
+                expect(page.locator("#view-analysis")).to_have_count(0)
+                assert page.evaluate("()=>[$('media-jobs').childElementCount,$('media-jobs').textContent]") == [0, ""]
 
                 # An open settings form belongs to one workspace, including late responses.
                 second = page.evaluate("""async()=>{
@@ -169,9 +170,9 @@ def main():
                 assert page.locator("#ai-settings-form").evaluate("el=>el.inert")
                 expect(page.locator("#ai-enabled")).not_to_be_checked()
                 expect(page.locator("#ai-model")).to_have_value("")
-                expect(page.locator("#ask-question")).to_have_value("")
-                expect(page.locator("#ask-query")).to_have_value("")
-                expect(page.locator("#ask-chats")).to_be_empty()
+                expect(page.locator("#view-analysis")).to_have_count(0)
+                assert page.evaluate("()=>[$('ask-question').value,$('ask-query').value]") == ["", ""]
+                assert page.evaluate("()=>[$('ask-chats').childElementCount,$('ask-chats').textContent]") == [0, ""]
                 release_api_response(page)
                 page.evaluate("window.pendingProviderSettings")
                 expect(page.locator("#ai-model")).to_have_value("")

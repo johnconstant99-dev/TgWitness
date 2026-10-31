@@ -230,7 +230,8 @@ def main(proxy_script=None):
             query.fill("unsaved private query")
             page.locator("#pool-token").fill("synthetic pending token")
             page.locator("#top-lock").click()
-            expect(page.locator("#pool-token")).to_have_value("")
+            assert page.evaluate("""()=>{const root=panelRoots.get('connection');
+              return !root.isConnected&&root.querySelector('#pool-token').value==='';}""")
             page.locator("#panel-token").fill(server.app.state.vault.token)
             page.locator("#unlock-form button").click()
             expect(page.locator("#unlock-form button")).to_be_enabled()

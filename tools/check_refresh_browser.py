@@ -1,6 +1,7 @@
 """Slow responses must not rewind the workspace or interrupt reading saved edits."""
 import tempfile
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -46,7 +47,13 @@ def main():
             return interval(callback, delay, ...args);
           };
         })();""")
-        page.goto(server.url)
+        with page.expect_response(
+            lambda response: "/api/chats/" in urlsplit(response.url).path
+            and urlsplit(response.url).path.endswith("/messages")
+            and response.request.method == "GET", timeout=20000,
+        ) as initial_messages:
+            page.goto(server.url)
+        assert initial_messages.value.ok, initial_messages.value.status
         try:
             expect(page.locator("#chat-feed .msg").first).to_be_visible()
         except AssertionError:

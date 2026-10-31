@@ -27,11 +27,17 @@
 .health-actions { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
 @media (max-width: 767px) {
   .health-toolbar { justify-content: space-between; flex-wrap: nowrap; padding: 4px 8px; gap: 2px; min-height: 34px; }
-  .health-chip { padding: 4px; gap: 4px; font-size: 11px; min-height: 30px; }
+  .health-chip { min-width: 0; padding: 4px; gap: 4px; font-size: 11px; min-height: 30px; }
+  .health-chip-mark { flex: none; }
+  .health-chip-label { min-width: 0; overflow-wrap: anywhere; text-align: start; }
   .health-chip-value { display: none; }
   .health-dialog { width: 100%; max-width: none; max-height: 85dvh; margin: auto 0 0; border-radius: 16px 16px 0 0; }
   .health-dialog-head { padding: 14px 16px; }
   .health-part-tabs { padding: 8px 8px 0; }
   .health-part-tabs button { font-size: 12px; padding: 8px; }
   .health-part-body { padding: 16px; }
+}
+@media (max-width: 359px) {
+  .health-toolbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; }
+  .health-chip { min-height: 44px; justify-content: flex-start; }
 }

@@ -73,6 +73,12 @@
   .journal-inspector[data-docked=true] { box-shadow:none; }
 }
 @media(max-width:600px){
+  .journal .card-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 8px; }
+  .journal .card-heading h2 { grid-column: 1 / -1; min-width: 0; margin: 0; }
+  .journal .card-heading button { min-height: 44px; max-width: 100%; }
+  .journal #refresh { justify-self: start; }
+  .journal .live-controls { min-width: 0; max-width: 100%; margin-inline-start: 0; justify-content: flex-end; }
+  .journal .live-toggle { overflow-wrap: anywhere; }
   .journal .filters { padding:12px; gap:10px; }
   .journal-controls { grid-template-columns:minmax(0,1fr); }
   .journal-type-filters { display:flex; flex-wrap:nowrap; overflow-x:auto; gap:5px; padding-bottom:5px; scrollbar-width:thin; }

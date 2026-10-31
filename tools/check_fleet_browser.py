@@ -83,11 +83,14 @@ def main():
         expect(page.locator("#fleet-group")).to_be_disabled()
         expect(page.locator("#fleet-import-close")).to_be_disabled()
         page.locator("#top-lock").click()
-        expect(page.locator("#fleet-passcode")).to_have_value("")
-        expect(page.locator("#fleet-api")).to_have_value("")
+        expect(page.locator("#view-accounts")).to_have_count(0)
+        assert page.evaluate("()=>[$('fleet-passcode').value,$('fleet-api').value,$('fleet-files').value]") == ["", "", ""]
         release_api_response(page)
         page.locator("#panel-token").fill(server.app.state.vault.token)
-        page.locator("#unlock-form button").click()
+        with page.expect_response(lambda response: response.url == server.url + "/api/status"
+                                  and response.request.method == "GET", timeout=20000) as login_status:
+            page.locator("#unlock-form button").click()
+        assert login_status.value.status == 200
         expect(page.locator("#unlock-form button")).to_be_enabled()
         expect(page.locator("#workspace")).to_be_visible()
         page.locator('[data-view="accounts"]').click()
@@ -95,7 +98,11 @@ def main():
         assert len(imported) == before + 1, "Locking must stop the remaining import queue"
         assert not any(e["label"] == "delta" for e in server.app.state.profiles.entries.values())
 
-        page.locator("#profile-select").select_option(alpha)
+        # Switching awaits its final scoped notification read before releasing the workspace.
+        with page.expect_response(lambda response: response.url == server.url + "/profiles/" + alpha + "/api/notifications"
+                                  and response.request.method == "GET", timeout=20000) as switched:
+            page.locator("#profile-select").select_option(alpha)
+        assert switched.value.status == 200
         expect(page.locator("#workspace")).to_have_js_property("inert", False)
         expect(page.locator("#workspace")).to_be_visible()
         page.locator('[data-view="connection"]').click()

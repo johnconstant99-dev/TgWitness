@@ -1,6 +1,10 @@
 .panel-connection-notice{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--warning-soft);color:var(--status-warn);border-block-end:1px solid var(--warning-border);font-size:13px}
 .panel-connection-notice button{flex-shrink:0}
 .toast{pointer-events:none}
+.chat-list-skeleton{display:grid;gap:10px;width:100%;padding-top:8px}
+.chat-list-skeleton span{display:block;height:42px;border-radius:var(--radius-small);background:var(--surface-2);border:1px solid var(--border);animation:chat-skeleton 1.3s ease-in-out infinite alternate}
+@keyframes chat-skeleton{from{opacity:.45}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.chat-list-skeleton span{animation:none}}
 body:has(.view:not([hidden]) .form-draft-bar:not([hidden]),.view:not([hidden]) .parameters-actions,.view:not([hidden]) .recording-savebar) .toast{bottom:100px}
 .view[data-loading=true]{position:relative}
 .view[data-loading=true]::before{content:"";display:block;position:absolute;inset:0 auto auto 0;height:3px;width:40%;border-radius:var(--radius-small);background:var(--status-info);animation:view-loading 1.3s ease-in-out infinite;pointer-events:none;z-index:2}

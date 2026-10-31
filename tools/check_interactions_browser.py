@@ -14,7 +14,7 @@ if (ROOT / ".playwright").is_dir():
 import requests
 from playwright.sync_api import expect, sync_playwright
 
-from tools.check_browser import RunningApp, launch_browser, hold_api_response, release_api_response
+from tools.check_browser import RunningApp, launch_browser, hold_api_response, release_api_response, lock_panel, navigate_panel, unlock
 from tests.test_interactions import InteractionClient
 from tests.test_collector import CHAT, saved_session
 from tests.test_investigation import offer
@@ -65,25 +65,38 @@ def main():
             expect(page.locator("#interaction-result")).to_contain_text("Recorded answer")
             expect(page.locator("#interaction-result")).to_contain_text("https://example.test/receipt")
             press = page.locator("#msg-10 .msg-button", has_text="I paid").get_by_role("button")
+            expect(page.locator("#chat-send")).to_be_enabled()
             expect(press).to_be_enabled()
             callbacks = len(server.app.state.collector.client.callbacks)
 
             page.evaluate("""() => {
               const original=window.fetch;let arm=true,fail=false;
+              window.interactionRefreshFailure={hits:0,backgroundFailed:false,
+                restore(){window.fetch=original;delete window.interactionRefreshFailure;}};
               window.fetch=async(...args)=>{
                 if(fail&&String(args[0]).endsWith('/api/status')){
-                  fail=false;throw new TypeError('Synthetic status connection failure');
+                  window.interactionRefreshFailure.hits++;
+                  throw new TypeError('Synthetic status connection failure');
                 }
                 const result=await original(...args);
-                if(arm&&String(args[0]).endsWith('/api/interactions')){arm=false;fail=true;}
+                if(arm&&String(args[0]).endsWith('/api/interactions')){
+                  arm=false;fail=true;
+                  // A competing poll must not consume the post-action outage fixture.
+                  await refreshStatus().catch(()=>{window.interactionRefreshFailure.backgroundFailed=true;});
+                }
                 return result;
               };
             }""")
             press.click()
-            expect(page.locator("#interaction-result")).to_contain_text("Action completed and recorded.")
-            expect(page.locator("#interaction-result")).to_contain_text("Chat refresh failed")
-            expect(page.locator("#toast")).to_be_hidden()
-            assert len(server.app.state.collector.client.callbacks) == callbacks + 1
+            try:
+                expect(page.locator("#interaction-result")).to_contain_text("Action completed and recorded.")
+                expect(page.locator("#interaction-result")).to_contain_text("Chat refresh failed")
+                expect(page.locator("#toast")).to_be_hidden()
+                assert page.evaluate("interactionRefreshFailure.backgroundFailed")
+                assert page.evaluate("interactionRefreshFailure.hits") >= 2
+                assert len(server.app.state.collector.client.callbacks) == callbacks + 1
+            finally:
+                page.evaluate("interactionRefreshFailure.restore()")
 
             expect(press).to_be_enabled()
             press.click()
@@ -101,10 +114,11 @@ def main():
             page.locator("#chat-preview-button").click()
             expect(page.locator("#chat-link-preview")).to_contain_text("Preview group")
             page.evaluate("""path=>{
-              const original=window.fetch;let fail=true;
+              const original=window.fetch;
+              window.interactionJoinFailure={restore(){window.fetch=original;delete window.interactionJoinFailure;}};
               window.fetch=async(...args)=>{
-                if(fail&&String(args[0]).endsWith(path)){
-                  fail=false;throw new TypeError('Synthetic new-chat connection failure');
+                if(String(args[0]).endsWith(path)){
+                  throw new TypeError('Synthetic new-chat connection failure');
                 }
                 return original(...args);
               };
@@ -118,6 +132,7 @@ def main():
             assert len(server.app.state.collector.client.joined) == 1
             expect(page.locator("#chat-feed")).to_contain_text("Could not load data")
             expect(page.locator("#chat-send")).to_be_disabled()
+            page.evaluate("interactionJoinFailure.restore()")
             page.locator("#chat-feed").get_by_role("button", name="Retry", exact=True).click()
             expect(page.locator("#chat-send")).to_be_enabled()
             expect(page.locator("#interaction-result")).to_contain_text("Action completed and recorded.")
@@ -161,21 +176,24 @@ def main():
             for width, height in [(1440, 1000), (390, 844), (320, 800)]:
                 page.set_viewport_size({"width": width, "height": height})
                 for theme in ("light", "dark"):
+                    if width < 768:
+                        page.locator("#navigation-toggle").click()
                     page.locator(f'#workspace [data-theme-choice="{theme}"]').click()
                     expect(page.locator("html")).to_have_attribute("data-theme", theme)
+                    if width < 768:
+                        page.locator(".mobile-nav-close").click()
                     page.locator("#chat-compose").scroll_into_view_if_needed()
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
                     page.screenshot(path=str(output / f"chat-{width}-{theme}.png"), full_page=True)
 
             page.locator("#chat-message").fill("private unfinished draft")
-            page.locator("#top-lock").click()
+            lock_panel(page)
             expect(page.locator("#gate")).to_be_visible()
-            assert page.locator("#chat-message").input_value() == ""
+            assert page.evaluate("""()=>{const root=panelRoots.get('chats');
+              return !root.isConnected&&root.querySelector('#chat-message').value==='';}""")
 
-            page.reload()
-            page.locator("#panel-token").fill(server.app.state.vault.token)
-            page.locator("#unlock-form button").click()
-            page.locator('[data-view="chats"]').click()
+            unlock(page, server)
+            navigate_panel(page, "chats")
             expect(page.locator("#chat-send")).to_have_text("Send")
             expect(page.locator("#chat-message")).to_have_attribute("placeholder", "Write a message…")
             expect(page.locator("#chat-compose-account")).to_contain_text("Sending as")

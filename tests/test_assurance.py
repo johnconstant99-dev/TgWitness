@@ -83,19 +83,25 @@ def test_redaction_replaces_only_the_two_secret_values():
                                                 "      TGWITNESS_TUNNEL_TOKEN=REDACTED\nprintf 'TGWITNESS_TOKEN=%s'\n")
 
 
-def test_assurance_loop_records_changes_only(journal, tmp_path):
+def test_assurance_loop_records_changes_only(journal, tmp_path, monkeypatch):
     store, _vault = journal
     root = host_root(tmp_path)
+    clean = assurance.host_state(root)
+    changed = assurance.host_state(host_root(tmp_path, listening=True, logins=1))
+    # A poll must see a complete snapshot, not the fixture's multi-file rewrite.
+    # The filesystem parser is covered separately above.
+    frames = [clean, clean, changed, changed]
+    monkeypatch.setattr(assurance, "host_state", lambda _root: frames.pop(0))
 
-    async def run():
-        task = asyncio.create_task(assurance.assurance_loop(store, "hetzner", {"instance_id": 42}, 0.01, root))
-        await asyncio.sleep(0.1)
-        assert store.events(kind="host.state") == []
-        host_root(tmp_path, listening=True, logins=1)
-        await asyncio.sleep(0.1)
-        task.cancel()
-        await asyncio.gather(task, return_exceptions=True)
-    asyncio.run(run())
+    async def tick(_interval):
+        if len(frames) == 2:
+            assert store.events(kind="host.state") == []
+        if not frames:
+            raise asyncio.CancelledError
+
+    monkeypatch.setattr(assurance.asyncio, "sleep", tick)
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(assurance.assurance_loop(store, "hetzner", {"instance_id": 42}, 0.01, root))
     [event] = store.events(kind="host.state")
     assert event["payload"]["ssh_listening"] is True and event["payload"]["before"]["ssh_listening"] is False
     assert event["payload"]["instance_id"] == 42 and event["payload"]["logins"] == 1

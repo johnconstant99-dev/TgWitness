@@ -6,7 +6,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import RunningApp, check_layout, launch_browser, unlock
+from check_browser import RunningApp, check_layout, launch_browser, navigate_panel, unlock
 from test_collector import CHAT, FakeClient, media_message, telegram_message
 from tgwitness import history, i18n
 from tgwitness.verify import verify_history_report
@@ -46,13 +46,15 @@ def main():
                 response = context.request.post(server.url + "/api/" + path, data=body, headers=headers)
                 assert response.ok, response.text()
             unlock(page, server)
-            page.locator('[data-view="sources"]').click()
+            navigate_panel(page, "sources")
+            page.locator("#sources-tab-chats").click()
             page.locator("#history-start").click()
             expect(page.locator("#history-progress")).to_contain_text("2 messages", timeout=12000)
             page.locator("#history-pause").click()
             expect(page.locator("#history-progress")).to_contain_text("History paused")
             page.reload()
-            page.locator('[data-view="sources"]').click()
+            navigate_panel(page, "sources")
+            page.locator("#sources-tab-chats").click()
             expect(page.locator("#history-progress")).to_contain_text("History paused")
             expect(page.locator("#history-resume")).to_be_enabled()
             HistoryClient.allow_remaining.set()
@@ -77,7 +79,8 @@ def main():
                 check_layout(page)
             context.add_cookies([{"name": i18n.COOKIE, "value": "ru", "url": server.url}])
             page.goto(server.url + "/?lang=ru")
-            page.locator('[data-view="sources"]').click()
+            navigate_panel(page, "sources")
+            page.locator("#sources-tab-chats").click()
             expect(page.locator("#history-progress")).to_contain_text("Чтение истории завершено")
             check_layout(page)
             assert not errors, errors

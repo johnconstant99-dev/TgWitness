@@ -24,7 +24,12 @@ def main():
             errors, requests, captures = [], [], []
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.on("request", lambda request: requests.append(request.url))
-            unlock(page, app)
+            try:
+                unlock(page, app)
+            except AssertionError as exc:
+                if errors:
+                    raise AssertionError(f"Unlock failed with browser errors: {errors}") from exc
+                raise
             expect(page.locator(".view")).to_have_count(1)
             expect(page.locator("#view-connection")).to_be_visible()
             assert not any("/api/parameters" in url or "/api/events?" in url for url in requests), requests
@@ -52,12 +57,15 @@ def main():
             expect(page.locator("#" + field_id)).to_have_value(draft)
 
             navigate_panel(page, "evidence")
+            page.locator('#exports-tab-settings').click()
+            expect(page.locator("#report-case-title")).to_be_visible()
             expect(page.locator("#report-case-title")).to_be_enabled()
             page.locator("#report-case-title").fill("Unsaved local case")
             navigate_panel(page, "chats")
             expect(page.locator("#chat-feed .msg").first).to_be_visible()
             assert page.evaluate("()=>document.querySelectorAll('.view').length") == 1
             navigate_panel(page, "evidence")
+            expect(page.locator("#report-case-title")).to_be_visible()
             expect(page.locator("#report-case-title")).to_have_value("Unsaved local case")
 
             for width, height in ((1440, 1000), (390, 844)):
