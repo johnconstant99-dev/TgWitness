@@ -397,6 +397,7 @@ def main():
             for method in ("phone", "qr", "files", "key"):
                 choose_method(method)
                 check_layout(page, connection=method == "phone")
+                page.screenshot(path=str(output / (method+"-"+str(width)+".png")), full_page=True)
                 if method == "files":
                     picker = page.locator(".account-file-picker").bounding_box()
                     formats = page.locator(".import-formats").bounding_box()
@@ -404,8 +405,16 @@ def main():
                     assert picker["y"] + picker["height"] < 844
                     connect = page.locator("#auth-continue").bounding_box()
                     assert connect["y"] + connect["height"] < 844, (width, connect)
-                page.screenshot(path=str(output / (method+"-"+str(width)+".png")), full_page=True)
         scenarios.append("all four sign-in tabs fit 320/390/1440px; file picker precedes format guidance")
+        choose_method("files")
+        page.evaluate("document.documentElement.style.setProperty('--font', 'Arial, sans-serif')")
+        for width in (390, 320):
+            page.set_viewport_size({"width": width, "height": 844})
+            check_layout(page)
+            page.screenshot(path=str(output / ("files-fallback-"+str(width)+".png")), full_page=True)
+            connect = page.locator("#auth-continue").bounding_box()
+            assert connect["y"] >= 0 and connect["y"] + connect["height"] < 844, (width, connect)
+        scenarios.append("file-import submit stays visible with fallback font metrics at 320/390px")
         assert not errors and not outbound, {"errors":errors,"outbound":outbound}
         receipt = {"passed":True,"scenarios":scenarios,"page_errors":errors,"external_requests":outbound}
         (output / "receipt.json").write_text(json.dumps(receipt,indent=2),encoding="utf-8")
