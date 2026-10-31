@@ -19,7 +19,7 @@ oauthlib==4.0.0
 opentelemetry-api==1.45.1
 pillow==13.0.0
 pyaes==1.6.1
-pyasn1==0.6.4
+pyasn1==0.6.5
 pycparser==3.12
 pycryptodomex==3.24.1
 pysocks==1.7.1

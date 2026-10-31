@@ -12,6 +12,14 @@ FILES = [
     "deploy/Dockerfile", "compose.yaml", "deploy/compose/compose.image.yaml", "deploy/compose/compose.https.yaml", "deploy/compose/compose.witness.yaml", "deploy/compose/compose.proof.yaml", "deploy/compose/compose.proxies.yaml",
     ".gitignore", ".gitattributes", ".dockerignore", "deploy/env.example", "deploy/constraints.txt", "deploy/requirements.lock", "deploy/build.lock",
 ]
+# A bounded service manifest: never recurse through node_modules, .dev.vars,
+# controller state, browser profiles or locally exported receipts.
+FILES.extend("services/witness-controller/" + name for name in (
+    ".gitignore", "README.md", "package.json", "package-lock.json", "wrangler.jsonc",
+    "src/dashboard.mjs", "src/engine.mjs", "src/protocol.mjs", "src/worker.mjs",
+    "test/actions.test.mjs", "test/engine.test.mjs", "test/helpers.mjs", "test/worker.test.mjs",
+    "tools/demo.mjs", "tools/local-keys.mjs", "tools/synthetic.mjs", "tools/verify.mjs",
+))
 DIRECTORIES = {
     "tgwitness": {".md", ".py", ".html", ".css", ".js", ".svg", ".json"},
     "docs": {".md", ".png", ".webp", ".svg", ".txt", ".gif", ".mp4"}, "tests": {".py", ".md"}, "tools": {".py", ".md"},
