@@ -3,8 +3,8 @@
   const ENV="TGWITNESS_MCP_TOKEN", PLACEHOLDER="<PASTE_TOKEN_HERE>";
   const toolLabels={list_workspaces:tr("List workspaces"),list_chats:tr("List chats"),search_messages:tr("Search messages"),
     get_message_versions:tr("Message versions"),get_message_context:tr("Message context"),get_journal_event:tr("Journal records"),get_capture_status:tr("Capture status")};
-  let secret="", issuedId=null, configuration=null, revision=0, owner=null, runtime=null, creating=false, timer=null, refreshing=null, listSignature="", checkActive=0;
-  const groups=new Map();
+  let secret="", issuedId=null, configuration=null, revision=0, owner=null, runtime=null, creating=false, timer=null, refreshing=null, checkActive=0;
+  const groups=new Map(), connectionRows=new Map();
   const ownerKey=()=>state.workspaceRevision+":"+state.profile;
   const current=expected=>expected===revision&&owner===ownerKey()&&state.view==="integrations"&&!!state.token;
   function forget(){
@@ -12,11 +12,28 @@
   }
   function clear(reset=false){
     revision++;clearTimeout(timer);timer=null;refreshing=null;creating=false;forget();
-    if(reset){owner=null;runtime=null;groups.clear();$("mcp-form").reset();$("mcp-scope").replaceChildren();$("mcp-tools").replaceChildren();$("mcp-list").replaceChildren();listSignature="";}
+    if(reset){owner=null;runtime=null;groups.clear();connectionRows.clear();$("mcp-form").reset();$("mcp-scope").replaceChildren();$("mcp-tools").replaceChildren();$("mcp-list").replaceChildren();}
+    if(reset){customExpiry.hidden=true;customMinutes.required=false;customMinutes.setCustomValidity("");}
     controls();
   }
   window.addEventListener("tgwitness:lock",()=>clear(true));
+  $("mcp-form").before($("mcp-form-status"));
+  const customExpiry=node("div"),customLabel=node("label","",tr("Custom duration (minutes)")),customMinutes=node("input");
+  customExpiry.id="mcp-custom-expiry";customExpiry.hidden=true;customMinutes.id="mcp-custom-minutes";
+  Object.assign(customMinutes,{type:"number",min:"1",max:String(90*24*60),step:"1",value:"60"});
+  customLabel.htmlFor=customMinutes.id;customExpiry.append(customLabel,customMinutes,node("p","hint",tr("1 minute to 90 days. Starts when the server creates the connection.")));
+  $("mcp-duration").append(new Option(tr("Custom duration"),"custom"));$("mcp-duration").after(customExpiry);
+  function durationSeconds(){
+    const seconds=$("mcp-duration").value==="custom"?Number(customMinutes.value)*60:Number($("mcp-duration").value)*3600;
+    const valid=Number.isInteger(seconds)&&seconds>=60&&seconds<=Number(runtime?.max_days||90)*86400;
+    customMinutes.setCustomValidity(valid?"":tr("Access must expire between one minute and 90 days from now."));
+    return valid?seconds:null;
+  }
+  $("mcp-duration").addEventListener("change",()=>{customExpiry.hidden=$("mcp-duration").value!=="custom";customMinutes.required=!customExpiry.hidden;durationSeconds();});
+  customMinutes.addEventListener("input",durationSeconds);
+
   function controls(){
+    show("mcp-form",!!runtime?.available&&!state.status?.demo);
     $("mcp-fields").disabled=!runtime?.available||creating||!!state.status?.demo||owner!==ownerKey();
   }
   async function loadChats(profile,group,choices){
@@ -64,32 +81,48 @@
     $("mcp-tools").querySelectorAll("input").forEach(input=>input.checked=value==="all"||overview.has(input.value));
   });
   function renderConnections(connections){
-    const signature=JSON.stringify([runtime?.available,connections,state.profiles.map(profile=>[profile.id,profile.label]),connections.map(entry=>entry.expires_at*1000<=Date.now())]);
-    if(signature===listSignature)return;listSignature=signature;
-    const box=$("mcp-list"),open=new Set([...box.querySelectorAll("details[open]")].map(detail=>detail.dataset.connection));box.replaceChildren();
-    for(const entry of connections){
-      const expired=entry.expires_at*1000<=Date.now(),row=node("div","target-row mcp-connection"),info=node("div"),status=entry.revoked_at?tr("Revoked"):expired?tr("Expired"):tr("Active");
-      row.dataset.connection=entry.id;
-      info.append(node("h3","",entry.name),node("p","",status+" · "+tr("Expires {time}",{time:formatTime(entry.expires_at*1000)})),
-        node("p","",entry.last_used_at?tr("Last used {time}",{time:formatTime(entry.last_used_at*1000)}):tr("Not used yet")));
+    const box=$("mcp-list"),keep=new Set(connections.map(entry=>entry.id));
+    for(const [id,item] of connectionRows)if(!keep.has(id)){item.row.remove();connectionRows.delete(id);}
+    if(connections.length)box.querySelector(":scope > .ui-state")?.remove();
+    const text=(element,value)=>{if(element.textContent!==value)element.textContent=value;};
+    connections.forEach((entry,index)=>{
+      let item=connectionRows.get(entry.id);
+      if(!item){
+        const row=node("div","target-row mcp-connection"),info=node("div"),actions=node("div","route-actions"),details=node("details");
+        row.dataset.connection=entry.id;details.dataset.connection=entry.id;
+        item={row,details,entry};
+        for(const key of ["name","status","rate","last","scope","uses","address","tool","tools"])
+          item[key]=node(key==="name"?"h3":key==="tools"?"code":"p",key==="tools"?"mcp-tool-names":"");
+        details.append(node("summary","",tr("Connection details")),item.uses,item.address,item.tool,node("p","",tr("Allowed tools")),item.tools);
+        info.append(item.name,item.status,item.rate,item.last,item.scope,details);
+        item.rotate=node("button","secondary",tr("Rotate token"));item.revoke=node("button","danger",tr("Revoke"));
+        item.rotate.type=item.revoke.type="button";actions.append(item.rotate,item.revoke);row.append(info,actions);
+        item.rotate.addEventListener("click",()=>{
+          const entry=item.entry;
+          if(!window.confirm(tr("Replace the token for {name}? The old token stops working immediately.",{name:entry.name})))return;
+          const expected=revision;busy(item.rotate,async()=>{const result=await json("mcp/connections/"+encodeURIComponent(entry.id)+"/rotate",{},{root:true});if(!current(expected))return;issued(result);await afterMutation(expected);});
+        });
+        item.revoke.addEventListener("click",()=>{
+          const entry=item.entry;
+          if(!window.confirm(tr("Revoke {name}? Its next request will be refused.",{name:entry.name})))return;
+          const expected=revision;busy(item.revoke,async()=>{await api("mcp/connections/"+encodeURIComponent(entry.id),undefined,{method:"DELETE",root:true});if(!current(expected))return;if(issuedId===entry.id)forget();await afterMutation(expected);});
+        });
+        connectionRows.set(entry.id,item);
+      }
+      item.entry=entry;
+      const expired=entry.expires_at*1000<=Date.now(),status=entry.revoked_at?tr("Revoked"):expired?tr("Expired"):tr("Active");
+      text(item.name,entry.name);text(item.status,status+" · "+tr("Expires {time}",{time:formatTime(entry.expires_at*1000)}));
+      text(item.rate,tr("Last minute: {n} / {limit} requests",{n:entry.requests_last_minute||0,limit:entry.rate_limit_per_minute||60}));
+      text(item.last,entry.last_used_at?tr("Last used {time}",{time:formatTime(entry.last_used_at*1000)}):tr("Not used yet"));
       const scopes=Object.entries(entry.workspaces).map(([id,chats])=>(state.profiles.find(profile=>profile.id===id)?.label||id)+": "+(chats?chats.join(", "):tr("All chats")));
-      info.append(node("p","",scopes.join(" · ")));
-      const details=node("details"),summary=node("summary","",tr("Connection details"));details.dataset.connection=entry.id;details.open=open.has(entry.id);
-      details.append(summary,node("p","",tr("Requests: {n}",{n:entry.uses||0})),node("p","",tr("Last address: {address}",{address:entry.last_address||tr("Not used yet")})),
-        node("p","",tr("Last tool: {tool}",{tool:entry.last_tool||tr("Not used yet")})),node("p","",tr("Allowed tools")),node("code","mcp-tool-names",entry.tools.join(", ")));info.append(details);
-      const actions=node("div","route-actions"),rotate=node("button","secondary",tr("Rotate token")),revoke=node("button","danger",tr("Revoke"));rotate.type=revoke.type="button";
-      rotate.disabled=!!entry.revoked_at||expired||!runtime?.available;revoke.disabled=!!entry.revoked_at;
-      rotate.addEventListener("click",()=>{
-        if(!window.confirm(tr("Replace the token for {name}? The old token stops working immediately.",{name:entry.name})))return;
-        const expected=revision;busy(rotate,async()=>{const result=await json("mcp/connections/"+encodeURIComponent(entry.id)+"/rotate",{},{root:true});if(!current(expected))return;issued(result);await afterMutation(expected);});
-      });
-      revoke.addEventListener("click",()=>{
-        if(!window.confirm(tr("Revoke {name}? Its next request will be refused.",{name:entry.name})))return;
-        const expected=revision;busy(revoke,async()=>{await api("mcp/connections/"+encodeURIComponent(entry.id),undefined,{method:"DELETE",root:true});if(!current(expected))return;if(issuedId===entry.id)forget();await afterMutation(expected);});
-      });
-      actions.append(rotate,revoke);row.append(info,actions);box.append(row);
-    }
-    if(!connections.length)box.append(viewState("empty",tr("No archive connections"),tr("Create a connection above to grant read-only access.")));
+      text(item.scope,scopes.join(" · "));text(item.uses,tr("Requests: {n}",{n:entry.uses||0}));
+      text(item.address,tr("Last address: {address}",{address:entry.last_address||tr("Not used yet")}));
+      text(item.tool,tr("Last tool: {tool}",{tool:entry.last_tool||tr("Not used yet")}));text(item.tools,entry.tools.join(", "));
+      item.rotate.disabled=!!entry.revoked_at||expired||!runtime?.available||item.rotate.hasAttribute("aria-busy");
+      item.revoke.disabled=!!entry.revoked_at||item.revoke.hasAttribute("aria-busy");
+      if(box.children[index]!==item.row)box.insertBefore(item.row,box.children[index]||null);
+    });
+    if(!connections.length&&!box.childElementCount)box.append(viewState("empty",tr("No archive connections"),tr("Create a connection above to grant read-only access.")));
   }
   function schedule(){
     clearTimeout(timer);timer=null;
@@ -170,15 +203,19 @@
     busy(event.submitter,async()=>{
       if(!Object.keys(workspaces).length)throw new Error(tr("Choose at least one workspace and chat."));
       if(!tools.length)throw new Error(tr("Choose at least one tool."));
+      const duration=durationSeconds();if(duration===null){customMinutes.reportValidity();return;}
       if(secret&&!window.confirm(tr("Replace the token shown here? Save it first; it cannot be retrieved later.")))return;
       creating=true;controls();
-      try{const result=await json("mcp/connections",{name:$("mcp-name").value.trim(),workspaces,tools,expires_at:Date.now()/1000+Number($("mcp-duration").value)*3600},{root:true});
+      try{const result=await json("mcp/connections",{name:$("mcp-name").value.trim(),workspaces,tools,expires_in_seconds:duration},{root:true});
         if(!current(expected))return;issued(result);await afterMutation(expected);
       }finally{if(expected===revision){creating=false;controls();}}
     });
   });
   $("mcp-copy-token").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(secret){await navigator.clipboard.writeText(secret);toast(tr("Archive token copied. It grants access to the selected chats."));}}));
-  $("mcp-hide-token").addEventListener("click",()=>{forget();$("mcp-name").focus();});
+  $("mcp-hide-token").addEventListener("click",()=>{
+    forget();$("mcp-form").reset();customExpiry.hidden=true;customMinutes.required=false;customMinutes.setCustomValidity("");groups.clear();$("mcp-scope").replaceChildren();$("mcp-tools").replaceChildren();
+    scope();renderTools(runtime?.tools||[]);$("mcp-name").focus();
+  });
   $("mcp-copy-install").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(runtime?.install_command){await navigator.clipboard.writeText(runtime.install_command);toast(tr("Copied"));}}));
   $("mcp-copy-config").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(configuration){await navigator.clipboard.writeText(JSON.stringify(configuration.data,null,2)+"\n");toast(tr("Configuration copied."));}}));
   $("mcp-download").addEventListener("click",()=>{

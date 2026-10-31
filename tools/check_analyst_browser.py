@@ -145,7 +145,7 @@ def review_drawer(page, fixture, output):
     assert page.evaluate("navigator.clipboard.readText()") == fixture["edited"]["hash"]
     drawer.get_by_role("button", name="Link to this record", exact=True).click()
     copied = page.evaluate("navigator.clipboard.readText()")
-    assert "event=" + str(fixture["edited"]["seq"]) in copied and "workspace=default" in copied
+    assert "/journal/event/" + str(fixture["edited"]["seq"]) in copied and "ws=default" in copied
     current = fixture["edited"]["seq"]
     next_seq = page.evaluate("state.events[state.events.findIndex(e=>e.seq===state.drawerSeq)+1].seq")
     page.keyboard.press("j")
@@ -234,12 +234,14 @@ def media_checks(page, server, fixture, output):
 
 def source_checks(page, server, output):
     page.evaluate("navigate('sources')")
+    page.locator("#sources-tab-chats").click()
     expect(page.locator("#target-list .target-row")).to_have_count(2)
     page.locator("#target-search").fill("Harbor")
     expect(page.locator("#target-list .target-row")).to_have_count(1)
     page.locator("#target-list .source-select").check()
-    page.locator("#target-bulk-actions").get_by_role("button", name="Pause selected").click()
-    expect(page.locator("#target-list .toggle-label input")).not_to_be_checked()
+    page.locator("#target-bulk-action").select_option("pause")
+    page.locator("#target-bulk-apply").click()
+    expect(page.locator("#target-list .source-state")).to_have_text("Paused")
     assert not server.app.state.store.targets()[0]["enabled"]
     page.locator("#target-filter").select_option("paused")
     expect(page.locator("#target-list .target-row")).to_have_count(1)
@@ -250,6 +252,7 @@ def source_checks(page, server, output):
     page.locator("#dialog-search").fill("New research")
     page.locator("#dialog-bulk-actions").get_by_role("button", name="Add all matching").click()
     expect(page.locator("#target-list .target-row")).to_have_count(3)
+    page.locator("#finish-source-selection").click()
     page.locator("#target-list .source-select").first.check()
     for width in (1440, 390):
         page.set_viewport_size({"width": width, "height": 960 if width > 600 else 844})
@@ -257,7 +260,7 @@ def source_checks(page, server, output):
           n.closest('.card').getBoundingClientRect().top+scrollY-(innerWidth>600?74:14))""")
         assert page.evaluate("document.documentElement.scrollWidth<=innerWidth")
         for row in page.locator("#target-list .target-row").all():
-            check, heading = row.locator(".source-select").bounding_box(), row.locator("h3").bounding_box()
+            check, heading = row.locator(".source-select").bounding_box(), row.locator("strong").bounding_box()
             assert heading["x"] - check["x"] - check["width"] < 36, "Source title floats away from its checkbox"
         page.screenshot(path=str(output / f"sources-{width}.png"))
     page.set_viewport_size({"width": 1440, "height": 960})
@@ -285,6 +288,8 @@ def palette_checks(page):
     expect(page.locator("#quick-option-workspace-default")).to_be_visible()
     page.locator("#quick-option-workspace-default").click()
     expect(page.locator("#profile-select")).to_have_value("default")
+    # Wait for the final syncLive before installing the synthetic stream.
+    page.wait_for_function("()=>state.profile==='default'&&!document.querySelector('#workspace').inert")
 
 
 def live_checks(page):
@@ -362,9 +367,11 @@ def stream_and_scope(page, context, server, fixture):
 
 def batch_lock(page):
     page.evaluate("navigate('sources')")
+    page.locator("#sources-tab-chats").click()
     page.locator("#target-list .source-select").first.check()
     hold_api_response(page, "/targets/batch")
-    page.locator("#target-bulk-actions").get_by_role("button", name="Pause selected").click()
+    page.locator("#target-bulk-action").select_option("pause")
+    page.locator("#target-bulk-apply").click()
     expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
     for button in page.locator("#target-bulk-actions button").all():
         expect(button).to_be_disabled()
@@ -372,7 +379,8 @@ def batch_lock(page):
     release_api_response(page)
     expect(page.locator("#gate")).to_be_visible()
     expect(page.locator("#workspace")).to_be_hidden()
-    assert page.evaluate("selectedSources.size===0&&!sourceBatchBusy")
+    expect(page.locator("#target-list .source-select")).to_have_count(0)
+    expect(page.locator("#target-bulk-actions")).to_be_hidden()
 
 
 def main():

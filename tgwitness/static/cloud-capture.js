@@ -189,6 +189,8 @@
       return ()=>{save(value,"delivery.zip","application/zip");state.delivered=true;};
     });
   });
-  addEventListener("tgwitness:lock",()=>{epoch++;state=initial();window.TgWitnessCaptureStory?.reset();render();});
+  function reset(){epoch++;state=initial();window.TgWitnessCaptureStory?.reset();render();}
+  addEventListener("tgwitness:lock",reset);
+  window.TgWitnessCapture={reset};
   render();
 })();

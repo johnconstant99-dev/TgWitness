@@ -13,6 +13,8 @@
 
   const CATEGORIES = {
     membership: ["membership."],
+    messages: ["message.new", "message.snapshot", "message.recovered"],
+    media: ["media."], actions: ["interaction."],
     coverage: ["coverage.", "connection.", "collector.", "process.", "observation.", "snapshot.", "target.",
       "capture.", "monitoring.", "source.", "scope.", "telegram.", "clock.", "media.failed", "media.retry",
       "media.recovered", "deletion.unscoped"],
@@ -43,16 +45,44 @@
       if (!/\/api\/events(\?|$)/.test(key)) continue;
       for (const event of JSON.parse(answer.text).events) known.set(event.seq, event);
     }
-    const kind = params.get("kind"), search = (params.get("search") || "").toLowerCase();
-    const chat = params.get("chat_id"), message = params.get("message_id"), before = params.get("before");
+    const kinds = (params.get("kind") || "").split(",").map(kind => kind.trim()).filter(Boolean), search = (params.get("search") || "").toLowerCase();
+    const chat = params.get("chat_id"), message = params.get("message_id"), before = params.get("before"), after = params.get("after");
+    const since = params.get("since"), until = params.get("until");
+    const hideSystem = ["true", "1"].includes(params.get("hide_system"));
     const limit = Math.min(500, Math.max(1, Number(params.get("limit")) || 100));
     const matches = [...known.values()].filter(e =>
       (chat === null || String(e.chat_id) === chat) && (message === null || String(e.message_id) === message) &&
-      (!kind || (CATEGORIES[kind] ? CATEGORIES[kind].some(p => e.kind.startsWith(p)) : e.kind === kind)) &&
-      (before === null || e.seq < Number(before)) &&
+      (!kinds.length || kinds.some(kind => (CATEGORIES[kind] || [kind]).some(p => p.endsWith(".") ? e.kind.startsWith(p) : e.kind === p))) &&
+      (!hideSystem || !["collector.heartbeat", "host.state"].includes(e.kind) && !(e.kind === "media.skipped" && e.payload.reason === "media download disabled")) &&
+      (!since || Date.parse(e.observed_at) >= Date.parse(since)) && (!until || Date.parse(e.observed_at) <= Date.parse(until)) &&
       (!search || JSON.stringify(e.payload).toLowerCase().includes(search)))
-      .sort((a, b) => b.seq - a.seq).slice(0, limit);
-    return {events: matches, next_before: matches.length === limit ? matches[matches.length - 1].seq : null};
+      .sort((a, b) => b.seq - a.seq);
+    const eligible = matches.filter(e => (before === null || e.seq < Number(before)) && (after === null || e.seq > Number(after)));
+    const page = after === null ? eligible.slice(0, limit) : eligible.slice(-limit);
+    const counted = ["true", "1"].includes(params.get("include_count"));
+    return {events: page,
+      next_before: page.length && matches.some(e => e.seq < page.at(-1).seq) ? page.at(-1).seq : null,
+      next_after: page.length && matches.some(e => e.seq > page[0].seq) ? page[0].seq : null,
+      matched: counted ? matches.length : null, count_exact: counted};
+  }
+
+  function chatMessages(all, path, params) {
+    const known = new Map(); let included = false;
+    for (const [key, answer] of Object.entries(all)) {
+      if (key.split('?')[0] !== path) continue;
+      included = true;
+      for (const message of JSON.parse(answer.text).messages) known.set(message.message_id, message);
+    }
+    if (!included) return null;
+    const before = params.get('before_id'), after = params.get('after_id');
+    const limit = Math.min(200, Math.max(1, Number(params.get('limit')) || 60));
+    const ordered = [...known.values()].sort((a, b) => a.message_id - b.message_id);
+    const matching = ordered.filter(message => (before === null || message.message_id < Number(before))
+      && (after === null || message.message_id > Number(after)));
+    const messages = after === null ? matching.slice(-limit) : matching.slice(0, limit);
+    const first = messages[0]?.message_id, last = messages.at(-1)?.message_id;
+    return {messages, next_before: ordered.some(message => message.message_id < first) ? first : null,
+      next_after: ordered.some(message => message.message_id > last) ? last : null};
   }
 
   window.fetch = async (input, init = {}) => {
@@ -67,6 +97,11 @@
     }
     if (method !== "GET") return json(403, {detail: READ_ONLY});
     const all = await answers;
+    if (path.endsWith("/api/exports/history")) return json(200, {exports: [], limit: 20});
+    if (/\/api\/chats\/-?\d+\/messages$/.test(path)) {
+      const messages = chatMessages(all, path, url.searchParams);
+      return messages ? json(200, messages) : json(404, {detail: MISSING});
+    }
     if (all[path + url.search]) return recorded(all[path + url.search]);
     if (path.endsWith("/api/events")) return json(200, events(all, url.searchParams));
     if (all[path]) return recorded(all[path]);

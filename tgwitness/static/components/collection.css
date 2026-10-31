@@ -1,0 +1,8 @@
+.observation-indicator { display: none; align-items: center; gap: 5px; color: var(--muted); font: var(--type-support); }
+.observation-dot { font-size: 12px; }
+.observation-indicator[data-state=observing] .observation-dot { color: var(--success); }
+.observation-indicator[data-state=reconnecting] .observation-dot { color: var(--warning); }
+@media (max-width: 767px) {
+  .topbar .profile-switch > .observation-indicator:not([hidden]) { display: inline-flex; margin-inline-end: 6px; }
+  .observation-label { display: none; }
+}

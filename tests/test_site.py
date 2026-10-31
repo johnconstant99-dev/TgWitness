@@ -69,7 +69,7 @@ def test_pages_uses_only_presentation_files_and_project_relative_assets(site_roo
         path = url.removeprefix("https://example.github.io/Journal/")
         assert (output / (path + "index.html" if path.endswith("/") else path)).is_file(), url
     full = (output / "llms-full.txt").read_text(encoding="utf-8")
-    assert "python -m tgwitness.mcp_server --api-url http://127.0.0.1:8787" in full
+    assert "python -m tgwitness.mcp_server --url https://your-panel.example/mcp" in full
     assert "# Use a separate account. Never your main one." in full
     assert "## User flow" in full and "sealed-connection" in full
     assert '<script' not in full and "@@" not in full

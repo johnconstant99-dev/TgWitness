@@ -100,9 +100,10 @@ def main():
                     check_layout(page)
             page.set_viewport_size({"width": 1440, "height": 1000})
             page.evaluate("lock()")
-            expect(page.locator("#report-case-title")).to_have_value("")
-            expect(page.locator("#report-notes")).to_have_value("")
-            expect(page.locator("#report-case-title")).to_be_disabled()
+            assert page.evaluate("()=>$('report-case-title').value") == ""
+            assert page.evaluate("()=>$('report-notes').value") == ""
+            assert page.evaluate("()=>$('report-case-title').matches(':disabled')")
+            expect(page.locator("#report-form")).to_have_count(0)
             assert not errors, errors
             browser.close()
     print("Report settings passed: workspace separation, local drafts, late loads/saves, failed load retry, lock clearing and mobile layouts.")

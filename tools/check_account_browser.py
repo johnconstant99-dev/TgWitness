@@ -167,8 +167,10 @@ def main():
         candidate = begin_qr()
         page.locator('[aria-label="Lock workspace"]:visible').first.click()
         expect(page.locator("#gate")).to_be_visible()
-        page.wait_for_function("!document.querySelector('#qr-image').getAttribute('src')")
-        hold_api_response(page, "/events?limit=60")
+        page.wait_for_function("()=>!$('qr-image').getAttribute('src')")
+        # Unlock loads only the active Account screen. A late policy response
+        # must not reset a QR sign-in started while account settings load.
+        hold_api_response(page, "/network/policy")
         page.locator("#panel-token").fill(server.app.state.vault.token)
         page.locator("#unlock-form button[type=submit]").click()
         expect(page.locator("#workspace")).to_be_visible()
@@ -180,7 +182,7 @@ def main():
         release_api_response(page)
         page.wait_for_load_state("networkidle")
         expect(page.locator("#qr-state")).to_be_visible()
-        scenarios.append("sign-in is ready before journal loading and is not reset when it completes")
+        scenarios.append("sign-in is ready before account settings load and is not reset when they arrive")
         response = context.request.post(server.url+"/api/profiles",data={"label":"Second synthetic account"},
             headers={"Authorization":"Bearer "+server.app.state.vault.token})
         child = response.json()["id"]
@@ -279,7 +281,11 @@ def main():
             headers={"Authorization":"Bearer "+server.app.state.vault.token})
         third = response.json()["id"]
         page.reload()
-        expect(page.locator("#workspace")).to_be_visible()
+        try:
+            expect(page.locator("#workspace")).to_be_visible()
+        except AssertionError as failure:
+            reason = page.locator("#login-error").text_content()
+            raise AssertionError({"reload_error": reason, "browser_errors": errors}) from failure
         open_settings()
         page.locator("#profile-select").select_option(third)
         open_account()
@@ -382,9 +388,8 @@ def main():
         choose_method("key")
         enter_key()
         page.locator('[aria-label="Lock workspace"]:visible').first.click()
-        expect(page.locator("#auth-key")).to_have_value("")
-        expect(page.locator("#auth-dc")).to_have_value("")
-        expect(page.locator("#auth-user-id")).to_have_value("")
+        assert page.evaluate("()=>['auth-key','auth-dc','auth-user-id'].map(id=>$(id).value)") == ["", "", ""]
+        expect(page.locator("#view-connection")).to_have_count(0)
         scenarios.append("locking the panel clears pasted Auth Key and identity fields")
 
         page.locator("#panel-token").fill(server.app.state.vault.token)

@@ -10,6 +10,7 @@ from playwright.sync_api import sync_playwright, expect
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.check_browser import (RunningApp, launch_browser, unlock, check_layout,
                                  hold_api_response, release_api_response)
+from tools.check_analysis_settings_browser import check_settings
 from tgwitness import netclient
 
 
@@ -33,6 +34,7 @@ def main():
             app.app.state.store.append("message.new", {"text": "A saved link: example.org"}, chat_id=-1001, message_id=1)
             with sync_playwright() as p:
                 browser = launch_browser(p)
+                check_settings(browser)
                 page = browser.new_page(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce")
                 errors = []
                 calls = []
@@ -192,8 +194,8 @@ def main():
                 expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
                 page.evaluate("id=>switchProfile(id)", second)
                 release_api_response(page)
-                # busy() may restore its old button; it must not unlock B's unloaded form.
-                expect(page.locator('#ai-settings-form button[type="submit"]')).to_be_enabled()
+                # A late save cannot enable the next workspace's unloaded form.
+                expect(page.locator('#ai-settings-form button[type="submit"]')).to_be_disabled()
                 assert page.locator("#ai-settings-form").evaluate("el=>el.inert")
                 expect(page.locator("#ai-model")).to_have_value("")
                 baseline = len(calls)

@@ -271,7 +271,7 @@ class Collector:
                                  if s in ("queued", "running", "retry")),
             "media_jobs": self.store.media_stats(),
             "oldest_pending_media_at": self.store.media_oldest(),
-            "source_status": self.source_status,
+            "source_status": self.source_status_view(),
             "last_update_at": self.last_update_at,
             "max_handler_ms": round(self.max_handler_ms, 2),
             "rpc_backoff_until": self.store.get_setting("rpc_backoff_until", 0),
@@ -1151,9 +1151,42 @@ class Collector:
             self.phase = "login_required"
             raise ValueError("Telegram authorization expired. Sign in again.")
 
+    def source_status_view(self):
+        ignored = set(self.store.get_setting("ignored_source_warnings", []))
+        enabled = {str(t["chat_id"]) for t in self.store.targets(True)}
+        return {chat: {**status, **({"ignored": True} if int(chat) in ignored
+                                  and status.get("state") == "access_unconfirmed" else {})}
+                for chat, status in self.source_status.items() if chat in enabled}
+
+    def refresh_source_visibility(self):
+        """Refresh only after completed dialog enumeration; an ignored source resets on positive sighting."""
+        targets = self.store.targets(True)
+        statuses = {}
+        with self.store.transaction():
+            ignored = set(self.store.get_setting("ignored_source_warnings", []))
+            resolved = self.store.get_setting("resolved_source_warnings", {})
+            returned = ignored.intersection(self.dialog_cache, (t["chat_id"] for t in targets))
+            for target in targets:
+                chat_id = target["chat_id"]
+                visible = chat_id in self.dialog_cache
+                statuses[str(chat_id)] = {
+                    "state": "visible_in_dialogs" if visible else "access_unconfirmed",
+                    "checked_at": utcnow(), "meaning": "Dialog visibility is not a guarantee of every update.",
+                    "visibility": self.dialog_cache.get(chat_id, {}).get("visibility", "unknown"),
+                    "role": self.dialog_cache.get(chat_id, {}).get("role", "unknown")}
+                if chat_id in returned:
+                    receipt = self.store.append("target.changed", {"title": target["title"], "enabled": True,
+                                                                   "ignore_unconfirmed": False,
+                                                                   "reason": "source visible in account dialogs"}, chat_id)
+                    resolved[str(chat_id)] = receipt["seq"]
+            if returned:
+                self.store.set_setting("ignored_source_warnings", sorted(ignored - returned))
+                self.store.set_setting("resolved_source_warnings", resolved)
+        self.source_status = statuses
+
     async def dialogs(self):
         await self.restore()
-        self.dialog_cache = {}
+        dialogs = {}
         count, limit = 0, self.param("dialog_limit")
 
         async for dialog in self.client.iter_dialogs(limit=limit):
@@ -1162,7 +1195,7 @@ class Collector:
             kind = kind_of(entity) or (
                 "supergroup" if getattr(entity, "megagroup", False) else "channel" if dialog.is_channel
                 else "group" if dialog.is_group else "bot" if getattr(entity, "bot", False) else "private")
-            self.dialog_cache[dialog.id] = {
+            dialogs[dialog.id] = {
                 "chat_id": dialog.id, "title": dialog.name, "kind": kind, "entity": entity,
                 "archived": getattr(dialog, "folder_id", None) == 1,
                 "visibility": "public_username" if getattr(entity, "username", None) else "private_or_unlisted",
@@ -1170,6 +1203,8 @@ class Collector:
                         else "administrator" if getattr(entity, "admin_rights", None) else "member_or_unknown",
             }
         await self.load_folders()
+        self.dialog_cache = dialogs
+        self.refresh_source_visibility()
         return {"dialogs": [{k: v for k, v in d.items() if k != "entity"}
                             for d in self.dialog_cache.values()],
                 "folders": [{"id": f["id"], "title": f["title"],
@@ -1472,7 +1507,8 @@ class Collector:
             media_type = media_kind(message) if message.file else None
             rule = settings["types"].get(media_type) if media_type else None
             if not settings["download_media"]:
-                media_skip = "media download disabled"
+                if settings["record_disabled_media"]:
+                    media_skip = "media download disabled"
             elif not message.file:
                 media_skip = "metadata-only media type; no downloadable file"
             elif not rule["enabled"]:
@@ -2127,6 +2163,13 @@ class Collector:
         media_root = self.store.root / "media"
         media_root.mkdir(exist_ok=True)
         while self.running:
+            if not capture_settings(self.store)["download_media"]:
+                self.media_wakeup.clear()
+                try:
+                    await asyncio.wait_for(self.media_wakeup.wait(), 1)
+                except TimeoutError:
+                    pass
+                continue
             if time.time() < self.store.get_setting("rpc_backoff_until", 0):
                 await asyncio.sleep(1)
                 continue

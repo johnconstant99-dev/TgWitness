@@ -3,16 +3,16 @@
   const bars=[];
   function render(){
     if(!context)return;
-    for(const {toggle,fresh} of bars){
+    for(const {bar,toggle,fresh} of bars){
+      if(!bar.isConnected)continue;
       toggle.textContent=context.tr(paused?"Live: paused":connected?"Live: on":"Live: reconnecting");
       toggle.setAttribute("aria-pressed",String(!paused));
       fresh.hidden=!pending;fresh.textContent=context.tr("{n} new events",{n:pending});
     }
   }
-  function setup(){
-    if(bars.length)return;
-    for(const selector of [".journal .card-heading",".chat-header"]){
-      const parent=document.querySelector(selector);if(!parent)continue;
+  function setup(parents){
+    for(const parent of parents){
+      if(!parent||bars.some(item=>item.bar.parentNode===parent))continue;
       const bar=document.createElement("div");bar.className="live-controls";
       const toggle=document.createElement("button"),fresh=document.createElement("button");
       toggle.type=fresh.type="button";toggle.className="quiet small live-toggle";fresh.className="secondary small live-new";fresh.hidden=true;
@@ -23,7 +23,7 @@
   async function flush(force=false){
     if(!context||flushing||!pending||(!force&&(paused||!context.canRefresh())))return;
     const rev=generation,count=pending;flushing=true;let success=false;
-    try{await context.refresh();success=true;if(rev===generation)pending=Math.max(0,pending-count);}
+    try{await context.refresh({force});success=true;if(rev===generation)pending=Math.max(0,pending-count);}
     catch{}finally{if(rev===generation){flushing=false;render();
       if(pending&&!paused&&context?.canRefresh()){clearTimeout(flushTimer);flushTimer=setTimeout(()=>flush(),success?200:3000);}
     }}
@@ -56,8 +56,9 @@
   }
   function stop(){generation++;controller?.abort();controller=null;clearTimeout(retry);clearTimeout(flushTimer);context=null;pending=0;connected=false;flushing=false;for(const b of bars)b.bar.hidden=true;}
   function start(ctx){
-    if(context?.key===ctx.key)return;
-    stop();context=ctx;cursor=ctx.head||0;paused=false;setup();for(const b of bars)b.bar.hidden=false;render();connect(generation);
+    setup(ctx.hosts||[]);
+    if(context?.key===ctx.key){context=ctx;for(const b of bars)b.bar.hidden=false;render();return;}
+    stop();context=ctx;cursor=ctx.head||0;paused=false;for(const b of bars)b.bar.hidden=false;render();connect(generation);
   }
   document.addEventListener("visibilitychange",()=>{if(!context)return;if(document.hidden){controller?.abort();controller=null;connected=false;clearTimeout(retry);render();}else{clearTimeout(retry);connect(generation);}});
   document.addEventListener("selectionchange",()=>{if(!window.getSelection()?.toString())flush();});

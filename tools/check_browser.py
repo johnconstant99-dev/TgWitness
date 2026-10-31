@@ -113,6 +113,15 @@ def unlock(page, server):
     expect(page.locator("#workspace")).to_be_visible()
 
 
+def navigate_panel(page, view):
+    """Use the same navigation on desktop and the mobile menu."""
+    button = page.locator(f'.sidebar [data-view="{view}"]')
+    if not button.is_visible():
+        page.locator("#navigation-toggle").click()
+    button.click()
+    expect(page.locator(f"#view-{view}")).to_be_visible()
+
+
 def check_layout(page, connection=False):
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "Horizontal overflow"
     for button in page.locator(".sidebar .nav:visible").all():
@@ -236,7 +245,7 @@ def check_reading_states(browser, server):
         for view in ("chats", "sources", "parameters"):
             page.locator(f'[data-view="{view}"]').first.click()
             if view == "sources":
-                page.locator("#source-options").evaluate("n=>n.open=true")
+                page.locator("#sources-tab-recording").click()
                 page.locator(".media-rules-details").evaluate("n=>n.open=true")
             check_layout(page)
     page.close()
@@ -543,15 +552,15 @@ def main():
             page.get_by_role("button", name="Choose sources").click()
 
             expect(page.locator("#available-card")).to_be_visible()
-            expect(page.locator("#load-dialogs")).to_have_text("Reload chats")
+            expect(page.locator("#load-dialogs")).to_have_text("Refresh chat list")
             page.get_by_role("button", name="Add source").first.click()
             expect(page.locator("#target-list .target-row")).to_have_count(1)
             page.locator("#finish-source-selection").click()
             expect(page.locator("#available-card")).not_to_be_visible()
-            page.locator("#source-options > summary").click()
+            page.locator("#sources-tab-recording").click()
             page.locator('[data-monitor-preset="changes"]').click()
             expect(page.locator("#monitoring-unsaved")).to_contain_text("Unsaved changes")
-            page.locator('#monitoring-form button[type="submit"]').click()
+            page.locator("#recording-save").click()
             expect(page.locator("#monitoring-current")).to_have_text("Saved for this account: messages, edits, deletions.")
             expect(page.locator("#monitor-reactions")).not_to_be_checked()
             page.locator("#download-media").check()
@@ -561,17 +570,17 @@ def main():
             expect(page.locator("#download-media")).to_be_checked()
             expect(page.locator("#max-media")).to_have_value("50")
             expect(page.locator("#capture-unsaved")).to_contain_text("Unsaved changes")
-            hold_api_response(page, "/api/capture")
-            page.locator("#capture-form button").click()
+            hold_api_response(page, "/api/recording")
+            page.locator("#recording-save").click()
             expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
             page.locator("#download-media").uncheck()
             page.locator("#max-media").fill("20")
             release_api_response(page)
-            expect(page.locator("#capture-form button")).to_be_enabled()
+            expect(page.locator("#recording-save")).to_be_enabled()
             expect(page.locator("#capture-unsaved")).to_contain_text("Unsaved changes")
             expect(page.locator("#download-media")).not_to_be_checked()
             expect(page.locator("#max-media")).to_have_value("20")
-            page.locator("#capture-form button").click()
+            page.locator("#recording-save").click()
             expect(page.locator("#capture-unsaved")).to_have_text("")
             saved = live.app.state.store.get_setting("capture")
             assert (saved["download_media"], saved["max_media_mb"]) == (False, 20)
@@ -587,6 +596,8 @@ def main():
             page.set_viewport_size({"width":1440,"height":1060})
             page.locator("#collector-toggle").click()
             expect(page.locator("#collector-toggle")).to_have_text("Pause observation")
+            page.locator('[data-view="evidence"]').click()
+            page.locator("#export-chat-tools > summary").click()
             page.locator("#snapshot-form button").click()
             expect(page.locator("#toast")).to_contain_text("Saved 3 history observations", timeout=15000)
             page.locator("#collector-toggle").click()
@@ -595,12 +606,12 @@ def main():
             page.locator('[data-view="parameters"]').click()
             expect(page.locator("#parameters-groups .parameters-group")).to_have_count(8)
             page.locator("#parameter-recheck_max_chats").fill("0")
-            page.locator('#parameters-form button[type="submit"]').click()
-            expect(page.locator("#parameters-form .form-error")).to_contain_text("Chats per recheck pass")
+            expect(page.locator("#parameters-save")).to_be_disabled()
+            expect(page.locator("#parameter-recheck_max_chats-parameter-error")).to_contain_text("1 to 1,000")
             page.locator("#parameter-recheck_max_chats").fill("5")
             page.locator("#parameter-dossier_phones").uncheck()
             page.locator("#parameter-dossier_patterns").fill("Domain: [a-z0-9-]+\\.top\\b")
-            expect(page.locator("#parameters-unsaved")).to_contain_text("Unsaved changes")
+            expect(page.locator("#parameters-change-count")).to_contain_text("unsaved changes")
             page.locator('#parameters-form button[type="submit"]').click()
             expect(page.locator("#parameters-unsaved")).to_have_text("")
             expect(page.locator(".parameter-row.changed")).to_have_count(3)
@@ -611,8 +622,10 @@ def main():
                 page.set_viewport_size({"width": width, "height": 844})
                 check_layout(page)
             page.set_viewport_size({"width": 1440, "height": 1060})
-            page.once("dialog", lambda dialog: dialog.accept())
+            page.locator("#parameters-menu > summary").click()
             page.locator("#parameters-reset").click()
+            page.locator("#parameters-reset-apply").click()
+            page.locator("#parameters-save").click()
             expect(page.locator(".parameter-row.changed")).to_have_count(0)
             assert live.app.state.store.get_setting("parameters") == {}
             page.reload()

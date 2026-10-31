@@ -23,6 +23,7 @@ def main(fleet_source=None):
         group = page.evaluate("json('profile-groups',{label:'Case team',template:'default'},{root:true}).then(r=>r.groups[0])")
         page.locator('[data-view="accounts"]').click()
         page.evaluate("loadProfiles()")
+        page.locator("#accounts-groups").evaluate("element=>element.open=true")
         panel = page.locator(".fleet-group-settings")
         template = page.locator("#fleet-template-" + group["id"])
         reports = panel.locator('input[value="reports"]')
@@ -99,7 +100,7 @@ def main(fleet_source=None):
         release_api_response(page)
         expect(move).to_have_value(group["id"])
         expect(move).to_be_enabled()
-        assert page.locator(".fleet-group .account-card").count() == 1
+        assert page.evaluate("id=>[...document.querySelectorAll('.fleet-card-group')].filter(select=>select.value===id).length", group["id"]) == 1
 
         # Responses from different moves may arrive in the opposite order.
         third = page.evaluate("json('profiles',{label:'Third account'},{root:true})")
@@ -113,7 +114,7 @@ def main(fleet_source=None):
         release_api_response(page)
         expect(move).to_be_enabled()
         expect(other).to_have_value(group["id"])
-        assert page.locator(".fleet-group .account-card").count() == 1
+        assert page.evaluate("id=>[...document.querySelectorAll('.fleet-card-group')].filter(select=>select.value===id).length", group["id"]) == 1
 
         # Successful saves become the new baseline; later polls may update it.
         page.evaluate("async id=>{await json('profile-groups/'+id,{label:'Fresh case name',template:'default',sections:['parameters','reports']},{root:true,method:'PATCH'});await loadProfiles();}", group["id"])

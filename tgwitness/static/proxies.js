@@ -110,7 +110,7 @@
       tile(tr("Median ping"), s.median_ms ? s.median_ms + " " + tr("ms") : "—", speed(s.median_ms)),
       tile(tr("Countries"), s.countries.toLocaleString()),
       tile(tr("Last check"), s.checking ? tr("Checking now…") : s.checked_at ?
-        new Date(s.checked_at * 1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : tr("Not yet")));
+        fmtTime(s.checked_at * 1000) : tr("Not yet")));
     $("pool-check").disabled = s.checking;
     let note = $("pool-note");
     if (!note) { note = node("p", "hint pool-note"); note.id = "pool-note"; box.after(note); }

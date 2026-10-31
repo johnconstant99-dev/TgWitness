@@ -92,5 +92,5 @@
   }
   document.addEventListener("visibilitychange", schedule);
   motion.addEventListener("change", () => {if (motion.matches) {playing = false; if (host) {drawControls(); schedule();}}});
-  window.TgWitnessCaptureStory = {mount, reset() {playing = false; frame = 0; scenario = "original"; clearTimeout(timer);}};
+  window.TgWitnessCaptureStory = {mount, pause(){playing=false;clearTimeout(timer);}, reset() {playing = false; frame = 0; scenario = "original"; clearTimeout(timer);}};
 })();

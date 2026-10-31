@@ -148,6 +148,53 @@ jobs:
       - run: python tools/check_proof_browser.py
       - run: python tools/check_setup_browser.py
       - run: python tools/check_public_proxies_browser.py
+  browser-ux:
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Create an isolated Python environment
+        if: runner.os == 'Linux'
+        run: |
+          python -m venv "$RUNNER_TEMP/tgwitness-venv"
+          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
+      - run: python -m pip install -c deploy/constraints.txt -e ".[dev]"
+      - run: python -m playwright install chromium
+      - run: python tools/check_router_browser.py
+      - run: python tools/check_view_host_browser.py
+      - run: python tools/check_view_lifecycle_browser.py
+      - run: python tools/check_polling_browser.py
+      - run: python tools/check_time_browser.py
+      - run: python tools/check_shell_browser.py
+      - run: python tools/check_health_controls_browser.py
+      - run: python tools/check_notifications_browser.py
+      - run: python tools/check_chat_layout_browser.py
+      - run: python tools/check_chat_list_browser.py
+      - run: python tools/check_chat_features_browser.py
+      - run: python tools/check_sources_browser.py
+      - run: python tools/check_parameters_browser.py
+      - run: python tools/check_accounts_overview_browser.py
+      - run: python tools/check_access_sections_browser.py
+      - run: python tools/check_journal_browser.py
+      - run: python tools/check_exports_browser.py
+      - run: python tools/check_controls_browser.py
+      - name: Check write-only form drafts
+        run: python -c "from playwright._impl._driver import compute_driver_executable; import subprocess; subprocess.run([str(compute_driver_executable()[0]), 'tools/check_writeonly_drafts.mjs'], check=True)"
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: panel-ux-review
+          path: |
+            build/ux-review/**/*.png
+            build/journal-review/**/*.png
+          if-no-files-found: ignore
+          retention-days: 3
   source:
     runs-on: [self-hosted, Linux, X64, tgwitness-ci]
     timeout-minutes: 30

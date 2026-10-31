@@ -34,7 +34,7 @@ def main():
             expect(dialog).to_be_visible()
             expect(search).to_be_focused()
             destinations = ["chats", "observations", "sources", "evidence", "witness", "parameters",
-                            "connection", "accounts", "access", "integrations"]
+                            "connection", "accounts", "access", "system-log", "integrations"]
             expect(dialog.get_by_role("option")).to_have_count(len(destinations))
             assert dialog.get_by_role("option").evaluate_all(
                 "nodes=>nodes.map(n=>n.dataset.destination)") == destinations

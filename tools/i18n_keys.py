@@ -12,7 +12,7 @@ from pathlib import Path
 
 PACKAGE = Path(__file__).resolve().parents[1] / "tgwitness"
 STATIC = PACKAGE / "static"
-LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
+LITERAL = re.compile(r'''(["'])((?:\\[\s\S]|(?!\1)[^\\\r\n])*)\1''')
 
 PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "sessions.py", "network.py",
                  "profiles.py", "multi_export.py", "alerts.py", "witness_api.py", "tuning.py", "interactions.py",
@@ -26,9 +26,36 @@ DYNAMIC_SCRIPT_KEYS = (
     "All", "Priority", "Paused", "Unconfirmed access", "Enable selected", "Pause selected",
     "Mark priority", "Add selected", "Add all matching", "SHA-256", "Message ID", "Sender ID",
     "Link to this record",
+    "Messages", "Edits", "Deletions", "Reactions", "Membership", "Attachments", "Actions", "Collection",
+    "All events", "All sources", "Any time", "1 hour", "24 hours", "7 days", "Custom", "Custom period",
+    "From (UTC)", "Until (UTC)", "Apply dates", "Close", "Clear filters",
+    "Newer records", "Older records", "Latest", "Previous record", "Next record", "Open in chat",
+    "Recent activity", "Most deletions", "Most edits", "Name", "Sort", "Filters", "Type", "State",
+    "Channels", "Groups", "Bots", "Private chats", "Auto-discovered", "Access unconfirmed", "Excluded",
+    "Paused", "Priority", "Mark regular", "Mark priority", "No chats match these filters.",
+    "Recheck", "Media", "People", "Notifications", "Exports", "Telegram", "MTProxy",
+    "Photos", "Videos", "GIFs & animations", "Round video messages", "Voice messages", "Music & audio", "Stickers", "Files & documents",
+    "Show affected sources", "Exclude from scope", "Ignore until visible", "Enable downloads",
+    "Clear waiting queue", "Skip download-disabled notices",
     "Install MCP support in this Python environment and restart TgWitness.",
     "MCP support is installed. Restart TgWitness to activate the endpoint.",
 )
+
+
+def js_literal(body):
+    """Decode a quoted JS string's contents without evaluating source code."""
+    escapes = {"b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t", "v": "\v", "0": "\0"}
+    def replace(match):
+        value = match.group(1)
+        if value.startswith("u{"):
+            return chr(int(value[2:-1], 16))
+        if value[0] in {"u", "x"} and len(value) > 1:
+            return chr(int(value[1:], 16))
+        if value in {"\n", "\r", "\r\n"}:
+            return ""
+        return escapes.get(value, value)
+    value = re.sub(r"\\(u\{[a-fA-F0-9]+\}|u[a-fA-F0-9]{4}|x[a-fA-F0-9]{2}|\r\n|[\s\S])", replace, body)
+    return value.encode("utf-16-le", "surrogatepass").decode("utf-16-le")
 
 
 def calls(source):
@@ -59,7 +86,7 @@ def script_keys(source):
         for match in LITERAL.finditer(body):
             if re.search(r"[=!]==?\s*$", body[:match.start()]):
                 continue
-            text = json.loads('"' + match.group(1) + '"')
+            text = js_literal(match.group(2))
             if re.search(r"[A-Za-z]{2}", text):
                 keys.append(text)
     return list(dict.fromkeys(keys))
@@ -67,7 +94,7 @@ def script_keys(source):
 
 def all_script_keys():
     keys = list(DYNAMIC_SCRIPT_KEYS)
-    for name in ("app.js", "i18n.js", "guide.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js", "fleet.js", "review.js", "live.js"):
+    for name in ("app.js", "i18n.js", "guide.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js", "fleet.js", "review.js", "live.js", "components/journal.js"):
         keys += script_keys((STATIC / name).read_text(encoding="utf-8"))
     return list(dict.fromkeys(keys))
 

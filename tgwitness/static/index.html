@@ -7,24 +7,39 @@
 <meta name="color-scheme" content="light dark">
 <title>TgWitness · Observation workspace</title>
 <link rel="icon" type="image/svg+xml" href="/mark.svg">
-<link rel="stylesheet" href="/style.css?v=0.7.0-mcp2">
+<link rel="stylesheet" href="/style.css?v=0.7.0-chats11">
+<link rel="stylesheet" href="/components/shell.css?v=1">
+<link rel="stylesheet" href="/components/health.css?v=1">
+<link rel="stylesheet" href="/components/collection.css?v=1">
+<link rel="stylesheet" href="/components/notifications.css?v=1">
+<link rel="stylesheet" href="/views/sources.css?v=17">
+<link rel="stylesheet" href="/views/parameters.css?v=21">
+<link rel="stylesheet" href="/views/accounts.css?v=29">
+<link rel="stylesheet" href="/views/access.css?v=30">
+<link rel="stylesheet" href="/components/journal.css?v=4">
+<link rel="stylesheet" href="/views/chats.css?v=11">
+<link rel="stylesheet" href="/views/chat-list.css?v=12">
 <link rel="stylesheet" href="/cloud-capture.css?v=5"><link rel="stylesheet" href="/cloud-capture-story.css?v=3">
 <script src="/theme.js?v=0.7.0"></script>
 <script src="/guide-locale.js" data-scope="panel"></script>
 <script defer src="/i18n.js?v=0.7.0"></script>
-<script defer src="/app.js?v=0.7.0-mcp2"></script>
+<script defer src="/app.js?v=0.7.0-chats12"></script>
 <script defer src="/integrations.js?v=2"></script>
 <script defer src="/analysis.js?v=3"></script>
 <script defer src="/media-analysis.js?v=2"></script>
-<script defer src="/webhooks.js?v=1"></script>
+<script defer src="/webhooks.js?v=2"></script>
 <script defer src="/proxies.js?v=3"></script>
-<script defer src="/fleet.js?v=2"></script>
+<script defer src="/fleet.js?v=4"></script>
 <script defer src="/review.js?v=1"></script>
-<script defer src="/live.js?v=1"></script>
-<script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=3"></script><script defer src="/cloud-capture.js?v=5"></script>
+<script defer src="/live.js?v=2"></script>
+<script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=4"></script><script defer src="/cloud-capture.js?v=6"></script>
+<link href="/views/exports.css?v=32" rel="stylesheet">
+<link href="/components/forms.css?v=35" rel="stylesheet">
+<link href="/components/feedback.css?v=36" rel="stylesheet">
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
   <symbol id="i-journal" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
   <symbol id="i-sources" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/><path d="M8 8h8M8 12h5"/></symbol>
   <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 3v12m-4.5-4.5L12 15l4.5-4.5M5 16v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></symbol>
@@ -124,6 +139,7 @@
     <button class="nav" data-view="connection"><svg aria-hidden="true" class="nav-icon"><use href="#i-account"/></svg> Account</button>
     <button class="nav" data-view="accounts"><svg aria-hidden="true" class="nav-icon"><use href="#i-users"/></svg> Accounts <b id="nav-accounts">1</b></button>
     <button class="nav" data-view="access" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-lock"/></svg> Access</button>
+    <button class="nav" data-view="system-log" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-activity"/></svg> System log</button>
     <button class="nav" data-view="integrations" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-link"/></svg> Integrations</button>
   </nav>
   <div class="sidebar-bottom">
@@ -150,11 +166,17 @@
   <div class="top-actions">
     <button class="quiet quick-mobile" data-quick-open type="button" aria-label="Go to a section" aria-haspopup="dialog" aria-controls="quick-dialog"><svg aria-hidden="true" class="icon"><use href="#i-search"/></svg></button>
     <div class="notify-wrap">
-      <button aria-controls="notify-panel" aria-expanded="false" aria-label="Notifications" class="quiet notify-button" id="notify-toggle" title="Notifications" type="button"><svg aria-hidden="true" class="icon"><use href="#i-bell"/></svg><b hidden id="notify-count">0</b></button>
-      <div aria-label="Notifications" class="notify-panel" hidden id="notify-panel" role="dialog">
-        <div class="notify-head"><h2>Notifications</h2><button class="text-link" id="notify-read" type="button">Mark all as read</button></div>
-        <div id="notify-list"></div>
-      </div>
+      <button aria-controls="notify-panel" aria-expanded="false" aria-haspopup="dialog" aria-label="Notifications" class="quiet notify-button" disabled id="notify-toggle" title="Notifications" type="button"><svg aria-hidden="true" class="icon"><use href="#i-bell"/></svg><b hidden id="notify-count">0</b></button>
+      <dialog aria-labelledby="notify-title" class="notify-panel" hidden id="notify-panel">
+        <div class="notify-head"><div><h2 id="notify-title">Notifications</h2><p class="notice-summary" id="notify-summary"></p></div><button aria-label="Close notifications" class="quiet" id="notify-close" type="button"><svg aria-hidden="true" class="icon"><use href="#i-x"/></svg></button></div>
+        <div aria-label="Notification categories" class="notice-filters" role="tablist">
+          <button aria-controls="notify-list" aria-selected="true" data-notice-filter="all" id="notify-tab-all" role="tab" type="button">All</button>
+          <button aria-controls="notify-list" aria-selected="false" data-notice-filter="problems" id="notify-tab-problems" role="tab" tabindex="-1" type="button">Problems</button>
+          <button aria-controls="notify-list" aria-selected="false" data-notice-filter="changes" id="notify-tab-changes" role="tab" tabindex="-1" type="button">Chat changes</button>
+        </div>
+        <div aria-labelledby="notify-tab-all" id="notify-list" role="tabpanel" tabindex="0"></div>
+        <div class="notice-footer"><div class="notice-footer-actions"><button id="notify-read" type="button">Mark all as read</button><button id="notify-rules" type="button">Notification rules</button></div><p id="notify-status" role="status"></p></div>
+      </dialog>
     </div>
     <span class="status-chip" id="status-chip">Offline</span>
     <button class="secondary" id="collector-toggle">Start observation</button>
@@ -199,7 +221,7 @@
       <h2>Event timeline <span class="subtle" id="event-total"></span></h2>
       <button class="quiet" id="refresh"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Refresh</button>
     </div>
-    <div class="filters">
+    <div class="filters" id="journal-filters">
       <div aria-label="Event type" class="filter-tabs" role="group">
         <button class="filter active" data-filter="">All events</button>
         <button class="filter" data-filter="message.edited">Edits</button>
@@ -213,7 +235,7 @@
         <select aria-label="Filter by source" id="source-filter"><option value="">All sources</option></select>
       </div>
     </div>
-    <div class="table-wrap"><table class="events-table"><thead><tr><th>Event / observation</th><th>Source</th><th>Observed · UTC</th><th><span class="visually-hidden">Open</span></th></tr></thead><tbody id="events-body"></tbody></table></div>
+    <div class="table-wrap"><table class="events-table"><thead><tr><th>Event / observation</th><th>Source</th><th>Observed</th><th><span class="visually-hidden">Open</span></th></tr></thead><tbody id="events-body"></tbody></table></div>
     <div class="empty" hidden id="empty-events"><div class="empty-mark"><svg aria-hidden="true" class="icon"><use href="#i-inbox"/></svg></div><h3>No observations here yet</h3><p id="empty-copy">Connect an account, choose your sources, then start observation.</p><button class="secondary" id="empty-action" type="button">Connect account →</button></div>
     <div class="table-footer"><span id="shown-count">0 events shown</span><button class="quiet" hidden id="load-more">Load earlier events ↓</button><span class="subtle">Append-only journal</span></div>
   </div>
@@ -222,9 +244,21 @@
 
 <section class="view" hidden id="view-sources">
   <div class="page-heading">
-    <div><h1 id="sources-title">Choose chats</h1><p class="page-description" id="sources-description">Pick the groups and channels this account should observe.</p></div>
-    <button class="primary" id="load-dialogs">Load chats</button>
+    <div><h1 id="sources-title">Sources</h1><p class="page-description" id="sources-description">Choose the conversations to record and what to keep.</p></div>
+    <button class="secondary" id="load-dialogs" type="button" aria-describedby="dialog-refresh-description">Refresh chat list</button>
   </div>
+  <div class="source-refresh-info">
+    <p id="dialog-refresh-description" class="hint">Read the chats and folders available to this account. This refreshes the list; it does not download messages.</p>
+    <div class="source-refresh-status"><span class="hint" id="dialog-refresh-status" role="status" aria-live="polite">Not refreshed in this session.</span><button type="button" class="text-link" id="dialog-refresh-retry" hidden>Retry</button></div>
+    <progress id="dialog-refresh-progress" aria-label="Refreshing chat list" hidden></progress>
+  </div>
+  <div class="sources-summary" aria-label="Source overview"><span id="sources-scope-summary"></span><span id="sources-count-summary"></span><span id="sources-recording-summary"></span></div>
+  <div class="sources-tabs" role="tablist" aria-label="Source settings">
+    <button type="button" id="sources-tab-scope" role="tab" aria-controls="sources-panel-scope" aria-selected="true" data-source-tab="scope">Scope</button>
+    <button type="button" id="sources-tab-chats" role="tab" aria-controls="sources-panel-chats" aria-selected="false" tabindex="-1" data-source-tab="chats">Chats in scope <span id="sources-tab-count" class="tab-count">0</span></button>
+    <button type="button" id="sources-tab-recording" role="tab" aria-controls="sources-panel-recording" aria-selected="false" tabindex="-1" data-source-tab="recording">Recording <span id="recording-tab-dirty" class="tab-count" hidden></span></button>
+  </div>
+  <div id="sources-panel-scope" role="tabpanel" aria-labelledby="sources-tab-scope">
   <form class="card padded scope-card" id="scope-form"><div class="eyebrow">Observation scope</div><h2>What this account records</h2>
     <div class="investigation-preset"><button class="secondary" id="scope-investigation" type="button"><svg aria-hidden="true" class="icon"><use href="#i-eye"/></svg> Investigation mode</button><p class="hint">For a dedicated account that joins teams and talks to bots: records every chat, group, private chat and bot it sees, its own messages and button presses, and for each new chat or bot saves its profile and earlier visible messages at once. Review and press Save scope.</p><a class="format-help" href="/dedicated-account.html" rel="noopener" target="_blank">Why never your main account ↗</a></div>
     <div aria-label="Observation scope" class="scope-modes" role="radiogroup">
@@ -250,8 +284,37 @@
     <div class="scope-actions"><button class="primary" type="submit">Save scope</button><span id="scope-unsaved" role="status"></span></div>
     <details class="scope-limits"><summary>Limits of folder and whole-account modes</summary><p class="hint">Secret chats are end-to-end encrypted between two devices and never reach TgWitness. Nothing is recorded while TgWitness is not running: after a restart it catches up only what Telegram still returns, and the report shows the gap. Chats beyond the chat list limit (1,000 dialogs unless changed in Parameters) are added when they next become active, and the earlier history of an added chat is not fetched. Muted or read state of a folder is not applied: such chats stay observed. Inline bot buttons pressed in another app are invisible to TgWitness; the bot's reply or edit is recorded.</p></details>
   </form>
-  <div class="card padded"><h2 id="target-list-title">Selected chats</h2><div id="target-list"></div></div>
-  <div class="card padded" hidden id="available-card"><h2>Available chats</h2><div class="dialog-filters"><input aria-label="Find an available chat" id="dialog-search" placeholder="Find a chat…" type="search"><select aria-label="Chat type" id="dialog-kind"><option value="">All types</option><option value="channels">Channels</option><option value="groups">Groups</option><option value="private">Private chats</option><option value="bots">Bots</option></select></div><p class="hint" id="dialog-limit"></p><div id="dialog-list"></div><button class="primary" id="finish-source-selection" type="button">Done</button></div>
+  </div>
+  <div id="sources-panel-chats" role="tabpanel" aria-labelledby="sources-tab-chats" hidden>
+  <section class="card source-list-card" id="target-card" aria-labelledby="target-list-title">
+    <div class="source-list-heading"><h2 id="target-list-title" tabindex="-1">Chats in scope</h2><span id="target-match-count" class="hint"></span></div>
+    <div class="source-filters" id="target-tools">
+      <input type="search" id="target-search" aria-label="Search chats" placeholder="Search by name or ID">
+      <select id="target-filter" aria-label="Source status"><option value="">All statuses</option><option value="enabled">Enabled</option><option value="paused">Paused</option><option value="priority">Priority</option><option value="excluded">Excluded</option><option value="unconfirmed">Unconfirmed access</option><option value="ignored">Ignored</option></select>
+      <select id="target-kind" aria-label="Source type"><option value="">All types</option><option value="channels">Channels</option><option value="groups">Groups</option><option value="private">Private chats</option><option value="bots">Bots</option></select>
+      <select id="target-sort" aria-label="Sort sources"><option value="name">Name · A–Z</option><option value="name-desc">Name · Z–A</option><option value="priority">Priority first</option><option value="status">Enabled first</option></select>
+    </div>
+    <div id="target-bulk-actions" class="source-selection-bar" hidden role="toolbar" aria-label="Selected sources">
+      <strong id="target-selection-count"></strong>
+      <label class="sr-only" for="target-bulk-action">Action for selected sources</label>
+      <select id="target-bulk-action"><option value="enable">Enable</option><option value="pause">Pause</option><option value="priority">Mark priority</option><option value="regular">Remove priority</option><option value="exclude">Exclude from scope</option><option value="remove">Remove sources</option></select>
+      <button type="button" class="secondary" id="target-bulk-apply">Apply</button><button type="button" class="quiet" id="target-selection-clear">Clear selection</button>
+    </div>
+    <div class="source-table-wrap"><table class="sources-table"><thead><tr>
+      <th class="source-select-cell"><input type="checkbox" id="target-select-page" aria-label="Select this page"></th><th>Source</th><th class="source-type-cell">Type</th><th class="source-status-cell">Status</th><th class="source-star-cell"><span class="sr-only">Priority</span></th><th class="source-menu-cell"><span class="sr-only">Actions</span></th>
+    </tr></thead><tbody id="target-list"></tbody></table></div>
+    <div id="target-empty" class="source-empty" hidden><p id="target-empty-message"></p><button type="button" class="quiet" id="target-clear-filters">Clear filters</button></div>
+    <div class="source-pagination"><button type="button" class="quiet" id="target-select-matching">Select all matching</button><span id="target-page-count" class="hint" role="status"></span><div><button type="button" class="quiet" id="target-prev">Previous</button><button type="button" class="quiet" id="target-next">Next</button></div></div>
+    <p id="source-action-result" class="hint source-action-result" role="status"></p>
+  </section>
+  <section class="card padded" hidden id="available-card" aria-labelledby="dialog-list-title">
+    <h2 id="dialog-list-title">Available chats</h2>
+    <div class="dialog-filters"><input aria-label="Find an available chat" id="dialog-search" placeholder="Find a chat…" type="search"><select aria-label="Chat type" id="dialog-kind"><option value="">All types</option><option value="channels">Channels</option><option value="groups">Groups</option><option value="private">Private chats</option><option value="bots">Bots</option></select></div>
+    <p class="hint" id="dialog-limit"></p>
+    <div id="dialog-bulk-actions" class="source-bulk"><button type="button" class="secondary small" id="dialog-add-selected">Add selected</button><button type="button" class="secondary small" id="dialog-add-matching">Add all matching</button></div>
+    <div id="dialog-list"></div>
+    <div class="source-pagination"><span class="hint" id="dialog-page-count" role="status"></span><div><button type="button" class="quiet" id="dialog-prev">Previous</button><button type="button" class="quiet" id="dialog-next">Next</button></div><button class="secondary" id="finish-source-selection" type="button">Done</button></div>
+  </section>
   <section class="card padded" id="history-card" aria-labelledby="history-heading">
     <div class="eyebrow">Full history</div><h2 id="history-heading">Bring past messages into this workspace</h2>
     <p class="muted">Load the available history of every enabled source into Chats and the signed journal. Progress survives a restart. Attachments follow your media settings. Deleted messages and unseen past edits cannot be recovered.</p>
@@ -268,8 +331,12 @@
     <ul id="history-sources"></ul>
     <p class="hint">Use Export evidence to hand over the journal and saved attachments. Finishing history reads does not mean every attachment was downloaded.</p>
   </section>
-  <details class="source-options" id="source-options"><summary>Recording settings · what to save, photos &amp; files, history</summary>
-  <form class="card padded monitoring-card" id="monitoring-form">
+  </div>
+  <div id="sources-panel-recording" role="tabpanel" aria-labelledby="sources-tab-recording" hidden>
+  <form id="recording-form">
+    <p class="hint recording-intro">One policy for this workspace. Changes apply to future activity; saved records stay.</p>
+    <div id="source-options" class="recording-sections">
+  <section class="card padded monitoring-card" id="monitoring-form">
     <div class="eyebrow">Monitoring policy</div><h2>Choose which changes to preserve</h2>
     <p class="muted">Applies to all selected sources in this workspace. Keep original messages to compare later changes.</p>
     <div class="monitoring-presets"><button class="secondary" data-monitor-preset="all" type="button">All visible activity</button><button class="secondary" data-monitor-preset="changes" type="button">Messages, edits &amp; deletions</button></div>
@@ -282,22 +349,22 @@
     </div>
     <p class="hint" id="monitoring-note"></p><p class="hint" id="monitoring-current"></p>
     <details class="monitoring-details"><summary>What these settings affect</summary><p class="hint">Changes apply to future live updates. Turning a category back on does not recover missed events. Operational records, other group service events and explicitly requested history snapshots remain separate. These switches do not remove metadata embedded in captured messages.</p></details>
-    <div class="monitoring-actions"><button class="primary" type="submit">Save monitoring settings</button><span id="monitoring-unsaved" role="status"></span></div>
-  </form>
-  <div class="two-columns">
-    <form class="card padded" id="capture-form"><div class="eyebrow">Attachments</div><h2>Preserve media when available</h2><p class="muted">Downloads happen after message capture. Deleted or unavailable files may be missed; every attempt gets a recorded outcome.</p><label class="check-label"><input id="download-media" type="checkbox"> Download visible attachments</label><label for="max-media">Maximum file size, MiB</label><input id="max-media" max="2000" min="1" required step="1" type="number"><details class="media-rules-details"><summary>Limits by type</summary><p class="hint">Changing the maximum size above sets every type; adjust single types here, 1 to 2,000 MiB.</p><div class="media-rules" id="media-rules"></div></details><button class="secondary" type="submit">Save media settings</button><p id="capture-unsaved" role="status"></p></form>
-    <form class="card padded" id="snapshot-form"><div class="eyebrow">History snapshot</div><h2>Start with visible context</h2><p class="muted">Save the latest visible messages as a labeled snapshot. This cannot reconstruct deleted messages or changes missed while offline.</p><label for="snapshot-source">Selected source</label><select id="snapshot-source" required></select><label for="snapshot-limit">Most recent messages</label><input id="snapshot-limit" max="500" min="1" required step="1" type="number" value="100"><p class="hint" id="snapshot-limit-hint"></p><button class="secondary" type="submit">Capture history snapshot</button></form>
-  </div>
-  <form class="card padded" id="recheck-form"><div class="eyebrow">Recheck</div><h2>Ask Telegram again for missed changes</h2>
+    <span id="monitoring-unsaved" class="hint" hidden></span>
+  </section>
+    <section class="card padded" id="capture-form"><div class="eyebrow">Attachments</div><h2>Preserve media when available</h2><p class="muted">Downloads happen after message capture. Deleted or unavailable files may be missed; every attempt gets a recorded outcome.</p><label class="check-label"><input id="download-media" type="checkbox"> Download visible attachments</label><label for="max-media">Maximum file size, MiB</label><input id="max-media" max="2000" min="1" required step="1" type="number"><details class="media-rules-details"><summary>Limits by type</summary><p class="hint">Changing the maximum size above sets every type; adjust single types here, 1 to 2,000 MiB.</p><div class="media-rules" id="media-rules"></div></details><p id="capture-unsaved" hidden></p></section>
+  <section class="card padded" id="recheck-form"><div class="eyebrow">Recheck</div><h2>Ask Telegram again for missed changes</h2>
     <p class="muted">Rechecks recover missed messages and edits and mark messages Telegram no longer returns. Priority chats are rechecked often, the rest rarely, so the account stays clear of Telegram's rate limits (FloodWait). Mark priority chats with the star in the list above.</p>
     <div class="recheck-fields"><div><label for="recheck-priority">Priority chats, every … minutes</label><input id="recheck-priority" max="1440" min="0" required step="1" type="number"></div>
     <div><label for="recheck-other">Other chats, every … minutes</label><input id="recheck-other" max="10080" min="0" required step="1" type="number"></div></div>
     <p class="hint">0 turns rechecks of that group off. How many chats a pass takes and the pause between them are under Parameters.</p>
-    <button class="secondary" type="submit">Save recheck settings</button>
+  </section>
+    </div>
+    <div class="recording-savebar" id="recording-savebar">
+      <div><strong id="recording-change-count" role="status">No unsaved changes</strong><p id="recording-result" class="hint" aria-live="polite"></p></div>
+      <div class="recording-actions"><button class="quiet" type="button" id="recording-discard" disabled>Discard changes</button><button class="primary" type="submit" id="recording-save" disabled>Save recording settings</button></div>
+    </div>
   </form>
-  <form class="card padded" id="chat-export-form"><div class="eyebrow">Full chat export</div><h2>Export a whole chat, signed</h2><p class="muted">Download the entire visible history of one chat as a signed bundle: <code>chat.json</code> (Telegram-style) and a readable <code>chat.html</code>, with an Ed25519 signature so a copy can be checked for changes against your key. Private chats work when the account is a member. A current snapshot only: deleted or past-edited messages are not reconstructed. Large chats can take a long time and depend on Telegram's rate limits.</p><label for="chat-export-source">Selected source</label><select id="chat-export-source" required></select><div class="chat-export-actions"><button class="secondary" type="submit">Export full chat</button><button class="quiet" hidden id="chat-export-cancel" type="button">Cancel</button><button class="primary" hidden id="chat-export-download" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Download signed bundle</button></div><p id="chat-export-progress" role="status"></p><p class="hint">Language and case details of <code>chat.html</code>: <a data-go-reports="settings" href="#">Exports → Report settings</a>.</p></form>
-  </details>
-  <p class="hint">Notifications, evidence mode and a 24/7 server are under <a data-go-extra="alerts" href="#">Extras</a>.</p>
+  </div>
 </section>
 
 <section class="view" hidden id="view-evidence">
@@ -306,6 +373,12 @@
     <button class="secondary" id="verify-journal"><svg aria-hidden="true" class="icon"><use href="#i-shield"/></svg> Verify journal</button>
   </div>
   <div id="verification-result" role="status"></div>
+  <div class="exports-tabs" role="tablist" aria-label="Export options">
+    <button type="button" role="tab" id="exports-tab-downloads" data-export-tab="downloads" aria-controls="exports-downloads" aria-selected="true">Downloads</button>
+    <button type="button" role="tab" id="exports-tab-settings" data-export-tab="settings" aria-controls="report-form" aria-selected="false" tabindex="-1">Report settings</button>
+  </div>
+  <div id="exports-progress" class="card padded" hidden role="status" aria-live="polite"><strong id="exports-progress-label"></strong><progress id="exports-progress-bar" aria-label="Download progress"></progress><span id="exports-progress-bytes" class="hint"></span></div>
+  <div id="exports-downloads" role="tabpanel" aria-labelledby="exports-tab-downloads">
   <div class="evidence-hero card">
     <div class="evidence-symbol"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg></div>
     <div class="evidence-body">
@@ -330,7 +403,16 @@
     <div hidden id="export-password-field"><label for="export-password">Password, at least 12 characters</label><input autocomplete="new-password" id="export-password" maxlength="256" spellcheck="false" type="password"></div>
     <p class="hint">The file is saved as an AES-256 ZIP that 7-Zip or WinRAR opens with this password. Inside is the unchanged signed file, so <code>verify.py</code> works as before. The password is not stored; without it the file cannot be opened.</p>
   </div>
-  <form class="card padded report-settings" id="report-form">
+  <details class="source-options" id="export-chat-tools"><summary>Capture or export one chat</summary>
+    <form class="card padded" id="snapshot-form"><div class="eyebrow">History snapshot</div><h2>Start with visible context</h2><p class="muted">Save the latest visible messages as a labeled snapshot. This cannot reconstruct deleted messages or changes missed while offline.</p><label for="snapshot-source">Selected source</label><select id="snapshot-source" required></select><label for="snapshot-limit">Most recent messages</label><input id="snapshot-limit" max="500" min="1" required step="1" type="number" value="100"><p class="hint" id="snapshot-limit-hint"></p><button class="secondary" type="submit">Capture history snapshot</button></form>  <form class="card padded" id="chat-export-form"><div class="eyebrow">Full chat export</div><h2>Export a whole chat, signed</h2><p class="muted">Download the entire visible history of one chat as a signed bundle: <code>chat.json</code> (Telegram-style) and a readable <code>chat.html</code>, with an Ed25519 signature so a copy can be checked for changes against your key. Private chats work when the account is a member. A current snapshot only: deleted or past-edited messages are not reconstructed. Large chats can take a long time and depend on Telegram's rate limits.</p><label for="chat-export-source">Selected source</label><select id="chat-export-source" required></select><div class="chat-export-actions"><button class="secondary" type="submit">Export full chat</button><button class="quiet" hidden id="chat-export-cancel" type="button">Cancel</button><button class="primary" hidden id="chat-export-download" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Download signed bundle</button></div><p id="chat-export-progress" role="status"></p><p class="hint">Language and case details of <code>chat.html</code>: <a data-go-reports="settings" href="#">Exports → Report settings</a>.</p></form>
+  </details>
+  <section class="card padded exports-history" aria-labelledby="exports-history-title">
+    <div class="card-heading compact"><div><h2 id="exports-history-title">Prepared exports</h2><p id="exports-last" class="hint"></p></div><button class="quiet" type="button" id="exports-history-refresh">Refresh</button></div>
+    <p class="hint">The last 20 files prepared by this workspace. Compare a file with its SHA-256 below. This list does not store downloads or prove delivery.</p>
+    <div id="exports-history-list"></div><p id="exports-history-status" class="hint" role="status"></p>
+  </section>
+  </div>
+  <form class="card padded report-settings" id="report-form" role="tabpanel" aria-labelledby="exports-tab-settings" hidden>
     <div class="eyebrow">Readable reports</div><h2>Report settings</h2>
     <p class="muted">Language, case details and contents of the report in every signed archive and chat export. Case details are signed into the export; leave a field empty to omit it.</p>
     <fieldset class="report-fields" id="report-fields" disabled>
@@ -466,41 +548,41 @@
 
   <div id="extras-overview">
   <div class="extras-intro">
-    <span class="eyebrow">MAKE IT YOURS</span>
-    <h1>A little more confidence.</h1>
+    <span class="eyebrow">WORKSPACE OPTIONS</span>
+    <h1>Extras</h1>
     <span class="extras-note"><svg aria-hidden="true" class="icon"><use href="#i-check"/></svg> Optional · your account and sources are enough to start collecting.</span>
   </div>
   <div class="extras-grid">
     <article class="extra-card extra-alerts">
       <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span><span class="extra-badge" id="extra-alerts-badge">Off</span></div>
-      <h2>Alerts on your phone</h2><p>Problems, deleted and edited messages and a daily summary in Telegram, Discord, email or another service.</p>
+      <h2>Notifications</h2><p>Problems, deleted and edited messages and a daily summary in Telegram, Discord, email or another service.</p>
       <p class="extra-requires">A bot, a webhook or a mailbox</p>
-      <button class="secondary" id="extras-open-alerts" data-extra="alerts" aria-expanded="false" aria-controls="extras-alerts" type="button">Set up alerts <span aria-hidden="true">→</span></button>
+      <button class="secondary" id="extras-open-alerts" data-extra="alerts" aria-expanded="false" aria-controls="extras-alerts" type="button">Configure <span aria-hidden="true">→</span></button>
     </article>
     <article class="extra-card extra-evidence">
       <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-archive"/></svg></span><span class="extra-badge" id="extra-evidence-badge">Off</span></div>
-      <h2>Evidence that holds up</h2><p>Independent timestamps for the journal and an encrypted copy in storage that nobody can quietly delete.</p>
+      <h2>Evidence &amp; backups</h2><p>Anchor checkpoints and keep an encrypted off-site copy of the journal and files.</p>
       <p class="extra-requires">Timestamps work at once · the copy needs S3 storage</p>
       <p class="extra-status" hidden id="extra-evidence-status"></p>
-      <button class="secondary" id="extras-open-evidence" data-extra="evidence" aria-expanded="false" aria-controls="extras-evidence" type="button">Turn on evidence mode <span aria-hidden="true">→</span></button>
+      <button class="secondary" id="extras-open-evidence" data-extra="evidence" aria-expanded="false" aria-controls="extras-evidence" type="button">Configure <span aria-hidden="true">→</span></button>
     </article>
     <article class="extra-card extra-cloud">
-      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></span><span class="extra-badge" id="extra-cloud-badge">Available</span></div>
-      <h2>A sealed 24/7 server</h2><p>Collect around the clock on a cloud server without SSH, with a provider log anyone can check.</p>
+      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></span><span class="extra-badge" id="extra-cloud-badge">Off</span></div>
+      <h2>Server 24/7</h2><p>Collect around the clock on a cloud server without SSH, with a provider log anyone can check.</p>
       <p class="extra-requires">Hetzner, DigitalOcean, Linode, Vultr, AWS or your own server + Cloudflare</p>
-      <button class="secondary" id="extras-open-cloud" data-extra="cloud" aria-expanded="false" aria-controls="extras-cloud" type="button">Prepare the server <span aria-hidden="true">→</span></button>
+      <button class="secondary" id="extras-open-cloud" data-extra="cloud" aria-expanded="false" aria-controls="extras-cloud" type="button">Configure <span aria-hidden="true">→</span></button>
     </article>
     <article class="extra-card extra-bot">
-      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span><span class="extra-badge">Available</span></div>
-      <h2>A bot in your channel</h2><p>Keep signed checks in Telegram so you can compare your saved history later.</p>
+      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span><span class="extra-badge" id="extra-bot-badge">Not checked</span></div>
+      <h2>Witness bot</h2><p>Keep signed checks in Telegram so you can compare your saved history later.</p>
       <p class="extra-requires">Your bot + a channel + a witness host</p>
-      <button class="secondary" id="extras-open-bot" data-extra="bot" aria-expanded="false" aria-controls="extras-bot" type="button">Set up a bot <span id="extra-bot-arrow" aria-hidden="true">→</span></button>
+      <button class="secondary" id="extras-open-bot" data-extra="bot" aria-expanded="false" aria-controls="extras-bot" type="button">Configure <span id="extra-bot-arrow" aria-hidden="true">→</span></button>
     </article>
     <article class="extra-card extra-github">
       <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><span class="extra-badge" id="extra-github-badge">Not checked</span></div>
-      <h2>Verified code from GitHub</h2><p>Prove that this program is exactly one commit of your fork or of the official repository.</p>
+      <h2>Code check</h2><p>Compare the running program with a public Git commit and retain the result.</p>
       <p class="extra-requires">A public GitHub repository · no token</p>
-      <button class="secondary" id="extras-open-github" data-extra="github" aria-expanded="false" aria-controls="extras-github" type="button">Check the code <span id="extra-github-arrow" aria-hidden="true">→</span></button>
+      <button class="secondary" id="extras-open-github" data-extra="github" aria-expanded="false" aria-controls="extras-github" type="button">Configure <span id="extra-github-arrow" aria-hidden="true">→</span></button>
     </article>
   </div>
   <p class="extras-footnote">Only the option you choose opens its settings. Nothing is connected automatically.</p>
@@ -571,13 +653,28 @@
 <section class="view" hidden id="view-parameters">
   <div class="page-heading">
     <div><h1>Parameters</h1><p class="page-description">Limits and pace of collection, rechecks, downloads, people profiles, notifications and exports for this workspace. Each change applies from the next use of the value and is recorded in the signed journal.</p></div>
-    <button class="secondary" id="parameters-reset" type="button"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Restore all defaults</button>
+    <details class="parameters-menu" id="parameters-menu"><summary>More options</summary><button class="quiet" id="parameters-reset" type="button">Restore defaults…</button></details>
   </div>
-  <div class="parameters-tools"><input aria-label="Search parameters" id="parameters-search" placeholder="Search parameters" type="search"><label class="check-label"><input id="parameters-changed" type="checkbox"> Only changed</label></div>
+  <div class="parameters-toolbar" id="parameters-toolbar">
+    <div class="parameters-tools"><input aria-label="Search parameters" id="parameters-search" placeholder="Find a parameter or group" type="search"><label class="check-label"><input id="parameters-changed" type="checkbox"> Only changed</label><span class="hint" id="parameters-count" role="status"></span></div>
+    <nav aria-label="Parameter groups" class="parameters-nav" id="parameters-nav"></nav>
+  </div>
+  <p id="parameters-result" class="hint" role="status"></p>
+  <p id="parameters-catalog-warning" class="notice warning" role="alert" hidden></p>
+  <div id="parameters-empty" class="card" hidden><p>No parameters match these filters.</p><button type="button" class="quiet" id="parameters-clear-search">Clear filters</button></div>
   <form class="parameters-form" id="parameters-form" novalidate>
-    <div class="parameters-layout"><nav aria-label="Parameter groups" class="parameters-nav" id="parameters-nav"></nav><div id="parameters-groups"></div></div>
-    <div class="parameters-actions"><button class="primary" type="submit">Save parameters</button><span id="parameters-unsaved" role="status"></span></div>
+    <div class="parameters-layout"><div id="parameters-groups"></div></div>
+    <div class="parameters-actions" id="parameters-savebar">
+      <div><strong id="parameters-change-count">No unsaved changes</strong><p class="hint" id="parameters-unsaved" role="status"></p><button type="button" class="text-link" id="parameters-review-invalid" hidden>Review invalid values</button></div>
+      <div class="parameters-save-buttons"><button type="button" class="quiet" id="parameters-discard" disabled>Discard</button><button class="primary" id="parameters-save" type="submit" disabled>Save parameters</button></div>
+    </div>
   </form>
+  <dialog id="parameters-reset-dialog" class="parameters-reset-dialog" aria-labelledby="parameters-reset-title">
+    <h2 id="parameters-reset-title">Restore these defaults?</h2>
+    <p class="hint">Only the values below will change. Defaults are prepared as a draft; Save parameters applies them.</p>
+    <ul id="parameters-reset-list"></ul><p class="hint" id="parameters-reset-note" role="status"></p>
+    <div class="parameters-save-buttons"><button type="button" class="quiet" id="parameters-reset-cancel">Cancel</button><button type="button" class="primary" id="parameters-reset-apply">Prepare defaults</button></div>
+  </dialog>
 </section>
 
 <section class="view" hidden id="view-connection">
@@ -750,14 +847,14 @@
           <div class="chat-title"><span class="avatar lg" id="chat-avatar"></span><div><h2 id="chat-name"></h2><p id="chat-sub"></p></div></div>
           <div class="chat-actions">
             <button class="quiet" id="chat-pattern" type="button" aria-pressed="false" aria-label="Dotted background" title="Dotted background"><svg aria-hidden="true" class="icon"><use href="#i-settings"/></svg></button>
-            <button class="primary" id="chat-export-start" title="Download the whole chat as a signed archive (chat.json + chat.html)" type="button"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg> <span class="label" id="chat-export-label">Export chat</span></button>
+            <button class="primary" id="chat-export-start" aria-label="Export chat" title="Download the whole chat as a signed archive (chat.json + chat.html)" type="button"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg> <span class="label" id="chat-export-label">Export chat</span></button>
             <button class="primary" hidden id="chat-export-get" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Save export</button>
           </div>
         </header>
         <div class="chat-toolbar" aria-label="Chat tools">
           <div class="chat-history-tools"><select aria-label="How many recent messages to load" id="chat-history-limit"><option value="100">Last 100</option><option value="250">Last 250</option><option value="500">Last 500</option></select><button class="quiet" id="chat-load-history" title="Download recent messages from Telegram into this view" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Load history</button></div>
         </div>
-        <div class="chat-status" id="chat-status" role="status"></div>
+        <div class="chat-status" id="chat-status"></div>
         <div class="export-box" hidden id="export-box" role="status"></div>
         <div class="chat-feed" id="chat-feed"></div>
         <form class="chat-compose" id="chat-compose">
@@ -802,8 +899,19 @@
     <div class="fleet-import-run"><button class="primary" disabled id="fleet-import-start" type="button">Import accounts</button><span class="hint" id="fleet-import-summary" role="status"></span></div>
     <ol class="fleet-results" id="fleet-results"></ol>
   </section>
-  <div id="fleet-groups"></div>
-  <div id="accounts-list" class="accounts-grid"></div>
+  <div class="accounts-overview" id="accounts-overview" aria-label="Workspace totals"></div>
+  <div class="accounts-tools">
+    <label>Find workspace<input id="accounts-search" type="search" placeholder="Name, username or account ID"></label>
+    <label>Show<select id="accounts-filter"><option value="all">All workspaces</option><option value="attention">Needs attention</option><option value="collecting">Collecting</option><option value="offline">Offline or paused</option><option value="empty">Not connected</option></select></label>
+    <label>Sort<select id="accounts-sort"><option value="attention">Problems first</option><option value="name">Name</option><option value="events">Most events</option><option value="pending">Most pending media</option></select></label>
+  </div>
+  <div class="accounts-bulk" id="accounts-bulk"><label class="check-label"><input id="accounts-select-page" type="checkbox"> Select this page</label><span id="accounts-selected" role="status"></span><button id="accounts-pause" class="secondary" type="button">Pause selected</button><button id="accounts-resume" class="secondary" type="button">Resume selected</button><button id="accounts-clear" class="quiet" type="button">Clear selection</button></div>
+  <p id="accounts-result" class="notice" role="status" hidden></p>
+  <div class="accounts-columns" aria-hidden="true"><span></span><span>Workspace</span><span>State</span><span>Sources</span><span>Events</span><span>Queue</span><span>Actions</span></div>
+  <div id="accounts-list" class="accounts-grid accounts-overview-list"></div>
+  <p id="accounts-empty" class="hint" hidden>No matching workspaces.</p>
+  <div class="accounts-pagination"><button id="accounts-prev" class="quiet" type="button">Previous</button><span id="accounts-page" role="status"></span><button id="accounts-next" class="quiet" type="button">Next</button></div>
+  <details class="accounts-groups" id="accounts-groups"><summary>Groups and shared settings</summary><div id="fleet-groups"></div></details>
   <form class="card padded profile-create" id="account-add-form"><div class="eyebrow">Add account</div><h2>New workspace</h2><p class="muted">Create an isolated workspace, then connect a distinct Telegram account inside it. Importing the same session into two workspaces can disrupt update delivery.</p><label for="account-add-label">Workspace name</label><input id="account-add-label" maxlength="80" placeholder="e.g. Research account 2" required><label for="account-add-group">Group · optional</label><select id="account-add-group"></select><button class="secondary" type="submit">Add workspace</button><p class="hint" id="accounts-limit"></p></form>
 </section>
 
@@ -901,23 +1009,29 @@
 </section>
 
 <section class="view" hidden id="view-access">
-  <div class="page-heading">
-    <div><h1>Access</h1><p class="page-description">Who opens this panel and what they can do there. Your panel token stays the main key; everyone else gets their own access, limited to chosen workspaces and chats.</p></div>
-    <button class="secondary" id="access-refresh"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Refresh</button>
+  <div class="page-heading"><div><h1>Access</h1><p class="page-description">Give each person their own access to chosen workspaces and chats. The panel token remains the administrator key.</p></div><button class="secondary" id="access-refresh" type="button"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Refresh</button></div>
+  <div class="access-tabs"><div class="access-tablist" role="tablist" aria-label="Access sections">
+    <button id="access-tab-grants" data-access-tab="grants" type="button" role="tab" aria-selected="true" aria-controls="access-panel-grants">Granted access</button>
+    <button id="access-tab-sessions" data-access-tab="sessions" type="button" role="tab" aria-selected="false" aria-controls="access-panel-sessions" tabindex="-1">Open sessions</button>
+    <button id="access-tab-limits" data-access-tab="limits" type="button" role="tab" aria-selected="false" aria-controls="access-panel-limits" tabindex="-1">My limits</button>
+    </div><a id="access-console-open" class="access-console-link" href="/system-log">Console</a>
   </div>
+  <div id="access-panel-grants" data-access-panel="grants" role="tabpanel" aria-labelledby="access-tab-grants">
   <form class="card padded access-form" id="access-form"><div class="eyebrow" id="access-form-mode">New access</div><h2>Give someone access</h2>
     <label for="access-label">Name</label><input id="access-label" maxlength="80" placeholder="e.g. Lawyer, analyst on the Harbor case" required>
     <fieldset class="access-group"><legend>Workspaces and chats</legend>
       <label class="check-label"><input id="access-all" type="checkbox"> All workspaces, including ones added later</label>
-      <div class="access-workspaces" id="access-workspaces"></div>
+      <div class="access-workspace-tools"><label for="access-workspace-search">Find workspace<input id="access-workspace-search" type="search" placeholder="Workspace name or ID"></label><label class="check-label"><input id="access-workspace-picked" type="checkbox"> Selected only</label></div>
+      <div class="access-workspaces" id="access-workspaces"></div><p id="access-workspace-empty" class="hint" hidden>No matching workspaces.</p><p id="access-workspace-count" role="status"></p>
     </fieldset>
-    <fieldset class="access-group"><legend>What this access may do</legend><div class="access-permissions" id="access-permissions"></div>
+    <fieldset class="access-group"><legend>What this access may do</legend><div class="access-presets"><label for="access-preset">Rights preset<select id="access-preset"><option value="reviewer">Reviewer · read</option><option value="analyst">Analyst · read and export</option><option value="operator">Operator · read, export, sources and settings</option><option value="custom">Custom rights</option></select></label><p>Choose a starting set, then adjust individual rights below. Presets do not change existing access until you save.</p></div><div class="access-permissions" id="access-permissions"></div>
       <p class="hint">Where only chosen chats are open, actions on the whole workspace stay closed: connecting the account, the source list, full exports, settings and parameters.</p></fieldset>
     <fieldset class="access-group"><legend>Limits</legend>
       <div class="access-limits">
         <div><label for="access-sessions">Parallel sessions</label><input id="access-sessions" max="100" min="1" required type="number" value="1"></div>
         <div><label for="access-on-limit">When the limit is reached</label><select id="access-on-limit"><option value="refuse">Refuse the new sign-in</option><option value="replace">End the oldest session</option></select></div>
         <div><label for="access-uses">Sign-ins allowed (empty: no limit)</label><input id="access-uses" min="1" type="number"></div>
+        <div><label for="access-expiry-preset">Expires after</label><select id="access-expiry-preset"><option value="none">No end date</option><option value="1">24 hours</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="custom">Custom date</option></select></div>
         <div><label for="access-expires">Valid until (empty: no end date)</label><input id="access-expires" type="datetime-local"></div>
         <div><label for="access-idle">A session ends after … minutes without activity</label><input id="access-idle" max="43200" min="5" required type="number" value="720"></div>
       </div>
@@ -927,22 +1041,21 @@
     <button class="primary" id="access-submit" type="submit">Create access</button> <button class="quiet" hidden id="access-cancel" type="button">Cancel editing</button>
     <div class="access-new" hidden id="access-new"><p><strong>Token of this access.</strong> It is shown only now. Send it over a private channel; the person enters it on this panel's sign-in page.</p><code data-no-translate id="access-token"></code><button class="secondary" id="access-copy" type="button">Copy token</button></div>
   </form>
-  <div class="card padded"><div class="eyebrow">Issued</div><h2>Accesses</h2><div class="access-list" id="access-list"></div></div>
-  <div class="card padded"><div class="eyebrow">Now</div><h2>Open sessions</h2><div class="access-list" id="access-sessions-list"></div>
-    <details><summary>Limits for your own sign-ins with the panel token</summary>
+    <div class="card padded"><div class="eyebrow">Issued</div><h2>Granted access</h2><div class="access-list" id="access-list"></div></div>
+  </div>
+  <div id="access-panel-sessions" data-access-panel="sessions" role="tabpanel" aria-labelledby="access-tab-sessions" hidden><div class="card padded"><h2>Open sessions</h2><div class="access-list" id="access-sessions-list"></div></div></div>
+  <div id="access-panel-limits" data-access-panel="limits" role="tabpanel" aria-labelledby="access-tab-limits" hidden><div class="card padded"><h2>My session limits</h2><p class="muted">These limits apply to your own sign-ins with the panel token.</p>
       <form id="access-admin-form"><div class="access-limits">
         <div><label for="admin-sessions">Parallel sessions (0: no limit)</label><input id="admin-sessions" max="100" min="0" required type="number"></div>
         <div><label for="admin-on-limit">When the limit is reached</label><select id="admin-on-limit"><option value="replace">End the oldest session</option><option value="refuse">Refuse the new sign-in</option></select></div>
         <div><label for="admin-idle">A session ends after … minutes without activity</label><input id="admin-idle" max="43200" min="5" required type="number"></div>
       </div><button class="secondary" type="submit">Save limits</button>
       <p class="hint">Signing in on this page starts a session. Scripts that send the panel token itself are not counted as sessions; keep that token private.</p></form>
-    </details>
-  </div>
-  <div class="card padded"><div class="eyebrow">Console</div><h2>Log since this start</h2>
-    <p class="muted">What this TgWitness process logs: its start, Telegram connections, proxy changes, sign-ins, refusals and changes made by anyone, and the journal records of every workspace. Message records are left out; they stay in the journal.</p>
-    <label class="check-label"><input checked id="console-follow" type="checkbox"> Follow new lines</label>
-    <pre class="access-console" id="access-console" tabindex="0"></pre>
-  </div>
+  </div></div>
+</section>
+<section class="view" hidden id="view-system-log">
+  <div class="page-heading"><div><h1>System log</h1><p class="page-description">Activity since this process started: connections, proxy changes, sign-ins, refusals and settings changes across workspaces. Messages remain in the journal.</p></div><button id="console-refresh" class="secondary" type="button">Refresh</button></div>
+  <div class="card padded"><div class="system-log-tools"><label class="check-label"><input checked id="console-follow" type="checkbox"> Follow new lines</label><p id="console-state" role="status"></p></div><pre class="access-console" id="access-console" tabindex="0" aria-label="Process log"></pre></div>
 </section>
 </div>
 <footer><a href="/guide.html" rel="noopener" target="_blank">Help &amp; setup guide</a></footer>

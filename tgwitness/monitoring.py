@@ -28,8 +28,7 @@ class MediaRule(BaseModel):
 class Capture(BaseModel):
     model_config = ConfigDict(extra="forbid")
     download_media: StrictBool = True
-
-
+    record_disabled_media: StrictBool = True
     max_media_mb: int = Field(default=20, ge=1, le=2000)
     types: dict[Literal[MEDIA_TYPES], MediaRule] = Field(default_factory=dict)
 
@@ -47,6 +46,7 @@ def capture_settings(store):
         rule = rules.get(kind) or {"enabled": True, "max_mb": legacy or MEDIA_DEFAULT_MB[kind]}
         types[kind] = {"enabled": bool(rule.get("enabled", True)), "max_mb": int(rule.get("max_mb") or 20)}
     return {"download_media": bool(saved.get("download_media", True)),
+            "record_disabled_media": bool(saved.get("record_disabled_media", True)),
             "max_media_mb": int(saved.get("max_media_mb") or CAPTURE_DEFAULTS["max_media_mb"]), "types": types}
 
 

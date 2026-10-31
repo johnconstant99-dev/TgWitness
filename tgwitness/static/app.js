@@ -1,15 +1,135 @@
 "use strict";
-const $ = (id) => document.getElementById(id);
+// Classic addons share this adapter; each screen keeps its own root while detached.
+const panelRoots=new Map([...document.querySelectorAll('.view')].map(root=>[root.id.slice(5),root]));
+const $ = id => {
+  const attached=document.getElementById(id);if(attached)return attached;
+  for(const root of panelRoots.values()){
+    if(root.id===id)return root;
+    const found=root.querySelector('#'+CSS.escape(id));if(found)return found;
+  }
+  return null;
+};
+const viewQuery=(view,selector)=>panelRoots.get(view)?.querySelector(selector);
+const viewQueries=(view,selector)=>[...panelRoots.get(view)?.querySelectorAll(selector)||[]];
+function panelQueries(selector){
+  const found=new Set(document.querySelectorAll(selector));
+  for(const root of panelRoots.values())if(!root.isConnected)for(const item of root.querySelectorAll(selector))found.add(item);
+  return [...found];
+}
 const state = {token: sessionStorage.getItem("tgwitness-token") || "",
   view:({account:"connection",sources:"sources",exports:"evidence",journal:"observations",sealed:"sealed"}[location.hash.slice(1)]||"connection"), status: null,
-  events: [], dialogs: [], filter: "", source: "", search: "", cursor: null, request: 0, drawerSeq: null,
+  events: [], dialogs: [], filter: "", source: "", search: "", eventSince:"",eventUntil:"",eventSystem:false,
+  eventBefore:null,eventAfter:null,eventMatched:null,cursor: null, request: 0, drawerSeq: null,
   profile: sessionStorage.getItem("tgwitness-profile") || "default", profiles: [], demoToken: "", monitoringDirty: false,
   captureDirty: false, workspaceRevision: 0, verification: null, opened:false, connectionSettings:false,
-  chat: null, chats: [], chatMessages: [], chatNextBefore: null, chatInfo: null, chatFilter: "all", chatAuthor: null,
+  chat: null, chats: [], chatMessages: [], chatNextBefore: null, chatNextAfter: null, chatInfo: null, chatFilter: "all", chatView: "messages", chatAuthor: null,
   scope: null, scopeDirty: false, dossier: null, notifications: [], witnessToken: null, parameters: null, parametersDirty: false,
   me: null, access: null, accessEdit: null, accessChats: {}, consoleAfter: 0};
-const monitoringFields=["messages","edits","deletions","reactions","membership"];
-let sourceLink=new URLSearchParams(location.search);
+let viewHost=null;
+const viewContexts=new Map();
+const viewOptions=view=>({signal:viewContexts.get(view)?.signal});
+const viewReady=Promise.all([
+  import('./core/view-host.js?v=1'),
+  new Promise(resolve=>document.readyState==='complete'?resolve():document.addEventListener('DOMContentLoaded',resolve,{once:true})),
+]).then(([{createViewHost}])=>{
+  viewHost=createViewHost({getSession:()=>({workspace:state.profile,revision:state.workspaceRevision}),onError:error=>toast(error.message,true)});
+  for(const [name,root] of panelRoots){
+    let top=0,scrolls=[];
+    viewHost.register(name,root,{
+      async enter(context){
+        viewContexts.set(name,context);
+        if(context.params.load!==false)await loadPanelView(name);
+        if(!context.current())return;
+        for(const [element,scroll] of scrolls)if(root.contains(element))element.scrollTop=scroll;
+        if(context.params.restore!==false)window.scrollTo({top,behavior:'instant'});
+      },
+      updateStatus:()=>renderViewStatus(name),
+      leave(){
+        top=window.scrollY;scrolls=[root,...root.querySelectorAll('*')].filter(element=>element.scrollTop).map(element=>[element,element.scrollTop]);
+        if(name==='connection')window.TgWitnessProxies?.stop?.();
+        if(name==='integrations'){window.TgWitnessIntegrations?.clear();window.TgWitnessWebhooks?.clear();}
+        if(name==='sealed')window.TgWitnessCaptureStory?.pause?.();
+        if(name==='parameters')parametersView?.leave();
+        if(name==='evidence')exportsView?.leave();
+        if(name==='system-log')systemLogView?.leave();
+        if(name==='observations')window.TgWitnessJournal?.leave();
+      },
+      resetSession(){top=0;scrolls=[];viewContexts.delete(name);resetViewContent(name);},
+    });
+  }
+});
+function resetViewContent(view){
+  const root=panelRoots.get(view);for(const form of root.querySelectorAll('form'))form.reset();
+  for(const field of root.querySelectorAll('input,textarea'))if(!field.form){field.value=field.defaultValue;field.checked=field.defaultChecked;}
+  if(view==='connection'){networkLoadedFor=null;policyOutsideDirty=false;policyFormDirty=false;state.policy=null;}
+  if(view==='sources'){state.scope=null;state.scopeDirty=false;state.recheckDirty=false;}
+  if(view==='parameters')parametersView?.resetSession();
+  if(view==='evidence')exportsView?.resetSession();
+  if(view==='accounts')accountsView?.resetSession();
+  if(view==='witness'){state.evidenceDirty=false;state.replicaDirty=false;state.alertsDirty=false;state.githubDirty=false;}
+  if(view==='chats')chatListView?.resetSession();
+  if(view==='sealed')window.TgWitnessCapture?.reset();
+  if(view==='system-log')systemLogView?.resetSession();
+  if(view==='access'){accessView?.resetSession();accessFormVersion++;adminLimitsVersion++;accessFormReady=false;adminLimitsReady=false;adminLimitsDirty=false;accessLoadSerial++;
+    state.access=null;state.accessEdit=null;state.accessChats={};state.consoleAfter=0;show('access-new',false);}
+  if(view==='observations')window.TgWitnessJournal?.reset();
+  const clear={observations:['events-body'],chats:['chats-list','chat-feed','chat-people','chat-about'],accounts:['accounts-list','fleet-groups'],
+    access:['access-list','access-sessions-list','access-token'],'system-log':['access-console'],
+    connection:['profiles-list'],witness:['witness-list','github-result','cloud-health','alerts-saved','evidence-status','replica-status'],
+    integrations:['webhook-list','webhook-history','webhook-chats']}[view]||[];
+  for(const id of clear)$(id)?.replaceChildren();
+}
+async function loadPanelView(view){
+  if(view==='sources'){await sourcesReady;sourcesView.enter();renderTargets();await loadScope();}
+  else if(view==='witness')await loadExtras();
+  else if(view==='parameters')await loadParameters();
+  else if(view==='accounts'){renderAccounts();await loadProfiles();}
+  else if(view==='chats')await refreshChats(true);
+  else if(view==='observations')await refreshEvents();
+  else if(view==='access')await loadAccess();
+  else if(view==='system-log')await loadConsole();
+  else if(view==='evidence'){renderChatExportTools();await Promise.all([loadReportSettings(),loadExports()]);}
+  else if(view==='integrations')await window.TgWitnessIntegrations?.load();
+  else if(view==='analysis')await window.TgWitnessAnalysis?.load();
+  else if(view==='connection'){await loadProfiles();if(!state.status.demo)await loadPolicy();}
+}
+let routerTask=null;
+function routeSnapshot(){return {view:state.drawerSeq!==null?"observations":state.view,workspace:state.profile,
+  chatId:state.view==="chats"?state.chat:null,seq:state.drawerSeq,kind:state.filter,source:state.source,q:state.search,
+  since:state.eventSince,until:state.eventUntil,system:state.eventSystem,before:state.eventBefore,extra:state.extra||null,section:state.parameterSection||null};}
+function ensureRouter(){
+  if(!routerTask)routerTask=import("./router.js?v=3").then(({createRouter})=>{
+    window.TgWitnessRouter=createRouter({snapshot:routeSnapshot,ready:()=>!!state.me&&!$("workspace").hidden,
+      error:message=>toast(tr(message),true),apply:applyRouteToPanel});return window.TgWitnessRouter;
+  });
+  return routerTask;
+}
+async function applyRouteToPanel(route,current){
+  if(!state.profiles.some(profile=>profile.id===route.workspace&&!profile.error_type))throw new Error(tr("Unknown workspace."));
+  if(state.profile!==route.workspace)await switchProfile(route.workspace,{history:false});
+  if(!current())return;
+  closeDetail({history:false});
+  state.filter=route.kind;state.source=route.source;state.search=route.q;state.eventSince=route.since;state.eventUntil=route.until;
+  state.eventSystem=!!route.system;
+  state.eventBefore=route.before??null;
+  $("event-search").value=state.search;fillSourceSelect("source-filter",state.source,true);
+  viewQueries("observations","[data-filter]").forEach(button=>button.classList.toggle("active",button.dataset.filter===state.filter));
+  navigate(route.view,{history:false,load:false});
+  const view=state.view;
+  if(view==="chats"){await refreshChats();if(current()&&route.chatId!==null)await openChat(route.chatId,{history:false});}
+  else if(view==="observations"){await refreshEvents();if(current()&&route.seq)await openRecord(route.seq,{history:false});}
+  else if(view==="sources"){await sourcesReady;sourcesView.enter();renderTargets();await loadScope();}
+  else if(view==="parameters"){
+    await loadParameters();if(current()){state.parameterSection=route.section;if(route.section)parametersView?.selectSection(route.section,{record:false});}
+  }else if(view==="accounts")await loadProfiles();
+  else if(view==="connection"){await loadProfiles();if(current()&&!state.status.demo)await loadPolicy();}
+  else if(view==="access")await loadAccess();
+  else if(view==="system-log")await loadConsole();
+  else if(view==="integrations")await window.TgWitnessIntegrations?.load();
+  else if(view==="analysis")await window.TgWitnessAnalysis?.load();
+  else if(view==="evidence"){renderChatExportTools();await Promise.all([loadReportSettings(),loadExports()]);}
+  else if(view==="witness"){await loadExtras();if(current())selectExtra(route.extra,{history:false});}
+}
 
 const permissionLabels={
   view:[tr("Read"),tr("Chats, journal, messages, attachments and settings. Always included.")],
@@ -78,6 +198,16 @@ const labels = {
   "access.admin_changed": [tr("Administrator session limits changed"), "settings", "system"],
 };
 function node(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
+function placeChildren(parent,children){
+  const keep=new Set(children);for(const child of [...parent.childNodes])if(!keep.has(child))child.remove();
+  children.forEach((child,index)=>{if(parent.childNodes[index]!==child)parent.insertBefore(child,parent.childNodes[index]||null);});
+}
+function syncOptions(select,choices,fallback=""){
+  const selected=select.value,existing=new Map([...select.options].map(option=>[option.value,option]));
+  placeChildren(select,choices.map(([value,label])=>{const option=existing.get(value)||new Option(label,value);
+    if(option.textContent!==label)option.textContent=label;return option;}));
+  select.value=choices.some(([value])=>value===selected)?selected:fallback;
+}
 function viewState(kind,title,text="",label="",action=null){
   const box=node("div","ui-state");box.dataset.state=kind;
   box.setAttribute("role",kind==="error"?"alert":"status");
@@ -156,7 +286,51 @@ const termLabels={offline:tr("offline"),ready:tr("ready"),credentials:tr("creden
   member_or_unknown:tr("member or unknown"),unknown:tr("unknown"),messages:tr("messages"),edits:tr("edits"),
   deletions:tr("deletions"),reactions:tr("reactions"),membership:tr("membership")};
 const termText=value=>termLabels[value]??String(value??"").replaceAll("_"," ");
-function formatTime(value) { return value ? new Date(value).toISOString().replace("T", " ").replace(".000Z", " UTC").replace(/Z$/, " UTC") : tr("Not supplied"); }
+let panelTime;
+const timeReady=import("./core/time.js?v=1").then(({createTimeFormatter})=>{
+  let zone="UTC";try{zone=localStorage.getItem("tgwitness-time-zone")||"UTC";}catch{}
+  panelTime=createTimeFormatter({locale:LANG,translate:tr,zone});
+  const label=node("label","language-pick time-zone-pick"),select=node("select");
+  select.id="time-zone";select.setAttribute("aria-label",tr("Display time"));
+  select.append(new Option(tr("UTC"),"UTC"),new Option(tr("Local time"),"local"));select.value=panelTime.zone;
+  label.append(node("span","",tr("Time")),select);document.querySelector(".sidebar .preferences").prepend(label);
+  select.addEventListener("change",()=>{
+    panelTime.setZone(select.value);try{localStorage.setItem("tgwitness-time-zone",panelTime.zone);}catch{}
+    if(state.view==="chats"&&state.chat!==null){const feed=$("chat-feed"),top=feed.scrollTop;renderChatFeed();feed.scrollTop=top;}
+    updateTimes();window.dispatchEvent(new CustomEvent("tgwitness:time-zone",{detail:{zone:panelTime.zone}}));
+  });
+});
+const shellReady=import("./components/shell.js?v=2").then(({createResponsiveShell})=>createResponsiveShell({node,icon,tr}));
+let connectionNotice=null;
+const connectionReady=import('./components/connection-notice.js').then(({createConnectionNotice})=>{
+  connectionNotice=createConnectionNotice({host:document.querySelector('.topbar').parentElement,tr,retry:()=>refreshStatus(),
+    active:()=>!!state.me&&!$("workspace").hidden});
+  const notice=$("panel-connection-notice");document.querySelector('.topbar').after(notice);
+});
+let formControls=null;
+const formsReady=import('./components/forms.js').then(({createFormControls})=>{
+  formControls=createFormControls({roots:[...panelRoots.values()],tr,getSession:()=>state.workspaceRevision+':'+state.profile,toast,
+    forms:[['report-form',value=>reportDirty=value],['evidence-form',value=>state.evidenceDirty=value],
+      ['replica-form',value=>state.replicaDirty=value],['alerts-form',value=>state.alertsDirty=value],
+      ['github-form',value=>state.githubDirty=value]].map(([id,setDirty])=>({form:$(id),setDirty}))});
+});
+function fmtTime(value,options){return panelTime?.fmtTime(value,options)??tr("Not supplied");}
+function formatTime(value){return fmtTime(value);}
+function timeNode(value,cls="",mode="relative"){
+  const result=node("time",cls,fmtTime(value,{mode}));
+  if(value!==null&&value!==undefined&&value!==""){
+    result.dataset.timestamp=String(value);result.dataset.timeMode=mode;result.title=fmtTime(value);
+    const instant=new Date(value);if(Number.isFinite(instant.getTime()))result.dateTime=instant.toISOString();
+  }
+  return result;
+}
+function updateTimes(){
+  for(const item of document.querySelectorAll("[data-timestamp]")){
+    const value=item.dateTime||item.dataset.timestamp;
+    item.textContent=fmtTime(value,{mode:item.dataset.timeMode||"absolute"});item.title=fmtTime(value);
+  }
+}
+setInterval(()=>{if(!document.hidden)updateTimes();},30000);
 function sourceTitle(id) { return state.status?.targets.find(x => x.chat_id === id)?.title || (id === null ? tr("Collector / account") : String(id)); }
 let toastTimer;
 let networkLoadedFor=null;
@@ -168,23 +342,36 @@ async function api(path, body, options={}) {
   const revision=state.workspaceRevision;
   const {root=false,profile=state.profile,token=state.token,allowStale=false,...fetchOptions}=options;
   const prefix=root||profile==="default" ? "/api/" : "/profiles/"+encodeURIComponent(profile)+"/api/";
-  const response = await fetch(prefix + path, {method: body === undefined ? "GET" : "POST",
+  const deadline=path==='status'?AbortSignal.timeout(15000):null;
+  const requestSignal=deadline?(fetchOptions.signal?AbortSignal.any([deadline,fetchOptions.signal]):deadline):fetchOptions.signal;
+  let response;try{response = await fetch(prefix + path, {method: body === undefined ? "GET" : "POST",
     headers: {Authorization: "Bearer " + token, ...(body !== undefined ? {"Content-Type":"application/json"} : {})},
-    ...(body !== undefined ? {body: JSON.stringify(body)} : {}), ...fetchOptions});
+    ...(body !== undefined ? {body: JSON.stringify(body)} : {}), ...fetchOptions,...(requestSignal?{signal:requestSignal}:{})});
+  }catch(error){if(fetchOptions.signal?.aborted)throw new StaleView();
+    if(revision===state.workspaceRevision&&token===state.token)connectionNotice?.fail();
+    if(deadline?.aborted)throw new Error(tr("Panel status timed out. Try again."));throw error;}
+  if(fetchOptions.signal?.aborted){await response.body?.cancel();throw new StaleView();}
   if(!allowStale&&revision!==state.workspaceRevision){await response.body?.cancel();throw new StaleView();}
+  if(revision===state.workspaceRevision&&token===state.token){
+    if(response.ok&&path==='status')connectionNotice?.clear();else if(response.status>=500)connectionNotice?.fail();
+  }
   if (!response.ok) {
     const result = await response.json().catch(() => ({detail: tr("Request failed")}));
-    let detail = result.detail || tr("Request failed");
+    let detail = result.detail || tr("Request failed");const parameter=detail?.parameter;
     if (Array.isArray(detail)) detail = detail.map(x => x.field + ": " + x.message).join("; ");
     if (typeof detail === "object") detail = tr(detail.message) + (detail.retry_after ? " " + tr("Retry after {n} seconds.", {n: detail.retry_after}) : "");
     if(!allowStale&&revision!==state.workspaceRevision)throw new StaleView();
     if (response.status === 401 && revision===state.workspaceRevision && token===state.token && !$("workspace").hidden) lock();
-    const error=new Error(tr(detail));error.status=response.status;throw error;
+    if(fetchOptions.signal?.aborted)throw new StaleView();
+    const error=new Error(tr(detail));error.status=response.status;if(parameter)error.parameter=parameter;throw error;
   }
   return response;
 }
 async function json(path, body, options) {
-  const revision=state.workspaceRevision,result=await (await api(path, body, options)).json();
+  const revision=state.workspaceRevision;let result;
+  try{result=await (await api(path, body, options)).json();}
+  catch(error){if(options?.signal?.aborted)throw new StaleView();throw error;}
+  if(options?.signal?.aborted)throw new StaleView();
   if(!options?.allowStale&&revision!==state.workspaceRevision)throw new StaleView();
   return result;
 }
@@ -202,7 +389,12 @@ async function busy(button, work) {
     if(button.id==="chat-send"||button.id==="chat-preview-button")renderComposer();} }
 }
 function lock() {
-  selectedSources.clear();selectedDialogs.clear();sourceBatchBusy=false;
+  window.TgWitnessRouter?.invalidate();
+  viewHost?.resetSession();formControls?.reset();connectionNotice?.clear();state.permissionsStamp=null;
+  state.events=[];state.chats=[];state.chatMessages=[];state.chatInfo=null;state.chat=null;state.parameters=null;
+  sourcesView?.resetSession();
+  parametersView?.resetSession();
+  resetChatExportTools();
   resetReportSettings();
   window.dispatchEvent(new Event("tgwitness:lock"));
   $("quick-dialog").close();
@@ -214,20 +406,23 @@ function lock() {
   if(state.token.startsWith("tgws_"))fetch("/api/access/logout",{method:"POST",headers:{Authorization:"Bearer "+state.token}}).catch(()=>{});
   state.me=null;state.access=null;state.accessEdit=null;state.accessChats={};state.consoleAfter=0;$("access-console").textContent="";
   $("access-token").textContent="";show("access-new",false);
-  state.token=""; sessionStorage.removeItem("tgwitness-token"); closeDetail();
+  state.token=""; sessionStorage.removeItem("tgwitness-token"); closeDetail({history:false});
   $("export-dialog").close("cancel");stopExportPoll();clearTimeout(multiPoll);multiPoll=null;state.multiChecked=false;
   clearSecrets();resetWitnessSetup();selectExtra(null);
   $("panel-token").value=""; show("workspace",false); show("gate",true);
 }
 async function unlock() {
   accessStarted=true;
+  await Promise.all([timeReady,shellReady,viewReady,formsReady,connectionReady,chatListReady]);
+  const router=await ensureRouter(),requested=router.parse();
   state.me = await json("access/me",undefined,{root:true});
   await loadProfiles();
+  if(state.profiles.some(profile=>profile.id===requested.workspace&&!profile.error_type))state.profile=requested.workspace;
   if(!state.profiles.some(p=>p.id===state.profile && !p.error_type))
     state.profile=state.profiles.find(p=>!p.error_type)?.id||"default";
   state.status = await json("status");
   applyAccess();
-  if(!state.opened&&!location.hash){
+  if(!state.opened&&!requested.explicit){
     state.view=state.status.demo?"chats":!state.status.collector.has_session&&viewAllowed("connection")?"connection":
       hasSources(state.status)||!viewAllowed("sources")?"chats":"sources";
   }
@@ -235,22 +430,13 @@ async function unlock() {
   state.opened=true;
   sessionStorage.setItem("tgwitness-token", state.token);
   show("gate",false); show("workspace",true); $("panel-token").value="";
-  navigate(state.view);
+  navigate(state.view,{history:false});
 
   const openingView=state.view;
   renderStatus(); setAuthStep(state.status.collector.has_session ? "authorized" : "credentials");
-  await refreshEvents();
   loadNotifications().catch(()=>{});
-  if(state.view!=="parameters")loadParameters().catch(()=>{});
-  if(state.view===openingView&&state.view!=="sealed"&&!state.status.demo&&!state.status.collector.has_session&&viewAllowed("connection"))navigate("connection");
-  if(sourceLink){
-    const params=sourceLink;sourceLink=null;
-    const workspace=params.get("workspace"),seq=Number(params.get("event"));
-    if(workspace&&/^(default|[a-f0-9]{32})$/.test(workspace)&&Number.isSafeInteger(seq)&&seq>0){
-      if(!state.profiles.some(p=>p.id===workspace))toast(tr("Record is unavailable to this access."),true);
-      else{if(state.profile!==workspace)await switchProfile(workspace);navigate("observations");await openRecord(seq);}
-    }
-  }
+  if(!requested.explicit&&state.view===openingView&&state.view!=="sealed"&&!state.status.demo&&!state.status.collector.has_session&&viewAllowed("connection"))navigate("connection",{history:false});
+  await router.start();
 }
 $("unlock-form").addEventListener("submit", async event => {
   event.preventDefault(); $("login-error").textContent="";
@@ -268,10 +454,12 @@ function viewAllowed(view){
   const limited=!!state.status?.chats_limited;
   return {sources:may("sources")&&!limited,evidence:may("export")&&!limited,sealed:may("export")&&!limited,witness:may("settings")&&!limited,
     parameters:may("settings")&&!limited,connection:may("account")&&!limited,accounts:!!state.me?.admin,
-    access:!!state.me?.admin,integrations:!!state.me?.admin,
+    access:!!state.me?.admin,"system-log":!!state.me?.admin,integrations:!!state.me?.admin,
     analysis:!!(state.status?.analysis?.enabled||state.status?.analysis?.media_available)}[view]??true;
 }
 function applyAccess(){
+  const stamp=JSON.stringify([state.workspaceRevision,state.me,state.status?.chats_limited,state.status?.demo,state.status?.analysis]);
+  if(stamp===state.permissionsStamp)return;state.permissionsStamp=stamp;
   window.TgWitnessAnalysis?.syncStatus?.(state.status);
   const analysisTitle=tr(state.status?.analysis?.enabled?"Ask the archive":"Machine recognition");
   const analysisNav=document.querySelector('.sidebar [data-view="analysis"]');
@@ -284,15 +472,15 @@ function applyAccess(){
     while(next&&!next.classList.contains("nav-section")){visible=visible||!next.hidden;next=next.nextElementSibling;}
     heading.hidden=!visible;
   });
-  document.querySelectorAll("[data-open]").forEach(n=>n.hidden=!viewAllowed(n.dataset.open));
+  panelQueries("[data-open]").forEach(n=>n.hidden=!viewAllowed(n.dataset.open));
   $("collector-toggle").hidden=!may("collect")||!!state.status?.chats_limited;
   $("manage-profiles").hidden=!state.me?.admin;
   if(state.view==="analysis"&&!viewAllowed("analysis")&&!$("workspace").hidden)navigate("chats");
-  document.querySelectorAll("[data-export]").forEach(n=>n.hidden=!viewAllowed("evidence"));
+  panelQueries("[data-export]").forEach(n=>n.hidden=!viewAllowed("evidence"));
 
   const limited=!!state.status?.chats_limited;
   $("chats-manage").hidden=!viewAllowed("sources");
-  document.querySelector(".chat-open").hidden=!may("interact")||limited;
+  viewQuery("chats",".chat-open").hidden=!may("interact")||limited;
   $("chat-load-history").hidden=$("chat-history-limit").hidden=!may("sources");
   $("chat-export-start").hidden=!may("export");
   $("chat-compose").hidden=!may("interact");
@@ -322,39 +510,39 @@ function syncLive(){
     window.TgWitnessLive?.stop();return;
   }
   window.TgWitnessLive?.start({key:state.workspaceRevision+":"+state.profile,head:state.status.stats.head?.seq,api,tr,accessEnded:lock,
+    hosts:[viewQuery(state.view,state.view==='chats'?'.chat-toolbar':'.journal .card-heading')].filter(Boolean),
     canRefresh:()=>{
       if(state.drawerSeq!==null||window.getSelection()?.toString()||document.hidden)return false;
-      if(state.view==="chats"){const feed=$("chat-feed");return feed.scrollHeight-feed.scrollTop-feed.clientHeight<80;}
-      return state.events.length<=60&&window.scrollY<120;
+      if(state.view==="chats"){const feed=$("chat-feed");return state.chatNextAfter===null&&feed.scrollHeight-feed.scrollTop-feed.clientHeight<80;}
+      return state.eventBefore===null&&state.events.length<=200&&window.scrollY<120&&window.TgWitnessJournal?.canRefresh()!==false;
     },
-    refresh:async()=>{await refreshStatus();if(state.view==="chats")await refreshChats(true);else if(state.view==="observations")await refreshEvents();}
+    refresh:async({force=false}={})=>{await refreshStatus();if(state.view==="chats"){
+      const result=force&&state.chatView==='messages'?await loadChatMessages('latest'):await refreshChats(true);
+      if(result===false)throw new Error('Chat refresh failed');
+    }else if(state.view==="observations")await refreshEvents();}
   });
 }
-function navigate(view) {
+function navigate(view,options={}) {
   if(!viewAllowed(view))view="chats";
+  if(view!==state.view)window.TgWitnessJournal?.leave();
+  if(view!==state.view&&state.drawerSeq!==null)closeDetail({history:false});
   if(view!=="connection")window.TgWitnessProxies?.stop?.();
   state.view=view;
-  syncLive();
   $("workspace").dataset.currentView=view;
-  document.querySelectorAll(".view").forEach(n=>n.hidden=n.id !== "view-"+view);
+  const entered=viewHost.activate(view,{params:{load:options.load,restore:options.restore}}).catch(error=>{
+    if(!(error instanceof StaleView)&&error.name!=='AbortError')toast(error.message,true);
+  });
+  syncLive();
   document.querySelectorAll("[data-view]").forEach(n=>{
     const selected=n.dataset.view===(view==="sealed"?"evidence":view);
     n.classList.toggle("active",selected);
     if(selected)n.setAttribute("aria-current","page");else n.removeAttribute("aria-current");
   });
-  $("view-label").textContent=tr({chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",access:"Access",integrations:"Integrations",analysis:state.status?.analysis?.enabled?"Ask the archive":"Machine recognition"}[view]);
+  $("view-label").textContent=tr({chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",access:"Access","system-log":"System log",integrations:"Integrations",analysis:state.status?.analysis?.enabled?"Ask the archive":"Machine recognition"}[view]);
   show("entry-header",view==="connection");
   if(view==="connection")connectionSettings(false);
-  if (view==="sources") {renderTargets();loadScope().catch(e=>toast(e.message,true));}
-  if (view==="witness") loadExtras().catch(e=>toast(e.message,true));
-  if (view==="parameters") loadParameters().catch(e=>toast(e.message,true));
-  if (view==="accounts") {renderAccounts();loadProfiles().catch(e=>toast(e.message,true));window.TgWitnessFleet?.load();}
-  if (view==="chats") refreshChats().catch(e=>toast(e.message,true));
-  if (view==="access") loadAccess().catch(e=>toast(e.message,true));
-  if (view==="evidence") loadReportSettings().catch(e=>toast(e.message,true));
-  if (view==="integrations") window.TgWitnessIntegrations?.load();
-  else {window.TgWitnessIntegrations?.clear();window.TgWitnessWebhooks?.clear();}
-  if(view==="analysis")window.TgWitnessAnalysis?.load();
+  if(options.history!==false)window.TgWitnessRouter?.record();
+  return entered;
 }
 $("manage-profiles").addEventListener("click",()=>{
   navigate("connection");connectionSettings(true);$("profiles-details").open=true;$("profiles-details").scrollIntoView({block:"start"});
@@ -406,9 +594,9 @@ function renderQuick(){
     for(const chat of (state.status?.targets||[]).filter(c=>(c.title+" "+c.chat_id).toLowerCase().includes(query)).slice(0,12))
       option("chat-"+chat.chat_id,chat.title,String(chat.chat_id),async()=>{navigate("chats");await refreshChats();await openChat(chat.chat_id);});
     const text=quickSearch.value.trim().slice(0,200);
-    option("journal",tr("Search journal"),text,async()=>{state.search=text;state.cursor=null;$("event-search").value=text;navigate("observations");await refreshEvents();});
+    option("journal",tr("Search journal"),text,async()=>{state.search=text;state.cursor=state.eventBefore=state.eventAfter=null;$("event-search").value=text;navigate("observations");await refreshEvents();});
     if(/^(@[a-z0-9_]{3,}|(?:https?:\/\/)?t\.me\/\S+)$/i.test(text)&&may("interact"))
-      option("telegram",tr("Open Telegram link"),text,()=>{navigate("chats");$("chat-link").value=text;document.querySelector(".chat-open").open=true;$("chat-link").focus();});
+      option("telegram",tr("Open Telegram link"),text,()=>{navigate("chats");$("chat-link").value=text;viewQuery("chats",".chat-open").open=true;$("chat-link").focus();});
   }
   show("quick-empty",!quickResults.children.length);selectQuick(0);
 }
@@ -478,6 +666,10 @@ function openDiagnostics(name){
   navigate(d.view);
   if(d.extra)$("extras-open-"+d.extra).click();
   if(d.filter)document.querySelector('[data-filter="'+d.filter+'"]')?.click();
+  if(d.target==="capture-form"){
+    sourcesReady.then(view=>{view.showTab("recording");$("capture-form").scrollIntoView({block:"start"});});
+    return;
+  }
   if(d.target)$(d.target).scrollIntoView({block:"start"});
 }
 function healthRow(name,title,item,lines){
@@ -532,33 +724,35 @@ function collectorLines(name,p){
   if(p.reason==="queue_waiting")return [tr("Attachments have been waiting for more than an hour."),...facts];
   return [tr("Attachment downloads are off."),...facts];
 }
+let healthUI=null;
+const healthReady=import("./components/health.js?v=1").then(({createHealthBar})=>{
+  healthUI=createHealthBar({node,icon,tr,stateNames:healthStates,partNames:healthPartNames,lines:collectorLines,
+    actionContext:{getState:()=>state,getSession:()=>state.workspaceRevision+':'+state.profile,may,json,refreshStatus,toast,getSources:()=>sourcesReady,navigate},
+    diagnose:openDiagnostics,canDiagnose:name=>viewAllowed(healthDiagnostics[name]?.view),workspace:$("workspace")});
+  if(state.status)renderCollectorHealth(state.status.health);
+  return healthUI;
+});
+healthReady.catch(error=>toast(error.message,true));
 function renderCollectorHealth(h){
-  const strip=$("health-strip");strip.replaceChildren();
-  const summary=document.querySelector(".health-details > summary");
-  summary.querySelector(".health-badge")?.remove();
+  healthUI?.update(h,{profile:state.profile,demo:state.status?.demo});
   if(!h)return;
-  const names=["connection","intake","sources","media"];
-  for(const name of names)strip.append(healthRow(name,healthPartNames[name],h[name],collectorLines(name,h[name])));
-  summary.append(stateBadge(h.state));
-  // The rows are rebuilt on every refresh; only a change of a part's state is announced.
-  const states=state.profile+":"+names.map(name=>h[name].state).join(",");
+  const names=["connection","intake","sources","media"],states=state.profile+":"+names.map(name=>h[name]?.state).join(",");
   if(state.healthStates&&state.healthStates!==states&&state.healthStates.split(":")[0]===state.profile)
-    $("health-announce").textContent=names.map(name=>healthPartNames[name]+" — "+healthStates[healthKnown(h[name].state)][0]).join(" · ");
+    $("health-announce").textContent=names.map(name=>healthPartNames[name]+" — "+healthStates[healthKnown(h[name]?.state)][0]).join(" · ");
   state.healthStates=states;
 }
 
+let collectionUI=null;
+const collectionReady=import("./components/collection.js?v=1").then(({createCollectionControl})=>{
+  collectionUI=createCollectionControl({node,tr,status:()=>state.status,workspace:$("workspace")});collectionUI.update();return collectionUI;
+});
+collectionReady.catch(error=>toast(error.message,true));
 function renderStatus() {
-  renderHistory();
-  renderComposer();
-  const s=state.status,c=s.collector,counts=s.stats.counts;
+  const s=state.status,c=s.collector;
   $("workspace").dataset.demo=String(!!s.demo);
   $("workspace").dataset.onlineDemo=String(!!window.TGW_ONLINE_DEMO);
   show("demo-banner",s.demo);
-  renderChatStatus();
   $("app-version").textContent=s.version?"TgWitness "+s.version:"";
-  show("entry-settings",!s.demo);
-  show("entry-demo",s.demo);show("entry-return",s.demo||c.has_session);
-  $("entry-return").textContent=tr(s.demo?"View sample messages →":"Back to journal");
   $("status-chip").textContent=tr(s.demo ? "Demo workspace" : c.running ? (c.connected?"Observing":"Reconnecting") :
     c.has_session ? "Observation off" : ({code_required:"Waiting for code",password_required:"Waiting for 2FA",qr_pending:"Waiting for QR"}[c.phase]||"Account not connected"));
   $("status-chip").classList.toggle("live",!s.demo && c.running && c.connected);
@@ -567,32 +761,38 @@ function renderStatus() {
   $("collector-toggle").disabled=s.demo||(!c.running&&(!c.has_session||!hasSources(s)));
   $("collector-toggle").title=tr(s.demo?"Demo uses fictional observations":!c.has_session?"Connect an account first":
     !hasSources(s)?"Select at least one source first":"");
-  $("stat-messages").textContent=((counts["message.new"]||0)+(counts["message.snapshot"]||0)).toLocaleString();
-  $("stat-edits").textContent=(counts["message.edited"]||0).toLocaleString();
-  $("stat-deletes").textContent=(counts["message.deleted"]||0).toLocaleString();
-  $("stat-sources").textContent=s.targets.filter(x=>x.enabled).length;
-  $("sources-footnote").textContent=tr(s.demo ? "Synthetic sources" : c.running ? "Observation enabled" : "Observation paused");
   $("nav-count").textContent=s.stats.total.toLocaleString();
-  $("event-total").textContent=s.stats.total.toLocaleString();
-  $("fingerprint").textContent=s.fingerprint;
-  $("export-profile-id").textContent=state.profile;
-  renderCollectorHealth(s.health);
+  renderCollectorHealth(s.health);collectionUI?.update();
   show("collector-error",!!c.last_error);
   $("collector-error").textContent=c.last_error ? tr("Collector reported {error}. Review coverage events before relying on completeness.",{error:c.last_error}) : "";
-  fillSourceSelect("source-filter",state.source,true);
-  if (!state.captureDirty) {
-    $("download-media").checked=s.capture.download_media;
-    $("max-media").value=String(s.capture.max_media_mb);
-    renderMediaRules(s.capture.types||{});
-  }
-  renderCaptureDraft();renderVerification();renderRecheck();
-  if(!state.monitoringDirty){
-    for(const name of monitoringFields)$("monitor-"+name).checked=s.monitoring?.[name]??true;
-    renderMonitoringDraft();
-  }
-  const enabled=monitoringFields.filter(name=>s.monitoring?.[name]??true);
-  $("monitoring-current").textContent=tr("Saved for this account: {list}.",{list:enabled.length?enabled.map(termText).join(", "):tr("no live event categories")});
-  if (state.view==="sources") renderTargets();
+  renderSetup();
+  viewHost?.updateStatus(s);
+}
+function renderViewStatus(view){
+  const s=state.status;if(!s||viewHost?.active!==view)return;
+  const c=s.collector,counts=s.stats.counts;
+  if(view==='observations'){
+    $("stat-messages").textContent=((counts["message.new"]||0)+(counts["message.snapshot"]||0)).toLocaleString();
+    $("stat-edits").textContent=(counts["message.edited"]||0).toLocaleString();
+    $("stat-deletes").textContent=(counts["message.deleted"]||0).toLocaleString();
+    $("stat-sources").textContent=s.targets.filter(x=>x.enabled).length;
+    $("sources-footnote").textContent=tr(s.demo ? "Synthetic sources" : c.running ? "Observation enabled" : "Observation paused");
+    $("event-total").textContent=s.stats.total.toLocaleString();
+    fillSourceSelect("source-filter",state.source,true);
+    window.TgWitnessJournal?.sync();
+  }else if(view==='chats'){
+    renderComposer();renderChatStatus();renderMulti();renderChatsList();
+  }else if(view==='evidence'){
+    $("fingerprint").textContent=s.fingerprint;$("export-profile-id").textContent=state.profile;
+    renderVerification();renderChatExportTools();
+  }else if(view==='parameters'){
+    parametersView?.updateStatus();
+  }else if(view==='sources'){
+    sourcesView?.updateStatus(s);renderHistory();renderRecheck();renderTargets();
+  }else if(view==='connection'){
+  show("entry-settings",!s.demo);
+  show("entry-demo",s.demo);show("entry-return",s.demo||c.has_session);
+  $("entry-return").textContent=tr(s.demo?"View sample messages →":"Back to journal");
   const account=c.account;
   show("account-summary",!!account);
   const identity=account ? (account.username ? "@"+account.username+" · " : "") + "ID "+account.id : "";
@@ -606,7 +806,7 @@ function renderStatus() {
     show("authorized-mark",!account);
   }
   renderConnection();
-  renderSetup();
+  }else if(view==='analysis'||view==='integrations')window.TgWitnessAnalysis?.syncStatus?.(s);
 }
 
 function hasSources(s){return s.targets.some(t=>t.enabled)||(s.scope?.mode||"selected")!=="selected";}
@@ -633,9 +833,11 @@ function nextSetupStep(){
 }
 $("setup-action").addEventListener("click",nextSetupStep);
 $("empty-action").addEventListener("click",()=>{
-  if(state.filter||state.source||state.search){
-    state.filter=state.source=state.search="";$("event-search").value="";$("source-filter").value="";
-    document.querySelectorAll("[data-filter]").forEach(n=>n.classList.toggle("active",n.dataset.filter===""));
+  if(state.filter||state.source||state.search||state.eventSince||state.eventUntil){
+    state.filter=state.source=state.search=state.eventSince=state.eventUntil="";$("event-search").value="";$("source-filter").value="";
+    state.cursor=state.eventBefore=state.eventAfter=null;
+    viewQueries("observations","[data-filter]").forEach(n=>n.classList.toggle("active",n.dataset.filter===""));
+    window.TgWitnessRouter?.record();
     busy($("empty-action"),()=>refreshEvents());
   }else nextSetupStep();
 });
@@ -646,6 +848,7 @@ function fillSourceSelect(id,value,all=false) {
   if ([...n.options].some(o=>o.value===String(value))) n.value=String(value);
 }
 let statusRequest=0,profilesRequest=0;
+const workspaceOptionsReady=import("./components/workspaces.js?v=1");
 async function refreshStatus() {
   const request=++statusRequest,revision=state.workspaceRevision,result=await json("status");
   if(revision!==state.workspaceRevision||request!==statusRequest)return;
@@ -654,25 +857,31 @@ async function refreshStatus() {
 }
 async function loadProfiles(){
   const request=++profilesRequest,result=await json("profiles",undefined,{root:true});
+  const {updateWorkspaceOptions}=await workspaceOptionsReady;
   if(request!==profilesRequest)return;
   state.profiles=result.profiles;
 
   for(const profile of state.profiles)if(profile.id==="default"&&profile.label==="Main account")profile.label=tr("Main account");
-  const select=$("profile-select");select.replaceChildren();
-  const list=$("profiles-list");list.replaceChildren();
+  const select=$("profile-select");updateWorkspaceOptions(select,state.profiles,state.profile,tr);
+  const list=$("profiles-list"),showList=state.view==='connection',oldRows=new Map([...list.children].map(row=>[row.dataset.profile,row])),rows=[];
   for(const profile of state.profiles){
-    const option=new Option(profile.label,profile.id);option.disabled=!!profile.error_type;select.append(option);
+    if(!showList)continue;
     const row=node("div","target-row"),info=node("div");
     info.append(node("h3","",profile.label),node("p","",profile.error_type==="DeletionPending"?tr("Deletion incomplete"):profile.error_type?tr("Unavailable: {error}",{error:profile.error_type}):
       termText(profile.collector?.phase||"offline")+" · "+trn("{n} journal event","{n} journal events",profile.stats?.total||0)));
     const button=node("button","secondary",tr(profile.id===state.profile?"Current workspace":"Open workspace"));
     button.disabled=!!profile.error_type||profile.id===state.profile;
     button.addEventListener("click",()=>busy(button,()=>switchProfile(profile.id)));
-    row.append(info,button);list.append(row);
+    row.dataset.profile=profile.id;row.append(info,button);
+    const existing=oldRows.get(profile.id);
+    if(existing){if(existing.firstElementChild.outerHTML!==info.outerHTML)existing.firstElementChild.replaceWith(info);
+      const control=existing.lastElementChild;control.textContent=button.textContent;if(!control.hasAttribute('aria-busy'))control.disabled=button.disabled;rows.push(existing);
+    }else rows.push(row);
   }
+  if(showList)placeChildren(list,rows);
   select.value=state.profile;
   $("nav-accounts").textContent=String(state.profiles.length);
-  await window.TgWitnessFleet?.load();
+  if(state.view==='accounts')await window.TgWitnessFleet?.load();
   if(request!==profilesRequest)return;
   renderAccounts();
 }
@@ -688,17 +897,27 @@ function accountIdentity(p){
   if(!a)return tr(p.collector&&p.collector.has_session?"Signed in":"No account connected");
   return (a.username?"@"+a.username+" · ":"")+"ID "+a.id;
 }
+let accountsView=null;
+const accountsReady=import("./views/accounts.js").then(({createAccounts})=>{
+  accountsView=createAccounts({root:$("view-accounts"),tr,getState:()=>state,getSession:()=>state.workspaceRevision+":"+state.profile,
+    json,loadProfiles,refreshStatus,toast,switchProfile,navigate,diagnose:openDiagnostics});
+  window.TgWitnessAccounts=accountsView;
+  if(state.view==='accounts')renderAccounts();
+  return accountsView;
+}).catch(error=>toast(error.message,true));
 function renderAccounts(){
+  if(state.view!=='accounts')return;
   const grid=$("accounts-list"),s=state.status;if(!grid||!s)return;
   window.TgWitnessFleet?.beforeRender?.();
-  grid.replaceChildren();$("fleet-groups")?.replaceChildren();
+  const cards=new Map(viewQueries('accounts','.account-card[data-profile]').map(card=>[card.dataset.profile,card]));
   const list=state.profiles||[];
   $("accounts-limit").textContent=trn("{n} workspace. Add as many as you need — each uses its own Telegram account.",
     "{n} workspaces. Add as many as you need — each uses its own Telegram account.",list.length);
   $("account-add-form").querySelector("button").disabled=s.demo;
-  for(const p of list){
+  for(const value of list){
+    const existing=cards.get(value.id),p=existing?Object.assign(existing.profileData,value):value;
     const c=p.collector,current=p.id===state.profile,down=!!p.error_type||!c;
-    const card=node("div","card padded account-card"+(current?" current":""));card.dataset.profile=p.id;
+    const card=node("div","card padded account-card"+(current?" current":""));card.dataset.profile=p.id;card.profileData=p;
     const head=node("div","account-head"),who=node("div","account-who"),account=c&&c.account;
     const title=node("div");title.append(node("h2","",p.label));
     // The badge sums up every part (health.py); the observation phase alone is listed below it.
@@ -709,14 +928,14 @@ function renderAccounts(){
     head.append(who,badge);card.append(head);
     if(!down){
       const meta=node("dl","account-meta");
-      const pair=(k,v)=>{meta.append(node("dt","",k),node("dd","",v));};
-      pair(tr("Observation"),s.demo?tr("Sample data"):accountPhaseLabel(p));
+      const pair=(k,v,field)=>{const item=node("div","account-value");item.dataset.field=field;item.append(node("dt","",k),node("dd","",v));meta.append(item);};
+      pair(tr("Observation"),s.demo?tr("Sample data"):accountPhaseLabel(p),"observation");
       const attention=!s.demo&&p.health?Object.keys(healthPartNames).filter(name=>needsLook(p.health[name]?.state)):[];
-      if(attention.length)pair(tr("Needs attention"),attention.map(name=>healthPartNames[name]+" — "+healthStates[healthKnown(p.health[name].state)][0]).join(" · "));
-      pair(tr("Sources"),tr("{n} active",{n:p.sources_enabled||0})+(p.sources_total?" / "+p.sources_total:""));
-      pair(tr("Journal"),trn("{n} event","{n} events",p.stats&&p.stats.total||0));
-      pair(tr("Pending media"),String(c.media_pending||0));
-      pair(tr("Last update"),c.last_update_at?new Date(c.last_update_at).toLocaleString():"—");
+      if(attention.length)pair(tr("Needs attention"),attention.map(name=>healthPartNames[name]+" — "+healthStates[healthKnown(p.health[name].state)][0]).join(" · "),"attention");
+      pair(tr("Sources"),tr("{n} active",{n:p.sources_enabled||0})+(p.sources_total?" / "+p.sources_total:""),"sources");
+      pair(tr("Journal"),p.stats?trn("{n} event","{n} events",p.stats.total):tr("Unavailable"),"events");
+      pair(tr("Pending media"),String(c.media_pending||0),"pending");
+      pair(tr("Last update"),c.last_update_at?fmtTime(c.last_update_at):"—","updated");
       card.append(meta);
     } else if(p.error_type){
       card.append(node("p","access-warning",p.error_type==="DeletionPending"?
@@ -724,19 +943,26 @@ function renderAccounts(){
         tr("This workspace could not start. Its data directory is preserved for inspection.")));
     }
     const actions=node("div","account-actions");
-    const open=node("button","secondary",tr(current?"Current":"Open"));open.disabled=down||current;
+    const open=node("button","secondary",tr(current?"Current":"Open"));open.dataset.action='open';open.disabled=down||current;
     open.addEventListener("click",()=>busy(open,()=>switchProfile(p.id)));
     actions.append(open);
+    if(!down&&!c.has_session){
+      const connect=node("button","secondary",tr("Connect"));connect.type="button";connect.dataset.action="connect";connect.disabled=state.status.demo;
+      connect.addEventListener("click",()=>busy(connect,async()=>{if(state.profile!==p.id)await switchProfile(p.id);if(state.profile===p.id&&state.token)await navigate("connection");}));
+      actions.prepend(connect);
+    }
     if(!down){
-      const toggle=node("button","quiet",tr(c.running?"Pause":"Start"));toggle.disabled=state.status.demo||(!c.running&&!c.has_session);
+      const toggle=node("button","quiet",tr(c.running?"Pause":"Start"));toggle.dataset.action='toggle';toggle.disabled=state.status.demo||(!c.running&&!c.has_session);
       toggle.addEventListener("click",()=>busy(toggle,async()=>{
-        await json("collector/"+(c.running?"stop":"start"),{},{profile:p.id});
-        toast(tr(c.running?"Paused collection for {name}.":"Started collection for {name}.",{name:p.label}));
+        const running=!!p.collector?.running;
+        if(running&&!(await collectionReady).confirmPause(p.label))return;
+        await json("collector/"+(running?"stop":"start"),{},{profile:p.id});
+        toast(tr(running?"Paused collection for {name}.":"Started collection for {name}.",{name:p.label}));
         await loadProfiles();if(p.id===state.profile)await refreshStatus();
       }));
       actions.append(toggle);
     }
-    const rename=node("button","quiet",tr("Rename"));rename.disabled=state.status.demo;
+    const rename=node("button","quiet",tr("Rename"));rename.dataset.action='rename';rename.disabled=state.status.demo;
     rename.addEventListener("click",()=>busy(rename,async()=>{
       const label=(window.prompt(tr("New name for this workspace:"),p.label)||"").trim();
       if(!label||label===p.label)return;
@@ -745,7 +971,7 @@ function renderAccounts(){
     }));
     actions.append(rename);
     if(p.id!=="default"){
-      const del=node("button","danger",tr("Delete"));del.disabled=state.status.demo;
+      const del=node("button","danger",tr("Delete"));del.dataset.action='delete';del.disabled=state.status.demo;
       del.addEventListener("click",()=>busy(del,async()=>{
         if(!window.confirm(tr("Delete \"{name}\" permanently? This stops its collector and erases its session, journal, sources and signing key. This cannot be undone.",{name:p.label})))return;
         const revision=state.workspaceRevision;
@@ -764,12 +990,27 @@ function renderAccounts(){
       }));
       actions.append(del);
     }
-    card.append(actions);grid.append(card);
+    card.append(actions);
+    if(!existing){grid.append(card);continue;}
+    existing.className=card.className;
+    for(const selector of ['.account-head','.account-meta','.access-warning']){
+      const old=existing.querySelector(':scope > '+selector),fresh=card.querySelector(':scope > '+selector);
+      if(!fresh)old?.remove();else if(!old)existing.insertBefore(fresh,existing.querySelector('.account-actions'));
+      else if(old.outerHTML!==fresh.outerHTML)old.replaceWith(fresh);
+    }
+    const retained=existing.querySelector('.account-actions'),buttons=new Map([...retained.children].map(button=>[button.dataset.action,button]));
+    placeChildren(retained,[...actions.children].map(button=>{const old=buttons.get(button.dataset.action);if(!old)return button;
+      if(old.textContent!==button.textContent)old.textContent=button.textContent;
+      if(!old.hasAttribute('aria-busy'))old.disabled=button.disabled;return old;}));
   }
-  window.TgWitnessFleet?.decorate();
+  for(const [id,card] of cards)if(!list.some(profile=>profile.id===id))card.remove();
+  window.TgWitnessFleet?.decorate();accountsView?.updateStatus();
 }
-async function switchProfile(id){
-  selectedSources.clear();selectedDialogs.clear();sourceBatchBusy=false;
+async function switchProfile(id,options={}){
+  formControls?.reset();connectionNotice?.clear();
+  if(options.history!==false)window.TgWitnessRouter?.invalidate();
+  parametersView?.resetSession();
+  resetChatExportTools();
   resetReportSettings();
   window.TgWitnessIntegrations?.clear(true);
   window.TgWitnessLive?.stop();window.TgWitnessReview?.clear();
@@ -777,38 +1018,37 @@ async function switchProfile(id){
   window.TgWitnessAnalysis?.clear();
   quickDialog.close();
   const revision=++state.workspaceRevision;
+  viewHost?.resetSession();state.permissionsStamp=null;
   $("workspace").inert=true;
   try{
   resetInteractions();
-  closeDetail();$("export-dialog").close("cancel");stopExportPoll();state.exportId=null;
+  closeDetail({history:false});$("export-dialog").close("cancel");stopExportPoll();state.exportId=null;
   clearTimeout(multiPoll);multiPoll=null;state.multiChecked=false;
   await cancelQR();
   if(revision!==state.workspaceRevision)return;
   state.request++;clearVerification();
   state.profile=id;state.monitoringDirty=false;state.captureDirty=false;sessionStorage.setItem("tgwitness-profile",id);
-  state.events=[];state.dialogs=[];state.cursor=null;state.filter="";state.source="";state.search="";
-  state.chat=null;state.chats=[];state.chatMessages=[];state.chatNextBefore=null;state.chatInfo=null;state.chatFilter="all";state.chatAuthor=null;
+  state.events=[];state.dialogs=[];state.cursor=null;state.filter="";state.source="";state.search="";state.eventSince="";state.eventUntil="";state.eventSystem=false;
+  state.eventBefore=state.eventAfter=state.eventMatched=null;
+  state.chat=null;state.chats=[];state.chatMessages=[];state.chatNextBefore=null;state.chatNextAfter=null;state.chatInfo=null;state.chatFilter="all";state.chatView="messages";state.chatAuthor=null;
   state.scope=null;state.scopeDirty=false;state.dossier=null;state.notifications=[];resetWitnessSetup();
   closeNotifications();renderNotifications();renderExportState(null);
   state.evidenceDirty=false;state.replicaDirty=false;state.alertsDirty=false;
   state.parameters=null;state.parametersDirty=false;state.recheckDirty=false;
+  sourcesView?.resetSession();
   $("load-dialogs").textContent=tr("Load chats");
   $("event-search").value="";$("dialog-search").value="";show("available-card",false);
-  document.querySelectorAll("[data-filter]").forEach(n=>n.classList.toggle("active",n.dataset.filter===""));
+  viewQueries("observations","[data-filter]").forEach(n=>n.classList.toggle("active",n.dataset.filter===""));
   clearSecrets();$("api-id").value="";networkLoadedFor=null;
   $("network-result").textContent="";
-  await refreshStatus();await refreshEvents();await loadProfiles();
-  if(state.view==="chats")await refreshChats();
-  if(state.view==="sources")await loadScope();
-  if(state.view==="witness")await loadExtras();
-  if(state.view==="parameters")await loadParameters();
-  if(state.view==="evidence")await loadReportSettings();
-  if(state.view==="analysis")await window.TgWitnessAnalysis?.load();
-  if(state.view==="integrations"){window.TgWitnessWebhooks?.clear();await window.TgWitnessIntegrations?.load();}
+  await refreshStatus();await loadProfiles();
+  if(revision!==state.workspaceRevision)return;
+  await navigate(state.view,{history:false});
   await loadNotifications().catch(()=>{});
   if(revision!==state.workspaceRevision)return;
   setAuthStep(state.status.collector.has_session?"authorized":"credentials");
   syncLive();
+  if(options.history!==false)window.TgWitnessRouter?.record();
   toast(tr("Switched workspace. Other collectors keep their current state."));
   }catch(error){if(revision===state.workspaceRevision&&!(error instanceof StaleView))lock();throw error;}
   finally{if(revision===state.workspaceRevision)$("workspace").inert=false;}
@@ -894,28 +1134,29 @@ function excerpt(e) {
   return tr("Open the source record for observation details");
 }
 let previouslyFocused;
-function renderEvents() {
-  const body=$("events-body"); body.replaceChildren();
-  for (const e of state.events) {
+function eventRow(e) {
     const label=labels[e.kind] || [e.kind,"activity","system"];
     const row=node("tr","event-row"); row.tabIndex=0; row.setAttribute("role","button"); row.setAttribute("aria-label",tr("Open {label} event {seq}",{label:label[0],seq:e.seq}));
     const cell=node("td"), summary=node("div","event-summary"), text=node("div");
     const title=node("div","event-title",label[0]); title.append(node("span","",e.message_id ? "#"+e.message_id : "#"+e.seq));
-    text.append(title,node("div","event-excerpt",excerpt(e)),
-      node("div","event-mobile-meta",sourceTitle(e.chat_id)+" · "+new Date(e.observed_at).toISOString().slice(0,19).replace("T"," ")+" UTC"));
+    const mobileMeta=node("div","event-mobile-meta",sourceTitle(e.chat_id)+" · ");
+    mobileMeta.append(timeNode(e.observed_at));text.append(title,node("div","event-excerpt",excerpt(e)),mobileMeta);
     const mark=node("span","event-icon "+label[2]); mark.append(icon(label[1]));
     summary.append(mark,text); cell.append(summary);
     const source=node("td"); source.append(node("span","source-title",sourceTitle(e.chat_id)),node("span","source-id",e.chat_id || tr("system")));
-    const time=node("td"),d=new Date(e.observed_at);
-    time.append(node("span","event-time",d.toISOString().slice(11,19)),node("span","event-date",d.toISOString().slice(0,10)));
+    const time=node("td");time.append(timeNode(e.observed_at,"event-time"));
     const open=node("td","event-open"); open.append(icon("chevron"));
     row.append(cell,source,time,open);
     row.addEventListener("click",()=>openDetail(e));
-    row.addEventListener("keydown",event=>{ if(event.key==="Enter"||event.key===" "){event.preventDefault();openDetail(e);} });
-    body.append(row);
-  }
+    row.addEventListener("keydown",event=>{ if(event.target===row&&(event.key==="Enter"||event.key===" ")){event.preventDefault();openDetail(e);} });
+    row.dataset.seq=String(e.seq);
+    return row;
+}
+function renderEvents() {
+  if(state.view!=='observations')return;
+  window.TgWitnessJournal.renderRows(state.events,eventRow);
   show("empty-events",state.events.length===0);
-  const filtered=state.filter||state.source||state.search,c=state.status.collector;
+  const filtered=state.filter||state.source||state.search||state.eventSince||state.eventUntil,c=state.status.collector;
   $("empty-copy").textContent=tr(filtered ? "No events match these filters. Try another source, event type, or search." :
     !c.has_session?"Connect an account to start your journal.":!hasSources(state.status)?
     "Your account is connected. Choose which groups and channels to observe.":c.running?
@@ -923,29 +1164,46 @@ function renderEvents() {
   $("empty-action").textContent=tr(filtered?"Clear filters":!c.has_session?"Connect account →":
     !hasSources(state.status)?"Choose sources →":"Start observation");
   show("empty-action",!!filtered||(!state.status.demo&&!c.running));
-  $("shown-count").textContent=trn("{n} event shown","{n} events shown",state.events.length);
-  show("load-more",state.cursor!==null);
+  window.TgWitnessJournal.syncPage();
 }
-async function refreshEvents(append=false) {
-  const request=++state.request,params=new URLSearchParams({limit:"60"});
+async function refreshEvents(direction=false) {
+  if(state.view!=='observations')return;
+  await journalReady;
+  window.TgWitnessJournal.sync();
+  const request=++state.request,params=new URLSearchParams({limit:"200",include_count:"true"});
+  const after=direction==="newer"?state.eventAfter:null;
+  const before=direction==="latest"?null:direction===true||direction==="older"?state.cursor:state.eventBefore;
+  if(direction==="newer"&&after===null||[true,"older"].includes(direction)&&before===null)return;
   if(state.filter)params.set("kind",state.filter);
   if(state.source)params.set("chat_id",state.source);
   if(state.search)params.set("search",state.search);
-  if(append && state.cursor)params.set("before",state.cursor);
-  const result=await json("events?"+params);
+  if(state.eventSince)params.set("since",state.eventSince);
+  if(state.eventUntil)params.set("until",state.eventUntil);
+  if(!state.eventSystem)params.set("hide_system","true");
+  if(after!==null)params.set("after",after);else if(before!==null)params.set("before",before);
+  const result=await json("events?"+params,undefined,viewOptions('observations'));
   if(request!==state.request)return;
-  state.events=append ? [...state.events,...result.events] : result.events;
-  state.cursor=result.next_before; renderEvents();
+  state.events=result.events.slice(0,200);state.cursor=result.next_before??null;state.eventAfter=result.next_after??null;
+  state.eventMatched=result.count_exact?result.matched:null;
+  state.eventBefore=after!==null?(state.eventAfter!==null&&result.events.length?result.events[0].seq+1:null):before;
+  renderEvents();
+  if(direction)window.TgWitnessRouter?.record({seq:null,before:state.eventBefore});
 }
-document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>busy(b,async()=>{
-  state.filter=b.dataset.filter;
-  document.querySelectorAll("[data-filter]").forEach(n=>n.classList.toggle("active",n===b));
-  await refreshEvents();
-})));
-$("source-filter").addEventListener("change",()=>{state.source=$("source-filter").value;refreshEvents().catch(e=>toast(e.message,true));});
-let searchTimer;
-$("event-search").addEventListener("input",()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{state.search=$("event-search").value;refreshEvents().catch(e=>toast(e.message,true));},250);});
-$("load-more").addEventListener("click",e=>busy(e.currentTarget,()=>refreshEvents(true)));
+const journalReady=import('./components/journal.js?v=4').then(({createJournal})=>{
+  window.TgWitnessJournal=createJournal({get:$,state,node,icon,tr,invalidate:()=>{state.request++;},error:message=>toast(message,true),
+    changed:async()=>{state.cursor=state.eventBefore=state.eventAfter=state.eventMatched=null;closeDetail({history:false});window.TgWitnessRouter?.record({seq:null});await refreshEvents();},
+    page:direction=>{closeDetail({history:false});return refreshEvents(direction);},openDetail,showBackdrop:visible=>show("drawer-backdrop",visible),
+    openChat:async event=>{
+      const revision=state.workspaceRevision;closeDetail({history:false});await navigate("chats",{load:false});
+      if(revision!==state.workspaceRevision||state.view!=="chats")return;
+      await refreshChats();if(revision!==state.workspaceRevision||state.view!=="chats")return;
+      if(await openChat(event.chat_id)){
+        const message=$("msg-"+event.message_id);
+        if(message){message.scrollIntoView({block:"center"});replay(message,"flash",1500);}
+      }
+    }});
+  return window.TgWitnessJournal;
+});
 $("refresh").addEventListener("click",e=>busy(e.currentTarget,async()=>{await refreshStatus();await refreshEvents();}));
 $("collector-toggle").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   await json("collector/"+(state.status.collector.running ? "stop" : "start"),{});
@@ -954,9 +1212,12 @@ $("collector-toggle").addEventListener("click",e=>busy(e.currentTarget,async()=>
 function detailBlock(label,text,cls="") {
   const n=node("div","detail-block "+cls); n.append(node("small","",label),node("div","message-text",text||tr("(No text in this version)"))); return n;
 }
-async function openDetail(e) {
+async function openDetail(e,options={}) {
+  const detailView=state.view,detailRevision=state.workspaceRevision;await journalReady;
+  if(state.view!==detailView||state.workspaceRevision!==detailRevision||$("workspace").hidden)return;
   if($("detail-drawer").hidden)previouslyFocused=document.activeElement;
   state.drawerSeq=e.seq;
+  if(options.history!==false)window.TgWitnessRouter?.record({view:"observations",seq:e.seq});
   const label=labels[e.kind]?.[0]||e.kind;
   const content=$("detail-content");content.replaceChildren();
   const h=node("h2","",label);h.id="detail-title";content.append(h);
@@ -971,7 +1232,7 @@ async function openDetail(e) {
   content.append(meta);
   const copies=node("div","review-tabs");
   for(const [label,value] of [["SHA-256",e.hash],["Message ID",e.message_id],["Sender ID",sender],
-    ["Link to this record",location.origin+location.pathname+"?"+new URLSearchParams({event:e.seq,workspace:state.profile})+"#journal"]]){
+    ["Link to this record",window.TgWitnessRouter?.href({view:"observations",seq:e.seq})||location.origin+"/?"+new URLSearchParams({event:e.seq,workspace:state.profile})+"#journal"]]){
     if(value===null||value===undefined)continue;
     const copy=node("button","quiet small",tr(label));copy.type="button";copy.title=String(value);
     copy.addEventListener("click",()=>busy(copy,async()=>{await navigator.clipboard.writeText(String(value));toast(tr("Copied"));}));copies.append(copy);
@@ -987,10 +1248,11 @@ async function openDetail(e) {
       recognize.addEventListener("click",()=>window.TgWitnessMedia?.select({workspace:state.profile,chat_id:e.chat_id,event_seq:e.seq,digest:e.payload.media_sha256}));content.append(recognize);
     }
   }
-  const raw=node("details","detail-block");raw.append(node("summary","",tr("Original signed record")),node("pre","",JSON.stringify(e,null,2)));content.append(raw);
+  content.append(window.TgWitnessJournal.signedRecord(e));
   content.append(node("p","detail-hash","SHA-256 · "+e.hash));
   const lineage=node("div","lineage");content.append(lineage);
   show("drawer-backdrop",true);show("detail-drawer",true);$("close-detail").focus();
+  window.TgWitnessJournal.openDetail(e);
   if(e.chat_id!==null && e.message_id!==null) {
     try {
       const result=await json("events?"+new URLSearchParams({chat_id:e.chat_id,message_id:e.message_id,limit:"500"}));
@@ -1014,217 +1276,41 @@ async function openDetail(e) {
     } catch(error) {if(state.drawerSeq===e.seq)lineage.append(node("p","hint",error.message));}
   }
 }
-function closeDetail(){state.drawerSeq=null;leave("detail-drawer");leave("drawer-backdrop");if(previouslyFocused?.isConnected)previouslyFocused.focus();}
+function closeDetail(options={}){const opened=state.drawerSeq!==null;state.drawerSeq=null;window.TgWitnessJournal?.closeDetail();leave("detail-drawer");leave("drawer-backdrop");$("detail-content").replaceChildren();if(opened&&previouslyFocused?.isConnected)previouslyFocused.focus();previouslyFocused=null;if(opened&&options.history!==false)window.TgWitnessRouter?.record({seq:null},{replace:true});}
 $("close-detail").addEventListener("click",closeDetail);$("drawer-backdrop").addEventListener("click",closeDetail);
 document.addEventListener("keydown",e=>{
   if($("detail-drawer").hidden)return;
   if(document.querySelector("dialog[open]"))return;
   if(e.key==="Escape")closeDetail();
-  if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey&&!e.isComposing&&!e.target.closest("input,textarea,select,[contenteditable='true'],audio,video")
+  if(!e.defaultPrevented&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey&&!e.isComposing&&!e.target.closest("input,textarea,select,[contenteditable='true'],audio,video")
     &&!window.getSelection()?.toString()&&["ArrowUp","ArrowDown","j","k"].includes(e.key)){
     const index=state.events.findIndex(item=>item.seq===state.drawerSeq),step=["ArrowDown","j"].includes(e.key)?1:-1;
     if(index>=0&&state.events[index+step]){e.preventDefault();openDetail(state.events[index+step]);}
   }
-  if(e.key==="Tab"){
+  if(e.key==="Tab"&&$("detail-drawer").getAttribute("aria-modal")==="true"){
     const nodes=[...$("detail-drawer").querySelectorAll("button,summary,a,audio,video,[tabindex='0']")].filter(n=>!n.disabled&&n.getClientRects().length);
     const first=nodes[0],last=nodes.at(-1);
     if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
     else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
   }
 });
-const selectedSources=new Set(),selectedDialogs=new Set();let sourceBatchBusy=false;
-async function updateSources(ids,changes){
-  if(sourceBatchBusy||!ids.length)return;
-  const revision=state.workspaceRevision;sourceBatchBusy=true;renderSourceTools();
-  try{
-    await json("targets/batch",{chat_ids:ids,...changes});
-    if(revision!==state.workspaceRevision)return;
-    ids.forEach(id=>{selectedSources.delete(id);selectedDialogs.delete(id);});await refreshStatus();renderDialogs();
-  }finally{if(revision===state.workspaceRevision){sourceBatchBusy=false;renderSourceTools();}}
-}
-function sourceCheck(id,selected,title){
-  const check=node("input","source-select");check.type="checkbox";check.checked=selected.has(id);check.disabled=sourceBatchBusy||state.status.demo;
-  check.setAttribute("aria-label",tr("Select {name}",{name:title}));
-  check.addEventListener("change",()=>{if(check.checked)selected.add(id);else selected.delete(id);renderSourceTools();});return check;
-}
-function matchingDialogs(){const term=$("dialog-search").value.toLowerCase(),type=$("dialog-kind").value;
-  return state.dialogs.filter(d=>(d.title+" "+d.chat_id).toLowerCase().includes(term)&&(!type||kindType[d.kind]===type));}
-function renderSourceTools(){
-  if(!$("target-tools")){
-    const bar=node("div","source-bulk");bar.id="target-tools";
-    const search=node("input");search.id="target-search";search.type="search";search.placeholder=tr("Search chats");search.setAttribute("aria-label",tr("Search chats"));search.addEventListener("input",renderTargets);
-    const filter=node("select");filter.id="target-filter";filter.setAttribute("aria-label",tr("Filter"));
-    for(const [value,label] of [["","All"],["priority","Priority"],["paused","Paused"],["unconfirmed","Unconfirmed access"]]){const option=node("option","",tr(label));option.value=value;filter.append(option);}
-    filter.addEventListener("change",renderTargets);bar.append(search,filter);$("target-list").before(bar);
-    const actions=node("div","source-bulk");actions.id="target-bulk-actions";bar.after(actions);
-  }
-  const actions=$("target-bulk-actions");actions.replaceChildren();
-  for(const [label,change] of [["Enable selected",{enabled:true}],["Pause selected",{enabled:false}],["Mark priority",{priority:true}]]){
-    const button=node("button","quiet small",tr(label)+" · "+selectedSources.size);button.type="button";button.disabled=sourceBatchBusy||!selectedSources.size||state.status.demo;
-    button.addEventListener("click",()=>busy(button,()=>updateSources([...selectedSources],change)));actions.append(button);
-  }
-  if(!$("dialog-bulk-actions")){const actions=node("div","source-bulk");actions.id="dialog-bulk-actions";$("dialog-list").before(actions);}
-  const available=$("dialog-bulk-actions");available.replaceChildren();
-  const enabled=new Set(state.status.targets.filter(t=>t.enabled).map(t=>t.chat_id));
-  const matching=matchingDialogs().filter(d=>!enabled.has(d.chat_id)).map(d=>d.chat_id);
-  for(const [label,ids] of [["Add selected",[...selectedDialogs]],["Add all matching",matching]]){
-    const button=node("button","secondary small",tr(label)+" · "+ids.length);button.type="button";button.disabled=sourceBatchBusy||!ids.length||ids.length>500||state.status.demo;
-    button.addEventListener("click",()=>busy(button,()=>updateSources(ids,{enabled:true})));available.append(button);
-  }
-}
-function renderTargets() {
-  const list=$("target-list");list.replaceChildren();
-  const s=state.status;
-  renderSourceTools();
-  const term=$("target-search").value.trim().toLowerCase(),filter=$("target-filter").value;
-  if(!s.targets.length)list.append(node("p","hint",tr(s.collector.has_session?
-    "No sources selected yet. Add groups from your chat list.":"Add an account first.")));
-  const wide=(s.scope?.mode||"selected")!=="selected";
-
-  $("sources-title").textContent=tr(wide?"Observed chats":"Choose chats");
-  $("sources-description").textContent=tr(wide?"The scope adds chats by itself. Exclude or pause the ones you do not need.":
-    "Pick the groups and channels this account should observe.");
-  $("target-list-title").textContent=tr(wide?"Chats in the scope":"Selected chats");
-  for(const t of s.targets){
-    const source=s.collector.source_status?.[String(t.chat_id)];
-    if(!(t.title+" "+t.chat_id).toLowerCase().includes(term)||(filter==="priority"&&!t.priority)||
-      (filter==="paused"&&t.enabled)||(filter==="unconfirmed"&&source?.state!=="access_unconfirmed"))continue;
-    const row=node("div","target-row"),info=node("div"),title=node("h3","",t.title);
-    if(t.origin==="scope"){const badge=node("span","pill",tr("auto"));badge.title=tr("Added by the observation scope");title.append(" ",badge);}
-    info.append(title,node("p","",termText(t.kind)+" · "+t.chat_id));
-    if(source)info.append(node("p",source.state==="access_unconfirmed"?"access-warning":"",termText(source.state)+" · "+termText(source.visibility)+" · "+termText(source.role)));
-    const actions=node("div","target-actions");
-    const star=node("button","icon-button star"+(t.priority?" on":""));star.type="button";star.append(icon("star"));
-    star.setAttribute("aria-pressed",String(!!t.priority));star.disabled=s.demo;
-    star.title=tr(t.priority?"Priority: rechecked every {n} min. Press for the regular interval.":"Regular: rechecked every {h} h. Press to make it a priority chat.",
-      {n:s.recheck?.recheck_minutes??15,h:Math.round((s.recheck?.recheck_other_minutes??360)/60)});
-    star.setAttribute("aria-label",tr("Priority recheck for {name}",{name:t.title}));
-    star.addEventListener("click",()=>busy(star,async()=>{await json("targets/priority",{chat_id:t.chat_id,priority:!t.priority});await refreshStatus();}));
-    const remove=node("button","quiet small",tr("Remove"));remove.type="button";remove.disabled=s.demo;
-    remove.addEventListener("click",()=>busy(remove,async()=>{
-      if(!window.confirm(tr("Remove \"{name}\" from the sources? Its people profiles are deleted. Records already saved stay in the journal.",{name:t.title})+
-        (wide?" "+tr("The chat is also excluded, so the scope does not add it again."):"")))return;
-      await api("targets/"+encodeURIComponent(t.chat_id),undefined,{method:"DELETE"});
-      toast(tr("Source removed."));await refreshStatus();if(state.scope)await loadScope();
-    }));
-    const label=node("label","toggle-label"),check=node("input");check.type="checkbox";check.checked=!!t.enabled;check.disabled=s.demo;
-    check.setAttribute("aria-label",tr("Observe {name}",{name:t.title}));
-    check.addEventListener("change",()=>busy(null,async()=>{check.disabled=true;try {await json("targets",{chat_id:t.chat_id,enabled:check.checked});await refreshStatus();} finally {check.disabled=s.demo;}}));
-    label.append(check,node("span","",tr(t.enabled?"Enabled":"Paused")));actions.append(star,label);
-    if(wide&&!s.scope.exclude.includes(t.chat_id)){
-      const exclude=node("button","quiet small",tr("Exclude"));exclude.type="button";exclude.disabled=s.demo;
-      exclude.title=tr("Never record this chat while the scope is a folder or the whole account");
-      exclude.addEventListener("click",()=>busy(exclude,async()=>{
-        await json("scope",{...s.scope,exclude:[...s.scope.exclude,t.chat_id],acknowledged:false});
-        toast(tr("Chat excluded from the scope."));await refreshStatus();await loadScope();
-      }));
-      actions.append(exclude);
-    }
-    actions.append(remove);row.append(sourceCheck(t.chat_id,selectedSources,t.title),info,actions);list.append(row);
-  }
-  fillSourceSelect("snapshot-source",$("snapshot-source").value);
-  fillSourceSelect("chat-export-source",$("chat-export-source").value,true);
-  syncExport(s);
-  $("load-dialogs").disabled=s.demo||!s.collector.has_session;
-  $("load-dialogs").title=!s.collector.has_session&&!s.demo?tr("Connect your Telegram account first"):"";
-  $("capture-form").querySelector("button").disabled=s.demo;
-  $("monitoring-form").querySelectorAll("button,input").forEach(n=>n.disabled=s.demo);
-  $("snapshot-form").querySelector("button").disabled=s.demo||!s.targets.some(t=>t.enabled);
-  autoLoadDialogs();
-}
-const kindType={channel:"channels",supergroup:"groups",group:"groups",private:"private",bot:"bots"};
-function renderDialogs(){
-  const list=$("dialog-list");list.replaceChildren();renderSourceTools();
-  $("finish-source-selection").disabled=!state.status.targets.some(t=>t.enabled);
-  matchingDialogs().forEach(d=>{
-    const row=node("div","target-row"),info=node("div");
-    info.append(node("h3","",d.title),node("p","",termText(d.kind)+" · "+d.chat_id+(d.visibility?" · "+termText(d.visibility):"")));
-    const chosen=state.status.targets.some(t=>t.chat_id===d.chat_id&&t.enabled);
-    const b=node("button","secondary",tr(chosen?"Selected":"Add source"));b.disabled=chosen;
-    b.addEventListener("click",()=>busy(b,async()=>{await json("targets",{chat_id:d.chat_id,enabled:true});await refreshStatus();renderDialogs();}));
-    if(!chosen)row.append(sourceCheck(d.chat_id,selectedDialogs,d.title));row.append(info,b);list.append(row);
-  });
-  if(!list.children.length)list.append(node("p","hint",tr("No available chats match this search.")));
-}
-const loadDialogs=button=>busy(button,async()=>{
-  const revision=state.workspaceRevision,result=await json("dialogs");
-  if(revision!==state.workspaceRevision)return;
-  state.dialogs=result.dialogs;show("available-card",true);
-  $("dialog-limit").textContent=tr(result.may_be_truncated?"First 1,000 dialogs inspected; more may exist.":"Showing the chats already available to this account.");
-  if(state.scope){state.scope.folders=result.folders||[];renderScope();}
-  $("load-dialogs").textContent=tr("Reload chats");
-  renderDialogs();
-});
-$("load-dialogs").addEventListener("click",e=>loadDialogs(e.currentTarget));
-
-function autoLoadDialogs(){
-  const s=state.status;
-  if(state.view!=="sources"||!s||s.demo||!s.collector.has_session||hasSources(s))return;
-  if(state.dialogs.length||state.dialogsRequested===state.workspaceRevision)return;
-  state.dialogsRequested=state.workspaceRevision;loadDialogs($("load-dialogs"));
-}
-$("dialog-search").addEventListener("input",renderDialogs);
-$("dialog-kind").addEventListener("change",renderDialogs);
-$("finish-source-selection").addEventListener("click",()=>{
-  show("available-card",false);$("collector-toggle").focus({preventScroll:true});
-});
-function renderMonitoringDraft(){
-  const messages=$("monitor-messages").checked,enabled=monitoringFields.filter(name=>$("monitor-"+name).checked);
-  $("monitoring-note").textContent=tr(!enabled.length?"No live event types selected. Only operational and other group service records will continue.":
-    !messages?"New message capture is off. Edits and deletion notices may have no earlier content to compare.":
-    "Original messages provide context for later edits and deletion notices. Already saved records remain available.");
-  $("monitoring-unsaved").textContent=state.monitoringDirty?tr("Unsaved changes — press Save monitoring settings to apply."):"";
-}
-$("monitoring-form").addEventListener("change",()=>{state.monitoringDirty=true;renderMonitoringDraft();});
-document.querySelectorAll("[data-monitor-preset]").forEach(button=>button.addEventListener("click",()=>{
-  for(const name of monitoringFields)$("monitor-"+name).checked=button.dataset.monitorPreset==="all"||["messages","edits","deletions"].includes(name);
-  state.monitoringDirty=true;renderMonitoringDraft();
-}));
-$("monitoring-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
-  const profile=state.profile,revision=state.workspaceRevision,settings=Object.fromEntries(monitoringFields.map(name=>[name,$("monitor-"+name).checked]));
-  await json("monitoring",settings,{profile});
-  if(revision!==state.workspaceRevision)return;
-  state.monitoringDirty=monitoringFields.some(name=>settings[name]!==$("monitor-"+name).checked);
-  await refreshStatus();toast(tr(state.monitoringDirty?"Monitoring settings saved. Newer edits are still unsaved.":"Monitoring settings saved and recorded in the signed journal."));
-});});
-$("capture-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
-  const profile=state.profile,revision=state.workspaceRevision,settings=captureDraft();
-  await json("capture",settings,{profile});
-  if(revision!==state.workspaceRevision)return;
-  state.captureDirty=JSON.stringify(settings)!==JSON.stringify(captureDraft());
-  await refreshStatus();toast(tr(state.captureDirty?"Media settings saved. Newer edits are still unsaved.":"Media settings saved."));
-});});
-const mediaTypes=[["photo",tr("Photos")],["video",tr("Videos")],["animation",tr("GIFs & animations")],["video_note",tr("Round video messages")],
-  ["voice",tr("Voice messages")],["audio",tr("Music & audio")],["sticker",tr("Stickers")],["document",tr("Files & documents")]];
-
+// Sources view boundary: the host supplies session, data and actions explicitly.
+let sourcesView=null;
+const sourcesReady=import("./views/sources.js").then(({createSources})=>{
+  sourcesView=createSources({root:$("view-sources"),tr,getState:()=>state,
+    getSession:()=>state.workspaceRevision+":"+state.profile,may,json,refreshStatus,toast,termText,scopeName,icon,loadScope,formatTime,
+    setDialogs:result=>{state.dialogs=result.dialogs;if(state.scope)state.scope.folders=result.folders||[];},
+    renderScope,focusObservation:()=>$("collector-toggle").focus({preventScroll:true}),
+    confirm:message=>window.confirm(message),
+    scopeExclusions:(ids,excluded)=>{if(state.scopeDirty)state.scopeExclude=excluded?
+      [...new Set([...state.scopeExclude,...ids])]:state.scopeExclude.filter(id=>!ids.includes(id));},
+    setDirty:dirty=>{state.monitoringDirty=dirty.monitoring;state.captureDirty=dirty.capture;state.recheckDirty=dirty.recheck;},
+    saved:result=>{for(const name of ["monitoring","capture","recheck"])state.status[name]=result[name];}});
+  if(state.view==="sources"&&!$("workspace").hidden)sourcesView.enter();
+  return sourcesView;
+}).catch(error=>{toast(error.message,true);throw error;});
+function renderTargets() { sourcesView?.renderTargets(); }
 const mediaLimit=c=>Math.max(0,...Object.values(c?.types||{}).filter(r=>r.enabled).map(r=>r.max_mb))||c?.max_media_mb;
-function renderMediaRules(types){
-  const box=$("media-rules");box.replaceChildren();
-  for(const [key,label] of mediaTypes){
-    const rule=types[key]||{enabled:true,max_mb:20},row=node("div","media-rule"),check=node("input"),size=node("input");
-    check.type="checkbox";check.checked=rule.enabled;check.id="media-on-"+key;check.dataset.mediaType=key;
-    Object.assign(size,{id:"media-max-"+key,type:"number",min:1,max:2000,step:1,required:true,value:String(rule.max_mb)});
-    size.setAttribute("aria-label",tr("Maximum size for {type}",{type:label}));
-    const name=node("label","",label);name.htmlFor=check.id;row.append(check,name,unitField(size,"MiB"));box.append(row);
-  }
-  $("media-rules").querySelectorAll("input,select").forEach(n=>n.disabled=!!state.status?.demo);
-}
-$("max-media").addEventListener("input",()=>{
-
-  for(const [key] of mediaTypes){const size=$("media-max-"+key);if(size)size.value=$("max-media").value;}
-});
-function captureDraft(){
-  const types={};
-  for(const [key] of mediaTypes){
-    if($("media-on-"+key))types[key]={enabled:$("media-on-"+key).checked,max_mb:Number($("media-max-"+key).value)};
-  }
-  return {download_media:$("download-media").checked,max_media_mb:Number($("max-media").value),types};
-}
-function renderCaptureDraft(){
-  $("capture-unsaved").textContent=state.captureDirty?tr("Unsaved changes — press Save media settings to apply."):"";
-}
-$("capture-form").addEventListener("change",()=>{state.captureDirty=true;renderCaptureDraft();});
-$("capture-form").addEventListener("input",()=>{state.captureDirty=true;renderCaptureDraft();});
 function renderHistory(){
   const s=state.status,h=s?.history||{phase:"none"},phase=h.phase;
   const active=phase==="running",paused=phase==="paused",exists=phase!=="none";
@@ -1258,6 +1344,21 @@ for(const action of ["start","pause","resume","cancel"]){
 }
 $("history-report").addEventListener("click",e=>busy(e.currentTarget,()=>download("history/report","tgwitness-history-report.json")));
 
+function resetChatExportTools(){
+  for(const id of ["snapshot-source","chat-export-source"])$(id).replaceChildren();
+  $("export-chat-tools").open=false;
+  $("chat-export-progress").textContent="";
+  show("chat-export-download",false);show("chat-export-cancel",false);
+}
+function renderChatExportTools(){
+  const s=state.status;if(!s||state.view!=="evidence")return;
+  show("snapshot-form",may("sources"));show("chat-export-form",may("export"));
+  fillSourceSelect("snapshot-source",$("snapshot-source").value);
+  fillSourceSelect("chat-export-source",$("chat-export-source").value,true);
+  $("chat-export-source").options[0].textContent=tr("Choose a chat");
+  $("snapshot-form").querySelector("button").disabled=s.demo||!may("sources")||!s.collector.has_session||!s.targets.some(t=>t.enabled);
+  renderRecheck();syncExport(s);
+}
 $("snapshot-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
   toast(tr("Capturing visible history. This may take a minute."));
   const limit=Number($("snapshot-limit").value),most=state.status?.parameters?.snapshot_max||500;
@@ -1268,6 +1369,7 @@ $("snapshot-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submi
 let exportPoll=null;
 function stopExportPoll(){if(exportPoll){clearTimeout(exportPoll);exportPoll=null;}}
 function renderExportState(x){
+  if(state.view!=='sources')return;
   const prog=$("chat-export-progress");
   const running=!!x&&x.phase==="running",done=!!x&&x.phase==="done"&&x.ready;
   show("chat-export-cancel",running);show("chat-export-download",done);
@@ -1320,12 +1422,18 @@ function saveExport(button){return busy(button,async()=>{
   $("chat-export-progress").textContent=tr("Downloaded. Export another chat if needed.");
 });}
 $("chat-export-download").addEventListener("click",e=>saveExport(e.currentTarget));
-async function download(path,filename,stream=false,root=false,body=undefined){
+let exportsView=null;
+const exportsReady=import('./views/exports.js').then(({createExports})=>{
+  exportsView=createExports({root:$("view-evidence"),tr,json,getSession:()=>state.workspaceRevision+":"+state.profile,fmtTime,toast});
+  return exportsView;
+});
+async function loadExports(){return (await exportsReady).enter(viewOptions('evidence'));}
+async function download(path,filename,stream=false,root=false,body=undefined,progress=()=>{}){
   const profile=state.profile;
   let handle=null,writer=null,reader=null;
   if(stream&&typeof window.showSaveFilePicker==="function"){
     try{handle=await window.showSaveFilePicker({suggestedName:filename});}
-    catch(error){if(error.name==="AbortError")return false;throw error;}
+    catch(error){if(error.name==="AbortError"){progress({phase:"cancelled"});return false;}throw error;}
   }
   const response=await api(path,body,root?{root:true,allowStale:true}:{profile,allowStale:true});
   const expected=Number(response.headers.get("Content-Length")||0);
@@ -1340,12 +1448,13 @@ async function download(path,filename,stream=false,root=false,body=undefined){
       total+=value.byteLength;
       if(writer)await writer.write(value);
       else{if(total>limit)throw new Error(tr("Browser download limit reached. Use the streaming download command."));chunks.push(value);}
+      progress({phase:"saving",total,expected});
       if(stream){const size=(total/1024**2).toFixed(1)+" MiB"+(expected?" / "+(expected/1024**2).toFixed(1)+" MiB":"");toast(tr("Saving export: {size}",{size}));}
     }
     if(expected&&total!==expected)throw new Error(tr("Download was interrupted. Retry the export."));
     if(writer){await writer.close();writer=null;}
     else saveBlob(new Blob(chunks,{type:response.headers.get("Content-Type")||"application/octet-stream"}),filename);
-    return true;
+    progress({phase:"done",total,expected});return true;
   }catch(error){
     if(reader)await reader.cancel().catch(()=>{});else await response.body.cancel().catch(()=>{});
     if(writer)await writer.abort().catch(()=>{});
@@ -1355,14 +1464,15 @@ async function download(path,filename,stream=false,root=false,body=undefined){
 function saveBlob(blob,filename){
   const url=URL.createObjectURL(blob),a=node("a");a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
-document.querySelectorAll("[data-export]").forEach(b=>b.addEventListener("click",()=>busy(b,async()=>{
+panelQueries("[data-export]").forEach(b=>b.addEventListener("click",()=>busy(b,async()=>{
   const fmt=b.dataset.export,password=$("export-password").value;
   const encrypt=!!b.closest("#view-evidence")&&$("export-encrypt-on").checked;
   if(encrypt&&password.length<12){$("export-password").focus();throw new Error(tr("Enter a password of at least 12 characters, or untick encryption."));}
-  toast(tr("Checking journal integrity and preparing the export…"));
-  if(!encrypt){if(await download("export/"+fmt,"tgwitness-evidence."+fmt,true))toast(tr("Evidence export saved."));return;}
-  if(await download("export/"+fmt,"tgwitness-evidence-"+fmt+"-encrypted.zip",true,false,{password}))
-    toast(tr("Encrypted export saved. Open it in 7-Zip or WinRAR with the password; the signed file inside is unchanged."));
+  const progress=(await exportsReady).begin();
+  try{
+    const saved=await download("export/"+fmt,encrypt?"tgwitness-evidence-"+fmt+"-encrypted.zip":"tgwitness-evidence."+fmt,true,false,encrypt?{password}:undefined,progress);
+    if(saved)toast(tr(encrypt?"Encrypted export saved. Open it in 7-Zip or WinRAR with the password; the signed file inside is unchanged.":"Evidence export saved."));
+  }catch(error){progress({phase:"failed",error:error.message});throw error;}
 })));
 // Report settings: language, case details and contents of the sealed report in every export.
 const REPORT_FIELDS={"report-language":"language","report-theme":"theme","report-case-title":"case_title",
@@ -1389,7 +1499,7 @@ async function loadReportSettings(){
   reportReady=false;reportControls();$("report-status").textContent=tr("Loading…");
   const pending=(async()=>{
     try{
-      const options=await json("report-options");if(!current())return;
+      const options=await json("report-options",undefined,viewOptions('evidence'));if(!current()||state.view!=='evidence')return;
       const select=$("report-language");
       if(!select.options.length){
         select.append(new Option(tr("Same as the panel"),"auto"));
@@ -1397,9 +1507,9 @@ async function loadReportSettings(){
       }
       for(const [id,key] of Object.entries(REPORT_FIELDS))$(id).value=options[key];
       for(const [id,key] of Object.entries(REPORT_CHECKS))$(id).checked=options[key];
-      reportReady=true;reportDirty=false;$("report-status").textContent=window.TGW_ONLINE_DEMO?tr("Sample data"):"";
+      reportReady=true;reportDirty=false;formControls?.loaded("report-form");$("report-status").textContent=window.TGW_ONLINE_DEMO?tr("Sample data"):"";
     }catch(error){
-      if(!current()||error instanceof StaleView)return;
+      if(!current()||error instanceof StaleView||error.name==='AbortError')return;
       const retry=node("button","text-link",tr("Retry"));retry.type="button";
       retry.addEventListener("click",()=>loadReportSettings());
       $("report-status").replaceChildren(node("span","",tr("Could not load data")+": "+error.message+" "),retry);
@@ -1413,18 +1523,18 @@ $("report-timeline").addEventListener("change",syncReportParts);
 $("report-form").addEventListener("input",()=>{if(reportReady){reportDirty=true;$("report-status").replaceChildren();}});
 $("report-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
   if(!reportReady||reportOwner!==reportKey()||reportSaving||window.TGW_ONLINE_DEMO)return;
-  const owner=reportOwner;
+  const owner=reportOwner,draft=formControls?.capture("report-form");
   const body={};
   for(const [id,key] of Object.entries(REPORT_FIELDS))body[key]=$(id).value;
   for(const [id,key] of Object.entries(REPORT_CHECKS))body[key]=$(id).checked;
   reportSaving=true;reportControls();
   try{
     await json("report-options",body);if(reportOwner!==owner||reportKey()!==owner)return;
-    reportDirty=false;$("report-status").textContent=tr("Saved. The next export uses these settings.");toast(tr("Report settings saved."));
+    reportDirty=formControls?.changed(draft)||false;formControls?.accepted(draft,reportDirty);$("report-status").textContent=tr(reportDirty?"Saved. New edits have not been saved.":"Saved. The next export uses these settings.");toast(tr("Report settings saved."));
   }finally{if(reportOwner===owner&&reportKey()===owner){reportSaving=false;reportControls();}}
 });});
 document.querySelectorAll("[data-go-reports]").forEach(link=>link.addEventListener("click",event=>{
-  event.preventDefault();navigate("evidence");$("report-form").scrollIntoView({block:"start"});
+  event.preventDefault();navigate("evidence");exportsReady.then(view=>{view.select("settings");$("report-form").scrollIntoView({block:"start"});});
 }));
 $("export-encrypt-on").addEventListener("change",()=>{
   const on=$("export-encrypt-on").checked;show("export-password-field",on);if(on)$("export-password").focus();else $("export-password").value="";
@@ -1487,6 +1597,7 @@ function timestampsFacts(e,h){
   return facts;
 }
 function renderEvidence(e){
+  if(state.view!=='witness')return;
   const form=$("evidence-form"),status=$("evidence-status");
   form.querySelectorAll("input,select,textarea,button").forEach(n=>n.disabled=!e);
   state.timestampsHealth=e?.health||null;renderEvidenceBadge();
@@ -1494,17 +1605,18 @@ function renderEvidence(e){
   if(state.evidenceProfile!==state.profile){state.evidenceDirty=false;state.evidenceProfile=state.profile;}
   if(!state.evidenceDirty){
     $("evidence-enabled").checked=e.settings.enabled;$("evidence-interval").value=String(e.settings.interval_minutes);
-    $("evidence-tsa").value=e.settings.tsa_urls.join("\n");$("evidence-ots").value=e.settings.ots_calendars.join("\n");
+    $("evidence-tsa").value=e.settings.tsa_urls.join("\n");$("evidence-ots").value=e.settings.ots_calendars.join("\n");formControls?.loaded("evidence-form");
   }
   $("evidence-anchor").disabled=!e.settings.enabled||e.busy;
   renderHealthDetail(status,e.health,timestampsLead(e.health),timestampsFacts(e,e.health));
 }
 $("evidence-form").addEventListener("input",()=>{state.evidenceDirty=true;});
 $("evidence-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
+  const draft=formControls?.capture("evidence-form");
   const lines=id=>$(id).value.split("\n").map(v=>v.trim()).filter(Boolean);
   const e=await json("evidence",{enabled:$("evidence-enabled").checked,interval_minutes:Number($("evidence-interval").value),
     tsa_urls:lines("evidence-tsa"),ots_calendars:lines("evidence-ots")});
-  state.evidenceDirty=false;renderEvidence(e);
+  state.evidenceDirty=formControls?.changed(draft)||false;renderEvidence(e);formControls?.accepted(draft,state.evidenceDirty);
   toast(tr(e.settings.enabled?"Evidence mode is on. The current checkpoint is being timestamped.":"Evidence mode is off."));
 });});
 $("evidence-anchor").addEventListener("click",ev=>busy(ev.currentTarget,async()=>{
@@ -1544,6 +1656,7 @@ function lockText(lock){
   return lock.bucket_enabled?tr("Object Lock is enabled on the bucket; no retention was requested."):tr("Object Lock is not enabled on this bucket.");
 }
 function renderReplica(r){
+  if(state.view!=='witness')return;
   const form=$("replica-form"),status=$("replica-status");
   form.querySelectorAll("input,select,button").forEach(n=>n.disabled=!r);
   state.replicaHealth=r?.health||null;renderEvidenceBadge();
@@ -1554,7 +1667,7 @@ function renderReplica(r){
     $("replica-enabled").checked=s.enabled;$("replica-endpoint").value=s.endpoint;$("replica-region").value=s.region;
     $("replica-bucket").value=s.bucket;$("replica-prefix").value=s.prefix;$("replica-path-style").checked=s.path_style;
     $("replica-interval").value=String(s.interval_minutes);$("replica-retention").value=String(s.retention_days);
-    $("replica-mode").value=s.retention_mode;
+    $("replica-mode").value=s.retention_mode;formControls?.loaded("replica-form");
   }
   for(const id of ["replica-access","replica-secret"])$(id).placeholder=r.has_credentials?tr("Saved — leave empty to keep"):"";
   $("replica-test").disabled=!r.has_credentials;$("replica-sync").disabled=!s.enabled||r.busy;$("replica-key").disabled=!r.has_key;
@@ -1562,12 +1675,14 @@ function renderReplica(r){
 }
 $("replica-form").addEventListener("input",()=>{state.replicaDirty=true;});
 $("replica-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
+  const draft=formControls?.capture("replica-form");
   const r=await json("replica",{enabled:$("replica-enabled").checked,endpoint:$("replica-endpoint").value.trim(),
     region:$("replica-region").value.trim()||"us-east-1",bucket:$("replica-bucket").value.trim(),prefix:$("replica-prefix").value.trim()||"tgwitness",
     path_style:$("replica-path-style").checked,interval_minutes:Number($("replica-interval").value),
     retention_days:Number($("replica-retention").value||0),retention_mode:$("replica-mode").value,
     access_key:$("replica-access").value.trim(),secret_key:$("replica-secret").value.trim()});
-  $("replica-access").value="";$("replica-secret").value="";state.replicaDirty=false;renderReplica(r);
+  formControls?.clearSubmitted(draft,["replica-access","replica-secret"]);
+  state.replicaDirty=formControls?.changed(draft)||false;renderReplica(r);formControls?.accepted(draft,state.replicaDirty);
   toast(tr(r.settings.enabled?"Off-site copy is on. Download the encryption key and keep it apart.":"Off-site copy settings saved."));
 });});
 $("replica-test").addEventListener("click",e=>busy(e.currentTarget,async()=>{
@@ -1594,6 +1709,7 @@ function alertsText(a){
   return tr("Last notification {time}.",{time:fmtFull(l.at)})+(l.error?" "+tr("Not delivered: {error} — retried within a minute.",{error:l.error}):"");
 }
 function renderAlerts(a){
+  if(state.view!=='witness')return;
   const form=$("alerts-form"),status=$("alerts-status");
   form.querySelectorAll("input,select,textarea,button").forEach(n=>n.disabled=!a);
   extraBadge("alerts",!!a?.settings.enabled,"On","Off");
@@ -1603,7 +1719,7 @@ function renderAlerts(a){
   if(!state.alertsDirty){
     $("alerts-enabled").checked=s.enabled;$("alerts-problems").checked=s.problems;$("alerts-changes").checked=s.changes;
     $("alerts-text").checked=!!s.include_text;
-    $("alerts-daily").checked=s.daily;$("alerts-hour").value=String(s.daily_hour);
+    $("alerts-daily").checked=s.daily;$("alerts-hour").value=String(s.daily_hour);formControls?.loaded("alerts-form");
   }
   $("alerts-urls").placeholder=a.destinations.length?tr("Leave empty to keep the saved destinations"):"matrixs://user:password@matrix.example.org/#room";
   $("alerts-saved").textContent=a.destinations.length?tr("Saved: {list}",{list:a.destinations.join(" · ")}):"";
@@ -1613,9 +1729,10 @@ function renderAlerts(a){
 for(let h=0;h<24;h++)$("alerts-hour").append(new Option(String(h).padStart(2,"0")+":00",String(h)));
 $("alerts-form").addEventListener("input",()=>{state.alertsDirty=true;});
 async function saveAlerts(urls,add=[]){
+  const draft=formControls?.capture("alerts-form");
   const a=await json("alerts",{enabled:$("alerts-enabled").checked,problems:$("alerts-problems").checked,changes:$("alerts-changes").checked,
     daily:$("alerts-daily").checked,daily_hour:Number($("alerts-hour").value),language:LANG,include_text:$("alerts-text").checked,urls,add_urls:add});
-  $("alerts-urls").value="";state.alertsDirty=false;renderAlerts(a);return a;
+  formControls?.clearSubmitted(draft,["alerts-urls"]);state.alertsDirty=formControls?.changed(draft)||false;renderAlerts(a);formControls?.accepted(draft,state.alertsDirty);return a;
 }
 $("alerts-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
   const lines=$("alerts-urls").value.split("\n").map(v=>v.trim()).filter(Boolean);
@@ -1682,21 +1799,24 @@ const scopeTypes=["channels","groups","private","bots"];
 const wideWarning=()=>tr("Folder and whole-account modes record private chats and messages of third parties. Use them only on a dedicated account, for a lawful purpose, and keep the data protected.");
 async function loadScope(){
   if(!state.status)return;
-  if(state.status.demo){state.scope=null;renderScope();return;}
-  const profile=state.profile,r=await json("scope");
-  if(profile!==state.profile)return;
+  if(state.status.demo){
+    state.scope={settings:state.status.scope,recheck:state.status.recheck,folders:[],warning:wideWarning()};
+    if(state.view==="sources")renderScope();return;
+  }
+  const revision=state.workspaceRevision,profile=state.profile,r=await json("scope");
+  if(revision!==state.workspaceRevision||profile!==state.profile)return;
   state.scope={...r,folders:r.folders.length?r.folders:(state.scope?.folders||[])};
-  renderScope();
+  if(state.view==="sources")renderScope();
 }
 function scopeDraft(){
-  const mode=document.querySelector("[name=scope-mode]:checked")?.value||"selected",folder=$("scope-folder").value;
+  const mode=viewQuery("sources","[name=scope-mode]:checked")?.value||"selected",folder=$("scope-folder").value;
   return {mode,folder_id:mode==="folder"&&folder!==""?Number(folder):null,
     types:Object.fromEntries(scopeTypes.map(k=>[k,$("scope-"+k).checked])),exclude:state.scopeExclude||[],own_actions:$("scope-own").checked,
     new_chats:{profile:$("scope-new-profile").checked,history:Math.max(0,Math.min(1000,Math.floor(Number($("scope-new-history").value)||0)))}};
 }
 
 $("scope-investigation").addEventListener("click",()=>{
-  document.querySelectorAll("[name=scope-mode]").forEach(r=>{r.checked=r.value==="account";});
+  viewQueries("sources","[name=scope-mode]").forEach(r=>{r.checked=r.value==="account";});
   for(const k of scopeTypes)$("scope-"+k).checked=true;
   $("scope-own").checked=true;$("scope-new-profile").checked=true;
   if(Number($("scope-new-history").value)<200)$("scope-new-history").value="200";
@@ -1722,7 +1842,7 @@ function renderScope(){
   if(saved.folder_id!==null&&!sc.folders.some(f=>f.id===saved.folder_id))select.append(new Option(tr("Folder {id}",{id:saved.folder_id}),String(saved.folder_id)));
   select.value=chosen;
   $("scope-folder-hint").textContent=tr(sc.folders.length?"Chats added to this folder in Telegram are picked up within an hour; new chats that match its rules at once.":
-    "Press Load chats above to list this account's folders.");
+    "Press Refresh chat list above to list this account's folders.");
   const draft=scopeDraft();
   show("scope-folder-field",draft.mode==="folder");show("scope-types",draft.mode!=="selected");show("scope-new",draft.mode!=="selected");
   const box=$("scope-exclude");box.replaceChildren();
@@ -1739,142 +1859,51 @@ function renderScope(){
 }
 $("scope-form").addEventListener("change",()=>{state.scopeDirty=true;renderScope();});
 $("scope-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
-  const draft=scopeDraft(),saved=state.scope.settings;
+  const draft=scopeDraft(),saved=state.scope.settings,revision=state.workspaceRevision,profile=state.profile;
   if(draft.mode==="folder"&&draft.folder_id===null)throw new Error(tr("Choose a Telegram folder. Load chats first if the list is empty."));
   const widening=draft.mode!=="selected"&&(draft.mode!==saved.mode||draft.folder_id!==saved.folder_id);
   if(widening&&!window.confirm(wideWarning()+"\n\n"+tr("Continue only with a dedicated account. Your confirmation is recorded in the signed journal.")))return;
-  const r=await json("scope",{...draft,acknowledged:widening});
-  state.scope={...r,folders:r.folders.length?r.folders:state.scope.folders};state.scopeDirty=false;
-  await refreshStatus();renderScope();
+  const r=await json("scope",{...draft,acknowledged:widening},{profile});
+  if(revision!==state.workspaceRevision)return;
+  state.scopeDirty=JSON.stringify(draft)!==JSON.stringify(scopeDraft());
+  state.scope={...r,folders:r.folders.length?r.folders:state.scope.folders};
+  await refreshStatus();
+  if(revision!==state.workspaceRevision||profile!==state.profile)return;
+  if(state.view==="sources")renderScope();
   toast(tr(draft.mode==="selected"?"Scope saved: only chosen chats are recorded.":"Scope saved and recorded in the signed journal. New chats are added as they appear."));
 });});
 function renderRecheck(){
   const most=state.status?.parameters?.snapshot_max||500;
   $("snapshot-limit").max=String(most);
   $("snapshot-limit-hint").textContent=tr("1 to {n} messages; the largest snapshot is set in Parameters.",{n:most});
-  if(state.recheckDirty||!state.status?.recheck)return;
-  $("recheck-priority").value=String(state.status.recheck.recheck_minutes);
-  $("recheck-other").value=String(state.status.recheck.recheck_other_minutes);
-  $("recheck-form").querySelectorAll("input,button").forEach(n=>n.disabled=!!state.status.demo);
 }
-$("recheck-form").addEventListener("input",()=>{state.recheckDirty=true;});
-$("recheck-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
-  await json("recheck",{recheck_minutes:Number($("recheck-priority").value),recheck_other_minutes:Number($("recheck-other").value)});
-  state.recheckDirty=false;await refreshStatus();toast(tr("Recheck settings saved."));
-});});
 
 const parameterItems=()=>(state.parameters?.groups||[]).flatMap(g=>g.items);
-const sameValue=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 function parameterLabel(key){const item=parameterItems().find(i=>i.key===key);return item?tr(item.label):key.replaceAll("_"," ");}
 function parameterValue(value){
   if(Array.isArray(value))return trn("{n} line","{n} lines",value.length);
   return typeof value==="boolean"?tr(value?"On":"Off"):Number(value).toLocaleString();
 }
-async function loadParameters(){
-  if(!state.status)return;
-  const profile=state.profile,r=await json("parameters");
-  if(profile!==state.profile)return;
-  state.parameters=r;
-  if(!state.parametersDirty)renderParameters();
-}
-function setParameterField(item,value){
-  const field=$("parameter-"+item.key);
-  if(item.kind==="bool")field.checked=value;else field.value=item.kind==="lines"?value.join("\n"):String(value);
-}
-function renderParameters(){
-  const box=$("parameters-groups"),demo=!!state.status?.demo,nav=$("parameters-nav");box.replaceChildren();nav.replaceChildren();
-  for(const group of state.parameters.groups){
-    const card=node("section","card padded parameters-group"),fields=node("div","parameters-grid");card.id="parameters-group-"+group.id;
-    card.append(node("h2","",tr(group.title)),node("p","muted",tr(group.description)),fields);
-    const link=node("a","",tr(group.title)),changedCount=group.items.filter(i=>!sameValue(i.value,i.default)).length;
-    link.href="#parameters-group-"+group.id;link.addEventListener("click",e=>{e.preventDefault();card.scrollIntoView({block:"start",behavior:"smooth"});});
-    if(changedCount)link.append(node("span","parameters-nav-count",String(changedCount)));
-    nav.append(link);
-    for(const item of group.items){
-      const changed=!sameValue(item.value,item.default),row=node("div","parameter-row"+(changed?" changed":"")),id="parameter-"+item.key;
-      let field;
-      if(item.kind==="bool"){
-        const label=node("label","check-label");field=node("input");field.type="checkbox";field.checked=item.value;
-        label.append(field," "+tr(item.label));row.append(label);
-      }else{
-        const label=node("label","",tr(item.label)),line=node("div","parameter-field");label.htmlFor=id;
-        if(item.kind==="lines"){field=node("textarea");field.rows=3;field.spellcheck=false;field.value=item.value.join("\n");}
-        else{field=node("input");Object.assign(field,{type:"number",min:item.low,max:item.high,step:1,required:true,value:String(item.value)});}
-        line.append(item.unit?unitField(field,tr(item.unit)):field);row.append(label,line);
-      }
-      field.id=id;field.dataset.parameter=item.key;field.disabled=demo;
-      if(item.help)row.append(node("p","hint",tr(item.help)));
-      const meta=node("p","hint parameter-meta",[item.kind==="int"?tr("{low} to {high}",{low:item.low.toLocaleString(),high:item.high.toLocaleString()}):"",
-        tr("Default: {value}",{value:parameterValue(item.default)})].filter(Boolean).join(" · "));
-      if(changed){
-        const reset=node("button","text-link",tr("Restore default"));reset.type="button";reset.disabled=demo;
-        reset.addEventListener("click",()=>{setParameterField(item,item.default);state.parametersDirty=true;renderParametersDraft();});
-        meta.append(" · ",reset);
-      }
-      row.append(meta);row.dataset.search=[item.key,tr(item.label),tr(item.help||""),item.label].join(" ").toLowerCase();fields.append(row);
-    }
-    box.append(card);
-  }
-  filterParameters();
-  $("parameters-form").querySelector("button[type=submit]").disabled=demo;$("parameters-reset").disabled=demo;
-  renderParametersDraft();
-}
-function filterParameters(){
-  const query=$("parameters-search").value.trim().toLowerCase(),changed=$("parameters-changed").checked;
-  for(const card of $("parameters-groups").querySelectorAll(".parameters-group")){
-    let visible=0;
-    for(const row of card.querySelectorAll(".parameter-row")){
-      const show_=(!query||row.dataset.search.includes(query))&&(!changed||row.classList.contains("changed"));
-      row.hidden=!show_;if(show_)visible++;
-    }
-    card.hidden=!visible;
-    const link=$("parameters-nav").querySelector('a[href="#'+card.id+'"]');if(link)link.hidden=!visible;
-  }
-}
-$("parameters-search").addEventListener("input",filterParameters);
-$("parameters-changed").addEventListener("change",filterParameters);
-function parametersDraft(){
-  const changes={};
-  for(const item of parameterItems()){
-    const field=$("parameter-"+item.key);if(!field)continue;
-    const value=item.kind==="bool"?field.checked:item.kind==="lines"?field.value.split("\n").map(s=>s.trim()).filter(Boolean):Number(field.value);
-    if(!sameValue(value,item.value))changes[item.key]=value;
-  }
-  return changes;
-}
-function renderParametersDraft(){
-  $("parameters-unsaved").textContent=state.parametersDirty&&Object.keys(parametersDraft()).length?tr("Unsaved changes — press Save parameters to apply."):"";
-}
-$("parameters-form").addEventListener("input",()=>{state.parametersDirty=true;renderParametersDraft();});
-$("parameters-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
-  for(const field of $("parameters-form").querySelectorAll("input[type=number]")){
-    if(field.value.trim()===""||!field.checkValidity()){
-      field.focus();
-      throw new Error(tr("{name}: enter a whole number from {low} to {high}.",{name:parameterLabel(field.dataset.parameter),low:Number(field.min).toLocaleString(),high:Number(field.max).toLocaleString()}));
-    }
-  }
-  const changes=parametersDraft();
-  if(!Object.keys(changes).length){state.parametersDirty=false;renderParametersDraft();toast(tr("No changes to save."));return;}
-  const profile=state.profile,r=await json("parameters",{values:changes},{profile});
-  if(profile!==state.profile)return;
-  state.parameters=r;state.parametersDirty=false;renderParameters();await refreshStatus();
-  toast(tr("Parameters saved and recorded in the signed journal."));
-});});
-$("parameters-reset").addEventListener("click",e=>busy(e.currentTarget,async()=>{
-  if(!state.parameters||!window.confirm(tr("Restore every parameter of this workspace to its default?")))return;
-  const profile=state.profile,values=Object.fromEntries(parameterItems().map(i=>[i.key,null]));
-  const r=await json("parameters",{values},{profile});
-  if(profile!==state.profile)return;
-  state.parameters=r;state.parametersDirty=false;renderParameters();await refreshStatus();
-  toast(tr("Defaults restored and recorded in the signed journal."));
-}));
+let parametersView=null;
+const parametersReady=import("./views/parameters.js").then(({createParameters})=>{
+  parametersView=createParameters({root:$("view-parameters"),tr,getState:()=>state,
+    getSession:()=>state.workspaceRevision+":"+state.profile,may,json,refreshStatus,toast,
+    headerOffset:()=>{const header=document.querySelector(".topbar");return header&&["sticky","fixed"].includes(getComputedStyle(header).position)?header.getBoundingClientRect().height:0;},
+    sectionHref:id=>window.TgWitnessRouter?.href({view:"parameters",section:id})||"#parameters-group-"+id,
+    sectionChanged:id=>{state.parameterSection=id;window.TgWitnessRouter?.record();},
+    setDirty:value=>state.parametersDirty=value,saved:value=>state.parameters=value});
+  return parametersView;
+}).catch(error=>{toast(error.message,true);throw error;});
+async function loadParameters(){if(state.view==="parameters")return (await parametersReady).enter(viewContexts.get("parameters")||{});}
 
-function selectExtra(name){
+function selectExtra(name,options={}){
+  state.extra=name;
   show("extras-overview",!name);
   for(const key of ["alerts","evidence","cloud","bot","github"]){
     show("extras-"+key,key===name);
     $("extras-open-"+key).setAttribute("aria-expanded",String(key===name));
   }
+  if(state.view==="witness"&&options.history!==false)window.TgWitnessRouter?.record();
 }
 document.querySelectorAll("[data-extra]").forEach(button=>button.addEventListener("click",()=>{
   const name=button.dataset.extra;selectExtra(name);
@@ -1885,7 +1914,7 @@ document.querySelectorAll("[data-extra-close]").forEach(button=>button.addEventL
 }));
 
 document.querySelectorAll("[data-go-extra]").forEach(link=>link.addEventListener("click",event=>{
-  event.preventDefault();navigate("witness");$("extras-open-"+link.dataset.goExtra).click();
+  event.preventDefault();navigate("witness",{history:false});$("extras-open-"+link.dataset.goExtra).click();
 }));
 function extraBadge(name,on,onText,offText){
   const badge=$("extra-"+name+"-badge");badge.textContent=tr(on?onText:offText);badge.classList.toggle("on",on);
@@ -1909,8 +1938,9 @@ async function loadAssurance(){
     state.assurance=r?.ok?(await r.json()).statement:null;
   }
   const s=state.assurance,on=!!s;
+  if(state.view!=='witness')return;
   show("alerts-host",on);show("cloud-active",on);
-  if(!on){$("extra-cloud-badge").className="extra-badge";extraBadge("cloud",false,"","Available");renderServerHealth(null);return;}
+  if(!on){$("extra-cloud-badge").className="extra-badge";extraBadge("cloud",false,"","Off");renderServerHealth(null);return;}
   $("cloud-active").textContent=tr("This collector runs on a sealed {provider} server, signing key {fingerprint}. An opened SSH port or a login there is recorded in the journal and sent as a problem notification.",
     {provider:CLOUD[s.host?.mode]?.[0]||s.host?.mode||"",fingerprint:s.fingerprint});
   const profile=state.profile,h=await json("health");
@@ -1918,6 +1948,7 @@ async function loadAssurance(){
 }
 // Deployment and the protection checks are separate: a running server is not a sealed one.
 function renderServerHealth(s){
+  if(state.view!=='witness')return;
   const box=$("cloud-health");box.replaceChildren();
   show("cloud-health",!!s);if(!s)return;
   const d=s.deployment,c=s.checks;
@@ -1948,11 +1979,12 @@ async function loadSourceCheck(){
   if(profile===state.profile)renderSourceCheck(r);
 }
 function renderSourceCheck(r){
+  if(state.view!=='witness')return;
   const l=r.last,box=$("github-result"),badge=$("extra-github-badge"),good=!!l&&r.current&&l.matches;
   $("github-form").querySelectorAll("input,button").forEach(n=>n.disabled=!!state.status?.demo);
   badge.textContent=tr(!l?"Not checked":!r.current?"Check again":l.matches?"Matches":"Differs");
   badge.classList.toggle("on",good);badge.classList.toggle("warn",!!l&&!good);
-  if(l&&!state.githubDirty){$("github-repository").value=l.repository.replace("https://","");$("github-ref").value=l.ref;}
+  if(l&&!state.githubDirty){$("github-repository").value=l.repository.replace("https://","");$("github-ref").value=l.ref;formControls?.loaded("github-form");}
   $("github-running").textContent=tr("Running: version {version}, {n} program files, source hash {hash}.",
     {version:r.version,n:r.files,hash:r.source_tree_sha256.slice(0,16)+"…"});
   box.replaceChildren();show("github-result",!!l);
@@ -1972,8 +2004,9 @@ function renderSourceCheck(r){
 }
 $("github-form").addEventListener("input",()=>{state.githubDirty=true;});
 $("github-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
+  const draft=formControls?.capture("github-form");
   const r=await json("source-check",{repository:$("github-repository").value.trim(),ref:$("github-ref").value.trim()});
-  state.githubDirty=false;renderSourceCheck(r);
+  state.githubDirty=formControls?.changed(draft)||false;renderSourceCheck(r);formControls?.accepted(draft,state.githubDirty);
   toast(tr(r.last.matches?"The code matches the commit. The check is saved in the signed journal."
     :"The code differs from the commit. The check is saved in the signed journal."),!r.last.matches);
 });});
@@ -2015,7 +2048,10 @@ async function loadWitness(){
 }
 function collectorAddress(){return location.origin+(state.profile==="default"?"":"/profiles/"+encodeURIComponent(state.profile));}
 function renderWitness(r){
+  if(state.view!=='witness')return;
   const list=$("witness-list"),demo=!!state.status?.demo;list.replaceChildren();
+  const witnessed=r.tokens.some(token=>token.last_poll&&!token.overdue);
+  extraBadge("bot",witnessed,"On",r.tokens.some(token=>token.overdue)?"Check again":"Not checked");
   $("witness-form").querySelectorAll("input,button").forEach(n=>n.disabled=demo);
   $("witness-setup-form").querySelector('[type="submit"]').disabled=demo;
   $("witness-token-download").disabled=demo||!state.witnessToken;
@@ -2071,7 +2107,7 @@ function resetWitnessSetup(){
   for(const id of ["witness-token","witness-docker","witness-remote","witness-options","witness-setup-result"])$(id).textContent="";
   $("witness-setup-form").reset();$("witness-address").value="";
   $("witness-launch").open=false;
-  document.querySelectorAll("#extras-bot details").forEach(detail=>detail.open=false);
+  viewQueries("witness","#extras-bot details").forEach(detail=>detail.open=false);
 }
 function renderWitnessVolume(){
   const interval=Number($("witness-interval").value),policy=$("witness-policy").value;
@@ -2103,44 +2139,59 @@ $("witness-setup-form").addEventListener("submit",e=>{e.preventDefault();busy(e.
   $("witness-launch").open=true;
 });});
 
-const readMark=()=>Number(localStorage.getItem("tgwitness-read-"+state.profile)||0);
+let noticeUI=null,noticeRequest=0;
+async function noticeNavigate(view){
+  if(!viewAllowed(view))return false;
+  if(typeof selectView==="function")await selectView(view);else navigate(view);
+  return state.view===view;
+}
+async function noticeAction(item,kind){
+  const revision=state.workspaceRevision,action=kind==="record"?{type:"record"}:item.action||
+    {type:item.level==="change"?"chat":"record",chat_id:item.chat_id};
+  if(action.type==="chat"&&Number.isSafeInteger(action.chat_id)){
+    if(!await noticeNavigate("chats"))return openRecord(item.seq);
+    await refreshChats();
+    if(revision!==state.workspaceRevision)return;
+    if(state.chats.some(chat=>chat.chat_id===action.chat_id))return openChat(action.chat_id);
+  }else if(action.type==="diagnostics"){
+    const destination=healthDiagnostics[action.part]||{accounts:{view:"accounts"},exports:{view:"evidence"}}[action.part];
+    if(destination&&await noticeNavigate(destination.view)){
+      if(revision!==state.workspaceRevision)return;
+      if(destination.extra)selectExtra(destination.extra);
+      if(destination.filter)document.querySelector('[data-filter="'+destination.filter+'"]')?.click();
+      const target=destination.target?$(destination.target):$("view-"+destination.view)?.querySelector("h1,h2");
+      if(target){target.tabIndex=-1;target.focus({preventScroll:true});target.scrollIntoView({block:"start"});}
+      return;
+    }
+  }
+  if(revision===state.workspaceRevision)return openRecord(item.seq);
+}
+const noticesReady=import("./components/notifications.js?v=1").then(({createNotifications})=>{
+  noticeUI=createNotifications({workspace:$("workspace"),panel:$("notify-panel"),toggle:$("notify-toggle"),badge:$("notify-count"),list:$("notify-list"),
+    readAll:$("notify-read"),rules:$("notify-rules"),closeButton:$("notify-close"),
+    filters:[...document.querySelectorAll("[data-notice-filter]")],summary:$("notify-summary"),status:$("notify-status"),
+    tr,trn,formatTime:fmtFull,items:()=>state.notifications,
+    context:()=>({profile:state.profile,fingerprint:state.status?.fingerprint,revision:state.workspaceRevision,
+      active:!!state.token&&!!state.status&&!$("workspace").hidden&&!$("workspace").inert}),
+    refresh:loadNotifications,action:noticeAction,canRules:()=>viewAllowed("witness")&&may("settings"),
+    openRules:async()=>{if(await noticeNavigate("witness")){selectExtra("alerts");$("extras-alerts-title").focus({preventScroll:true});$("extras-alerts").scrollIntoView({block:"start"});}},
+    error:error=>{if(!(error instanceof StaleView))toast(error.message,true);}});
+});
+noticesReady.catch(()=>{$("notify-toggle").disabled=false;$("notify-toggle").addEventListener("click",()=>toast(tr("Notifications could not load. Reload the page to retry."),true));});
 async function loadNotifications(){
-  if(!state.status)return;
-  const profile=state.profile,r=await json("notifications");
-  if(profile!==state.profile)return;
+  if(!state.status||!state.token||$("workspace").hidden)return;
+  const profile=state.profile,revision=state.workspaceRevision,ticket=++noticeRequest,r=await json("notifications");
+  if(profile!==state.profile||revision!==state.workspaceRevision||ticket!==noticeRequest)return;
   state.notifications=r.items;renderNotifications();
 }
 function renderNotifications(){
-  const mark=readMark(),unread=state.notifications.filter(i=>i.seq>mark).length,list=$("notify-list");
-  $("notify-count").textContent=unread>99?"99+":String(unread);show("notify-count",unread>0);
-  $("notify-toggle").setAttribute("aria-label",unread?trn("{n} unread notification","{n} unread notifications",unread):tr("Notifications"));
-  list.replaceChildren();
-  if(!state.notifications.length)list.append(node("p","hint notify-empty",tr("Nothing yet. Problems and changes in observed chats appear here.")));
-  for(const item of state.notifications){
-    const b=node("button","notify-item "+item.level+(item.seq>mark?" unread":""));b.type="button";
-    b.append(node("span","",item.text),node("small","",fmtFull(item.at)));
-    b.addEventListener("click",()=>busy(null,async()=>{
-      closeNotifications();
-      if(item.level==="change"&&item.chat_id!==null){navigate("chats");await refreshChats();if(state.chats.some(c=>c.chat_id===item.chat_id))await openChat(item.chat_id);}
-      else await openRecord(item.seq);
-    }));
-    list.append(b);
-  }
+  if(noticeUI)noticeUI.render();else noticesReady.then(()=>noticeUI.render()).catch(()=>{});
 }
-function closeNotifications(){show("notify-panel",false);$("notify-toggle").setAttribute("aria-expanded","false");}
-$("notify-toggle").addEventListener("click",()=>{
-  const open=$("notify-panel").hidden;show("notify-panel",open);$("notify-toggle").setAttribute("aria-expanded",String(open));
-  if(open)loadNotifications().catch(e=>toast(e.message,true));
-});
-$("notify-read").addEventListener("click",()=>{
-  const newest=Math.max(0,...state.notifications.map(i=>i.seq));
-  localStorage.setItem("tgwitness-read-"+state.profile,String(Math.max(newest,readMark())));renderNotifications();
-});
-document.addEventListener("click",e=>{if(!$("notify-panel").hidden&&!e.target.closest(".notify-wrap"))closeNotifications();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("notify-panel").hidden){closeNotifications();$("notify-toggle").focus();}});
-async function openRecord(seq){
-  const r=await json("events?"+new URLSearchParams({before:String(seq+1),limit:"1"}));
-  if(r.events[0]?.seq===seq)openDetail(r.events[0]);
+function closeNotifications(){if(noticeUI)noticeUI.close();else{$("notify-panel").hidden=true;$("notify-toggle").setAttribute("aria-expanded","false");}}
+async function openRecord(seq,options={}){
+  const context=viewContexts.get(state.view),r=await json("events?"+new URLSearchParams({before:String(seq+1),limit:"1"}),undefined,{signal:context?.signal});
+  if(context&&!context.current())return;
+  if(r.events[0]?.seq===seq)await openDetail(r.events[0],options);
   else toast(tr("Record is unavailable to this access."),true);
 }
 function clearVerification(){state.verification=null;$("verification-result").textContent="";}
@@ -2179,7 +2230,7 @@ function setAuthMethod(method){
     $("import-result").textContent="";
   }
   authMethod=method;
-  document.querySelectorAll("[data-auth-method]").forEach(button=>{
+  viewQueries("connection","[data-auth-method]").forEach(button=>{
     const selected=button.dataset.authMethod===method;
     button.classList.toggle("active",selected);button.setAttribute("aria-pressed",String(selected));
   });
@@ -2230,7 +2281,7 @@ async function loginRequest(path,body,options){
 function authProgress(message){
   $("auth-progress").textContent=message;show("auth-progress",!!message);
 }
-document.querySelectorAll("[data-auth-method]").forEach(button=>button.addEventListener("click",()=>setAuthMethod(button.dataset.authMethod)));
+viewQueries("connection","[data-auth-method]").forEach(button=>button.addEventListener("click",()=>setAuthMethod(button.dataset.authMethod)));
 $("api-id").addEventListener("paste",event=>{
   const text=event.clipboardData?.getData("text")||"";
   if(!text.includes(":"))return;
@@ -2260,12 +2311,13 @@ function routeFields(){
   show("network-endpoint",endpoint);show("network-login",kind!=="mtproxy");show("network-mtproxy",kind==="mtproxy");
   $("network-host").required=endpoint;$("network-secret").required=kind==="mtproxy";
   $("network-link").closest(".proxy-link").hidden=kind!=="mtproxy";
-  document.querySelector(".proxy-catalog").hidden=kind!=="mtproxy";
+  viewQuery("connection",".proxy-catalog").hidden=kind!=="mtproxy";
   $("network-auto-help").hidden=kind!=="mtproxy_auto";
   window.TgWitnessProxies?.sync?.();
   if(kind==="mtproxy"&&$("network-details").open)loadProxyCatalog();
 }
 function renderConnection(){
+  if(state.view!=='connection')return;
   renderApiState();
   const c=state.status.collector,r=c.network||{kind:"mtproxy_auto"},p=state.status.protection||{};
   const route=tr({direct:"Direct connection",socks5:"SOCKS5 proxy",http:"HTTP CONNECT proxy",mtproxy:"MTProxy · experimental",
@@ -2284,7 +2336,6 @@ function renderConnection(){
   if(networkLoadedFor!==state.profile){
     $("network-kind").value=r.kind;$("network-host").value=r.host||"";$("network-port").value=String(r.port||1080);
     networkLoadedFor=state.profile;routeFields();
-    if(!state.status.demo)loadPolicy().catch(e=>toast(e.message,true));
   }
   $("network-form").querySelector('[type="submit"]').disabled=state.status.demo||c.running;
   $("network-test").disabled=state.status.demo;$("sign-out").disabled=state.status.demo;
@@ -2361,11 +2412,12 @@ $("network-import").addEventListener("click",e=>busy(e.currentTarget,async()=>{
 
 const exposureNames={hide:tr("Hide this server's address"),fallback:tr("Direct connection as a last resort"),
   tunnel:tr("Server behind a tunnel or VPN")};
-let policyOutsideDirty=false;
+let policyOutsideDirty=false,policyFormDirty=false;
 function renderPolicy(p){
-  state.policy=p;policyOutsideDirty=false;
+  if(state.view!=='connection')return;
+  state.policy=p;policyOutsideDirty=false;policyFormDirty=false;
   $("policy-summary").textContent=exposureNames[p.exposure];
-  document.querySelectorAll('input[name="exposure"]').forEach(n=>n.checked=n.value===p.exposure);
+  viewQueries("connection",'input[name="exposure"]').forEach(n=>n.checked=n.value===p.exposure);
   $("outside-enabled").checked=p.outside_enabled;
   const proxy=p.outside_proxy;
   $("outside-kind").value=proxy?.kind||"";$("outside-host").value=proxy?.host||"";
@@ -2387,14 +2439,15 @@ function outsideFields(){
   $("outside-kind").parentElement.hidden=!$("outside-enabled").checked;
 }
 async function loadPolicy(){
-  const profile=state.profile,p=await json("network/policy");
-  if(profile===state.profile)renderPolicy(p);
+  const profile=state.profile,p=await json("network/policy",undefined,viewOptions('connection'));
+  if(profile===state.profile){if(policyFormDirty)state.policy=p;else renderPolicy(p);}
 }
+for(const event of ['input','change'])$("policy-form").addEventListener(event,()=>{policyFormDirty=true;});
 for(const id of ["outside-kind","outside-host","outside-port","outside-username","outside-password"])
   $(id).addEventListener("input",()=>{policyOutsideDirty=true;outsideFields();});
 $("outside-enabled").addEventListener("change",outsideFields);
 $("policy-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
-  const kind=$("outside-kind").value,body={exposure:document.querySelector('input[name="exposure"]:checked')?.value||"hide",
+  const kind=$("outside-kind").value,body={exposure:viewQuery("connection",'input[name="exposure"]:checked')?.value||"hide",
     outside_enabled:$("outside-enabled").checked,outside_proxy:null,remove_outside_proxy:false};
   if(policyOutsideDirty&&kind)body.outside_proxy={kind,host:$("outside-host").value.trim(),port:Number($("outside-port").value),
     username:$("outside-username").value,password:$("outside-password").value};
@@ -2454,7 +2507,7 @@ async function loadAccountFiles(){
     converted=true;renderApiState();return result;
   }catch(error){
     if(revision===state.workspaceRevision&&selection===accountImportRevision&&/passcode/i.test(error.message)){
-      document.querySelector(".import-advanced").open=true;$("tdata-passcode").focus();
+      viewQuery("connection",".import-advanced").open=true;$("tdata-passcode").focus();
     }
     throw error;
   }finally{if(revision===state.workspaceRevision&&selection===accountImportRevision){if(converted)input.value="";renderSelectedFiles();$("tdata-passcode").value="";authProgress("");}}
@@ -2602,10 +2655,9 @@ function avatarNode(id,name,size="",profile=state.profile){
   loadAvatar(id,profile).then(url=>{if(url){const img=node("img");img.alt="";img.src=url;n.replaceChildren(img);}});
   return n;
 }
-const fmtTime=v=>v?new Date(v).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
-const fmtDay=v=>v?new Date(v).toLocaleDateString([],{weekday:"long",day:"numeric",month:"long",year:"numeric"}):tr("Unknown date");
-const fmtFull=v=>v?new Date(v).toLocaleString():tr("unknown time");
-function fmtShort(v){if(!v)return "";const d=new Date(v);return d.toDateString()===new Date().toDateString()?fmtTime(v):d.toLocaleDateString([],{day:"numeric",month:"short"});}
+const fmtDay=value=>panelTime?.day(value)??tr("Unknown date");
+const fmtFull=value=>fmtTime(value);
+const fmtShort=value=>value?fmtTime(value,{mode:"relative"}):"";
 function humanSize(n){if(n===null||n===undefined)return "";const u=["B","KB","MB","GB"];let i=0;while(n>=1024&&i<3){n/=1024;i++;}return n.toFixed(i?1:0)+" "+u[i];}
 const serviceLabels={MessageActionChatAddUser:tr("added a member"),MessageActionChatDeleteUser:tr("removed a member or left"),
   MessageActionChatJoinedByLink:tr("joined via invite link"),MessageActionChatJoinedByRequest:tr("joined after a join request"),
@@ -2622,20 +2674,25 @@ function recheckText(c){
   if(!c.recheck)return " "+tr("Telegram is asked again every {n} min for anything missed.",{n:c.recheck_minutes});
   return " "+tr("Last recheck {time}: {recovered} recovered, {missing} not found.",{time:fmtTime(c.recheck.at),recovered:c.recheck.recovered,missing:c.recheck.missing});
 }
-function modeSummary(s){
+function recordingMode(s){
   const m=s.monitoring||{},on=["messages","edits","deletions","reactions","membership"].filter(k=>m[k]);
-  const mode=on.length===5?tr("Everything"):on.join()==="messages,edits,deletions"?tr("Messages, edits & deletions"):
+  return on.length===5?tr("Everything"):on.join()==="messages,edits,deletions"?tr("Messages, edits & deletions"):
     on.length?tr("Custom: {list}",{list:on.map(termText).join(", ")}):tr("Nothing selected");
+}
+function modeSummary(s){
   const free=s.collector?.disk_free_bytes,files=s.capture?.download_media?tr("photos & files up to {n} MB each",{n:mediaLimit(s.capture)})
     +(free?" · "+tr("{size} free on disk",{size:humanSize(free)}):""):tr("photos & files not saved");
-  return tr("Mode: {mode}",{mode})+" · "+files;
+  return tr("Mode: {mode}",{mode:recordingMode(s)})+" · "+files;
+}
+async function openRecordingSettings(){
+  await navigate("sources");sourcesView?.showTab('recording');$("capture-form").scrollIntoView({block:"start"});
 }
 const exportRunning=()=>multiRunning()||state.status?.collector.chat_export?.phase==="running";
 async function refreshChats(refresh=false){
-  if(!state.status)return;
+  if(!state.status||state.view!=='chats')return;
   void resumeMulti();
-  const revision=state.workspaceRevision,result=await json("chats");
-  if(revision!==state.workspaceRevision)return;
+  const revision=state.workspaceRevision,result=await json("chats",undefined,viewOptions('chats'));
+  if(revision!==state.workspaceRevision||state.view!=='chats')return;
   state.chats=result.chats;
   if(state.chat!==null&&!state.chats.some(c=>c.chat_id===state.chat))beginChat(null);
   if(state.chat===null&&state.chats.length){beginChat((state.chats.find(c=>c.enabled)||state.chats[0]).chat_id);refresh=false;}
@@ -2643,39 +2700,22 @@ async function refreshChats(refresh=false){
   if(state.chat===null){renderChatEmpty();return;}
   return await loadChatMessages(refresh?"refresh":"open");
 }
-function renderChatsList(){
-  const list=$("chats-list");list.replaceChildren();
-  const query=$("chat-search").value.trim().toLocaleLowerCase();
-  for(const c of state.chats){
-    if(query&&!`${c.title||""} ${c.chat_id}`.toLocaleLowerCase().includes(query))continue;
-    const title=c.title||tr("Chat {id}",{id:c.chat_id}),row=node("button","chat-item"+(c.chat_id===state.chat?" active":""));row.type="button";
-    const body=node("span","chat-item-body"),top=node("span","chat-item-top"),bottom=node("span","chat-item-bottom");
-    top.append(node("span","chat-item-title",title),node("span","chat-item-time",fmtShort(c.last_observed_at)));
-    bottom.append(node("span","chat-item-preview",c.last_text?(c.last_sender?c.last_sender+": ":"")+c.last_text:tr(c.messages?"Media or service message":"No messages saved yet")));
-    const badges=node("span","chat-item-badges");
-    if(c.deleted)badges.append(node("span","pill pill-deleted",tr("{n} deleted",{n:c.deleted})));
-    if(c.missing)badges.append(node("span","pill pill-missing",tr("{n} not found",{n:c.missing})));
-    if(c.edited)badges.append(node("span","pill pill-edited",tr("{n} edited",{n:c.edited})));
-    if(!c.enabled)badges.append(node("span","pill",tr("paused")));
-    body.append(top,bottom,badges);row.append(avatarNode(c.chat_id,title),body);
-    row.setAttribute("aria-pressed",String(c.chat_id===state.chat));
-    row.addEventListener("click",()=>openChat(c.chat_id).catch(e=>toast(e.message,true)));
-    list.append(row);
-  }
-  if(!state.chats.length)list.append(node("p","hint chats-none",tr("No chats chosen yet.")));
-  else if(!list.children.length)list.append(node("p","hint chats-none",tr("No chats match your search.")));
-}
-$("chat-search").addEventListener("input",renderChatsList);
-$("chat-search").addEventListener("keydown",e=>{if(e.key==="Escape"){$("chat-search").value="";renderChatsList();}});
+let chatListView=null;
+const chatListReady=import('./views/chat-list.js?v=12').then(({createChatList})=>{
+  chatListView=createChatList({root:panelRoots.get('chats'),tr,node,icon,avatarNode,timeNode,getState:()=>state,
+    getSession:()=>state.workspaceRevision+':'+state.profile,may,json,refreshStatus,openChat,toast});
+  return chatListView;
+});
+function renderChatsList(){chatListView?.render();}
 $("chat-back").addEventListener("click",()=>{
-  document.querySelector(".chats-shell").dataset.panel="list";
+  viewQuery("chats",".chats-shell").dataset.panel="list";
   $("chat-search").focus({preventScroll:true});
 });
 document.querySelectorAll("[data-demo-filter]").forEach(button=>button.addEventListener("click",()=>busy(button,async()=>{
   if(!state.status?.demo)return;
   const revision=state.workspaceRevision;
-  state.chatFilter=button.dataset.demoFilter;state.chatAuthor=null;
-  document.querySelector(".chats-shell").dataset.panel="chat";
+  state.chatFilter=button.dataset.demoFilter;state.chatView="messages";state.chatAuthor=null;
+  viewQuery("chats",".chats-shell").dataset.panel="chat";
   if(state.view!=="chats")navigate("chats");
   await refreshChats();
   if(revision!==state.workspaceRevision||state.view!=="chats")return;
@@ -2686,13 +2726,13 @@ document.querySelectorAll("[data-demo-filter]").forEach(button=>button.addEventL
 function beginChat(id){
   $("export-dialog").close("cancel");
   chatGeneration++;chatReady=false;state.chat=id;state.chatInfo=null;state.chatMessages=[];
-  state.chatNextBefore=null;state.chatAuthor=null;state.chatProfile=null;
-  if(state.chatFilter==="people")state.chatFilter="all";
+  state.chatNextBefore=null;state.chatNextAfter=null;state.chatAuthor=null;state.chatProfile=null;
+  state.chatView="messages";
   renderComposer();renderChat();renderChatsList();
 }
-async function openChat(id){
-  document.querySelector(".chats-shell").dataset.panel="chat";
-  beginChat(id);const loaded=await loadChatMessages("open");
+async function openChat(id,options={}){
+  viewQuery("chats",".chats-shell").dataset.panel="chat";
+  beginChat(id);if(options.history!==false)window.TgWitnessRouter?.record({view:"chats",chatId:id,seq:null});const loaded=await loadChatMessages("open");
   if(loaded)loadChatProfile().catch(()=>{});
   return loaded;
 }
@@ -2703,34 +2743,50 @@ function fmtDuration(seconds){
   return tr("~{h} h {m} min",{h:Math.floor(seconds/3600),m:Math.round(seconds%3600/60)});
 }
 async function loadChatMessages(mode){
-  const id=state.chat,revision=state.workspaceRevision,generation=chatGeneration,feed=$("chat-feed"),params=new URLSearchParams({limit:"60"});
-  if(mode==="older"&&state.chatNextBefore)params.set("before_id",String(state.chatNextBefore));
+  const id=state.chat,revision=state.workspaceRevision,generation=chatGeneration,feed=$("chat-feed");
+  const atBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<80;
+  if(mode==='refresh'&&(chatPagePending?.generation===generation||state.chatNextAfter!==null||(state.chatView==='messages'&&!atBottom))){renderChat();return true;}
+  if((mode==='older'&&state.chatNextBefore===null)||(mode==='newer'&&state.chatNextAfter===null))return true;
+  const request=++chatPageRequest,params=new URLSearchParams({limit:String(mode==='refresh'?Math.min(200,Math.max(60,state.chatMessages.length)):60)});
+  if(mode==="older")params.set("before_id",String(state.chatNextBefore));
+  if(mode==="newer")params.set("after_id",String(state.chatNextAfter));
+  chatPagePending={request,generation};
   let result;
-  try {result=await json("chats/"+encodeURIComponent(id)+"/messages?"+params);}
+  try {result=await json("chats/"+encodeURIComponent(id)+"/messages?"+params,undefined,viewOptions('chats'));}
   catch(error){
-    if(error instanceof StaleView||revision!==state.workspaceRevision||id!==state.chat||generation!==chatGeneration)return;
+    if(error instanceof StaleView||error.name==='AbortError'||request!==chatPageRequest||state.view!=='chats'||revision!==state.workspaceRevision||id!==state.chat||generation!==chatGeneration)return;
     feed.querySelector(".refresh-notice")?.remove();
     const notice=viewState("error",tr("Could not load data"),tr("Saved content remains available. Try loading again."),tr("Retry"),()=>loadChatMessages(mode));
     if(state.chatMessages.length){notice.classList.add("refresh-notice");feed.prepend(notice);}else feed.replaceChildren(notice);
     return false;
   }
-  if(revision!==state.workspaceRevision||id!==state.chat||generation!==chatGeneration)return;
+  finally{if(chatPagePending?.request===request)chatPagePending=null;}
+  if(request!==chatPageRequest||state.view!=='chats'||revision!==state.workspaceRevision||id!==state.chat||generation!==chatGeneration)return;
   const known=state.chatMessages.reduce((last,m)=>Math.max(last,m.message_id),0);
-  const atBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<80,height=feed.scrollHeight,top=feed.scrollTop;
-  const merged=new Map((mode==="open"?[]:state.chatMessages).map(m=>[m.message_id,m]));
+  const bounds=feed.getBoundingClientRect(),visible=[...feed.querySelectorAll('.msg,.chat-service[id]')].find(row=>{const r=row.getBoundingClientRect();return r.bottom>bounds.top&&r.top<bounds.bottom;});
+  const anchor=visible?{id:visible.id,offset:visible.getBoundingClientRect().top-bounds.top}:null,top=feed.scrollTop;
+  const reset=mode==='open'||mode==='latest'||(mode==='refresh'&&result.messages.length&&result.messages[0].message_id>known);
+  const previousBefore=state.chatNextBefore,previousAfter=state.chatNextAfter;
+  const merged=new Map((reset?[]:state.chatMessages).map(m=>[m.message_id,m]));
   result.messages.forEach(m=>merged.set(m.message_id,m));
-  state.chatMessages=[...merged.values()].sort((a,b)=>a.message_id-b.message_id);
-  if(mode!=="refresh")state.chatNextBefore=result.next_before;
+  const ordered=[...merged.values()].sort((a,b)=>a.message_id-b.message_id);
+  state.chatMessages=mode==='older'?ordered.slice(0,200):ordered.slice(-200);
+  const first=state.chatMessages[0]?.message_id,last=state.chatMessages.at(-1)?.message_id;
+  if(reset){state.chatNextBefore=result.next_before;state.chatNextAfter=result.next_after??null;}
+  else if(mode==='older'){state.chatNextBefore=result.next_before;state.chatNextAfter=ordered.length>200?last:previousAfter;}
+  else if(mode==='newer'){state.chatNextBefore=ordered.length>200?first:previousBefore;state.chatNextAfter=result.next_after??null;}
+  else{state.chatNextBefore=ordered.length>200?first:first===result.messages[0]?.message_id?result.next_before:previousBefore;state.chatNextAfter=result.next_after??null;}
   chatReady=true;renderChat();
 
   if(mode==="open")replay(feed,"entering",900);
   else if(mode==="refresh")state.chatMessages.forEach(m=>{if(m.message_id>known)$("msg-"+m.message_id)?.classList.add("fresh");});
-  if(mode==="open"||(mode==="refresh"&&atBottom))feed.scrollTop=feed.scrollHeight;
-  else if(mode==="older")feed.scrollTop=feed.scrollHeight-height+top;
+  if(mode==="open"||mode==='latest'||(mode==="refresh"&&atBottom))feed.scrollTop=feed.scrollHeight;
+  else{const kept=anchor&&feed.querySelector('#'+CSS.escape(anchor.id));
+    if(kept)feed.scrollTop+=kept.getBoundingClientRect().top-feed.getBoundingClientRect().top-anchor.offset;else feed.scrollTop=top;}
   return true;
 }
 function renderChatEmpty(){
-  document.querySelector(".chats-shell").dataset.panel="chat";
+  viewQuery("chats",".chats-shell").dataset.panel="chat";
   const box=$("chat-empty"),s=state.status;show("chat-main",false);show("chat-empty",true);box.replaceChildren();
   if(!s)return;
   const add=(title,text,label,view)=>{box.append(node("h2","",title),node("p","",text));
@@ -2740,46 +2796,65 @@ function renderChatEmpty(){
   else add(tr("Select a chat"),tr("Pick a chat on the left to see its messages."));
 }
 function renderChat(){
+  if(state.view!=='chats')return;
   const info=state.chats.find(c=>c.chat_id===state.chat);state.chatInfo=info||null;
   if(!info){renderChatEmpty();return;}
   show("chat-empty",false);show("chat-main",true);
   const title=info.title||tr("Chat {id}",{id:info.chat_id}),avatar=avatarNode(info.chat_id,title,"lg");avatar.id="chat-avatar";
   $("chat-avatar").replaceWith(avatar);$("chat-name").textContent=title;
-  $("chat-sub").textContent=[termText(info.kind),tr("{n} saved",{n:(info.messages||0).toLocaleString()}),info.deleted?tr("{n} deleted",{n:info.deleted}):"",
+  const kind={supergroup:tr("Group"),megagroup:tr("Group"),group:tr("Group"),chat:tr("Group"),channel:tr("Channel"),broadcast:tr("Channel"),bot:tr("Bot"),user:tr("Private chat"),private:tr("Private chat")}[info.kind]||termText(info.kind);
+  $("chat-sub").textContent=[kind,tr("{n} saved",{n:(info.messages||0).toLocaleString()}),info.deleted?tr("{n} deleted",{n:info.deleted}):"",
     info.missing?tr("{n} not found",{n:info.missing}):"",info.edited?tr("{n} edited",{n:info.edited}):""].filter(Boolean).join(" · ");
   renderChatStatus();renderMulti();renderChatFeed();renderComposer();
 }
 function renderChatStatus(){
+  if(state.view!=='chats')return;
   const box=$("chat-status"),s=state.status,info=state.chatInfo;if(!info||!s||$("chat-main").hidden)return;
+  const current=s.collector,key=JSON.stringify([state.workspaceRevision,chatGeneration,info.enabled,s.demo,s.chats_limited,state.me?.permissions,
+    current.has_session,current.running,current.connected,current.storage_low,current.storage_low&&current.disk_free_bytes,
+    modeSummary(s),recheckText(current),state.chatFilter,state.chatView,state.chatAuthor,state.chatProfile,s.analysis?.enabled,exportRunning()]);
+  if(box.renderKey===key)return;box.renderKey=key;
   const focusedFilter=box.contains(document.activeElement)?document.activeElement.dataset.chatFilter:null;
-  const c=s.collector,contextOpen=!!box.querySelector(".chat-context[open]");box.replaceChildren();
-  const state_=node("div","chat-state"),say=(cls,text)=>{state_.className="chat-state "+cls;const t=node("span","",text);t.title=text;state_.append(t);};
+  const focusedView=box.contains(document.activeElement)?document.activeElement.dataset.chatView:null;
+  const c=s.collector;box.replaceChildren();
+  const state_=node("div","chat-state"),say=(cls,text,description=text)=>{state_.className="chat-state "+cls;const t=node("span","",text);t.title=description;state_.append(t);};
+  state_.setAttribute('role','status');
   const action=(cls,label,work)=>{const b=node("button",cls+" small",label);b.type="button";b.addEventListener("click",()=>busy(b,work));state_.append(b);return b;};
   if(s.demo)say("info",tr("Demo with fictional messages. Deleted messages are red; edited ones keep every saved version."));
-  else if(!info.enabled){say("warn",tr("This chat is paused — nothing in it is being saved."));if(viewAllowed("sources"))action("secondary",tr("Choose chats"),async()=>navigate("sources"));}
-  else if(!c.running){say("warn",tr("Observation is off — new messages, edits and deletions are not being saved."));
-    if(may("collect")&&!s.chats_limited)action("primary",tr("Start observation"),async()=>{await json("collector/start",{});await refreshStatus();toast(tr("Observation started. New messages, edits and deletions will appear here."));}).disabled=!c.has_session;}
-  else if(c.storage_low)say("warn",tr("Observing, but the disk is almost full ({size} free): photos & files are paused until space is freed. Messages are still saved.",{size:humanSize(c.disk_free_bytes)}));
-  else say(c.connected?"ok":"warn",c.connected?tr("Observing — new messages, edits and deletions are saved as they happen.")+recheckText(c):tr("Reconnecting to Telegram — missed changes are requested again once connected."));
-  const mode=node("div","chat-mode"),summary=node("span","",modeSummary(s));summary.title=summary.textContent;mode.append(summary);
-  if(!s.demo&&viewAllowed("sources")){const change=node("button","text-link",tr("Change"));change.type="button";change.addEventListener("click",()=>{navigate("sources");$("source-options").open=true;$("source-options").scrollIntoView({block:"start"});});mode.append(change);}
+  else if(!info.enabled){say("warn",tr("Chat paused"),tr("This chat is paused — nothing in it is being saved."));if(viewAllowed("sources"))action("text-link",tr("Choose chats"),async()=>navigate("sources"));}
+  else if(!c.has_session){say("warn",tr("Account not connected"));if(viewAllowed("connection"))action("text-link",tr("Connect account"),async()=>navigate("connection"));}
+  else if(!c.running){say("warn",tr("Observation off"),tr("Observation is off — new messages, edits and deletions are not being saved."));
+    if(may("collect")&&!s.chats_limited)action("text-link",tr("Start observation"),async()=>{await json("collector/start",{});await refreshStatus();toast(tr("Observation started. New messages, edits and deletions will appear here."));});}
+  else if(c.storage_low)say("warn",tr("Files paused: low disk space"),tr("Observing, but the disk is almost full ({size} free): photos & files are paused until space is freed. Messages are still saved.",{size:humanSize(c.disk_free_bytes)}));
+  else say(c.connected?"ok":"warn",c.connected?tr("Observing"):tr("Reconnecting to Telegram"),c.connected?tr("Observing — new messages, edits and deletions are saved as they happen.")+recheckText(c):tr("Reconnecting to Telegram — missed changes are requested again once connected."));
+  const mode=node("div","chat-mode-chips");
+  for(const [name,label] of [['mode',tr("Mode: {mode}",{mode:recordingMode(s)})],['files',s.capture?.download_media?tr("Files ≤ {n} MB",{n:mediaLimit(s.capture)}):tr("Files off")]]){
+    const allowed=!s.demo&&viewAllowed('sources'),chip=node(allowed?'button':'span','chat-setting-chip',label);chip.dataset.recording=name;chip.title=modeSummary(s);
+    if(allowed){chip.type='button';chip.setAttribute('aria-label',label+' · '+tr('Recording settings'));chip.addEventListener('click',()=>busy(chip,openRecordingSettings));}mode.append(chip);
+  }
   const filters=node("div","chat-filters");filters.setAttribute("role","group");filters.setAttribute("aria-label",tr("Show messages"));
-  for(const [key,label] of [["all",tr("All")],["deleted",tr("Deleted")],["edited",tr("Edited")],["people",tr("People")]]){
+  for(const [key,label] of [["all",tr("All")],["deleted",tr("Deleted")],["edited",tr("Edited")],["media",tr("Media")]]){
     const f=node("button","filter"+(state.chatFilter===key?" active":""),label);f.type="button";
     f.dataset.chatFilter=key;
     f.setAttribute("aria-pressed",String(state.chatFilter===key));
-    f.addEventListener("click",()=>{state.chatFilter=key;if(key==="people")state.chatAuthor=null;renderChatStatus();renderChatFeed();});filters.append(f);
+    f.addEventListener("click",()=>{state.chatFilter=key;renderChatStatus();renderChatFeed();});filters.append(f);
   }
-  const details=node("details","chat-context"),contextTitle=node("summary","",tr("Collection"));
-  details.open=contextOpen;details.append(contextTitle,mode,profileNode());
-  const toolbar=node("div","chat-filter-row");toolbar.append(filters);
-  if(!s.demo){box.append(state_);toolbar.append(details);}
+  const tabs=node('div','chat-view-tabs');tabs.setAttribute('role','group');tabs.setAttribute('aria-label',tr('Chat views'));
+  const views=[['messages',tr('Messages')],['people',tr('People')],['profile',tr('Profile')]];
+  if(s.analysis?.enabled&&!s.demo&&viewAllowed('analysis'))views.push(['ai',tr('AI context')]);
+  for(const [name,label] of views){const tab=node('button','filter'+(state.chatView===name?' active':''),label);tab.type='button';tab.dataset.chatView=name;
+    tab.setAttribute('aria-pressed',String(state.chatView===name));tab.addEventListener('click',()=>{
+      if(name==='ai'){busy(tab,async()=>{const chat=state.chat,revision=state.workspaceRevision;await navigate('analysis');
+        if(revision===state.workspaceRevision)await window.TgWitnessAnalysis?.focusChat(chat);});return;}
+      state.chatView=name;renderChatStatus();renderChatFeed();renderComposer();});tabs.append(tab);}
+  const toolbar=node("div","chat-filter-row");toolbar.append(filters);toolbar.hidden=state.chatView!=='messages';
+  if(!s.demo){box.append(state_,mode);}
   else {
     const hint=node("span","visually-hidden",tr("Demo with fictional messages. Deleted messages are red; edited ones keep every saved version."));
     box.append(hint);
   }
-  box.append(toolbar);
-  if(state.chatAuthor!==null&&state.chatFilter!=="people"){
+  box.append(tabs,toolbar);
+  if(state.chatAuthor!==null&&state.chatView==='messages'){
     const who=state.chatMessages.find(m=>m.sender?.id===state.chatAuthor),chip=node("div","chat-author-chip");
     const author=who?senderName(who):"ID "+state.chatAuthor;chip.append(node("span","",tr("Showing only messages from {name}",{name:author})));
     const clear=node("button","text-link",tr("Show everyone"));clear.type="button";
@@ -2789,18 +2864,24 @@ function renderChatStatus(){
   $("chat-load-history").disabled=blocked;$("chat-history-limit").disabled=blocked;
   $("chat-export-start").disabled=s.demo||!c.has_session||exportRunning();
   if(focusedFilter)box.querySelector('[data-chat-filter="'+focusedFilter+'"]')?.focus({preventScroll:true});
+  if(focusedView)box.querySelector('[data-chat-view="'+focusedView+'"]')?.focus({preventScroll:true});
 }
 function renderChatFeed(){
+  if(state.view!=='chats')return;
   const feed=$("chat-feed"),s=state.status,info=state.chatInfo;
-  if(state.chatFilter==="people"){
+  if(state.chatView==="people"){
     const generation=chatGeneration;
     if(!feed.querySelector(".people"))feed.replaceChildren(viewState("loading",tr("Loading…")));
     renderPeople(feed).catch(error=>{
-      if(error instanceof StaleView||state.chatFilter!=="people"||generation!==chatGeneration)return;
+      if(error instanceof StaleView||state.chatView!=="people"||generation!==chatGeneration)return;
       const notice=viewState("error",tr("Could not load data"),"",tr("Retry"),()=>renderChatFeed());
       if(feed.querySelector(".people")){feed.querySelector(".refresh-notice")?.remove();notice.classList.add("refresh-notice");feed.prepend(notice);}
       else feed.replaceChildren(notice);
     });return;
+  }
+  if(state.chatView==='profile'){
+    const key=JSON.stringify([state.chat,state.chatProfile,s.demo,s.collector.has_session,may('sources')]);
+    if(feed.firstElementChild?.profileKey!==key){const profile=profileNode(true);profile.profileKey=key;feed.replaceChildren(profile);}return;
   }
   const expanded=new Map([...feed.querySelectorAll(".msg")].map(row=>[row.id,{
     versions:!!row.querySelector(".versions"),author:!!row.querySelector(".sender-details[open]")
@@ -2808,29 +2889,49 @@ function renderChatFeed(){
   const active=document.activeElement,focusRow=feed.contains(active)?active.closest(".msg")?.id:null;
   const focusSelector=active.matches("button.pill-edited")?"button.pill-edited":
     active.matches(".sender-details > summary")?".sender-details > summary":null;
-  feed.replaceChildren();
-  if(!chatReady){feed.append(viewState("loading",tr("Loading…")));return;}
-  const shown=state.chatMessages.filter(m=>(state.chatFilter==="all"||(state.chatFilter==="deleted"?m.deleted||m.missing:m.edited))
+  const oldRows=new Map([...feed.querySelectorAll('.msg')].map(row=>[row.id,row])),days=new Map([...feed.querySelectorAll('.chat-day')].map(day=>[day.dataset.day,day])),next=[],replaced=new Set();
+  if(!chatReady){feed.replaceChildren(viewState("loading",tr("Loading…")));return;}
+  const shown=state.chatMessages.filter(m=>(state.chatFilter==="all"||(state.chatFilter==="deleted"?m.deleted||m.missing:state.chatFilter==='media'?m.has_media||m.media.length:m.edited))
     &&(state.chatAuthor===null||m.sender?.id===state.chatAuthor));
-  if(state.chatNextBefore){const older=node("button","quiet chat-older",tr("Show older messages"));older.type="button";
-    older.addEventListener("click",()=>busy(older,()=>loadChatMessages("older")));feed.append(older);}
+  if(shown.some(m=>m.has_media&&!m.media.length)){
+    const key=JSON.stringify([s.demo,may('sources'),s.capture?.download_media]);let notice=feed.querySelector('.chat-media-notice');
+    if(!notice||notice.renderKey!==key){notice=node('aside','chat-media-notice');notice.setAttribute('role','note');notice.renderKey=key;
+      notice.append(icon('clip'),node('span','',tr('Some attachment files have not been saved.')));
+      if(!s.demo&&viewAllowed('sources')){const settings=node('button','text-link',tr('File saving settings'));settings.type='button';
+        settings.title=tr('Applies to future captures. Earlier files may no longer be available.');settings.addEventListener('click',()=>busy(settings,openRecordingSettings));notice.append(settings);}}
+    next.push(notice);
+  }
+  if(state.chatNextBefore){let older=feed.querySelector('.chat-older');if(!older){older=node("button","quiet chat-older",tr("Show older messages"));older.type="button";
+    older.addEventListener("click",()=>busy(older,()=>loadChatMessages("older")));}next.push(older);}
+  const newer=()=>{
+    if(state.chatNextAfter===null)return;
+    let controls=feed.querySelector('.chat-newer');if(!controls){controls=node('div','chat-newer');
+      for(const [mode,label] of [['newer',tr('Show newer messages')],['latest',tr('Back to latest')]]){const button=node('button','quiet',label);button.type='button';button.dataset.chatPage=mode;
+        button.addEventListener('click',()=>busy(button,()=>loadChatMessages(mode)));controls.append(button);}}
+    next.push(controls);
+  };
   if(!shown.length){
     const filtered=state.chatFilter!=="all"||state.chatAuthor!==null;
     const empty=filtered?viewState("filtered-empty",tr("No messages match these filters"),tr(state.chatNextBefore?"Older messages are not loaded yet — use “Show older messages”.":"Try another filter or show all saved messages."),tr("Clear filters"),()=>{state.chatFilter="all";state.chatAuthor=null;renderChatStatus();renderChatFeed();}):
       viewState("empty",tr("No messages saved for this chat yet"),tr(s.demo?"This demo chat has no messages.":"Load recent messages from Telegram to see the conversation. Keep observation on to catch new messages, edits and deletions."),tr("Load last 100 messages"),!s.demo&&s.collector.has_session&&info.enabled?b=>loadHistory(b,100):null);
     empty.classList.add("chat-feed-empty");
-    feed.append(empty);return;
+    next.push(empty);newer();placeChildren(feed,next);return;
   }
   const byId=new Map(state.chatMessages.map(m=>[m.message_id,m]));
   let lastDay=null,lastSender=null,lastTime=0;
   for(const m of shown){
-    const when=m.sent_at||m.versions[0]?.observed_at||m.deleted_observed_at,day=when?new Date(when).toDateString():"unknown";
-    if(day!==lastDay){feed.append(node("div","chat-day",fmtDay(when)));lastDay=day;lastSender=null;}
-    if(m.service_action){feed.append(node("div","chat-service",senderName(m)+" "+serviceText(m.service_action)+" · "+fmtTime(when)));lastSender=null;continue;}
+    const when=m.sent_at||m.versions[0]?.observed_at||m.deleted_observed_at,day=panelTime.dayKey(when);
+    if(day!==lastDay){const chip=days.get(day)||node("div","chat-day"),label=fmtDay(when);chip.dataset.day=day;
+      if(chip.textContent!==label)chip.textContent=label;chip.title=label;next.push(chip);lastDay=day;lastSender=null;}
+    if(m.service_action){const service=node("div","chat-service",senderName(m)+" "+serviceText(m.service_action)+" · ");service.id='msg-'+m.message_id;service.append(timeNode(when));next.push(service);lastSender=null;continue;}
     const sid=m.sender?.id??null,t=when?new Date(when).getTime():0,grouped=sid!==null&&sid===lastSender&&t>=lastTime&&t-lastTime<300000;
-    lastSender=sid;lastTime=t;feed.append(messageRow(m,grouped,byId));
+    lastSender=sid;lastTime=t;
+    const old=oldRows.get('msg-'+m.message_id),key=JSON.stringify([chatGeneration,m,grouped,m.reply_to&&byId.get(m.reply_to),may('interact'),s.demo,s.collector.has_session]);
+    if(old?.renderKey===key)next.push(old);else{const row=messageRow(m,grouped,byId);row.renderKey=key;next.push(row);replaced.add(row.id);}
   }
+  newer();placeChildren(feed,next);
   for(const row of feed.querySelectorAll(".msg")){
+    if(!replaced.has(row.id))continue;
     const previous=expanded.get(row.id);if(!previous)continue;
     if(previous.versions)row.querySelector("button.pill-edited")?.click();
     if(previous.author&&row.querySelector(".sender-details"))row.querySelector(".sender-details").open=true;
@@ -2842,22 +2943,23 @@ function messageRow(m,grouped,byId){
   const name=senderName(m),bubble=node("div","bubble");
   row.append(grouped?node("span","avatar-spacer"):avatarNode(m.sender?.id,name));
   if(!grouped){const head=node("div","bubble-head"),details=node("details","sender-details"),summary=node("summary"),facts=node("div","sender-facts");
-    summary.title=tr("Author details");summary.append(node("span","sender",name));
+    summary.title=m.sender?.username?'@'+m.sender.username:tr("Author details");summary.setAttribute('aria-label',tr('Author details')+': '+name);summary.append(node("span","sender",name));
     if(m.sender?.username)facts.append(node("span","","@"+m.sender.username));
     if(m.sender?.id!==null&&m.sender?.id!==undefined)facts.append(node("span","","ID "+m.sender.id));
     if(!facts.children.length)facts.append(node("span","",tr("No saved author details")));
     details.append(summary,facts);head.append(details);bubble.append(head);}
   if(m.reply_to){
-    const target=byId.get(m.reply_to),quote=node("button","reply-quote");quote.type="button";
-    quote.append(node("b","",target?senderName(target):tr("Reply")),node("span","",target?(target.text||tr("[attachment]")):tr("to message #{id} (not saved)",{id:m.reply_to})));
-    if(target)quote.addEventListener("click",()=>{const el=$("msg-"+m.reply_to);if(!el)return;el.scrollIntoView({block:"center",behavior:"smooth"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1600);});
-    else quote.disabled=true;
+    const target=byId.get(m.reply_to),quote=node(target?'button':'div',target?'reply-quote':'reply-unavailable');
+    if(target){quote.type='button';quote.append(node('b','',senderName(target)),node('span','',target.text||tr('[attachment]')));
+      quote.addEventListener('click',()=>{let el=$('msg-'+m.reply_to);if(!el){state.chatFilter='all';state.chatAuthor=null;renderChatStatus();renderChatFeed();el=$('msg-'+m.reply_to);}if(!el)return;
+        el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1600);});}
+    else quote.textContent=tr('Reply to #{id} · outside this loaded window',{id:m.reply_to});
     bubble.append(quote);
   }
   if(m.captured){if(m.text)bubble.append(node("div","bubble-text",m.text));if(m.buttons)bubble.append(buttonsNode(m.buttons,m));}
   else bubble.append(node("div","bubble-text muted-text",tr(m.deleted?"Deleted before TgWitness could save it — only the deletion notice was recorded.":"Content was not saved.")));
   m.media.forEach(media=>bubble.append(mediaNode(media)));
-  if(m.has_media&&!m.media.length)bubble.append(node("div","media-chip",tr("Attachment not downloaded — turn on photo & file saving to keep files")));
+  if(m.has_media&&!m.media.length){const missing=node('span','media-missing');missing.title=tr('Attachment file not saved');missing.setAttribute('role','img');missing.setAttribute('aria-label',missing.title);missing.append(icon('clip'));bubble.append(missing);}
   const meta=node("div","bubble-meta");
   if(m.deleted){const d=node("span","pill pill-deleted",tr("Deleted"));d.title=tr("Deletion seen {time}. Telegram does not report who deleted it or exactly when.",{time:fmtFull(m.deleted_observed_at)});meta.append(d);}
   else if(m.missing){const d=node("span","pill pill-missing",tr("Not found at recheck"));d.title=tr("Telegram no longer returned this message at {time} and no deletion notice was received: deleted while notices were missed, removed by an auto-delete timer, or no longer visible to this account.",{time:fmtFull(m.missing_observed_at)});meta.append(d);}
@@ -2866,23 +2968,26 @@ function messageRow(m,grouped,byId){
     e.addEventListener("click",()=>{const open=bubble.querySelector(".versions");e.setAttribute("aria-expanded",String(!open));if(open){open.remove();return;}bubble.insertBefore(versionsNode(m),meta);});meta.append(e);}
   else if(m.edited){const e=node("span","pill pill-edited",tr("Edited"));e.title=tr("Telegram marks this message as edited; the earlier text was not saved.");meta.append(e);}
   if(!m.origins.includes("live")&&m.origins.includes("history")){const o=node("span","origin",tr("from history"));o.title=tr("Loaded from chat history, not seen live");meta.append(o);}
-  meta.append(node("span","time",fmtTime(m.sent_at||m.versions[0]?.observed_at)));
-  if(!state.status?.demo&&!m.deleted&&!m.missing&&may("interact")){const reply=node("button","text-link",tr("Reply"));reply.type="button";
+  meta.append(timeNode(m.sent_at||m.versions[0]?.observed_at,"time"));
+  if(!state.status?.demo&&state.status?.collector.has_session&&!m.deleted&&!m.missing&&may("interact")){const reply=node("button","text-link",tr("Reply"));reply.type="button";
     const generation=chatGeneration,revision=state.workspaceRevision;
     reply.addEventListener("click",()=>{if(!chatReady||generation!==chatGeneration||revision!==state.workspaceRevision)return;
       composeReply=m.message_id;renderComposer();$("chat-message").focus();});meta.append(reply);}
   bubble.append(meta);row.append(bubble);return row;
 }
+let peopleRequest=0;
 async function renderPeople(feed){
-  const id=state.chat,generation=chatGeneration,result=await json("chats/"+encodeURIComponent(id)+"/authors");
-  if(id!==state.chat||generation!==chatGeneration||state.chatFilter!=="people")return;
-  feed.replaceChildren();
+  const id=state.chat,generation=chatGeneration,request=++peopleRequest,result=await json("chats/"+encodeURIComponent(id)+"/authors",undefined,viewOptions('chats'));
+  if(request!==peopleRequest||state.view!=='chats'||id!==state.chat||generation!==chatGeneration||state.chatView!=="people")return;
+  const old=feed.querySelector('.people'),profiled=(state.status.dossiers||[]).includes(id),key=JSON.stringify([result,profiled]);
+  if(old?.renderKey===key&&old.chat===id){feed.querySelector('.refresh-notice')?.remove();return;}
   const box=node("div","people");
+  box.chat=id;box.profiled=profiled;box.renderKey=key;
   box.append(node("h3","",trn("{n} person with saved messages","{n} people with saved messages",result.authors.length)),
     node("p","hint",tr("Counted from messages saved in this workspace. Load history or export the chat for the full list. Names are the profile seen when the message was saved.")));
   if(result.deleted_without_author)box.append(node("p","hint",tr("{n} deleted message(s) were never saved, so their author is unknown.",{n:result.deleted_without_author})));
-  const profiled=(state.status.dossiers||[]).includes(id);
-  box.append(dossierBar(id,profiled));
+  const keepBar=old?.chat===id&&old.profiled===profiled?old.querySelector('.dossier-bar'):null;
+  if(!keepBar)box.append(dossierBar(id,profiled));
   const table=node("table","people-table"),head=node("tr");
   [tr("Person"),tr("Messages"),tr("Deleted"),tr("Edited"),tr("First"),tr("Last")].forEach((h,i)=>head.append(node("th",i>0&&i<4?"num":"",h)));
   const thead=node("thead");thead.append(head);table.append(thead);
@@ -2893,14 +2998,17 @@ async function renderPeople(feed){
     const text=node("div");text.append(node("b","",name),node("small","",[p.username?"@"+p.username:"",p.id!==null?"ID "+p.id:""].filter(Boolean).join(" · ")));
     card.append(text);who.append(card);
     row.append(who,node("td","num",String(p.messages)),node("td","num"+(p.deleted||p.missing?" bad":""),String(p.deleted)+(p.missing?" +"+tr("{n} not found",{n:p.missing}):"")),
-      node("td","num",String(p.edited)),node("td","",fmtShort(p.first_message_at)),node("td","",fmtShort(p.last_message_at)));
+      node("td","num",String(p.edited)),Object.assign(node("td"),{title:fmtTime(p.first_message_at)}),Object.assign(node("td"),{title:fmtTime(p.last_message_at)}));
+    row.children[row.children.length-2].append(timeNode(p.first_message_at));row.lastElementChild.append(timeNode(p.last_message_at));
     if(p.id!==null){row.tabIndex=0;row.title=tr(profiled&&p.id!==id?"Open this person's profile":"Show this person's messages");
       const open=profiled&&p.id!==id?()=>openDossier(p.id).catch(e=>toast(e.message,true)):
-        ()=>{state.chatAuthor=p.id;state.chatFilter="all";renderChatStatus();renderChatFeed();};
+        ()=>{state.chatAuthor=p.id;state.chatFilter="all";state.chatView='messages';renderChatStatus();renderChatFeed();renderComposer();};
       row.addEventListener("click",open);row.addEventListener("keydown",e=>{if(e.key==="Enter")open();});}
     body.append(row);
   }
-  table.append(body);box.append(table);feed.append(box);
+  table.append(body);box.append(table);
+  if(keepBar){placeChildren(old,[...box.children].filter(child=>child!==table).concat(keepBar,table));old.renderKey=key;feed.querySelector('.refresh-notice')?.remove();}
+  else feed.replaceChildren(box);
 }
 
 function dossierBar(chat,profiled){
@@ -2956,13 +3064,13 @@ function factSection(title,items,describe=item=>String(item.value)){
   section.append(list);return section;
 }
 async function openDossier(personId){
-  const generation=chatGeneration,revision=state.workspaceRevision;
+  const generation=chatGeneration,revision=state.workspaceRevision,context=viewContexts.get('chats');
   const value=await dossierData(state.chat),statement=value.statement;
-  if(generation!==chatGeneration||revision!==state.workspaceRevision)return;
+  if(generation!==chatGeneration||revision!==state.workspaceRevision||state.view!=='chats'||context?.signal.aborted)return;
   const person=statement.people.find(p=>p.id===personId);
   if(!person)throw new Error(tr("No profile for this person: they have no saved message in this chat."));
   const nameOf=id=>{const other=statement.people.find(p=>p.id===id);return other?.names.at(-1)?.value||tr("User {id}",{id});};
-  previouslyFocused=document.activeElement;state.drawerSeq="dossier";
+  previouslyFocused=document.activeElement;state.drawerSeq="dossier";window.TgWitnessJournal?.closeDetail();
   const content=$("detail-content");content.replaceChildren();
   const head=node("div","dossier-head"),h=node("h2","",nameOf(person.id));h.id="detail-title";
   head.append(avatarNode(person.id,nameOf(person.id),"lg"),h);content.append(head);
@@ -3022,7 +3130,7 @@ async function openDossier(personId){
     factSection(tr("Phone numbers mentioned"),m.phones),factSection(tr("Usernames mentioned"),m.usernames),factSection(tr("Links"),m.links),
     factSection(tr("Matches of your patterns"),m.patterns||[],item=>item.value+(item.detail?" · "+item.detail:"")));
   const show_=node("button","secondary",tr("Show this person's messages"));show_.type="button";
-  show_.addEventListener("click",()=>{closeDetail();state.chatAuthor=person.id;state.chatFilter="all";renderChatStatus();renderChatFeed();});
+  show_.addEventListener("click",()=>{closeDetail();state.chatAuthor=person.id;state.chatFilter="all";state.chatView='messages';renderChatStatus();renderChatFeed();renderComposer();});
   const limits=node("details","detail-block");limits.append(node("summary","",tr("What a profile can and cannot show")));
   const ul=node("ul");statement.limitations.forEach(x=>ul.append(node("li","",x)));limits.append(ul);
   content.append(show_,limits,node("p","detail-hash",tr("Built {time} from {n} journal records · signed with this workspace's key",{time:fmtFull(statement.built_at),n:Object.keys(statement.record_hashes).length})));
@@ -3071,20 +3179,22 @@ function buttonsNode(keyboard,message=null){
 
 
 let composeContext=null,composeReply=null,linkPreview=null,actionBusy=false;
-let chatGeneration=0,chatReady=false,composeDestination=null;
+let chatGeneration=0,chatReady=false,composeDestination=null,chatPageRequest=0,chatPagePending=null;
 const pendingActions=new Map();
 function resetInteractions(){
   composeContext=null;composeReply=null;linkPreview=null;
   chatGeneration++;chatReady=false;composeDestination=null;
   $("chat-message").value="";$("chat-link").value="";$("chat-link-preview").replaceChildren();
   $("chat-search").value="";
-  document.querySelector(".chats-shell").dataset.panel="chat";
+  viewQuery("chats",".chats-shell").dataset.panel="chat";
   show("interaction-result",false);show("chat-reply",false);
 }
 function renderComposer(){
+  if(state.view!=='chats')return;
   const context=state.workspaceRevision+":"+chatGeneration+":"+state.profile+":"+state.chat;
   if(composeContext!==context){$("chat-message").value="";composeReply=null;composeContext=context;show("interaction-result",false);}
   const s=state.status,enabled=!!(chatReady&&s&&!s.demo&&s.collector.has_session&&state.chatInfo?.enabled);
+  show("chat-compose",!!(state.chatView==='messages'&&s&&!s.demo&&s.collector.has_session&&may('interact')));
   composeDestination=enabled?{chat:state.chat,profile:state.profile,revision:state.workspaceRevision,generation:chatGeneration}:null;
   $("chat-send").disabled=!enabled||actionBusy;$("chat-message").disabled=!enabled||actionBusy;
   $("chat-message").placeholder=tr("Write a message…");
@@ -3166,15 +3276,18 @@ $("chat-open-form").addEventListener("submit",e=>{e.preventDefault();busy($("cha
 
 async function loadChatProfile(){
   const id=state.chat,revision=state.workspaceRevision,generation=chatGeneration;if(id===null||id===undefined)return;
-  const r=await json("chats/"+encodeURIComponent(id)+"/profile");
+  let r;
+  try{r=await json("chats/"+encodeURIComponent(id)+"/profile",undefined,viewOptions('chats'));}
+  catch(error){if(id===state.chat&&revision===state.workspaceRevision&&generation===chatGeneration&&!(error instanceof StaleView)){
+    state.chatProfile={chat:id,error:true};if(state.chatView==='profile')renderChatFeed();}throw error;}
   if(id!==state.chat||revision!==state.workspaceRevision||generation!==chatGeneration)return;
-  state.chatProfile={chat:id,...r};renderChatStatus();
+  state.chatProfile={chat:id,...r};renderChatStatus();if(state.chatView==='profile')renderChatFeed();
 }
-function profileNode(){
+function profileNode(standalone=false){
   const s=state.status,saved=state.chatProfile?.chat===state.chat?state.chatProfile:null,data=saved?.profile;
-  const box=node("details","chat-profile"),summary=node("summary");box.open=!!state.chatProfileOpen;
-  box.addEventListener("toggle",()=>{state.chatProfileOpen=box.open;});
-  summary.append(node("strong","",tr("Profile")),node("span","",data?tr("saved {time}",{time:fmtFull(saved.observed_at)}):tr("not saved yet")));
+  const box=node(standalone?'section':'details',"chat-profile"+(standalone?' chat-profile-view':'')),summary=node(standalone?'header':'summary');
+  if(!standalone){box.open=!!state.chatProfileOpen;box.addEventListener("toggle",()=>{state.chatProfileOpen=box.open;});}
+  summary.append(node("strong","",tr("Profile")),node("span","",data?tr("saved {time}",{time:fmtFull(saved.observed_at)}):saved&&!saved.error?tr("not saved yet"):''));
   box.append(summary);
   if(data){
     const facts=node("dl","dossier-facts"),add=(label,value)=>{if(value===null||value===undefined||value==="")return;facts.append(node("dt","",label),node("dd","",String(value)));};
@@ -3192,13 +3305,14 @@ function profileNode(){
     const record=node("button","text-link",tr("Open record #{seq}",{seq:saved.seq}));record.type="button";
     record.addEventListener("click",()=>openRecord(saved.seq).catch(e=>toast(e.message,true)));box.append(record);
   }
-  if(!data){const empty=viewState("unavailable",tr("Profile not saved yet"),tr("Save a profile snapshot to view the details available to this account."));empty.classList.add("compact");box.append(empty);}
+  if(!data){const empty=!saved?viewState('loading',tr('Loading…')):saved.error?viewState('error',tr('Could not load data'),'',tr('Retry'),()=>loadChatProfile().catch(()=>{})):
+    viewState("unavailable",tr("Profile not saved yet"),tr("Save a profile snapshot to view the details available to this account."));empty.classList.add("compact");box.append(empty);}
   const save=node("button","secondary small",tr("Save profile now"));save.type="button";save.disabled=!s||s.demo||!s.collector.has_session;
   save.hidden=!may("sources");
   save.addEventListener("click",()=>busy(save,async()=>{
     const id=state.chat,r=await json("chats/"+encodeURIComponent(id)+"/profile",{});
     if(id!==state.chat)return;
-    state.chatProfile={chat:id,...r};state.chatProfileOpen=true;renderChatStatus();toast(tr("Profile saved in the signed journal."));
+    state.chatProfile={chat:id,...r};state.chatProfileOpen=true;renderChatStatus();if(state.chatView==='profile')renderChatFeed();toast(tr("Profile saved in the signed journal."));
   }));
   box.append(save);return box;
 }
@@ -3262,6 +3376,7 @@ async function openExportDialog(){
   toast(trn("Export started with {n} account. Observation keeps running.","Export started with {n} accounts. Observation keeps running.",profiles.length));
 }
 function renderMulti(){
+  if(state.view!=='chats')return;
   const x=state.multi,box=$("export-box"),known=x&&!["none","unknown"].includes(x.phase);
   const running=known&&x.phase==="running",mine=known&&x.chat_id===state.chat&&x.lead===state.profile;
   const percent=known&&x.total?Math.min(running?99:100,Math.floor(x.captured*100/x.total)):null;
@@ -3401,6 +3516,7 @@ function renderAccessWorkspaces(selected){
   }
 }
 function renderAccessForm(g){
+  accessFormVersion++;
   $("access-form-mode").textContent=g?tr("Edit access"):tr("New access");
   $("access-submit").textContent=g?tr("Save access"):tr("Create access");
   show("access-cancel",!!g);
@@ -3410,7 +3526,7 @@ function renderAccessForm(g){
   $("access-uses").value=g?.max_uses??"";$("access-expires").value=localInput(g?.expires_unix);
   $("access-idle").value=g?.session_minutes??720;
   $("access-ips").value=(g?.ips||[]).join("\n");$("access-bind").checked=!!g?.bind_first_ip;
-  renderAccessWorkspaces(g?g.workspaces:{[state.profile]:null});
+  renderAccessWorkspaces(g?g.workspaces:{[state.profile]:null});accessView?.syncForm();
 }
 function accessSettings(){
   const workspaces={},box=$("access-workspaces");
@@ -3430,10 +3546,12 @@ function accessSettings(){
 function sessionOwner(s){return s.admin?tr("Main administrator"):s.label;}
 function renderAccess(){
   const a=state.access;if(!a)return;
-  const list=$("access-list");list.replaceChildren();
-  if(!a.grants.length)list.append(node("p","hint",tr("No access issued yet. Only the panel token opens this panel.")));
-  for(const g of a.grants){
+  const list=$("access-list"),grants=new Map([...list.children].map(row=>[row.dataset.id,row])),grantRows=[];
+  if(!a.grants.length)grantRows.push(list.querySelector('p.hint')||node("p","hint",tr("No access issued yet. Only the panel token opens this panel.")));
+  for(const value of a.grants){
+    const old=grants.get(value.id),g=old?Object.assign(old.record,value):value;
     const row=node("div","access-row"),info=node("div"),actions=node("div","access-actions");
+    row.dataset.id=g.id;row.record=g;
     const condition=g.expired?tr("expired"):g.used_up?tr("used up"):trn("{n} open session","{n} open sessions",g.sessions);
     const last=g.last_login_at?" · "+tr("last sign-in {time} from {address}",{time:formatTime(g.last_login_at),address:g.last_address}):"";
     info.append(node("h3","",g.label+" · "+condition),node("p","",accessScope(g)),
@@ -3442,55 +3560,73 @@ function renderAccess(){
     edit.addEventListener("click",()=>{state.accessEdit=g;show("access-new",false);renderAccessForm(g);$("access-form").scrollIntoView({block:"start"});});
     revoke.addEventListener("click",()=>busy(revoke,async()=>{
       if(!window.confirm(tr("Revoke the access of \"{name}\"? Its open sessions end at once.",{name:g.label})))return;
+      accessLoadSerial++;
       state.access=await json("access/grants/"+encodeURIComponent(g.id),undefined,{root:true,method:"DELETE"});
       if(state.accessEdit?.id===g.id){state.accessEdit=null;renderAccessForm(null);}
       renderAccess();
     }));
-    actions.append(edit,revoke);row.append(info,actions);list.append(row);
+    actions.append(edit,revoke);row.append(info,actions);
+    if(old){if(old.firstElementChild.outerHTML!==info.outerHTML)old.firstElementChild.replaceWith(info);grantRows.push(old);}else grantRows.push(row);
   }
-  const sessions=$("access-sessions-list");sessions.replaceChildren();
-  if(!a.sessions.length)sessions.append(node("p","hint",tr("No open sessions.")));
-  for(const s of a.sessions){
+  placeChildren(list,grantRows);
+  const sessions=$("access-sessions-list"),existing=new Map([...sessions.children].map(row=>[row.dataset.id,row])),sessionRows=[];
+  if(!a.sessions.length)sessionRows.push(sessions.querySelector('p.hint')||node("p","hint",tr("No open sessions.")));
+  for(const value of a.sessions){
+    const old=existing.get(value.id),s=old?Object.assign(old.record,value):value;
     const row=node("div","access-row"),info=node("div"),end=node("button","quiet",tr("End session"));
+    row.dataset.id=s.id;row.record=s;
     info.append(node("h3","",sessionOwner(s)+(s.current?" · "+tr("this browser"):"")),
       node("p","",[s.address,tr("since {time}",{time:formatTime(s.started_at)}),
         tr("last activity {time}",{time:formatTime(s.last_seen_at)}),trn("{n} request","{n} requests",s.requests)].join(" · ")),
       node("p","hint",s.agent.slice(0,120)));
     end.addEventListener("click",()=>busy(end,async()=>{
+      if(!window.confirm(tr("End this session? Its open panel will be locked.")))return;
+      accessLoadSerial++;
       state.access=await json("access/sessions/"+encodeURIComponent(s.id),undefined,{root:true,method:"DELETE"});renderAccess();
     }));
-    row.append(info,end);sessions.append(row);
+    row.append(info,end);if(old){if(old.firstElementChild.outerHTML!==info.outerHTML)old.firstElementChild.replaceWith(info);sessionRows.push(old);}else sessionRows.push(row);
   }
+  placeChildren(sessions,sessionRows);
 }
-async function loadConsole(){
-  const r=await json("access/console?after="+state.consoleAfter,undefined,{root:true}),pre=$("access-console");
-  if(r.lines.length&&r.lines[0].n<=state.consoleAfter)pre.replaceChildren();
-  for(const line of r.lines){
-    const item=node("span","console-line "+line.level.toLowerCase(),
-      line.at.slice(11,19)+" "+line.level.padEnd(7)+" "+line.text+"\n");
-    pre.append(item);
-  }
-  while(pre.childElementCount>3000)pre.firstElementChild.remove();
-  state.consoleAfter=r.last;
-  if(r.lines.length&&$("console-follow").checked)pre.scrollTop=pre.scrollHeight;
-}
+let accessView=null,systemLogView=null;
+const accessReady=import("./views/access.js").then(({createAccessView})=>{
+  accessView=createAccessView({root:$("view-access"),tr,navigate,localInput,getState:()=>state});return accessView;
+});
+const systemLogReady=import("./views/system-log.js").then(({createSystemLog})=>{
+  systemLogView=createSystemLog({root:$("view-system-log"),tr,json,getState:()=>state,getSession:()=>state.workspaceRevision+":"+state.profile,
+    options:()=>viewOptions('system-log'),formatTime:fmtTime,toast});return systemLogView;
+});
+accessReady.catch(error=>toast(error.message,true));systemLogReady.catch(error=>toast(error.message,true));
+async function loadConsole(){return (await systemLogReady).load();}
+let accessFormVersion=0,adminLimitsVersion=0;
+let accessFormReady=false,adminLimitsReady=false,adminLimitsDirty=false,accessLoadSerial=0;
 async function loadAccess(quiet=false){
   if(!state.me?.admin)return;
-  state.access=await json("access",undefined,{root:true});
-  if(!quiet){
-    renderAccessForm(state.accessEdit);
+  // Build a complete new-access form before the request yields; later responses only update saved data.
+  if(!accessFormReady){renderAccessForm(state.accessEdit);accessFormReady=true;}
+  if(!adminLimitsReady)$("access-admin-form").inert=true;
+  const view=await accessReady;if(state.view!=='access'||!state.me?.admin)return;view.enter();
+  const serial=++accessLoadSerial,result=await json("access",undefined,{root:true,...viewOptions('access')});
+  if(serial!==accessLoadSerial||state.view!=='access')return;
+  state.access=result;
+  if(!adminLimitsDirty){
     $("admin-sessions").value=state.access.admin.max_sessions;$("admin-on-limit").value=state.access.admin.on_limit;
     $("admin-idle").value=state.access.admin.session_minutes;
   }
+  adminLimitsReady=true;$("access-admin-form").inert=false;
   renderAccess();
-  await loadConsole();
 }
 $("access-refresh").addEventListener("click",e=>busy(e.currentTarget,()=>loadAccess()));
 $("access-all").addEventListener("change",()=>$("access-workspaces").querySelectorAll("input,select")
   .forEach(n=>n.disabled=$("access-all").checked));
 $("access-cancel").addEventListener("click",()=>{state.accessEdit=null;renderAccessForm(null);});
+for(const event of ['input','change']){
+  $("access-admin-form").addEventListener(event,()=>{adminLimitsDirty=true;adminLimitsVersion++;});
+  $("access-form").addEventListener(event,()=>{accessFormVersion++;});
+}
 $("access-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
-  const settings=accessSettings(),edit=state.accessEdit;
+  accessLoadSerial++;
+  const settings=accessSettings(),edit=state.accessEdit,version=accessFormVersion;
   if(edit){
     state.access=await json("access/grants/"+encodeURIComponent(edit.id),settings,{root:true,method:"PATCH"});
     toast(tr("Access saved. Its open sessions follow the new settings."));
@@ -3498,15 +3634,17 @@ $("access-form").addEventListener("submit",event=>{event.preventDefault();busy(e
     const result=await json("access/grants",settings,{root:true});state.access=result;
     $("access-token").textContent=result.token;show("access-new",true);toast(tr("Access created. Copy its token now."));
   }
-  state.accessEdit=null;renderAccessForm(null);renderAccess();
+  if(version===accessFormVersion&&state.accessEdit===edit){state.accessEdit=null;renderAccessForm(null);}renderAccess();
 });});
 $("access-copy").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   await navigator.clipboard.writeText($("access-token").textContent);toast(tr("Token copied."));
 }));
 $("access-admin-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
+  if(!adminLimitsReady)return;
+  accessLoadSerial++;const version=adminLimitsVersion;
   state.access=await json("access/admin",{max_sessions:Number($("admin-sessions").value),on_limit:$("admin-on-limit").value,
     session_minutes:Number($("admin-idle").value)},{root:true});
-  renderAccess();toast(tr("Limits saved."));
+  if(version===adminLimitsVersion)adminLimitsDirty=false;renderAccess();toast(tr("Limits saved."));
 });});
 let notifyTick=0,pollRevision=null;
 async function pollWorkspace(){
@@ -3515,18 +3653,21 @@ async function pollWorkspace(){
   try{
     const head=state.status?.stats.head?.seq;
     await refreshStatus();
-    if(!window.TgWitnessLive?.active()&&state.view==="observations" && state.drawerSeq===null && state.events.length<=60
+    if(!window.TgWitnessLive?.active()&&state.view==="observations" && state.drawerSeq===null && state.eventBefore===null && state.events.length<=200&&window.TgWitnessJournal?.canRefresh()!==false
         && state.status.stats.head?.seq!==head) await refreshEvents();
     if(!window.TgWitnessLive?.active()&&state.view==="chats" && state.status.stats.head?.seq!==head) await refreshChats(true);
     if(state.view==="accounts") await loadProfiles();
     if(state.view==="witness") await loadExtras();
     if(state.view==="access") await loadAccess(true);
+    if(state.view==="system-log") await loadConsole();
     if(++notifyTick%3===0) await loadNotifications();
   }catch(e){if(revision===state.workspaceRevision&&!(e instanceof StaleView))$("status-chip").textContent=tr("Panel connection unavailable");}
   finally{if(pollRevision===revision)pollRevision=null;}
 }
 setInterval(pollWorkspace,5000);
 async function bootstrap(){
+  await Promise.all([timeReady,shellReady,viewReady,chatListReady]);
+  await ensureRouter();
   const revision=state.workspaceRevision;
   try{
     const response=await fetch("/api/demo-access",{cache:"no-store",credentials:"omit"});
@@ -3541,6 +3682,6 @@ async function bootstrap(){
     }
   }catch(error){                                                                     }
   if(!accessStarted&&revision===state.workspaceRevision&&state.token)
-    await unlock().catch(error=>{if(!(error instanceof StaleView))lock();});
+    await unlock().catch(error=>{if(!(error instanceof StaleView)){lock();$("login-error").textContent=error.message;}});
 }
 bootstrap();

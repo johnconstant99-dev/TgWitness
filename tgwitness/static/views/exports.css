@@ -1,0 +1,8 @@
+.exports-tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin:0 0 20px;padding-bottom:8px}
+.exports-tabs [role=tab]{border:0;background:transparent;color:var(--muted);padding:10px 16px;border-radius:8px;font:inherit;cursor:pointer}
+.exports-tabs [aria-selected=true]{background:var(--surface-2);color:var(--text);font-weight:650}
+#exports-progress{display:grid;gap:8px;margin-bottom:16px}#exports-progress progress{width:100%}
+.exports-history{margin-top:20px}.export-receipt{display:grid;grid-template-columns:70px 100px minmax(180px,1fr) 90px auto;gap:12px;align-items:start;padding:14px 0;border-top:1px solid var(--border);font-size:13px}
+.export-receipt time{color:var(--muted)}.export-receipt details{min-width:0}.export-receipt code{display:block;overflow-wrap:anywhere;font-size:12px;margin:8px 0}
+.export-receipt details[open]{grid-column:1/-1}.exports-history .card-heading{align-items:start}
+@media(max-width:767px){.export-receipt{grid-template-columns:1fr 1fr;gap:8px}.export-receipt time{grid-column:1/-1}.export-receipt details{grid-column:1/-1}.exports-tabs{position:sticky;top:var(--topbar-height,64px);z-index:3;background:var(--bg)}}

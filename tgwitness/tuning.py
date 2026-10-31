@@ -41,9 +41,9 @@ class Parameter:
 GROUPS = (
     ("collection", "Collection", "Chat list, liveness records and the start of observation."),
     ("recheck", "Recheck", "How rechecks spread their requests. How often each chat is rechecked is set under "
-                           "Sources → Recheck."),
+                           "Sources → Recording."),
     ("attachments", "Photos & files", "Download pace and disk reserve. Types and sizes are set under Sources → "
-                                      "Attachments."),
+                                      "Recording."),
     ("people", "People profiles", "What profiles look for in saved messages."),
     ("notifications", "Notifications", "Size and pace of notifications and of the panel's notification list."),
     ("exports", "Exports & history", "Size limits of history snapshots, signed archives and browser downloads."),

@@ -245,7 +245,9 @@ def sources(c, enabled_sources):
     counts = {"enabled": enabled_sources, "checked": len(statuses),
               "visible": sum(s.get("state") == "visible_in_dialogs" for s in statuses),
               "added": sum(s.get("state") == "discovered" for s in statuses),
-              "unconfirmed": sum(s.get("state") == "access_unconfirmed" for s in statuses)}
+              "unconfirmed_total": sum(s.get("state") == "access_unconfirmed" for s in statuses),
+              "ignored": sum(s.get("state") == "access_unconfirmed" and bool(s.get("ignored")) for s in statuses),
+              "unconfirmed": sum(s.get("state") == "access_unconfirmed" and not s.get("ignored") for s in statuses)}
     scope = (c.get("scope") or {}).get("mode", "selected")
     if not enabled_sources and scope == "selected":
         return part("off", "no_sources", counts=counts)
@@ -255,6 +257,10 @@ def sources(c, enabled_sources):
         return part("failed", "none_visible", counts=counts)
     if counts["unconfirmed"]:
         return part("degraded", "some_unconfirmed", counts=counts)
+    if counts["ignored"]:
+        if not (counts["visible"] or counts["added"]):
+            return part("off", "ignored_unconfirmed", counts=counts)
+        return part("working", "visible_with_ignored", counts=counts)
     return part("working", "visible", counts=counts)
 
 
@@ -284,13 +290,14 @@ def collector(c, capture, heartbeat_seconds, enabled_sources, now):
     return {**parts, "state": worst(p["state"] for p in parts.values())}
 
 
-def collector_of(app_state, status=None, now=None):
+def collector_of(app_state, status=None, now=None, *, enabled_sources=None):
     """The collector parts of one workspace app; status: its collector.status() when already read."""
     from .monitoring import capture_settings
     from . import tuning
     store = app_state.store
     return collector(status or app_state.collector.status(), capture_settings(store),
-                     tuning.value(store, "heartbeat_seconds"), len(store.targets(True)), now or now_utc())
+                     tuning.value(store, "heartbeat_seconds"),
+                     len(store.targets(True)) if enabled_sources is None else enabled_sources, now or now_utc())
 
 
 def next_at(seconds, now=None):

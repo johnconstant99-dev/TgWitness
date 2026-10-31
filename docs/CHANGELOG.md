@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Added workspace-aware panel URLs, Back/Forward navigation and an active-view
+  lifecycle. Background updates preserve form drafts and focus; settings can be
+  saved with Ctrl/Cmd+S. Submitted secrets never become a Discard baseline.
+- Reorganized Sources into Scope, Chats and Recording with one recording save;
+  Parameters now have search, section links, inline validation and a reset preview.
+- Kept chat navigation and messages in separate scrolling columns, with compact
+  actions, source filters, priority and distinct conversation views/message filters.
+- Added combined journal filters, cursor windows and a desktop record inspector.
+  Routine system events are hidden by default and remain available with a toggle.
+- Added grouped notifications, focused health actions, workspace summaries and
+  access presets. Export preparation history records byte counts and hashes without
+  changing signed evidence. See [panel development](FRONTEND.md) for module ownership
+  and the remaining extraction plan.
+
 - Serve read-only MCP at the panel's `/mcp` endpoint. Connections select their
   tools and scope, support token rotation and report recent use. Client setup
   uses `tgwitness.mcp_server` and `TGWITNESS_MCP_TOKEN`; the runtime check provides

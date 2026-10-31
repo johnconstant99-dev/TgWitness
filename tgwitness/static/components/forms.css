@@ -1,0 +1,7 @@
+.form-draft-bar{position:sticky;bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding:10px 14px;border:1px solid var(--accent-border);border-radius:var(--radius-control);background:var(--surface-popover);color:var(--text);box-shadow:0 3px 14px #0001;z-index:4;font-size:13px}
+.form-draft-bar span{overflow-wrap:anywhere}.form-draft-bar button{flex-shrink:0}.form-draft-bar span{margin-inline-end:auto}
+form[data-dirty=false] .form-draft-bar{position:static;justify-content:flex-start;border-color:transparent;background:transparent;box-shadow:none;padding-inline:0}
+.report-actions:empty{display:none}
+@media(max-width:767px){.form-draft-bar{bottom:8px;padding:8px;gap:6px}.form-draft-bar button{font-size:12px}}
+
+@media(max-width:767px){.form-draft-bar{flex-wrap:wrap}.form-draft-bar span{flex-basis:100%}}

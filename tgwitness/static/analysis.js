@@ -2,11 +2,14 @@
   "use strict";
   let config=null, plan=null, report=null, workspace=null, generation=0;
   let loaded=false,loading=null,providerPending=null,capabilityKey="";
+  let providerEpoch=0,editRevision=0,saving=null;
+  const edits=new Map();
+  const numberFields={context:"context_chars",output:"output_tokens",timeout:"timeout_seconds",budget:"daily_requests","input-price":"input_per_million","output-price":"output_per_million"};
   const call=(path,body,options={})=>json("analysis/"+path,body,{root:true,...options});
   const scoped=path=>path+(path.includes("?")?"&":"?")+"workspace_id="+encodeURIComponent(workspace);
-  function resetResults(){generation++;loaded=false;loading=null;providerPending=null;plan=null;report=null;window.TgWitnessMedia?.clear();$("ask-consent").checked=false;["ask-preview","ask-answer","ask-report"].forEach(id=>show(id,false));["ask-sources","ask-claims","ask-report-content","ask-reports","ask-transmission"].forEach(id=>$(id).replaceChildren());}
+  function resetResults(){generation++;loaded=false;loading=null;plan=null;report=null;window.TgWitnessMedia?.clear();$("ask-consent").checked=false;["ask-preview","ask-answer","ask-report"].forEach(id=>show(id,false));["ask-sources","ask-claims","ask-report-content","ask-reports","ask-transmission"].forEach(id=>$(id).replaceChildren());}
   function clear(){
-    resetResults();workspace=null;config=null;providerPending=null;capabilityKey="";
+    resetResults();workspace=null;config=null;providerPending=null;capabilityKey="";providerEpoch++;edits.clear();saving=null;
     $("ai-settings").open=false;$("ai-settings-form").reset();$("ai-settings-form").inert=true;
     $("ai-settings-form").querySelector('button[type="submit"]').disabled=true;$("ai-test").disabled=true;
     for(const id of ["ai-status","ai-key-state","ai-test-result","ask-provider-status","ask-workspace","ask-usage"])$(id).textContent="";
@@ -27,37 +30,65 @@
   }
   window.addEventListener("tgwitness:lock",clear);
   function providerMode(){if(!config)return;$("ai-endpoint").readOnly=$("ai-provider").value==="ollama";if($("ai-endpoint").readOnly)$("ai-endpoint").value=config.local_endpoint;}
-  function settings(data){
-    config=data;$("ai-enabled").checked=data.enabled;$("ai-provider").value=data.provider;$("ai-model").value=data.model;$("ai-endpoint").value=data.endpoint;
-    $("ai-settings-form").inert=false;$("ai-settings-form").querySelector('button[type="submit"]').disabled=false;
-    for(const [id,key] of Object.entries({context:"context_chars",output:"output_tokens",timeout:"timeout_seconds",budget:"daily_requests","input-price":"input_per_million","output-price":"output_per_million",currency:"currency"}))$("ai-"+id).value=data[key]??"";
-    $("ai-key").value="";$("ai-clear-key").checked=false;$("ai-key-state").textContent=data.has_key?tr("A key is stored. Leave blank to keep it."):tr("No API key stored.");
-    $("ai-test").disabled=!data.enabled;
+  function providerCurrent(epoch){return epoch===providerEpoch&&workspace===state.profile&&!!state.me;}
+  function providerControls(){
+    const editable=!!config&&workspace===state.profile&&!!state.me?.admin&&!state.status?.demo;
+    $("ai-settings-form").inert=!editable;
+    $("ai-settings-form").querySelector('button[type="submit"]').disabled=!editable||!!providerPending||!!saving;
+    $("ai-test").disabled=!editable||!config.enabled||!!providerPending||!!saving;
+  }
+  function settings(data,submitted=null){
+    config=data;
+    const values={"ai-enabled":data.enabled,"ai-provider":data.provider,"ai-model":data.model,"ai-endpoint":data.endpoint,
+      "ai-key":"","ai-clear-key":false,"ai-currency":data.currency};
+    for(const [id,key] of Object.entries(numberFields))values["ai-"+id]=data[key]??"";
+    for(const [id,value] of Object.entries(values)){
+      const edited=edits.get(id);
+      if(edited!==undefined&&(submitted===null||edited>submitted))continue;
+      const field=$(id);if(field.type==="checkbox")field.checked=value;else field.value=value??"";
+      edits.delete(id);
+    }
+    $("ai-key-state").textContent=data.has_key?tr("A key is stored. Leave blank to keep it."):tr("No API key stored.");
     $("ai-status").textContent=(data.enabled?tr("AI enabled"):tr("AI disabled"))+" · "+data.provider+" · "+data.endpoint+" · "+tr("Workspace route")+": "+data.route;
     if($("ask-provider-status"))$("ask-provider-status").textContent=$("ai-status").textContent;
-    providerMode();
+    providerMode();providerControls();
   }
   $("ai-provider").addEventListener("change",providerMode);
-  $("ai-settings-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
-    if(!config||workspace!==state.profile)return;
-    const body={enabled:$("ai-enabled").checked,provider:$("ai-provider").value,endpoint:$("ai-endpoint").value,model:$("ai-model").value,clear_key:$("ai-clear-key").checked};
-    if($("ai-key").value)body.api_key=$("ai-key").value;
-    for(const [id,key] of Object.entries({context:"context_chars",output:"output_tokens",timeout:"timeout_seconds",budget:"daily_requests","input-price":"input_per_million","output-price":"output_per_million"}))body[key]=$("ai-"+id).value===""?null:Number($("ai-"+id).value);
-    body.currency=$("ai-currency").value;const turn=generation,data=await call(scoped("provider"),body);if(!current(turn))return;settings(data);resetResults();await refreshStatus();toast(tr("Provider settings saved."));
-  });});
+  for(const event of ["input","change"])$("ai-settings-form").addEventListener(event,event=>{
+    if(!event.target.matches("input,select"))return;
+    edits.set(event.target.id,++editRevision);
+    if(event.target.id==="ai-provider")edits.set("ai-endpoint",editRevision);
+  });
+  $("ai-settings-form").addEventListener("submit",event=>{
+    event.preventDefault();
+    if(!config||workspace!==state.profile||!state.me?.admin||state.status?.demo||providerPending||saving)return;
+    const marker={},epoch=providerEpoch,submitted=editRevision;
+    saving=marker;providerControls();
+    busy(null,async()=>{
+      try{
+        const body={enabled:$("ai-enabled").checked,provider:$("ai-provider").value,endpoint:$("ai-endpoint").value,model:$("ai-model").value,clear_key:$("ai-clear-key").checked};
+        if($("ai-key").value)body.api_key=$("ai-key").value;
+        for(const [id,key] of Object.entries(numberFields))body[key]=$("ai-"+id).value===""?null:Number($("ai-"+id).value);
+        body.currency=$("ai-currency").value;
+        const data=await call(scoped("provider"),body);if(!providerCurrent(epoch))return;
+        settings(data,submitted);resetResults();await refreshStatus();
+        if(providerCurrent(epoch))toast(tr("Provider settings saved."));
+      }finally{if(saving===marker){saving=null;providerControls();}}
+    });
+  });
   async function loadProvider(force=false){
-    if(config&&!force)return config;
+    if(config&&!force||saving)return config;
     if(providerPending)return providerPending;
-    const turn=generation;
-    const pending=(async()=>{const data=await call(scoped("provider"));if(!current(turn))return null;settings(data);return data;})();
-    providerPending=pending;
-    try{return await pending;}finally{if(providerPending===pending)providerPending=null;}
+    const epoch=providerEpoch;
+    const pending=(async()=>{const data=await call(scoped("provider"));if(!providerCurrent(epoch))return null;settings(data);return data;})();
+    providerPending=pending;providerControls();
+    try{return await pending;}finally{if(providerPending===pending){providerPending=null;if(providerCurrent(epoch))providerControls();}}
   }
   async function loadSettings(){
-    syncStatus();if(!state.me?.admin||state.status?.demo)return;
-    const turn=generation;
+    syncStatus();if(!state.me?.admin||state.status?.demo||saving)return;
+    const epoch=providerEpoch;
     $("ai-status").textContent=tr("Loading…");
-    try{await loadProvider(true);}catch(error){if(current(turn))$("ai-status").textContent=error.message;}
+    try{await loadProvider(true);}catch(error){if(providerCurrent(epoch))$("ai-status").textContent=error.message;}
   }
   $("ai-settings").addEventListener("toggle",()=>{if($("ai-settings").open)loadSettings();});
   $("ai-test").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(!config?.enabled)return;const turn=generation;await call(scoped("provider/test"),{});if(current(turn))$("ai-test-result").textContent=tr("Connection checked with synthetic text. No messages were read.");}));
@@ -142,5 +173,14 @@
     try{await pending;}catch(error){if(current(turn)){$("ai-status").textContent=error.message;loaded=false;}}
     finally{if(loading===pending)loading=null;}
   }
-  window.TgWitnessAnalysis={clear,syncStatus,loadSettings,load};
+  async function focusChat(id){
+    if(!syncStatus().enabled||state.view!=='analysis')return false;
+    const turn=generation;await load();
+    if(!current(turn)||!loaded||state.view!=='analysis'||!capabilities().enabled)return false;
+    const choices=[...$("ask-chats").querySelectorAll('input[type="checkbox"]')];
+    if(!choices.some(input=>input.value===String(id)))return false;
+    for(const input of choices)input.checked=input.value===String(id);
+    $("ask-question").focus({preventScroll:true});return true;
+  }
+  window.TgWitnessAnalysis={clear,syncStatus,loadSettings,load,focusChat};
 })();

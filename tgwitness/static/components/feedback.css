@@ -1,0 +1,10 @@
+.panel-connection-notice{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--warning-soft);color:var(--status-warn);border-block-end:1px solid var(--warning-border);font-size:13px}
+.panel-connection-notice button{flex-shrink:0}
+.toast{pointer-events:none}
+body:has(.view:not([hidden]) .form-draft-bar:not([hidden]),.view:not([hidden]) .parameters-actions,.view:not([hidden]) .recording-savebar) .toast{bottom:100px}
+.view[data-loading=true]{position:relative}
+.view[data-loading=true]::before{content:"";display:block;position:absolute;inset:0 auto auto 0;height:3px;width:40%;border-radius:var(--radius-small);background:var(--status-info);animation:view-loading 1.3s ease-in-out infinite;pointer-events:none;z-index:2}
+@keyframes view-loading{0%,100%{opacity:.35;transform:translateX(0)}50%{opacity:1;transform:translateX(140%)}}
+@media(prefers-reduced-motion:reduce){.view[data-loading=true]::before{animation:none;width:100%;opacity:.7}}
+@media(max-width:767px){.panel-connection-notice{padding:8px 12px;font-size:12px}}
+@media(max-width:767px){body:has(.view:not([hidden]) .form-draft-bar:not([hidden]),.view:not([hidden]) .parameters-actions,.view:not([hidden]) .recording-savebar) .toast{bottom:160px}}

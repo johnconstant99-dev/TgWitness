@@ -10,6 +10,8 @@ from starlette.responses import JSONResponse, Response
 from .access import Refused
 from .archive import RateLimited
 
+REQUEST_TIMEOUT = 12
+
 
 def remember_panel_origin(app, request):
     """Called only after administrator authentication on the MCP settings page."""
@@ -107,7 +109,7 @@ class Endpoint:
 
         self.active += 1
         try:
-            async with asyncio.timeout(12):
+            async with asyncio.timeout(REQUEST_TIMEOUT):
                 body = bytearray()
                 async with asyncio.timeout(8):
                     async for chunk in request.stream():
@@ -141,5 +143,9 @@ class Endpoint:
         except TimeoutError:
             if not started:
                 await error(408, "MCP request timed out.")
+            else:
+                # Headers cannot be replaced now. Let the ASGI server close the
+                # incomplete response instead of silently accepting its body.
+                raise
         finally:
             self.active -= 1

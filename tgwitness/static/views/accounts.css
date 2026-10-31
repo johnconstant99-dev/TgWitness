@@ -1,0 +1,32 @@
+.accounts-overview{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:0 0 18px}
+.accounts-total{display:grid;gap:3px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+.accounts-total strong{font-size:24px;line-height:1.2;font-variant-numeric:tabular-nums}.accounts-total span{font-size:12px;color:var(--muted)}
+.accounts-tools{display:grid;grid-template-columns:minmax(200px,1fr) minmax(140px,.5fr) minmax(140px,.5fr);gap:12px;margin-bottom:12px}
+.accounts-tools label{display:grid;gap:5px;font-size:12px;color:var(--muted)}
+.accounts-bulk{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:10px 0;font-size:12px}.accounts-bulk .check-label{margin:0}.accounts-bulk button{font-size:12px;padding:7px 9px}
+.accounts-overview-list{display:block!important}.accounts-columns{display:none}.accounts-pagination{display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:14px 0;font-size:13px}.accounts-pagination button{padding:8px 10px}
+.accounts-groups{margin:0 0 20px;border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px}.accounts-groups>summary{font-weight:600;cursor:pointer}.accounts-groups #fleet-groups{margin-top:12px}
+#view-accounts .account-card{position:relative;margin:0 0 10px;padding:14px 16px}
+#view-accounts .account-select{position:absolute;top:18px;left:14px;display:flex;margin:0}#view-accounts .account-head{padding-left:28px}
+#view-accounts .account-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+#view-accounts .account-value{min-width:0;font-size:12px}#view-accounts .account-value dt{color:var(--muted);font-size:11px}#view-accounts .account-value dd{margin:3px 0 0;overflow-wrap:anywhere}
+#view-accounts .account-value[data-field=observation],#view-accounts .account-value[data-field=attention],#view-accounts .account-value[data-field=updated]{display:none}
+.account-problems{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;margin-top:6px}.account-problems button{font-size:12px}.account-select input{width:16px;height:16px;margin:0}
+@media(min-width:1200px){
+ .accounts-columns,#view-accounts .account-card{display:grid;grid-template-columns:24px minmax(180px,2fr) minmax(105px,1.1fr) 65px 85px 65px minmax(170px,1.4fr);column-gap:12px;align-items:center}
+ .accounts-columns{padding:8px 14px;color:var(--muted);font-size:11px;border-bottom:1px solid var(--border)}
+ #view-accounts .account-card{padding:12px 14px;border-radius:0;border-width:0 0 1px;box-shadow:none;margin:0;row-gap:5px;background:var(--surface)}
+ #view-accounts .account-card.current{border-left:2px solid var(--accent)}
+ #view-accounts .account-head,#view-accounts .account-meta{display:contents}
+ #view-accounts .account-select{position:static;grid-column:1;grid-row:1 / 3}
+ #view-accounts .account-who{grid-column:2;grid-row:1;gap:8px}#view-accounts .account-who .avatar{width:30px;height:30px;min-width:30px;font-size:12px}
+ #view-accounts .account-who h2{font-size:13px}#view-accounts .account-id{font-size:11px;overflow-wrap:anywhere}
+ #view-accounts .account-badge{grid-column:3;grid-row:1;justify-self:start;font-size:11px;max-width:100%;white-space:normal}
+ #view-accounts .account-value[data-field=sources]{grid-column:4;grid-row:1 / 3}#view-accounts .account-value[data-field=events]{grid-column:5;grid-row:1 / 3}#view-accounts .account-value[data-field=pending]{grid-column:6;grid-row:1 / 3}
+ #view-accounts .account-value dt{display:none}
+ #view-accounts .account-actions{grid-column:7;grid-row:1 / 3;margin:0;gap:5px;justify-content:flex-start;flex-wrap:wrap}#view-accounts .account-actions button{font-size:11px;padding:5px 8px;min-height:30px}
+ #view-accounts .fleet-card-row{grid-column:2;grid-row:2;margin:0;padding:0;border:0;gap:6px;font-size:11px}#view-accounts .fleet-card-group{font-size:11px;padding:3px 6px;min-height:28px;max-width:170px}
+ #view-accounts .account-problems{grid-column:3;grid-row:2;margin:0;gap:2px 8px}#view-accounts .account-problems button{font-size:11px}
+ #view-accounts .account-card>.access-warning{grid-column:2 / 7;grid-row:3;margin:3px 0;font-size:12px}
+}
+@media(max-width:700px){.accounts-overview{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.accounts-total{padding:10px}.accounts-total strong{font-size:21px}.accounts-tools{grid-template-columns:1fr 1fr}.accounts-tools label:first-child{grid-column:1 / -1}.accounts-bulk{gap:8px}.accounts-bulk #accounts-selected{margin-left:auto}#view-accounts .account-actions{flex-wrap:wrap;gap:7px}#view-accounts .account-actions button{min-height:36px}.accounts-pagination{justify-content:space-between;gap:8px}.accounts-groups{padding:12px}.accounts-total span{overflow-wrap:anywhere}}

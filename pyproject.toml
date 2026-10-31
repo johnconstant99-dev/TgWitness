@@ -63,6 +63,9 @@ include-package-data = false
 [tool.setuptools.package-data]
 tgwitness = [
   "static/*.html", "static/*.css", "static/*.js", "static/*.svg",
+  "static/core/*.js",
+  "static/components/*.js", "static/components/*.css",
+  "static/views/*.js", "static/views/*.css",
   "locales/ru.json", "locales/uk.json", "locales/es.json", "locales/pt.json",
   "locales/fr.json", "locales/de.json", "locales/it.json", "locales/uz.json",
   "locales/ko.json", "locales/zh-Hant.json", "locales/ms.json", "locales/pl.json",

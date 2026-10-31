@@ -1,0 +1,37 @@
+.health-toolbar { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px;
+  padding: 6px 24px; min-height: 38px; background: var(--surface); border-bottom: 1px solid var(--border-soft); }
+.health-toolbar[hidden] { display: none; }
+.health-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 3px 8px;
+  border: 1px solid transparent; background: transparent; color: var(--text-2); font: var(--type-support); }
+.health-chip:hover { border-color: var(--border); background: var(--surface-2); }
+.health-chip-mark { display: inline-flex; color: var(--muted); }
+.health-chip-mark .icon { width: 14px; height: 14px; }
+.health-chip-value { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.health-chip[data-state=working] .health-chip-mark, .health-part-status[data-state=working] { color: var(--success); }
+.health-chip[data-state=degraded] .health-chip-mark, .health-part-status[data-state=degraded] { color: var(--warning); }
+.health-chip[data-state=failed] .health-chip-mark, .health-part-status[data-state=failed] { color: var(--danger); }
+.health-chip[data-state=running] .health-chip-mark, .health-part-status[data-state=running] { color: var(--accent-text); }
+.health-dialog { width: min(620px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0;
+  color: var(--text); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-panel); }
+.health-dialog::backdrop { background: rgb(0 0 0 / .4); }
+.health-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.health-dialog-head h2 { margin: 0; font: var(--type-section); }
+.health-part-tabs { display: flex; gap: 4px; padding: 12px 16px 0; overflow-x: auto; }
+.health-part-tabs button { flex: 1 0 auto; min-height: 40px; }
+.health-part-tabs button[aria-selected=true] { background: var(--accent-soft); color: var(--accent-text); }
+.health-part-body { padding: 20px; }
+.health-part h3 { margin: 0 0 8px; }
+.health-part-status { font-weight: 600; color: var(--muted); }
+.health-facts { margin: 16px 0; }
+.health-facts p { color: var(--text-2); margin: 8px 0; overflow-wrap: anywhere; }
+.health-actions { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
+@media (max-width: 767px) {
+  .health-toolbar { justify-content: space-between; flex-wrap: nowrap; padding: 4px 8px; gap: 2px; min-height: 34px; }
+  .health-chip { padding: 4px; gap: 4px; font-size: 11px; min-height: 30px; }
+  .health-chip-value { display: none; }
+  .health-dialog { width: 100%; max-width: none; max-height: 85dvh; margin: auto 0 0; border-radius: 16px 16px 0 0; }
+  .health-dialog-head { padding: 14px 16px; }
+  .health-part-tabs { padding: 8px 8px 0; }
+  .health-part-tabs button { font-size: 12px; padding: 8px; }
+  .health-part-body { padding: 16px; }
+}

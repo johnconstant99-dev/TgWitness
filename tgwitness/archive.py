@@ -27,7 +27,8 @@ class ConnectionSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(min_length=1, max_length=80)
     workspaces: dict[str, list[int] | None] = Field(min_length=1, max_length=100)
-    expires_at: float
+    expires_at: float | None = None
+    expires_in_seconds: int | None = Field(default=None, ge=60, le=90 * 86400, strict=True)
     tools: list[Literal[TOOLS]] = Field(default_factory=lambda: list(TOOLS), min_length=1, max_length=len(TOOLS))
 
     @field_validator("name")
@@ -36,6 +37,12 @@ class ConnectionSettings(BaseModel):
         if not value.strip() or any(ord(c) < 32 for c in value):
             raise ValueError("Enter a connection name.")
         return value.strip()
+
+    @model_validator(mode="after")
+    def expiry_choice(self):
+        if (self.expires_at is None) == (self.expires_in_seconds is None):
+            raise ValueError("Choose either an expiry time or an access duration.")
+        return self
 
 
 class ArchiveQuery(BaseModel):
@@ -76,15 +83,19 @@ class Connections:
     def save(self):
         self.vault.save("archive-access", {"connections": self.entries})
 
-    @staticmethod
-    def public(entry):
-        return {k: v for k, v in entry.items() if k not in ("sha256", "usage_saved_at")} | {
-            "tools": list(entry.get("tools", TOOLS)), "uses": entry.get("uses", 0),
-            "last_address": entry.get("last_address"), "last_tool": entry.get("last_tool")}
+    def public(self, entry):
+        with self.lock:
+            recent = self.requests.get(entry["id"], ())
+            used = sum(at >= time.time() - 60 for at in recent)
+            return {k: v for k, v in entry.items() if k not in ("sha256", "usage_saved_at")} | {
+                "tools": list(entry.get("tools", TOOLS)), "uses": entry.get("uses", 0),
+                "last_address": entry.get("last_address"), "last_tool": entry.get("last_tool"),
+                "requests_last_minute": used, "rate_limit_per_minute": 60}
 
     def issue(self, settings):
         now = time.time()
-        if not now + 60 <= settings.expires_at <= now + 90 * 86400:
+        expires_at = now + settings.expires_in_seconds if settings.expires_in_seconds is not None else settings.expires_at
+        if not now + 60 <= expires_at <= now + 90 * 86400:
             raise ValueError("Access must expire between one minute and 90 days from now.")
         scope = GrantSettings(label=settings.name, workspaces=settings.workspaces).workspaces
         with self.lock:
@@ -92,7 +103,7 @@ class Connections:
                 raise ValueError("At most 100 archive connections are supported.")
             token = "tgw_mcp_" + secrets.token_urlsafe(32)
             entry = {"id": secrets.token_hex(16), "name": settings.name, "workspaces": scope,
-                     "expires_at": settings.expires_at, "created_at": now, "last_used_at": None,
+                     "expires_at": expires_at, "created_at": now, "last_used_at": None,
                      "tools": [tool for tool in TOOLS if tool in settings.tools], "uses": 0,
                      "last_address": None, "last_tool": None,
                      "revoked_at": None, "sha256": hashlib.sha256(token.encode()).hexdigest()}

@@ -52,6 +52,19 @@ def test_only_named_public_tsa_fixtures_enter_the_source_package(tmp_path):
     assert not findings
 
 
+def test_named_ui_regression_and_mcp_pins_ship_without_unreviewed_neighbors(tmp_path):
+    public_tree(tmp_path)
+    private_script = tmp_path / "tools/local-credentials.mjs"
+    private_pins = tmp_path / "deploy/constraints-local.txt"
+    private_script.write_text("// Private helper\n", encoding="utf-8")
+    private_pins.write_text("private-package==1\n", encoding="utf-8")
+    sources, _, findings = check_sources(tmp_path)
+    assert tmp_path / "tools/check_writeonly_drafts.mjs" in sources
+    assert tmp_path / "deploy/constraints-mcp.txt" in sources
+    assert private_script not in sources and private_pins not in sources
+    assert not findings
+
+
 def test_only_named_demo_archives_ship_and_their_contents_are_scanned(tmp_path):
     public_tree(tmp_path)
     demo = tmp_path / "website/demo/downloads"

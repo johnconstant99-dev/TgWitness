@@ -20,7 +20,7 @@
   }
   $("webhook-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
     const expected=revision;
-    const result=await json("integrations/webhooks",{name:$("webhook-name").value,url:$("webhook-url").value,events:[...document.querySelectorAll('[name="hook-event"]:checked')].map(el=>el.value),chats:[...$("webhook-chats").querySelectorAll("input:checked")].map(el=>Number(el.value)),include_text:$("webhook-text").checked});
+    const result=await json("integrations/webhooks",{name:$("webhook-name").value,url:$("webhook-url").value,events:[...$("webhook-form").querySelectorAll('[name="hook-event"]:checked')].map(el=>el.value),chats:[...$("webhook-chats").querySelectorAll("input:checked")].map(el=>Number(el.value)),include_text:$("webhook-text").checked});
     if(expected!==revision)return;secret=result.secret;$("webhook-secret").value=secret;show("webhook-created",true);await refresh();
   });});
   $("webhook-copy").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(secret){await navigator.clipboard.writeText(secret);toast(tr("Signing secret copied. Store it only in the receiver's protected configuration."));}}));

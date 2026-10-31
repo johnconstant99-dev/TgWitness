@@ -52,7 +52,7 @@ def main():
             page.route("**/api/mcp", unavailable)
             page.locator("#mcp-refresh").click()
             expect(page.locator("#mcp-unavailable")).to_be_visible()
-            expect(page.locator('#mcp-form button[type="submit"]')).to_be_disabled()
+            expect(page.locator("#mcp-form")).to_be_hidden()
             expect(page.locator("#mcp-install-command")).to_contain_text("pip install")
             page.locator("#mcp-copy-install").click()
             assert "pip install" in page.evaluate("navigator.clipboard.readText()")
@@ -62,6 +62,14 @@ def main():
             expect(page.locator("#mcp-unavailable")).to_be_hidden()
             expect(page.locator("#mcp-fields")).to_be_enabled()
             expect(page.locator("#mcp-name")).to_have_value("Analyst laptop")
+            page.locator("#mcp-duration").select_option("custom")
+            page.locator("#mcp-custom-minutes").fill("0")
+            before = len(writes)
+            page.locator('#mcp-form button[type="submit"]').click()
+            assert len(writes) == before
+            page.locator("#mcp-custom-minutes").fill("60")
+            page.evaluate("window.TgWitnessIntegrations.refresh()")
+            expect(page.locator("#mcp-custom-minutes")).to_have_value("60")
             page.locator('#mcp-form button[type="submit"]').click()
             expect(page.locator("#mcp-created")).to_be_visible()
             token = page.locator("#mcp-token").input_value()
@@ -70,6 +78,7 @@ def main():
             assert page.evaluate("navigator.clipboard.readText()") == token
             creation = next(body for url, method, body in writes if url.endswith("/mcp/connections") and method == "POST")
             assert creation["workspaces"] == {"default": [-1001]}
+            assert creation["expires_in_seconds"] == 3600
             assert set(creation["tools"]) == {"list_workspaces", "list_chats", "get_capture_status"}
 
             # Refresh is allowed to change usage counters, never inputs or the shown-once secret.
@@ -120,6 +129,11 @@ def main():
             expect(page.locator("#mcp-check-result")).to_contain_text("3 tools")
             expect(page.locator("#mcp-check-result")).to_contain_text("list_workspaces")
             assert "Never sent to an AI" not in page.locator("#mcp-check-result").inner_text()
+            page.locator("#mcp-list details summary").focus()
+            page.evaluate("window.keptMcpControl=document.activeElement")
+            page.evaluate("window.TgWitnessIntegrations.refresh()")
+            assert page.evaluate("window.keptMcpControl===document.activeElement")
+            expect(page.locator("#mcp-list")).to_contain_text("/ 60 requests")
 
             for width in (1440, 390, 320):
                 page.set_viewport_size({"width": width, "height": 1000})
@@ -189,8 +203,8 @@ def main():
             expect(page.locator("#mcp-created")).to_be_hidden()
             expect(page.locator("#mcp-name")).to_have_value("")
             page.evaluate("lock()")
-            expect(page.locator("#mcp-token")).to_have_value("")
-            expect(page.locator("#mcp-name")).to_have_value("")
+            assert page.evaluate("()=>[$('mcp-token').value,$('mcp-name').value]") == ["", ""]
+            expect(page.locator("#view-integrations")).to_have_count(0)
             assert not errors, errors
             browser.close()
     print("MCP UI passed: persistent drafts, availability recovery, scoped tools, six client configs, diagnostics, rotation/revocation, workspace isolation and mobile.")

@@ -258,13 +258,14 @@ def set_enabled(store, chat_id, enabled):
                                                     "on request; their contents never enter the journal"}, chat_id)
 
 
-def remove(store, chat_id):
-    """Forget the chat's profiles (setting and cached file). Returns whether any existed."""
+def remove(store, chat_id, *, clear_cache=True):
+    """Forget profiles. Defer cache cleanup when composing a larger transaction."""
     with store.transaction():
         chats = store.get_setting("dossiers", {})
         existed = chats.pop(str(chat_id), None) is not None or cache_path(store, chat_id).exists()
         store.set_setting("dossiers", chats)
-        cache_path(store, chat_id).unlink(missing_ok=True)
+        if clear_cache:
+            cache_path(store, chat_id).unlink(missing_ok=True)
     return existed
 
 
