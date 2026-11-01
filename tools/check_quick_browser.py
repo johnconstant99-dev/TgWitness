@@ -33,15 +33,21 @@ def main():
             page.locator("#quick-open").click()
             expect(dialog).to_be_visible()
             expect(search).to_be_focused()
-            destinations = ["chats", "observations", "sources", "evidence", "witness", "parameters",
-                            "connection", "accounts", "access", "system-log", "integrations"]
+            destinations = ["start", "chats", "observations", "sources", "evidence", "accounts", "witness",
+                            "parameters", "connection", "access", "system-log", "integrations"]
             expect(dialog.get_by_role("option")).to_have_count(len(destinations))
-            assert dialog.get_by_role("option").evaluate_all(
-                "nodes=>nodes.map(n=>n.dataset.destination)") == destinations
+            actual_destinations = dialog.get_by_role("option").evaluate_all(
+                "nodes=>nodes.map(n=>n.dataset.destination)")
+            assert actual_destinations == destinations, actual_destinations
             page.keyboard.press("ArrowUp")
             expect(search).to_have_attribute("aria-activedescendant", "quick-option-integrations")
             page.keyboard.press("ArrowDown")
-            expect(search).to_have_attribute("aria-activedescendant", "quick-option-chats")
+            expect(search).to_have_attribute("aria-activedescendant", "quick-option-start")
+            page.keyboard.press("Enter")
+            expect(dialog).not_to_be_visible()
+            expect(page.locator("#view-start")).to_be_visible()
+            expect(page.locator("#view-start h1")).to_be_focused()
+            page.keyboard.press("Control+k")
             search.fill("access")
             expect(dialog.locator("[role=option][data-destination]")).to_have_count(1)
             expect(dialog.locator("[data-action=journal]")).to_be_visible()

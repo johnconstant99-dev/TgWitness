@@ -25,22 +25,25 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_LOG_BYTES = 4 * 1024**2
 SUITES = {
     "browser": (
-        "check_session_reservations.py",
+        "check_session_reservations.py", "check_account_recovery.py",
         "check_browser.py", "check_mcp_transport.py", "check_integrations_browser.py",
         "check_mcp_browser.py", "check_settings_browser.py", "check_analysis_browser.py",
         "check_account_browser.py", "check_fleet_browser.py", "check_proxy_async_browser.py",
         "check_export_async_browser.py", "check_account_export_browser.py", "check_refresh_browser.py",
+        "check_account_reports.py",
         "check_analyst_browser.py", "check_history_browser.py", "check_sealed_browser.py",
         "check_interactions_browser.py", "check_workspace_browser.py", "check_quick_browser.py",
         "check_proof_browser.py", "check_setup_browser.py", "check_public_proxies_browser.py",
         "check_capture_language_browser.py",
     ),
     "browser-ux": (
+        "check_workflows_browser.py", "check_disclosure_preview_browser.py",
         "check_router_browser.py", "check_view_host_browser.py", "check_view_lifecycle_browser.py",
         "check_polling_browser.py", "check_time_browser.py", "check_shell_browser.py",
         "check_health_controls_browser.py", "check_notifications_browser.py",
         "check_chat_layout_browser.py", "check_chat_list_browser.py", "check_chat_features_browser.py",
         "check_sources_browser.py", "check_parameters_browser.py", "check_accounts_overview_browser.py",
+        "check_account_states_browser.py",
         "check_access_sections_browser.py", "check_journal_browser.py", "check_exports_browser.py",
         "check_controls_browser.py", "check_quick_search_browser.py",
     ),

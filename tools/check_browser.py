@@ -79,7 +79,7 @@ class RunningApp:
         self.sock.close()
 
 
-def unlock(page, server):
+def unlock(page, server, *, start=False):
     page.goto(server.url)
     if server.app.state.store.get_setting("demo",False):
         expect(page.locator("#workspace")).to_be_visible()
@@ -101,7 +101,7 @@ def unlock(page, server):
         expect(page.locator("#chat-feed .msg").first).to_be_visible()
         page.locator("#chat-status .chat-author-chip button").click()
         expect(page.locator("#chat-status .chat-author-chip")).to_have_count(0)
-        page.locator('[data-view="connection"]').click()
+        navigate_panel(page, 'connection')
         expect(page.locator("#demo-account-state")).to_be_visible()
         expect(page.locator("#credentials-form")).not_to_be_visible()
         expect(page.locator("#demo-account-state")).to_contain_text("python start.py")
@@ -114,6 +114,12 @@ def unlock(page, server):
     assert authenticated.value.ok, authenticated.value.status
     authenticated.value.body()
     expect(page.locator("#workspace")).to_be_visible()
+    # Legacy scenario helpers continue into setup through the new task choice.
+    # New landing acceptance keeps the chooser visible with start=True.
+    if not start and page.locator('#view-start').is_visible():
+        button = page.locator('[data-workflow="investigation"]')
+        if button.is_visible():
+            button.click()
 
 
 def navigate_panel(page, view):
@@ -122,6 +128,9 @@ def navigate_panel(page, view):
     toggle = page.locator("#navigation-toggle")
     if page.viewport_size["width"] < 768 and toggle.get_attribute("aria-expanded") != "true":
         toggle.click()
+    if button.evaluate("el=>!!el.closest('#nav-more')"):
+        if page.locator('#nav-more').get_attribute('open') is None:
+            page.locator('#nav-more > summary').click()
     button.click()
     expect(page.locator(f"#view-{view}")).to_be_visible()
 
@@ -283,7 +292,7 @@ def check_reading_states(browser, server):
     for theme in ("light", "dark"):
         page.emulate_media(color_scheme=theme)
         for view in ("chats", "sources", "parameters"):
-            page.locator(f'[data-view="{view}"]').first.click()
+            navigate_panel(page, view)
             if view == "sources":
                 page.locator("#sources-tab-recording").click()
                 page.locator(".media-rules-details").evaluate("n=>n.open=true")
@@ -355,7 +364,7 @@ def check_themes(browser, server):
     expect(html).to_have_attribute("data-theme", "dark")
     expect(sidebar.locator('[data-theme-choice="system"]')).to_have_attribute("aria-pressed", "true")
     for view in ("chats", "observations", "sources", "evidence", "witness", "parameters", "connection", "accounts"):
-        page.locator('[data-view="%s"]' % view).first.click()
+        navigate_panel(page, view)
         expect(page.locator("#view-" + view)).to_be_visible()
         check_layout(page)
     page.locator('[data-view="observations"]').first.click()
@@ -515,6 +524,7 @@ def main():
             page.evaluate("window.showSaveFilePicker=undefined")
             page.route("**/api/export/jsonl", lambda route: route.fulfill(status=200,
                        headers={"Content-Length":str(128*1024**2+1), "Content-Type":"application/x-ndjson"}, body=b""))
+            page.locator('#export-more-formats > summary').click()
             page.locator('[data-export="jsonl"]').click()
             expect(page.locator("#toast")).to_contain_text("cannot stream this large export")
             page.unroute("**/api/export/jsonl")
@@ -653,6 +663,7 @@ def main():
             page.locator("#collector-toggle").click()
             expect(page.locator("#collector-toggle")).to_have_text("Pause observation")
             page.locator('[data-view="evidence"]').click()
+            page.locator('#export-task-journal').click()
             page.locator("#export-chat-tools > summary").click()
             page.locator("#snapshot-form button").click()
             expect(page.locator("#toast")).to_contain_text("Saved 3 history observations", timeout=15000)
@@ -660,7 +671,7 @@ def main():
             page.locator("#collector-toggle").click()
             expect(page.locator("#collector-toggle")).to_have_text("Start observation")
 
-            page.locator('[data-view="parameters"]').click()
+            navigate_panel(page, "parameters")
             expect(page.locator("#parameters-groups .parameters-group")).to_have_count(8)
             page.locator("#parameter-recheck_max_chats").fill("0")
             expect(page.locator("#parameters-save")).to_be_disabled()
@@ -687,7 +698,7 @@ def main():
             assert live.app.state.store.get_setting("parameters") == {}
             reload_panel(page)
             expect(page.locator("#workspace")).to_be_visible()
-            page.locator('[data-view="connection"]').click()
+            navigate_panel(page, "connection")
             page.locator("#entry-settings").click()
             page.locator("#manage-profiles").click()
             page.locator("#profile-label").fill("Private groups · Account B")
@@ -701,7 +712,7 @@ def main():
             page.locator('[data-view="sources"]').click()
             page.locator("#sources-tab-recording").click()
             expect(page.locator("#monitor-reactions")).to_be_checked()
-            page.locator('[data-view="connection"]').click()
+            navigate_panel(page, "connection")
             page.locator('[data-auth-method="files"]').click()
             session_path = run / "synthetic.tgwitness-session"
             session_path.write_text(saved_session(b"y"), encoding="ascii")  # another account, another key
@@ -736,6 +747,7 @@ def main():
 
             expect(page.locator("#accounts-list .danger")).to_have_count(1)
             page.locator('[data-view="evidence"]').click()
+            page.locator('#export-task-journal').click()
             if not page.locator("#verification-details").get_attribute("open") == "":
                 page.locator("#verification-details > summary").click()
             page.locator("#verify-journal").click()

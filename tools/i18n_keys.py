@@ -18,7 +18,7 @@ PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "ses
                  "profiles.py", "multi_export.py", "alerts.py", "witness_api.py", "tuning.py", "interactions.py",
                  "access.py", "history.py", "archive.py", "archive_api.py", "ai.py", "analysis.py", "analysis_api.py",
                  "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py", "proxy_catalog.py",
-                 "proxy_sources.py", "account_export.py", "account_export_transport.py", "disclosure.py")
+                 "proxy_sources.py", "account_export.py", "account_export_transport.py", "account_report.py", "disclosure.py")
 
 # Labels passed through small renderer tables (tr(label)), rather than literal tr() calls.
 DYNAMIC_SCRIPT_KEYS = (
@@ -131,7 +131,8 @@ def server_keys():
     if str(PACKAGE.parent) not in sys.path:
         sys.path.insert(0, str(PACKAGE.parent))
     from tgwitness.tuning import texts
-    return list(dict.fromkeys(keys + texts()))
+    from tgwitness.account_report import text_keys as account_report_keys
+    return list(dict.fromkeys(keys + texts() + account_report_keys()))
 
 
 if __name__ == "__main__":

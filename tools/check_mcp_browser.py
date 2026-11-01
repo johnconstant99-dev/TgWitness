@@ -8,7 +8,7 @@ from playwright.sync_api import expect, sync_playwright
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.check_browser import (RunningApp, check_layout, hold_api_response,
-                                 launch_browser, release_api_response, unlock)
+                                 launch_browser, release_api_response, unlock, navigate_panel)
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
             unlock(page, app)
             second = page.evaluate("""async()=>{const result=await json('profiles',{label:'Another case'},{root:true});
                 await loadProfiles();return result.id;}""")
-            page.locator('.sidebar [data-view="integrations"]').click()
+            navigate_panel(page, "integrations")
             expect(page.locator("#mcp-fields")).to_be_enabled()
             page.locator("#mcp-name").fill("Analyst laptop")
             page.locator("#mcp-scope summary").first.click()

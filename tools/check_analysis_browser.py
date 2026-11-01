@@ -9,7 +9,7 @@ from playwright.sync_api import sync_playwright, expect
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.check_browser import (RunningApp, launch_browser, unlock, check_layout,
-                                 hold_api_response, release_api_response)
+                                 hold_api_response, release_api_response, navigate_panel)
 from tools.check_analysis_settings_browser import check_settings
 from tgwitness import netclient
 
@@ -67,10 +67,13 @@ def main():
                 page.on("request", lambda request: calls.append(request.url) if "/api/analysis/" in request.url else None)
                 unlock(page, app)
                 expect(page.locator("#unlock-form button")).to_be_enabled()
+                if page.locator('#nav-more').get_attribute('open') is None:
+                    page.locator('#nav-more > summary').click()
                 expect(page.locator('[data-view="analysis"]')).to_be_hidden()
+                assert page.locator('[data-view="analysis"]').evaluate('element=>element.hidden')
                 page.evaluate("async()=>{await refreshStatus();await refreshStatus();await TgWitnessAnalysis.load();await TgWitnessMedia.load();}")
                 assert not calls, calls
-                page.locator('[data-view="integrations"]').click()
+                navigate_panel(page, "integrations")
                 page.locator("#ai-settings > summary").click()
                 expect(page.locator("#ai-status")).to_contain_text("AI disabled")
                 page.locator("#ai-model").fill("synthetic-test")
@@ -82,7 +85,7 @@ def main():
                 page.locator('#ai-settings-form button[type="submit"]').click()
                 expect(page.locator("#ai-status")).to_contain_text("AI enabled")
                 page.locator("#ai-settings > summary").click()
-                page.locator('[data-view="analysis"]').click()
+                navigate_panel(page, "analysis")
                 expect(page.locator("#media-analysis-section")).to_be_hidden()
                 check_default_period(page)
                 page.locator('#ask-chats input[value="-1001"]').check()
@@ -119,7 +122,7 @@ def main():
                 page.set_viewport_size({"width": 390, "height": 900})
                 check_layout(page)
                 page.set_viewport_size({"width": 1440, "height": 1000})
-                page.locator('[data-view="integrations"]').click()
+                navigate_panel(page, "integrations")
                 page.locator("#ai-settings > summary").click()
                 page.locator("#ai-enabled").uncheck()
                 page.locator('#ai-settings-form button[type="submit"]').click()
@@ -141,9 +144,11 @@ def main():
                 expect(viewer.locator("#unlock-form button")).to_be_enabled()
                 expect(viewer.locator('[data-view="analysis"]')).to_be_hidden()
                 expect(viewer.locator('[data-view="integrations"]')).to_be_hidden()
+                assert viewer.locator('[data-view="analysis"]').evaluate('element=>element.hidden')
+                assert viewer.locator('[data-view="integrations"]').evaluate('element=>element.hidden')
                 page.evaluate("json('analysis/provider',{enabled:true,model:'synthetic-test'},{root:true})")
                 viewer.evaluate("refreshStatus()")
-                viewer.locator('[data-view="analysis"]').click()
+                navigate_panel(viewer, "analysis")
                 expect(viewer.locator("#ask-form")).to_be_visible()
                 expect(viewer.locator("#ai-settings")).to_be_hidden()
                 expect(viewer.locator('#ask-chats input[value="-1001"]')).to_be_visible()
@@ -158,7 +163,7 @@ def main():
                         patch("tgwitness.media_analysis_api.available", return_value=True):
                     page.evaluate("refreshStatus()")
                     baseline = len(calls)
-                    page.locator('[data-view="analysis"]').click()
+                    navigate_panel(page, "analysis")
                     expect(page.locator("#media-analysis-section")).to_be_visible()
                     expect(page.locator("#media-worker-status")).to_contain_text("Local worker")
                     expect(page.locator("#ask-form")).to_be_hidden()
@@ -182,7 +187,7 @@ def main():
                     await json('analysis/provider?workspace_id=default',{enabled:true,model:'workspace-a'},{root:true});
                     await refreshStatus();await loadProfiles();return other.id;
                 }""")
-                page.locator('[data-view="integrations"]').click()
+                navigate_panel(page, "integrations")
                 if page.locator("#ai-settings").evaluate("el=>el.open"):
                     page.locator("#ai-settings > summary").click()
                 page.locator("#ai-settings > summary").click()

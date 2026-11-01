@@ -3,7 +3,6 @@ import asyncio
 import base64
 import hashlib
 import hmac
-import html
 import json
 import re
 import secrets
@@ -16,6 +15,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .account_export import AccountExportOptions, file_sha
+from . import account_report
 from .security import private_write
 from .store import canonical, utcnow
 from .verify import MAX_MEMBERS, MAX_UNCOMPRESSED_GIB, fingerprint, verify_account_export, verify_account_disclosure
@@ -35,6 +35,7 @@ MAX_MASK_TERMS = 5000
 class DisclosurePolicy(BaseModel):
     model_config = ConfigDict(extra='forbid')
     purpose: str = Field(min_length=1, max_length=1000)
+    report_language: str = 'en'
     from_utc: str | None = None
     to_utc: str | None = None
     sender_ids: list[int] = Field(default_factory=list, max_length=10000)
@@ -50,6 +51,11 @@ class DisclosurePolicy(BaseModel):
     include_stories: bool = False
     include_session_metadata: bool = False
     include_other_data: bool = False
+
+    @field_validator('report_language')
+    @classmethod
+    def report_language_supported(cls, value):
+        return account_report.validate_language(value)
 
     @field_validator('purpose')
     @classmethod
@@ -297,7 +303,8 @@ def public_policy(policy, projection=None):
     purpose = mask_literals(policy.purpose, pattern, '[private criterion]')
     if projection is not None:
         purpose = projection.mask_text(purpose)
-    return {'purpose': purpose, 'identity_mode': policy.identity_mode, 'text_mode': policy.text_mode,
+    return {'purpose': purpose, 'report_language': policy.report_language,
+            'identity_mode': policy.identity_mode, 'text_mode': policy.text_mode,
             'from_utc': policy.from_utc, 'to_utc': policy.to_utc, 'include_media': policy.include_media,
             **{'include_' + name: False for name in METADATA},
             'sender_filter_count': len(policy.sender_ids), 'text_filter_count': len(policy.text_contains),
@@ -435,23 +442,10 @@ class Disclosures:
                         yield canonical(row) + b'\n'
                 write('messages.jsonl', message_bytes())
                 counts.update(chats=len(chats), media=len(media))
-                def readable():
-                    yield ("<!doctype html><html><head><meta charset=utf-8><meta name=viewport content='width=device-width'>"
-                           "<meta http-equiv=Content-Security-Policy content=\"default-src 'none'; style-src 'unsafe-inline'\">"
-                           "<title>Minimized disclosure</title><style>body{max-width:960px;margin:2rem auto;padding:1rem;font:16px system-ui}"
-                           "article{border-top:1px solid #aaa;padding:1rem 0}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style></head><body>"
-                           "<h1>Minimized disclosure</h1><p>" + html.escape(shared_policy['purpose']) + "</p><p>"
-                           + html.escape(' '.join(WARNINGS)) + '</p>').encode()
-                    for row in rows():
-                        message = row['message']
-                        yield ('<article><h2>' + html.escape(row['chat']['title']) + '</h2><p>'
-                               + html.escape(str(message['date']) + ' · ' + str(message['sender'])) + '</p><pre>'
-                               + html.escape(message['text']) + '</pre>').encode()
-                        for attachment in message['attachments']:
-                            yield ('<p><a download href="' + attachment['file'] + '">Included original attachment</a></p>').encode()
-                        yield b'</article>'
-                    yield b'</body></html>'
-                write('index.html', readable())
+                report_context = {'report_language': policy.report_language, 'policy': shared_policy,
+                    'counts': counts, 'fingerprint': fingerprint(self.vault.public_key),
+                    'source_archive_sha256': digest, 'limitations': WARNINGS}
+                write('index.html', account_report.sharing_report(report_context, rows()))
                 for name in sorted(media):
                     with source.open(name) as stream:
                         write(name, iter(lambda: stream.read(1024**2), b''))
@@ -464,6 +458,7 @@ class Disclosures:
                     + 'For large packages add --max-gib with the expanded size. index.html is protected by the manifest.\n').encode()])
                 write('SHA256SUMS', [''.join(f'{v}  {k}\n' for k, v in sorted(hashes.items())).encode()])
                 manifest = dict(format='tgwitness-account-disclosure-v1', public_key=self.vault.public_key,
+                    report_language=policy.report_language,
                     fingerprint=fingerprint(self.vault.public_key), disclosure_id=identity, created_at=created,
                     source_archive_sha256=digest, source_collector_fingerprint=fingerprint(self.vault.public_key),
                     policy=shared_policy, counts=counts, files=hashes, limitations=WARNINGS)

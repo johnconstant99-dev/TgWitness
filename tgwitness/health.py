@@ -210,6 +210,8 @@ def connection(c, now):
     detail = {"phase": c.get("phase"), "attempts": c.get("reconnect_attempts") or 0,
               "next_reconnect_at": iso(parse(c.get("next_reconnect_at"))), "error": c.get("last_error"),
               "telegram_pause_until": iso(parse(c.get("rpc_backoff_until")))}
+    if c.get("authorization_required"):
+        return part("failed", "signed_out", **detail)
     if c.get("phase") in FAILED_PHASES:
         return part("failed", FAILED_PHASES[c["phase"]], **detail)
     if not c.get("has_session"):

@@ -240,6 +240,9 @@ def main():
                 panel.goto(workspace.url + "?lang=ru")
                 expect(panel.locator("#workspace")).to_be_visible()
                 panel.locator('[data-view="evidence"]').click()
+                panel.locator('#export-task-journal').click()
+                if panel.locator('#export-more-formats').get_attribute('open') is None:
+                    panel.locator('#export-more-formats > summary').click()
                 panel.locator("#export-sealed").click()
                 expect(panel.locator("#view-sealed")).to_be_visible()
                 assert panel.url.startswith(workspace.url)
@@ -257,6 +260,9 @@ def main():
                 panel.locator("#open-demo").click()
                 expect(panel.locator("#workspace")).to_be_visible()
                 panel.locator('[data-view="evidence"]').click()
+                panel.locator('#export-task-journal').click()
+                if panel.locator('#export-more-formats').get_attribute('open') is None:
+                    panel.locator('#export-more-formats > summary').click()
                 panel.locator("#export-sealed").click()
                 expect(panel.locator('[data-capture-action="generate"]')).to_be_visible()
                 expect(panel.locator('[data-capture-action="next"]')).to_be_disabled()

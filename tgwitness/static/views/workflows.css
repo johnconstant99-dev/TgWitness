@@ -1,0 +1,49 @@
+/* Task choices first; technical controls remain available through disclosure. */
+.workflow-intro { max-width: 720px; margin: 12px 0 28px; }
+.workflow-intro h1 { font-size: clamp(26px, 3vw, 34px); line-height: 1.2; margin: 8px 0 12px; }
+.workflow-intro p { color: var(--muted); font-size: 15px; line-height: 1.65; }
+.workflow-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.workflow-card { padding: 28px; display: flex; flex-direction: column; align-items: start; gap: 14px; }
+.workflow-card > .icon { width: 28px; height: 28px; color: var(--accent-text); }
+.workflow-card h2, .workflow-card p { margin: 0; }
+.workflow-card p { color: var(--muted); line-height: 1.6; }
+.workflow-card ol { margin: 0 0 8px; padding-inline-start: 20px; color: var(--text-2); line-height: 1.9; }
+.workflow-card button { margin-top: auto; min-height: 44px; }
+.workflow-status { margin-top: 20px; padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+.workflow-status > div { flex: 1 1 260px; }
+.workflow-status p { margin: 5px 0 0; color: var(--muted); }
+.workflow-status[data-state="sign_in"], .workflow-status[data-state="failed"] { border-color: var(--warning-border); }
+.workflow-handoff { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding: 16px 20px; background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: var(--radius-panel); }
+.workflow-handoff p { margin: 0; flex: 1 1 240px; }
+#collector-error { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+#collector-error-copy { flex: 1 1 260px; }
+.sidebar .nav-more { border: 0; border-top: 1px solid var(--rail-border); margin-top: 16px; padding-top: 10px; }
+.sidebar .nav-more > summary { color: var(--rail-text); min-height: 44px; padding: 12px; font-size: 13px; cursor: pointer; }
+.sidebar .nav-more > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: 6px; }
+.export-task-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 0 20px; }
+.export-task-choices button { text-align: start; display: grid; gap: 6px; padding: 18px 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: var(--radius-panel); white-space: normal; }
+.export-task-choices button span { font-weight: 400; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.export-task-choices button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.export-task-choices button:hover { border-color: var(--accent); }
+.export-task-choices:has(button[hidden]) { grid-template-columns: 1fr; }
+.export-options { margin: 20px 0; border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); }
+.export-options > summary { padding: 16px 20px; font-weight: 600; cursor: pointer; }
+.export-options > :not(summary) { margin: 0 20px 20px; }
+.account-export-dialog .export-options { margin: 12px 0; }
+.account-export-dialog .export-options > :not(summary) { margin: 0 16px 16px; }
+.account-export-dialog .export-options .account-export-fieldset { border: 0; padding: 0; }
+.account-export-advanced-summary { display: block; font-weight: 400; color: var(--muted); font-size: 12px; margin-top: 5px; }
+.exports-job-link { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; margin-bottom: 16px; border: 1px solid var(--border); border-radius: var(--radius-control); }
+.exports-job-link span { flex: 1 1 220px; }
+.export-scope-note { color: var(--text-2); font-size: 13px; line-height: 1.6; }
+.export-language { margin: 16px 0 20px; }
+.export-language select { max-width: 360px; }
+.workspace[data-current-view="start"] .health-details, .workspace[data-current-view="evidence"] .health-details { margin-bottom: 8px; }
+@media (max-width: 767px) {
+  .workflow-choices, .export-task-choices { grid-template-columns: 1fr; }
+  .workflow-card { padding: 22px; gap: 12px; }
+  .workflow-intro { margin: 8px 0 20px; }
+  .workflow-status { padding: 18px; }
+  .workflow-status button, .workflow-card button { width: 100%; }
+  .export-task-choices button { padding: 14px 16px; }
+}

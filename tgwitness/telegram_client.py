@@ -45,5 +45,9 @@ class WitnessClient(TelegramClient):
         token = _single_attempt.set(single)
         try:
             return await super()._call(sender, request, ordered, flood_sleep_threshold)
+        except Exception as exc:
+            if handler := getattr(self, "rpc_error_handler", None):
+                handler(exc)
+            raise
         finally:
             _single_attempt.reset(token)

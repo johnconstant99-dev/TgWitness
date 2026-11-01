@@ -6,7 +6,7 @@ from starlette.exceptions import HTTPException
 
 
 DOCUMENTS = (
-    "/chats", "/journal", "/sources", "/parameters", "/account", "/accounts",
+    "/start", "/chats", "/journal", "/sources", "/parameters", "/account", "/accounts",
     "/access", "/system-log", "/integrations", "/exports", "/extras", "/analysis", "/sealed",
     *("/extras/" + card for card in ("alerts", "evidence", "cloud", "bot", "github")),
 )

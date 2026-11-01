@@ -1,5 +1,7 @@
 .accounts-overview{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:0 0 18px}
-.accounts-total{display:grid;gap:3px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+.accounts-total{display:grid;gap:3px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);text-align:left;color:var(--text);font:inherit;cursor:pointer;min-width:0}
+.accounts-total:hover,.accounts-total[aria-pressed=true]{border-color:var(--accent)}
+.accounts-total:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .accounts-total strong{font-size:24px;line-height:1.2;font-variant-numeric:tabular-nums}.accounts-total span{font-size:12px;color:var(--muted)}
 .accounts-tools{display:grid;grid-template-columns:minmax(200px,1fr) minmax(140px,.5fr) minmax(140px,.5fr);gap:12px;margin-bottom:12px}
 .accounts-tools label{display:grid;gap:5px;font-size:12px;color:var(--muted)}

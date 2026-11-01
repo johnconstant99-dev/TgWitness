@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="/components/notifications.css?v=1">
 <link rel="stylesheet" href="/views/sources.css?v=17">
 <link rel="stylesheet" href="/views/parameters.css?v=21">
-<link rel="stylesheet" href="/views/accounts.css?v=29">
+<link rel="stylesheet" href="/views/accounts.css?v=30">
 <link rel="stylesheet" href="/views/access.css?v=30">
 <link rel="stylesheet" href="/components/journal.css?v=4">
 <link rel="stylesheet" href="/views/chats.css?v=11">
@@ -23,7 +23,7 @@
 <script src="/theme.js?v=0.7.0"></script>
 <script src="/guide-locale.js" data-scope="panel"></script>
 <script defer src="/i18n.js?v=0.7.0"></script>
-<script defer src="/app.js?v=0.7.0-chats12"></script>
+<script defer src="/app.js?v=0.7.0-workflows1"></script>
 <script defer src="/integrations.js?v=2"></script>
 <script defer src="/analysis.js?v=3"></script>
 <script defer src="/media-analysis.js?v=2"></script>
@@ -34,11 +34,14 @@
 <script defer src="/live.js?v=2"></script>
 <script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=4"></script><script defer src="/cloud-capture.js?v=6"></script>
 <link href="/views/exports.css?v=32" rel="stylesheet">
+<link href="/views/workflows.css?v=1" rel="stylesheet">
+<link href="/views/disclosure-preview.css?v=1" rel="stylesheet">
 <link href="/components/forms.css?v=35" rel="stylesheet">
 <link href="/components/feedback.css?v=36" rel="stylesheet">
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3Z"/><path d="M9 20v-7h6v7"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
   <symbol id="i-journal" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
   <symbol id="i-sources" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/><path d="M8 8h8M8 12h5"/></symbol>
@@ -127,20 +130,23 @@
   <div class="sidebar-caption">Observation workspace</div>
   <button class="quick-open" id="quick-open" data-quick-open type="button" aria-haspopup="dialog" aria-controls="quick-dialog" aria-keyshortcuts="Control+k Meta+k"><svg aria-hidden="true" class="icon"><use href="#i-search"/></svg><span>Go to…</span><kbd data-no-translate id="quick-shortcut">Ctrl K</kbd></button>
   <nav aria-label="Main navigation">
+    <button class="nav" data-view="start"><svg aria-hidden="true" class="nav-icon"><use href="#i-home"/></svg> Start here</button>
     <div class="nav-section">Investigation</div>
     <button class="nav" data-view="chats"><svg aria-hidden="true" class="nav-icon"><use href="#i-message"/></svg> Chats</button>
     <button class="nav active" data-view="observations"><svg aria-hidden="true" class="nav-icon"><use href="#i-journal"/></svg> Journal <b id="nav-count">0</b></button>
     <button class="nav" data-view="sources"><svg aria-hidden="true" class="nav-icon"><use href="#i-sources"/></svg> Sources</button>
     <button class="nav" data-view="evidence"><svg aria-hidden="true" class="nav-icon"><use href="#i-export"/></svg> Exports</button>
+    <div class="nav-section">Workspace</div>
+    <button class="nav" data-view="accounts"><svg aria-hidden="true" class="nav-icon"><use href="#i-users"/></svg> Accounts <b id="nav-accounts">1</b></button>
+    <details class="nav-more" id="nav-more"><summary>More tools &amp; settings</summary>
     <button class="nav" data-view="witness"><svg aria-hidden="true" class="nav-icon"><use href="#i-sparkle"/></svg> Extras</button>
     <button class="nav" data-view="analysis"><svg aria-hidden="true" class="nav-icon"><use href="#i-search"/></svg> Ask the archive</button>
-    <div class="nav-section">Workspace</div>
     <button class="nav" data-view="parameters"><svg aria-hidden="true" class="nav-icon"><use href="#i-settings"/></svg> Parameters</button>
     <button class="nav" data-view="connection"><svg aria-hidden="true" class="nav-icon"><use href="#i-account"/></svg> Account</button>
-    <button class="nav" data-view="accounts"><svg aria-hidden="true" class="nav-icon"><use href="#i-users"/></svg> Accounts <b id="nav-accounts">1</b></button>
     <button class="nav" data-view="access" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-lock"/></svg> Access</button>
     <button class="nav" data-view="system-log" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-activity"/></svg> System log</button>
     <button class="nav" data-view="integrations" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-link"/></svg> Integrations</button>
+    </details>
   </nav>
   <div class="sidebar-bottom">
     <a class="sidebar-help" href="/guide.html" target="_blank" rel="noopener"><svg aria-hidden="true" class="nav-icon"><use href="#i-help"/></svg> Help &amp; documentation</a>
@@ -197,13 +203,23 @@
   <details class="health-details"><summary>Collector health <span>Storage &amp; attachment queue</span></summary><div class="health-strip" id="health-strip"></div></details>
   <span aria-live="polite" class="visually-hidden" id="health-announce"></span>
 </div>
-<div class="notice error" hidden id="collector-error"></div>
+<div class="notice error" hidden id="collector-error" role="alert"><span id="collector-error-copy"></span><button class="secondary" id="collector-sign-in" type="button" hidden>Sign in again</button></div>
 
 <div class="setup-card" hidden id="setup-card">
   <div class="setup-copy"><span class="eyebrow" id="setup-stage">GET STARTED</span><h2 id="setup-title">Connect your Telegram account</h2><p id="setup-description">Sign in, choose your sources, then start observation.</p></div>
   <button class="primary" id="setup-action" type="button">Connect account →</button>
   <ol aria-label="Setup progress" class="setup-progress"><li id="setup-account"><span>1</span> Connect account</li><li id="setup-sources"><span>2</span> Choose sources</li><li id="setup-observe"><span>3</span> Start observation</li></ol>
 </div>
+
+<section class="view" hidden id="view-start">
+  <div class="workflow-intro"><span class="eyebrow">YOUR WORKSPACE</span><h1>What would you like to do?</h1><p>Save a copy of your Telegram account, or keep a record of conversations as they change.</p></div>
+  <div class="workflow-choices">
+    <article class="card workflow-card" id="workflow-account-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export my account</h2><p>Download the chats and history your account can read now. Choose dates, messages and files before starting.</p><ol><li>Connect your account</li><li>Choose what to include</li><li>Download a signed archive</li></ol><button class="primary" data-workflow="account" type="button">Export my account</button><p class="hint">No continuous observation needed. Earlier deletions and edits cannot be recovered.</p></article>
+    <article class="card workflow-card" id="workflow-investigation-card"><svg aria-hidden="true" class="icon"><use href="#i-journal"/></svg><h2>Follow an investigation</h2><p>Keep new messages, observed edits and deletion notices from the chats you choose.</p><ol><li>Choose sources</li><li>Start observation explicitly</li><li>Review and export saved records</li></ol><button class="secondary" data-workflow="investigation" type="button">Set up observation</button><p class="hint">Previously saved records stay available when observation is paused.</p></article>
+  </div>
+  <section class="card workflow-status" aria-label="Current workspace"><div><strong id="workflow-status-title"></strong><p id="workflow-status-copy"></p></div><button class="secondary" data-open="chats" type="button">Open saved chats</button><button class="quiet" data-open="accounts" type="button">Manage accounts</button></section>
+  <p class="hint">TgWitness signs the saved files. Telegram does not certify them. Export details explain what was collected and what is missing.</p>
+</section>
 
 <section class="view" id="view-observations">
   <div class="page-heading">
@@ -369,7 +385,7 @@
 
 <section class="view" hidden id="view-evidence">
   <div class="page-heading">
-    <div><h1>Export records</h1><p class="page-description">Workspace ID: <code id="export-profile-id">default</code> · <a href="/guide.html#export" rel="noopener" target="_blank">Large downloads &amp; verification</a></p></div>
+    <div><h1>Export records</h1><p class="page-description">Choose a fresh Telegram snapshot or the observations already saved here.</p></div>
     <button class="secondary" id="verify-journal"><svg aria-hidden="true" class="icon"><use href="#i-shield"/></svg> Verify journal</button>
   </div>
   <div id="verification-result" role="status"></div>
@@ -378,7 +394,14 @@
     <button type="button" role="tab" id="exports-tab-settings" data-export-tab="settings" aria-controls="report-form" aria-selected="false" tabindex="-1">Report settings</button>
   </div>
   <div id="exports-progress" class="card padded" hidden role="status" aria-live="polite"><strong id="exports-progress-label"></strong><progress id="exports-progress-bar" aria-label="Download progress"></progress><span id="exports-progress-bytes" class="hint"></span></div>
+  <p class="notice error" id="exports-account-error" hidden role="alert"></p>
   <div id="exports-downloads" role="tabpanel" aria-labelledby="exports-tab-downloads">
+  <div class="export-task-choices" role="group" aria-label="What to export">
+    <button id="export-task-account" type="button" data-export-task="account" aria-pressed="false" aria-controls="export-account-panel"><strong>Telegram account</strong><span>Read the history available now. Choose chats, dates and files.</span></button>
+    <button id="export-task-journal" type="button" data-export-task="journal" aria-pressed="true" aria-controls="export-journal-panel"><strong>Saved observations</strong><span>Export the messages and changes already recorded by TgWitness.</span></button>
+  </div>
+  <div class="exports-job-link" id="exports-job-link" hidden><span id="exports-job-summary"></span><button type="button" class="quiet" data-export-task="account">Open account exports</button></div>
+  <div id="export-account-panel" hidden>
   <section class="card account-export-card" id="account-export-card" hidden aria-labelledby="account-export-title">
     <div class="account-export-head">
       <div><span class="eyebrow">TELEGRAM ACCOUNT SNAPSHOT</span><h2 id="account-export-title">Export this account</h2>
@@ -388,20 +411,23 @@
     <div class="account-export-toolbar"><div><strong>Account export jobs</strong><span class="hint">Jobs remain available after a restart. A finished archive can be downloaded again until you delete it.</span></div><button class="quiet" id="account-export-refresh" type="button">Refresh jobs</button></div>
     <p class="hint" id="account-export-status" role="status"></p><div class="account-export-jobs" id="account-export-jobs"></div>
   </section>
+  </div>
   <dialog class="account-export-dialog" id="account-export-dialog" aria-labelledby="account-export-dialog-title">
     <form id="account-export-form" method="dialog">
-      <div class="account-export-dialog-head"><div><span class="eyebrow">NEW ACCOUNT EXPORT</span><h2 id="account-export-dialog-title">Choose what to save</h2></div><button class="quiet" id="account-export-close" type="button" aria-label="Close export settings">×</button></div>
+      <div class="account-export-dialog-head"><div><span class="eyebrow">NEW ACCOUNT EXPORT</span><h2 id="account-export-dialog-title" tabindex="-1">Choose what to save</h2></div><button class="quiet" id="account-export-close" type="button" aria-label="Close export settings">×</button></div>
       <p class="muted">Every accessible chat and its full visible history are selected by default. Observation sources are separate from this export.</p>
+      <p class="hint">For a personal backup, describe that purpose. You can prepare a separate sharing copy after the export finishes.</p>
+      <div class="export-language"><label for="account-export-language">Report language</label><select id="account-export-language" data-no-translate></select><p class="hint">Report labels use this language. Original messages stay unchanged.</p></div>
       <div class="account-export-purpose"><label for="account-export-purpose">Collection purpose</label><textarea id="account-export-purpose" rows="2" maxlength="1000" required placeholder="Why this account snapshot is being collected"></textarea><p class="hint">The purpose is included in the signed export. Describe the specific investigation or request.</p><button class="secondary account-export-preset" id="account-export-minimize" type="button">Minimize collection</button><p class="hint">Turns off media and optional account data. Chat and sender filters remain yours to set.</p></div>
       <fieldset class="account-export-fieldset"><legend>Chats</legend>
-        <div class="account-export-choices" id="account-export-kinds">
+        <div class="account-export-choices" id="account-export-kinds" tabindex="-1">
           <label><input type="checkbox" value="private" checked> Private chats &amp; Saved Messages</label><label><input type="checkbox" value="bot" checked> Bots</label>
           <label><input type="checkbox" value="group" checked> Groups</label><label><input type="checkbox" value="supergroup" checked> Supergroups</label>
           <label><input type="checkbox" value="channel" checked> Channels</label>
         </div>
         <div class="account-export-choices"><label><input id="account-export-archived" type="checkbox" checked> Include archived chats</label><label><input id="account-export-own" type="checkbox"> Only messages sent by this account</label></div>
         <details><summary>Choose individual chat IDs</summary><label for="account-export-ids">Chat IDs, separated by commas or lines</label><textarea id="account-export-ids" rows="2" placeholder="Leave blank for all chats of the selected types"></textarea><p class="hint">This limits the export to those IDs; it does not change observation sources.</p></details>
-        <div class="account-export-fields account-export-content-filters"><div><label for="account-export-senders">Sender IDs</label><textarea id="account-export-senders" rows="2" placeholder="Leave blank for all senders"></textarea><p class="hint">Numeric IDs separated by commas or spaces.</p></div><div><label for="account-export-phrases">Text contains</label><textarea id="account-export-phrases" rows="2" placeholder="One literal phrase per line"></textarea><p class="hint">A message matches any phrase. This is literal text, not a regular expression.</p></div></div>
+        <details class="account-export-message-filters"><summary>Filter by sender or message text</summary><div class="account-export-fields account-export-content-filters"><div><label for="account-export-senders">Sender IDs</label><textarea id="account-export-senders" rows="2" placeholder="Leave blank for all senders"></textarea><p class="hint">Numeric IDs separated by commas or spaces.</p></div><div><label for="account-export-phrases">Text contains</label><textarea id="account-export-phrases" rows="2" placeholder="One literal phrase per line"></textarea><p class="hint">A message matches any phrase. This is literal text, not a regular expression.</p></div></div></details>
       </fieldset>
       <fieldset class="account-export-fieldset"><legend>History dates</legend><div class="account-export-fields"><div><label for="account-export-from">From date (UTC)</label><input id="account-export-from" type="date"></div><div><label for="account-export-through">Through date (UTC)</label><input id="account-export-through" type="date"></div></div><p class="hint">Leave both blank for full visible history. Dates include the whole selected day in UTC.</p></fieldset>
       <fieldset class="account-export-fieldset"><legend>Media</legend><div class="account-export-choices" id="account-export-media">
@@ -410,21 +436,24 @@
         <label><input type="checkbox" value="audio" checked> Audio</label><label><input type="checkbox" value="document" checked> Documents</label>
         <label><input type="checkbox" value="sticker" checked> Stickers</label><label><input type="checkbox" value="animation" checked> Animations</label>
       </div><div class="account-export-fields"><div><label for="account-export-file-limit">Maximum per media file, MiB</label><input id="account-export-file-limit" type="number" min="1" max="4096" step="1" value="512" required></div><div><label for="account-export-total-limit">Downloaded media budget, GiB</label><input id="account-export-total-limit" type="number" min="1" max="1024" step="1" value="16" required></div></div><p class="hint">Files above the per-file limit are listed as skipped. The total limit applies to downloaded media; message text and ZIP overhead may add to the final archive size.</p></fieldset>
+      <details class="export-options" id="account-export-advanced"><summary>Account data &amp; connection method<span class="account-export-advanced-summary" id="account-export-advanced-summary"></span></summary>
       <fieldset class="account-export-fieldset"><legend>Other account data</legend><div class="account-export-choices" id="account-export-sections">
         <label><input id="account-export-profile" type="checkbox" checked> Account profile</label><label><input id="account-export-contacts" type="checkbox" checked> Contacts</label>
         <label><input id="account-export-profile-photos" type="checkbox"> Profile photos</label><label><input id="account-export-stories" type="checkbox"> Stories</label>
         <label><input id="account-export-session-metadata" type="checkbox"> Session metadata</label><label><input id="account-export-other-data" type="checkbox"> Other available data</label>
       </div><p class="hint">The signed manifest lists unavailable or failed sections. Session keys and passwords are never included.</p></fieldset>
       <fieldset class="account-export-fieldset"><legend>Telegram transport</legend><div class="account-export-fields"><div><label for="account-export-transport">Acquisition method</label><select id="account-export-transport"><option value="takeout">Telegram Takeout session</option><option value="regular">Regular session</option></select></div></div><p class="hint">Takeout may have a delay or be unavailable for this account. Choose regular explicitly if you want to use the ordinary session.</p></fieldset>
+      </details>
       <p class="account-export-preview" id="account-export-preview" role="status"></p>
       <div class="account-export-dialog-actions"><button class="quiet" id="account-export-dismiss" type="button">Keep settings for later</button><button class="primary" id="account-export-start" type="submit">Start account export</button></div>
     </form>
   </dialog>
   <dialog class="account-export-dialog account-disclosure-dialog" id="account-disclosure-dialog" aria-labelledby="account-disclosure-title">
     <form id="account-disclosure-form" method="dialog">
-      <div class="account-export-dialog-head"><div><span class="eyebrow">REVIEW BEFORE SHARING</span><h2 id="account-disclosure-title">Prepare minimized disclosure</h2></div><button class="quiet" id="account-disclosure-close" type="button" aria-label="Close disclosure settings">×</button></div>
+      <div class="account-export-dialog-head"><div><span class="eyebrow">REVIEW BEFORE SHARING</span><h2 id="account-disclosure-title">Prepare a sharing copy</h2></div><button class="quiet" id="account-disclosure-close" type="button" aria-label="Close disclosure settings">×</button></div>
       <p class="muted">Create a separate signed derivative from a completed account export. The original archive stays unchanged. Review the sample and remaining personal information before creating a file for sharing.</p>
       <div class="account-export-purpose"><label for="account-disclosure-purpose">Disclosure purpose</label><textarea id="account-disclosure-purpose" rows="2" maxlength="1000" required placeholder="Who needs this file, and why"></textarea></div>
+      <div class="export-language"><label for="account-disclosure-language">Report language</label><select id="account-disclosure-language" data-no-translate></select><p class="hint">Report labels use this language. Original messages stay unchanged.</p></div>
       <fieldset class="account-export-fieldset"><legend>Records to include</legend>
         <div class="account-export-fields"><div><label for="account-disclosure-from">From date (UTC)</label><input id="account-disclosure-from" type="date"></div><div><label for="account-disclosure-through">Through date (UTC)</label><input id="account-disclosure-through" type="date"></div></div>
         <div class="account-export-fields account-export-content-filters"><div><label for="account-disclosure-senders">Sender IDs to include</label><textarea id="account-disclosure-senders" rows="2" placeholder="Leave blank for all senders"></textarea><p class="hint">Numeric IDs separated by commas or spaces.</p></div><div><label for="account-disclosure-phrases">Text contains</label><textarea id="account-disclosure-phrases" rows="2" placeholder="One literal phrase per line"></textarea><p class="hint">A message matches any listed phrase.</p></div></div>
@@ -437,28 +466,32 @@
       </fieldset>
       <div class="account-disclosure-preview" id="account-disclosure-preview" hidden><h3>Review transformed sample</h3><p class="hint">Only the transformed sample is shown here. Check names, quotes and other details that might still identify people.</p><div id="account-disclosure-summary"></div><div id="account-disclosure-samples"></div><div id="account-disclosure-warnings"></div><p class="hint" id="account-disclosure-expiry"></p></div>
       <p class="account-export-preview" id="account-disclosure-status" role="status">Preview is required after every change to these settings.</p>
-      <div class="account-export-dialog-actions"><button class="quiet" id="account-disclosure-dismiss" type="button">Close</button><button class="secondary" id="account-disclosure-check" type="button">Preview disclosure</button><button class="primary" disabled id="account-disclosure-create" type="submit">Create signed derivative</button></div>
+      <div class="account-export-dialog-actions"><button class="quiet" id="account-disclosure-dismiss" type="button">Close</button><button class="secondary" id="account-disclosure-check" type="button">Preview sharing copy</button><button class="primary" disabled id="account-disclosure-create" type="submit">Create signed sharing copy</button></div>
     </form>
   </dialog>
+  <div id="export-journal-panel">
   <div class="evidence-hero card">
     <div class="evidence-symbol"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg></div>
     <div class="evidence-body">
       <h2>Signed archive</h2>
       <p>Journal, report, attachments and verification tools.</p>
+      <p class="hint"><a data-go-reports="settings" href="#">Choose report language &amp; case details</a></p>
       <button class="primary" data-export="zip"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Download signed ZIP</button>
       <small>Includes all sources through a fixed journal boundary, regardless of filters. Streaming export · ZIP limit: 4 GiB uncompressed unless changed in Parameters.</small>
     </div>
+  </div>
+  <details class="export-options" id="export-more-formats"><summary>Other formats &amp; capture tools</summary>
+  <div class="export-grid">
+    <button class="card export-card" data-export="jsonl"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-braces"/></svg></span><h3>JSONL journal</h3><p>Original event records and individual signatures. One event per line.</p><span>Download .jsonl</span></button>
+    <button class="card export-card" data-export="csv"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-table"/></svg></span><h3>Spreadsheet</h3><p>Review observations in your analysis tools. Formula-safe cells.</p><span>Download .csv</span></button>
+    <button class="card export-card" data-export="html"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-report"/></svg></span><h3>Readable report</h3><p>A self-contained report for offline review, sharing, and printing to PDF.</p><span>Download .html</span></button>
   </div>
   <section class="card padded" id="sealed-capture-option">
     <h2>GitHub Actions capture (preview)</h2>
     <p>A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.</p>
     <button class="primary" id="export-sealed" data-open="sealed" type="button">Open capture helper</button>
   </section>
-  <div class="export-grid">
-    <button class="card export-card" data-export="jsonl"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-braces"/></svg></span><h3>JSONL journal</h3><p>Original event records and individual signatures. One event per line.</p><span>Download .jsonl</span></button>
-    <button class="card export-card" data-export="csv"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-table"/></svg></span><h3>Spreadsheet</h3><p>Review observations in your analysis tools. Formula-safe cells.</p><span>Download .csv</span></button>
-    <button class="card export-card" data-export="html"><span class="file-icon"><svg aria-hidden="true" class="icon"><use href="#i-report"/></svg></span><h3>Readable report</h3><p>A self-contained report for offline review, sharing, and printing to PDF.</p><span>Download .html</span></button>
-  </div>
+  </details>
   <div class="card padded" id="export-encrypt">
     <label class="check-label"><input id="export-encrypt-on" type="checkbox"> Encrypt the downloads above with a password</label>
     <div hidden id="export-password-field"><label for="export-password">Password, at least 12 characters</label><input autocomplete="new-password" id="export-password" maxlength="256" spellcheck="false" type="password"></div>
@@ -473,9 +506,10 @@
     <div id="exports-history-list"></div><p id="exports-history-status" class="hint" role="status"></p>
   </section>
   </div>
+  </div>
   <form class="card padded report-settings" id="report-form" role="tabpanel" aria-labelledby="exports-tab-settings" hidden>
     <div class="eyebrow">Readable reports</div><h2>Report settings</h2>
-    <p class="muted">Language, case details and contents of the report in every signed archive and chat export. Case details are signed into the export; leave a field empty to omit it.</p>
+    <p class="muted">Language, case details and contents of journal and single-chat reports. Case details are signed into the export; leave a field empty to omit it. Account snapshots and sharing copies choose their report language in their own export settings.</p>
     <fieldset class="report-fields" id="report-fields" disabled>
     <div class="report-grid">
       <div><label for="report-language">Report language</label><select data-no-translate id="report-language"></select></div>
@@ -496,8 +530,9 @@
     <p class="hint" id="report-status" role="status"></p>
     <p class="hint">Every report is sealed: a signature inside the file covers each of its bytes. Readers check it in the browser by dropping the file onto the report, or with <code>python verify.py report.html --fingerprint …</code>. The archive also carries <code>custody.json</code> and <code>SHA256SUMS</code>.</p>
   </form>
-  <p class="hint">Automatic timestamps and an encrypted off-site copy: <a data-go-extra="evidence" href="#">Extras → Evidence that holds up</a>.</p>
   <details class="verification-details" id="verification-details"><summary>Verification &amp; limitations</summary>
+    <p class="hint">Automatic timestamps and an encrypted off-site copy: <a data-go-extra="evidence" href="#">Extras → Evidence that holds up</a>.</p>
+    <p class="hint">Workspace ID: <code id="export-profile-id">default</code> · <a href="/guide.html#export" rel="noopener" target="_blank">Large downloads &amp; verification</a></p>
     <div class="card padded">
       <div class="card-heading compact"><div><h2>Your signing identity</h2><p>Ed25519 · SHA-256 public-key fingerprint</p></div><button class="secondary" id="save-checkpoint"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Save checkpoint</button></div>
       <code class="fingerprint" id="fingerprint"></code>
@@ -744,6 +779,7 @@
     <div><span class="page-kicker">Workspace</span><h1 id="account-heading">Add account</h1></div>
     <div class="entry-header" hidden id="entry-header"><span hidden id="entry-demo">Demo</span><button class="quiet quick-mobile" data-quick-open type="button" aria-label="Go to a section" aria-haspopup="dialog" aria-controls="quick-dialog"><svg aria-hidden="true" class="icon"><use href="#i-search"/></svg></button><button aria-expanded="false" aria-label="Settings" class="quiet" id="entry-settings" title="Account settings" type="button"><svg aria-hidden="true" class="icon"><use href="#i-settings"/></svg><span>Settings</span></button><button aria-label="Lock workspace" class="quiet" id="entry-lock" title="Lock workspace" type="button"><svg aria-hidden="true" class="icon"><use href="#i-lock"/></svg><span>Lock</span></button></div>
   </div>
+  <div class="workflow-handoff" hidden id="workflow-handoff"><p id="workflow-handoff-copy"></p><button class="primary" id="workflow-continue" type="button" hidden>Continue to export</button><button class="quiet" data-open="start" type="button">Change task</button></div>
   <div class="notice" hidden id="account-summary"></div>
   <div class="auth-card">
     <div hidden id="demo-account-state"><span class="eyebrow">Sample workspace</span><h2>Try TgWitness with your account</h2><p>Stop the demo with Ctrl+C, then run from your project folder:</p><code class="start-command">python start.py</code><p class="hint">On Windows, you can double-click <strong>Start.cmd</strong> instead. Open the panel address printed in the terminal.</p><a class="format-help" href="/guide.html#trouble" rel="noopener" target="_blank">Installation help ↗</a><button class="primary full" data-open="observations" type="button">Back to sample journal</button></div>

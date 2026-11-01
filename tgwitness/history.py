@@ -191,6 +191,7 @@ class History:
                 if backoff > 0:
                     await asyncio.sleep(min(backoff, 1))
                     continue
+                client = self.collector.client
                 try:
                     await asyncio.wait_for(self.read_page(job), self.collector.param("operation_timeout_seconds"))
                 except FloodWaitError as exc:
@@ -200,6 +201,9 @@ class History:
                         self.store.append("history.waiting", {"history_run_id": run_id,
                             "retry_after_seconds": exc.seconds}, job["chat_id"])
                 except RPCError as exc:
+                    if self.collector.handle_authorization_error(exc, "history", client=client):
+                        self.transition(run_id, "paused", "authorization_required")
+                        return
                     self.finish_source(job, "failed", type(exc).__name__)
                 except (OSError, TimeoutError) as exc:
 

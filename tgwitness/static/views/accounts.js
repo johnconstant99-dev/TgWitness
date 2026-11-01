@@ -1,3 +1,5 @@
+import {accountState} from "../components/account-state.js";
+
 export function createAccounts(context) {
   const {root,tr,getState,getSession,json,loadProfiles,refreshStatus,toast,switchProfile,navigate,diagnose}=context;
   const find=id=>root.querySelector('#'+id), listeners=new AbortController(), selected=new Set();
@@ -6,12 +8,15 @@ export function createAccounts(context) {
   const on=(node,event,fn)=>node.addEventListener(event,fn,{signal:listeners.signal});
   const profiles=()=>getState().profiles||[];
   const allowed=()=>!!getState().me?.admin&&!getState().status?.demo;
-  const empty=p=>!p.error_type&&!p.collector?.has_session;
+  const empty=p=>accountState(p).kind==='empty';
   const issues=p=>['connection','intake','sources','media'].filter(key=>['failed','degraded','unknown'].includes(p.health?.[key]?.state));
-  const problem=p=>!!p.error_type||issues(p).length>0;
-  const collecting=p=>!!p.collector?.running&&!!p.collector?.connected;
+  const problem=p=>!!p.error_type||accountState(p).needsSignIn||issues(p).length>0;
+  const collecting=p=>accountState(p).kind==='collecting';
   const eligible=(p,action)=>!p.error_type&&!!p.collector&&(action==='stop'?p.collector.running:
-    !p.collector.running&&p.collector.has_session&&(p.sources_enabled>0||p.collector.scope?.mode&&p.collector.scope.mode!=='selected'));
+    accountState(p).canStart);
+  for(const [value,label] of [['sign_in','Sign-in required'],['paused','Paused']]){
+    if(![...find('accounts-filter').options].some(option=>option.value===value))find('accounts-filter').add(new Option(tr(label),value));
+  }
   function resetSession(){
     session=getSession();selected.clear();working=false;page=0;
     find('accounts-result').hidden=true;find('accounts-result').textContent='';
@@ -19,14 +24,18 @@ export function createAccounts(context) {
     find('accounts-overview').replaceChildren();find('accounts-selected').textContent=tr('{n} selected',{n:0});
   }
   function summary(){
-    const list=profiles(), facts=[['workspaces',tr('Workspaces'),list.length],['collecting',tr('Collecting'),list.filter(collecting).length],
-      ['problems',tr('Needs attention'),list.filter(problem).length],['offline',tr('Offline / paused'),list.filter(p=>!collecting(p)).length],
-      ['events',tr('Events'),list.reduce((n,p)=>n+(p.stats?.total||0),0)],['pending',tr('Pending media'),list.reduce((n,p)=>n+(p.collector?.media_pending||0),0)]];
+    const list=profiles(), facts=[['workspaces',tr('Workspaces'),list.length,'all'],['collecting',tr('Collecting'),list.filter(collecting).length,'collecting'],
+      ['sign_in',tr('Sign-in required'),list.filter(p=>accountState(p).needsSignIn).length,'sign_in'],
+      ['empty',tr('Not connected'),list.filter(empty).length,'empty'],
+      ['paused',tr('Paused'),list.filter(p=>accountState(p).kind==='paused').length,'paused'],
+      ['problems',tr('Needs attention'),list.filter(problem).length,'attention']];
     const box=find('accounts-overview');
-    for(const [id,label,value] of facts){
+    for(const [id,label,value,filter] of facts){
       let item=box.querySelector('[data-count="'+id+'"]');
-      if(!item){item=make('div','accounts-total');item.dataset.count=id;item.append(make('strong'),make('span','',label));box.append(item);}
+      if(!item){item=make('button','accounts-total');item.type='button';item.dataset.count=id;item.append(make('strong'),make('span','',label));box.append(item);
+        on(item,'click',()=>{find('accounts-search').value='';find('accounts-filter').value=filter;page=0;updateStatus();});}
       item.firstElementChild.textContent=value.toLocaleString();
+      item.setAttribute('aria-pressed',String(find('accounts-filter').value===filter));
     }
   }
   async function openWorkspace(id,target){
@@ -40,17 +49,25 @@ export function createAccounts(context) {
     let label=card.querySelector('.account-select');
     if(!label){label=make('label','account-select');const check=make('input');check.type='checkbox';
       on(check,'change',()=>{check.checked?selected.add(id):selected.delete(id);controls();});label.append(check);card.prepend(label);}
-    const p=card.profileData;label.firstElementChild.checked=selected.has(id);label.firstElementChild.disabled=working||!allowed()||!!p.error_type;
+    const p=card.profileData,account=accountState(p);card.dataset.accountState=account.kind;
+    label.firstElementChild.checked=selected.has(id);label.firstElementChild.disabled=working||!allowed()||!!p.error_type;
     label.firstElementChild.setAttribute('aria-label',tr('Select {name}',{name:p.label}));
     let connection=card.querySelector('[data-action="connect"]');
-    if(connection){connection.hidden=!empty(p);connection.disabled=working||!allowed();}
+    if(connection){connection.hidden=!empty(p)&&!account.needsSignIn;connection.disabled=working||!allowed();
+      connection.textContent=tr(account.needsSignIn?'Sign in again':'Connect');}
+    const toggle=card.querySelector('[data-action="toggle"]');
+    if(toggle){toggle.disabled=working||!allowed()||!eligible(p,p.collector?.running?'stop':'start');
+      toggle.hidden=account.needsSignIn||account.kind==='empty';}
     let attention=card.querySelector('.account-problems');
     if(!attention){attention=make('div','account-problems');card.append(attention);}
     const found=issues(p), prior=new Map([...attention.children].map(n=>[n.dataset.part,n]));
+    if(account.needsSignIn&&!found.includes('connection'))found.unshift('connection');
     const names={connection:tr('Connection'),intake:tr('Event intake'),sources:tr('Sources'),media:tr('Media queue')};
     for(const part of found){let button=prior.get(part);if(!button){button=make('button','text-link',names[part]);button.type='button';button.dataset.part=part;
       on(button,'click',()=>openWorkspace(id,part).catch(error=>toast(error.message,true)));attention.append(button);}
-      button.title=tr('Open {part} diagnostics',{part:names[part]});}
+      button.textContent=tr(part==='connection'&&account.needsSignIn?'Sign in again':names[part]);
+      button.hidden=part==='connection'&&account.needsSignIn&&!!connection;
+      button.title=tr(part==='connection'&&account.needsSignIn?'Sign in to this account again':'Open {part} diagnostics',{part:names[part]});}
     for(const [part,button] of prior)if(!found.includes(part))button.remove();
     attention.hidden=!found.length;
   }
@@ -71,7 +88,8 @@ export function createAccounts(context) {
     summary();
     const query=find('accounts-search').value.trim().toLowerCase(),filter=find('accounts-filter').value,sort=find('accounts-sort').value;
     const filtered=list.filter(p=>(!query||[p.label,p.collector?.account?.username,p.collector?.account?.id].join(' ').toLowerCase().includes(query))&&
-      (filter==='all'||filter==='attention'&&problem(p)||filter==='collecting'&&collecting(p)||filter==='offline'&&!collecting(p)||filter==='empty'&&empty(p)));
+      (filter==='all'||filter==='attention'&&problem(p)||filter==='collecting'&&collecting(p)||filter==='offline'&&!collecting(p)||filter==='empty'&&empty(p)||
+        filter==='sign_in'&&accountState(p).needsSignIn||filter==='paused'&&accountState(p).kind==='paused'));
     filtered.sort((a,b)=>(sort==='attention'?Number(problem(b))-Number(problem(a)):sort==='events'?(b.stats?.total||0)-(a.stats?.total||0):sort==='pending'?(b.collector?.media_pending||0)-(a.collector?.media_pending||0):0)||a.label.localeCompare(b.label));
     page=Math.min(page,Math.max(0,Math.ceil(filtered.length/10)-1));visible=filtered.slice(page*10,page*10+10);
     const shown=new Set(visible.map(p=>p.id)),cards=new Map([...root.querySelectorAll('.account-card')].map(n=>[n.dataset.profile,n])),box=find('accounts-list');

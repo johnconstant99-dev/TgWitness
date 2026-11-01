@@ -66,7 +66,7 @@ def main():
             first = page.locator('.account-card[data-profile=default]')
             expect(first.locator('[data-action=connect]')).to_be_visible()
             expect(first.locator('[data-field=observation]')).to_be_visible()
-            expect(first.locator('[data-field=observation] dd')).to_have_text('offline')
+            expect(first.locator('[data-field=observation] dd')).to_have_text('Not connected')
             expect(page.locator('.account-card[data-profile="00000000000000000000000000000001"] [data-field=observation] dd')).to_have_text('Collecting')
             assert page.evaluate("""async()=>{const card=document.querySelector('.account-card[data-profile=default]'),
               field=card.querySelector('.fleet-card-group');field.focus();await loadProfiles();
@@ -81,7 +81,7 @@ def main():
             expect(page.locator('#accounts-result')).to_contain_text('2 workspaces updated.')
             assert len(calls) == 2 and all(url.endswith('/stop') for url in calls)
             page.locator('#accounts-filter').select_option('all')
-            expect(page.locator('.account-card[data-profile="00000000000000000000000000000001"] [data-field=observation] dd')).to_have_text('paused')
+            expect(page.locator('.account-card[data-profile="00000000000000000000000000000001"] [data-field=observation] dd')).to_have_text('Paused')
             page.locator('#accounts-filter').select_option('offline')
             page.locator('#accounts-search').fill('Research 01')
             page.locator('#accounts-select-page').check()
@@ -100,7 +100,7 @@ def main():
                       await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}""")
                     assert page.evaluate('()=>scrollY===0')
                     expect(first.locator('[data-field=observation]')).to_be_visible()
-                    expect(first.locator('[data-field=observation] dd')).to_have_text('offline')
+                    expect(first.locator('[data-field=observation] dd')).to_have_text('Not connected')
                     page.screenshot(path=str(output / f'accounts-{theme}-{width}.png'), full_page=True)
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'), (theme, width)
             page.set_viewport_size({'width': 1440, 'height': 1000})

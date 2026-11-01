@@ -7,7 +7,6 @@ HTML is an escaped readable derivative. No new Telegram authorization is created
 import asyncio
 import base64
 import hashlib
-import html
 import json
 import os
 import re
@@ -26,7 +25,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from telethon import errors
 from telethon.tl import types
 
-from . import account_export_transport as transport
+from . import account_export_transport as transport, account_report
 from .evidence import producer
 from .security import private_write
 from .store import ZERO, canonical, utcnow
@@ -53,6 +52,7 @@ class AccountExportOptions(BaseModel):
     sender_ids: list[int] = Field(default_factory=list, max_length=10000)
     text_contains: list[str] = Field(default_factory=list, max_length=100)
     purpose: str = Field(default="", max_length=1000)
+    report_language: str = "en"
     from_utc: str | None = None
     to_utc: str | None = None
     own_messages_only: bool = False
@@ -66,6 +66,11 @@ class AccountExportOptions(BaseModel):
     include_stories: bool = False
     include_session_metadata: bool = False
     include_other_data: bool = False
+
+    @field_validator("report_language")
+    @classmethod
+    def report_language_supported(cls, value):
+        return account_report.validate_language(value)
 
     @field_validator("chat_ids", "sender_ids", mode="before")
     @classmethod
@@ -741,6 +746,7 @@ class AccountExport:
                 write("inventory.json", chunks(directory / "inventory.json"))
                 media = set()
                 message_pages = {}
+                chat_counts = {}
                 for envelope in self.receipts:
                     receipt = envelope["statement"]
                     write(f"receipts/{receipt['seq']:08d}.json", [canonical(envelope)])
@@ -749,6 +755,7 @@ class AccountExport:
                         raise ValueError("A captured page changed while packaging.")
                     if receipt["category"] == "messages":
                         message_pages.setdefault(receipt["chat_id"], []).append(receipt["data_file"])
+                        chat_counts[receipt["chat_id"]] = chat_counts.get(receipt["chat_id"], 0) + receipt["count"]
                     with (directory / receipt["data_file"]).open("rb") as stream:
                         for raw in stream:
                             for attachment in json.loads(raw).get("attachments", []):
@@ -758,30 +765,22 @@ class AccountExport:
                     write(name, chunks(directory / name))
                     if hashes[name] != name.removeprefix("media/"):
                         raise ValueError("An attachment changed while packaging.")
-                header = b'<!doctype html><meta charset="utf-8"><title>TgWitness account export</title>'
                 selected = [c for c in self.inventory["chats"] if c["selected"]]
-                index = [header, b"<h1>Account export</h1><p>Authoritative records: signed JSONL pages.</p>",
-                         ("<p>" + html.escape(" ".join(LIMITATIONS)) + "</p><ul>").encode()]
+                report_context = {"report_language": job["options"].get("report_language", "en"),
+                    "options": job["options"], "counts": self.current["counts"], "coverage": self.current["coverage"],
+                    "complete_within_scope": not self.current["coverage"]["failures"],
+                    "omissions": [*self.inventory.get("gaps", []), *self.current.get("omissions", [])],
+                    "fingerprint": fingerprint(self.vault.public_key), "limitations": LIMITATIONS}
                 for chat in selected:
                     name = "chats/" + str(chat["id"]) + ".html"
-                    index.append((f'<li><a href="{name}">' + html.escape(chat["title"]) + "</a></li>").encode())
-                    def readable(chat=chat):
-                        yield header + ("<h1>" + html.escape(chat["title"]) + "</h1>").encode()
+                    def message_rows(chat=chat):
                         for data_file in message_pages.get(chat["id"], ()):
                             with (directory / data_file).open("rb") as stream:
                                 for raw in stream:
-                                    row = json.loads(raw)
-                                    yield ("<article><h2>" + str(row["id"]) + " · " + html.escape(str(row.get("date") or ""))
-                                           + "</h2><pre>" + html.escape(row.get("text") or row.get("message") or "") + "</pre>").encode()
-                                    for attachment in row.get("attachments", []):
-                                        if attachment["outcome"] == "saved":
-                                            yield (f'<p><a download href="../{attachment["file"]}">Attachment</a></p>').encode()
-                                        else:
-                                            yield ("<p>Attachment: " + html.escape(attachment["reason"]) + "</p>").encode()
-                                    yield b"</article>"
-                    write(name, readable())
-                index.append(b"</ul><h2>Coverage</h2><pre>" + html.escape(json.dumps(self.current["coverage"], indent=2)).encode() + b"</pre>")
-                write("index.html", index)
+                                    yield json.loads(raw)
+                    write(name, account_report.account_chat(report_context, chat, message_rows()))
+                write("index.html", account_report.account_index(report_context,
+                    ({**chat, "message_count": chat_counts.get(chat["id"], 0)} for chat in selected)))
                 write("README.txt", [("TgWitness account export\n\n" + "\n".join(LIMITATIONS)
                     + "\n\nVerify using verify.py from a trusted checkout, with --fingerprint TRUSTED_SHA256.\n"
                     + "data/*.jsonl are authoritative; receipts bind each page to frozen options and inventory.\n"
@@ -789,6 +788,7 @@ class AccountExport:
                 write("verify.py", chunks(Path(__file__).with_name("verify.py")))
                 write("SHA256SUMS", ["".join(f"{digest}  {name}\n" for name, digest in sorted(hashes.items())).encode()])
                 manifest = {"format": "tgwitness-account-export-v1", "public_key": self.vault.public_key,
+                    "report_language": report_context["report_language"],
                     "fingerprint": fingerprint(self.vault.public_key), "job_id": job["job_id"], "account_id": job["account_id"],
                     "options": job["options"], "options_sha256": job["options_sha256"], "inventory_sha256": self.inventory_hash,
                     "created_at": job["created_at"], "completed_at": utcnow(), "status": "partial" if self.current["coverage"]["failures"] else "done",

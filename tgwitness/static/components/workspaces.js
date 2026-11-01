@@ -1,12 +1,13 @@
+import {accountState} from "./account-state.js";
+
 const PARTS = ["connection", "intake", "sources", "media"];
 
 export function describeWorkspace(profile, tr) {
-  const collector = profile.collector;
-  const problems = profile.error_type ? 1 : !collector?.has_session ? 0
-    : PARTS.filter(name => ["failed", "degraded", "unknown"].includes(profile.health?.[name]?.state)).length;
-  const state = profile.error_type ? tr("Unavailable") : !collector?.has_session ? tr("Account not connected")
-    : collector.running ? tr(collector.connected ? "Collecting" : "Reconnecting") : tr("Paused");
-  const marker = problems ? "⚠" : collector?.running ? "●" : "○";
+  const account = accountState(profile);
+  const reported = PARTS.filter(name => ["failed", "degraded", "unknown"].includes(profile.health?.[name]?.state)).length;
+  const problems = profile.error_type ? 1 : account.needsSignIn ? Math.max(1, reported) : !account.hasSession ? 0 : reported;
+  const state = tr(account.label);
+  const marker = problems ? "⚠" : account.kind === "collecting" ? "●" : "○";
   const count = problems ? " · " + problems : "";
   return {problems, state, label: marker + " " + profile.label + count,
     title: profile.label + " · " + state + (problems ? " · " + tr("Health checks needing attention: {n}", {n: problems}) : "")};

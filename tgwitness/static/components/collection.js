@@ -1,3 +1,5 @@
+import {accountState} from "./account-state.js";
+
 export function createCollectionControl({node, tr, status, workspace}) {
   const control = document.getElementById("collector-toggle");
   const indicator = node("span", "observation-indicator"); indicator.id = "workspace-observation";
@@ -16,9 +18,10 @@ export function createCollectionControl({node, tr, status, workspace}) {
   function update() {
     const current = status(), collector = current?.collector;
     indicator.hidden = !collector || workspace.hidden;
-    const state = current?.demo ? "demo" : !collector?.has_session ? "offline" : collector.running
-      ? collector.connected ? "observing" : "reconnecting" : "paused";
-    const text = {demo: tr("Demo"), offline: tr("Offline"), observing: tr("Observing"), reconnecting: tr("Reconnecting"), paused: tr("Paused")}[state];
+    const account = accountState(current || {});
+    const state = current?.demo ? "demo" : ({empty:"offline", collecting:"observing"}[account.kind] || account.kind);
+    const text = {demo: tr("Demo"), offline: tr("Offline"), observing: tr("Observing"), reconnecting: tr("Reconnecting"),
+      paused: tr("Paused"), sign_in: tr("Sign-in required"), failed: tr("Needs attention"), unavailable: tr("Unavailable")}[state];
     indicator.dataset.state = state; indicator.title = text; indicator.setAttribute("aria-label", text);
     if (label.textContent !== text) label.textContent = text;
   }

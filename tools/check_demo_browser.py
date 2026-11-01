@@ -1,9 +1,11 @@
 """The static demo must show a usable case and deliver actual verifiable sample files."""
 import hashlib
 import json
+import os
+from pathlib import Path
 import zipfile
 
-from playwright.sync_api import expect
+from playwright.sync_api import expect, sync_playwright
 
 
 def check_demo_downloads(browser, url, output, route_request, errors, failed):
@@ -19,13 +21,20 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
     expect(page.locator("#chat-feed .sender").first).to_be_visible()
     assert "Unknown" not in page.locator("#chat-feed .sender").all_text_contents()
     assert files_requested == [], "Sample downloads should not slow the initial demo load"
+    expect(page.locator('.sidebar [data-view="integrations"]')).to_be_hidden()
+    page.locator('#nav-more > summary').click()
     page.locator('.sidebar [data-view="integrations"]').click()
     expect(page.locator("#view-integrations")).to_be_visible()
     expect(page.locator("#ai-settings")).to_be_hidden()
     page.locator('.sidebar [data-view="evidence"]').click()
     expect(page.locator("#view-evidence")).to_be_visible()
+    expect(page.locator('#export-task-journal')).to_have_attribute('aria-pressed', 'true')
+    expect(page.locator('#export-account-panel')).to_be_hidden()
+    expect(page.locator('#view-evidence [data-export="html"]')).to_be_hidden()
     answers = page.request.get(url + "demo/fixtures.json").json()
     for fmt in ("zip", "html", "jsonl", "csv"):
+        if fmt == "html":
+            page.locator('#export-more-formats > summary').click()
         with page.expect_download() as pending:
             page.locator(f'#view-evidence [data-export="{fmt}"]').click()
         download = pending.value
@@ -76,6 +85,9 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
     assert signed == {"original": True, "changed": False}, signed
     account = json.loads(answers["/api/account-export"]["text"])["jobs"][0]
     assert account["ready"] and account["disclosures"][0]["ready"]
+    page.locator('#export-task-account').click()
+    expect(page.locator('#export-task-account')).to_have_attribute('aria-pressed', 'true')
+    expect(page.locator('#account-export-card')).to_be_visible()
     expect(page.locator("#account-export-jobs")).to_contain_text(account["id"][:10])
     expect(page.locator("#account-export-jobs")).to_contain_text(account["disclosures"][0]["id"][:10])
     account_paths = {
@@ -92,6 +104,8 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
             assert len(data) == answers[path]["bytes"]
             assert hashlib.sha256(data).hexdigest() == answers[path]["sha256"]
     assert len(files_requested) == 8
+    page.locator('#export-task-journal').click()
+    expect(page.locator('#export-task-journal')).to_have_attribute('aria-pressed', 'true')
     page.locator("#verify-journal").click()
     expect(page.locator("#verification-result")).to_contain_text(f'Verified {checked["events"]} event signatures')
     assert page.evaluate("fetch('/api/collector/start', {method:'POST'}).then(r=>r.status)") == 403
@@ -101,3 +115,44 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
     context.close()
     print("Online demo: named sample case, all nine download hashes, run receipt signature and tamper rejection, "
           "lazy downloads and read-only actions passed", flush=True)
+
+
+def main():
+    """Run just the signed-download demo acceptance against an already built site."""
+    import argparse
+
+    if __package__:
+        from .site_test_server import site_server
+    else:
+        from site_test_server import site_server
+
+    root = Path(__file__).resolve().parents[1]
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--site-root', type=Path, default=root / 'dist/site')
+    parser.add_argument('--output', type=Path, default=root / 'test-results/demo-downloads')
+    args = parser.parse_args()
+    args.output.mkdir(parents=True, exist_ok=True)
+    errors, external, failed = [], [], []
+    with site_server(args.site_root) as url, sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=True, channel=os.environ.get('TGWITNESS_BROWSER_CHANNEL') or None)
+
+        def local_only(route):
+            if route.request.url.startswith(url):
+                route.continue_()
+            else:
+                external.append(route.request.url)
+                route.abort()
+
+        check_demo_downloads(browser, url, args.output, local_only, errors, failed)
+        assert errors == [], errors
+        assert external == [], external
+        assert failed == [], failed
+        browser.close()
+    receipt = {'passed': True, 'artifacts': 9, 'receipt_signature_and_tamper_rejection': True,
+               'progressive_navigation': True, 'read_only': True, 'page_errors': errors,
+               'external_requests': external, 'failed_requests': failed}
+    (args.output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+
+
+if __name__ == '__main__':
+    main()

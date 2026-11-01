@@ -53,7 +53,7 @@ export function createResponsiveShell({node, icon, tr}) {
     if (!opened) return;
     if (event.key === "Escape") { event.preventDefault(); setOpen(false); return; }
     if (event.key !== "Tab") return;
-    const controls = [...sidebar.querySelectorAll("a[href],button,input,select,[tabindex='0']")]
+    const controls = [...sidebar.querySelectorAll("a[href],button,input,select,summary,[tabindex='0']")]
       .filter(control => !control.disabled && control.checkVisibility());
     const first = controls[0], last = controls.at(-1);
     if (event.shiftKey && (document.activeElement === first || !sidebar.contains(document.activeElement))) {

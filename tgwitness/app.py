@@ -27,7 +27,7 @@ from .account_export import AccountExport, AccountExportOptions
 from .disclosure import Disclosures, DisclosurePolicy
 from .downloads import TemporaryDownload, build_file
 from .access import POLICY, AccessControl, AdminSettings, Console, GrantSettings, Refused, check as access_check
-from .collector import Collector
+from .collector import AUTHORIZATION_ERRORS, Collector
 from .demo import seed_demo
 from .evidence import LIMITS, checkpoint, encrypt_export, export_file, producer, retain_checkpoint, cleanup_exports
 from . import i18n
@@ -367,7 +367,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     async with op_lock:
                         await collector.start()
                 except Exception as exc:
-                    collector.phase, collector.last_error = "resume_failed", type(exc).__name__
+                    collector.phase = "authorization_required" if collector.authorization_required else "resume_failed"
+                    collector.last_error = type(exc).__name__
                     store.append("coverage.gap", {"reason": "resume_failed", "error_type": type(exc).__name__})
 
             if store.get_setting("resume", False) and not store.get_setting("demo", False):
@@ -591,6 +592,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             raise HTTPException(409, "This is a synthetic demo. Start a separate data directory for real observation.")
 
     async def perform_operation(call, *args):
+        collector = app.state.collector
+        client = collector.client
         try:
             return await asyncio.wait_for(call(*args), tuning.value(app.state.store, "operation_timeout_seconds"))
         except FloodWaitError as exc:
@@ -598,6 +601,14 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 app.state.store.get_setting("rpc_backoff_until", 0)))
             raise HTTPException(429, {"message": "Telegram requested a pause.", "retry_after": exc.seconds},
                                 headers={"Retry-After": str(exc.seconds)}) from None
+        except AUTHORIZATION_ERRORS as exc:
+            owner, name = getattr(call, "__self__", None), getattr(call, "__name__", "operation")
+            candidate = name in {"configure", "start_phone", "start_qr", "send_code", "confirm_code",
+                                 "confirm_password", "cancel_qr", "sign_out", "test_network"}
+            if not candidate and (owner is collector or getattr(owner, "collector", None) is collector
+                                  or args and args[0] is collector):
+                collector.handle_authorization_error(exc, name, client=client)
+            raise HTTPException(400, "Telegram authorization expired. Sign in again.") from None
         except RPCError as exc:
             raise HTTPException(400, "Telegram rejected the request: " + type(exc).__name__) from None
         except ValueError as exc:

@@ -113,7 +113,7 @@ async def check_recovery(root):
             with zipfile.ZipFile(archive_path) as archive:
                 for chat_id in (-100100001, -100100002, -100100003):
                     html = archive.read(f"chats/{chat_id}.html").decode()
-                    rendered = [int(value) for value in re.findall(r"<h2>(\d+) ·", html)]
+                    rendered = [int(value) for value in re.findall(r'data-message-id="(\d+)"', html)]
                     records = []
                     for name in sorted(n for n in archive.namelist() if n.startswith("data/") and n.endswith(".jsonl")):
                         records.extend(json.loads(line) for line in archive.read(name).splitlines())

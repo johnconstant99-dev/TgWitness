@@ -22,9 +22,6 @@
 
 <a name="screenshots"></a>
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/phishdestroy/TgWitness/badge)](https://securityscorecards.dev/viewer/?uri=github.com/phishdestroy/TgWitness)
-[![Independent verification guide](https://img.shields.io/badge/Independent%20verification%20guide-docs-356a8a)](docs/TRUST.md)
-
 <a href="https://phishdestroy.github.io/TgWitness/demo/">
 <picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="docs/assets/presentation/readme-workspace-mobile-dark-still.webp">
@@ -56,6 +53,12 @@
   <a href="docs/INVESTIGATION.md"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-investigate-mobile.svg"><img src="docs/assets/presentation/readme-nav-investigate.svg" width="32%" alt="Investigation guide"></picture></a>
   <a href="docs/COLLECTION.md"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-history-mobile.svg"><img src="docs/assets/presentation/readme-nav-history.svg" width="32%" alt="Collection and saved versions"></picture></a>
 </p>
+
+In the current source panel, **Start here** offers **Export my account** for a
+one-off [signed account snapshot](docs/ACCOUNT-EXPORT.md), or **Follow an investigation**
+for ongoing observation. Choose a task, connect an account and review its scope;
+collection only starts when you explicitly start it. Less common controls live
+under **More tools & settings**.
 
 **Choose your scope:** selected chats, a Telegram folder or the whole account.
 Keep each account in its own workspace, with separate sources, session and signing key.
@@ -155,6 +158,8 @@ python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --checkpoin
 
 Verification checks integrity against those trusted inputs. A local signing key
 alone does not prove Telegram origin or complete history.
+
+[Verification guide](docs/TRUST.md) · [Checks and tested scale](docs/VERIFICATION.md)
 
 <details>
 <summary><strong>Inside the signed record</strong> · hashes, signatures and independent checkpoints</summary>

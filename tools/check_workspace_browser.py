@@ -15,7 +15,7 @@ import requests
 from playwright.sync_api import expect, sync_playwright
 from telethon.helpers import TotalList
 
-from tools.check_browser import RunningApp, hold_api_response, launch_browser, release_api_response
+from tools.check_browser import RunningApp, hold_api_response, launch_browser, release_api_response, navigate_panel
 from tools.browser_fixtures import CHAT, FakeClient, saved_session, telegram_message
 from tools.browser_fixtures import ALICE, say
 from tgwitness import dossier, i18n
@@ -100,7 +100,7 @@ def main():
 
             page = page_for_case()
             hold_api_response(page, "/api/witness/tokens")
-            page.locator('[data-view="witness"]').click()
+            navigate_panel(page, "witness")
             page.locator("#extras-open-bot").click()
             page.locator("#witness-label").fill("First workspace witness")
             page.locator("#witness-form button[type=submit]").click()

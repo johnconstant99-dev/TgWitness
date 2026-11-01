@@ -1,7 +1,7 @@
-const paths={chats:"chats",observations:"journal",sources:"sources",parameters:"parameters",accounts:"accounts",
+const paths={start:"start",chats:"chats",observations:"journal",sources:"sources",parameters:"parameters",accounts:"accounts",
   access:"access","system-log":"system-log",integrations:"integrations",evidence:"exports",witness:"extras",connection:"account",analysis:"analysis",sealed:"sealed"};
 const views=Object.fromEntries(Object.entries(paths).map(([view,path])=>[path,view]));
-const legacy={account:"connection",connection:"connection",journal:"observations",observations:"observations",
+const legacy={start:"start",account:"connection",connection:"connection",journal:"observations",observations:"observations",
   exports:"evidence",evidence:"evidence",extras:"witness",witness:"witness",sealed:"sealed",chats:"chats",
   sources:"sources",parameters:"parameters",accounts:"accounts",access:"access","system-log":"system-log",integrations:"integrations",analysis:"analysis"};
 const cards=new Set(["alerts","evidence","cloud","bot","github"]);
