@@ -31,7 +31,15 @@ function bind(id, action) {
     finally {$(id).disabled = false;}
   };
 }
-const credentials = () => ({api_id: Number($("api-id").value), api_hash: $("api-hash").value.trim()});
+function credentials() {
+  const id = $("api-id").value.trim(), hash = $("api-hash").value.trim();
+  if (!id && !hash) return {};
+  if (!/^[0-9]+$/.test(id) || Number(id) < 1 || Number(id) > 2147483647 || !/^[a-fA-F0-9]{32}$/.test(hash)) {
+    $("custom-api").open = true;
+    throw new Error($("api-error").textContent);
+  }
+  return {api_id: Number(id), api_hash: hash};
+}
 bind("send-code", async () => {
   await api("phone", {...credentials(), phone: $("phone").value.trim()});
   qrId = null; $("qr-image").hidden = true;

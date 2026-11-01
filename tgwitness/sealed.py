@@ -20,7 +20,7 @@ from urllib.parse import urlsplit
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .collector import Collector, WitnessClient
 from .evidence import export_file
@@ -40,8 +40,19 @@ class StrictBody(BaseModel):
 
 
 class Login(StrictBody):
-    api_id: int = Field(gt=0, le=2147483647)
-    api_hash: str = Field(pattern=r"^[a-fA-F0-9]{32}$")
+    api_id: int | None = Field(default=None, strict=True, gt=0, le=2147483647)
+    api_hash: str | None = Field(default=None, pattern=r"^[a-fA-F0-9]{32}$")
+
+    @field_validator("api_id", "api_hash", mode="before")
+    @classmethod
+    def empty_field(cls, value):
+        return None if isinstance(value, str) and not value.strip() else value
+
+    @model_validator(mode="after")
+    def complete_pair(self):
+        if (self.api_id is None) != (self.api_hash is None):
+            raise ValueError("Supply both API credentials or leave both empty")
+        return self
 
 
 class Phone(Login):

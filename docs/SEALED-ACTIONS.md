@@ -36,10 +36,14 @@ substitution on sample data. **Start my capture** opens the wizard.
    The resulting link contains a random access secret in its URL fragment.
    Keep this link private. The panel removes the fragment and keeps the secret
    in this tab's session storage; it is not placed in HTTP access logs.
-5. Enter your Telegram `api_id` and `api_hash`, then authorize by QR or phone
-   code and, if required, Telegram's two-step verification password. Use
-   [my.telegram.org/apps](https://my.telegram.org/apps) for your API credentials.
-   Existing session files cannot be imported into this mode.
+5. Open the connection link. Sign in with a QR code, or with your phone number and the
+   login code. Enter your two-step verification password if Telegram asks for it. The
+   built-in API credential pool is used by default, just like the normal workspace. You
+   may expand the optional custom credentials section and enter both `api_id` and
+   `api_hash` from [my.telegram.org/apps](https://my.telegram.org/apps). Leave both
+   fields empty to use the built-in pool; a partial or malformed pair is rejected.
+   Session imports are not allowed. Load the chats and choose one source. The connection
+   link contains an access secret: keep it private.
 6. Load the dialogs and select one chat. Capture starts immediately. The
    selected source cannot be changed after starting. You can resume a paused
    history read, finish with the data already collected, or cancel without

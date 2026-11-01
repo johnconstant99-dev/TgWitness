@@ -40,6 +40,40 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
         manifest = json.loads(bundle.read("manifest.json"))
         assert manifest["event_count"] == checked["events"]
         assert manifest["head_hash"] == checked["head_hash"]
+        events = [json.loads(line) for line in bundle.read("events.jsonl").splitlines()]
+    # Decode JSON from its original UTF-8 bytes, including non-ASCII target titles.
+    auxiliary = {}
+    for endpoint in ("/api/checkpoint", "/api/run-receipt", "/api/anchor-request"):
+        descriptor = answers[endpoint]
+        response = page.request.get(url + "demo/" + descriptor["file"])
+        assert response.status == 200
+        body = response.body()
+        assert len(body) == descriptor["bytes"]
+        assert hashlib.sha256(body).hexdigest() == descriptor["sha256"]
+        auxiliary[endpoint] = body
+    receipt = json.loads(auxiliary["/api/run-receipt"])
+    started = next(event for event in events if event["seq"] == receipt["statement"]["journal_event_seq"])
+    assert started["kind"] == "process.started"
+    assert started["payload"]["run"] == receipt["statement"]["run"]
+    assert receipt["public_key"] == manifest["public_key"]
+    signed = page.evaluate("""async receipt => {
+      function canonical(value) {
+        if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
+        if (value !== null && typeof value === 'object') return '{' + Object.keys(value).sort()
+          .map(key => JSON.stringify(key) + ':' + canonical(value[key])).join(',') + '}';
+        if (typeof value === 'number' && !Number.isSafeInteger(value))
+          throw new Error('Demo receipt number cannot be represented exactly in this browser');
+        return JSON.stringify(value);
+      }
+      const decode = text => Uint8Array.from(atob(text), char => char.charCodeAt(0));
+      const key = await crypto.subtle.importKey('raw', decode(receipt.public_key), 'Ed25519', false, ['verify']);
+      const verify = statement => crypto.subtle.verify('Ed25519', key, decode(receipt.signature),
+        new TextEncoder().encode(canonical(statement)));
+      const changed = structuredClone(receipt.statement);
+      changed.run.targets[0].title += ' changed';
+      return {original: await verify(receipt.statement), changed: await verify(changed)};
+    }""", receipt)
+    assert signed == {"original": True, "changed": False}, signed
     account = json.loads(answers["/api/account-export"]["text"])["jobs"][0]
     assert account["ready"] and account["disclosures"][0]["ready"]
     expect(page.locator("#account-export-jobs")).to_contain_text(account["id"][:10])
@@ -65,4 +99,5 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
     assert page.evaluate("fetch('/api/account-export/start', {method:'POST'}).then(r=>r.status)") == 403
     page.screenshot(path=str(output / "demo-exports-1440.png"))
     context.close()
-    print("Online demo: named sample case, lazy downloads matching published hashes and read-only actions passed", flush=True)
+    print("Online demo: named sample case, all nine download hashes, run receipt signature and tamper rejection, "
+          "lazy downloads and read-only actions passed", flush=True)

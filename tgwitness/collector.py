@@ -950,10 +950,13 @@ class Collector:
 
     def login_pairs(self, api_id, api_hash):
         """An entered, imported or own saved pair is used as is; otherwise rotate through the built-in pool."""
-        if api_id is None and api_hash is None:
-            saved = self.vault.read("credentials")
-            api_id, api_hash = saved.get("api_id"), saved.get("api_hash")
-        if api_id and api_hash and api_id not in api_pool.POOL_IDS:
+        if api_id is not None or api_hash is not None:
+            if not api_id or not api_hash:
+                raise ValueError("Supply both API credentials or leave both empty")
+            return [(api_id, api_hash)]
+        saved = self.vault.read("credentials")
+        api_id, api_hash = saved.get("api_id"), saved.get("api_hash")
+        if api_id and api_hash and (api_id, api_hash) not in api_pool.POOL:
             return [(api_id, api_hash)]
         return api_pool.login_order((api_id, api_hash) if api_id and api_hash else None)
 
@@ -963,7 +966,8 @@ class Collector:
             try:
                 return await attempt(pair_id, pair_hash)
             except api_pool.PAIR_ERRORS:
-                api_pool.reject(pair_id)
+                if (pair_id, pair_hash) in api_pool.POOL:
+                    api_pool.reject(pair_id)
                 await self.cancel_login()
                 self.phase = "ready" if self.vault.read("credentials").get("session") else "offline"
                 if number == len(pairs):
