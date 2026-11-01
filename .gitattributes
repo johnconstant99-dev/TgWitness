@@ -6,3 +6,5 @@
 *.png binary
 *.svg text eol=lf
 website/demo/downloads/* binary
+website/demo/report/report.html binary
+website/demo/report/*.zip binary

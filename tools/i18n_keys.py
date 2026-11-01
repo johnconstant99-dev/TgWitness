@@ -121,8 +121,10 @@ def server_keys():
                     texts = node.args[1:2]
             elif isinstance(node, ast.Return) and name == "alerts.py":
                 texts = [node.value]
-            elif isinstance(node, ast.Assign) and name == "disclosure.py" and any(
-                    isinstance(target, ast.Name) and target.id == "WARNINGS" for target in node.targets):
+            elif isinstance(node, ast.Assign) and any(
+                    isinstance(target, ast.Name) and (name, target.id) in {
+                        ("disclosure.py", "WARNINGS"), ("account_export.py", "LIMITATIONS")}
+                    for target in node.targets):
                 texts = node.value.elts if isinstance(node.value, (ast.List, ast.Tuple)) else []
             for arg in texts:
                 if isinstance(arg, ast.Constant) and isinstance(arg.value, str) and " " in arg.value:

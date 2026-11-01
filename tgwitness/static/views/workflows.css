@@ -38,6 +38,22 @@
 .export-scope-note { color: var(--text-2); font-size: 13px; line-height: 1.6; }
 .export-language { margin: 16px 0 20px; }
 .export-language select { max-width: 360px; }
+.account-export-next { margin: 12px 0; padding-inline-start: 12px; border-inline-start: 2px solid var(--accent-border); color: var(--text-2); font-size: 13px; line-height: 1.6; }
+.account-export-original { padding: 16px; margin-top: 16px; background: var(--surface); border: 1px solid var(--accent-border); border-radius: var(--radius); }
+.account-export-original h3 { margin: 0 0 6px; font-size: 14px; }
+.account-export-original p, .account-disclosure-list > .hint { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.account-disclosure-item { display: block; padding: 14px 16px; }
+.account-disclosure-item-head { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.account-disclosure-item-head > strong { flex: 1 1 160px; overflow-wrap: anywhere; }
+.account-export-handoff { margin-top: 12px; border-top: 1px solid var(--border); }
+.account-export-handoff > summary { padding: 12px 0 0; color: var(--accent-text); cursor: pointer; font-weight: 600; }
+.account-export-handoff ol { padding-inline-start: 20px; color: var(--text-2); line-height: 1.7; }
+.account-export-handoff li + li { margin-top: 5px; }
+.account-export-handoff textarea { width: 100%; resize: vertical; font-size: 12px; line-height: 1.65; }
+.account-export-management { display: flex; justify-content: flex-end; margin-top: 8px; }
+.account-export-job [data-account-export-action] { min-height: 44px; }
+.exports-next { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 16px; }
+.exports-next p { color: var(--text-2); margin: 8px 0 0; line-height: 1.6; font-size: 13px; }
 .workspace[data-current-view="start"] .health-details, .workspace[data-current-view="evidence"] .health-details { margin-bottom: 8px; }
 @media (max-width: 767px) {
   .workflow-choices, .export-task-choices { grid-template-columns: 1fr; }
@@ -46,4 +62,6 @@
   .workflow-status { padding: 18px; }
   .workflow-status button, .workflow-card button { width: 100%; }
   .export-task-choices button { padding: 14px 16px; }
+  .account-export-original, .account-disclosure-item { padding: 12px; }
+  .account-export-original .account-export-job-actions > button, .account-disclosure-item-head > button { width: 100%; }
 }

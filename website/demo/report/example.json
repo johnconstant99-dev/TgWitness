@@ -1,0 +1,10 @@
+{
+  "synthetic": true,
+  "archive": "sharing-copy.zip",
+  "sha256": "8490012d3c0cb8e573e6c52a15400f83359631c32301f4f1da5564499755b6bf",
+  "fingerprint": "7becd673e1f3db55852fe8d2f46f4c366a16dcb13cc6374f0d3f472b10fa18a1",
+  "report": "report.html",
+  "report_sha256": "cee54e19ab064deb56bfcac0bf274deeb81d3f7e0674a18ff46b5e615313ed77",
+  "report_archive_member": "index.html",
+  "language": "en"
+}

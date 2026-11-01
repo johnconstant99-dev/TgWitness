@@ -5,6 +5,10 @@
   "use strict";
   window.TGW_ONLINE_DEMO = true;
   const base = new URL(".", document.currentScript.src);
+  document.addEventListener("DOMContentLoaded", () => {
+    const report = document.getElementById("demo-report-preview");
+    if (report) { report.href = new URL("report/", base).href; report.hidden = false; }
+  }, {once: true});
   const realFetch = window.fetch.bind(window);
   const answers = realFetch(new URL("fixtures.json", base), {cache: "no-cache"}).then(r => r.json());
   const READ_ONLY = "This online demo is read-only. Run the local demo (scripts\\Demo.cmd or sh start.sh --demo) " +

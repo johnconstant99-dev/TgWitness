@@ -1,5 +1,6 @@
 """Synthetic account-export panel check; all export API responses are fictional."""
 import json
+import re
 import tempfile
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -143,6 +144,7 @@ def main():
             page.locator("#account-export-start").click()
             expect(page.locator("#account-export-dialog")).to_be_hidden()
             expect(page.locator("#account-export-jobs")).to_contain_text("Fictional group")
+            expect(page.locator('.account-export-next')).to_contain_text('You can leave this page and return')
             assert page.evaluate("accountExportTime('2026-11-01T12:00:00Z') === fmtTime(new Date('2026-11-01T12:00:00Z'))")
             started_utc = page.locator(".account-export-job-sub").inner_text()
             page.evaluate("() => { const select=document.getElementById('time-zone'); select.value='local'; select.dispatchEvent(new Event('change')); }")
@@ -163,18 +165,29 @@ def main():
             assert "video" not in starts[0]["media_types"]
             page.locator('[data-account-export-action="pause"]').click()
             expect(page.locator("#account-export-jobs")).to_contain_text("Paused")
+            expect(page.locator('.account-export-next')).to_contain_text('Progress is saved')
             page.locator('[data-account-export-action="resume"]').click()
             expect(page.locator("#account-export-jobs")).to_contain_text("Reading Telegram")
             jobs[0].update(phase="waiting", active=False, wait_until="2099-11-02T12:00:00Z")
             page.evaluate("pollWorkspace()")
             expect(page.locator('[data-account-export-action="resume"]')).to_have_count(0)
-            jobs[0]["wait_until"] = "2026-10-30T12:00:00Z"
+            expect(page.locator('.account-export-next')).to_contain_text('When the Telegram waiting period ends')
+            # An unchanged API response still needs to reveal Resume when the wait expires.
+            page.evaluate("""()=>{window.realExportNow=Date.now;Date.now=()=>Date.parse('2099-11-03T12:00:00Z');}""")
             page.evaluate("pollWorkspace()")
             expect(page.locator('[data-account-export-action="resume"]')).to_be_visible()
             expect(page.locator('[data-account-export-action="pause"]')).to_have_count(0)
+            expect(page.locator('.account-export-next')).to_contain_text('Choose Resume to continue')
+            page.evaluate("()=>{Date.now=window.realExportNow;delete window.realExportNow;}")
             page.locator('[data-account-export-action="resume"]').click()
             expect(page.locator("#account-export-jobs")).to_contain_text("Reading Telegram")
+            jobs[0].update(phase='failed', active=False, error='Synthetic connection interrupted')
+            page.evaluate('pollWorkspace()')
+            expect(page.locator('.account-export-next')).to_contain_text('retry from saved progress')
+            expect(page.locator('[data-account-export-action="resume"]')).to_be_enabled()
+            page.locator('[data-account-export-action="resume"]').click()
             jobs[0].update(phase="partial", active=False, ready=True, current_chat=None,
+                           error=None,
                            omissions=[{"section": "stories", "reason": "unavailable"}],
                            counts={**jobs[0]["counts"], "chats_done": 2, "messages_exported": 99,
                                    "media_saved": 4, "media_skipped": 1},
@@ -182,12 +195,21 @@ def main():
             page.evaluate("pollWorkspace()")
             expect(page.locator("#account-export-jobs")).to_contain_text("Omissions and unavailable data (1)")
             expect(page.locator("#account-export-jobs")).to_contain_text("messages saved: 99")
+            expect(page.locator('.account-export-original h3')).to_have_text('Original account archive')
+            expect(page.locator('[data-account-export-action="download"]')).to_have_text('Download original archive')
+            omissions = page.locator('.account-export-omissions')
+            omissions.locator('summary').focus()
+            page.keyboard.press('Enter')
+            expect(omissions).to_have_attribute('open', '')
+            page.evaluate('pollWorkspace()')
+            expect(omissions).to_have_attribute('open', '')
+            expect(omissions.locator('summary')).to_be_focused()
             expect(page.locator('[data-account-export-action="resume"]')).to_have_count(0)
             fail_get[0] = True
-            page.evaluate("pollWorkspace()")
+            page.evaluate("()=>loadAccountExport().catch(accountExportError)")
             expect(page.locator("#account-export-status")).to_contain_text("Fictional temporary outage")
             fail_get[0] = False
-            page.evaluate("pollWorkspace()")
+            page.locator('#account-export-refresh').click()
             expect(page.locator("#account-export-status")).to_contain_text("Demo account export uses fictional data only")
             page.evaluate("window.showSaveFilePicker=undefined")
             for _ in range(2):
@@ -220,6 +242,7 @@ def main():
             page.locator("#account-disclosure-create").click()
             expect(page.locator("#account-disclosure-dialog")).to_be_hidden()
             expect(page.locator("#account-export-jobs")).to_contain_text("Signed sharing copies")
+            expect(page.locator('[data-account-export-action="disclosure-download"]')).to_be_focused()
             assert len(disclosure_previews) == 2
             assert disclosure_previews[-1]["purpose"] == "Fictional narrow disclosure"
             assert disclosure_previews[-1]['report_language'] == 'ar'
@@ -235,6 +258,48 @@ def main():
                     page.locator('[data-account-export-action="disclosure-download"]').click()
                 assert saved.value.suggested_filename == "tgwitness-disclosure-fictional-derivative.zip"
             assert len(downloads) == 4
+            # A second copy must retain its own focus and note when another job field updates.
+            jobs[0]['options'] = {'purpose': 'PRIVATE PURPOSE CANARY', 'sender_ids': [987654321]}
+            jobs[0]['disclosures'].append({'id': 'second-copy', 'ready': True,
+                                          'summary': {'private_note': 'PRIVATE FILTER CANARY'}})
+            page.evaluate('pollWorkspace()')
+            expect(page.locator('.account-disclosure-item')).to_have_count(2)
+            handoff = page.locator('.account-export-handoff').nth(1)
+            handoff.locator('summary').focus()
+            page.keyboard.press('Enter')
+            note = handoff.locator('textarea')
+            expect(note).to_have_value(re.compile('tgwitness-disclosure-second-copy.zip'))
+            assert not any(value in note.input_value() for value in
+                           ('PRIVATE PURPOSE CANARY', 'PRIVATE FILTER CANARY', '987654321', 'synthetic-job'))
+            page.context.grant_permissions(['clipboard-read', 'clipboard-write'])
+            handoff.get_by_role('button', name='Copy recipient note', exact=True).click()
+            expect(handoff.get_by_role('button', name='Copy recipient note', exact=True)).not_to_have_attribute('aria-busy', 'true')
+            copied = page.evaluate('navigator.clipboard.readText()')
+            assert copied.replace('\r\n', '\n') == note.input_value(), repr(copied)
+            expect(handoff.get_by_role('button', name='Copy recipient note', exact=True)).to_be_focused()
+            jobs[0]['counts']['media_skipped'] = 2
+            page.evaluate('pollWorkspace()')
+            expect(handoff).to_have_attribute('open', '')
+            expect(omissions).to_have_attribute('open', '')
+            expect(handoff.get_by_role('button', name='Copy recipient note', exact=True)).to_be_focused()
+            # Clipboard denial leaves a selected, readable fallback instead of losing the note.
+            page.evaluate("""()=>{window.recipientWrite=navigator.clipboard.writeText.bind(navigator.clipboard);
+              navigator.clipboard.writeText=async()=>{throw new DOMException('Synthetic denial','NotAllowedError');};}""")
+            handoff.get_by_role('button', name='Copy recipient note', exact=True).click()
+            expect(note).to_be_focused()
+            assert note.evaluate('(n)=>n.selectionEnd-n.selectionStart===n.value.length')
+            jobs[0]['counts']['media_skipped'] = 3
+            page.evaluate('pollWorkspace()')
+            expect(note).to_be_focused()
+            assert note.evaluate('(n)=>n.selectionEnd-n.selectionStart===n.value.length')
+            page.evaluate('()=>{navigator.clipboard.writeText=window.recipientWrite;delete window.recipientWrite;}')
+            output = Path('build/ux-review/after/34-handoff')
+            output.mkdir(parents=True, exist_ok=True)
+            for width in (1440, 390, 320):
+                page.set_viewport_size({'width': width, 'height': 1000})
+                expect(note).to_be_visible()
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), width
+                page.screenshot(path=str(output / f'account-{width}.png'), full_page=True)
             page.once("dialog", lambda dialog: dialog.accept())
             page.locator('[data-account-export-action="delete"]').click()
             expect(page.locator("#account-export-jobs")).to_contain_text("No account exports yet")
@@ -302,7 +367,10 @@ def main():
                       "purpose, sender/content filters and UTC dates",
                       "draft survives polling", "locale time formatting and zone switch",
                       "pause, idle waiting resume, sealed partial omissions",
+                      "time-based wait expiry with unchanged response and recoverable failure",
                       "retryable job-list outage",
+                      "original and sharing-copy distinction, keyboard review and persistent polling focus",
+                      "recipient note omits private context, clipboard success and denial fallback",
                       "repeat download and delete",
                       "transformed disclosure preview and invalidation", "signed derivative repeat download",
                       "320/390px layout", "restricted access hides account export",

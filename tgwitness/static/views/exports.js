@@ -60,9 +60,10 @@ export function createExports({root, tr, json, getSession, fmtTime, toast}) {
     }finally{if(owner===getSession()&&mine===request)find('exports-history-refresh').disabled=false;}
   }
   find('exports-history-refresh').addEventListener('click',()=>load());
-  function begin() {
+  function begin({format='zip',encrypted=false}={}) {
     const owner=getSession(), mine=++transfer;
     select('downloads');find('exports-progress').hidden=false;
+    find('exports-next').hidden=true;
     find('exports-progress-bar').hidden=false;
     find('exports-progress-label').textContent=tr('Checking journal integrity and preparing the export…');
     find('exports-progress-bar').removeAttribute('value');find('exports-progress-bytes').textContent='';
@@ -74,13 +75,21 @@ export function createExports({root, tr, json, getSession, fmtTime, toast}) {
         ? tr('{saved} of {total}',{saved:bytes(update.total),total:bytes(update.expected)}):bytes(update.total);
       const bar=find('exports-progress-bar');
       if(update.expected){bar.max=update.expected;bar.value=update.total||0;}
-      if(update.phase==='done'){bar.max=1;bar.value=1;void load();}
+      if(update.phase==='done'){
+        bar.max=1;bar.value=1;void load();
+        find('exports-next-copy').textContent=tr(format==='zip'
+          ? 'Extract the ZIP and open report.html. Review coverage gaps and personal information. README.txt explains how to check integrity with an independently obtained signing-key fingerprint.'
+          : format==='html'
+          ? 'Open the HTML report in your browser. Review coverage gaps and personal information before sending the unchanged file.'
+          : 'Review this data file in a compatible tool. Download the signed ZIP when your recipient also needs the readable report and verification tools.');
+        find('exports-next-encrypted').hidden=!encrypted;find('exports-next').hidden=false;
+      }
       if(['failed','cancelled'].includes(update.phase)){bar.hidden=true;if(update.error)find('exports-progress-bytes').textContent=update.error;}
       else bar.hidden=false;
     };
   }
   return {load,select,begin,leave(){request++;find('exports-history-refresh').disabled=false;},resetSession(){
-    session=getSession();request++;transfer++;entries=[];select('downloads');find('exports-progress').hidden=true;
+    session=getSession();request++;transfer++;entries=[];select('downloads');find('exports-progress').hidden=true;find('exports-next').hidden=true;
     find('exports-history-list').replaceChildren();delete find('exports-history-list').dataset.stamp;
     find('exports-last').textContent=find('exports-history-status').textContent='';
   },destroy(){window.removeEventListener('tgwitness:time-zone',renderTimes);},

@@ -602,7 +602,7 @@ function renderExportJobLink(){
   const jobs=state.accountExportJobs||[],canUse=!!state.me?.admin&&viewAllowed('evidence');
   show('exports-job-link',canUse&&state.exportTask!=='account'&&jobs.length>0);
   const active=jobs.filter(job=>['preparing','running','waiting','packaging'].includes(job.phase)&&job.active!==false).length;
-  const attention=jobs.filter(job=>['failed','partial','paused'].includes(job.phase)).length;
+  const attention=jobs.filter(job=>['failed','partial','paused'].includes(job.phase)||job.phase==='waiting'&&job.active===false).length;
   $('exports-job-summary').textContent=tr('Account exports: {total} · in progress: {active} · ready: {ready} · review: {attention}',
     {total:jobs.length,active,ready:jobs.filter(job=>job.ready).length,attention});
 }
@@ -1596,14 +1596,14 @@ const accountExportFallback={purpose:"",chat_kinds:accountExportKinds,from_utc:n
   include_archived:true,media_types:accountExportMedia,max_media_file_mib:512,max_total_gib:16,
   include_profile:true,include_contacts:true,include_profile_photos:false,include_stories:false,
   include_session_metadata:false,include_other_data:false,transport:"takeout"};
-let accountExportRead=null,accountExportRequest=0;
+let accountExportRead=null,accountExportRequest=0,accountExportJobStamp=null;
 for(const id of ['account-export-language','account-disclosure-language']){
   for(const [code,name] of Object.entries(PANEL_LANGUAGES)){
     const option=new Option(name,code);option.lang=code;option.defaultSelected=code==='en';$(id).append(option);
   }
 }
 function resetAccountExport(){
-  accountExportRequest++;accountExportRead=null;disclosurePreview?.clear();
+  accountExportRequest++;accountExportRead=null;accountExportJobStamp=null;disclosurePreview?.clear();
   $("account-export-dialog")?.close();$("account-disclosure-dialog")?.close();
   state.accountExportJobs=[];state.accountExportDefaults=null;state.accountExportCapabilities=null;
   state.accountExportDraftProfile=null;state.accountExportDirty=false;
@@ -1716,7 +1716,7 @@ function accountExportTime(value){
   const date=new Date(accountExportEpochMs(value));
   return Number.isNaN(date.valueOf())?String(value):fmtTime(date);
 }
-window.addEventListener("tgwitness:time-zone",()=>{if(state.view==="evidence")renderAccountExportJobs();});
+window.addEventListener("tgwitness:time-zone",()=>{accountExportJobStamp=null;if(state.view==="evidence")renderAccountExportJobs();});
 function accountExportEpochMs(value){return typeof value==="number"&&value<1e12?value*1000:value;}
 function accountExportIds(value,label){
   const values=String(value||"").trim().split(/[\s,;]+/).filter(Boolean);
@@ -1742,16 +1742,46 @@ function accountExportDates(prefix){
     throw new Error(tr("The through date must be on or after the from date."));
   return {from_utc,to_utc};
 }
+function accountExportWaiting(job){return job.phase==='waiting'&&!!job.wait_until&&new Date(accountExportEpochMs(job.wait_until)).valueOf()>Date.now();}
+function accountExportNextStep(job){
+  if(job.ready)return '';
+  if(job.phase==='waiting')return tr(job.active!==false?
+    'Telegram has asked this job to wait. It will continue automatically while TgWitness is running.':accountExportWaiting(job)?
+    'Saved progress is kept. When the Telegram waiting period ends, choose Resume.':
+    'Progress is saved. Choose Resume to continue this job.');
+  if(job.phase==='paused')return tr('Progress is saved. Choose Resume to continue this job.');
+  if(job.phase==='failed')return tr('Review the error below, then choose Resume to retry from saved progress.');
+  if(job.phase==='packaging')return tr('The archive is being packaged and signed. Download will appear here when it is ready.');
+  if(job.active!==false&&['preparing','running'].includes(job.phase))
+    return tr('This job continues while TgWitness is running. You can leave this page and return.');
+  return '';
+}
+function accountDisclosureFilename(item){return 'tgwitness-disclosure-'+String(item.id).replace(/[^a-zA-Z0-9_-]/g,'')+'.zip';}
+function accountDisclosureRecipientNote(item){
+  return [tr('File: {filename}',{filename:accountDisclosureFilename(item)}),
+    tr('Extract the ZIP and open index.html to read this sharing copy. Review its scope, omissions and disclosure settings.'),
+    tr('Keep the ZIP unchanged. Follow README.txt to check its integrity using a signing-key fingerprint obtained independently from the sender.'),
+    tr('TgWitness signs these files; Telegram does not. An integrity check does not establish whether a message is true or who wrote it.')].join('\n\n');
+}
 function renderAccountExportJobs(){
   const box=$("account-export-jobs"),focused=document.activeElement,
-    action=focused?.dataset?.accountExportAction,jobId=focused?.dataset?.jobId;
-  box.replaceChildren();
+    action=focused?.dataset?.accountExportAction,jobId=focused?.dataset?.jobId,disclosureId=focused?.dataset?.disclosureId;
   const jobs=state.accountExportJobs;
   renderExportJobLink();
+  const stamp=JSON.stringify([jobs,state.accountDisclosures,jobs.map(accountExportWaiting)]);
+  if(accountExportJobStamp===stamp)return;
+  accountExportJobStamp=stamp;
+  const openDetails=new Set([...box.querySelectorAll('details[open]')].map(el=>el.dataset.exportDetail));
+  const selection=focused?.tagName==='TEXTAREA'?[focused.selectionStart,focused.selectionEnd]:null;
+  box.replaceChildren();
   if(!jobs.length){box.append(node("p","account-export-empty",tr("No account exports yet. Configure one to save the history this account can currently read.")));return;}
-  const addAction=(parent,job,label,kind,work,cls="secondary")=>{
-    const b=node("button",cls,label);b.type="button";b.dataset.accountExportAction=kind;b.dataset.jobId=job.id;
-    b.addEventListener("click",()=>busy(b,work));parent.append(b);
+  const identify=(element,job,kind,disclosure)=>{
+    element.dataset.accountExportAction=kind;element.dataset.jobId=job.id;
+    if(disclosure)element.dataset.disclosureId=disclosure.id;return element;
+  };
+  const addAction=(parent,job,label,kind,work,cls="secondary",disclosure)=>{
+    const b=node("button",cls,label);b.type="button";
+    identify(b,job,kind,disclosure);b.addEventListener("click",()=>busy(b,work));parent.append(b);return b;
   };
   for(const job of jobs){
     const phase=job.phase||"unknown",counts=job.counts||{},coverage=job.coverage||{};
@@ -1761,6 +1791,8 @@ function renderAccountExportJobs(){
     card.append(head);
     const when=accountExportTime(job.created_at);
     if(when)card.append(node("p","account-export-job-sub",tr("Started {time}",{time:when})));
+    const next=accountExportNextStep(job);
+    if(next)card.append(node('p','account-export-next',next));
     if(Number.isFinite(coverage.tasks_total)&&coverage.tasks_total>0){
       const bar=node("progress");bar.max=coverage.tasks_total;bar.value=Math.min(coverage.tasks_total,coverage.tasks_done||0);
       bar.setAttribute("aria-label",tr("Export tasks completed"));card.append(bar);
@@ -1791,6 +1823,7 @@ function renderAccountExportJobs(){
     const omissions=Array.isArray(job.omissions)?job.omissions:[];
     if(omissions.length){
       const details=node("details","account-export-omissions"),summary=node("summary","",tr("Omissions and unavailable data ({n})",{n:omissions.length}));
+      details.dataset.exportDetail=job.id+':omissions';identify(summary,job,'omissions');
       const list=node("ul");for(const item of omissions.slice(0,100)){
         const description=typeof item==="string"?item:[item.section||item.chat_id||item.kind,item.reason||item.error||item.status].filter(Boolean).join(": ");
         list.append(node("li","",description||tr("Not available")));
@@ -1801,37 +1834,58 @@ function renderAccountExportJobs(){
     if(job.error)card.append(node("p","account-export-job-note error",tr("Job error: {error}",{error:job.error})));
     const actions=node("div","account-export-job-actions"),
       active=["preparing","running","waiting","packaging"].includes(phase)&&job.active!==false,
-      waitPending=phase==="waiting"&&job.wait_until&&
-        new Date(accountExportEpochMs(job.wait_until)).valueOf()>Date.now();
+      waitPending=accountExportWaiting(job);
     if(active)addAction(actions,job,tr("Pause"),"pause",()=>accountExportAction(job,"pause"),"quiet");
     if(!job.ready&&(["paused","failed"].includes(phase)||(phase==="waiting"&&!active&&!waitPending)))
       addAction(actions,job,tr("Resume"),"resume",()=>accountExportAction(job,"resume"));
-    if(job.ready)addAction(actions,job,tr("Download signed archive"),"download",()=>accountExportDownload(job),"primary");
-    if(job.ready)addAction(actions,job,tr("Prepare a sharing copy"),"disclosure",()=>openAccountDisclosure(job));
-    if(!active)addAction(actions,job,tr("Delete job"),"delete",()=>accountExportDelete(job),"quiet");
-    card.append(actions);
+    if(job.ready){
+      const original=node('section','account-export-original');
+      original.append(node('h3','',tr('Original account archive')),
+        node('p','',tr('Download and keep this original. Extract the ZIP and open index.html to review what was saved and what is missing.')));
+      addAction(actions,job,tr('Download original archive'),'download',()=>accountExportDownload(job),'primary');
+      addAction(actions,job,tr('Prepare a sharing copy'),'disclosure',()=>openAccountDisclosure(job));
+      original.append(actions);card.append(original);
+    }else card.append(actions);
     const saved=state.accountDisclosures[job.id]||[];
     const persisted=Array.isArray(job.disclosures)?job.disclosures:[];
     const disclosures=[...persisted,...saved.filter(local=>!persisted.some(item=>item.id===local.id))];
     if(disclosures.length){
       const derivatives=node("div","account-disclosure-list");
       derivatives.append(node("strong","",tr("Signed sharing copies")));
+      derivatives.append(node('p','hint',tr('Separate files made from the original. Review each full copy before sending it.')));
       for(const item of disclosures){
-        const row=node("div","account-disclosure-item"),label=node("span","",tr("Disclosure {id}",{id:String(item.id||"").slice(0,10)}));
-        row.append(label);
-        if(item.ready){const button=node("button","quiet",tr("Download sharing copy"));button.type="button";
-          button.dataset.accountExportAction="disclosure-download";button.dataset.jobId=job.id;
-          button.addEventListener("click",()=>busy(button,()=>accountDisclosureDownload(job,item)));
-          row.append(button);
+        const row=node("section","account-disclosure-item"),heading=node('div','account-disclosure-item-head'),
+          label=node('strong','',tr('Sharing copy {id}',{id:String(item.id||'').slice(0,10)}));
+        heading.append(label);row.append(heading);
+        if(item.ready){
+          addAction(heading,job,tr('Download sharing copy'),'disclosure-download',()=>accountDisclosureDownload(job,item),'secondary',item);
+          const handoff=node('details','account-export-handoff'),summary=node('summary','',tr('Review & hand off'));
+          handoff.dataset.exportDetail=job.id+':handoff:'+item.id;identify(summary,job,'handoff',item);
+          const steps=node('ol');
+          for(const text of [tr('Download this copy. Extract the ZIP and open index.html.'),
+            tr('Review the full report and included files for personal information, context and omissions.'),
+            tr('Send the reviewed ZIP with the recipient note below. Keep your original archive separately.')])steps.append(node('li','',text));
+          const note=identify(node('textarea','recipient-note'),job,'recipient-note',item);
+          note.readOnly=true;note.rows=6;note.value=accountDisclosureRecipientNote(item);note.setAttribute('aria-label',tr('Recipient note'));
+          const noteActions=node('div','account-export-job-actions');
+          addAction(noteActions,job,tr('Copy recipient note'),'recipient-copy',async()=>{
+            try{await navigator.clipboard.writeText(note.value);toast(tr('Recipient note copied.'));}
+            catch{note.focus();note.select();toast(tr('Could not copy. Select and copy the recipient note.'),true);}
+          },'quiet',item);
+          handoff.append(summary,steps,note,noteActions);row.append(handoff);
         }else row.append(node("span","hint",tr("Preparing signed derivative")));
         derivatives.append(row);
       }
       card.append(derivatives);
     }
+    if(!active){const management=node('div','account-export-management');
+      addAction(management,job,tr('Delete job'),'delete',()=>accountExportDelete(job),'quiet');card.append(management);}
     box.append(card);
   }
+  for(const details of box.querySelectorAll('details'))details.open=openDetails.has(details.dataset.exportDetail);
   if(action&&jobId){const replacement=[...box.querySelectorAll("[data-account-export-action]")].find(n=>
-    n.dataset.accountExportAction===action&&n.dataset.jobId===jobId);replacement?.focus({preventScroll:true});}
+    n.dataset.accountExportAction===action&&n.dataset.jobId===jobId&&n.dataset.disclosureId===disclosureId);
+    replacement?.focus({preventScroll:true});if(selection&&replacement?.tagName==='TEXTAREA')replacement.setSelectionRange(...selection);}
 }
 async function loadAccountExport(silent=false){
   if(!state.me?.admin||!viewAllowed("evidence"))return;
@@ -1970,7 +2024,7 @@ async function createAccountDisclosure(){
     accountDisclosureInvalidate();throw new Error(tr("The disclosure preview expired. Preview the settings again."));
   }
   if(!window.confirm(tr("Create a signed derivative from this preview? Personal information may still remain; review the file before sharing.")))return;
-  const jobId=approved.jobId,profile=approved.profile,revision=approved.revision;
+  const jobId=approved.jobId,profile=approved.profile,revision=approved.revision,context=viewContexts.get('evidence');
   const result=await json("account-export/"+encodeURIComponent(jobId)+"/disclosure",{preview_id:approved.id});
   if(profile!==state.profile||revision!==state.workspaceRevision||jobId!==state.accountDisclosureJob)return;
   if(!result?.id)throw new Error(tr("Disclosure creation did not return a derivative ID."));
@@ -1978,13 +2032,16 @@ async function createAccountDisclosure(){
   state.accountDisclosureDirty=false;state.accountDisclosurePreview=null;
   $("account-disclosure-create").disabled=true;$("account-disclosure-dialog").close();
   await loadAccountExport();
-  toast(tr("Signed minimized disclosure created. Review the downloaded file before sharing."));
+  if(profile!==state.profile||revision!==state.workspaceRevision)return;
+  if(state.view==='evidence'&&state.exportTask==='account'&&context?.current())
+    [...$('account-export-jobs').querySelectorAll('[data-account-export-action="disclosure-download"]')]
+      .find(button=>button.dataset.jobId===jobId&&button.dataset.disclosureId===result.id)?.focus();
+  toast(tr('Sharing copy created. Download it below, then review it before sharing.'));
 }
 async function accountDisclosureDownload(job,item){
   if(!item.ready)throw new Error(tr("This disclosure is still being prepared."));
-  const safeId=String(item.id).replace(/[^a-zA-Z0-9_-]/g,"");
   const path="account-export/"+encodeURIComponent(job.id)+"/disclosures/"+encodeURIComponent(item.id)+"/download";
-  if(await download(path,"tgwitness-disclosure-"+safeId+".zip",true))
+  if(await download(path,accountDisclosureFilename(item),true))
     toast(tr("Signed disclosure saved. Review it before sharing."));
 }
 $("account-disclosure-form").addEventListener("input",accountDisclosureInvalidate);
@@ -1999,7 +2056,7 @@ $("account-disclosure-form").addEventListener("submit",event=>{
   event.preventDefault();busy(event.submitter,createAccountDisclosure);
 });
 let exportsView=null;
-const exportsReady=import('./views/exports.js').then(({createExports})=>{
+const exportsReady=import('./views/exports.js?v=2').then(({createExports})=>{
   exportsView=createExports({root:$("view-evidence"),tr,json,getSession:()=>state.workspaceRevision+":"+state.profile,fmtTime,toast});
   return exportsView;
 });
@@ -2044,7 +2101,7 @@ panelQueries("[data-export]").forEach(b=>b.addEventListener("click",()=>busy(b,a
   const fmt=b.dataset.export,password=$("export-password").value;
   const encrypt=!!b.closest("#view-evidence")&&$("export-encrypt-on").checked;
   if(encrypt&&password.length<12){$("export-password").focus();throw new Error(tr("Enter a password of at least 12 characters, or untick encryption."));}
-  const progress=(await exportsReady).begin();
+  const progress=(await exportsReady).begin({format:fmt,encrypted:encrypt});
   try{
     const saved=await download("export/"+fmt,encrypt?"tgwitness-evidence-"+fmt+"-encrypted.zip":"tgwitness-evidence."+fmt,true,false,encrypt?{password}:undefined,progress);
     if(saved)toast(tr(encrypt?"Encrypted export saved. Open it in 7-Zip or WinRAR with the password; the signed file inside is unchanged.":"Evidence export saved."));
@@ -3473,6 +3530,7 @@ function renderChatFeed(){
     });return;
   }
   if(state.chatView==='profile'){
+    if(state.chatProfile?.chat!==state.chat)loadChatProfile().catch(()=>{});
     const key=JSON.stringify([state.chat,state.chatProfile,s.demo,s.collector.has_session,may('sources')]);
     if(feed.firstElementChild?.profileKey!==key){const profile=profileNode(true);profile.profileKey=key;feed.replaceChildren(profile);}return;
   }
@@ -3867,14 +3925,23 @@ $("chat-open-form").addEventListener("submit",e=>{e.preventDefault();busy($("cha
   }));
 });});
 
+let chatProfileRead=null;
 async function loadChatProfile(){
   const id=state.chat,revision=state.workspaceRevision,generation=chatGeneration;if(id===null||id===undefined)return;
-  let r;
-  try{r=await json("chats/"+encodeURIComponent(id)+"/profile",undefined,viewOptions('chats'));}
-  catch(error){if(id===state.chat&&revision===state.workspaceRevision&&generation===chatGeneration&&!(error instanceof StaleView)){
-    state.chatProfile={chat:id,error:true};if(state.chatView==='profile')renderChatFeed();}throw error;}
-  if(id!==state.chat||revision!==state.workspaceRevision||generation!==chatGeneration)return;
-  state.chatProfile={chat:id,...r};renderChatStatus();if(state.chatView==='profile')renderChatFeed();
+  const options=viewOptions('chats');
+  if(chatProfileRead?.id===id&&chatProfileRead.revision===revision&&chatProfileRead.generation===generation&&
+      chatProfileRead.signal===options.signal)return chatProfileRead.promise;
+  const read={id,revision,generation,signal:options.signal};
+  read.promise=(async()=>{
+    let r;
+    try{r=await json("chats/"+encodeURIComponent(id)+"/profile",undefined,options);}
+    catch(error){if(id===state.chat&&revision===state.workspaceRevision&&generation===chatGeneration&&!(error instanceof StaleView)){
+      state.chatProfile={chat:id,error:true};if(state.chatView==='profile')renderChatFeed();}throw error;}
+    if(id!==state.chat||revision!==state.workspaceRevision||generation!==chatGeneration)return;
+    state.chatProfile={chat:id,...r};renderChatStatus();if(state.chatView==='profile')renderChatFeed();
+  })();
+  chatProfileRead=read;
+  try{return await read.promise;}finally{if(chatProfileRead===read)chatProfileRead=null;}
 }
 function profileNode(standalone=false){
   const s=state.status,saved=state.chatProfile?.chat===state.chat?state.chatProfile:null,data=saved?.profile;

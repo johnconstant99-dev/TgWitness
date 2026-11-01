@@ -443,6 +443,7 @@ class Disclosures:
                 write('messages.jsonl', message_bytes())
                 counts.update(chats=len(chats), media=len(media))
                 report_context = {'report_language': policy.report_language, 'policy': shared_policy,
+                    'archive_reference': identity, 'created_at': created,
                     'counts': counts, 'fingerprint': fingerprint(self.vault.public_key),
                     'source_archive_sha256': digest, 'limitations': WARNINGS}
                 write('index.html', account_report.sharing_report(report_context, rows()))

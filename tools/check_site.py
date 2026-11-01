@@ -109,6 +109,7 @@ def main():
             demo.goto(url + "demo/?lang=ru", wait_until="networkidle")
             expect(demo.locator("#workspace")).to_be_visible()
             demo.locator('[data-view="evidence"]').click()
+            demo.locator('#export-more-formats > summary').click()
             expect(demo.locator("#export-sealed")).to_be_visible()
             demo.locator("#export-sealed").click()
             expect(demo.locator("#view-sealed")).to_be_visible()

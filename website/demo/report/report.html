@@ -1,0 +1,109 @@
+<!doctype html><html lang="en" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;"><title>Sharing copy · TgWitness</title><style>
+:root{color-scheme:light dark;--bg:#f3f5f8;--paper:#fff;--ink:#182438;--muted:#536174;--line:#dce2eb;--accent:#235dcc;--soft:#edf3ff;--warn:#fff5df}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1060px;margin:auto;padding:40px 28px 64px}header{border-top:4px solid var(--accent);padding-top:22px;margin-bottom:28px}
+.brand{font-size:12px;letter-spacing:.15em;font-weight:750;color:var(--accent)}h1{font-size:clamp(26px,5vw,42px);line-height:1.2;margin:12px 0}
+h2{font-size:20px;line-height:1.4;margin:28px 0 12px}h3{font-size:16px;margin:0}p{margin:8px 0 14px}.muted,small{color:var(--muted)}
+.lead{font-size:17px;max-width:80ch}.badge{display:inline-block;padding:3px 9px;background:var(--soft);border:1px solid var(--line);border-radius:5px;font-size:12px;font-weight:650}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:24px 0}.stat{padding:15px;background:var(--paper);border:1px solid var(--line);border-radius:10px;min-width:0}
+.stat dt{font-size:12px;color:var(--muted)}.stat dd{font-size:26px;line-height:1.3;font-weight:700;font-variant-numeric:tabular-nums;margin:5px 0 0;overflow-wrap:anywhere}
+.panel,.message{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px;margin:14px 0}.panel>h2:first-child{margin-top:0}.notice{background:var(--warn);border-inline-start:3px solid #d7a33e;padding:14px 18px;margin:18px 0}
+.recipient-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 30px;padding-inline-start:22px;margin-bottom:0}.recipient-steps li{padding-inline-start:3px;margin:0}.recipient-steps p{font-size:13px;margin:4px 0 0}
+.facts{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,3fr);gap:8px 18px;margin:0}.facts dt{color:var(--muted)}.facts dd{margin:0;min-width:0}
+.chat-list{list-style:none;padding:0}.chat-list li{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.message-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px 20px;flex-wrap:wrap}.record-link{font-size:12px;white-space:nowrap}.message-meta,.record-citation{font-size:12px;color:var(--muted);margin:8px 0}.message-meta span{display:inline-block;margin-inline-end:16px}.record-citation{border-top:1px solid var(--line);padding-top:8px}.record-citation code{color:var(--ink)}.message:target{outline:2px solid var(--accent);outline-offset:3px}
+.message-text{white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;margin:16px 0}.user{unicode-bidi:plaintext;overflow-wrap:anywhere;min-width:0}
+a{color:var(--accent);text-underline-offset:3px}a,code,pre,dd{overflow-wrap:anywhere}pre{white-space:pre-wrap;font:12px/1.6 ui-monospace,monospace;margin:12px 0 0}
+nav{display:flex;gap:8px 18px;flex-wrap:wrap;margin:18px 0;font-size:13px}nav a{padding:4px 0}
+code{font:12px/1.6 ui-monospace,monospace}.command{display:block;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:6px;white-space:pre-wrap;direction:ltr;unicode-bidi:plaintext}
+details{border-top:1px solid var(--line);padding-top:10px;margin-top:16px}summary{cursor:pointer;color:var(--muted);font-size:12px}li{margin-bottom:7px}footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;font-size:12px;color:var(--muted)}
+@media(prefers-color-scheme:dark){:root{--bg:#101722;--paper:#182231;--ink:#e8eef8;--muted:#abb8cb;--line:#354258;--accent:#9cc0ff;--soft:#233553;--warn:#332c1f}}
+@media(max-width:600px){main{padding:24px 16px 40px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.recipient-steps{grid-template-columns:1fr}.panel,.message{padding:15px}.facts{grid-template-columns:1fr;gap:2px}.facts dd{margin-bottom:10px}.chat-list li{flex-wrap:wrap}}
+@page{margin:14mm}
+@media print{
+:root{color-scheme:light;--bg:#fff;--paper:#fff;--ink:#111;--muted:#444;--line:#bbb;--accent:#111;--soft:#fff;--warn:#fff}main{max-width:none;padding:0}body{font-size:9pt;line-height:1.4}
+header{border-top-width:2px;padding-top:8px;margin-bottom:10px}h1{font-size:22pt;margin:7px 0}.lead{font-size:10pt}h2{font-size:13pt;margin:16px 0 8px;break-after:avoid}h3{font-size:10pt}p{margin:5px 0 8px}nav,details{display:none}
+.panel,.message{padding:10px;margin:9px 0;border-radius:0}.recipient-guide,.stat,.message{break-inside:avoid}.recipient-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 22px}.recipient-steps p,.message-meta,.record-citation,.record-link{font-size:8pt}
+.stats{grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0;gap:8px}.stat{padding:8px;border-radius:0}.stat dd{font-size:17pt}.stat dt,.badge{font-size:8pt}.facts{grid-template-columns:minmax(120px,1fr) minmax(0,3fr);gap:4px 12px}.facts dd{margin-bottom:0}.notice{margin:10px 0;padding:8px 10px}
+.message-head,.message-meta{break-after:avoid}.message-text{margin:9px 0;orphans:3;widows:3}.record-citation{break-before:avoid}a{color:inherit;text-decoration:none}.chat-list li{padding:6px 0}.command{font-size:8pt;padding:8px}footer{margin-top:16px;padding-top:8px;font-size:8pt}}
+</style></head><body><main><header><div class="brand" dir="ltr">TGWITNESS</div><p class="badge">Sharing copy</p><h1 class="user" dir="auto">Sharing copy</h1><p class="lead">A minimized, signed copy for review and sharing. The original account export is unchanged.</p></header><nav><a href="#start">Start here</a><a href="#messages">Messages</a><a href="#verification">Verification</a></nav><section class="panel recipient-guide" id="start"><h2>Start here</h2><ol class="recipient-steps"><li><h3>Open</h3><p>Keep the ZIP unchanged. Extract all files together, then open index.html in your browser. No internet connection is needed.</p></li><li><h3>Read</h3><p>Check the scope below, then read the messages. Names or text may have been changed or omitted.</p></li><li><h3>Cite</h3><p>Cite the archive reference, the file path and the record reference beside a message. Record numbers apply only to this copy.</p></li><li><h3>Check</h3><p>Before relying on this copy, ask for the ZIP verification result and confirm the signer&#x27;s key through a separate trusted channel.</p></li></ol><p><a href="#verification">How to check the ZIP</a></p></section><dl class="stats"><div class="stat"><dt>Messages</dt><dd>5</dd></div><div class="stat"><dt>Chats</dt><dd>3</dd></div><div class="stat"><dt>Media files included</dt><dd>0</dd></div></dl><section class="panel" id="context"><h2>About this copy</h2><dl class="facts"><dt>Archive reference</dt><dd><code dir="ltr">e34ea538d54bfde09301e1637d5f5d67</code></dd><dt>Copy created</dt><dd><time dir="ltr" datetime="2026-11-01T22:09:26.103+00:00">2026-11-01 22:09:26.103000</time> · <bdi>UTC</bdi></dd><dt>Report language</dt><dd><bdi>en</bdi></dd></dl><p class="muted">Times retain their recorded timezone. UTC is the common time reference; an offset shows the difference from UTC. Missing timezones are marked.</p></section><section class="panel"><h2>Selected scope</h2><dl class="facts"><dt>Names and user IDs</dt><dd class="user" dir="auto">Pseudonymize everyone</dd><dt>Message text</dt><dd class="user" dir="auto">Keep matching text</dd><dt>Include media files</dt><dd class="user" dir="auto">No</dd><dt>Sender filters</dt><dd class="user" dir="auto">1</dd><dt>History dates</dt><dd>No additional date restriction</dd></dl><p class="muted">Inactive filters are not listed. Public settings are recorded in manifest.json.</p><p>Account profile, contacts and other account metadata are not included. Some message fields are omitted; consult messages.jsonl for the retained fields.</p><h3>Disclosure purpose</h3><p class="user" dir="auto">SYNTHETIC DEMO — selected messages for review</p></section><p class="notice">This sharing copy is a separate derivative, not the complete original account export.</p><section id="messages"><h2>Messages</h2><p class="muted">Record numbers follow messages.jsonl line order. They identify records in this copy, not original Telegram message IDs.</p><article class="message" id="record-000001" data-message-id="message-f46ce63abb63a82d"><div class="message-head"><h3 class="user" dir="auto">Participant-528dddfb78448408</h3><a class="record-link" href="#record-000001">Record <bdi>000001</bdi></a></div><p class="message-meta"><span>Message date: <time dir="ltr" datetime="2026-11-01T21:43:25.771149+00:00">2026-11-01 21:43:25.771149</time> · <bdi>UTC</bdi></span></p><p class="muted user" dir="auto">Chat-5e281a0e95571094</p><p class="message-text" dir="auto">I saved the original text, the edited link and both deletion notices for review.</p><p class="record-citation">Record reference: <code dir="ltr">index.html#record-000001</code></p><details><summary>Technical details</summary><pre dir="ltr">{
+  &quot;chat&quot;: {
+    &quot;id&quot;: &quot;chat-15209969bddffbc7&quot;,
+    &quot;kind&quot;: &quot;supergroup&quot;,
+    &quot;title&quot;: &quot;Chat-5e281a0e95571094&quot;
+  },
+  &quot;message&quot;: {
+    &quot;attachments&quot;: [],
+    &quot;date&quot;: &quot;2026-11-01T21:43:25.771149+00:00&quot;,
+    &quot;edited&quot;: null,
+    &quot;from_id&quot;: &quot;participant-b0cb8b259ef837b7&quot;,
+    &quot;id&quot;: &quot;message-f46ce63abb63a82d&quot;,
+    &quot;outgoing&quot;: false,
+    &quot;sender&quot;: &quot;Participant-528dddfb78448408&quot;,
+    &quot;text&quot;: &quot;I saved the original text, the edited link and both deletion notices for review.&quot;
+  }
+}</pre></details></article><article class="message" id="record-000002" data-message-id="message-63ad904339af6e6d"><div class="message-head"><h3 class="user" dir="auto">Participant-528dddfb78448408</h3><a class="record-link" href="#record-000002">Record <bdi>000002</bdi></a></div><p class="message-meta"><span>Message date: <time dir="ltr" datetime="2026-11-01T20:55:25.771149+00:00">2026-11-01 20:55:25.771149</time> · <bdi>UTC</bdi></span></p><p class="muted user" dir="auto">Chat-5e281a0e95571094</p><p class="message-text" dir="auto">Support asked me to enter my recovery phrase at [link or handle withheld] Is that normal?</p><p class="record-citation">Record reference: <code dir="ltr">index.html#record-000002</code></p><details><summary>Technical details</summary><pre dir="ltr">{
+  &quot;chat&quot;: {
+    &quot;id&quot;: &quot;chat-15209969bddffbc7&quot;,
+    &quot;kind&quot;: &quot;supergroup&quot;,
+    &quot;title&quot;: &quot;Chat-5e281a0e95571094&quot;
+  },
+  &quot;message&quot;: {
+    &quot;attachments&quot;: [],
+    &quot;date&quot;: &quot;2026-11-01T20:55:25.771149+00:00&quot;,
+    &quot;edited&quot;: null,
+    &quot;from_id&quot;: &quot;participant-b0cb8b259ef837b7&quot;,
+    &quot;id&quot;: &quot;message-63ad904339af6e6d&quot;,
+    &quot;outgoing&quot;: false,
+    &quot;sender&quot;: &quot;Participant-528dddfb78448408&quot;,
+    &quot;text&quot;: &quot;Support asked me to enter my recovery phrase at [link or handle withheld] Is that normal?&quot;
+  }
+}</pre></details></article><article class="message" id="record-000003" data-message-id="message-bdf36b679eba1786"><div class="message-head"><h3 class="user" dir="auto">Participant-528dddfb78448408</h3><a class="record-link" href="#record-000003">Record <bdi>000003</bdi></a></div><p class="message-meta"><span>Message date: <time dir="ltr" datetime="2026-11-01T21:27:25.771149+00:00">2026-11-01 21:27:25.771149</time> · <bdi>UTC</bdi></span></p><p class="muted user" dir="auto">Chat-f4babf4933ee4e7c</p><p class="message-text" dir="auto">Working note: one portal link found in the captured messages.</p><p class="record-citation">Record reference: <code dir="ltr">index.html#record-000003</code></p><details><summary>Technical details</summary><pre dir="ltr">{
+  &quot;chat&quot;: {
+    &quot;id&quot;: &quot;chat-4d8616bce6eb3605&quot;,
+    &quot;kind&quot;: &quot;supergroup&quot;,
+    &quot;title&quot;: &quot;Chat-f4babf4933ee4e7c&quot;
+  },
+  &quot;message&quot;: {
+    &quot;attachments&quot;: [],
+    &quot;date&quot;: &quot;2026-11-01T21:27:25.771149+00:00&quot;,
+    &quot;edited&quot;: null,
+    &quot;from_id&quot;: &quot;participant-b0cb8b259ef837b7&quot;,
+    &quot;id&quot;: &quot;message-bdf36b679eba1786&quot;,
+    &quot;outgoing&quot;: false,
+    &quot;sender&quot;: &quot;Participant-528dddfb78448408&quot;,
+    &quot;text&quot;: &quot;Working note: one portal link found in the captured messages.&quot;
+  }
+}</pre></details></article><article class="message" id="record-000004" data-message-id="message-a19b14cdf66263f0"><div class="message-head"><h3 class="user" dir="auto">Participant-528dddfb78448408</h3><a class="record-link" href="#record-000004">Record <bdi>000004</bdi></a></div><p class="message-meta"><span>Message date: <time dir="ltr" datetime="2026-11-01T20:39:25.771149+00:00">2026-11-01 20:39:25.771149</time> · <bdi>UTC</bdi></span></p><p class="muted user" dir="auto">Chat-f4babf4933ee4e7c</p><p class="message-text" dir="auto">Case HBR-042. Keep the original portal link, later edits and deletion notices together.</p><p class="record-citation">Record reference: <code dir="ltr">index.html#record-000004</code></p><details><summary>Technical details</summary><pre dir="ltr">{
+  &quot;chat&quot;: {
+    &quot;id&quot;: &quot;chat-4d8616bce6eb3605&quot;,
+    &quot;kind&quot;: &quot;supergroup&quot;,
+    &quot;title&quot;: &quot;Chat-f4babf4933ee4e7c&quot;
+  },
+  &quot;message&quot;: {
+    &quot;attachments&quot;: [],
+    &quot;date&quot;: &quot;2026-11-01T20:39:25.771149+00:00&quot;,
+    &quot;edited&quot;: null,
+    &quot;from_id&quot;: &quot;participant-b0cb8b259ef837b7&quot;,
+    &quot;id&quot;: &quot;message-a19b14cdf66263f0&quot;,
+    &quot;outgoing&quot;: false,
+    &quot;sender&quot;: &quot;Participant-528dddfb78448408&quot;,
+    &quot;text&quot;: &quot;Case HBR-042. Keep the original portal link, later edits and deletion notices together.&quot;
+  }
+}</pre></details></article><article class="message" id="record-000005" data-message-id="message-4227daffa10ba226"><div class="message-head"><h3 class="user" dir="auto">Participant-528dddfb78448408</h3><a class="record-link" href="#record-000005">Record <bdi>000005</bdi></a></div><p class="message-meta"><span>Message date: <time dir="ltr" datetime="2026-11-01T21:11:25.771149+00:00">2026-11-01 21:11:25.771149</time> · <bdi>UTC</bdi></span></p><p class="muted user" dir="auto">Chat-4a83bf73c9122f0c</p><p class="message-text" dir="auto">No team member will ask for your recovery phrase. Keep it private.</p><p class="record-citation">Record reference: <code dir="ltr">index.html#record-000005</code></p><details><summary>Technical details</summary><pre dir="ltr">{
+  &quot;chat&quot;: {
+    &quot;id&quot;: &quot;chat-32b69bfedd4fa4d4&quot;,
+    &quot;kind&quot;: &quot;channel&quot;,
+    &quot;title&quot;: &quot;Chat-4a83bf73c9122f0c&quot;
+  },
+  &quot;message&quot;: {
+    &quot;attachments&quot;: [],
+    &quot;date&quot;: &quot;2026-11-01T21:11:25.771149+00:00&quot;,
+    &quot;edited&quot;: null,
+    &quot;from_id&quot;: &quot;participant-b0cb8b259ef837b7&quot;,
+    &quot;id&quot;: &quot;message-4227daffa10ba226&quot;,
+    &quot;outgoing&quot;: false,
+    &quot;sender&quot;: &quot;Participant-528dddfb78448408&quot;,
+    &quot;text&quot;: &quot;No team member will ask for your recovery phrase. Keep it private.&quot;
+  }
+}</pre></details></article></section><section id="verification"><h2>Verification</h2><p>TgWitness signs this archive; Telegram does not. A valid signature does not establish completeness or truth.</p><p>This HTML is protected by the archive manifest. Verify the ZIP; this page alone has no standalone signature.</p><p>Get the signer&#x27;s key fingerprint from a trusted channel, not from this archive.</p><h3>Signing key fingerprint (SHA-256)</h3><p><code dir="ltr">7becd673e1f3db55852fe8d2f46f4c366a16dcb13cc6374f0d3f472b10fa18a1</code></p><p>Run the verifier from an independently trusted installation.</p><code class="command">python verify.py disclosure.zip --fingerprint TRUSTED_SHA256</code><p>Replace the example ZIP filename with the file you received, and TRUSTED_SHA256 with the fingerprint confirmed separately. Keep the verification result with your review notes.</p><p>Optional source comparison checks the archive reference, not the correctness of filtering or redaction.</p><code class="command">python verify.py disclosure.zip --fingerprint TRUSTED_SHA256 --evidence original.zip</code><p>Source archive SHA-256: <code dir="ltr">8514c4b18851e9974e14df247fb411a39bd99618f4108357ff1148fb08537b14</code></p></section><section><h2>Limitations</h2><ul><li>This is a minimized derivative, not the complete original account export.</li><li>Pseudonymization is not anonymization. Dates, context and message content can still identify people.</li><li>Automatic text masking cannot find every personal detail. Review the disclosed content before sharing.</li><li>A signature protects this derivative. Source linkage alone does not prove that filtering or redaction was correct.</li><li>Purpose and settings do not establish a legal basis, GDPR compliance or court admissibility.</li></ul></section><footer><p>Report labels may include English fallbacks. Original messages are not translated.</p><p>Message text and dates can still identify people. Review the full copy and included files before sharing.</p></footer></main></body></html>

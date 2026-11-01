@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Added a clear handoff after download: distinguish the original archive from
+  sharing copies, review the report, and copy plain instructions for the recipient.
+  Polling preserves the selected copy and focus; unavailable clipboard access
+  leaves the instructions selectable.
+- Added recipient guidance and stable record references to readable account and
+  sharing reports, including print layouts. References describe the archived
+  document; they do not turn printouts or screenshots into signed evidence.
+- Added a browsable fictional report with the matching signed ZIP. Its preview
+  is byte-identical to the archived HTML; previous signed demo samples are retained.
+- Translated new export, sharing and recipient-report labels through DeepL into
+  the 24 supported non-English interface languages, including active labels that
+  had previously displayed English. Message text and operator-entered content
+  remain unchanged; English remains the canonical source.
+
 - Added **Start here** with separate personal-export and investigation journeys.
   Account snapshots and saved observations now have distinct export controls;
   secondary formats, account metadata and connection options are progressively

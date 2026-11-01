@@ -23,7 +23,7 @@
 <script src="/theme.js?v=0.7.0"></script>
 <script src="/guide-locale.js" data-scope="panel"></script>
 <script defer src="/i18n.js?v=0.7.0"></script>
-<script defer src="/app.js?v=0.7.0-workflows1"></script>
+<script defer src="/app.js?v=0.7.0-handoff2"></script>
 <script defer src="/integrations.js?v=2"></script>
 <script defer src="/analysis.js?v=3"></script>
 <script defer src="/media-analysis.js?v=2"></script>
@@ -34,7 +34,7 @@
 <script defer src="/live.js?v=2"></script>
 <script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=4"></script><script defer src="/cloud-capture.js?v=6"></script>
 <link href="/views/exports.css?v=32" rel="stylesheet">
-<link href="/views/workflows.css?v=1" rel="stylesheet">
+<link href="/views/workflows.css?v=2" rel="stylesheet">
 <link href="/views/disclosure-preview.css?v=1" rel="stylesheet">
 <link href="/components/forms.css?v=35" rel="stylesheet">
 <link href="/components/feedback.css?v=36" rel="stylesheet">
@@ -198,6 +198,7 @@
       <button class="secondary" data-demo-filter="deleted" type="button"><svg aria-hidden="true" class="icon"><use href="#i-journal"/></svg> Review deletions</button>
       <button class="secondary" data-demo-filter="edited" type="button"><svg aria-hidden="true" class="icon"><use href="#i-clock"/></svg> Compare edits</button>
       <button class="primary" data-export="zip" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Export signed ZIP</button>
+      <a class="text-link" id="demo-report-preview" href="#" hidden>Read a sample report</a>
     </div>
   </div>
   <details class="health-details"><summary>Collector health <span>Storage &amp; attachment queue</span></summary><div class="health-strip" id="health-strip"></div></details>
@@ -393,7 +394,6 @@
     <button type="button" role="tab" id="exports-tab-downloads" data-export-tab="downloads" aria-controls="exports-downloads" aria-selected="true">Downloads</button>
     <button type="button" role="tab" id="exports-tab-settings" data-export-tab="settings" aria-controls="report-form" aria-selected="false" tabindex="-1">Report settings</button>
   </div>
-  <div id="exports-progress" class="card padded" hidden role="status" aria-live="polite"><strong id="exports-progress-label"></strong><progress id="exports-progress-bar" aria-label="Download progress"></progress><span id="exports-progress-bytes" class="hint"></span></div>
   <p class="notice error" id="exports-account-error" hidden role="alert"></p>
   <div id="exports-downloads" role="tabpanel" aria-labelledby="exports-tab-downloads">
   <div class="export-task-choices" role="group" aria-label="What to export">
@@ -470,6 +470,7 @@
     </form>
   </dialog>
   <div id="export-journal-panel">
+  <div id="exports-progress" class="card padded" hidden role="status" aria-live="polite"><strong id="exports-progress-label"></strong><progress id="exports-progress-bar" aria-label="Download progress"></progress><span id="exports-progress-bytes" class="hint"></span><div id="exports-next" class="exports-next" hidden><strong>Review before handoff</strong><p id="exports-next-copy"></p><p id="exports-next-encrypted" hidden>Open the outer ZIP with your password first. Send the password through a separate channel.</p></div></div>
   <div class="evidence-hero card">
     <div class="evidence-symbol"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg></div>
     <div class="evidence-body">

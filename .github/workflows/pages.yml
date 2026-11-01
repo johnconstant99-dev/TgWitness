@@ -23,6 +23,7 @@ on:
       - tools/check_site.py
       - tools/run_checks.py
       - tools/check_demo_browser.py
+      - tools/check_report_example.py
       - tools/check_docs_site.py
       - tools/check_home_browser.py
       - tools/check_modes_browser.py
@@ -75,7 +76,7 @@ jobs:
         run: python tools/build_site.py
       - name: Check the built public pages independently (two at a time)
         run: python tools/run_checks.py --suite site --jobs 2
-      - name: Retain both site check results
+      - name: Retain site check results
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
@@ -86,6 +87,8 @@ jobs:
             test-results/site/**/*.json
             test-results/docs-site/**/*.png
             test-results/docs-site/**/*.json
+            test-results/report-example/**/*.png
+            test-results/report-example/**/*.json
           if-no-files-found: warn
           retention-days: 3
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5

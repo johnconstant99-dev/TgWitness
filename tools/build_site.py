@@ -6,6 +6,7 @@ English lives at the site root and every other language under /<code>/ (tools/si
 translations come from website/i18n/<code>.json, made by test-results/site_translate.py.
 """
 import argparse
+import hashlib
 import html
 from html.parser import HTMLParser
 import json
@@ -80,6 +81,8 @@ DEMO_STATIC.update({"demo/components/" + name: "tgwitness/static/components/" + 
 DEMO_STATIC.update({"demo/views/" + name: "tgwitness/static/views/" + name
                     for name in ("sources.js", "sources.css", "parameters.js", "parameters.css", "exports.js", "exports.css", "accounts.js", "accounts.css", "access.js", "access.css", "system-log.js", "chats.css", "chat-list.js", "chat-list.css", "workflows.css", "disclosure-preview.js", "disclosure-preview.css")})
 DEMO_STATIC.update({"demo/mock.js": "website/demo/mock.js", "demo/fixtures.json": "website/demo/fixtures.json"})
+DEMO_STATIC.update({"demo/report/" + name: "website/demo/report/" + name
+                    for name in ("index.html", "report.html", "sharing-copy.zip", "example.json")})
 DEMO_STATIC.update({"demo/components/" + name: "tgwitness/static/components/" + name
                     for name in ("notifications.js", "notifications.css", "journal.js", "journal.css")})
 DEMO_STATIC.update({"demo/downloads/" + name: "website/demo/downloads/" + name for name in (
@@ -690,7 +693,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     return output
 
 
-def demo_language_script(languages, folder):
+def demo_language_script(languages, folder, revision=""):
     return ("<script>(function(){var known=" + json.dumps(list(languages)) + ","
             "saved=(document.cookie.match(/(?:^|; )tgwitness-lang=([^;]+)/)||[])[1];"
             "try{saved=saved&&decodeURIComponent(saved)}catch(e){saved=''}"
@@ -701,7 +704,7 @@ def demo_language_script(languages, folder):
             "var asked=new URLSearchParams(location.search).get('lang'),"
             "browser=navigator.languages||[navigator.language||'en'],"
             "pick=[asked,saved].concat(browser).map(match).find(Boolean)||'en';"
-            "document.write('<script src=\"" + folder + "/'+pick+'.js\"><\\/script>');})();</script>")
+            "document.write('<script src=\"" + folder + "/'+pick+'.js?v=" + revision + "\"><\\/script>');})();</script>")
 
 
 def redirect_page(target, root):
@@ -712,6 +715,8 @@ def redirect_page(target, root):
 
 def build_demo(read_public, write):
     """Panel pages with relative paths, the request answering script and one dictionary per language."""
+    revision = hashlib.sha256(b"".join(read_public(path) for path in
+        (*DEMO_DICTIONARIES, *GUIDE_DICTIONARIES))).hexdigest()[:16]
     for target, source in DEMO_PAGES.items():
         page = read_public(source).decode("utf-8").replace('href="/"', 'href="../"')
         page = re.sub(r'\b(src|href)="/(?=[A-Za-z])', r'\1="', page)
@@ -720,8 +725,8 @@ def build_demo(read_public, write):
                            else '<script src="guide-locale.js" data-scope="panel"></script>')
         if original_loader not in page:
             raise ValueError("Demo page no longer loads locale.js where expected: " + source)
-        answering = '<script src="mock.js"></script>' if target == "demo/index.html" else ""
-        loader = demo_language_script(site_modes.LANGUAGES if guide else LANGS, "guide-locales" if guide else "locales")
+        answering = '<script src="mock.js?v=handoff1"></script>' if target == "demo/index.html" else ""
+        loader = demo_language_script(site_modes.LANGUAGES if guide else LANGS, "guide-locales" if guide else "locales", revision)
         page = page.replace(original_loader, answering + loader)
         page = page.replace("<head>", '<head>\n<meta name="robots" content="noindex">', 1)
         write(target, page)

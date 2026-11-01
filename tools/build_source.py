@@ -26,6 +26,9 @@ FILES.extend("website/demo/downloads/" + name for name in (
     "tgwitness-demo-checkpoint.json", "tgwitness-demo-run-receipt.json", "tgwitness-demo-timestamp-request.zip",
     "tgwitness-demo-account-export.zip", "tgwitness-demo-minimized-disclosure.zip",
 ))
+FILES.extend("website/demo/report/" + name for name in (
+    "index.html", "report.html", "sharing-copy.zip", "example.json",
+))
 DIRECTORIES = {
     "tgwitness": {".md", ".py", ".html", ".css", ".js", ".svg", ".json"},
     "docs": {".md", ".png", ".webp", ".svg", ".txt", ".gif", ".mp4"}, "tools": {".py", ".md"},

@@ -30,20 +30,25 @@ class ReportTransport(PrivacyTransport):
         rows, next_cursor, terminal = await super().page(task, cursor)
         for row, _ in rows:
             row['text'] = MESSAGE
+            row['edit_date'] = '2026-11-01T15:30:00+05:30'
         return rows, next_cursor, terminal
 
 
 class Document(HTMLParser):
     def __init__(self, source):
         super().__init__(convert_charrefs=True)
-        self.tags, self.links, self.root, self.details = [], [], {}, 0
+        self.tags, self.links, self.root, self.details, self.ids = [], [], {}, 0, []
         self.feed(source)
         self.close()
         assert source.startswith('<!doctype html>') and source.endswith('</html>')
+        assert len(self.ids) == len(set(self.ids)), 'Duplicate HTML anchors'
+        assert all(href[1:] in self.ids for href in self.links if href.startswith('#')), 'Broken local anchor'
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         self.tags.append(tag)
+        if 'id' in attrs:
+            self.ids.append(attrs['id'])
         assert tag not in ('script', 'iframe', 'img', 'video', 'audio', 'object', 'embed', 'form', 'link'), tag
         assert not any(key.startswith('on') or key in ('src', 'srcdoc') for key in attrs), attrs
         if tag == 'html':
@@ -79,7 +84,11 @@ def pure_checks():
                 raise AssertionError('Invalid report language accepted')
 
     context = {'report_language': 'en', 'policy': {'purpose': 'Public purpose', 'sender_ids': ['SECRET_FILTER'],
-               'text_contains': ['SECRET_TERM'], 'mapping': 'SECRET_MAPPING'}, 'counts': {'messages': 1},
+               'text_contains': ['SECRET_TERM'], 'mapping': 'SECRET_MAPPING', 'include_media': False,
+               'sender_filter_count': 0, 'text_filter_count': 0}, 'counts': {'messages': 1},
+               'archive_reference': 'public-copy', 'created_at': '2026-11-01T12:00:00Z',
+               'requested_at': 'SECRET_REQUEST', 'captured_from': 'SECRET_CAPTURE',
+               'captured_until': 'SECRET_END', 'options': {'transport': 'SECRET_METHOD'},
                'fingerprint': 'a' * 64, 'source_archive_sha256': 'b' * 64, 'limitations': []}
     row = {'before': 'SECRET_SOURCE', 'chat': {'id': 'chat-1', 'title': 'Public chat', 'raw': 'SECRET_CHAT'},
            'message': {'id': 'message-1" onmouseover="window.reportXSS=3', 'sender': 'Participant-1', 'date': '2026-11-01T12:00:00Z', 'text': MESSAGE,
@@ -93,6 +102,29 @@ def pure_checks():
     assert 'media/' + 'a' * 64 in parsed.links
     assert '&lt;img' in rendered and MESSAGE not in rendered
     assert '<p class="message-text" dir="auto">UNCHANGED' in rendered
+    assert 'index.html#record-000001' in rendered and '#record-000001' in parsed.links
+    assert '>Sender filters<' not in rendered and '>Text filters<' not in rendered
+    assert '>Include media files<' in rendered and '>No<' in rendered
+    assert 'Account profile, contacts and other account metadata are not included.' in rendered
+    original_scope = account_report.scope({'sender_ids': [42], 'text_contains': ['one', 'two']}, account_report.Words('en'))
+    assert '>Sender filters</dt><dd class="user" dir="auto">1<' in original_scope
+    assert '>Text filters</dt><dd class="user" dir="auto">2<' in original_scope
+
+    # A reference belongs to this copy and its row order, never a source identifier.
+    repeated = [row, row, {'message': {'text': 'No source ID'}, 'chat': {}}]
+    rendered = b''.join(account_report.sharing_report(context, iter(repeated))).decode()
+    assert rendered == b''.join(account_report.sharing_report(context, iter(repeated))).decode()
+    assert [value for value in Document(rendered).ids if value.startswith('record-')] == [
+        'record-000001', 'record-000002', 'record-000003']
+    assert 'Message date: Not recorded' in rendered
+    chat = b''.join(account_report.account_chat({'report_language': 'en'}, {'id': -42}, iter([
+        {'id': 7, 'date': '2026-11-01T12:00:00Z', 'edit_date': '2026-11-01T17:30:00+05:30'},
+        {'id': 7, 'date': '2026-11-01T12:00:00'}, {'date': '<img src=x>'}]))).decode()
+    assert 'chats/-42.html#record-000002' in chat
+    assert '2026-11-01 12:00:00</time> · <bdi>UTC</bdi>' in chat
+    assert 'Edited date:' in chat and '17:30:00</time> · <bdi>UTC+05:30</bdi>' in chat
+    assert 'Timezone not recorded' in chat and 'Date format not recognized' in chat
+    Document(chat)
 
     consumed = [0]
 
@@ -143,6 +175,13 @@ async def manager_checks(directory, output):
                 for name in ('index.html', 'chats/101.html'):
                     body = archive.read(name).decode()
                     assert Document(body).root['lang'] == language
+                    assert job['id'] in body and manifest['created_at'] in body
+                    receipts = [json.loads(archive.read(name))['statement'] for name in archive.namelist() if name.startswith('receipts/')]
+                    assert min(r['captured_from'] for r in receipts) in body
+                    assert max(r['captured_until'] for r in receipts) in body
+                    extracted = output / f'account-{language}' / name
+                    extracted.parent.mkdir(parents=True, exist_ok=True)
+                    extracted.write_text(body, encoding='utf-8')
                     (output / f'account-{language}-{Path(name).name}').write_text(body, encoding='utf-8')
                 rows = [json.loads(line) for name in archive.namelist() if name.startswith('data/')
                         for line in archive.read(name).splitlines()]
@@ -162,8 +201,12 @@ async def manager_checks(directory, output):
                 body = archive.read('index.html').decode()
                 assert Document(body).root['lang'] == language
                 assert 'SECRET_FILTER' not in body and SECRET_METADATA not in body
+                assert result['id'] in body and manifest['created_at'] in body
+                assert job['id'] not in body, 'Source export reference leaked into sharing HTML'
                 shared_rows = [json.loads(line) for line in archive.read('messages.jsonl').splitlines()]
                 assert all(row['message']['text'] == MESSAGE.replace('Straße', '[redacted]') for row in shared_rows)
+                assert [value for value in Document(body).ids if value.startswith('record-')] == [
+                    f'record-{number:06d}' for number in range(1, len(shared_rows) + 1)]
                 (output / f'sharing-{language}.html').write_text(body, encoding='utf-8')
             assert hashlib.sha256(source.read_bytes()).hexdigest() == before
             await exports.resume(job['id'])
@@ -211,14 +254,36 @@ def browser_checks(output):
                 page.set_viewport_size({'width': width, 'height': 1000})
                 for theme in ('light', 'dark'):
                     page.emulate_media(color_scheme=theme)
-                    page.set_content((output / f'sharing-{language}.html').read_text(encoding='utf-8'))
-                    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'), (language, width)
-                    assert page.locator('script,img,iframe').count() == 0
-                    assert page.locator('details[open]').count() == 0
-                    assert page.evaluate('window.reportXSS ?? 0') == 0
-                    if language in ('en', 'ar') and width in (390, 1440):
-                        page.screenshot(path=str(output / f'sharing-{language}-{width}-{theme}.png'))
+                    for report in (f'sharing-{language}', f'account-{language}-index', f'account-{language}-101'):
+                        page.set_content((output / f'{report}.html').read_text(encoding='utf-8'))
+                        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'), (report, width, theme)
+                        assert page.locator('script,img,iframe').count() == 0
+                        assert page.locator('details[open]').count() == 0
+                        assert page.evaluate('window.reportXSS ?? 0') == 0
+                        if language in ('en', 'ar') and width in (390, 1440) and report == f'sharing-{language}':
+                            page.screenshot(path=str(output / f'{report}-{width}-{theme}.png'))
         assert not errors and not requests, (errors, requests)
+        page.emulate_media(media='screen', color_scheme='light')
+        page.set_viewport_size({'width': 1100, 'height': 1000})
+        page.goto((output / 'account-en/index.html').as_uri())
+        page.locator('a[href="chats/101.html"]').click()
+        page.locator('a[href="#record-000002"]').click()
+        assert page.url.endswith('/chats/101.html#record-000002')
+        assert page.locator('#record-000002').is_visible()
+        assert 'chats/101.html#record-000002' in page.locator('#record-000002 .record-citation').inner_text()
+        page.locator('#record-000002').screenshot(path=str(output / 'account-en-record.png'))
+        for language in ('en', 'ar'):
+            for report in (f'sharing-{language}', f'account-{language}-index', f'account-{language}-101'):
+                page.emulate_media(media='print', color_scheme='light')
+                page.set_content((output / f'{report}.html').read_text(encoding='utf-8'))
+                assert not page.locator('nav').is_visible()
+                if page.locator('.record-citation').count():
+                    assert page.locator('.record-citation').first.is_visible()
+                    assert not page.locator('details').first.is_visible()
+                    assert 'UTC' in page.locator('.message-meta').first.inner_text()
+                page.pdf(path=str(output / f'{report}-print.pdf'), format='A4', print_background=True)
+                page.screenshot(path=str(output / f'{report}-print.png'), full_page=True)
+        assert not errors and all(url.startswith('file:') for url in requests), (errors, requests)
         browser.close()
 
 
@@ -232,7 +297,10 @@ def main():
     receipt = {'passed': True, 'languages_validated': len(i18n.LANGUAGES), 'signed_languages': ['en', 'ru', 'ar', 'zh'],
                'browser_viewports': [320, 390, 1440], 'themes': ['light', 'dark'], 'streamed_messages': 6000,
                'peak_stream_bytes': peak, 'legacy_raw_options_preserved': True, 'source_archives_unchanged': True,
-               'xss_and_external_resources': False, 'private_selection_criteria_in_html': False}
+               'xss_and_external_resources': False, 'private_selection_criteria_in_html': False,
+               'deterministic_record_anchors': True, 'local_chat_and_record_navigation': True,
+               'source_acquisition_metadata_in_sharing_html': False, 'print_languages': ['en', 'ar'],
+               'timezone_and_missing_date_checks': True, 'browser_report_views': ['sharing', 'account index', 'account chat']}
     (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(receipt, indent=2))
 

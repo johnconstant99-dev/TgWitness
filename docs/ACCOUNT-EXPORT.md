@@ -47,6 +47,12 @@ The Ed25519 signature and SHA-256 hashes detect changes after the collector comm
 
 ## Prepare a disclosure for a lawyer or another recipient
 
+After downloading a finished export, keep the original ZIP and open `index.html`
+from an extracted copy. The report explains its scope, available coverage and
+limits. Its record references combine the archive reference, document path and
+record number, so a recipient can locate the same entry in the HTML or printout.
+For a worked example, [open the fictional report](https://phishdestroy.github.io/TgWitness/demo/report/).
+
 From a finished account export, choose **Prepare a sharing copy**. This builds a separate signed derivative. The source ZIP remains unchanged and private; do not send it together with a minimized derivative unless the recipient is authorized to receive its full contents. Choose its report language separately. Changing the language or any selection setting requires another preview before creation.
 
 1. Enter the disclosure purpose and select dates, sender IDs and literal text criteria.

@@ -747,8 +747,14 @@ class AccountExport:
                 media = set()
                 message_pages = {}
                 chat_counts = {}
+                captured_from = captured_until = None
                 for envelope in self.receipts:
                     receipt = envelope["statement"]
+                    first, last = receipt.get("captured_from"), receipt.get("captured_until")
+                    if first:
+                        captured_from = min(captured_from, first) if captured_from else first
+                    if last:
+                        captured_until = max(captured_until, last) if captured_until else last
                     write(f"receipts/{receipt['seq']:08d}.json", [canonical(envelope)])
                     write(receipt["data_file"], chunks(directory / receipt["data_file"]))
                     if hashes[receipt["data_file"]] != receipt["data_sha256"]:
@@ -767,6 +773,8 @@ class AccountExport:
                         raise ValueError("An attachment changed while packaging.")
                 selected = [c for c in self.inventory["chats"] if c["selected"]]
                 report_context = {"report_language": job["options"].get("report_language", "en"),
+                    "archive_reference": job["job_id"], "requested_at": job["created_at"],
+                    "captured_from": captured_from, "captured_until": captured_until,
                     "options": job["options"], "counts": self.current["counts"], "coverage": self.current["coverage"],
                     "complete_within_scope": not self.current["coverage"]["failures"],
                     "omissions": [*self.inventory.get("gaps", []), *self.current.get("omissions", [])],

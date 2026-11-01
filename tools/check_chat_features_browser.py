@@ -46,6 +46,26 @@ def capture(page, point):
     page.set_viewport_size({'width': 1440, 'height': 1000})
 
 
+def hold_profile_read(page):
+    hold_once(page, '/api/chats/-1001/profile')
+    page.evaluate("""()=>{
+      window.profileReadOriginal=window.loadChatProfile;
+      window.loadChatProfile=(...args)=>{
+        const pending=window.profileReadOriginal(...args);
+        window.heldProfileRead??=pending;return pending;
+      };
+    }""")
+
+
+def release_profile_read(page):
+    page.evaluate("""async()=>{
+      window.releaseRefresh();await window.heldProfileRead.catch(()=>{});
+      window.loadChatProfile=window.profileReadOriginal;
+      delete window.profileReadOriginal;delete window.heldProfileRead;
+      delete document.documentElement.dataset.refreshHeld;
+    }""")
+
+
 def main():
     with tempfile.TemporaryDirectory(prefix='chat-features-') as scratch, RunningApp(Path(scratch)) as server:
         store = server.app.state.store
@@ -81,7 +101,11 @@ def main():
             page.route('**/api/status', status)
             page.route('**/api/snapshot', snapshot)
             unlock(page, server)
+            # Opening a chat starts its profile read in the background. Leaving for
+            # settings can cancel that read before it fills the profile cache.
+            hold_profile_read(page)
             page.evaluate("async()=>{await navigate('chats');await openChat(-1001);}")
+            expect(page.locator('html')).to_have_attribute('data-refresh-held', 'true')
             expect(page.locator('#chat-sub')).to_contain_text('Group')
             expect(page.locator('#chat-compose')).to_be_hidden()
             expect(page.locator('#chat-load-history')).to_be_disabled()
@@ -91,6 +115,8 @@ def main():
             expect(page.locator('.chat-mode-chips')).to_contain_text('Files off')
             page.locator('[data-recording="files"]').click()
             expect(page.locator('#capture-form')).to_be_visible()
+            release_profile_read(page)
+            assert page.evaluate('()=>state.chatProfile===null'), 'A cancelled profile read populated the cache'
             page.evaluate("()=>navigate('chats')")
             expect(page.locator('.chat-media-notice')).to_have_count(1)
             expect(page.locator('#msg-500 .reply-unavailable')).to_have_text('Reply to #1 · outside this loaded window')
@@ -118,6 +144,22 @@ def main():
             expect(page.locator('.chat-filter-row')).to_be_hidden()
             page.locator('[data-chat-view="profile"]').click()
             expect(page.locator('.chat-profile-view')).to_be_visible()
+            expect(page.locator('.chat-profile-view')).to_contain_text('Profile not saved yet')
+            # Repeated paints share the active read. Reentry gets a fresh read even
+            # while an older request for the same chat has not settled yet.
+            hold_profile_read(page)
+            page.evaluate('()=>openChat(-1001)')
+            expect(page.locator('html')).to_have_attribute('data-refresh-held', 'true')
+            page.locator('[data-chat-view="profile"]').click()
+            page.evaluate('()=>{renderChatFeed();renderChatFeed();renderChatFeed();}')
+            expect(page.locator('.chat-profile-view')).to_contain_text('Loading…')
+            assert page.evaluate('()=>window.refreshRequests') == 1, 'Profile renders started duplicate requests'
+            page.locator('[data-recording="files"]').click()
+            expect(page.locator('#capture-form')).to_be_visible()
+            page.evaluate("()=>navigate('chats')")
+            expect(page.locator('.chat-profile-view')).to_contain_text('Profile not saved yet')
+            assert page.evaluate('()=>window.refreshRequests') == 2, 'Reentry reused the cancelled profile read'
+            release_profile_read(page)
             expect(page.locator('.chat-profile-view')).to_contain_text('Profile not saved yet')
             page.route('**/api/chats/-1001/profile', lambda route: route.fulfill(status=503, json={'detail': 'Synthetic failure'}))
             page.evaluate('()=>loadChatProfile().catch(()=>{})')
@@ -191,7 +233,7 @@ def main():
             static_chat_pages(browser)
             assert not errors, errors
             browser.close()
-    print('Chats passed: controls, views, AI scope, 200-message window, bidirectional paging, anchored scroll, stale responses and static demo.')
+    print('Chats passed: controls, views, cancelled profile recovery, shared profile reads, profile Retry, AI scope, 200-message window, bidirectional paging, anchored scroll, stale responses and static demo.')
 
 
 if __name__ == '__main__':
