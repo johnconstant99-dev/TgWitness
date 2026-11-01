@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Kept English as the canonical interface, documentation and demo language, with
+  explicit fallback and browser checks. Capture now falls back to its English
+  source when a translation is missing. Other languages remain translations.
+- Hardened Capture language selection and encoded its HTML/URL output, pinned
+  release actions, and documented the dated security scan results, including
+  unresolved Debian package findings in the container images.
 - Refreshed the Russian panel and Capture wizard through DeepL, with reviewed
   privacy and evidence terminology, preserved placeholders and command examples.
 - Raised dependency security floors and regenerated the hash-locked build tools.

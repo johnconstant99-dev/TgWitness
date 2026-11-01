@@ -293,7 +293,9 @@ def check_reading_states(browser, server):
 
 def check_languages(browser, server):
     """Every shipped string has a translation or explicit English fallback; language choice works."""
-    context = browser.new_context(viewport={"width": 1440, "height": 1060}, reduced_motion="reduce")
+    assert i18n.pick(None, None) == i18n.pick(None, "zz-ZZ") == "en"
+    assert i18n.pick("en", "ru,en;q=0.5") == "en" and i18n.words("en") == {}
+    context = browser.new_context(viewport={"width": 1440, "height": 1060}, reduced_motion="reduce", locale="en-US")
     page, errors, keys = context.new_page(), [], []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
     panel_scripts = ("app.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js",
@@ -301,6 +303,8 @@ def check_languages(browser, server):
     for script in panel_scripts:
         page.route("**/" + script + "*", lambda route: route.abort())
     page.goto(server.url + "/")
+    expect(page.locator("html")).to_have_attribute("lang", "en")
+    expect(page.locator('[data-view="observations"]').first).to_contain_text("Journal")
     keys += page.evaluate("pageKeys()")
 
 

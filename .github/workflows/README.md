@@ -85,3 +85,6 @@ coverage. Scanner versions and action pins should be reviewed along with normal
 dependency updates. See the [Dependabot options](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference),
 [CodeQL workflow options](https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options),
 and [Trivy action](https://github.com/aquasecurity/trivy-action) for their actual scopes.
+
+The [1 November 2026 audit review](../../docs/internal/SECURITY-AUDIT-2026-11-01.md)
+records the first real scan, source-alert triage, and unresolved container findings.

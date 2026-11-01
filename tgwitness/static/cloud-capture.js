@@ -5,12 +5,20 @@
   const encoder = new TextEncoder(), decoder = new TextDecoder();
   const requested = root.dataset.siteLanguage || new URLSearchParams(location.search).get("lang") || window.TGW_LANG || navigator.language;
   const languages = window.TGW_CAPTURE_LANGUAGES || {en:"English",ru:"Русский"};
-  const tag = requested.toLowerCase().replaceAll("_", "-");
-  let lang = /^zh-(?:hant|tw|hk|mo)(?:-|$)/.test(tag) ? "zh-Hant" : Object.keys(languages).find(code => code.toLowerCase() === tag) || (Object.hasOwn(languages, tag.split("-")[0]) ? tag.split("-")[0] : "en"), epoch = 0;
+  const languageTag = value => {
+    const tag = String(value || "").toLowerCase().replaceAll("_", "-");
+    return /^zh-(?:hant|tw|hk|mo)(?:-|$)/.test(tag) ? "zh-Hant" :
+      Object.keys(languages).find(code => code.toLowerCase() === tag) ||
+      Object.keys(languages).find(code => code === tag.split("-")[0]) || "en";
+  };
+  let lang = languageTag(requested), epoch = 0;
   const initial = () => ({step: 1, key: null, privateKey: null, saved: false, connection: null,
     repository: "", busy: false, error: "", note: "", delivered: false});
   let state = initial();
-  const t = (en, ru) => window.TGW_CAPTURE_LOCALES?.[lang]?.[en] ?? (lang === "ru" ? ru : en);
+  const t = en => {
+    const translated = lang === "en" ? en : window.TGW_CAPTURE_LOCALES?.[lang]?.[en];
+    return typeof translated === "string" ? translated : en;
+  };
   const esc = value => String(value).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const icon = name => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${{
     lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>',
@@ -43,11 +51,11 @@
     root.innerHTML = `<div class="page-heading capture-heading"><div><span class="eyebrow">GITHUB ACTIONS <span class="capture-preview">${t("PREVIEW", "ПРЕДВАРИТЕЛЬНАЯ ВЕРСИЯ")}</span></span>
       <h1>${t("Capture a chat through GitHub", "Выгрузка чата через GitHub")}</h1>
       <p class="page-description">${t("Collect a Telegram chat on a temporary runner. Receive an encrypted archive and GitHub provenance.", "Выгрузите чат Telegram на временной машине. Получите зашифрованный архив и аттестацию GitHub.")}</p></div>
-      <label class="capture-language"><span>${t("Language", "Язык")}</span><select id="capture-language">${Object.entries(languages).map(([code,name])=>`<option value="${code}" ${lang === code ? "selected" : ""}>${esc(name)}</option>`).join("")}</select></label></div>
+      <label class="capture-language"><span>${t("Language", "Язык")}</span><select id="capture-language">${Object.entries(languages).map(([code,name])=>`<option value="${esc(code)}" ${lang === code ? "selected" : ""}>${esc(name)}</option>`).join("")}</select></label></div>
       <div data-capture-story></div><div class="capture-setup-heading" id="capture-setup" tabindex="-1"><h2>${t("Capture your chat", "Выгрузка чата")}</h2><p>${t("Follow these four steps. Keep this tab open.", "Четыре шага. Оставьте эту вкладку открытой.")}</p></div>
       <div class="capture-layout"><aside class="capture-rail"><ol class="capture-steps" aria-label="${t("Capture steps", "Шаги выгрузки")}">${titles.map((title, i) => `<li><button type="button" data-capture-step="${i+1}" ${state.busy || (i > 0 && !ready()) ? "disabled" : ""} ${state.step === i+1 ? 'aria-current="step"' : ""}><span class="capture-number">${i+1}</span><span><strong>${title}</strong><small>${subtitles[i]}</small></span></button></li>`).join("")}</ol>
       <div class="capture-private">${icon("lock")}<p>${t("Your private key stays here. Save it before continuing.", "Закрытый ключ остаётся здесь. Сохраните его перед продолжением.")}</p></div>
-      <a id="instructions" class="text-link" href="https://phishdestroy.github.io/TgWitness/${lang === "en" ? "" : lang + "/"}docs/capture/" target="_blank" rel="noopener noreferrer">${t("Full instructions", "Подробная инструкция")}</a></aside>
+      <a id="instructions" class="text-link" href="https://phishdestroy.github.io/TgWitness/${lang === "en" ? "" : encodeURIComponent(lang) + "/"}docs/capture/" target="_blank" rel="noopener noreferrer">${t("Full instructions", "Подробная инструкция")}</a></aside>
       <div class="capture-work"><section class="card capture-card" aria-labelledby="capture-step-title" aria-busy="${state.busy}"><div class="capture-step-heading"><span class="eyebrow">${t("STEP", "ШАГ")} ${state.step} / 4</span><h2 id="capture-step-title" tabindex="-1">${titles[state.step-1]}</h2></div>
       <p id="capture-error" class="notice error" role="alert" ${state.error ? "" : "hidden"}>${esc(state.error)}</p>
       <p class="capture-feedback" role="status" ${state.busy || state.note ? "" : "hidden"}>${esc(state.busy ? t("Processing locally…", "Обработка в браузере…") : state.note)}</p>
@@ -166,7 +174,7 @@
   });
   root.addEventListener("change", event => {
     const input=event.target;
-    if (input.id === "capture-language") {lang=input.value;render();return;}
+    if (input.id === "capture-language") {lang=languageTag(input.value);render();return;}
     if (input.id === "capture-key-saved") {state.saved=input.checked;render();return;}
     const file=input.files?.[0];if (!file) return;
     if (input.id === "key-file") perform(async()=>{

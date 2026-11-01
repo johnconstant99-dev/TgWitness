@@ -98,14 +98,35 @@ def main():
             page.evaluate("lock()")
             expect(page.locator(".view")).to_have_count(0)
 
+            forwarded_errors, patched_statuses = [], []
+
             def saved_route(route):
                 response = route.fetch()
+                if response.status != 200:
+                    forwarded_errors.append({"status": response.status, "body": response.text()})
+                    route.fulfill(response=response)
+                    return
                 status = response.json()
+                assert isinstance(status, dict) and isinstance(status.get("collector"), dict), (
+                    "Successful status response has no collector object"
+                )
                 status["collector"]["network"] = {"kind": "socks5", "host": "synthetic-proxy.example", "port": 1080}
+                patched_statuses.append(response.status)
                 route.fulfill(response=response, json=status)
 
             # Re-unlock the same page, retaining the controller cache. No proxy is contacted.
             page.route("**/api/status", saved_route)
+            # A late poll after locking legitimately returns an error, not the status schema.
+            # Exercise that branch deterministically and preserve its HTTP status and body.
+            locked_response = page.evaluate("""async()=>{
+              const response=await fetch('/api/status');
+              return {status:response.status,body:await response.text()};
+            }""")
+            assert locked_response["status"] == 401, locked_response["status"]
+            assert locked_response in forwarded_errors, "The interceptor changed the unauthorized response"
+            assert set(json.loads(locked_response["body"])) == {"detail"}
+            expect(page.locator("#workspace")).to_be_hidden()
+            expect(page.locator(".view")).to_have_count(0)
             for _ in range(2):
                 page.locator("#panel-token").fill(app.app.state.vault.token)
                 page.locator('#unlock-form button[type="submit"]').click()
@@ -114,6 +135,7 @@ def main():
                 expect(page.locator("#network-kind")).to_have_value("socks5")
                 expect(page.locator("#network-host")).to_have_value("synthetic-proxy.example")
                 page.evaluate("lock()")
+            assert len(patched_statuses) >= 2, patched_statuses
             assert not errors, errors
             browser.close()
     (output / "routes.json").write_text(json.dumps(captures, indent=2), encoding="utf-8")

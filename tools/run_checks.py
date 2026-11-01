@@ -32,6 +32,7 @@ SUITES = {
         "check_analyst_browser.py", "check_history_browser.py", "check_sealed_browser.py",
         "check_interactions_browser.py", "check_workspace_browser.py", "check_quick_browser.py",
         "check_proof_browser.py", "check_setup_browser.py", "check_public_proxies_browser.py",
+        "check_capture_language_browser.py",
     ),
     "browser-ux": (
         "check_router_browser.py", "check_view_host_browser.py", "check_view_lifecycle_browser.py",
