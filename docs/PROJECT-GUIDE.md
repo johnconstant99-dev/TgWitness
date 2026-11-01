@@ -405,6 +405,12 @@ if you need protection at rest. [Security model](CONNECTION-SECURITY.md) · [Rep
 This is a pre-release project. Review the [verification record](VERIFICATION.md) before distributing a build.
 Executed checks and remaining qualification work are recorded explicitly.
 
+The [1 November live server inventory](VERIFICATION.md#live-server-journal-inventory--1-november-2026)
+counted 1,610,818 journal records across ten workspace databases, including 900,232
+`message.new` events. These are read-only, non-deduplicated event counts; the full
+aggregate hash chain was not newly verified. The table below describes the earlier
+single-account acceptance test.
+
 <details>
 <summary>What has actually been tested</summary>
 
@@ -414,7 +420,7 @@ TgWitness **0.6.1** runs on Windows 11 with Python 3.12. Status on 29 October 20
 
 | Area | How it was tested |
 | --- | --- |
-| Messages, edits, deletions, attachments, rechecks after restarts, FloodWait pauses | Done with **a real Telegram account**, 27–29 October 2026: 9,968 signed records, every signature and the hash chain verified ([live test](VERIFICATION.md#live-telegram-test-whole-account--29-october-2026)) |
+| Messages, edits, deletions, attachments, rechecks after restarts, FloodWait pauses | Historical **single-account test**, 27–29 October 2026: 9,968 signed records, every signature and the hash chain verified ([live test](VERIFICATION.md#live-telegram-test-whole-account--29-october-2026)) |
 | Observing the whole account, and history snapshots | Done with **a real account** on 29 October 2026: messages from 2 groups or channels and 3 private chats and bots |
 | Pressing a message button from **Chats** | Done once with **a real account** |
 | Sign-in with Telethon/Pyrogram session files and Telegram Desktop TData | Done with **one real account** |

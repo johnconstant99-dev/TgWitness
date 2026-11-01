@@ -82,6 +82,9 @@ jobs:
       - name: Check bounded CI orchestration with synthetic failures
         if: ${{ !cancelled() }}
         run: python tools/check_check_runner.py
+      - name: Check source archive repeatability and interrupted-build recovery
+        if: ${{ !cancelled() }}
+        run: python -I tools/check_source_archive.py
       - name: Check reviewed source and Git index for publication
         id: publication
         if: ${{ !cancelled() }}
@@ -136,6 +139,10 @@ jobs:
           python -m pip check
       - name: Check the installation and signed export with synthetic data
         run: python tools/check_install.py --package . --output build/package-smoke
+      - name: Check disclosure privacy and interrupted account export recovery
+        run: |
+          python -I tools/check_disclosure_privacy.py
+          python -I tools/check_account_export_recovery.py
       - run: python -m tgwitness --check --json --data-dir readiness-probe
       - name: Exercise the first-run installer in a fresh environment
         if: matrix.python == '3.12'

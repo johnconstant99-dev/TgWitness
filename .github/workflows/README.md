@@ -6,12 +6,12 @@
 
 | Workflow | Purpose |
 | --- | --- |
-| [`checks.yml`](checks.yml) | Linux checks on the project runner; full Windows/macOS matrix on request |
+| [`checks.yml`](checks.yml) | Hosted Python, source and browser checks; Docker on the project runner; full platform matrix on request |
 | [`pr-check.yml`](pr-check.yml) | Read-only GitHub-hosted PR/merge-queue gate: lint, synthetic installation and notification redirect checks, pinned dependency audits |
 | [`security-audit.yml`](security-audit.yml) | CodeQL on main, pull requests and merge queue; nightly/manual default-branch dependency and built-container scans |
 | [`pages.yml`](pages.yml) | Public website build and Pages workflow |
 | [`release.yml`](release.yml) | Release preparation and configured release jobs |
-| [`wiki.yml`](wiki.yml) | Downloadable wiki bundle |
+| [`wiki.yml`](wiki.yml) | Downloadable wiki bundle built on hosted Ubuntu |
 
 Read each workflow's `on:` triggers and `permissions:` before changing it. The wiki
 bundle workflow prepares artifacts; publishing the separate GitHub Wiki is described
@@ -20,17 +20,17 @@ in the [wiki maintenance guide](../../docs/internal/WIKI.md).
 Use [local tooling](../../tools/README.md) to inspect outputs before enabling or
 triggering publication.
 
-The `tgwitness-ci` runner handles trusted main-branch, maintainer-dispatched and
-published-release jobs. Pull-request code is checked on GitHub-hosted runners;
+The `tgwitness-ci` runner handles only reviewed main-branch, maintainer-dispatched
+and published-release jobs. Pull-request code is checked on GitHub-hosted runners;
 the CodeQL job uses `build-mode: none` and does not execute the checked-out source.
-Self-hosted runner findings therefore mark an operational trust boundary that
-still requires runner isolation and maintenance, not a reason to run public PRs
-on that host.
+The project runner still requires isolation and maintenance.
 
-Routine jobs use the repository's `tgwitness-ci` Linux runner. Full platform
-checks and Windows release packages still use GitHub-hosted Windows/macOS
-machines. See [runner operations](../../docs/internal/CI-RUNNER.md) for triggers,
-artifact retention, host replacement and troubleshooting.
+Independent Python, source, browser and Wiki jobs use fresh GitHub-hosted
+runners. Docker checks, website builds and selected release jobs retain the
+repository's `tgwitness-ci` Linux runner. See
+[CI execution and queue isolation](../../docs/internal/CI-PARALLELISM.md) for
+routing and measurements, and [runner operations](../../docs/internal/CI-RUNNER.md)
+for triggers, artifact retention, host replacement and troubleshooting.
 
 Checks runs its fixed browser and panel check lists in separate processes, at most
 two at a time. A failed check does not skip the remaining scripts; per-check logs
@@ -40,16 +40,17 @@ survive best-effort process-tree termination, but cannot hold the runner open.
 Write-only form checks remain a separate step. Small dependency, lint and source
 gates share one fresh virtual environment; independent gates still run after a
 failure. Browser jobs install the constrained `dev,mcp` dependencies once. The
-self-hosted runner reuses its native pip cache, Playwright's revision-specific
-browser files and the default BuildKit layer cache used by Compose; it does not
-restore virtual environments or upload these warm caches on every job. Hosted
-platform jobs use dependency-keyed pip caching. Site checks run independently
+self-hosted runner retains its native pip cache and the default BuildKit layer
+cache used by Compose. Hosted checks use dependency-keyed pip caching, and each
+browser job installs Chromium and its OS dependencies on its own machine.
+No virtual environment is restored across jobs. Site checks run independently
 after the strict build. These changes reduce repeated setup and sequential work;
 overall completion still depends on runner queues, load and individual checks.
 
 The PR gate runs on fresh GitHub-hosted Ubuntu runners. It uses no repository
-secrets, persists no checkout credentials, and never calls the self-hosted Checks
-workflow. There is no `pull_request_target` execution path. All action references
+secrets, persists no checkout credentials, and never calls the Checks workflow
+that can execute Docker on the project runner. There is no `pull_request_target`
+execution path. All action references
 in the new security workflows use full commit hashes. Enable the two PR job
 checks in the repository's branch rules to make them required: `Lint and synthetic
 smoke` and `Locked dependency audit` from the `PR checks` workflow. Confirm their

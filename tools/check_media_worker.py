@@ -31,6 +31,24 @@ def main():
                               "print('faster-whisper=' + version('faster-whisper') + ' av=' + av.__version__)"],
                              check=True, capture_output=True, text=True, timeout=90)
     print("Offline transcription imports passed:", imports.stdout.strip(), flush=True)
+    harness = Path(__file__).with_name("check_media_decoding.py").resolve()
+    name = "tgw-media-decoder-check-" + secrets.token_hex(8)
+    try:
+        decoding = subprocess.run([*docker(), "run", "--rm", "--pull=never", "--name", name,
+                                  "--network=none", "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges",
+                                  "--user=65534:65534", "--memory=2g", "--memory-swap=2g", "--cpus=1", "--pids-limit=64",
+                                  "--ulimit=nofile=128:128", "--tmpfs=/tmp:rw,noexec,nosuid,size=128m",
+                                  "-e", "OMP_NUM_THREADS=1", "-e", "OPENBLAS_NUM_THREADS=1",
+                                  "--mount", "type=bind,src=" + str(harness) + ",dst=/checks/check_media_decoding.py,readonly",
+                                  "--entrypoint", "python", os.environ["TGWITNESS_MEDIA_IMAGE"],
+                                  "/checks/check_media_decoding.py", "--worker", "/worker.py"],
+                                 capture_output=True, text=True, timeout=90)
+    finally:
+        # Killing a timed-out Docker CLI alone does not guarantee container termination.
+        subprocess.run([*docker(), "rm", "--force", name], capture_output=True, timeout=10)
+    print(decoding.stdout.strip(), flush=True)
+    if decoding.returncode:
+        raise RuntimeError("Native decoder check failed:\n" + decoding.stderr[-16384:])
     with tempfile.TemporaryDirectory(prefix="media-worker-check-") as scratch:
         path = Path(scratch) / "synthetic.png"
         image = Image.new("RGB", (1000, 140), "white")

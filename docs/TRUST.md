@@ -42,6 +42,23 @@ Repeat the command with the `.zip.sha256` file to authenticate it as well.
 For saved bundles, add `--bundle provenance.sigstore.json`; obtain trusted roots
 in advance if verification must be offline.
 
+### Rebuilding the source ZIP
+
+`python tools/build_source.py` writes source entries in sorted order with fixed
+ZIP timestamps, permissions and compression settings. The same public input bytes
+and Python/zlib toolchain produce the same ZIP bytes, independent of build time or
+input file modification times. The neutral 1980 ZIP timestamp is not a claim about
+when the code or evidence was created. The separate attestation records build identity.
+
+To compare against a hosted source ZIP, use the reviewed commit in a clean checkout
+with the same line-ending settings and toolchain, then compare the ZIP SHA-256.
+Renaming `*-source.zip` to the hosted asset's filename does not change its bytes.
+Checkout line endings and compressor versions can affect the result; source bytes
+are never normalized by the packager, including signed demo downloads. A failed
+write before publication preserves the previous archive. Archive and checksum
+replacement are separate operations: an interruption between them must fail checksum
+verification rather than be accepted as a matching pair.
+
 ## Sealed evidence
 
 After decrypting the handoff described in [SEALED-ACTIONS](SEALED-ACTIONS.md),
@@ -121,8 +138,9 @@ python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo
   deletions; message timestamps; or secrecy from the capture host.
 - Coverage of portable ZIPs, wheels, containers, GitHub's automatic source
   downloads, legacy `*-source.zip` files or releases without this attestation.
-- Bit-for-bit reproducible rebuilds: the current ZIP builder records timestamps.
-  The guarantee concerns the exact published and attested bytes.
+- Reproducibility of complete releases, containers, wheels, SBOMs or attestation
+  bundles. Source ZIP repeatability has the input/toolchain conditions above;
+  provenance authenticates the exact published bytes independently of a rebuild.
 - An exhaustive list of installed packages or operating-system/container packages.
   The Python entries list exact versions specified for the runtime, build tools
   and optional MCP support across supported platforms. Some listed packages may

@@ -458,8 +458,11 @@ def main():
             expect(page.locator("#detail-drawer")).not_to_be_visible()
             page.get_by_role("button", name="All events", exact=True).click()
             page.get_by_role("button", name="Deletions", exact=True).click()
+            # The unfiltered table already contains three deletion icons.
+            # Wait until the filter has replaced all rows before selecting one.
+            expect(page.locator("#events-body tr")).to_have_count(3)
             expect(page.locator("#events-body tr:has(.event-icon.delete)")).to_have_count(3)
-            page.locator("#events-body tr").first.click()
+            page.locator("#events-body tr:has(.event-icon.delete)").first.click()
             expect(page.locator("#detail-content")).to_contain_text("Last captured content")
             expect(page.locator("#detail-content")).to_contain_text("Deleter not supplied")
             page.keyboard.press("Escape")

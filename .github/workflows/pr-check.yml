@@ -45,6 +45,12 @@ jobs:
         run: python tools/check_notification_redirects.py
       - name: Verify frozen dependency inventories cannot omit or replace pins
         run: python -I tools/check_sbom_locks.py
+      - name: Verify source archive repeatability and interrupted-build recovery
+        run: python -I tools/check_source_archive.py
+      - name: Verify disclosure privacy and interrupted account export recovery
+        run: |
+          python -I tools/check_disclosure_privacy.py
+          python -I tools/check_account_export_recovery.py
   dependencies:
     name: Locked dependency audit
     runs-on: ubuntu-24.04

@@ -49,6 +49,8 @@ jobs:
           if os.environ["EVENT_NAME"] == "release" and os.environ["RELEASE_TAG"] != "v" + version:
               raise SystemExit("Release tag must be v" + version)
           PY
+      - name: Verify source archive repeatability and interrupted-build recovery
+        run: python3 -I tools/check_source_archive.py
       - name: Build the public source archive
         run: python3 -I tools/build_source.py
       - name: Give the hosted build its own release asset name

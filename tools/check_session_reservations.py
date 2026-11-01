@@ -24,6 +24,11 @@ async def pinned(route, operator=False):
     return route
 
 
+async def probe(route):
+    # Account ownership checks must not depend on a real MTProto handshake.
+    return 40
+
+
 class RecordingClient(FakeClient):
     connections = 0
 
@@ -35,7 +40,8 @@ class RecordingClient(FakeClient):
 @asynccontextmanager
 async def workspace():
     with tempfile.TemporaryDirectory(prefix="session-reservations-") as scratch, \
-            patch.object(ProxyPool, "run", idle), patch.object(ProxyPool, "pin", staticmethod(pinned)):
+            patch.object(ProxyPool, "run", idle), patch.object(ProxyPool, "pin", staticmethod(pinned)), \
+            patch.object(ProxyPool, "probe", staticmethod(probe)):
         app = create_app(Path(scratch), client_factory=RecordingClient)
         async with app.router.lifespan_context(app):
             RecordingClient.connections = 0

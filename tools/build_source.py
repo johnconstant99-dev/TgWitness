@@ -2,6 +2,7 @@
 import hashlib
 import zipfile
 import tomllib
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -87,17 +88,33 @@ def main():
     out.mkdir(exist_ok=True)
     target = out / ("TgWitness-" + VERSION + "-source.zip")
     manifest = []
-    with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        for source in sources:
-            name = source.relative_to(ROOT).as_posix()
-            data = source.read_bytes()
-            archive.writestr("TgWitness/" + name, data)
-            manifest.append(hashlib.sha256(data).hexdigest() + "  " + name)
-        archive.writestr("TgWitness/SOURCE_SHA256SUMS", "\n".join(manifest) + "\n")
-    digest = hashlib.sha256(target.read_bytes()).hexdigest()
-    target.with_suffix(".zip.sha256").write_text(digest + "  " + target.name + "\n")
+    # Stage on the destination filesystem: a failed build leaves the previous ZIP intact.
+    with tempfile.TemporaryDirectory(prefix=".source-build-", dir=out) as temporary:
+        staged = Path(temporary) / target.name
+        with zipfile.ZipFile(staged, "w") as archive:
+            for source in sources:
+                name = source.relative_to(ROOT).as_posix()
+                data = source.read_bytes()
+                write_member(archive, "TgWitness/" + name, data)
+                manifest.append(hashlib.sha256(data).hexdigest() + "  " + name)
+            write_member(archive, "TgWitness/SOURCE_SHA256SUMS", ("\n".join(manifest) + "\n").encode("utf-8"))
+        with staged.open("rb") as stream:
+            digest = hashlib.file_digest(stream, "sha256").hexdigest()
+        checksum = staged.with_suffix(".zip.sha256")
+        checksum.write_bytes((digest + "  " + target.name + "\n").encode("utf-8"))
+        # Each rename is atomic; a failure between them leaves a detectable checksum mismatch.
+        staged.replace(target)
+        checksum.replace(target.with_suffix(".zip.sha256"))
     print("Public source archive:", target)
     print("Files:", len(sources), "| SHA-256:", digest)
+
+
+def write_member(archive, name, data):
+    # Archive timestamps are neutral metadata, never a claim about collection/build time.
+    member = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+    member.create_system = 3
+    member.external_attr = 0o100644 << 16
+    archive.writestr(member, data, compress_type=zipfile.ZIP_DEFLATED, compresslevel=6)
 
 
 if __name__ == "__main__":

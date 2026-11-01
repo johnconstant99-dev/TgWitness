@@ -50,10 +50,11 @@ preview predates them. [Start with the workflow guide](https://phishdestroy.gith
 | Let a third party check the server itself | [High-assurance deployment](HIGH-ASSURANCE.md) | A report from the provider, Cloudflare and the collector |
 | Diagnose a problem | [Operations](OPERATIONS.md) | A concrete cause and a way to check recovery |
 
-**What has actually been tested:** [verification record](VERIFICATION.md).
-Real Telegram observations, synthetic tests and remaining live qualification work
-are recorded separately. A signed journal establishes integrity relative to a
-trusted key; a controlled delivery test checks particular Telegram events.
+**What has actually been tested:** [verification record](VERIFICATION.md), including
+a dated live server inventory of journal and message-event counts. Real Telegram
+observations, synthetic tests and remaining live qualification work are recorded
+separately. A signed journal establishes integrity relative to a trusted key;
+a controlled delivery test checks particular Telegram events.
 
 For step-by-step instructions, use the [wiki](wiki/Home.md).
 For terminology, use the [glossary](wiki/Glossary.md).

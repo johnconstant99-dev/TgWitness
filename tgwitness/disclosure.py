@@ -29,6 +29,7 @@ WARNINGS = [
     'A signature protects this derivative. Source linkage alone does not prove that filtering or redaction was correct.',
     'Purpose and settings do not establish a legal basis, GDPR compliance or court admissibility.',
 ]
+MAX_MASK_TERMS = 5000
 
 
 class DisclosurePolicy(BaseModel):
@@ -128,6 +129,32 @@ def plain_string(value):
     return value if isinstance(value, str) else ''
 
 
+def mask_literals(text, pattern, replacement):
+    """Match full Unicode casefolds, replacing spans in the unchanged original text."""
+    if not pattern:
+        return text
+    matches = list(pattern.finditer(text.casefold()))
+    if not matches:
+        return text
+    offsets = []
+    for index, char in enumerate(text):
+        part = char.casefold()
+        offsets.extend([index] * len(part))
+    spans = []
+    for match in matches:
+        start, end = offsets[match.start()], offsets[match.end() - 1] + 1
+        if spans and start <= spans[-1][1]:
+            spans[-1] = (spans[-1][0], max(end, spans[-1][1]))
+        else:
+            spans.append((start, end))
+    result, position = [], 0
+    for start, end in spans:
+        result.extend((text[position:start], replacement))
+        position = end
+    result.append(text[position:])
+    return ''.join(result)
+
+
 def matches(row, policy):
     if policy.sender_ids and sender_id(row) not in policy.sender_ids:
         return False
@@ -149,19 +176,64 @@ class Projection:
     def __init__(self, policy, seed, source):
         self.policy, self.seed = policy, seed
         terms = set(policy.redact_terms)
+        ids = set()
         self.identity_count = set()
+        purpose_only = policy.text_mode == 'omit'
+        folded_purpose = policy.purpose.casefold()
+
+        def add_term(value):
+            if isinstance(value, str) and 2 <= len(value) <= 200:
+                folded = value.casefold()
+                # Omitted message text needs no name dictionary, but the public
+                # purpose still needs masking. Retain only its possible matches.
+                if purpose_only and folded not in folded_purpose:
+                    return
+                terms.add(folded)
+                if len(terms) + len(ids) > MAX_MASK_TERMS:
+                    raise ValueError('Too many known identities to mask safely. Narrow the source export or omit message text.')
+
         if policy.identity_mode != 'keep':
-            for _chat, row in source_rows(source):
+            for chat, row in source_rows(source):
+                # Direct-chat titles can identify a person even when its sender
+                # object was unavailable. Generic group/channel titles are not
+                # treated as personal names in arbitrary message text.
+                if chat.get('kind') in ('private', 'bot'):
+                    add_term(chat.get('title'))
                 if self.reveal(sender_id(row)):
                     continue
+                if sender_id(row) is not None and (not purpose_only or str(sender_id(row)) in folded_purpose):
+                    ids.add(str(sender_id(row)))
+                    if len(terms) + len(ids) > MAX_MASK_TERMS:
+                        raise ValueError('Too many known identities to mask safely. Narrow the source export or omit message text.')
+                add_term(row.get('from'))
+                add_term(row.get('from_username'))
                 person = row.get('sender') or {}
                 if not isinstance(person, dict):
                     continue
                 for field in ('first_name', 'last_name', 'username', 'phone', 'title'):
-                    value = person.get(field)
-                    if isinstance(value, str) and 2 <= len(value) <= 200 and len(terms) < 5000:
-                        terms.add(value.casefold())
-        self.pattern = re.compile('|'.join(re.escape(t) for t in sorted(terms, key=len, reverse=True)), re.I) if terms else None
+                    add_term(person.get(field))
+                usernames = person.get('usernames')
+                if isinstance(usernames, list):
+                    for username in usernames:
+                        if isinstance(username, dict):
+                            add_term(username.get('username'))
+                if len(terms) + len(ids) > MAX_MASK_TERMS:
+                    raise ValueError('Too many known identities to mask safely. Narrow the source export or omit message text.')
+        # Matching on casefolded text covers expansions such as Straße/STRASSE.
+        # IDs match whole numeric tokens, never a substring of another ID or decimal.
+        patterns = [re.escape(t) for t in sorted(terms, key=len, reverse=True)]
+        patterns += [r'(?<![\w.+-])' + re.escape(t) + r'(?![\w.])' for t in sorted(ids, key=len, reverse=True)]
+        self.pattern = re.compile('|'.join(patterns)) if patterns else None
+
+    def mask_known(self, text):
+        return mask_literals(text, self.pattern, '[redacted]')
+
+    def mask_text(self, text):
+        if self.policy.identity_mode != 'keep':
+            text = re.sub(r'(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', '[email withheld]', text)
+            text = re.sub(r'(?i)(?:https?://|tg://|www\.)\S+|@[\w]+', '[link or handle withheld]', text)
+            text = re.sub(r'(?<!\w)\+?\d[\d ()-]{6,}\d(?!\w)', '[number withheld]', text)
+        return self.mask_known(text)
 
     def alias(self, category, value):
         digest = hmac.new(self.seed, canonical([category, value]), hashlib.sha256).hexdigest()[:16]
@@ -188,21 +260,19 @@ class Projection:
                            or plain_string(person.get('title')) or plain_string(row.get('from')) or str(uid or 'Unknown'),
                            username=plain_string(person.get('username')) or plain_string(row.get('from_username')) or None)
         else:
-            message.update(from_id=self.alias('participant', uid), sender=self.alias('Participant', uid))
+            # An absent sender ID does not establish that two messages share a sender.
+            subject = uid if uid is not None else ['unknown', chat['id'], row['id']]
+            message.update(from_id=self.alias('participant', subject), sender=self.alias('Participant', subject))
             message['redacted_fields'].extend(['sender_identity', 'chat_identity', 'message_id'])
-            self.identity_count.add(message['from_id'])
+            if uid is not None:
+                self.identity_count.add(message['from_id'])
         text = visible_text(row)
         if policy.text_mode == 'omit':
             text = '[text withheld]'
             message['redacted_fields'].append('text')
         else:
             original = text
-            if private:
-                text = re.sub(r'(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', '[email withheld]', text)
-                text = re.sub(r'(?i)(?:https?://|tg://|www\.)\S+|@[\w]+', '[link or handle withheld]', text)
-                text = re.sub(r'(?<!\w)\+?\d[\d ()-]{6,}\d(?!\w)', '[number withheld]', text)
-            if self.pattern:
-                text = self.pattern.sub('[redacted]', text)
+            text = self.mask_text(text)
             if text != original:
                 message['redacted_fields'].append('text')
         message['text'] = text
@@ -218,14 +288,15 @@ class Projection:
         return {'chat': public_chat, 'message': message}
 
 
-def public_policy(policy):
+def public_policy(policy, projection=None):
     # The public purpose must not echo otherwise-private selection or identity criteria.
     private_terms = {str(value) for value in (*policy.sender_ids, *policy.disclose_user_ids)}
     private_terms.update(policy.text_contains)
     private_terms.update(policy.redact_terms)
-    purpose = policy.purpose
-    for value in sorted(private_terms, key=len, reverse=True):
-        purpose = re.sub(re.escape(value), '[private criterion]', purpose, flags=re.I)
+    pattern = re.compile('|'.join(re.escape(value.casefold()) for value in sorted(private_terms, key=len, reverse=True))) if private_terms else None
+    purpose = mask_literals(policy.purpose, pattern, '[private criterion]')
+    if projection is not None:
+        purpose = projection.mask_text(purpose)
     return {'purpose': purpose, 'identity_mode': policy.identity_mode, 'text_mode': policy.text_mode,
             'from_utc': policy.from_utc, 'to_utc': policy.to_utc, 'include_media': policy.include_media,
             **{'include_' + name: False for name in METADATA},
@@ -338,10 +409,10 @@ class Disclosures:
         hashes, counts, media, chats = {}, dict(messages=0, chats=0, media=0), set(), set()
         created = utcnow()
         policy = ticket['policy']
-        shared_policy = public_policy(policy)
         try:
             with zipfile.ZipFile(path) as source, zipfile.ZipFile(stage, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as target:
                 projection = Projection(policy, ticket['seed'], source)
+                shared_policy = public_policy(policy, projection)
 
                 def write(name, chunks):
                     digest = hashlib.sha256()

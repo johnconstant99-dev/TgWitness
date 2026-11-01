@@ -9,6 +9,7 @@ Run from the repo root after [dev setup](../.github/CONTRIBUTING.md#development-
 | Command | Output |
 | --- | --- |
 | `python tools/build_source.py` | Source ZIP + checksums in `dist/` |
+| `python -I tools/check_source_archive.py` | Source ZIP repeatability, exact bytes and failed-build recovery |
 | `python tools/build_wiki.py` | Wiki bundle in `dist/` |
 | `python tools/build_site.py` | Static site, Markdown editions, `llms.txt` and `llms-full.txt` |
 | `python tools/build_portable.py` | Windows portable ZIP; see `--help` |

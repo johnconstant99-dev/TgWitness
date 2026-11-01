@@ -1,28 +1,33 @@
 # CI runner operations
 
-TgWitness's routine checks use a dedicated Ubuntu 24.04 machine registered to this
-repository with the labels `self-hosted`, `Linux`, `X64`, and `tgwitness-ci`.
-GitHub stores the workflow definitions, job results and logs. The runner executes
-the jobs. No collecting Telegram account or production evidence belongs on it.
+TgWitness runs independent Python, source, browser and Wiki checks on fresh
+GitHub-hosted runners. Docker checks, website builds and selected release jobs
+use a dedicated Ubuntu 24.04 machine registered with the labels `self-hosted`,
+`Linux`, `X64`, and `tgwitness-ci`. GitHub stores workflow definitions, job results
+and logs. No collecting Telegram account or production evidence belongs on the
+project runner. See [CI execution and queue isolation](CI-PARALLELISM.md) for the
+routing and measured queue times.
 
 ## What runs and when
 
 | Workflow | Automatic trigger | Execution |
 | --- | --- | --- |
-| Checks | Program, tooling or deployment changes pushed to `main` | Linux, Python 3.12 package readiness, dependency audit, browser checks, source and Docker validation |
+| Checks | Program, tooling or deployment changes pushed to `main` | Hosted Python, dependency, browser and source checks; Docker validation on the project runner |
 | Project website | Website and documentation inputs pushed to `main` | Build and browser checks on the Linux runner |
-| Wiki bundle | Handbook inputs pushed to `main` | Build the downloadable Wiki bundle on the Linux runner |
+| Wiki bundle | Handbook inputs pushed to `main` | Build the downloadable Wiki bundle on hosted Ubuntu |
 | Release packages | A published release | Full compatibility checks, release downloads and container publication |
 
 Changes confined to README or prose do not trigger all application checks.
 A newer automatic run replaces an outdated run for the same branch.
 Each allocated job has a timeout and its own Python virtual environment.
-The runner accepts one job at a time, so independent workflows can queue.
+The project runner accepts one job at a time; Docker, website and release work
+can still queue. Hosted checks run independently of that queue.
 
 In **Actions → Checks → Run workflow**, leave **full_platforms** unchecked for the
 normal Linux checks. Checking it also verifies package installation and readiness
-with Python 3.11–3.13 across Linux, Windows and macOS and builds Windows portable. Windows/macOS use GitHub-hosted
-runners and consume the account's included compute while this repository is private.
+with Python 3.11–3.13 across Linux, Windows and macOS and builds Windows portable.
+All Python matrix jobs use GitHub-hosted runners. Hosted compute is subject to
+GitHub's current billing rules and the repository's visibility.
 Published releases explicitly request this complete matrix.
 
 Source ZIPs are uploaded for manually requested checks or full release checks.
@@ -68,8 +73,9 @@ The installer is repeatable and leaves an existing runner registration intact.
 ## Verify and transfer
 
 - Confirm the new runner is **Idle** in repository settings.
-- Start **Checks** manually with **full_platforms** unchecked. Confirm the jobs
-  identify the new host and finish successfully.
+- Start **Checks** manually with **full_platforms** unchecked. Confirm the
+  **docker** job identifies the new host and finishes successfully. The other
+  jobs should identify GitHub-hosted runners.
 - Stop the old runner service and remove its registration from GitHub. Remove
   the old VM at the provider after verifying the replacement. A powered-off VM
   may still incur provider charges.

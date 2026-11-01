@@ -466,10 +466,17 @@ class AccountExport:
         chats = self.inventory["chats"]
         selected = [c for c in chats if c["selected"]]
         discovered = self.inventory.get("discovery_counts", {}).get("chats_discovered", len(chats))
+        # A page can be sealed for each slice of a large chat history. Rechecking
+        # every task for every chat after each page made progress O(chats * tasks * pages).
+        chat_tasks = {chat["id"]: [0, 0] for chat in selected}
+        for task in tasks:
+            status = chat_tasks.get(task["chat_id"])
+            if status is not None:
+                status[0] += 1
+                page = self.progress.get(task["id"])
+                status[1] += bool(page and page["terminal"] and page["outcome"] == "ok")
         self.current["counts"] = {**self.counts, "chats_discovered": discovered, "chats_selected": len(selected),
-            "chats_done": sum(all(self.progress.get(t["id"], {}).get("terminal")
-                                  and self.progress[t["id"]]["outcome"] == "ok" for t in tasks
-                                  if t["chat_id"] == c["id"]) for c in selected)}
+            "chats_done": sum(total == done for total, done in chat_tasks.values())}
         self.current["coverage"] = {"inventory_complete": self.inventory["discovery_complete"],
             "tasks_total": len(tasks), "tasks_done": sum(bool(p["terminal"]) and p["outcome"] == "ok"
                                                           for p in self.progress.values()),
@@ -733,12 +740,15 @@ class AccountExport:
                 write("job.json", chunks(directory / "job.json"))
                 write("inventory.json", chunks(directory / "inventory.json"))
                 media = set()
+                message_pages = {}
                 for envelope in self.receipts:
                     receipt = envelope["statement"]
                     write(f"receipts/{receipt['seq']:08d}.json", [canonical(envelope)])
                     write(receipt["data_file"], chunks(directory / receipt["data_file"]))
                     if hashes[receipt["data_file"]] != receipt["data_sha256"]:
                         raise ValueError("A captured page changed while packaging.")
+                    if receipt["category"] == "messages":
+                        message_pages.setdefault(receipt["chat_id"], []).append(receipt["data_file"])
                     with (directory / receipt["data_file"]).open("rb") as stream:
                         for raw in stream:
                             for attachment in json.loads(raw).get("attachments", []):
@@ -757,11 +767,8 @@ class AccountExport:
                     index.append((f'<li><a href="{name}">' + html.escape(chat["title"]) + "</a></li>").encode())
                     def readable(chat=chat):
                         yield header + ("<h1>" + html.escape(chat["title"]) + "</h1>").encode()
-                        for envelope in self.receipts:
-                            receipt = envelope["statement"]
-                            if receipt["category"] != "messages" or receipt["chat_id"] != chat["id"]:
-                                continue
-                            with (directory / receipt["data_file"]).open("rb") as stream:
+                        for data_file in message_pages.get(chat["id"], ()):
+                            with (directory / data_file).open("rb") as stream:
                                 for raw in stream:
                                     row = json.loads(raw)
                                     yield ("<article><h2>" + str(row["id"]) + " · " + html.escape(str(row.get("date") or ""))

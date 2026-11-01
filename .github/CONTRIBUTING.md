@@ -89,6 +89,11 @@ packager; files of unexpected types inside source directories are also excluded.
 Review the selected source itself before release: an allowlist cannot detect every
 secret pasted into a source file. This command does not publish anything.
 
+ZIP metadata is fixed for repeatable builds from identical input bytes and the same
+Python/zlib toolchain. Preserve checkout line endings when comparing archives.
+`python -I tools/check_source_archive.py` checks repeatability, exact source bytes,
+private-file exclusions and preservation of the previous ZIP after a failed write.
+
 GitHub Actions checks package installation across the configured Python/platform
 matrix, synthetic browser workflows, source packaging and the container package.
 The workflow definitions are not a claim

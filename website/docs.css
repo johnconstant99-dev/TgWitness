@@ -41,6 +41,7 @@ pre .copy-control:focus-visible { outline-color:#8eafff; }
 .sidebar-note { border-top:1px solid var(--line); margin:30px 12px 0; padding-top:20px; font-size:11px; color:var(--muted); }
 .breadcrumbs { display:flex; align-items:center; flex-wrap:wrap; gap:8px; color:var(--muted); font-size:11px; margin:0 0 24px; }
 .breadcrumbs a { text-decoration:none; color:var(--muted); }
+.verification-shortcut { margin:-10px 0 22px; font-size:13px; font-weight:600; }
 .docs-main { min-width:0; }
 .search { margin-bottom:44px; }
 .search label { display:block; font-size:12px; font-weight:600; margin-bottom:8px; }
@@ -136,6 +137,8 @@ details p { font-size:14px; }
 .table-wrap tbody tr { transition:background .15s; }
 .table-wrap tbody tr:hover { background:#f6f8fc; }
 .table-wrap td code { white-space:normal; }
+#live-server-journal-inventory--1-november-2026 + p + .table-wrap th:first-child { white-space:normal; }
+#live-server-journal-inventory--1-november-2026 + p + .table-wrap :is(th,td):last-child { width:1%; white-space:nowrap; }
 .wiki-formula { margin:22px 0; padding:16px 20px; border:1px solid #ccd9ec; border-radius:12px; background:linear-gradient(130deg,#fff,#eff4ff); font:clamp(15px,1.5vw,18px)/1.9 var(--mono); color:#143c71; overflow-x:auto; direction:ltr; text-align:left; }
 .math { font-family:var(--mono); font-size:.92em; color:#143c71; unicode-bidi:isolate; direction:ltr; }
 [data-theme=dark] .wiki-formula { border-color:#2b3f5f; background:linear-gradient(130deg,#121d31,#14223b); color:#c9dcff; }

@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Made large account-export progress and HTML preparation use linear task/page
+  scans. Interrupted ZIP writes leave no downloadable partial archive; regression
+  checks resume from byte-identical signed receipts and retain coverage gaps.
+- Strengthened disclosure masking for Unicode names, alternate usernames,
+  direct-chat names and whole-token sender IDs, including the public purpose.
+  Unknown senders no longer receive a shared identity alias. Exceeding the masking
+  limit now stops preparation rather than silently skipping identities.
+- Bound transcription by actual decoded audio samples, decode only once, and
+  reject playlist formats and secondary file/URL references inside the isolated
+  media worker. Native decoder checks cover generated common Telegram formats
+  and malformed input without downloading a transcription model.
+- Made source ZIP metadata repeatable and preserved the previous archive when
+  a new build fails before publication. Input bytes, including signed demo files,
+  remain unchanged; reproducibility requires matching inputs and compression tools.
+
 - Kept English as the canonical interface, documentation and demo language, with
   explicit fallback and browser checks. Capture now falls back to its English
   source when a translation is missing. Other languages remain translations.

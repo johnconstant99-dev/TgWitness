@@ -41,6 +41,24 @@ this change removes the unrelated Python/browser/Wiki work from that queue.
 Manual Checks opt into the Windows/macOS matrix through `full_platforms`;
 release validation requests that full matrix.
 
+## Observed results
+
+The first successful main-branch [hosted Checks run](https://github.com/phishdestroy/TgWitness/actions/runs/41338303858)
+took 4m56s, compared with 9m45s in the earlier successful run. Its four hosted
+jobs started within one second of each other on four different runner IDs.
+The browser suites finished in 3m29s and 2m25s. Docker still waited 1m57s for
+the project runner, then ran for 2m58s; the rest of CI continued during that wait.
+
+The [hosted Wiki trial](https://github.com/phishdestroy/TgWitness/actions/runs/41337210120)
+ran for 14s, compared with 13s of execution plus 12m40s of queueing in the earlier
+run. These are observed runs with different cache states and commits, not a
+fixed runtime guarantee.
+
+Synthetic checks must also be independent of machine speed and external services.
+Wait for the filtered journal table and enabled import controls before using
+them. Stub proxy probes in session-reservation fixtures, as in the browser
+fixtures, so an account-ownership test never needs a public MTProto handshake.
+
 ## Rollback
 
 Revert this PR to restore the original runner selection. There is no server-side
