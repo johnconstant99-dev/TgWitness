@@ -76,6 +76,7 @@ def main():
     import uvicorn
     from .app import create_app
     from .logging_config import server_logging
+    from .middleware import KEEP_ALIVE_SECONDS
     banner(args.demo)
     host ="127.0.0.1" if args.host == "0.0.0.0" else "[" + args.host + "]" if ":" in args.host else args.host
     url = "http://" + host + ":" + str(args.port)
@@ -92,7 +93,8 @@ def main():
         threading.Thread(target=open_when_ready, daemon=True,
                          args=(url, args.host, args.port, None if args.demo else root / "panel-token.txt")).start()
     uvicorn.run(create_app(root, demo=args.demo), host=args.host, port=args.port, workers=1,
-                access_log=False, log_level="info", log_config=server_logging(root))
+                access_log=False, log_level="info", log_config=server_logging(root),
+                timeout_keep_alive=KEEP_ALIVE_SECONDS)
 
 
 if __name__ == "__main__":

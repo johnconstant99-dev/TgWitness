@@ -43,7 +43,7 @@ def main():
         post("/api/auth/configure", {"api_id": 123, "api_hash": "a" * 32, "session": saved_session()})
         child = post("/api/profiles", {"label": "Second workspace"})["id"]
         post("/profiles/" + child + "/api/auth/configure", {
-            "api_id": 124, "api_hash": "a" * 32, "session": saved_session()})
+            "api_id": 124, "api_hash": "a" * 32, "session": saved_session(b"y")})
         first_store = server.app.state.store
         second_store = server.app.state.profiles.entries[child]["app"].state.store
         for store, label in ((first_store, "First"), (second_store, "Second")):

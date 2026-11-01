@@ -35,14 +35,14 @@ from .profiles import GROUP_SECTIONS, Profiles, ProfileDispatch
 from .multi_export import MultiExport
 from .provenance import run_receipt
 from .middleware import RequestLimit, request_limit
-from .account_import import import_accounts, IMPORT_REQUEST_LIMIT
+from .account_import import import_accounts, IMPORT_REQUEST_LIMIT, session_key
 from .anchor import request_archive
 from .anchoring import EvidenceMode, anchor_loop, evidence_settings, request_anchor
 from . import replica
 from . import alerts
 from .network import NetworkConfig, RoutePolicy, parse_mtproxy_link
 from . import proxy_catalog, proxy_sources
-from .proxy_catalog import ProxyPool, PublicCatalog, feed_network
+from .proxy_catalog import NoProxyAvailable, ProxyPool, PublicCatalog, feed_network
 from .monitoring import Capture, Monitoring, capture_settings, monitoring_settings
 from .scope import (EXCLUDE_LIMIT, WIDE_WARNING, Recheck, ScopeUpdate, recheck_settings, scope_settings,
                     unexclude)
@@ -290,6 +290,14 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 if store.stats()["total"] and not store.get_setting("demo", False):
                     raise RuntimeError("Refusing to mix synthetic data into a real journal.")
                 seed_demo(store)
+            elif store.get_setting("capture", None) is None:
+                # Freeze defaults before the first startup record. An older journal without an
+                # explicit policy previously enabled every type; an upgrade must retain that choice.
+                policy = capture_settings(store)
+                if store.stats()["total"]:
+                    for rule in policy["types"].values():
+                        rule["enabled"] = True
+                store.set_setting("capture", policy)
             collector = Collector(store, vault, **({"client_factory": client_factory} if client_factory else {}))
             collector.account_guard = account_guard
             collector.proxy_pool = shared_pool
@@ -350,6 +358,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                                      "probe": tuning.value(store, "proxy_probe_minutes") * 60}
                     shared_pool.outside = collector.outside_route
                     shared_pool.catalog.vault = vault
+                    shared_pool.catalog.changed()
                     pool_task = asyncio.create_task(shared_pool.run())
 
             async def resume():
@@ -626,7 +635,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 "fingerprint": fingerprint(vault.public_key), "limitations": LIMITS,
                 "protection": {"vault_key_mode": vault.key_mode, "secrets_encrypted": True,
                                "journal_encrypted_by_app": False, "media_encrypted_by_app": False},
-                "run_id": app.state.run_receipt["run_id"], "chats_limited": allowed is not None}
+                "run_id": app.state.run_receipt["run_id"], "chats_limited": allowed is not None,
+                "assurance": bool(app.state.assurance)}
 
     if allow_profiles:
         @app.get("/api/profiles", dependencies=[Depends(authenticate)])
@@ -732,33 +742,57 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             if not account.get("session"):
                 raise HTTPException(400, "These files hold no login session. Add the .session or TData of the account.")
             registry = app.state.profiles
-            expected = account.get("expected_user_id")
-            for entry in registry.entries.values():
-                known = entry["app"].state.store.get_setting("account", {}) if entry.get("app") else {}
-                if expected and (known or {}).get("id") == expected:
-                    raise HTTPException(409, "This Telegram account already has a workspace: " + entry["label"] + ".")
+            expected, key = account.get("expected_user_id"), session_key(account["session"])
+            # Before any connection: the same key from a second proxy address while its workspace is
+            # connected can make Telegram revoke it (AUTH_KEY_DUPLICATED)
+            holder = registry.holder(expected, key)
+            if holder:
+                raise HTTPException(409, "This Telegram account already has a workspace: " + holder["label"] + ".")
+            owner = object()
+            release = release_account = None
+            try:
+                release = registry.reserve_session(key, owner)
+                if expected is not None:
+                    release_account = registry.reserve_account(expected, owner)
+            except ValueError as exc:
+                if release:
+                    release()
+                raise HTTPException(409, str(exc)) from None
+            entry = None
             label = body.label.strip() or (body.files[0].name.rsplit(".", 1)[0][:80] or "Imported account")
             try:
                 entry = await registry.create(label, body.group)
-            except ValueError as exc:
-                raise HTTPException(400, str(exc)) from None
-            try:
-                async with registry.lock:
-                    child = registry.entries[entry["id"]]["app"]
-                    if child is None:
+                # Only this new child's operation lock is held; the main workspace and registry stay usable.
+                child = registry.entries[entry["id"]]["app"]
+                if child is None:
+                    raise ValueError("The new workspace could not start.")
+                collector = child.state.collector
+                registry.transfer_session(key, owner, collector, expected)
+                async with child.state.operation_lock:
+                    if child.state.closing:
                         raise ValueError("The new workspace could not start.")
-                    async with op_lock:
-                        await asyncio.wait_for(child.state.collector.configure(
-                            body.api_id or account.get("api_id"), body.api_hash or account.get("api_hash"),
-                            account["session"], expected), tuning.value(app.state.store, "operation_timeout_seconds"))
+                    await asyncio.wait_for(collector.configure(
+                        body.api_id or account.get("api_id"), body.api_hash or account.get("api_hash"),
+                        account["session"], expected), tuning.value(app.state.store, "operation_timeout_seconds"))
                     account_info = child.state.store.get_setting("account", {}) or {}
+                    # Keep the account photo, then disconnect until the operator chooses sources.
+                    with suppress(Exception):
+                        await asyncio.wait_for(collector.avatar(account_info.get("id")), 20)
+                    await collector.stop()
             except (Exception, asyncio.CancelledError) as exc:
-                with suppress(Exception):
-                    await registry.delete(entry["id"])
+                if entry is not None:
+                    with suppress(Exception):
+                        await registry.delete(entry["id"])
                 if isinstance(exc, asyncio.CancelledError):
                     raise
-                reason = str(exc) if isinstance(exc, ValueError) else type(exc).__name__
+                reason = (str(exc) if isinstance(exc, (ValueError, NoProxyAvailable)) else
+                          "Telegram did not answer in time. Try again later." if isinstance(exc, TimeoutError)
+                          else type(exc).__name__)
                 raise HTTPException(400, "Not imported: " + reason) from None
+            finally:
+                if release_account:
+                    release_account()
+                release()
             return {"profile": entry, "account": {"id": account_info.get("id"), "username": account_info.get("username"),
                                                   "name": account_info.get("name")},
                     "formats": account.get("formats", [])}
@@ -1006,6 +1040,15 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             return await app.state.collector.set_network(route)
         return await operation(apply)
 
+    def lists_updated_at(sources):
+        """When the newest list in use was actually downloaded; a blocked or failed attempt changes nothing."""
+        stamps = []
+        for source in sources:
+            with suppress(TypeError, ValueError):
+                if source.get("enabled") and source.get("fetched_at"):
+                    stamps.append(datetime.fromisoformat(source["fetched_at"]).timestamp())
+        return max(stamps, default=None)
+
     def proxy_view(principal=None):
         """The shared automatic pool as the panel shows it: every server, its check and its users."""
         catalog = shared_pool.catalog
@@ -1014,16 +1057,20 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         for entry in (profiles.entries.values() if profiles else ()):
             if entry.get("app") is not None and (principal is None or principal.opens(entry["id"])):
                 labels[str(entry["app"].state.store.root)] = entry["label"]
-        rows, settings = shared_pool.table(labels), catalog.settings()
+        rows, settings, intervals = shared_pool.table(labels), catalog.settings(), shared_pool.intervals()
+        sources = catalog.public()["sources"]
         latencies = sorted(r["latency_ms"] for r in rows if r["latency_ms"])
         return {"rows": rows, "summary": {
                     "listed": len(rows), "ok": sum(r["status"] == "ok" for r in rows),
                     "resting": sum(r["status"] == "resting" for r in rows),
                     "untested": sum(r["status"] == "untested" for r in rows),
+                    "excluded": sum(r["excluded"] for r in rows), "preferred": sum(r["preferred"] for r in rows),
                     "median_ms": latencies[len(latencies) // 2] if latencies else None,
                     "countries": len({r["country"] for r in rows if r["country"]}),
                     "checked_at": shared_pool.probed_at or None, "checking": shared_pool.check_task is not None},
-                "sources": catalog.public()["sources"],
+                "schedule": {"lists_minutes": round(intervals["lists"] / 60), "probe_minutes": round(intervals["probe"] / 60),
+                             "lists_at": lists_updated_at(sources)},
+                "sources": sources,
                 "settings": {**settings.model_dump(), "github_token": bool(catalog.github_token()),
                              "github_status": catalog.github_status},
                 **download_route()}
@@ -1057,9 +1104,11 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 proxy_sources.save(catalog.root, body)
             except ValueError as exc:
                 raise HTTPException(422, str(exc)) from None
+            catalog.changed()
             catalog.forget(before - {item.id for item in body.custom})
         app.state.store.append("network.sources_changed", {
-            "bundled_off": body.disabled, "own_lists": len(body.custom), "github_search": body.github.enabled})
+            "bundled_off": body.disabled, "own_lists": len(body.custom), "github_search": body.github.enabled,
+            "prefer_countries": body.prefer, "avoid_countries": body.avoid, "only_preferred": body.only_preferred})
         return proxy_view()
 
     @app.post("/api/network/sources/list", dependencies=[Depends(authenticate)])
@@ -1780,7 +1829,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             raise HTTPException(404)
         path = await app.state.collector.avatar(peer_id)
         if not path:
-            raise HTTPException(404)
+            return Response(status_code=204)  # no photo (yet): not an error the browser should log
         return FileResponse(path, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=3600"})
 
     # Account-wide acquisition can reach data outside the observation scope and

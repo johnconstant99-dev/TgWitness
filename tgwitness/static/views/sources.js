@@ -72,7 +72,7 @@ export function createSources(context) {
       const field = root.ownerDocument.createElement("span");
       field.className = "field-unit";
       const unit = root.ownerDocument.createElement("span");
-      unit.className = "unit"; unit.textContent = "MiB";
+      unit.className = "unit"; unit.textContent = tr("MiB");
       field.append(size, unit); row.append(checkbox, title, field); box.append(row);
     }
   }

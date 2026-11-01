@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_LOG_BYTES = 4 * 1024**2
 SUITES = {
     "browser": (
+        "check_session_reservations.py",
         "check_browser.py", "check_mcp_transport.py", "check_integrations_browser.py",
         "check_mcp_browser.py", "check_settings_browser.py", "check_analysis_browser.py",
         "check_account_browser.py", "check_fleet_browser.py", "check_proxy_async_browser.py",

@@ -3,8 +3,10 @@
   // Proxy servers of the automatic MTProxy route: checks, countries, lists and the GitHub search.
   let view = null, timer = null, limit = 150, request = 0, generation = 0, pending = 0;
   let mutations = Promise.resolve(), sourceKey = "";
+  // Country choice being edited; kept across re-renders until it is saved.
+  let picks = {prefer: [], avoid: []}, picksDirty = false;
   const draft = new Map();
-  const fields = ["pool-github-search", "pool-github-query", "pool-github-max", "pool-countries"];
+  const fields = ["pool-github-search", "pool-github-query", "pool-github-max", "pool-countries", "pool-only-preferred"];
   const filter = {q: "", country: "", source: "", status: ""};
   const automatic = () => $("network-kind").value === "mtproxy_auto";
   const active = () => !!state.token && !!state.status && state.view === "connection" &&
@@ -23,6 +25,7 @@
   function stop() { clearTimeout(timer); timer = null; request++; }
   function clear() {
     stop(); generation++; view = null; pending = 0; mutations = Promise.resolve(); sourceKey = ""; draft.clear();
+    picks = {prefer: [], avoid: []}; picksDirty = false; $("pool-prefer").replaceChildren(); $("pool-avoid").replaceChildren();
     $("pool-token").value = ""; $("pool-paste").value = ""; $("pool-url").value = "";
     $("pool-save-state").textContent = "";
     $("pool-stats").replaceChildren(); $("pool-rows").replaceChildren(); $("pool-count").textContent = "";
@@ -42,7 +45,13 @@
     $("pool-github-search").disabled ||= !view?.settings.github_token;
     $("pool-token-remove").disabled ||= !view?.settings.github_token;
     $("pool-check").disabled = !!state.status?.demo || pending > 0 || !!view?.summary.checking;
-    $("pool-update").disabled = readOnly || pending > 0;
+    $("pool-update").disabled = readOnly || pending > 0 || !!view?.download_problem;
+    $("pool-update").title = view?.download_problem ? tr(view.download_problem) : "";
+    for (const kind of ["prefer", "avoid"]) {
+      const add = $("pool-" + kind + "-add");
+      add.disabled ||= !$("pool-countries").checked || add.options.length < 2;
+    }
+    $("pool-only-preferred").disabled ||= !picks.prefer.length;
     for (const button of $("pool-rows").querySelectorAll("button"))
       button.disabled = !!state.status?.demo || pending > 0 || !!state.status?.collector.running;
   }
@@ -61,7 +70,20 @@
   function runAction(button, work) {
     return busy(button, () => mutate(work)).finally(controls);
   }
-  const flag = code => /^[A-Z]{2}$/.test(code || "") ? String.fromCodePoint(...[...code].map(c => 127397 + c.charCodeAt(0))) : "";
+  // Flag emoji only where the system draws them in colour; elsewhere (Windows) they would repeat the code as letters.
+  const flags = (() => {
+    try {
+      const canvas = document.createElement("canvas"), pen = canvas.getContext("2d", {willReadFrequently: true});
+      canvas.width = canvas.height = 24; pen.font = "18px sans-serif"; pen.textBaseline = "top";
+      pen.fillText("\u{1F1E9}\u{1F1EA}", 0, 0);
+      const pixels = pen.getImageData(0, 0, 24, 24).data;
+      for (let i = 0; i < pixels.length; i += 4) {
+        if (pixels[i + 3] && (Math.abs(pixels[i] - pixels[i + 1]) > 40 || Math.abs(pixels[i + 1] - pixels[i + 2]) > 40)) return true;
+      }
+    } catch {}
+    return false;
+  })();
+  const flag = code => flags && /^[A-Z]{2}$/.test(code || "") ? String.fromCodePoint(...[...code].map(c => 127397 + c.charCodeAt(0))) : "";
   function countryName(code) {
     try { return new Intl.DisplayNames([document.documentElement.lang || "en"], {type: "region"}).of(code) || code; }
     catch { return code; }
@@ -91,6 +113,7 @@
     $("pool-stats").replaceChildren();
     $("pool-rows").replaceChildren();
     $("pool-count").textContent = tr("Available in your own workspace");
+    show("pool-schedule", false);
     for (const id of ["pool-check", "pool-update", "pool-save", "pool-token-save", "pool-token-remove"]) $(id).disabled = true;
     sourceFields();
   }
@@ -101,22 +124,43 @@
     return box;
   }
 
+  const clock = seconds => fmtTime(seconds * 1000);
+  const every = minutes => minutes >= 60 && minutes % 60 === 0 ? tr("{n} h", {n: minutes / 60}) : tr("{n} min", {n: minutes});
+
   function renderStats() {
-    const s = view.summary, box = $("pool-stats");
+    const s = view.summary, box = $("pool-stats"), policy = view.settings.prefer.length || view.settings.avoid.length;
     box.replaceChildren(
       tile(tr("Listed"), s.listed.toLocaleString()),
       tile(tr("Answering"), s.ok.toLocaleString(), s.ok ? "good" : "warn"),
       tile(tr("Resting"), s.resting.toLocaleString(), s.resting ? "warn" : ""),
       tile(tr("Median ping"), s.median_ms ? s.median_ms + " " + tr("ms") : "—", speed(s.median_ms)),
       tile(tr("Countries"), s.countries.toLocaleString()),
-      tile(tr("Last check"), s.checking ? tr("Checking now…") : s.checked_at ?
-        fmtTime(s.checked_at * 1000) : tr("Not yet")));
+      ...(policy ? [tile(tr("In preferred countries"), s.preferred.toLocaleString(), view.settings.prefer.length && !s.preferred ? "warn" : ""),
+                    tile(tr("Excluded by country"), s.excluded.toLocaleString())] : []),
+      tile(tr("Last check"), s.checking ? tr("Checking now…") : s.checked_at ? clock(s.checked_at) : tr("Not yet")));
     $("pool-check").disabled = s.checking;
+    const plan = view.schedule;
+    $("pool-schedule-text").textContent = tr("Lists update every {lists}, servers are checked every {probe}.",
+      {lists: every(plan.lists_minutes), probe: every(plan.probe_minutes)}) +
+      (plan.lists_at ? " " + tr("Last list update at {time}.", {time: clock(plan.lists_at)}) : "") +
+      (state.profile === "default" ? "" : " " + tr("The main workspace sets these intervals."));
+    show("pool-schedule-edit", state.profile === "default");
     let note = $("pool-note");
-    if (!note) { note = node("p", "hint pool-note"); note.id = "pool-note"; box.after(note); }
-    note.textContent = view.download_problem ? tr(view.download_problem) + " " +
-      tr("List updates and country lookups wait for it; checks of the servers themselves still run.") :
-      !view.settings.countries ? tr("Country lookups are switched off under Lists and sources.") : "";
+    if (!note) { note = node("p", "hint pool-note"); note.id = "pool-note"; $("pool-schedule").after(note); }
+    // Every applicable warning: a blocked download also explains why a country choice excludes everything
+    note.textContent = [
+      view.download_problem && tr(view.download_problem) + " " +
+        tr("List updates and country lookups wait for it; checks of the servers themselves still run."),
+      policy && s.listed && s.excluded === s.listed &&
+        tr("The country choice excludes every listed server. Workspaces on the automatic route wait until one is allowed."),
+      !view.settings.countries && tr("Country lookups are switched off under Lists and sources.")].filter(Boolean).join(" ");
+    if (view.download_problem && $("outside-kind")) {
+      const set = node("button", "quiet small", tr("Set a proxy for these requests")); set.type = "button";
+      set.addEventListener("click", () => {
+        $("policy-form").scrollIntoView({block: "start", behavior: "smooth"}); $("outside-enabled").focus({preventScroll: true});
+      });
+      note.append(" ", set);
+    }
     note.hidden = !note.textContent;
   }
 
@@ -141,15 +185,16 @@
   }
 
   function order(a, b) {
-    const rank = r => r.status === "ok" ? 0 : r.status === "untested" ? 1 : 2;
-    return rank(a) - rank(b) || (a.latency_ms ?? 1e9) - (b.latency_ms ?? 1e9) || a.host.localeCompare(b.host);
+    const rank = r => r.excluded ? 3 : r.status === "ok" ? 0 : r.status === "untested" ? 1 : 2;
+    return rank(a) - rank(b) || b.preferred - a.preferred || (a.latency_ms ?? 1e9) - (b.latency_ms ?? 1e9) ||
+      a.host.localeCompare(b.host);
   }
 
   function renderTable() {
     const body = $("pool-rows"), rows = view.rows.filter(matches).sort(order), shown = rows.slice(0, limit);
     body.replaceChildren();
     for (const row of shown) {
-      const tr_ = node("tr", "pool-row " + row.status);
+      const tr_ = node("tr", "pool-row " + row.status + (row.excluded ? " excluded" : ""));
       const country = node("td", "pool-country");
       if (row.country) {
         country.title = countryName(row.country);
@@ -165,6 +210,8 @@
       const status = node("td"), pill = node("span", "pool-pill " + row.status, tr(STATUS[row.status]));
       if (row.status === "resting" && row.error_type) pill.title = row.error_type + " · " + trn("{n} failure", "{n} failures", row.failures);
       status.append(pill);
+      if (row.excluded) status.append(" ", node("span", "pool-pill excluded", tr("Excluded by country")));
+      else if (row.preferred) status.append(" ", node("span", "pool-pill preferred", tr("Preferred")));
       const source = node("td", "pool-source-cell", row.label || row.source || "—");
       const users = node("td", "pool-users", (row.used_by || []).join(", ") || "—");
       const action = node("td"), use = node("button", "text-link", tr("Use"));
@@ -220,12 +267,15 @@
     $("pool-token-state").textContent = tr(settings.github_token ? "Token stored" : "No token");
     $("pool-token-state").className = "pool-pill " + (settings.github_token ? "ok" : "untested");
     $("pool-token-remove").disabled = !settings.github_token;
-    const values = [settings.github.enabled, settings.github.query, String(settings.github.max_files), settings.countries];
+    const values = [settings.github.enabled, settings.github.query, String(settings.github.max_files), settings.countries,
+                    settings.only_preferred];
     fields.forEach((id, index) => {
       const field = $(id), key = field.type === "checkbox" ? "checked" : "value";
       const value = draft.has(id) ? draft.get(id) : values[index];
       if (field[key] !== value) field[key] = value;
     });
+    if (!picksDirty) picks = {prefer: [...settings.prefer], avoid: [...settings.avoid]};
+    renderCountries();
     const g = settings.github_status;
     $("pool-github-status").textContent = !settings.github_token ? tr("Save a token to search GitHub.") :
       g.error ? tr("Last search failed: {error}", {error: g.error}) :
@@ -234,10 +284,30 @@
     sourceFields();
   }
 
+  function renderCountries() {
+    const label = code => (flag(code) + " " + countryName(code)).trim();
+    const known = [...new Set([...view.rows.map(r => r.country).filter(Boolean), ...picks.prefer, ...picks.avoid])]
+      .sort((a, b) => countryName(a).localeCompare(countryName(b)));
+    const free = known.filter(code => !picks.prefer.includes(code) && !picks.avoid.includes(code));
+    for (const kind of ["prefer", "avoid"]) {
+      $("pool-" + kind).replaceChildren(...(picks[kind].length ? picks[kind].map(code => {
+        const chip = node("button", "pool-chip"); chip.type = "button"; chip.dataset.unpick = kind; chip.dataset.code = code;
+        chip.title = tr("Remove"); chip.append(label(code), node("b", "", "×"));
+        return chip;
+      }) : [node("span", "hint", tr("No country chosen"))]));
+      $("pool-" + kind + "-add").replaceChildren(new Option(free.length ? tr("Add a country…") : tr("No other countries known yet"), ""),
+        ...free.map(code => new Option(label(code) + " · " + code, code)));
+    }
+    if (!picks.prefer.length && $("pool-only-preferred").checked) {
+      $("pool-only-preferred").checked = false; draft.set("pool-only-preferred", false);
+    }
+    controls();
+  }
+
   function render() {
-    renderStats();
+    show("pool-schedule", true); renderStats();
     options($("pool-country"), [...new Set(view.rows.map(r => r.country).filter(Boolean))].sort()
-      .map(code => [code, flag(code) + " " + countryName(code)]), tr("All countries"));
+      .map(code => [code, (flag(code) + " " + countryName(code)).trim()]), tr("All countries"));
     options($("pool-source"), view.sources.filter(s => s.enabled).map(s => [s.id, s.label]), tr("All lists"));
     filter.country = $("pool-country").value; filter.source = $("pool-source").value;
     renderTable(); renderSources();
@@ -246,7 +316,7 @@
 
   function settingsBody(change) {
     const s = view.settings, body = {disabled: [...s.disabled], custom: s.custom.map(item => ({...item})),
-      github: {...s.github}, countries: s.countries};
+      github: {...s.github}, countries: s.countries, prefer: [...s.prefer], avoid: [...s.avoid], only_preferred: s.only_preferred};
     change(body);
     return body;
   }
@@ -279,7 +349,7 @@
   $("pool-update").addEventListener("click", e => runAction(e.currentTarget, async () => {
     const result = await json("network/catalog/refresh", {}, {root: true});
     toast(result.throttled ? tr("The list was refreshed recently. Wait one minute before another download.") :
-      tr("Lists updated: {n} sources.", {n: (result.refresh?.updated || []).length}));
+      trn("Lists updated: {n} source.", "Lists updated: {n} sources.", (result.refresh?.updated || []).length));
     view = await json("network/proxies"); render();
   }));
   $("pool-sources").addEventListener("change", event => {
@@ -290,7 +360,19 @@
       else body.disabled = enabled ? body.disabled.filter(id => id !== source) : [...body.disabled, source];
     }));
   });
+  $("pool-sources").addEventListener("change", event => {
+    const pick = event.target.closest("[data-pick]");
+    if (pick && pick.value) {
+      picks[pick.dataset.pick].push(pick.value); picksDirty = true; $("pool-save-state").textContent = ""; renderCountries();
+    }
+    if (event.target.id === "pool-countries" || event.target.id === "pool-only-preferred") renderCountries();
+  });
   $("pool-sources").addEventListener("click", event => {
+    const chip = event.target.closest("[data-unpick]");
+    if (chip) {
+      picks[chip.dataset.unpick] = picks[chip.dataset.unpick].filter(code => code !== chip.dataset.code);
+      picksDirty = true; $("pool-save-state").textContent = ""; renderCountries(); return;
+    }
     const remove = event.target.closest("[data-remove]"); if (!remove) return;
     runAction(remove, async () => {
       await saveSettings(body => { body.custom = body.custom.filter(item => item.id !== remove.dataset.remove); });
@@ -306,7 +388,7 @@
   async function importLists(files) {
     if (!state.me?.admin || state.status?.demo) return;
     const revision = state.workspaceRevision;
-    let added = 0;
+    let added = 0, skipped = 0;
     for (const file of files) {
       if (revision !== state.workspaceRevision || !state.token) return;
       if (file.size > 1024 * 1024) { toast(tr("{name}: a list may have at most 1 MiB.", {name: file.name}), true); continue; }
@@ -314,14 +396,18 @@
         const text = await file.text();
         if (revision !== state.workspaceRevision || !state.token) return;
         view = await json("network/sources/list", {label: file.name, text});
-        added += view.added.compatible;
+        added += view.added.compatible; skipped += view.added.skipped;
       } catch (error) {
         if (revision !== state.workspaceRevision || error instanceof StaleView) return;
         toast(file.name + ": " + error.message, true);
       }
     }
     if (view) render();
-    if (added) toast(tr("{n} servers added from your files.", {n: added}));
+    if (added) toast(trn("{n} server added from your files.", "{n} servers added from your files.", added) + skippedText(skipped));
+  }
+  function skippedText(n) {
+    return n ? " " + trn("{n} link left out: Fake TLS links (secret starting with ee), private addresses and broken links are not supported.",
+                         "{n} links left out: Fake TLS links (secret starting with ee), private addresses and broken links are not supported.", n) : "";
   }
   function addLists(files) { return runAction(null, () => importLists(files)); }
   $("pool-files").addEventListener("change", () => { const files = [...$("pool-files").files]; $("pool-files").value = ""; addLists(files); });
@@ -334,7 +420,7 @@
     view = await json("network/sources/list", {label: tr("Pasted links"), text});
     if ($("pool-paste").value.trim() === text) $("pool-paste").value = "";
     render();
-    toast(tr("{n} servers added.", {n: view.added.compatible}));
+    toast(trn("{n} server added.", "{n} servers added.", view.added.compatible) + skippedText(view.added.skipped));
   }));
   $("pool-token-save").addEventListener("click", e => runAction(e.currentTarget, async () => {
     const token = $("pool-token").value.trim(); if (!token) throw new Error(tr("Paste a GitHub token first."));
@@ -349,15 +435,25 @@
   }));
   $("pool-save").addEventListener("click", e => {
     const submitted = new Map(fields.map(id => [id, $(id).type === "checkbox" ? $(id).checked : $(id).value]));
+    const chosen = JSON.stringify(picks);
     runAction(e.currentTarget, async () => {
     await saveSettings(body => {
       body.github = {enabled: submitted.get("pool-github-search"), query: submitted.get("pool-github-query").trim(),
                      max_files: Number(submitted.get("pool-github-max")) || 20};
       body.countries = submitted.get("pool-countries");
+      const choice = JSON.parse(chosen);
+      body.prefer = choice.prefer; body.avoid = choice.avoid; body.only_preferred = submitted.get("pool-only-preferred");
     });
     for (const [id, value] of submitted) if (draft.get(id) === value) draft.delete(id);
-    $("pool-save-state").textContent = draft.size ? "" : tr("Saved. Applies from the next list update.");
+    if (JSON.stringify(picks) === chosen) { picksDirty = false; render(); }
+    $("pool-save-state").textContent = draft.size || picksDirty ? "" :
+      tr("Saved. Lists follow it from the next update, countries from the next server choice.");
   }); });
+  $("pool-schedule-edit").addEventListener("click", async () => {
+    navigate("parameters");
+    await loadParameters().catch(() => {});
+    $("parameters-group-proxies")?.scrollIntoView({block: "start", behavior: "smooth"});
+  });
   window.addEventListener("tgwitness:lock", clear);
   $("proxy-pool").addEventListener("toggle", () => { if ($("proxy-pool").open) load(); else stop(); });
   window.TgWitnessProxies = {load, stop, clear, sync};

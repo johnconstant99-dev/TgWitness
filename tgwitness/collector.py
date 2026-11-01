@@ -25,7 +25,7 @@ from . import message_content
 from . import replica
 from . import tuning
 from .history import History
-from .account_import import validate_string
+from .account_import import session_key, validate_string
 from .avatar_history import AvatarHistory
 from .telegram_client import WitnessClient
 from .workers import complete_in_thread
@@ -980,27 +980,32 @@ class Collector:
         await self.cancel_login()
 
         session = validate_string(session) if session else ""
-        await self.ensure_route()
-        candidate = self.make_client(api_id, api_hash, session)
-        self.login_client = candidate
-        self.pending_credentials = {"api_id": api_id, "api_hash": api_hash}
-        self.pending_account_id = expected_user_id
-
-        self.pending_key_origin = "imported" if session else "created"
+        release = self.account_guard(None, self, key=session_key(session)) if session and self.account_guard else None
         try:
-            await self.connect_client(candidate)
-            is_authorized = await candidate.is_user_authorized()
-            if session and not is_authorized:
-                raise ValueError("This session is not authorized.")
-            if is_authorized:
-                await self.authorized()
-                return {"step": "authorized"}
-        except BaseException:
-            await self.cancel_login()
-            self.phase = "ready" if self.vault.read("credentials").get("session") else "offline"
-            raise
-        self.phase = "login_required"
-        return {"step": "phone"}
+            await self.ensure_route()
+            candidate = self.make_client(api_id, api_hash, session)
+            self.login_client = candidate
+            self.pending_credentials = {"api_id": api_id, "api_hash": api_hash}
+            self.pending_account_id = expected_user_id
+
+            self.pending_key_origin = "imported" if session else "created"
+            try:
+                await self.connect_client(candidate)
+                is_authorized = await candidate.is_user_authorized()
+                if session and not is_authorized:
+                    raise ValueError("This session is not authorized.")
+                if is_authorized:
+                    await self.authorized()
+                    return {"step": "authorized"}
+            except BaseException:
+                await self.cancel_login()
+                self.phase = "ready" if self.vault.read("credentials").get("session") else "offline"
+                raise
+            self.phase = "login_required"
+            return {"step": "phone"}
+        finally:
+            if release:
+                release()
 
     async def start_phone(self, phone, api_id=None, api_hash=None):
         async def attempt(pair_id, pair_hash):
@@ -1102,6 +1107,7 @@ class Collector:
         candidate = self.login_client
         if not candidate:
             raise ValueError("Configure API credentials first.")
+        release = None
         try:
             me = await candidate.get_me()
             self.remember(me)
@@ -1113,7 +1119,7 @@ class Collector:
             if existing.get("id") is not None and existing["id"] != me.id:
                 raise ValueError("This journal belongs to a different Telegram account. Create another account workspace.")
             if self.account_guard:
-                self.account_guard(me.id, self)
+                release = self.account_guard(me.id, self)
             credentials = dict(self.pending_credentials)
             credentials["session"] = candidate.session.save()
             await self.avatar_history.close()
@@ -1128,6 +1134,9 @@ class Collector:
             await self.cancel_login()
             self.phase = "ready" if self.vault.read("credentials").get("session") else "offline"
             raise
+        finally:
+            if release:
+                release()
         self.client = candidate
         self.login_client = None
         self.pending_credentials = None
@@ -2187,7 +2196,9 @@ class Collector:
                 self.store.append("storage.ok", {"free_bytes": free, "media_jobs": self.store.media_stats()})
             account = self.store.get_setting("account", {}) or {}
             limits = {"max_priority": 1} if lane == "urgent" else {"min_priority": 2} if lane == "bulk" else {}
-            job = self.store.claim_media(account.get("id", 0), **limits)
+            capture = capture_settings(self.store)
+            # Downloads turned off keep the waiting files queued until they are turned on again
+            job = self.store.claim_media(account.get("id", 0), **limits) if capture["download_media"] else None
             if not job:
                 self.media_wakeup.clear()
                 try:
@@ -2209,6 +2220,16 @@ class Collector:
                 with BinaryReader(job["descriptor"]) as reader:
                     message = reader.tgread_object()
                 size = getattr(message.file, "size", None) if message.file else None
+                kind = policy.get("media_type") or media_kind(message)
+                rule, limit = capture["types"][kind], capture["types"][kind]["max_mb"] * 1024**2
+                if not rule["enabled"] or (size is not None and limit < size <= job["max_bytes"]):
+                    # The settings changed after the file was queued: a type turned off or a lower limit
+                    # also stops the files already waiting
+                    self.store.finish_media(job, "skipped", {
+                        "reason": "above the size limit of the attachment settings" if rule["enabled"]
+                        else "attachment type not collected by policy: " + kind,
+                        "meaning": "the attachment settings changed after this file was queued"})
+                    continue
                 if size is None or size > job["max_bytes"]:
                     raise ValueError("unknown_size_or_above_limit")
                 if shutil.disk_usage(media_root).free < size + 64 * 1024**2:

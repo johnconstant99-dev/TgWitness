@@ -244,7 +244,7 @@ document.addEventListener("invalid",event=>{
   (input.closest(".field-unit")||input).after(error);
 },true);
 document.addEventListener("input",event=>{if(event.target.hasAttribute("aria-invalid"))clearFieldError(event.target);});
-for(const [id,unit] of [["max-media","MiB"],["recheck-priority",tr("min")],["recheck-other",tr("min")]]){
+for(const [id,unit] of [["max-media",tr("MiB")],["recheck-priority",tr("min")],["recheck-other",tr("min")]]){
   const input=$(id);if(input){const placeholder=node("span");input.replaceWith(placeholder);placeholder.replaceWith(unitField(input,unit));}
 }
 const patternButton=$("chat-pattern");
@@ -1140,6 +1140,19 @@ function excerpt(e) {
     case "interaction.result": return [p.status,p.answer?.message,p.answer?.url,p.error_type].filter(Boolean).join(" · ");
     case "account.authorized": return tr("Telegram account ID {id}",{id:p.account_id});
     case "account.signed_out": return tr("Telegram account ID {id}",{id:p.account_id})+(p.telegram_session_ended?"":" · "+tr("Telegram did not confirm the end of the session"))+failure;
+    case "media.skipped": {
+      const type=/^attachment type not collected by policy: (\w+)$/.exec(p.reason||"")?.[1];
+      if(type)return tr("Not collected by the attachment settings: {type}",{type:Object.fromEntries(mediaTypes)[type]||termText(type)});
+      if(p.reason==="media download disabled")return tr("Attachment downloads off");
+      if(p.reason==="above the size limit of the attachment settings")return tr("Larger than the size limit");
+      if(p.reason==="authorized account identity unavailable")return tr("Telegram account not identified yet");
+      return String(p.reason||"").startsWith("metadata-only")?tr("No file to download"):p.reason||"";
+    }
+    case "media.failed": return p.reason==="download failed"?tr("Download failed")+failure:tr({above_limit:"Larger than the size limit",
+      unknown_size_or_above_limit:"Size unknown or above the limit",download_unavailable:"Telegram did not provide the file",
+      download_size_differs_from_observed_attachment:"The downloaded size differs from the observed attachment",
+      queue_descriptor_differs_from_signed_observation:"The queued file differs from the signed observation",
+      existing_content_addressed_file_is_corrupt:"The saved copy of this file is damaged"}[p.reason]||p.reason||p.meaning||"");
     case "target.changed": return (p.title||tr("Source"))+" · "+tr(p.enabled?"observed":"paused");
     case "capture.changed": return p.download_media ? tr("Attachments on · up to {n} MiB per file",{n:mediaLimit(p)}) : tr("Attachment downloads off");
     case "connection.retry": return tr("Attempt {n}",{n:p.attempt});
@@ -1179,7 +1192,7 @@ function excerpt(e) {
   if (p.reason) return p.reason;
   if (p.service_action) return p.service_action;
   if (p.action) return p.action._ || tr("Telegram service action");
-  if (p.coverage) return p.coverage;
+  if (p.coverage) return tr(p.coverage);
   if (p.meaning) return p.meaning;
   return tr("Open the source record for observation details");
 }
@@ -2387,8 +2400,9 @@ function renderEvidenceBadge(){
 }
 
 async function loadAssurance(){
-  if(state.assurance===undefined){
-    const r=await fetch("/api/assurance").catch(()=>null);
+  if(state.assurance===undefined&&state.status){
+    // The statement exists only in high-assurance mode; elsewhere the request would only log a 404
+    const r=state.status.assurance?await fetch("/api/assurance").catch(()=>null):null;
     state.assurance=r?.ok?(await r.json()).statement:null;
   }
   const s=state.assurance,on=!!s;
@@ -3099,8 +3113,10 @@ function initials(name){
 function loadAvatar(id,profile=state.profile){
   if(id===null||id===undefined||typeof id!=="number"||state.status?.demo)return Promise.resolve(null);
   const key=profile+":"+id;
-  if(!avatarCache.has(key))avatarCache.set(key,api("avatar/"+id,undefined,{profile}).then(r=>r.blob())
-    .then(b=>URL.createObjectURL(new Blob([b],{type:"image/jpeg"})))
+  // 204: no photo now; asked again after ten minutes instead of on every list render
+  if(!avatarCache.has(key))avatarCache.set(key,api("avatar/"+id,undefined,{profile})
+    .then(r=>r.status===204?(setTimeout(()=>avatarCache.delete(key),600000),null):r.blob())
+    .then(b=>b&&URL.createObjectURL(new Blob([b],{type:"image/jpeg"})))
     .catch(()=>{setTimeout(()=>avatarCache.delete(key),60000);return null;}));
   return avatarCache.get(key);
 }

@@ -329,6 +329,8 @@ def main():
         page.set_viewport_size({"width": 1440, "height": 1000})
         page.locator("#sources-tab-recording").click()
         second = page.evaluate("json('profiles',{label:'Independent workspace'}).then(value=>value.id)")
+        second_capture = server.app.state.profiles.entries[second]["app"].state.store.get_setting("capture")
+        assert second_capture is not None and not second_capture["types"]["animation"]["enabled"]
         page.evaluate("loadProfiles()")
         page.locator("#sources-tab-chats").click()
         page.locator("#target-search").fill("source 03")
@@ -358,7 +360,7 @@ def main():
         expect(page.locator("#max-media")).to_have_value("20")
         expect(page.locator("#monitor-edits")).to_be_checked()
         expect(page.locator("#recording-save")).to_be_disabled()
-        assert server.app.state.profiles.entries[second]["app"].state.store.get_setting("capture") is None
+        assert server.app.state.profiles.entries[second]["app"].state.store.get_setting("capture") == second_capture
         token = page.evaluate("""json('access/grants',{label:'Source operator',permissions:['sources'],
             workspaces:{default:null}},{root:true}).then(value=>value.token)""")
         limited = browser.new_page(viewport={"width": 1440, "height": 1000})

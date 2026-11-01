@@ -372,7 +372,7 @@ kbd { font: 11px/1.4 var(--mono); }
 .sidebar-bottom { display: grid; gap: 2px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--rail-border); }
 .sidebar-help, .sidebar-bottom .quiet {
   display: flex; align-items: center; justify-content: flex-start; gap: 11px; width: 100%; min-height: 38px;
-  padding: 0 12px; border-radius: var(--radius); color: var(--rail-text);
+  padding: 0 12px; border-radius: var(--radius); color: var(--rail-text); text-align: start;
   font-size: 13px; font-weight: 500; text-decoration: none;
 }
 .sidebar-help:hover, .sidebar-bottom .quiet:hover { background: var(--rail-hover); color: #fff; }
@@ -722,9 +722,9 @@ form > .health-detail { margin-top: 14px; }
 #chat-export-progress:not(:empty) { margin-top: 12px; color: var(--text-2); font-size: 13px; }
 .accounts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 16px; }
 .account-card.current { border-color: var(--accent-border); box-shadow: 0 0 0 1px var(--accent-border); }
-.account-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.account-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .account-head h2 { font-size: 17px; margin: 0; }
-.account-card .account-id { margin: 4px 0 0; color: var(--text-2); font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+.account-card .account-id { margin: 4px 0 0; color: var(--text-2); font-size: 13px; font-variant-numeric: tabular-nums; overflow-wrap: break-word; }
 .account-badge { flex: none; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid var(--border-strong); background: var(--surface-3); color: var(--text-2); }
 .account-badge.on { background: var(--success-soft); border-color: var(--success-border); color: var(--success); }
 .account-badge.down { background: var(--danger-soft); border-color: var(--danger-border); color: var(--danger); }
@@ -733,7 +733,7 @@ form > .health-detail { margin-top: 14px; }
 .account-meta dd { margin: 0; font-size: 13px; font-weight: 550; text-align: right; }
 .account-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 #account-add-form { margin-top: 18px; }
-.account-who > div { min-width: 0; overflow-wrap: anywhere; }
+.account-who > div { min-width: 0; overflow-wrap: break-word; }
 .account-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .avatar { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px;
   border-radius: 50%; overflow: hidden; color: #fff; font-size: 14px; font-weight: 650; letter-spacing: .02em; user-select: none; }
@@ -1008,9 +1008,8 @@ button.pill { cursor: pointer; font-family: inherit; }
   margin-bottom: 18px; padding: 3px; border-radius: 10px; background: var(--surface-3);
 }
 .login-method {
-  min-width: 0; overflow: hidden; text-overflow: ellipsis;
-  min-height: 36px; padding: 0 6px; border: 0; border-radius: 7px; background: transparent;
-  color: var(--muted); font-size: 13.5px; font-weight: 550; white-space: nowrap;
+  min-width: 0; min-height: 36px; padding: 4px 6px; border: 0; border-radius: 7px; background: transparent;
+  color: var(--muted); font-size: 13.5px; font-weight: 550; line-height: 1.2; overflow-wrap: break-word; hyphens: auto;
 }
 .login-method:hover:not(.active) { color: var(--text); }
 .login-method.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgb(16 24 40 / .1), 0 1px 2px rgb(16 24 40 / .06); }
@@ -1762,7 +1761,7 @@ button.primary[aria-busy=true]::after { color: #fff; }
 .pool-head, .fleet-import-head, .fleet-group-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 24px; }
 .pool-head .muted { max-width: 720px; margin-bottom: 0; }
 .pool-actions, .fleet-actions, .fleet-group-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.pool-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 18px 0 14px; }
+.pool-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 10px; margin: 18px 0 14px; }
 .pool-stat { padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
 .pool-stat strong { display: block; font: 600 20px/26px var(--font); color: var(--text); }
 .pool-stat span { color: var(--muted); font-size: 12px; }
@@ -1777,7 +1776,7 @@ button.primary[aria-busy=true]::after { color: #fff; }
 .segmented button + button { border-left: 1px solid var(--border); }
 .segmented button[aria-pressed=true] { background: var(--accent-soft); color: var(--accent-text); font-weight: 600; }
 .pool-table-wrap { max-height: 520px; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); }
-.pool-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pool-table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 13px; }
 .pool-table thead th { position: sticky; top: 0; z-index: 1; background: var(--surface-2); color: var(--muted); font-weight: 600;
   text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
 .pool-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
@@ -1821,10 +1820,24 @@ button.primary[aria-busy=true]::after { color: #fff; }
 .pool-drop:hover, .pool-drop.over { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-text); }
 .pool-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .pool-paste textarea { font-family: var(--mono); font-size: 12px; margin: 8px 0; }
-.pool-github { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-soft); }
+.pool-github, .pool-geo { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-soft); }
+.pool-geo h3 { margin: 0 0 4px; font: var(--type-section); font-size: 15px; }
 .pool-search-fields { display: grid; grid-template-columns: minmax(0, 1fr) 160px; gap: 0 12px; }
+.pool-country-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; margin: 10px 0 6px; }
+.pool-country-fields select { width: 100%; }
+.pool-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; margin: 6px 0 8px; align-items: center; }
+.pool-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 6px 0 10px; border: 1px solid var(--border);
+  border-radius: 999px; background: var(--surface-2); color: var(--text); font-size: 13px; cursor: pointer; }
+.pool-chip:hover { border-color: var(--danger); }
+.pool-chip b { color: var(--muted); font-weight: 400; font-size: 15px; line-height: 1; }
+.pool-chip:hover b { color: var(--danger); }
+.pool-chips .hint { margin: 0; }
+.pool-pill.excluded { background: var(--danger-soft); color: var(--danger); }
+.pool-pill.preferred { background: var(--accent-soft); color: var(--accent-text); }
+.pool-table tr.excluded td { opacity: .6; }
+.pool-schedule { margin: -4px 0 12px; }
 .pool-save { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 14px; }
-@media (max-width: 860px) { .pool-source-grid, .pool-search-fields { grid-template-columns: 1fr; } }
+@media (max-width: 860px) { .pool-source-grid, .pool-search-fields, .pool-country-fields { grid-template-columns: 1fr; } }
 
 /* Account groups and bulk import. */
 .fleet-import { margin-bottom: 18px; }

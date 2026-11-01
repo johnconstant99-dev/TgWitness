@@ -100,7 +100,7 @@ def main():
             server = uvicorn.Server(uvicorn.Config(app, log_level="error", access_log=False))
             thread = threading.Thread(target=server.run, kwargs={"sockets": [sock]}, daemon=True)
             thread.start()
-            deadline = time.monotonic() + 15
+            deadline = time.monotonic() + 60  # slow starts under load; ready returns at once
             while not server.started:
                 if time.monotonic() > deadline:
                     raise RuntimeError("Synthetic server did not start")

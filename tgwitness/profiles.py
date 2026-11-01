@@ -8,6 +8,7 @@ import uuid
 from starlette.responses import JSONResponse
 
 from . import health
+from .account_import import session_key
 
 
 # What a group shares, copied from its template workspace: setting keys in each workspace's store.
@@ -29,16 +30,79 @@ class Profiles:
         label = app.state.store.get_setting("profile_label", "Main account")
         self.entries = {"default": {"id": "default", "label": label, "app": app, "cm": None}}
         self.opening = {}
+        self.session_reservations = {}  # authorization keys reserved before a connection can start
+        self.account_reservations = {}  # account IDs held through the durable ownership write
         self.lock = asyncio.Lock()
         app.state.collector.account_guard = self.check_account
 
-    def check_account(self, account_id, collector):
+    def holder(self, account_id=None, key=None, collector=None):
+        """The workspace that already holds this Telegram account, by its ID once signed in or by the
+        authorization key of its session, or None."""
         for entry in self.entries.values():
             other = entry["app"]
-            if other and other.state.collector is not collector:
-                account = other.state.store.get_setting("account", {}) or {}
-                if account.get("id") == account_id:
-                    raise ValueError("This Telegram account already belongs to another profile. Use its existing workspace.")
+            if not other or other.state.collector is collector:
+                continue
+            account = other.state.store.get_setting("account", {}) or {}
+            if account_id is not None and account.get("id") == account_id:
+                return entry
+            if key:
+                try:
+                    held = session_key(other.state.vault.read("credentials").get("session"))
+                except Exception:
+                    held = None
+                if held == key:
+                    return entry
+        return None
+
+    def check_account(self, account_id, collector, key=None):
+        """Refuse an account another workspace holds. An imported session is checked by its key before it
+        connects: the same key from a second address can make Telegram revoke it (AUTH_KEY_DUPLICATED)."""
+        if self.holder(account_id, key, collector):
+            raise ValueError("This Telegram account already belongs to another profile. Use its existing workspace.")
+        if key:
+            return self.reserve_session(key, collector)
+        if account_id is not None:
+            return self.reserve_account(account_id, collector)
+
+    @staticmethod
+    def _reserve(reservations, identity, owner):
+        existing = reservations.get(identity)
+        if existing is not None:
+            if existing["owner"] is owner:
+                return lambda: None  # an outer import already holds this lease
+            raise ValueError("This Telegram account is being imported right now.")
+        lease = {"owner": owner}
+        reservations[identity] = lease
+
+        def release():
+            if reservations.get(identity) is lease:
+                del reservations[identity]
+        return release
+
+    def reserve_session(self, key, owner):
+        """Reserve a key synchronously before any await; return an identity-bound release callback."""
+        if not key:
+            raise ValueError("These files hold no login session. Add the .session or TData of the account.")
+        if self.holder(key=key, collector=owner):
+            raise ValueError("This Telegram account already belongs to another profile. Use its existing workspace.")
+        return self._reserve(self.session_reservations, key, owner)
+
+    def reserve_account(self, account_id, owner):
+        if self.holder(account_id=account_id, collector=owner):
+            raise ValueError("This Telegram account already belongs to another profile. Use its existing workspace.")
+        return self._reserve(self.account_reservations, account_id, owner)
+
+    def transfer_session(self, key, owner, collector, account_id=None):
+        """Give a still-held import lease to its child without opening a reservation gap."""
+        lease = self.session_reservations.get(key)
+        if lease is None or lease["owner"] is not owner:
+            raise ValueError("The account import no longer holds its session reservation.")
+        account = self.account_reservations.get(account_id) if account_id is not None else None
+        if account_id is not None and (account is None or account["owner"] is not owner):
+            raise ValueError("The account import no longer holds its session reservation.")
+        lease["owner"] = collector
+        if account is not None:
+            account["owner"] = collector
 
     async def open(self):
         try:

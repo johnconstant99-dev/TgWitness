@@ -9,8 +9,28 @@ from pathlib import Path
 from typing import Literal
 from urllib.parse import parse_qs, urlsplit
 
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from telethon.network.connection import ConnectionTcpMTProxyRandomizedIntermediate
+from telethon.network.connection import ConnectionTcpMTProxyRandomizedIntermediate, tcpmtproxy, tcpobfuscated
+
+
+class OpenSSLCTR:
+    """AES-CTR of Telegram's obfuscated transports (MTProxy) through OpenSSL.
+
+    Telethon's AESModeCTR is pure Python: it deciphers a few hundred KB/s per CPU core, so a busy
+    MTProxy route held a whole core and the panel waited seconds for every answer. Same continuous
+    keystream as Telethon's: encrypting and decrypting are one operation.
+    """
+    def __init__(self, key, iv):
+        self._stream = Cipher(algorithms.AES(key), modes.CTR(iv)).encryptor()
+
+    def encrypt(self, data):
+        return self._stream.update(data)
+
+    decrypt = encrypt
+
+
+tcpmtproxy.AESModeCTR = tcpobfuscated.AESModeCTR = OpenSSLCTR
 
 
 TELEGRAM_ONLY = ("mtproxy", "mtproxy_auto")

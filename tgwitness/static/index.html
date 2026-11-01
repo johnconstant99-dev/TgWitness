@@ -831,6 +831,7 @@
         <div class="pool-actions"><button class="secondary" id="pool-check" type="button"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Check all now</button><button class="quiet" id="pool-update" type="button">Update lists</button></div>
       </div>
       <div class="pool-stats" id="pool-stats"></div>
+      <p class="hint pool-schedule" id="pool-schedule"><span id="pool-schedule-text"></span> <button class="text-link" id="pool-schedule-edit" type="button">Open Parameters</button></p>
       <div class="pool-tools">
         <input aria-label="Search servers" id="pool-search" placeholder="Search server, country or list" type="search">
         <select aria-label="Country" id="pool-country"></select>
@@ -855,10 +856,19 @@
           <label class="check-label"><input id="pool-github-search" type="checkbox"> Search GitHub for MTProxy lists</label>
           <div class="pool-search-fields"><div><label for="pool-github-query">Search query</label><input id="pool-github-query" maxlength="200" spellcheck="false"></div><div><label for="pool-github-max">Files per search</label><input id="pool-github-max" max="60" min="1" type="number"></div></div>
           <p class="hint" id="pool-github-status" role="status"></p>
+        </div>
+        <div class="pool-geo">
+          <h3>Countries</h3><p class="hint">Servers in preferred countries are tried first. Servers identified as being in avoided countries are excluded. Servers whose country is unknown remain eligible unless "Use only servers in preferred countries" is selected. A workspace keeps a working server; the choice applies when it picks the next one.</p>
           <label class="check-label"><input id="pool-countries" type="checkbox"> Look up server countries</label>
           <p class="hint">Country lookups ask a public GeoIP service about the server addresses only, through the same route as list downloads.</p>
-          <div class="pool-save"><button class="primary" id="pool-save" type="button">Save source settings</button><span class="hint" id="pool-save-state" role="status"></span></div>
+          <div class="pool-country-fields">
+            <div><label for="pool-prefer-add">Preferred countries</label><div class="pool-chips" id="pool-prefer"></div><select data-pick="prefer" id="pool-prefer-add"></select></div>
+            <div><label for="pool-avoid-add">Avoided countries</label><div class="pool-chips" id="pool-avoid"></div><select data-pick="avoid" id="pool-avoid-add"></select></div>
+          </div>
+          <label class="check-label"><input id="pool-only-preferred" type="checkbox"> Use only servers in preferred countries</label>
+          <p class="hint">Without this, other countries serve when no preferred server answers. A server whose country is not known yet counts as another country.</p>
         </div>
+        <div class="pool-save"><button class="primary" id="pool-save" type="button">Save these settings</button><span class="hint" id="pool-save-state" role="status"></span></div>
       </details>
     </details>
     <form class="card padded route-card policy-card" id="policy-form"><div class="eyebrow">IP protection</div><h2 id="policy-summary">Hide this server's address</h2>
@@ -952,12 +962,12 @@
     <div class="fleet-import-head"><div><div class="eyebrow">Bulk import</div><h2>Import many accounts at once</h2><p class="muted">Each account gets its own workspace, signing key and proxy. Files with the same name form one account, for example <code>name.session</code> with <code>name.json</code>. A session that does not sign in is not kept.</p></div><button class="quiet" id="fleet-import-close" type="button">Close</button></div>
     <label class="pool-drop fleet-drop" id="fleet-drop"><input accept=".session,.json,.zip,.txt" id="fleet-files" multiple type="file"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><span>Drop account files here or choose them: .session, .json, TData .zip, StringSession .txt</span></label>
     <div class="fleet-import-grid">
-      <div><label for="fleet-group">Put them in</label><select id="fleet-group"></select></div>
+      <div><label for="fleet-group">Add to group</label><select id="fleet-group"></select></div>
       <div><label for="fleet-group-name">New group name</label><input id="fleet-group-name" maxlength="80" placeholder="e.g. Scam monitors"></div>
       <div><label for="fleet-passcode">TData passcode · optional</label><input autocomplete="off" id="fleet-passcode" maxlength="512" type="password"></div>
       <div><label for="fleet-api">API ID:Hash · optional</label><input autocomplete="off" id="fleet-api" placeholder="Built-in pool when empty" spellcheck="false"></div>
     </div>
-    <div class="fleet-import-run"><button class="primary" disabled id="fleet-import-start" type="button">Import accounts</button><span class="hint" id="fleet-import-summary" role="status"></span></div>
+    <div class="fleet-import-run"><button class="primary" disabled id="fleet-import-start" type="button">Import accounts</button><button class="secondary" hidden id="fleet-import-stop" type="button">Stop after this account</button><span class="hint" id="fleet-import-summary" role="status"></span></div>
     <ol class="fleet-results" id="fleet-results"></ol>
   </section>
   <div class="accounts-overview" id="accounts-overview" aria-label="Workspace totals"></div>

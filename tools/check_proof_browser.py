@@ -29,7 +29,7 @@ def monitor_server(app):
     thread = threading.Thread(target=server.run, kwargs={"sockets": [sock]}, daemon=True)
     thread.start()
     try:
-        deadline = time.monotonic() + 15
+        deadline = time.monotonic() + 60  # slow starts under load; ready returns at once
         while not server.started:
             if time.monotonic() > deadline:
                 raise RuntimeError("Proof monitor did not start")

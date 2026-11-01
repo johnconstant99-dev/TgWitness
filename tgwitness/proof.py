@@ -12,6 +12,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
 
+from .middleware import KEEP_ALIVE_SECONDS
 from .store import canonical, utcnow
 from .verify import parse_time
 from .witness import Witness, http_address, proxy_config
@@ -207,7 +208,8 @@ def main():
     if args.check_config:
         print("Proof configuration valid:", len(config["workspaces"]), "distinct pinned workspaces; no connection opened.")
         return
-    uvicorn.run(create_app(config), host=args.host, port=args.port, access_log=False)
+    uvicorn.run(create_app(config), host=args.host, port=args.port, access_log=False,
+                timeout_keep_alive=KEEP_ALIVE_SECONDS)
 
 
 if __name__ == "__main__":

@@ -250,6 +250,7 @@ def main(argv=None):
     else:
         import uvicorn
         from mcp.server.transport_security import TransportSecuritySettings
+        from .middleware import KEEP_ALIVE_SECONDS
         hosts, origins = ["127.0.0.1:*", "localhost:*", "[::1]:*"], []
         if args.public_url:
             public = urlsplit(endpoint(args.public_url))
@@ -262,7 +263,8 @@ def main(argv=None):
         server = build_server(api)
         app = server.streamable_http_app(stateless_http=True, json_response=True,
                                         transport_security=TransportSecuritySettings(allowed_hosts=hosts, allowed_origins=origins))
-        uvicorn.run(BearerAccess(app, api), host=args.host, port=args.port, access_log=False)
+        uvicorn.run(BearerAccess(app, api), host=args.host, port=args.port, access_log=False,
+                    timeout_keep_alive=KEEP_ALIVE_SECONDS)
 
 
 if __name__ == "__main__":

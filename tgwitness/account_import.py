@@ -29,6 +29,15 @@ def string_session(dc, key):
     return session.save()
 
 
+def session_key(value):
+    """The authorization key of a StringSession, or None: one account imported twice has one key."""
+    try:
+        session = StringSession((value or "").strip())
+    except (ValueError, TypeError, binascii.Error, struct.error):
+        return None
+    return session.auth_key.key if session.auth_key else None
+
+
 def validate_string(value):
     """The StringSession rebuilt from its DC and key alone; its address and port are ignored."""
     if not isinstance(value, str) or len(value) > 4096:

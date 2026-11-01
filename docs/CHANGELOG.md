@@ -92,6 +92,42 @@
   imports leave no empty workspace; locking or switching stops the remaining queue.
 - Added the MTProxy dashboard: ping, status, countries, filters, shared custom
   lists and optional GitHub search. Routes remain separate for each account.
+- Added a country choice for the automatic MTProxy route (preferred, avoided, only
+  preferred) and the list download and check intervals to the dashboard. Panel strings of
+  groups, import and the dashboard are translated with their screen as context and with
+  plural forms; context-dependent report labels are corrected in 23 languages.
+- MTProxy traffic is deciphered through OpenSSL instead of Telethon's pure-Python AES
+  (about 0.3 MB/s on a small server): a busy MTProxy route no longer holds a whole CPU
+  core and delays every panel answer by seconds. The chats list shows that it is loading,
+  and journal rows explain skipped and failed attachments in the panel language.
+- The panel, proof, sealed and MCP servers keep idle connections for 150 seconds instead
+  of 5: Caddy and cloudflared reused connections the server had already closed, and the
+  browser received sporadic 502 answers.
+- GIFs and stickers are no longer downloaded unless turned on. Turning downloads off now
+  pauses the files already waiting, and turning a type off or lowering its limit skips the
+  waiting files it excludes; before, the queue kept downloading under the old settings.
+- Public proxy lists are parsed once, and again only after a list, a source setting or the
+  GitHub token changes. Every status read of every workspace parsed them on the event loop
+  that also carries Telegram traffic; with 10 workspaces the account list took 690 ms, now 7 ms.
+- Bulk import refuses a session another workspace already holds before it connects: the same
+  key from a second proxy address can make Telegram revoke it. An imported workspace
+  disconnects until its sources are chosen, imports no longer hold the other workspaces'
+  operations, an import can be stopped after the current account, files that are not
+  account files are shown as such, and import errors appear in the panel language.
+  Account groups can start or pause all their workspaces at once.
+- Unanswered servers in preferred countries no longer hide working servers in other
+  countries; servers identified as being in avoided countries are excluded, including from
+  checks. Servers with unknown country remain eligible unless only preferred countries are
+  allowed.
+  Country lookups move past hosts without an answer, the saved lists stay readable at
+  their size limits, the last list update shows when lists were actually downloaded, and
+  a blocked list download disables the update button and offers the proxy setting. Own
+  lists say how many links were left out and why. One server listed with several secrets
+  counts as one address, so two workspaces are no longer put on the same server.
+- People and chats without a photo no longer fill the browser console with 404 errors,
+  and the panel asks for the high-assurance statement only where it exists. Sign-in tabs
+  wrap long labels instead of cutting them; the offline-gap note, size units and the
+  reason of attachments dropped with a removed source are shown in the panel language.
 - Added scoped, read-only MCP connections and local archive search with optional
   AI source review and separate analytical reports.
 - Added local OCR/transcription for saved attachments and signed outgoing webhooks

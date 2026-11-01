@@ -21,10 +21,10 @@ ALICE = 70001
 CHAT = -1000000000123
 
 
-def saved_session():
+def saved_session(seed=b"x"):
     session = StringSession()
     session.set_dc(2, "149.154.167.51", 443)
-    session.auth_key = AuthKey(b"x" * 256)
+    session.auth_key = AuthKey(seed * 256)
     return session.save()
 
 
@@ -34,7 +34,7 @@ class FakeClient:
         self.options = kwargs
         self.account_id = 44 if api_id == 123 else api_id
         self.authorized = bool(session.auth_key)
-        self.session = NS(save=saved_session)
+        self.session = NS(save=session.save if session.auth_key else lambda: saved_session(bytes([self.account_id % 256])))
         self.connected = False
         self.handlers = []
         self.instances.append(self)

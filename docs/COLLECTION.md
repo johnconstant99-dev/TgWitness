@@ -249,12 +249,15 @@ Limits are set **per type**: photos, videos, GIFs and animations, round video me
 voice messages, music and audio, stickers, and files. Each type can be turned off and has
 its own size limit from 1 to 2,000 MiB; new workspaces start with 20 MiB for photos,
 100 MiB for videos, 50 MiB for files, audio and round videos, 20 MiB for voice and GIFs and
-5 MiB for stickers. *Maximum file size* sets every type at once. Policies saved before
-per-type limits keep their single limit for every type. A type turned off produces a
-`media.skipped` record; unknown-size or oversized files are not downloaded. Large files get
-download time for at least 256 KiB/s. Jobs survive restart, but expired references, lost
-access, or deleted files can still prevent recovery. Existing jobs retain the policy saved
-with them.
+5 MiB for stickers. New workspaces leave GIFs and stickers off until turned on. Workspaces
+with policies saved before per-type limits keep all types enabled and retain their single
+limit for every type. *Maximum file size* sets every type at once. A type turned off produces
+a `media.skipped` record; unknown-size or oversized files are not downloaded. Large files get
+extra download time based on their size and a baseline speed of 256 KiB/s. Jobs survive
+restart, but expired references, lost access, or deleted files can still prevent recovery.
+Waiting jobs keep the limit saved with them, so a raised limit applies to new files only.
+Turning a type off or lowering its limit also skips the waiting files it excludes, each with
+a `media.skipped` record; turning downloads off pauses the queue until they are turned on again.
 
 ## Pause, lock, disconnect, and restart
 

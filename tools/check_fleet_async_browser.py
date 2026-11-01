@@ -8,6 +8,82 @@ from check_browser import (RunningApp, hold_api_response, launch_browser,
                            release_api_response, unlock)
 
 
+def check_group_runs(page, server):
+    group = page.evaluate("""async()=>{
+      const result=await json('profile-groups',{label:'Synthetic batch'},{root:true});
+      const group=result.groups.find(item=>item.label==='Synthetic batch');
+      for(const profile of state.profiles)await json('profiles/'+profile.id+'/group',{group:group.id},{root:true,method:'PUT'});
+      return group;
+    }""")
+    simulated, calls, moves = {}, [], []
+
+    def profiles(route):
+        response = route.fetch()
+        if response.status != 200:
+            route.fulfill(response=response)
+            return
+        body = response.json()
+        for profile in body["profiles"]:
+            simulated.setdefault(profile["id"], profile["id"] == "default")
+            profile["collector"].update(running=simulated[profile["id"]], has_session=True)
+        route.fulfill(response=response, json=body)
+
+    def collect(route):
+        path = route.request.url.split("/api/collector/", 1)
+        profile = path[0].rsplit("/profiles/", 1)[-1] if "/profiles/" in path[0] else "default"
+        action = path[1]
+        calls.append((profile, action))
+        simulated[profile] = action == "start"
+        route.fulfill(json={"running": simulated[profile]})
+
+    page.route("**/api/profiles", profiles)
+    page.route("**/api/collector/*", collect)
+    page.on("request", lambda request: moves.append(request.url)
+            if request.method == "PUT" and request.url.endswith("/group") else None)
+    page.evaluate("loadProfiles()")
+    section = page.locator('.fleet-group[data-group="' + group["id"] + '"]')
+    start = section.get_by_role("button", name="Start all", exact=True)
+    stop = section.get_by_role("button", name="Pause all", exact=True)
+    expect(start).to_be_enabled()
+    expect(stop).to_be_enabled()
+    hold_api_response(page, "/api/collector/start")
+    start.click()
+    expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
+    expect(start).to_be_disabled()
+    expect(stop).to_be_disabled()
+    assert all(select.is_disabled() for select in page.locator(".fleet-card-group").all())
+    # Synthetic events cannot bypass the operation and membership guards.
+    stop.dispatch_event("click")
+    page.locator(".fleet-card-group").first.evaluate("""select=>{
+      select.value='';select.dispatchEvent(new Event('change',{bubbles:true}));
+    }""")
+    assert not moves and len(calls) == 1
+    page.evaluate("lock()")
+    release_api_response(page)
+    page.locator("#panel-token").fill(server.app.state.vault.token)
+    page.locator("#unlock-form button").click()
+    expect(page.locator("#workspace")).to_be_visible()
+    expect(page.locator("#unlock-form button")).to_be_enabled()
+    page.locator('[data-view="accounts"]').click()
+    assert len(calls) == 1, "A locked batch continued to another account"
+
+    for profile in simulated:
+        simulated[profile] = False
+    calls.clear()
+    page.evaluate("loadProfiles()")
+    start.click()
+    expect(page.locator("#toast")).to_contain_text("3 workspaces started.")
+    assert len(calls) == 3 and all(action == "start" for _, action in calls), calls
+    expect(start).to_be_disabled()
+    expect(stop).to_be_enabled()
+    calls.clear()
+    stop.click()
+    expect(page.locator("#toast")).to_contain_text("3 workspaces paused.")
+    assert len(calls) == 3 and all(action == "stop" for _, action in calls), calls
+    page.unroute("**/api/profiles", profiles)
+    page.unroute("**/api/collector/*", collect)
+
+
 def main(fleet_source=None):
     with tempfile.TemporaryDirectory(prefix="fleet-async-") as scratch, RunningApp(
             Path(scratch)) as server, sync_playwright() as p:
@@ -149,6 +225,7 @@ def main(fleet_source=None):
         page.evaluate("()=>{window.releaseGroupCreate();window.restoreGroupFetch();}")
         expect(page.locator("#fleet-group-new")).to_be_enabled()
         expect(page.locator(".fleet-group-head h2", has_text="Queued case")).to_have_count(1)
+        check_group_runs(page, server)
         assert not errors, errors
         browser.close()
     print("Fleet async passed: drafts, focus, refresh errors, latest groups, overlapping saves/moves and lock cleanup.")

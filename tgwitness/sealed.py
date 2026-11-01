@@ -24,7 +24,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .collector import Collector, WitnessClient
 from .evidence import export_file
-from .middleware import RequestLimit
+from .middleware import KEEP_ALIVE_SECONDS, RequestLimit
 from .provenance import run_receipt
 from .sealed_crypto import recipient_id
 from .security import InstanceLock, Vault, private_write
@@ -352,7 +352,7 @@ def main():
 
     logging.disable(logging.CRITICAL)
     uvicorn.run(create_app(args.data, args.out, config), host="0.0.0.0", port=8787,
-                access_log=False, log_level="critical", proxy_headers=False)
+                access_log=False, log_level="critical", proxy_headers=False, timeout_keep_alive=KEEP_ALIVE_SECONDS)
 
 
 if __name__ == "__main__":
