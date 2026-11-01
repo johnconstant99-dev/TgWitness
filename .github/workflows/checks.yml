@@ -40,7 +40,8 @@ concurrency:
 jobs:
   quality:
     name: Dependencies, lint and source
-    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    # Independent checks use fresh runners; Docker retains the project runner.
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -104,7 +105,7 @@ jobs:
       matrix:
         os: ${{ fromJSON(inputs.full_platforms && '["linux", "windows-latest", "macos-latest"]' || '["linux"]') }}
         python: ${{ fromJSON(inputs.full_platforms && '["3.11", "3.12", "3.13"]' || '["3.12"]') }}
-    runs-on: ${{ matrix.os == 'linux' && fromJSON('["self-hosted", "Linux", "X64", "tgwitness-ci"]') || matrix.os }}
+    runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || matrix.os }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -143,7 +144,7 @@ jobs:
           python start.py --check --json --data-dir installer-readiness-probe
   browser:
     name: Synthetic browser behavior
-    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -173,9 +174,10 @@ jobs:
           python -m pip install --require-hashes --no-build-isolation -r deploy/browser.lock
           python -m pip install --no-deps --no-build-isolation -e ".[dev,mcp]"
           python -m pip check
-      - name: Reuse the runner's versioned browser files
+      - name: Use a separate versioned browser cache
         run: echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright" >> "$GITHUB_ENV"
-      - run: python -m playwright install chromium
+      - name: Install Chromium and its hosted-runner OS dependencies
+        run: python -m playwright install --with-deps chromium
       - name: Run independent browser checks (two at a time)
         run: python tools/run_checks.py --suite browser --jobs 2
       - name: Retain every check's logs and results
@@ -191,7 +193,7 @@ jobs:
           retention-days: 3
   browser-ux:
     name: Interface and accessibility browser checks
-    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -221,9 +223,10 @@ jobs:
           python -m pip install --require-hashes --no-build-isolation -r deploy/browser.lock
           python -m pip install --no-deps --no-build-isolation -e ".[dev,mcp]"
           python -m pip check
-      - name: Reuse the runner's versioned browser files
+      - name: Use a separate versioned browser cache
         run: echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright" >> "$GITHUB_ENV"
-      - run: python -m playwright install chromium
+      - name: Install Chromium and its hosted-runner OS dependencies
+        run: python -m playwright install --with-deps chromium
       - name: Run independent panel checks (two at a time)
         run: python tools/run_checks.py --suite browser-ux --jobs 2
       - name: Check write-only form drafts

@@ -131,6 +131,10 @@ def main():
         page.locator("#fleet-files").set_input_files(account_files("finished", 505))
         page.locator("#fleet-import-start").click()
         expect(page.locator("#fleet-results .ok")).to_have_count(1, timeout=30000)  # an import connects
+        # The result row is marked before the queue's final profile/group refresh.
+        # Wait for the form to become usable before selecting a second batch.
+        expect(page.locator("#fleet-import-stop")).to_be_hidden(timeout=30000)
+        expect(page.locator("#fleet-files")).to_be_enabled()
         expect(page.locator("#fleet-import-close")).to_be_enabled()
         expect(page.locator("#fleet-import-start")).to_be_disabled()
         page.locator("#fleet-files").set_input_files([*account_files("stopped", 506), *account_files("skipped", 507),
