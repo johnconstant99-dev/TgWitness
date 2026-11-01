@@ -1,7 +1,5 @@
 # Archive analysis
 
-**Current main:** use a source checkout; the 0.7.0 portable preview predates this feature.
-
 [Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
 
 Use **Journal** for local search without AI. For **Ask the archive**, first enable

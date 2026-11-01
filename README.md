@@ -14,7 +14,7 @@
 <p align="center"><strong>Your Telegram investigation workspace.</strong><br>Export chats, preserve observed changes and trace connections back to the source.<br>Self-hosted. Separate accounts. Signed handoffs.</p>
 
 <p align="center">
-  <a href="docs/CHANGELOG.md"><img src="docs/assets/presentation/identity-meta-version.svg" width="144" height="30" alt="v0.7.0 · pre-release"></a>
+  <a href="docs/CHANGELOG.md"><img src="docs/assets/presentation/identity-meta-version.svg" width="144" height="30" alt="v0.7.1 · pre-release"></a>
   <a href="docs/VERIFICATION.md"><img src="docs/assets/presentation/identity-meta-verification.svg" width="158" height="30" alt="Tested environments"></a>
   <img src="docs/assets/presentation/identity-meta-languages.svg" width="279" height="30" alt="25 interface languages · 26 guide languages">
   <a href="LICENSE"><img src="docs/assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a>
@@ -54,7 +54,7 @@
   <a href="docs/COLLECTION.md"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-history-mobile.svg"><img src="docs/assets/presentation/readme-nav-history.svg" width="32%" alt="Collection and saved versions"></picture></a>
 </p>
 
-In the current source panel, **Start here** offers **Export my account** for a
+In the panel, **Start here** offers **Export my account** for a
 one-off [signed account snapshot](docs/ACCOUNT-EXPORT.md), or **Follow an investigation**
 for ongoing observation. Choose a task, connect an account and review its scope;
 collection only starts when you explicitly start it. Less common controls live
@@ -81,10 +81,9 @@ Keep each account in its own workspace, with separate sources, session and signi
   <a href="docs/HIGH-ASSURANCE.md"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-cloud-mobile.svg"><img src="docs/assets/presentation/readme-nav-cloud.svg" width="48%" alt="Sealed cloud deployment"></picture></a>
 </p>
 
-**Current source adds more:** load the history of enabled chats with pause/resume,
+**Available in 0.7.1:** load the history of enabled chats with pause/resume,
 review sources before asking AI, connect read-only MCP clients, run local OCR or
-transcription, and send HMAC-signed webhooks. The 0.7.0 portable preview predates
-these additions; use `main` to try them.
+transcription, and send HMAC-signed webhooks.
 
 <details>
 <summary><strong>Pick the tools for your case</strong> · history, accounts, media and integrations</summary>
@@ -112,11 +111,13 @@ these additions; use `main` to try them.
 
 ## Your first capture
 
-**Windows portable:** [download TgWitness 0.7.0](https://github.com/phishdestroy/TgWitness/releases/download/v0.7.0/TgWitness-0.7.0-windows-amd64-portable.zip),
+**Windows portable:** [download TgWitness 0.7.1](https://github.com/phishdestroy/TgWitness/releases/download/v0.7.1/TgWitness-0.7.1-windows-amd64-portable.zip),
 extract it and run **`TgWitness.cmd`**. Python is included.
 
-**From source:** [download the source](https://github.com/phishdestroy/TgWitness/archive/refs/heads/main.zip)
+**From source:** [download the source](https://github.com/phishdestroy/TgWitness/releases/download/v0.7.1/TgWitness-0.7.1-source.zip)
 with **Python 3.11+** installed. The launcher prepares the environment.
+
+[All downloads and SHA-256 checksums](https://github.com/phishdestroy/TgWitness/releases/tag/v0.7.1).
 
 | | Windows | Linux / macOS |
 | --- | --- | --- |

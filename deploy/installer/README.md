@@ -48,7 +48,6 @@ The output is `dist/installer-site/`. Each release path contains a wheel,
 dependency constraints, installer copies, SHA-256 sidecars and a manifest linking
 the build to its source commit. `install.cmd` pins the PowerShell child's hash.
 The wheel inventory and RECORD are checked against the checkout before release.
-The endpoint serves the current source build, not the older 0.7.0 portable ZIP.
 
 The install acceptance check maps only the unpublished download origin to the
 generated local files. uv, managed Python and package downloads use real HTTPS.

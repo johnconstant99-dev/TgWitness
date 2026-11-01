@@ -18,11 +18,20 @@ except ImportError:
     from build_source import ROOT, public_sources
 
 BINARY = {".png", ".webp", ".gif", ".mp4", ".bin", ".tsq", ".tsr"}
+DEEPL_UUID = r"[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}"
 PATTERNS = {
-    "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----"),
+    "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----"),
     "GitHub token": re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{60,})\b"),
     "Telegram bot token": re.compile(r"\b[0-9]{6,12}:[A-Za-z0-9_-]{35}\b"),
     "Telethon session": re.compile(r"(?<![A-Za-z0-9_-])1[A-Za-z0-9_-]{340,}={0,2}(?![A-Za-z0-9_-])"),
+    "AI provider API key": re.compile(
+        r"\b(?:sk-(?:(?:proj|svcacct|ant|or-v1)-[A-Za-z0-9_-]{20,}|[A-Za-z0-9]{32,})"
+        r"|gsk_[A-Za-z0-9_-]{32,}|AIza[A-Za-z0-9_-]{35})\b"),
+    # Paid DeepL keys resemble ordinary UUIDs: require a named key assignment or
+    # authorization scheme. The Free API's :fx suffix is recognizable on its own.
+    "DeepL API key": re.compile(
+        rf"\b(?:{DEEPL_UUID}:fx|deepl[_-](?:auth|api)[_-]key\b[\"']?\s*[:=]?\s*[\"']?{DEEPL_UUID}(?::fx)?)\b",
+        re.IGNORECASE),
 }
 LINK = re.compile(r"\[[^\]]*\]\(([^\s)]+)(?:\s+[^)]*)?\)")
 

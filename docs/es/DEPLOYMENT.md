@@ -121,7 +121,7 @@ Esto estará disponible una vez que se haya completado con éxito el [flujo de t
 Copie `deploy/env.example` en `.env`. Establezca `TGWITNESS_IMAGE` en la versión publicada, utilizando la ruta del repositorio **en minúsculas**; por ejemplo:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.0
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.1
 TGWITNESS_PORT=8787
 ```
 
@@ -200,7 +200,7 @@ Compruebe el acceso al panel, la identidad de la cuenta, el estado de la observa
 
 El [flujo de trabajo de lanzamiento](../../.github/workflows/release.yml) estará listo para su uso una vez que este proyecto se haya subido a un repositorio de GitHub con Actions habilitado. Se ejecuta cuando se **publica** una versión de GitHub, incluidas las versiones preliminares. Los borradores y las subidas de etiquetas por sí solos no publican paquetes.
 
-1. Establezca la versión del paquete y el registro de cambios; a continuación, publique una versión etiquetada con `v` más la versión exacta `pyproject.toml`, como por ejemplo `v0.7.0`.
+1. Establezca la versión del paquete y el registro de cambios; a continuación, publique una versión etiquetada con `v` más la versión exacta `pyproject.toml`, como por ejemplo `v0.7.1`.
 2. El flujo de trabajo valida la etiqueta y ejecuta las comprobaciones compartidas para Windows/Linux/macOS de Python, el navegador general/de importación de cuentas/QR, el paquete fuente y Docker. También se lleva a cabo una instalación nativa nueva en los tres sistemas operativos utilizando Python 3.12.
 3. Una vez superadas esas comprobaciones, realiza pruebas de funcionamiento de una imagen ARM64 en QEMU, publica las imágenes AMD64/ARM64 en `ghcr.io/<lowercase-owner>/<lowercase-repository>:<version>` y adjunta el archivo ZIP con el código fuente, la suma de comprobación y el paquete Python wheel a la versión. Una tarea independiente en Windows compila y adjunta el archivo ZIP portátil y su suma de comprobación.
 4. Tras la primera publicación, abra la configuración del paquete GHCR y establezca la visibilidad en **«Pública»** si se pretende realizar descargas anónimas de imágenes. Un repositorio de código fuente público por sí solo no garantiza que el paquete del contenedor sea público. Las políticas de la organización deben permitir la publicación del paquete. El flujo de trabajo utiliza `GITHUB_TOKEN`; no deben incluirse en el repositorio contraseñas de registro ni credenciales de VPS.

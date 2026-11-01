@@ -34,10 +34,9 @@ External HTTP requests have a separate route and off switch.
 
 ## Archive tools
 
-Current `main` adds [history acquisition](HISTORY.md), [archive search and analysis](ANALYSIS.md),
+[History acquisition](HISTORY.md), [archive search and analysis](ANALYSIS.md),
 [read-only MCP](MCP.md), [local OCR/transcription](MEDIA-ANALYSIS.md) and
-[outgoing webhooks](WEBHOOKS.md). These are source-checkout features, added after
-the 0.7.0 portable preview. Analytical reports and recognized text stay separate
+[outgoing webhooks](WEBHOOKS.md) are included in 0.7.1. Analytical reports and recognized text stay separate
 from captured events.
 
 ## Optional extras

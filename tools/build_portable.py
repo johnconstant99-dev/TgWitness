@@ -7,6 +7,7 @@ Run on 64-bit Windows with Python 3.12 (the embedded runtime's version):
 The user extracts the ZIP and double-clicks TgWitness.cmd; nothing is installed system-wide.
 """
 import argparse
+import csv
 import hashlib
 import json
 import os
@@ -167,6 +168,26 @@ def embedded_runtime(arch, cache, supplied=None):
     return archive
 
 
+def clean_app_install_metadata(site_packages):
+    """Drop local pip provenance and records for the app launchers replaced by CMD files."""
+    metadata = site_packages / ("tgwitness-" + VERSION + ".dist-info")
+    record = metadata / "RECORD"
+    with record.open(encoding="utf-8", newline="") as source:
+        rows = list(csv.reader(source))
+    if any(len(row) != 3 for row in rows):
+        raise SystemExit("Installed TgWitness RECORD is malformed")
+    origin = metadata / "direct_url.json"
+    origin_name = origin.relative_to(site_packages).as_posix()
+    launchers = {"../../bin/tgwitness.exe", "../../bin/tgwitness-mcp.exe"}
+    kept = [row for row in rows if row[0] != origin_name and not (
+        row[0] in launchers and not (site_packages / row[0]).exists()
+        and not (site_packages / "bin" / Path(row[0]).name).exists())]
+    origin.unlink(missing_ok=True)
+    if kept != rows:
+        with record.open("w", encoding="utf-8", newline="") as target:
+            csv.writer(target, lineterminator="\n").writerows(kept)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build the Windows portable package.")
     parser.add_argument("--python-zip", help="use a local python-" + PYTHON + "-embed-<arch>.zip")
@@ -197,6 +218,7 @@ def main():
                     "--no-compile", "--target", str(site_packages), "-c", str(ROOT / "deploy/constraints.txt"), str(ROOT)],
                    check=True, cwd=ROOT)
     shutil.rmtree(site_packages / "bin", ignore_errors=True)
+    clean_app_install_metadata(site_packages)
 
     for filename, text in (("TgWitness.cmd", LAUNCHER), ("TgWitness-Demo.cmd", DEMO), ("TgWitness-Check.cmd", CHECK),
                            ("README.txt", README.format(version=VERSION, python=PYTHON))):

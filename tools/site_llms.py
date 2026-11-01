@@ -144,8 +144,7 @@ def index(base_url, repo_url, branch, version, guides, references):
         "records to the local journal. Archive search, AI analysis, OCR, transcription, MCP and signed webhooks work "
         "with the records you have collected.",
         f"These guides track the `{branch}` source branch. The project version is `{version}`; check the changelog and "
-        "release notes before assuming a source feature is included in a downloaded package. "
-        "The 0.7.0 portable preview predates the archive analysis and MCP tools.",
+        "release notes before assuming a source feature is included in a downloaded package.",
         "Choose an entry below for the exact workflow, commands and limits. Each guide has a Markdown edition; "
         "its canonical HTML page retains diagrams, animations and interactive examples. Translated pages also expose "
         "Markdown through `rel=alternate` links.",

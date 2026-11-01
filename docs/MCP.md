@@ -30,8 +30,7 @@ that server's actual Python executable. **Re-check** refreshes this status witho
 reloading the page; it does not install packages or restart the server.
 
 The MCP extra uses the official [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk).
-`deploy/constraints-mcp.txt` pins the tested SDK and dependencies. These features
-require current source; the 0.7.0 portable preview predates them.
+`deploy/constraints-mcp.txt` pins the tested SDK and dependencies.
 
 ## Issue a connection
 

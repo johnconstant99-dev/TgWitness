@@ -121,7 +121,7 @@ Isso fica disponível após a conclusão bem-sucedida [do fluxo de trabalho de l
 Copie `deploy/env.example` para `.env`. Defina `TGWITNESS_IMAGE` como a versão publicada, utilizando o caminho do repositório **em letras minúsculas**, por exemplo:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.0
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.1
 TGWITNESS_PORT=8787
 ```
 
@@ -200,7 +200,7 @@ Verifique o acesso ao painel, a identidade da conta, o status da observação e 
 
 O [fluxo de trabalho de lançamento](../../.github/workflows/release.yml) estará pronto para uso após este projeto ser enviado para um repositório do GitHub com o Actions habilitado. Ele é executado quando um lançamento no GitHub é **publicado**, incluindo um pré-lançamento. Rascunhos e envios de tags, por si só, não publicam pacotes.
 
-1. Defina a versão do pacote e o registro de alterações e, em seguida, publique uma versão marcada com `v`, além da versão exata `pyproject.toml`, como `v0.7.0`.
+1. Defina a versão do pacote e o registro de alterações e, em seguida, publique uma versão marcada com `v`, além da versão exata `pyproject.toml`, como `v0.7.1`.
 2. O fluxo de trabalho valida a tag e executa as verificações compartilhadas para Python no Windows/Linux/macOS, navegador geral/importação de conta/QR, pacote-fonte e Docker. Também é realizada uma instalação nativa nova em todos os três sistemas operacionais utilizando o Python 3.12.
 3. Após a aprovação dessas verificações, ele realiza testes preliminares de uma imagem ARM64 no QEMU, publica imagens AMD64/ARM64 em `ghcr.io/<lowercase-owner>/<lowercase-repository>:<version>` e anexa o ZIP com o código-fonte, a soma de verificação e o pacote Python wheel à versão. Uma tarefa separada no Windows compila e anexa o ZIP portátil e sua soma de verificação.
 4. Após a primeira publicação, abra as configurações do pacote GHCR e defina a visibilidade como **Pública**, caso se pretenda realizar baixas anônimas de imagens. Um repositório de código-fonte público, por si só, não garante um pacote de contêiner público. As políticas da organização devem permitir a publicação do pacote. O fluxo de trabalho utiliza `GITHUB_TOKEN`; nenhuma senha de registro ou credenciais de VPS devem constar no repositório.

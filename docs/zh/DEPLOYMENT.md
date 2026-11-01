@@ -121,7 +121,7 @@ docker compose logs witness                     # witness key fingerprint
 将 `deploy/env.example` 复制到 `.env`。将 `TGWITNESS_IMAGE` 设置为已发布的版本，并使用**小写形式的**仓库路径，例如：
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.0
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.1
 TGWITNESS_PORT=8787
 ```
 
@@ -200,7 +200,7 @@ docker compose --project-directory . -f deploy/compose/compose.image.yaml up -d 
 
 将该项目推送到启用了 Actions 的 GitHub 仓库后，[发布工作流](../../.github/workflows/release.yml)即可投入使用。当**发布** GitHub 版本（包括预发布版本）时，该工作流会自动运行。仅推送草稿或标签并不会发布软件包。
 
-1. 设置软件包版本和变更日志，然后发布一个带有`v`标签且包含精确`pyproject.toml`版本的发布版本，例如`v0.7.0`。
+1. 设置软件包版本和变更日志，然后发布一个带有`v`标签且包含精确`pyproject.toml`版本的发布版本，例如`v0.7.1`。
 2. 该工作流会验证标签，并运行共享的 Windows/Linux/macOS Python 环境、通用/账户导入/二维码浏览器、源代码包以及 Docker 检查。此外，还针对这三种操作系统使用 Python 3.12 进行了全新的原生安装测试。
 3. 在通过上述检查后，系统会在 QEMU 环境下对 ARM64 镜像进行烟雾测试，将 AMD64/ARM64 镜像发布至 `ghcr.io/<lowercase-owner>/<lowercase-repository>:<version>`，并将源代码 ZIP 包、校验和及 Python wheel 文件附加到发布包中。另有专门的 Windows 任务负责构建并附加可移植 ZIP 包及其校验和。
 4. 首次发布后，请打开 GHCR 包设置，若需匿名拉取镜像，请将可见性设为“**公开**”。仅将源代码仓库设为公开并不能保证容器包也会公开。组织政策必须允许发布包。该工作流使用 `GITHUB_TOKEN`；仓库中不应包含任何注册表密码或 VPS 凭据。

@@ -1,10 +1,10 @@
 # TgWitness roadmap
 
-Status reviewed on 31 October 2026. This separates the current release from
+Status reviewed on 1 November 2026. This separates the current release from
 prototypes and proposed work. The [changelog](CHANGELOG.md) records shipped changes;
 the [trust design](ru/TRUST-ROADMAP.md) explains the proposed verification model.
 
-## 0.7.0 preview: a verifiable local journal
+## 0.7.1 preview: a verifiable local journal
 
 The current source includes account workspaces, observation of available Telegram
 events, interaction records, media capture, signed exports, scoped panel tokens,
@@ -29,7 +29,7 @@ Release acceptance:
 
 Archive usability and feature coverage now have a parallel delivery track:
 [Telegram archive parity plan](ru/ARCHIVE-PARITY.md). The first implementation is
-[resumable history acquisition](HISTORY.md), currently unreleased. Richer review,
+[resumable history acquisition](HISTORY.md), included in 0.7.1. Richer review,
 imports, transcription, account administration and measured operating cost remain
 separate acceptance milestones; this roadmap does not claim overall superiority.
 

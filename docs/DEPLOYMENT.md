@@ -218,7 +218,7 @@ Copy `deploy/env.example` to `.env`. Set `TGWITNESS_IMAGE` to the published vers
 the **lowercase** repository path, for example:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.0
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.1
 TGWITNESS_PORT=8787
 ```
 
@@ -327,15 +327,20 @@ GitHub Release is **published**, including a prerelease. Drafts and tag pushes
 alone do not publish packages.
 
 1. Set the package version and changelog, then publish a release tagged with `v`
-   plus the exact `pyproject.toml` version, such as `v0.7.0`.
+   plus the exact `pyproject.toml` version, such as `v0.7.1`.
 2. The workflow validates the tag and runs the shared Windows/Linux/macOS Python,
    general/account-import/QR browser, source-package, and Docker checks. Fresh native installation is also
    exercised on all three operating systems using Python 3.12.
 3. After those checks pass, it smoke-tests an ARM64 image under QEMU, publishes
    AMD64/ARM64 images to `ghcr.io/<lowercase-owner>/<lowercase-repository>:<version>`,
-   and attaches the source ZIP, checksum, and Python wheel to the release. A separate
-   Windows job builds and attaches the portable ZIP and its checksum.
-4. After the first publication, open the GHCR package settings and set visibility
+   and attaches the source ZIP and Python wheel with their SHA-256 sidecars.
+   The Windows portable ZIP is the exact artifact tested by the checks workflow;
+   the release workflow downloads and publishes that artifact and its checksum.
+4. A final job downloads all three published packages again and verifies their
+   checksums. It then publishes `SHA256SUMS.txt` and `RELEASE-MANIFEST.json`, recording
+   the version, source revision and asset sizes. Uploads refuse to overwrite
+   existing release assets.
+5. After the first publication, open the GHCR package settings and set visibility
    to **Public** if anonymous image pulls are intended. A public source repository
    alone does not guarantee a public container package. Organization policies must
    permit package publication. The workflow uses `GITHUB_TOKEN`; no registry

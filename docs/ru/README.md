@@ -12,7 +12,7 @@
   <img alt="FastAPI + Telethon" src="https://img.shields.io/badge/FastAPI-Telethon-243a52?logo=fastapi&amp;logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-243a52?logo=docker&amp;logoColor=white">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-243a52">
-  <img alt="Version: 0.7.0" src="https://img.shields.io/badge/version-0.7.0-243a52">
+  <img alt="Version: 0.7.1" src="https://img.shields.io/badge/version-0.7.1-243a52">
 </p>
 
 <p align="center">

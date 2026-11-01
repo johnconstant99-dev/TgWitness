@@ -121,7 +121,7 @@ Ini akan tersedia setelah [alur kerja rilis](#rilis-github-otomatis) berhasil da
 Salin `deploy/env.example` ke `.env`. Atur `TGWITNESS_IMAGE` ke versi yang telah dipublikasikan, dengan menggunakan jalur repositori **dalam** **huruf** **kecil**, misalnya:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.0
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.1
 TGWITNESS_PORT=8787
 ```
 
@@ -200,7 +200,7 @@ Periksa akses panel, identitas akun, status pemantauan, dan cakupan setelah pemb
 
 [alur kerja rilis](../../.github/workflows/release.yml) ini siap digunakan setelah proyek ini di-push ke repositori GitHub dengan Actions yang diaktifkan. Proses ini berjalan saat GitHub Release **diterbitkan**, termasuk prerelease. Draft dan push tag saja tidak akan menerbitkan paket.
 
-1. Tentukan versi paket dan catatan perubahan, lalu terbitkan rilis yang diberi tag dengan `v` ditambah versi `pyproject.toml` yang tepat, seperti `v0.7.0`.
+1. Tentukan versi paket dan catatan perubahan, lalu terbitkan rilis yang diberi tag dengan `v` ditambah versi `pyproject.toml` yang tepat, seperti `v0.7.1`.
 2. Alur kerja ini memvalidasi tag dan menjalankan pemeriksaan Python yang dapat digunakan di Windows/Linux/macOS, browser umum/impor akun/QR, paket sumber, serta Docker. Instalasi asli yang baru juga dilakukan pada ketiga sistem operasi tersebut menggunakan Python 3.12.
 3. Setelah pemeriksaan tersebut lulus, sistem ini melakukan uji coba awal (smoke test) terhadap gambar ARM64 di bawah QEMU, mempublikasikan gambar AMD64/ARM64 ke `ghcr.io/<lowercase-owner>/<lowercase-repository>:<version>`, serta melampirkan berkas ZIP sumber, checksum, dan Python wheel ke dalam rilis. Sebuah tugas terpisah di Windows membangun dan melampirkan berkas ZIP portabel beserta checksum-nya.
 4. Setelah publikasi pertama, buka pengaturan paket GHCR dan atur visibilitas menjadi **Publik** jika Anda bermaksud melakukan pengunduhan gambar secara anonim. Repositori sumber yang publik saja tidak menjamin paket kontainer yang publik. Kebijakan organisasi harus mengizinkan publikasi paket. Alur kerja ini menggunakan `GITHUB_TOKEN`; kata sandi registri atau kredensial VPS tidak boleh disertakan dalam repositori.

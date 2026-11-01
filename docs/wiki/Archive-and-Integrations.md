@@ -4,9 +4,6 @@
 
 [Interactive guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Investigations](Investigations.md) · [Export and verify](Exports-and-Verification.md)
 
-These features are in the current `main` branch. Use a source checkout; the 0.7.0
-portable preview predates them.
-
 ## Bring in the history
 
 In **Sources → Chats in scope**, review enabled chats, start observation and

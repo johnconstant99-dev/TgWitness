@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="CHANGELOG.md">v0.7.0</a> &nbsp; · &nbsp;
+  <a href="CHANGELOG.md">v0.7.1</a> &nbsp; · &nbsp;
   <a href="QUICKSTART.md">Python 3.11+</a> &nbsp; · &nbsp;
   <a href="../LICENSE">MIT license</a>
 </p>
@@ -562,10 +562,8 @@ Read [CONTRIBUTING.md](../.github/CONTRIBUTING.md) before opening a pull request
 | [Website](../website/README.md) | Public pages, practical guides and language catalogues |
 | [GitHub configuration](../.github/AUTOMATION.md) | Automation, issue forms and dependency updates |
 
-## Archive and integrations in current main
+## Archive and integrations
 
 [Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) ·
 [History loading](HISTORY.md) · [Archive analysis](ANALYSIS.md) · [MCP](MCP.md) ·
 [OCR / transcription](MEDIA-ANALYSIS.md) · [Webhooks](WEBHOOKS.md)
-
-Use a source checkout for these additions; the 0.7.0 portable preview predates them.

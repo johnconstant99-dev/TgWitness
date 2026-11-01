@@ -52,38 +52,34 @@ jobs:
   portable:
     name: Publish Windows portable package
     needs: [version, checks]
-    runs-on: windows-latest
-    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write # Attach the verified portable archive to the release.
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download the exact portable archive exercised by the release checks
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: "3.12"
-      - name: Create an isolated Python environment
-        if: runner.os == 'Linux'
-        run: |
-          python -m venv "$RUNNER_TEMP/tgwitness-venv"
-          echo "$RUNNER_TEMP/tgwitness-venv/bin" >> "$GITHUB_PATH"
-          echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
-      - run: python tools/build_portable.py
+          name: tgwitness-windows-portable
+          path: dist
+      - name: Verify the portable checksum
+        working-directory: dist
+        run: sha256sum --check --strict ./*-portable.zip.sha256
       - name: Attach the Windows portable package to the release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: gh release upload "$RELEASE_TAG" dist/*-portable.zip dist/*-portable.zip.sha256 --clobber
+        # Released bytes are immutable; a rerun must not replace an existing asset.
+        run: gh release upload "$RELEASE_TAG" dist/*-portable.zip dist/*-portable.zip.sha256
   packages:
-    name: Publish source, wheel and container
+    name: Publish source and Python wheel
     needs: [version, checks]
-    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
-    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write # Attach source and wheel archives to the release.
-      packages: write # Push the multi-architecture image to GHCR.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -102,6 +98,30 @@ jobs:
           python -m pip install --require-hashes -r deploy/build.lock
           python -m pip wheel --no-deps --no-build-isolation --wheel-dir dist .
           python tools/build_source.py
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          for wheel in Path("dist").glob("*.whl"):
+              digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
+              wheel.with_suffix(".whl.sha256").write_text(digest + "  " + wheel.name + "\n", encoding="ascii")
+          PY
+      - name: Attach downloads to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" dist/*.whl dist/*.whl.sha256 dist/*-source.zip dist/*-source.zip.sha256
+  container:
+    name: Publish verified AMD64 and ARM64 container
+    needs: [version, checks]
+    runs-on: [self-hosted, Linux, X64, tgwitness-ci]
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write # Push the image; application downloads publish independently.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
       - name: Build an ARM64 package for the emulated smoke check
@@ -124,6 +144,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Refuse replacing a published container version
+        env:
+          IMAGE: ${{ needs.version.outputs.image }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          if docker buildx imagetools inspect "$IMAGE:$VERSION" >/dev/null 2>&1; then
+            echo "Container version already exists; publish changes under a new version." >&2
+            exit 1
+          fi
       - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         id: image
         with:
@@ -138,11 +167,6 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
           provenance: mode=max
           sbom: true
-      - name: Attach downloads to the release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: gh release upload "$RELEASE_TAG" dist/*.whl dist/*-source.zip dist/*-source.zip.sha256 --clobber
       - name: Record the published image
         env:
           IMAGE: ${{ needs.version.outputs.image }}
@@ -150,3 +174,55 @@ jobs:
           DIGEST: ${{ steps.image.outputs.digest }}
         run: |
           printf 'Container: `%s:%s`\n\nDigest: `%s@%s`\n' "$IMAGE" "$VERSION" "$IMAGE" "$DIGEST" >> "$GITHUB_STEP_SUMMARY"
+  manifest:
+    name: Verify published downloads and publish their checksums
+    needs: [version, portable, packages]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # Attach the manifest only after every listed download verifies.
+    steps:
+      - name: Download this release's application packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: >-
+          gh release download "$RELEASE_TAG" --dir dist
+          --pattern '*-portable.zip*' --pattern '*-source.zip*' --pattern '*.whl*'
+      - name: Verify downloaded bytes and bind the file list to the source revision
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          SOURCE_REVISION: ${{ github.sha }}
+        run: |
+          python3 -I - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          version = os.environ["VERSION"]
+          names = [f"TgWitness-{version}-source.zip",
+                   f"TgWitness-{version}-windows-amd64-portable.zip",
+                   f"tgwitness-{version}-py3-none-any.whl"]
+          root = Path("dist")
+          expected = set(names + [name + ".sha256" for name in names])
+          if {path.name for path in root.iterdir()} != expected:
+              raise SystemExit("Unexpected or missing release downloads")
+          files, sums = {}, []
+          for name in names:
+              path = root / name
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              line = digest + "  " + name
+              if (root / (name + ".sha256")).read_text(encoding="ascii").strip() != line:
+                  raise SystemExit("Release checksum mismatch: " + name)
+              files[name] = {"sha256": digest, "bytes": path.stat().st_size}
+              sums.append(line)
+          manifest = {"schema": "tgwitness-release-v1", "version": version,
+                      "source_revision": os.environ["SOURCE_REVISION"], "files": files}
+          (root / "SHA256SUMS.txt").write_text("\n".join(sums) + "\n", encoding="ascii")
+          (root / "RELEASE-MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="ascii")
+          PY
+      - name: Attach the verified download inventory
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" dist/SHA256SUMS.txt dist/RELEASE-MANIFEST.json

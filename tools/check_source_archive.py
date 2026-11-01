@@ -1,10 +1,13 @@
-"""Offline source archive reproducibility, private-file and failed-write regressions."""
+"""Offline source archive, private-file, secret-scan and failed-write regressions."""
 import hashlib
+import base64
+import csv
 import importlib.util
 import io
 import os
 from pathlib import Path
 import tempfile
+import sys
 from unittest.mock import patch
 import zipfile
 from contextlib import redirect_stdout
@@ -14,9 +17,106 @@ builder = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(builder)
 
 
+def check_publication_secrets():
+    spec = importlib.util.spec_from_file_location("check_publication", Path(__file__).with_name("check_publication.py"))
+    scanner = importlib.util.module_from_spec(spec)
+    with patch.dict(sys.modules, {"build_source": builder}):
+        spec.loader.exec_module(scanner)
+    # Assemble synthetic credentials so publication scanning never needs a fixture
+    # exemption and no real key/environment variable is read by this regression.
+    suffix = "SyntheticCanary0123" * 3
+    uuid = "12345678" + "-1234" * 3 + "-123456789abc"
+    values = ["sk-" + suffix, "sk-" + "proj-" + suffix, "sk-" + "svcacct-" + suffix,
+              "sk-" + "ant-api03-" + suffix, "sk-" + "or-v1-" + "a" * 64,
+              "gsk_" + suffix, "AIza" + "a" * 35, uuid + ":fx",
+              "DEEPL_AUTH_KEY=" + uuid, '"deepl_api_key": "' + uuid + '"',
+              "Authorization: DeepL-Auth-Key " + uuid,
+              "-----" + "BEGIN ENCRYPTED PRIVATE KEY" + "-----"]
+    for value in values:
+        findings = scanner.secret_findings("public text\n" + value, "synthetic.py")
+        assert len(findings) == 1 and "synthetic.py:2:" in findings[0]
+        assert all(secret not in findings[0] for secret in (value, suffix, uuid)) and "value withheld" in findings[0]
+        # The same guard must cover approved demonstration archives as well as source.
+        payload = io.BytesIO()
+        with zipfile.ZipFile(payload, "w") as archive:
+            archive.writestr("notes.txt", "public text\n" + value)
+        archived = scanner.data_findings(payload.getvalue(), "synthetic.zip")
+        assert len(archived) == 1 and "synthetic.zip/notes.txt:2:" in archived[0]
+        assert all(secret not in archived[0] for secret in (value, suffix, uuid)) and "value withheld" in archived[0]
+    for value in (uuid, "DEEPL_AUTH_KEY", 'os.environ["DEEPL_API_KEY"]',
+                  '"DEEPL_AUTH_KEY": "your-key-here"', "sk-" + "example", "TRUSTED_SHA256"):
+        assert scanner.secret_findings(value, "public.py") == []
+
+
+def check_portable_metadata(root):
+    spec = importlib.util.spec_from_file_location("build_portable", Path(__file__).with_name("build_portable.py"))
+    portable = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(portable)
+    site = root / "portable/python/Lib/site-packages"
+    metadata = site / ("tgwitness-" + portable.VERSION + ".dist-info")
+    files = {
+        metadata / "METADATA": b"Name: tgwitness\n",
+        metadata / "licenses/LICENSE, notice.txt": "Public licence — preserved\n".encode(),
+        metadata / "direct_url.json": b'{"url":"file:///synthetic-private-builder"}',
+        site / "dependency.dist-info/licenses/LICENSE": b"Dependency licence\n",
+        site / "dependency.dist-info/direct_url.json": b'{"url":"https://example.invalid/dependency"}',
+    }
+    for path, data in files.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+    record = metadata / "RECORD"
+    launcher = (site / "../../bin/tgwitness.exe").resolve()
+    assert launcher.is_relative_to(root)
+    launcher.parent.mkdir(parents=True, exist_ok=True)
+    launcher_data = b"Synthetic retained launcher\n"
+    launcher.write_bytes(launcher_data)
+    rows = [[path.relative_to(site).as_posix(),
+             "sha256=" + base64.urlsafe_b64encode(hashlib.sha256(data).digest()).decode().rstrip("="), str(len(data))]
+            for path, data in files.items() if path.is_relative_to(metadata)]
+    rows += [["../../bin/tgwitness.exe", "sha256=" + base64.urlsafe_b64encode(
+                  hashlib.sha256(launcher_data).digest()).decode().rstrip("="), str(len(launcher_data))],
+             ["../../bin/tgwitness-mcp.exe", "sha256=removed", "10"],
+             [record.relative_to(site).as_posix(), "", ""]]
+    with record.open("w", encoding="utf-8", newline="") as target:
+        csv.writer(target).writerows(rows)
+    portable.clean_app_install_metadata(site)
+    assert not (metadata / "direct_url.json").exists()
+    with record.open(encoding="utf-8", newline="") as source:
+        kept = list(csv.reader(source))
+    assert len(kept) == 4
+    for name, digest, size in kept:
+        path = site / name
+        assert path.is_file()
+        if path != record:
+            data = path.read_bytes()
+            assert int(size) == len(data)
+            assert digest == "sha256=" + base64.urlsafe_b64encode(hashlib.sha256(data).digest()).decode().rstrip("=")
+    for path, data in files.items():
+        if path != metadata / "direct_url.json":
+            assert path.read_bytes() == data, "Unrelated metadata or a licence was modified"
+    cleaned = record.read_bytes()
+    portable.clean_app_install_metadata(site)
+    assert record.read_bytes() == cleaned, "Portable metadata cleanup is not idempotent"
+    launcher.unlink()
+    portable.clean_app_install_metadata(site)
+    with record.open(encoding="utf-8", newline="") as source:
+        assert list(csv.reader(source)) == [row for row in kept if row[0] != "../../bin/tgwitness.exe"]
+    (metadata / "direct_url.json").write_bytes(files[metadata / "direct_url.json"])
+    record.write_text("malformed,two columns\n", encoding="utf-8")
+    try:
+        portable.clean_app_install_metadata(site)
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("Malformed RECORD was accepted")
+    assert (metadata / "direct_url.json").exists(), "Malformed metadata caused partial cleanup"
+
+
 def main():
+    check_publication_secrets()
     with tempfile.TemporaryDirectory(prefix="tgwitness-source-check-") as temporary:
         root = Path(temporary).resolve()
+        check_portable_metadata(root)
         source = root / "tgwitness"
         source.mkdir()
         original = {
@@ -31,6 +131,12 @@ def main():
         (source / "sessions.json").write_text("PRIVATE_CANARY", encoding="utf-8")
         (source / "data").mkdir()
         (source / "data" / "secrets.py").write_text("PRIVATE_CANARY", encoding="utf-8")
+        for name in ("Data/private.py", "BUILD/output.py", "nested/dist/generated.py",
+                     ".tmp/scratch.py", ".TMP-audit/scratch.py", ".tmp-note.py", "nested/.tmp-notes.md"):
+            path = source / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("PRIVATE_CANARY", encoding="utf-8")
+            assert not builder.is_public_file(path, source), name
         target = root / "dist" / "TgWitness-0.0.0-source.zip"
         checksum = target.with_suffix(".zip.sha256")
 
@@ -93,7 +199,7 @@ def main():
         assert target.read_bytes() != first
         with zipfile.ZipFile(target) as archive:
             assert archive.read("TgWitness/README.md") == b"Changed public source\n"
-    print("Source archive checks passed: repeatability, metadata, exact bytes, private exclusions and interrupted writes.")
+    print("Source archive checks passed: repeatability, metadata, exact bytes, private exclusions, secret redaction, interrupted writes and portable metadata hygiene.")
 
 
 if __name__ == "__main__":

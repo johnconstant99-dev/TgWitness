@@ -25,9 +25,8 @@ The proxy and witness bot are separate options.
 
 ## Find your workflow
 
-**New in main:** history loading, archive analysis, MCP, local OCR/transcription
-and webhooks. Use a source checkout for these features; the 0.7.0 portable
-preview predates them. [Start with the workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/).
+History loading, archive analysis, MCP, local OCR/transcription and webhooks are
+included in 0.7.1. [Start with the workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/).
 
 | I want to… | Start here | What I should see |
 | --- | --- | --- |

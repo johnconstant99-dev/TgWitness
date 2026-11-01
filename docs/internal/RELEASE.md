@@ -1,15 +1,19 @@
-# Version 0.7.0
+# Version 0.7.1 preview
 
 TgWitness is a self-hosted Telegram observation journal under the
-[MIT License](../../LICENSE). Version 0.7.0 is the first GitHub preview release; its
+[MIT License](../../LICENSE). Version 0.7.1 is the 1 November 2026 preview; its
 contents are listed in the [changelog](../CHANGELOG.md). The release carries the
 Windows portable package, the wheel and the source archive, each with its SHA-256.
 
 ## Included in this source tree
 
 - A bearer-protected panel with isolated account workspaces, light/dark themes, 25 interface
-  languages and a searchable Ctrl/Cmd+K navigation menu. Newer untranslated strings have
-  explicit English fallbacks; quick-navigation labels also have Russian translations.
+  languages and a searchable Ctrl/Cmd+K navigation menu. English is canonical;
+  export and recipient-report labels use DeepL translations in all other languages.
+- Separate personal account exports and investigation workflows, with readable
+  offline reports, privacy previews, minimized sharing copies and recipient notes.
+- Resumable history loading, archive search and analysis, read-only MCP, optional
+  local OCR/transcription and HMAC-signed webhooks.
 - Phone/code/2FA, QR sign-in and bounded import of supported Telethon/Pyrogram sessions,
   Telegram Desktop TData ZIP, StringSession and Auth Key inputs.
 - Selection of individual chats, a Telegram folder or account-wide scope; capture of visible
@@ -38,25 +42,20 @@ wheel, Windows portable and GHCR packages. Public source and wheel assets use al
 the public site includes only presentation assets. Publication checks and dependency auditing
 run in CI. See [publishing](PUBLISHING.md) for commands and deployment steps.
 
-Version 0.7.0 is a preview. Its source archive, wheel and Windows portable package
-are built locally using the tools the workflow runs. Shipped application files
-are compared with the reviewed source commit recorded in `RELEASE-MANIFEST.json`;
-`SHA256SUMS.txt` covers the three downloads. No GHCR image exists for
-0.7.0 yet; Docker users build locally with
-`scripts/Docker.cmd` or `scripts/docker-start.sh`.
+Version 0.7.1 remains a preview. The release workflow publishes the exact Windows
+portable artifact tested by the checks workflow, alongside the source archive
+and wheel. A final job downloads all three published packages, checks their
+SHA-256 sidecars and publishes `SHA256SUMS.txt` and `RELEASE-MANIFEST.json` with
+the version, source revision and asset sizes. Existing release assets are not
+overwritten. Docker users can also build locally with `scripts/Docker.cmd` or
+`scripts/docker-start.sh`.
 
 Local checks do not establish that GitHub-hosted workflows have run successfully.
 
-Local preview validation on 31 October 2026 (Windows, Python 3.12): 735 Python tests
-passed, 2 skipped; all eight browser checks in the checks workflow passed. The
-controller's 21 Node tests passed, including the Worker restart and replay tests.
-Ruff, notice consistency and the staged-publication check passed. The source
-archive contains 795 reviewed files; 111 application files were compared across
-the source tree, wheel and portable package. The installed portable package
-started with synthetic data, exported a 32-event journal and verified both normal
-and streamed downloads. No new live Telegram run was performed for this preview.
-Current Linux/macOS validation and successful completion of the queued GitHub
-checks remain separate qualification work.
+The [verification record](../VERIFICATION.md) describes prior tests and their
+limits. Check the release commit's Actions results and published package manifest
+for this build's acceptance. Packaging and synthetic checks do not establish new
+live Telegram coverage or native-platform qualification.
 
 TgWitness has run on a real Telegram account: one supergroup from 27 to 29 October 2026,
 1,291 messages, 472 deletions and 12 edits, with the signatures of all 2,385 records

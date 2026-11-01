@@ -52,13 +52,16 @@ PRESENTATION_MEDIA = {
     "assets/presentation/investigation.mp4", "assets/presentation/investigation.gif",
     "assets/presentation/message-history.mp4", "assets/presentation/message-history.gif",
 }
-PRIVATE_DIRECTORIES = {"data", "proof-data", "proof-config", "proxy-config", "witness-data", "__pycache__", ".venv", "venv", "test-results", ".pytest_cache", ".ruff_cache"}
+PRIVATE_DIRECTORIES = {"data", "proof-data", "proof-config", "proxy-config", "witness-data", "__pycache__", ".venv", "venv", "test-results", ".pytest_cache", ".ruff_cache", "build", "dist"}
 
 
 def is_public_file(path, directory):
     """JSON is an explicit resource allowlist, never a blanket source extension."""
     relative = path.relative_to(directory)
-    if any(part in PRIVATE_DIRECTORIES or part.startswith("tgwitness-backup") for part in relative.parts[:-1]):
+    parts = tuple(part.casefold() for part in relative.parts)
+    if any(part in PRIVATE_DIRECTORIES or part.startswith("tgwitness-backup") for part in parts[:-1]):
+        return False
+    if any(part == ".tmp" or part.startswith(".tmp-") for part in parts):
         return False
     if path.suffix in {".gif", ".mp4"}:
         return directory.name == "docs" and relative.as_posix() in PRESENTATION_MEDIA

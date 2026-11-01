@@ -121,7 +121,7 @@ Bu, başarılı bir [sürüm iş akışı](#otomatik-github-sürümleri) ve halk
 `deploy/env.example` öğesini `.env` öğesine kopyalayın. `TGWITNESS_IMAGE` öğesini, **küçük harfli** depo yolunu kullanarak yayınlanan sürüme ayarlayın, örneğin:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.0
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.1
 TGWITNESS_PORT=8787
 ```
 
@@ -200,7 +200,7 @@ Güncellemeden sonra panel erişimini, hesap kimliğini, gözlem durumunu ve kap
 
 Bu proje, Actions özelliği etkinleştirilmiş bir GitHub deposuna gönderildikten sonra [sürüm yayınlama iş akışı](../../.github/workflows/release.yml) kullanıma hazır hale gelir. Bu iş akışı, ön sürüm dahil olmak üzere bir GitHub Sürümü yayınlandığında çalışır. Taslaklar ve etiket gönderimleri tek başına paketlerin yayınlanmasına yol açmaz.
 
-1. Paket sürümünü ve değişiklik günlüğünü belirleyin, ardından `v` etiketiyle ve tam `pyproject.toml` sürümüyle (örneğin `v0.7.0`) bir sürüm yayınlayın.
+1. Paket sürümünü ve değişiklik günlüğünü belirleyin, ardından `v` etiketiyle ve tam `pyproject.toml` sürümüyle (örneğin `v0.7.1`) bir sürüm yayınlayın.
 2. İş akışı, etiketi doğrular ve paylaşılan Windows/Linux/macOS Python, genel/hesap içe aktarma/QR tarayıcı, kaynak paket ve Docker kontrollerini çalıştırır. Ayrıca, Python 3.12 kullanılarak üç işletim sisteminin tümünde yeni yerel kurulum da gerçekleştirilir.
 3. Bu kontroller başarıyla tamamlandıktan sonra, QEMU altında bir ARM64 görüntüsünü hızlı test eder, AMD64/ARM64 görüntülerini `ghcr.io/<lowercase-owner>/<lowercase-repository>:<version>` adresine yayınlar ve kaynak ZIP dosyasını, sağlama toplamını ve Python wheel dosyasını sürüme ekler. Ayrı bir Windows işi, taşınabilir ZIP dosyasını ve sağlama toplamını derler ve ekler.
 4. İlk yayınlamadan sonra, GHCR paket ayarlarını açın ve anonim görüntü çekimleri planlanıyorsa görünürlüğü "**Herkese Açık**" olarak ayarlayın. Yalnızca herkese açık bir kaynak deposu, paketin herkese açık bir konteyner paketi olacağını garanti etmez. Kuruluş politikaları, paket yayınlamasına izin vermelidir. İş akışı `GITHUB_TOKEN` kullanır; depoda kayıt defteri şifresi veya VPS kimlik bilgileri bulunmamalıdır.

@@ -121,7 +121,7 @@ Tài liệu này sẽ được cung cấp sau khi [quy trình phát hành](#các
 Sao chép `deploy/env.example` vào `.env`. Đặt `TGWITNESS_IMAGE` thành phiên bản đã được xuất bản, sử dụng đường dẫn kho lưu trữ **viết thường**, ví dụ:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.0
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.1
 TGWITNESS_PORT=8787
 ```
 
@@ -200,7 +200,7 @@ Vui lòng kiểm tra quyền truy cập bảng điều khiển, thông tin nhậ
 
 [Quy trình phát hành](../../.github/workflows/release.yml) sẽ sẵn sàng hoạt động sau khi dự án này được đẩy lên kho lưu trữ GitHub có bật tính năng Actions. Quy trình này sẽ được kích hoạt khi một bản phát hành GitHub được **công bố**, bao gồm cả bản phát hành trước. Việc đẩy bản nháp hoặc thẻ (tag) đơn thuần sẽ không dẫn đến việc phát hành các gói phần mềm.
 
-1. Vui lòng thiết lập phiên bản gói phần mềm và nhật ký thay đổi, sau đó phát hành bản cập nhật được gắn thẻ bằng `v` cùng với phiên bản chính xác `pyproject.toml`, chẳng hạn như `v0.7.0`.
+1. Vui lòng thiết lập phiên bản gói phần mềm và nhật ký thay đổi, sau đó phát hành bản cập nhật được gắn thẻ bằng `v` cùng với phiên bản chính xác `pyproject.toml`, chẳng hạn như `v0.7.1`.
 2. Quy trình làm việc này sẽ xác thực thẻ và thực thi các kiểm tra chung cho Python trên Windows/Linux/macOS, trình duyệt chung/nhập tài khoản/mã QR, gói nguồn cũng như các kiểm tra Docker. Việc cài đặt bản gốc mới cũng được thực hiện trên cả ba hệ điều hành này bằng Python 3.12.
 3. Sau khi các bước kiểm tra này thành công, hệ thống sẽ tiến hành kiểm tra sơ bộ (smoke test) hình ảnh ARM64 trên QEMU, đăng tải các hình ảnh AMD64/ARM64 lên `ghcr.io/<lowercase-owner>/<lowercase-repository>:<version>`, đồng thời đính kèm tệp ZIP nguồn, tổng kiểm tra (checksum) và gói Python wheel vào bản phát hành. Một tác vụ riêng biệt trên Windows sẽ biên dịch và đính kèm tệp ZIP di động cùng tổng kiểm tra (checksum) của nó.
 4. Sau lần xuất bản đầu tiên, quý vị hãy mở cài đặt gói GHCR và đặt quyền truy cập thành **Công khai** nếu có ý định thực hiện việc tải xuống hình ảnh ẩn danh. Chỉ riêng kho lưu trữ nguồn công khai không đảm bảo rằng gói container cũng sẽ công khai. Chính sách của tổ chức phải cho phép việc xuất bản gói. Quy trình làm việc sử dụng thẻ `GITHUB_TOKEN`; tuyệt đối không được lưu mật khẩu kho lưu trữ hoặc thông tin đăng nhập VPS trong kho lưu trữ.

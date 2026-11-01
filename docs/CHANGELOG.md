@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.7.1 preview · 1 November 2026
+
+- Fixed chat profiles getting stuck after navigating away while a request was
+  loading. Reopening the view can retry, and an outdated request cannot overwrite
+  the current chat's profile state.
 
 - Added a clear handoff after download: distinguish the original archive from
   sharing copies, review the report, and copy plain instructions for the recipient.
@@ -180,7 +184,6 @@
 - Added local OCR/transcription for saved attachments and signed outgoing webhooks
   with delivery status, retries and an n8n example.
 - Connected the new workflows across README, Wiki and translated site reference.
-  These additions require current source; the 0.7.0 portable preview predates them.
 
 - Sealed, localized reports. `report.html` and `chat.html` are rebuilt as self-contained
   case documents in any of the 25 panel languages: case details, integrity and key

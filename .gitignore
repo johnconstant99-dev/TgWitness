@@ -47,6 +47,8 @@ dist/
 build/
 *.egg-info/
 test-results/
+.tmp/
+.tmp-*/
 .playwright/
 proof-config/
 proof-data/

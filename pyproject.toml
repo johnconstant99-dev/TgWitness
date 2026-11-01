@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tgwitness"
-version = "0.7.0"
+version = "0.7.1"
 description = "Telegram observation journal with version history and signed evidence exports"
 readme = "README.md"
 requires-python = ">=3.11"
