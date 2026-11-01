@@ -24,7 +24,11 @@ const state = {token: sessionStorage.getItem("tgwitness-token") || "",
   captureDirty: false, workspaceRevision: 0, verification: null, opened:false, connectionSettings:false,
   chat: null, chats: [], chatsLoading: false, chatsError: false, chatMessages: [], chatNextBefore: null, chatNextAfter: null, chatInfo: null, chatFilter: "all", chatView: "messages", chatAuthor: null,
   scope: null, scopeDirty: false, dossier: null, notifications: [], witnessToken: null, parameters: null, parametersDirty: false,
-  me: null, access: null, accessEdit: null, accessChats: {}, consoleAfter: 0};
+  me: null, access: null, accessEdit: null, accessChats: {}, consoleAfter: 0,
+  accountExportJobs: [], accountExportDefaults: null, accountExportCapabilities: null,
+  accountExportDraftProfile: null, accountExportDirty: false,
+  accountDisclosureJob: null, accountDisclosurePreview: null, accountDisclosureDirty: false,
+  accountDisclosures: {}};
 let viewHost=null;
 const viewContexts=new Map();
 const viewOptions=view=>({signal:viewContexts.get(view)?.signal});
@@ -64,7 +68,7 @@ function resetViewContent(view){
   if(view==='connection'){networkLoadedFor=null;policyOutsideDirty=false;policyFormDirty=false;state.policy=null;}
   if(view==='sources'){state.scope=null;state.scopeDirty=false;state.recheckDirty=false;}
   if(view==='parameters')parametersView?.resetSession();
-  if(view==='evidence')exportsView?.resetSession();
+  if(view==='evidence'){exportsView?.resetSession();resetAccountExport();}
   if(view==='accounts')accountsView?.resetSession();
   if(view==='witness'){state.evidenceDirty=false;state.replicaDirty=false;state.alertsDirty=false;state.githubDirty=false;}
   if(view==='chats')chatListView?.resetSession();
@@ -88,7 +92,10 @@ async function loadPanelView(view){
   else if(view==='observations')await refreshEvents();
   else if(view==='access')await loadAccess();
   else if(view==='system-log')await loadConsole();
-  else if(view==='evidence'){renderChatExportTools();await Promise.all([loadReportSettings(),loadExports()]);}
+  else if(view==='evidence'){
+    renderChatExportTools();
+    await Promise.all([loadReportSettings(),loadExports(),loadAccountExport().catch(accountExportError)]);
+  }
   else if(view==='integrations')await window.TgWitnessIntegrations?.load();
   else if(view==='analysis')await window.TgWitnessAnalysis?.load();
   else if(view==='connection'){await loadProfiles();if(!state.status.demo)await loadPolicy();}
@@ -127,7 +134,10 @@ async function applyRouteToPanel(route,current){
   else if(view==="system-log")await loadConsole();
   else if(view==="integrations")await window.TgWitnessIntegrations?.load();
   else if(view==="analysis")await window.TgWitnessAnalysis?.load();
-  else if(view==="evidence"){renderChatExportTools();await Promise.all([loadReportSettings(),loadExports()]);}
+  else if(view==="evidence"){
+    renderChatExportTools();
+    await Promise.all([loadReportSettings(),loadExports(),loadAccountExport().catch(accountExportError)]);
+  }
   else if(view==="witness"){await loadExtras();if(current())selectExtra(route.extra,{history:false});}
 }
 
@@ -477,6 +487,7 @@ function applyAccess(){
   $("manage-profiles").hidden=!state.me?.admin;
   if(state.view==="analysis"&&!viewAllowed("analysis")&&!$("workspace").hidden)navigate("chats");
   panelQueries("[data-export]").forEach(n=>n.hidden=!viewAllowed("evidence"));
+  show("account-export-card",!!state.me?.admin&&viewAllowed("evidence"));
 
   const limited=!!state.status?.chats_limited;
   $("chats-manage").hidden=!viewAllowed("sources");
@@ -558,6 +569,10 @@ const quickDialog=$("quick-dialog"),quickSearch=$("quick-search"),quickResults=$
 const quickCatalogHint=node('p','hint');quickCatalogHint.hidden=true;quickCatalogHint.setAttribute('role','status');quickResults.after(quickCatalogHint);
 let quickIndex=0,quickCatalog=[],quickCatalogKey='',quickCatalogPending=null;
 const quickSession=()=>state.workspaceRevision+':'+state.profile;
+function cancelQuickCatalog(){
+  const pending=quickCatalogPending;quickCatalogPending=null;
+  pending?.abort();quickCatalogHint.hidden=true;
+}
 async function loadQuickCatalog(){
   if(!quickDialog.open||!viewAllowed('parameters'))return;
   const session=quickSession();if(quickCatalogKey===session||quickCatalogPending)return;
@@ -571,8 +586,9 @@ async function loadQuickCatalog(){
     quickCatalogHint.textContent=tr('Parameter search is unavailable. Open Parameters to retry.');quickCatalogHint.hidden=false;
   }}finally{if(quickCatalogPending===controller)quickCatalogPending=null;}
 }
-quickDialog.addEventListener('close',()=>{quickCatalogPending?.abort();quickCatalogPending=null;quickCatalogHint.hidden=true;});
-window.addEventListener('tgwitness:lock',()=>{quickCatalog=[];quickCatalogKey='';quickCatalogPending?.abort();quickCatalogPending=null;quickResults.replaceChildren();});
+// Native close events are queued; an older one must not cancel a reopened palette.
+quickDialog.addEventListener('close',()=>{if(!quickDialog.open)cancelQuickCatalog();});
+window.addEventListener('tgwitness:lock',()=>{quickCatalog=[];quickCatalogKey='';cancelQuickCatalog();quickResults.replaceChildren();});
 $("quick-shortcut").textContent=/Mac|iPhone|iPad/.test(navigator.platform)?"⌘ K":"Ctrl K";
 function selectQuick(index){
   const options=[...quickResults.children];
@@ -641,7 +657,8 @@ function openQuickDestination(view){
 function toggleQuick(){
   if(quickDialog.open){quickDialog.close();return;}
   if($("workspace").hidden||$("workspace").inert||document.querySelector("dialog[open]")||!$("detail-drawer").hidden)return;
-  closeNotifications();quickSearch.value="";
+  // Retire the previous request before reopening, even if its close event is still queued.
+  closeNotifications();cancelQuickCatalog();quickSearch.value="";
   quickDialog.showModal();renderQuick();quickSearch.focus();void loadQuickCatalog();
 }
 document.querySelectorAll("[data-quick-open]").forEach(button=>button.addEventListener("click",toggleQuick));
@@ -1036,6 +1053,10 @@ function renderAccounts(){
   window.TgWitnessFleet?.decorate();accountsView?.updateStatus();
 }
 async function switchProfile(id,options={}){
+  if(id!==state.profile&&(state.accountExportDirty||state.accountDisclosureDirty)&&
+      !options.discardConfirmed&&!window.confirm(tr("Discard unsaved settings in this workspace and switch accounts?"))){
+    $("profile-select").value=state.profile;return false;
+  }
   formControls?.reset();connectionNotice?.clear();
   if(options.history!==false)window.TgWitnessRouter?.invalidate();
   parametersView?.resetSession();
@@ -1451,6 +1472,410 @@ function saveExport(button){return busy(button,async()=>{
   $("chat-export-progress").textContent=tr("Downloaded. Export another chat if needed.");
 });}
 $("chat-export-download").addEventListener("click",e=>saveExport(e.currentTarget));
+// A Telegram account snapshot is a durable job, separate from the signed observation journal.
+const accountExportKinds=["private","bot","group","supergroup","channel"];
+const accountExportMedia=["photo","video","video_message","voice","audio","document","sticker","animation"];
+const accountExportFallback={purpose:"",chat_kinds:accountExportKinds,from_utc:null,to_utc:null,chat_ids:[],
+  sender_ids:[],text_contains:[],own_messages_only:false,
+  include_archived:true,media_types:accountExportMedia,max_media_file_mib:512,max_total_gib:16,
+  include_profile:true,include_contacts:true,include_profile_photos:false,include_stories:false,
+  include_session_metadata:false,include_other_data:false,transport:"takeout"};
+let accountExportRead=null,accountExportRequest=0;
+function resetAccountExport(){
+  accountExportRequest++;accountExportRead=null;
+  $("account-export-dialog")?.close();$("account-disclosure-dialog")?.close();
+  state.accountExportJobs=[];state.accountExportDefaults=null;state.accountExportCapabilities=null;
+  state.accountExportDraftProfile=null;state.accountExportDirty=false;
+  state.accountDisclosureJob=null;state.accountDisclosurePreview=null;state.accountDisclosureDirty=false;
+  state.accountDisclosures={};
+  $("account-export-jobs")?.replaceChildren();
+  if($("account-export-status"))$("account-export-status").textContent="";
+}
+function accountExportError(error){
+  if(error instanceof StaleView)return;
+  $("account-export-status").textContent=tr("Account export could not be refreshed: {error}",{error:error.message});
+}
+function accountExportDefaults(options){
+  const saved={...accountExportFallback,...options};
+  $("account-export-purpose").value=saved.purpose||"";
+  for(const input of $("account-export-kinds").querySelectorAll('input[type="checkbox"]'))
+    input.checked=saved.chat_kinds.includes(input.value);
+  for(const input of $("account-export-media").querySelectorAll('input[type="checkbox"]'))
+    input.checked=saved.media_types.includes(input.value);
+  $("account-export-archived").checked=!!saved.include_archived;
+  $("account-export-own").checked=!!saved.own_messages_only;
+  $("account-export-ids").value=(saved.chat_ids||[]).join(", ");
+  $("account-export-senders").value=(saved.sender_ids||[]).join(", ");
+  $("account-export-phrases").value=(saved.text_contains||[]).join("\n");
+  $("account-export-from").value=saved.from_utc?String(saved.from_utc).slice(0,10):"";
+  $("account-export-through").value=saved.to_utc?
+    new Date(Date.parse(saved.to_utc)-86400000).toISOString().slice(0,10):"";
+  $("account-export-file-limit").value=String(saved.max_media_file_mib);
+  $("account-export-total-limit").value=String(saved.max_total_gib);
+  for(const key of ["profile","contacts","profile-photos","stories","session-metadata","other-data"]){
+    const field="include_"+key.replaceAll("-","_");$("account-export-"+key).checked=!!saved[field];
+  }
+  $("account-export-transport").value=saved.transport;
+  state.accountExportDraftProfile=state.profile;state.accountExportDirty=false;
+  renderAccountExportPreview();
+}
+function accountExportOptions(){
+  const purpose=$("account-export-purpose").value.trim();
+  const kinds=[...$("account-export-kinds").querySelectorAll("input:checked")].map(n=>n.value);
+  if(!kinds.length)throw new Error(tr("Choose at least one chat type."));
+  const ids=$("account-export-ids").value.trim().split(/[\s,;]+/).filter(Boolean);
+  const chat_ids=[...new Set(ids.map(value=>{
+    const id=Number(value);
+    if(!Number.isSafeInteger(id)||id===0)throw new Error(tr("Enter valid numeric chat IDs, separated by commas or lines."));
+    return id;
+  }))];
+  const sender_ids=[...new Set($("account-export-senders").value.trim().split(/[\s,;]+/).filter(Boolean).map(value=>{
+    const id=Number(value);
+    if(!Number.isSafeInteger(id)||id===0)throw new Error(tr("Enter valid numeric sender IDs, separated by commas or spaces."));
+    return id;
+  }))];
+  if(sender_ids.length>10000)throw new Error(tr("Select no more than 10,000 sender IDs."));
+  const text_contains=[...new Set($("account-export-phrases").value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean))];
+  if(text_contains.length>100||text_contains.some(value=>value.length>200))
+    throw new Error(tr("Use no more than 100 literal phrases, each up to 200 characters."));
+  const from=$("account-export-from").value,through=$("account-export-through").value;
+  const from_utc=from?from+"T00:00:00Z":null;
+  const to_utc=through?new Date(Date.parse(through+"T00:00:00Z")+86400000).toISOString():null;
+  if(from_utc&&to_utc&&Date.parse(from_utc)>=Date.parse(to_utc))
+    throw new Error(tr("The through date must be on or after the from date."));
+  const max_media_file_mib=Number($("account-export-file-limit").value);
+  const max_total_gib=Number($("account-export-total-limit").value);
+  if(!Number.isInteger(max_media_file_mib)||max_media_file_mib<1||max_media_file_mib>4096||
+      !Number.isInteger(max_total_gib)||max_total_gib<1||max_total_gib>1024)
+    throw new Error(tr("Enter a per-file limit of 1–4,096 MiB and a media budget of 1–1,024 GiB."));
+  return {purpose,chat_kinds:kinds,from_utc,to_utc,chat_ids,sender_ids,text_contains,
+    own_messages_only:$("account-export-own").checked,
+    include_archived:$("account-export-archived").checked,
+    media_types:[...$("account-export-media").querySelectorAll("input:checked")].map(n=>n.value),
+    max_media_file_mib,max_total_gib,include_profile:$("account-export-profile").checked,
+    include_contacts:$("account-export-contacts").checked,
+    include_profile_photos:$("account-export-profile-photos").checked,
+    include_stories:$("account-export-stories").checked,
+    include_session_metadata:$("account-export-session-metadata").checked,
+    include_other_data:$("account-export-other-data").checked,transport:$("account-export-transport").value};
+}
+function renderAccountExportPreview(){
+  const box=$("account-export-preview");
+  try{
+    const x=accountExportOptions(),all=!x.chat_ids.length;
+    box.textContent=tr(all?"All accessible chats of {n} selected types, including Saved Messages when private chats are selected.":
+      "{n} selected chat IDs of the chosen types.",{n:all?x.chat_kinds.length:x.chat_ids.length})+" "+
+      tr(x.from_utc||x.to_utc?"Selected UTC dates apply to each chat.":"Full visible history, without a date limit.")+" "+
+      tr("Media: {n} types, up to {file} MiB per file and {total} GiB downloaded media budget.",
+        {n:x.media_types.length,file:x.max_media_file_mib,total:x.max_total_gib})+" "+
+      tr("Sender filter: {senders}; literal phrases: {phrases}.",
+        {senders:x.sender_ids.length||tr("all"),phrases:x.text_contains.length||tr("none")})+
+      (x.purpose?" "+tr("Purpose: {purpose}",{purpose:x.purpose}):" "+tr("Enter a collection purpose before starting."));
+  }catch(error){box.textContent=error.message;}
+}
+function accountExportPhase(phase){return tr({preparing:"Discovering chats",running:"Reading Telegram",waiting:"Waiting for Telegram",
+  paused:"Paused — can resume",packaging:"Signing archive",done:"Finished",partial:"Partial — review omissions",
+  failed:"Stopped with an error"}[phase]||phase||"Unknown");}
+function accountExportTime(value){
+  if(!value)return "";
+  const date=new Date(accountExportEpochMs(value));
+  return Number.isNaN(date.valueOf())?String(value):fmtTime(date);
+}
+window.addEventListener("tgwitness:time-zone",()=>{if(state.view==="evidence")renderAccountExportJobs();});
+function accountExportEpochMs(value){return typeof value==="number"&&value<1e12?value*1000:value;}
+function accountExportIds(value,label){
+  const values=String(value||"").trim().split(/[\s,;]+/).filter(Boolean);
+  const ids=[...new Set(values.map(raw=>{
+    const id=Number(raw);
+    if(!Number.isSafeInteger(id)||id===0)throw new Error(tr("Enter valid numeric {label} IDs, separated by commas or spaces.",{label}));
+    return id;
+  }))];
+  if(ids.length>10000)throw new Error(tr("Select no more than 10,000 {label} IDs.",{label}));
+  return ids;
+}
+function accountExportPhrases(value){
+  const phrases=[...new Set(String(value||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean))];
+  if(phrases.length>100||phrases.some(x=>x.length>200))
+    throw new Error(tr("Use no more than 100 literal phrases, each up to 200 characters."));
+  return phrases;
+}
+function accountExportDates(prefix){
+  const from=$(prefix+"-from").value,through=$(prefix+"-through").value;
+  const from_utc=from?from+"T00:00:00Z":null;
+  const to_utc=through?new Date(Date.parse(through+"T00:00:00Z")+86400000).toISOString():null;
+  if(from_utc&&to_utc&&Date.parse(from_utc)>=Date.parse(to_utc))
+    throw new Error(tr("The through date must be on or after the from date."));
+  return {from_utc,to_utc};
+}
+function renderAccountExportJobs(){
+  const box=$("account-export-jobs"),focused=document.activeElement,
+    action=focused?.dataset?.accountExportAction,jobId=focused?.dataset?.jobId;
+  box.replaceChildren();
+  const jobs=state.accountExportJobs;
+  if(!jobs.length){box.append(node("p","account-export-empty",tr("No account exports yet. Configure one to save the history this account can currently read.")));return;}
+  const addAction=(parent,job,label,kind,work,cls="secondary")=>{
+    const b=node("button",cls,label);b.type="button";b.dataset.accountExportAction=kind;b.dataset.jobId=job.id;
+    b.addEventListener("click",()=>busy(b,work));parent.append(b);
+  };
+  for(const job of jobs){
+    const phase=job.phase||"unknown",counts=job.counts||{},coverage=job.coverage||{};
+    const card=node("article","account-export-job"),head=node("div","account-export-job-head");
+    head.append(node("strong","",tr("Account export {id}",{id:String(job.id||"").slice(0,10)})),
+      node("span","account-export-state "+phase,accountExportPhase(phase)));
+    card.append(head);
+    const when=accountExportTime(job.created_at);
+    if(when)card.append(node("p","account-export-job-sub",tr("Started {time}",{time:when})));
+    if(Number.isFinite(coverage.tasks_total)&&coverage.tasks_total>0){
+      const bar=node("progress");bar.max=coverage.tasks_total;bar.value=Math.min(coverage.tasks_total,coverage.tasks_done||0);
+      bar.setAttribute("aria-label",tr("Export tasks completed"));card.append(bar);
+    }else if(["preparing","running","waiting","packaging"].includes(phase)&&job.active!==false){
+      const bar=node("progress");bar.setAttribute("aria-label",tr("Export in progress"));card.append(bar);
+    }
+    const facts=node("div","account-export-metrics");
+    const metric=(label,value)=>{if(Number.isFinite(value)){const item=node("span");item.append(label+": ",node("b","",value.toLocaleString()));facts.append(item);}};
+    metric(tr("chats discovered"),counts.chats_discovered);
+    metric(tr("chats selected"),counts.chats_selected);
+    metric(tr("chats finished"),counts.chats_done);
+    metric(tr("messages saved"),counts.messages_exported);
+    metric(tr("media saved"),counts.media_saved);
+    metric(tr("media skipped"),counts.media_skipped);
+    if(Number.isFinite(counts.bytes_saved))metric(tr("bytes saved"),counts.bytes_saved);
+    if(facts.childNodes.length)card.append(facts);
+    const current=job.current_chat;
+    if(current)card.append(node("p","account-export-job-note",tr("Current chat: {name}",
+      {name:typeof current==="object"?(current.title||current.id||current.chat_id||tr("Unknown")):current})));
+    if(job.wait_until)card.append(node("p","account-export-job-note warning",tr("Telegram asked this job to wait until {time}.",
+      {time:accountExportTime(job.wait_until)})));
+    else if(job.delay_seconds)card.append(node("p","account-export-job-note warning",tr("Telegram delay: {n} seconds.",{n:job.delay_seconds})));
+    if(coverage.inventory_complete===false)card.append(node("p","account-export-job-note warning",
+      tr("Chat inventory is still being read or was interrupted; this is not a complete account inventory.")));
+    if(coverage.scope)card.append(node("p","account-export-job-note",tr("Coverage: {scope}",{scope:tr(coverage.scope)})));
+    if(coverage.failures)card.append(node("p","account-export-job-note warning",
+      tr("Coverage issues: {n}.",{n:Array.isArray(coverage.failures)?coverage.failures.length:coverage.failures})));
+    const omissions=Array.isArray(job.omissions)?job.omissions:[];
+    if(omissions.length){
+      const details=node("details","account-export-omissions"),summary=node("summary","",tr("Omissions and unavailable data ({n})",{n:omissions.length}));
+      const list=node("ul");for(const item of omissions.slice(0,100)){
+        const description=typeof item==="string"?item:[item.section||item.chat_id||item.kind,item.reason||item.error||item.status].filter(Boolean).join(": ");
+        list.append(node("li","",description||tr("Not available")));
+      }
+      if(omissions.length>100)list.append(node("li","",tr("More omissions are recorded in the signed archive.")));
+      details.append(summary,list);card.append(details);
+    }
+    if(job.error)card.append(node("p","account-export-job-note error",tr("Job error: {error}",{error:job.error})));
+    const actions=node("div","account-export-job-actions"),
+      active=["preparing","running","waiting","packaging"].includes(phase)&&job.active!==false,
+      waitPending=phase==="waiting"&&job.wait_until&&
+        new Date(accountExportEpochMs(job.wait_until)).valueOf()>Date.now();
+    if(active)addAction(actions,job,tr("Pause"),"pause",()=>accountExportAction(job,"pause"),"quiet");
+    if(!job.ready&&(["paused","failed"].includes(phase)||(phase==="waiting"&&!active&&!waitPending)))
+      addAction(actions,job,tr("Resume"),"resume",()=>accountExportAction(job,"resume"));
+    if(job.ready)addAction(actions,job,tr("Download signed archive"),"download",()=>accountExportDownload(job),"primary");
+    if(job.ready)addAction(actions,job,tr("Prepare minimized disclosure"),"disclosure",()=>openAccountDisclosure(job));
+    if(!active)addAction(actions,job,tr("Delete job"),"delete",()=>accountExportDelete(job),"quiet");
+    card.append(actions);
+    const saved=state.accountDisclosures[job.id]||[];
+    const persisted=Array.isArray(job.disclosures)?job.disclosures:[];
+    const disclosures=[...persisted,...saved.filter(local=>!persisted.some(item=>item.id===local.id))];
+    if(disclosures.length){
+      const derivatives=node("div","account-disclosure-list");
+      derivatives.append(node("strong","",tr("Signed minimized disclosures")));
+      for(const item of disclosures){
+        const row=node("div","account-disclosure-item"),label=node("span","",tr("Disclosure {id}",{id:String(item.id||"").slice(0,10)}));
+        row.append(label);
+        if(item.ready){const button=node("button","quiet",tr("Download disclosure"));button.type="button";
+          button.dataset.accountExportAction="disclosure-download";button.dataset.jobId=job.id;
+          button.addEventListener("click",()=>busy(button,()=>accountDisclosureDownload(job,item)));
+          row.append(button);
+        }else row.append(node("span","hint",tr("Preparing signed derivative")));
+        derivatives.append(row);
+      }
+      card.append(derivatives);
+    }
+    box.append(card);
+  }
+  if(action&&jobId){const replacement=[...box.querySelectorAll("[data-account-export-action]")].find(n=>
+    n.dataset.accountExportAction===action&&n.dataset.jobId===jobId);replacement?.focus({preventScroll:true});}
+}
+async function loadAccountExport(silent=false){
+  if(!state.me?.admin||!viewAllowed("evidence"))return;
+  if(silent&&accountExportRead?.revision===state.workspaceRevision&&accountExportRead.profile===state.profile)
+    return accountExportRead.promise;
+  const revision=state.workspaceRevision,profile=state.profile,request=++accountExportRequest;
+  const pending=(async()=>{
+    const result=await json("account-export");
+    if(revision!==state.workspaceRevision||profile!==state.profile||request!==accountExportRequest)return;
+    state.accountExportJobs=Array.isArray(result.jobs)?result.jobs:[];
+    state.accountExportDefaults=result.defaults||accountExportFallback;
+    state.accountExportCapabilities=result.capabilities||{};
+    if(state.accountExportDraftProfile!==profile&&!state.accountExportDirty)accountExportDefaults(state.accountExportDefaults);
+    $("account-export-start").disabled=state.accountExportCapabilities.can_start===false||
+      state.accountExportJobs.some(job=>["preparing","running","waiting","packaging"].includes(job.phase));
+    $("account-export-status").textContent=state.status?.demo?
+      tr("Demo account export uses fictional data only."):"";
+    renderAccountExportJobs();
+  })();
+  accountExportRead={revision,profile,promise:pending};
+  try{await pending;}finally{if(accountExportRead?.promise===pending)accountExportRead=null;}
+}
+async function accountExportAction(job,verb){
+  await json("account-export/"+encodeURIComponent(job.id)+"/"+verb,{});
+  await loadAccountExport();
+}
+async function accountExportDownload(job){
+  if(!job.ready)throw new Error(tr("This account archive is not ready to download."));
+  const name="tgwitness-account-export-"+String(job.id).replace(/[^a-zA-Z0-9_-]/g,"")+".zip";
+  if(await download("account-export/"+encodeURIComponent(job.id)+"/download",name,true))
+    toast(tr("Signed account archive saved. You can download it again from this job."));
+}
+async function accountExportDelete(job){
+  if(!window.confirm(tr("Delete this account export job, its archive and its disclosures? This cannot be undone.")))return;
+  await api("account-export/"+encodeURIComponent(job.id),undefined,{method:"DELETE"});
+  delete state.accountDisclosures[job.id];
+  await loadAccountExport();toast(tr("Account export job deleted."));
+}
+$("account-export-configure").addEventListener("click",e=>busy(e.currentTarget,async()=>{
+  await loadAccountExport();$("account-export-dialog").showModal();
+  $("account-export-dialog-title").focus?.();
+}));
+$("account-export-refresh").addEventListener("click",e=>busy(e.currentTarget,()=>loadAccountExport()));
+$("account-export-close").addEventListener("click",()=>$("account-export-dialog").close());
+$("account-export-dismiss").addEventListener("click",()=>$("account-export-dialog").close());
+$("account-export-form").addEventListener("input",()=>{state.accountExportDirty=true;renderAccountExportPreview();});
+$("account-export-form").addEventListener("change",()=>{state.accountExportDirty=true;renderAccountExportPreview();});
+$("account-export-minimize").addEventListener("click",()=>{
+  for(const input of $("account-export-media").querySelectorAll("input"))input.checked=false;
+  for(const input of $("account-export-sections").querySelectorAll("input"))input.checked=false;
+  state.accountExportDirty=true;renderAccountExportPreview();
+});
+$("account-export-form").addEventListener("submit",event=>{
+  event.preventDefault();busy(event.submitter,async()=>{
+    const options=accountExportOptions(),profile=state.profile,revision=state.workspaceRevision;
+    if(!options.purpose){$("account-export-purpose").focus();throw new Error(tr("Enter a collection purpose."));}
+    const job=await json("account-export/start",options);
+    if(revision!==state.workspaceRevision||profile!==state.profile)return;
+    state.accountExportDirty=false;$("account-export-dialog").close();
+    await loadAccountExport();
+    toast(tr("Account export started. Progress and omissions appear here; you can leave this page and return."));
+    if(job?.id&&!state.accountExportJobs.some(x=>x.id===job.id)){
+      state.accountExportJobs.unshift(job);renderAccountExportJobs();
+    }
+  });
+});
+let accountDisclosurePolicyRevision=0;
+function accountDisclosurePolicy(){
+  const purpose=$("account-disclosure-purpose").value.trim();
+  if(!purpose)throw new Error(tr("Enter a disclosure purpose."));
+  const identity_mode=$("account-disclosure-identities").value;
+  return {purpose,...accountExportDates("account-disclosure"),
+    sender_ids:accountExportIds($("account-disclosure-senders").value,"sender"),
+    text_contains:accountExportPhrases($("account-disclosure-phrases").value),
+    redact_terms:accountExportPhrases($("account-disclosure-redact-terms").value),
+    identity_mode,
+    disclose_user_ids:identity_mode==="pseudonymize_third_parties"?
+      accountExportIds($("account-disclosure-disclose-ids").value,"disclosed user"):[],
+    text_mode:$("account-disclosure-text-mode").value,
+    include_media:$("account-disclosure-media").checked,
+    include_contacts:false,include_profile:false,include_profile_photos:false,
+    include_stories:false,include_session_metadata:false,include_other_data:false};
+}
+function accountDisclosureInvalidate(){
+  accountDisclosurePolicyRevision++;
+  state.accountDisclosurePreview=null;state.accountDisclosureDirty=true;
+  $("account-disclosure-create").disabled=true;
+  $("account-disclosure-preview").hidden=true;
+  $("account-disclosure-status").textContent=tr("Settings changed. Preview again before creating a signed derivative.");
+}
+function openAccountDisclosure(job){
+  if(!job.ready)throw new Error(tr("Finish the source archive before preparing a disclosure."));
+  if(state.accountDisclosureJob!==job.id){
+    if(state.accountDisclosureDirty&&!window.confirm(tr("Discard the unfinished disclosure settings?")))return;
+    $("account-disclosure-form").reset();
+    state.accountDisclosureJob=job.id;state.accountDisclosureDirty=false;
+    accountDisclosureInvalidate();state.accountDisclosureDirty=false;
+    $("account-disclosure-status").textContent=tr("Preview is required after every change to these settings.");
+  }
+  $("account-disclosure-disclose-ids").disabled=$("account-disclosure-identities").value!=="pseudonymize_third_parties";
+  $("account-disclosure-dialog").showModal();
+  $("account-disclosure-purpose").focus();
+}
+function renderAccountDisclosurePreview(result){
+  $("account-disclosure-preview").hidden=false;
+  const summary=$("account-disclosure-summary");summary.replaceChildren();summary.className="account-disclosure-summary";
+  const facts=result.summary&&typeof result.summary==="object"?result.summary:{};
+  const labels={messages_before:tr("Source messages"),messages_after:tr("Included messages"),
+    chats_before:tr("Source chats"),chats_after:tr("Included chats"),
+    media_included:tr("Media files included"),identities_pseudonymized:tr("Identities pseudonymized")};
+  for(const [key,value] of Object.entries(facts)){
+    if(typeof value==="number"||typeof value==="boolean")
+      summary.append(node("span","",(labels[key]||key.replaceAll("_"," "))+": "+value));
+  }
+  if(!summary.childNodes.length)summary.append(node("span","",tr("Review the transformed sample and warnings below.")));
+  const samples=$("account-disclosure-samples");samples.replaceChildren();
+  for(const item of (Array.isArray(result.samples)?result.samples:[]).slice(0,5)){
+    const after=item?.after;
+    if(after!==undefined&&after!==null)
+      samples.append(node("pre","account-disclosure-sample",typeof after==="string"?after:JSON.stringify(after,null,2)));
+  }
+  if(!samples.childNodes.length)samples.append(node("p","hint",tr("No matching transformed sample is available. Review the counts and policy before creating a file.")));
+  const warnings=$("account-disclosure-warnings");warnings.replaceChildren();
+  warnings.append(node("p","account-disclosure-warning",tr("Personal information can remain in message text, quotes, names and attachments. Review the generated file before sharing.")));
+  for(const warning of (Array.isArray(result.warnings)?result.warnings:[]).slice(0,20))
+    warnings.append(node("p","account-disclosure-warning",typeof warning==="string"?tr(warning):JSON.stringify(warning)));
+  $("account-disclosure-expiry").textContent=result.expires_at?
+    tr("This preview expires {time}.",{time:accountExportTime(result.expires_at)}):
+    tr("Create the derivative promptly; previews expire.");
+}
+async function previewAccountDisclosure(){
+  const jobId=state.accountDisclosureJob,profile=state.profile,revision=state.workspaceRevision;
+  const policyRevision=accountDisclosurePolicyRevision,policy=accountDisclosurePolicy();
+  $("account-disclosure-status").textContent=tr("Preparing transformed preview…");
+  const result=await json("account-export/"+encodeURIComponent(jobId)+"/disclosure/preview",policy);
+  if(profile!==state.profile||revision!==state.workspaceRevision||jobId!==state.accountDisclosureJob||
+      policyRevision!==accountDisclosurePolicyRevision)return;
+  if(!result?.preview_id)throw new Error(tr("Disclosure preview did not return an approval ID."));
+  state.accountDisclosurePreview={id:result.preview_id,jobId,profile,revision,policyRevision,expires_at:result.expires_at};
+  renderAccountDisclosurePreview(result);
+  $("account-disclosure-status").textContent=tr("Review the transformed sample and remaining privacy warnings, then confirm creation.");
+  $("account-disclosure-create").disabled=false;
+}
+async function createAccountDisclosure(){
+  const approved=state.accountDisclosurePreview;
+  if(!approved||approved.jobId!==state.accountDisclosureJob||approved.profile!==state.profile||
+      approved.revision!==state.workspaceRevision||approved.policyRevision!==accountDisclosurePolicyRevision)
+    throw new Error(tr("Preview the current disclosure settings before creating a file."));
+  if(approved.expires_at&&Date.now()>=new Date(accountExportEpochMs(approved.expires_at)).valueOf()){
+    accountDisclosureInvalidate();throw new Error(tr("The disclosure preview expired. Preview the settings again."));
+  }
+  if(!window.confirm(tr("Create a signed derivative from this preview? Personal information may still remain; review the file before sharing.")))return;
+  const jobId=approved.jobId,profile=approved.profile,revision=approved.revision;
+  const result=await json("account-export/"+encodeURIComponent(jobId)+"/disclosure",{preview_id:approved.id});
+  if(profile!==state.profile||revision!==state.workspaceRevision||jobId!==state.accountDisclosureJob)return;
+  if(!result?.id)throw new Error(tr("Disclosure creation did not return a derivative ID."));
+  (state.accountDisclosures[jobId]??=[]).unshift(result);
+  state.accountDisclosureDirty=false;state.accountDisclosurePreview=null;
+  $("account-disclosure-create").disabled=true;$("account-disclosure-dialog").close();
+  await loadAccountExport();
+  toast(tr("Signed minimized disclosure created. Review the downloaded file before sharing."));
+}
+async function accountDisclosureDownload(job,item){
+  if(!item.ready)throw new Error(tr("This disclosure is still being prepared."));
+  const safeId=String(item.id).replace(/[^a-zA-Z0-9_-]/g,"");
+  const path="account-export/"+encodeURIComponent(job.id)+"/disclosures/"+encodeURIComponent(item.id)+"/download";
+  if(await download(path,"tgwitness-disclosure-"+safeId+".zip",true))
+    toast(tr("Signed disclosure saved. Review it before sharing."));
+}
+$("account-disclosure-form").addEventListener("input",accountDisclosureInvalidate);
+$("account-disclosure-form").addEventListener("change",accountDisclosureInvalidate);
+$("account-disclosure-identities").addEventListener("change",()=>{
+  $("account-disclosure-disclose-ids").disabled=$("account-disclosure-identities").value!=="pseudonymize_third_parties";
+});
+$("account-disclosure-close").addEventListener("click",()=>$("account-disclosure-dialog").close());
+$("account-disclosure-dismiss").addEventListener("click",()=>$("account-disclosure-dialog").close());
+$("account-disclosure-check").addEventListener("click",event=>busy(event.currentTarget,previewAccountDisclosure));
+$("account-disclosure-form").addEventListener("submit",event=>{
+  event.preventDefault();busy(event.submitter,createAccountDisclosure);
+});
 let exportsView=null;
 const exportsReady=import('./views/exports.js').then(({createExports})=>{
   exportsView=createExports({root:$("view-evidence"),tr,json,getSession:()=>state.workspaceRevision+":"+state.profile,fmtTime,toast});
@@ -3501,7 +3926,7 @@ $("chat-export-start").addEventListener("click",e=>busy(e.currentTarget,openExpo
 $("chat-export-get").addEventListener("click",e=>saveMulti(e.currentTarget));
 
 function localInput(unix){
-  if(!unix)return "";const d=new Date(unix*1000);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);
+  if(!unix)return "";const d=new Date(unix*1000);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
 }
 function workspaceName(id){return state.profiles.find(p=>p.id===id)?.label||id;}
 function accessScope(g){
@@ -3703,6 +4128,7 @@ async function pollWorkspace(){
     if(state.view==="witness") await loadExtras();
     if(state.view==="access") await loadAccess(true);
     if(state.view==="system-log") await loadConsole();
+    if(state.view==="evidence") await loadAccountExport(true).catch(accountExportError);
     if(++notifyTick%3===0) await loadNotifications();
   }catch(e){if(revision===state.workspaceRevision&&!(e instanceof StaleView))$("status-chip").textContent=tr("Panel connection unavailable");}
   finally{if(pollRevision===revision)pollRevision=null;}

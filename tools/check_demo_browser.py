@@ -40,11 +40,29 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
         manifest = json.loads(bundle.read("manifest.json"))
         assert manifest["event_count"] == checked["events"]
         assert manifest["head_hash"] == checked["head_hash"]
-    assert len(files_requested) == 4
+    account = json.loads(answers["/api/account-export"]["text"])["jobs"][0]
+    assert account["ready"] and account["disclosures"][0]["ready"]
+    expect(page.locator("#account-export-jobs")).to_contain_text(account["id"][:10])
+    expect(page.locator("#account-export-jobs")).to_contain_text(account["disclosures"][0]["id"][:10])
+    account_paths = {
+        "download": f'/api/account-export/{account["id"]}/download',
+        "disclosure-download": f'/api/account-export/{account["id"]}/disclosures/{account["disclosures"][0]["id"]}/download',
+    }
+    for action, path in account_paths.items():
+        for repeat in range(2):
+            with page.expect_download() as pending:
+                page.locator(f'[data-account-export-action="{action}"]').click()
+            sample = output / f'demo-{action}-{repeat}.zip'
+            pending.value.save_as(sample)
+            data = sample.read_bytes()
+            assert len(data) == answers[path]["bytes"]
+            assert hashlib.sha256(data).hexdigest() == answers[path]["sha256"]
+    assert len(files_requested) == 8
     page.locator("#verify-journal").click()
     expect(page.locator("#verification-result")).to_contain_text(f'Verified {checked["events"]} event signatures')
     assert page.evaluate("fetch('/api/collector/start', {method:'POST'}).then(r=>r.status)") == 403
     assert page.evaluate("fetch('/api/report-options', {method:'POST'}).then(r=>r.status)") == 403
+    assert page.evaluate("fetch('/api/account-export/start', {method:'POST'}).then(r=>r.status)") == 403
     page.screenshot(path=str(output / "demo-exports-1440.png"))
     context.close()
     print("Online demo: named sample case, lazy downloads matching published hashes and read-only actions passed", flush=True)

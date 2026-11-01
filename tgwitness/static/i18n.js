@@ -25,11 +25,14 @@ function inlineOnly(el){return [...el.children].every(c=>INLINE.has(c.tagName)&&
 
 function walkPage(visit,root=document.body){
   const walk=el=>{
-    if(el.namespaceURI!=="http://www.w3.org/1999/xhtml"||SKIP.has(el.tagName)||el.hasAttribute("data-no-translate"))return;
+    if(el.namespaceURI!=="http://www.w3.org/1999/xhtml"||el.hasAttribute("data-no-translate")||
+       (SKIP.has(el.tagName)&&el.tagName!=="TEXTAREA"))return;
     for(const name of ["placeholder","aria-label","title","alt"]){
       const value=el.getAttribute(name);
       if(value&&wordy(value))visit({key:normal(value),apply:text=>el.setAttribute(name,text)});
     }
+    // Textareas have translatable labels, but their text and value belong to the user.
+    if(el.tagName==="TEXTAREA")return;
     if(el.children.length&&inlineOnly(el)&&wordy(el.textContent)){
       if(visit({key:normal(el.innerHTML),apply:html=>{el.innerHTML=html;}},true))return;
     }

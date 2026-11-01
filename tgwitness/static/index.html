@@ -379,6 +379,67 @@
   </div>
   <div id="exports-progress" class="card padded" hidden role="status" aria-live="polite"><strong id="exports-progress-label"></strong><progress id="exports-progress-bar" aria-label="Download progress"></progress><span id="exports-progress-bytes" class="hint"></span></div>
   <div id="exports-downloads" role="tabpanel" aria-labelledby="exports-tab-downloads">
+  <section class="card account-export-card" id="account-export-card" hidden aria-labelledby="account-export-title">
+    <div class="account-export-head">
+      <div><span class="eyebrow">TELEGRAM ACCOUNT SNAPSHOT</span><h2 id="account-export-title">Export this account</h2>
+        <p>Save the chats this account can read, including Saved Messages and archived chats, with optional media and account data. TgWitness signs this archive; Telegram does not. This reads Telegram now and cannot reconstruct deleted messages or past edits.</p></div>
+      <button class="primary" id="account-export-configure" type="button"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg> Configure account export</button>
+    </div>
+    <div class="account-export-toolbar"><div><strong>Account export jobs</strong><span class="hint">Jobs remain available after a restart. A finished archive can be downloaded again until you delete it.</span></div><button class="quiet" id="account-export-refresh" type="button">Refresh jobs</button></div>
+    <p class="hint" id="account-export-status" role="status"></p><div class="account-export-jobs" id="account-export-jobs"></div>
+  </section>
+  <dialog class="account-export-dialog" id="account-export-dialog" aria-labelledby="account-export-dialog-title">
+    <form id="account-export-form" method="dialog">
+      <div class="account-export-dialog-head"><div><span class="eyebrow">NEW ACCOUNT EXPORT</span><h2 id="account-export-dialog-title">Choose what to save</h2></div><button class="quiet" id="account-export-close" type="button" aria-label="Close export settings">×</button></div>
+      <p class="muted">Every accessible chat and its full visible history are selected by default. Observation sources are separate from this export.</p>
+      <div class="account-export-purpose"><label for="account-export-purpose">Collection purpose</label><textarea id="account-export-purpose" rows="2" maxlength="1000" required placeholder="Why this account snapshot is being collected"></textarea><p class="hint">The purpose is included in the signed export. Describe the specific investigation or request.</p><button class="secondary account-export-preset" id="account-export-minimize" type="button">Minimize collection</button><p class="hint">Turns off media and optional account data. Chat and sender filters remain yours to set.</p></div>
+      <fieldset class="account-export-fieldset"><legend>Chats</legend>
+        <div class="account-export-choices" id="account-export-kinds">
+          <label><input type="checkbox" value="private" checked> Private chats &amp; Saved Messages</label><label><input type="checkbox" value="bot" checked> Bots</label>
+          <label><input type="checkbox" value="group" checked> Groups</label><label><input type="checkbox" value="supergroup" checked> Supergroups</label>
+          <label><input type="checkbox" value="channel" checked> Channels</label>
+        </div>
+        <div class="account-export-choices"><label><input id="account-export-archived" type="checkbox" checked> Include archived chats</label><label><input id="account-export-own" type="checkbox"> Only messages sent by this account</label></div>
+        <details><summary>Choose individual chat IDs</summary><label for="account-export-ids">Chat IDs, separated by commas or lines</label><textarea id="account-export-ids" rows="2" placeholder="Leave blank for all chats of the selected types"></textarea><p class="hint">This limits the export to those IDs; it does not change observation sources.</p></details>
+        <div class="account-export-fields account-export-content-filters"><div><label for="account-export-senders">Sender IDs</label><textarea id="account-export-senders" rows="2" placeholder="Leave blank for all senders"></textarea><p class="hint">Numeric IDs separated by commas or spaces.</p></div><div><label for="account-export-phrases">Text contains</label><textarea id="account-export-phrases" rows="2" placeholder="One literal phrase per line"></textarea><p class="hint">A message matches any phrase. This is literal text, not a regular expression.</p></div></div>
+      </fieldset>
+      <fieldset class="account-export-fieldset"><legend>History dates</legend><div class="account-export-fields"><div><label for="account-export-from">From date (UTC)</label><input id="account-export-from" type="date"></div><div><label for="account-export-through">Through date (UTC)</label><input id="account-export-through" type="date"></div></div><p class="hint">Leave both blank for full visible history. Dates include the whole selected day in UTC.</p></fieldset>
+      <fieldset class="account-export-fieldset"><legend>Media</legend><div class="account-export-choices" id="account-export-media">
+        <label><input type="checkbox" value="photo" checked> Photos</label><label><input type="checkbox" value="video" checked> Videos</label>
+        <label><input type="checkbox" value="video_message" checked> Video messages</label><label><input type="checkbox" value="voice" checked> Voice messages</label>
+        <label><input type="checkbox" value="audio" checked> Audio</label><label><input type="checkbox" value="document" checked> Documents</label>
+        <label><input type="checkbox" value="sticker" checked> Stickers</label><label><input type="checkbox" value="animation" checked> Animations</label>
+      </div><div class="account-export-fields"><div><label for="account-export-file-limit">Maximum per media file, MiB</label><input id="account-export-file-limit" type="number" min="1" max="4096" step="1" value="512" required></div><div><label for="account-export-total-limit">Downloaded media budget, GiB</label><input id="account-export-total-limit" type="number" min="1" max="1024" step="1" value="16" required></div></div><p class="hint">Files above the per-file limit are listed as skipped. The total limit applies to downloaded media; message text and ZIP overhead may add to the final archive size.</p></fieldset>
+      <fieldset class="account-export-fieldset"><legend>Other account data</legend><div class="account-export-choices" id="account-export-sections">
+        <label><input id="account-export-profile" type="checkbox" checked> Account profile</label><label><input id="account-export-contacts" type="checkbox" checked> Contacts</label>
+        <label><input id="account-export-profile-photos" type="checkbox"> Profile photos</label><label><input id="account-export-stories" type="checkbox"> Stories</label>
+        <label><input id="account-export-session-metadata" type="checkbox"> Session metadata</label><label><input id="account-export-other-data" type="checkbox"> Other available data</label>
+      </div><p class="hint">The signed manifest lists unavailable or failed sections. Session keys and passwords are never included.</p></fieldset>
+      <fieldset class="account-export-fieldset"><legend>Telegram transport</legend><div class="account-export-fields"><div><label for="account-export-transport">Acquisition method</label><select id="account-export-transport"><option value="takeout">Telegram Takeout session</option><option value="regular">Regular session</option></select></div></div><p class="hint">Takeout may have a delay or be unavailable for this account. Choose regular explicitly if you want to use the ordinary session.</p></fieldset>
+      <p class="account-export-preview" id="account-export-preview" role="status"></p>
+      <div class="account-export-dialog-actions"><button class="quiet" id="account-export-dismiss" type="button">Keep settings for later</button><button class="primary" id="account-export-start" type="submit">Start account export</button></div>
+    </form>
+  </dialog>
+  <dialog class="account-export-dialog account-disclosure-dialog" id="account-disclosure-dialog" aria-labelledby="account-disclosure-title">
+    <form id="account-disclosure-form" method="dialog">
+      <div class="account-export-dialog-head"><div><span class="eyebrow">REVIEW BEFORE SHARING</span><h2 id="account-disclosure-title">Prepare minimized disclosure</h2></div><button class="quiet" id="account-disclosure-close" type="button" aria-label="Close disclosure settings">×</button></div>
+      <p class="muted">Create a separate signed derivative from a completed account export. The original archive stays unchanged. Review the sample and remaining personal information before creating a file for sharing.</p>
+      <div class="account-export-purpose"><label for="account-disclosure-purpose">Disclosure purpose</label><textarea id="account-disclosure-purpose" rows="2" maxlength="1000" required placeholder="Who needs this file, and why"></textarea></div>
+      <fieldset class="account-export-fieldset"><legend>Records to include</legend>
+        <div class="account-export-fields"><div><label for="account-disclosure-from">From date (UTC)</label><input id="account-disclosure-from" type="date"></div><div><label for="account-disclosure-through">Through date (UTC)</label><input id="account-disclosure-through" type="date"></div></div>
+        <div class="account-export-fields account-export-content-filters"><div><label for="account-disclosure-senders">Sender IDs to include</label><textarea id="account-disclosure-senders" rows="2" placeholder="Leave blank for all senders"></textarea><p class="hint">Numeric IDs separated by commas or spaces.</p></div><div><label for="account-disclosure-phrases">Text contains</label><textarea id="account-disclosure-phrases" rows="2" placeholder="One literal phrase per line"></textarea><p class="hint">A message matches any listed phrase.</p></div></div>
+      </fieldset>
+      <fieldset class="account-export-fieldset"><legend>Remove or hide personal information</legend>
+        <div class="account-export-fields"><div><label for="account-disclosure-identities">Names and user IDs</label><select id="account-disclosure-identities"><option value="pseudonymize_all" selected>Pseudonymize everyone</option><option value="pseudonymize_third_parties">Pseudonymize third parties</option><option value="keep">Keep identities</option></select></div><div><label for="account-disclosure-text-mode">Message text</label><select id="account-disclosure-text-mode"><option value="keep" selected>Keep matching text</option><option value="omit">Omit message text</option></select></div></div>
+        <label for="account-disclosure-disclose-ids">User IDs allowed to remain identifiable</label><textarea id="account-disclosure-disclose-ids" rows="2" placeholder="Leave blank to identify no one"></textarea><p class="hint">Only applies to the third-party mode. Names, quotes, and attachments can still identify people; review the preview.</p>
+        <label for="account-disclosure-redact-terms">Additional terms to hide</label><textarea id="account-disclosure-redact-terms" rows="2" placeholder="One literal word or phrase per line"></textarea><p class="hint">Each listed term is replaced in disclosed message text. This is literal matching, not a regular expression. Review the preview for context that still identifies people.</p>
+        <div class="account-export-choices account-disclosure-inclusions"><label><input id="account-disclosure-media" type="checkbox"> Include media files</label></div><p class="hint">Account profile, contacts, photos, stories, session metadata and other account data are excluded from this derivative.</p>
+      </fieldset>
+      <div class="account-disclosure-preview" id="account-disclosure-preview" hidden><h3>Review transformed sample</h3><p class="hint">Only the transformed sample is shown here. Check names, quotes and other details that might still identify people.</p><div id="account-disclosure-summary"></div><div id="account-disclosure-samples"></div><div id="account-disclosure-warnings"></div><p class="hint" id="account-disclosure-expiry"></p></div>
+      <p class="account-export-preview" id="account-disclosure-status" role="status">Preview is required after every change to these settings.</p>
+      <div class="account-export-dialog-actions"><button class="quiet" id="account-disclosure-dismiss" type="button">Close</button><button class="secondary" id="account-disclosure-check" type="button">Preview disclosure</button><button class="primary" disabled id="account-disclosure-create" type="submit">Create signed derivative</button></div>
+    </form>
+  </dialog>
   <div class="evidence-hero card">
     <div class="evidence-symbol"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg></div>
     <div class="evidence-body">

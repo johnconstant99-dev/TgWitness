@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Refreshed the Russian panel and Capture wizard through DeepL, with reviewed
+  privacy and evidence terminology, preserved placeholders and command examples.
+- Raised dependency security floors and regenerated the hash-locked build tools.
+  Notification services now refuse HTTP redirects, including URL-level redirect
+  overrides, so credentials cannot be forwarded to a different endpoint. Configure
+  the final notification endpoint directly; HTTP 3xx responses fail delivery.
+- Added weekly Dependabot updates, checks for pull requests on hosted runners,
+  and nightly dependency, CodeQL and container vulnerability scans. Custom
+  dependency locks remain reviewed and regenerated together with version changes.
+- Fixed quick search after rapid close/reopen and temporary parameter API errors.
+  Browser checks run two at a time with individual logs and a complete result
+  summary, including checks after a failure.
+- Corrected archive-search date defaults across daylight-saving transitions so
+  recently captured records remain inside the selected period.
+
+- Added configurable account export through Telegram Takeout or the explicitly
+  selected regular API. Jobs retain signed progress, support pause/resume and
+  produce a reusable ZIP with coverage and omission records.
+- Added separate signed disclosure copies with purpose, sender/date/text filters,
+  participant pseudonyms and optional text/file exclusions. Preview is bound to
+  the administrator session and source archive. Signatures establish integrity;
+  they do not establish Telegram authorship, completeness or legal admissibility.
+  See [account export](ACCOUNT-EXPORT.md) and the [Russian guide](ru/ACCOUNT-EXPORT.md).
+- Added fictional account-export and disclosure downloads to the online demo.
+
 - Added workspace-aware panel URLs, Back/Forward navigation and an active-view
   lifecycle. Background updates preserve form drafts and focus; settings can be
   saved with Ctrl/Cmd+S. Submitted secrets never become a Discard baseline.

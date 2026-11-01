@@ -35,6 +35,8 @@ preview predates them. [Start with the workflow guide](https://phishdestroy.gith
 | Connect my account | [Account setup](ACCOUNTS.md) | A new test message in the journal |
 | Capture one private chat from my fork | [GitHub Actions capture (preview)](SEALED-ACTIONS.md) | An encrypted archive and verification against the approved upstream workflow |
 | Load older messages into the workspace | [Source history](HISTORY.md) | Resumable capture and a signed progress report |
+| Export an account with a defined scope | [Account export](ACCOUNT-EXPORT.md) · [Русский](ru/ACCOUNT-EXPORT.md) | Selected messages and files, resumable jobs and a signed archive with coverage records |
+| Prepare a copy for a lawyer or another recipient | [Minimized disclosure](ACCOUNT-EXPORT.md#prepare-a-disclosure-for-a-lawyer-or-another-recipient) | A separate signed copy with participant pseudonyms and optional text/files; the source stays unchanged |
 | Give a reviewer or analyst access | [Access and permissions](ACCESS.md) | Only the chosen accounts, chats and permitted actions |
 | Connect an AI client | [Read-only MCP](MCP.md) | Expiring access to selected workspaces and chats |
 | Ask questions and write a report | [Archive analysis](ANALYSIS.md) | Reviewed sources, verified references and separate analyst revisions |

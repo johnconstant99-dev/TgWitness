@@ -95,7 +95,7 @@ jobs:
           echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-venv" >> "$GITHUB_ENV"
       - name: Build release downloads
         run: |
-          python -m pip install "setuptools>=75" wheel
+          python -m pip install --require-hashes -r deploy/build.lock
           python -m pip wheel --no-deps --no-build-isolation --wheel-dir dist .
           python tools/build_source.py
       - uses: docker/setup-qemu-action@v4

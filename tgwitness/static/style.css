@@ -1921,3 +1921,96 @@ button.primary[aria-busy=true]::after { color: #fff; }
 .target-row>.source-select+div { flex:1; }
 @media(max-width:600px){.review-split{grid-template-columns:1fr}.chat-header .live-controls{width:100%;margin-inline-start:0}.review-diff-body{padding:10px}}
 @media(max-width:600px){.target-row>.source-select+div{flex-basis:calc(100% - 40px)}.target-row:has(.source-select)>.target-actions{width:100%;justify-content:flex-end}.target-row:has(.source-select)>.secondary{margin-inline-start:34px}}
+/* Full-account snapshot: separate from the observed journal export. */
+.account-export-card { margin-bottom: 18px; overflow: hidden; }
+.account-export-head { display: flex; align-items: center; justify-content: space-between; gap: 18px 28px; padding: 22px 24px;
+  background: linear-gradient(125deg, var(--accent-soft), var(--surface) 62%); }
+.account-export-head > div { min-width: 0; max-width: 700px; }
+.account-export-head h2 { margin: 5px 0 7px; font-size: 21px; letter-spacing: -.02em; }
+.account-export-head p { margin: 0; color: var(--text-2); font-size: 13.5px; line-height: 1.55; }
+.account-export-head > button { flex: none; }
+.account-export-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 14px 24px;
+  border-top: 1px solid var(--border); }
+.account-export-toolbar strong { display: block; font-size: 14px; }
+.account-export-toolbar .hint { display: block; margin: 3px 0 0; font-size: 12.5px; }
+#account-export-status { margin: 0 24px 12px; }
+#account-export-status:empty { display: none; }
+.account-export-jobs { display: grid; gap: 12px; padding: 0 24px 24px; }
+.account-export-empty { margin: 0; padding: 16px; border: 1px dashed var(--border-strong); border-radius: var(--radius);
+  background: var(--surface-2); color: var(--muted); font-size: 13px; }
+.account-export-job { min-width: 0; padding: 15px 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-2); }
+.account-export-job-head { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+.account-export-job-head strong { min-width: 0; margin-right: auto; font-size: 14px; overflow-wrap: anywhere; }
+.account-export-state { padding: 3px 9px; border: 1px solid var(--border-strong); border-radius: 999px; font-size: 11.5px;
+  font-weight: 650; color: var(--text-2); background: var(--surface); }
+.account-export-state.running, .account-export-state.packaging { color: var(--accent-text); border-color: var(--accent-border); background: var(--accent-soft); }
+.account-export-state.waiting, .account-export-state.paused, .account-export-state.partial { color: var(--warning); border-color: var(--warning-border); background: var(--warning-soft); }
+.account-export-state.failed { color: var(--danger); border-color: var(--danger-border); background: var(--danger-soft); }
+.account-export-job-sub { margin: 6px 0 0; color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+.account-export-job progress { display: block; width: 100%; height: 8px; margin: 13px 0 10px; accent-color: var(--accent); }
+.account-export-metrics { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 10px 0; color: var(--text-2); font-size: 12.5px; }
+.account-export-metrics b { color: var(--text); font-variant-numeric: tabular-nums; }
+.account-export-job-note { margin: 7px 0; font-size: 12.5px; color: var(--text-2); overflow-wrap: anywhere; }
+.account-export-job-note.warning { color: var(--warning); }
+.account-export-job-note.error { color: var(--danger); }
+.account-export-job-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+.account-export-job-actions button { min-height: 34px; }
+.account-export-dialog { width: min(760px, calc(100vw - 28px)); max-height: min(92dvh, 960px); padding: 0; overflow: auto;
+  border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
+.account-export-dialog::backdrop { background: rgb(15 23 40 / .58); backdrop-filter: blur(3px); }
+.account-export-dialog form { padding: 22px 26px 24px; }
+.account-export-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.account-export-dialog-head h2 { margin: 4px 0 8px; font-size: 21px; }
+.account-export-dialog-head button { font-size: 24px; line-height: 1; }
+.account-export-dialog .muted { margin: 0 0 18px; font-size: 13.5px; line-height: 1.5; }
+.account-export-purpose { margin-bottom: 18px; }
+.account-export-purpose label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 650; }
+.account-export-purpose textarea { width: 100%; }
+.account-export-purpose .hint { margin: 6px 0 0; font-size: 12px; }
+.account-export-preset { margin-top: 10px; }
+.account-export-fieldset { min-width: 0; margin: 0; padding: 17px 0; border: 0; border-top: 1px solid var(--border); }
+.account-export-fieldset legend { float: left; width: 100%; padding: 0 0 11px; font-size: 14px; font-weight: 700; }
+.account-export-fieldset legend + * { clear: both; }
+.account-export-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.account-export-choices label { display: inline-flex; align-items: center; gap: 7px; margin: 0; padding: 7px 10px;
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.account-export-choices label:has(input:checked) { border-color: var(--accent-border); background: var(--accent-soft); }
+.account-export-choices input { flex: none; width: 16px; height: 16px; margin: 0; }
+.account-export-choices + .account-export-choices { margin-top: 10px; }
+.account-export-fieldset details { margin-top: 12px; }
+.account-export-fieldset summary { cursor: pointer; color: var(--accent-text); font-size: 13px; font-weight: 600; }
+.account-export-fieldset textarea { width: 100%; margin-top: 7px; }
+.account-export-fieldset .hint { margin: 9px 0 0; font-size: 12px; }
+.account-export-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+.account-export-fields > div { min-width: 0; }
+.account-export-fields label { display: block; margin: 0 0 6px; font-size: 12.5px; }
+.account-export-fields input, .account-export-fields select { width: 100%; margin: 0; }
+.account-export-content-filters { margin-top: 14px; }
+.account-export-content-filters textarea { width: 100%; margin: 0; }
+.account-disclosure-inclusions { margin-top: 14px; }
+.account-disclosure-preview { margin-top: 18px; padding: 15px; border: 1px solid var(--accent-border); border-radius: var(--radius-lg);
+  background: var(--accent-soft); }
+.account-disclosure-preview h3 { margin: 0 0 6px; font-size: 15px; }
+.account-disclosure-preview .hint { margin: 5px 0 10px; font-size: 12px; }
+.account-disclosure-summary { display: flex; flex-wrap: wrap; gap: 7px; }
+.account-disclosure-summary span { padding: 5px 8px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-2); font-size: 12px; }
+.account-disclosure-sample { margin: 10px 0 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.account-disclosure-warning { margin: 8px 0; color: var(--warning); font-size: 12.5px; overflow-wrap: anywhere; }
+.account-disclosure-list { display: grid; gap: 8px; margin-top: 15px; padding-top: 13px; border-top: 1px solid var(--border); }
+.account-disclosure-list > strong { font-size: 12.5px; }
+.account-disclosure-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); font-size: 12.5px; }
+.account-disclosure-item span { overflow-wrap: anywhere; }
+.account-export-preview { margin: 10px 0 0; padding: 10px 12px; border-radius: var(--radius); background: var(--surface-2); color: var(--text-2); font-size: 12.5px; }
+.account-export-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+@media (max-width: 700px) {
+  .account-export-head { align-items: stretch; flex-direction: column; padding: 18px; }
+  .account-export-head > button { align-self: flex-start; }
+  .account-export-toolbar { padding: 13px 18px; }
+  .account-export-jobs { padding: 0 18px 18px; }
+  #account-export-status { margin-inline: 18px; }
+  .account-export-dialog form { padding: 18px; }
+  .account-export-fields { grid-template-columns: minmax(0, 1fr); }
+}

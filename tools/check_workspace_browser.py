@@ -18,7 +18,7 @@ from telethon.helpers import TotalList
 from tools.check_browser import RunningApp, hold_api_response, launch_browser, release_api_response
 from tools.browser_fixtures import CHAT, FakeClient, saved_session, telegram_message
 from tools.browser_fixtures import ALICE, say
-from tgwitness import dossier
+from tgwitness import dossier, i18n
 
 
 class WorkspaceClient(FakeClient):
@@ -151,7 +151,11 @@ def main():
             page.reload()
             page.locator('[data-view="accounts"]').click()
             expect(card.locator(".account-badge")).to_have_text("Удаление не завершено")
-            expect(card).to_contain_text("Наблюдение остановлено.")
+            warning = ("Deletion is incomplete. Close programs using this workspace's files, "
+                       "then retry Delete. Observation remains stopped.")
+            translated = i18n.words("ru")[warning]
+            assert translated and translated != warning, "Incomplete-deletion warning must be translated"
+            expect(card).to_contain_text(translated)
             page.once("dialog", lambda dialog: dialog.accept())
             card.get_by_role("button", name="Удалить", exact=True).click()
             expect(card).to_have_count(0)

@@ -22,6 +22,8 @@ from telethon.errors import FloodWaitError, RPCError
 
 from . import __version__
 from .workers import complete_in_thread
+from .account_export import AccountExport, AccountExportOptions
+from .disclosure import Disclosures, DisclosurePolicy
 from .downloads import TemporaryDownload, build_file
 from .access import POLICY, AccessControl, AdminSettings, Console, GrantSettings, Refused, check as access_check
 from .collector import Collector
@@ -258,6 +260,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @asynccontextmanager
     async def lifespan(app):
+        app.state.closing = False
         if console:
             console.attach()
         instance = InstanceLock(root)
@@ -291,6 +294,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             collector.account_guard = account_guard
             collector.proxy_pool = shared_pool
             app.state.store, app.state.vault, app.state.collector = store, vault, collector
+            app.state.account_export = AccountExport(collector, store, vault)
+            app.state.disclosures = Disclosures(app.state.account_export, vault)
             app.state.access = access or AccessControl(vault, store, console)
             if not access:
                 def workspace_label(pid):
@@ -369,6 +374,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 await start_mcp(app)
             yield
         finally:
+            app.state.closing = True
             try:
                 if allow_profiles:
                     from .archive_api import shutdown as stop_mcp
@@ -379,6 +385,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     await app.state.multi_export.close()
                 if profiles:
                     await profiles.close()
+                if getattr(app.state, "disclosures", None):
+                    await app.state.disclosures.close()
+                if getattr(app.state, "account_export", None):
+                    await app.state.account_export.close()
                 check_task = shared_pool.check_task if proxy_pool is None else None
                 for task in (resume_task, anchor_task, replica_task, alert_task, host_task, pool_task, check_task):
                     if task:
@@ -398,6 +408,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     app = FastAPI(title="TgWitness", version=__version__, lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
+    app.state.operation_lock, app.state.closing = op_lock, False
     app.add_middleware(RequestLimit, max_body=16384)
 
     @app.middleware("http")
@@ -564,6 +575,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return entry
 
     def require_live():
+        if app.state.closing:
+            raise HTTPException(503, "This workspace is closing. Wait for it to finish.")
         if app.state.store.get_setting("demo", False):
             raise HTTPException(409, "This is a synthetic demo. Start a separate data directory for real observation.")
 
@@ -585,6 +598,11 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     async def operation(call, *args):
         require_live()
         async with op_lock:
+            require_live()
+            if (app.state.collector.export_claim and getattr(call, "__name__", "") in {
+                    "configure", "start_phone", "start_qr", "send_code", "confirm_code", "confirm_password",
+                    "sign_out", "set_network", "set_route_policy", "apply"}):
+                raise HTTPException(409, "Pause the active export before changing its account or connection.")
             return await perform_operation(call, *args)
 
     @app.get("/api/status", dependencies=[Depends(authenticate)])
@@ -898,6 +916,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     async def import_account(body: AccountImport):
         require_live()
         async with op_lock:
+            require_live()
+            if app.state.collector.export_claim:
+                raise HTTPException(409, "Pause the active export before importing another account.")
             if app.state.collector.running:
                 raise HTTPException(400, "Pause observation before importing another account.")
             try:
@@ -1761,6 +1782,99 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         if not path:
             raise HTTPException(404)
         return FileResponse(path, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=3600"})
+
+    # Account-wide acquisition can reach data outside the observation scope and
+    # account contacts. These routes deliberately stay outside issued-access POLICY:
+    # only the installation administrator may acquire or prepare a disclosure.
+    @app.get("/api/account-export", dependencies=[Depends(authenticate)])
+    async def account_export_jobs():
+        jobs = app.state.account_export.list_jobs()
+        for job in jobs:
+            job["disclosures"] = app.state.disclosures.list(job["id"])
+        return {"jobs": jobs, "defaults": AccountExportOptions().model_dump(),
+                "capabilities": {"takeout": True, "regular": True, "resumable": True,
+                                 "signed_capture_pages": True, "minimized_disclosure": True}}
+
+    @app.post("/api/account-export/start", dependencies=[Depends(authenticate)])
+    async def account_export_start(body: AccountExportOptions):
+        return await operation(app.state.account_export.start, body.model_dump())
+
+    @app.get("/api/account-export/{export_id}", dependencies=[Depends(authenticate)])
+    async def account_export_status(export_id: str):
+        try:
+            state = app.state.account_export.public(export_id)
+            if state["phase"] == "unknown":
+                raise HTTPException(404, "Unknown account export.")
+            return {**state, "disclosures": app.state.disclosures.list(export_id)}
+        except ValueError as exc:
+            raise HTTPException(404, str(exc)) from None
+
+    @app.post("/api/account-export/{export_id}/pause", dependencies=[Depends(authenticate)])
+    async def account_export_pause(export_id: str):
+        return await operation(app.state.account_export.pause, export_id)
+
+    @app.post("/api/account-export/{export_id}/resume", dependencies=[Depends(authenticate)])
+    async def account_export_resume(export_id: str):
+        return await operation(app.state.account_export.resume, export_id)
+
+    @app.delete("/api/account-export/{export_id}", dependencies=[Depends(authenticate)])
+    async def account_export_remove(export_id: str):
+        if app.state.disclosures.busy(export_id):
+            raise HTTPException(409, "Wait for the disclosure package to finish before removing its source.")
+        return await operation(app.state.account_export.remove, export_id)
+
+    @app.get("/api/account-export/{export_id}/download", dependencies=[Depends(authenticate)])
+    async def account_export_download(export_id: str):
+        try:
+            path = app.state.account_export.result_path(export_id)
+        except ValueError:
+            path = None
+        if not path:
+            raise HTTPException(404, "No finished account export is available.")
+        state = app.state.account_export.public(export_id)
+        headers = {"Cache-Control": "private, no-store"}
+        if state.get("archive_sha256"):
+            headers["ETag"] = '"' + state["archive_sha256"] + '"'
+        return FileResponse(path, filename="tgwitness-account-export.zip", media_type="application/zip", headers=headers)
+
+    @app.post("/api/account-export/{export_id}/disclosure/preview", dependencies=[Depends(authenticate)])
+    async def disclosure_preview(request: Request, export_id: str, body: DisclosurePolicy):
+        require_live()
+        principal = request.state.principal
+        async with op_lock:
+            try:
+                require_live()
+                return await complete_in_thread(app.state.disclosures.preview, export_id, body.model_dump(),
+                                                principal.session_id or principal.owner)
+            except (ValueError, OSError, KeyError) as exc:
+                raise HTTPException(409, str(exc)) from None
+
+    class DisclosureConfirmation(BaseModel):
+        model_config = {"extra": "forbid"}
+        preview_id: str = Field(min_length=16, max_length=100)
+
+    @app.post("/api/account-export/{export_id}/disclosure", dependencies=[Depends(authenticate)])
+    async def disclosure_create(request: Request, export_id: str, body: DisclosureConfirmation):
+        require_live()
+        principal = request.state.principal
+        async with op_lock:
+            try:
+                require_live()
+                return await app.state.disclosures.create(export_id, body.preview_id,
+                                                         principal.session_id or principal.owner)
+            except (ValueError, OSError, KeyError) as exc:
+                raise HTTPException(409, str(exc)) from None
+
+    @app.get("/api/account-export/{export_id}/disclosures/{disclosure_id}/download", dependencies=[Depends(authenticate)])
+    async def disclosure_download(export_id: str, disclosure_id: str):
+        try:
+            path = app.state.disclosures.result_path(export_id, disclosure_id)
+        except ValueError:
+            path = None
+        if not path:
+            raise HTTPException(404, "No finished disclosure is available.")
+        return FileResponse(path, filename="tgwitness-minimized-disclosure.zip", media_type="application/zip",
+                            headers={"Cache-Control": "private, no-store"})
 
     @app.post("/api/chat-export/start", dependencies=[Depends(authenticate)])
     async def chat_export_start(request: Request, body: ChatExport):

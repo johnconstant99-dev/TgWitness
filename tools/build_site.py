@@ -84,7 +84,8 @@ DEMO_STATIC.update({"demo/components/" + name: "tgwitness/static/components/" + 
                     for name in ("notifications.js", "notifications.css", "journal.js", "journal.css")})
 DEMO_STATIC.update({"demo/downloads/" + name: "website/demo/downloads/" + name for name in (
     "tgwitness-demo.zip", "tgwitness-demo.jsonl", "tgwitness-demo.csv", "tgwitness-demo.html",
-    "tgwitness-demo-checkpoint.json", "tgwitness-demo-run-receipt.json", "tgwitness-demo-timestamp-request.zip")})
+    "tgwitness-demo-checkpoint.json", "tgwitness-demo-run-receipt.json", "tgwitness-demo-timestamp-request.zip",
+    "tgwitness-demo-account-export.zip", "tgwitness-demo-minimized-disclosure.zip")})
 DEMO_PAGES = {"demo/index.html": "tgwitness/static/index.html", "demo/guide.html": "tgwitness/static/guide.html",
               "demo/dedicated-account.html": "tgwitness/static/dedicated-account.html"}
 DEMO_LOCALES = {f"demo/locales/{lang}.js": lang for lang in LANGS}

@@ -162,7 +162,7 @@
       if(flags.enabled){
         $("ask-workspace").textContent=tr("Workspace")+": "+(state.profiles.find(p=>p.id===workspace)?.label||workspace);
         $("ask-form").querySelector('button[type="submit"]').disabled=false;
-        const date=value=>{const d=new Date(value);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);};$("ask-since").value=date(Date.now()-86400000);$("ask-until").value=date(Date.now()+60000);
+        const date=value=>{const d=new Date(value);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);};$("ask-since").value=date(Date.now()-86400000);$("ask-until").value=date(Date.now()+60000);
         const [,data]=await Promise.all([loadProvider(),json("chats")]);if(!current(turn))return;
         const box=$("ask-chats");box.replaceChildren();for(const chat of data.chats){const label=node("label","check-label"),input=node("input");input.type="checkbox";input.value=chat.chat_id;input.checked=chat.chat_id===state.chat;label.append(input,node("span","",chat.title||String(chat.chat_id)));box.append(label);}await reports();
       }

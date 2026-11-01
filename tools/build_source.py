@@ -21,6 +21,7 @@ FILES = [
 FILES.extend("website/demo/downloads/" + name for name in (
     "tgwitness-demo.zip", "tgwitness-demo.jsonl", "tgwitness-demo.csv", "tgwitness-demo.html",
     "tgwitness-demo-checkpoint.json", "tgwitness-demo-run-receipt.json", "tgwitness-demo-timestamp-request.zip",
+    "tgwitness-demo-account-export.zip", "tgwitness-demo-minimized-disclosure.zip",
 ))
 DIRECTORIES = {
     "tgwitness": {".md", ".py", ".html", ".css", ".js", ".svg", ".json"},

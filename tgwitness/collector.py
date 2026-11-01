@@ -1337,7 +1337,7 @@ class Collector:
                 self.phase = "collector_error"
             await self.cancel_workers()
             await self.avatar_history.close()
-            if self.client:
+            if self.client and not (self.export_busy() or self.export_claim):
                 await self.client.disconnect()
 
     async def cancel_workers(self):
@@ -1470,7 +1470,7 @@ class Collector:
             self.running, self.phase = False, "storage_error"
             await self.cancel_workers()
             await self.avatar_history.close()
-            if self.client:
+            if self.client and not (self.export_busy() or self.export_claim):
                 await self.client.disconnect()
 
     async def capture_message(self, message, kind, chat_id, update=None, source=None, history_run_id=None):

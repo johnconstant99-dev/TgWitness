@@ -187,9 +187,14 @@ def deliver(urls, title, body, network):
         _guard.update(on=not netclient.private_allowed(), refused=None,
                       allowed={address} if address else set())
         try:
-            bundle = apprise.Apprise()
+            bundle = apprise.Apprise(asset=apprise.AppriseAsset(http_redirects=False))
             for url in urls:
                 bundle.add(url)
+            # URL redirect=yes overrides the asset default in Apprise. Enforce
+            # the application's policy after parsing, without rewriting service
+            # paths, query credentials or the workspace's transport settings.
+            for service in bundle:
+                service.redirects = False
             result = bundle.notify(body=body, title=title)
         finally:
             _guard["on"] = False

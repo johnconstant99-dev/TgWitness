@@ -8,6 +8,60 @@ from check_browser import RunningApp, launch_browser, unlock
 from check_refresh_browser import hold_once, release
 
 
+def check_reopened_pending_catalog(page):
+    """Deliver the previous close and response after the next opening, without timers."""
+    page.evaluate("""()=>{
+      const originalFetch=window.fetch,originalLoad=loadQuickCatalog;
+      window.quickHeldResponses=[];window.quickHeldLoads=[];window.quickHeldCloses=0;
+      window.deferQuickClose=true;
+      const deferClose=event=>{
+        if(event.target===quickDialog&&window.deferQuickClose){
+          event.stopImmediatePropagation();window.quickHeldCloses++;
+        }
+      };
+      document.addEventListener('close',deferClose,true);
+      window.fetch=async(...args)=>{
+        if(!String(args[0]).endsWith('/api/parameters'))return originalFetch(...args);
+        const held={signal:args[1]?.signal};quickHeldResponses.push(held);
+        const response=await originalFetch(...args);
+        await new Promise(resolve=>{held.release=resolve;});return response;
+      };
+      loadQuickCatalog=(...args)=>{const result=originalLoad(...args);quickHeldLoads.push(result);return result;};
+      window.restoreQuickBarriers=()=>{
+        window.fetch=originalFetch;loadQuickCatalog=originalLoad;
+        document.removeEventListener('close',deferClose,true);
+      };
+      toggleQuick();
+    }""")
+    page.wait_for_function('()=>quickHeldResponses[0]?.release')
+    # Both operations run in one task, before the browser can deliver the old close event.
+    assert page.evaluate("""()=>{
+      window.previousQuickRequest=quickCatalogPending;
+      quickDialog.close();toggleQuick();
+      window.reopenedQuickRequest=quickCatalogPending;
+      return reopenedQuickRequest!==previousQuickRequest;
+    }"""), 'A pending request from the previous opening blocked the new catalog load'
+    page.wait_for_function('()=>quickHeldResponses[1]?.release&&quickHeldCloses===1')
+    assert page.evaluate("""()=>{
+      window.deferQuickClose=false;quickDialog.dispatchEvent(new Event('close'));
+      return quickDialog.open&&quickCatalogPending===reopenedQuickRequest&&!reopenedQuickRequest.signal.aborted;
+    }"""), 'A delayed close event cancelled the reopened catalog request'
+    assert page.evaluate("""async()=>{
+      quickHeldResponses[0].release();await quickHeldLoads[0];
+      return previousQuickRequest.signal.aborted&&quickCatalogPending===reopenedQuickRequest&&
+        quickCatalog.length===0&&quickCatalogHint.hidden;
+    }"""), 'An obsolete response changed the reopened catalog or its pending request'
+    page.evaluate('async()=>{quickHeldResponses[1].release();await quickHeldLoads[1];}')
+    page.locator('#quick-search').fill('dialog_limit')
+    expect(page.locator('[data-action="parameter-dialog_limit"]')).to_be_visible()
+    page.evaluate("""async()=>{
+      restoreQuickBarriers();
+      const closed=new Promise(resolve=>quickDialog.addEventListener('close',resolve,{once:true}));
+      quickDialog.close();await closed;
+      quickCatalog=[];quickCatalogKey='';
+    }""")
+
+
 def main():
     output = Path('build/ux-review/after/37-quick-search')
     output.mkdir(parents=True, exist_ok=True)
@@ -29,9 +83,13 @@ def main():
             page.evaluate("()=>{quickDialog.showModal();renderQuick();window.heldRefresh=loadQuickCatalog();quickSearch.focus();}")
             expect(page.locator('html')).to_have_attribute('data-refresh-held', 'true')
             page.locator('#quick-search').fill('dialog_limit')
+            page.evaluate("window.initialQuickClose=new Promise(resolve=>quickDialog.addEventListener('close',resolve,{once:true}));void 0")
             page.keyboard.press('Escape')
             release(page)
+            page.evaluate('()=>initialQuickClose')
             assert page.evaluate('()=>quickCatalog.length===0')
+
+            check_reopened_pending_catalog(page)
 
             page.route('**/api/parameters', lambda route: route.fulfill(status=503, json={'detail': 'Synthetic failure'}))
             page.keyboard.press('Control+k')
@@ -97,7 +155,8 @@ def main():
             assert page.evaluate('()=>quickCatalog.length===0&&quickResults.childElementCount===0')
             assert not errors, errors
             browser.close()
-    print('Quick search passed: schema labels/keys/groups, draft-preserving focus, #record links, stale reads and permission changes.')
+    print('Quick search passed: rapid reopen, delayed close/response, 503 recovery, schema labels/keys/groups, '
+          'draft-preserving focus, #record links, stale reads and permission changes.')
 
 
 if __name__ == '__main__':

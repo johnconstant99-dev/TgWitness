@@ -25,6 +25,7 @@ Builds stay local. See [publishing](../docs/internal/PUBLISHING.md) and
 | `python tools/check_site.py` | Site smoke test |
 | `python tools/check_docs_site.py` | Docs, search and diagrams |
 | `python tools/check_browser.py` | Panel flow with fake Telegram data |
+| `python tools/check_account_export_browser.py` | Account-export scope, disclosure preview, access and narrow-screen flows |
 | `python tools/capture_screenshots.py` | Screenshots in `test-results/`; `--docs` updates docs assets |
 | `python tools/capture_demo.py` | Refresh `website/demo/fixtures.json` from the local demo |
 

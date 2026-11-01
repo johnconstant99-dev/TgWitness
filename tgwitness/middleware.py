@@ -6,6 +6,8 @@ MCP_BODY_TIMEOUT = 8
 
 
 def request_limit(path, default=16384):
+    if "/api/account-export" in path:
+        return 512 * 1024  # bounded IDs, literal filters and disclosure policies; no uploads
     if "/api/analysis/reports/" in path:
         return 65536
     if path.endswith(("/api/auth/import", "/api/profiles/import")):

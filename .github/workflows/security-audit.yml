@@ -1,0 +1,133 @@
+name: Security audit
+on:
+  schedule:
+    - cron: "23 7 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: security-audit-${{ github.ref }}
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash
+jobs:
+  dependencies:
+    name: Advisory audit (${{ matrix.name }})
+    # Manual dispatch from another branch must not become a privileged code scan.
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: runtime
+            lock: deploy/requirements.lock
+          - name: build
+            lock: deploy/build.lock
+          - name: mcp
+            lock: deploy/constraints-mcp.txt
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+      - run: python -m pip install "pip-audit==2.10.1"
+      - name: Audit exact versions against current advisories
+        env:
+          AUDIT_LOCK: ${{ matrix.lock }}
+        run: |
+          python -m pip_audit -r "$AUDIT_LOCK" --no-deps --disable-pip --strict \
+            --progress-spinner off --format json --output dependency-audit.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: security-dependencies-${{ matrix.name }}
+          path: dependency-audit.json
+          if-no-files-found: warn
+          retention-days: 14
+  codeql:
+    name: CodeQL (${{ matrix.language }})
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, javascript-typescript, actions]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Initialize language-specific security analysis
+        uses: github/codeql-action/init@793b778da9c9275a0f276522b27cb5fc14bba279 # v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          queries: security-extended
+      - name: Analyze and upload SARIF to code scanning
+        uses: github/codeql-action/analyze@793b778da9c9275a0f276522b27cb5fc14bba279 # v4
+        with:
+          category: /language:${{ matrix.language }}
+  containers:
+    name: Container vulnerabilities (${{ matrix.name }})
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: runtime
+            dockerfile: deploy/Dockerfile
+          - name: sealed
+            dockerfile: deploy/Dockerfile.sealed
+          - name: media-worker
+            dockerfile: deploy/media-worker/Dockerfile
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the actual image without publishing it
+        env:
+          AUDIT_DOCKERFILE: ${{ matrix.dockerfile }}
+          AUDIT_IMAGE: tgwitness-security:${{ matrix.name }}
+        run: docker build --pull -f "$AUDIT_DOCKERFILE" -t "$AUDIT_IMAGE" .
+      - name: Scan OS and installed library packages
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          version: v0.76.1
+          scan-type: image
+          image-ref: tgwitness-security:${{ matrix.name }}
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: false
+          format: sarif
+          limit-severities-for-sarif: true
+          output: trivy.sarif
+          exit-code: "1"
+          timeout: 15m
+          hide-progress: true
+          cache: false
+      - name: Upload findings even when the severity gate fails
+        if: always() && hashFiles('trivy.sarif') != ''
+        uses: github/codeql-action/upload-sarif@793b778da9c9275a0f276522b27cb5fc14bba279 # v4
+        with:
+          sarif_file: trivy.sarif
+          category: container-${{ matrix.name }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always() && hashFiles('trivy.sarif') != ''
+        with:
+          name: security-container-${{ matrix.name }}
+          path: trivy.sarif
+          retention-days: 14

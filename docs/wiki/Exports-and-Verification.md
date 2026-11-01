@@ -44,6 +44,8 @@
 | Signed evidence ZIP | Captured journal, signatures, manifest, retained media and an offline report |
 | JSONL / CSV / HTML | Analysis or reading; retain the signed ZIP for verification |
 | Full chat export | The chat history visible at acquisition time |
+| [Account export](../ACCOUNT-EXPORT.md) | Resumable account acquisition with chat, sender, date, text and file controls; signed coverage records |
+| [Minimized disclosure](../ACCOUNT-EXPORT.md#prepare-a-disclosure-for-a-lawyer-or-another-recipient) | A separate signed copy for a defined recipient, with optional pseudonyms and text/file exclusions |
 | People profile export | Derived observations with record references |
 | Checkpoint | A signed journal boundary to retain separately |
 | Run receipt | The collector's program/version information for that run |

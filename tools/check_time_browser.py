@@ -24,6 +24,15 @@ def main():
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
             unlock(page, app)
+            expiry_cases = [
+                ("2026-10-31T16:30:00Z", "2026-10-31T09:30"),
+                ("2026-11-01T16:30:00Z", "2026-11-01T08:30"),
+                ("2026-03-08T15:30:00Z", "2026-03-08T08:30"),
+            ]
+            for instant, expected in expiry_cases:
+                expiry = page.evaluate("""instant=>{const value=localInput(Date.parse(instant)/1000);
+                  return {value,roundTrip:new Date(value).toISOString()};}""", instant)
+                assert expiry == {"value": expected, "roundTrip": instant.replace("Z", ".000Z")}, (instant, expiry)
             head = store.stats()["head"]
             expect(page.locator("#time-zone")).to_have_value("UTC")
             result = page.evaluate("""async () => {

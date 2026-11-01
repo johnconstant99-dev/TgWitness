@@ -1,0 +1,68 @@
+name: PR checks
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pr-check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
+jobs:
+  lint-and-smoke:
+    name: Lint and synthetic smoke
+    # PR code and dependency installers never run on the project runner.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+      - name: Install the hash-locked build and runtime dependencies
+        run: |
+          python -m pip install --require-hashes -r deploy/build.lock
+          python -m pip install --require-hashes --no-build-isolation -r deploy/requirements.lock
+          python -m pip install --no-deps --no-build-isolation -e .
+          python -m pip check
+          python -m pip install "ruff==0.17.3"
+      - run: python -m ruff check .
+      - name: Check installed resources, authentication and signed downloads with synthetic data
+        run: python tools/check_install.py --package . --output test-results/pr-install
+      - name: Verify notification credentials cannot follow redirects
+        run: python tools/check_notification_redirects.py
+  dependencies:
+    name: Locked dependency audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+      - run: python -m pip install "pip-audit==2.10.1"
+      - name: Audit all pinned runtime, build and optional MCP versions without installing project code
+        run: |
+          mkdir -p audit-results
+          status=0
+          for lock in deploy/requirements.lock deploy/build.lock deploy/constraints-mcp.txt; do
+            python -m pip_audit -r "$lock" --no-deps --disable-pip --strict \
+              --progress-spinner off --format json --output "audit-results/$(basename "$lock").json" || status=1
+          done
+          exit "$status"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: pr-dependency-audit
+          path: audit-results/*.json
+          if-no-files-found: warn
+          retention-days: 7

@@ -121,6 +121,12 @@ class Profiles:
             if multi and multi.uses(profile_id):
                 raise ValueError("This account is part of a running multi-account export. "
                                  "Cancel the export or wait for it to finish, then delete the account.")
+            child = entry.get("app")
+            if child and (child.state.collector.export_claim
+                          or getattr(child.state, "operation_lock", None) and child.state.operation_lock.locked()
+                          or getattr(child.state, "account_export", None) and child.state.account_export.busy()
+                          or getattr(child.state, "disclosures", None) and child.state.disclosures.busy()):
+                raise ValueError("Pause the account export and wait for current workspace operations and disclosure packaging before deleting this workspace.")
 
 
             if not entry.get("deleting"):
@@ -133,6 +139,8 @@ class Profiles:
                     self.app.state.store.append("profile.deletion_started", {"profile_id": profile_id})
                 entry["deleting"] = True
             cm = entry.get("cm")
+            if child:
+                child.state.closing = True
             entry.update(app=None, error_type="DeletionPending")
             if cm is not None:
 

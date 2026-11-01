@@ -25,6 +25,30 @@ async def synthetic(method, url, network, **kwargs):
                                "prompt_eval_count": 50, "eval_count": 20}).encode()
 
 
+def check_default_period(page):
+    # Exercise the real controller with fixed instants, including both DST transition days.
+    cases = [
+        ("2026-10-31T16:30:00Z", "2026-10-30T09:30", "2026-10-31T09:31"),
+        ("2026-11-01T16:30:00Z", "2026-10-31T09:30", "2026-11-01T08:31"),
+        ("2026-03-08T15:30:00Z", "2026-03-07T07:30", "2026-03-08T08:31"),
+    ]
+    for instant, since, until in cases:
+        period = page.evaluate("""async instant=>{
+          const originalNow=Date.now;Date.now=()=>Date.parse(instant);
+          try{
+            TgWitnessAnalysis.clear();await TgWitnessAnalysis.load();
+            return {since:$('ask-since').value,until:$('ask-until').value,
+              sinceUTC:new Date($('ask-since').value).toISOString(),untilUTC:new Date($('ask-until').value).toISOString()};
+          }finally{Date.now=originalNow;}
+        }""", instant)
+        assert period["since"] == since and period["until"] == until, (instant, period)
+        elapsed = page.evaluate("""({instant,period})=>({
+          since:Date.parse(instant)-Date.parse(period.sinceUTC),
+          until:Date.parse(period.untilUTC)-Date.parse(instant)})""", {"instant": instant, "period": period})
+        assert elapsed == {"since": 86_400_000, "until": 60_000}, (instant, elapsed)
+    page.evaluate('async()=>{TgWitnessAnalysis.clear();await TgWitnessAnalysis.load();}')
+
+
 def main():
     original = netclient.request
     netclient.request = synthetic
@@ -35,7 +59,8 @@ def main():
             with sync_playwright() as p:
                 browser = launch_browser(p)
                 check_settings(browser)
-                page = browser.new_page(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce")
+                page = browser.new_page(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce",
+                                        timezone_id="America/Los_Angeles")
                 errors = []
                 calls = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
@@ -59,6 +84,7 @@ def main():
                 page.locator("#ai-settings > summary").click()
                 page.locator('[data-view="analysis"]').click()
                 expect(page.locator("#media-analysis-section")).to_be_hidden()
+                check_default_period(page)
                 page.locator('#ask-chats input[value="-1001"]').check()
                 page.evaluate("json('analysis/provider',{enabled:true,model:'synthetic-updated'},{root:true})")
                 page.locator("#ask-question").fill("Where does example.org appear?")

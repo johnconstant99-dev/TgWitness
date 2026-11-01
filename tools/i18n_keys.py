@@ -18,7 +18,7 @@ PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "ses
                  "profiles.py", "multi_export.py", "alerts.py", "witness_api.py", "tuning.py", "interactions.py",
                  "access.py", "history.py", "archive.py", "archive_api.py", "ai.py", "analysis.py", "analysis_api.py",
                  "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py", "proxy_catalog.py",
-                 "proxy_sources.py")
+                 "proxy_sources.py", "account_export.py", "account_export_transport.py", "disclosure.py")
 
 # Labels passed through small renderer tables (tr(label)), rather than literal tr() calls.
 DYNAMIC_SCRIPT_KEYS = (
@@ -39,6 +39,7 @@ DYNAMIC_SCRIPT_KEYS = (
     "Clear waiting queue", "Skip download-disabled notices",
     "Install MCP support in this Python environment and restart TgWitness.",
     "MCP support is installed. Restart TgWitness to activate the endpoint.",
+    "visible to this account during the recorded acquisition intervals",
 )
 
 
@@ -113,10 +114,16 @@ def server_keys():
                 func = getattr(node.func, "id", None) or getattr(node.func, "attr", "")
                 if func in ("HTTPException", "ValueError", "RouteError", "Refused"):
                     texts = node.args
+                elif name == "disclosure.py" and func == "append" and isinstance(node.func.value, ast.Name) \
+                        and node.func.value.id == "warnings":
+                    texts = node.args[:1]
                 elif func in ("tr", "Invalid") and len(node.args) > 1:
                     texts = node.args[1:2]
             elif isinstance(node, ast.Return) and name == "alerts.py":
                 texts = [node.value]
+            elif isinstance(node, ast.Assign) and name == "disclosure.py" and any(
+                    isinstance(target, ast.Name) and target.id == "WARNINGS" for target in node.targets):
+                texts = node.value.elts if isinstance(node.value, (ast.List, ast.Tuple)) else []
             for arg in texts:
                 if isinstance(arg, ast.Constant) and isinstance(arg.value, str) and " " in arg.value:
                     keys.append(arg.value)
