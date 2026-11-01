@@ -9,16 +9,17 @@ concurrency:
   cancel-in-progress: false
 jobs:
   version:
+    name: Validate release tag
     runs-on: [self-hosted, Linux, X64, tgwitness-ci]
     timeout-minutes: 30
     outputs:
       version: ${{ steps.version.outputs.version }}
       image: ${{ steps.version.outputs.image }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
       - name: Create an isolated Python environment
@@ -43,21 +44,23 @@ jobs:
               output.write(f"version={version}\nimage={image}\n")
           PY
   checks:
+    name: Full release validation
     needs: version
     uses: ./.github/workflows/checks.yml
     with:
       full_platforms: true
   portable:
+    name: Publish Windows portable package
     needs: [version, checks]
     runs-on: windows-latest
     timeout-minutes: 30
     permissions:
-      contents: write
+      contents: write # Attach the verified portable archive to the release.
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
       - name: Create an isolated Python environment
@@ -74,17 +77,18 @@ jobs:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: gh release upload "$RELEASE_TAG" dist/*-portable.zip dist/*-portable.zip.sha256 --clobber
   packages:
+    name: Publish source, wheel and container
     needs: [version, checks]
     runs-on: [self-hosted, Linux, X64, tgwitness-ci]
     timeout-minutes: 30
     permissions:
-      contents: write
-      packages: write
+      contents: write # Attach source and wheel archives to the release.
+      packages: write # Push the multi-architecture image to GHCR.
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
       - name: Create an isolated Python environment
@@ -112,7 +116,7 @@ jobs:
         run: >-
           docker run --rm --platform linux/arm64 --network none --read-only --cap-drop=ALL
           --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
-          --mount type=bind,source="${{ github.workspace }}/tools",target=/checks,readonly
+          --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly
           tgwitness:arm64-check python /checks/check_install.py
           --package /usr/local/lib/python3.12/site-packages --output /data/checks
       - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4

@@ -32,6 +32,7 @@ on:
       - tgwitness/guide_locales/**
       - tgwitness/english_fallbacks.json
       - pyproject.toml
+      - deploy/site.lock
       - .github/workflows/pages.yml
   workflow_dispatch:
 permissions:
@@ -41,6 +42,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
+    name: Build and test public website
     runs-on: [self-hosted, Linux, X64, tgwitness-ci]
     timeout-minutes: 30
     steps:
@@ -53,6 +55,7 @@ jobs:
           cache: ${{ runner.environment == 'github-hosted' && 'pip' || '' }}
           cache-dependency-path: |
             pyproject.toml
+            deploy/site.lock
             .github/workflows/pages.yml
       - name: Create an isolated Python environment
         if: runner.os == 'Linux'
@@ -62,7 +65,7 @@ jobs:
           echo "$check_venv/bin" >> "$GITHUB_PATH"
           echo "VIRTUAL_ENV=$check_venv" >> "$GITHUB_ENV"
       - run: python tools/sync_notice.py --check
-      - run: python -m pip install 'playwright>=1.48,<2' 'markdown==3.11.2'
+      - run: 'python -m pip install --require-hashes --only-binary=:all: -r deploy/site.lock'
       - name: Reuse the runner's versioned browser files
         run: echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright" >> "$GITHUB_ENV"
       - run: python -m playwright install chromium
@@ -91,13 +94,14 @@ jobs:
           retention-days: 1
           path: dist/site
   deploy:
+    name: Deploy checked website
     if: github.event_name != 'pull_request' && vars.TGWITNESS_PAGES_DEPLOYMENT == 'actions'
     needs: build
     runs-on: [self-hosted, Linux, X64, tgwitness-ci]
     timeout-minutes: 30
     permissions:
-      pages: write
-      id-token: write
+      pages: write # Publish the checked site through GitHub Pages.
+      id-token: write # Authenticate the Pages deployment with GitHub OIDC.
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

@@ -14,11 +14,14 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
 
 jobs:
   capture:
+    name: Capture and attest approved evidence
+    permissions:
+      contents: read # Check out only the approved upstream collector commit.
+      id-token: write # Obtain the GitHub identity for the evidence attestation.
+      attestations: write # Store the attestation before encrypting the result.
     runs-on: ubuntu-24.04
     timeout-minutes: 150
     steps:

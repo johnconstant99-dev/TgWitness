@@ -30,8 +30,10 @@ from .verify import (SEAL_CLOSE, SEAL_OPEN, coverage_lines, fingerprint, fingerp
 SEAL_FORMAT = "tgwitness-report-seal-v1"
 CUSTODY_FORMAT = "tgwitness-custody-v1"
 RTL = ("ar", "fa", "ur", "he")
-# Bidirectional overrides can make a case title read differently from its bytes.
-HIDDEN = re.compile("[\x00-\x08\x0b-\x1f\x7f-\x9f\u200e\u200f\u2028\u2029\u202a-\u202e\u2066-\u2069]")
+# Case metadata rejects C0/C1 controls (except tab/LF), direction controls and
+# line/paragraph separators. This does not rewrite authoritative message text.
+HIDDEN_CODEPOINTS = frozenset((*range(0x00, 0x09), *range(0x0B, 0x20), *range(0x7F, 0xA0),
+                             0x200E, 0x200F, 0x2028, 0x2029, *range(0x202A, 0x202F), *range(0x2066, 0x206A)))
 
 
 class ReportOptions(BaseModel):
@@ -60,7 +62,7 @@ class ReportOptions(BaseModel):
     @classmethod
     def printable(cls, value, info):
         value = value.replace("\r\n", "\n")
-        if HIDDEN.search(value) or (info.field_name != "notes" and ("\n" in value or "\t" in value)):
+        if any(ord(char) in HIDDEN_CODEPOINTS for char in value) or (info.field_name != "notes" and ("\n" in value or "\t" in value)):
             raise ValueError("Remove control and text-direction characters")
         return value
 

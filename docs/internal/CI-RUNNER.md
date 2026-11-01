@@ -38,8 +38,9 @@ Use an otherwise empty Ubuntu 24.04 server. Four CPU cores, 8 GB RAM and at leas
 SSH access. Jobs require outbound HTTPS and package-registry access; the runner
 does not need an inbound public web endpoint.
 
-1. Copy [`scripts/install-ci-runner.sh`](../../scripts/install-ci-runner.sh) from
-   the reviewed repository revision onto the host and run it as root. It installs
+1. Copy a full checkout of the reviewed repository revision onto the host,
+   including [`deploy/site.lock`](../../deploy/site.lock). Run
+   [`scripts/install-ci-runner.sh`](../../scripts/install-ci-runner.sh) as root. It installs
    Docker, Python, browser libraries and a checksum-verified runner release.
 2. In **Settings → Actions → Runners → New self-hosted runner**, select Linux x64
    and obtain a short-lived registration token. Keep the account API token off

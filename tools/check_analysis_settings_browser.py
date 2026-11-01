@@ -1,14 +1,19 @@
 """Provider form races with deferred local promises; no network/provider calls."""
 from pathlib import Path
 import os
-import re
 
 
 def check_settings(browser):
     root = Path(__file__).resolve().parents[1]
     html = (root / 'tgwitness/static/index.html').read_text(encoding='utf-8')
-    html = re.sub(r'<script\b[^>]*>.*?</script>', '', html, flags=re.S)
     page = browser.new_page()
+    # Parse this repository-owned fixture as inert HTML before removing scripts.
+    # This is fixture isolation, not sanitization of externally supplied HTML.
+    html = page.evaluate("""source => {
+      const document = new DOMParser().parseFromString(source, 'text/html');
+      for (const script of document.querySelectorAll('script')) script.remove();
+      return '<!doctype html>' + document.documentElement.outerHTML;
+    }""", html)
     page.set_content(html)
     page.evaluate("""()=>{
       window.$=id=>document.getElementById(id);window.show=(id,on)=>$(id).hidden=!on;

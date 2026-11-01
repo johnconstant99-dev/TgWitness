@@ -32,13 +32,14 @@ concurrency:
   cancel-in-progress: true
 jobs:
   attestation-binding:
+    name: Reject unapproved attestation signer
     if: github.event_name == 'push' && github.repository == 'phishdestroy/TgWitness'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: read
-      id-token: write
-      attestations: write
+      id-token: write # Request a GitHub OIDC identity for the synthetic attestation.
+      attestations: write # Store the synthetic attestation used by this verifier check.
     steps:
       - name: Create a clearly synthetic public test subject
         run: printf '%s\n' 'TgWitness synthetic attestation integration test. No Telegram content.' > synthetic.txt
@@ -63,6 +64,7 @@ jobs:
             exit 1
           fi
   synthetic-and-container:
+    name: Validate sealed capture and container
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -73,7 +75,11 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/sealed-tests"
           echo "$RUNNER_TEMP/sealed-tests/bin" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install -c deploy/constraints.txt -e '.[dev]'
+          "$RUNNER_TEMP/sealed-tests/bin/python" tools/lock_requirements.py --check
+          "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install --require-hashes -r deploy/build.lock
+          "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install --require-hashes --no-build-isolation -r deploy/browser.lock
+          "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install --no-deps --no-build-isolation -e '.[dev]'
+          "$RUNNER_TEMP/sealed-tests/bin/python" -m pip check
       - run: python -m playwright install --with-deps chromium
       - run: python tools/check_sealed_browser.py
       - run: python tools/check_sealed_container.py

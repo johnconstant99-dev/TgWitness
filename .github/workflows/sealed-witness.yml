@@ -14,11 +14,14 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
 
 jobs:
   capture:
+    name: Request approved sealed capture
+    permissions:
+      contents: read # Let the approved collector check out its pinned source.
+      id-token: write # Pass OIDC identity to the approved attestation job.
+      attestations: write # Let the approved collector store its signed attestation.
     # The user owns this caller, but the verifier requires the upstream signer below.
     uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@eab5169e400ff3010d8853f42c8e430fe23ffe6b
     with:

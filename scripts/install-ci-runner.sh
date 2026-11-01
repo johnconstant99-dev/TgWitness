@@ -3,6 +3,14 @@
 # Register separately with a short-lived GitHub runner registration token.
 set -euo pipefail
 
+# Keep this file with the reviewed checkout's hash lock when copying it to a host.
+repo_root=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+bootstrap_lock="$repo_root/deploy/site.lock"
+if [[ ! -r "$bootstrap_lock" ]]; then
+  echo 'Copy the reviewed checkout, including deploy/site.lock, before provisioning.' >&2
+  exit 1
+fi
+
 if [[ ${EUID} -ne 0 ]]; then
   echo 'Run this provisioning script as root on a dedicated CI host.' >&2
   exit 1
@@ -43,7 +51,7 @@ fi
 
 # Install browser OS libraries once, outside unprivileged CI jobs.
 python3 -m venv /opt/tgwitness-ci-bootstrap
-/opt/tgwitness-ci-bootstrap/bin/python -m pip install --disable-pip-version-check 'playwright>=1.48,<2'
+/opt/tgwitness-ci-bootstrap/bin/python -m pip install --disable-pip-version-check --only-binary=:all: --require-hashes -r "$bootstrap_lock"
 /opt/tgwitness-ci-bootstrap/bin/python -m playwright install-deps chromium
 
 # This directory is shared only by runner-managed tool installations.

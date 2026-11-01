@@ -68,6 +68,12 @@ def file_payload(data):
 
 
 def decrypt_local(data, key):
+    """Decode Desktop's legacy local AES-IGE format, not an application password hash.
+
+    SHA-1 combines an existing 256-byte key with the message key as required by
+    that format. ECB supplies only the AES block primitive; the loop applies
+    IGE chaining and verifies the plaintext message-key digest before returning.
+    """
     if len(key) != 256 or len(data) < 32 or len(data) % 16:
         raise ValueError("Invalid encrypted TData structure.")
     message_key = data[:16]
@@ -140,6 +146,8 @@ def read_tdata_zip(payload, passcode=""):
             if len(salt) != 32:
                 raise ValueError("Unsupported TData salt.")
             password = passcode.encode("utf-8")
+            # Desktop defines this SHA-512 preprocessing followed by PBKDF2.
+            # It is import compatibility, not storage of passwords by TgWitness.
             seed = hashlib.sha512(salt + password + salt).digest()
             password_key = hashlib.pbkdf2_hmac("sha512", seed, salt, 100000 if password else 1, 256)
             local_key = decrypt_local(encrypted_key, password_key).take(256)

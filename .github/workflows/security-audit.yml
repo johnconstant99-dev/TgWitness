@@ -1,5 +1,11 @@
 name: Security audit
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
   schedule:
     - cron: "23 7 * * *"
   workflow_dispatch:
@@ -14,8 +20,8 @@ defaults:
 jobs:
   dependencies:
     name: Advisory audit (${{ matrix.name }})
-    # Manual dispatch from another branch must not become a privileged code scan.
-    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    # Dependency resolution and container builds are reserved for trusted scheduled/manual runs.
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
@@ -28,6 +34,16 @@ jobs:
             lock: deploy/build.lock
           - name: mcp
             lock: deploy/constraints-mcp.txt
+          - name: mcp-lock
+            lock: deploy/mcp.lock
+          - name: audit-tooling
+            lock: deploy/audit.lock
+          - name: browser-tooling
+            lock: deploy/browser.lock
+          - name: site-tooling
+            lock: deploy/site.lock
+          - name: media-worker
+            lock: deploy/media-worker/requirements.lock
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -35,7 +51,7 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
-      - run: python -m pip install "pip-audit==2.10.1"
+      - run: 'python -m pip install --require-hashes --only-binary=:all: -r deploy/audit.lock'
       - name: Audit exact versions against current advisories
         env:
           AUDIT_LOCK: ${{ matrix.lock }}
@@ -51,12 +67,14 @@ jobs:
           retention-days: 14
   codeql:
     name: CodeQL (${{ matrix.language }})
-    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    # Pull requests (including forks and Dependabot) analyze the merge commit without building source.
+    # GitHub permits CodeQL result uploads for pull_request runs with a read-only token.
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
-      security-events: write
+      security-events: write # Upload CodeQL findings under the existing per-language category.
     strategy:
       fail-fast: false
       matrix:
@@ -77,12 +95,12 @@ jobs:
           category: /language:${{ matrix.language }}
   containers:
     name: Container vulnerabilities (${{ matrix.name }})
-    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     permissions:
       contents: read
-      security-events: write
+      security-events: write # Upload Trivy SARIF for the built image.
     strategy:
       fail-fast: false
       matrix:

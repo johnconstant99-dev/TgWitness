@@ -10,6 +10,7 @@ FILES = [
     "deploy/installer/install.sh.in", "deploy/installer/install.ps1.in", "deploy/installer/install.cmd.in",
     "deploy/installer/index.html", "deploy/installer/style.css", "deploy/installer/site.js", "deploy/installer/wrangler.toml",
     "deploy/media-worker/Dockerfile", "deploy/media-worker/worker.py",
+    "deploy/media-worker/requirements.in", "deploy/media-worker/requirements.lock",
     "integrations/webhook.schema.json", "integrations/n8n-tgwitness.json", "tools/check_webhook_example.cjs",
     "tools/check_writeonly_drafts.mjs", "deploy/constraints-mcp.txt",
     "deploy/Dockerfile.sealed", "scripts/sealed_runner.py",
@@ -17,6 +18,7 @@ FILES = [
     "start.py", "start.sh", "Start.cmd",
     "deploy/Dockerfile", "compose.yaml", "deploy/compose/compose.image.yaml", "deploy/compose/compose.https.yaml", "deploy/compose/compose.witness.yaml", "deploy/compose/compose.proof.yaml", "deploy/compose/compose.proxies.yaml",
     ".gitignore", ".gitattributes", ".dockerignore", "deploy/env.example", "deploy/constraints.txt", "deploy/requirements.lock", "deploy/build.lock",
+    "deploy/audit.lock", "deploy/browser.lock", "deploy/mcp.lock", "deploy/site.lock",
 ]
 FILES.extend("website/demo/downloads/" + name for name in (
     "tgwitness-demo.zip", "tgwitness-demo.jsonl", "tgwitness-demo.csv", "tgwitness-demo.html",

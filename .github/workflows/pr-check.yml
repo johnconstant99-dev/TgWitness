@@ -26,6 +26,8 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
+      - name: Check dependency lock inputs before installing code
+        run: python tools/lock_requirements.py --check
       - name: Install the hash-locked build and runtime dependencies
         run: |
           python -m pip install --require-hashes -r deploy/build.lock
@@ -33,8 +35,10 @@ jobs:
           python -m pip install -c deploy/constraints.txt --require-hashes --no-build-isolation -r deploy/requirements.lock
           python -m pip install --no-deps --no-build-isolation -e .
           python -m pip check
-          python -m pip install "ruff==0.17.3"
+          python -m pip install --require-hashes --only-binary=:all: -r deploy/audit.lock
       - run: python -m ruff check .
+      - name: Check media and locale boundaries and legacy import compatibility
+        run: python -I tools/check_codeql_boundaries.py
       - name: Check installed resources, authentication and signed downloads with synthetic data
         run: python tools/check_install.py --package . --output test-results/pr-install
       - name: Verify notification credentials cannot follow redirects
@@ -52,7 +56,7 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
-      - run: python -m pip install "pip-audit==2.10.1"
+      - run: 'python -m pip install --require-hashes --only-binary=:all: -r deploy/audit.lock'
       - name: Audit all pinned runtime, build and optional MCP versions without installing project code
         run: |
           mkdir -p audit-results

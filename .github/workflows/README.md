@@ -8,7 +8,7 @@
 | --- | --- |
 | [`checks.yml`](checks.yml) | Linux checks on the project runner; full Windows/macOS matrix on request |
 | [`pr-check.yml`](pr-check.yml) | Read-only GitHub-hosted PR/merge-queue gate: lint, synthetic installation and notification redirect checks, pinned dependency audits |
-| [`security-audit.yml`](security-audit.yml) | Nightly/manual default-branch dependency audits, CodeQL and built-container vulnerability scans |
+| [`security-audit.yml`](security-audit.yml) | CodeQL on main, pull requests and merge queue; nightly/manual default-branch dependency and built-container scans |
 | [`pages.yml`](pages.yml) | Public website build and Pages workflow |
 | [`release.yml`](release.yml) | Release preparation and configured release jobs |
 | [`wiki.yml`](wiki.yml) | Downloadable wiki bundle |
@@ -19,6 +19,13 @@ in the [wiki maintenance guide](../../docs/internal/WIKI.md).
 
 Use [local tooling](../../tools/README.md) to inspect outputs before enabling or
 triggering publication.
+
+The `tgwitness-ci` runner handles trusted main-branch, maintainer-dispatched and
+published-release jobs. Pull-request code is checked on GitHub-hosted runners;
+the CodeQL job uses `build-mode: none` and does not execute the checked-out source.
+Self-hosted runner findings therefore mark an operational trust boundary that
+still requires runner isolation and maintenance, not a reason to run public PRs
+on that host.
 
 Routine jobs use the repository's `tgwitness-ci` Linux runner. Full platform
 checks and Windows release packages still use GitHub-hosted Windows/macOS
@@ -68,14 +75,17 @@ Actions and Docker; GitHub separately limits security-update PRs. No auto-merge
 is configured. This publication has no maintained npm manifest, so there is no
 empty npm job or configuration for the removed witness-controller package.
 
-Do not assume Dependabot updates custom `deploy/requirements.lock` or
-`deploy/build.lock`, their hashes, or the project's constraints files. Maintainers
-must review `deploy/constraints.txt` and `deploy/constraints-mcp.txt`, regenerate
-the hash locks with `python tools/lock_requirements.py` (requires `uv`), and commit
-the results with dependency changes. PR installation uses those hash locks and
-`pip check` to detect incompatibility with the package requirements. Both new
-workflows audit the runtime lock, build lock and pinned MCP dependency list
-without resolving or installing the audited project. Keep the approved sealed
+Do not assume Dependabot updates the custom hash locks or the project's
+constraints files. Maintainers must review `deploy/constraints.txt` and
+`deploy/constraints-mcp.txt`, regenerate the runtime, build, audit, browser,
+MCP and site locks with `python tools/lock_requirements.py` (requires `uv`),
+and commit the results with dependency changes. PR checks run the offline
+`python tools/lock_requirements.py --check` input-consistency guard before
+installation. CI installs third-party tooling from the separate hash locks,
+then installs reviewed local source without resolving dependencies and runs
+`pip check`. The scheduled dependency audit checks exact runtime, build, MCP,
+audit, browser, site and media worker pins without resolving or installing
+the audited project. Keep the approved sealed
 release/attestation policy separate from an ordinary dependency refresh.
 
 The chosen scanners are pip-audit for the Python manifests, CodeQL for source,

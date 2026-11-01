@@ -4,6 +4,7 @@ import io
 import ipaddress
 import json
 import logging
+import re
 import secrets
 from secrets import token_bytes as secrets_token
 import time
@@ -2048,7 +2049,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.get("/api/media/{digest}", dependencies=[Depends(authenticate)])
     async def media(request: Request, digest: str, inline: bool = False):
-        if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+        if re.fullmatch(r"[0-9a-f]{64}", digest) is None:
             raise HTTPException(404)
         allowed = visible_chats(request)
         if allowed is not None and not app.state.store.media_in_chats(digest, allowed):

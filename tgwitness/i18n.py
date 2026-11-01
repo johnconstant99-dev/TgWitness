@@ -10,6 +10,10 @@ COOKIE = "tgwitness-lang"
 LOCALES = Path(__file__).parent / "locales"
 GUIDE_LOCALES = Path(__file__).parent / "guide_locales"
 ENGLISH_FALLBACKS = Path(__file__).parent / "english_fallbacks.json"
+# Resolve only paths constructed from the fixed supported-language catalog.
+# Callers choose languages too, but the file-reading boundary enforces this itself.
+LOCALE_FILES = {code: LOCALES / (code + ".json") for code in LANGUAGES if code != "en"}
+GUIDE_FILES = {code: GUIDE_LOCALES / (code + ".json") for code in GUIDE_LANGUAGES if code not in LANGUAGES}
 
 
 def language_tag(tag, languages=LANGUAGES):
@@ -46,10 +50,11 @@ def pick(cookie, accept, languages=LANGUAGES):
 def words(lang):
     if lang == "en":
         return {}
-
-
+    path = LOCALE_FILES.get(lang)
+    if path is None:
+        raise ValueError("Unsupported panel language")
     fallback = {text: text for text in json.loads(ENGLISH_FALLBACKS.read_text(encoding="utf-8"))}
-    return {**fallback, **json.loads((LOCALES / (lang + ".json")).read_text(encoding="utf-8"))}
+    return {**fallback, **json.loads(path.read_text(encoding="utf-8"))}
 
 
 @lru_cache(maxsize=None)
@@ -63,6 +68,7 @@ def script(lang, guide=False):
 def guide_words(lang):
     if lang in LANGUAGES:
         return words(lang)
-    if lang not in GUIDE_LANGUAGES:
+    path = GUIDE_FILES.get(lang)
+    if path is None:
         raise ValueError("Unsupported guide language")
-    return json.loads((GUIDE_LOCALES / (lang + ".json")).read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8"))
