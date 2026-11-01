@@ -22,6 +22,9 @@
 
 <a name="screenshots"></a>
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/phishdestroy/TgWitness/badge)](https://securityscorecards.dev/viewer/?uri=github.com/phishdestroy/TgWitness)
+[![Independent verification guide](https://img.shields.io/badge/Independent%20verification%20guide-docs-356a8a)](docs/TRUST.md)
+
 <a href="https://phishdestroy.github.io/TgWitness/demo/">
 <picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="docs/assets/presentation/readme-workspace-mobile-dark-still.webp">

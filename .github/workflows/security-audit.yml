@@ -66,13 +66,13 @@ jobs:
         with:
           persist-credentials: false
       - name: Initialize language-specific security analysis
-        uses: github/codeql-action/init@793b778da9c9275a0f276522b27cb5fc14bba279 # v4
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           languages: ${{ matrix.language }}
           build-mode: none
           queries: security-extended
       - name: Analyze and upload SARIF to code scanning
-        uses: github/codeql-action/analyze@793b778da9c9275a0f276522b27cb5fc14bba279 # v4
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           category: /language:${{ matrix.language }}
   containers:
@@ -103,7 +103,7 @@ jobs:
           AUDIT_IMAGE: tgwitness-security:${{ matrix.name }}
         run: docker build --pull -f "$AUDIT_DOCKERFILE" -t "$AUDIT_IMAGE" .
       - name: Scan OS and installed library packages
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           version: v0.76.1
           scan-type: image
@@ -121,7 +121,7 @@ jobs:
           cache: false
       - name: Upload findings even when the severity gate fails
         if: always() && hashFiles('trivy.sarif') != ''
-        uses: github/codeql-action/upload-sarif@793b778da9c9275a0f276522b27cb5fc14bba279 # v4
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           sarif_file: trivy.sarif
           category: container-${{ matrix.name }}

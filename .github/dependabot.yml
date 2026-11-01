@@ -26,6 +26,9 @@ updates:
       timezone: Etc/UTC
     open-pull-requests-limit: 2
     groups:
+      # Match before the generic group; include SHA-only updates as well.
+      codeql:
+        patterns: ["github/codeql-action/*"]
       actions-compatible:
         patterns: ["*"]
         update-types: [minor, patch]
@@ -46,6 +49,11 @@ updates:
       time: "06:45"
       timezone: Etc/UTC
     open-pull-requests-limit: 2
+    # Docker interpreter upgrades need coordinated runtime and release checks.
+    # Keep the tested 3.12 line; patch releases and digest updates remain eligible.
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
       containers-compatible:
         patterns: ["*"]
