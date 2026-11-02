@@ -47,6 +47,10 @@ def main():
             assert (site / name).read_bytes() == data
             assert b"@@" not in data, "Unresolved installer template"
     assert (release / "manifest.json").read_bytes() == (site / "manifest.json").read_bytes()
+    for name in ("manifest.json", "SHA256SUMS.txt"):
+        public_key.verify((site / (name + ".sig")).read_bytes(), (site / name).read_bytes(),
+                          padding.PKCS1v15(), hashes.SHA256())
+    assert (release / "manifest.json.sig").read_bytes() == (site / "manifest.json.sig").read_bytes()
     assert manifest["files"]["install.ps1"]["sha256"] in (site / "install.cmd").read_text()
     assert urlsplit(manifest["base_url"]).scheme == "https"
     print("Artifact sizes, immutable files, SHA-256, RSA release signatures and pinned CMD bootstrap: passed", flush=True)

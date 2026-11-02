@@ -10,6 +10,24 @@
 
 ## Start here
 
+**Install TgWitness with Python included:**
+
+Linux / macOS (Bash; root for an Ubuntu server, normal user on a desktop):
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+Windows (PowerShell or Command Prompt, no administrator):
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+[Install, verify signatures and hashes, open the panel, and update](INSTALLATION.md).
+The same links serve the current published preview build. Your program and data
+stay on your machine; Cloudflare Workers hosts the download files.
+
 **Licence:** [MIT License](../LICENSE). Our
 [position on Taylor Wessing](TAYLOR-WESSING-EXCLUSION.md) adds no condition to it.
 

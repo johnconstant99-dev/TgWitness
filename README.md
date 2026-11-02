@@ -20,6 +20,32 @@
   <a href="LICENSE"><img src="docs/assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a>
 </p>
 
+<a name="quick-start"></a>
+<a name="run-it-on-your-machine"></a>
+
+## Install
+
+Python included. Use the same commands to update.
+
+**Linux / macOS**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows · PowerShell or CMD**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+<sub>Ubuntu server: run as root. Desktop: run as your normal user.</sub>
+
+[Setup & panel access](docs/INSTALLATION.md) ·
+[Signatures & SHA-256](https://get.destroy.tools/#verification) ·
+[Update](docs/INSTALLATION.md#update-an-existing-installation) ·
+[ZIP downloads](https://github.com/phishdestroy/TgWitness/releases)
+
 <a name="screenshots"></a>
 
 <a href="https://phishdestroy.github.io/TgWitness/demo/">
@@ -105,40 +131,6 @@ transcription, and send HMAC-signed webhooks.
 </details>
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
-
-<a name="quick-start"></a>
-<a name="run-it-on-your-machine"></a>
-
-## Your first capture
-
-**Guided installer · preview:** on Ubuntu, run this as root. On Linux desktops and
-macOS, run it as your normal user:
-
-```sh
-curl -fsSL https://get.destroy.tools/install.sh | bash
-```
-
-On Ubuntu, choose **This computer**, **HTTPS link** or **My own domain**. The
-installer prepares the panel and prints its address and access key. Use
-`tgwitness open` to find it again. Your account data stays on your machine.
-
-[Windows installer, signatures and setup options](https://get.destroy.tools/).
-
-**Windows portable:** [download TgWitness 0.7.1](https://github.com/phishdestroy/TgWitness/releases/download/v0.7.1/TgWitness-0.7.1-windows-amd64-portable.zip),
-extract it and run **`TgWitness.cmd`**. Python is included.
-
-**From source:** [download the source](https://github.com/phishdestroy/TgWitness/releases/download/v0.7.1/TgWitness-0.7.1-source.zip)
-with **Python 3.11+** installed. The launcher prepares the environment.
-
-[All downloads and SHA-256 checksums](https://github.com/phishdestroy/TgWitness/releases/tag/v0.7.1).
-
-| | Windows | Linux / macOS |
-| --- | --- | --- |
-| Try the demo | `scripts\Demo.cmd` | `sh start.sh --demo` |
-| Connect Telegram | `Start.cmd` | `sh start.sh` |
-
-Open **http://127.0.0.1:8787**. Use a separate Telegram account. Stop the demo before
-starting live mode; the live panel token is in `data/live/panel-token.txt`.
 
 <p align="center">
   <a href="https://phishdestroy.github.io/TgWitness/docs/start/"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-setup-mobile.svg"><img src="docs/assets/presentation/readme-nav-setup.svg" width="32%" alt="Setup guide"></picture></a>

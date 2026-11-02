@@ -215,12 +215,16 @@ def main():
         manifest_bytes = (json.dumps(manifest, indent=2) + "\n").encode()
         put(release / "manifest.json", manifest_bytes, immutable=True)
         put(output / "manifest.json", manifest_bytes)
+        manifest_signature = signing_key.sign(manifest_bytes, padding.PKCS1v15(), hashes.SHA256())
+        put(release / "manifest.json.sig", manifest_signature, immutable=True)
+        put(output / "manifest.json.sig", manifest_signature)
         for name, content in scripts.items():
             put(output / name, content)
             put(output / (name + ".sig"), artifacts[name + ".sig"])
         put(output / "release-signing.pub", public_key)
         sums = "".join(digest(content) + "  " + name + "\n" for name, content in scripts.items())
         put(output / "SHA256SUMS.txt", sums.encode())
+        put(output / "SHA256SUMS.txt.sig", signing_key.sign(sums.encode(), padding.PKCS1v15(), hashes.SHA256()))
         page_values = {key: html.escape(value, quote=True) for key, value in values.items()}
         put(output / "index.html", render("index.html", page_values).encode())
         for name in ("style.css", "site.js"):
@@ -229,7 +233,7 @@ def main():
         put(output / "_headers", (
             "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n"
             "  Content-Security-Policy: default-src 'none'; script-src '" + values["SITE_SCRIPT_SRI"] + "'; style-src 'self'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'\n"
-            "  Cache-Control: public, max-age=300, no-transform\n"
+            "  Cache-Control: no-cache, no-transform\n"
             "/install.sh\n  Content-Type: text/plain; charset=utf-8\n"
             "/install.ps1\n  Content-Type: text/plain; charset=utf-8\n"
             "/install.cmd\n  Content-Type: text/plain; charset=utf-8\n"

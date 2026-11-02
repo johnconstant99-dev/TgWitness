@@ -2,22 +2,16 @@ name: Installer
 on:
   push:
     branches: [main]
-    paths:
-      - deploy/installer/**
-      - tools/build_installer.py
-      - tools/check_installer.py
-      - tools/check_panel_setup.py
-      - tgwitness/panelctl.py
-      - tgwitness/operator_guide.py
-      - .github/workflows/installer.yml
+    # Every new main commit gets a build: even a later docs-only push must not
+    # leave a skipped obsolete application build without a replacement.
   workflow_dispatch:
   release:
     types: [published]
 permissions:
   contents: read
 concurrency:
-  group: installer-${{ github.ref }}
-  cancel-in-progress: true
+  group: installer-publication
+  cancel-in-progress: false
 jobs:
   build:
     name: Build and verify installer
@@ -38,6 +32,7 @@ jobs:
       - run: python -m pip install --require-hashes -r deploy/build.lock
       - run: python -m pip install -c deploy/constraints.txt cryptography
       - run: python -I tools/check_panel_setup.py
+      - run: python -I tools/check_installer_publication.py
       - name: Build installers and download page
         env:
           INSTALLER_SIGNING_KEY: ${{ secrets.TGWITNESS_INSTALLER_SIGNING_KEY }}
@@ -56,3 +51,58 @@ jobs:
           name: tgwitness-installer-site
           path: dist/installer-site/
           retention-days: 7
+  publish:
+    name: Publish verified installer to Cloudflare
+    needs: build
+    # Forks, PRs and old release tags cannot replace the current preview installer.
+    if: github.repository == 'phishdestroy/TgWitness' && github.ref == 'refs/heads/main' && vars.TGWITNESS_INSTALLER_DEPLOYMENT == 'cloudflare'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: installer-production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: tgwitness-installer-site
+          path: dist/installer-site/
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - run: python -m pip install -c deploy/constraints.txt cryptography
+      - name: Check the artifact belongs to this exact source
+        env:
+          EXPECTED_REVISION: ${{ github.sha }}
+        run: |
+          python -c 'import json, os; m=json.load(open("dist/installer-site/manifest.json")); assert m["source_revision"] == os.environ["EXPECTED_REVISION"] and m["test_only"] is False'
+          python tools/check_installer.py
+      - name: Retain and authenticate previously published downloads
+        run: python tools/installer_publication.py retain
+      - name: Refuse an obsolete build
+        id: current
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_REVISION: ${{ github.sha }}
+        run: |
+          current=$(gh api repos/phishdestroy/TgWitness/commits/main --jq .sha)
+          if [ "$current" = "$EXPECTED_REVISION" ]; then
+            echo 'publish=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'Main has advanced. Leave the published installer unchanged.'
+          fi
+      - name: Publish the checked static files
+        if: steps.current.outputs.publish == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Configure Cloudflare CI credentials before enabling publication.'; exit 1; }
+          npx --yes wrangler@4.156.1 deploy --config deploy/installer/wrangler.toml
+      - name: Check the public downloads after deployment
+        if: steps.current.outputs.publish == 'true'
+        run: python tools/installer_publication.py verify-public

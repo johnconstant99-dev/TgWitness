@@ -11,6 +11,8 @@
 | [`security-audit.yml`](security-audit.yml) | CodeQL on main, pull requests and merge queue; nightly/manual default-branch dependency and built-container scans |
 | [`pages.yml`](pages.yml) | Public website build and Pages workflow |
 | [`release.yml`](release.yml) | Release preparation and configured release jobs |
+| [`installer.yml`](installer.yml) | Build, sign and install-check the current application; publish verified static downloads to Cloudflare when configured |
+| [`installer-acceptance.yml`](installer-acceptance.yml) | First-run Ubuntu local-panel and temporary-tunnel acceptance, with synthetic data |
 | [`wiki.yml`](wiki.yml) | Downloadable wiki bundle built on hosted Ubuntu |
 
 Read each workflow's `on:` triggers and `permissions:` before changing it. The wiki
@@ -19,6 +21,13 @@ in the [wiki maintenance guide](../../docs/internal/WIKI.md).
 
 Use [local tooling](../../tools/README.md) to inspect outputs before enabling or
 triggering publication.
+
+The [installer publication guide](../../deploy/installer/README.md#automatic-publication-from-github)
+describes the CI secret and variables, immutable-download retention and public
+verification. Installer version labels come from `pyproject.toml`; the manifest
+records the exact commit and build ID. No version number needs editing in the
+one-line installation commands. Publication updates the download site; it does
+not restart or update users' running collectors.
 
 The `tgwitness-ci` runner handles only reviewed main-branch, maintainer-dispatched
 and published-release jobs. Pull-request code is checked on GitHub-hosted runners;

@@ -112,8 +112,55 @@ and TLS through Cloudflare. No application server or Telegram credentials are
 needed by this host.
 
 Keep account IDs and API tokens in the operator environment or GitHub secrets.
-The repository's installer workflow builds and checks an artifact; it does not
-change DNS or deploy without a separate hosting step.
+The public hostname is already attached to the `tgwitness-install` Worker. The
+application itself is installed on each user's own machine.
+
+## Automatic publication from GitHub
+
+The [Installer workflow](../../.github/workflows/installer.yml) rebuilds when the
+application, dependency constraints, package metadata or installer changes on
+`main`. It derives the software version from `pyproject.toml`, records the commit,
+signs the files and verifies an isolated Linux installation before publication.
+The permanent `/install.sh`, `/install.ps1` and `/install.cmd` addresses receive
+the new build together with its checksums, signatures and download page.
+
+Configure these repository Actions settings once:
+
+| Setting | Kind | Value |
+| --- | --- | --- |
+| `TGWITNESS_INSTALLER_SIGNING_KEY` | Secret | Existing private release key matching `release-signing.pub`. |
+| `CLOUDFLARE_API_TOKEN` | Secret | Cloudflare Workers deployment token, restricted to the publishing account and `destroy.tools` zone. |
+| `CLOUDFLARE_ACCOUNT_ID` | Variable | The account that owns `tgwitness-install`. |
+| `TGWITNESS_INSTALLER_DEPLOYMENT` | Variable | `cloudflare` enables publication. Unset it to keep build/check jobs without deployment. |
+
+See [Cloudflare's GitHub Actions setup](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/)
+for the token. A local `wrangler login` is not a CI credential. Keep the signing
+key in GitHub; Cloudflare receives public files only. Do not also enable native
+Workers Builds for the same Worker: use one publisher to avoid competing deploys.
+The publish job uses the `installer-production` GitHub environment; any required
+reviewers configured there apply before its deployment credentials are used.
+
+The publication job downloads the artifact from its own successful build, checks
+its source commit and signatures, and copies previously published releases after
+verifying their hashes and signatures against the repository key. The public
+`releases.json` catalog lists these immutable paths. If retention fails, deployment
+stops; it never silently removes old downloads. Publication is serialized and an
+obsolete main commit is skipped. Forks, PRs and release tags cannot replace the
+main preview channel. After deployment, CI compares all public bytes with its
+artifact and checks that missing files return 404.
+
+For the initial migration only, prepare a copy of the current site containing
+**all** existing `releases/` directories, then generate its catalog before deploying:
+
+```sh
+python tools/installer_publication.py index --site dist/installer-site
+npx --yes wrangler@4.156.1 deploy --config deploy/installer/wrangler.toml
+```
+
+Subsequent publications retain that catalog automatically. Old release IDs are
+never overwritten with new bytes. Manual dispatch on `main` uses the same checks
+and publishing path. Installed copies update only when their operator reruns the
+installer; this workflow does not install an unattended updater on their machines.
 
 ## Everyday commands
 
@@ -141,7 +188,7 @@ after building. The builder refuses an unsigned release or a key that does not
 match the reviewed public key. Test builds use an ephemeral key and are restricted
 to `.invalid` origins.
 
-The wheel, constraints and all three installer scripts have detached RSA-3072
+The wheel, constraints, manifest, checksum list and all three installer scripts have detached RSA-3072
 PKCS#1 v1.5 / SHA-256 signatures. Bash verifies application and constraint signatures
 with OpenSSL; Windows uses the operating system's RSA implementation. A signature
 failure stops before the application is installed or run. Native uv/Python and
