@@ -1,82 +1,42 @@
 # Release readiness
 
-This is an internal engineering assessment updated 29 October 2026, not an independent
-audit or certification. It records the tested scope and known limitations of
-TgWitness 0.7.0. Platform support and event completeness are assessed from actual tests.
+Engineering assessment for the 0.8.0 preview candidate, updated 2 November 2026.
+Public release is held while the container HIGH/CRITICAL vulnerability gate fails.
+This assessment is not an independent audit or certification.
 
-## Established scope
+## Evidence and limits
 
-| Area | Evidence available | Not established |
+| Area | Evidence available | Still required or limited |
 | --- | --- | --- |
-| Windows/Python 3.12 | Local source tests, installed-package checks and browser acceptance | Every Windows/Python configuration |
-| Linux/macOS | Portable code, dependency matrix, CI and service examples | Executed installation/soak qualification on those systems |
-| Docker | Dockerfile/Compose and a runtime smoke check in CI | Local container build/run; Docker is unavailable here |
-| Telegram | Live test on a real account: one supergroup, 27 to 29 October, 1,291 messages, 472 deletions, 12 edits, 8 FloodWait pauses handled; automated tests use synthetic clients | Several accounts at once, administrator roles, long outages and sustained operation |
-| Restart recovery | Encrypted account/channel update-state persistence, Telethon catch-up and periodic history rechecks are implemented | Atomic cursor/observation commits and lossless replay through every process/network failure |
-| Proxies | Loopback SOCKS5/HTTP CONNECT fixtures; bundled public lists, real HTTPS downloads from two sources, retained caches, filtered/pinned public addresses, operator override, own links and bilingual UI | Live Telegram delivery through these listed proxies, deployed project proxies, Fake TLS ee and automatic server selection |
-| Witness bot setup | Pinned config download, own channel/API/proxy settings, offline preflight, signed posts through a local HTTP Bot API fixture and recorded posting failures | Hosted project witness, independent operator custody and live bot publication from this setup |
-| Signatures | Detection of changed records, media and checkpoint mismatch | Telegram authenticity or prevention of operator fabrication |
-| Storage | Encrypted secrets, optional external master key and optional password-encrypted ZIP exports | Application encryption of the local journal and attachments |
+| Current application | [Checks on main at a6eb9b5a](https://github.com/phishdestroy/TgWitness/actions/runs/41392237410) passed Linux installation, browser suites and Docker/Compose integration; the phone fixes in #59 passed their PR checks and local browser checks | The release candidate must pass its own full platform run; prior results do not qualify a new revision |
+| Platforms | The release workflow exercises Python 3.11–3.13 on Linux, Windows and macOS, and builds/tests Windows portable | Check the actual candidate run, including all nine matrix jobs and the portable artifact; synthetic installation is not sustained-operation qualification |
+| Dependencies and containers | [2 November audit](https://github.com/phishdestroy/TgWitness/actions/runs/41396355070): all Python advisory checks and CodeQL passed | Runtime/sealed each have 45 HIGH/CRITICAL findings across 9 CVEs; media worker has 72 across 29 CVEs. The container gate failed |
+| Reports | Signed HTML/JSON/PDF, offline viewer, archive verification, configurable contents and 25 report languages | CJK PDFs need an installed font or `TGWITNESS_FONT_DIR`. PDF availability is reported; HTML and JSON remain available |
+| Telegram | A real-account test observed one supergroup on 27–29 October: 1,291 messages, 472 deletions and 12 edits; all 2,385 record signatures verified | A complete live matrix of roles, several accounts, attachment types, revocation, FloodWait, reconnects and sustained operation |
+| Recovery | Saved update state, catch-up, periodic history rechecks, absent-ID rechecks and recorded coverage gaps | Atomic cursor/observation commits and lossless replay through every process/network failure are not established |
+| Integrity | Hash chains, Ed25519 signatures, checkpoints and independent archive verification | Signatures do not authenticate Telegram content, prevent operator fabrication or establish legal admissibility |
+| Storage | Encrypted credentials, optional external master key and password-protected ZIP exports | Local journals and attachments need disk/volume encryption |
 
-Docker/Podman were unavailable on this host; the WSL executable did not provide a
-working Linux environment. No OS/hypervisor installation was performed. A CI file
-does not count as a successful remote CI run.
+The fresh scan improves on the previous container counts, but does not clear the
+release gate. Keep the findings visible; see the
+[container analysis](CODE-SCANNING-2026-11-01.md#remaining-container-findings).
+Passing functional tests does not override a failed security check.
 
-The live test on a real account is described in
-[VERIFICATION.md](../VERIFICATION.md#live-telegram-test--27-to-29-october-2026).
+## Release acceptance
 
-## Improvements in 0.4
+- Build source, wheel and Windows portable from one recorded revision. Verify every
+  package checksum and bind the exact file list to that revision in the release manifest.
+- Run the full platform checks and source/publication checks for that revision.
+  Preserve failed or skipped results in the acceptance record.
+- Keep the existing 0.7.1 tag, assets and container image unchanged. Do not publish
+  this candidate as security-cleared or replace an existing release download.
+- Keep the draft public showcase (#57) outside this candidate. Guided connection
+  setup and portable WARP (#58) are included from main; their helper lifecycle passed
+  the [full platform run](https://github.com/phishdestroy/TgWitness/actions/runs/41397629374).
 
-Account now centers account login, keeps the route available before login, and
-collapses storage/account-management details. Mobile navigation uses four visible
-buttons. Text colors and input labels were revised. The browser acceptance harness
-checks desktop/narrow layouts and solid-background text contrast; this is not a
-complete accessibility audit or screen-reader evaluation.
+Admin-log context, scoped panel permissions, supported TData import, QR sign-in
+and isolated media processing are implemented. Their presence does not establish
+complete Telegram coverage or independent operator custody.
 
-Exports use native browser file streaming where available, a bounded 128 MiB fallback
-otherwise, and an authenticated streaming CLI. Server temporary files are kept on
-the workspace's data volume and interrupted files are cleaned on startup. The previous
-Compose `/tmp` capacity bottleneck no longer applies to export construction.
-Production-scale multi-gigabyte transfers still need target-system qualification.
-
-The launcher has a no-install `--check` mode for dependencies, signing, storage,
-address/port and key configuration. Service templates and a local setup guide ship
-with the source. These improve deployment without certifying untested environments.
-
-## Improvements in 0.5
-
-The local demo now opens directly without copying an access token, while real
-workspaces retain authentication. Sources offers explicit event-category selection
-and presets. Policies are isolated by account, persist across restarts, control
-the live handlers and record signed before/after changes. Defaults preserve the
-previous behavior. No completeness, replay or new full-storage encryption claim
-is implied by these controls.
-
-## Remaining validation and reliability work
-
-The seven defects from the 27 October review are addressed
-in 0.5.1 with regressions recorded in [verification](../VERIFICATION.md). Windowless Windows startup is now exercised, including
-the panel response and diagnostic file; Task Scheduler lifecycle qualification
-remains separate. This does not remove the live-service/platform blockers below.
-
-- A controlled live matrix of private groups, several accounts, edits/deletions,
-  reactions, roles, attachments, revoked access and real FloodWait.
-- Qualification of the implemented saved-state/catch-up recovery, including the boundary
-  between cursor advancement and committed observations. Persisted `pts/qts/seq` and
-  channel state exist; an atomic durable replay protocol is not established. Media
-  recovery is a separate feature.
-- Sustained operation, network/process/host failure, full disk and verified restore,
-  with explicit accounting for known loss.
-- Clean installation and actual execution on the target OS/container matrix.
-- Large-transfer qualification on target browsers, proxies and storage.
-- Independent security, attribution and evidence-handoff review.
-
-Admin-log polling, extra reactor lists, priority polling, isolated workers, whole-store
-application encryption remain separate features. Scoped panel permissions are
-documented in [access and permissions](../ACCESS.md). Supported TData
-import and QR login are implemented in 0.6; see [account formats](../ACCOUNTS.md).
-Their absence must not be inferred away from a successful panel launch.
-
-Actual commands, results and environmental observations are recorded in
-[VERIFICATION.md](../VERIFICATION.md). Use [LIVE_ACCEPTANCE.md](LIVE_ACCEPTANCE.md) for
-real-account qualification.
+See [verification](../VERIFICATION.md), [release contents](RELEASE.md) and
+[live acceptance](LIVE_ACCEPTANCE.md) for test scope and remaining qualification.

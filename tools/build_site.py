@@ -79,7 +79,7 @@ DEMO_STATIC.update({"demo/core/" + name: "tgwitness/static/core/" + name
 DEMO_STATIC.update({"demo/components/" + name: "tgwitness/static/components/" + name
                     for name in ("shell.js", "shell.css", "health.js", "health.css", "health-actions.js", "collection.js", "collection.css", "workspaces.js", "forms.js", "forms.css", "connection-notice.js", "feedback.css", "account-state.js", "modes.js", "modes.css")})
 DEMO_STATIC.update({"demo/views/" + name: "tgwitness/static/views/" + name
-                    for name in ("sources.js", "sources.css", "parameters.js", "parameters.css", "exports.js", "exports.css", "accounts.js", "accounts.css", "access.js", "access.css", "system-log.js", "chats.css", "chat-list.js", "chat-list.css", "workflows.css", "setup.js", "setup.css", "disclosure-preview.js", "disclosure-preview.css")})
+                    for name in ("sources.js", "sources.css", "parameters.js", "parameters.css", "exports.js", "exports.css", "accounts.js", "accounts.css", "access.js", "access.css", "system-log.js", "chats.css", "chat-list.js", "chat-list.css", "workflows.css", "setup.js", "setup.css", "disclosure-preview.js", "disclosure-preview.css", "connection.js", "connection.css")})
 DEMO_STATIC.update({"demo/mock.js": "website/demo/mock.js", "demo/fixtures.json": "website/demo/fixtures.json"})
 DEMO_STATIC.update({"demo/report/" + name: "website/demo/report/" + name
                     for name in ("index.html", "report.html", "sharing-copy.zip", "example.json")})
@@ -279,8 +279,29 @@ def inventory(root=ROOT):
     return list(dict.fromkeys(s for s in strings if s)), fragments, list(dict.fromkeys(diagrams))
 
 
+def validate_demo_assets(root):
+    """Keep the explicit publication list complete for referenced panel assets."""
+    published = set(DEMO_STATIC.values()) | set(DEMO_PAGES.values())
+    reference = re.compile(r'''["']([^"'\s<>]+\.(?:js|css)(?:\?[^"'\s<>]*)?)["']''')
+    for source in sorted(published):
+        if not source.startswith("tgwitness/static/") or Path(source).suffix not in (".html", ".js", ".css"):
+            continue
+        for value in reference.findall((root / source).read_text(encoding="utf-8")):
+            parts = urlsplit(html.unescape(value))
+            if parts.scheme or parts.netloc:
+                continue
+            target = ("tgwitness/static" + parts.path if parts.path.startswith("/") else
+                      posixpath.normpath(posixpath.join(posixpath.dirname(source), parts.path)))
+            # Demo HTML replaces the server locale loader with generated dictionaries below.
+            if source in DEMO_PAGES.values() and target == "tgwitness/static/guide-locale.js":
+                continue
+            if target.startswith("tgwitness/static/") and (root / target).is_file() and target not in published:
+                raise ValueError("Referenced panel asset is missing from the demo: " + target)
+
+
 def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None, branch="main"):
     root = Path(root).resolve()
+    validate_demo_assets(root)
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9][A-Za-z0-9_.-]*", repository):
         raise ValueError("Repository must be OWNER/REPOSITORY")
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", branch):

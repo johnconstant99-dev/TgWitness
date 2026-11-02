@@ -1,8 +1,8 @@
-# Version 0.7.1 preview
+# Version 0.8.0 preview
 
 TgWitness is a self-hosted Telegram observation journal under the
-[MIT License](../../LICENSE). Version 0.7.1 is the 1 November 2026 preview; its
-contents are listed in the [changelog](../CHANGELOG.md). The release carries the
+[MIT License](../../LICENSE). Version 0.8.0 is the 2 November 2026 preview candidate; its
+contents are listed in the [changelog](../CHANGELOG.md). The release packages are the
 Windows portable package, the wheel and the source archive, each with its SHA-256.
 
 ## Included in this source tree
@@ -22,7 +22,7 @@ Windows portable package, the wheel and the source archive, each with its SHA-25
 - A panel mini-client for messages, replies, supported bot buttons and invitation joins.
   Each action is attributed to the selected account and recorded in its journal.
 - SHA-256 hash chains, Ed25519 signatures, checkpoints, run receipts and JSONL/CSV/HTML/ZIP
-  exports. Optional AES-256 ZIP passwords, full-chat exports and coordinated multi-account
+  exports, signed PDF reports and an offline report viewer with verified selections. Optional AES-256 ZIP passwords, full-chat exports and coordinated multi-account
   chat exports are available. An independent verifier checks exported records.
 - Opt-in people profiles, notification delivery, timestamp tooling, encrypted S3-compatible
   copies and an independently operated witness process.
@@ -42,7 +42,7 @@ wheel, Windows portable and GHCR packages. Public source and wheel assets use al
 the public site includes only presentation assets. Publication checks and dependency auditing
 run in CI. See [publishing](PUBLISHING.md) for commands and deployment steps.
 
-Version 0.7.1 remains a preview. The release workflow publishes the exact Windows
+Version 0.8.0 remains a preview. The release workflow publishes the exact Windows
 portable artifact tested by the checks workflow, alongside the source archive
 and wheel. A final job downloads all three published packages, checks their
 SHA-256 sidecars and publishes `SHA256SUMS.txt` and `RELEASE-MANIFEST.json` with
@@ -63,9 +63,20 @@ verified. See the [live test](../VERIFICATION.md#live-telegram-test--27-to-29-oc
 
 ## Remaining validation
 
+The candidate is held from public release while the container HIGH/CRITICAL gate fails.
+The [2 November audit](https://github.com/phishdestroy/TgWitness/actions/runs/41396355070)
+passed Python dependency checks and CodeQL, but found 45 records (9 distinct CVEs)
+in each runtime/sealed image and 72 records (29 distinct CVEs) in the media worker.
+See the [container findings](CODE-SCANNING-2026-11-01.md#remaining-container-findings).
+Do not disable the gate or describe this candidate as security-cleared.
+
+CJK PDFs require a suitable installed font or `TGWITNESS_FONT_DIR`; when PDF rendering
+is unavailable, the export keeps its HTML and JSON reports and records the limitation.
+
 - A complete live Telegram matrix covering QR confirmation, roles, update delivery, media,
   rate limits, reconnects and sustained operation.
-- Actual Linux/macOS installation and Docker runtime checks on their target environments.
+- Successful checks for this candidate on Linux, Windows and macOS, including the portable package.
+  Prior platform results do not qualify a newer revision; use its Actions run and manifest.
 - Independent security review, operator-resistant capture, legal admissibility and guaranteed
   event completeness. Signatures verify the journal; they do not certify Telegram's content.
 

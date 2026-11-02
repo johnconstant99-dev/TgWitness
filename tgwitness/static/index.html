@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="/views/parameters.css?v=21">
 <link rel="stylesheet" href="/views/accounts.css?v=30">
 <link rel="stylesheet" href="/views/setup.css?v=3">
+<link rel="stylesheet" href="/views/connection.css?v=1">
 <link rel="stylesheet" href="/views/access.css?v=30">
 <link rel="stylesheet" href="/components/journal.css?v=5">
 <link rel="stylesheet" href="/views/chats.css?v=11">
@@ -951,7 +952,7 @@
     <form class="github-form" id="github-form">
       <div class="replica-fields">
         <div><label for="github-repository">Repository</label><input data-no-translate id="github-repository" maxlength="200" placeholder="github.com/phishdestroy/TgWitness" required spellcheck="false" autocomplete="off"></div>
-        <div><label for="github-ref">Tag, branch or commit</label><input data-no-translate id="github-ref" maxlength="200" placeholder="v0.7.1" required spellcheck="false" autocomplete="off"></div>
+        <div><label for="github-ref">Tag, branch or commit</label><input data-no-translate id="github-ref" maxlength="200" placeholder="v0.8.0" required spellcheck="false" autocomplete="off"></div>
       </div>
       <button class="primary" type="submit">Check now</button>
     </form>
@@ -988,6 +989,36 @@
 </section>
 
 <section class="view" hidden id="view-connection">
+  <section class="card padded connect-guide" id="connect-guide" aria-labelledby="connect-title" hidden>
+    <details id="connect-details"><summary id="connect-toggle">Connection route</summary><div class="connect-body">
+    <div class="connect-heading"><div><div class="eyebrow">Before you connect</div><h2 id="connect-title">Choose how this account connects</h2><p class="hint">Choose a route, check it, then apply. Your saved connection keeps working while you prepare.</p></div><span class="eyebrow" id="connect-step">1. Choose a route</span></div>
+    <div class="connect-current"><strong id="connect-current">Current connection</strong><p class="hint" id="connect-check-result" role="status">Not checked yet</p><div class="route-actions"><button type="button" class="secondary" id="connect-check">Check now</button><button type="button" class="secondary" id="connect-start" hidden>Start tunnel</button><button type="button" class="quiet" id="connect-stop" hidden>Stop tunnel</button></div></div>
+    <fieldset id="connect-fields"><legend class="sr-only">Connection settings</legend>
+      <div class="connect-scope"><label>Apply to<select id="connect-scope"><option value="account">This account</option><option value="group">An account group</option><option value="all">All accounts</option></select></label><label id="connect-group-wrap" hidden>Account group<select id="connect-group"></select></label></div>
+      <label class="check-label" id="connect-keep-wrap" hidden><input type="checkbox" id="connect-keep" checked>Keep accounts that already have their own route</label>
+      <div class="connect-routes" role="group" aria-label="Connection route">
+        <button type="button" class="connect-route" data-connect-mode="direct" aria-pressed="false"><strong>Direct</strong><span>This machine's IP</span></button>
+        <button type="button" class="connect-route" data-connect-mode="vpn" aria-pressed="false"><strong>VPN</strong><span>Import WireGuard</span></button>
+        <button type="button" class="connect-route" data-connect-mode="proxy" aria-pressed="false"><strong>My proxy</strong><span>Server or proxy URL</span></button>
+        <button type="button" class="connect-route" data-connect-mode="mtproxy" aria-pressed="false"><strong>Public MTProto</strong><span>Automatic pool</span></button>
+        <button type="button" class="connect-route" data-connect-mode="warp" aria-pressed="true"><strong>WARP</strong><span>Managed local tunnel</span></button>
+      </div>
+      <p id="connect-note" class="hint"></p>
+      <div id="connect-proxy-fields" hidden>
+        <label>Proxy URL (optional)<input type="password" id="connect-proxy-url" autocomplete="off" placeholder="socks5://user:password@host:1080"></label>
+        <div class="connect-fields"><label>Protocol<select id="connect-proxy-kind"><option value="socks5">SOCKS5</option><option value="http">HTTP CONNECT</option><option value="mtproxy">MTProxy</option></select></label><label>Host<input id="connect-host" maxlength="253" autocomplete="off"></label><label>Port<input id="connect-port" type="number" min="1" max="65535" value="1080"></label></div>
+        <div id="connect-login-fields" class="connect-fields"><label>Username (optional)<input id="connect-user" maxlength="255" autocomplete="off"></label><label>Password (optional)<input type="password" id="connect-password" maxlength="255" autocomplete="off"></label></div>
+        <label id="connect-secret-wrap" hidden>MTProxy secret<input id="connect-secret" type="password" maxlength="512" autocomplete="off"></label>
+      </div>
+      <div id="connect-vpn-fields" hidden><label>WireGuard profile<textarea id="connect-wireguard" maxlength="16384" spellcheck="false" autocomplete="off" placeholder="[Interface]&#10;PrivateKey = …&#10;Address = …&#10;&#10;[Peer]&#10;PublicKey = …&#10;Endpoint = …&#10;AllowedIPs = 0.0.0.0/0, ::/0"></textarea></label><p class="hint">One profile per account. OpenVPN and IPsec can run outside TgWitness; use Direct through that host VPN or enter its SOCKS5 gateway. Host VPN status is not verified here.</p></div>
+      <div id="connect-setup-fields"><label class="check-label"><input type="checkbox" id="connect-consent">Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.</label><p class="hint"><a href="https://www.cloudflare.com/application/terms/" target="_blank" rel="noopener noreferrer">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.</p></div>
+      <p id="connect-warp-note" class="hint">Each selected account gets its own local tunnel. Cloudflare chooses the exit address and country; separate tunnels may share an exit IP. WARP does not authenticate message content.</p>
+      <details><summary>External requests</summary><label class="check-label"><input type="checkbox" id="connect-outside" checked>Use this route for timestamps, notifications and other requests outside Telegram</label><p class="hint">Applying replaces a separately configured external proxy. MTProxy carries only Telegram, so external requests stay off until you configure their own proxy under Advanced. Proxied routes never fall back to Direct.</p></details>
+    </fieldset>
+    <div class="route-actions"><button type="button" class="secondary" id="connect-preview">Review selection</button><button type="button" id="connect-prepare" hidden>Prepare and check</button><button type="button" id="connect-apply" hidden>Apply checked connection</button><button type="button" class="quiet" id="connect-cancel" hidden>Discard draft</button><button type="button" id="connect-continue" hidden>Continue</button></div>
+    <p id="connect-progress" class="hint" role="status" aria-live="polite"></p><div id="connect-review" class="connect-review"></div>
+    </div></details>
+  </section>
 <div class="connection-simple">
   <div class="page-heading">
     <div><span class="page-kicker">Workspace</span><h1 id="account-heading">Add account</h1></div>

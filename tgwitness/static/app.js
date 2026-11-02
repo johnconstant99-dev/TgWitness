@@ -30,6 +30,10 @@ const state = {token: sessionStorage.getItem("tgwitness-token") || "",
   accountDisclosureJob: null, accountDisclosurePreview: null, accountDisclosureDirty: false,
   accountDisclosures: {}, exportTask: 'journal', workflow: null};
 let accountState;
+let connectionView;
+const connectionViewReady=import('./views/connection.js?v=1').then(({createConnectionView})=>{
+  connectionView=createConnectionView({root:$('connect-guide'),tr,json,state,refreshStatus,askConfirm});
+});
 const accountStateReady=import('./components/account-state.js?v=1').then(module=>{accountState=module.accountState;});
 let disclosurePreview;
 const disclosurePreviewReady=import('./views/disclosure-preview.js?v=1').then(({createDisclosurePreview})=>{
@@ -56,7 +60,7 @@ const viewReady=Promise.all([
       updateStatus:()=>renderViewStatus(name),
       leave(){
         top=window.scrollY;scrolls=[root,...root.querySelectorAll('*')].filter(element=>element.scrollTop).map(element=>[element,element.scrollTop]);
-        if(name==='connection')window.TgWitnessProxies?.stop?.();
+        if(name==='connection'){window.TgWitnessProxies?.stop?.();connectionView?.leave();}
         if(name==='integrations'){window.TgWitnessIntegrations?.clear();window.TgWitnessWebhooks?.clear();}
         if(name==='sealed')window.TgWitnessCaptureStory?.pause?.();
         if(name==='parameters')parametersView?.leave();
@@ -71,7 +75,7 @@ const viewReady=Promise.all([
 function resetViewContent(view){
   const root=panelRoots.get(view);for(const form of root.querySelectorAll('form'))form.reset();
   for(const field of root.querySelectorAll('input,textarea'))if(!field.form){field.value=field.defaultValue;field.checked=field.defaultChecked;}
-  if(view==='connection'){networkLoadedFor=null;policyOutsideDirty=false;policyFormDirty=false;state.policy=null;}
+  if(view==='connection'){networkLoadedFor=null;policyOutsideDirty=false;policyFormDirty=false;state.policy=null;connectionView?.reset();}
   if(view==='sources'){state.scope=null;state.scopeDirty=false;state.recheckDirty=false;}
   if(view==='parameters')parametersView?.resetSession();
   if(view==='evidence'){exportsView?.resetSession();resetAccountExport();}
@@ -105,7 +109,7 @@ async function loadPanelView(view){
   }
   else if(view==='integrations')await window.TgWitnessIntegrations?.load();
   else if(view==='analysis')await window.TgWitnessAnalysis?.load();
-  else if(view==='connection'){await loadProfiles();if(!state.status.demo)await loadPolicy();}
+  else if(view==='connection'){await loadProfiles();if(!state.status.demo)await loadPolicy();await connectionViewReady;await connectionView.enter();}
 }
 let routerTask=null;
 function routeSnapshot(){return {view:state.drawerSeq!==null?"observations":state.view,workspace:state.profile,
@@ -144,7 +148,7 @@ async function applyRouteToPanel(route,current){
   else if(view==="parameters"){
     await loadParameters();if(current()){state.parameterSection=route.section;if(route.section)parametersView?.selectSection(route.section,{record:false});}
   }else if(view==="accounts")await loadProfiles();
-  else if(view==="connection"){await loadProfiles();if(current()&&!state.status.demo)await loadPolicy();}
+  else if(view==="connection"){await loadProfiles();if(current()&&!state.status.demo)await loadPolicy();await connectionViewReady;if(current())await connectionView.enter();}
   else if(view==="access")await loadAccess();
   else if(view==="system-log")await loadConsole();
   else if(view==="integrations")await window.TgWitnessIntegrations?.load();

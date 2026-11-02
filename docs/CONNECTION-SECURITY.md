@@ -1,10 +1,83 @@
 # Connection, proxies and data protection
 
-This document describes TgWitness 0.7.1 behavior and its limits. Authentication,
+This document describes TgWitness 0.8.0 behavior and its limits. Authentication,
 source access, network connectivity and capture completeness are separate states.
 For sign-in steps, file formats, and multiple accounts, start with
 [accounts and session formats](ACCOUNTS.md). For event policies and restart
 behavior, see [how collection works](COLLECTION.md).
+
+## Guided connection setup
+
+In **Connection**, the administrator can choose **This account**, **An account
+group** or **All accounts**, then select a route. **Review selection** lists the
+affected accounts. **Prepare and check** tests the proposed route without changing
+the saved one. **Apply checked connection** checks again, pauses observation if
+necessary, saves the route and resumes observation that was already running.
+It never starts collection in a previously idle account. History downloads remain
+paused and can be resumed separately. Pause active exports before switching.
+
+Group changes keep accounts with their own route by default. Clear that option
+only when the preview lists the changes you intend. Application reports each
+account's result; it is not an all-or-nothing transaction across databases. A
+failed switch restores that account's previous settings. A failure to resume is
+shown explicitly. Previews expire after ten minutes and changes to connection
+settings or group membership require a new check.
+
+| Route | What TgWitness manages |
+| --- | --- |
+| Direct | Connections from the host; an external host VPN is not detected or enforced. |
+| VPN | One full-tunnel WireGuard profile per account, carried by a local userspace SOCKS5 process. No host interface or driver is installed. |
+| My proxy | SOCKS5, HTTP CONNECT or MTProxy credentials. A URL can fill the SOCKS5/HTTP fields. Selecting several accounts shares this entered proxy. |
+| Public MTProto | The existing pool assigns Telegram routes. External requests are disabled until a separate suitable proxy is configured in the advanced settings. |
+| WARP | A separate local tunnel for each selected account, with WARP registration and a WireGuard profile kept in that account's vault. |
+
+The current-route check uses a fresh unauthenticated Telegram transport, not the
+account's session. For HTTP-capable routes it also requests Cloudflare's HTTPS
+trace through that route and displays its reported exit IP, country, WARP state
+and check time. The measured latency is the Telegram connection setup time,
+not an ICMP ping. WARP preparation fails unless the trace reports WARP active.
+These checks establish connectivity, not the authenticity or completeness of
+captured messages. A running local process alone is not a successful exit check.
+
+### Portable WARP and WireGuard
+
+This is an **unofficial WARP integration** using
+[wgcf 2.3.1](https://github.com/ViRb3/wgcf/releases/tag/v2.3.1) and
+[wireproxy 1.1.3](https://github.com/windtf/wireproxy/releases/tag/v1.1.3).
+The administrator explicitly accepts setup before the first download or WARP
+registration. Those setup connections go directly to GitHub and Cloudflare and
+reveal the machine's IP. Ordinary account traffic keeps its existing route until
+application. Cloudflare chooses the exit address and country; separate tunnels
+can share an exit address. Country selection, periodic IP rotation and a host-wide
+VPN kill switch are not provided by this feature.
+
+Supported helper downloads: Linux and macOS x86-64/ARM64, and Windows x86-64.
+Artifacts are checked against SHA-256 hashes bundled in the reviewed source,
+and cached executables are checked again before launch. No helper is added to
+PATH, installed as a system service, or given a public listener. All files live
+under the workspace's `portable-routes/` directory and encrypted vault entries.
+The loopback SOCKS5 listener requires independently generated credentials.
+
+Private profiles and WARP account credentials are encrypted with the existing
+workspace vault. While running, the helper needs an owner-only plaintext config;
+it is removed on a normal stop. A host crash can leave this file behind in the
+owner-only data folder. This does not encrypt the disk or protect against its
+administrator. The supervisor closes the tunnel if the panel's parent pipe
+disappears. A failed tunnel never enables a direct fallback. Panel restart
+restores a selected tunnel; failed starts retry with a bounded delay. **Stop
+tunnel** also pauses observation and persists the stopped state. **Start tunnel**
+starts the tunnel; resume observation separately when ready.
+
+Uploaded WireGuard profiles must contain one Interface and one Peer, full IPv4
+and IPv6 routes, and no hooks, includes, environment substitutions or extra
+listeners. Public endpoint addresses are resolved and pinned before startup.
+Use an external VPN or SOCKS5 gateway for OpenVPN/IPsec and private endpoints.
+
+The synthetic checks are `python tools/check_guided_connection.py` and
+`python tools/check_guided_connection_browser.py`. The optional
+`python tools/check_portable_routes_runtime.py` downloads verified helpers and
+tests their actual local process lifecycle against loopback fixtures. It does
+not register a Cloudflare device or use a Telegram account.
 
 ## Authentication methods
 

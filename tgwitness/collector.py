@@ -1108,6 +1108,11 @@ class Collector:
     async def ensure_route(self):
         """Automatic mode: choose this workspace's proxy (the same one as before while it works); where the
         IP mode allows, connect directly while no listed proxy answers."""
+        managed = getattr(self, "portable_routes", None)
+        if managed and managed.selected():
+            if managed.selected().get("paused"):
+                raise ValueError("The local tunnel is stopped. Start it in Connection before continuing.")
+            await managed.restore()
         if not self.automatic():
             await self.pin_proxy()
             return
@@ -1274,6 +1279,7 @@ class Collector:
         self.pinned_proxy = None
         self.vault.save("network", config.model_dump())
         with self.store.transaction():
+            self.store.set_setting("connection_check", None)
             self.store.set_setting("resume", False)
             self.store.set_setting("auto_route", None)
             self.store.append("network.changed", config.receipt())

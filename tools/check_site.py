@@ -124,6 +124,8 @@ def main():
             demo.close()
             from check_demo_browser import check_demo_downloads
             check_demo_downloads(browser, url, output, route_request, errors, failed)
+            assert errors == [], errors
+            assert failed == [], failed
             from check_home_browser import check_home
             check_home(browser, url, output, route_request, errors)
             from check_modes_browser import check_modes

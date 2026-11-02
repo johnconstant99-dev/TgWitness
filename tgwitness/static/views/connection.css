@@ -1,0 +1,24 @@
+.connect-guide{grid-column:1/-1;margin:0 0 1rem;min-width:0;padding:0;scroll-margin-top:80px}
+.connect-guide>details>summary{padding:16px 24px;cursor:pointer;font-weight:600}
+.connect-body{padding:0 24px 24px}
+.connect-guide .connect-heading{display:flex;justify-content:space-between;align-items:start;gap:1rem;flex-wrap:wrap}
+.connect-guide h2{margin:.3rem 0}.connect-guide h3{margin:1rem 0 .6rem}
+.connect-current{padding:1rem;margin:1rem 0;background:var(--surface-2,var(--bg));border:1px solid var(--line,var(--border));border-radius:12px}
+.connect-current p{overflow-wrap:anywhere}.connect-current .route-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.connect-guide fieldset{border:0;padding:0;margin:0;min-width:0}
+.connect-scope{display:flex;gap:1rem;flex-wrap:wrap;align-items:end;margin-bottom:1rem}
+.connect-scope label{flex:1;min-width:180px}
+.connect-routes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.65rem}
+.connect-route{display:flex;flex-direction:column;align-items:start;gap:.4rem;padding:1rem;white-space:normal;text-align:left;min-width:0;border:1px solid var(--line,var(--border));border-radius:12px;background:var(--surface);color:var(--text);cursor:pointer}
+.connect-route span{font-size:.8rem;font-weight:400;color:var(--muted)}
+.connect-route.selected{border-color:var(--accent,#598cff);box-shadow:inset 0 0 0 1px var(--accent,#598cff)}
+.connect-route:focus-visible{outline:3px solid var(--accent,#598cff);outline-offset:3px}
+.connect-fields{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+.connect-guide input:not([type=checkbox]),.connect-guide select,.connect-guide textarea{width:100%;box-sizing:border-box}
+.connect-guide textarea{min-height:170px;font-family:monospace}
+.connect-guide .hint{line-height:1.6}.connect-guide label.check-label{display:flex;align-items:start;gap:.55rem;line-height:1.5;margin:.8rem 0}
+.connect-guide input[type=checkbox]{flex-shrink:0;margin-top:.25rem}
+.connect-review{overflow:auto;margin-top:1rem}.connect-table{width:100%;border-collapse:collapse;font-size:.9rem}
+.connect-table th,.connect-table td{text-align:left;padding:.75rem;border-bottom:1px solid var(--line,var(--border));overflow-wrap:anywhere;vertical-align:top}
+.connect-guide [hidden]{display:none!important}.connect-guide .error{color:var(--danger,#cf5353)}
+@media(max-width:760px){.connect-routes{grid-template-columns:repeat(2,minmax(0,1fr))}.connect-route:last-child{grid-column:1/-1}.connect-fields{grid-template-columns:1fr}.connect-table{min-width:420px}}

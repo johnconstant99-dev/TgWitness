@@ -367,6 +367,15 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             collector.proxy_pool = shared_pool
             app.state.store, app.state.vault, app.state.collector = store, vault, collector
             app.state.account_export = AccountExport(collector, store, vault)
+            from .guided_connection import GuidedConnection
+            app.state.connection = GuidedConnection(app, profile_id)
+            collector.portable_routes = app.state.connection.portable
+            if not demo:
+                try:
+                    await app.state.connection.portable.restore()
+                except Exception as exc:
+                    store.append("network.tunnel_unavailable", {"error_type": type(exc).__name__})
+                app.state.connection.maintenance = asyncio.create_task(app.state.connection.maintain())
             app.state.disclosures = Disclosures(app.state.account_export, vault)
             app.state.access = access or AccessControl(vault, store, console)
             if not access:
@@ -463,6 +472,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 if getattr(app.state, "multi_export", None):
                     await app.state.multi_export.close()
                 if profiles:
+                    await app.state.connection.close()
                     await profiles.close()
                 if getattr(app.state, "disclosures", None):
                     await app.state.disclosures.close()
@@ -475,6 +485,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                         await asyncio.gather(task, return_exceptions=True)
                 if collector:
                     await collector.stop(shutdown=True)
+                if getattr(app.state, "connection", None):
+                    await app.state.connection.close()
                 if store and journal_ready:
                     store.append("process.stopped", {"reason": "graceful shutdown"})
                     retain_checkpoint(store, vault)
@@ -1158,6 +1170,54 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.post("/api/network", dependencies=[Depends(authenticate)])
     async def network(request: Request, body: NetworkConfig):
         return await operation(app.state.collector.set_network, await approved_route(request, body))
+
+    # No issued-access policy: provisioning executables and controlling multiple
+    # accounts requires the main administrator, enforced by authenticate.
+    from .guided_connection import ApplyDraft, ConnectionDraft
+
+    @app.get("/api/connection", dependencies=[Depends(authenticate)])
+    async def connection_state():
+        return app.state.connection.public()
+
+    @app.post("/api/connection/preview", dependencies=[Depends(authenticate)])
+    async def connection_preview(body: ConnectionDraft):
+        require_live()
+        try:
+            return app.state.connection.preview(body)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from None
+
+    @app.post("/api/connection/prepare", dependencies=[Depends(authenticate)])
+    async def connection_prepare(body: ConnectionDraft):
+        require_live()
+        try:
+            return app.state.connection.start_prepare(body)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from None
+
+    @app.post("/api/connection/apply", dependencies=[Depends(authenticate)])
+    async def connection_apply(body: ApplyDraft):
+        require_live()
+        try:
+            return app.state.connection.start_apply(body.plan)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from None
+
+    @app.post("/api/connection/check", dependencies=[Depends(authenticate)])
+    async def connection_check():
+        return await operation(app.state.connection.check_current)
+
+    @app.post("/api/connection/cancel", dependencies=[Depends(authenticate)])
+    async def connection_cancel():
+        return await operation(app.state.connection.cancel)
+
+    @app.post("/api/connection/stop", dependencies=[Depends(authenticate)])
+    async def connection_stop():
+        return await operation(app.state.connection.control, "stop")
+
+    @app.post("/api/connection/start", dependencies=[Depends(authenticate)])
+    async def connection_start():
+        return await operation(app.state.connection.control, "start")
 
     @app.get("/api/network/policy", dependencies=[Depends(authenticate)])
     async def network_policy():

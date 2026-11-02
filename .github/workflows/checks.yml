@@ -140,6 +140,9 @@ jobs:
       - name: Check the installation and signed export with synthetic data
         run: python tools/check_install.py --package . --output build/package-smoke
       - run: python tools/check_collector_authorization.py
+      - name: Check pinned tunnel helpers and process cleanup on this platform
+        if: matrix.python == '3.12'
+        run: python tools/check_portable_routes_runtime.py
       - name: Check disclosure privacy, interrupted account export recovery and chat counters
         run: |
           python -I tools/check_disclosure_privacy.py

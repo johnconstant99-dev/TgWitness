@@ -109,6 +109,12 @@ PRIVATE_NAMES = {"vault.key", "panel-token.txt", "credentials.json", "account.js
                  ".instance.lock"}
 PRIVATE_SUFFIXES = (".session", ".session-journal", ".tgwitness-session", ".jsonl", ".sqlite", ".sqlite3",
                     ".db", ".db-wal", ".db-shm")
+FPDF_RESOURCES = {
+    "python/Lib/site-packages/fpdf/data/__init__.py",
+    "python/Lib/site-packages/fpdf/data/color_profiles/__init__.py",
+    "python/Lib/site-packages/fpdf/data/color_profiles/sRGB2014.icc",
+    "python/Lib/site-packages/fpdf/data/color_profiles/sRGB2014.icc.LICENSE",
+}
 
 
 def release_problem(relative):
@@ -117,7 +123,11 @@ def release_problem(relative):
     if parts[0] not in TOP_LEVEL or (parts[0] != "python" and len(parts) > 1):
         return "unexpected entry outside the package layout"
     name = parts[-1].lower()
-    if any(part in ("data", "__pycache__") for part in parts[:-1]) or name in PRIVATE_NAMES or name.endswith(PRIVATE_SUFFIXES):
+    folders = {part.lower() for part in parts[:-1]}
+    # fpdf2's pinned distribution includes its public ICC profile in a directory
+    # named data. Keep the exact package resources, not arbitrary data folders.
+    if ("__pycache__" in folders or "data" in folders and relative not in FPDF_RESOURCES
+            or name in PRIVATE_NAMES or name.endswith(PRIVATE_SUFFIXES)):
         return "private or generated file"
     return None
 

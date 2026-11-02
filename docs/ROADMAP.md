@@ -1,10 +1,10 @@
 # TgWitness roadmap
 
-Status reviewed on 1 November 2026. This separates the current release from
+Status reviewed on 2 November 2026. This separates the current release from
 prototypes and proposed work. The [changelog](CHANGELOG.md) records shipped changes;
 the [trust design](ru/TRUST-ROADMAP.md) explains the proposed verification model.
 
-## 0.7.1 preview: a verifiable local journal
+## 0.8.0 preview: a verifiable local journal
 
 The current source includes account workspaces, observation of available Telegram
 events, interaction records, media capture, signed exports, scoped panel tokens,

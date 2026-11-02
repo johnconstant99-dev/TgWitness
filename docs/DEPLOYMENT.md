@@ -218,7 +218,7 @@ Copy `deploy/env.example` to `.env`. Set `TGWITNESS_IMAGE` to the published vers
 the **lowercase** repository path, for example:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.7.1
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.8.0
 TGWITNESS_PORT=8787
 ```
 
@@ -327,7 +327,7 @@ GitHub Release is **published**, including a prerelease. Drafts and tag pushes
 alone do not publish packages.
 
 1. Set the package version and changelog, then publish a release tagged with `v`
-   plus the exact `pyproject.toml` version, such as `v0.7.1`.
+   plus the exact `pyproject.toml` version, such as `v0.8.0`.
 2. The workflow validates the tag and runs the shared Windows/Linux/macOS Python,
    general/account-import/QR browser, source-package, and Docker checks. Fresh native installation is also
    exercised on all three operating systems using Python 3.12.
