@@ -55,30 +55,39 @@ def confirmations(page, server, child):
     page.remove_listener('request', record)
 
     calls = []
+    child_app = server.app.state.profiles.entries[child]['app']
+    collector = child_app.state.collector
+    credentials = child_app.state.vault.read('credentials')
+    previous = (collector.running, collector.phase, collector.authorization_required)
+    child_app.state.vault.save('credentials', {'api_id': 123, 'api_hash': 'b' * 32, 'session': saved_session()})
     page.route('**/api/collector/*', lambda route: (
         calls.append(route.request.url.rsplit('/', 1)[-1]), route.fulfill(json={'ok': True})))
-    def running():
-        page.evaluate("""()=>{
-          Object.assign(state.status.collector,{has_session:true,running:true,connected:true,authorization_required:false});
-          renderStatus();
-        }""")
-    running()
-    page.locator('#collector-toggle').click()
-    expect(page.locator('dialog.panel-dialog[open]')).to_be_visible()
-    page.evaluate('()=>{state.status.collector.running=false;renderStatus();}')
-    with page.expect_request('**/api/collector/stop'):
+    def running(value=True):
+        collector.running = value
+        collector.phase = 'observing' if value else 'offline'
+        collector.authorization_required = False
+        page.evaluate('()=>refreshStatus()')
+    try:
+        running()
+        page.locator('#collector-toggle').click()
+        expect(page.locator('dialog.panel-dialog[open]')).to_be_visible()
+        running(False)
+        with page.expect_request('**/api/collector/stop'):
+            accept(page)
+        expect(page.locator('#collector-toggle')).to_be_enabled()
+        expect(page.locator('#collector-toggle')).not_to_have_attribute('aria-busy', 'true')
+        assert calls == ['stop'], calls
+        running()
+        page.locator('#collector-toggle').click()
+        expect(page.locator('dialog.panel-dialog[open]')).to_be_visible()
+        page.evaluate("()=>switchProfile('default')")
         accept(page)
-    expect(page.locator('#collector-toggle')).to_be_enabled()
-    expect(page.locator('#collector-toggle')).not_to_have_attribute('aria-busy', 'true')
-    assert calls == ['stop'], calls
-    running()
-    page.locator('#collector-toggle').click()
-    expect(page.locator('dialog.panel-dialog[open]')).to_be_visible()
-    page.evaluate("()=>switchProfile('default')")
-    accept(page)
-    page.wait_for_timeout(150)
-    assert calls == ['stop'], calls
-    page.unroute('**/api/collector/*')
+        page.wait_for_timeout(150)
+        assert calls == ['stop'], calls
+    finally:
+        page.unroute('**/api/collector/*')
+        collector.running, collector.phase, collector.authorization_required = previous
+        child_app.state.vault.save('credentials', credentials)
 
 
 def connection_and_reports(page):
