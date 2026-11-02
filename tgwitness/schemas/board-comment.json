@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tgwitness:board:comment:v1",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{32}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Id"
+    },
+    "supersedes": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes"
+    },
+    "parent_id": {
+      "pattern": "^[a-f0-9]{32}$",
+      "title": "Parent Id",
+      "type": "string"
+    },
+    "text": {
+      "maxLength": 20000,
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    },
+    "mentions": {
+      "items": {
+        "pattern": "^(?:admin|[a-f0-9]{16})$",
+        "type": "string"
+      },
+      "maxItems": 50,
+      "title": "Mentions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "parent_id",
+    "text"
+  ],
+  "title": "Comment",
+  "type": "object"
+}

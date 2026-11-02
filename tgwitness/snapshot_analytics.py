@@ -8,7 +8,6 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 import html
 import math
-from .report_analytics import DESIGN_COLORS as COLORS
 
 
 CHARTS = (("activity", "Activity over time"), ("heatmap", "Weekly rhythm"),
@@ -274,8 +273,8 @@ def _pdf_section(lay, data, options):
     if not data or not selected(options):
         return
     say, pdf = lay.say, lay.pdf
-    accent = COLORS.get(options.get("design"), COLORS["dossier"])
-    if pdf.get_y() > 45:
+    accent = lay.design.accent
+    if pdf.get_y() > 45 and not getattr(lay, "composition_chapter", False):
         pdf.add_page()
     lay.section(say("Activity & participants"), say(data["method"]))
     lay.figures([(say("Records analysed"), data["records"]), (say("Message observations" if data["basis"] == "journal" else "Message rows"), data["messages"]),

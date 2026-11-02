@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tgwitness:board:highlight:v1",
+  "$defs": {
+    "HighlightRange": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "default": "text",
+          "enum": [
+            "text",
+            "caption"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "start": {
+          "maximum": 10000000,
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "length": {
+          "maximum": 20000,
+          "minimum": 1,
+          "title": "Length",
+          "type": "integer"
+        },
+        "quote": {
+          "maxLength": 20000,
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        }
+      },
+      "required": [
+        "start",
+        "length",
+        "quote"
+      ],
+      "title": "HighlightRange",
+      "type": "object"
+    },
+    "Target": {
+      "additionalProperties": false,
+      "properties": {
+        "event_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Event Hash",
+          "type": "string"
+        },
+        "seq": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seq"
+        },
+        "chat_id": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": -9007199254740991,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Chat Id"
+        },
+        "message_id": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": -9007199254740991,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message Id"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        }
+      },
+      "required": [
+        "event_hash"
+      ],
+      "title": "Target",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{32}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Id"
+    },
+    "supersedes": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes"
+    },
+    "title": {
+      "default": "",
+      "maxLength": 240,
+      "title": "Title",
+      "type": "string"
+    },
+    "labels": {
+      "items": {
+        "maxLength": 80,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 30,
+      "title": "Labels",
+      "type": "array"
+    },
+    "note": {
+      "default": "",
+      "maxLength": 20000,
+      "title": "Note",
+      "type": "string"
+    },
+    "target": {
+      "$ref": "#/$defs/Target"
+    },
+    "range": {
+      "$ref": "#/$defs/HighlightRange"
+    },
+    "color": {
+      "default": "amber",
+      "enum": [
+        "amber",
+        "blue",
+        "green",
+        "rose"
+      ],
+      "title": "Color",
+      "type": "string"
+    }
+  },
+  "required": [
+    "target",
+    "range"
+  ],
+  "title": "Highlight",
+  "type": "object"
+}

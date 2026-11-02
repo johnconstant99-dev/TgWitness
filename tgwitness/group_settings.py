@@ -1,13 +1,3 @@
-"""Settings a group shares: every member takes the group's value unless it keeps its own.
-
-A group stores a value for each setting it defines (profile_groups[].values). A member's own store always
-holds the value in effect, so the collector and every form read their settings as before; changing a
-group value writes it into the members that follow the group. A member whose value differs from the
-group's keeps its own value until the operator returns it to the group's. effective() is the one place that
-says, for each setting of a member, which value is in effect and whether it comes from the group.
-
-Every change is signed: the panel journal records the group change and its outcome per member, and each
-member records the values it took in its own journal, next to the record its own form would write."""
 import hashlib
 import json
 from types import SimpleNamespace
@@ -22,7 +12,6 @@ from .recording import RecordingUpdate, save as save_recording
 from .scope import Recheck, recheck_settings
 from .store import utcnow
 
-# Whether an account collects right now is not shared: Start all and Pause all act on the group's accounts.
 HUB = ("files", "timestamps", "drand", "notifications", "replica", "outside", "ip")
 PARAMETERS = tuple("parameter:" + key for key in tuning.BY_KEY)
 KEYS = ("goal", *HUB, "monitoring", "recheck", "alert_rules", "reports", "route", *PARAMETERS)
@@ -36,14 +25,13 @@ LABELS = {"goal": "Goal", "monitoring": "What to record", "recheck": "Recheck sc
           "alert_rules": "Notification rules", "reports": "Report settings", "route": "Connection route",
           **{f["key"]: f["label"] for f in settings_hub.FIELDS},
           **{"parameter:" + key: p.label for key, p in tuning.BY_KEY.items()}}
-# What an old template group copied, as the keys it now defines.
 SECTION_KEYS = {"parameters": PARAMETERS, "reports": ("reports",), "capture": ("files", "monitoring"),
                 "recheck": ("recheck",), "route": ("outside", "ip")}
 
 
 class GroupChange(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    values: dict[str, Any] = Field(min_length=1, max_length=len(KEYS))  # None stops sharing a setting
+    values: dict[str, Any] = Field(min_length=1, max_length=len(KEYS))
     allow_outside: bool = False
     disable_dependents: bool = False
     overwrite: list[str] = Field(default_factory=list, max_length=1000)
@@ -57,7 +45,6 @@ class Adopt(BaseModel):
 
 
 def read(app, keys):
-    """The values in effect in one workspace, for the given keys."""
     s = app.state.store
     hub = settings_hub.values(app) if any(key in HUB for key in keys) else {}
     result = {}
@@ -84,7 +71,6 @@ def read(app, keys):
 
 
 def valid(key, value):
-    """The value in its saved form; raises ValueError for a value the setting cannot hold."""
     if key not in KEYS:
         raise ValueError("Unknown shared setting.")
     if key == "goal" and value in settings_hub.PRESETS or key == "files" and value in ("photos", "short_media", "all") \
@@ -117,12 +103,10 @@ def valid(key, value):
 
 
 def follows(member, group):
-    """A member follows the group for every shared setting whose value it holds unchanged."""
     return {key for key, value in group.items() if member.get(key) == value}
 
 
 def effective(registry, profile_id):
-    """Per setting the group shares: the value in effect for this member and where it comes from."""
     group = group_record(registry, registry.group_of(profile_id))
     entry = registry.entries.get(profile_id) or {}
     if group is None or entry.get("app") is None:
@@ -172,13 +156,11 @@ def revision(shared, members):
 
 
 def proposed(shared, body):
-    """The group's shared values after this change, checked by the rules a single workspace follows."""
     changes = {key: None if value is None else valid(key, value) for key, value in body.values.items()}
     result = {k: v for k, v in shared.items() if k not in changes or changes[k] is not None}
     result.update({k: v for k, v in changes.items() if v is not None})
     hub_changes = [key for key in changes if key in HUB]
     if "goal" in changes and changes["goal"] is not None:
-        # A goal brings its preset; values given with it (kept manual changes) win.
         result.update({k: v for k, v in settings_hub.PRESETS[changes["goal"]].items() if k in HUB and k not in changes})
     elif len(hub_changes) == 1 and changes[hub_changes[0]] is not None and all(k in shared for k in HUB):
         result.update(settings_hub.edited({k: shared[k] for k in HUB}, SimpleNamespace(
@@ -205,8 +187,6 @@ def plan(registry, group_id, body):
             continue
         current = member["values"]
         given = [k for k in changed if k in after]
-        # Its own value: the member already differs from what the group shared before (or, for a setting
-        # the group starts sharing now, from what it is about to share).
         own = {k: current[k] for k in given if current[k] != after[k] and (k not in shared or current[k] != shared[k])}
         takes = [k for k in given if current[k] != after[k] and k not in own]
         rows.append({**row, "status": "own" if own else "follows", "own": own, "takes": takes,
@@ -218,13 +198,10 @@ def plan(registry, group_id, body):
 
 
 def adoptable(values):
-    """The route changes only through a checked connection, never by copying its name."""
     return {k: v for k, v in values.items() if k != "route"}
 
 
 async def apply_member(app, values, group, reason):
-    """Write group values into one workspace through the paths its own forms use; returns None or the reason
-    it refused. Every record lands in this workspace's journal."""
     values = adoptable(values)
     if not values:
         return None
@@ -263,13 +240,11 @@ async def apply_member(app, values, group, reason):
     except ValueError as exc:
         return str(exc)
     except Exception as exc:
-        # One account's failure never stops the others; the panel journal names it.
         return "Not applied: " + type(exc).__name__
     return None
 
 
 async def adopt_all(registry, profile_id, group):
-    """A new workspace in a group starts with every value the group shares (under the registry lock)."""
     shared = adoptable(group.get("values", {}))
     entry = registry.entries.get(profile_id) or {}
     if not shared or entry.get("app") is None:
@@ -310,7 +285,10 @@ async def change(registry, group_id, body):
                 continue
             app = registry.entries[row["id"]]["app"]
             error = await apply_member(app, {k: result["after"][k] for k in keys}, group, "group value changed")
-            (failed.append({"id": row["id"], "label": row["label"], "error": error}) if error else applied.append(row["id"]))
+            if error:
+                failed.append({"id": row["id"], "label": row["label"], "error": error})
+            else:
+                applied.append(row["id"])
         registry.app.state.store.append("profile_group.settings_changed", {
             "group_id": group_id, "group": group["label"], "before": result["before"], "after": result["after"],
             "applied": applied, "kept_own": kept, "failed": failed, "unavailable": unavailable})
@@ -319,7 +297,6 @@ async def change(registry, group_id, body):
 
 
 async def adopt(registry, group_id, body):
-    """Give chosen members the group's value for chosen settings (or all it shares), replacing their own."""
     async with registry.lock:
         group = registry._group(group_id)
         shared = group.get("values", {})
@@ -338,15 +315,16 @@ async def adopt(registry, group_id, body):
             current = read(entry["app"], keys)
             values = {k: shared[k] for k in keys if current[k] != shared[k]}
             error = await apply_member(entry["app"], values, group, "returned to the group value")
-            (failed.append({"id": profile_id, "label": entry["label"], "error": error}) if error else applied.append(profile_id))
+            if error:
+                failed.append({"id": profile_id, "label": entry["label"], "error": error})
+            else:
+                applied.append(profile_id)
         registry.app.state.store.append("profile_group.settings_adopted", {
             "group_id": group_id, "group": group["label"], "keys": keys, "applied": applied, "failed": failed})
         return {"applied": applied, "failed": failed, **group_view(registry, group_id)}
 
 
 def migrate(registry):
-    """An old group copied chosen sections from a template workspace on request; it now shares those
-    values, read once from the template. Members are not changed: those that differ keep their own value."""
     store = registry.app.state.store
     groups, changed = registry.groups(), []
     for group in groups:
@@ -368,7 +346,6 @@ def migrate(registry):
 
 
 def record_route(registry, group_id, strategy, applied):
-    """A checked route applied to the whole group becomes the route the group shares (registry lock held)."""
     group = group_record(registry, group_id)
     if group is None or not applied:
         return

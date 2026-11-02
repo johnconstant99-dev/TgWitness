@@ -85,6 +85,8 @@ class Options(BaseModel):
     attachments: Literal["subjects", "all", "none"] = "subjects"
     avatars: bool = False
     mask_contacts: bool = False
+    case_board: Literal["off", "bookmarks", "comments"] = "off"
+    board_pseudonyms: bool = True
 
     @field_validator("purpose")
     @classmethod
@@ -405,6 +407,8 @@ def export(store, vault, options, report_options=None):
                     if shown is not None:
                         out.write(canonical(shown) + b"\n")
             titles = {t["chat_id"]: t["title"] for t in store.targets() if t.get("title")}
+            from .board_handover import prepare as prepare_board
+            board_export = prepare_board(snapshot, records_path, vault, options, minimiser)
         if not minimiser.messages:
             raise EmptySelection("No message in the journal matches these chats, period and people.")
         head = survey.head or {}
@@ -433,6 +437,8 @@ def export(store, vault, options, report_options=None):
                    "account": account or None, "archive": True, "sign": vault.sign, "events_again": records,
                    "journal_verified": True,
                    "handover": {"purpose": options.purpose, "selection": selection, "counts": dict(minimiser.counts)}}
+        if board_export:
+            context["case_board"] = board_export["statement"]["material"]
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             def write_member(name, values):
                 nonlocal total
@@ -450,6 +456,8 @@ def export(store, vault, options, report_options=None):
             with records_path.open("rb") as handle:
                 write_member("records.jsonl", iter(lambda: handle.read(1024 * 1024), b""))
             write_member("coverage.json", [json.dumps(coverage, ensure_ascii=False, indent=1).encode("utf-8")])
+            if board_export:
+                write_member("case-board.json", [canonical(board_export)])
             write_member("verify.py", [Path(__file__).with_name("verify.py").read_bytes()])
             write_indicators(write_member, summary.get("indicators"), context)
             for name in sorted(x for x in minimiser.files if isinstance(x, str) and re.fullmatch("[0-9a-f]{64}", x)):

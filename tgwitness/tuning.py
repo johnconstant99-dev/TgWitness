@@ -54,6 +54,12 @@ GROUPS = (
 )
 
 PARAMETERS = (
+    Parameter("board_max_cards", "exports", 10000, 100, 100000, "cards", "Case Board card soft limit",
+              "Warn after this many cards. Existing annotations remain available."),
+    Parameter("board_max_comments", "exports", 50000, 100, 500000, "comments", "Case Board comment soft limit"),
+    Parameter("board_preview_records", "exports", 5000, 100, 5000, "records", "Case Board slice page size"),
+    Parameter("board_thumbnails", "exports", True, label="Show Case Board media previews",
+              help="Read existing preserved media by hash; no duplicate copies or external requests."),
     Parameter("dialog_limit", "collection", 1000, 100, 20000, "chats", "Chats read from the account's list",
               "Sources, folder and whole-account modes read this many dialogs. Chats beyond it are added when "
               "they become active."),

@@ -31,6 +31,8 @@ def main():
                 const response = await original(...args);
                 if (String(args[0]) === '/api/demo-access') {
                     await new Promise(resolve => { window.releaseAcceptanceBootstrap = resolve; });
+                    const parse=response.json.bind(response);
+                    response.json=async()=>{const value=await parse();window.acceptanceBootstrapParsed=true;return value;};
                 }
                 return response;
             };
@@ -170,7 +172,8 @@ def main():
         candidate = begin_qr()
         page.wait_for_function("typeof window.releaseAcceptanceBootstrap === 'function'")
         page.evaluate("window.releaseAcceptanceBootstrap()")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_function('()=>window.acceptanceBootstrapParsed===true')
+        page.evaluate('()=>new Promise(requestAnimationFrame)')
         expect(page.locator("#qr-state")).to_be_visible()
         expect(page.locator("#authorized-state")).not_to_be_visible()
         scenarios.append("late startup response cannot replace an active QR sign-in")
@@ -214,8 +217,9 @@ def main():
         assert not candidate.connected
         open_account()
         candidate = begin_qr()
+        page.evaluate('state.policy=null')
         release_api_response(page)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_function('()=>state.policy!==null')
         expect(page.locator("#qr-state")).to_be_visible()
         scenarios.append("sign-in is ready before account settings load and is not reset when they arrive")
         response = context.request.post(server.url+"/api/profiles",data={"label":"Second synthetic account"},

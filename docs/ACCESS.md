@@ -47,6 +47,9 @@ the API boundary. [Create and verify a showcase](LIVE-SHOWCASE.md).
 | `interact` | Perform supported Telegram interactions within the access scope. Chat-limited access cannot use account-wide link previews. |
 | `settings` | Change collection settings, timestamps, notifications, off-site copies and parameters. Requires whole-workspace access. |
 | `account` | Sign in or out of Telegram and manage connection routes. Requires whole-workspace access. |
+| `board.read` | Read Case Board notes only within the permitted workspace and chats. |
+| `board.write` | Add bookmarks, highlights, slices, comments and open/review statuses. Also needs `board.read`. |
+| `board.manage` | Manage collections, final team statuses and other participants' cards. Also needs board read/write. |
 
 Permissions and scope are checked together. Ticking a permission does not open
 other chats or unlock a workspace-wide operation for a chat-limited access.
@@ -62,7 +65,9 @@ sessions or open the administrator console.
 | Analyst preparing a handover | The chats to investigate and export | `view`, `export`; add `interact` only if they should act through Telegram |
 | Collection operator | Selected whole workspaces | `view`, `sources`, `collect`; add `settings` or `account` only when needed |
 
-These are examples you configure with the permission checkboxes, not fixed roles.
+The Access form's starting presets also include Case Board: Reviewer can read, Analyst can read
+and write, and Operator can manage it. Presets remain editable, and existing grants are not
+automatically expanded. See [Case Board](CASE-BOARD.md) for inherited chat scopes and export privacy.
 
 ## Limits and sessions
 

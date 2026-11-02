@@ -8,14 +8,13 @@ export function createSettingsHub(ctx) {
   const routes = [['auto','✨','Automatic','Try public proxies, then WARP.'],['warp','🛡','Cloudflare WARP','Connect through a local tunnel.'],['proxy','🔌','My proxy','Paste one proxy address.'],['direct','🌐','Direct','Telegram will see this server’s address.']];
   const levels = [['simple','🙂','Simple','Only the essentials.'],['standard','⚙','Standard','Common settings and explanations.'],['expert','🛠','Expert','All fields, limits and technical details.']];
   const navLevels = {start:'simple',chats:'simple',observations:'simple',evidence:'simple',settings:'simple',
-    accounts:'standard',access:'standard',sources:'expert',connection:'expert',witness:'expert',analysis:'expert',
+    board:'standard',accounts:'standard',access:'standard',sources:'expert',connection:'expert',witness:'expert',analysis:'expert',
     parameters:'expert','system-log':'expert',integrations:'expert',sealed:'expert'};
   let data=null, prefs=null, draft=null, section=null, generation=0, connectionBusy=false, checkTimer=null, statusTimer=null;
   let dialogs=null, moved=[], query='', reveal=new Set(), editing=false;
   let autoTried=false, routeDirty=false;
   // After Start: the live check of the four collector parts. visited bounds browser Forward to steps already seen.
   let live=null, liveTimer=null, visited=0, recordedStep=null, shownSession=null;
-  // Settings shows one account, or the shared settings of a group when groupScope names it.
   let groupScope=null;
   let preferencesQueue=Promise.resolve(), draftQueue=Promise.resolve(), preferencesSequence=0, draftSequence=0, checkSequence=0;
   const owner=()=>({generation,profile:state.profile,token:state.token,revision:state.workspaceRevision});
@@ -87,12 +86,12 @@ export function createSettingsHub(ctx) {
     });return preferencesQueue;
   }
   async function bootstrap({openFirstRun=true}={}) {
-    const who=owner(), initialRoute=location.href;
+    const who=owner(), initialRoute=location.href, draftVersion=draftSequence, preferenceVersion=preferencesSequence;
     const demo=state.status?.demo||window.TGW_ONLINE_DEMO;
     for(const control of document.querySelectorAll('[data-ui-level]'))control.hidden=!!demo;
     if(demo){$('hub-route-status').hidden=true;return;}
     const loaded=await request(who,'preferences');
-    prefs=loaded.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:'simple'};
+    if(preferenceVersion===preferencesSequence)prefs=loaded.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:'simple'};
     const requestedLanguage=new URL(location.href).searchParams.get('lang');
     if(requestedLanguage===ctx.language&&prefs.language!==requestedLanguage)await savePreferences({language:requestedLanguage},who);
     else if(!loaded.saved)await savePreferences({},who);else applyPresentation();
@@ -100,6 +99,9 @@ export function createSettingsHub(ctx) {
     if(prefs.language!==ctx.language){await ctx.changeLanguage(prefs.language);return;}
     if(!state.me?.admin||state.status?.demo)return;
     const loadedSettings=await request(who,'settings');
+    // The route can already be interactive while bootstrap is reading. Its old
+    // snapshot must not replace a step or answer the investigator has just saved.
+    if(draftVersion!==draftSequence){scheduleStatus();return;}
     data=loadedSettings;draft={...data.wizard};
     // A direct link or a newer navigation takes precedence over automatic setup.
     if(openFirstRun&&location.href===initialRoute&&!draft.completed&&!draft.skipped)await navigate('first-run');
@@ -182,7 +184,6 @@ export function createSettingsHub(ctx) {
     },'text-link'));
     return row;
   }
-  // In a group: 🔗 the value comes from the group, ✏️ this account keeps its own until returned to the group's.
   const inherited=key=>data?.inheritance?.keys?.[key];
   async function adoptGroup(keys,who=owner()){
     requireOwner(who);
@@ -191,7 +192,6 @@ export function createSettingsHub(ctx) {
   }
   function revertKey(key){
     const item=inherited(key);
-    // A route changes only after its connection check.
     if(key==='route')return ctx.openConnection({scope:'account',mode:item.group_value.mode});
     if(data.fields.some(f=>f.key===key))return edit(key,item.group_value);
     return adoptGroup([key]);

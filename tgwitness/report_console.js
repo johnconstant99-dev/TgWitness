@@ -129,7 +129,7 @@ async function startViewer(meta){
       service:d.type==="service"?actionText(d.action)+(d.action_title?" · “"+d.action_title+"”":""):"",edited:d.edited,found:d.found_on_recheck};
     it.link=(d.text_entities||[]).some(x=>x.href||x.type==="link");return finishItem(it);}
   function journalItem(j){const d=j.d||{};const it={key:"r"+j.s,n:j.s,at:j.t,chat:j.ch,msg:j.m,who:j.a||(j.id!=null?"ID "+j.id:""),user:j.u,uid:j.id,
-      text:j.x||"",cat:j.c,kind:j.k,d,hash:j.h,tt:j.tt,p:j.p,withheld:j.w,textWithheld:j.xw,raw:j,
+      text:j.x||"",cat:j.c,kind:j.k,d,hash:j.h,sent:Object.hasOwn(j,"sent_at")?j.sent_at:j.tt,edited:j.edited_at,p:j.p,withheld:j.w,textWithheld:j.xw,raw:j,
       file:j.f?{path:"media/"+j.f.sha,sha:j.f.sha,mime:j.f.mime,size:j.f.size,name:j.f.name}:null};
     it.link=(d.text_entities||[]).some(x=>x.href||x.type==="link");return finishItem(it);}
   function finishItem(it){const d=it.d||{},parts=[it.text,it.who,it.user?"@"+it.user:"",it.uid,"#"+it.n,it.service||"",title(it.chat),it.p||""];
@@ -279,13 +279,21 @@ async function startViewer(meta){
   function detail(key){const it=V.byKey.get(key);if(!it)return;const d=it.d||{},box=$("#v-detail"),facts=[];
     for(const r of $$("#v-list .open"))r.classList.remove("open");const shown=$('#v-list [data-key="'+key+'"]');if(shown)shown.classList.add("open");
     const fact=(k,v)=>{if(v!==undefined&&v!==null&&v!=="")facts.push("<dt>"+esc(k)+"</dt><dd>"+v+"</dd>");};
-    fact(chat?say("Sent"):say("Observed"),esc(when(it.at)));if(it.tt)fact(say("Telegram time"),esc(when(it.tt)));
+    fact(chat?say("Sent"):say("Observed"),esc(when(it.at)));
+    if(!chat&&it.sent)fact(say("Sent"),esc(when(it.sent)));
     if(it.chat!=null)fact(say("Chat"),esc(title(it.chat))+"<br><small>id "+esc(it.chat)+"</small>");if(it.msg!=null)fact(say("Message"),"#"+esc(it.msg));
     if(chat)fact(say("Message"),"#"+esc(it.n));
     if(it.who&&!chat)fact(say("Sender"),esc(it.who)+(it.user?" @"+esc(it.user):"")+(it.uid!=null?"<br><small>ID "+esc(it.uid)+"</small>":""));
-    if(it.edited)fact(say("Edited"),esc(when(it.edited))+"<br><small>"+esc(say("earlier text not in this export"))+"</small>");
-    if(d.reply_to_message_id){const reply=chat?V.byKey.get("m"+d.reply_to_message_id):V.items.find(x=>x.chat===it.chat&&x.msg===d.reply_to_message_id&&["message","edited"].includes(x.cat));
+    if(it.edited)fact(say("Edited"),esc(when(it.edited))+(chat?"<br><small>"+esc(say("earlier text not in this export"))+"</small>":""));
+    const replyChat=Number.isSafeInteger(d.reply_to_peer_id)?d.reply_to_peer_id:it.chat;
+    if(Number.isSafeInteger(d.reply_to_message_id)){const reply=chat?(replyChat==null||replyChat===meta.chat_id?V.byKey.get("m"+d.reply_to_message_id):null)
+      :V.items.find(x=>x.chat===replyChat&&x.msg===d.reply_to_message_id&&["message","edited"].includes(x.cat));
       fact(say("Reply to"),reply?'<a href="#" data-goto="'+esc(reply.key)+'">#'+esc(d.reply_to_message_id)+"</a>":"#"+esc(d.reply_to_message_id));}
+    if(Number.isSafeInteger(d.reply_to_peer_id))fact(say("Chat of the original message"),esc(d.reply_to_peer_id));
+    if(Number.isSafeInteger(d.reply_to_top_id))fact(say("Reply thread"),"#"+esc(d.reply_to_top_id));
+    if(typeof d.forum_topic==="boolean")fact(say("Forum topic"),esc(d.forum_topic?say("Yes"):say("No")));
+    if(typeof d.quote_text==="string"&&d.quote_text){fact(say("Quoted text"),esc(d.quote_text));
+      if(Number.isSafeInteger(d.quote_offset))fact(say("Quote offset (UTF-16)"),esc(d.quote_offset));}
     const fwd=d.forwarded_from;if(fwd)fact(say("Forwarded from"),esc(fwd.from_name||(fwd.from_id!=null?"ID "+fwd.from_id:say("a hidden sender")))
       +(fwd.date?"<br><small>"+esc(when(fwd.date))+(fwd.channel_post?" · #"+esc(fwd.channel_post):"")+"</small>":""));
     if(d.via_bot_id!=null)fact(say("Via bot"),"ID "+esc(d.via_bot_id));if(d.author)fact(say("Signed"),esc(d.author));
@@ -295,7 +303,7 @@ async function startViewer(meta){
     if(d.protected)fact(say("Protected"),esc(say("saving and forwarding restricted")));if(it.withheld)fact(say("Minimised"),esc(it.withheld.join(", ")));
     if(it.file)fact(say("File"),esc(it.file.name||say("Saved file"))+(it.file.size?" · "+num(it.file.size)+" B":"")+'<br><small><code>'+esc(it.file.sha)+"</code></small>");
     else if(d.media_type)fact(say("File"),esc(d.media_type)+(d.file_status?"<br><small>"+esc(d.file_status)+"</small>":""));
-    const links=(d.text_entities||[]).filter(x=>x.href||x.user_id!=null).map(x=>"<li"+(x.deceptive?' class="warn"':"")+">“"+esc(x.text)+"” → <code>"
+    const links=[...(d.text_entities||[]),...(d.quote_entities||[])].filter(x=>x.href||x.user_id!=null).map(x=>"<li"+(x.deceptive?' class="warn"':"")+">“"+esc(x.text)+"” → <code>"
       +esc(x.href||"user ID "+x.user_id)+"</code>"+(x.deceptive?'<br><b>⚠ '+esc(say("the text shows a different address"))+"</b>":"")+"</li>").join("");
     const buttons=((d.buttons&&d.buttons.rows)||[]).flat().map(b=>"<span>"+esc(b.text)+(b.url||b.query||b.copy_text?"<code>"+esc(b.url||b.query||b.copy_text)+"</code>":"")+"</span>").join("");
     const iocs=(V.iocKeys.get(key)||[]).map(i=>V.iocs[i]).map(x=>"<li><b>"+esc((meta.iocKinds||{})[x.kind]||x.kind)+"</b> · <code>"+esc(defang(x.kind,x.value))+"</code>"

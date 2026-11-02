@@ -17,6 +17,11 @@ from .journal_index import NUL_PAYLOAD
 ZERO = "0" * 64
 EVENT_FIELDS = ("seq", "observed_at", "source_at", "kind", "chat_id", "message_id",
                 "actor_id", "payload", "previous_hash")
+JOURNAL_KIND_GROUPS = {"membership": ("membership.",), "media": ("media.",), "actions": ("interaction.",),
+    "messages": ("message.new", "message.snapshot", "message.recovered"),
+    "coverage": ("coverage.", "connection.", "collector.", "process.", "observation.", "snapshot.", "target.",
+                 "capture.", "monitoring.", "source.", "scope.", "telegram.", "clock.", "media.failed",
+                 "media.retry", "media.recovered", "deletion.unscoped")}
 
 def utcnow():
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
@@ -79,6 +84,8 @@ class Store:
         self.db.execute("CREATE INDEX IF NOT EXISTS event_message_id ON events(message_id)")
         self.db.commit()
         self.signer = None
+        from .board import initialize as initialize_board
+        initialize_board(self.db)
         self.targets_revision = 0
         self.listeners = []
         with self.transaction():
@@ -279,14 +286,15 @@ class Store:
             newer = self.db.execute(
                 "SELECT 1 FROM message_state_index WHERE chat_id=? AND message_id>? LIMIT 1", (chat_id, max(ids))).fetchone()
             rows = self.db.execute(
-                "SELECT seq, observed_at, source_at, kind, message_id, payload FROM events"
+                "SELECT seq, hash, observed_at, source_at, kind, message_id, payload FROM events"
                 " WHERE chat_id=? AND message_id IN (" + ",".join("?" * len(ids)) + ") AND kind IN (" + marks + ")"
                 " ORDER BY seq", (chat_id, *ids, *CHAT_KINDS)).fetchall()
         messages = {}
         for row in rows:
             payload = json.loads(row["payload"])
             item = messages.setdefault(row["message_id"], {
-                "message_id": row["message_id"], "first_seq": row["seq"], "sender": None, "sent_at": None,
+                "message_id": row["message_id"], "first_seq": row["seq"],
+                "reference": {"event_hash": row["hash"], "seq": row["seq"], "kind": row["kind"]}, "sender": None, "sent_at": None,
                 "reply_to": None, "has_media": False, "service_action": None, "grouped_id": None,
                 "versions": [], "media": [], "deleted": False, "deleted_observed_at": None,
                 "missing": False, "missing_observed_at": None,
@@ -311,7 +319,7 @@ class Store:
                 observable = message_content.of_payload(payload)
                 content_hash = hashlib.sha256(canonical(observable)).hexdigest()
                 if not item["versions"] or item["versions"][-1]["content_hash"] != content_hash:
-                    item["versions"].append({"text": text, "buttons": buttons, "observed_at": row["observed_at"],
+                    item["versions"].append({"text": text, "buttons": buttons, "observed_at": row["observed_at"], "event_hash": row["hash"],
                                              "entities": observable["entities"],
                                              "content_hash": content_hash,
                                              "edited_at": payload.get("edited_at"), "kind": kind, "seq": row["seq"]})
@@ -400,12 +408,7 @@ class Store:
                 filters.append(key + "=?")
                 params.append(value)
         if kind:
-            groups = {"membership": ("membership.",), "media": ("media.",), "actions": ("interaction.",),
-                      "messages": ("message.new", "message.snapshot", "message.recovered"),
-                      "coverage": ("coverage.", "connection.", "collector.", "process.", "observation.",
-                                   "snapshot.", "target.", "capture.", "monitoring.", "source.", "scope.",
-                                   "telegram.", "clock.", "media.failed", "media.retry", "media.recovered",
-                                   "deletion.unscoped")}
+            groups = JOURNAL_KIND_GROUPS
             kinds = list(dict.fromkeys(value.strip() for value in kind.split(",") if value.strip()))
             choices = []
             for value in kinds:

@@ -15,13 +15,14 @@ manifest. Existing signatures and authoritative records are not rewritten.
 
 ### Report studio
 
-Open **Exports → Configure and preview**. Work through **Data → Contents → Preview**:
+Open **Exports → Configure and preview**. Work through **Data → Design & contents → Preview**:
 
 1. Use the whole workspace or choose chats, authors, inclusive UTC observation
    dates and event types. Load the catalog to search chats and authors, or enter
    their Telegram IDs. Author filters match recorded sender IDs; a deletion
    notice without a sender does not match an author filter.
-2. Choose charts, participant labels, the transcript and your written findings.
+2. Pick a page design, then choose charts, participant labels, the transcript and
+   your written findings. Changing the design keeps these choices.
 3. Build the preview. It shows actual counts, activity, participants, sample
    records, saved changes and missing message-number ranges. Changing a choice
    marks the preview out of date. Save before downloading HTML, signed PDF,
@@ -54,32 +55,68 @@ create a false gap. Neighboring saved messages are labelled as context. A missin
 number does not establish that a message existed or was deleted; deletion notices
 and unsuccessful rechecks remain separate event types.
 
-### Choose a layout
+### Choose a design
 
-Open **Exports → Build report**. Choose one of three independent visual designs:
-**Case dossier**, **Intelligence brief** or **Editorial review**. Then choose the
-contents: **Case dossier** (detailed), **Briefing** (an overview), **Activity review**
-(charts without the transcript), or **Custom report**. A content preset keeps your
-chosen design, case details and written analysis. Individual changes select Custom.
+Eight page designs are available for journal and single-chat HTML and signed PDF
+reports. They use the same records and calculations, with different covers,
+typography, chapter headings, tables and spacing.
+
+| Design | Reading style |
+| --- | --- |
+| Classic | A traditional dossier with a dark cover and numbered sections. |
+| Editorial | A framed serif title page, wide margins and a narrow chapter rail. |
+| Briefing | A compact cover with a navy spine, short headings and close-set tables. |
+| Analytics | A survey-style cover, modular chart plates and monospaced figures. |
+| Technical | A ruled register, numbered reference rail and precise comparison tables. |
+| Overview | A panoramic cover, generous spacing and prominent summary figures. |
+| Reading series | A section rail and grouped chapters for findings, scope, changes and the observation journal. |
+| Ledger & margin | Numbered chapters with a wide margin, exact chart tables and a separate message transcript. |
+
+The design is saved per workspace and recorded in the signed export manifest.
+HTML works offline, supports light and dark themes, and adapts to narrow screens
+and right-to-left languages. Native PDFs use bundled fonts; the Editorial design
+includes Noto Serif under its bundled SIL Open Font License. Reading series and
+Ledger & margin also apply to account overviews, account chats and sharing copies.
+
+These two designs include a readable journal without JavaScript. For large
+exports this view contains up to 500 whole records within an 8 MiB input budget;
+the report labels the limit and links to the complete viewer and source records.
+The account directory and relationship index describe that same reading sample,
+not all participants. Full-journal charts keep their separately stated scope.
+
+### Choose the contents
+
+| Contents preset | Included by default |
+| --- | --- |
+| Case dossier | Activity, observation times, participants, chats and the record transcript. |
+| Briefing | An activity overview without participant rankings or the transcript. |
+| Activity review | Activity, observation times, participants, chats and composition, with source references and exact figures. |
+| Custom report | Your own combination of charts, transcript and previews. |
+
+Changing a preset keeps your design, case details and written analysis. Integrity
+checks, coverage, limitations and verification instructions remain in every design.
+Source records in the ZIP stay unchanged when a chart or transcript is hidden.
+
+The optional **Examination notes** contain the question, method, findings and
+conclusion written by the report's author. Cite the source file and record numbers
+in the findings. The signature preserves these statements alongside the report;
+it does not mean an independent expert has reviewed them. These private notes and
+full-journal charts are omitted from minimized handovers. Chart and examination
+choices apply to journal reports.
 
 Select activity over time, the UTC weekday/hour heatmap, participant rankings, chat
 rankings and record composition. Choose 5–30 ranked groups and neutral participant
 aliases or account IDs. Unknown senders and the remaining participants are separate
 rows. Aliases affect charts only; source records still contain their identities.
 
-The optional **Examination notes** contain the question, method, findings and
-conclusion written by the report's author. Cite source files and record numbers.
-The signature preserves these statements; it does not mean an independent expert
-has reviewed them. Private examination notes and full-journal charts are excluded
-from minimized journal handovers.
 
 The design preview updates from the unsaved draft using production cover, examination and
 chart components, limited to matches within the first 50,000 source records. The data preview below
 calculates the complete selection. It is explicitly
 unsigned and does not persist edits. Cover and Charts buttons switch its section.
 This is not a complete PDF preview. **Save report settings** applies the choices to
-future exports; existing signed files are immutable. PDF uses the chosen palette,
-its own A4 layout and the same selected aggregates as HTML and signed JSON.
+future exports; existing signed files are immutable. PDF uses the chosen cover,
+typography, chapter layout and the same selected aggregates as HTML and signed JSON.
 
 Trust assessment, coverage limitations and verification instructions stay present.
 Hiding charts or the readable transcript does not remove authoritative source rows
@@ -125,15 +162,15 @@ detects changed bytes; it does not independently certify the calculation method.
 Recompute journal aggregates with `report_analytics.Analytics` and `selected`, or
 snapshot aggregates with `snapshot_analytics.collect` and `project`.
 
-Build the three designs from fictional activity, without Telegram or external services:
+Build all six designs from the same fictional journal:
 
 ```sh
-python tools/build_report_studio_example.py --output test-results/new-studio-example
+python tools/build_report_styles.py --output test-results/report-styles
 ```
 
-Use a new directory for each run. English is the default; `--language` also accepts
-`ru` and `de`. To exercise all four content presets, use
-`python tools/build_dossier_example.py --templates --language en --output test-results/new-presets`.
+Open the resulting `index.html` to compare complete HTML reports, signed PDFs and
+ZIPs. Every design uses the same source journal. Use a new output directory for
+each run so previously signed examples are preserved.
 
 ![Fictional HTML dossier](assets/reports/dossier-en.png)
 

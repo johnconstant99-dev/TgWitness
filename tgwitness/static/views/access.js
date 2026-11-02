@@ -1,4 +1,4 @@
-const rights={reviewer:['view'],analyst:['view','export'],operator:['view','export','sources','settings']};
+const rights={reviewer:['view','board.read'],analyst:['view','export','board.read','board.write'],operator:['view','export','sources','settings','board.read','board.write','board.manage']};
 
 export function createAccessView({root,tr,navigate,localInput,getState}) {
   const find=id=>root.querySelector('#'+id),listeners=new AbortController();

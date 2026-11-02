@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tgwitness:board:collection:v1",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{32}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Id"
+    },
+    "supersedes": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes"
+    },
+    "title": {
+      "maxLength": 240,
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "default": "",
+      "maxLength": 20000,
+      "title": "Description",
+      "type": "string"
+    },
+    "chat_ids": {
+      "items": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "maxItems": 1000,
+      "title": "Chat Ids",
+      "type": "array"
+    },
+    "card_ids": {
+      "items": {
+        "pattern": "^[a-f0-9]{32}$",
+        "type": "string"
+      },
+      "maxItems": 10000,
+      "title": "Card Ids",
+      "type": "array"
+    },
+    "order": {
+      "default": 0,
+      "maximum": 10000,
+      "minimum": 0,
+      "title": "Order",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "title": "Collection",
+  "type": "object"
+}

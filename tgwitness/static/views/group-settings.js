@@ -1,8 +1,5 @@
-// A group's shared settings (group_settings.py): every member takes each value unless it keeps its own.
-// A change is previewed first; accounts with their own value keep it unless ticked in the preview.
 export function createGroupSettings(ctx) {
   const {json, tr, trn, node, toast, askConfirm, button, message, cards, label, describe, goals, openConnection, back} = ctx;
-  // Collecting now or paused stays with each account: Accounts starts or pauses a whole group.
   const fields=()=>ctx.fields().filter(f=>f.key!=='continuous');
   let data=null, groupId=null;
   const who=m=>m.username?'@'+m.username:m.label;
@@ -24,7 +21,6 @@ export function createGroupSettings(ctx) {
     const text=tr('{n} of {total} accounts follow the group',{n:members.length-owners.length,total:data.members.length});
     return owners.length?text+' · '+tr('own value: {list}',{list:owners.map(who).join(', ')}):text;
   }
-  // Lines for the preview: one per setting, Parameters counted together.
   function changeLines(plan){
     const keys=Object.keys(plan.after),params=keys.filter(k=>k.startsWith('parameter:'));
     const lines=keys.filter(k=>!k.startsWith('parameter:')).map(k=>nameOf(k)+': '+valueText(k,plan.before[k])+' → '+valueText(k,plan.after[k]));
@@ -40,8 +36,6 @@ export function createGroupSettings(ctx) {
   async function change(values,flags={}){
     const plan=await json('profile-groups/'+encodeURIComponent(groupId)+'/settings/preview',{values,...flags},{root:true});
     if(!Object.keys(plan.after).length){toast(tr('The group already shares these values.'));return false;}
-    // An account differs either by its own choice (kept unless ticked) or because the group did not share
-    // this setting until now (ticked: by default an account takes what its group shares).
     const owners=plan.members.filter(r=>r.status==='own'),missing=plan.members.filter(r=>r.status==='unavailable');
     const applies=plan.follow+owners.filter(r=>r.new.length).length;
     const text=[changeLines(plan).join('\n'),tr('Applies to {n} of {total} accounts.',{n:applies,total:plan.total})];
@@ -58,7 +52,6 @@ export function createGroupSettings(ctx) {
     toast(parts.join(' '),!!data.failed.length);
     return true;
   }
-  // The same consent a single account asks for when a feature depends on another.
   async function editHub(key,value){
     const v=data.values,flags={};
     if(['timestamps','drand','notifications','replica'].includes(key)&&value&&!v.outside){

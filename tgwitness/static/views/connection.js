@@ -57,7 +57,6 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
     }
     table.append(body);get('connect-review').replaceChildren(table);
   }
-  // Settings open this form for a group's route or an account's return to it; the group list may still be loading.
   function applyPreset(){
     if(!pending)return;const p=pending;
     if(p.group&&![...get('connect-group').options].some(o=>o.value===p.group))return;

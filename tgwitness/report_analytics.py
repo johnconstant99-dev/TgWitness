@@ -18,13 +18,15 @@ labels, not anonymization of the source journal supplied with an export.
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from . import report_design
 
 
 class Presentation(BaseModel):
     """Shared visual choices; private case and examination text never enters this model."""
     model_config = ConfigDict(extra="forbid")
-    design: Literal["dossier", "analytical", "editorial"] = "dossier"
+    design: report_design.Design = "classic"
     activity_chart: bool = True
     hourly_chart: bool = True
     participant_chart: bool = True
@@ -33,8 +35,10 @@ class Presentation(BaseModel):
     participant_labels: Literal["aliases", "ids"] = "aliases"
     chart_limit: int = Field(default=10, ge=5, le=30)
 
-
-DESIGN_COLORS = {"dossier": (29, 72, 91), "analytical": (45, 75, 196), "editorial": (146, 62, 42)}
+    @field_validator("design", mode="before")
+    @classmethod
+    def migrate_design(cls, value):
+        return report_design.canonical(value)
 
 
 FORMAT = "tgwitness-observation-analytics-v1"

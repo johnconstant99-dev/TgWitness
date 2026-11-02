@@ -65,7 +65,7 @@ include-package-data = false
 
 [tool.setuptools.package-data]
 tgwitness = [
-  "report_console.js", "report_console.css", "report_skin.css", "report_dossier.css", "report_icons.svg",
+  "report_console.js", "report_console.css", "report_skin.css", "report_dossier.css", "report_styles.css", "report_layouts.css", "report_icons.svg",
   "static/*.html", "static/*.css", "static/*.js", "static/*.svg",
   "static/core/*.js",
   "static/components/*.js", "static/components/*.css",
@@ -78,8 +78,9 @@ tgwitness = [
   "locales/hi.json", "locales/id.json", "locales/vi.json", "locales/zh.json",
   "guide_locales/*.json",
   "english_fallbacks.json", "public_proxies.json", "sealed_policy.json",
+  "schemas/board-*.json",
   "client_profiles.json", "client_profiles.LICENSE",
-  "fonts/*.ttf", "fonts/OFL.txt",
+  "fonts/*.ttf", "fonts/OFL.txt", "fonts/NotoSerif-OFL.txt",
 ]
 
 [tool.ruff]

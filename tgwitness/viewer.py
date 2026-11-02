@@ -24,7 +24,7 @@ CHUNK_BYTES = 16 * 1024 * 1024  # split large raw records before a browser needs
 INLINE_LIMIT = 20000    # items a report saved on its own carries inside the page
 INLINE_BYTES = 32 * 1024 * 1024
 LONE = re.compile("[\ud800-\udfff]")
-DETAIL_KEYS = ("text_entities", "reply_to_message_id", "forwarded_from", "via_bot_id", "author", "views", "forwards", "replies", "reactions",
+DETAIL_KEYS = ("text_entities", "forwarded_from", "via_bot_id", "author", "views", "forwards", "replies", "reactions",
                "buttons", "auto_delete_seconds", "protected", "media_info", "album_id")
 
 
@@ -59,8 +59,9 @@ def journal_item(event, raw_records=False):
         item["m"] = event["message_id"]
     sender = payload.get("sender_observation") if isinstance(payload.get("sender_observation"), dict) else {}
     sender_id = payload.get("sender_id", sender.get("id"))
+    times = report.message_times(payload)
     for key, value in (("a", sender.get("display_name")), ("u", sender.get("username")), ("id", sender_id),
-                       ("tt", payload.get("date") if isinstance(payload.get("date"), str) else None)):
+                       ("tt", times["sent_at"])):
         if value not in (None, ""):
             item[key] = value
     if isinstance(payload.get("text"), str) and payload["text"]:
@@ -70,9 +71,8 @@ def journal_item(event, raw_records=False):
     if event.get("minimised"):
         item["w"] = event["minimised"]
     if item["c"] in ("message", "edited"):
-        details = {k: v for k, v in report.shown_details(payload).items() if k in DETAIL_KEYS}
-        if isinstance(payload.get("reply_to_message_id"), int):
-            details["reply_to_message_id"] = payload["reply_to_message_id"]
+        item.update(times)
+        details = {k: v for k, v in report.shown_details(payload).items() if k in (*DETAIL_KEYS, *report.REPLY_DETAILS_KEYS)}
         if details:
             item["d"] = details
     if kind == "media.saved" and isinstance(payload.get("media_sha256"), str):

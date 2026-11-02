@@ -25,8 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_LOG_BYTES = 4 * 1024**2
 SUITES = {
     "browser": (
+        "test_case_board.py", "test_case_board_api.py", "check_case_board_browser.py",
         "check_showcase.py", "check_showcase_browser.py",
-        "test_settings_hub.py", "test_case_assessment.py", "test_group_settings.py",
+        "test_settings_hub.py", "test_case_assessment.py", "test_group_settings.py", "test_group_overview.py",
         "check_operator_security.py", "check_operator_browser.py",
         "check_guided_connection.py", "check_guided_connection_browser.py",
         "check_session_reservations.py", "check_account_recovery.py",
@@ -36,6 +37,11 @@ SUITES = {
         "check_export_async_browser.py", "check_account_export_browser.py", "check_refresh_browser.py",
         "check_account_reports.py", "check_report_design.py", "check_report_studio.py", "test_snapshot_analytics.py", "test_report_analytics.py", "test_report_composition.py", "check_report_builder_browser.py",
         "test_report_selection.py", "test_report_selection_exports.py", "test_report_history_context.py", "check_report_selection_browser.py",
+        "test_report_record_metadata.py", "test_pdf_record_metadata.py",
+        "test_report_styles.py", "test_report_styles_pdf.py", "check_report_styles_browser.py", "check_report_style_documents.py",
+        "check_independent_report_designs_browser.py",
+        "test_account_report_layouts.py",
+        "test_independent_report_html.py", "test_independent_report_pdf.py",
         "check_analyst_browser.py", "check_history_browser.py", "check_sealed_browser.py",
         "check_interactions_browser.py", "check_workspace_browser.py", "check_quick_browser.py",
         "check_proof_browser.py", "check_setup_browser.py", "check_public_proxies_browser.py",
@@ -55,7 +61,7 @@ SUITES = {
         "check_access_sections_browser.py", "check_journal_browser.py", "check_exports_browser.py",
         "check_controls_browser.py", "check_quick_search_browser.py",
         "check_cloud_wizard.py", "check_evidence_witnesses.py", "check_setup_levels.py", "check_first_run.py",
-        "check_group_settings_browser.py", "check_gateway_dns.py", "check_tdx.py", "check_phala.py",
+        "check_group_settings_browser.py", "check_group_screen_browser.py", "check_gateway_dns.py", "check_tdx.py", "check_phala.py",
     ),
     "site": ("check_site.py", "check_docs_site.py", "check_report_example.py"),
 }

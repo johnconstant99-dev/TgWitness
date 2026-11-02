@@ -238,7 +238,7 @@ class Profiles:
             self.entries.pop(profile_id, None)
             return {"id": profile_id, "deleted": True}
 
-    # Groups: workspaces that share settings (group_settings.py); Apply copies them from one member ---
+    # Groups: workspaces that share settings, copied from one of them on request ------------------
 
     def groups(self):
         return self.app.state.store.get_setting("profile_groups", [])
@@ -357,7 +357,6 @@ class Profiles:
                         except ValueError:
                             skipped.append(section)
                             continue
-                        # Settings show the IP answer saved with the policy; copy both together.
                         store.set_setting("ip_choice", template_ip)
                         applied.append(section)
                         continue
@@ -376,7 +375,6 @@ class Profiles:
                                                         "skipped_while_observing": skipped})
                 results.append({"id": profile_id, "label": entry["label"], "status": "applied" if applied else "skipped",
                                 "applied": applied, "skipped": skipped})
-            # The copied values become what the group shares, so a workspace added later starts with them.
             from .group_settings import SECTION_KEYS, read, save_values
             current = read(template["app"], [k for section in group.get("sections", []) for k in SECTION_KEYS[section]])
             shared = {**group.get("values", {}),

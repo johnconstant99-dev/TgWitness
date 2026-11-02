@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tgwitness:board:remove:v1",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{32}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Id"
+    },
+    "card_id": {
+      "pattern": "^[a-f0-9]{32}$",
+      "title": "Card Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "card_id"
+  ],
+  "title": "Remove",
+  "type": "object"
+}

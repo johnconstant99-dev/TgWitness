@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Group screen at `/groups/<id>`: accounts, problems, shared chats with coverage, group export.
+- Add Reading series and Ledger & margin to the report builder, with distinct
+  HTML and native signed PDF chapters, live preview, account and sharing layouts,
+  and DeepL translations. Preserve selected scope and minimized data across designs.
+- Add Classic, Editorial, Briefing, Analytics, Technical and Overview report
+  designs with independent covers and typography; changing a design keeps filters,
+  charts and written notes.
+- Show separate send, edit and observation times, reply/thread references and
+  permitted message metadata in reports and the viewer.
+- Add a private Case Board with signed, append-only bookmarks, exact-version Unicode
+  highlights, complete action slices, scoped collections, threaded comments and team statuses.
+  Chats/Journal shortcuts, live updates, source navigation, presentation and English/Russian UI
+  keep team interpretation separate from observed evidence. Signed ZIPs bind the annotations
+  head and recomputed slices; the standalone verifier checks replay, references, query excerpts
+  and retained checkpoints. Reports have independent board/comment controls; minimized handovers
+  require explicit inclusion and support investigator aliases. New board rights do not expand
+  existing grants, and export permission alone does not disclose team notes.
 - Account groups now share settings. The group page sets the goal, collection,
   protection and notification rules, recording, recheck schedule, report settings,
   parameters and connection route; members follow it, and an account with its own
@@ -13,7 +30,7 @@
   including accounts added to it later; showcase links still list their channels.
   Every change is recorded in the signed journal of the main workspace and of each
   member it reaches; existing template groups are migrated.
-- Add Report studio with three document designs, live unsigned cover/chart preview,
+- Add Report studio with independent document designs, live unsigned cover/chart preview,
   selectable activity, weekday/hour, participant, chat and composition charts, and
   journal history/indicator controls. Saved choices reach HTML, signed PDF/JSON and
   new account/disclosure jobs. Analytics use only included/minimized records, retain

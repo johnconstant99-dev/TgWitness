@@ -73,10 +73,15 @@ def checkout_commit(root):
 
 
 def checkpoint(store, vault):
-    head = store.stats()["head"]
-    statement = {"format": "tgwitness-checkpoint-v1", "created_at": utcnow(),
-                 "public_key": vault.public_key, "event_count": head["seq"] if head else 0,
-                 "head_hash": head["hash"] if head else ZERO}
+    from . import board
+    with store.snapshot() as snapshot:
+        head = snapshot.head
+        statement = {"format": "tgwitness-checkpoint-v1", "created_at": utcnow(),
+                     "public_key": vault.public_key, "event_count": head["seq"] if head else 0,
+                     "head_hash": head["hash"] if head else ZERO}
+        annotations = board.head(snapshot.connection)
+        if annotations["seq"]:
+            statement["annotations_head"] = annotations
     return {"statement": statement, "signature": vault.sign(canonical(statement)),
             "fingerprint": fingerprint(vault.public_key)}
 
@@ -146,7 +151,7 @@ def html_chunks(events, coverage=None, context=None):
 COVERAGE_RANGES = 100_000  # absent message numbers listed per chat in coverage.json and report.json
 
 
-def export_file(store, vault, fmt, options=None):
+def export_file(store, vault, fmt, options=None, *, include_board=True):
     """A stable journal prefix as JSONL, CSV, a sealed HTML or JSON report, or the signed evidence ZIP.
 
     options are resolved report options (report.resolved); the case details they carry are
@@ -167,6 +172,8 @@ def export_file(store, vault, fmt, options=None):
     try:
         retained = store.retained_checkpoint()
         with store.snapshot() as snapshot:
+            from . import board
+            board_export = board.export_state(snapshot.connection, vault) if include_board and board.head(snapshot.connection)["seq"] else None
             observed, digest = Coverage(), report.Digest()
             journal_bytes = hashlib.sha256()
 
@@ -192,6 +199,9 @@ def export_file(store, vault, fmt, options=None):
                        "digest": summary, "anchors": [], "files": {},
                        "account": store.get_setting("account", None), "archive": fmt == "zip", "sign": vault.sign,
                        "events_again": snapshot.events, "journal_verified": True}
+            if board_export:
+                from . import board_report
+                context["case_board"] = board_report.material(snapshot.connection, board_export["statement"], options)
             selection = report.report_selection.Selection.model_validate(options.get("selection") or {})
             report_events = snapshot.events
             if selection.enabled and fmt in ("html", "json", "pdf", "zip"):
@@ -252,6 +262,11 @@ def export_file(store, vault, fmt, options=None):
                 for format, name in (("jsonl", "events.jsonl"), ("csv", "events.csv")):
                     write_member(name, chunks(format))
                 write_member("coverage.json", [json.dumps(coverage, ensure_ascii=False, indent=1).encode("utf-8")])
+                if board_export:
+                    write_member("annotations.jsonl", (canonical(row) + b"\n" for row in board.records(snapshot.connection)))
+                    write_member("case-board.json", [canonical(board_export)])
+                    for identifier, item in board.export_slices(snapshot.connection, board_export["statement"]["state"]):
+                        write_member("board/slices/" + identifier + ".json", [canonical(item)])
                 if analytics := report.report_material(context).get("analytics"):
                     write_member("analytics.json", [canonical(analytics)])
                 write_member("verify.py", [Path(__file__).with_name("verify.py").read_bytes()])
@@ -313,6 +328,8 @@ def export_file(store, vault, fmt, options=None):
                             "producer": producer(), "limitations": LIMITS, "case": report.case_of(options),
                             "report": report_entry(context, options), "files": hashes,
                             "case_assessment": data["case_assessment"]}
+                if board_export:
+                    manifest["annotations_head"] = board_export["statement"]["state"]["annotations_head"]
                 manifest_bytes = canonical(manifest)
                 if total + len(manifest_bytes) + 88 > limit:
                     raise ValueError("Manifest pushes bundle above the verification size limit")
@@ -353,6 +370,7 @@ def write_pdf(write_member, name, render):
 def report_entry(context, options, file="report.html"):
     """The manifest's account of the readable reports: the sealed page, its JSON and PDF twins and any parts."""
     entry = {"id": context["report_id"], "file": file, "language": options["language"], "sealed": True,
+             "design": report.report_design.normalized(options.get("design")),
              "custody": "custody.json", "presentation": {k: options.get(k, v) for k, v in report.report_analytics.Presentation().model_dump().items()}}
     if context.get("selection"):
         entry["selection"] = context["selection"]["selection"]

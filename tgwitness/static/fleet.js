@@ -103,7 +103,6 @@
     return select;
   }
 
-  // A moved account keeps its settings; where they differ from what the group shares, offer the group's.
   async function offerShared(groupId, profileId) {
     const shared = await json("profile-groups/" + encodeURIComponent(groupId) + "/settings", undefined, {root: true});
     const member = shared.members.find(m => m.id === profileId);
@@ -262,7 +261,10 @@
     const shared = node("button", "secondary small", tr("Shared settings")); shared.type = "button";
     shared.dataset.action = "shared-settings"; shared.disabled = !editable();
     shared.addEventListener("click", () => openShared(group));
-    actions.append(shared, apply, ...groupRun(group), rename, remove);
+    const page = node("button", "secondary small", tr("Open group")); page.type = "button";
+    page.dataset.action = "open-group";
+    page.addEventListener("click", () => busy(null, () => window.TgWitnessOpenGroup?.(group.id)));
+    actions.append(page, shared, apply, ...groupRun(group), rename, remove);
     for (const button of [rename, remove]) button.disabled = !editable() || writing.has(group.id);
     head.append(who, actions);
     section.append(head);if(headerOnly)return section;

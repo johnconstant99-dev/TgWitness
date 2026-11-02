@@ -1,5 +1,6 @@
 """Bounded, committed journal notifications. No payloads or signing material leave this path."""
 import asyncio
+import copy
 import json
 import time
 
@@ -71,7 +72,8 @@ def notifications(store, after, allowed, limit=100):
         return [dict(row) for row in rows]
 
 
-async def stream(store, after, authorize, disconnected, *, interval=1, lifetime=45):
+async def stream(store, after, authorize, disconnected, *, interval=1, lifetime=45,
+                 board_after=0, board_authorize=None, workspace="default"):
     cursor = after
     deadline = time.monotonic() + lifetime
     while time.monotonic() < deadline and not await disconnected():
@@ -80,6 +82,16 @@ async def stream(store, after, authorize, disconnected, *, interval=1, lifetime=
         if allowed != authorize():
             await asyncio.sleep(0.05)
             continue
+        if board_authorize:
+            from .board import notifications as board_notifications
+            principal = board_authorize()
+            authorization = copy.deepcopy((principal.public(), principal.chats(workspace))) if principal else None
+            notes, next_board = await asyncio.to_thread(board_notifications, store, board_after, principal, workspace)
+            current = board_authorize()
+            if principal and current and authorization == (current.public(), current.chats(workspace)):
+                board_after = next_board
+                if notes:
+                    yield "event: board\ndata: " + json.dumps(notes, separators=(",", ":")) + "\n\n"
         if records:
             cursor = records[-1]["seq"]
             yield "id: " + str(cursor) + "\nevent: journal\ndata: " + json.dumps(records, separators=(",", ":")) + "\n\n"

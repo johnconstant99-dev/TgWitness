@@ -1,6 +1,6 @@
 // Panel dialogs in place of window.prompt/confirm, which embedded and some mobile browsers refuse.
 // Each call returns a promise: confirm → true/false, prompt → text or null, typed → true when the
-// person typed the expected name, choose → the ticked values or null.
+// person typed the expected name.
 (() => {
   const t = (text, vars) => (typeof tr === "function" ? tr(text, vars) : text);
 
@@ -96,7 +96,6 @@
       placeholder: options.placeholder, maxLength: options.maxLength, required: options.required !== false}}),
     typed: (message, expected, options = {}) => open({...options, message, danger: true, expected,
       field: {label: options.label || t("Type the name to confirm"), placeholder: expected, maxLength: 300}}),
-    // Ticked values, or null when cancelled; an empty list is a confirmation with nothing ticked.
     choose: (message, options = {}) => open({...options, message, choices: options.choices || []}),
   };
 })();

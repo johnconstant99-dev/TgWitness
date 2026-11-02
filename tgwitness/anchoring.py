@@ -332,6 +332,9 @@ def latest_checkpoint(store):
     statement = json.loads(latest.read_bytes())["statement"]
     name = "checkpoint-" + str(statement["event_count"]).zfill(12)
     source = directory / (name + ".json")
+    if source.is_file():
+        # The numbered checkpoint is immutable; latest.json can contain a newer annotations head.
+        statement = json.loads(source.read_bytes())["statement"]
     return (name, source, statement) if source.is_file() else None
 
 

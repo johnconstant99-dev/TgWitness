@@ -111,6 +111,12 @@ def main():
         if not args.docs:
             page.goto(live.url + "/guide.html")
             shoot(page, "guide.png")
+        from tools.build_case_board_example import seed_board
+        seed_board(demo.app.state.store)
+        page.goto(demo.url + '/board')
+        expect(page.locator('.board-feed .board-card')).to_have_count(3)
+        page.evaluate('scrollTo(0,0)')
+        shoot(page, 'case-board.png')
         browser.close()
 
 

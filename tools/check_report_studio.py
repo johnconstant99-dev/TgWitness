@@ -10,6 +10,8 @@ from check_browser import RunningApp, answer_panel_dialog, hold_api_response, la
 from build_report_studio_example import seed
 from tgwitness.verify import fingerprint, verify_bundle
 
+DESIGNS = ('classic', 'quire', 'meridian', 'atlas', 'ledger', 'horizon')
+
 
 def main():
     output = Path("test-results/report-studio")
@@ -33,16 +35,22 @@ def main():
             page.locator("#report-timeline").uncheck()
             page.locator("#report-chart-limit").fill("5")
             page.locator("#report-notes").fill("SYNTHETIC EXAMPLE · Fictional records, no Telegram connection.")
-            for template in ("analytical", "editorial", "dossier"):
-                page.locator(f'[name="report-design"][value="{template}"]').check()
+            preview_numbers = None
+            for design in DESIGNS:
+                page.locator(f'[name="report-design"][value="{design}"]').check()
                 expect(page.locator("#report-design-preview-status")).to_contain_text("not signed", timeout=20000)
                 frame = page.frame_locator("#report-preview-frame")
-                expect(frame.locator("html")).to_have_attribute("data-template", template)
+                expect(frame.locator("html")).to_have_attribute("data-report-design", design)
+                expect(page.locator("#report-preview-frame")).to_have_attribute("data-report-design", design)
                 expect(frame.locator(".chart-card")).to_have_count(5)
                 expect(frame.locator(".rank-row").first).to_contain_text("Participant")
+                numbers = frame.locator('.analytics-totals b').all_text_contents()
+                if preview_numbers is None:
+                    preview_numbers = numbers
+                assert numbers == preview_numbers, 'Changing the design changed preview counts'
                 # External stylesheet is actually applied under the panel CSP.
                 assert frame.locator(".analytics-pair").evaluate("el=>getComputedStyle(el).display") == "grid"
-                if template == 'editorial':
+                if design == 'quire':
                     assert frame.locator('.facts b').first.evaluate('el=>getComputedStyle(el).color') == frame.locator('h1').evaluate('el=>getComputedStyle(el).color')
                 assert frame.locator(".preview-watermark").inner_text() == "DRAFT PREVIEW · NOT SIGNED"
                 page.locator("#report-form button[type=submit]").click()
@@ -51,7 +59,7 @@ def main():
                 with page.expect_download() as transfer:
                     page.locator("#export-journal-panel [data-export=zip]").click()
                     answer_panel_dialog(page)
-                destination = output / f"{template}.zip"
+                destination = output / f"{design}.zip"
                 transfer.value.save_as(destination)
                 verified = verify_bundle(destination, fingerprint(server.app.state.vault.public_key))
                 assert verified["key_pinned"] and verified["report_pdf"]
@@ -60,12 +68,13 @@ def main():
                     data = json.loads(archive.read("report.json"))["report"]
                     analytic = json.loads(archive.read("analytics.json"))
                     assert data["analytics"] == analytic
-                    assert data["presentation"]["design"] == template
-                    assert f'data-template="{template}"' in html
+                    assert data["presentation"]["design"] == design
+                    assert f'data-report-design="{design}"' in html
                     assert sum(row["total"] for row in analytic["activity"]["rows"]) == analytic["activity_events"]
-                    (output / f"{template}.html").write_text(html, encoding="utf-8")
+                    assert sum(analytic['totals'].values()) == sum(int(value) for value in numbers)
+                    (output / f"{design}.html").write_text(html, encoding="utf-8")
                 page.locator("#exports-tab-settings").click()
-            page.locator('[name="report-design"][value="analytical"]').check()
+            page.locator('[name="report-design"][value="atlas"]').check()
             expect(page.locator("#report-design-preview-status")).to_contain_text("not signed", timeout=20000)
             for width in (1440, 390):
                 page.set_viewport_size({"width": width, "height": 1100 if width == 1440 else 844})
@@ -78,7 +87,7 @@ def main():
             expect(page.frame_locator("#report-preview-frame").locator(".chart-participants")).to_have_count(0)
             # Preview never persists the draft or produces a signature.
             options = page.evaluate("json('report-options')")
-            assert options["participant_chart"] and options["design"] == "dossier"
+            assert options["participant_chart"] and options["design"] == "horizon"
             hold_api_response(page, '/api/report-design-preview')
             page.locator('#report-case-title').fill('PRIVATE STALE DRAFT')
             page.wait_for_function("()=>typeof releaseAcceptanceResponse==='function'")
@@ -87,7 +96,7 @@ def main():
             assert page.evaluate("()=>!panelRoots.get('evidence').querySelector('#report-preview-frame').hasAttribute('srcdoc')")
             assert not errors, errors
             browser.close()
-    print("Studio preview, 3 signed template exports, shared analytic data, selections, draft isolation, CSP styling, lock and responsive layouts PASS")
+    print("Studio preview, 6 signed design exports, shared analytic data, selections, draft isolation, CSP styling, lock and responsive layouts PASS")
 
 
 if __name__ == "__main__":

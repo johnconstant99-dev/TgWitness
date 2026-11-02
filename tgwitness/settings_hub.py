@@ -145,8 +145,6 @@ def preview(app, body):
 
 
 def edited(current, body):
-    """The values after one edit, with the features it depends on or that depend on it; a group edits its
-    shared values by the same rules."""
     desired = dict(current)
     if body.key == "files":
         valid = body.value in ("photos", "short_media", "all")

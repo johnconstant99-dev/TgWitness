@@ -77,7 +77,7 @@ def main(console_only=False):
             release_api_response(page)
             expect(page.locator('#access-label')).to_have_value('Draft during refresh')
             page.locator('#access-preset').select_option('operator')
-            assert page.evaluate("()=>accessSettings().permissions") == ['view', 'export', 'sources', 'settings']
+            assert set(page.evaluate("()=>accessSettings().permissions")) == {'view', 'export', 'sources', 'settings', 'board.read', 'board.write', 'board.manage'}
             page.locator('#access-permissions input[value=interact]').check()
             expect(page.locator('#access-preset')).to_have_value('custom')
             page.locator('#access-workspace-search').fill('workspace 12')

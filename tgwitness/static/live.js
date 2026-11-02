@@ -1,5 +1,5 @@
 (() => {
-  let context=null,controller=null,retry=null,flushTimer=null,cursor=0,pending=0,paused=false,connected=false,flushing=false,generation=0;
+  let context=null,controller=null,retry=null,flushTimer=null,cursor=0,boardCursor=0,pending=0,paused=false,connected=false,flushing=false,generation=0;
   const bars=[];
   function render(){
     if(!context)return;
@@ -36,7 +36,7 @@
     if(!context||rev!==generation||document.hidden||controller)return;
     const current=context,ctrl=new AbortController();controller=ctrl;
     try{
-      const response=await current.api("stream?after="+cursor,undefined,{signal:ctrl.signal});
+      const response=await current.api("stream?after="+cursor+"&board_after="+boardCursor,undefined,{signal:ctrl.signal});
       if(rev!==generation||controller!==ctrl){await response.body?.cancel();return;}
       connected=true;render();const reader=response.body.getReader(),decoder=new TextDecoder();let buffer="";
       try{for(;;){
@@ -48,6 +48,10 @@
           if(block.includes("event: access-ended")){stop();current.accessEnded();return;}
           const data=block.split("\n").filter(line=>line.startsWith("data: ")).map(line=>line.slice(6)).join("\n");
           if(!data)continue;
+          if(block.includes("event: board")){
+            const notes=JSON.parse(data).filter(event=>Number.isSafeInteger(event.seq)&&event.seq>boardCursor);
+            if(notes.length){boardCursor=notes.at(-1).seq;window.TgWitnessBoard?.live(notes);}continue;
+          }
           const events=JSON.parse(data).filter(event=>Number.isSafeInteger(event.seq)&&event.seq>cursor);
           if(events.length){cursor=events.at(-1).seq;changed(events);}
         }
@@ -59,7 +63,7 @@
   function start(ctx){
     setup(ctx.hosts||[]);
     if(context?.key===ctx.key){context=ctx;for(const b of bars)b.bar.hidden=false;render();return;}
-    stop();context=ctx;cursor=ctx.head||0;paused=false;for(const b of bars)b.bar.hidden=false;render();connect(generation);
+    stop();context=ctx;cursor=ctx.head||0;boardCursor=window.TgWitnessBoard?.cursor()||0;paused=false;for(const b of bars)b.bar.hidden=false;render();connect(generation);
   }
   document.addEventListener("visibilitychange",()=>{if(!context)return;if(document.hidden){controller?.abort();controller=null;connected=false;clearTimeout(retry);render();}else{clearTimeout(retry);connect(generation);}});
   document.addEventListener("selectionchange",()=>{if(!window.getSelection()?.toString())flush();});

@@ -122,7 +122,6 @@ html[data-ui-level=simple] #mode-switch,html[data-ui-level=standard] #mode-switc
 /* The step heading takes focus for screen readers; it needs no visible ring. */
 .first-run-shell h1[tabindex="-1"]:focus{outline:none}
 
-/* Group settings: 🔗 from the group, ✏️ the account's own value; the group's own page. */
 .hub-group-note{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 18px}
 .inherit-mark{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:12px;margin-top:5px;color:var(--muted)}
 .inherit-mark.own .inherit-source{color:var(--accent)}

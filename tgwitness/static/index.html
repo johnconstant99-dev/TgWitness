@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="/views/sources.css?v=18">
 <link rel="stylesheet" href="/views/parameters.css?v=21">
 <link rel="stylesheet" href="/views/accounts.css?v=30">
+<link rel="stylesheet" href="/views/group.css?v=1">
 <link rel="stylesheet" href="/views/setup.css?v=3">
 <link rel="stylesheet" href="/views/settings-hub.css?v=3">
 <link rel="stylesheet" href="/views/connection.css?v=1">
@@ -26,6 +27,7 @@
 <link rel="stylesheet" href="/components/journal.css?v=5">
 <link rel="stylesheet" href="/views/chats.css?v=11">
 <link rel="stylesheet" href="/views/chat-list.css?v=12">
+<link rel="stylesheet" href="/views/board.css?v=1">
 <link rel="stylesheet" href="/cloud-capture.css?v=5"><link rel="stylesheet" href="/cloud-capture-story.css?v=3">
 <script src="/theme.js?v=0.7.0"></script>
 <script src="/guide-locale.js" data-scope="panel"></script>
@@ -33,7 +35,7 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.8.0-report-studio3"></script>
+<script defer src="/app.js?v=0.8.0-case-board1"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/account-import.js?v=1"></script>
 <script defer src="/integrations.js?v=2"></script>
@@ -41,7 +43,7 @@
 <script defer src="/media-analysis.js?v=2"></script>
 <script defer src="/webhooks.js?v=2"></script>
 <script defer src="/proxies.js?v=3"></script>
-<script defer src="/fleet.js?v=5"></script>
+<script defer src="/fleet.js?v=6"></script>
 <script defer src="/review.js?v=1"></script>
 <script defer src="/live.js?v=2"></script>
 <script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=4"></script><script defer src="/cloud-capture.js?v=6"></script>
@@ -144,6 +146,7 @@
   <nav aria-label="Main navigation">
     <button class="nav" data-view="start"><svg aria-hidden="true" class="nav-icon"><use href="#i-home"/></svg> Start here</button>
     <div class="nav-section">Investigation</div>
+    <button class="nav" data-view="board"><svg aria-hidden="true" class="nav-icon"><use href="#i-layers"/></svg> Case Board <b id="board-unread" hidden>0</b></button>
     <button class="nav" data-view="chats"><svg aria-hidden="true" class="nav-icon"><use href="#i-message"/></svg> Chats</button>
     <button class="nav active" data-view="observations"><svg aria-hidden="true" class="nav-icon"><use href="#i-journal"/></svg> Journal <b id="nav-count">0</b></button>
     <button class="nav" data-view="sources"><svg aria-hidden="true" class="nav-icon"><use href="#i-sources"/></svg> Sources</button>
@@ -555,6 +558,8 @@
       </fieldset>
       <label class="check-label"><input id="handover-avatars" type="checkbox"> Include profile photos of the chosen people</label>
       <label class="check-label"><input id="handover-contacts" type="checkbox"> Mask phone numbers and e-mail addresses in texts</label>
+      <label for="handover-board">Case Board in this handover<select id="handover-board"><option value="off">Do not include</option><option value="bookmarks">Bookmarks and slices, without comments</option><option value="comments">Cards and team comments</option></select></label>
+      <label class="check-label"><input id="handover-board-aliases" type="checkbox" checked> Replace investigator names with R01, R02…</label>
       <div class="chat-export-actions"><button class="primary" type="submit"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Download handover extract</button></div>
       <p class="hint">Records shown unchanged are verified in full by verify.py; minimised records by the signature over the original record. The password option below applies to this download too.</p>
     </form>
@@ -580,7 +585,7 @@
     <fieldset class="report-fields" id="report-fields" disabled>
     <nav class="report-steps" aria-label="Report preparation">
       <button class="quiet" type="button" data-report-step="report-data"><b>1</b> Data</button>
-      <button class="quiet" type="button" data-report-step="report-content"><b>2</b> Contents</button>
+      <button class="quiet" type="button" data-report-step="report-content"><b>2</b> Design &amp; contents</button>
       <button class="quiet" type="button" data-report-step="report-preview"><b>3</b> Preview</button>
     </nav>
     <section class="report-data" id="report-data" aria-labelledby="report-data-title">
@@ -610,13 +615,118 @@
       <p class="hint">Missing numbers are gaps in the observed IDs, not proof of deletion.</p>
       <p class="report-scope-notice">Scope applies to the report. The evidence ZIP keeps the complete original journal; use a minimized handover to share only selected data.</p>
     </section>
-    <div class="report-section-heading" id="report-content"><span aria-hidden="true">02</span><div><h3 tabindex="-1">Arrange the contents</h3><p class="hint">These choices change the report layout. Your data selection stays the same.</p></div></div>
-    <fieldset class="studio-templates"><legend>01 · Choose a template</legend>
-      <label class="studio-template"><input type="radio" name="report-design" value="dossier" checked><span class="template-sheet sheet-dossier" aria-hidden="true"><i></i><b></b><em></em><em></em><small></small></span><span><strong>Case dossier</strong><small>Formal cover, measured typography, clear evidence structure.</small></span></label>
-      <label class="studio-template"><input type="radio" name="report-design" value="analytical"><span class="template-sheet sheet-analytical" aria-hidden="true"><i></i><b></b><em></em><em></em><small></small></span><span><strong>Intelligence brief</strong><small>Bold numbers, clean charts and a contemporary blue palette.</small></span></label>
-      <label class="studio-template"><input type="radio" name="report-design" value="editorial"><span class="template-sheet sheet-editorial" aria-hidden="true"><i></i><b></b><em></em><em></em><small></small></span><span><strong>Editorial review</strong><small>Paper-like layout, expressive headings and warm accents.</small></span></label>
+    <div class="report-section-heading" id="report-content"><span aria-hidden="true">02</span><div><h3 tabindex="-1">Design and contents</h3><p class="hint">Choose how the report looks and what it includes.</p></div></div>
+    <fieldset class="report-designs" aria-describedby="report-design-help"><legend>Report design</legend>
+      <p class="hint" id="report-design-help">Page layouts for HTML and PDF. Changing the design keeps your data, included sections and written notes.</p>
+      <div class="report-design-grid">
+        <label class="report-design" data-report-design="classic">
+          <input type="radio" name="report-design" value="classic" id="report-design-classic" aria-labelledby="report-design-name-classic" aria-describedby="report-design-copy-classic" checked>
+          <svg class="report-design-preview" viewBox="0 0 240 140" aria-hidden="true" data-no-translate>
+            <rect class="design-page" x="15" y="9" width="210" height="122" rx="3"/>
+            <path class="design-accent-fill" d="M15 12a3 3 0 0 1 3-3h204a3 3 0 0 1 3 3v26H15z"/>
+            <path class="design-paper-line" d="M28 21h72m-72 8h108"/>
+            <path class="design-rule" d="M27 49h186v25H27zm46 0v25m47-25v25m46-25v25"/>
+            <path class="design-ink-line" d="M35 58h15m31 0h15m32 0h15m31 0h15"/>
+            <path class="design-rule" d="M27 87h130m-130 8h172m-172 8h158m-158 8h172m-172 8h110"/>
+            <rect class="design-accent-faint" x="177" y="84" width="36" height="36" rx="2"/>
+          </svg>
+          <strong id="report-design-name-classic">Classic</strong><small id="report-design-copy-classic">A familiar dossier with clear sections and a structured record.</small>
+        </label>
+        <label class="report-design" data-report-design="quire">
+          <input type="radio" name="report-design" value="quire" id="report-design-quire" aria-labelledby="report-design-name-quire" aria-describedby="report-design-copy-quire">
+          <svg class="report-design-preview" viewBox="0 0 240 140" aria-hidden="true" data-no-translate>
+            <rect class="design-page" x="15" y="9" width="210" height="122" rx="3"/>
+            <path class="design-accent-hairline" d="M25 18h190v61H25zm3 3h184v55H28z"/>
+            <text x="101" y="49" class="design-serif">Aa</text><path class="design-accent-hairline" d="M95 56h50m-40 7h30"/>
+            <path class="design-rule" d="M27 90h186M55 101h158M55 109h145M55 117h158"/>
+            <path class="design-accent-line" d="M29 99h10m-5 0v17m-5 0h10"/>
+          </svg>
+          <strong id="report-design-name-quire">Editorial</strong><small id="report-design-copy-quire">Serif headings, a quiet margin and space for longer explanations.</small>
+        </label>
+        <label class="report-design" data-report-design="meridian">
+          <input type="radio" name="report-design" value="meridian" id="report-design-meridian" aria-labelledby="report-design-name-meridian" aria-describedby="report-design-copy-meridian">
+          <svg class="report-design-preview" viewBox="0 0 240 140" aria-hidden="true" data-no-translate>
+            <rect class="design-page" x="15" y="9" width="210" height="122" rx="3"/>
+            <path class="design-accent-fill" d="M15 12a3 3 0 0 1 3-3h11v122H18a3 3 0 0 1-3-3z"/>
+            <path class="design-ink-line" d="M40 25h106m-106 10h72"/>
+            <path class="design-rule" d="M40 45h170v24H40zm43 0v24m42-24v24m42-24v24"/>
+            <path class="design-accent-line" d="M48 55h23m19 0h23m19 0h23m19 0h23"/>
+            <path class="design-rule" d="M40 81h170M40 91h76m18 0h76M40 99h76m18 0h76M40 107h63m31 0h76M40 115h76m18 0h53"/>
+          </svg>
+          <strong id="report-design-name-meridian">Briefing</strong><small id="report-design-copy-meridian">A compact opening, key figures in one row and concise sections.</small>
+        </label>
+        <label class="report-design" data-report-design="atlas">
+          <input type="radio" name="report-design" value="atlas" id="report-design-atlas" aria-labelledby="report-design-name-atlas" aria-describedby="report-design-copy-atlas">
+          <svg class="report-design-preview" viewBox="0 0 240 140" aria-hidden="true" data-no-translate>
+            <rect class="design-page" x="15" y="9" width="210" height="122" rx="3"/>
+            <path class="design-rule design-graticule" d="M25 18h190v104H25zm0 18h190M25 54h190M25 72h190M25 90h190M25 108h190M44 18v104M63 18v104M82 18v104M101 18v104M120 18v104M139 18v104M158 18v104M177 18v104M196 18v104"/>
+            <rect class="design-page" x="33" y="26" width="112" height="25"/><path class="design-ink-line" d="M40 33h91"/><path class="design-accent-line" d="M40 43h91"/>
+            <rect class="design-page" x="33" y="62" width="100" height="51"/><rect class="design-page" x="143" y="62" width="63" height="51"/>
+            <path class="design-accent-faint" d="M40 102l14-11 13 4 14-21 15 12 15-12 14 9v23H40z"/>
+            <path class="design-accent-line" d="M40 102l14-11 13 4 14-21 15 12 15-12 14 9"/>
+            <path class="design-accent-fill" d="M151 73h47v5h-47zm0 13h29v5h-29zm0 13h39v5h-39z"/>
+          </svg>
+          <strong id="report-design-name-atlas">Analytics</strong><small id="report-design-copy-atlas">A modular dashboard for comparing activity, people and sources.</small>
+        </label>
+        <label class="report-design" data-report-design="ledger">
+          <input type="radio" name="report-design" value="ledger" id="report-design-ledger" aria-labelledby="report-design-name-ledger" aria-describedby="report-design-copy-ledger">
+          <svg class="report-design-preview" viewBox="0 0 240 140" aria-hidden="true" data-no-translate>
+            <rect class="design-page" x="15" y="9" width="210" height="122" rx="1"/>
+            <path class="design-accent-line" d="M27 18h186M27 42h186"/><text x="27" y="36" class="design-mono">Aa_</text><path class="design-rule" d="M162 25h51m-51 8h35"/>
+            <rect class="design-accent-faint" x="27" y="51" width="186" height="13"/>
+            <path class="design-ink-line" d="M34 57h13m19 0h54m16 0h59"/>
+            <path class="design-rule" d="M27 51h186v67H27zm30 0v67m70-67v67m-100-54h186M27 78h186M27 91h186M27 104h186"/>
+            <path class="design-rule" d="M34 71h13m19 0h45m25 0h59M34 85h13m19 0h54m16 0h42M34 98h13m19 0h32m38 0h59M34 111h13m19 0h54m16 0h50"/>
+          </svg>
+          <strong id="report-design-name-ledger">Technical</strong><small id="report-design-copy-ledger">Ruled tables, precise references and a compact register layout.</small>
+        </label>
+        <label class="report-design" data-report-design="horizon">
+          <input type="radio" name="report-design" value="horizon" id="report-design-horizon" aria-labelledby="report-design-name-horizon" aria-describedby="report-design-copy-horizon">
+          <svg class="report-design-preview" viewBox="0 0 240 140" aria-hidden="true" data-no-translate>
+            <rect class="design-page" x="15" y="9" width="210" height="122" rx="3"/>
+            <path class="design-secondary-fill" d="M15 12a3 3 0 0 1 3-3h204a3 3 0 0 1 3 3v18H15z"/>
+            <path class="design-paper-line" d="M28 20h90m51 0h44"/><rect class="design-highlight" x="15" y="30" width="210" height="2"/>
+            <path class="design-ink-line" d="M28 46h103m-103 11h82"/>
+            <path class="design-rule" d="M28 70h104m-104 8h89"/><rect class="design-accent-faint" x="160" y="41" width="53" height="40" rx="3"/>
+            <path class="design-accent-line" d="M171 52h31m-31 10h24"/>
+            <path class="design-rule" d="M28 93h40v27H28zm48 0h40v27H76zm48 0h40v27h-40zm48 0h40v27h-40z"/>
+            <rect class="design-highlight" x="28" y="93" width="40" height="2"/>
+            <path class="design-ink-line" d="M37 104h14m34 0h14m34 0h14m34 0h14"/>
+            <path class="design-rule" d="M37 113h23m25 0h23m25 0h23m25 0h23"/>
+          </svg>
+          <strong id="report-design-name-horizon">Overview</strong><small id="report-design-copy-horizon">An open cover, prominent figures and a clear path through events.</small>
+        </label>
+        <label class="report-design" data-report-design="reading_series">
+          <input type="radio" name="report-design" value="reading_series" id="report-design-reading_series" aria-labelledby="report-design-name-reading_series" aria-describedby="report-design-copy-reading_series">
+          <svg class="report-design-preview" viewBox="0 0 240 140" aria-hidden="true" data-no-translate>
+            <rect class="design-page" x="15" y="9" width="210" height="122" rx="2"/>
+            <path class="design-rail-fill" d="M17 9h42v122H17a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2z"/>
+            <path class="design-accent-line" d="M23 22h25"/><path class="design-rule" d="M23 36h28m-28 11h23m-23 11h28m-28 11h24m-24 11h28m-28 11h21"/>
+            <path class="design-accent-line" d="M70 19h143"/><path class="design-serif-line" d="M70 31h123m-123 8h96"/>
+            <rect class="design-accent-faint" x="70" y="49" width="143" height="19"/>
+            <path class="design-rule" d="M76 55h123m-123 7h108M70 77h143M82 87h124m-124 6h116M70 101h143M82 111h117m-117 6h100"/>
+            <text class="design-section-number" x="70" y="89">1</text><text class="design-section-number" x="70" y="113">2</text>
+          </svg>
+          <strong id="report-design-name-reading_series">Reading series</strong><small id="report-design-copy-reading_series">A section rail, clear findings and a focused history of changes.</small>
+        </label>
+        <label class="report-design" data-report-design="ledger_margin">
+          <input type="radio" name="report-design" value="ledger_margin" id="report-design-ledger_margin" aria-labelledby="report-design-name-ledger_margin" aria-describedby="report-design-copy-ledger_margin">
+          <svg class="report-design-preview" viewBox="0 0 240 140" aria-hidden="true" data-no-translate>
+            <rect class="design-page" x="15" y="9" width="210" height="122" rx="2"/>
+            <path class="design-serif-line" d="M27 24h177m-177 8h139"/><path class="design-rule" d="M27 40h186m-186 2h186"/>
+            <text class="design-section-number" x="28" y="62">1</text><path class="design-rule" d="M28 69h18m-18 5h14"/>
+            <rect class="design-note-fill" x="66" y="51" width="147" height="24"/>
+            <path class="design-rule" d="M72 58h129m-129 8h114M27 83h186"/>
+            <text class="design-section-number" x="28" y="101">2</text><path class="design-rule" d="M28 108h18m-18 5h14"/>
+            <path class="design-accent-fill" d="M67 92h61v5H67zm0 10h44v5H67zm0 10h53v5H67z"/>
+            <path class="design-rule" d="M144 92h69v25h-69zm0 8h69m-69 8h69m-45-16v25"/>
+          </svg>
+          <strong id="report-design-name-ledger_margin">Ledger &amp; margin</strong><small id="report-design-copy-ledger_margin">Numbered sections, a generous margin and figures with exact tables.</small>
+        </label>
+      </div>
     </fieldset>
-    <fieldset class="report-templates"><legend>Choose report contents</legend>
+    <fieldset class="report-templates"><legend>Contents preset</legend>
+      <p class="hint">Presets choose the sections below. They keep your design, data selection and written notes.</p>
       <div class="report-template-grid">
         <label class="report-template"><input type="radio" name="report-template" value="dossier" id="report-template-dossier" checked>
           <div class="report-template-heading"><svg aria-hidden="true" class="icon"><use href="#i-journal"/></svg><strong>Case dossier</strong></div>
@@ -671,6 +781,7 @@
     <fieldset class="report-parts"><legend>Report contents</legend>
       <label class="check-label"><input id="report-changes" type="checkbox"> Changed and deleted message histories</label>
       <label class="check-label"><input id="report-indicators" type="checkbox"> Links and technical indicators</label>
+      <label for="report-case-board">Case Board in the report<select id="report-case-board"><option value="off">Do not include</option><option value="bookmarks">Bookmarks and slices, without comments</option><option value="comments">Cards and team comments</option></select></label>
       <label class="check-label"><input id="report-timeline" type="checkbox"> Journal records in HTML and PDF</label>
       <label class="check-label"><input id="report-raw" type="checkbox"> Full JSON record in the HTML viewer</label>
       <label class="check-label"><input id="report-media" type="checkbox"> Photo previews in HTML reports</label>
@@ -1333,6 +1444,7 @@
 </section>
 
 <section class="view" hidden id="view-settings"></section>
+<section class="view" hidden id="view-board"></section>
 <section class="view" hidden id="view-first-run"></section>
 <section class="view" hidden id="view-chats">
   <div class="chats-shell" data-panel="chat">
@@ -1422,6 +1534,7 @@
   <details class="accounts-groups" id="accounts-groups"><summary>Groups and shared settings</summary><div id="fleet-groups"></div></details>
   <form class="card padded profile-create" id="account-add-form"><div class="eyebrow">Add account</div><h2>New workspace</h2><p class="muted">Create an isolated workspace, then connect a distinct Telegram account inside it. Importing the same session into two workspaces can disrupt update delivery.</p><label for="account-add-label">Workspace name</label><input id="account-add-label" maxlength="80" placeholder="e.g. Research account 2" required><label for="account-add-group">Group · optional</label><select id="account-add-group"></select><button class="secondary" type="submit">Add workspace</button><p class="hint" id="accounts-limit"></p></form>
 </section>
+<section class="view" hidden id="view-group"></section>
 
 <section class="view" hidden id="view-analysis">
   <div class="page-heading"><div><h1>Ask the archive</h1><p class="page-description" id="analysis-description">Search saved observations, review the sources, then choose whether to use AI.</p></div></div>

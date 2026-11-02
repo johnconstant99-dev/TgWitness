@@ -33,7 +33,7 @@ def main():
             page.locator("#quick-open").click()
             expect(dialog).to_be_visible()
             expect(search).to_be_focused()
-            destinations = ["start", "chats", "observations", "sources", "evidence", "settings", "accounts", "witness",
+            destinations = ["start", "board", "chats", "observations", "sources", "evidence", "settings", "accounts", "witness",
                             "parameters", "connection", "access", "system-log", "integrations"]
             expect(dialog.get_by_role("option")).to_have_count(len(destinations))
             actual_destinations = dialog.get_by_role("option").evaluate_all(

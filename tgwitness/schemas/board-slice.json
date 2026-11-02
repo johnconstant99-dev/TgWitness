@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tgwitness:board:slice:v1",
+  "$defs": {
+    "SliceQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "chat_id": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": -9007199254740991,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Chat Id"
+        },
+        "chat_ids": {
+          "items": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "maxItems": 1000,
+          "title": "Chat Ids",
+          "type": "array"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "To"
+        },
+        "from_message_id": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Message Id"
+        },
+        "to_message_id": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "To Message Id"
+        },
+        "kinds": {
+          "anyOf": [
+            {
+              "const": "all",
+              "type": "string"
+            },
+            {
+              "items": {
+                "maxLength": 100,
+                "pattern": "^(?:messages|membership|media|actions|coverage|[a-z][a-z0-9_]*(?:\\.[a-z0-9_*]+)+)$",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "all",
+          "title": "Kinds"
+        },
+        "actors": {
+          "items": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "maxItems": 100,
+          "title": "Actors",
+          "type": "array"
+        },
+        "search": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Search",
+          "type": "string"
+        },
+        "hide_system": {
+          "default": false,
+          "title": "Hide System",
+          "type": "boolean"
+        },
+        "include_unscoped": {
+          "default": false,
+          "title": "Include Unscoped",
+          "type": "boolean"
+        }
+      },
+      "title": "SliceQuery",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{32}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Id"
+    },
+    "supersedes": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes"
+    },
+    "title": {
+      "default": "",
+      "maxLength": 240,
+      "title": "Title",
+      "type": "string"
+    },
+    "labels": {
+      "items": {
+        "maxLength": 80,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 30,
+      "title": "Labels",
+      "type": "array"
+    },
+    "note": {
+      "default": "",
+      "maxLength": 20000,
+      "title": "Note",
+      "type": "string"
+    },
+    "query": {
+      "$ref": "#/$defs/SliceQuery"
+    }
+  },
+  "required": [
+    "query"
+  ],
+  "title": "Slice",
+  "type": "object"
+}

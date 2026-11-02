@@ -10,6 +10,7 @@ VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["
 FILES = [
     "tgwitness/client_profiles.LICENSE",
     "tgwitness/fonts/OFL.txt",
+    "tgwitness/fonts/NotoSerif-OFL.txt",
     "deploy/installer/install.sh.in", "deploy/installer/install.ps1.in", "deploy/installer/install.cmd.in",
     "deploy/installer/release-signing.pub",
     "deploy/installer/index.html", "deploy/installer/style.css", "deploy/installer/site.js", "deploy/installer/wrangler.toml",
@@ -26,6 +27,7 @@ FILES = [
 ]
 FILES.extend("tgwitness/fonts/" + name for name in (
     "NotoSans-Regular.ttf", "NotoSans-Bold.ttf", "NotoSansMono-Regular.ttf",
+    "NotoSerif-Regular.ttf", "NotoSerif-Bold.ttf",
     "NotoSansArabic-Regular.ttf", "NotoSansHebrew-Regular.ttf", "NotoSansDevanagari-Regular.ttf",
     "NotoSansBengali-Regular.ttf", "NotoSansThai-Regular.ttf", "NotoSansSymbols2-Regular.ttf",
     "NotoEmoji-Regular.ttf",
@@ -55,6 +57,7 @@ LANGUAGES = ("ru", "uk", "es", "pt", "tr", "ar", "fa", "ur", "hi", "id", "vi", "
              "fr", "de", "it", "uz", "ko", "zh-Hant", "ms", "pl", "ja", "th", "he", "bn")
 GUIDE_LANGUAGES = ("fr", "de", "it", "uz", "ko", "zh-Hant", "ms", "pl", "ja", "th", "he", "am", "bn")
 PACKAGE_JSON = {"english_fallbacks.json", "public_proxies.json", "sealed_policy.json", "client_profiles.json", *("locales/" + language + ".json" for language in LANGUAGES),
+                *("schemas/board-" + name + ".json" for name in ("bookmark", "highlight", "slice", "collection", "comment", "status", "move", "remove")),
                 "guide_locales/keys.json", *("guide_locales/" + language + ".json" for language in GUIDE_LANGUAGES)}
 
 SITE_JSON = {"i18n/" + language + ".json" for language in

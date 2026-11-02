@@ -27,7 +27,7 @@ def collect(events, changed, limit=1000, *, predicate=None):
     """
     # Lazy import avoids a report -> helper -> report import cycle. These two
     # projection helpers also preserve the established handoff field layout.
-    from .report import pointing, shown_details
+    from .report import message_times, pointing, shown_details
 
     if type(limit) is not int or limit < 0:
         raise ValueError("History limit must be a non-negative integer")
@@ -48,15 +48,17 @@ def collect(events, changed, limit=1000, *, predicate=None):
         payload = event.get("payload")
         payload = payload if isinstance(payload, dict) else {}
         if kind in VERSION_KINDS:
+            times = message_times(payload)
             version = {"seq": event["seq"], "kind": kind, "observed_at": event["observed_at"],
                        "text": payload.get("text") if isinstance(payload.get("text"), str) else "",
-                       "telegram_at": payload.get("edited_at") or payload.get("sent_at"),
+                       **times, "telegram_at": times["edited_at"] or times["sent_at"],
                        "sender": payload.get("sender_observation") if isinstance(payload.get("sender_observation"), dict) else {},
                        "sender_id": payload.get("sender_id"), "details": shown_details(payload),
                        "withheld": bool(payload.get("text_withheld")), **flags}
             last = item["versions"][-1] if item["versions"] else None
             if kind != "message.edited" and last and last["text"] == version["text"] \
                     and pointing(last) == pointing(version) and last["withheld"] == version["withheld"] \
+                    and message_times(last) == times \
                     and last["in_selection"] == version["in_selection"]:
                 continue
             item["versions"].append(version)
@@ -69,6 +71,7 @@ def collect(events, changed, limit=1000, *, predicate=None):
 
 def preview(events, changed, *, predicate):
     """Bounded panel samples; complete histories are generated in the export."""
+    from .report import message_times
     keys = set(tuple(key) for key in changed)
     found, previous = {}, {}
     for event in events:
@@ -84,7 +87,7 @@ def preview(events, changed, *, predicate):
             payload = event.get("payload")
             payload = payload if isinstance(payload, dict) else {}
             text = payload.get("text") if isinstance(payload.get("text"), str) else ""
-            row.update(text=text[:240], text_truncated=len(text) > 240)
+            row.update(text=text[:240], text_truncated=len(text) > 240, **message_times(payload))
             previous[key] = row["seq"]
             item["versions"].append(row)
             if len(item["versions"]) > 40:

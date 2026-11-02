@@ -25,7 +25,7 @@ from typing import Literal
 from pydantic import ConfigDict, Field, field_validator
 
 from . import __version__, case_assessment, i18n, message_details, report_analytics, report_charts, snapshot_analytics
-from . import report_history, report_selection, report_selection_view
+from . import report_design, report_history, report_layouts, report_selection, report_selection_view
 from . import indicators as ioc
 from . import viewer
 from .store import canonical, utcnow
@@ -57,6 +57,7 @@ class ReportOptions(report_analytics.Presentation):
     media_previews: bool = True
     show_changes: bool = True
     show_indicators: bool = True
+    case_board: Literal["off", "bookmarks", "comments"] = "bookmarks"
     # Maximum items per signed viewer data file and maximum transcript size included in a PDF.
     part_size: int = Field(default=5000, ge=500, le=100000)
     # Runs of collector heartbeats are listed as one line; each one stays in the journal file.
@@ -136,11 +137,12 @@ def text_keys():
     from pathlib import Path
     from .chat_export import EXPORT_LIMITS
     from .evidence import LIMITS
+    from . import report_composition_pdf
     sources = (Path(__file__), Path(__file__).with_name("pdf_report.py"))
     keys = [node.args[0].value for source in sources for node in ast.walk(ast.parse(source.read_text(encoding="utf-8")))
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "say"
             and node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)]
-    return list(dict.fromkeys(keys + case_assessment.text_keys() + report_charts.text_keys() + snapshot_analytics.text_keys() + report_selection_view.text_keys() + list(SCRIPT_WORDS) + LIMITS + EXPORT_LIMITS + list(MEDIA_NAMES.values()) + ["Media"]
+    return list(dict.fromkeys(keys + case_assessment.text_keys() + report_charts.text_keys() + snapshot_analytics.text_keys() + report_selection_view.text_keys() + report_layouts.text_keys() + report_composition_pdf.text_keys() + list(SCRIPT_WORDS) + LIMITS + EXPORT_LIMITS + list(MEDIA_NAMES.values()) + ["Media"]
                               + list(ROUTE_KINDS.values()) + list(EXPOSURES.values()) + list(FILE_STATUS.values())
                               + list(ACTION_NAMES.values()) + [label for _, label in OUTCOMES.values()]
                               + ["Action", "no result recorded"] + list(OTHERS.values()) + list(TEXTS.values())
@@ -974,6 +976,8 @@ CSS += case_assessment.CSS
 DOSSIER_CSS = Path(__file__).with_name("report_dossier.css").read_text(encoding="utf-8")
 CSS += DOSSIER_CSS
 CSS += report_charts.CSS
+CSS += report_design.CSS
+CSS += report_layouts.CSS
 SCRIPT += "\n" + CONSOLE_JS
 SCRIPT_HASH = "'sha256-" + base64.b64encode(hashlib.sha256(SCRIPT.encode("utf-8")).digest()).decode() + "'"
 # Data documents run inside opaque-origin sandboxed frames, with their own CSP.
@@ -992,13 +996,14 @@ SCRIPT_WORDS = ("Copy", "Copied", "Signature valid · this file not yet checked"
     json.loads('"' + text + '"') for text in re.findall(r'\bsayf?\("((?:[^"\\]|\\.)*)"', CONSOLE_JS)))
 
 
-def head(say, *, title, description, meta, linked, theme, template="dossier", design="dossier"):
+def head(say, *, title, description, meta, linked, theme, template="dossier", design="classic"):
     """Document start: metadata for people, search tools and case-management systems."""
     tags = [("generator", "TgWitness " + __version__), ("description", description),
             ("robots", "noindex, nofollow, noarchive"), ("referrer", "no-referrer"), ("color-scheme", "light dark")]
-    tags += meta
-    return ('<!doctype html><html lang="' + e(say.language) + '" dir="' + say.direction + '" data-report-template="' + e(template) + '" data-theme="' + e(theme)
-            + '" data-template="' + e(design) + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    design = report_design.normalized(design)
+    tags += [*meta, ("tgwitness:report-design", design)]
+    return ('<!doctype html><html lang="' + e(say.language) + '" dir="' + say.direction + '" data-report-design="' + design + '" data-report-template="' + e(template) + '" data-theme="' + e(theme)
+            + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
             '<meta http-equiv="Content-Security-Policy" content="' + e(CSP) + '"><title>' + e(title) + "</title>"
             '<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">'
             + "".join('<meta name="' + e(n) + '" content="' + e(v) + '">' for n, v in tags if v not in (None, ""))
@@ -1394,10 +1399,56 @@ def linked_data(*, kind, title, description, created_at, report_id, language, pr
     return data
 
 
+REPLY_DETAILS_KEYS = ("reply_to_message_id", "reply_to_top_id", "reply_to_peer_id", "forum_topic",
+                      "quote_text", "quote_offset", "quote_entities")
+
+
+def message_times(payload):
+    """Permitted message times; an explicit missing value must not revive a legacy or raw value."""
+    sent = payload.get("sent_at") if "sent_at" in payload else payload.get("date")
+    edited = payload.get("edited_at")
+    return {"sent_at": sent if isinstance(sent, str) and sent else None,
+            "edited_at": edited if isinstance(edited, str) and edited else None}
+
+
 def shown_details(payload):
-    """Details already minimised for a handover extract, otherwise read from the saved Telegram object."""
-    found = payload.get("details")
-    return found if isinstance(found, dict) else message_details.details(payload.get("raw"))
+    """Use the permitted projection verbatim, or normalize an unminimised saved message.
+
+    Replies are normalized here rather than globally: a handover's approved
+    details must never acquire a quote or cross-chat identity from its raw data.
+    """
+    if "details" in payload:
+        found = payload["details"]
+        return found if isinstance(found, dict) else {}
+    raw = payload.get("raw")
+    found = message_details.details(raw)
+    reply = raw.get("reply_to") if isinstance(raw, dict) else None
+    reply = reply if isinstance(reply, dict) else {}
+    for key, source in (("reply_to_message_id", "reply_to_msg_id"), ("reply_to_top_id", "reply_to_top_id"),
+                        ("quote_offset", "quote_offset")):
+        value = payload[key] if key in payload else reply.get(source)
+        if type(value) is int:
+            found[key] = value
+    raw_peer = reply.get("reply_to_peer_id")
+    peer_field = {"PeerUser": "user_id", "PeerChat": "chat_id", "PeerChannel": "channel_id"}.get(raw_peer.get("_")) \
+        if isinstance(raw_peer, dict) else None
+    peer = payload.get("reply_to_peer_id") if "reply_to_peer_id" in payload else \
+        message_details.peer_id(raw_peer) if peer_field and type(raw_peer.get(peer_field)) is int else None
+    if type(peer) is int:
+        found["reply_to_peer_id"] = peer
+    topic = payload.get("forum_topic") if "forum_topic" in payload else reply.get("forum_topic")
+    if type(topic) is bool:
+        found["forum_topic"] = topic
+    quote = payload.get("quote_text") if "quote_text" in payload else reply.get("quote_text")
+    if isinstance(quote, str) and quote:
+        found["quote_text"] = quote
+        # Only normalized entities enter the reading copy; links remain escaped text.
+        if "quote_entities" in payload:
+            if isinstance(payload["quote_entities"], list):
+                found["quote_entities"] = payload["quote_entities"]
+        elif "quote_text" not in payload and isinstance(reply.get("quote_entities"), list):
+            found["quote_entities"] = message_details.entities(quote, reply["quote_entities"])
+    return found
 
 
 def seconds_text(say, value):
@@ -1411,6 +1462,23 @@ def details_html(say, d):
     """What a Telegram client showed around the text (message_details.details): hidden links, mentions,
     forward origin, buttons, signature, views and the auto-delete timer."""
     parts = []
+    reply = []
+    if type(d.get("reply_to_message_id")) is int:
+        reply.append(e(say("Reply to")) + " #" + e(d["reply_to_message_id"]))
+    if type(d.get("reply_to_peer_id")) is int:
+        reply.append(e(say("Chat of the original message")) + " " + e(d["reply_to_peer_id"]))
+    if type(d.get("reply_to_top_id")) is int:
+        reply.append(e(say("Reply thread")) + " #" + e(d["reply_to_top_id"]))
+    if type(d.get("forum_topic")) is bool:
+        reply.append(e(say("Forum topic")) + ": " + e(say("Yes") if d["forum_topic"] else say("No")))
+    if reply:
+        parts.append('<div class="facts-line">' + " · ".join(reply) + '</div>')
+    if isinstance(d.get("quote_text"), str) and d["quote_text"]:
+        parts.append('<div class="quoted"><b>' + e(say("Quoted text")) + '</b><blockquote class="text">'
+                     + e(d["quote_text"]) + '</blockquote>')
+        if type(d.get("quote_offset")) is int:
+            parts.append('<div class="facts-line">' + e(say("Quote offset (UTF-16)")) + ": " + e(d["quote_offset"]) + '</div>')
+        parts.append(details_html(say, {"text_entities": d.get("quote_entities") or []}) + '</div>')
     forward = d.get("forwarded_from")
     if forward:
         who = forward.get("from_name") or (say("ID {id}", id=forward["from_id"]) if forward.get("from_id") is not None
@@ -1546,7 +1614,7 @@ def record_html(event, say, titles, options, archive, base=""):
         parts.append("<span>" + e(titles.get(chat) or say("Chat {id}", id=chat))
                      + (" · " + e(say("message {id}", id=event["message_id"])) if event["message_id"] is not None else "")
                      + "</span>")
-    parts.append('<span class="at">' + when(event["observed_at"]) + "</span></header>")
+    parts.append('<span class="at">' + e(say("Observed")) + " " + when(event["observed_at"]) + "</span></header>")
     sender = payload.get("sender_observation") if isinstance(payload.get("sender_observation"), dict) else {}
     sender_id = payload.get("sender_id", sender.get("id"))
     if sender.get("display_name") or sender_id is not None:
@@ -1578,9 +1646,17 @@ def record_html(event, say, titles, options, archive, base=""):
         if archive and options.get("media_previews") and mime in IMAGES and re.fullmatch("[0-9a-f]{64}", digest):
             parts.append('<img loading="lazy" alt="" src="' + base + "media/" + digest + '">')
     footer = ['<span title="' + e(event["hash"]) + '">SHA-256 ' + e(short(event["hash"], 16, 6)) + "</span>"]
-    if event.get("source_at"):
+    times = message_times(payload)
+    if times["sent_at"]:
+        footer.append("<span>" + e(say("Sent")) + " " + when(times["sent_at"]) + "</span>")
+    if times["edited_at"]:
+        footer.append("<span>" + e(say("Edited")) + " " + when(times["edited_at"]) + "</span>")
+    if (event.get("source_at") and not any(times.values())
+            and not any(key in payload for key in ("sent_at", "edited_at"))):
         footer.append("<span>" + e(say("Telegram time")) + " " + when(event["source_at"]) + "</span>")
     parts.append("<footer>" + "".join(footer) + "</footer>")
+    if options.get("design") in report_layouts.DESIGNS:
+        parts.append(report_layouts.record_metadata_html(event, say))
     if options.get("raw_records"):
         parts.append('<details class="raw"><summary>' + e(say("Record data")) + "</summary><pre>"
                      + e(json.dumps(payload, ensure_ascii=False, indent=2)) + "</pre></details>")
@@ -1693,7 +1769,7 @@ def records_part_chunks(events, context, part):
         linked = {"@context": "https://schema.org", "@type": "Report", "name": title, "description": description,
                   "inLanguage": say.language, "isPartOf": {"@type": "Report", "identifier": "urn:uuid:" + report_id}}
         yield (head(say, title=title + " · TgWitness", description=description, meta=meta, linked=linked,
-                    theme=options.get("theme", "auto"), design=options.get("design", "dossier"))
+                    theme=options.get("theme", "auto"), design=options.get("design"))
                + bar(say, say("Records") + " · " + label, [("records", say("Records")), ("seal", say("Seal"))])
                ).encode("utf-8")
         facts = [(say("Part"), e(label)), (say("Records"), "#" + num(part["from"]) + " – #" + num(part["to"])),
@@ -1778,6 +1854,7 @@ def report_data(events_again, coverage, context):
                     "messages_sent": digest.get("own_total", 0), "sent_listed": digest.get("own_messages") or []},
         "timestamps": anchors, "coverage": coverage, "custody": custody(context),
         "case_assessment": case_assessment.journal(context, coverage),
+        "case_board": context.get("case_board"),
         "indicators": digest.get("indicators") or {"items": [], "total": 0, "not_listed": 0},
         "files": context.get("files") or {},
         "parts": [{k: p[k] for k in ("index", "file", "from", "to", "count", "first_at", "last_at", "sha256") if k in p}
@@ -1816,7 +1893,8 @@ def pointing(version):
     media = details.get("media_info") or {}
     return ([(x["type"], x["text"], x.get("href"), x.get("user_id")) for x in details.get("text_entities") or []
              if x["type"] in message_details.POINTING], details.get("buttons"),
-            (media.get("kind"), media.get("document_id"), media.get("photo_id")))
+            (media.get("kind"), media.get("document_id"), media.get("photo_id")),
+            tuple(details.get(key) for key in REPLY_DETAILS_KEYS))
 
 
 def message_histories(events, changed, limit=HISTORY_LIMIT):
@@ -1833,14 +1911,16 @@ def message_histories(events, changed, limit=HISTORY_LIMIT):
             found[key] = {"versions": [], "gone": []}
         item, kind, payload = found[key], event["kind"], event["payload"]
         if kind in VERSION_KINDS:
+            times = message_times(payload)
             version = {"seq": event["seq"], "kind": kind, "observed_at": event["observed_at"],
                        "text": payload.get("text") if isinstance(payload.get("text"), str) else "",
-                       "telegram_at": payload.get("edited_at") or payload.get("sent_at"),
+                       **times, "telegram_at": times["edited_at"] or times["sent_at"],
                        "sender": payload.get("sender_observation") if isinstance(payload.get("sender_observation"), dict)
                        else {}, "sender_id": payload.get("sender_id"), "details": shown_details(payload),
                        "withheld": bool(payload.get("text_withheld"))}
             last = item["versions"][-1] if item["versions"] else None
-            if last and last["text"] == version["text"] and pointing(last) == pointing(version):
+            if kind != "message.edited" and last and last["text"] == version["text"] and pointing(last) == pointing(version) \
+                    and message_times(last) == times:
                 continue
             item["versions"].append(version)
         elif kind in ("message.deleted", "message.missing_on_recheck"):
@@ -1903,9 +1983,15 @@ def history_card(say, key, item, titles, linked=True):
         else:
             label = '<span class="pill warn">' + e(say("Edit {n}", n=number) if version["kind"] == "message.edited"
                                                     else say("Saved version {n}", n=number + 1)) + "</span>"
-        head = (label + " " + e(say("observed")) + " " + when(version["observed_at"])
-                + (" · " + e(say("Telegram time")) + " " + when(version["telegram_at"]) if version["telegram_at"] else "")
-                + " · " + record_link(version["seq"], linked and not version.get("context_only")))
+        times = message_times(version)
+        head = label + " " + e(say("observed")) + " " + when(version["observed_at"])
+        if times["sent_at"]:
+            head += " · " + e(say("Sent")) + " " + when(times["sent_at"])
+        if times["edited_at"]:
+            head += " · " + e(say("Edited")) + " " + when(times["edited_at"])
+        if "sent_at" not in version and "edited_at" not in version and version.get("telegram_at"):
+            head += " · " + e(say("Telegram time")) + " " + when(version["telegram_at"])
+        head += " · " + record_link(version["seq"], linked and not version.get("context_only"))
         if version.get("context_only"):
             head += ' · <span class="pill">' + e(say("Context outside the report filters")) + '</span>'
         if version.get("withheld"):
@@ -2254,6 +2340,8 @@ def evidence_chunks(events, coverage=None, context=None):
                                                                          ("verify", say("Verify"))]
         if material.get("analytics"):
             links.insert(1, ("report-analytics", say(report_charts.TITLE)))
+        if (context.get("case_board") or {}).get("cards"):
+            links.insert(2, ("case-board", say("Case Board")))
         if material.get("examination"):
             links.insert(1, ("examination", say(report_charts.REVIEW_TITLE)))
         if material.get("selection"):
@@ -2263,7 +2351,7 @@ def evidence_chunks(events, coverage=None, context=None):
         if options.get("timeline"):
             links.append(("records", say("Records")))
         yield (head(say, title=title + " · TgWitness", description=description, meta=meta, linked=linked,
-                    theme=options.get("theme", "auto"), template=options.get("template", "dossier"), design=options.get("design", "dossier"))
+                    theme=options.get("theme", "auto"), template=options.get("template", "dossier"), design=options.get("design"))
                + bar(say, label, links, "journal" if data_kind else None)).encode("utf-8")
         facts = [(say("Case ID"), e(options.get("case_id"))), (say("Examiner"), e(options.get("examiner"))),
                  (say("Organization"), e(options.get("organization"))), (say("Created"), when(created)),
@@ -2300,6 +2388,9 @@ def evidence_chunks(events, coverage=None, context=None):
              + e(producer.get("project")))]).encode("utf-8")
         if handover:
             yield minimisation_section(say, next(numbers), handover, count).encode("utf-8")
+        if context.get("case_board"):
+            from . import board_report
+            yield board_report.html(context["case_board"], say).encode("utf-8")
         if changed and events_again and options.get("show_changes", True):
             yield changes_section(say, next(numbers), history_context(context, events_again, changed), len(changed),
                                   digest["titles"], bool(options.get("timeline")), filtered).encode("utf-8")
@@ -2439,7 +2530,13 @@ def evidence_chunks(events, coverage=None, context=None):
     statement = {"format": SEAL_FORMAT, "report_id": report_id, "created_at": created, "language": say.language,
                  "public_key": context.get("public_key"), "producer": producer, "case": case,
                  "subject": {**report_subject(context), **({"viewer": context.get("viewer") or {}} if data_kind else {})}}
-    yield from sealed(chunks(), statement, sign)
+    rendered = chunks()
+    if options.get("design") in report_layouts.DESIGNS:
+        event_factory = context.get("events_again") or (lambda: iter(events))
+        replacements = report_layouts.journal_replacements(event_factory, context, say, options,
+                                                           shown_count, bool(data_kind))
+        rendered = report_layouts.compose(rendered, options["design"], say, "journal", replacements)
+    yield from sealed(rendered, statement, sign)
 
 
 # Chat report --------------------------------------------------------------------------------
@@ -2527,7 +2624,7 @@ def build_html(say, producer):
     return shown
 
 
-def chat_rows(records, say, preview=False, base="", numbered=False, after=None):
+def chat_rows(records, say, preview=False, base="", numbered=False, after=None, metadata=False):
     """Telegram-style rows: day separators, grouped senders, reply quotes from earlier messages.
     base leads from a part's folder back to the archive root (media/ lives there). numbered marks
     where message numbers are absent (channels and supergroups); after is the number before these records."""
@@ -2550,7 +2647,8 @@ def chat_rows(records, say, preview=False, base="", numbered=False, after=None):
         name = record.get("from") or (str(sender) if sender is not None else say("Unknown"))
         if record.get("type") == "service":
             yield ('<div class="svc-row" id="m' + e(record.get("id")) + '" data-cat="service"><span>' + e(name) + " · "
-                   + e(action_text(record.get("action")) or say("Service message")) + "</span></div>")
+                   + e(action_text(record.get("action")) or say("Service message")) + "</span>"
+                   + (report_layouts.chat_metadata_html(record, say) if metadata else "") + "</div>")
             previous_sender = object()
             continue
         start = sender != previous_sender
@@ -2582,6 +2680,8 @@ def chat_rows(records, say, preview=False, base="", numbered=False, after=None):
         if text:
             body.append('<div class="text">' + e(text).replace("\n", "<br>") + "</div>")
         body.append(details_html(say, record))
+        if metadata:
+            body.append(report_layouts.chat_metadata_html(record, say))
         meta = ('<span class="meta"><a href="#m' + e(record.get("id")) + '">#' + e(record.get("id")) + "</a> · "
                 + ('<time datetime="' + e(date) + '" data-clock>' + e(date[11:16]) + "</time>" if date else "")
                 + (" · " + edited_html(say, record["edited"]) if record.get("edited") else "") + "</span>")
@@ -2618,7 +2718,7 @@ def chat_chunks(meta, records, context):
                                        "identifier": {"@type": "PropertyValue", "propertyID": "sha256",
                                                       "value": context.get("chat_json_sha256")}})
         yield (head(say, title=title + " · TgWitness", description=description, meta=tags, linked=linked,
-                    theme=options.get("theme", "auto"), design=options.get("design", "dossier"))
+                    theme=options.get("theme", "auto"), design=options.get("design"))
                + bar(say, say("Chat export"), [("summary", say("Summary")), ("people", say("Participants")),
                                                ("messages", say("Messages")), ("integrity", say("Integrity")),
                                                ("verify", say("Verify"))], "chat")).encode("utf-8")
@@ -2757,7 +2857,11 @@ def chat_chunks(meta, records, context):
     statement = {"format": SEAL_FORMAT, "report_id": report_id, "created_at": created, "language": say.language,
                  "public_key": context["public_key"], "producer": producer, "case": case,
                  "subject": {**chat_subject(meta, context), "viewer": context.get("viewer") or {}}}
-    yield from sealed(chunks(), statement, sign)
+    rendered = chunks()
+    if options.get("design") in report_layouts.DESIGNS:
+        rendered = report_layouts.compose(rendered, options["design"], say, "chat",
+                                          report_layouts.chat_replacements(records, context, meta, say, options))
+    yield from sealed(rendered, statement, sign)
 
 
 LABELS = (("scam", "Telegram marks this chat as a scam", "bad"),
@@ -2943,7 +3047,7 @@ def chat_part_chunks(meta, records, context, part):
         linked = {"@context": "https://schema.org", "@type": "Report", "name": title, "description": description,
                   "inLanguage": say.language, "isPartOf": {"@type": "Report", "identifier": "urn:uuid:" + report_id}}
         yield (head(say, title=title + " · TgWitness", description=description, meta=tags, linked=linked,
-                    theme=options.get("theme", "auto"), design=options.get("design", "dossier"))
+                    theme=options.get("theme", "auto"), design=options.get("design"))
                + bar(say, say("Messages") + " · " + label, [("messages", say("Messages")), ("seal", say("Seal"))])
                ).encode("utf-8")
         facts = [(say("Chat"), e(chat_title)), (say("Part"), e(label)),

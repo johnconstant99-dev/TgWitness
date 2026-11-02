@@ -1,4 +1,4 @@
-const paths={settings:"settings","first-run":"first-run",start:"start",chats:"chats",observations:"journal",sources:"sources",parameters:"parameters",accounts:"accounts",
+const paths={board:"board",settings:"settings","first-run":"first-run",start:"start",chats:"chats",observations:"journal",sources:"sources",parameters:"parameters",accounts:"accounts",group:"groups",
   access:"access","system-log":"system-log",integrations:"integrations",evidence:"exports",witness:"extras",connection:"account",analysis:"analysis",sealed:"sealed"};
 const views=Object.fromEntries(Object.entries(paths).map(([view,path])=>[path,view]));
 const legacy={start:"start",account:"connection",connection:"connection",journal:"observations",observations:"observations",
@@ -8,6 +8,7 @@ const cards=new Set(["setup","alerts","evidence","cloud","bot","github","storage
 // The first setup (views/settings-hub.js): one address per step, /first-run/1 to /first-run/7.
 const firstRunStep=value=>/^[1-7]$/.test(value||"")?Number(value):null;
 const workspacePattern=/^(?:default|[a-f0-9]{32})$/;
+const groupPattern=/^[a-f0-9]{32}$/;
 const integer=value=>/^-?\d+$/.test(value||"")&&Number.isSafeInteger(Number(value))&&Number(value)!==0?Number(value):null;
 
 export function parseRoute(value,{workspace="default",staticDemo=false}={}){
@@ -21,8 +22,8 @@ export function parseRoute(value,{workspace="default",staticDemo=false}={}){
   const explicit=!!query.get("route")||!!oldView||parts.length>0&&parts[0]!=="index.html"||query.has("event");
   const route={view:views[parts[0]]||null,workspace:query.get("ws")||query.get("workspace")||workspace,
     chatId:null,seq:null,kind:query.get("kind")||"",source:query.get("source")||"",q:query.get("q")||"",
-    since:query.get("since")||"",until:query.get("until")||"",system:query.get("system")==="1",
-    before:query.has("before")?integer(query.get("before")):null,extra:null,section:null,step:null,explicit};
+    since:query.get("since")||"",until:query.get("until")||"",system:query.get("system")==="1",slice:query.get('slice')||null,added:query.get('added')==='1',
+    before:query.has("before")?integer(query.get("before")):null,extra:null,section:null,step:null,group:null,explicit};
   if(!workspacePattern.test(route.workspace))route.error="Unknown workspace.";
   if(parts[0]==="chats"&&parts.length>1){route.chatId=integer(parts[1]);if(route.chatId===null||parts.length>2)route.error="Record is unavailable to this access.";}
   if(parts[0]==="journal"&&parts.length>1){
@@ -31,7 +32,8 @@ export function parseRoute(value,{workspace="default",staticDemo=false}={}){
   }
   if(parts[0]==="extras"&&parts.length>1){route.extra=parts[1];if(!cards.has(route.extra)||parts.length>2)route.error="Record is unavailable to this access.";}
   if(parts[0]==="first-run"&&parts.length>1){route.step=firstRunStep(parts[1]);if(route.step===null||parts.length>2)route.error="Record is unavailable to this access.";}
-  if(parts.length>1&&!["chats","journal","extras","first-run"].includes(parts[0]))route.error="Record is unavailable to this access.";
+  if(parts[0]==="groups"){route.group=groupPattern.test(parts[1]||"")&&parts.length===2?parts[1]:null;if(!route.group)route.error="Record is unavailable to this access.";}
+  if(parts.length>1&&!["chats","journal","extras","first-run","groups"].includes(parts[0]))route.error="Record is unavailable to this access.";
   if(query.has("event")){
     route.seq=integer(query.get("event"));route.view="observations";
     if(route.seq===null||route.seq<=0)route.error="Record is unavailable to this access.";
@@ -50,11 +52,13 @@ export function routeURL(route,{base=location.href,staticDemo=false}={}){
   if(route.view==="observations"&&route.seq)path+="/event/"+route.seq;
   if(route.view==="witness"&&route.extra)path+="/"+encodeURIComponent(route.extra);
   if(route.view==="first-run"&&route.step)path+="/"+route.step;
+  if(route.view==="group"&&route.group)path+="/"+route.group;
   if(staticDemo)query.set("route",path);else url.pathname=path;
   query.set("ws",route.workspace||"default");
   if(current.searchParams.has("lang"))query.set("lang",current.searchParams.get("lang"));
   if(route.view==="observations")for(const key of ["kind","source","q","since","until"])if(route[key])query.set(key,route[key]);
   if(route.view==="observations"&&route.system)query.set("system","1");
+  if(route.view==='observations'&&route.slice){query.set('slice',route.slice);if(route.added)query.set('added','1');}
   if(route.view==="observations"&&route.before)query.set("before",route.before);
   url.search=query.toString();url.hash=route.view==="parameters"&&route.section?encodeURIComponent(route.section):"";
   return url;

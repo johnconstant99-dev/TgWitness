@@ -613,5 +613,40 @@ def test_live_setup_check_stops_after_navigation(tmp_path, destination):
         browser.close()
 
 
+def test_late_bootstrap_does_not_restore_an_older_wizard_step(tmp_path):
+    from playwright.sync_api import sync_playwright, expect
+    with RunningApp(tmp_path) as server, sync_playwright() as p:
+        store = server.app.state.store
+        store.set_setting('first_run', {'step':2,'goal':'copy'})
+        browser = launch_browser(p)
+        page = browser.new_page(locale='en-US', reduced_motion='reduce')
+        page.add_init_script("""(() => {
+          const original=window.fetch.bind(window);let reads=0;
+          window.fetch=async(...args)=>{
+            const response=await original(...args);
+            if(String(args[0])==='/api/settings'&&++reads===2){
+              await new Promise(resolve=>{window.releaseOldSettings=resolve;});
+              const parse=response.json.bind(response);
+              response.json=async()=>{const data=await parse();window.oldSettingsParsed=true;return data;};
+            }
+            return response;
+          };
+        })();""")
+        page.goto(server.url+'/first-run/2?ws=default')
+        page.locator('#panel-token').fill(server.app.state.vault.token)
+        page.locator('#unlock-form button').click()
+        page.wait_for_function('()=>typeof window.releaseOldSettings==="function"')
+        page.locator('#first-run-next').click()
+        expect(page.locator('[data-answer="copy"]')).to_be_visible()
+        page.locator('[data-answer="copy"]').click()
+        expect(page.locator('[data-answer="copy"]')).to_be_enabled()
+        page.evaluate('window.releaseOldSettings()')
+        page.wait_for_function('()=>window.oldSettingsParsed===true')
+        page.evaluate('()=>new Promise(requestAnimationFrame)')
+        expect(page.locator('[data-answer="copy"]')).to_be_visible()
+        assert store.get_setting('first_run')['step']==3
+        browser.close()
+
+
 if __name__ == '__main__':
     raise SystemExit(pytest.main([__file__, '-q']))
