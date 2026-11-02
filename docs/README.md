@@ -54,6 +54,7 @@ included in 0.7.1. [Start with the workflow guide](https://phishdestroy.github.i
 | Connect my account | [Account setup](ACCOUNTS.md) | A new test message in the journal |
 | Choose a goal and change settings | [First setup and settings](SETTINGS.md) | Every value marked as the goal's or your own |
 | Find my way around the panel | [Panel guide](PANEL.md) | What each screen, switch and Extras card does |
+| Add independent browser or AyuGram capture | [Optional capture](OPTIONAL-CAPTURE.md) | Separate panels, switchable capture and video, signed originals and standalone verification; preview |
 | Check how protected a workspace is | [Protection modes](PANEL.md#protection-modes) | The active protection layers and what is still missing |
 | Check that the program matches GitHub | [Code check](PANEL.md#code-check) | A `source.checked` journal record listing any differing files |
 | Run several accounts together | [Account groups](ACCOUNTS.md#bulk-import-and-account-groups) | Shared settings, one page for problems and shared chats, one group export |

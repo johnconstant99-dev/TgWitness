@@ -53,4 +53,9 @@ build
 **/proof-data
 **/witness-data
 **/witness-key.json
+**/capture-private
+**/private-key.bin
+**/control-token.txt
+**/witness-token.txt
+.venv-capture
 **/proxy-config

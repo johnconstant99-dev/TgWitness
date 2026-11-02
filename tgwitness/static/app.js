@@ -1416,6 +1416,7 @@ async function switchProfile(id,options={}){
   window.TgWitnessProxies?.clear?.();
   window.TgWitnessAnalysis?.clear();
   window.TgWitnessServices?.clear();
+  window.TgWitnessIndependentCapture?.clear();
   quickDialog.close();
   const revision=++state.workspaceRevision;
   settingsHub?.reset();
@@ -3094,8 +3095,9 @@ function selectExtra(name,options={}){
   if(modesUI?.lockedExtra(name))name=null;
   state.extra=name;
   window.TgWitnessServices?.select();
+  window.TgWitnessIndependentCapture?.select();
   show("extras-overview",!name);
-  for(const key of ["setup","alerts","evidence","cloud","bot","github","storage"]){
+  for(const key of ["setup","alerts","evidence","cloud","bot","github","storage","capture"]){
     show("extras-"+key,key===name);
     $("extras-open-"+key).setAttribute("aria-expanded",String(key===name));
   }
@@ -3182,6 +3184,7 @@ function renderServerHealth(s){
 }
 async function loadExtras(){
   window.TgWitnessServices?.load();
+  window.TgWitnessIndependentCapture?.select();
   await Promise.all([loadWitness(),loadAlerts(),loadEvidence(),loadReplica(),loadAssurance(),loadSourceCheck(),loadSetup(),modesUI?.refresh()]);
 }
 

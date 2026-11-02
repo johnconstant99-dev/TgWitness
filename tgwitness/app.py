@@ -414,6 +414,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             app.state.host_status = {}
             app.state.alert_wakeup = asyncio.Event()
             app.state.storage = Storage(store, vault, collector.outside_route)
+            from .capture_connections import CaptureConnections
+            app.state.capture = CaptureConnections(store, vault)
             app.state.operator_bot = OperatorBot(app.state)
             if not store.get_setting("demo", False):
                 storage_task = asyncio.create_task(app.state.storage.loop())
@@ -2755,6 +2757,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     register_webhooks(app, authenticate, profile_id)
     from .storage_api import register as register_storage
     register_storage(app, authenticate, require_live)
+    from .capture_api import register as register_capture
+    register_capture(app, authenticate, require_live)
 
     if allow_profiles:
 

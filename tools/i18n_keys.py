@@ -13,7 +13,7 @@ PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "ses
                  "access.py", "history.py", "archive.py", "archive_api.py", "ai.py", "analysis.py", "analysis_api.py",
                  "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py", "proxy_catalog.py",
                  "proxy_sources.py", "account_export.py", "account_export_transport.py", "account_report.py", "disclosure.py",
-                 "cloud_wizard.py", "levels.py")
+                 "cloud_wizard.py", "levels.py", "capture_api.py", "capture_connections.py")
 
 DYNAMIC_SCRIPT_KEYS = (
     "Inline diff", "Side by side", "Raw", "Previously observed", "Newly observed version",

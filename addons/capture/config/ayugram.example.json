@@ -1,0 +1,11 @@
+{
+  "kind": "ayugram",
+  "operator": "ayugram-operator",
+  "route_label": "AyuGram B: separately configured client route; not tested by recorder",
+  "ayugram_db": "/source/ayudata.db",
+  "client_version": "SET-TO-YOUR-INSTALLED-AYUGRAM-VERSION",
+  "poll_seconds": 2,
+  "snapshot_seconds": 60,
+  "heartbeat_seconds": 10,
+  "video_input_args": []
+}

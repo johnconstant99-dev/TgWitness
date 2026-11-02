@@ -27,6 +27,16 @@ GROUP_ID = re.compile(r"[a-f0-9]{32}")
 
 
 POLICY = {
+    "GET /api/capture": ("settings", None),
+    "POST /api/capture/{kind}/connection": ("settings", None),
+    "GET /api/capture/{kind}/status": ("settings", None),
+    "GET /api/capture/{kind}/targets": ("settings", None),
+    "GET /api/capture/{kind}/events": ("settings", None),
+    "GET /api/capture/{kind}/checkpoint": ("settings", None),
+    "POST /api/capture/{kind}/target": ("settings", None),
+    "POST /api/capture/{kind}/settings": ("settings", None),
+    "POST /api/capture/{kind}/snapshot": ("settings", None),
+    "POST /api/capture/{kind}/export": ("settings", None),
     "GET /api/board": ("board.read", "filter"),
     "GET /api/board/card/{identifier}": ("board.read", "body"),
     "GET /api/board/card/{identifier}/participants": ("board.read", "body"),

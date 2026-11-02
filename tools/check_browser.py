@@ -304,7 +304,7 @@ def check_languages(browser, server):
     page, errors, keys = context.new_page(), [], []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
     panel_scripts = ("app.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js",
-                     "fleet.js", "review.js", "live.js", "services.js", "account-import.js")
+                     "fleet.js", "review.js", "live.js", "services.js", "account-import.js", "independent-capture.js")
     for script in panel_scripts:
         page.route("**/" + script + "*", lambda route: route.abort())
     page.goto(server.url + "/")

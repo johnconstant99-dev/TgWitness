@@ -7,6 +7,19 @@ An encrypted vault holds API credentials, the StringSession, and signing key.
 The frontend is plain bundled HTML/CSS/JavaScript: no Node build, CDNs, or runtime
 frontend downloads are needed.
 
+<p lang="en" translate="no">Optional browser and AyuGram recorders run in <strong>separate processes or containers</strong>.
+The <code>tgwitness_capture</code> package owns their event format, keys, artifacts,
+checkpoint API, independent witness and standalone verifier. It is bundled in the main
+wheel and can also be installed alone from <code>addons/capture</code>, without importing
+the collector. The main panel's <code>capture_api.py</code> and <code>capture_connections.py</code>
+provide administrator-only, workspace-scoped controls under <code>/api/capture</code>;
+connection tokens live in the encrypted vault. No recorder or outbound request starts
+with the main process. Each explicit command verifies a fresh challenge against the
+pinned recorder key. Exports are verified before download and keep their original
+signature; they do not become Telegram message events. Collection sessions and proxy
+routes stay with each client. See the English <a href="OPTIONAL-CAPTURE.md">Independent
+capture guide</a> for deployment and trust boundaries.</p>
+
 | Module | Responsibility |
 | --- | --- |
 | collector.py | Authorization, dialog selection, updates, snapshots, media queue, connection monitoring |

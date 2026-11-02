@@ -333,6 +333,12 @@ deletes nothing.
 
 ## More tools
 
+<p lang="en" translate="no"><strong>Extras → Independent capture</strong>: connect a
+separate browser or AyuGram recorder, pin its signing key, select capture options,
+start/pause, take snapshots and download verified signed archives. Each recorder has
+its own manual login, route, journal and key. Both connections start disabled.
+See the English <a href="OPTIONAL-CAPTURE.md">Independent capture guide</a>.</p>
+
 - **Ask the archive**: search saved observations, review the sources, then decide
   whether to send them to an AI model. See [archive analysis](ANALYSIS.md) and
   [local OCR and transcription](MEDIA-ANALYSIS.md).

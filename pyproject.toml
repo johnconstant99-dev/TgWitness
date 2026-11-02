@@ -55,6 +55,7 @@ Changelog = "https://github.com/phishdestroy/TgWitness/blob/main/docs/CHANGELOG.
 [project.scripts]
 tgwitness = "tgwitness.__main__:main"
 tgwitness-mcp = "tgwitness.mcp_server:main"
+tgwitness-capture = "tgwitness_capture.__main__:main"
 
 [tool.setuptools.packages.find]
 include = ["tgwitness*"]
@@ -64,6 +65,7 @@ namespaces = false
 include-package-data = false
 
 [tool.setuptools.package-data]
+tgwitness_capture = ["static/*.html", "static/*.css", "static/*.js"]
 tgwitness = [
   "report_console.js", "report_console.css", "report_skin.css", "report_dossier.css", "report_styles.css", "report_layouts.css", "report_icons.svg",
   "static/*.html", "static/*.css", "static/*.js", "static/*.svg",

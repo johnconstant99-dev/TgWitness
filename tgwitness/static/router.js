@@ -4,7 +4,7 @@ const views=Object.fromEntries(Object.entries(paths).map(([view,path])=>[path,vi
 const legacy={start:"start",account:"connection",connection:"connection",journal:"observations",observations:"observations",
   exports:"evidence",evidence:"evidence",extras:"witness",witness:"witness",sealed:"sealed",chats:"chats",
   sources:"sources",parameters:"parameters",accounts:"accounts",access:"access","system-log":"system-log",integrations:"integrations",analysis:"analysis"};
-const cards=new Set(["setup","alerts","evidence","cloud","bot","github","storage"]);
+const cards=new Set(["setup","alerts","evidence","cloud","bot","github","storage","capture"]);
 const firstRunStep=value=>/^[1-7]$/.test(value||"")?Number(value):null;
 const workspacePattern=/^(?:default|[a-f0-9]{32})$/;
 const groupPattern=/^[a-f0-9]{32}$/;

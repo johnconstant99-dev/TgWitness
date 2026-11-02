@@ -1,0 +1,19 @@
+.capture-connections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:24px 0}
+.capture-recorder{min-width:0;display:flex;flex-direction:column;gap:16px}
+.capture-recorder h3,.capture-recorder p{margin:0}
+.capture-recorder fieldset{min-width:0;border:0;padding:0;margin:0;display:grid;gap:16px}
+.capture-recorder form,.capture-fields{display:grid;gap:12px;margin-top:12px}
+.capture-recorder label{display:grid;gap:6px;min-width:0}
+.capture-recorder input,.capture-recorder select{width:100%;min-width:0}
+.capture-recorder .capture-check{display:flex;gap:8px;align-items:flex-start}
+.capture-recorder .capture-check input{width:auto;margin-top:3px;flex-shrink:0}
+.independent-capture-actions{display:flex;gap:8px;flex-wrap:wrap}
+.capture-status{padding:12px;border:1px solid var(--border);border-radius:10px;overflow-wrap:anywhere;font-size:13px;white-space:pre-line}
+.capture-status[data-state="running"]{border-color:var(--accent)}
+.capture-recorder details{min-width:0}
+.capture-recorder summary{cursor:pointer}
+.capture-recorder .capture-checkpoint{font-family:var(--mono,monospace);font-size:11px;overflow-wrap:anywhere;white-space:pre-line}
+.capture-events{font-size:12px;padding-left:20px;max-height:220px;overflow:auto;overflow-wrap:anywhere}
+.capture-explanation p{margin-top:12px}
+.capture-recorder .form-error:empty{display:none}
+@media(max-width:1000px){.capture-connections{grid-template-columns:1fr}}

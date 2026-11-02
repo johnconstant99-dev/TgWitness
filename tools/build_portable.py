@@ -174,7 +174,7 @@ def clean_app_install_metadata(site_packages):
         raise SystemExit("Installed TgWitness RECORD is malformed")
     origin = metadata / "direct_url.json"
     origin_name = origin.relative_to(site_packages).as_posix()
-    launchers = {"../../bin/tgwitness.exe", "../../bin/tgwitness-mcp.exe"}
+    launchers = {"../../bin/tgwitness.exe", "../../bin/tgwitness-mcp.exe", "../../bin/tgwitness-capture.exe"}
     kept = [row for row in rows if row[0] != origin_name and not (
         row[0] in launchers and not (site_packages / row[0]).exists()
         and not (site_packages / "bin" / Path(row[0]).name).exists())]

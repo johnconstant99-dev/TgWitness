@@ -1,0 +1,102 @@
+# Run from the repository root with --project-directory .
+# No service starts unless its optional profile is explicitly selected.
+name: tgwitness-capture
+services:
+  browser-gateway:
+    profiles: [capture-browser]
+    build:
+      context: .
+      dockerfile: addons/capture/deploy/Dockerfile.gateway
+    networks: [browser-internal, browser-egress]
+    volumes:
+      - type: bind
+        source: ${CAPTURE_PROXY_CONFIG:-./addons/capture/deploy/upstream-proxy.example.conf}
+        target: /etc/squid/squid.conf
+        read_only: true
+        bind:
+          create_host_path: false
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+  browser:
+    profiles: [capture-browser]
+    build:
+      context: .
+      dockerfile: addons/capture/deploy/Dockerfile.neko
+      args:
+        NEKO_IMAGE: ${CAPTURE_NEKO_IMAGE:-ghcr.io/m1k1o/neko/chromium:latest}
+    depends_on: [browser-gateway]
+    networks: [browser-internal]
+    shm_size: 2gb
+    environment:
+      NEKO_DESKTOP_SCREEN: 1280x720@30
+      NEKO_MEMBER_MULTIUSER_USER_PASSWORD: ${CAPTURE_NEKO_PASSWORD:-}
+      NEKO_MEMBER_MULTIUSER_ADMIN_PASSWORD: ${CAPTURE_NEKO_ADMIN_PASSWORD:-}
+      NEKO_WEBRTC_EPR: 52100-52109
+      NEKO_WEBRTC_NAT1TO1: ${CAPTURE_SCREEN_ADDRESS:-127.0.0.1}
+    ports:
+      - "127.0.0.1:8081:8080"
+      - "127.0.0.1:8791:8791"
+      - "${CAPTURE_SCREEN_BIND:-127.0.0.1}:52100-52109:52100-52109/udp"
+    volumes:
+      - browser-profile:/home/neko/.config/chromium
+      - browser-screen:/tmp/.X11-unix
+    restart: unless-stopped
+  browser-recorder:
+    profiles: [capture-browser]
+    build:
+      context: .
+      dockerfile: addons/capture/deploy/Dockerfile
+    depends_on: [browser]
+    network_mode: service:browser
+    volumes:
+      - browser-records:/data
+      - browser-screen:/tmp/.X11-unix:ro
+      - type: bind
+        source: ${CAPTURE_BROWSER_CONFIG:-./addons/capture/config/browser.example.json}
+        target: /config.json
+        read_only: true
+        bind:
+          create_host_path: false
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 90s
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+  ayugram-recorder:
+    profiles: [capture-ayugram]
+    build:
+      context: .
+      dockerfile: addons/capture/deploy/Dockerfile
+    command: [python, -m, tgwitness_capture, serve, --data, /data, --config, /config.json, --host, 0.0.0.0, --port, "8792"]
+    networks: [ayugram-recorder]
+    ports: ["127.0.0.1:8792:8792"]
+    volumes:
+      - ayugram-records:/data
+      - type: bind
+        source: ${CAPTURE_AYUGRAM_CONFIG:-./addons/capture/config/ayugram.example.json}
+        target: /config.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${CAPTURE_AYUGRAM_DB_DIRECTORY:-./capture-private/ayugram-database}
+        target: /source
+        read_only: true
+        bind:
+          create_host_path: false
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 90s
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+networks:
+  browser-internal:
+    internal: true
+  browser-egress: {}
+  ayugram-recorder:
+    internal: true
+volumes:
+  browser-profile: {}
+  browser-screen: {}
+  browser-records: {}
+  ayugram-records: {}

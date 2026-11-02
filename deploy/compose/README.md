@@ -13,6 +13,8 @@ existing named volumes rooted in the project directory.
 | [`compose.https.yaml`](compose.https.yaml) | Add Caddy and automatic HTTPS |
 | [`compose.proxies.yaml`](compose.proxies.yaml) | Mount an operator-managed proxy catalog |
 | [`compose.witness.yaml`](compose.witness.yaml) | Run an independent witness on its own server |
+| [`compose.capture-panel.yaml`](compose.capture-panel.yaml) | Connect the main panel to optional capture containers; use after both root and capture Compose files, as described in [Independent capture](../../docs/OPTIONAL-CAPTURE.md) |
+| [`../../addons/capture/compose.yaml`](../../addons/capture/compose.yaml) | Optional independent browser/AyuGram recorders; separate profiles and controls, disabled capture by default |
 
 For HTTPS, configure `.env` as described in the deployment guide, then run:
 

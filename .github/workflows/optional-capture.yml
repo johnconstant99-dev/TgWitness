@@ -1,0 +1,37 @@
+name: Optional independent capture
+on:
+  pull_request:
+    paths: ["addons/capture/**", "tgwitness_capture/**", "tgwitness/capture_*.py", "tgwitness/static/independent-capture.*", ".github/workflows/optional-capture.yml", "deploy/browser.lock", "deploy/compose/compose.capture-panel.yaml", "pyproject.toml"]
+  push:
+    branches: [main]
+    paths: ["addons/capture/**", "tgwitness_capture/**", "tgwitness/capture_*.py", "tgwitness/static/independent-capture.*", ".github/workflows/optional-capture.yml", "deploy/browser.lock", "deploy/compose/compose.capture-panel.yaml", "pyproject.toml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: optional-capture-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --require-hashes -r deploy/browser.lock
+      - run: python -m playwright install --with-deps chromium
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: python addons/capture/lock_from_project.py && git diff --exit-code -- addons/capture/requirements.lock
+      - run: python -m pytest addons/capture/tests -q --capture-browser
+      - run: docker compose --project-directory . -f addons/capture/compose.yaml --profile capture-browser --profile capture-ayugram config --quiet
+      - run: docker compose --project-directory . -f compose.yaml -f addons/capture/compose.yaml -f deploy/compose/compose.capture-panel.yaml --profile capture-browser --profile capture-ayugram config --quiet
+      - run: docker compose --project-directory . -f addons/capture/compose.yaml --profile capture-browser build browser-recorder browser-gateway
+      - name: Verify the built recorder starts paused and serves its English panel
+        run: |
+          recorder_image=$(docker compose --project-directory . -f addons/capture/compose.yaml --profile capture-browser images -q browser-recorder)
+          if [ -z "$recorder_image" ]; then recorder_image=tgwitness-capture-browser-recorder; fi
+          docker run --rm --entrypoint python "$recorder_image" -c 'import tgwitness_capture; from pathlib import Path; from tgwitness_capture.service import Config, Recorder; import tempfile; r=Recorder(Path(tempfile.mkdtemp()), Config()); assert not r.settings["enabled"]; assert "lang=\"en\"" in (Path(tgwitness_capture.__file__).parent/"static/index.html").read_text(); r.journal.close()'

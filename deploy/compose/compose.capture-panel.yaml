@@ -1,0 +1,14 @@
+# Use AFTER compose.yaml and addons/capture/compose.yaml, from the repo root.
+# Keeps the main project's existing volume names. No sidecar profile is enabled here.
+name: tgwitness
+services:
+  tgwitness:
+    networks: [default, browser-internal, ayugram-recorder]
+  browser:
+    networks:
+      browser-internal:
+        aliases: [capture-browser]
+  ayugram-recorder:
+    networks:
+      ayugram-recorder:
+        aliases: [capture-ayugram]

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Independent capture · TgWitness Capture</title><link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script></head>
+<body><main>
+<header><p class="eyebrow">TGWITNESS CAPTURE · OPTIONAL MODULE</p><h1>Independent capture</h1><p>A separate session, journal and signing key. This recorder runs independently of the main collector.</p></header>
+<section id="login"><h2>Connect to the recorder</h2><form id="login-form"><label>Control token<input id="token" type="password" autocomplete="off" required></label><button>Connect</button></form><p>Read control-token.txt on the recorder. This panel keeps the token only in this tab’s memory.</p></section>
+<p id="notice" role="status" aria-live="polite"></p>
+<div id="workspace" hidden>
+<section class="summary"><div><span id="badge" class="badge">Off</span><h2 id="kind">Recorder</h2><p id="last-success"></p></div><button id="logout" class="secondary">Disconnect panel</button></section>
+<section><h2>What to preserve</h2><p>Sign in to the separate browser or AyuGram client first. Capture starts disabled after every restart. Pause before entering passwords or login codes.</p>
+<div id="browser-options"><label class="switch"><input id="screenshots" type="checkbox"> Viewport screenshots</label><label class="switch"><input id="pages" type="checkbox"> MHTML page and extracted text</label><div class="target"><button id="refresh-targets" class="secondary">Find browser tabs</button><label>Tab to capture<select id="targets"><option value="">Select a tab after login</option></select></label><button id="select-target" class="secondary">Select</button></div></div>
+<div id="database-options" hidden><label class="switch"><input id="database" type="checkbox"> Consistent AyuGram database snapshots</label><p>Preserves the configured local SQLite database. Messages are not interpreted yet; history and attachment coverage depend on the client.</p></div>
+<label class="switch"><input id="video" type="checkbox"> Optional procedure video · no audio</label><p id="video-help">Video needs a configured screen source and FFmpeg.</p>
+<div class="actions"><button id="save" class="secondary">Save options</button><button id="toggle">Start capture</button><button id="snapshot" class="secondary">Snapshot now</button></div>
+<p id="coverage"></p></section>
+<section><h2>Verify and share</h2><dl><dt>Observer</dt><dd id="observer"></dd><dt>SHA-256 key fingerprint</dt><dd id="fingerprint"></dd><dt>Journal boundary</dt><dd id="boundary"></dd><dt>Operator-declared route</dt><dd id="route"></dd></dl>
+<p>Keep the key fingerprint separately. An independently retained checkpoint can reveal a truncated journal. It is not an external timestamp.</p>
+<div class="actions"><button id="checkpoint" class="secondary">Download checkpoint</button><button id="export">Download signed ZIP</button></div><p>Pause capture before exporting. The ZIP contains original artifacts, the signed journal and an HTML report. The verifier can run separately.</p></section>
+<section><h2>Recent events</h2><ol id="events"></ol></section>
+</div></main></body></html>

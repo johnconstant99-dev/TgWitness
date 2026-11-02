@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=84.1.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tgwitness-capture"
+version = "0.1.0"
+description = "Optional independent browser and SQLite capture with signed exports"
+requires-python = ">=3.11"
+dependencies = ["cryptography>=48.0.1,<51", "fastapi>=0.115,<1", "uvicorn>=0.30,<1"]
+
+[project.optional-dependencies]
+browser = ["playwright>=1.48,<2"]
+test = ["pytest>=9.1.1,<10", "httpx>=0.27,<1", "pyyaml>=6,<7"]
+
+[project.scripts]
+tgwitness-capture = "tgwitness_capture.__main__:main"
+
+[tool.setuptools]
+packages = ["tgwitness_capture"]
+package-dir = {tgwitness_capture = "../../tgwitness_capture"}
+
+[tool.setuptools.package-data]
+tgwitness_capture = ["static/*"]

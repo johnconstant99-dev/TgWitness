@@ -1,0 +1,6 @@
+ARG NEKO_IMAGE=ghcr.io/m1k1o/neko/chromium:latest
+FROM ${NEKO_IMAGE}
+COPY addons/capture/deploy/chromium.conf /etc/neko/supervisord/chromium.conf
+COPY addons/capture/deploy/chromium-policy.json /etc/chromium/policies/managed/capture.json
+COPY addons/capture/deploy/neko-start.sh /etc/neko/capture-start.sh
+CMD ["sh", "/etc/neko/capture-start.sh"]

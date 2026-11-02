@@ -7,6 +7,7 @@ WORKDIR /app
 COPY pyproject.toml README.md LICENSE NOTICE ./
 COPY deploy/build.lock deploy/requirements.lock ./
 COPY tgwitness ./tgwitness
+COPY tgwitness_capture ./tgwitness_capture
 # Every package must match a SHA-256 in the locks; builds use the hashed setuptools only.
 RUN pip install --no-cache-dir --require-hashes -r build.lock \
     && pip install --no-cache-dir --require-hashes --no-build-isolation -r requirements.lock \

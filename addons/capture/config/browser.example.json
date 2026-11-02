@@ -1,0 +1,11 @@
+{
+  "kind": "browser",
+  "operator": "browser-operator",
+  "route_label": "Browser A: dedicated upstream proxy, configured by operator",
+  "browser_cdp_url": "http://127.0.0.1:9222",
+  "browser_url_prefix": "",
+  "poll_seconds": 2,
+  "snapshot_seconds": 60,
+  "heartbeat_seconds": 10,
+  "video_input_args": ["-f", "x11grab", "-framerate", "10", "-video_size", "1280x720", "-i", ":99.0"]
+}

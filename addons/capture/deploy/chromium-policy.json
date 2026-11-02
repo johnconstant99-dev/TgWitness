@@ -1,0 +1,8 @@
+{
+  "DefaultCookiesSetting": 1,
+  "RestoreOnStartup": 1,
+  "BrowserSignin": 0,
+  "PasswordManagerEnabled": false,
+  "DnsOverHttpsMode": "off",
+  "QuicAllowed": false
+}

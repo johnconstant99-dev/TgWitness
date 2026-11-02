@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="/views/settings-hub.css?v=3">
 <link rel="stylesheet" href="/views/connection.css?v=1">
 <link rel="stylesheet" href="/services.css?v=1">
+<link rel="stylesheet" href="/independent-capture.css?v=1">
 <link rel="stylesheet" href="/workspace-safety.css?v=1">
 <link rel="stylesheet" href="/account-import.css?v=1">
 <link rel="stylesheet" href="/views/access.css?v=30">
@@ -37,6 +38,7 @@
 <script defer src="/chat-safety.js?v=1"></script>
 <script defer src="/app.js?v=0.8.0-case-board1"></script>
 <script defer src="/services.js?v=1"></script>
+<script defer src="/independent-capture.js?v=1"></script>
 <script defer src="/account-import.js?v=1"></script>
 <script defer src="/integrations.js?v=2"></script>
 <script defer src="/analysis.js?v=3"></script>
@@ -1041,6 +1043,7 @@
     <span class="extras-note"><svg aria-hidden="true" class="icon"><use href="#i-check"/></svg> Optional · your account and sources are enough to start collecting.</span>
   </div>
   <div class="extras-grid">
+    <article class="extra-card"><div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><span class="extra-badge">OPT-IN RECORDERS</span></div><h2>Independent capture</h2><p>Record a separate browser session or preserve AyuGram database snapshots with their own signing keys.</p><p class="extra-requires">Separate recorders · manual login · video optional</p><button class="secondary" id="extras-open-capture" data-extra="capture" aria-expanded="false" aria-controls="extras-capture" type="button">Manage capture <span aria-hidden="true">→</span></button></article>
     <article class="extra-card extra-storage"><div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-archive"/></svg></span><span class="extra-badge">YOUR STORAGE</span></div><h2>Storage &amp; disk space</h2><p>Back up the workspace, move older files to your cloud, or retain an immutable evidence copy.</p><div class="brand-strip" data-service-icons="mega,googledrive,dropbox,wasabi,backblaze"></div><button class="secondary" id="extras-open-storage" data-extra="storage" aria-expanded="false" aria-controls="extras-storage" type="button">Manage storage <span aria-hidden="true">→</span></button></article>
     <article class="extra-card extra-setup">
       <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-sparkle"/></svg></span><span class="extra-badge" id="extra-setup-badge">No goal chosen</span></div>
@@ -1081,6 +1084,14 @@
     </article>
   </div>
   <p class="extras-footnote">Only the option you choose opens its settings. Nothing is connected automatically.</p>
+  </div>
+
+  <div class="extra-panel" id="extras-capture" hidden role="region" aria-labelledby="extras-capture-title">
+    <div class="extra-panel-heading"><div><span class="eyebrow">SEPARATE SESSIONS · SEPARATE KEYS</span><h2 id="extras-capture-title" tabindex="-1">Independent capture</h2><p>Connect recorders you control. Sign in to each client manually, then start capture. Pause before entering passwords or login codes.</p></div><button class="quiet" data-extra-close="capture" type="button">Back to extras</button></div>
+    <p class="hint">Both connections start disabled. Closing this panel does not stop a recorder. Each recorder starts paused after a restart.</p>
+    <div id="capture-connections" class="capture-connections"></div>
+    <p class="hint" id="capture-load-message" role="status" aria-live="polite"></p>
+    <details class="card padded capture-explanation"><summary>Set up recorders and understand the evidence</summary><p>Deploy the optional containers first, then copy each recorder's control token and key fingerprint into its connection settings. These control requests use the address you supply directly; the recorder's collection proxy is configured separately.</p><p>Browser capture saves screenshots, MHTML and extracted text on detected changes and at intervals. It can miss changes between observations. AyuGram capture preserves a local SQLite database; it does not yet interpret message edits or deletions. Video is optional and starts only with capture enabled.</p><p>The panel verifies signed checkpoints and original ZIP exports against the pinned recorder key. This detects changed exported bytes; it does not authenticate a website's claims or provide an independent timestamp. Keep checkpoints or witness receipts on a separate host.</p><p><a href="https://github.com/phishdestroy/TgWitness/blob/main/docs/OPTIONAL-CAPTURE.md" target="_blank" rel="noopener noreferrer">Deployment and verification guide ↗</a></p></details>
   </div>
 
   <div class="extra-panel service-section" id="extras-storage" hidden role="region" aria-labelledby="extras-storage-title">
