@@ -225,10 +225,14 @@ def test_browser(tmp_path, monkeypatch):
         expect(page.locator('#view-first-run h1')).to_contain_text('Язык')
         page.locator('#first-run-next').click()
         page.locator('[data-answer="expert"]').click()
+        # The choice saves asynchronously and replaces the card/footer. Wait for
+        # the saved controls before reloading or clicking a different action.
+        expect(page.locator('[data-answer="expert"]')).to_be_enabled()
         page.reload()
         expect(page.locator('[data-answer="expert"]')).to_have_attribute('aria-pressed','true',timeout=20000)
         page.locator('#first-run-next').click()
         page.locator('[data-answer="copy"]').click()
+        expect(page.locator('[data-answer="copy"]')).to_be_enabled()
         page.locator('#first-run-next').click()
         expect(page.locator('#first-run-next')).to_be_disabled()
         expect(page.locator('#hub-connection-result')).to_have_class('connection-result failed',timeout=15000)

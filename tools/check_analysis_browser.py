@@ -124,7 +124,13 @@ def main():
                 expect(page.locator('#ask-sources')).not_to_contain_text('TopSecret-1234')
                 # A preference changed in Chats also updates detached Analysis results.
                 page.evaluate('async()=>{await navigate("chats");await openChat(-1001);}')
-                page.locator('#chat-mask-secrets').uncheck()
+                mask = page.locator('#chat-mask-secrets')
+                expect(mask).to_be_checked()
+                # Revealing waits for an audit write; rendering can restore the
+                # checked state while that request is pending. Wait for its result.
+                mask.click()
+                expect(mask).to_be_enabled()
+                expect(mask).not_to_be_checked()
                 page.evaluate('()=>navigate("analysis")')
                 expect(page.locator('#ask-sources')).to_contain_text('TopSecret-1234')
                 page.evaluate('()=>navigate("chats")')

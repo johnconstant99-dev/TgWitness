@@ -9,7 +9,8 @@ import json
 import re
 from datetime import datetime
 
-from . import case_assessment, i18n
+from . import case_assessment, i18n, snapshot_analytics
+from .report_analytics import Presentation
 from .report import DOSSIER_CSS, Words
 
 MEDIA_PATH = re.compile(r'media/[0-9a-f]{64}\Z')
@@ -141,7 +142,8 @@ def opening(context, title, sharing=False):
     kind = say('Sharing copy') if sharing else say('Account export')
     lead = (say('A minimized, signed copy for review and sharing. The original account export is unchanged.') if sharing else
             say('A snapshot of history visible to this Telegram account during acquisition.'))
-    yield encoded('<!doctype html><html lang="' + say.language + '" dir="' + say.direction + '"><head><meta charset="utf-8">'
+    template = Presentation.model_validate(context.get('presentation') or {}).design
+    yield encoded('<!doctype html><html data-template="' + template + '" lang="' + say.language + '" dir="' + say.direction + '"><head><meta charset="utf-8">'
                   '<meta name="viewport" content="width=device-width,initial-scale=1">'
                   '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;">'
                   '<title>' + e(title) + ' · TgWitness</title><style>' + CSS + case_assessment.CSS + DOSSIER_CSS + '</style></head><body class="dossier account-dossier"><main>'
@@ -230,6 +232,7 @@ def account_index(context, chats):
     yield encoded('<nav><a href="#start">' + e(say('Start here')) + '</a><a href="#chats">' + e(say('Chats')) + '</a><a href="#coverage">' + e(say('Coverage')) +
                   '</a><a href="#verification">' + e(say('Verification')) + '</a></nav>')
     yield encoded(recipient_guide(say))
+    yield encoded(snapshot_analytics.html_section(context.get('analytics'), context.get('presentation', {}), say))
     yield encoded(case_assessment.html(case_assessment.snapshot(context), say))
     yield encoded('<p class="notice">' + e(say('Original account data may contain personal information. Prepare a separate minimized copy before sharing.')) + '</p>')
     yield encoded(stats(context.get('counts', {}), say) + copy_context(context, say) + scope(context.get('options', {}), say))
@@ -337,6 +340,7 @@ def account_chat(context, chat, rows):
     yield encoded('<p><a href="../index.html">← ' + e(say('Account export')) + '</a></p><p>' +
                   e(say('Message records are shown in captured page order. Signed JSONL remains authoritative.')) + '</p>')
     yield encoded(copy_context(context, say))
+    yield encoded(snapshot_analytics.html_section(context.get('analytics'), context.get('presentation', {}), say))
     yield encoded('<p>' + e(say('Cite the archive reference, the file path and the record reference beside a message. Record numbers apply only to this copy.')) + '</p>')
     yield encoded('<nav><a href="#messages">' + e(say('Messages')) + '</a><a href="#case-assessment">' + e(say(case_assessment.TITLE)) + '</a><a href="#verification">' +
                   e(say('Verification')) + '</a></nav><section id="messages">')
@@ -360,6 +364,7 @@ def sharing_report(context, rows):
     yield encoded('<nav><a href="#start">' + e(say('Start here')) + '</a><a href="#messages">' + e(say('Messages')) + '</a><a href="#verification">' +
                   e(say('Verification')) + '</a></nav>')
     yield encoded(recipient_guide(say, sharing=True))
+    yield encoded(snapshot_analytics.html_section(context.get('analytics'), context.get('presentation', {}), say))
     yield encoded(case_assessment.html(case_assessment.snapshot(context, "sharing"), say))
     # Only explicitly public policy fields are rendered. No private criteria, map or source rows.
     public = {key: context.get('policy', {}).get(key) for key in (*SCOPE_LABELS, 'purpose')}

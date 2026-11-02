@@ -217,7 +217,7 @@ class MissingGlyphs(logging.Handler):
 
 class Layout:
     """The parts of a formal report, written onto a fpdf2 document."""
-    def __init__(self, pdf, say):
+    def __init__(self, pdf, say, template="dossier"):
         from fpdf.enums import TextEmphasis, XPos, YPos
         from fpdf.fonts import FontFace
         self.pdf, self.say, self.XPos, self.YPos, self.FontFace = pdf, say, XPos, YPos, FontFace
@@ -225,6 +225,12 @@ class Layout:
         self.number = 0
         self.rtl = pdf.rtl
         self.align = "RIGHT" if pdf.rtl else "LEFT"
+        self.accent = report.report_analytics.DESIGN_COLORS.get(template, INK)
+        self.template = template
+
+    def need(self, height):
+        if self.pdf.get_y() + height > self.pdf.h - self.pdf.b_margin:
+            self.pdf.add_page()
 
     def mirror(self, items):
         """Columns in reading order: right to left for Arabic, Persian, Urdu and Hebrew."""
@@ -245,18 +251,18 @@ class Layout:
         pdf = self.pdf
         pdf.add_page()
         pdf.start_section(str(title), level=0)
-        with pdf.local_context(fill_color=INK):
+        with pdf.local_context(fill_color=(248, 242, 233) if self.template == "editorial" else self.accent):
             pdf.rect(0, 0, pdf.w, 37, style="F")
-        with pdf.local_context(fill_color=GOLD):
+        with pdf.local_context(fill_color=self.accent if self.template == "editorial" else GOLD):
             pdf.rect(pdf.l_margin, 36, 28, 1, style="F")
         pdf.set_y(13)
-        self.text("TG / WITNESS", size=13, style="B", color=WHITE)
-        self.text(self.say("Evidence dossier").upper(), size=7.5, color=(214, 224, 228))
+        self.text("TG / WITNESS", size=13, style="B", color=INK if self.template == "editorial" else WHITE)
+        self.text(self.say("Evidence dossier").upper(), size=7.5, color=MUTED if self.template == "editorial" else (214, 224, 228))
         pdf.set_y(48)
         self.text(eyebrow.upper(), size=8, style="B", color=MUTED)
         self.gap(4)
         title_size = 29 if len(str(title)) < 90 else 23 if len(str(title)) < 160 else 19
-        self.text(title, size=title_size, style="B", height=title_size * .42)
+        self.text(title, size=title_size, style="" if self.template == "editorial" else "B", height=title_size * .42)
         self.gap(7)
         pdf.set_draw_color(*LINE)
         pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + pdf.epw, pdf.get_y())
@@ -305,7 +311,7 @@ class Layout:
         else:
             self.gap(3)
         y = pdf.get_y()
-        pdf.set_draw_color(*GOLD)
+        pdf.set_draw_color(*self.accent)
         pdf.line(pdf.l_margin, y, pdf.l_margin + pdf.epw, y)
         pdf.set_draw_color(*LINE)
         pdf.set_y(y + 3)
@@ -395,7 +401,7 @@ class Layout:
         self.heading(say(assessment.OVERVIEW))
         self.grid([say("Reference"), say("Evidence"), say("Status")],
                   [(f"{number:02d}", say(item["title"]), say(assessment.STATUSES[item["status"]]))
-                   for number, item in enumerate(data["checks"], 1)], widths=(8, 48, 44))
+                   for number, item in enumerate(data["checks"], 1)], widths=(14, 44, 42))
 
     def coverage_figure(self, coverage):
         plot = report.coverage_plot(coverage)
@@ -562,15 +568,24 @@ def changes(lay, say, changed, titles):
         previous = None
         for number, version in enumerate(versions):
             label = (say("Original") if version["kind"] != "message.edited" else say("First saved version")) if not number \
-                else say("Edit {n}", n=number)
+                else say("Edit {n}", n=number) if version["kind"] == "message.edited" else say("Saved version {n}", n=number + 1)
             lay.text(label + " · " + say("observed") + " " + report.utc_text(version["observed_at"])
                      + (" · " + say("Telegram time") + " " + report.utc_text(version["telegram_at"]) if version.get("telegram_at")
                         else "") + " · #" + str(version["seq"]), size=7.8, color=MUTED)
+            if version.get("context_only"):
+                lay.text(say("Context outside the report filters"), size=8, color=MUTED)
             if version.get("withheld"):
                 lay.text(say("Text withheld in this extract"), size=9, color=MUTED)
             elif previous is None or previous["text"] == version["text"]:
+                if previous is None and version["kind"] == "message.edited":
+                    lay.text(say("The earlier version was not captured."), size=8, color=MUTED)
                 lay.text(version["text"] or say("(no text)") if previous is None else say("Text unchanged"), size=9)
             else:
+                lay.text(say("Before"), size=8, style="B")
+                lay.text(previous["text"] or say("(no text)"), size=9)
+                lay.text(say("After"), size=8, style="B")
+                lay.text(version["text"] or say("(no text)"), size=9)
+                lay.text(say("Changes"), size=8, style="B")
                 lay.diff(previous["text"], version["text"])
             if previous is None or previous.get("details") != version.get("details"):
                 for line in details_lines(say, version.get("details") or {}):
@@ -579,6 +594,12 @@ def changes(lay, say, changed, titles):
             previous = version
         for step in gone:
             deleted = step["kind"] == "message.deleted"
+            if step.get("context_only"):
+                lay.text(say("Context outside the report filters"), size=8, color=MUTED)
+            retained = report.last_saved_before(versions, step["seq"])
+            lay.text(say("Saved text before deletion") if deleted else say("Saved text before recheck"), size=8, style="B")
+            lay.text(retained["text"] or say("(no text)") if retained else
+                     say("No message content was saved before this observation."), size=9)
             lay.text(report.kind_label(say, step["kind"]) + " · " + say("observed") + " "
                      + report.utc_text(step["observed_at"]) + " · #" + str(step["seq"]), size=7.8, style="B", color=BAD)
             lay.text(say("Telegram does not say who deleted a message or exactly when; this is when the notice was "
@@ -749,6 +770,7 @@ def evidence_pdf(data, context, events=None, certificate=None):
     options = {**report.ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
     say = report.Words(options["language"])
     handover, case = data.get("minimisation"), data["case"]
+    filtered = bool((data.get("selection") or {}).get("selection", {}).get("enabled"))
     report_id, fp = data["report_id"], data["subject"].get("fingerprint") or ""
     footer = " · ".join(x for x in ((say("Case ID") + " " + case["id"]) if case.get("id") else "",
                                     say("Report ID") + " " + report_id[:8]) if x)
@@ -757,7 +779,7 @@ def evidence_pdf(data, context, events=None, certificate=None):
     logging.getLogger("fpdf").addHandler(found)
     logging.getLogger("fontTools.subset").setLevel(logging.ERROR)  # tables it cannot subset are left out, quietly
     try:
-        lay = Layout(pdf, say)
+        lay = Layout(pdf, say, options.get("design", "dossier"))
         label = say("Handover extract") if handover else say("Evidence report")
         title = case.get("title") or (say("Handover extract") if handover else say("Telegram observation journal"))
         pdf.set_title(title)
@@ -772,6 +794,8 @@ def evidence_pdf(data, context, events=None, certificate=None):
                 "verify.py; the last section explains how.", fp=report.grouped(fp)))
         records_total = (handover["counts"]["unchanged"] + handover["counts"]["minimised"]) if handover \
             else data["subject"].get("event_count")
+        if data.get("selection"):
+            records_total = data["selection"]["counts"]["selected_records"]
         lay.figures([(say("Records"), records_total), (say("Chats"), summary["chats"]), (say("Messages"), cats["message"]),
                      (say("Edits"), cats["edited"]), (say("Deletions"), cats["deleted"]), (say("Files"), summary["files"]),
                      (say("Timestamps"), summary["timestamps"]),
@@ -786,7 +810,14 @@ def evidence_pdf(data, context, events=None, certificate=None):
         digest = {"categories": cats, "chats": [None] * summary["chats"], "media": [None] * summary["files"],
                   "first": summary["first_record_at"], "last": summary["last_record_at"]}
         lay.brief(*report.evidence_brief(say, digest, records_total, data["timestamps"], coverage, account_text,
-                                         handover))
+                                         handover, filtered))
+        report.report_selection_view.pdf(lay, data.get("selection"))
+        sections = [(report.report_charts.examination_pdf, data.get("examination")),
+                    (report.report_charts.pdf, data.get("analytics"))]
+        if options.get("template") == "activity":
+            sections.reverse()
+        for render, material in sections:
+            render(lay, material)
         report.case_assessment.pdf(lay, data.get("case_assessment") or report.case_assessment.journal(context, coverage))
         lay.section(say("Case"))
         lay.kv([(say("Case title"), case.get("title")), (say("Case ID"), case.get("id")),
@@ -810,15 +841,18 @@ def evidence_pdf(data, context, events=None, certificate=None):
             if isinstance(selection, dict):
                 lay.kv([(str(k), ", ".join(map(str, v)) if isinstance(v, list) else str(v)) for k, v in selection.items()])
         titles = {str(c["chat_id"]): c["title"] for c in data["chats"] if c.get("title")}
-        if data["changes"]["messages"]:
-            lay.section(say("Changed and deleted messages"), say(
+        if options.get("show_changes", True) and data["changes"]["messages"]:
+            lay.section(say("Selected message histories") if filtered else say("Changed and deleted messages"),
+                        say("Selected changes with saved message history. Versions outside the filters are marked as context.")
+                        if filtered else say(
                 "Every saved version of each message that was edited, deleted or not found at a later check. Removed "
                 "words are struck through and added words are marked; each step names its signed record."))
             changes(lay, say, data["changes"], titles)
         actions = data["actions"]
-        if (data.get("indicators") or {}).get("items"):
+        if options.get("show_indicators", True) and (data.get("indicators") or {}).get("items"):
             indicators_section(lay, say, data["indicators"])
-        lay.section(say("Actions by the observing account"), say(
+        if not filtered:
+            lay.section(say("Actions by the observing account"), say(
             "Actions taken with the observing account change what others in the chat see. They are listed here so "
             "that the records around them can be read with that in mind."))
         if actions["listed"]:
@@ -838,7 +872,7 @@ def evidence_pdf(data, context, events=None, certificate=None):
                              "#" + str(action["seq"])])
             lay.grid([say("Time"), say("Action"), say("Chat"), say("Details"), say("Outcome"), say("Records")], rows,
                      (15, 17, 14, 33, 10, 11))
-        else:
+        elif not filtered:
             lay.callout(say("No action through the panel is recorded in this journal."), OK)
         lay.section(say("Integrity"), say("Every record is linked to the previous one by SHA-256 and signed with Ed25519 "
                                           "when it is captured. The manifest lists the SHA-256 of every file and is "
@@ -948,12 +982,13 @@ def evidence_pdf(data, context, events=None, certificate=None):
                        + str(p["to"]), p["count"], report.utc_text(p["first_at"]) + " — " + report.utc_text(p["last_at"]),
                        Mono(p.get("sha256") or "")] for p in parts], (22, 16, 8, 26, 28))
         elif options.get("timeline") and events is not None and records_total and records_total <= limit:
-            lay.section(say("Records"), say("Every record of the journal in order. Filters only change what is shown.")
+            lay.section(say("Records"), say("Records matching the report filters, in journal order.") if filtered else
+                        say("Every record of the journal in order. Filters only change what is shown.")
                         if not handover else say("Every record in this extract, in journal order. Minimised records name "
                                                  "what was withheld."))
             records(lay, say, events, {**titles, **{int(k): v for k, v in titles.items() if k.lstrip("-").isdigit()}},
                     options)
-        elif options.get("timeline"):
+        elif options.get("timeline") and records_total:
             lay.section(say("Records"))
             lay.callout(say("This journal has {n} records, exceeding the PDF transcript limit of {limit}. "
                             "Every record remains in the signed source files and the HTML viewer.",
@@ -1005,7 +1040,7 @@ def chat_pdf(meta, context, messages=None, certificate=None):
     logging.getLogger("fpdf").addHandler(found)
     logging.getLogger("fontTools.subset").setLevel(logging.ERROR)
     try:
-        lay = Layout(pdf, say)
+        lay = Layout(pdf, say, options.get("design", "dossier"))
         title = case.get("title") or chat_title
         pdf.set_title(title)
         pdf.set_author(case.get("examiner") or case.get("organization") or "TgWitness")
@@ -1026,6 +1061,7 @@ def chat_pdf(meta, context, messages=None, certificate=None):
         account_text = " · ".join(x for x in (("@" + account["username"]) if account.get("username") else "",
                                               ("id " + str(account["id"])) if account.get("id") else "") if x)
         lay.brief(*report.chat_brief(say, meta, stats, ids, account_text))
+        report.snapshot_analytics.pdf_section(lay, context.get("analytics"), options)
         report.case_assessment.pdf(lay, report.case_assessment.snapshot(context, "chat", meta))
         lay.section(say("Case"))
         lay.kv([(say("Case title"), case.get("title")), (say("Case ID"), case.get("id")),
@@ -1086,7 +1122,7 @@ def chat_pdf(meta, context, messages=None, certificate=None):
                     (say("Not answered by Telegram"), summary.get("error_type") or "")])
             lay.grid([say("Time"), say("Account"), say("Action"), say("Message"), say("Content")],
                      [list(row) for row in report.admin_rows(say, context["admin_events"], 300)], (17, 13, 16, 8, 46))
-        if (context.get("indicators") or {}).get("items"):
+        if options.get("show_indicators", True) and (context.get("indicators") or {}).get("items"):
             indicators_section(lay, say, context["indicators"])
         limit = options.get("part_size") or report.ReportOptions().part_size
         if parts:

@@ -21,6 +21,17 @@ TITLES = {'ru': 'Изменение условий сделки', 'en': 'A chang
 DEMO = {'ru': 'УЧЕБНЫЙ ПРИМЕР · Все сообщения и участники вымышлены. Подключения к Telegram не было.',
         'en': 'SYNTHETIC DEMO · All messages and participants are fictional. No Telegram connection.',
         'de': 'FIKTIVES BEISPIEL · Alle Nachrichten und Personen sind erfunden. Keine Telegram-Verbindung.'}
+TITLES['ar'] = report.Words('ar')('Telegram observation journal')
+DEMO['ar'] = 'SYNTHETIC DEMO · '+report.Words('ar')('Sample data')
+
+PRESETS = {
+    'dossier': {},
+    'brief': {'timeline':False,'raw_records':False,'media_previews':False,
+              'hourly_chart':False,'participant_chart':False,'chat_chart':False},
+    'activity': {'timeline':False,'raw_records':False,'media_previews':False},
+    'custom': {'timeline':False,'raw_records':False,'media_previews':False,
+               'hourly_chart':False,'chat_chart':False,'chart_limit':5},
+}
 
 
 def seed(store):
@@ -61,7 +72,20 @@ def seed(store):
     append(37, 'observation.stopped', {'reason':'operator'})
 
 
-def build(output, languages=('ru', 'en', 'de')):
+def seed_activity(store):
+    """Uneven, entirely fictional observations for readable chart examples."""
+    start=datetime(2026,11,2,0,tzinfo=timezone.utc)
+    for day in range(14):
+        for index in range(2+day%6):
+            at=(start+timedelta(days=day,hours=(day*7+index*3)%24)).isoformat()
+            sender=70100+(day+index)%8
+            kind='message.snapshot' if day%5==0 else 'message.recovered' if day%7==0 else 'message.new'
+            with patch('tgwitness.store.utcnow',return_value=at):
+                store.append(kind,{'synthetic':True,'text':'DEMO · Fictional review note.',
+                                   'sender_id':sender,'has_media':False},-100100001-index%2,1000+day*10+index,sender,at)
+
+
+def build(output, languages=('en', 'de', 'ru'), templates=False):
     output = Path(output)
     if output.exists() and any(output.iterdir()):
         raise ValueError('Choose a new empty directory; signed examples are immutable.')
@@ -72,24 +96,34 @@ def build(output, languages=('ru', 'en', 'de')):
         store.bind(vault)
         try:
             seed(store)
+            if templates:
+                seed_activity(store)
             pin = fingerprint(vault.public_key)
             for language in languages:
                 if language not in TITLES:
-                    raise ValueError('Example language must be ru, en or de')
-                options = {**report.resolved(), 'language':language, 'theme':'light',
+                    raise ValueError('Unsupported example language')
+                base = {**report.resolved(), 'language':language, 'theme':'light',
                            'case_title':TITLES[language], 'case_id':'DEMO · MRD-024/26',
                            'examiner':'DEMO · Synthetic analyst', 'organization':'Fictional case lab',
                            'notes':DEMO[language], 'raw_records':False}
-                bundle = evidence.export_file(store, vault, 'zip', options)
-                verified = verify_bundle(bundle, pin)
-                assert verified['key_pinned'] and verified['report_pdf']
-                folder = output / language
-                folder.mkdir()
-                shutil.copyfile(bundle, folder / 'dossier.zip')
-                with zipfile.ZipFile(bundle) as archive:
-                    archive.extractall(folder)
-                receipts[language] = {'synthetic':True, 'fingerprint':pin,
-                                      'archive_sha256':hashlib.sha256(bundle.read_bytes()).hexdigest()}
+                for template in PRESETS if templates else ('dossier',):
+                    options={**base,**PRESETS[template], 'template':template}
+                    if templates:
+                        options.update(review_question='Did the recorded delivery terms change?',
+                            review_method='Compare the saved versions of message 408 in chat -100100001 in events.jsonl. Review coverage before drawing conclusions about the missing period.',
+                            review_findings='The first saved version names 20 November and 48,000. A later edit names 27 November and 64,000. A deletion notice is also recorded for message 409 in another chat; it does not identify who deleted it.',
+                            review_conclusion='The saved versions differ. The example does not establish who made the change. All participants, messages and times here are fictional.')
+                    bundle = evidence.export_file(store, vault, 'zip', options)
+                    verified = verify_bundle(bundle, pin)
+                    assert verified['key_pinned'] and verified['report_pdf']
+                    key=language+'/'+template if templates else language
+                    folder = output / key
+                    folder.mkdir(parents=True)
+                    shutil.copyfile(bundle, folder / 'dossier.zip')
+                    with zipfile.ZipFile(bundle) as archive:
+                        archive.extractall(folder)
+                    receipts[key] = {'synthetic':True, 'fingerprint':pin,
+                                     'archive_sha256':hashlib.sha256(bundle.read_bytes()).hexdigest()}
         finally:
             store.close()
     (output / 'example.json').write_text(json.dumps(receipts, indent=2) + '\n', encoding='utf-8')
@@ -99,5 +133,7 @@ def build(output, languages=('ru', 'en', 'de')):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=ROOT / 'test-results/report-dossier')
+    parser.add_argument('--language', action='append', choices=tuple(TITLES))
+    parser.add_argument('--templates', action='store_true', help='Build all four report presets with synthetic activity')
     args = parser.parse_args()
-    print(json.dumps(build(args.output), indent=2))
+    print(json.dumps(build(args.output,languages=args.language or ('en','de','ru'),templates=args.templates), indent=2))

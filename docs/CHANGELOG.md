@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Add Report studio with three document designs, live unsigned cover/chart preview,
+  selectable activity, weekday/hour, participant, chat and composition charts, and
+  journal history/indicator controls. Saved choices reach HTML, signed PDF/JSON and
+  new account/disclosure jobs. Analytics use only included/minimized records, retain
+  unknowns and bounded-grouping counts, and ship as manifest-protected `analytics.json`.
+  Designs are independent of content presets. Author-written examination notes and
+  source-linked journal statistics retain the published privacy defaults; minimized
+  journal handovers exclude that private analysis. Existing signed exports remain unchanged.
+- Configure report data by chat, author, UTC observation dates and event type.
+  Preview real activity, participants, messages and missing-ID ranges before
+  saving. HTML, PDF and JSON apply the same scope while preserving the original
+  signed journal. Edits show Before/After text; deletions show previously saved
+  content, with out-of-selection history explicitly marked as context.
 - Preserve workspace-specific deep links through first setup, keep the shared
   account form current in Settings, and expose file import when adding an account.
   Compact mobile connection controls keep the account identity visible.

@@ -165,17 +165,6 @@ alone does not prove Telegram origin or complete history.
 
 [Verification guide](docs/TRUST.md) · [Checks and tested scale](docs/VERIFICATION.md)
 
-### A dossier built for its reader
-
-[![Fictional evidence dossier with a case cover, record counts and a signed-file check](docs/assets/reports/dossier-en.png)](docs/CASE_REPORTS.md)
-
-An offline HTML report for exploring records; a signed PDF with a cover, summary,
-evidence map and observation timeline; a ZIP with authoritative data and verification
-instructions. Every conclusion has its basis, limits and independent review step.
-The preview uses fictional messages and a disposable demonstration key.
-
-[Report design and sample generation](docs/CASE_REPORTS.md)
-
 <details>
 <summary><strong>Inside the signed record</strong> · hashes, signatures and independent checkpoints</summary>
 

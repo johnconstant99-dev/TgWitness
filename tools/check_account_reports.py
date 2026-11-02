@@ -72,7 +72,7 @@ def pure_checks():
                    'fingerprint': 'a' * 64, 'source_archive_sha256': 'b' * 64, 'limitations': []}
         rendered = b''.join(account_report.sharing_report(context, iter(()))).decode()
         parsed = Document(rendered)
-        assert parsed.root == {'lang': language, 'dir': 'rtl' if language in RTL else 'ltr'}
+        assert parsed.root == {'lang': language, 'dir': 'rtl' if language in RTL else 'ltr', 'data-template': 'dossier'}
         assert i18n.words(language).get('Messages', 'Messages') in rendered
     for model, extra in ((AccountExportOptions, {}), (DisclosurePolicy, {'purpose': 'Synthetic'})):
         for language in ('xx', '../ru', 'auto', '<script>', 'RU'):
@@ -161,6 +161,7 @@ async def manager_checks(directory, output):
     try:
         for language in ('en', 'ru', 'ar', 'zh'):
             job = await exports.start({'transport': 'regular', 'report_language': language,
+                                       'report_presentation': {'design': 'analytical', 'chart_limit': 5},
                                        'purpose': 'Synthetic report <svg onload=window.reportXSS=2>',
                                        'include_profile': False, 'include_contacts': False, 'media_types': []})
             await asyncio.wait_for(asyncio.shield(exports.task), 30)
@@ -175,6 +176,8 @@ async def manager_checks(directory, output):
                 for name in ('index.html', 'chats/101.html'):
                     body = archive.read(name).decode()
                     assert Document(body).root['lang'] == language
+                    assert Document(body).root['data-template'] == 'analytical'
+                    assert 'id="analytics"' in body
                     assert job['id'] in body and manifest['created_at'] in body
                     receipts = [json.loads(archive.read(name))['statement'] for name in archive.namelist() if name.startswith('receipts/')]
                     assert min(r['captured_from'] for r in receipts) in body
@@ -187,6 +190,7 @@ async def manager_checks(directory, output):
                         for line in archive.read(name).splitlines()]
                 assert all(row['text'] == MESSAGE for row in rows)
             policy = {'purpose': 'Public review SECRET_FILTER', 'report_language': language,
+                      'report_presentation': {'design': 'editorial', 'participant_chart': False},
                       'text_contains': ['SECRET_FILTER', 'UNCHANGED'], 'identity_mode': 'pseudonymize_all'}
             preview = disclosures.preview(job['id'], policy, 'synthetic-reviewer')
             result = await disclosures.create(job['id'], preview['preview_id'], 'synthetic-reviewer')
@@ -200,6 +204,12 @@ async def manager_checks(directory, output):
                 assert 'text_contains' not in manifest['policy']
                 body = archive.read('index.html').decode()
                 assert Document(body).root['lang'] == language
+                assert Document(body).root['data-template'] == 'editorial'
+                assert 'chart-participants"' not in body
+                analytics = json.loads(archive.read('analytics.json'))
+                assert analytics['basis'] == 'sharing' and analytics['messages'] == 4
+                assert 'participants' not in analytics, 'Disabled participant chart leaked its series'
+                assert 'SECRET' not in json.dumps(analytics)
                 assert 'SECRET_FILTER' not in body and SECRET_METADATA not in body
                 assert result['id'] in body and manifest['created_at'] in body
                 assert job['id'] not in body, 'Source export reference leaked into sharing HTML'
@@ -279,7 +289,7 @@ def browser_checks(output):
                 assert not page.locator('nav').is_visible()
                 if page.locator('.record-citation').count():
                     assert page.locator('.record-citation').first.is_visible()
-                    assert not page.locator('details').first.is_visible()
+                    assert not page.locator('.message details').first.is_visible()
                     assert 'UTC' in page.locator('.message-meta').first.inner_text()
                 page.pdf(path=str(output / f'{report}-print.pdf'), format='A4', print_background=True)
                 page.screenshot(path=str(output / f'{report}-print.png'), full_page=True)

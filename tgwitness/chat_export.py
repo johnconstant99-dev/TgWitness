@@ -260,10 +260,13 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
                 if hashes["media/" + source.name] != source.name:
                     raise ValueError("Attachment changed while the export was written: " + source.name)
             stats = chat_stats(scratch_path)
+            analytics = report.snapshot_analytics.collect(records(scratch_path), "snapshot", meta.get("chat"))
+            analytics = report.snapshot_analytics.project(analytics, options)
+            write_member("analytics.json", [canonical(analytics)])
             context = {"kind": "chat", "options": options, "report_id": str(uuid.uuid4()), "created_at": meta["exported_at"],
                        "producer": meta["producer"], "limits": EXPORT_LIMITS, "public_key": vault.public_key,
                        "fingerprint": meta["fingerprint"], "meta": meta, "people": people,
-                       "stats": stats, "chat_json_sha256": hashes["chat.json"], "message_ids": ids,
+                       "stats": stats, "analytics": analytics, "chat_json_sha256": hashes["chat.json"], "message_ids": ids,
                        "account": meta.get("account"), "sign": vault.sign, "indicators": found,
                        "admin_events": admin_events}
             write_indicators(write_member, found, context)

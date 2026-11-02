@@ -54,6 +54,7 @@ class AccountExportOptions(BaseModel):
     text_contains: list[str] = Field(default_factory=list, max_length=100)
     purpose: str = Field(default="", max_length=1000)
     report_language: str = "en"
+    report_presentation: account_report.Presentation = Field(default_factory=account_report.Presentation)
     from_utc: str | None = None
     to_utc: str | None = None
     own_messages_only: bool = False
@@ -785,12 +786,14 @@ class AccountExport:
                         raise ValueError("An attachment changed while packaging.")
                 selected = [c for c in self.inventory["chats"] if c["selected"]]
                 report_context = {"report_language": job["options"].get("report_language", "en"), "archive": True,
+                    "presentation": job["options"].get("report_presentation", {}),
                     "archive_reference": job["job_id"], "requested_at": job["created_at"],
                     "captured_from": captured_from, "captured_until": captured_until,
                     "options": job["options"], "counts": self.current["counts"], "coverage": self.current["coverage"],
                     "complete_within_scope": not self.current["coverage"]["failures"],
                     "omissions": [*self.inventory.get("gaps", []), *self.current.get("omissions", [])],
                     "fingerprint": fingerprint(self.vault.public_key), "limitations": LIMITATIONS}
+                analytics = account_report.snapshot_analytics.Analytics("snapshot")
                 for chat in selected:
                     name = "chats/" + str(chat["id"]) + ".html"
                     def message_rows(chat=chat):
@@ -798,7 +801,13 @@ class AccountExport:
                             with (directory / data_file).open("rb") as stream:
                                 for raw in stream:
                                     yield json.loads(raw)
-                    write(name, account_report.account_chat(report_context, chat, message_rows()))
+                    chat_analytics = account_report.snapshot_analytics.Analytics("snapshot")
+                    for row in message_rows():
+                        analytics.snapshot(row, chat)
+                        chat_analytics.snapshot(row, chat)
+                    write(name, account_report.account_chat({**report_context, "analytics": account_report.snapshot_analytics.project(chat_analytics.result(), report_context["presentation"])}, chat, message_rows()))
+                report_context["analytics"] = account_report.snapshot_analytics.project(analytics.result(), report_context["presentation"])
+                write("analytics.json", [canonical(report_context["analytics"])])
                 write("index.html", account_report.account_index(report_context,
                     ({**chat, "message_count": chat_counts.get(chat["id"], 0)} for chat in selected)))
                 write("README.txt", [("TgWitness account export\n\n" + "\n".join(LIMITATIONS)

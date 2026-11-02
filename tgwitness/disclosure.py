@@ -36,6 +36,7 @@ class DisclosurePolicy(BaseModel):
     model_config = ConfigDict(extra='forbid')
     purpose: str = Field(min_length=1, max_length=1000)
     report_language: str = 'en'
+    report_presentation: account_report.Presentation = Field(default_factory=account_report.Presentation)
     from_utc: str | None = None
     to_utc: str | None = None
     sender_ids: list[int] = Field(default_factory=list, max_length=10000)
@@ -434,8 +435,11 @@ class Disclosures:
                         if matches(row, policy):
                             yield projection.apply(chat, row)
 
+                analytics = account_report.snapshot_analytics.Analytics("sharing")
+
                 def message_bytes():
                     for row in rows():
+                        analytics.snapshot(row['message'], row['chat'])
                         counts['messages'] += 1
                         chats.add(row['chat']['id'])
                         media.update(a['file'] for a in row['message']['attachments'])
@@ -443,10 +447,12 @@ class Disclosures:
                 write('messages.jsonl', message_bytes())
                 counts.update(chats=len(chats), media=len(media))
                 report_context = {'report_language': policy.report_language, 'policy': shared_policy, 'archive': True,
+                    'presentation': policy.report_presentation.model_dump(), 'analytics': account_report.snapshot_analytics.project(analytics.result(), policy.report_presentation.model_dump()),
                     'archive_reference': identity, 'created_at': created,
                     'counts': counts, 'fingerprint': fingerprint(self.vault.public_key),
                     'source_archive_sha256': digest, 'limitations': WARNINGS}
                 write('index.html', account_report.sharing_report(report_context, rows()))
+                write('analytics.json', [canonical(report_context['analytics'])])
                 for name in sorted(media):
                     with source.open(name) as stream:
                         write(name, iter(lambda: stream.read(1024**2), b''))
@@ -459,7 +465,7 @@ class Disclosures:
                     + 'For large packages add --max-gib with the expanded size. index.html is protected by the manifest.\n').encode()])
                 write('SHA256SUMS', [''.join(f'{v}  {k}\n' for k, v in sorted(hashes.items())).encode()])
                 manifest = dict(format='tgwitness-account-disclosure-v1', public_key=self.vault.public_key,
-                    report_language=policy.report_language,
+                    report_language=policy.report_language, report_presentation=policy.report_presentation.model_dump(),
                     fingerprint=fingerprint(self.vault.public_key), disclosure_id=identity, created_at=created,
                     source_archive_sha256=digest, source_collector_fingerprint=fingerprint(self.vault.public_key),
                     policy=shared_policy, counts=counts, files=hashes, limitations=WARNINGS,

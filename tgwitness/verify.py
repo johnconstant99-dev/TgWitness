@@ -1997,7 +1997,7 @@ def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_
         files = manifest["files"]
         if not isinstance(files, dict) or set(archive.namelist()) != set(files) | {"manifest.json", "manifest.sig"}:
             raise ValueError("Unexpected or missing disclosure archive members")
-        allowed = {"messages.jsonl", "index.html", "README.txt", "verify.py", "SHA256SUMS"}
+        allowed = {"messages.jsonl", "index.html", "analytics.json", "README.txt", "verify.py", "SHA256SUMS"}
         for name, checksum in files.items():
             if name not in allowed and not re.fullmatch(r"media/[0-9a-f]{64}", name):
                 raise ValueError("Unexpected disclosure content: " + name)
