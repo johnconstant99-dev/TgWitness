@@ -111,6 +111,19 @@ transcription, and send HMAC-signed webhooks.
 
 ## Your first capture
 
+**Guided installer · preview:** on Ubuntu, run this as root. On Linux desktops and
+macOS, run it as your normal user:
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+On Ubuntu, choose **This computer**, **HTTPS link** or **My own domain**. The
+installer prepares the panel and prints its address and access key. Use
+`tgwitness open` to find it again. Your account data stays on your machine.
+
+[Windows installer, signatures and setup options](https://get.destroy.tools/).
+
 **Windows portable:** [download TgWitness 0.7.1](https://github.com/phishdestroy/TgWitness/releases/download/v0.7.1/TgWitness-0.7.1-windows-amd64-portable.zip),
 extract it and run **`TgWitness.cmd`**. Python is included.
 

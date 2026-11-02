@@ -18,6 +18,8 @@ from urllib.parse import urlsplit
 import zipfile
 
 from setuptools import find_packages
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATES = ROOT / "deploy" / "installer"
@@ -124,6 +126,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="https://get.destroy.tools")
     parser.add_argument("--output", type=Path, default=ROOT / "dist" / "installer-site")
+    parser.add_argument("--signing-key", type=Path, help="Private RSA release key (outside the repository)")
+    parser.add_argument("--test-signing-key", action="store_true", help="Generate an ephemeral key; only for an .invalid test origin")
     args = parser.parse_args()
     base = args.base_url.rstrip("/")
     url = urlsplit(base)
@@ -131,6 +135,24 @@ def main():
             or any(part in (".", "..") for part in url.path.split("/"))
             or not re.fullmatch(r"https://[a-zA-Z0-9.-]+(?::[0-9]+)?(?:/[a-zA-Z0-9._/-]+)?", base)):
         parser.error("base-url must be a plain HTTPS origin or path without credentials")
+    if args.test_signing_key:
+        if not url.hostname.endswith(".invalid") or args.signing_key:
+            parser.error("Test signatures require an .invalid hostname and no release key")
+        signing_key = rsa.generate_private_key(public_exponent=65537, key_size=3072)
+    else:
+        if not args.signing_key:
+            parser.error("A release signing key is required; unsigned installers are not published")
+        if args.signing_key.resolve().is_relative_to(ROOT):
+            parser.error("Keep the private signing key outside the checkout")
+        signing_key = serialization.load_pem_private_key(args.signing_key.read_bytes(), password=None)
+        if not isinstance(signing_key, rsa.RSAPrivateKey) or signing_key.key_size < 3072:
+            parser.error("Use an RSA release key of at least 3072 bits")
+    public_key = signing_key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo)
+    if not args.test_signing_key and public_key != (TEMPLATES / "release-signing.pub").read_bytes():
+        parser.error("The signing key does not match the reviewed public release key")
+    numbers = signing_key.public_key().public_numbers()
+    public_modulus = base64.b64encode(numbers.n.to_bytes((numbers.n.bit_length() + 7) // 8, "big")).decode()
+    public_exponent = base64.b64encode(numbers.e.to_bytes((numbers.e.bit_length() + 7) // 8, "big")).decode()
     revision = git("rev-parse", "HEAD")
     if not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise ValueError("Expected a committed source revision")
@@ -162,14 +184,22 @@ def main():
         release = output / "releases" / release_id
         locked = constraints()
         values = {"BASE_URL": base, "VERSION": version, "REVISION": revision, "RELEASE_ID": release_id,
-                  "WHEEL_NAME": wheel.name, "WHEEL_SHA256": wheel_hash, "CONSTRAINTS_SHA256": digest(locked)}
+                  "WHEEL_NAME": wheel.name, "WHEEL_SHA256": wheel_hash, "CONSTRAINTS_SHA256": digest(locked),
+                  "SIGNING_PUBLIC_KEY": public_key.decode().strip(), "SIGNING_MODULUS": public_modulus,
+                  "SIGNING_EXPONENT": public_exponent, "SIGNING_KEY_SHA256": digest(public_key),
+                  "WHEEL_SIGNATURE_SHA256": digest(signing_key.sign(wheel_bytes, padding.PKCS1v15(), hashes.SHA256())),
+                  "CONSTRAINTS_SIGNATURE_SHA256": digest(signing_key.sign(locked, padding.PKCS1v15(), hashes.SHA256()))}
+        values["SITE_SCRIPT_SRI"] = "sha256-" + base64.b64encode(hashlib.sha256((TEMPLATES / "site.js").read_bytes()).digest()).decode()
         scripts = {}
         for name in ("install.sh", "install.ps1"):
             content = render(name + ".in", values)
             scripts[name] = content.replace("\n", "\r\n").encode() if name.endswith(".ps1") else content.encode()
         values["POWERSHELL_SHA256"] = digest(scripts["install.ps1"])
         scripts["install.cmd"] = render("install.cmd.in", values).replace("\n", "\r\n").encode()
-        artifacts = {wheel.name: wheel_bytes, "constraints.txt": locked, **scripts}
+        artifacts = {wheel.name: wheel_bytes, "constraints.txt": locked, **scripts, "release-signing.pub": public_key}
+        for name, content in list(artifacts.items()):
+            if name != "release-signing.pub":
+                artifacts[name + ".sig"] = signing_key.sign(content, padding.PKCS1v15(), hashes.SHA256())
         for name, content in artifacts.items():
             put(release / name, content, immutable=True)
             put(release / (name + ".sha256"), (digest(content) + "  " + name + "\n").encode(), immutable=True)
@@ -177,7 +207,8 @@ def main():
                     "release_id": release_id, "channel": "preview", "base_url": base,
                     "source_url": "https://github.com/phishdestroy/TgWitness/tree/" + revision,
                     "python": "3.12 (managed)", "mcp": True, "uv_version": "0.13.6",
-                    "verification": "SHA-256 hashes embedded in installers; HTTPS delivery. Not an issuer signature.",
+                    "verification": "Pinned SHA-256 and RSA-PKCS1v15-SHA256 release signatures. The bootstrap is delivered over HTTPS.",
+                    "signing_key_sha256": digest(public_key), "test_only": args.test_signing_key,
                     "files": {name: {"sha256": digest(content), "bytes": len(content),
                                      "url": base + "/releases/" + release_id + "/" + name}
                               for name, content in artifacts.items()}}
@@ -186,6 +217,8 @@ def main():
         put(output / "manifest.json", manifest_bytes)
         for name, content in scripts.items():
             put(output / name, content)
+            put(output / (name + ".sig"), artifacts[name + ".sig"])
+        put(output / "release-signing.pub", public_key)
         sums = "".join(digest(content) + "  " + name + "\n" for name, content in scripts.items())
         put(output / "SHA256SUMS.txt", sums.encode())
         page_values = {key: html.escape(value, quote=True) for key, value in values.items()}
@@ -195,12 +228,12 @@ def main():
         put(output / "mark.svg", (ROOT / "tgwitness" / "static" / "mark.svg").read_bytes())
         put(output / "_headers", (
             "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n"
-            "  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'\n"
-            "  Cache-Control: public, max-age=300\n"
+            "  Content-Security-Policy: default-src 'none'; script-src '" + values["SITE_SCRIPT_SRI"] + "'; style-src 'self'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'\n"
+            "  Cache-Control: public, max-age=300, no-transform\n"
             "/install.sh\n  Content-Type: text/plain; charset=utf-8\n"
             "/install.ps1\n  Content-Type: text/plain; charset=utf-8\n"
             "/install.cmd\n  Content-Type: text/plain; charset=utf-8\n"
-            "/releases/*\n  Cache-Control: public, max-age=31536000, immutable\n"
+            "/releases/*\n  Cache-Control: public, max-age=31536000, immutable, no-transform\n"
         ).encode())
     print(json.dumps({"output": str(output), "source_revision": revision, "release_id": release_id,
                       "wheel_sha256": wheel_hash, "base_url": base}, indent=2))

@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
 FILES = [
     "deploy/installer/install.sh.in", "deploy/installer/install.ps1.in", "deploy/installer/install.cmd.in",
+    "deploy/installer/release-signing.pub",
     "deploy/installer/index.html", "deploy/installer/style.css", "deploy/installer/site.js", "deploy/installer/wrangler.toml",
     "deploy/media-worker/Dockerfile", "deploy/media-worker/worker.py",
     "deploy/media-worker/requirements.in", "deploy/media-worker/requirements.lock",

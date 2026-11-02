@@ -1,0 +1,42 @@
+name: First-run installer acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - deploy/installer/**
+      - tgwitness/panelctl.py
+      - tools/build_installer.py
+      - tools/check_installer*.py
+      - tools/check_panel_setup.py
+      - .github/workflows/installer-acceptance.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: installer-acceptance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  install:
+    name: Ubuntu panel (${{ matrix.mode }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [local, quick]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --require-hashes -r deploy/build.lock
+      - run: python -m pip install -c deploy/constraints.txt cryptography
+      - run: python -I tools/check_panel_setup.py
+      - name: Build with an ephemeral test key, without release credentials
+        run: python tools/build_installer.py --base-url https://installer.invalid --test-signing-key
+      - name: Install and exercise an empty systemd panel
+        env:
+          PANEL_TEST_MODE: ${{ matrix.mode }}
+        run: sudo "$(command -v python)" tools/check_installer.py --service "$PANEL_TEST_MODE"

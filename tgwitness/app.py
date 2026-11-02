@@ -4,6 +4,7 @@ import io
 import ipaddress
 import json
 import logging
+import os
 import re
 import secrets
 from secrets import token_bytes as secrets_token
@@ -450,6 +451,16 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     app = FastAPI(title="TgWitness", version=__version__, lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
+    # An installer-generated, per-start routing identifier, not an access token.
+    # It lets setup check a domain before the operator enters credentials there.
+    installation_id = os.environ.get("TGWITNESS_INSTALLATION_ID", "")
+
+    @app.get("/_tgwitness/ready", include_in_schema=False)
+    async def installation_ready():
+        if not re.fullmatch(r"[0-9a-f]{64}", installation_id):
+            raise HTTPException(404, "Not found")
+        return Response(installation_id, media_type="text/plain", headers={"Cache-Control": "no-store"})
+
     app.state.operation_lock, app.state.closing = op_lock, False
     app.add_middleware(RequestLimit, max_body=16384)
 

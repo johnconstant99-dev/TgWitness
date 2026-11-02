@@ -43,6 +43,8 @@ jobs:
         run: python tools/check_install.py --package . --output test-results/pr-install
       - name: Verify notification credentials cannot follow redirects
         run: python tools/check_notification_redirects.py
+      - name: Check first-run panel choices and service boundaries
+        run: python -I tools/check_panel_setup.py
       - name: Verify frozen dependency inventories cannot omit or replace pins
         run: python -I tools/check_sbom_locks.py
       - name: Verify source archive repeatability and interrupted-build recovery

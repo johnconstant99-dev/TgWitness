@@ -3,6 +3,7 @@
 param(
     [string]$InstallDir,
     [switch]$Plan,
+    [switch]$NoStart,
     [switch]$Help
 )
 
@@ -18,11 +19,24 @@ $ConstraintsHash = '@@CONSTRAINTS_SHA256@@'
 $UvVersion = '0.13.6'
 $MarkerText = 'TgWitness Windows installer v1'
 
+function Verify-ReleaseSignature([string]$Artifact, [string]$Signature) {
+    $PublicParameters = New-Object Security.Cryptography.RSAParameters
+    $PublicParameters.Modulus = [Convert]::FromBase64String('@@SIGNING_MODULUS@@')
+    $PublicParameters.Exponent = [Convert]::FromBase64String('@@SIGNING_EXPONENT@@')
+    $Verifier = New-Object Security.Cryptography.RSACryptoServiceProvider
+    try {
+        $Verifier.ImportParameters($PublicParameters)
+        if (-not $Verifier.VerifyData([IO.File]::ReadAllBytes($Artifact), 'SHA256', [IO.File]::ReadAllBytes($Signature))) {
+            throw 'Release signature rejected. The downloaded package was not executed.'
+        }
+    } finally { $Verifier.Dispose() }
+}
+
 if ($Help) {
     Write-Host 'TgWitness installer for Windows (PowerShell 5.1 or later)'
-    Write-Host '  .\install.ps1 [-InstallDir PATH] [-Plan] [-Help]'
+    Write-Host '  .\install.ps1 [-InstallDir PATH] [-Plan] [-NoStart] [-Help]'
     Write-Host 'Default: %LOCALAPPDATA%\TgWitness; override: TGWITNESS_INSTALL_DIR.'
-    Write-Host 'Installs a private Python 3.12 and TgWitness. It does not start the app.'
+    Write-Host 'Installs a private Python 3.12 and TgWitness, then offers to open the local panel.'
     Write-Host 'Plan and Help make no changes and do not access the network.'
     exit 0
 }
@@ -47,7 +61,7 @@ if ($Plan) {
     Write-Host "Python:  private managed Python 3.12"
     Write-Host "Data:    $(Join-Path $InstallRoot 'data\live')"
     Write-Host "Launch:  $Launcher"
-    Write-Host 'Checks SHA-256 before using downloads; switches the launcher only after validation.'
+    Write-Host 'Checks SHA-256 and release signatures; switches the launcher only after validation.'
     Write-Host 'No changes made. The application will not be started automatically.'
     exit 0
 }
@@ -178,12 +192,19 @@ try {
         $UvExe = Join-Path $Stage 'uv.exe'
         $Wheel = Join-Path $Stage $WheelName
         $Constraints = Join-Path $Stage 'constraints.txt'
-        foreach ($File in @($UvZip, $UvExe, $Wheel, $Constraints)) { $TemporaryFiles.Add($File) }
+        $WheelSignature = Join-Path $Stage 'wheel.sig'
+        $ConstraintsSignature = Join-Path $Stage 'constraints.sig'
+        foreach ($File in @($UvZip, $UvExe, $Wheel, $Constraints, $WheelSignature, $ConstraintsSignature)) { $TemporaryFiles.Add($File) }
         $ProgressPreference = 'SilentlyContinue'
         [Net.ServicePointManager]::SecurityProtocol = $OldTls -bor [Net.SecurityProtocolType]::Tls12
         Write-Host "Installing TgWitness $Version ($Release)"
         Download-Checked "$ReleaseUrl/$WheelName" $Wheel $WheelHash
         Download-Checked "$ReleaseUrl/constraints.txt" $Constraints $ConstraintsHash
+        Download-Checked "$ReleaseUrl/$WheelName.sig" $WheelSignature '@@WHEEL_SIGNATURE_SHA256@@'
+        Download-Checked "$ReleaseUrl/constraints.txt.sig" $ConstraintsSignature '@@CONSTRAINTS_SIGNATURE_SHA256@@'
+        Verify-ReleaseSignature $Wheel $WheelSignature
+        Verify-ReleaseSignature $Constraints $ConstraintsSignature
+        Write-Host 'Release signatures verified. Key SHA-256: @@SIGNING_KEY_SHA256@@'
         Download-Checked "https://github.com/astral-sh/uv/releases/download/$UvVersion/uv-$UvTarget.zip" $UvZip $UvHash
         Add-Type -AssemblyName System.IO.Compression.FileSystem
         $Zip = [IO.Compression.ZipFile]::OpenRead($UvZip)
@@ -225,7 +246,13 @@ rem TgWitness managed launcher v1
 setlocal DisableDelayedExpansion
 pushd "%~dp0.."
 if errorlevel 1 exit /b 1
+if "%~1"=="" goto panel
+for %%A in (setup open status start stop restart logs doctor) do if /i "%~1"=="%%A" goto panel
 "%~dp0..\versions\$($Selected.Name)\.venv\Scripts\python.exe" -I -m tgwitness %*
+goto finished
+:panel
+"%~dp0..\versions\$($Selected.Name)\.venv\Scripts\python.exe" -I -m tgwitness.panelctl --root "%~dp0.." %*
+:finished
 set "TGWITNESS_EXIT=%ERRORLEVEL%"
 popd
 endlocal & exit /b %TGWITNESS_EXIT%
@@ -240,11 +267,10 @@ endlocal & exit /b %TGWITNESS_EXIT%
     }
     else { [IO.File]::Move($LauncherTemp, $Launcher) }
     Write-Host ''
-    Write-Host 'Ready. Start TgWitness when you choose:'
+    Write-Host 'Program files are ready. Open panel setup with:'
     Write-Host ('  & "' + $Launcher + '"')
     Write-Host ('CMD: "' + $Launcher + '"')
     Write-Host "Live data: $(Join-Path $InstallRoot 'data\live'); --demo uses separate data\demo."
-    Write-Host 'The application was not started. Existing sessions were not restarted.'
     $ExitCode = 0
 } catch {
     [Console]::Error.WriteLine('TgWitness installation failed: ' + $_.Exception.Message)
@@ -258,5 +284,10 @@ endlocal & exit /b %TGWITNESS_EXIT%
     }
     if ($Stage) { try { [IO.Directory]::Delete($Stage, $false) } catch { } }
     if ($Lock) { $Lock.Dispose() }
+}
+if ($ExitCode -eq 0 -and -not $NoStart -and $env:TGWITNESS_NO_SETUP -ne '1') {
+    $PanelPython = Join-Path $Selected.FullName '.venv\Scripts\python.exe'
+    & $PanelPython -I -m tgwitness.panelctl --root $InstallRoot setup
+    $ExitCode = $LASTEXITCODE
 }
 exit $ExitCode

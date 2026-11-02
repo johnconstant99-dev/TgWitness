@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
-# TgWitness user-local installer. No sudo, global Python, or automatic startup.
+# TgWitness installer. Verified private Python; choose how to open the panel.
 
 fail() { printf 'TgWitness: %s\n' "$*" >&2; exit 1; }
 step() { printf '%s/4 %s\n' "$1" "$2"; }
 
 usage() {
     cat <<'HELP'
-Install TgWitness with its own Python environment. The application is not started.
+Install TgWitness with its own Python environment, then choose panel access.
 
-Usage: install.sh [--help | --plan]
+Usage: install.sh [--help | --plan | --no-start]
   --help  Show this help without changing files or using the network.
   --plan  Show the destination and release without installing anything.
+  --no-start  Install only. Do not ask questions or start a panel.
 
-Default destination: ~/.local/share/tgwitness
+Default destination: ~/.local/share/tgwitness; Linux root: /opt/tgwitness.
 Override with TGWITNESS_INSTALL_DIR=/absolute/path.
 Set TGWITNESS_NO_LINK=1 to skip the optional ~/.local/bin/tgwitness shortcut.
 Existing source checkouts and unrelated directories are not overwritten.
@@ -73,6 +74,7 @@ configuration() {
     BASE_URL=${BASE_URL%/}
     [[ -n "${HOME:-}" ]] || fail 'HOME is not set.'
     INSTALL_ROOT=${TGWITNESS_INSTALL_DIR:-"$HOME/.local/share/tgwitness"}
+    if [[ -z "${TGWITNESS_INSTALL_DIR:-}" && "$(uname -s)" == Linux && "$EUID" == 0 ]]; then INSTALL_ROOT=/opt/tgwitness; fi
     [[ "$INSTALL_ROOT" == /* ]] || INSTALL_ROOT="$PWD/$INSTALL_ROOT"
     [[ "$INSTALL_ROOT" != *$'\n'* && "$INSTALL_ROOT" != *$'\r'* && "$INSTALL_ROOT" != / ]] || fail 'Invalid installation directory.'
     platform
@@ -83,7 +85,7 @@ plan() {
     printf 'Install: %s\nPython: private managed Python 3.12\n' "$INSTALL_ROOT"
     printf 'Download: %s/releases/%s/%s\n' "$BASE_URL" "$RELEASE_ID" "$WHEEL_NAME"
     printf 'Launch: %s/bin/tgwitness\nData: %s/data\n' "$INSTALL_ROOT" "$INSTALL_ROOT"
-    printf 'No application start, service restart, or PATH changes.\n'
+    printf 'Planning makes no changes. Installation asks before enabling panel access.\n'
 }
 
 managed_directory() {
@@ -172,6 +174,19 @@ verify() {
     [[ "$actual" == "$2" ]] || fail "Checksum mismatch: ${1##*/}. Nothing from this download was executed."
 }
 
+verify_signatures() {
+    cat > "$STAGING/release-signing.pub" <<'PUBLIC_KEY'
+@@SIGNING_PUBLIC_KEY@@
+PUBLIC_KEY
+    local artifact
+    for artifact in "$WHEEL_NAME" constraints.txt; do
+        openssl dgst -sha256 -verify "$STAGING/release-signing.pub" \
+            -signature "$STAGING/$artifact.sig" "$STAGING/$artifact" >/dev/null ||
+            fail "Release signature rejected: $artifact. Nothing from this download was executed."
+    done
+    printf 'Release signatures verified. Key SHA-256: @@SIGNING_KEY_SHA256@@\n'
+}
+
 unpack_uv() {
     local member kind
     tar -tzf "$STAGING/uv.tar.gz" > "$STAGING/uv-members"
@@ -231,15 +246,18 @@ activate() {
     {
         printf '#!/usr/bin/env bash\n# TgWitness managed launcher v1\nset -e\n'
         printf 'cd -- %q\n' "$INSTALL_ROOT"
-        printf 'exec %q -I -m tgwitness "$@"\n' "$PYTHON"
+        printf 'case "${1:-}" in\n'
+        printf '  ""|setup|open|status|start|stop|restart|logs|doctor) exec %q -I -m tgwitness.panelctl --root %q "$@" ;;\n' "$PYTHON" "$INSTALL_ROOT"
+        printf '  *) exec %q -I -m tgwitness "$@" ;;\nesac\n' "$PYTHON"
     } > "$temporary"
     chmod 700 "$temporary"
     mv -f -- "$temporary" "$LAUNCHER"
     shortcut="$HOME/.local/bin/tgwitness"
+    if [[ "$(uname -s)" == Linux && "$EUID" == 0 ]]; then shortcut=/usr/local/bin/tgwitness; fi
     if [[ "${TGWITNESS_NO_LINK:-0}" == 1 ]]; then
         :
     elif [[ ! -e "$shortcut" && ! -L "$shortcut" ]]; then
-        if mkdir -p -- "$HOME/.local/bin" && ln -s -- "$LAUNCHER" "$shortcut"; then
+        if mkdir -p -- "${shortcut%/*}" && ln -s -- "$LAUNCHER" "$shortcut"; then
             printf 'Shortcut: %s\n' "$shortcut"
         else
             printf 'Could not create the optional shortcut; use the launch path below.\n' >&2
@@ -251,12 +269,12 @@ activate() {
     fi
     step 4 Ready
     printf 'Launch: %q\nData: %s/data\n' "$LAUNCHER" "$INSTALL_ROOT"
-    printf 'The application has not been started. PATH was not changed.\n'
+    printf 'Program files are ready. Your panel access is chosen next.\n'
 }
 
 install() {
     local command release
-    for command in curl tar grep uname mktemp; do
+    for command in curl tar grep uname mktemp openssl; do
         command -v "$command" >/dev/null 2>&1 || fail "Install the required system tool first: $command"
     done
     command -v sha256sum >/dev/null 2>&1 || command -v shasum >/dev/null 2>&1 || fail 'A SHA-256 tool is required (sha256sum or shasum).'
@@ -280,10 +298,13 @@ install() {
     download "https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-$TARGET.tar.gz" "$STAGING/uv.tar.gz"
     download "$release/$WHEEL_NAME" "$STAGING/$WHEEL_NAME"
     download "$release/constraints.txt" "$STAGING/constraints.txt"
+    download "$release/$WHEEL_NAME.sig" "$STAGING/$WHEEL_NAME.sig"
+    download "$release/constraints.txt.sig" "$STAGING/constraints.txt.sig"
     step 2 Verify
     verify "$STAGING/uv.tar.gz" "$UV_SHA256"
     verify "$STAGING/$WHEEL_NAME" "$WHEEL_SHA256"
     verify "$STAGING/constraints.txt" "$CONSTRAINTS_SHA256"
+    verify_signatures
     unpack_uv
     step 3 Install
     mkdir -m 700 -- "$VERSION_DIR"
@@ -310,6 +331,7 @@ main() {
         case "$1" in
             --help|-h) usage; return ;;
             --plan) mode=plan ;;
+            --no-start) mode=install-only ;;
             *) fail "Unknown argument: $1. Use --help." ;;
         esac
     fi
@@ -317,6 +339,9 @@ main() {
     if [[ "$mode" == plan ]]; then plan; return; fi
     umask 077
     install
+    if [[ "$mode" != install-only && "${TGWITNESS_NO_SETUP:-0}" != 1 ]]; then
+        "$PYTHON" -I -m tgwitness.panelctl --root "$INSTALL_ROOT" setup
+    fi
 }
 
 main "$@"

@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 /tests/
 .ruff_cache/
+.wrangler/
 *.pyc
 data/
 tgwitness-backup*/
