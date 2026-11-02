@@ -32,15 +32,12 @@ LIMITS = [
 
 
 def producer():
-    """Who made an export. Part of every signed manifest, so verify.py can show it as verified."""
     return {"software": "TgWitness", "version": __version__, "project": "PhishDestroy",
             "homepage": "https://phishdestroy.io", "source": "https://github.com/phishdestroy/TgWitness", **build()}
 
 
 @functools.lru_cache(maxsize=1)
 def build():
-    """The exact program: the SHA-256 of its source files (provenance.source_files, which a checkout of any
-    commit reproduces) and the git commit when it runs from a checkout or the installer named one."""
     from .provenance import SOURCE_POLICY, source_files, source_tree_sha256
     found = {"source_policy": SOURCE_POLICY, "source_tree_sha256": source_tree_sha256(source_files())}
     commit = os.environ.get("TGWITNESS_COMMIT") or checkout_commit(Path(__file__).resolve().parents[1])
@@ -50,10 +47,9 @@ def build():
 
 
 def checkout_commit(root):
-    """HEAD of a git checkout (or worktree) at root, read from its files; None outside a checkout."""
     try:
         git = root / ".git"
-        if git.is_file():  # a worktree: "gitdir: <path>"
+        if git.is_file():
             git = (root / git.read_text(encoding="utf-8").split(":", 1)[1].strip()).resolve()
         head = (git / "HEAD").read_text(encoding="utf-8").strip()
         if not head.startswith("ref: "):
@@ -139,24 +135,14 @@ README = (
     "the signed manifest.\n")
 
 
-def html_bytes(events, coverage=None, context=None):
-    return b"".join(html_chunks(events, coverage, context))
-
-
 def html_chunks(events, coverage=None, context=None):
-    """The readable report (see report.py); sealed when the context carries the signing key."""
     return report.evidence_chunks(events, coverage, {"limits": LIMITS, "producer": producer(), **(context or {})})
 
 
-COVERAGE_RANGES = 100_000  # absent message numbers listed per chat in coverage.json and report.json
+COVERAGE_RANGES = 100_000
 
 
 def export_file(store, vault, fmt, options=None, *, include_board=True):
-    """A stable journal prefix as JSONL, CSV, a sealed HTML or JSON report, or the signed evidence ZIP.
-
-    options are resolved report options (report.resolved); the case details they carry are
-    signed into the manifest and the report seal. In the ZIP, report.html is a viewer whose data are
-    viewer/*.js beside it (viewer.py), listed by SHA-256 in its seal."""
     if fmt not in ("jsonl", "csv", "html", "json", "pdf", "zip"):
         raise ValueError("Unsupported export format")
     if fmt == "pdf" and not pdf_report.available():
@@ -189,7 +175,6 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
             coverage = observed.result(COVERAGE_RANGES)
             digest.hash_images(store.root / "media")
             summary = digest.result()
-            # Titles recorded in the journal win; current source titles fill the rest.
             summary["titles"] = {**{t["chat_id"]: t["title"] for t in store.targets() if t.get("title")},
                                  **summary["titles"]}
             context = {"kind": "evidence", "options": options, "report_id": str(uuid.uuid4()), "created_at": utcnow(),
@@ -221,8 +206,6 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
                 context["source_events"] = snapshot.events
             if (selection.enabled or selection.id_gaps) and fmt in ("html", "json", "pdf", "zip"):
                 selected = report.report_selection.analyze(snapshot, selection, preview_limit=0, scratch_root=directory)
-                # The private catalog and preview samples are panel-only. The signed
-                # report records its scope, counts and bounded missing-ID context.
                 context["selection"] = {key: selected[key] for key in ("selection", "source", "counts", "id_gaps")}
 
             def chunks(format):
@@ -303,7 +286,6 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
                             source.name, source.read_bytes(), proof.name, proof.read_bytes(),
                             query.read_bytes() if proof.suffix == ".tsr" and query.is_file() else None,
                             public_key=vault.public_key, event_count=result["events"], hash_at=snapshot.hash_at))
-                # The readable kit: custody record, sealed report, README and SHA256SUMS, in that order.
                 context["events_sha256"] = hashes["events.jsonl"]
                 write_member("custody.json", [json.dumps(report.custody(context), ensure_ascii=False,
                                                          indent=1).encode("utf-8")])
@@ -342,13 +324,11 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
 
 
 def write_indicators(write_member, found, context):
-    """indicators.csv, .stix.json and .misp.json when the messages named any; the signed manifest lists them."""
     for name, data in indicators.files(found or {"items": []}, {**context, "case": report.case_of(context["options"])}):
         write_member(name, [data])
 
 
 def write_viewer(write_member, kind, items, people, found, options=None):
-    """Signed viewer data files, bounded by the configured record count and the byte budget."""
     writer = viewer.Writer(write_member, kind, chunk_size=(options or {}).get("part_size", viewer.CHUNK))
     for item in items:
         writer.add(item)
@@ -356,7 +336,6 @@ def write_viewer(write_member, kind, items, people, found, options=None):
 
 
 def write_pdf(write_member, name, render):
-    """Add the signed PDF when this server can make one; the HTML and JSON reports never depend on it."""
     if not pdf_report.available():
         return False
     try:
@@ -368,7 +347,6 @@ def write_pdf(write_member, name, render):
 
 
 def report_entry(context, options, file="report.html"):
-    """The manifest's account of the readable reports: the sealed page, its JSON and PDF twins and any parts."""
     entry = {"id": context["report_id"], "file": file, "language": options["language"], "sealed": True,
              "design": report.report_design.normalized(options.get("design")),
              "custody": "custody.json", "presentation": {k: options.get(k, v) for k, v in report.report_analytics.Presentation().model_dump().items()}}
@@ -386,7 +364,6 @@ def report_entry(context, options, file="report.html"):
 
 
 def encrypt_export(path, fmt, password, inner_name=None):
-    """Put a finished export, unchanged, into a WinZip AES-256 ZIP that 7-Zip and WinRAR open."""
     import pyzipper
     out = path.with_name(path.name + ".zip")
     try:
@@ -404,7 +381,6 @@ def encrypt_export(path, fmt, password, inner_name=None):
 
 
 def cleanup_exports(root):
-    """Called with the profile instance lock held; remove only our interrupted temporary exports."""
     directory = root / "temporary-exports"
     if directory.is_symlink() or not directory.is_dir() or directory.resolve().parent != root.resolve():
         return

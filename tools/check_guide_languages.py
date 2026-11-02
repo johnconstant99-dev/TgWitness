@@ -1,9 +1,7 @@
-"""Exercise both bundled guides in the application and under a Pages project path."""
+import argparse
 import json
-import os
 from pathlib import Path
 import sys
-import tempfile
 from urllib.parse import urlsplit
 
 from playwright.sync_api import sync_playwright, expect
@@ -11,7 +9,7 @@ from playwright.sync_api import sync_playwright, expect
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tgwitness import i18n
-from tools.check_browser import RunningApp, check_layout, launch_browser
+from tools.browser_helpers import check_layout, launch_browser
 from tools.site_test_server import site_server
 from tools.i18n_keys import script_keys
 
@@ -144,19 +142,18 @@ def check_public_redirects(browser, base):
 
 
 def main():
-    output = ROOT / "test-results/guide-languages"
-    output.mkdir(parents=True, exist_ok=True)
-    os.environ.pop("TGWITNESS_TOKEN", None)
-    with tempfile.TemporaryDirectory(prefix="guide-languages-", dir=ROOT / "test-results") as scratch:
-        with site_server(ROOT / "dist/site") as public:
-            with RunningApp(Path(scratch) / "application", demo=True) as app, sync_playwright() as pw:
-                browser = launch_browser(pw)
-                check_inventory(browser)
-                check_guides(browser, app.url + "/", output, "application")
-                check_guides(browser, public + "demo/", output, "public")
-                check_public_redirects(browser, public)
-                browser.close()
-    print("Guide languages passed: 26 bundled guide languages and 25 complete public account guides.")
+    parser = argparse.ArgumentParser(description="Check translated guides in the built static website.")
+    parser.add_argument("--site-root", type=Path, default=ROOT / "dist/site")
+    parser.add_argument("--output", type=Path, default=ROOT / "test-results/guide-languages")
+    args = parser.parse_args()
+    args.output.mkdir(parents=True, exist_ok=True)
+    with site_server(args.site_root) as public, sync_playwright() as pw:
+        browser = launch_browser(pw)
+        check_inventory(browser)
+        check_guides(browser, public + "demo/", args.output, "public")
+        check_public_redirects(browser, public)
+        browser.close()
+    print("Static guide languages passed: 26 bundled guide languages and 25 complete public account guides.")
 
 
 if __name__ == "__main__":

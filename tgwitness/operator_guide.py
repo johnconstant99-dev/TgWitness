@@ -1,4 +1,3 @@
-"""An offline operations card written next to the managed launcher."""
 import base64
 import hashlib
 import html

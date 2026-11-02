@@ -1,9 +1,3 @@
-"""Capture the actual read-only demo for the README.
-
-Run tools/build_site.py first, then this script with Playwright, Chromium and
-Pillow installed. Only the generated local demo and its fictional fixtures are
-used. Nothing is sent to Telegram or to an external service.
-"""
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
@@ -25,7 +19,6 @@ class Quiet(SimpleHTTPRequestHandler):
 
 
 def capture(page, mobile):
-    """Use the desktop viewport or a readable crop of the phone conversation."""
     page.locator("#chat-feed").evaluate("el => el.scrollTop = 0")
     if mobile:
         page.locator("#chat-status").evaluate(

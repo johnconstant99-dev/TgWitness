@@ -1,4 +1,3 @@
-"""Header health actions, pause confirmation and stable workspace options."""
 import json
 from pathlib import Path
 import tempfile
@@ -52,7 +51,6 @@ def main():
             assert not writes
             page.locator("#collector-toggle").click()
             answer_panel_dialog(page)
-            # The confirmed pause is sent after the dialog closes.
             for _ in range(100):
                 if writes:
                     break

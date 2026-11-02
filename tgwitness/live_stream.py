@@ -1,4 +1,3 @@
-"""Bounded, committed journal notifications. No payloads or signing material leave this path."""
 import asyncio
 import copy
 import json
@@ -34,7 +33,6 @@ class StreamSlots:
 
 
 class LimitedStreamingResponse(StreamingResponse):
-    """Keep the slot for the complete ASGI response, including its first headers."""
     def __init__(self, content, *, slots, owner=None, **kwargs):
         super().__init__(content, **kwargs)
         self.slots = slots
@@ -77,7 +75,7 @@ async def stream(store, after, authorize, disconnected, *, interval=1, lifetime=
     cursor = after
     deadline = time.monotonic() + lifetime
     while time.monotonic() < deadline and not await disconnected():
-        allowed = authorize()  # Recheck revocation and current chat scope for every batch.
+        allowed = authorize()
         records = await asyncio.to_thread(notifications, store, cursor, allowed)
         if allowed != authorize():
             await asyncio.sleep(0.05)
@@ -97,5 +95,4 @@ async def stream(store, after, authorize, disconnected, *, interval=1, lifetime=
             yield "id: " + str(cursor) + "\nevent: journal\ndata: " + json.dumps(records, separators=(",", ":")) + "\n\n"
         else:
             yield ": keep-alive\n\n"
-        # A bounded batch, no unbounded per-browser queue even if the client is slow.
         await asyncio.sleep(interval if len(records) < 100 else 0.05)

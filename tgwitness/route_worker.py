@@ -1,4 +1,3 @@
-"""Own a portable tunnel until the panel closes its stdin pipe, including after a crash."""
 import os
 import subprocess
 import sys

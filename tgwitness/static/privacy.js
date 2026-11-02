@@ -1,16 +1,14 @@
-/* Presentation only: never edit message payloads or signed records. */
 (function () {
   "use strict";
   let enabled = true;
   const activeReveals = new Set();
   const displays = new Set(), painters = new WeakMap();
   function tracked(root, paint) {
-    // Inactive views may be detached and mounted again with their existing DOM.
     for (const ref of displays) if (!ref.deref()) displays.delete(ref);
     displays.add(new WeakRef(root)); painters.set(root, paint); paint(); return root;
   }
   window.addEventListener('tgwitness:lock', () => {for (const hide of activeReveals) hide();});
-  try { enabled = localStorage.getItem('tgwitness-mask-secrets') !== 'off'; } catch { /* private browsing */ }
+  try { enabled = localStorage.getItem('tgwitness-mask-secrets') !== 'off'; } catch { }
   const RU = {
     'Show': 'Показать', 'Hide': 'Скрыть', 'Retry': 'Повторить', 'Possible secret': 'Возможный секрет',
     'Revealing a secret is recorded in the journal.': 'Показ секрета будет записан в журнал.',
@@ -27,7 +25,6 @@
   function ranges(value) {
     const text = String(value ?? ''), found = [];
     const add = (start, end) => { if (end > start) found.push({start, end}); };
-    // Bounded tokens and simple character classes keep scans linear for large messages.
     const patterns = [
       /-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----[\s\S]*?(?:-----END (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----|$)/g,
       /\b(?:sk-(?:proj-|ant-api\d+-|or-v\d+-)?[A-Za-z0-9_-]{12,4096}|AIza[A-Za-z0-9_-]{25,64}|gh[pousr]_[A-Za-z0-9]{20,255}|github_pat_[A-Za-z0-9_]{20,255})\b/g,
@@ -94,7 +91,6 @@
   function recordPreview(value) {
     return JSON.stringify(value, (key, item) => {
       if (!enabled || typeof item !== 'string') return item;
-      // Journal hashes and public signatures are verification data, not credentials.
       if (/^(?:hash|prev_hash|signature|public_key|media_sha256|sha256)$/.test(key)) return item;
       if (/^(?:password|passwd|secret|token|api_key|api_hash|app_hash|auth_key|session|string_session|session_string|twofa|2fa)$/i.test(key)) return mask(item);
       return preview(item);
@@ -114,7 +110,7 @@
       enabled = !!value;
       for (const hide of activeReveals) hide();
       for (const ref of displays) {const root = ref.deref(); if (root) painters.get(root)?.(); else displays.delete(ref);}
-      try {localStorage.setItem('tgwitness-mask-secrets', enabled ? 'on' : 'off');} catch { /* optional preference */ }
+      try {localStorage.setItem('tgwitness-mask-secrets', enabled ? 'on' : 'off');} catch { }
     },
   };
 })();

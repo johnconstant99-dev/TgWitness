@@ -1,4 +1,3 @@
-"""Notification grouping, scoped navigation and viewport checks with synthetic records."""
 import argparse
 import re
 from pathlib import Path
@@ -108,7 +107,6 @@ def check_behavior(page, server, browser):
     expect(page.locator("#notify-panel")).to_be_hidden()
     expect(page.locator("#notify-toggle")).to_be_focused()
 
-    # Acknowledging the default workspace must not acknowledge a second account's same error.
     profile = api(page, server, "/api/profiles", {"label": "Second workspace"})["id"]
     other_store = server.app.state.profiles.entries[profile]["app"].state.store
     other_store.append("collector.error", {"operation": "recheck", "error_type": "TimeoutError"}, HARBOR)
@@ -127,7 +125,6 @@ def check_behavior(page, server, browser):
     open_panel(page)
     expect(page.locator("#notify-count")).to_be_hidden()
 
-    # Rules are navigation, and preserve an unsaved settings draft.
     page.locator("#notify-rules").click()
     expect(page.locator("#extras-alerts")).to_be_visible()
     page.locator("#alerts-advanced summary").click()
@@ -139,7 +136,6 @@ def check_behavior(page, server, browser):
     expect(page.locator("#alerts-urls")).to_have_value("jsons://notify.example/unsaved-draft")
     assert not mutations, mutations
 
-    # Lower-bound counts are visibly qualified, including old demo data without metadata.
     def partial(route):
         response = route.fetch()
         data = response.json()
@@ -151,7 +147,6 @@ def check_behavior(page, server, browser):
     page.unroute("**/api/notifications", partial)
     close_panel(page)
 
-    # Exact chat IDs are used; a read-only scoped viewer never receives hidden titles or settings actions.
     secret = "HIDDEN-NOTICE-SECRET"
     server.app.state.store.append("collector.error", {"operation": secret, "error_type": "OSError"}, OTHER)
     xss = '<img src=x onerror="window.noticeXss=1">'
@@ -182,7 +177,6 @@ def check_behavior(page, server, browser):
     assert not any("/api/multi-export/current" in url for url in reader_requests), reader_requests
     reader.close()
 
-    # A popover near the screen edge flips above its trigger and remains in the viewport.
     page.locator('[data-view="observations"]').click()
     open_panel(page)
     page.evaluate("""() => {
@@ -196,7 +190,6 @@ def check_behavior(page, server, browser):
     page.mouse.click(20, 20)
     expect(page.locator("#notify-panel")).to_be_hidden()
 
-    # A delayed old response cannot replace a more recent refresh or reopen a locked popup.
     held = []
     def delay(route):
         if not held:

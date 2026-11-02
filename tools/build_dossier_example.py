@@ -1,4 +1,4 @@
-"""Build a new offline, signed fictional dossier. Never overwrite signed examples."""
+"""Build a new offline, signed fictional dossier."""
 import argparse
 from datetime import datetime, timedelta, timezone
 import hashlib
@@ -73,7 +73,6 @@ def seed(store):
 
 
 def seed_activity(store):
-    """Uneven, entirely fictional observations for readable chart examples."""
     start=datetime(2026,11,2,0,tzinfo=timezone.utc)
     for day in range(14):
         for index in range(2+day%6):

@@ -1,7 +1,3 @@
-"""Optional real helper acceptance. Downloads pinned binaries; never registers with Cloudflare.
-
-WireGuard packets go only to a UDP socket owned by this test on loopback.
-"""
 import asyncio
 import base64
 import socket
@@ -55,7 +51,6 @@ async def main():
                 raise AssertionError('a second peer reused the active WireGuard key')
             assert process.returncode is None
             print('Rechecking reuses the selected tunnel; competing same-key profile refused', flush=True)
-            # Simulate disappearance of the panel. The worker must reap wireproxy.
             process.stdin.close()
             await asyncio.wait_for(process.wait(), 10)
             try:

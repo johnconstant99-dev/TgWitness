@@ -1,4 +1,3 @@
-"""Exercise key replacement and integrity failures in a real browser, with synthetic data."""
 import json
 from pathlib import Path
 import tempfile

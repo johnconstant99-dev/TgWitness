@@ -1,5 +1,4 @@
 "use strict";
-// Classic addons share this adapter; each screen keeps its own root while detached.
 const panelRoots=new Map([...document.querySelectorAll('.view')].map(root=>[root.id.slice(5),root]));
 const $ = id => {
   const attached=document.getElementById(id);if(attached)return attached;
@@ -74,7 +73,6 @@ const boardReady=import('./views/board.js?v=1').then(({createCaseBoard})=>{
 let settingsHub;
 const settingsHubReady=import('./views/settings-hub.js?v=4').then(({createSettingsHub})=>{
   const authCard=$('credentials-form').closest('.auth-card');
-  // Metadata covers legacy fields as well as the compact settings. Search never drops expert fields.
   const catalog=()=>panelQueries('input[id],select[id],textarea[id]').filter(el=>!el.closest('#gate,#view-settings,#view-first-run')).map(el=>{
     const root=[...panelRoots].find(([,r])=>r.contains(el));
     const view=root?.[0]||'connection';
@@ -216,7 +214,6 @@ async function applyRouteToPanel(route,current){
   state.eventBefore=route.before??null;
   $("event-search").value=state.search;fillSourceSelect("source-filter",state.source,true);
   viewQueries("observations","[data-filter]").forEach(button=>button.classList.toggle("active",button.dataset.filter===state.filter));
-  // A direct link to a chat must never show the previously open chat while the list loads.
   if(route.view==="chats"&&route.chatId!==null&&route.chatId!==state.chat)beginChat(route.chatId);
   if(route.view==="group")state.groupId=route.group;
   navigate(route.view,{history:false,load:false});
@@ -392,7 +389,6 @@ function hideTooltip(){
 }
 function showTooltip(event){
   const target=event.target.closest?.("button[title],summary[title]");if(!target?.title||target.disabled)return;
-  // A control whose panel is open does not show its hint: it would cover the panel, such as its close button.
   if(target.getAttribute("aria-expanded")==="true")return;
   hideTooltip();tooltipTarget=target;tooltip.textContent=target.title;tooltip.hidden=false;
   if(!target.textContent.trim()&&!target.getAttribute("aria-label"))target.setAttribute("aria-label",target.title);
@@ -429,8 +425,6 @@ const termLabels={offline:tr("offline"),ready:tr("ready"),credentials:tr("creden
   member_or_unknown:tr("member or unknown"),unknown:tr("unknown"),messages:tr("messages"),edits:tr("edits"),
   deletions:tr("deletions"),reactions:tr("reactions"),membership:tr("membership")};
 const termText=value=>termLabels[value]??String(value??"").replaceAll("_"," ");
-// Attachment type names, the same as in Sources → Recording.
-// Panel dialogs (dialogs.js) instead of window.prompt/confirm, which some browsers refuse.
 const askConfirm=(message,options)=>window.TgWitnessDialogs.confirm(message,options);
 const askText=(message,options)=>window.TgWitnessDialogs.prompt(message,options);
 const askTyped=(message,expected,options)=>window.TgWitnessDialogs.typed(message,expected,options);
@@ -492,7 +486,6 @@ let accessStarted=false;
 class StaleView extends Error {constructor(){super("");this.name="StaleView";}}
 function toast(message, error=false) { if(!message)return;const n = $("toast"); n.textContent = message; n.classList.toggle("error", error); show("toast", true); clearTimeout(toastTimer); toastTimer = setTimeout(() => leave("toast"), error ? 9000 : 5000); }
 async function api(path, body, options={}) {
-  // Cancelling an already-started QR login targets its captured workspace, including during a switch.
   const cancellingLogin=/^auth\/qr\/[A-Za-z0-9_-]+\/cancel$/.test(path);
   if(state.me&&!$("workspace").hidden&&!cancellingLogin&&!['access/me','profiles','access/logout'].includes(path))workspaceSafety?.assert();
   const revision=state.workspaceRevision;
@@ -595,8 +588,6 @@ function unlockFailed(error) {
   }
   const message=$('login-error');message.textContent=error.message||tr('Panel connection unavailable');
   if(!state.token)return;
-  // A failed status/read request does not revoke the authenticated session.
-  // Preserve it even if the first login failed before the workspace rendered.
   sessionStorage.setItem('tgwitness-token',state.token);
   window.TgWitnessLive?.stop();show('workspace',false);show('gate',true);
   const retry=node('button','secondary',tr('Retry'));retry.id='bootstrap-retry';retry.type='button';
@@ -818,7 +809,6 @@ function renderWorkflowControls(){
 }
 function openWorkflowSignIn(){
   const entered=navigate('connection');
-  // Navigation mounts synchronously; its reads may finish after the user advances sign-in.
   if(state.view==='connection'&&['code-form','password-form','qr-state'].every(id=>$(id).hidden))
     setAuthStep('credentials');
   return entered;
@@ -867,7 +857,6 @@ async function loadQuickCatalog(){
     quickCatalogHint.textContent=tr('Parameter search is unavailable. Open Parameters to retry.');quickCatalogHint.hidden=false;
   }}finally{if(quickCatalogPending===controller)quickCatalogPending=null;}
 }
-// Native close events are queued; an older one must not cancel a reopened palette.
 quickDialog.addEventListener('close',()=>{if(!quickDialog.open)cancelQuickCatalog();});
 window.addEventListener('tgwitness:lock',()=>{quickCatalog=[];quickCatalogKey='';cancelQuickCatalog();quickResults.replaceChildren();});
 $("quick-shortcut").textContent=/Mac|iPhone|iPad/.test(navigator.platform)?"⌘ K":"Ctrl K";
@@ -941,7 +930,6 @@ function openQuickDestination(view){
 function toggleQuick(){
   if(quickDialog.open){quickDialog.close();return;}
   if($("workspace").hidden||$("workspace").inert||document.querySelector("dialog[open]")||!$("detail-drawer").hidden)return;
-  // Retire the previous request before reopening, even if its close event is still queued.
   closeNotifications();cancelQuickCatalog();quickSearch.value="";
   quickDialog.showModal();renderQuick();quickSearch.focus();void loadQuickCatalog();
 }
@@ -973,8 +961,6 @@ document.addEventListener("keydown",event=>{
       &&!$("workspace").hidden&&!$("workspace").inert){event.preventDefault();if(!event.repeat)toggleQuick();}
 });
 
-// ---- Health: what each part does now, apart from whether it is switched on (health.py) ----
-// [label, icon]: the state is always written and drawn, colour only adds to it.
 const healthStates={off:[tr("Off"),"pause"],configured:[tr("Configured"),"settings"],running:[tr("In progress"),"refresh"],
   working:[tr("Working"),"check"],degraded:[tr("Degraded"),"alert"],failed:[tr("Error"),"x"],unknown:[tr("State unknown"),"question"]};
 const healthKnown=value=>Object.hasOwn(healthStates,value)?value:"unknown";
@@ -985,7 +971,6 @@ function stateBadge(value,cls="health-badge"){
   const key=healthKnown(value),badge=node("span",cls+" state-"+key);
   badge.append(icon(healthStates[key][1]),node("span","",healthStates[key][0]));return badge;
 }
-// Where a part's problem can be looked into; opening it changes no setting and contacts nobody.
 const healthDiagnostics={connection:{view:"connection"},intake:{view:"observations",filter:"coverage"},
   sources:{view:"sources"},media:{view:"sources",target:"capture-form"},
   timestamps:{view:"witness",extra:"evidence",target:"evidence-status"},
@@ -1014,7 +999,6 @@ function healthRow(name,title,item,lines){
   return row;
 }
 const healthPartNames={connection:tr("Telegram connection"),intake:tr("Event intake"),sources:tr("Sources"),media:tr("Attachment queue")};
-// Why Telegram stopped accepting the account's session (collector.py: LOSS_MEANING).
 function accountLossText(cause){
   return {account_banned:tr("Telegram banned this account. Observation stopped; the journal is kept."),
     account_frozen:tr("Telegram froze this account and refuses most requests. Observation stopped; the account can appeal through @SpamBot."),
@@ -1121,8 +1105,6 @@ function renderStatus() {
   modesUI?.sync(modeSession());
   viewHost?.updateStatus(s);
 }
-// Settings and first setup mount the same account card. Its identity must follow
-// the loaded workspace even while the original Account page is detached.
 function renderAccountIdentity(s){
   const account=s.collector.account;
   const identity=account ? (account.username ? "@"+account.username+" · " : "") + "ID "+account.id : "";
@@ -1141,7 +1123,6 @@ function renderAccountIdentity(s){
   renderApiState();
   window.TgWitnessAccountImport?.renderAccount();
 }
-// The overview never opens blank: with nothing recorded yet it says why and offers the next step.
 function renderOverviewEmpty(s){
   const box=$("overview-empty"),counts=s.stats.counts,c=s.collector;
   const recorded=["message.new","message.snapshot","message.edited","message.deleted"].some(kind=>counts[kind]);
@@ -1321,7 +1302,6 @@ function renderAccounts(){
     const card=node("div","card padded account-card"+(current?" current":""));card.dataset.profile=p.id;card.profileData=p;
     const head=node("div","account-head"),who=node("div","account-who"),account=c&&c.account;
     const title=node("div");title.append(node("h2","",p.label));
-    // The badge sums up every part (health.py); the observation phase alone is listed below it.
     const badge=s.demo?node("span","account-badge sample",tr("Sample data")):!down&&p.health?stateBadge(p.health.state,"account-badge"):
       node("span","account-badge "+(c&&c.running?"on":down?"down":"off"),accountPhaseLabel(p));
     title.append(node("p","account-id",s.demo?tr("Demo workspace"):accountIdentity(p)));
@@ -1566,7 +1546,6 @@ function excerpt(e) {
   if (p.meaning) return p.meaning;
   return tr("Open the source record for observation details");
 }
-// One unreadable record must not stop the timeline, its counter or its paging.
 function safeExcerpt(e){
   try{return excerpt(e);}
   catch(error){console.error("Journal record #"+e.seq+" could not be summarised",error);return tr("Open the source record for observation details");}
@@ -1740,7 +1719,6 @@ document.addEventListener("keydown",e=>{
     else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
   }
 });
-// Sources view boundary: the host supplies session, data and actions explicitly.
 let sourcesView=null;
 const sourcesReady=import("./views/sources.js?v=2").then(({createSources})=>{
   sourcesView=createSources({root:$("view-sources"),tr,getState:()=>state,
@@ -1756,8 +1734,6 @@ const sourcesReady=import("./views/sources.js?v=2").then(({createSources})=>{
   return sourcesView;
 }).catch(error=>{toast(error.message,true);throw error;});
 function renderTargets() { sourcesView?.renderTargets(); }
-const mediaLimit=c=>Math.max(0,...Object.values(c?.types||{}).filter(r=>r.enabled).map(r=>r.max_mb))||c?.max_media_mb;
-// The limits as the policy states them per type. The largest one alone misled: "Files ≤ 100 MB" while photos stop at 20 MB.
 const MEDIA_ORDER=["photo","video","document","voice","audio","video_note","animation","sticker"];
 function mediaLimitText(c,short=false){
   const types=c?.types||{};
@@ -1816,7 +1792,6 @@ function renderChatExportTools(){
   $("snapshot-form").querySelector("button").disabled=s.demo||!may("sources")||!s.collector.has_session||!s.targets.some(t=>t.enabled);
   renderRecheck();syncExport(s);renderHandoverChats();
 }
-// Handover extract: the chats, period and people a recipient needs, everyone else minimised (handover.py).
 const handoverChats=()=>[...$("handover-chats").querySelectorAll("input:checked")].map(input=>Number(input.value));
 function renderHandoverChats(){
   const box=$("handover-chats"),chosen=new Set(handoverChats()),targets=state.status?.targets||[];
@@ -1854,7 +1829,7 @@ $("handover-form").addEventListener("submit",event=>{event.preventDefault();busy
   if(purpose.length<3){$("handover-purpose").focus();throw new Error(tr("State the purpose of the handover."));}
   if(!chats.length)throw new Error(tr("Choose at least one chat."));
   const choice=name=>viewQuery("evidence",'input[name="'+name+'"]:checked')?.value;
-  const moment=id=>$(id).value?$(id).value+":00Z":null;  // datetime-local without a zone, read as UTC
+  const moment=id=>$(id).value?$(id).value+":00Z":null;
   const body={purpose,chats,subjects:[...$("handover-people").querySelectorAll("input:checked")].map(input=>Number(input.value)),
     others:choice("handover-others"),text:choice("handover-text"),attachments:choice("handover-files"),
     avatars:$("handover-avatars").checked,mask_contacts:$("handover-contacts").checked,
@@ -1935,7 +1910,6 @@ function saveExport(button){return busy(button,async()=>{
   $("chat-export-progress").textContent=tr("Downloaded. Export another chat if needed.");
 });}
 $("chat-export-download").addEventListener("click",e=>saveExport(e.currentTarget));
-// A Telegram account snapshot is a durable job, separate from the signed observation journal.
 const accountExportKinds=["private","bot","group","supergroup","channel"];
 const accountExportMedia=["photo","video","video_message","voice","audio","document","sticker","animation"];
 const accountExportFallback={purpose:"",chat_kinds:accountExportKinds,from_utc:null,to_utc:null,chat_ids:[],
@@ -2409,7 +2383,6 @@ const exportsReady=import('./views/exports.js?v=2').then(({createExports})=>{
   return exportsView;
 });
 async function loadExports(){fillExportLanguage();return (await exportsReady).enter(viewOptions('evidence'));}
-// The report language for the next downloads; empty means what Report settings say.
 function fillExportLanguage(){
   const select=$("export-language");if(select.options.length)return;
   select.append(new Option(tr("As in Report settings"),""));
@@ -2496,7 +2469,6 @@ panelQueries("[data-export]").forEach(b=>b.addEventListener("click",()=>busy(b,a
     if(saved)toast(tr(encrypt?"Encrypted export sent to your browser. Keep its password separately.":"Export sent to your browser. Check Downloads for the saved file."));
   }catch(error){progress({phase:"failed",error:error.message});throw error;}
 })));
-// Report settings: language, case details and contents of the sealed report in every export.
 const REPORT_FIELDS={"report-language":"language","report-theme":"theme","report-case-title":"case_title",
   "report-case-board":"case_board",
   "report-case-id":"case_id","report-examiner":"examiner","report-organization":"organization","report-notes":"notes",
@@ -2575,8 +2547,6 @@ async function loadReportSettings(){
       for(const [id,key] of Object.entries(REPORT_FIELDS))$(id).value=options[key]??({participant_labels:"aliases",chart_limit:10}[key]??"");
       for(const [id,key] of Object.entries(REPORT_CHECKS))$(id).checked=options[key]??REPORT_PRESETS.dossier[key];
       const template=options.template||"dossier",preset=REPORT_PRESETS[template];
-      // Older settings and API callers may supply a template label with different
-      // controls. Keep their choices and describe the resulting layout as custom.
       const matches=preset&&Object.entries(REPORT_CHECKS).every(([id,key])=>$(id).checked===preset[key])
         &&$("report-participant-labels").value==="aliases"&&$("report-chart-limit").valueAsNumber===10;
       setReportTemplate(matches?template:"custom");
@@ -2699,7 +2669,6 @@ $("report-open-downloads").addEventListener("click",async()=>{
 });
 panelQueries("[data-go-reports]").forEach(link=>link.addEventListener("click",event=>{
   event.preventDefault();
-  // Open the builder at the requested section; no draft is saved by navigation.
   Promise.resolve(navigate("evidence")).then(()=>exportsReady).then(view=>{view.select("settings");
     const field=$(link.dataset.goReports==='data'?"report-data-title":"report-language");field.scrollIntoView({block:"center"});field.focus({preventScroll:true});});
 }));
@@ -2746,7 +2715,6 @@ function timestampsLead(h){
     default:return tr("The latest checkpoint is timestamped.");
   }
 }
-// An answer that arrived is not yet a verified timestamp; an OpenTimestamps proof waits for Bitcoin.
 function timestampsFacts(e,h){
   if(!e.settings.enabled)return [];
   const c=h.counts,l=e.last,facts=[];
@@ -2763,7 +2731,6 @@ function timestampsFacts(e,h){
   if(h.next_attempt_at)facts.push(tr("Next attempt: {time}",{time:fmtFull(h.next_attempt_at)}));
   return facts.concat(witnessFacts(e));
 }
-// drand and the device list: the latest pass of each switched-on record, or why it failed.
 function witnessFacts(e){
   const w=e.witnesses||{},facts=[],d=w.drand,v=w.devices;
   if(e.settings.drand&&d)facts.push(d.ok?tr("drand round {round} written to the journal · round time {time}",{round:String(d.round),time:fmtFull(d.round_time)})
@@ -3031,7 +2998,6 @@ $("scope-investigation").addEventListener("click",()=>{
   for(const k of scopeTypes)$("scope-"+k).checked=true;
   $("scope-own").checked=true;$("scope-new-profile").checked=true;
   if(Number($("scope-new-history").value)<200)$("scope-new-history").value="200";
-  // The preset does what it describes: it is saved at once, after the whole-account confirmation.
   state.scopeDirty=true;renderScope();$("scope-form").requestSubmit($("scope-form").querySelector("button[type=submit]"));
 });
 function chatTitle(id){
@@ -3150,7 +3116,6 @@ function goPlace(place){
 function extraBadge(name,on,onText,offText){
   const badge=$("extra-"+name+"-badge");badge.textContent=tr(on?onText:offText);badge.classList.toggle("on",on);
 }
-// A card badge from what the parts do (health.py), not from their switches.
 function stateExtraBadge(name,value){
   const key=healthKnown(value),badge=$("extra-"+name+"-badge");
   badge.className="extra-badge state-"+key;badge.replaceChildren(icon(healthStates[key][1]),node("span","",healthStates[key][0]));
@@ -3165,7 +3130,6 @@ function renderEvidenceBadge(){
 
 async function loadAssurance(){
   if(state.assurance===undefined&&state.status){
-    // The statement exists only in high-assurance mode; elsewhere the request would only log a 404
     const r=state.status.assurance?await fetch("/api/assurance").catch(()=>null):null;
     state.assurance=r?.ok?(await r.json()).statement:null;
   }
@@ -3178,7 +3142,6 @@ async function loadAssurance(){
   const profile=state.profile,h=await json("health");
   if(profile===state.profile)renderServerHealth(h.server);
 }
-// Deployment and the protection checks are separate: a running server is not a sealed one.
 function renderServerHealth(s){
   if(state.view!=='witness')return;
   const box=$("cloud-health");box.replaceChildren();
@@ -3206,7 +3169,6 @@ async function loadExtras(){
   await Promise.all([loadWitness(),loadAlerts(),loadEvidence(),loadReplica(),loadAssurance(),loadSourceCheck(),loadSetup(),modesUI?.refresh()]);
 }
 
-// Setup by goal (views/setup.js, levels.py): the goal card on Start here, the Extras card and its panel.
 let setupView=null;
 const setupReady=import("./views/setup.js?v=3").then(({createSetup,renderScales})=>{
   setupView=createSetup({root:$("extras-setup"),tr,json,node,toast,may,fmtFull,getState:()=>state,
@@ -3224,7 +3186,6 @@ async function loadSetup(){
 function renderSetupCard(){
   const data=setupView?.data;if(!data||state.view!=="witness")return;
   const goal=data.saved&&!data.saved.skipped?data.saved.goal:null,badge=$("extra-setup-badge");
-  // Without a chosen goal, say what the configuration already amounts to instead of a bare "No goal chosen".
   const wide=["folder","account"].includes(state.status?.scope?.mode);
   badge.textContent=goal?setupView.goalName(goal):wide?tr("No goal chosen · set up like {goal}",{goal:setupView.goalName("investigation")}):tr("No goal chosen");
   badge.classList.toggle("on",!!goal);
@@ -3314,10 +3275,6 @@ $("cloud-copy").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   await navigator.clipboard.writeText($("cloud-commands").textContent);toast(tr("Commands copied."));
 }));
 
-// Guided server (cloud_wizard.py): the main administrator, in the panel on this computer only. Tokens stay in
-// the inputs and travel with each request; they are cleared when the panel locks. Without a Cloudflare token
-// the server gets a quick tunnel: a random trycloudflare.com address it posts, signed, for this panel to find.
-// Hetzner rents an ordinary server; Phala Cloud an Intel TDX confidential virtual machine whose attestation verify checks.
 const cloudWizard={status:null,offer:null,name:"",timer:null};
 const CLOUD_STAGES={
   deploy:{rank:{start:0,version:1,tunnel:2,gateway:2,server:3,running:4,waiting:4,attestation:5,done:5},rows:{
@@ -3332,13 +3289,11 @@ const CLOUD_STAGES={
   destroy:{rank:{start:0,server:1,tunnel:2,note:2,done:3},rows:{
     hetzner:[[1,"Hetzner server and firewall",""],[2,"Cloudflare address and tunnel",""],[3,"Done",""]],
     phala:[[1,"Phala Cloud confidential virtual machine",""],[2,"Cloudflare address and tunnel",""],[3,"Done",""]]}}};
-// Extras may be detached from the page (view lifecycle): its controls are looked up in the view's own root.
 const cloudHost=()=>viewQuery("witness",'input[name="cloud-host"]:checked')?.value||"hetzner";
 function showCloudHost(host){
   const choice=viewQuery("witness",'input[name="cloud-host"][value="'+host+'"]');if(choice)choice.checked=true;
   viewQueries("witness","#cloud-wizard [data-cloud-host]").forEach(el=>{el.hidden=el.dataset.cloudHost!==host;});
 }
-// One Cloudflare token serves both the domain and Gateway DNS; it may be pasted in either field.
 function cloudTokens(){
   const host=cloudHost(),domain=$("cloud-cloudflare-token").value.trim();
   const gateway=host==="hetzner"?$("cloud-gateway-token").value.trim():"";
@@ -3864,7 +3819,6 @@ function renderConnection(){
   $("route-line-text").textContent=tr("Connection: {route}",{route:r.kind==="direct"||(auto&&!now)?route:route+" · "+(now||r).host+":"+(now||r).port});
   show("route-line",!state.status.demo);show("network-running",!state.status.demo&&c.running);
   renderSeenBy();
-  // Changing the route needs a pause: one button does both steps, after saying what pausing means.
   if(!$("network-pause-change")){const b=node("button","secondary small",tr("Pause observation and change the route"));b.type="button";b.id="network-pause-change";
     b.addEventListener("click",()=>busy(b,async()=>{
       if(!(await askConfirm(tr("Pause observation to change the route? New messages, edits and deletion notices are not collected while paused, and an unfinished sign-in is cancelled when the route is saved."),{confirmText:tr("Pause observation")})))return;
@@ -3894,7 +3848,6 @@ function renderConnection(){
   }
 }
 $("network-kind").addEventListener("change",routeFields);
-// Quick routes only fill the form; the operator reviews, saves and tests them.
 document.querySelectorAll("[data-route-preset]").forEach(button=>button.addEventListener("click",()=>{
   const preset=button.dataset.routePreset;
   $("network-kind").value=preset==="auto"?"mtproxy_auto":"socks5";
@@ -3907,7 +3860,6 @@ document.querySelectorAll("[data-route-preset]").forEach(button=>button.addEvent
     tr("Automatic MTProxy picks a working proxy from the public lists and replaces it when it fails. Save to use it.");
   (preset==="socks5"?$("network-host"):$("network-form").querySelector('[type="submit"]')).focus();
 }));
-// What Telegram can tell about this workspace: the network address it sees and how the session presents itself.
 const LOCAL_HOSTS=["127.0.0.1","localhost","::1"];
 function renderSeenBy(){
   const c=state.status.collector,r=c.network||{},id=c.client||{},list=$("seen-by-list");
@@ -4007,7 +3959,6 @@ function renderPolicy(p){
   policyWarning();
   $("network-kind").querySelector('[value="direct"]').disabled=p.exposure!=="tunnel"&&$("network-kind").value!=="direct";
 }
-// A setting that silently blocks something is stated with its consequence and the two ways out, right here.
 function policyWarning(){
   const box=$("policy-warning"),p=state.policy;if(!p)return;
   const exposure=viewQuery("connection",'input[name="exposure"]:checked')?.value||p.exposure;
@@ -4215,7 +4166,6 @@ function initials(name){
 function loadAvatar(id,profile=state.profile){
   if(id===null||id===undefined||typeof id!=="number"||state.status?.demo)return Promise.resolve(null);
   const key=profile+":"+id;
-  // 204: no photo now; asked again after ten minutes instead of on every list render
   if(!avatarCache.has(key))avatarCache.set(key,api("avatar/"+id,undefined,{profile})
     .then(r=>r.status===204?(setTimeout(()=>avatarCache.delete(key),600000),null):r.blob())
     .then(b=>b&&URL.createObjectURL(new Blob([b],{type:"image/jpeg"})))
@@ -4229,7 +4179,6 @@ function avatarNode(id,name,size="",profile=state.profile){
 }
 const fmtDay=value=>panelTime?.day(value)??tr("Unknown date");
 const fmtFull=value=>fmtTime(value);
-const fmtShort=value=>value?fmtTime(value,{mode:"relative"}):"";
 function humanSize(n){if(n===null||n===undefined)return "";const u=["B","KB","MB","GB"];let i=0;while(n>=1024&&i<3){n/=1024;i++;}return n.toFixed(i?1:0)+" "+u[i];}
 const serviceLabels={MessageActionChatAddUser:tr("added a member"),MessageActionChatDeleteUser:tr("removed a member or left"),
   MessageActionChatJoinedByLink:tr("joined via invite link"),MessageActionChatJoinedByRequest:tr("joined after a join request"),
@@ -4392,7 +4341,6 @@ function renderChat(){
   const title=info.title||tr("Chat {id}",{id:info.chat_id}),avatar=avatarNode(info.chat_id,title,"lg");avatar.id="chat-avatar";
   $("chat-avatar").replaceWith(avatar);$("chat-name").textContent=title;$("chat-name").title=title;
   const kind={supergroup:tr("Group"),megagroup:tr("Group"),group:tr("Group"),chat:tr("Group"),channel:tr("Channel"),broadcast:tr("Channel"),bot:tr("Bot"),user:tr("Private chat"),private:tr("Private chat")}[info.kind]||termText(info.kind);
-  // The counters of /api/chats, with the definitions shared by the chat list and the notifications.
   const split=typeof info.deleted_saved==="number";
   $("chat-sub").textContent=$("chat-sub").title=[kind,tr("{n} saved",{n:(split?info.saved:info.messages||0).toLocaleString()}),
     split?(info.deleted_saved?tr("{n} deleted, text kept",{n:info.deleted_saved}):""):(info.deleted?tr("{n} deleted",{n:info.deleted}):""),
@@ -4812,7 +4760,6 @@ function renderComposer(){
   const context=state.workspaceRevision+":"+chatGeneration+":"+state.profile+":"+state.chat;
   if(composeContext!==context){$("chat-message").value="";composeReply=null;composeContext=context;composeOpen=false;show("interaction-result",false);}
   const s=state.status,enabled=!!(chatReady&&s&&!s.demo&&s.collector.has_session&&state.chatInfo?.enabled);
-  // A separate read-only switch gates both the composer and every bot action.
   const allowed=!!(state.chatView==='messages'&&chatSafety?.writable()&&s&&!s.demo&&s.collector.has_session&&may('interact'));
   const account_=s?.collector.account,who=account_?(account_.username?"@"+account_.username:"ID "+account_.id):tr("this account");
   show("chat-compose-toggle",allowed&&!composeOpen);
@@ -4821,7 +4768,6 @@ function renderComposer(){
   $("chat-compose-warning").textContent=tr("Chat members will see this message, and the action is recorded in the signed journal.");
   show("chat-compose",allowed&&composeOpen);
   composeDestination=enabled?{chat:state.chat,profile:state.profile,revision:state.workspaceRevision,generation:chatGeneration}:null;
-  // The control is busy while consent is pending, before panelAction sets actionBusy.
   const writing=actionBusy||$("chat-send").hasAttribute("aria-busy")||!!$("chat-feed").querySelector(".msg-button button[aria-busy]");
   $("chat-send").disabled=!enabled||writing;$("chat-message").disabled=!enabled||writing;
   for(const button of $("chat-feed").querySelectorAll(".msg-button button"))button.disabled=!enabled||writing;
@@ -4864,7 +4810,6 @@ async function panelAction(body,{profile=state.profile,revision=state.workspaceR
     try{
       await refreshStatus();
       if(revision!==state.workspaceRevision)return result;
-      // Show the user's own sent message even if opening the composer reduced the scroll area.
       refreshFailed=(await refreshChats(body.action!=="send"))===false;
 
       if(!refreshFailed&&result.status!=="unknown")pendingActions.delete(key);
@@ -5271,7 +5216,6 @@ let accessFormVersion=0,adminLimitsVersion=0;
 let accessFormReady=false,adminLimitsReady=false,adminLimitsDirty=false,accessLoadSerial=0;
 async function loadAccess(quiet=false){
   if(!state.me?.admin)return;
-  // Build a complete new-access form before the request yields; later responses only update saved data.
   if(!accessFormReady){renderAccessForm(state.accessEdit);accessFormReady=true;}
   if(!adminLimitsReady)$("access-admin-form").inert=true;
   const view=await accessReady;if(state.view!=='access'||!state.me?.admin)return;view.enter();

@@ -1,9 +1,3 @@
-"""List the English interface strings that the translations in tgwitness/locales must cover.
-
-Script keys are the strings passed to tr()/trn() in the panel scripts. Server keys are the fixed
-messages the panel can show from the server and the notification texts. Keys of the static pages
-are listed in the browser by pageKeys() and checked by tools/check_browser.py.
-"""
 import ast
 import json
 import re
@@ -21,7 +15,6 @@ PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "ses
                  "proxy_sources.py", "account_export.py", "account_export_transport.py", "account_report.py", "disclosure.py",
                  "cloud_wizard.py", "levels.py")
 
-# Labels passed through small renderer tables (tr(label)), rather than literal tr() calls.
 DYNAMIC_SCRIPT_KEYS = (
     "Inline diff", "Side by side", "Raw", "Previously observed", "Newly observed version",
     "All", "Priority", "Paused", "Unconfirmed access", "Enable selected", "Pause selected",
@@ -41,7 +34,6 @@ DYNAMIC_SCRIPT_KEYS = (
     "Install MCP support in this Python environment and restart TgWitness.",
     "MCP support is installed. Restart TgWitness to activate the endpoint.",
     "visible to this account during the recorded acquisition intervals",
-    # 24/7 server wizard: stage table, server states, result steps and file buttons.
     "Version on GitHub", "A few seconds", "Cloudflare tunnel and address", "Hetzner firewall and server",
     "Usually under a minute", "TgWitness installs itself on the server",
     "Usually several minutes; the panel waits up to 30", "The server answers with its signing key",
@@ -56,7 +48,6 @@ DYNAMIC_SCRIPT_KEYS = (
 
 
 def js_literal(body):
-    """Decode a quoted JS string's contents without evaluating source code."""
     escapes = {"b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t", "v": "\v", "0": "\0"}
     def replace(match):
         value = match.group(1)
@@ -72,7 +63,6 @@ def js_literal(body):
 
 
 def calls(source):
-    """Yield the source text of every tr(...)/trn(...) call, including nested calls."""
     for match in re.finditer(r"(?<![\w.$])(?:[A-Za-z_$][\w$]*\.)?trn?\(", source):
         depth, i, quote = 1, match.end(), None
         while depth and i < len(source):

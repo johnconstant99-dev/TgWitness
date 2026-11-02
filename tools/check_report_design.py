@@ -1,4 +1,3 @@
-"""Offline dossier navigation, coverage semantics, narrow layouts and signed formats."""
 import json
 from pathlib import Path
 import tempfile
@@ -45,7 +44,6 @@ def main():
                 assert page.locator('#assessment-coverage .assessment-state').inner_text() == report.Words(lang)(report.case_assessment.STATUSES['recorded'])
                 expect(page.locator('.coverage-figure')).to_have_count(1)
                 expect(page.locator('.coverage-span-0')).to_have_count(2)
-                # Includes the zero-duration stop at the final record; the table retains it.
                 expect(page.locator('.coverage-span-1')).to_have_count(2)
                 for width in (320,390,768,1440):
                     page.set_viewport_size({'width':width,'height':1000})

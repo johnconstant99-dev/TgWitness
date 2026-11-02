@@ -1,4 +1,3 @@
-"""Layout changes must keep the same signed observations and report selection."""
 import copy
 import hashlib
 import json

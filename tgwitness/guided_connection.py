@@ -1,4 +1,3 @@
-"""Prepare, inspect and apply routes without borrowing a signed-in Telegram session."""
 import asyncio
 import hashlib
 import ipaddress
@@ -68,7 +67,6 @@ def busy_account(app):
 
 
 async def probe(collector, route, mode, *, outside=True):
-    """A fresh, unauthenticated transport: never loads the workspace's session or update state."""
     started = time.monotonic()
     concrete, owner = route, None
     client = None
@@ -186,7 +184,6 @@ class GuidedConnection:
         return self.job
 
     async def automatic_route(self, c, portable, body, progress):
-        """Never bypass an explicit IP restriction; WARP precedes an allowed direct route."""
         errors = []
         for mode in ("mtproxy", "warp", "direct"):
             if mode == "direct" and not body.allow_direct:
@@ -307,7 +304,6 @@ class GuidedConnection:
                     raise ValueError("A connection setting changed. Check the route again.")
             if self.plan is not plan or time.monotonic() > plan["expires"]:
                 raise ValueError("This connection preview expired. Check the route again.")
-            # Consume before the first await that can change an account; repeated clicks cannot replay it.
             self.plan = None
             self.job = {"state": "applying", "stage": "Applying checked routes"}
             results = []
@@ -335,7 +331,6 @@ class GuidedConnection:
         old = {name: c.vault.read(name) for name in ("network", "outside_proxy", "portable_route")}
         policy, was_running = c.route_policy(), c.running
         try:
-            # Recheck immediately before pausing. A dead draft never disrupts current collection.
             check = await asyncio.wait_for(probe(c, item["route"], mode, outside=item["policy"].outside_enabled), 45)
             await c.stop()
             c.store.set_setting("route_policy", {"exposure": "tunnel", "outside_enabled": False})
@@ -445,8 +440,6 @@ class GuidedConnection:
             except Exception:
                 if strategy.get("mode") != "auto":
                     continue
-                # Re-run the chain only for an explicitly selected Auto strategy.
-                # No direct fallback can bypass the answer to the IP question.
                 try:
                     busy_account(self.app)
                     body = ConnectionDraft(**{**strategy, "scope": "account", "account": self.profile_id,

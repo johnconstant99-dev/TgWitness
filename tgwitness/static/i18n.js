@@ -31,7 +31,6 @@ function walkPage(visit,root=document.body){
       const value=el.getAttribute(name);
       if(value&&wordy(value))visit({key:normal(value),apply:text=>el.setAttribute(name,text)});
     }
-    // Textareas have translatable labels, but their text and value belong to the user.
     if(el.tagName==="TEXTAREA")return;
     if(el.children.length&&inlineOnly(el)&&wordy(el.textContent)){
       if(visit({key:normal(el.innerHTML),apply:html=>{el.innerHTML=html;}},true))return;
@@ -69,7 +68,6 @@ async function setLanguage(lang){
   url.hash=location.hash;location.assign(url.href);
 }
 translatePage();
-// A language supplied in a bookmarked URL must survive the next navigation too.
 if(new URL(location.href).searchParams.has('lang'))document.cookie='tgwitness-lang='+encodeURIComponent(LANG)+'; path=/; max-age=31536000; SameSite=Strict';
 document.querySelectorAll("[data-site-doc]").forEach(link=>{
   const lang=Object.hasOwn(PANEL_LANGUAGES,LANG)&&LANG!=="en"?LANG+"/":"";

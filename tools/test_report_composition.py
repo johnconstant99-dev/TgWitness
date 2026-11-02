@@ -1,4 +1,3 @@
-"""Signed report choices, honest chart counts, private notes and print fallback."""
 import copy
 import hashlib
 import json

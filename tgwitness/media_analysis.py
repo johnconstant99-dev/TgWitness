@@ -1,4 +1,3 @@
-"""Manual derived OCR/transcription jobs; untrusted decoding runs only in a restricted container."""
 import asyncio
 import hashlib
 import os

@@ -1,11 +1,3 @@
-"""Who opens the panel, what they see and do there, and the main administrator's console.
-
-The panel token (panel-token.txt) stays the main administrator's key. The administrator issues
-further access: a token is shown once and the vault keeps only its SHA-256. Each access opens the
-workspaces and chats it names, with the permissions ticked for it, and can be bound to addresses,
-a number of sign-ins, an end date and a number of parallel sessions. Signing in with any token
-starts a session; the panel then works with the session, which can be listed and ended.
-"""
 import hashlib
 import ipaddress
 import logging
@@ -174,7 +166,7 @@ QUIET_KINDS = ("message.", "reaction.", "membership.", "media.saved", "collector
 
 
 class Refused(Exception):
-    """The access exists but may not do this; the text is shown in the panel."""
+    pass
 
 
 def digest(token):
@@ -271,7 +263,6 @@ class Principal:
                 or self.by_group(profile_id))
 
     def chats(self, profile_id):
-        """None: every chat of the workspace; otherwise the only chat IDs this access sees."""
         if self.admin or self.grant["all_workspaces"] or self.by_group(profile_id):
             return None
         listed = self.grant["workspaces"].get(profile_id)
@@ -293,7 +284,6 @@ class Principal:
 
 
 def check(principal, profile_id, rule, path_params):
-    """Raises Refused if an issued access may not make this request."""
     if principal.admin:
         return
     if rule is None:
@@ -312,16 +302,12 @@ def check(principal, profile_id, rule, path_params):
 
 
 class Console(logging.Handler):
-    """Everything the process logs since it started, kept in memory for the administrator's console."""
-
     def __init__(self, size=5000):
         super().__init__(logging.INFO)
         self.lines, self.counter, self.guard = deque(maxlen=size), 0, threading.Lock()
         self.last = None
 
     def emit(self, record):
-        # Attached to the root and to uvicorn's loggers: a record that propagates through
-        # both reaches this handler twice. Keep it once.
         with self.guard:
             if record is self.last:
                 return
@@ -366,8 +352,6 @@ class Console(logging.Handler):
 
 
 class AccessControl:
-    """Issued accesses (in the vault) and the open sessions of the whole installation."""
-
     def __init__(self, vault, store, console=None):
         from .live_stream import StreamSlots
         self.stream_slots = StreamSlots()
@@ -382,8 +366,6 @@ class AccessControl:
         self.console = console or Console()
         self.labels = lambda profile_id: profile_id
         self.group_of = None
-        # Remove legacy browser fingerprints from the mutable encrypted session
-        # cache. Signed journal records are deliberately left untouched.
         if any(s.get("agent") for s in saved.get("sessions", [])):
             self.save()
 
@@ -432,7 +414,6 @@ class AccessControl:
         return not grant.get("bound_ip") or grant["bound_ip"] == str(ip)
 
     def refuse(self, grant, address, now, signing_in):
-        """Raises Refused (and logs it) if this access may not be used now from this address."""
         try:
             if grant["expires_at"] is not None and now >= grant["expires_at"]:
                 raise Refused("This access has expired.")
@@ -451,7 +432,6 @@ class AccessControl:
 
 
     def login(self, token, address, agent):
-        """A new session for a valid token, or None for an unknown token. Raises Refused."""
         now = time.time()
         with self.lock:
             for sha in [k for k, s in self.sessions.items() if s["expires"] <= now]:
@@ -497,7 +477,6 @@ class AccessControl:
         return Principal(False, grant["label"], grant, session["id"], self.group_of)
 
     def resolve(self, credential, address):
-        """The principal behind a bearer credential, or None. Raises Refused."""
         if secrets.compare_digest(digest(credential), digest(self.vault.token)):
             return Principal(True, "Main administrator (panel token)")
         now = time.time()
@@ -526,7 +505,6 @@ class AccessControl:
             return self.principal(session)
 
     def end(self, session_id, reason):
-        """Close a session; with a reason the journal records it."""
         with self.lock:
             found = next((s for s in self.sessions.values() if s["id"] == session_id), None)
             if found is None:
@@ -637,7 +615,6 @@ class AccessControl:
                 "permissions": list(PERMISSIONS)}
 
     def journal_listener(self, profile_id):
-        """Mirror journal records of one workspace into the console (without message content)."""
         def listen(event):
             if event["kind"].startswith(QUIET_KINDS):
                 return

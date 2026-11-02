@@ -17,6 +17,14 @@ parameters and the extended forms; a hidden field can be opened without changing
 level. Levels only change what is shown: the server checks permissions on its own.
 Collection settings and the first connection belong to the workspace administrator.
 
+| Level | Fields | Sidebar |
+| --- | --- | --- |
+| Simple | Only the essentials | Home, Chats, Changes, Archives, Settings |
+| Standard | Common settings with explanations | Adds Case Board, Accounts and Access |
+| Expert | All fields, limits and technical details | Adds Sources, Extras, Ask the archive, Parameters, Account, System log and Integrations |
+
+The [panel guide](PANEL.md) describes each section.
+
 ## Goals
 
 | Goal | Collection | Files | Outside services | Server address |

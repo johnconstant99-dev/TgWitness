@@ -447,7 +447,7 @@ in [access and permissions](ACCESS.md); independent checkpoints are covered by t
 Connection routes are per workspace and should be configured before authorization.
 SOCKS5/HTTP CONNECT use the pinned python-socks dependency. MTProxy uses Telethon's
 experimental randomized intermediate transport; Fake TLS ee secrets are unsupported.
-Direct fallback depends on the selected [IP mode](CONNECTION-SECURITY.md#ip-modes): Hide IP refuses it; the explicit fallback mode permits it after a delay. Tunnel/VPN mode permits direct routes but does not create a VPN. This is not a system-wide network policy.
+Direct fallback depends on the selected [IP mode](CONNECTION-SECURITY.md#ip-modes): **Hide the address** refuses it; **Direct as a last resort** permits it after a delay. **Server behind a tunnel or VPN** permits direct routes but does not create a VPN. This is not a system-wide network policy.
 
 For new installations, TGWITNESS_VAULT_KEY_FILE points to a separately protected random
 master-key file. Mount it read-only outside /data in a container. Preserve the public

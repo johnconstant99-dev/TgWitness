@@ -59,7 +59,6 @@ def validate_manifest(raw, release_id, public):
 
 
 def verify_release(raw, release_id, read, public):
-    """Never execute retained code. Verify bytes against the repository's public key."""
     manifest = validate_manifest(raw, release_id, public)
     files = {name: read(name) for name in manifest["files"]}
     if files["release-signing.pub"] != public:
@@ -100,7 +99,6 @@ def index(site, public):
 
 
 def retain(site, public):
-    """A missing/unavailable archive fails closed; never silently discard old URLs."""
     ids = release_ids(fetch("releases.json", 128 * 1024))
     for release_id in ids:
         release = site / "releases" / release_id
@@ -108,7 +106,6 @@ def retain(site, public):
         raw = fetch(prefix + "manifest.json", 128 * 1024)
         files = verify_release(raw, release_id, lambda name: fetch(prefix + name), public)
         files["manifest.json"] = raw
-        # Legacy releases predate signed manifests. Retain their exact bytes too.
         try:
             signature = fetch(prefix + "manifest.json.sig", 4096)
         except HTTPError as exc:
@@ -135,7 +132,6 @@ def verify_public(site):
              if p.is_file() and not p.name.startswith((".", "_"))]
 
     def check(path):
-        # Workers canonicalizes /index.html to /; downloads must not redirect.
         if fetch("" if path == "index.html" else path) != (site / path).read_bytes():
             raise ValueError("Published bytes differ: " + path)
 

@@ -1,4 +1,3 @@
-"""Runner-only packaging. This module is never exposed as an HTTP signing API."""
 import argparse
 import json
 import tempfile

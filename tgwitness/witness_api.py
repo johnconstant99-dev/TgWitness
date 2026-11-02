@@ -1,8 +1,3 @@
-"""Read-only witness access to signed journal heads and content-free capture summaries.
-
-A token is shown once; the vault keeps its SHA-256. It cannot open the panel, read messages,
-change settings or reach the Telegram session — only GET /api/witness/head answers it.
-"""
 import hashlib
 import re
 import secrets
@@ -49,7 +44,6 @@ def match(vault, presented):
 
 
 def head(store, vault, entry, headers, address, status=None):
-    """The signed checkpoint for a witness; remembers when and by which witness key it was asked."""
     witness = (headers.get("x-tgwitness-witness") or "").lower()
     witness = witness if re.fullmatch(r"[0-9a-f]{64}", witness) else None
     interval = headers.get("x-tgwitness-interval") or ""

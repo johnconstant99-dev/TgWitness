@@ -1,9 +1,3 @@
-"""Standard-library supervisor for the pinned GitHub-hosted reusable workflow.
-
-Never reads a caller checkout, downloads caller artifacts, restores caches, or
-passes GitHub credentials into the public-facing container. Only encrypted files
-are copied to public/. All commands use argument lists, never shell expansion.
-"""
 import argparse
 import json
 import os

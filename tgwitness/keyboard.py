@@ -1,10 +1,3 @@
-"""Buttons under a message, read from the saved Telegram object (payload raw.reply_markup).
-
-Bots hand out links, web apps and texts to copy through buttons rather than message text.
-Reading them from the saved object works for records made before this module existed too.
-Older Telegram layers name each button by its class (KeyboardButtonUrl); newer ones use one
-button class with a type object (KeyboardInlineButton with InlineButtonTypeUrl). Both are read.
-"""
 TYPES = {
 
     "InlineButtonTypeUrl": "url", "InlineButtonTypeCallback": "callback", "InlineButtonTypeCopy": "copy",
@@ -26,10 +19,6 @@ FIELDS = ("url", "query", "copy_text", "user_id", "fwd_text")
 
 
 def keyboard(markup):
-    """{"inline": bool, "rows": [[{type, text, url?, query?, copy_text?, data_base64?}]]} or None.
-
-    markup is the plain-dict form of a Telegram reply markup, as saved in raw.reply_markup.
-    """
     if not isinstance(markup, dict):
         return None
     rows = []

@@ -1,8 +1,3 @@
-"""Amazon EC2: instances, security groups and CloudTrail event history, signed with SigV4.
-
-Credentials: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and optionally AWS_SESSION_TOKEN, or a file
-holding "ACCESS_KEY_ID SECRET_ACCESS_KEY [SESSION_TOKEN]". The region is the deployment location.
-"""
 import base64
 import hashlib
 import hmac
@@ -26,7 +21,6 @@ SESSIONS = ("StartSession", "SendSSHPublicKey", "SendSerialConsoleSSHPublicKey",
 
 
 def signed_headers(method, url, region, service, headers, body, key_id, secret, token=None, now=None):
-    """AWS Signature Version 4: the headers to send with one request."""
     stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
     parts = urllib.parse.urlsplit(url)
     headers = {**{k.lower(): v for k, v in headers.items()}, "host": parts.netloc, "x-amz-date": stamp}

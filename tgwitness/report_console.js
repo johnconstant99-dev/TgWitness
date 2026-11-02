@@ -1,6 +1,3 @@
-// The viewer: the signed records or messages next to this page, each data file checked against the seal
-// before anything from it is shown; search, filters, people, indicators, selection and a check of every
-// file of the archive. Nothing leaves the browser.
 const viewerMeta=JSON.parse(($("#viewer-meta")||{}).textContent||"null");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nf=new Intl.NumberFormat(lang),num=n=>nf.format(n||0);
@@ -41,12 +38,10 @@ async function startViewer(meta){
   const show=name=>{for(const v of views)v.hidden=v.id!=="view-"+name;for(const t of tabs)t.setAttribute("aria-current",String(t.dataset.view===name));
     history.replaceState(null,"",name==="report"?location.pathname+location.search:"#"+name);window.scrollTo(0,0);};
   for(const t of $$("[data-view]"))t.addEventListener("click",e=>{e.preventDefault();show(t.dataset.view);});
-  // Links to one record or message (indicators in the report, history in the detail) open it in the viewer.
   document.addEventListener("click",e=>{const a=e.target.closest("a[data-goto]");if(!a)return;e.preventDefault();show("data");goto(a.dataset.goto);});
   for(const a of $$(".toc a,.brand,#seal-hint"))a.addEventListener("click",()=>show("report"));
   const start=(location.hash||"").slice(1);if(["data","people","iocs","check"].includes(start))show(start);
 
-  // ---- The page: filters, the search above the feed, the feed, one item in full ----
   $("#view-data").innerHTML='<div class="console"><button type="button" class="v-btn ghost v-filter-toggle" id="v-filter-toggle" aria-expanded="false" aria-controls="v-filters">'+ic("settings")+esc(say("Filters"))+'</button><aside class="v-filters" id="v-filters" aria-label="'+esc(say("Filters"))+'">'
     +'<div class="v-group"><h4>'+esc(say("Show"))+'</h4><div class="v-chips" id="v-cats"></div></div>'
     +(chat?"":'<div class="v-group" id="v-chats-box"><h4>'+esc(say("Chats"))+'</h4><div class="v-checks" id="v-chats"></div></div>')
@@ -74,7 +69,6 @@ async function startViewer(meta){
   for(const id of ["v-q","v-jump","v-people-q"]){const input=$("#"+id);input.setAttribute("aria-label",input.placeholder);}
   const setStatus=(tone,text,extra)=>{status.className="v-verified "+tone;status.innerHTML=ic(tone==="ok"?"shield":"alert")+"<span>"+esc(text)+"</span>"+(extra||"");};
 
-  // ---- Loading: each data file must have the SHA-256 the seal lists ----
   const seal=node?JSON.parse(node.textContent):null,descriptor=seal&&seal.statement&&seal.statement.subject&&seal.statement.subject.viewer;
   let sealOk=false,sealInvalid=false;try{const r=await opened(node.textContent);sealOk=r.ok&&r.fp===(stamp&&stamp.dataset.fp);sealInvalid=!sealOk;}catch(e){sealOk=false;}
   if(sealInvalid){setStatus("bad",say("The seal signature is not valid."));countBox.textContent="0";return;}
@@ -212,7 +206,6 @@ async function startViewer(meta){
     if(!V.results.length)list.innerHTML='<div class="v-empty">'+esc(say("Nothing matches these filters."))+"</div>";more();}
   function day(it){return (it&&it.at||"").slice(0,10);}
   function gapBetween(a,b){return chat&&meta.numbered&&V.plain&&a&&b&&b.n>a.n+1;}
-  // One run of bubbles: the same sender, the same day, no gap, under ten minutes apart (oldest first only).
   function together(a,b){return chat&&a&&b&&V.filter.sort==="asc"&&a.cat!=="service"&&b.cat!=="service"&&String(a.uid??a.who)===String(b.uid??b.who)
     &&day(a)===day(b)&&!gapBetween(a,b)&&Math.abs(new Date(b.at)-new Date(a.at))<10*60000;}
   function more(){if(V.to>=V.results.length)return;const list=$("#v-list"),html=[];let end=Math.min(V.results.length,V.to+150);
@@ -402,7 +395,6 @@ async function startViewer(meta){
     $("#i-q").addEventListener("input",draw);draw();
     for(const t of tabs)if(t.dataset.view==="iocs"){t.querySelector("b").textContent=num(V.iocs.length);t.hidden=!V.iocs.length;}}
 
-  // ---- Check: the data files on opening, and every file of the archive on request ----
   function buildCheck(){const box=$("#view-check");if(!box)return;const bad=V.files.bad,missing=V.files.missing;
     box.innerHTML='<div class="v-page"><div class="v-page-head"><h2>'+esc(say("Check"))+'</h2></div><div class="v-cards">'
       +card(sealOk?"ok":"warn","shield",sealOk?"green":"orange",say("Digital signature"),sealOk?say("The seal's Ed25519 signature is valid and names the key shown in the title."):say("The seal signature could not be checked in this browser"))
@@ -448,7 +440,6 @@ async function startViewer(meta){
     catch(e){out.innerHTML='<div class="callout bad">'+esc(e&&e.message?e.message:String(e))+"</div>";V.checked=out.innerHTML;}
     finally{V.checking=false;for(const input of $$("#c-zip,#c-dir")){input.disabled=false;input.value="";}}}
 
-  // ---- Reading an archive: the unpacked folder or the ZIP itself (deflate and ZIP64) ----
   const MAX_FILE=256*1024*1024,MAX_TOTAL=4*1024**3;
   function safeName(name){return typeof name==="string"&&name.length>0&&!/[\\\x00-\x1f\x7f:]/.test(name)
     &&!name.startsWith("/")&&name.split("/").every(p=>p&&p!=="."&&p!=="..");}

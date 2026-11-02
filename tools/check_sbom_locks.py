@@ -1,4 +1,3 @@
-"""Offline regressions for signed Python inventory coverage; no package installation."""
 import copy
 import importlib.util
 import json
@@ -85,7 +84,7 @@ def main():
             save(changed)
             previous = sbom.read_bytes()
             rejected(lambda: locks.verify(root, output, sbom), meaning)
-            assert sbom.read_bytes() == previous  # Never annotate incomplete output as checked.
+            assert sbom.read_bytes() == previous
 
         save(document)
         derived = output / "runtime-requirements.txt"

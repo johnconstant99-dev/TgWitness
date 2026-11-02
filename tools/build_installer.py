@@ -1,4 +1,4 @@
-"""Build a static installer site from a checked wheel; no credentials or running accounts."""
+"""Build a static installer site from a checked wheel"""
 import argparse
 import base64
 import csv

@@ -23,9 +23,6 @@ def windows_sid():
 
 
 def owner_only(root: Path):
-    """The data directory for this account only, also when it existed before. Unix: mode 0700 (files
-    inside are then unreachable whatever their own modes). Windows: one explicit entry for this account,
-    inherited by new children. Existing ACLs are inspected on every start."""
     if os.name != "nt":
         try:
             os.chmod(root, 0o700)
@@ -41,7 +38,6 @@ def owner_only(root: Path):
 
 
 def owner_only_state(root: Path):
-    """For doctor: whether only this account can read the data directory, as far as it can tell."""
     if os.name != "nt":
         mode = root.stat().st_mode & 0o777
         return mode & 0o077 == 0, "mode " + oct(mode)
@@ -55,8 +51,6 @@ def owner_only_state(root: Path):
 
 
 def private_write(path: Path, data: bytes):
-    """Atomic replacement. Unix permissions are restricted; on Windows the file inherits the data
-    directory's owner-only entry (owner_only)."""
     temp = path.with_suffix(path.suffix + ".tmp")
     fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(fd, "wb") as stream:
@@ -134,7 +128,6 @@ class Vault:
 
 
 class InstanceLock:
-    """One process per data directory; the OS releases the lock after a crash."""
     def __init__(self, root: Path):
 
         root.mkdir(parents=True, exist_ok=True, mode=0o700)

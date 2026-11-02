@@ -1,8 +1,3 @@
-"""One settings model for first run and subsequent edits; adapters use existing stores.
-
-Presets are previewed against current values. A revision protects the reviewed diff from
-another tab. Presentation levels never grant permissions or erase hidden configuration.
-"""
 import hashlib
 import asyncio
 import json
@@ -106,7 +101,6 @@ def values(app):
 
 
 def revision(app):
-    # Include raw fields so two distinct custom policies cannot share a preview revision.
     s = app.state.store
     raw = [values(app), capture_settings(s), evidence_settings(s), alerts.alert_settings(s), replica.replica_settings(s),
            app.state.collector.route_policy(), app.state.collector.network_config().public(),
@@ -177,8 +171,6 @@ def coherent(desired):
 
 
 def main_account_scope(app, body):
-    """A main account records only chosen chats: the whole account or a folder would bring in its owner's
-    private conversations. The answer comes from the first setup; a copy of one's own account is exempt."""
     saved = wizard_state(app)
     kind = body.account_kind or saved.get("account_kind")
     goal = body.goal if "goal" in body.model_fields_set else saved.get("goal", body.goal)
@@ -188,7 +180,6 @@ def main_account_scope(app, body):
 
 
 def validate_collection_scope(store):
-    """Validate actual continuous collection, independently of a saved copy-wizard goal."""
     from .scope import scope_settings
     if (store.get_setting("first_run", {}) or {}).get("account_kind") == "main" \
             and scope_settings(store)["mode"] != "selected":
@@ -196,7 +187,6 @@ def validate_collection_scope(store):
 
 
 def save_goal(store, goal):
-    """Keep the wizard's goal and the active preset consistent after later changes."""
     with store.transaction():
         store.set_setting("goal_preset", {"goal": goal, "version": 1, "values": PRESETS[goal], "at": utcnow()})
         wizard = store.get_setting("first_run", {})
@@ -256,7 +246,6 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
                 busy_account(app)
             except ValueError as exc:
                 raise HTTPException(409, str(exc)) from None
-        # IP tightening never permits an existing direct session to carry on unnoticed.
         if desired["ip"] == "hide" and (c.network_config().kind == "direct" or c.direct_fallback):
             await c.stop()
             from .network import NetworkConfig
@@ -270,7 +259,6 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
         with s.transaction():
             s.set_setting("route_policy", wanted)
             if wanted != policy:
-                # The same record the IP protection form writes: who may see this server's address is evidence.
                 from .collector import EXPOSURE_MEANING
                 s.append("network.policy_changed", {**wanted, "before": policy, "source": "settings",
                                                     "meaning": EXPOSURE_MEANING[exposure]})
@@ -299,7 +287,6 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
                 await asyncio.wait_for(c.start(), 45)
                 s.set_setting("collection_problem", None)
             except (OSError, ValueError, TimeoutError) as exc:
-                # Preferences are saved even if the transport is temporarily unavailable.
                 s.set_setting("collection_problem", type(exc).__name__)
                 s.append("settings.collection_pending", {"error_type": type(exc).__name__})
         elif not desired["continuous"]:
@@ -392,7 +379,6 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
             counts, sizes = [], []
             from .monitoring import media_kind, duration_allowed
             capture = capture_settings(app.state.store)
-            # Bounded sampling. Counts come from Telegram, never from sequential message IDs.
             for cid in ids[:3]:
                 entity = await c.resolve_target(cid)
                 batch = await asyncio.wait_for(c.client.get_messages(entity, limit=20), 15)

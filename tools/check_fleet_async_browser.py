@@ -1,4 +1,3 @@
-"""Group form drafts and pending writes survive asynchronous account refreshes."""
 import tempfile
 from pathlib import Path
 
@@ -52,7 +51,6 @@ def check_group_runs(page, server):
     expect(start).to_be_disabled()
     expect(stop).to_be_disabled()
     assert all(select.is_disabled() for select in page.locator(".fleet-card-group").all())
-    # Synthetic events cannot bypass the operation and membership guards.
     stop.dispatch_event("click")
     page.locator(".fleet-card-group").first.evaluate("""select=>{
       select.value='';select.dispatchEvent(new Event('change',{bubbles:true}));
@@ -114,7 +112,6 @@ def main(fleet_source=None):
         expect(template).to_be_focused()
         assert page.locator(".account-card").count() == 2
 
-        # A failed poll must retain the last good groups and the unsaved form.
         page.route("**/api/profile-groups", lambda route: route.fulfill(
             status=503, json={"detail": "Synthetic group refresh failure"}))
         page.evaluate("TgWitnessFleet.load()")
@@ -123,7 +120,6 @@ def main(fleet_source=None):
         expect(page.locator("#toast")).to_contain_text("Synthetic group refresh failure")
         page.unroute("**/api/profile-groups")
 
-        # The first response is delayed after the server has produced it.
         page.evaluate("""() => {
           const real=window.fetch;let held=false;
           window.releaseOldGroups=null;
@@ -158,7 +154,6 @@ def main(fleet_source=None):
         assert "reports" not in saved["sections"]
         assert saved["label"] == "Fresh case name"
 
-        # A failed move restores the last server-confirmed selection.
         move = page.locator('.account-card[data-profile="' + profile["id"] + '"] .fleet-card-group')
         move_path = "**/api/profiles/" + profile["id"] + "/group"
         page.route(move_path, lambda route: route.fulfill(status=503, json={"detail": "Synthetic move failure"}))
@@ -178,7 +173,6 @@ def main(fleet_source=None):
         expect(move).to_be_enabled()
         assert page.evaluate("id=>[...document.querySelectorAll('.fleet-card-group')].filter(select=>select.value===id).length", group["id"]) == 1
 
-        # Responses from different moves may arrive in the opposite order.
         third = page.evaluate("json('profiles',{label:'Third account'},{root:true})")
         page.evaluate("loadProfiles()")
         other = page.locator('.account-card[data-profile="' + third["id"] + '"] .fleet-card-group')
@@ -192,7 +186,6 @@ def main(fleet_source=None):
         expect(other).to_have_value(group["id"])
         assert page.evaluate("id=>[...document.querySelectorAll('.fleet-card-group')].filter(select=>select.value===id).length", group["id"]) == 1
 
-        # Successful saves become the new baseline; later polls may update it.
         page.evaluate("async id=>{await json('profile-groups/'+id,{label:'Fresh case name',template:'default',sections:['parameters','reports']},{root:true,method:'PATCH'});await loadProfiles();}", group["id"])
         expect(template).to_have_value("default")
         expect(reports).to_be_checked()

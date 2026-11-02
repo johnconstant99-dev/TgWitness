@@ -1,4 +1,3 @@
-"""Explicit live-event selection, separate from history and attachment policies."""
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_serializer
@@ -17,7 +16,6 @@ CAPTURE_DEFAULTS = {"download_media": True, "max_media_mb": 20}
 MEDIA_TYPES = ("photo", "video", "animation", "video_note", "voice", "audio", "sticker", "document")
 MEDIA_DEFAULT_MB = {"photo": 20, "video": 100, "animation": 20, "video_note": 50, "voice": 20, "audio": 50,
                     "sticker": 5, "document": 50}
-# New workspaces leave optional GIF and sticker downloads off until explicitly enabled.
 MEDIA_DEFAULT_OFF = ("animation", "sticker")
 
 
@@ -44,10 +42,6 @@ class Capture(BaseModel):
 
 
 def capture_settings(store):
-    """Saved attachment policy with a rule for every media type.
-
-    Policies saved before per-type rules apply their single size limit to every type.
-    """
     previous = store.get_setting("capture", None)
     saved = previous or {}
     rules = saved.get("types") or {}
@@ -65,7 +59,6 @@ def capture_settings(store):
 
 
 def media_kind(message):
-    """Attachment type used by the per-type rules (Telethon message properties)."""
     for kind, attribute in (("photo", "photo"), ("video_note", "video_note"), ("voice", "voice"),
                             ("sticker", "sticker"), ("animation", "gif"), ("video", "video"), ("audio", "audio")):
         if getattr(message, attribute, None):

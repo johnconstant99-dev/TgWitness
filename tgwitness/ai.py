@@ -1,4 +1,3 @@
-"""Explicitly configured, bounded AI requests through the workspace network route."""
 import asyncio
 import hashlib
 import json
@@ -62,7 +61,6 @@ def settings(state):
 
 
 def enabled(state, config=None):
-    """Panel capability only: no provider probe and no secret access."""
     config = settings(state) if config is None else config
     return bool(config.get("enabled") and str(config.get("model") or "").strip()
                 and not state.store.get_setting("demo", False))

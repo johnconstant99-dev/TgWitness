@@ -1,4 +1,3 @@
-"""Internal team annotations, separate from collected observations and every outgoing transport."""
 import copy
 import json
 import uuid
@@ -63,7 +62,6 @@ def visible(state, principal, workspace):
             continue
         shown.append(copy.deepcopy(item))
     ids = {item["id"] for item in shown}
-    # A card can be in a wider collection. Its private ID/title and sibling counts stay hidden.
     for item in shown:
         if item.get("collection_id") not in ids:
             item["collection_id"] = None
@@ -73,7 +71,6 @@ def visible(state, principal, workspace):
 
 
 def reaction_delta(previous, current):
-    """A snapshot comparison, never a claimed click time or an inferred complete actor list."""
     def values(event):
         raw = event["payload"].get("raw") or {}
         data = raw.get("reactions") or {}
@@ -96,7 +93,6 @@ class Board:
         self.store, self.workspace = store, workspace
 
     def state(self, connection):
-        # Authenticate before serving human-authored content, including after a restart.
         board_prepare(connection)
         return board_replay(records(connection), self.store.signer.public_key)
 
@@ -197,7 +193,6 @@ class Board:
             assert tuple(record) == ANNOTATION_FIELDS
             record["hash"] = annotation_hash(record)
             record["signature"] = self.store.signer.sign(bytes.fromhex(record["hash"]))
-            # Replay the candidate before the transaction commits, including all structural invariants.
             board_replay([*records(db), record])
             db.execute("INSERT INTO annotations VALUES(?,?,?)", (record["seq"], record["hash"], canonical(record).decode()))
             return record
@@ -316,7 +311,6 @@ def soft_limits(store, state):
 
 
 def notifications(store, after, principal, workspace):
-    """Only a visible annotation's ID/kind, after checking the current grant and full inherited scope."""
     if not principal or not principal.may("board.read"):
         return [], after
     with store.snapshot() as snapshot:

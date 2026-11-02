@@ -1,4 +1,3 @@
-"""Bounded, offline regressions for data ACLs, body admission and Telegram action policy."""
 import asyncio
 import os
 from pathlib import Path
@@ -27,10 +26,8 @@ def test_acl_repairs_explicit_grants_and_does_not_trust_marker(tmp_path):
     assert not security.owner_only_state(tmp_path)[0]
     security.owner_only(tmp_path)
     assert security.owner_only_state(tmp_path)[0]
-    # New files inherit the repaired ACL, including under an elevated account.
     (child / "new.txt").write_text("synthetic")
     assert security.owner_only_state(tmp_path)[0]
-    # Doctor and a later start must detect changes after initial hardening.
     subprocess.run(["icacls", str(target), "/grant:r", "*S-1-1-0:R", "/Q"],
                    capture_output=True, check=True, timeout=30)
     assert not security.owner_only_state(tmp_path)[0]
@@ -133,7 +130,6 @@ def test_body_admission_is_bounded_and_cancellation_releases_capacity():
             entered.set()
             await gate.wait()
             return {"type": "http.request", "body": b"ok", "more_body": False}
-        # Exercise both the concurrent-request and aggregate-byte bounds.
         for bodies, size in ((1, 100), (8, 32)):
             with patch.object(middleware, "MAX_PENDING_BODIES", bodies), patch.object(middleware, "MAX_PENDING_BODY_BYTES", size):
                 entered.clear()

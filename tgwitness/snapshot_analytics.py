@@ -1,9 +1,3 @@
-"""Bounded, reproducible descriptive statistics over the records in this copy only.
-
-No network, identity enrichment, inferred presence, sentiment or trust scores.
-Journal counts are observations, not deduplicated Telegram messages. Snapshot
-counts are exported message rows. Unknown timestamps never enter time charts.
-"""
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 import html
@@ -101,7 +95,6 @@ class Analytics:
                          chat.get("id"), chat.get("title"))
 
     def result(self):
-        # At most 90 equal-width UTC bins, zero-filled only inside the represented interval.
         series = []
         if self.first and self.last:
             start, end = self.first.date(), self.last.date()
@@ -151,15 +144,7 @@ def selected(options):
     return [(key, title) for key, title in CHARTS if options.get(CONTROLS[key], True)]
 
 
-def chat_labels(data, titles):
-    names = {str(key): value for key, value in titles.items()}
-    for row in data["chats"]:
-        if row["id"] in names and label(names[row["id"]]):
-            row["label"] = label(names[row["id"]])
-
-
 def project(data, options):
-    """Project chart labels and disabled series before serializing a snapshot copy."""
     if data.get("projected"):
         return data
     output = {**data, "projected": True, "participant_labels": options.get("participant_labels", "aliases"),
@@ -264,7 +249,6 @@ def html_section(data, options, say):
 
 
 def pdf_section(lay, data, options):
-    # fpdf table defaults inherit fill colours. Restore graphics state after charts.
     with lay.pdf.local_context():
         _pdf_section(lay, data, options)
 

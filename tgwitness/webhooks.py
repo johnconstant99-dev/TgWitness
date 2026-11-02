@@ -1,4 +1,3 @@
-"""Signed structured deliveries, driven by the existing notification loop."""
 import asyncio
 import hashlib
 import hmac

@@ -1,4 +1,3 @@
-"""Download public official reference pages for a dated, local engineering review."""
 import hashlib
 import argparse
 import json

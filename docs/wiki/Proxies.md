@@ -30,11 +30,11 @@ Open **Account → Settings → Connection settings → Change connection route*
 
 | IP mode | When a proxy is unavailable |
 | --- | --- |
-| Hide IP | Wait for a working proxy; no direct Telegram fallback |
-| Allow fallback | Permit Direct after the configured delay; return to a proxy when one works |
-| Tunnel / VPN | Permit Direct through the host network; this option does not install or verify a VPN |
+| Hide the address | Wait for a working proxy; no direct Telegram fallback |
+| Direct as a last resort | Permit Direct after the configured delay; return to a proxy when one works |
+| Server behind a tunnel or VPN | Permit Direct through the host network; this option does not install or verify a VPN |
 
-New workspaces use automatic MTProxy with Hide IP behavior. The pool checks entries,
+New workspaces use automatic MTProxy with **Hide the address**. The pool checks entries,
 retains working routes and moves accounts away from failing proxies.
 
 | Route | Inputs |
@@ -107,7 +107,7 @@ leads to these intervals under **Parameters → Automatic MTProxy** of the main 
 
 MTProxy carries Telegram traffic only. External requests use a separate SOCKS5/HTTP
 proxy when configured, then the workspace's SOCKS5/HTTP route. Without either,
-Hide IP refuses the request; the other modes permit Direct. External requests can
+Hide the address refuses the request; the other modes permit Direct. External requests can
 be disabled. An explicit feed-download proxy overrides the feed route; the
 independent witness keeps its own settings. These controls do not route your browser.
 

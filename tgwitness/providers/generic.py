@@ -1,9 +1,3 @@
-"""Any server installed by hand with install.sh: no provider API, so never more than self-attested.
-
-Nobody independent saw how this server was set up: whoever ran the installer had root before it,
-and the provider's own records are not available to a verifier. The installer records what the
-host looked like before installation, installs one commit and closes SSH; all of it self-reported.
-"""
 import json
 import socket
 

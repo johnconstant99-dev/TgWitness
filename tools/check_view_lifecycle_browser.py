@@ -1,4 +1,3 @@
-"""Active-screen mounting, draft retention and workspace cleanup with synthetic data."""
 import json
 from pathlib import Path
 import sys
@@ -54,8 +53,6 @@ def main():
             assert inactive == [], f"Status polling touched a detached screen: {inactive}"
             page.evaluate("()=>inactiveObserver.disconnect()")
 
-            # Settings mounts the shared sign-in card, while the original Account
-            # heading and summary remain in its detached screen.
             navigate_panel(page, "settings")
             page.locator('[data-section="telegram"]').click()
             expect(page.locator("#credentials-form")).to_be_visible()
@@ -101,7 +98,6 @@ def main():
                     captures.append({"width": width, "view": view, "url": page.url,
                                      "attached_views": page.locator(".view").count()})
 
-            # Reset clears private text even in a detached screen before another account loads.
             second = page.evaluate("""async()=>{const result=await json('profiles',{label:'Separate case'},{root:true});
               await loadProfiles();return result.id;}""")
             page.evaluate("id=>switchProfile(id)", second)
@@ -129,10 +125,7 @@ def main():
                 patched_statuses.append(response.status)
                 route.fulfill(response=response, json=status)
 
-            # Re-unlock the same page, retaining the controller cache. No proxy is contacted.
             page.route("**/api/status", saved_route)
-            # A late poll after locking legitimately returns an error, not the status schema.
-            # Exercise that branch deterministically and preserve its HTTP status and body.
             locked_response = page.evaluate("""async()=>{
               const response=await fetch('/api/status');
               return {status:response.status,body:await response.text()};

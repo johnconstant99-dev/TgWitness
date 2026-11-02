@@ -1,4 +1,3 @@
-"""Offline sealed-login acceptance: shared pool, explicit overrides and strict pair validation."""
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -129,7 +128,6 @@ async def pool_and_override_failures(recipient):
         assert collector.login_pairs(None, None) == [own]
 
     async with capsule(recipient) as (session, client):
-        # A saved custom hash must remain authoritative even when its ID matches a pool ID.
         own = (next(iter(api_pool.POOL_IDS)), "f" * 32)
         assert own not in api_pool.POOL
         session.vault.save("credentials", {"api_id": own[0], "api_hash": own[1]})

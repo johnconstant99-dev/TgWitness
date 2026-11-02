@@ -2,6 +2,7 @@
 
 - [Home](Home.md)
 - [Getting started](Getting-Started.md)
+- [Panel guide](../PANEL.md)
 
 **01 · Connect and capture**
 

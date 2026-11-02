@@ -1,4 +1,3 @@
-"""Message times and reply context remain readable without reviving withheld fields."""
 import copy
 import json
 from pathlib import Path
@@ -36,7 +35,7 @@ def test_journal_projection_keeps_three_independent_times_and_input_unchanged():
     original = copy.deepcopy(event)
     item = viewer.journal_item(event)
     assert (item['sent_at'], item['edited_at'], item['t']) == (SENT, EDITED, OBSERVED)
-    assert item['tt'] == SENT  # legacy clients can still read the original send time
+    assert item['tt'] == SENT
     assert 'r' not in item and event == original
     html = report.record_html(event, SAY, {}, {'raw_records': False}, False)
     for label, time in (('Sent', SENT), ('Edited', EDITED)):

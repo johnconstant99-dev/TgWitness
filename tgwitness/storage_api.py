@@ -1,4 +1,3 @@
-"""Administrator-only storage and operator bot controls."""
 import asyncio
 import configparser
 import json
@@ -89,8 +88,6 @@ def register(app, authenticate, require_live):
             obsolete = await complete_in_thread(manager.obsolete_copies, destination, config_replaced)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from None
-        # Retire only verified local copies before publishing new settings, so
-        # interruption cannot leave a mixed-destination recovery manifest.
         manager.discard_copies(obsolete)
         vault.save("storage", secret)
         try:

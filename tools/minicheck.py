@@ -1,8 +1,3 @@
-"""The few pytest idioms the TDX and Phala checks use, for standalone runs without pytest.
-
-fixture, mark.parametrize and raises behave as in pytest; run() calls every test_* function of a module
-with its fixtures (tmp_path, monkeypatch, capsys and the module's own), each case in a fresh directory.
-"""
 import contextlib
 import importlib
 import inspect
@@ -114,7 +109,6 @@ def _call(function, namespace, given, built, stack):
 
 
 def run(namespace):
-    """Runs the module's tests; prints one line per case and returns the exit status."""
     failed = passed = 0
     for name, function in list(namespace.items()):
         if not name.startswith("test_") or not callable(function):

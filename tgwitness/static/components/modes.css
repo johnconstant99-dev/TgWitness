@@ -1,4 +1,3 @@
-/* Protection modes: a hidden section is display:none, never removed or switched off. */
 [data-mode-locked] { display: none !important; }
 
 .mode-switch {
@@ -13,8 +12,6 @@
 .mode-switch + .sidebar-version { margin-top: 6px; }
 
 .mode-onboarding { margin-bottom: 22px; }
-/* The chat and capture views fill the window; a card arriving above them would push the feed off its bottom.
-   Before an account is connected, the phone login stays the first thing on the Account view. */
 #workspace:is([data-current-view="chats"], [data-current-view="sealed"]) .mode-onboarding,
 #workspace[data-current-view="connection"] .mode-onboarding[data-session="false"] { display: none; }
 .mode-onboarding h2 { margin: 6px 0 4px; font-size: 18px; }

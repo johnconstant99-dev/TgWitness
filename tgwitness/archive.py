@@ -1,4 +1,3 @@
-"""Scoped, bounded archive reads shared by integrations and analysis."""
 import hashlib
 import json
 import re

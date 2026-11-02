@@ -1,4 +1,3 @@
-/** URL, selector and loaded account must agree before any workspace request. */
 export function createWorkspaceSafety({state,find,tr,avatar,switchProfile,refreshStatus,confirm}) {
   const bar=document.createElement('aside'),copy=document.createElement('p'),resolve=document.createElement('button');
   bar.id='workspace-context-alert';bar.className='workspace-context-alert';bar.hidden=true;bar.setAttribute('role','alert');

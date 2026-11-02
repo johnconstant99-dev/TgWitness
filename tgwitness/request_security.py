@@ -1,4 +1,3 @@
-"""Explicit proxy trust and bounded API admission, shared by all workspaces."""
 from collections import OrderedDict, deque
 import ipaddress
 import math

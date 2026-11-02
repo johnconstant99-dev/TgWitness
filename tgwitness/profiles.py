@@ -1,4 +1,3 @@
-"""Isolated account collectors behind one authenticated panel."""
 import asyncio
 from contextlib import ExitStack
 import re
@@ -11,7 +10,6 @@ from . import health
 from .account_import import session_key
 
 
-# What a group shares, copied from its template workspace: setting keys in each workspace's store.
 GROUP_SECTIONS = {
     "parameters": ("parameters",),
     "reports": ("report_options",),
@@ -30,8 +28,8 @@ class Profiles:
         label = app.state.store.get_setting("profile_label", "Main account")
         self.entries = {"default": {"id": "default", "label": label, "app": app, "cm": None}}
         self.opening = {}
-        self.session_reservations = {}  # authorization keys reserved before a connection can start
-        self.account_reservations = {}  # account IDs held through the durable ownership write
+        self.session_reservations = {}
+        self.account_reservations = {}
         self.lock = asyncio.Lock()
         app.state.collector.account_guard = self.check_account
         app.state.group_link = lambda: self.inheritance("default")
@@ -41,8 +39,6 @@ class Profiles:
         return member_view(self, profile_id)
 
     def holder(self, account_id=None, key=None, collector=None):
-        """The workspace that already holds this Telegram account, by its ID once signed in or by the
-        authorization key of its session, or None."""
         for entry in self.entries.values():
             other = entry["app"]
             if not other or other.state.collector is collector:
@@ -60,8 +56,6 @@ class Profiles:
         return None
 
     def check_account(self, account_id, collector, key=None):
-        """Refuse an account another workspace holds. An imported session is checked by its key before it
-        connects: the same key from a second address can make Telegram revoke it (AUTH_KEY_DUPLICATED)."""
         if self.holder(account_id, key, collector):
             raise ValueError("This Telegram account already belongs to another profile. Use its existing workspace.")
         if key:
@@ -74,7 +68,7 @@ class Profiles:
         existing = reservations.get(identity)
         if existing is not None:
             if existing["owner"] is owner:
-                return lambda: None  # an outer import already holds this lease
+                return lambda: None
             raise ValueError("This Telegram account is being imported right now.")
         lease = {"owner": owner}
         reservations[identity] = lease
@@ -85,7 +79,6 @@ class Profiles:
         return release
 
     def reserve_session(self, key, owner):
-        """Reserve a key synchronously before any await; return an identity-bound release callback."""
         if not key:
             raise ValueError("These files hold no login session. Add the .session or TData of the account.")
         if self.holder(key=key, collector=owner):
@@ -98,7 +91,6 @@ class Profiles:
         return self._reserve(self.account_reservations, account_id, owner)
 
     def transfer_session(self, key, owner, collector, account_id=None):
-        """Give a still-held import lease to its child without opening a reservation gap."""
         lease = self.session_reservations.get(key)
         if lease is None or lease["owner"] is not owner:
             raise ValueError("The account import no longer holds its session reservation.")
@@ -238,8 +230,6 @@ class Profiles:
             self.entries.pop(profile_id, None)
             return {"id": profile_id, "deleted": True}
 
-    # Groups: workspaces that share settings, copied from one of them on request ------------------
-
     def groups(self):
         return self.app.state.store.get_setting("profile_groups", [])
 
@@ -258,7 +248,6 @@ class Profiles:
         return group
 
     async def save_group(self, group_id, label, template=None, sections=None):
-        """Create (group_id None) or update a group; returns it."""
         async with self.lock:
             if not label.strip():
                 raise ValueError("Enter a group label.")
@@ -321,10 +310,6 @@ class Profiles:
             return {"id": profile_id, "group": group_id}
 
     async def apply_group(self, group_id):
-        """Copy the group's shared settings from its template to every other member; returns each result.
-
-        Every member records what it received in its own journal. The IP mode goes through the
-        member's collector, so a workspace that is observing keeps its route until it is paused."""
         from .network import RoutePolicy
         async with self.lock:
             group = self._group(group_id)

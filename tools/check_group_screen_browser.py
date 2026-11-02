@@ -88,7 +88,6 @@ def check_browser(directory, output):
         store(alpha).append("observation.started", {"parameters": {"heartbeat_seconds": 60}})
         page.evaluate("g=>window.TgWitnessOpenGroup(g)", group)
         expect(chat).to_contain_text("Workspace observation: no interruptions in the available period")
-        # Workspace activity does not mean this source is currently recorded.
         for pid in (alpha, beta):
             store(pid).set_target(CHANNEL, "Harbor channel", "channel", False)
         page.evaluate("g=>window.TgWitnessOpenGroup(g)", group)

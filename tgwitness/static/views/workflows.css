@@ -1,4 +1,3 @@
-/* Task choices first; technical controls remain available through disclosure. */
 .workflow-intro { max-width: 720px; margin: 12px 0 28px; }
 .workflow-intro h1 { font-size: clamp(26px, 3vw, 34px); line-height: 1.2; margin: 8px 0 12px; }
 .workflow-intro p { color: var(--muted); font-size: 15px; line-height: 1.65; }

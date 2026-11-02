@@ -1,4 +1,4 @@
-"""Read-only public monitor for several account workspaces; owns no Telegram user session."""
+"""Read-only public monitor for several account workspaces"""
 import argparse
 import asyncio
 import copy

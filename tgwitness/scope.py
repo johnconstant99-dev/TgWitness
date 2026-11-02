@@ -1,9 +1,3 @@
-"""What observation covers: chosen chats, one Telegram folder, or everything the account sees.
-
-In folder and account modes the collector decides per chat from its type, the folder rules
-and the exclusion list; a chat that first appears while observing (a new group, private chat
-or bot) is added as a source on the spot and recorded in the journal.
-"""
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
@@ -27,7 +21,6 @@ class SourceTypes(BaseModel):
 
 
 class NewChats(BaseModel):
-    """What is saved at once when a chat or bot first appears in folder or whole-account mode."""
     model_config = ConfigDict(extra="forbid")
     profile: StrictBool = False
     history: int = Field(default=0, ge=0, le=1000)
@@ -59,7 +52,6 @@ def scope_settings(store):
 
 
 def unexclude(store, chat_id):
-    """The operator chose this chat again: folder and account modes stop keeping it out."""
     scope = scope_settings(store)
     if chat_id not in scope["exclude"]:
         return False
@@ -72,7 +64,6 @@ def recheck_settings(store):
 
 
 def kind_of(entity):
-    """targets.kind for a Telegram entity, or None."""
     if isinstance(entity, types.User):
         return "bot" if entity.bot else "private"
     if isinstance(entity, (types.Channel, types.ChannelForbidden)):
@@ -101,7 +92,6 @@ def peer_ids(peers, own_id=None):
 
 
 def folder_rule(folder, own_id=None):
-    """A plain description of a Telegram folder (DialogFilter) that membership checks use."""
     if folder is None or isinstance(folder, types.DialogFilterDefault):
         return {"all": True}
     title = getattr(folder, "title", "")
@@ -115,11 +105,6 @@ def folder_rule(folder, own_id=None):
 
 
 def in_folder(rule, chat_id, kind, entity=None, archived=False):
-    """Folder membership by its explicit chats and categories.
-
-    Muted and read state (exclude_muted, exclude_read) change constantly and are not applied:
-    a chat stays observed when it is read or muted.
-    """
     if rule.get("all"):
         return True
     if chat_id in rule["exclude"]:

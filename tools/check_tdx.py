@@ -1,9 +1,3 @@
-"""Intel TDX quotes and dstack event logs, checked by tgwitness.tdx without dcap-qvl or any Phala service.
-
-Real quotes (tools/tdx) must verify against the pinned Intel root. A forged PKI shaped like Intel's
-exercises every refusal: a broken signature, a revoked certificate, stale collateral, a debuggable or
-migratable TD, and an event log that does not replay to the quote's RTMR3.
-"""
 import hashlib
 import json
 import struct
@@ -28,7 +22,6 @@ SEPT_VE_DISABLE = 1 << 28
 
 
 def window(collateral):
-    """A moment inside every validity period of the collateral, as dcap-qvl's tests choose it."""
     documents = [json.loads(collateral[k]) for k in ("tcb_info", "qe_identity")]
     start = max(tdx.parse_time(d["issueDate"]) for d in documents)
     end = min(tdx.parse_time(d["nextUpdate"]) for d in documents)
@@ -40,7 +33,6 @@ def window(collateral):
 
 
 def fixture(name):
-    # Quotes are kept as hex text: the published source holds no binary files of this kind.
     return bytes.fromhex((FIXTURES / (name + ".hex")).read_text()), json.loads((FIXTURES / name.replace(".quote", ".collateral.json")).read_text())
 
 
@@ -77,7 +69,6 @@ def pem(*certificates):
 
 
 class Forge:
-    """A PKI shaped like Intel's (root, PCK platform CA, PCK certificate, TCB signer) issuing TDX quotes."""
     FMSPC, CPU_SVN, PCE_SVN = bytes.fromhex("00906ed50000"), bytes([2] * 16), 11
     MODULE_SIGNER, QE_SIGNER = bytes(range(48)), bytes(range(100, 132))
 
@@ -251,20 +242,20 @@ def test_a_forged_quote_verifies_only_against_its_own_root(forge):
     found = tdx.verify_quote(raw, forge.collateral(), NOW, root=forge.root)
     assert found["status"] == "UpToDate" and found["report"]["report_data"].startswith(b"statement".hex())
     with pytest.raises(tdx.QuoteError, match="not signed by .*Intel SGX Root CA"):
-        tdx.verify_quote(raw, forge.collateral(), NOW)  # the real Intel root
+        tdx.verify_quote(raw, forge.collateral(), NOW)
     genuine = json.loads((FIXTURES / "dstack-v4.collateral.json").read_text())
     with pytest.raises(tdx.QuoteError, match="PCK certificate chain: .* is not issued by"):
-        tdx.verify_quote(raw, genuine, window(genuine))  # Intel's own collateral, a forged PCK chain
+        tdx.verify_quote(raw, genuine, window(genuine))
 
 
 def test_every_break_in_the_chain_is_refused(forge):
     raw, collateral = forge.quote(b"x"), forge.collateral()
     body = bytearray(raw)
-    body[48 + 520] ^= 1  # report data
+    body[48 + 520] ^= 1
     with pytest.raises(tdx.QuoteError, match="TD report: the signature is invalid"):
         tdx.verify_quote(bytes(body), collateral, NOW, root=forge.root)
     qe = bytearray(raw)
-    qe[48 + 584 + 4 + 134 + 300] ^= 1  # inside the quoting enclave report
+    qe[48 + 584 + 4 + 134 + 300] ^= 1
     with pytest.raises(tdx.QuoteError, match="quoting enclave report: the signature"):
         tdx.verify_quote(bytes(qe), collateral, NOW, root=forge.root)
     tampered = dict(collateral, tcb_info=collateral["tcb_info"].replace('"UpToDate"', '"UpToDate" ', 1))
@@ -314,7 +305,6 @@ def test_the_launch_identity_is_what_was_measured_before_system_ready():
     twice = log[:4] + [runtime_event("compose-hash", b"\1" * 32)] + log[4:]
     with pytest.raises(tdx.QuoteError, match="Two compose-hash"):
         tdx.launch_identity(tdx.replay(twice)[1])
-    # A version 2 event is hashed as canonical JSON, not as the binary layout.
     v2 = runtime_event("x", b"\1", version=2)
     assert v2["digest"] == hashlib.sha384(b'{"name":"x","payload":"01","type":134217729}').hexdigest()
 

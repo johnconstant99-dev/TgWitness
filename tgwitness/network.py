@@ -1,4 +1,3 @@
-"""Explicit per-account Telegram route; credentials never belong in journal events."""
 import base64
 import binascii
 import ipaddress
@@ -15,12 +14,6 @@ from telethon.network.connection import ConnectionTcpMTProxyRandomizedIntermedia
 
 
 class OpenSSLCTR:
-    """AES-CTR of Telegram's obfuscated transports (MTProxy) through OpenSSL.
-
-    Telethon's AESModeCTR is pure Python: it deciphers a few hundred KB/s per CPU core, so a busy
-    MTProxy route held a whole core and the panel waited seconds for every answer. Same continuous
-    keystream as Telethon's: encrypting and decrypting are one operation.
-    """
     def __init__(self, key, iv):
         self._stream = Cipher(algorithms.AES(key), modes.CTR(iv)).encryptor()
 
@@ -40,7 +33,6 @@ EXPOSURES = ("hide", "fallback", "tunnel")
 
 
 class NoRoute:
-    """No route for requests outside Telegram: netclient and notifications refuse them with this error."""
     kind, telegram_only = "none", True
 
     def __init__(self, error):
@@ -54,7 +46,6 @@ class RoutePolicy(BaseModel):
 
 
 def hex_secret(value):
-    """Telegram links carry an MTProxy key as hex or as base64url; keep the hex form."""
     if re.fullmatch(r"(?:[a-fA-F0-9]{2})+", value):
         return value.lower()
     if not re.fullmatch(r"[A-Za-z0-9_+/-]{22,}={0,2}", value):
@@ -147,7 +138,6 @@ class NetworkConfig(BaseModel):
 
 
 def parse_proxy_url(value):
-    """Parse, never fetch, an operator-supplied proxy address."""
     value = value.strip()
     if value.startswith(("tg://", "https://t.me/", "https://telegram.me/")):
         return parse_mtproxy_link(value)
@@ -163,14 +153,12 @@ def parse_proxy_url(value):
 
 
 def saved_route(raw):
-    """A route read back from the vault."""
     if raw and raw.get("host") and "local_proxy" not in raw:
         raw = {**raw, "local_proxy": True}
     return NetworkConfig.model_validate(raw)
 
 
 def parse_mtproxy_link(link):
-    """Parse Telegram's proxy links without opening them or changing the saved route."""
     message = "Use a tg://proxy or https://t.me/proxy link with server, port and secret."
     if not isinstance(link, str) or len(link) > 2048:
         raise ValueError(message)
@@ -191,7 +179,6 @@ def parse_mtproxy_link(link):
 
 
 def proxy_catalog():
-    """An operator-provided local catalog, never an unsolicited third-party proxy feed."""
     filename = os.environ.get("TGWITNESS_PROXY_CATALOG")
     if not filename:
         return False, []

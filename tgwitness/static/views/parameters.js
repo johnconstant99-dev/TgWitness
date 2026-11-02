@@ -228,7 +228,6 @@ export function createParameters(context) {
   });
   on(form, "input", event => {
     const entry = fields.get(event.target.dataset.parameter); if (entry) entry.serverError = "";
-    // The shared native-validation listener runs first; this view owns its inline result.
     queueMicrotask(renderDraft);
   });
   on(form, "click", event => {

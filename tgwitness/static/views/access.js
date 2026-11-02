@@ -14,8 +14,6 @@ export function createAccessView({root,tr,navigate,localInput,getState}) {
     root.querySelector('[data-showcase-link]').hidden=!state.me?.admin||!!state.status?.demo||!!window.TGW_ONLINE_DEMO;
   }
   syncShowcase();
-  // The ordinary editor does not carry the redaction mode. Keep these grants in
-  // their dedicated manager instead of submitting a form that changes their mode.
   root.addEventListener('click',event=>{
     const button=event.target.closest('button'),row=button?.closest('#access-list .access-row');
     if(row?.record?.showcase&&button===row.querySelector('.access-actions')?.firstElementChild){

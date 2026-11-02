@@ -112,7 +112,6 @@ class Password(BaseModel):
 
 
 class GatewayLog(BaseModel):
-    """Where Cloudflare Gateway logs this collector's DNS queries; token empty keeps the saved one."""
     account: str = Field(pattern=r"^[0-9a-f]{32}$")
     location_id: str
     address: str = ""
@@ -287,7 +286,6 @@ class AccessLogin(BaseModel):
 
 
 def panel_language(request):
-    """The language the panel is shown in; reports set to "Same as the panel" use it."""
     return i18n.pick(request.cookies.get(i18n.COOKIE), request.headers.get("accept-language"))
 
 
@@ -298,7 +296,6 @@ def client_languages(request):
 
 
 def report_options(store, request, language=None):
-    """Saved report options; a language chosen for this one export wins over the saved one and the panel's."""
     options = report.resolved(store, panel_language(request))
     if language:
         if language not in i18n.LANGUAGES:
@@ -339,8 +336,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         profiles = None
         try:
             cleanup_exports(root)
-            # The PDF library and its font tools take seconds to load the first time; load them while the
-            # panel starts, not when someone waits for the first PDF.
             threading.Thread(target=pdf_report.available, name="pdf-preload", daemon=True).start()
             vault = Vault(root)
             if token_override:
@@ -357,8 +352,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     raise RuntimeError("Refusing to mix synthetic data into a real journal.")
                 seed_demo(store)
             elif store.get_setting("capture", None) is None:
-                # Freeze defaults before the first startup record. An older journal without an
-                # explicit policy previously enabled every type; an upgrade must retain that choice.
                 policy = capture_settings(store)
                 if store.stats()["total"]:
                     for rule in policy["types"].values():
@@ -405,7 +398,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 app.state.assurance = {"mode": selected, "provider": provider}
                 app.state.run_receipt["host"] = await asyncio.to_thread(
                     assurance.snapshot, selected, provider, detail=True)
-                # In a confidential VM the start record carries a quote over this run's key and host.
                 quote = await asyncio.to_thread(assurance.start_attestation, selected, app.state.run_receipt)
                 if quote is not None:
                     app.state.run_receipt["tdx_start"] = quote
@@ -419,7 +411,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             journal_ready = True
             app.state.anchor_wakeup, app.state.anchor_status = asyncio.Event(), {"busy": False}
             app.state.replica_wakeup, app.state.replica_status = asyncio.Event(), {"busy": False}
-            app.state.host_status = {}  # the assurance loop's latest host measurement
+            app.state.host_status = {}
             app.state.alert_wakeup = asyncio.Event()
             app.state.storage = Storage(store, vault, collector.outside_route)
             app.state.operator_bot = OperatorBot(app.state)
@@ -508,8 +500,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     app = FastAPI(title="TgWitness", version=__version__, lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
-    # An installer-generated, per-start routing identifier, not an access token.
-    # It lets setup check a domain before the operator enters credentials there.
     installation_id = os.environ.get("TGWITNESS_INSTALLATION_ID", "")
 
     @app.get("/_tgwitness/ready", include_in_schema=False)
@@ -567,7 +557,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return direct_local(request)
 
     def direct_local(request):
-        """A browser on this computer talking to the panel itself: no proxy, tunnel or other site between."""
         try:
             if not request.client or not ipaddress.ip_address(request.client.host).is_loopback:
                 return False
@@ -606,7 +595,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return request.client.host if request.client else "unknown"
 
     async def identify(request: Request, credential: HTTPAuthorizationCredentials = Depends(bearer)):
-        """Who is asking: the panel token, a session started with any token, or the local demo."""
         principal = None
         if credential:
             if local_demo_access(request) and secrets.compare_digest(
@@ -623,7 +611,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return principal
 
     async def authenticate(request: Request, principal=Depends(identify)):
-        """An issued access may use only the routes, workspaces and chats it was given."""
         route = request.scope.get("route")
         rule = POLICY.get(request.method + " " + route.path) if route else None
         try:
@@ -633,7 +620,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return principal
 
     def visible_chats(request):
-        """None for every chat of this workspace, otherwise the chat IDs the access opens."""
         return request.state.principal.chats(profile_id)
 
     def visible_targets(request):
@@ -674,7 +660,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return current, parts, targets
 
     async def authenticate_witness(request: Request, credential: HTTPAuthorizationCredentials = Depends(bearer)):
-        """Witness tokens open only the signed journal head; the panel token is not accepted here."""
         entry = witness_api.match(app.state.vault, credential.credentials) if credential else None
         if not entry:
             reject_access(request, "Unknown witness token.")
@@ -780,8 +765,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             return {"profiles": listed, "limit": Profiles.MAX_PROFILES,
                     "model": "independent account collectors and signing identities"}
 
-        # Servers for 24/7 collection (cloud_wizard). Not in POLICY: the main administrator only, and only
-        # in the panel on this computer, so cloud tokens never travel to a panel reached over a network.
         cloud_jobs = app.state.cloud_jobs = cloud_wizard.Jobs(root)
 
         def require_cloud(request):
@@ -920,8 +903,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
         @app.post("/api/profiles/import", dependencies=[Depends(authenticate)])
         async def profiles_import(body: ProfileImport, request: Request):
-            """One account per request: convert its files, give it a new workspace and connect the session.
-            A workspace whose session does not log in is removed again; the uploads are never stored."""
             require_live()
             if (body.api_id is None) != (body.api_hash is None):
                 raise HTTPException(422, "Provide both API ID and API hash, or leave both empty.")
@@ -935,8 +916,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 raise HTTPException(422, "Session found, but its application settings are incomplete. Supply both API ID and API hash in the JSON, or select the session file without this JSON to use the built-in app settings.")
             registry = app.state.profiles
             expected, key = account.get("expected_user_id"), session_key(account["session"])
-            # Before any connection: the same key from a second proxy address while its workspace is
-            # connected can make Telegram revoke it (AUTH_KEY_DUPLICATED)
             holder = registry.holder(expected, key)
             if holder:
                 raise HTTPException(409, "This Telegram account already has a workspace: " + holder["label"] + ".")
@@ -954,7 +933,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             label = body.label.strip() or (body.files[0].name.rsplit(".", 1)[0][:80] or "Imported account")
             try:
                 entry = await registry.create(label, body.group)
-                # Only this new child's operation lock is held; the main workspace and registry stay usable.
                 child = registry.entries[entry["id"]]["app"]
                 if child is None:
                     raise ValueError("The new workspace could not start.")
@@ -968,7 +946,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                         account["session"], expected, account.get("client_profile"), client_languages(request)),
                         tuning.value(app.state.store, "operation_timeout_seconds"))
                     account_info = child.state.store.get_setting("account", {}) or {}
-                    # Keep the account photo, then disconnect until the operator chooses sources.
                     with suppress(Exception):
                         await asyncio.wait_for(collector.avatar(account_info.get("id")), 20)
                     await collector.stop()
@@ -995,7 +972,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                        for pid in profile_ids)
 
         def multi_visible(request):
-            """An issued access sees a multi-account export only if it opens that chat in each of its accounts."""
             state = app.state.multi_export.state
             return not state or opens_chat_everywhere(request.state.principal, state["chat_id"],
                                                       [state["lead"], *(w["profile_id"] for w in state["workers"])])
@@ -1165,8 +1141,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.post("/api/auth/import", dependencies=[Depends(authenticate)])
     async def import_account(body: AccountImport):
         require_live()
-        # Conversion is read-only. Validate the file even while a collector runs;
-        # connecting a converted session remains a separately guarded operation.
         try:
             result = await asyncio.to_thread(import_accounts, [item.model_dump() for item in body.files], body.passcode)
             if not result["has_authorization"]:
@@ -1203,8 +1177,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return await operation(app.state.collector.cancel_qr, login_id)
 
     async def approved_route(request, config):
-        """A proxy resolving inside this machine or its network (a local Tor or SOCKS5 proxy) may be set only
-        by the main administrator; the saved route remembers that. A request's own local_proxy is ignored."""
         if config is None or config.kind not in ("socks5", "http", "mtproxy"):
             return config and config.model_copy(update={"local_proxy": False})
         try:
@@ -1220,8 +1192,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     async def network(request: Request, body: NetworkConfig):
         return await operation(app.state.collector.set_network, await approved_route(request, body))
 
-    # No issued-access policy: provisioning executables and controlling multiple
-    # accounts requires the main administrator, enforced by authenticate.
     from .guided_connection import ApplyDraft, ConnectionDraft
 
     @app.get("/api/connection", dependencies=[Depends(authenticate)])
@@ -1313,7 +1283,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return await operation(apply)
 
     def lists_updated_at(sources):
-        """When the newest list in use was actually downloaded; a blocked or failed attempt changes nothing."""
         stamps = []
         for source in sources:
             with suppress(TypeError, ValueError):
@@ -1322,7 +1291,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return max(stamps, default=None)
 
     def proxy_view(principal=None):
-        """The shared automatic pool as the panel shows it: every server, its check and its users."""
         catalog = shared_pool.catalog
         labels = {str(app.state.store.root): app.state.store.get_setting("profile_label", "this workspace")}
         profiles = getattr(app.state, "profiles", None)
@@ -1503,7 +1471,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return {"targets": visible_targets(request)}
 
     def remove_targets(ids):
-        """Remove validated sources as one transaction, then clear rebuildable caches."""
         store = app.state.store
         existing = {t["chat_id"]: t for t in store.targets()}
         if any(chat_id not in existing for chat_id in ids):
@@ -1660,14 +1627,13 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return scope_state()
 
     def outside_state():
-        """How requests outside Telegram leave this workspace, and why not when they cannot."""
         route = app.state.collector.outside_route()
         return {"route": route.kind, "route_problem": str(route.error) if route.kind == "none" else None}
 
     def timestamps_health(outside):
         store = app.state.store
         last, success = store.get_setting("evidence_last", None), store.get_setting("evidence_success", None)
-        if success is None and last and any(r.get("ok") for r in last.get("results", [])):  # saved before 0.7
+        if success is None and last and any(r.get("ok") for r in last.get("results", [])):
             success = {"at": last["at"], "verified_at": last["at"] if any(
                 r.get("ok") and r.get("kind") == "rfc3161" for r in last["results"]) else None}
         return health.timestamps(evidence_settings(store), last, success, store.get_setting("evidence_failure", None),
@@ -1676,7 +1642,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     def replica_health(outside):
         store = app.state.store
         last, success = store.get_setting("replica_last", None), store.get_setting("replica_success", None)
-        if success is None and last and not last.get("error"):  # saved before 0.7
+        if success is None and last and not last.get("error"):
             success = {"at": last["at"], "journal_seq": last.get("journal_seq")}
         return health.replica(replica.replica_settings(store), last, success, app.state.replica_status,
                               outside["route_problem"], (store.stats()["head"] or {}).get("seq", 0), health.now_utc())
@@ -1686,8 +1652,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                              health.now_utc())
 
     def gateway_state():
-        """The saved Gateway log settings without their token, and on a server deployed with Gateway DNS the
-        values its own deployment description and provider give."""
         saved = app.state.vault.read("gateway")
         suggested = None
         if app.state.assurance:
@@ -1777,7 +1741,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return source_state()
 
     def mode_facts():
-        """What the protection checklist measures (modes.measure), read from the existing settings."""
         store, vault, collector = app.state.store, app.state.vault, app.state.collector
         outside = outside_state()
         return {"media": capture_settings(store)["download_media"],
@@ -1801,7 +1764,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.patch("/api/mode", dependencies=[Depends(authenticate)])
     async def change_mode(request: Request, body: ModeChange):
-        """Only what the panel shows changes; the choice is a signed journal record."""
         principal = request.state.principal
         try:
             modes.change(app.state.store, body.mode, {"access_id": principal.owner, "label": principal.label},
@@ -1847,7 +1809,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.get("/api/health", dependencies=[Depends(authenticate)])
     async def get_health(request: Request):
-        """What each part is doing now, apart from whether it is switched on (health.py)."""
         outside = outside_state()
         parts = {"collector": health.collector_of(app.state), "timestamps": timestamps_health(outside),
                  "replica": replica_health(outside), "server": server_health()}
@@ -1856,7 +1817,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return {"checked_at": health.iso(health.now_utc()), **parts}
 
     def setup_state():
-        """Setup by goal (levels.py): the saved answers, the current state as answers, and both scales."""
         store, outside = app.state.store, outside_state()
         saved = store.get_setting("setup", None)
         place = (saved or {}).get("place") or ("server" if app.state.assurance else "computer")
@@ -2277,12 +2237,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             raise HTTPException(404)
         path = await app.state.collector.avatar(peer_id)
         if not path:
-            return Response(status_code=204)  # no photo (yet): not an error the browser should log
+            return Response(status_code=204)
         return FileResponse(path, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=3600"})
 
-    # Account-wide acquisition can reach data outside the observation scope and
-    # account contacts. These routes deliberately stay outside issued-access POLICY:
-    # only the installation administrator may acquire or prepare a disclosure.
     @app.get("/api/account-export", dependencies=[Depends(authenticate)])
     async def account_export_jobs():
         jobs = app.state.account_export.list_jobs()
@@ -2445,7 +2402,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.post("/api/report-options", dependencies=[Depends(authenticate)])
     async def set_report_options(body: report.ReportOptions):
-        # Recorded, signed, in every export manifest and report seal; not a journal event of its own.
         return report.save(app.state.store, body).model_dump()
 
     @app.get("/report-preview.css")
@@ -2463,7 +2419,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.post("/api/report-preview", dependencies=[Depends(authenticate)])
     async def preview_report(body: report.ReportOptions):
-        """A draft query, never a settings write or an integrity assertion."""
         def preview():
             with app.state.store.snapshot() as snapshot:
                 result = report.report_selection.analyze(snapshot, body.selection,
@@ -2478,8 +2433,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             result["unsigned"] = True
             return result
 
-        # One full scan per workspace at a time, held until the worker finishes
-        # even when a browser abandons the request. No first-N approximation.
         async with export_lock:
             return await complete_in_thread(preview)
 
@@ -2517,8 +2470,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.get("/api/assurance")
     async def assurance_statement(challenge: str = ""):
-        """Public in high-assurance mode only: the signing key and the host it was created on.
-        No message content, sources or account data; absent from ordinary installations."""
         if not app.state.assurance:
             raise HTTPException(404)
         if challenge and (len(challenge) != 32 or any(c not in "0123456789abcdef" for c in challenge)):
@@ -2604,7 +2555,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.post("/api/handover", dependencies=[Depends(authenticate)])
     async def export_handover(request: Request, body: HandoverRequest):
-        """A minimised extract for a court, lawyer or abuse desk; who made it, why and how is journaled."""
         for chat in body.chats:
             require_chat(request, chat)
         if body.case_board != "off" and not request.state.principal.may("board.read"):
@@ -2750,8 +2700,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 path = await build_file(prepare_download)
         except ValueError as exc:
             raise HTTPException(404, str(exc)) from None
-        # Copying a large saved file can take time. Recheck revocation before
-        # any response bytes escape, and remove the copy on every early exit.
         try:
             try:
                 who = await identify_download(request, credential)

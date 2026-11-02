@@ -1,8 +1,4 @@
-"""Render the investigation presentation's navigation and case-path diagrams.
-
-Uses the retained Manrope font licence and the existing SVG drawing helper.
-No network access or application data. Pass --font /path/to/Manrope.ttf.
-"""
+"""Render the investigation presentation's navigation and case-path diagrams."""
 import argparse
 import re
 
@@ -13,7 +9,6 @@ from render_readme import Drawing, OUT
 
 
 def save(drawing, name, description):
-    """Share repeated glyph outlines; a tenth of a font unit is subpixel here."""
     drawing.write(name, description)
     target = OUT / name
     svg = target.read_text(encoding="utf-8")

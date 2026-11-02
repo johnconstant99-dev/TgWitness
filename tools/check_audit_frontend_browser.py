@@ -1,8 +1,3 @@
-"""Audit regressions: async ownership, restored drafts and recoverable panel failures.
-
-All accounts, records, responses and download bodies are synthetic. No Telegram,
-provider, tunnel or cloud request is made by these scenarios.
-"""
 from pathlib import Path
 import tempfile
 
@@ -46,7 +41,6 @@ def confirmations(page, server, child):
     page.go_back()
     page.wait_for_function("id=>state.profile===id&&!$('workspace').inert", arg=child)
     accept(page)
-    # Exercise the separate bulk confirmation path as well.
     switch(page, 'default', 'sources')
     page.locator('#sources-tab-chats').click()
     page.locator('[data-source-action=select]').first.check()
@@ -125,7 +119,6 @@ def connection_and_reports(page):
     page.evaluate("()=>renderExportState({phase:'done',ready:true,captured:3,title:'Synthetic completed chat'})")
     assert not page.evaluate("$('chat-export-download').hidden")
     assert '3' in page.evaluate("$('chat-export-progress').textContent")
-    # A former job's completed response cannot replace the current job.
     path = '/api/chat-export/synthetic-old'
     page.route('**' + path, lambda route: route.fulfill(json={'phase': 'done', 'ready': True, 'captured': 999}))
     hold_api_response(page, path)
@@ -173,7 +166,6 @@ def settings_and_setup(page, server, child):
     assert page.locator('input[name=setup-goal]:checked').count() == 0
     for key in ('size', 'files', 'place'):
         expect(page.locator(f'input[name=setup-{key}]:checked')).to_have_value(saved['current'][key])
-    # The new workspace's own edit can still be applied after resetting the controller.
     page.locator('input[name=setup-goal][value=personal]').check()
     page.locator('#setup-form button[type=submit]').click()
     expect(page.locator('#setup-status')).to_contain_text('A personal record')
@@ -190,7 +182,6 @@ def settings_and_setup(page, server, child):
     expect(wizard.get_by_text('Telegram is connected.', exact=True)).to_have_count(0)
     expect(wizard.locator('#first-run-next')).to_be_disabled()
     expect(wizard.locator('.auth-card')).to_be_visible()
-    # Authorisation can change without the presence of the saved session changing.
     page.evaluate('()=>{state.status.collector.authorization_required=false;settingsHub.status();}')
     expect(wizard.get_by_text('Telegram is connected.', exact=True)).to_be_visible()
     expect(wizard.locator('#first-run-next')).to_be_enabled()
@@ -207,7 +198,6 @@ def delayed_downloads(page, child):
     page.locator('#ask-question').fill('Find the synthetic archived observation.')
     page.locator('#ask-form button[type=submit]').click()
     expect(page.locator('#ask-context-export')).to_be_visible()
-    # Return response headers immediately and release its body only after switching.
     page.evaluate("""()=>{
       window.auditFetch=window.fetch;window.auditDownloads=[];window.auditSaveBlob=window.saveBlob;
       window.saveBlob=(blob,name)=>auditDownloads.push(name);
@@ -227,7 +217,6 @@ def delayed_downloads(page, child):
     page.wait_for_timeout(150)
     assert page.evaluate('auditDownloads') == []
     page.evaluate('()=>{window.fetch=auditFetch;window.saveBlob=auditSaveBlob;}')
-    # A normal download still completes through the same guarded body reader.
     page.evaluate("()=>{window.fetch=async(...args)=>String(args[0]).includes('/analysis/synthetic-download')?new Response('synthetic complete'):auditFetch(...args);}")
     with page.expect_download() as result:
         assert page.evaluate("()=>download('analysis/synthetic-download','synthetic-analysis.json',false,true)")

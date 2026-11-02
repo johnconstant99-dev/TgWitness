@@ -9,8 +9,6 @@ function clear(){revision++;ticket++;session='';sessionStorage.removeItem('tgwit
 async function api(path,body){const response=await fetch('/api/'+path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json',...(session?{Authorization:'Bearer '+session}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store',referrerPolicy:'no-referrer'});if(!response.ok){if([401,403].includes(response.status))clear();const error=await response.json().catch(()=>({}));throw Error(typeof error.detail==='string'?error.detail:'The request could not be completed.');}return response.json();}
 function download(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'})),link=node('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 async function restoreSession(){
-  // Stored strings and URL fragments select credentials, never permissions.
-  // Resolve the session and its access type on the server before rendering data.
   const me=await api('access/me');
   if(!me.showcase){clear();throw Error('Use a showcase access link. This page does not open administrator or reviewer access.');}
   await refresh();

@@ -1,4 +1,3 @@
-"""Fail-closed verification against a locally trusted reusable-workflow policy."""
 import argparse
 import hashlib
 import json

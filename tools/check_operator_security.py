@@ -1,4 +1,3 @@
-"""Synthetic regressions for panel disclosure, proxy trust, limits and key replacement."""
 import asyncio
 import json
 import logging
@@ -44,7 +43,6 @@ async def boundary_checks():
     await request(peer='127.0.0.1', headers=[(b'cf-connecting-ip', b'2001:db8::12')], target=cf)
     assert seen[-1] == '2001:db8::12'
     assert (await request(peer='127.0.0.1', headers=[(b'cf-connecting-ip', b'192.0.2.1,192.0.2.2')], target=cf))['status'] == 400
-    # Malformed trusted metadata must never inherit an allowlisted local proxy IP.
     strict = RequestSecurity(app, trusted='127.0.0.1', allowed='127.0.0.1', header='x-forwarded-for')
     assert (await request(peer='127.0.0.1', headers=[(b'x-forwarded-for', b'invalid')], target=strict))['status'] == 400
     assert (await request(peer='127.0.0.1', headers=[(b'x-forwarded-for', b'192.0.2.1'), (b'x-forwarded-for', b'192.0.2.2')], target=strict))['status'] == 400
@@ -109,7 +107,6 @@ def disclosure_checks():
             child_url = '/profiles/' + child + '/api/status'
             assert http.get(child_url + '?ws=' + child, headers=root_headers).status_code == 200
             assert http.get(child_url + '?ws=default', headers=root_headers).status_code == 404
-            # A refused route policy cannot partly overwrite the saved settings.
             before = app.state.collector.policy_state()
             assert before['outside_enabled'] is False
             denied = http.post('/api/network/policy', headers=root_headers, json={'exposure': 'hide', 'outside_enabled': True})
@@ -117,7 +114,6 @@ def disclosure_checks():
             assert app.state.collector.policy_state() == before
             accepted = http.post('/api/network/policy', headers=root_headers, json={'exposure': 'hide', 'outside_enabled': False})
             assert accepted.status_code == 200, accepted.content
-            # A later Telegram-route change cannot remove the only outside route.
             proxy = {'kind': 'socks5', 'host': '127.0.0.1', 'port': 1080}
             assert http.post('/api/network', headers=root_headers, json=proxy).status_code == 200
             assert http.post('/api/network/policy', headers=root_headers, json={'exposure': 'hide', 'outside_enabled': True}).status_code == 200
@@ -129,7 +125,6 @@ def disclosure_checks():
             with zipfile.ZipFile(archive) as exported:
                 assert b'PrivateBrowser' not in exported.read('events.jsonl')
                 assert b'PrivateBrowser' not in exported.read('report.html')
-            # Old fingerprints are removed from mutable session data on restart.
             raw = vault.read('access')
             raw['sessions'][0]['agent'] = 'OldPrivateBrowser/123'
             vault.save('access', raw)
@@ -145,7 +140,6 @@ def disclosure_checks():
             assert not AccessControl(vault, store).sessions
             assert (Path(tmp) / 'panel-token.txt').read_text() == new_key
             assert new_key not in json.dumps(list(store.events(limit=200)))
-            # HTML reports render hostile raw strings as text, even in raw-record details.
             attack = '<img src=x onerror="window.attack=1"><script>unexpected()</script>'
             store.append('synthetic.operator_check', {'agent': attack})
             path = export_file(store, vault, 'html', {**report.resolved(), 'language': 'en', 'raw_records': True})

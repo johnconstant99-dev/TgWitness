@@ -1,9 +1,3 @@
-"""Independent report compositions over permitted, already-rendered report facts.
-
-These layouts adapt the separately reviewed Reading Series and Ledger & Margin
-designs. They do not bind fictional fixtures or execute model-authored JavaScript.
-Composition happens before the existing seal hashes the resulting HTML bytes.
-"""
 from dataclasses import dataclass
 from html import escape
 from html.parser import HTMLParser
@@ -26,7 +20,6 @@ class Chapter:
 
 
 def chapter_plan(design, kind="journal"):
-    """One section vocabulary shared with native PDF; unavailable sections disappear."""
     if design == "reading_series":
         return (
             Chapter("case", "Case & examination question", ("case", "brief")),
@@ -59,7 +52,6 @@ def chapter_plan(design, kind="journal"):
 
 
 def permitted_record(event):
-    """Never restore hidden fields from raw when a permitted details object exists."""
     from . import report
     payload = event.get("payload") if isinstance(event.get("payload"), dict) else {}
     sender = payload.get("sender_observation")
@@ -76,7 +68,6 @@ def permitted_record(event):
 
 
 def journal_directory(events, limit=SSR_LIMIT):
-    """A bounded index with an explicit basis, derived only from permitted events."""
     chats, senders, relations, count, limited = {}, {}, [], 0, False
     for event in events:
         if count >= limit:
@@ -101,7 +92,6 @@ def journal_directory(events, limit=SSR_LIMIT):
 
 
 def bounded_records(events, limit=SSR_LIMIT, byte_limit=SSR_BYTES):
-    """Keep whole records or omit them; never shorten evidence text to fit a page."""
     rows, size, limited = [], 0, False
     for event in events:
         if len(rows) >= limit:
@@ -134,7 +124,6 @@ FIELD_LABELS = {
 
 
 def _fields(value, say, depth=0):
-    """Escaped structured metadata; URLs and callback data are always inert text."""
     if value is None:
         return '<span class="muted">' + escape(say("Not supplied")) + '</span>'
     if isinstance(value, bool):
@@ -160,15 +149,12 @@ def record_metadata_html(event, say):
 
 
 def chat_metadata_html(record, say):
-    # Chat-export rows already are a permitted reading projection. No raw Telegram
-    # object, auth/session state or external entity lookup is consulted here.
     fields = {key: value for key, value in record.items() if key not in ("raw", "text")}
     return ('<details class="record-metadata"><summary>' + escape(say("Message metadata")) + '</summary>'
             + _fields(fields, say) + '</details>')
 
 
 def journal_replacements(event_factory, context, say, options, total=None, viewer_available=True):
-    """Reading copy + directory from one bounded permitted slice; viewer stays authoritative."""
     if not options.get("timeline") or not event_factory:
         return {}
     from . import report
@@ -270,7 +256,6 @@ SECTION_KEYS = {
 
 
 class _Blocks(HTMLParser):
-    """Split only the bounded report overview, never inline viewer data or a journal."""
     VOID = frozenset(("area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"))
 
     def __init__(self):
@@ -343,7 +328,6 @@ def chapter_close(design):
 
 
 def _children(markup):
-    """Inspect a generated section's bounded children without touching source text."""
     parser = _Blocks()
     parser.feed(markup.split('>', 1)[1].rsplit('</', 1)[0])
     parser.close()
@@ -352,7 +336,6 @@ def _children(markup):
 
 
 def _case_opening(sections, say):
-    """Lead with the author's question; keep repeated case facts in native details."""
     from . import report_charts
     question, examination = [], []
     question_heading = '<h3>' + escape(say("Question examined")) + '</h3>'
@@ -396,7 +379,6 @@ def _body(blocks, design, say, kind, replacements):
         elif anchor in SECTION_KEYS:
             sections.setdefault(SECTION_KEYS[anchor], []).append(markup)
         elif tag == "h2":
-            # The source-coverage label belongs to the interval section, not the cover.
             sections.setdefault("coverage", []).insert(0, markup)
         else:
             extras.append(markup)
@@ -433,13 +415,6 @@ def _body(blocks, design, say, kind, replacements):
 
 
 def compose(chunks, design, say, kind="journal", replacements=None):
-    """Reorder bounded overview sections; stream viewer data and SSR records separately.
-
-    Input chunks are the existing report generator, whose main overview does not
-    contain the full journal. Replacements are lazy HTML iterators, so hundreds
-    of records are never joined into an overview string. The first closing main
-    ends parsing; the potentially large inline viewer payload passes unchanged.
-    """
     if design not in DESIGNS:
         yield from chunks
         return
@@ -470,7 +445,6 @@ def compose(chunks, design, say, kind="journal", replacements=None):
 
 
 def preview(fragment, design, say):
-    """Bounded preview composition without scripts, inline styles or a document head."""
     return b''.join(compose([('<main>' + fragment + '</main>').encode('utf-8')], design, say, 'preview')).decode('utf-8')
 
 

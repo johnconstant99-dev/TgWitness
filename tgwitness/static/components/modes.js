@@ -1,6 +1,3 @@
-/** Protection modes: which sections the panel shows for a workspace. A hidden section keeps working;
- * recording and signing are the same in every mode. The server journals every change (modes.py). */
-// Places of the checklist that sit inside a section a lower mode hides.
 const PLACES = {'extras:bot': 'witness', 'extras:evidence': 'timestamps_backup', 'wizard:timestamps': 'timestamps_backup',
   'extras:github': 'code_check', 'extras:cloud': 'cloud'};
 export const EXTRA_FEATURES = {bot: 'witness', evidence: 'timestamps_backup', github: 'code_check', cloud: 'cloud'};
@@ -36,7 +33,6 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
   wizard.id = 'tsa-wizard'; wizard.setAttribute('aria-labelledby', 'tsa-wizard-title');
   document.body.append(dialog, wizard);
 
-  // Protection level on the Extras overview; the full checklist opens there in Mossad mode.
   const card = node('section', 'card padded protection-card');
   card.id = 'protection-card'; card.hidden = true; card.setAttribute('aria-labelledby', 'protection-card-title');
   query('#extras-overview .extras-intro')[0]?.after(card);
@@ -189,7 +185,6 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
 
   function renderCard() {
     card.hidden = !data;
-    // Periodic reads repeat the same state; rebuilding would move the focus out of the card.
     const signature = data ? JSON.stringify([data, may('settings')]) : '';
     if (!data || card.dataset.signature === signature) return;
     card.dataset.signature = signature;
@@ -248,7 +243,6 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
       unlock.addEventListener('click', () => show(feature.mode));
       lock.append(text, unlock);
     }
-    // Easy mode: the chat export (JSON with its files) is the first download, and open.
     const tools = query('#export-chat-tools')[0];
     if (tools) {
       home ??= tools.nextElementSibling;
@@ -323,7 +317,6 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
     if (place === 'wizard:timestamps') openWizard(); else go(place);
   }
 
-  // Court-ready: the RFC 3161 / OpenTimestamps wizard. Only checkpoint hashes leave the machine.
   let wizardRun = 0;
   async function openWizard() {
     const run = ++wizardRun;
@@ -344,7 +337,6 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
     let evidence;
     try { evidence = await json('evidence'); } catch (error) { body.append(node('p', 'form-error', error.message)); return; }
     if (run !== wizardRun) return;
-    // The saved services (the defaults until changed); a workspace that removed all of them gets the defaults back.
     const saved = evidence.settings, settings = saved.tsa_urls.length || saved.ots_calendars.length ? saved : {...saved, ...evidence.defaults};
     body.append(node('p', 'muted', tr('Only the SHA-256 of each signed checkpoint is sent, through this workspace\'s connection route. The answers are kept with the checkpoints, travel in evidence exports and are checked by verify.py.')));
     const services = node('ul', 'tsa-services');

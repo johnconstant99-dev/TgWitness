@@ -1,4 +1,3 @@
-"""Portable, cited source chunks for offline reading and retrieval systems."""
 import hashlib
 import io
 import json
@@ -9,7 +8,6 @@ from .store import canonical, utcnow
 
 
 def literal_block(text, language="text"):
-    """Untrusted content cannot close its own Markdown fence or create a remote image."""
     fence = "`" * max(3, 1 + max((len(x) for x in re.findall(r"`+", text)), default=0))
     return [fence + language, text, fence, ""]
 

@@ -1,6 +1,3 @@
-"""Roots a timestamp authority's signature must chain to before an answer counts: the Mozilla roots
-shipped with certifi (DigiCert, Sectigo and other commercial authorities) and the FreeTSA root, which
-is not among them. Kept in a .py file so the source tree hash covers it."""
 import re
 import warnings
 from functools import lru_cache

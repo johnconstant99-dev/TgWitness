@@ -1,9 +1,7 @@
 (() => {
   "use strict";
-  // Proxy servers of the automatic MTProxy route: checks, countries, lists and the GitHub search.
   let view = null, timer = null, limit = 150, request = 0, generation = 0, pending = 0;
   let mutations = Promise.resolve(), sourceKey = "";
-  // Country choice being edited; kept across re-renders until it is saved.
   let picks = {prefer: [], avoid: []}, picksDirty = false;
   const draft = new Map();
   const fields = ["pool-github-search", "pool-github-query", "pool-github-max", "pool-countries", "pool-only-preferred"];
@@ -70,7 +68,6 @@
   function runAction(button, work) {
     return busy(button, () => mutate(work)).finally(controls);
   }
-  // Flag emoji only where the system draws them in colour; elsewhere (Windows) they would repeat the code as letters.
   const flags = (() => {
     try {
       const canvas = document.createElement("canvas"), pen = canvas.getContext("2d", {willReadFrequently: true});
@@ -147,7 +144,6 @@
     show("pool-schedule-edit", state.profile === "default");
     let note = $("pool-note");
     if (!note) { note = node("p", "hint pool-note"); note.id = "pool-note"; $("pool-schedule").after(note); }
-    // Every applicable warning: a blocked download also explains why a country choice excludes everything
     note.textContent = [
       view.download_problem && tr(view.download_problem) + " " +
         tr("List updates and country lookups wait for it; checks of the servers themselves still run."),

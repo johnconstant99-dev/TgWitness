@@ -1,11 +1,3 @@
-"""Record the synthetic demo's API answers for the read-only online demo on the website.
-
-python tools/capture_demo.py      # writes website/demo/fixtures.json
-
-Runs the local demo (fictional records, no Telegram connection), walks every panel view
-in Chromium and stores each GET answer the interface asked for. The website serves the
-real panel files with these answers; nothing on the website can change data.
-"""
 import base64
 import hashlib
 import io
@@ -36,7 +28,6 @@ def answer_of(body, kind):
 
 
 def capture_downloads(page, demo, answers, account_job, disclosure_id):
-    """Build real exports once; the online demo downloads these files on demand."""
     headers = {"Authorization": "Bearer " + demo.app.state.vault.token}
     DOWNLOADS.mkdir(parents=True, exist_ok=True)
     paths = {f"/api/export/{fmt}": f"tgwitness-demo.{fmt}" for fmt in ("zip", "jsonl", "csv", "html")}
@@ -55,7 +46,6 @@ def capture_downloads(page, demo, answers, account_job, disclosure_id):
         answers[path] = {"type": response.headers["content-type"].split(";")[0],
                          "file": "downloads/" + filename, "bytes": len(body),
                          "sha256": hashlib.sha256(body).hexdigest()}
-    # This POST only verifies the synthetic journal; it does not change any records.
     response = page.request.post(demo.url + "/api/verify", headers=headers, data={})
     if response.status != 200:
         raise RuntimeError("Could not verify the captured synthetic journal")
@@ -114,7 +104,6 @@ def main():
 
 
 def scan_downloads(answers, root):
-    """Do not publish signed sample archives containing capture-host details."""
     markers = [root, root.replace("\\", "/"), root.replace("\\", "\\\\"),
                "Administrator", "\\Users\\", "/Users/", "test-results", "demo-capture-"]
     markers = [value.lower().encode("utf-8") for value in markers]
@@ -131,7 +120,6 @@ def scan_downloads(answers, root):
 
 
 def neutralize(answers):
-    """Remove what describes the capturing machine or third parties rather than the demo."""
     access = answers.get("/api/demo-access")
     if access:
         access["text"] = json.dumps({"available": True, "token": "online-demo"})
@@ -149,7 +137,6 @@ def neutralize(answers):
         catalog["text"] = json.dumps(value)
     for path, answer in answers.items():
         if "text" in answer and path in ("/api/status", "/api/profiles"):
-            # A static recording cannot describe the viewer's disk; never alter signed records.
             answer["text"] = re.sub(r'"disk_free_bytes":\s*\d+', '"disk_free_bytes":null', answer["text"])
 
 

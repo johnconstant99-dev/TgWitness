@@ -1,4 +1,3 @@
-"""Inspect and replace data-directory ACLs using Windows' locale-independent APIs."""
 import ctypes
 from ctypes import wintypes
 from pathlib import Path
@@ -68,9 +67,6 @@ class WindowsAcl:
         if error:
             raise ctypes.WinError(error)
         try:
-            # Elevated Windows processes create children owned by Administrators.
-            # That privileged group can already take ownership of any local file;
-            # do not accept an unrelated ordinary account as an alternate owner.
             if not acl or not owner or not (self.api.EqualSid(owner, self.sid)
                                            or self.api.EqualSid(owner, self.administrators)):
                 return False
@@ -90,7 +86,7 @@ class WindowsAcl:
                     return False
                 if not ace.flags & 0x08 and ace.mask & FILE_ALL_ACCESS == FILE_ALL_ACCESS:
                     effective = True
-                    if ace.flags & 0x07 == 0x03:  # OI + CI, without NO_PROPAGATE
+                    if ace.flags & 0x07 == 0x03:
                         inheritable = True
             return effective and (not path.is_dir() or inheritable)
         finally:
@@ -113,7 +109,6 @@ class WindowsAcl:
 
 
 def paths(root):
-    """Never change a link target outside the data directory."""
     pending = [Path(root)]
     while pending:
         path = pending.pop()
@@ -125,9 +120,6 @@ def paths(root):
 
 
 def owner_acl(root, sid, *, repair=False):
-    # SetNamedSecurityInfo propagates inheritance before the next path is visited.
-    # Preflight the entire tree first so an external hardlink cannot have its
-    # shared security descriptor changed as a side effect of restricting root.
     linked = {}
     for path in paths(root):
         info = path.lstat()

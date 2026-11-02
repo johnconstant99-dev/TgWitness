@@ -1,4 +1,3 @@
-"""Bundled Desktop profiles; imported and saved account metadata takes priority."""
 from functools import lru_cache
 import hashlib
 import json

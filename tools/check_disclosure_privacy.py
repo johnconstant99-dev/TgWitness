@@ -1,4 +1,3 @@
-"""Offline adversarial disclosure checks; synthetic accounts and freshly generated keys only."""
 import asyncio
 import hashlib
 import json
@@ -83,7 +82,6 @@ def projection_checks():
             'prefix 🧪[redacted]|[redacted]![redacted] tail 👁')
         assert projection.mask_known('StraßeGroßmann tail') == '[redacted] tail'
         assert projection.mask_known('Unrelated 🧪 trailing text 👁') == 'Unrelated 🧪 trailing text 👁'
-        # Two absent sender IDs cannot substantiate the same participant identity.
         unknown = {'id': 2, 'text': ''}
         first = projection.apply(chat, unknown)['message']
         second = projection.apply(chat, {**unknown, 'id': 3})['message']
@@ -107,7 +105,6 @@ def projection_checks():
             result = projected.apply(chat, {**row, 'attachments': [attachment]})
             assert SECRET_METADATA not in json.dumps(result)
             assert bool(result['message']['attachments']) is include
-    # Generic group titles are not names to erase from all message content.
     group = {'id': 2, 'kind': 'group', 'title': 'Meeting'}
     with patch('tgwitness.disclosure.source_rows', lambda _source: iter([(group, row)])):
         projected = Projection(policy, b'seed', None)
@@ -173,7 +170,6 @@ async def manager_checks(directory):
             if private:
                 assert 'RarePrivateContact' not in json.dumps(preview['samples'])
             assert hashlib.sha256(original.read_bytes()).hexdigest() == original_digest
-        # Text omission drops every alternative text/metadata copy as well.
         preview = manager.preview(job['id'], {'purpose': 'Omit text for Großmann RarePrivateContact',
                                               'text_mode': 'omit'}, 'synthetic-owner')
         info = await manager.create(job['id'], preview['preview_id'], 'synthetic-owner')

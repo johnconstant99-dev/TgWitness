@@ -1,11 +1,4 @@
-"""Run explicit independent CI checks, with bounded concurrency and durable results.
-
-Each check runs in its own process and temporary directory. No shell or wildcard
-discovery is used. Failure does not prevent the remaining checks from running.
-Timeout cleanup has a five-second budget. Process-tree termination is best
-effort; a descendant that detaches itself may survive, but cannot hold the runner
-open through an inherited output pipe.
-"""
+"""Run explicit independent CI checks, with bounded concurrency and durable results."""
 import argparse
 import asyncio
 from dataclasses import dataclass
@@ -45,7 +38,7 @@ SUITES = {
         "check_analyst_browser.py", "check_history_browser.py", "check_sealed_browser.py",
         "check_interactions_browser.py", "check_workspace_browser.py", "check_quick_browser.py",
         "check_proof_browser.py", "check_setup_browser.py", "check_public_proxies_browser.py",
-        "check_capture_language_browser.py",
+        "check_capture_language_browser.py", "check_application_guides.py",
     ),
     "browser-ux": (
         "test_audit_security_fixes.py", "test_audit_data_fixes.py", "test_audit_platform_fixes.py",
@@ -78,7 +71,6 @@ class Check:
 
 
 async def stop_process(process):
-    """Stop descendants too: a timed-out check may own a browser and an app."""
     if os.name == "nt":
         killer = await asyncio.create_subprocess_exec(
             str(Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32/taskkill.exe"),
@@ -93,7 +85,6 @@ async def stop_process(process):
             os.killpg(process.pid, signal.SIGTERM)
         except ProcessLookupError:
             pass
-        # Also kill descendants that ignored TERM, even if their parent exited.
         try:
             await asyncio.wait_for(process.wait(), 2)
         except TimeoutError:
@@ -111,13 +102,10 @@ async def stop_process(process):
 
 
 async def finish_output(process, reader, log, result):
-    """Escaped descendants must not turn a timeout into an unbounded pipe wait."""
     try:
         result["output_truncated"] = await asyncio.wait_for(asyncio.shield(reader), 2)
     except TimeoutError:
         result["output_interrupted"] = result["output_truncated"] = True
-        # asyncio has no public StreamReader.close(). Close its pipe transport.
-        # This also releases a pending Windows Proactor pipe read.
         transport = getattr(process.stdout, "_transport", None)
         if transport is not None:
             transport.close()
@@ -130,7 +118,6 @@ async def finish_output(process, reader, log, result):
 
 
 async def capture_output(stream, log):
-    """Drain all output, while bounding each artifact and memory consumption."""
     kept = total = 0
     limit = MAX_LOG_BYTES - 256
     while chunk := await stream.read(65536):
@@ -164,7 +151,6 @@ async def run_one(check, output, timeout, cwd):
                     stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT, **kwargs)
                 reader = asyncio.create_task(capture_output(process.stdout, log))
                 try:
-                    # Include output draining: orphan children must not hold a pipe forever.
                     await asyncio.wait_for(asyncio.gather(process.wait(), asyncio.shield(reader)), timeout)
                     result["status"] = "passed" if process.returncode == 0 else "failed"
                 except TimeoutError:

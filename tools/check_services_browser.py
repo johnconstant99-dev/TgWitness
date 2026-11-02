@@ -1,4 +1,3 @@
-"""Service discovery and storage purpose navigation, without sending external requests."""
 from pathlib import Path
 import sys
 import tempfile
@@ -43,7 +42,6 @@ def main():
             expect(page.locator('#storage-form')).to_be_visible()
             expect(page.locator('#replica-form')).to_be_hidden()
             expect(page.locator('#storage-status')).to_contain_text('Ready to configure')
-            # Purpose navigation never connects or removes local data on its own.
             assert not server.app.state.vault.read('storage')
             for width in (1440, 390):
                 page.set_viewport_size({'width': width, 'height': 1000 if width == 1440 else 844})

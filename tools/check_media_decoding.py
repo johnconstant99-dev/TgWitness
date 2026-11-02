@@ -1,4 +1,4 @@
-"""Real native-decoder regressions; no model, network, Telegram account or prerecorded media."""
+"""Real native-decoder regressions"""
 import argparse
 import errno
 import hashlib
@@ -51,8 +51,6 @@ def refused(worker, path, seconds=10):
     except (ValueError, av.error.FFmpegError):
         return
     except OSError as exc:
-        # PyAV's Python IO callback propagates EINVAL for an invalid seek in malformed media.
-        # Do not classify unrelated file/permission/resource failures as successful rejection.
         if exc.errno == errno.EINVAL:
             return
         raise
@@ -82,7 +80,6 @@ def main():
             assert hashlib.sha256(path.read_bytes()).digest() == before
             print("Decoded generated " + name, flush=True)
 
-        # Native decoder negative control: metadata claims 1s, but the frames contain 4s.
         forged = root / "forged-duration.flac"
         encoded(forged, "flac", "flac", seconds=4)
         data = bytearray(forged.read_bytes())
@@ -91,13 +88,12 @@ def main():
         data[18:26] = ((packed & ~((1 << 36) - 1)) | 48000).to_bytes(8, "big")
         forged.write_bytes(data)
         with av.open(str(forged)) as old:
-            assert 0 < old.duration / av.time_base <= 2  # Previous worker accepted this precheck.
+            assert 0 < old.duration / av.time_base <= 2
             decoded = sum(frame.samples for frame in old.decode(audio=0))
             assert decoded == 4 * 48000
         refused(worker, forged, seconds=2)
         print("Rejected forged FLAC duration after positive old-decoder control", flush=True)
 
-        # A concat manifest successfully opens a second local file under the old automatic decoder.
         playlist = root / "references.txt"
         playlist.write_text("ffconcat version 1.0\nfile 'audio.wav'\n", encoding="utf-8")
         with av.open(str(playlist)) as old:
@@ -109,7 +105,6 @@ def main():
             path = root / name
             path.write_bytes(content)
             refused(worker, path)
-        # Test the secondary-open barrier separately even if a supported container references another file.
         try:
             worker.deny_secondary_open(str(root / "audio.wav"), 1, {})
         except ValueError:
@@ -117,7 +112,6 @@ def main():
         else:
             raise AssertionError("Secondary file reference allowed")
 
-        # Real parser corpus: reproducible structural truncations and header mutations, not token mocks.
         randomizer = random.Random(20261101)
         rejected, bounded = 0, 0
         original = (root / "audio.flac").read_bytes()
@@ -141,7 +135,7 @@ def main():
                 rejected += 1
             else:
                 assert len(samples) <= 3 * 16000 and np.isfinite(samples).all()
-                bounded += 1  # Some metadata changes remain valid encodings; do not call them corrupt.
+                bounded += 1
         assert rejected >= 24
     print(f"Native media decoding passed:6 formats, forged duration and external-reference controls; corpus48 ({rejected} rejected, {bounded} bounded valid decodes).")
 

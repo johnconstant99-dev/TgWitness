@@ -1,9 +1,7 @@
-"""Bound background reads and finish file workers before cleanup."""
 import asyncio
 
 
 async def limited_in_thread(slots, function, *args):
-    """Keep a read slot until its thread finishes, even if the caller times out."""
     await slots.acquire()
     try:
         task = asyncio.create_task(asyncio.to_thread(function, *args))

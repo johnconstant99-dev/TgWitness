@@ -1,12 +1,3 @@
-"""The panel's guided 24/7 server: python -m tgwitness.cloud deploy and destroy, started from the local panel.
-
-Hetzner hosts an ordinary server; Phala Cloud runs the collector in an Intel TDX confidential VM whose quote
-the verifier checks to Intel's root. The address is a quick tunnel on trycloudflare.com, or a name under the
-user's own domain when a Cloudflare token comes along. The tokens come with each request
-from the browser on this computer and live only for that request or task: nothing writes them down. The
-deployment record, the redacted installer and the panel token are kept under the data directory, as the
-command line keeps them under deployments/.
-"""
 import json
 import os
 import re
@@ -27,9 +18,9 @@ from .store import utcnow
 
 # Region → preferred location, then any location in these network zones.
 REGIONS = {"eu": ("nbg1", ("eu-central",)), "us": ("ash", ("us-east", "us-west"))}
-PREFERRED_TYPE = "cpx22"  # the type the deployment guide starts with; otherwise the cheapest that fits
+PREFERRED_TYPE = "cpx22"
 MIN_MEMORY = 2
-PHALA_TYPE = "tdx.small"  # otherwise the cheapest CPU type with enough memory
+PHALA_TYPE = "tdx.small"
 HOURS_PER_MONTH = 730
 GITHUB = "https://api.github.com/repos/phishdestroy/TgWitness/commits/"
 FILES = {"deployment.json": "application/json", "panel-token.txt": "text/plain; charset=utf-8",
@@ -41,8 +32,6 @@ DOMAIN_CHARACTERS = frozenset(string.ascii_lowercase + string.digits + "-")
 
 
 class WizardError(ValueError):
-    """A problem the user can solve; technical holds the service's own answer."""
-
     def __init__(self, message, technical=""):
         super().__init__(message)
         self.technical = technical
@@ -53,7 +42,6 @@ def plain(value):
 
 
 def domain(value):
-    """A DNS name such as example.org, checked label by label rather than with one pattern over the whole name."""
     labels = value.split(".") if 4 <= len(value) <= 253 else []
     return (len(labels) >= 2 and len(labels[-1]) >= 2 and set(labels[-1]) <= set(string.ascii_lowercase)
             and all(0 < len(label) <= 63 and label[0] != "-" and label[-1] != "-"
@@ -129,8 +117,6 @@ class Address(BaseModel):
 
 
 def explain(exc):
-    """A message that says what to do; the service's own words stay in technical. API errors start with the
-    service's name (providers.base.Api.call)."""
     text = str(exc)
     head = text.split(":", 1)[0]
     if "did not answer in time" in text:
@@ -195,7 +181,6 @@ def location(region, locations):
 
 
 def server_type(types, place):
-    """The guide's type where Hetzner offers it here, else the cheapest x86 type with enough memory."""
     offers = []
     for kind in types:
         if kind.get("deprecated") or kind.get("deprecation") or kind.get("architecture", "x86") != "x86" \
@@ -216,7 +201,6 @@ def server_type(types, place):
 
 
 def version(ref=None, session=None):
-    """The commit the server installs: a 40-character commit as given, otherwise a tag or branch on GitHub."""
     ref = ref or "v" + __version__
     if cloud.COMMIT.fullmatch(ref):
         return {"ref": ref, "commit": ref}
@@ -240,8 +224,6 @@ def version(ref=None, session=None):
 
 
 def phala_type(families):
-    """tdx.small where Phala offers it, else the cheapest CPU type with enough memory; the price per month
-    is Phala's hourly rate times 730 hours."""
     offers = []
     for family in families:
         for kind in family.get("items") or []:
@@ -269,8 +251,6 @@ def services(tokens, session=None):
 
 
 def check(request, session=None):
-    """What would be created, at what monthly price, and under which of the user's domains when a Cloudflare
-    token is given; creates nothing."""
     host, cf = services(request, session)
     phala = request.provider == "phala"
     if phala and request.gateway:
@@ -312,7 +292,7 @@ def check(request, session=None):
         except DeployError:
             pass
     if request.gateway and not (zones and tunnels):
-        return found  # Gateway DNS needs no domain: the quick tunnel stays
+        return found
     if not zones:
         raise WizardError("The Cloudflare token sees no active domain. Add your domain to Cloudflare, or allow "
                           "the token for it.")
@@ -327,8 +307,6 @@ def check(request, session=None):
 
 
 def gateway_accounts(cf, accounts):
-    """The accounts in which the token may run Gateway; one that has never used Gateway counts, deploy switches
-    it on there."""
     usable = []
     for account in accounts:
         try:
@@ -342,8 +320,6 @@ def gateway_accounts(cf, accounts):
 
 
 class Jobs:
-    """One server task at a time, in a thread: deploying waits up to half an hour for the new server."""
-
     def __init__(self, root, session=None, fetch=None, beacon=None, collateral=None):
         self.directory = Path(root) / "deployments"
         self.session, self.fetch, self.collateral = session, fetch or cloud.collector_statement, collateral
@@ -359,7 +335,6 @@ class Jobs:
         return {"job": job, "deployments": self.deployments()}
 
     def folder(self, *parts):
-        """A path inside the deployments directory, or None for a name that would lead out of it."""
         root = os.path.normpath(os.path.abspath(self.directory))
         path = os.path.normpath(os.path.join(root, *parts))
         if not path.startswith(root + os.sep):
@@ -384,7 +359,6 @@ class Jobs:
         return found
 
     def address(self, name):
-        """The quick tunnel's current address, as the server last posted it signed with this deployment's key."""
         folder = self.folder(name) if cloud.NAME.fullmatch(name) else None
         if folder is None or not (folder / "deployment.json").is_file():
             raise WizardError("This deployment does not exist.")
@@ -435,7 +409,7 @@ class Jobs:
             except DeployError as exc:
                 problem = explain(exc)
                 result, error = None, {"message": str(problem), "technical": problem.technical}
-            except Exception as exc:  # the panel must outlive any failure of this task
+            except Exception as exc:
                 result, error = None, {"message": "The task stopped.", "technical": type(exc).__name__ + ": " + str(exc)}
             with self.guard:
                 job.update(state="failed" if error else "done", error=error, result=result, finished_at=utcnow())

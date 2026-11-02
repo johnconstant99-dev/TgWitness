@@ -1,4 +1,3 @@
-"""Verified TLS to an HTTPS CONNECT proxy; never downgrade HTTPS to cleartext."""
 import asyncio
 import base64
 import ssl
@@ -35,7 +34,6 @@ async def tunnel(route, host, port, timeout=15, address=None):
 class HTTPSConnection(ConnectionTcpFull):
     async def _connect(self, timeout=None, ssl=None):
         from .network import NetworkConfig
-        # The host can be a pinned IP; retain the original name for certificate verification.
         route = NetworkConfig.model_construct(**self._proxy)
         self._reader, self._writer = await tunnel(route, self._ip, self._port, timeout or 15)
         self._codec = self.packet_codec(self)

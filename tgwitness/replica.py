@@ -1,14 +1,3 @@
-"""Off-site copy: journal, files, checkpoints (with timestamps) and chat exports, encrypted, to S3.
-
-Every object is encrypted before it leaves the machine (AES-256-GCM in 1 MiB chunks; the
-object name and a final-chunk flag are authenticated, so objects cannot be swapped or
-truncated unnoticed). The key stays in this workspace's vault; download it once and keep it
-apart, or the copy cannot be read. Journal records keep their own hash chain and signatures,
-so a restored copy is verified exactly like an evidence export.
-
-Restore: python -m tgwitness.replica restore --key-file KEY.json --out DIR
-(access keys from TGWITNESS_S3_ACCESS_KEY / TGWITNESS_S3_SECRET_KEY).
-"""
 import argparse
 import asyncio
 import base64
@@ -78,7 +67,6 @@ def workspace_prefix(settings, public_key):
 
 
 def encrypt(key, name, read, nonce_prefix):
-    """Ciphertext pieces for plaintext read in chunks; a shorter (possibly empty) chunk is last."""
     aead, counter, label = AESGCM(key), 0, name.encode()
     yield MAGIC + nonce_prefix
     while True:
@@ -106,17 +94,11 @@ def decrypt(key, name, read):
             return
 
 
-def encrypted_size(size):
-    return len(MAGIC) + 8 + size + 16 * (size // CHUNK + 1)
-
-
 class MediaUnavailable(ValueError):
-    """A preserved file is missing or no longer matches its signed hash."""
+    pass
 
 
 async def upload(s3, key, name, opener, extra, expected_digest=None):
-    """Encrypt twice (same nonce prefix): first for Content-MD5/SHA-256, then streaming the upload. The
-    second pass refuses any chunk that differs from the first, so one nonce never covers two plaintexts."""
     prefix, chunks = os.urandom(8), []
 
     def digests():
@@ -153,7 +135,6 @@ async def upload(s3, key, name, opener, extra, expected_digest=None):
 
 
 class Sent:
-    """What has already been copied, kept apart from the append-only journal."""
     def __init__(self, root, namespace):
         self.namespace = namespace
         self.db = sqlite3.connect(root / "replica.sqlite3")
@@ -185,7 +166,6 @@ class Sent:
 
 
 def outbox(store, path):
-    """Queue a finished chat export for the off-site copy (hard link; copy if linking fails)."""
     if not replica_settings(store)["enabled"]:
         return
     folder = store.root / "replica-outbox"
@@ -203,7 +183,6 @@ def client(settings, secrets, network):
 
 
 def lock_headers(settings, days=None):
-    """Object Lock request headers for an upload; none when no retention is set."""
     days = settings["retention_days"] if days is None else days
     if not days:
         return {}
@@ -213,12 +192,6 @@ def lock_headers(settings, days=None):
 
 
 async def lock_report(s3, name, settings, requested=None, uploaded_at=None):
-    """What the storage actually did about Object Lock for one uploaded object.
-
-    Some S3-compatible services accept the Object Lock headers and silently ignore them, so the
-    retention is read back. verified: True when locked as requested, False when retention was
-    requested (or is the bucket default) but the object is not locked, None when none is wanted.
-    """
     try:
         bucket = await s3.object_lock()
     except Exception as exc:
@@ -256,7 +229,6 @@ async def lock_report(s3, name, settings, requested=None, uploaded_at=None):
 
 
 async def sync(store, vault, network):
-    """Copy everything not yet copied. Stops at the first failure; the next pass continues."""
     settings, secrets = replica_settings(store), vault.read("replica")
     if not (settings["enabled"] and settings["endpoint"] and settings["bucket"] and secrets.get("access_key")):
         return None
@@ -338,13 +310,12 @@ async def sync(store, vault, network):
         store.append("replica.completed", {**status, "destination": settings["endpoint"] + "/" + settings["bucket"]
                                            + "/" + base, "encrypted": True})
     store.set_setting("replica_last", status)
-    if not error:  # kept apart so that a failed pass does not hide the last complete one
+    if not error:
         store.set_setting("replica_success", {"at": status["at"], "journal_seq": journal_seq})
     return status
 
 
 async def replica_loop(store, vault, network_config, wakeup, status):
-    """status: busy, and of the latest pass its time, error and when the next one is due."""
     last = 0.0
     while True:
         with suppress(TimeoutError):
@@ -375,7 +346,6 @@ def key_file(store, vault):
 
 
 async def restore(keyinfo, access_key, secret_key, out, network=None):
-    """Download, decrypt and verify a copy into out/ (events.jsonl, media/, checkpoints/, exports/)."""
     s3 = S3(keyinfo["endpoint"], keyinfo["region"], keyinfo["bucket"], access_key, secret_key,
             network or NetworkConfig(kind="direct"), keyinfo["path_style"])
     key, base, out = base64.b64decode(keyinfo["key"]), keyinfo["prefix"], Path(out)
@@ -398,7 +368,6 @@ async def restore(keyinfo, access_key, secret_key, out, network=None):
 
 
 def filesystem_link(path):
-    """Symlinks and Windows reparse points (including junctions), also on Python 3.11."""
     if path.is_symlink():
         return True
     try:

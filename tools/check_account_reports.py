@@ -1,4 +1,3 @@
-"""Offline account/sharing report acceptance with synthetic accounts and fresh keys."""
 import asyncio
 import hashlib
 from html.parser import HTMLParser
@@ -110,7 +109,6 @@ def pure_checks():
     assert '>Sender filters</dt><dd class="user" dir="auto">1<' in original_scope
     assert '>Text filters</dt><dd class="user" dir="auto">2<' in original_scope
 
-    # A reference belongs to this copy and its row order, never a source identifier.
     repeated = [row, row, {'message': {'text': 'No source ID'}, 'chat': {}}]
     rendered = b''.join(account_report.sharing_report(context, iter(repeated))).decode()
     assert rendered == b''.join(account_report.sharing_report(context, iter(repeated))).decode()
@@ -222,8 +220,6 @@ async def manager_checks(directory, output):
             await exports.resume(job['id'])
             assert hashlib.sha256(source.read_bytes()).hexdigest() == before, 'Resume rewrote a published archive'
 
-        # Construct a valid pre-feature signed job before any acquisition. Resume must
-        # retain the original raw options/hash rather than inserting a new default.
         job = await exports.start({'transport': 'regular', 'include_profile': False,
                                    'include_contacts': False, 'media_types': []})
         await exports.pause(job['id'])

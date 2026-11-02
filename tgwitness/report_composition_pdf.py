@@ -1,9 +1,3 @@
-"""Native compositions of the approved Evidence Reading Series and Ledger & Margin.
-
-The chapter content is supplied by the existing report renderers. This module
-does not read account data, restore hidden fields, or alter the signed subject.
-No browser, external fonts, network calls or HTML interpreter are required.
-"""
 INDEPENDENT = frozenset(("reading_series", "ledger_margin"))
 
 
@@ -73,7 +67,6 @@ def title_block(lay, eyebrow, title, facts, signed_note):
 
 
 def figures(lay, items):
-    """The models use an exact count register, rather than ornamental KPI cards."""
     if not items:
         return
     pdf, style = lay.pdf, lay.design
@@ -107,7 +100,6 @@ def _body_margins(pdf):
 
 
 def _rail(pdf, title, number, y):
-    """A real marginal column, outside the narrative's text measure."""
     style = pdf.report_style
     base_left, _, base_right = style.margins
     x = pdf.w - base_right - 25 if pdf.rtl else base_left
@@ -124,7 +116,6 @@ def _rail(pdf, title, number, y):
 
 def section(lay, title, lead=""):
     pdf, style = lay.pdf, lay.design
-    # Existing section renderers become subsections inside the model's chapters.
     if getattr(lay, "composition_chapter", False):
         lay.need(23)
         pdf.start_section(str(title), level=2)
@@ -137,8 +128,6 @@ def section(lay, title, lead=""):
     _body_margins(pdf)
     lay.number += 1
     if pdf.page_no() == 1 or pdf.get_y() > pdf.h - 67:
-        # The new chapter will draw its own rail below. Do not first print the
-        # previous chapter in the same margin from the page header.
         pdf.report_chapter = None
         pdf.add_page()
     else:
@@ -215,18 +204,12 @@ def render(lay, callbacks, default_order, kind, visible=None):
                 seen.add(key)
         finally:
             lay.composition_chapter = False
-    # Never silently omit an established content block if the plan grows stale.
     remaining = [key for key in default_order if key not in seen and visible.get(key, True)]
     if remaining:
         raise ValueError("Native PDF chapter plan omits sections: " + ", ".join(remaining))
 
 
 def indexed_events(events, total):
-    """Read a bounded permitted prefix once and put every consumed event back.
-
-    The directory is explicitly a reading aid, never a full-journal ranking.
-    The transcript still receives the complete original iterator in order.
-    """
     import itertools
     import json
     from .report_layouts import journal_directory, SSR_LIMIT, SSR_BYTES
@@ -290,7 +273,6 @@ def relations(lay, index):
 
 
 def record_heading(lay, label):
-    """Model-specific record geometry while callers retain every permitted field."""
     if not active(lay):
         lay.text(label, size=7.8, style="B")
         return
@@ -311,11 +293,8 @@ def message_text(lay, text):
 
 
 def comparison(lay, old, new):
-    """Complete texts always remain readable, even across page boundaries."""
     say, pdf, style = lay.say, lay.pdf, lay.design
     if style.name == "reading_series":
-        # Paired panels are used only while both complete strings fit a row.
-        # Longer texts flow vertically rather than being clipped by table cells.
         pdf.set_font("Serif", "", 9)
         widths = (pdf.epw / 2 - 5, pdf.epw / 2 - 5)
         heights = [pdf.multi_cell(width, 4.7, text or say("(no text)"), dry_run=True, output="HEIGHT")

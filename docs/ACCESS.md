@@ -89,7 +89,7 @@ several users may otherwise appear to share the proxy's address.
 
 ## Change or withdraw access
 
-Edit an entry under **Accesses** to change its scope, permissions or limits.
+Edit an entry under **Granted access** to change its scope, permissions or limits.
 Scope and permission changes are checked on subsequent requests, including
 requests from sessions that are already open. Revoking an access ends its sessions
 and makes the issued token unusable. **Open sessions** also lets the administrator

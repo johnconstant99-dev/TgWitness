@@ -1,8 +1,4 @@
-"""Render the casework presentation with outlined local fonts and SVG motion.
-
-No network or application access. Use --display-font SpaceGrotesk.ttf and
---text-font Manrope.ttf; both font licences are retained with the assets.
-"""
+"""Render the casework presentation with outlined local fonts and SVG motion."""
 import argparse
 
 from fontTools.ttLib import TTFont
@@ -16,9 +12,6 @@ MUTED = "#a0b6cb"
 BLUE = "#8ccfff"
 GOLD = "#dfbd86"
 GREEN = "#98d8c0"
-RED = "#f0a6a9"
-
-
 def canvas(font, width, height, title, still=False, corners=True):
     d = Drawing(font, width, height, title)
     d.add(f'''<defs>

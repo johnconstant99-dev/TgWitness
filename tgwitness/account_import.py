@@ -1,4 +1,3 @@
-"""Convert bounded account uploads in memory; never contact Telegram or save uploads."""
 import base64
 import binascii
 import json
@@ -20,8 +19,6 @@ DC_ADDRESSES = {1: "149.154.175.53", 2: "149.154.167.51", 3: "149.154.175.100",
 
 
 def string_session(dc, key):
-    """Always the reference address of the DC: an address from an untrusted file could be a server
-    that answers with the key it handed over and stands in for Telegram."""
     if type(dc) is not int or dc not in DC_ADDRESSES or not isinstance(key, bytes) or len(key) != 256:
         raise ValueError("Expected a production Telegram DC (1–5) and a complete 256-byte authorization key.")
     session = StringSession()
@@ -31,7 +28,6 @@ def string_session(dc, key):
 
 
 def session_key(value):
-    """The authorization key of a StringSession, or None: one account imported twice has one key."""
     try:
         session = StringSession((value or "").strip())
     except (ValueError, TypeError, binascii.Error, struct.error):
@@ -40,7 +36,6 @@ def session_key(value):
 
 
 def validate_string(value):
-    """The StringSession rebuilt from its DC and key alone; its address and port are ignored."""
     if not isinstance(value, str) or len(value) > 4096:
         raise ValueError("Expected a Telethon StringSession of at most 4 KiB.")
     try:
@@ -195,7 +190,6 @@ def import_accounts(files, passcode=""):
 
 
 def preview(files, passcode=""):
-    """Inspect locally without a login, credential changes or returning auth keys."""
     try:
         result = import_accounts(files, passcode)
     except (ValueError, OSError) as exc:

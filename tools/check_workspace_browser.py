@@ -1,4 +1,3 @@
-"""Workspace isolation with delayed API responses, using synthetic local accounts."""
 import json
 import os
 import sys

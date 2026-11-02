@@ -1,4 +1,3 @@
-"""Mini-client acceptance against a synthetic Telegram transport; no live account is used."""
 import asyncio
 import json
 import os
@@ -36,7 +35,6 @@ def allow_writes(page):
 
 
 def confirm_action(page):
-    """Legacy transport checks still exercise the explicit per-chat consent gate."""
     page.wait_for_function("()=>document.querySelector('dialog.chat-action-confirm[open]')||!actionBusy&& !document.querySelector('#chat-send')?.hasAttribute('aria-busy')")
     dialog = page.locator('dialog.chat-action-confirm[open]')
     if dialog.count():
@@ -74,7 +72,6 @@ def main():
                 raise
             page.locator('[data-view="chats"]').click()
             expect(page.locator("#chat-message")).to_be_enabled()
-            # Sending acts as the account in the chat: closed until asked for, with a warning when opened.
             expect(page.locator("#chat-compose")).to_be_hidden()
             expect(page.locator('#chat-read-only')).to_be_checked()
             allow_writes(page)
@@ -206,7 +203,6 @@ def main():
                     and response.request.post_data_json.get("text") == "Message intended for the group") as group_send:
                 page.locator("#chat-send").click()
                 expect(page.locator('dialog.chat-action-confirm[open]')).to_be_visible()
-                # Polling during consent must not make a pending send look completed.
                 page.evaluate("refreshStatus()")
                 expect(page.locator("#chat-send")).to_have_attribute("aria-busy", "true")
                 expect(page.locator("#chat-send")).to_be_disabled()
@@ -254,7 +250,6 @@ def main():
             expect(page.locator("#chat-send")).to_have_text("Send")
             expect(page.locator("#chat-message")).to_have_attribute("placeholder", "Write a message…")
             expect(page.locator("#chat-compose-account")).to_contain_text("Sending as")
-            # The Evidence goal records without acting: the panel and the API both refuse to send.
             sent = len(server.app.state.collector.client.sent)
             server.app.state.store.set_setting("setup", {"goal": "evidence"})
             page.evaluate("refreshStatus()")

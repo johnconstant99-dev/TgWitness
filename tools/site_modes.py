@@ -1,4 +1,3 @@
-"""Keyed, statically translated capability guide; no runtime translation fetch."""
 import html
 import json
 import posixpath
@@ -33,7 +32,6 @@ def catalogue(read_public, lang, required=None):
 
 
 def render_page(template, words, *, lang, base_url, values, dictionary, render, seo, theme_script):
-    """Resolve text separately from layout; translated values are always escaped."""
     base = "" if lang == "en" else lang + "/"
     path = base + LOCAL
     parent = posixpath.dirname(path)

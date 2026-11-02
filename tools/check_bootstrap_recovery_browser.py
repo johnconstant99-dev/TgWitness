@@ -1,4 +1,3 @@
-"""Temporary bootstrap failures preserve sessions; actual denial still signs out."""
 from pathlib import Path
 import re
 import sys
@@ -52,8 +51,6 @@ def main():
             expect(page.locator("#workspace")).to_be_visible()
             assert page.evaluate("state.token") == token
 
-        # The session created by the first login also survives an unavailable
-        # initial status response, before unlock() has rendered the workspace.
         fresh_context = browser.new_context()
         fresh = fresh_context.new_page()
         fresh.route("**/api/status", lambda route: route.fulfill(status=503,
@@ -70,8 +67,6 @@ def main():
         assert fresh.evaluate("state.token") == first_token
         fresh_context.close()
 
-        # Language navigation uses the same stored session and retains its
-        # requested language even if the new document encounters an outage.
         page.route("**/api/status", lambda route: route.fulfill(status=503,
             content_type="application/json", body='{"detail":"Synthetic language reload outage"}'))
         page.evaluate("setLanguage('ru')")
@@ -84,7 +79,6 @@ def main():
         expect(page.locator("#workspace")).to_be_visible()
         expect(page.locator("html")).to_have_attribute("lang", "ru")
 
-        # An explicit authorization denial must still clear and end the session.
         page.route("**/api/status", lambda route: route.fulfill(status=401,
             content_type="application/json", body='{"detail":"Synthetic authorization ended"}'))
         with page.expect_response(lambda response: urlsplit(response.url).path == "/api/access/logout"):
@@ -101,8 +95,6 @@ def main():
         revoked = page.evaluate("state.token")
         principal = server.app.state.access.resolve(revoked, "127.0.0.1")
         panel_url = page.url
-        # Revoke while this document is closed so SSE cannot consume the
-        # revocation first: this assertion exercises bootstrap authorization.
         page.goto("about:blank")
         server.app.state.access.end(principal.session_id, "Synthetic administrator revocation")
         page.goto(panel_url)

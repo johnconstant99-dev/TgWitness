@@ -1,4 +1,3 @@
-"""Exercise quick navigation with synthetic data, keyboard, locales and narrow screens."""
 import json
 import tempfile
 
@@ -124,7 +123,6 @@ def main():
                 expected = ["observations", "system-log"] if lang == "ru" else ["observations"]
                 expect(destinations).to_have_count(len(expected))
                 assert destinations.evaluate_all("nodes=>nodes.map(node=>node.dataset.destination)") == expected
-                # Both Russian labels contain "журнал"; select the intended destination explicitly.
                 journal = dialog.locator('[data-destination="observations"]')
                 expect(journal).to_be_visible()
                 journal.click()

@@ -263,7 +263,6 @@ export function createJournal(context){
   function syncPage(){
     shown.textContent=Number.isFinite(state.eventMatched)?tr("{shown} of {total} matching records",{shown:state.events.length,total:state.eventMatched.toLocaleString()}):
       tr("{shown} records in this window",{shown:state.events.length});
-    // The row carries the journal number; a second range looked like a second numbering scheme.
     range.textContent="";range.hidden=true;
     older.disabled=pageBusy||state.cursor===null;newer.disabled=pageBusy||state.eventAfter===null;
     latest.disabled=pageBusy;latest.hidden=state.eventBefore===null;

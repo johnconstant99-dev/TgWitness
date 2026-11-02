@@ -1,4 +1,3 @@
-// One name and one explanation for the priority star, in the chat list and in Sources alike.
 export function priorityHint(tr, priority, collector) {
   const fast = collector?.recheck_minutes, slow = collector?.recheck_other_minutes;
   if (priority) return fast

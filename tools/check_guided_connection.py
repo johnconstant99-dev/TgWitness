@@ -1,4 +1,3 @@
-"""Synthetic routing acceptance: no Telegram account or WARP registration needed."""
 import base64
 import asyncio
 import hashlib
@@ -13,7 +12,7 @@ from unittest.mock import AsyncMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from fastapi.testclient import TestClient
-from tools.check_browser import FakeClient  # also disables the public pool worker
+from tools.check_browser import FakeClient
 from tgwitness.app import create_app
 from tgwitness.guided_connection import probe
 from tgwitness.network import NetworkConfig
@@ -162,8 +161,6 @@ class API(unittest.TestCase):
         self.assertEqual(self.post('preview', {'mode':'direct','scope':'group','group':'missing'}).status_code, 400)
         self.assertEqual(self.post('preview', {'mode':'vpn','wireguard':PROFILE,'scope':'all'}).status_code, 422)
         self.assertEqual(self.client.get('/api/connection').status_code, 401)
-        # Unknown routes are administrator-only: verify an issued reviewer cannot
-        # inspect infrastructure or provision helpers even with all-chat access.
         from tgwitness.access import GrantSettings
         token, _ = self.app.state.access.issue(GrantSettings(label='Reviewer', workspaces={'default':None}))
         login = self.client.post('/api/access/login', json={'token':token}).json()

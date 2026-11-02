@@ -1,4 +1,3 @@
-"""Stdio transport helpers for the canonical tgwitness.mcp_server entry point."""
 import ipaddress
 import os
 import sys
@@ -47,7 +46,6 @@ async def relay(url, token):
             async def copy(source, destination):
                 async for message in source:
                     if isinstance(message, Exception):
-                        # Do not print request headers, URLs or credential-bearing exception text.
                         print("TgWitness MCP transport failed: " + type(message).__name__, file=sys.stderr)
                     else:
                         await destination.send(message)

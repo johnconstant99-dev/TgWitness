@@ -1,5 +1,3 @@
-/* Adapted compositions of the independently reviewed report authors.
-   Every rule is scoped: existing report designs keep their original rendering. */
 html[data-report-design="reading_series"]{--paper:#fffefa;--bg:#e9ede9;--ink:#202d30;--muted:#526366;--line:#c3ceca;--accent:#176461;--panel:#fffefa;--surface:#fffefa}
 html[data-report-design="ledger_margin"]{--paper:#fbfaf6;--bg:#fbfaf6;--ink:#1d1f22;--muted:#5f6065;--line:#d6d2c5;--accent:#0d5c63;--panel:#fbfaf6;--surface:#fbfaf6}
 :is([data-report-design="reading_series"],[data-report-design="ledger_margin"]) body{background:var(--bg);color:var(--ink)}

@@ -1,8 +1,4 @@
-"""Render README cards and buttons in TgWitness's casework palette.
-
-Navy surfaces, ice-blue signals and warm accents match the repository covers.
-Outlined Manrope captions need no installed or remotely loaded fonts.
-"""
+"""Render README cards and buttons in TgWitness's casework palette."""
 import argparse
 from html import escape
 from pathlib import Path
@@ -173,7 +169,6 @@ def features(still):
 
 
 def card_layouts(names, source_prefix, output_prefix, card_height, title):
-    """One responsive image keeps each desktop row intact at browser zoom levels."""
     ns = "http://www.w3.org/2000/svg"
     for mobile in (False, True):
         for still in (False, True):

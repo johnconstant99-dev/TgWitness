@@ -1,4 +1,3 @@
-"""Keep retryable reads separate from actions whose outcome may be ambiguous."""
 from contextvars import ContextVar
 
 from telethon import TelegramClient, utils
@@ -23,13 +22,6 @@ class WitnessClient(TelegramClient):
         self._read_retries = value
 
     async def switch_route(self, options):
-        """Use another route (Telethon connection options: an MTProxy, a SOCKS5/HTTP proxy or none)
-        from the next connect.
-
-        Telethon's set_proxy updates only the address of a live transport, not an MTProxy secret
-        or the transport kind; after a full disconnect, connect() builds a new transport from these
-        values. The connection request names an MTProxy only when one is used.
-        """
         await self.disconnect()
         self._connection = options.get("connection", ConnectionTcpFull)
         self._proxy = options.get("proxy")

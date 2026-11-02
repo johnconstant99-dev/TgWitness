@@ -1,4 +1,3 @@
-"""Offline regressions for reviewed CodeQL boundaries; synthetic accounts and bytes only."""
 import hashlib
 import http.client
 import importlib.util
@@ -35,7 +34,6 @@ def refused(call):
 
 @contextmanager
 def local_client(app):
-    """Exercise the real HTTP boundary using only installed runtime dependencies."""
     import uvicorn
 
     sock = socket.socket()
@@ -90,8 +88,6 @@ def check_locales_and_case_metadata():
             refused(lambda: i18n.guide_words(bad))
     assert i18n.words("en") == {}
     assert i18n.words("ru") and i18n.guide_words("am")
-    # Golden fingerprint of all 76 codepoints rejected by the previous policy.
-    # Enumerating the whole Unicode domain detects both added and removed points.
     rejected_text = "".join(chr(code) for code in range(sys.maxunicode + 1) if code in HIDDEN_CODEPOINTS)
     assert len(rejected_text) == 76
     assert hashlib.sha256(rejected_text.encode()).hexdigest() == "e524743ebc6eb569eda579e15428d183bc8cbcbb32082bfd43bd4f66cfd30aa2"
@@ -131,8 +127,6 @@ def check_media_and_locale_http():
             except OSError as exc:
                 if getattr(exc, "winerror", None) != 1314:
                     raise
-                # Windows without CreateSymbolicLink privilege: exercise the
-                # refusal branch against a readable file; Linux CI uses a real link.
                 link.write_bytes(data)
                 original = Path.is_symlink
                 with patch.object(Path, "is_symlink", lambda path: path == link or original(path)):

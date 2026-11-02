@@ -1,4 +1,3 @@
-"""Exercise installer retention with forged inventories and interrupted downloads."""
 import hashlib
 import json
 from pathlib import Path

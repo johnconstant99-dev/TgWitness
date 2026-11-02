@@ -1,4 +1,3 @@
-"""Synthetic MCP setup, drafts, credentials and client configurations. No AI calls."""
 import json
 import re
 from pathlib import Path
@@ -43,7 +42,6 @@ def main():
             expect(page.locator("#mcp-tools input:checked")).to_have_count(3)
             expect(page.locator("#mcp-duration")).to_have_value("168")
 
-            # A missing runtime explains how to recover and preserves the draft.
             def unavailable(route):
                 response = route.fetch()
                 value = response.json()
@@ -82,7 +80,6 @@ def main():
             assert creation["expires_in_seconds"] == 3600
             assert set(creation["tools"]) == {"list_workspaces", "list_chats", "get_capture_status"}
 
-            # Refresh is allowed to change usage counters, never inputs or the shown-once secret.
             page.evaluate("window.TgWitnessIntegrations.load()")
             page.evaluate("window.TgWitnessIntegrations.refresh()")
             expect(page.locator("#mcp-token")).to_have_value(token)
@@ -124,7 +121,6 @@ def main():
             copied = page.evaluate("navigator.clipboard.readText()")
             assert token not in copied and json.loads(copied)["servers"]["tgwitness"]["type"] == "http"
 
-            # Handshake is real, using only the local synthetic archive; no tool call.
             page.locator("#mcp-check").click()
             expect(page.locator("#mcp-check-result")).to_contain_text("No messages were read.", timeout=20000)
             expect(page.locator("#mcp-check-result")).to_contain_text("3 tools")
@@ -163,14 +159,12 @@ def main():
             expect(page.locator("#mcp-list")).to_contain_text("Requests:")
             expect(page.locator("#mcp-list")).to_contain_text("Last address:")
 
-            # A completed check from A must not appear in B after switching.
             hold_api_response(page, "/api/mcp/check")
             page.locator("#mcp-check").click()
             expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true", timeout=20000)
             page.locator("#mcp-url").fill("http://remote.invalid/mcp")
             expect(page.locator("#mcp-check")).to_be_disabled()
             release_api_response(page)
-            # The page's CSP refuses string evaluation, so wait on the attribute instead of wait_for_function.
             expect(page.locator("#mcp-check")).not_to_have_attribute("aria-busy", re.compile(".*"))
             expect(page.locator("#mcp-check")).to_be_disabled()
             expect(page.locator("#mcp-check-result")).to_have_text("")

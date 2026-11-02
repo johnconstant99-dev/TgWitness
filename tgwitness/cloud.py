@@ -1,28 +1,3 @@
-"""High-assurance deployment of a collector on a cloud server behind a Cloudflare Tunnel.
-
-    python -m tgwitness.cloud plan   --provider P ...  the cloud-init and API calls; nothing is created
-    python -m tgwitness.cloud deploy --provider P ...  tunnel, DNS, firewall and server; waits for the key
-    python -m tgwitness.cloud lock   --record ...      removes every inbound firewall rule (debug deployments)
-    python -m tgwitness.cloud verify --record ...      a report from the provider, Cloudflare and the collector
-    python -m tgwitness.cloud destroy --record ...     deletes the server, firewall, DNS records and tunnel
-
-Providers (tgwitness/providers): hetzner, digitalocean, linode, vultr, aws. The server is created
-through the provider's API without an SSH key, behind a provider firewall with no inbound rules,
-and SSH is masked from the first boot. TgWitness is installed from one commit and creates its
-signing key on that server; the panel is reached only through the tunnel. A verifier with
-read-only credentials compares the provider's own log and firewall, the tunnel connector's
-address and the collector's signed statement. "generic" installs on any server by hand with
-install.sh and is never more than self-attested. Nothing here shows what a provider can do on
-its own hypervisor, except on "phala": there the collector runs in an Intel TDX confidential VM,
-its compose pins the commit's source files and both images by hash, and the verifier checks the
-processor's quote over the collector's statement to Intel's root itself (tgwitness.tdx).
-
---quick-tunnel needs no domain and no Cloudflare account: cloudflared opens a random
-https://*.trycloudflare.com address that changes whenever it restarts. The server posts each
-address, signed with a key only the deployment directory holds, to a ntfy.sh topic, where deploy
-and the panel look it up. No Cloudflare account keeps records of such a tunnel, so verify cannot
-check its connector.
-"""
 import argparse
 import base64
 import hashlib
@@ -79,14 +54,12 @@ QUICK_HOST = re.compile(r"[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.trycloudflare\.com
 ADDRESS_FORMAT = "tgwitness-address-v1"
 INSTALLER_FIELDS = ("deployment_id", "name", "mode", "provider", "repository", "commit", "panel_host",
                     "witness_host", "ssh", "beacon", "gateway")
-# --gateway-dns: Cloudflare Gateway's anycast resolvers. One account's location is told apart by the name its
-# DNS-over-TLS certificate carries, <doh_subdomain>.cloudflare-gateway.com.
 GATEWAY_RESOLVERS = ("172.64.36.1", "172.64.36.2")
 GATEWAY_HOST = ".cloudflare-gateway.com"
 DOH_SUBDOMAIN = re.compile(r"[a-z0-9]{6,32}")
 LOCATION_ID = re.compile(r"[0-9a-f]{32}")
 DNS_PORTS = (53, 853)
-GATEWAY_WINDOW_SECONDS = 3 * 3600  # the widest range one raw Gateway log query may span (free plan)
+GATEWAY_WINDOW_SECONDS = 3 * 3600
 GATEWAY_RULE_ACTIONS = ("override", "block", "safesearch", "ytrestricted", "resolve")
 
 REFERENCE_BUILDER = """\
@@ -171,14 +144,12 @@ LIMITS = (
     "metadata answers, user data and hashes before it signs them. The byte comparison with the reference "
     "installer shows what the collector was given, not what the provider delivered.",
 )
-# Phala: the images the compose pins, by digest, and what of the commit's tree it installs.
 PHALA_IMAGES = {"python": "python:3.12-slim@sha256:aa943ce411423c7582288f18707ff66eddcbaeb510502d747a72aeb34f30d159",
                 "cloudflared": "cloudflare/cloudflared:2026.10.7"
                                "@sha256:4955524aeaa379e154023d5a027c250f7b35041a2e7e950cf13f144bc9b9c5ba"}
 SOURCE_NEEDED = ("pyproject.toml", "README.md", "LICENSE", "NOTICE", "deploy/build.lock", "deploy/requirements.lock")
 GITHUB = re.compile(r"https://github\.com/([A-Za-z0-9-]{1,39})/([A-Za-z0-9._-]{1,100}?)(\.git)?")
 PHALA_ENV = ("TGWITNESS_TOKEN", "TGWITNESS_TUNNEL_TOKEN")
-# The app-compose settings deploy sends; anything else the measured compose holds is reported.
 PHALA_SETTINGS = {"kms_enabled": True, "gateway_enabled": False, "public_logs": False, "public_sysinfo": False,
                   "public_tcbinfo": True, "no_instance_id": False, "secure_time": True}
 EXECUTABLE_SETTINGS = ("pre_launch_script", "bash_script", "init_script", "init_scripts")
@@ -200,7 +171,6 @@ class Cloudflare(Api):
         return None if data is None else data["result"]
 
     def graphql(self, query, variables):
-        """Cloudflare's analytics API; its answers carry data and errors rather than success."""
         response = self.send("POST", self.base + "/graphql", "/graphql", json={"query": query, "variables": variables},
                              headers=self.headers)
         try:
@@ -215,7 +185,6 @@ class Cloudflare(Api):
 
 
 def read_secret(path, variable, option, required=True):
-    """Tokens come from a file or the environment, never from the command line."""
     value = Path(path).read_text(encoding="utf-8-sig").strip() if path else os.environ.get(variable, "").strip()
     if not value and required:
         raise DeployError("Provide " + option + " or set " + variable)
@@ -223,7 +192,6 @@ def read_secret(path, variable, option, required=True):
 
 
 def resolve_commit(repository, ref, run=subprocess.run):
-    """A tag (release) is resolved once, here; the server only ever receives the commit."""
     if COMMIT.fullmatch(ref):
         return ref
     if not TAG.fullmatch(ref) or ".." in ref:
@@ -323,15 +291,12 @@ def ingress(spec):
 
 
 def inbound_rules(spec):
-    """Provider-neutral inbound rules: none, or the debug SSH rule."""
     if spec["ssh"] == "disabled":
         return []
     return [{"protocol": "tcp", "port": "22", "source": spec["ssh"]["allowed_from"]}]
 
 
 def outbound_rules(spec):
-    """Provider-neutral outbound rules. None without --gateway-dns: everything may leave. With it, everything
-    may leave except DNS (ports 53 and 853), which reaches only Cloudflare Gateway, over TLS."""
     if not spec.get("gateway"):
         return []
     anywhere = ["0.0.0.0/0", "::/0"]
@@ -342,7 +307,6 @@ def outbound_rules(spec):
 
 
 def dns_leaks(outbound):
-    """What in a firewall's outbound rules lets DNS reach anything but Gateway's resolvers."""
     if not outbound:
         return ["no outbound rules: every destination is reachable, DNS included"]
     gateway = [ipaddress.ip_network(ip) for ip in GATEWAY_RESOLVERS]
@@ -479,8 +443,6 @@ cloudflared service install "$TGWITNESS_TUNNEL_TOKEN"
 rm -f /etc/tgwitness/secrets.env
 """
 
-# --quick-tunnel: TGWITNESS_TUNNEL_TOKEN carries the key that signs the published address, so the
-# redaction every released collector applies covers it too.
 QUICK_START = """\
 set -a
 . /etc/tgwitness/secrets.env
@@ -555,8 +517,6 @@ while True:
     time.sleep(30)
 """
 
-# --gateway-dns: every lookup over TLS to the deployment's Gateway location; the provider firewall blocks DNS
-# to any other resolver, including the ones the network configuration hands out.
 RESOLVED = """\
 [Resolve]
 DNS=@SERVERS@
@@ -597,8 +557,6 @@ def fill(template, spec):
 
 
 def files(spec, tunnel_id, panel_token, tunnel_token):
-    """What every deployment writes before installing: its description, the two secrets, the units and,
-    for a quick tunnel or Gateway DNS, their own files."""
     if not TUNNEL_TOKEN.fullmatch(tunnel_token) or not re.fullmatch(r"[A-Za-z0-9_-]{24,256}", panel_token):
         raise DeployError("Unexpected token format; refusing to write it into the installer")
     description = deployment_description(spec, tunnel_id)
@@ -630,7 +588,6 @@ def block(text, spaces=6):
 
 
 def cloud_init(spec, tunnel_id, panel_token, tunnel_token):
-    """The complete user data. Its redacted form (two secret values replaced) is what gets published."""
     locked = spec["ssh"] == "disabled"
     bootstrap = ("#!/bin/bash\n# TgWitness high-assurance bootstrap: runs once from cloud-init and needs no "
                  "interactive access.\nset -euo pipefail\nexec >>/var/log/tgwitness-bootstrap.log 2>&1\n"
@@ -653,7 +610,6 @@ def cloud_init(spec, tunnel_id, panel_token, tunnel_token):
 
 
 def install_script(spec, tunnel_id, panel_token, tunnel_token):
-    """install.sh for a hand-installed server. Its redacted form is what gets published."""
     lines = ["#!/bin/bash",
              "# TgWitness self-attested installation, deployment " + spec["deployment_id"] + ".",
              "# Run once, as a file, as root on a freshly installed Ubuntu 24.04 server: sudo bash install.sh",
@@ -768,7 +724,6 @@ PHALA_TUNNEL = """\
     command: [tunnel, --no-autoupdate, run]
 """
 
-# --quick-tunnel: a trycloudflare.com address, posted signed to the deployment's topic as on other providers.
 PHALA_QUICK_TUNNEL = """\
   tunnel:
     image: @CLOUDFLARED@
@@ -796,7 +751,6 @@ def wanted_source(path):
 
 
 def source_manifest(files):
-    """SHA-256 over the hashes of the files the CVM installs; the installer computes the same."""
     digests = {path: hashlib.sha256(body).hexdigest() for path, body in files.items() if wanted_source(path)}
     missing = [path for path in SOURCE_NEEDED if path not in digests]
     if missing or not any(path.startswith("tgwitness/") for path in digests):
@@ -805,7 +759,6 @@ def source_manifest(files):
 
 
 def tarball_files(data):
-    """The regular files of a GitHub commit archive, without its top directory."""
     files = {}
     with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as archive:
         for member in archive.getmembers():
@@ -816,7 +769,6 @@ def tarball_files(data):
 
 
 def tree_files(folder):
-    """The same files from a checkout of the commit (clone with core.autocrlf=false on Windows)."""
     folder = Path(folder)
     found = {path: (folder / path).read_bytes() for path in SOURCE_NEEDED if (folder / path).is_file()}
     for item in sorted((folder / "tgwitness").rglob("*")):
@@ -850,8 +802,6 @@ def deployment_description(spec, tunnel_id):
 
 
 def phala_compose(spec, tunnel_id, manifest):
-    """The docker-compose file of a Phala deployment. dstack measures it (as part of app-compose) into
-    RTMR3 before anything runs; it holds no secret, so it is published as it is."""
     if not re.fullmatch(r"[0-9a-f]{64}", manifest):
         raise DeployError("Unexpected source manifest")
     installer = PHALA_INSTALLER.replace("@ARCHIVE@", archive_url(spec)).replace("@MANIFEST@", manifest) \
@@ -868,14 +818,10 @@ def phala_compose(spec, tunnel_id, manifest):
 
 
 def app_compose(compose):
-    """What deploy asks Phala to measure: this compose, the names of the two secrets and the settings."""
     return {"docker_compose_file": compose, "allowed_envs": list(PHALA_ENV), **PHALA_SETTINGS}
 
 
 def compose_check(text, reference=None, published=None):
-    """Status and detail of the app-compose the CVM measured against what deploy asked for: its compose
-    byte for byte equal to the one the commit's code builds, no other executable setting, the settings
-    deploy sent. Without a reference only the published copy can be compared."""
     try:
         found = json.loads(text)
     except (TypeError, ValueError):
@@ -920,7 +866,6 @@ def compose_check(text, reference=None, published=None):
 
 
 def collector_statement(host, challenge=None, session=None):
-    """The collector's signed /api/assurance answer, checked: format, signature, fingerprint, challenge."""
     url = "https://" + host + "/api/assurance" + ("?challenge=" + challenge if challenge else "")
     response = (session or requests).get(url, timeout=30)
     if response.status_code != 200:
@@ -942,7 +887,6 @@ def collector_statement(host, challenge=None, session=None):
 
 
 def binding(statement, server_id, ipv4, cloud):
-    """Problems tying the statement to the provider's server and to the cloud-init it was given."""
     provider, problems = (statement.get("host") or {}).get("provider") or {}, []
     if provider.get("error"):
         problems.append("the collector could not read the metadata service: " + provider["error"])
@@ -961,8 +905,6 @@ def binding(statement, server_id, ipv4, cloud):
 
 
 def installer_spec(record):
-    """The record's values that go into the installer, held to the rules deploy applies to its options:
-    a value carrying its own shell or YAML would otherwise reach the reference and pass with it."""
     spec, tunnel = {k: record.get(k) for k in INSTALLER_FIELDS}, (record.get("tunnel") or {}).get("id")
     patterns = [(spec["deployment_id"], DEPLOYMENT_ID), (spec["name"], NAME), (spec["repository"], REPOSITORY),
                 (spec["commit"], COMMIT)]
@@ -1001,8 +943,6 @@ def installer_spec(record):
 
 
 def reference_installer(record, source, run=subprocess.run):
-    """The published installer (secrets replaced) as the deployed commit's own code builds it from the record.
-    It runs from the checkout in a separate interpreter, so the verifier's own version does not matter."""
     spec, tunnel = installer_spec(record)
     folder = str(Path(source).resolve())
     key = (folder, json.dumps([spec, tunnel], sort_keys=True))
@@ -1020,7 +960,6 @@ def reference_installer(record, source, run=subprocess.run):
 
 
 def first_difference(expected, found):
-    """Where two texts part: the line and both versions of it with their line endings, shortened."""
     a, b = expected.splitlines(keepends=True), found.splitlines(keepends=True)
     for number, (x, y) in enumerate(zip(a, b), 1):
         if x != y:
@@ -1032,9 +971,6 @@ def first_difference(expected, found):
 
 
 def installer_check(seen, commit, reference=None, published=None):
-    """Status and detail of the byte comparison between the reference installer built by the deployed
-    commit's code, the user data the server read from its metadata service (secrets replaced) and the
-    published copy. Without a reference only the copies can be compared with each other."""
     received = seen.get("user_data_redacted") if isinstance(seen.get("user_data_redacted"), str) else None
     reported = seen.get("user_data_redacted_sha256")
     problems, compared = [], []
@@ -1075,7 +1011,6 @@ def hex_id(value):
 
 
 def intel_collateral(path=None, session=None):
-    """Intel's collateral per platform: from a file (dcap-qvl's JSON layout) or from Intel's PCS, once each."""
     if path:
         fixed = json.loads(Path(path).read_text(encoding="utf-8"))
         return lambda raw: fixed
@@ -1090,7 +1025,6 @@ def intel_collateral(path=None, session=None):
 
 
 def intel_check(raw, collateral, now=None):
-    """(status, detail) of Intel's chain over a quote: pass only at TCB level UpToDate."""
     try:
         found = tdx.verify_quote(raw, collateral(raw), now)
     except tdx.QuoteError as exc:
@@ -1106,9 +1040,6 @@ def intel_check(raw, collateral, now=None):
 
 
 def attestation_checks(answer, record, reference=None, published=None, collateral=None, expected=None, now=None):
-    """The Intel TDX evidence beside a collector statement, check by check, as (check, status, title, detail):
-    the quote covers the statement, Intel vouches for the quote, RTMR3 measures the app-compose the collector
-    reports, that compose is the commit's, the CVM is the deployed one, its image is the expected one."""
     statement = answer["statement"]
     seen = (statement.get("host") or {}).get("provider") or {}
     evidence = answer.get("tdx") or {}
@@ -1187,8 +1118,6 @@ def address_signature(key, text):
 
 
 def read_beacon(topic, key=None, session=None):
-    """The newest quick tunnel address posted to the deployment's topic. With the deployment's key only
-    signed posts count; a verifier without it relies on the collector statement found at the address."""
     if not BEACON.fullmatch(topic or ""):
         raise DeployError("The deployment has no address topic")
     response = (session or requests).get(topic + "/json", params={"poll": "1", "since": "all"}, timeout=30)
@@ -1213,7 +1142,6 @@ def read_beacon(topic, key=None, session=None):
 
 
 def wait_for_collector(host, minutes, fetch):
-    """host is the panel's hostname, or a function that looks up the current one."""
     deadline = time.monotonic() + minutes * 60
     while True:
         try:
@@ -1237,7 +1165,6 @@ def printed(stage, text):
 
 def deploy(args, provider=None, cloudflare=None, fetch=collector_statement, resolve=resolve_commit, progress=printed,
            beacon=read_beacon, archive=None, collateral=None):
-    """progress(stage, text) reports each step: tunnel, gateway, install, server, running, waiting, attestation."""
     spec = specification(args, resolve)
     kind, generic, quick = get(spec["provider"]), spec["provider"] == "generic", bool(spec["beacon"])
     phala = spec["provider"] == "phala"
@@ -1395,7 +1322,6 @@ def lock(args, provider=None):
 
 
 def remove_tunnel(cf, record):
-    """The DNS records that point to the deployment's tunnel, then the tunnel. Missing ones are skipped."""
     account, removed = record["cloudflare_account"], []
     tunnels = {record["tunnel"]["id"]} if record.get("tunnel") else set()
     name = "tgwitness-" + record["name"] + "-" + record["deployment_id"]
@@ -1418,7 +1344,7 @@ def remove_tunnel(cf, record):
             except DeployError:
                 if attempt == 5:
                     raise
-                base.pause(10)  # the connector of the deleted server is still registered
+                base.pause(10)
         removed.append({"resource": "tunnel", "id": tunnel, "name": name})
     return removed
 
@@ -1428,18 +1354,12 @@ def gateway_name(record):
 
 
 def create_gateway(cf, spec):
-    """The Gateway DNS location the server resolves through, and whether other devices may share it.
-
-    A location of the server's own, unless --gateway-location names an existing one. Without a Zero Trust plan
-    Cloudflare allows one location per account: when it refuses another and the account has exactly one, the
-    server shares that one, and its queries are told apart by its own address. An account that has never used
-    Gateway gets it switched on first."""
     account, wanted = spec["gateway"]["account"], spec["gateway"]["location_id"]
     path = "/accounts/" + account + "/gateway"
     try:
         cf.result("GET", path)
     except DeployError as exc:
-        if "1001" not in str(exc):  # "has not been initialized"
+        if "1001" not in str(exc):
             raise
         cf.result("POST", path)
     shared = bool(wanted)
@@ -1452,7 +1372,7 @@ def create_gateway(cf, spec):
                 "endpoints": {"doh": {"enabled": True}, "dot": {"enabled": True}, "ipv4": {"enabled": False},
                               "ipv6": {"enabled": False}}})
         except DeployError as exc:
-            if "1002" not in str(exc):  # "does not have access to this feature": the plan's location limit
+            if "1002" not in str(exc):
                 raise
             existing = cf.result("GET", path + "/locations") or []
             if len(existing) != 1:
@@ -1471,8 +1391,6 @@ def create_gateway(cf, spec):
 
 
 def remove_gateway(cf, record):
-    """The deployment's own Gateway location, also when a failed deployment never recorded its ID; a shared
-    location stays."""
     path = "/accounts/" + record["gateway"]["account"] + "/gateway/locations"
     ids = set() if record.get("gateway_shared") else {record["gateway"]["location_id"]} - {None}
     ids |= {item["id"] for item in cf.result("GET", path) or [] if item.get("name") == gateway_name(record)}
@@ -1484,8 +1402,6 @@ def remove_gateway(cf, record):
 
 
 def destroy(args, provider=None, cloudflare=None, progress=printed):
-    """Deletes what a deployment created: server and firewall at the provider, DNS records and tunnel at
-    Cloudflare. The server's journal and signing key go with it. The record stays, marked removed."""
     path = Path(args.record)
     record = json.loads(path.read_text(encoding="utf-8"))
     if args.confirm != record["name"]:
@@ -1506,7 +1422,7 @@ def destroy(args, provider=None, cloudflare=None, progress=printed):
             progress("server", kind.title + (": deleting the confidential VM" if record["provider"] == "phala"
                                              else ": deleting the server and its firewall"))
             removed += provider.destroy(record)
-        if not quick:  # a quick tunnel ends with its server; its posts expire from ntfy.sh within 12 hours
+        if not quick:
             progress("tunnel", "Cloudflare: deleting the DNS records and the tunnel")
             removed += remove_tunnel(cf, record)
         if record.get("gateway"):
@@ -1668,8 +1584,6 @@ def verify_tunnel(report, record, cf, server):
 
 
 def gateway_queries(by_source):
-    """The location's DNS queries of the last day, newest first; by_source keeps only one address's (Cloudflare
-    treats source addresses as personal data: the filter needs Zero Trust PII Read)."""
     return ("query($account: String!, $location: String!, $since: Time!, $until: Time!"
             + (", $source: String!" if by_source else "") + ") { viewer { accounts(filter: {accountTag: $account}) { "
             "cf1GatewayDnsRawGroups(limit: 1000, filter: {location: $location" + (", sourceIP: $source" if by_source
@@ -1679,7 +1593,6 @@ def gateway_queries(by_source):
 
 
 def gateway_day(cf, by_source, asked):
-    """The last 24 hours of the location's log, newest first, read in the windows Cloudflare allows."""
     rows, end = [], time.time()
     start = end - 86400
     while end > start and len(rows) < 5000:
@@ -1692,8 +1605,6 @@ def gateway_day(cf, by_source, asked):
 
 
 def verify_gateway(report, record, cf, server=None):
-    """The deployment's Gateway location, what Gateway logs and may change, the server's queries there (told apart
-    by the server's address, which also covers a shared location) and the audit trail."""
     gateway, path = record["gateway"], "/accounts/" + record["gateway"]["account"] + "/gateway"
     if not gateway.get("location_id"):
         report.add("gateway_location", "fail", "The server's Gateway location exists and takes DNS over TLS",
@@ -1805,7 +1716,7 @@ def verify_collector(report, record, server, args, fetch, reference=None, refere
 
     title = "The collector-reported user data equals the installer the deployed commit builds"
     if phala:
-        pass  # the measured compose is checked with the quote (attestation_checks)
+        pass
     elif reference_error:
         report.add("cloud_init", "fail", title, reference_error, COLLECTOR)
     else:
@@ -1837,7 +1748,7 @@ def verify_collector(report, record, server, args, fetch, reference=None, refere
     problems = [text for flag, text in flags if flag]
     unknown = [k for k in ("sessions", "logins") if host.get(k) is None]
     notes = problems + (["unreadable: " + ", ".join(unknown)] if unknown else [])
-    if not phala:  # inside the collector's container these say nothing; the measured image does (tdx_os)
+    if not phala:
         report.add("host_access", "fail" if problems else "review" if unknown else "pass",
                    "No SSH and no logins on the host",
                    "; ".join(notes) or "nothing on port 22, no SSH processes, no sessions, no logins recorded", COLLECTOR)
@@ -1907,8 +1818,6 @@ def verify_journal(report, path, key, server_id, generic=False, reference=None):
 
 
 def account_key_check(report, keys):
-    """A key imported from a session file also exists outside this server: whoever holds it can answer for
-    Telegram on the network path. Marked for review, not refused: seized accounts stay usable."""
     notes = ["record " + str(seq) + ": " + (
         "authorized with an imported session; its key also exists outside this server, and whoever holds it "
         "could stand in for Telegram on the network path, so observations also rest on the key's holders"
@@ -1922,8 +1831,6 @@ def account_key_check(report, keys):
 
 
 def verify_tdx_journal(report, path, key, record, reference=None, collateral=None, now=None):
-    """Every start in the journal carries an Intel TDX quote over its run, key and host; each must replay to
-    the deployed app-compose of the deployed CVM, and Intel must vouch for each quote."""
     if not key:
         report.add("journal", "fail", "The evidence journal matches the expected collector key",
                    "no expected collector key is available for this deployment", JOURNAL)
@@ -2101,7 +2008,6 @@ def cell(value):
 
 
 def render(report):
-    """The report as Markdown, ready to attach to an evidence package."""
     deployment, server = report["deployment"], report["server"]
     account, tunnel = report["cloudflare_account"], report["tunnel"]
     lines = ["# TgWitness " + ("self-attested" if deployment["mode"] == "self-attested" else "high-assurance")

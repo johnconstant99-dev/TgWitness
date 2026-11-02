@@ -1,5 +1,3 @@
-/* The report on screen, in the look of the documentation site (static/guide.css). Printing keeps the plain
-   court layout of the base style: everything here is for screens only. */
 .icon-sprite{position:absolute;width:0;height:0;overflow:hidden}
 .i{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tone-blue{--t1:#4f8dff;--t2:#2156e0}.tone-violet{--t1:#a27bff;--t2:#6332d6}.tone-teal{--t1:#2fc7b4;--t2:#0b8577}
@@ -12,7 +10,6 @@ body{font:400 15px/1.65 var(--sans,Inter,'Segoe UI Variable Text','Segoe UI',sys
 ::selection{background:rgb(37 99 235 / .22)}
 a{color:var(--accent-text);text-underline-offset:3px;text-decoration-thickness:1px}
 
-/* The bar: brand and version, tabs, the signature, the language, theme and print. */
 .bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;min-height:62px;
   padding:10px 24px;border-bottom:1px solid var(--line);box-shadow:0 1px 8px rgb(15 23 40 / .03);
   background:color-mix(in srgb,var(--card) 86%,transparent);backdrop-filter:saturate(1.4) blur(12px)}

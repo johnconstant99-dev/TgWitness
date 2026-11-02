@@ -1,4 +1,3 @@
-"""Synthetic regression for concurrency, failure collection, log caps and timeouts."""
 import asyncio
 import json
 import os
@@ -14,7 +13,6 @@ from run_checks import Check, MAX_LOG_BYTES, ROOT, SUITES, run_checks
 async def check_runner():
     with tempfile.TemporaryDirectory(prefix="check-runner-") as scratch:
         directory = Path(scratch)
-        # Windows process startup is slower; keep the Linux CI probe inexpensive.
         test_timeout = 10 if os.name == "nt" else 2
         fixture = directory / "fixture.py"
         fixture.write_text('''import json, os, subprocess, sys, time
@@ -48,7 +46,6 @@ else:
         modes = ("first", "second", "failure", "timeout", "verbose", "last")
         checks = [Check(mode, (sys.executable, str(fixture), mode, str(directory), str(test_timeout))) for mode in modes]
         checks.append(Check("missing", (str(directory / "no-such-executable"),)))
-        # A caller's summary is an output file, not a command to execute.
         original = os.environ.get("GITHUB_STEP_SUMMARY")
         os.environ["GITHUB_STEP_SUMMARY"] = str(directory / "github-summary.md")
         try:
@@ -92,7 +89,6 @@ else:
             assert result[0]["output_interrupted"], "An inherited pipe must be forcibly closed"
             assert result[0]["duration_seconds"] < test_timeout + 7, "Cleanup exceeded its bounded budget"
         finally:
-            # The test deliberately detached this child; clean up only its saved PID.
             if (directory / "escaped.pid").is_file():
                 pid = int((directory / "escaped.pid").read_text())
                 if os.name == "nt":
@@ -124,7 +120,6 @@ else:
         for suite in SUITES.values():
             assert len(suite) == len(set(suite))
             assert all((ROOT / "tools" / script).is_file() for script in suite)
-        # Exercise the real CLI exit status without changing its production lists.
         (directory / "tools").mkdir()
         (directory / "tools/failure.py").write_text("raise SystemExit(7)\n", encoding="utf-8")
         driver = (

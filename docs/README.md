@@ -24,7 +24,7 @@ Windows (PowerShell or Command Prompt, no administrator):
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
 ```
 
-[Install, verify signatures and hashes, open the panel, and update](INSTALLATION.md).
+[Install, verify signatures and hashes, open the panel, update or remove](INSTALLATION.md).
 The same links serve the current published preview build. Your program and data
 stay on your machine; Cloudflare Workers hosts the download files.
 
@@ -53,10 +53,13 @@ included in 0.7.1. [Start with the workflow guide](https://phishdestroy.github.i
 | Try the interface | [Quick start](QUICKSTART.md#explore-the-interface) | Fictional conversations; no Telegram login |
 | Connect my account | [Account setup](ACCOUNTS.md) | A new test message in the journal |
 | Choose a goal and change settings | [First setup and settings](SETTINGS.md) | Every value marked as the goal's or your own |
+| Find my way around the panel | [Panel guide](PANEL.md) | What each screen, switch and Extras card does |
+| Check how protected a workspace is | [Protection modes](PANEL.md#protection-modes) | The active protection layers and what is still missing |
+| Check that the program matches GitHub | [Code check](PANEL.md#code-check) | A `source.checked` journal record listing any differing files |
 | Run several accounts together | [Account groups](ACCOUNTS.md#bulk-import-and-account-groups) | Shared settings, one page for problems and shared chats, one group export |
 | Capture one private chat from my fork | [GitHub Actions capture (preview)](SEALED-ACTIONS.md) | An encrypted archive and verification against the approved upstream workflow |
 | Load older messages into the workspace | [Source history](HISTORY.md) | Resumable capture and a signed progress report |
-| Export an account with a defined scope | [Account export](ACCOUNT-EXPORT.md) · [Русский](ru/ACCOUNT-EXPORT.md) | Selected messages and files, resumable jobs and a signed archive with coverage records |
+| Export an account with a defined scope | [Account export](ACCOUNT-EXPORT.md) | Selected messages and files, resumable jobs and a signed archive with coverage records |
 | Prepare a copy for a lawyer or another recipient | [Minimized disclosure](ACCOUNT-EXPORT.md#prepare-a-disclosure-for-a-lawyer-or-another-recipient) | A separate signed copy with participant pseudonyms and optional text/files; the source stays unchanged |
 | Give a reviewer or analyst access | [Access and permissions](ACCESS.md) | Only the chosen accounts, chats and permitted actions |
 | Connect an AI client | [Read-only MCP](MCP.md) | Expiring access to selected workspaces and chats |

@@ -94,7 +94,6 @@ export function createAccounts(context) {
     page=Math.min(page,Math.max(0,Math.ceil(filtered.length/10)-1));visible=filtered.slice(page*10,page*10+10);
     const shown=new Set(visible.map(p=>p.id)),cards=new Map([...root.querySelectorAll('.account-card')].map(n=>[n.dataset.profile,n])),box=find('accounts-list');
     for(const card of cards.values()){decorate(card);card.hidden=!shown.has(card.dataset.profile);}
-    // Move only when ordering changes; ordinary status polls retain focus and controls.
     let cursor=box.firstElementChild;
     for(const p of [...filtered,...list.filter(p=>!filtered.includes(p))]){const card=cards.get(p.id);if(!card)continue;
       if(card!==cursor)box.insertBefore(card,cursor);cursor=card.nextElementSibling;}

@@ -1,4 +1,3 @@
-"""Slow responses must not rewind the workspace or interrupt reading saved edits."""
 import tempfile
 from pathlib import Path
 from urllib.parse import urlsplit

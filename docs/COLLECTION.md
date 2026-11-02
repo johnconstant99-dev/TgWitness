@@ -192,7 +192,7 @@ intervals are set under Sources → Recording settings → Recheck (0 turns a ti
 recorded as `recheck.changed`.
 
 Missed messages are fetched upward from where the previous pass stopped, at most
-**Parameters → new messages per recheck** (1,000 by default) per pass. After a long stop the
+**Parameters → Missed messages recovered per chat and pass** (1,000 by default). After a long stop the
 recheck therefore fills the whole gap, even when live messages newer than the gap were saved
 first. A chat that is still catching up is rechecked again on the next minute instead of
 waiting for its tier interval; `recheck.completed` shows `continues_after` until it is done.

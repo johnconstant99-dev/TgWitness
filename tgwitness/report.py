@@ -1,16 +1,3 @@
-"""Readable reports for signed exports: localized, self-contained, printable and sealed.
-
-A report is for people; events.jsonl or chat.json and the signed manifest stay authoritative.
-Every report ends with a seal: an Ed25519-signed statement carrying the SHA-256 of every byte
-before it, what the report describes (journal head and record count, or the hash of chat.json)
-and the case details entered by the operator. verify.py checks the seal inside an archive and
-for a report handed over on its own (python verify.py report.html --fingerprint ...). In a
-browser the report checks its statement's signature itself, and the hash of its own bytes when
-the file is dropped onto it. Nothing in a report loads from the network.
-
-The same export also carries custody.json (who acquired what, how and when, with the standards
-followed) and SHA256SUMS, which `sha256sum -c` checks without Python.
-"""
 import base64
 import difflib
 import hashlib
@@ -35,15 +22,11 @@ from .verify import (SEAL_CLOSE, SEAL_OPEN, coverage_lines, fingerprint, fingerp
 SEAL_FORMAT = "tgwitness-report-seal-v1"
 CUSTODY_FORMAT = "tgwitness-custody-v1"
 RTL = ("ar", "fa", "ur", "he")
-# Case metadata rejects C0/C1 controls (except tab/LF), direction controls and
-# line/paragraph separators. This does not rewrite authoritative message text.
 HIDDEN_CODEPOINTS = frozenset((*range(0x00, 0x09), *range(0x0B, 0x20), *range(0x7F, 0xA0),
                              0x200E, 0x200F, 0x2028, 0x2029, *range(0x202A, 0x202F), *range(0x2066, 0x206A)))
 
 
 class ReportOptions(report_analytics.Presentation):
-    """How reports look and what they say about the case. Saved per workspace and recorded,
-    signed, in every export manifest and report seal."""
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     language: str = Field(default="auto", max_length=16)
     case_title: str = Field(default="", max_length=200)
@@ -58,9 +41,7 @@ class ReportOptions(report_analytics.Presentation):
     show_changes: bool = True
     show_indicators: bool = True
     case_board: Literal["off", "bookmarks", "comments"] = "bookmarks"
-    # Maximum items per signed viewer data file and maximum transcript size included in a PDF.
     part_size: int = Field(default=5000, ge=500, le=100000)
-    # Runs of collector heartbeats are listed as one line; each one stays in the journal file.
     group_heartbeats: bool = True
     template: Literal["dossier", "brief", "activity", "custom"] = "dossier"
     review_question: str = Field(default="", max_length=2000)
@@ -100,7 +81,6 @@ def save(store, options):
 
 
 def resolved(store=None, language_hint="en"):
-    """Saved options, with "auto" replaced by the language the panel is shown in."""
     options = (saved(store) if store is not None else ReportOptions()).model_dump()
     if options["language"] == "auto":
         options["language"] = language_hint if language_hint in i18n.LANGUAGES else "en"
@@ -108,7 +88,6 @@ def resolved(store=None, language_hint="en"):
 
 
 def case_of(options):
-    """The case details that were filled in, as they appear in manifests, seals and custody records."""
     options = options or {}
     return {key: options[name] for key, name in (("title", "case_title"), ("id", "case_id"), ("examiner", "examiner"),
                                                  ("organization", "organization"), ("notes", "notes"))
@@ -116,7 +95,6 @@ def case_of(options):
 
 
 class Words:
-    """Report text in one panel language; English keys, as in tgwitness/locales."""
     def __init__(self, language):
         self.language = language if language in i18n.LANGUAGES else "en"
         self.table = i18n.words(self.language)
@@ -132,7 +110,6 @@ class Words:
 
 
 def text_keys():
-    """Every English text a report (HTML or PDF) can show; each panel language translates all of them."""
     import ast
     from pathlib import Path
     from .chat_export import EXPORT_LIMITS
@@ -154,7 +131,6 @@ def e(value):
 
 
 def script_json(value):
-    """JSON safe inside a <script> element: no markup characters, ASCII only."""
     return (json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
             .replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026"))
 
@@ -169,7 +145,6 @@ def utc_text(value, seconds=True):
 
 
 def when(value):
-    """A time readers see in their language (the script formats it); UTC text without scripts."""
     if not value:
         return "—"
     return '<time datetime="' + e(value) + '">' + e(utc_text(value)) + "</time>"
@@ -210,8 +185,6 @@ def size_text(value):
         value /= 1024
 
 
-# Journal records ----------------------------------------------------------------------------
-
 CATEGORY_ORDER = ("message", "edited", "deleted", "media", "reaction", "member", "system")
 CATEGORIES = {"message.new": "message", "message.snapshot": "message", "message.recovered": "message",
               "message.edited": "edited", "message.deleted": "deleted", "message.missing_on_recheck": "deleted",
@@ -219,9 +192,9 @@ CATEGORIES = {"message.new": "message", "message.snapshot": "message", "message.
 TITLE_KINDS = ("target.changed", "source.discovered", "target.removed")
 VERSION_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited")
 CHANGE_KINDS = ("message.edited", "message.deleted", "message.missing_on_recheck")
-HISTORY_LIMIT = 1000  # messages shown with their versions; the rest stay in Records
-ACTION_LIMIT = 500    # panel actions and own messages listed by name; counts stay complete
-CLOCK_LIMIT = 500     # clock measurements kept from the journal's observation starts
+HISTORY_LIMIT = 1000
+ACTION_LIMIT = 500
+CLOCK_LIMIT = 500
 IMAGES = ("image/jpeg", "image/png", "image/webp", "image/gif")
 
 
@@ -243,16 +216,14 @@ def kind_label(say, kind):
 
 
 class Digest:
-    """What a report's summary needs, gathered in the pass that verifies the journal."""
     def __init__(self):
         self.categories = dict.fromkeys(CATEGORY_ORDER, 0)
         self.chats, self.titles, self.media, self.senders = {}, {}, {}, set()
         self.first = self.last = self.first_hash = None
         self.clients, self.routes, self.direct = {}, {}, {"count": 0, "first": None, "last": None}
-        self.clocks = []  # the collector's clock against Telegram's, measured when observation started
+        self.clocks = []
         self.indicators = ioc.Indicators()
-        self.changed = set()  # (chat, message) of every message edited, deleted or missing at a recheck
-        # What the observing account itself did: panel actions with their outcome and messages it sent.
+        self.changed = set()
         self.actions, self.previews, self.action_count = {}, {}, 0
         self.own_messages, self.own_total, self.own_scope = [], 0, set()
         self.trust_signals = {"drand": 0, "starts": 0, "tdx": 0}
@@ -260,7 +231,6 @@ class Digest:
 
     @staticmethod
     def seen(table, value, at):
-        # The automatic route's chosen proxy changes between runs; the kind of route is what is reported.
         key = canonical({k: v for k, v in value.items() if k != "proxy_id"}).decode()
         entry = table.setdefault(key, {"value": value, "first": at, "last": at, "count": 0})
         entry["last"], entry["count"] = at, entry["count"] + 1
@@ -310,7 +280,6 @@ class Digest:
         self.add_action(event)
 
     def hash_images(self, folder):
-        """Saved pictures as indicators: SHA-256 and dHash (indicators.image_hash)."""
         for digest, info in self.media.items():
             if str(info.get("mime_type") or "").startswith("image/") and (folder / digest).is_file():
                 self.indicators.image(digest, folder / digest, info.get("ref"), info.get("at"))
@@ -356,7 +325,6 @@ class Digest:
 
 def describe_anchor(checkpoint_name, checkpoint, proof_name, proof, query=None, *, public_key=None,
                     event_count=None, hash_at=None):
-    """A stored timestamp answer as the report shows it, read with the verifier's own checks."""
     digest = hashlib.sha256(checkpoint).digest()
     stem = checkpoint_name[:-len(".json")]
     entry = {"checkpoint": checkpoint_name, "file": "anchors/" + proof_name, "checkpoint_bound": False,
@@ -387,7 +355,6 @@ def rfc3161_count(anchors, *, validated=False):
 
 
 def stamps_text(say, anchors):
-    """The Integrity section's line on independent timestamps: how many, the latest, or none."""
     rfc, latest = rfc3161_count(anchors), latest_stamp(anchors)
     ots = sum(1 for a in anchors if a.get("kind") == "opentimestamps")
     if not rfc and not ots:
@@ -404,11 +371,7 @@ def latest_stamp(anchors):
     return max(stamped, key=lambda a: (a.get("event_count") or 0, a.get("time") or "")) if stamped else None
 
 
-# Standards, files and custody -----------------------------------------------------------------
-
 def standards(say, kind="evidence", stamps=0):
-    """Practices this export follows. Alignment, not certification. stamps: RFC 3161 answers in this export;
-    the timestamp rows say whether timestamps are part of it at all."""
     rows = [
         ("ISO/IEC 27037:2012", say("Identification, collection, acquisition and preservation of digital evidence"),
          say("Capture time, tool, method and account are recorded; every record is hashed and signed when it is captured.")),
@@ -477,12 +440,10 @@ def file_purpose(say, name):
 
 
 def sha256sums(hashes):
-    """The format `sha256sum -c` and `shasum -a 256 -c` read."""
     return "".join(hashes[name] + "  " + name + "\n" for name in sorted(hashes)).encode("utf-8")
 
 
 def custody(context):
-    """Who acquired what, how and when: a structured record for case-management systems."""
     say = Words("en")
     options, kind = context["options"], context["kind"]
     record = {
@@ -559,7 +520,6 @@ def custody(context):
 
 
 def reading(meta):
-    """When a chat export read the history and how the collector's clock stood against Telegram's then."""
     found = meta.get("acquisition") if isinstance(meta.get("acquisition"), dict) else {}
     return {"read_started_at": found.get("started_at"), "read_finished_at": found.get("finished_at"),
             "clock_checks": [c for c in (found.get("clock_at_start"), found.get("clock_at_end")) if isinstance(c, dict)]
@@ -567,7 +527,6 @@ def reading(meta):
 
 
 def readme(context, files, english):
-    """README.txt in the report language, then the English instructions."""
     say = Words(context["options"].get("language", "en"))
     options, fp = context["options"], fingerprint(context["public_key"])
     evidence, handover = context["kind"] == "evidence", context["kind"] == "handover"
@@ -629,7 +588,6 @@ def readme(context, files, english):
               say("The PDF is a signed reading copy. Use the HTML viewer for search and the JSON or JSONL for structured analysis.")]
     lines += ["", say("Limitations"), "-" * 64] + ["- " + say(item) for item in context["limits"]]
     text = "\n".join(lines) + "\n"
-    # The legacy supplement starts with the same limitations; do not repeat them.
     prefix = "\n".join(context["limits"])
     supplement = english[len(prefix):].lstrip() if english.startswith(prefix) else english.strip()
     if say.language != "en":
@@ -641,8 +599,6 @@ def readme(context, files, english):
     return text.encode("utf-8")
 
 
-# Page parts ---------------------------------------------------------------------------------
-
 MARK = ('<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="tgw-g" x1="0" y1="0" x2="1" y2="1">'
         '<stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient></defs>'
         '<rect width="48" height="48" rx="13" fill="url(#tgw-g)"/><path d="M15 12h18a6 6 0 0 1 6 6v10a6 6 0 0 1-6 6H22'
@@ -653,10 +609,6 @@ STAMP = ('<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r=
          '<path class="warn" d="M18 9.5v10M18 25.5v.4"/></svg>')
 ICON_PRINT = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16'
               'a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>')
-ICON_THEME = ('<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/>'
-              '<path d="M12 3a9 9 0 0 1 0 18z" class="fill"/></svg>')
-
-# The documentation site's palette (static/guide.css), so that reports look like the rest of TgWitness.
 LIGHT = ("--bg:#f4f5f7;--bg2:#f8f9fb;--th:#eef0f4;--card:#fff;--ink:#0f1728;--soft:#2f3a4d;--muted:#596377;"
          "--line:#e3e6eb;--line2:#cfd4dc;--rule:#0f1728;--accent:#2563eb;--accent-text:#1d4ed8;--tint:#eef3ff;"
          "--tint-line:#c9d8fd;--ok:#08734a;--oktint:#ebf8f1;--ok-line:#bfe5d1;--warn:#a64b06;--warntint:#fff7e8;"
@@ -710,7 +662,6 @@ CSS = (
     "background:var(--card);color:var(--soft);cursor:pointer}.icon-btn:hover{color:var(--ink);border-color:var(--soft)}"
     ".icon-btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}"
     ".icon-btn svg .fill{fill:currentColor;stroke:none}"
-    # The document: one sheet with a title block, then numbered sections separated by rules.
     "main{max-width:940px;margin:28px auto 36px;padding:44px 56px 40px;background:var(--card);border:1px solid var(--line);"
     "box-shadow:0 1px 3px rgba(0,0,0,.06)}"
     ".hero{display:grid;grid-template-columns:1fr 258px;gap:28px;align-items:start;padding-bottom:22px;"
@@ -721,8 +672,6 @@ CSS = (
     ".facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 22px;font-size:14px}"
     ".facts div{min-width:0}.facts>div>span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;"
     "letter-spacing:.07em}.facts b{font-weight:600;overflow-wrap:anywhere}"
-    # The seal check. On opening, the page can check its seal's Ed25519 signature but not its own bytes (a browser does
-    # not give a page its file): amber until the reader drops the file in, green only when every byte matches.
     ".stamp{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 12px;align-items:center;padding:12px 14px;"
     "border:1px solid var(--line);border-inline-start:4px solid var(--muted);background:var(--bg2);"
     "-webkit-print-color-adjust:exact;print-color-adjust:exact}"
@@ -825,7 +774,6 @@ CSS = (
     ".versions{list-style:none;margin:0;padding:0;border-inline-start:2px solid var(--line)}"
     ".versions>li{padding:4px 0 8px 14px}.vhead{font-size:12.5px;color:var(--muted)}"
     ".versions .text{white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0}.gone-step .gone{color:var(--bad);margin:4px 0;font-size:13.5px}"
-    # Struck through and underlined as well as coloured: still readable in black-and-white print.
     "del{background:var(--badtint);color:var(--bad)}ins{background:var(--oktint);color:var(--ok)}"
     "del,ins{-webkit-print-color-adjust:exact;print-color-adjust:exact}"
     ".kbd-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.key{display:inline-flex;flex-direction:column;gap:2px;"
@@ -884,7 +832,6 @@ CSS = (
     "@media (max-width:760px){main{margin:0;padding:22px 16px 28px;border:0;box-shadow:none}"
     ".hero{grid-template-columns:1fr;gap:18px}.bar nav{display:none}.kv th{width:42%}.keycard{grid-template-columns:1fr}"
     ".fp{grid-template-columns:repeat(4,auto)}.bubble{max-width:88%}}"
-    # Printed pages: A4, numbered, each naming the case and report it belongs to (see page_footer).
     "@page{size:A4;margin:16mm 14mm 18mm;@bottom-left{font:8pt " + SANS + ";color:#555}"
     "@bottom-right{content:counter(page) ' / ' counter(pages);font:8pt " + SANS + ";color:#555}}"
     "@media print{body{background:#fff;font-size:12.5px}.bar,.no-print,.tools,.copy,.drop{display:none!important}"
@@ -968,7 +915,6 @@ const zone=$("#drop");if(zone){const input=$("#drop-file"),out=$("#drop-result")
   zone.addEventListener("drop",e=>{e.preventDefault();zone.classList.remove("over");if(e.dataTransfer.files[0])check(e.dataTransfer.files[0]);});
   input.addEventListener("change",()=>{if(input.files[0])check(input.files[0]);});}
 """
-# The viewer (report_console.js / .css): tabs, filters, people, indicators, selection and the archive check.
 CONSOLE_JS = Path(__file__).with_name("report_console.js").read_text(encoding="utf-8")
 CSS += Path(__file__).with_name("report_console.css").read_text(encoding="utf-8")
 CSS += Path(__file__).with_name("report_skin.css").read_text(encoding="utf-8")
@@ -980,8 +926,6 @@ CSS += report_design.CSS
 CSS += report_layouts.CSS
 SCRIPT += "\n" + CONSOLE_JS
 SCRIPT_HASH = "'sha256-" + base64.b64encode(hashlib.sha256(SCRIPT.encode("utf-8")).digest()).decode() + "'"
-# Data documents run inside opaque-origin sandboxed frames, with their own CSP.
-# The report itself only executes this one hashed application script.
 CSP = ("default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data: file:; script-src " + SCRIPT_HASH
        + "; frame-src 'self' file:; base-uri 'none'; form-action 'none'")
 SCRIPT_WORDS = ("Copy", "Copied", "Signature valid · this file not yet checked",
@@ -997,7 +941,6 @@ SCRIPT_WORDS = ("Copy", "Copied", "Signature valid · this file not yet checked"
 
 
 def head(say, *, title, description, meta, linked, theme, template="dossier", design="classic"):
-    """Document start: metadata for people, search tools and case-management systems."""
     tags = [("generator", "TgWitness " + __version__), ("description", description),
             ("robots", "noindex, nofollow, noarchive"), ("referrer", "no-referrer"), ("color-scheme", "light dark")]
     design = report_design.normalized(design)
@@ -1012,12 +955,10 @@ def head(say, *, title, description, meta, linked, theme, template="dossier", de
 
 
 def css_text(value):
-    """A CSS string: anything but printable ASCII, quotes, backslashes and angle brackets as escapes."""
     return '"' + "".join(c if " " <= c <= "~" and c not in '"\\<>' else "\\%x " % ord(c) for c in str(value)) + '"'
 
 
 def page_footer(say, meta):
-    """Each printed page names the case and the report it belongs to; the browser adds the page numbers."""
     found = dict(meta)
     parts = [say("Case ID") + " " + str(found["tgwitness:case-id"])] if found.get("tgwitness:case-id") else []
     if found.get("tgwitness:report-id"):
@@ -1026,7 +967,6 @@ def page_footer(say, meta):
 
 
 def bar(say, label, links, viewer_kind=None):
-    """The toolbar. With the viewer: tabs for the report, the data, people, indicators and the archive check."""
     sections = "".join('<a href="#' + a + '">' + icon(SECTION_ICONS.get(a, ("info", ""))[0]) + e(t) + "</a>"
                        for a, t in links)
     if not viewer_kind:
@@ -1054,7 +994,6 @@ def bar(say, label, links, viewer_kind=None):
 
 
 def hero(say, eyebrow, title, facts, fp, sealed):
-    """The title block: what the document is, the case details and the result of the page's own seal check."""
     stamp = ('<aside class="stamp" id="stamp" data-fp="' + e(fp) + '"><div class="stamp-top">' + STAMP + "<div>"
              '<div class="stamp-label">' + e(say("Digital signature")) + '</div><div class="stamp-state" id="seal-state">'
              + e(say("Checking…")) + '</div></div></div><div class="stamp-key"><span>Ed25519</span>'
@@ -1072,7 +1011,6 @@ TILE_TONES = {"accent": "blue", "violet": "violet", "warn": "orange", "bad": "re
 
 
 def tiles(items):
-    """Summary figures; each item is (label, figure, colour) or (label, figure, colour, icon)."""
     out = []
     for item in items:
         label, value, colour = item[:3]
@@ -1083,7 +1021,6 @@ def tiles(items):
 
 
 def toc(links):
-    """The report's own section links, under the title (screen only)."""
     return ('<nav class="toc no-print">' + "".join('<a href="#' + a + '">' + icon(SECTION_ICONS.get(a, ("info", ""))[0])
                                                     + e(text) + "</a>" for a, text in links) + "</nav>")
 
@@ -1117,7 +1054,6 @@ def keycard(say, fp):
 
 
 def evidence_brief(say, digest, count, anchors, coverage, account_text, handover=None, selected=False):
-    """(summary, what it shows, what it does not show) for the top of an evidence report or extract."""
     cats, latest = digest["categories"], latest_stamp(anchors)
     summary = say("{account} observed {chats} chats from {first} to {last}. The journal holds {n} records: {m} messages, "
                   "{e} edits, {d} deletions and {f} saved files.", account=account_text or say("The observing account"),
@@ -1147,7 +1083,6 @@ def evidence_brief(say, digest, count, anchors, coverage, account_text, handover
 
 
 def chat_brief(say, meta, stats, ids, account_text):
-    """(summary, what it shows, what it does not show) for the top of a chat export."""
     chat, profile = meta.get("chat") or {}, (meta.get("chat") or {}).get("profile") or {}
     summary = say("The {n} messages Telegram returned to {account} for {chat}, sent from {first} to {last}, exported on "
                   "{date}.", n=meta.get("message_count"), account=account_text or say("the exporting account"),
@@ -1169,7 +1104,6 @@ def chat_brief(say, meta, stats, ids, account_text):
 
 
 def brief_section(say, summary, shows, hidden):
-    """Under the title: one paragraph, then what the material shows and what it does not. Unnumbered."""
     items = lambda values: "<ul>" + "".join("<li>" + e(v) + "</li>" for v in values) + "</ul>"
     return ('<section class="card brief" id="brief"><h2><span class="sec-icon tone-blue">' + icon("info") + "</span>"
             + e(say("In brief")) + '</h2><p class="lead">' + e(summary)
@@ -1200,7 +1134,6 @@ def custody_section(say, number, steps, record):
             + "</tr></thead><tbody>" + blank + "</tbody></table></div></section>")
 
 
-# Route and IP-mode names as the panel shows them (Account → Connection settings).
 ROUTE_KINDS = {"mtproxy_auto": "Automatic MTProxy · public lists", "direct": "Direct connection",
                "socks5": "SOCKS5 proxy", "http": "HTTP CONNECT proxy", "mtproxy": "MTProxy"}
 EXPOSURES = {"hide": "Hide this server's address", "fallback": "Direct connection as a last resort",
@@ -1222,7 +1155,6 @@ def client_text(say, value):
 
 
 def build_text(say, producer):
-    """The exact program: the commit it was built from, when known, and the SHA-256 of its source files."""
     parts = [label + " " + producer[key] for label, key in ((say("Commit"), "commit"),
                                                             (say("Source files SHA-256"), "source_tree_sha256"))
              if producer.get(key)]
@@ -1230,7 +1162,6 @@ def build_text(say, producer):
 
 
 def clock_text(say, clock):
-    """Telegram's clock against the collector's, or why it was not measured."""
     if not isinstance(clock, dict):
         return say("Not recorded in this export")
     if not isinstance(clock.get("offset_seconds"), (int, float)):
@@ -1260,7 +1191,6 @@ def route_text(say, value):
 
 
 def seen_list(say, entries, describe):
-    """Each distinct value recorded in the journal, with when it was first and last recorded."""
     if not entries:
         return e(say("Not recorded in this journal"))
     return "".join('<div class="seen">' + e(describe(say, entry["value"])) + "<small>" + when(entry["first"])
@@ -1315,7 +1245,6 @@ def seal_section(say, number, report_id, created_at):
 
 
 def ending(say, producer, viewer_meta=None, data=""):
-    """The end of the page; with the viewer, its views, its settings and any data carried inside the page."""
     views = ""
     if viewer_meta:
         views = ("</div>" + "".join('<div class="view" id="view-' + key + '" hidden></div>' for key in ("data", "people", "iocs", "check"))
@@ -1329,7 +1258,6 @@ def ending(say, producer, viewer_meta=None, data=""):
 
 
 def viewer_meta(say, kind, context, **extra):
-    """What the viewer needs beside its data: labels in the report language, chat titles and the archive."""
     options = {**ReportOptions().model_dump(), **(context.get("options") or {})}
     if kind == "chat":
         cats = {"text": say("Text"), "media": say("With media"), "edited": say("Edited"), "service": say("Service")}
@@ -1347,7 +1275,6 @@ def viewer_meta(say, kind, context, **extra):
 
 
 def records_pointer(say, number, anchor, title, count, label, lead=""):
-    """In the report: where the records or messages are, now that the viewer shows them."""
     return (section(number, anchor, title, lead) + '<div class="records-pointer"><b>' + e(label) + "</b><span>"
             + e(say("Search, filters, people, indicators and every item in full are in the viewer tab. Select items to "
                     "print them or to save an extract that verify.py checks against this archive."))
@@ -1355,7 +1282,6 @@ def records_pointer(say, number, anchor, title, count, label, lead=""):
 
 
 def sealed(chunks, statement, sign):
-    """Yield the report, then its seal: the statement with the SHA-256 of every byte before it, signed."""
     digest = hashlib.sha256()
     for chunk in chunks:
         digest.update(chunk)
@@ -1370,7 +1296,6 @@ def sealed(chunks, statement, sign):
 
 
 def metadata(say, *, title, description, created_at, report_id, fp, case, extra):
-    """Dublin Core and TgWitness meta tags."""
     creator = case.get("examiner") or case.get("organization") or "TgWitness"
     return [("DC.title", title), ("DC.creator", creator), ("DC.publisher", case.get("organization")),
             ("DC.date", created_at), ("DC.language", say.language), ("DC.identifier", "urn:uuid:" + report_id),
@@ -1404,7 +1329,6 @@ REPLY_DETAILS_KEYS = ("reply_to_message_id", "reply_to_top_id", "reply_to_peer_i
 
 
 def message_times(payload):
-    """Permitted message times; an explicit missing value must not revive a legacy or raw value."""
     sent = payload.get("sent_at") if "sent_at" in payload else payload.get("date")
     edited = payload.get("edited_at")
     return {"sent_at": sent if isinstance(sent, str) and sent else None,
@@ -1412,11 +1336,6 @@ def message_times(payload):
 
 
 def shown_details(payload):
-    """Use the permitted projection verbatim, or normalize an unminimised saved message.
-
-    Replies are normalized here rather than globally: a handover's approved
-    details must never acquire a quote or cross-chat identity from its raw data.
-    """
     if "details" in payload:
         found = payload["details"]
         return found if isinstance(found, dict) else {}
@@ -1442,7 +1361,6 @@ def shown_details(payload):
     quote = payload.get("quote_text") if "quote_text" in payload else reply.get("quote_text")
     if isinstance(quote, str) and quote:
         found["quote_text"] = quote
-        # Only normalized entities enter the reading copy; links remain escaped text.
         if "quote_entities" in payload:
             if isinstance(payload["quote_entities"], list):
                 found["quote_entities"] = payload["quote_entities"]
@@ -1459,8 +1377,6 @@ def seconds_text(say, value):
 
 
 def details_html(say, d):
-    """What a Telegram client showed around the text (message_details.details): hidden links, mentions,
-    forward origin, buttons, signature, views and the auto-delete timer."""
     parts = []
     reply = []
     if type(d.get("reply_to_message_id")) is int:
@@ -1538,7 +1454,6 @@ IOC_SHOWN = 1000
 
 
 def ioc_rows(say, found):
-    """(kind, value as written safely, count, where, first seen, item) for each listed indicator."""
     for item in found["items"][:IOC_SHOWN]:
         kind = say(IOC_KINDS[item["kind"]])
         if item["kind"] == "wallet":
@@ -1557,7 +1472,6 @@ def ioc_lead(say):
 
 
 def indicators_section(say, number, found, link):
-    """The indicators table; link(ref) gives the address of the record or message an indicator was seen in."""
     rows = []
     for kind, value, count, where, first, item in ioc_rows(say, found):
         refs = " ".join('<a href="#data" data-goto="' + e(ref_key(ref)) + '">' + e(ref_label(ref)) + "</a>"
@@ -1581,7 +1495,6 @@ def ref_label(ref):
 
 
 def ref_link(parts, folder, key, anchor, prefix=""):
-    """Where a record or message is shown: this page, or the sealed part that lists it."""
     def link(ref):
         value = ref.get(key)
         for part in parts or []:
@@ -1601,10 +1514,7 @@ def media_text(say, info):
                                   info.get("url")) if x)
 
 
-# Evidence report ----------------------------------------------------------------------------
-
 def record_html(event, say, titles, options, archive, base=""):
-    """One record in full. base leads from a part's folder back to the archive root (media/ lives there)."""
     kind, payload, chat, seq = event["kind"], event["payload"], event["chat_id"], event["seq"]
     cat = category(kind)
     parts = ['<article class="rec cat-' + cat + '" id="r' + str(seq) + '" data-cat="' + cat + '" data-chat="'
@@ -1664,7 +1574,6 @@ def record_html(event, say, titles, options, archive, base=""):
 
 
 def record_items(events, say, titles, options, archive, base=""):
-    """The record list: every record in full, except that a run of collector heartbeats can be one line."""
     group, run = options.get("group_heartbeats", True), None
     for event in events:
         if group and event["kind"] == "collector.heartbeat":
@@ -1691,58 +1600,7 @@ def heartbeats_html(say, first, last, count):
             + "</div></article>")
 
 
-class PartPlan:
-    """Splits a long list into parts of at most `size` items, noting each part's range, times and categories."""
-    def __init__(self, size):
-        self.size, self.parts = max(1, int(size)), []
-
-    def add(self, key, at, cat):
-        if not self.parts or self.parts[-1]["count"] >= self.size:
-            self.parts.append({"index": len(self.parts) + 1, "from": key, "to": key, "count": 0,
-                               "first_at": at, "last_at": at, "categories": {},
-                               "after": self.parts[-1]["to"] if self.parts else None})
-        part = self.parts[-1]
-        part.update(to=key, last_at=at or part["last_at"], count=part["count"] + 1)
-        part["first_at"] = part["first_at"] or at
-        part["categories"][cat] = part["categories"].get(cat, 0) + 1
-
-    def result(self, folder):
-        """The parts with their file names, or None when everything fits in one."""
-        if len(self.parts) < 2:
-            return None
-        for part in self.parts:
-            part.update(of=len(self.parts), file=part_file(folder, part["index"]))
-        return self.parts
-
-
-def part_file(folder, index):
-    return folder + "/" + folder + "-" + str(index).zfill(4) + ".html"
-
-
-def part_nav(say, part, index_href):
-    folder = part["file"].split("/")[0]
-    links = ['<a href="' + e(index_href) + '">' + e(say("Back to the report")) + "</a>"]
-    if part["index"] > 1:
-        links.append('<a href="' + e(part_file(folder, part["index"] - 1).split("/")[1]) + '">'
-                     + e(say("Previous part")) + "</a>")
-    if part["index"] < part["of"]:
-        links.append('<a href="' + e(part_file(folder, part["index"] + 1).split("/")[1]) + '">'
-                     + e(say("Next part")) + "</a>")
-    return '<nav class="part-nav no-print">' + "".join(links) + "</nav>"
-
-
-def parts_index(say, number, anchor, title, lead, parts, range_label, prefix):
-    """The table of a long list's parts: what each one holds and its SHA-256 (also in manifest.json)."""
-    rows = [['<a href="' + e(p["file"]) + '">' + e(say("Part {n} of {m}", n=p["index"], m=p["of"])) + "</a>",
-             prefix + num(p["from"]) + " – " + prefix + num(p["to"]), num(p["count"]),
-             when(p["first_at"]) + " — " + when(p["last_at"]),
-             '<code title="' + e(p.get("sha256")) + '">' + e(short(p.get("sha256"), 10, 6)) + "</code>"] for p in parts]
-    return (section(number, anchor, title, lead, long=True)
-            + table([say("Part"), range_label, say("Count"), say("Period"), "SHA-256"], rows) + "</section>")
-
-
 def report_subject(context):
-    """What a sealed report describes; verify.py matches it against the archive it comes from."""
     handover = context.get("handover")
     if handover:
         return {"kind": "handover", "record_count": handover["counts"]["unchanged"] + handover["counts"]["minimised"],
@@ -1751,62 +1609,11 @@ def report_subject(context):
             **({"events_sha256": context["events_sha256"]} if context.get("events_sha256") else {})}
 
 
-def records_part_chunks(events, context, part):
-    """One part of a long record list: a page of its own with its own seal, linked from the report's index."""
-    options = {**ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
-    say = Words(options["language"])
-    producer, handover, sign = context["producer"], context.get("handover"), context.get("sign")
-    fp, report_id, created = context.get("fingerprint") or "", context["report_id"], context["created_at"]
-    case = case_of(options)
-    name = options.get("case_title") or (say("Handover extract") if handover else say("Telegram observation journal"))
-    label = say("Part {n} of {m}", n=part["index"], m=part["of"])
-    title = name + " · " + say("Records") + " · " + label
-    description = say("Records #{a}–#{b} of a sealed TgWitness report.", a=part["from"], b=part["to"])
-
-    def chunks():
-        meta = metadata(say, title=title, description=description, created_at=created, report_id=report_id, fp=fp,
-                        case=case, extra=[("tgwitness:part", str(part["index"]) + "/" + str(part["of"]))])
-        linked = {"@context": "https://schema.org", "@type": "Report", "name": title, "description": description,
-                  "inLanguage": say.language, "isPartOf": {"@type": "Report", "identifier": "urn:uuid:" + report_id}}
-        yield (head(say, title=title + " · TgWitness", description=description, meta=meta, linked=linked,
-                    theme=options.get("theme", "auto"), design=options.get("design"))
-               + bar(say, say("Records") + " · " + label, [("records", say("Records")), ("seal", say("Seal"))])
-               ).encode("utf-8")
-        facts = [(say("Part"), e(label)), (say("Records"), "#" + num(part["from"]) + " – #" + num(part["to"])),
-                 (say("Period"), when(part["first_at"]) + " — " + when(part["last_at"])),
-                 (say("Case ID"), e(options.get("case_id"))),
-                 (say("Report ID"), '<span class="mono">' + e(report_id[:8]) + "</span>")]
-        kind = say("Handover extract") if handover else say("Evidence report")
-        yield hero(say, kind + " · " + say("Records"), name, facts, fp, sign is not None).encode("utf-8")
-        chips = "".join('<button class="chip" type="button" aria-pressed="false" data-cat="' + c + '">'
-                        + e(category_label(say, c)) + "<b>" + num(part["categories"][c]) + "</b></button>"
-                        for c in CATEGORY_ORDER if part["categories"].get(c))
-        yield (section(1, "records", say("Records"), say("Records #{a}–#{b}, in journal order.", a=part["from"],
-                                                         b=part["to"]), long=True)
-               + part_nav(say, part, "../report.html")
-               + '<div class="tools"><input type="search" id="q" placeholder="' + e(say("Search text, names, IDs…"))
-               + '">' + chips + '<span class="shown">' + e(say("Shown")) + ': <b id="shown-n">' + num(part["count"])
-               + "</b></span></div>").encode("utf-8")
-        for item in record_items(events, say, context["digest"]["titles"], options, context.get("archive", False), "../"):
-            yield item.encode("utf-8")
-        yield (part_nav(say, part, "../report.html") + "</section>").encode("utf-8")
-        if sign is not None:
-            yield seal_section(say, 2, report_id, created).encode("utf-8")
-        yield ending(say, producer).encode("utf-8")
-
-    statement = {"format": SEAL_FORMAT, "report_id": report_id, "created_at": created, "language": say.language,
-                 "public_key": context.get("public_key"), "producer": producer, "case": case,
-                 "subject": {**report_subject(context), "part": part["index"], "parts": part["of"],
-                             "from": part["from"], "to": part["to"]}}
-    yield from sealed(chunks(), statement, sign)
-
-
 JSON_FORMAT = "tgwitness-report-json-v1"
-JSON_HISTORY_LIMIT = 20000  # changed messages listed with their versions; the journal file has every one
+JSON_HISTORY_LIMIT = 20000
 
 
 def seal_statement(context, subject=None):
-    """What every seal of one report says (HTML, JSON or PDF); the content hash is added per file."""
     options = {**ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
     return {"format": SEAL_FORMAT, "report_id": context.get("report_id") or "unsealed",
             "created_at": context.get("created_at"), "language": Words(options["language"]).language,
@@ -1815,8 +1622,6 @@ def seal_statement(context, subject=None):
 
 
 def report_json(events_again, coverage, context):
-    """The report as signed JSON for case-management systems and scripts: the same facts, no layout.
-    The seal signs the SHA-256 of the canonical "report" object (verify.py recomputes it)."""
     return sealed_json(report_data(events_again, coverage, context), context)
 
 
@@ -1830,8 +1635,6 @@ def sealed_json(data, context):
 
 
 def report_data(events_again, coverage, context):
-    """The facts of an evidence report or handover extract as plain JSON values: what report.json signs
-    and what the PDF shows."""
     options = {**ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
     say = Words(options["language"])
     digest, handover = context.get("report_digest") or context.get("digest") or Digest().result(), context.get("handover")
@@ -1864,12 +1667,10 @@ def report_data(events_again, coverage, context):
     }
     if handover:
         data["minimisation"] = handover
-    # Plain JSON values only (string keys, lists): what a reader parses is exactly what was signed.
     return json.loads(json.dumps(data, ensure_ascii=False, default=str))
 
 
 def report_material(context):
-    """Selected full-journal material. Never copy private analysis into a minimized handover."""
     if context.get("handover") or context.get("kind") not in (None, "evidence"):
         return {}
     options = {**ReportOptions().model_dump(), **(context.get("options") or {})}
@@ -1888,7 +1689,6 @@ def report_material(context):
 
 
 def pointing(version):
-    """What a version links to: links behind or in the text, mentions, buttons and the attachment."""
     details = version["details"]
     media = details.get("media_info") or {}
     return ([(x["type"], x["text"], x.get("href"), x.get("user_id")) for x in details.get("text_entities") or []
@@ -1898,8 +1698,6 @@ def pointing(version):
 
 
 def message_histories(events, changed, limit=HISTORY_LIMIT):
-    """Saved versions, deletion notices and recheck misses of the changed messages, in journal order.
-    A record repeating the previous version (a snapshot or a recovery) is not a new version."""
     found = {}
     for event in events:
         key = (event["chat_id"], event["message_id"])
@@ -1929,7 +1727,6 @@ def message_histories(events, changed, limit=HISTORY_LIMIT):
 
 
 def history_context(context, events_again, changed, limit=HISTORY_LIMIT):
-    """A selected deletion or edit retains its preceding saved content as labelled context."""
     if not changed or not events_again:
         return {}
     if context.get("selection") and context.get("source_events"):
@@ -1939,7 +1736,6 @@ def history_context(context, events_again, changed, limit=HISTORY_LIMIT):
 
 
 def diff_html(old, new):
-    """Word-level comparison: removed words struck through, added words marked."""
     a, b = re.findall(r"\s+|\S+", old), re.findall(r"\s+|\S+", new)
     out = []
     for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
@@ -2037,11 +1833,9 @@ def history_card(say, key, item, titles, linked=True):
 
 
 def last_saved_before(versions, seq):
-    """Do not present content captured after a deletion as known beforehand."""
     return next((version for version in reversed(versions) if version["seq"] < seq), None)
 
 
-# What a minimised record of a handover extract withholds (handover.Minimiser).
 WITHHELD = {"raw": "the saved Telegram object", "text": "message text", "sender": "sender identity",
             "actor_id": "sender ID", "other chats": "other chats", "mentions or contact details":
             "mentions or contact details", "file name": "file name", "preview details": "preview details"}
@@ -2054,7 +1848,6 @@ FILES = {"subjects": "files of the chosen people and the observing account", "al
 
 
 def minimisation_section(say, number, handover, journal_count):
-    """Why the extract was made, what it contains and what was withheld, as signed into its manifest."""
     chosen, counts = handover["selection"], handover["counts"]
     period = (when(chosen["since"]) if chosen.get("since") else e(say("from the first record"))) + " — " \
         + (when(chosen["until"]) if chosen.get("until") else e(say("to the last record")))
@@ -2091,7 +1884,6 @@ OUTCOMES = {"succeeded": ("ok", "done"), "rejected": ("bad", "refused"), "unknow
 
 
 def actions_section(say, number, digest, titles, linked):
-    """What the observing account itself did. Each action changes what others in the chat see."""
     actions, own = digest.get("actions") or [], digest.get("own_messages") or []
     out = section(number, "actions", say("Actions by the observing account"),
                   say("Actions taken with the observing account change what others in the chat see. They are listed "
@@ -2145,7 +1937,6 @@ def actions_section(say, number, digest, titles, linked):
 
 
 def ranges_text(ranges, total, limit=8):
-    """The first runs of absent numbers, "1004–1010, 1015 … +12"; a range is a dict or a [low, high] pair."""
     pairs = [(r["low"], r["high"]) if isinstance(r, dict) else tuple(r) for r in ranges[:limit]]
     shown = [str(low) if low == high else str(low) + "–" + str(high) for low, high in pairs]
     more = max(total, len(ranges)) - len(shown)
@@ -2154,7 +1945,6 @@ def ranges_text(ranges, total, limit=8):
 
 
 def coverage_plot(coverage):
-    """Position recorded intervals on one UTC axis; never fill unobserved time."""
     rows = []
     for key in ("continuous", "gaps"):
         spans = []
@@ -2289,7 +2079,6 @@ def verify_section(say, number, archive_name, fp, report_name, archive, data_nam
 
 
 def evidence_chunks(events, coverage=None, context=None):
-    """The readable journal report; sealed when the context carries the signing function."""
     context = context or {}
     options = {**ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
     say = Words(options["language"])
@@ -2524,7 +2313,6 @@ def evidence_chunks(events, coverage=None, context=None):
             archive="tgwitness-handover.zip" if handover else "tgwitness-evidence.zip", head_hash=head_hash,
             event_count=count) if data_kind else None, data).encode("utf-8")
 
-    # The viewer's data: files beside report.html in an archive, or the page itself for a report saved alone.
     data_kind = "journal" if options.get("timeline") and (context.get("viewer") or context.get("events_again")) else None
     inline = viewer.Inline("journal", options["part_size"]) if data_kind and not context.get("viewer") else None
     statement = {"format": SEAL_FORMAT, "report_id": report_id, "created_at": created, "language": say.language,
@@ -2538,8 +2326,6 @@ def evidence_chunks(events, coverage=None, context=None):
         rendered = report_layouts.compose(rendered, options["design"], say, "journal", replacements)
     yield from sealed(rendered, statement, sign)
 
-
-# Chat report --------------------------------------------------------------------------------
 
 MEDIA_NAMES = {"MessageMediaPhoto": "Photo", "MessageMediaDocument": "File", "MessageMediaWebPage": "Link preview",
                "MessageMediaGeo": "Location", "MessageMediaGeoLive": "Location", "MessageMediaVenue": "Location",
@@ -2564,20 +2350,17 @@ def action_text(action):
     return words[:1].upper() + words[1:].lower() if words else ""
 
 
-# Why an exported message's attachment is not in the archive (collector.export_attachment).
 FILE_STATUS = {"type_not_collected": "type not collected by the attachment settings",
                "above_limit": "larger than the attachment limit", "unknown_size": "size unknown; not downloaded",
                "unavailable": "Telegram did not provide the file", "rate_limited": "not downloaded: Telegram rate limit"}
 
 
 def absent_text(say, low, high):
-    """'Message number 35 absent' or 'Message numbers 47–49 absent (3)'."""
     return say("Message number {n} absent", n=low) if low == high else \
         say("Message numbers {a}–{b} absent ({n})", a=low, b=high, n=high - low + 1)
 
 
 def absent_before(record, previous):
-    """The run of message numbers missing between the previous message and this one, or None."""
     number = record.get("id")
     if type(number) is int and type(previous) is int and number > previous + 1:
         return previous + 1, number - 1
@@ -2585,7 +2368,6 @@ def absent_before(record, previous):
 
 
 def edited_text(say, edited):
-    """'edited 2026-10-30 13:17 UTC' when the export has the time of the edit, else 'edited'."""
     return say("edited {time}", time=utc_text(edited, False)) if isinstance(edited, str) and edited[:2].isdigit() \
         else say("edited")
 
@@ -2604,7 +2386,6 @@ def edited_note(say, stats):
 
 
 def poster_notes(say, person, chat):
-    """A channel posts in its own name: say so, with the admins' signatures seen under its posts."""
     notes = []
     if person.get("user_id") is not None and person.get("user_id") == chat.get("id"):
         notes.append(say("The channel itself: its posts appear in the channel's name"))
@@ -2625,9 +2406,6 @@ def build_html(say, producer):
 
 
 def chat_rows(records, say, preview=False, base="", numbered=False, after=None, metadata=False):
-    """Telegram-style rows: day separators, grouped senders, reply quotes from earlier messages.
-    base leads from a part's folder back to the archive root (media/ lives there). numbered marks
-    where message numbers are absent (channels and supergroups); after is the number before these records."""
     quotes, previous_day, previous_sender, previous_id = {}, None, object(), after
     for record in records:
         date, sender = record.get("date") or "", record.get("from_id")
@@ -2694,7 +2472,6 @@ def chat_rows(records, say, preview=False, base="", numbered=False, after=None, 
 
 
 def chat_chunks(meta, records, context):
-    """The readable chat: sealed with a statement over chat.json's hash."""
     options = {**ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
     say = Words(options["language"])
     producer, chat, stats = context["producer"], meta.get("chat") or {}, context["stats"]
@@ -2878,8 +2655,6 @@ ADMIN_ACTIONS = {"DeleteMessage": "Deleted a message", "EditMessage": "Edited a 
 
 
 def source_rows(say, meta, stats):
-    """The chat as Telegram described it when the export began, and the exporting account's place in it:
-    (label, text, tone) where tone marks Telegram's own warnings."""
     chat = meta.get("chat") or {}
     profile, observer, errors = chat.get("profile") or {}, meta.get("observer") or {}, chat.get("profile_errors") or {}
     if not (profile or observer or errors):
@@ -2943,7 +2718,6 @@ def source_section(say, number, meta, stats):
 
 
 def recheck_text(say, recheck):
-    """What a recheck of the absent numbers found, in one sentence."""
     if not isinstance(recheck, dict):
         return ""
     if recheck.get("error_type"):
@@ -2961,7 +2735,6 @@ def recheck_text(say, recheck):
 
 
 def admin_rows(say, events, limit=500):
-    """(time, account, action, message, content) for each admin log event."""
     for event in (events or [])[:limit]:
         content, message = "", ""
         if event.get("message"):
@@ -2998,7 +2771,6 @@ def chat_subject(meta, context):
 
 
 def message_ids_section(say, number, ids):
-    """How a chat's message numbers run: where they continue without a gap and where numbers are absent."""
     out = section(number, "ids", say("Message numbers"), say(
         "Telegram numbers the messages of a channel or supergroup 1, 2, 3… in order, service messages included. A "
         "number between the first and the last exported message that is absent belongs to a message Telegram did "
@@ -3026,55 +2798,3 @@ def message_ids_section(say, number, ids):
             "message-ids.json lists every absent number; verify.py recounts them from chat.json.")) + "</p>"
     return out + "</section>"
 
-
-def chat_part_chunks(meta, records, context, part):
-    """One part of a long chat: a page of its own with its own seal, linked from chat.html."""
-    options = {**ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
-    say = Words(options["language"])
-    producer, chat, sign = context["producer"], meta.get("chat") or {}, context.get("sign")
-    fp, report_id, created, case = context["fingerprint"], context["report_id"], context["created_at"], case_of(options)
-    chat_title = chat.get("title") or say("Chat {id}", id=chat.get("id"))
-    name = options.get("case_title") or chat_title
-    label = say("Part {n} of {m}", n=part["index"], m=part["of"])
-    title = name + " · " + say("Messages") + " · " + label
-    description = say("Messages #{a}–#{b} of a sealed TgWitness chat export.", a=part["from"], b=part["to"])
-
-    def chunks():
-        tags = metadata(say, title=title, description=description, created_at=created, report_id=report_id, fp=fp,
-                        case=case, extra=[("tgwitness:format", "tgwitness-chat-export-v1"),
-                                          ("tgwitness:chat-id", chat.get("id")),
-                                          ("tgwitness:part", str(part["index"]) + "/" + str(part["of"]))])
-        linked = {"@context": "https://schema.org", "@type": "Report", "name": title, "description": description,
-                  "inLanguage": say.language, "isPartOf": {"@type": "Report", "identifier": "urn:uuid:" + report_id}}
-        yield (head(say, title=title + " · TgWitness", description=description, meta=tags, linked=linked,
-                    theme=options.get("theme", "auto"), design=options.get("design"))
-               + bar(say, say("Messages") + " · " + label, [("messages", say("Messages")), ("seal", say("Seal"))])
-               ).encode("utf-8")
-        facts = [(say("Chat"), e(chat_title)), (say("Part"), e(label)),
-                 (say("Message numbers"), "#" + num(part["from"]) + " – #" + num(part["to"])),
-                 (say("Period"), when(part["first_at"]) + " — " + when(part["last_at"])),
-                 (say("Case ID"), e(options.get("case_id"))),
-                 (say("Report ID"), '<span class="mono">' + e(report_id[:8]) + "</span>")]
-        yield hero(say, say("Chat export") + " · " + say("Messages"), name, facts, fp, sign is not None).encode("utf-8")
-        labels = {"text": say("Text"), "media": say("With media"), "edited": say("Edited"), "service": say("Service")}
-        chips = "".join('<button class="chip" type="button" aria-pressed="false" data-cat="' + c + '">' + e(labels[c])
-                        + "<b>" + num(part["categories"][c]) + "</b></button>" for c in labels if part["categories"].get(c))
-        yield (section(1, "messages", say("Messages"), say("Messages #{a}–#{b}, oldest first.", a=part["from"],
-                                                           b=part["to"]), long=True)
-               + part_nav(say, part, "../chat.html")
-               + '<div class="tools"><input type="search" id="q" placeholder="' + e(say("Search text, names, IDs…")) + '">'
-               + chips + '<span class="shown">' + e(say("Shown")) + ': <b id="shown-n">' + num(part["count"])
-               + '</b></span></div><div class="chatwall">').encode("utf-8")
-        numbered = bool((context.get("message_ids") or {}).get("numbered_per_chat"))
-        for row in chat_rows(records, say, bool(options.get("media_previews")), "../", numbered, part.get("after")):
-            yield row.encode("utf-8")
-        yield ("</div>" + part_nav(say, part, "../chat.html") + "</section>").encode("utf-8")
-        if sign is not None:
-            yield seal_section(say, 2, report_id, created).encode("utf-8")
-        yield ending(say, producer).encode("utf-8")
-
-    statement = {"format": SEAL_FORMAT, "report_id": report_id, "created_at": created, "language": say.language,
-                 "public_key": context["public_key"], "producer": producer, "case": case,
-                 "subject": {**chat_subject(meta, context), "part": part["index"], "parts": part["of"],
-                             "from": part["from"], "to": part["to"]}}
-    yield from sealed(chunks(), statement, sign)

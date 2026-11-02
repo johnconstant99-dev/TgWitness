@@ -1,4 +1,3 @@
-"""Export progress survives network failures without restarting work or crossing sessions."""
 import tempfile
 from pathlib import Path
 from urllib.parse import urlsplit

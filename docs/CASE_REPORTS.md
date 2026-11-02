@@ -1,7 +1,5 @@
 # Case reports: contents, design and verification
 
-[Русский](ru/CASE_REPORTS.md)
-
 Turn selected observations into a readable account of the case: its question,
 scope, saved changes, charts, findings and source references. Each report gives
 the recipient a way to check the delivered material and inspect its collection

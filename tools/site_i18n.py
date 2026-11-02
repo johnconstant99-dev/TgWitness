@@ -1,14 +1,3 @@
-"""Languages of the public site and how translated text is stored and applied.
-
-English is the source. website/i18n/<lang>.json holds, per language:
-  "strings": English string -> translation (labels, titles, script texts, attribute values)
-  "blocks":  SHA-256 of an English text unit -> translated unit
-A text unit is the inner HTML of one paragraph, list item, heading, cell, caption, button, link
-and the like: text with at most inline markup. Structure around it (sections, lists, labs, code,
-SVG) is never sent for translation, so it cannot be changed by it. When an English unit changes
-its hash changes. The renderer can report an English fallback during development;
-the publication builder rejects missing translations in a full-site language.
-"""
 import hashlib
 import html
 import json
@@ -73,7 +62,6 @@ class _Node:
 
 
 class _Tree(HTMLParser):
-    """Elements of an HTML fragment with the offsets of their tags."""
     def __init__(self, source):
         super().__init__(convert_charrefs=False)
         self.source = source
@@ -120,7 +108,6 @@ def _has_text(source):
 
 
 def units(fragment):
-    """(start, end) of every translatable text unit, in document order, without overlaps."""
     found = []
 
     def inline_only(node):
@@ -176,7 +163,6 @@ def attribute_values(fragment):
 
 
 def localize(fragment, data):
-    """The fragment in another language; returns the HTML and how many units are still English."""
     if data is None:
         return fragment, 0
     blocks, strings, missing, out, position = data["blocks"], data["strings"], 0, [], 0
@@ -199,7 +185,6 @@ def localize(fragment, data):
 
 
 def script_strings(source):
-    """Keys passed to T('...') in a site script."""
     return [match.group(1).replace("\\'", "'") for match in re.finditer(r"\bT\('((?:[^'\\]|\\.)*)'", source)]
 
 

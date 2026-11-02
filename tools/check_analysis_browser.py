@@ -1,4 +1,3 @@
-"""Synthetic provider acceptance: review sources, generate, revise and export."""
 import json
 from pathlib import Path
 import sys
@@ -27,7 +26,6 @@ async def synthetic(method, url, network, **kwargs):
 
 
 def check_default_period(page):
-    # Exercise the real controller with fixed instants, including both DST transition days.
     cases = [
         ("2026-10-31T16:30:00Z", "2026-10-30T09:30", "2026-10-31T09:31"),
         ("2026-11-01T16:30:00Z", "2026-10-31T09:30", "2026-11-01T08:31"),
@@ -122,12 +120,9 @@ def main():
                 page.locator('#ask-sources button', has_text="Open chat context").click()
                 expect(page.locator("#ask-sources")).to_contain_text("message.new")
                 expect(page.locator('#ask-sources')).not_to_contain_text('TopSecret-1234')
-                # A preference changed in Chats also updates detached Analysis results.
                 page.evaluate('async()=>{await navigate("chats");await openChat(-1001);}')
                 mask = page.locator('#chat-mask-secrets')
                 expect(mask).to_be_checked()
-                # Revealing waits for an audit write; rendering can restore the
-                # checked state while that request is pending. Wait for its result.
                 mask.click()
                 expect(mask).to_be_enabled()
                 expect(mask).not_to_be_checked()
@@ -176,7 +171,6 @@ def main():
                 page.evaluate("async()=>{await refreshStatus();await refreshStatus();await TgWitnessAnalysis.load();await TgWitnessMedia.load();}")
                 assert len(calls) == baseline, calls[baseline:]
 
-                # Issued access follows the workspace capability, without provider controls.
                 grant = page.evaluate("json('access/grants',{label:'Archive observer',workspaces:{default:[-1001]}},{root:true})")
                 viewer_context = browser.new_context()
                 viewer = viewer_context.new_page()
@@ -202,7 +196,6 @@ def main():
                 expect(viewer.locator("#view-analysis")).to_be_hidden()
                 viewer_context.close()
 
-                # An explicitly configured local worker does not turn the LLM UI on.
                 with patch("tgwitness.media_analysis.available", return_value=True), \
                         patch("tgwitness.media_analysis_api.available", return_value=True):
                     page.evaluate("refreshStatus()")
@@ -224,7 +217,6 @@ def main():
                 expect(page.locator("#view-analysis")).to_have_count(0)
                 assert page.evaluate("()=>[$('media-jobs').childElementCount,$('media-jobs').textContent]") == [0, ""]
 
-                # An open settings form belongs to one workspace, including late responses.
                 second = page.evaluate("""async()=>{
                     const other=await json('profiles',{label:'Second synthetic workspace'},{root:true});
                     await json('analysis/provider?workspace_id='+other.id,{enabled:false,model:'workspace-b'},{root:true});
@@ -270,7 +262,6 @@ def main():
                 expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
                 page.evaluate("id=>switchProfile(id)", second)
                 release_api_response(page)
-                # A late save cannot enable the next workspace's unloaded form.
                 expect(page.locator('#ai-settings-form button[type="submit"]')).to_be_disabled()
                 assert page.locator("#ai-settings-form").evaluate("el=>el.inert")
                 expect(page.locator("#ai-model")).to_have_value("")

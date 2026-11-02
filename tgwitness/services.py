@@ -1,4 +1,3 @@
-"""Discover the notification services shipped with the installed Apprise version."""
 import json
 from functools import lru_cache
 
@@ -17,6 +16,5 @@ def notifications():
             "templates": list(details.get("templates") or ()),
             "tokens": details.get("tokens") or {},
         })
-    # Apprise metadata contains sets and lazy translated strings, never credentials.
     return json.loads(json.dumps({"count": len(services), "services": sorted(services, key=lambda s: s["name"].lower())},
                                 default=lambda value: sorted(value) if isinstance(value, (set, frozenset)) else str(value)))

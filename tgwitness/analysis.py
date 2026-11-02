@@ -1,4 +1,3 @@
-"""Bounded lexical retrieval, verified references and separate analytical reports."""
 import json
 import re
 import secrets

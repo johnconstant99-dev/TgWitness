@@ -1,4 +1,3 @@
-"""Synthetic report-settings lifecycle: workspace boundaries, drafts and retry."""
 from pathlib import Path
 import sys
 import tempfile

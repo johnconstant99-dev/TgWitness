@@ -96,7 +96,7 @@ if (observe && tocLinks.length) {
 
 
 if (observe && !motion.matches) {
-  const blocks = document.querySelectorAll('.guide-content > :is(h2, .guide-grid, .lab, figure, .table-wrap, .threat-grid, .checklist, .fact-strip, .wiki-index), .wiki-body > :is(h2, .flow-figure, .table-wrap, pre)');
+  const blocks = document.querySelectorAll('.guide-content > :is(h2, .guide-grid, .lab, figure, .table-wrap, .threat-grid, .checklist, .fact-strip, .wiki-index), .hub-catalog > :is(h2, .guide-grid, .wiki-index), .wiki-body > :is(h2, .flow-figure, .table-wrap, pre)');
   const reveal = new IntersectionObserver(entries => entries.forEach(entry => {
     if (!entry.isIntersecting) return;
     entry.target.classList.add('is-revealed');
@@ -185,4 +185,48 @@ if (languageMenu) {
   languageMenu.addEventListener('keydown', event => {
     if (event.key === 'Escape') { languageMenu.open = false; languageMenu.querySelector('summary').focus(); }
   });
+}
+
+const hub = document.querySelector('[data-docs-hub]');
+if (hub) {
+  const cards = [...hub.querySelectorAll('[data-hub-workflow]')];
+  const play = hub.querySelector('[data-hub-play]');
+  const status = hub.querySelector('[data-hub-status]');
+  const progress = hub.querySelector('[data-hub-progress]');
+  const initial = status.textContent;
+  let active = -1, playing = false, timer = null;
+  function paint() {
+    hub.classList.toggle('is-playing', playing);
+    hub.dataset.activeWorkflow = active < 0 ? '' : cards[active].dataset.hubWorkflow;
+    cards.forEach((card, index) => card.classList.toggle('is-active', index === active));
+    play.querySelector('[data-hub-play-label]').hidden = playing;
+    play.querySelector('[data-hub-pause-label]').hidden = !playing;
+    progress.textContent = active < 0 ? '' : (active + 1) + ' / ' + cards.length;
+    status.textContent = active < 0 ? initial : cards[active].querySelector('h3').textContent + ': ' + cards[active].querySelector('p').textContent;
+  }
+  function pause() { clearTimeout(timer); timer = null; playing = false; paint(); }
+  function advance() {
+    active++;
+    paint();
+    timer = setTimeout(() => {
+      if (active === cards.length - 1) pause();
+      else advance();
+    }, 2200);
+  }
+  play.addEventListener('click', () => {
+    if (playing) { pause(); return; }
+    playing = true;
+    if (active === cards.length - 1) active = -1;
+    advance();
+  });
+  hub.querySelector('[data-hub-next]').addEventListener('click', () => { pause(); active = (active + 1) % cards.length; paint(); });
+  hub.querySelector('[data-hub-reset]').addEventListener('click', () => { pause(); active = -1; paint(); });
+  cards.forEach(card => card.addEventListener('focus', () => { if (playing) pause(); }));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+  addEventListener('pagehide', pause);
+  motion.addEventListener('change', pause);
+  if (observe) new IntersectionObserver(entries => { if (!entries[0].isIntersecting && playing) pause(); }, {threshold:0}).observe(hub);
+  hub.querySelector('[data-hub-controls]').hidden = false;
+  status.hidden = false;
+  paint();
 }

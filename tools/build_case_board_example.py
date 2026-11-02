@@ -1,4 +1,4 @@
-"""Build a signed, explicitly fictional Case Board dossier. Never contacts Telegram."""
+"""Build a signed, explicitly fictional Case Board dossier."""
 import argparse
 import hashlib
 import json

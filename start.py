@@ -1,4 +1,3 @@
-"""Cross-platform launcher with an isolated environment."""
 import os
 import subprocess
 import sys
@@ -18,7 +17,6 @@ VENV_HINT = ("On Debian/Ubuntu install the venv package for this Python, for exa
 
 
 def step(command, failure):
-    """Run one setup step; replace a traceback with an actionable message."""
     try:
         subprocess.run(command, check=True, cwd=ROOT)
     except (subprocess.CalledProcessError, OSError):

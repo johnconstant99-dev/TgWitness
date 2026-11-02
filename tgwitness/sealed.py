@@ -1,9 +1,3 @@
-"""Restricted, single-account/single-chat capture application for disposable runners.
-
-This deliberately does not mount the normal administration app. Configuration is
-supplied by the pinned runner, never by an HTTP request. No import, file upload,
-network configuration, arbitrary RPC, signing, or plaintext download API exists.
-"""
 import argparse
 import asyncio
 import hashlib

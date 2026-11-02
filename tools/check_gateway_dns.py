@@ -1,10 +1,4 @@
-"""Gateway DNS for a 24/7 server (cloud.py --gateway-dns) against simulated Hetzner and Cloudflare: no network.
-
-Covers the options, the plan, a quick-tunnel deployment that resolves only through its own Gateway location (the
-resolver configuration in the installer, the outbound firewall rules, the installer this checkout rebuilds), lock
-keeping the outbound rules, verify with its firewall and Gateway checks in a clean case, with a DNS leak in the
-firewall, a Gateway policy that rewrites answers and a late audit entry, destroy, and a tampered record.
-"""
+"""Gateway DNS for a 24/7 server (cloud.py --gateway-dns) against simulated Hetzner and Cloudflare"""
 import argparse
 import asyncio
 import copy
@@ -33,8 +27,6 @@ LOG_TOKEN = "r" * 40
 
 
 class GatewayWorld(World):
-    """World plus Cloudflare Gateway, its analytics and audit log, and the Hetzner reads verify makes."""
-
     def __init__(self, location_limit=False):
         super().__init__()
         self.gateway_ready, self.locations, self.rules, self.log_all = False, {}, [], True
@@ -249,7 +241,6 @@ def check_deployment(directory):
 
 
 def check_shared(directory):
-    """Without a Zero Trust plan Cloudflare allows one DNS location: the server shares the account's only one."""
     world = GatewayWorld(location_limit=True)
     world.gateway_ready = True
     world.locations[LOCATION] = {"id": LOCATION, "name": "home router", "doh_subdomain": SUBDOMAIN,
@@ -284,7 +275,6 @@ def check_shared(directory):
 
 
 def fake_log(rows, seen):
-    """Cloudflare's analytics API for anchoring.request: the rows inside each window asked, oldest first."""
     async def request(method, url, network, headers=None, body=b"", **options):
         assert method == "POST" and url == anchoring.GATEWAY_GRAPHQL and headers["Authorization"] == "Bearer " + LOG_TOKEN
         asked = json.loads(body)["variables"]
@@ -293,7 +283,7 @@ def fake_log(rows, seen):
         assert until - since <= 3 * 3600 and asked["location"] == str(uuid.UUID(LOCATION))
         found = [r for r in rows if since < base.parse_time(r["datetime"]).timestamp() <= until
                  and (asked.get("source") in (None, r["source"]))]
-        found = sorted(found, key=lambda r: r["datetime"])[:anchoring.GATEWAY_LIMIT]  # orderBy: datetime_ASC
+        found = sorted(found, key=lambda r: r["datetime"])[:anchoring.GATEWAY_LIMIT]
         dims = [{k: v for k, v in r.items() if k != "source"} for r in found]
         answer = {"data": {"viewer": {"accounts": [{"cf1GatewayDnsRawGroups": [{"dimensions": d} for d in dims]}]}}}
         return 200, {}, json.dumps(answer).encode()
@@ -318,7 +308,7 @@ def check_journal_copy(directory):
     anchoring.request = fake_log(rows, seen)
     try:
         first = asyncio.run(anchoring.record_gateway(store, None, config))
-        assert first["count"] == 1008 and len(seen) >= 8, (first, len(seen))  # 24 hours in 3-hour windows
+        assert first["count"] == 1008 and len(seen) >= 8, (first, len(seen))
         again = asyncio.run(anchoring.record_gateway(store, None, config))
         assert again.get("skipped"), "nothing new within a minute"
         payloads = [json.loads(r[0]) for r in store.db.execute(
@@ -338,7 +328,7 @@ def check_journal_copy(directory):
         try:
             asyncio.run(anchoring.record_gateway(store, None, moved))
         except AssertionError:
-            pass  # another location starts from Cloudflare's retention again, not from the old cursor
+            pass
         assert seen and base.parse_time(seen[0]["since"]).timestamp() < time.time() - 23 * 3600
     finally:
         anchoring.request = saved
@@ -472,7 +462,7 @@ def check_browser(directory, output):
             expect(page.locator("#cloud-offer")).to_be_visible()
             page.locator("#cloud-domain").select_option("quick")
             expect(page.locator("#cloud-dns")).to_contain_text("Only through Cloudflare Gateway, account Mine")
-            expect(page.locator("#cloud-gateway-field")).to_be_hidden()  # one usable account: nothing to choose
+            expect(page.locator("#cloud-gateway-field")).to_be_hidden()
             page.locator("#cloud-offer").screenshot(path=str(output / "wizard-gateway-offer.png"))
             page.locator("#cloud-consent").check()
             page.locator("#cloud-create").click()

@@ -1,11 +1,3 @@
-"""Operating parameters: limits and pace of collection, rechecks, attachments, people profiles,
-notifications, exports and the Telegram connection.
-
-Every value here is changed in the panel (Parameters) without editing code. Values are kept per
-workspace; only those that differ from the default are saved, and every change is recorded in
-the signed journal (parameters.changed). Reading never fails: a saved value that no longer fits
-its range falls back to the default.
-"""
 import re
 from dataclasses import dataclass
 
@@ -146,7 +138,6 @@ BY_KEY = {p.key: p for p in PARAMETERS}
 
 
 def patterns(lines):
-    """[(name, compiled)] from "name: regular expression" lines."""
     found = []
     for line in lines:
         name, sep, expression = line.partition(":")
@@ -204,10 +195,6 @@ def values(store):
 
 
 def changes(store, wanted):
-    """Validate the requested values (None restores a default).
-
-    Returns the overrides to save and the changed values before and after.
-    """
     current, saved = values(store), dict(saved_values(store))
     before, after = {}, {}
     for key, raw in wanted.items():
@@ -233,7 +220,6 @@ def described(store):
 
 
 def texts():
-    """English texts of the Parameters page that the translations must cover."""
     found = [text for group in GROUPS for text in group[1:]]
     for p in PARAMETERS:
         found += [p.label, p.help, p.unit]

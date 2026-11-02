@@ -81,4 +81,4 @@ Free text, dates, rare events and combinations of facts can identify people even
 
 This feature runs in the local panel. The separately published [hosted Capture preview](https://phishdestroy.github.io/TgWitness/docs/capture/) uses a pinned disposable runner and its own attestation policy. Local collector signatures do not inherit that runner's provenance. A change here does not update an approved remote workflow or its trust pins; hosted full-account capture needs a separately reviewed and published collector/workflow pair and live runner acceptance. No hosted deployment or real Telegram account acquisition is claimed by local synthetic tests.
 
-[Русская инструкция](ru/ACCOUNT-EXPORT.md) · [Evidence format](EVIDENCE.md)
+[Evidence format](EVIDENCE.md) · [Case reports](CASE_REPORTS.md)

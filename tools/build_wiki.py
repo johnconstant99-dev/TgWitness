@@ -1,7 +1,4 @@
-"""Build an English GitHub Wiki bundle from reviewed Markdown pages.
-
-No Git operations, publication, application imports or network access.
-"""
+"""Build an English GitHub Wiki bundle from reviewed Markdown pages."""
 import argparse
 import hashlib
 import html
@@ -35,7 +32,6 @@ IMAGES = {".svg", ".png", ".webp", ".gif"}
 
 
 def render_links(content, source, root, public, repository, branch, assets):
-    """Resolve local documentation links for GitHub's separate wiki repository."""
     repo_url = "https://github.com/" + repository
     wiki = root / "docs/wiki"
 

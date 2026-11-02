@@ -1,4 +1,3 @@
-/** Download receipts and progress; report drafts remain owned by their form. */
 export function createExports({root, tr, json, getSession, fmtTime, toast,downloadAgain}) {
   const find = id => root.querySelector('#'+id), tabs = [...root.querySelectorAll('[data-export-tab]')];
   let session = getSession(), request = 0, transfer = 0, selected = 'downloads', entries = [];

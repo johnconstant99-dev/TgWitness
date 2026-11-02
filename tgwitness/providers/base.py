@@ -1,4 +1,3 @@
-"""What every provider implements, and the HTTP client they share."""
 import ipaddress
 import json
 import os
@@ -21,7 +20,6 @@ def pause(seconds):
 
 
 def parse_time(value):
-    """Provider timestamps: ISO 8601 with or without zone (naive means UTC), or epoch seconds."""
     if isinstance(value, (int, float)):
         return datetime.fromtimestamp(value, timezone.utc)
     parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
@@ -29,7 +27,6 @@ def parse_time(value):
 
 
 def network(address):
-    """An address or a network as a CIDR string, or None."""
     try:
         return str(ipaddress.ip_network(address, strict=False)) if address else None
     except ValueError:
@@ -37,7 +34,6 @@ def network(address):
 
 
 class Api:
-    """JSON over HTTPS. The log keeps method, path and status: no bodies, no credentials."""
     name = base = ""
 
     def __init__(self, token, session=None, log=None):
@@ -75,13 +71,6 @@ class Api:
 
 
 class Provider(Api):
-    """A cloud with an API that creates servers, firewalls and keeps a log of actions.
-
-    Deploy: create(spec, user_data, rules, outbound) returns (firewall, server) records and waits until
-    the server runs; lock(record) removes every inbound rule and keeps the outbound ones. Verify: describe() reads the server back,
-    firewall() what filters its public interface, actions() the provider's own log, normalised to
-    {resource, id, command, started, finished, status, actor}. metadata() runs on the server.
-    """
     key = title = ""
     location = mode = None
     variables = ()
@@ -98,7 +87,6 @@ class Provider(Api):
 
     @classmethod
     def credentials(cls, path):
-        """Credentials come from a file or the environment, never from the command line."""
         value = Path(path).read_text(encoding="utf-8-sig").strip() if path else \
             os.environ.get(cls.variables[0], "").strip()
         if not value:
@@ -115,7 +103,6 @@ class Provider(Api):
         raise NotImplementedError
 
     def destroy(self, record):
-        """Deletes the deployment's server and firewall, found by its label; returns what was removed."""
         raise DeployError(self.title + ": removal through the API is not available here; delete the resources "
                           "labelled tgwitness-deployment=" + record["deployment_id"] + " in the provider's console")
 
@@ -133,7 +120,6 @@ class Provider(Api):
         raise NotImplementedError
 
     def classify(self, action, created):
-        """pass, review or fail for one logged action, with its meaning."""
         command, status = action["command"], action["status"]
         started = parse_time(action.get("started") or created.isoformat())
         early = (started - created).total_seconds() <= self.window
@@ -166,7 +152,6 @@ class Provider(Api):
 
 
 def labels(spec):
-    """Tags marking every created resource; the deployment ID makes them unique."""
     return {"tgwitness": spec["mode"], "tgwitness-deployment": spec["deployment_id"]}
 
 

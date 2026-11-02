@@ -1,4 +1,3 @@
-// A route is a draft until its server-side check and explicit application finish.
 export function createConnectionView({root, tr, json, state, refreshStatus, askConfirm}) {
   const get = id => root.querySelector('#' + id);
   const el = (tag, text, cls) => { const n = document.createElement(tag); if(text)n.textContent=text; if(cls)n.className=cls; return n; };

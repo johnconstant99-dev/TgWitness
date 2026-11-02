@@ -1,15 +1,3 @@
-"""Evidence mode: send checkpoint hashes to independent timestamp services automatically.
-
-Only the SHA-256 of a signed checkpoint leaves the machine. RFC 3161 authorities return a
-signed time-stamp token at once; OpenTimestamps calendars return a proof that is confirmed
-in Bitcoin hours later (`ots upgrade`). Answers are stored beside the checkpoint, travel in
-evidence exports, and are checked again by verify.py.
-
-Two optional records go into the journal on the same passes. drand: the newest public random
-value of the League of Entropy, which nobody knows before its time, so every later record is
-newer than it; the timestamps bound the same records from the other side. devices: Telegram's
-own list of the account's sessions (Settings → Devices), so a session nobody expected shows.
-"""
 import asyncio
 import calendar
 import hashlib
@@ -46,11 +34,6 @@ OTS_TREE_LIMIT = 1024 * 1024
 
 
 class OTSReader:
-    """Bounded OTS v1 tree reader; operations are evaluated before following a pending leaf.
-
-    Protocol: python-opentimestamps/core/{timestamp,op,notary}.py and calendar.py.
-    A calendar upgrades the leaf commitment, which need not equal the checkpoint hash.
-    """
     def __init__(self, data):
         if len(data) > OTS_TREE_LIMIT:
             raise ValueError("OpenTimestamps size limit exceeded")
@@ -170,7 +153,6 @@ def ots_pending(node):
 
 
 def approved_calendar(uri, settings):
-    """Proof contents cannot turn the background worker into an arbitrary URL fetcher."""
     parts = urlsplit(uri)
     if (parts.scheme != "https" or not parts.hostname or parts.username or parts.password
             or parts.query or parts.fragment):
@@ -184,7 +166,6 @@ def approved_calendar(uri, settings):
 
 
 def old_ots_files(folder, cursor):
-    """Rotate through old receipts with bounded memory; directory I/O runs off the event loop."""
     after, before, now = [], [], time.time()
     for path in folder.glob("checkpoint-*.ots"):
         try:
@@ -201,7 +182,6 @@ def old_ots_files(folder, cursor):
 
 
 async def upgrade_pending_ots(store, network, settings):
-    """Upgrade old pending proofs; Bitcoin validation remains an independent `ots verify` step."""
     folder = store.root / "checkpoints" / "anchors"
     if not folder.is_dir() or folder.is_symlink() or not settings["ots_calendars"]:
         return []
@@ -254,7 +234,6 @@ async def upgrade_pending_ots(store, network, settings):
             summary = ots_summary(candidate, digest)
             if summary["status"] != "bitcoin-unverified":
                 continue
-            # Keep the submitted receipt. A later export can still show exactly what first arrived.
             backup = path.with_suffix(".ots.pending")
             if not backup.exists():
                 private_write(backup, original)
@@ -312,7 +291,6 @@ async def post(url, body, headers, network, timeout=30, limit=256 * 1024):
 
 
 def service_name(url):
-    """File-name part for a service: host, plus port and path when present (freetsa.org-tsr)."""
     parts = urlsplit(url)
     return re.sub(r"[^a-z0-9.]+", "-", (parts.netloc + parts.path).lower()).strip("-.")
 
@@ -324,7 +302,6 @@ def problem(exc):
 
 
 def latest_checkpoint(store):
-    """The latest retained checkpoint: (file name stem, file, statement), or None."""
     directory = store.root / "checkpoints"
     latest = directory / "latest.json"
     if not latest.is_file():
@@ -333,13 +310,11 @@ def latest_checkpoint(store):
     name = "checkpoint-" + str(statement["event_count"]).zfill(12)
     source = directory / (name + ".json")
     if source.is_file():
-        # The numbered checkpoint is immutable; latest.json can contain a newer annotations head.
         statement = json.loads(source.read_bytes())["statement"]
     return (name, source, statement) if source.is_file() else None
 
 
 async def anchor_latest(store, network, settings):
-    """Stamp the latest retained checkpoint with every service that has not answered for it yet."""
     found = latest_checkpoint(store)
     if not found:
         return None
@@ -354,7 +329,7 @@ async def anchor_latest(store, network, settings):
         if target.exists():
             covered.append({"service": url, "kind": "rfc3161"})
             continue
-        received = False  # an answer arrived but failed the checks, unlike no answer at all
+        received = False
         try:
             query = timestamp_request(data)
             reply = await post(url, query, {"Content-Type": "application/timestamp-query",
@@ -394,7 +369,6 @@ async def anchor_latest(store, network, settings):
                                       "covered: services that answered for this checkpoint on an earlier pass."})
     at = utcnow()
     store.set_setting("evidence_last", {"at": at, **record})
-    # The latest answer and the latest failure are kept apart: a failed attempt must not hide the last success.
     if any(r["ok"] for r in results):
         verified = any(r["ok"] and r["kind"] == "rfc3161" for r in results)
         previous = store.get_setting("evidence_success", None) or {}
@@ -408,7 +382,6 @@ async def anchor_latest(store, network, settings):
 
 
 async def record_drand(store, network):
-    """The newest drand round into the journal; a relay that fails or answers nonsense is skipped."""
     errors = []
     for relay in DRAND_RELAYS:
         try:
@@ -432,12 +405,10 @@ async def record_drand(store, network):
 
 
 def device_view(device):
-    """The collector's own session is active all the time; only other sessions' activity is a change."""
     return {k: v for k, v in device.items() if not (device.get("current") and k == "active_at")}
 
 
 async def record_devices(store, devices):
-    """Telegram's list of the account's sessions into the journal: in full when it changed, else its hash."""
     listed = sorted(await devices(), key=lambda d: (not d.get("current"), str(d.get("hash"))))
     digest = hashlib.sha256(canonical([device_view(d) for d in listed])).hexdigest()
     previous = store.get_setting("evidence_devices", None) or {}
@@ -462,12 +433,9 @@ async def record_devices(store, devices):
 GATEWAY_GRAPHQL = "https://api.cloudflare.com/client/v4/graphql"
 GATEWAY_FIELDS = ("at", "name", "type", "rcode", "decision", "colo")
 GATEWAY_LIMIT = 1000
-# Cloudflare's log lags a query by a minute or two; the free plan keeps it 24 hours.
 GATEWAY_LAG_SECONDS = 120
-# Shorter windows wait for the next pass rather than fill the journal with empty records.
 GATEWAY_MIN_WINDOW_SECONDS = 60
 GATEWAY_RETENTION_SECONDS = 86400
-# The widest range one raw log query may span on the free plan; a pass catches up window by window.
 GATEWAY_WINDOW_SECONDS = 3 * 3600
 
 
@@ -485,7 +453,6 @@ def gateway_time(seconds):
 
 
 async def gateway_rows(network, config, since, until):
-    """One page of the location's DNS log from Cloudflare's analytics API, oldest first."""
     variables = {"account": config["account"], "location": str(uuid.UUID(config["location_id"])),
                  "since": gateway_time(since), "until": gateway_time(until)}
     if config.get("address"):
@@ -500,10 +467,6 @@ async def gateway_rows(network, config, since, until):
 
 
 async def record_gateway(store, network, config):
-    """The DNS queries Cloudflare Gateway logged for this collector since the last copy, into the journal.
-
-    One record per window, also when there were none: the journal then shows Cloudflare's own account of what
-    the server looked up, with no window left out, for longer than Cloudflare keeps it."""
     copied, last = 0, None
     for _ in range(GATEWAY_RETENTION_SECONDS // GATEWAY_WINDOW_SECONDS + 1):
         done = await gateway_window(store, network, config)
@@ -528,13 +491,13 @@ async def gateway_window(store, network, config):
     if until - since < GATEWAY_MIN_WINDOW_SECONDS:
         return {"count": 0, "until": gateway_time(since), "skipped": True}
     rows, truncated = await gateway_rows(network, config, since, until), False
-    if len(rows) >= GATEWAY_LIMIT:  # more in this window: stop before the last second, read it whole next pass
+    if len(rows) >= GATEWAY_LIMIT:
         last = rows[-1]["datetime"]
         whole = [row for row in rows if row["datetime"] < last]
         second = calendar.timegm(time.strptime(last, "%Y-%m-%dT%H:%M:%SZ"))
         if whole:
             rows, until = whole, second - 1
-        else:  # a full page within one second: keep it, and say the rest of that second is missing
+        else:
             until, truncated = second, True
     queries = [[row.get("datetime"), row.get("destination"), row.get("queryType"), row.get("rcode"),
                 row.get("resolverDecision"), row.get("coloName")] for row in rows]
@@ -553,8 +516,6 @@ async def gateway_window(store, network, config):
 
 
 async def record_extras(store, network, settings, devices, gateway=None):
-    """drand, the device list and the Gateway log, each on its own: one failing does not stop the others or
-    the timestamps."""
     saved = dict(store.get_setting("evidence_witnesses", None) or {})
     for name, enabled, work in (("drand", settings["drand"], lambda: record_drand(store, network)),
                                 ("devices", settings["devices"] and devices, lambda: record_devices(store, devices)),
@@ -574,16 +535,11 @@ async def record_extras(store, network, settings, devices, gateway=None):
 
 
 def request_anchor(store, vault, wakeup):
-    """Anchor a fresh checkpoint (it carries the signing public key) on the next loop pass."""
     retain_checkpoint(store, vault)
     wakeup.set()
 
 
 async def anchor_loop(store, network_config, wakeup, status, devices=None, gateway=None):
-    """status: busy, and of the latest pass its time, outcome, error and when the next one is due.
-
-    devices: an async callable returning Telegram's session list, or None where there is no account.
-    gateway: a callable returning the saved Gateway log settings with their token, or None."""
     last = 0.0
     while True:
         with suppress(TimeoutError):

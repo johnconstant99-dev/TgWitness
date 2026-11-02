@@ -1,12 +1,3 @@
-"""Check the first setup (settings_hub.py, views/settings-hub.js) beyond tools/test_settings_hub.py.
-
-Every string of the setup and of Settings is translated in each panel language. A new workspace walks the
-setup in a browser: each step has its own address and browser Back and Forward move between steps; the
-account step asks whether the account is separate, and a main account records only chosen chats (also
-refused by the server); Start shows the live check of the collector before leaving; the IP mode change is
-in the signed journal. Every step at 360, 600, 1024 and 1440 pixels in English and Russian, at 360 and
-1440 in German and right-to-left Arabic, without horizontal overflow.
-"""
 import json
 import re
 import sys
@@ -22,13 +13,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 
-# Product names stay as they are in every language.
 NAMES = {"Cloudflare WARP", "GitHub Actions"}
 STEPS = range(1, 8)
 
 
 def setup_keys():
-    """The setup's strings: tr() calls plus the literal tables the setup passes through tr()."""
     from i18n_keys import script_keys
     source = (ROOT / "tgwitness/static/views/settings-hub.js").read_text(encoding="utf-8")
     keys = script_keys(source)
@@ -40,7 +29,6 @@ def setup_keys():
     for table in (r"const label=\(value\)=>tr\(\{(.*?)\}\[value\]", r"const explanations=\{(.*?)\};"):
         keys += re.findall(r":'([^']+)'", re.search(table, source, re.S).group(1))
     keys += re.findall(r"\['[a-z]+','([^']+)'", re.search(r"const summaries=\[(.*?)\];", source, re.S).group(1))
-    # Words that identify values in code (" ", capitals or punctuation mark interface text).
     return [key for key in dict.fromkeys(keys) if re.search(r"[A-Z ]|…", key) and key not in NAMES]
 
 
@@ -61,7 +49,6 @@ def unlock(page, server):
 
 
 def clipped(page):
-    """Elements past the screen edge, except inside their own scrolling box."""
     return page.evaluate("""() => [...document.querySelectorAll('#view-first-run *')].filter(e => {
         const r = e.getBoundingClientRect();
         if (!r.width || (r.right <= innerWidth + 1 && r.left >= -1)) return false;
@@ -77,12 +64,10 @@ def check_browser(directory, output):
     from playwright.sync_api import expect, sync_playwright
     from tgwitness import i18n
     errors, external = [], []
-    # A fresh synthetic check: the setup accepts a connection checked within the last five minutes.
     probe = patch("tgwitness.guided_connection.probe",
                   AsyncMock(side_effect=lambda *args, **kwargs: {**CHECK, "checked_at": int(time.time())}))
     async def no_tunnel(*args, **kwargs):
         raise ValueError("No public proxy answers. Try WARP or your own proxy.")
-    # The automatic route fails here without downloading a tunnel; the direct route is then chosen.
     tunnel = patch("tgwitness.portable_routes.PortableRoutes.prepare", no_tunnel)
     with probe, tunnel, RunningApp(directory / "panel") as server, sync_playwright() as p:
         store = server.app.state.store
@@ -111,7 +96,6 @@ def check_browser(directory, output):
         page.go_forward()
         expect(page).to_have_url(address(4))
 
-        # The automatic route is tried first on its own; a direct route is chosen once that attempt ends.
         expect(page.locator("#hub-connection-result")).to_have_class(re.compile("failed|working"), timeout=60000)
         page.locator('[data-answer="direct"]').click()
         deadline = time.monotonic() + 30
@@ -153,7 +137,6 @@ def check_browser(directory, output):
         labels = page.evaluate("Object.keys(labels)")
         assert {"settings.changed", "sources.selected", "network.connection_applied"} <= set(labels)
 
-        # The server keeps the main-account rule for later edits too.
         headers = {"Authorization": "Bearer " + page.evaluate("state.token")}
         refused = requests.post(server.url + "/api/settings/scope", json={"scope": "account"}, headers=headers, timeout=20)
         assert refused.status_code == 409, refused.text
@@ -165,7 +148,6 @@ def check_browser(directory, output):
         after = store.db.execute("SELECT count(*) FROM events WHERE kind='network.policy_changed'").fetchone()[0]
         assert after == before + 1, "hiding this server's address is a signed journal record"
 
-        # Every step, four widths, English and Russian; German and Arabic at the edges.
         for lang, widths in (("en", (360, 600, 1024, 1440)), ("ru", (360, 600, 1024, 1440)),
                              ("de", (360, 1440)), ("ar", (360, 1440))):
             context.add_cookies([{"name": i18n.COOKIE, "value": lang, "url": server.url}])
@@ -174,7 +156,6 @@ def check_browser(directory, output):
             for width in widths:
                 page.set_viewport_size({"width": width, "height": 900})
                 for step in STEPS:
-                    # Moving within the page, as the step list does; reloading every page would hit the request limit.
                     page.evaluate("step=>settingsHub.load(step)", step)
                     assert page.evaluate("settingsHub.step") == step, (lang, width, step)
                     page.wait_for_timeout(200)

@@ -1,4 +1,3 @@
-"""Synthetic regressions for collection scope, recovery, notification and measurement boundaries."""
 import asyncio
 import base64
 from concurrent.futures import ThreadPoolExecutor
@@ -61,7 +60,6 @@ def test_main_account_scope_is_checked_before_changes():
                 assert response.status_code == 200, response.text
                 assert start.await_count == 1
             assert store.get_setting("first_run")["goal"] == store.get_setting("goal_preset")["goal"] == "watch"
-            # A stale copy-form submission cannot widen active collection.
             store.set_setting("resume", True)
             response = await client.post("/api/settings/scope", json={"goal": "copy", "scope": "account"})
             assert response.status_code == 409
@@ -112,7 +110,6 @@ def test_rclone_token_replacement_keeps_recovery(tmp_path):
                 assert response.status_code == 409 and "Restore" in response.text
                 assert ws.vault.read("storage") == original_secret
                 assert ws.manager.public()["remote_files"] == 1
-                # Formatting-only edits keep the same credentials and receipts.
                 response = await client.post("/api/storage", json={**body, "rclone_config": "# harmless comment\n" + old_config})
                 assert response.status_code == 200, response.text
                 assert ws.manager.public()["remote_files"] == 1
@@ -164,7 +161,6 @@ def test_replica_restore_coexists_with_ordinary_s3_storage(tmp_path):
                 result = await replica.restore(keyinfo, "synthetic", "synthetic", tmp_path / "restored")
                 assert result["media_verified"] == 1
                 assert (tmp_path / "restored" / "media" / digest).read_bytes() == original
-                # Unknown/unsafe replica names still fail; only storage/ is reserved.
                 base = next(name.split("/storage/")[0] for name in bucket.objects if "/storage/" in name)
                 bucket.objects[base + "/../unsafe.tgwr"] = b"synthetic"
                 with pytest.raises(ValueError, match="Unsafe backup"):
@@ -203,8 +199,6 @@ def test_partial_notification_retry_is_per_destination(tmp_path):
                 assert ws.store.get_setting("alerts_cursor") == ws.store.stats()["head"]["seq"]
                 await alerts.alert_pass(ws.store, ws.vault, NetworkConfig(kind="direct"), now + timedelta(seconds=60))
                 assert len(calls) == 5
-                # Even an unexpected provider exception must not block another
-                # receiver or advance the failing receiver's acknowledgement.
                 ws.vault.save("alerts", {"urls": [bad, good]})
                 ws.store.append("storage.low", {"free_bytes": 1})
                 failing.add(bad)

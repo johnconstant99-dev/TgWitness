@@ -1,17 +1,4 @@
-"""Standalone verifier: python verify.py bundle.zip [--fingerprint SHA256] [--tsa-ca ROOT.pem].
-
-Accepts a signed observation bundle (tgwitness-evidence-v1), a signed chat export
-(tgwitness-chat-export-v1), a signed account export (tgwitness-account-export-v1),
-a minimized disclosure (tgwitness-account-disclosure-v1), an independent witness
-journal (tgwitness-witness-v1) or a
-people-profile file (tgwitness-dossier-v1 JSON); the format is detected from the file.
-For an observation bundle it also reports continuous observation periods, gaps and
-message IDs that were never observed. With --witness WITNESS.zip it checks that every
-journal head the witness saw is part of this journal, and with --channel it checks the
-witness's channel posts against the witness journal. With --check-drand it compares the
-drand rounds written in evidence mode with drand relays run by Cloudflare and Protocol Labs.
-Archives and checkpoints made before the rename carry tgwatch-* names and are accepted.
-"""
+"""Standalone verifier"""
 import argparse
 import base64
 import bisect
@@ -51,21 +38,17 @@ MAX_SMALL_MEMBER_BYTES = 16 * 1024**2
 MAX_RECORD_BYTES = 64 * 1024**2
 MAX_JSON_BYTES = 256 * 1024**2
 OTS_PENDING, OTS_BITCOIN = bytes.fromhex("83dfe30d2ef90c8e"), bytes.fromhex("0588960d73d71901")
-# A readable report ends with a seal: a signed statement over the SHA-256 of every byte before it.
 SEAL_OPEN = b'<script type="application/tgwitness-seal+json" id="tgwitness-seal">'
 SEAL_CLOSE = b"</script></body></html>\n"
-SEAL_WINDOW = 1024 * 1024  # the seal is always within the last mebibyte of a report
-# drand quicknet (League of Entropy): a round every 3 seconds; its value cannot be known before its time.
+SEAL_WINDOW = 1024 * 1024
 DRAND_CHAIN = "52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971"
 DRAND_GENESIS, DRAND_PERIOD = 1692803367, 3
-# Run by Cloudflare and by Protocol Labs: --check-drand asks one of each.
 DRAND_RELAYS = ("https://drand.cloudflare.com", "https://api.drand.sh", "https://api2.drand.sh", "https://api3.drand.sh")
 DRAND_CHECK_LIMIT = 100
 GATEWAY_FIELDS = ("at", "name", "type", "rcode", "decision", "colo")
 
 
 def open_archive(path, max_gib=None):
-    """Open a ZIP and enforce member count, duplicates and total expanded size before any read."""
     limit = MAX_UNCOMPRESSED_GIB if max_gib is None else max_gib
     if type(limit) not in (int, float) or not math.isfinite(limit) or limit <= 0:
         raise ValueError("Archive size limit must be a positive finite number of GiB")
@@ -86,7 +69,6 @@ def open_archive(path, max_gib=None):
 
 
 def read_member(archive, name, limit=MAX_SMALL_MEMBER_BYTES):
-    """A whole member, bounded by both its declared size and the bytes actually produced."""
     if archive.getinfo(name).file_size > limit:
         raise ValueError(name + " exceeds the verifier's size limit for this member")
     with archive.open(name) as stream:
@@ -109,7 +91,6 @@ def member_digest(archive, name):
 
 
 def bounded_lines(stream):
-    """Lines of a journal or chat file, refusing one longer than any record could be."""
     for line in iter(lambda: stream.readline(MAX_RECORD_BYTES + 1), stream.read(0)):
         if len(line) > MAX_RECORD_BYTES:
             raise ValueError("A record exceeds the verifier's size limit")
@@ -124,7 +105,6 @@ def read_json_file(path):
 
 
 def der(data, offset):
-    """Tag, value start and value end of the DER element at offset."""
     tag, length, start = data[offset], data[offset + 1], offset + 2
     if length & 0x80:
         count = length & 0x7F
@@ -137,7 +117,6 @@ def der(data, offset):
 
 
 def children(data, start, end):
-    """(tag, offset, value start, value end) of each DER element between start and end."""
     found, offset = [], start
     while offset < end:
         tag, value_start, value_end = der(data, offset)
@@ -173,8 +152,6 @@ ECDSA_SIGNATURES = {"1.2.840.10045.4.3.2": hashes.SHA256, "1.2.840.10045.4.3.3":
 
 
 def timestamp_token(reply):
-    """The parts of an RFC 3161 reply, read strictly: status, the TSTInfo bytes, the certificates and
-    the one SignerInfo of the signed data around them."""
     tag, start, end = der(reply, 0)
     if tag != 0x30 or end != len(reply):
         raise ValueError("Not an RFC 3161 timestamp reply")
@@ -219,7 +196,6 @@ def generalized_time(raw):
 
 
 def tst_info(tst):
-    """Imprint algorithm and hash, time and nonce of a TSTInfo, by position as RFC 3161 defines it."""
     tag, start, end = der(tst, 0)
     items = children(tst, start, end) if tag == 0x30 and end == len(tst) else []
     if len(items) < 5 or [t for t, *_ in items[:5]] != [0x02, 0x06, 0x30, 0x02, 0x18]:
@@ -240,8 +216,6 @@ def query_nonce(query):
 
 
 def timestamp_reply_summary(reply, digest, query=None):
-    """Status and time of an RFC 3161 reply whose TSTInfo stamps exactly this SHA-256 (and the request's nonce).
-    The signature is checked by timestamp_signature, or by OpenSSL with --tsa-ca."""
     token = timestamp_token(reply)
     info = tst_info(token["tst"])
     if info["algorithm"] != "2.16.840.1.101.3.4.2.1" or info["hash"] != digest:
@@ -266,7 +240,6 @@ def signed_attributes(reply, start, end):
 
 
 def signing_certificate_hash(reply, attributes):
-    """The hash algorithm and the hash of the signer's certificate named in the ESS attribute."""
     if SIGNING_CERTIFICATE_V2 in attributes:
         name, default = SIGNING_CERTIFICATE_V2, hashes.SHA256
     elif SIGNING_CERTIFICATE in attributes:
@@ -287,9 +260,6 @@ def signing_certificate_hash(reply, attributes):
 
 
 def timestamp_signature(reply, roots):
-    """Who signed an RFC 3161 reply, checked: the hash of the TSTInfo in the signed attributes, the
-    signature over them, the certificate the ESS attribute names, its critical time-stamping key usage
-    as its only use, and a chain valid at the stamped time up to one of the given root certificates."""
     token = timestamp_token(reply)
     when = tst_info(token["tst"])["time"]
     _, _, start, end = token["signer"]
@@ -389,12 +359,6 @@ def timestamp_signature(reply, roots):
 
 
 def ots_summary(proof, digest):
-    """Validate the OTS structure, not its commitment against a Bitcoin block.
-
-    Attestation tags count only at tree leaves, never inside operation arguments
-    or opaque attestation payloads. Keep this standalone and network-free: the
-    recipient must still run `ots verify` to authenticate a Bitcoin timestamp.
-    """
     head = OTS_MAGIC + b"\x01\x08"
     if len(digest) != 32 or proof[:len(head)] != head or proof[len(head):len(head) + 32] != digest:
         raise ValueError("The OpenTimestamps proof is not for this checkpoint")
@@ -509,7 +473,6 @@ def find_openssl():
 
 
 def openssl_verify_timestamp(data, reply, query, ca_path):
-    """Check the TSA signature and certificate chain against only the given root certificate."""
     binary = find_openssl()
     with tempfile.TemporaryDirectory() as tmp:
         paths = {}
@@ -527,7 +490,6 @@ def openssl_verify_timestamp(data, reply, query, ca_path):
 
 
 def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None):
-    """Checkpoints anchored in evidence mode: each checkpoint, then every answer stored for it."""
     results = []
     for name in sorted(n for n in names if n.startswith("anchors/") and n.endswith(".json")):
         data = read_member(archive, name)
@@ -554,7 +516,6 @@ def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None
 
 
 def is_format(value, name):
-    """True for tgwitness-<name>, or tgwatch-<name> written before the project was renamed."""
     return value in ("tgwitness-" + name, "tgwatch-" + name)
 
 
@@ -585,7 +546,6 @@ def hash_bytes(value):
 
 
 class MerkleFrontier:
-    """Streaming tree root using O(log n) memory, recomputed from exported events."""
     def __init__(self):
         self.nodes = []
         self.count = 0
@@ -618,7 +578,6 @@ def merkle_path(value):
 
 
 def verify_inclusion(event_hash, index, size, root, path):
-    """RFC 9162 section 2.1.3.2; all unused/extra nodes are rejected."""
     if not 0 <= index < size:
         raise ValueError("Merkle leaf outside tree")
     fn, sn, calculated = index, size - 1, merkle_leaf(event_hash)
@@ -639,7 +598,6 @@ def verify_inclusion(event_hash, index, size, root, path):
 
 
 def verify_consistency(first, second, first_root, second_root, path):
-    """RFC 9162 section 2.1.4.2, plus explicit empty/equal tree cases."""
     nodes = merkle_path(path)
     if not 0 <= first <= second:
         raise ValueError("Invalid Merkle tree sizes")
@@ -677,7 +635,6 @@ def verify_consistency(first, second, first_root, second_root, path):
 
 
 def verify_continuity(value, checkpoint, previous=None, challenge=None):
-    """Authenticate the tree, its journal head and its extension of a retained boundary."""
     statement, proof = value["statement"], value["proof"]
     if (set(value) != {"statement", "signature", "proof"}
             or set(statement) != {"format", "public_key", "event_count", "head_hash", "root", "challenge"}
@@ -727,7 +684,6 @@ MESSAGE_KINDS = ("message.new", "message.snapshot", "message.edited", "message.r
 INTERRUPTIONS = {"transport_disconnected": "connection to Telegram lost",
                  "authorization_required": "Telegram signed the account out",
                  "resume_failed": "observation could not resume after a restart"}
-# Why Telegram stopped accepting the session, as the collector recorded it (coverage.gap "cause").
 ACCOUNT_LOSS = {"account_banned": "account banned", "account_deleted": "account deleted",
                 "account_frozen": "account frozen", "session_duplicated": "session used in two places",
                 "session_revoked": "session revoked", "session_expired": "session expired",
@@ -735,13 +691,10 @@ ACCOUNT_LOSS = {"account_banned": "account banned", "account_deleted": "account 
 
 
 def missing_ranges(ordered):
-    """(low, high) of every run of numbers absent between neighbours of an ascending list of distinct IDs."""
     return [(a + 1, b - 1) for a, b in zip(ordered, ordered[1:]) if b - a > 1]
 
 
 def numbered_per_chat(chat_id):
-    """Channels and supergroups number their messages 1, 2, 3… per chat; elsewhere the numbers are the
-    account's own, shared by all its private chats and basic groups, so a gap there means nothing."""
     return isinstance(chat_id, int) and chat_id < CHANNEL_IDS_BELOW
 
 
@@ -750,14 +703,6 @@ def parse_time(value):
 
 
 class Coverage:
-    """Continuous observation periods, gaps, and message IDs never observed, read from the journal.
-
-    A period runs from "observation started" until a pause, a stop, a lost connection, a process
-    restart, or a silence longer than three heartbeat intervals and at least three minutes (heartbeats
-    come every minute unless the operator changed the interval; each heartbeat records it). Message
-    IDs missing between observed ones are reported as "not observed", never as deleted: they may
-    be deleted, never delivered, or simply outside the saved history.
-    """
     def __init__(self):
         self.periods, self.gaps, self.notes = [], [], []
         self.start = self.alive = self.closed_at = self.close_reason = None
@@ -854,7 +799,6 @@ class Coverage:
 
 
 def coverage_lines(coverage):
-    """Plain-language summary of Coverage.result() for people reading verifier output."""
     def span(seconds):
         hours, rest = divmod(int(seconds), 3600)
         return (str(hours) + " h " if hours else "") + str(rest // 60) + " min"
@@ -876,9 +820,6 @@ def drand_time(number):
 
 
 def drand_beacon(value):
-    """A quicknet round {round, randomness, signature}; its randomness is the SHA-256 of its signature.
-
-    The BLS signature itself is not checked here: --check-drand compares rounds with drand relays."""
     if not isinstance(value, dict) or type(value.get("round")) is not int or value["round"] < 1:
         raise ValueError("drand value without a round number")
     signature, randomness = value.get("signature"), value.get("randomness")
@@ -889,8 +830,6 @@ def drand_beacon(value):
 
 
 class OutsideRecords:
-    """drand rounds, Telegram's device lists and Cloudflare Gateway's DNS log written into the journal in
-    evidence mode."""
     def __init__(self):
         self.rounds, self.checks, self.changes = [], [], []
         self.devices, self.largest_gap, self.clock_behind = {}, 0, 0
@@ -903,7 +842,6 @@ class OutsideRecords:
             if payload.get("chain") != DRAND_CHAIN or payload.get("round_time") != drand_time(beacon["round"]):
                 raise ValueError("drand value from another chain or with a wrong round time at record "
                                  + str(event["seq"]))
-            # Written after the round: an earlier record time means the collector's clock was behind.
             self.clock_behind = max(self.clock_behind,
                                     (parse_time(payload["round_time"]) - parse_time(at)).total_seconds())
             if self.rounds:
@@ -982,7 +920,6 @@ def device_name(device, active=False):
 
 
 def outside_lines(outside):
-    """Plain-language summary of OutsideRecords.result() for people reading verifier output."""
     lines, drand, devices = [], outside["drand"], outside["devices"]
     if drand["rounds"]:
         lines.append(str(drand["rounds"]) + " drand round(s) recorded from " + drand["first"]["at"] + " to "
@@ -1027,9 +964,6 @@ def outside_lines(outside):
 
 
 def confirm_drand(rounds, relays=DRAND_RELAYS, limit=DRAND_CHECK_LIMIT, fetch=None):
-    """Compare recorded rounds with two relays run by different operators (Cloudflare, Protocol Labs).
-
-    Large journals are checked on a random sample, so a forger cannot guess which rounds are asked."""
     import random
     chosen = rounds if len(rounds) <= limit else \
         [rounds[0], rounds[-1]] + random.SystemRandom().sample(rounds[1:-1], limit - 2)
@@ -1040,7 +974,7 @@ def confirm_drand(rounds, relays=DRAND_RELAYS, limit=DRAND_CHECK_LIMIT, fetch=No
             try:
                 answers = [(item, drand_beacon(fetch(relay, item["round"]))) for item in chosen]
             except (OSError, ValueError):
-                continue  # unreachable or not a drand answer: ask the operator's next relay
+                continue
             for item, answer in answers:
                 if answer["randomness"] != item["randomness"]:
                     raise ValueError("drand round " + str(item["round"]) + " at record " + str(item["seq"])
@@ -1118,10 +1052,7 @@ def verify_checkpoint(checkpoint, public_key, event_count, hash_at):
         raise ValueError("Journal disagrees with the retained checkpoint")
 
 
-# Readable reports --------------------------------------------------------------------------
-
 def read_sealed(stream):
-    """(SHA-256 of the bytes before the seal, seal) of a report; None when it has none (older exports)."""
     digest, window = hashlib.sha256(), b""
     for chunk in iter(lambda: stream.read(1024 * 1024), b""):
         window += chunk
@@ -1139,7 +1070,6 @@ def read_sealed(stream):
 
 
 def check_seal(sealed, public_key=None, expected_fingerprint=None):
-    """What a sealed report says it describes, once its signature and its bytes are checked."""
     content, seal = sealed
     statement = seal["statement"]
     if not is_format(statement.get("format"), "report-seal-v1"):
@@ -1166,16 +1096,11 @@ def archive_seal(archive, name, public_key):
 
 
 REPORT_JSON = "report-json-v1"
-# The Ed25519 seal inside a PDF's signature (pdf_report.SEAL_ATTRIBUTE: UUID arc, named after the project).
 PDF_SEAL = "2.25.240684792623320047764573196045913242332"
 SIGNING_TIME = "1.2.840.113549.1.9.5"
 
 
 def read_pdf_seal(data):
-    """(SHA-256 of the signed bytes, seal, certificate details) of a PDF signed by TgWitness, once the PDF
-    signature itself is checked: it must cover the whole file but its own value, its digest must match
-    those bytes and its ECDSA signature the certificate it carries, and the Ed25519 seal inside it must
-    name that certificate."""
     ranges = re.findall(rb"/ByteRange\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*\]", data)
     if len(ranges) != 1:
         raise ValueError("Not a PDF signed by TgWitness: exactly one signature is expected")
@@ -1229,7 +1154,6 @@ def read_pdf_seal(data):
 
 
 def read_json_seal(data):
-    """(SHA-256 of the canonical report, seal) of a JSON report: the seal signs that hash."""
     if not isinstance(data, dict) or set(data) != {"format", "report", "seal"} \
             or not is_format(data.get("format"), REPORT_JSON):
         raise ValueError("Not a TgWitness JSON report")
@@ -1237,7 +1161,6 @@ def read_json_seal(data):
 
 
 def report_companions(archive, manifest, public, describes):
-    """The signed JSON report and the parts of a long report each carry their own seal over this export."""
     files, report = manifest["files"], manifest.get("report") or {}
     checked = {"json": None, "parts": 0, "pdf": None}
     if "report.json" in files:
@@ -1266,7 +1189,6 @@ def report_companions(archive, manifest, public, describes):
 
 
 def check_sums(archive, manifest):
-    """SHA256SUMS (for sha256sum -c) must repeat the signed manifest's hash of every other file."""
     if "SHA256SUMS" not in manifest["files"]:
         return None
     listed = {}
@@ -1279,8 +1201,6 @@ def check_sums(archive, manifest):
 
 
 def verify_report(path, expected_fingerprint=None, evidence=None):
-    """A report handed over on its own (HTML, a part of a long report, or JSON): its seal and, with
-    --evidence, the archive it describes."""
     signature = None
     if Path(path).suffix.lower() == ".json":
         sealed = read_json_seal(read_json_file(path))
@@ -1321,11 +1241,6 @@ def verify_report(path, expected_fingerprint=None, evidence=None):
 
 
 def verify_selection(path, expected_fingerprint=None, evidence=None):
-    """An unsigned viewer selection: exact membership in a separately verified archive.
-
-    Selection time, author and notes are not signed. Never report a selection as
-    carrying its own signature, even when every chosen item matches the source.
-    """
     data = read_json_file(path)
     if data.get("statement", {}).get("format") == "tgwitness-board-selection-v1":
         return verify_board_selection(data, expected_fingerprint, evidence)
@@ -1424,7 +1339,6 @@ def verify_board_selection(data, expected_fingerprint=None, evidence=None):
     if len(wanted) != len(items):
         raise ValueError("Duplicate selection records")
     boundary, matched, at_boundary = statement["journal_head"], set(), "0" * 64
-    # The source may be a later complete ZIP; its prefix must contain the signed selection boundary.
     with open_archive(evidence) as archive, archive.open("events.jsonl") as incoming:
         for line in bounded_lines(incoming):
             event = json.loads(line)
@@ -1436,7 +1350,6 @@ def verify_board_selection(data, expected_fingerprint=None, evidence=None):
                 matched.add(event["seq"])
     if matched != set(wanted) or boundary["hash"] != at_boundary or boundary["seq"] > checked["events"]:
         raise ValueError("Selection source boundary or records missing")
-    # Authenticate the query's completeness as well as each item's membership.
     with tempfile.TemporaryDirectory(prefix="tgwitness-selection-") as temporary:
         db = sqlite3.connect(str(Path(temporary) / "query.sqlite3"))
         try:
@@ -1466,7 +1379,6 @@ def annotation_hash(record):
 
 
 def board_replay(records, public_key=None):
-    """Deterministic replay, also used by the panel. No Telegram observations are modified."""
     key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public_key, validate=True)) if public_key else None
     items, history, previous, count, action_ids = {}, [], "0" * 64, 0, set()
     for count, record in enumerate(records, 1):
@@ -1537,7 +1449,6 @@ def board_replay(records, public_key=None):
 
 
 def board_scope(item, lookup, trail=None):
-    """None means workspace-wide (including unknown-chat records). Empty set never means all."""
     trail = set() if trail is None else trail
     identifier = item.get("id")
     if identifier in trail:
@@ -1559,7 +1470,6 @@ def board_scope(item, lookup, trail=None):
 
 
 def board_where(query, boundary=None):
-    """Parameterized SQLite predicate; dates are collector observations, actor_id is not sender_id."""
     chats = query.get("chat_ids") or [query.get("chat_id")]
     if not chats or any(type(chat) is not int for chat in chats) or len(chats) > 1000:
         raise ValueError("Invalid slice chat scope")
@@ -1635,7 +1545,6 @@ def board_slice_summary(connection, query, boundary=None):
 
 
 def verify_board(archive, manifest, checkpoint=None):
-    """Verify both the immutable human chain and its materialized state against the signed journal."""
     files = manifest["files"]
     if not {"annotations.jsonl", "case-board.json"} & set(files):
         if manifest.get("annotations_head") or (checkpoint or {}).get("statement", {}).get("annotations_head"):
@@ -1744,7 +1653,6 @@ def verify_board_disclosure(archive, manifest):
         for line in bounded_lines(incoming):
             record = json.loads(line)
             if record["hash"] in wanted:
-                # Notes must carry exactly the minimized observation from this same disclosure.
                 for card in cards:
                     if card.get("target", {}).get("event_hash") == record["hash"] and card.get("observation") != record:
                         raise ValueError("Board exposes content outside the handover record")
@@ -1911,8 +1819,6 @@ def verify_chat_export(path, expected_fingerprint=None):
 
 
 def message_id_summary(chat_id, ids):
-    """How a chat's message numbers run: first and last, how many are present and which are absent.
-    ids: ascending, distinct. Meaningful only where messages are numbered per chat."""
     holes = missing_ranges(ids)
     return {"chat_id": chat_id, "numbered_per_chat": numbered_per_chat(chat_id),
             "first_id": ids[0] if ids else None, "last_id": ids[-1] if ids else None, "present": len(ids),
@@ -1921,7 +1827,6 @@ def message_id_summary(chat_id, ids):
 
 
 def check_message_ids(archive, manifest):
-    """message-ids.json must say exactly what chat.json shows: recount the numbers from the messages."""
     claimed = json.loads(read_member(archive, "message-ids.json", MAX_JSON_BYTES))
     ids = sorted({m["id"] for m in chat_messages(archive) if type(m.get("id")) is int})
     counted = message_id_summary((manifest.get("chat") or {}).get("id"), ids)
@@ -1932,8 +1837,6 @@ def check_message_ids(archive, manifest):
 
 
 def verify_handover(path, expected_fingerprint=None):
-    """A handover extract: records shown unchanged are verified in full (hash, signature and the link to an
-    included predecessor); minimised records by the signature over the hash of the original record."""
     with open_archive(path) as archive:
         names = archive.namelist()
         manifest = read_manifest(archive)
@@ -2011,7 +1914,6 @@ def verify_handover(path, expected_fingerprint=None):
 
 
 def check_attachments(archive, manifest):
-    """Saved attachments are named by their SHA-256, and every message naming one finds that file."""
     files = manifest["files"]
     for name, digest in files.items():
         if name.startswith("media/") and name[len("media/"):] != digest:
@@ -2028,7 +1930,6 @@ def check_attachments(archive, manifest):
 
 
 def chat_messages(archive):
-    """Stream messages from chat.json, written one message per line by TgWitness."""
     with archive.open("chat.json") as stream:
         inside = False
         for raw in bounded_lines(io.TextIOWrapper(stream, encoding="utf-8")):
@@ -2043,7 +1944,6 @@ def chat_messages(archive):
 
 
 def verify_parts(archive, manifest):
-    """Multi-account export: every account signed the ranges it fetched; recompute them."""
     ranges = []
     for part in manifest["parts"]:
         statement = part["statement"]
@@ -2078,12 +1978,6 @@ def verify_parts(archive, manifest):
 
 
 def verify_account_export(path, expected_fingerprint=None, max_gib=None):
-    """Authenticate a frozen account-export acquisition, without asserting Telegram completeness.
-
-    The signed inventory fixes the selected tasks. Page receipts bind their original
-    JSONL bytes and downloaded attachments before packaging; their global chain and
-    per-task cursors must agree. A partial acquisition can be cryptographically valid.
-    """
     def integer(value, name, minimum=0):
         if type(value) is not int or value < minimum:
             raise ValueError("Invalid account export " + name)
@@ -2383,7 +2277,6 @@ def account_export_lines(result):
 
 
 def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_gib=None):
-    """A separately signed minimized derivative; source linkage is not proof of derivation."""
     with open_archive(path, max_gib=max_gib) as archive, tempfile.TemporaryDirectory() as temporary:
         manifest = read_manifest(archive)
         if manifest.get("format") != "tgwitness-account-disclosure-v1":
@@ -2491,7 +2384,6 @@ def bundle_format(path):
 
 
 def bundle_hashes(path, seqs):
-    """{seq: hash} for the wanted records of an evidence bundle's events.jsonl, in one pass."""
     wanted, found = set(seqs), {}
     if not wanted:
         return found
@@ -2508,7 +2400,6 @@ CAPTURE_KINDS = ("message.new", "message.edited", "message.deleted", "message.re
 
 
 def verify_capture(value, checkpoint):
-    """Authenticate counters and bind them to the exact signed checkpoint."""
     statement = value["statement"]
     fields = {"format", "created_at", "public_key", "event_count", "head_hash", "challenge", "counts", "last_message_at", "health"}
     if set(value) != {"statement", "signature"} or set(statement) != fields:
@@ -2577,7 +2468,6 @@ def bundle_capture_prefixes(bundle_path, boundaries):
 
 
 def check_capture_prefix(value, bundle_path):
-    """Recount a previously verified evidence prefix, including its last message time."""
     statement = value["statement"]
     prefix = bundle_capture_prefixes(bundle_path, [statement["event_count"]]).get(statement["event_count"])
     if prefix is None or prefix["head_hash"] != statement["head_hash"]:
@@ -2599,7 +2489,6 @@ def unb64url(text):
 
 
 def post_statement(event, witness_fingerprint):
-    """What a witness posts to its channel for one of its journal records (signed separately)."""
     payload = event["payload"]
     statement = {"format": "tgwitness-witness-post-v1", "witness": witness_fingerprint, "seq": event["seq"],
             "at": event["observed_at"], "record_hash": event["hash"],
@@ -2617,7 +2506,6 @@ def post_token(statement, signature_b64):
 
 
 def verify_witness(path, expected_fingerprint=None):
-    """A witness journal export (tgwitness-witness-v1): signatures, chain, and what the witness saw."""
     with open_archive(path) as archive:
         names = archive.namelist()
         manifest = read_manifest(archive)
@@ -2638,7 +2526,6 @@ def verify_witness(path, expected_fingerprint=None):
         retained = {}
 
         def observed(stream):
-            """One pass: each event is read when the chain check asks for it, then summarised."""
             nonlocal interval
             for line in bounded_lines(stream):
                 if not line.strip():
@@ -2692,8 +2579,6 @@ def verify_witness(path, expected_fingerprint=None):
 
 
 def witnessed_periods(witness, key=None):
-    """Times the witness got consistent answers without a miss, and the gaps between them.
-    With key, only answers signed by that collector key count as consistent."""
     limit = (witness.get("interval_minutes") or 10) * 60 * 2.5
     timeline = sorted([(a["at"], a["status"] == "ok" and key in (None, a["collector_fingerprint"]))
                        for a in witness["anchors"]]
@@ -2717,7 +2602,6 @@ def witnessed_periods(witness, key=None):
 
 
 def cross_check_witness(witness, bundle_path, bundle_result):
-    """Every head the witness saw must be a prefix of the exported journal (same key, same hash)."""
     count, key = bundle_result["events"], bundle_result["fingerprint"]
     mine = [a for a in witness["anchors"] if a["collector_fingerprint"] == key]
     hashes = bundle_hashes(bundle_path, {a["event_count"] for a in mine
@@ -2769,7 +2653,6 @@ def cross_check_witness(witness, bundle_path, bundle_result):
 
 
 def channel_texts(source):
-    """(message id, date, text) of channel posts: a Telegram Desktop JSON export, a saved page or a t.me/s URL."""
     source = str(source)
     if source.startswith(("http://", "https://")):
         import urllib.parse
@@ -2801,7 +2684,6 @@ def channel_texts(source):
 
 
 def check_channel(witness, source):
-    """Signed witness posts in the channel must match the witness journal record by record."""
     key = Ed25519PublicKey.from_public_bytes(base64.b64decode(witness["public_key"], validate=True))
     matching, invalid, differing, foreign, dates = set(), [], [], 0, {}
     for message_id, date, text in channel_texts(source):
@@ -2834,7 +2716,6 @@ def check_channel(witness, source):
 
 
 def verify_dossier(path, expected_fingerprint=None, bundle=None):
-    """A people-profile file: signature, and optionally every referenced record against an evidence export."""
     value = read_json_file(path)
     statement = value["statement"]
     if not is_format(statement.get("format"), "dossier-v1"):
@@ -2968,13 +2849,9 @@ def producer_line(producer):
 
 
 def fingerprint_colors(value):
-    """Sixteen (hue, saturation, lightness) blocks drawn from a fingerprint, the same in report and console:
-    two copies whose colours differ were signed by different keys. Compare the full hex to be sure."""
     data = bytes.fromhex(value)
     return [(data[i] * 360 // 256, 68, 40 + data[i + 1] % 24) for i in range(0, 32, 2)]
 
-
-# Console -----------------------------------------------------------------------------------
 
 SAY = {
     "ru": {
@@ -3072,7 +2949,6 @@ KINDS = {"evidence": "Evidence archive", "chat": "Chat export", "account": "Acco
 
 
 def console_language(choice=None):
-    """--lang, else the terminal's locale when it is Russian or Ukrainian, else English."""
     if choice:
         return choice
     value = next((os.environ[name] for name in ("LC_ALL", "LC_MESSAGES", "LANG") if os.environ.get(name)), "")
@@ -3084,7 +2960,6 @@ def console_language(choice=None):
 
 
 def enable_ansi(stream):
-    """Windows consoles show colours once virtual terminal processing is switched on."""
     if os.name != "nt":
         return True
     try:
@@ -3099,7 +2974,6 @@ def enable_ansi(stream):
 
 
 class Console:
-    """The verifier's answer for a person at a terminal; scripts and pipes get the plain form."""
     WIDTH = 66
     STYLES = {"ok": "1;32", "bad": "1;31", "warn": "1;33", "dim": "2", "bold": "1", "accent": "1;38;5;75",
               "okbar": "1;97;42", "badbar": "1;97;41"}
@@ -3108,7 +2982,7 @@ class Console:
         try:
             "".join(SAY.get(lang, {}).values()).encode(stream.encoding or "ascii")
         except (LookupError, UnicodeEncodeError):
-            lang = "en"  # a console that cannot show the language gets English rather than escapes
+            lang = "en"
         self.stream, self.words, self.lang = stream, SAY.get(lang, {}), lang
         try:
             "✔✘⚠◷•─│╭╮╰╯█⠋".encode(stream.encoding or "ascii")
@@ -3359,7 +3233,6 @@ class Console:
 
 
 class Spinner:
-    """A small animation on stderr while large archives are hashed; gone before the answer is printed."""
     def __init__(self, stream, text, frames):
         import threading
         self.stream, self.text, self.frames = stream, text, frames

@@ -1,4 +1,3 @@
-"""Public-only proxy destinations: routed DNS, pinning, TLS identity and thread isolation."""
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager

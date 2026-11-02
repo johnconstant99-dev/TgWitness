@@ -1,4 +1,3 @@
-"""Synthetic counts, chart projections and privacy boundaries for report analytics."""
 from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
@@ -32,13 +31,13 @@ def test_observation_counts_are_not_unique_messages_or_extra_panel_actions():
     )
     assert data["activity_events"] == 6
     assert data["totals"] == dict.fromkeys(analytics.KINDS.values(), 1)
-    assert data["message_observations"] == 3  # same message ID, three observations
+    assert data["message_observations"] == 3
     assert data["sequence"] == {"from": 1, "to": 6}
     assert data["participants"]["total"] == 3
     assert data["participants"]["rows"][0]["total"] == 3
     assert data["chats"]["total"] == 6
     assert data["activity"]["rows"][0]["counts"] == data["totals"]
-    assert data["hourly"]["rows"][0][10] == 6  # 2 November 2026 was Monday
+    assert data["hourly"]["rows"][0][10] == 6
     assert sum(map(sum, data["hourly"]["rows"])) == 6
 
 
@@ -48,7 +47,7 @@ def test_sender_rankings_never_infer_an_editor_or_deletion_actor():
                    event(5, sender=None), event(6, payload={"sender_observation": {"id": 15, "display_name": "SECRET"}}))
     assert [(row["id"], row["total"]) for row in data["participants"]["rows"]] == [(11, 1), (15, 1)]
     assert data["participants"]["unknown_count"] == 1
-    assert "999" not in json.dumps(data["participants"])  # actor_id must not fill in an unknown sender
+    assert "999" not in json.dumps(data["participants"])
     assert "SECRET" not in json.dumps(data)
 
 

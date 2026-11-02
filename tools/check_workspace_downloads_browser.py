@@ -1,4 +1,4 @@
-"""Real local exports: workspace confusion, denied file APIs, receipts and repeat downloads."""
+"""Real local exports"""
 import argparse
 import hashlib
 from pathlib import Path
@@ -31,7 +31,6 @@ def main():
               await loadProfiles();return p.id;}""")
             page.evaluate("()=>navigate('evidence')")
             expect(page.locator('#workspace-identity')).to_be_visible()
-            # Cancelling Back's discard prompt must preserve the selected workspace and its draft.
             page.evaluate('id=>switchProfile(id)', second)
             second_url = page.url
             page.evaluate('state.accountExportDirty=true')
@@ -41,7 +40,6 @@ def main():
             expect(page.locator('#profile-select')).to_have_value(second)
             expect(page.locator('#workspace-context-alert')).to_be_hidden()
             assert page.evaluate('state.accountExportDirty'), 'Cancel must retain the unsaved draft'
-            # Explicit group/account controls still address another workspace intentionally.
             with page.expect_response(lambda response: response.url.endswith('/api/collector/stop')) as stopped:
                 page.evaluate("()=>json('collector/stop',{},{profile:'default'})")
             assert stopped.value.status == 200
@@ -58,8 +56,6 @@ def main():
             expect(page.locator('#workspace-context-alert')).to_be_hidden()
             expect(page.locator('#profile-select')).to_have_value('default')
 
-            # A file-handle prompt can outlive the account where export was confirmed.
-            # Stop before making the old account's request, and close the stale writer.
             page.evaluate("""()=>{window.reviewAbort=0;window.reviewResult=null;
               window.showSaveFilePicker=async()=>({createWritable:()=>new Promise(resolve=>{
                 window.releaseReviewWriter=()=>resolve({write:async()=>{},close:async()=>{},
@@ -82,7 +78,6 @@ def main():
             page.remove_listener('request',track_stale)
             page.evaluate("()=>switchProfile('default')")
 
-            # A link change while the response is in flight must close an already-open file writer.
             original_url = page.url
             page.evaluate("""()=>{window.reviewAbort=0;window.reviewResult=null;
               window.showSaveFilePicker=async()=>({createWritable:async()=>({write:async()=>{},
@@ -121,7 +116,6 @@ def main():
                 expect(page.locator('.export-receipt')).to_have_count(index + 1)
                 receipt = page.evaluate("async()=>(await json('exports/history')).exports[0]")
                 assert receipt['sha256'] == digest and receipt['bytes'] == file.stat().st_size and receipt['available']
-                # Cache never relies on the response's temporary file remaining on disk.
                 cache = Path(scratch) / 'prepared-exports' / receipt['id']
                 assert cache.is_file() and hashlib.sha256(cache.read_bytes()).hexdigest() == digest
 
@@ -131,14 +125,10 @@ def main():
                 answer_panel_dialog(page)
             assert hashlib.sha256(Path(again.value.path()).read_bytes()).hexdigest() == digest
             assert page.request.get(server.url + '/api/exports/' + receipt['id'] + '/download').status in (401, 403)
-            # A native download cookie is scoped to one file and can only be redeemed once.
             ticket = page.evaluate("id=>json('exports/'+id+'/ticket',{})", receipt['id'])
             assert page.request.get(server.url + ticket['url']).status == 200
             assert page.request.get(server.url + ticket['url']).status == 403
 
-            # Account archives and minimized disclosures can be larger than the
-            # browser's memory budget. Use their retained job files directly:
-            # cancel the fetch, request a scoped ticket and let the browser save.
             job, disclosure = 'a' * 32, 'b' * 32
             archive = Path(scratch) / 'synthetic-account.zip'
             archive.write_bytes(b'Synthetic account export transport bytes\n' * (450 * 1024))
@@ -172,7 +162,6 @@ def main():
                     page.remove_listener('request', track_ticket)
                     assert archive.is_file(), 'Native fallback must retain the finished job archive'
                     assert page.request.get(server.url + '/api/' + endpoint + '/download').status == 403
-            # Native job downloads do not duplicate large files in prepared cache.
             assert len(page.evaluate("async()=>(await json('exports/history')).exports")) == len(cases)
             store.set_setting('parameters', {})
             page.evaluate('refreshStatus()')
@@ -180,7 +169,6 @@ def main():
                 response = page.request.get(server.url + '/api/access?ws=' + ws,
                                             headers={'Authorization': 'Bearer ' + server.app.state.vault.token})
                 assert response.status == 404
-            # Context from another status response never overwrites the account being viewed.
             page.route('**/api/status', lambda route: route.fulfill(json={
                 **page.evaluate('state.status'), 'workspace_id': second}))
             assert page.evaluate('async()=>{try{await refreshStatus();return false;}catch{return true;}}')

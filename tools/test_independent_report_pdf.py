@@ -1,4 +1,3 @@
-"""The two approved compositions share real, signed report data, not demo fixtures."""
 from copy import deepcopy
 import hashlib
 import json

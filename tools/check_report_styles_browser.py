@@ -1,4 +1,3 @@
-"""Report appearance is an independent, workspace-owned choice for HTML and PDF."""
 from pathlib import Path
 import sys
 import tempfile
@@ -61,7 +60,6 @@ def main():
             expect(page.locator('#report-design-horizon')).to_be_checked()
             expect(page.locator('#report-case-title')).to_have_value('Fictional case design review')
 
-            # Content presets and manual chart choices cannot change the selected design.
             page.locator('#report-template-brief').check()
             expect(page.locator('#report-design-horizon')).to_be_checked()
             assert page.evaluate('reportDraft().selection') == original['selection']
@@ -110,7 +108,6 @@ def main():
             page.locator('#exports-tab-settings').click()
             expect(page.locator('#report-design-quire')).to_be_checked()
 
-            # A save response from the former workspace must not touch this workspace.
             page.locator('#report-design-meridian').check()
             hold_report_response(page)
             page.locator('#report-form button[type=submit]').click()
@@ -125,7 +122,6 @@ def main():
             page.locator('#exports-tab-settings').click()
             expect(page.locator('#report-design-meridian')).to_be_checked()
 
-            # Older settings responses without this field default to the existing appearance.
             def legacy_options(route):
                 response = route.fetch()
                 value = response.json()
@@ -151,7 +147,6 @@ def main():
             page.evaluate('lock()')
             assert page.evaluate("()=>$('report-design-classic').checked&&$('report-design-classic').matches(':disabled')")
 
-            # A view-only access cannot enter the report editor or select a design.
             token, _ = app.app.state.access.issue(GrantSettings(label='Read-only layout review',
                                                                permissions=['view'], workspaces={'default': None}))
             context = browser.new_context(viewport={'width': 1440, 'height': 1000})

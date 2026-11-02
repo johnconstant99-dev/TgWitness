@@ -1,4 +1,3 @@
-"""Offline export recovery and scale checks using fictional account data only."""
 import asyncio
 import hashlib
 import json
@@ -30,7 +29,6 @@ class Counted(list):
 
 
 def check_progress_scale():
-    # Sealing each page must scan tasks once, not once per selected chat.
     export = object.__new__(AccountExport)
     chats = [{"id": i + 1, "selected": True} for i in range(400)]
     tasks = Counted({"id": f"messages:{chat['id']}", "chat_id": chat["id"]} for chat in chats)
@@ -109,7 +107,7 @@ async def check_recovery(root):
             result = verify_account_export(archive_path, fingerprint(vault.public_key))
             assert result["receipt_count"] == len(sealed_before)
             assert result["counts"]["messages"] == 18
-            assert not result["complete_within_scope"]  # Synthetic discovery gap remains visible.
+            assert not result["complete_within_scope"]
             with zipfile.ZipFile(archive_path) as archive:
                 for chat_id in (-100100001, -100100002, -100100003):
                     html = archive.read(f"chats/{chat_id}.html").decode()

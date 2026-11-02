@@ -1,7 +1,4 @@
-"""Check complete signed report layouts, exact figures and offline reading.
-
-Use --examples PATH to review an existing immutable gallery without rebuilding it.
-"""
+"""Check complete signed report layouts, exact figures and offline reading."""
 import argparse
 from contextlib import ExitStack
 import hashlib
@@ -89,7 +86,6 @@ def geometry(page):
 
 
 def screen_identity(page, design):
-    """Design-specific details must survive the shared report reset rules."""
     cover = page.locator('.hero').evaluate("""el=>{
       const css=getComputedStyle(el);
       return {leadingBorder:css.borderInlineStartWidth,topBorderStyle:css.borderTopStyle,
@@ -102,8 +98,6 @@ def screen_identity(page, design):
         assert cover['background'].count('linear-gradient') == 2, ('Atlas grid axes', cover)
     elif design == 'quire':
         assert cover['topBorderStyle'] == 'double' and cover['topBorderWidth'] == '4px', ('Quire frame', cover)
-    # The base dossier has pale cover text; a shared reset must not leak it onto
-    # the other designs' light paper when selector specificity changes.
     contrast = page.locator('.hero h1, .hero .facts b, .hero .facts time, .hero .facts>div>span').evaluate_all("""elements=>{
       const rgba=value=>{const n=value.match(/[\\d.]+/g).map(Number);return [n[0],n[1],n[2],n[3]??1];};
       const blend=(front,back)=>front.slice(0,3).map((v,i)=>v*front[3]+back[i]*(1-front[3]));
@@ -204,7 +198,6 @@ def check(examples, designs, output):
         browser.close()
     for index, design in enumerate(designs):
         for other in designs[:index]:
-            # Different palettes alone are insufficient: title, cover or section geometry must differ.
             differing = [key for key, value in geometries[design].items() if value != geometries[other][key]]
             if len(differing) < 2:
                 failures.append({'same_geometry': [design, other], 'differing_blocks': differing})

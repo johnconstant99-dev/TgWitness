@@ -1,23 +1,4 @@
-"""Write the hash locks that servers install from: every package pinned with its SHA-256 hashes.
-
-    python tools/lock_requirements.py   # needs uv (pip install uv) and network access to PyPI
-
-deploy/requirements.lock: pyproject's dependencies under deploy/constraints.txt, resolved for every
-platform (uv --universal) with Python 3.11 or newer, each version with the hashes of all its files.
-deploy/build.lock: setuptools, which builds this project and the packages published only as source
-(pyaes), installed first so that no build fetches an unhashed package.
-
-With pip install --require-hashes a file replaced on PyPI or a mirror is refused even when its version
-number is the same. Regenerate both locks when the constraints change.
-
-deploy/audit.lock, site.lock, browser.lock and mcp.lock separate CI tool scopes;
-browser/mcp include the project's dependencies under constraints-mcp.txt. Install
-build.lock before either project scope, with --no-build-isolation for all later
-installs. audit/site support --only-binary=:all:. Local source is installed with
---no-deps --no-build-isolation after its dependencies, not resolved from PyPI.
-Use --only audit site browser mcp to preserve the existing runtime/build locks.
-Use --check in PR CI to reject changed inputs before running package installers.
-"""
+"""Write the hash locks that servers install from"""
 import argparse
 import hashlib
 import json
@@ -56,7 +37,6 @@ def ci_header(kind):
 
 
 def check_ci_locks():
-    """Detect changed optional-lock inputs without installing or resolving packages."""
     stale = [kind for kind in CI_PINS if not (DEPLOY / (kind + ".lock")).is_file()
              or not (DEPLOY / (kind + ".lock")).read_text(encoding="utf-8").startswith(ci_header(kind))]
     if stale:

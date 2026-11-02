@@ -1,4 +1,3 @@
-/* Local file inspection never starts a Telegram session. */
 (() => {
   let inspection=null, pending=null, inspectionSerial=0, editing=false, intent='auto';
   const missing="No session — only application settings. Add a .session or TData file, or sign in by phone or QR.";
@@ -72,7 +71,6 @@
     render({state:"checking",can_connect:false,message:"No sign-in takes place during this check."});
     const work=(async()=>{
       try{
-        // Catch metadata-only JSON immediately. The server independently checks every upload too.
         if(files.every(file=>/\.json$/i.test(file.name))){
           const objects=await Promise.all(files.map(file=>file.text().then(text=>JSON.parse(text.replace(/^\uFEFF/,"")))));
           if(objects.every(value=>value&&typeof value==="object"&&!Array.isArray(value)&&

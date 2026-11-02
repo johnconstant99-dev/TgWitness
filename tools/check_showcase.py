@@ -1,4 +1,3 @@
-"""Synthetic HTTP disclosure boundaries and offline signature/continuity checks."""
 import copy
 from pathlib import Path
 import sys
@@ -131,7 +130,6 @@ def main():
             rejected(lambda: verify(wrong_label, fingerprint(state.vault.public_key)))
             assert http.get("/api/showcase/default", headers=auth,
                             params={"challenge": "a" * 32, "from_count": 10**12}).status_code == 409
-            # Editing through the ordinary Access form must never turn the redacted link into raw access.
             downgraded = http.patch("/api/access/grants/" + issued["id"], headers=admin, json={**body(), "showcase": False})
             assert downgraded.status_code == 422, downgraded.text
             entry = state.profiles.entries["default"]

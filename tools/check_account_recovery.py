@@ -1,4 +1,3 @@
-"""Expired authorization is distinct from transport failure; synthetic Telegram clients only."""
 import asyncio
 from pathlib import Path
 import sys
@@ -42,7 +41,6 @@ async def recovery():
         assert status["collector"]["phase"] == "authorization_required"
         assert status["health"]["connection"]["reason"] == "signed_out"
 
-        # A rejected replacement cannot erase a known authorization failure or rebind the journal.
         await rejects(collector.configure(124, "a" * 32, saved_session(b"y")), ValueError)
         assert collector.authorization_required and collector.phase == "authorization_required"
         assert vault.read("credentials") == credentials and vault.public_key == identity
@@ -50,7 +48,6 @@ async def recovery():
         assert store.db.execute("SELECT hash FROM events WHERE seq=?", (head["seq"],)).fetchone()[0] == head["hash"]
         assert store.targets(True)[0]["chat_id"] == CHAT
 
-        # An unsuccessful new sign-in and changing its route must retain the known invalid state.
         with patch.object(FakeClient, "is_user_authorized", AsyncMock(return_value=False)):
             await rejects(collector.configure(123, "a" * 32, saved_session(b"z")), ValueError)
         assert collector.authorization_required
@@ -58,7 +55,6 @@ async def recovery():
         await collector.cancel_login()
         assert collector.authorization_required
 
-        # A validated same-account session is the point at which the warning may clear.
         await collector.configure(123, "a" * 32, saved_session(b"z"))
         assert not collector.authorization_required and collector.last_error is None
         assert collector.phase == "ready" and vault.public_key == identity
@@ -73,7 +69,6 @@ async def recovery():
             await collector.restore()
             assert not collector.authorization_required and collector.last_error is None
 
-        # Authorization can be rejected by a later RPC after the initial session check.
         with patch.object(collector, "prepare_start", AsyncMock(side_effect=SessionRevokedError(None))):
             await rejects(collector.start(), SessionRevokedError)
         assert collector.authorization_required and collector.phase == "authorization_required"
@@ -145,7 +140,7 @@ async def late_rpc_boundaries():
             if operation == "dialogs":
                 async def rejected_dialogs(*args, **kwargs):
                     raise error
-                    yield  # An async iterator: authorization was cached before enumeration.
+                    yield
                 with patch.object(collector.client, "iter_dialogs", rejected_dialogs):
                     response = await http.get("/api/dialogs")
                     assert response.status_code == 400
@@ -319,7 +314,6 @@ async def earlier_success_cannot_erase_new_rejection():
             await rejects(asyncio.wait_for(restore, 3), AuthorizationRequired)
         assert collector.authorization_required and collector.phase == "authorization_required"
         assert not client.is_connected()
-        # A subsequent fresh validation may recover; the stale in-flight success may not.
         await collector.restore()
         assert not collector.authorization_required and client.is_connected()
 

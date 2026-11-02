@@ -1,10 +1,3 @@
-"""Where the automatic MTProxy pool finds servers beyond the bundled public lists.
-
-The operator switches bundled lists off, adds list URLs, uploads or pastes lists and may store a
-GitHub token: downloads from GitHub then authenticate, and a periodic code search collects
-published MTProxy lists. The token stays in the vault and is never returned. Countries come from a
-public GeoIP service, asked through the same route as the list downloads and cached on disk.
-"""
 import asyncio
 import hashlib
 import ipaddress
@@ -69,13 +62,11 @@ class SourceSettings(BaseModel):
     custom: list[CustomSource] = Field(default_factory=list, max_length=MAX_CUSTOM)
     github: GitHubSearch = Field(default_factory=GitHubSearch)
     countries: bool = True
-    # Country choice of the automatic route: preferred servers first, avoided ones never.
     prefer: list[str] = Field(default_factory=list, max_length=60)
     avoid: list[str] = Field(default_factory=list, max_length=60)
     only_preferred: bool = False
 
     def country_rank(self, code):
-        """0 preferred, 1 any other allowed country, None not to be used."""
         if code in self.avoid or (self.only_preferred and code not in self.prefer):
             return None
         return 0 if code in self.prefer else 1
@@ -120,7 +111,6 @@ def token_problem(value):
 
 
 def github_headers(url, token, raw=False):
-    """Authorization only for GitHub's own hosts; a token never goes to another list's server."""
     if not token or urlsplit(url).scheme != "https" or (urlsplit(url).hostname or "").lower() not in GITHUB_HOSTS:
         return None
     headers = {"Authorization": "Bearer " + token, "X-GitHub-Api-Version": "2022-11-28"}
@@ -130,7 +120,6 @@ def github_headers(url, token, raw=False):
 
 
 async def github_search(token, search, network, limit):
-    """[(label, text)] of files that GitHub's code search finds for the query."""
     url = ("https://api.github.com/search/code?per_page=" + str(search.max_files) + "&q=" + quote(search.query))
     headers = {**github_headers(url, token), "Accept": "application/vnd.github+json"}
     async with asyncio.timeout(40):
@@ -157,7 +146,6 @@ async def github_search(token, search, network, limit):
 
 
 class Countries:
-    """Country codes of proxy addresses, cached for GEO_DAYS; hostnames are resolved first."""
     def __init__(self, root):
         self.path = Path(root) / GEO
         self.lock = asyncio.Lock()
@@ -198,10 +186,8 @@ class Countries:
         return None
 
     async def locate(self, hosts, network):
-        """Look up hosts without a fresh country; returns how many were found."""
         async with self.lock:
             now, found, gate = time.time(), 0, asyncio.Semaphore(6)
-            # A host without an answer waits before its next lookup, so the next batch reaches other hosts
             def fresh(entry):
                 return isinstance(entry, dict) and now - entry.get("at", 0) <= (
                     GEO_DAYS * 86400 if entry.get("country") else GEO_RETRY_SECONDS)

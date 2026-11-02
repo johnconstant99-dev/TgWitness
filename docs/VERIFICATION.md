@@ -132,7 +132,7 @@ zakky8/mtproto-proxy-pro. On this host, the application downloader fetched both 
 successfully on 29 October 2026 at 12:58 UTC: **118 unique compatible endpoints** after
 filtering, deduplication and the 64-entry limit per source. This verifies list retrieval,
 not connectivity or message delivery through those endpoints. No real account was
-connected to a listed proxy during this work. [Operator and user guide](ru/PROXIES.md).
+connected to a listed proxy during this work. [Operator and user guide](wiki/Proxies.md).
 
 Failed/empty/incompatible source responses retain previous entries and dates. Updates
 do not alter the selected route. Public addresses are validated and resolved IPs pinned
@@ -166,7 +166,7 @@ Browser/account/transport fixtures are synthetic; the two feed downloads above a
 The former Proof bot destination is now **Extras**: a short overview followed by a
 separate setup page for the selected option. The witness form has three steps, with
 connection management, network options and deployment details folded away. GitHub is
-explicitly planned and has no credential form. [Russian overview](ru/EXTRAS.md).
+explicitly planned and has no credential form. [Overview of Extras](PANEL.md#extras).
 
 - 30 focused tests passed for localization, witness setup and publication checks.
 - Chromium setup acceptance passed in English/Russian, light/dark, at 390/1440 pixels:
@@ -192,7 +192,7 @@ Screenshot assets use synthetic workspaces.
 
 ## Witness bot and proxy setup audit · 29 October 2026
 
-The witness setup (now **Extras → A bot in your channel**) prepares an independently deployed witness: pinned collector
+The witness setup (now **Extras → Independent witness**) prepares an independently deployed witness: pinned collector
 key, scoped token download, own channel, publication policy, HTTP/SOCKS5 route and custom
 Bot API. The bot token remains on the witness host. Its new `--check-config` validates
 configuration and files without opening a network connection or creating a key. JSON
@@ -227,7 +227,7 @@ Receipts: `test-results/setup-full-suite.log`, `setup-final-focused.log`,
 These checks use synthetic accounts/proxies and a local Bot API fixture. They do not
 claim a real bot publication, working public MTProxy server, remote CI run or Docker
 deployment. The retained real Telegram observation history above remains a separate
-piece of evidence. [Setup instructions](ru/WITNESS.md).
+piece of evidence. [Setup instructions](WITNESS.md#run-a-witness).
 
 ## Presentation and documentation review · 29 October 2026
 

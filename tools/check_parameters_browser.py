@@ -1,4 +1,3 @@
-"""Parameter drafts and field validation against a synthetic local workspace."""
 import json
 import tempfile
 from pathlib import Path
@@ -86,7 +85,6 @@ def main():
         page.locator("#parameters-discard").click()
         expect(page.locator("#parameter-dialog_limit")).to_have_value("1000")
 
-        # A newer server catalog can change labels/bounds without discarding this browser's edits.
         page.locator("#parameter-dialog_limit").fill("4100")
         page.locator("#parameter-dialog_limit").focus()
         catalog = page.evaluate("json('parameters')")
@@ -110,7 +108,6 @@ def main():
         expect(page.locator("#parameters-catalog-warning")).to_be_hidden()
         expect(page.locator("#parameter-dialog_limit")).to_have_value("1000")
 
-        # Python validates the pattern; its structured error is attached to the right field.
         page.locator("#parameter-dossier_patterns").fill("missing colon")
         page.locator("#parameters-save").click()
         expect(page.locator("#parameter-dossier_patterns-parameter-error")).to_contain_text("colon")
@@ -173,7 +170,6 @@ def main():
                 page.locator("#parameters-group-proxies").screenshot(path=str(output / "24" / f"proxies-{width}-{theme}.png"))
         page.set_viewport_size({"width": 1440, "height": 1000})
 
-        # A saved response in another view is applied on return, without losing newer edits.
         hold_parameter_save(page)
         page.locator("#parameters-save").click()
         expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")

@@ -1,4 +1,3 @@
-"""Signed, content-free collection counters bound to one immutable journal prefix."""
 from .store import ZERO, canonical, utcnow
 from .verify import CAPTURE_KINDS, fingerprint
 from . import continuity

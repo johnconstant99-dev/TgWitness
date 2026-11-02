@@ -1,4 +1,3 @@
-"""Account recovery actions distinguish rejected sessions, paused accounts and transport failures."""
 import copy
 import tempfile
 from pathlib import Path
@@ -68,14 +67,12 @@ def main():
             expect(cards["failed"].locator('[data-action="connect"]')).to_have_count(0)
             expect(cards["failed"].locator('[data-field="observation"] dd')).to_have_text("Needs attention")
 
-            # Starting a replacement login does not invalidate a still-valid saved session.
             profiles[2]["collector"]["phase"] = "login_required"
             page.evaluate("()=>loadProfiles()")
             expect(cards["paused"]).to_have_attribute("data-account-state", "paused")
             expect(page.locator('[data-count="sign_in"] strong')).to_have_text("1")
             profiles[2]["collector"]["phase"] = "paused"
 
-            # Counters are keyboard-operable filters; expired sessions must not enter batch Start.
             page.locator('[data-count="sign_in"]').focus()
             page.keyboard.press("Enter")
             expect(page.locator(".account-card:visible")).to_have_count(1)
@@ -89,7 +86,6 @@ def main():
             assert page.evaluate("""async()=>{const button=document.querySelector('[data-count="paused"]');
               button.focus();await loadProfiles();return button.isConnected&&document.activeElement===button;}""")
 
-            # Recovery stays in the original workspace and opens sign-in without replaying a mutation.
             cards["sign_in"].locator('[data-action="connect"]').click()
             expect(page.locator("#view-connection")).to_be_visible()
             expect(page.locator("#credentials-form")).to_be_visible()
@@ -97,12 +93,10 @@ def main():
             assert page.evaluate("state.profile") == profiles[1]["id"]
             assert not changes, "Recovery navigation dispatched an authentication or collector mutation"
 
-            # Strings resembling an authorization error do not override structured transport state.
             profiles[3]["collector"]["last_error"] = "Telegram authorization expired. Sign in again."
             page.evaluate("()=>navigate('accounts')")
             expect(cards["failed"]).to_have_attribute("data-account-state", "failed")
             expect(cards["failed"].locator('[data-action="connect"]')).to_have_count(0)
-            # A newly validated session removes the recovery action without clearing the workspace.
             profiles[1]["collector"].update(authorization_required=False, phase="ready")
             profiles[1]["health"]["connection"].update(state="off", reason="paused")
             page.evaluate("()=>loadProfiles()")

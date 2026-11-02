@@ -1,4 +1,3 @@
-/** Retry only a status read. Failed mutations are never replayed automatically. */
 export function createConnectionNotice({host,tr,retry,active}) {
   const box=document.createElement('div'),message=document.createElement('span'),button=document.createElement('button');
   box.id='panel-connection-notice';box.className='panel-connection-notice';box.hidden=true;box.setAttribute('role','status');

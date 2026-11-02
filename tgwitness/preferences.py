@@ -1,4 +1,3 @@
-"""Server-backed presentation preferences, independent of Telegram authorization."""
 from typing import Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -32,7 +31,6 @@ class Preferences(BaseModel):
 
 
 def preference_key(principal):
-    # An issued token cannot change another operator's presentation preferences.
     return "ui_preferences:" + ("admin" if principal.admin else str(principal.owner))
 
 

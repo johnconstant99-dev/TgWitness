@@ -1,4 +1,3 @@
-"""Offline source archive, private-file, secret-scan and failed-write regressions."""
 import hashlib
 import base64
 import csv
@@ -22,8 +21,6 @@ def check_publication_secrets():
     scanner = importlib.util.module_from_spec(spec)
     with patch.dict(sys.modules, {"build_source": builder}):
         spec.loader.exec_module(scanner)
-    # Assemble synthetic credentials so publication scanning never needs a fixture
-    # exemption and no real key/environment variable is read by this regression.
     suffix = "SyntheticCanary0123" * 3
     uuid = "12345678" + "-1234" * 3 + "-123456789abc"
     values = ["sk-" + suffix, "sk-" + "proj-" + suffix, "sk-" + "svcacct-" + suffix,
@@ -36,7 +33,6 @@ def check_publication_secrets():
         findings = scanner.secret_findings("public text\n" + value, "synthetic.py")
         assert len(findings) == 1 and "synthetic.py:2:" in findings[0]
         assert all(secret not in findings[0] for secret in (value, suffix, uuid)) and "value withheld" in findings[0]
-        # The same guard must cover approved demonstration archives as well as source.
         payload = io.BytesIO()
         with zipfile.ZipFile(payload, "w") as archive:
             archive.writestr("notes.txt", "public text\n" + value)
@@ -230,7 +226,6 @@ def main():
         assert checksum.read_bytes() == first_sum
         assert sorted(path.name for path in target.parent.iterdir()) == sorted([target.name, checksum.name])
 
-        # A real source change must affect both the ZIP and its embedded manifest.
         (root / "README.md").write_bytes(b"Changed public source\n")
         build((2020, 1, 2, 3, 4, 6, 0, 2, 0))
         assert target.read_bytes() != first

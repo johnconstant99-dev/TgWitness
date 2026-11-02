@@ -1,5 +1,3 @@
-"""Explicit public guide and reference inventory. No runtime application dependency."""
-
 GUIDES = {
     "archive": ("Work the archive", "Load history, search saved records, review AI sources and connect your tools.", "archive history search AI MCP OCR transcription webhooks reports integrations", "docs/ANALYSIS.md"),
     "capture": ("GitHub Actions capture", "Export one Telegram chat on a temporary GitHub runner.", "github actions capture encrypted archive", "docs/SEALED-ACTIONS.md"),
@@ -56,22 +54,29 @@ REFERENCE = {
     "architecture": ("Architecture", "Components of the collector, panel, journal, workers and witness, and how data moves between them.", "architecture components journal workers sqlite telethon fastapi", "docs/ARCHITECTURE.md"),
     "verification": ("What has been tested", "The live Telegram test, automated checks, browser checks and what remains unverified.", "tests verification live test coverage limitations", "docs/VERIFICATION.md"),
     "changelog": ("Changelog", "Every change by version, including the changes not yet released.", "changelog release notes versions history", "docs/CHANGELOG.md"),
+    "panel": ("Panel guide", "Every screen of the panel: chats, journal, sources, exports, Extras, protection modes and the code check.", "panel screens chats journal sources exports extras protection mode code check quick search", "docs/PANEL.md"),
+    "settings": ("First setup and settings", "The setup wizard, goals, interface levels, connection routes and settings shared by an account group.", "setup wizard settings goal interface level connection group shared", "docs/SETTINGS.md"),
+    "installation": ("Install, verify and update", "Install with one command, check signatures and hashes, update and remove an installation.", "install installer signature hash update uninstall remove windows linux macos", "docs/INSTALLATION.md"),
+    "storage": ("Storage and recovery", "Backups, moving older files to your cloud, copies under Object Lock and recovery on a new machine.", "storage backup rclone s3 offload object lock recovery disk", "docs/STORAGE.md"),
+    "account-export": ("Account export", "Export what an account can read now: scope, resumable jobs, a signed archive and minimized sharing copies.", "account export takeout disclosure minimized sharing copy scope", "docs/ACCOUNT-EXPORT.md"),
+    "showcase": ("Public showcase", "Publish saved messages of selected public channels and signed snapshots through expiring, revocable links.", "showcase public channel link snapshot redaction verify", "docs/LIVE-SHOWCASE.md"),
+    "high-assurance": ("High-assurance deployment", "A sealed 24/7 server on Hetzner or Phala Cloud, Gateway DNS and the checks a third party can repeat.", "high assurance hetzner phala tdx cloudflare gateway dns sealed server", "docs/HIGH-ASSURANCE.md"),
 }
 
 REFERENCE_GROUPS = (
-    ("Set up", ("quickstart", "accounts", "access", "connection", "deployment")),
-    ("Collect", ("collection", "history", "operations", "investigation", "features")),
-    ("Archive & integrations", ("case-board", "analysis", "mcp", "media-analysis", "webhooks")),
-    ("Evidence", ("how-it-works", "case-reports", "evidence", "witness", "timestamp")),
+    ("Set up", ("quickstart", "installation", "settings", "accounts", "access", "connection", "deployment", "high-assurance")),
+    ("Collect", ("panel", "collection", "history", "operations", "investigation", "features")),
+    ("Archive & integrations", ("case-board", "analysis", "mcp", "media-analysis", "webhooks", "showcase")),
+    ("Evidence", ("how-it-works", "case-reports", "account-export", "evidence", "witness", "timestamp", "storage")),
     ("Security & project", ("security", "architecture", "verification", "license", "notice", "changelog")),
 )
 
 LABELS = {
     "licence_link": "MIT license", "operator_link": "Operator notice",
     "docs": "Documentation", "home": "Home", "skip": "Skip to content", "nav": "Guides",
-    "title": "Follow the message. Understand the evidence.",
-    "intro": "Get your first capture, explore how the proof works, then build the setup you need.",
-    "description": "Get your first capture, explore how the proof works, then build the setup you need.",
+    "title": "From Telegram records to a clear case.",
+    "intro": "Work with saved messages and changes, connect your findings to their sources, and prepare signed files for review.",
+    "description": "Learn to preserve Telegram records, build a Case Board, design signed reports, prepare sharing copies and manage account groups.",
     "search": "Search the documentation", "placeholder": "Try proxy, hash chain, token or witness…",
     "empty": "No matches. Try a shorter term or choose a page below.",
     "results": "Pages found:", "prompt": "Type a word to search the guides and the reference. Search stays in your browser.",

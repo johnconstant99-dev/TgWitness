@@ -2,7 +2,8 @@
 
 Status reviewed on 2 November 2026. This separates the current release from
 prototypes and proposed work. The [changelog](CHANGELOG.md) records shipped changes;
-the [trust design](ru/TRUST-ROADMAP.md) explains the proposed verification model.
+[trust in the build](#proposed-trust-in-the-build-and-proof-delivery) summarizes the
+proposed verification model.
 
 ## 0.8.0 preview: a verifiable local journal
 
@@ -27,11 +28,21 @@ Release acceptance:
 
 ## Next: connect the external witness controller
 
-Archive usability and feature coverage now have a parallel delivery track:
-[Telegram archive parity plan](ru/ARCHIVE-PARITY.md). The first implementation is
-[resumable history acquisition](HISTORY.md), included in 0.7.1. Richer review,
-imports, transcription, account administration and measured operating cost remain
-separate acceptance milestones; this roadmap does not claim overall superiority.
+Archive usability and feature coverage have a parallel delivery track. Each direction
+is accepted on its own test, and this roadmap does not claim overall superiority over
+other archivers:
+
+| Direction | Acceptance | Status |
+| --- | --- | --- |
+| Long history loading | A crash between a message and its position loses nothing and repeats nothing | [Shipped](HISTORY.md) |
+| Complete source list | Listed, skipped-by-limit and later-added chats are visible; only failed sources retry | Open |
+| Everyday reading | Search, date and context jumps, forum topics, gallery, forwards, reactions, versions | Open |
+| Importing existing archives | Telegram Desktop JSON/HTML with attachments, resumable, marked as a supplied file | Open |
+| Voice messages | Optional local transcription and search; recognized text never replaces the original | [Shipped](MEDIA-ANALYSIS.md) |
+| Accounts and access | Revoking access stops reading; nobody sees another person's chats, sessions or jobs | [Shipped](ACCESS.md) |
+| Offline handover | The recipient reads and verifies the package without the author's server | [Shipped](CASE_REPORTS.md) |
+| Operations and cost | Published CPU, memory, disk and recovery measurements | Open |
+| Independent verification | A rewritten chain, a cut tail, a key change or a missing witness is detected | [Shipped](WITNESS.md) |
 
 A controller with a real collector integration is the next delivery milestone.
 
@@ -81,6 +92,32 @@ change buttons, disconnect and restart each observer, then inspect the offline b
 Signed receipts can expose changes to previously witnessed history. They do not
 prove that a compromised collector told the truth before signing. Multiple
 containers under the same host administrator do not remove that shared control.
+
+## Proposed: trust in the build and proof delivery
+
+A recipient should be able to tell which build collected the record, which journal it
+presented, which outside witnesses kept it and where the gaps are. A fork or a GitHub
+token gives none of that on its own. Today the run receipt measures the program files,
+the [code check](PANEL.md#code-check) compares them with a public commit, and the
+[witness](WITNESS.md) publishes signed checkpoints. Proposed next, in this order:
+
+1. A full delivery manifest with every executable file and resource, the dependency set,
+   the commit, the workflow and the artifact digest, bound to the run receipt and to
+   each proof.
+2. A durable outgoing queue on the witness: a signed record and its delivery job are
+   saved in one transaction, survive a restart and show attempts, the next retry and
+   the oldest unsent record. Duplicates after a timeout are recognized by the record
+   hash; a late delivery never counts as timely publication.
+3. Releases through a checked draft with attestations, then a guided fork setup with a
+   narrowly scoped token kept on the witness host.
+4. GitHub as an extra store for hourly signed checkpoint blocks, each linking to the
+   previous one, uploaded without force-push.
+5. Several witnesses run by different operators, confirmation policies and visible key
+   rotation: the old key announces the new one.
+6. Live tests of restarts, lost connectivity, restoring an old backup and a changed build.
+
+Also not yet implemented: threshold signing by several keys (FROST), a checkpoint
+mirror on GitLab, anchoring on Nostr relays and co-signers who countersign checkpoints.
 
 ## Release automation
 

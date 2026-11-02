@@ -1,11 +1,3 @@
-"""Select report material from a stable journal without editing source records.
-
-Observation dates are inclusive UTC calendar dates. Missing message-number
-ranges are calculated independently of author and event-kind filters, using
-every known positive message number in the snapshot. They are not deletion
-claims. A separate disposable SQLite database bounds memory while preserving
-exact counts for arbitrarily long journals; the snapshot remains read-only.
-"""
 from datetime import date
 from pathlib import Path
 import sqlite3
@@ -77,7 +69,6 @@ def _text(value, limit=PREVIEW_CHARS):
 
 
 def sender_id(event):
-    """The recorded message sender, never the event's actor or an inferred user."""
     payload = event.get("payload")
     payload = payload if isinstance(payload, dict) else {}
     observed = payload.get("sender_observation")
@@ -113,7 +104,6 @@ class _Matcher:
 
 
 def compile_selection(selection):
-    """Prepare a reusable predicate for long export streams."""
     return _Matcher(_selection(selection))
 
 
@@ -132,8 +122,6 @@ def _preview(event):
 
 
 def _message_id(value):
-    # MTProto message IDs are positive signed 32-bit integers. Do not expand a
-    # range or accept a boolean/float just because Python compares it as an int.
     return value if type(value) is int and 0 < value < 2**31 else None
 
 
@@ -227,9 +215,6 @@ def _gaps(connection, predicate, enabled):
     if not enabled:
         return result
     previous = None
-    # Every known ID participates, including IDs seen outside selected dates and
-    # IDs only referenced by a deletion, recheck or attachment. The date range
-    # chooses boundaries; it does not erase known IDs between those boundaries.
     rows = connection.execute("SELECT k.* FROM known k JOIN bounds b ON b.chat=k.chat "
                               "WHERE k.message BETWEEN b.low AND b.high ORDER BY k.chat,k.message")
     for row in rows:
@@ -247,13 +232,6 @@ def _gaps(connection, predicate, enabled):
 
 
 def analyze(snapshot, selection=None, preview_limit=40, *, scratch_root=None):
-    """Analyze every record in one stable snapshot with bounded returned previews.
-
-    All counts are exact. Catalog overflow is explicit, not a silently partial
-    top list. Selection controls report presentation; it is not a redaction
-    policy for the signed original archive. Gap-neighbor context may contain a
-    sender or message excluded by the report's filters.
-    """
     selection = _selection(selection)
     predicate = compile_selection(selection)
     preview_limit = max(0, min(MAX_PREVIEW_ROWS, preview_limit)) if type(preview_limit) is int else 40

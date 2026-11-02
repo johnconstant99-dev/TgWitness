@@ -1,20 +1,3 @@
-"""Exact, bounded aggregates of journal observations for signed reports.
-
-These are counts of observation records, not distinct Telegram messages or
-verified people. A history snapshot followed by a live observation may count the
-same message twice. Dates are the collector's observation times, converted to
-UTC; they are neither message send times nor independent timestamp assertions.
-
-Only the six listed message event kinds contribute. In particular, a saved
-attachment, heartbeat or panel action does not count as another message. Sender
-rankings use new/snapshot/recovered observations only: an edit's sender is not
-necessarily its editor and a deletion notice does not identify its actor.
-
-The accumulation layer holds numeric identifiers but no text, names or files.
-``selected`` is the publication boundary: disabled charts and sender identifiers
-hidden by the label setting never enter its result. Aliases are presentation
-labels, not anonymization of the source journal supplied with an export.
-"""
 from datetime import datetime, timezone
 from typing import Literal
 
@@ -24,7 +7,6 @@ from . import report_design
 
 
 class Presentation(BaseModel):
-    """Shared visual choices; private case and examination text never enters this model."""
     model_config = ConfigDict(extra="forbid")
     design: report_design.Design = "classic"
     activity_chart: bool = True
@@ -51,8 +33,6 @@ KINDS = {
     "message.missing_on_recheck": "missing",
 }
 MESSAGE_KINDS = frozenset(("new", "snapshot", "recovered"))
-# Limits constrain distinct groups, not event volume. An overflow disables only
-# that chart, rather than quietly publishing an approximate or partial ranking.
 MAX_GROUPS = 100_000
 MAX_DAY_BUCKETS = 366
 MAX_MONTH_BUCKETS = 1200
@@ -63,8 +43,6 @@ def _counts():
 
 
 def _identifier(value):
-    # Reject booleans, labels and malformed identifiers rather than retaining
-    # arbitrary account metadata in an analytics document.
     return value if type(value) is int and 0 < abs(value) < 2**63 else None
 
 
@@ -140,7 +118,6 @@ class _Groups:
 
 
 class Analytics:
-    """Streaming observations; memory is bounded independently of journal length."""
     def __init__(self):
         self.totals = _row()
         self.message_observations = 0
@@ -187,8 +164,6 @@ class Analytics:
             payload = payload if isinstance(payload, dict) else {}
             sender = payload.get("sender_observation")
             sender = sender if isinstance(sender, dict) else {}
-            # An explicit unknown or malformed sender is never replaced by an
-            # actor ID: that would silently change what this record says.
             identity = payload.get("sender_id", sender.get("id", event.get("sender_id")))
             self.participants.add(_identifier(identity), kind, seq)
         moment = _time(event.get("observed_at"))
@@ -220,8 +195,6 @@ class Analytics:
 
 def _ranking(data, limit, *, participants=False, labels="aliases"):
     rows = data["rows"]
-    # Alias numbering is independent of frequency, so a participant's label is
-    # stable across templates or chart limits for the same exported material.
     aliases = {row["id"]: index for index, row in enumerate(sorted(rows, key=lambda row: row["id"]), 1)}
     ranked = sorted(rows, key=lambda row: (-row["total"], row["id"]))
     visible, remaining = ranked[:limit], ranked[limit:]
@@ -259,11 +232,6 @@ def _ranking(data, limit, *, participants=False, labels="aliases"):
 
 
 def selected(data, options):
-    """Publication projection with hidden charts and sender IDs removed entirely.
-
-    ``options`` normally comes from ReportOptions. Invalid direct-call limits
-    are clamped; unknown label modes use aliases. The input is never mutated.
-    """
     options = options or {}
     value = options.get("chart_limit", 10)
     limit = max(5, min(30, value)) if type(value) is int else 10

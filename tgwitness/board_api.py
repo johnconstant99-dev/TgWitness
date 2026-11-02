@@ -1,4 +1,3 @@
-"""Case Board routes. No collector, notification or external-service calls."""
 import csv
 import copy
 import io
@@ -124,7 +123,6 @@ def register(app, authenticate, workspace):
                             if payload.get("media_sha256"):
                                 media.append({"sha256": payload["media_sha256"], "mime_type": payload.get("mime_type"), "size": payload.get("size"), "name": payload.get("name")})
                         item["preview_media"] = media
-            # Only visible content contributes authors, counters and the live cursor.
             return {"cards": page, "total": len(cards), "next_offset": offset+len(page) if offset+len(page) < len(cards) else None,
                     "collections": sorted([item for item in result["items"] if item["kind"] == "board.collection" and not item["removed"]], key=lambda item: (item.get("order", 0), item["title"])),
                     "authors": list({item["access_id"]: {"id": item["access_id"], "label": item["access_label"]} for item in result["items"]}.values()),
@@ -232,11 +230,12 @@ def register(app, authenticate, workspace):
             raise HTTPException(404, "Board action not found.")
         def append(db, who):
             validated = MODELS[action].model_validate(body).model_dump(by_alias=True, exclude_none=True)
-            with app.state.store.transaction():
-                who = current(request)
-                if action == "comment" and validated.get("mentions"):
-                    allowed = {item["id"] for item in participants(db, who, validated["parent_id"])}
-                    if not set(validated["mentions"]) <= allowed:
-                        raise ValueError("A mentioned participant does not have access to this card.")
-                return service().append(action, validated, who, authorize=lambda: current(request))
+            with app.state.access.lock:
+                with app.state.store.transaction():
+                    who = current(request)
+                    if action == "comment" and validated.get("mentions"):
+                        allowed = {item["id"] for item in participants(db, who, validated["parent_id"])}
+                        if not set(validated["mentions"]) <= allowed:
+                            raise ValueError("A mentioned participant does not have access to this card.")
+                    return service().append(action, validated, who, authorize=lambda: current(request))
         return await run(request, append, write=True)

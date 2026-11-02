@@ -1,4 +1,3 @@
-/** Explicit, workspace-owned report preview. No automatic scan, save or export. */
 export function createReportSelection({root,tr,json,getOwner,ready,options,active}) {
   const find=id=>root.querySelector('#'+id), kinds=[...root.querySelectorAll('[data-report-kind]')];
   const make=(tag,text='',cls='')=>{const el=document.createElement(tag);el.textContent=String(text??'');if(cls)el.className=cls;return el;};

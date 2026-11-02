@@ -1,4 +1,3 @@
-"""Browser acceptance for the keyed capability guide, called by check_site.py."""
 import hashlib
 import json
 from urllib.parse import urlsplit

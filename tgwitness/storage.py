@@ -1,9 +1,3 @@
-"""Verified media offloading. The signed journal stays local and is never rewritten.
-
-An upload alone never authorizes eviction: read back the complete encrypted object,
-compare its SHA-256, commit a recovery receipt, rehash the source, then unlink it.
-All helpers, credentials and temporary files stay inside the workspace.
-"""
 import asyncio
 import base64
 import configparser
@@ -42,8 +36,6 @@ HASHES = {
     "osx-arm64": "610ab7d48615135dfc60b763858b11a426a0d3d1160c1bb76fb0ae6011b02edd",
     "windows-amd64": "8a9db2bad1dc79a65b3348fd857069598e2aab7cf4d118b77b1df23055aff818",
 }
-# These backends do not execute an operator-provided shell command. Composition,
-# local filesystem and command-driven SFTP backends are deliberately not accepted.
 REMOTE_TYPES = {"mega", "drive", "onedrive", "dropbox", "box", "pcloud", "webdav", "b2", "s3",
                 "swift", "azureblob", "google cloud storage", "koofr", "yandex", "protondrive", "jottacloud"}
 MAX_RECOVERY_OBJECTS = 100000
@@ -83,7 +75,6 @@ class ObjectReceipt(BaseModel):
 
 
 def validate_recovery(value, trusted_fingerprint):
-    """Validate the complete manifest before touching a key, receipt or file."""
     if not isinstance(value, dict) or value.get("format") != "tgwitness-storage-recovery-v1":
         raise ValueError("Choose a signed TgWitness storage recovery file.")
     try:
@@ -292,8 +283,6 @@ class Rclone:
                     self.config = refreshed
                     if code:
                         raise ValueError("The storage service refused the operation. Check its credentials and available space.")
-                # OAuth refresh tokens are updated by rclone. Preserve the refreshed
-                # configuration in the encrypted vault through the caller.
                 return bytes(result)
             finally:
                 if process.returncode is None:
@@ -391,17 +380,8 @@ class Storage:
         return hashlib.sha256(canonical({"backend": saved["backend"], "folder": saved["remote_path"], "identity": identity})).hexdigest()
 
     def obsolete_copies(self, destination, config_replaced=False):
-        """Check a destination change while the caller holds the storage lock.
-
-        Receipts describe one configured destination. Only discard an old copy's
-        receipt when its original bytes are safely present here; otherwise it may
-        be the only recovery path. Keep this read-only check separate from commit.
-        """
         receipts = Receipts(self.store.root)
         try:
-            # An operator-supplied OAuth token can belong to another account even
-            # when its public remote identity is unchanged. Automatic rclone
-            # refreshes use save_refreshed and do not retire recovery receipts.
             obsolete = [row for row in receipts.rows() if config_replaced or row["destination"] != destination]
         finally:
             receipts.close()
@@ -492,15 +472,13 @@ class Storage:
     async def copy_one(self, backend, digest, source, saved, receipt_db, destination):
         if source.stat().st_size > MAX_MEDIA_BYTES:
             raise ValueError("This attachment exceeds the 32 GiB storage limit. It remains local.")
-        key = self.key()  # A readable receipt is insufficient if its decryption key was lost.
+        key = self.key()
         receipt = receipt_db.get(digest)
         if receipt and not receipt["object"].startswith("media/" + hmac.new(key, digest.encode(), hashlib.sha256).hexdigest() + "-"):
             raise ValueError("The storage key does not match this saved receipt. Restore the original recovery key; the local file is kept.")
         if not receipt and receipt_db.count()[0] >= MAX_RECOVERY_OBJECTS:
             raise ValueError("The workspace reached the 100,000-file storage recovery limit. Existing receipts remain recoverable; new files stay local.")
         if receipt and receipt["destination"] == destination and receipt["compressed"] == saved["compress"]:
-            # Recheck the remote even if a previous upload succeeded. A stale
-            # receipt is never permission to delete the last surviving copy.
             await self.check_object(backend, receipt["object"], receipt["cipher_sha256"], receipt["cipher_bytes"])
         else:
             name = "media/" + hmac.new(key, digest.encode(), hashlib.sha256).hexdigest() + "-" + secrets.token_hex(8) + ".tgwr"
@@ -542,7 +520,7 @@ class Storage:
             checked = safe_file(self.store.root, digest)
             if file_hash(checked) != digest:
                 raise ValueError("The local file changed during copying. It is kept.")
-            receipt_db.evict(digest)  # recoverable if interrupted before unlink
+            receipt_db.evict(digest)
             checked.unlink()
             self.store.append("storage.offloaded", {"sha256": digest, "bytes": receipt["bytes"],
                                                      "object": receipt["object"], "destination": destination})
@@ -702,13 +680,9 @@ class Storage:
             raise ValueError("This recovery file contains several storage destinations. Use the original recovery file for each destination.")
         destination = next(iter(destinations), None) or self.destination(value["settings"],
             replica_config=replica.ReplicaSettings.model_validate(value.get("s3", {})).model_dump())
-        # Import also changes the configured destination. A valid older recovery
-        # file must not strand newer, remote-only files missing from that file.
         obsolete = self.obsolete_copies(destination)
         current = Receipts(self.store.root)
         try:
-            # A receipt for the same plaintext may reference another destination;
-            # never overwrite its only recovery path during an import.
             for row in value["objects"]:
                 existing = current.get(row["sha256"])
                 if existing and existing["object"] != row["object"] and existing["evicted"]:
@@ -738,7 +712,6 @@ class Storage:
 
 
 async def recover_directory(value, trusted_fingerprint, credentials, output, install_helper=True):
-    """Recover attachments after workspace loss, without inventing a replacement journal."""
     from .network import NetworkConfig
     from .security import owner_only
     validate_recovery(value, trusted_fingerprint)
@@ -769,7 +742,6 @@ async def recover_directory(value, trusted_fingerprint, credentials, output, ins
             self.values[name] = data
 
         def append(self, kind, payload):
-            # This is a local recovery log, explicitly not the original signed journal.
             with (output / "recovery-log.jsonl").open("ab") as log:
                 log.write(canonical({"at": utcnow(), "kind": kind, "payload": payload, "signed": False}) + b"\n")
 

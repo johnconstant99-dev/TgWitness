@@ -1,4 +1,3 @@
-"""Settings invariants and first-run browser coverage, using only synthetic Telegram clients."""
 import asyncio
 import json
 import ssl
@@ -225,8 +224,6 @@ def test_browser(tmp_path, monkeypatch):
         expect(page.locator('#view-first-run h1')).to_contain_text('Язык')
         page.locator('#first-run-next').click()
         page.locator('[data-answer="expert"]').click()
-        # The choice saves asynchronously and replaces the card/footer. Wait for
-        # the saved controls before reloading or clicking a different action.
         expect(page.locator('[data-answer="expert"]')).to_be_enabled()
         page.reload()
         expect(page.locator('[data-answer="expert"]')).to_have_attribute('aria-pressed','true',timeout=20000)
@@ -297,8 +294,6 @@ def test_browser(tmp_path, monkeypatch):
         page.get_by_role('button',name='Off-site copy',exact=True).click()
         expect(page.locator('#view-settings #replica-form')).to_be_visible()
         expect(page.locator('#replica-enabled')).not_to_be_checked()
-        # URL language renders before bootstrap persists the saved preference.
-        # Wait for that specific write before inspecting the store or navigating away.
         with page.expect_response(lambda response: response.url == server.url+'/api/preferences'
                 and response.request.method == 'POST'
                 and response.request.post_data_json.get('language') == 'ru') as language_saved:
@@ -357,7 +352,6 @@ def test_settings_bootstrap_failure_preserves_session(tmp_path, outcome):
 
 
 def test_first_run_import_and_settings_account_actions(tmp_path):
-    """Moving the original auth card must retain preflight, renew and separate-account import."""
     from playwright.sync_api import sync_playwright, expect
     from tools.browser_fixtures import saved_session, sqlite_fixture
     from tools.check_browser import answer_panel_dialog
@@ -410,7 +404,6 @@ def test_first_run_import_and_settings_account_actions(tmp_path):
         assert len(server.app.state.profiles.entries) == 1
         assert server.app.state.vault.public_key == key
 
-        # The programmatic Files choice must expose its method controls as well.
         page.locator('.other-sign-in').evaluate('el=>el.open=false')
         page.locator('#account-add-another').click()
         expect(page.locator('[data-auth-method="files"]')).to_be_visible()
@@ -435,7 +428,6 @@ def test_first_run_import_and_settings_account_actions(tmp_path):
 
 @pytest.mark.parametrize('workspace', ['default', 'child'])
 def test_unfinished_setup_keeps_explicit_workspace_link(tmp_path, workspace):
-    """Fresh-install deep links remain scoped without silently skipping setup."""
     from playwright.sync_api import sync_playwright, expect
     with RunningApp(tmp_path) as server, sync_playwright() as p:
         profile = 'default'
@@ -494,7 +486,6 @@ def test_unfinished_setup_bootstrap_respects_new_navigation(tmp_path, held_path)
 
 @pytest.mark.parametrize('change', ['goal', 'outside'])
 def test_settings_consent_belongs_to_its_workspace(tmp_path, change):
-    """Accepting A's dialog after switching to B cannot use B's identical revision."""
     from playwright.sync_api import sync_playwright, expect
     from tools.check_browser import answer_panel_dialog
 
@@ -528,8 +519,6 @@ def test_settings_consent_belongs_to_its_workspace(tmp_path, change):
         page.locator('[data-section="goal"]' if change == 'goal' else '[data-section="notifications"]').click()
         control = page.locator('[data-answer="copy"]' if change == 'goal' else '[data-setting="notifications"] input')
         event = 'onclick' if change == 'goal' else 'onchange'
-        # Await the complete real action after its dialog resolves, without sleep or
-        # an assertion that races the subsequent request/refresh/render callbacks.
         control.evaluate("""(el, event) => {
           const original = el[event];
           el[event] = (...args) => (window.pendingSettingsChange = original.apply(el, args));
@@ -538,7 +527,6 @@ def test_settings_consent_belongs_to_its_workspace(tmp_path, change):
         dialog = page.locator('dialog.panel-dialog[open]')
         expect(dialog).to_contain_text('Change goal?' if change == 'goal'
             else 'This feature needs external requests. Allow them?')
-        # A browser-history/workspace navigation can happen while a modal is open.
         page.evaluate('id => switchProfile(id)', child)
         assert page.evaluate('state.profile') == child
         expect(page).to_have_url(server.url + '/settings?ws=' + child)
@@ -556,7 +544,6 @@ def test_settings_consent_belongs_to_its_workspace(tmp_path, change):
 
 @pytest.mark.parametrize('destination', ['settings', 'workspace'])
 def test_live_setup_check_stops_after_navigation(tmp_path, destination):
-    """A delayed health response must not revive setup or touch the next workspace."""
     from playwright.sync_api import sync_playwright, expect
     from tools.browser_fixtures import ScopeClient, saved_session, CHAT
 

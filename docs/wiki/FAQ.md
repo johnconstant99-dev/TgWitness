@@ -81,7 +81,7 @@ They may have different access, membership dates and visibility. Each workspace 
 
 ## Does a public proxy failure switch me to a direct connection?
 
-Hide IP mode does not fall back to Direct. The explicitly selected fallback mode can connect directly after its configured delay; tunnel/VPN mode permits direct routes. External HTTP requests and the independent witness have their own routing rules. See [connection routes](Proxies.md).
+**Hide the address** does not fall back to Direct. **Direct as a last resort** connects directly after its configured delay; **Server behind a tunnel or VPN** permits direct routes. External HTTP requests and the independent witness have their own routing rules. See [connection routes](Proxies.md).
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>

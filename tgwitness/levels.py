@@ -1,11 +1,3 @@
-"""Setup by goal and the two scales the panel shows: credibility (what an outsider can check about
-the record) and reliability (how likely collection keeps running and the record survives).
-
-Nothing here switches anything on by itself. For a goal the panel proposes settings, the person
-reviews them and applies them; the scales are computed from what is set and working now, never from
-the goal that was picked. Settings that need the person's own accounts or keys (notifications, an
-off-site copy, a server) are proposed as next steps and open their own forms.
-"""
 from pydantic import BaseModel, ConfigDict
 from typing import Literal
 
@@ -16,8 +8,6 @@ SIZES = ("small", "medium", "large")
 FILES = ("text", "media", "all")
 PLACES = ("computer", "server")
 
-# Applied by the panel in one step; everything else is a step with its own form.
-APPLIED = ("timestamps", "drand", "devices")
 STEPS = ("alerts", "replica", "server", "gateway", "code", "witness")
 EXTRA = {"timestamps": "evidence", "drand": "evidence", "devices": "evidence", "alerts": "alerts",
          "replica": "evidence", "replica_lock": "evidence", "server": "cloud", "always_on": "cloud",
@@ -32,11 +22,7 @@ RECOMMENDED = {
 DIALOG_LIMIT = {"small": 1000, "medium": 3000, "large": 20000}
 LARGE_MEDIA_MB = {"photo": 20, "video": 1000, "animation": 50, "video_note": 100, "voice": 50, "audio": 200,
                   "sticker": 5, "document": 1000}
-# Free disk kept when everything is downloaded; downloads pause below it.
 LARGE_MEDIA_RESERVE_MB = 4096
-# Smallest server disk, in GB, offered for a large observation that keeps every file.
-LARGE_DISK_GB = 160
-
 CREDIBILITY = (("journal", 1), ("timestamps", 3), ("drand", 1), ("devices", 1), ("code", 1), ("witness", 1),
                ("server", 2), ("gateway_log", 1))
 RELIABILITY = (("always_on", 3), ("replica", 3), ("replica_lock", 1), ("alerts", 1))
@@ -55,7 +41,6 @@ class Setup(BaseModel):
 
 
 def files_choice(capture):
-    """The answer that matches the current attachment policy."""
     if not capture["download_media"]:
         return "text"
     rules = capture["types"]
@@ -70,7 +55,6 @@ def size_choice(dialog_limit):
 
 
 def capture_for(files, capture):
-    """The attachment policy for an answer; None when the current one already gives it."""
     if files_choice(capture) == files:
         return None
     if files == "text":
@@ -82,8 +66,6 @@ def capture_for(files, capture):
 
 
 def plan(setup, evidence, capture, parameters):
-    """What applying the setup changes: new evidence settings, attachment policy and parameter values,
-    each None or empty when nothing changes."""
     if (setup.drand or setup.devices) and not setup.timestamps:
         raise ValueError("Live-recording records and the device list work only with independent timestamps on.")
     wanted = {**evidence, "enabled": setup.timestamps, "drand": setup.drand, "devices": setup.devices}
@@ -110,8 +92,6 @@ def scale(weights, on):
 
 
 def assess(evidence, replica, alerts, destinations, assurance, source, witnesses, place, gateway_log=False):
-    """Both scales from the current settings. A part counts when it is switched on and set up; whether
-    it is working right now is shown next to it from health.py."""
     timestamps = bool(evidence["enabled"])
     polled = [w for w in witnesses if w.get("last_poll") and not w.get("overdue")]
     credibility = {"journal": True, "timestamps": timestamps, "drand": timestamps and evidence.get("drand"),

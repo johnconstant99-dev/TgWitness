@@ -19,7 +19,6 @@ PAGES = {"case-board": "board", "reports": "report", "handover": "handover", "gr
 
 
 def english_fixture(destination):
-    """Use the actual new guide fragments before the multilingual site is built."""
     destination.mkdir(parents=True, exist_ok=True)
     for asset in ("docs.css", "learn.css", "workflows.css", "workflows.js"):
         shutil.copyfile(ROOT / "website" / asset, destination / asset)
@@ -90,7 +89,7 @@ def check_sequence(page, lab):
     assert lab.locator("[data-workflow-status]").inner_text() == current_text(lab)
     page.clock.install()
     page.clock.fast_forward(12000)
-    expect(lab).to_have_attribute("data-step", "0")  # No autoplay.
+    expect(lab).to_have_attribute("data-step", "0")
     next_button = lab.locator("[data-workflow-next]")
     next_button.focus()
     expect(next_button).to_be_focused()
@@ -171,7 +170,6 @@ def check_choices(lab, kind):
 
 
 def mobile_step_measurements(page, lab, kind):
-    """The active sample must remain beside its controls during real playback."""
     page.clock.install()
     measurements = []
 
@@ -187,9 +185,6 @@ def mobile_step_measurements(page, lab, kind):
                 scene:box(root.querySelector('[data-workflow-scene]'))};
         }""")
         current = value["current"]
-        # The persistent original can start above the viewport when the browser
-        # centres controls under a long translated original/copy pair. It remains
-        # readable by scrolling; every subsequent active copy/stage is in view.
         if kind == "handover" and value["step"] == 0:
             assert current["bottom"] > 0, value
         else:

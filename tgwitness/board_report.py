@@ -1,4 +1,3 @@
-"""A separately labelled, readable layer of team opinions, never observation facts."""
 import copy
 import html as escaping
 
@@ -33,7 +32,6 @@ def material(connection, statement, options):
                 parent = items.get(parent["parent_id"])
             if parent and parent["id"] in lookup:
                 lookup[parent["id"]]["comments"].append(comment)
-    # Report data selection also limits the notes shown in the readable derivative.
     selection = options.get("selection") or {}
     if selection.get("enabled"):
         from .report_selection import Selection, compile_selection

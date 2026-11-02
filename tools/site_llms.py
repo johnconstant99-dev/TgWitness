@@ -1,4 +1,3 @@
-"""Plain-text editions of the public handbook. No application or data access."""
 import html
 import re
 from urllib.parse import urljoin, urlsplit
@@ -20,7 +19,6 @@ def nodes(node):
 
 
 def markdown(source, url):
-    """Keep the article's prose, commands, links and tables; omit site controls."""
     tree = _Tree(source)
     all_nodes = list(nodes(tree.root))
     code_blocks = []
@@ -56,6 +54,7 @@ def markdown(source, url):
         if (tag in {"script", "style", "nav", "footer", "button", "input", "select", "textarea"}
                 or attrs.get("aria-hidden") == "true"
                 or "data-workflow-controls" in attrs or "data-workflow-choices" in attrs
+                or "data-hub-controls" in attrs or "data-hub-status" in attrs
                 or classes & {"eyebrow", "card-number", "search", "lab-controls", "copy-button", "language-notice", "anchor"}):
             return ""
         if tag == "svg":

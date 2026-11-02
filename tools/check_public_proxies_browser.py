@@ -1,4 +1,3 @@
-"""Public-list UI acceptance with a local collector and synthetic download/transport fixtures."""
 import ipaddress
 import json
 import os

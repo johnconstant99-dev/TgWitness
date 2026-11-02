@@ -1,4 +1,3 @@
-/** Local drafts only: no storage, credentials, or automatic writes. */
 export function createFormControls({forms, roots, tr, getSession, toast}) {
   const records=new Map(), listeners=new AbortController(), signal=listeners.signal;
   const fields=form=>[...form.querySelectorAll('input,textarea,select')].filter(field=>
@@ -17,8 +16,6 @@ export function createFormControls({forms, roots, tr, getSession, toast}) {
     const bar=document.createElement('div'),label=document.createElement('span'),button=document.createElement('button');
     bar.className='form-draft-bar';bar.hidden=true;label.setAttribute('role','status');
     button.type='button';button.className='quiet';button.textContent=tr('Discard changes');
-    // Move the existing action, keeping its label, listeners and disabled fieldset.
-    // Some actions (Check now) also make sense without a settings change.
     const save=form.querySelector('button[type=submit]')||document.createElement('button');
     const owner=save.closest('fieldset')||form;
     if(!save.textContent){save.type='submit';save.className='primary';save.textContent=tr('Save changes');}

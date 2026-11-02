@@ -1,10 +1,3 @@
-"""Regenerate the optional media worker's complete wheel hash lock.
-
-Run with uv installed: python tools/lock_media_requirements.py
-The Python 3.12 universal resolution covers the worker's Linux image platforms.
-Review version changes and run tools/check_media_worker.py on Linux after rebuilding.
-The Docker build refuses source distributions and artifacts absent from this lock.
-"""
 from pathlib import Path
 import subprocess
 import sys

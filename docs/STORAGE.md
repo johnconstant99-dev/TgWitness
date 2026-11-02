@@ -21,8 +21,8 @@ enabled evidence backup has not yet copied that file, removal also waits for it.
 
 ## Connect a destination
 
-In **More tools & settings → Storage**, choose the task and destination, save it,
-then select **Test storage**. The test uploads a small random probe and reads it
+In **Extras → Storage & disk space → Manage storage**, choose the task and destination,
+save it, then select **Test upload & download**. The test uploads a small random probe and reads it
 back. It does not use Telegram content.
 
 For S3, use the provider's actual endpoint, region and bucket. Wasabi, Backblaze,
@@ -47,7 +47,7 @@ rclone does not silently bypass an unavailable route.
 
 ## Keep the recovery file
 
-Download **Storage recovery file** after copying files and keep it somewhere
+Choose **Save recovery file** after copying files and keep it somewhere
 separate from the installation. It contains the decryption key and signed object
 receipts, so treat it as a private key backup. Keep the original remote configuration
 and destination credentials separately as well. A recovery file taken before a
@@ -57,8 +57,8 @@ The signing-key fingerprint should already be recorded independently. A signatur
 checked only against the key supplied inside the same file does not establish whose
 recovery file it is.
 
-To repair missing storage receipts in an existing workspace, choose **Import
-recovery file**. The panel checks the signature and requires the same workspace
+To repair missing storage receipts in an existing workspace, open **Recover files
+from a saved recovery file** and select the file. The panel checks the signature and requires the same workspace
 signing key. It refuses to replace a different storage key. Then choose **Restore
 all files**. Restoration pauses the automatic storage rule so the next scheduled
 pass cannot immediately remove the restored files again. Re-enable the rule when

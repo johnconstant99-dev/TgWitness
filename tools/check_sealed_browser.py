@@ -75,7 +75,6 @@ def custom_qr_capture(context, root, record):
 
 
 def credential_controls(page):
-    """Check browser validation and exact payloads; offline acceptance checks the real login paths."""
     expect(page.locator("#api-id")).to_be_hidden()
     page.locator("#custom-api summary").click()
     page.locator("#api-id").fill("123")
@@ -114,7 +113,6 @@ def credential_controls(page):
 
 
 def main():
-    # This check runs in the sealed/browser [dev] environment, which includes httpx.
     asyncio.run(check_login())
     screenshots = ROOT / "test-results" / "sealed-experience"
     screenshots.mkdir(parents=True, exist_ok=True)
@@ -194,7 +192,7 @@ def main():
             server = uvicorn.Server(uvicorn.Config(app, log_level="error", access_log=False))
             thread = threading.Thread(target=server.run, kwargs={"sockets": [sock]}, daemon=True)
             thread.start()
-            deadline = time.monotonic() + 60  # slow starts under load; ready returns at once
+            deadline = time.monotonic() + 60
             while not server.started:
                 if time.monotonic() > deadline:
                     raise RuntimeError("Synthetic server did not start")

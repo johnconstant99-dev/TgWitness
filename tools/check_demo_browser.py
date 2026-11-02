@@ -6,7 +6,11 @@ from pathlib import Path
 import zipfile
 
 from playwright.sync_api import expect, sync_playwright
-from check_browser import answer_panel_dialog
+
+if __package__:
+    from .browser_helpers import answer_panel_dialog
+else:
+    from browser_helpers import answer_panel_dialog
 
 
 def check_demo_downloads(browser, url, output, route_request, errors, failed):
@@ -53,7 +57,6 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
         assert manifest["event_count"] == checked["events"]
         assert manifest["head_hash"] == checked["head_hash"]
         events = [json.loads(line) for line in bundle.read("events.jsonl").splitlines()]
-    # Decode JSON from its original UTF-8 bytes, including non-ASCII target titles.
     auxiliary = {}
     for endpoint in ("/api/checkpoint", "/api/run-receipt", "/api/anchor-request"):
         descriptor = answers[endpoint]
@@ -122,7 +125,6 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
 
 
 def main():
-    """Run just the signed-download demo acceptance against an already built site."""
     import argparse
 
     if __package__:

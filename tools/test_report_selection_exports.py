@@ -1,4 +1,3 @@
-"""Configured reports select real records without rewriting the signed source."""
 import asyncio
 import copy
 import hashlib
@@ -55,7 +54,7 @@ def test_selected_archive_has_full_source_and_filtered_report(tmp_path):
             data = json.loads(bundle.read('report.json'))['report']
             assert data['selection']['counts'] == expected['counts']
             assert data['selection']['counts']['selected_records'] == 3
-            assert data['selection']['id_gaps']['ids_total'] == 1  # ID 12 known on another date; 14 deleted.
+            assert data['selection']['id_gaps']['ids_total'] == 1
             assert data['selection']['id_gaps']['rows'][0]['start'] == 13
             assert data['summary']['chats'] == 1 and data['analytics']['activity_events'] == 3
             assert data['analytics']['message_observations'] == 2
@@ -128,7 +127,6 @@ def test_preview_is_scoped_read_only_and_requires_export_access():
             invalid['selection']['date_to'] = '2026-10-01'
             assert (await client.post('/api/report-preview', json=invalid)).status_code == 422
             assert (await client.post('/api/report-preview?ws=../other', json=choices())).status_code == 404
-            # Permission matching rejects a chat-limited access before catalog enumeration.
             from tgwitness.access import POLICY, Refused, check as check_access
             from types import SimpleNamespace
             principal = SimpleNamespace(admin=False, opens=lambda _: True, may=lambda _: True,

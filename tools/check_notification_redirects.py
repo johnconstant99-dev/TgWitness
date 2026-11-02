@@ -1,8 +1,3 @@
-"""Notification redirect regression using real Apprise/Requests and an in-memory HTTP adapter.
-
-No notifications, DNS lookups or network requests leave this process. Run from a
-checkout with runtime dependencies: python tools/check_notification_redirects.py.
-"""
 import base64
 import json
 import logging
@@ -21,8 +16,6 @@ from tgwitness.network import NetworkConfig, NoRoute
 
 
 class SyntheticHTTP:
-    """Only these reserved example hosts exist; HTTP responses stay in memory."""
-
     def __init__(self):
         self.calls = []
         self.status = 302
@@ -68,15 +61,12 @@ def run():
     with patch.object(requests.adapters.HTTPAdapter, "send", send), \
             patch("requests.sessions.get_netrc_auth", return_value=None), \
             patch("socket.getaddrinfo", side_effect=AssertionError("A synthetic notification tried DNS")):
-        # Negative control: the installed library follows explicit redirect=yes
-        # and forwards the custom token to another origin without our policy.
         unsafe = apprise.Apprise()
         assert unsafe.add(destination("/redirect/negative-control", "yes"))
         unsafe.notify(body="Synthetic body", title="Synthetic title")
         forwarded = [row for row in transport.calls if urlsplit(row["url"]).hostname == "receiver.example"]
         assert forwarded and forwarded[0]["headers"].get("X-Synthetic-Token") == "SYNTHETIC_CUSTOM_TOKEN"
 
-        # Normal delivery preserves the original path and configured credentials.
         for basic in (False, True):
             transport.calls.clear()
             result = alerts.deliver([destination("/notify/explicit-path", "yes", basic)],
@@ -107,14 +97,11 @@ def run():
                     assert urlsplit(transport.calls[0]["url"]).hostname == "notify.example"
                     checked += 1
 
-        # No exception exists for same-origin redirects either: the configured
-        # destination must be the final URL, keeping the policy predictable.
         transport.same_origin = True
         transport.calls.clear()
         result = alerts.deliver([destination("/redirect/same-origin", "yes")], "Title", "Body", direct)
         assert result["failed"] == 1 and len(transport.calls) == 1
 
-        # Existing refusal of disabled external routes still happens before HTTP.
         transport.calls.clear()
         result = alerts.deliver([destination("/notify/unused")], "Title", "Body", NoRoute(ValueError("Synthetic no route")))
         assert result["failed"] == 1 and not transport.calls

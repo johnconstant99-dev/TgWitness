@@ -1,4 +1,3 @@
-"""Interface languages: the panel loads /locale.js and receives the dictionary of one language."""
 import json
 from functools import lru_cache
 from pathlib import Path
@@ -10,14 +9,11 @@ COOKIE = "tgwitness-lang"
 LOCALES = Path(__file__).parent / "locales"
 GUIDE_LOCALES = Path(__file__).parent / "guide_locales"
 ENGLISH_FALLBACKS = Path(__file__).parent / "english_fallbacks.json"
-# Resolve only paths constructed from the fixed supported-language catalog.
-# Callers choose languages too, but the file-reading boundary enforces this itself.
 LOCALE_FILES = {code: LOCALES / (code + ".json") for code in LANGUAGES if code != "en"}
 GUIDE_FILES = {code: GUIDE_LOCALES / (code + ".json") for code in GUIDE_LANGUAGES if code not in LANGUAGES}
 
 
 def language_tag(tag, languages=LANGUAGES):
-    """Match script/region tags before their base language; keep the two Chinese scripts distinct."""
     tag = (tag or "").strip().lower().replace("_", "-")
     known = {code.lower(): code for code in languages}
     if tag in known:
@@ -28,7 +24,6 @@ def language_tag(tag, languages=LANGUAGES):
 
 
 def pick(cookie, accept, languages=LANGUAGES):
-    """The language chosen in the panel, else the browser's preferred supported one, else English."""
     if cookie in languages:
         return cookie
     choices = []

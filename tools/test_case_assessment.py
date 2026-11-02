@@ -1,4 +1,3 @@
-"""Trust boundaries of signed reports; all accounts, keys and receipts are synthetic."""
 import copy
 import json
 from pathlib import Path
@@ -46,8 +45,6 @@ def test_checkpoint_belongs_to_exact_journal(tmp_path, monkeypatch):
     store.bind(vault)
     store.append('message.new',{'text':'Synthetic observation'},-1001,1)
     point = evidence.checkpoint(store, vault)
-    # The receipt parser/signature checker are isolated here; the real checkpoint
-    # signature, key and journal-prefix check must still run and reject substitutions.
     monkeypatch.setattr(report,'timestamp_reply_summary',lambda *a:{'time':'2026-11-01T00:00:00Z'})
     monkeypatch.setattr(report,'timestamp_signature',lambda *a:{'signer':'Synthetic TSA','root_sha256':'a'*64})
     def describe(value, key=None, hash_at=None):

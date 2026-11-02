@@ -1,4 +1,3 @@
-"""Import error-prevention acceptance; synthetic sessions only, never Telegram."""
 import base64
 import json
 import sys
@@ -92,8 +91,6 @@ def main():
             expect(page.locator("#authorized-account")).to_contain_text("ID 44")
             expect(page.locator("#credentials-form")).not_to_be_visible()
             page.locator("#authorized-state").screenshot(path=str(output / "connected-account-card.png"))
-            # Renewing this account must stay in its existing journal. It is a
-            # separate intent from the Add another account wizard.
             renewal_metadata = json.dumps({"api_id": 123, "api_hash": "b" * 32}).encode()
             for expired, seed in ((False, b"r"), (True, b"s")):
                 if expired:

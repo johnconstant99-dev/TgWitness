@@ -1,4 +1,3 @@
-"""Comparable message content, excluding delivery and file-access metadata."""
 from . import keyboard
 
 

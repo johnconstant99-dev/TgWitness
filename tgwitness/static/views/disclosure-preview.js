@@ -1,4 +1,3 @@
-// Display only the disclosure API's transformed sample, never source payloads.
 const MAX_SAMPLES = 12;
 const MAX_TEXT = 2000;
 const COUNTS = [

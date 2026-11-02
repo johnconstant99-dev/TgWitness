@@ -1,4 +1,3 @@
-"""View lifecycle checks in a real DOM, using no accounts or application APIs."""
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path

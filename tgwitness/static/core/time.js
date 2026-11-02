@@ -1,4 +1,3 @@
-// All panel dates share one display zone. Saved journal timestamps stay untouched.
 export function createTimeFormatter({locale = "en", translate = text => text, zone = "UTC", now = Date.now} = {}) {
   const valid=value=>{try{new Intl.DateTimeFormat('en',{timeZone:value});return value;}catch{return 'UTC';}};
   let displayZone = zone === 'local' ? 'local' : valid(zone);

@@ -1,4 +1,3 @@
-"""Independent account layouts preserve disclosure boundaries and stream large exports."""
 from pathlib import Path
 import sys
 

@@ -1,7 +1,4 @@
-"""Render the current investigation artwork into GitHub and website preview PNGs.
-
-Uses reviewed, self-contained SVG artwork. No application imports or network access.
-"""
+"""Render the current investigation artwork into GitHub and website preview PNGs."""
 import argparse
 import base64
 import os

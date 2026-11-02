@@ -1,6 +1,5 @@
 (() => {
   "use strict";
-  // Account groups with shared settings, and importing many accounts into their own workspaces.
   let groups = [], sections = [], picked = [], importing = false, stopping = false;
   let loadSerial = 0, formRevision = -1, restorePoint = null, loadError = "", creating = null;
   const settings = new Map(), moving = new Map(), writing = new Map(), groupActions = new Map();
@@ -108,7 +107,6 @@
     const shared = await json("profile-groups/" + encodeURIComponent(groupId) + "/settings", undefined, {root: true});
     const member = shared.members.find(m => m.id === profileId);
     if (!member?.available || !member.own.length) return;
-    // A route needs the connection check/apply flow; ordinary settings adoption cannot change it.
     const keys = member.own.filter(key => key !== "route");
     if (!keys.length) return;
     const names = keys.map(key => tr(shared.keys.find(k => k.key === key)?.label || key));
@@ -189,7 +187,6 @@
     groupControls(group.id);
   }
 
-  // Start or pause every member at once; members without a session or already in that state are left alone
   function groupRun(group) {
     const members = () => (state.profiles || []).filter(p => group.members.includes(p.id) && p.collector);
     const due = {start: p => !p.collector.running && p.collector.has_session, stop: p => p.collector.running};
@@ -311,10 +308,8 @@
       if(!members.length)members.push(grid.querySelector('.fleet-empty')||node('p','hint fleet-empty',tr('No workspaces in this group yet. Move one here or import accounts into it.')));
       placeChildren(grid,members);return section;
     });
-    // Move cards before retiring an old group, so removal never drops an account.
     placeChildren(list,[...cards].filter(([id])=>window.TgWitnessAccounts?.ownsRows||!membership.has(id)).map(([,card])=>card));
     placeChildren(box,sections);
-    // Without groups the section must not open blank: say what a group is for and offer to create one.
     if (!groups.length) {
       const empty = node("div", "fleet-groups-empty");
       const create = node("button", "secondary small", tr("New group")); create.type = "button";
@@ -340,7 +335,6 @@
     }
   }
 
-  // Bulk import ---------------------------------------------------------------------------
   function bundles(files) {
     const byName = new Map();
     for (const file of files) {
@@ -377,8 +371,6 @@
 
   function pick(files) {
     if (importing || !editable()) return;
-    // Dropped files skip the chooser's filter: other types are shown as not importable, not counted as ready;
-    // SQLite journals and hidden files that travel next to sessions are left out silently
     files = files.filter(f => !f.name.startsWith(".") && !/-journal$/i.test(f.name));
     const supported = file => /\.(session|json|zip|txt)$/i.test(file.name);
     picked = bundles(files.filter(f => f.size <= 8 * 1024 * 1024 && supported(f)));
@@ -386,7 +378,6 @@
     renderPicked(files.filter(f => !supported(f)));
   }
 
-  // The server prefixes its reason and names the other workspace: translate the parts, not the sentence
   function importError(message) {
     const reason = /^Not imported: (.+)$/s.exec(message)?.[1] ?? message;
     const owner = /^This Telegram account already has a workspace: (.+)\.$/s.exec(reason)?.[1];

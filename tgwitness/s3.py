@@ -1,4 +1,3 @@
-"""S3-compatible object storage: AWS Signature Version 4 and the calls the off-site copy needs."""
 import hashlib
 import hmac
 import xml.etree.ElementTree as ET
@@ -16,7 +15,6 @@ def canonical_query(query):
 
 
 def sign(method, url, headers, payload_hash, access_key, secret_key, region, now=None, service="s3"):
-    """Headers plus x-amz-date, x-amz-content-sha256 and Authorization. url carries the encoded path."""
     amz_date = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
     parts = urlsplit(url)
     signed_headers = {**{k.lower(): v for k, v in headers.items()}, "host": parts.netloc,
@@ -71,7 +69,6 @@ class S3:
         return root, ns
 
     async def object_lock(self):
-        """The bucket's Object Lock configuration: enabled, and the default retention if any."""
         try:
             _, _, data = await self.call("GET", self.url("", "object-lock"))
         except HTTPError as exc:
@@ -86,7 +83,6 @@ class S3:
                 "default_days": int(days) if days else int(years) * 365 if years else None}
 
     async def retention(self, key):
-        """Mode and retain-until date the storage applied to one object, or None."""
         try:
             _, _, data = await self.call("GET", self.url(key, "retention"))
         except HTTPError as exc:
@@ -97,7 +93,6 @@ class S3:
         return {"mode": root.findtext(ns + "Mode"), "retain_until": root.findtext(ns + "RetainUntilDate")}
 
     async def list(self, prefix):
-        """Every (key, size) under prefix, following continuation tokens (ListObjectsV2)."""
         token = None
         seen = set()
         while True:

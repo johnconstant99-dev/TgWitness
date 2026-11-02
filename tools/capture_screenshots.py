@@ -1,8 +1,4 @@
-"""Capture panel screenshots from synthetic data. Never connects to Telegram.
-
-python tools/capture_screenshots.py            # review set in test-results/screens
-python tools/capture_screenshots.py --docs     # README images in docs/assets
-"""
+"""Capture panel screenshots from synthetic data."""
 import argparse
 import sys
 import tempfile

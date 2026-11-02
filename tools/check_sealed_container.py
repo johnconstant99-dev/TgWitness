@@ -1,4 +1,3 @@
-"""Linux Docker smoke check of the restricted image, without a Telegram login."""
 import json
 import os
 import secrets

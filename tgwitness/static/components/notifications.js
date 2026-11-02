@@ -28,7 +28,7 @@ export function createNotifications(adapter) {
         saved = raw ? JSON.parse(raw) : {all: !owner || owner === c.fingerprint
           ? number(localStorage.getItem("tgwitness-read-" + c.profile)) : 0};
         if (!owner && c.fingerprint) localStorage.setItem(ownerKey, c.fingerprint);
-      } catch { /* Read state remains usable when browser storage is unavailable. */ }
+      } catch { }
       const groups = Object.create(null);
       for (const [id, seq] of Object.entries(saved?.groups || {}).slice(-256)) if (number(seq)) groups[id] = number(seq);
       memories.set(key, {all: number(saved?.all), groups});
@@ -41,7 +41,7 @@ export function createNotifications(adapter) {
     saved.groups = Object.fromEntries(Object.entries(saved.groups).filter(([,seq]) => seq > saved.all)
       .sort((a,b) => b[1] - a[1]).slice(0,256));
     try { localStorage.setItem("tgwitness-notifications-v1:" + scopeKey(context()), JSON.stringify(saved)); }
-    catch { /* Keep the in-memory acknowledgement. */ }
+    catch { }
   }
 
   function unread(item) {

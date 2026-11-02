@@ -1,4 +1,3 @@
-"""Authenticated, stateless MCP transport hosted by the panel."""
 import asyncio
 import json
 import os
@@ -14,7 +13,6 @@ REQUEST_TIMEOUT = 12
 
 
 def remember_panel_origin(app, request):
-    """Called only after administrator authentication on the MCP settings page."""
     scheme, host = request.scope.get("scheme", "http"), request.headers.get("host", "").lower()
     origin = scheme + "://" + host
     try:
@@ -22,7 +20,7 @@ def remember_panel_origin(app, request):
         if (scheme not in ("http", "https") or not parsed.hostname or parsed.netloc != host
                 or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment):
             return
-        parsed.port  # Validate the port before remembering it.
+        parsed.port
     except ValueError:
         return
     supplied = request.headers.get("origin")
@@ -36,7 +34,6 @@ def remember_panel_origin(app, request):
 
 
 def trusted_request(request, registered=()):
-    """Trust the listening address or the operator's public URL, never an arbitrary Host."""
     try:
         server, port = request.scope.get("server") or ("127.0.0.1", 8787)
         hosts = set()
@@ -119,7 +116,7 @@ class Endpoint:
                 try:
                     message = json.loads(body)
                 except (ValueError, UnicodeDecodeError):
-                    message = None  # The SDK returns the protocol's parse error.
+                    message = None
                 if isinstance(message, dict) and message.get("method") == "tools/call":
                     params = message.get("params")
                     name = params.get("name") if isinstance(params, dict) else None
@@ -144,8 +141,6 @@ class Endpoint:
             if not started:
                 await error(408, "MCP request timed out.")
             else:
-                # Headers cannot be replaced now. Let the ASGI server close the
-                # incomplete response instead of silently accepting its body.
                 raise
         finally:
             self.active -= 1

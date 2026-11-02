@@ -1,4 +1,3 @@
-/** Submitted credentials must never become the Discard baseline. No browser or network. */
 import {readFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
@@ -44,7 +43,7 @@ assert.equal(form.dataset.dirty,'false');
 
 secret.value='  unnormalized  ';
 const normalized=controls.capture(form.id);
-secret.value='unnormalized'; // The server canonicalized a field with no newer local edit.
+secret.value='unnormalized';
 controls.accepted(normalized,false);
 assert.equal(form.dataset.dirty,'false','Server normalization must become the clean baseline.');
 
@@ -55,8 +54,6 @@ secret.value='current-workspace-draft';
 controls.clearSubmitted(stale,[secret.id]);controls.accepted(stale);discard();
 assert.equal(secret.value,'current-workspace-draft','Old replies cannot clear or restore another workspace draft.');
 controls.destroy();
-// Destination helpers have their own Add action and disappear when the service changes.
-// They must not leave removed controls in the saved form's Discard baseline.
 const destination=new Element();destination.id='alert-destinations';
 const helper=new Element();helper.id='alert-builder-token';
 helper.closest=selector=>selector==='.alerts-builder'?{}:null;

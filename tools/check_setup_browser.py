@@ -1,4 +1,3 @@
-"""Witness configuration and proxy setup acceptance; local fixtures only."""
 import json
 import os
 import sys

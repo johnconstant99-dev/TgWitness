@@ -86,7 +86,7 @@ Proxy configuration is encrypted in the vault. Passwords and MTProxy secrets are
 not returned by the API or written to evidence records. Each workspace chooses
 its Telegram route and an [IP mode](CONNECTION-SECURITY.md#ip-modes).
 
-Hide IP mode refuses direct Telegram fallback and requires a proxy for external
+**Hide the address** refuses direct Telegram fallback and requires a proxy for external
 HTTP requests. The explicitly selected fallback mode permits direct Telegram
 access after its delay; tunnel/VPN mode permits direct routes. Choosing tunnel
 mode does not install or verify a VPN. These settings do not control all machine

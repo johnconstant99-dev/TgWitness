@@ -25,8 +25,9 @@ you configure for the selected workspace.
 
 ## Set up delivery
 
-1. Open **Sources → Notifications → Alerts and a daily summary**.
-2. Enter one Apprise destination URL per line. Use the
+1. Open **Extras → Notifications → Configure**.
+2. Choose a service under **Add a destination** and fill in its fields, or open
+   **Destinations as Apprise addresses** and enter one URL per line. Use the
    [service catalogue](https://appriseit.com/services/) for your destination's format.
 3. Enable **Send notifications** and select problem alerts, changes in observed
    chats or a daily summary. The summary hour follows the server's time.

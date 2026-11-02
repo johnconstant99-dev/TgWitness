@@ -1,4 +1,3 @@
-"""Display-zone boundaries, relative titles and persistence. Synthetic journal only."""
 from pathlib import Path
 import re
 import sys

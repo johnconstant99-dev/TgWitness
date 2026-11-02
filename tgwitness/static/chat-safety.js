@@ -1,4 +1,3 @@
-/* All Telegram write actions share the same explicit, account-scoped consent. */
 (function () {
   'use strict';
   const RU = {
@@ -44,7 +43,6 @@
       bar.classList.toggle('can-send', writable());
     }
     async function confirm(action) {
-      // Joining is also available before any chat exists. It always asks, and never enables sending.
       const canAct=()=>action==='open'?!!context().allowed:writable();
       if (!canAct()) {warn(text('Turn off Read-only before acting from this account.')); return false;}
       if (pending) return false;

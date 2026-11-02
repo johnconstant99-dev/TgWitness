@@ -1,15 +1,3 @@
-"""Indicators an abuse desk can act on, found in the recorded messages.
-
-Links and domains (also those hidden behind text, in buttons and in link previews), cryptocurrency
-addresses (Bitcoin, Litecoin, Dogecoin and TRON by their base58 checksum, bech32 addresses by theirs, TON
-by its CRC; EVM and Solana addresses have no checksum this module checks and say so), Telegram usernames
-and invite links, phone numbers and e-mail addresses. Each indicator names the messages it was seen in, when
-it was first and last seen and where in the message it was.
-
-The archive carries them as indicators.csv, a STIX 2.1 bundle and a MISP event, all listed in the signed
-manifest. Being named here says that the text contained it, not that it is malicious; the files mark every
-indicator as unknown and not for automatic blocking (MISP to_ids false) until an analyst decides.
-"""
 import base64
 import csv
 import hashlib
@@ -21,20 +9,17 @@ from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
 NAMESPACE = uuid.uuid5(uuid.NAMESPACE_URL, "https://github.com/phishdestroy/TgWitness#indicators")
-MAX_INDICATORS = 20000  # distinct indicators per export; counts stay complete for those listed
-MAX_REFS = 50           # messages named per indicator; the count stays complete
+MAX_INDICATORS = 20000
+MAX_REFS = 50
 KINDS = ("url", "domain", "wallet", "telegram", "telegram-invite", "email", "phone", "image")
 B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 BECH32 = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
-# Version bytes of base58check addresses; 0x05 (P2SH) is shared by Bitcoin and old Litecoin addresses.
 BASE58_CHAINS = {0x00: "Bitcoin", 0x05: "Bitcoin", 0x30: "Litecoin", 0x32: "Litecoin", 0x1E: "Dogecoin",
                  0x41: "TRON"}
 BECH32_CHAINS = {"bc": "Bitcoin", "ltc": "Litecoin"}
 TELEGRAM_HOSTS = ("t.me", "telegram.me", "telegram.dog")
 TELEGRAM_PATHS = ("joinchat", "addstickers", "addemoji", "share", "proxy", "socks", "setlanguage", "login",
                   "iv", "s", "c", "contact", "boost", "giftcode", "addlist", "m", "bg", "addtheme")
-# Bare "name.ext" in text is a file far more often than a domain: these are not taken as domains unless
-# written as a link.
 FILE_ENDINGS = {"txt", "jpg", "jpeg", "png", "gif", "pdf", "doc", "docx", "xls", "xlsx", "csv", "json", "html", "htm",
                 "js", "py", "exe", "dll", "apk", "ipa", "php", "mp4", "mp3", "webp", "svg", "log", "md", "ini", "cfg",
                 "bat", "sh", "jar", "rar", "7z", "tar", "gz", "heic", "webm", "ogg", "wav", "tgs"}
@@ -61,7 +46,6 @@ def b58decode(text):
 
 
 def base58check_chain(text):
-    """The chain of a base58check address whose checksum is right, else None."""
     try:
         data = b58decode(text)
     except ValueError:
@@ -72,7 +56,6 @@ def base58check_chain(text):
 
 
 def bech32_valid(text):
-    """BIP 173 / BIP 350: the checksum of a segwit address (bech32 or bech32m)."""
     text = text.lower()
     hrp, _, data = text.rpartition("1")
     if not hrp or len(data) < 6 or any(c not in BECH32 for c in data):
@@ -106,15 +89,12 @@ def ton_valid(text):
 
 
 def image_hash(path):
-    """dHash: 64 bits from a 9x8 greyscale copy, each bit whether a pixel is brighter than its right neighbour.
-    Recompressed or resized copies of the same picture keep nearly the same bits (compare by Hamming distance);
-    SHA-256 links only identical files. None for a file that is not an image Pillow reads."""
     try:
         from PIL import Image
         with Image.open(path) as picture:
             picture.draft("L", (64, 64))
             small = picture.convert("L").resize((9, 8), Image.Resampling.LANCZOS)
-            pixels = list(small.tobytes())  # one byte per pixel in mode L
+            pixels = list(small.tobytes())
     except Exception:
         return None
     bits = [pixels[row * 9 + column] > pixels[row * 9 + column + 1] for row in range(8) for column in range(8)]
@@ -138,7 +118,6 @@ def host_of(url):
 
 
 def defang(kind, value):
-    """Written so that no reader or tool opens it by accident: hxxps://example[.]com, name[@]example[.]com."""
     if kind == "url":
         scheme, sep, rest = value.partition("://")
         host_end = len(rest.split("/", 1)[0])
@@ -155,8 +134,6 @@ def defang(kind, value):
 
 
 class Indicators:
-    """Collects indicators from messages as an export reads them, in one pass."""
-
     def __init__(self):
         self.found, self.dropped = {}, 0
 
@@ -196,7 +173,7 @@ class Indicators:
     def domain(self, host, source, ref, at):
         host = host.rstrip(".").lower()
         if host in TELEGRAM_HOSTS:
-            return  # the username or invite behind a t.me link is the indicator
+            return
         try:
             ascii_host = host.encode("idna").decode("ascii")
         except UnicodeError:
@@ -216,7 +193,6 @@ class Indicators:
             self.note("telegram", "@" + path[1], source, ref, at)
 
     def text(self, text, source, ref, at):
-        """Everything this module recognises in one piece of text."""
         if not isinstance(text, str) or not text:
             return
         taken = []
@@ -269,13 +245,11 @@ class Indicators:
             self.note("wallet", match.group(0).lower(), source, ref, at, chain="TON", checksum="none")
 
     def image(self, sha256, path, ref, at):
-        """A picture sent in a message: its SHA-256 and its dHash, which also finds recompressed copies."""
         dhash = image_hash(path)
         if dhash:
             self.note("image", sha256, "attachment", ref, at, dhash=dhash)
 
     def message(self, text, details, ref, at):
-        """A message: its text, what Telegram marked in it, links behind its text, buttons and preview."""
         self.text(text, "text", ref, at)
         details = details if isinstance(details, dict) else {}
         for entity in details.get("text_entities") or []:
@@ -287,7 +261,7 @@ class Indicators:
                 if 7 <= len(digits) <= 15:
                     self.note("phone", ("+" if shown.strip().startswith("+") else "") + digits, "text", ref, at)
             elif kind == "bank_card":
-                continue  # card numbers are personal data of victims as often as of fraudsters: not listed
+                continue
         for row in (details.get("buttons") or {}).get("rows") or []:
             for button in row:
                 if isinstance(button, dict) and isinstance(button.get("url"), str):
@@ -316,7 +290,6 @@ def csv_bytes(items):
 
 
 def ref_text(ref):
-    """'chat -100123:message 42 (#17)' for a journal record, 'message 42' in a chat export."""
     text = "message " + str(ref.get("message")) if ref.get("message") is not None else ""
     if ref.get("chat") is not None:
         text = "chat " + str(ref["chat"]) + (":" + text if text else "")
@@ -350,7 +323,6 @@ def item_id(item):
 
 
 def stix_time(value):
-    """STIX timestamps are UTC with a Z (RFC 3339), to the millisecond."""
     try:
         moment = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
     except ValueError:
@@ -360,8 +332,6 @@ def stix_time(value):
 
 
 def stix_bundle(items, context):
-    """A STIX 2.1 bundle: the workspace as identity, one indicator per item and a report that groups them.
-    Indicator IDs depend only on kind and value, so the same indicator keeps its ID across exports."""
     created, case = stix_time(context["created_at"]), context.get("case") or {}
     who = case.get("organization") or "TgWitness workspace " + context["fingerprint"][:16]
     identity = {"type": "identity", "spec_version": "2.1", "id": "identity--" + str(uuid.uuid5(NAMESPACE, who)),
@@ -397,8 +367,6 @@ MISP_TYPES = {"url": ("url", "Network activity"), "telegram-invite": ("url", "So
 
 
 def misp_event(items, context):
-    """A MISP event (JSON import): one attribute per item, not for automatic detection (to_ids false),
-    distribution 'your organisation only' until an analyst shares it."""
     case = context.get("case") or {}
     attributes = []
     for item in items:
@@ -420,7 +388,6 @@ def misp_event(items, context):
 
 
 def files(result, context):
-    """The three indicator files for an archive, or nothing when no indicator was found."""
     items = result["items"]
     if not items:
         return []

@@ -1,4 +1,3 @@
-"""Exercise first-run choices and failure boundaries without changing host services."""
 import contextlib
 import http.server
 import io
@@ -169,7 +168,6 @@ class SetupChecks(unittest.TestCase):
             self.assertEqual(json.loads((Path(tmp) / "tunnel-config.yml").read_text()), {})
             self.assertNotIn("0.0.0.0", " ".join(args))
         for value in ("https://panel.trycloudflare.com.attacker.test", "https://panel.trycloudflare.com@attacker.test"):
-            # Parsing is tightened to a full hostname boundary, never arbitrary URLs.
             self.assertIsNone(panel.QUICK_URL.search(value))
 
 

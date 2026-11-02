@@ -1,4 +1,3 @@
-"""Offline report figures, with the same selected aggregates in HTML, PDF and JSON."""
 from datetime import date
 from html import escape
 import math
@@ -60,7 +59,6 @@ def label(row, say):
 
 
 def activity_bins(rows, maximum=36):
-    """Equal-width chronological bins; never compress missing dates out of the axis."""
     if not rows:
         return []
     monthly = len(rows[0]["period"]) == 7
@@ -87,7 +85,6 @@ def _table(headers, rows, say):
     table = ('<table class="analytics-data"><thead><tr>'
             + ''.join('<th scope="col">'+_e(h)+'</th>' for h in headers)+'</tr></thead><tbody>'
             + ''.join('<tr>'+''.join('<td>'+_e(v)+'</td>' for v in row)+'</tr>' for row in rows)+'</tbody></table>')
-    # Closed details stays non-rendered in several print engines, despite display overrides.
     return ('<details class="analytics-table"><summary>'+_e(say("Exact figures"))+'</summary>'+table+'</details>'
             + '<div class="analytics-print-data">'+table+'</div>')
 

@@ -1,27 +1,3 @@
-"""Full chat history export in a Telegram-style, signed bundle.
-
-The collector streams one JSON record per message into a scratch JSONL file
-(memory-safe for very large chats). This module turns that scratch file into a
-downloadable ZIP that contains:
-
-  chat.json      Telegram-export-style array of messages.
-  chat.html      The sealed report and its viewer (report.py): search, filters, people, indicators,
-                 selection; the messages are viewer/*.js beside it, listed by SHA-256 in its seal.
-  message-ids.json  How the message numbers run: present, absent and every absent run.
-  authors.csv    Everyone who posted: ID, name, username, message count, first/last.
-  authors.json   The same list as JSON.
-  custody.json   How the history was acquired and exported, with the standards followed.
-  SHA256SUMS     Every file's SHA-256 for sha256sum -c.
-  manifest.json  Metadata plus a SHA-256 for every file in the bundle.
-  manifest.sig   Ed25519 signature over manifest.json by the profile key.
-  verify.py      A copy of the journal verifier (shares the signature scheme).
-  README.txt     Scope and verification, in the report language and in English.
-
-The signature proves the bundle was not changed after export relative to a
-trusted key fingerprint. It does not prove Telegram origin, and the export is a
-current snapshot: messages deleted before export or past edits are not
-reconstructed.
-"""
 import csv
 import hashlib
 import io
@@ -52,7 +28,6 @@ MAX_BUNDLE_BYTES = 4 * 1024**3
 
 
 def records(scratch_path):
-    """Yield message records previously written one-per-line as canonical JSON."""
     with Path(scratch_path).open("r", encoding="utf-8") as handle:
         for line in handle:
             line = line.strip()
@@ -61,7 +36,6 @@ def records(scratch_path):
 
 
 def authors(scratch_path):
-    """Everyone who posted in the exported history, most active first."""
     people = {}
     for record in records(scratch_path):
         if record.get("type") == "service":
@@ -73,7 +47,7 @@ def authors(scratch_path):
         person["name"] = person["name"] or record.get("from")
         person["username"] = person["username"] or record.get("from_username")
         person["messages"] += 1
-        signed = record.get("author")  # an admin's signature under a channel post
+        signed = record.get("author")
         if isinstance(signed, str) and signed and signed not in person.setdefault("signatures", []) \
                 and len(person["signatures"]) < 50:
             person["signatures"].append(signed)
@@ -98,14 +72,11 @@ def authors_csv(people):
 
 
 def message_ids(scratch_path, chat_id):
-    """How the exported messages' numbers run; verify.py recounts this from chat.json."""
     ids = sorted({r["id"] for r in records(scratch_path) if type(r.get("id")) is int})
     return {**message_id_summary(chat_id, ids), "meaning": ID_MEANING}
 
 
 def chat_indicators(scratch_path, meta=None, media_dir=None):
-    """Links, domains, wallets, accounts, phone numbers and e-mail addresses in the exported messages and in
-    the chat's description."""
     found = indicators.Indicators()
     profile = ((meta or {}).get("chat") or {}).get("profile") or {}
     found.text(profile.get("about"), "chat description", None, (meta or {}).get("exported_at"))
@@ -117,12 +88,6 @@ def chat_indicators(scratch_path, meta=None, media_dir=None):
                     and (Path(media_dir) / saved).is_file():
                 found.image(saved, Path(media_dir) / saved, {"message": record.get("id")}, record.get("date"))
     return found.result()
-
-
-def chat_category(record):
-    """The filter a message falls under in chat.html (as report.chat_rows marks it)."""
-    return "service" if record.get("type") == "service" else "media" if record.get("media_type") \
-        else "edited" if record.get("edited") else "text"
 
 
 def json_chunks(meta, scratch_path):
@@ -140,7 +105,6 @@ def json_chunks(meta, scratch_path):
 
 
 def records_backwards(scratch_path, block=1 << 16):
-    """Records from the last line to the first, reading the file from its end in blocks."""
     with Path(scratch_path).open("rb") as handle:
         handle.seek(0, 2)
         position, rest = handle.tell(), b""
@@ -161,7 +125,6 @@ RENAMES = ("MessageActionChannelCreate", "MessageActionChatCreate", "MessageActi
 
 
 def chat_stats(scratch_path):
-    """Counts, first and last dates, and whether Telegram returned the history newest first."""
     stats = {"text": 0, "media": 0, "edited": 0, "service": 0, "first_at": None, "last_at": None,
              "first_id": None, "last_id": None, "renames": [], "found_on_recheck": 0}
     for record in records(scratch_path):
@@ -188,7 +151,6 @@ def chat_stats(scratch_path):
 
 
 def html_chunks(meta, scratch_path, context=None):
-    """The readable chat, oldest message first (see report.py); sealed when the context can sign."""
     context = context or {}
     stats = context.get("stats") or chat_stats(scratch_path)
     context = {"producer": producer(), "limits": EXPORT_LIMITS, "people": authors(scratch_path), "files": {},
@@ -198,7 +160,6 @@ def html_chunks(meta, scratch_path, context=None):
 
 
 def attachment_files(media_dir):
-    """Attachments saved by the export, each named by its SHA-256."""
     if media_dir is None or not Path(media_dir).is_dir():
         return []
     return sorted(p for p in Path(media_dir).iterdir() if p.is_file() and len(p.name) == 64
@@ -235,7 +196,6 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
                 ids["recheck"] = meta["recheck"]
             log = meta.get("admin_log")
             if isinstance(log, dict) and log.get("events") is not None:
-                # The events go into a file of their own; chat.json and the report name what it holds.
                 write_member("admin-log.json", [json.dumps(log, ensure_ascii=False, indent=1).encode("utf-8")])
                 meta["admin_log"] = {"file": "admin-log.json", "read_at": log.get("read_at"),
                                      "events": len(log["events"]), "complete": log.get("complete"),

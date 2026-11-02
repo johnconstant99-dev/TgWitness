@@ -1,4 +1,3 @@
-"""Rebuildable read indexes. Signed journal records remain the source of truth."""
 import json
 import sqlite3
 import unicodedata
@@ -22,7 +21,6 @@ def search_text(value):
 
 
 def nul_text(payload):
-    """Older JSON1 builds truncate decoded strings at NUL; Python preserves them."""
     value = json.loads(payload).get("text")
     return value if isinstance(value, str) else ""
 
@@ -78,8 +76,6 @@ class JournalIndex:
                 self.search_payload(row["seq"], row["payload"])
         self.initialize_counts()
         if not self.position("missing_recovery"):
-            # Older derived indexes kept "missing" forever, including after a
-            # later positive observation. Repair only the index, never the journal.
             db.execute("UPDATE message_state_index SET missing=0 WHERE missing=1 AND text_seq > "
                        "(SELECT max(seq) FROM events WHERE events.chat_id=message_state_index.chat_id "
                        "AND events.message_id=message_state_index.message_id AND kind='message.missing_on_recheck')")
@@ -88,15 +84,9 @@ class JournalIndex:
             self.advance("missing_recovery", 1)
 
     def repair_missing_tables(self):
-        """A watermark is usable only with every table it describes.
-
-        The caller's transaction restores the previous state if replay fails.
-        Reset a whole group so surviving counters/FTS rows cannot be replayed twice.
-        """
         existing = {row[0] for row in self.db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         has_positions = "journal_read_index" in existing
         positions = {row[0] for row in self.db.execute("SELECT name FROM journal_read_index")} if has_positions else set()
-        # Per-chat counters gained saved/deleted_saved: an older state index is rebuilt from the journal once.
         state_columns = {row[1] for row in self.db.execute("PRAGMA table_info(chat_state_index)")}             if "chat_state_index" in existing else set()
         for name, tables in READ_GROUPS.items():
             current = name != "state" or "chat_state_index" not in existing or "deleted_saved" in state_columns
@@ -169,7 +159,6 @@ class JournalIndex:
                 if kind in TEXT_KINDS:
                     updated = (*updated[:3], 0)
                 text_seq = event["seq"] if kind in TEXT_KINDS else old["text_seq"] if old else None
-                # Saved text, and deletions of messages whose text was saved before the deletion notice.
                 had_text = bool(old and old["text_seq"] is not None)
                 saved_before = (int(had_text), int(had_text and bool(previous[2])))
                 saved_after = (int(text_seq is not None), int(text_seq is not None and bool(updated[2])))
@@ -192,8 +181,6 @@ class JournalIndex:
     def search(self, event):
         value = event["payload"].get("text")
         if value is not None and not isinstance(value, str):
-            # JSON objects/arrays are strings to SQLite's json_extract(), and
-            # were searchable before FTS. Index that exact representation.
             value = self.db.execute("SELECT json_extract(payload,'$.text') FROM events WHERE seq=?",
                                     (event["seq"],)).fetchone()[0]
         if value is not None:
@@ -207,8 +194,6 @@ class JournalIndex:
         self.advance("payload_search", seq)
 
     def candidate(self, query, *, text_only=True):
-        # Exact instr() remains authoritative. Short queries use the
-        # original scan; NUL is excluded because FTS query strings cannot carry it.
         value = search_text(query)
         enabled = self.search_enabled if text_only else self.payload_search_enabled
         if not enabled or len(value) < 3 or "\0" in value:
@@ -217,7 +202,6 @@ class JournalIndex:
 
 
 def media_fields(payload):
-    """Best-effort scheduling hints for old queues; never alter signed payloads."""
     capture = payload.get("media_capture") or {}
     raw = payload.get("raw") or {}
     media = raw.get("media") or {}

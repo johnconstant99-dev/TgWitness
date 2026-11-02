@@ -1,4 +1,3 @@
-"""Uvicorn diagnostics for console and windowless launches."""
 import copy
 import os
 import sys

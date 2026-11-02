@@ -1,4 +1,3 @@
-"""Minimize operator metadata in panel responses; never rewrite signed evidence."""
 import ipaddress
 import re
 
@@ -14,7 +13,6 @@ CREDENTIAL = re.compile(
 
 
 def private_log(text):
-    """A display copy only: redact URL credentials and labelled secrets."""
     text = URL_LOGIN.sub(r"\1[credentials hidden]@", text)
     text = BEARER.sub(r"\1[secret hidden]", text)
     text = CREDENTIAL.sub(lambda match: match[1] + match[2] + '[secret hidden]' + match[4], text)

@@ -1,4 +1,3 @@
-"""Synthetic studio: real preview renderer, saved/exported choices, privacy and responsive charts."""
 import json
 from pathlib import Path
 import tempfile
@@ -48,7 +47,6 @@ def main():
                 if preview_numbers is None:
                     preview_numbers = numbers
                 assert numbers == preview_numbers, 'Changing the design changed preview counts'
-                # External stylesheet is actually applied under the panel CSP.
                 assert frame.locator(".analytics-pair").evaluate("el=>getComputedStyle(el).display") == "grid"
                 if design == 'quire':
                     assert frame.locator('.facts b').first.evaluate('el=>getComputedStyle(el).color') == frame.locator('h1').evaluate('el=>getComputedStyle(el).color')
@@ -85,7 +83,6 @@ def main():
             page.locator("#report-participant-chart").uncheck()
             expect(page.locator("#report-design-preview-status")).to_contain_text("not signed", timeout=20000)
             expect(page.frame_locator("#report-preview-frame").locator(".chart-participants")).to_have_count(0)
-            # Preview never persists the draft or produces a signature.
             options = page.evaluate("json('report-options')")
             assert options["participant_chart"] and options["design"] == "horizon"
             hold_api_response(page, '/api/report-design-preview')

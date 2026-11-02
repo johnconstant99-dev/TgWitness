@@ -505,7 +505,7 @@ See the [procedure](TIMESTAMP.md) and [validation results](VERIFICATION.md).
 ## Optional records in evidence mode: drand and Telegram devices
 
 Two more records can run on the same passes as the timestamps. Both are off by default and
-take effect only while evidence mode is on: Extras → Evidence → **More witnesses · optional**,
+take effect only while evidence mode is on: Extras → Evidence & backups → **More witnesses · optional**,
 or `"drand": true` and `"devices": true` in `POST /api/evidence`. One failing does not stop the
 other or the timestamps; the panel shows the latest result of each under the form.
 

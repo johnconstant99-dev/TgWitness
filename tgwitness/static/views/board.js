@@ -1,4 +1,3 @@
-// Private team notes. This module calls only the panel's board/read APIs.
 export function createCaseBoard(ctx){
   const {root,state,json,tr,node,toast,may,openEvidence,openSlice,download}=ctx;
   const n=(tag,cls='',text='')=>node(tag,cls,text), t=value=>tr(value);

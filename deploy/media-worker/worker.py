@@ -1,4 +1,3 @@
-"""Runs inside the networkless media worker, never in the panel process."""
 import hashlib
 import importlib.metadata
 import io
@@ -12,7 +11,6 @@ import sys
 
 MAX_AUDIO_SECONDS = 1800
 SAMPLE_RATE = 16000
-# Single-file formats only: no HLS, DASH, concat, image sequences or device demuxers.
 AUDIO_FORMATS = "aac,aiff,amr,asf,avi,flac,flv,matroska,webm,mov,mp3,mpeg,mpegts,ogg,wav,w64"
 
 
@@ -21,7 +19,6 @@ def deny_secondary_open(*args):
 
 
 def decode_audio(path, max_seconds=MAX_AUDIO_SECONDS):
-    """Decode once, bounding actual samples before copying or passing them to Whisper."""
     import av
     import numpy as np
     from fractions import Fraction
@@ -57,7 +54,6 @@ def decode_audio(path, max_seconds=MAX_AUDIO_SECONDS):
                 elapsed += Fraction(frame.samples, rate)
                 if elapsed > max_seconds:
                     raise ValueError("Decoded audio exceeds duration limit")
-                # Preserve sample order without allocating silence for attacker-controlled timestamps.
                 frame.pts = None
             for decoded in resampler.resample(frame):
                 if decoded.samples > limit - samples:
@@ -66,7 +62,6 @@ def decode_audio(path, max_seconds=MAX_AUDIO_SECONDS):
                 output.write(decoded.to_ndarray().tobytes())
     if not samples:
         raise ValueError("No decoded audio samples")
-    # At most 57.6 MB of s16 PCM and 115.2 MB of float32 samples at the production limit.
     result = np.frombuffer(output.getbuffer(), dtype=np.int16).astype(np.float32)
     result /= 32768.0
     return result

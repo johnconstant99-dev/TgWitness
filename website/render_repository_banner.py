@@ -1,8 +1,4 @@
-"""Render the technical repository banners used across the PhishDestroy family.
-
-Pass the Space Grotesk variable TTF with --font. Outlined text, SVG motion and
-separate mobile/still compositions; no network access or application imports.
-"""
+"""Render the technical repository banners used across the PhishDestroy family."""
 import argparse
 
 from fontTools.ttLib import TTFont

@@ -1,5 +1,3 @@
-/* The viewer beside the report: filters, the feed (a Telegram-style chat or a journal timeline) and one item in
-   full. Colours come from the report palette, so the light and dark themes apply as they do to the report. */
 .view[hidden],[hidden].v-btn,.v-selbar[hidden],.v-detail[hidden],.tabs [data-view][hidden]{display:none!important}
 .fp,.stamp-key{direction:ltr;unicode-bidi:isolate}
 code{direction:ltr;unicode-bidi:isolate}
@@ -96,7 +94,6 @@ code{direction:ltr;unicode-bidi:isolate}
 .v-feed .gap-row span{padding:4px 12px;border:1px dashed var(--bad);border-radius:999px;background:var(--badtint);color:var(--bad);font-size:12.5px;
   font-weight:650}
 
-/* A chat message: avatar on the last of a run, name on the first, time inside the bubble */
 .msg{position:relative;display:flex;align-items:flex-end;gap:10px;padding:1px 6px 1px 36px;border-radius:12px;cursor:pointer}
 .msg.first{margin-top:10px}
 .msg .pick{position:absolute;left:8px;bottom:9px;opacity:0;transition:opacity .15s}
@@ -127,7 +124,6 @@ code{direction:ltr;unicode-bidi:isolate}
 .tag.red{background:var(--badtint);color:var(--bad)}.tag.orange{background:var(--warntint);color:var(--warn)}
 .tag.violet{background:var(--violettint);color:var(--violet)}.tag.blue{background:var(--tint);color:var(--accent-text)}
 
-/* A journal record: an icon by kind, the chat and the time, then the text */
 .rec2{position:relative;display:grid;grid-template-columns:18px 36px minmax(0,1fr);gap:12px;align-items:start;padding:12px 14px;border-radius:14px;
   cursor:pointer}
 .rec2+.rec2{border-top:1px solid var(--line)}

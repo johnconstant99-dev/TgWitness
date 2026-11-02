@@ -50,7 +50,7 @@ SMALL_MEDIA_BYTES = 2 * 1024**2
 
 
 class AuthorizationRequired(ValueError):
-    """The saved account session was rejected, not merely disconnected."""
+    pass
 
 
 AUTHORIZATION_ERRORS = (AuthorizationRequired, AuthKeyDuplicatedError, AuthKeyInvalidError,
@@ -72,20 +72,17 @@ MEMBERSHIP_ACTIONS = (types.MessageActionChatAddUser, types.MessageActionChatDel
 CLIENT_FIELDS = ("device_model", "system_version", "app_version", "lang_code", "system_lang_code")
 CLOCK_TIMEOUT = 10
 PROFILE_TIMEOUT = 30
-# What Telegram itself says about a chat: its labels, and how it is set up.
 PROFILE_FLAGS = ("scam", "fake", "verified", "restricted", "noforwards", "broadcast", "megagroup", "gigagroup",
                  "signatures", "join_to_send", "join_request", "slowmode_enabled")
 ROLES = {"ChannelParticipantCreator": "creator", "ChannelParticipantAdmin": "admin", "ChannelParticipantSelf": "member",
          "ChannelParticipant": "member", "ChannelParticipantBanned": "restricted", "ChannelParticipantLeft": "left",
          "ChatParticipantCreator": "creator", "ChatParticipantAdmin": "admin", "ChatParticipant": "member"}
-RECHECK_LIMIT = 10000   # absent message numbers asked for again by number in one export
-ADMIN_LOG_LIMIT = 10000  # admin log events read in one export (Telegram keeps about 48 hours)
+RECHECK_LIMIT = 10000
+ADMIN_LOG_LIMIT = 10000
 ADMIN_LOG_MEANING = ("The chat's admin log as Telegram returned it to this admin account: Telegram keeps about the last "
                      "48 hours. Deleted and edited messages appear with their content and the account that acted.")
 CLOCK_METHOD = ("updates.getState: Telegram's time in whole seconds against the collector's clock halfway through the "
                 "request; offset is Telegram minus collector")
-# Why Telegram stopped accepting this workspace's session, read from the error it returned. Telethon's
-# error.message holds only the error class (UNAUTHORIZED, FLOOD), so the Telegram error is named here.
 ACCOUNT_LOSS = ((UserDeactivatedBanError, "USER_DEACTIVATED_BAN", "account_banned"),
                 (UserDeactivatedError, "USER_DEACTIVATED", "account_deleted"),
                 (AuthKeyDuplicatedError, "AUTH_KEY_DUPLICATED", "session_duplicated"),
@@ -115,14 +112,12 @@ def telegram_error(exc):
 
 
 class AccountLost(AuthorizationRequired):
-    """Telegram no longer accepts this workspace's session; cause says why when Telegram said."""
     def __init__(self, cause, error=None):
         super().__init__("Telegram authorization expired. Sign in again.")
         self.cause, self.error = cause, error
 
 
 def connection_change(call):
-    """An export and an account change must never own the same connection."""
     @wraps(call)
     async def guarded(self, *args, **kwargs):
         if self.export_busy() or self.export_claim:
@@ -139,7 +134,6 @@ def connection_change(call):
 
 
 def recovered_source(update):
-    """Telethon hands over messages fetched through getDifference (after a gap or restart) with pts=0."""
     return "update_recovery" if getattr(update, "pts", None) == 0 else None
 
 
@@ -158,7 +152,6 @@ def attachment_identity(message):
 
 
 def downloadable_media(message):
-    # A web preview may contain both a photo and a document. Use the file whose size was checked.
     if isinstance(message.media, types.MessageMediaWebPage):
         return message.photo or message.document
     return message.media
@@ -186,7 +179,6 @@ def plain(value):
 
 
 def absent_numbers(scratch):
-    """Message numbers between the first and the last exported message that the history did not return."""
     numbers = set()
     with Path(scratch).open(encoding="utf-8") as handle:
         for line in handle:
@@ -200,7 +192,6 @@ def absent_numbers(scratch):
 
 
 def merge_history(scratch, entries):
-    """Put messages found on a recheck into the history file where they belong (newest first), in one pass."""
     entries = sorted(entries, key=lambda e: e["id"], reverse=True)
     merged = Path(scratch).with_suffix(".merged")
     with Path(scratch).open(encoding="utf-8") as incoming, merged.open("w", encoding="utf-8") as outgoing:
@@ -221,7 +212,6 @@ def date_string(value):
 
 
 def buttons_of(message):
-    """The message's buttons in the same form as saved records (keyboard.keyboard of raw.reply_markup)."""
     return keyboard.keyboard(plain(getattr(message, "reply_markup", None)))
 
 
@@ -265,7 +255,6 @@ def describe_message(message):
 
 
 def admin_event(event):
-    """One admin log entry: when, which account, what it did; a deleted or edited message in full."""
     action = event.action
     found = {"id": event.id, "date": date_string(event.date), "user_id": event.user_id,
              "action": type(action).__name__.replace("ChannelAdminLogEventAction", "")}
@@ -281,7 +270,6 @@ def admin_event(event):
 
 
 def message_record(message):
-    """A Telegram-export-style record for one message: no access hashes or sessions."""
     sender = getattr(message, "sender", None)
     action = getattr(message, "action", None)
     media = getattr(message, "media", None)
@@ -300,10 +288,9 @@ def message_record(message):
     if action:
         record["action"] = type(action).__name__
         if isinstance(getattr(action, "title", None), str):
-            record["action_title"] = action.title  # a chat created or renamed
+            record["action_title"] = action.title
     if media:
         record["media_type"] = type(media).__name__
-    # Hidden links, buttons, forward origin, views and the rest of what the reader saw.
     record.update(message_details.details(plain(message)))
     return record
 
@@ -412,15 +399,9 @@ class Collector:
         }
 
     def handle_authorization_error(self, exc, operation, *, client=None):
-        """Invalidate only rejected saved authorization, before callers turn RPC errors into results.
-
-        Cleanup runs separately: an RPC can fail inside any observation worker, and two workers
-        must not cancel or await each other while reporting the same account-wide failure.
-        """
         if not isinstance(exc, AUTHORIZATION_ERRORS):
             return False
         if client is not None and client is not self.client:
-            # A late result from an old connection must not invalidate a replacement session.
             return True
         self.authorization_generation += 1
         first = not self.authorization_required
@@ -468,7 +449,6 @@ class Collector:
         return chat_id in self.target_ids
 
     async def covers(self, chat_id, entity=None):
-        """Whether updates from this chat are recorded; folder and account modes add new chats here."""
         if chat_id is None:
             return False
         if self.selected(chat_id):
@@ -527,7 +507,6 @@ class Collector:
             self.intake.put_nowait((chat_id, entity))
 
     async def intake_loop(self):
-        """New chats and bots: save their profile and the messages visible when they appeared."""
         while self.running:
             chat_id, entity = await self.intake.get()
             client = self.client
@@ -559,7 +538,6 @@ class Collector:
                                 "messages may be missing"}, chat_id)
 
     async def capture_profile(self, chat_id, entity):
-        """What Telegram shows about a chat or bot now: description, bot commands, members, invite link."""
         info = {}
         if isinstance(entity, types.User):
             full = (await asyncio.wait_for(self.client(functions.users.GetFullUserRequest(entity)), 30)).full_user
@@ -595,7 +573,6 @@ class Collector:
         return event
 
     async def save_profile(self, chat_id):
-        """Panel action: save the current profile of a source now."""
         await self.restore()
         entity = self.dialog_cache.get(chat_id, {}).get("entity") or await self.lookup_entity(chat_id)
         if entity is None:
@@ -603,11 +580,6 @@ class Collector:
         return await self.capture_profile(chat_id, entity)
 
     async def apply_scope(self, refresh=True):
-        """Bring sources in line with the scope: add matching chats, pause chats that no longer match.
-
-        Chosen-chats mode pauses every automatically added source. Excluded chats are paused in every
-        mode. Returns what changed; the change is recorded in the signed journal.
-        """
         scope = scope_settings(self.store)
         self.scope_rejected = set()
         if refresh or (scope["mode"] != "selected" and not self.dialog_cache):
@@ -680,13 +652,10 @@ class Collector:
                                      timeout=self.param("telegram_timeout_seconds"), catch_up=True,
                                      **options, **self.route_options())
         client.tgwitness_client_profile = device
-        # Telethon's public constructor has no lang_pack argument. Keep the
-        # imported value in the actual initConnection request when available.
         request = getattr(client, "_init_request", None)
         if isinstance(request, functions.InitConnectionRequest):
             request.lang_pack = device["lang_pack"]
         def rpc_error(exc):
-            # Candidate logins and independent network probes do not own the saved session.
             self.handle_authorization_error(exc, "Telegram RPC", client=client)
         client.rpc_error_handler = rpc_error
         for handler, builder in ((self.on_new, events.NewMessage()),
@@ -711,12 +680,6 @@ class Collector:
         return client
 
     def save_update_state(self):
-        """Persist Telegram's update position (pts) so a restart can catch up on what it missed.
-
-        StringSession keeps this state only in memory; Telethon refreshes it in the session
-        about once a minute and on disconnect. Channel access hashes are kept with it because
-        Telethon cannot request a channel's missed updates without them.
-        """
         session = getattr(self.client, "session", None)
         account = (self.store.get_setting("account", {}) or {}).get("id")
         if account is None or not hasattr(session, "get_update_states"):
@@ -744,7 +707,6 @@ class Collector:
                                                  "coverage": "a restart may not catch up on missed updates"})
 
     def load_update_state(self, session):
-        """Load the saved update position into a new session; returns when it was saved, or None."""
         saved = self.vault.read("update_state")
         account = (self.store.get_setting("account", {}) or {}).get("id")
         if not saved or account is None or saved.get("account_id") != account:
@@ -779,8 +741,6 @@ class Collector:
 
     @connection_change
     async def sign_out(self):
-        """End this workspace's Telegram session and forget it here. The journal, sources, settings and
-        signing key stay; the workspace still belongs to its account, so only that account can connect again."""
         if self.running:
             raise ValueError("Pause observation before signing out.")
         await self.cancel_login()
@@ -833,7 +793,6 @@ class Collector:
 
 
     def route_policy(self):
-        """This workspace's IP mode; a workspace that chose a direct route before the modes existed keeps it."""
         saved = self.store.get_setting("route_policy", None)
         if saved is None:
             kind = self.network_config().kind
@@ -846,8 +805,6 @@ class Collector:
         return saved_route(saved) if saved else None
 
     def outside_route(self):
-        """The route for requests outside Telegram (timestamps, notifications, off-site copy, source check,
-        proxy lists): the proxy set for them, this workspace's SOCKS5/HTTP route, or direct where the IP mode allows."""
         policy = self.route_policy()
         if not policy["outside_enabled"]:
             return NoRoute(RouteError("Requests outside Telegram are turned off for this workspace. "
@@ -904,7 +861,6 @@ class Collector:
         return "direct" if self.direct_fallback else self.auto_route[0] if self.auto_route else None
 
     def route_options(self):
-        """Telethon connection options of this workspace's route; automatic mode uses its chosen proxy."""
         if not self.automatic():
             config = self.network_config()
             if self.pinned_proxy and self.pinned_proxy[0] == config.host:
@@ -917,8 +873,6 @@ class Collector:
         return self.auto_route[1].client_options()
 
     def client_identity(self, client=None, credentials=None):
-        """How this workspace presents itself to Telegram: the application pair (its api_id, never the hash)
-        and the client description in the connection request the client sends."""
         init = getattr(client or self.client, "_init_request", None)
         api_id = getattr(init, "api_id", None) or (credentials if credentials is not None
                                                    else self.vault.read("credentials")).get("api_id")
@@ -934,13 +888,11 @@ class Collector:
         return identity
 
     async def telegram_clock(self):
-        """The collector's clock against Telegram's: the server time in updates.getState (whole seconds),
-        compared with the collector clock halfway through the request. Telegram minus collector."""
         try:
             before = time.time()
             state = await asyncio.wait_for(self.client(functions.updates.GetStateRequest()), CLOCK_TIMEOUT)
             after = time.time()
-            server = state.date.timestamp() + 0.5  # Telegram gives whole seconds, rounded down
+            server = state.date.timestamp() + 0.5
         except asyncio.CancelledError:
             raise
         except Exception as exc:
@@ -950,10 +902,6 @@ class Collector:
                 "uncertainty_seconds": round((after - before) / 2 + 0.5, 3), "method": CLOCK_METHOD}
 
     async def chat_profile(self, entity, media_dir=None):
-        """The chat as Telegram described it when an export began, and this account's place in it: the labels
-        Telegram sets (scam, fake, verified, restricted), description, size, linked discussion, from which
-        message on the history is visible, when the chat was created (its first message), its photo, and the
-        account's role and join date. A request Telegram refuses is named in errors; the export goes on."""
         profile, observer, errors = {}, {}, {}
         for name in PROFILE_FLAGS:
             if isinstance(getattr(entity, name, None), bool):
@@ -1021,9 +969,6 @@ class Collector:
                 {k: v for k, v in observer.items() if v not in (None, "", [])}, errors)
 
     async def recheck_absent(self, entity, absent):
-        """Ask Telegram for every absent message number again, by number (channels.getMessages). An empty
-        answer means Telegram has no message under that number for this account: deleted, or never visible
-        to it. Messages it does return were missed while reading the history and are added to the export."""
         asked, returned, started = list(absent)[:RECHECK_LIMIT], [], utcnow()
         for low in range(0, len(asked), 100):
             batch = asked[low:low + 100]
@@ -1044,8 +989,6 @@ class Collector:
                            "or never visible to it. Telegram does not say which."}, returned
 
     async def admin_log(self, entity):
-        """The admin log, when this account may read it: deletions and edits with the content, and the account
-        that acted. Telegram keeps about 48 hours. None when the account is not an admin or Telegram refuses."""
         if not isinstance(entity, types.Channel):
             return None
         events, max_id = [], 0
@@ -1084,7 +1027,6 @@ class Collector:
         return public
 
     def fallback_due(self):
-        """Whether the IP mode now lets this workspace reach Telegram directly, as no listed proxy answers."""
         exposure = self.route_policy()["exposure"]
         if exposure == "hide":
             return False
@@ -1106,8 +1048,6 @@ class Collector:
             "meaning": "No listed MTProxy answered; Telegram sees this server's address until one answers again."})
 
     async def ensure_route(self):
-        """Automatic mode: choose this workspace's proxy (the same one as before while it works); where the
-        IP mode allows, connect directly while no listed proxy answers."""
         managed = getattr(self, "portable_routes", None)
         if managed and managed.selected():
             if managed.selected().get("paused"):
@@ -1141,8 +1081,6 @@ class Collector:
                 "meaning": "Telegram traffic of this account goes through this listed MTProxy until it fails."})
 
     async def pin_proxy(self):
-        """A listed proxy is resolved and checked once here, and Telethon connects to that address: a name
-        cannot later resolve inside this machine or its network unless the main administrator set it."""
         config = self.network_config()
         self.pinned_proxy = None
         if config.kind in ("socks5", "http", "mtproxy"):
@@ -1152,7 +1090,6 @@ class Collector:
                 raise ValueError(str(exc)) from None
 
     async def align(self, client):
-        """Point a client at the workspace's current automatic route before it connects."""
         wanted = self.current_route_id()
         if wanted and getattr(client, "route_id", None) != wanted:
             await client.switch_route(self.route_options())
@@ -1176,8 +1113,6 @@ class Collector:
                 "previous_cooldown_seconds": cooldown, "fallback_to_direct": False})
 
     async def rotate_route(self, client, reason, exc=None):
-        """Automatic mode: rest the client's failing proxy and move this account to the next working one;
-        where the IP mode allows, connect directly when none answers."""
         old = getattr(client, "route_id", None)
         if old == "direct" or (self.auto_route and self.auto_route[0] != old):
             return
@@ -1204,7 +1139,6 @@ class Collector:
         self.record_route(alias, route, old, reason, exc, cooldown)
 
     async def planned_rotation(self):
-        """Move to another working proxy after the set hours although the current one works."""
         hours, since = self.param("proxy_rotate_hours"), self.store.get_setting("auto_route_since", None)
         if not hours or not self.auto_route or self.direct_fallback or since is None or time.time() - since < hours * 3600:
             return
@@ -1219,8 +1153,6 @@ class Collector:
         await self.client.disconnect()
 
     async def review_route(self):
-        """Automatic mode while connected: leave a direct fallback once a listed proxy answers again,
-        and switch proxies on the planned schedule."""
         if self.direct_fallback:
             if time.time() >= self.pool_retry_at and (self.route_policy()["exposure"] == "hide"
                                                       or self.pool().available(self.route_owner, self.share())):
@@ -1230,7 +1162,6 @@ class Collector:
         await self.planned_rotation()
 
     async def connect_client(self, client):
-        """Connect; in automatic mode a proxy that fails is set aside and the next one is tried."""
         attempts = self.param("proxy_connect_attempts")
         for attempt in range(1, attempts + 1):
             automatic = self.automatic()
@@ -1310,7 +1241,6 @@ class Collector:
                 await client.disconnect()
 
     def login_pairs(self, api_id, api_hash):
-        """An entered, imported or own saved pair is used as is; otherwise rotate through the built-in pool."""
         if api_id is not None or api_hash is not None:
             if not api_id or not api_hash:
                 raise ValueError("Supply both API credentials or leave both empty")
@@ -1545,8 +1475,6 @@ class Collector:
                 cause, error = await self.refusal(client)
                 raise AccountLost(cause, error)
             if self.authorization_required:
-                # Telethon may cache a positive authorization check. A known rejection needs
-                # a fresh Telegram RPC before the panel can consider this session usable again.
                 me = await client.get_me()
                 if me is None:
                     raise AuthorizationRequired("Telegram authorization expired. Sign in again.")
@@ -1558,21 +1486,17 @@ class Collector:
             raise
         if client is self.client and self.authorization_required:
             if authorization_generation != self.authorization_generation:
-                # A successful earlier RPC cannot erase a newer rejection on this connection.
                 raise AuthorizationRequired("Telegram authorization expired. Sign in again.")
             self.authorization_required = False
             self.phase, self.last_error = "observing" if self.running else "ready", None
         if client is self.client and authorization_generation == self.authorization_generation:
             self.store.set_setting("account_loss", None)
-        # Freeze legacy defaults only if this authorization is still current.
-        # An awaited RPC above may have overlapped a sign-out or replacement.
         if (client is self.client and authorization_generation == self.authorization_generation
                 and not credentials.get("client_profile") and self.vault.read("credentials") == credentials):
             credentials["client_profile"] = client.tgwitness_client_profile
             self.vault.save("credentials", credentials)
 
     async def refusal(self, client):
-        """Why Telegram refuses this session. is_user_authorized and get_me hide the error, so ask once more."""
         try:
             await client(functions.users.GetUsersRequest([types.InputUserSelf()]))
         except RPCError as exc:
@@ -1593,8 +1517,6 @@ class Collector:
     RECEIVING_DAYS = 7
 
     def source_visibility(self, chat_id, overview):
-        """One status per source, everywhere: listed in the account's chats, delivering records although
-        not listed (the list stops at dialog_limit and may omit archived chats), or unconfirmed with the reason."""
         cached = self.dialog_cache.get(chat_id)
         status = {"checked_at": utcnow(), "meaning": "Dialog visibility is not a guarantee of every update.",
                   "visibility": (cached or {}).get("visibility", "unknown"), "role": (cached or {}).get("role", "unknown")}
@@ -1607,7 +1529,6 @@ class Collector:
         return {**status, "state": "access_unconfirmed", "reason": reason}
 
     def refresh_source_visibility(self):
-        """Refresh only after completed dialog enumeration; an ignored source resets on positive sighting."""
         targets = self.store.targets(True)
         statuses, overview = {}, self.store.chat_overview()
         with self.store.transaction():
@@ -1658,7 +1579,6 @@ class Collector:
                 "limit": limit, "may_be_truncated": count >= limit}
 
     async def signed_in_devices(self):
-        """Telegram's list of this account's sessions (Settings → Devices), without IP addresses."""
         if not (self.running and self.client and self.client.is_connected()):
             raise ValueError("Telegram is not connected: observation is paused or reconnecting.")
         result = await asyncio.wait_for(self.client(functions.account.GetAuthorizationsRequest()), 30)
@@ -1670,7 +1590,6 @@ class Collector:
                  "country": a.country, "region": a.region} for a in result.authorizations]
 
     async def load_folders(self):
-        """The account's Telegram folders (dialog filters); empty when Telegram does not answer."""
         own = (self.store.get_setting("account", {}) or {}).get("id")
         client = self.client
         try:
@@ -1708,8 +1627,6 @@ class Collector:
         except BaseException as exc:
             self.buffered, self.buffering = [], False
             if self.running:
-                # Buffered handlers and catch-up can yield after running was set.
-                # A timeout there must not leave a collector without workers.
                 with suppress(Exception):
                     await self.stop()
                 self.running = False
@@ -1888,7 +1805,6 @@ class Collector:
             await asyncio.sleep(min(10, interval))
 
     async def note_drop(self):
-        """Automatic mode: a proxy that keeps losing the connection is replaced before reconnecting."""
         if not self.automatic() or self.direct_fallback:
             return
         now = time.monotonic()
@@ -2021,7 +1937,6 @@ class Collector:
         return event
 
     def own_skipped(self, message):
-        """Messages sent by this account are skipped when the scope leaves out own actions."""
         return bool(getattr(message, "out", False)) and not scope_settings(self.store)["own_actions"]
 
     async def on_new(self, event):
@@ -2146,12 +2061,6 @@ class Collector:
             await self.failure(exc, "raw.update", client=client)
 
     async def recheck_loop(self):
-        """Periodically ask Telegram again: recover missed messages, missed edits and silent removals.
-
-        Live updates and catch-up can still lose events (Telethon drops ChannelDifferenceTooLong and
-        DifferenceTooLong; long outages; leaving or losing a chat). This is the second layer.
-        """
-
         delay, forced = self.param("recheck_first_delay_seconds"), True
         while self.running:
             try:
@@ -2187,7 +2096,6 @@ class Collector:
                 await self.recheck_pass(due)
 
     def mark_recheck_start(self):
-        """Before live updates are saved, note where saved history ends so the recheck walks any gap from there."""
         walked = self.store.get_setting("recheck_walked", {})
         for target in self.store.targets(True):
             key = str(target["chat_id"])
@@ -2196,7 +2104,6 @@ class Collector:
         self.store.set_setting("recheck_walked", walked)
 
     def due_targets(self, forced=False):
-        """Sources whose recheck is due: priority sources at the short interval, others at the long one."""
         settings, last, now = recheck_settings(self.store), self.store.get_setting("recheck_last", {}), time.time()
         due = []
         for target in self.store.targets(True):
@@ -2346,8 +2253,6 @@ class Collector:
         return result
 
     async def snapshot(self, chat_id, limit, entity=None, origin=None):
-        """Save the latest visible messages. origin "new_chat": taken when the chat appeared; messages
-        already saved live are skipped there."""
         if not self.selected(chat_id):
             raise ValueError("Enable this target before taking a history snapshot.")
         await self.restore()
@@ -2376,8 +2281,6 @@ class Collector:
         return bool(self.export_task and not self.export_task.done())
 
     def reserve_export(self, owner):
-        """One export per account, individual or multi-account. Checked and taken with no await in
-        between, before the owner's first await; only the owner releases it."""
         if self.export_busy() or self.export_claim or self.connection_change_task is not None:
             return False
         self.export_claim = owner
@@ -2388,14 +2291,12 @@ class Collector:
             self.export_claim = None
 
     def note(self, kind, payload, chat_id=None):
-        """A diagnostic journal record that must never mask the failure being recorded."""
         try:
             self.store.append(kind, payload, chat_id)
         except Exception:
             pass
 
     async def chat_scale(self, chat_id):
-        """Exact current message count from Telegram (one request) and a full-download estimate."""
         await self.restore()
         entity = await self.resolve_target(chat_id)
         started = time.monotonic()
@@ -2468,7 +2369,7 @@ class Collector:
                         recheck, missed = await self.recheck_absent(entity, absent)
                     except asyncio.CancelledError:
                         raise
-                    except Exception as exc:  # the history is complete without it; say that it was not done
+                    except Exception as exc:
                         recheck, missed = {"asked_at": utcnow(), "asked": 0, "absent_total": len(absent),
                                            "error_type": type(exc).__name__}, []
                     if missed:
@@ -2512,7 +2413,6 @@ class Collector:
             shutil.rmtree(media_dir, ignore_errors=True)
 
     async def iterate_history(self, entity, on_message, min_id=0, offset_id=0, on_wait=None):
-        """Newest to oldest; after FloodWait or a brief connection loss, resume below the last message seen."""
         failures = 0
         while True:
             writing = False
@@ -2533,8 +2433,6 @@ class Collector:
                 await asyncio.sleep(wait)
             except (OSError, ConnectionError, TimeoutError):
                 if writing:
-                    # A local write/flush failure is not a retryable Telegram
-                    # disconnect. Never skip that record and sign the remainder.
                     raise
                 failures += 1
                 if failures > 8:
@@ -2544,8 +2442,6 @@ class Collector:
                     await self.restore()
 
     async def export_attachment(self, message, directory):
-        """The attachment of an exported message under this workspace's attachment rules: saved in directory
-        by its SHA-256, or the reason it was left out. The result goes into the message's export record."""
         if not getattr(message, "media", None) or not getattr(message, "file", None):
             return {}
         settings = capture_settings(self.store)
@@ -2620,7 +2516,6 @@ class Collector:
         return count
 
     async def resolve_for_export(self, chat_id, username=None):
-        """This account's own handle on the chat: from its dialogs, or by public username."""
         await self.restore()
         try:
             return await self.resolve_target(chat_id)
@@ -2633,8 +2528,6 @@ class Collector:
             return entity
 
     async def fetch_range(self, entity, low, high, path, progress=None, on_wait=None):
-        """Messages low..high inclusive, newest first. The SHA-256 is computed as messages arrive,
-        before anything is re-read from disk, so the merged file can be checked against it."""
         digest, count = hashlib.sha256(), 0
         with path.open("w", encoding="utf-8") as handle:
             async def write(message):
@@ -2669,7 +2562,6 @@ class Collector:
         return None
 
     def remember(self, entity, *, chat_id=None):
-        """Keep full user/chat objects seen in updates; profile photos need the full object."""
         peer = getattr(entity, "id", None)
         if peer is None or not hasattr(entity, "photo"):
             return
@@ -2680,7 +2572,6 @@ class Collector:
             self.avatar_history.observe(entity, chat_id=chat_id)
 
     async def avatar(self, peer_id):
-        """Small profile photo from a local cache; downloaded once, never written to the journal."""
         directory = self.store.root / "avatars"
         path, missing = directory / (str(peer_id) + ".jpg"), directory / (str(peer_id) + ".none")
         if path.is_file():
@@ -2776,7 +2667,6 @@ class Collector:
             account = self.store.get_setting("account", {}) or {}
             limits = {"max_priority": 1} if lane == "urgent" else {"min_priority": 2} if lane == "bulk" else {}
             capture = capture_settings(self.store)
-            # Downloads turned off keep the waiting files queued until they are turned on again
             job = self.store.claim_media(account.get("id", 0), **limits) if capture["download_media"] else None
             if not job:
                 self.media_wakeup.clear()
@@ -2803,8 +2693,6 @@ class Collector:
                 kind = policy.get("media_type") or media_kind(message)
                 rule, limit = capture["types"][kind], capture["types"][kind]["max_mb"] * 1024**2
                 if not rule["enabled"] or not duration_allowed(message, rule) or (size is not None and limit < size <= job["max_bytes"]):
-                    # The settings changed after the file was queued: a type turned off or a lower limit
-                    # also stops the files already waiting
                     self.store.finish_media(job, "skipped", {
                         "reason": "above the size limit of the attachment settings" if rule["enabled"]
                         else "attachment type not collected by policy: " + kind,

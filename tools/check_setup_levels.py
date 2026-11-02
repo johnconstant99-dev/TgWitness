@@ -1,9 +1,4 @@
-"""Check setup by goal and the credibility and reliability scales (levels.py, views/setup.js).
-
-The proposal for each goal, what Apply changes and records in the signed journal, and the scales
-from the actual settings. Then the panel in a browser: the goal card on Start here, the
-proposal with its predicted scales, Apply, the Extras card, both widths and Russian.
-"""
+"""Check setup by goal and the credibility and reliability scales (levels.py, views/setup.js)."""
 import argparse
 import json
 import sys

@@ -1,4 +1,3 @@
-"""Polling must update saved facts without replacing controls or losing local drafts."""
 import json
 from pathlib import Path
 import tempfile
@@ -27,7 +26,6 @@ def main():
             page = browser.new_page(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce")
             errors, captures = [], []
             page.on("pageerror", lambda error: errors.append(str(error)))
-            # Exercise refreshes deterministically, without a competing five-second timer.
             page.add_init_script("""(()=>{const set=window.setInterval;window.setInterval=(fn,ms,...args)=>
               ms===5000?0:set(fn,ms,...args);})();""")
             unlock(page, server)
@@ -90,7 +88,6 @@ def main():
             assert page.evaluate("()=>savedPassword.isConnected&&document.activeElement===savedPassword&&savedPassword.selectionStart===3&&savedPassword.selectionEnd===9")
             expect(password).to_have_value("synthetic-unsaved-password")
 
-            # A navigation-aborted read is expected cancellation; a real 503 remains an error.
             page.evaluate("()=>navigate('observations')")
             page.evaluate("""()=>{const original=window.fetch;window.fetch=async(...args)=>{
               const response=await original(...args);if(String(args[0]).includes('/api/events?'))await new Promise(resolve=>window.releaseRead=()=>{window.fetch=original;resolve();});
@@ -104,7 +101,6 @@ def main():
             expect(page.locator('#toast.error')).to_contain_text("Synthetic temporary failure")
             page.unroute('**/api/access')
 
-            # Source form values are read through their controller root even when detached.
             page.evaluate("()=>navigate('sources')")
             page.evaluate("()=>{for(const radio of $('scope-form').querySelectorAll('[name=scope-mode]'))radio.checked=radio.value==='account';}")
             page.evaluate("()=>navigate('chats')")

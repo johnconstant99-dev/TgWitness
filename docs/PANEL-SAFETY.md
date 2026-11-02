@@ -97,24 +97,6 @@ The cache retains at most 20 entries within 2 GiB, plus the latest file. Existin
 account-export jobs retain their own download list. Preparation or dispatch to a
 browser does not establish receipt. Check the browser's Downloads list.
 
-## English and Russian copy
-
-| English | Русский |
-| --- | --- |
-| No session found | Сессия не найдена |
-| No session — only application settings. Add a .session or TData file, or sign in by phone or QR. | Нет сессии — только настройки приложения. Добавьте .session или TData либо войдите по телефону или QR. |
-| Export records from {account}? | Выгрузить записи аккаунта {account}? |
-| Confirm the workspace above before continuing. | Сначала подтвердите пространство в плашке выше. |
-| Download again | Скачать снова |
-| Read-only | Только чтение |
-| Mask secrets | Маскировать секреты |
-| Send as {account}? | Отправить от {account}? |
-| Do not ask again for 10 minutes in this chat | Не спрашивать 10 минут в этом чате |
-| Retry export | Повторить экспорт |
-| No data | Нет данных |
-| Telegram does not report who deleted the message | Кто удалил — Telegram не сообщает |
-| Technical sequence (seq) | Технический номер (seq) |
-
 ## Implementation map
 
 | Files | Change |

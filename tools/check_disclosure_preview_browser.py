@@ -1,4 +1,4 @@
-"""Offline disclosure renderer regression; uses synthetic transformed samples only."""
+"""Offline disclosure renderer regression"""
 import argparse
 import json
 import os
@@ -122,7 +122,6 @@ def main():
                 assert preview.locator(".disclosure-preview-message").evaluate("e=>e.scrollWidth<=e.clientWidth"), width
                 page.screenshot(path=str(args.output / f"preview-{width}.png"))
 
-            # All 12 server samples remain available (the previous renderer showed five).
             many = {"summary": {"messages_after": 99},
                     "samples": [{"after": f"Transformed legacy sample {i}"} for i in range(1, 15)]}
             page.evaluate("value=>preview.render(value)", many)
@@ -131,7 +130,6 @@ def main():
             assert "legacy sample 12" in preview.inner_text() and "legacy sample 13" not in preview.inner_text()
             assert "Transformed text" not in preview.inner_text()
 
-            # Zero is a known count; absent/invalid values must not become invented zeros.
             page.evaluate("()=>preview.render({summary:{messages_before:0,messages_after:0,chats_before:-1,chats_after:true},samples:[{before:'SECRET WITHOUT AFTER'},{after:{message:null}}]})")
             expect(preview.locator(".disclosure-preview-count dd")).to_have_text(["0", "0"])
             expect(preview.locator(".disclosure-preview-message")).to_have_count(0)

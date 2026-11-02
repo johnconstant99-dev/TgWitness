@@ -40,14 +40,15 @@ that sequence, not every possible Telegram event.
 | I want to… | Open |
 | --- | --- |
 | Try TgWitness and connect an account | [Getting started](Getting-Started.md) → [Accounts](Accounts.md) |
+| Learn what each screen and switch does | [Panel guide](../PANEL.md) |
 | Choose chats and keep observed changes | [Collection and coverage](Collection.md) |
 | Save one conversation for offline reading | [Export one chat](Chat-Export.md) |
 | Run several accounts as one group | [Accounts](Accounts.md#import-accounts-and-share-settings) |
 | Investigate across conversations | [Investigations](Investigations.md) |
-| Keep team notes on a case | [Case Board](Investigations.md#keep-team-notes-on-case-board) |
+| Keep team notes on a case | [Case Board](Investigations.md#organize-and-review-on-case-board) |
 | Load history, search with AI or connect other tools | [Archive and integrations](Archive-and-Integrations.md) |
 | Hand over and verify evidence | [Exports and verification](Exports-and-Verification.md) |
-| Retain an independent checkpoint | [Independent witness](Independent-Witness.md) |
+| Retain an independent checkpoint | [Independent witness](Independent-Witness.md) · [Protection modes](../PANEL.md#protection-modes) |
 | Send alerts or keep an encrypted remote copy | [Notifications](Notifications.md) · [Off-site copy](Off-site-Copy.md) |
 | Run on a server and recover after a problem | [Server and Docker](Server-and-Docker.md) · [Backup and recovery](Backup-and-Recovery.md) |
 | Fix a problem or understand a term | [Troubleshooting](Troubleshooting.md) · [FAQ](FAQ.md) · [Glossary](Glossary.md) |

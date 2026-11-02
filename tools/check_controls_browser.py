@@ -1,4 +1,3 @@
-"""Settings keep later edits; connection retries read status only."""
 from pathlib import Path
 import tempfile
 

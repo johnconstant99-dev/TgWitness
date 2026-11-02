@@ -1,8 +1,3 @@
-"""Telegram account-export reads, over the collector's existing connection only.
-
-Takeout and split-range wrappers apply to reads and media DC downloads. Authorization
-handles and input peers are kept in the vault, never in the portable export.
-"""
 import base64
 import functools
 import inspect
@@ -19,7 +14,6 @@ SECRET_FIELDS = frozenset({"access_hash", "file_reference", "auth_key", "api_has
 
 
 def safe(value, depth=0):
-    """Readable Telegram fields with operational authorization material removed."""
     if depth > 24:
         return "[depth limit]"
     if isinstance(value, datetime):
@@ -53,7 +47,6 @@ def attachments(media):
 
 
 class WrappedClient:
-    """Rebind Telethon helpers so downloads through _call also carry Takeout."""
     def __init__(self, client, takeout_id=None, message_range=None):
         self._export_client, self._export_takeout, self._export_range = client, takeout_id, message_range
 
@@ -144,7 +137,6 @@ class Transport:
         chats = {}
         for index, split in enumerate(ranges):
             client = WrappedClient(self.collector.client, self.secret.get("takeout_id"), split)
-            # No panel dialog_limit and no folder filter: includes Saved Messages and archived dialogs.
             async for dialog in client.iter_dialogs(limit=None, folder=None, ignore_migrated=False):
                 entity = dialog.entity
                 cid = utils.get_peer_id(entity)
@@ -225,8 +217,6 @@ class Transport:
     async def page(self, task, cursor):
         category = task["category"]
         if task.get("source") == "top_peers":
-            # Rankings can reorder between requests or restarts: seal this small
-            # metadata acquisition together instead of resuming at a stale rank.
             rows, offset = [], 0
             while True:
                 result = await self.client(f.contacts.GetTopPeersRequest(offset, 100, 0,
@@ -280,8 +270,6 @@ class Transport:
             value = await self.client(f.users.GetFullUserRequest(t.InputUserSelf()))
             return [({"category": category, "data": safe(value)}, None)], cursor, True
         if category == "contacts":
-            # This API returns one complete snapshot. Seal it together; positional
-            # paging of a freshly fetched contact list after restart could skip people.
             value = await self.client(f.contacts.GetSavedRequest()) if self.options["transport"] == "takeout" else \
                 await self.client(f.contacts.GetContactsRequest(0))
             rows = value if isinstance(value, list) else value.users
@@ -391,6 +379,6 @@ class Transport:
             try:
                 await self.client(f.account.FinishTakeoutSessionRequest(success=success))
             except errors.TakeoutInvalidError:
-                pass  # An expired/already-finished server session has no remaining handle to retain.
+                pass
             self.secret.pop("takeout_id", None)
             self.save()

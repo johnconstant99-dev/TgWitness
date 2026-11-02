@@ -1,7 +1,5 @@
 'use strict';
 
-// Progressive enhancement of the documentation's local, synthetic examples.
-// All explanations and sample values live in the translated page markup.
 (() => {
   const dictionary = (() => {
     try { return JSON.parse(document.getElementById('site-dict')?.textContent || '{}'); }

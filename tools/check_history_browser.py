@@ -1,4 +1,3 @@
-"""Offline browser acceptance: history pause, reload, resume, media and signed handoff."""
 import asyncio
 import tempfile
 import threading

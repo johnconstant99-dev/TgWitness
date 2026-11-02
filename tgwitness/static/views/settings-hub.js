@@ -1,4 +1,3 @@
-// First run and Settings edit the same server records. Secrets stay in the existing auth forms.
 import {createGroupSettings} from './group-settings.js?v=1';
 import {accountState} from '../components/account-state.js';
 
@@ -14,7 +13,6 @@ export function createSettingsHub(ctx) {
   let data=null, prefs=null, draft=null, section=null, generation=0, connectionBusy=false, checkTimer=null, statusTimer=null;
   let dialogs=null, moved=[], query='', reveal=new Set(), editing=false;
   let autoTried=false, routeDirty=false, checkFailure=null;
-  // After Start: the live check of the four collector parts. visited bounds browser Forward to steps already seen.
   let live=null, liveTimer=null, visited=0, recordedStep=null, shownSession=null;
   let groupScope=null;
   let preferencesQueue=Promise.resolve(), draftQueue=Promise.resolve(), preferencesSequence=0, draftSequence=0, checkSequence=0;
@@ -101,11 +99,8 @@ export function createSettingsHub(ctx) {
     if(prefs.language!==ctx.language){await ctx.changeLanguage(prefs.language);return;}
     if(!state.me?.admin||state.status?.demo)return;
     const loadedSettings=await request(who,'settings');
-    // The route can already be interactive while bootstrap is reading. Its old
-    // snapshot must not replace a step or answer the investigator has just saved.
     if(draftVersion!==draftSequence){scheduleStatus();return;}
     data=loadedSettings;draft={...data.wizard};
-    // A direct link or a newer navigation takes precedence over automatic setup.
     if(openFirstRun&&location.href===initialRoute&&!draft.completed&&!draft.skipped)await navigate('first-run');
     requireOwner(who);
     scheduleStatus();
@@ -117,7 +112,6 @@ export function createSettingsHub(ctx) {
     if(!prefs){const result=await request(who,'preferences');prefs=result.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:'simple'};applyPresentation();}
     data=await request(who,'settings');draft={...data.wizard};
     visited=Math.max(visited,draft.step);
-    // A step address from Back or Forward opens that step when it was already reached; the server keeps it.
     if(state.view==='first-run'&&wanted&&wanted!==draft.step&&wanted<=visited&&!live){
       recordedStep=wanted;
       try{await saveDraft({step:wanted},who);}catch(error){if(error.name==='StaleView')throw error;toast(error.message,true);recordedStep=null;}
@@ -301,7 +295,6 @@ export function createSettingsHub(ctx) {
     const who=owner();
     section=id==='evidence-form'?'protection':'notifications';query='';render();
     const detail=root.querySelector('.hub-detail');
-    // Reuse the original form and listeners; both entry points edit one backend record.
     const form=$(id);move(form,detail);await ctx.loadSettingsForm(id);
     requireOwner(who);
     const control=focus?$(focus):form;
@@ -436,7 +429,6 @@ export function createSettingsHub(ctx) {
     if(draft.step===5){
       shownSession=signedIn();
       if(shownSession)body.append(message('Telegram is connected.','notice success'));
-      // Keep the connected account identity and its sign-in actions in this step.
       move(ctx.authCard(),body);if(!shownSession)ctx.authMethod('qr');
       if(draft.goal!=='copy')accountQuestion(body);
     }
@@ -445,7 +437,6 @@ export function createSettingsHub(ctx) {
       if(main&&draft.scope!=='selected')draft.scope='selected';
       cards(body,[['account','✦','All chats','Includes new chats in continuous collection.'],['selected','☑','Choose chats','Only the chats you select.'],['folder','▤','Telegram folder','Use a folder from Telegram.']],draft.scope,async scope=>{
         draft.scope=scope;await saveDraft();await renderWizard();});
-      // A main account records only chosen chats; the whole account and folders would bring in its owner's own chats.
       if(main){
         for(const key of ['account','folder']){const card=body.querySelector('[data-answer="'+key+'"]');card.disabled=true;card.title=tr('Only on a separate account.');}
         body.append(message('Only chosen chats can be recorded on a main account.','notice warning'));
@@ -485,7 +476,6 @@ export function createSettingsHub(ctx) {
       if(draft.step===7){
         const result=await request(action,'first-run/finish',draftBody());data=result;draft={...result.wizard};await refresh(action);
         if(result.action==='export'){await navigate('evidence');return;}
-        // Recording started: stay here and show that it works before leaving the setup.
         if(state.view!=='first-run')return;
         live={started:Date.now(),done:false};await renderWizard(action);watchLive(action);return;
       }
@@ -498,7 +488,6 @@ export function createSettingsHub(ctx) {
       autoTried=true;void checkConnection(false,who);
     }
   }
-  // Recording sees everything the account sees; the answer limits what a main account may record.
   function accountQuestion(box){
     box.append(node('h2','',tr('Is this a separate account or your main one?')));
     cards(box,[['dedicated','🧪','A separate account','Made for recording: it joins only the chats you want to keep.'],
@@ -529,7 +518,6 @@ export function createSettingsHub(ctx) {
       page.append(actions);
     }
   }
-  // Until every part works (or is off), for at most two minutes; then the person moves on either way.
   function watchLive(who=owner()){
     clearTimeout(liveTimer);
     const session=live;
@@ -558,7 +546,6 @@ export function createSettingsHub(ctx) {
     leave(){restoreMoved();clearTimeout(liveTimer);live=null;recordedStep=null;groupScope=null;},
     status(){
       updateNext();if(data)updateIndicator(data.connection);
-      // Signing in on step 5 replaces the sign-in form with the result and the account question.
       const session=signedIn();
       if(state.view==='first-run'&&draft?.step===5&&!live&&shownSession!==null&&session!==shownSession)void renderWizard();
       shownSession=session;

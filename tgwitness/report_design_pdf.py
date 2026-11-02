@@ -1,10 +1,3 @@
-"""Instance-local compositions for the native, signed PDF reports.
-
-These renderers only lay out supplied facts; signatures and source records stay
-in pdf_report. Quire uses the bundled Noto Serif fonts from notofonts/noto-fonts,
-revision ffebf8c1ee449e544955a7e813c54f9b73848eac (hinted/ttf/NotoSerif).
-Their SIL OFL 1.1 is bundled as fonts/NotoSerif-OFL.txt.
-"""
 from dataclasses import dataclass
 from types import MappingProxyType
 
@@ -39,12 +32,10 @@ STYLES = MappingProxyType({
                    heading_family="Serif", margins=(20, 18, 20)),
     "meridian": Style("meridian", rgb("#1A1E24"), rgb("#5C6570"), rgb("#0E4B64"),
                       rgb("#D4CDC1"), rgb("#F5F3EE"), margins=(12, 16, 12), table_padding=1.25),
-    # The model's #6E7A87 was darkened for readable small print on its warm plate.
     "atlas": Style("atlas", rgb("#16212E"), rgb("#526273"), rgb("#0B5D6B"),
                    rgb("#D6CFC1"), rgb("#F6F2E9"), margins=(16, 17, 16), table_border="ALL", table_padding=2.3),
     "ledger": Style("ledger", rgb("#17252E"), rgb("#4C606C"), rgb("#174F69"),
                     rgb("#8B9BA5"), rgb("#EDF2F5"), margins=(16, 16, 16), table_border="ALL", table_padding=1.3),
-    # Gemini's cyan is decorative; darker text passes contrast on pale plates.
     "horizon": Style("horizon", rgb("#0F172A"), rgb("#52657C"), rgb("#036B9C"),
                      rgb("#E2E8F0"), rgb("#F4F6F9"), margins=(12, 17, 12), table_padding=1.9,
                      highlight=rgb("#0EA5E9")),
@@ -62,7 +53,6 @@ def get_style(value):
 
 
 def color(style, value):
-    """Map established semantic colors without changing process-global state."""
     return {
         (20, 44, 59): style.ink, (89, 104, 112): style.muted,
         (214, 219, 218): style.line, (245, 245, 240): style.tint,
@@ -193,7 +183,7 @@ def title_block(lay, eyebrow, title, facts, signed_note):
         _rule(pdf, pdf.get_y(), style.ink, thickness=.65)
         lay.gap(4)
         _facts(lay, facts, name)
-    else:  # Horizon: a panoramic title band which expands for long titles.
+    else:
         size = 28 if len(str(title)) < 90 else 23 if len(str(title)) < 160 else 20
         pdf.set_font("Sans", "B", size)
         title_height = pdf.multi_cell(pdf.epw, size * .47, str(title), dry_run=True, output="HEIGHT")
@@ -246,7 +236,6 @@ def figures(lay, items):
     if not items:
         return
     width = {"quire": 4, "meridian": 4, "atlas": 2, "ledger": 4, "horizon": 4}[style.name]
-    # Long ranges get the full measure; they should never be squeezed under a tiny statistic.
     short = [(label, value) for label, value in items if len(value) < 36]
     long = [(label, value) for label, value in items if len(value) >= 36]
     for start in range(0, len(short), width):

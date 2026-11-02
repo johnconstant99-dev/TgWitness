@@ -1,18 +1,3 @@
-"""Handover extracts: the part of a journal a recipient needs, with other people's data minimised.
-
-A court, a lawyer or an abuse desk rarely needs an observing account's whole journal, and handing it
-over discloses everyone else in those chats (GDPR Art. 5(1)(c), data minimisation). An extract keeps
-chosen chats, an optional period and, when named, the messages of chosen people (the subjects).
-Everyone else can be shown, replaced by stable pseudonyms (P01, P02…) or left out; message text,
-attachments, profile photos and contact details have their own switches. The stated purpose and the
-rules are signed into the extract and recorded in the journal.
-
-Integrity without a new journal format: a record shown unchanged keeps its complete signed form, so
-its hash is recomputed and its signature checked. A record whose content was minimised keeps the
-collector's signature over the hash of the original record and names what was withheld: the
-recipient sees that it is a genuine record of this journal, and anyone holding the complete journal
-confirms its content by that hash. Records left out are only counted.
-"""
 import hashlib
 import json
 import re
@@ -38,7 +23,6 @@ MENTION = re.compile(r"(?<![\w@])@([A-Za-z][A-Za-z0-9_]{3,31})(?!\w)")
 MESSAGE_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited")
 GONE_KINDS = ("message.deleted", "message.missing_on_recheck")
 MEDIA_KINDS = ("media.saved", "media.skipped", "media.failed", "media.retry")
-# How observation went: no message content and no other people, so these stay unchanged.
 GLOBAL_KEEP = frozenset((
     "process.started", "process.stopped", "observation.stopped", "coverage.gap", "connection.restored",
     "connection.retry", "connection.retry_failed", "collector.heartbeat", "clock.discontinuity", "telegram.backoff",
@@ -51,7 +35,6 @@ CHAT_KEEP = frozenset((
     "target.changed", "target.priority", "target.removed", "source.added", "source.discovered", "coverage.gap",
     "snapshot.started", "snapshot.completed", "snapshot.interrupted", "chat_export.started", "chat_export.completed",
     "chat_export.interrupted", "source.access_unconfirmed", "dossier.changed"))
-# Records about a chosen chat that name other people; kept only when the others are shown.
 CHAT_PEOPLE = ("reaction.", "membership.", "chat.service", "source.profile")
 LIMITS = [
     "This extract is part of a journal: chosen chats, period and people. Records left out are counted, not shown.",
@@ -65,19 +48,18 @@ LIMITS = [
 
 
 class EmptySelection(ValueError):
-    """No record of the journal matches the chosen chats, period and people."""
+    pass
 
 
 class RemoteAttachment(ValueError):
-    """A selected preserved attachment was offloaded and must be restored first."""
+    pass
 
 
 class MissingAttachment(FileNotFoundError):
-    """A selected preserved attachment is unavailable locally."""
+    pass
 
 
 class Options(BaseModel):
-    """What a handover extract contains. Signed into its manifest and recorded in the journal."""
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     purpose: str = Field(min_length=3, max_length=1000)
     chats: list[int] = Field(min_length=1, max_length=200)
@@ -115,11 +97,10 @@ class Options(BaseModel):
 
 
 def replace_ranges(text, ranges):
-    """Replace (offset, length, value) ranges counted in UTF-16 units, as Telegram counts them."""
     data, end = text.encode("utf-16-le"), None
     for offset, length, value in sorted(ranges, reverse=True):
         if end is not None and offset + length > end:
-            continue  # overlapping ranges: the later one already replaced this text
+            continue
         data = data[:2 * offset] + value.encode("utf-16-le") + data[2 * (offset + length):]
         end = offset
     return data.decode("utf-16-le", errors="replace")
@@ -134,9 +115,6 @@ def moment(value):
 
 
 class Survey:
-    """What the extract needs to know before choosing records: the people who wrote in the chosen
-    chats, the investigator's actions there and the coverage of those chats."""
-
     def __init__(self, chats):
         self.chats, self.people, self.coverage = set(chats), {}, Coverage()
         self.requests, self.result_chats, self.head = {}, {}, None
@@ -160,15 +138,12 @@ class Survey:
             self.result_chats[payload.get("request_event")] = payload.get("chat_id", chat)
 
     def interactions(self):
-        """Panel actions in the chosen chats (an opened link counts where it led) and their link previews."""
         wanted = {seq for seq, (chat, _) in self.requests.items()
                   if chat in self.chats or self.result_chats.get(seq) in self.chats}
         return wanted, {self.requests[seq][1] for seq in wanted if self.requests[seq][1] is not None}
 
 
 class Minimiser:
-    """Decides, record by record, what an extract shows: unchanged, minimised or left out."""
-
     def __init__(self, options, observer, people, requests=(), previews=()):
         self.o, self.observer = options, observer
         self.chats, self.subjects = set(options.chats), set(options.subjects)
@@ -177,14 +152,12 @@ class Minimiser:
         self.labels, self.messages, self.roles, self.files = {}, set(), {}, set()
         self.counts = {"unchanged": 0, "minimised": 0, "left_out": 0}
 
-    # People ----------------------------------------------------------------------------------
     def label(self, person):
         if person not in self.labels:
             self.labels[person] = "P%02d" % (len(self.labels) + 1)
         return self.labels[person]
 
     def shown(self, person):
-        """Whether a person's identity may appear: subjects, the observing account, or everyone when shown."""
         return self.o.others == "show" or person in self.subjects or person == self.observer \
             or not isinstance(person, int) or person < 0
 
@@ -194,7 +167,6 @@ class Minimiser:
         return "subject" if person in self.subjects else "other"
 
     def clean(self, text):
-        """Mentions of hidden participants become their pseudonyms; contact details are masked on request."""
         if self.o.others != "show":
             text = MENTION.sub(lambda m: self.label(self.mentioned[m[1].casefold()])
                                if m[1].casefold() in self.mentioned and not self.shown(self.mentioned[m[1].casefold()])
@@ -203,7 +175,6 @@ class Minimiser:
             text = EMAIL.sub("[e-mail]", PHONE.sub("[phone]", text))
         return text
 
-    # Records ---------------------------------------------------------------------------------
     def keep(self, event):
         self.counts["unchanged"] += 1
         return dict(event)
@@ -261,7 +232,6 @@ class Minimiser:
         return self.leave()
 
     def other_chats_removed(self, event):
-        """Start and scope records list every observed chat; other chats are taken out."""
         payload, chats = event["payload"], self.chats
         shown = dict(payload)
         if isinstance(payload.get("targets"), list):
@@ -309,7 +279,6 @@ class Minimiser:
         return self.minimise(event, shown, withheld, hide_actor=hidden)
 
     def hidden_names(self, raw):
-        """Text ranges that name a hidden person through a mention by ID, with the pseudonym to show instead."""
         ranges = []
         for entity in (raw or {}).get("entities") or []:
             if isinstance(entity, dict) and entity.get("_") in ("MessageEntityMentionName", "InputMessageEntityMentionName") \
@@ -322,9 +291,6 @@ class Minimiser:
         return ranges
 
     def details(self, found, role, show_text):
-        """Links behind the text, forwards and buttons with hidden people replaced by their pseudonyms."""
-        # Project known fields before deriving indicators or reports. Unknown future
-        # metadata must not silently bypass the selected disclosure controls.
         found = {k: v for k, v in found.items() if k in (
             "text_entities", "forwarded_from", "via_bot_id", "author", "views", "forwards", "buttons",
             "replies", "reactions", "auto_delete_seconds", "protected", "album_id", "media_info")}
@@ -336,7 +302,6 @@ class Minimiser:
                 item["user_id"] = item["user_id"].get("user_id")
             hidden = item.get("user_id") is not None and not self.shown(item["user_id"])
             if hidden:
-                # A mention by ID shows the person's name: the name goes with the person.
                 item["user_id"] = item["text"] = self.label(item["user_id"])
                 item.pop("href", None)
             elif item["type"] in ("phone", "email") and self.o.mask_contacts:
@@ -406,7 +371,6 @@ class Minimiser:
 
 
 def selection_text(options, titles, people, minimiser):
-    """The selection as the report shows it; subjects by name, never the hidden participants."""
     subject = lambda person: " · ".join(x for x in ((people.get(person) or {}).get("display_name"),
                                                     "@" + people[person]["username"] if (people.get(person) or {}).get("username") else "",
                                                     "id " + str(person)) if x)
@@ -420,7 +384,6 @@ def selection_text(options, titles, people, minimiser):
 
 
 def export(store, vault, options, report_options=None):
-    """Write a signed handover extract and return its path; the caller records it in the journal."""
     report_options = report_options or report.resolved()
     directory = store.root / "temporary-exports"
     directory.mkdir(mode=0o700, exist_ok=True)

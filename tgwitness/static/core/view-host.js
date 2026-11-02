@@ -1,4 +1,3 @@
-// View roots retain their own nodes and listeners while detached from the document.
 export function viewReferences(root){
   return {
     root,
@@ -28,7 +27,6 @@ export function createViewHost({getSession=()=>({}),onError=error=>console.error
   async function activate(name,{params={},signal}={}){
     const entry=entries.get(name);
     if(disposed||!entry)throw new Error("Unknown view: "+name);
-    // A cancelled navigation must not disturb the screen the person is using.
     if(signal?.aborted)return false;
     const ticket=++generation;
     if(active&&active!==entry)leave(active);

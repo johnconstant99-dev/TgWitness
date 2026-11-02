@@ -1,4 +1,3 @@
-"""Workspace overview and bulk actions with fictional collector states only."""
 import copy
 import tempfile
 from pathlib import Path

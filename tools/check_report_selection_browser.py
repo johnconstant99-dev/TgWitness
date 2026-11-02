@@ -1,4 +1,3 @@
-"""Actual report selection, preview, draft lifecycle and workspace isolation."""
 from pathlib import Path
 import sys
 import tempfile
@@ -111,7 +110,6 @@ def main():
             page.locator('#report-selection-from').fill('2026-10-02')
             assert preview(page)['counts']['selected_records'] == 1, 'Both dates include the same UTC day'
 
-            # Catalog search is transient; it must not mark a fresh preview stale.
             page.locator('[data-report-search=chats]').fill('Harbor')
             expect(page.locator('#report-chat-catalog [data-report-choice]')).to_have_count(1)
             expect(page.locator('#report-preview-stale')).to_be_hidden()
@@ -124,7 +122,6 @@ def main():
             expect(page.locator('#report-sender-catalog [data-id="999999"]')).to_be_checked()
             expect(page.locator('#report-sender-count')).to_have_text('1 selected')
 
-            # Edit-only and deletion-only queries retain the actual earlier source text.
             page.locator('#report-selection-senders').fill('')
             page.locator('#report-selection-from').fill('2026-10-01')
             page.locator('#report-selection-to').fill('2026-10-03')
@@ -189,7 +186,6 @@ def main():
             expect(page.locator('#report-preview-result')).to_be_empty()
             preview(page)
 
-            # A failed preview retains the prior result, shows an error and retries explicitly.
             page.route('**/api/report-preview', lambda route: route.fulfill(status=503, json={'detail': 'Synthetic preview outage'}))
             page.locator('#report-preview-run').click()
             expect(page.locator('#report-preview-status')).to_contain_text('Could not build the preview.')
@@ -197,7 +193,6 @@ def main():
             page.unroute('**/api/report-preview')
             preview(page, '#report-preview-retry')
 
-            # A late response cannot replace choices edited while a scan was in flight.
             hold_api_response(page, '/api/report-preview')
             page.locator('#report-preview-run').click()
             page.wait_for_function("()=>typeof releaseAcceptanceResponse==='function'")

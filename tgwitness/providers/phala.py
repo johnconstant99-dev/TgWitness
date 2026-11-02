@@ -1,11 +1,3 @@
-"""Phala Cloud: a Docker Compose application in an Intel TDX confidential VM run by dstack.
-
-The verifier does not take Phala's word for what runs: the collector answers with an Intel TDX quote
-whose RTMR3 names the compose (tgwitness.tdx), and the compose pins the commit, its source files and
-both images by digest. Phala's API creates the CVM and is read for what Phala itself reports: the CVM,
-its OS image and node, and the application's revisions, each one a compose or environment change.
-On the CVM the collector asks the dstack guest agent, on its Unix socket, for its identity and quotes.
-"""
 import http.client
 import json
 import secrets
@@ -20,7 +12,7 @@ from .base import DeployError, Provider, resource_name
 
 SOCKET = "/var/run/dstack.sock"
 API_VERSION = "2026-06-23"
-COMPOSE_LIMIT = 200 * 1024  # docker_compose_file and pre_launch_script together
+COMPOSE_LIMIT = 200 * 1024
 
 
 class GuestConnection(http.client.HTTPConnection):
@@ -35,7 +27,6 @@ class GuestConnection(http.client.HTTPConnection):
 
 
 def guest(method, body=None, path=SOCKET, timeout=10):
-    """One call to the dstack guest agent's frozen v0 API (POST /<Method>) on the CVM's socket."""
     connection = GuestConnection(path, timeout)
     try:
         connection.request("POST", "/" + method, json.dumps(body or {}), {"Content-Type": "application/json"})
@@ -49,8 +40,6 @@ def guest(method, body=None, path=SOCKET, timeout=10):
 
 
 def encrypt_environment(values, public_key_hex):
-    """Secrets for the CVM: X25519 with the application's key from Phala's KMS, then AES-256-GCM, as dstack
-    decrypts them inside the CVM. Their names are measured (allowed_envs), their values are not."""
     secret = X25519PrivateKey.generate()
     shared = secret.exchange(X25519PublicKey.from_public_bytes(bytes.fromhex(public_key_hex.removeprefix("0x"))))
     nonce = secrets.token_bytes(12)
@@ -94,7 +83,6 @@ class Phala(Provider):
         self.headers = {"X-API-Key": credentials, "X-Phala-Version": API_VERSION, "User-Agent": "TgWitness/" + __version__}
 
     def create(self, spec, app_compose, environment):
-        """Provision the CVM with the compose, then commit it with the secrets encrypted to the application's key."""
         body = {"name": resource_name(spec), "instance_type": spec["server_type"], "compose_file": app_compose,
                 "listed": False, "kms": "PHALA"}
         if spec.get("location") not in (None, "any"):
@@ -105,7 +93,6 @@ class Phala(Provider):
         for field in ("app_id", "app_env_encrypt_pubkey", "compose_hash"):
             if not isinstance(prepared.get(field), str) or not prepared[field]:
                 raise DeployError("Phala Cloud did not prepare the CVM (no " + field + ")")
-        # The one-time commit token is optional in Phala's API; app_id and compose_hash identify the commit.
         token = {"token": prepared["token"]} if isinstance(prepared.get("token"), str) and prepared["token"] else {}
         committed = self.call("POST", "/cvms", {
             "app_id": prepared["app_id"], "compose_hash": prepared["compose_hash"], **token,
@@ -130,7 +117,6 @@ class Phala(Provider):
         raise DeployError("A Phala CVM has no SSH and no provider firewall to close")
 
     def destroy(self, record):
-        """Deletes the deployment's CVM: by its ID, or by name when a failed deployment did not record one."""
         name, server = resource_name(record), record.get("server") or {}
         cvms, page = ([str(server["id"])] if server.get("id") else []), 1
         while not cvms:
@@ -163,7 +149,6 @@ class Phala(Provider):
                 "gateway_enabled": found.get("gateway_enabled"), "endpoints": found.get("endpoints") or []}
 
     def firewall(self, record, server):
-        """No provider firewall: a CVM accepts connections only through the dstack gateway, if enabled."""
         inbound = []
         if server.get("gateway_enabled"):
             inbound.append("the dstack gateway forwards public connections into the CVM")
@@ -188,7 +173,7 @@ class Phala(Provider):
             if revision.get("compose_hash") != first:
                 command = "update_compose"
             elif index == 0:
-                command = "create"  # the first revision, with the deployed compose, whatever Phala calls it
+                command = "create"
             actions.append({"resource": "app", "id": revision.get("revision_id"), "command": command,
                             "operation": revision.get("operation_type"), "started": revision.get("created_at"),
                             "finished": revision.get("created_at"), "status": "success",
@@ -197,7 +182,6 @@ class Phala(Provider):
 
     @staticmethod
     def metadata(request, root):
-        """The dstack guest agent's answer about this CVM: identity and the compose exactly as deployed."""
         info = guest("Info")
         tcb = json.loads(info["tcb_info"]) if isinstance(info.get("tcb_info"), str) else info.get("tcb_info") or {}
         return {"instance_id": info.get("instance_id"), "app_id": info.get("app_id"), "hostname": socket.gethostname(),
@@ -208,7 +192,6 @@ class Phala(Provider):
 
     @staticmethod
     def attest(data):
-        """An Intel TDX quote over 64 bytes of report data, with the event log and VM configuration."""
         if len(data) != 64:
             raise ValueError("report data must be 64 bytes")
         answer = guest("GetQuote", {"report_data": data.hex()}, timeout=30)

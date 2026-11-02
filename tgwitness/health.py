@@ -1,12 +1,5 @@
-"""What each part of a workspace is actually doing, kept apart from whether it is switched on.
-
-Every part answers with one of STATES and a reason code; the panel words them. "working" needs
-recent evidence that the part did its job: a switched-on setting, a started process or missing
-data is never reported as success. Data older than the part's own schedule is "unknown".
-"""
 from datetime import datetime, timedelta, timezone
 
-STATES = ("off", "configured", "running", "working", "degraded", "failed", "unknown")
 # Summaries show the first of these that any part has.
 ORDER = ("failed", "degraded", "unknown", "running", "configured", "working", "off")
 # Slack on top of a part's own schedule before its data counts as stale.
@@ -16,7 +9,6 @@ MEDIA_WAIT_SECONDS = 3600
 
 
 def parse(value):
-    """ISO text (journal times) or Unix seconds; None when absent or unreadable."""
     if value in (None, ""):
         return None
     if isinstance(value, (int, float)):
@@ -50,12 +42,7 @@ def now_utc():
     return datetime.now(timezone.utc)
 
 
-# Timestamps ---------------------------------------------------------------------------------
-
 def stamp_counts(last):
-    """The latest attempt, by what came back: verified tokens, OpenTimestamps proofs awaiting
-    Bitcoin, answers that failed the checks, and services that gave no usable answer. Services
-    that answered for the same checkpoint on an earlier pass count as covered."""
     counts = {"verified": 0, "ots_pending": 0, "ots_bitcoin_unverified": 0, "rejected": 0, "unreachable": 0,
               "covered": 0, "covered_verified": 0}
     for result in (last or {}).get("results", []):
@@ -76,8 +63,6 @@ def stamp_counts(last):
 
 
 def timestamps(settings, last, success, failure, runtime, route_problem, now):
-    """settings: evidence_settings; last/success/failure: the saved latest attempt, latest attempt
-    with an answer and latest attempt with a failure; runtime: the anchor loop's own status."""
     runtime = runtime or {}
     interval = settings["interval_minutes"] * 60
     counts = stamp_counts(last)
@@ -115,10 +100,7 @@ def timestamps(settings, last, success, failure, runtime, route_problem, now):
     return part("working", "stamped", **detail)
 
 
-# Off-site copy ------------------------------------------------------------------------------
-
 def replica(settings, last, success, runtime, route_problem, head_seq, now):
-    """last: the latest pass (replica_last); success: the latest pass without an error."""
     runtime = runtime or {}
     interval = settings["interval_minutes"] * 60
     copied = (last or {}).get("journal_seq")
@@ -148,11 +130,7 @@ def replica(settings, last, success, runtime, route_problem, head_seq, now):
     return part("working", "copied", **detail)
 
 
-# Sealed server ------------------------------------------------------------------------------
-
 def server_checks(measured, baseline):
-    """Protection conditions of a sealed server, each passed, needing attention or unknown.
-    Self-reported by the collector on its own host (assurance.ATTESTATION)."""
     measured, baseline = measured or {}, baseline or {}
     checks = []
 
@@ -173,8 +151,6 @@ def server_checks(measured, baseline):
 
 
 def server(assurance, baseline, measured, now, interval=60):
-    """assurance: app.state.assurance (None on an ordinary installation); baseline: the host
-    measured into the signed start record; measured: the assurance loop's latest measurement."""
     if not assurance:
         return {"deployment": part("off", "not_deployed"), "checks": part("off", "not_deployed", items=[])}
     provider = assurance.get("provider") or {}
@@ -198,8 +174,6 @@ def server(assurance, baseline, measured, now, interval=60):
         ("unknown", "partly_unknown") if "unknown" in results else ("working", "passed")
     return {"deployment": deployment, "checks": part(state, reason, items=items, measured_at=measured_at)}
 
-
-# Collector ----------------------------------------------------------------------------------
 
 FAILED_PHASES = {"authorization_required": "signed_out", "collector_error": "collector_error",
                  "storage_error": "storage_error", "resume_failed": "resume_failed"}
@@ -229,7 +203,6 @@ def connection(c, now):
 
 
 def intake(c, heartbeat_seconds, now):
-    """Liveness comes from the collector's heartbeat; a quiet chat with no new messages is not a fault."""
     detail = {"last_heartbeat": c.get("last_heartbeat"), "last_event_at": c.get("last_update_at"),
               "heartbeat_seconds": heartbeat_seconds}
     if not c.get("running"):
@@ -247,7 +220,6 @@ def intake(c, heartbeat_seconds, now):
 def sources(c, enabled_sources):
     statuses = list((c.get("source_status") or {}).values())
     counts = {"enabled": enabled_sources, "checked": len(statuses),
-              # A source that delivers records works, whether or not the account's chat list shows it.
               "visible": sum(s.get("state") in ("visible_in_dialogs", "receiving_updates") for s in statuses),
               "receiving": sum(s.get("state") == "receiving_updates" for s in statuses),
               "added": sum(s.get("state") == "discovered" for s in statuses),
@@ -297,7 +269,6 @@ def collector(c, capture, heartbeat_seconds, enabled_sources, now):
 
 
 def collector_of(app_state, status=None, now=None, *, enabled_sources=None):
-    """The collector parts of one workspace app; status: its collector.status() when already read."""
     from .monitoring import capture_settings
     from . import tuning
     store = app_state.store

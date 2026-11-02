@@ -1,4 +1,4 @@
-"""Render the ethical statement and technical NOTICE consistently; no network access."""
+"""Render the ethical statement and technical NOTICE consistently"""
 import argparse
 import html
 from pathlib import Path
@@ -19,7 +19,6 @@ def statement(root):
 
 
 def quoted_html(text):
-    """Preserve wording; use paragraphs and lists instead of a fixed-width text box."""
     blocks = []
     for paragraph in re.split(r'\n\s*\n', text):
         lines = paragraph.splitlines()

@@ -1,4 +1,3 @@
-"""Acceptance helper: an empty, isolated installation on a disposable systemd host."""
 import hashlib
 import json
 import os
@@ -15,7 +14,6 @@ from urllib.request import Request, urlopen
 
 
 def interactive_setup(launcher, mode, port):
-    """A real controlling terminal with piped stdin, as in curl ... | bash."""
     child, terminal = pty.fork()
     if child == 0:
         args = [launcher, "setup", "--port", str(port)]
@@ -65,7 +63,6 @@ def check_service(app, mode):
     def run(*args):
         result = subprocess.run([launcher, *args], capture_output=True, text=True, timeout=240)
         if result.returncode:
-            # First-run output includes a fresh access key: never publish it in CI.
             safe = "\n".join(line for line in result.stdout.splitlines() if "Access key:" not in line)
             raise AssertionError(safe + "\n" + result.stderr)
         return result.stdout
@@ -141,8 +138,6 @@ def check_service(app, mode):
         assert request(origin + "/api/status", token)[0] == 200
         assert (data / "acceptance-record").read_text() == "keep this record\n"
         if mode == "local":
-            # Run the actual pinned Caddy binary against the generated own-domain
-            # configuration. Certificate issuance needs the operator's DNS/ports.
             python = next((app / "versions").glob("*/venv/bin/python"))
             snippet = ("import json; from pathlib import Path; from tgwitness.panelctl import fetch_tool, bridge_command; "
                        "root=Path(" + repr(str(app)) + "); "

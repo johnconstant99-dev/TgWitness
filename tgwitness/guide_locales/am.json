@@ -415,5 +415,16 @@
 "Rental keeps a number for weeks or months. A one-time activation gives a single code: set the cloud password right after registering.": "ኪራይ ቁጥርን ለሳምንታት ወይም ለወራት ያቆያል። የአንድ ጊዜ ማንቃት አንድ ኮድ ይሰጣል፦ ከምዝገባ በኋላ ወዲያውኑ የደመና የይለፍ ቃል ያዘጋጁ።",
 "Rental": "ኪራይ",
 "Activations": "ማንቃቶች",
-"One-time": "የአንድ ጊዜ"
+"One-time": "የአንድ ጊዜ",
+"In <strong>Sources → Recording → Choose which changes to preserve</strong>, select event categories or use <strong>Messages, edits &amp; deletions</strong>, then press <strong>Save recording settings</strong>.": "በ<strong>Sources → Recording → Choose which changes to preserve</strong> ውስጥ የክስተት ምድቦችን ይምረጡ ወይም <strong>Messages, edits &amp; deletions</strong>ን ይጠቀሙ፣ ከዚያ <strong>Save recording settings</strong>ን ይጫኑ።",
+"Hide the address waits for a working proxy; direct fallback requires a mode that permits it": "Hide the address የሚሰራ ፕሮክሲ እስኪገኝ ይጠብቃል፤ ቀጥታ ግንኙነት የሚቻለው ይህን በሚፈቅድ ሁነታ ብቻ ነው",
+"Hide the address refuses direct fallback. Direct as a last resort can use Direct after the configured delay. Server behind a tunnel or VPN permits the host's direct network route but does not create a VPN. Pause observation before changing routes; saving cancels unfinished login. <strong>Test Telegram connection</strong> checks transport, not complete delivery.": "Hide the address ቀጥታ ግንኙነትን አይፈቅድም። Direct as a last resort ከተዋቀረው መዘግየት በኋላ Direct ሊጠቀም ይችላል። Server behind a tunnel or VPN የአስተናጋጁን ቀጥታ የአውታረ መረብ መንገድ ይፈቅዳል፤ ነገር ግን VPN አይፈጥርም። መንገድ ከመቀየርዎ በፊት ክትትልን ባለበት ያቁሙ፤ ማስቀመጥ ያልተጠናቀቀ መግቢያን ይሰርዛል። <strong>Test Telegram connection</strong> የሚፈትሸው ማጓጓዣውን እንጂ ሙሉ አቅርቦትን አይደለም።",
+"Independent witness": "ገለልተኛ ምስክር",
+"Signed checks outside the collector, posted to Telegram or Discord.": "ከሰብሳቢው ውጭ የተፈረሙ ማረጋገጫዎች፣ ወደ Telegram ወይም Discord የሚለጠፉ።",
+"Code check": "የኮድ ማረጋገጫ",
+"Compare the running program with a public GitHub commit.": "እየሠራ ያለውን ፕሮግራም ከይፋዊ የGitHub commit ጋር ያነጻጽሩ።",
+"Open Extras in the panel and choose Configure under Independent witness. The form prepares the files for a separate witness process.": "በፓነሉ ውስጥ Extras ይክፈቱና በIndependent witness ስር Configure የሚለውን ይምረጡ። ቅጹ ለተለየ የምስክር ሂደት ፋይሎችን ያዘጋጃል።",
+"Choose your Telegram channel or Discord webhook and the check interval, then save the configuration.": "የTelegram ቻናልዎን ወይም የDiscord webhook እና የምርመራ ክፍተቱን ይምረጡ፣ ከዚያ ውቅሩን ያስቀምጡ።",
+"Install TgWitness on the witness host, add your BotFather token or Discord webhook and follow the launch commands in step 3.": "TgWitnessን በምስክሩ አስተናጋጅ ላይ ይጫኑ፣ የBotFather ቶከንዎን ወይም Discord webhook ያክሉና በእርምጃ 3 ያሉትን የማስጀመሪያ ትእዛዞች ይከተሉ።",
+"In Extras, open Code check and enter your fork or the official repository with a release tag or commit. TgWitness compares every program file with that commit and saves the result in the signed journal, so an export shows which public code was running. No GitHub token is needed.": "በExtras ውስጥ Code check የሚለውን ይክፈቱ፣ ከዚያም የእርስዎን fork ወይም ይፋዊውን ማከማቻ ከመልቀቂያ መለያ ወይም ከcommit ጋር ያስገቡ። TgWitness እያንዳንዱን የፕሮግራም ፋይል ከዚያ commit ጋር ያነጻጽራል፣ ውጤቱንም በተፈረመው መዝገብ ውስጥ ያስቀምጣል፤ ስለዚህ ወደ ውጭ የተላከ ፋይል የትኛው ይፋዊ ኮድ እየሠራ እንደነበር ያሳያል። የGitHub ቶከን አያስፈልግም።"
 }

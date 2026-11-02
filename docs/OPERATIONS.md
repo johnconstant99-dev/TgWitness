@@ -67,11 +67,11 @@ or proxied demo access retain token authentication. Demo entry grants no Telegra
 
 ![Per-account monitoring settings with synthetic source data](assets/sources.png)
 
-In **Sources → Capture settings → Choose which changes to preserve**, select new messages, edits,
+In **Sources → Recording → Choose which changes to preserve**, select new messages, edits,
 deletion notices, reaction updates and membership events independently. The default
 retains all categories. **Messages, edits & deletions** keeps the original context
 while disabling separate reaction/member updates. **All visible activity** restores
-all five. Presets change the form; press **Save monitoring settings** to apply.
+all five. Presets change the form; press **Save recording settings** to apply.
 
 The saved policy applies to all selected sources in that workspace. Other
 workspaces retain their own settings. Each actual change records signed before/after
@@ -103,7 +103,7 @@ under their own retention policy.
 
 ## Notifications
 
-Open **Sources → Notifications → Alerts and a daily summary**. TgWitness uses
+Open **Extras → Notifications → Configure**. TgWitness uses
 Apprise to send alerts to Matrix, Telegram, Discord, Slack, ntfy, email and other
 supported services. You can add several destinations to one workspace.
 

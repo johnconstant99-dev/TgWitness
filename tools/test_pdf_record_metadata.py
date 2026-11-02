@@ -1,4 +1,3 @@
-"""Printed evidence must keep permitted message context and distinguish hashes/times."""
 from copy import deepcopy
 from pathlib import Path
 import sys

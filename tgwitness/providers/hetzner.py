@@ -1,4 +1,3 @@
-"""Hetzner Cloud: servers, firewalls and the per-server action log (api.hetzner.cloud)."""
 import json
 import time
 
@@ -12,7 +11,6 @@ def describe_rule(rule):
 
 
 def outbound_rule(rule):
-    """A provider-neutral outbound rule (cloud.outbound_rules) as Hetzner writes it."""
     made = {"direction": "out", "protocol": rule["protocol"], "destination_ips": list(rule["destination"]),
             "description": "TgWitness: DNS only to Cloudflare Gateway"}
     if rule.get("port"):
@@ -81,7 +79,6 @@ class Hetzner(Provider):
         return action
 
     def create(self, spec, user_data, rules, outbound=()):
-        # With any outbound rule, Hetzner drops outbound traffic that no rule allows.
         made = self.call("POST", "/firewalls", {"name": resource_name(spec), "labels": labels(spec), "rules": [
             {"direction": "in", "protocol": r["protocol"], "port": r["port"], "source_ips": [r["source"]],
              "description": "TgWitness debug SSH; remove with python -m tgwitness.cloud lock"} for r in rules]
@@ -113,7 +110,6 @@ class Hetzner(Provider):
         return [a["id"] for a in actions]
 
     def destroy(self, record):
-        # By label, so a deployment that failed before its record listed the server is removed as well.
         selector = {"label_selector": "tgwitness-deployment=" + record["deployment_id"]}
         removed = []
         for server in self.pages("/servers", "servers", params=selector):
@@ -127,7 +123,7 @@ class Hetzner(Provider):
                 except DeployError:
                     if attempt == 11:
                         raise
-                    pause(5)  # still detaching from the deleted server
+                    pause(5)
             removed.append({"resource": "firewall", "id": firewall["id"], "name": firewall["name"]})
         return removed
 
@@ -159,7 +155,6 @@ class Hetzner(Provider):
             if found:
                 inbound += [describe_rule(r) for r in found["firewall"]["rules"] if r["direction"] == "in"]
                 outbound += [neutral_rule(r) for r in found["firewall"]["rules"] if r["direction"] == "out"]
-        # Hetzner merges the rules of every firewall applied to a server: any of them may let traffic out.
         return {"problems": problems, "inbound": inbound, "changed": None, "outbound": outbound}
 
     def actions(self, record, server):

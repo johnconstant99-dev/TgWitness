@@ -54,6 +54,7 @@
 html { scroll-behavior: smooth; }
 body { margin: 0; background: var(--bg); color: var(--text-2); font: 400 16px/1.7 var(--font); -webkit-font-smoothing: antialiased; }
 main, footer { max-width: var(--page); margin: 0 auto; padding: 0 24px; }
+main { overflow-wrap: anywhere; }
 .icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .i { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }

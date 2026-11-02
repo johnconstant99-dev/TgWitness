@@ -1,8 +1,4 @@
-"""Compose TgWitness's investigation artwork into its repository identity.
-
-Pass --font /path/to/Manrope.ttf. Uses the existing, reviewed illustration and
-outlined type. No network, new image generation, account data or SVG scripts.
-"""
+"""Compose TgWitness's investigation artwork into its repository identity."""
 import argparse
 from copy import deepcopy
 from math import ceil

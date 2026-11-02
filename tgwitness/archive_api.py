@@ -1,4 +1,3 @@
-"""Panel-managed archive credentials; read-only integration endpoints."""
 import asyncio
 import json
 from types import SimpleNamespace
@@ -31,7 +30,6 @@ async def startup(app):
             raise ValueError(str(exc)) from None
 
     server = build_server(SimpleNamespace(request=request))
-    # Endpoint validates the listening address, configured public host and Origin.
     manager = StreamableHTTPSessionManager(server._lowlevel_server, json_response=True, stateless=True,
         max_request_body_size=65536, security_settings=TransportSecuritySettings(enable_dns_rebinding_protection=False))
     context = manager.run()

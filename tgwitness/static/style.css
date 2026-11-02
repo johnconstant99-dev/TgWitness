@@ -1,5 +1,3 @@
-/* On desktop, reserve the scrollbar track so the layout does not shift or clip when a page starts to scroll.
-   Phones use overlay scrollbars, where a reserved track would only narrow the content. */
 @media (min-width: 768px) { html { scrollbar-gutter: stable; } }
 :root {
   --radius-small: 6px; --radius-control: 8px; --radius-panel: 12px; --radius-large: 16px;
@@ -494,7 +492,6 @@ footer a:hover { color: var(--text); text-decoration: underline; }
 .health-strip span { color: var(--muted); font-size: 13px; }
 .health-strip strong { color: var(--text); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
-/* ---------- Health states: the icon and the word carry the state, colour only adds to them ---------- */
 .health-badge {
   display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; flex: none;
   border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface-3);
@@ -1069,7 +1066,6 @@ button.pill { cursor: pointer; font-family: inherit; }
 .chat-title > div { min-width: 0; }
 .chat-title h2 { font-size: 17px; white-space: normal; overflow-wrap: anywhere; }
 .chat-title p { white-space: normal; }
-/* On narrow screens the counters stay on one line (full text in the tooltip), so the feed keeps its height. */
 @media (max-width: 767px) { .chat-title p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
 .chat-actions { flex: none; flex-wrap: nowrap; gap: 6px; }
 .chat-actions select, .chat-actions button { min-height: 34px; font-size: 13px; }
@@ -1601,7 +1597,6 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
   #connection-options .card { padding: 16px; }
 }
 @media (max-width: 520px) {
-  /* Ten sections make three rows here; kept short so the sign-in button stays on the first screen of a phone. */
   .sidebar nav .nav { flex-direction: column; gap: 3px; min-height: 44px; padding: 4px 2px; font-size: 13px;
     line-height: 1.15; text-align: center; white-space: normal; overflow-wrap: anywhere; }
 }
@@ -1804,11 +1799,9 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
 h3.alerts-kinds { margin: 18px 0 6px; font-size: 15px; }
 #extras-cloud .cloud-form { margin-bottom: 8px; }
 #cloud-form details { margin: 4px 0 12px; }
-/* Neutral: the deployment mode is described here; whether its conditions hold is shown in #cloud-health. */
 #cloud-active { display: block; margin: 0 0 16px; background: var(--surface-2); border-color: var(--border); color: var(--text-2); }
 #cloud-commands { margin: 10px 0 12px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); color: var(--text-2); }
 #cloud-cli .text-link { margin-inline-start: 12px; }
-/* Guided server (cloud_wizard.py): steps 1-3 collect, step 4 shows the task as the server reports it. */
 #cloud-remote { margin: 0 0 16px; }
 #extras-cloud > .card.extra-detail { margin: 0 0 16px; }
 .cloud-regions { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
@@ -1966,7 +1959,6 @@ button.primary[aria-busy=true]::after { color: #fff; }
 @media (max-width: 700px) { .source-options .two-columns > :first-child { border-inline-end: 0; } }
 @media (prefers-reduced-motion: reduce) { .ui-state[data-state=loading] > .icon { animation: none; } }
 
-/* Proxy servers of the automatic route: overview, filters, table and sources. */
 .proxy-pool { margin-bottom: 16px; }
 .pool-head, .fleet-import-head, .fleet-group-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 24px; }
 .pool-head .muted { max-width: 720px; margin-bottom: 0; }
@@ -2087,7 +2079,6 @@ button.primary[aria-busy=true]::after { color: #fff; }
 @media (max-width: 900px) { .fleet-import-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .fleet-import-grid { grid-template-columns: 1fr; } .fleet-result { grid-template-columns: 1fr; } .fleet-state { text-align: left; } }
 
-/* Parameters: group navigation, search and a two-column grid of fields. */
 .parameters-tools { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin: 0 0 16px; }
 .parameters-tools input[type=search] { flex: 1 1 280px; width: auto; max-width: 520px; }
 .parameters-tools .check-label { margin: 0; }
@@ -2238,7 +2229,6 @@ button.primary[aria-busy=true]::after { color: #fff; }
   .account-export-dialog form { padding: 18px; }
   .account-export-fields { grid-template-columns: minmax(0, 1fr); }
 }
-/* Quick connection routes and what Telegram can tell about this workspace (Account). */
 .route-presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 6px; }
 .seen-by { margin-top: 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
 .seen-by h3 { margin: 0 0 8px; font-size: 14px; }
@@ -2246,7 +2236,6 @@ button.primary[aria-busy=true]::after { color: #fff; }
 .seen-by dt { color: var(--muted); }
 .seen-by dd { margin: 0; overflow-wrap: anywhere; }
 @media (max-width: 600px) { .seen-by dl { grid-template-columns: 1fr; } .seen-by dd { margin-bottom: 4px; } }
-/* Handover extract (Exports): the chats, period and people a recipient needs. */
 .handover-card { margin-top: 18px; }
 .handover-group { border: 0; padding: 0; margin: 16px 0 0; min-width: 0; }
 .handover-group legend { padding: 0; font-weight: 600; }

@@ -1,4 +1,3 @@
-"""Prepared downloads: scope, one-use tickets, revocation, expiry and corrupt cache."""
 import asyncio
 from datetime import datetime, timedelta, timezone
 import hashlib
@@ -25,7 +24,6 @@ async def native(app, path, ticket, headers=None):
 
 
 async def account_tickets():
-    """Account jobs keep their existing ACL and files; browser tickets add no authority."""
     async with workspace() as (app, client):
         job, disclosure = "a" * 32, "b" * 32
         payload = b"Synthetic account export transport bytes" * 4096
@@ -64,8 +62,6 @@ async def account_tickets():
             assert (await native(app, prefix + "/download", cookie)).status_code == 200
             await child_download_lifecycle(app, client, child, admin, payload)
 
-            # Authorization may be revoked while a request waits for a panel
-            # operation. Both ticket creation and lease acquisition recheck it.
             for action, method in (("ticket", "POST"), ("download", "GET")):
                 temporary, _ = app.state.access.login(app.state.vault.token, "127.0.0.1", "Queued download")
                 waiting_at_lock = asyncio.Event()
@@ -86,8 +82,6 @@ async def account_tickets():
                 assert response.status_code == 403, (action, response.text)
                 assert not app.state.account_downloads
 
-            # The download lease starts before response bytes. Neither the source
-            # nor its sharing copies can disappear while any such response is active.
             started, release = asyncio.Event(), asyncio.Event()
 
             async def slow(scope, receive, send):
@@ -110,7 +104,6 @@ async def account_tickets():
                     assert (await client.delete(prefix)).status_code == 200
                     removed.assert_awaited_once()
 
-                    # Aborting a response releases the lease without deleting the archive.
                     started.clear()
                     release.clear()
                     pending = asyncio.create_task(downloader.get(prefix + "/download", headers=admin))
@@ -141,8 +134,6 @@ async def child_download_lifecycle(app, client, profile, admin, payload):
     original = app_module.RetainedDownload.__call__
 
     async def held(response, scope, receive, send):
-        # Hold after the route acquired its lease, before FileResponse opens the
-        # archive. Deleting the workspace here used to remove the download source.
         started.set()
         await release.wait()
         return await original(response, scope, receive, send)
@@ -206,23 +197,18 @@ async def tickets():
         assert downloaded.headers["cache-control"] == "no-store" and "attachment" in downloaded.headers["content-disposition"]
         assert (await native(app, endpoint + "/download", cookie)).status_code == 403, "Ticket reused"
 
-        # Subset grants cannot fetch a cached whole-workspace archive, even when
-        # they can export one of their assigned chats through the scoped exporter.
         _, restricted = grant_session(app, {"default": [11]})
         assert (await client.post(endpoint + "/ticket", headers=restricted)).status_code == 403
         assert (await client.get(endpoint + "/download", headers=restricted)).status_code == 403
         _, view_only = grant_session(app, permissions=["view"])
         assert (await client.post(endpoint + "/ticket", headers=view_only)).status_code == 403
 
-        # Another workspace cannot consume or reuse this workspace's ticket.
         child = await app.state.profiles.create("Synthetic second workspace")
         response = await client.post(endpoint + "/ticket", headers=headers)
         cookie = response.cookies.get("tgwitness-download")
         assert (await native(app, "/profiles/" + child["id"] + endpoint + "/download", cookie)).status_code == 403
         assert (await native(app, endpoint + "/download", cookie)).status_code == 200
 
-        # Expiration uses monotonic time. Patch only app.py's reference, leaving
-        # the event loop and access-session clocks untouched.
         issued = time.monotonic()
 
         class Clock:
@@ -241,7 +227,6 @@ async def tickets():
             clock.now += 121
             assert (await native(app, endpoint + "/download", cookie)).status_code == 403
 
-        # Revocation takes effect even for an already-issued ticket.
         grant, revocable = grant_session(app)
         prepared = prepared_for(app, path, revocable)
         endpoint = "/api/exports/" + prepared["id"]
@@ -250,8 +235,6 @@ async def tickets():
         app.state.access.revoke(grant["id"])
         assert (await native(app, endpoint + "/download", cookie)).status_code == 403
 
-        # Integrity check cannot become an authorization gap while hashing a
-        # large archive in a worker thread.
         grant, revocable = grant_session(app)
         prepared = prepared_for(app, path, revocable)
         ident = prepared["id"]
@@ -276,7 +259,6 @@ async def tickets():
         assert response.status_code == 403, "Revoked access began a download after hashing"
         assert not list((app.state.store.root / "temporary-exports").glob("tgwitness-export-download-*")), "Revocation leaked its private download copy"
 
-        # A retained file cannot be served merely because its ID is valid.
         cached, _ = export_history.locate(app.state.store, ident)
         cached.write_bytes(b"replaced")
         response = await client.get(endpoint + "/download")
@@ -299,7 +281,6 @@ async def research_scope():
         request = {"plan_id": plan["plan_id"], "source_ids": [plan["sources"][0]["id"]]}
         result = await client.post("/api/analysis/context-export", json=request, headers=headers)
         assert result.status_code == 200, result.text
-        # Same preview belongs to the issuing access, not any other session.
         _, other = grant_session(app, {"default": [11]})
         assert (await client.post("/api/analysis/context-export", json=request, headers=other)).status_code == 403
         _, readonly = grant_session(app, {"default": [11]}, ["view"])
@@ -352,7 +333,6 @@ async def retained_provenance():
             assert (await client.get(prefix + "/download", headers=headers)).status_code == 403
             assert (await client.get(prefix + "/download")).status_code == 200
 
-        # Removing board.read preserves export permission but must close old board exports.
         ticket = await client.post(endpoint + "/ticket", headers=headers)
         assert ticket.status_code == 200, ticket.text
         app.state.access.change(owner["id"], GrantSettings(label="Narrowed", workspaces={"default": None},
@@ -361,7 +341,6 @@ async def retained_provenance():
         assert (await client.get("/api/exports/history", headers=headers)).json()["exports"] == []
         assert (await client.post(endpoint + "/ticket", headers=headers)).status_code == 403
 
-        # Both ticket hashing and download copying re-evaluate current permissions.
         for action in ("ticket", "download"):
             app.state.access.change(owner["id"], GrantSettings(label="Restored", workspaces={"default": None},
                                        permissions=["view", "export", "board.read"]))
@@ -384,7 +363,6 @@ async def retained_provenance():
             assert result.status_code == 403, (action, result.text)
             assert not list((store.root / "temporary-exports").glob("tgwitness-export-download-*"))
 
-        # The ordinary API records the creator and whether board access was used.
         emitted = []
         def fake_export(*args, **kwargs):
             path = store.root / ("synthetic-built-" + str(len(emitted)) + ".zip")
@@ -515,8 +493,6 @@ async def download_lifetime():
             assert result.headers["x-tgwitness-export-sha256"] == hashlib.sha256(payload).hexdigest()
             assert not copies[0].exists(), "Completed stream leaked its copy"
 
-            # Cancellation after the file is open must close it and remove the
-            # response copy; the retained cache remains available for retry.
             started.clear()
             release.clear()
             pending = asyncio.create_task(downloader.get("/api/exports/" + replacement["id"] + "/download", headers=headers))
@@ -531,8 +507,6 @@ async def download_lifetime():
             assert not list((store.root / "temporary-exports").glob("tgwitness-export-download-*"))
             assert export_history.locate(store, replacement["id"])[0].exists()
 
-        # OS/antivirus locks must not fail an otherwise complete export, grow
-        # the cache, or silently pretend that a retry copy was retained.
         locked = store.root / "prepared-exports" / replacement["id"]
         original_unlink = Path.unlink
 

@@ -1,5 +1,3 @@
-"""Serve the built site under its Pages prefix without copying the artifact."""
-
 from contextlib import contextmanager
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -22,7 +20,6 @@ class SiteHandler(SimpleHTTPRequestHandler):
         try:
             super().copyfile(source, outputfile)
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
-            # Navigation can cancel an asset response before the browser reads it.
             pass
 
     def public_path(self) -> Path | None:
@@ -40,7 +37,6 @@ class SiteHandler(SimpleHTTPRequestHandler):
             else:
                 return None
             parts = [part for part in relative.split("/") if part]
-            # Reject traversal and Windows path aliases before filesystem resolution.
             if any(part in {".", ".."} or ":" in part or part.rstrip(" .") != part
                    or re.fullmatch(r"(?:CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|COM[1-9¹²³]|LPT[1-9¹²³])(?:\..*)?", part, re.I)
                    for part in parts):
@@ -66,7 +62,6 @@ class SiteHandler(SimpleHTTPRequestHandler):
         return super().send_head()
 
     def translate_path(self, path):
-        # send_head validates once; a second URL decode could change the target.
         return str(self._public_path)
 
     def list_directory(self, path):

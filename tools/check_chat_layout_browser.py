@@ -1,4 +1,3 @@
-"""Chat list and conversation scroll independently across tablet and phone widths."""
 import argparse
 import json
 from pathlib import Path
@@ -92,9 +91,6 @@ def main():
                         page.screenshot(path=str(output / f'chats-{width}-{theme}.png'), animations='disabled')
                     results.append(original)
 
-                # Windows Segoe metrics can conceal the extra wrapping seen with
-                # Linux system fonts. Verdana reproduces the 70px feed regression
-                # on Windows; DejaVu Sans covers the corresponding Linux fallback.
                 page.evaluate("""()=>document.documentElement.style.setProperty(
                   '--font','Verdana, "DejaVu Sans", sans-serif')""")
                 page.mouse.move(0, 0)

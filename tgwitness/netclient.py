@@ -1,15 +1,3 @@
-"""Minimal HTTP/1.1 client over the workspace route (direct, SOCKS5 or HTTP CONNECT).
-
-Used for timestamp services and S3. It never falls back to a direct connection: MTProxy
-carries only Telegram traffic, so other requests are refused on that route.
-
-Addresses entered in the panel reach only the public internet: a request to this machine, its
-network or a cloud metadata service (169.254.169.254) is refused, checked on the resolved address
-that is then connected (no second lookup). Storage or services in the operator's own network are
-allowed only by TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 in the server's environment, which the
-panel cannot set. A proxy is held to the same rule unless the main administrator set it
-(NetworkConfig.local_proxy), for a local SOCKS5 proxy such as Tor.
-"""
 import asyncio
 import ipaddress
 import json
@@ -49,8 +37,6 @@ def private_allowed():
 
 
 def internal(address):
-    """Loopback, private, link-local (cloud metadata), shared, reserved and multicast addresses, also
-    inside IPv4-mapped, NAT64 (64:ff9b::/96) and 6to4 IPv6 addresses; IPv4-compatible ::a.b.c.d is reserved."""
     ip = ipaddress.ip_address(str(address).split("%", 1)[0])
     if ip.version == 6:
         embedded = ip.ipv4_mapped or ip.sixtofour or (
@@ -68,7 +54,6 @@ def refuse_internal(host, addresses):
 
 
 def literal(host):
-    """The host as an address, or None for a name. localhost names count as loopback."""
     if host.lower() == "localhost" or host.lower().endswith(".localhost"):
         return "127.0.0.1"
     with suppress(ValueError):
@@ -82,8 +67,6 @@ async def resolve(host, port):
 
 
 def checked_proxy(network, addresses, private=False):
-    """The address to connect the proxy at. Inside this machine or its network only for a proxy the
-    main administrator set, or with the server's opt-in."""
     blocked = [a for a in addresses if internal(a)]
     if blocked and not (private or private_allowed() or getattr(network, "local_proxy", False)):
         raise RouteError("The proxy " + network.host + " resolves to " + str(blocked[0]) + ", inside this machine "
@@ -92,12 +75,10 @@ def checked_proxy(network, addresses, private=False):
 
 
 async def proxy_address(network, private=False):
-    """The proxy's address, resolved once and connected as is."""
     return checked_proxy(network, await resolve(network.host, network.port), private)
 
 
 async def connect_public(host, port, tls, private):
-    """Resolve once, check every address, then connect to those same addresses."""
     addresses = await resolve(host, port)
     if not private:
         refuse_internal(host, addresses)
@@ -111,7 +92,6 @@ async def connect_public(host, port, tls, private):
 
 
 async def public_proxy_addresses(host, network, timeout):
-    """Resolve through the same proxy, then pin public addresses without local destination DNS."""
     if address := literal(host):
         refuse_internal(host, [address])
         return [address]
@@ -133,8 +113,6 @@ async def public_proxy_addresses(host, network, timeout):
         _dns_cache.pop(key, None)
 
     async def query(kind):
-        # The fixed resolver IP needs no hostname lookup. open_stream checks its
-        # public literal address and uses the same proxy without recursion here.
         _, _, body = await request("GET", DOH_URL + "?" + urlencode({"name": name, "type": kind}), network,
             headers={"Accept": "application/dns-json"}, timeout=timeout, limit=64 * 1024)
         value = json.loads(body)
@@ -180,7 +158,6 @@ async def public_proxy_addresses(host, network, timeout):
 
 
 async def connect_proxy(network, address, target, port, tls, host, timeout):
-    """Connect the checked numeric target while keeping the service's TLS identity."""
     if network.kind == "http" and network.tls:
         from .https_proxy import tunnel
         reader, writer = await tunnel(network, target, port, timeout, address)
@@ -203,7 +180,6 @@ async def connect_proxy(network, address, target, port, tls, host, timeout):
 
 
 async def open_stream(url, network, timeout, private=False):
-    """private=True only for addresses an operator configured outside the panel (the witness's collector)."""
     parts = urlsplit(url)
     host, port = parts.hostname, parts.port or (443 if parts.scheme == "https" else 80)
     tls = ssl.create_default_context() if parts.scheme == "https" else None
@@ -228,11 +204,6 @@ async def open_stream(url, network, timeout, private=False):
 
 async def request(method, url, network, headers=None, body=b"", length=None, sink=None,
                   timeout=60, limit=1024 * 1024, private=False):
-    """Send one request. body: bytes or an async iterator of bytes (then length is required).
-
-    Returns (status, headers, data); with sink (an async callable) the body is streamed to it
-    and data is b"". Non-2xx statuses raise HTTPError carrying the (bounded) response body.
-    """
     parts = urlsplit(url)
     reader, writer = await open_stream(url, network, timeout, private)
     try:

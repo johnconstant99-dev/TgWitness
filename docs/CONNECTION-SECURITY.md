@@ -156,21 +156,22 @@ MTProxy is a Telegram transport proxy; SOCKS5 and HTTP CONNECT provide general
 tunnels. None replaces account authentication.
 
 Save the route for each workspace in **Account → Settings → Connection settings → Change connection route** before
-signing in. New workspaces default to **Automatic MTProxy · public lists** with Hide IP behavior.
+signing in. New workspaces default to **Automatic MTProxy · public lists** with **Hide the address**.
 Existing workspaces that explicitly used Direct retain a mode permitting it.
 
 ## IP modes
 
-The route chooses the connection. The IP mode determines when the server's address
-may be exposed. These controls do not install a VPN or route all machine traffic.
+The route chooses the connection. The IP mode, **IP protection** in the panel's Account
+section, determines when the server's address may be exposed. These controls do not
+install a VPN or route all machine traffic.
 
 | Mode | Telegram | External requests |
 | --- | --- | --- |
-| Hide IP (`hide`) | Use a proxy; wait if none works. No direct fallback. | Require SOCKS5/HTTP; refuse requests without an applicable proxy. |
-| Allow fallback (`fallback`) | Automatic MTProxy may use Direct after the configured delay, then return to a working proxy. | Prefer a configured external proxy or the account's SOCKS5/HTTP route; otherwise Direct is allowed. |
-| Tunnel / VPN (`tunnel`) | Direct routes and immediate automatic-pool fallback are permitted. | Direct is permitted when no applicable proxy is configured. |
+| Hide the address (`hide`) | Use a proxy; wait if none works. No direct fallback. | Require SOCKS5/HTTP; refuse requests without an applicable proxy. |
+| Direct as a last resort (`fallback`) | Automatic MTProxy may use Direct after the configured delay, then return to a working proxy. | Prefer a configured external proxy or the account's SOCKS5/HTTP route; otherwise Direct is allowed. |
+| Server behind a tunnel or VPN (`tunnel`) | Direct routes and immediate automatic-pool fallback are permitted. | Direct is permitted when no applicable proxy is configured. |
 
-Tunnel/VPN mode assumes you manage that network separately. Without a working
+The tunnel or VPN mode assumes you manage that network separately. Without a working
 tunnel, destinations can see the server's own address. Select the mode according
 to your actual network, not the name of the option.
 
@@ -179,7 +180,7 @@ to your actual network, not the name of the option.
 | Route | Settings | Boundary |
 | --- | --- | --- |
 | Automatic MTProxy | Built-in lists or an operator catalog | Maintains a working Telegram route; direct fallback depends on the IP mode |
-| Direct | Tunnel/VPN mode | Telethon uses the host's network route |
+| Direct | Tunnel or VPN mode | Telethon uses the host's network route |
 | SOCKS5 | Host, port, optional username/password | python-socks, remote destination DNS enabled |
 | HTTP CONNECT | Host, port, optional username/password | Plain HTTP CONNECT; TLS to the proxy itself is not implemented |
 | MTProxy | Host, port, secret | Experimental Telethon transport; 32 hex digits or `dd` + 32 hex digits |
@@ -233,7 +234,7 @@ Provider names, snapshot dates and the download route appear under **Where the l
 
 An MTProxy carries Telegram traffic only. Workspace HTTP operations such as timestamps,
 notifications, off-site copies and source checks use a separate SOCKS5/HTTP proxy when
-configured, then the account's SOCKS5/HTTP route. Without either, Hide IP refuses the
+configured, then the account's SOCKS5/HTTP route. Without either, Hide the address refuses the
 request; the other modes permit Direct. External requests can be disabled. An explicitly
 configured feed-download proxy remains a separate operator override.
 The independent witness service keeps its own route.
@@ -275,7 +276,7 @@ planned rotation, proxy sharing and permitted fallback delay.
 | First / maximum rest after failure | 10 minutes / 6 hours |
 | Planned rotation | Disabled; switch on failure |
 | Accounts per proxy | 0: prefer separate entries, share when needed. Set 1 to wait for an exclusive entry. |
-| Delay before permitted Direct fallback | 10 minutes; Hide IP still refuses Direct |
+| Delay before permitted Direct fallback | 10 minutes; Hide the address still refuses Direct |
 | Feed refresh / transport checks | 60 / 10 minutes; main workspace values apply to the shared pool |
 
 Different proxies do not guarantee different exit addresses. These settings do not

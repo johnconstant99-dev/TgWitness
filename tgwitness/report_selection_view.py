@@ -1,4 +1,3 @@
-"""Human-readable scope and missing message numbers in configured reports."""
 from html import escape
 
 

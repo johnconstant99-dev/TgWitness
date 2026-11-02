@@ -1,4 +1,3 @@
-"""Exercise official MCP stdio and HTTP clients against synthetic scoped records."""
 import asyncio
 import json
 import os

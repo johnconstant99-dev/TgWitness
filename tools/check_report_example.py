@@ -1,4 +1,3 @@
-"""The browsable fictional report must be the exact document in its signed ZIP."""
 import base64
 import hashlib
 import json
@@ -53,7 +52,6 @@ def check_report_example(browser, url, output):
         assert len(source.namelist()) == len(set(source.namelist()))
         for name, checksum in manifest['files'].items():
             assert hashlib.sha256(source.read(name)).hexdigest() == checksum, name
-        # Use the browser's native verifier so the site-only CI needs no app dependencies.
         def encoded(value):
             return base64.b64encode(json.dumps(value, ensure_ascii=False, sort_keys=True,
                 separators=(',', ':'), allow_nan=False).encode('utf-8')).decode('ascii')

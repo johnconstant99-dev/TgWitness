@@ -16,7 +16,6 @@ function changes(before, after) {
   return before === after ? 0 : 1;
 }
 
-/** Sources keeps drafts, selection and chat-list requests within one workspace. */
 export function createSources(context) {
   const {root, tr, getState, getSession, may, json, refreshStatus, toast} = context;
   const find = id => root.querySelector("#" + id);
@@ -234,9 +233,7 @@ export function createSources(context) {
         const state = sourceState(target, status), stateCell = element("td", "source-status-cell");
         const label = {enabled: tr("Enabled"), paused: tr("Paused"), excluded: tr("Excluded"),
           unconfirmed: tr("Unconfirmed"), ignored: tr("Ignored")}[state];
-        // The status is only shown here; changing it is in the row menu, with what it does.
         stateCell.append(element("span", "source-state " + state, label));
-        // The reason is written out, so the same status reads the same here, in health and in notifications.
         const seen = status.collector.source_status?.[String(target.chat_id)];
         if (seen?.state === "receiving_updates" || state === "unconfirmed")
           stateCell.append(element("span", "source-reason", context.termText(
@@ -396,7 +393,6 @@ export function createSources(context) {
       if (confirmed && owner === getSession()) runSourceAction([target.chat_id], action, {confirmed: true});
     });
   });
-  // Pausing and excluding are confirmed; removing a source asks for its name, so one stray click changes nothing.
   async function confirmRowAction(target, action) {
     const dialogs = window.TgWitnessDialogs;
     if (action === "pause") return dialogs.confirm(tr("Pause recording of {name}? New messages, edits and deletions in this chat are not saved until you resume. Saved records stay.", {name: target.title}),

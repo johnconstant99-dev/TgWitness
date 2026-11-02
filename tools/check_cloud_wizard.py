@@ -1,10 +1,4 @@
-"""The 24/7 server wizard against a simulated Hetzner, Cloudflare, ntfy.sh and GitHub: no network, nothing is created.
-
-The simulated server's collector signs real assurance statements, so the deployment's own checks run. Covers
-the choice of location and server type, deploy and destroy from the command line with a domain and with a quick
-tunnel, the signed address and the installer the branch's own code rebuilds, removal after a failed deployment,
-the panel's local-only API, and that no token is written to disk. --browser adds both panel flows.
-"""
+"""The 24/7 server wizard against a simulated Hetzner, Cloudflare, ntfy.sh and GitHub"""
 import argparse
 import json
 import re
@@ -64,8 +58,6 @@ LOCATIONS = [{"name": "fsn1", "city": "Falkenstein", "country": "DE", "network_z
 
 
 class World:
-    """Cloudflare, Hetzner and GitHub in memory; every request is recorded."""
-
     def __init__(self, read_only=False, tunnels_allowed=True):
         self.read_only, self.tunnels_allowed = read_only, tunnels_allowed
         self.calls, self.dns, self.tunnels, self.servers, self.firewalls = [], [], {}, {}, {}
@@ -74,7 +66,6 @@ class World:
         self.guard = threading.Lock()
 
     def get(self, url, params=None, timeout=None):
-        """ntfy.sh: the posts of a topic, as /json?poll=1&since=all returns them."""
         assert timeout and url.startswith(cloud.BEACON_SERVER) and url.endswith("/json") and params["poll"] == "1"
         with self.guard:
             self.calls.append(("GET", url, params))
@@ -82,7 +73,6 @@ class World:
             return Response(200, None, "".join(json.dumps({"event": "message", "message": m}) + "\n" for m in posts))
 
     def post_address(self, host, signed=True):
-        """What the quick tunnel's address service posts, signed with the key in the server's user data."""
         topic = re.search(r"TGWITNESS_BEACON=(\S+)", self.user_data).group(1)
         key = re.search(r"^ *TGWITNESS_TUNNEL_TOKEN=(\S+)$", self.user_data, re.M).group(1)
         self.clock += 60
@@ -174,7 +164,7 @@ class World:
             return Response(200, {"firewalls": self.labelled(self.firewalls, params), **page})
         if path == "/servers" and method == "POST":
             self.user_data = body["user_data"]
-            if "TGWITNESS_BEACON=" in self.user_data:  # the server comes up and posts its quick tunnel address
+            if "TGWITNESS_BEACON=" in self.user_data:
                 self.post_address("bright-words-here.trycloudflare.com")
                 self.post_address("forged-address-here.trycloudflare.com", signed=False)
             self.servers[self.server_id] = {
@@ -195,8 +185,6 @@ class World:
 
 
 class Host:
-    """The collector on the simulated server: a real vault signs the assurance statement."""
-
     def __init__(self, world, directory):
         self.world, self.vault, self.root = world, Vault(directory / "collector"), directory / "host"
         for folder in ("proc/net", "proc/sys/kernel/random", "run", "var/log", "etc/tgwitness"):
@@ -242,7 +230,6 @@ def check_selection():
     assert cloud_wizard.location("eu", [LOCATIONS[0], LOCATIONS[2]])["name"] == "fsn1"
     picked = cloud_wizard.server_type(TYPES, "nbg1")
     assert picked["name"] == "cpx22" and picked["monthly"] == "7.13", picked
-    # cpx22 is not available in Ashburn here: the cheapest x86 type with 2 GB or more instead.
     assert cloud_wizard.server_type(TYPES, "ash")["name"] == "cpx11"
     try:
         cloud_wizard.server_type(TYPES, "hil")
@@ -323,7 +310,7 @@ def check_command_line(directory):
         raise AssertionError("a read-only Hetzner token must stop the deployment")
     except base.DeployError as exc:
         assert "Read & Write" in str(cloud_wizard.explain(exc))
-    assert world.dns and not world.servers  # Cloudflare parts exist, nothing at Hetzner
+    assert world.dns and not world.servers
     args = argparse.Namespace(record=directory / "case-2" / "deployment.json", confirm="case-2",
                               provider_token_file=None, cloudflare_token_file=None)
     record, removed = cloud.destroy(args, *services(world), progress=lambda stage, text: None)
@@ -342,14 +329,13 @@ def check_command_line(directory):
                                progress=lambda stage, text: stages.append(stage),
                                beacon=lambda topic, key=None: cloud.read_beacon(topic, key, world))
     assert record["state"] == "running" and stages == ["tunnel", "server", "running", "waiting"], stages
-    # Only the signed post counts: the later, unsigned one is ignored.
     assert record["address"]["host"] == "bright-words-here.trycloudflare.com" == host.hosts[-1], host.hosts
     assert cloud.read_beacon(record["beacon"], session=world)["host"] == "forged-address-here.trycloudflare.com"
     assert not any(url.startswith(cloud.CLOUDFLARE_API) for _, url, _ in world.calls)
     key = (out / "address-key.txt").read_text(encoding="utf-8")
     published = (out / "cloud-init.redacted.yaml").read_text(encoding="utf-8")
     assert key not in published and "tgwitness-tunnel.service" in published and record["beacon"] in published
-    assert cloud.reference_installer(record, ROOT) == published  # what this checkout's code rebuilds for a verifier
+    assert cloud.reference_installer(record, ROOT) == published
     assert "Quick tunnel" in cloud.plan(cloud.specification(quick_args(directory, "quick-2"), lambda r, ref: ref))
     args = argparse.Namespace(record=out / "deployment.json", confirm="quick-1", provider_token_file=None,
                               cloudflare_token_file=None)
@@ -552,7 +538,7 @@ def check_browser(directory, output):
         page.set_viewport_size({"width": 1280, "height": 1000})
         name = page.locator("#cloud-address").inner_text().split("//", 1)[1].split(".", 1)[0]
         last = jobs.status()["job"]["id"]
-        page.locator("#cloud-create").click()  # consent unchecked: the form does not submit
+        page.locator("#cloud-create").click()
         time.sleep(.5)
         assert not world.servers and jobs.status()["job"]["id"] == last
         page.locator("#cloud-consent").check()

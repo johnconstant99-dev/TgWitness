@@ -1,4 +1,3 @@
-"""Independent compositions preserve selection, privacy, streaming bounds and seals."""
 import copy
 import json
 from pathlib import Path

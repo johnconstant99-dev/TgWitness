@@ -1,4 +1,3 @@
-"""Guided connection flow against a local synthetic server, including narrow screens."""
 import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
@@ -47,7 +46,6 @@ def main():
             expect(page.locator('#connect-progress')).to_contain_text('Connection updated',timeout=15000)
             assert server.app.state.collector.network_config().kind == 'direct'
             assert not server.app.state.collector.running
-            # No raw proxy password from the unsaved form appears in rendered result text.
             assert 'private' not in page.locator('#connect-review').inner_text()
             output=Path('test-results/guided-connection')
             output.mkdir(parents=True,exist_ok=True)

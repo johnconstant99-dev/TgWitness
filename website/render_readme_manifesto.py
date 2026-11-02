@@ -1,8 +1,4 @@
-"""Render the README manifesto's opening card without changing the authors' text.
-
-Usage: python website/render_readme_manifesto.py --font /path/to/Manrope.ttf
-Uses the existing outlined-font renderer and retained Manrope OFL licence.
-"""
+"""Render the README manifesto's opening card without changing the authors' text."""
 import argparse
 
 from fontTools.ttLib import TTFont

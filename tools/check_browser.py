@@ -1,8 +1,6 @@
-"""Synthetic end-to-end browser acceptance. Never connects to Telegram."""
 import asyncio
 import json
 import hashlib
-import os
 import zipfile
 import socket
 import sys
@@ -22,6 +20,7 @@ from tgwitness.app import create_app
 from tgwitness.proxy_catalog import ProxyPool
 from tgwitness.verify import verify_bundle
 from tools.browser_fixtures import FakeClient, saved_session
+from tools.browser_helpers import answer_panel_dialog, check_layout, launch_browser
 
 
 async def _listed(route, operator=False):
@@ -39,12 +38,6 @@ async def _idle(self):
 ProxyPool.pin, ProxyPool.probe, ProxyPool.run = staticmethod(_listed), staticmethod(_answers), _idle
 
 
-def launch_browser(p):
-
-
-    return p.chromium.launch(headless=True, channel=os.environ.get("TGWITNESS_BROWSER_CHANNEL") or None)
-
-
 class RunningApp:
     def __init__(self, path, demo=False, client_factory=FakeClient):
         self.app = create_app(path, demo=demo, client_factory=client_factory)
@@ -57,7 +50,6 @@ class RunningApp:
 
     def __enter__(self):
         self.thread.start()
-        # A cold optional MCP SDK import is slower on Windows CI.
         deadline = time.monotonic() + 45
         try:
             while not self.server.started:
@@ -81,8 +73,6 @@ class RunningApp:
 
 def unlock(page, server, *, start=False):
     if not server.app.state.store.get_setting("demo", False):
-        # Legacy feature checks explicitly skip onboarding and use all controls.
-        # test_settings_hub.py exercises the untouched first-run defaults separately.
         store = server.app.state.store
         if not store.get_setting('first_run', None):
             store.set_setting('first_run', {'skipped': True})
@@ -135,8 +125,6 @@ def unlock(page, server, *, start=False):
     authenticated.value.body()
     expect(page.locator("#workspace")).to_be_visible()
     page.wait_for_function('()=>window.TGW_ONLINE_DEMO||!!document.documentElement.dataset.uiLevel')
-    # Legacy scenario helpers continue into setup through the new task choice.
-    # New landing acceptance keeps the chooser visible with start=True.
     if not start and page.locator('#view-start').is_visible():
         button = page.locator('[data-workflow="investigation"]')
         if button.is_visible():
@@ -145,24 +133,7 @@ def unlock(page, server, *, start=False):
         page.evaluate("document.querySelectorAll('.other-sign-in').forEach(el=>el.open=true)")
 
 
-def answer_panel_dialog(page, accept=True, text=None):
-    """Answer the panel's own confirm/prompt dialog (static/dialogs.js), which replaced window.confirm/prompt.
-
-    A typed confirmation is filled with the expected name unless another text is given."""
-    dialog = page.locator("dialog.panel-dialog[open]")
-    expect(dialog).to_have_count(1)
-    field = dialog.locator("input")
-    if accept and field.count():
-        if text is not None:
-            field.fill(text)
-        elif not field.input_value():
-            field.fill(field.get_attribute("placeholder") or "")
-    dialog.locator("button[type=submit]" if accept else "button.secondary").click()
-    expect(dialog).to_have_count(0)
-
-
 def navigate_panel(page, view):
-    """Use the same navigation on desktop and the mobile menu."""
     button = page.locator(f'.sidebar [data-view="{view}"]')
     if not page.evaluate('!!state.status?.demo'):
         page.wait_for_function('()=>window.TGW_ONLINE_DEMO||!!document.documentElement.dataset.uiLevel')
@@ -196,7 +167,6 @@ def lock_panel(page):
 
 
 def reload_panel(page):
-    """Wait for authenticated bootstrap, separately from the render assertion."""
     requests, errors = [], []
     def response_seen(response):
         if '/api/' in response.url:
@@ -222,44 +192,7 @@ def reload_panel(page):
     expect(page.locator("#workspace")).to_be_visible()
 
 
-def check_layout(page, connection=False):
-    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), page.evaluate("""()=>({width:innerWidth,overflow:[...document.querySelectorAll('body *')].filter(e=>e.checkVisibility()&&e.getBoundingClientRect().right>innerWidth+1).map(e=>[e.tagName,e.id,e.className,e.getBoundingClientRect().right]).slice(0,20)})""")
-    for button in page.locator(".sidebar .nav:visible").all():
-        bounds = button.bounding_box()
-        assert bounds and bounds["x"] >= 0 and bounds["x"] + bounds["width"] <= page.viewport_size["width"] + 1
-    if connection:
-        for selector in ("#phone", "#auth-continue"):
-            bounds = page.locator(selector).bounding_box()
-            assert bounds and bounds["y"]+bounds["height"] <= page.viewport_size["height"], "Phone login requires initial scrolling"
-    if page.locator("#view-observations").is_visible() and page.locator("#events-body tr").count():
-        row = page.locator("#events-body tr").first
-        assert row.locator("td").nth(2).is_visible() or row.locator(".event-mobile-meta").is_visible(), \
-            "Timeline timestamps disappeared at this width"
-
-
-    failures = page.evaluate("""() => {
-      const rgba=s=>(s.match(/[\\d.]+/g)||[]).map(Number);
-      const blend=(fg,bg)=>fg.slice(0,3).map((v,i)=>v*(fg[3]??1)+bg[i]*(1-(fg[3]??1)));
-      const luminance=c=>c.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0);
-      const result=[];
-      for(const el of document.querySelectorAll('body *')){
-        if(![...el.childNodes].some(n=>n.nodeType===3&&n.textContent.trim())||!el.checkVisibility({checkVisibilityCSS:true})||el.closest('[disabled]'))continue;
-        const cs=getComputedStyle(el);if(cs.visibility!=='visible')continue;
-        let chain=[],n=el,skip=false;
-        while(n){const s=getComputedStyle(n);chain.unshift(s);if(Number(s.opacity)<1||/url\\(/.test(s.backgroundImage))skip=true;n=n.parentElement;}
-        if(skip)continue;
-        let bg=[255,255,255];for(const s of chain)bg=blend(rgba(s.backgroundColor),bg);
-        const color=blend(rgba(cs.color),bg), a=luminance(color),b=luminance(bg),ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
-        const large=parseFloat(cs.fontSize)>=24||(parseFloat(cs.fontSize)>=18.66&&Number(cs.fontWeight)>=700);
-        if(ratio<(large?3:4.5))result.push({text:el.textContent.trim().slice(0,65),selector:el.id||el.className,ratio:+ratio.toFixed(2),color:cs.color});
-      }
-      return result;
-    }""")
-    assert not failures, failures
-
-
 def hold_api_response(page, path):
-    """Keep the real API response, but let the UI change before its promise resolves."""
     page.evaluate("""path => {
       window.acceptanceFetch=window.fetch;window.releaseAcceptanceResponse=null;
       window.fetch=async(...args)=>{
@@ -281,7 +214,6 @@ def release_api_response(page):
 
 
 def check_journal_messages(page, expected):
-    """Read the dashboard in its active view, then restore the user's screen."""
     previous = page.evaluate("state.view")
     page.evaluate("navigate('observations')")
     expect(page.locator("#view-observations")).to_be_visible()
@@ -366,7 +298,6 @@ def check_reading_states(browser, server):
 
 
 def check_languages(browser, server):
-    """Every shipped string has a translation or explicit English fallback; language choice works."""
     assert i18n.pick(None, None) == i18n.pick(None, "zz-ZZ") == "en"
     assert i18n.pick("en", "ru,en;q=0.5") == "en" and i18n.words("en") == {}
     context = browser.new_context(viewport={"width": 1440, "height": 1060}, reduced_motion="reduce", locale="en-US")
@@ -418,8 +349,6 @@ def check_languages(browser, server):
 
 
 def check_themes(browser, server):
-    """The dark theme keeps text contrast on every view; a chosen theme overrides the system one and persists;
-    motion can be kept on when the system asks for less."""
     context = browser.new_context(viewport={"width": 1440, "height": 1060}, reduced_motion="reduce", color_scheme="dark")
     page, errors = context.new_page(), []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
@@ -532,8 +461,6 @@ def main():
             expect(page.locator("#detail-drawer")).not_to_be_visible()
             page.get_by_role("button", name="All events", exact=True).click()
             page.get_by_role("button", name="Deletions", exact=True).click()
-            # The unfiltered table already contains three deletion icons.
-            # Wait until the filter has replaced all rows before selecting one.
             expect(page.locator("#events-body tr")).to_have_count(3)
             expect(page.locator("#events-body tr:has(.event-icon.delete)")).to_have_count(3)
             page.locator("#events-body tr:has(.event-icon.delete)").first.click()
@@ -786,7 +713,7 @@ def main():
             navigate_panel(page, "connection")
             page.locator('[data-auth-method="files"]').click()
             session_path = run / "synthetic.tgwitness-session"
-            session_path.write_text(saved_session(b"y"), encoding="ascii")  # another account, another key
+            session_path.write_text(saved_session(b"y"), encoding="ascii")
             page.locator("#session-file").set_input_files(session_path)
 
             started = time.monotonic()

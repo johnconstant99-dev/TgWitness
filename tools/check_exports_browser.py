@@ -1,4 +1,3 @@
-"""Synthetic downloads: progress, exact receipt, report drafts and compact layouts."""
 import hashlib
 import json
 from pathlib import Path

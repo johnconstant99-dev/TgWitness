@@ -1,7 +1,3 @@
-"""Simulated Cloudflare API and collector host for the Phala check (tools/check_phala.py).
-
-Every request is recorded and every resource is kept in memory; no network, no real accounts.
-"""
 import re
 import sys
 from pathlib import Path
@@ -29,7 +25,6 @@ class Response:
 
 
 class World:
-    """Cloudflare plus one provider: every request is recorded, every resource is in memory."""
     key = ""
 
     def __init__(self):
@@ -79,7 +74,6 @@ class World:
 
 
 class Host:
-    """The collector on the simulated server: a real vault signing real assurance statements."""
     def __init__(self, world, tmp_path, user_data=None):
         self.world, self.vault, self.root = world, Vault(tmp_path / "collector"), tmp_path / "host"
         self.user_data = user_data or (lambda: world.user_data)

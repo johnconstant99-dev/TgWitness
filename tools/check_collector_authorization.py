@@ -1,4 +1,3 @@
-"""Account-loss receipts retain the current connection and worker cleanup boundaries."""
 import asyncio
 from pathlib import Path
 import sys

@@ -1,4 +1,3 @@
-"""Showcase publication, recipient reading and revocation with synthetic records only."""
 import json
 from pathlib import Path
 import sys
@@ -22,7 +21,6 @@ def main():
             RunningApp(Path(scratch), demo=True) as server, sync_playwright() as p:
         seed(server.app.state.store)
         browser = launch_browser(p)
-        # Neither a made-up fragment nor a stored credential can select permissions.
         for stored, fragment in ((None, "#access=tgwa_invalid"), ("tgws_invalid", ""),
                                  (server.app.state.vault.token, "")):
             denied = browser.new_context()

@@ -1,4 +1,3 @@
-"""Error-prevention acceptance with synthetic Telegram; no live account or sends."""
 import asyncio
 import json
 import sys
@@ -73,7 +72,6 @@ def main():
             assert 'abcdef' not in page.evaluate('TgWitnessPrivacy.preview("api_key=abcdef123456")')
             assert page.evaluate('TgWitnessPrivacy.preview("ordinary text <b>literal</b>")') == 'ordinary text <b>literal</b>'
 
-            # Reveals are logged before the text enters the DOM; API failure stays masked.
             page.route('**/api/privacy/reveal', lambda route: route.fulfill(status=503, json={'detail': 'Unavailable'}))
             reveal = page.locator('#msg-10 .secret-reveal').first
             reveal.click()
@@ -89,7 +87,6 @@ def main():
             assert recorded and all('TopSecret' not in json.dumps(row) for row in recorded)
             assert store.events(chat_id=SHOP_BOT, kind='message.new', limit=20)[0]['hash'] == before[0]['hash']
 
-            # Opting out changes the feed, never the preview or the stored message.
             page.locator('#chat-mask-secrets').uncheck()
             expect(page.locator('#msg-10 .bubble-text')).to_contain_text('TopSecret-1234')
             expect(page.locator('.chat-item-preview').filter(has_text='Password:')).not_to_contain_text('TopSecret-1234')
@@ -104,7 +101,6 @@ def main():
             page.locator('#close-detail').click()
             page.evaluate('(id)=>navigate("chats").then(()=>openChat(id))', SHOP_BOT)
 
-            # No write request until an explicit account-named confirmation.
             page.locator('#chat-read-only').uncheck()
             page.locator('#chat-compose-open').click()
             page.locator('#chat-message').fill('Synthetic approved message')
@@ -114,7 +110,6 @@ def main():
             page.locator('[data-confirm-action="false"]').click()
             assert not actions
             page.locator('#chat-send').click()
-            # A receipt arrives before the subsequent chat refresh; block another write until both finish.
             hold_api_response(page, '/api/chats')
             approve(page, remember=True)
             expect(page.locator('#interaction-result')).to_contain_text('Action completed')
@@ -140,14 +135,12 @@ def main():
             expect(page.locator('#chat-compose')).to_be_hidden()
             expect(page.locator('#chat-feed button', has_text='Press button')).to_have_count(0)
 
-            # Empty-state and toolbar history share the same real endpoint, including retry.
             page.evaluate('(id)=>openChat(id)', CHAT)
             expect(page.locator('#chat-read-only')).to_be_checked()
             page.route('**/api/snapshot', lambda route: route.fulfill(status=503, json={'detail': 'Telegram is temporarily unavailable. Retry.'}))
             page.locator('#chat-feed').get_by_role('button', name='Load last 100 messages').click()
             expect(page.locator('#chat-history-feedback')).to_contain_text('Could not load messages')
             assert snapshots[-1] == {'chat_id': CHAT, 'limit': 100}
-            # A retry belongs to the failed chat, including a queued click after removal.
             stale_retry = page.locator('#chat-history-feedback').get_by_role('button', name='Retry').element_handle()
             page.evaluate('(id)=>openChat(id)', SHOP_BOT)
             expect(page.locator('#chat-history-feedback')).to_have_count(0)
@@ -167,13 +160,11 @@ def main():
             assert snapshots[-1] == {'chat_id': CHAT, 'limit': 100}
             assert len(snapshots) == 4
 
-            # Fresh chat and reload return to read-only, regardless of remembered confirmation.
             page.evaluate('(id)=>openChat(id)', SHOP_BOT)
             expect(page.locator('#chat-read-only')).to_be_checked()
             page.reload()
             expect(page.locator('#chat-read-only')).to_be_checked()
             expect(page.locator('#chat-compose')).to_be_hidden()
-            # First chat: the read-only pane is absent, so joining has its own mandatory consent.
             page.evaluate('()=>beginChat(null)')
             page.locator('.chat-open summary').click()
             page.locator('#chat-link').fill('https://t.me/+invite_hash')

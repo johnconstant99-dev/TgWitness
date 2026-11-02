@@ -1,4 +1,3 @@
-"""Native PDF styles preserve content while changing composition per document."""
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import FrozenInstanceError
 from datetime import datetime, timezone

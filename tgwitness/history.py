@@ -1,10 +1,3 @@
-"""Resumable history acquisition into the signed journal, using the existing media queue.
-
-A run freezes the enabled source list. Each source fixes its upper message ID when first
-read; Telegram history is not an atomic snapshot and gaps in IDs are not deletion evidence.
-The cursor, journal observation and media job commit together. Restart requires an explicit
-resume, and completed/failed sources remain visible instead of being silently discarded.
-"""
 import asyncio
 import secrets
 import shutil
@@ -263,7 +256,6 @@ class History:
             await asyncio.sleep(0)
 
     def report(self):
-        """A current signed progress report; immutable source events remain in the evidence journal."""
         with self.store.lock:
             statement = self.status()
             if statement["phase"] == "none":

@@ -1,10 +1,4 @@
-"""Check the optional evidence-mode records: drand rounds and Telegram's device list.
-
-Builds a real signed journal, writes both records the way the anchor loop does, exports the
-evidence ZIP and verifies it with verify.py, including forged and unreachable drand answers.
-Then switches both options on in the panel in a browser. With --live it also asks the real
-drand relays and compares the recorded round with them.
-"""
+"""Check the optional evidence-mode records"""
 import argparse
 import asyncio
 import hashlib
@@ -96,7 +90,6 @@ async def check_records(directory):
     assert saved["drand"]["ok"] and saved["drand"]["round"] == beacon["round"], saved
     assert saved["drand"]["relay"] == DRAND_RELAYS[1] and len(asked) == 2, asked
     assert saved["devices"] == {**saved["devices"], "ok": True, "count": 2, "others": 1, "changed": True}, saved
-    # The collector's own session is active all the time: that alone is not a change.
     telegram.sessions = [authorization(0, "TgWitness", "TgWitness", "Germany", current=True,
                                        active=datetime(2026, 11, 1, 10, 0, tzinfo=timezone.utc)), phone]
     assert not (await anchoring.record_devices(store, collector.signed_in_devices))["changed"]
@@ -147,7 +140,6 @@ async def check_records(directory):
     def down(relay, number):
         raise OSError("down")
     assert confirm_drand(recorded, fetch=down) == {"asked": 1, "confirmed": 0, "relays": []}
-    # A long journal: a random sample that always holds the first and the last round.
     rounds = {n: fake_round(n) for n in range(1, 501)}
     seen = []
 
@@ -165,7 +157,6 @@ async def check_records(directory):
     assert "drand round(s) recorded" in plain.stdout and "Telegram device list recorded 4 time(s)" in plain.stdout
     archive.unlink()
 
-    # A key holder who writes a made-up value is caught offline when it is malformed.
     forged_vault, forged = journal(directory / "forged")
     bad = fake_round()
     forged.append("beacon.drand", {"chain": DRAND_CHAIN, **bad, "randomness": "0" * 64,
@@ -204,7 +195,7 @@ def check_browser(directory, output):
 
     async def untouched(store, network, settings, devices):
         return store.get_setting("evidence_witnesses", None) or {}
-    anchoring.record_extras = untouched  # the anchor loop must not reach the internet in this check
+    anchoring.record_extras = untouched
     errors = []
     with RunningApp(directory / "panel") as server, sync_playwright() as p:
         store = server.app.state.store

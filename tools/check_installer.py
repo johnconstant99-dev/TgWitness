@@ -1,4 +1,4 @@
-"""Check installer artifacts; optionally perform a real isolated Unix installation."""
+"""Check installer artifacts"""
 import argparse
 import hashlib
 import json
@@ -70,8 +70,6 @@ def main():
         app = scratch / "private app"
         shim = scratch / "commands"
         shim.mkdir()
-        # Only the not-yet-published static origin is mapped locally. Runtime and
-        # dependency downloads still use their real HTTPS URLs and pinned hashes.
         proxy = shim / "curl"
         proxy_script = shim / "curl.py"
         proxy_script.write_text(r'''

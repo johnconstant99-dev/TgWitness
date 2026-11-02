@@ -1,4 +1,3 @@
-"""Own temporary downloads across worker cancellation and broken HTTP connections."""
 from pathlib import Path
 
 from starlette.responses import FileResponse
@@ -31,7 +30,6 @@ class TemporaryDownload(FileResponse):
 
 
 class RetainedDownload(FileResponse):
-    """Release a job lease even if streaming fails or the client disconnects."""
     def __init__(self, path, *, release, **kwargs):
         super().__init__(path, **kwargs)
         self.release = release

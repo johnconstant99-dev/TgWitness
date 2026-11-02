@@ -1,4 +1,4 @@
-"""Build the animated README capability cards. Uses the existing Manrope font."""
+"""Build the animated README capability cards."""
 import argparse
 
 from fontTools.ttLib import TTFont

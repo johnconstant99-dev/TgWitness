@@ -1,4 +1,3 @@
-"""Explicit opt-in board disclosure, derived only from records already in the handover."""
 import copy
 import json
 import re
@@ -63,8 +62,6 @@ def prepare(snapshot, records_path, vault, options, minimiser):
                     original = snapshot.connection.execute("SELECT actor_id,payload,hash FROM events WHERE seq=?", (event["seq"],)).fetchone()
                     if original is None or original["hash"] != event["hash"]:
                         raise ValueError("Disclosure source differs from the board snapshot")
-                    # Match the saved query against its original fields, while rendering only the
-                    # already-minimised record. Redaction must not silently change query membership.
                     db.execute("INSERT INTO events VALUES(?,?,?,?,?,?,?,?,?)", tuple(event.get(key) for key in
                         ("seq", "hash", "observed_at", "chat_id", "message_id", "kind")) + (original["actor_id"], line.decode(), original["payload"]))
             cards = []
@@ -79,7 +76,6 @@ def prepare(snapshot, records_path, vault, options, minimiser):
                     item["observation"] = json.loads(row[0])
                     item["dangling"] = False
                     if item["kind"] == "board.highlight":
-                        # Do not expose the unredacted quote or pretend its offsets survived redaction.
                         if item["observation"].get("minimised") or options.text == "none":
                             item["range"] = {"quote": "[highlight withheld in minimised disclosure]", "field": item["range"]["field"], "offsets_withheld": True}
                         else:

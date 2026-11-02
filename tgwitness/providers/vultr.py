@@ -1,8 +1,3 @@
-"""Vultr: instances, firewall groups and the account activity log (api.vultr.com).
-
-The activity log records each API and portal request with its method, path and body. Only the
-names of body fields are kept: an instance's creation request carries its user data.
-"""
 import base64
 import ipaddress
 import json

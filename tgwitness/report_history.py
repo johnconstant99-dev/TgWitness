@@ -1,32 +1,8 @@
-"""Preserved message context for selected edits and deletion observations.
-
-Callers supply keys of changed messages selected for the report, then stream the
-full stable source snapshot. Earlier versions remain visible even when outside
-the report's author, event-kind or observation-date filters. Every shown record
-states whether it matched that selection. Unrelated messages are never added.
-"""
-
 VERSION_KINDS = frozenset(("message.new", "message.snapshot", "message.recovered", "message.edited"))
 GONE_KINDS = frozenset(("message.deleted", "message.missing_on_recheck"))
 
 
 def collect(events, changed, limit=1000, *, predicate=None):
-    """Return report-compatible histories for already-selected changed keys.
-
-    ``predicate`` describes the report selection, not which context may be read.
-    It is called on each original event before projection. Pass only keys with
-    a selected edit/deletion/recheck observation; use the same snapshot for the
-    keys and this complete source stream. ``limit`` bounds message groups, as in
-    the report's existing history limit, rather than cutting off source records.
-
-    Equal content from repeated history observations can share one entry only
-    when its selection status is equal too. Actual edit observations are kept,
-    even with unchanged text, so a selected edit never disappears behind an
-    identical older snapshot. Renderers must use ``kind`` rather than assume
-    every entry after the first is an edit.
-    """
-    # Lazy import avoids a report -> helper -> report import cycle. These two
-    # projection helpers also preserve the established handoff field layout.
     from .report import message_times, pointing, shown_details
 
     if type(limit) is not int or limit < 0:
@@ -70,7 +46,6 @@ def collect(events, changed, limit=1000, *, predicate=None):
 
 
 def preview(events, changed, *, predicate):
-    """Bounded panel samples; complete histories are generated in the export."""
     from .report import message_times
     keys = set(tuple(key) for key in changed)
     found, previous = {}, {}

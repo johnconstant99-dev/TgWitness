@@ -1,4 +1,3 @@
-"""Exact selection and missing-number context; every record is synthetic."""
 import copy
 import json
 from pathlib import Path
@@ -68,7 +67,6 @@ def test_dates_are_inclusive_utc_not_input_offset_dates():
     for at in ("2026-11-01T23:59:59Z", "2026-11-03T00:00:00Z", "2026-11-02T00:30:00+02:00",
                "2026-11-02T23:30:00-02:00", "2026-11-02T12:00:00", "invalid"):
         assert not predicate(event(1, at=at)), at
-    # The inclusive upper bound never adds a day beyond datetime's range.
     assert selection.matches(event(1, at="9999-12-31T23:59:59Z"),
                              selection.Selection(enabled=True, date_to="9999-12-31"))
 
@@ -133,8 +131,6 @@ def test_no_false_gaps_from_author_or_kind_filters_and_no_before_or_after_infere
     assert [row["message_id"] for row in data["messages"]["rows"]] == [100, 103]
     assert data["id_gaps"]["rows"] == []
     assert data["id_gaps"]["ids_total"] == 0
-    # The future-known number is excluded only from date boundaries; it cannot
-    # create a gap after the last message observed in the requested interval.
     all_dates = analyze(events, senders=[10], kinds=["message.new"])
     assert [(row["start"], row["end"]) for row in all_dates["id_gaps"]["rows"]] == [(104, 899)]
 

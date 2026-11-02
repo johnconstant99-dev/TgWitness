@@ -1,8 +1,4 @@
-"""Build compact, responsive README buttons in the existing casework palette.
-
-Usage: python website/render_readme_navigation.py --font /path/to/Manrope.ttf
-Text uses outlined glyphs; the font licence is retained in docs/assets/presentation.
-"""
+"""Build compact, responsive README buttons in the existing casework palette."""
 import argparse
 
 from fontTools.ttLib import TTFont

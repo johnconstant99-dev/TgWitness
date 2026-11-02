@@ -1,4 +1,3 @@
-"""Public site metadata and faithful Markdown extraction; optional built-site validation."""
 from collections import Counter
 import json
 from pathlib import Path
@@ -58,7 +57,6 @@ def test_metadata_tracks_localized_page_and_visible_hierarchy():
     local = "docs/reports/"
     path = "pt/" + local
     crumbs = [("Home", "pt/"), ("Documentation", "pt/docs/"), ("Design a report", path)]
-    # x-default must select English explicitly, independently of dictionary order.
     alternates = [("pt", path), ("en", local)]
     source = build_site.seo(BASE, path, "Design a report | TgWitness", "Preview a signed report.",
                             "pt", alternates, crumbs=crumbs)
@@ -122,7 +120,6 @@ def test_llms_index_leads_with_workflows_and_verification():
 
 
 def check_built_site(output):
-    """Inspect every published canonical, alternate, sitemap entry and article edition."""
     output = Path(output)
     ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9", "x": "http://www.w3.org/1999/xhtml"}
     sitemap = ET.parse(output / "sitemap.xml").getroot()

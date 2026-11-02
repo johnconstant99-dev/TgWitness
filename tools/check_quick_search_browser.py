@@ -1,4 +1,3 @@
-"""Ctrl+K searches parameter metadata and record numbers without resetting drafts."""
 from pathlib import Path
 import tempfile
 
@@ -9,7 +8,6 @@ from check_refresh_browser import hold_once, release
 
 
 def check_reopened_pending_catalog(page):
-    """Deliver the previous close and response after the next opening, without timers."""
     page.evaluate("""()=>{
       const originalFetch=window.fetch,originalLoad=loadQuickCatalog;
       window.quickHeldResponses=[];window.quickHeldLoads=[];window.quickHeldCloses=0;
@@ -34,7 +32,6 @@ def check_reopened_pending_catalog(page):
       toggleQuick();
     }""")
     page.wait_for_function('()=>quickHeldResponses[0]?.release')
-    # Both operations run in one task, before the browser can deliver the old close event.
     assert page.evaluate("""()=>{
       window.previousQuickRequest=quickCatalogPending;
       quickDialog.close();toggleQuick();
@@ -78,7 +75,6 @@ def main():
             unlock(page, server)
             page.evaluate("()=>navigate('chats')")
 
-            # Closing a palette with a pending schema request must not populate a later view.
             hold_once(page, '/api/parameters')
             page.evaluate("()=>{quickDialog.showModal();renderQuick();window.heldRefresh=loadQuickCatalog();quickSearch.focus();}")
             expect(page.locator('html')).to_have_attribute('data-refresh-held', 'true')
@@ -142,7 +138,6 @@ def main():
             expect(page.locator('[data-action="telegram"]')).to_be_visible()
             page.keyboard.press('Escape')
 
-            # Switch to an actual issued, read-only session; cached admin metadata stays hidden.
             page.evaluate("""async()=>{const grant=await json('access/grants',{label:'Synthetic reader',permissions:['view'],workspaces:{default:null}},{root:true});
               state.token=(await json('access/login',{token:grant.token},{root:true,token:''})).session;await unlock();}""")
             before = len(parameter_reads)

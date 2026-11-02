@@ -5969,5 +5969,14 @@
 "Workspace observation: {n} interruption in the available period": "작업 공간 관찰: 사용 가능한 기간 동안 {n}회의 중단 발생",
 "Workspace observation: {n} interruptions in the available period": {
 "other": "작업 공간 관찰: 해당 기간 동안 {n}회의 중단 발생"
-}
+},
+"In <strong>Sources → Recording → Choose which changes to preserve</strong>, select event categories or use <strong>Messages, edits &amp; deletions</strong>, then press <strong>Save recording settings</strong>.": "<strong>출처 → 기록 중 → 유지할 변경 사항을 선택하세요</strong>에서 이벤트 카테고리를 선택하거나 <strong>메시지, 수정 및 삭제</strong>를 사용한 다음, <strong>기록 설정 저장</strong>를 누르세요.",
+"Hide the address waits for a working proxy; direct fallback requires a mode that permits it": "&#x27;주소 숨기기&#x27; 기능은 정상적으로 작동하는 프록시를 기다리며, 직접 연결로 전환하려면 이를 허용하는 모드가 필요합니다.",
+"Hide the address refuses direct fallback. Direct as a last resort can use Direct after the configured delay. Server behind a tunnel or VPN permits the host's direct network route but does not create a VPN. Pause observation before changing routes; saving cancels unfinished login. <strong>Test Telegram connection</strong> checks transport, not complete delivery.": "&#x27;주소 숨기기&#x27;는 직접 연결로 자동 전환되는 것을 거부합니다. 최후의 수단인 &#x27;직접 연결&#x27;은 설정된 지연 시간이 지난 후에 사용할 수 있습니다. 터널이나 VPN 뒤의 서버는 호스트의 직접 네트워크 경로를 허용하지만 VPN을 생성하지는 않습니다. 경로를 변경하기 전에 관찰을 일시 중지하십시오. 저장을 하면 완료되지 않은 로그인이 취소됩니다. <strong>텔레그램 연결 테스트는</strong> 전송 상태를 확인하며, 완전한 전달 여부는 확인하지 않습니다.",
+"Signed checks outside the collector, posted to Telegram or Discord.": "컬렉터 외부에서 서명된 체크를 텔레그램이나 디스코드에 게시합니다.",
+"Compare the running program with a public GitHub commit.": "실행 중인 프로그램을 공개된 GitHub 커밋과 비교해 보세요.",
+"Open Extras in the panel and choose Configure under Independent witness. The form prepares the files for a separate witness process.": "패널에서 ‘Extras’를 열고 ‘Independent witness’ 아래의 ‘Configure’를 선택하세요. 이 양식을 통해 별도의 위트니스 프로세스에 필요한 파일을 준비할 수 있습니다.",
+"Choose your Telegram channel or Discord webhook and the check interval, then save the configuration.": "텔레그램 채널이나 디스코드 웹훅을 선택하고 확인 간격을 설정한 후, 구성을 저장하세요.",
+"Install TgWitness on the witness host, add your BotFather token or Discord webhook and follow the launch commands in step 3.": "위트니스 호스트에 TgWitness를 설치하고, BotFather 토큰이나 Discord 웹훅을 추가한 후 3단계의 실행 명령을 따르세요.",
+"In Extras, open Code check and enter your fork or the official repository with a release tag or commit. TgWitness compares every program file with that commit and saves the result in the signed journal, so an export shows which public code was running. No GitHub token is needed.": "&#x27;Extras&#x27;에서 &#x27;Code check&#x27;를 열고, 릴리스 태그나 커밋이 포함된 포크 또는 공식 저장소를 입력하세요. TgWitness는 모든 프로그램 파일을 해당 커밋과 비교하여 결과를 서명된 저널에 저장하므로, 내보내기 시 어떤 공개 코드가 실행되었는지 확인할 수 있습니다. GitHub 토큰은 필요하지 않습니다."
 }

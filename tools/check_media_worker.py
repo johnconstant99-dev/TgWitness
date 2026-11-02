@@ -1,4 +1,3 @@
-"""Check offline transcription imports and OCR in the real restricted worker."""
 import asyncio
 import hashlib
 import os
@@ -17,8 +16,6 @@ from tgwitness.media_analysis import MediaJob, docker, run_container
 def main():
     if os.name != "posix":
         raise SystemExit("This check requires the Linux container worker.")
-    # OCR does not import the separately locked transcription dependencies. Check
-    # their public entry points without downloading a model or contacting a service.
     imports = subprocess.run([*docker(), "run", "--rm", "--network=none", "--read-only",
                               "--cap-drop=ALL", "--security-opt=no-new-privileges",
                               "--user=65534:65534", "--memory=2g", "--pids-limit=64",
@@ -44,7 +41,6 @@ def main():
                                   "/checks/check_media_decoding.py", "--worker", "/worker.py"],
                                  capture_output=True, text=True, timeout=90)
     finally:
-        # Killing a timed-out Docker CLI alone does not guarantee container termination.
         subprocess.run([*docker(), "rm", "--force", name], capture_output=True, timeout=10)
     print(decoding.stdout.strip(), flush=True)
     if decoding.returncode:

@@ -1,7 +1,3 @@
-"""Offline acceptance for verified offload, recovery, service discovery and operator controls.
-
-Uses synthetic media/credentials and in-memory remotes. No cloud or Telegram request is sent.
-"""
 import asyncio
 import base64
 import copy
@@ -109,7 +105,6 @@ async def offload_checks(base):
             await raises(storage.recover_directory(changed, fingerprint(ws.vault.public_key), "", base / "must-not-exist", False), "signature")
             assert not (base / "must-not-exist").exists()
 
-            # Restoration authenticates ciphertext AND checks the plaintext against the original signed digest.
             ws.remote.corrupt = True
             await raises(ws.manager.restore(digest), "checksum")
             assert not path.exists()
@@ -124,7 +119,6 @@ async def offload_checks(base):
             ws.manager.require_local_media()
             assert not list(ws.root.glob("storage-*/")), "Plaintext staging directory retained"
 
-            # Lost receipt database can be reconstructed from the signed recovery file.
             path.unlink()
             (ws.root / "storage.sqlite3").unlink()
             ws.manager.import_recovery(manifest)
@@ -132,7 +126,6 @@ async def offload_checks(base):
             await ws.manager.restore_all()
             assert path.read_bytes() == original
 
-            # Complete workspace loss: recover to a new directory, with trusted fingerprint.
             recovery_dir = base / ("recovered-packed" if compressed else "recovered-plain")
             with patch.object(storage.Storage, "backend", return_value=ws.remote):
                 result = await storage.recover_directory(manifest, fingerprint(ws.vault.public_key),
@@ -156,7 +149,6 @@ async def offload_checks(base):
         assert result["error"] == "OSError" and path.read_bytes() == original
         ws.remote.fail = False
 
-        # A previous copy receipt must be rechecked before eviction.
         ws.store.set_setting("storage", {**storage.settings(ws.store), "purpose": "copy"})
         assert not (await ws.manager.sync())["error"] and path.exists()
         ws.store.set_setting("storage", {**storage.settings(ws.store), "purpose": "offload"})
@@ -170,7 +162,6 @@ async def offload_checks(base):
         assert (await ws.manager.sync())["error"] and path.exists()
         ws.remote.corrupt = False
 
-        # Cancellation during readback leaves the only local file in place.
         ws.remote.pause = asyncio.Event()
         task = asyncio.create_task(ws.manager.sync())
         await asyncio.sleep(.03)
@@ -182,13 +173,11 @@ async def offload_checks(base):
         assert path.read_bytes() == original and not ws.manager.busy and not ws.manager.lock.locked()
         ws.remote.pause = None
 
-        # Enabled evidence replication has first claim on local files it has not copied.
         ws.store.set_setting("replica", {"enabled": True})
         result = await ws.manager.sync()
         assert "evidence backup" in result["error"] and path.exists()
         ws.store.set_setting("replica", {"enabled": False})
 
-        # A file changed before copying must never be mislabeled with its former digest.
         path.write_bytes(b"changed")
         assert "journal hash" in (await ws.manager.sync())["error"] and path.read_bytes() == b"changed"
     finally:
@@ -234,7 +223,6 @@ async def lifecycle_checks():
         for path in ("/api/storage", "/api/operator-bot", "/api/services/notifications"):
             response = await client.get(path)
             assert response.status_code == 200, (path, response.text)
-        # Bounded ASCII token validation must reject hostile input without losing a saved token.
         bot_token = "123456789:" + "a" * 35
         assert (await client.post("/api/operator-bot", json={"token": bot_token})).status_code == 200
         for invalid in ("0" * 249, "0" * 100 + ":" + "a" * 35, "٠١٢:" + "a" * 35,
@@ -285,8 +273,6 @@ async def storage_destination_checks(base):
         change = {**old_settings, "remote_path": "second-destination", "purpose": "offload",
                   "batch_files": 1, "confirm_offload": True}
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
-            # An old receipt may be the only recovery path even when its evicted
-            # bit is false (external deletion, interrupted restore, corruption).
             first.unlink()
             response = await client.post("/api/storage", json=change)
             assert response.status_code == 409 and "Restore" in response.text
@@ -298,8 +284,6 @@ async def storage_destination_checks(base):
             response = await client.post("/api/storage", json=change)
             assert response.status_code == 200, response.text
             assert response.json()["copied_files"] == 0 and first.read_bytes() == original
-        # A partial first batch at the new destination must already have a usable
-        # recovery file, with no stale receipts from the previous destination.
         assert (await ws.manager.sync())["files"] == 1
         manifest = ws.manager.recovery()
         assert len(manifest["objects"]) == 1
@@ -317,8 +301,6 @@ async def storage_destination_checks(base):
     finally:
         ws.close()
 
-    # Native S3 shares the replica settings endpoint, so the same guard is
-    # required there, not just in POST /api/storage.
     from tools.check_session_reservations import workspace
     async with workspace() as (app, client):
         initial = {"endpoint": "https://old.example.invalid", "bucket": "old-bucket", "enabled": False,
@@ -339,7 +321,6 @@ async def storage_destination_checks(base):
         assert response.status_code == 409 and "Restore" in response.text, response.text
         assert app.state.store.get_setting("replica")["bucket"] == "old-bucket"
         assert manager.public()["remote_files"] == 1
-        # Credential rotation at the same destination preserves its recovery path.
         response = await client.post("/api/replica", json={**initial, "secret_key": "synthetic-rotated"})
         assert response.status_code == 200 and manager.public()["remote_files"] == 1
         await manager.restore(digest)
@@ -430,8 +411,6 @@ async def transport_checks(base):
         assert headers["x-amz-object-lock-mode"] == "COMPLIANCE"
         assert headers["x-amz-object-lock-retain-until-date"]
 
-        # A pinned helper is launched without a shell; its config stays within the
-        # workspace and is removed on success and cancellation. No real process runs.
         helper = storage.safe_helper(ws.root)
         helper.parent.mkdir(parents=True)
         helper.write_bytes(b"synthetic executable, never run")
@@ -513,8 +492,6 @@ async def bot_reconfiguration_checks(base):
                         next_offset = payload["offset"]
                         raise asyncio.CancelledError()
                     return [update(10, "/status", 7), update(11, "/pause", 8)]
-                # Saving settings while the first reply awaits Telegram must
-                # invalidate the rest of the previously fetched update batch.
                 if change == "token":
                     ws.vault.save("operator_bot", {"token": "456:" + "b" * 30})
                     ws.store.set_setting("operator_bot_offset", 0)

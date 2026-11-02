@@ -1,8 +1,4 @@
-"""Check public source, local Markdown links and recognizable secret formats.
-
-This bounded check is not a comprehensive secret scanner. It never prints matches.
-Use --git-index to check the staged contents and require the complete reviewed source.
-"""
+"""Check public source, local Markdown links and recognizable secret formats."""
 import argparse
 import io
 from pathlib import Path
@@ -27,8 +23,6 @@ PATTERNS = {
     "AI provider API key": re.compile(
         r"\b(?:sk-(?:(?:proj|svcacct|ant|or-v1)-[A-Za-z0-9_-]{20,}|[A-Za-z0-9]{32,})"
         r"|gsk_[A-Za-z0-9_-]{32,}|AIza[A-Za-z0-9_-]{35})\b"),
-    # Paid DeepL keys resemble ordinary UUIDs: require a named key assignment or
-    # authorization scheme. The Free API's :fx suffix is recognizable on its own.
     "DeepL API key": re.compile(
         rf"\b(?:{DEEPL_UUID}:fx|deepl[_-](?:auth|api)[_-]key\b[\"']?\s*[:=]?\s*[\"']?{DEEPL_UUID}(?::fx)?)\b",
         re.IGNORECASE),
@@ -104,7 +98,6 @@ def check_sources(root):
 
 
 def check_git_index(root, sources):
-    """Inspect actual index objects without changing the index or repository settings."""
     root = Path(root).resolve()
 
     def git(*args, **kwargs):

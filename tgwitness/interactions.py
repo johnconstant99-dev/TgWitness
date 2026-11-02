@@ -1,4 +1,3 @@
-"""Explicit panel actions on the workspace's Telegram session, with durable receipts."""
 import asyncio
 import base64
 import re
@@ -135,11 +134,6 @@ async def sent(collector, entity, text, reply_to=None):
 
 
 async def execute(collector, body):
-    """Called under the workspace operation lock. A recorded request is never executed twice.
-
-    A crash between the intent and receipt leaves an unknown outcome, including after restart.
-    No retry of side effects is attempted here. Telegram/transport errors can be ambiguous.
-    """
     store = collector.store
     key = "interaction.action." + body.request_id
     request = body.model_dump()
@@ -150,7 +144,6 @@ async def execute(collector, body):
         return prior.get("result") or {"request_id": body.request_id, "status": "unknown",
                                        "request_event": prior["request_event"]}
     check_pause(collector)
-    # Every execute action can alter Telegram state (including opening/joining a link).
     goal = (store.get_setting("goal_preset", None) or store.get_setting("setup", None) or {}).get("goal")
     if goal == "evidence":
         raise ValueError("Telegram actions from the panel are off for the Evidence for a case goal.")

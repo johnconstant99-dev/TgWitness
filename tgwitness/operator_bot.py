@@ -1,8 +1,3 @@
-"""An operator-owned Telegram bot with an explicit chat AND user allowlist.
-
-No Telegram account session is used. Incoming commands never contain a program,
-URL or file path to execute. Message content is not returned by this bot.
-"""
 import asyncio
 import json
 import re
@@ -86,9 +81,6 @@ class OperatorBot:
             return "Enable control commands in the panel to use this command."
         if command in ("/pause", "/resume"):
             token = self.state.vault.read("operator_bot").get("token")
-            # Use the same operation boundary as the panel. Starting/stopping
-            # while a login, route change or another start is in flight can leave
-            # the collector's connection and background workers inconsistent.
             async with self.state.operation_lock:
                 if self.public()["settings"] != cfg or self.state.vault.read("operator_bot").get("token") != token:
                     return None
@@ -120,12 +112,8 @@ class OperatorBot:
                 if self.public()["settings"] != cfg or self.state.vault.read("operator_bot").get("token") != token:
                     continue
                 for update in updates:
-                    # A previous command/reply awaits I/O. Settings or the bot
-                    # token may have changed meanwhile: old updates must never
-                    # acquire the replacement bot's permissions or cursor.
                     if self.public()["settings"] != cfg or self.state.vault.read("operator_bot").get("token") != token:
                         break
-                    # Persist consumption before executing: a crash cannot replay a control command.
                     self.state.store.set_setting("operator_bot_offset", update["update_id"] + 1)
                     answer = await self.handle(update)
                     if answer and self.public()["settings"] == cfg and self.state.vault.read("operator_bot").get("token") == token:

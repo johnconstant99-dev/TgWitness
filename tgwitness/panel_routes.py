@@ -1,5 +1,3 @@
-"""Document URLs for the panel; API requests keep their own access checks."""
-
 import re
 
 from starlette.exceptions import HTTPException

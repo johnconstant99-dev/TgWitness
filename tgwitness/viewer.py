@@ -1,16 +1,3 @@
-"""The data behind the report's viewer: the records or messages of an export, beside report.html.
-
-report.html is the viewer: search, filters, people, indicators, selection and a check of the whole
-archive, all in the browser with nothing sent anywhere. It reads viewer/*.html documents in sandboxed
-frames without same-origin privileges. Each frame passes one JSON text via postMessage; the signed
-seal lists the SHA-256 of that text, and the viewer checks it before display. Unverified frame code
-cannot access the report DOM. A report saved on its own carries the
-same JSON texts inside the page.
-
-Journal records are shown by the fields a reader needs (text, sender, details, files, hashes); the
-journal files in the archive stay authoritative. Chat messages are the records of chat.json as they
-are, so a selection of them can be compared with chat.json by verify.py.
-"""
 import base64
 import hashlib
 import json
@@ -19,9 +6,9 @@ import re
 from . import report
 
 FORMAT = "tgwitness-viewer-v1"
-CHUNK = 2000            # items per data file
-CHUNK_BYTES = 16 * 1024 * 1024  # split large raw records before a browser needs excessive memory
-INLINE_LIMIT = 20000    # items a report saved on its own carries inside the page
+CHUNK = 2000
+CHUNK_BYTES = 16 * 1024 * 1024
+INLINE_LIMIT = 20000
 INLINE_BYTES = 32 * 1024 * 1024
 LONE = re.compile("[\ud800-\udfff]")
 DETAIL_KEYS = ("text_entities", "forwarded_from", "via_bot_id", "author", "views", "forwards", "replies", "reactions",
@@ -29,7 +16,6 @@ DETAIL_KEYS = ("text_entities", "forwarded_from", "via_bot_id", "author", "views
 
 
 def json_text(value):
-    """JSON as the viewer reads it: compact, UTF-8, with lone surrogates written as escapes."""
     text = json.dumps(value, ensure_ascii=False, separators=(",", ":"))
     return LONE.sub(lambda m: "\\u%04x" % ord(m.group()), text)
 
@@ -39,7 +25,6 @@ def sha256(text):
 
 
 def document(name, text):
-    """A data document for an opaque-origin sandbox; no unverified code runs in the report."""
     loader = 'parent.postMessage(JSON.parse(document.getElementById("data").textContent),"*");'
     digest = base64.b64encode(hashlib.sha256(loader.encode()).digest()).decode()
     payload = json.dumps({"file": name, "text": text}, ensure_ascii=True).replace("<", "\\u003c")
@@ -50,7 +35,6 @@ def document(name, text):
 
 
 def journal_item(event, raw_records=False):
-    """One journal record as the viewer shows it."""
     payload, kind = event["payload"] if isinstance(event["payload"], dict) else {}, event["kind"]
     item = {"s": event["seq"], "k": kind, "c": report.category(kind), "t": event["observed_at"], "h": event["hash"]}
     if event["chat_id"] is not None:
@@ -90,8 +74,6 @@ def journal_item(event, raw_records=False):
 
 
 class Writer:
-    """Collects items into data files, bounded by the configured count and byte budget."""
-
     def __init__(self, write_member, kind, role="items", prefix=None, chunk_size=CHUNK):
         self.write_member, self.kind, self.files, self.batch, self.role = write_member, kind, [], [], role
         self.prefix = prefix or ("messages" if kind == "chat" else "records")
@@ -131,8 +113,6 @@ class Writer:
 
 
 class Inline:
-    """The same data inside a report saved on its own: JSON texts in the page, listed in its seal."""
-
     def __init__(self, kind, chunk_size=CHUNK):
         self.kind, self.items, self.files, self.blocks = kind, [], [], []
         self.chunk_size = max(1, int(chunk_size))
@@ -154,7 +134,6 @@ class Inline:
                            + "</script>")
 
     def html(self, people=None, indicators=None):
-        """The data blocks for the end of the page; the descriptor is then complete."""
         if self.items is None:
             return ""
         prefix = "messages" if self.kind == "chat" else "records"

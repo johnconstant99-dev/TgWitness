@@ -1,4 +1,3 @@
-"""DigitalOcean: Droplets, Cloud Firewalls and Droplet actions (api.digitalocean.com)."""
 import json
 
 from .base import DeployError, Provider, network, resource_name

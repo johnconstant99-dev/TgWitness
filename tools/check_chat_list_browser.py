@@ -1,4 +1,3 @@
-"""Chat search, filters, sorting and shared priority against a synthetic archive."""
 from pathlib import Path
 import tempfile
 
@@ -12,7 +11,6 @@ def ids(page):
 
 
 def check_initial_read_states(browser, server):
-    """A delayed or failed read must not look like an empty configured account."""
     def open_page(mode):
         page = browser.new_page(viewport={'width': 1440, 'height': 1000}, reduced_motion='reduce')
         errors = []

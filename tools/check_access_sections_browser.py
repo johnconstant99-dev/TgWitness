@@ -1,4 +1,3 @@
-"""Access presets, drafts and the separately scoped process log."""
 import copy
 import re
 import sys

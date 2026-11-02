@@ -1,9 +1,3 @@
-"""One set of chat counters and one source status on every screen: list, header, health and notifications.
-
-Definitions: saved (a message whose text was saved), deleted with its text kept, deleted before any
-text was saved, not found on recheck, edited. The per-chat index is rebuilt from the signed journal
-when an older index lacks the split.
-"""
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import sys
@@ -22,7 +16,6 @@ CHAT = -1001
 
 
 def journal(store):
-    # One fixed hour, so the notification groups every change of this test together.
     clock, store_module.utcnow = store_module.utcnow, lambda: "2026-11-02T10:15:00.000+00:00"
     try:
         record(store)
@@ -36,7 +29,7 @@ def record(store):
     store.append("message.new", {"text": "edited"}, CHAT, 2, 7)
     store.append("message.edited", {"text": "edited again"}, CHAT, 2)
     store.append("message.deleted", {}, CHAT, 1)
-    store.append("message.deleted", {}, CHAT, 3)  # never saved: deleted before saving
+    store.append("message.deleted", {}, CHAT, 3)
     store.append("message.new", {"text": "gone at recheck"}, CHAT, 4, 7)
     store.append("message.missing_on_recheck", {}, CHAT, 4)
 
@@ -55,7 +48,6 @@ def main():
         journal(store)
         expected(store.chat_overview()[CHAT])
 
-        # The notifications use the same split, worded as changes in that hour.
         words = i18n.words("en")
         items = alerts.panel_items(store, words)
         change = next(item for item in items if item.get("category") == "change" or "this hour" in item.get("text", ""))
@@ -65,7 +57,6 @@ def main():
         assert alerts.change_item({"kind": "message.deleted", "message_id": 3}, "Chat", words, kept=False).endswith(
             "before its text was saved")
 
-        # An index from before the split is rebuilt from the journal, with the same numbers.
         store.db.execute("ALTER TABLE chat_state_index DROP COLUMN deleted_saved")
         store.db.commit()
         store.close()
@@ -79,7 +70,6 @@ def main():
 
 
 def source_status():
-    """A chat that delivers records works, even when the account's chat list does not show it."""
     collector = SimpleNamespace(dialog_cache={}, dialogs_truncated=True, RECEIVING_DAYS=Collector.RECEIVING_DAYS)
     recent = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(timespec="milliseconds")
     stale = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat(timespec="milliseconds")

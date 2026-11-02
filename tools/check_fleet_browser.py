@@ -1,4 +1,3 @@
-"""Bulk account import, groups and shared proxies with synthetic sessions."""
 import json
 import tempfile
 from pathlib import Path
@@ -81,7 +80,6 @@ def main():
         page.locator("#fleet-import-start").click()
         expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
         expect(page.locator("#fleet-group")).to_be_disabled()
-        # Close and Stop stay usable while accounts are imported; both end the queue after the current account
         expect(page.locator("#fleet-import-close")).to_be_enabled()
         expect(page.locator("#fleet-import-stop")).to_be_visible()
         page.locator("#top-lock").click()
@@ -100,7 +98,6 @@ def main():
         assert len(imported) == before + 1, "Locking must stop the remaining import queue"
         assert not any(e["label"] == "delta" for e in server.app.state.profiles.entries.values())
 
-        # Switching awaits its final scoped notification read before releasing the workspace.
         with page.expect_response(lambda response: response.url == server.url + "/profiles/" + alpha + "/api/notifications"
                                   and response.request.method == "GET", timeout=20000) as switched:
             page.locator("#profile-select").select_option(alpha)
@@ -131,9 +128,7 @@ def main():
         page.locator("#fleet-import-open").click()
         page.locator("#fleet-files").set_input_files(account_files("finished", 505))
         page.locator("#fleet-import-start").click()
-        expect(page.locator("#fleet-results .ok")).to_have_count(1, timeout=30000)  # an import connects
-        # The result row is marked before the queue's final profile/group refresh.
-        # Wait for the form to become usable before selecting a second batch.
+        expect(page.locator("#fleet-results .ok")).to_have_count(1, timeout=30000)
         expect(page.locator("#fleet-import-stop")).to_be_hidden(timeout=30000)
         expect(page.locator("#fleet-files")).to_be_enabled()
         expect(page.locator("#fleet-import-close")).to_be_enabled()

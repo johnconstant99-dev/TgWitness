@@ -1,4 +1,3 @@
-"""Sources tabs and recording drafts against a synthetic local workspace."""
 import json
 import tempfile
 from pathlib import Path
@@ -69,7 +68,6 @@ def check_targets(page, server):
     page.locator("#target-clear-filters").click()
     page.locator("#target-sort").select_option("name")
 
-    # A failed update keeps the selection and can be retried without another click per row.
     page.locator("#target-search").fill("source 02")
     page.locator("#target-select-page").check()
     page.locator("#target-bulk-action").select_option("priority")
@@ -81,7 +79,6 @@ def check_targets(page, server):
     page.locator("#target-bulk-apply").click()
     expect(rows.locator('[data-source-action="star"]')).to_have_attribute("aria-pressed", "true")
 
-    # Exclusions merge into a newer unsaved Scope draft instead of replacing it.
     page.evaluate("""async()=>{await json('scope',{...state.status.scope,mode:'account',acknowledged:true});
         await refreshStatus();await loadScope();}""")
     page.locator("#sources-tab-scope").click()
@@ -97,7 +94,6 @@ def check_targets(page, server):
     expect(page.locator("#scope-new-profile")).to_be_checked()
     expect(page.locator("#scope-exclude")).to_contain_text("Investigation source 02")
     page.locator("#sources-tab-chats").click()
-    # The status badge is only an indicator; resuming is a menu action.
     rows.locator(".source-state").click()
     expect(rows.locator(".source-state")).to_have_text("Excluded")
     rows.locator(".source-row-menu > summary").click()
@@ -106,7 +102,6 @@ def check_targets(page, server):
     expect(page.locator("#target-card")).to_have_attribute("aria-busy", "false")
     assert page.evaluate("state.scopeDirty && !state.scopeExclude.includes(-1000000001001)")
 
-    # Removing membership never removes signed history.
     store = server.app.state.store
     saved = store.append("message.new", {"text": "retained evidence"}, chat_id=-1000000001001,
                          message_id=7)
@@ -216,7 +211,6 @@ def check_dialog_refresh(page, server):
     expect(page.locator("#dialog-list button").nth(1)).to_be_disabled()
     expect(page.locator("#sources-tab-count")).to_have_text("21")
 
-    # A late refresh cannot navigate away from the journal or discard the old list on failure.
     hold_api_response(page, "/api/dialogs")
     page.locator("#load-dialogs").click()
     expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
@@ -330,7 +324,6 @@ def main():
                     page.screenshot(path=str(output / f"{tab}-{width}-{theme}.png"), full_page=True)
                     checks.append({"theme": theme, "width": width, "tab": tab, "height": height})
 
-        # Investigation mode saves what it describes, once the whole-account scope is confirmed.
         page.locator("#sources-tab-scope").click()
         page.locator("#scope-investigation").click()
         answer_panel_dialog(page, accept=False)

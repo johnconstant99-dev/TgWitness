@@ -1,4 +1,4 @@
-"""Verify one canary message, its edit and deletion in independently pinned account exports. Sends nothing."""
+"""Verify one canary message, its edit and deletion in independently pinned account exports."""
 import argparse
 import json
 from pathlib import Path

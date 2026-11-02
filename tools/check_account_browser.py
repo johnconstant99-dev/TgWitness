@@ -1,4 +1,3 @@
-"""Browser acceptance of account import and QR login using only synthetic credentials."""
 import json
 import sys
 import tempfile
@@ -128,8 +127,6 @@ def main():
             return ("" if profile == "default" else "/profiles/" + profile) + "/api/" + path
 
         def request_qr(button):
-            # Cold QR rendering may outlast the UI assertion budget. Wait for
-            # the request itself, then keep the normal rendering assertions.
             path = workspace_api_path("auth/qr/start")
             with page.expect_response(lambda response: urlsplit(response.url).path == path
                                       and response.request.method == "POST", timeout=25000) as pending:
@@ -206,8 +203,6 @@ def main():
         page.locator('[aria-label="Lock workspace"]:visible').first.click()
         expect(page.locator("#gate")).to_be_visible()
         page.wait_for_function("()=>!$('qr-image').getAttribute('src')")
-        # Unlock loads only the active Account screen. A late policy response
-        # must not reset a QR sign-in started while account settings load.
         hold_api_response(page, "/network/policy")
         page.locator("#panel-token").fill(server.app.state.vault.token)
         page.locator("#unlock-form button[type=submit]").click()
@@ -470,8 +465,6 @@ def main():
             connect = page.locator("#auth-continue").bounding_box()
             assert connect["y"] >= 0 and connect["y"] + connect["height"] < 844, (width, connect)
         scenarios.append("file-import submit stays visible with fallback font metrics at 320/390px")
-        # Adding another account has the longest heading. Its title gets the
-        # whole mobile row rather than wrapping beside the three header actions.
         page.evaluate("setAuthStep('authorized')")
         page.locator('#account-add-another').click()
         for width in (390, 320):

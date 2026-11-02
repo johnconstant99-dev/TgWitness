@@ -5969,5 +5969,14 @@
 "Workspace observation: {n} interruption in the available period": "工作區監測：在可用期間內發生{n}次中斷",
 "Workspace observation: {n} interruptions in the available period": {
 "other": "工作區監測：在可用期間內發生{n}次中斷"
-}
+},
+"In <strong>Sources → Recording → Choose which changes to preserve</strong>, select event categories or use <strong>Messages, edits &amp; deletions</strong>, then press <strong>Save recording settings</strong>.": "在<strong>「來源」→「記錄」→「選擇要保留的變更</strong>」中，選取事件類別或使用「<strong>訊息、編輯與刪除</strong>」，然後按下<strong>「儲存記錄設定」</strong>。",
+"Hide the address waits for a working proxy; direct fallback requires a mode that permits it": "「隱藏地址」功能會等待可用的代理伺服器；若要直接備用，則需啟用允許此功能的模式",
+"Hide the address refuses direct fallback. Direct as a last resort can use Direct after the configured delay. Server behind a tunnel or VPN permits the host's direct network route but does not create a VPN. Pause observation before changing routes; saving cancels unfinished login. <strong>Test Telegram connection</strong> checks transport, not complete delivery.": "「隱藏地址」功能會拒絕直接連線的備用方案。若需以直接連線作為最後手段，可在設定的延遲時間過後使用「直接連線」。位於隧道或 VPN 後方的伺服器允許主機使用直接網路路徑，但不會建立 VPN。變更路徑前請暫停監測；儲存操作會取消未完成的登入程序。<strong>Telegram 連線測試</strong>僅檢查傳輸狀況，而非完整傳送。",
+"Signed checks outside the collector, posted to Telegram or Discord.": "在收集器之外簽署的檢查結果，會發佈至 Telegram 或 Discord。",
+"Compare the running program with a public GitHub commit.": "請將正在執行的程式與 GitHub 上的公開提交進行比對。",
+"Open Extras in the panel and choose Configure under Independent witness. The form prepares the files for a separate witness process.": "在面板中開啟「Extras」，並在「Independent witness」下選擇「Configure」。此表單會為獨立見證程序準備所需檔案。",
+"Choose your Telegram channel or Discord webhook and the check interval, then save the configuration.": "選擇您的 Telegram 頻道或 Discord Webhook 以及檢查間隔，然後儲存設定。",
+"Install TgWitness on the witness host, add your BotFather token or Discord webhook and follow the launch commands in step 3.": "在見證主機上安裝 TgWitness，加入您的 BotFather 憑證或 Discord Webhook，並依照第 3 步中的啟動指令操作。",
+"In Extras, open Code check and enter your fork or the official repository with a release tag or commit. TgWitness compares every program file with that commit and saves the result in the signed journal, so an export shows which public code was running. No GitHub token is needed.": "在「Extras」中，開啟「Code check」並輸入您的分支，或輸入附有發行標籤或提交記錄的官方儲存庫。TgWitness 會將每個程式檔案與該提交記錄進行比對，並將結果儲存於簽名日誌中，因此匯出時可顯示哪些公開程式碼曾被執行。無需 GitHub 憑證。"
 }

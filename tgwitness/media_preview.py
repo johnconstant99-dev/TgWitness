@@ -1,6 +1,3 @@
-"""Recognize inert preview formats from bytes, never Telegram's supplied MIME type."""
-
-
 def content_type(path):
     with path.open("rb") as source:
         head = source.read(512)

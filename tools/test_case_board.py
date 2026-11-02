@@ -1,4 +1,3 @@
-"""Case Board integrity, exact text versions and access boundaries; no Telegram connection."""
 import copy
 import json
 import sqlite3

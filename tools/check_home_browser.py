@@ -1,4 +1,3 @@
-"""Homepage actions, translated narrow layouts and actual text contrast."""
 import json
 from urllib.parse import urljoin
 

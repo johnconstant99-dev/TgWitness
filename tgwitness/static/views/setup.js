@@ -1,5 +1,3 @@
-// Setup by goal (levels.py): four answers, the settings suggested for them and the two scales.
-// Nothing is saved until Apply; the scales come from what is set now, plus what Apply would add.
 const APPLIED = ["timestamps", "drand", "devices"];
 const STEP_ITEMS = {alerts: "alerts", replica: "replica", server: "server", gateway: "gateway_log", code: "code",
   witness: "witness"};
@@ -42,7 +40,6 @@ function score(scale, levels) {
   return {percent, level: levelOf(levels, percent)};
 }
 
-// Both scales; with `after`, the part Apply would add is shown on top of the current state.
 export function renderScales(box, data, {tr, node, after = null, compact = false}) {
   box.replaceChildren();
   const describe = {
@@ -100,7 +97,6 @@ export function createSetup(context) {
       devices: find("setup-devices").checked};
   }
 
-  // The scales as they would be after Apply: the applied switches and the answer to "where".
   function predicted(a) {
     const copy = JSON.parse(JSON.stringify(data.assessment));
     for (const item of copy.credibility.items) {
@@ -164,7 +160,6 @@ export function createSetup(context) {
     update();
   }
 
-  // A reload that lands after the person changed an answer keeps the answers and refreshes the rest.
   async function load() {
     const first = !data, who = owner(), sequence = ++loadSequence;
     const loaded = await json("setup", undefined, {profile: who.profile});

@@ -1,8 +1,3 @@
-"""Folder-contained WireGuard/WARP runtimes. No host routing, drivers or system services.
-
-Only the administrator can provision these helpers. Release hashes are part of
-the reviewed application; downloaded checksums never authorize a new executable.
-"""
 import asyncio
 import base64
 import configparser
@@ -66,7 +61,6 @@ class ReleaseRedirect(HTTPRedirectHandler):
 
 
 def fetch_asset(url):
-    """Bounded HTTPS download; setup explicitly opts into a direct connection."""
     check_asset_url(url)
     opener = build_opener(ProxyHandler({}), ReleaseRedirect())
     content, started = bytearray(), time.monotonic()
@@ -106,7 +100,6 @@ def binary_data(tool, content, expected, windows):
         return content
     name = "wireproxy.exe" if windows else "wireproxy"
     with tarfile.open(fileobj=io.BytesIO(content), mode="r:gz") as archive:
-        # Read exactly one regular member, never extract paths, links or permissions.
         matches = [m for m in archive.getmembers() if m.name in (name, "./" + name)]
         if len(matches) != 1 or not matches[0].isfile() or not 0 < matches[0].size <= MAX_DOWNLOAD:
             raise ValueError("Invalid tunnel helper archive.")
@@ -128,7 +121,6 @@ async def install_helper(root, tool, allow_download=False):
         raise ValueError("Tunnel helper download is too large.")
     executable = binary_data(tool, cache.read_bytes(), expected, target.startswith("windows_"))
     path = root / (tool + "-" + VERSIONS[tool] + (".exe" if os.name == "nt" else ""))
-    # Recheck the binary, too: a cached path alone is never a trust decision.
     if not path.exists() or path.stat().st_size != len(executable) or path.read_bytes() != executable:
         private_write(path, executable)
     if os.name != "nt":
@@ -137,7 +129,6 @@ async def install_helper(root, tool, allow_download=False):
 
 
 def wireguard_profile(text):
-    """Parse a data-only, single-peer full-tunnel profile; never pass uploaded text to a helper."""
     if not isinstance(text, str) or not 1 <= len(text) <= 16384:
         raise ValueError("Supply a WireGuard profile of at most 16 KB.")
     parser = configparser.ConfigParser(interpolation=None, strict=True, empty_lines_in_values=False)
@@ -237,7 +228,6 @@ class PortableRoutes:
                 with tempfile.TemporaryDirectory(prefix="registration-", dir=self.root) as folder:
                     path = Path(folder)
                     owner_only(path)
-                    # Preserve a completed registration on a later generate failure; do not create another device.
                     account = self.vault.read("warp_account")
                     if account:
                         private_write(path / "wgcf-account.toml", account["toml"].encode())
@@ -254,9 +244,6 @@ class PortableRoutes:
                     self.vault.save("warp_profile", {"profile": text})
         profile = wireguard_profile(text)
         async with self.lock:
-            # Two simultaneous WireGuard peers with one private key roam between
-            # endpoints and interrupt each other. Rechecking a selected route
-            # must reuse its listener, not silently start a competing peer.
             selected = self.selected()
             if selected and wireguard_profile(selected["profile"]) == profile and selected["mode"] == mode:
                 saved = {k: v for k, v in selected.items() if k != "paused"}
@@ -307,7 +294,6 @@ class PortableRoutes:
                 stderr=subprocess.DEVNULL, creationflags=CREATE_FLAGS)
             self.processes[identifier] = process
             self.configs[identifier] = saved
-            # Prove this is our authenticated listener, not just any process holding the port.
             for _ in range(50):
                 if process.returncode is not None:
                     break

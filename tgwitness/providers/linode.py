@@ -1,4 +1,3 @@
-"""Akamai Cloud (Linode): instances, Cloud Firewalls with rule versions and account events."""
 import base64
 import ipaddress
 import json

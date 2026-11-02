@@ -1,9 +1,3 @@
-"""Reference pages: the repository's Markdown documents rendered for the public site.
-
-Links between rendered documents stay on the site (anchors are checked against the rendered
-headings); links to anything else in the repository point at GitHub. Mermaid blocks become
-SVG diagrams (site_diagrams). No account data or application code is read.
-"""
 import html
 import posixpath
 import re
@@ -25,13 +19,11 @@ NEWLINE = "\n"
 
 
 def github_slug(value, separator="-"):
-    """GitHub's heading anchors: lower case, punctuation dropped, spaces become hyphens."""
     value = html.unescape(re.sub(r"<[^>]+>", "", value)).strip().lower()
     return re.sub(r"[^\w\- ]", "", value).replace(" ", "-")
 
 
 def escape_pseudo_tags(text):
-    """<id>, <version> and similar placeholders in prose are text, not HTML (as on GitHub)."""
     def outside_code(part):
         return re.sub(r"<(/?)([A-Za-z][\w .:-]*)>",
                       lambda m: m.group(0) if m.group(2).split()[0].lower() in HTML_TAGS
@@ -44,7 +36,6 @@ def escape_pseudo_tags(text):
 
 
 def indent_lists(text):
-    """Python-Markdown nests list content at four spaces; the docs use GitHub's two or three."""
     out, unit = [], None
     for line in text.split(NEWLINE):
         stripped = line.lstrip(" ")
@@ -64,8 +55,6 @@ MATH_SYMBOLS = {r"\ge": "≥", r"\le": "≤", r"\cap": "∩", r"\cup": "∪", r"
 
 
 def math(expression):
-    """The small LaTeX subset the docs use (operator names, sub- and superscripts, fractions,
-    a few symbols) as HTML; the docs show it with GitHub's math on GitHub."""
     text = re.sub(r"\\(?:operatorname|mathrm|text)\{([^{}]*)\}", r"\1", " ".join(expression.split()))
     for name, symbol in sorted(MATH_SYMBOLS.items(), key=lambda item: -len(item[0])):
         text = text.replace(name, symbol)
@@ -77,7 +66,6 @@ def math(expression):
 
 
 def prepare(text, number_start, labels=None):
-    """Code blocks and diagrams out first (Python-Markdown cannot fence code inside list items)."""
     blocks = []
 
     def keep(match):
@@ -113,8 +101,6 @@ def prepare(text, number_start, labels=None):
 
 
 def markup(text, number_start=1, labels=None):
-    """Markdown body to HTML in which code blocks and diagrams are still WIKISLOT tokens.
-    This is the form that is translated: the tokens and heading ids pass through unchanged."""
     text, blocks = prepare(text.replace("\r\n", NEWLINE), number_start, labels)
     body = markdown.markdown(text, extensions=["tables", "sane_lists", "toc"],
                              extension_configs={"toc": {"slugify": github_slug, "toc_depth": "2-4"}})
@@ -122,7 +108,6 @@ def markup(text, number_start=1, labels=None):
 
 
 def finish(body, blocks, words=None):
-    """Put code blocks and diagrams back and add the page furniture."""
     for index, block in enumerate(blocks):
         body = re.sub(r"<p>\s*" + SLOT.format(index) + r"\s*</p>", lambda m, b=block: b, body)
         body = body.replace(SLOT.format(index), block)
@@ -136,8 +121,6 @@ def finish(body, blocks, words=None):
 
 
 def to_html(text, number_start=1, labels=None, translate=None, words=None):
-    """Markdown body (without its title) to HTML. translate(html) -> (html, blocks left in English).
-    Returns the HTML, the number of diagrams and the number of untranslated blocks."""
     body, blocks = markup(text, number_start, labels)
     missing = 0
     if translate:
@@ -146,12 +129,10 @@ def to_html(text, number_start=1, labels=None, translate=None, words=None):
 
 
 def diagram_sources(text):
-    """The Mermaid sources of a Markdown document."""
     return [m.group(4) for m in FENCE.finditer(text.replace("\r\n", NEWLINE)) if m.group(3).strip() == "mermaid"]
 
 
 def split_title(text):
-    """The first H1 is the page title; anything before it (a list of translations) stays in the body."""
     text = text.replace("\r\n", NEWLINE)
     match = re.search(r"^#\s+(.+?)[ \t]*\n", text, re.M)
     if not match or "```" in text[:match.start()]:
@@ -164,7 +145,6 @@ def ids(body):
 
 
 def rewrite_links(body, source, page_path, pages, page_ids, relative, repo_url, branch, assets, root):
-    """pages: repository path -> site path of rendered documents. assets: collects images to copy."""
     directory = posixpath.dirname(source)
 
     def target_of(value):

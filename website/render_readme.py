@@ -1,10 +1,4 @@
-"""Build the README's self-contained SVG cover and navigation.
-
-Requires fonttools and the Manrope variable TTF (see the retained OFL licence).
-Animated WebP exports also require Playwright Chromium and Pillow.
-Usage: python website/render_readme.py --font /path/to/Manrope.ttf
-No network, application data or raster artwork is used.
-"""
+"""Build the README's self-contained SVG cover and navigation."""
 import argparse
 from html import escape
 from io import BytesIO
@@ -123,7 +117,6 @@ def button(font, name, title, subtitle, primary=False):
 
 
 def animate():
-    """Render a deterministic six-second image loop; no video player or network."""
     from PIL import Image
     from playwright.sync_api import sync_playwright
 

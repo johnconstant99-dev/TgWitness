@@ -1,9 +1,3 @@
-"""Recipient encryption for disposable exports; no password or private key on the runner.
-
-RSA-OAEP-SHA256 wraps a fresh AES-256 key. AES-GCM authenticates the complete
-header and ciphertext. Large files are streamed; unauthenticated plaintext is
-never installed at the requested destination. See docs/SEALED-ACTIONS.md.
-"""
 import argparse
 import base64
 import hashlib

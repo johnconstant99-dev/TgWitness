@@ -163,7 +163,7 @@ launcher in place. Keep the pre-upgrade backup for storage-format changes.
 | Command | Result |
 | --- | --- |
 | `tgwitness open` | Current panel URL and access key. |
-| `tgwitness paths` | Exact program, data and service paths. |
+| `tgwitness paths` | Exact program, data and guide paths. |
 | `tgwitness guide --print` | Offline operating instructions. |
 | `tgwitness status` / `tgwitness logs` | Availability / service logs. |
 | `tgwitness stop` / `tgwitness start` | Stop / resume the service; retain data. |
@@ -174,3 +174,38 @@ launcher in place. Keep the pre-upgrade backup for storage-format changes.
 See [Access](ACCESS.md) for colleague tokens, sessions and IP restrictions, and
 [installer publishing](../deploy/installer/README.md#automatic-publication-from-github)
 for the GitHub-to-Cloudflare release workflow.
+
+## Remove TgWitness
+
+There is no uninstaller: you stop the panel and delete its folders. Deleting the data
+folder destroys journals, signing keys, Telegram sessions and saved files for good.
+Before that:
+
+1. Export what you need (**Exports → Download signed ZIP**) and keep the signing key
+   fingerprint and checkpoints outside this machine. To keep the workspace itself, copy
+   the whole data folder with collection stopped.
+2. Delete servers created under **Extras → Server 24/7** from **Your servers** or with
+   `python -m tgwitness.cloud destroy`; the provider bills them until they are deleted.
+3. End each account's session in Telegram under **Settings → Devices**. Deleting the
+   files does not sign the session out on Telegram's side.
+
+**Ubuntu root installation.** Note the data folder, stop the service, then remove the
+service, the folders and the shortcut:
+
+```sh
+/opt/tgwitness/bin/tgwitness paths
+/opt/tgwitness/bin/tgwitness stop
+systemctl list-unit-files 'tgwitness-*'
+systemctl disable tgwitness-<ID>
+rm /etc/systemd/system/tgwitness-<ID>.service
+systemctl daemon-reload
+rm -rf /opt/tgwitness /var/lib/tgwitness-<ID> /usr/local/bin/tgwitness
+```
+
+**Linux or macOS user installation.** Close the panel. A configured Linux user service
+is stopped with `systemctl --user disable --now tgwitness-<ID>`; its unit is in
+`~/.config/systemd/user/`. Then delete `~/.local/share/tgwitness` (or your
+`TGWITNESS_INSTALL_DIR`) and the `~/.local/bin/tgwitness` shortcut.
+
+**Windows.** Close the panel and delete `%LOCALAPPDATA%\TgWitness` (or your
+`TGWITNESS_INSTALL_DIR`). The installer adds no service, scheduled task or shortcut.

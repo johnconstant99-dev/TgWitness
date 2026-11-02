@@ -1,5 +1,3 @@
-"""Save recording settings together, using the existing journal receipts."""
-
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from .monitoring import Capture, Monitoring, capture_settings, monitoring_settings
@@ -48,7 +46,6 @@ def scope_change(previous, body):
 
 
 def save(store, body):
-    """Call under the workspace operation lock. No network or filesystem side effects."""
     before, changed = settings(store), []
     scope, widening = scope_change(before["scope"], body.scope) if body.scope is not None else (None, False)
     with store.transaction():

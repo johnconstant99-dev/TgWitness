@@ -1,4 +1,3 @@
-"""Compatibility entry point; use tgwitness.mcp_server for all MCP transports."""
 import sys
 
 from .mcp_stdio import check_url, read_token  # noqa: F401

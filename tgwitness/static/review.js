@@ -1,4 +1,3 @@
-/* Saved content is text, including links and button data. Nothing here executes it. */
 (() => {
   const n=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
   const words=text=>String(text??"").match(/[\p{L}\p{N}_]+|\s+|[^\p{L}\p{N}_\s]/gu)||[];
@@ -9,7 +8,6 @@
     while(endA>start&&endB>start&&a[endA-1]===b[endB-1]){endA--;endB--;}
     if(start)out.push(["",a.slice(0,start).join("")]);
     const x=a.slice(start,endA),y=b.slice(start,endB);
-    // Cap memory/work for pasted logs and very long posts; unchanged edges stay precise.
     if(x.length*y.length>250000){
       if(x.length)out.push(["del",x.join("")]);if(y.length)out.push(["ins",y.join("")]);
     }else{
@@ -130,7 +128,6 @@
       preview.hidden=true;
     }));
     save.addEventListener("click",()=>busy(save,()=>download("media/"+digest,media.name||digest)));
-    // Pictures are fetched only when their row comes into view; audio/video stay opt-in.
     if(/^image\//.test(media.mime_type||"")&&(media.size||0)<=8*1024*1024){
       const observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){observer.disconnect();preview.click();}});
       observer.observe(wrap);setTimeout(()=>observer.disconnect(),60000);

@@ -45,10 +45,10 @@ checkpoint beyond its end; matching the boundary does not replace checking every
 
 ## Set up a witness
 
-1. Open **Extras → A bot in your channel → Set up a bot**.
+1. Open **Extras → Independent witness → Configure**.
 2. Create a read-only token and save it as `witness-token.txt`.
-3. Configure your channel, polling interval and reachable collector address. Download `witness.json`; it pins the workspace's collector key.
-4. On the witness host, place the JSON and token together. Save your Telegram bot token in `bot-token.txt`. Give your bot permission to post in your channel.
+3. Choose a Telegram channel or a Discord webhook, the polling interval and the reachable collector address. Download `witness.json`; it pins the workspace's collector key.
+4. On the witness host, place the JSON and token together. For Telegram, save your bot token in `bot-token.txt` and let the bot post in your channel. For Discord, save the channel's webhook URL in `discord-webhook.txt`.
 5. In the installed project environment, check and launch:
 
 ~~~sh

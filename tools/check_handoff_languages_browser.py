@@ -1,4 +1,3 @@
-"""All shipped panel languages on the active export and recipient handoff path."""
 import json
 import tempfile
 from pathlib import Path
@@ -121,7 +120,6 @@ def main():
                 page.locator('#account-disclosure-dismiss').click()
                 page.locator('#export-task-journal').click()
                 for fmt, key in completion_keys.items():
-                    # Download mechanics already have dedicated acceptance; render each completion state here.
                     page.evaluate("""async format=>{
                       const update=(await exportsReady).begin({format,encrypted:format==='zip'});
                       update({phase:'done',total:8,expected:8});

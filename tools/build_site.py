@@ -1,10 +1,4 @@
-"""Build the public project site from an explicit list of presentation files.
-
-No application import, account data, dependency install, or Telegram connection. The
-reference pages are the repository's own Markdown documents (tools/site_content.REFERENCE).
-English lives at the site root and every other language under /<code>/ (tools/site_i18n.py);
-translations come from website/i18n/<code>.json, made by test-results/site_translate.py.
-"""
+"""Build the public project site from an explicit list of presentation files."""
 import argparse
 import hashlib
 import html
@@ -72,7 +66,6 @@ STATIC = {"style.css": "website/style.css", "site.js": "website/site.js",
           "learn.css": "website/learn.css", "learn.js": "website/learn.js",
           "workflows.css": "website/workflows.css", "workflows.js": "website/workflows.js", **ASSETS, **WIKI_ASSETS}
 SITE_SCRIPTS = ("website/learn.js", "website/docs.js", "website/site.js", "website/workflows.js")
-TRANSLATIONS = tuple(f"website/i18n/{lang}.json" for lang in site_modes.LANGUAGES)
 MODES_PAGES = site_modes.FILES
 
 
@@ -103,10 +96,6 @@ DEMO_GUIDE_LOCALES = {f"demo/guide-locales/{lang}.js": lang for lang in site_mod
 DEMO_DICTIONARIES = ("tgwitness/english_fallbacks.json", *(f"tgwitness/locales/{lang}.json" for lang in LANGS if lang != "en"))
 GUIDE_DICTIONARIES = ("tgwitness/guide_locales/keys.json", *(f"tgwitness/guide_locales/{lang}.json" for lang in site_modes.EXTRA_LANGUAGES))
 CAPTURE_DOCS = {"en": "docs/SEALED-ACTIONS.md", "ru": "docs/ru/SEALED-ACTIONS.md"}
-INPUTS = ("website/index.html", "website/docs.html", "website/guide_intro.html", site_modes.SOURCE, *STATIC.values(),
-          *DEMO_STATIC.values(), *DEMO_PAGES.values(), *DEMO_DICTIONARIES, *GUIDE_DICTIONARIES, *CAPTURE_DOCS.values(),
-          *(f"website/guides/en/{slug}.html" for slug in GUIDES if slug != "dedicated-account"),
-          *dict.fromkeys(entry[3] for entry in REFERENCE.values()))
 WIKI_HUB = "docs/reference/"
 LOCAL_PAGES = ("", "docs/", *(f"docs/{slug}/" for slug in GUIDES), WIKI_HUB, *(f"{WIKI_HUB}{slug}/" for slug in REFERENCE))
 NOTICE_PAGES = tuple(f"{WIKI_HUB}{slug}/" for slug in NOTICE_SLUGS)
@@ -131,7 +120,8 @@ FRAME = ("Visual guide", "Security", "Language", "Switch between light and dark 
          "This page is available in English only.")
 NOTICE_LINK_NOTE = ("The two project notices and the capability guide are translated into this language. "
                     "Other linked guides and reference pages are in English.")
-NOTICE_FRAME = (*LABELS.values(), *FRAME[:5], "Security & project", NOTICE_LINK_NOTE)
+NOTICE_FRAME = (*(value for key, value in LABELS.items() if key not in {"title", "intro", "description"}),
+                *FRAME[:5], "Security & project", NOTICE_LINK_NOTE)
 THEME_SCRIPT = ("(()=>{try{const s=localStorage.getItem('tgw-theme');document.documentElement.dataset.theme="
                 "s||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(e){}})()")
 
@@ -141,12 +131,10 @@ def prefix(lang):
 
 
 def page_languages(local):
-    """Full documentation languages, plus the existing Amharic notices."""
     return NOTICE_LANGUAGES if local in NOTICE_PAGES else site_i18n.LANGUAGES
 
 
 def canonical_path(path):
-    """Keep translated navigation, but consolidate untranslated reference copies."""
     local = path.split("/", 1)[1] if path.split("/", 1)[0] in LANGS and "/" in path else path
     return local if local in {WIKI_HUB + slug + "/" for slug in site_i18n.ENGLISH_ONLY} else path
 
@@ -243,7 +231,6 @@ def seo(base_url, path, title, description, lang, alternates, *, crumbs=(), extr
 
 
 def headings(content):
-    """(id, text) of every h2, for the page contents list."""
     return [(id_, html.escape(PlainText(inner).text.rstrip("#").strip(), quote=False))
             for id_, inner in re.findall(r'<h2 id="([^"]+)">(.*?)</h2>', content, re.S)]
 
@@ -254,8 +241,6 @@ def home_body(template):
 
 
 def inventory(root=ROOT):
-    """Everything that is translated: (UI strings, HTML fragments, diagram texts). The translation
-    script and the build use this one list, so nothing is translated that the site does not show."""
     root = Path(root)
     strings = list(LABELS.values()) + list(FRAME) + [HOME_TITLE, HOME_DESCRIPTION, HOME_OG, HOME_IMAGE_ALT, WIKI_DESCRIPTION, NOTICE_LINK_NOTE]
     for title, description, keywords, _ in GUIDES.values():
@@ -289,7 +274,6 @@ def inventory(root=ROOT):
 
 
 def validate_demo_assets(root):
-    """Keep the explicit publication list complete for referenced panel assets."""
     published = set(DEMO_STATIC.values()) | set(DEMO_PAGES.values())
     reference = re.compile(r'''["']([^"'\s<>]+\.(?:js|css)(?:\?[^"'\s<>]*)?)["']''')
     for source in sorted(published):
@@ -301,7 +285,6 @@ def validate_demo_assets(root):
                 continue
             target = ("tgwitness/static" + parts.path if parts.path.startswith("/") else
                       posixpath.normpath(posixpath.join(posixpath.dirname(source), parts.path)))
-            # Demo HTML replaces the server locale loader with generated dictionaries below.
             if source in DEMO_PAGES.values() and target == "tgwitness/static/guide-locale.js":
                 continue
             if target.startswith("tgwitness/static/") and (root / target).is_file() and target not in published:
@@ -386,7 +369,6 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     for code, source in CAPTURE_DOCS.items():
         body = site_wiki.to_html(site_wiki.split_title(read_public(source).decode("utf-8"))[1])[0]
         source_url = repo_url + "/blob/" + branch + "/" + source
-        # Relative source links still resolve correctly outside GitHub's Markdown renderer.
         body = re.sub(r'href="([^"#][^"]*)"', lambda m: 'href="' + html.escape(
             urljoin(source_url, html.unescape(m[1])), quote=True) + '"', body)
         capture_instructions[code] = body
@@ -467,7 +449,6 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                             + re.escape(html.escape(branch, quote=True)) + r'/([^"#]+)(?:#([^"]*))?"')
 
         def links(content, path, wiki_page=wiki_page, page_ids=page_ids):
-            """Links to rendered documents on GitHub stay on the site, in this language."""
             def replace(match):
                 target = wiki_page.get(match.group(1))
                 if match.group(1) in ("LICENSE", "NOTICE"):
@@ -592,7 +573,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
             toc_html = (f'<p class="nav-label">{labels["toc"]}</p>' + ''.join(f'<a href="#{id_}">{text}</a>' for id_, text in toc)
                         if toc else "")
             context = {**guide_values(path), **language_values,
-                       "PAGE_CLASS": "notice-page" if local in NOTICE_PAGES else "docs-root",
+                       "PAGE_CLASS": "notice-page" if local in NOTICE_PAGES else "docs-root docs-hub" if local == "docs/" else "docs-root",
                        **{key.upper(): html.escape(value, quote=True) for key, value in labels.items()},
                        "HOME": relative(path, base if full_site else ""), "HUB": relative(path, hub if full_site else "docs/"),
                        "WIKI_HUB": relative(path, wiki_hub if full_site else WIKI_HUB),
@@ -604,6 +585,13 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                        "BREADCRUMBS": breadcrumb, "NOTICE": notice, "CONTENT": content, "CONTENTS": toc_html,
                        "GUIDE_FOOTER": footer}
             result = render(doc_template, context)
+            if local == "docs/":
+                search_start = result.index('<div class="search"')
+                search_end = result.index('<article class="guide-content">', search_start)
+                search = result[search_start:search_end]
+                result = result[:search_start] + result[search_end:]
+                result = result.replace('<div data-hub-search></div>', search, 1)
+                result = re.sub(r'<p class="verification-shortcut">.*?</p>', '', result, count=1)
             if "data-workflow=" in content:
                 assets = relative(path, "")
                 result = result.replace('</head>', f'<link rel="stylesheet" href="{assets}workflows.css">'
@@ -631,6 +619,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
             intro, intro_missing = localize(intro_template)
             content = (f'<p class="eyebrow">TGWITNESS / {labels["docs"].upper()}</p><h1>{labels["title"]}</h1>'
                        f'<p class="guide-outcome">{labels["intro"]}</p>' + render(intro, guide_values(hub)))
+            content += '<section class="hub-catalog" id="guide-catalog">'
             content += (f'<a class="guide-card" href="{relative_file(hub, base + site_modes.LOCAL)}">'
                         f'<span class="card-number" aria-hidden="true">04 / 08 ↗</span>'
                         f'<h2>{html.escape(modes_words["modes.eyebrow"])}</h2>'
@@ -643,7 +632,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                         f'<div class="wiki-index">' + "".join(
                             f'<div class="wiki-column"><p class="nav-label">{t(label)}</p>' + "".join(
                                 f'<a href="{relative(hub, wiki_hub + key + "/")}">{reference[key][0]}</a>' for key in keys)
-                            + '</div>' for label, keys in REFERENCE_GROUPS) + '</div>')
+                            + '</div>' for label, keys in REFERENCE_GROUPS) + '</div></section>')
             page("docs/", labels["docs"], labels["description"], [(labels["home"], base), (labels["docs"], hub)], content, [], "",
                  notice(intro_missing))
 
@@ -712,8 +701,6 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     build_demo(read_public, write)
     llms_index = site_llms.index(base_url, repo_url, branch, version, GUIDES, REFERENCE)
     write("llms.txt", llms_index)
-    # Hub pages repeat all navigation cards. The handbook contains each article once;
-    # every hub and the home page keep their own linked Markdown edition.
     handbook_paths = [f"docs/{slug}/index.html" for _, _, keys in GROUPS for slug in keys]
     handbook_paths += [f"{WIKI_HUB}{slug}/index.html" for _, keys in REFERENCE_GROUPS for slug in keys]
     handbook = site_llms.full(llms_index, [markdown_documents[path] for path in handbook_paths]
@@ -755,14 +742,7 @@ def demo_language_script(languages, folder, revision=""):
             "document.write('<script src=\"" + folder + "/'+pick+'.js?v=" + revision + "\"><\\/script>');})();</script>")
 
 
-def redirect_page(target, root):
-    return (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-            f'<title>TgWitness</title><script defer src="{root}site-redirect.js"></script></head>'
-            f'<body data-site-root="{root}" data-site-target="{target}"><a href="{root}{target}">TgWitness</a></body></html>')
-
-
 def build_demo(read_public, write):
-    """Panel pages with relative paths, the request answering script and one dictionary per language."""
     revision = hashlib.sha256(b"".join(read_public(path) for path in
         (*DEMO_DICTIONARIES, *GUIDE_DICTIONARIES))).hexdigest()[:16]
     for target, source in DEMO_PAGES.items():

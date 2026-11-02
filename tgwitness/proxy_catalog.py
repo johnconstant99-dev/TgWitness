@@ -1,8 +1,3 @@
-"""Public MTProxy lists: bundled seed, HTTPS refresh, a last-good cache and the automatic pool.
-
-Remote lists supply data only. They cannot change feed URLs or the selected route.
-Operator catalogs keep their existing, exclusive override semantics.
-"""
 import asyncio
 from collections import Counter
 from contextlib import contextmanager, suppress
@@ -50,12 +45,11 @@ SOURCES = (
      "url": "https://raw.githubusercontent.com/KhodeJav/telegram-proxy-collector/main/output/proxies.txt",
      "homepage": "https://github.com/KhodeJav/telegram-proxy-collector"},
 )
-SOURCE_IDS = {source["id"] for source in SOURCES}
 SEED = Path(__file__).with_name("public_proxies.json")
 FORMAT = "tgwitness-public-proxies-v1"
 MAX_BYTES = 1024 * 1024
 MAX_PER_SOURCE = 400
-MAX_LARGE_SOURCE = 2000  # uploaded lists and the GitHub search collect from many files
+MAX_LARGE_SOURCE = 2000
 REFRESH_SECONDS = 60
 FEED_SECONDS = 3600
 PROBE_SECONDS = 600
@@ -69,7 +63,7 @@ PROBE_DC = (2, "149.154.167.51", 443)
 
 
 class NoProxyAvailable(ConnectionError):
-    """No listed proxy works now; only a workspace whose IP mode allows it then connects directly."""
+    pass
 
 
 class _Loggers(dict):
@@ -88,7 +82,6 @@ def public_ip(address):
 
 
 def public_host(host):
-    """Reject local addresses in external data; domains are also checked on selection."""
     try:
         return public_ip(host)
     except ValueError:
@@ -130,7 +123,6 @@ def parse_feed(text, limit=MAX_PER_SOURCE):
 
 
 def feed_text(source, text):
-    """Proxy links, one per line; a JSON feed lists the parts of each t.me link."""
     if source.get("format") != "json":
         return text
     data = json.loads(text)
@@ -148,7 +140,6 @@ LINK = re.compile(r"(?:tg://proxy\?|https?://t(?:elegram)?\.me/proxy\?)[^\s\"'<>
 
 
 def links_in(text):
-    """MTProxy links anywhere in a file: one per line, inside Markdown or HTML, or a JSON list of t.me parts."""
     text = text.replace("&amp;", "&")
     try:
         found = feed_text({"format": "json"}, text).splitlines()
@@ -165,7 +156,6 @@ def source_data(source, text, now):
 
 
 def feed_network():
-    """The proxy set for list downloads in the environment, or None."""
     value = os.environ.get("TGWITNESS_PROXY_FEED_PROXY", "").strip()
     if not value:
         return None
@@ -200,8 +190,6 @@ def signature(path):
 
 
 def read_snapshot(path, known=None):
-    # Room for every list at its download limit: a larger file would be read as missing, and the next
-    # save would rebuild it from the bundled lists without the operator's own
     if path.stat().st_size > (len(SOURCES) + proxy_sources.MAX_CUSTOM + 1) * 2 * MAX_BYTES:
         raise ValueError
     data = json.loads(path.read_text(encoding="utf-8"))
@@ -213,7 +201,7 @@ def read_snapshot(path, known=None):
     for entry in data["sources"]:
         if (isinstance(entry, dict) and entry.get("id") not in known
                 and re.fullmatch(r"(url|list)-[0-9a-f]{12}|" + proxy_sources.GITHUB_SEARCH_ID, str(entry.get("id")))):
-            continue  # an own list or the GitHub search that was removed or switched off since
+            continue
         kept.append(entry)
         if (not isinstance(entry, dict) or entry.get("id") not in known or entry["id"] in seen
                 or not isinstance(entry.get("proxies"), list) or len(entry["proxies"]) > source_limit(entry["id"])
@@ -237,15 +225,12 @@ class PublicCatalog:
         self.lock = asyncio.Lock()
         self.last_attempt = 0.0
         self.last_result = None
-        self.vault = None  # the main workspace's vault keeps the GitHub token
+        self.vault = None
         self.github_status = {"last_run": None, "files": 0, "proxies": 0, "error": None}
         self.countries = proxy_sources.Countries(self.root)
-        # Every status read of every workspace describes the pool: parsing the lists each time held
-        # the event loop for tens of milliseconds per workspace
         self.parsed, self.revision = None, 0
 
     def changed(self):
-        """Parse the lists again on the next read: a list, a source setting or the token changed."""
         self.revision += 1
 
     def settings(self):
@@ -261,7 +246,6 @@ class PublicCatalog:
         self.changed()
 
     def sources(self):
-        """Bundled lists, the operator's lists and the GitHub search, each with its switch."""
         settings, token = self.settings(), self.github_token()
         result = [{**source, "kind": "builtin", "enabled": source["id"] not in settings.disabled} for source in SOURCES]
         for item in settings.custom:
@@ -317,7 +301,6 @@ class PublicCatalog:
                 "country": self.countries.of(row["route"].host)} for row in catalog["proxies"]]}
 
     async def refresh(self, network=None):
-        """Download the lists through the environment's proxy, else the given route (direct by default)."""
         async with self.lock:
             if self.catalog()["mode"] == "operator":
                 return self.public()
@@ -379,7 +362,6 @@ class PublicCatalog:
         self._save({"format": FORMAT, "sources": [saved[i] for i in order if i in saved]})
 
     def add_list(self, label, text):
-        """Keep an uploaded or pasted list as its own source; returns (source, compatible, skipped)."""
         if len(text.encode("utf-8")) > proxy_sources.MAX_FILE_BYTES:
             raise ValueError("A list may have at most 1 MiB.")
         settings = self.settings()
@@ -400,7 +382,6 @@ class PublicCatalog:
         return item, len(entry["proxies"]), entry["skipped"]
 
     def forget(self, ids):
-        """Drop stored data of sources that were removed."""
         previous, _ = self.snapshot()
         saved = {e["id"]: e for e in previous["sources"] if e["id"] not in ids}
         if len(saved) != len(previous["sources"]):
@@ -432,8 +413,6 @@ class PublicCatalog:
 
 
 async def pinned(route, operator=False):
-    """Pin a public IP so a downloaded hostname cannot rebind to a local service
-    between validation and a later Telegram connection. Manual and operator routes are separate."""
     if operator:
         return route
     try:
@@ -453,11 +432,6 @@ async def pinned(route, operator=False):
 
 
 async def probe(route):
-    """Milliseconds for an MTProto handshake (req_pq_multi) through the proxy to Telegram.
-
-    The same obfuscated transport the client uses; no account, session or authorization key is involved.
-    Telethon's MTProxy connect always waits 2 s for a refusal, so only the exchange itself is timed.
-    """
     options = route.client_options()
     connection = options["connection"](PROBE_DC[1], PROBE_DC[2], PROBE_DC[0], loggers=_Loggers(),
                                        proxy=options["proxy"])
@@ -475,15 +449,6 @@ async def probe(route):
 
 
 class ProxyPool:
-    """Automatic MTProxy routes shared by every workspace of one process.
-
-    A workspace keeps its proxy while it works (Telegram distrusts accounts that hop between
-    addresses); different workspaces get different proxies while enough work; a proxy that fails
-    rests for a cooldown and the workspace moves to the next healthy one. The pool itself never
-    connects directly; the workspace's IP mode decides whether a direct fallback is allowed.
-    """
-
-
     pin = staticmethod(pinned)
     probe = staticmethod(probe)
 
@@ -514,11 +479,6 @@ class ProxyPool:
 
     @contextmanager
     def read_snapshot(self):
-        """Reuse catalog rows within one synchronous view; health stays live.
-
-        Loading is lazy so describe() still handles invalid operator catalogs.
-        A copied context in another task/thread cannot extend this read scope.
-        """
         snapshot = {"owner": self._snapshot_owner(), "active": True}
         token = self._entry_snapshot.set(snapshot)
         try:
@@ -549,7 +509,6 @@ class ProxyPool:
         return bool(state.get("latency_ms")) and now - state.get("checked_at", 0) < 2 * self.intervals()["probe"]
 
     def degrade(self, alias, error_type, first=COOLDOWN_SECONDS, longest=COOLDOWN_MAX):
-        """Set a failed proxy aside; repeated failures rest longer."""
         state = self.health.setdefault(alias, {"failures": 0})
         state["failures"] = state.get("failures", 0) + 1
         cooldown = min(longest, first * 2 ** (state["failures"] - 1))
@@ -563,8 +522,6 @@ class ProxyPool:
                      latency_ms=latency_ms or state.get("latency_ms") or 1)
 
     async def check(self, alias, row, operator, quick=False):
-        """The pinned route after a successful handshake (quick: recently checked, only resolve), or None;
-        a failed proxy then rests."""
         try:
             route = await self.pin(row["route"], operator)
             latency = None if quick else await self.probe(route)
@@ -576,8 +533,6 @@ class ProxyPool:
         return route
 
     def country_ranks(self, entries):
-        """{proxy id: 0 preferred country, 1 other} after the operator's country choice; proxies in an
-        avoided country, or outside the preferred ones when only those may serve, are left out."""
         settings, countries = getattr(self.catalog, "settings", None), getattr(self.catalog, "countries", None)
         policy = settings() if settings and countries else None
         if policy is None or not (policy.prefer or policy.avoid):
@@ -587,13 +542,9 @@ class ProxyPool:
 
     @staticmethod
     def addresses(entries):
-        """{proxy id: host and port}: one server listed with several secrets is one address to Telegram."""
         return {alias: (row["route"].host, row["route"].port) for alias, row in entries.items()}
 
     def order(self, owner, entries, avoid, now, share=0, ranks=None, addresses=None):
-        """Candidates: preferred countries first, then least shared, then measured latency, then list
-        order; share caps the accounts on one proxy (0: no cap); ranks leaves the other proxies out.
-        Sharing counts per server address, so two secrets of one server are not two proxies."""
         where = (addresses or {}).get
         load = Counter(where(v, v) for k, v in self.assigned.items() if k != owner)
         position = {alias: number for number, alias in enumerate(entries)}
@@ -604,7 +555,6 @@ class ProxyPool:
                                              self.health.get(a, {}).get("latency_ms") or 0, position[a]))
 
     def available(self, owner, share=0):
-        """Whether a checked proxy could serve this workspace now, without checking anything."""
         try:
             _, entries = self.entries()
         except ValueError:
@@ -614,7 +564,6 @@ class ProxyPool:
                                                              self.country_ranks(entries), self.addresses(entries)))
 
     async def acquire(self, owner, preferred=None, avoid=(), share=0):
-        """(proxy id, pinned route) for a workspace; raises NoProxyAvailable."""
         async with self.lock:
             try:
                 operator, entries = self.entries()
@@ -631,8 +580,6 @@ class ProxyPool:
                     self.assigned[owner] = current
                     return current, route
             ordered = self.order(owner, list(entries), set(avoid), now, share, ranks, addresses)
-            # Preferred countries first; when none of them answers the others are tried, each group with
-            # its own window, so unanswered preferred servers cannot crowd out working ones
             for rank in sorted({ranks[a] for a in ordered}):
                 candidates = [a for a in ordered if ranks[a] == rank]
                 for alias in [a for a in candidates if self.healthy(a, now)][:PICK_BATCH]:
@@ -651,7 +598,7 @@ class ProxyPool:
                         self.assigned[owner] = alias
                         return alias, route
             self.assigned.pop(owner, None)
-            if ranks:  # a country choice that allows no listed server is not helped by checking them again
+            if ranks:
                 self.exhausted = True
                 self.wakeup.set()
             if not ranks and entries:
@@ -662,7 +609,6 @@ class ProxyPool:
         self.assigned.pop(owner, None)
 
     def keep(self, owner, alias):
-        """Leave a workspace on its proxy after a planned switch found no other."""
         self.assigned[owner] = alias
 
     def describe(self, owner):
@@ -682,7 +628,6 @@ class ProxyPool:
             "lists_blocked": self.lists_blocked}}
 
     def table(self, labels=None):
-        """Every listed proxy with its last check and the workspaces on it, for the panel."""
         try:
             _, entries = self.entries()
         except ValueError:
@@ -705,7 +650,6 @@ class ProxyPool:
         return rows
 
     async def check_all(self, network=None):
-        """Handshake with every listed proxy now, then look up countries through the download route."""
         try:
             await self.probe_all()
             self.probed_at = time.time()
@@ -731,7 +675,6 @@ class ProxyPool:
         self.exhausted = False
 
     async def run(self):
-        """Background upkeep while any workspace uses automatic routes: hourly lists, regular checks."""
         while True:
             with suppress(TimeoutError):
                 await asyncio.wait_for(self.wakeup.wait(), 60)

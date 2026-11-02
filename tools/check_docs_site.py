@@ -1,4 +1,3 @@
-"""Exercise public guides and visual examples without importing the collector."""
 import hashlib
 import json
 import os

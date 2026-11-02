@@ -1,22 +1,3 @@
-"""PDF versions of the sealed reports, for courts, lawyers and printing.
-
-A PDF shows the facts of the signed JSON report (report.data) as a formal document: title block,
-numbered sections, tables, page numbers and the case on every page. It is signed twice over the same
-bytes, the whole file except the signature value (the PDF /ByteRange):
-
-  * a standard PDF signature (adbe.pkcs7.detached, SHA-256, ECDSA P-256) by the workspace's
-    document-signing certificate, so PDF readers show whether the file was changed after signing;
-  * the workspace's Ed25519 seal, carried inside that signature as an unsigned attribute. It names the
-    certificate's SHA-256, so the Ed25519 key vouches for the certificate, and verify.py checks it like
-    the seals of the HTML and JSON reports.
-
-The certificate is self-issued: a PDF reader confirms that nothing changed, and shows the signer as
-unknown until the reader trusts this certificate. The Ed25519 fingerprint, retained independently,
-remains the identity to compare. Needs the optional fpdf2 (uharfbuzz shapes Arabic, Indic and Thai
-text). Fonts: the bundled Noto set (fonts/, SIL Open Font License) for Latin, Cyrillic, Greek, Arabic,
-Hebrew, Devanagari, Bengali, Thai, symbols and emoji; Chinese, Japanese and Korean use a font installed
-on the server or placed in TGWITNESS_FONT_DIR.
-"""
 import difflib
 import hashlib
 import logging
@@ -37,9 +18,8 @@ from .store import canonical
 from .verify import coverage_lines, fingerprint
 
 FONT_DIR = Path(__file__).with_name("fonts")
-# The Ed25519 seal inside the PDF signature: an attribute in the UUID arc (ITU-T X.667), named after the project.
 SEAL_ATTRIBUTE = "2.25." + str(uuid.uuid5(uuid.NAMESPACE_URL, "https://github.com/phishdestroy/TgWitness#pdf-seal").int)
-CONTENTS_HEX = 65536  # room for the signature value (certificate, signature and seal), hex-encoded
+CONTENTS_HEX = 65536
 BYTE_RANGE_PLACEHOLDER = b"[0000000000 0000000000 0000000000 0000000000]"
 SIGNED_DATA, DATA = "1.2.840.113549.1.7.2", "1.2.840.113549.1.7.1"
 CONTENT_TYPE, MESSAGE_DIGEST, SIGNING_TIME = "1.2.840.113549.1.9.3", "1.2.840.113549.1.9.4", "1.2.840.113549.1.9.5"
@@ -50,21 +30,17 @@ OK, BAD, WARN = (23, 102, 58), (161, 25, 31), (138, 75, 0)
 FALLBACKS = ("NotoSansArabic-Regular.ttf", "NotoSansHebrew-Regular.ttf", "NotoSansDevanagari-Regular.ttf",
              "NotoSansBengali-Regular.ttf", "NotoSansThai-Regular.ttf", "NotoSansSymbols2-Regular.ttf",
              "NotoEmoji-Regular.ttf")
-# Fonts with Chinese, Japanese and Korean, as operating systems ship them: (file, face in a collection).
 CJK_FONTS = ("msyh.ttc", "malgun.ttf", "msyh.ttf", "msjh.ttc", "YuGothR.ttc", "meiryo.ttc", "simsun.ttc",
              "NotoSansCJK-Regular.ttc", "NotoSansCJKsc-Regular.otf", "NotoSansSC-Regular.ttf", "wqy-zenhei.ttc",
              "Arial Unicode.ttf", "Hiragino Sans GB.ttc")
 CJK_DIRS = ("C:/Windows/Fonts", "/usr/share/fonts/opentype/noto", "/usr/share/fonts/noto-cjk",
             "/usr/share/fonts/truetype/wqy", "/usr/share/fonts/google-noto-cjk", "/Library/Fonts",
             "/System/Library/Fonts", "/System/Library/Fonts/Supplemental")
-CJK_LANGUAGES = ("zh", "zh-Hant", "ja", "ko")
-# Scripts whose letters change shape or order with their neighbours, and the joiners of emoji sequences.
 COMPLEX_SCRIPTS = re.compile("[\u0300-\u036f\u0590-\u08ff\u0900-\u0dff\u0e00-\u0fff\u1000-\u109f\u1780-\u18af"
                              "\u200c-\u200f\u202a-\u202e\u2066-\u2069\ufb1d-\ufdff\ufe70-\ufeff\U0001f3fb-\U0001f3ff]")
 
 
 def available():
-    """True when the optional fpdf2 is installed."""
     try:
         import fpdf  # noqa: F401
     except ImportError:
@@ -73,11 +49,10 @@ def available():
 
 
 class MissingFont(ValueError):
-    """The report language needs a font this server does not have."""
+    pass
 
 
 def cjk_candidates():
-    """Available CJK fonts, in configuration and system preference order."""
     folders = [os.environ.get("TGWITNESS_FONT_DIR")] if os.environ.get("TGWITNESS_FONT_DIR") else []
     windows = os.environ.get("WINDIR")
     folders += ([windows + "/Fonts"] if windows else []) + list(CJK_DIRS)
@@ -91,12 +66,10 @@ def cjk_candidates():
 
 
 def cjk_font():
-    """Primary CJK font. A Chinese font can need a second fallback for Korean glyphs."""
     return next(cjk_candidates(), None)
 
 
 def document(say, footer, design="classic"):
-    """An A4 page set-up with the bundled fonts, a footer naming the case and report, and page numbers."""
     from fpdf import FPDF
     from fpdf.enums import XPos, YPos
 
@@ -118,15 +91,11 @@ def document(say, footer, design="classic"):
                 self.set_xy(self.l_margin, line_y + 4)
 
         def font_on_page(self):
-            # fpdf2 sets the font of a line that starts in a fallback font (an emoji, say) inside that line's
-            # own q/Q and then counts it as set for the page, so the next lines lost their font. Set it first.
             if self.page and self.current_font is not None and getattr(self, "current_font_is_set_on_page", True) is False \
                     and hasattr(self, "_set_font_for_page"):
                 self._out(self._set_font_for_page(self.current_font, self.font_size_pt))
 
         def shape_for(self, text):
-            # Shaping (uharfbuzz) is what Arabic, Hebrew, Indic and Thai text needs, and it costs time on every
-            # line: on only for the texts that need it.
             wanted = self.can_shape and bool(COMPLEX_SCRIPTS.search(str(text or "")))
             if wanted != self.shaping:
                 self.set_text_shaping(wanted)
@@ -203,7 +172,7 @@ def document(say, footer, design="classic"):
         pdf.set_text_shaping(True)
         pdf.set_text_shaping(False)
         pdf.can_shape = True
-    except Exception:  # without uharfbuzz: Latin, Cyrillic, Greek and CJK are still right
+    except Exception:
         pdf.can_shape = False
     pdf.shaping = False
     pdf.set_creator("TgWitness")
@@ -214,7 +183,6 @@ def document(say, footer, design="classic"):
 
 
 class MissingGlyphs(logging.Handler):
-    """fpdf2 names characters no font could show; the PDF lists them at its end."""
     def __init__(self, found):
         super().__init__(logging.WARNING)
         self.found = found
@@ -229,7 +197,6 @@ class MissingGlyphs(logging.Handler):
 
 
 class Layout:
-    """The parts of a formal report, written onto a fpdf2 document."""
     def __init__(self, pdf, say, template=None):
         from fpdf.enums import TextEmphasis, XPos, YPos
         from fpdf.fonts import FontFace
@@ -239,8 +206,6 @@ class Layout:
         self.design = pdf.report_style
         self.rtl = pdf.rtl
         self.align = "RIGHT" if pdf.rtl else "LEFT"
-        # Older callers passed the presentation here; the document now owns
-        # the complete immutable style, shared by its cover, tables and footer.
         self.accent = self.design.accent
 
     def need(self, height):
@@ -248,7 +213,6 @@ class Layout:
             self.pdf.add_page()
 
     def mirror(self, items):
-        """Columns in reading order: right to left for Arabic, Persian, Urdu and Hebrew."""
         items = list(items)
         return items[::-1] if self.rtl else items
 
@@ -305,7 +269,6 @@ class Layout:
         self.gap(5)
 
     def figures(self, items):
-        """A readable two-row index of figures on the cover, including long periods."""
         if self.design.name != "classic":
             return report_design_pdf.figures(self, items)
         pdf = self.pdf
@@ -410,15 +373,12 @@ class Layout:
         pdf.set_text_color(*self.design.ink)
         pdf.multi_cell(pdf.epw - 3.5, 4.4, str(text), new_x=self.XPos.LMARGIN, new_y=self.YPos.NEXT,
                        align=self.align[0])
-        with pdf.local_context(fill_color=color):  # tables take the fill colour in force when they start
+        with pdf.local_context(fill_color=color):
             pdf.rect(x + pdf.epw - 1.2 if self.rtl else x, y, 1.2, max(pdf.get_y() - y, 4.4), style="F")
         self.gap(2)
 
     def brief(self, summary, shows, hidden):
-        """Under the title: one paragraph, then what the material shows and what it does not."""
         say = self.say
-        # A long case cover may already have flowed its QR onto the next page.
-        # Continue there instead of leaving a mostly empty reference-only page.
         if self.pdf.page_no() == 1 and not report_composition_pdf.active(self):
             self.pdf.add_page()
         else:
@@ -489,8 +449,6 @@ class Layout:
         self.gap(5)
 
     def qr(self, lines, size=27):
-        """A QR code with the report ID, the key fingerprint and the SHA-256 of the authoritative data, so that
-        the printed report leads back to the archive; the same lines are printed beside it."""
         pdf = self.pdf
         if pdf.get_y() > pdf.h - 60:
             pdf.add_page()
@@ -504,7 +462,6 @@ class Layout:
         pdf.set_y(max(pdf.get_y(), y + size) + 3)
 
     def blank(self, label, width=None):
-        """A labelled line to fill in by hand."""
         pdf = self.pdf
         pdf.set_font("Sans", "", 8.8)
         pdf.set_text_color(*MUTED)
@@ -523,7 +480,6 @@ class Layout:
         self.gap(1.5)
 
     def diff(self, old, new):
-        """Word-level comparison: removed words struck through in red, added words underlined in green."""
         pdf, height = self.pdf, 4.6
         a, b = re.findall(r"\s+|\S+", old), re.findall(r"\s+|\S+", new)
         if report_composition_pdf.active(self) and len(a) * len(b) > 250000:
@@ -551,11 +507,10 @@ class Layout:
 
 
 class Mono(str):
-    """A value shown in the monospaced font: hashes, keys, commands, file names."""
+    pass
 
 
 def message_time_line(say, item, legacy=None):
-    """Keep source send/edit times separate; use the older generic time only as a fallback."""
     times = report.message_times(item)
     parts = [say(label) + ": " + report.utc_text(times[key]) for key, label in
              (("sent_at", "Sent"), ("edited_at", "Edited"))
@@ -566,7 +521,6 @@ def message_time_line(say, item, legacy=None):
 
 
 def details_lines(say, d, *, include_media=True):
-    """Readable permitted metadata; callers pass the already minimized projection, never raw."""
     if not isinstance(d, dict):
         return []
     lines = []
@@ -653,7 +607,6 @@ def details_lines(say, d, *, include_media=True):
 
 
 def changes(lay, say, changed, titles):
-    """Every saved version of each changed message, with word-level differences."""
     for item in changed["messages"]:
         versions, gone = item.get("versions") or [], item.get("gone") or []
         first = versions[0] if versions else {}
@@ -714,7 +667,6 @@ def changes(lay, say, changed, titles):
 
 
 def records(lay, say, events, titles, options):
-    """The record list, compact: number, kind, chat, time and text; runs of heartbeats as one line."""
     group, run = options.get("group_heartbeats", True), None
 
     def flush():
@@ -785,7 +737,6 @@ def custody_steps(say, data):
 
 
 def transfers(lay, say):
-    """Blank rows for hand-written custody transfers on the printed report."""
     lay.heading(say("Custody transfers"))
     lay.text(say("Fill in by hand when the printed report or the archive changes hands."), size=8.5, color=MUTED)
     with lay.pdf.table(line_height=8, borders_layout="ALL", text_align=lay.align, padding=1.4,
@@ -802,7 +753,6 @@ def transfers(lay, say):
 
 
 def qr_matrix(text):
-    """The QR code's modules (error correction M), quiet zone included."""
     import qrcode
     code = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, border=2)
     code.add_data(text)
@@ -811,7 +761,6 @@ def qr_matrix(text):
 
 
 def draw_qr(pdf, matrix, x, y, size):
-    """Each dark module as a filled square, runs in a row joined: vector, sharp at any print size."""
     step = size / len(matrix)
     with pdf.local_context(fill_color=(0, 0, 0)):
         for row, line in enumerate(matrix):
@@ -832,7 +781,6 @@ def paper_lines(report_id, fp, data_name, data_sha256):
 
 
 def declaration(lay, say, case):
-    """The examiner's declaration, signed by hand, and what a notary or court expert records."""
     lay.section(say("Examiner's declaration"), say("Completed and signed by hand by the person who collected and "
                                                    "exported this material."))
     lay.text(say("I, {name}, of {organization}, declare that I collected the material described in this report with the "
@@ -854,7 +802,6 @@ def declaration(lay, say, case):
 
 
 def signatures_section(lay, say, certificate, fp, name):
-    """How this PDF is signed and how a reader checks it."""
     lay.section(say("Signatures of this PDF"), say(
         "This PDF is signed twice over the same bytes: with a standard PDF signature that PDF readers show, and with "
         "the Ed25519 seal of the key below. Any change to the file breaks both."))
@@ -880,7 +827,6 @@ def signatures_section(lay, say, certificate, fp, name):
 
 
 def evidence_pdf(data, context, events=None, certificate=None):
-    """The PDF of an evidence report or handover extract, unsigned (with room for the signature)."""
     options = {**report.ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
     say = report.Words(options["language"])
     handover, case = data.get("minimisation"), data["case"]
@@ -891,7 +837,7 @@ def evidence_pdf(data, context, events=None, certificate=None):
     pdf = document(say, footer, options.get("design", "classic"))
     found = MissingGlyphs(pdf.missing)
     logging.getLogger("fpdf").addHandler(found)
-    logging.getLogger("fontTools.subset").setLevel(logging.ERROR)  # tables it cannot subset are left out, quietly
+    logging.getLogger("fontTools.subset").setLevel(logging.ERROR)
     try:
         lay = Layout(pdf, say)
         label = say("Handover extract") if handover else say("Evidence report")
@@ -1035,7 +981,7 @@ def evidence_pdf(data, context, events=None, certificate=None):
                 for anchor in anchors:
                     if anchor.get("kind") == "rfc3161":
                         signer = (anchor.get("signed") or {}).get("signer")
-                        name = re.search(r"(?:^|,)CN=((?:\\,|[^,])+)", signer or "")  # the full name is in report.json
+                        name = re.search(r"(?:^|,)CN=((?:\\,|[^,])+)", signer or "")
                         rows.append([anchor.get("event_count"), anchor.get("service"), "RFC 3161", report.utc_text(anchor.get("time")),
                                      say("Token valid") + " · " + (name.group(1).replace("\\,", ",") if name else signer)
                                      if report.case_assessment.verified_stamp(anchor, 2**63 - 1)
@@ -1207,7 +1153,6 @@ def evidence_pdf(data, context, events=None, certificate=None):
 
 
 def indicators_section(lay, say, found, shown=300):
-    """The indicators, written so that they do not open by accident; the archive's files carry all of them."""
     lay.section(say("Indicators"), report.ioc_lead(say))
     rows = []
     for kind, value, count, where, first, item in report.ioc_rows(say, found):
@@ -1230,7 +1175,6 @@ def ranges_line(ranges, total, limit=8):
 
 
 def chat_pdf(meta, context, messages=None, certificate=None):
-    """The PDF of a chat export, unsigned (with room for the signature)."""
     options = {**report.ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
     say = report.Words(options["language"])
     chat, stats, people = meta.get("chat") or {}, context["stats"], context["people"]
@@ -1458,7 +1402,6 @@ def chat_pdf(meta, context, messages=None, certificate=None):
 
 
 def clocks_lines(say, clocks, empty):
-    """Telegram's clock against the collector's at each measurement, one per line."""
     if not clocks:
         return say(empty)
     measured = [c["offset_seconds"] for c in clocks if isinstance(c.get("offset_seconds"), (int, float))]
@@ -1468,8 +1411,6 @@ def clocks_lines(say, clocks, empty):
 
 
 def transcript(lay, say, messages, numbered=False):
-    """The chat as a transcript: number, time, sender, then text, attachment and details; in channels and
-    supergroups, a line wherever message numbers are absent."""
     previous = None
     for record in messages:
         gap = report.absent_before(record, previous) if numbered else None
@@ -1505,7 +1446,6 @@ def transcript(lay, say, messages, numbered=False):
 
 
 def add_signature_field(pdf, say):
-    """An invisible signature field whose value the signer fills in after the layout is written."""
     from fpdf.annotations import PDFAnnotation
     from fpdf.enums import AnnotationFlag
     from fpdf.sign import Signature
@@ -1519,8 +1459,6 @@ def add_signature_field(pdf, say):
 
 
 def indirect_signature(buffer):
-    """fpdf2 writes the signature dictionary inside its field (/V <<…>>). PDF 2.0 wants it as an object of
-    its own, and validators such as pyHanko insist: move it there and rewrite the cross-reference table."""
     data = bytes(buffer)
     contents = data.find(b"/Contents <" + b"0" * CONTENTS_HEX + b">")
     start, close = data.rfind(b"/V <<", 0, contents), data.find(b"/Type /Sig>>", contents)
@@ -1548,11 +1486,7 @@ def indirect_signature(buffer):
                      + b"startxref\n%d\n%%%%EOF\n" % len(body))
 
 
-# Signing ------------------------------------------------------------------------------------------
-
 def identity(vault):
-    """The workspace's document-signing key and certificate, made once and kept in the vault. The
-    certificate names the Ed25519 key it belongs to; every PDF seal names the certificate."""
     fp = fingerprint(vault.public_key)
     saved = vault.read("document_signing")
     if saved.get("key") and saved.get("certificate"):
@@ -1579,16 +1513,12 @@ def identity(vault):
 
 
 def sign(buffer, key, certificate, seal_for):
-    """Fill in the signature: first the /ByteRange, then a CMS signature over those bytes that carries
-    the Ed25519 seal. seal_for(content_sha256, certificate_sha256) returns the signed seal."""
     buffer = bytearray(buffer)
     placeholder = b"<" + b"0" * CONTENTS_HEX + b">"
     start = buffer.find(placeholder)
     if start < 0 or buffer.find(placeholder, start + 1) >= 0:
         raise ValueError("The PDF has no single signature placeholder")
     end = start + len(placeholder)
-    # The Info dictionary may contain the same literal text in a case title.
-    # Only replace the property inside our generated indirect signature object.
     objects = list(re.finditer(rb"(?:^|\n)\d+ 0 obj\r?\n", buffer[:start]))
     object_start = objects[-1].end() if objects else -1
     object_end = buffer.find(b"\nendobj", end)
@@ -1625,7 +1555,7 @@ def _seq(*parts):
 
 
 def _set(*parts):
-    return _tlv(0x31, b"".join(sorted(parts)))  # DER orders the elements of a SET OF by their encoding
+    return _tlv(0x31, b"".join(sorted(parts)))
 
 
 def _oid(dotted):
@@ -1646,8 +1576,6 @@ def _int(n):
 
 
 def signed_data(digest, key, certificate, der_certificate, seal):
-    """A detached CMS SignedData (RFC 5652) over the PDF byte range: one ECDSA signer whose signed
-    attributes carry the digest and the certificate's hash, and the Ed25519 seal as an unsigned attribute."""
     when = datetime.now(timezone.utc).strftime("%y%m%d%H%M%SZ").encode()
     attribute = lambda kind, value: _seq(_oid(kind), _set(value))
     signed = _set(attribute(CONTENT_TYPE, _oid(DATA)), attribute(SIGNING_TIME, _tlv(0x17, when)),
@@ -1662,20 +1590,17 @@ def signed_data(digest, key, certificate, der_certificate, seal):
 
 
 def report_pdf(data, context, vault, events=None):
-    """The signed PDF of an evidence report or handover extract (data: report.report_data)."""
     certificate = identity(vault)[1]
     return sealed_pdf(evidence_pdf(data, context, events, certificate), vault, report.seal_statement(context))
 
 
 def chat_report_pdf(meta, context, vault, messages=None):
-    """The signed PDF of a chat export."""
     certificate = identity(vault)[1]
     return sealed_pdf(chat_pdf(meta, context, messages, certificate), vault,
                       report.seal_statement(context, report.chat_subject(meta, context)))
 
 
 def sealed_pdf(unsigned, vault, statement):
-    """Sign a rendered PDF: the PDF signature and, inside it, the Ed25519 seal of statement."""
     key, certificate = identity(vault)
 
     def seal_for(content, certificate_sha256):

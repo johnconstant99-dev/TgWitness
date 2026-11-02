@@ -1,4 +1,3 @@
-"""Read-only, bounded cover/analytics preview using the production report components."""
 from itertools import islice
 
 from . import report, report_analytics
@@ -31,8 +30,6 @@ def preview(store, options):
     if options.get("template") == "activity":
         sections.reverse()
     title = options.get("case_title") or say("Telegram observation journal")
-    # An external stylesheet works under the panel's strict CSP. No scripts,
-    # inline styles, external assets, signing operations or stored preview files.
     document = ('<!doctype html><html lang="' + report.e(say.language) + '" dir="' + say.direction
         + '" data-report-design="' + report.report_design.normalized(options.get("design")) + '" data-theme="' + report.e(options["theme"])
         + '" data-report-template="' + report.e(options.get("template", "dossier"))

@@ -1,4 +1,3 @@
-"""Synthetic Case Board workflow, exact highlights, threads, slices, scopes and responsive UI."""
 from pathlib import Path
 import tempfile
 

@@ -1,4 +1,3 @@
-"""Proxy polling and settings races, using local synthetic responses only."""
 import copy
 import json
 import tempfile
@@ -110,14 +109,12 @@ def main(proxy_script=None):
             page.locator("#proxy-pool > summary").click()
             expect(query).to_have_value("a query still being edited")
 
-            # Disabled GitHub search hides its tuning without deleting the draft.
             page.locator("#pool-github-search").uncheck()
             expect(query).to_be_hidden()
             page.locator("#pool-github-search").check()
             expect(query).to_be_visible()
             expect(query).to_have_value("a query still being edited")
 
-            # A route draft controls the visible settings, without changing the saved route.
             page.locator("#network-details").evaluate("n=>n.open=true")
             expect(page.locator("#network-endpoint")).to_be_hidden()
             expect(page.locator("#network-link")).to_be_hidden()
@@ -148,7 +145,6 @@ def main(proxy_script=None):
             expect(page.locator("#proxy-pool")).to_be_visible()
             expect(query).to_have_value("a query still being edited")
 
-            # Disabled external requests expose no irrelevant proxy fields and retain drafts.
             expect(page.locator("#outside-kind")).to_be_hidden()
             page.locator("#outside-enabled").check()
             expect(page.locator("#outside-kind")).to_be_visible()
@@ -164,7 +160,6 @@ def main(proxy_script=None):
             assert not server.app.state.collector.route_policy()["outside_enabled"]
             page.locator("#outside-enabled").uncheck()
 
-            # An older HTTP response must not overwrite a later dashboard refresh.
             hold_next(page, "/api/network/proxies")
             page.evaluate("void TgWitnessProxies.load()")
             expect(page.locator("html")).to_have_attribute("data-proxy-held", "true")
@@ -176,7 +171,6 @@ def main(proxy_script=None):
             expect(page.locator("#pool-stats")).to_contain_text("900")
             expect(query).to_have_value("a query still being edited")
 
-            # Keep edits made after Save was pressed; polling cannot re-enable its button.
             hold_next(page, "/api/network/sources")
             page.locator("#pool-save").click()
             expect(page.locator("html")).to_have_attribute("data-proxy-held", "true")
@@ -193,7 +187,6 @@ def main(proxy_script=None):
             assert saves[-1]["github"]["max_files"] == 37
             assert saves[-1]["countries"] is False
 
-            # Two file selections queue their changes rather than racing a shared catalog.
             hold_next(page, "/api/network/sources/list")
             page.locator("#pool-files").set_input_files({"name": "first.txt", "mimeType": "text/plain", "buffer": b"synthetic list"})
             expect(page.locator("html")).to_have_attribute("data-proxy-held", "true")
@@ -212,7 +205,6 @@ def main(proxy_script=None):
             expect(page.locator("#pool-token-save")).to_be_enabled()
             expect(page.locator("#pool-token")).to_have_value("synthetic replacement token")
 
-            # A refresh already in flight when the page closes must not restart polling.
             snapshot["summary"]["checking"] = True
             hold_next(page, "/api/network/proxies")
             page.evaluate("void TgWitnessProxies.load()")
@@ -223,7 +215,6 @@ def main(proxy_script=None):
             page.wait_for_timeout(4400)
             assert len(loads) == before, "Hidden proxy dashboard continued polling"
 
-            # Locking discards a draft and token; reopening starts with server values.
             page.locator('[data-view="connection"]').click()
             page.locator("#entry-settings").click()
             expect(query).to_have_value("the next edit")

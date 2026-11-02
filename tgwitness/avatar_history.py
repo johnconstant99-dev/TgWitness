@@ -1,4 +1,3 @@
-"""Preserve profile photos encountered in observed sources, independently of panel previews."""
 import asyncio
 import hashlib
 import io
@@ -46,7 +45,6 @@ def history_events(store, chat_id=None):
 
 
 def history_index(store, chat_id=None, events=None):
-    """Newest bounded set of journal-backed photos, scoped like the source that observed them."""
     result = {}
     for event in history_events(store, chat_id) if events is None else events:
         payload = event["payload"]
@@ -76,7 +74,6 @@ class AvatarHistory:
         self.loaded = False
 
     def observe(self, entity, *, chat_id):
-        """Queue only an entity already recorded in a source; this hook never waits for Telegram."""
         photo_id = getattr(getattr(entity, "photo", None), "photo_id", None)
         if entity is None or not hasattr(entity, "photo") or type(chat_id) is not int or (photo_id is not None and type(photo_id) is not int):
             return False
@@ -85,8 +82,6 @@ class AvatarHistory:
             peer_id = utils.get_peer_id(entity)
         except (RuntimeError, TypeError, ValueError):
             return False
-        # A min User may omit an existing photo or contain stale fields. Telegram
-        # requires apply_min_photo before that partial update replaces a full one.
         if peer_id > 0 and getattr(entity, "min", False) and not getattr(entity, "apply_min_photo", False):
             return False
         key = (chat_id, peer_id, photo_id)
@@ -163,8 +158,6 @@ class AvatarHistory:
                 raise ValueError("Observed profile photo changed before capture")
             location = types.InputPeerPhotoFileLocation(
                 peer=utils.get_input_peer(entity, check_hash=False), photo_id=key[2], big=False)
-            # download_profile_photo can fall back to a channel's newest photo.
-            # The signed record must describe the exact photo observed above.
             with PhotoBuffer() as stream:
                 await asyncio.wait_for(client.download_file(location, file=stream, dc_id=photo.dc_id), 20)
                 data = stream.getvalue()
@@ -190,7 +183,6 @@ class AvatarHistory:
             await self.worker
 
     async def close(self):
-        """Drop pending work before disconnect; the next observation can start a new worker."""
         if self.worker:
             self.worker.cancel()
             await asyncio.gather(self.worker, return_exceptions=True)

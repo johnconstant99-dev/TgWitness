@@ -1,5 +1,3 @@
-**English** · [Русский](ru/HIGH-ASSURANCE.md)
-
 # High-assurance deployment
 
 A signed journal proves that records were not changed **after** signing. For serious cases

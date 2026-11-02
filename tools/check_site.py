@@ -1,4 +1,3 @@
-"""Check the built public site in Chromium, with no Telegram or external requests."""
 import json
 import os
 from pathlib import Path
@@ -7,8 +6,14 @@ from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright, expect
 
 if __package__:
+    from .check_demo_browser import check_demo_downloads
+    from .check_home_browser import check_home
+    from .check_modes_browser import check_modes
     from .site_test_server import site_server
 else:
+    from check_demo_browser import check_demo_downloads
+    from check_home_browser import check_home
+    from check_modes_browser import check_modes
     from site_test_server import site_server
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -122,13 +127,10 @@ def main():
             expect(demo.locator("#events-body tr").first).to_be_visible()
             assert demo.evaluate("fetch('/api/collector/start', {method: 'POST'}).then(r => r.status)") == 403
             demo.close()
-            from check_demo_browser import check_demo_downloads
             check_demo_downloads(browser, url, output, route_request, errors, failed)
             assert errors == [], errors
             assert failed == [], failed
-            from check_home_browser import check_home
             check_home(browser, url, output, route_request, errors)
-            from check_modes_browser import check_modes
             check_modes(browser, url, output, errors, external, failed)
             assert errors == [], errors
             assert external == [], external

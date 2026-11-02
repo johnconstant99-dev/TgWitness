@@ -1,4 +1,3 @@
-/** A saved session is not proof that Telegram still accepts it. */
 export function accountState(profile = {}) {
   const collector = profile.collector;
   const hasSession = Boolean(collector?.has_session);

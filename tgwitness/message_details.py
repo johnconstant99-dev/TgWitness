@@ -1,15 +1,7 @@
-"""What a Telegram client shows around a message's text, read from its saved plain-dict form.
-
-Links hidden behind text, mentions, the original sender of a forward, the bot it was sent via, a
-channel post's signature, view counts, buttons and the chat's auto-delete timer are part of what a
-reader saw. They are kept in the saved Telegram object (payload raw); this module names them for
-exports and reports. Works on records made before it existed, since it only reads raw.
-"""
 import re
 
 from . import keyboard
 
-# Telegram entity classes under the names a reader knows; others keep their class name in snake case.
 ENTITY_TYPES = {"MessageEntityTextUrl": "text_link", "MessageEntityUrl": "link", "MessageEntityMention": "mention",
                 "MessageEntityMentionName": "mention_name", "MessageEntityEmail": "email",
                 "MessageEntityPhone": "phone", "MessageEntityHashtag": "hashtag", "MessageEntityCashtag": "cashtag",
@@ -18,7 +10,6 @@ ENTITY_TYPES = {"MessageEntityTextUrl": "text_link", "MessageEntityUrl": "link",
                 "MessageEntityCode": "code", "MessageEntityPre": "pre", "MessageEntityBold": "bold",
                 "MessageEntityItalic": "italic", "MessageEntityUnderline": "underline",
                 "MessageEntityStrike": "strikethrough", "MessageEntitySpoiler": "spoiler"}
-# Entities that point somewhere or at someone; formatting alone is left out of reports.
 POINTING = ("text_link", "link", "mention", "mention_name", "email", "phone", "bank_card", "cashtag", "bot_command")
 
 
@@ -27,13 +18,11 @@ def snake(name):
 
 
 def entity_text(text, offset, length):
-    """Telegram counts entity offsets in UTF-16 code units."""
     data = text.encode("utf-16-le")
     return data[2 * offset:2 * (offset + length)].decode("utf-16-le", errors="replace")
 
 
 def peer_id(peer):
-    """A plain-dict Telegram peer as the marked ID the rest of TgWitness uses (channels -100…)."""
     if not isinstance(peer, dict):
         return None
     if peer.get("_") == "PeerUser":
@@ -65,20 +54,17 @@ def entities(text, raw_entities):
 
 
 def host(value):
-    """The host of a link or of an address written as text, lower case, without www."""
     found = re.search(r"(?i)(?:[a-z][a-z0-9+.-]*://)?((?:[\w-]+\.)+[\w-]{2,})", value or "")
     name = found.group(1).lower().rstrip(".") if found else ""
     return name[4:] if name.startswith("www.") else name
 
 
 def deceptive(text, href):
-    """Text that shows one address while the link behind it goes to another host."""
     shown, target = host(text), host(href)
     return bool(shown and target and shown != target and not target.endswith("." + shown))
 
 
 def reactions(raw):
-    """Reaction counts as Telegram showed them: emoji, custom emoji (by document ID) or paid stars."""
     found = []
     for result in (raw or {}).get("results") or [] if isinstance(raw, dict) else []:
         reaction = (result or {}).get("reaction") or {}
@@ -102,7 +88,6 @@ def forward(header):
 
 
 def media_info(media):
-    """Kind, type, size, name and dimensions of an attachment; never file references or access hashes."""
     if not isinstance(media, dict) or media.get("_") in (None, "", "MessageMediaEmpty"):
         return None
     info = {"kind": media["_"]}
@@ -135,7 +120,6 @@ def media_info(media):
 
 
 def details(raw):
-    """Everything above for one saved message (raw is its plain-dict form); empty fields are left out."""
     if not isinstance(raw, dict):
         return {}
     text = raw.get("message") or ""

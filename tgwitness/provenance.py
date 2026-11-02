@@ -1,4 +1,3 @@
-"""Capture-run identification; a measurement record, not hardware attestation."""
 import hashlib
 import importlib.metadata
 import platform
@@ -17,23 +16,17 @@ SOURCE_POLICY = "tgwitness-package-v2"
 
 
 def measured_path(path, policy=SOURCE_POLICY):
-    """Versioned selection shared by on-disk and Git tree measurements."""
     path = Path(path)
     if policy == LEGACY_SOURCE_POLICY:
         return path.suffix in (".py", ".js", ".css", ".html", ".svg") and "__pycache__" not in path.parts
     if policy != SOURCE_POLICY:
         raise ValueError("Unknown source measurement policy: " + str(policy))
-    # Measure package data too: policy, locale, proxy and client JSON files and
-    # font bytes affect behavior/output. Reference README.md files are not wheel
-    # resources; exclude those and generated caches, never an arbitrary unknown
-    # resource extension. The same selection must match checkout and wheel.
     return not (set(path.parts) & {"__pycache__", ".git", ".pytest_cache", ".ruff_cache", ".mypy_cache"}) \
         and path.suffix not in (".pyc", ".pyo") and path.name not in (".DS_Store", "README.md")
 
 
 def source_files(root=Path(__file__).parent, policy=SOURCE_POLICY):
-    """Hashes of the measured package files; also run on a checkout of a commit to compare."""
-    measured_path("", policy)  # Validate even an empty source tree.
+    measured_path("", policy)
     files = {}
     for source in sorted(Path(root).rglob("*")):
         if source.is_file() and measured_path(source.relative_to(root), policy):

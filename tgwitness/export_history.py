@@ -1,4 +1,3 @@
-"""Bounded export metadata, separate from the signed journal and archive formats."""
 import hashlib
 import os
 import secrets
@@ -54,8 +53,6 @@ def prepared(store, path, fmt, encrypted, *, owner=None, workspace=None, require
         elif not retry:
             try:
                 if os.name == "nt":
-                    # Windows may deny unlinking any hardlink while FileResponse
-                    # has the original open. A cache copy has its own lifetime.
                     shutil.copy2(path, cached)
                 else:
                     try:
@@ -69,8 +66,6 @@ def prepared(store, path, fmt, encrypted, *, owner=None, workspace=None, require
                     retry.append(ident)
                 entry["cache_warning"] = "A saved copy is unavailable. Download this export now; prepare it again later to retry."
         else:
-            # Do not grow the cache beyond its limit while an antivirus or another
-            # program holds a stale file. The original response remains usable.
             entry["cache_warning"] = "Saved-copy cleanup is pending. Download this export now; prepare it again later to retry."
         store.set_setting(CLEANUP_KEY, retry)
         store.set_setting(KEY, keep)
@@ -78,11 +73,6 @@ def prepared(store, path, fmt, encrypted, *, owner=None, workspace=None, require
 
 
 def permitted(entry, principal, profile_id):
-    """Legacy/unscoped and multi-workspace archives remain administrator-only.
-
-    A retained file never grants its creator permissions removed since creation.
-    These local access hints are outside the signed portable export.
-    """
     if principal.admin:
         return True
     permissions = entry.get("required_permissions")
@@ -139,11 +129,6 @@ def locate(store, ident, verify=True):
 
 
 def download_copy(store, ident):
-    """Own exact verified bytes until the HTTP response finishes.
-
-    Caller holds the workspace export lock, so pruning cannot remove the source
-    while copying. Hash the private copy's input in the same bounded pass.
-    """
     source, entry = locate(store, ident, False)
     directory = store.root / "temporary-exports"
     if filesystem_link(directory) or directory.resolve().parent != store.root.resolve():

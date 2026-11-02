@@ -1,30 +1,3 @@
-"""Independent witness: fetches a collector's signed journal head, signs it, posts it to a channel.
-
-Runs apart from the collector — another process, container or server, ideally run by someone
-else — with its own Ed25519 key and its own signed journal. It holds only a read-only witness
-token for the collector: never the collector's Telegram session, vault or panel token.
-
-Every N minutes it fetches the collector's signed checkpoint itself (record count and head
-hash), checks the signature, pinned key, nondecreasing count and unchanged head at equal
-count, records the result and posts it, signed, to a Telegram channel through its own bot.
-While the witness is running it also records missing answers; posting still requires a
-working Bot API connection. verify.py later checks the collector's export against the witness journal
-(every witnessed head must be part of the exported journal) and the channel posts against both.
-
-  python -m tgwitness.witness run --collector https://collector.example.org \\
-      --token-file witness-token.txt --bot-token-file bot-token.txt --channel @my_witness_channel
-  python -m tgwitness.witness run --config witness.json
-  python -m tgwitness.witness export --out witness.zip
-  python -m tgwitness.witness fingerprint
-
-Every option can also come from the environment (TGWITNESS_WITNESS_COLLECTOR, _TOKEN or
-_TOKEN_FILE, _BOT_TOKEN or _BOT_TOKEN_FILE, _CHANNEL, _INTERVAL, _TIMEOUT, _POST, _TITLE, _DATA,
-_COLLECTOR_FINGERPRINT, _PROXY, _BOT_API, _CONFIG), which keeps secrets out of the process list,
-or from a JSON config file (--config) with the same names in lower case, e.g. {"interval": 5,
-"post": "changes", "texts": {"ok": "head"}}. The command line wins over the environment, the
-environment over the file. "texts" replaces the words of the channel posts; the signed token at
-the end of every post is what verify.py checks, so wording does not affect verification.
-"""
 import argparse
 import asyncio
 import base64
@@ -62,15 +35,12 @@ TEXTS = {"ok": "journal head", "key_changed": "COLLECTOR KEY CHANGED", "rollback
          "fork": "SAME LENGTH, DIFFERENT HEAD", "invalid": "ANSWER FAILED VERIFICATION",
          "no_response": "no answer from the collector", "collector": "Collector", "records": "records",
          "head": "Head"}
-STATUS_TEXT = {key: TEXTS[key] for key in ("ok", "key_changed", "rollback", "fork", "invalid")}
 OPTIONS = ("collector", "token", "token_file", "bot_token", "bot_token_file", "channel", "interval", "timeout",
            "post", "title", "texts", "collector_fingerprint", "proxy", "bot_api", "data_dir",
            "discord_webhook", "discord_webhook_file")
 
 
 def key_cipher(root):
-    """Seals the witness key as the collector's vault seals its own: with TGWITNESS_VAULT_KEY_FILE's master
-    key when set (kept away from this directory, the protective form), else a local key file beside it."""
     external = os.environ.get("TGWITNESS_VAULT_KEY_FILE")
     if external:
         source = Path(external).resolve(strict=True)
@@ -91,7 +61,6 @@ def key_cipher(root):
 
 
 class WitnessKey:
-    """The witness's own signing key, encrypted in its data directory (key_cipher)."""
     def __init__(self, root):
         root = Path(root)
         root.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -123,7 +92,6 @@ class InvalidAnswer(ValueError):
 
 
 def proxy_config(url):
-    """NetworkConfig from socks5://user:pass@host:port or http://host:port; direct when empty."""
     if not url:
         return NetworkConfig(kind="direct")
     try:
@@ -142,7 +110,6 @@ def proxy_config(url):
 
 
 def http_address(value):
-    """Check configured HTTP destinations without logging secrets from an invalid URL."""
     try:
         if not isinstance(value, str):
             raise ValueError
@@ -248,8 +215,6 @@ class Witness:
         return answer["result"]["message_id"]
 
     async def discord_send(self, text):
-        # Discord has a 2,000-character message limit. Keep the entire signed post
-        # in an attachment when it does not fit; never truncate a proof token.
         payload = {"content": text if len(text) <= 2000 else "TgWitness witness · full signed check attached.",
                    "allowed_mentions": {"parse": []}}
         headers = {"Content-Type": "application/json"}
@@ -267,7 +232,6 @@ class Witness:
         return json.loads(answer)["id"]
 
     def check(self, answer):
-        """Journal record for one answer: verified checkpoint, pinned key, journal only grows."""
         try:
             value = answer["checkpoint"]
             statement = value["statement"]
@@ -364,7 +328,6 @@ class Witness:
         return "\n".join(lines + [token])
 
     def worth_posting(self, event):
-        """Post policy: every check, only changes of the head and problems, or only problems."""
         problem = event["kind"] == "witness.no_response" or event["payload"].get("status") != "ok"
         if self.post == "all" or problem:
             return True
@@ -376,7 +339,6 @@ class Witness:
         return True
 
     async def tick(self):
-        """Fetch, check, record, post. Never raises: every outcome becomes a journal record."""
         try:
             answer = await asyncio.wait_for(self.fetch(), self.timeout + 5)
             with self.store.transaction():
@@ -420,7 +382,6 @@ class Witness:
 
 
 def export(root, out):
-    """A signed, verifiable copy of the witness journal (tgwitness-witness-v1)."""
     root, out = Path(root), Path(out)
     key = WitnessKey(root)
     store = Store(root)
@@ -460,7 +421,6 @@ def export(root, out):
 
 
 def load_config(path):
-    """Options from a JSON config file: the long option names, with underscores."""
     if not path:
         return {}
     data = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -473,7 +433,6 @@ def load_config(path):
 
 
 def resolve(args, config):
-    """Every run option from the command line, else the environment, else the config file, else the default."""
     env_names = {"data_dir": "DATA"}
     defaults = {"interval": DEFAULT_INTERVAL, "timeout": TIMEOUT, "post": "all", "title": TITLE,
                 "bot_api": "https://api.telegram.org", "data_dir": "witness-data"}

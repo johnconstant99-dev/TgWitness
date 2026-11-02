@@ -1,9 +1,4 @@
-"""Expose frozen Python pins to Syft and reject incomplete inventory before signing.
-
-Syft 1.55 discovers *requirements*.txt, not our deployment lock filenames, and
-does not follow pip's -c includes. Stage derived inputs AFTER building the source
-ZIP. This is a declaration inventory across platforms, not an installed SBOM.
-"""
+"""Expose frozen Python pins to Syft and reject incomplete inventory before signing."""
 import argparse
 import hashlib
 import json
@@ -138,7 +133,6 @@ def verify(root, output, sbom_path, source_archive=None):
         missing = sorted("==".join(pair) for pair in expected - actual)
         extra = sorted("==".join(pair) for pair in actual - expected)
         raise ValueError(f"Python lock inventory mismatch; missing={missing}; unexpected={extra}")
-    # Preserve the derivation in the attested predicate, not just in temporary scanner inputs.
     annotations = [item for item in sbom.get("annotations", []) if item.get("annotator") != ANNOTATOR]
     annotations.append({"annotationType": "OTHER", "annotator": ANNOTATOR,
                         "annotationDate": sbom["creationInfo"]["created"], "comment": canonical_json(manifest)})

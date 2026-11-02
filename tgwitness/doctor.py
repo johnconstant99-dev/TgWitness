@@ -1,4 +1,3 @@
-"""Local deployment checks. No Telegram authorization or external network requests."""
 import base64
 import importlib
 import importlib.metadata

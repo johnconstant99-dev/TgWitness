@@ -1,4 +1,3 @@
-"""Task chooser, private export handoff and permission boundaries; synthetic accounts only."""
 import json
 from pathlib import Path
 import tempfile
@@ -11,7 +10,6 @@ from check_account_export_browser import DEFAULTS
 
 
 def hold_connection_navigation(page, selector):
-    """Keep the mounted sign-in form usable while this workflow's real policy read waits."""
     page.evaluate("""selector => {
       const probe={fetch:window.fetch,busy:window.busy,armed:false,held:false,pending:null};
       window.workflowNavigationProbe=probe;
@@ -34,7 +32,6 @@ def hold_connection_navigation(page, selector):
 
 
 def release_connection_navigation(page):
-    # Finish the original workflow continuation before checking that it kept the live auth step.
     page.evaluate("""async()=>{
       const probe=window.workflowNavigationProbe;
       window.fetch=probe.fetch;window.busy=probe.busy;
@@ -43,7 +40,6 @@ def release_connection_navigation(page):
 
 
 def hold_configure(page):
-    """Hold only this button's first real response; later view loads must finish normally."""
     page.evaluate("""() => {
       const probe={fetch:window.fetch,busy:window.busy,armed:false,held:false,pending:null};
       window.workflowResponseProbe=probe;
@@ -72,7 +68,6 @@ def hold_configure(page):
 
 
 def release_configure(page):
-    # Await the original click handler, not a timer or an assertion made before its continuation.
     page.evaluate("""async()=>{
       const probe=window.workflowResponseProbe;
       window.fetch=probe.fetch;window.busy=probe.busy;
@@ -117,7 +112,6 @@ def main():
             assert not server.app.state.collector.running
             checks.append("English chooser and disconnected export handoff make no backend writes")
 
-            # Real local auth endpoints, backed by FakeClient; no credential or session fixture injection.
             page.locator("#phone").fill("+15550001111")
             page.locator("#auth-continue").click()
             expect(page.locator("#code-form")).to_be_visible()
@@ -229,7 +223,7 @@ def main():
 
             second = page.evaluate("()=>json('profiles',{label:'Synthetic second workspace'},{root:true})")
             page.evaluate("()=>loadProfiles()")
-            before = list(writes)  # Creating the synthetic workspace above is the explicit fixture write.
+            before = list(writes)
             hold_configure(page)
             page.evaluate("id=>switchProfile(id,{discardConfirmed:true})", second["id"])
             assert page.evaluate("state.profile") == second["id"]
@@ -241,7 +235,6 @@ def main():
             assert writes == before, "Switching workspaces changed observation or export state"
             checks.append("late configure response cannot reopen or copy drafts/jobs into another workspace")
 
-            # An explicit URL must win over the default task chooser, including a full reload.
             page.goto(server.url + "/journal?ws=default")
             expect(page.locator("#view-observations")).to_be_visible()
             expect(page.locator("#view-start")).to_have_count(0)
@@ -265,7 +258,6 @@ def main():
                         expect(page.locator("#nav-more")).not_to_have_attribute("open", "")
                     page.keyboard.press("Enter")
                     expect(page.locator("#nav-more")).to_have_attribute("open", "")
-                    # Every Tab stays within the modal navigation; Escape restores the trigger.
                     for _ in range(24):
                         page.keyboard.press("Tab")
                         assert page.evaluate("document.querySelector('.sidebar').contains(document.activeElement)")
@@ -279,7 +271,6 @@ def main():
                 assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), width
             checks.append("320/390/1440 layouts, expanded navigation keyboard trap and Escape focus")
 
-            # Grants use the real backend; no status/permission response mocks.
             for label, permissions, scope in (
                 ("Read only", ["view"], None),
                 ("Journal exporter", ["view", "export"], None),

@@ -1,4 +1,3 @@
-"""Independent report layouts use the real draft, saved scope and signed export path."""
 from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
@@ -28,7 +27,6 @@ CHAT = -100333
 
 
 def seed(store):
-    """A small, wholly fictional case with two revisions and a retained deletion."""
     store.set_setting('demo', False)
     store.set_target(CHAT, 'Fictional workshop', 'supergroup', True)
     store.set_target(CHAT - 1, 'Outside report scope', 'supergroup', True)
@@ -144,7 +142,6 @@ def main():
                 receipts.append({'design': design, 'saved': True, 'reload': True, 'signed_export_verified': True})
                 open_settings(page)
 
-            # Presets select contents only; the chosen independent design stays selected.
             page.locator('#report-template-brief').check()
             expect(page.locator('#report-design-ledger_margin')).to_be_checked()
             assert page.evaluate('reportDraft().selection') == original['selection']

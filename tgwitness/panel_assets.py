@@ -1,4 +1,3 @@
-"""Serve the panel with integrity metadata for its local scripts and styles."""
 import base64
 import hashlib
 import html
@@ -32,8 +31,6 @@ class PanelFiles(StaticFiles):
         hashes = {path: integrity(data) for path, data in files.items()}
         document = (root / 'index.html').read_text(encoding='utf-8')
         modules = {path: value for path, value in hashes.items() if path.endswith('.js')}
-        # Include versioned import URLs as well as unversioned module URLs. The
-        # map is metadata only: it does not eagerly load otherwise lazy views.
         for path, source in [('/index.html', document), *((p, d.decode('utf-8')) for p, d in files.items() if p.endswith('.js'))]:
             for reference in REFERENCE.findall(source):
                 resolved = urljoin(path, reference)

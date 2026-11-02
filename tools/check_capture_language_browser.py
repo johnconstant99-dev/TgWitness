@@ -1,4 +1,3 @@
-"""Capture-language inputs remain supported tags and cannot create executable markup."""
 import json
 from pathlib import Path
 from urllib.parse import quote
@@ -40,7 +39,6 @@ def main():
             expect(root.locator("img,iframe,script")).to_have_count(0)
             assert not page.evaluate("Boolean(window.captureXss)")
 
-        # A forged DOM option/change must pass the same boundary as the initial URL input.
         page.evaluate("""value=>{const select=document.querySelector('#capture-language');
           select.append(new Option(value,value));select.value=value;
           select.dispatchEvent(new Event('change',{bubbles:true}));}""", attack)
@@ -49,7 +47,6 @@ def main():
         expect(page.locator("[data-capture-wizard] img,iframe")).to_have_count(0)
         assert not page.evaluate("Boolean(window.captureXss)")
 
-        # English is the source; a missing translation falls back to that source.
         page.evaluate("""()=>{
           delete window.TGW_CAPTURE_LOCALES.ru['Full instructions'];
           const select=document.querySelector('#capture-language');select.value='ru';

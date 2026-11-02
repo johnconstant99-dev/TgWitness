@@ -1,4 +1,3 @@
-"""Read-only, explicitly scoped public-channel projections. Never return raw payloads."""
 import asyncio
 import json
 import re
@@ -19,7 +18,6 @@ USERNAME = re.compile(r"[A-Za-z][A-Za-z0-9_]{3,31}")
 
 
 def public_channel(connection, chat_id):
-    # A later profile without a public username immediately closes the projection.
     row = connection.execute(
         "SELECT payload,observed_at FROM events INDEXED BY event_kind WHERE chat_id=? AND kind='source.profile' "
         "ORDER BY seq DESC LIMIT 1", (chat_id,)).fetchone()
@@ -167,7 +165,6 @@ def overview(registry, principal, challenge):
 
 
 def register(app, authenticate):
-    # These two routes are intentionally absent from the issued-grant policy.
     @app.get("/api/showcase/manage", dependencies=[Depends(authenticate)])
     async def manage():
         def read():

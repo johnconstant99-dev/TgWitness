@@ -1,4 +1,3 @@
-"""Concurrent workspace authentication checks with synthetic sessions and no Telegram traffic."""
 import asyncio
 from contextlib import asynccontextmanager
 import base64
@@ -25,7 +24,6 @@ async def pinned(route, operator=False):
 
 
 async def probe(route):
-    # Account ownership checks must not depend on a real MTProto handshake.
     return 40
 
 
@@ -222,8 +220,6 @@ async def capture_default_migration():
                 else:
                     assert all(rule["enabled"] for rule in rules.values())
                 if stage == 1:
-                    # An older journal could have used its implicit all-enabled defaults without
-                    # ever saving a capture setting. Model that exact persisted state for upgrade.
                     with store.transaction():
                         store.db.execute("DELETE FROM settings WHERE key='capture'")
                 elif stage == 2:

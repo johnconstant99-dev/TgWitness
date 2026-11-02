@@ -1,21 +1,3 @@
-"""Export one chat with several accounts at once, merged into a single signed bundle.
-
-The chat's message numbers 1..N (N = newest message when the export starts) are cut into
-ranges of CHUNK numbers placed in a shared queue. Every selected account takes the next
-range, fetches it with its own single client and takes another, so an account waiting
-out a FloodWait simply does less and a range left by a failed account is fetched by
-another. Telegram flood limits apply per account, so throughput grows with accounts.
-
-Rules followed: each account uses only its existing client (a second connection on the
-same authorization key makes Telegram revoke the session: AUTH_KEY_DUPLICATED), and the
-same Telegram account can never be in two workspaces. Ranges only make sense where
-message numbers are per chat — channels and supergroups. Ordinary groups and private chats
-number messages per account, so they are exported by the starting account alone.
-
-Integrity: a range's SHA-256 is computed while its messages arrive. Before signing, every
-range file is re-read and must reproduce that hash. Each account signs, with its own key,
-the ranges it fetched; the starting account signs the whole bundle.
-"""
 import asyncio
 import hashlib
 import json
@@ -67,7 +49,6 @@ class MultiExport:
         if not lead.reserve_export(export_id):
             raise ValueError("The starting account is already exporting. Wait for it or cancel it.")
         reserved = {lead_id: lead}
-        # Reserve the coordinator and selected workspaces before Telegram yields control.
         self.preparing = {lead_id, *profile_ids}
         try:
             entity = await lead.resolve_for_export(chat_id)
@@ -125,8 +106,6 @@ class MultiExport:
             collector.release_export(export_id)
 
     def uses(self, profile_id):
-        """Whether a running export still depends on this workspace (its store, client or keys)."""
-
         return profile_id in self.preparing or bool(self.task and not self.task.done() and (
             profile_id == self.state["lead"] or any(
                 w["profile_id"] == profile_id and w["state"] != "skipped"
@@ -228,7 +207,7 @@ class MultiExport:
                         recheck, missed = await lead.recheck_absent(lead_entity, absent)
                     except asyncio.CancelledError:
                         raise
-                    except Exception as exc:  # the history is complete without it; say that it was not done
+                    except Exception as exc:
                         recheck, missed = {"asked_at": utcnow(), "asked": 0, "absent_total": len(absent),
                                            "error_type": type(exc).__name__}, []
                     if missed:
@@ -278,7 +257,6 @@ class MultiExport:
 
     @staticmethod
     def merge(parts, scratch):
-        """Concatenate ranges newest first; each must still match the hash taken on arrival."""
         with scratch.open("w", encoding="utf-8") as merged:
             for part in parts:
                 digest, count = hashlib.sha256(), 0
@@ -294,7 +272,6 @@ class MultiExport:
                                      " changed on disk after it was fetched; export stopped.")
 
     def sign_parts(self, parts):
-        """One statement per account, signed with that account's own key."""
         by_profile = {}
         for part in parts:
             by_profile.setdefault(part["profile_id"], []).append(part)

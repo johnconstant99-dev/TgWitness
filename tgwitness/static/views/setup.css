@@ -44,7 +44,6 @@
 #setup-scales { padding: 16px; border-radius: var(--radius-lg); background: var(--surface-2); }
 .setup-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 
-/* On Start here, below the two journeys: how much the record has to prove. */
 .setup-start { margin: 0 0 16px; padding: 18px 20px; border: 1px solid var(--accent-border); border-radius: var(--radius-lg); background: var(--accent-soft); }
 .setup-start h2 { margin: 6px 0 4px; font-size: 18px; }
 .setup-start-goals { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 8px; }

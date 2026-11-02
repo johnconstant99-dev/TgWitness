@@ -1,4 +1,3 @@
-"""Publish the bundled account guide intact, using its existing translations."""
 import html
 import json
 import re
@@ -15,7 +14,6 @@ SKIP = {"script", "style", "template", "pre", "textarea"}
 
 
 def translate(source, words):
-    """Same text units as the panel's walkPage; keep markup and SVGs intact."""
     edits = []
 
     def normal(text):
@@ -71,7 +69,6 @@ def main_content(source):
 
 
 def render_page(source, *, lang, path, relative, relative_file, head, docs_label):
-    """Use the original layout at the canonical docs URL, with project-relative links."""
     base = "" if lang == "en" else lang + "/"
     page = re.sub(r'<html lang="[^"]*">',
                   f'<html lang="{site_i18n.LANGUAGES[lang][1]}" dir="{site_i18n.LANGUAGES[lang][2]}">', source, count=1)

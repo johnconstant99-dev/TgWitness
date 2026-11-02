@@ -25,7 +25,7 @@ for reading, exporting, collecting, interacting, settings and account management
 | Discuss the case on Case Board | Select the chats; enable `board.read`, add `board.write` to post |
 | Cover a whole account group | Select the group; accounts added to it later are included |
 | End one connection | **Open sessions → End session** |
-| Withdraw access completely | Revoke the entry under **Accesses** |
+| Withdraw access completely | Revoke the entry under **Granted access** |
 
 Collection scope controls what is recorded. Access scope controls what someone can
 read and do. Changing one does not change the other.

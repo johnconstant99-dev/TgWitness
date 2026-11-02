@@ -1,4 +1,3 @@
-"""MCP connection creation, secret handling and source links with synthetic records."""
 import json
 from pathlib import Path
 import sys

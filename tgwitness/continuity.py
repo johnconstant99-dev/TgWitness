@@ -1,8 +1,3 @@
-"""Transactional Merkle index over event hashes; proofs disclose no message content.
-
-Tree shape and proofs follow RFC 9162 section 2.1. This index is a cache, not a
-trust anchor: offline verification recomputes roots from the signed events.
-"""
 from .verify import MERKLE_EMPTY, merkle_leaf, merkle_node
 
 
@@ -32,7 +27,6 @@ def initialize(connection):
 
 
 class Tree:
-    """Read a tree from the same SQLite snapshot as its checkpoint and counters."""
     def __init__(self, connection):
         self.connection = connection
 

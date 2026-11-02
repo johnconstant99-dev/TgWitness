@@ -1,9 +1,3 @@
-"""Notifications through Apprise: problems, changes in observed chats and a daily summary.
-
-By default only chat names, counts and problem descriptions leave the machine. Message text
-is added only when the operator turns on text excerpts. The panel's notification list uses
-the same wording.
-"""
 import asyncio
 import hashlib
 import re
@@ -75,7 +69,6 @@ def tr(words, text, **values):
 
 
 def describe(url):
-    """Apprise's own masked form of a destination, or None when Apprise cannot use it."""
     import apprise
     plugin = apprise.Apprise.instantiate(url)
     return plugin.url(privacy=True) if plugin else None
@@ -93,12 +86,9 @@ def route_problem(urls, network):
 
 
 def proxy_url(network, address=None):
-    """address: the proxy's resolved and checked address, connected instead of its name."""
     if network.kind == "direct":
         return None
     login = (quote(network.username, safe="") + ":" + quote(network.password, safe="") + "@") if network.username else ""
-    # HTTPS uses the original hostname for certificate verification. The socket
-    # guard still connects only to the address checked before the send.
     host = network.host if network.kind == "http" and network.tls else address or network.host
     host = "[" + host + "]" if ":" in host else host
 
@@ -110,11 +100,10 @@ _guard = ContextVar("notification_route_guard", default=None)
 
 
 class Refused(OSError):
-    """An internal destination; an OSError, so the services report it as a failed connection."""
+    pass
 
 
 def _checked(host, port):
-    """The addresses to connect to, checked once and then used (no second lookup); None: unchecked."""
     guard = _guard.get()
     if guard is None:
         return None
@@ -132,7 +121,6 @@ def _checked(host, port):
 
 
 def _proxy_targets(host):
-    """Only the current synchronous notification send may resolve/pin proxy destinations."""
     guard = _guard.get()
     network = guard.get("network") if guard else None
     if not guard or not guard["on"] or network is None or network.kind == "direct":
@@ -179,9 +167,6 @@ def _install_proxy_guard():
                 try:
                     return original_connect(self)
                 except OSError as exc:
-                    # CONNECT failed before any service request body was sent.
-                    # Restart the whole connection so urllib3 uses the new socket
-                    # for proxy TLS and service TLS as well as the tunnel itself.
                     self.close()
                     failure = exc
             raise failure
@@ -202,8 +187,6 @@ def _install_proxy_guard():
         try:
             return original_tunnel(self)
         finally:
-            # urllib3 reads _tunnel_host after CONNECT for TLS SNI/certificate
-            # validation and Host. Restore it before that step, even on errors.
             self._tunnel_host, self._tunnel_headers = host, headers
 
     def request(self, method, url, body=None, headers=None, **kwargs):
@@ -215,8 +198,6 @@ def _install_proxy_guard():
                 authority = ("[" + target + "]" if ":" in target else target)
                 if parts.port:
                     authority += ":" + str(parts.port)
-                # An HTTP forwarding proxy receives an absolute request target.
-                # Pin that authority too, while the service Host stays original.
                 url = urlunsplit((parts.scheme, authority, parts.path, parts.query, parts.fragment))
                 headers = dict(headers or {})
                 if not any(k.lower() == "host" for k in headers):
@@ -264,7 +245,6 @@ def _install_guard():
 
 @contextmanager
 def _routed(proxy):
-    """Apprise sends through requests; for this send its proxy settings are the workspace route only."""
     import requests
     original = requests.Session.merge_environment_settings
     token = _guard.set({"on": False, "allowed": set(), "refused": None, "pinned": {}})
@@ -292,7 +272,6 @@ def _routed(proxy):
 
 
 def deliver(urls, title, body, network):
-    """Send one notification to every destination. Returns how many accepted it and the first error."""
     import apprise
     problem = route_problem(urls, network)
     if problem:
@@ -313,14 +292,9 @@ def deliver(urls, title, body, network):
                       allowed={address} if address else set(),
                       pinned={network.host: [address]} if address else {})
         try:
-            # Synchronous plugins stay in this delivery context. The socket and
-            # Requests hooks are inert for unrelated requests in other threads.
             bundle = apprise.Apprise(asset=apprise.AppriseAsset(http_redirects=False, async_mode=False))
             for url in urls:
                 bundle.add(url)
-            # URL redirect=yes overrides the asset default in Apprise. Enforce
-            # the application's policy after parsing, without rewriting service
-            # paths, query credentials or the workspace's transport settings.
             for service in bundle:
                 service.redirects = False
                 service.asset.async_mode = False
@@ -347,7 +321,6 @@ def human_size(n):
 
 
 def account_loss_line(cause, words):
-    """Why observation stopped when Telegram no longer accepts the account's session."""
     if cause == "account_banned":
         return tr(words, "Telegram banned this account. Observation stopped; the journal is kept.")
     if cause == "account_frozen":
@@ -390,7 +363,6 @@ def problem_line(event, titles, words):
         return tr(words, "Off-site copy stopped: {error}", error=p["error"])
     if kind == "storage.completed" and p.get("error"):
         return tr(words, "Storage task stopped: {error}", error=p["error"])
-    # A checkpoint another service stamped on an earlier pass is partly covered, as when some answer at once.
     if kind == "anchor.completed" and not any(r.get("ok") for r in p.get("results", [])) and not p.get("covered"):
         return tr(words, "No timestamp service answered for the latest checkpoint.")
     if kind == "profile.unavailable":
@@ -402,7 +374,6 @@ def problem_line(event, titles, words):
 
 
 def host_line(state, words):
-    """A server deployed with python -m tgwitness.cloud measured SSH or a login; closing them is no problem."""
     before, found, login = state.get("before") or {}, [], False
     if state.get("ssh_listening") and not before.get("ssh_listening"):
         found.append(tr(words, "port 22 accepts connections"))
@@ -427,8 +398,6 @@ CHANGE_PARTS = (("deleted_saved", "{n} deleted, text kept"), ("deleted_unsaved",
 
 
 def split_deletions(store, chat_id, counts, deleted_ids):
-    """The panel's chat counters use the same split: a deletion notice for a message whose text was saved,
-    or for one deleted before any text was saved."""
     if not counts.get("deleted"):
         return counts
     saved = store.saved_message_ids(chat_id, deleted_ids)
@@ -447,7 +416,6 @@ def discovered_line(title, words):
 
 
 def excerpt_line(store, event, title, words, chars=EXCERPT_CHARS):
-    """One changed message with a short excerpt of its text (only when text excerpts are on)."""
     if event["kind"] == "message.edited":
         text = event["payload"].get("text") or ""
     else:
@@ -501,7 +469,6 @@ def timestamp_answered(payload):
 
 
 def problem_group(event):
-    """Typed identity and recovery family. Distinct user operations remain individual records."""
     p, kind, chat = notice_payload(event), event["kind"], event["chat_id"]
     fields, family = None, kind
     if kind == "collector.error":
@@ -577,11 +544,6 @@ def notice_entry(event, level, text, read_key, *, group_id=None, count_exact=Tru
 
 
 def panel_items(store, words, limit=60, *, allowed_chats=None, workspace_id="default"):
-    """Bounded, scoped notification projection; the signed journal is never changed.
-
-    Recurring problems and chat changes are grouped per UTC hour. Known recovery events
-    separate problem episodes. A truncated scan reports lower-bound counts explicitly.
-    """
     if limit <= 0 or allowed_chats is not None and not allowed_chats:
         return []
     titles = {t["chat_id"]: t["title"] for t in store.targets()
@@ -708,7 +670,6 @@ def completion_line(event, titles, words):
 
 
 def collect(store, cursor, titles, words, include_text=False, max_lines=MAX_LINES, chars=EXCERPT_CHARS):
-    """Problem lines, per-chat change counts, newly added chats and (optionally) excerpts after cursor."""
     problems, changes, discovered, excerpts = [], {}, [], []
     while True:
         events = store.events_after(cursor, BATCH)
@@ -781,7 +742,6 @@ async def _destination_pass(store, vault, network, now=None, urls=None):
 
 
 class _DestinationProgress:
-    """Give each receiver its own acknowledgement cursor without copying the journal."""
     KEYS = {"alerts_cursor": "cursor", "alerts_daily": "daily", "alerts_last": "last"}
 
     def __init__(self, store, progress):
@@ -810,7 +770,6 @@ async def alert_pass(store, vault, network, now=None):
         store.set_setting("alerts_cursor", head)
         store.set_setting("alerts_delivery", {})
         return None
-    # URLs may contain credentials. Persist only hashes and delivery progress.
     keys = {hashlib.sha256(url.encode()).hexdigest(): url for url in urls}
     saved = store.get_setting("alerts_delivery", {}) or {}
     progress = {key: saved.get(key, {"cursor": store.get_setting("alerts_cursor", head),
@@ -835,8 +794,6 @@ async def alert_pass(store, vault, network, now=None):
         else:
             state.pop("failures", None)
             state.pop("retry_at", None)
-        # Persist successes before attempting another receiver; a failed receiver
-        # retains its own cursor and is retried without replaying acknowledged work.
         store.set_setting("alerts_delivery", progress)
     store.set_setting("alerts_cursor", min(state["cursor"] for state in progress.values()))
     days = [state.get("daily") for state in progress.values()]

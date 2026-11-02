@@ -5,7 +5,6 @@ const legacy={start:"start",account:"connection",connection:"connection",journal
   exports:"evidence",evidence:"evidence",extras:"witness",witness:"witness",sealed:"sealed",chats:"chats",
   sources:"sources",parameters:"parameters",accounts:"accounts",access:"access","system-log":"system-log",integrations:"integrations",analysis:"analysis"};
 const cards=new Set(["setup","alerts","evidence","cloud","bot","github","storage"]);
-// The first setup (views/settings-hub.js): one address per step, /first-run/1 to /first-run/7.
 const firstRunStep=value=>/^[1-7]$/.test(value||"")?Number(value):null;
 const workspacePattern=/^(?:default|[a-f0-9]{32})$/;
 const groupPattern=/^[a-f0-9]{32}$/;

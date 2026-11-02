@@ -1,4 +1,3 @@
-"""Changed-message context must survive selection without inventing unseen text."""
 import copy
 from pathlib import Path
 import sys
@@ -96,7 +95,7 @@ def test_participant_count_includes_known_authors_of_selected_edits():
             yield record(2,"message.deleted",sender=None)
     data = report_selection.analyze(Snapshot(),report_selection.Selection(enabled=True,kinds=["message.edited"],id_gaps=False))
     assert data["counts"]["participants"] == 1
-    assert data["analytics"]["participants"]["total"] == 0  # activity ranking keeps its observation-only basis
+    assert data["analytics"]["participants"]["total"] == 0
 
 
 def test_preview_keeps_last_forty_versions_and_notices_with_bounded_text():
@@ -111,7 +110,7 @@ def test_preview_keeps_last_forty_versions_and_notices_with_bounded_text():
             yield record(seq + 2, "message.edited", "Unrelated", chat=-1002)
 
     result = report_history.preview(events(), [(-1001, 1)], predicate=lambda row: row["seq"] % 2 == 0)
-    assert len(consumed) == 80  # late records are retained rather than cutting off the source scan
+    assert len(consumed) == 80
     assert len(result) == 1
     item = result[0]
     assert item["chat_id"] == -1001 and item["message_id"] == 1
@@ -162,8 +161,6 @@ def test_preview_keeps_reference_when_saved_pre_deletion_version_is_outside_prev
     assert len(item["versions"]) == 40
     assert item["gone"][0]["previous_version_seq"] == 1
     assert all(version["seq"] > 2 for version in item["versions"])
-    # A non-null reference tells the UI that the content exists outside this
-    # sample; it must not claim that it was never captured or show later text.
 
 
 if __name__ == "__main__":

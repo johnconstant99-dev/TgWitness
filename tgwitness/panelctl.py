@@ -1,9 +1,3 @@
-"""First-run panel setup and management for the native installer.
-
-No hosted control plane: configuration, addresses, credentials and journals stay
-on this machine. Linux services use systemd; other platforms retain the normal
-foreground launcher. Public access is enabled only by an explicit selection.
-"""
 import argparse
 import hashlib
 import ipaddress
@@ -178,7 +172,6 @@ def read_config(root):
 
 
 def prepare_code(root):
-    # Public program files only. Never change permissions on the private data.
     root.chmod(0o755)
     for name in ("versions", "tools"):
         folder = root / name
@@ -411,7 +404,6 @@ def token_rotate(root, port=8787):
                       headers={"Authorization": "Bearer " + token, "Content-Type": "application/json"}, method="POST")
     with urlopen(request, timeout=15) as response:
         result = json.load(response)
-    # The CLI does not need the replacement browser session returned to the UI.
     logout = Request(f"http://127.0.0.1:{config['port']}/api/access/logout", data=b"{}",
                      headers={"Authorization": "Bearer " + result["session"], "Content-Type": "application/json"}, method="POST")
     with urlopen(logout, timeout=15):
@@ -427,8 +419,6 @@ def guide(root, print_text=False, write_only=False):
     if write_only:
         return
     if print_text or os.environ.get("SSH_CONNECTION"):
-        # Redirected Windows stdout can use a legacy code page without arrows.
-        # Keep navigation readable there; the offline files retain their layout.
         print((root / "START-HERE.txt").read_text(encoding="utf-8").replace(" → ", " > "))
     else:
         print("Operator guide: " + str(path))
@@ -518,7 +508,6 @@ def main():
     root = args.root.resolve()
     try:
         if not (root / ".tgwitness-installer").is_file() and not (root / ".tgwitness-installer.json").is_file():
-            # Windows uses a different marker name; it still needs a generated launcher.
             if not (root / "bin" / "tgwitness.cmd").is_file():
                 raise ValueError("Use this command from a managed TgWitness installation.")
         if args.action == "guide":

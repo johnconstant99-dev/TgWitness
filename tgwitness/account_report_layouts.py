@@ -1,4 +1,3 @@
-"""Chapter layouts for account exports; message and chat iterators stay streaming."""
 from . import account_report as view, case_assessment, report_layouts, snapshot_analytics
 
 
@@ -53,8 +52,6 @@ def transcript(context, rows, *, chat=None, sharing=False):
 
     def scope():
         if sharing:
-            # The same allowlist as the standard sharing report: never disclose
-            # private criteria, identity maps or original source records.
             public = {key: context.get('policy', {}).get(key) for key in (*view.SCOPE_LABELS, 'purpose')}
             yield view.scope(public, say, sharing=True)
             yield '<p class="notice">' + view.e(say('This sharing copy is a separate derivative, not the complete original account export.')) + '</p>'

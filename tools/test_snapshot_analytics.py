@@ -1,4 +1,3 @@
-"""Descriptive statistics must retain scope, unknowns, UTC semantics and signed bytes."""
 import json
 from pathlib import Path
 import sys

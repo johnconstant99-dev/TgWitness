@@ -1,8 +1,3 @@
-"""Case-specific, bounded claims. Export-time checks are not an independent opinion.
-
-Only allowlisted aggregates enter this record, especially for minimized copies.
-No network calls, inferred identity, legal score, or claimed witness verification.
-"""
 from html import escape
 from datetime import datetime
 import re
@@ -61,7 +56,6 @@ def result(item, key, **values):
 
 
 def verified_stamp(anchor, count):
-    """No conclusion from merely parsed TSA/OTS bytes or an unbound checkpoint."""
     try:
         stamp = datetime.fromisoformat(anchor["time"].replace("Z", "+00:00"))
     except (KeyError, AttributeError, TypeError, ValueError):
@@ -142,7 +136,6 @@ def journal(context, coverage):
 
 
 def snapshot(context, kind="account", meta=None):
-    """Public aggregates only. Never include private disclosure source/identity maps."""
     meta = meta or {}
     sharing = kind == "sharing"
     chat = kind in ("chat", "account_chat")
@@ -221,7 +214,6 @@ def pdf(lay, data):
 
 
 def text_keys():
-    """Explicit assessment language inventory without user-supplied facts."""
     examples = [journal({}, {}), snapshot({}), snapshot({}, "sharing"), snapshot({}, "chat"), journal({"journal_verified": True}, {})]
     return list(dict.fromkeys([TITLE, INTRO, OVERVIEW, "Limits of this conclusion", "Independent review", "Evidence references", "Not recorded",
                               *STATUSES.values(), *LABELS.values(),

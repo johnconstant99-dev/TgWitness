@@ -5969,5 +5969,14 @@
 "Workspace observation: {n} interruption in the available period": "ワークスペースの監視：利用可能期間中に{n}回の中断が発生しました",
 "Workspace observation: {n} interruptions in the available period": {
 "other": "ワークスペースの監視：利用可能期間中に{n}回の中断が発生しました"
-}
+},
+"In <strong>Sources → Recording → Choose which changes to preserve</strong>, select event categories or use <strong>Messages, edits &amp; deletions</strong>, then press <strong>Save recording settings</strong>.": "[<strong>ソース] → [記録] → [保存する変更の選択]</strong> で、イベントカテゴリを選択するか、[<strong>メッセージ、編集、削除</strong>] を選択し、<strong>[記録設定を保存</strong>] を押してください。",
+"Hide the address waits for a working proxy; direct fallback requires a mode that permits it": "「アドレスを非表示」は、正常に動作するプロキシを待機します。直接接続によるフォールバックには、それを許可するモードが必要です。",
+"Hide the address refuses direct fallback. Direct as a last resort can use Direct after the configured delay. Server behind a tunnel or VPN permits the host's direct network route but does not create a VPN. Pause observation before changing routes; saving cancels unfinished login. <strong>Test Telegram connection</strong> checks transport, not complete delivery.": "「アドレスを非表示」はダイレクト接続のフォールバックを拒否します。「ダイレクト」は最後の手段として、設定された遅延時間が経過した後に使用できます。トンネルやVPNを経由するサーバーは、ホストのダイレクトネットワーク経路を許可しますが、VPNは作成しません。経路を変更する前に監視を一時停止してください。保存すると、未完了のログインはキャンセルされます。<strong>Telegram接続のテストでは</strong>、完全な配信ではなく、トランスポートがチェックされます。",
+"Signed checks outside the collector, posted to Telegram or Discord.": "コレクター外で署名されたチェックを、Telegram や Discord に投稿します。",
+"Compare the running program with a public GitHub commit.": "実行中のプログラムと、GitHub上の公開コミットを比較してください。",
+"Open Extras in the panel and choose Configure under Independent witness. The form prepares the files for a separate witness process.": "パネルで「Extras」を開き、「Independent witness」の下にある「Configure」を選択します。このフォームでは、独立したウィットネスプロセス用のファイルが準備されます。",
+"Choose your Telegram channel or Discord webhook and the check interval, then save the configuration.": "TelegramチャンネルまたはDiscordのWebhookを選択し、チェック間隔を設定してから、設定を保存してください。",
+"Install TgWitness on the witness host, add your BotFather token or Discord webhook and follow the launch commands in step 3.": "ウィットネスホストにTgWitnessをインストールし、BotFatherトークンまたはDiscordウェブフックを追加して、手順3の起動コマンドに従ってください。",
+"In Extras, open Code check and enter your fork or the official repository with a release tag or commit. TgWitness compares every program file with that commit and saves the result in the signed journal, so an export shows which public code was running. No GitHub token is needed.": "「Extras」で「Code check」を開き、フォークまたはリリースタグやコミットを含む公式リポジトリを入力します。TgWitnessは、すべてのプログラムファイルをそのコミットと比較し、結果を署名付きジャーナルに保存するため、エクスポートを行うと、どの公開コードが実行されていたかが確認できます。GitHubトークンは必要ありません。"
 }

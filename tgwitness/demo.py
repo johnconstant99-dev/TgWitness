@@ -16,7 +16,6 @@ def seed_demo(store):
         store.set_target(cid, title, kind, True)
     store.append("demo.created", {"synthetic": True, "meaning": "Fictional demonstration; no Telegram connection"})
     people = ("Morgan Reed", "Alex Quinn", "Sam Vale", "Casey Lin")
-    # All people, messages and .example addresses below belong to this fictional case.
     texts = [
         "Case HBR-042. Keep the original portal link, later edits and deletion notices together.",
         "Is harbor-check.example the new verification portal? The link arrived in a private message.",

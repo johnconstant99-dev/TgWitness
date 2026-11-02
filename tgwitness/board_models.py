@@ -1,4 +1,3 @@
-"""Case Board input contracts. JSON Schemas are generated from these models."""
 from datetime import datetime, timezone
 from typing import Annotated, Literal
 
@@ -58,7 +57,6 @@ class SliceQuery(Model):
     actors: list[Peer] = Field(default_factory=list, max_length=100)
     search: str = Field(default="", max_length=200)
     hide_system: bool = False
-    # Unknown-chat deletions are separate context, never attributed to selected chats.
     include_unscoped: bool = False
 
     @field_validator("from_", "to")

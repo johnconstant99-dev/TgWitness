@@ -1,4 +1,3 @@
-"""Smoke-test an installed package using stdlib HTTP; no live account."""
 import argparse
 import importlib.metadata
 import http.client

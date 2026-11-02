@@ -5,7 +5,7 @@ observation, highlight an exact passage, save a range of actions, and discuss it
 Cards retain their source references and signed revision history. Team annotations stay in the
 workspace, separately identifiable from the original Telegram observations.
 
-[Evidence model](EVIDENCE.md) · [Access](ACCESS.md) · [Reports](CASE_REPORTS.md) · [Русский](ru/CASE-BOARD.md)
+[Evidence model](EVIDENCE.md) · [Access](ACCESS.md) · [Reports](CASE_REPORTS.md)
 
 ![Synthetic investigation feed](assets/case-board.png)
 

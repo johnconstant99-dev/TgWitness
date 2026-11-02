@@ -1,12 +1,3 @@
-"""Protection modes: how much of the evidence tooling the panel shows and asks for in a workspace.
-
-A mode changes what the panel shows and suggests, never what is recorded. Every event is signed in
-every mode, a setting keeps working while its section is hidden, and the journal format is the same.
-The first choice and every change are signed journal records (workspace.mode_changed).
-
-The checklist measures each layer in the workspace's own state (app.mode_facts); a layer the panel
-cannot see, such as a key kept on paper, is not counted.
-"""
 from dataclasses import asdict, dataclass
 from typing import Literal
 
@@ -14,8 +5,8 @@ from .health import age, now_utc
 
 Mode = Literal["easy", "signed", "witnessed", "court", "github", "mossad"]
 SETTING = "mode"
-PENDING = "mode_pending"  # a new installation: the panel asks before anything is hidden
-EXISTING = "witnessed"  # installations from before the modes, and "Change later"
+PENDING = "mode_pending"
+EXISTING = "witnessed"
 MEANING = ("Only what the panel shows and suggests changed. Recording, signing and saved settings "
            "are the same in every mode; a hidden section keeps working.")
 
@@ -32,20 +23,18 @@ class ModeInfo:
 
 @dataclass(frozen=True)
 class Feature:
-    """A panel section shown from one mode upwards; below it the section is hidden, never switched off."""
     id: str
     mode: str
     name: str
-    layers: tuple = ()  # layers that show the section is in use while it is hidden
+    layers: tuple = ()
 
 
 @dataclass(frozen=True)
 class Layer:
-    """One protection, measured in this workspace's own state."""
     id: str
     mode: str
     name: str
-    place: str | None  # where the panel sets it up; None when it is built in
+    place: str | None
 
 
 MODES = (
@@ -107,7 +96,6 @@ LAYERS = (
     Layer("sealed_server", "mossad", "Sealed 24/7 server with provider records", "extras:cloud"),
 )
 
-# Asked for in the modes request; not part of this version, so never counted as a layer.
 NOT_YET = ("Threshold signing by several keys (FROST)", "Checkpoint mirror on GitLab",
            "Anchoring on Nostr relays", "Co-signers who countersign checkpoints")
 
@@ -120,7 +108,6 @@ class Downgrade(ValueError):
 
 
 def texts():
-    """Every English text the panel shows from this module, for the translation inventory."""
     found = [text for mode in MODES for text in (mode.name, mode.audience, mode.outcome, mode.effort)]
     found += [feature.name for feature in FEATURES] + [layer.name for layer in LAYERS] + list(NOT_YET)
     return list(dict.fromkeys(found + [UNKNOWN, LOWER]))
@@ -137,10 +124,6 @@ def recent(value, seconds, now):
 
 
 def measure(facts, now=None):
-    """{layer id: "on" | "off" | "pending"} from what the workspace reports about itself.
-
-    pending: set up, but the first confirmation (a witness poll, a verified timestamp, a lock the
-    storage reports) has not arrived yet."""
     now = now or now_utc()
     witness = facts["witness"]
     polled = [t for t in witness if t.get("last_poll")]
@@ -183,7 +166,6 @@ def measure(facts, now=None):
 
 
 def hidden_between(old, new):
-    """Sections a change hides; from no choice yet (everything shown) every section above the new mode."""
     low = RANK[old] if old else len(MODES)
     return [f.id for f in FEATURES if RANK[new] < RANK[f.mode] <= low]
 
@@ -206,9 +188,6 @@ def state(store, facts, now=None):
 
 
 def change(store, new, by, confirm_downgrade=False, reason="chosen", active=None):
-    """Save the mode and journal the change; returns False when it is already the mode.
-
-    Lowering an already chosen mode needs confirm_downgrade: its sections are hidden, not switched off."""
     if new not in IDS:
         raise ValueError(UNKNOWN)
     old = current(store)
@@ -227,8 +206,6 @@ def change(store, new, by, confirm_downgrade=False, reason="chosen", active=None
 
 
 def migrate(store):
-    """Before the first record of a run: an installation from before the modes keeps a known panel
-    (Witnessed, recorded once); a new one is marked so that the panel asks."""
     if store.get_setting(SETTING, None) is not None or store.get_setting(PENDING, False) or store.get_setting("demo", False):
         return None
     if not store.stats()["total"]:

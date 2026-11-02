@@ -1,6 +1,3 @@
-// Panel dialogs in place of window.prompt/confirm, which embedded and some mobile browsers refuse.
-// Each call returns a promise: confirm → true/false, prompt → text or null, typed → true when the
-// person typed the expected name.
 (() => {
   const t = (text, vars) => (typeof tr === "function" ? tr(text, vars) : text);
 

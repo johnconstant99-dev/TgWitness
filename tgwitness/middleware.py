@@ -2,8 +2,6 @@ import asyncio
 
 from starlette.responses import JSONResponse
 
-# Reverse proxies reuse idle connections: Caddy keeps them two minutes, cloudflared 90 seconds. Uvicorn closes
-# them after 5 seconds by default, and a request sent into a connection it is closing reaches the browser as 502.
 KEEP_ALIVE_SECONDS = 150
 
 MCP_BODY_TIMEOUT = 8
@@ -14,7 +12,7 @@ MAX_PENDING_BODY_BYTES = 64 * 1024 * 1024
 
 def request_limit(path, default=16384):
     if "/api/account-export" in path:
-        return 512 * 1024  # bounded IDs, literal filters and disclosure policies; no uploads
+        return 512 * 1024
     if "/api/analysis/reports/" in path:
         return 65536
     if path.endswith(("/api/auth/import", "/api/auth/import/preview", "/api/profiles/import")):
@@ -30,7 +28,6 @@ def request_limit(path, default=16384):
 
 
 class RequestLimit:
-    """Enforce request size while receiving, including requests without Content-Length."""
     def __init__(self, app, max_body=16384, path_limits=True):
         self.app, self.max_body, self.path_limits = app, max_body, path_limits
         self.pending_bodies = self.pending_bytes = 0
@@ -42,8 +39,6 @@ class RequestLimit:
         limit = request_limit(scope.get("path", ""), self.max_body) if self.path_limits else self.max_body
         route = scope.get("path", "").removeprefix(scope.get("root_path", "")).rstrip("/")
         timeout = MCP_BODY_TIMEOUT if route == "/mcp" else BODY_TIMEOUT
-        # Reserve the full route allowance before reading: partial uploads cannot
-        # consume an unbounded number of buffers. No await between check and reserve.
         if self.pending_bodies >= MAX_PENDING_BODIES or self.pending_bytes + limit > MAX_PENDING_BODY_BYTES:
             return await JSONResponse({"detail": "Too many pending request bodies. Try again shortly."},
                 status_code=503, headers={"Cache-Control": "no-store", "Retry-After": "1"})(scope, receive, send)

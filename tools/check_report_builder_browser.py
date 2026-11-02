@@ -1,4 +1,3 @@
-"""Report template choices, authored notes, privacy defaults and workspace ownership."""
 from pathlib import Path
 import sys
 import tempfile
@@ -67,7 +66,6 @@ def main():
             page.locator('#exports-tab-settings').click()
             expect(page.locator('#report-template-brief')).to_be_checked()
             expect(page.locator('#report-review-findings')).to_have_value(authored['findings'])
-            # Native radio keyboard navigation is also a template change.
             page.locator('#report-template-brief').focus()
             page.keyboard.press('ArrowRight')
             expect(page.locator('#report-template-activity')).to_be_checked()
@@ -84,7 +82,6 @@ def main():
             expect(page.locator('#report-hourly-chart')).not_to_be_checked()
             assert save(page)['chart_limit'] == 15
 
-            # A preset resets chart identity choices, while preserving the author's analysis.
             page.locator('#report-template-dossier').check()
             expect(page.locator('#report-participant-labels')).to_have_value('aliases')
             expect(page.locator('#report-chart-limit')).to_have_value('10')
@@ -97,7 +94,6 @@ def main():
             expect(page.locator('#report-outline')).not_to_contain_text('Activity by weekday and hour')
             expect(page.locator('#report-form')).to_have_attribute('data-dirty', 'false')
 
-            # Invalid numeric choices cannot cause an API write, even through a synthetic submit event.
             page.locator('#report-chart-limit').fill('31')
             baseline = len(writes)
             page.locator('#report-form button[type=submit]').click()
@@ -115,7 +111,6 @@ def main():
             page.evaluate('id=>switchProfile(id)', second)
             page.locator('#exports-tab-settings').click()
             expect(page.locator('#report-case-title')).to_have_value('Other case')
-            # Legacy/API settings with mismatched labels become Custom; controls are kept.
             expect(page.locator('#report-template-custom')).to_be_checked()
             expect(page.locator('#report-timeline')).not_to_be_checked()
             expect(page.locator('#report-review-findings')).to_have_value('Other workspace only')

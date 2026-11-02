@@ -23,6 +23,8 @@ on:
       - tools/check_site.py
       - tools/run_checks.py
       - tools/check_demo_browser.py
+      - tools/browser_helpers.py
+      - tools/check_guide_languages.py
       - tools/check_report_example.py
       - tools/check_docs_site.py
       - tools/check_docs_workflows.py
@@ -93,6 +95,7 @@ jobs:
             test-results/docs-workflows/**/*.json
             test-results/report-example/**/*.png
             test-results/report-example/**/*.json
+            test-results/guide-languages/**/*.png
           if-no-files-found: warn
           retention-days: 3
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5

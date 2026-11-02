@@ -1,12 +1,3 @@
-"""Intel TDX quotes checked from scratch, and the dstack event log that says what a confidential VM booted.
-
-A quote is trusted only through Intel: its PCK certificate chain to the pinned Intel SGX Root CA,
-Intel's revocation lists, the quoting enclave's report signed by that PCK key and naming the key
-that signed the quote, and the TCB level Intel's signed TCB Info gives that platform. Neither the
-cloud, the host nor dstack is asked anything. What the TD booted is in its measurement registers:
-MRTD and RTMR0-2 (firmware, kernel, command line) are compared with values computed from the image,
-RTMR3 is replayed from dstack's event log, whose compose-hash event names the application's compose.
-"""
 import base64
 import hashlib
 import json
@@ -23,7 +14,6 @@ from cryptography.hazmat.primitives.serialization import Encoding
 
 from .verify import canonical, children, der, oid
 
-# Intel SGX Root CA, as published at certificates.trustedservices.intel.com; the only trust anchor.
 INTEL_ROOT_DER = base64.b64decode(
     "MIICjzCCAjSgAwIBAgIUImUM1lqdNInzg7SVUr9QGzknBqwwCgYIKoZIzj0EAwIwaDEaMBgGA1UEAwwRSW50ZWwgU0dYIFJvb3Qg"
     "Q0ExGjAYBgNVBAoMEUludGVsIENvcnBvcmF0aW9uMRQwEgYDVQQHDAtTYW50YSBDbGFyYTELMAkGA1UECAwCQ0ExCzAJBgNVBAYT"
@@ -39,15 +29,14 @@ PCS = "https://api.trustedservices.intel.com"
 ROOT_CRL_URL = "https://certificates.trustedservices.intel.com/IntelSGXRootCA.der"
 INTEL_QE_VENDOR = bytes.fromhex("939a7233f79c4ca9940a0db3957f0607")
 TDX, ECDSA_P256 = 0x81, 2
-BODIES = {2: 584, 3: 648, 4: 885}  # TD report 1.0, 1.5 and 1.5 with service TD extensions
+BODIES = {2: 584, 3: 648, 4: 885}
 SGX_EXTENSION, TCB, PCEID, FMSPC = ("1.2.840.113741.1.13.1", "1.2.840.113741.1.13.1.2", "1.2.840.113741.1.13.1.3",
                                     "1.2.840.113741.1.13.1.4")
-DSTACK_EVENT = 0x08000001  # dstack runtime events; their digest is recomputed from name and payload
+DSTACK_EVENT = 0x08000001
 STATUSES = ("UpToDate", "SWHardeningNeeded", "ConfigurationNeeded", "ConfigurationAndSWHardeningNeeded",
             "OutOfDate", "OutOfDateConfigurationNeeded", "Revoked")
 QE_STATUSES = ("UpToDate", "OutOfDate", "ConfigurationNeeded", "OutOfDateConfigurationNeeded", "Revoked")
 MODULE_STATUSES = ("UpToDate", "OutOfDate", "Revoked")
-# TDX module ABI 348551-008US table 3.23: TD attribute bits a verifier must see clear.
 RESERVED_ATTRIBUTES = sum(1 << bit for bit in (*range(1, 4), *range(7, 16), *range(23, 27), *range(32, 62)))
 MEASUREMENTS = ("mrtd", "rtmr0", "rtmr1", "rtmr2")
 IDENTITY_EVENTS = ("app-id", "compose-hash", "instance-id", "key-provider", "os-image-hash", "storage-encrypted",
@@ -66,7 +55,6 @@ def intel_root():
 
 
 def report_data(value):
-    """The 64 bytes a quote carries for a statement: SHA-512 of its canonical JSON."""
     return hashlib.sha512(canonical(value)).digest()
 
 
@@ -83,8 +71,6 @@ def td_report(body, kind):
 
 
 def parse_quote(raw):
-    """A version 4 or 5 Intel TDX quote, read strictly: header, TD report and the ECDSA P-256 signature
-    data with the quoting enclave's report and the PCK certificate chain."""
     raw = bytes(raw)
     if len(raw) < 48:
         raise QuoteError("The quote is truncated")
@@ -156,7 +142,6 @@ def in_window(start, end, now):
 
 
 def crl_list(data, issuer, now, what):
-    """A revocation list signed by issuer and current at now."""
     try:
         crl = x509.load_der_x509_crl(data)
     except ValueError:
@@ -169,9 +154,6 @@ def crl_list(data, issuer, now, what):
 
 
 def check_chain(chain, root, crls, now, what):
-    """Leaf first: each certificate issued by the next (the last by the pinned root), every issuer a
-    certificate authority, all valid at now and none on its issuer's revocation list. A copy of the root
-    at the end is dropped; any other self-issued end certificate is refused."""
     chain = list(chain)
     if chain and chain[-1].public_bytes(Encoding.DER) == root.public_bytes(Encoding.DER):
         chain = chain[:-1]
@@ -194,7 +176,7 @@ def check_chain(chain, root, crls, now, what):
             if not checked.not_valid_before_utc <= now <= checked.not_valid_after_utc:
                 raise QuoteError(what + ": " + checked.subject.rfc4514_string() + " is not valid at "
                                  + now.isoformat())
-    for index, certificate in enumerate(chain):  # revocation once the whole path reaches the root
+    for index, certificate in enumerate(chain):
         issuer = chain[index + 1] if index + 1 < len(chain) else root
         crl = crls.get(issuer.subject.public_bytes())
         if crl is None:
@@ -205,7 +187,6 @@ def check_chain(chain, root, crls, now, what):
 
 
 def pck_extension(certificate):
-    """CPU SVN, PCE SVN, PCE ID and FMSPC from the PCK certificate's Intel SGX extension."""
     try:
         data = certificate.extensions.get_extension_for_oid(x509.ObjectIdentifier(SGX_EXTENSION)).value.value
     except x509.ExtensionNotFound:
@@ -246,7 +227,6 @@ def parse_time(value):
 
 
 def signed_document(collateral, name, root, crls, now, what):
-    """TCB Info or QE Identity: JSON whose exact bytes Intel signed with a key certified by the root."""
     chain = check_chain(pem_chain(collateral[name + "_issuer_chain"]), root, crls, now, what)
     if len(chain) != 1:
         raise QuoteError(what + " must be signed by a certificate the root issued directly")
@@ -256,7 +236,6 @@ def signed_document(collateral, name, root, crls, now, what):
 
 
 def converge(platform, component):
-    """Intel QVL's convergeTcbStatuses: only an OutOfDate or Revoked component changes the platform status."""
     if component == "Revoked":
         return "Revoked"
     if component == "OutOfDate" and platform in ("UpToDate", "SWHardeningNeeded"):
@@ -267,7 +246,6 @@ def converge(platform, component):
 
 
 def relaunch(launch, current):
-    """Intel QVL's checkForRelaunch for a TD 1.5: launched out of date, current TCB no longer out of date."""
     configuration = ("ConfigurationNeeded", "OutOfDateConfigurationNeeded", "ConfigurationAndSWHardeningNeeded",
                      "TDRelaunchAdvisedConfigurationNeeded")
     if launch in ("OutOfDate", "OutOfDateConfigurationNeeded") and current in (
@@ -282,7 +260,6 @@ def components(level, key):
 
 
 def ordered_levels(tcb_info):
-    """Intel QVL's order: SGX components, then PCE SVN, then TDX components, highest first."""
     return sorted(tcb_info["tcbLevels"], reverse=True, key=lambda level: (
         components(level, "sgxtcbcomponents"), level["tcb"]["pcesvn"], components(level, "tdxtcbcomponents")))
 
@@ -298,7 +275,6 @@ def module_identity(tcb_info, svn):
 
 
 def platform_level(tcb_info, cpu_svn, pce_svn, svn):
-    """The first TCB level the platform meets, converged with its TDX module's level."""
     skip = 2 if svn[1] > 0 else 0
     for level in ordered_levels(tcb_info):
         sgx, tdx = components(level, "sgxtcbcomponents"), components(level, "tdxtcbcomponents")
@@ -324,7 +300,6 @@ def platform_level(tcb_info, cpu_svn, pce_svn, svn):
 
 
 def check_module(tcb_info, report):
-    """The SEAM module that built the TD report is Intel's: its signer and attributes match TCB Info."""
     base = tcb_info.get("tdxModule")
     if not base:
         raise QuoteError("TDX TCB Info has no tdxModule")
@@ -338,7 +313,6 @@ def check_module(tcb_info, report):
 
 
 def td_problems(quote):
-    """What makes a TD untrustworthy whatever it runs: debugging, profiling, migration, reserved bits."""
     report, problems = quote["report"], []
     attributes = int.from_bytes(report["td_attributes"], "little")
     if attributes & 0x01:
@@ -349,7 +323,7 @@ def td_problems(quote):
         problems.append("reserved TD attribute bits are set")
     if attributes & (1 << 29):
         problems.append("the TD can be migrated to another machine")
-    if attributes & (1 << 17):  # no service TD is allowed to inspect or update this TD
+    if attributes & (1 << 17):
         problems.append("service TD extensions are enabled")
     if not attributes & (1 << 28):
         problems.append("SEPT_VE_DISABLE is off")
@@ -359,7 +333,6 @@ def td_problems(quote):
 
 
 def check_qe(qe_report, identity):
-    """The quoting enclave is Intel's, not in debug mode, at a QE TCB level Intel lists."""
     if qe_report[128:160] != bytes.fromhex(identity["mrsigner"]):
         raise QuoteError("The quoting enclave is not signed by Intel")
     if qe_report[48] & 0x02:
@@ -384,10 +357,6 @@ def check_qe(qe_report, identity):
 
 
 def verify_quote(raw, collateral, now=None, root=None):
-    """Everything Intel vouches for in a TDX quote, checked against Intel's collateral at now.
-
-    Returns the TCB status, its advisories and the TD report; raises QuoteError on any break in the
-    chain, on a revoked platform and on a TD that runs in debug mode or can be migrated."""
     now = now or datetime.now(timezone.utc)
     root = root or intel_root()
     quote = parse_quote(raw)
@@ -450,7 +419,6 @@ def verify_quote(raw, collateral, now=None, root=None):
 
 
 def signed_member(body, name):
-    """The exact bytes of one member of an Intel PCS answer and the hex signature beside it."""
     marker = '"' + name + '":'
     start = body.index(marker) + len(marker)
     while body[start] in " \t\r\n":
@@ -460,7 +428,6 @@ def signed_member(body, name):
 
 
 def fetch_collateral(raw, session):
-    """Intel's current collateral for this quote's platform, straight from Intel's PCS."""
     pck = pem_chain(parse_quote(raw)["pck_chain"])[0]
     fmspc = pck_extension(pck)["fmspc"].hex().upper()
     issuer = pck.issuer.get_attributes_for_oid(x509.NameOID.COMMON_NAME)[0].value
@@ -491,7 +458,6 @@ def fetch_collateral(raw, session):
 
 
 def event_digest(event):
-    """SHA-384 of a dstack runtime event as dstack extends it: version 1 binary, version 2 canonical JSON."""
     payload = bytes.fromhex(event["event_payload"])
     version = event.get("version") or 1
     if version == 1:
@@ -505,8 +471,6 @@ def event_digest(event):
 
 
 def replay(event_log):
-    """RTMR3 rebuilt from the event log, and its events with their payloads. A dstack event's digest
-    is recomputed from its name and payload; another event's digest can only be taken as given."""
     register, events = bytes(48), []
     for event in event_log:
         if event.get("imr") != 3:
@@ -526,7 +490,6 @@ def replay(event_log):
 
 
 def launch_identity(events):
-    """What dstack measured before the application started: the events before system-ready."""
     before, after, ready = [], [], False
     for event in events:
         (after if ready else before).append(event)
@@ -557,14 +520,12 @@ def launch_identity(events):
 
 
 def evidence(answer):
-    """The quote, event log and VM configuration as a collector attaches them, decoded."""
     raw = bytes.fromhex(answer["quote"])
     log = answer["event_log"]
     return raw, json.loads(log) if isinstance(log, str) else log
 
 
 def measured(raw, event_log):
-    """The quote's TD report and the launch identity its RTMR3 vouches for, without Intel's chain."""
     quote = parse_quote(raw)
     register, events = replay(event_log)
     if register != quote["report"]["rtmr3"]:
@@ -573,7 +534,6 @@ def measured(raw, event_log):
 
 
 def compare_measurements(report, expected):
-    """MRTD and RTMR0-2 against values computed from the image (dstack-mr), as (status, detail)."""
     if not expected:
         return "unavailable", ("pass --tdx-measurements with MRTD and RTMR0-2 computed from the dstack OS image "
                                "(dstack-mr measure); without them the firmware, kernel and command line are not compared")

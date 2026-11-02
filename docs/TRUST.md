@@ -1,6 +1,6 @@
 # Independent verification
 
-[Русская версия](ru/TRUST.md) · [Security policy](../.github/SECURITY.md)
+[Security policy](../.github/SECURITY.md)
 
 You can check artifact bytes against a public workflow and commit without access
 to our infrastructure or trust in our self-hosted runner. This still requires

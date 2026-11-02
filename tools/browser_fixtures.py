@@ -1,5 +1,3 @@
-"""Synthetic clients and sample data for standalone browser checks; no live Telegram."""
-
 import asyncio
 import hashlib
 import io
@@ -122,7 +120,6 @@ def sqlite_fixture(kind="telethon", version=None, bot=0, test=0, address=None, p
 
 
 def tdata_fixture(passcode="", account_count=1, user_id=44):
-    """Synthetic Desktop encoding, using Telethon's separate AES-IGE implementation."""
     def array(data):
         return struct.pack(">I", len(data)) + data
 

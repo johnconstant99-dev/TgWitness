@@ -1,4 +1,3 @@
-"""Explicit, previewed disclosure derivatives. Original account evidence is never rewritten."""
 import asyncio
 import base64
 import hashlib
@@ -92,7 +91,6 @@ class DisclosurePolicy(BaseModel):
 
 
 def source_rows(archive):
-    """Read only sealed message pages; account/contacts/avatars are never copied."""
     inventory = json.loads(archive.read('inventory.json'))['statement']
     chats = {row['id']: row for row in inventory['chats']}
     for name in sorted(n for n in archive.namelist() if n.startswith('receipts/')):
@@ -122,7 +120,6 @@ def visible_text(row):
 
 
 def date_text(value):
-    """A date field cannot carry nested source metadata into the projection."""
     if not isinstance(value, str):
         return None
     try:
@@ -137,7 +134,6 @@ def plain_string(value):
 
 
 def mask_literals(text, pattern, replacement):
-    """Match full Unicode casefolds, replacing spans in the unchanged original text."""
     if not pattern:
         return text
     matches = list(pattern.finditer(text.casefold()))
@@ -191,8 +187,6 @@ class Projection:
         def add_term(value):
             if isinstance(value, str) and 2 <= len(value) <= 200:
                 folded = value.casefold()
-                # Omitted message text needs no name dictionary, but the public
-                # purpose still needs masking. Retain only its possible matches.
                 if purpose_only and folded not in folded_purpose:
                     return
                 terms.add(folded)
@@ -201,9 +195,6 @@ class Projection:
 
         if policy.identity_mode != 'keep':
             for chat, row in source_rows(source):
-                # Direct-chat titles can identify a person even when its sender
-                # object was unavailable. Generic group/channel titles are not
-                # treated as personal names in arbitrary message text.
                 if chat.get('kind') in ('private', 'bot'):
                     add_term(chat.get('title'))
                 if self.reveal(sender_id(row)):
@@ -226,8 +217,6 @@ class Projection:
                             add_term(username.get('username'))
                 if len(terms) + len(ids) > MAX_MASK_TERMS:
                     raise ValueError('Too many known identities to mask safely. Narrow the source export or omit message text.')
-        # Matching on casefolded text covers expansions such as Straße/STRASSE.
-        # IDs match whole numeric tokens, never a substring of another ID or decimal.
         patterns = [re.escape(t) for t in sorted(terms, key=len, reverse=True)]
         patterns += [r'(?<![\w.+-])' + re.escape(t) + r'(?![\w.])' for t in sorted(ids, key=len, reverse=True)]
         self.pattern = re.compile('|'.join(patterns)) if patterns else None
@@ -267,7 +256,6 @@ class Projection:
                            or plain_string(person.get('title')) or plain_string(row.get('from')) or str(uid or 'Unknown'),
                            username=plain_string(person.get('username')) or plain_string(row.get('from_username')) or None)
         else:
-            # An absent sender ID does not establish that two messages share a sender.
             subject = uid if uid is not None else ['unknown', chat['id'], row['id']]
             message.update(from_id=self.alias('participant', subject), sender=self.alias('Participant', subject))
             message['redacted_fields'].extend(['sender_identity', 'chat_identity', 'message_id'])
@@ -290,13 +278,10 @@ class Projection:
                     message['attachments'].append({k: item[k] for k in ('outcome', 'file', 'sha256', 'bytes')})
         elif row.get('attachments'):
             message['redacted_fields'].append('attachments')
-        # Forward headers, entities, reply quotes, usernames, locations, contact cards,
-        # avatars and raw Telegram payloads are deliberately outside this allowlist.
         return {'chat': public_chat, 'message': message}
 
 
 def public_policy(policy, projection=None):
-    # The public purpose must not echo otherwise-private selection or identity criteria.
     private_terms = {str(value) for value in (*policy.sender_ids, *policy.disclose_user_ids)}
     private_terms.update(policy.text_contains)
     private_terms.update(policy.redact_terms)
@@ -314,14 +299,6 @@ def public_policy(policy, projection=None):
 
 
 def archive_limit(path):
-    """Allow the local ZIP's expanded size, independently of its media-only budget.
-
-    Completed sources are pinned to their published ZIP digest/size before this
-    allowance is used. The full verifier still authenticates the collector and
-    streams every hash, with its member-count, whole-member and line limits.
-    Locally generated derivatives use the same bounded per-call allowance;
-    external CLI verification retains its explicit --max-gib requirement.
-    """
     with zipfile.ZipFile(path) as archive:
         members = archive.infolist()
         if len(members) > MAX_MEMBERS:

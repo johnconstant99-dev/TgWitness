@@ -1,4 +1,3 @@
-"""Synthetic conversation controls and archive navigation; no Telegram requests."""
 from pathlib import Path
 import json
 import tempfile
@@ -101,8 +100,6 @@ def main():
             page.route('**/api/status', status)
             page.route('**/api/snapshot', snapshot)
             unlock(page, server)
-            # Opening a chat starts its profile read in the background. Leaving for
-            # settings can cancel that read before it fills the profile cache.
             hold_profile_read(page)
             page.evaluate("async()=>{await navigate('chats');await openChat(-1001);}")
             expect(page.locator('html')).to_have_attribute('data-refresh-held', 'true')
@@ -145,8 +142,6 @@ def main():
             page.locator('[data-chat-view="profile"]').click()
             expect(page.locator('.chat-profile-view')).to_be_visible()
             expect(page.locator('.chat-profile-view')).to_contain_text('Profile not saved yet')
-            # Repeated paints share the active read. Reentry gets a fresh read even
-            # while an older request for the same chat has not settled yet.
             hold_profile_read(page)
             page.evaluate('()=>openChat(-1001)')
             expect(page.locator('html')).to_have_attribute('data-refresh-held', 'true')

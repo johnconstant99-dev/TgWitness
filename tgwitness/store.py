@@ -95,7 +95,6 @@ class Store:
 
     @contextmanager
     def transaction(self):
-        """Nested operations commit together, including a journal record and its durable job."""
         with self.lock:
             outer = not self.db.in_transaction
             if outer:
@@ -151,7 +150,6 @@ class Store:
         return result
 
     def chat_overview(self):
-        """Per chat: saved messages, edited and deleted counts, and the newest saved text."""
         with self.lock:
             rows = self.db.execute(
                 "SELECT c.*,e.payload FROM chat_state_index c LEFT JOIN events e ON e.seq=c.text_seq "
@@ -160,8 +158,6 @@ class Store:
             for row in rows:
                 payload = json.loads(row["payload"]) if row["payload"] is not None else {}
                 sender = payload.get("sender_observation") or {}
-                # One set of definitions for every screen: saved text; deleted with its text kept; deleted
-                # before any text was saved; not returned by Telegram at a recheck.
                 result[row["chat_id"]] = {
                     "messages": row["messages"], "edited": row["edited"], "deleted": row["deleted"],
                     "missing": row["missing"], "saved": row["saved"], "deleted_saved": row["deleted_saved"],
@@ -173,7 +169,6 @@ class Store:
         return result
 
     def chat_authors(self, chat_id):
-        """Everyone with a saved message in this chat: counts of saved, edited and deleted messages."""
         text_marks = ",".join("?" * len(TEXT_KINDS))
         with self.lock:
             rows = self.db.execute(
@@ -214,14 +209,12 @@ class Store:
         return {"authors": result, "deleted_without_author": len(deleted - set(owner))}
 
     def last_message_id(self, chat_id):
-        """Highest message ID with saved content in this chat, or None."""
         with self.lock:
             row = self.db.execute("SELECT message_id FROM message_state_index INDEXED BY message_text WHERE chat_id=? "
                                   "AND text_seq IS NOT NULL ORDER BY message_id DESC LIMIT 1", (chat_id,)).fetchone()
         return row[0] if row else None
 
     def saved_message_ids(self, chat_id, message_ids):
-        """Which of these messages have saved text, so a deletion reads as "text kept" or "before saving"."""
         ids = sorted({m for m in message_ids if isinstance(m, int)})
         found = set()
         with self.lock:
@@ -233,7 +226,6 @@ class Store:
         return found
 
     def message_state(self, chat_id, message_id):
-        """Latest saved content of one message and whether it is already recorded as gone."""
         with self.lock:
             row = self.db.execute(
                 "SELECT e.seq,e.hash,json_extract(e.payload,'$.text') AS text,"
@@ -250,7 +242,6 @@ class Store:
                 "deleted": bool(row and row["deleted"]), "missing": bool(row and row["missing"])}
 
     def alive_message_ids(self, chat_id, below=None, limit=200, *, include_missing=False):
-        """Saved IDs without deletion notices; optionally retry those missing at an earlier recheck."""
         where, params = "chat_id=? AND text_seq IS NOT NULL AND deleted=0", [chat_id]
         if not include_missing:
             where += " AND missing=0"
@@ -264,7 +255,6 @@ class Store:
                 " ORDER BY message_id DESC LIMIT ?", (*params, limit))]
 
     def chat_messages(self, chat_id, before_id=None, limit=60, *, after_id=None):
-        """Readable view of one chat: every saved version, deletion and attachment per message."""
         if before_id is not None and after_id is not None:
             raise ValueError("Choose one message cursor.")
         if not 1 <= limit <= 200:
@@ -348,27 +338,23 @@ class Store:
                 "next_after": max(ids) if newer else None}
 
     def events_after(self, seq, limit):
-        """Consecutive journal records after seq, as stored (for the off-site copy)."""
         with self.lock:
             return [self.decode(r) for r in self.db.execute(
                 "SELECT * FROM events WHERE seq>? ORDER BY seq LIMIT ?", (seq, limit))]
 
     def counts_since(self, observed_at, kinds):
-        """{(chat_id, kind): records} observed at or after the given UTC time (for the daily summary)."""
         with self.lock:
             return {(r[0], r[1]): r[2] for r in self.db.execute(
                 "SELECT chat_id, kind, count(*) FROM events WHERE observed_at>=? AND kind IN ("
                 + ",".join("?" * len(kinds)) + ") GROUP BY chat_id, kind", (observed_at, *kinds))}
 
     def media_saved_after(self, seq):
-        """(seq, SHA-256) of preserved files recorded after seq."""
         with self.lock:
             return [(r[0], r[1]) for r in self.db.execute(
                 "SELECT seq, json_extract(payload,'$.media_sha256') FROM events WHERE kind IN (?,?) AND seq>?"
                 " ORDER BY seq", (*MEDIA_KINDS, seq)) if r[1]]
 
     def media_in_chats(self, sha256, chat_ids):
-        """Whether a preserved file was saved from one of these chats."""
         marks = ",".join("?" * len(chat_ids))
         with self.lock:
             return self.db.execute(
@@ -377,7 +363,6 @@ class Store:
                 (*MEDIA_KINDS, *sorted(chat_ids), sha256)).fetchone() is not None
 
     def sender_in_chats(self, sender_id, chat_ids):
-        """Whether someone wrote a saved message in one of these chats."""
         marks = ",".join("?" * len(chat_ids))
         with self.lock:
             return self.db.execute(
@@ -436,9 +421,6 @@ class Store:
             if candidate is not None:
                 table = "event_text_search" if text_only else "event_payload_search"
                 if text_only:
-                    # Older trigram tokenizers also stop at NUL. Include the rare
-                    # NUL rows from a partial index, including existing journals
-                    # whose FTS rows were already truncated. Exact matching follows.
                     source = ("(SELECT rowid FROM event_text_search WHERE event_text_search MATCH ? "
                               "UNION SELECT seq AS rowid FROM events INDEXED BY event_text_nul WHERE "
                               + NUL_PAYLOAD + ") AS candidates JOIN events ON events.seq=candidates.rowid")
@@ -451,8 +433,6 @@ class Store:
                     params.append(candidate)
             value = "COALESCE(json_extract(payload,'$.text'),'')" if text_only else "payload"
             if text_only:
-                # Keep the fast path and scalar semantics. Only escaped-NUL text
-                # needs Python extraction on SQLite versions with JSON1 truncation.
                 value = ("CASE WHEN instr(payload,'\\u0000')>0 AND json_type(payload,'$.text')='text' "
                          "THEN nul_text(payload) ELSE " + value + " END")
             filters.append("instr(search_text(" + value + "), ?)>0")
@@ -505,7 +485,6 @@ class Store:
 
     @contextmanager
     def snapshot(self):
-        """Separate read transaction: bounded-memory stable prefix without blocking WAL writers."""
         connection = sqlite3.connect(self.root / "journal.sqlite3")
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA query_only=ON")
@@ -565,7 +544,6 @@ class Store:
             return job
 
     def clear_media_queue(self, through_seq):
-        """Cancel waiting jobs in the reviewed snapshot, retaining their signed receipts and files."""
         if type(through_seq) is not int or not 0 <= through_seq < 2**53:
             raise ValueError("Invalid queue cutoff")
         with self.transaction():
@@ -634,7 +612,6 @@ class Store:
         return {"total": row[0], "enabled": row[1]}
 
     def set_target(self, chat_id, title, kind, enabled, origin=None, priority=None):
-        """Add or update a source. origin/priority keep their saved values unless given."""
         with self.transaction():
             self.db.execute(
                 "INSERT INTO targets(chat_id,title,enabled,kind,origin,priority) VALUES (?,?,?,?,?,?)"
@@ -646,8 +623,6 @@ class Store:
             self.targets_revision += 1
 
     def remove_target(self, chat_id):
-        """Forget a source; its journal records stay (the journal is append-only). Its files still
-        waiting to download are recorded as failed: nothing fetches files of a removed source."""
         with self.transaction():
             removed = self.db.execute("DELETE FROM targets WHERE chat_id=?", (chat_id,)).rowcount
             waiting = self.db.execute("SELECT * FROM media_jobs WHERE chat_id=? AND state IN ('queued','retry')"
@@ -659,10 +634,6 @@ class Store:
         return bool(removed)
 
     def account_message_chat(self, message_id):
-        """The private chat or ordinary group where this account-wide message ID was saved, or None.
-
-        Channels and supergroups (IDs below -10^12) number messages per chat and are never matched.
-        """
         with self.lock:
             chats = [r[0] for r in self.db.execute(
                 "SELECT chat_id FROM message_state_index WHERE message_id=? AND text_seq IS NOT NULL"
@@ -670,8 +641,6 @@ class Store:
         return chats[0] if len(chats) == 1 else None
 
     def latest_reply_keyboard(self, chat_id, window=500, before_message_id=None):
-        """(seq, button labels) of the newest saved message in this chat with a reply keyboard,
-        only among messages older than before_message_id when given."""
         with self.lock:
             row = self.db.execute(
                 "SELECT seq, json_extract(payload,'$.raw.reply_markup') FROM (SELECT seq, message_id, payload FROM events"
@@ -686,7 +655,6 @@ class Store:
         return row[0], labels
 
     def events_of(self, kinds, limit=50, after=None, before=None, *, chat_ids=None):
-        """Newest records of the given kinds (for the panel's notification list)."""
         if not kinds or chat_ids is not None and not chat_ids:
             return []
         where, params = "kind IN (" + ",".join("?" * len(kinds)) + ")", list(kinds)
@@ -704,15 +672,12 @@ class Store:
                 "SELECT * FROM events WHERE " + where + " ORDER BY seq DESC LIMIT ?", (*params, limit))]
 
     def chat_records(self, chat_id, kinds):
-        """Every record of the given kinds in one chat, oldest first."""
         with self.lock:
             return [self.decode(r) for r in self.db.execute(
                 "SELECT * FROM events WHERE chat_id=? AND kind IN (" + ",".join("?" * len(kinds)) + ")"
                 " ORDER BY seq", (chat_id, *kinds))]
 
     def sender_chats(self, sender_ids, *, allowed_chats=None):
-        """{sender_id: {chat_id: distinct saved messages}} in the permitted chats. Snapshots,
-        edits and recoveries of one message are further records of the same message, not new ones."""
         if not sender_ids or allowed_chats is not None and not allowed_chats:
             return {}
         marks = ",".join("?" * len(TEXT_KINDS))

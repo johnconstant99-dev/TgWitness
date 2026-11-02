@@ -1,4 +1,3 @@
-"""Synthetic preservation, disclosure and export regressions; no Telegram connection."""
 import asyncio
 import copy
 from datetime import datetime, timedelta, timezone
@@ -201,7 +200,6 @@ def test_legacy_missing_index_repair_preserves_journal(workspace):
     store.append("message.missing_on_recheck", {}, CHAT, 1)
     store.append("message.snapshot", payload(), CHAT, 1, PERSON)
     before = copy.deepcopy(store.all_events())
-    # Reproduce the old derived index, then reopen through the normal migration.
     with store.transaction():
         store.db.execute("UPDATE message_state_index SET missing=1")
         store.db.execute("UPDATE chat_state_index SET missing=1")
@@ -295,7 +293,6 @@ def test_multi_export_requires_shared_message_namespace(tmp_path, channel):
             vault.save("credentials", {"session": "synthetic-presence-marker"})
             collector = Collector(store, vault)
             collector.restore = AsyncMock()
-            # Stale metadata must not make a private peer eligible for pooling.
             collector.dialog_cache = {chat: {"kind": "supergroup", "entity": peer}}
             collector.client = SimpleNamespace(get_messages=AsyncMock(return_value=[SimpleNamespace(id=4001)]))
             entries[name] = {"app": SimpleNamespace(state=SimpleNamespace(collector=collector, store=store, vault=vault))}

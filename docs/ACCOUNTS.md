@@ -364,7 +364,7 @@ makes no network request and refuses to overwrite an existing output file.
 | Account ID does not match the imported account | The file's user ID differs from what Telegram reports; the file is for another account. |
 | Account already belongs to another workspace | Open that workspace instead of adding the account twice. |
 | Connected, but a private group is missing from the chat list in **Sources** | Check membership. The picker inspects the first 1,000 dialogs; raise the limit under **Parameters**. |
-| Proxy connection fails | Check the route and IP mode. Automatic MTProxy tries another working entry. Hide IP mode waits; the explicitly selected fallback mode can connect directly after its configured delay. See [routing modes](CONNECTION-SECURITY.md#ip-modes). |
+| Proxy connection fails | Check the route and IP mode. Automatic MTProxy tries another working entry. Hide the address waits; Direct as a last resort can connect directly after its configured delay. See [routing modes](CONNECTION-SECURITY.md#ip-modes). |
 
 See also: [connection and security](CONNECTION-SECURITY.md) for proxies and encryption,
 and [how collection works](COLLECTION.md) for what is captured after sign-in.
