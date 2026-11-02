@@ -1323,6 +1323,18 @@ class Collector:
                             for f in self.folders.values()],
                 "limit": limit, "may_be_truncated": count >= limit}
 
+    async def signed_in_devices(self):
+        """Telegram's list of this account's sessions (Settings → Devices), without IP addresses."""
+        if not (self.running and self.client and self.client.is_connected()):
+            raise ValueError("Telegram is not connected: observation is paused or reconnecting.")
+        result = await asyncio.wait_for(self.client(functions.account.GetAuthorizationsRequest()), 30)
+        return [{"hash": str(a.hash), "current": bool(a.current), "official_app": bool(a.official_app),
+                 "password_pending": bool(a.password_pending), "unconfirmed": bool(a.unconfirmed),
+                 "device_model": a.device_model, "platform": a.platform, "system_version": a.system_version,
+                 "app_name": a.app_name, "app_version": a.app_version, "api_id": a.api_id,
+                 "created_at": date_string(a.date_created), "active_at": date_string(a.date_active),
+                 "country": a.country, "region": a.region} for a in result.authorizations]
+
     async def load_folders(self):
         """The account's Telegram folders (dialog filters); empty when Telegram does not answer."""
         own = (self.store.get_setting("account", {}) or {}).get("id")

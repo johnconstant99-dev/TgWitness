@@ -5,6 +5,46 @@
 - Preserve an active Telegram sign-in when workflow navigation finishes late.
   Returning through account export or investigation keeps the pending code,
   password or QR step instead of resetting the form.
+- Added a guided 24/7 server in Extras → Server 24/7: on the local panel, a region
+  and a Hetzner token are enough to review the type, monthly price and version from
+  Hetzner's API, then run `deploy` with live progress. Without a domain the server
+  gets a quick tunnel (`--quick-tunnel`): a random trycloudflare.com address that it
+  posts, signed with a key kept by the deployment, to ntfy.sh, where the panel finds
+  it again after a restart. A Cloudflare token adds an address under your own
+  domain. Tokens are never stored and never accepted by a panel reached over a
+  network. New `python -m tgwitness.cloud destroy` removes a deployment's server,
+  firewall, DNS records and tunnel, including what a failed deployment left behind.
+  `tools/check_cloud_wizard.py` covers it offline; the quick tunnel path was also run
+  against real Hetzner Cloud. See [high assurance](HIGH-ASSURANCE.md#from-the-panel).
+- Evidence mode has two optional records under **More witnesses**, both off by
+  default: the newest drand round (League of Entropy, first from Cloudflare's relay),
+  which shows the records after it are newer, and Telegram's list of the account's
+  signed-in devices without IP addresses. `verify.py` reports both; `--check-drand`
+  compares the rounds with Cloudflare and Protocol Labs relays. The drand path ran
+  against the real relays. See [evidence](EVIDENCE.md#optional-records-in-evidence-mode-drand-and-telegram-devices).
+- Added Gateway DNS for a 24/7 server (`--gateway-dns`, **Cloudflare Gateway DNS** in the
+  wizard): the server resolves only through a Cloudflare Gateway location over TLS, Hetzner's
+  firewall blocks DNS to anything else, and `verify` checks that firewall, the location,
+  logging, Gateway policies that could rewrite answers, the server's queries and the audit log.
+  Evidence mode can copy the location's log into the journal (`cloudflare.gateway_dns`) and
+  `verify.py` summarises it. Free accounts share their one location, told apart by address.
+  Ran against real Hetzner Cloud and Cloudflare; `tools/check_gateway_dns.py` covers it offline.
+- Added setup by goal in Extras → Goal & protection level, offered on Start here
+  until it is answered or skipped: four questions (what for, how much, photos and
+  files, where it runs) lead to suggested settings, each with one line on what it
+  adds, and two scales, credibility and reliability, computed from what is actually
+  set. Apply changes only timestamps, drand, the device list, the attachment policy
+  and two parameters, each recorded in the journal as usual plus `setup.applied`;
+  notifications, an off-site copy, a server, the code check and a witness bot are
+  offered as next steps with their own forms.
+- Added Phala Cloud for a 24/7 server (`--provider phala`, **Confidential virtual machine ·
+  Phala Cloud** in the wizard): the collector runs in an Intel TDX confidential virtual
+  machine whose compose pins the commit's source files and both images by hash. `verify`
+  checks each Intel attestation up to Intel's root itself (`tgwitness.tdx`), the measured
+  compose, the instance and, with `--tdx-measurements`, the OS image; every start in the
+  journal carries an attestation too. Works with the quick tunnel; `destroy` removes the
+  machine. `tools/check_tdx.py` and `tools/check_phala.py` cover it offline; not yet tried
+  on Phala Cloud itself. See [high assurance](HIGH-ASSURANCE.md#confidential-vm-on-phala-cloud-intel-tdx).
 
 ## 0.7.1 preview · 1 November 2026
 

@@ -77,8 +77,8 @@ class Api:
 class Provider(Api):
     """A cloud with an API that creates servers, firewalls and keeps a log of actions.
 
-    Deploy: create(spec, user_data, rules) returns (firewall, server) records and waits until the
-    server runs; lock(record) removes every inbound rule. Verify: describe() reads the server back,
+    Deploy: create(spec, user_data, rules, outbound) returns (firewall, server) records and waits until
+    the server runs; lock(record) removes every inbound rule and keeps the outbound ones. Verify: describe() reads the server back,
     firewall() what filters its public interface, actions() the provider's own log, normalised to
     {resource, id, command, started, finished, status, actor}. metadata() runs on the server.
     """
@@ -108,11 +108,16 @@ class Provider(Api):
     def __init__(self, credentials, session=None, log=None):
         super().__init__(credentials, session, log)
 
-    def create(self, spec, user_data, rules):
+    def create(self, spec, user_data, rules, outbound=()):
         raise NotImplementedError
 
     def lock(self, record):
         raise NotImplementedError
+
+    def destroy(self, record):
+        """Deletes the deployment's server and firewall, found by its label; returns what was removed."""
+        raise DeployError(self.title + ": removal through the API is not available here; delete the resources "
+                          "labelled tgwitness-deployment=" + record["deployment_id"] + " in the provider's console")
 
     def describe(self, record):
         raise NotImplementedError

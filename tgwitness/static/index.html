@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="/views/sources.css?v=17">
 <link rel="stylesheet" href="/views/parameters.css?v=21">
 <link rel="stylesheet" href="/views/accounts.css?v=30">
+<link rel="stylesheet" href="/views/setup.css?v=3">
 <link rel="stylesheet" href="/views/access.css?v=30">
 <link rel="stylesheet" href="/components/journal.css?v=4">
 <link rel="stylesheet" href="/views/chats.css?v=11">
@@ -23,7 +24,7 @@
 <script src="/theme.js?v=0.7.0"></script>
 <script src="/guide-locale.js" data-scope="panel"></script>
 <script defer src="/i18n.js?v=0.7.0"></script>
-<script defer src="/app.js?v=0.7.0-handoff2"></script>
+<script defer src="/app.js?v=0.7.0-handoff2-setup2-phala2"></script>
 <script defer src="/integrations.js?v=2"></script>
 <script defer src="/analysis.js?v=3"></script>
 <script defer src="/media-analysis.js?v=2"></script>
@@ -219,6 +220,16 @@
     <article class="card workflow-card" id="workflow-investigation-card"><svg aria-hidden="true" class="icon"><use href="#i-journal"/></svg><h2>Follow an investigation</h2><p>Keep new messages, observed edits and deletion notices from the chats you choose.</p><ol><li>Choose sources</li><li>Start observation explicitly</li><li>Review and export saved records</li></ol><button class="secondary" data-workflow="investigation" type="button">Set up observation</button><p class="hint">Previously saved records stay available when observation is paused.</p></article>
   </div>
   <section class="card workflow-status" aria-label="Current workspace"><div><strong id="workflow-status-title"></strong><p id="workflow-status-copy"></p></div><button class="secondary" data-open="chats" type="button">Open saved chats</button><button class="quiet" data-open="accounts" type="button">Manage accounts</button></section>
+  <section class="setup-start" hidden id="setup-start" aria-labelledby="setup-start-title">
+    <span class="eyebrow">BEFORE YOU START</span><h2 id="setup-start-title">What will you use TgWitness for?</h2>
+    <p class="hint">Pick a goal and we suggest the settings. It takes a minute, and everything can be changed later under Extras.</p>
+    <div class="setup-start-goals">
+      <button class="secondary" data-setup-goal="personal" type="button">A personal record</button>
+      <button class="secondary" data-setup-goal="investigation" type="button">An investigation</button>
+      <button class="secondary" data-setup-goal="evidence" type="button">Evidence for a case</button>
+    </div>
+    <button class="text-link" id="setup-start-skip" type="button">Skip, I will set it up myself</button>
+  </section>
   <p class="hint">TgWitness signs the saved files. Telegram does not certify them. Export details explain what was collected and what is missing.</p>
 </section>
 
@@ -562,12 +573,32 @@
     <p class="muted">Sends only the SHA-256 of each signed checkpoint to timestamp services, through this workspace's connection route. Their answers are kept with the checkpoints, included in evidence exports and checked by <code>verify.py</code>.</p>
     <label class="check-label"><input id="evidence-enabled" type="checkbox"> Anchor checkpoints automatically</label>
     <label for="evidence-interval">How often, every … minutes (5 to 1,440)</label><input id="evidence-interval" max="1440" min="5" required step="1" type="number">
+    <details id="evidence-more"><summary>More witnesses · optional</summary>
+      <label class="check-label"><input id="evidence-drand" type="checkbox"> Public randomness (drand): shows the journal was written live, not prepared later</label>
+      <p class="hint">Each pass writes the newest drand value into the journal. Nobody knows it in advance, so the records after it are newer; the timestamps bound them from the other side. One request to drand.cloudflare.com per pass. Check later with <code>verify.py --check-drand</code>.</p>
+      <label class="check-label"><input id="evidence-devices" type="checkbox"> Telegram's list of signed-in devices</label>
+      <p class="hint">Each pass records this account's sessions as Telegram lists them in Settings → Devices, so a session nobody expected shows in the journal. Device names, apps and countries are kept, IP addresses are not.</p>
+      <label class="check-label"><input id="evidence-gateway" type="checkbox"> Cloudflare Gateway's log of this server's DNS queries</label>
+      <p class="hint">For a server that resolves through Cloudflare Gateway, such as Server 24/7 with Gateway DNS. Each pass copies what Cloudflare logged since the previous one into the journal, so it outlasts Cloudflare's 24 hours. Set the account, location and a read-only token below.</p>
+    </details>
     <details><summary>Timestamp services</summary>
       <label for="evidence-tsa">RFC 3161 timestamp authorities, one address per line</label><textarea id="evidence-tsa" rows="3" spellcheck="false"></textarea>
       <label for="evidence-ots">OpenTimestamps calendars, one address per line</label><textarea id="evidence-ots" rows="4" spellcheck="false"></textarea>
     </details>
     <button class="secondary" type="submit">Save evidence mode</button> <button class="quiet" id="evidence-anchor" type="button">Anchor now</button>
     <div class="hint health-detail" id="evidence-status" role="status"></div>
+  </form>
+  <form class="card padded" hidden id="gateway-form"><div class="eyebrow">Cloudflare Gateway log</div><h2>Where Cloudflare logs this server's DNS</h2>
+    <p class="muted">TgWitness checks these values with one request to Cloudflare before saving. The token stays encrypted on this machine and only reads analytics.</p>
+    <div class="replica-fields">
+      <div><label for="gateway-account">Cloudflare account ID</label><input autocomplete="off" data-no-translate id="gateway-account" spellcheck="false"></div>
+      <div><label for="gateway-location">Gateway DNS location ID</label><input autocomplete="off" data-no-translate id="gateway-location" spellcheck="false"></div>
+      <div><label for="gateway-address">This server's public IP address · optional</label><input autocomplete="off" data-no-translate id="gateway-address" spellcheck="false"></div>
+      <div><label for="gateway-token">Read-only Cloudflare API token</label><input autocomplete="new-password" id="gateway-token" type="password"></div>
+    </div>
+    <p class="hint">The token needs Account · Account Analytics · Read. To keep only this server's queries in a location other devices share, give its address and add Account · Zero Trust: PII · Read.</p>
+    <button class="secondary" type="submit">Check and save</button> <button class="quiet" id="gateway-remove" type="button">Remove</button>
+    <p class="hint" id="gateway-status" role="status"></p>
   </form>
   <form class="card padded" id="replica-form"><div class="eyebrow">Off-site copy</div><h2>Copy everything to S3-compatible storage</h2>
     <p class="muted">The journal, photos &amp; files, checkpoints with their timestamps and chat exports are encrypted on this machine before upload, so the provider stores only encrypted objects. Works with AWS S3 and other S3-compatible services. Download the encryption key and keep it apart: without it the copy cannot be read.</p>
@@ -618,10 +649,91 @@
   </form>
   </div>
 
-  <div class="extra-panel card padded" id="extras-cloud" hidden role="region" aria-labelledby="extras-cloud-title">
+  <div class="extra-panel" id="extras-cloud" hidden role="region" aria-labelledby="extras-cloud-title">
     <div class="extra-panel-heading"><div><span class="eyebrow">24/7 SERVER</span><h2 id="extras-cloud-title" tabindex="-1">A sealed server, set up by commands you can check.</h2><p>The server has no SSH and no open ports: the panel is reached through a Cloudflare Tunnel, and anyone with a read-only token can check how it was created.</p></div><button class="quiet" data-extra-close="cloud" type="button">Back to extras</button></div>
     <p class="notice" hidden id="cloud-active"></p>
     <div class="health-detail" hidden id="cloud-health" role="status"></div>
+    <p class="notice warning" hidden id="cloud-remote">This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.</p>
+    <div hidden id="cloud-wizard">
+      <form id="cloud-setup">
+        <div class="card padded extra-step"><div class="extra-step-heading"><span class="step-number" aria-hidden="true">1</span><div><h3>Which server, and where?</h3><p>The provider rents out the server and bills you directly, not TgWitness.</p></div></div>
+          <div aria-label="Server kind" class="scope-modes cloud-hosts" role="radiogroup">
+            <label><input checked name="cloud-host" type="radio" value="hetzner"><span><strong>Ordinary server · Hetzner</strong><small>Lowest price. Hetzner's and Cloudflare's records can be checked, but Hetzner could read the server's memory.</small></span></label>
+            <label><input name="cloud-host" type="radio" value="phala"><span><strong>Confidential virtual machine · Phala Cloud</strong><small>Intel TDX: the processor attests which code runs, and the host cannot read its memory. Costs more.</small></span></label>
+          </div>
+          <div data-cloud-host="hetzner">
+            <p class="hint">Data protection law follows the country: for EU cases choose Europe.</p>
+            <div aria-label="Server region" class="scope-modes cloud-regions" role="radiogroup">
+              <label><input checked name="cloud-region" type="radio" value="eu"><span><strong>Europe</strong><small>Germany · usually the lowest price</small></span></label>
+              <label><input name="cloud-region" type="radio" value="us"><span><strong>United States</strong><small>Virginia or Oregon</small></span></label>
+            </div>
+          </div>
+          <p class="hint" data-cloud-host="phala" hidden>Phala Cloud chooses the data centre; the deployment record names it. Every answer of the server carries Intel's attestation, which TgWitness checks against Intel's own certificates.</p>
+        </div>
+        <div class="card padded extra-step"><div class="extra-step-heading"><span class="step-number" aria-hidden="true">2</span><div><h3 data-cloud-host="hetzner">Connect Hetzner</h3><h3 data-cloud-host="phala" hidden>Connect Phala Cloud</h3><p>One access token. It stays in this tab and reaches TgWitness on this computer only while a task runs; nothing stores it.</p></div></div>
+          <div data-cloud-host="hetzner">
+            <div class="witness-fields">
+              <label for="cloud-hetzner-token">Hetzner API token<input autocomplete="off" id="cloud-hetzner-token" spellcheck="false" type="password"></label>
+            </div>
+            <details class="extra-detail"><summary>How to get the Hetzner token</summary>
+              <ol class="cloud-howto"><li>Open the Hetzner console and create a project, for example TgWitness. A new account asks for a payment method first.</li><li>In the project, open Security → API tokens → Generate API token.</li><li>Choose Read &amp; Write, create the token and copy it: Hetzner shows it only once.</li></ol>
+              <a class="text-link cloud-link" href="https://console.hetzner.com/projects" rel="noopener noreferrer" target="_blank">Open the Hetzner console ↗</a><a class="text-link cloud-link" href="https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/" rel="noopener noreferrer" target="_blank">Hetzner's guide ↗</a>
+            </details>
+          </div>
+          <div data-cloud-host="phala" hidden>
+            <div class="witness-fields">
+              <label for="cloud-phala-token">Phala Cloud API key<input autocomplete="off" id="cloud-phala-token" spellcheck="false" type="password"></label>
+            </div>
+            <details class="extra-detail"><summary>How to get the Phala Cloud API key</summary>
+              <ol class="cloud-howto"><li>Sign up at Phala Cloud and add credit: it bills the confidential virtual machine by the hour.</li><li>In the dashboard, open your account settings → API Keys and create a key.</li><li>Copy the key: it starts with phak_.</li></ol>
+              <a class="text-link cloud-link" href="https://cloud.phala.com/" rel="noopener noreferrer" target="_blank">Open Phala Cloud ↗</a><a class="text-link cloud-link" href="https://docs.phala.com/phala-cloud/what-is/what-is-phala-cloud" rel="noopener noreferrer" target="_blank">Phala Cloud documentation ↗</a>
+            </details>
+          </div>
+          <details class="extra-detail" id="cloud-own-domain"><summary>Optional · your own domain instead of a trycloudflare.com address</summary>
+            <p class="hint">Without a domain the panel gets a free random address on trycloudflare.com. It changes whenever the server restarts; Your servers below finds the current one. Cloudflare keeps no record of such an address, so a verifier cannot check which machine serves it. Under your own domain the address stays the same and Cloudflare's records can be checked.</p>
+            <div class="witness-fields">
+              <label for="cloud-cloudflare-token">Cloudflare API token<input autocomplete="off" id="cloud-cloudflare-token" spellcheck="false" type="password"></label>
+            </div>
+            <ol class="cloud-howto"><li>Your domain must be in your Cloudflare account; the free plan is enough. The panel gets an address in it, such as tgw-1a2b3c.your-domain.org.</li><li>Open the prepared token page: Zone Read, DNS Edit and Cloudflare Tunnel Edit are already selected.</li><li>Choose Continue to summary, then Create token, and copy it: Cloudflare shows it only once.</li></ol>
+            <a class="text-link cloud-link" href="https://dash.cloudflare.com/profile/api-tokens?permissionGroupKeys=%5B%7B%22key%22%3A%22zone%22%2C%22type%22%3A%22read%22%7D%2C%7B%22key%22%3A%22dns%22%2C%22type%22%3A%22edit%22%7D%2C%7B%22key%22%3A%22argotunnel%22%2C%22type%22%3A%22edit%22%7D%5D&amp;accountId=%2A&amp;zoneId=all&amp;name=TgWitness%20server" rel="noopener noreferrer" target="_blank">Create the Cloudflare token ↗</a><a class="text-link cloud-link" href="https://developers.cloudflare.com/registrar/get-started/register-domain/" rel="noopener noreferrer" target="_blank">Buy a domain at Cloudflare ↗</a><a class="text-link cloud-link" href="https://developers.cloudflare.com/fundamentals/manage-domains/add-site/" rel="noopener noreferrer" target="_blank">Add a domain you have ↗</a>
+          </details>
+          <details class="extra-detail" data-cloud-host="hetzner" id="cloud-gateway"><summary>Optional · Cloudflare Gateway DNS: a record of every name the server looks up</summary>
+            <p class="hint">The server resolves names only through a DNS location in your Cloudflare account, over TLS, and the Hetzner firewall blocks DNS to anyone else. Cloudflare logs each lookup, such as github.com, pypi.org or ntfy.sh, so a verifier sees by name where the server connected. No domain is needed and the free Zero Trust plan is enough. Cloudflare keeps the log 24 hours; evidence mode on the server can copy it into the journal.</p>
+            <label class="check-label"><input id="cloud-gateway-on" type="checkbox"> Resolve the server's DNS only through Cloudflare Gateway</label>
+            <div class="witness-fields">
+              <label for="cloud-gateway-token">Cloudflare API token for Gateway<input autocomplete="off" id="cloud-gateway-token" spellcheck="false" type="password"></label>
+            </div>
+            <ol class="cloud-howto"><li>In Cloudflare, open My Profile → API Tokens → Create Token → Custom token.</li><li>Add Account · Zero Trust · Edit and Account · Account Analytics · Read, limited to your account. With your own domain above, add its three permissions to the same token and paste it in both fields.</li><li>A free account allows one DNS location. If yours has one already, the server uses it and its lookups are told apart by its address; destroying the server leaves that location.</li></ol>
+            <a class="text-link cloud-link" href="https://dash.cloudflare.com/profile/api-tokens" rel="noopener noreferrer" target="_blank">Open Cloudflare API tokens ↗</a>
+          </details>
+          <button class="primary" id="cloud-check" type="submit">Check and show the price</button>
+        </div>
+      </form>
+      <form class="card padded extra-step" hidden id="cloud-offer">
+        <div class="extra-step-heading"><span class="step-number" aria-hidden="true">3</span><div><h3>Review and create</h3><p>Nothing has been created yet. Check what you get and what it costs.</p></div></div>
+        <dl class="cloud-summary" id="cloud-summary"></dl>
+        <div hidden id="cloud-domain-field"><label for="cloud-domain">Domain for the panel address</label><select id="cloud-domain"></select></div>
+        <div hidden id="cloud-gateway-field"><label for="cloud-gateway-account">Cloudflare account for Gateway DNS</label><select id="cloud-gateway-account"></select></div>
+        <details class="extra-detail"><summary>Advanced · name and version</summary>
+          <div class="witness-fields">
+            <label for="cloud-wizard-name">Server name<input autocomplete="off" data-no-translate id="cloud-wizard-name" maxlength="50" spellcheck="false"></label>
+            <label for="cloud-wizard-ref">Version: release tag or commit<input autocomplete="off" data-no-translate id="cloud-wizard-ref" maxlength="100" spellcheck="false"></label>
+          </div>
+          <p class="hint">The name is also the first part of the address. Leave both empty for a random name and the version this panel runs.</p>
+        </details>
+        <label class="cloud-consent"><input id="cloud-consent" required type="checkbox"><span data-cloud-host="hetzner">I understand that Hetzner bills this server from now on, until I delete it.</span><span data-cloud-host="phala" hidden>I agree that Phala Cloud bills this confidential virtual machine by the hour from now on, until I delete it.</span></label>
+        <button class="primary" id="cloud-create" type="submit">Create the server</button>
+      </form>
+      <div class="card padded extra-step" hidden id="cloud-job">
+        <div class="extra-step-heading"><span class="step-number" aria-hidden="true">3</span><div><h3 id="cloud-job-title">Creating the server</h3><p id="cloud-job-lead">Keep TgWitness running on this computer until the end. Closing this tab does not stop the task.</p></div></div>
+        <ol aria-live="polite" class="cloud-stages" id="cloud-stages"></ol>
+        <p class="hint" id="cloud-elapsed"></p>
+        <div id="cloud-outcome"></div>
+        <details class="extra-detail"><summary>Technical log</summary><pre id="cloud-log"></pre></details>
+      </div>
+    </div>
+    <details class="card padded extra-detail" hidden id="cloud-servers"><summary>Your servers</summary><div id="cloud-server-list"></div></details>
+    <details class="card padded extra-detail" id="cloud-cli"><summary>Command line · any provider</summary>
     <form class="cloud-form" id="cloud-form">
       <div class="replica-fields">
         <div><label for="cloud-provider">Provider</label><select id="cloud-provider"></select></div>
@@ -637,10 +749,11 @@
         <label for="cloud-witness">Hostname that exposes only the witness and assurance endpoints</label><input data-no-translate id="cloud-witness" placeholder="check.example.org" spellcheck="false" autocomplete="off">
       </details>
     </form>
-    <p class="hint">Run these on your own computer in a checkout of TgWitness. Provider and Cloudflare tokens are read from files there; this panel never asks for them.</p>
+    <p class="hint">Run these in a terminal on your own computer, with TgWitness installed. Provider and Cloudflare tokens are read from files there.</p>
     <pre id="cloud-commands"></pre>
     <button class="quiet" id="cloud-copy" type="button">Copy commands</button>
     <a class="text-link" href="https://github.com/phishdestroy/TgWitness/blob/main/docs/HIGH-ASSURANCE.md" rel="noopener noreferrer" target="_blank">Tokens, costs and what the check proves ↗</a>
+    </details>
   </div>
 
   <div id="extras-overview">
@@ -650,6 +763,12 @@
     <span class="extras-note"><svg aria-hidden="true" class="icon"><use href="#i-check"/></svg> Optional · your account and sources are enough to start collecting.</span>
   </div>
   <div class="extras-grid">
+    <article class="extra-card extra-setup">
+      <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-sparkle"/></svg></span><span class="extra-badge" id="extra-setup-badge">No goal chosen</span></div>
+      <h2>Goal &amp; protection level</h2><p>Four short questions: we suggest settings for your goal and show how far the record can be trusted.</p>
+      <div class="level-scales compact" id="setup-overview-scales"></div>
+      <button class="secondary" id="extras-open-setup" data-extra="setup" aria-expanded="false" aria-controls="extras-setup" type="button">Choose a goal <span aria-hidden="true">→</span></button>
+    </article>
     <article class="extra-card extra-alerts">
       <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span><span class="extra-badge" id="extra-alerts-badge">Off</span></div>
       <h2>Notifications</h2><p>Problems, deleted and edited messages and a daily summary in Telegram, Discord, email or another service.</p>
@@ -683,6 +802,61 @@
     </article>
   </div>
   <p class="extras-footnote">Only the option you choose opens its settings. Nothing is connected automatically.</p>
+  </div>
+
+  <div class="extra-panel" id="extras-setup" hidden role="region" aria-labelledby="extras-setup-title">
+    <div class="extra-panel-heading"><div><span class="eyebrow">GOAL &amp; PROTECTION</span><h2 id="extras-setup-title" tabindex="-1">Settings for what you need.</h2><p>Answer four short questions. We suggest settings, say what each one adds and show it on two scales. Nothing changes until you apply.</p></div><button class="quiet" data-extra-close="setup" type="button">Back to extras</button></div>
+  <form class="card padded setup-form" id="setup-form">
+    <fieldset class="setup-question"><legend>What is it for?</legend>
+      <div class="scope-modes setup-choices">
+        <label><input name="setup-goal" required type="radio" value="personal"><span><strong>A personal record</strong><small>What you saw, kept for yourself.</small></span></label>
+        <label><input name="setup-goal" type="radio" value="investigation"><span><strong>An investigation</strong><small>Watching chats, reports to abuse teams and platforms.</small></span></label>
+        <label><input name="setup-goal" type="radio" value="evidence"><span><strong>Evidence for a case</strong><small>For police, a court or a platform: it has to hold up when challenged.</small></span></label>
+      </div>
+    </fieldset>
+    <fieldset class="setup-question"><legend>How much will you observe?</legend>
+      <div class="scope-modes setup-choices">
+        <label><input name="setup-size" type="radio" value="small"><span><strong>A few chats</strong><small>Up to about 50.</small></span></label>
+        <label><input name="setup-size" type="radio" value="medium"><span><strong>Many chats</strong><small>Up to about 500.</small></span></label>
+        <label><input name="setup-size" type="radio" value="large"><span><strong>Whole accounts</strong><small>Thousands of chats or several accounts.</small></span></label>
+      </div>
+    </fieldset>
+    <fieldset class="setup-question"><legend>Photos and files?</legend>
+      <div class="scope-modes setup-choices">
+        <label><input name="setup-files" type="radio" value="text"><span><strong>Text only</strong><small>A note that a file was sent, without the file.</small></span></label>
+        <label><input name="setup-files" type="radio" value="media"><span><strong>Photos and short media</strong><small>Standard limits: photos 20 MB, videos 100 MB.</small></span></label>
+        <label><input name="setup-files" type="radio" value="all"><span><strong>Everything</strong><small>Videos and documents up to 1 GB each.</small></span></label>
+      </div>
+    </fieldset>
+    <fieldset class="setup-question"><legend>Where will it run?</legend>
+      <div class="scope-modes setup-choices setup-two">
+        <label><input name="setup-place" type="radio" value="computer"><span><strong>This computer</strong><small>Collects while the computer is on and online.</small></span></label>
+        <label><input name="setup-place" type="radio" value="server"><span><strong>A server that is always on</strong><small>Your own, or one created under Server 24/7.</small></span></label>
+      </div>
+    </fieldset>
+    <div hidden id="setup-proposal">
+      <h3>We suggest</h3>
+      <p class="hint" id="setup-goal-note"></p>
+      <div class="setup-items">
+        <label class="check-label setup-item"><input id="setup-timestamps" type="checkbox"><span><strong>Independent timestamps</strong><small>Timestamp services confirm when each checkpoint existed. Only a hash leaves this machine.</small></span></label>
+        <label class="check-label setup-item"><input id="setup-drand" type="checkbox"><span><strong>Proof of live recording (drand)</strong><small>Shows the journal was written as things happened, not prepared later. Works together with timestamps.</small></span></label>
+        <label class="check-label setup-item"><input id="setup-devices" type="checkbox"><span><strong>Telegram's list of signed-in devices</strong><small>A session nobody expected shows in the journal. Works together with timestamps.</small></span></label>
+      </div>
+      <ul class="setup-facts" id="setup-facts"></ul>
+      <h3>Then, with your own accounts</h3>
+      <ul class="setup-steps" id="setup-steps">
+        <li data-step="alerts"><div><strong>Problem notifications</strong><small>A message when collection stops, the disk fills up or the account is signed out.</small></div><span class="setup-tag"></span><button class="quiet" data-go-extra="alerts" type="button">Set up <span aria-hidden="true">→</span></button></li>
+        <li data-step="replica"><div><strong>Off-site copy</strong><small>An encrypted copy away from this machine. With Object Lock nobody can delete it before the date you set.</small></div><span class="setup-tag"></span><button class="quiet" data-go-extra="evidence" type="button">Set up <span aria-hidden="true">→</span></button></li>
+        <li data-step="server"><div><strong>Server 24/7</strong><small>Collects around the clock on a server without SSH, created by commands anyone can check.</small></div><span class="setup-tag"></span><button class="quiet" data-go-extra="cloud" type="button">Set up <span aria-hidden="true">→</span></button></li>
+        <li data-step="gateway"><div><strong>Cloudflare Gateway DNS</strong><small>The server looks up names only through Cloudflare, which logs each one; evidence mode copies that log into the journal.</small></div><span class="setup-tag"></span><button class="quiet" data-go-extra="cloud" type="button">Set up <span aria-hidden="true">→</span></button></li>
+        <li data-step="code"><div><strong>Code check</strong><small>Compares the running program with a public commit on GitHub.</small></div><span class="setup-tag"></span><button class="quiet" data-go-extra="github" type="button">Set up <span aria-hidden="true">→</span></button></li>
+        <li data-step="witness"><div><strong>Witness bot</strong><small>A separate witness checks the journal and posts signed results to Telegram.</small></div><span class="setup-tag"></span><button class="quiet" data-go-extra="bot" type="button">Set up <span aria-hidden="true">→</span></button></li>
+      </ul>
+      <div class="level-scales" id="setup-scales"></div>
+      <div class="setup-actions"><button class="primary" type="submit">Apply</button><button class="quiet" id="setup-skip" type="button">Skip for now</button></div>
+    </div>
+    <p class="hint" id="setup-status" role="status"></p>
+  </form>
   </div>
 
   <div class="extra-panel" id="extras-bot" hidden role="region" aria-labelledby="extras-bot-title">
@@ -813,7 +987,7 @@
         <a class="format-help" href="/guide.html#formats" rel="noopener" target="_blank">Format details &amp; examples ↗</a>
       </div>
       <details id="api-details"><summary>API ID + Hash <span id="api-state">Built-in</span></summary>
-        <p class="hint" id="api-required">Optional. Leave empty: TgWitness picks a working pair from its built-in pool, or uses the pair from your account file. To use your own app, <a href="https://my.telegram.org" rel="noopener noreferrer" target="_blank">get it at my.telegram.org ↗</a></p>
+        <p class="hint" id="api-required">Optional. Leave empty: TgWitness picks a working pair from its built-in pool, or uses the pair from your account file. To use your own app, <a href="https://my.telegram.org" rel="noopener noreferrer" target="_blank">get it at my.telegram.org ↗</a>
         <div class="api-fields"><div><label for="api-id">API ID</label><input autocomplete="off" id="api-id" inputmode="numeric" pattern="[0-9]{1,10}" placeholder="API ID or ID:Hash" type="text"></div>
         <div><label for="api-hash">API Hash</label><input autocomplete="off" id="api-hash" pattern="[a-fA-F0-9]{32}" placeholder="32-character hash" type="password"></div></div>
         <p class="hint" id="api-pair-help">Have <code>app_id:app_hash</code>? Paste the pair into API ID.</p><p class="hint api-purpose">These identify your app. To access an account, also use phone, QR or a session. An API Hash is different from an Auth Key.</p><p class="hint" id="api-pair-result" role="status"></p>

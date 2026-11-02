@@ -184,9 +184,12 @@ alone does not prove Telegram origin or complete history.
 
 ## What nobody can prove, including us
 
-<p align="center"><strong>No signature makes a Telegram message true — ours included.</strong><br>We preserve what the account saw, link it so that a change shows, and hand you the verifier.</p>
+<picture>
+  <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-manifesto-mobile.svg">
+  <img src="docs/assets/presentation/readme-manifesto.svg" width="1200" alt="No signature makes a Telegram message true — ours included. We preserve what the account saw, link it so that a change shows, and hand you the verifier.">
+</picture>
 
-We publish this under a project name, not a person's. No title, degree or prefix
+**We publish this under a project name, not a person's.** No title, degree or prefix
 belongs in front of it: a credential describes who is speaking, not what
 happened. The same bytes that would be doubted in one pair of hands do not become
 true in another. Whoever brings evidence is an interested party — we are no
@@ -199,18 +202,18 @@ anywhere else. Everything after that, ours included, is a record of what somebod
 saw.
 
 <details>
-<summary><strong>What we found looking into this</strong> · unequal standards, borrowed reputation, and why an export settles nothing</summary>
+<summary><strong>What we found looking into this</strong><br><sub>unequal standards, borrowed reputation, and why an export settles nothing</sub></summary>
 
 We read through cases where chat material decided the outcome, and we collected
 such material ourselves, recently, the same way everyone does. Two things became
 clear.
 
-The standard moves with the accusation. Where one side is already assumed to be
+**The standard moves with the accusation.** Where one side is already assumed to be
 right, a screenshot settles the matter. Where the other side has to clear its
 name, a full export filmed from beginning to end is waved away. The same
 artifact, opposite weight.
 
-Filming does not fix it. An export recorded on video, with the archive signed on
+**Filming does not fix it.** An export recorded on video, with the archive signed on
 camera, shows that a file existed and was signed. It says nothing about where the
 content came from.
 
@@ -235,7 +238,7 @@ not mathematical ones. Tedious is not impossible, an oath is worth whatever the
 person swearing it is worth, and both weigh unevenly — they help most whoever
 already has standing to lose.
 
-This is why an export should not be the thing that decides. Open one in a text
+**This is why an export should not be the thing that decides.** Open one in a text
 editor, change a 1 to a 2, save. Nothing complains, and there is nothing to
 compare it against. No cache tricks, no DNS, no interception — a text editor.
 
@@ -246,11 +249,11 @@ and it was never meant to vouch for its own contents.
 
 </details>
 
-We take no side in what is recorded. Who runs the tool is not the tool's
-business, and its purpose is plain: preserve what was there, as completely and as
-checkably as it can be preserved. This software is not on its operator's side. It
-is on the side of the record staying what it was — about everyone in it,
-including whoever collected it.
+> **We take no side in what is recorded.** Who runs the tool is not the tool's
+> business, and its purpose is plain: preserve what was there, as completely and as
+> checkably as it can be preserved. This software is not on its operator's side. It
+> is on the side of the record staying what it was — about everyone in it,
+> including whoever collected it.
 
 So we claim no proof. TgWitness signs what the connected account saw, links every
 record to the one before it, and ships the verifier inside the archive, so the

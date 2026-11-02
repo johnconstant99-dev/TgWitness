@@ -4,12 +4,19 @@ Only the SHA-256 of a signed checkpoint leaves the machine. RFC 3161 authorities
 signed time-stamp token at once; OpenTimestamps calendars return a proof that is confirmed
 in Bitcoin hours later (`ots upgrade`). Answers are stored beside the checkpoint, travel in
 evidence exports, and are checked again by verify.py.
+
+Two optional records go into the journal on the same passes. drand: the newest public random
+value of the League of Entropy, which nobody knows before its time, so every later record is
+newer than it; the timestamps bound the same records from the other side. devices: Telegram's
+own list of the account's sessions (Settings → Devices), so a session nobody expected shows.
 """
 import asyncio
+import calendar
 import hashlib
 import json
 import re
 import time
+import uuid
 from contextlib import suppress
 from urllib.parse import urlsplit
 
@@ -20,9 +27,10 @@ from .netclient import RouteError, request
 from .evidence import retain_checkpoint
 from .health import next_at
 from .security import private_write
-from .store import utcnow
+from .store import canonical, utcnow
 from .tsa_roots import trusted_roots
-from .verify import OTS_BITCOIN, OTS_MAGIC, OTS_PENDING, ots_summary, timestamp_reply_summary, timestamp_signature
+from .verify import (DRAND_CHAIN, DRAND_GENESIS, DRAND_PERIOD, DRAND_RELAYS, OTS_BITCOIN, OTS_MAGIC, OTS_PENDING,
+                     drand_beacon, drand_time, ots_summary, timestamp_reply_summary, timestamp_signature)
 
 
 DEFAULT_TSA = ["https://freetsa.org/tsr", "https://timestamp.sectigo.com"]
@@ -270,6 +278,9 @@ class EvidenceMode(BaseModel):
     tsa_urls: list[str] = Field(default_factory=lambda: list(DEFAULT_TSA), max_length=8)
     ots_calendars: list[str] = Field(default_factory=lambda: list(DEFAULT_OTS), max_length=8)
     interval_minutes: int = Field(default=10, ge=5, le=1440)
+    drand: bool = False
+    devices: bool = False
+    gateway: bool = False
 
     @field_validator("tsa_urls", "ots_calendars")
     @classmethod
@@ -393,14 +404,183 @@ async def anchor_latest(store, network, settings):
     return record
 
 
+async def record_drand(store, network):
+    """The newest drand round into the journal; a relay that fails or answers nonsense is skipped."""
+    errors = []
+    for relay in DRAND_RELAYS:
+        try:
+            answer = (await request("GET", relay + "/" + DRAND_CHAIN + "/public/latest", network,
+                                    {"Accept": "application/json"}, timeout=15, limit=4096))[2]
+            beacon = drand_beacon(json.loads(answer))
+        except Exception as exc:
+            errors.append(urlsplit(relay).hostname + ": " + problem(exc))
+            continue
+        ahead = DRAND_GENESIS + (beacon["round"] - 1) * DRAND_PERIOD - time.time()
+        if ahead > 60:
+            errors.append(urlsplit(relay).hostname + ": the round is " + str(round(ahead)) + " s ahead of this clock")
+            continue
+        event = store.append("beacon.drand", {
+            "chain": DRAND_CHAIN, **beacon, "round_time": drand_time(beacon["round"]), "relay": relay,
+            "meaning": "Public randomness from drand (League of Entropy). Nobody knew it before round_time, so the "
+                       "records after this one were written later. Any drand relay returns the same round."})
+        return {"round": beacon["round"], "round_time": drand_time(beacon["round"]), "relay": relay,
+                "seq": event["seq"]}
+    raise ValueError("No drand relay answered: " + "; ".join(errors))
+
+
+def device_view(device):
+    """The collector's own session is active all the time; only other sessions' activity is a change."""
+    return {k: v for k, v in device.items() if not (device.get("current") and k == "active_at")}
+
+
+async def record_devices(store, devices):
+    """Telegram's list of the account's sessions into the journal: in full when it changed, else its hash."""
+    listed = sorted(await devices(), key=lambda d: (not d.get("current"), str(d.get("hash"))))
+    digest = hashlib.sha256(canonical([device_view(d) for d in listed])).hexdigest()
+    previous = store.get_setting("evidence_devices", None) or {}
+    hashes = [str(d.get("hash")) for d in listed]
+    payload = {"source": "account.getAuthorizations", "count": len(listed), "list_sha256": digest,
+               "changed": previous.get("list_sha256") != digest}
+    if payload["changed"]:
+        payload["devices"] = listed
+        if previous:
+            before = previous.get("hashes") or []
+            payload.update(added=[h for h in hashes if h not in before], removed=[h for h in before if h not in hashes])
+    payload["meaning"] = ("Telegram's list of this account's sessions (Settings, Devices) without IP addresses; "
+                          "in full when it changed since the previous list, otherwise only its hash.")
+    store.append("account.devices", payload)
+    at = utcnow()
+    store.set_setting("evidence_devices", {"at": at, "count": len(listed), "list_sha256": digest, "hashes": hashes,
+                                           "changed_at": at if payload["changed"] else previous.get("changed_at")})
+    return {"count": len(listed), "others": sum(1 for d in listed if not d.get("current")),
+            "changed": payload["changed"]}
+
+
+GATEWAY_GRAPHQL = "https://api.cloudflare.com/client/v4/graphql"
+GATEWAY_FIELDS = ("at", "name", "type", "rcode", "decision", "colo")
+GATEWAY_LIMIT = 1000
+# Cloudflare's log lags a query by a minute or two; the free plan keeps it 24 hours.
+GATEWAY_LAG_SECONDS = 120
+# Shorter windows wait for the next pass rather than fill the journal with empty records.
+GATEWAY_MIN_WINDOW_SECONDS = 60
+GATEWAY_RETENTION_SECONDS = 86400
+# The widest range one raw log query may span on the free plan; a pass catches up window by window.
+GATEWAY_WINDOW_SECONDS = 3 * 3600
+
+
+def gateway_query(address):
+    source = ", sourceIP: $source" if address else ""
+    return ("query($account: String!, $location: String!, $since: Time!, $until: Time!"
+            + (", $source: String!" if address else "") + ") { viewer { accounts(filter: {accountTag: $account}) { "
+            "cf1GatewayDnsRawGroups(limit: " + str(GATEWAY_LIMIT) + ", filter: {location: $location" + source
+            + ", datetime_gt: $since, datetime_leq: $until}, orderBy: [datetime_ASC]) { dimensions { datetime "
+            "destination queryType rcode resolverDecision coloName } } } } }")
+
+
+def gateway_time(seconds):
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(seconds))
+
+
+async def gateway_rows(network, config, since, until):
+    """One page of the location's DNS log from Cloudflare's analytics API, oldest first."""
+    variables = {"account": config["account"], "location": str(uuid.UUID(config["location_id"])),
+                 "since": gateway_time(since), "until": gateway_time(until)}
+    if config.get("address"):
+        variables["source"] = config["address"]
+    body = json.dumps({"query": gateway_query(config.get("address")), "variables": variables}).encode()
+    answer = json.loads((await request("POST", GATEWAY_GRAPHQL, network, {
+        "Authorization": "Bearer " + config["token"], "Content-Type": "application/json",
+        "Accept": "application/json"}, body=body, timeout=30, limit=4 * 1024 * 1024))[2])
+    if answer.get("errors") or not answer.get("data"):
+        raise ValueError("Cloudflare: " + "; ".join(str(e.get("message")) for e in answer.get("errors") or []))
+    return [row["dimensions"] for row in answer["data"]["viewer"]["accounts"][0]["cf1GatewayDnsRawGroups"]]
+
+
+async def record_gateway(store, network, config):
+    """The DNS queries Cloudflare Gateway logged for this collector since the last copy, into the journal.
+
+    One record per window, also when there were none: the journal then shows Cloudflare's own account of what
+    the server looked up, with no window left out, for longer than Cloudflare keeps it."""
+    copied, last = 0, None
+    for _ in range(GATEWAY_RETENTION_SECONDS // GATEWAY_WINDOW_SECONDS + 1):
+        done = await gateway_window(store, network, config)
+        if done.get("skipped"):
+            break
+        copied, last = copied + done["count"], done
+        if done["caught_up"]:
+            break
+    if last is None:
+        return {"count": 0, "skipped": True}
+    return {"count": copied, "until": last["until"], "seq": last["seq"]}
+
+
+async def gateway_window(store, network, config):
+    now = time.time()
+    cursor = store.get_setting("evidence_gateway_cursor", None) or {}
+    since = now - GATEWAY_RETENTION_SECONDS
+    if cursor.get("location_id") == config["location_id"] and cursor.get("address") == config.get("address"):
+        since = max(since, cursor["until"])
+    latest = now - GATEWAY_LAG_SECONDS
+    until = min(latest, since + GATEWAY_WINDOW_SECONDS - 1)
+    if until - since < GATEWAY_MIN_WINDOW_SECONDS:
+        return {"count": 0, "until": gateway_time(since), "skipped": True}
+    rows, truncated = await gateway_rows(network, config, since, until), False
+    if len(rows) >= GATEWAY_LIMIT:  # more in this window: stop before the last second, read it whole next pass
+        last = rows[-1]["datetime"]
+        whole = [row for row in rows if row["datetime"] < last]
+        second = calendar.timegm(time.strptime(last, "%Y-%m-%dT%H:%M:%SZ"))
+        if whole:
+            rows, until = whole, second - 1
+        else:  # a full page within one second: keep it, and say the rest of that second is missing
+            until, truncated = second, True
+    queries = [[row.get("datetime"), row.get("destination"), row.get("queryType"), row.get("rcode"),
+                row.get("resolverDecision"), row.get("coloName")] for row in rows]
+    event = store.append("cloudflare.gateway_dns", {
+        "source": "Cloudflare Gateway log, GraphQL cf1GatewayDnsRawGroups", "account": config["account"],
+        "location_id": config["location_id"], "address": config.get("address") or None,
+        "from": gateway_time(since), "until": gateway_time(until), "count": len(queries),
+        "fields": list(GATEWAY_FIELDS), "queries": queries, **({"truncated": True} if truncated else {}),
+        "meaning": "the DNS queries Cloudflare Gateway logged for this location"
+                   + (" from " + config["address"] if config.get("address") else "")
+                   + " in this window, as Cloudflare's API returned them; Cloudflare's own copy is kept 24 hours "
+                     "on the free plan"})
+    store.set_setting("evidence_gateway_cursor", {"location_id": config["location_id"],
+                                                  "address": config.get("address"), "until": until})
+    return {"count": len(queries), "until": gateway_time(until), "seq": event["seq"], "caught_up": until >= latest}
+
+
+async def record_extras(store, network, settings, devices, gateway=None):
+    """drand, the device list and the Gateway log, each on its own: one failing does not stop the others or
+    the timestamps."""
+    saved = dict(store.get_setting("evidence_witnesses", None) or {})
+    for name, enabled, work in (("drand", settings["drand"], lambda: record_drand(store, network)),
+                                ("devices", settings["devices"] and devices, lambda: record_devices(store, devices)),
+                                ("gateway", settings.get("gateway") and gateway,
+                                 lambda: record_gateway(store, network, gateway))):
+        if not enabled:
+            saved.pop(name, None)
+            continue
+        before = saved.get(name) or {}
+        try:
+            saved[name] = {"at": utcnow(), "ok": True, **await work()}
+        except Exception as exc:
+            saved[name] = {"at": utcnow(), "ok": False, "error": problem(exc),
+                           "last_ok_at": before["at"] if before.get("ok") else before.get("last_ok_at")}
+    store.set_setting("evidence_witnesses", saved)
+    return saved
+
+
 def request_anchor(store, vault, wakeup):
     """Anchor a fresh checkpoint (it carries the signing public key) on the next loop pass."""
     retain_checkpoint(store, vault)
     wakeup.set()
 
 
-async def anchor_loop(store, network_config, wakeup, status):
-    """status: busy, and of the latest pass its time, outcome, error and when the next one is due."""
+async def anchor_loop(store, network_config, wakeup, status, devices=None, gateway=None):
+    """status: busy, and of the latest pass its time, outcome, error and when the next one is due.
+
+    devices: an async callable returning Telegram's session list, or None where there is no account.
+    gateway: a callable returning the saved Gateway log settings with their token, or None."""
     last = 0.0
     while True:
         with suppress(TimeoutError):
@@ -418,6 +598,7 @@ async def anchor_loop(store, network_config, wakeup, status):
             network = network_config()
             record = await anchor_latest(store, network, settings)
             await upgrade_pending_ots(store, network, settings)
+            await record_extras(store, network, settings, devices, gateway() if gateway else None)
             status["outcome"] = "anchored" if record else "up_to_date" if latest_checkpoint(store) else "no_checkpoint"
         except Exception as exc:
             status.update(outcome="error", error=type(exc).__name__)

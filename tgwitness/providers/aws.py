@@ -175,7 +175,9 @@ class Aws(Provider):
                         allow=("InvalidInstanceID.NotFound", "InvalidInstanceID.Malformed"))
         return root.find("reservationSet/item/instancesSet/item") if root is not None else None
 
-    def create(self, spec, user_data, rules):
+    def create(self, spec, user_data, rules, outbound=()):
+        if outbound:
+            raise DeployError(self.title + ": outbound firewall rules are not implemented here")
         values = {"Name": spec["name"], **labels(spec)}
         vpc = text(self.ec2("DescribeVpcs", {"Filter.1.Name": "isDefault", "Filter.1.Value.1": "true"}),
                    "vpcSet/item/vpcId")

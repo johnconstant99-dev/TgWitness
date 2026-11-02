@@ -18,7 +18,8 @@ PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "ses
                  "profiles.py", "multi_export.py", "alerts.py", "witness_api.py", "tuning.py", "interactions.py",
                  "access.py", "history.py", "archive.py", "archive_api.py", "ai.py", "analysis.py", "analysis_api.py",
                  "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py", "proxy_catalog.py",
-                 "proxy_sources.py", "account_export.py", "account_export_transport.py", "account_report.py", "disclosure.py")
+                 "proxy_sources.py", "account_export.py", "account_export_transport.py", "account_report.py", "disclosure.py",
+                 "cloud_wizard.py", "levels.py")
 
 # Labels passed through small renderer tables (tr(label)), rather than literal tr() calls.
 DYNAMIC_SCRIPT_KEYS = (
@@ -40,6 +41,17 @@ DYNAMIC_SCRIPT_KEYS = (
     "Install MCP support in this Python environment and restart TgWitness.",
     "MCP support is installed. Restart TgWitness to activate the endpoint.",
     "visible to this account during the recorded acquisition intervals",
+    # 24/7 server wizard: stage table, server states, result steps and file buttons.
+    "Version on GitHub", "A few seconds", "Cloudflare tunnel and address", "Hetzner firewall and server",
+    "Usually under a minute", "TgWitness installs itself on the server",
+    "Usually several minutes; the panel waits up to 30", "The server answers with its signing key",
+    "Hetzner server and firewall", "Cloudflare address and tunnel", "Done", "Up and running", "Server deleted",
+    "Starting",
+    "Open the panel address and sign in with the panel token.", "Connect a Telegram account in the server's panel.",
+    "Choose the chats to observe.", "Save the deployment record",
+    "Phala Cloud confidential virtual machine", "Usually a few minutes", "TgWitness installs itself in the confidential virtual machine",
+    "Usually several minutes; the panel waits up to 40", "The server answers with its signing key and Intel's attestation",
+    "Save the measured docker-compose file",
 )
 
 
@@ -112,7 +124,7 @@ def server_keys():
             texts = []
             if isinstance(node, ast.Call):
                 func = getattr(node.func, "id", None) or getattr(node.func, "attr", "")
-                if func in ("HTTPException", "ValueError", "RouteError", "Refused"):
+                if func in ("HTTPException", "ValueError", "RouteError", "Refused", "WizardError"):
                     texts = node.args
                 elif name == "disclosure.py" and func == "append" and isinstance(node.func.value, ast.Name) \
                         and node.func.value.id == "warnings":

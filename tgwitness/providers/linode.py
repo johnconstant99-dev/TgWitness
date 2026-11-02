@@ -55,7 +55,9 @@ class Linode(Provider):
     def instance(self, linode_id, allow=()):
         return self.call("GET", "/linode/instances/" + str(linode_id), allow=allow)
 
-    def create(self, spec, user_data, rules):
+    def create(self, spec, user_data, rules, outbound=()):
+        if outbound:
+            raise DeployError(self.title + ": outbound firewall rules are not implemented here")
         if not 3 <= len(spec["name"]) <= 64:
             raise DeployError("Linode labels need 3 to 64 characters; choose another --name")
         tag = "tgwitness-" + spec["deployment_id"]

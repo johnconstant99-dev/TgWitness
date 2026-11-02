@@ -4,7 +4,9 @@ Enabled only by TGWITNESS_ASSURANCE=<provider>; an ordinary installation never r
 The collector process measures its own host: SSH listeners and processes, current and past
 logins, the boot, and what the provider's metadata service says about the server and the
 cloud-init it was created with. Root on the host could falsify every value; the point is
-to compare them with the records the provider and Cloudflare keep themselves.
+to compare them with the records the provider and Cloudflare keep themselves. In a confidential VM
+(phala) the processor signs instead: every statement and every start carries an Intel TDX quote
+over its own canonical bytes.
 """
 import argparse
 import asyncio
@@ -13,11 +15,14 @@ import json
 import os
 import re
 import struct
+import threading
+import time
 import urllib.request
 from pathlib import Path
 
 from .providers import NAMES, get
 from .store import canonical, utcnow
+from .tdx import report_data
 from .verify import fingerprint
 
 MODES = NAMES
@@ -30,6 +35,8 @@ USER_PROCESS = 7
 SSH_PROCESSES = ("sshd", "sshd-session")
 ATTESTATION = ("self-reported by the collector process on its own host; root on that host could "
                "falsify it. Compare with the provider's action log, firewall and the Cloudflare tunnel record.")
+QUOTES = threading.Lock()  # one quote at a time: the public endpoint must not queue the host's quoting service
+CACHE = {}
 
 
 def mode(environ=os.environ):
@@ -184,15 +191,48 @@ PRIVATE_HOST = ("recent_logins",)
 PRIVATE_PROVIDER = ("public_ipv4",)
 
 
+def attestation(selected, value):
+    """An Intel TDX quote whose report data is SHA-512 of the value's canonical JSON; None outside a
+    confidential VM. A failure is answered, not hidden: the verifier reports it."""
+    attest = getattr(get(selected), "attest", None)
+    if attest is None:
+        return None
+    try:
+        with QUOTES:
+            return attest(report_data(value))
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return {"error": type(exc).__name__ + ": " + str(exc)[:200]}
+
+
+def start_attestation(selected, receipt):
+    """A quote over the start of this run: its key, run ID, source tree and measured host."""
+    return attestation(selected, start_binding(receipt))
+
+
+def start_binding(run):
+    return {"format": "tgwitness-tdx-start-v1", "public_key": run.get("public_key"), "run_id": run.get("run_id"),
+            "source_tree_sha256": run.get("source_tree_sha256"), "host": run.get("host")}
+
+
 def statement(vault, receipt, run_event_seq, selected, provider, challenge=None, root=Path("/")):
-    """The public, signed answer of /api/assurance: who signs this journal and on which host."""
+    """The public, signed answer of /api/assurance: who signs this journal and on which host. In a
+    confidential VM a quote over the statement rides beside it; an answer without a challenge is reused
+    for half a minute so the public endpoint cannot keep the quoting service busy."""
+    if not challenge and CACHE.get("until", 0) > time.monotonic() and CACHE.get("key") == vault.public_key:
+        return CACHE["answer"]
     host = {k: v for k, v in snapshot(selected, provider, root).items() if k not in PRIVATE_HOST}
     host["provider"] = {k: v for k, v in provider.items() if k not in PRIVATE_PROVIDER}
     value = {"format": "tgwitness-assurance-v1", "created_at": utcnow(), "challenge": challenge,
              "public_key": vault.public_key, "fingerprint": fingerprint(vault.public_key),
              "run_id": receipt["run_id"], "run_event_seq": run_event_seq, "version": receipt["version"],
              "source_tree_sha256": receipt["source_tree_sha256"], "host": host}
-    return {"statement": value, "signature": vault.sign(canonical(value))}
+    answer = {"statement": value, "signature": vault.sign(canonical(value))}
+    quote = attestation(selected, value)
+    if quote is not None:
+        answer["tdx"] = quote
+        if not challenge:
+            CACHE.update(until=time.monotonic() + 30, key=vault.public_key, answer=answer)
+    return answer
 
 
 def install_record(script, preinstall, out):

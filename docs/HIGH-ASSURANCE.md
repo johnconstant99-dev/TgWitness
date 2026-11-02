@@ -50,6 +50,7 @@ support the provider and Cloudflare records rather than replace them.
 | `linode` | `LINODE_TOKEN` | `linodes`, `firewall`, `events` read-only scopes | Account events, firewall rule versions | 90 days |
 | `vultr` | `VULTR_API_KEY` | User with read access and the `activity_logs` permission | Account activity log (method, path, actor) | 30 days, longer with an audit-log subscription |
 | `aws` | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | `ec2:DescribeInstances`, `ec2:DescribeSecurityGroups`, `cloudtrail:LookupEvents` | CloudTrail event history | 90 days |
+| `phala` | `PHALA_CLOUD_API_KEY` | An API key of the same workspace | Application revisions: compose and environment changes, restarts, OS upgrades | While the application exists |
 | `generic` | none | none | none: **self-attested** | – |
 
 Use a dedicated project, team, account or sub-account for each case: the verifier's
@@ -63,12 +64,56 @@ console are not logged as such, so root is locked at the first boot and a consol
 would need a password reset or a boot change, which are logged. Vultr returns the console
 address to any key that can read the instance; neither the record nor the report stores it.
 
+## Confidential VM on Phala Cloud (Intel TDX)
+
+With `--provider phala` the collector runs in an Intel TDX confidential virtual machine on
+[Phala Cloud](https://phala.com/), managed by dstack. The host and Phala's staff cannot read its
+memory, and the processor signs an attestation of what the machine booted. The verifier does not
+take Phala's word for it: `tgwitness.tdx` checks every attestation itself, up to the pinned Intel
+SGX Root CA, against Intel's revocation lists and Intel's signed platform data, and refuses
+machines that can be debugged or migrated.
+
+| Report entry | What it shows |
+| --- | --- |
+| `tdx_binding` | The attestation covers the signed statement of the collector and the random value of this request |
+| `tdx_quote` | Intel vouches for the attestation; it passes only when Intel rates the platform as up to date |
+| `tdx_compose_hash` | RTMR3, replayed from the dstack event log, measures the app-compose the collector reports |
+| `tdx_compose` | That compose is byte for byte the one the code of the deployed commit builds: source files pinned by hash, both images by digest, no other code |
+| `tdx_identity` | The attestation comes from the deployed application and instance, with keys from Phala's KMS and an encrypted disk |
+| `tdx_os` | With `--tdx-measurements`, MRTD and RTMR0-2 equal the values computed from the dstack OS image (`dstack-mr measure --json`) |
+
+Every start of the collector recorded in the journal carries such an attestation, so
+`verify --evidence` checks each start. Phala's list of application revisions serves as the
+provider log: if the compose changed after the deployment, the report fails.
+
+In the panel choose **Confidential virtual machine · Phala Cloud** under **Extras** → **Server 24/7**
+and paste a Phala Cloud API key; the quick tunnel works as on Hetzner. From the command line:
+
+```sh
+python -m tgwitness.cloud deploy --provider phala --name case-1 --server-type tdx.small \
+    --ref v0.7.1 --repository https://github.com/phishdestroy/TgWitness --quick-tunnel \
+    --provider-token-file phala-key.txt
+python -m tgwitness.cloud verify --record deployments/case-1/deployment.json \
+    --provider-token-file phala-key.txt --cloud-init deployments/case-1/docker-compose.yaml \
+    --source CHECKOUT_OF_COMMIT --tdx-measurements dstack-mr.json
+```
+
+`--tdx-collateral` reads Intel's certificates and revocation lists from a file instead of
+downloading them from Intel. Gateway DNS is not available here: Phala has no provider firewall
+for outgoing traffic.
+
+An attestation cannot rule out a flaw in Intel's TDX module or microcode, or physical access to
+the memory bus. Whoever controls the application in Phala's account can deploy another compose;
+it appears as a new revision with a new compose hash. The host controls the machine's time
+source and network.
+
 ## Before you start
 
 1. A Cloudflare zone, its account ID, and an API token with **Cloudflare Tunnel Edit**,
    **Zone Read** and **DNS Edit**, given with `--cloudflare-token-file` or
    `CLOUDFLARE_API_TOKEN`. For the verifier: **Cloudflare Tunnel Read**, **DNS Read** and, for
-   the audit log, **Account Settings Read**.
+   the audit log, **Account Settings Read**. Without a domain, a
+   [quick tunnel](#quick-tunnel-without-a-domain) needs none of this.
 2. Provider credentials with write access to a dedicated project; `lock` uses the same:
    - Hetzner: API token with Read & Write permission;
    - DigitalOcean: personal access token with write access;
@@ -80,6 +125,58 @@ address to any key that can read the instance; neither the record nor the report
      `ec2:RevokeSecurityGroupIngress`.
 3. The commit to run. A release tag is resolved once to its commit with `git ls-remote`;
    the server only ever receives the 40-character commit.
+
+## From the panel
+
+On your own computer, **Extras → Server 24/7** runs the same `deploy` for Hetzner in three
+steps: choose Europe or the United States, paste a Hetzner token (Read & Write), then review
+the server type, monthly price, address and version the panel found with that token. Nothing
+is created before you confirm. The panel shows each step as `deploy` reports it, then the
+address, the panel token and the signing key fingerprint. Without a domain the server gets a
+[quick tunnel](#quick-tunnel-without-a-domain); **Your servers → Find the current address**
+looks it up again after a restart. For a fixed address under your own domain, open
+**Optional · your own domain** and add a Cloudflare token (the prepared link selects Zone
+Read, DNS Edit and Cloudflare Tunnel Edit).
+
+The tokens travel with each request from the browser tab to TgWitness on the same computer
+and are not written anywhere; the deployment record, redacted cloud-init, panel token and,
+for a quick tunnel, the address key are kept in `deployments/NAME` inside the data directory.
+The panel offers this only to the main administrator on a direct loopback connection
+(`127.0.0.1`, no proxy or tunnel headers); a panel reached over a network shows the commands
+instead. The version defaults to the release tag of the running panel, resolved through the
+GitHub API. Location, server type and price come from Hetzner's API: `cpx22` where it is
+offered, otherwise the cheapest x86 type with at least 2 GB of memory.
+
+## Quick tunnel without a domain
+
+`--quick-tunnel` replaces `--zone`, `--cloudflare-account` and `--panel-host`; no Cloudflare
+account or token is involved:
+
+```sh
+python -m tgwitness.cloud deploy --provider hetzner --name case-2026-11 --server-type cpx22 \
+    --ref 0123456789abcdef0123456789abcdef01234567 --quick-tunnel --provider-token-file hetzner.token
+```
+
+On the server, cloudflared opens a
+[quick tunnel](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)
+to the panel: a random `https://….trycloudflare.com` address that changes whenever cloudflared
+or the server restarts. A small service on the server posts each address to a random ntfy.sh
+topic, signed (HMAC-SHA256) with a key only the deployment directory holds
+(`address-key.txt`), and repeats it every three hours because ntfy.sh keeps posts for 12.
+`deploy` and **Find the current address** accept signed posts only, so a forged post cannot
+send you, and your panel token, to someone else's address. The topic is in the record and the
+published cloud-init: whoever has them can read the current address, which still asks for the
+panel token. The server keeps no inbound port either way.
+
+What it costs: no Cloudflare account keeps records of a quick tunnel, so `verify` reports the
+tunnel, connector and DNS check as unavailable and the result is at best `incomplete`; the
+provider records, firewall, signed statement, host measurements and installer comparison are
+checked as usual. The byte comparison with the reference installer needs a deployed commit
+that already knows `--quick-tunnel`; a 0.7.0 checkout builds the domain installer and reports
+the difference. Cloudflare gives quick tunnels no uptime guarantee, allows 200 requests in
+flight and does not carry Server-Sent Events, so the panel's live updates (versions after 0.7.0)
+may not arrive through one and a view needs reloading; that part has not been tried. For a case
+that has to stand, use your own domain.
 
 ## Deploy
 
@@ -151,7 +248,8 @@ instance, and EC2 through `DescribeInstanceAttribute`. For AWS give the verifier
 actions in the table, never `ec2:Describe*`. For Vultr, assume the verifier's key can read both
 tokens. A tunnel token lets someone run a second connector: `verify` reports any connector
 not on the server, and the collector's statements cannot be forged that way because each one
-signs a fresh challenge.
+signs a fresh challenge. With `--quick-tunnel` the second secret is the address key instead:
+whoever reads it can post a false address that the panel would accept.
 
 The collector's public statement leaves out the server's address and the sources of logins;
 both stay in the signed journal.
@@ -173,6 +271,24 @@ python -m tgwitness.cloud lock --record deployments/case-2026-11/deployment.json
 
 The firewall loses every inbound rule. Reports then show when SSH was allowed and when it
 was closed; that window stays visible.
+
+## Remove a deployment
+
+`destroy` deletes the server and its firewall, found by the deployment's label so that a
+deployment which failed half-way is removed as well, then the DNS records that point to its
+tunnel, and the tunnel. The server's journal and signing key are deleted with it: export the
+evidence first. The record stays, marked `removed`, with the API calls of the removal.
+
+```sh
+python -m tgwitness.cloud destroy --record deployments/case-2026-11/deployment.json --confirm case-2026-11 \
+    --provider-token-file hetzner.token --cloudflare-token-file cloudflare.token
+```
+
+Removal through the API is implemented for Hetzner. For other providers `destroy` stops before
+deleting anything and names the label to delete in the provider's console. A hand-installed
+server (`generic`) loses only its tunnel and DNS records. A quick tunnel deployment needs no
+Cloudflare token: its tunnel ends with the server, and its posts expire from ntfy.sh within
+12 hours.
 
 ## Any server (self-attested)
 
@@ -232,6 +348,46 @@ are marked for review. An unknown action never passes silently.
 Hand over the report, `report.json`, `deployment.json`, the published installer and the
 evidence ZIP. Produce the report early: provider logs are kept for limited periods.
 
+## Cloudflare as an outside witness
+
+Everything here is optional. Without a Cloudflare account the server still runs, and two of
+these work today:
+
+| What | What it shows | In TgWitness |
+| --- | --- | --- |
+| Quick tunnel or your domain's tunnel | the panel is reached only through the tunnel | the server wizard, see above |
+| drand relay `drand.cloudflare.com` | records after a drand round are newer than it: the journal was written as it went | evidence mode, **More witnesses**, no account ([format](EVIDENCE.md#optional-records-in-evidence-mode-drand-and-telegram-devices)) |
+| Tunnel health notifications | when the tunnel was down, by email or webhook from Cloudflare | set them in the Cloudflare dashboard |
+| Gateway DNS (`--gateway-dns`, or **Cloudflare Gateway DNS** in the wizard) | every name the server looked up, answered by Cloudflare over TLS; the Hetzner firewall lets DNS reach nothing else; whether a Gateway policy could rewrite answers | Hetzner, free Zero Trust plan, no domain; `verify` checks the firewall, the location, logging, policies, the server's queries and the audit log; evidence mode copies the log into the journal |
+| Gateway with the Cloudflare One client on the server, an outbound firewall that allows only Cloudflare | every connection the server made, not just DNS | not built yet |
+| Access in front of the panel | who signed in to the panel and when | not built: needs your own domain |
+| SSH command logging | each command in a debug session | not built yet |
+
+Logpush, which would keep Cloudflare's own copy in R2, is an Enterprise feature: on the free
+plan Cloudflare answers `logpush is not enabled for this account`. Its Gateway log lasts 24
+hours there, so evidence mode copies it into the signed journal (**Cloudflare Gateway's log of
+this server's DNS queries**, a read-only token with Account Analytics Read).
+
+Without a Zero Trust plan an account has one DNS location. When Cloudflare refuses another,
+the server shares the existing one and its queries are told apart by its address; that filter
+needs Zero Trust PII Read as well, and `destroy` leaves a shared location. One log query spans
+at most three hours, so the copy and `verify` read the day in three-hour windows.
+
+Gateway DNS covers the system resolver. DNS over HTTPS on port 443 to another resolver, and
+connections to an address looked up nowhere (Telegram's data centres, for one), are not in
+its log.
+
+Cloudflare cannot see inside Telegram's encryption, other devices on the Telegram account
+(evidence mode's device list records them from Telegram's side) or the provider's hypervisor.
+
+On 1 November 2026 Gateway DNS ran against real Hetzner Cloud and a free Cloudflare account:
+Hetzner accepted the outbound rules, the server installed v0.7.0 with every lookup going
+through Gateway over TLS, the quick tunnel worked through that firewall, and `verify` read
+the server's 19 names back from Cloudflare (Ubuntu and Hetzner mirrors, GitHub, PyPI, NTP,
+the tunnel, ntfy.sh). The panel copied 36 queries in eight windows into a journal and
+`verify.py` summarised them without gaps; `destroy` removed the server and firewall and left
+the shared location.
+
 ## What this does not establish
 
 - The provider and its staff control the hypervisor, disks and network.
@@ -244,5 +400,31 @@ evidence ZIP. Produce the report early: provider logs are kept for limited perio
 The deployment, lock and verification logic is covered by automated tests against simulated
 Hetzner, DigitalOcean, Linode, Vultr, EC2/CloudTrail and Cloudflare APIs built from their
 published API references, and the AWS request signing against AWS's published examples.
-It has **not** yet been run against real provider accounts; check the first deployment on
+`tools/check_cloud_wizard.py` runs the panel's server wizard the same way, with a domain and
+with a quick tunnel. `tools/check_tdx.py` verifies real Intel TDX attestations from dcap-qvl and dstack
+up to Intel's root certificate (sources in [tools/tdx/README.md](../tools/tdx/README.md)); `tools/check_phala.py`
+runs deploy, verify, the journal, destroy and the panel wizard against a simulated Phala Cloud
+whose attestations come from a forged PKI shaped like Intel's. The Phala path has not yet been
+tried on Phala Cloud itself.
+
+On 1 November 2026 the quick tunnel path ran against real **Hetzner Cloud** (Nuremberg, `cpx22`,
+TgWitness v0.7.0), real ntfy.sh and GitHub, from the panel and from code:
+
+- the price check, then creation from the panel's buttons: server running after 13 seconds,
+  signed statement with matching instance and installer hashes after about two minutes;
+- the server's own panel opened through its trycloudflare.com address and accepted the
+  panel token; without the token it answers 401;
+- after a reboot through the Hetzner API the server posted a new signed address, **Find the
+  current address** found it, the old address stopped answering, the signing key stayed the
+  same; an unsigned post to an ntfy.sh topic was ignored;
+- `verify` against Hetzner's API: server, firewall without inbound rules, statement, binding,
+  host measurements, boot and the source hash of a v0.7.0 checkout passed; the Cloudflare
+  checks were unavailable, as described above; the installer differed from the one v0.7.0
+  builds and equalled byte for byte the one this version's code builds;
+- deletion from the panel removed exactly the server and firewall the deployment labelled;
+  other servers and firewalls in the same project were untouched.
+
+Not yet run against real accounts: a deployment under your own domain (Cloudflare tunnel and
+DNS), the other providers, a debug deployment and `lock`, a Telegram account on such a server,
+and the live updates of later versions through a quick tunnel. Check the first deployment on
 each provider with `plan`, a debug deployment and `verify` before relying on it in a case.

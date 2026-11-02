@@ -11,6 +11,19 @@ def describe_rule(rule):
     return (rule.get("protocol") or "") + " " + (rule.get("port") or "") + " from " + ", ".join(rule.get("source_ips") or [])
 
 
+def outbound_rule(rule):
+    """A provider-neutral outbound rule (cloud.outbound_rules) as Hetzner writes it."""
+    made = {"direction": "out", "protocol": rule["protocol"], "destination_ips": list(rule["destination"]),
+            "description": "TgWitness: DNS only to Cloudflare Gateway"}
+    if rule.get("port"):
+        made["port"] = rule["port"]
+    return made
+
+
+def neutral_rule(rule):
+    return {"protocol": rule.get("protocol"), "port": rule.get("port"), "destination": rule.get("destination_ips") or []}
+
+
 class Hetzner(Provider):
     key, title, name, base = "hetzner", "Hetzner Cloud", "Hetzner", "https://api.hetzner.cloud/v1"
     variables = ("HCLOUD_TOKEN",)
@@ -45,10 +58,11 @@ class Hetzner(Provider):
         error = data.get("error") if isinstance(data, dict) else None
         return str(error.get("code")) + ": " + str(error.get("message")) if isinstance(error, dict) else ""
 
-    def pages(self, path, key, allow=()):
+    def pages(self, path, key, allow=(), params=None):
         items, page = [], 1
         while page:
-            data = self.call("GET", path, params={"page": page, "per_page": 50, "sort": "id:asc"}, allow=allow)
+            data = self.call("GET", path, params={**(params or {}), "page": page, "per_page": 50, "sort": "id:asc"},
+                             allow=allow)
             if data is None:
                 return items
             items += data[key]
@@ -66,10 +80,12 @@ class Hetzner(Provider):
             raise DeployError("Hetzner action " + action["command"] + " failed: " + json.dumps(action.get("error")))
         return action
 
-    def create(self, spec, user_data, rules):
+    def create(self, spec, user_data, rules, outbound=()):
+        # With any outbound rule, Hetzner drops outbound traffic that no rule allows.
         made = self.call("POST", "/firewalls", {"name": resource_name(spec), "labels": labels(spec), "rules": [
             {"direction": "in", "protocol": r["protocol"], "port": r["port"], "source_ips": [r["source"]],
-             "description": "TgWitness debug SSH; remove with python -m tgwitness.cloud lock"} for r in rules]})
+             "description": "TgWitness debug SSH; remove with python -m tgwitness.cloud lock"} for r in rules]
+            + [outbound_rule(r) for r in outbound]})
         for action in made.get("actions") or []:
             self.wait(action)
         firewall = made["firewall"]
@@ -89,11 +105,31 @@ class Hetzner(Provider):
                  "root_password": "returned by the provider and discarded" if created.get("root_password") else None})
 
     def lock(self, record):
+        keep = [outbound_rule(r) for r in record["firewall"].get("outbound_rules") or []]
         actions = self.call("POST", "/firewalls/" + str(record["firewall"]["id"]) + "/actions/set_rules",
-                            {"rules": []})["actions"]
+                            {"rules": keep})["actions"]
         for action in actions:
             self.wait(action)
         return [a["id"] for a in actions]
+
+    def destroy(self, record):
+        # By label, so a deployment that failed before its record listed the server is removed as well.
+        selector = {"label_selector": "tgwitness-deployment=" + record["deployment_id"]}
+        removed = []
+        for server in self.pages("/servers", "servers", params=selector):
+            self.wait(self.call("DELETE", "/servers/" + str(server["id"]))["action"])
+            removed.append({"resource": "server", "id": server["id"], "name": server["name"]})
+        for firewall in self.pages("/firewalls", "firewalls", params=selector):
+            for attempt in range(12):
+                try:
+                    self.call("DELETE", "/firewalls/" + str(firewall["id"]), allow=(404,))
+                    break
+                except DeployError:
+                    if attempt == 11:
+                        raise
+                    pause(5)  # still detaching from the deleted server
+            removed.append({"resource": "firewall", "id": firewall["id"], "name": firewall["name"]})
+        return removed
 
     def describe(self, record):
         data = self.call("GET", "/servers/" + str(record["server"]["id"]), allow=(404,))
@@ -113,6 +149,7 @@ class Hetzner(Provider):
 
     def firewall(self, record, server):
         wanted, applied, problems, inbound = record["firewall"]["id"], server["firewalls"], [], []
+        outbound = []
         if not any(f["id"] == wanted and f["status"] == "applied" for f in applied):
             problems.append("the deployment firewall " + str(wanted) + " is not applied")
         if not applied:
@@ -121,7 +158,9 @@ class Hetzner(Provider):
             found = self.call("GET", "/firewalls/" + str(item["id"]), allow=(404,))
             if found:
                 inbound += [describe_rule(r) for r in found["firewall"]["rules"] if r["direction"] == "in"]
-        return {"problems": problems, "inbound": inbound, "changed": None}
+                outbound += [neutral_rule(r) for r in found["firewall"]["rules"] if r["direction"] == "out"]
+        # Hetzner merges the rules of every firewall applied to a server: any of them may let traffic out.
+        return {"problems": problems, "inbound": inbound, "changed": None, "outbound": outbound}
 
     def actions(self, record, server):
         rows = []

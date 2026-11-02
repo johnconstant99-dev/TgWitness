@@ -313,3 +313,55 @@ The current verifier does not fetch revocation information or implement long-ter
 archival validation after certificate expiry. Do not equate successful signature
 verification with a qualified timestamp or legal admissibility. A real independent
 TSA has not been contacted during development. See [procedure](TIMESTAMP.md).
+
+## Optional records in evidence mode: drand and Telegram devices
+
+Two more records can run on the same passes as the timestamps. Both are off by default and
+take effect only while evidence mode is on: Extras → Evidence → **More witnesses · optional**,
+or `"drand": true` and `"devices": true` in `POST /api/evidence`. One failing does not stop the
+other or the timestamps; the panel shows the latest result of each under the form.
+
+**drand** (`beacon.drand`). Each pass writes the newest round of drand quicknet, the public
+randomness of the League of Entropy (a round every 3 seconds), into the journal: `chain`,
+`round`, `randomness`, `signature`, `round_time` and the `relay` that answered. Nobody knows a
+round's value before its time, so every record after it was written later. A timestamped
+checkpoint bounds the same records from the other side: together they show that the journal
+was written as it went, not prepared afterwards. The collector asks `drand.cloudflare.com`
+first, then the relays of Protocol Labs, through the workspace route, one request per pass.
+
+`verify.py` checks that each randomness is the SHA-256 of its signature and that the round
+time is right, and reports the rounds, the longest stretch without one and how far behind
+drand the collector's clock was. It does not check the BLS signature. `--check-drand`
+compares the rounds with a Cloudflare relay and a Protocol Labs relay, all of them or a random
+sample of 100 in a long journal; a round that differs fails the verification.
+
+**Telegram devices** (`account.devices`). Each pass reads the account's sessions with
+`account.getAuthorizations`, the list Telegram shows in Settings → Devices, and records it:
+in full when it changed since the previous pass, with the `added` and `removed` session
+hashes, otherwise only its count and SHA-256. Device model, platform, app and version,
+creation and last activity, country and region are kept; IP addresses are not, because
+evidence exports leave your hands. The collector's own session is active all the time, so
+only other sessions' activity counts as a change. `verify.py` reports how often the list
+was recorded and each new and ended session. It reads the list only while observation runs.
+
+What they do not show: drand proves no more than the order of records against public time,
+and the device list is Telegram's statement through the collector, signed by the collector
+like every other record.
+
+Tested on 1 November 2026: `tools/check_evidence_witnesses.py --live` wrote a real round from
+`drand.cloudflare.com`, exported the journal and confirmed the round with `drand.cloudflare.com`
+and `api.drand.sh`; the device list ran against simulated Telegram answers, not a real account.
+
+**Cloudflare Gateway log** (`cloudflare.gateway_dns`). For a server that resolves through
+Cloudflare Gateway ([Gateway DNS](HIGH-ASSURANCE.md#cloudflare-as-an-outside-witness)), each
+pass copies what Gateway logged since the previous copy: one record per window of at most three
+hours with `from`, `until`, the `location_id`, the server's `address` when one is set, and the
+`queries` as `[at, name, type, rcode, decision, colo]`, also when there were none. Set it under
+**Cloudflare Gateway log**: account, location, optional address and a read-only token (Account
+Analytics Read; Zero Trust PII Read to keep one address of a shared location). The panel checks
+them with one request before saving; the token stays encrypted and never enters the journal.
+`verify.py` lists the windows, the names looked up most and any time no copy covers; a record
+whose count does not match its queries fails. A window that holds more than one page of
+queries in a single second keeps that page and says the rest is missing. The copy is
+Cloudflare's answer through the collector, signed by the collector; within 24 hours anyone with
+a read-only token can compare it with Cloudflare.

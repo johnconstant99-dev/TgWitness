@@ -46,6 +46,8 @@ SUITES = {
         "check_account_states_browser.py",
         "check_access_sections_browser.py", "check_journal_browser.py", "check_exports_browser.py",
         "check_controls_browser.py", "check_quick_search_browser.py",
+        "check_cloud_wizard.py", "check_evidence_witnesses.py", "check_setup_levels.py",
+        "check_gateway_dns.py", "check_tdx.py", "check_phala.py",
     ),
     "site": ("check_site.py", "check_docs_site.py", "check_report_example.py"),
 }

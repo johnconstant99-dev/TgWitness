@@ -38,7 +38,7 @@ from .provenance import run_receipt
 from .middleware import RequestLimit, request_limit
 from .account_import import import_accounts, IMPORT_REQUEST_LIMIT, session_key
 from .anchor import request_archive
-from .anchoring import EvidenceMode, anchor_loop, evidence_settings, request_anchor
+from .anchoring import EvidenceMode, anchor_loop, evidence_settings, gateway_rows, request_anchor
 from . import replica
 from . import alerts
 from .network import NetworkConfig, RoutePolicy, parse_mtproxy_link
@@ -48,6 +48,7 @@ from .monitoring import Capture, Monitoring, capture_settings, monitoring_settin
 from .scope import (EXCLUDE_LIMIT, WIDE_WARNING, Recheck, ScopeUpdate, recheck_settings, scope_settings,
                     unexclude)
 from . import assurance
+from . import cloud_wizard
 from . import health
 from . import netclient
 from . import source_check
@@ -57,7 +58,8 @@ from . import recording
 from . import tuning
 from . import witness_api
 from . import interactions
-from .store import Store, canonical
+from . import levels
+from .store import Store, canonical, utcnow
 from .verify import fingerprint
 
 
@@ -98,6 +100,30 @@ class Code(BaseModel):
 
 class Password(BaseModel):
     password: str = Field(min_length=1, max_length=512)
+
+
+class GatewayLog(BaseModel):
+    """Where Cloudflare Gateway logs this collector's DNS queries; token empty keeps the saved one."""
+    account: str = Field(pattern=r"^[0-9a-f]{32}$")
+    location_id: str
+    address: str = ""
+    token: str = Field(default="", max_length=400)
+
+    @model_validator(mode="after")
+    def plain(self):
+        self.location_id = self.location_id.strip().lower().replace("-", "")
+        if not re.fullmatch(r"[0-9a-f]{32}", self.location_id):
+            raise ValueError("Enter the Gateway DNS location ID from Cloudflare Zero Trust.")
+        self.address = self.address.strip()
+        if self.address:
+            try:
+                ipaddress.ip_address(self.address)
+            except ValueError:
+                raise ValueError("Enter this server's public IP address, or leave the field empty.") from None
+        self.token = self.token.strip()
+        if self.token.startswith("cfk_") or (self.token and not re.fullmatch(r"[A-Za-z0-9_-]{20,400}", self.token)):
+            raise ValueError("Paste a Cloudflare API token with read access, not the Global API Key.")
+        return self
 
 
 class SourceCheck(BaseModel):
@@ -330,6 +356,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 app.state.assurance = {"mode": selected, "provider": provider}
                 app.state.run_receipt["host"] = await asyncio.to_thread(
                     assurance.snapshot, selected, provider, detail=True)
+                # In a confidential VM the start record carries a quote over this run's key and host.
+                quote = await asyncio.to_thread(assurance.start_attestation, selected, app.state.run_receipt)
+                if quote is not None:
+                    app.state.run_receipt["tdx_start"] = quote
             collector.run_id = app.state.run_receipt["run_id"]
             previous = store.stats()["head"]
             process_event = store.append("process.started", {"version": __version__, "previous_observation": previous,
@@ -347,7 +377,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 alert_task = asyncio.create_task(alerts.alert_loop(
                     store, vault, collector.outside_route, app.state.alert_wakeup, profile_id))
                 anchor_task = asyncio.create_task(anchor_loop(
-                    store, collector.outside_route, app.state.anchor_wakeup, app.state.anchor_status))
+                    store, collector.outside_route, app.state.anchor_wakeup, app.state.anchor_status,
+                    collector.signed_in_devices, lambda: vault.read("gateway").get("token") and vault.read("gateway")))
                 replica_task = asyncio.create_task(replica.replica_loop(
                     store, vault, collector.outside_route, app.state.replica_wakeup, app.state.replica_status))
                 if app.state.assurance:
@@ -461,6 +492,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 or len(app.state.profiles.entries) != 1
                 or app.state.vault.read("credentials").get("session")):
             return False
+        return direct_local(request)
+
+    def direct_local(request):
+        """A browser on this computer talking to the panel itself: no proxy, tunnel or other site between."""
         try:
             if not request.client or not ipaddress.ip_address(request.client.host).is_loopback:
                 return False
@@ -469,7 +504,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 return False
         except ValueError:
             return False
-        if any(name in request.headers for name in ("forwarded", "x-forwarded-for", "x-forwarded-host", "x-forwarded-proto")):
+        if any(name in request.headers for name in ("forwarded", "x-forwarded-for", "x-forwarded-host", "x-forwarded-proto",
+                                                    "x-real-ip", "cf-connecting-ip")):
             return False
         if request.headers.get("sec-fetch-site") not in (None, "same-origin", "none"):
             return False
@@ -644,6 +680,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 "recheck": recheck_settings(store),
                 "dossiers": [c for c in dossier.enabled_chats(store) if allowed is None or c in allowed],
                 "parameters": tuning.values(store),
+                "setup_answered": store.get_setting("setup", None) is not None,
                 "fingerprint": fingerprint(vault.public_key), "limitations": LIMITS,
                 "protection": {"vault_key_mode": vault.key_mode, "secrets_encrypted": True,
                                "journal_encrypted_by_app": False, "media_encrypted_by_app": False},
@@ -667,6 +704,65 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 listed.append(entry)
             return {"profiles": listed, "limit": Profiles.MAX_PROFILES,
                     "model": "independent account collectors and signing identities"}
+
+        # Servers for 24/7 collection (cloud_wizard). Not in POLICY: the main administrator only, and only
+        # in the panel on this computer, so cloud tokens never travel to a panel reached over a network.
+        cloud_jobs = app.state.cloud_jobs = cloud_wizard.Jobs(root)
+
+        def require_cloud(request):
+            require_live()
+            if not direct_local(request):
+                raise HTTPException(403, "Servers are started from TgWitness on your own computer. Open the panel "
+                                         "there at 127.0.0.1; cloud tokens are never sent to a panel over the network.")
+
+        def cloud_error(exc):
+            return {"error": {"message": str(exc), "technical": exc.technical}}
+
+        @app.get("/api/cloud", dependencies=[Depends(authenticate)])
+        async def cloud_status(request: Request):
+            return {**cloud_jobs.status(), "local": direct_local(request), "version": __version__}
+
+        @app.post("/api/cloud/check", dependencies=[Depends(authenticate)])
+        async def cloud_check(request: Request, body: cloud_wizard.Check):
+            require_cloud(request)
+            try:
+                return await asyncio.to_thread(cloud_jobs.check, body)
+            except cloud_wizard.WizardError as exc:
+                return cloud_error(exc)
+
+        @app.post("/api/cloud/deploy", dependencies=[Depends(authenticate)])
+        async def cloud_deploy(request: Request, body: cloud_wizard.Deploy):
+            require_cloud(request)
+            try:
+                return cloud_jobs.deploy(body)
+            except cloud_wizard.WizardError as exc:
+                return cloud_error(exc)
+
+        @app.post("/api/cloud/destroy", dependencies=[Depends(authenticate)])
+        async def cloud_destroy(request: Request, body: cloud_wizard.Destroy):
+            require_cloud(request)
+            try:
+                return cloud_jobs.destroy(body)
+            except cloud_wizard.WizardError as exc:
+                return cloud_error(exc)
+
+        @app.post("/api/cloud/address", dependencies=[Depends(authenticate)])
+        async def cloud_address(request: Request, body: cloud_wizard.Address):
+            require_cloud(request)
+            try:
+                return await asyncio.to_thread(cloud_jobs.address, body.name)
+            except cloud_wizard.WizardError as exc:
+                return cloud_error(exc)
+
+        @app.get("/api/cloud/deployments/{name}/{filename}", dependencies=[Depends(authenticate)])
+        async def cloud_file(request: Request, name: str, filename: str):
+            require_cloud(request)
+            try:
+                path, media = cloud_jobs.file(name, filename)
+            except cloud_wizard.WizardError as exc:
+                raise HTTPException(404, str(exc)) from None
+            return Response(path.read_bytes(), media_type=media,
+                            headers={"Content-Disposition": 'attachment; filename="' + name + "-" + filename + '"'})
 
         @app.post("/api/profiles", dependencies=[Depends(authenticate)])
         async def profiles_create(body: ProfileCreate):
@@ -1311,6 +1407,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             result = remove_targets([chat_id])
         return {"targets": visible_targets(request), **result}
 
+    def save_capture(store, saved):
+        store.set_setting("capture", saved)
+        store.append("capture.changed", capture_settings(store))
+
     @app.post("/api/capture", dependencies=[Depends(authenticate)])
     async def capture(body: Capture):
         require_live()
@@ -1319,8 +1419,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 saved = body.model_dump()
                 if "record_disabled_media" not in body.model_fields_set:
                     saved["record_disabled_media"] = capture_settings(app.state.store)["record_disabled_media"]
-                app.state.store.set_setting("capture", saved)
-                app.state.store.append("capture.changed", capture_settings(app.state.store))
+                save_capture(app.state.store, saved)
             app.state.collector.media_wakeup.set()
         return capture_settings(app.state.store)
 
@@ -1422,9 +1521,23 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return health.server(app.state.assurance, app.state.run_receipt.get("host"), app.state.host_status,
                              health.now_utc())
 
+    def gateway_state():
+        """The saved Gateway log settings without their token, and on a server deployed with Gateway DNS the
+        values its own deployment description and provider give."""
+        saved = app.state.vault.read("gateway")
+        suggested = None
+        if app.state.assurance:
+            described = (assurance.deployment() or {}).get("gateway") or {}
+            if described.get("location_id"):
+                suggested = {"account": described.get("account"), "location_id": described["location_id"],
+                             "address": (app.state.assurance.get("provider") or {}).get("public_ipv4")}
+        return {"account": saved.get("account"), "location_id": saved.get("location_id"),
+                "address": saved.get("address"), "has_token": bool(saved.get("token")), "suggested": suggested}
+
     def evidence_state():
         store, outside = app.state.store, outside_state()
         return {"settings": evidence_settings(store), "last": store.get_setting("evidence_last", None),
+                "witnesses": store.get_setting("evidence_witnesses", None) or {}, "gateway": gateway_state(),
                 "busy": app.state.anchor_status["busy"], **outside, "health": timestamps_health(outside),
                 "defaults": EvidenceMode().model_dump(exclude={"enabled"})}
 
@@ -1438,10 +1551,44 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         store, vault = app.state.store, app.state.vault
         was = evidence_settings(store)["enabled"]
         with store.transaction():
-            store.set_setting("evidence", body.model_dump())
-            store.append("evidence.changed", {**body.model_dump(), "fingerprint": fingerprint(vault.public_key)})
+            save_evidence(store, body)
         if body.enabled and not was:
             request_anchor(store, vault, app.state.anchor_wakeup)
+        return evidence_state()
+
+    def save_evidence(store, body):
+        store.set_setting("evidence", body.model_dump())
+        store.append("evidence.changed", {**body.model_dump(), "fingerprint": fingerprint(app.state.vault.public_key)})
+
+    @app.post("/api/evidence/gateway", dependencies=[Depends(authenticate)])
+    async def set_gateway_log(body: GatewayLog):
+        require_live()
+        store, vault = app.state.store, app.state.vault
+        token = body.token or vault.read("gateway").get("token")
+        if not token:
+            raise HTTPException(422, "Paste the read-only Cloudflare token.")
+        config = {"account": body.account, "location_id": body.location_id, "address": body.address or None,
+                  "token": token}
+        try:
+            await gateway_rows(app.state.collector.outside_route(), config, time.time() - 3600, time.time() - 60)
+        except (netclient.RouteError, OSError, asyncio.TimeoutError):
+            raise HTTPException(502, "Cloudflare could not be reached through this workspace's connection route.")
+        except (netclient.HTTPError, ValueError, KeyError, IndexError, TypeError):
+            raise HTTPException(422, "Cloudflare did not accept this account, location or token. The token needs "
+                                     "Account Analytics Read, and Zero Trust PII Read to keep one address only.")
+        vault.save("gateway", config)
+        store.append("evidence.gateway_set", {k: config[k] for k in ("account", "location_id", "address")})
+        return evidence_state()
+
+    @app.delete("/api/evidence/gateway", dependencies=[Depends(authenticate)])
+    async def remove_gateway_log():
+        require_live()
+        store = app.state.store
+        app.state.vault.save("gateway", {})
+        with store.transaction():
+            if evidence_settings(store)["gateway"]:
+                save_evidence(store, EvidenceMode(**{**evidence_settings(store), "gateway": False}))
+            store.append("evidence.gateway_removed", {})
         return evidence_state()
 
     @app.post("/api/evidence/anchor", dependencies=[Depends(authenticate)])
@@ -1504,6 +1651,63 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return {"checked_at": health.iso(health.now_utc()), "collector": health.collector_of(app.state),
                 "timestamps": timestamps_health(outside), "replica": replica_health(outside),
                 "server": server_health()}
+
+    def setup_state():
+        """Setup by goal (levels.py): the saved answers, the current state as answers, and both scales."""
+        store, outside = app.state.store, outside_state()
+        saved = store.get_setting("setup", None)
+        place = (saved or {}).get("place") or ("server" if app.state.assurance else "computer")
+        assessment = levels.assess(evidence_settings(store), replica.replica_settings(store),
+                                   alerts.alert_settings(store), app.state.vault.read("alerts").get("urls", []),
+                                   app.state.assurance, source_state(),
+                                   witness_api.state(app.state.vault, store)["tokens"], place,
+                                   bool(app.state.vault.read("gateway").get("token")))
+        return {"saved": saved, "recommended": levels.RECOMMENDED, "assessment": assessment,
+                "levels": levels.LEVELS, "sealed": bool(app.state.assurance),
+                "limits": {"dialog_limit": levels.DIALOG_LIMIT, "reserve_mb": levels.LARGE_MEDIA_RESERVE_MB},
+                "current": {"size": levels.size_choice(tuning.value(store, "dialog_limit")),
+                            "files": levels.files_choice(capture_settings(store)), "place": place},
+                "health": {"timestamps": timestamps_health(outside)["state"],
+                           "replica": replica_health(outside)["state"]}}
+
+    @app.get("/api/setup", dependencies=[Depends(authenticate)])
+    async def get_setup():
+        return setup_state()
+
+    @app.post("/api/setup", dependencies=[Depends(authenticate)])
+    async def apply_setup(body: levels.Setup):
+        require_live()
+        store, vault = app.state.store, app.state.vault
+        evidence_was = evidence_settings(store)
+        try:
+            planned = levels.plan(body, evidence_was, capture_settings(store), tuning.values(store))
+            saved, before, after = tuning.changes(store, planned["parameters"])
+        except (ValueError, tuning.Invalid) as exc:
+            raise HTTPException(422, str(exc)) from None
+        changed = [name for name in ("evidence", "capture") if planned[name]] + (["parameters"] if after else [])
+        async with op_lock:
+            with store.transaction():
+                if planned["evidence"]:
+                    save_evidence(store, EvidenceMode(**planned["evidence"]))
+                if planned["capture"]:
+                    save_capture(store, Capture(**planned["capture"]).model_dump())
+                if after:
+                    save_parameters(store, saved, before, after)
+                store.set_setting("setup", {**body.model_dump(), "at": utcnow()})
+                store.append("setup.applied", {**body.model_dump(), "changed": changed})
+        if planned["evidence"] and planned["evidence"]["enabled"] and not evidence_was["enabled"]:
+            request_anchor(store, vault, app.state.anchor_wakeup)
+        if planned["capture"]:
+            app.state.collector.media_wakeup.set()
+        if after:
+            app.state.alert_wakeup.set()
+        return {**setup_state(), "changed": changed}
+
+    @app.post("/api/setup/skip", dependencies=[Depends(authenticate)])
+    async def skip_setup():
+        require_live()
+        app.state.store.set_setting("setup", {"skipped": True, "at": utcnow()})
+        return setup_state()
 
     @app.post("/api/replica", dependencies=[Depends(authenticate)])
     async def set_replica(body: ReplicaUpdate):
@@ -1685,13 +1889,16 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             raise HTTPException(422, {"message": str(exc), "parameter": exc.key}) from None
         if after:
             with store.transaction():
-                store.set_setting("parameters", saved)
-                store.append("parameters.changed", {
-                    "before": before, "after": after,
-                    "applies": "from the next use of each value; Telegram client timeouts and retries from "
-                               "the next connection"})
+                save_parameters(store, saved, before, after)
             app.state.alert_wakeup.set()
         return tuning.described(store)
+
+    def save_parameters(store, saved, before, after):
+        store.set_setting("parameters", saved)
+        store.append("parameters.changed", {
+            "before": before, "after": after,
+            "applies": "from the next use of each value; Telegram client timeouts and retries from "
+                       "the next connection"})
 
     @app.get("/api/chats", dependencies=[Depends(authenticate)])
     async def chats(request: Request):

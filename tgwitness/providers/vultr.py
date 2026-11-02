@@ -55,7 +55,9 @@ class Vultr(Provider):
             raise DeployError("Vultr has no x64 operating system named like " + image + "; pass its numeric os_id")
         return found[0]["id"]
 
-    def create(self, spec, user_data, rules):
+    def create(self, spec, user_data, rules, outbound=()):
+        if outbound:
+            raise DeployError(self.title + ": outbound firewall rules are not implemented here")
         tag = "tgwitness-" + spec["deployment_id"]
         firewall = self.call("POST", "/firewalls", {"description": resource_name(spec)})["firewall_group"]
         for rule in rules:

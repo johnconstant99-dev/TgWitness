@@ -29,6 +29,11 @@ FILES.extend("website/demo/downloads/" + name for name in (
 FILES.extend("website/demo/report/" + name for name in (
     "index.html", "report.html", "sharing-copy.zip", "example.json",
 ))
+# Public Intel TDX quotes and Intel's collateral for them (tools/tdx/README.md names each source).
+FILES.extend("tools/tdx/" + name for name in (
+    "intel-v4.quote.hex", "intel-v4.collateral.json", "intel-v5-td15ex.quote.hex", "intel-v5-td15ex.collateral.json",
+    "intel-outdated.collateral.json", "dstack-v4.json", "dstack-v4.collateral.json",
+))
 DIRECTORIES = {
     "tgwitness": {".md", ".py", ".html", ".css", ".js", ".svg", ".json"},
     "docs": {".md", ".png", ".webp", ".svg", ".txt", ".gif", ".mp4"}, "tools": {".py", ".md"},
