@@ -26,14 +26,22 @@ errors and flagged corrupt packets fail the job instead of silently skipping
 frames. Some mutations are valid media, so the regression corpus distinguishes
 rejections from successful, bounded decodes.
 
-Run `python tools/check_media_worker.py` on Linux after building the image and
-setting `TGWITNESS_MEDIA_IMAGE`. It runs the native decoder regression harness
-inside the restricted image, then performs real OCR on a generated image. The
-harness needs only the image's pinned PyAV and NumPy packages; no Whisper model,
-Telegram account or network service is used. It demonstrates the old duration
-precheck accepting forged FLAC metadata and the old demuxer following a local
-concat reference before checking that the worker rejects both.
+Install `espeak-ng` on the Linux test host, build the image, and set
+`TGWITNESS_MEDIA_IMAGE`. Prepare the small English test model outside the source
+tree with `python tools/prepare_media_test_model.py --output /path/to/test-model`,
+then set `TGWITNESS_WHISPER_MODEL_DIR` to that directory and run
+`python tools/check_media_worker.py`. Preparation downloads 78.1 MB from the
+fixed Systran `faster-whisper-tiny.en` revision recorded in the helper and verifies
+all four file sizes and SHA-256 hashes. The model is MIT licensed; its source and
+the original Whisper license are linked in the preparation receipt.
 
-These controls reduce decoding exposure. They do not remove installed Debian
-packages, fix every native parser vulnerability, or change the container
-scanner's unresolved findings.
+The check runs the native decoder regression harness, real English and Russian
+OCR on generated images, and real ASR on speech generated locally by espeak-ng.
+Each worker runs without network access, with read-only input and model mounts.
+The checks verify recognized text, engine/model identifiers and unchanged input
+bytes. Missing models or a missing speech generator fail the check. The decoder
+harness also exercises forged FLAC duration and forbidden secondary references.
+
+Container vulnerability scans remain separate release checks. These functional
+tests establish that the restricted worker can decode and recognize the
+synthetic fixtures with the installed libraries and models.

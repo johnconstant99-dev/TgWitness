@@ -1,0 +1,48 @@
+name: Container dependency locks
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'deploy/containers/*.packages'
+      - 'deploy/containers/resolve-packages.sh'
+      - '.github/workflows/container-locks.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: container-locks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  resolve:
+    name: Resolve ${{ matrix.profile }} (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        profile: [runtime, media, build]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Resolve packages against the signed index and record candidate hashes
+        env:
+          PROFILE: ${{ matrix.profile }}
+          WOLFI_BASE: cgr.dev/chainguard/wolfi-base:latest@sha256:fd50bd0cdeb808cf4f45c9c9189e0cc7f7fcc27195d69abd6622c80527e7e021
+        run: |
+          mkdir -p "$RUNNER_TEMP/container-locks"
+          docker run --rm \
+            --mount type=bind,source="$GITHUB_WORKSPACE",target=/src,readonly \
+            --mount type=bind,source="$RUNNER_TEMP/container-locks",target=/out \
+            "$WOLFI_BASE" sh /src/deploy/containers/resolve-packages.sh "$PROFILE"
+      - name: Retain candidates for review without changing checked-in locks
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: container-locks-${{ matrix.profile }}-${{ matrix.runner }}
+          path: ${{ runner.temp }}/container-locks/
+          if-no-files-found: error
+          retention-days: 7

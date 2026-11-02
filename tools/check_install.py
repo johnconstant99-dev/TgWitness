@@ -4,18 +4,21 @@ import http.client
 import json
 import socket
 import sys
+import sysconfig
 import tempfile
 import threading
 import time
 from pathlib import Path
 
 
-def main():
+def main(arguments=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--package", type=Path, required=True)
+    location = parser.add_mutually_exclusive_group(required=True)
+    location.add_argument("--package", type=Path)
+    location.add_argument("--installed", action="store_true")
     parser.add_argument("--output", type=Path, default=Path("test-results"))
-    args = parser.parse_args()
-    package = args.package.resolve()
+    args = parser.parse_args(arguments)
+    package = (Path(sysconfig.get_path("purelib")) if args.installed else args.package).resolve()
     sys.path.insert(0, str(package))
     import tgwitness
     from tgwitness import i18n

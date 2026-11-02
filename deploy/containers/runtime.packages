@@ -1,0 +1,2 @@
+# Direct packages; resolve-packages.sh records the complete installed closure.
+python-3.12=3.12.16-r3

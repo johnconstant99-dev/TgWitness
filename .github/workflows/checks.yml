@@ -335,17 +335,31 @@ jobs:
           docker run --rm --network none --read-only --cap-drop=ALL
           --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
           --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly
-          tgwitness:test python /checks/check_install.py
-          --package /usr/local/lib/python3.12/site-packages --output /data/checks
+          tgwitness:test python /checks/check_container_runtime.py --output /data/checks
       - name: Check Compose health, access control, and persistent restart
         run: python tools/check_compose.py
+  media:
+    name: Isolated OCR and transcription
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
       - name: Exercise the isolated OCR worker
         env:
           TGWITNESS_MEDIA_IMAGE: tgwitness-media:test
+          TGWITNESS_WHISPER_MODEL_DIR: ${{ runner.temp }}/tgwitness-asr-model
         run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends espeak-ng
           python -m pip install --require-hashes -r deploy/build.lock
           python -m pip install --require-hashes --no-build-isolation -r deploy/requirements.lock
           python -m pip install --no-deps --no-build-isolation -e .
           python -m pip check
           docker build -f deploy/media-worker/Dockerfile -t tgwitness-media:test .
+          python tools/prepare_media_test_model.py --output "$TGWITNESS_WHISPER_MODEL_DIR"
           python tools/check_media_worker.py

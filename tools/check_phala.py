@@ -2,6 +2,8 @@ import hashlib
 import io
 import json
 import re
+import subprocess
+import sys
 import tarfile
 import time
 from datetime import datetime, timezone
@@ -222,6 +224,71 @@ def test_the_compose_pins_the_commit_its_files_and_both_images(tmp_path):
         with pytest.raises(cloud.DeployError, match=message):
             cloud.specification(arguments(tmp_path, "phala", server_type="tdx.small", **{
                 "repository": "https://github.com/phishdestroy/TgWitness", **changes}), resolve=lambda repository, ref: ref)
+
+
+def test_phala_source_preserves_capture_and_excludes_unrelated_files():
+    capture = {path.relative_to(ROOT).as_posix(): path.read_bytes()
+               for path in (ROOT / "tgwitness_capture").rglob("*")
+               if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"}
+    assert capture and all(SOURCE.get(path) == body for path, body in capture.items())
+    ignored = {"capture-private/identity.json": b"synthetic private identity",
+               "data/source.session": b"synthetic private session",
+               "tgwitness_capture_private/token.txt": b"synthetic private token",
+               "tgwitness_capture/__pycache__/private.pyc": b"synthetic bytecode",
+               "tgwitness_capture/stale.pyc": b"synthetic bytecode"}
+    assert cloud.tarball_files(archive_of({**SOURCE, **ignored})) == SOURCE
+    assert cloud.source_manifest({**SOURCE, **ignored}) == cloud.source_manifest(SOURCE)
+    changed = {**SOURCE, "tgwitness_capture/verify.py": capture["tgwitness_capture/verify.py"] + b"\n"}
+    assert cloud.source_manifest(changed) != cloud.source_manifest(SOURCE)
+
+
+def test_phala_installer_extracts_capture_for_startup_and_rejects_its_tampering(tmp_path, monkeypatch):
+    spec = cloud.specification(arguments(tmp_path, "phala", server_type="tdx.small",
+                                         repository="https://github.com/phishdestroy/TgWitness"),
+                               resolve=lambda repository, ref: ref)
+    compose = cloud.phala_compose(spec, TUNNEL, cloud.source_manifest(SOURCE))
+    installer = compose.split("      - |\n", 1)[1].split("\n  tunnel:", 1)[0]
+    program = "\n".join(line[8:] for line in installer.splitlines())
+    namespace = {}
+    exec(compile(program.split("\nmarker = VENV", 1)[0], "phala-installer", "exec"), namespace)
+    namespace["SOURCE"], namespace["VENV"] = tmp_path / "source", tmp_path / "venv"
+    feed, commands = {"data": ARCHIVE}, []
+
+    class SourceResponse(io.BytesIO):
+        def read(self, size=-1):
+            assert size == 128 * 1024 * 1024
+            return super().read(size)
+
+    def get_archive(url, timeout):
+        assert url == cloud.archive_url(spec) and timeout == 300
+        return SourceResponse(feed["data"])
+
+    def build(command, check):
+        assert check
+        commands.append(command)
+        namespace["VENV"].mkdir(parents=True, exist_ok=True)
+
+    run = subprocess.run
+    monkeypatch.setattr(namespace["urllib"].request, "urlopen", get_archive)
+    monkeypatch.setattr(namespace["subprocess"], "run", build)
+    namespace["install"]()
+    assert len(commands) == 4 and "--require-hashes" in commands[1] and "--require-hashes" in commands[2]
+    for path, body in SOURCE.items():
+        assert (namespace["SOURCE"] / path).read_bytes() == body
+    assert not (namespace["SOURCE"] / "website/index.html").exists()
+    smoke = ("import pathlib,sys; sys.path.insert(0,sys.argv[1]); "
+             "import tgwitness,tgwitness_capture; root=pathlib.Path(sys.argv[1]).resolve(); "
+             "assert pathlib.Path(tgwitness.__file__).resolve().is_relative_to(root); "
+             "assert pathlib.Path(tgwitness_capture.__file__).resolve().is_relative_to(root); "
+             "from tgwitness.app import create_app; create_app(pathlib.Path(sys.argv[2]),demo=True); print('app-created')")
+    result = run([sys.executable, "-X", "utf8", "-I", "-c", smoke, str(namespace["SOURCE"]),
+                  str(tmp_path / "app-data")], capture_output=True, text=True, timeout=45)
+    assert result.returncode == 0 and "app-created" in result.stdout, result.stderr
+    feed["data"] = archive_of({**SOURCE, "tgwitness_capture/verify.py": SOURCE["tgwitness_capture/verify.py"] + b"\n"})
+    namespace["SOURCE"] = tmp_path / "rejected-source"
+    with pytest.raises(SystemExit, match="downloaded source is not the deployed commit"):
+        namespace["install"]()
+    assert not namespace["SOURCE"].exists() and len(commands) == 4
 
 
 def test_deploy_creates_a_cvm_whose_secrets_never_leave_encrypted(phala):

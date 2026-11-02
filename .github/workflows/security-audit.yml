@@ -108,20 +108,78 @@ jobs:
         include:
           - name: runtime
             dockerfile: deploy/Dockerfile
+            platform: linux/amd64
+          - name: runtime-arm64
+            dockerfile: deploy/Dockerfile
+            platform: linux/arm64
           - name: sealed
             dockerfile: deploy/Dockerfile.sealed
+            platform: linux/amd64
           - name: media-worker
             dockerfile: deploy/media-worker/Dockerfile
+            platform: linux/amd64
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Build the actual image without publishing it
+      - name: Enable the ARM64 execution check
+        if: matrix.platform == 'linux/arm64'
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
+        with:
+          platforms: arm64
+      - name: Check source-built OCR against its upstream advisories
+        if: matrix.name == 'media-worker'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 -I tools/test_ocr_advisories.py
+          python3 -I tools/check_ocr_advisories.py --output ocr-upstream-advisories.json
+      - name: Build the actual image from the public source archive
+        id: build_image
         env:
           AUDIT_DOCKERFILE: ${{ matrix.dockerfile }}
           AUDIT_IMAGE: tgwitness-security:${{ matrix.name }}
-        run: docker build --pull -f "$AUDIT_DOCKERFILE" -t "$AUDIT_IMAGE" .
+          AUDIT_PLATFORM: ${{ matrix.platform }}
+        run: |
+          python3 tools/build_source.py
+          export CONTAINER_SOURCE_DIR
+          CONTAINER_SOURCE_DIR=$(mktemp -d "$RUNNER_TEMP/tgwitness-source.XXXXXX")
+          python3 - <<'PY'
+          import os, tomllib, zipfile
+          from pathlib import Path
+          version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]
+          with zipfile.ZipFile(Path("dist") / f"TgWitness-{version}-source.zip") as archive:
+              archive.extractall(os.environ["CONTAINER_SOURCE_DIR"])
+          PY
+          docker build --pull --platform "$AUDIT_PLATFORM" \
+            -f "$CONTAINER_SOURCE_DIR/TgWitness/$AUDIT_DOCKERFILE" \
+            -t "$AUDIT_IMAGE" "$CONTAINER_SOURCE_DIR/TgWitness"
+      - name: Verify package authentication rejects modified archives
+        if: matrix.name == 'runtime'
+        run: |
+          python3 -I tools/test_container_package_auth.py
+          mkdir -p "$RUNNER_TEMP/package-auth"
+          docker run --rm --user 0:0 --entrypoint python \
+            --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly \
+            --mount type=bind,source="$RUNNER_TEMP/package-auth",target=/out \
+            tgwitness-security:runtime /checks/check_container_package_auth.py --output /out/package-auth.json
+      - name: Retain package authentication results
+        if: always() && matrix.name == 'runtime'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: container-package-authentication
+          path: ${{ runner.temp }}/package-auth/package-auth.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Exercise the ARM64 application and signed PDF exports
+        if: matrix.platform == 'linux/arm64'
+        run: >-
+          docker run --rm --platform linux/arm64 --network none --read-only --cap-drop=ALL
+          --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
+          --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly
+          tgwitness-security:runtime-arm64 python /checks/check_container_runtime.py --output /data/checks
       - name: Scan OS and installed library packages
+        if: ${{ !cancelled() && steps.build_image.outcome == 'success' }}
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           version: v0.76.1
@@ -145,8 +203,10 @@ jobs:
           sarif_file: trivy.sarif
           category: container-${{ matrix.name }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        if: always() && hashFiles('trivy.sarif') != ''
+        if: always() && (hashFiles('trivy.sarif') != '' || hashFiles('ocr-upstream-advisories.json') != '')
         with:
           name: security-container-${{ matrix.name }}
-          path: trivy.sarif
+          path: |
+            trivy.sarif
+            ocr-upstream-advisories.json
           retention-days: 14

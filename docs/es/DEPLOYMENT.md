@@ -121,7 +121,7 @@ Esto estará disponible una vez que se haya completado con éxito el [flujo de t
 Copie `deploy/env.example` en `.env`. Establezca `TGWITNESS_IMAGE` en la versión publicada, utilizando la ruta del repositorio **en minúsculas**; por ejemplo:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.8.0
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.8.1
 TGWITNESS_PORT=8787
 ```
 

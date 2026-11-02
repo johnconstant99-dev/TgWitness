@@ -6,6 +6,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
+CONTAINER_INPUTS = (
+    "deploy/containers/runtime.packages", "deploy/containers/media.packages", "deploy/containers/build.packages",
+    "deploy/containers/resolve-packages.sh", "deploy/containers/install-packages.sh",
+    *("deploy/containers/" + role + "-" + arch + ".lock"
+      for role in ("runtime", "media", "build") for arch in ("x86_64", "aarch64")),
+    "deploy/media-worker/build-tesseract.sh", "deploy/media-worker/tesseract.nfpm.yaml",
+    "deploy/media-worker/sources.lock.json",
+)
 FILES = [
     "tgwitness/client_profiles.LICENSE",
     "tgwitness/fonts/OFL.txt",
@@ -23,6 +31,7 @@ FILES = [
     "deploy/Dockerfile", "compose.yaml", "deploy/compose/compose.image.yaml", "deploy/compose/compose.https.yaml", "deploy/compose/compose.witness.yaml", "deploy/compose/compose.proof.yaml", "deploy/compose/compose.proxies.yaml", "deploy/compose/compose.capture-panel.yaml",
     ".gitignore", ".gitattributes", ".dockerignore", "deploy/env.example", "deploy/constraints.txt", "deploy/requirements.lock", "deploy/build.lock",
     "deploy/audit.lock", "deploy/browser.lock", "deploy/mcp.lock", "deploy/site.lock",
+    *CONTAINER_INPUTS,
 ]
 FILES.extend("tgwitness/fonts/" + name for name in (
     "NotoSans-Regular.ttf", "NotoSans-Bold.ttf", "NotoSansMono-Regular.ttf",

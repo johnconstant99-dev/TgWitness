@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "tesseract": {
+    "version": "5.5.4",
+    "commit": "7e548e6eff172f38f97664afe7f7ce40db36c8d6",
+    "url": "https://github.com/tesseract-ocr/tesseract/archive/refs/tags/5.5.4.tar.gz",
+    "sha256": "a8dbf8b8c8ee427ff6ad1d99116502feaf59440af1adb893caf60a6576826cf4",
+    "license": "Apache-2.0",
+    "cpe": "cpe:2.3:a:tesseract-ocr:tesseract_ocr:5.5.4:*:*:*:*:*:*:*"
+  },
+  "traineddata": {
+    "repository": "https://github.com/tesseract-ocr/tessdata_fast",
+    "commit": "87416418657359cb625c412a48b6e1d6d41c29bd",
+    "license": {
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "files": {
+      "eng": {
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      "rus": {
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/rus.traineddata",
+        "sha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225"
+      }
+    }
+  }
+}

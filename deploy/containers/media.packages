@@ -1,0 +1,7 @@
+python-3.12=3.12.16-r3
+# Wolfi ships the statically linked Leptonica library in its -dev package.
+# Keep that package in the final inventory as well as its codec dependencies.
+leptonica-dev=1.87.0-r2
+giflib=6.1.3-r4
+libgomp=16.2.0-r2
+libstdc++=16.2.0-r2

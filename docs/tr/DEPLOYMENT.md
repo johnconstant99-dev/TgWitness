@@ -121,7 +121,7 @@ Bu, başarılı bir [sürüm iş akışı](#otomatik-github-sürümleri) ve halk
 `deploy/env.example` öğesini `.env` öğesine kopyalayın. `TGWITNESS_IMAGE` öğesini, **küçük harfli** depo yolunu kullanarak yayınlanan sürüme ayarlayın, örneğin:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.8.0
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.8.1
 TGWITNESS_PORT=8787
 ```
 

@@ -144,8 +144,7 @@ jobs:
           docker run --rm --platform linux/arm64 --network none --read-only --cap-drop=ALL
           --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
           --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly
-          tgwitness:arm64-check python /checks/check_install.py
-          --package /usr/local/lib/python3.12/site-packages --output /data/checks
+          tgwitness:arm64-check python /checks/check_container_runtime.py --output /data/checks
       - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4
         with:
           registry: ghcr.io

@@ -148,6 +148,7 @@ PHALA_IMAGES = {"python": "python:3.12-slim@sha256:aa943ce411423c7582288f18707ff
                 "cloudflared": "cloudflare/cloudflared:2026.10.7"
                                "@sha256:4955524aeaa379e154023d5a027c250f7b35041a2e7e950cf13f144bc9b9c5ba"}
 SOURCE_NEEDED = ("pyproject.toml", "README.md", "LICENSE", "NOTICE", "deploy/build.lock", "deploy/requirements.lock")
+SOURCE_PACKAGES = ("tgwitness", "tgwitness_capture")
 GITHUB = re.compile(r"https://github\.com/([A-Za-z0-9-]{1,39})/([A-Za-z0-9._-]{1,100}?)(\.git)?")
 PHALA_ENV = ("TGWITNESS_TOKEN", "TGWITNESS_TUNNEL_TOKEN")
 PHALA_SETTINGS = {"kms_enabled": True, "gateway_enabled": False, "public_logs": False, "public_sysinfo": False,
@@ -641,12 +642,13 @@ from pathlib import Path
 ARCHIVE = "@ARCHIVE@"
 MANIFEST = "@MANIFEST@"
 NEEDED = @NEEDED@
+PACKAGES = @PACKAGES@
 DESCRIPTION = json.loads(@DESCRIPTION@)
 SOURCE, VENV = Path("/opt/tgwitness/source"), Path("/opt/tgwitness/.venv")
 
 
 def wanted(path):
-    return path in NEEDED or (path.startswith("tgwitness/") and "__pycache__" not in path.split("/")
+    return path in NEEDED or (path.startswith(tuple(name + "/" for name in PACKAGES)) and "__pycache__" not in path.split("/")
                               and not path.endswith(".pyc"))
 
 
@@ -746,7 +748,7 @@ PHALA_QUICK_TUNNEL = """\
 
 
 def wanted_source(path):
-    return path in SOURCE_NEEDED or (path.startswith("tgwitness/") and "__pycache__" not in path.split("/")
+    return path in SOURCE_NEEDED or (path.startswith(tuple(name + "/" for name in SOURCE_PACKAGES)) and "__pycache__" not in path.split("/")
                                      and not path.endswith(".pyc"))
 
 
@@ -771,10 +773,11 @@ def tarball_files(data):
 def tree_files(folder):
     folder = Path(folder)
     found = {path: (folder / path).read_bytes() for path in SOURCE_NEEDED if (folder / path).is_file()}
-    for item in sorted((folder / "tgwitness").rglob("*")):
-        path = item.relative_to(folder).as_posix()
-        if item.is_file() and wanted_source(path):
-            found[path] = item.read_bytes()
+    for package in SOURCE_PACKAGES:
+        for item in sorted((folder / package).rglob("*")):
+            path = item.relative_to(folder).as_posix()
+            if item.is_file() and wanted_source(path):
+                found[path] = item.read_bytes()
     return found
 
 
@@ -806,6 +809,7 @@ def phala_compose(spec, tunnel_id, manifest):
         raise DeployError("Unexpected source manifest")
     installer = PHALA_INSTALLER.replace("@ARCHIVE@", archive_url(spec)).replace("@MANIFEST@", manifest) \
         .replace("@NEEDED@", repr(SOURCE_NEEDED)) \
+        .replace("@PACKAGES@", repr(SOURCE_PACKAGES)) \
         .replace("@DESCRIPTION@", json.dumps(json.dumps(deployment_description(spec, tunnel_id), sort_keys=True)))
     address = ADDRESS_SCRIPT.replace("@FORMAT@", ADDRESS_FORMAT)
     if "$" in installer or "$" in address:
