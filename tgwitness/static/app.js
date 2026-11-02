@@ -638,12 +638,19 @@ function renderWorkflowControls(){
     info.needsSignIn?'Sign in again':'Connect account →':'Configure account export');
   }
 }
+function openWorkflowSignIn(){
+  const entered=navigate('connection');
+  // Navigation mounts synchronously; its reads may finish after the user advances sign-in.
+  if(state.view==='connection'&&['code-form','password-form','qr-state'].every(id=>$(id).hidden))
+    setAuthStep('credentials');
+  return entered;
+}
 async function openAccountWorkflow(){
   if(!state.me?.admin||!viewAllowed('evidence'))return;
   const workflow=state.workflow={profile:state.profile,kind:'account'},revision=state.workspaceRevision;
   const current=()=>state.workflow===workflow&&revision===state.workspaceRevision&&state.me?.admin&&viewAllowed('evidence');
   if(!state.status.demo&&!accountSignedIn()){
-    await navigate('connection');if(current()&&state.view==='connection')setAuthStep('credentials');return;
+    await openWorkflowSignIn();return;
   }
   selectExportTask('account');await navigate('evidence');
   if(current()&&state.view==='evidence'){exportsView?.select('downloads');$('account-export-configure').click();}
@@ -652,8 +659,8 @@ panelQueries('[data-workflow]').forEach(button=>button.addEventListener('click',
   if(button.dataset.workflow==='account'){await openAccountWorkflow();return;}
   state.workflow=null;
   if(!viewAllowed('sources')||!viewAllowed('connection')||!may('collect'))return;
-  await navigate(!accountSignedIn()&&!state.status.demo?'connection':hasSources(state.status)?'chats':'sources');
-  if(state.view==='connection')setAuthStep('credentials');
+  if(!accountSignedIn()&&!state.status.demo){await openWorkflowSignIn();return;}
+  await navigate(hasSources(state.status)?'chats':'sources');
 })));
 $('workflow-continue').addEventListener('click',e=>busy(e.currentTarget,openAccountWorkflow));
 $('collector-sign-in').addEventListener('click',()=>{navigate('connection');setAuthStep('credentials');});
@@ -1932,8 +1939,7 @@ $("account-export-configure").addEventListener("click",e=>busy(e.currentTarget,a
   if(!current())return;
   if(!state.status.demo&&!accountSignedIn()){
     state.workflow={profile:state.profile,kind:'account'};
-    await navigate('connection');
-    if(profile===state.profile&&revision===state.workspaceRevision&&state.view==='connection')setAuthStep('credentials');return;
+    await openWorkflowSignIn();return;
   }
   await loadAccountExport();if(!current())return;$('account-export-dialog').showModal();
   $("account-export-dialog-title").focus?.();

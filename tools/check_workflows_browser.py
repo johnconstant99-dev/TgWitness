@@ -10,6 +10,38 @@ from check_browser import RunningApp, launch_browser, navigate_panel, unlock
 from check_account_export_browser import DEFAULTS
 
 
+def hold_connection_navigation(page, selector):
+    """Keep the mounted sign-in form usable while this workflow's real policy read waits."""
+    page.evaluate("""selector => {
+      const probe={fetch:window.fetch,busy:window.busy,armed:false,held:false,pending:null};
+      window.workflowNavigationProbe=probe;
+      window.fetch=async(...args)=>{
+        const response=await probe.fetch.apply(window,args);
+        if(probe.armed&&!probe.held&&new URL(String(args[0]),location.href).pathname==='/api/network/policy'){
+          probe.held=true;
+          await new Promise(resolve=>{probe.release=resolve;});
+        }
+        return response;
+      };
+      window.busy=(button,work)=>{
+        if(!button?.matches(selector))return probe.busy(button,work);
+        probe.armed=true;probe.pending=probe.busy(button,work);return probe.pending;
+      };
+    }""", selector)
+    page.locator(selector).click()
+    page.wait_for_function("()=>typeof window.workflowNavigationProbe?.release==='function'")
+    expect(page.locator("#view-connection")).to_be_visible()
+
+
+def release_connection_navigation(page):
+    # Finish the original workflow continuation before checking that it kept the live auth step.
+    page.evaluate("""async()=>{
+      const probe=window.workflowNavigationProbe;
+      window.fetch=probe.fetch;window.busy=probe.busy;
+      probe.release();await probe.pending;delete window.workflowNavigationProbe;
+    }""")
+
+
 def hold_configure(page):
     """Hold only this button's first real response; later view loads must finish normally."""
     page.evaluate("""() => {
@@ -70,12 +102,13 @@ def main():
             page.on("request", lambda request: writes.append((request.method, urlsplit(request.url).path))
                     if request.method not in ("GET", "HEAD", "OPTIONS") else None)
             unlock(page, server, start=True)
+            page.wait_for_function("window.TgWitnessRouter?.started")
             expect(page.locator("#view-start")).to_be_visible()
             expect(page.locator("#workflow-account-card")).to_be_visible()
             expect(page.locator("#workflow-investigation-card")).to_be_visible()
             expect(page.locator("#view-start h1")).to_contain_text("What")
             before = list(writes)
-            page.locator('[data-workflow="account"]').click()
+            hold_connection_navigation(page, '[data-workflow="account"]')
             expect(page.locator("#view-connection")).to_be_visible()
             expect(page.locator("#workflow-handoff")).to_be_visible()
             expect(page.locator("#workflow-continue")).to_be_hidden()
@@ -89,6 +122,28 @@ def main():
             page.locator("#auth-continue").click()
             expect(page.locator("#code-form")).to_be_visible()
             page.locator("#code").fill("11111")
+            release_connection_navigation(page)
+            expect(page.locator("#code-form")).to_be_visible()
+            expect(page.locator("#code")).to_be_focused()
+            expect(page.locator("#code")).to_have_value("11111")
+            checks.append("late workflow navigation preserves the code step reached during the real policy read")
+
+            pending_auth_writes = list(writes)
+            for selector, view in (('[data-workflow="investigation"]', "start"),
+                                   ('[data-workflow="account"]', "start"),
+                                   ("#account-export-configure", "evidence")):
+                navigate_panel(page, view)
+                if view == "evidence":
+                    page.locator("#export-task-account").click()
+                hold_connection_navigation(page, selector)
+                expect(page.locator("#code-form")).to_be_visible()
+                expect(page.locator("#code")).to_have_value("11111")
+                release_connection_navigation(page)
+                expect(page.locator("#code-form")).to_be_visible()
+                expect(page.locator("#code")).to_have_value("11111")
+            assert writes == pending_auth_writes, "Returning to a workflow changed pending authentication"
+            checks.append("all three workflow sign-in entrypoints preserve a pending code and its draft on return")
+
             page.locator("#code-form button[type=submit]").click()
             expect(page.locator("#authorized-state")).to_be_visible()
             expect(page.locator("#workflow-continue")).to_be_visible()

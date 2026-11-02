@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Preserve an active Telegram sign-in when workflow navigation finishes late.
+  Returning through account export or investigation keeps the pending code,
+  password or QR step instead of resetting the form.
+
 ## 0.7.1 preview · 1 November 2026
 
 - Fixed chat profiles getting stuck after navigating away while a request was
