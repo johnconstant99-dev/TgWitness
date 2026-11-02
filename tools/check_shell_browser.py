@@ -110,7 +110,10 @@ def main():
                     expect(page.locator(".sidebar")).to_be_hidden()
                     expect(page.locator("#navigation-toggle")).to_be_visible()
                     # Connection and interface controls remain available on a second row.
-                    assert page.locator(".topbar").bounding_box()["height"] <= 112
+                    bar = page.locator(".topbar").bounding_box()
+                    if bar["height"] > 112:
+                        page.screenshot(path=str(output / f"topbar-{width}-failure.png"))
+                    assert bar["height"] <= 112, (width, bar)
                     page.locator("#navigation-toggle").click()
                     expect(page.locator(".sidebar")).to_have_attribute("aria-modal", "true")
                     expect(page.locator(".mobile-nav-close")).to_be_focused()

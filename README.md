@@ -80,11 +80,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.dest
   <a href="docs/COLLECTION.md"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-history-mobile.svg"><img src="docs/assets/presentation/readme-nav-history.svg" width="32%" alt="Collection and saved versions"></picture></a>
 </p>
 
-In the panel, **Start here** offers **Export my account** for a
-one-off [signed account snapshot](docs/ACCOUNT-EXPORT.md), or **Follow an investigation**
-for ongoing observation. Choose a task, connect an account and review its scope;
-collection only starts when you explicitly start it. Less common controls live
-under **More tools & settings**.
+Choose what you want to do: [export your account](docs/ACCOUNT-EXPORT.md) or
+[follow an investigation](docs/INVESTIGATION.md). Connect an account, choose the
+chats and files to save, then start when you are ready.
 
 **Choose your scope:** selected chats, a Telegram folder or the whole account.
 Keep each account in its own workspace, with separate sources, session and signing key.
@@ -116,8 +114,8 @@ transcription, and send HMAC-signed webhooks.
 
 | Task | What you get |
 | --- | --- |
-| [Load older messages](docs/HISTORY.md) | Enabled sources → workspace history, with pause/resume and a signed progress report. |
-| [Export with several accounts](docs/ACCOUNTS.md#multiple-accounts) | Split one chat's acquisition across eligible accounts; each keeps its own session and signing key. |
+| [Load older messages](docs/HISTORY.md) | Save older messages from your selected chats. Pause and resume without starting over. |
+| [Export with several accounts](docs/ACCOUNTS.md#multiple-accounts) | Use several connected accounts to export one chat. Each account keeps its own session and signing key. |
 | [Import a batch of accounts](docs/ACCOUNTS.md#bulk-import-and-account-groups) | Pair session files automatically, see each login result and organize workspaces into groups with shared settings. |
 | [Manage the MTProxy pool](docs/wiki/Proxies.md#pool-dashboard-and-custom-sources) | Ping, countries, filters and your own lists; one shared catalog with separate account routes. |
 | [Bring an existing session](docs/ACCOUNTS.md) | Telegram Desktop TData, Telethon, Pyrogram, StringSession or an auth key. |
@@ -145,7 +143,7 @@ Run the pinned collector from your fork, select one chat and download an encrypt
 archive with GitHub provenance. The capture helper is also available under
 **Exports** in the panel.
 
-[Open the capture page](https://phishdestroy.github.io/TgWitness/docs/capture/) · [Instructions](docs/SEALED-ACTIONS.md) · [Русский](docs/ru/SEALED-ACTIONS.md)
+[Open the capture page](https://phishdestroy.github.io/TgWitness/docs/capture/) · [Instructions](docs/SEALED-ACTIONS.md)
 
 </details>
 
@@ -176,7 +174,7 @@ evidence map and observation timeline; a ZIP with authoritative data and verific
 instructions. Every conclusion has its basis, limits and independent review step.
 The preview uses fictional messages and a disposable demonstration key.
 
-[Report design and sample generation](docs/CASE_REPORTS.md) · [Русский](docs/ru/CASE_REPORTS.md)
+[Report design and sample generation](docs/CASE_REPORTS.md)
 
 <details>
 <summary><strong>Inside the signed record</strong> · hashes, signatures and independent checkpoints</summary>

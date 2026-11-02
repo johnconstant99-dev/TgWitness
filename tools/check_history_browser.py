@@ -6,7 +6,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import RunningApp, check_layout, launch_browser, navigate_panel, unlock
+from check_browser import RunningApp, answer_panel_dialog, check_layout, launch_browser, navigate_panel, unlock
 from tools.browser_fixtures import CHAT, FakeClient, media_message, telegram_message
 from tgwitness import history, i18n
 from tgwitness.verify import verify_history_report
@@ -64,6 +64,7 @@ def main():
             expect(page.locator("#history-media")).to_contain_text("1 saved, 0 pending", timeout=12000)
             with page.expect_download() as download:
                 page.locator("#history-report").click()
+                answer_panel_dialog(page)
             report = root / "history-report.json"
             download.value.save_as(report)
             response = context.request.get(server.url + "/api/export/zip", headers=headers)

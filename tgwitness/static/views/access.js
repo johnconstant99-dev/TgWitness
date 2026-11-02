@@ -4,6 +4,24 @@ export function createAccessView({root,tr,navigate,localInput,getState}) {
   const find=id=>root.querySelector('#'+id),listeners=new AbortController();
   const on=(node,event,fn)=>node.addEventListener(event,fn,{signal:listeners.signal});
   const tabs=[...root.querySelectorAll('[data-access-tab]')];
+  if(!root.querySelector('[data-showcase-link]')){
+    const link=root.ownerDocument.createElement('a');link.href='/showcase-manage.html';
+    link.className='secondary';link.dataset.showcaseLink='';link.textContent=tr('Public showcase');
+    root.querySelector('.page-heading').append(link);
+  }
+  function syncShowcase(){
+    const state=getState();
+    root.querySelector('[data-showcase-link]').hidden=!state.me?.admin||!!state.status?.demo||!!window.TGW_ONLINE_DEMO;
+  }
+  syncShowcase();
+  // The ordinary editor does not carry the redaction mode. Keep these grants in
+  // their dedicated manager instead of submitting a form that changes their mode.
+  root.addEventListener('click',event=>{
+    const button=event.target.closest('button'),row=button?.closest('#access-list .access-row');
+    if(row?.record?.showcase&&button===row.querySelector('.access-actions')?.firstElementChild){
+      event.preventDefault();event.stopPropagation();location.assign('/showcase-manage.html');
+    }
+  },{capture:true,signal:listeners.signal});
   let current='grants';
   function showTab(name,focus=false){
     if(name==='console'){navigate('system-log');return;}
@@ -64,7 +82,7 @@ export function createAccessView({root,tr,navigate,localInput,getState}) {
   on(find('access-workspace-picked'),'change',workspaceFilter);
   on(find('access-workspaces'),'change',workspaceFilter);
   on(find('access-all'),'change',workspaceFilter);
-  return {showTab,syncForm,workspaceFilter,enter(){showTab(current);workspaceFilter();},
-    updateStatus(){},leave(){},resetSession(){current='grants';find('access-workspace-search').value='';find('access-workspace-picked').checked=false;showTab(current);},
+  return {showTab,syncForm,workspaceFilter,enter(){showTab(current);workspaceFilter();syncShowcase();},
+    updateStatus:syncShowcase,leave(){},resetSession(){current='grants';find('access-workspace-search').value='';find('access-workspace-picked').checked=false;showTab(current);syncShowcase();},
     destroy(){listeners.abort();}};
 }

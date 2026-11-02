@@ -197,11 +197,27 @@ def lock_panel(page):
 
 def reload_panel(page):
     """Wait for authenticated bootstrap, separately from the render assertion."""
-    with page.expect_response(
-        lambda response: response.url.endswith("/api/status")
-        and response.request.method == "GET", timeout=20000,
-    ) as ready:
-        page.reload()
+    requests, errors = [], []
+    def response_seen(response):
+        if '/api/' in response.url:
+            requests.append((urlsplit(response.url).path, response.status))
+    def error_seen(error):
+        errors.append(str(error))
+    page.on('response', response_seen)
+    page.on('pageerror', error_seen)
+    try:
+        with page.expect_response(
+            lambda response: response.url.endswith("/api/status")
+            and response.request.method == "GET", timeout=20000,
+        ) as ready:
+            page.reload()
+    except Exception:
+        print('Reload bootstrap failed:', {'url': page.url, 'requests': requests, 'errors': errors,
+              'login_error': page.locator('#login-error').text_content()}, flush=True)
+        raise
+    finally:
+        page.remove_listener('response', response_seen)
+        page.remove_listener('pageerror', error_seen)
     assert ready.value.ok, ready.value.status
     expect(page.locator("#workspace")).to_be_visible()
 
@@ -357,7 +373,7 @@ def check_languages(browser, server):
     page, errors, keys = context.new_page(), [], []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
     panel_scripts = ("app.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js",
-                     "fleet.js", "review.js", "live.js")
+                     "fleet.js", "review.js", "live.js", "services.js", "account-import.js")
     for script in panel_scripts:
         page.route("**/" + script + "*", lambda route: route.abort())
     page.goto(server.url + "/")
@@ -522,7 +538,7 @@ def main():
             expect(page.locator("#events-body tr:has(.event-icon.delete)")).to_have_count(3)
             page.locator("#events-body tr:has(.event-icon.delete)").first.click()
             expect(page.locator("#detail-content")).to_contain_text("Last captured content")
-            expect(page.locator("#detail-content")).to_contain_text("Deleter not supplied")
+            expect(page.locator("#detail-content")).to_contain_text("Telegram does not report who deleted the message")
             page.keyboard.press("Escape")
             page.get_by_role("button", name="All events", exact=True).click()
             page.get_by_role("button", name="Membership", exact=True).click()
@@ -538,6 +554,7 @@ def main():
             expect(page.locator("#verification-result")).to_contain_text("event signatures")
             with page.expect_download() as pending:
                 page.get_by_role("button", name="Download signed ZIP").click()
+                answer_panel_dialog(page)
             bundle = output / "browser-evidence.zip"
             pending.value.save_as(bundle)
             assert verify_bundle(bundle)["events"] > 25
@@ -548,8 +565,9 @@ def main():
                 close:async()=>{window.writerClosed=true},abort:async()=>{window.writerAborted=true}
               })});}""")
             page.get_by_role("button", name="Download signed ZIP").click()
+            answer_panel_dialog(page)
             page.wait_for_function("()=>window.writerClosed===true")
-            expect(page.locator("#toast")).to_have_text("Evidence export saved.")
+            expect(page.locator("#toast")).to_have_text("Export sent to your browser. Check Downloads for the saved file.")
             assert page.evaluate("window.writerClosed")
             streamed = output / "browser-streamed-evidence.zip"
             streamed.write_bytes(bytes(page.evaluate("window.savedChunks.flat()")))
@@ -559,6 +577,7 @@ def main():
             page.on("request", lambda req: requests_before.append(req.url) if "/api/export/" in req.url else None)
             page.evaluate("() => {window.showSaveFilePicker=async()=>{throw new DOMException('Cancelled','AbortError')};}")
             page.get_by_role("button", name="Download signed ZIP").click()
+            answer_panel_dialog(page)
             expect(page.get_by_role("button", name="Download signed ZIP")).to_be_enabled()
             assert not requests_before, "Cancelled file chooser must not start an export"
             page.evaluate("""() => {window.writerAborted=false;
@@ -567,15 +586,17 @@ def main():
                 close:async()=>{throw new Error('Failed stream must not be closed')},
                 abort:async()=>{window.writerAborted=true}
               })});}""")
-            page.get_by_role("button", name="Download signed ZIP").click()
-            expect(page.locator("#toast")).to_have_text("Synthetic disk full")
+            with page.expect_download():
+                page.get_by_role("button", name="Download signed ZIP").click()
+                answer_panel_dialog(page)
             assert page.evaluate("window.writerAborted")
             page.evaluate("window.showSaveFilePicker=undefined")
             page.route("**/api/export/jsonl", lambda route: route.fulfill(status=200,
                        headers={"Content-Length":str(128*1024**2+1), "Content-Type":"application/x-ndjson"}, body=b""))
             page.locator('#export-more-formats > summary').click()
             page.locator('[data-export="jsonl"]').click()
-            expect(page.locator("#toast")).to_contain_text("cannot stream this large export")
+            answer_panel_dialog(page)
+            expect(page.locator("#toast")).to_contain_text("too large for this browser")
             page.unroute("**/api/export/jsonl")
             check_layout(page)
             with page.expect_download() as pending:

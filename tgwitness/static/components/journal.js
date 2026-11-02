@@ -26,7 +26,8 @@ export function signedRecordPreview(value,{node,tr}){
   let rendered=false;
   details.addEventListener("toggle",()=>{
     if(!details.open||rendered)return;rendered=true;
-    const raw=JSON.stringify(value,null,2),limit=120000,text=raw.slice(0,limit);
+    const raw=window.TgWitnessPrivacy?.recordPreview(value)??JSON.stringify(value,null,2),limit=120000,text=raw.slice(0,limit);
+    if(window.TgWitnessPrivacy?.enabled)details.append(node("p","hint",tr("Possible secrets are masked in this preview. Export preserves the original signed record.")));
     const pattern=/"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|\b(?:true|false|null)\b/g;
     let offset=0,tokens=0;
     for(const match of text.matchAll(pattern)){
@@ -262,7 +263,8 @@ export function createJournal(context){
   function syncPage(){
     shown.textContent=Number.isFinite(state.eventMatched)?tr("{shown} of {total} matching records",{shown:state.events.length,total:state.eventMatched.toLocaleString()}):
       tr("{shown} records in this window",{shown:state.events.length});
-    range.textContent=state.events.length?"#"+state.events[0].seq+" – #"+state.events.at(-1).seq:"";
+    // The row carries the journal number; a second range looked like a second numbering scheme.
+    range.textContent="";range.hidden=true;
     older.disabled=pageBusy||state.cursor===null;newer.disabled=pageBusy||state.eventAfter===null;
     latest.disabled=pageBusy;latest.hidden=state.eventBefore===null;
     $("events-body").closest(".table-wrap").setAttribute("aria-busy",String(pageBusy));

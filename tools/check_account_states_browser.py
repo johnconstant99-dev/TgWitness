@@ -44,7 +44,7 @@ def main():
             def current_status(route):
                 profile_id = route.request.url.split("/profiles/", 1)[1].split("/", 1)[0] if "/profiles/" in route.request.url else "default"
                 profile = next(item for item in profiles if item["id"] == profile_id)
-                route.fulfill(json={**status, "collector": profile["collector"], "health": profile["health"],
+                route.fulfill(json={**status, "workspace_id": profile_id, "collector": profile["collector"], "health": profile["health"],
                     "targets": [{"chat_id": -1000000000123, "title": "Synthetic source", "enabled": True, "kind": "supergroup"}]})
 
             page.route("**/api/status", current_status)

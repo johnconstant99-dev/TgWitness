@@ -98,11 +98,30 @@
     if(!data.workspace_events_visible)target.append(node("p","hint",tr("This access cannot read workspace-wide coverage events.")));
     for(const event of data.events){const line=node("p","hint",event.kind+" · "+fmtFull(event.observed_at)+" ");line.append(citation(event.source));target.append(line);}
   }
+  function privacyOptions(references){
+    const turn=generation,owner=workspace,refs=references.filter(Boolean);
+    const active=()=>current(turn)&&workspace===owner;
+    const supported=refs.length&&refs.every(ref=>ref.workspace===owner&&Number.isSafeInteger(ref.chat_id));
+    const targets=[...new Map(refs.map(ref=>[ref.chat_id+':'+ref.message_id,ref])).values()];
+    return {tr,current:active,reveal:supported?async()=>{
+      for(const ref of targets){
+        if(!active())throw new Error(tr("The selected sources changed. Review them again."));
+        await json("privacy/reveal",{chat_id:ref.chat_id,message_id:ref.message_id??null,
+          reason:ref.message_id==null?"display_preference":"message"},{profile:owner});
+      }
+    }:undefined};
+  }
+  const privateText=(value,refs=[])=>window.TgWitnessPrivacy.render(value,privacyOptions(refs));
   function transmission(){
     if(!plan)return;
     const ids=new Set([...$("ask-sources").querySelectorAll("input:checked")].map(el=>el.value));
     const messages=structuredClone(plan.transmission),data=JSON.parse(messages[1].content);data.observations=data.observations.filter(s=>ids.has(s.id));messages[1].content=JSON.stringify(data,null,2);
-    $("ask-transmission").textContent=JSON.stringify(messages,null,2);$("ask-consent").checked=false;
+    $("ask-transmission").replaceChildren(window.TgWitnessPrivacy.renderRecord(messages,
+      privacyOptions(plan.sources.filter(source=>ids.has(source.id)).map(source=>source.source))));
+    $("ask-consent").checked=false;
+    $("ask-transmission-privacy")?.remove();
+    const hint=node("p","hint",tr("Display masking does not change the original text sent to the model after approval."));
+    hint.id="ask-transmission-privacy";$("ask-transmission").before(hint);
   }
   function sources(data){
     const provider=data.provider;
@@ -111,9 +130,10 @@
     if(data.not_found)box.append(viewState("empty",tr("Not found in the available archive"),tr("Try a different phrase, chat or observation period.")));
     for(const source of data.sources){
       const row=node("article","analysis-source"),label=node("label","check-label"),check=node("input");check.type="checkbox";check.value=source.id;check.checked=true;
-      label.append(check,node("span","",source.id+" · "+source.kind+" · "+fmtFull(source.observed_at)));row.append(label,node("blockquote","",source.text||tr("Metadata-only observation")));
+      const quote=node("blockquote");quote.append(privateText(source.text||tr("Metadata-only observation"),[source.source]));
+      label.append(check,node("span","",source.id+" · "+source.kind+" · "+fmtFull(source.observed_at)));row.append(label,quote);
       const links=node("div","route-actions");links.append(citation(source.source,tr("Compare with source")));
-      const context=node("button","quiet",tr("Open chat context")),contextBox=node("div");context.type="button";context.addEventListener("click",()=>busy(context,async()=>{const result=await call("context",{tool:"get_message_context",workspace,chat_id:source.source.chat_id,message_id:source.source.message_id});contextBox.replaceChildren();for(const item of result.items){const p=node("p","",item.kind+" · "+item.text+" ");p.append(citation(item.source));contextBox.append(p);}if(result.next_before)contextBox.append(node("p","hint",tr("The context is bounded. Open the source for more detail.")));}));links.append(context);row.append(links,contextBox);
+      const context=node("button","quiet",tr("Open chat context")),contextBox=node("div");context.type="button";context.addEventListener("click",()=>busy(context,async()=>{const turn=generation,result=await call("context",{tool:"get_message_context",workspace,chat_id:source.source.chat_id,message_id:source.source.message_id});if(!current(turn)||!contextBox.isConnected)return;contextBox.replaceChildren();for(const item of result.items){const p=node("div");p.append(privateText(item.kind+" · "+item.text,[item.source]),citation(item.source));contextBox.append(p);}if(result.next_before)contextBox.append(node("p","hint",tr("The context is bounded. Open the source for more detail.")));}));links.append(context);row.append(links,contextBox);
       if(source.text_truncated)row.append(node("small","hint",tr("Excerpt shortened. Open the source to read the saved text.")));
       check.addEventListener("change",transmission);box.append(row);
     }
@@ -128,10 +148,17 @@
     try{const result=await call("preview",body);if(turn!==generation)return;plan=result;sources(result);}
     catch(error){if(turn===generation)$("ask-sources").replaceChildren(viewState("error",tr("Could not load data"),error.message));throw error;}
   });});
+  $("ask-context-export").addEventListener("click",event=>busy(event.currentTarget,async()=>{
+    if(!plan||!may("export"))return;
+    const source_ids=[...$("ask-sources").querySelectorAll("input:checked")].map(el=>el.value);
+    if(!source_ids.length)throw new Error(tr("Select at least one source."));
+    const response=await api("analysis/context-export",{plan_id:plan.plan_id,source_ids},{root:true});
+    saveBlob(await response.blob(),"tgwitness-research-context.zip");
+  }));
   function claims(items,box){
     box.replaceChildren();
     if(!items.length)box.append(viewState("empty",tr("Not found in the available archive"),tr("The selected sources do not support an answer.")));
-    for(const item of items){const row=node("article","analysis-source");row.append(node("small","hint",tr("Model inference")),node("p","",item.text));for(const ref of item.citations){row.append(node("blockquote","",ref.quote),citation(ref.source,ref.id+" · #"+ref.source.event_seq));}box.append(row);}
+    for(const item of items){const row=node("article","analysis-source");row.append(node("small","hint",tr("Model inference")),privateText(item.text,item.citations.map(ref=>ref.source)));for(const ref of item.citations){const quote=node("blockquote");quote.append(privateText(ref.quote,[ref.source]));row.append(quote,citation(ref.source,ref.id+" · #"+ref.source.event_seq));}box.append(row);}
   }
   $("ask-generate").addEventListener("click",event=>busy(event.currentTarget,async()=>{
     if(!plan||!capabilities().enabled)return;if(!$("ask-consent").checked)throw new Error(tr("Review and approve the selected data first."));
@@ -144,8 +171,8 @@
   function renderReport(data){
     report=data;show("ask-report",true);const box=$("ask-report-content");box.replaceChildren();
     const summary=node("div");claims(data.model_summary,summary);box.append(node("h3","",tr("Model inference")),summary);
-    const history=node("details");history.append(node("summary","",tr("Observed facts · chronology")));for(const event of data.chronology){const row=node("p","",fmtFull(event.observed_at)+" · "+event.kind+" · "+event.quote+" ");row.append(citation(event.source));history.append(row);}box.append(history);
-    const entities=node("details");entities.append(node("summary","",tr("Observed links and entities")));for(const entry of data.entities){const row=node("p","",entry.value+" ");row.append(citation(entry.source));entities.append(row);}box.append(entities);
+    const history=node("details");history.append(node("summary","",tr("Observed facts · chronology")));for(const event of data.chronology){const row=node("div");row.append(privateText(fmtFull(event.observed_at)+" · "+event.kind+" · "+event.quote,[event.source]),citation(event.source));history.append(row);}box.append(history);
+    const entities=node("details");entities.append(node("summary","",tr("Observed links and entities")));for(const entry of data.entities){const row=node("div");row.append(privateText(entry.value,[entry.source]),citation(entry.source));entities.append(row);}box.append(entities);
     const gaps=node("div");coverage(data.coverage,gaps);box.append(gaps);
     box.append(node("p","hint",data.template+" · "+data.generation.provider+" · "+data.generation.model+" · "+fmtFull(data.generation.at)));
     for(const revision of data.analyst_revisions){box.append(node("h3","",tr("Analyst note")+" · "+fmtFull(revision.at)),node("p","",revision.revised_summary),node("p","",revision.analyst_note));}

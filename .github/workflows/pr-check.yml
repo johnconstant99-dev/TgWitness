@@ -14,6 +14,65 @@ defaults:
   run:
     shell: bash
 jobs:
+  browser:
+    name: Panel regression (${{ matrix.suite }})
+    # Untrusted PRs use disposable hosted runners with a read-only token.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [browser, browser-ux]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            deploy/build.lock
+            deploy/browser.lock
+      - name: Validate and install the locked browser environment
+        run: |
+          python tools/lock_requirements.py --check
+          python -m pip install --require-hashes -r deploy/build.lock
+          python -m pip install --require-hashes --no-build-isolation -r deploy/browser.lock
+          python -m pip install --no-deps --no-build-isolation -e ".[dev,mcp]"
+          python -m pip check
+      - name: Install Chromium
+        if: matrix.suite == 'browser'
+        run: python -m playwright install --with-deps chromium
+      - name: Install browser engines for account and download regression checks
+        if: matrix.suite == 'browser-ux'
+        run: python -m playwright install --with-deps chromium firefox webkit
+      - name: Run panel scenarios and retain individual results
+        env:
+          CHECK_SUITE: ${{ matrix.suite }}
+        run: python tools/run_checks.py --suite "$CHECK_SUITE" --jobs 2
+      - name: Check Firefox downloads and workspace boundaries
+        if: ${{ !cancelled() && matrix.suite == 'browser-ux' }}
+        run: python tools/check_workspace_downloads_browser.py --browser firefox
+      - name: Check WebKit downloads and workspace boundaries
+        if: ${{ !cancelled() && matrix.suite == 'browser-ux' }}
+        run: python tools/check_workspace_downloads_browser.py --browser webkit
+      - name: Check secret masking and write-only form drafts
+        if: ${{ !cancelled() && matrix.suite == 'browser-ux' }}
+        run: |
+          python -c "from playwright._impl._driver import compute_driver_executable; import subprocess; subprocess.run([str(compute_driver_executable()[0]), 'tools/check_privacy_js.cjs'], check=True)"
+          python -c "from playwright._impl._driver import compute_driver_executable; import subprocess; subprocess.run([str(compute_driver_executable()[0]), 'tools/check_writeonly_drafts.mjs'], check=True)"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: pr-panel-${{ matrix.suite }}
+          path: |
+            build/check-results/${{ matrix.suite }}/
+            build/ux-review/**/*.png
+            test-results/**/*.png
+            test-results/**/*receipt.json
+          if-no-files-found: warn
+          retention-days: 7
   lint-and-smoke:
     name: Lint and synthetic smoke
     # PR code and dependency installers never run on the project runner.

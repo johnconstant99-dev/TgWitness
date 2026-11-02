@@ -3,7 +3,7 @@
 This follow-up reviews the authenticated GitHub Code scanning results after
 `973fefcb11c015f467af07a50f5563fd922d6bf9`. It supplements the earlier
 [dated security audit](SECURITY-AUDIT-2026-11-01.md); that document remains a
-record of the code and scans at the time. English is the canonical language.
+record of the code and scans at the time.
 
 ## Starting inventory
 

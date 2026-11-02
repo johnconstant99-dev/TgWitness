@@ -53,6 +53,21 @@ def main():
             inactive = page.evaluate("()=>inactiveMutations")
             assert inactive == [], f"Status polling touched a detached screen: {inactive}"
             page.evaluate("()=>inactiveObserver.disconnect()")
+
+            # Settings mounts the shared sign-in card, while the original Account
+            # heading and summary remain in its detached screen.
+            navigate_panel(page, "settings")
+            page.locator('[data-section="telegram"]').click()
+            expect(page.locator("#credentials-form")).to_be_visible()
+            assert page.evaluate("()=>!$('view-connection').isConnected")
+            page.evaluate("""()=>{
+              window.inactiveMutations=[];
+              for(const root of panelRoots.values())if(!root.isConnected)inactiveObserver.observe(root,{childList:true,subtree:true,attributes:true,characterData:true});
+            }""")
+            page.evaluate("async()=>{await refreshStatus();await refreshStatus();}")
+            inactive = page.evaluate("()=>inactiveMutations")
+            assert inactive == [], f"Moved account-card polling touched a detached screen: {inactive}"
+            page.evaluate("()=>inactiveObserver.disconnect()")
             navigate_panel(page, "parameters")
             expect(page.locator("#" + field_id)).to_have_value(draft)
 

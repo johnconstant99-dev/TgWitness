@@ -7,9 +7,8 @@ Windows portable package, the wheel and the source archive, each with its SHA-25
 
 ## Included in this source tree
 
-- A bearer-protected panel with isolated account workspaces, light/dark themes, 25 interface
-  languages and a searchable Ctrl/Cmd+K navigation menu. English is canonical;
-  export and recipient-report labels use DeepL translations in all other languages.
+- A panel with access tokens, separate account workspaces, light/dark themes and
+  Ctrl/Cmd+K search. Choose from 25 languages for the panel and reports.
 - Separate personal account exports and investigation workflows, with readable
   offline reports, privacy previews, minimized sharing copies and recipient notes.
 - Resumable history loading, archive search and analysis, read-only MCP, optional

@@ -220,7 +220,7 @@ def main():
                 assert values == sorted(set(values)) and len(values) <= 200
                 seen.update(values)
             assert seen == set(range(1, 502)) and page.evaluate('()=>state.chatMessages.at(-1).message_id===501')
-            assert page.locator('.chat-day').first.evaluate('day=>getComputedStyle(day).position') == 'sticky'
+            assert page.locator('.chat-day').first.evaluate('day=>getComputedStyle(day).position') == 'relative'
             hold_once(page, '/messages?limit=60&before_id=' + str(page.evaluate('()=>state.chatNextBefore')))
             page.evaluate("()=>{window.heldRefresh=loadChatMessages('older');}")
             expect(page.locator('html')).to_have_attribute('data-refresh-held', 'true')

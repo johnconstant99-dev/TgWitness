@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark"><meta name="referrer" content="no-referrer">
+  <title>TgWitness · Live showcase</title><link rel="icon" href="/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/showcase.css"><script type="module" src="/showcase.js"></script>
+</head>
+<body>
+  <header class="wrap top"><a class="brand" href="https://github.com/phishdestroy/TgWitness" rel="noreferrer"><img src="/mark.svg" width="30" height="30" alt="">TgWitness</a><span class="pill">Read-only showcase</span><button id="sign-out" hidden>Close access</button></header>
+  <main class="wrap">
+    <section class="intro"><p class="eyebrow">A record of what changed</p><h1 id="title">Real records.<br>Visible changes.</h1><p class="lead">Public channel messages, their saved versions and deletion observations. Author details are redacted. Files stay private.</p></section>
+    <form id="login" class="card login"><h2>Open this showcase</h2><label for="token">Showcase access token</label><input id="token" type="password" autocomplete="off" required><button class="primary">Open showcase</button></form>
+    <p id="notice" role="status" aria-live="polite"></p>
+    <div id="content" hidden>
+      <div class="toolbar"><p id="updated" class="muted"></p><button id="refresh">Refresh now</button></div>
+      <p id="synthetic" class="notice" hidden>Synthetic demonstration records. No live Telegram connection.</p>
+      <section id="totals" class="totals" aria-label="Visible channel events"></section>
+      <p class="caption">Counts are recorded events in the selected channels, including repeated observations. They are not counts of unique messages.</p>
+      <section><div class="section-heading"><h2>Collection &amp; checkpoints</h2><span class="muted">Settings as observed now</span></div><div id="collectors" class="collectors"></div></section>
+      <section class="records"><div class="section-heading"><h2>Inside the record</h2><span class="pill">Text only · authors redacted</span></div>
+        <div class="toolbar filters"><label>Channel<select id="channel"></select></label><label>Show<select id="filter"><option value="all">All observations</option><option value="edited">Edits</option><option value="deleted">Deletions</option></select></label><button id="latest" hidden>Back to channel</button></div>
+        <p class="caption">Public message text is shown as captured and may itself contain names or links. Sender IDs, profile fields, forwards, avatars and file metadata are not shared.</p>
+        <p id="feed-status" role="status"></p><div id="feed" class="feed"></div><button id="older" hidden>Earlier observations</button>
+      </section>
+      <details class="card limits"><summary>How to check this record</summary><p>Each collector signs its displayed snapshot and a checkpoint of its journal. Download successive snapshots to check signatures and continuity. The first key fingerprint needs a separate trusted reference.</p><p>Displayed text is a redacted presentation, signed separately from the original journal. A source hash identifies an original record; checking that original needs the corresponding evidence export. Current settings do not describe every earlier acquisition.</p><p>The page reads saved observations. It does not reconnect Telegram, recover unseen deletions or certify complete collection. Public-channel eligibility uses the latest saved source profile; its observation date is shown.</p><a href="https://github.com/phishdestroy/TgWitness/blob/main/docs/LIVE-SHOWCASE.md" rel="noreferrer">Verification instructions ↗</a></details>
+    </div>
+    <noscript><p>Enable JavaScript to open the showcase and read its signed snapshots.</p></noscript>
+  </main>
+  <footer class="wrap">TgWitness · Your installation. Your records. <a href="https://github.com/phishdestroy/TgWitness" rel="noreferrer">Source on GitHub ↗</a></footer>
+</body>
+</html>

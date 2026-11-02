@@ -33,6 +33,11 @@ visible chats and permitted actions before handing it over.
 
 ## Choose the permissions
 
+For a text-only public demonstration, use **Public showcase** instead of ordinary
+reviewer access. It shows explicitly selected public channels, retained edits and
+deletions, and signed statistics, with author fields redacted and files closed at
+the API boundary. [Create and verify a showcase](LIVE-SHOWCASE.md).
+
 | Permission | What it allows |
 | --- | --- |
 | `view` | Read permitted chats, captured messages, profiles, files and filtered journal records. Always included. |

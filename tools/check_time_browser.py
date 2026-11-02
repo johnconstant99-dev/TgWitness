@@ -54,8 +54,8 @@ def main():
             assert result["utcDay"] == "2026-10-31" and result["localDay"] == "2026-10-30"
             assert "08:19:22" in result["local"]
             assert result["dst"][0] != result["dst"][1] and all("01:30:00" in item for item in result["dst"])
-            assert result["invalid"] == result["empty"] == "Not supplied"
-            assert result["zero"] != "Not supplied"
+            assert result["invalid"] == result["empty"] == "No data"
+            assert result["zero"] != "No data"
             page.locator('.sidebar [data-view="observations"]').click()
             page.evaluate("async()=>{state.filter='message.new';await refreshEvents();}")
             expect(page.locator('#events-body .event-time').first).to_be_visible()

@@ -19,6 +19,9 @@
 <link rel="stylesheet" href="/views/setup.css?v=3">
 <link rel="stylesheet" href="/views/settings-hub.css?v=2">
 <link rel="stylesheet" href="/views/connection.css?v=1">
+<link rel="stylesheet" href="/services.css?v=1">
+<link rel="stylesheet" href="/workspace-safety.css?v=1">
+<link rel="stylesheet" href="/account-import.css?v=1">
 <link rel="stylesheet" href="/views/access.css?v=30">
 <link rel="stylesheet" href="/components/journal.css?v=5">
 <link rel="stylesheet" href="/views/chats.css?v=11">
@@ -28,7 +31,11 @@
 <script src="/guide-locale.js" data-scope="panel"></script>
 <script defer src="/i18n.js?v=0.7.0"></script>
 <script defer src="/dialogs.js?v=1"></script>
+<script defer src="/privacy.js?v=1"></script>
+<script defer src="/chat-safety.js?v=1"></script>
 <script defer src="/app.js?v=0.7.0-handoff2-setup2-phala2"></script>
+<script defer src="/services.js?v=1"></script>
+<script defer src="/account-import.js?v=1"></script>
 <script defer src="/integrations.js?v=2"></script>
 <script defer src="/analysis.js?v=3"></script>
 <script defer src="/media-analysis.js?v=2"></script>
@@ -557,7 +564,7 @@
   </details>
   <section class="card padded exports-history" aria-labelledby="exports-history-title">
     <div class="card-heading compact"><div><h2 id="exports-history-title">Prepared exports</h2><p id="exports-last" class="hint"></p></div><button class="quiet" type="button" id="exports-history-refresh">Refresh</button></div>
-    <p class="hint">The last 20 files prepared by this workspace. Compare a file with its SHA-256 below. This list does not store downloads or prove delivery.</p>
+    <p class="hint">Prepared files stay on this machine for repeat downloads: up to 20 files within 2 GiB, plus the latest file. SHA-256 identifies the exact file. Preparation does not prove delivery.</p>
     <div id="exports-history-list"></div><p id="exports-history-status" class="hint" role="status"></p>
   </section>
   </div>
@@ -645,7 +652,11 @@
     <button class="secondary" type="submit">Check and save</button> <button class="quiet" id="gateway-remove" type="button">Remove</button>
     <p class="hint" id="gateway-status" role="status"></p>
   </form>
-  <form class="card padded" id="replica-form"><div class="eyebrow">Off-site copy</div><h2>Copy everything to S3-compatible storage</h2>
+   <div id="storage-s3-home"></div>
+   <form class="card padded" id="replica-form"><div class="eyebrow">Encrypted backup</div><h2>Keep a recoverable copy of your workspace</h2>
+     <div class="brand-strip" data-service-icons="wasabi,backblaze,cloudflare,minio"></div>
+     <label for="replica-provider">Storage provider</label><select id="replica-provider"><option value="custom">S3-compatible storage</option><option value="wasabi">Wasabi</option><option value="aws">Amazon S3</option><option value="b2">Backblaze B2</option><option value="r2">Cloudflare R2</option><option value="minio">MinIO / your server</option></select>
+     <p class="hint" id="replica-provider-hint">Use the endpoint and region shown in your storage account.</p>
     <p class="muted">The journal, photos &amp; files, checkpoints with their timestamps and chat exports are encrypted on this machine before upload, so the provider stores only encrypted objects. Works with AWS S3 and other S3-compatible services. Download the encryption key and keep it apart: without it the copy cannot be read.</p>
     <label class="check-label"><input id="replica-enabled" type="checkbox"> Keep an off-site copy</label>
     <div class="replica-fields">
@@ -672,6 +683,9 @@
   <form class="card padded" id="alerts-form">
     <p class="muted">Sent through Apprise to Matrix, Telegram, Discord, Slack, ntfy, email and many other services. Notifications contain chat names and counts; message text only if you turn on excerpts below.</p>
     <label class="check-label"><input id="alerts-enabled" type="checkbox"> Send notifications</label>
+    <div class="services-toolbar"><label for="services-search">Find a notification service<input id="services-search" type="search" placeholder="Telegram, Discord, Matrix, email…" autocomplete="off"></label><p class="services-count" id="services-count" role="status"></p></div>
+    <div class="service-catalog" id="services-catalog" aria-label="Notification services"></div>
+    <div class="service-setup" id="service-setup" hidden></div>
     <div class="alerts-builder">
       <label for="alerts-service">Add a destination</label>
       <select id="alerts-service"><option value="">Choose a service…</option><option value="tgram">Telegram bot</option><option value="discord">Discord webhook</option><option value="slack">Slack webhook</option><option value="ntfy">ntfy push</option><option value="mailto">Email</option></select>
@@ -687,15 +701,26 @@
     <label class="check-label"><input id="alerts-problems" type="checkbox"> Problems: disk almost full, account signed out, collection, copy or timestamp errors</label>
     <p class="hint" hidden id="alerts-host">This collector runs on a sealed server: an opened SSH port or a login there is sent as a problem.</p>
     <label class="check-label"><input id="alerts-changes" type="checkbox"> Changes: deleted, edited and missing messages in observed chats, grouped into one notification per check (every minute unless changed in Parameters)</label>
+    <label class="check-label"><input id="alerts-completions" type="checkbox"> Completed tasks: history, exports and storage copies</label>
     <label class="check-label"><input id="alerts-text" type="checkbox"> Include short excerpts of deleted and edited messages. Off by default: with it on, message text leaves this machine.</label>
     <div class="alerts-daily"><label class="check-label"><input id="alerts-daily" type="checkbox"> Daily summary of observed chats at</label><select aria-label="Hour of the daily summary, server time" id="alerts-hour"></select><span class="hint">server time</span></div>
     <button class="secondary" type="submit">Save notifications</button> <button class="quiet" id="alerts-test" type="button">Send test</button> <button class="quiet" id="alerts-clear" type="button">Remove destinations</button>
     <p class="hint" id="alerts-status" role="status"></p>
   </form>
+  <form class="card padded service-section" id="operator-bot-form">
+    <div class="eyebrow">YOUR OPERATOR BOT</div><h2>Status and controls in Telegram</h2>
+    <p class="muted">Use your own bot from BotFather. Only the chat and people listed below can use it. Commands return status and counts; conversation text stays in the workspace.</p>
+    <div class="brand-strip" data-service-icons="telegram"></div>
+    <label class="check-label"><input id="operator-bot-enabled" type="checkbox"> Enable my operator bot</label>
+    <div class="replica-fields"><label>Bot token<input id="operator-bot-token" type="password" autocomplete="new-password"></label><label>Allowed chat ID<input id="operator-bot-chat" placeholder="123456789 or -100…" autocomplete="off"></label><label>Allowed Telegram user IDs<input id="operator-bot-users" placeholder="123456789, 987654321" autocomplete="off"></label><label>Commands<select id="operator-bot-commands"><option value="status">Status only: /status and /stats</option><option value="manage">Allow /pause, /resume and /copy as well</option></select></label></div>
+    <p class="hint">Use a separate bot if another application already receives its commands. To receive alerts too, add this bot and the same chat as a notification destination above.</p>
+    <div class="storage-actions"><button class="secondary" type="submit">Save operator bot</button><button class="quiet" id="operator-bot-test" type="button">Send status now</button></div><p class="hint" id="operator-bot-status" role="status"></p>
+  </form>
   </div>
 
   <div class="extra-panel" id="extras-cloud" hidden role="region" aria-labelledby="extras-cloud-title">
-    <div class="extra-panel-heading"><div><span class="eyebrow">24/7 SERVER</span><h2 id="extras-cloud-title" tabindex="-1">A sealed server, set up by commands you can check.</h2><p>The server has no SSH and no open ports: the panel is reached through a Cloudflare Tunnel, and anyone with a read-only token can check how it was created.</p></div><button class="quiet" data-extra-close="cloud" type="button">Back to extras</button></div>
+    <div class="extra-panel-heading"><div><span class="eyebrow">24/7 SERVER</span><h2 id="extras-cloud-title" tabindex="-1">Keep collecting when your computer is off.</h2><p>Choose where the workspace runs. You own the cloud account and pay the provider directly. The panel opens through an HTTPS tunnel.</p><div class="brand-strip" data-service-icons="hetzner,digitalocean,vultr,cloudflare"></div></div><button class="quiet" data-extra-close="cloud" type="button">Back to extras</button></div>
+    <div class="provider-highlight"><span class="eyebrow">CONFIDENTIAL COMPUTING · PHALA CLOUD</span><h3>Check the environment that collected the record</h3><p>Intel TDX isolates the virtual machine's memory from the host. Hardware attestation lets the verifier compare its measured environment with the expected configuration and code.</p><div class="provider-benefits"><span>Hardware attestation</span><span>Measured configuration</span><span>Encrypted storage</span><span>No SSH in production</span></div><p class="hint">This adds a check on the collector's environment. It does not certify the truth of a message. Live deployment acceptance on Phala is still pending.</p><button class="secondary" type="button" id="cloud-choose-phala">Choose Phala Cloud</button></div>
     <p class="notice" hidden id="cloud-active"></p>
     <div class="health-detail" hidden id="cloud-health" role="status"></div>
     <p class="notice warning" hidden id="cloud-remote">This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.</p>
@@ -808,6 +833,7 @@
     <span class="extras-note"><svg aria-hidden="true" class="icon"><use href="#i-check"/></svg> Optional · your account and sources are enough to start collecting.</span>
   </div>
   <div class="extras-grid">
+    <article class="extra-card extra-storage"><div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-archive"/></svg></span><span class="extra-badge">YOUR STORAGE</span></div><h2>Storage &amp; disk space</h2><p>Back up the workspace, move older files to your cloud, or retain an immutable evidence copy.</p><div class="brand-strip" data-service-icons="mega,googledrive,dropbox,wasabi,backblaze"></div><button class="secondary" id="extras-open-storage" data-extra="storage" aria-expanded="false" aria-controls="extras-storage" type="button">Manage storage <span aria-hidden="true">→</span></button></article>
     <article class="extra-card extra-setup">
       <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-sparkle"/></svg></span><span class="extra-badge" id="extra-setup-badge">No goal chosen</span></div>
       <h2>Goal &amp; protection level</h2><p>Four short questions: we suggest settings for your goal and show how far the record can be trusted.</p>
@@ -835,7 +861,7 @@
     </article>
     <article class="extra-card extra-bot" data-mode-anchor data-mode-feature="witness">
       <div class="extra-card-top"><span class="extra-icon"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span><span class="extra-badge" id="extra-bot-badge">Not checked</span></div>
-      <h2>Witness bot</h2><p>Keep signed checks in Telegram so you can compare your saved history later.</p>
+      <h2>Independent witness</h2><p>Publish signed checks to your Telegram channel or Discord. A separate witness checks continuity without reading conversations.</p><div class="brand-strip" data-service-icons="telegram,discord"></div>
       <p class="extra-requires">Your bot + a channel + a witness host</p>
       <button class="secondary" id="extras-open-bot" data-extra="bot" aria-expanded="false" aria-controls="extras-bot" type="button">Configure <span id="extra-bot-arrow" aria-hidden="true">→</span></button>
     </article>
@@ -847,6 +873,24 @@
     </article>
   </div>
   <p class="extras-footnote">Only the option you choose opens its settings. Nothing is connected automatically.</p>
+  </div>
+
+  <div class="extra-panel service-section" id="extras-storage" hidden role="region" aria-labelledby="extras-storage-title">
+    <div class="extra-panel-heading"><div><span class="eyebrow">STORAGE &amp; DISK SPACE</span><h2 id="extras-storage-title" tabindex="-1">Keep what matters. Make room for what comes next.</h2><p>Choose a purpose first, then your own destination. Nothing uploads until you save the settings or start a copy.</p></div><button class="quiet" data-extra-close="storage" type="button">Back to extras</button></div>
+    <div class="storage-modes" aria-label="Storage purpose"><button type="button" data-storage-mode="backup" aria-pressed="true"><strong>Backup</strong><small>An encrypted copy of the journal, files, checkpoints and exports. Originals stay here.</small></button><button type="button" data-storage-mode="offload" aria-pressed="false"><strong>Free disk space</strong><small>Move older files to your cloud after verifying every uploaded byte. Keep the journal and file hashes here.</small></button><button type="button" data-storage-mode="evidence" aria-pressed="false"><strong>Protect an evidence copy</strong><small>S3 Object Lock prevents deletion for a chosen period. The provider's response is checked.</small></button></div>
+    <div id="storage-s3-slot"></div>
+    <p class="services-warning" id="storage-lock-help" hidden>Enable Object Lock in the bucket first. Compliance mode cannot be shortened by the bucket owner; Governance can be bypassed by an authorized administrator. Choose 30 days or your required period below. Storage billing rules are separate from this protection.</p>
+    <form class="card padded storage-fields" id="storage-form" hidden>
+      <h2>Move or copy saved files</h2><div class="brand-strip" data-service-icons="rclone,mega,googledrive,dropbox,protondrive,box"></div>
+      <div class="storage-path"><span>Local file</span><span aria-hidden="true">→</span><span>Compress &amp; encrypt</span><span aria-hidden="true">→</span><span>Upload &amp; read back</span><span aria-hidden="true">→</span><strong>Verify before removal</strong></div>
+      <div class="replica-fields"><label>Destination<select id="storage-backend"><option value="rclone">Cloud drive via rclone</option><option value="s3">My configured S3 destination</option></select></label><label>After verification<select id="storage-purpose"><option value="copy">Keep the local file</option><option value="offload">Remove the local file to free space</option></select></label><label>Files older than, days<input id="storage-age" type="number" min="0" max="36500" value="7"></label><label>Folder in the remote<input id="storage-folder" value="tgwitness" autocomplete="off"></label></div>
+      <div id="storage-rclone"><button class="secondary" id="storage-install" type="button">Install verified rclone in this workspace</button><p class="hint">No system service or global installation. The helper is checked against a pinned SHA-256. rclone uses Direct for external requests; S3 can use the configured proxy.</p><details><summary>Connect MEGA, Google Drive, Dropbox or another drive</summary><p>In rclone, configure your cloud account with <code>rclone config</code>. For an OAuth service, authorize your own account using rclone's browser flow. Copy one remote section here. Credentials are encrypted in this workspace.</p><a href="https://rclone.org/remote_setup/" target="_blank" rel="noopener noreferrer">rclone connection guide ↗</a></details><label>rclone remote configuration<textarea id="storage-config" spellcheck="false" autocomplete="off" placeholder="[mycloud]&#10;type = mega&#10;user = …&#10;pass = …"></textarea></label><p class="hint">Leave empty to keep saved credentials. This is your account; TgWitness provides no shared cloud storage.</p></div>
+      <label class="check-label"><input id="storage-compress" type="checkbox"> Compress files before encryption (lossless gzip; photos and videos may not shrink)</label>
+      <label class="check-label"><input id="storage-enabled" type="checkbox"> Run automatically</label><div class="replica-fields"><label>Every, minutes<input id="storage-interval" type="number" min="5" max="1440" value="60"></label><label>Files per pass<input id="storage-batch" type="number" min="1" max="1000" value="100"></label></div>
+      <p class="services-warning">A hash cannot restore a file. Keep the recovery file and access to your cloud. Restore offloaded files before a full evidence export; the original journal is never deleted or rewritten.</p>
+      <div class="storage-actions"><button class="primary" type="submit">Save storage settings</button><button class="secondary" id="storage-test" type="button">Test upload &amp; download</button><button class="secondary" id="storage-copy" type="button">Copy now</button><button class="quiet" id="storage-restore" type="button">Restore all files</button><button class="quiet" id="storage-recovery" type="button">Save recovery file</button></div>
+      <details><summary>Recover files from a saved recovery file</summary><label>Signed recovery file<input id="storage-recovery-import" type="file" accept=".json,application/json"></label><p class="hint">For recovery on a new machine, use the recovery command in the storage guide. Keep the recovery file private: it contains the file decryption key.</p><a class="text-link" href="https://github.com/phishdestroy/TgWitness/blob/main/docs/STORAGE.md" target="_blank" rel="noopener noreferrer">Storage and recovery guide ↗</a></details>
+    </form><div class="storage-stats" id="storage-stats"></div><p class="hint" id="storage-status" role="status"></p>
   </div>
 
   <div class="extra-panel" id="extras-setup" hidden role="region" aria-labelledby="extras-setup-title">
@@ -913,6 +957,8 @@
   </div>
   <div class="card padded witness-setup extra-step"><div class="extra-step-heading"><span class="step-number" aria-hidden="true">2</span><div><h3>Choose where to publish</h3><p>Create your bot with @BotFather and allow it to post in your channel.</p></div></div>
     <form id="witness-setup-form">
+      <label for="witness-publisher">Publish with your own account</label><select id="witness-publisher"><option value="telegram">Telegram bot · your channel</option><option value="discord">Discord webhook · your channel</option></select>
+      <p id="witness-discord-help" class="hint" hidden>On the independent witness host, save your Discord webhook URL in discord-webhook.txt next to witness.json. Posts contain signed checkpoint metadata and verification results, not conversations. Long checks are attached as witness-check.txt. Keep the witness journal for verification.</p>
       <div class="witness-fields">
         <label for="witness-channel">Your Telegram channel<input id="witness-channel" maxlength="64" required placeholder="@your_proof_channel or -100…"></label>
         <label for="witness-interval">Check every · minutes<input id="witness-interval" type="number" min="1" max="1440" value="10" required></label>
@@ -932,7 +978,7 @@
   </div>
   <details class="card padded extra-step witness-launch" id="witness-launch"><summary><span class="step-number" aria-hidden="true">3</span><span id="witness-launch-title">Start it on the witness host</span></summary>
     <p>The saved configuration is a setup file. Run it on the witness host to begin checks and publication.</p>
-    <p class="hint">On the witness host, save the read-only token in witness-token.txt and the BotFather token in bot-token.txt next to witness.json. The bot token is never entered into this collector panel.</p>
+    <p class="hint">On the witness host, save the read-only token in witness-token.txt. For Telegram, save the BotFather token in bot-token.txt; for Discord, the webhook URL in discord-webhook.txt. Keep these files next to witness.json. Publishing credentials stay on the witness host.</p>
     <pre id="witness-start-command"></pre>
     <p class="hint">Keep the witness key fingerprint separately. Confirm the first signed post in your channel; a downloaded file does not mean the bot is running.</p>
   </details>
@@ -952,8 +998,8 @@
   </div>
 
   <div class="extra-panel card padded" id="extras-github" hidden role="region" aria-labelledby="extras-github-title">
-    <div class="extra-panel-heading"><div><span class="eyebrow">VERIFIED CODE</span><h2 id="extras-github-title" tabindex="-1">Know which software made the record.</h2><p>Every program file is compared with the same file in the commit on GitHub. The result is saved in the signed journal, so anyone holding an export sees which public code was running.</p></div><button class="quiet" data-extra-close="github" type="button">Back to extras</button></div>
-    <ol class="extra-checklist"><li>Fork the repository on GitHub and review the code, or use the official one.</li><li>Enter the repository and a release tag or commit: a commit cannot change later, a branch can.</li><li>Check again after every update; the badge shows when the running code is no longer the checked one.</li></ol>
+    <div class="extra-panel-heading"><div><span class="eyebrow">CODE CHECK</span><h2 id="extras-github-title" tabindex="-1">Does this installation match the published code?</h2><p>Compare your installed program files with a version on GitHub. This helps you notice local changes and lets a recipient identify the version used for collection.</p><div class="brand-strip" data-service-icons="github"></div></div><button class="quiet" data-extra-close="github" type="button">Back to extras</button></div>
+    <div class="plain-flow"><div><strong>1. Choose a version</strong><p>The official repository is filled in. Use the release you installed, or a specific commit from your own fork.</p></div><div><strong>2. Compare the files</strong><p>TgWitness downloads that source version and compares file hashes. Your chats and credentials are not uploaded.</p></div><div><strong>3. Keep the result</strong><p>The signed journal records matches and differences. Recheck after updates. A match identifies code; it is not hardware attestation.</p></div></div>
     <form class="github-form" id="github-form">
       <div class="replica-fields">
         <div><label for="github-repository">Repository</label><input data-no-translate id="github-repository" maxlength="200" placeholder="github.com/phishdestroy/TgWitness" required spellcheck="false" autocomplete="off"></div>
@@ -1296,7 +1342,7 @@
   </form>
   <section class="card padded" id="ask-preview" hidden>
     <h2>Review selected sources</h2><p class="hint">Edits and deletion notices are separate records. Missing on recheck does not establish that Telegram sent a deletion notice.</p>
-    <div id="ask-sources"></div><div id="ask-coverage"></div>
+    <div class="storage-actions"><button type="button" class="secondary" id="ask-context-export">Download selected sources · Markdown + RAG JSONL</button></div><p class="hint">A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.</p><div id="ask-sources"></div><div id="ask-coverage"></div>
     <details><summary>Data sent to the model</summary><pre id="ask-transmission" class="analysis-data"></pre></details>
     <label class="check-label"><input id="ask-consent" type="checkbox"> Process the checked sources and my question at the endpoint shown above</label>
     <button id="ask-generate" type="button" class="primary">Generate an answer</button>

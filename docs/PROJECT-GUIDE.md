@@ -110,10 +110,8 @@
   to Matrix, Telegram, Discord, Slack, ntfy, email and many other services — without message
   text unless you turn on excerpts — and listed in the panel. Delivery is tested against a
   local endpoint; the services themselves have not been tested yet.
-- **25 interface languages.** The panel and documentation share the same language selection,
-  including German, French, Italian, Japanese, Korean, Hebrew and both Chinese scripts.
-  Translations are prepared with DeepL; the bundled guides also retain their separate Amharic
-  translation. Telegram content and journal records are always shown exactly as saved.
+- **Choose your language.** Use the panel and prepare reports in any of the 25 supported
+  languages. Saved messages and journal records keep their original text.
 - **Light and dark theme.** Follows the system setting by default; the choice is remembered per browser.
 - **Keyboard-friendly navigation.** Press **Ctrl+K** (Mac: **⌘K**) or select **Go to…** to
   find a section. Use the arrow keys and Enter to open it; Escape closes the menu.

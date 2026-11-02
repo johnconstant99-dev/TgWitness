@@ -14,6 +14,20 @@ export function createSettingsHub(ctx) {
   // After Start: the live check of the four collector parts. visited bounds browser Forward to steps already seen.
   let live=null, liveTimer=null, visited=0, recordedStep=null, shownSession=null;
   let preferencesQueue=Promise.resolve(), draftQueue=Promise.resolve(), preferencesSequence=0, draftSequence=0, checkSequence=0;
+  const owner=()=>({generation,profile:state.profile,token:state.token,revision:state.workspaceRevision});
+  const current=who=>who.generation===generation&&who.profile===state.profile&&who.token===state.token&&who.revision===state.workspaceRevision;
+  function requireOwner(who){
+    if(!current(who))throw ctx.staleView();
+  }
+  async function request(who,path,body){
+    requireOwner(who);
+    const result=await json(path,body,{profile:who.profile,token:who.token});
+    requireOwner(who);return result;
+  }
+  async function confirm(who,message){
+    requireOwner(who);const accepted=await askConfirm(message);requireOwner(who);return accepted;
+  }
+  async function refresh(who){requireOwner(who);await refreshStatus();requireOwner(who);}
   const auth=ctx.authCard(), primary=auth.querySelector('[data-auth-method="phone"]').parentElement;
   primary.prepend(auth.querySelector('[data-auth-method="qr"]'));
   const other=node('details','other-sign-in'), otherTitle=node('summary','',tr('Other sign-in methods'));
@@ -28,7 +42,7 @@ export function createSettingsHub(ctx) {
     mtproxy_auto:'Automatic',mtproxy:'My proxy',socks5:'My proxy',http:'My proxy'}[value]||String(value));
   const describe=value=>typeof value==='boolean'?tr(value?'On':'Off'):label(value);
   function button(text, fn, style='secondary') { const el=node('button',style,tr(text));el.type='button';el.onclick=()=>run(fn,el);return el; }
-  async function run(fn, control) { if(control)control.disabled=true;try{return await fn();}catch(e){toast(e.message,true);}finally{if(control?.isConnected)control.disabled=false;} }
+  async function run(fn, control) { if(control)control.disabled=true;try{return await fn();}catch(e){if(e.name!=='StaleView')toast(e.message,true);}finally{if(control?.isConnected)control.disabled=false;} }
   function message(text, cls='hint') { return node('p',cls,tr(text)); }
   function title(box,text){box.append(node('h2','',tr(text)));}
   function select(text, choices, value, fn) {
@@ -56,79 +70,82 @@ export function createSettingsHub(ctx) {
     for(const control of document.querySelectorAll('[data-ui-level]'))control.value=prefs.level;
     ctx.applyPreferences(prefs);
   }
-  function savePreferences(patch){
-    prefs={...prefs,...patch};const body={...prefs}, sequence=++preferencesSequence, version=generation;
+  function savePreferences(patch,who=owner()){
+    requireOwner(who);
+    prefs={...prefs,...patch};const body={...prefs}, sequence=++preferencesSequence;
     preferencesQueue=preferencesQueue.catch(()=>{}).then(async()=>{
-      if(version!==generation)return;
-      const result=await json('preferences',body);
-      if(version===generation&&sequence===preferencesSequence){prefs=result.saved;applyPresentation();}
+      const result=await request(who,'preferences',body);
+      if(sequence===preferencesSequence){prefs=result.saved;applyPresentation();}
     });return preferencesQueue;
   }
-  async function bootstrap() {
-    const version=generation;
+  async function bootstrap({openFirstRun=true}={}) {
+    const who=owner(), initialRoute=location.href;
     const demo=state.status?.demo||window.TGW_ONLINE_DEMO;
     for(const control of document.querySelectorAll('[data-ui-level]'))control.hidden=!!demo;
     if(demo){$('hub-route-status').hidden=true;return;}
-    const loaded=await json('preferences');
-    if(version!==generation)return;
+    const loaded=await request(who,'preferences');
     prefs=loaded.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:'simple'};
     const requestedLanguage=new URL(location.href).searchParams.get('lang');
-    if(requestedLanguage===ctx.language&&prefs.language!==requestedLanguage)await savePreferences({language:requestedLanguage});
-    else if(!loaded.saved)await savePreferences({});else applyPresentation();
-    if(version!==generation)return;
+    if(requestedLanguage===ctx.language&&prefs.language!==requestedLanguage)await savePreferences({language:requestedLanguage},who);
+    else if(!loaded.saved)await savePreferences({},who);else applyPresentation();
+    requireOwner(who);
     if(prefs.language!==ctx.language){await ctx.changeLanguage(prefs.language);return;}
     if(!state.me?.admin||state.status?.demo)return;
-    const loadedSettings=await json('settings');if(version!==generation)return;
+    const loadedSettings=await request(who,'settings');
     data=loadedSettings;draft={...data.wizard};
-    if(!draft.completed&&!draft.skipped)await navigate('first-run');
+    // A direct link or a newer navigation takes precedence over automatic setup.
+    if(openFirstRun&&location.href===initialRoute&&!draft.completed&&!draft.skipped)await navigate('first-run');
+    requireOwner(who);
     scheduleStatus();
   }
   async function load(wanted=null){
+    const who=owner();
     if(state.status?.demo){root.replaceChildren(message('Demo workspace. Connect accounts in your live installation.'));return;}
     if(!state.me?.admin){root.replaceChildren(message('Only the workspace administrator can change collection settings.'));return;}
-    if(!prefs){const result=await json('preferences');prefs=result.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:'simple'};applyPresentation();}
-    data=await json('settings');draft={...data.wizard};
+    if(!prefs){const result=await request(who,'preferences');prefs=result.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:'simple'};applyPresentation();}
+    data=await request(who,'settings');draft={...data.wizard};
     visited=Math.max(visited,draft.step);
     // A step address from Back or Forward opens that step when it was already reached; the server keeps it.
     if(state.view==='first-run'&&wanted&&wanted!==draft.step&&wanted<=visited&&!live){
       recordedStep=wanted;
-      try{await saveDraft({step:wanted});}catch(error){toast(error.message,true);recordedStep=null;}
+      try{await saveDraft({step:wanted},who);}catch(error){if(error.name==='StaleView')throw error;toast(error.message,true);recordedStep=null;}
     }
-    if(state.view==='first-run')await renderWizard();else render();
+    if(state.view==='first-run')await renderWizard(who);else render();
+    requireOwner(who);
     updateIndicator(data.connection);
   }
-  function saveDraft(patch={}){
-    draft={...draft,...patch};const body=draftBody(), sequence=++draftSequence, version=generation;
+  function saveDraft(patch={},who=owner()){
+    requireOwner(who);
+    draft={...draft,...patch};const body=draftBody(), sequence=++draftSequence;
     draftQueue=draftQueue.catch(()=>{}).then(async()=>{
-      if(version!==generation)return;
       let result;
-      try{result=await json('first-run',body);}catch(error){
-        if(version===generation&&sequence===draftSequence&&data?.wizard)draft={...data.wizard};
+      try{result=await request(who,'first-run',body);}catch(error){
+        if(current(who)&&sequence===draftSequence&&data?.wizard)draft={...data.wizard};
         throw error;
       }
-      if(version!==generation)return;
       data=result;if(sequence===draftSequence)draft={...result.wizard};
     });return draftQueue;
   }
-  async function applyGoal(goal,{first=false,keep=false}={}){
-    const plan=await json('settings/goal/preview',{goal,keep_manual:keep});
+  async function applyGoal(goal,{first=false,keep=false}={},who=owner()){
+    const plan=await request(who,'settings/goal/preview',{goal,keep_manual:keep});
     const text=plan.diff.map(row=>tr(data.fields.find(f=>f.key===row.key)?.label||row.key)+': '+describe(row.before)+' → '+describe(row.after)).join('\n');
-    if(!first&&!await askConfirm(tr('Change goal?')+'\n\n'+(text||tr('The settings already match.'))))return false;
-    data=await json('settings/goal',{goal,revision:plan.revision,keep_manual:keep});
-    await refreshStatus();return true;
+    if(!first&&!await confirm(who,tr('Change goal?')+'\n\n'+(text||tr('The settings already match.'))))return false;
+    data=await request(who,'settings/goal',{goal,revision:plan.revision,keep_manual:keep});
+    await refresh(who);return true;
   }
-  async function edit(key,value){
+  async function edit(key,value,who=owner()){
+    requireOwner(who);const revision=data.revision,values={...data.values};
     let allow_outside=false,disable_dependents=false;
-    if(['timestamps','drand','notifications','replica'].includes(key)&&value&&!data.values.outside){
-      allow_outside=await askConfirm(tr('This feature needs external requests. Allow them?'));if(!allow_outside)return;
+    if(['timestamps','drand','notifications','replica'].includes(key)&&value&&!values.outside){
+      allow_outside=await confirm(who,tr('This feature needs external requests. Allow them?'));if(!allow_outside)return;
     }
-    if(key==='outside'&&!value&&(data.values.timestamps||data.values.drand||data.values.notifications||data.values.replica)){
-      disable_dependents=await askConfirm(tr('Turn off the dependent features too?'));if(!disable_dependents)return;
+    if(key==='outside'&&!value&&(values.timestamps||values.drand||values.notifications||values.replica)){
+      disable_dependents=await confirm(who,tr('Turn off the dependent features too?'));if(!disable_dependents)return;
     }
-    data=await json('settings/edit',{key,value,allow_outside,disable_dependents,revision:data.revision});render();await refreshStatus();
+    data=await request(who,'settings/edit',{key,value,allow_outside,disable_dependents,revision});render();await refresh(who);
   }
   function preferencesForm(box){
-    box.append(select('Language',Object.entries(ctx.languages),prefs.language,async value=>{await savePreferences({language:value});await ctx.changeLanguage(value);}),
+    box.append(select('Language',Object.entries(ctx.languages),prefs.language,async value=>{const who=owner();await savePreferences({language:value},who);requireOwner(who);await ctx.changeLanguage(value);}),
       select('Theme',[['system','System theme'],['light','Light theme'],['dark','Dark theme']],prefs.theme,value=>savePreferences({theme:value})));
     const zones=[...new Set([prefs.timezone,Intl.DateTimeFormat().resolvedOptions().timeZone,'UTC',...(Intl.supportedValuesOf?.('timeZone')||[])])];
     box.append(select('Time zone',zones.map(x=>[x,x]),prefs.timezone,value=>savePreferences({timezone:value})));
@@ -152,7 +169,7 @@ export function createSettingsHub(ctx) {
       if(f.value==='custom')field.querySelector('option').disabled=true;row.append(field);
     }
     if(f.modified)row.append(button('Restore goal value',async()=>{
-      const plan=await json('settings/goal/preview',{goal:data.goal});await edit(f.key,plan.values[f.key]);
+      const who=owner(),plan=await request(who,'settings/goal/preview',{goal:data.goal});await edit(f.key,plan.values[f.key],who);
     },'text-link'));
     return row;
   }
@@ -173,7 +190,7 @@ export function createSettingsHub(ctx) {
       b.append(node('strong','',tr(name)),node('span','hint',summary),node('span','hub-arrow','→'));overview.append(b);}
     const detail=node('section','hub-detail');detail.hidden=!section;root.append(detail);
     if(section){
-      detail.append(button('Back to settings',async()=>{data=await json('settings');section=null;render();},'text-link'));
+      detail.append(button('Back to settings',async()=>{data=await request(owner(),'settings');section=null;render();},'text-link'));
       title(detail,summaries.find(s=>s[0]===section)?.[1]||'Settings');
       if(section==='appearance')preferencesForm(detail);
       if(section==='level')cards(detail,levels,prefs.level,async level=>{await savePreferences({level});render();});
@@ -221,19 +238,24 @@ export function createSettingsHub(ctx) {
     }
   }
   async function openForm(id, focus){
+    const who=owner();
     section=id==='evidence-form'?'protection':'notifications';query='';render();
     const detail=root.querySelector('.hub-detail');
     // Reuse the original form and listeners; both entry points edit one backend record.
     const form=$(id);move(form,detail);await ctx.loadSettingsForm(id);
+    requireOwner(who);
     const control=focus?$(focus):form;
     for(let p=control.parentElement;p&&p!==detail;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;
     control.scrollIntoView({block:'center'});if(focus)control.focus();
   }
   async function openAdvanced(view, extra, id){
+    const who=owner();
     restoreMoved();await navigate(view);
+    requireOwner(who);
     const page=$('view-'+view);
     if(page&&!page.querySelector('.hub-back-link'))page.prepend(button('Back to settings',()=>navigate('settings'),'text-link hub-back-link'));
     if(extra)await ctx.openExtra(extra);
+    requireOwner(who);
     if(id){const el=$(id);if(el){for(let p=el.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;el.scrollIntoView({block:'center'});el.focus();}}
   }
   function connectionForm(box, first){
@@ -241,11 +263,12 @@ export function createSettingsHub(ctx) {
     if(!first){draft=routeDraft;editing=true;}
     const routeBox=node('div');box.append(routeBox);
     function updateRoutes(){routeBox.replaceChildren();cards(routeBox,routes,draft.route,async mode=>{
+      const who=owner();
       if(connectionBusy)return;
       draft.route=mode;draft.unchecked=false;routeDirty=true;
       if(mode==='direct')draft.allow_direct=true;
-      if(first)await saveDraft({step:4});updateRoutes();
-      if(mode==='auto'||mode==='direct')await checkConnection();
+      if(first)await saveDraft({step:4},who);requireOwner(who);updateRoutes();
+      if(mode==='auto'||mode==='direct')await checkConnection(false,who);
     });
       const protection=select('Can Telegram see this server’s address?',[['hide','No, hide it'],['allow','Only if nothing else works']],draft.allow_direct?'allow':'hide',async v=>{
         draft.allow_direct=v==='allow';draft.unchecked=false;routeDirty=true;if(!draft.allow_direct&&draft.route==='direct')draft.route='auto';
@@ -253,7 +276,7 @@ export function createSettingsHub(ctx) {
       });routeBox.append(protection);
       if(!first&&data.fields.find(f=>f.key==='ip')?.modified){
         routeBox.append(message('Changed by you','modified-tag'),button('Restore goal value',async()=>{
-          const plan=await json('settings/goal/preview',{goal:data.goal});editing=false;await edit('ip',plan.values.ip);
+          const who=owner(),plan=await request(who,'settings/goal/preview',{goal:data.goal});editing=false;await edit('ip',plan.values.ip,who);
         },'text-link'));
       }
       if(draft.route==='proxy'){
@@ -267,31 +290,32 @@ export function createSettingsHub(ctx) {
     const status=node('div','connection-result');status.id='hub-connection-result';status.setAttribute('role','status');box.append(status);
     paintConnection(data.connection);
     if(first){const bypass=node('label','check-label');const check=node('input');check.type='checkbox';check.checked=!!draft.unchecked;
-      check.onchange=()=>run(async()=>{draft.unchecked=check.checked;
-        if(check.checked&&connectionBusy){checkSequence++;clearTimeout(checkTimer);await json('connection/cancel',{});connectionBusy=false;}
-        await saveDraft({step:4});updateNext();});
+      check.onchange=()=>run(async()=>{const who=owner();draft.unchecked=check.checked;
+        if(check.checked&&connectionBusy){checkSequence++;clearTimeout(checkTimer);await request(who,'connection/cancel',{});connectionBusy=false;}
+        await saveDraft({step:4},who);updateNext();});
       bypass.append(check,document.createTextNode(tr('Continue without checking')));box.append(bypass);}
   }
-  async function checkConnection(acceptSetup=false){
+  async function checkConnection(acceptSetup=false,who=owner()){
+    requireOwner(who);
     if(connectionBusy)return;connectionBusy=true;updateNext();
-    const version=generation,profile=state.profile, attempt=++checkSequence;
-    const currentAttempt=()=>generation===version&&state.profile===profile&&checkSequence===attempt;
+    const profile=who.profile,attempt=++checkSequence;
+    const currentAttempt=()=>current(who)&&checkSequence===attempt;
     const result=$('hub-connection-result');if(result){result.className='connection-result checking';result.textContent=tr('Checking connection…');}
     try{
-      await json('connection/prepare',{mode:draft.route,scope:'account',account:profile,
+      await request(who,'connection/prepare',{mode:draft.route,scope:'account',account:profile,
         allow_direct:draft.allow_direct,outside_enabled:data.values.outside,
         accept_setup:acceptSetup||draft.route==='auto',...(draft.route==='proxy'?{proxy_url:$('hub-proxy').value}:{})});
       const poll=async()=>{
         if(!currentAttempt())return;
-        const current=await json('connection');
+        const current=await request(who,'connection');
         if(!currentAttempt())return;
-        if(current.job.state==='ready'){await json('connection/apply',{plan:current.job.plan});}
+        if(current.job.state==='ready'){await request(who,'connection/apply',{plan:current.job.plan});}
         else if(current.job.state==='applied'){
           if(current.job.rows.some(r=>!r.applied))throw new Error(current.job.rows.find(r=>!r.applied).error);
           connectionBusy=false;routeDirty=false;data.connection=current.current;draft.unchecked=false;
-        if(state.view==='first-run')await saveDraft({unchecked:false});
-        else{data=await json('settings');}
-          paintConnection(current.current);updateIndicator(current.current);updateNext();await refreshStatus();return;
+        if(state.view==='first-run')await saveDraft({unchecked:false},who);
+        else{data=await request(who,'settings');}
+          requireOwner(who);paintConnection(current.current);updateIndicator(current.current);updateNext();await refresh(who);return;
         }else if(['failed','expired'].includes(current.job.state))throw new Error(current.job.error||current.job.stage);
         if(currentAttempt())checkTimer=setTimeout(()=>poll().catch(e=>{if(currentAttempt())connectionFailed(e);}),800);
       };
@@ -322,15 +346,16 @@ export function createSettingsHub(ctx) {
     const warning=$('hub-proxy-warning');
     warning.hidden=ok||!connection?.pool?.listed||connection.pool.healthy!==0||!connection.pool.probed_at;
     if(!warning.hidden){warning.replaceChildren(message('No public proxy answers. Try WARP or your own proxy.'));
-      warning.append(button('Switch to WARP',async()=>{section='connection';await navigate('settings');draft.route='warp';editing=true;render();}),
-        button('Check again',async()=>{section='connection';await navigate('settings');await checkConnection();}));}
+      warning.append(button('Switch to WARP',async()=>{const who=owner();section='connection';await navigate('settings');requireOwner(who);draft.route='warp';editing=true;render();}),
+        button('Check again',async()=>{const who=owner();section='connection';await navigate('settings');requireOwner(who);await checkConnection(false,who);}));}
   }
-  function scheduleStatus(){clearTimeout(statusTimer);statusTimer=setTimeout(async()=>{
-    if(!state.token||!state.me?.admin||state.status?.demo)return;
-    try{const current=await json('connection');if(data)data.connection=current.current;updateIndicator(current.current);}catch{}
-    scheduleStatus();
+  function scheduleStatus(who=owner()){clearTimeout(statusTimer);statusTimer=setTimeout(async()=>{
+    if(!current(who)||!state.token||!state.me?.admin||state.status?.demo)return;
+    try{const result=await request(who,'connection');if(data)data.connection=result.current;updateIndicator(result.current);}catch{}
+    if(current(who))scheduleStatus(who);
   },15000);}
-  async function renderWizard(){
+  async function renderWizard(who=owner()){
+    requireOwner(who);
     restoreMoved();wizardRoot.replaceChildren();if(!draft||!prefs)return;
     const page=node('div','first-run-shell');wizardRoot.append(page);
     page.append(node('div','eyebrow',tr('First setup')));
@@ -361,7 +386,8 @@ export function createSettingsHub(ctx) {
         for(const key of ['account','folder']){const card=body.querySelector('[data-answer="'+key+'"]');card.disabled=true;card.title=tr('Only on a separate account.');}
         body.append(message('Only chosen chats can be recorded on a main account.','notice warning'));
       }
-      if(!dialogs){const loading=message('Loading chats…');body.append(loading);try{dialogs=await json('dialogs');loading.remove();}catch(e){loading.remove();body.append(message(e.message,'notice warning'));}}
+      if(!dialogs){const loading=message('Loading chats…');body.append(loading);try{dialogs=await request(who,'dialogs');loading.remove();}catch(e){loading.remove();if(e.name==='StaleView')throw e;body.append(message(e.message,'notice warning'));}}
+      requireOwner(who);
       if(dialogs){
         if(draft.scope==='folder')body.append(select('Telegram folder',[['','Choose a folder'],...dialogs.folders.map(f=>[String(f.id),f.title])],String(draft.folder_id??''),async id=>{draft.folder_id=id===''?null:Number(id);await saveDraft();updateNext();}));
         if(draft.scope==='selected'){
@@ -374,8 +400,8 @@ export function createSettingsHub(ctx) {
         }
         body.append(message(tr('{n} chats loaded. File size and duration are estimates, not a guarantee.',{n:dialogs.dialogs.length})));
         if(dialogs.may_be_truncated)body.append(message('The chat list is limited. Increase the chat list limit in Settings.','notice warning'));
-        if(draft.completed)body.append(button('Save chat selection',async()=>{data=await json('settings/scope',draftBody());await navigate('settings');toast(tr('Settings saved.'));},'primary'));
-        body.append(button('Estimate size and time',async()=>{const estimate=await json('first-run/estimate',draftBody());
+        if(draft.completed)body.append(button('Save chat selection',async()=>{const action=owner();data=await request(action,'settings/scope',draftBody());await navigate('settings');requireOwner(action);toast(tr('Settings saved.'));},'primary'));
+        body.append(button('Estimate size and time',async()=>{const estimate=await request(owner(),'first-run/estimate',draftBody());
           estimateBox.textContent=estimate.available?tr('About {size} MB · {min}–{max} minutes. Based on a sample; actual results may differ.',estimate):tr('An estimate is not available yet.');}));
         const estimateBox=message('The estimate uses a small sample of the selected chats.');body.append(estimateBox);
       }
@@ -391,19 +417,21 @@ export function createSettingsHub(ctx) {
     const footer=node('div','wizard-actions');page.append(footer);
     const back=button('Back',async()=>{draft.step--;await saveDraft();await renderWizard();});back.disabled=draft.step===1;footer.append(back);
     const next=button(draft.step===7?'Start':'Next',async()=>{
+      const action=owner();
       if(draft.step===7){
-        const result=await json('first-run/finish',draftBody());data=result;draft={...result.wizard};await refreshStatus();
+        const result=await request(action,'first-run/finish',draftBody());data=result;draft={...result.wizard};await refresh(action);
         if(result.action==='export'){await navigate('evidence');return;}
         // Recording started: stay here and show that it works before leaving the setup.
-        live={started:Date.now(),done:false};await renderWizard();watchLive();return;
+        if(state.view!=='first-run')return;
+        live={started:Date.now(),done:false};await renderWizard(action);watchLive(action);return;
       }
-      if(draft.step===3){if(!await applyGoal(draft.goal,{first:!data.goal}))return;}
-      await saveDraft({step:draft.step+1});await renderWizard();
+      if(draft.step===3){if(!await applyGoal(draft.goal,{first:!data.goal},action))return;}
+      await saveDraft({step:draft.step+1},action);await renderWizard(action);
     },'primary');next.id='first-run-next';footer.append(next);
-    page.append(button('Skip, I’ll set it up myself',async()=>{data=await json('first-run/skip',{});await navigate('settings');},'text-link setup-skip'));
+    page.append(button('Skip, I’ll set it up myself',async()=>{data=await request(owner(),'first-run/skip',{});await navigate('settings');},'text-link setup-skip'));
     updateNext();heading.focus({preventScroll:true});
     if(draft.step===4&&draft.route==='auto'&&!autoTried&&!fresh(data.connection)){
-      autoTried=true;void checkConnection();
+      autoTried=true;void checkConnection(false,who);
     }
   }
   // Recording sees everything the account sees; the answer limits what a main account may record.
@@ -438,15 +466,18 @@ export function createSettingsHub(ctx) {
     }
   }
   // Until every part works (or is off), for at most two minutes; then the person moves on either way.
-  function watchLive(){
+  function watchLive(who=owner()){
     clearTimeout(liveTimer);
+    const session=live;
+    const active=()=>current(who)&&session&&live===session&&state.view==='first-run';
     const tick=async()=>{
-      if(!live||state.view!=='first-run')return;
-      try{await refreshStatus();}catch{}
+      if(!active())return;
+      try{await refresh(who);}catch{}
+      if(!active())return;
       const ready=liveParts().every(part=>['working','off'].includes(part.state));
       if(ready&&Date.now()-live.started>4000||Date.now()-live.started>120000)live.done=true;
-      await renderWizard();
-      if(!live.done)liveTimer=setTimeout(tick,2000);
+      await renderWizard(who);
+      if(active()&&!live.done)liveTimer=setTimeout(tick,2000);
     };
     liveTimer=setTimeout(tick,1500);
   }

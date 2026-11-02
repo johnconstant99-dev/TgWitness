@@ -4,7 +4,7 @@ const views=Object.fromEntries(Object.entries(paths).map(([view,path])=>[path,vi
 const legacy={start:"start",account:"connection",connection:"connection",journal:"observations",observations:"observations",
   exports:"evidence",evidence:"evidence",extras:"witness",witness:"witness",sealed:"sealed",chats:"chats",
   sources:"sources",parameters:"parameters",accounts:"accounts",access:"access","system-log":"system-log",integrations:"integrations",analysis:"analysis"};
-const cards=new Set(["setup","alerts","evidence","cloud","bot","github"]);
+const cards=new Set(["setup","alerts","evidence","cloud","bot","github","storage"]);
 // The first setup (views/settings-hub.js): one address per step, /first-run/1 to /first-run/7.
 const firstRunStep=value=>/^[1-7]$/.test(value||"")?Number(value):null;
 const workspacePattern=/^(?:default|[a-f0-9]{32})$/;
@@ -63,7 +63,7 @@ export function routeURL(route,{base=location.href,staticDemo=false}={}){
 export function createRouter(context){
   const staticDemo=!!window.TGW_ONLINE_DEMO||/\/demo(?:\/index\.html|\/)?$/.test(location.pathname);
   let generation=0,lastReplay=null,started=false;
-  const parse=()=>parseRoute(location.href,{workspace:context.snapshot().workspace,staticDemo});
+  const parse=()=>parseRoute(location.href,{workspace:'default',staticDemo});
   const href=patch=>routeURL({...context.snapshot(),...patch},{staticDemo}).href;
   const emit=(route,reason)=>window.dispatchEvent(new CustomEvent("tgwitness:route",{detail:{view:route.view,workspace:route.workspace,route,reason}}));
   function record(patch={},options={}){

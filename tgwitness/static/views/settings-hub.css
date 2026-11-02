@@ -105,7 +105,7 @@ html[data-ui-level=simple] #mode-switch,html[data-ui-level=standard] #mode-switc
   .workspace[data-current-view=chats] .health-toolbar { display:none; }
   .media-duration { gap:6px; margin-block:6px; }
   #view-sources .recording-sections .padded { padding-block:14px; }
-  .workspace .topbar { flex-wrap:wrap; }
+  .workspace .topbar { flex-wrap:wrap; row-gap:4px; padding-block:6px; }
   .topbar .profile-switch { flex-basis:calc(100% - 52px); }
   .topbar .top-actions { flex:1 1 100%; max-width:100%; }
 }

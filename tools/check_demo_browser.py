@@ -6,6 +6,7 @@ from pathlib import Path
 import zipfile
 
 from playwright.sync_api import expect, sync_playwright
+from check_browser import answer_panel_dialog
 
 
 def check_demo_downloads(browser, url, output, route_request, errors, failed):
@@ -37,6 +38,7 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
             page.locator('#export-more-formats > summary').click()
         with page.expect_download() as pending:
             page.locator(f'#view-evidence [data-export="{fmt}"]').click()
+            answer_panel_dialog(page)
         download = pending.value
         assert download.failure() is None
         saved = output / ("demo-sample." + fmt)
@@ -98,6 +100,7 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
         for repeat in range(2):
             with page.expect_download() as pending:
                 page.locator(f'[data-account-export-action="{action}"]').click()
+                answer_panel_dialog(page)
             sample = output / f'demo-{action}-{repeat}.zip'
             pending.value.save_as(sample)
             data = sample.read_bytes()

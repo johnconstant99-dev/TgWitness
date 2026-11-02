@@ -6,12 +6,10 @@ own temporary workspaces and do not connect Telegram accounts.
 
 ## Source language and localization
 
-English is the canonical source language for the interface, documentation, demo
-and release notes. Design and review new behavior in English first, including its
-complete browser flows. Russian and other languages are additional translations.
-Keep English strings as translation keys and English as the fallback. Respect an
-explicit language choice and supported browser preferences; a translation update
-must not change the project's source language or force that locale on users.
+Write and review new interface text, guides and release notes in English before
+translating them. Use English strings as translation keys and as the fallback for
+missing translations. Keep the user's selected language across navigation and
+reloads; use browser preferences when they have not chosen one.
 
 ## Modules and ownership
 

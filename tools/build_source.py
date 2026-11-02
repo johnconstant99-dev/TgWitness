@@ -15,7 +15,7 @@ FILES = [
     "deploy/installer/index.html", "deploy/installer/style.css", "deploy/installer/site.js", "deploy/installer/wrangler.toml",
     "deploy/media-worker/Dockerfile", "deploy/media-worker/worker.py",
     "deploy/media-worker/requirements.in", "deploy/media-worker/requirements.lock",
-    "integrations/webhook.schema.json", "integrations/n8n-tgwitness.json", "tools/check_webhook_example.cjs",
+    "integrations/webhook.schema.json", "integrations/n8n-tgwitness.json", "tools/check_webhook_example.cjs", "tools/check_privacy_js.cjs",
     "tools/check_writeonly_drafts.mjs", "deploy/constraints-mcp.txt",
     "deploy/Dockerfile.sealed", "scripts/sealed_runner.py",
     "README.md", "docs/QUICKSTART.md", "LICENSE", "NOTICE", ".github/SECURITY.md", ".github/SUPPORT.md", ".github/CONTRIBUTING.md", "docs/CHANGELOG.md", "pyproject.toml",

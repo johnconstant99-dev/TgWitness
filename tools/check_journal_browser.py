@@ -271,7 +271,7 @@ def inspector(page):
       const preview=signedRecordPreview(value,{node,tr});document.body.append(preview);preview.open=true;
       await new Promise(resolve=>setTimeout(resolve,50));
       const result={size:preview.querySelector('code').textContent.length,images:preview.querySelectorAll('img').length,
-        hint:preview.querySelector('.hint')?.textContent,ran:window.__journal_xss||false};preview.remove();return result;
+        hint:[...preview.querySelectorAll('.hint')].map(item=>item.textContent).join(' '),ran:window.__journal_xss||false};preview.remove();return result;
     }""")
     assert safe["size"] == 120000 and safe["images"] == 0 and not safe["ran"] and "complete record" in safe["hint"]
     for width, height in ((1440, 1000), (390, 844)):

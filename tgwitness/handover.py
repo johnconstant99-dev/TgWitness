@@ -68,6 +68,10 @@ class EmptySelection(ValueError):
     """No record of the journal matches the chosen chats, period and people."""
 
 
+class RemoteAttachment(ValueError):
+    """A selected preserved attachment was offloaded and must be restored first."""
+
+
 class Options(BaseModel):
     """What a handover extract contains. Signed into its manifest and recorded in the journal."""
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
@@ -451,6 +455,16 @@ def export(store, vault, options, report_options=None):
             for name in sorted(x for x in minimiser.files if isinstance(x, str) and re.fullmatch("[0-9a-f]{64}", x)):
                 source = store.root / "media" / name
                 if not source.is_file():
+                    if (store.root / "storage.sqlite3").exists():
+                        from .storage import Receipts
+                        receipts = Receipts(store.root)
+                        try:
+                            receipt = receipts.get(name)
+                        finally:
+                            receipts.close()
+                        if receipt and receipt["evicted"]:
+                            raise RemoteAttachment("A selected attachment is in remote storage. Open Storage → Restore all files, "
+                                                   "then create the handover again, or explicitly omit attachments.")
                     continue
                 with source.open("rb") as incoming:
                     if write_member("media/" + name, iter(lambda: incoming.read(1024 * 1024), b"")) != name:

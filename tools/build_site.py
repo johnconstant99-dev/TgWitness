@@ -73,9 +73,11 @@ MODES_PAGES = site_modes.FILES
 
 DEMO_STATIC = {"demo/" + name: "tgwitness/static/" + name
                for name in ("style.css", "theme.js", "i18n.js", "dialogs.js", "app.js", "router.js", "integrations.js", "analysis.js", "media-analysis.js", "webhooks.js", "proxies.js", "fleet.js", "review.js", "live.js", "mark.svg", "guide.css", "guide.js",
-                            "cloud-capture-locales.js", "cloud-capture.js", "cloud-capture.css", "cloud-capture-story.js", "cloud-capture-story.css", "capture.html")}
+                            "cloud-capture-locales.js", "cloud-capture.js", "cloud-capture.css", "cloud-capture-story.js", "cloud-capture-story.css", "capture.html",
+                            "services.js", "services.css", "services-icons.svg", "account-import.js", "account-import.css",
+                            "privacy.js", "chat-safety.js", "workspace-safety.css")}
 DEMO_STATIC.update({"demo/core/" + name: "tgwitness/static/core/" + name
-                    for name in ("time.js", "view-host.js")})
+                    for name in ("time.js", "view-host.js", "workspace-safety.js")})
 DEMO_STATIC.update({"demo/components/" + name: "tgwitness/static/components/" + name
                     for name in ("shell.js", "shell.css", "health.js", "health.css", "health-actions.js", "collection.js", "collection.css", "workspaces.js", "forms.js", "forms.css", "connection-notice.js", "feedback.css", "account-state.js", "modes.js", "modes.css")})
 DEMO_STATIC.update({"demo/views/" + name: "tgwitness/static/views/" + name

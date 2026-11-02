@@ -19,6 +19,7 @@ async def synthetic(method, url, network, **kwargs):
     request = json.loads(kwargs["body"])
     data = json.loads(request["messages"][1]["content"])
     source = data["observations"][0]
+    assert "TopSecret-1234" in source["text"], "Display masking must not change approved model input"
     answer = {"claims": [{"text": "The saved observation includes example.org.",
                           "citations": [{"id": source["id"], "quote": "example.org"}]}]}
     return 200, {}, json.dumps({"message": {"content": json.dumps(answer)}, "done": True,
@@ -55,7 +56,7 @@ def main():
     try:
         with tempfile.TemporaryDirectory(prefix="analysis-check-") as scratch, RunningApp(Path(scratch)) as app:
             app.app.state.store.set_target(-1001, "Synthetic archive", "supergroup", True)
-            app.app.state.store.append("message.new", {"text": "A saved link: example.org"}, chat_id=-1001, message_id=1)
+            original_record = app.app.state.store.append("message.new", {"text": "A saved link: example.org; Password: TopSecret-1234"}, chat_id=-1001, message_id=1)
             with sync_playwright() as p:
                 browser = launch_browser(p)
                 check_settings(browser)
@@ -93,10 +94,44 @@ def main():
                 page.locator("#ask-question").fill("Where does example.org appear?")
                 page.locator('#ask-form button[type="submit"]').click()
                 expect(page.locator("#ask-sources")).to_contain_text("example.org")
+                expect(page.locator("#ask-sources")).not_to_contain_text("TopSecret-1234")
+                expect(page.locator("#ask-transmission")).not_to_contain_text("TopSecret-1234")
+                expect(page.locator("#ask-transmission-privacy")).to_contain_text("original text")
+                page.locator('#ask-transmission').locator('..').locator('summary').click()
+                transmission_reveal = page.locator('#ask-transmission .secret-reveal')
+                page.route('**/api/privacy/reveal', lambda route: route.fulfill(status=503, json={'detail': 'Synthetic unavailable'}))
+                transmission_reveal.click()
+                expect(transmission_reveal).to_be_enabled()
+                expect(page.locator('#ask-transmission')).not_to_contain_text('TopSecret-1234')
+                page.unroute('**/api/privacy/reveal')
+                transmission_reveal.click()
+                expect(page.locator('#ask-transmission code')).to_contain_text('TopSecret-1234')
+                reveals = app.app.state.store.events(kind='panel.secret_revealed', limit=20)
+                assert reveals[-1]['payload']['chat_id'] == -1001 and reveals[-1]['payload']['message_id'] == 1
+                assert 'TopSecret-1234' not in json.dumps(reveals)
+                transmission_reveal.click()
+                expect(page.locator('#ask-transmission')).not_to_contain_text('TopSecret-1234')
+                page.locator('#ask-transmission').locator('..').locator('summary').click()
+                source_reveal = page.locator('#ask-sources blockquote .secret-reveal').first
+                source_reveal.click()
+                expect(page.locator('#ask-sources')).to_contain_text('TopSecret-1234')
+                source_reveal.click()
+                expect(page.locator('#ask-sources')).not_to_contain_text('TopSecret-1234')
                 expect(page.locator("#ask-provider-status")).to_contain_text("synthetic-updated")
                 expect(page.locator("#ask-provider-status")).to_contain_text("http://127.0.0.1:11434")
                 page.locator('#ask-sources button', has_text="Open chat context").click()
                 expect(page.locator("#ask-sources")).to_contain_text("message.new")
+                expect(page.locator('#ask-sources')).not_to_contain_text('TopSecret-1234')
+                # A preference changed in Chats also updates detached Analysis results.
+                page.evaluate('async()=>{await navigate("chats");await openChat(-1001);}')
+                page.locator('#chat-mask-secrets').uncheck()
+                page.evaluate('()=>navigate("analysis")')
+                expect(page.locator('#ask-sources')).to_contain_text('TopSecret-1234')
+                page.evaluate('()=>navigate("chats")')
+                page.locator('#chat-mask-secrets').check()
+                page.evaluate('()=>navigate("analysis")')
+                expect(page.locator('#ask-sources')).not_to_contain_text('TopSecret-1234')
+                expect(page.locator('#ask-transmission')).not_to_contain_text('TopSecret-1234')
                 page.locator("#ask-consent").check()
                 page.locator("#ask-generate").click()
                 expect(page.locator("#ask-claims")).to_contain_text("The saved observation includes")
@@ -111,6 +146,9 @@ def main():
                 report = json.loads(Path(download.value.path()).read_text())
                 assert report["analyst_revisions"] and report["sources"][0]["source"]["hash"]
                 assert report["model_summary"][0]["category"] == "model_inference"
+                assert 'TopSecret-1234' in report['sources'][0]['text'], 'Export must preserve the source text'
+                assert app.app.state.store.events(kind='message.new', limit=1)[0]['hash'] == original_record['hash']
+                expect(page.locator('#ask-report-content')).not_to_contain_text('TopSecret-1234')
                 for theme in ("light", "dark"):
                     page.locator('.sidebar [data-theme-choice="' + theme + '"]').click()
                     check_layout(page)

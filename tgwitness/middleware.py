@@ -14,9 +14,13 @@ def request_limit(path, default=16384):
         return 512 * 1024  # bounded IDs, literal filters and disclosure policies; no uploads
     if "/api/analysis/reports/" in path:
         return 65536
-    if path.endswith(("/api/auth/import", "/api/profiles/import")):
+    if path.endswith(("/api/auth/import", "/api/auth/import/preview", "/api/profiles/import")):
         from .account_import import IMPORT_REQUEST_LIMIT
         return IMPORT_REQUEST_LIMIT
+    if path.endswith('/api/storage/recovery'):
+        return 8 * 1024 * 1024
+    if path.endswith('/api/storage'):
+        return 128 * 1024
     if path.endswith("/api/network/sources/list"):
         return 1536 * 1024
     return default

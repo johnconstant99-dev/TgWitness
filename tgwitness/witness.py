@@ -64,7 +64,8 @@ TEXTS = {"ok": "journal head", "key_changed": "COLLECTOR KEY CHANGED", "rollback
          "head": "Head"}
 STATUS_TEXT = {key: TEXTS[key] for key in ("ok", "key_changed", "rollback", "fork", "invalid")}
 OPTIONS = ("collector", "token", "token_file", "bot_token", "bot_token_file", "channel", "interval", "timeout",
-           "post", "title", "texts", "collector_fingerprint", "proxy", "bot_api", "data_dir")
+           "post", "title", "texts", "collector_fingerprint", "proxy", "bot_api", "data_dir",
+           "discord_webhook", "discord_webhook_file")
 
 
 def key_cipher(root):
@@ -170,7 +171,7 @@ def describe(exc):
 class Witness:
     def __init__(self, root, collector, token, channel=None, bot_token=None, interval=DEFAULT_INTERVAL,
                  pinned=None, network=None, bot_api="https://api.telegram.org", fetch=None, send=None,
-                 timeout=TIMEOUT, post="all", title=TITLE, texts=None):
+                 timeout=TIMEOUT, post="all", title=TITLE, texts=None, discord_webhook=None):
         if post not in POST_POLICIES:
             raise ValueError("--post must be one of: " + ", ".join(POST_POLICIES) + ".")
         unknown = set(texts or {}) - set(TEXTS)
@@ -189,6 +190,16 @@ class Witness:
         self.fingerprint = fingerprint(self.key.public_key)
         self.collector, self.token = collector.rstrip("/"), token
         self.channel, self.bot_token, self.bot_api = channel, bot_token, bot_api.rstrip("/")
+        if discord_webhook and (not isinstance(discord_webhook, str) or len(discord_webhook) > 2048
+                                or not re.fullmatch(r"https://discord\.com/api/webhooks/[0-9]+/[A-Za-z0-9_-]+", discord_webhook)):
+            self.close()
+            raise ValueError("Use a Discord channel webhook from Channel Settings → Integrations.")
+        if discord_webhook and channel:
+            self.close()
+            raise ValueError("Choose one witness publisher: a Telegram channel or a Discord webhook.")
+        self.discord_webhook = discord_webhook
+        if discord_webhook:
+            self.channel = "Discord webhook"
         self.interval, self.timeout = interval, timeout
         self.post, self.title, self.texts = post, title, {**TEXTS, **(texts or {})}
         self.network = network or NetworkConfig(kind="direct")
@@ -199,7 +210,7 @@ class Witness:
             self.store.set_setting("collector_fingerprint", pinned)
         self.pinned = pinned or self.store.get_setting("collector_fingerprint")
         self.fetch = fetch or self.http_fetch
-        self.send = send if send is not None else (self.bot_send if channel and bot_token else None)
+        self.send = send if send is not None else (self.discord_send if discord_webhook else self.bot_send if channel and bot_token else None)
         self.host = urlsplit(self.collector).hostname
 
     def close(self):
@@ -235,6 +246,25 @@ class Witness:
         if not answer.get("ok"):
             raise InvalidAnswer(answer.get("description") or "The Bot API refused the message.")
         return answer["result"]["message_id"]
+
+    async def discord_send(self, text):
+        # Discord has a 2,000-character message limit. Keep the entire signed post
+        # in an attachment when it does not fit; never truncate a proof token.
+        payload = {"content": text if len(text) <= 2000 else "TgWitness witness · full signed check attached.",
+                   "allowed_mentions": {"parse": []}}
+        headers = {"Content-Type": "application/json"}
+        body = json.dumps(payload).encode()
+        if len(text) > 2000:
+            boundary = "tgwitness-" + secrets.token_hex(16)
+            headers["Content-Type"] = "multipart/form-data; boundary=" + boundary
+            body = (f'--{boundary}\r\nContent-Disposition: form-data; name="payload_json"\r\n'
+                    'Content-Type: application/json\r\n\r\n').encode() + json.dumps(payload).encode()
+            body += (f'\r\n--{boundary}\r\nContent-Disposition: form-data; name="files[0]"; '
+                     'filename="witness-check.txt"\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n').encode()
+            body += text.encode() + f'\r\n--{boundary}--\r\n'.encode()
+        _, _, answer = await request("POST", self.discord_webhook + "?wait=true", self.network, headers, body,
+                                    timeout=self.timeout, limit=256 * 1024)
+        return json.loads(answer)["id"]
 
     def check(self, answer):
         """Journal record for one answer: verified checkpoint, pinned key, journal only grows."""
@@ -472,8 +502,9 @@ def resolve(args, config):
         return file_path(name + "_file", path).read_text(encoding="utf-8").strip() if path else None
 
     options = {name: pick(name) for name in OPTIONS if name not in ("token", "token_file", "bot_token",
-                                                                     "bot_token_file", "texts")}
-    options.update(token=secret("token"), bot_token=secret("bot_token"), texts=config.get("texts") or {})
+                                  "bot_token_file", "discord_webhook", "discord_webhook_file", "texts")}
+    options.update(token=secret("token"), bot_token=secret("bot_token"), discord_webhook=secret("discord_webhook"),
+                   texts=config.get("texts") or {})
     for name in ("interval", "timeout"):
         try:
             options[name] = int(options[name])
@@ -498,6 +529,8 @@ def main():
     run.add_argument("--token-file")
     run.add_argument("--bot-token", help="Telegram bot token (prefer --bot-token-file)")
     run.add_argument("--bot-token-file")
+    run.add_argument("--discord-webhook-file", help="File containing your Discord channel webhook URL")
+    run.add_argument("--discord-webhook", help="Discord webhook (prefer --discord-webhook-file)")
     run.add_argument("--channel", help="@channel or numeric chat ID the bot posts to")
     run.add_argument("--interval", type=int, help="Minutes between checks (default 10)")
     run.add_argument("--timeout", type=int, help="Seconds to wait for the collector and the Bot API (default 30)")
@@ -526,6 +559,8 @@ def main():
             parser.error("--timeout must be 5-600 seconds.")
         if bool(options["channel"]) != bool(options["bot_token"]):
             parser.error("Posting needs both --channel and a bot token; give both or neither.")
+        if options["discord_webhook"] and options["channel"]:
+            parser.error("Choose either a Discord webhook or a Telegram bot for this witness.")
         options["collector"] = http_address(options["collector"])
         options["bot_api"] = http_address(options["bot_api"])
         if options["collector_fingerprint"] and not re.fullmatch(r"[0-9a-f]{64}", options["collector_fingerprint"]):
@@ -540,7 +575,7 @@ def main():
         network = proxy_config(options["proxy"])
         if args.check_config:
             print(json.dumps({"valid": True, "key_pinned": bool(options["collector_fingerprint"]),
-                              "posting": bool(options["channel"]), "interval_minutes": options["interval"],
+                              "posting": bool(options["channel"] or options["discord_webhook"]), "interval_minutes": options["interval"],
                               "post_policy": options["post"], "route": network.kind,
                               "network_checked": False}))
             return
@@ -550,13 +585,13 @@ def main():
         witness = Witness(options["data_dir"], options["collector"], options["token"], options["channel"],
                           options["bot_token"], options["interval"], options["collector_fingerprint"],
                           network, options["bot_api"], timeout=options["timeout"],
-                          post=options["post"], title=options["title"], texts=options["texts"])
+                          post=options["post"], title=options["title"], texts=options["texts"], discord_webhook=options["discord_webhook"])
     except (ValueError, RuntimeError, OSError) as exc:
         parser.exit(1, str(exc) + "\n")
     print("TgWitness witness", __version__, flush=True)
     print("Witness key fingerprint:", witness.fingerprint, "(keep a copy elsewhere)", flush=True)
     print("Collector:", witness.host, "- every", options["interval"], "min -",
-          ("posting to " + options["channel"] + " (" + options["post"] + ")") if witness.send
+          ("posting to " + witness.channel + " (" + options["post"] + ")") if witness.send
           else "not posting (no channel configured)", flush=True)
 
     async def serve():

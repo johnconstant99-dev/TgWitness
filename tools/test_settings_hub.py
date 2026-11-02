@@ -1,5 +1,6 @@
 """Settings invariants and first-run browser coverage, using only synthetic Telegram clients."""
 import asyncio
+import json
 import ssl
 import sys
 import time
@@ -292,10 +293,18 @@ def test_browser(tmp_path, monkeypatch):
         page.get_by_role('button',name='Off-site copy',exact=True).click()
         expect(page.locator('#view-settings #replica-form')).to_be_visible()
         expect(page.locator('#replica-enabled')).not_to_be_checked()
-        page.goto(server.url+'/settings?lang=ru')
+        # URL language renders before bootstrap persists the saved preference.
+        # Wait for that specific write before inspecting the store or navigating away.
+        with page.expect_response(lambda response: response.url == server.url+'/api/preferences'
+                and response.request.method == 'POST'
+                and response.request.post_data_json.get('language') == 'ru') as language_saved:
+            page.goto(server.url+'/settings?lang=ru')
+        assert language_saved.value.ok, language_saved.value.status
+        assert language_saved.value.json()['saved']['language'] == 'ru'
         expect(page.locator('#view-settings h1')).to_have_text('Настройки')
         expect(page.locator('html')).to_have_attribute('data-ui-level','simple')
         assert server.app.state.store.get_setting('ui_preferences:admin')['language']=='ru'
+        assert page.evaluate("sessionStorage.getItem('tgwitness-token')")==token
         page.goto(server.url+'/settings')
         expect(page.locator('#view-settings h1')).to_have_text('Настройки')
         assert page.evaluate("sessionStorage.getItem('tgwitness-token')")==token
@@ -340,6 +349,263 @@ def test_settings_bootstrap_failure_preserves_session(tmp_path, outcome):
         assert page.evaluate('sessionStorage.getItem("tgwitness-token")')==token
         expect(page.locator('#workspace')).to_be_visible()
         assert page.evaluate('async()=>{await json("status");return true;}')
+        browser.close()
+
+
+def test_first_run_import_and_settings_account_actions(tmp_path):
+    """Moving the original auth card must retain preflight, renew and separate-account import."""
+    from playwright.sync_api import sync_playwright, expect
+    from tools.browser_fixtures import saved_session, sqlite_fixture
+    from tools.check_browser import answer_panel_dialog
+
+    def upload(name, payload):
+        return {'name': name, 'mimeType': 'application/octet-stream', 'buffer': payload}
+
+    metadata = json.dumps({'session_file': '', 'app_id': 123, 'app_hash': 'a' * 32,
+                           'device': 'Synthetic import laptop', 'sdk': 'Windows 11'}).encode()
+    pair = [upload('research.json', metadata), upload('research.session', sqlite_fixture())]
+    with RunningApp(tmp_path) as server, sync_playwright() as p:
+        store = server.app.state.store
+        store.set_setting('first_run', {'step': 5, 'goal': 'copy', 'unchecked': True})
+        store.set_setting('ui_preferences:admin', {'language': 'en', 'timezone': 'UTC', 'theme': 'system', 'level': 'expert'})
+        key = server.app.state.vault.public_key
+        browser = launch_browser(p)
+        page = browser.new_page(viewport={'width': 1280, 'height': 1000}, locale='en-US', reduced_motion='reduce')
+        errors = []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        page.goto(server.url)
+        page.locator('#panel-token').fill(server.app.state.vault.token)
+        page.locator('#unlock-form button').click()
+        expect(page.locator('#view-first-run #credentials-form')).to_be_visible()
+        page.locator('.other-sign-in > summary').click()
+        page.locator('[data-auth-method="files"]').click()
+        page.locator('#session-file').set_input_files([pair[0]])
+        expect(page.locator('#import-result')).to_have_attribute('data-state', 'missing_session')
+        expect(page.locator('#auth-continue')).to_be_disabled()
+        expect(page.locator('#first-run-next')).to_be_disabled()
+        assert not server.app.state.collector.status()['has_session']
+        page.locator('#session-file').set_input_files(pair)
+        expect(page.locator('#import-result')).to_have_attribute('data-state', 'ready')
+        expect(page.locator('#auth-continue')).to_be_enabled()
+        page.locator('#auth-continue').click()
+        expect(page.locator('#view-first-run #authorized-account')).to_contain_text('ID 44')
+        expect(page.locator('#first-run-next')).to_be_enabled()
+        assert server.app.state.vault.public_key == key
+
+        page.evaluate('()=>navigate("settings")')
+        page.locator('[data-section="telegram"]').click()
+        expect(page.locator('#view-settings #authorized-account')).to_contain_text('ID 44')
+        page.locator('#change-account').click()
+        page.locator('.other-sign-in').evaluate('el=>el.open=true')
+        page.locator('[data-auth-method="files"]').click()
+        page.locator('#session-file').set_input_files(pair)
+        expect(page.locator('#import-result')).to_have_attribute('data-state', 'ready')
+        page.locator('#auth-continue').click()
+        expect(page.locator('#view-settings #authorized-account')).to_contain_text('ID 44')
+        assert page.evaluate('state.profile') == 'default'
+        assert len(server.app.state.profiles.entries) == 1
+        assert server.app.state.vault.public_key == key
+
+        # The programmatic Files choice must expose its method controls as well.
+        page.locator('.other-sign-in').evaluate('el=>el.open=false')
+        page.locator('#account-add-another').click()
+        expect(page.locator('[data-auth-method="files"]')).to_be_visible()
+        expect(page.locator('#view-settings #session-file')).to_be_visible()
+        page.locator('#api-details').evaluate('el=>el.open=true')
+        page.locator('#api-id').fill('')
+        page.locator('#api-hash').fill('')
+        other = json.dumps({'app_id': 456, 'app_hash': 'b' * 32, 'session': saved_session(b'n')}).encode()
+        page.locator('#session-file').set_input_files(upload('second-account.json', other))
+        expect(page.locator('#import-result')).to_have_attribute('data-state', 'ready')
+        page.locator('#auth-continue').click()
+        expect(page.locator('dialog.panel-dialog input')).to_have_value('second-account')
+        answer_panel_dialog(page, text='Second imported account')
+        expect(page.locator('#view-connection #authorized-account')).to_contain_text('ID 456')
+        assert page.evaluate('state.profile') != 'default'
+        assert len(server.app.state.profiles.entries) == 2
+        assert store.get_setting('account')['id'] == 44
+        assert server.app.state.vault.public_key == key
+        assert not errors, errors
+        browser.close()
+
+
+@pytest.mark.parametrize('workspace', ['default', 'child'])
+def test_unfinished_setup_keeps_explicit_workspace_link(tmp_path, workspace):
+    """Fresh-install deep links remain scoped without silently skipping setup."""
+    from playwright.sync_api import sync_playwright, expect
+    with RunningApp(tmp_path) as server, sync_playwright() as p:
+        profile = 'default'
+        if workspace == 'child':
+            response = requests.post(server.url + '/api/profiles',
+                headers={'Authorization': 'Bearer ' + server.app.state.vault.token}, json={'label': 'Fresh child'})
+            assert response.ok, response.text
+            profile = response.json()['id']
+        app = server.app if profile == 'default' else server.app.state.profiles.entries[profile]['app']
+        app.state.store.set_setting('ui_preferences:admin',
+            {'language': 'en', 'timezone': 'UTC', 'theme': 'system', 'level': 'expert'})
+        browser = launch_browser(p)
+        page = browser.new_page(locale='en-US', reduced_motion='reduce')
+        page.add_init_script('sessionStorage.setItem("tgwitness-profile", "default")')
+        page.goto(server.url + '/exports?ws=' + profile)
+        page.locator('#panel-token').fill(server.app.state.vault.token)
+        page.locator('#unlock-form button').click()
+        expect(page.locator('#view-evidence')).to_be_visible()
+        expect(page.locator('#unlock-form button')).to_be_enabled()
+        expect(page).to_have_url(server.url + '/exports?ws=' + profile)
+        expect(page.locator('#view-first-run')).to_be_hidden()
+        assert page.evaluate('state.profile') == profile
+        assert app.state.store.get_setting('first_run', None) is None
+        browser.close()
+
+
+@pytest.mark.parametrize('held_path', ['/api/preferences', '/api/settings'])
+def test_unfinished_setup_bootstrap_respects_new_navigation(tmp_path, held_path):
+    from playwright.sync_api import sync_playwright, expect
+    with RunningApp(tmp_path) as server, sync_playwright() as p:
+        server.app.state.store.set_setting('ui_preferences:admin',
+            {'language': 'en', 'timezone': 'UTC', 'theme': 'system', 'level': 'expert'})
+        browser = launch_browser(p)
+        page = browser.new_page(locale='en-US', reduced_motion='reduce')
+        page.add_init_script("""(() => {
+          const original=window.fetch.bind(window);let held=false;
+          window.fetch=async(...args)=>{const response=await original(...args);
+            if(!held&&String(args[0])===HELD_PATH){held=true;await new Promise(resolve=>{window.releaseSetupBootstrap=resolve;});}
+            return response;
+          };
+        })();""".replace('HELD_PATH', json.dumps(held_path)))
+        page.goto(server.url)
+        page.locator('#panel-token').fill(server.app.state.vault.token)
+        page.locator('#unlock-form button').click()
+        page.wait_for_function('()=>typeof window.releaseSetupBootstrap==="function"')
+        page.locator('.sidebar [data-view="evidence"]').click()
+        expect(page.locator('#view-evidence')).to_be_visible()
+        page.evaluate('window.releaseSetupBootstrap()')
+        expect(page.locator('#unlock-form button')).to_be_enabled()
+        expect(page).to_have_url(server.url + '/exports?ws=default')
+        expect(page.locator('#view-evidence')).to_be_visible()
+        expect(page.locator('#view-first-run')).to_be_hidden()
+        assert server.app.state.store.get_setting('first_run', None) is None
+        browser.close()
+
+
+@pytest.mark.parametrize('change', ['goal', 'outside'])
+def test_settings_consent_belongs_to_its_workspace(tmp_path, change):
+    """Accepting A's dialog after switching to B cannot use B's identical revision."""
+    from playwright.sync_api import sync_playwright, expect
+    from tools.check_browser import answer_panel_dialog
+
+    with RunningApp(tmp_path) as server, sync_playwright() as p:
+        response = requests.post(server.url + '/api/profiles',
+            headers={'Authorization': 'Bearer ' + server.app.state.vault.token}, json={'label': 'Second'})
+        assert response.ok, response.text
+        child = response.json()['id']
+        apps = (server.app, server.app.state.profiles.entries[child]['app'])
+        for app in apps:
+            app.state.store.set_setting('first_run', {'skipped': True})
+            app.state.store.set_setting('ui_preferences:admin',
+                {'language': 'en', 'timezone': 'UTC', 'theme': 'system', 'level': 'expert'})
+            app.state.store.set_setting('route_policy', {'exposure': 'tunnel', 'outside_enabled': False})
+        before = [settings_hub.state(app) for app in apps]
+        assert before[0]['revision'] == before[1]['revision']
+        assert not before[0]['values']['outside'] and not before[0]['values']['notifications']
+        assert settings_hub.preview(apps[0], settings_hub.GoalChange(goal='copy'))['diff']
+
+        browser = launch_browser(p)
+        page = browser.new_page(locale='en-US', reduced_motion='reduce')
+        mutations, errors = [], []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        page.on('request', lambda request: mutations.append(request.url)
+            if request.method == 'POST' and request.url.endswith(('/api/settings/goal', '/api/settings/edit')) else None)
+        page.goto(server.url + '/settings?ws=default')
+        page.locator('#panel-token').fill(server.app.state.vault.token)
+        page.locator('#unlock-form button').click()
+        expect(page.locator('#view-settings h1')).to_have_text('Settings')
+        expect(page.locator('#unlock-form button')).to_be_enabled()
+        page.locator('[data-section="goal"]' if change == 'goal' else '[data-section="notifications"]').click()
+        control = page.locator('[data-answer="copy"]' if change == 'goal' else '[data-setting="notifications"] input')
+        event = 'onclick' if change == 'goal' else 'onchange'
+        # Await the complete real action after its dialog resolves, without sleep or
+        # an assertion that races the subsequent request/refresh/render callbacks.
+        control.evaluate("""(el, event) => {
+          const original = el[event];
+          el[event] = (...args) => (window.pendingSettingsChange = original.apply(el, args));
+        }""", event)
+        control.click()
+        dialog = page.locator('dialog.panel-dialog[open]')
+        expect(dialog).to_contain_text('Change goal?' if change == 'goal'
+            else 'This feature needs external requests. Allow them?')
+        # A browser-history/workspace navigation can happen while a modal is open.
+        page.evaluate('id => switchProfile(id)', child)
+        assert page.evaluate('state.profile') == child
+        expect(page).to_have_url(server.url + '/settings?ws=' + child)
+        answer_panel_dialog(page)
+        page.evaluate('async () => { await window.pendingSettingsChange; }')
+        assert not mutations, f'An old confirmation sent a settings mutation: {mutations}'
+        for app, original in zip(apps, before, strict=True):
+            current = settings_hub.state(app)
+            assert current['revision'] == original['revision']
+            assert current['goal'] == original['goal']
+            assert current['values'] == original['values']
+        assert not errors, errors
+        browser.close()
+
+
+@pytest.mark.parametrize('destination', ['settings', 'workspace'])
+def test_live_setup_check_stops_after_navigation(tmp_path, destination):
+    """A delayed health response must not revive setup or touch the next workspace."""
+    from playwright.sync_api import sync_playwright, expect
+    from tools.browser_fixtures import ScopeClient, saved_session, CHAT
+
+    with RunningApp(tmp_path, client_factory=ScopeClient) as server, sync_playwright() as p:
+        store, vault = server.app.state.store, server.app.state.vault
+        vault.save('credentials', {'api_id': 123, 'api_hash': 'a' * 32, 'session': saved_session()})
+        vault.save('network', {'kind': 'direct'})
+        store.set_setting('route_policy', {'exposure': 'tunnel', 'outside_enabled': False})
+        store.set_setting('goal_preset', {'goal': 'watch'})
+        store.set_setting('first_run', {'step': 7, 'goal': 'watch', 'unchecked': True,
+            'scope': 'selected', 'chat_ids': [CHAT], 'account_kind': 'dedicated', 'route': 'direct'})
+        prefs = {'language': 'en', 'timezone': 'UTC', 'theme': 'system', 'level': 'expert'}
+        store.set_setting('ui_preferences:admin', prefs)
+        response = requests.post(server.url + '/api/profiles',
+            headers={'Authorization': 'Bearer ' + vault.token}, json={'label': 'Second'})
+        assert response.ok, response.text
+        child = response.json()['id']
+        child_store = server.app.state.profiles.entries[child]['app'].state.store
+        child_store.set_setting('first_run', {'skipped': True})
+        child_store.set_setting('ui_preferences:admin', prefs)
+        browser = launch_browser(p)
+        page = browser.new_page(locale='en-US', reduced_motion='reduce')
+        errors = []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        page.add_init_script("""(() => {
+          const original=window.fetch.bind(window); let held=false;
+          window.fetch=async(...args)=>{
+            const response=await original(...args);
+            if(!held&&String(args[0])==='/api/status'&&document.querySelector('.first-run-live')){
+              held=true; await new Promise(resolve=>{window.releaseLiveStatus=resolve;});
+              window.liveStatusReleased=true;
+            }
+            return response;
+          };
+        })();""")
+        page.goto(server.url + '/first-run/7?ws=default')
+        page.locator('#panel-token').fill(vault.token)
+        page.locator('#unlock-form button').click()
+        expect(page.locator('#first-run-next')).to_be_enabled()
+        page.locator('#first-run-next').click()
+        expect(page.locator('.first-run-live')).to_be_visible()
+        page.wait_for_function('()=>typeof window.releaseLiveStatus==="function"')
+        if destination == 'workspace':
+            page.evaluate('id=>switchProfile(id)', child)
+        page.evaluate('()=>navigate("settings")')
+        expect(page.locator('#view-settings')).to_be_visible()
+        page.evaluate('window.releaseLiveStatus()')
+        page.wait_for_function('()=>window.liveStatusReleased')
+        page.evaluate('()=>new Promise(requestAnimationFrame)')
+        expect(page.locator('#view-first-run')).to_be_hidden()
+        assert page.evaluate('state.profile') == (child if destination == 'workspace' else 'default')
+        assert child_store.get_setting('first_run') == {'skipped': True}
+        assert not errors, errors
         browser.close()
 
 

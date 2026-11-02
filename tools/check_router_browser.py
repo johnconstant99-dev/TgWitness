@@ -120,7 +120,7 @@ def main():
             page.goto(app.url + "/#observations")
             expect(page.locator("#view-observations")).to_be_visible()
             page.wait_for_function("()=>acceptanceLegacyRoute.pending.length>0")
-            expect(page).to_have_url(app.url + "/#observations")
+            expect(page).to_have_url(app.url + "/?ws=default#observations")
             page.evaluate("acceptanceLegacyRoute.active=false;acceptanceLegacyRoute.pending.splice(0).forEach(resolve=>resolve())")
             expect(page).to_have_url(app.url + "/journal?ws=default")
 

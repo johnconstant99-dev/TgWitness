@@ -55,8 +55,16 @@ class PanelFiles(StaticFiles):
 
         self.document = TAG.sub(decorate, document).replace('<script', '<script type="importmap">' + metadata + '</script><script', 1)
         self.policy = POLICY.format(script_hash=" '" + metadata_hash + "'")
+        self.showcase_documents = {name: TAG.sub(decorate, (root / name).read_text(encoding='utf-8'))
+                                   for name in ('showcase.html', 'showcase-manage.html')}
 
     async def get_response(self, path, scope):
+        if path in self.showcase_documents and scope['method'] in ('GET', 'HEAD'):
+            response = HTMLResponse(self.showcase_documents[path], headers={
+                'Content-Security-Policy': POLICY.format(script_hash=''), 'Cache-Control': 'no-store'})
+            if scope['method'] == 'HEAD':
+                response.body = b''
+            return response
         if path in ('.', '', 'index.html') and scope['method'] in ('GET', 'HEAD'):
             response = HTMLResponse(self.document, headers={'Content-Security-Policy': self.policy, 'Cache-Control': 'no-store'})
             if scope['method'] == 'HEAD':

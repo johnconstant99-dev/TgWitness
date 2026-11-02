@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, StrictBool, field_validator, model_validator
 
 from .store import utcnow
 from .operator_privacy import private_log
@@ -34,6 +34,15 @@ WORKSPACE_ID = re.compile(r"default|[a-f0-9]{32}")
 
 
 POLICY = {
+    "GET /api/showcase": ("showcase", "root"),
+    "GET /api/showcase/{workspace_id}": ("showcase", "root"),
+    "GET /api/showcase/{workspace_id}/chats/{chat_id}": ("showcase", "root"),
+    "POST /api/auth/import/preview": ("account", None),
+    "GET /api/exports/{export_id}/download": ("export", None),
+    "POST /api/exports/{export_id}/ticket": ("export", None),
+    "POST /api/privacy/reveal": ("view", "body"),
+    "GET /api/services/notifications": ("settings", None),
+    "POST /api/analysis/context-export": ("export", "root"),
     "GET /api/preferences": ("view", "root"),
     "POST /api/preferences": ("view", "root"),
     "GET /api/analysis/provider": ("view", "root"),
@@ -167,6 +176,7 @@ def unix_iso(value):
 
 class GrantSettings(BaseModel):
     label: str = Field(min_length=1, max_length=80)
+    showcase: StrictBool = False
     permissions: list[Literal[PERMISSIONS]] = Field(default_factory=lambda: ["view"], max_length=len(PERMISSIONS))
     all_workspaces: bool = False
 
@@ -209,6 +219,13 @@ class GrantSettings(BaseModel):
         if not self.all_workspaces and not self.workspaces:
             raise ValueError("Choose at least one workspace for this access.")
         self.permissions = [p for p in PERMISSIONS if p in {"view", *self.permissions}]
+        if self.showcase:
+            if self.all_workspaces or any(chats is None for chats in self.workspaces.values()):
+                raise ValueError("A showcase opens only explicitly selected public channels.")
+            if len(self.workspaces) > 16 or sum(len(chats) for chats in self.workspaces.values()) > 64:
+                raise ValueError("A showcase supports up to 16 workspaces and 64 channels.")
+            if self.permissions != ["view"]:
+                raise ValueError("A showcase is read-only. Additional permissions are not allowed.")
         return self
 
 
@@ -240,13 +257,16 @@ class Principal:
         return None if listed is None else set(listed)
 
     def may(self, permission):
+        if not self.admin and self.grant.get("showcase"):
+            return permission == "showcase"
         return self.admin or permission in self.grant["permissions"]
 
     def public(self):
         if self.admin:
             return {"admin": True, "label": self.label, "permissions": list(PERMISSIONS), "all_workspaces": True,
                     "workspaces": {}, "expires_at": None}
-        return {"admin": False, "label": self.label, "permissions": self.grant["permissions"],
+        return {"admin": False, "label": self.label, "showcase": bool(self.grant.get("showcase")),
+                "permissions": ["showcase"] if self.grant.get("showcase") else self.grant["permissions"],
                 "all_workspaces": self.grant["all_workspaces"], "workspaces": self.grant["workspaces"],
                 "expires_at": unix_iso(self.grant["expires_at"])}
 
@@ -500,7 +520,7 @@ class AccessControl:
 
 
     def journal_view(self, grant):
-        return {"access_id": grant["id"], **{k: grant[k] for k in (
+        return {"access_id": grant["id"], "showcase": bool(grant.get("showcase")), **{k: grant[k] for k in (
             "label", "permissions", "all_workspaces", "workspaces", "ips", "bind_first_ip", "max_uses",
             "max_sessions", "on_limit", "session_minutes")}, "expires_at": unix_iso(grant["expires_at"])}
 
@@ -522,6 +542,8 @@ class AccessControl:
             grant = self.grant(grant_id)
             if grant is None:
                 raise Refused("Unknown access.")
+            if bool(grant.get("showcase")) != settings.showcase:
+                raise Refused("Create a new access to change between a showcase and ordinary panel access.")
             if settings.expires_at is not None and settings.expires_at <= time.time():
                 raise Refused("Choose an end date in the future.")
             if not settings.bind_first_ip:

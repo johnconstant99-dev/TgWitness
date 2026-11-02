@@ -186,6 +186,8 @@ class Profiles:
                 raise ValueError("This account is part of a running multi-account export. "
                                  "Cancel the export or wait for it to finish, then delete the account.")
             child = entry.get("app")
+            if child and getattr(child.state, "account_downloads", None):
+                raise ValueError("Finish active downloads before deleting this workspace.")
             if child and (child.state.collector.export_claim
                           or getattr(child.state, "operation_lock", None) and child.state.operation_lock.locked()
                           or getattr(child.state, "account_export", None) and child.state.account_export.busy()

@@ -49,9 +49,16 @@ jobs:
     uses: ./.github/workflows/checks.yml
     with:
       full_platforms: true
+  security:
+    name: Audit the release revision
+    needs: version
+    permissions:
+      contents: read
+      security-events: write # Upload findings for the release candidate, including failures.
+    uses: ./.github/workflows/security-audit.yml
   portable:
     name: Publish Windows portable package
-    needs: [version, checks]
+    needs: [version, checks, security]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -75,7 +82,7 @@ jobs:
         run: gh release upload "$RELEASE_TAG" dist/*-portable.zip dist/*-portable.zip.sha256
   packages:
     name: Publish source and Python wheel
-    needs: [version, checks]
+    needs: [version, checks, security]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -112,7 +119,7 @@ jobs:
         run: gh release upload "$RELEASE_TAG" dist/*.whl dist/*.whl.sha256 dist/*-source.zip dist/*-source.zip.sha256
   container:
     name: Publish verified AMD64 and ARM64 container
-    needs: [version, checks]
+    needs: [version, checks, security]
     runs-on: [self-hosted, Linux, X64, tgwitness-ci]
     timeout-minutes: 30
     permissions:

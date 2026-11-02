@@ -19,7 +19,7 @@ export function createTimeFormatter({locale = "en", translate = text => text, zo
   }
   function fmtTime(value, {mode = "absolute"} = {}) {
     const instant = date(value);
-    if (!instant) return translate("Not supplied");
+    if (!instant) return translate("No data");
     if (mode !== "relative") return absolute.format(instant);
     const seconds = (instant.getTime() - now()) / 1000;
     const magnitude = Math.abs(seconds);

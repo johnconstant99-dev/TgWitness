@@ -1428,7 +1428,11 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
 
   .workspace[data-current-view="connection"] .content { padding-top: 18px; }
   .connection-simple { margin: 0 auto; }
-  .connection-simple > .page-heading { flex-wrap: nowrap; margin-bottom: 14px; }
+  .connection-simple > .page-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; margin-bottom: 14px; }
+  .connection-simple > .page-heading > div:first-child { display: contents; }
+  .connection-simple > .page-heading .page-kicker { grid-column: 1; align-self: center; margin: 0; }
+  .connection-simple > .page-heading h1 { grid-column: 1 / -1; grid-row: 2; }
+  .connection-simple > .page-heading .entry-header { grid-column: 2; grid-row: 1; }
   .connection-simple h1 { font-size: 22px; }
   .page-kicker { margin-bottom: 4px; font-size: 10.5px; }
   .entry-header .quiet { min-height: 34px; padding: 0 9px; }

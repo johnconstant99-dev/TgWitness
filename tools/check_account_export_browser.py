@@ -215,6 +215,7 @@ def main():
             for _ in range(2):
                 with page.expect_download() as saved:
                     page.locator('[data-account-export-action="download"]').click()
+                    answer_panel_dialog(page)
                 assert saved.value.suggested_filename == "tgwitness-account-export-synthetic-job.zip"
             assert len(downloads) == 2
             page.locator('[data-account-export-action="disclosure"]').click()
@@ -256,6 +257,7 @@ def main():
             for _ in range(2):
                 with page.expect_download() as saved:
                     page.locator('[data-account-export-action="disclosure-download"]').click()
+                    answer_panel_dialog(page)
                 assert saved.value.suggested_filename == "tgwitness-disclosure-fictional-derivative.zip"
             assert len(downloads) == 4
             # A second copy must retain its own focus and note when another job field updates.

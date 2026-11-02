@@ -2,11 +2,11 @@ import asyncio
 import re
 
 from fastapi import Depends, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
 from . import ai
-from .access import Refused
+from .access import Refused, check as access_check
 from .analysis import Analysis, Generate, Question, ReportEdit, prompt, report_from, retrieve, verified_claims, verify_sources
 from .archive import ArchiveQuery, ArchiveReader
 from .store import utcnow
@@ -93,6 +93,28 @@ def register(app, authenticate):
             async with asyncio.timeout(8):
                 return await limited_in_thread(reads, reader(request).read, body)
         return await execute(read_context)
+
+    @app.post("/api/analysis/context-export", dependencies=[Depends(authenticate)])
+    async def context_export(request: Request, body: Generate):
+        async def build():
+            from .research_export import package
+            plan = service.plan(body.plan_id, request.state.principal)
+            selected = [s for s in plan["sources"] if s["id"] in body.source_ids]
+            if set(body.source_ids) != {s["id"] for s in selected}:
+                raise ValueError("Select only sources from this preview.")
+            await reauthorize(request)
+            await asyncio.to_thread(verify_sources, reader(request), selected + plan["coverage"]["events"])
+            await reauthorize(request)
+            current = workspace(request, plan["workspace"])
+            for source in selected + plan['coverage']['events']:
+                ref = source['source']
+                access_check(request.state.principal, ref['workspace'],
+                             ('export', 'path' if ref['chat_id'] is not None else None),
+                             {'chat_id': ref['chat_id']})
+            data = package(plan, selected, current.vault)
+            return Response(data, media_type="application/zip", headers={
+                "Content-Disposition": 'attachment; filename="tgwitness-research-context.zip"'})
+        return await execute(build)
 
     @app.post("/api/analysis/generate", dependencies=[Depends(authenticate)])
     async def generate(request: Request, body: Generate):

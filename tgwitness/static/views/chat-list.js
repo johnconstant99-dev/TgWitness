@@ -58,7 +58,7 @@ export function createChatList({root, tr, node, icon, avatarNode, timeNode, getS
     const title = chat.title || tr('Chat {id}', {id: chat.chat_id}), body = node('span', 'chat-item-body');
     const top = node('span', 'chat-item-top'), bottom = node('span', 'chat-item-bottom'), badges = node('span', 'chat-item-badges');
     top.append(node('span', 'chat-item-title', title), timeNode(chat.last_observed_at, 'chat-item-time'));
-    bottom.append(node('span', 'chat-item-preview', chat.last_text ? (chat.last_sender ? chat.last_sender + ': ' : '') + chat.last_text
+    bottom.append(node('span', 'chat-item-preview', chat.last_text ? (chat.last_sender ? chat.last_sender + ': ' : '') + window.TgWitnessPrivacy.preview(chat.last_text)
       : tr(chat.messages ? 'Media or service message' : 'No messages saved yet')));
     // The same definitions as the chat header and the notifications: text kept, deleted before saving, not found.
     const deleted = typeof chat.deleted_saved === 'number' ? [chat.deleted_saved ? tr('{n} deleted, text kept', {n: chat.deleted_saved}) : '',

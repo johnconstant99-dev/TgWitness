@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_LOG_BYTES = 4 * 1024**2
 SUITES = {
     "browser": (
+        "check_showcase.py", "check_showcase_browser.py",
         "test_settings_hub.py", "test_case_assessment.py",
         "check_operator_security.py", "check_operator_browser.py",
         "check_guided_connection.py", "check_guided_connection_browser.py",
@@ -40,6 +41,9 @@ SUITES = {
         "check_capture_language_browser.py",
     ),
     "browser-ux": (
+        "check_bootstrap_recovery_browser.py",
+        "check_import_preflight.py", "check_chat_safety_browser.py", "check_workspace_downloads_browser.py",
+        "check_storage_services.py", "check_prepared_export_access.py", "check_services_browser.py",
         "check_workflows_browser.py", "check_disclosure_preview_browser.py", "check_handoff_languages_browser.py",
         "check_router_browser.py", "check_view_host_browser.py", "check_view_lifecycle_browser.py",
         "check_polling_browser.py", "check_time_browser.py", "check_shell_browser.py",

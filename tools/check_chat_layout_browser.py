@@ -19,6 +19,9 @@ def layout(page):
       return {width:innerWidth,height:innerHeight,documentHeight:document.documentElement.scrollHeight,
         documentWidth:document.documentElement.scrollWidth,listVisible:list.checkVisibility(),
         feedHeight:feed.clientHeight,headerTop:header.getBoundingClientRect().top,
+        topbarHeight:document.querySelector('.topbar').getBoundingClientRect().height,
+        healthVisible:document.querySelector('.health-toolbar').checkVisibility(),
+        chatStatusHeight:document.querySelector('#chat-status').getBoundingClientRect().height,
         searchTop:search.getBoundingClientRect().top,windowY:scrollY};
     }""")
 
@@ -57,6 +60,8 @@ def main():
                     original['theme'] = theme
                     original['url'] = page.url
                     original['headerMoved'] = abs(scrolled['headerTop'] - original['headerTop']) > 1
+                    if width == 320:
+                        page.screenshot(path=str(output / f'chats-{width}-{theme}.png'), animations='disabled')
                     if not args.before:
                         assert original['documentWidth'] <= width + 1, original
                         assert original['documentHeight'] <= height + 1, original
@@ -86,6 +91,29 @@ def main():
                             return rect.bottom>bounds.top&&rect.top<bounds.bottom;});}""")
                         page.screenshot(path=str(output / f'chats-{width}-{theme}.png'), animations='disabled')
                     results.append(original)
+
+                # Windows Segoe metrics can conceal the extra wrapping seen with
+                # Linux system fonts. Verdana reproduces the 70px feed regression
+                # on Windows; DejaVu Sans covers the corresponding Linux fallback.
+                page.evaluate("""()=>document.documentElement.style.setProperty(
+                  '--font','Verdana, "DejaVu Sans", sans-serif')""")
+                page.mouse.move(0, 0)
+                wide = layout(page)
+                wide.update(theme=theme, font='wide-system-fallback', url=page.url)
+                page.screenshot(path=str(output / f'chats-320-{theme}-wide.png'), animations='disabled')
+                if not args.before:
+                    assert wide['documentWidth'] <= 321, wide
+                    assert wide['documentHeight'] <= 721, wide
+                    assert wide['feedHeight'] >= 100, wide
+                    assert not wide['healthVisible'], wide
+                    expect(page.locator('.profile-switch .workspace-identity')).to_be_visible()
+                    expect(page.locator('#hub-route-status')).to_be_visible()
+                    expect(page.locator('.top-actions [data-ui-level]')).to_be_visible()
+                    expect(page.locator('#chat-read-only')).to_be_visible()
+                    expect(page.locator('#chat-read-only')).to_be_checked()
+                    expect(page.locator('#chat-mask-secrets')).to_be_visible()
+                results.append(wide)
+                page.evaluate("()=>document.documentElement.style.removeProperty('--font')")
             assert not errors, errors
             browser.close()
     (output / 'layout.json').write_text(json.dumps(results, indent=2), encoding='utf-8')
