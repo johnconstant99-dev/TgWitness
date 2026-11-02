@@ -18,7 +18,7 @@ import time
 from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Callable, Literal
 
 from pydantic import BaseModel, Field, StrictBool, field_validator, model_validator
 
@@ -31,6 +31,7 @@ JOURNAL_LOG = logging.getLogger("tgwitness.journal")
 PERMISSIONS = ("view", "export", "sources", "collect", "interact", "settings", "account")
 ADMIN_DEFAULTS = {"max_sessions": 0, "on_limit": "replace", "session_minutes": 720}
 WORKSPACE_ID = re.compile(r"default|[a-f0-9]{32}")
+GROUP_ID = re.compile(r"[a-f0-9]{32}")
 
 
 POLICY = {
@@ -183,6 +184,8 @@ class GrantSettings(BaseModel):
     all_workspaces: bool = False
 
     workspaces: dict[str, list[int] | None] = Field(default_factory=dict, max_length=1000)
+    # Account groups: every workspace in them, including ones added to the group later.
+    groups: list[str] = Field(default_factory=list, max_length=100)
     ips: list[str] = Field(default_factory=list, max_length=100)
     bind_first_ip: bool = False
     max_uses: int | None = Field(default=None, ge=1, le=1000000)
@@ -218,11 +221,15 @@ class GrantSettings(BaseModel):
                 if not chats or len(chats) > 10000:
                     raise ValueError("Choose at least one chat, or open the whole workspace.")
                 self.workspaces[key] = sorted(set(chats))
-        if not self.all_workspaces and not self.workspaces:
+        if any(not GROUP_ID.fullmatch(group) for group in self.groups):
+            raise ValueError("Unknown account group.")
+        self.groups = sorted(set(self.groups))
+        if not self.all_workspaces and not self.workspaces and not self.groups:
             raise ValueError("Choose at least one workspace for this access.")
         self.permissions = [p for p in PERMISSIONS if p in {"view", *self.permissions}]
         if self.showcase:
-            if self.all_workspaces or any(chats is None for chats in self.workspaces.values()):
+            # A group opens whole accounts, including ones added later; a showcase lists its channels.
+            if self.all_workspaces or self.groups or any(chats is None for chats in self.workspaces.values()):
                 raise ValueError("A showcase opens only explicitly selected public channels.")
             if len(self.workspaces) > 16 or sum(len(chats) for chats in self.workspaces.values()) > 64:
                 raise ValueError("A showcase supports up to 16 workspaces and 64 channels.")
@@ -243,17 +250,23 @@ class Principal:
     label: str
     grant: dict | None = None
     session_id: str | None = None
+    group_of: Callable | None = None  # the account group of a workspace, from the main panel
 
     @property
     def owner(self):
         return "admin" if self.admin else self.grant["id"]
 
+    def by_group(self, profile_id):
+        groups = self.grant.get("groups") or []
+        return bool(groups and self.group_of and self.group_of(profile_id) in groups)
+
     def opens(self, profile_id):
-        return self.admin or self.grant["all_workspaces"] or profile_id in self.grant["workspaces"]
+        return (self.admin or self.grant["all_workspaces"] or profile_id in self.grant["workspaces"]
+                or self.by_group(profile_id))
 
     def chats(self, profile_id):
         """None: every chat of the workspace; otherwise the only chat IDs this access sees."""
-        if self.admin or self.grant["all_workspaces"]:
+        if self.admin or self.grant["all_workspaces"] or self.by_group(profile_id):
             return None
         listed = self.grant["workspaces"].get(profile_id)
         return None if listed is None else set(listed)
@@ -270,7 +283,7 @@ class Principal:
         return {"admin": False, "label": self.label, "showcase": bool(self.grant.get("showcase")),
                 "permissions": ["showcase"] if self.grant.get("showcase") else self.grant["permissions"],
                 "all_workspaces": self.grant["all_workspaces"], "workspaces": self.grant["workspaces"],
-                "expires_at": unix_iso(self.grant["expires_at"])}
+                "groups": self.grant.get("groups") or [], "expires_at": unix_iso(self.grant["expires_at"])}
 
 
 def check(principal, profile_id, rule, path_params):
@@ -362,6 +375,7 @@ class AccessControl:
         self.lock = threading.RLock()
         self.console = console or Console()
         self.labels = lambda profile_id: profile_id
+        self.group_of = None
         # Remove legacy browser fingerprints from the mutable encrypted session
         # cache. Signed journal records are deliberately left untouched.
         if any(s.get("agent") for s in saved.get("sessions", [])):
@@ -474,7 +488,7 @@ class AccessControl:
         if session["owner"] == "admin":
             return Principal(True, "Main administrator", None, session["id"])
         grant = self.grant(session["owner"])
-        return Principal(False, grant["label"], grant, session["id"])
+        return Principal(False, grant["label"], grant, session["id"], self.group_of)
 
     def resolve(self, credential, address):
         """The principal behind a bearer credential, or None. Raises Refused."""
@@ -524,7 +538,8 @@ class AccessControl:
     def journal_view(self, grant):
         return {"access_id": grant["id"], "showcase": bool(grant.get("showcase")), **{k: grant[k] for k in (
             "label", "permissions", "all_workspaces", "workspaces", "ips", "bind_first_ip", "max_uses",
-            "max_sessions", "on_limit", "session_minutes")}, "expires_at": unix_iso(grant["expires_at"])}
+            "max_sessions", "on_limit", "session_minutes")}, "groups": grant.get("groups") or [],
+            "expires_at": unix_iso(grant["expires_at"])}
 
     def issue(self, settings: GrantSettings):
         if settings.expires_at is not None and settings.expires_at <= time.time():
@@ -572,6 +587,17 @@ class AccessControl:
             self.save()
         self.store.append("access.revoked", {"access_id": grant_id, "label": grant["label"]})
         LOG.info("Access %s revoked", grant["label"])
+
+    def forget_group(self, group_id):
+        """A deleted group opens nothing; accesses that named it stop naming it."""
+        with self.lock:
+            changed = [g for g in self.grants if group_id in (g.get("groups") or [])]
+            for grant in changed:
+                grant["groups"] = [g for g in grant["groups"] if g != group_id]
+            if changed:
+                self.save()
+        for grant in changed:
+            self.store.append("access.changed", self.journal_view(grant))
 
     def set_admin(self, settings: AdminSettings):
         with self.store.transaction():

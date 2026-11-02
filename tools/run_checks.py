@@ -26,7 +26,7 @@ MAX_LOG_BYTES = 4 * 1024**2
 SUITES = {
     "browser": (
         "check_showcase.py", "check_showcase_browser.py",
-        "test_settings_hub.py", "test_case_assessment.py",
+        "test_settings_hub.py", "test_case_assessment.py", "test_group_settings.py",
         "check_operator_security.py", "check_operator_browser.py",
         "check_guided_connection.py", "check_guided_connection_browser.py",
         "check_session_reservations.py", "check_account_recovery.py",
@@ -55,7 +55,7 @@ SUITES = {
         "check_access_sections_browser.py", "check_journal_browser.py", "check_exports_browser.py",
         "check_controls_browser.py", "check_quick_search_browser.py",
         "check_cloud_wizard.py", "check_evidence_witnesses.py", "check_setup_levels.py", "check_first_run.py",
-        "check_gateway_dns.py", "check_tdx.py", "check_phala.py",
+        "check_group_settings_browser.py", "check_gateway_dns.py", "check_tdx.py", "check_phala.py",
     ),
     "site": ("check_site.py", "check_docs_site.py", "check_report_example.py"),
 }

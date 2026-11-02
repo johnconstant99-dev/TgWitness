@@ -5648,5 +5648,91 @@
 "Validated time bound through record #{n}; {tail} later records are outside that bound.": "經驗證的時間範圍以記錄 #{n} 為界；{tail} 之後的記錄均超出該範圍。",
 "Validated timestamp receipts": "經驗證的時間戳記收據",
 "Verify the original ZIP with a trusted copy of verify.py and --fingerprint from a separate trusted channel. Keep the verification result with the unchanged ZIP.": "請使用來自獨立可信管道的可信副本，透過 verify.py 及 --fingerprint 參數驗證原始 ZIP 檔案。請將驗證結果與未經修改的 ZIP 檔案一併保存。",
-"Witnesses and collection environment": "見證人與蒐集環境"
+"Witnesses and collection environment": "見證人與蒐集環境",
+"Not shared": "未共享",
+"Shared": "共享",
+"Not shared: each account keeps its own value.": "未共享：每個帳戶保留其自有值。",
+"{n} of {total} accounts follow the group": "{n} 個帳戶（共 {total} 個）使用該群組的設定值",
+"own value: {list}": "自有值：{list}",
+"{n} value changes": "{n} 個值將會被變更",
+"{n} values change": {
+"other": "{n} 個值將會被變更"
+},
+"{n} value differs": "{n} 個值有所不同",
+"{n} values differ": {
+"other": "{n} 個值有所不同"
+},
+"The group already shares these values.": "該群組已共享這些值。",
+"Applies to {n} of {total} accounts.": "適用於 {n} 個帳戶（總數為 {total}）。",
+"Unavailable now, they keep their current values: {list}": "目前不可用，但會保留其當前值：{list}",
+"current value": "當前值",
+"own value": "自有值",
+"Change the group setting?": "要變更群組設定嗎？",
+"These accounts have a different value. Ticked ones take the group value:": "這些帳戶的設定值不同。已勾選的項目將採用群組的設定值：",
+"Applied to {n} account.": "已套用至 {n} 個帳戶。",
+"Applied to {n} accounts.": {
+"other": "已套用至 {n} 個帳戶。"
+},
+"{n} account kept its own value.": "{n} 個帳戶保留了其「自有值」。",
+"{n} accounts kept their own value.": {
+"other": "{n} 個帳戶保留了其「自有值」。"
+},
+"Group route": "群組連線路徑",
+"Take the value of": "應使用其設定值的帳戶",
+"Take the value of {name}": "{name} 的值",
+"Shared settings: {name}": "共用設定：{name}",
+"{n} own value": "{n} 自有值",
+"{n} own values": {
+"other": "{n} 自有值"
+},
+"follows the group": "使用群組的設定值",
+"No accounts in this group yet.": "此群組目前尚無任何帳戶。",
+"Collection, protection and notifications": "蒐集、保護與通知",
+"More shared settings": "更多共用設定",
+"What to record": "應記錄的內容",
+"Change the group route": "變更群組路徑",
+"Stop sharing": "停止分享",
+"Back to account settings": "返回帳戶設定",
+"Accounts in the group take these values. An account with its own value keeps it until you return it to the group value.": "群組中的帳戶會採用這些值。若某帳戶設有「自有值」，則會保留該值，直到您將其恢復為群組值為止。",
+"Starting and pausing collection stays with each account; Accounts starts or pauses the whole group.": "每個帳戶會自行啟動或暫停其資料蒐集；在「帳戶」頁面中，您可以啟動或暫停整個群組的資料蒐集。",
+"Choose a goal for the group first; its settings come together.": "請先為該群組選擇一個目標；該目標會一併設定這些選項。",
+"Share the value one account already has. Notification destinations, proxies and sign-in stay with each account.": "套用某個帳戶已有的設定值。通知目的地、代理伺服器及登入資訊仍保留在各帳戶中。",
+"From the group": "來自群組",
+"Own value": "自有值",
+"Return to the group value": "還原為群組值",
+"This account is in the group {name}.": "此帳戶屬於 {name} 群組。",
+"🔗 marks a value from the group; ✏️ marks this account’s own value.": "🔗 標示來自群組的值；✏️ 標示此帳戶的自有值。",
+"Group settings": "群組設定",
+"Shared with the group": "與群組共享",
+"Settings the group shares besides those in the other sections:": "除其他章節所述設定外，群組共享的設定如下：",
+"The group shares only settings shown in the other sections.": "該群組僅共享其他區段中顯示的設定。",
+"{n} setting of this account differs from the group {name}:": "此帳戶有 {n} 項設定與群組 {name} 不同：",
+"{n} settings of this account differ from the group {name}:": {
+"other": "此帳戶有 {n} 項設定與群組 {name} 不同："
+},
+"and {n} more": "以及另外 {n} 個",
+"Take the group's values? Otherwise the account keeps its own and Settings marks them ✏️.": "使用群組的設定值嗎？否則該帳戶將保留其自有值，且「設定」會標記為 ✏️。",
+"Take the shared settings?": "要使用共用設定嗎？",
+"Take the group's values": "使用群組的設定值",
+"The account now follows the group.": "該帳戶現在使用群組的設定值。",
+"Copy settings from one account": "從一個帳戶複製設定",
+"Apply copies these settings from the chosen account to every other member, and the group then shares them: accounts added later start with them. Each member records what it received in its signed journal; an observing account keeps its IP mode until it is paused.": "「套用」會將選定帳戶的這些設定複製給其他所有成員，該群組隨即共享這些設定：之後加入的帳戶將預設採用這些設定。每位成員都會將接收到的設定記錄在其簽名日誌中；觀察帳戶則會維持其 IP 模式，直到被暫停為止。",
+"Group {name}: every account": "群組 {name}：所有帳戶",
+"Group {name}": "群組 {name}",
+"{n} account": "{n} 個帳戶",
+"{n} accounts": {
+"other": "{n} 個帳戶"
+},
+"Account groups: every account of the group, including ones added to it later.": "帳戶群組：該群組中的所有帳戶，包括日後新增的帳戶。",
+"Group settings taken": "已接收的群組設定",
+"Group settings changed": "群組設定已變更",
+"Accounts returned to the group settings": "已還原至群組設定的帳戶",
+"Group settings not applied": "群組設定未套用",
+"Group shares its copied settings": "該群組現已共用從某個帳戶複製而來的設定",
+"These group settings conflict. Review external requests and timestamps.": "這些群組設定相互衝突。請檢視外部請求與時間戳記。",
+"The group does not share this setting.": "該群組不共用此設定。",
+"This workspace is not in the group.": "此工作區不屬於該群組。",
+"Continuous collection": "持續收集",
+"Saved files": "已儲存的檔案",
+"Can Telegram see this server's address?": "Telegram 能否看到此伺服器的位址？"
 }

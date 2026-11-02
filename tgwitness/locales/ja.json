@@ -3987,7 +3987,7 @@
 "Start all": "すべて開始",
 "Pause all": "すべてを一時停止",
 "Capture and monitoring": "キャプチャとモニタリング",
-"Recheck schedule": "スケジュールの再確認",
+"Recheck schedule": "再確認のスケジュール",
 "IP protection mode": "IP保護モード",
 "{n} workspaces started.": {
 "other": "{n}つのワークスペースが開始されました。"
@@ -5648,5 +5648,91 @@
 "Validated time bound through record #{n}; {tail} later records are outside that bound.": "レコード #{n} までの検証済み時間範囲；{tail} 以降のレコードはその範囲外となります。",
 "Validated timestamp receipts": "検証済みのタイムスタンプ受領証",
 "Verify the original ZIP with a trusted copy of verify.py and --fingerprint from a separate trusted channel. Keep the verification result with the unchanged ZIP.": "別の信頼できるチャネルから入手した、verify.pyと--fingerprintオプション付きの信頼できるコピーを使用して、元のZIPを検証してください。検証結果は、変更されていないZIPと一緒に保管してください。",
-"Witnesses and collection environment": "証人および収集環境"
+"Witnesses and collection environment": "証人および収集環境",
+"Not shared": "共有されていません",
+"Shared": "共有",
+"Not shared: each account keeps its own value.": "共有されません：各アカウントは独自の値を維持します。",
+"{n} of {total} accounts follow the group": "{total}件のアカウントのうち、{n}件がグループの設定値を使用しています",
+"own value: {list}": "独自の値：{list}",
+"{n} value changes": "{n}個の値が変更されます",
+"{n} values change": {
+"other": "{n}個の値が変更されます"
+},
+"{n} value differs": "{n}個の値が異なります",
+"{n} values differ": {
+"other": "{n}個の値が異なります"
+},
+"The group already shares these values.": "このグループはすでにこれらの値を共有しています。",
+"Applies to {n} of {total} accounts.": "{total}アカウントのうち{n}に適用されます。",
+"Unavailable now, they keep their current values: {list}": "現在は利用できませんが、現在の値は保持されます：{list}",
+"current value": "現在の値",
+"own value": "独自の値",
+"Change the group setting?": "グループ設定を変更しますか？",
+"These accounts have a different value. Ticked ones take the group value:": "これらのアカウントには異なる値が設定されています。チェックマークが付いているものは、グループの値を採用します：",
+"Applied to {n} account.": "{n}個のアカウントに適用されました。",
+"Applied to {n} accounts.": {
+"other": "{n}個のアカウントに適用されました。"
+},
+"{n} account kept its own value.": "{n}個のアカウントが独自の値を維持しました。",
+"{n} accounts kept their own value.": {
+"other": "{n}個のアカウントが独自の値を維持しました。"
+},
+"Group route": "グループ接続経路",
+"Take the value of": "値をコピーするアカウント",
+"Take the value of {name}": "{name} の値",
+"Shared settings: {name}": "共有設定：{name}",
+"{n} own value": "{n}個の独自の値",
+"{n} own values": {
+"other": "{n}個の独自の値"
+},
+"follows the group": "グループの設定値を使用します",
+"No accounts in this group yet.": "このグループにはまだアカウントがありません。",
+"Collection, protection and notifications": "収集、保護、および通知",
+"More shared settings": "その他の共有設定",
+"What to record": "記録対象",
+"Change the group route": "グループのルートを変更する",
+"Stop sharing": "共有を停止する",
+"Back to account settings": "アカウント設定に戻る",
+"Accounts in the group take these values. An account with its own value keeps it until you return it to the group value.": "グループ内のアカウントは、これらの値を採用します。独自の値を持つアカウントは、その値をグループの値に戻すまで、その値を維持します。",
+"Starting and pausing collection stays with each account; Accounts starts or pauses the whole group.": "各アカウントは、それぞれ独自のデータ収集を開始・一時停止します。「アカウント」ページでは、グループ全体のデータ収集を開始または一時停止することができます。",
+"Choose a goal for the group first; its settings come together.": "まず、グループの目標を選択してください。目標によって、これらの設定が一括して設定されます。",
+"Share the value one account already has. Notification destinations, proxies and sign-in stay with each account.": "あるアカウントがすでに持っている値を共有します。通知先、プロキシ、およびログイン情報は、各アカウントごとに保持されます。",
+"From the group": "グループから",
+"Own value": "独自の値",
+"Return to the group value": "グループの値に戻す",
+"This account is in the group {name}.": "このアカウントは、{name}というグループに所属しています。",
+"🔗 marks a value from the group; ✏️ marks this account’s own value.": "🔗はグループからの値を示し、✏️はこのアカウント独自の値を示します。",
+"Group settings": "グループ設定",
+"Shared with the group": "グループと共有されています",
+"Settings the group shares besides those in the other sections:": "他のセクションの設定に加え、グループで共有される設定は以下の通りです：",
+"The group shares only settings shown in the other sections.": "グループで共有されるのは、他のセクションに表示されている設定のみです。",
+"{n} setting of this account differs from the group {name}:": "このアカウントの{n}個の設定が、グループ{name}とは異なります：",
+"{n} settings of this account differ from the group {name}:": {
+"other": "このアカウントの{n}個の設定が、グループ{name}とは異なります："
+},
+"and {n} more": "および{n}件",
+"Take the group's values? Otherwise the account keeps its own and Settings marks them ✏️.": "グループの設定値を使用しますか？ そうでない場合、アカウントは独自の値を維持し、[設定] ではそれらが ✏️ でマークされます。",
+"Take the shared settings?": "共有設定を使用しますか？",
+"Take the group's values": "グループの値を使用する",
+"The account now follows the group.": "このアカウントは、グループの設定値を使用するようになりました。",
+"Copy settings from one account": "あるアカウントの設定をコピーする",
+"Apply copies these settings from the chosen account to every other member, and the group then shares them: accounts added later start with them. Each member records what it received in its signed journal; an observing account keeps its IP mode until it is paused.": "「適用」を選択すると、選択したアカウントの設定が他のすべてのメンバーにコピーされ、グループ全体で共有されます。その後、追加されたアカウントも最初からその設定で開始されます。各メンバーは受け取った設定を署名付きジャーナルに記録します。また、監視用アカウントは、一時停止されるまでIPモードを維持します。",
+"Group {name}: every account": "グループ{name}：すべてのアカウント",
+"Group {name}": "グループ{name}",
+"{n} account": "{n}個のアカウント",
+"{n} accounts": {
+"other": "{n}個のアカウント"
+},
+"Account groups: every account of the group, including ones added to it later.": "アカウントグループ：そのグループに属するすべてのアカウント（後から追加されたアカウントも含みます）。",
+"Group settings taken": "グループ設定を受信しました",
+"Group settings changed": "グループ設定が変更されました",
+"Accounts returned to the group settings": "グループ設定に戻されたアカウント",
+"Group settings not applied": "グループ設定が適用されていません",
+"Group shares its copied settings": "グループは、アカウントからコピーされた設定を共有するようになりました",
+"These group settings conflict. Review external requests and timestamps.": "これらのグループ設定に矛盾があります。外部リクエストとタイムスタンプを確認してください。",
+"The group does not share this setting.": "このグループはこの設定を共有していません。",
+"This workspace is not in the group.": "このワークスペースはグループに含まれていません。",
+"Continuous collection": "継続的な収集",
+"Saved files": "保存されたファイル",
+"Can Telegram see this server's address?": "Telegramはこのサーバーのアドレスを確認できますか？"
 }

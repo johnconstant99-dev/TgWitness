@@ -2,7 +2,7 @@
 export function createConnectionView({root, tr, json, state, refreshStatus, askConfirm}) {
   const get = id => root.querySelector('#' + id);
   const el = (tag, text, cls) => { const n = document.createElement(tag); if(text)n.textContent=text; if(cls)n.className=cls; return n; };
-  let generation=0, timer=null, data=null, draft=null, plan=null, mode='warp', visible=false;
+  let generation=0, timer=null, data=null, draft=null, plan=null, mode='warp', visible=false, pending=null;
   const labels = {direct:tr('Direct'),vpn:tr('VPN'),proxy:tr('My proxy'),mtproxy:tr('Public MTProto'),warp:tr('WARP')};
   const routeName=value=>({mtproxy_auto:tr('Public MTProto'),socks5:tr('SOCKS5 proxy'),http:tr('HTTP proxy')}[value]||labels[value]||value);
   const notes = {
@@ -57,6 +57,17 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
     }
     table.append(body);get('connect-review').replaceChildren(table);
   }
+  // Settings open this form for a group's route or an account's return to it; the group list may still be loading.
+  function applyPreset(){
+    if(!pending)return;const p=pending;
+    if(p.group&&![...get('connect-group').options].some(o=>o.value===p.group))return;
+    pending=null;
+    if(p.mode&&root.querySelector('[data-connect-mode="'+p.mode+'"]'))choose(p.mode);
+    get('connect-scope').value=p.scope||'account';get('connect-scope').dispatchEvent(new Event('change'));
+    if(p.group)get('connect-group').value=p.group;
+    if(p.allow_direct!==undefined&&get('connect-direct'))get('connect-direct').checked=p.allow_direct;
+    get('connect-details').open=true;get('connect-details').scrollIntoView({block:'start'});
+  }
   function setBusy(busy){
     get('connect-fields').disabled=busy;get('connect-preview').disabled=busy;
     get('connect-prepare').disabled=busy;get('connect-apply').disabled=busy;
@@ -86,6 +97,7 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
       data=result;
       const group=get('connect-group'),selected=group.value;
       group.replaceChildren(...result.groups.map(g=>{const o=el('option',g.label);o.value=g.id;return o;}));group.value=selected||result.groups[0]?.id||'';
+      applyPreset();
       get('connect-current').textContent=routeName(current.current.mode)+
         (current.current.managed?' · '+tr(current.current.process_running?'Local tunnel running':'Local tunnel stopped'):'');
       get('connect-toggle').textContent=tr('Connection route')+' · '+routeName(current.current.mode);
@@ -154,6 +166,7 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
   }));
   choose('warp');
   return {
+    preset(options){pending=options;applyPreset();},
     enter(){visible=true;root.hidden=!state.me?.admin||!!state.status?.demo;clearTimeout(timer);if(!root.hidden)return load();},
     leave(){visible=false;generation++;clearTimeout(timer);},
     reset(){generation++;clearTimeout(timer);data=null;invalidate();get('connect-current').textContent=tr('Current connection');

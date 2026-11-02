@@ -94,12 +94,36 @@
         const result = await json("profiles/" + encodeURIComponent(profileId) + "/group", {group: marker.group || null},
                                  {root: true, method: "PUT"});
         await acceptWrite(result, serial); toast(tr("Workspace moved."));
+        if (marker.group) await offerShared(marker.group, profileId);
       } finally {
         if (moving.get(profileId) === marker) moving.delete(profileId);
         if (revision === state.workspaceRevision) decorate();
       }
     }));
     return select;
+  }
+
+  // A moved account keeps its settings; where they differ from what the group shares, offer the group's.
+  async function offerShared(groupId, profileId) {
+    const shared = await json("profile-groups/" + encodeURIComponent(groupId) + "/settings", undefined, {root: true});
+    const member = shared.members.find(m => m.id === profileId);
+    if (!member?.available || !member.own.length) return;
+    const names = member.own.map(key => tr(shared.keys.find(k => k.key === key)?.label || key));
+    const list = names.length > 6 ? [...names.slice(0, 6), tr("and {n} more", {n: names.length - 6})] : names;
+    if (!(await window.TgWitnessDialogs.confirm(trn("{n} setting of this account differs from the group {name}:", "{n} settings of this account differ from the group {name}:",
+        member.own.length, {name: shared.group.label}) + "\n\n" + list.join("\n") + "\n\n" +
+        tr("Take the group's values? Otherwise the account keeps its own and Settings marks them ✏️."),
+        {title: tr("Take the shared settings?"), confirmText: tr("Take the group's values")}))) return;
+    const result = await json("profile-groups/" + encodeURIComponent(groupId) + "/settings/adopt", {profiles: [profileId]}, {root: true});
+    if (result.failed.length) toast(result.failed.map(f => f.label + ": " + tr(f.error)).join(" · "), true);
+    else toast(tr("The account now follows the group."));
+  }
+
+  function openShared(group) {
+    return busy(null, async () => {
+      await navigate("settings");
+      if (state.view === "settings") await settingsHub?.openGroup(group.id);
+    });
   }
 
   function updateGroupSelect(select,profileId,current){
@@ -115,7 +139,7 @@
       updateSettings(entry);
       return entry.panel;
     }
-    const panel = node("details", "fleet-group-settings"), summary = node("summary", "", tr("Shared settings"));
+    const panel = node("details", "fleet-group-settings"), summary = node("summary", "", tr("Copy settings from one account"));
     const body = node("div", "fleet-settings-body");
     const templateLabel = node("label", "", tr("Copy from")), template = node("select");
     template.id = "fleet-template-" + group.id; templateLabel.htmlFor = template.id;
@@ -136,7 +160,7 @@
       await acceptWrite(result, serial); entry.dirty = false; decorate();
       toast(tr("Group settings saved. Use Apply to copy them to the members."));
     })));
-    body.append(templateLabel, template, node("p", "hint", tr("These settings are copied from the chosen workspace to every other member when you press Apply. Each member records what it received in its signed journal; an observing workspace keeps its IP mode until it is paused.")), checks, save);
+    body.append(templateLabel, template, node("p", "hint", tr("Apply copies these settings from the chosen account to every other member, and the group then shares them: accounts added later start with them. Each member records what it received in its signed journal; an observing account keeps its IP mode until it is paused.")), checks, save);
     for (const field of body.querySelectorAll("input, select, button")) field.disabled = !editable();
     panel.append(summary, body);
     updateSettings(entry);
@@ -235,7 +259,10 @@
       const result = await json("profile-groups/" + group.id, undefined, {root: true, method: "DELETE"});
       await acceptWrite(result, serial); fillSelects(); decorate();
     })));
-    actions.append(apply, ...groupRun(group), rename, remove);
+    const shared = node("button", "secondary small", tr("Shared settings")); shared.type = "button";
+    shared.dataset.action = "shared-settings"; shared.disabled = !editable();
+    shared.addEventListener("click", () => openShared(group));
+    actions.append(shared, apply, ...groupRun(group), rename, remove);
     for (const button of [rename, remove]) button.disabled = !editable() || writing.has(group.id);
     head.append(who, actions);
     section.append(head);if(headerOnly)return section;

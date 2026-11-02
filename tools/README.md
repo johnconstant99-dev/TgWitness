@@ -33,6 +33,7 @@ Builds stay local. See [publishing](../docs/internal/PUBLISHING.md) and
 | `python tools/check_gateway_dns.py` | Gateway DNS for a 24/7 server: firewall rules, installer, verify, shared location, the journal copy and the panel; `--no-browser` skips the panel |
 | `python tools/check_setup_levels.py` | Setup by goal: the proposal per goal, what Apply changes and records, the credibility and reliability scales, in the browser |
 | `python tools/check_first_run.py` | First setup: every string in all panel languages; step addresses and Back, the separate/main account question and its limits, the live check after Start, the IP mode journal record; every step at four widths in English, Russian, German and Arabic |
+| `python tools/check_group_settings_browser.py` | Group settings: every string in all panel languages; the group page, 🔗/✏️ marks and return to the group value, an own value kept, a value shared from an account, a moved account adopting, access by group, the signed records; four widths in English and Russian. `tools/test_group_settings.py` covers the API |
 | `python tools/check_tdx.py` | Intel TDX attestations: real quotes from dcap-qvl and dstack to Intel's root, and every refusal with a forged PKI |
 | `python tools/check_phala.py` | Phala Cloud deployments against a simulated Phala Cloud: deploy, verify, the journal, quick tunnel, destroy and the panel wizard |
 | `python tools/capture_screenshots.py` | Screenshots in `test-results/`; `--docs` updates docs assets |

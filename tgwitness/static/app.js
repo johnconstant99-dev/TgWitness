@@ -36,7 +36,7 @@ const workspaceSafetyReady=import('./core/workspace-safety.js?v=1').then(({creat
 });
 let accountState;
 let settingsHub;
-const settingsHubReady=import('./views/settings-hub.js?v=2').then(({createSettingsHub})=>{
+const settingsHubReady=import('./views/settings-hub.js?v=3').then(({createSettingsHub})=>{
   const authCard=$('credentials-form').closest('.auth-card');
   // Metadata covers legacy fields as well as the compact settings. Search never drops expert fields.
   const catalog=()=>panelQueries('input[id],select[id],textarea[id]').filter(el=>!el.closest('#gate,#view-settings,#view-first-run')).map(el=>{
@@ -52,7 +52,8 @@ const settingsHubReady=import('./views/settings-hub.js?v=2').then(({createSettin
     language:LANG,languages:LANGUAGES,authCard:()=>authCard,authMethod:setAuthMethod,catalog,
     loadSettingsForm:id=>({'alerts-form':loadAlerts,'replica-form':loadReplica,'evidence-form':loadEvidence}[id])(),
     openExtra:async id=>{await loadExtras();selectExtra(id);},changeLanguage:setLanguage,
-    stateBadge,healthLines:collectorLines,healthNames:healthPartNames,record:options=>window.TgWitnessRouter?.record({},options||{}),
+    stateBadge,healthLines:collectorLines,healthNames:healthPartNames,record:options=>window.TgWitnessRouter?.record({},options||{}),trn,
+    openConnection:async preset=>{await navigate('connection');await connectionViewReady;connectionView.preset(preset);},
     applyPreferences:p=>{
       for(const el of panelQueries('[data-mode-locked]'))el.removeAttribute('data-mode-locked');
       for(const el of panelQueries('.mode-lock'))el.hidden=true;
@@ -65,7 +66,7 @@ const settingsHubReady=import('./views/settings-hub.js?v=2').then(({createSettin
   catalog();
 });
 let connectionView;
-const connectionViewReady=import('./views/connection.js?v=1').then(({createConnectionView})=>{
+const connectionViewReady=import('./views/connection.js?v=2').then(({createConnectionView})=>{
   connectionView=createConnectionView({root:$('connect-guide'),tr,json,state,refreshStatus,askConfirm});
 });
 const accountStateReady=import('./components/account-state.js?v=1').then(module=>{accountState=module.accountState;});
@@ -256,6 +257,11 @@ const labels = {
   "settings.changed": [tr("Settings changed"), "settings", "system"],
   "settings.collection_pending": [tr("Recording waits for a working connection"), "alert", "coverage"],
   "sources.selected": [tr("Chats to record chosen"), "sources", "system"],
+  "group.settings_inherited": [tr("Group settings taken"), "settings", "system"],
+  "profile_group.settings_changed": [tr("Group settings changed"), "settings", "system"],
+  "profile_group.settings_adopted": [tr("Accounts returned to the group settings"), "settings", "system"],
+  "profile_group.settings_failed": [tr("Group settings not applied"), "alert", "coverage"],
+  "profile_group.migrated": [tr("Group shares its copied settings"), "settings", "system"],
   "profile.created": [tr("Workspace created"), "plus", "system"], "profile.unavailable": [tr("Workspace unavailable"), "alert", "coverage"],
   "snapshot.started": [tr("History snapshot started"), "layers", "system"], "snapshot.completed": [tr("History snapshot completed"), "layers", "system"],
   "snapshot.interrupted": [tr("History snapshot interrupted"), "alert", "coverage"],
@@ -5003,8 +5009,22 @@ function localInput(unix){
 function workspaceName(id){return state.profiles.find(p=>p.id===id)?.label||id;}
 function accessScope(g){
   if(g.all_workspaces)return tr("All workspaces");
-  return Object.entries(g.workspaces).map(([id,chats])=>chats===null?tr("{workspace}: every chat",{workspace:workspaceName(id)}):
-    trn("{workspace}: {n} chat","{workspace}: {n} chats",chats.length,{workspace:workspaceName(id)})).join("; ");
+  const groups=(g.groups||[]).map(id=>tr("Group {name}: every account",{name:state.access?.groups?.find(x=>x.id===id)?.label||id}));
+  return [...groups,...Object.entries(g.workspaces).map(([id,chats])=>chats===null?tr("{workspace}: every chat",{workspace:workspaceName(id)}):
+    trn("{workspace}: {n} chat","{workspace}: {n} chats",chats.length,{workspace:workspaceName(id)}))].join("; ");
+}
+// Groups open every account in them, including ones added later; the list arrives with the access overview.
+let accessGroupChoice=[];
+function renderAccessGroups(selected){
+  const box=$("access-group-list"),groups=state.access?.groups||[];
+  if(selected)accessGroupChoice=selected;else if(box.childElementCount)accessGroupChoice=[...box.querySelectorAll("input:checked")].map(x=>x.value);
+  const checked=accessGroupChoice;
+  box.replaceChildren(...groups.map(group=>{
+    const label=node("label","check-label"),input=document.createElement("input");
+    input.type="checkbox";input.value=group.id;input.dataset.group=group.id;input.checked=checked.includes(group.id);input.disabled=$("access-all").checked;
+    label.append(input,document.createTextNode(" "+tr("Group {name}",{name:group.label})+" · "+trn("{n} account","{n} accounts",group.members.length)));return label;
+  }));
+  $("access-groups").hidden=!groups.length;
 }
 function accessLimits(g){
   const parts=[trn("{n} parallel session","{n} parallel sessions",g.max_sessions)+" · "+
@@ -5066,7 +5086,7 @@ function renderAccessForm(g){
   $("access-uses").value=g?.max_uses??"";$("access-expires").value=localInput(g?.expires_unix);
   $("access-idle").value=g?.session_minutes??720;
   $("access-ips").value=(g?.ips||[]).join("\n");$("access-bind").checked=!!g?.bind_first_ip;
-  renderAccessWorkspaces(g?g.workspaces:{[state.profile]:null});accessView?.syncForm();
+  renderAccessWorkspaces(g?g.workspaces:{[state.profile]:null});renderAccessGroups(g?.groups||[]);accessView?.syncForm();
 }
 function accessSettings(){
   const workspaces={},box=$("access-workspaces");
@@ -5077,6 +5097,7 @@ function accessSettings(){
   }
   const expires=$("access-expires").value,uses=$("access-uses").value;
   return {label:$("access-label").value.trim(),all_workspaces:$("access-all").checked,workspaces,
+    groups:$("access-all").checked?[]:[...$("access-group-list").querySelectorAll("input:checked")].map(x=>x.value),
     permissions:[...$("access-permissions").querySelectorAll("input:checked")].map(x=>x.value),
     ips:$("access-ips").value.split(/\s+/).filter(Boolean),bind_first_ip:$("access-bind").checked,
     max_uses:uses?Number(uses):null,expires_at:expires?new Date(expires).getTime()/1000:null,
@@ -5153,10 +5174,10 @@ async function loadAccess(quiet=false){
     $("admin-idle").value=state.access.admin.session_minutes;
   }
   adminLimitsReady=true;$("access-admin-form").inert=false;
-  renderAccess();
+  renderAccessGroups();renderAccess();
 }
 $("access-refresh").addEventListener("click",e=>busy(e.currentTarget,()=>loadAccess()));
-$("access-all").addEventListener("change",()=>$("access-workspaces").querySelectorAll("input,select")
+$("access-all").addEventListener("change",()=>[...$("access-workspaces").querySelectorAll("input,select"),...$("access-group-list").querySelectorAll("input")]
   .forEach(n=>n.disabled=$("access-all").checked));
 $("access-cancel").addEventListener("click",()=>{state.accessEdit=null;renderAccessForm(null);});
 for(const event of ['input','change']){

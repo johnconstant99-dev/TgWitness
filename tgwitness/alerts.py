@@ -61,6 +61,13 @@ def alert_settings(store):
     return AlertSettings(**store.get_setting("alerts", {})).model_dump()
 
 
+def change_record(settings, urls):
+    """The journal record of a notification change: never the destinations themselves."""
+    return {**settings, "destinations": len(urls), "services": sorted({u.split("://", 1)[0].lower() for u in urls}),
+            "content": "chat names, counts and excerpts of changed messages" if settings["include_text"] else
+                       "chat names and counts only, never message text"}
+
+
 def tr(words, text, **values):
     out = words.get(text)
     out = out if isinstance(out, str) else text

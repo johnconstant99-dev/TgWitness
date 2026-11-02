@@ -123,8 +123,10 @@ def state(app):
     metadata = [dict(f, value=current[f["key"]], modified=f["key"] in baseline and current[f["key"]] != baseline[f["key"]]) for f in FIELDS]
     parameters = [{"key": "parameter:" + key, "label": p.label, "section": "parameters", "level": "expert"}
                   for key, p in tuning.BY_KEY.items()]
+    link = getattr(app.state, "group_link", None)
     return {"wizard": wizard, "goal": (preset or {}).get("goal"), "values": current,
             "fields": metadata, "parameters": parameters, "revision": revision(app),
+            "inheritance": link() if link else None,
             "connection": app.state.connection.public()["current"],
             "recommendations": ["replica", "witness", "code"] if (preset or {}).get("goal") == "evidence" else [],
             "needs_notification_destination": current["notifications"] and not app.state.vault.read("alerts").get("urls"),
@@ -140,6 +142,40 @@ def preview(app, body):
         desired.update({k: v for k, v in current.items() if k in baseline and v != baseline[k]})
     return {"goal": body.goal, "revision": revision(app), "values": desired,
             "diff": [{"key": k, "before": current[k], "after": v} for k, v in desired.items() if current[k] != v]}
+
+
+def edited(current, body):
+    """The values after one edit, with the features it depends on or that depend on it; a group edits its
+    shared values by the same rules."""
+    desired = dict(current)
+    if body.key == "files":
+        valid = body.value in ("photos", "short_media", "all")
+    elif body.key == "ip":
+        valid = body.value in ("auto", "hide")
+    else:
+        valid = type(body.value) is bool
+    if not valid:
+        raise HTTPException(422, "Invalid setting value")
+    desired[body.key] = body.value
+    if body.key in ("timestamps", "drand", "notifications", "replica") and body.value and not desired["outside"]:
+        if not body.allow_outside:
+            raise HTTPException(409, "This feature needs external requests. Allow them?")
+        desired["outside"] = True
+    if body.key == "outside" and not body.value and any(desired[k] for k in ("timestamps", "drand", "notifications", "replica")):
+        if not body.disable_dependents:
+            raise HTTPException(409, "Turn off the dependent features too?")
+        desired.update(timestamps=False, drand=False, notifications=False, replica=False)
+    if desired["drand"]:
+        if body.key == "timestamps" and not body.value:
+            desired["drand"] = False
+        else:
+            desired["timestamps"] = True
+    return desired
+
+
+def coherent(desired):
+    return not (desired["drand"] and not desired["timestamps"]
+                or any(desired[k] for k in ("timestamps", "notifications", "replica")) and not desired["outside"])
 
 
 def main_account_scope(app, body):
@@ -187,7 +223,7 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
     async def apply_values(desired):
         s, c = app.state.store, app.state.collector
         before = values(app)
-        if desired["drand"] and not desired["timestamps"] or any(desired[k] for k in ("timestamps", "notifications", "replica")) and not desired["outside"]:
+        if not coherent(desired):
             raise HTTPException(409, "The preserved manual settings conflict with this goal. Review external requests and timestamps.")
         if desired["replica"]:
             destination = replica.replica_settings(s)
@@ -260,36 +296,15 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
                 "values": PRESETS[body.goal], "at": utcnow()})
         return state(app)
 
+    app.state.settings_apply = apply_values
+
     @app.post("/api/settings/edit", dependencies=deps)
     async def edit(body: Edit):
         require_live()
         async with app.state.operation_lock:
             if body.revision != revision(app):
                 raise HTTPException(409, "Settings changed. Review the differences again.")
-            desired = values(app)
-            if body.key == "files":
-                valid = body.value in ("photos", "short_media", "all")
-            elif body.key == "ip":
-                valid = body.value in ("auto", "hide")
-            else:
-                valid = type(body.value) is bool
-            if not valid:
-                raise HTTPException(422, "Invalid setting value")
-            desired[body.key] = body.value
-            if body.key in ("timestamps", "drand", "notifications", "replica") and body.value and not desired["outside"]:
-                if not body.allow_outside:
-                    raise HTTPException(409, "This feature needs external requests. Allow them?")
-                desired["outside"] = True
-            if body.key == "outside" and not body.value and any(desired[k] for k in ("timestamps", "drand", "notifications", "replica")):
-                if not body.disable_dependents:
-                    raise HTTPException(409, "Turn off the dependent features too?")
-                desired.update(timestamps=False, drand=False, notifications=False, replica=False)
-            if desired["drand"]:
-                if body.key == "timestamps" and not body.value:
-                    desired["drand"] = False
-                else:
-                    desired["timestamps"] = True
-            await apply_values(desired)
+            await apply_values(edited(values(app), body))
         return state(app)
 
     @app.post("/api/first-run", dependencies=deps)

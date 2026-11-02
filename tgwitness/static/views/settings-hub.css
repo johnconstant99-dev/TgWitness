@@ -121,3 +121,22 @@ html[data-ui-level=simple] #mode-switch,html[data-ui-level=standard] #mode-switc
 @media(max-width:600px){.first-run-check{grid-template-columns:auto minmax(0,1fr)}.first-run-check .hint{grid-column:1/-1}.first-run-next-actions button{flex:1 1 100%}}
 /* The step heading takes focus for screen readers; it needs no visible ring. */
 .first-run-shell h1[tabindex="-1"]:focus{outline:none}
+
+/* Group settings: 🔗 from the group, ✏️ the account's own value; the group's own page. */
+.hub-group-note{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 18px}
+.inherit-mark{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:12px;margin-top:5px;color:var(--muted)}
+.inherit-mark.own .inherit-source{color:var(--accent)}
+.inherit-mark .text-link{font-size:12px}
+.hub-heading h1[tabindex="-1"]:focus{outline:none}
+.group-members{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:16px 0}
+.group-members li{padding:6px 12px;border:1px solid var(--border);border-radius:30px;font-size:13px;overflow-wrap:anywhere}
+.group-field>div:first-child{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 260px}
+.group-field .hint{margin:0;overflow-wrap:anywhere}
+.group-field-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;max-width:100%}
+.group-field-actions select{max-width:100%;min-width:0}
+.panel-dialog-choices{display:grid;gap:8px;margin:12px 0 0;padding:12px;border:1px solid var(--border);border-radius:10px;max-height:40vh;overflow:auto}
+.panel-dialog-choices legend{padding:0 6px;font-weight:550;white-space:normal}
+.panel-dialog-choices .check-label{white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.access-groups{display:grid;gap:6px;margin:10px 0}
+.access-groups .check-label{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:600px){.group-field-actions{flex-direction:column;align-items:stretch}.group-field-actions button,.group-field-actions select{width:100%}}

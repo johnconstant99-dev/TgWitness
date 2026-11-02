@@ -463,6 +463,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                       access=app.state.access, profile_id=Path(path).name, **options)
                 profiles = Profiles(app, root, child_factory)
                 app.state.profiles = profiles
+                app.state.access.group_of = profiles.group_of
                 await profiles.open()
                 app.state.multi_export = MultiExport(profiles)
                 from .archive_api import startup as start_mcp
@@ -909,6 +910,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             except ValueError as exc:
                 raise HTTPException(400, str(exc)) from None
             return groups_view()
+
+        from .group_settings import register as register_group_settings
+        register_group_settings(app, authenticate, require_live)
 
         @app.post("/api/profiles/import", dependencies=[Depends(authenticate)])
         async def profiles_import(body: ProfileImport, request: Request):
@@ -1955,11 +1959,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         vault.save("alerts", {"urls": urls})
         with store.transaction():
             store.set_setting("alerts", settings)
-            store.append("alerts.changed", {**settings, "destinations": len(urls),
-                                            "services": sorted({u.split("://", 1)[0].lower() for u in urls}),
-                                            "content": "chat names, counts and excerpts of changed messages"
-                                                       if settings["include_text"] else
-                                                       "chat names and counts only, never message text"})
+            store.append("alerts.changed", alerts.change_record(settings, urls))
         app.state.alert_wakeup.set()
         return alert_state()
 
@@ -2090,6 +2090,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             "before": before, "after": after,
             "applies": "from the next use of each value; Telegram client timeouts and retries from "
                        "the next connection"})
+
+    app.state.save_parameters = save_parameters
 
     @app.get("/api/chats", dependencies=[Depends(authenticate)])
     async def chats(request: Request):
@@ -2753,12 +2755,16 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             unknown = set(settings.workspaces) - set(app.state.profiles.entries)
             if unknown:
                 raise HTTPException(422, "Unknown workspace.")
+            if set(settings.groups) - {g["id"] for g in app.state.profiles.groups()}:
+                raise HTTPException(422, "Unknown account group.")
             from .showcase import validate_scope
             validate_scope(app.state.profiles, settings)
             return settings
 
         def access_state(request):
-            return app.state.access.state(request.state.principal.session_id)
+            return {**app.state.access.state(request.state.principal.session_id),
+                    "groups": [{"id": g["id"], "label": g["label"], "members": app.state.profiles.members(g["id"])}
+                               for g in app.state.profiles.groups()]}
 
         @app.get("/api/access", dependencies=[Depends(authenticate)])
         async def access_overview(request: Request):

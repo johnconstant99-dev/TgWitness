@@ -5648,5 +5648,91 @@
 "Validated time bound through record #{n}; {tail} later records are outside that bound.": "通过记录 #{n} 验证的时间边界；{tail} 之后的记录超出该边界。",
 "Validated timestamp receipts": "经过验证的时间戳收据",
 "Verify the original ZIP with a trusted copy of verify.py and --fingerprint from a separate trusted channel. Keep the verification result with the unchanged ZIP.": "使用来自独立可信渠道的可信verify.py副本及--fingerprint参数，对原始ZIP文件进行验证。将验证结果与未修改的ZIP文件一同保存。",
-"Witnesses and collection environment": "见证人和采集环境"
+"Witnesses and collection environment": "见证人和采集环境",
+"Not shared": "未共享",
+"Shared": "共享",
+"Not shared: each account keeps its own value.": "未共享：每个账户保留自己的自有值。",
+"{n} of {total} accounts follow the group": "{n}个账户（占{total}）使用该组的设置值",
+"own value: {list}": "自有值：{list}",
+"{n} value changes": "{n}个值将被更改",
+"{n} values change": {
+"other": "{n}个值将被更改"
+},
+"{n} value differs": "{n}个值不同",
+"{n} values differ": {
+"other": "{n}个值不同"
+},
+"The group already shares these values.": "该组已共享这些值。",
+"Applies to {n} of {total} accounts.": "适用于{n}个账户（总数为{total}个）。",
+"Unavailable now, they keep their current values: {list}": "当前不可用，它们将保留当前值：{list}",
+"current value": "当前值",
+"own value": "自有值",
+"Change the group setting?": "更改组设置？",
+"These accounts have a different value. Ticked ones take the group value:": "这些账户的值不同。带勾选标记的账户采用组设置值：",
+"Applied to {n} account.": "已应用于 {n} 个账户。",
+"Applied to {n} accounts.": {
+"other": "已应用于 {n} 个账户。"
+},
+"{n} account kept its own value.": "{n}个账户保留了各自的自有值。",
+"{n} accounts kept their own value.": {
+"other": "{n}个账户保留了各自的自有值。"
+},
+"Group route": "组连接路径",
+"Take the value of": "应使用哪个账户的设置值",
+"Take the value of {name}": "{name} 的值",
+"Shared settings: {name}": "共享设置：{name}",
+"{n} own value": "{n}个自有值",
+"{n} own values": {
+"other": "{n}个自有值"
+},
+"follows the group": "使用组的值",
+"No accounts in this group yet.": "该组中尚无账户。",
+"Collection, protection and notifications": "收集、保护和通知",
+"More shared settings": "更多共享设置",
+"What to record": "记录内容",
+"Change the group route": "更改组路由",
+"Stop sharing": "停止共享",
+"Back to account settings": "返回账户设置",
+"Accounts in the group take these values. An account with its own value keeps it until you return it to the group value.": "组中的账户将采用这些值。具有“自有值”的账户会保留该值，直到您将其恢复为组值为止。",
+"Starting and pausing collection stays with each account; Accounts starts or pauses the whole group.": "每个账户都会单独启动和暂停其数据收集；在“账户”页面上，您可以启动或暂停整个组的数据收集。",
+"Choose a goal for the group first; its settings come together.": "请先为该组选择一个目标；该目标将统一设置以下选项。",
+"Share the value one account already has. Notification destinations, proxies and sign-in stay with each account.": "共享某个账户已有的值。通知接收方、代理和登录信息仍与各账户绑定。",
+"From the group": "来自该组",
+"Own value": "自有值",
+"Return to the group value": "恢复为组设置值",
+"This account is in the group {name}.": "该账户属于{name}组。",
+"🔗 marks a value from the group; ✏️ marks this account’s own value.": "🔗 表示来自组的值；✏️ 表示该账户的自有值。",
+"Group settings": "组设置",
+"Shared with the group": "与组共享",
+"Settings the group shares besides those in the other sections:": "除其他部分所述设置外，该组还共享以下设置：",
+"The group shares only settings shown in the other sections.": "该组仅共享其他部分中显示的设置。",
+"{n} setting of this account differs from the group {name}:": "该账户有 {n} 项设置与组 {name} 不同：",
+"{n} settings of this account differ from the group {name}:": {
+"other": "该账户有 {n} 项设置与组 {name} 不同："
+},
+"and {n} more": "以及{n}个其他项",
+"Take the group's values? Otherwise the account keeps its own and Settings marks them ✏️.": "使用组的设置值吗？否则，该账户将保留其自有值，且“设置”界面会用 ✏️ 标记这些值。",
+"Take the shared settings?": "使用共享设置吗？",
+"Take the group's values": "使用组的值",
+"The account now follows the group.": "该账户现在使用组的设置值。",
+"Copy settings from one account": "从一个账户复制设置",
+"Apply copies these settings from the chosen account to every other member, and the group then shares them: accounts added later start with them. Each member records what it received in its signed journal; an observing account keeps its IP mode until it is paused.": "“应用”会将所选账户的这些设置复制给其他所有成员，随后该组将共享这些设置：后续添加的账户将直接采用这些设置。每个成员都会将其接收到的设置记录在自己的签名日志中；观察账户将保持其 IP 模式，直到被暂停为止。",
+"Group {name}: every account": "组{name}：所有账户",
+"Group {name}": "组 {name}",
+"{n} account": "{n}个账户",
+"{n} accounts": {
+"other": "{n}个账户"
+},
+"Account groups: every account of the group, including ones added to it later.": "账户组：该组中的所有账户，包括后续添加的账户。",
+"Group settings taken": "已接收的组设置",
+"Group settings changed": "组设置已更改",
+"Accounts returned to the group settings": "已恢复到组设置的账户",
+"Group settings not applied": "未应用组设置",
+"Group shares its copied settings": "该组现已共享从某个账户复制的设置",
+"These group settings conflict. Review external requests and timestamps.": "这些组设置存在冲突。请检查外部请求和时间戳。",
+"The group does not share this setting.": "该组不共享此设置。",
+"This workspace is not in the group.": "此工作区不属于该组。",
+"Continuous collection": "持续收集",
+"Saved files": "已保存的文件",
+"Can Telegram see this server's address?": "Telegram 能看到该服务器的地址吗？"
 }

@@ -3987,7 +3987,7 @@
 "Start all": "모두 시작",
 "Pause all": "모두 일시 중지",
 "Capture and monitoring": "캡처 및 모니터링",
-"Recheck schedule": "일정 재확인",
+"Recheck schedule": "재확인 일정",
 "IP protection mode": "IP 보호 모드",
 "{n} workspaces started.": {
 "other": "{n}개의 작업 공간이 시작되었습니다."
@@ -5648,5 +5648,91 @@
 "Validated time bound through record #{n}; {tail} later records are outside that bound.": "기록 #{n}까지 검증된 시간 범위이며, {tail} 이후의 기록은 해당 범위를 벗어납니다.",
 "Validated timestamp receipts": "검증된 타임스탬프 영수증",
 "Verify the original ZIP with a trusted copy of verify.py and --fingerprint from a separate trusted channel. Keep the verification result with the unchanged ZIP.": "별도의 신뢰할 수 있는 채널에서 가져온 신뢰할 수 있는 verify.py 사본과 --fingerprint 옵션을 사용하여 원본 ZIP 파일을 검증하십시오. 검증 결과를 변경되지 않은 ZIP 파일과 함께 보관하십시오.",
-"Witnesses and collection environment": "증인 및 수집 환경"
+"Witnesses and collection environment": "증인 및 수집 환경",
+"Not shared": "공유되지 않음",
+"Shared": "공유됨",
+"Not shared: each account keeps its own value.": "공유되지 않음: 각 계정은 자체 값을 유지합니다.",
+"{n} of {total} accounts follow the group": "{total}개의 계정 중 {n}개가 그룹의 값을 사용합니다.",
+"own value: {list}": "자체 값: {list}",
+"{n} value changes": "{n}개의 값이 변경됩니다",
+"{n} values change": {
+"other": "{n}개의 값이 변경됩니다"
+},
+"{n} value differs": "{n}개의 값이 다릅니다",
+"{n} values differ": {
+"other": "{n}개의 값이 다릅니다"
+},
+"The group already shares these values.": "이 그룹은 이미 이러한 값을 공유하고 있습니다.",
+"Applies to {n} of {total} accounts.": "{total}개 계정 중 {n}개에 적용됩니다.",
+"Unavailable now, they keep their current values: {list}": "현재 사용할 수 없으며, 현재 값을 유지합니다: {list}",
+"current value": "현재 값",
+"own value": "자체 값",
+"Change the group setting?": "그룹 설정을 변경하시겠습니까?",
+"These accounts have a different value. Ticked ones take the group value:": "이 계정들은 다른 값을 가집니다. 체크 표시가 된 항목은 그룹 값을 적용합니다:",
+"Applied to {n} account.": "{n}개의 계정에 적용됨.",
+"Applied to {n} accounts.": {
+"other": "{n}개의 계정에 적용됨."
+},
+"{n} account kept its own value.": "{n}개의 계정이 자체 값을 유지했습니다.",
+"{n} accounts kept their own value.": {
+"other": "{n}개의 계정이 자체 값을 유지했습니다."
+},
+"Group route": "그룹 연결 경로",
+"Take the value of": "값을 복사할 계정",
+"Take the value of {name}": "{name}의 값",
+"Shared settings: {name}": "공유 설정: {name}",
+"{n} own value": "{n}의 자체 값",
+"{n} own values": {
+"other": "{n}의 자체 값"
+},
+"follows the group": "그룹의 값을 사용합니다",
+"No accounts in this group yet.": "이 그룹에는 아직 계정이 없습니다.",
+"Collection, protection and notifications": "수집, 보호 및 알림",
+"More shared settings": "더 많은 공유 설정",
+"What to record": "기록 대상",
+"Change the group route": "그룹 경로 변경",
+"Stop sharing": "공유 중지",
+"Back to account settings": "계정 설정으로 돌아가기",
+"Accounts in the group take these values. An account with its own value keeps it until you return it to the group value.": "그룹에 속한 계정들은 이러한 값을 적용받습니다. 자체 값을 가진 계정은 해당 값을 그룹 값으로 되돌릴 때까지 그 값을 유지합니다.",
+"Starting and pausing collection stays with each account; Accounts starts or pauses the whole group.": "각 계정은 자체 데이터 수집을 시작하거나 일시 중지할 수 있으며, ‘계정’ 페이지에서는 그룹 전체의 데이터 수집을 시작하거나 일시 중지할 수 있습니다.",
+"Choose a goal for the group first; its settings come together.": "먼저 그룹의 목표를 선택하세요. 목표를 설정하면 관련 설정들이 함께 적용됩니다.",
+"Share the value one account already has. Notification destinations, proxies and sign-in stay with each account.": "한 계정이 이미 가지고 있는 값을 공유합니다. 알림 수신처, 프록시 및 로그인 정보는 각 계정에 그대로 유지됩니다.",
+"From the group": "그룹에서",
+"Own value": "자체 값",
+"Return to the group value": "그룹 값으로 되돌리기",
+"This account is in the group {name}.": "이 계정은 {name} 그룹에 속해 있습니다.",
+"🔗 marks a value from the group; ✏️ marks this account’s own value.": "🔗는 그룹의 값을, ✏️는 해당 계정의 자체 값을 나타냅니다.",
+"Group settings": "그룹 설정",
+"Shared with the group": "그룹과 공유됨",
+"Settings the group shares besides those in the other sections:": "다른 섹션에 있는 설정 외에도 그룹이 공유하는 설정은 다음과 같습니다:",
+"The group shares only settings shown in the other sections.": "이 그룹은 다른 섹션에 표시된 설정만 공유합니다.",
+"{n} setting of this account differs from the group {name}:": "이 계정의 {n}개 설정이 그룹 {name}과 다릅니다:",
+"{n} settings of this account differ from the group {name}:": {
+"other": "이 계정의 {n}개 설정이 그룹 {name}과 다릅니다:"
+},
+"and {n} more": "{n}개 더",
+"Take the group's values? Otherwise the account keeps its own and Settings marks them ✏️.": "그룹의 값을 사용할까요? 그렇지 않으면 계정은 자체 값을 유지하며, 설정에서 해당 값에 ✏️ 표시가 됩니다.",
+"Take the shared settings?": "공유 설정을 사용하시겠습니까?",
+"Take the group's values": "그룹의 값 사용",
+"The account now follows the group.": "이제 이 계정은 그룹의 값을 사용합니다.",
+"Copy settings from one account": "한 계정의 설정 복사",
+"Apply copies these settings from the chosen account to every other member, and the group then shares them: accounts added later start with them. Each member records what it received in its signed journal; an observing account keeps its IP mode until it is paused.": "'적용'을 선택하면 선택한 계정의 설정이 다른 모든 구성원에게 복사되며, 그룹 전체가 해당 설정을 공유하게 됩니다. 즉, 나중에 추가된 계정도 처음부터 해당 설정을 적용받게 됩니다. 각 구성원은 수신한 내용을 서명된 저널에 기록하며, 관찰 계정은 일시 중지될 때까지 IP 모드를 유지합니다.",
+"Group {name}: every account": "그룹 {name}: 모든 계정",
+"Group {name}": "그룹 {name}",
+"{n} account": "{n}개의 계정",
+"{n} accounts": {
+"other": "{n}개의 계정"
+},
+"Account groups: every account of the group, including ones added to it later.": "계정 그룹: 해당 그룹에 속한 모든 계정(나중에 추가된 계정 포함).",
+"Group settings taken": "수신된 그룹 설정",
+"Group settings changed": "그룹 설정이 변경되었습니다",
+"Accounts returned to the group settings": "그룹 설정으로 복원된 계정",
+"Group settings not applied": "그룹 설정이 적용되지 않음",
+"Group shares its copied settings": "이제 이 그룹은 특정 계정에서 복사된 설정을 공유합니다.",
+"These group settings conflict. Review external requests and timestamps.": "이 그룹 설정들이 상충됩니다. 외부 요청 및 타임스탬프를 검토하십시오.",
+"The group does not share this setting.": "이 그룹은 이 설정을 공유하지 않습니다.",
+"This workspace is not in the group.": "이 작업 공간은 그룹에 속해 있지 않습니다.",
+"Continuous collection": "지속적인 수집",
+"Saved files": "저장된 파일",
+"Can Telegram see this server's address?": "텔레그램에서 이 서버의 주소를 확인할 수 있나요?"
 }

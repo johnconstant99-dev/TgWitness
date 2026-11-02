@@ -318,6 +318,10 @@ class GuidedConnection:
                         item["app"].state.store.set_setting("connection_strategy", plan["body"].model_dump(exclude={"proxy", "proxy_url", "wireguard"}))
                         if plan["body"].allow_direct or plan["body"].mode == "direct":
                             item["app"].state.store.set_setting("ip_choice", "auto")
+                if registry and plan["body"].scope == "group":
+                    from .group_settings import record_route
+                    record_route(registry, plan["body"].group, plan["body"].model_dump(),
+                                 [r["id"] for r in results if r["applied"]])
                 self.job = {"state": "applied", "rows": results, "stage": "Connection updated"}
             finally:
                 for item in plan["items"]:

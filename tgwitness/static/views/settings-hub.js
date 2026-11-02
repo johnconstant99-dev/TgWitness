@@ -1,4 +1,6 @@
 // First run and Settings edit the same server records. Secrets stay in the existing auth forms.
+import {createGroupSettings} from './group-settings.js?v=1';
+
 export function createSettingsHub(ctx) {
   const {root, wizardRoot, state, json, tr, node, toast, navigate, askConfirm, $, refreshStatus} = ctx;
   const rank = {simple:0, standard:1, expert:2};
@@ -13,6 +15,8 @@ export function createSettingsHub(ctx) {
   let autoTried=false, routeDirty=false;
   // After Start: the live check of the four collector parts. visited bounds browser Forward to steps already seen.
   let live=null, liveTimer=null, visited=0, recordedStep=null, shownSession=null;
+  // Settings shows one account, or the shared settings of a group when groupScope names it.
+  let groupScope=null;
   let preferencesQueue=Promise.resolve(), draftQueue=Promise.resolve(), preferencesSequence=0, draftSequence=0, checkSequence=0;
   const owner=()=>({generation,profile:state.profile,token:state.token,revision:state.workspaceRevision});
   const current=who=>who.generation===generation&&who.profile===state.profile&&who.token===state.token&&who.revision===state.workspaceRevision;
@@ -39,8 +43,12 @@ export function createSettingsHub(ctx) {
     short_media:'Photos and videos up to 60 seconds / 20 MB',all:'All files up to 1 GB',custom:'Custom file limits',
     auto:'Automatic',hide:'No, hide it',simple:'Simple',standard:'Standard',expert:'Expert',
     account:'All chats',selected:'Choose chats',folder:'Telegram folder',warp:'Cloudflare WARP',proxy:'My proxy',direct:'Direct',
-    mtproxy_auto:'Automatic',mtproxy:'My proxy',socks5:'My proxy',http:'My proxy'}[value]||String(value));
+    mtproxy_auto:'Automatic',mtproxy:'My proxy',socks5:'My proxy',http:'My proxy',vpn:'VPN'}[value]||String(value));
   const describe=value=>typeof value==='boolean'?tr(value?'On':'Off'):label(value);
+  const sharedNames={goal:'Goal',monitoring:'What to record',recheck:'Recheck schedule',alert_rules:'Notification rules',
+    reports:'Report settings',route:'Connection route'};
+  const groupView=createGroupSettings({json,tr,trn:ctx.trn,node,toast,askConfirm,button,message,cards,label,describe,goals,run,root,
+    fields:()=>data?.fields||[],openConnection:ctx.openConnection,back:async()=>{groupScope=null;data=await request(owner(),'settings');render();}});
   function button(text, fn, style='secondary') { const el=node('button',style,tr(text));el.type='button';el.onclick=()=>run(fn,el);return el; }
   async function run(fn, control) { if(control)control.disabled=true;try{return await fn();}catch(e){if(e.name!=='StaleView')toast(e.message,true);}finally{if(control?.isConnected)control.disabled=false;} }
   function message(text, cls='hint') { return node('p',cls,tr(text)); }
@@ -158,7 +166,8 @@ export function createSettingsHub(ctx) {
       const help=node('details','setting-help');help.append(node('summary','', '?'),message(explanations[f.key]));
       help.querySelector('summary').setAttribute('aria-label',tr('Explain this setting'));heading.append(help);
     }
-    if(f.modified)heading.append(node('span','modified-tag',tr('Changed by you')));
+    const mark=inheritMark(f.key);
+    if(mark)heading.append(mark);else if(f.modified)heading.append(node('span','modified-tag',tr('Changed by you')));
     row.append(heading);
     if(f.type==='bool'){
       const control=node('input');control.type='checkbox';control.checked=f.value;control.setAttribute('aria-label',tr(f.label));
@@ -168,15 +177,48 @@ export function createSettingsHub(ctx) {
       const field=select(f.label,values.map(v=>[v,label(v)]),f.value,v=>edit(f.key,v));
       if(f.value==='custom')field.querySelector('option').disabled=true;row.append(field);
     }
-    if(f.modified)row.append(button('Restore goal value',async()=>{
+    if(f.modified&&!mark)row.append(button('Restore goal value',async()=>{
       const who=owner(),plan=await request(who,'settings/goal/preview',{goal:data.goal});await edit(f.key,plan.values[f.key],who);
     },'text-link'));
     return row;
   }
+  // In a group: 🔗 the value comes from the group, ✏️ this account keeps its own until returned to the group's.
+  const inherited=key=>data?.inheritance?.keys?.[key];
+  async function adoptGroup(keys,who=owner()){
+    requireOwner(who);
+    await json('profile-groups/'+encodeURIComponent(data.inheritance.group.id)+'/settings/adopt',{profiles:[who.profile],keys},{root:true,token:who.token});
+    data=await request(who,'settings');render();await refresh(who);
+  }
+  function revertKey(key){
+    const item=inherited(key);
+    // A route changes only after its connection check.
+    if(key==='route')return ctx.openConnection({scope:'account',mode:item.group_value.mode});
+    if(data.fields.some(f=>f.key===key))return edit(key,item.group_value);
+    return adoptGroup([key]);
+  }
+  function inheritMark(key){
+    const item=inherited(key);if(!item)return null;
+    const box=node('span','inherit-mark '+item.source);box.dataset.inherit=item.source;
+    box.append(node('span','inherit-source',item.source==='group'?'🔗 '+tr('From the group'):'✏️ '+tr('Own value')));
+    if(item.source==='own')box.append(button('Return to the group value',()=>revertKey(key),'text-link'));
+    return box;
+  }
+  function sharedName(key){return key.startsWith('parameter:')?data.parameters.find(p=>p.key===key)?.label||key:sharedNames[key]||key;}
+  async function openGroup(id){await groupView.load(id);groupScope=id;section=null;query='';render();}
   function openSection(name){section=name;query='';render();root.querySelector('h2')?.focus();}
   function render(){
-    restoreMoved();if(!data||!prefs)return;root.replaceChildren();
+    restoreMoved();if(!data||!prefs)return;
+    if(groupScope&&groupView.data){groupView.render(root);return;}
+    root.replaceChildren();
     const header=node('div','hub-heading');header.append(node('div','eyebrow',tr('One place for every answer')),node('h1','',tr('Settings')));root.append(header);
+    const inheritance=data.inheritance;
+    if(inheritance){
+      const note=node('div','notice hub-group-note');
+      note.append(node('span','',tr('This account is in the group {name}.',{name:inheritance.group.label})+' '+
+        tr('🔗 marks a value from the group; ✏️ marks this account’s own value.')),
+        button('Group settings',()=>openGroup(inheritance.group.id),'text-link'));
+      root.append(note);
+    }
     const search=node('input','hub-search');search.type='search';search.placeholder=tr('Search all settings, including hidden ones');search.setAttribute('aria-label',search.placeholder);search.value=query;
     search.oninput=()=>{query=search.value;renderResults(results);};root.append(search);
     const results=node('div','hub-results');root.append(results);renderResults(results);
@@ -186,6 +228,10 @@ export function createSettingsHub(ctx) {
       ['telegram','Telegram account',state.status.collector.has_session?tr('Connected'):tr('Not connected')],
       ['chats','Which chats?',label(data.wizard.scope||'account')],['collection','Collection and files',label(data.values.files)],
       ['protection','Record protection',tr(data.values.timestamps?'On':'Off')],['notifications','Notifications and off-site copy',tr(data.values.notifications?'On':'Off')]];
+    if(inheritance){
+      const keys=Object.values(inheritance.keys),own=keys.filter(k=>k.source==='own').length;
+      summaries.push(['group','Shared with the group',inheritance.group.label+' · '+(own?ctx.trn('{n} own value','{n} own values',own):tr('follows the group'))]);
+    }
     for(const [id,name,summary] of summaries){const b=button('',()=>openSection(id),'hub-summary');b.dataset.section=id;
       b.append(node('strong','',tr(name)),node('span','hint',summary),node('span','hub-arrow','→'));overview.append(b);}
     const detail=node('section','hub-detail');detail.hidden=!section;root.append(detail);
@@ -194,7 +240,17 @@ export function createSettingsHub(ctx) {
       title(detail,summaries.find(s=>s[0]===section)?.[1]||'Settings');
       if(section==='appearance')preferencesForm(detail);
       if(section==='level')cards(detail,levels,prefs.level,async level=>{await savePreferences({level});render();});
+      if(section==='group'&&inheritance){
+        const keys=Object.keys(inheritance.keys).filter(k=>k!=='goal'&&!data.fields.some(f=>f.key===k));
+        detail.append(message(keys.length?'Settings the group shares besides those in the other sections:':'The group shares only settings shown in the other sections.'));
+        for(const key of keys){
+          const row=node('div','hub-field');row.dataset.setting=key;const heading=node('div');
+          heading.append(node('strong','',tr(sharedName(key))),inheritMark(key));row.append(heading);detail.append(row);
+        }
+        detail.append(button('Group settings',()=>openGroup(inheritance.group.id)));
+      }
       if(section==='goal'){
+        const goalMark=inheritMark('goal');if(goalMark)detail.append(goalMark);
         const keep=node('input');keep.type='checkbox';const keepLabel=node('label','check-label');keepLabel.append(keep,document.createTextNode(tr('Keep my manual changes')));detail.append(keepLabel);
         cards(detail,goals,data.goal,async goal=>{await applyGoal(goal,{keep:keep.checked});render();});
       }
@@ -489,8 +545,9 @@ export function createSettingsHub(ctx) {
   }
   for(const select of document.querySelectorAll('[data-ui-level]'))select.onchange=()=>run(async()=>{await savePreferences({level:select.value});if(state.view==='settings')render();});
   return {bootstrap,load,render,savePreferences,
+    async openGroup(id){if(!data)data=await request(owner(),'settings');await openGroup(id);},
     get step(){return draft&&!live?draft.step:null;},
-    leave(){restoreMoved();clearTimeout(liveTimer);live=null;recordedStep=null;},
+    leave(){restoreMoved();clearTimeout(liveTimer);live=null;recordedStep=null;groupScope=null;},
     status(){
       updateNext();if(data)updateIndicator(data.connection);
       // Signing in on step 5 replaces the sign-in form with the result and the account question.
@@ -498,7 +555,7 @@ export function createSettingsHub(ctx) {
       if(state.view==='first-run'&&draft?.step===5&&!live&&shownSession!==null&&session!==shownSession)void renderWizard();
       shownSession=session;
     },
-    reset(){generation++;checkSequence++;clearTimeout(checkTimer);clearTimeout(statusTimer);clearTimeout(liveTimer);restoreMoved();data=prefs=draft=dialogs=null;live=null;visited=0;recordedStep=null;connectionBusy=false;editing=false;autoTried=routeDirty=false;preferencesQueue=draftQueue=Promise.resolve();},
+    reset(){generation++;checkSequence++;clearTimeout(checkTimer);clearTimeout(statusTimer);clearTimeout(liveTimer);restoreMoved();data=prefs=draft=dialogs=null;live=null;groupScope=null;groupView.reset();visited=0;recordedStep=null;connectionBusy=false;editing=false;autoTried=routeDirty=false;preferencesQueue=draftQueue=Promise.resolve();},
     async refreshPreferences(patch){if(prefs)await savePreferences(patch);},
   };
 }

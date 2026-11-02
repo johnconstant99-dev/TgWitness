@@ -5648,5 +5648,91 @@
 "Validated time bound through record #{n}; {tail} later records are outside that bound.": "Batas masa yang disahkan sehingga rekod #{n}; rekod #{tail} yang kemudian berada di luar batas tersebut.",
 "Validated timestamp receipts": "Resit cap masa yang disahkan",
 "Verify the original ZIP with a trusted copy of verify.py and --fingerprint from a separate trusted channel. Keep the verification result with the unchanged ZIP.": "Sahkan ZIP asal dengan salinan verify.py yang dipercayai dan --fingerprint daripada saluran dipercayai yang berasingan. Simpan keputusan pengesahan bersama ZIP yang tidak berubah.",
-"Witnesses and collection environment": "Saksi dan persekitaran pengumpulan"
+"Witnesses and collection environment": "Saksi dan persekitaran pengumpulan",
+"Not shared": "Tidak dikongsi",
+"Shared": "Dikongsi",
+"Not shared: each account keeps its own value.": "Tidak dikongsi: setiap akaun mengekalkan nilai tersendiri.",
+"{n} of {total} accounts follow the group": "{n} akaun daripada {total} menggunakan nilai kumpulan",
+"own value: {list}": "nilai sendiri: {list}",
+"{n} value changes": "{n} nilai akan diubah",
+"{n} values change": {
+"other": "{n} nilai akan diubah"
+},
+"{n} value differs": "{n} nilai berbeza",
+"{n} values differ": {
+"other": "{n} nilai berbeza"
+},
+"The group already shares these values.": "Kumpulan ini sudah berkongsi nilai-nilai ini.",
+"Applies to {n} of {total} accounts.": "Terpakai kepada {n} daripada {total} akaun.",
+"Unavailable now, they keep their current values: {list}": "Tidak tersedia sekarang, ia mengekalkan nilai semasa mereka: {list}",
+"current value": "nilai semasa",
+"own value": "nilai sendiri",
+"Change the group setting?": "Ubah tetapan kumpulan?",
+"These accounts have a different value. Ticked ones take the group value:": "Akaun-akaun ini mempunyai nilai yang berbeza. Yang dicentang mengambil nilai kumpulan:",
+"Applied to {n} account.": "Diterapkan pada {n} akaun.",
+"Applied to {n} accounts.": {
+"other": "Diterapkan pada {n} akaun."
+},
+"{n} account kept its own value.": "{n} akaun mengekalkan nilai mereka sendiri.",
+"{n} accounts kept their own value.": {
+"other": "{n} akaun mengekalkan nilai mereka sendiri."
+},
+"Group route": "Rute sambungan kumpulan",
+"Take the value of": "Akaun yang nilai untuk digunakan",
+"Take the value of {name}": "Nilai {name}",
+"Shared settings: {name}": "Tetapan yang dikongsi: {name}",
+"{n} own value": "{n} nilai sendiri",
+"{n} own values": {
+"other": "{n} nilai sendiri"
+},
+"follows the group": "menggunakan nilai kumpulan",
+"No accounts in this group yet.": "Tiada akaun dalam kumpulan ini lagi.",
+"Collection, protection and notifications": "Pengumpulan, perlindungan dan pemberitahuan",
+"More shared settings": "Lebih banyak tetapan yang dikongsi",
+"What to record": "Apa yang hendak direkod",
+"Change the group route": "Ubah laluan kumpulan",
+"Stop sharing": "Hentikan perkongsian",
+"Back to account settings": "Kembali ke tetapan akaun",
+"Accounts in the group take these values. An account with its own value keeps it until you return it to the group value.": "Akaun dalam kumpulan mengambil nilai-nilai ini. Akaun yang mempunyai nilai tersendiri mengekalkan nilai itu sehingga anda mengembalikannya kepada nilai kumpulan.",
+"Starting and pausing collection stays with each account; Accounts starts or pauses the whole group.": "Setiap akaun memulakan dan menjeda pengumpulan sendiri; di halaman Akaun anda boleh memulakan atau menjeda keseluruhan kumpulan.",
+"Choose a goal for the group first; its settings come together.": "Pilih matlamat untuk kumpulan terlebih dahulu; matlamat ini menetapkan semua tetapan ini secara serentak.",
+"Share the value one account already has. Notification destinations, proxies and sign-in stay with each account.": "Berkongsi nilai yang sudah dimiliki oleh satu akaun. Destinasi pemberitahuan, proksi dan log masuk kekal dengan setiap akaun.",
+"From the group": "Daripada kumpulan",
+"Own value": "Nilai sendiri",
+"Return to the group value": "Pulihkan kepada nilai kumpulan",
+"This account is in the group {name}.": "Akaun ini berada dalam kumpulan {name}.",
+"🔗 marks a value from the group; ✏️ marks this account’s own value.": "🔗 menandakan nilai daripada kumpulan; ✏️ menandakan nilai tersendiri akaun ini.",
+"Group settings": "Tetapan kumpulan",
+"Shared with the group": "Dikongsi dengan kumpulan",
+"Settings the group shares besides those in the other sections:": "Penyetelan yang dikongsi oleh kumpulan selain daripada yang terdapat dalam bahagian lain:",
+"The group shares only settings shown in the other sections.": "Kumpulan hanya berkongsi tetapan yang dipaparkan dalam bahagian lain.",
+"{n} setting of this account differs from the group {name}:": "{n} tetapan akaun ini berbeza daripada kumpulan {name}:",
+"{n} settings of this account differ from the group {name}:": {
+"other": "{n} tetapan akaun ini berbeza daripada kumpulan {name}:"
+},
+"and {n} more": "dan {n}yang lain",
+"Take the group's values? Otherwise the account keeps its own and Settings marks them ✏️.": "Menggunakan nilai kumpulan? Jika tidak, akaun mengekalkan nilai tersendiri dan Tetapan menandakannya ✏️.",
+"Take the shared settings?": "Menggunakan tetapan yang dikongsi?",
+"Take the group's values": "Gunakan nilai kumpulan",
+"The account now follows the group.": "Akaun kini menggunakan nilai kumpulan.",
+"Copy settings from one account": "Salin tetapan daripada satu akaun",
+"Apply copies these settings from the chosen account to every other member, and the group then shares them: accounts added later start with them. Each member records what it received in its signed journal; an observing account keeps its IP mode until it is paused.": "Apply menyalin tetapan ini daripada akaun yang dipilih ke setiap ahli lain, dan kumpulan kemudian berkongsi tetapan tersebut: akaun yang ditambah kemudian bermula dengannya. Setiap ahli merekodkan apa yang diterimanya dalam jurnal yang disahkan; akaun pemerhati mengekalkan mod IP sehingga ia dihentikan.",
+"Group {name}: every account": "Kumpulan {name}: setiap akaun",
+"Group {name}": "Kumpulan {name}",
+"{n} account": "{n} akaun",
+"{n} accounts": {
+"other": "{n} akaun"
+},
+"Account groups: every account of the group, including ones added to it later.": "Kumpulan akaun: setiap akaun dalam kumpulan, termasuk yang ditambah kemudian.",
+"Group settings taken": "Tetapan kumpulan diterima",
+"Group settings changed": "Tetapan kumpulan telah diubah",
+"Accounts returned to the group settings": "Akaun yang dikembalikan ke tetapan kumpulan",
+"Group settings not applied": "Tetapan kumpulan tidak diterapkan",
+"Group shares its copied settings": "Kumpulan kini berkongsi tetapan yang disalin daripada akaun",
+"These group settings conflict. Review external requests and timestamps.": "Tetapan kumpulan ini bertembung. Semak permintaan luaran dan cap masa.",
+"The group does not share this setting.": "Kumpulan tidak berkongsi tetapan ini.",
+"This workspace is not in the group.": "Ruang kerja ini tidak berada dalam kumpulan.",
+"Continuous collection": "Pengumpulan berterusan",
+"Saved files": "Fail yang disimpan",
+"Can Telegram see this server's address?": "Bolehkah Telegram melihat alamat pelayan ini?"
 }

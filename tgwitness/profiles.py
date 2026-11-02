@@ -34,6 +34,11 @@ class Profiles:
         self.account_reservations = {}  # account IDs held through the durable ownership write
         self.lock = asyncio.Lock()
         app.state.collector.account_guard = self.check_account
+        app.state.group_link = lambda: self.inheritance("default")
+
+    def inheritance(self, profile_id):
+        from .group_settings import member_view
+        return member_view(self, profile_id)
 
     def holder(self, account_id=None, key=None, collector=None):
         """The workspace that already holds this Telegram account, by its ID once signed in or by the
@@ -111,6 +116,8 @@ class Profiles:
         except BaseException:
             await self.close()
             raise
+        from .group_settings import migrate
+        migrate(self)
 
     async def open_entry(self, entry):
         if not re.fullmatch(r"[a-f0-9]{32}", entry["id"]):
@@ -136,6 +143,7 @@ class Profiles:
         finally:
             self.opening.pop(entry["id"], None)
         self.entries[entry["id"]] = {**entry, "app": child, "cm": cm}
+        child.state.group_link = lambda: self.inheritance(entry["id"])
 
     async def create(self, label, group=None):
         async with self.lock:
@@ -149,6 +157,9 @@ class Profiles:
                 items = self.app.state.store.get_setting("profiles", [])
                 self.app.state.store.set_setting("profiles", [*items, entry])
                 self.app.state.store.append("profile.created", entry)
+            if group is not None:
+                from .group_settings import adopt_all
+                await adopt_all(self, entry["id"], self._group(group))
             return entry
 
     async def rename(self, profile_id, label):
@@ -227,7 +238,7 @@ class Profiles:
             self.entries.pop(profile_id, None)
             return {"id": profile_id, "deleted": True}
 
-    # Groups: workspaces that share settings, copied from one of them on request ------------------
+    # Groups: workspaces that share settings (group_settings.py); Apply copies them from one member ---
 
     def groups(self):
         return self.app.state.store.get_setting("profile_groups", [])
@@ -281,6 +292,9 @@ class Profiles:
             with self.app.state.store.transaction():
                 self.app.state.store.set_setting("profile_groups", [g for g in self.groups() if g["id"] != group_id])
                 self.app.state.store.append("profile_group.deleted", {"group_id": group_id})
+            access = getattr(self.app.state, "access", None)
+            if hasattr(access, "forget_group"):
+                access.forget_group(group_id)
             return {"id": group_id, "deleted": True}
 
     def _assign(self, profile_id, group_id):
@@ -320,6 +334,8 @@ class Profiles:
             source = template["app"].state.store
             settings = {key: source.get_setting(key, None)
                         for section in group.get("sections", []) for key in GROUP_SECTIONS[section]}
+            from .group_settings import read
+            template_ip = read(template["app"], ["ip"])["ip"]
             results = []
             for profile_id in self.members(group_id):
                 entry = self.entries[profile_id]
@@ -341,6 +357,8 @@ class Profiles:
                         except ValueError:
                             skipped.append(section)
                             continue
+                        # Settings show the IP answer saved with the policy; copy both together.
+                        store.set_setting("ip_choice", template_ip)
                         applied.append(section)
                         continue
                     with store.transaction():
@@ -358,8 +376,16 @@ class Profiles:
                                                         "skipped_while_observing": skipped})
                 results.append({"id": profile_id, "label": entry["label"], "status": "applied" if applied else "skipped",
                                 "applied": applied, "skipped": skipped})
-            self.app.state.store.append("profile_group.applied", {"group_id": group_id, "members": len(results)})
-            return {"group": group, "results": results}
+            # The copied values become what the group shares, so a workspace added later starts with them.
+            from .group_settings import SECTION_KEYS, read, save_values
+            current = read(template["app"], [k for section in group.get("sections", []) for k in SECTION_KEYS[section]])
+            shared = {**group.get("values", {}),
+                      **{k: v for k, v in current.items() if v is not None and not (k == "files" and v == "custom")}}
+            with self.app.state.store.transaction():
+                save_values(self, group_id, shared)
+                self.app.state.store.append("profile_group.applied", {"group_id": group_id, "members": len(results),
+                                                                     "shared": sorted(current)})
+            return {"group": {**group, "values": shared}, "results": results}
 
     def summary(self):
         with ExitStack() as snapshots:
