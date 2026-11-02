@@ -40,7 +40,7 @@ def main():
             assert page.locator('#panel-key-new').input_value() == ''
             for width in (1440, 390):
                 page.set_viewport_size({'width': width, 'height': 1000})
-                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), page.evaluate("""()=>({width:innerWidth,overflow:[...document.querySelectorAll('body *')].filter(e=>e.checkVisibility()&&e.getBoundingClientRect().right>innerWidth+1).map(e=>[e.tagName,e.id,e.className,e.getBoundingClientRect().right]).slice(0,20)})""")
                 page.screenshot(path=str(output / f'access-{width}.png'), full_page=True)
             page.reload()
             expect(page.locator('#workspace')).to_be_visible()

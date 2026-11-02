@@ -34,6 +34,8 @@ WORKSPACE_ID = re.compile(r"default|[a-f0-9]{32}")
 
 
 POLICY = {
+    "GET /api/preferences": ("view", "root"),
+    "POST /api/preferences": ("view", "root"),
     "GET /api/analysis/provider": ("view", "root"),
     "GET /api/analysis/media": ("view", "root"),
     "POST /api/analysis/media": ("view", "root"),

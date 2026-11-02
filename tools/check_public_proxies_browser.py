@@ -109,7 +109,7 @@ def main():
                 assert page.locator("#proxy-catalog-select option").count() == 2
 
                 for lang in ("en", "ru"):
-                    context.add_cookies([{"name": "tgwitness-lang", "value": lang, "url": server.url}])
+                    page.evaluate("lang=>{const url=new URL(location.href);url.searchParams.set(\"lang\",lang);history.replaceState(null,\"\",url);}",lang)
                     page.reload()
                     expect(page.locator("#workspace")).to_be_visible()
                     settings(page)

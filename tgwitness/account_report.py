@@ -9,8 +9,8 @@ import json
 import re
 from datetime import datetime
 
-from . import i18n
-from .report import Words
+from . import case_assessment, i18n
+from .report import DOSSIER_CSS, Words
 
 MEDIA_PATH = re.compile(r'media/[0-9a-f]{64}\Z')
 COUNT_LABELS = {'messages': 'Messages', 'chats': 'Chats', 'media': 'Media files included',
@@ -144,8 +144,9 @@ def opening(context, title, sharing=False):
     yield encoded('<!doctype html><html lang="' + say.language + '" dir="' + say.direction + '"><head><meta charset="utf-8">'
                   '<meta name="viewport" content="width=device-width,initial-scale=1">'
                   '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;">'
-                  '<title>' + e(title) + ' · TgWitness</title><style>' + CSS + '</style></head><body><main>'
-                  '<header><div class="brand" dir="ltr">TGWITNESS</div><p class="badge">' + e(kind) + '</p>'
+                  '<title>' + e(title) + ' · TgWitness</title><style>' + CSS + case_assessment.CSS + DOSSIER_CSS + '</style></head><body class="dossier account-dossier"><main>'
+                  '<header class="account-cover"><div class="cover-register"><span dir="ltr">TG / WITNESS</span><span>'
+                  + e(say('Evidence dossier')) + '</span></div><p class="badge">' + e(kind) + '</p>'
                   '<h1 class="user" dir="auto">' + e(title) + '</h1><p class="lead">' + e(lead) + '</p></header>')
 
 
@@ -229,6 +230,7 @@ def account_index(context, chats):
     yield encoded('<nav><a href="#start">' + e(say('Start here')) + '</a><a href="#chats">' + e(say('Chats')) + '</a><a href="#coverage">' + e(say('Coverage')) +
                   '</a><a href="#verification">' + e(say('Verification')) + '</a></nav>')
     yield encoded(recipient_guide(say))
+    yield encoded(case_assessment.html(case_assessment.snapshot(context), say))
     yield encoded('<p class="notice">' + e(say('Original account data may contain personal information. Prepare a separate minimized copy before sharing.')) + '</p>')
     yield encoded(stats(context.get('counts', {}), say) + copy_context(context, say) + scope(context.get('options', {}), say))
     coverage = context.get('coverage', {})
@@ -336,7 +338,7 @@ def account_chat(context, chat, rows):
                   e(say('Message records are shown in captured page order. Signed JSONL remains authoritative.')) + '</p>')
     yield encoded(copy_context(context, say))
     yield encoded('<p>' + e(say('Cite the archive reference, the file path and the record reference beside a message. Record numbers apply only to this copy.')) + '</p>')
-    yield encoded('<nav><a href="#messages">' + e(say('Messages')) + '</a><a href="#verification">' +
+    yield encoded('<nav><a href="#messages">' + e(say('Messages')) + '</a><a href="#case-assessment">' + e(say(case_assessment.TITLE)) + '</a><a href="#verification">' +
                   e(say('Verification')) + '</a></nav><section id="messages">')
     page_path = 'chats/' + str(chat['id']) + '.html' if type(chat.get('id')) is int else 'chat.html'
     seen = False
@@ -346,6 +348,8 @@ def account_chat(context, chat, rows):
     if not seen:
         yield encoded('<p>' + e(say('No message records are included in this view. Check the scope and omissions before drawing conclusions.')) + '</p>')
     yield encoded('</section>')
+    yield encoded(case_assessment.html(case_assessment.snapshot(context, 'account_chat',
+        {'message_count': chat.get('message_count')}), say))
     yield encoded(verification(context, say))
     yield ending(say)
 
@@ -356,6 +360,7 @@ def sharing_report(context, rows):
     yield encoded('<nav><a href="#start">' + e(say('Start here')) + '</a><a href="#messages">' + e(say('Messages')) + '</a><a href="#verification">' +
                   e(say('Verification')) + '</a></nav>')
     yield encoded(recipient_guide(say, sharing=True))
+    yield encoded(case_assessment.html(case_assessment.snapshot(context, "sharing"), say))
     # Only explicitly public policy fields are rendered. No private criteria, map or source rows.
     public = {key: context.get('policy', {}).get(key) for key in (*SCOPE_LABELS, 'purpose')}
     yield encoded(stats(context.get('counts', {}), say) + copy_context(context, say, sharing=True) + scope(public, say, sharing=True))
@@ -381,5 +386,5 @@ def text_keys():
     keys = [node.args[0].value for node in ast.walk(tree) if isinstance(node, ast.Call)
             and isinstance(node.func, ast.Name) and node.func.id == 'say' and node.args
             and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)]
-    return list(dict.fromkeys(keys + list(COUNT_LABELS.values()) + list(SCOPE_LABELS.values()) +
+    return list(dict.fromkeys(keys + case_assessment.text_keys() + list(COUNT_LABELS.values()) + list(SCOPE_LABELS.values()) +
                               list(VALUES.values()) + list(CONTEXT_LABELS.values()) + ['Tasks completed', 'Tasks planned', 'Failures and gaps']))

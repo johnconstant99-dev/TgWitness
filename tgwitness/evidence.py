@@ -188,7 +188,7 @@ def export_file(store, vault, fmt, options=None):
                        "fingerprint": result["fingerprint"], "event_count": result["events"],
                        "head_hash": result["head_hash"], "digest": summary, "anchors": [], "files": {},
                        "account": store.get_setting("account", None), "archive": fmt == "zip", "sign": vault.sign,
-                       "events_again": snapshot.events}
+                       "events_again": snapshot.events, "journal_verified": True}
 
             def chunks(format):
                 events = snapshot.events()
@@ -259,7 +259,8 @@ def export_file(store, vault, fmt, options=None):
                         query = proof.with_suffix(".tsq")
                         context["anchors"].append(report.describe_anchor(
                             source.name, source.read_bytes(), proof.name, proof.read_bytes(),
-                            query.read_bytes() if proof.suffix == ".tsr" and query.is_file() else None))
+                            query.read_bytes() if proof.suffix == ".tsr" and query.is_file() else None,
+                            public_key=vault.public_key, event_count=result["events"], hash_at=snapshot.hash_at))
                 # The readable kit: custody record, sealed report, README and SHA256SUMS, in that order.
                 context["events_sha256"] = hashes["events.jsonl"]
                 write_member("custody.json", [json.dumps(report.custody(context), ensure_ascii=False,
@@ -283,7 +284,8 @@ def export_file(store, vault, fmt, options=None):
                             "event_count": result["events"], "head_hash": result["head_hash"],
                             "scope": "Complete stable journal prefix from sequence 1, including operational events",
                             "producer": producer(), "limitations": LIMITS, "case": report.case_of(options),
-                            "report": report_entry(context, options), "files": hashes}
+                            "report": report_entry(context, options), "files": hashes,
+                            "case_assessment": data["case_assessment"]}
                 manifest_bytes = canonical(manifest)
                 if total + len(manifest_bytes) + 88 > limit:
                     raise ValueError("Manifest pushes bundle above the verification size limit")

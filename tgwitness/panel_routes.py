@@ -6,9 +6,11 @@ from starlette.exceptions import HTTPException
 
 
 DOCUMENTS = (
+    "/settings", "/first-run",
     "/start", "/chats", "/journal", "/sources", "/parameters", "/account", "/accounts",
     "/access", "/system-log", "/integrations", "/exports", "/extras", "/analysis", "/sealed",
     *("/extras/" + card for card in ("alerts", "evidence", "cloud", "bot", "github")),
+    *("/first-run/" + str(step) for step in range(1, 8)),
 )
 
 

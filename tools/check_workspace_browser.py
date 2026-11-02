@@ -39,7 +39,12 @@ def main():
         def post(path, body):
             response = session.post(server.url + path, json=body, timeout=15)
             response.raise_for_status()
-            return response.json()
+            result = response.json()
+            if path == "/api/profiles":
+                store = server.app.state.profiles.entries[result["id"]]["app"].state.store
+                store.set_setting("first_run", {"skipped":True})
+                store.set_setting("ui_preferences:admin", {"language":"en","timezone":"UTC","theme":"system","level":"expert"})
+            return result
         post("/api/auth/configure", {"api_id": 123, "api_hash": "a" * 32, "session": saved_session()})
         child = post("/api/profiles", {"label": "Second workspace"})["id"]
         post("/profiles/" + child + "/api/auth/configure", {
@@ -147,7 +152,7 @@ def main():
                 expect(page.locator("#toast")).to_contain_text("Could not delete all workspace files")
             assert directory.exists()
             page.screenshot(path=str(output / "deletion-incomplete.png"))
-            page.context.add_cookies([{"name": "tgwitness-lang", "value": "ru", "url": server.url}])
+            page.evaluate("()=>{const url=new URL(location.href);url.searchParams.set('lang','ru');history.replaceState(null,'',url);}")
             page.reload()
             page.locator('[data-view="accounts"]').click()
             expect(card.locator(".account-badge")).to_have_text("Удаление не завершено")

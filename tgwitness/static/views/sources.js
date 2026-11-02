@@ -61,6 +61,8 @@ export function createSources(context) {
 
   function buildMedia() {
     const box = find("media-rules");
+    const durations=root.ownerDocument.createElement('details'), summary=root.ownerDocument.createElement('summary');
+    summary.textContent=tr('Duration limits');durations.append(summary);durations.className='media-duration-details';
     for (const [key, label] of media) {
       const row = root.ownerDocument.createElement("div");
       row.className = "media-rule";
@@ -76,7 +78,16 @@ export function createSources(context) {
       const unit = root.ownerDocument.createElement("span");
       unit.className = "unit"; unit.textContent = tr("MiB");
       field.append(size, unit); row.append(checkbox, title, field); box.append(row);
+      if (['video','video_note','animation','voice','audio'].includes(key)) {
+        const duration = root.ownerDocument.createElement('input');
+        Object.assign(duration, {id:'media-seconds-'+key,type:'number',min:'0',max:'86400',step:'1',value:'0'});
+        duration.dataset.level='expert';
+        duration.setAttribute('aria-label',tr('Maximum duration in seconds, 0 means unlimited'));
+        const durationLabel = root.ownerDocument.createElement('label');durationLabel.className='media-duration';
+        durationLabel.append(tr(label)+' · '+tr('Duration limit, seconds (0 = unlimited)'),duration);durations.append(durationLabel);
+      }
     }
+    box.after(durations);
   }
   buildMedia();
 
@@ -88,6 +99,7 @@ export function createSources(context) {
         download_media: find("download-media").checked, max_media_mb: Number(find("max-media").value),
         types: Object.fromEntries(media.map(([key]) => [key, {
           enabled: find("media-on-" + key).checked, max_mb: Number(find("media-max-" + key).value),
+          ...(Number(find('media-seconds-'+key)?.value) ? {max_seconds:Number(find('media-seconds-'+key).value)} : {}),
         }])),
       },
       recheck: {recheck_minutes: Number(find("recheck-priority").value),
@@ -105,6 +117,7 @@ export function createSources(context) {
         const rule = value.types[key] || {enabled: true, max_mb: value.max_media_mb};
         find("media-on-" + key).checked = rule.enabled;
         find("media-max-" + key).value = String(rule.max_mb);
+        if(find('media-seconds-'+key))find('media-seconds-'+key).value=String(rule.max_seconds||0);
       }
     } else {
       find("recheck-priority").value = String(value.recheck_minutes);

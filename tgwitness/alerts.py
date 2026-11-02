@@ -88,13 +88,16 @@ def proxy_url(network, address=None):
     if network.kind == "direct":
         return None
     login = (quote(network.username, safe="") + ":" + quote(network.password, safe="") + "@") if network.username else ""
-    host = address or network.host
+    # HTTPS uses the original hostname for certificate verification. The socket
+    # guard still connects only to the address checked before the send.
+    host = network.host if network.kind == "http" and network.tls else address or network.host
     host = "[" + host + "]" if ":" in host else host
 
-    return ("socks5h" if network.kind == "socks5" else "http") + "://" + login + host + ":" + str(network.port)
+    scheme = "socks5h" if network.kind == "socks5" else "https" if network.tls else "http"
+    return scheme + "://" + login + host + ":" + str(network.port)
 
 
-_guard = {"on": False, "allowed": set(), "refused": None}
+_guard = {"on": False, "allowed": set(), "refused": None, "pinned": {}}
 
 
 class Refused(OSError):
@@ -103,6 +106,8 @@ class Refused(OSError):
 
 def _checked(host, port):
     """The addresses to connect to, checked once and then used (no second lookup); None: unchecked."""
+    if host in _guard["pinned"]:
+        return _guard["pinned"][host]
     if not _guard["on"] or host in _guard["allowed"]:
         return None
     addresses = list(dict.fromkeys(info[4][0] for info in socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)))
@@ -185,7 +190,8 @@ def deliver(urls, title, body, network):
     _install_guard()
     with _send_lock, _routed(proxy_url(network, address)):
         _guard.update(on=not netclient.private_allowed(), refused=None,
-                      allowed={address} if address else set())
+                      allowed={address} if address else set(),
+                      pinned={network.host: [address]} if address else {})
         try:
             bundle = apprise.Apprise(asset=apprise.AppriseAsset(http_redirects=False))
             for url in urls:
@@ -198,6 +204,7 @@ def deliver(urls, title, body, network):
             result = bundle.notify(body=body, title=title)
         finally:
             _guard["on"] = False
+            _guard["pinned"] = {}
         refused = _guard["refused"]
     if isinstance(result, bool):
         return {"sent": len(urls) if result else 0, "failed": 0 if result else len(urls),

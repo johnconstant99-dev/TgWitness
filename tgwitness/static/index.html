@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="/views/parameters.css?v=21">
 <link rel="stylesheet" href="/views/accounts.css?v=30">
 <link rel="stylesheet" href="/views/setup.css?v=3">
+<link rel="stylesheet" href="/views/settings-hub.css?v=2">
 <link rel="stylesheet" href="/views/connection.css?v=1">
 <link rel="stylesheet" href="/views/access.css?v=30">
 <link rel="stylesheet" href="/components/journal.css?v=5">
@@ -140,6 +141,7 @@
     <button class="nav active" data-view="observations"><svg aria-hidden="true" class="nav-icon"><use href="#i-journal"/></svg> Journal <b id="nav-count">0</b></button>
     <button class="nav" data-view="sources"><svg aria-hidden="true" class="nav-icon"><use href="#i-sources"/></svg> Sources</button>
     <button class="nav" data-view="evidence"><svg aria-hidden="true" class="nav-icon"><use href="#i-export"/></svg> Exports</button>
+    <button class="nav" data-view="settings" data-level="simple"><svg aria-hidden="true" class="nav-icon"><use href="#i-settings"/></svg> Settings</button>
     <div class="nav-section">Workspace</div>
     <button class="nav" data-view="accounts"><svg aria-hidden="true" class="nav-icon"><use href="#i-users"/></svg> Accounts <b id="nav-accounts">1</b></button>
     <details class="nav-more" id="nav-more"><summary>More tools &amp; settings</summary>
@@ -174,6 +176,8 @@
     <span class="slash" aria-hidden="true">/</span><span id="view-label">Observations</span>
   </div>
   <div class="top-actions">
+    <button class="route-status" id="hub-route-status" type="button">Checking connection…</button>
+    <select class="level-pick" data-ui-level aria-label="Interface level"><option value="simple">Simple</option><option value="standard">Standard</option><option value="expert">Expert</option></select>
     <button class="quiet quick-mobile" data-quick-open type="button" aria-label="Go to a section" aria-haspopup="dialog" aria-controls="quick-dialog"><svg aria-hidden="true" class="icon"><use href="#i-search"/></svg></button>
     <div class="notify-wrap">
       <button aria-controls="notify-panel" aria-expanded="false" aria-haspopup="dialog" aria-label="Notifications" class="quiet notify-button" disabled id="notify-toggle" title="Notifications" type="button"><svg aria-hidden="true" class="icon"><use href="#i-bell"/></svg><b hidden id="notify-count">0</b></button>
@@ -195,6 +199,7 @@
 </header>
 
 <div class="content">
+<div id="hub-proxy-warning" class="connection-result failed" role="alert" hidden></div>
 <div class="context-bar">
   <div class="notice demo" hidden id="demo-banner">
     <div class="demo-intro"><strong>Demo workspace</strong><span id="demo-caption">Fictional messages. No Telegram connection.</span></div>
@@ -1072,7 +1077,7 @@
         </dl>
     </form>
     <div hidden id="qr-state"><h2>Scan with Telegram</h2><p class="hint">Settings → Devices → Link Desktop Device</p><img alt="Telegram sign-in QR code" class="qr-image" height="256" id="qr-image" width="256"><p id="qr-status" role="status"></p><div class="auth-actions"><button class="primary" hidden id="qr-retry" type="button">Generate another QR code</button><button class="quiet" id="qr-cancel" type="button">Back</button></div></div>
-    <form hidden id="code-form"><h2>Enter your login code</h2><label for="code">Code from Telegram</label><input autocomplete="one-time-code" id="code" inputmode="numeric" pattern="[0-9 -]{3,12}" required><button class="primary" type="submit">Confirm code</button></form>
+    <form hidden id="code-form"><h2>Enter your login code</h2><label for="code">Code from Telegram</label><input autocomplete="one-time-code" id="code" inputmode="numeric" pattern="[0-9 \-]{3,12}" required><button class="primary" type="submit">Confirm code</button></form>
     <form hidden id="password-form"><h2>Two-step verification</h2><label for="password">Telegram password</label><input autocomplete="off" id="password" required type="password"><button class="primary" type="submit">Sign in</button></form>
     <button class="quiet auth-back" hidden id="auth-back" type="button">← Change sign-in method</button>
     <div hidden id="authorized-state"><span class="success-mark" id="authorized-mark"><svg aria-hidden="true" class="icon"><use href="#i-check"/></svg></span><span class="avatar xl" hidden id="authorized-avatar"></span><h2>Account connected</h2><p class="account-id" hidden id="authorized-account"></p><p class="muted">Choose the groups and channels to observe.</p><button class="primary" data-open="sources">Choose sources →</button><button class="quiet" id="change-account">Sign in again</button><button class="quiet sign-out" id="sign-out" type="button">Sign out of Telegram</button></div>
@@ -1184,6 +1189,8 @@
 </div>
 </section>
 
+<section class="view" hidden id="view-settings"></section>
+<section class="view" hidden id="view-first-run"></section>
 <section class="view" hidden id="view-chats">
   <div class="chats-shell" data-panel="chat">
     <aside class="chats-sidebar card">

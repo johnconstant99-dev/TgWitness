@@ -1,12 +1,13 @@
 // All panel dates share one display zone. Saved journal timestamps stay untouched.
 export function createTimeFormatter({locale = "en", translate = text => text, zone = "UTC", now = Date.now} = {}) {
-  let displayZone = zone === "local" ? "local" : "UTC";
+  const valid=value=>{try{new Intl.DateTimeFormat('en',{timeZone:value});return value;}catch{return 'UTC';}};
+  let displayZone = zone === 'local' ? 'local' : valid(zone);
   const language = locale === "en" ? "en-GB" : locale;
   let absolute, calendar;
   const relative = new Intl.RelativeTimeFormat(language, {numeric: "auto"});
 
   function rebuild() {
-    const timezone = displayZone === "UTC" ? {timeZone: "UTC"} : {};
+    const timezone = displayZone === 'local' ? {} : {timeZone:displayZone};
     absolute = new Intl.DateTimeFormat(language, {...timezone, year: "numeric", month: "short", day: "2-digit",
       hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23", timeZoneName: "short"});
     calendar = new Intl.DateTimeFormat(language, {...timezone, weekday: "long", year: "numeric", month: "long", day: "numeric"});
@@ -34,11 +35,10 @@ export function createTimeFormatter({locale = "en", translate = text => text, zo
   function dayKey(value) {
     const instant = date(value);
     if (!instant) return "unknown";
-    const prefix = displayZone === "UTC" ? "getUTC" : "get";
-    return [instant[prefix + "FullYear"](), instant[prefix + "Month"]() + 1, instant[prefix + "Date"]()]
-      .map((part, index) => String(part).padStart(index ? 2 : 4, "0")).join("-");
+    const parts=new Intl.DateTimeFormat('en-CA',{...(displayZone==='local'?{}:{timeZone:displayZone}),year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(instant);
+    return ['year','month','day'].map(key=>parts.find(p=>p.type===key).value).join('-');
   }
-  function setZone(value) { displayZone = value === "local" ? "local" : "UTC"; rebuild(); }
+  function setZone(value) { displayZone = value === 'local' ? 'local' : valid(value); rebuild(); }
   rebuild();
   return {fmtTime, day, dayKey, setZone, get zone() { return displayZone; }};
 }

@@ -51,7 +51,8 @@ def main():
             expect(page.locator("#witness-form")).to_be_hidden()
             expect(page.locator(".extra-card")).to_have_count(6)
             before = len(writes)
-            for name in ("setup", "alerts", "evidence", "cloud", "github"):
+            expect(page.locator('.extra-setup')).to_be_hidden()
+            for name in ("alerts", "evidence", "cloud", "github"):
                 opener = page.locator("#extras-open-" + name)
                 opener.focus()
                 page.keyboard.press("Enter")
@@ -123,7 +124,7 @@ def main():
             expect(page.locator("#route-detail")).to_contain_text("own.example.org:8443")
             expect(page.locator("#network-secret")).to_have_value("")
             for lang in ("en", "ru"):
-                context.add_cookies([{"name": "tgwitness-lang", "value": lang, "url": server.url}])
+                page.evaluate("lang=>{const url=new URL(location.href);url.searchParams.set(\"lang\",lang);history.replaceState(null,\"\",url);}",lang)
                 page.reload()
                 expect(page.locator("#workspace")).to_be_visible()
                 for width in (390, 1440):

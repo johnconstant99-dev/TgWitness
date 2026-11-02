@@ -287,7 +287,8 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
                 "Exports above 4 GiB uncompressed also need --max-gib with their size in GiB.\n"
                 "Requires Python 3.11+ and cryptography. chat.json is authoritative.\n")])
             write_member("SHA256SUMS", [report.sha256sums(hashes)])
-            manifest = {**meta, "report": report_entry(context, options, "chat.html"), "files": hashes}
+            manifest = {**meta, "report": report_entry(context, options, "chat.html"), "files": hashes,
+                        "case_assessment": report.case_assessment.snapshot(context, "chat", meta)}
             manifest_bytes = canonical(manifest)
             archive.writestr("manifest.json", manifest_bytes)
             archive.writestr("manifest.sig", vault.sign(manifest_bytes))

@@ -554,7 +554,7 @@ def test_the_wizard_in_the_browser_offers_deploys_and_deletes_a_phala_cvm(phala,
         expect(page.locator("#cloud-job-title")).to_have_text("The server is deleted", timeout=30000)
         expect(page.locator("#cloud-outcome")).to_contain_text("Phala Cloud stops billing")
         assert world.deleted
-        context.add_cookies([{"name": i18n.COOKIE, "value": "ru", "url": server.url}])
+        page.evaluate("()=>{const url=new URL(location.href);url.searchParams.set(\"lang\",\"ru\");history.replaceState(null,\"\",url);}")
         reload_panel(page)
         expect(page.locator("#view-witness")).to_be_visible()
         navigate_panel(page, "witness")

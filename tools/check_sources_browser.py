@@ -351,6 +351,9 @@ def main():
         page.set_viewport_size({"width": 1440, "height": 1000})
         page.locator("#sources-tab-recording").click()
         second = page.evaluate("json('profiles',{label:'Independent workspace'}).then(value=>value.id)")
+        second_store = server.app.state.profiles.entries[second]["app"].state.store
+        second_store.set_setting('first_run', {'skipped': True})
+        second_store.set_setting('ui_preferences:admin', {'language':'en','theme':'system','timezone':'UTC','level':'expert'})
         second_capture = server.app.state.profiles.entries[second]["app"].state.store.get_setting("capture")
         assert second_capture is not None and not second_capture["types"]["animation"]["enabled"]
         page.evaluate("loadProfiles()")

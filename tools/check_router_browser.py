@@ -94,7 +94,12 @@ def main():
 
             # An explicit workspace in a deep link must be chosen before fetching its record.
             page.goto(app.url + "/journal/event/" + str(second_event["seq"]) + "?ws=" + second)
-            expect(page.locator("#detail-drawer")).to_contain_text("Only in second case")
+            try:
+                expect(page.locator("#detail-drawer")).to_contain_text("Only in second case")
+            except AssertionError:
+                print('Route bootstrap:', page.locator('#login-error').text_content(), errors,
+                      page.evaluate('({token:!!state.token,saved:!!sessionStorage.getItem("tgwitness-token"),profile:state.profile,started:accessStarted})'),requests[-20:])
+                raise
             assert page.evaluate("state.profile") == second
             page.goto(app.url + "/?workspace=default&event=" + str(event["seq"]) + "#journal")
             expect(page.locator("#detail-drawer")).to_contain_text("Invoice revised")

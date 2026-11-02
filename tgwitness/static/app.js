@@ -30,6 +30,34 @@ const state = {token: sessionStorage.getItem("tgwitness-token") || "",
   accountDisclosureJob: null, accountDisclosurePreview: null, accountDisclosureDirty: false,
   accountDisclosures: {}, exportTask: 'journal', workflow: null};
 let accountState;
+let settingsHub;
+const settingsHubReady=import('./views/settings-hub.js?v=2').then(({createSettingsHub})=>{
+  const authCard=$('credentials-form').closest('.auth-card');
+  // Metadata covers legacy fields as well as the compact settings. Search never drops expert fields.
+  const catalog=()=>panelQueries('input[id],select[id],textarea[id]').filter(el=>!el.closest('#gate,#view-settings,#view-first-run')).map(el=>{
+    const root=[...panelRoots].find(([,r])=>r.contains(el));
+    const view=root?.[0]||'connection';
+    const text=el.labels?.[0]?.textContent?.trim()||el.getAttribute('aria-label')||el.id;
+    el.dataset.level=el.dataset.level||(['parameters','integrations','system-log'].includes(view)?'expert':'standard');
+    const form=el.closest('form')?.id, extra=el.closest('.extra-panel')?.id.replace('extras-','');
+    return {key:el.id,id:el.id,label:text,view,level:el.dataset.level,extra,form};
+  });
+  settingsHub=createSettingsHub({root:$('view-settings'),wizardRoot:$('view-first-run'),state,json,tr,node,toast,navigate,askConfirm,$,refreshStatus,
+    language:LANG,languages:LANGUAGES,authCard:()=>authCard,authMethod:setAuthMethod,catalog,
+    loadSettingsForm:id=>({'alerts-form':loadAlerts,'replica-form':loadReplica,'evidence-form':loadEvidence}[id])(),
+    openExtra:async id=>{await loadExtras();selectExtra(id);},changeLanguage:setLanguage,
+    stateBadge,healthLines:collectorLines,healthNames:healthPartNames,record:options=>window.TgWitnessRouter?.record({},options||{}),
+    applyPreferences:p=>{
+      for(const el of panelQueries('[data-mode-locked]'))el.removeAttribute('data-mode-locked');
+      for(const el of panelQueries('.mode-lock'))el.hidden=true;
+      panelTime?.setZone(p.timezone);updateTimes();
+      const choice=$('time-zone');if(choice){if(![...choice.options].some(o=>o.value===p.timezone))choice.add(new Option(p.timezone,p.timezone));choice.value=p.timezone;}
+      window.tgwApplyTheme?.(p.theme);
+    }});
+  window.tgwSaveLanguage=async language=>{if(state.token)await settingsHub.refreshPreferences({language});};
+  document.addEventListener('tgwitness:theme',event=>{if(state.token)settingsHub.refreshPreferences({theme:event.detail}).catch(e=>toast(e.message,true));});
+  catalog();
+});
 let connectionView;
 const connectionViewReady=import('./views/connection.js?v=1').then(({createConnectionView})=>{
   connectionView=createConnectionView({root:$('connect-guide'),tr,json,state,refreshStatus,askConfirm});
@@ -59,6 +87,7 @@ const viewReady=Promise.all([
       },
       updateStatus:()=>renderViewStatus(name),
       leave(){
+        if(name==='settings'||name==='first-run')settingsHub?.leave();
         top=window.scrollY;scrolls=[root,...root.querySelectorAll('*')].filter(element=>element.scrollTop).map(element=>[element,element.scrollTop]);
         if(name==='connection'){window.TgWitnessProxies?.stop?.();connectionView?.leave();}
         if(name==='integrations'){window.TgWitnessIntegrations?.clear();window.TgWitnessWebhooks?.clear();}
@@ -94,7 +123,8 @@ function resetViewContent(view){
   for(const id of clear)$(id)?.replaceChildren();
 }
 async function loadPanelView(view){
-  if(view==='start')renderWorkflowControls();
+  if(view==='settings'||view==='first-run'){await settingsHubReady;await settingsHub.load();}
+  else if(view==='start')renderWorkflowControls();
   else if(view==='sources'){await sourcesReady;sourcesView.enter();renderTargets();await loadScope();}
   else if(view==='witness')await loadExtras();
   else if(view==='parameters')await loadParameters();
@@ -114,9 +144,10 @@ async function loadPanelView(view){
 let routerTask=null;
 function routeSnapshot(){return {view:state.drawerSeq!==null?"observations":state.view,workspace:state.profile,
   chatId:state.view==="chats"?state.chat:null,seq:state.drawerSeq,kind:state.filter,source:state.source,q:state.search,
-  since:state.eventSince,until:state.eventUntil,system:state.eventSystem,before:state.eventBefore,extra:state.extra||null,section:state.parameterSection||null};}
+  since:state.eventSince,until:state.eventUntil,system:state.eventSystem,before:state.eventBefore,extra:state.extra||null,section:state.parameterSection||null,
+  step:state.view==="first-run"?settingsHub?.step||null:null};}
 function ensureRouter(){
-  if(!routerTask)routerTask=import("./router.js?v=4").then(({createRouter})=>{
+  if(!routerTask)routerTask=import("./router.js?v=5").then(({createRouter})=>{
     window.TgWitnessRouter=createRouter({snapshot:routeSnapshot,ready:()=>!!state.me&&!$("workspace").hidden,
       error:message=>toast(tr(message),true),apply:applyRouteToPanel});return window.TgWitnessRouter;
   });
@@ -136,7 +167,8 @@ async function applyRouteToPanel(route,current){
   if(route.view==="chats"&&route.chatId!==null&&route.chatId!==state.chat)beginChat(route.chatId);
   navigate(route.view,{history:false,load:false});
   const view=state.view;
-  if(view==="chats"){
+  if(view==='settings'||view==='first-run'){await settingsHubReady;await settingsHub.load(route.step);}
+  else if(view==="chats"){
     await refreshChats(false,route.chatId);
     if(current()&&route.chatId!==null){
       if(state.chat!==route.chatId)await openChat(route.chatId,{history:false});
@@ -208,6 +240,13 @@ const labels = {
   "network.route_unavailable": [tr("No working proxy"), "alert", "coverage"],
   "network.route_fallback": [tr("Connected directly without a proxy"), "alert", "coverage"],
   "network.policy_changed": [tr("IP protection changed"), "shield", "system"],
+  "network.connection_applied": [tr("Checked connection applied"), "link", "system"],
+  "network.connection_checked": [tr("Connection checked"), "link", "system"],
+  "network.connection_failed": [tr("Connection change not applied"), "alert", "coverage"],
+  "network.tunnel_control": [tr("Local tunnel started or stopped"), "link", "system"],
+  "settings.changed": [tr("Settings changed"), "settings", "system"],
+  "settings.collection_pending": [tr("Recording waits for a working connection"), "alert", "coverage"],
+  "sources.selected": [tr("Chats to record chosen"), "sources", "system"],
   "profile.created": [tr("Workspace created"), "plus", "system"], "profile.unavailable": [tr("Workspace unavailable"), "alert", "coverage"],
   "snapshot.started": [tr("History snapshot started"), "layers", "system"], "snapshot.completed": [tr("History snapshot completed"), "layers", "system"],
   "snapshot.interrupted": [tr("History snapshot interrupted"), "alert", "coverage"],
@@ -341,6 +380,7 @@ const timeReady=import("./core/time.js?v=1").then(({createTimeFormatter})=>{
   select.append(new Option(tr("UTC"),"UTC"),new Option(tr("Local time"),"local"));select.value=panelTime.zone;
   label.append(node("span","",tr("Time")),select);document.querySelector(".sidebar .preferences").prepend(label);
   select.addEventListener("change",()=>{
+    settingsHub?.refreshPreferences({timezone:select.value==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:select.value}).catch(e=>toast(e.message,true));
     panelTime.setZone(select.value);try{localStorage.setItem("tgwitness-time-zone",panelTime.zone);}catch{}
     if(state.view==="chats"&&state.chat!==null){const feed=$("chat-feed"),top=feed.scrollTop;renderChatFeed();feed.scrollTop=top;}
     updateTimes();window.dispatchEvent(new CustomEvent("tgwitness:time-zone",{detail:{zone:panelTime.zone}}));
@@ -387,6 +427,15 @@ function toast(message, error=false) { if(!message)return;const n = $("toast"); 
 async function api(path, body, options={}) {
   const revision=state.workspaceRevision;
   const {root=false,profile=state.profile,token=state.token,allowStale=false,...fetchOptions}=options;
+  if(body?.enabled&&['evidence','replica','alerts'].includes(path)&&state.me?.admin){
+    const current=await json('settings',undefined,{profile,token});
+    if(!current.values.outside){
+      if(!await askConfirm(tr('This feature needs external requests. Allow them?')))throw new Error(tr('Cancelled'));
+      if(revision!==state.workspaceRevision||token!==state.token)throw new StaleView();
+      await json('settings/edit',{key:'outside',value:true,revision:current.revision},{profile,token});
+    }
+  }
+  if(!allowStale&&revision!==state.workspaceRevision)throw new StaleView();
   const prefix=root||profile==="default" ? "/api/" : "/profiles/"+encodeURIComponent(profile)+"/api/";
   const deadline=path==='status'?AbortSignal.timeout(15000):null;
   const requestSignal=deadline?(fetchOptions.signal?AbortSignal.any([deadline,fetchOptions.signal]):deadline):fetchOptions.signal;
@@ -437,6 +486,7 @@ async function busy(button, work) {
     if(button.id==="chat-send"||button.id==="chat-preview-button")renderComposer();} }
 }
 function lock() {
+  settingsHub?.reset();
   state.workflow=null;state.exportTask='journal';
   window.TgWitnessRouter?.invalidate();
   viewHost?.resetSession();formControls?.reset();connectionNotice?.clear();state.permissionsStamp=null;
@@ -459,6 +509,11 @@ function lock() {
   $("export-dialog").close("cancel");stopExportPoll();clearTimeout(multiPoll);multiPoll=null;state.multiChecked=false;
   clearSecrets();resetWitnessSetup();selectExtra(null);
   $("panel-token").value=""; show("workspace",false); show("gate",true);
+}
+async function bootstrapSettings() {
+  await settingsHubReady;
+  try { await settingsHub.bootstrap(); }
+  catch(error) { if(!(error instanceof StaleView))toast(error.message,true); }
 }
 async function unlock() {
   accessStarted=true;
@@ -483,6 +538,7 @@ async function unlock() {
   renderStatus(); setAuthStep(accountSignedIn() ? "authorized" : "credentials");
   loadNotifications().catch(()=>{});
   await router.start();
+  await bootstrapSettings();
 }
 $("unlock-form").addEventListener("submit", async event => {
   event.preventDefault(); $("login-error").textContent="";
@@ -492,13 +548,13 @@ $("unlock-form").addEventListener("submit", async event => {
     const entered=$("panel-token").value.trim();
     state.token=(await json("access/login",{token:entered},{root:true,token:""})).session;
     await unlock();
-  } catch (e) { state.token="";$("login-error").textContent=e.message; } finally { button.disabled=false; }
+  } catch (e) { if(!(e instanceof StaleView)){state.token="";$("login-error").textContent=e.message;} } finally { button.disabled=false; }
 });
 function may(permission){return !!state.me&&(state.me.admin||state.me.permissions.includes(permission));}
 
 function viewAllowed(view){
   const limited=!!state.status?.chats_limited;
-  return {start:!!state.me&&!limited,sources:may("sources")&&!limited,evidence:may("export")&&!limited,sealed:may("export")&&!limited,witness:may("settings")&&!limited,
+  return {settings:!!state.me?.admin,'first-run':!!state.me?.admin,start:!!state.me&&!limited,sources:may("sources")&&!limited,evidence:may("export")&&!limited,sealed:may("export")&&!limited,witness:may("settings")&&!limited,
     parameters:may("settings")&&!limited,connection:may("account")&&!limited,accounts:!!state.me?.admin,
     access:!!state.me?.admin,"system-log":!!state.me?.admin,integrations:!!state.me?.admin,
     analysis:!!(state.status?.analysis?.enabled||state.status?.analysis?.media_available)}[view]??true;
@@ -590,7 +646,7 @@ function navigate(view,options={}) {
     n.classList.toggle("active",selected);
     if(selected)n.setAttribute("aria-current","page");else n.removeAttribute("aria-current");
   });
-  $("view-label").textContent=tr({start:"Start here",chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",access:"Access","system-log":"System log",integrations:"Integrations",analysis:state.status?.analysis?.enabled?"Ask the archive":"Machine recognition"}[view]);
+  $("view-label").textContent=tr({settings:'Settings','first-run':'First setup',start:"Start here",chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",access:"Access","system-log":"System log",integrations:"Integrations",analysis:state.status?.analysis?.enabled?"Ask the archive":"Machine recognition"}[view]);
   show("entry-header",view==="connection");
   if(view==="connection")connectionSettings(false);
   if(state.status){renderSetup();renderWorkflowControls();}
@@ -731,6 +787,8 @@ function renderQuick(){
   const query=quickSearch.value.trim().toLocaleLowerCase();
   for(const nav of document.querySelectorAll(".sidebar .nav")){
     if(nav.hidden)continue;
+    const rank={simple:0,standard:1,expert:2}, hiddenLevel=rank[nav.dataset.level]>rank[document.documentElement.dataset.uiLevel];
+    if(!query&&hiddenLevel)continue;
     const title=[...nav.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join("").trim();
     const keywords=nav.dataset.view==="witness"?tr("bot Telegram proof GitHub witness"):
       nav.dataset.view==="connection"?tr("proxy MTProxy SOCKS5 HTTP connection route"):"";
@@ -739,6 +797,7 @@ function renderQuick(){
     option.id="quick-option-"+nav.dataset.view;option.setAttribute("role","option");
     option.dataset.destination=nav.dataset.view;
     option.append(nav.querySelector("svg").cloneNode(true),node("span","quick-label",title));
+    if(hiddenLevel)option.append(node('small','',tr('Show hidden setting')));
     if(nav.dataset.view===state.view)option.append(node("small","",tr("Current section")));
     option.append(icon("chevron"));
     option.addEventListener("click",()=>openQuickDestination(nav.dataset.view));
@@ -1064,6 +1123,7 @@ async function refreshStatus() {
   const request=++statusRequest,revision=state.workspaceRevision,result=await json("status");
   if(revision!==state.workspaceRevision||request!==statusRequest)return;
   state.status=result;applyAccess();renderStatus();
+  settingsHub?.status();
   if(!viewAllowed(state.view))navigate("chats");
 }
 async function loadProfiles(){
@@ -1231,6 +1291,7 @@ async function switchProfile(id,options={}){
   window.TgWitnessAnalysis?.clear();
   quickDialog.close();
   const revision=++state.workspaceRevision;
+  settingsHub?.reset();
   viewHost?.resetSession();state.permissionsStamp=null;
   $("workspace").inert=true;
   try{
@@ -1256,6 +1317,8 @@ async function switchProfile(id,options={}){
   clearSecrets();$("api-id").value="";networkLoadedFor=null;
   $("network-result").textContent="";
   await refreshStatus();await loadProfiles();
+  if(revision!==state.workspaceRevision)return;
+  await bootstrapSettings();
   if(revision!==state.workspaceRevision)return;
   await navigate(state.view,{history:false});
   await loadNotifications().catch(()=>{});
@@ -2420,7 +2483,7 @@ $("gateway-remove").addEventListener("click",ev=>busy(ev.currentTarget,async()=>
   toast(tr("Gateway log settings and token removed."));
 }));
 function renderEvidence(e){
-  if(state.view!=='witness')return;
+  if(state.view!=='witness'&&!(state.view==='settings'&&$('evidence-form').closest('#view-settings')))return;
   const form=$("evidence-form"),status=$("evidence-status");
   form.querySelectorAll("input,select,textarea,button").forEach(n=>n.disabled=!e);
   state.timestampsHealth=e?.health||null;renderEvidenceBadge();
@@ -2485,7 +2548,7 @@ function lockText(lock){
   return lock.bucket_enabled?tr("Object Lock is enabled on the bucket; no retention was requested."):tr("Object Lock is not enabled on this bucket.");
 }
 function renderReplica(r){
-  if(state.view!=='witness')return;
+  if(state.view!=='witness'&&!(state.view==='settings'&&$('replica-form').closest('#view-settings')))return;
   const form=$("replica-form"),status=$("replica-status");
   form.querySelectorAll("input,select,button").forEach(n=>n.disabled=!r);
   state.replicaHealth=r?.health||null;renderEvidenceBadge();
@@ -2538,7 +2601,7 @@ function alertsText(a){
   return tr("Last notification {time}.",{time:fmtFull(l.at)})+(l.error?" "+tr("Not delivered: {error} — retried within a minute.",{error:l.error}):"");
 }
 function renderAlerts(a){
-  if(state.view!=='witness')return;
+  if(state.view!=='witness'&&!(state.view==='settings'&&$('alerts-form').closest('#view-settings')))return;
   const form=$("alerts-form"),status=$("alerts-status");
   form.querySelectorAll("input,select,textarea,button").forEach(n=>n.disabled=!a);
   extraBadge("alerts",!!a?.settings.enabled,"On","Off");
@@ -3366,7 +3429,7 @@ function setAuthMethod(method){
     $("import-result").textContent="";
   }
   authMethod=method;
-  viewQueries("connection","[data-auth-method]").forEach(button=>{
+  panelQueries("[data-auth-method]").forEach(button=>{
     const selected=button.dataset.authMethod===method;
     button.classList.toggle("active",selected);button.setAttribute("aria-pressed",String(selected));
   });
@@ -3418,7 +3481,7 @@ async function loginRequest(path,body,options){
 function authProgress(message){
   $("auth-progress").textContent=message;show("auth-progress",!!message);
 }
-viewQueries("connection","[data-auth-method]").forEach(button=>button.addEventListener("click",()=>setAuthMethod(button.dataset.authMethod)));
+panelQueries("[data-auth-method]").forEach(button=>button.addEventListener("click",()=>setAuthMethod(button.dataset.authMethod)));
 $("api-id").addEventListener("paste",event=>{
   const text=event.clipboardData?.getData("text")||"";
   if(!text.includes(":"))return;

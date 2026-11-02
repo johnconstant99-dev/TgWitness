@@ -43,7 +43,8 @@ BYTE_RANGE_PLACEHOLDER = b"[0000000000 0000000000 0000000000 0000000000]"
 SIGNED_DATA, DATA = "1.2.840.113549.1.7.2", "1.2.840.113549.1.7.1"
 CONTENT_TYPE, MESSAGE_DIGEST, SIGNING_TIME = "1.2.840.113549.1.9.3", "1.2.840.113549.1.9.4", "1.2.840.113549.1.9.5"
 SIGNING_CERTIFICATE_V2, SHA256, ECDSA_SHA256 = "1.2.840.113549.1.9.16.2.47", "2.16.840.1.101.3.4.2.1", "1.2.840.10045.4.3.2"
-INK, MUTED, LINE, FILL = (21, 25, 31), (95, 106, 120), (205, 211, 218), (238, 240, 243)
+INK, MUTED, LINE, FILL = (20, 44, 59), (89, 104, 112), (214, 219, 218), (245, 245, 240)
+GOLD, WHITE = (198, 158, 91), (255, 255, 255)
 OK, BAD, WARN = (23, 102, 58), (161, 25, 31), (138, 75, 0)
 FALLBACKS = ("NotoSansArabic-Regular.ttf", "NotoSansHebrew-Regular.ttf", "NotoSansDevanagari-Regular.ttf",
              "NotoSansBengali-Regular.ttf", "NotoSansThai-Regular.ttf", "NotoSansSymbols2-Regular.ttf",
@@ -101,13 +102,17 @@ def document(say, footer):
     class Document(FPDF):
         def header(self):
             if self.page_no() > 1:
-                self.set_font("Sans", size=7.5)
+                self.set_font("Sans", "B", size=7)
                 self.set_text_color(*MUTED)
                 self.set_y(6)
-                self.multi_cell(self.epw, 3.5, "TgWitness · " + footer, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                self.multi_cell(self.epw, 3.5, "TG / WITNESS    ·    " + footer, align="R" if self.rtl else "L",
+                                new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                line_y = max(14, self.get_y() + 2)
                 self.set_draw_color(*LINE)
-                self.line(self.l_margin, 14, self.l_margin + self.epw, 14)
-                self.set_xy(self.l_margin, 18)
+                self.line(self.l_margin, line_y, self.l_margin + self.epw, line_y)
+                with self.local_context(draw_color=GOLD, line_width=0.7):
+                    self.line(self.l_margin, line_y, self.l_margin + 16, line_y)
+                self.set_xy(self.l_margin, line_y + 4)
 
         def font_on_page(self):
             # fpdf2 sets the font of a line that starts in a fallback font (an emoji, say) inside that line's
@@ -140,6 +145,8 @@ def document(say, footer):
             return super().write(h, text, *args, **kwargs)
 
         def footer(self):
+            self.set_draw_color(*LINE)
+            self.line(self.l_margin, self.h - 16, self.l_margin + self.epw, self.h - 16)
             self.set_y(-12)
             self.set_font("Sans", size=7.5)
             self.set_text_color(*MUTED)
@@ -238,47 +245,57 @@ class Layout:
         pdf = self.pdf
         pdf.add_page()
         pdf.start_section(str(title), level=0)
-        self.text(eyebrow.upper(), size=8.5, style="B", color=MUTED)
-        self.gap(1)
-        self.text(title, size=19, style="B", height=8.5)
-        self.gap(3)
+        with pdf.local_context(fill_color=INK):
+            pdf.rect(0, 0, pdf.w, 37, style="F")
+        with pdf.local_context(fill_color=GOLD):
+            pdf.rect(pdf.l_margin, 36, 28, 1, style="F")
+        pdf.set_y(13)
+        self.text("TG / WITNESS", size=13, style="B", color=WHITE)
+        self.text(self.say("Evidence dossier").upper(), size=7.5, color=(214, 224, 228))
+        pdf.set_y(48)
+        self.text(eyebrow.upper(), size=8, style="B", color=MUTED)
+        self.gap(4)
+        title_size = 29 if len(str(title)) < 90 else 23 if len(str(title)) < 160 else 19
+        self.text(title, size=title_size, style="B", height=title_size * .42)
+        self.gap(7)
+        pdf.set_draw_color(*LINE)
+        pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + pdf.epw, pdf.get_y())
+        self.gap(5)
         shown = [(k, v) for k, v in facts if v]
-        width = pdf.epw / 3
-        for row in range(0, len(shown), 3):
+        width = pdf.epw / 2
+        for row in range(0, len(shown), 2):
             y = pdf.get_y()
             heights = []
-            for column, (label, value) in enumerate(shown[row:row + 3]):
-                pdf.set_xy(pdf.l_margin + (2 - column if self.rtl else column) * width + (4 if self.rtl else 0), y)
+            for column, (label, value) in enumerate(shown[row:row + 2]):
+                pdf.set_xy(pdf.l_margin + (1 - column if self.rtl else column) * width + (4 if self.rtl else 0), y)
                 pdf.set_font("Sans", "", 7.5)
                 pdf.set_text_color(*MUTED)
-                pdf.cell(width - 4, 4, label.upper(), new_x=self.XPos.LEFT, new_y=self.YPos.NEXT, align=self.align[0])
+                pdf.multi_cell(width - 5, 4, label.upper(), new_x=self.XPos.LEFT, new_y=self.YPos.NEXT, align=self.align[0])
                 pdf.set_font("Sans", "B", 9.5)
                 pdf.set_text_color(*INK)
-                pdf.multi_cell(width - 4, 4.6, str(value), new_x=self.XPos.LEFT, new_y=self.YPos.NEXT,
+                pdf.multi_cell(width - 5, 4.6, str(value), new_x=self.XPos.LEFT, new_y=self.YPos.NEXT,
                                align=self.align[0])
                 heights.append(pdf.get_y() - y)
-            pdf.set_xy(pdf.l_margin, y + max(heights) + 2)
-        self.gap(1)
-        self.callout(signed_note, OK)
-        y = pdf.get_y() + 1
-        pdf.set_draw_color(*INK)
-        pdf.set_line_width(0.6)
-        pdf.line(pdf.l_margin, y, pdf.l_margin + pdf.epw, y)
-        pdf.set_line_width(0.2)
-        pdf.set_y(y + 4)
+            pdf.set_xy(pdf.l_margin, y + max(heights) + 4)
+        self.gap(3)
+        self.callout(signed_note, GOLD)
+        self.gap(5)
 
     def figures(self, items):
-        """One ruled row of summary figures, the label above the figure."""
+        """A readable two-row index of figures on the cover, including long periods."""
         pdf = self.pdf
-        items = self.mirror((k, str(v)) for k, v in items)
-        widths = [max(len(label) * 1.6, len(value) * 2.6, 9) + 3.2 for label, value in items]  # millimetres, roughly
-        with pdf.table(col_widths=widths, first_row_as_headings=False, line_height=4.6, borders_layout="ALL",
-                       text_align=self.align, padding=1.6) as table:
-            labels, values = table.row(), table.row()
-            for label, value in items:
-                labels.cell(label.upper(), style=self.face(size=6.8, color=MUTED))
-                values.cell(value, style=self.face(size=11, bold=True))
+        items = [(k, str(v) if v is not None else "—") for k, v in items]
+        for start in range(0, len(items), 4):
+            row = self.mirror(items[start:start + 4])
+            with pdf.table(col_widths=[1] * len(row), first_row_as_headings=False, line_height=5,
+                           borders_layout="HORIZONTAL_LINES", text_align=self.align, padding=2.5) as table:
+                labels, values = table.row(), table.row()
+                for label, value in row:
+                    labels.cell(label.upper(), style=self.face(size=7, color=MUTED))
+                    values.cell(value, style=self.face(size=16 if len(value) < 12 else 10, bold=True))
+            self.gap(2)
         self.gap(4)
+        self.text(self.say("Read the summary. Review the evidence. Repeat the checks."), size=8, color=MUTED)
 
     def section(self, title, lead=""):
         pdf = self.pdf
@@ -288,11 +305,12 @@ class Layout:
         else:
             self.gap(3)
         y = pdf.get_y()
-        pdf.set_draw_color(*LINE)
+        pdf.set_draw_color(*GOLD)
         pdf.line(pdf.l_margin, y, pdf.l_margin + pdf.epw, y)
+        pdf.set_draw_color(*LINE)
         pdf.set_y(y + 3)
         pdf.start_section(str(self.number) + ". " + title, level=1)
-        self.text(str(self.number) + ".  " + title, size=13, style="B", height=6.4)
+        self.text(f"{self.number:02d}" + "   /   " + title, size=15, style="B", height=7)
         if lead:
             self.gap(1)
             self.text(lead, size=8.8, color=MUTED)
@@ -356,8 +374,14 @@ class Layout:
     def brief(self, summary, shows, hidden):
         """Under the title: one paragraph, then what the material shows and what it does not."""
         say = self.say
-        self.heading(say("In brief"))
-        self.text(summary, size=9)
+        # A long case cover may already have flowed its QR onto the next page.
+        # Continue there instead of leaving a mostly empty reference-only page.
+        if self.pdf.page_no() == 1:
+            self.pdf.add_page()
+        else:
+            self.gap(4)
+        self.section(say("In brief"))
+        self.text(summary, size=11, height=5.8)
         self.gap(1.5)
         self.text(say("What this shows"), size=9, style="B", color=OK)
         self.bullets(shows, size=8.6)
@@ -365,6 +389,61 @@ class Layout:
         self.text(say("What this does not show"), size=9, style="B", color=BAD)
         self.bullets(hidden, size=8.6)
         self.gap(2)
+
+    def assessment_overview(self, data):
+        say, assessment = self.say, report.case_assessment
+        self.heading(say(assessment.OVERVIEW))
+        self.grid([say("Reference"), say("Evidence"), say("Status")],
+                  [(f"{number:02d}", say(item["title"]), say(assessment.STATUSES[item["status"]]))
+                   for number, item in enumerate(data["checks"], 1)], widths=(8, 48, 44))
+
+    def coverage_figure(self, coverage):
+        plot = report.coverage_plot(coverage)
+        if not plot:
+            return
+        pdf, say = self.pdf, self.say
+        if pdf.get_y() > pdf.h - 70:
+            pdf.add_page()
+        self.heading(say("Observation timeline"))
+        for index, label in enumerate(("Continuous observation", "Gaps")):
+            self.text(say(label), size=7.5, color=MUTED)
+            y = pdf.get_y()
+            with pdf.local_context(fill_color=FILL):
+                pdf.rect(pdf.l_margin, y, pdf.epw, 4, style="F")
+            with pdf.local_context(fill_color=INK if index == 0 else GOLD):
+                for x, width in plot["rows"][index]:
+                    pdf.rect(pdf.l_margin + x * pdf.epw, y, width * pdf.epw, 4, style="F")
+            pdf.set_y(y + 6)
+        self.text(report.utc_text(plot["from"]) + "  —  " + report.utc_text(plot["to"]), size=7, color=MUTED, align="L")
+        self.text(say("Recorded intervals only. Blank space is not proof of uninterrupted collection."), size=7.5, color=MUTED)
+        self.gap(3)
+
+    def assessment_card(self, number, item):
+        pdf, say, assessment = self.pdf, self.say, report.case_assessment
+        if pdf.get_y() > 145:
+            pdf.add_page()
+        pdf.start_section(f"{number:02d}" + " · " + say(item["title"]), level=2)
+        self.gap(3)
+        with pdf.local_context(draw_color=GOLD, line_width=0.6):
+            pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + 14, pdf.get_y())
+        self.gap(3)
+        self.text(f"{number:02d}" + "   /   " + say(item["title"]), size=13, style="B", height=6)
+        self.text(say(assessment.STATUSES[item["status"]]), size=8, color=OK if item["status"] == "checked_locally" else MUTED)
+        self.gap(3)
+        conclusion = item["result"]
+        self.text(say(conclusion["text"], **conclusion["values"]), size=10.5, style="B", height=5.2)
+        self.gap(2)
+        self.text(say(item["basis"]), size=8.5, color=MUTED)
+        self.gap(2)
+        self.kv([(say(assessment.LABELS.get(k, k)), assessment.fact_text(v, say)) for k, v in item["facts"].items()])
+        self.text(say("Limits of this conclusion").upper(), size=7, style="B", color=MUTED)
+        self.text(say(item["limitation"]), size=8.5)
+        self.gap(2)
+        self.text(say("Independent review").upper(), size=7, style="B", color=MUTED)
+        self.callout(say(item["verification"]), GOLD)
+        if item["references"]:
+            self.text(say("Evidence references") + ': ' + ', '.join(item["references"]), size=7.3, color=MUTED)
+        self.gap(5)
 
     def qr(self, lines, size=27):
         """A QR code with the report ID, the key fingerprint and the SHA-256 of the authoritative data, so that
@@ -696,7 +775,10 @@ def evidence_pdf(data, context, events=None, certificate=None):
         lay.figures([(say("Records"), records_total), (say("Chats"), summary["chats"]), (say("Messages"), cats["message"]),
                      (say("Edits"), cats["edited"]), (say("Deletions"), cats["deleted"]), (say("Files"), summary["files"]),
                      (say("Timestamps"), summary["timestamps"]),
-                     (say("Observed"), report.span_text(say, summary["first_record_at"], summary["last_record_at"]))])
+                     (say("Observation period"), report.span_text(say, summary["first_record_at"], summary["last_record_at"]))])
+        data_name = "records.jsonl" if handover else "events.jsonl"
+        lay.gap(5)
+        lay.qr(paper_lines(report_id, fp, data_name, data["subject"].get("records_sha256" if handover else "events_sha256")))
         acquisition = data["custody"]["acquisition"]
         account = acquisition.get("account") or {}
         account_text = " · ".join(x for x in (("@" + account["username"]) if account.get("username") else "",
@@ -705,8 +787,7 @@ def evidence_pdf(data, context, events=None, certificate=None):
                   "first": summary["first_record_at"], "last": summary["last_record_at"]}
         lay.brief(*report.evidence_brief(say, digest, records_total, data["timestamps"], coverage, account_text,
                                          handover))
-        data_name = "records.jsonl" if handover else "events.jsonl"
-        lay.qr(paper_lines(report_id, fp, data_name, data["subject"].get("records_sha256" if handover else "events_sha256")))
+        report.case_assessment.pdf(lay, data.get("case_assessment") or report.case_assessment.journal(context, coverage))
         lay.section(say("Case"))
         lay.kv([(say("Case title"), case.get("title")), (say("Case ID"), case.get("id")),
                 (say("Examiner"), case.get("examiner")), (say("Organization"), case.get("organization")),
@@ -791,7 +872,8 @@ def evidence_pdf(data, context, events=None, certificate=None):
                     name = re.search(r"(?:^|,)CN=((?:\\,|[^,])+)", signer or "")  # the full name is in report.json
                     rows.append([anchor.get("event_count"), anchor.get("service"), "RFC 3161", report.utc_text(anchor.get("time")),
                                  say("Token valid") + " · " + (name.group(1).replace("\\,", ",") if name else signer)
-                                 if signer else say("Check the signature with --tsa-ca")])
+                                 if report.case_assessment.verified_stamp(anchor, 2**63 - 1)
+                                 else say("Checkpoint or timestamp trust not established")])
                 elif anchor.get("kind") == "opentimestamps":
                     rows.append([anchor.get("event_count"), anchor.get("service"), "OpenTimestamps · Bitcoin", "—",
                                  say("Waiting for Bitcoin confirmation") if anchor.get("status") == "pending"
@@ -802,12 +884,13 @@ def evidence_pdf(data, context, events=None, certificate=None):
                                          "every three minutes. IDs not observed were never seen by this collector; "
                                          "that is not evidence that they were deleted."))
         if coverage:
-            lay.grid([say("From"), say("To"), say("Duration")],
+            lay.coverage_figure(coverage)
+            lay.grid([say("Interval start"), say("Interval end"), say("Duration")],
                      [[report.utc_text(p["from"]), report.utc_text(p["to"]), report.span_text(say, p["from"], p["to"])]
                       for p in coverage.get("continuous") or []], (38, 38, 24))
             if coverage.get("gaps"):
                 lay.heading(say("Gaps"))
-                lay.grid([say("From"), say("To"), say("Reason")],
+                lay.grid([say("Interval start"), say("Interval end"), say("Reason")],
                          [[report.utc_text(g["from"]), report.utc_text(g["to"]), str(g.get("reason"))] for g in coverage["gaps"]],
                          (26, 26, 48))
             if coverage.get("unobserved_ids"):
@@ -937,11 +1020,13 @@ def chat_pdf(meta, context, messages=None, certificate=None):
                      (say("With media"), stats["media"]), (say("Edited"), stats["edited"]), (say("Service"), stats["service"])]
                     + ([(say("Numbers absent"), ids["missing"])] if ids.get("numbered_per_chat") else [])
                     + [(say("Period"), report.span_text(say, stats["first_at"], stats["last_at"]))])
+        lay.gap(5)
+        lay.qr(paper_lines(report_id, fp, "chat.json", context.get("chat_json_sha256")))
         account = meta.get("account") or {}
         account_text = " · ".join(x for x in (("@" + account["username"]) if account.get("username") else "",
                                               ("id " + str(account["id"])) if account.get("id") else "") if x)
         lay.brief(*report.chat_brief(say, meta, stats, ids, account_text))
-        lay.qr(paper_lines(report_id, fp, "chat.json", context.get("chat_json_sha256")))
+        report.case_assessment.pdf(lay, report.case_assessment.snapshot(context, "chat", meta))
         lay.section(say("Case"))
         lay.kv([(say("Case title"), case.get("title")), (say("Case ID"), case.get("id")),
                 (say("Examiner"), case.get("examiner")), (say("Organization"), case.get("organization")),

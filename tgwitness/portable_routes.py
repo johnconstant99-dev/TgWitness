@@ -214,7 +214,11 @@ class PortableRoutes:
 
     def selected(self):
         saved = self.vault.read("portable_route")
-        return saved if saved and saved.get("network") == self.collector.network_config().model_dump() else None
+        if saved and saved.get("network"):
+            normalized = NetworkConfig.model_validate(saved["network"]).model_dump()
+            if normalized == self.collector.network_config().model_dump():
+                return {**saved, "network": normalized}
+        return None
 
     async def prepare(self, mode, text, consent, progress):
         self.root.mkdir(parents=True, exist_ok=True)

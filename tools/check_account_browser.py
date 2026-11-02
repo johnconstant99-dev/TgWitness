@@ -48,6 +48,8 @@ def main():
                 page.locator('#entry-settings').click()
 
         def choose_method(method):
+            if method in ('files','key'):
+                page.locator('.other-sign-in').evaluate('el=>el.open=true')
             button=page.locator('[data-auth-method="'+method+'"]')
             if button.get_attribute('aria-pressed') != 'true': button.click()
 
@@ -144,8 +146,7 @@ def main():
             if page.locator("#authorized-state").is_visible():
                 page.locator("#change-account").click()
             expect(page.locator("#credentials-form")).to_be_visible()
-
-
+            page.locator('.other-sign-in').evaluate('el=>el.open=true')
             if page.locator("#api-details").get_attribute("open") is None:
                 page.locator("#api-details summary").click()
             expect(page.locator("#api-id")).to_be_visible()

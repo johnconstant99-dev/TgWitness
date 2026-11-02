@@ -442,7 +442,7 @@ class Disclosures:
                         yield canonical(row) + b'\n'
                 write('messages.jsonl', message_bytes())
                 counts.update(chats=len(chats), media=len(media))
-                report_context = {'report_language': policy.report_language, 'policy': shared_policy,
+                report_context = {'report_language': policy.report_language, 'policy': shared_policy, 'archive': True,
                     'archive_reference': identity, 'created_at': created,
                     'counts': counts, 'fingerprint': fingerprint(self.vault.public_key),
                     'source_archive_sha256': digest, 'limitations': WARNINGS}
@@ -462,7 +462,8 @@ class Disclosures:
                     report_language=policy.report_language,
                     fingerprint=fingerprint(self.vault.public_key), disclosure_id=identity, created_at=created,
                     source_archive_sha256=digest, source_collector_fingerprint=fingerprint(self.vault.public_key),
-                    policy=shared_policy, counts=counts, files=hashes, limitations=WARNINGS)
+                    policy=shared_policy, counts=counts, files=hashes, limitations=WARNINGS,
+                    case_assessment=account_report.case_assessment.snapshot(report_context, "sharing"))
                 target.writestr('manifest.json', canonical(manifest))
                 target.writestr('manifest.sig', self.vault.sign(canonical(manifest)))
             verify_account_disclosure(stage, fingerprint(self.vault.public_key), max_gib=archive_limit(stage))

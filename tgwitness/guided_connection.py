@@ -18,7 +18,7 @@ from .portable_routes import PortableRoutes, target_platform, HASHES, wireguard_
 
 class ConnectionDraft(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    mode: Literal["direct", "vpn", "proxy", "mtproxy", "warp"]
+    mode: Literal["auto", "direct", "vpn", "proxy", "mtproxy", "warp"]
     scope: Literal["account", "group", "all"] = "account"
     account: str = Field(default="default", max_length=40)
     group: str | None = Field(default=None, max_length=40)
@@ -27,9 +27,17 @@ class ConnectionDraft(BaseModel):
     wireguard: str = Field(default="", max_length=16384)
     accept_setup: bool = False
     outside_enabled: bool = True
+    allow_direct: bool = False
+    proxy_url: str = Field(default="", max_length=2048)
 
     @model_validator(mode="after")
     def coherent(self):
+        if self.proxy_url:
+            from .network import parse_proxy_url
+            if self.mode != "proxy" or self.proxy is not None:
+                raise ValueError("Use one proxy address.")
+            self.proxy = parse_proxy_url(self.proxy_url)
+            self.proxy_url = ""
         if self.mode == "proxy" and (not self.proxy or self.proxy.kind not in ("socks5", "http", "mtproxy")):
             raise ValueError("Enter a SOCKS5, HTTP CONNECT or MTProxy route.")
         if self.mode != "proxy" and self.proxy is not None:
@@ -59,7 +67,7 @@ def busy_account(app):
         raise ValueError("Pause the active export before changing its connection.")
 
 
-async def probe(collector, route, mode):
+async def probe(collector, route, mode, *, outside=True):
     """A fresh, unauthenticated transport: never loads the workspace's session or update state."""
     started = time.monotonic()
     concrete, owner = route, None
@@ -78,7 +86,7 @@ async def probe(collector, route, mode):
         latency = round((time.monotonic() - started) * 1000)
         result = {"telegram_connected": True, "latency_ms": latency, "checked_at": int(time.time()),
                   "exit_ip": None, "country": None, "warp": None}
-        if not concrete.telegram_only:
+        if not concrete.telegram_only and (outside or mode == "warp"):
             try:
                 _, _, body = await asyncio.wait_for(netclient.request("GET", "https://www.cloudflare.com/cdn-cgi/trace",
                     concrete, timeout=15, limit=8192), 20)
@@ -154,10 +162,15 @@ class GuidedConnection:
         selected = self.portable.selected()
         registry = getattr(self.app.state, "profiles", None)
         process = self.portable.processes.get(selected["id"]) if selected else None
+        check = c.store.get_setting("connection_check", None)
+        if check:
+            check = {**check, "current": check.get("revision") == revision(c)}
         return {"job": self.job, "current": {"mode": selected["mode"] if selected else c.network_config().kind,
                     "route": c.network_config().public(), "policy": c.policy_state(),
                     "managed": bool(selected), "process_running": process is not None and process.returncode is None,
-                    "check": c.store.get_setting("connection_check", None)},
+                    "strategy": {k: v for k, v in c.store.get_setting("connection_strategy", {}).items() if k in ("mode", "allow_direct")},
+                    "pool": c.pool().describe(c.route_owner)["pool"] if c.network_config().kind == "mtproxy_auto" else None,
+                    "check": check},
                 "supported": target_platform() in HASHES["wireproxy"],
                 "accounts": [{"id": i, "label": e["label"]} for i, e in self.entries().items()],
                 "groups": [{"id": g["id"], "label": g["label"]} for g in registry.groups()] if registry else []}
@@ -171,6 +184,32 @@ class GuidedConnection:
         self.job = {"state": "preparing", "stage": "Preparing connection", "rows": preview["rows"]}
         self.task = asyncio.create_task(self.prepare(body, preview))
         return self.job
+
+    async def automatic_route(self, c, portable, body, progress):
+        """Never bypass an explicit IP restriction; WARP precedes an allowed direct route."""
+        errors = []
+        for mode in ("mtproxy", "warp", "direct"):
+            if mode == "direct" and not body.allow_direct:
+                continue
+            managed = None
+            try:
+                progress("Checking " + mode)
+                if mode == "warp":
+                    managed = await portable.prepare("warp", "", body.accept_setup, progress)
+                    route = NetworkConfig.model_validate(managed["network"])
+                else:
+                    route = NetworkConfig(kind="mtproxy_auto" if mode == "mtproxy" else "direct")
+                result = await asyncio.wait_for(probe(c, route, mode, outside=body.outside_enabled), 45)
+                if mode == "mtproxy" and body.outside_enabled and c.outside_proxy() is None:
+                    # Timestamp/notification presets also need an external route.
+                    errors.append("MTProxy works, but external services need WARP or a SOCKS5 proxy.")
+                    continue
+                return route, managed, result, mode
+            except (OSError, ValueError, TimeoutError, netclient.RouteError) as exc:
+                if managed and portable.selected() != managed:
+                    await portable.stop(managed["id"])
+                errors.append(str(exc) if isinstance(exc, ValueError) else type(exc).__name__)
+        raise ValueError("No working connection. Try WARP or your own proxy. " + " · ".join(errors))
 
     async def discard(self):
         plan, self.plan = self.plan, None
@@ -195,7 +234,11 @@ class GuidedConnection:
                 def progress(stage):
                     self.job.update(stage=stage, account=row["label"])
                 progress("Preparing connection")
-                if body.mode in ("warp", "vpn"):
+                auto_check = None
+                actual_mode = body.mode
+                if body.mode == "auto":
+                    route, item["managed"], auto_check, actual_mode = await self.automatic_route(c, portable, body, progress)
+                elif body.mode in ("warp", "vpn"):
                     if body.mode == "vpn":
                         key = wireguard_profile(body.wireguard)["interface"]["PrivateKey"]
                         for other_id, entry in self.entries().items():
@@ -212,10 +255,11 @@ class GuidedConnection:
                 else:
                     route = NetworkConfig(kind="direct" if body.mode == "direct" else "mtproxy_auto")
                 item["route"] = route
+                item["mode"] = actual_mode
                 item["policy"] = RoutePolicy(exposure="tunnel" if route.kind == "direct" else "hide",
-                                               outside_enabled=body.outside_enabled and not route.telegram_only)
+                                               outside_enabled=body.outside_enabled and (not route.telegram_only or c.outside_proxy() is not None))
                 progress("Checking Telegram and the exit address")
-                item["check"] = await asyncio.wait_for(probe(c, route, body.mode), 45)
+                item["check"] = auto_check or await asyncio.wait_for(probe(c, route, body.mode, outside=body.outside_enabled), 45)
                 row["check"] = item["check"]
             self.plan = {"token": secrets.token_hex(24), "expires": time.monotonic() + 600,
                          "body": body, "ids": self.targets(body), "items": items}
@@ -269,7 +313,11 @@ class GuidedConnection:
             results = []
             try:
                 for item in plan["items"]:
-                    results.append(await self.apply_one(item, plan["body"].mode))
+                    results.append(await self.apply_one(item, item.get("mode", plan["body"].mode)))
+                    if results[-1]["applied"]:
+                        item["app"].state.store.set_setting("connection_strategy", plan["body"].model_dump(exclude={"proxy", "proxy_url", "wireguard"}))
+                        if plan["body"].allow_direct or plan["body"].mode == "direct":
+                            item["app"].state.store.set_setting("ip_choice", "auto")
                 self.job = {"state": "applied", "rows": results, "stage": "Connection updated"}
             finally:
                 for item in plan["items"]:
@@ -284,14 +332,16 @@ class GuidedConnection:
         policy, was_running = c.route_policy(), c.running
         try:
             # Recheck immediately before pausing. A dead draft never disrupts current collection.
-            check = await asyncio.wait_for(probe(c, item["route"], mode), 45)
+            check = await asyncio.wait_for(probe(c, item["route"], mode, outside=item["policy"].outside_enabled), 45)
             await c.stop()
             c.store.set_setting("route_policy", {"exposure": "tunnel", "outside_enabled": False})
             await c.set_network(item["route"])
-            c.vault.save("outside_proxy", {})
+            if not item["route"].telegram_only:
+                c.vault.save("outside_proxy", {})
             c.vault.save("portable_route", item["managed"] or {})
             with c.store.transaction():
                 c.store.set_setting("route_policy", item["policy"].model_dump())
+                check["revision"] = revision(c)
                 c.store.set_setting("connection_check", check)
                 c.store.append("network.connection_applied", {"mode": mode, **item["route"].receipt(),
                     "policy": item["policy"].model_dump(), "check": check,
@@ -324,7 +374,13 @@ class GuidedConnection:
         c = self.app.state.collector
         await self.portable.restore()
         selected = self.portable.selected()
-        result = await asyncio.wait_for(probe(c, c.network_config(), selected["mode"] if selected else "proxy"), 45)
+        try:
+            result = await asyncio.wait_for(probe(c, c.network_config(), selected["mode"] if selected else "proxy",
+                outside=c.route_policy()["outside_enabled"]), 45)
+        except Exception:
+            c.store.set_setting("connection_check", {"telegram_connected": False, "checked_at": int(time.time()), "revision": revision(c)})
+            raise
+        result["revision"] = revision(c)
         with c.store.transaction():
             c.store.set_setting("connection_check", result)
             c.store.append("network.connection_checked", result)
@@ -359,6 +415,7 @@ class GuidedConnection:
         return self.job
 
     async def maintain(self):
+        health_at = 0
         while True:
             await asyncio.sleep(10)
             if self.plan and time.monotonic() > self.plan["expires"]:
@@ -372,6 +429,35 @@ class GuidedConnection:
             except Exception:
                 self.failures += 1
                 self.retry_at = time.monotonic() + min(300, 10 * 2 ** min(self.failures, 5))
+            if time.monotonic() < health_at or self.task and not self.task.done() or self.plan:
+                continue
+            c = self.app.state.collector
+            strategy = c.store.get_setting("connection_strategy", {})
+            if not strategy:
+                continue
+            health_at = time.monotonic() + 60
+            try:
+                await self.check_current()
+            except Exception:
+                if strategy.get("mode") != "auto":
+                    continue
+                # Re-run the chain only for an explicitly selected Auto strategy.
+                # No direct fallback can bypass the answer to the IP question.
+                try:
+                    busy_account(self.app)
+                    body = ConnectionDraft(**{**strategy, "scope": "account", "account": self.profile_id,
+                        "outside_enabled": c.route_policy()["outside_enabled"]})
+                    self.task = asyncio.create_task(self.recover_automatic(body))
+                except Exception:
+                    health_at = time.monotonic() + 120
+
+    async def recover_automatic(self, body):
+        try:
+            await self.prepare(body, self.preview(body))
+            if self.plan:
+                await self.apply(self.plan["token"])
+        except Exception:
+            self.job = {"state": "failed", "stage": "No connection", "error": "Automatic recovery failed. Check the connection in Settings."}
 
     async def close(self):
         for task in (self.task, self.maintenance):

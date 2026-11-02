@@ -134,6 +134,8 @@ footer.end{margin-top:12px}
   .tabs{order:3;flex:1 0 100%;width:100%;min-width:0;overflow-x:auto;margin:0;border-radius:10px}
   .bar nav.tabs{display:flex;flex-wrap:nowrap;margin-inline-start:0;justify-content:flex-start}
   .bar nav.tabs a{min-width:0;flex:1 1 0;padding:8px 4px;font-size:11px}
+  .bar nav.sections{order:3;flex:1 0 100%;max-width:100%;overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;margin:0}
+  .bar nav.sections a{flex:0 0 auto;white-space:nowrap}
   .tabs a{flex:1;justify-content:center;padding:8px 7px;white-space:nowrap;font-size:12px}.tabs a span{display:inline}
   main{padding:16px 12px 32px}.hero{padding:24px 20px;gap:22px}.hero h1{font-size:28px}.stamp{width:100%}
   .facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.facts b{overflow-wrap:anywhere}

@@ -249,7 +249,7 @@ def check_browser(directory, output):
             page.set_viewport_size({"width": width, "height": 1000})
             check_layout(page)
         page.set_viewport_size({"width": 1280, "height": 1000})
-        context.add_cookies([{"name": i18n.COOKIE, "value": "ru", "url": server.url}])
+        page.evaluate("()=>{const url=new URL(location.href);url.searchParams.set(\"lang\",\"ru\");history.replaceState(null,\"\",url);}")
         reload_panel(page)
         expect(page.locator("#view-witness")).to_be_visible()
         navigate_panel(page, "witness")

@@ -20,6 +20,7 @@
   }
 
   function choose(choice,button){
+    document.dispatchEvent(new CustomEvent('tgwitness:theme',{detail:choice}));
     write(KEY,choice);
     if(resolve(choice)===root.dataset.theme||!document.startViewTransition||window.tgwReducedMotion()){apply(choice);return;}
     const r=button.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
@@ -32,6 +33,7 @@
     transition.finished.then(done,done);
   }
   apply(read(KEY,"system"));
+  window.tgwApplyTheme=choice=>{write(KEY,choice);apply(choice);};
   applyMotion();
   systemDark.addEventListener("change",()=>{if(read(KEY,"system")==="system")apply("system");});
   addEventListener("storage",event=>{if(event.key===KEY)apply(read(KEY,"system"));if(event.key===MOTION)applyMotion();});

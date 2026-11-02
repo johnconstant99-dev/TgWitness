@@ -427,6 +427,7 @@ def export(store, vault, options, report_options=None):
                    "fingerprint": checked["fingerprint"], "event_count": checked["events"],
                    "head_hash": checked["head_hash"], "digest": summary, "anchors": [], "files": {},
                    "account": account or None, "archive": True, "sign": vault.sign, "events_again": records,
+                   "journal_verified": True,
                    "handover": {"purpose": options.purpose, "selection": selection, "counts": dict(minimiser.counts)}}
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             def write_member(name, values):
@@ -475,7 +476,8 @@ def export(store, vault, options, report_options=None):
                         "case": report.case_of(report_options), "purpose": options.purpose,
                         "journal": journal, "selection": options.model_dump(mode="json"),
                         "counts": dict(minimiser.counts), "pseudonyms": len(minimiser.labels), "limitations": LIMITS,
-                        "report": report_entry(context, report_options), "files": hashes}
+                        "report": report_entry(context, report_options), "files": hashes,
+                        "case_assessment": data["case_assessment"]}
             manifest_bytes = canonical(manifest)
             archive.writestr("manifest.json", manifest_bytes)
             archive.writestr("manifest.sig", vault.sign(manifest_bytes))

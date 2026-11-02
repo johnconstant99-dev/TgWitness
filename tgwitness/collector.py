@@ -40,7 +40,7 @@ from .evidence import retain_checkpoint
 from .netclient import RouteError, proxy_address
 from .network import NetworkConfig, NoRoute, RoutePolicy, saved_route
 from .proxy_catalog import NoProxyAvailable, ProxyPool, PublicCatalog
-from .monitoring import capture_settings, media_kind, monitoring_settings
+from .monitoring import capture_settings, media_kind, monitoring_settings, duration_allowed
 from .scope import allowed, folder_rule, in_folder, kind_of, recheck_settings, scope_settings
 from .verify import fingerprint
 
@@ -1979,6 +1979,8 @@ class Collector:
                     media_skip = "media download disabled"
             elif not message.file:
                 media_skip = "metadata-only media type; no downloadable file"
+            elif not duration_allowed(message, rule):
+                media_skip = "video duration unknown or above the selected limit"
             elif not rule["enabled"]:
                 media_skip = "attachment type not collected by policy: " + media_type
             elif not account.get("id"):
@@ -2537,6 +2539,8 @@ class Collector:
         rule, size = settings["types"].get(kind) or {"enabled": False, "max_mb": 0}, getattr(message.file, "size", None)
         if not rule["enabled"]:
             return {"file_status": "type_not_collected", "file_kind": kind}
+        if not duration_allowed(message, rule):
+            return {"file_status": "duration_limit", "file_kind": kind}
         limit = rule["max_mb"] * 1024**2
         if size is None or size > limit:
             return {"file_status": "above_limit" if size else "unknown_size", "file_kind": kind,
@@ -2782,7 +2786,7 @@ class Collector:
                 size = getattr(message.file, "size", None) if message.file else None
                 kind = policy.get("media_type") or media_kind(message)
                 rule, limit = capture["types"][kind], capture["types"][kind]["max_mb"] * 1024**2
-                if not rule["enabled"] or (size is not None and limit < size <= job["max_bytes"]):
+                if not rule["enabled"] or not duration_allowed(message, rule) or (size is not None and limit < size <= job["max_bytes"]):
                     # The settings changed after the file was queued: a type turned off or a lower limit
                     # also stops the files already waiting
                     self.store.finish_media(job, "skipped", {

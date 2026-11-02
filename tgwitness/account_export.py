@@ -27,6 +27,7 @@ from telethon.tl import types
 
 from . import account_export_transport as transport, account_report
 from .evidence import producer
+from .monitoring import MediaRule
 from .security import private_write
 from .store import ZERO, canonical, utcnow
 from .verify import fingerprint
@@ -59,6 +60,7 @@ class AccountExportOptions(BaseModel):
     include_archived: bool = True
     media_types: list[Literal[MEDIA]] = Field(default_factory=lambda: list(MEDIA), max_length=len(MEDIA))
     max_media_file_mib: int = Field(default=512, ge=1, le=4096)
+    media_rules: dict[Literal[MEDIA], MediaRule] = Field(default_factory=dict)
     max_total_gib: int = Field(default=16, ge=1, le=1024)
     include_profile: bool = True
     include_contacts: bool = True
@@ -511,6 +513,16 @@ class AccountExport:
         category = task["category"]
         if category in ("messages", "stories") and info["kind"] not in options["media_types"]:
             return {**info, "outcome": "excluded", "reason": "media_type_not_selected"}
+        rule = options.get("media_rules", {}).get(info["kind"], {}) if category in ("messages", "stories") else {}
+        if rule:
+            if not rule.get("enabled", True):
+                return {**info, "outcome": "excluded", "reason": "media_type_not_selected"}
+            limit = min(limit, rule["max_mb"] * 1024**2)
+            if rule.get("max_seconds"):
+                item = getattr(media, "document", None) or media
+                duration = next((a.duration for a in getattr(item, "attributes", []) if hasattr(a, "duration")), None)
+                if duration is None or not 0 <= duration <= rule["max_seconds"]:
+                    return {**info, "outcome": "excluded", "reason": "duration_limit"}
         if info["expected_bytes"] is not None and info["expected_bytes"] > limit:
             return {**info, "outcome": "excluded", "reason": "per_file_limit"}
         remaining = options["max_total_gib"] * 1024**3 - self.counts["bytes_saved"] - self.pending_bytes
@@ -772,7 +784,7 @@ class AccountExport:
                     if hashes[name] != name.removeprefix("media/"):
                         raise ValueError("An attachment changed while packaging.")
                 selected = [c for c in self.inventory["chats"] if c["selected"]]
-                report_context = {"report_language": job["options"].get("report_language", "en"),
+                report_context = {"report_language": job["options"].get("report_language", "en"), "archive": True,
                     "archive_reference": job["job_id"], "requested_at": job["created_at"],
                     "captured_from": captured_from, "captured_until": captured_until,
                     "options": job["options"], "counts": self.current["counts"], "coverage": self.current["coverage"],
@@ -802,7 +814,8 @@ class AccountExport:
                     "created_at": job["created_at"], "completed_at": utcnow(), "status": "partial" if self.current["coverage"]["failures"] else "done",
                     "complete_within_scope": not self.current["coverage"]["failures"], "coverage": self.current["coverage"],
                     "counts": self.current["counts"], "receipt_count": len(self.receipts), "receipt_head_sha256": self.head,
-                    "files": hashes, "limitations": LIMITATIONS, "producer": producer()}
+                    "files": hashes, "limitations": LIMITATIONS, "producer": producer(),
+                    "case_assessment": account_report.case_assessment.snapshot(report_context)}
                 archive.writestr(zipfile.ZipInfo("manifest.json"), canonical(manifest))
                 archive.writestr(zipfile.ZipInfo("manifest.sig"), self.vault.sign(canonical(manifest)))
             with out.open("r+b") as stream:

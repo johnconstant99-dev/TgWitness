@@ -8,6 +8,7 @@ export const EXTRA_FEATURES = {bot: 'witness', evidence: 'timestamps_backup', gi
 export function createModes({node, tr, json, may, status, query, go, toast}) {
   let data = null, key = '', loadedAt = 0, request = 0, selected = null, easyOpened = '', home = null;
   const isLocked = featureId => {
+    if(document.documentElement.dataset.uiLevel)return false;
     const feature = data?.features.find(f => f.id === featureId);
     return !!(feature && data.mode && rank(data.mode) < rank(feature.mode));
   };
@@ -158,7 +159,7 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
   }
 
   function renderOnboarding() {
-    const s = status(), wanted = !!data && data.mode === null && !s?.demo && !window.TGW_ONLINE_DEMO && may('settings');
+    const s = status(), wanted = !document.documentElement.dataset.uiLevel && !!data && data.mode === null && !s?.demo && !window.TGW_ONLINE_DEMO && may('settings');
     onboarding.hidden = !wanted;
     onboarding.dataset.session = String(!!s?.collector?.has_session);
     if (!wanted) { onboarding.replaceChildren(); return; }
@@ -214,6 +215,11 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
   }
 
   function applyGating() {
+    if(document.documentElement.dataset.uiLevel){
+      for(const el of query('[data-mode-locked]'))delete el.dataset.modeLocked;
+      for(const el of query('.mode-lock'))el.hidden=true;
+      return;
+    }
     const current = data?.mode ? rank(data.mode) : Infinity, byId = new Map((data?.features || []).map(f => [f.id, f]));
     document.getElementById('workspace').dataset.protectionMode = data?.mode || '';
     for (const element of query('[data-mode-feature]')) {

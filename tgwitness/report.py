@@ -24,12 +24,12 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from . import __version__, i18n, message_details
+from . import __version__, case_assessment, i18n, message_details
 from . import indicators as ioc
 from . import viewer
 from .store import canonical, utcnow
 from .verify import (SEAL_CLOSE, SEAL_OPEN, coverage_lines, fingerprint, fingerprint_colors, ots_summary,
-                     timestamp_reply_summary, timestamp_signature)
+                     timestamp_reply_summary, timestamp_signature, verify_checkpoint)
 
 SEAL_FORMAT = "tgwitness-report-seal-v1"
 CUSTODY_FORMAT = "tgwitness-custody-v1"
@@ -129,7 +129,7 @@ def text_keys():
     keys = [node.args[0].value for source in sources for node in ast.walk(ast.parse(source.read_text(encoding="utf-8")))
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "say"
             and node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)]
-    return list(dict.fromkeys(keys + list(SCRIPT_WORDS) + LIMITS + EXPORT_LIMITS + list(MEDIA_NAMES.values()) + ["Media"]
+    return list(dict.fromkeys(keys + case_assessment.text_keys() + list(SCRIPT_WORDS) + LIMITS + EXPORT_LIMITS + list(MEDIA_NAMES.values()) + ["Media"]
                               + list(ROUTE_KINDS.values()) + list(EXPOSURES.values()) + list(FILE_STATUS.values())
                               + list(ACTION_NAMES.values()) + [label for _, label in OUTCOMES.values()]
                               + ["Action", "no result recorded"] + list(OTHERS.values()) + list(TEXTS.values())
@@ -242,6 +242,7 @@ class Digest:
         # What the observing account itself did: panel actions with their outcome and messages it sent.
         self.actions, self.previews, self.action_count = {}, {}, 0
         self.own_messages, self.own_total, self.own_scope = [], 0, set()
+        self.trust_signals = {"drand": 0, "starts": 0, "tdx": 0}
 
     @staticmethod
     def seen(table, value, at):
@@ -252,6 +253,12 @@ class Digest:
 
     def add(self, event):
         kind, payload, chat = event["kind"], event["payload"], event["chat_id"]
+        if kind == "beacon.drand":
+            self.trust_signals["drand"] += 1
+        if kind == "process.started":
+            self.trust_signals["starts"] += 1
+            if isinstance(payload.get("run"), dict) and payload["run"].get("tdx_start"):
+                self.trust_signals["tdx"] += 1
         self.categories[category(kind)] += 1
         self.first, self.last = self.first or event["observed_at"], event["observed_at"]
         self.first_hash = self.first_hash or event["hash"]
@@ -325,27 +332,32 @@ class Digest:
         return {"categories": self.categories, "chats": self.chats, "titles": self.titles, "media": self.media,
                 "senders": len(self.senders), "first": self.first, "last": self.last, "first_hash": self.first_hash,
                 "clients": list(self.clients.values()), "routes": list(self.routes.values()), "clocks": self.clocks,
-                "indicators": self.indicators.result(),
+                "indicators": self.indicators.result(), "trust_signals": dict(self.trust_signals),
                 "direct_fallbacks": self.direct, "changed": self.changed,
                 "actions": list(self.actions.values()), "action_count": self.action_count,
                 "own_messages": self.own_messages, "own_total": self.own_total, "own_scope": sorted(self.own_scope)}
 
 
-def describe_anchor(checkpoint_name, checkpoint, proof_name, proof, query=None):
+def describe_anchor(checkpoint_name, checkpoint, proof_name, proof, query=None, *, public_key=None,
+                    event_count=None, hash_at=None):
     """A stored timestamp answer as the report shows it, read with the verifier's own checks."""
     digest = hashlib.sha256(checkpoint).digest()
     stem = checkpoint_name[:-len(".json")]
-    entry = {"checkpoint": checkpoint_name, "file": "anchors/" + proof_name,
+    entry = {"checkpoint": checkpoint_name, "file": "anchors/" + proof_name, "checkpoint_bound": False,
              "service": proof_name[len(stem) + 1:].rsplit(".", 1)[0]}
     try:
         entry["event_count"] = json.loads(checkpoint)["statement"]["event_count"]
+        if public_key is not None and event_count is not None and hash_at is not None:
+            verify_checkpoint(json.loads(checkpoint), public_key, event_count, hash_at)
+            entry["checkpoint_bound"] = True
         if proof_name.endswith(".tsr"):
             entry.update(kind="rfc3161", time=timestamp_reply_summary(proof, digest, query)["time"])
             try:
                 from .tsa_roots import trusted_roots
                 entry["signed"] = timestamp_signature(proof, trusted_roots())
-            except Exception:
+            except Exception as exc:
                 entry["signed"] = None
+                entry["signature_error"] = type(exc).__name__
         else:
             entry.update(kind="opentimestamps", status=ots_summary(proof, digest)["status"])
     except Exception as exc:
@@ -353,8 +365,9 @@ def describe_anchor(checkpoint_name, checkpoint, proof_name, proof, query=None):
     return entry
 
 
-def rfc3161_count(anchors):
-    return sum(1 for a in anchors if a.get("kind") == "rfc3161")
+def rfc3161_count(anchors, *, validated=False):
+    return sum(1 for a in anchors if a.get("kind") == "rfc3161"
+               and (not validated or case_assessment.verified_stamp(a, 2**63 - 1)))
 
 
 def stamps_text(say, anchors):
@@ -371,7 +384,7 @@ def stamps_text(say, anchors):
 
 
 def latest_stamp(anchors):
-    stamped = [a for a in anchors if a.get("kind") == "rfc3161"]
+    stamped = [a for a in anchors if case_assessment.verified_stamp(a, 2**63 - 1)]
     return max(stamped, key=lambda a: (a.get("event_count") or 0, a.get("time") or "")) if stamped else None
 
 
@@ -394,15 +407,13 @@ def standards(say, kind="evidence", stamps=0):
         rows += [("RFC 3161", say("Time-Stamp Protocol"),
                   say("Journal checkpoints in this export are stamped by independent timestamp authorities; see Timestamps.")),
                  ("eIDAS, Art. 41", say("Qualified electronic time stamps (EU)"),
-                  say("Only an authority on the EU Trusted List gives a legal presumption of accuracy; check the "
-                      "authorities named under Timestamps."))]
+                  say("Not assessed by this report: a valid RFC 3161 token alone does not establish qualified status or legal effect."))]
     else:
         rows.append(("RFC 3161", say("Time-Stamp Protocol"),
                      say("Not used: a chat export is not timestamped.") if kind == "chat" else
                      say("Not used in this extract: timestamps cover the complete journal and are checked with the "
                          "full archive.") if kind == "handover" else
-                     say("Not used in this export: no checkpoint was timestamped. Evidence mode stamps checkpoints "
-                         "automatically.")))
+                     say("No independently validated checkpoint timestamp in this copy.")))
     return rows + [
         ("RFC 8032 · FIPS 180-4", say("Ed25519 signatures · SHA-256 hashes"),
          say("Records and the manifest are signed with Ed25519; files and records are identified by SHA-256.")),
@@ -479,7 +490,7 @@ def custody(context):
                       "manifest": "manifest.json lists the SHA-256 of every file; manifest.sig signs it",
                       "report_seal": "the readable report ends with a signed seal over its own bytes"},
         "standards": [{"reference": ref, "title": title, "how": how}
-                      for ref, title, how in standards(say, kind, rfc3161_count(context.get("anchors", [])))],
+                      for ref, title, how in standards(say, kind, rfc3161_count(context.get("anchors", []), validated=True))],
         "custody_log": [{"at": context["created_at"], "action": "exported and sealed",
                          "by": options.get("examiner") or None, "tool": "TgWitness " + __version__}],
         "statement": "Alignment with the listed practices, not certification. Integrity is verifiable; "
@@ -942,6 +953,9 @@ const zone=$("#drop");if(zone){const input=$("#drop-file"),out=$("#drop-result")
 CONSOLE_JS = Path(__file__).with_name("report_console.js").read_text(encoding="utf-8")
 CSS += Path(__file__).with_name("report_console.css").read_text(encoding="utf-8")
 CSS += Path(__file__).with_name("report_skin.css").read_text(encoding="utf-8")
+CSS += case_assessment.CSS
+DOSSIER_CSS = Path(__file__).with_name("report_dossier.css").read_text(encoding="utf-8")
+CSS += DOSSIER_CSS
 SCRIPT += "\n" + CONSOLE_JS
 SCRIPT_HASH = "'sha256-" + base64.b64encode(hashlib.sha256(SCRIPT.encode("utf-8")).digest()).decode() + "'"
 # Data documents run inside opaque-origin sandboxed frames, with their own CSP.
@@ -971,7 +985,7 @@ def head(say, *, title, description, meta, linked, theme):
             '<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">'
             + "".join('<meta name="' + e(n) + '" content="' + e(v) + '">' for n, v in tags if v not in (None, ""))
             + '<script type="application/ld+json">' + script_json(linked) + "</script>"
-            "<style>" + CSS + page_footer(say, meta) + "</style></head><body>" + ICONS)
+            "<style>" + CSS + page_footer(say, meta) + '</style></head><body class="dossier">' + ICONS)
 
 
 def css_text(value):
@@ -1024,7 +1038,8 @@ def hero(say, eyebrow, title, facts, fp, sealed):
              + e(" ".join(grouped(fp).split()[:4])) + " …</div>"
              '<a class="stamp-hint no-print" id="seal-hint" href="#seal" hidden>'
              + e(say("Check the file itself")) + " →</a></aside>") if sealed else ""
-    return ('<section class="hero" id="summary"><div class="hero-main"><div class="eyebrow">' + e(eyebrow) + "</div><h1>"
+    return ('<section class="hero" id="summary"><div class="cover-register"><span>TG / WITNESS</span><span>'
+            + e(say("Evidence dossier")) + '</span></div><div class="hero-main"><div class="eyebrow">' + e(eyebrow) + "</div><h1>"
             + e(title) + "</h1>"
             '<div class="facts">' + "".join("<div><span>" + e(k) + "</span><b>" + v + "</b></div>" for k, v in facts if v)
             + "</div></div>" + stamp + "</section>")
@@ -1053,7 +1068,7 @@ def toc(links):
 def section(number, anchor, title, lead="", long=False):
     glyph, tone = SECTION_ICONS.get(anchor, ("info", "slate"))
     return ('<section class="card' + (" long" if long else "") + '" id="' + anchor + '"><h2><span class="sec-icon tone-'
-            + tone + '">' + icon(glyph) + '</span><span class="num">' + str(number) + "</span>" + e(title) + "</h2>"
+            + tone + '">' + icon(glyph) + '</span><span class="num">' + str(number) + '</span><span class="section-title">' + e(title) + '</span></h2>'
             + ('<p class="lead">' + e(lead) + "</p>" if lead else ""))
 
 
@@ -1741,6 +1756,7 @@ def report_data(events_again, coverage, context):
         "actions": {"panel_actions": digest.get("action_count", 0), "listed": digest.get("actions") or [],
                     "messages_sent": digest.get("own_total", 0), "sent_listed": digest.get("own_messages") or []},
         "timestamps": anchors, "coverage": coverage, "custody": custody(context),
+        "case_assessment": case_assessment.journal(context, coverage),
         "indicators": digest.get("indicators") or {"items": [], "total": 0, "not_listed": 0},
         "files": context.get("files") or {},
         "parts": [{k: p[k] for k in ("index", "file", "from", "to", "count", "first_at", "last_at", "sha256") if k in p}
@@ -1978,6 +1994,46 @@ def ranges_text(ranges, total, limit=8):
             if shown else "—")
 
 
+def coverage_plot(coverage):
+    """Position recorded intervals on one UTC axis; never fill unobserved time."""
+    rows = []
+    for key in ("continuous", "gaps"):
+        spans = []
+        for item in coverage.get(key) or []:
+            try:
+                start, end = (datetime.fromisoformat(item[k].replace("Z", "+00:00")) for k in ("from", "to"))
+                if start.tzinfo is None or end.tzinfo is None or end < start:
+                    return None
+                spans.append((start.timestamp(), end.timestamp()))
+            except (KeyError, AttributeError, TypeError, ValueError, OverflowError):
+                return None
+        rows.append(spans)
+    all_spans = rows[0] + rows[1]
+    if not all_spans or len(all_spans) > 2000:
+        return None
+    first, last = min(a for a, _ in all_spans), max(b for _, b in all_spans)
+    if last <= first:
+        return None
+    return {"from": datetime.fromtimestamp(first, timezone.utc).isoformat(),
+            "to": datetime.fromtimestamp(last, timezone.utc).isoformat(),
+            "rows": [[((a-first)/(last-first), (b-a)/(last-first)) for a, b in spans] for spans in rows]}
+
+
+def coverage_figure(say, coverage):
+    plot = coverage_plot(coverage)
+    if not plot:
+        return ""
+    out = '<figure class="coverage-figure"><figcaption>' + e(say("Observation timeline")) + '</figcaption>'
+    for index, label in enumerate(("Continuous observation", "Gaps")):
+        out += '<div class="coverage-track"><span>' + e(say(label)) + '</span><svg viewBox="0 0 1000 24" preserveAspectRatio="none" aria-hidden="true">'
+        out += '<rect width="1000" height="24" class="coverage-track-bg"/>'
+        for x, width in plot["rows"][index]:
+            out += f'<rect x="{x*1000:.3f}" y="3" width="{width*1000:.3f}" height="18" class="coverage-span coverage-span-{index}"/>'
+        out += '</svg></div>'
+    return (out + '<div class="coverage-axis"><span>' + when(plot["from"]) + '</span><span>' + when(plot["to"])
+            + '</span></div><p>' + e(say("Recorded intervals only. Blank space is not proof of uninterrupted collection.")) + '</p></figure>')
+
+
 def coverage_section(say, number, coverage):
     if not coverage:
         return ""
@@ -1991,10 +2047,11 @@ def coverage_section(say, number, coverage):
     out = section(number, "coverage", say("Coverage"),
                   say("Continuous means observation was on, connected and writing records at least every three minutes. "
                       "IDs not observed were never seen by this collector; that is not evidence that they were deleted."))
-    out += "<h3>" + e(say("Continuous observation")) + "</h3>" + (table([say("From"), say("To"), say("Duration")], periods)
+    out += coverage_figure(say, coverage)
+    out += "<h3>" + e(say("Continuous observation")) + "</h3>" + (table([say("Interval start"), say("Interval end"), say("Duration")], periods)
                                                                     if periods else "<p>—</p>")
     if gaps:
-        out += "<h3>" + e(say("Gaps")) + "</h3>" + table([say("From"), say("To"), say("Reason")], gaps)
+        out += "<h3>" + e(say("Gaps")) + "</h3>" + table([say("Interval start"), say("Interval end"), say("Reason")], gaps)
     if ids:
         out += ("<h3>" + e(say("Message IDs per chat")) + '</h3><p class="lead">' + e(say(
             "Channels and supergroups number their messages 1, 2, 3… A number between the first and the last "
@@ -2024,8 +2081,9 @@ def timestamps_section(say, number, anchors, archive_name, fp):
     for anchor in anchors:
         if anchor.get("kind") == "rfc3161":
             signer = (anchor.get("signed") or {}).get("signer")
-            status = ('<span class="pill ok">' + e(say("Token valid")) + "</span> <small>" + e(signer) + "</small>" if signer
-                      else '<span class="pill warn">' + e(say("Check the signature with --tsa-ca")) + "</span>")
+            status = ('<span class="pill ok">' + e(say("Token valid")) + "</span> <small>" + e(signer) + "</small>"
+                      if case_assessment.verified_stamp(anchor, 2**63 - 1)
+                      else '<span class="pill warn">' + e(say("Checkpoint or timestamp trust not established")) + "</span>")
             rows.append([num(anchor.get("event_count")), e(anchor["service"]), "RFC 3161", when(anchor.get("time")), status])
         elif anchor.get("kind") == "opentimestamps":
             pending = anchor.get("status") == "pending"
@@ -2113,7 +2171,7 @@ def evidence_chunks(events, coverage=None, context=None):
         changed, events_again = digest.get("changed") or set(), context.get("events_again")
         links = [("summary", say("Summary"))] + ([("minimisation", say("Minimisation"))] if handover else []) \
             + ([("changes", say("Changes"))] if changed and events_again else []) \
-            + [("actions", say("Actions")), ("integrity", say("Integrity"))] \
+            + [("case-assessment", say(case_assessment.TITLE)), ("actions", say("Actions")), ("integrity", say("Integrity"))] \
             + ([] if handover else [("timestamps", say("Timestamps"))]) + [("custody", say("Custody")),
                                                                          ("verify", say("Verify"))]
         if options.get("timeline"):
@@ -2133,7 +2191,7 @@ def evidence_chunks(events, coverage=None, context=None):
                         (say("Deletions"), num(categories["deleted"]), "bad", "trash"),
                         (say("Files"), num(len(digest["media"])), "violet", "file"),
                         (say("Timestamps"), num(len([a for a in anchors if a.get("kind") != "unreadable"])), "ok", "seal"),
-                        (say("Observed"), e(span_text(say, digest["first"], digest["last"])), "pink", "eye")])
+                        (say("Observation period"), e(span_text(say, digest["first"], digest["last"])), "pink", "eye")])
                + (toc(links) if data_kind else "")).encode("utf-8")
         account = context.get("account") or {}
         account_text = " · ".join(x for x in (("@" + account["username"]) if account.get("username") else "",
@@ -2141,6 +2199,7 @@ def evidence_chunks(events, coverage=None, context=None):
         numbers = iter(range(1, 100))
         yield brief_section(say, *evidence_brief(say, digest, count, anchors, coverage, account_text,
                                                  handover)).encode("utf-8")
+        yield case_assessment.html(case_assessment.journal(context, coverage), say).encode("utf-8")
         yield case_section(say, next(numbers), options, [
             (say("Observing account"), e(account_text)),
             (say("Report language"), '<span data-lang="' + e(say.language) + '">' + e(say.language) + "</span>"),
@@ -2233,7 +2292,7 @@ def evidence_chunks(events, coverage=None, context=None):
             yield files_section(say, next(numbers), files, ("report.html", "README.txt", "SHA256SUMS", "manifest.json",
                                                             "manifest.sig")).encode("utf-8")
         yield standards_section(say, next(numbers), "handover" if handover else "evidence",
-                                rfc3161_count(anchors)).encode("utf-8")
+                                rfc3161_count(anchors, validated=True)).encode("utf-8")
         yield limits_section(say, next(numbers), context.get("limits") or []).encode("utf-8")
         data = ""
         if data_kind:
@@ -2485,6 +2544,7 @@ def chat_chunks(meta, records, context):
                                               ("id " + str(account["id"])) if account.get("id") else "") if x)
         numbers = iter(range(1, 100))
         yield brief_section(say, *chat_brief(say, meta, stats, ids, account_text)).encode("utf-8")
+        yield case_assessment.html(case_assessment.snapshot(context, "chat", meta), say).encode("utf-8")
         yield case_section(say, next(numbers), options, [
             (say("Chat"), '<span class="chathead"><span class="ava ' + colour(chat.get("id")) + '">' + e(initials(chat_title))
              + "</span><span><b>" + e(chat_title) + "</b><br><small>" + e(chat.get("kind")) + " · " + e(chat.get("visibility"))

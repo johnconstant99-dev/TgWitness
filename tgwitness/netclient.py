@@ -119,6 +119,16 @@ async def open_stream(url, network, timeout, private=False):
     if not private and literal(host):
         refuse_internal(host, [literal(host)])
     address = await asyncio.wait_for(proxy_address(network, private), timeout)
+    if network.kind == "http" and network.tls:
+        from .https_proxy import tunnel
+        reader, writer = await tunnel(network, host, port, timeout, address)
+        if tls:
+            try:
+                await asyncio.wait_for(writer.start_tls(tls, server_hostname=host), timeout)
+            except BaseException:
+                writer.close()
+                raise
+        return reader, writer
     proxy = Proxy(ProxyType.SOCKS5 if network.kind == "socks5" else ProxyType.HTTP, address,
                   network.port, network.username or None, network.password or None, rdns=True)
     sock = await proxy.connect(dest_host=host, dest_port=port, timeout=timeout)

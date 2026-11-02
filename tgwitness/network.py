@@ -7,7 +7,7 @@ import os
 import re
 from pathlib import Path
 from typing import Literal
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, urlsplit, unquote
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -79,9 +79,15 @@ class NetworkConfig(BaseModel):
 
 
     local_proxy: bool = False
+    tls: bool = False
+    tls_server_name: str = ""
 
     @model_validator(mode="after")
     def check_route(self):
+        if self.tls and self.kind != "http":
+            raise ValueError("TLS to the proxy is supported for HTTPS CONNECT only.")
+        if self.tls:
+            self.tls_server_name = self.host
         if self.kind == "direct":
             if any((self.host, self.username, self.password, self.secret)):
                 raise ValueError("Direct mode must not include proxy credentials.")
@@ -113,6 +119,7 @@ class NetworkConfig(BaseModel):
 
     def public(self, fallback=False):
         return {"kind": self.kind, "host": self.host,
+                "tls": self.tls,
                 "port": self.port if self.kind not in ("direct", "mtproxy_auto") else None,
                 "has_credentials": bool(self.username or self.password or self.secret),
                 "fallback_to_direct": fallback, "scope": "Telegram client traffic only"}
@@ -132,8 +139,27 @@ class NetworkConfig(BaseModel):
             secret = self.secret if len(self.secret) == 34 else "dd" + self.secret
             return {"connection": ConnectionTcpMTProxyRandomizedIntermediate,
                     "proxy": (self.host, self.port, secret)}
+        if self.tls:
+            from .https_proxy import HTTPSConnection
+            return {"connection": HTTPSConnection, "proxy": self.model_dump()}
         return {"proxy": {"proxy_type": self.kind, "addr": self.host, "port": self.port,
                           "rdns": True, "username": self.username or None, "password": self.password or None}}
+
+
+def parse_proxy_url(value):
+    """Parse, never fetch, an operator-supplied proxy address."""
+    value = value.strip()
+    if value.startswith(("tg://", "https://t.me/", "https://telegram.me/")):
+        return parse_mtproxy_link(value)
+    try:
+        parts = urlsplit(value)
+        if parts.scheme not in ("socks5", "socks5h", "http", "https") or parts.path not in ("", "/") or parts.query or parts.fragment:
+            raise ValueError
+        return NetworkConfig(kind="socks5" if parts.scheme.startswith("socks5") else "http",
+            host=parts.hostname or "", port=parts.port or (1080 if parts.scheme.startswith("socks5") else 443 if parts.scheme == "https" else 80),
+            username=unquote(parts.username or ""), password=unquote(parts.password or ""), tls=parts.scheme == "https")
+    except ValueError:
+        raise ValueError("Enter a tg://proxy, socks5://, http:// or https:// proxy address.") from None
 
 
 def saved_route(raw):

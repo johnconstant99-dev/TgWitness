@@ -34,7 +34,7 @@ def main():
                   return {value,roundTrip:new Date(value).toISOString()};}""", instant)
                 assert expiry == {"value": expected, "roundTrip": instant.replace("Z", ".000Z")}, (instant, expiry)
             head = store.stats()["head"]
-            expect(page.locator("#time-zone")).to_have_value("UTC")
+            expect(page.locator("#time-zone")).to_have_value("America/Los_Angeles")
             result = page.evaluate("""async () => {
                 const {createTimeFormatter} = await import('/core/time.js');
                 const t = createTimeFormatter({now: () => Date.parse('2026-10-31T15:19:22Z')});
@@ -65,8 +65,8 @@ def main():
             expect(timestamp).not_to_have_attribute("title", re.compile(r"UTC$"))
             assert store.stats()["head"] == head, "Display settings must not append journal events"
             page.reload()
-            expect(page.locator("#time-zone")).to_have_value("local")
-            assert page.evaluate("localStorage.getItem('tgwitness-time-zone')") == "local"
+            expect(page.locator("#time-zone")).to_have_value("America/Los_Angeles")
+            assert store.get_setting('ui_preferences:admin')['timezone'] == 'America/Los_Angeles'
             output = Path("build/ux-review/after/04-time")
             output.mkdir(parents=True, exist_ok=True)
             for width in (1440, 390):

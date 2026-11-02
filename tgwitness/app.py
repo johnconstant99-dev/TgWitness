@@ -677,6 +677,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         if app.state.store.get_setting("demo", False):
             raise HTTPException(409, "This is a synthetic demo. Start a separate data directory for real observation.")
 
+    def require_external(enabled):
+        if enabled and not app.state.collector.route_policy()["outside_enabled"]:
+            raise HTTPException(409, "This feature needs external requests. Allow them in Settings first.")
+
     async def perform_operation(call, *args):
         collector = app.state.collector
         client = collector.client
@@ -1663,6 +1667,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.post("/api/evidence", dependencies=[Depends(authenticate)])
     async def set_evidence(body: EvidenceMode):
         require_live()
+        require_external(body.enabled)
         store, vault = app.state.store, app.state.vault
         was = evidence_settings(store)["enabled"]
         with store.transaction():
@@ -1864,6 +1869,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.post("/api/replica", dependencies=[Depends(authenticate)])
     async def set_replica(body: ReplicaUpdate):
         require_live()
+        require_external(body.enabled)
         store, vault = app.state.store, app.state.vault
         secrets = dict(vault.read("replica"))
         if body.access_key or body.secret_key:
@@ -1894,6 +1900,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.post("/api/alerts", dependencies=[Depends(authenticate)])
     async def set_alerts(request: Request, body: AlertUpdate):
+        require_external(body.enabled)
         require_live()
         store, vault = app.state.store, app.state.vault
         saved = vault.read("alerts").get("urls", [])
@@ -2580,6 +2587,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         from .media_analysis_api import register as register_media_analysis
         register_media_analysis(app, authenticate)
         app.mount("/profiles", ProfileDispatch(app), name="profiles")
+    from .settings_hub import register as register_settings
+    register_settings(app, authenticate, require_live, operation, save_evidence, save_capture)
     from .panel_routes import register as register_panel
     from .panel_assets import PanelFiles
     static = PanelFiles(directory=Path(__file__).parent / "static")

@@ -124,7 +124,7 @@ def main():
         assert server.app.state.profiles.entries[alpha]["app"].state.collector.network_config().host == "7.7.7.7"
         for width in (1440, 390, 320):
             page.set_viewport_size({"width": width, "height": 1000})
-            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), width
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), page.evaluate("""()=>({width:innerWidth,overflow:[...document.querySelectorAll('body *')].filter(e=>e.checkVisibility()&&e.getBoundingClientRect().right>innerWidth+1).map(e=>[e.tagName,e.id,e.className,e.getBoundingClientRect().right]).slice(0,25)})""")
             page.screenshot(path=str(output / ("proxies-" + str(width) + ".png")), full_page=True)
         page.set_viewport_size({"width": 1440, "height": 1000})
         page.locator('[data-view="accounts"]').click()

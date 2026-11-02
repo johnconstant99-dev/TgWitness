@@ -8,7 +8,6 @@ import argparse
 import json
 import sys
 import tempfile
-import time
 from pathlib import Path
 
 import requests
@@ -137,81 +136,43 @@ def check_api(directory):
 
 
 def check_browser(directory, output):
-    from check_browser import RunningApp, check_layout, launch_browser, navigate_panel, reload_panel, unlock
+    from check_browser import RunningApp, answer_panel_dialog, check_layout, launch_browser, navigate_panel, unlock
     from playwright.sync_api import expect, sync_playwright
-    from tgwitness import i18n
     errors = []
     with RunningApp(directory / "panel") as server, sync_playwright() as p:
         store = server.app.state.store
         browser = launch_browser(p)
-        context = browser.new_context(viewport={"width": 1280, "height": 900}, reduced_motion="reduce")
-        page = context.new_page()
-        page.on("pageerror", lambda exc: errors.append(str(exc)))
-        unlock(page, server, start=True)
-        expect(page.locator("#view-start")).to_be_visible()
-        expect(page.locator("#setup-start")).to_be_visible()
-        check_layout(page)
-        page.screenshot(path=str(output / "setup-start-en.png"))
-        page.set_viewport_size({"width": 390, "height": 844})
-        check_layout(page)
-        page.set_viewport_size({"width": 1280, "height": 900})
-
-        page.locator('[data-setup-goal="evidence"]').click()
-        expect(page.locator("#extras-setup")).to_be_visible()
-        expect(page.locator('input[name="setup-goal"][value="evidence"]')).to_be_checked()
-        expect(page.locator('input[name="setup-size"][value="small"]')).to_be_checked()
-        expect(page.locator('input[name="setup-files"][value="media"]')).to_be_checked()
-        expect(page.locator("#setup-proposal")).to_be_visible()
-        for name in ("timestamps", "drand", "devices"):
-            expect(page.locator("#setup-" + name)).to_be_checked()
-        expect(page.locator('#setup-steps li[data-step="server"] .setup-tag')).to_have_text("Recommended")
-        scale = page.locator('#setup-scales .level-scale').first
-        expect(scale.locator(".level-name")).to_have_text("High")
-        expect(scale.locator(".level-was")).to_have_text("now: Basic")
-        page.locator("#setup-timestamps").uncheck()
-        expect(page.locator("#setup-drand")).to_be_disabled()
-        expect(page.locator("#setup-drand")).not_to_be_checked()
-        expect(scale.locator(".level-was")).to_have_count(0)
-        page.locator("#setup-timestamps").check()
-        page.locator("#setup-drand").check()
-        page.locator("#setup-devices").check()
-        page.locator('input[name="setup-place"][value="server"]').check()
-        page.locator('input[name="setup-files"][value="all"]').check()
-        expect(page.locator("#setup-facts")).to_contain_text("everything up to 1 GB each")
-        page.screenshot(path=str(output / "setup-proposal-en.png"), full_page=True)
-        for width in (390, 1440):
-            page.set_viewport_size({"width": width, "height": 1000})
-            check_layout(page)
-        page.set_viewport_size({"width": 1280, "height": 900})
-        page.locator("#setup-form button[type=submit]").click()
-        deadline = time.monotonic() + 15
-        while store.get_setting("setup", None) is None and time.monotonic() < deadline:
-            time.sleep(.1)
-        saved = store.get_setting("setup")
-        assert saved["goal"] == "evidence" and saved["place"] == "server" and saved["files"] == "all", saved
-        expect(page.locator("#setup-status")).to_contain_text("Evidence for a case")
-        expect(page.locator("#setup-skip")).to_be_hidden()
-
-        page.locator('[data-extra-close="setup"]').click()
-        expect(page.locator("#extra-setup-badge")).to_have_text("Evidence for a case")
-        expect(page.locator("#setup-overview-scales .level-scale")).to_have_count(2)
-        expect(page.locator("#setup-overview-scales .level-scale").first.locator(".level-name")).to_have_text("High")
-        page.locator(".extra-card.extra-setup").screenshot(path=str(output / "setup-card-en.png"))
-        navigate_panel(page, "start")
-        expect(page.locator("#setup-start")).to_be_hidden()
-
-        context.add_cookies([{"name": i18n.COOKIE, "value": "ru", "url": server.url}])
-        reload_panel(page)
-        expect(page.locator("#view-start")).to_be_visible()
-        navigate_panel(page, "witness")
-        words = i18n.words("ru")
-        expect(page.locator("#extra-setup-badge")).to_have_text(words["Evidence for a case"])
-        page.locator("#extras-open-setup").click()
-        expect(page.locator("#setup-scales .level-scale").first.locator("strong")).to_have_text(words["Credibility"])
-        page.screenshot(path=str(output / "setup-proposal-ru.png"), full_page=True)
+        page = browser.new_page(viewport={"width":1280,"height":900},reduced_motion="reduce")
+        page.on("pageerror",lambda exc:errors.append(str(exc)))
+        unlock(page,server,start=True)
+        expect(page.locator('#setup-start')).to_be_hidden()
+        navigate_panel(page,'settings')
+        page.locator('[data-section="goal"]').click()
+        page.locator('[data-answer="evidence"]').click()
+        expect(page.locator('dialog.panel-dialog[open]')).to_contain_text('Independent timestamps')
+        answer_panel_dialog(page,accept=False)
+        assert store.get_setting('goal_preset',None) is None
+        page.locator('[data-answer="evidence"]').click()
+        answer_panel_dialog(page)
+        expect(page.locator('[data-answer="evidence"]')).to_have_attribute('aria-pressed','true')
+        assert store.get_setting('goal_preset')['goal']=='evidence'
+        assert store.get_setting('evidence')['enabled'] and store.get_setting('evidence')['drand']
+        page.locator('[data-section="collection"]').click()
+        page.locator('[data-setting="files"] select').select_option('photos')
+        expect(page.locator('[data-setting="files"] .modified-tag')).to_have_text('Changed by you')
+        page.locator('[data-setting="files"]').get_by_role('button',name='Restore goal value').click()
+        expect(page.locator('[data-setting="files"] select')).to_have_value('all')
+        expect(page.locator('[data-setting="files"] .modified-tag')).to_have_count(0)
+        for width in (390,1280):
+            page.set_viewport_size({'width':width,'height':900});check_layout(page)
+            page.screenshot(path=str(output / f'settings-goal-{width}.png'),full_page=True)
+        page.evaluate("setLanguage('ru')")
+        expect(page.locator('#view-settings h1')).to_have_text('Настройки')
+        assert store.get_setting('ui_preferences:admin')['language']=='ru'
+        assert store.get_setting('goal_preset')['goal']=='evidence'
         browser.close()
-    assert not errors, errors
-    return "ok  browser: goal card on Start here, proposal with predicted scales, Apply, Extras card; English and Russian"
+    assert not errors,errors
+    return 'ok  browser: goal diff, cancellation, apply, manual override, restore, mobile layout and saved language'
 
 
 def main():
