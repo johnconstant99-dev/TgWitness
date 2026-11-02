@@ -10,7 +10,6 @@ from . import alerts, report, settings_hub, tuning
 from .monitoring import Monitoring, monitoring_settings
 from .recording import RecordingUpdate, save as save_recording
 from .scope import Recheck, recheck_settings
-from .store import utcnow
 
 HUB = ("files", "timestamps", "drand", "notifications", "replica", "outside", "ip")
 PARAMETERS = tuple("parameter:" + key for key in tuning.BY_KEY)
@@ -209,12 +208,13 @@ async def apply_member(app, values, group, reason):
     try:
         async with app.state.operation_lock:
             hub = {k: v for k, v in values.items() if k in HUB}
+            if settings_hub.values(app)["continuous"]:
+                settings_hub.validate_collection_scope(s)
             if hub:
                 await app.state.settings_apply({**settings_hub.values(app), **hub})
             with s.transaction():
                 if "goal" in values:
-                    s.set_setting("goal_preset", {"goal": values["goal"], "version": 1,
-                                                  "values": settings_hub.PRESETS[values["goal"]], "at": utcnow()})
+                    settings_hub.save_goal(s, values["goal"])
                 if "monitoring" in values or "recheck" in values:
                     save_recording(s, RecordingUpdate(
                         monitoring=Monitoring(**values["monitoring"]) if "monitoring" in values else None,
@@ -304,7 +304,7 @@ async def adopt(registry, group_id, body):
         if body.keys is not None and len(keys) != len(body.keys):
             raise HTTPException(409, "The group does not share this setting.")
         members = set(registry.members(group_id))
-        applied, failed = [], []
+        applied, failed, kept_own = [], [], []
         for profile_id in body.profiles:
             entry = registry.entries.get(profile_id)
             if profile_id not in members or entry is None:
@@ -314,14 +314,20 @@ async def adopt(registry, group_id, body):
                 continue
             current = read(entry["app"], keys)
             values = {k: shared[k] for k in keys if current[k] != shared[k]}
+            if "route" in values:
+                kept_own.append({"id": profile_id, "label": entry["label"], "keys": ["route"]})
+            values = adoptable(values)
+            if not values:
+                continue
             error = await apply_member(entry["app"], values, group, "returned to the group value")
             if error:
                 failed.append({"id": profile_id, "label": entry["label"], "error": error})
             else:
                 applied.append(profile_id)
         registry.app.state.store.append("profile_group.settings_adopted", {
-            "group_id": group_id, "group": group["label"], "keys": keys, "applied": applied, "failed": failed})
-        return {"applied": applied, "failed": failed, **group_view(registry, group_id)}
+            "group_id": group_id, "group": group["label"], "keys": keys, "applied": applied,
+            "failed": failed, "kept_own": kept_own})
+        return {"applied": applied, "failed": failed, "kept_own": kept_own, **group_view(registry, group_id)}
 
 
 def migrate(registry):

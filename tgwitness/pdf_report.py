@@ -1587,9 +1587,17 @@ def sign(buffer, key, certificate, seal_for):
     if start < 0 or buffer.find(placeholder, start + 1) >= 0:
         raise ValueError("The PDF has no single signature placeholder")
     end = start + len(placeholder)
-    at = buffer.find(BYTE_RANGE_PLACEHOLDER)
-    if not 0 <= at < start:
+    # The Info dictionary may contain the same literal text in a case title.
+    # Only replace the property inside our generated indirect signature object.
+    objects = list(re.finditer(rb"(?:^|\n)\d+ 0 obj\r?\n", buffer[:start]))
+    object_start = objects[-1].end() if objects else -1
+    object_end = buffer.find(b"\nendobj", end)
+    prefix = b"/ByteRange " + BYTE_RANGE_PLACEHOLDER
+    at = buffer.find(prefix, object_start, start) if object_start >= 0 else -1
+    if at < 0 or object_end < 0 or b"/Type /Sig" not in buffer[end:object_end] \
+            or buffer.find(prefix, at + 1, start) >= 0:
         raise ValueError("The PDF has no byte range placeholder")
+    at += len(b"/ByteRange ")
     buffer[at:at + len(BYTE_RANGE_PLACEHOLDER)] = b"[%010d %010d %010d %010d]" % (0, start, end, len(buffer) - end)
     digest = hashlib.sha256(bytes(buffer[:start]) + bytes(buffer[end:])).digest()
     der_certificate = certificate.public_bytes(serialization.Encoding.DER)

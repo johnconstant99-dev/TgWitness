@@ -4,6 +4,7 @@
 .hub-summary:hover{border-color:var(--accent);transform:translateY(-2px)}
 .hub-summary strong{font-size:17px}
 .hub-arrow{position:absolute;inset-inline-end:20px;bottom:18px}
+[dir=rtl] .hub-arrow{transform:scaleX(-1)}
 .hub-search{width:100%;max-width:720px}
 .hub-detail{padding:28px;border:1px solid var(--border);border-radius:18px;background:var(--surface);margin:24px 0}
 .hub-detail h2{margin:22px 0}

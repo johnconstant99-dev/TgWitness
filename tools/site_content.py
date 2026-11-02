@@ -10,6 +10,10 @@ GUIDES = {
     "exports": ("Export and verify", "Export captured Telegram history, verify signatures and compare a journal with a checkpoint retained by an independent witness.", "evidence signature hash integrity verify zip fingerprint checkpoint s3 backup restore recovery object lock", "docs/EVIDENCE.md"),
     "concepts": ("See how evidence works", "Follow a message from capture to checkpoint. Change a sample record, recalculate its SHA-256 chain and see what a retained checkpoint detects.", "visual animation diagram formula sha256 hash chain canonical signature tamper learn", "docs/HOW-IT-WORKS.md"),
     "cases": ("Investigate across all chats", "Run an end-to-end Telegram investigation across channels, groups, private chats and bots: whole-account capture, history, people, links, files, timelines and verified evidence.", "use cases scenarios investigation all chats whole account history dossier people links files timeline case package", "docs/INVESTIGATION.md"),
+    "case-board": ("Build a Case Board", "Collect saved observations, exact highlights and action slices on a private board, discuss them with your team and present a collection.", "case board bookmarks highlights slices collections comments presentation", "docs/CASE-BOARD.md"),
+    "reports": ("Design a report", "Choose report data, one of eight designs and the contents, then preview and export HTML, signed PDF or a complete evidence package.", "report studio design contents preview PDF HTML charts transcript", "docs/CASE_REPORTS.md"),
+    "handover": ("Prepare a sharing copy", "Choose the records and fields a recipient can receive, inspect the finished copy and verify its signed manifest and source journal boundary.", "sharing copy minimized handover disclosure redaction privacy recipient verification", "docs/EVIDENCE.md"),
+    "groups": ("Manage a group of accounts", "Compare group workspaces, find a source, review observation periods and apply shared settings with per-account exceptions.", "group accounts workspaces source coverage observation shared settings overrides", "docs/OPERATIONS.md"),
     "security": ("Keep it secure", "See where sessions, keys and evidence live, what leaves your machine, what the protections cover and how to harden an installation.", "security threat model secrets vault token encryption hardening privacy vulnerability report", "docs/SECURITY-MODEL.md"),
     "access": ("Share a case", "Give reviewers and analysts access to selected accounts and chats, with separate permissions, session limits and revocable tokens.", "access permissions roles scope reviewer analyst token sessions IP expiry revoke", "docs/ACCESS.md"),
     "witness": ("Set up a witness bot", "Publish signed journal checkpoints to your Telegram channel with a separate witness, its own key and read-only collector access.", "bot botfather telegram channel continuity checkpoint independent witness", "docs/WITNESS.md"),
@@ -19,8 +23,9 @@ GUIDES = {
 
 GROUPS = (
     ("First steps", "Your first captured message", ("start", "dedicated-account", "accounts", "proxies", "exports", "capture")),
-    ("Understand the evidence", "Learn by trying it", ("concepts", "cases", "security")),
-    ("Go further", "Add only what you need", ("archive", "access", "witness", "server", "troubleshooting")),
+    ("Investigation & reporting", "From saved records to a shared report", ("cases", "case-board", "reports", "handover", "groups")),
+    ("Understand the evidence", "Learn by trying it", ("concepts", "security", "witness")),
+    ("Go further", "Add only what you need", ("archive", "access", "server", "troubleshooting")),
 )
 
 
@@ -40,7 +45,9 @@ REFERENCE = {
     "collection": ("How collection works", "Observation scope, live updates, rechecks, attachments, own actions and what a gap means, record by record.", "scope folder account recheck attachments gaps updates floodwait", "docs/COLLECTION.md"),
     "operations": ("Workflows and operations", "Daily operation of the panel: modes, monitoring categories, parameters, notifications, exports, backup and capacity.", "panel operations parameters notifications backup restore capacity", "docs/OPERATIONS.md"),
     "investigation": ("Investigation mode", "Whole-account investigations across channels, groups, private chats and bots, from scope to a verified case package.", "investigation whole account bots people timeline case", "docs/INVESTIGATION.md"),
-    "features": ("Features and limits", "What TgWitness implements today, what the Telegram platform limits and what remains future work.", "features product status roadmap limits platform", "docs/PRODUCT.md"),
+    "case-board": ("Case Board reference", "Bookmarks, exact highlights, action slices, discussions, scoped access and the signed annotation history used by Case Board.", "case board annotations revisions highlights slices permissions collections", "docs/CASE-BOARD.md"),
+    "case-reports": ("Report configuration and verification", "Report filters, eight designs, contents presets, saved change histories and the assessment included in signed exports.", "report configuration designs assessment trust verification signed PDF HTML", "docs/CASE_REPORTS.md"),
+    "features": ("Features and limits", "The current collection model, multi-account workflows, exports and operational boundaries of TgWitness.", "features product status collection accounts exports limits platform", "docs/PRODUCT.md"),
     "how-it-works": ("How the evidence works", "Hash chain, signatures, checkpoints and witnesses explained with the exact formulas the verifier uses.", "hash chain sha256 ed25519 canonical json checkpoint formula", "docs/HOW-IT-WORKS.md"),
     "evidence": ("Evidence format", "Contents of the signed ZIP, record kinds, process receipts, people profiles, off-site copies and offline verification.", "evidence zip manifest events jsonl verify dossier replica s3", "docs/EVIDENCE.md"),
     "witness": ("Independent witness", "Run a witness with its own key and bot, publish signed checkpoints to a channel and check exports against it.", "witness bot channel checkpoint tgw1 verify continuity", "docs/WITNESS.md"),
@@ -54,8 +61,8 @@ REFERENCE = {
 REFERENCE_GROUPS = (
     ("Set up", ("quickstart", "accounts", "access", "connection", "deployment")),
     ("Collect", ("collection", "history", "operations", "investigation", "features")),
-    ("Archive & integrations", ("analysis", "mcp", "media-analysis", "webhooks")),
-    ("Evidence", ("how-it-works", "evidence", "witness", "timestamp")),
+    ("Archive & integrations", ("case-board", "analysis", "mcp", "media-analysis", "webhooks")),
+    ("Evidence", ("how-it-works", "case-reports", "evidence", "witness", "timestamp")),
     ("Security & project", ("security", "architecture", "verification", "license", "notice", "changelog")),
 )
 
@@ -76,6 +83,6 @@ LABELS = {
     "wiki_intro": "Every document of the project, rendered here with its diagrams. The guides are the short path; these pages hold every detail.",
 }
 
-NEXT = {"archive": "exports", "capture": "exports", "dedicated-account": "accounts", "start": "accounts", "accounts": "exports", "access": "security", "proxies": "accounts", "exports": "concepts",
-        "concepts": "cases", "cases": "security", "security": "start", "witness": "server",
+NEXT = {"archive": "case-board", "capture": "exports", "dedicated-account": "accounts", "start": "accounts", "accounts": "exports", "access": "security", "proxies": "accounts", "exports": "reports",
+        "concepts": "cases", "cases": "case-board", "case-board": "reports", "reports": "handover", "handover": "access", "groups": "cases", "security": "start", "witness": "server",
         "server": "troubleshooting", "troubleshooting": "start"}

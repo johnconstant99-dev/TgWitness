@@ -380,7 +380,8 @@ class Transport:
             def identity(value):
                 item = getattr(value, "document", None) or getattr(value, "photo", None) or value
                 return type(item).__name__, getattr(item, "id", None), getattr(item, "size", None)
-            if refreshed is None or identity(refreshed) != identity(media):
+            refreshed = next((item for item in attachments(refreshed) if identity(item) == identity(media)), None)
+            if refreshed is None:
                 raise ValueError("Attachment changed or became unavailable while refreshing its file reference.")
             stream.reset()
             return await client.download_media(refreshed, file=stream, progress_callback=progress)

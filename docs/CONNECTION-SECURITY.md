@@ -238,6 +238,30 @@ request; the other modes permit Direct. External requests can be disabled. An ex
 configured feed-download proxy remains a separate operator override.
 The independent witness service keeps its own route.
 
+Public-only external HTTP requests through SOCKS5 or HTTP proxies resolve the
+destination with Cloudflare DNS over HTTPS at `https://1.1.1.1/dns-query`, through
+that same proxy. Only the hostname and A/AAAA query types go to the resolver;
+service URLs, credentials and notification contents are not included. TLS verifies
+the resolver certificate for its IP address. Both address families are checked,
+and any private, loopback, link-local or reserved answer rejects the request.
+Connections use a checked numeric address while retaining the service's original
+HTTP Host and TLS certificate name. Notification HTTP forwarding and CONNECT
+requests use the same destination checks. DNS failure stops the request without
+local destination DNS or a direct fallback. Successful answers are cached in
+memory per proxy route for at most 30 seconds and no longer than their DNS TTL;
+the cache is limited to 128 entries. The proxy hostname itself may use local DNS.
+SOCKS and CONNECT failures can try another checked address before sending the
+service request body. Plain HTTP forwarding reports a failed request without
+automatically replaying its body through another address.
+
+For operator-managed private services, the existing server environment setting
+`TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1` permits private destinations and keeps
+proxy-side hostname resolution. It cannot be enabled from the panel. Public-only
+mode rejects `.onion` destinations before querying the public resolver; Tor onion
+services require that explicit private-destination setting and a suitable proxy.
+This DNS behavior applies to external HTTP operations, not Telegram's transport.
+Cloudflare documents the [JSON DNS endpoint](https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/make-api-requests/dns-json/).
+
 <details>
 <summary><strong>Automatic pool parameters</strong></summary>
 

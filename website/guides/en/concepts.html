@@ -1,6 +1,16 @@
 <p class="guide-outcome">A message can change. The record of what you observed should remain checkable.</p>
 <p>Explore two small experiments below. They use fictional messages, stay in your browser and never connect to Telegram.</p>
 
+<h2 id="telegram-export">From a chat export to a verifiable record</h2>
+<p><a href="https://telegram.org/blog/export-and-more">Telegram Desktop exports</a> save available chat history and media as HTML or JSON for offline use. TgWitness adds an ongoing journal of received changes, signatures on observations and exports, and checkpoints that recipients can compare independently.</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">Task</th><th scope="col">Telegram Desktop export</th><th scope="col">TgWitness</th></tr></thead><tbody>
+<tr><td>Read saved conversations</td><td>HTML or JSON with selected media</td><td>Saved chats, searchable journal and offline reports</td></tr>
+<tr><td>Follow a change over time</td><td>The history available when exported</td><td>Earlier captured versions, later edits and deletion observations retained together</td></tr>
+<tr><td>Check files after handover</td><td>Standard HTML/JSON export files are unsigned</td><td>Signed manifest, per-record signatures and sealed HTML/PDF/JSON reports checked against a trusted collector key</td></tr>
+<tr><td>Compare with an earlier retained state</td><td>Keep a separate reference copy or hash</td><td>Signed checkpoints, a separate witness and optional external timestamps</td></tr>
+</tbody></table></div>
+<p>The file-signing comparison is based on the <a href="https://github.com/telegramdesktop/tdesktop/tree/768d47cda6c7f447c10a25d1f363279493a90ed7/Telegram/SourceFiles/export/output">Telegram Desktop export writers</a> reviewed on 2 November 2026. TgWitness signs with the collector’s key; the checks below show how a recipient uses it.</p>
+
 <h2 id="journey">One message, three observations</h2>
 <p>When Telegram delivers a new message, an edit and a deletion notice, the collector appends three separate observations. The edit does not replace the first record. A deletion notice does not erase it.</p>
 <figure class="lab journey-lab" data-lab="journey" aria-labelledby="journey-caption">
@@ -50,5 +60,5 @@
 
 <h2 id="layers">Three questions, three different checks</h2>
 <div class="evidence-layers"><a href="@@GUIDE_EXPORTS@@"><span>01 / INTEGRITY</span><strong>Did this record change?</strong><p>Verify hashes and signatures against a separately trusted key.</p></a><a href="@@GUIDE_WITNESS@@"><span>02 / CONTINUITY</span><strong>What was retained earlier?</strong><p>Compare a signed export with checkpoints kept by a separate witness.</p></a><a href="@@GUIDE_CASES@@"><span>03 / DELIVERY</span><strong>Did these test events arrive?</strong><p>Match controlled send, edit and delete actions against each account’s journal.</p></a></div>
-<p class="callout">A matching hash chain answers an integrity question. It does not establish complete Telegram delivery, the truth of a message or an independently trusted observation time.</p>
+<p class="callout">Use signatures to check the retained records, checkpoints to compare an earlier boundary, and controlled delivery tests to measure collection. Each answers a specific question. <a href="@@REF_EVIDENCE@@#verification-scope">Read the verification scope and trust assumptions.</a></p>
 <p>Follow the <a href="@@GUIDE_CASES@@">whole-account investigation</a> from acquisition to case package.</p>

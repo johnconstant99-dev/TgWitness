@@ -1,0 +1,36 @@
+<p class="guide-outcome">Manage several collecting accounts together while keeping each account's records and signing identity distinct.</p>
+<p>An account group brings connection status, observation controls, shared settings and exports into one working view. It is useful when several accounts cover the same investigation or need a consistent operating setup.</p>
+
+<h2 id="overview">Open the group overview</h2>
+<p>In <strong>Accounts</strong>, open the group. Each account shows its observation state, connection route, latest measured route latency when a current check succeeded, and last saved message. <strong>Needs attention</strong> links to the accounts that need work; <strong>Fix</strong> opens the relevant workspace and control.</p>
+<p><strong>Start all</strong> and <strong>Pause all</strong> act on eligible accounts after confirmation. <strong>Group settings</strong> shares selected settings; accounts with their own values keep them until you choose to replace them.</p>
+
+<section class="workflow-lab" data-workflow="groups" aria-labelledby="groups-example-title">
+  <h3 id="groups-example-title">Review a route change across a group</h3>
+  <p class="sample-tag">Synthetic example · illustrative checks and outcomes</p>
+  <ol class="workflow-steps">
+    <li data-workflow-step><strong>Select.</strong> Choose the group and review which accounts will change.</li>
+    <li data-workflow-step><strong>Prepare.</strong> Keep an account's own route when it should remain separate.</li>
+    <li data-workflow-step><strong>Check.</strong> Test the proposed connection and inspect the measured results.</li>
+    <li data-workflow-step><strong>Apply.</strong> Recheck before saving and review the outcome for each account.</li>
+  </ol>
+  <div data-workflow-scene>
+    <article class="workflow-node" data-workflow-node="0"><h4>Case team</h4><p>Channel collector · Group collector · Reference account</p><p>3 separate workspaces</p></article>
+    <article class="workflow-node" data-workflow-node="1"><h4>Reviewed selection</h4><p>2 accounts take the proposed route.</p><p>Reference account keeps its own route.</p></article>
+    <article class="workflow-node" data-workflow-node="2"><h4>Preparation checks</h4><p>Channel collector: Telegram transport 84 ms</p><p>Group collector: Telegram transport 91 ms</p><p>These numbers are fictional measurements for the example.</p></article>
+    <article class="workflow-node" data-workflow-node="3"><h4>Application results</h4><p>Channel collector: route saved, observation resumed.</p><p>Group collector: recheck failed, previous settings restored.</p><p>Reference account: own route retained.</p></article>
+  </div>
+  <div data-workflow-controls hidden><button type="button" data-workflow-play><span data-workflow-play-label>Play example</span><span data-workflow-pause-label hidden>Pause</span></button><button type="button" data-workflow-next>Next step</button><button type="button" data-workflow-reset>Reset example</button><span data-workflow-progress></span></div>
+  <p class="workflow-status" data-workflow-status role="status" aria-live="polite"></p>
+</section>
+
+<h2 id="route">Change the route with a review step</h2>
+<ol><li>Select <strong>Change the group route</strong>, then choose the connection type and settings.</li><li>Choose <strong>Review selection</strong>. Review the listed accounts and their individual route overrides.</li><li>Select <strong>Prepare and check</strong>. The check uses a fresh Telegram transport; supported HTTP routes also report their HTTPS exit check.</li><li>Select <strong>Apply checked connection</strong> and inspect each account's result. Previously running observation resumes where application succeeds; idle accounts remain idle.</li></ol>
+<p>Latency describes the measured Telegram connection setup. An exit-IP check describes that route at the recorded check time. Account authorization and observation health have their own indicators; a group change can finish with different outcomes per account.</p>
+
+<h2 id="shared-chats">Use overlapping access</h2>
+<p><strong>Chats several accounts see</strong> shows shared sources and the available workspace-observation coverage. Eligible channels and supergroups can use <strong>Export with … accounts</strong> to divide one chat's history acquisition. Private chats and ordinary groups stay with the starting account because their message numbers belong to an account's history.</p>
+
+<h2 id="export-group">Export the group as a package</h2>
+<p><strong>Export group</strong> creates one ZIP containing each account's signed export and a signed list of those files. The original workspace identities and fingerprints remain available for verification. Build a cross-account narrative using those references; a single merged timeline is still assembled separately.</p>
+<p>Continue with <a href="@@GUIDE_REPORTS@@">report design</a>, <a href="@@GUIDE_CASE_BOARD@@">a Case Board within a workspace</a>, or <a href="@@GUIDE_EXPORTS@@">export verification</a>.</p>

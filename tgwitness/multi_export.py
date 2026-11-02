@@ -9,8 +9,8 @@ another. Telegram flood limits apply per account, so throughput grows with accou
 Rules followed: each account uses only its existing client (a second connection on the
 same authorization key makes Telegram revoke the session: AUTH_KEY_DUPLICATED), and the
 same Telegram account can never be in two workspaces. Ranges only make sense where
-message numbers are per chat — channels and supergroups. Ordinary groups number messages
-per account, so they are exported by the starting account alone.
+message numbers are per chat — channels and supergroups. Ordinary groups and private chats
+number messages per account, so they are exported by the starting account alone.
 
 Integrity: a range's SHA-256 is computed while its messages arrive. Before signing, every
 range file is re-read and must reproduce that hash. Each account signs, with its own key,
@@ -22,6 +22,7 @@ import json
 import secrets
 import time
 from contextlib import suppress
+from telethon.tl import types
 
 from . import chat_export
 from . import replica
@@ -75,7 +76,7 @@ class MultiExport:
             total, newest = getattr(latest, "total", None) or 0, (latest[0].id if latest else 0)
             basic_group = info.get("kind") == "group"
             chosen = [lead_id] + [p for p in dict.fromkeys(profile_ids) if p != lead_id]
-            if basic_group:
+            if not isinstance(entity, (types.Channel, types.ChannelForbidden)):
                 chosen = [lead_id]
             workers = []
             for profile_id in chosen:

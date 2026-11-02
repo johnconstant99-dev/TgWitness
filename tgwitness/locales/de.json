@@ -6011,5 +6011,23 @@
 "Export group": "Gruppe exportieren",
 "Fix": "Korrektur",
 "Share this value": "Diesen Wert teilen",
-"Share this value instead": "Teilen Sie stattdessen diesen Wert"
+"Share this value instead": "Teilen Sie stattdessen diesen Wert",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Ein ausgewählter Anhang fehlt. Stellen Sie die Datei wieder her und erstellen Sie die Übergabe anschließend erneut, oder lassen Sie Anhänge explizit weg.",
+"Request body timed out": "Zeitüberschreitung beim Request-Body",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "Telegram-Aktionen über das Bedienfeld sind für das Ziel „Beweismaterial für einen Fall“ deaktiviert.",
+"This chat is outside the permitted scope.": "Dieser Chat liegt außerhalb des zulässigen Bereichs.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Dieser Export überschreitet das Limit für den Cache der gespeicherten Kopien. Laden Sie ihn jetzt herunter; bereiten Sie ihn später erneut vor.",
+"This export is not open to this access.": "Dieser Export ist für diesen Zugriff nicht freigegeben.",
+"This prepared export is unavailable.": "Dieser vorbereitete Export ist nicht verfügbar.",
+"Too many pending request bodies. Try again shortly.": "Zu viele ausstehende Anfrageinhalte. Bitte versuchen Sie es in Kürze erneut.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Onion-Ziele erfordern die Einstellung TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 auf dem Server; bei ausschließlich öffentlichen Anfragen können die Zieladressen nicht überprüft werden.",
+"Invalid destination hostname.": "Ungültiger Ziel-Hostname.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "Das öffentliche Ziel-DNS konnte über den konfigurierten Proxy nicht überprüft werden. Es wurde kein Versuch unternommen, eine direkte Verbindung herzustellen.",
+"Workspace observation: no interruptions in the available period": "Arbeitsbereichsüberwachung: keine Unterbrechungen während des verfügbaren Zeitraums",
+"No workspace observation in the last {days} days": "Keine Arbeitsbereichsüberwachung in den letzten {days} Tagen",
+"Workspace observation: {n} interruption in the available period": "Arbeitsbereichsüberwachung: {n} Unterbrechung im verfügbaren Zeitraum",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "Arbeitsbereichsüberwachung: {n} Unterbrechung im verfügbaren Zeitraum",
+"other": "Arbeitsbereichsüberwachung: {n} Unterbrechungen im verfügbaren Zeitraum"
+}
 }

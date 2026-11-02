@@ -5988,5 +5988,23 @@
 "Export group": "Exportar grupo",
 "Fix": "Corrigir",
 "Share this value": "Compartilhar este valor",
-"Share this value instead": "Compartilhe este valor em vez disso"
+"Share this value instead": "Compartilhe este valor em vez disso",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Falta um anexo selecionado. Recupere o arquivo e, em seguida, crie a transferência novamente ou omita explicitamente os anexos.",
+"Request body timed out": "O tempo limite do corpo da solicitação expirou",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "As ações do Telegram no painel estão desativadas para o objetivo “Provas para um caso”.",
+"This chat is outside the permitted scope.": "Este chat está fora do escopo permitido.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Esta exportação excede o limite do cache de cópias salvas. Baixe agora; prepare novamente mais tarde.",
+"This export is not open to this access.": "Esta exportação não está disponível para este tipo de acesso.",
+"This prepared export is unavailable.": "Esta exportação preparada não está disponível.",
+"Too many pending request bodies. Try again shortly.": "Há muitos corpos de solicitação pendentes. Tente novamente em breve.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Destinos Onion exigem que TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 esteja definido no servidor; solicitações exclusivamente públicas não podem verificar seus endereços de destino.",
+"Invalid destination hostname.": "Nome de host de destino inválido.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "Não foi possível verificar o DNS de destino público por meio do proxy configurado. Não foi tentada nenhuma conexão direta.",
+"Workspace observation: no interruptions in the available period": "Observação da área de trabalho: sem interrupções durante o período disponível",
+"No workspace observation in the last {days} days": "Nenhuma observação da área de trabalho nos últimos {days} dias",
+"Workspace observation: {n} interruption in the available period": "Observação da área de trabalho: {n}a interrupção no período disponível",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "Observação da área de trabalho: {n}a interrupção no período disponível",
+"other": "Observação da área de trabalho: {n} interrupções no período disponível"
+}
 }

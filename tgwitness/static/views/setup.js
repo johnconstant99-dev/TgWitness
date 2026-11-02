@@ -83,7 +83,9 @@ export function renderScales(box, data, {tr, node, after = null, compact = false
 export function createSetup(context) {
   const {root, tr, json, node, toast, may, getState, answered, openExtra} = context;
   const form = root.querySelector("#setup-form"), find = id => root.querySelector("#" + id);
-  let data = null, wanted = null, edited = false;
+  let data = null, wanted = null, edited = false, generation = 0, loadSequence = 0;
+  const owner = () => ({generation, profile: getState().profile, revision: getState().workspaceRevision});
+  const current = who => who.generation === generation && who.profile === getState().profile && who.revision === getState().workspaceRevision;
   const pick = name => form.querySelector(`input[name="setup-${name}"]:checked`)?.value || null;
   const choose = (name, value) => {
     const input = form.querySelector(`input[name="setup-${name}"][value="${value}"]`);
@@ -164,36 +166,46 @@ export function createSetup(context) {
 
   // A reload that lands after the person changed an answer keeps the answers and refreshes the rest.
   async function load() {
-    const first = !data;
-    data = await json("setup");
+    const first = !data, who = owner(), sequence = ++loadSequence;
+    const loaded = await json("setup", undefined, {profile: who.profile});
+    if (!current(who) || sequence !== loadSequence) return;
+    data = loaded;
     if (edited && !first) update(); else render();
     return data;
   }
 
   form.addEventListener("change", event => {
+    if (!data) return;
     edited = true;
     if (event.target.name === "setup-goal") { wanted = event.target.value; preset(wanted); }
     update();
   });
   form.addEventListener("submit", async event => {
     event.preventDefault();
+    if (!data || !allowed()) return;
+    const who = owner();
     const button = event.submitter; if (button) button.disabled = true;
     try {
-      const result = await json("setup", answers());
+      const result = await json("setup", answers(), {profile: who.profile});
+      if (!current(who)) return;
       data = result; wanted = null; edited = false; answered();
       render();
       toast(result.changed.length ? tr("Settings applied for: {goal}.", {goal: goalName(tr, result.saved.goal)})
         : tr("Saved. The current settings already match."));
-    } catch (error) { toast(error.message, true); }
-    finally { if (button) button.disabled = !allowed(); }
+    } catch (error) { if (current(who) && error.name !== 'StaleView') toast(error.message, true); }
+    finally { if (button && current(who)) button.disabled = !allowed(); }
   });
   find("setup-skip").addEventListener("click", async () => {
-    try { data = await json("setup/skip", {}); edited = false; answered(); render(); openExtra(null); }
-    catch (error) { toast(error.message, true); }
+    const who = owner();
+    try { const result = await json("setup/skip", {}, {profile: who.profile});
+      if (!current(who)) return;
+      data = result; edited = false; answered(); render(); openExtra(null); }
+    catch (error) { if (current(who) && error.name !== 'StaleView') toast(error.message, true); }
   });
 
   return {
     load, render, goalName: goal => goalName(tr, goal),
+    resetSession() { generation++;loadSequence++;data = null;wanted = null;edited = false; },
     start(goal) { wanted = goal; edited = false; if (data) render(); },
     get data() { return data; },
   };

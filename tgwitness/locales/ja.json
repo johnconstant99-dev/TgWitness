@@ -5952,5 +5952,22 @@
 "Export group": "グループのエクスポート",
 "Fix": "修正",
 "Share this value": "この値を共有する",
-"Share this value instead": "代わりにこの値を共有する"
+"Share this value instead": "代わりにこの値を共有する",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "選択した添付ファイルが見つかりません。ファイルを復元してから再度「ハンドオーバー」を作成するか、添付ファイルを明示的に除外してください。",
+"Request body timed out": "リクエスト本文のタイムアウトが発生しました",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "「事件の証拠」という収集目標については、パネルからのTelegram操作は無効になっています。",
+"This chat is outside the permitted scope.": "このチャットは許可された範囲外です。",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "このエクスポートは、保存済みコピーのキャッシュ制限を超えています。今すぐダウンロードし、後で再度準備してください。",
+"This export is not open to this access.": "このエクスポート機能は、このアクセス権限では利用できません。",
+"This prepared export is unavailable.": "このエクスポート設定は利用できません。",
+"Too many pending request bodies. Try again shortly.": "保留中のリクエスト本文が多すぎます。しばらくしてから再度お試しください。",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Onion 宛先を利用するには、サーバー側で TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 を設定する必要があります。パブリック宛先のみのリクエストでは、宛先アドレスを検証できません。",
+"Invalid destination hostname.": "宛先のホスト名が不正です。",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "設定されたプロキシを介して、パブリック宛先 DNS を確認できませんでした。直接接続は試みられませんでした。",
+"Workspace observation: no interruptions in the available period": "ワークスペースの監視：利用可能期間中は中断なし",
+"No workspace observation in the last {days} days": "過去{days}日間、ワークスペースの監視は行われていません",
+"Workspace observation: {n} interruption in the available period": "ワークスペースの監視：利用可能期間中に{n}回の中断が発生しました",
+"Workspace observation: {n} interruptions in the available period": {
+"other": "ワークスペースの監視：利用可能期間中に{n}回の中断が発生しました"
+}
 }

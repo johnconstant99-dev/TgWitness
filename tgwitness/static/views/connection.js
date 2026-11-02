@@ -2,7 +2,7 @@
 export function createConnectionView({root, tr, json, state, refreshStatus, askConfirm}) {
   const get = id => root.querySelector('#' + id);
   const el = (tag, text, cls) => { const n = document.createElement(tag); if(text)n.textContent=text; if(cls)n.className=cls; return n; };
-  let generation=0, timer=null, data=null, draft=null, plan=null, mode='warp', visible=false, pending=null;
+  let generation=0, draftRevision=0, timer=null, data=null, draft=null, plan=null, mode='warp', visible=false, pending=null;
   const labels = {direct:tr('Direct'),vpn:tr('VPN'),proxy:tr('My proxy'),mtproxy:tr('Public MTProto'),warp:tr('WARP')};
   const routeName=value=>({mtproxy_auto:tr('Public MTProto'),socks5:tr('SOCKS5 proxy'),http:tr('HTTP proxy')}[value]||labels[value]||value);
   const notes = {
@@ -13,7 +13,7 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
     warp:tr('Run a local WARP tunnel for this account. TgWitness manages it inside its data folder using wgcf and wireproxy, an unofficial integration. No system VPN or driver is installed.'),
   };
   function status(text, error=false){get('connect-progress').textContent=text;get('connect-progress').classList.toggle('error',error);}
-  function invalidate(){draft=null;plan=null;status('');get('connect-prepare').hidden=true;get('connect-apply').hidden=true;get('connect-continue').hidden=true;get('connect-review').replaceChildren();}
+  function invalidate(){draftRevision++;draft=null;plan=null;status('');get('connect-prepare').hidden=true;get('connect-apply').hidden=true;get('connect-continue').hidden=true;get('connect-review').replaceChildren();}
   function choose(value){
     mode=value;invalidate();
     for(const button of root.querySelectorAll('[data-connect-mode]')){
@@ -115,6 +115,7 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
   }
   for(const b of root.querySelectorAll('[data-connect-mode]'))b.addEventListener('click',()=>choose(b.dataset.connectMode));
   get('connect-fields').addEventListener('input',invalidate);
+  get('connect-fields').addEventListener('change',invalidate);
   get('connect-scope').addEventListener('change',()=>{
     get('connect-group-wrap').hidden=get('connect-scope').value!=='group';
     get('connect-keep-wrap').hidden=get('connect-scope').value==='account';
@@ -134,19 +135,26 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
     }catch{status(tr('Enter a SOCKS5 or HTTP proxy URL with a port.'),true);}
   });
   get('connect-preview').addEventListener('click',e=>action(e.currentTarget,async stamp=>{
-    const body=readDraft(),preview=await json('connection/preview',body,{root:true});
-    if(stamp!==generation)return;draft=body;rows(preview.rows);get('connect-prepare').hidden=false;
+    const revision=draftRevision,body=readDraft(),preview=await json('connection/preview',body,{root:true});
+    if(stamp!==generation||revision!==draftRevision)return;draft=body;rows(preview.rows);get('connect-prepare').hidden=false;
     get('connect-step').textContent=tr('2. Prepare and check');
     status(tr('Review this selection. Preparing checks the new route while the saved connection keeps working.'));
   }));
   get('connect-prepare').addEventListener('click',e=>action(e.currentTarget,async stamp=>{
-    if(!draft)return;await json('connection/prepare',draft,{root:true});
-    if(stamp!==generation)return;draft=null;get('connect-wireguard').value='';get('connect-password').value='';get('connect-secret').value='';await load();
+    if(!draft)return;
+    if(JSON.stringify(draft)!==JSON.stringify(readDraft())){invalidate();return;}
+    const body=draft;setBusy(true);
+    try{
+      await json('connection/prepare',body,{root:true});
+      if(stamp!==generation)return;draft=null;get('connect-wireguard').value='';get('connect-password').value='';get('connect-secret').value='';await load();
+    }catch(error){if(stamp===generation)setBusy(false);throw error;}
   }));
   get('connect-apply').addEventListener('click',e=>action(e.currentTarget,async stamp=>{
     if(!plan)return;
+    const checkedPlan=plan,revision=draftRevision;
     if(!await askConfirm(tr('Apply the checked routes? Active observation pauses during the switch and resumes if the connection succeeds. History downloads remain paused. External requests will use this route or be disabled for MTProto.'),{confirmText:tr('Apply connection')}))return;
-    if(stamp!==generation)return;await json('connection/apply',{plan},{root:true});if(stamp===generation)await load();
+    if(stamp!==generation||revision!==draftRevision||checkedPlan!==plan)return;
+    await json('connection/apply',{plan:checkedPlan},{root:true});if(stamp===generation)await load();
   }));
   get('connect-check').addEventListener('click',e=>action(e.currentTarget,async stamp=>{
     status(tr('Checking the current connection…'));const check=await json('connection/check',{});

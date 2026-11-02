@@ -1,5 +1,6 @@
 // First run and Settings edit the same server records. Secrets stay in the existing auth forms.
 import {createGroupSettings} from './group-settings.js?v=1';
+import {accountState} from '../components/account-state.js';
 
 export function createSettingsHub(ctx) {
   const {root, wizardRoot, state, json, tr, node, toast, navigate, askConfirm, $, refreshStatus} = ctx;
@@ -12,12 +13,13 @@ export function createSettingsHub(ctx) {
     parameters:'expert','system-log':'expert',integrations:'expert',sealed:'expert'};
   let data=null, prefs=null, draft=null, section=null, generation=0, connectionBusy=false, checkTimer=null, statusTimer=null;
   let dialogs=null, moved=[], query='', reveal=new Set(), editing=false;
-  let autoTried=false, routeDirty=false;
+  let autoTried=false, routeDirty=false, checkFailure=null;
   // After Start: the live check of the four collector parts. visited bounds browser Forward to steps already seen.
   let live=null, liveTimer=null, visited=0, recordedStep=null, shownSession=null;
   let groupScope=null;
   let preferencesQueue=Promise.resolve(), draftQueue=Promise.resolve(), preferencesSequence=0, draftSequence=0, checkSequence=0;
   const owner=()=>({generation,profile:state.profile,token:state.token,revision:state.workspaceRevision});
+  const signedIn=()=>{const account=accountState(state.status||{});return account.hasSession&&!account.needsSignIn;};
   const current=who=>who.generation===generation&&who.profile===state.profile&&who.token===state.token&&who.revision===state.workspaceRevision;
   function requireOwner(who){
     if(!current(who))throw ctx.staleView();
@@ -145,14 +147,16 @@ export function createSettingsHub(ctx) {
   }
   async function edit(key,value,who=owner()){
     requireOwner(who);const revision=data.revision,values={...data.values};
-    let allow_outside=false,disable_dependents=false;
-    if(['timestamps','drand','notifications','replica'].includes(key)&&value&&!values.outside){
-      allow_outside=await confirm(who,tr('This feature needs external requests. Allow them?'));if(!allow_outside)return;
-    }
-    if(key==='outside'&&!value&&(values.timestamps||values.drand||values.notifications||values.replica)){
-      disable_dependents=await confirm(who,tr('Turn off the dependent features too?'));if(!disable_dependents)return;
-    }
-    data=await request(who,'settings/edit',{key,value,allow_outside,disable_dependents,revision});render();await refresh(who);
+    try{
+      let allow_outside=false,disable_dependents=false;
+      if(['timestamps','drand','notifications','replica'].includes(key)&&value&&!values.outside){
+        allow_outside=await confirm(who,tr('This feature needs external requests. Allow them?'));if(!allow_outside)return;
+      }
+      if(key==='outside'&&!value&&(values.timestamps||values.drand||values.notifications||values.replica)){
+        disable_dependents=await confirm(who,tr('Turn off the dependent features too?'));if(!disable_dependents)return;
+      }
+      data=await request(who,'settings/edit',{key,value,allow_outside,disable_dependents,revision});await refresh(who);
+    }finally{if(current(who)&&state.view==='settings')render();}
   }
   function preferencesForm(box){
     box.append(select('Language',Object.entries(ctx.languages),prefs.language,async value=>{const who=owner();await savePreferences({language:value},who);requireOwner(who);await ctx.changeLanguage(value);}),
@@ -173,7 +177,7 @@ export function createSettingsHub(ctx) {
     row.append(heading);
     if(f.type==='bool'){
       const control=node('input');control.type='checkbox';control.checked=f.value;control.setAttribute('aria-label',tr(f.label));
-      control.onchange=()=>run(()=>edit(f.key,control.checked));row.append(control);
+      control.onchange=()=>run(()=>edit(f.key,control.checked),control);row.append(control);
     }else{
       const values=f.key==='files'?[...(f.value==='custom'?['custom']:[]),'photos','short_media','all']:['hide','auto'];
       const field=select(f.label,values.map(v=>[v,label(v)]),f.value,v=>edit(f.key,v));
@@ -225,7 +229,7 @@ export function createSettingsHub(ctx) {
     const overview=node('div','hub-grid');overview.hidden=!!query;root.append(overview);
     const summaries=[['appearance','Language, time and appearance',ctx.languages[prefs.language]+' · '+prefs.timezone],['level','Interface level',label(prefs.level)],
       ['goal','Goal',data.goal?label(data.goal):tr('Choose a goal')],['connection','Connection',label(data.connection.mode)],
-      ['telegram','Telegram account',state.status.collector.has_session?tr('Connected'):tr('Not connected')],
+      ['telegram','Telegram account',signedIn()?tr('Connected'):tr('Not connected')],
       ['chats','Which chats?',label(data.wizard.scope||'account')],['collection','Collection and files',label(data.values.files)],
       ['protection','Record protection',tr(data.values.timestamps?'On':'Off')],['notifications','Notifications and off-site copy',tr(data.values.notifications?'On':'Off')]];
     if(inheritance){
@@ -321,7 +325,7 @@ export function createSettingsHub(ctx) {
     function updateRoutes(){routeBox.replaceChildren();cards(routeBox,routes,draft.route,async mode=>{
       const who=owner();
       if(connectionBusy)return;
-      draft.route=mode;draft.unchecked=false;routeDirty=true;
+      draft.route=mode;draft.unchecked=false;routeDirty=true;checkFailure=null;
       if(mode==='direct')draft.allow_direct=true;
       if(first)await saveDraft({step:4},who);requireOwner(who);updateRoutes();
       if(mode==='auto'||mode==='direct')await checkConnection(false,who);
@@ -344,7 +348,9 @@ export function createSettingsHub(ctx) {
     }
     updateRoutes();
     const status=node('div','connection-result');status.id='hub-connection-result';status.setAttribute('role','status');box.append(status);
-    paintConnection(data.connection);
+    if(connectionBusy){status.className='connection-result checking';status.textContent=tr('Checking connection…');}
+    else if(checkFailure&&!fresh(data.connection))connectionFailed(checkFailure);
+    else paintConnection(data.connection);
     if(first){const bypass=node('label','check-label');const check=node('input');check.type='checkbox';check.checked=!!draft.unchecked;
       check.onchange=()=>run(async()=>{const who=owner();draft.unchecked=check.checked;
         if(check.checked&&connectionBusy){checkSequence++;clearTimeout(checkTimer);await request(who,'connection/cancel',{});connectionBusy=false;}
@@ -353,7 +359,7 @@ export function createSettingsHub(ctx) {
   }
   async function checkConnection(acceptSetup=false,who=owner()){
     requireOwner(who);
-    if(connectionBusy)return;connectionBusy=true;updateNext();
+    if(connectionBusy)return;connectionBusy=true;checkFailure=null;updateNext();
     const profile=who.profile,attempt=++checkSequence;
     const currentAttempt=()=>current(who)&&checkSequence===attempt;
     const result=$('hub-connection-result');if(result){result.className='connection-result checking';result.textContent=tr('Checking connection…');}
@@ -380,7 +386,7 @@ export function createSettingsHub(ctx) {
       if(currentAttempt())checkTimer=setTimeout(safePoll,600);
     }catch(e){if(currentAttempt())connectionFailed(e);}
   }
-  function connectionFailed(error){connectionBusy=false;const box=$('hub-connection-result');if(box){box.className='connection-result failed';box.replaceChildren(message('Connection failed. Try WARP or your own proxy.'));
+  function connectionFailed(error){connectionBusy=false;checkFailure=error;const box=$('hub-connection-result');if(box){box.className='connection-result failed';box.replaceChildren(message('Connection failed. Try WARP or your own proxy.'));
     const details=node('details');details.append(node('summary','',tr('Technical details')),message(error.message));box.append(details);
     box.append(button('Try WARP',async()=>{draft.route='warp';if(state.view==='first-run')await renderWizard();else render();}),
       button('My proxy',async()=>{draft.route='proxy';if(state.view==='first-run')await renderWizard();else render();}),button('Check again',checkConnection));}updateNext();}
@@ -428,8 +434,10 @@ export function createSettingsHub(ctx) {
     if(draft.step===3)cards(body,goals,draft.goal,async goal=>{draft.goal=goal;await saveDraft();await renderWizard();});
     if(draft.step===4)connectionForm(body,true);
     if(draft.step===5){
-      if(state.status.collector.has_session)body.append(message('Telegram is connected.','notice success'));
-      else{move(ctx.authCard(),body);ctx.authMethod('qr');}
+      shownSession=signedIn();
+      if(shownSession)body.append(message('Telegram is connected.','notice success'));
+      // Keep the connected account identity and its sign-in actions in this step.
+      move(ctx.authCard(),body);if(!shownSession)ctx.authMethod('qr');
       if(draft.goal!=='copy')accountQuestion(body);
     }
     if(draft.step===6){
@@ -540,7 +548,7 @@ export function createSettingsHub(ctx) {
   function draftBody(){const {step,goal,route,allow_direct,unchecked,scope,chat_ids,folder_id,account_kind}=draft;return {step,goal,route,allow_direct,unchecked,scope,chat_ids,folder_id,account_kind:account_kind||null};}
   function updateNext(){const next=$('first-run-next');if(!next||!draft)return;
     next.disabled=connectionBusy||draft.step===4&&!draftChecked()&&!draft.unchecked||
-      draft.step===5&&(!state.status.collector.has_session||draft.goal!=='copy'&&!draft.account_kind)||
+      draft.step===5&&(!signedIn()||draft.goal!=='copy'&&!draft.account_kind)||
       draft.step===6&&(draft.scope==='selected'&&!draft.chat_ids.length||draft.scope==='folder'&&draft.folder_id===null);
   }
   for(const select of document.querySelectorAll('[data-ui-level]'))select.onchange=()=>run(async()=>{await savePreferences({level:select.value});if(state.view==='settings')render();});
@@ -551,11 +559,11 @@ export function createSettingsHub(ctx) {
     status(){
       updateNext();if(data)updateIndicator(data.connection);
       // Signing in on step 5 replaces the sign-in form with the result and the account question.
-      const session=!!state.status?.collector?.has_session;
+      const session=signedIn();
       if(state.view==='first-run'&&draft?.step===5&&!live&&shownSession!==null&&session!==shownSession)void renderWizard();
       shownSession=session;
     },
-    reset(){generation++;checkSequence++;clearTimeout(checkTimer);clearTimeout(statusTimer);clearTimeout(liveTimer);restoreMoved();data=prefs=draft=dialogs=null;live=null;groupScope=null;groupView.reset();visited=0;recordedStep=null;connectionBusy=false;editing=false;autoTried=routeDirty=false;preferencesQueue=draftQueue=Promise.resolve();},
+    reset(){generation++;checkSequence++;clearTimeout(checkTimer);clearTimeout(statusTimer);clearTimeout(liveTimer);restoreMoved();data=prefs=draft=dialogs=null;live=null;groupScope=null;groupView.reset();visited=0;recordedStep=shownSession=null;connectionBusy=false;editing=false;autoTried=routeDirty=false;checkFailure=null;preferencesQueue=draftQueue=Promise.resolve();},
     async refreshPreferences(patch){if(prefs)await savePreferences(patch);},
   };
 }

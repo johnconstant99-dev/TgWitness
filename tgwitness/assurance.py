@@ -210,8 +210,13 @@ def start_attestation(selected, receipt):
 
 
 def start_binding(run):
-    return {"format": "tgwitness-tdx-start-v1", "public_key": run.get("public_key"), "run_id": run.get("run_id"),
-            "source_tree_sha256": run.get("source_tree_sha256"), "host": run.get("host")}
+    value = {"format": "tgwitness-tdx-start-v1", "public_key": run.get("public_key"), "run_id": run.get("run_id"),
+             "source_tree_sha256": run.get("source_tree_sha256"), "host": run.get("host")}
+    # Absence denotes the original v1 selection and must keep its exact signed
+    # binding. New receipts explicitly bind their measurement policy too.
+    if "source_policy" in run:
+        value["source_policy"] = run["source_policy"]
+    return value
 
 
 def statement(vault, receipt, run_event_seq, selected, provider, challenge=None, root=Path("/")):
@@ -226,6 +231,8 @@ def statement(vault, receipt, run_event_seq, selected, provider, challenge=None,
              "public_key": vault.public_key, "fingerprint": fingerprint(vault.public_key),
              "run_id": receipt["run_id"], "run_event_seq": run_event_seq, "version": receipt["version"],
              "source_tree_sha256": receipt["source_tree_sha256"], "host": host}
+    if "source_policy" in receipt:
+        value["source_policy"] = receipt["source_policy"]
     answer = {"statement": value, "signature": vault.sign(canonical(value))}
     quote = attestation(selected, value)
     if quote is not None:

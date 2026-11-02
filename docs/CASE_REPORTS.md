@@ -1,15 +1,17 @@
-# Case reports: basis of trust and limitations
+# Case reports: contents, design and verification
 
 [Русский](ru/CASE_REPORTS.md)
 
-Each report explains what supports its claims, where the support ends, and how a
-recipient can check it. It describes the exported material, not the quality of a
-configuration or the likely outcome of a court case.
+Turn selected observations into a readable account of the case: its question,
+scope, saved changes, charts, findings and source references. Each report gives
+the recipient a way to check the delivered material and inspect its collection
+coverage.
 
 The **Basis of trust and limitations** section appears in journal, handover, chat,
 account and sharing reports. Journal and handover PDFs use the same assessment as
 their signed `report.json`. ZIP manifests carry `case_assessment` in the signed
-manifest. Existing signatures and authoritative records are not rewritten.
+manifest. This assessment travels with the exported material. The original
+observations retain their existing signatures.
 
 ## Document formats and reading order
 
@@ -34,11 +36,10 @@ shown. A later export takes a fresh stable snapshot, so ongoing collection may
 increase the figures. Scope, counts and source identity are included in the
 signed report. Opening or previewing the form does not save it.
 
-**This is a report selection, not a minimized handover.** Charts and the transcript
-use the selected records. Integrity, custody and coverage describe the full source
-journal. The evidence ZIP still contains its original records and attachments.
-Use [a minimized handover](EVIDENCE.md) when a recipient must receive only
-the permitted data.
+**Choose the recipient's copy.** Charts and the transcript use the selected records.
+Integrity, custody and coverage describe the full source journal. The evidence ZIP
+contains its original records and attachments. Use [a minimized handover](EVIDENCE.md#handover-extract)
+when a recipient should receive only selected, permitted data.
 
 ### Read edits, deletions and missing IDs
 
@@ -78,6 +79,10 @@ and right-to-left languages. Native PDFs use bundled fonts; the Editorial design
 includes Noto Serif under its bundled SIL Open Font License. Reading series and
 Ledger & margin also apply to account overviews, account chats and sharing copies.
 
+Chinese, Japanese and Korean PDFs additionally need a suitable font on the server,
+such as Noto Sans CJK, installed system-wide or placed in `TGWITNESS_FONT_DIR`.
+When it is unavailable, the ZIP keeps the HTML and JSON reports.
+
 These two designs include a readable journal without JavaScript. For large
 exports this view contains up to 500 whole records within an 8 MiB input budget;
 the report labels the limit and links to the complete viewer and source records.
@@ -99,10 +104,10 @@ Source records in the ZIP stay unchanged when a chart or transcript is hidden.
 
 The optional **Examination notes** contain the question, method, findings and
 conclusion written by the report's author. Cite the source file and record numbers
-in the findings. The signature preserves these statements alongside the report;
-it does not mean an independent expert has reviewed them. These private notes and
-full-journal charts are omitted from minimized handovers. Chart and examination
-choices apply to journal reports.
+in the findings. The signature preserves these authored statements alongside the
+report; source observations and the author's interpretation remain identifiable.
+Minimized handovers omit these private notes and full-journal charts. Chart and
+examination choices apply to journal reports.
 
 Select activity over time, the UTC weekday/hour heatmap, participant rankings, chat
 rankings and record composition. Choose 5–30 ranked groups and neutral participant
@@ -152,17 +157,17 @@ and filtering. These charts use at most 90 equal-width UTC date intervals and re
 up to 10,000 grouping values; excess counts are explicitly declared and reconciled.
 The last interval may be shorter. Unknown or naive dates do not enter time charts.
 
-An empty interval means no included observations, not verified inactivity. Activity
-is not online presence or identification of a real person. Consult coverage for gaps.
-Unknown senders are not treated as a verified common identity. There is no trust score.
+An empty interval means no included observations; consult coverage for gaps. These
+charts describe saved activity. Unknown senders remain a separate category, and
+each check is reported individually.
 
 When included, `analytics.json` is protected by the archive's signed file hashes.
 Journal `report.json` embeds the same selected aggregate. Signature verification
-detects changed bytes; it does not independently certify the calculation method.
-Recompute journal aggregates with `report_analytics.Analytics` and `selected`, or
+detects changed bytes. To check the figures, recompute journal aggregates with
+`report_analytics.Analytics` and `selected`, or
 snapshot aggregates with `snapshot_analytics.collect` and `project`.
 
-Build all six designs from the same fictional journal:
+From a source checkout, build all eight designs listed above from the same fictional journal:
 
 ```sh
 python tools/build_report_styles.py --output test-results/report-styles
@@ -226,42 +231,36 @@ its own Bitcoin confirmation check.
 | Not independently checked | The report does not supply an independent verification result. |
 | Incomplete or unavailable | Material or a required check is missing, incomplete or unsuccessful. |
 
-There is no aggregate trust percentage. Zero recorded interruptions does not
-prove complete Telegram delivery. A valid signature does not establish the real
-identity of an account holder, the truth of message contents or legal admissibility.
+Review each check separately, alongside the recorded collection coverage.
 
 ## What a strong configuration must preserve
 
 1. Before relying on collection, retain the collector's key fingerprint through
-   a separate trusted channel. A key contained only in the supplied ZIP does not
-   protect against substitution of the whole ZIP and key.
+   a separate trusted channel. Compare that reference with the export's signing key.
 2. Retain independently timestamped checkpoints and, where used, a witness
    journal outside the collector's administrative control. Compare them against
-   the exported journal. A person controlling the signing key can otherwise
-   produce another mathematically valid journal.
+   the exported journal to check its earlier boundaries.
 3. Record acquisition scope, gaps, filters, limits and changes in collection.
-   Explain missing periods relevant to the actual claim. Do not interpret absent
-   message IDs as proof of deletion.
+   Explain missing periods relevant to the actual claim, keeping unobserved
+   message IDs, deletion notices and unsuccessful rechecks distinct.
 4. Preserve original ZIPs and their hashes. Record each holder, transfer, date
-   and purpose. Operator names and case notes are signed declarations, not
-   identity or qualification checks.
+   and purpose. Retain the attributed operator statements and case notes with them.
 5. For confidential VMs, preserve and independently verify the quote, challenge,
    Intel certificate chain, measurements, exact source and key-handling conditions.
-   A TDX setting or a quote's presence alone is not a successful attestation.
+   Keep the attestation verification result with the reviewed artifacts.
 
-These measures detect particular substitutions and changes under stated trust
-assumptions. They do not turn Telegram data into Telegram-signed statements and
-cannot make fabricated input before signing universally detectable.
+See [verification scope](EVIDENCE.md#verification-scope) for the trust assumptions
+and the separate assessment of source claims, identity, time and collection coverage.
 
 ## Recipient review
 
-Use a trusted checkout's verifier and an independently obtained fingerprint:
+Use a trusted installation of TgWitness and an independently obtained fingerprint:
 
 ```sh
-python verify.py evidence.zip --fingerprint TRUSTED_SHA256
-python verify.py evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca tsa-root.pem
-python verify.py evidence.zip --fingerprint TRUSTED_SHA256 --witness witness.zip --witness-fingerprint WITNESS_SHA256 --require-witness
-python verify.py evidence.zip --fingerprint TRUSTED_SHA256 --check-drand
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca tsa-root.pem
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --witness witness.zip --witness-fingerprint WITNESS_SHA256 --require-witness
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --check-drand
 ```
 
 The witness ZIP must come from an independently trusted source; preserve its key
@@ -271,10 +270,9 @@ the report renderer never contacts a service merely to display a report.
 
 For a dispute over a particular message, cite the archive reference, authoritative
 file and record reference, then describe the relevant time bound, coverage gaps,
-selection and corroborating material. A sharing copy is a separate derivative:
-its signature protects that copy but does not by itself prove faithful derivation.
-Private filters and identity mappings do not enter its public assessment.
+selection and corroborating material. For a sharing copy, also review the recorded
+transformation and its references to the source archive. Private filters and identity
+mappings stay outside its public assessment.
 
-The report's editable PDF view is protected by its signatures. Verification of
-the signed PDF detects changes to covered bytes; a screenshot or printout does
-not carry those signatures. Keep the original digital file and verification result.
+Verification of the signed PDF detects changes to covered bytes. Keep the original
+digital file and verification result alongside any screenshots or printed reading copies.

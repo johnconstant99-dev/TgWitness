@@ -6024,5 +6024,24 @@
 "Export group": "ייצוא קבוצה",
 "Fix": "תיקון",
 "Share this value": "שתף ערך זה",
-"Share this value instead": "שתף ערך זה במקום"
+"Share this value instead": "שתף ערך זה במקום",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "קובץ מצורף שנבחר חסר. יש לשחזר את הקובץ, ולאחר מכן ליצור את ה\"העברה\" מחדש, או להשמיט במפורש את הקבצים המצורפים.",
+"Request body timed out": "פסק הזמן של גוף הבקשה חלף",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "פעולות טלגרם מהלוח אינן זמינות עבור מטרת \"ראיות לתיק\".",
+"This chat is outside the permitted scope.": "צ'אט זה נמצא מחוץ להיקף המותר.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "ייצוא זה חורג ממגבלת המטמון של העותקים השמורים. הורידו אותו כעת; הכינו אותו שוב מאוחר יותר.",
+"This export is not open to this access.": "ייצוא זה אינו פתוח לגישה זו.",
+"This prepared export is unavailable.": "ייצוא מוכן זה אינו זמין.",
+"Too many pending request bodies. Try again shortly.": "יש יותר מדי גופי בקשות בהמתנה. נסה שוב בעוד זמן קצר.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "יעדים מסוג Onion מחייבים הגדרת TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 בשרת; בקשות המיועדות לציבור בלבד אינן יכולות לאמת את כתובות היעד שלהן.",
+"Invalid destination hostname.": "שם מארח יעד לא חוקי.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "לא ניתן היה לאמת את ה-DNS של היעד הציבורי באמצעות הפרוקסי שהוגדר. לא בוצעה כל ניסיון לחיבור ישיר.",
+"Workspace observation: no interruptions in the available period": "תצפית על סביבת העבודה: ללא הפרעות במהלך התקופה הזמינה",
+"No workspace observation in the last {days} days": "לא נצפתה פעילות בסביבת העבודה ב-{days} הימים האחרונים",
+"Workspace observation: {n} interruption in the available period": "תצפית על סביבת העבודה: הפרעה אחת ({n}) במהלך התקופה הזמינה",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "תצפית על סביבת העבודה: הפרעה אחת ({n}) במהלך התקופה הזמינה",
+"two": "תצפית על סביבת העבודה: {n} הפרעות בתקופה הזמינה",
+"other": "תצפית על סביבת העבודה: {n} הפרעות בתקופה הזמינה"
+}
 }

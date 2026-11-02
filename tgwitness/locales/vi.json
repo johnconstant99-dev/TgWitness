@@ -5952,5 +5952,22 @@
 "Export group": "Xuất nhóm",
 "Fix": "Sửa lỗi",
 "Share this value": "Chia sẻ giá trị này",
-"Share this value instead": "Hãy chia sẻ giá trị này thay thế"
+"Share this value instead": "Hãy chia sẻ giá trị này thay thế",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Một tệp đính kèm đã chọn bị thiếu. Hãy khôi phục tệp đó, sau đó tạo lại \"handover\", hoặc bỏ qua các tệp đính kèm một cách rõ ràng.",
+"Request body timed out": "Thời gian chờ của nội dung yêu cầu đã hết",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "Các thao tác Telegram từ bảng điều khiển bị tắt đối với mục tiêu \"Bằng chứng cho vụ án\".",
+"This chat is outside the permitted scope.": "Cuộc trò chuyện này nằm ngoài phạm vi cho phép.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Việc xuất dữ liệu này đã vượt quá giới hạn bộ nhớ đệm của bản sao lưu. Hãy tải xuống ngay bây giờ; chuẩn bị lại sau.",
+"This export is not open to this access.": "Việc xuất dữ liệu này không được phép đối với quyền truy cập này.",
+"This prepared export is unavailable.": "Tệp xuất đã chuẩn bị này hiện không khả dụng.",
+"Too many pending request bodies. Try again shortly.": "Có quá nhiều nội dung yêu cầu đang chờ xử lý. Vui lòng thử lại sau một lúc.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Các đích đến Onion yêu cầu thiết lập TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 trên máy chủ; các yêu cầu chỉ dành cho công khai không thể xác minh địa chỉ đích của chúng.",
+"Invalid destination hostname.": "Tên máy chủ đích không hợp lệ.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "Không thể xác minh DNS đích công khai thông qua proxy đã cấu hình. Không có nỗ lực kết nối trực tiếp nào được thực hiện.",
+"Workspace observation: no interruptions in the available period": "Quan sát không gian làm việc: không có gián đoạn trong khoảng thời gian có sẵn",
+"No workspace observation in the last {days} days": "Không có hoạt động quan sát không gian làm việc trong {days} ngày qua",
+"Workspace observation: {n} interruption in the available period": "Quan sát không gian làm việc: {n} lần gián đoạn trong khoảng thời gian có sẵn",
+"Workspace observation: {n} interruptions in the available period": {
+"other": "Quan sát không gian làm việc: Có{n} lần gián đoạn trong khoảng thời gian có sẵn"
+}
 }

@@ -77,6 +77,15 @@ class JournalIndex:
             if self.payload_search_enabled and row["seq"] > payload_seq:
                 self.search_payload(row["seq"], row["payload"])
         self.initialize_counts()
+        if not self.position("missing_recovery"):
+            # Older derived indexes kept "missing" forever, including after a
+            # later positive observation. Repair only the index, never the journal.
+            db.execute("UPDATE message_state_index SET missing=0 WHERE missing=1 AND text_seq > "
+                       "(SELECT max(seq) FROM events WHERE events.chat_id=message_state_index.chat_id "
+                       "AND events.message_id=message_state_index.message_id AND kind='message.missing_on_recheck')")
+            db.execute("UPDATE chat_state_index SET missing=(SELECT coalesce(sum(missing),0) "
+                       "FROM message_state_index WHERE message_state_index.chat_id=chat_state_index.chat_id)")
+            self.advance("missing_recovery", 1)
 
     def repair_missing_tables(self):
         """A watermark is usable only with every table it describes.
@@ -157,6 +166,8 @@ class JournalIndex:
                           int(kind == "message.deleted"), int(kind == "message.missing_on_recheck"))
                 previous = tuple(old[k] for k in ("has_message", "edited", "deleted", "missing")) if old else (0,)*4
                 updated = tuple(max(a, b) for a, b in zip(previous, values))
+                if kind in TEXT_KINDS:
+                    updated = (*updated[:3], 0)
                 text_seq = event["seq"] if kind in TEXT_KINDS else old["text_seq"] if old else None
                 # Saved text, and deletions of messages whose text was saved before the deletion notice.
                 had_text = bool(old and old["text_seq"] is not None)

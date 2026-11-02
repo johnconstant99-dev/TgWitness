@@ -1,5 +1,6 @@
 """Administrator-only storage and operator bot controls."""
 import asyncio
+import configparser
 import json
 from string import ascii_letters, digits
 
@@ -64,9 +65,14 @@ def register(app, authenticate, require_live):
         if saved["purpose"] == "offload" and not body.confirm_offload:
             raise HTTPException(422, "Confirm that local files may be removed after a verified remote copy.")
         secret = dict(vault.read("storage"))
+        config_replaced = False
         try:
             if body.rclone_config:
                 storage.parse_config(body.rclone_config)
+                before, after = configparser.ConfigParser(interpolation=None), configparser.ConfigParser(interpolation=None)
+                before.read_string(secret.get("config", ""))
+                after.read_string(body.rclone_config)
+                config_replaced = dict(before) != dict(after)
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from None
         if body.rclone_config:
@@ -80,7 +86,7 @@ def register(app, authenticate, require_live):
             raise HTTPException(422, str(exc)) from None
         try:
             destination = manager.destination(saved, secret.get("config", ""))
-            obsolete = await complete_in_thread(manager.obsolete_copies, destination)
+            obsolete = await complete_in_thread(manager.obsolete_copies, destination, config_replaced)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from None
         # Retire only verified local copies before publishing new settings, so

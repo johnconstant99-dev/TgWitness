@@ -6,7 +6,9 @@ key and an earlier retained checkpoint.
 
 The [local documentation website](internal/PUBLISHING.md#preview-the-website-locally) adds
 interactive examples at `/docs/concepts/`, a checkpoint decision explorer at
-`/docs/witness/`. All example messages,
+`/docs/witness/`, and walkthroughs for [Case Board](CASE-BOARD.md),
+[report design](CASE_REPORTS.md) and [handover extracts](EVIDENCE.md#handover-extract).
+All example messages,
 counts and delays are fictional. Hashes in the chain sandbox are calculated with
 SHA-256 in the browser. Nothing is sent to Telegram.
 
@@ -136,8 +138,9 @@ that every earlier record remains unchanged; compare the export with retained
 checkpoints. A witness on another host avoids sharing the collector's host outage;
 a separate operator gives additional independence.
 
-The witness attests to the collector's reported journal state. It does not
-independently observe all Telegram messages. See [witness setup](WITNESS.md).
+The witness attests to the collector's reported journal state. Use a controlled
+delivery test to measure which Telegram actions reached a collecting account.
+See [witness setup](WITNESS.md).
 
 ## Test delivery against known actions
 
@@ -162,19 +165,22 @@ because Telegram does not provide the exact deletion time. A result such as 5/6
 The [complete investigation walkthrough](INVESTIGATION.md) follows an incident
 across a channel, group, bot and private chat:
 
-1. Enable whole-account Investigation mode and inventory every accessible chat.
+1. On a dedicated collecting account, enable whole-account Investigation mode and
+   inventory accessible chats. Use selected chats or a folder for a main account.
 2. Acquire journal snapshots, per-chat full history and preserved attachments.
 3. Keep live changes and any deliberate panel interactions with their receipts.
 4. Follow numeric sender IDs, reply relationships, repeated destinations and file
    hashes through cited records and people profiles.
-5. Reconstruct a cross-chat timeline with both timestamps and explicit gaps.
+5. Add source-linked notes and collections in Case Board. Reconstruct a cross-chat
+   timeline with both timestamps and explicit gaps.
 6. Compare other account workspaces while keeping their origins and keys separate.
 7. Assemble and verify the signed journals, profiles and history exports with case notes.
 
 The website's `/docs/cases/` guide includes an interactive case map and variants
-for bot disputes, removed messages and participants changing names. Case notes
-and cross-workspace analysis are external; the application does not automatically
-generate a global investigation graph or a merged case archive.
+for bot disputes, removed messages and participants changing names. Case Board
+keeps notes and collections within a workspace. Group exports collect separate
+workspace packages; cross-workspace correlation and a combined timeline remain
+analyst work.
 
 [Completed validation and remaining work](VERIFICATION.md) ·
 [Export and verify](EVIDENCE.md#investigation-handoff) ·

@@ -11,7 +11,7 @@ from urllib.parse import parse_qs, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tgwitness import assurance, cloud  # noqa: E402
-from tgwitness.provenance import source_files, source_tree_sha256  # noqa: E402
+from tgwitness.provenance import SOURCE_POLICY, source_files, source_tree_sha256  # noqa: E402
 from tgwitness.security import Vault  # noqa: E402
 
 ACCOUNT, COMMIT, TUNNEL = "0" * 32, "a" * 40, "6ff42ae2-765d-4adf-8112-31c55c1551ef"
@@ -89,7 +89,8 @@ class Host:
         (self.root / "proc/net/tcp").write_text("  sl  local_address rem_address   st\n")
         (self.root / "run/utmp").write_bytes(b"")
         (self.root / "var/log/wtmp").write_bytes(b"")
-        self.receipt = {"run_id": "run-1", "version": "0.6.1", "source_tree_sha256": source_tree_sha256(source_files())}
+        self.receipt = {"run_id": "run-1", "version": "0.6.1", "source_policy": SOURCE_POLICY,
+                        "source_tree_sha256": source_tree_sha256(source_files())}
         self.override = {}
 
     def provider(self):

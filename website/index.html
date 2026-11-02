@@ -85,6 +85,7 @@
         <figure id="panel-edits" aria-labelledby="tour-edits" data-tab-panel><div class="screen-frame"><div class="screen-bar"><span class="window-dots" aria-hidden="true">● ● ●</span><span>TgWitness / Edit history</span><span class="screen-mode">LOCAL WORKSPACE</span></div><img src="@@ROOT@@assets/detail.png" width="1440" height="900" alt="Detail drawer comparing the captured previous and edited versions of a message" loading="lazy"></div><figcaption><span>03 / Edit history</span> Compare captured versions without overwriting the earlier observation.</figcaption></figure>
         <figure id="panel-exports" aria-labelledby="tour-exports" data-tab-panel><div class="screen-frame"><div class="screen-bar"><span class="window-dots" aria-hidden="true">● ● ●</span><span>TgWitness / Signed exports</span><span class="screen-mode">LOCAL WORKSPACE</span></div><img src="@@ROOT@@assets/exports.png" width="1440" height="900" alt="Export workspace offering a signed ZIP, JSONL, CSV and an offline HTML report" loading="lazy"></div><figcaption><span>04 / Signed exports</span> Take the journal with you, with a manifest and an independent verifier.</figcaption></figure>
       </div>
+      <div class="section-actions"><p>Follow a saved record through <a href="@@GUIDE_CASE_BOARD@@">Case Board</a>, <a href="@@GUIDE_REPORTS@@">report design</a> and a <a href="@@GUIDE_HANDOVER@@">sharing copy</a>. <a href="@@GUIDE_GROUPS@@">Review account groups</a> together.</p></div>
     </section>
 
     <section class="principles wrap" aria-label="Designed around your observations">
@@ -94,7 +95,7 @@
     </section>
 
     <section class="proof wrap" id="proof" aria-labelledby="proof-title">
-      <div class="section-heading"><div><p class="eyebrow">HOW THE RECORD HOLDS TOGETHER</p><h2 id="proof-title">Change one byte.<br>The chain tells you.</h2></div><p>Each event links to the previous hash and carries an Ed25519 signature.</p></div>
+      <div class="section-heading"><div><p class="eyebrow">HOW THE RECORD HOLDS TOGETHER</p><h2 id="proof-title">Change one byte.<br>Verification tells you.</h2></div><p>Each event links to the previous hash and carries an Ed25519 signature.</p></div>
       <div class="switcher" data-tabs aria-label="Evidence explanations">
         <div class="tab-buttons" data-tab-buttons>
           <button type="button" id="proof-chain" aria-controls="panel-chain">01 <span>Linked records</span></button>
@@ -105,12 +106,12 @@
         <figure id="panel-tamper" aria-labelledby="proof-tamper" data-tab-panel><picture><source media="(prefers-reduced-motion: reduce)" srcset="@@ROOT@@assets/evidence-tamper-static.svg"><img src="@@ROOT@@assets/evidence-tamper-animated.svg" width="1200" height="560" loading="lazy" alt="Changing a captured record changes its hash and breaks verification of the linked record."></picture></figure>
         <figure id="panel-checkpoint" aria-labelledby="proof-checkpoint" data-tab-panel><picture><source media="(prefers-reduced-motion: reduce)" srcset="@@ROOT@@assets/evidence-checkpoint-static.svg"><img src="@@ROOT@@assets/evidence-checkpoint-animated.svg" width="1200" height="560" loading="lazy" alt="A separately retained checkpoint lets a recipient compare the exported journal with an earlier observation."></picture></figure>
       </div>
-      <div class="section-actions"><p>See what each verification mechanism establishes, and where its limits remain.</p><a class="button outline" href="guides/modes.html#levels">Explore eight evidence levels <span aria-hidden="true">→</span></a></div>
+      <div class="section-actions"><p>Follow the checks from a file hash to a separately retained checkpoint.</p><a class="button outline" href="guides/modes.html#levels">Explore eight evidence levels <span aria-hidden="true">→</span></a></div>
     </section>
 
     <section class="integrity" aria-labelledby="integrity-title"><div class="wrap integrity-layout">
       <div><p class="eyebrow">BUILT FOR REVIEW</p><h2 id="integrity-title">Ready for<br>another pair<br><span>of eyes.</span></h2><p>Hand over observations, files and an offline HTML report in one signed bundle.</p><a class="text-link" href="@@REPO_URL@@/blob/@@BRANCH@@/docs/EVIDENCE.md">Read the evidence model <span aria-hidden="true">↗</span></a></div>
-      <div class="bundle"><div class="bundle-heading"><span class="mono">tgwitness-evidence.zip</span><span class="bundle-tag">SIGNED BUNDLE</span></div><ul><li><span>01</span><div>Original observations<small>JSONL records + CSV table</small></div></li><li><span>02</span><div>Readable context<small>Offline HTML report + preserved media</small></div></li><li><span>03</span><div>Independent verification<small>Signed manifest + standalone verifier</small></div></li></ul><p class="bundle-note">Signatures detect tampering relative to a trusted key. They do not prove Telegram origin or guarantee complete capture. Journal content and media need encrypted storage provided by you.</p></div>
+      <div class="bundle"><div class="bundle-heading"><span class="mono">tgwitness-evidence.zip</span><span class="bundle-tag">SIGNED BUNDLE</span></div><ul><li><span>01</span><div>Original observations<small>JSONL records + CSV table</small></div></li><li><span>02</span><div>Readable context<small>Offline HTML report + preserved media</small></div></li><li><span>03</span><div>Independent verification<small>Signed manifest + standalone verifier</small></div></li></ul><p class="bundle-note">Recipients check the saved records and files against a trusted collector key. A separately retained checkpoint also checks continuity with the earlier journal. <a href="docs/concepts/#layers">Explore the verification steps.</a></p></div>
     </div></section>
 
     <section class="retention wrap" id="retention" aria-labelledby="retention-title">
@@ -134,35 +135,35 @@
         </div>
         <div class="replica-flow" aria-label="Data is encrypted before upload"><span>Journal and media</span><span aria-hidden="true">→</span><code translate="no">AES-256-GCM</code><span aria-hidden="true">→</span><span>S3-compatible storage</span></div>
         <div class="s3-actions"><a class="button primary" href="docs/exports/#s3">Configure S3 and restore a copy <span aria-hidden="true">→</span></a><a class="text-link" href="docs/reference/evidence/#off-site-copy-and-restore-s3">Read the verification details <span aria-hidden="true">↗</span></a></div>
-        <p class="retention-limit"><strong>Does not do</strong> It does not restore without the exported decryption key or replace an independent witness.</p>
+        <p class="retention-limit"><strong>Recovery key</strong> Save the exported decryption key separately so you can restore the encrypted copy.</p>
       </article>
       <div class="retention-grid">
         <article class="retention-card notification-overview" id="notifications" aria-labelledby="notifications-title">
           <div class="retention-heading"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <h3 id="notifications-title">Notifications · Apprise</h3>
           <p>Problem alerts, chat changes and daily summaries via Apprise: messengers, email or your own JSON webhook.</p>
-          <p class="retention-limit"><strong>Does not do</strong> It does not send message text unless you enable excerpts.</p>
+          <p class="retention-limit"><strong>Choose what to share</strong> Message excerpts are off by default; enable them for destinations you trust.</p>
           <a class="text-link" href="docs/reference/operations/#notifications">Configure notification destinations <span aria-hidden="true">→</span></a>
         </article>
         <article class="retention-card">
           <div class="retention-heading"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3" stroke-linecap="round"/></svg></div>
           <h3>External timestamps</h3>
           <p>Timestamp checkpoint hashes with RFC 3161 and OpenTimestamps.</p>
-          <p class="retention-limit"><strong>Does not do</strong> It does not treat a pending calendar receipt as a confirmed Bitcoin timestamp.</p>
+          <p class="retention-limit"><strong>Follow the result</strong> Check the authority response or upgrade the OpenTimestamps receipt to a confirmed Bitcoin proof.</p>
           <a class="text-link" href="docs/reference/timestamp/">Check timestamp proofs <span aria-hidden="true">→</span></a>
         </article>
         <article class="retention-card">
           <div class="retention-heading"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z"/><path d="m8 12 3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <h3>Independent witness</h3>
           <p>A separate host keeps signed observations and can publish <code>TGW1</code> checkpoints.</p>
-          <p class="retention-limit"><strong>Does not do</strong> It does not make two workspaces on one collector host into independent witnesses.</p>
+          <p class="retention-limit"><strong>Separate the reference</strong> Run the witness on another host and retain its own signing key and journal.</p>
           <a class="text-link" href="docs/witness/">Set up a witness <span aria-hidden="true">→</span></a>
         </article>
         <article class="retention-card">
           <div class="retention-heading"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 12h6m6 0h6M12 7v3m0 4v3" stroke-linecap="round"/><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></div>
           <h3>Recovery and visible gaps</h3>
           <p>Resume after restart. Rechecks and <code>coverage.json</code> show recovered messages and gaps.</p>
-          <p class="retention-limit"><strong>Does not do</strong> It does not reconstruct every missed edit or vanished message.</p>
+          <p class="retention-limit"><strong>Review the interval</strong> See recovered current messages alongside recorded interruptions; earlier versions remain available when captured.</p>
           <a class="text-link" href="guides/modes.html#continuity">Inspect continuity and gaps <span aria-hidden="true">→</span></a>
         </article>
       </div>

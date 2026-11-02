@@ -6132,5 +6132,27 @@
 "Export group": "تصدير المجموعة",
 "Fix": "تصحيح",
 "Share this value": "مشاركة هذه القيمة",
-"Share this value instead": "شارك هذه القيمة بدلاً من ذلك"
+"Share this value instead": "شارك هذه القيمة بدلاً من ذلك",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "المرفق المحدد مفقود. قم باستعادة الملف، ثم أنشئ عملية التسليم مرة أخرى، أو احذف المرفقات صراحةً.",
+"Request body timed out": "انتهت مهلة انتظار نص الطلب",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "إجراءات Telegram من اللوحة معطلة بالنسبة لهدف «أدلة القضية».",
+"This chat is outside the permitted scope.": "هذه المحادثة خارج النطاق المسموح به.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "يتجاوز هذا التصدير حد ذاكرة التخزين المؤقتة للنسخ المحفوظة. قم بتنزيله الآن؛ وأعد إعداده لاحقًا.",
+"This export is not open to this access.": "هذا التصدير غير متاح لهذا الوصول.",
+"This prepared export is unavailable.": "هذا التصدير المُعد مسبقًا غير متاح.",
+"Too many pending request bodies. Try again shortly.": "يوجد عدد كبير جدًا من نصوص الطلبات المعلقة. يرجى المحاولة مرة أخرى بعد قليل.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "تتطلب وجهات Onion تعيين TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 على الخادم؛ ولا يمكن للطلبات العامة فقط التحقق من عناوين وجهاتها.",
+"Invalid destination hostname.": "اسم مضيف الوجهة غير صالح.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "تعذر التحقق من DNS الوجهة العامة عبر الوكيل المُهيأ. لم تتم محاولة إجراء اتصال مباشر.",
+"Workspace observation: no interruptions in the available period": "مراقبة مساحة العمل: لا توجد انقطاعات خلال الفترة المتاحة",
+"No workspace observation in the last {days} days": "لم تتم مراقبة مساحة العمل خلال آخر {days} يومًا",
+"Workspace observation: {n} interruption in the available period": "مراقبة مساحة العمل: انقطاع واحد ({n}) خلال الفترة المتاحة",
+"Workspace observation: {n} interruptions in the available period": {
+"zero": "مراقبة مساحة العمل: {n} مقاطعة خلال الفترة المتاحة",
+"one": "مراقبة مساحة العمل: انقطاع واحد ({n}) خلال الفترة المتاحة",
+"two": "مراقبة مساحة العمل:{n} مقاطعة خلال الفترة المتاحة",
+"few": "مراقبة مساحة العمل:{n} مقاطعات خلال الفترة المتاحة",
+"many": "مراقبة مساحة العمل: {n} مقاطعة خلال الفترة المتاحة",
+"other": "مراقبة مساحة العمل: {n} مقاطعة خلال الفترة المتاحة"
+}
 }

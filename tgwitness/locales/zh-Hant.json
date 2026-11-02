@@ -5952,5 +5952,22 @@
 "Export group": "匯出群組",
 "Fix": "修正",
 "Share this value": "分享此值",
-"Share this value instead": "請改為分享此值"
+"Share this value instead": "請改為分享此值",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "選取的附件遺失。請先還原檔案，然後重新建立「移交」，或明確省略附件。",
+"Request body timed out": "請求內容超時",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "在「案件證據」目標下，控制面板中的 Telegram 操作功能已關閉。",
+"This chat is outside the permitted scope.": "此聊天內容超出允許範圍。",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "此匯出檔案超過儲存副本快取的限制。請立即下載；稍後再重新準備。",
+"This export is not open to this access.": "此匯出功能不對此存取權限開放。",
+"This prepared export is unavailable.": "此預先準備的匯出檔目前無法使用。",
+"Too many pending request bodies. Try again shortly.": "待處理的請求正文過多。請稍後重試。",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "若要連線至洋蔥網址，伺服器端需設定 TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1；僅限公開網址的請求無法驗證其目的地位址。",
+"Invalid destination hostname.": "目標主機名稱無效。",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "無法透過已設定的代理伺服器驗證公開目的端 DNS。未嘗試建立直接連線。",
+"Workspace observation: no interruptions in the available period": "工作區監測：在可用期間內不會中斷",
+"No workspace observation in the last {days} days": "過去 {days} 天內未進行工作區監測",
+"Workspace observation: {n} interruption in the available period": "工作區監測：在可用期間內發生{n}次中斷",
+"Workspace observation: {n} interruptions in the available period": {
+"other": "工作區監測：在可用期間內發生{n}次中斷"
+}
 }

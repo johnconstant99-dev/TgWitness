@@ -13,7 +13,7 @@ export function createFormControls({forms, roots, tr, getSession, toast}) {
     entry.label.textContent=tr('Unsaved changes: {n}',{n:count});
     entry.label.hidden=entry.button.hidden=!count;entry.button.disabled=!count;
   }
-  for(const {form,setDirty} of forms) {
+  for(const {form,setDirty,onDiscard} of forms) {
     const bar=document.createElement('div'),label=document.createElement('span'),button=document.createElement('button');
     bar.className='form-draft-bar';bar.hidden=true;label.setAttribute('role','status');
     button.type='button';button.className='quiet';button.textContent=tr('Discard changes');
@@ -32,7 +32,7 @@ export function createFormControls({forms, roots, tr, getSession, toast}) {
         const value=entry.baseline.get(field.id);if(['checkbox','radio'].includes(field.type))field.checked=value;else field.value=value;
         field.dispatchEvent(new Event('change',{bubbles:true}));
       }
-      setDirty(false);update(entry);form.querySelector('.form-error')?.remove();toast(tr('Unsaved changes discarded.'));
+      setDirty(false);update(entry);onDiscard?.();form.querySelector('.form-error')?.remove();toast(tr('Unsaved changes discarded.'));
     },{signal});
   }
   function loaded(id) {const entry=records.get(id);if(entry){entry.baseline=snapshot(entry.form);update(entry);}}

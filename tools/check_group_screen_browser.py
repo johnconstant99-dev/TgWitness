@@ -65,7 +65,6 @@ def check_browser(directory, output):
             store(pid).set_target(CHANNEL, "Harbor channel", "channel", True)
             vault = registry.entries[pid]["app"].state.vault
             vault.save("credentials", {**vault.read("credentials"), "session": "synthetic"})
-        store(alpha).append("observation.started", {"parameters": {"heartbeat_seconds": 60}})
         store(alpha).append("message.new", {"text": "hello", "sender": {"id": 5}}, chat_id=CHANNEL, message_id=7)
         page.evaluate("loadProfiles()")
 
@@ -85,7 +84,20 @@ def check_browser(directory, output):
         chat = page.locator("#view-group .group-chat")
         expect(chat).to_have_count(1)
         expect(chat).to_contain_text("2 of 2 accounts see it")
-        expect(chat).to_contain_text("no interruptions in 7 days")
+        expect(chat).to_contain_text("No workspace observation in the last 7 days")
+        store(alpha).append("observation.started", {"parameters": {"heartbeat_seconds": 60}})
+        page.evaluate("g=>window.TgWitnessOpenGroup(g)", group)
+        expect(chat).to_contain_text("Workspace observation: no interruptions in the available period")
+        # Workspace activity does not mean this source is currently recorded.
+        for pid in (alpha, beta):
+            store(pid).set_target(CHANNEL, "Harbor channel", "channel", False)
+        page.evaluate("g=>window.TgWitnessOpenGroup(g)", group)
+        expect(chat).to_contain_text("none of them records it")
+        expect(chat).not_to_contain_text("Workspace observation:")
+        for pid in (alpha, beta):
+            store(pid).set_target(CHANNEL, "Harbor channel", "channel", True)
+        page.evaluate("g=>window.TgWitnessOpenGroup(g)", group)
+        expect(chat).to_contain_text("Workspace observation: no interruptions in the available period")
         expect(chat.get_by_role("button", name="Export with 2 accounts")).to_be_visible()
         chat.get_by_role("button", name="Open chat").click()
         expect(page.locator("#view-chats")).to_be_visible()

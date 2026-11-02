@@ -5988,5 +5988,23 @@
 "Export group": "Exporter le groupe",
 "Fix": "Correction",
 "Share this value": "Partager cette valeur",
-"Share this value instead": "Partager cette valeur à la place"
+"Share this value instead": "Partager cette valeur à la place",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Une pièce jointe sélectionnée est manquante. Restaurez le fichier, puis recréez le transfert, ou omettez explicitement les pièces jointes.",
+"Request body timed out": "Délai d'attente du corps de la requête dépassé",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "Les actions Telegram depuis le panneau sont désactivées pour l’objectif « Preuve pour une affaire ».",
+"This chat is outside the permitted scope.": "Cette conversation ne relève pas du champ d'application autorisé.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Cette exportation dépasse la limite du cache des copies enregistrées. Téléchargez-la maintenant ; préparez-la à nouveau plus tard.",
+"This export is not open to this access.": "Cette exportation n'est pas accessible à cet utilisateur.",
+"This prepared export is unavailable.": "Cette exportation préparée n'est pas disponible.",
+"Too many pending request bodies. Try again shortly.": "Trop de corps de requêtes en attente. Veuillez réessayer dans quelques instants.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Les destinations « onion » nécessitent que TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 soit défini sur le serveur ; les requêtes exclusivement publiques ne permettent pas de vérifier leurs adresses de destination.",
+"Invalid destination hostname.": "Nom d'hôte de destination non valide.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "Le DNS de destination public n'a pas pu être vérifié via le proxy configuré. Aucune connexion directe n'a été tentée.",
+"Workspace observation: no interruptions in the available period": "Observation de l'espace de travail : aucune interruption pendant la période disponible",
+"No workspace observation in the last {days} days": "Aucune observation de l'espace de travail au cours des {days} derniers jours",
+"Workspace observation: {n} interruption in the available period": "Observation de l'espace de travail : {n} interruption au cours de la période disponible",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "Observation de l'espace de travail : {n} interruption au cours de la période disponible",
+"other": "Observation de l'espace de travail : {n} interruptions au cours de la période considérée"
+}
 }

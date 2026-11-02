@@ -120,7 +120,11 @@ def check_examples(page, base):
     history = page.locator('.case-table tbody tr').filter(has_text="History across enabled chats")
     expect(history).to_contain_text("pause/resume and a signed progress report")
     expect(history.locator('a')).to_have_attribute("href", "../reference/history/")
-    expect(page.locator('.guide-content')).to_contain_text("does not currently provide one global search")
+    group_guide = page.locator('.guide-content a[href="../groups/"]')
+    expect(group_guide).to_be_visible()
+    group_guide.click()
+    expect(page).to_have_url(base + "docs/groups/")
+    expect(page.locator('[data-workflow="groups"]')).to_be_visible()
 
     page.goto(base + "docs/security/", wait_until="networkidle")
     lab = page.locator('[data-lab="security"]')

@@ -52,6 +52,8 @@ included in 0.7.1. [Start with the workflow guide](https://phishdestroy.github.i
 | --- | --- | --- |
 | Try the interface | [Quick start](QUICKSTART.md#explore-the-interface) | Fictional conversations; no Telegram login |
 | Connect my account | [Account setup](ACCOUNTS.md) | A new test message in the journal |
+| Choose a goal and change settings | [First setup and settings](SETTINGS.md) | Every value marked as the goal's or your own |
+| Run several accounts together | [Account groups](ACCOUNTS.md#bulk-import-and-account-groups) | Shared settings, one page for problems and shared chats, one group export |
 | Capture one private chat from my fork | [GitHub Actions capture (preview)](SEALED-ACTIONS.md) | An encrypted archive and verification against the approved upstream workflow |
 | Load older messages into the workspace | [Source history](HISTORY.md) | Resumable capture and a signed progress report |
 | Export an account with a defined scope | [Account export](ACCOUNT-EXPORT.md) · [Русский](ru/ACCOUNT-EXPORT.md) | Selected messages and files, resumable jobs and a signed archive with coverage records |
@@ -59,6 +61,8 @@ included in 0.7.1. [Start with the workflow guide](https://phishdestroy.github.i
 | Give a reviewer or analyst access | [Access and permissions](ACCESS.md) | Only the chosen accounts, chats and permitted actions |
 | Connect an AI client | [Read-only MCP](MCP.md) | Expiring access to selected workspaces and chats |
 | Ask questions and write a report | [Archive analysis](ANALYSIS.md) | Reviewed sources, verified references and separate analyst revisions |
+| Keep team notes on a case | [Case Board](CASE-BOARD.md) | Signed bookmarks, highlights, slices and discussions, kept apart from observations |
+| Hand over a readable report | [Case reports](CASE_REPORTS.md) | A signed HTML, PDF or JSON report with the chosen design, charts and scope |
 | Read text in saved attachments | [Local OCR and transcription](MEDIA-ANALYSIS.md) | Hash-linked machine recognition, separate from original evidence |
 | Connect n8n or a SIEM | [Signed webhooks](WEBHOOKS.md) | Scoped notifications with delivery status |
 | Investigate across the whole account | [Complete investigation walkthrough](INVESTIGATION.md) | A source register, cited cross-chat timeline, people/file connections and verified evidence per workspace |

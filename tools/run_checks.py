@@ -48,6 +48,9 @@ SUITES = {
         "check_capture_language_browser.py",
     ),
     "browser-ux": (
+        "test_audit_security_fixes.py", "test_audit_data_fixes.py", "test_audit_platform_fixes.py",
+        "test_proxy_destination_dns.py",
+        "check_audit_frontend_browser.py",
         "check_bootstrap_recovery_browser.py",
         "check_import_preflight.py", "check_chat_safety_browser.py", "check_workspace_downloads_browser.py",
         "check_storage_services.py", "check_prepared_export_access.py", "check_services_browser.py",
@@ -63,7 +66,8 @@ SUITES = {
         "check_cloud_wizard.py", "check_evidence_witnesses.py", "check_setup_levels.py", "check_first_run.py",
         "check_group_settings_browser.py", "check_group_screen_browser.py", "check_gateway_dns.py", "check_tdx.py", "check_phala.py",
     ),
-    "site": ("check_site.py", "check_docs_site.py", "check_report_example.py"),
+    "site": ("check_site.py", "check_docs_site.py", "check_docs_workflows.py", "test_site_metadata.py",
+             "check_report_example.py", "check_guide_languages.py"),
 }
 
 

@@ -1,0 +1,33 @@
+<p class="guide-outcome">Share the relevant observations while keeping the original workspace intact.</p>
+<p>A handover is a separate signed extract. Choose the chats and people, reduce identities or text, and decide which files and team notes belong in the recipient's copy. Its manifest records the selection and the number of unchanged, minimized and omitted records.</p>
+
+<h2 id="prepare">Prepare the recipient's extract</h2>
+<ol><li>Open <strong>Exports → Handover extract</strong>. Write its purpose, choose the chats and optional UTC period, then select <strong>Load people of the chosen chats</strong> if you need named subjects.</li><li>Choose how to handle everyone else: pseudonyms, omit their messages, or show as recorded. Set message text and attachments independently; optionally mask phone numbers and email addresses.</li><li>Choose whether to include Case Board bookmarks and slices, or cards with comments. Investigator aliases can replace team names in this copy.</li><li>Select <strong>Download handover extract</strong>. Open the generated report and selected records locally, verify the archive, and inspect the copy before sending it.</li></ol>
+
+<section class="workflow-lab" data-workflow="handover" aria-labelledby="handover-example-title">
+  <h3 id="handover-example-title">One original, a deliberate sharing copy</h3>
+  <p class="sample-tag">Synthetic example · identity illustration only</p>
+  <ol class="workflow-steps">
+    <li data-workflow-step><strong>Select.</strong> Include the case chat and identify the person the extract is about.</li>
+    <li data-workflow-step><strong>Minimize.</strong> Choose how another participant appears in the sharing copy.</li>
+    <li data-workflow-step><strong>Inspect.</strong> Open the generated archive's report and records before sending it.</li>
+    <li data-workflow-step><strong>Share.</strong> Deliver the checked copy and communicate its trusted fingerprint separately.</li>
+  </ol>
+  <fieldset data-workflow-choices="identity" hidden><legend>Another participant in this example</legend><button type="button" data-workflow-choice="keep">Show as recorded</button><button type="button" data-workflow-choice="pseudonymize">Use a pseudonym</button><button type="button" data-workflow-choice="omit">Leave the message out</button></fieldset>
+  <div data-workflow-scene>
+    <article class="workflow-node" data-workflow-node="0"><h4>Original observation</h4><p>Nora · user 71002</p><p>“I received the revised link.”</p><p>The source journal keeps this saved observation.</p></article>
+    <article class="workflow-node" data-workflow-node="1"><h4>Recipient's copy</h4><p data-workflow-identity-value="keep">Show as recorded: Nora · user 71002 · “I received the revised link.”</p><p data-workflow-identity-value="pseudonymize">Pseudonym: P01 · “I received the revised link.”</p><p data-workflow-identity-value="omit">Omit: this participant's message is left out of the copy.</p></article>
+    <article class="workflow-node" data-workflow-node="2"><h4>Inspect the actual files</h4><p>Read report.html and records.jsonl.</p><p>Check identities, text, attachments and optional team comments.</p></article>
+    <article class="workflow-node" data-workflow-node="3"><h4>Signed extract</h4><p>Selection + file hashes + signed manifest</p><p>A separate package linked to its source journal boundary</p></article>
+  </div>
+  <div data-workflow-controls hidden><button type="button" data-workflow-play><span data-workflow-play-label>Play example</span><span data-workflow-pause-label hidden>Pause</span></button><button type="button" data-workflow-next>Next step</button><button type="button" data-workflow-reset>Reset example</button><span data-workflow-progress></span></div>
+  <p class="workflow-status" data-workflow-status role="status" aria-live="polite"></p>
+</section>
+
+<h2 id="controls">Use the controls together</h2>
+<div class="table-wrap"><table><caption>Decisions that shape a handover</caption><thead><tr><th scope="col">Control</th><th scope="col">Effect on the copy</th></tr></thead><tbody><tr><th scope="row">People</th><td>Keep selected subjects identifiable; pseudonymize or omit other participants as chosen.</td></tr><tr><th scope="row">Text</th><td>Include all text, only the selected people's and observing account's text, or omit message text and its text-bearing detail fields.</td></tr><tr><th scope="row">Files</th><td>Choose files of the selected people and observing account, all shown messages' files, or no files.</td></tr><tr><th scope="row">Case Board</th><td>Choose no board material, bookmarks and slices, or cards with team discussion.</td></tr></tbody></table></div>
+<p>Review free-form text and file contents as well as identities: a pseudonym does not automatically remove every name written in a message or attachment. If a selected preserved file is unavailable, restore it or explicitly omit attachments before generating the extract.</p>
+
+<h2 id="verify">Keep the copy independently checkable</h2>
+<pre><code>python -m tgwitness.verify handover.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256</code></pre>
+<p>Retain the original signed evidence archive and checkpoints separately. The handover records its own projection, so a recipient can check the delivered copy without receiving the entire workspace. <a href="@@GUIDE_REPORTS@@">Report studio</a> supplies its reading design; <a href="@@GUIDE_EXPORTS@@">export verification</a> explains the trusted references.</p>

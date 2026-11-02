@@ -7,6 +7,9 @@ from starlette.responses import JSONResponse
 KEEP_ALIVE_SECONDS = 150
 
 MCP_BODY_TIMEOUT = 8
+BODY_TIMEOUT = 60
+MAX_PENDING_BODIES = 32
+MAX_PENDING_BODY_BYTES = 64 * 1024 * 1024
 
 
 def request_limit(path, default=16384):
@@ -30,6 +33,7 @@ class RequestLimit:
     """Enforce request size while receiving, including requests without Content-Length."""
     def __init__(self, app, max_body=16384, path_limits=True):
         self.app, self.max_body, self.path_limits = app, max_body, path_limits
+        self.pending_bodies = self.pending_bytes = 0
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
@@ -37,7 +41,14 @@ class RequestLimit:
         body = bytearray()
         limit = request_limit(scope.get("path", ""), self.max_body) if self.path_limits else self.max_body
         route = scope.get("path", "").removeprefix(scope.get("root_path", "")).rstrip("/")
-        timeout = MCP_BODY_TIMEOUT if route == "/mcp" else None
+        timeout = MCP_BODY_TIMEOUT if route == "/mcp" else BODY_TIMEOUT
+        # Reserve the full route allowance before reading: partial uploads cannot
+        # consume an unbounded number of buffers. No await between check and reserve.
+        if self.pending_bodies >= MAX_PENDING_BODIES or self.pending_bytes + limit > MAX_PENDING_BODY_BYTES:
+            return await JSONResponse({"detail": "Too many pending request bodies. Try again shortly."},
+                status_code=503, headers={"Cache-Control": "no-store", "Retry-After": "1"})(scope, receive, send)
+        self.pending_bodies += 1
+        self.pending_bytes += limit
         too_large = False
         try:
             async with asyncio.timeout(timeout):
@@ -55,10 +66,12 @@ class RequestLimit:
                     if not message.get("more_body", False):
                         break
         except TimeoutError:
-            if timeout is None:
-                raise
-            return await JSONResponse({"detail": "MCP request body timed out"}, status_code=408,
+            detail = "MCP request body timed out" if route == "/mcp" else "Request body timed out"
+            return await JSONResponse({"detail": detail}, status_code=408,
                                       headers={"Cache-Control": "no-store"})(scope, receive, send)
+        finally:
+            self.pending_bodies -= 1
+            self.pending_bytes -= limit
         if too_large:
             return await JSONResponse({"detail": "Request body too large"}, status_code=413)(scope, receive, send)
         sent = False

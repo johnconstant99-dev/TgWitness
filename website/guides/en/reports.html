@@ -1,0 +1,37 @@
+<p class="guide-outcome">Give a reader a clear route from the case question to the saved records.</p>
+<p>Report studio combines a data selection, readable change histories, charts and your written findings. Eight integrated designs apply to supported HTML and native PDF outputs. HTML, PDF and JSON reports carry their own signed seals; the ZIP manifest also binds the files in the package. HTML and PDF are sealed after their final layout is complete.</p>
+
+<h2 id="build">Build a report in three steps</h2>
+<ol><li>Open <strong>Exports → Configure and preview → Data</strong>. Use the whole workspace or select chats, authors, inclusive UTC observation dates and record types. The dates describe when TgWitness observed the record.</li><li>In <strong>Design &amp; contents</strong>, choose a design and contents preset. Select activity charts, participant labels, the transcript, saved changes and optional Case Board material. Add your case details and examination notes.</li><li>Open <strong>Preview</strong> to review counts, activity, participants, sampled records and missing ID ranges. Save the settings, then download the format you need.</li></ol>
+
+<section class="workflow-lab" data-workflow="report" aria-labelledby="report-example-title">
+  <h3 id="report-example-title">Arrange the same saved material for a reader</h3>
+  <p class="sample-tag">Synthetic example · schematic layout, not a generated report</p>
+  <ol class="workflow-steps">
+    <li data-workflow-step><strong>Select.</strong> Choose two chats and the observation period for the case.</li>
+    <li data-workflow-step><strong>Compose.</strong> Choose a layout and the sections that answer the question.</li>
+    <li data-workflow-step><strong>Preview.</strong> Review the selected counts and the saved before-and-after text.</li>
+    <li data-workflow-step><strong>Verify.</strong> Generate the final file and check its signature against the trusted workspace fingerprint.</li>
+  </ol>
+  <fieldset data-workflow-choices="design" hidden><legend>Diagram layout</legend><button type="button" data-workflow-choice="classic">Classic</button><button type="button" data-workflow-choice="reading_series">Reading series</button></fieldset>
+  <fieldset data-workflow-choices="contents" hidden><legend>Diagram contents</legend><button type="button" data-workflow-choice="context">Message context</button><button type="button" data-workflow-choice="changes">Saved changes</button></fieldset>
+  <div data-workflow-scene>
+    <article class="workflow-node" data-workflow-node="0"><h4>Selected observations</h4><p>2 chats · 1 observation day</p><p>Messages, edits and deletion notices</p></article>
+    <article class="workflow-node" data-workflow-node="1"><h4>Report structure</h4><div data-workflow-design="classic"><h5>Changed payment destination</h5><p>Case question → scope → findings → record references</p><div data-workflow-content="context"><strong>Message context</strong><p>Observation #142: “Use the new payment link.”</p></div><div data-workflow-content="changes"><strong>Saved changes</strong><p>Before: old.example.invalid → After: new.example.invalid</p></div></div></article>
+    <article class="workflow-node" data-workflow-node="2"><h4>Review the selection</h4><p>18 observations · 2 saved edits</p><p>Sent, edited and observed times have separate labels.</p></article>
+    <article class="workflow-node" data-workflow-node="3"><h4>Final deliverable</h4><p>Signed PDF + signed JSON, or a signed ZIP with its readable report</p><p>Recipient checks the file and trusted fingerprint.</p></article>
+  </div>
+  <div data-workflow-controls hidden><button type="button" data-workflow-play><span data-workflow-play-label>Play example</span><span data-workflow-pause-label hidden>Pause</span></button><button type="button" data-workflow-next>Next step</button><button type="button" data-workflow-reset>Reset example</button><span data-workflow-progress></span></div>
+  <p class="workflow-status" data-workflow-status role="status" aria-live="polite"></p>
+</section>
+
+<h2 id="designs">Choose a reading style</h2>
+<p><strong>Classic, Editorial, Briefing, Analytics, Technical, Overview, Reading series, and Ledger &amp; margin</strong> present the same underlying records in different compositions. Changing the design keeps the data selection and written notes. Report language can be chosen from the 25 supported languages.</p>
+<p>Reading series groups the case, scope, findings and changes around a section rail. Ledger &amp; margin uses numbered chapters and a wide margin. Both also support account HTML overviews and sharing copies. Native PDFs are generated with bundled fonts; the user's machine needs no browser or Node installation for PDF creation. Chinese, Japanese and Korean PDFs additionally require a suitable font on the server, such as Noto Sans CJK, installed system-wide or placed in <code>TGWITNESS_FONT_DIR</code>. Without it, the ZIP keeps the HTML and JSON reports.</p>
+
+<h2 id="read">Read a change with its context</h2>
+<p>Saved edits show before and after. A deletion notice can be accompanied by the last captured version. Replies, quotes, forwards, reactions, buttons and attachment metadata retain their available references. File SHA-256 and journal-record hashes are labelled separately.</p>
+<p>The design preview shows cover, examination and chart components using matching records among the first 50,000 source records. The separate data preview scans the complete stable journal snapshot for exact selection counts, with displayed sample limits labelled. Generate a PDF to inspect final pagination. A full account export has an HTML overview; its individual chat PDFs use the chosen design.</p>
+
+<h2 id="sharing">Choose the recipient's copy deliberately</h2>
+<p>Report filters shape the readable report. The full evidence ZIP retains the original journal and attachments. Use a <a href="@@GUIDE_HANDOVER@@">minimized handover</a> when the recipient should receive only selected data. See <a href="@@REF_CASE_REPORTS@@">report contents and verification</a> or <a href="@@GUIDE_EXPORTS@@">verify the finished export</a>.</p>

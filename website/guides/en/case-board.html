@@ -1,0 +1,35 @@
+<p class="guide-outcome">Turn saved Telegram observations into a case your team can review together.</p>
+<p>Case Board keeps bookmarks, exact-text highlights, saved slices and discussion beside their source references. A collection gives the case a working structure; signed revisions preserve how the team developed it.</p>
+
+<h2 id="first-card">From a message to a case card</h2>
+<ol><li>Open <strong>Investigation → Case Board</strong> in Standard or Expert mode. Create a collection for the case and choose its chat scope.</li><li>In <strong>Journal</strong> or a saved chat, choose <strong>To board</strong>, or focus the record and press <strong>B</strong>. The card enters Inbox; give it a useful title and move it to your collection.</li><li>Select a passage in a saved chat message and choose <strong>Highlight → board</strong> to retain the exact quote and message version. Add a note explaining why it matters.</li><li>Discuss the card, assign a review status, and return to its source context whenever a claim needs checking. Use <strong>Presentation</strong> to walk through the collection with colleagues.</li></ol>
+
+<section class="workflow-lab" data-workflow="board" aria-labelledby="board-example-title">
+  <h3 id="board-example-title">Follow one changed payment link</h3>
+  <p class="sample-tag">Synthetic example · local illustration</p>
+  <ol class="workflow-steps">
+    <li data-workflow-step><strong>Capture.</strong> Open saved observation #142 and its message version.</li>
+    <li data-workflow-step><strong>Bookmark.</strong> Keep the quote, source reference and your question on a card.</li>
+    <li data-workflow-step><strong>Review.</strong> Add a team comment and move the card to Review.</li>
+    <li data-workflow-step><strong>Present.</strong> Walk through the collection and open the cited source context.</li>
+  </ol>
+  <div data-workflow-scene>
+    <article class="workflow-node" data-workflow-node="0"><h4>Saved observation #142</h4><p>“Use the new payment link.”</p><p>Operations chat · message 38 · observed 09:12 UTC</p></article>
+    <article class="workflow-node" data-workflow-node="1"><h4>Card: changed destination</h4><blockquote>Use the new payment link.</blockquote><p>Question: which destination appeared in the earlier version?</p></article>
+    <article class="workflow-node" data-workflow-node="2"><h4>Team review</h4><p>Analyst: compare with observation #101.</p><p>Status: Review · revision retained</p></article>
+    <article class="workflow-node" data-workflow-node="3"><h4>Source context</h4><p>Card → saved version → earlier observation</p><p>The annotation and the Telegram observation remain separately identifiable.</p></article>
+  </div>
+  <div data-workflow-controls hidden><button type="button" data-workflow-play><span data-workflow-play-label>Play example</span><span data-workflow-pause-label hidden>Pause</span></button><button type="button" data-workflow-next>Next step</button><button type="button" data-workflow-reset>Reset example</button><span data-workflow-progress></span></div>
+  <p class="workflow-status" data-workflow-status role="status" aria-live="polite"></p>
+</section>
+
+<h2 id="slices">Save a useful range once</h2>
+<p>Shift-click two records in one chat for <strong>Slice between</strong>, choose <strong>Slice by time</strong>, or save the current Journal filters. Review the count before saving. Reopen the slice to apply its saved query; <strong>Show records added since bookmark</strong> reveals later additions.</p>
+<p>A time slice follows collector observation time. A message-ID slice can follow the selected messages as later changes arrive. The saved creation boundary lets a recipient compare the original selection with its later state.</p>
+
+<h2 id="team">Give each colleague the right role</h2>
+<p><strong>Reviewer</strong> reads the board; <strong>Analyst</strong> adds cards and comments; <strong>Operator</strong> also manages collections and review decisions. Workspace and chat permissions apply to cards, source context and discussions. Use named access grants for clear attribution.</p>
+
+<h2 id="deliver">Carry the work into a deliverable</h2>
+<p>Export a slice as signed JSON, or use CSV for a spreadsheet. Report settings can include bookmarks and slices, with team comments when selected. Choose these contents in <a href="@@GUIDE_REPORTS@@">Report studio</a>; a saved slice does not automatically configure a report. For a restricted recipient, use the separate <a href="@@GUIDE_HANDOVER@@">handover controls</a>.</p>
+<p>Read the <a href="@@REF_CASE_BOARD@@">Case Board reference</a> for signed revisions, exact quote matching, selection verification and permissions.</p>

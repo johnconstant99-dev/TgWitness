@@ -42,7 +42,9 @@ that sequence, not every possible Telegram event.
 | Try TgWitness and connect an account | [Getting started](Getting-Started.md) → [Accounts](Accounts.md) |
 | Choose chats and keep observed changes | [Collection and coverage](Collection.md) |
 | Save one conversation for offline reading | [Export one chat](Chat-Export.md) |
+| Run several accounts as one group | [Accounts](Accounts.md#import-accounts-and-share-settings) |
 | Investigate across conversations | [Investigations](Investigations.md) |
+| Keep team notes on a case | [Case Board](Investigations.md#keep-team-notes-on-case-board) |
 | Load history, search with AI or connect other tools | [Archive and integrations](Archive-and-Integrations.md) |
 | Hand over and verify evidence | [Exports and verification](Exports-and-Verification.md) |
 | Retain an independent checkpoint | [Independent witness](Independent-Witness.md) |

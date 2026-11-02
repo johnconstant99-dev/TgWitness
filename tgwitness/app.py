@@ -1767,6 +1767,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     def source_state():
         last, receipt = app.state.store.get_setting("source_check", None), app.state.run_receipt
         return {"last": last, "version": __version__, "source_tree_sha256": receipt["source_tree_sha256"],
+                "source_policy": receipt.get("source_policy"),
                 "files": len(receipt["source_files"]), **outside_state(),
 
                 "current": bool(last) and last["source_tree_sha256"] == receipt["source_tree_sha256"]}
@@ -2180,15 +2181,20 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                                       if allowed is None or chat in allowed]}
 
     @app.get("/api/chats/{chat_id}/dossier", dependencies=[Depends(authenticate)])
-    async def dossier_view(chat_id: int):
+    async def dossier_view(request: Request, chat_id: int):
         title = dossier_title(chat_id)
-        return await asyncio.to_thread(dossier.signed, app.state.store, app.state.vault, chat_id, title, producer())
+        allowed = visible_chats(request)
+        value = await asyncio.to_thread(dossier.signed, app.state.store, app.state.vault, chat_id, title, producer(),
+                                        allowed_chats=allowed)
+        await recheck_export_scope(request, allowed)
+        return value
 
-    async def dossier_file(chat_id, password=None):
+    async def dossier_file(request, chat_id, password=None):
         title = dossier_title(chat_id)
+        allowed = visible_chats(request)
 
         def build():
-            value = dossier.signed(app.state.store, app.state.vault, chat_id, title, producer())
+            value = dossier.signed(app.state.store, app.state.vault, chat_id, title, producer(), allowed_chats=allowed)
             directory = root / "temporary-exports"
             directory.mkdir(mode=0o700, exist_ok=True)
             if directory.resolve().parent != root:
@@ -2205,16 +2211,22 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 raise
 
         async with export_lock:
-            return await build_file(build)
+            path = await build_file(build)
+        try:
+            await recheck_export_scope(request, allowed)
+            return path
+        except BaseException:
+            path.unlink(missing_ok=True)
+            raise
 
     @app.get("/api/chats/{chat_id}/dossier/export", dependencies=[Depends(authenticate)])
-    async def dossier_export(chat_id: int):
-        path = await dossier_file(chat_id)
+    async def dossier_export(request: Request, chat_id: int):
+        path = await dossier_file(request, chat_id)
         return TemporaryDownload(path, filename="tgwitness-dossier-" + str(chat_id) + ".json", media_type="application/json")
 
     @app.post("/api/chats/{chat_id}/dossier/export", dependencies=[Depends(authenticate)])
-    async def dossier_export_encrypted(chat_id: int, body: ExportPassword):
-        path = await dossier_file(chat_id, body.password)
+    async def dossier_export_encrypted(request: Request, chat_id: int, body: ExportPassword):
+        path = await dossier_file(request, chat_id, body.password)
         return TemporaryDownload(path, filename="tgwitness-dossier-" + str(chat_id) + "-encrypted.zip",
                                  media_type="application/zip")
 
@@ -2532,13 +2544,17 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         from . import export_history
         receipt = {}
         options = report_options(app.state.store, request, language)
+        principal = request.state.principal
+        include_board = principal.may("board.read")
+        permissions = ["view", "export"] + (["board.read"] if include_board else [])
 
         def build():
-            path = export_file(app.state.store, app.state.vault, fmt, options, include_board=request.state.principal.may("board.read"))
+            path = export_file(app.state.store, app.state.vault, fmt, options, include_board=include_board)
             try:
                 if password is not None:
                     path = encrypt_export(path, fmt, password)
-                receipt.update(export_history.prepared(app.state.store, path, fmt, password is not None))
+                receipt.update(export_history.prepared(app.state.store, path, fmt, password is not None,
+                               owner=principal.owner, workspace=profile_id, required_permissions=permissions))
                 return path
             except BaseException:
                 path.unlink(missing_ok=True)
@@ -2561,6 +2577,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             from .webhooks import export_completed
             await export_completed(app.state.store, app.state.vault, profile_id)
             app.state.alert_wakeup.set()
+            await recheck_export_scope(request, None)
+            require_prepared_access(request, receipt)
         except BaseException:
             path.unlink(missing_ok=True)
             raise
@@ -2595,6 +2613,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         options = report_options(app.state.store, request, body.language)
         selection = handover.Options.model_validate(body.model_dump(exclude={"password", "language"}))
         receipt, summary = {}, {}
+        principal = request.state.principal
+        permissions = ["view", "export"] + (["board.read"] if body.case_board != "off" else [])
 
         def build():
             path, recorded = handover.export(app.state.store, app.state.vault, selection, options)
@@ -2602,7 +2622,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 summary.update(recorded)
                 if body.password is not None:
                     path = encrypt_export(path, "zip", body.password, "tgwitness-handover.zip")
-                receipt.update(export_history.prepared(app.state.store, path, "handover", body.password is not None))
+                receipt.update(export_history.prepared(app.state.store, path, "handover", body.password is not None,
+                               owner=principal.owner, workspace=profile_id, required_permissions=permissions,
+                               chat_ids=body.chats))
                 return path
             except BaseException:
                 path.unlink(missing_ok=True)
@@ -2611,13 +2633,19 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         async with export_lock, app.state.storage.lock:
             try:
                 path = await build_file(build)
-            except handover.RemoteAttachment as exc:
+            except (handover.RemoteAttachment, handover.MissingAttachment) as exc:
                 raise HTTPException(409, str(exc)) from None
             except handover.EmptySelection as exc:
                 raise HTTPException(422, str(exc)) from None
             except Exception as exc:
                 app.state.store.append("export.failed", {"format": "handover", "error_type": type(exc).__name__})
                 raise HTTPException(409, "Export failed integrity, size, or file checks. Inspect local data and limits.") from None
+        try:
+            await recheck_export_scope(request, set(body.chats))
+            require_prepared_access(request, receipt)
+        except BaseException:
+            path.unlink(missing_ok=True)
+            raise
         principal = request.state.principal
         app.state.store.append("handover.exported", {
             **summary, "file_sha256": receipt.get("sha256"), "encrypted": body.password is not None,
@@ -2627,9 +2655,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                  media_type="application/zip", headers=export_history.headers(receipt))
 
     @app.get("/api/exports/history", dependencies=[Depends(authenticate)])
-    async def prepared_exports():
+    async def prepared_exports(request: Request):
         from .export_history import listing
-        return listing(app.state.store)
+        return listing(app.state.store, principal=request.state.principal, profile_id=profile_id)
 
     prepared_tickets = {}
 
@@ -2642,6 +2670,25 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             if exc.status_code == 401:
                 raise HTTPException(403, 'This access has expired.') from None
             raise
+
+    async def recheck_export_scope(request, original_chats):
+        await identify_download(request, request.headers.get("authorization", "").partition(" ")[2])
+        current = visible_chats(request)
+        if current is not None and (original_chats is None or not set(original_chats) <= current):
+            raise HTTPException(403, "This chat is not open to this access.")
+
+    def require_prepared_access(request, entry):
+        from .export_history import permitted
+        if not permitted(entry, request.state.principal, profile_id):
+            raise HTTPException(403, "This export is not open to this access.")
+
+    def prepared_access(request, export_id):
+        from .export_history import metadata
+        entry = metadata(app.state.store, export_id)
+        if entry is None:
+            raise HTTPException(404, "This prepared export is unavailable.")
+        require_prepared_access(request, entry)
+        return entry
 
     def issue_download_ticket(request, target, api_path):
         now = time.monotonic()
@@ -2678,9 +2725,12 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         from .export_history import locate
         try:
             async with export_lock:
+                prepared_access(request, export_id)
                 await complete_in_thread(locate, app.state.store, export_id)
         except ValueError as exc:
             raise HTTPException(404, str(exc)) from None
+        await identify_download(request, request.headers.get("authorization", "").partition(" ")[2])
+        prepared_access(request, export_id)
         return issue_download_ticket(request, export_id, "exports/" + export_id + "/download")
 
     @app.get("/api/exports/{export_id}/download")
@@ -2696,6 +2746,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
         try:
             async with export_lock:
+                prepared_access(request, export_id)
                 path = await build_file(prepare_download)
         except ValueError as exc:
             raise HTTPException(404, str(exc)) from None
@@ -2707,9 +2758,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 if who is None:
                     raise Refused('This access has expired.')
                 access_check(who, profile_id, POLICY['GET /api/exports/{export_id}/download'], {})
+                require_prepared_access(request, receipt)
             except Refused as exc:
                 raise HTTPException(403, str(exc)) from None
-            extension = "zip" if receipt["encrypted"] or receipt["format"] == "handover" else receipt["format"]
+            extension = "zip" if receipt["encrypted"] or receipt["format"] in ("handover", "group") else receipt["format"]
             return TemporaryDownload(path, filename="tgwitness-" + profile_id[:8] + "-" + export_id[:8] + "." + extension,
                                      media_type="application/octet-stream", headers={**headers(receipt), "Cache-Control": "no-store"})
         except BaseException:

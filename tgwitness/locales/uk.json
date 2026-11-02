@@ -6060,5 +6060,25 @@
 "Export group": "Експорт групи",
 "Fix": "Виправити",
 "Share this value": "Поділитися цим значенням",
-"Share this value instead": "Поділіться цим значенням замість цього"
+"Share this value instead": "Поділіться цим значенням замість цього",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Відсутнє вибране вкладення. Відновіть файл, а потім створіть передачу заново або явно виключіть вкладення.",
+"Request body timed out": "Тайм-аут тіла запиту",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "Дії Telegram з панелі вимкнені для мети «Докази у справі».",
+"This chat is outside the permitted scope.": "Цей чат виходить за межі дозволеного обсягу.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Цей експорт перевищує ліміт кешу збережених копій. Завантажте його зараз; підготуйте його знову пізніше.",
+"This export is not open to this access.": "Цей експорт недоступний для цього доступу.",
+"This prepared export is unavailable.": "Цей підготовлений експорт недоступний.",
+"Too many pending request bodies. Try again shortly.": "Занадто багато очікуючих запитів. Спробуйте ще раз через деякий час.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Для адресатів у мережі Onion на сервері потрібно встановити параметр TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1; запити, призначені лише для публічних адресатів, не можуть перевірити адреси призначення.",
+"Invalid destination hostname.": "Неправильне ім’я хосту призначення.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "Не вдалося перевірити публічний DNS-адресат через налаштований проксі-сервер. Спроба встановлення прямого з’єднання не здійснювалася.",
+"Workspace observation: no interruptions in the available period": "Спостереження за робочим простором: без перерв протягом усього доступного періоду",
+"No workspace observation in the last {days} days": "Спостереження за робочим простором не проводилося протягом останніх {days} днів",
+"Workspace observation: {n} interruption in the available period": "Спостереження за робочим простором: {n} переривання протягом доступного періоду",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "Спостереження за робочим простором: {n} переривання протягом доступного періоду",
+"few": "Спостереження за робочим простором: {n} переривання протягом доступного періоду",
+"many": "Спостереження за робочим простором: {n} переривань за вказаний період",
+"other": "Спостереження за робочим простором: {n} переривання протягом доступного періоду"
+}
 }

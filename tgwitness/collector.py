@@ -1698,6 +1698,8 @@ class Collector:
         return self.dialog_cache[chat_id]["entity"]
 
     async def start(self):
+        from .settings_hub import validate_collection_scope
+        validate_collection_scope(self.store)
         if self.running:
             return
         client = self.client
@@ -2045,7 +2047,9 @@ class Collector:
             if not await self.covers(event.chat_id, getattr(event, "chat", None)):
                 return
             content = self.store.message_state(event.chat_id, event.message.id)["content"]
-            if content and content["observable"] == message_content.of_payload(describe_message(event.message)):
+            payload = describe_message(event.message)
+            if content and content["observable"] == message_content.of_payload(payload) \
+                    and content["edited_at"] == payload.get("edited_at"):
                 return
             await self.capture_message(event.message, "message.edited", event.chat_id,
                                        getattr(event, "original_update", None))
@@ -2288,12 +2292,12 @@ class Collector:
             return result
 
         batch = self.param("recheck_batch")
-        newest = self.store.alive_message_ids(chat_id, limit=batch)
+        newest = self.store.alive_message_ids(chat_id, limit=batch, include_missing=True)
         older = []
         if len(newest) == batch:
             cursors = self.store.get_setting("recheck_cursor", {})
             below = min(cursors.get(str(chat_id)) or newest[-1], newest[-1])
-            older = self.store.alive_message_ids(chat_id, below=below, limit=batch)
+            older = self.store.alive_message_ids(chat_id, below=below, limit=batch, include_missing=True)
             cursors[str(chat_id)] = older[-1] if len(older) == batch else None
             self.store.set_setting("recheck_cursor", cursors)
         ids = newest + older
@@ -2304,17 +2308,29 @@ class Collector:
         for message_id, message in zip(ids, messages):
             if message is None:
                 missing.append(message_id)
-            elif settings["edits"] and not self.own_skipped(message):
-
-                content = self.store.message_state(chat_id, message_id)["content"]
-                if content and content["observable"] != message_content.of_payload(describe_message(message)):
+            elif not self.own_skipped(message):
+                state = self.store.message_state(chat_id, message_id)
+                content = state["content"]
+                payload = describe_message(message)
+                changed = content and (content["observable"] != message_content.of_payload(payload)
+                                       or content["edited_at"] != payload.get("edited_at"))
+                if settings["edits"] and changed:
                     await self.capture_message(message, "message.edited", chat_id, source="recheck")
                     result["edited"] += 1
+                elif state["missing"]:
+                    await self.capture_message(message, "message.recovered", chat_id, source="recheck")
+                    result["recovered"] += 1
         result.update(checked=len(ids), checked_from=min(ids), checked_to=max(ids))
         if missing and settings["deletions"]:
-            if len(missing) == len(ids) and len(ids) >= 10:
-
-                await self.client.get_messages(entity, limit=1)
+            if len(missing) == len(ids):
+                probe = await self.client.get_messages(entity, limit=1)
+                if not probe or not any(message is not None for message in probe):
+                    self.store.append("coverage.gap", {
+                        "reason": "recheck_visibility_uncertain", "checked_from": min(ids), "checked_to": max(ids),
+                        "meaning": "No requested messages or visible history were returned. Individual messages "
+                                   "were not marked missing because chat access could not be confirmed."}, chat_id)
+                    result["visibility_uncertain"] = True
+                    return result
             for message_id in missing:
                 state = self.store.message_state(chat_id, message_id)
                 if state["deleted"] or state["missing"]:

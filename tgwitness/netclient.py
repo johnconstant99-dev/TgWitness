@@ -12,19 +12,26 @@ panel cannot set. A proxy is held to the same rule unless the main administrator
 """
 import asyncio
 import ipaddress
+import json
 import os
 import socket
 import ssl
+import threading
+import time
+from collections import OrderedDict
 from contextlib import suppress
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
 
-from python_socks import ProxyType
+from python_socks import ProxyError, ProxyType
 from python_socks.async_.asyncio import Proxy
 
 
 PIECE = 64 * 1024
 PRIVATE_OPT_IN = "TGWITNESS_ALLOW_PRIVATE_DESTINATIONS"
 NAT64 = ipaddress.ip_network("64:ff9b::/96")
+DOH_URL = "https://1.1.1.1/dns-query"
+DNS_CACHE_LIMIT, DNS_CACHE_SECONDS = 128, 30
+_dns_cache, _dns_lock = OrderedDict(), threading.Lock()
 
 
 class RouteError(Exception):
@@ -103,6 +110,98 @@ async def connect_public(host, port, tls, private):
     raise failure
 
 
+async def public_proxy_addresses(host, network, timeout):
+    """Resolve through the same proxy, then pin public addresses without local destination DNS."""
+    if address := literal(host):
+        refuse_internal(host, [address])
+        return [address]
+    name = host.rstrip(".").encode("idna").decode("ascii").lower()
+    if name.endswith(".onion") or name == "onion":
+        raise RouteError("Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; "
+                         "public-only requests cannot verify their destination addresses.")
+    if not name or len(name) > 253 or any(not label or len(label) > 63 or
+            any(c not in "abcdefghijklmnopqrstuvwxyz0123456789-_" for c in label) for label in name.split(".")):
+        raise RouteError("Invalid destination hostname.")
+    route = tuple(getattr(network, key, None) for key in
+                  ("kind", "host", "port", "username", "password", "tls", "tls_server_name", "local_proxy"))
+    key = (route, name)
+    with _dns_lock:
+        cached = _dns_cache.get(key)
+        if cached and cached[0] > time.monotonic():
+            _dns_cache.move_to_end(key)
+            return list(cached[1])
+        _dns_cache.pop(key, None)
+
+    async def query(kind):
+        # The fixed resolver IP needs no hostname lookup. open_stream checks its
+        # public literal address and uses the same proxy without recursion here.
+        _, _, body = await request("GET", DOH_URL + "?" + urlencode({"name": name, "type": kind}), network,
+            headers={"Accept": "application/dns-json"}, timeout=timeout, limit=64 * 1024)
+        value = json.loads(body)
+        if not isinstance(value, dict) or value.get("Status") != 0 or value.get("TC"):
+            raise ValueError("DNS resolution failed")
+        records = value.get("Answer", [])
+        if not isinstance(records, list):
+            raise ValueError("Invalid DNS response")
+        addresses, ttl = [], DNS_CACHE_SECONDS
+        for record in records:
+            if not isinstance(record, dict):
+                raise ValueError("Invalid DNS answer")
+            ttl = min(ttl, max(0, int(record.get("TTL", 0))))
+            if record.get("type") in (1, 28):
+                address = ipaddress.ip_address(record["data"])
+                if address.version != (4 if record["type"] == 1 else 6):
+                    raise ValueError("Invalid DNS address family")
+                addresses.append(str(address))
+        return addresses, ttl
+
+    try:
+        answers = await asyncio.wait_for(asyncio.gather(query("A"), query("AAAA"), return_exceptions=True), timeout)
+        for answer in answers:
+            if isinstance(answer, BaseException):
+                raise answer
+        addresses = list(dict.fromkeys(address for rows, _ in answers for address in rows))
+        if not addresses:
+            raise ValueError("No destination addresses")
+        refuse_internal(host, addresses)
+    except RouteError:
+        raise
+    except (OSError, ProxyError, ValueError, TimeoutError, KeyError, TypeError) as exc:
+        raise RouteError("Public destination DNS could not be verified through the configured proxy. "
+                         "No direct connection was attempted.") from exc
+    ttl = min(ttl for _, ttl in answers)
+    if ttl:
+        with _dns_lock:
+            _dns_cache[key] = (time.monotonic() + ttl, tuple(addresses))
+            _dns_cache.move_to_end(key)
+            while len(_dns_cache) > DNS_CACHE_LIMIT:
+                _dns_cache.popitem(last=False)
+    return addresses
+
+
+async def connect_proxy(network, address, target, port, tls, host, timeout):
+    """Connect the checked numeric target while keeping the service's TLS identity."""
+    if network.kind == "http" and network.tls:
+        from .https_proxy import tunnel
+        reader, writer = await tunnel(network, target, port, timeout, address)
+        if tls:
+            try:
+                await asyncio.wait_for(writer.start_tls(tls, server_hostname=host), timeout)
+            except BaseException:
+                writer.close()
+                raise
+        return reader, writer
+    proxy = Proxy(ProxyType.SOCKS5 if network.kind == "socks5" else ProxyType.HTTP, address,
+                  network.port, network.username or None, network.password or None, rdns=True)
+    sock = await proxy.connect(dest_host=target, dest_port=port, timeout=timeout)
+    try:
+        return await asyncio.wait_for(
+            asyncio.open_connection(sock=sock, ssl=tls, server_hostname=host if tls else None), timeout)
+    except BaseException:
+        sock.close()
+        raise
+
+
 async def open_stream(url, network, timeout, private=False):
     """private=True only for addresses an operator configured outside the panel (the witness's collector)."""
     parts = urlsplit(url)
@@ -116,24 +215,15 @@ async def open_stream(url, network, timeout, private=False):
     if network.telegram_only:
         raise RouteError("MTProxy carries only Telegram traffic; choose Direct, SOCKS5 or HTTP in "
                          "Connection settings for this request.")
-    if not private and literal(host):
-        refuse_internal(host, [literal(host)])
     address = await asyncio.wait_for(proxy_address(network, private), timeout)
-    if network.kind == "http" and network.tls:
-        from .https_proxy import tunnel
-        reader, writer = await tunnel(network, host, port, timeout, address)
-        if tls:
-            try:
-                await asyncio.wait_for(writer.start_tls(tls, server_hostname=host), timeout)
-            except BaseException:
-                writer.close()
-                raise
-        return reader, writer
-    proxy = Proxy(ProxyType.SOCKS5 if network.kind == "socks5" else ProxyType.HTTP, address,
-                  network.port, network.username or None, network.password or None, rdns=True)
-    sock = await proxy.connect(dest_host=host, dest_port=port, timeout=timeout)
-    return await asyncio.wait_for(
-        asyncio.open_connection(sock=sock, ssl=tls, server_hostname=host if tls else None), timeout)
+    targets = [host] if private else await public_proxy_addresses(host, network, timeout)
+    failure = OSError("No address for " + host)
+    for target in targets:
+        try:
+            return await connect_proxy(network, address, target, port, tls, host, timeout)
+        except (OSError, ProxyError) as exc:
+            failure = exc
+    raise failure
 
 
 async def request(method, url, network, headers=None, body=b"", length=None, sink=None,

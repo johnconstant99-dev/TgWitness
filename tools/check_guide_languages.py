@@ -1,13 +1,9 @@
 """Exercise both bundled guides in the application and under a Pages project path."""
-from functools import partial
-from http.server import ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
-import shutil
 import sys
 import tempfile
-import threading
 from urllib.parse import urlsplit
 
 from playwright.sync_api import sync_playwright, expect
@@ -16,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tgwitness import i18n
 from tools.check_browser import RunningApp, check_layout, launch_browser
-from tools.check_site import QuietHandler
+from tools.site_test_server import site_server
 from tools.i18n_keys import script_keys
 
 PAGES = ("guide.html", "dedicated-account.html")
@@ -152,22 +148,14 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     os.environ.pop("TGWITNESS_TOKEN", None)
     with tempfile.TemporaryDirectory(prefix="guide-languages-", dir=ROOT / "test-results") as scratch:
-        shutil.copytree(ROOT / "dist/site", Path(scratch) / "TgWitness")
-        server = ThreadingHTTPServer(("127.0.0.1", 0), partial(QuietHandler, directory=scratch))
-        thread = threading.Thread(target=server.serve_forever, daemon=True)
-        thread.start()
-        try:
+        with site_server(ROOT / "dist/site") as public:
             with RunningApp(Path(scratch) / "application", demo=True) as app, sync_playwright() as pw:
                 browser = launch_browser(pw)
                 check_inventory(browser)
                 check_guides(browser, app.url + "/", output, "application")
-                check_guides(browser, f"http://127.0.0.1:{server.server_port}/TgWitness/demo/", output, "public")
-                check_public_redirects(browser, f"http://127.0.0.1:{server.server_port}/TgWitness/")
+                check_guides(browser, public + "demo/", output, "public")
+                check_public_redirects(browser, public)
                 browser.close()
-        finally:
-            server.shutdown()
-            server.server_close()
-            thread.join(timeout=10)
     print("Guide languages passed: 26 bundled guide languages and 25 complete public account guides.")
 
 

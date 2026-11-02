@@ -5988,5 +5988,23 @@
 "Export group": "গ্রুপ রপ্তানি",
 "Fix": "ফিক্স",
 "Share this value": "এই মান শেয়ার করুন",
-"Share this value instead": "এই মানটি শেয়ার করুন"
+"Share this value instead": "এই মানটি শেয়ার করুন",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "নির্বাচিত সংযুক্তি অনুপস্থিত। ফাইলটি পুনরুদ্ধার করুন, তারপর আবার হস্তান্তর তৈরি করুন, অথবা স্পষ্টভাবে সংযুক্তিগুলো বাদ দিন।",
+"Request body timed out": "অনুরোধের বডি সময়সীমা অতিক্রম করেছে",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "প্যানেল থেকে টেলিগ্রাম অ্যাকশনগুলো 'মামলার প্রমাণ' লক্ষ্যটির জন্য বন্ধ আছে।",
+"This chat is outside the permitted scope.": "এই চ্যাট অনুমোদিত পরিসরের বাইরে।",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "এই রপ্তানি সংরক্ষিত কপি ক্যাশের সীমা অতিক্রম করেছে। এখনই এটি ডাউনলোড করুন; পরে আবার প্রস্তুত করুন।",
+"This export is not open to this access.": "এই এক্সপোর্ট এই অ্যাক্সেসের জন্য উন্মুক্ত নয়।",
+"This prepared export is unavailable.": "এই প্রস্তুত রপ্তানিটি অনুপলব্ধ।",
+"Too many pending request bodies. Try again shortly.": "অত্যধিক পেন্ডিং অনুরোধের বডি। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "অনিয়ন গন্তব্যের জন্য সার্ভারে TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 থাকা আবশ্যক; শুধুমাত্র পাবলিক অনুরোধগুলো তাদের গন্তব্য ঠিকানা যাচাই করতে পারে না।",
+"Invalid destination hostname.": "অবৈধ গন্তব্য হোস্টনাম।",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "কনফিগারকৃত প্রক্সির মাধ্যমে পাবলিক ডেস্টিনেশন DNS যাচাই করা যায়নি। কোনো সরাসরি সংযোগের চেষ্টা করা হয়নি।",
+"Workspace observation: no interruptions in the available period": "ওয়ার্কস্পেস পর্যবেক্ষণ: উপলব্ধ সময়কালে কোনো বিঘ্নতা নেই",
+"No workspace observation in the last {days} days": "গত {days} দিনে কোনো কর্মক্ষেত্র পর্যবেক্ষণ হয়নি",
+"Workspace observation: {n} interruption in the available period": "ওয়ার্কস্পেস পর্যবেক্ষণ: {n}টি উপলব্ধ সময়ের মধ্যে একটি বিঘ্ন",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "ওয়ার্কস্পেস পর্যবেক্ষণ: {n}টি উপলব্ধ সময়ের মধ্যে একটি বিঘ্ন",
+"other": "ওয়ার্কস্পেস পর্যবেক্ষণ: {n}টি উপলব্ধ সময়ের মধ্যে বিঘ্ন"
+}
 }

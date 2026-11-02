@@ -120,9 +120,9 @@ export function createGroupView(ctx){
     const list=node('ul','group-chat-list');
     for(const c of data.chats){
       const li=node('li','group-chat'),text=node('div','group-chat-text'),cover=c.coverage;
-      const coverage=!c.recorded_by.length?tr('none of them records it'):!cover.observed?tr('not observed in the last {days} days',{days:data.window_days}):
-        cover.interruptions?trn('{n} interruption in {days} days','{n} interruptions in {days} days',cover.interruptions,{days:data.window_days})+' ('+ctx.fmtDuration(cover.seconds_unobserved)+')':
-        tr('no interruptions in {days} days',{days:data.window_days});
+      const coverage=!c.recorded_by.length?tr('none of them records it'):!cover.observed?tr('No workspace observation in the last {days} days',{days:data.window_days}):
+        cover.interruptions?trn('Workspace observation: {n} interruption in the available period','Workspace observation: {n} interruptions in the available period',cover.interruptions)+' ('+ctx.fmtDuration(cover.seconds_unobserved)+')':
+        tr('Workspace observation: no interruptions in the available period');
       const paused=c.recorded_by.length&&!c.recorded_by.some(id=>profile(id)?.collector?.running);
       text.append(node('strong','',c.title||String(c.chat_id)),
         node('span','group-chat-meta',tr('{n} of {total} accounts see it',{n:c.seen_by.length,total})+' · '+coverage+(paused?' · '+tr('recording paused'):'')));

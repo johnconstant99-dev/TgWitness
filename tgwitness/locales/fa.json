@@ -5988,5 +5988,23 @@
 "Export group": "صادرات گروه",
 "Fix": "اصلاح",
 "Share this value": "این مقدار را به اشتراک بگذارید",
-"Share this value instead": "به جای آن این مقدار را به اشتراک بگذارید"
+"Share this value instead": "به جای آن این مقدار را به اشتراک بگذارید",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "پیوست انتخاب‌شده وجود ندارد. فایل را بازیابی کنید، سپس هاندوور را دوباره ایجاد کنید یا صراحتاً پیوست‌ها را حذف کنید.",
+"Request body timed out": "بدنه درخواست زمانی منقضی شد",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "اقدامات تلگرام از پنل برای هدف «شواهد برای یک پرونده» غیرفعال هستند.",
+"This chat is outside the permitted scope.": "این گفتگو خارج از محدوده مجاز است.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "این خروجی از حد حافظهٔ کش نسخهٔ ذخیره شده فراتر می‌رود. اکنون آن را دانلود کنید؛ بعداً دوباره آماده کنید.",
+"This export is not open to this access.": "این خروجی برای این دسترسی در دسترس نیست.",
+"This prepared export is unavailable.": "این خروجی آماده‌شده در دسترس نیست.",
+"Too many pending request bodies. Try again shortly.": "بدنه‌های درخواست در انتظار بیش از حد زیاد است. کمی بعد دوباره تلاش کنید.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "مقاصد پیازی نیازمند مقدار TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 روی سرور هستند؛ درخواست‌های فقط-عمومی نمی‌توانند آدرس مقصد خود را تأیید کنند.",
+"Invalid destination hostname.": "نام میزبان مقصد نامعتبر است.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "DNS مقصد عمومی از طریق پروکسی پیکربندی‌شده قابل تأیید نبود. هیچ اتصال مستقیمی برقرار نشد.",
+"Workspace observation: no interruptions in the available period": "مشاهده فضای کاری: بدون وقفه در دورهٔ در دسترس",
+"No workspace observation in the last {days} days": "در {days} روز گذشته هیچ مشاهده‌ای از فضای کاری صورت نگرفته است",
+"Workspace observation: {n} interruption in the available period": "مشاهده فضای کاری: وقفه {n} در دورهٔ در دسترس",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "مشاهده فضای کاری: وقفه {n} در دورهٔ در دسترس",
+"other": "مشاهده فضای کاری: {n} وقفه در دورهٔ در دسترس"
+}
 }

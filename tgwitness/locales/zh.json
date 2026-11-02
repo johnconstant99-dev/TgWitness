@@ -5952,5 +5952,22 @@
 "Export group": "导出组",
 "Fix": "修正",
 "Share this value": "分享此值",
-"Share this value instead": "请分享此值"
+"Share this value instead": "请分享此值",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "选定的附件缺失。请恢复该文件，然后重新创建移交包，或者明确省略附件。",
+"Request body timed out": "请求正文超时",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "对于“案件证据”目标，面板中的 Telegram 操作已禁用。",
+"This chat is outside the permitted scope.": "此聊天超出了允许的范围。",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "此次导出超出了保存副本的缓存限制。请立即下载；稍后再重新准备。",
+"This export is not open to this access.": "此导出功能对当前访问权限不可用。",
+"This prepared export is unavailable.": "此预设导出功能不可用。",
+"Too many pending request bodies. Try again shortly.": "待处理的请求正文过多。请稍后再试。",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "对于洋葱网络目的地，服务器端需设置 TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1；仅限公开的请求无法验证其目标地址。",
+"Invalid destination hostname.": "目标主机名无效。",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "无法通过配置的代理验证公共目标 DNS。未尝试建立直接连接。",
+"Workspace observation: no interruptions in the available period": "工作区观察：在可用期间内无中断",
+"No workspace observation in the last {days} days": "过去 {days} 天内未进行工作区监控",
+"Workspace observation: {n} interruption in the available period": "工作区观察：在可用期间内发生{n}次中断",
+"Workspace observation: {n} interruptions in the available period": {
+"other": "工作区观察：在可用期间内发生{n}次中断"
+}
 }

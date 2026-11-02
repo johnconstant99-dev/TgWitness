@@ -1,9 +1,8 @@
 # TgWitness product and collection model
 
-Design reference: 26 October 2026. The primary use case is private Telegram groups
-and channels accessible to the connected accounts. This document separates
-implemented behavior, platform boundaries and future work. A target architecture
-item is not a claim that the feature already exists.
+TgWitness preserves Telegram conversations accessible to connected accounts,
+records observed changes and prepares verifiable exports. This reference describes
+the collection model, current workflows and their boundaries.
 
 ## Standalone application
 
@@ -14,15 +13,14 @@ The operator connects their accounts, chooses sources visible to each, and obtai
 a saved observation journal. The panel exposes content, saved changes, observation
 provenance and known gaps. Another investigator can verify the exported material.
 
-Four distinct states matter: account authorization, access to a source, a working
-collector, and the extent to which delivery completeness is established. None of
-the first three automatically proves the fourth. A quiet group is not necessarily
-a failed collector.
+The panel distinguishes account authorization, access to a source, collector
+activity and recorded coverage. Review those states together when assessing an
+interval with few messages or a connection problem.
 
 ## Shared investigations
 
 An administrator can issue [access tokens](ACCESS.md) scoped to workspaces and
-individual chats, with seven permissions, IP restrictions, expiry, sign-in limits
+individual chats, with per-action permissions, IP restrictions, expiry, sign-in limits
 and session control. A read-only reviewer can inspect a case without receiving
 Telegram authorization or the main panel key. Chat-limited access stays separate
 from account-wide settings and full-journal exports.
@@ -38,6 +36,10 @@ External HTTP requests have a separate route and off switch.
 [read-only MCP](MCP.md), [local OCR/transcription](MEDIA-ANALYSIS.md) and
 [outgoing webhooks](WEBHOOKS.md) are included in 0.7.1. Analytical reports and recognized text stay separate
 from captured events.
+
+[Case Board](CASE-BOARD.md) adds source-linked bookmarks, quotes, notes and
+collections within a workspace. The [report constructor](CASE_REPORTS.md) selects
+material, sections and one of eight designs for supported HTML/PDF exports.
 
 ## Optional extras
 
@@ -92,14 +94,18 @@ authorization across workspaces is rejected. A journal already bound to one Tele
 account cannot be reassigned to another; reconnecting the same account is allowed.
 This preserves account identity and the relevant message-ID scope.
 
-There is no fixed number and no measured throughput guarantee. Workspaces share a
-Python process and event loop. Separate account workers remain future work. For
-current process isolation, use separate installations, ports and data directories.
+The application sets no fixed workspace count. Each workspace runs its own collector
+tasks for connection monitoring, media downloads, rechecks and new-chat intake within
+a shared Python process and event loop. Throughput depends on the workload. For
+process isolation, use separate installations, ports and data directories.
 
 Assign each account sources it can access. Different accounts may observe the same
 group, but their observations remain separate and retain their origin. Two accounts
-on one operator-controlled machine are not two independent witnesses. Exports are
-per workspace; a merged case package or global Telegram timeline is not implemented.
+on one operator-controlled machine are not two independent witnesses. **Export group**
+bundles the separately signed workspace ZIPs with a signed file list containing their
+workspace IDs, hashes and signing-key fingerprints. Each journal retains its own
+boundary. Build a combined cross-workspace timeline in case notes or analysis tools,
+retaining those source references.
 
 ## Capture and attribution
 
@@ -114,13 +120,13 @@ separate-update switches. There are no per-group category overrides yet.
 
 | Material | Captured now | Boundary |
 | --- | --- | --- |
-| Message | Text, peer/message IDs, sender metadata, replies and original update envelope | No publicly verifiable Telegram signature for the message |
+| Message | Text, peer/message IDs, sender metadata, replies and original update envelope | Preserved as an account-visible observation signed by the collector |
 | Edit | New observed version and any previously saved versions | Intermediate edits during downtime can be lost; sender is not necessarily editor |
 | Deletion | Notification and prior captured content, if any | Usually no deleter or precise action time |
-| Unscoped deletion | Original account-level notice without guessing the peer | Strict correlation with previously saved account-scoped IDs is future work |
+| Account-level deletion notice | Original notice; resolved records include the saved chat and correlation method | Requires exactly one previously saved private-chat or ordinary-group match in scope; other IDs stay `deletion.unscoped`. Channel and supergroup IDs are excluded from this correlation |
 | Reaction | Delivered counters and visible recent identities | A complete available reactor list requires separate queries; channels may hide identities |
 | Membership | Service messages and delivered participant updates | Visibility depends on role and chat type; missing events do not establish absence |
-| Admin actions | Only relevant delivered updates | Separate admin-log polling is not implemented |
+| Admin actions | Relevant delivered updates and an admin-log snapshot in channel/supergroup chat exports | The export reads the log when available to the exporting admin account; continuous admin-log polling is outside this path |
 | Attachment | Original version descriptor, downloaded bytes/SHA-256 and attempt outcomes | A vanished file may be unrecoverable; the latest version is not substituted |
 | History | Explicit snapshot of current visible messages | Does not reconstruct all edits or deleted content |
 | Collector process | Start/stop, heartbeat, errors, settings, scope and program receipt | Self-report, not independent process attestation |
@@ -144,7 +150,10 @@ sources**. This is not a limit of ten selected groups or a completeness guarante
 | Mode | Purpose | Status |
 | --- | --- | --- |
 | Standard observation | Record delivered updates from selected sources | Implemented |
-| Priority observation | Additional difference checks for a bounded source set | Not implemented as a user mode |
+| Priority rechecks | Starred sources use their own configurable interval and take precedence in each bounded recheck pass | Implemented with history and message queries |
+
+The priority star controls these rechecks. Additional `updates.getChannelDifference`
+short polling is not exposed as a separate user mode.
 
 Arbitrary high-frequency polling, ignoring FloodWait or assuming linear capacity
 from extra accounts is not a valid sizing model. Default limits are the
@@ -200,13 +209,13 @@ A retained local checkpoint can detect rollback to an earlier journal prefix.
 | Valid independent TSA response | Existence of particular bytes by the TSA time under explicit trust assumptions |
 
 RFC 3161 request preparation and OpenSSL response verification are implemented.
-Automatic submission is not. A request or local signature carrying the machine's
-time is not an independent timestamp. See [TIMESTAMP.md](TIMESTAMP.md).
+Evidence mode also submits checkpoint hashes to configured timestamp services.
+Retain and verify the authority's response to establish an independent time anchor.
+See [TIMESTAMP.md](TIMESTAMP.md).
 
-An operator controlling the collector and signing key can fabricate new signed
-observations. The signatures do not establish Telegram origin, truth or automatic
-legal admissibility. Stronger custody requires independent checkpoint/time storage,
-key access controls, transfer records and verification from trusted software.
+Retain checkpoints independently, control access to signing keys, keep transfer
+records and verify exports with trusted software. The [verification scope](EVIDENCE.md#verification-scope)
+explains how those checks complement one another and which trust assumptions apply.
 
 ## Export, deployment and handoff
 
@@ -246,9 +255,7 @@ Before a stable release, qualify:
 6. Clean installation on the intended OS/container matrix and verified backup restore.
 7. Independent review of security, signatures and attribution/evidence claims.
 
-Admin-log polling, additional reactor lists, priority polling, separate workers,
-application-wide encryption remain future work. Scoped panel access is described
-in [access and permissions](ACCESS.md). Version 0.6 supports
+Scoped panel access is described in [access and permissions](ACCESS.md). Version 0.6 supports
 the bounded single-account TData and account-file import described in [ACCOUNTS.md](ACCOUNTS.md).
 Review Telegram API terms before publication. Research references and platform
 findings are in [RESEARCH.md](internal/RESEARCH.md).

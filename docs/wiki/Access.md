@@ -11,7 +11,7 @@ for reading, exporting, collecting, interacting, settings and account management
 ## Issue a token
 
 1. As the administrator, open **Access → Give someone access**.
-2. Name the access and choose its workspaces and chats.
+2. Name the access and choose its workspaces, an account group or individual chats.
 3. Choose permissions. For a reviewer, keep **View** only; add **Export** for downloads.
 4. Set an expiry, session limits and IP restrictions if needed.
 5. Create the access and copy the token shown once. Send it privately with the panel URL.
@@ -22,6 +22,8 @@ for reading, exporting, collecting, interacting, settings and account management
 | Review one conversation | Select that chat; keep `view` |
 | Download a case | Select the required chats; enable `export` |
 | Manage collection | Select whole workspaces; enable `sources` and `collect` |
+| Discuss the case on Case Board | Select the chats; enable `board.read`, add `board.write` to post |
+| Cover a whole account group | Select the group; accounts added to it later are included |
 | End one connection | **Open sessions → End session** |
 | Withdraw access completely | Revoke the entry under **Accesses** |
 
@@ -32,7 +34,9 @@ read and do. Changing one does not change the other.
 
 Chat-limited access cannot open account-wide settings, sign in as the Telegram
 account or download the full workspace journal. Additional permission checkboxes
-do not remove that boundary. **All workspaces** includes accounts added later.
+do not remove that boundary. **All workspaces** includes accounts added later, and a
+group access includes accounts added to that group. Case Board notes follow the same
+chat scope.
 
 Changes apply on subsequent requests. Revocation ends open sessions but cannot
 recall downloaded files. Closing a session leaves collection running.

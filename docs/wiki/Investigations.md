@@ -15,7 +15,9 @@
 - [Set up the case](#set-up-the-case)
 - [Keep a source register](#keep-a-source-register)
 - [Follow changes and connections](#follow-changes-and-connections)
+- [Organize and review on Case Board](#organize-and-review-on-case-board)
 - [Record deliberate actions](#record-deliberate-actions)
+- [Work with the saved archive](#work-with-the-saved-archive)
 - [Hand over the case](#hand-over-the-case)
 
 </details>
@@ -34,11 +36,11 @@ Use one dedicated account and a clearly defined question. Keep source observatio
 4. Start observation and record its start time.
 5. Save current chat histories where earlier visible context is needed.
 
-Investigation mode prepares collection of an account's visible chats and actions. It does not grant access to private sources or turn earlier history into continuous observation.
+Investigation mode prepares collection of the account's visible chats and actions. Retain the history acquisition results alongside the coverage of ongoing observation.
 
 ## Keep a source register
 
-For each source, retain its workspace, numeric chat ID, observed title/username, reason for inclusion, acquisition method and time range. Add access changes and gaps. Names and usernames can change; do not use them as the sole identity of a source.
+For each source, retain its workspace, numeric chat ID, observed title/username, reason for inclusion, acquisition method and time range. Add access changes and gaps. The numeric ID keeps the source identifiable through name and username changes.
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
@@ -54,7 +56,24 @@ People profiles are opt-in per chat. They can show observed names, reply relatio
 | Same numeric sender ID | The saved records identify the same Telegram account |
 | Same URL or wallet string | The records contain the same string; ownership is a separate question |
 | Same attachment SHA-256 | The preserved file bytes match |
-| Similar name or avatar | A lead to examine; not proof of one person or operator |
+| Similar name or avatar | A lead to examine using the cited account records |
+
+## Organize and review on Case Board
+
+Open **Investigation → Case Board** in Standard or Expert mode and create a collection for
+the case. Use **To board** (or **B**) beside a journal record or saved chat message to keep its
+source reference on a card. Select an exact passage for **Highlight → board**, Shift-click two
+records in one chat for **Slice between**, or save Journal's current filters as a slice.
+
+Sort cards into collections, discuss them in threads and set a team status. Signed revisions
+retain the team's changes. **Presentation** walks through cards, source context and comments
+without editing controls. Workspace and chat permissions also apply; configure board rights
+in [Access](Access.md).
+
+Team annotations stay in the workspace with their own signed history, separately identifiable
+from Telegram observations. Reports label them as team notes; minimized handovers include them
+when selected. Evidence ZIPs carry the board, and slices export as signed JSON. See
+[Case Board](../CASE-BOARD.md) for roles, exports and verification.
 
 ## Record deliberate actions
 
@@ -76,6 +95,13 @@ source references and revisions separately from the signed journal.
 
 Build a timeline citing saved records, with both source time and observation time where available. Include the source register, scope changes, gaps, signed evidence ZIPs, separate history exports, checkpoints and trusted fingerprints.
 
-Do not merge journals from different workspaces into one apparent signing identity. A cross-account narrative should cite the original workspace for each observation.
+In **Exports → Configure and preview**, choose the report's data, design, contents and written
+findings. Include Case Board bookmarks and slices, or team comments, when useful to the recipient.
+[Report studio](../CASE_REPORTS.md) offers eight designs for supported HTML and native PDF outputs.
+Use the separate handover controls when the recipient needs a minimized copy.
 
-**Next:** [Exports](Exports-and-Verification.md) · [Worked cross-chat case](../INVESTIGATION.md) · [How the evidence works](../HOW-IT-WORKS.md)
+**Accounts → group → Export group** packages the accounts' signed exports with a signed file
+list. Keep each workspace's fingerprint with its records. A cross-account narrative and combined
+timeline are assembled separately, citing the original workspace for each observation.
+
+**Next:** [Case Board](../CASE-BOARD.md) · [Report studio](../CASE_REPORTS.md) · [Exports](Exports-and-Verification.md) · [Worked cross-chat case](../INVESTIGATION.md)

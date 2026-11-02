@@ -66,10 +66,17 @@ the queue. Each account accepts up to four files, 8 MiB total; a TData ZIP must
 contain one account. Each account gets a separate workspace; failed logins are rolled back,
 and duplicates are rejected. Locking or switching stops the remaining queue.
 
-Groups keep the account list organized. Open **Shared settings**, choose a template
-and select the settings to copy, then press **Apply to members**. Settings are copied
-once; sessions, signing keys, evidence and proxy credentials stay separate. An
-observing account keeps its IP mode until paused. Deleting a group preserves its
-accounts. See [session formats and limits](../ACCOUNTS.md).
+A group shares its settings with its accounts. Open **Accounts → Groups and shared
+settings → Shared settings** and choose the goal, files, protection, notification
+rules, recheck schedule, report settings, parameters and route. Every member follows
+the group; Settings marks each value 🔗 from the group or ✏️ the account's own. A
+change asks per account before replacing an own value, and accounts added later start
+with the group's values. Sessions, signing keys, evidence, notification destinations
+and proxy credentials stay separate. Deleting a group keeps its accounts.
+
+**Open group** shows the group page: members with **Start all** and **Pause all**,
+what needs attention, shared chats and the available workspace-observation intervals,
+and **Export group**. See [shared settings](../SETTINGS.md#account-groups) and
+[account groups](../ACCOUNTS.md#bulk-import-and-account-groups).
 
 **Next:** [Collection](Collection.md) · [Session formats and limits](../ACCOUNTS.md) · [Backup](Backup-and-Recovery.md)

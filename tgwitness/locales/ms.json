@@ -5952,5 +5952,22 @@
 "Export group": "Eksport kumpulan",
 "Fix": "Betulkan",
 "Share this value": "Kongsi nilai ini",
-"Share this value instead": "Berkongsi nilai ini sebaliknya"
+"Share this value instead": "Berkongsi nilai ini sebaliknya",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Lampiran yang dipilih hilang. Pulihkan fail, kemudian buat penyerahan semula, atau nyatakan secara eksplisit untuk mengecualikan lampiran.",
+"Request body timed out": "Badan permintaan tamat masa",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "Tindakan Telegram daripada panel dimatikan untuk matlamat bukti bagi kes.",
+"This chat is outside the permitted scope.": "Perbualan ini berada di luar skop yang dibenarkan.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Eksport ini melebihi had cache salinan yang disimpan. Muat turun sekarang; sediakan semula kemudian.",
+"This export is not open to this access.": "Eksport ini tidak terbuka untuk capaian ini.",
+"This prepared export is unavailable.": "Eksport yang disediakan ini tidak tersedia.",
+"Too many pending request bodies. Try again shortly.": "Terlalu banyak badan permintaan yang tertunggak. Cuba semula sebentar lagi.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Destinasi Onion memerlukan TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 pada pelayan; permintaan hanya awam tidak dapat mengesahkan alamat destinasi mereka.",
+"Invalid destination hostname.": "Nama hos destinasi tidak sah.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "DNS destinasi awam tidak dapat disahkan melalui proksi yang dikonfigurasikan. Tiada sambungan langsung dicuba.",
+"Workspace observation: no interruptions in the available period": "Pengamatan ruang kerja: tiada gangguan dalam tempoh yang tersedia",
+"No workspace observation in the last {days} days": "Tiada pemerhatian ruang kerja dalam {days} hari terakhir",
+"Workspace observation: {n} interruption in the available period": "Pengamatan ruang kerja: gangguan {n} dalam tempoh tersedia",
+"Workspace observation: {n} interruptions in the available period": {
+"other": "Pengamatan ruang kerja: {n}gangguan dalam tempoh yang tersedia"
+}
 }

@@ -5952,5 +5952,22 @@
 "Export group": "ส่งออกกลุ่ม",
 "Fix": "แก้ไข",
 "Share this value": "แชร์ค่านี้",
-"Share this value instead": "แชร์ค่านี้แทน"
+"Share this value instead": "แชร์ค่านี้แทน",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "ไฟล์แนบที่เลือกไว้หายไป โปรดกู้คืนไฟล์แล้วสร้างการส่งต่อใหม่ หรือระบุให้ชัดเจนว่าไม่ต้องการไฟล์แนบ",
+"Request body timed out": "ตัวเนื้อหาของคำขอหมดเวลา",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "การดำเนินการใน Telegram จากแผงควบคุมถูกปิดสำหรับเป้าหมาย “หลักฐานสำหรับคดี”",
+"This chat is outside the permitted scope.": "การสนทนานี้อยู่นอกขอบเขตที่อนุญาต",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "การส่งออกนี้เกินขีดจำกัดของแคชสำเนาที่เก็บไว้ โปรดดาวน์โหลดทันที และเตรียมใหม่ในภายหลัง",
+"This export is not open to this access.": "การส่งออกนี้ไม่เปิดให้เข้าถึง",
+"This prepared export is unavailable.": "การส่งออกที่เตรียมไว้นี้ไม่สามารถใช้งานได้",
+"Too many pending request bodies. Try again shortly.": "มีเนื้อหาคำขอที่รอการประมวลผลมากเกินไป โปรดลองอีกครั้งในไม่ช้า",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "จุดหมายปลายทางแบบ Onion จำเป็นต้องตั้งค่า TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 บนเซิร์ฟเวอร์; คำขอที่เปิดให้สาธารณะเท่านั้นไม่สามารถตรวจสอบที่อยู่ปลายทางได้",
+"Invalid destination hostname.": "ชื่อโฮสต์ปลายทางไม่ถูกต้อง",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "ไม่สามารถยืนยัน DNS ของปลายทางสาธารณะได้ผ่านพร็อกซีที่ตั้งค่าไว้ ไม่มีการพยายามเชื่อมต่อโดยตรง",
+"Workspace observation: no interruptions in the available period": "การสังเกตพื้นที่ทำงาน: ไม่มีการขัดจังหวะในช่วงเวลาที่มีอยู่",
+"No workspace observation in the last {days} days": "ไม่มีการสังเกตพื้นที่ทำงานใน{days} วันที่ผ่านมา",
+"Workspace observation: {n} interruption in the available period": "การสังเกตพื้นที่ทำงาน: มีการขัดจังหวะ{n} ครั้งในช่วงเวลาที่มีอยู่",
+"Workspace observation: {n} interruptions in the available period": {
+"other": "การสังเกตพื้นที่ทำงาน: มีการขัดจังหวะ{n} ครั้งในช่วงเวลาที่มีอยู่"
+}
 }

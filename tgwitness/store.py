@@ -186,7 +186,7 @@ class Store:
             deleted = {r[0] for r in self.db.execute(
                 "SELECT DISTINCT message_id FROM events WHERE chat_id=? AND kind='message.deleted'", (chat_id,))}
             missing = {r[0] for r in self.db.execute(
-                "SELECT DISTINCT message_id FROM events WHERE chat_id=? AND kind='message.missing_on_recheck'",
+                "SELECT message_id FROM message_state_index WHERE chat_id=? AND missing=1",
                 (chat_id,))} - deleted
         people, edited, owner = {}, set(), {}
         for row in rows:
@@ -249,15 +249,18 @@ class Store:
         return {"content": content,
                 "deleted": bool(row and row["deleted"]), "missing": bool(row and row["missing"])}
 
-    def alive_message_ids(self, chat_id, below=None, limit=200):
-        """Saved message IDs not yet recorded as deleted or missing, newest first."""
-        where, params = "chat_id=? AND text_seq IS NOT NULL AND deleted=0 AND missing=0", [chat_id]
+    def alive_message_ids(self, chat_id, below=None, limit=200, *, include_missing=False):
+        """Saved IDs without deletion notices; optionally retry those missing at an earlier recheck."""
+        where, params = "chat_id=? AND text_seq IS NOT NULL AND deleted=0", [chat_id]
+        if not include_missing:
+            where += " AND missing=0"
+        index = "message_text" if include_missing else "message_alive"
         if below is not None:
             where += " AND message_id<?"
             params.append(below)
         with self.lock:
             return [r[0] for r in self.db.execute(
-                "SELECT message_id FROM message_state_index INDEXED BY message_alive WHERE " + where +
+                "SELECT message_id FROM message_state_index INDEXED BY " + index + " WHERE " + where +
                 " ORDER BY message_id DESC LIMIT ?", (*params, limit))]
 
     def chat_messages(self, chat_id, before_id=None, limit=60, *, after_id=None):
@@ -301,6 +304,7 @@ class Store:
                 "telegram_edited_at": None, "origins": []})
             kind = row["kind"]
             if kind in TEXT_KINDS:
+                item["missing"], item["missing_observed_at"] = False, None
                 observed = payload.get("sender_observation") or {}
                 if item["sender"] is None and (payload.get("sender_id") is not None or observed):
                     item["sender"] = {"id": payload.get("sender_id", observed.get("id")),
@@ -318,7 +322,8 @@ class Store:
                 text, buttons = payload.get("text") or "", keyboard.of_payload(payload)
                 observable = message_content.of_payload(payload)
                 content_hash = hashlib.sha256(canonical(observable)).hexdigest()
-                if not item["versions"] or item["versions"][-1]["content_hash"] != content_hash:
+                if not item["versions"] or item["versions"][-1]["content_hash"] != content_hash \
+                        or item["versions"][-1]["edited_at"] != payload.get("edited_at"):
                     item["versions"].append({"text": text, "buttons": buttons, "observed_at": row["observed_at"], "event_hash": row["hash"],
                                              "entities": observable["entities"],
                                              "content_hash": content_hash,
@@ -705,23 +710,27 @@ class Store:
                 "SELECT * FROM events WHERE chat_id=? AND kind IN (" + ",".join("?" * len(kinds)) + ")"
                 " ORDER BY seq", (chat_id, *kinds))]
 
-    def sender_chats(self, sender_ids):
-        """{sender_id: {chat_id: distinct saved messages}} across every chat in this journal. Snapshots,
+    def sender_chats(self, sender_ids, *, allowed_chats=None):
+        """{sender_id: {chat_id: distinct saved messages}} in the permitted chats. Snapshots,
         edits and recoveries of one message are further records of the same message, not new ones."""
-        if not sender_ids:
+        if not sender_ids or allowed_chats is not None and not allowed_chats:
             return {}
         marks = ",".join("?" * len(TEXT_KINDS))
         wanted = set(sender_ids)
         sender_filter = "json_extract(payload,'$.sender_id') IN (" + ",".join("?" * len(wanted)) + ")"
         if None in wanted:
             sender_filter = "(" + sender_filter + " OR json_extract(payload,'$.sender_id') IS NULL)"
+        params = [*TEXT_KINDS, *wanted]
+        if allowed_chats is not None:
+            sender_filter += " AND chat_id IN (" + ",".join("?" * len(allowed_chats)) + ")"
+            params.extend(allowed_chats)
         result = {}
         with self.lock:
             for chat_id, sender, count in self.db.execute(
                     "SELECT chat_id, json_extract(payload,'$.sender_id') AS sender, count(DISTINCT message_id) FROM events"
                     " WHERE kind IN (" + marks + ") AND chat_id IS NOT NULL"
                     " AND " + sender_filter +
-                    " GROUP BY chat_id, sender", (*TEXT_KINDS, *wanted)):
+                    " GROUP BY chat_id, sender", params):
                 result.setdefault(sender, {})[chat_id] = count
         return result
 

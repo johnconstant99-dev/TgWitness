@@ -31,10 +31,11 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
     expect(page.locator("#view-evidence")).to_be_visible()
     expect(page.locator('#export-task-journal')).to_have_attribute('aria-pressed', 'true')
     expect(page.locator('#export-account-panel')).to_be_hidden()
-    expect(page.locator('#view-evidence [data-export="html"]')).to_be_hidden()
+    expect(page.locator('#view-evidence [data-export="html"]')).to_be_visible()
+    expect(page.locator('#view-evidence [data-export="jsonl"]')).to_be_hidden()
     answers = page.request.get(url + "demo/fixtures.json").json()
     for fmt in ("zip", "html", "jsonl", "csv"):
-        if fmt == "html":
+        if fmt == "jsonl":
             page.locator('#export-more-formats > summary').click()
         with page.expect_download() as pending:
             page.locator(f'#view-evidence [data-export="{fmt}"]').click()

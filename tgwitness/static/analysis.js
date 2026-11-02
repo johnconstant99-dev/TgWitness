@@ -152,8 +152,7 @@
     if(!plan||!may("export"))return;
     const source_ids=[...$("ask-sources").querySelectorAll("input:checked")].map(el=>el.value);
     if(!source_ids.length)throw new Error(tr("Select at least one source."));
-    const response=await api("analysis/context-export",{plan_id:plan.plan_id,source_ids},{root:true});
-    saveBlob(await response.blob(),"tgwitness-research-context.zip");
+    await download("analysis/context-export","tgwitness-research-context.zip",false,true,{plan_id:plan.plan_id,source_ids},undefined,{confirmWorkspace:false});
   }));
   function claims(items,box){
     box.replaceChildren();
@@ -181,7 +180,9 @@
   $("ask-save-report").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(plan&&capabilities().enabled){const turn=generation,data=await call("reports",{plan_id:plan.plan_id});if(current(turn)){renderReport(data);await reports();}}}));
   $("ask-refresh-reports").addEventListener("click",event=>busy(event.currentTarget,reports));
   $("ask-report-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{if(report&&capabilities().enabled){const turn=generation,data=await call(scoped("reports/"+report.id),{title:$("report-title").value,revised_summary:$("report-summary").value,analyst_note:$("report-note").value},{method:"PATCH"});if(current(turn)){renderReport(data);await reports();}}});});
-  $("report-download").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(!report)return;const response=await api("analysis/"+scoped("reports/"+report.id+"/download"),undefined,{root:true});const url=URL.createObjectURL(await response.blob()),link=node("a");link.href=url;link.download="tgwitness-analysis.json";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}));
+  $("report-download").addEventListener("click",event=>busy(event.currentTarget,async()=>{
+    if(report)await download("analysis/"+scoped("reports/"+report.id+"/download"),"tgwitness-analysis.json",false,true);
+  }));
   async function load(){
     const flags=syncStatus();if(!flags.enabled&&!flags.media||loaded)return;if(loading)return loading;
     const turn=generation;

@@ -1,8 +1,9 @@
 # Evidence format v1
 
-An observation is not a conclusion. A sender ID is not a real-world identity.
-The account-visible service update is the source; Telegram does not cryptographically
-sign these saved records for a third-party investigator.
+TgWitness preserves account-visible Telegram observations in a signed journal.
+Recipients can verify the saved records, attachments and reports against a trusted
+collector key, then compare the journal with an independently retained checkpoint.
+This page describes the formats, the checks and the material to keep for handover.
 
 ## What is signed
 
@@ -18,16 +19,17 @@ sign these saved records for a third-party investigator.
 | Screenshots, printouts, or PDF produced by a browser | No TgWitness signature on the derivative | Keep the original verified package and document how the derivative was made |
 
 The collector verifies journal signatures before generating every export format.
-That source check does not create a signature on a separately downloaded CSV or
-HTML file. A valid JSONL event signature likewise does not provide the attachment
-bytes or independently establish that the entire observed journal was supplied.
+Readable HTML and PDF reports carry their own seals; standalone CSV is checked as
+part of a signed ZIP. Keep the ZIP to retain the attachment bytes and manifest,
+and a separate checkpoint to check the journal against an earlier boundary.
 
 ## Investigation handoff
 
 1. Record the case reference, operator, numeric Telegram account ID, selected
    sources, collection policy, and collection period in your case notes. TgWitness
-   preserves observations; case assignment and custody records are managed outside
-   the application. Qualify the intended collection setup with the
+   preserves observations and supports source-linked notes and collections in
+   [Case Board](CASE-BOARD.md). Keep transfer and custody records with your case
+   materials. Check the intended collection setup with the
    [live acceptance procedure](internal/LIVE_ACCEPTANCE.md).
 2. Retain the workspace's public-key fingerprint independently before relying on
    its exports. Save signed checkpoints outside the collector during collection.
@@ -64,28 +66,20 @@ bytes or independently establish that the entire observed journal was supplied.
    does not obtain a timestamp.
 
 Successful verification establishes integrity relative to the trusted collector
-key and retained boundary. Source truth, complete Telegram delivery, trusted time,
-and legal admissibility require separate evidence. This version has not completed
-live Telegram qualification or an independent forensic/security assessment.
+key and retained boundary. See [verification scope](#verification-scope) for the
+trust assumptions and [validation results](VERIFICATION.md) for the checks performed.
 
-A copied collector key can sign a fabricated replacement journal. Verification against
-an independently retained checkpoint or witness record detects a changed earlier prefix;
-signature verification alone cannot. A witness fixes what the collector presented, so it
-does not independently establish the truth of records fabricated before their first
-external checkpoint. Cloud deployment reports check configuration and collector-reported
-measurements; they do not establish that a private key was never copied during bootstrap.
-
-Notifications sent through Apprise contain workspace and chat names and counts; short
-excerpts of deleted and edited messages are added only when the operator turns them on
-(off by default). They are a convenience signal, not evidence: delivery is not guaranteed,
-and only the journal and its signed exports record what was observed. With a workspace
-proxy, notifications use the same route; services that cannot use it, and MTProxy routes, are refused.
+Notifications sent through Apprise help operators follow workspace and chat activity.
+They contain names and counts; excerpts of deleted and edited messages are optional
+and off by default. Use the signed journal and exports for the retained record.
+With a workspace proxy, notifications use the same route; services that cannot use
+it, and MTProxy routes, are refused.
 
 ## Handover extract
 
 A signed ZIP carries the whole workspace journal. When a court, a lawyer or an abuse desk needs
 only some chats, a period or certain people, **Exports → Handover extract** prepares a minimised
-copy (`tgwitness-handover-v1`) and does not disclose third parties the recipient does not need.
+copy (`tgwitness-handover-v1`) according to the selected disclosure rules.
 The operator states the purpose and chooses the chats, an optional period (UTC), the people the
 extract is about, what happens to everyone else (shown, replaced by pseudonyms P01, P02… or left
 out), which message texts stay, which attachments and profile photos are included, and whether
@@ -99,14 +93,15 @@ minimised record keeps the original hash and signature, so the signature still v
 withheld fields cannot be recomputed from it; the record names what was withheld and the report
 marks it. The manifest names the journal length and head with the collector's signature over that
 head, and counts the records left out; `coverage.json` describes the chosen chats. Names inside file
-names are not detected. Keep the full signed ZIP: the extract is a disclosure, not a replacement.
+names are not detected. Review the final files before sharing: free text, file names and selected
+attachments can still identify people. Keep the full signed ZIP: the extract is a disclosure, not a replacement.
 
 ## Readable reports
 
-Every signed ZIP (evidence, handover extract, chat export) carries the same report three ways,
-in the report language chosen in Report settings or for the one export. Each file is sealed on
-its own with the workspace's Ed25519 key, so a report handed over without its ZIP still shows
-any change, and `python verify.py FILE --fingerprint KEY [--evidence ZIP]` checks it.
+Signed evidence, handover and chat ZIPs carry readable HTML and JSON reports, plus
+PDF when the required fonts are available, in the selected report language. Each
+report is sealed with the workspace's Ed25519 key and can be verified separately:
+`python -m tgwitness.verify FILE --fingerprint KEY [--evidence ZIP]`.
 
 - `report.html` / `chat.html`: the seal statement (`tgwitness-report-seal-v1`) closes the file and
   signs the SHA-256 of every byte before it. Long journals and chats are split into parts of a
@@ -385,10 +380,23 @@ hash, and creation time. The verifier can check that a later archive contains th
 same prefix. Retain a checkpoint outside the collector before a disputed change:
 an attacker controlling both archive and checkpoint can replace both.
 
-A valid signature from an unpinned key establishes internal consistency only.
-Even a pinned key cannot prove truthful source content if the collector or key was
-compromised before recording. External timestamping and trusted capture are separate
-requirements. TgWitness does not promise admissibility or forensic certification.
+## Verification scope
+
+The signatures identify the collector key and protect the saved material. Pin its
+fingerprint independently to associate that key with the expected collector. Telegram
+updates are the input to collection; TgWitness signs its observations of those updates.
+The signatures are not signatures issued by Telegram or by message authors.
+
+A retained checkpoint or witness record detects a changed earlier journal prefix,
+including a replacement signed with a copied collector key. Records fabricated before
+their first independent checkpoint require source corroboration: a collector key holder
+can sign new material. Keep signing-key access controlled and retain references separately.
+
+Assess account visibility and delivery using coverage records and controlled tests.
+Use a verified external timestamp for independent time anchoring. A sender ID identifies
+a Telegram account; link it to a person through your investigation. Program receipts and
+cloud checks describe collector-reported measurements and deployment configuration.
+See [validation results](VERIFICATION.md) for measured behavior and its scope.
 
 ## Attachments
 
@@ -489,10 +497,10 @@ the CLI, so retain and supply --request to check the nonce. The result states wh
 it was checked. The collector checkpoint signature and journal must still be verified
 separately with the trusted collector fingerprint.
 
-The current verifier does not fetch revocation information or implement long-term
-archival validation after certificate expiry. Do not equate successful signature
-verification with a qualified timestamp or legal admissibility. A real independent
-TSA has not been contacted during development. See [procedure](TIMESTAMP.md).
+Verification checks the response signature, checkpoint bytes and, when supplied,
+the original request under the specified CA trust. Revocation checks and long-term
+archival validation after certificate expiry are outside the current verifier.
+See the [procedure](TIMESTAMP.md) and [validation results](VERIFICATION.md).
 
 ## Optional records in evidence mode: drand and Telegram devices
 
@@ -503,10 +511,10 @@ other or the timestamps; the panel shows the latest result of each under the for
 
 **drand** (`beacon.drand`). Each pass writes the newest round of drand quicknet, the public
 randomness of the League of Entropy (a round every 3 seconds), into the journal: `chain`,
-`round`, `randomness`, `signature`, `round_time` and the `relay` that answered. Nobody knows a
-round's value before its time, so every record after it was written later. A timestamped
-checkpoint bounds the same records from the other side: together they show that the journal
-was written as it went, not prepared afterwards. The collector asks `drand.cloudflare.com`
+`round`, `randomness`, `signature`, `round_time` and the `relay` that answered. A verified
+unpredictable round supplies a lower time reference for the subsequent hash-linked material.
+A verified timestamp on a later checkpoint supplies an upper time reference. These checks
+bound the linked material; collection coverage is assessed separately. The collector asks `drand.cloudflare.com`
 first, then the relays of Protocol Labs, through the workspace route, one request per pass.
 
 `verify.py` checks that each randomness is the SHA-256 of its signature and that the round

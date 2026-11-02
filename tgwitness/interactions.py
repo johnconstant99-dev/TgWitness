@@ -150,9 +150,10 @@ async def execute(collector, body):
         return prior.get("result") or {"request_id": body.request_id, "status": "unknown",
                                        "request_event": prior["request_event"]}
     check_pause(collector)
-    # The Evidence goal records without acting in the observed chats: no messages from the panel.
-    if body.action == "send" and (store.get_setting("setup", None) or {}).get("goal") == "evidence":
-        raise ValueError("Sending messages from the panel is off for the Evidence for a case goal.")
+    # Every execute action can alter Telegram state (including opening/joining a link).
+    goal = (store.get_setting("goal_preset", None) or store.get_setting("setup", None) or {}).get("goal")
+    if goal == "evidence":
+        raise ValueError("Telegram actions from the panel are off for the Evidence for a case goal.")
     await collector.restore()
     account = (store.get_setting("account", {}) or {}).get("id")
     prepared, entity = None, None

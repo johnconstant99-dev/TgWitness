@@ -14,7 +14,7 @@ KEY = "prepared_exports"
 CLEANUP_KEY = "prepared_exports_cleanup"
 
 
-def prepared(store, path, fmt, encrypted):
+def prepared(store, path, fmt, encrypted, *, owner=None, workspace=None, required_permissions=None, chat_ids=None):
     with path.open("rb") as source:
         digest = hashlib.file_digest(source, "sha256").hexdigest()
         size = os.fstat(source.fileno()).st_size
@@ -26,14 +26,19 @@ def prepared(store, path, fmt, encrypted):
     cached = folder / ident
     entry = {"id": ident, "format": fmt, "encrypted": bool(encrypted), "bytes": size, "sha256": digest,
              "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    if owner is not None and workspace is not None and required_permissions:
+        entry.update(owner=owner, workspace=workspace, required_permissions=sorted(set(required_permissions)),
+                     chat_ids=sorted(set(chat_ids)) if chat_ids is not None else None)
     with store.transaction():
         previous = store.get_setting(KEY, [])
         remove = {item for item in store.get_setting(CLEANUP_KEY, []) if valid_id(item)}
-        keep, used = [entry], size
+        oversized = size > MAX_CACHE_BYTES
+        keep, used = [entry], 0 if oversized else size
         for old in previous:
-            if len(keep) < LIMIT and used + old["bytes"] <= MAX_CACHE_BYTES:
+            old_size = 0 if old.get("cache_warning") else old["bytes"]
+            if len(keep) < LIMIT and used + old_size <= MAX_CACHE_BYTES:
                 keep.append(old)
-                used += old["bytes"]
+                used += old_size
             elif valid_id(old.get("id", "")):
                 remove.add(old["id"])
         retry = []
@@ -44,7 +49,9 @@ def prepared(store, path, fmt, encrypted):
                     stale.unlink(missing_ok=True)
                 except OSError:
                     retry.append(old_id)
-        if not retry:
+        if oversized:
+            entry["cache_warning"] = "This export exceeds the saved-copy cache limit. Download it now; prepare it again later."
+        elif not retry:
             try:
                 if os.name == "nt":
                     # Windows may deny unlinking any hardlink while FileResponse
@@ -70,11 +77,37 @@ def prepared(store, path, fmt, encrypted):
     return entry
 
 
-def listing(store):
+def permitted(entry, principal, profile_id):
+    """Legacy/unscoped and multi-workspace archives remain administrator-only.
+
+    A retained file never grants its creator permissions removed since creation.
+    These local access hints are outside the signed portable export.
+    """
+    if principal.admin:
+        return True
+    permissions = entry.get("required_permissions")
+    if entry.get("format") == "group" or entry.get("owner") != principal.owner \
+            or entry.get("workspace") != profile_id or not principal.opens(profile_id) \
+            or not isinstance(permissions, list) or not permissions \
+            or not all(isinstance(p, str) and principal.may(p) for p in permissions):
+        return False
+    allowed = principal.chats(profile_id)
+    chats = entry.get("chat_ids")
+    return allowed is None or isinstance(chats, list) and set(chats) <= allowed
+
+
+def metadata(store, ident):
+    if not valid_id(ident):
+        return None
+    return next((e for e in store.get_setting(KEY, []) if e.get("id") == ident), None)
+
+
+def listing(store, *, principal=None, profile_id=None):
     folder = store.root / "prepared-exports"
     return {"exports": [{**e, "available": bool(not e.get("cache_warning") and valid_id(e.get("id", "")) and not filesystem_link(folder)
                           and not filesystem_link(folder / e["id"]) and (folder / e["id"]).is_file())}
-                        for e in store.get_setting(KEY, [])[:LIMIT]], "limit": LIMIT}
+                        for e in store.get_setting(KEY, [])[:LIMIT]
+                        if principal is None or permitted(e, principal, profile_id)], "limit": LIMIT}
 
 
 def headers(entry):
@@ -89,7 +122,7 @@ def valid_id(ident):
 def locate(store, ident, verify=True):
     if not valid_id(ident):
         raise ValueError("This prepared export is unavailable.")
-    entry = next((e for e in store.get_setting(KEY, []) if e.get("id") == ident), None)
+    entry = metadata(store, ident)
     if entry and entry.get("cache_warning"):
         raise ValueError("This export was not retained for another download. Prepare it again.")
     path = store.root / "prepared-exports" / ident

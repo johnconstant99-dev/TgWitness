@@ -10,9 +10,10 @@ import re
 import socket
 import threading
 from contextlib import contextmanager, suppress
+from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
 from typing import Literal
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 
 from pydantic import BaseModel, Field
 
@@ -105,7 +106,7 @@ def proxy_url(network, address=None):
     return scheme + "://" + login + host + ":" + str(network.port)
 
 
-_guard = {"on": False, "allowed": set(), "refused": None, "pinned": {}}
+_guard = ContextVar("notification_route_guard", default=None)
 
 
 class Refused(OSError):
@@ -114,22 +115,126 @@ class Refused(OSError):
 
 def _checked(host, port):
     """The addresses to connect to, checked once and then used (no second lookup); None: unchecked."""
-    if host in _guard["pinned"]:
-        return _guard["pinned"][host]
-    if not _guard["on"] or host in _guard["allowed"]:
+    guard = _guard.get()
+    if guard is None:
+        return None
+    if host in guard["pinned"]:
+        return guard["pinned"][host]
+    if not guard["on"] or host in guard["allowed"]:
         return None
     addresses = list(dict.fromkeys(info[4][0] for info in socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)))
     try:
         netclient.refuse_internal(host, addresses)
     except netclient.RouteError as error:
-        _guard["refused"] = str(error)
+        guard["refused"] = str(error)
         raise Refused(str(error)) from None
     return addresses
+
+
+def _proxy_targets(host):
+    """Only the current synchronous notification send may resolve/pin proxy destinations."""
+    guard = _guard.get()
+    network = guard.get("network") if guard else None
+    if not guard or not guard["on"] or network is None or network.kind == "direct":
+        return None
+    try:
+        return asyncio.run(netclient.public_proxy_addresses(host, network, 15))
+    except Exception as exc:
+        guard["refused"] = str(exc)
+        raise Refused(str(exc)) from None
+
+
+def _install_proxy_guard():
+    import socks
+    from urllib3.connection import HTTPConnection, HTTPSConnection
+    if getattr(socks.create_connection, "notification_guarded", False):
+        return
+    original_socket = socks.create_connection
+    original_tunnel = HTTPConnection._tunnel
+    original_request = HTTPConnection.request
+    original_connect = HTTPSConnection.connect
+
+    def socks_connection(destination, *args, **kwargs):
+        addresses = _proxy_targets(destination[0])
+        if not addresses:
+            return original_socket(destination, *args, **kwargs)
+        failure = OSError("No reachable destination address")
+        for address in addresses:
+            try:
+                return original_socket((address, destination[1]), *args, **kwargs)
+            except OSError as exc:
+                failure = exc
+        raise failure
+
+    def connect(self):
+        addresses = _proxy_targets(self._tunnel_host) if self._tunnel_host else None
+        if not addresses:
+            return original_connect(self)
+        failure = OSError("No reachable destination address")
+        tunnel_state = (self._tunnel_host, self._tunnel_port, self._tunnel_scheme, self._tunnel_headers)
+        try:
+            for address in addresses:
+                self._tunnel_host, self._tunnel_port, self._tunnel_scheme, self._tunnel_headers = tunnel_state
+                self._notification_target = address
+                try:
+                    return original_connect(self)
+                except OSError as exc:
+                    # CONNECT failed before any service request body was sent.
+                    # Restart the whole connection so urllib3 uses the new socket
+                    # for proxy TLS and service TLS as well as the tunnel itself.
+                    self.close()
+                    failure = exc
+            raise failure
+        finally:
+            self.__dict__.pop("_notification_target", None)
+            self._tunnel_host, self._tunnel_port, self._tunnel_scheme, self._tunnel_headers = tunnel_state
+
+    def tunnel(self):
+        addresses = _proxy_targets(self._tunnel_host)
+        if not addresses:
+            return original_tunnel(self)
+        host, headers = self._tunnel_host, self._tunnel_headers
+        target = getattr(self, "_notification_target", addresses[0])
+        authority = ("[" + target + "]" if ":" in target else target) + ":" + str(self._tunnel_port)
+        self._tunnel_host = target
+        self._tunnel_headers = {k: v for k, v in headers.items() if k.lower() != "host"}
+        self._tunnel_headers["Host"] = authority
+        try:
+            return original_tunnel(self)
+        finally:
+            # urllib3 reads _tunnel_host after CONNECT for TLS SNI/certificate
+            # validation and Host. Restore it before that step, even on errors.
+            self._tunnel_host, self._tunnel_headers = host, headers
+
+    def request(self, method, url, body=None, headers=None, **kwargs):
+        parts = urlsplit(url)
+        if parts.scheme == "http" and parts.hostname:
+            addresses = _proxy_targets(parts.hostname)
+            if addresses:
+                target = addresses[0]
+                authority = ("[" + target + "]" if ":" in target else target)
+                if parts.port:
+                    authority += ":" + str(parts.port)
+                # An HTTP forwarding proxy receives an absolute request target.
+                # Pin that authority too, while the service Host stays original.
+                url = urlunsplit((parts.scheme, authority, parts.path, parts.query, parts.fragment))
+                headers = dict(headers or {})
+                if not any(k.lower() == "host" for k in headers):
+                    original = "[" + parts.hostname + "]" if ":" in parts.hostname else parts.hostname
+                    headers["Host"] = original + (":" + str(parts.port) if parts.port else "")
+        return original_request(self, method, url, body, headers, **kwargs)
+
+    socks_connection.notification_guarded = True
+    socks.create_connection = socks_connection
+    HTTPConnection._tunnel = tunnel
+    HTTPConnection.request = request
+    HTTPSConnection.connect = connect
 
 
 def _install_guard():
     import smtplib
     import urllib3.util.connection as connection
+    _install_proxy_guard()
     if getattr(connection.create_connection, "guarded", False):
         return
     plain = connection.create_connection
@@ -162,14 +267,18 @@ def _routed(proxy):
     """Apprise sends through requests; for this send its proxy settings are the workspace route only."""
     import requests
     original = requests.Session.merge_environment_settings
+    token = _guard.set({"on": False, "allowed": set(), "refused": None, "pinned": {}})
 
     def merge(self, url, proxies, stream, verify, cert):
+        guard = _guard.get()
+        if guard is None:
+            return original(self, url, proxies, stream, verify, cert)
         host = urlsplit(url).hostname or ""
-        if proxy and _guard["on"] and netclient.literal(host):
+        if proxy and guard["on"]:
             try:
-                netclient.refuse_internal(host, [netclient.literal(host)])
-            except netclient.RouteError as error:
-                _guard["refused"] = str(error)
+                _proxy_targets(host)
+            except Refused as error:
+                guard["refused"] = str(error)
                 raise requests.exceptions.ConnectionError(str(error)) from None
         settings = original(self, url, {}, stream, verify, cert)
         settings["proxies"] = {"http": proxy, "https": proxy} if proxy else {}
@@ -179,6 +288,7 @@ def _routed(proxy):
         yield
     finally:
         requests.Session.merge_environment_settings = original
+        _guard.reset(token)
 
 
 def deliver(urls, title, body, network):
@@ -195,13 +305,17 @@ def deliver(urls, title, body, network):
                 info[4][0] for info in socket.getaddrinfo(network.host, network.port, type=socket.SOCK_STREAM))))
         except (netclient.RouteError, OSError) as exc:
             return {"sent": 0, "failed": len(urls), "error": str(exc)[:300]}
-    _install_guard()
     with _send_lock, _routed(proxy_url(network, address)):
-        _guard.update(on=not netclient.private_allowed(), refused=None,
+        _install_guard()
+        guard = _guard.get()
+        guard.update(on=not netclient.private_allowed(), refused=None,
+                      network=network,
                       allowed={address} if address else set(),
                       pinned={network.host: [address]} if address else {})
         try:
-            bundle = apprise.Apprise(asset=apprise.AppriseAsset(http_redirects=False))
+            # Synchronous plugins stay in this delivery context. The socket and
+            # Requests hooks are inert for unrelated requests in other threads.
+            bundle = apprise.Apprise(asset=apprise.AppriseAsset(http_redirects=False, async_mode=False))
             for url in urls:
                 bundle.add(url)
             # URL redirect=yes overrides the asset default in Apprise. Enforce
@@ -209,11 +323,12 @@ def deliver(urls, title, body, network):
             # paths, query credentials or the workspace's transport settings.
             for service in bundle:
                 service.redirects = False
+                service.asset.async_mode = False
             result = bundle.notify(body=body, title=title)
         finally:
-            _guard["on"] = False
-            _guard["pinned"] = {}
-        refused = _guard["refused"]
+            guard["on"] = False
+            guard["pinned"] = {}
+        refused = guard["refused"]
     if isinstance(result, bool):
         return {"sent": len(urls) if result else 0, "failed": 0 if result else len(urls),
                 "error": None if result else refused or "The service did not accept the notification."}
@@ -617,8 +732,8 @@ def collect(store, cursor, titles, words, include_text=False, max_lines=MAX_LINE
             return cursor, problems, changes, discovered, excerpts
 
 
-async def alert_pass(store, vault, network, now=None):
-    settings, urls = alert_settings(store), vault.read("alerts").get("urls", [])
+async def _destination_pass(store, vault, network, now=None, urls=None):
+    settings = alert_settings(store)
     head = (store.stats()["head"] or {}).get("seq", 0)
     if not settings["enabled"] or not urls:
         store.set_setting("alerts_cursor", head)
@@ -661,6 +776,73 @@ async def alert_pass(store, vault, network, now=None):
         if daily_due:
             store.set_setting("alerts_daily", local.date().isoformat())
     if messages:
+        store.set_setting("alerts_last", {"at": utcnow(), "notifications": sent, "error": error})
+    return {"notifications": sent, "error": error}
+
+
+class _DestinationProgress:
+    """Give each receiver its own acknowledgement cursor without copying the journal."""
+    KEYS = {"alerts_cursor": "cursor", "alerts_daily": "daily", "alerts_last": "last"}
+
+    def __init__(self, store, progress):
+        self.store, self.progress = store, progress
+
+    def __getattr__(self, name):
+        return getattr(self.store, name)
+
+    def get_setting(self, key, default=None):
+        if key in self.KEYS:
+            return self.progress.get(self.KEYS[key], default)
+        return self.store.get_setting(key, default)
+
+    def set_setting(self, key, value):
+        if key in self.KEYS:
+            self.progress[self.KEYS[key]] = value
+        else:
+            self.store.set_setting(key, value)
+
+
+async def alert_pass(store, vault, network, now=None):
+    settings = alert_settings(store)
+    urls = list(dict.fromkeys(vault.read("alerts").get("urls", [])))
+    head = (store.stats()["head"] or {}).get("seq", 0)
+    if not settings["enabled"] or not urls:
+        store.set_setting("alerts_cursor", head)
+        store.set_setting("alerts_delivery", {})
+        return None
+    # URLs may contain credentials. Persist only hashes and delivery progress.
+    keys = {hashlib.sha256(url.encode()).hexdigest(): url for url in urls}
+    saved = store.get_setting("alerts_delivery", {}) or {}
+    progress = {key: saved.get(key, {"cursor": store.get_setting("alerts_cursor", head),
+                                   "daily": store.get_setting("alerts_daily", None)}) for key in keys}
+    instant = (now or datetime.now(timezone.utc)).timestamp()
+    sent, error = 0, None
+    for key, url in keys.items():
+        state = progress[key]
+        if state.get("retry_at", 0) > instant:
+            error = error or (state.get("last") or {}).get("error")
+            continue
+        try:
+            result = await _destination_pass(_DestinationProgress(store, state), vault, network, now, [url])
+        except Exception as exc:
+            result = {"notifications": 0, "error": type(exc).__name__}
+            state["last"] = {"at": utcnow(), **result}
+        sent += result["notifications"]
+        if result["error"]:
+            error = error or result["error"]
+            state["failures"] = min(state.get("failures", 0) + 1, 8)
+            state["retry_at"] = instant + min(3600, 30 * 2 ** (state["failures"] - 1))
+        else:
+            state.pop("failures", None)
+            state.pop("retry_at", None)
+        # Persist successes before attempting another receiver; a failed receiver
+        # retains its own cursor and is retried without replaying acknowledged work.
+        store.set_setting("alerts_delivery", progress)
+    store.set_setting("alerts_cursor", min(state["cursor"] for state in progress.values()))
+    days = [state.get("daily") for state in progress.values()]
+    if all(days):
+        store.set_setting("alerts_daily", min(days))
+    if sent or error:
         store.set_setting("alerts_last", {"at": utcnow(), "notifications": sent, "error": error})
     return {"notifications": sent, "error": error}
 

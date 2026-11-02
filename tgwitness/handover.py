@@ -72,6 +72,10 @@ class RemoteAttachment(ValueError):
     """A selected preserved attachment was offloaded and must be restored first."""
 
 
+class MissingAttachment(FileNotFoundError):
+    """A selected preserved attachment is unavailable locally."""
+
+
 class Options(BaseModel):
     """What a handover extract contains. Signed into its manifest and recorded in the journal."""
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
@@ -288,7 +292,7 @@ class Minimiser:
         text = payload.get("text") if isinstance(payload.get("text"), str) else ""
         show_text = self.o.text == "all" or (self.o.text == "subjects" and role != "other")
         cleaned = self.clean(replace_ranges(text, self.hidden_names(payload.get("raw")))) if show_text else None
-        if self.o.others == "show" and show_text and cleaned == text:
+        if self.o.others == "show" and show_text and not self.o.mask_contacts and cleaned == text:
             return self.keep(event)
         hidden = role == "other" and self.o.others != "show"
         observed = payload.get("sender_observation") if isinstance(payload.get("sender_observation"), dict) else {}
@@ -297,7 +301,8 @@ class Minimiser:
         shown = {"text": cleaned, "text_withheld": bool(text) and not show_text,
                  "sender_id": None if hidden else person,
                  "sender_observation": {"display_name": self.label(person)} if hidden
-                 else {k: observed[k] for k in ("id", "username", "display_name", "flags") if k in observed},
+                 else {k: self.clean(observed[k]) if isinstance(observed[k], str) else observed[k]
+                       for k in ("id", "username", "display_name", "flags") if k in observed},
                  "details": self.details(message_details.details(payload.get("raw")), role, show_text),
                  **{k: payload.get(k) for k in ("outgoing", "reply_to_message_id", "grouped_id", "sent_at", "edited_at",
                                                 "has_media", "source")}}
@@ -318,36 +323,70 @@ class Minimiser:
 
     def details(self, found, role, show_text):
         """Links behind the text, forwards and buttons with hidden people replaced by their pseudonyms."""
-        found = dict(found)
+        # Project known fields before deriving indicators or reports. Unknown future
+        # metadata must not silently bypass the selected disclosure controls.
+        found = {k: v for k, v in found.items() if k in (
+            "text_entities", "forwarded_from", "via_bot_id", "author", "views", "forwards", "buttons",
+            "replies", "reactions", "auto_delete_seconds", "protected", "album_id", "media_info")}
         entities = []
-        for item in found.get("text_entities") or []:
-            item = dict(item)
+        for item in (found.get("text_entities") or []) if show_text else []:
+            item = {k: self.clean(v) if isinstance(v, str) else v for k, v in item.items()
+                    if k in ("type", "text", "href", "user_id", "language", "document_id", "deceptive")}
+            if isinstance(item.get("user_id"), dict):
+                item["user_id"] = item["user_id"].get("user_id")
             hidden = item.get("user_id") is not None and not self.shown(item["user_id"])
             if hidden:
                 # A mention by ID shows the person's name: the name goes with the person.
                 item["user_id"] = item["text"] = self.label(item["user_id"])
-            elif not show_text:
-                item["text"] = "…"
+                item.pop("href", None)
             elif item["type"] in ("phone", "email") and self.o.mask_contacts:
                 item["text"] = "[phone]" if item["type"] == "phone" else "[e-mail]"
             else:
                 item["text"] = self.clean(item["text"])
             entities.append(item)
+        found.pop("text_entities", None)
         if entities:
             found["text_entities"] = entities
         forward = dict(found.get("forwarded_from") or {})
         for field in ("from_id", "saved_from_id"):
             if forward.get(field) is not None and not self.shown(forward[field]):
                 forward[field] = self.label(forward[field])
-        if self.o.others != "show":
+        if self.o.others != "show" or not show_text:
             for field in ("from_name", "post_author"):
                 forward.pop(field, None)
+        else:
+            forward = {k: self.clean(v) if isinstance(v, str) else v for k, v in forward.items()}
+        found.pop("forwarded_from", None)
         if forward:
             found["forwarded_from"] = forward
-        if role == "other" and self.o.others != "show":
+        if found.get("via_bot_id") is not None and not self.shown(found["via_bot_id"]):
+            found["via_bot_id"] = self.label(found["via_bot_id"])
+        if not show_text or (role == "other" and self.o.others != "show"):
             found.pop("author", None)
-            if found.get("media_info"):
-                found["media_info"] = {k: v for k, v in found["media_info"].items() if k != "file_name"}
+        elif isinstance(found.get("author"), str):
+            found["author"] = self.clean(found["author"])
+        if not show_text:
+            found.pop("buttons", None)
+        elif found.get("buttons"):
+            rows = []
+            for row in found["buttons"].get("rows", []):
+                buttons = []
+                for button in row:
+                    item = {k: self.clean(v) if isinstance(v, str) else v for k, v in button.items()
+                            if k in ("type", "text", "url", "query", "copy_text", "user_id", "fwd_text")}
+                    if item.get("user_id") is not None and not self.shown(item["user_id"]):
+                        item["user_id"] = item["text"] = self.label(item["user_id"])
+                    buttons.append(item)
+                rows.append(buttons)
+            found["buttons"] = {"inline": bool(found["buttons"].get("inline")), "rows": rows}
+        if found.get("media_info"):
+            technical = {"kind", "mime_type", "size", "document_id", "photo_id", "dc_id", "width", "height",
+                         "duration_seconds", "self_destruct_seconds"}
+            textual = {"url", "site_name", "title", "file_name"} if show_text else set()
+            if role == "other" and self.o.others != "show":
+                textual.discard("file_name")
+            found["media_info"] = {k: self.clean(v) if isinstance(v, str) else v
+                                   for k, v in found["media_info"].items() if k in technical | textual}
         return found
 
     def attachment(self, event):
@@ -473,7 +512,8 @@ def export(store, vault, options, report_options=None):
                         if receipt and receipt["evicted"]:
                             raise RemoteAttachment("A selected attachment is in remote storage. Open Storage → Restore all files, "
                                                    "then create the handover again, or explicitly omit attachments.")
-                    continue
+                    raise MissingAttachment("A selected attachment is missing. Restore the file, then create the "
+                                            "handover again, or explicitly omit attachments.")
                 with source.open("rb") as incoming:
                     if write_member("media/" + name, iter(lambda: incoming.read(1024 * 1024), b"")) != name:
                         raise ValueError("Attachment changed: " + name)

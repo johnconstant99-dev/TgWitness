@@ -25,32 +25,17 @@ def windows_sid():
 def owner_only(root: Path):
     """The data directory for this account only, also when it existed before. Unix: mode 0700 (files
     inside are then unreachable whatever their own modes). Windows: one explicit entry for this account,
-    inherited by everything inside, and no inherited entries for other users; done once per directory."""
+    inherited by new children. Existing ACLs are inspected on every start."""
     if os.name != "nt":
         try:
             os.chmod(root, 0o700)
         except OSError:
             LOG.warning("Could not restrict %s to its owner; doctor reports its permissions", root)
         return
-    marker = root / ".owner-only"
-    if marker.exists():
-        return
     try:
-        sid = windows_sid()
-        subprocess.run(["icacls", str(root), "/inheritance:r", "/grant:r", "*" + sid + ":(OI)(CI)F", "/Q"],
-                       capture_output=True, check=True, timeout=60)
-        if any(root.iterdir()):
-            subprocess.run(["icacls", str(root / "*"), "/reset", "/T", "/C", "/Q"], capture_output=True, check=True,
-                           timeout=900)
-
-        shown = subprocess.run(["icacls", str(root)], capture_output=True, text=True, timeout=60).stdout
-        found = subprocess.run(["icacls", str(root), "/findsid", "*" + sid], capture_output=True, text=True,
-                               timeout=60).stdout
-        if "No permissions are set" in shown or "SID Found" not in found:
-            LOG.warning("%s is on a volume without access control (FAT/exFAT): any local account can read its "
-                        "keys. Keep the data directory on NTFS", root)
-            return
-        marker.write_text("Access to this directory is limited to the account that runs TgWitness.\n")
+        from .windows_acl import owner_acl
+        if not owner_acl(root, windows_sid(), repair=True):
+            raise OSError("The filesystem did not retain the owner-only ACL")
     except (OSError, subprocess.SubprocessError, IndexError):
         LOG.warning("Could not limit %s to this account; other local accounts may read it", root)
 
@@ -60,9 +45,13 @@ def owner_only_state(root: Path):
     if os.name != "nt":
         mode = root.stat().st_mode & 0o777
         return mode & 0o077 == 0, "mode " + oct(mode)
-    if (root / ".owner-only").exists():
-        return True, "explicit entry for this account only"
-    return False, "no owner-only entry (a FAT/exFAT volume keeps no permissions)"
+    try:
+        from .windows_acl import owner_acl
+        if owner_acl(root, windows_sid()):
+            return True, "verified ACLs for this account only"
+    except (OSError, subprocess.SubprocessError, IndexError):
+        pass
+    return False, "owner-only ACLs could not be verified (FAT/exFAT volumes keep no permissions)"
 
 
 def private_write(path: Path, data: bytes):

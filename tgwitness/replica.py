@@ -430,7 +430,8 @@ def restore_path(out, base, name):
 async def restore_objects(s3, keyinfo, key, base, out):
     segments, counts = [], {"journal": 0, "media": 0, "checkpoints": 0, "exports": 0}
     async for name, _ in s3.list(base + "/"):
-        if not name.endswith(".tgwr") or name == base + "/connection-test.tgwr":
+        if not name.endswith(".tgwr") or name == base + "/connection-test.tgwr" \
+                or name.startswith(base + "/storage/"):
             continue
         kind, target = restore_path(out, base, name)
         target.parent.mkdir(parents=True, exist_ok=True)

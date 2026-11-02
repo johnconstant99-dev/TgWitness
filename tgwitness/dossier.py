@@ -294,8 +294,11 @@ class Facts:
         return sorted(self.items.values(), key=lambda i: i["first_at"])
 
 
-def build(store, chat_id, title=None):
+def build(store, chat_id, title=None, *, allowed_chats=None):
     """Profiles of everyone with a saved message in this chat, as a signable statement body."""
+    allowed_chats = None if allowed_chats is None else set(allowed_chats)
+    if allowed_chats is not None and chat_id not in allowed_chats:
+        raise ValueError("This chat is outside the permitted scope.")
     settings = options(store)
     refs, find, patterns = settings["max_refs"], settings["find"], tuning.patterns(settings["patterns"])
     records = store.chat_records(chat_id, TEXT_KINDS + GONE_KINDS)
@@ -306,6 +309,8 @@ def build(store, chat_id, title=None):
             gone.setdefault(event["message_id"], []).append(event)
             continue
         payload = event["payload"]
+        gone[event["message_id"]] = [e for e in gone.get(event["message_id"], [])
+                                     if e["kind"] != "message.missing_on_recheck"]
         observed = payload.get("sender_observation") or {}
         sender = payload.get("sender_id", observed.get("id"))
         if sender is None or (sender == chat_id and chat_id < 0):
@@ -345,7 +350,9 @@ def build(store, chat_id, title=None):
             person["replies_to"].setdefault(reply, {}).setdefault(message_id, []).append(event["seq"])
         for category, value, extra in mentions(payload, find, patterns):
             person["mentions"][category].add(value, event, extra)
-    avatars = avatar_index(store.root)
+    # The legacy cache has no chat provenance. Scoped viewers use only the
+    # avatar history recorded in the authorized chat.
+    avatars = avatar_index(store.root) if allowed_chats is None else {}
     avatar_records = history_events(store, chat_id)
     histories = history_index(store, chat_id, avatar_records)
     avatar_changes = {}
@@ -355,8 +362,9 @@ def build(store, chat_id, title=None):
             "photo_id": payload.get("photo_id"), "sha256": payload.get("media_sha256"),
             "at": event["observed_at"], "kind": event["kind"], "records": [event["seq"]]})
     neighbors = PhotoNeighbors({peer: photos for peer, photos in histories.items() if peer in people})
-    elsewhere = store.sender_chats(list(people))
-    titles = {t["chat_id"]: t["title"] for t in store.targets()}
+    elsewhere = store.sender_chats(list(people), allowed_chats=allowed_chats)
+    titles = {t["chat_id"]: t["title"] for t in store.targets()
+              if allowed_chats is None or t["chat_id"] in allowed_chats}
     result, referenced = [], set()
     for person in people.values():
         replies, replying = {}, {}
@@ -445,15 +453,15 @@ def build(store, chat_id, title=None):
             "contents_in_journal": False}
 
 
-def signed(store, vault, chat_id, title=None, producer=None):
+def signed(store, vault, chat_id, title=None, producer=None, *, allowed_chats=None):
     enabled = store.get_setting("dossiers", {}).get(str(chat_id))
-    statement = build(store, chat_id, title)
+    statement = build(store, chat_id, title, allowed_chats=allowed_chats)
     statement.update(public_key=vault.public_key, producer=producer)
     value = {"statement": statement, "signature": vault.sign(canonical(statement)),
              "fingerprint": fingerprint(vault.public_key)}
     with store.lock:
 
-        if enabled and enabled == store.get_setting("dossiers", {}).get(str(chat_id)):
+        if allowed_chats is None and enabled and enabled == store.get_setting("dossiers", {}).get(str(chat_id)):
             path = cache_path(store, chat_id)
             path.parent.mkdir(mode=0o700, exist_ok=True)
             private_write(path, json.dumps(value, ensure_ascii=False).encode("utf-8"))

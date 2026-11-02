@@ -72,7 +72,7 @@ const boardReady=import('./views/board.js?v=1').then(({createCaseBoard})=>{
   const slice=node('button','quiet small',tr('Slice by time'));slice.type='button';slice.id='chat-to-slice';slice.addEventListener('click',()=>boardView.sliceDialog({chat_id:state.chat}));viewQuery('chats','.chat-toolbar').append(slice);
 });
 let settingsHub;
-const settingsHubReady=import('./views/settings-hub.js?v=3').then(({createSettingsHub})=>{
+const settingsHubReady=import('./views/settings-hub.js?v=4').then(({createSettingsHub})=>{
   const authCard=$('credentials-form').closest('.auth-card');
   // Metadata covers legacy fields as well as the compact settings. Search never drops expert fields.
   const catalog=()=>panelQueries('input[id],select[id],textarea[id]').filter(el=>!el.closest('#gate,#view-settings,#view-first-run')).map(el=>{
@@ -155,7 +155,7 @@ function resetViewContent(view){
   if(view==='evidence'){exportsView?.resetSession();resetAccountExport();}
   if(view==='accounts')accountsView?.resetSession();
   if(view==='group')groupView?.reset();
-  if(view==='witness'){state.evidenceDirty=false;state.replicaDirty=false;state.alertsDirty=false;state.githubDirty=false;}
+  if(view==='witness'){setupView?.resetSession();state.evidenceDirty=false;state.replicaDirty=false;state.alertsDirty=false;state.githubDirty=false;}
   if(view==='chats')chatListView?.resetSession();
   if(view==='sealed')window.TgWitnessCapture?.reset();
   if(view==='system-log')systemLogView?.resetSession();
@@ -463,7 +463,8 @@ const formsReady=import('./components/forms.js').then(({createFormControls})=>{
   formControls=createFormControls({roots:[...panelRoots.values()],tr,getSession:()=>state.workspaceRevision+':'+state.profile,toast,
     forms:[['report-form',value=>reportDirty=value],['evidence-form',value=>state.evidenceDirty=value],
       ['replica-form',value=>state.replicaDirty=value],['alerts-form',value=>state.alertsDirty=value],
-      ['github-form',value=>state.githubDirty=value]].map(([id,setDirty])=>({form:$(id),setDirty}))});
+      ['github-form',value=>state.githubDirty=value]].map(([id,setDirty])=>({form:$(id),setDirty,
+        onDiscard:id==='report-form'?discardReportDraft:undefined}))});
   $("report-form").querySelector('.form-draft-bar').append($("report-open-downloads"));
 });
 function fmtTime(value,options){return panelTime?.fmtTime(value,options)??tr("No data");}
@@ -1464,7 +1465,7 @@ async function switchProfile(id,options={}){
   workspaceSafety?.sync();
   if(options.history!==false)window.TgWitnessRouter?.record({}, {replace:true});
   toast(tr("Switched workspace. Other collectors keep their current state."));
-  }catch(error){if(revision===state.workspaceRevision&&!(error instanceof StaleView))lock();throw error;}
+  }catch(error){if(revision===state.workspaceRevision)unlockFailed(error);throw error;}
   finally{if(revision===state.workspaceRevision)$("workspace").inert=false;}
 }
 $("profile-select").addEventListener("change",()=>busy(null,()=>switchProfile($("profile-select").value)));
@@ -1646,7 +1647,10 @@ const journalReady=import('./components/journal.js?v=4').then(({createJournal})=
 });
 $("refresh").addEventListener("click",e=>busy(e.currentTarget,async()=>{await refreshStatus();await refreshEvents();}));
 $("collector-toggle").addEventListener("click",e=>busy(e.currentTarget,async()=>{
-  await json("collector/"+(state.status.collector.running ? "stop" : "start"),{});
+  const profile=state.profile,revision=state.workspaceRevision,action=state.status.collector.running?'stop':'start';
+  if(action==='stop'&&!await (await collectionReady).confirmPause())return;
+  if(profile!==state.profile||revision!==state.workspaceRevision)return;
+  await json("collector/"+action,{},{profile});
   await refreshStatus();await refreshEvents();
 }));
 function detailBlock(label,text,cls="") {
@@ -1875,7 +1879,6 @@ $("snapshot-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submi
 let exportPoll=null;
 function stopExportPoll(){if(exportPoll){clearTimeout(exportPoll);exportPoll=null;}}
 function renderExportState(x){
-  if(state.view!=='sources')return;
   const prog=$("chat-export-progress");
   const running=!!x&&x.phase==="running",done=!!x&&x.phase==="done"&&x.ready;
   show("chat-export-cancel",running);show("chat-export-download",done);
@@ -1889,13 +1892,17 @@ function renderExportState(x){
   else if(x.phase==="cancelled")prog.textContent=tr("Export cancelled.");
 }
 async function pollExport(id){
+  const profile=state.profile,revision=state.workspaceRevision;
+  const current=()=>profile===state.profile&&revision===state.workspaceRevision&&id===state.exportId;
+  if(!current())return;
   stopExportPoll();
   try{
-    const x=await json("chat-export/"+encodeURIComponent(id));
+    const x=await json("chat-export/"+encodeURIComponent(id),undefined,{profile});
+    if(!current())return;
     renderExportState(x);
-    if(x.phase==="running")exportPoll=setTimeout(()=>pollExport(id),1500);
+    if(x.phase==="running")exportPoll=setTimeout(()=>{if(current())pollExport(id);},1500);
     else state.exportId=x.phase==="done"?id:null;
-  }catch(e){if(e instanceof StaleView)return;renderExportState({phase:"failed",error:e.message});state.exportId=null;}
+  }catch(e){if(e instanceof StaleView||!current())return;renderExportState({phase:"failed",error:e.message});state.exportId=null;}
 }
 function syncExport(s){
   const btn=$("chat-export-form").querySelector("button[type=submit]"),x=s.collector.chat_export;
@@ -2409,10 +2416,10 @@ function fillExportLanguage(){
   for(const [code,name] of Object.entries(PANEL_LANGUAGES)){const o=new Option(name,code);o.lang=code;select.append(o);}
 }
 const exportLanguage=()=>$("export-language").value;
-async function download(path,filename,stream=false,root=false,body=undefined,progress=()=>{}){
+async function download(path,filename,stream=false,root=false,body=undefined,progress=()=>{},{confirmWorkspace=true}={}){
   workspaceSafety?.assert();
   const profile=state.profile,revision=state.workspaceRevision;
-  if((/export|handover|history\/report/.test(path))&&!path.startsWith('profile-groups/')&&!(await workspaceSafety.confirmExport())){progress({phase:'cancelled'});return false;}
+  if(confirmWorkspace&&(/export|handover|history\/report/.test(path))&&!path.startsWith('profile-groups/')&&!(await workspaceSafety.confirmExport())){progress({phase:'cancelled'});return false;}
   const current=()=>{workspaceSafety?.assert();if(profile!==state.profile||revision!==state.workspaceRevision)throw new StaleView();};
   let handle=null,writer=null,reader=null;
   if(stream&&typeof window.showSaveFilePicker==="function"){
@@ -2452,7 +2459,7 @@ async function download(path,filename,stream=false,root=false,body=undefined,pro
     let total=0;const chunks=[];
     while(true){
       current();
-      const {value,done}=await reader.read();if(done)break;
+      const {value,done}=await reader.read();current();if(done)break;
       total+=value.byteLength;
       if(writer)await writer.write(value);
       else{if(total>limit)throw new Error(tr('Browser memory limit reached. Download the prepared file again.'));chunks.push(value);}
@@ -2622,6 +2629,12 @@ function reportDraft(){
 function scheduleReportPreview(){
   clearTimeout(reportPreviewTimer);
   reportPreviewTimer=setTimeout(()=>refreshReportPreview(),900);
+}
+function discardReportDraft(){
+  clearTimeout(reportPreviewTimer);reportPreviewRequest++;reportPreviewBusy=false;
+  $("report-preview-frame").removeAttribute("srcdoc");show("report-preview-frame",false);show("report-preview-empty",true);
+  syncReportParts();reportControls();$("report-status").textContent="";
+  $("report-design-preview-status").textContent=tr("Preview is updating to your draft…");scheduleReportPreview();
 }
 function showReportPreviewSection(section){
   reportPreviewSection=section;

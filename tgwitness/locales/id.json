@@ -5952,5 +5952,22 @@
 "Export group": "Ekspor grup",
 "Fix": "Perbaiki",
 "Share this value": "Bagikan nilai ini",
-"Share this value instead": "Bagikan nilai ini sebagai gantinya"
+"Share this value instead": "Bagikan nilai ini sebagai gantinya",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Lampiran yang dipilih tidak ditemukan. Pulihkan berkas tersebut, lalu buat \"handover\" kembali, atau hilangkan lampiran secara eksplisit.",
+"Request body timed out": "Waktu tunggu badan permintaan telah habis",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "Tindakan Telegram dari panel dinonaktifkan untuk tujuan \"Bukti untuk suatu kasus\".",
+"This chat is outside the permitted scope.": "Obrolan ini berada di luar cakupan yang diizinkan.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Ekspor ini melebihi batas cache salinan yang disimpan. Unduh sekarang; siapkan kembali nanti.",
+"This export is not open to this access.": "Ekspor ini tidak tersedia untuk akses ini.",
+"This prepared export is unavailable.": "Ekspor yang telah disiapkan ini tidak tersedia.",
+"Too many pending request bodies. Try again shortly.": "Terlalu banyak badan permintaan yang tertunda. Silakan coba lagi sebentar lagi.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Tujuan Onion memerlukan pengaturan TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 di server; permintaan yang hanya terbuka untuk umum tidak dapat memverifikasi alamat tujuannya.",
+"Invalid destination hostname.": "Nama host tujuan tidak valid.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "DNS tujuan publik tidak dapat diverifikasi melalui proxy yang dikonfigurasi. Tidak ada upaya koneksi langsung yang dilakukan.",
+"Workspace observation: no interruptions in the available period": "Pengamatan ruang kerja: tidak ada gangguan selama periode yang tersedia",
+"No workspace observation in the last {days} days": "Tidak ada pengamatan ruang kerja dalam {days} hari terakhir",
+"Workspace observation: {n} interruption in the available period": "Pengamatan ruang kerja: {n} kali gangguan dalam periode yang tersedia",
+"Workspace observation: {n} interruptions in the available period": {
+"other": "Pengamatan ruang kerja: T{n} kali gangguan dalam periode yang tersedia"
+}
 }

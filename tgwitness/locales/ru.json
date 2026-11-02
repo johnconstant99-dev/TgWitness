@@ -6366,5 +6366,25 @@
 "Export group": "Экспорт группы",
 "Fix": "Исправить",
 "Share this value": "Поделиться этим значением",
-"Share this value instead": "Вместо этого поделитесь этим значением"
+"Share this value instead": "Вместо этого поделитесь этим значением",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Отсутствует выбранное вложение. Восстановите файл, а затем создайте передачу заново или явно исключите вложения.",
+"Request body timed out": "Истекло время ожидания тела запроса",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "Действия Telegram из панели отключены для цели «Доказательства по делу».",
+"This chat is outside the permitted scope.": "Этот чат выходит за пределы разрешённой области.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Этот экспорт превышает лимит кэша сохраненных копий. Скачайте его сейчас; подготовьте его заново позже.",
+"This export is not open to this access.": "Этот экспорт недоступен для данного уровня доступа.",
+"This prepared export is unavailable.": "Данный готовый экспорт недоступен.",
+"Too many pending request bodies. Try again shortly.": "Слишком много ожидающих обработки тел запросов. Повторите попытку через некоторое время.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Для адресов в сети Onion на сервере требуется параметр TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1; запросы, предназначенные только для общедоступных адресов, не могут проверить адреса назначения.",
+"Invalid destination hostname.": "Недопустимое имя хоста назначения.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "Не удалось проверить DNS публичного адреса назначения через настроенный прокси-сервер. Попытка установления прямого соединения не предпринималась.",
+"Workspace observation: no interruptions in the available period": "Наблюдение за рабочей средой: без перерывов в течение всего доступного периода",
+"No workspace observation in the last {days} days": "Наблюдение за рабочей средой отсутствовало в течение последних {days} дней",
+"Workspace observation: {n} interruption in the available period": "Наблюдение за рабочим пространством: {n} прерывание в течение доступного периода",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "Наблюдение за рабочей средой: {n} прерывание в течение доступного периода",
+"few": "Наблюдение за рабочим пространством: {n} прерывания за указанный период",
+"many": "Наблюдение за рабочим пространством: {n} прерываний за отчетный период",
+"other": "Наблюдение за рабочей средой: {n} прерываний в течение доступного периода"
+}
 }

@@ -181,15 +181,21 @@ def grant_session(app, workspaces=None, permissions=None):
     return grant, {"Authorization": "Bearer " + session}
 
 
+def prepared_for(app, path, headers, fmt="zip", permissions=None):
+    principal = app.state.access.resolve(headers["Authorization"].split(" ", 1)[1], "127.0.0.1")
+    return export_history.prepared(app.state.store, path, fmt, False, owner=principal.owner,
+        workspace="default", required_permissions=permissions or ["view", "export"])
+
+
 async def tickets():
     async with workspace() as (app, client):
         path = app.state.store.root / "synthetic-export.zip"
         payload = b"Synthetic signed export fixture; exact bytes must survive transport."
         path.write_bytes(payload)
-        prepared = export_history.prepared(app.state.store, path, "zip", False)
+        _, headers = grant_session(app)
+        prepared = prepared_for(app, path, headers)
         ident = prepared["id"]
         endpoint = "/api/exports/" + ident
-        _, headers = grant_session(app)
         response = await client.post(endpoint + "/ticket", headers=headers)
         assert response.status_code == 200, response.text
         cookie = response.cookies.get("tgwitness-download")
@@ -237,6 +243,8 @@ async def tickets():
 
         # Revocation takes effect even for an already-issued ticket.
         grant, revocable = grant_session(app)
+        prepared = prepared_for(app, path, revocable)
+        endpoint = "/api/exports/" + prepared["id"]
         response = await client.post(endpoint + "/ticket", headers=revocable)
         cookie = response.cookies.get("tgwitness-download")
         app.state.access.revoke(grant["id"])
@@ -245,6 +253,9 @@ async def tickets():
         # Integrity check cannot become an authorization gap while hashing a
         # large archive in a worker thread.
         grant, revocable = grant_session(app)
+        prepared = prepared_for(app, path, revocable)
+        ident = prepared["id"]
+        endpoint = "/api/exports/" + ident
         response = await client.post(endpoint + "/ticket", headers=revocable)
         cookie = response.cookies.get("tgwitness-download")
         entered, release = threading.Event(), threading.Event()
@@ -316,6 +327,138 @@ async def research_scope():
         assert (await client.post("/api/analysis/context-export", json=request, headers=headers)).status_code == 403
 
 
+async def retained_provenance():
+    async with workspace() as (app, client):
+        store = app.state.store
+        source = store.root / "synthetic-retained.zip"
+        source.write_bytes(b"Synthetic retained private board contents")
+        owner, headers = grant_session(app, permissions=["view", "export", "board.read"])
+        _, outsider = grant_session(app, permissions=["view", "export", "board.read"])
+        own = prepared_for(app, source, headers, permissions=["view", "export", "board.read"])
+        legacy = export_history.prepared(store, source, "zip", False)
+        group = prepared_for(app, source, headers, fmt="group")
+        entries = (own, legacy, group)
+        endpoint = "/api/exports/" + own["id"]
+        listed = await client.get("/api/exports/history", headers=headers)
+        assert [item["id"] for item in listed.json()["exports"]] == [own["id"]]
+        assert (await client.get("/api/exports/history", headers=outsider)).json()["exports"] == []
+        for entry in entries:
+            prefix = "/api/exports/" + entry["id"]
+            assert (await client.post(prefix + "/ticket", headers=outsider)).status_code == 403
+            assert (await client.get(prefix + "/download", headers=outsider)).status_code == 403
+        for entry in (legacy, group):
+            prefix = "/api/exports/" + entry["id"]
+            assert (await client.post(prefix + "/ticket", headers=headers)).status_code == 403
+            assert (await client.get(prefix + "/download", headers=headers)).status_code == 403
+            assert (await client.get(prefix + "/download")).status_code == 200
+
+        # Removing board.read preserves export permission but must close old board exports.
+        ticket = await client.post(endpoint + "/ticket", headers=headers)
+        assert ticket.status_code == 200, ticket.text
+        app.state.access.change(owner["id"], GrantSettings(label="Narrowed", workspaces={"default": None},
+                                                        permissions=["view", "export"]))
+        assert (await native(app, endpoint + "/download", ticket.cookies.get("tgwitness-download"))).status_code == 403
+        assert (await client.get("/api/exports/history", headers=headers)).json()["exports"] == []
+        assert (await client.post(endpoint + "/ticket", headers=headers)).status_code == 403
+
+        # Both ticket hashing and download copying re-evaluate current permissions.
+        for action in ("ticket", "download"):
+            app.state.access.change(owner["id"], GrantSettings(label="Restored", workspaces={"default": None},
+                                       permissions=["view", "export", "board.read"]))
+            entered, release = threading.Event(), threading.Event()
+            original = export_history.locate
+            def held(*args):
+                value = original(*args)
+                entered.set()
+                if not release.wait(5):
+                    raise AssertionError("Test did not release retained export")
+                return value
+            with patch.object(export_history, "locate", held):
+                request = client.post if action == "ticket" else client.get
+                pending = asyncio.create_task(request(endpoint + "/" + action, headers=headers))
+                assert await asyncio.to_thread(entered.wait, 3)
+                app.state.access.change(owner["id"], GrantSettings(label="Narrowed during preparation",
+                    workspaces={"default": None}, permissions=["view", "export"]))
+                release.set()
+                result = await pending
+            assert result.status_code == 403, (action, result.text)
+            assert not list((store.root / "temporary-exports").glob("tgwitness-export-download-*"))
+
+        # The ordinary API records the creator and whether board access was used.
+        emitted = []
+        def fake_export(*args, **kwargs):
+            path = store.root / ("synthetic-built-" + str(len(emitted)) + ".zip")
+            path.write_bytes(b"Synthetic API export bytes")
+            emitted.append(kwargs["include_board"])
+            return path
+        with patch.object(app_module, "export_file", fake_export):
+            made = await client.get("/api/export/zip", headers=headers)
+        assert made.status_code == 200, made.text
+        recorded = export_history.metadata(store, made.headers["x-tgwitness-export-id"])
+        assert recorded["owner"] == owner["id"] and recorded["workspace"] == "default"
+        assert recorded["required_permissions"] == ["export", "view"] and emitted == [False]
+        assert (await client.get("/api/exports/" + recorded["id"] + "/download", headers=headers)).status_code == 200
+        assert (await client.get("/api/exports/" + recorded["id"] + "/download", headers=outsider)).status_code == 403
+
+
+async def dossier_scope():
+    async with workspace() as (app, client):
+        store = app.state.store
+        for chat, title in ((11, "Visible source"), (22, "PRIVATE_SOURCE")):
+            store.set_target(chat, title, "channel", True)
+            store.append("message.new", {"text": "Synthetic observation", "sender_id": 42,
+                         "sender_observation": {"display_name": "Synthetic person"}}, chat_id=chat, message_id=1)
+        store.set_setting("dossiers", {"11": {"enabled_at": "2026-10-01T00:00:00Z", "generation": "synthetic"}})
+        grant, headers = grant_session(app, {"default": [11]})
+        prefix = "/api/chats/11/dossier"
+        for suffix in ("", "/export"):
+            response = await client.get(prefix + suffix, headers=headers)
+            assert response.status_code == 200, response.text
+            assert response.json()["statement"]["people"][0]["relations"]["other_chats"] == []
+            assert "PRIVATE_SOURCE" not in response.text
+        assert (await client.post(prefix + "/export", headers=headers,
+                                 json={"password": "Synthetic-long-passphrase-2026"})).status_code == 200
+        assert (await client.get("/api/chats/22/dossier", headers=headers)).status_code == 403
+
+        entered, release = threading.Event(), threading.Event()
+        original = app_module.dossier.signed
+        def held(*args, **kwargs):
+            value = original(*args, **kwargs)
+            entered.set()
+            if not release.wait(5):
+                raise AssertionError("Test did not release dossier")
+            return value
+        with patch.object(app_module.dossier, "signed", held):
+            pending = asyncio.create_task(client.get(prefix + "/export", headers=headers))
+            assert await asyncio.to_thread(entered.wait, 3)
+            app.state.access.change(grant["id"], GrantSettings(label="Scope removed", workspaces={"default": [22]},
+                                                             permissions=["view", "export"]))
+            release.set()
+            response = await pending
+        assert response.status_code == 403, response.text
+        assert not list((store.root / "temporary-exports").glob("tgwitness-export-dossier-*"))
+
+
+async def scoped_handover_metadata():
+    async with workspace() as (app, client):
+        store = app.state.store
+        store.set_target(11, "Synthetic selected source", "channel", True)
+        message = store.append("message.new", {"text": "Synthetic media observation", "sender_id": 42},
+                               chat_id=11, message_id=1)
+        grant, headers = grant_session(app, {"default": [11]})
+        selection = {"purpose": "Synthetic scoped export", "chats": [11], "case_board": "off",
+                     "others": "show", "text": "all", "attachments": "none"}
+        response = await client.post("/api/handover", json=selection, headers=headers)
+        assert response.status_code == 200, response.text
+        entry = export_history.metadata(store, response.headers["x-tgwitness-export-id"])
+        assert entry["owner"] == grant["id"] and entry["chat_ids"] == [11]
+        assert entry["required_permissions"] == ["export", "view"]
+        store.append("media.saved", {"message_event": message["seq"], "media_sha256": "a" * 64, "size": 3},
+                     chat_id=11, message_id=1)
+        response = await client.post("/api/handover", json={**selection, "attachments": "all"}, headers=headers)
+        assert response.status_code == 409 and "selected attachment is missing" in response.text
+
+
 async def local_demo():
     with tempfile.TemporaryDirectory(prefix="prepared-local-demo-") as temp:
         app = app_module.create_app(Path(temp), demo=True)
@@ -345,8 +488,8 @@ async def download_lifetime():
         source = store.root / "synthetic.zip"
         payload = b"Exact bytes during concurrent cache eviction.\n" * 10000
         source.write_bytes(payload)
-        entry = export_history.prepared(store, source, "zip", False)
         _, headers = grant_session(app)
+        entry = prepared_for(app, source, headers)
         started, release = asyncio.Event(), asyncio.Event()
 
         async def held_app(scope, receive, send):
@@ -363,7 +506,7 @@ async def download_lifetime():
             copies = list((store.root / "temporary-exports").glob("tgwitness-export-download-*"))
             assert len(copies) == 1, "No owned download copy while streaming"
             with patch.object(export_history, "LIMIT", 1):
-                replacement = await asyncio.to_thread(export_history.prepared, store, source, "zip", False)
+                replacement = await asyncio.to_thread(prepared_for, app, source, headers)
             assert not (store.root / "prepared-exports" / entry["id"]).exists(), "Active stream locked cache eviction"
             assert copies[0].exists(), "Cache eviction removed the active response"
             release.set()
@@ -439,6 +582,9 @@ async def main():
     await tickets()
     await account_tickets()
     await research_scope()
+    await retained_provenance()
+    await dossier_scope()
+    await scoped_handover_metadata()
     await local_demo()
     await download_lifetime()
     print("Prepared downloads and research exports passed: single use, expiry, scoped access, revocation during hashing, corruption, concurrent eviction, stream cancellation, locked-file retry and ownership.")

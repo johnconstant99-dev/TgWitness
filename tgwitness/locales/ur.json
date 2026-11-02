@@ -5988,5 +5988,23 @@
 "Export group": "گروپ کی برآمد",
 "Fix": "ٹھیک کریں",
 "Share this value": "اس قدر کو شیئر کریں",
-"Share this value instead": "اس قدر کو شیئر کریں"
+"Share this value instead": "اس قدر کو شیئر کریں",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "ایک منتخب منسلک غائب ہے۔ فائل کو بحال کریں، پھر ہینڈ اوور دوبارہ بنائیں، یا منسلکات کو واضح طور پر خارج کریں۔",
+"Request body timed out": "درخواست کے جسم کا وقت ختم ہو گیا",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "پینل سے ٹیلیگرام ایکشنز 'مقدمے کے لیے شواہد' کے مقصد کے لیے بند ہیں۔",
+"This chat is outside the permitted scope.": "یہ چیٹ اجازت شدہ دائرہ کار سے باہر ہے۔",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "یہ برآمد محفوظ شدہ کاپی کیش کی حد سے تجاوز کر گیا ہے۔ ابھی اسے ڈاؤن لوڈ کریں؛ بعد میں دوبارہ تیار کریں۔",
+"This export is not open to this access.": "یہ برآمد اس رسائی کے لیے دستیاب نہیں ہے۔",
+"This prepared export is unavailable.": "یہ تیار کردہ برآمد دستیاب نہیں ہے۔",
+"Too many pending request bodies. Try again shortly.": "بہت زیادہ زیر التواء درخواست کے باڈیز۔ چند لمحوں بعد دوبارہ کوشش کریں۔",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "آنین منزلوں کے لیے سرور پر TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 ضروری ہے؛ صرف عوامی درخواستیں اپنی منزل کے پتے کی تصدیق نہیں کر سکتیں۔",
+"Invalid destination hostname.": "غلط منزل ہوسٹ نام۔",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "تشکیل شدہ پراکسی کے ذریعے عوامی منزل کے DNS کی تصدیق نہیں کی جا سکی۔ براہِ راست کنکشن کی کوئی کوشش نہیں کی گئی۔",
+"Workspace observation: no interruptions in the available period": "ورک اسپیس مشاہدہ: دستیاب مدت میں کوئی خلل نہیں۔",
+"No workspace observation in the last {days} days": "گزشتہ {days} دنوں میں کوئی ورک اسپیس مشاہدہ نہیں ہوا۔",
+"Workspace observation: {n} interruption in the available period": "ورک اسپیس مشاہدہ: دستیاب مدت میں{n} وقفہ",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "ورک اسپیس مشاہدہ: دستیاب مدت میں{n} رکاوٹ",
+"other": "ورک اسپیس مشاہدہ: دستیاب مدت میں {n} وقفے"
+}
 }

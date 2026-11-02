@@ -5988,5 +5988,23 @@
 "Export group": "Grubu dışa aktar",
 "Fix": "Düzeltme",
 "Share this value": "Bu değeri paylaş",
-"Share this value instead": "Bunun yerine bu değeri paylaşın"
+"Share this value instead": "Bunun yerine bu değeri paylaşın",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Seçilen bir ek eksik. Dosyayı geri yükleyin, ardından devri yeniden oluşturun veya ekleri açıkça hariç tutun.",
+"Request body timed out": "İstek gövdesi zaman aşımına uğradı",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "\"Davaya ilişkin kanıt\" hedefi için panelden gerçekleştirilen Telegram işlemleri devre dışıdır.",
+"This chat is outside the permitted scope.": "Bu sohbet, izin verilen kapsamın dışındadır.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Bu dışa aktarma işlemi, kaydedilmiş kopya önbellek sınırını aşıyor. Şimdi indirin; daha sonra yeniden hazırlayın.",
+"This export is not open to this access.": "Bu dışa aktarma, bu erişim için açık değildir.",
+"This prepared export is unavailable.": "Bu hazırlanan dışa aktarım kullanılamaz.",
+"Too many pending request bodies. Try again shortly.": "Bekleyen istek gövdesi sayısı çok fazla. Kısa bir süre sonra tekrar deneyin.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Onion hedefleri için sunucuda TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 ayarının etkinleştirilmesi gerekir; yalnızca herkese açık istekler hedef adreslerini doğrulayamaz.",
+"Invalid destination hostname.": "Geçersiz hedef ana bilgisayar adı.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "Yapılandırılmış proxy üzerinden genel hedef DNS doğrulanamadı. Doğrudan bağlantı denemesi yapılmadı.",
+"Workspace observation: no interruptions in the available period": "Çalışma alanı gözlemi: kullanılabilir süre boyunca kesinti yoktur",
+"No workspace observation in the last {days} days": "Son {days} gün içinde çalışma alanı gözlemi yapılmamıştır",
+"Workspace observation: {n} interruption in the available period": "Çalışma alanı gözlemi: Kullanılabilir süre içinde {n} kesinti",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "Çalışma alanı gözlemi: Kullanılabilir süre içinde {n} kesinti",
+"other": "Çalışma alanı gözlemi: Kullanılabilir süre içinde {n} kesinti"
+}
 }

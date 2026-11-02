@@ -5988,5 +5988,23 @@
 "Export group": "Exportar grupo",
 "Fix": "Corregir",
 "Share this value": "Compartir este valor",
-"Share this value instead": "Comparte este valor en su lugar"
+"Share this value instead": "Comparte este valor en su lugar",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Falta un archivo adjunto seleccionado. Restaura el archivo y, a continuación, vuelve a crear la entrega, u omite explícitamente los archivos adjuntos.",
+"Request body timed out": "Se ha agotado el tiempo de espera del cuerpo de la solicitud",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "Las acciones de Telegram desde el panel están desactivadas para el objetivo «Pruebas para un caso».",
+"This chat is outside the permitted scope.": "Este chat queda fuera del ámbito permitido.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Esta exportación supera el límite de la caché de copias guardadas. Descárgala ahora y vuelve a prepararla más tarde.",
+"This export is not open to this access.": "Esta exportación no está disponible para este tipo de acceso.",
+"This prepared export is unavailable.": "Esta exportación preparada no está disponible.",
+"Too many pending request bodies. Try again shortly.": "Hay demasiados cuerpos de solicitud pendientes. Inténtalo de nuevo dentro de un rato.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Los destinos «onion» requieren que se establezca TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 en el servidor; las solicitudes exclusivamente públicas no pueden verificar sus direcciones de destino.",
+"Invalid destination hostname.": "Nombre de host de destino no válido.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "No se ha podido verificar el DNS de destino público a través del proxy configurado. No se ha intentado establecer una conexión directa.",
+"Workspace observation: no interruptions in the available period": "Observación del espacio de trabajo: sin interrupciones durante el periodo disponible",
+"No workspace observation in the last {days} days": "No se ha producido ninguna observación del espacio de trabajo en los últimos {days} días",
+"Workspace observation: {n} interruption in the available period": "Observación del espacio de trabajo: {n} interrupción en el periodo disponible",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "Observación del espacio de trabajo: {n} interrupción durante el periodo disponible",
+"other": "Observación del espacio de trabajo: {n} interrupciones en el periodo disponible"
+}
 }

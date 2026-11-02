@@ -25,6 +25,8 @@ on:
       - tools/check_demo_browser.py
       - tools/check_report_example.py
       - tools/check_docs_site.py
+      - tools/check_docs_workflows.py
+      - tools/test_site_metadata.py
       - tools/check_home_browser.py
       - tools/check_modes_browser.py
       - docs/assets/**
@@ -87,6 +89,8 @@ jobs:
             test-results/site/**/*.json
             test-results/docs-site/**/*.png
             test-results/docs-site/**/*.json
+            test-results/docs-workflows/**/*.png
+            test-results/docs-workflows/**/*.json
             test-results/report-example/**/*.png
             test-results/report-example/**/*.json
           if-no-files-found: warn

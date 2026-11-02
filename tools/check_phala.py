@@ -23,7 +23,7 @@ from cloud_world import COMMIT, CREATED, LATE, ROOT, TUNNEL, Response, World, ar
 from check_tdx import SEPT_VE_DISABLE, Forge, launch_log, rtmr3, runtime_event
 from tgwitness import assurance, cloud, tdx
 from tgwitness.evidence import export_file
-from tgwitness.provenance import source_files, source_tree_sha256
+from tgwitness.provenance import SOURCE_POLICY, source_files, source_tree_sha256
 from tgwitness.providers import base, get
 from tgwitness.providers.phala import API_VERSION, Phala
 from tgwitness.security import Vault
@@ -132,7 +132,8 @@ class Cvm:
             (self.root / directory).mkdir(parents=True, exist_ok=True)
         (self.root / "proc/sys/kernel/random/boot_id").write_text("boot-1\n")
         (self.root / "proc/net/tcp").write_text("  sl  local_address rem_address   st\n")
-        self.receipt = {"run_id": "run-1", "version": "0.7.0", "source_tree_sha256": source_tree_sha256(source_files()),
+        self.receipt = {"run_id": "run-1", "version": "0.7.0", "source_policy": SOURCE_POLICY,
+                        "source_tree_sha256": source_tree_sha256(source_files()),
                         "public_key": self.vault.public_key}
         self.override, self.attributes, self.late, self.bind_to = {}, SEPT_VE_DISABLE, [], None
         self.compose_hash = None  # what dstack measured, if not the world's app-compose

@@ -9,7 +9,7 @@ DOCUMENTS = (
     "/settings", "/first-run", "/board",
     "/start", "/chats", "/journal", "/sources", "/parameters", "/account", "/accounts",
     "/access", "/system-log", "/integrations", "/exports", "/extras", "/analysis", "/sealed",
-    *("/extras/" + card for card in ("alerts", "evidence", "cloud", "bot", "github")),
+    *("/extras/" + card for card in ("alerts", "evidence", "cloud", "bot", "github", "setup", "storage")),
     *("/first-run/" + str(step) for step in range(1, 8)),
 )
 

@@ -1,9 +1,9 @@
 # Case Board
 
-Case Board is the investigation team's private working feed. Bookmark a saved observation,
-highlight an exact passage, save a range of actions, and discuss it with colleagues. Team notes
-are opinions. They never become Telegram observations and are never sent to Telegram, webhooks,
-Apprise or an AI provider by this feature.
+Case Board gives an investigation team a shared working view of saved material. Bookmark an
+observation, highlight an exact passage, save a range of actions, and discuss it with colleagues.
+Cards retain their source references and signed revision history. Team annotations stay in the
+workspace, separately identifiable from the original Telegram observations.
 
 [Evidence model](EVIDENCE.md) · [Access](ACCESS.md) · [Reports](CASE_REPORTS.md) · [Русский](ru/CASE-BOARD.md)
 
@@ -15,6 +15,11 @@ Open **Investigation → Case Board** in Standard or Expert mode. The language f
 Use **To board** beside a journal record or saved chat message, or focus it and press **B**.
 The bookmark is added to Inbox in one click. Edit its title, labels and note, or move it to a
 collection. A changed card appends a signed revision; removing it preserves the history.
+
+For a first case, choose a collection and add the records that answer one question. Use comments
+to review the interpretation, then **Presentation** to walk through the cards and source context.
+Choose Case Board material separately in [Report studio](CASE_REPORTS.md) when preparing the
+deliverable. Saving a slice does not automatically configure a report's data filters.
 
 Select text inside a saved chat message to reveal **Highlight → board**. Select its colour and
 add a note. The server checks the exact quote and saved version, including emoji, RTL text and
@@ -29,8 +34,8 @@ it does not assume that the message author edited, deleted or reacted to a messa
 
 The slice dialog previews counts before allowing creation. `all` includes every recorded kind,
 including snapshots, edits, deletions, reactions, membership/service updates, own actions,
-buttons, media outcomes, recovered messages and future event kinds. Nothing can display an
-action that the collector never observed. Unknown-chat deletion notices are separate context,
+buttons, media outcomes, recovered messages and future event kinds. The selection describes
+saved observations. Unknown-chat deletion notices are separate context,
 available only to a whole-workspace access, never attributed to one of the chosen chats.
 
 Collections have a declared chat scope. An empty scope means the whole workspace. A collection
@@ -106,7 +111,7 @@ Items retain their last annotation hash, sequence, author and time, as well as t
 creator and creation time across revisions. Replay checks revisions,
 parents, collection references and duplicate action IDs. `manifest.json` and new checkpoints
 also bind `annotations_head`. Retain a checkpoint independently to detect truncation or rewriting
-with a copied signing key. A signature alone does not establish that its author told the truth.
+with a copied signing key.
 
 ### Text versions
 
@@ -164,9 +169,9 @@ readable notes too; full signed source files in the evidence ZIP remain complete
 `?format=csv` produces a convenient table without a standalone signature. Keep the JSON and ZIP:
 
 ```sh
-python verify.py evidence.zip --fingerprint TRUSTED_KEY_SHA256 --board
-python verify.py board-slice.json --evidence evidence.zip --fingerprint TRUSTED_KEY_SHA256
-python verify.py case-board.json --evidence evidence.zip --fingerprint TRUSTED_KEY_SHA256
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_KEY_SHA256 --board
+python -m tgwitness.verify board-slice.json --evidence evidence.zip --fingerprint TRUSTED_KEY_SHA256
+python -m tgwitness.verify case-board.json --evidence evidence.zip --fingerprint TRUSTED_KEY_SHA256
 ```
 
 The selection check authenticates the signed statement, exact source records and completeness
@@ -193,6 +198,6 @@ at most 200 cards. Standalone JSON slice excerpts are capped at 64 MiB; narrow t
 the signed ZIP for larger material. The standalone verifier caps annotations replay at 256 MiB.
 No external comment notifications are enabled or implemented by Case Board.
 
-The feature's automated acceptance uses fictional data and fake Telegram transport. It verifies
-storage, access, rendering and exports; it does not establish Telegram completeness, trustworthy
-wall-clock time, court admissibility or resistance to a host administrator who controls the key.
+The feature's automated acceptance uses fictional data and a simulated Telegram transport to
+check storage, access, rendering and exports. See [verification scope](EVIDENCE.md#verification-scope)
+for the scope of the evidence checks.

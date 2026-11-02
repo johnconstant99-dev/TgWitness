@@ -41,8 +41,8 @@ def producer():
 def build():
     """The exact program: the SHA-256 of its source files (provenance.source_files, which a checkout of any
     commit reproduces) and the git commit when it runs from a checkout or the installer named one."""
-    from .provenance import source_files, source_tree_sha256
-    found = {"source_tree_sha256": source_tree_sha256(source_files())}
+    from .provenance import SOURCE_POLICY, source_files, source_tree_sha256
+    found = {"source_policy": SOURCE_POLICY, "source_tree_sha256": source_tree_sha256(source_files())}
     commit = os.environ.get("TGWITNESS_COMMIT") or checkout_commit(Path(__file__).resolve().parents[1])
     if isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit.strip()):
         found["commit"] = commit.strip()

@@ -104,17 +104,25 @@
   }
 
   async function offerShared(groupId, profileId) {
+    const revision = state.workspaceRevision;
     const shared = await json("profile-groups/" + encodeURIComponent(groupId) + "/settings", undefined, {root: true});
     const member = shared.members.find(m => m.id === profileId);
     if (!member?.available || !member.own.length) return;
-    const names = member.own.map(key => tr(shared.keys.find(k => k.key === key)?.label || key));
+    // A route needs the connection check/apply flow; ordinary settings adoption cannot change it.
+    const keys = member.own.filter(key => key !== "route");
+    if (!keys.length) return;
+    const names = keys.map(key => tr(shared.keys.find(k => k.key === key)?.label || key));
     const list = names.length > 6 ? [...names.slice(0, 6), tr("and {n} more", {n: names.length - 6})] : names;
     if (!(await window.TgWitnessDialogs.confirm(trn("{n} setting of this account differs from the group {name}:", "{n} settings of this account differ from the group {name}:",
-        member.own.length, {name: shared.group.label}) + "\n\n" + list.join("\n") + "\n\n" +
+        keys.length, {name: shared.group.label}) + "\n\n" + list.join("\n") + "\n\n" +
         tr("Take the group's values? Otherwise the account keeps its own and Settings marks them ✏️."),
         {title: tr("Take the shared settings?"), confirmText: tr("Take the group's values")}))) return;
-    const result = await json("profile-groups/" + encodeURIComponent(groupId) + "/settings/adopt", {profiles: [profileId]}, {root: true});
+    if (revision !== state.workspaceRevision) return;
+    const result = await json("profile-groups/" + encodeURIComponent(groupId) + "/settings/adopt", {profiles: [profileId], keys}, {root: true});
+    const remaining = result.members.find(m => m.id === profileId)?.own || [];
     if (result.failed.length) toast(result.failed.map(f => f.label + ": " + tr(f.error)).join(" · "), true);
+    else if (remaining.includes("route") || result.kept_own?.length) toast(tr("Settings saved.") + " " + tr("Own route preserved"));
+    else if (remaining.length) toast(tr("Settings saved."));
     else toast(tr("The account now follows the group."));
   }
 

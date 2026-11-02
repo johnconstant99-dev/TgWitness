@@ -6060,5 +6060,25 @@
 "Export group": "Eksportuj grupę",
 "Fix": "Popraw",
 "Share this value": "Udostępnij tę wartość",
-"Share this value instead": "Udostępnij tę wartość zamiast tego"
+"Share this value instead": "Udostępnij tę wartość zamiast tego",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Brakuje wybranego załącznika. Przywróć plik, a następnie ponownie utwórz przekaz, lub wyraźnie pomiń załączniki.",
+"Request body timed out": "Przekroczono limit czasu dla treści żądania",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "Działania w Telegramie z poziomu panelu są wyłączone dla celu „Dowody w sprawie”.",
+"This chat is outside the permitted scope.": "Ten czat wykracza poza dozwolony zakres.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Ten eksport przekracza limit pamięci podręcznej zapisanych kopii. Pobierz go teraz; przygotuj go ponownie później.",
+"This export is not open to this access.": "Ten eksport nie jest dostępny dla tego użytkownika.",
+"This prepared export is unavailable.": "Ten przygotowany eksport jest niedostępny.",
+"Too many pending request bodies. Try again shortly.": "Zbyt wiele oczekujących treści żądań. Spróbuj ponownie za chwilę.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Adresy docelowe typu onion wymagają ustawienia TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 na serwerze; żądania skierowane wyłącznie do adresów publicznych nie pozwalają na weryfikację adresów docelowych.",
+"Invalid destination hostname.": "Nieprawidłowa nazwa hosta docelowego.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "Nie udało się zweryfikować publicznego serwera DNS docelowego za pośrednictwem skonfigurowanego serwera proxy. Nie podjęto próby nawiązania bezpośredniego połączenia.",
+"Workspace observation: no interruptions in the available period": "Obserwacja obszaru roboczego: brak przerw w dostępnym okresie",
+"No workspace observation in the last {days} days": "Brak obserwacji obszaru roboczego w ciągu ostatnich {days} dni",
+"Workspace observation: {n} interruption in the available period": "Obserwacja obszaru roboczego: {n} przerwa w dostępnym okresie",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "Obserwacja obszaru roboczego: {n} przerwa w dostępnym okresie",
+"few": "Obserwacja obszaru roboczego: {n} przerw w dostępnym okresie",
+"many": "Obserwacja obszaru roboczego: {n} przerw w dostępnym okresie",
+"other": "Obserwacja obszaru roboczego: {n}-przerwy w dostępnym okresie"
+}
 }

@@ -5988,5 +5988,23 @@
 "Export group": "समूह निर्यात",
 "Fix": "ठीक करें",
 "Share this value": "इस मान को साझा करें",
-"Share this value instead": "इसके बजाय इस मान को साझा करें"
+"Share this value instead": "इसके बजाय इस मान को साझा करें",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "एक चयनित अटैचमेंट अनुपस्थित है। फ़ाइल को पुनर्स्थापित करें, फिर हैंडओवर फिर से बनाएँ, या अटैचमेंट्स को स्पष्ट रूप से छोड़ दें।",
+"Request body timed out": "रिक्वेस्ट बॉडी टाइम आउट हो गई",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "पैनल से टेलीग्राम क्रियाएँ 'केस के लिए साक्ष्य' लक्ष्य के लिए बंद हैं।",
+"This chat is outside the permitted scope.": "यह चैट अनुमत दायरे से बाहर है।",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "यह निर्यात सहेजी गई प्रति कैश सीमा से अधिक है। इसे अभी डाउनलोड करें; बाद में फिर से तैयार करें।",
+"This export is not open to this access.": "यह निर्यात इस पहुँच के लिए खुला नहीं है।",
+"This prepared export is unavailable.": "यह तैयार निर्यात उपलब्ध नहीं है।",
+"Too many pending request bodies. Try again shortly.": "बहुत अधिक लंबित अनुरोध बॉडीज़। थोड़ी देर बाद फिर से प्रयास करें।",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "ऑनियन गंतव्यों के लिए सर्वर पर TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 की आवश्यकता होती है; केवल सार्वजनिक अनुरोध अपने गंतव्य पतों को सत्यापित नहीं कर सकते।",
+"Invalid destination hostname.": "अमान्य गंतव्य होस्टनाम।",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "सार्वजनिक गंतव्य DNS को कॉन्फ़िगर किए गए प्रॉक्सी के माध्यम से सत्यापित नहीं किया जा सका। कोई सीधा कनेक्शन प्रयास नहीं किया गया।",
+"Workspace observation: no interruptions in the available period": "कार्यक्षेत्र अवलोकन: उपलब्ध अवधि में कोई रुकावट नहीं",
+"No workspace observation in the last {days} days": "पिछले {days} दिनों में कोई कार्यक्षेत्र अवलोकन नहीं",
+"Workspace observation: {n} interruption in the available period": "कार्यक्षेत्र अवलोकन: उपलब्ध अवधि में {n} बाधा",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "कार्यक्षेत्र अवलोकन: उपलब्ध अवधि में {n} बाधा",
+"other": "कार्यक्षेत्र अवलोकन: उपलब्ध अवधि में {n} बाधाएँ"
+}
 }

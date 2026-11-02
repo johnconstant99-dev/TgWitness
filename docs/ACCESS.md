@@ -13,9 +13,12 @@ folder or the whole account. **Access scope** decides which of those recorded
 accounts and chats another person can see and use. Giving access does not join a
 Telegram chat, start collection or grant Telegram account permissions.
 
-An access can open selected workspaces, selected chats within them, or all
-workspaces. **All workspaces, including ones added later** also covers future
-accounts. Select workspaces explicitly when a case should stay limited to them.
+An access can open selected workspaces, selected chats within them, all
+workspaces, or every account of an
+[account group](ACCOUNTS.md#bulk-import-and-account-groups). **All workspaces,
+including ones added later** also covers future accounts. A group access also
+covers accounts added to that group later. Select workspaces explicitly when a
+case should stay limited to them.
 
 ## Give someone access
 
@@ -92,6 +95,12 @@ requests from sessions that are already open. Revoking an access ends its sessio
 and makes the issued token unusable. **Open sessions** also lets the administrator
 end an individual session without revoking the whole access.
 
+Saved export copies retain their creator, workspace, chat scope and required permissions.
+An issued access can list or download its own copies only while those permissions still apply;
+copies containing Case Board also require `board.read`. The administrator can retrieve all copies.
+Older copies without this metadata and group bundles are administrator-only. Download tickets
+and prepared file responses recheck access after preparing the file, before sending its bytes.
+
 Revocation cannot recall files that someone already downloaded. Signing out,
 locking the panel or ending a session does not stop a running collector.
 
@@ -126,6 +135,10 @@ without a failed attempt resets escalation. Rejections return HTTP 429 and
 `Retry-After`. Limits are in memory, shared across workspaces in one panel process;
 restart clears them. Live streams are limited to four per bearer token and 32
 for the panel process. Opening a stream also consumes the API request budget.
+
+Request bodies have a 60-second receive deadline (8 seconds for MCP). Each application bounds
+unfinished bodies to 32 requests and 64 MiB of reserved route allowances. Oversized bodies return
+413, timed-out bodies return 408, and exhausted body capacity returns 503 with `Retry-After`.
 
 Forwarded IP headers are ignored unless the actual TCP peer belongs to
 `TGWITNESS_TRUSTED_PROXIES` (comma-separated IPs or CIDRs). Set

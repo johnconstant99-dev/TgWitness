@@ -23,7 +23,7 @@ import uvicorn
 from tgwitness import __version__, assurance, cloud, cloud_wizard
 from tgwitness.app import create_app
 from tgwitness.providers import base, hetzner
-from tgwitness.provenance import source_files, source_tree_sha256
+from tgwitness.provenance import SOURCE_POLICY, source_files, source_tree_sha256
 from tgwitness.security import Vault
 from tgwitness.verify import fingerprint
 
@@ -205,7 +205,8 @@ class Host:
         (self.root / "proc/net/tcp").write_text("  sl  local_address rem_address   st\n")
         (self.root / "run/utmp").write_bytes(b"")
         (self.root / "var/log/wtmp").write_bytes(b"")
-        self.receipt = {"run_id": "run-1", "version": __version__, "source_tree_sha256": source_tree_sha256(source_files())}
+        self.receipt = {"run_id": "run-1", "version": __version__, "source_policy": SOURCE_POLICY,
+                        "source_tree_sha256": source_tree_sha256(source_files())}
         self.hosts = []
 
     def get(self, url, timeout):

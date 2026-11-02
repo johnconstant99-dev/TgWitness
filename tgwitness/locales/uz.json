@@ -5988,5 +5988,23 @@
 "Export group": "Guruhni eksport qilish",
 "Fix": "Tuzatish",
 "Share this value": "Ushbu qiymatni ulashing",
-"Share this value instead": "Bu qiymatni o'rniga ulashing"
+"Share this value instead": "Bu qiymatni o'rniga ulashing",
+"A selected attachment is missing. Restore the file, then create the handover again, or explicitly omit attachments.": "Tanlangan ilova yo'q. Faylni tiklang, so'ng handoverni qayta yarating yoki ilovalarni aniq o'chirib tashlang.",
+"Request body timed out": "So'rov tanasi vaqti tugadi",
+"Telegram actions from the panel are off for the Evidence for a case goal.": "Panelning Telegram harakatlari \"Ish uchun dalil\" maqsadi uchun o'chirilgan.",
+"This chat is outside the permitted scope.": "Ushbu suhbat ruxsat etilgan doiradan tashqarida.",
+"This export exceeds the saved-copy cache limit. Download it now; prepare it again later.": "Ushbu eksport saqlangan nusxa kesh limitidan oshadi. Hozir yuklab oling; keyinroq qayta tayyorlang.",
+"This export is not open to this access.": "Ushbu eksport ushbu kirish uchun ochiq emas.",
+"This prepared export is unavailable.": "Ushbu tayyorlangan eksport mavjud emas.",
+"Too many pending request bodies. Try again shortly.": "Kutayotgan so'rov tanalari juda ko'p. Biroz vaqtdan keyin yana urinib ko'ring.",
+"Onion destinations require TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 on the server; public-only requests cannot verify their destination addresses.": "Onion manzillari serverda TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1 bo'lishini talab qiladi; faqat ommaviy so'rovlar manzil manzillarini tasdiqlay olmaydi.",
+"Invalid destination hostname.": "Noto'g'ri manzil host nomi.",
+"Public destination DNS could not be verified through the configured proxy. No direct connection was attempted.": "Sozlangan proksi orqali ommaviy manzil DNS tasdiqlanmadi. To'g'ridan-to'g'ri ulanishga urinilmadi.",
+"Workspace observation: no interruptions in the available period": "Ish maydoni kuzatuvi: mavjud davrda uzilishlarsiz",
+"No workspace observation in the last {days} days": "Oxirgi {days} kun ichida ish maydoni kuzatuvi bo'lmadi",
+"Workspace observation: {n} interruption in the available period": "Ish maydoni kuzatuvi: mavjud davrda{n}ta uzilish",
+"Workspace observation: {n} interruptions in the available period": {
+"one": "Ish maydoni kuzatuvi: mavjud davrda{n}ta uzilish",
+"other": "Ish maydoni kuzatuvi: mavjud davrda {n}ta uzilish"
+}
 }

@@ -5,6 +5,7 @@ services:
     image: ${TGWITNESS_IMAGE:?Set TGWITNESS_IMAGE to a published version or digest in .env}
     environment:
       TGWITNESS_PROXY_FEED_PROXY: ${TGWITNESS_PROXY_FEED_PROXY:-}
+      TGWITNESS_ALLOW_PRIVATE_DESTINATIONS: ${TGWITNESS_ALLOW_PRIVATE_DESTINATIONS:-}
     restart: unless-stopped
     ports:
       - "127.0.0.1:${TGWITNESS_PORT:-8787}:8787"

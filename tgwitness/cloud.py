@@ -47,7 +47,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 from . import __version__, tdx
 from .assurance import redact_user_data, start_binding, user_data_hashes
-from .provenance import source_files, source_tree_sha256
+from .provenance import LEGACY_SOURCE_POLICY, source_files, source_tree_sha256
 from .providers import NAMES, get
 from .providers import base
 from .providers.base import Api, DeployError, parse_time
@@ -1173,7 +1173,13 @@ def attestation_checks(answer, record, reference=None, published=None, collatera
 
 
 def write_record(path, record):
-    path.write_bytes(json.dumps(record, indent=2, ensure_ascii=False).encode() + b"\n")
+    private_write(path, json.dumps(record, indent=2, ensure_ascii=False).encode() + b"\n")
+    if os.name != "nt":
+        directory = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
 
 
 def address_signature(key, text):
@@ -1811,11 +1817,16 @@ def verify_collector(report, record, server, args, fetch, reference=None, refere
     report.add("deployment", "pass" if same else "fail", "The server describes this deployment and commit",
                "commit " + str(deployed.get("commit")) + ", deployment " + str(deployed.get("deployment_id")), COLLECTOR)
     if args.source:
-        expected = source_tree_sha256(source_files(Path(args.source) / "tgwitness"))
-        same = expected == statement["source_tree_sha256"]
-        report.add("source", "pass" if same else "fail", "The collector-reported source hash matches the checkout",
-                   "running " + statement["source_tree_sha256"] + ", checkout " + expected
-                   + ("" if same else "; on Windows clone with git -c core.autocrlf=false"), COLLECTOR)
+        try:
+            expected = source_tree_sha256(source_files(Path(args.source) / "tgwitness",
+                policy=statement.get("source_policy", LEGACY_SOURCE_POLICY)))
+        except ValueError as exc:
+            report.add("source", "fail", "The collector-reported source hash matches the checkout", str(exc), COLLECTOR)
+        else:
+            same = expected == statement["source_tree_sha256"]
+            report.add("source", "pass" if same else "fail", "The collector-reported source hash matches the checkout",
+                       "running " + statement["source_tree_sha256"] + ", checkout " + expected
+                       + ("" if same else "; on Windows clone with git -c core.autocrlf=false"), COLLECTOR)
     else:
         report.add("source", "unavailable", "The collector-reported source hash matches the checkout",
                    "pass --source with a checkout of " + record["commit"], COLLECTOR)

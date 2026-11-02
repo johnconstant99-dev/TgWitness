@@ -110,7 +110,7 @@ def revision(app):
     s = app.state.store
     raw = [values(app), capture_settings(s), evidence_settings(s), alerts.alert_settings(s), replica.replica_settings(s),
            app.state.collector.route_policy(), app.state.collector.network_config().public(),
-           s.get_setting("goal_preset", None)]
+           s.get_setting("goal_preset", None), s.get_setting("first_run", {}), s.get_setting("scope", {})]
     return hashlib.sha256(json.dumps(raw, sort_keys=True).encode()).hexdigest()
 
 
@@ -182,8 +182,26 @@ def main_account_scope(app, body):
     saved = wizard_state(app)
     kind = body.account_kind or saved.get("account_kind")
     goal = body.goal if "goal" in body.model_fields_set else saved.get("goal", body.goal)
-    if kind == "main" and goal != "copy" and body.scope != "selected":
+    collecting = app.state.collector.running or app.state.store.get_setting("resume", False)
+    if kind == "main" and (goal != "copy" or collecting) and body.scope != "selected":
         raise HTTPException(409, "On your main account only chosen chats can be recorded. Choose chats, or use a separate account.")
+
+
+def validate_collection_scope(store):
+    """Validate actual continuous collection, independently of a saved copy-wizard goal."""
+    from .scope import scope_settings
+    if (store.get_setting("first_run", {}) or {}).get("account_kind") == "main" \
+            and scope_settings(store)["mode"] != "selected":
+        raise ValueError("On your main account only chosen chats can be recorded. Choose chats, or use a separate account.")
+
+
+def save_goal(store, goal):
+    """Keep the wizard's goal and the active preset consistent after later changes."""
+    with store.transaction():
+        store.set_setting("goal_preset", {"goal": goal, "version": 1, "values": PRESETS[goal], "at": utcnow()})
+        wizard = store.get_setting("first_run", {})
+        if wizard:
+            store.set_setting("first_run", {**wizard, "goal": goal})
 
 
 def checked(app, draft=None):
@@ -221,6 +239,11 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
     async def apply_values(desired):
         s, c = app.state.store, app.state.collector
         before = values(app)
+        if desired["continuous"]:
+            try:
+                validate_collection_scope(s)
+            except ValueError as exc:
+                raise HTTPException(409, str(exc)) from None
         if not coherent(desired):
             raise HTTPException(409, "The preserved manual settings conflict with this goal. Review external requests and timestamps.")
         if desired["replica"]:
@@ -290,8 +313,7 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
                 raise HTTPException(409, "Settings changed. Review the differences again.")
             proposed = preview(app, body)
             await apply_values(proposed["values"])
-            app.state.store.set_setting("goal_preset", {"goal": body.goal, "version": 1,
-                "values": PRESETS[body.goal], "at": utcnow()})
+            save_goal(app.state.store, body.goal)
         return state(app)
 
     app.state.settings_apply = apply_values

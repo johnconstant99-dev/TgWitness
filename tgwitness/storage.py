@@ -390,7 +390,7 @@ class Storage:
                         for section in config.sections()}
         return hashlib.sha256(canonical({"backend": saved["backend"], "folder": saved["remote_path"], "identity": identity})).hexdigest()
 
-    def obsolete_copies(self, destination):
+    def obsolete_copies(self, destination, config_replaced=False):
         """Check a destination change while the caller holds the storage lock.
 
         Receipts describe one configured destination. Only discard an old copy's
@@ -399,7 +399,10 @@ class Storage:
         """
         receipts = Receipts(self.store.root)
         try:
-            obsolete = [row for row in receipts.rows() if row["destination"] != destination]
+            # An operator-supplied OAuth token can belong to another account even
+            # when its public remote identity is unchanged. Automatic rclone
+            # refreshes use save_refreshed and do not retire recovery receipts.
+            obsolete = [row for row in receipts.rows() if config_replaced or row["destination"] != destination]
         finally:
             receipts.close()
         for row in obsolete:

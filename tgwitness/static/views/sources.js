@@ -303,7 +303,7 @@ export function createSources(context) {
   }
 
   async function runSourceAction(ids, action, {confirmed = false} = {}) {
-    const state = getState(), status = state.status;
+    const state = getState(), status = state.status, current = getSession(), profile = state.profile;
     if (sourceBusy || dialogLoading || !status || status.demo || !may("sources") || !ids.length) return;
     if (ids.length > 500) {toast(tr("Choose up to 500 sources at a time."), true); return;}
     const wide = (status.scope?.mode || "selected") !== "selected";
@@ -314,7 +314,8 @@ export function createSources(context) {
       ? "Remove this source? Saved messages and files stay. Cached people profiles are removed."
       : "Remove {n} sources? Saved messages and files stay. Cached people profiles are removed.", {n: ids.length})
       + (wide ? " " + tr("These chats are also excluded so the scope does not add them again.") : ""), {danger: true}))) return;
-    const current = getSession(), attempt = ++sourceAttempt, profile = state.profile;
+    if (current !== getSession()) return;
+    const attempt = ++sourceAttempt;
     sourceBusy = true; renderTargets(); renderDialogs(); renderDialogRefresh();
     try {
       let result;
@@ -390,7 +391,10 @@ export function createSources(context) {
     button.closest("details")?.removeAttribute("open");
     let action = button.dataset.sourceAction;
     if (action === "star") action = target.priority ? "regular" : "priority";
-    confirmRowAction(target, action).then(confirmed => {if (confirmed) runSourceAction([target.chat_id], action, {confirmed: true});});
+    const owner = getSession();
+    confirmRowAction(target, action).then(confirmed => {
+      if (confirmed && owner === getSession()) runSourceAction([target.chat_id], action, {confirmed: true});
+    });
   });
   // Pausing and excluding are confirmed; removing a source asks for its name, so one stray click changes nothing.
   async function confirmRowAction(target, action) {
