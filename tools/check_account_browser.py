@@ -85,7 +85,11 @@ def main():
         expect(page.locator("#method-description")).to_contain_text("one session format")
         scenarios.append("file formats explain which session to choose and when JSON is needed")
         page.locator(".import-advanced summary").click()
-        metadata = json.dumps({"app_id":123,"app_hash":"a"*32}).encode()
+        client_profile = {"device_model":"Synthetic laptop", "system_version":"Windows 11", "app_version":"6.0.0 x64",
+                          "lang_code":"en", "system_lang_code":"en-US", "lang_pack":"tdesktop"}
+        metadata = json.dumps({"app_id":123,"app_hash":"a"*32, "device":client_profile["device_model"],
+                               "sdk":client_profile["system_version"],
+                               **{k:v for k,v in client_profile.items() if k not in ("device_model", "system_version")}}).encode()
         files = [("telethon.session",sqlite_fixture()), ("pyrogram.session",sqlite_fixture("pyrogram")),
                  ("tdata.zip",tdata_fixture("synthetic-passcode")), ("account.json",metadata)]
         page.locator("#tdata-passcode").fill("synthetic-passcode")
@@ -109,7 +113,11 @@ def main():
         page.locator("#credentials-form button[type=submit]").click()
         expect(page.locator("#authorized-state")).to_be_visible()
         assert not server.app.state.collector.running
+        assert server.app.state.vault.read("credentials")["client_profile"] == client_profile
+        assert server.app.state.collector.client.options["device_model"] == client_profile["device_model"]
+        assert page.evaluate("importClientProfile") is None
         scenarios.append("imported account ID checked during authorization")
+        scenarios.append("companion JSON device, OS, version and languages reach the client and encrypted vault")
 
         def workspace_api_path(path):
             profile = page.evaluate("state.profile")
@@ -218,6 +226,7 @@ def main():
         expect(page.locator("#profile-select")).to_have_value(child)
         expect(page.locator("#credentials-form")).to_be_visible()
         assert not candidate2.connected
+        assert page.evaluate("importClientProfile") is None
         scenarios += ["wrong-account QR rejected", "lock clears and cancels QR", "new login replaces pending QR",
                       "workspace switch cancels only its pending QR"]
         if not page.locator("#session-file").is_visible():
@@ -236,7 +245,21 @@ def main():
         expect(page.locator("#api-id")).to_have_value("123")
         expect(page.locator("#api-hash")).to_have_value("a"*32)
         expect(page.locator("#import-details")).not_to_be_visible()
+        assert page.evaluate("apiCredentials().client_profile") == client_profile
+        choose_method("qr")
+        request_qr("#start-qr")
+        child_collector = server.app.state.profiles.entries[child]["app"].state.collector
+        assert child_collector.login_client.tgwitness_client_profile == client_profile
+        page.locator("#qr-cancel").click()
+        expect(page.locator("#credentials-form")).to_be_visible()
+        choose_method("phone")
+        page.locator("#phone").fill("+15550001111")
+        page.locator("#auth-continue").click()
+        expect(page.locator("#code-form")).to_be_visible()
+        assert child_collector.login_client.tgwitness_client_profile == client_profile
+        page.locator("#auth-back").click()
         scenarios.append("metadata-only import points to phone or QR and preserves API fields")
+        scenarios.append("metadata-only profile reaches both QR and phone login")
         choose_method("files")
         if not page.locator("#api-id").is_visible():
             open_settings()
@@ -276,6 +299,7 @@ def main():
         expect(page.locator("#import-account")).to_be_enabled()
         expect(page.locator("#api-id")).to_have_value("789")
         expect(page.locator("#api-hash")).to_have_value("c"*32)
+        assert page.evaluate("importClientProfile") is None
         scenarios.append("late import cannot replace a newly pasted API pair")
         choose_method("phone")
         page.locator("#phone").fill("+1 (555) 000-1111")

@@ -356,7 +356,7 @@ setInterval(()=>{if(!document.hidden)updateTimes();},30000);
 function sourceTitle(id) { return state.status?.targets.find(x => x.chat_id === id)?.title || (id === null ? tr("Collector / account") : String(id)); }
 let toastTimer;
 let networkLoadedFor=null;
-let qrPending=null,importExpectedId=null,accountImportRevision=0,authMethod="phone";
+let qrPending=null,importExpectedId=null,importClientProfile=null,accountImportRevision=0,authMethod="phone";
 let accessStarted=false;
 class StaleView extends Error {constructor(){super("");this.name="StaleView";}}
 function toast(message, error=false) { if(!message)return;const n = $("toast"); n.textContent = message; n.classList.toggle("error", error); show("toast", true); clearTimeout(toastTimer); toastTimer = setTimeout(() => leave("toast"), error ? 9000 : 5000); }
@@ -367,7 +367,8 @@ async function api(path, body, options={}) {
   const deadline=path==='status'?AbortSignal.timeout(15000):null;
   const requestSignal=deadline?(fetchOptions.signal?AbortSignal.any([deadline,fetchOptions.signal]):deadline):fetchOptions.signal;
   let response;try{response = await fetch(prefix + path, {method: body === undefined ? "GET" : "POST",
-    headers: {Authorization: "Bearer " + token, ...(body !== undefined ? {"Content-Type":"application/json"} : {})},
+    headers: {Authorization: "Bearer " + token, ...(body !== undefined ? {"Content-Type":"application/json"} : {}),
+      ...(path.startsWith("auth/")||path==="profiles/import"?{"X-TgWitness-System-Language":navigator.language}:{})},
     ...(body !== undefined ? {body: JSON.stringify(body)} : {}), ...fetchOptions,...(requestSignal?{signal:requestSignal}:{})});
   }catch(error){if(fetchOptions.signal?.aborted)throw new StaleView();
     if(revision===state.workspaceRevision&&token===state.token)connectionNotice?.fail();
@@ -3227,8 +3228,9 @@ function renderApiState(){
 }
 function apiCredentials(){
   const id=$("api-id"),hash=$("api-hash");
+  const profile=importClientProfile?{client_profile:importClientProfile}:{};
 
-  if(!id.value&&!hash.value){id.required=hash.required=false;return {};}
+  if(!id.value&&!hash.value){id.required=hash.required=false;return profile;}
   id.required=hash.required=true;
   if(!id.checkValidity()||!hash.checkValidity()||Number(id.value)<1||Number(id.value)>2147483647){
     show("api-details",true);$("api-details").open=true;
@@ -3238,7 +3240,7 @@ function apiCredentials(){
     }else hash.reportValidity();
     return null;
   }
-  return {api_id:Number(id.value),api_hash:hash.value.trim()};
+  return {api_id:Number(id.value),api_hash:hash.value.trim(),...profile};
 }
 async function loginRequest(path,body,options){
   const controls=[...$("credentials-form").querySelectorAll("input,textarea,button")].map(n=>[n,n.disabled]);
@@ -3260,15 +3262,15 @@ $("api-id").addEventListener("paste",event=>{
   const valid=match&&Number(match[1])>0&&Number(match[1])<=2147483647;
   $("api-pair-result").classList.toggle("error",!valid);
   if(!valid){$("api-pair-result").textContent=tr("Paste one pair: a positive API ID, a colon, and a 32-character hexadecimal API hash. Existing fields were kept.");return;}
-  accountImportRevision++;
+  accountImportRevision++;importClientProfile=null;
   $("api-id").value=String(Number(match[1]));$("api-hash").value=match[2];
   $("api-pair-result").textContent=tr("Both fields filled. Telegram will validate the credentials when you sign in.");
   renderApiState();
 });
-for(const id of ["api-id","api-hash"])$(id).addEventListener("input",()=>{accountImportRevision++;$("api-pair-result").textContent="";authProgress("");renderApiState();});
+for(const id of ["api-id","api-hash"])$(id).addEventListener("input",()=>{accountImportRevision++;importClientProfile=null;$("api-pair-result").textContent="";authProgress("");renderApiState();});
 function clearSecrets(){
   clearTimeout(toastTimer);show("toast",false);
-  cancelQR();importExpectedId=null;accountImportRevision++;$("import-result").textContent="";
+  cancelQR();importExpectedId=null;importClientProfile=null;accountImportRevision++;$("import-result").textContent="";
   for(const name of ["api-id","api-hash","session-string","session-file","phone","code","password",
                     "tdata-passcode","auth-key","auth-dc","auth-user-id","network-username","network-password","network-secret","network-link"])$(name).value="";
   $("network-link-result").textContent="";
@@ -3445,7 +3447,7 @@ function renderSelectedFiles(){
   $("selected-files").textContent=files.map(f=>f.name).join(" · ");show("selected-files",!!files.length);
 }
 $("session-file").addEventListener("change",()=>{
-  accountImportRevision++;
+  accountImportRevision++;importClientProfile=null;
   authProgress("");
   $("session-string").value="";importExpectedId=null;
   $("import-result").textContent="";
@@ -3470,6 +3472,7 @@ async function loadAccountFiles(){
     if(revision!==state.workspaceRevision||selection!==accountImportRevision||!state.token)return;
 
     $("session-string").value=result.session||"";importExpectedId=result.expected_user_id||null;
+    importClientProfile=result.client_profile||null;
     if(result.api_id)$("api-id").value=result.api_id;
     if(result.api_hash)$("api-hash").value=result.api_hash;
     $("import-result").textContent=tr("{formats} loaded.",{formats:result.formats.join(" + ")})+" "+tr(result.has_authorization?
@@ -3498,14 +3501,15 @@ async function loadAuthKey(){
     const result=await json("auth/import",{files:[{name:"auth-key.json",content:btoa(JSON.stringify(record))}]},{profile});
     if(revision!==state.workspaceRevision||selection!==accountImportRevision||!state.token)return;
     $("session-string").value=result.session||"";importExpectedId=result.expected_user_id||null;
+    importClientProfile=result.client_profile||null;
     return result;
   }finally{if(revision===state.workspaceRevision&&selection===accountImportRevision)authProgress("");}
 }
 for(const id of ["auth-key","auth-dc","auth-user-id"])$(id).addEventListener("input",()=>{
-  accountImportRevision++;importExpectedId=null;$("session-string").value="";authProgress("");
+  accountImportRevision++;importExpectedId=null;importClientProfile=null;$("session-string").value="";authProgress("");
 });
 $("import-account").addEventListener("click",e=>busy(e.currentTarget,loadAccountFiles));
-$("session-string").addEventListener("input",()=>{accountImportRevision++;importExpectedId=null;$("import-result").textContent="";});
+$("session-string").addEventListener("input",()=>{accountImportRevision++;importExpectedId=null;importClientProfile=null;$("import-result").textContent="";});
 $("credentials-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
   if(state.status.demo){toast(tr("Demo workspace. Connect accounts in your live installation."),true);return;}
   if(authMethod==="qr"){await beginQR();return;}

@@ -17,7 +17,8 @@ $("language").onchange = () => {lang = $("language").value; translate(); poll();
 translate();
 async function api(path, body) {
   const response = await fetch("/api/" + path, {method: body === undefined ? "GET" : "POST",
-    headers: {"Authorization": "Bearer " + token, "Content-Type": "application/json"},
+    headers: {"Authorization": "Bearer " + token, "Content-Type": "application/json", "X-TgWitness-Language": lang,
+      "X-TgWitness-System-Language": navigator.language},
     body: body === undefined ? undefined : JSON.stringify(body), cache: "no-store", redirect: "error"});
   const data = await response.json();
   if (!response.ok) throw new Error(data.detail || "Request failed");

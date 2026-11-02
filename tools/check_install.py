@@ -27,6 +27,9 @@ def main():
     assert Path(tgwitness.__file__).resolve().is_relative_to(package)
     from tgwitness.proxy_catalog import SEED, read_snapshot
     assert SEED.is_relative_to(package) and read_snapshot(SEED)["sources"]
+    from tgwitness.client_profiles import desktop
+    assert desktop("installed-resource-check")["lang_pack"] == "tdesktop"
+    assert (package / "tgwitness/client_profiles.LICENSE").read_bytes()
     for name in ("proof.html", "proof.css", "proof.js"):
         assert (package / "tgwitness/static" / name).read_bytes(), "Missing installed proof resource: " + name
     args.output.mkdir(exist_ok=True, parents=True)

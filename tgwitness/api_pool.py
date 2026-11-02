@@ -3,9 +3,6 @@ import random
 
 from telethon.errors import ApiIdInvalidError, ApiIdPublishedFloodError, UpdateAppToLoginError
 
-from . import __version__
-
-
 POOL = (
     (2040, "b18441a1ff607e10a989891a5462e627"), (800812, "db55ad67a98df35667ca788b97f771f5"),
     (27097807, "9fd790a9cb1f639c921d941621d2959d"), (1621727, "31350903c528876f79527398c09660ce"),
@@ -36,30 +33,31 @@ POOL = (
 POOL_IDS = frozenset(api_id for api_id, _ in POOL)
 DESKTOP_ID = 2040
 
-DESKTOP_DEVICE = {"device_model": "Desktop", "system_version": "Windows 10", "app_version": "5.6.3 x64",
-                  "lang_code": "en", "system_lang_code": "en-US"}
-APP_DEVICE = {"device_model": "TgWitness", "system_version": "Python", "app_version": __version__,
-              "lang_code": "en", "system_lang_code": "en-US"}
-
 PAIR_ERRORS = (ApiIdInvalidError, ApiIdPublishedFloodError, UpdateAppToLoginError)
 
 ATTEMPTS = 8
 rejected = set()
 
 
-def device_for(api_id):
-    """Stable client description for built-in pairs; custom pairs keep the client's defaults."""
+def device_for(api_id, seed=""):
+    """Use the Desktop catalog only with its API; other pairs keep platform defaults."""
     if api_id == DESKTOP_ID:
-        return dict(DESKTOP_DEVICE)
-    return dict(APP_DEVICE) if api_id in POOL_IDS else {}
+        from .client_profiles import desktop
+        return desktop(seed)
+    return {}
 
 
 def login_order(first=None):
-    """Pairs for one login: a previously used pool pair first, then the rest in random order."""
+    """Retain a saved pair; prefer the known Desktop profile for a fresh login."""
     pairs = [pair for pair in POOL if pair[0] not in rejected and pair != first]
     random.shuffle(pairs)
     if first in POOL and first[0] not in rejected:
         pairs.insert(0, first)
+    elif first is None:
+        desktop = next((pair for pair in pairs if pair[0] == DESKTOP_ID), None)
+        if desktop:
+            pairs.remove(desktop)
+            pairs.insert(0, desktop)
     return (pairs or list(POOL))[:ATTEMPTS]
 
 

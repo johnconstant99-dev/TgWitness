@@ -57,6 +57,8 @@ def custom_qr_capture(context, root, record):
             expect(page.locator("#qr-image")).to_be_visible()
             candidate = runner.app.state.session.collector.login_client
             assert candidate.pair == pair
+            assert candidate.options["lang_code"] == "en"
+            assert candidate.options["system_lang_code"] == page.evaluate("navigator.language")
             candidate.loop.call_soon_threadsafe(candidate.scan.set)
             expect(page.locator("#selection")).to_be_visible()
             expect(page.locator("#api-hash")).to_have_value("")
@@ -211,6 +213,9 @@ def main():
             capture.locator("#code").fill("12345")
             capture.locator("#confirm-code").click()
             expect(capture.locator("#selection")).to_be_visible()
+            saved_profile = app.state.session.vault.read("credentials")["client_profile"]
+            assert saved_profile["lang_code"] == "ru"
+            assert saved_profile["system_lang_code"] == capture.evaluate("navigator.language")
             pair, = RecordingClient.attempts
             assert pair in api_pool.POOL
             capture.locator("#refresh").click()

@@ -547,8 +547,15 @@ class Collector:
                                 "become active; earlier history of added chats is not fetched"})
         return {"added": len(added), "paused": len(paused), "resumed": len(resumed)}
 
-    def make_client(self, api_id, api_hash, session=""):
-        device = api_pool.device_for(api_id)
+    def make_client(self, api_id, api_hash, session="", client_profile=None, languages=None):
+        from . import client_identity
+        saved = self.vault.read("credentials")
+        if client_profile is None and (saved.get("api_id"), saved.get("api_hash")) == (api_id, api_hash):
+            if not session or session_key(session) == session_key(saved.get("session")):
+                client_profile = saved.get("client_profile")
+        supplied = {**client_identity.validate(languages), **client_identity.validate(client_profile)}
+        device = client_identity.resolve(api_id, supplied, self.vault.public_key)
+        options = {key: value for key, value in device.items() if key != "lang_pack"}
         string_session = StringSession(session)
         self.resumed_state_at = self.load_update_state(string_session)
 
@@ -558,7 +565,13 @@ class Collector:
                                      request_retries=self.param("telegram_request_retries"),
                                      connection_retries=self.param("telegram_connection_retries"),
                                      timeout=self.param("telegram_timeout_seconds"), catch_up=True,
-                                     **device, **self.route_options())
+                                     **options, **self.route_options())
+        client.tgwitness_client_profile = device
+        # Telethon's public constructor has no lang_pack argument. Keep the
+        # imported value in the actual initConnection request when available.
+        request = getattr(client, "_init_request", None)
+        if isinstance(request, functions.InitConnectionRequest):
+            request.lang_pack = device["lang_pack"]
         def rpc_error(exc):
             # Candidate logins and independent network probes do not own the saved session.
             self.handle_authorization_error(exc, "Telegram RPC", client=client)
@@ -1039,12 +1052,15 @@ class Collector:
                 if number == len(pairs):
                     raise
 
-    async def configure(self, api_id=None, api_hash=None, session="", expected_user_id=None):
+    async def configure(self, api_id=None, api_hash=None, session="", expected_user_id=None, client_profile=None, languages=None):
         return await self.with_api_pair(api_id, api_hash, lambda pair_id, pair_hash:
-                                        self.connect_login(pair_id, pair_hash, session, expected_user_id))
+                                        self.connect_login(pair_id, pair_hash, session, expected_user_id, client_profile, languages))
 
     @connection_change
-    async def connect_login(self, api_id, api_hash, session="", expected_user_id=None):
+    async def connect_login(self, api_id, api_hash, session="", expected_user_id=None, client_profile=None, languages=None):
+        from .client_identity import validate
+        if client_profile is not None:
+            client_profile = validate(client_profile)
         await self.wait_authorization_cleanup()
         if self.running:
             raise ValueError("Pause observation before changing accounts.")
@@ -1054,9 +1070,10 @@ class Collector:
         release = self.account_guard(None, self, key=session_key(session)) if session and self.account_guard else None
         try:
             await self.ensure_route()
-            candidate = self.make_client(api_id, api_hash, session)
+            candidate = self.make_client(api_id, api_hash, session, client_profile, languages)
             self.login_client = candidate
-            self.pending_credentials = {"api_id": api_id, "api_hash": api_hash}
+            self.pending_credentials = {"api_id": api_id, "api_hash": api_hash,
+                                        "client_profile": candidate.tgwitness_client_profile}
             self.pending_account_id = expected_user_id
 
             self.pending_key_origin = "imported" if session else "created"
@@ -1078,15 +1095,15 @@ class Collector:
             if release:
                 release()
 
-    async def start_phone(self, phone, api_id=None, api_hash=None):
+    async def start_phone(self, phone, api_id=None, api_hash=None, client_profile=None, languages=None):
         async def attempt(pair_id, pair_hash):
-            await self.connect_login(pair_id, pair_hash)
+            await self.connect_login(pair_id, pair_hash, client_profile=client_profile, languages=languages)
             return await self.send_code(phone)
         return await self.with_api_pair(api_id, api_hash, attempt)
 
-    async def start_qr(self, api_id=None, api_hash=None):
+    async def start_qr(self, api_id=None, api_hash=None, client_profile=None, languages=None):
         async def attempt(pair_id, pair_hash):
-            await self.connect_login(pair_id, pair_hash)
+            await self.connect_login(pair_id, pair_hash, client_profile=client_profile, languages=languages)
             return await self.login_client.qr_login()
         try:
             qr = await self.with_api_pair(api_id, api_hash, attempt)
@@ -1260,6 +1277,12 @@ class Collector:
                 raise AuthorizationRequired("Telegram authorization expired. Sign in again.")
             self.authorization_required = False
             self.phase, self.last_error = "observing" if self.running else "ready", None
+        # Freeze legacy defaults only if this authorization is still current.
+        # An awaited RPC above may have overlapped a sign-out or replacement.
+        if (client is self.client and authorization_generation == self.authorization_generation
+                and not credentials.get("client_profile") and self.vault.read("credentials") == credentials):
+            credentials["client_profile"] = client.tgwitness_client_profile
+            self.vault.save("credentials", credentials)
 
     def source_status_view(self):
         ignored = set(self.store.get_setting("ignored_source_warnings", []))

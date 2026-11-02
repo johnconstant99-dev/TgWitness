@@ -23,6 +23,9 @@ class RecordingClient(CapsuleClient, QRClient):
     fail_ids = set()
 
     def __init__(self, session, api_id, api_hash, **kwargs):
+        labels = (kwargs.get("device_model", ""), kwargs.get("system_version", ""), kwargs.get("app_version", ""))
+        assert not any("tgwitness" in str(value).lower() for value in labels)
+        assert kwargs.get("system_version") != "Python"
         self.pair = (api_id, api_hash)
         self.attempts.append(self.pair)
         super().__init__(session, api_id, api_hash, **kwargs)
@@ -155,6 +158,14 @@ async def main():
         await login_cases(recipient)
         await invalid_cases(recipient)
         await pool_and_override_failures(recipient)
+        for method, language in (("phone", "ru"), ("qr", "en")):
+            async with capsule(recipient) as (session, client):
+                headers = {"X-TgWitness-Language": language, "Accept-Language": "de-DE,de;q=0.9"}
+                response = await client.post("/api/" + method, json={"phone": "+15550001111"} if method == "phone" else {},
+                                             headers=headers)
+                assert response.status_code == 200, response.text
+                assert session.collector.login_client.options["lang_code"] == language
+                assert session.collector.login_client.options["system_lang_code"] == "de-DE"
     print("Sealed login passed: default/custom phone and QR, pair validation before connection, pool retry, no custom fallback, authentication and revocation.")
 
 

@@ -11,6 +11,7 @@ from telethon.crypto import AuthKey
 from telethon.sessions import StringSession
 
 from .tdata import read_tdata_zip
+from . import client_identity
 
 MAX_UPLOAD = 8 * 1024**2
 IMPORT_REQUEST_LIMIT = 12 * 1024**2
@@ -104,6 +105,9 @@ def json_account(payload):
     if not isinstance(raw, dict):
         raise ValueError("Import one JSON account object, not a bulk account list.")
     result = {"format": "Account JSON"}
+    client_profile = client_identity.from_account(raw)
+    if client_profile:
+        result["client_profile"] = client_profile
     aliases = {"api_id": ("api_id", "app_id"), "api_hash": ("api_hash", "app_hash"),
                "session": ("string_session", "session_string", "session"),
                "expected_user_id": ("user_id", "id"), "auth_key": ("auth_key", "auth_key_hex")}
@@ -169,7 +173,7 @@ def import_accounts(files, passcode=""):
         converted.append(result)
     merged = {"formats": [item["format"] for item in converted]}
     for result in converted:
-        for key in ("session", "api_id", "api_hash", "expected_user_id"):
+        for key in ("session", "api_id", "api_hash", "expected_user_id", "client_profile"):
             if key not in result:
                 continue
             if key in merged:

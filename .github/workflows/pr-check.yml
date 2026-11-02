@@ -45,6 +45,8 @@ jobs:
         run: python tools/check_notification_redirects.py
       - name: Check first-run panel choices and service boundaries
         run: python -I tools/check_panel_setup.py
+      - name: Check Telegram client metadata without network access
+        run: python -I tools/check_client_identity.py
       - name: Verify frozen dependency inventories cannot omit or replace pins
         run: python -I tools/check_sbom_locks.py
       - name: Verify source archive repeatability and interrupted-build recovery
