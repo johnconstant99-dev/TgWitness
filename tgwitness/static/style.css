@@ -999,6 +999,14 @@ button.pill { cursor: pointer; font-family: inherit; }
 .export-card p { flex: 1; color: var(--muted); font-size: 13.5px; line-height: 1.55; }
 .export-card > span:last-child { margin-top: 8px; color: var(--accent-text); font-size: 13.5px; font-weight: 600; }
 .export-card > span:last-child::after { content: " →"; }
+.export-card.report-card { cursor: default; }
+.report-formats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.report-formats button { min-width: 64px; }
+.export-language { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 16px; }
+.export-language label { margin: 0; font-weight: 600; }
+.export-language select { width: auto; min-width: 220px; }
+.export-language .hint { flex-basis: 100%; margin: 0; }
+.report-part-size { max-width: 360px; margin-top: 10px; }
 .fingerprint {
   display: block; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
   background: var(--surface-2); color: var(--text-2); font-size: 13px; letter-spacing: .04em; overflow-wrap: anywhere;
@@ -1328,7 +1336,7 @@ details[open] > :not(summary) { animation: unfold .22s ease-out; }
   .export-grid { grid-template-columns: 1fr; }
   .export-card { display: grid; grid-template-columns: 40px 1fr; gap: 2px 16px; }
   .export-card .file-icon { grid-row: 1 / span 3; margin: 0; }
-  .export-card > h3, .export-card > p, .export-card > span:last-child { grid-column: 2; }
+  .export-card > h3, .export-card > p, .export-card > span:last-child, .export-card > .report-formats { grid-column: 2; }
   .export-card > span:last-child { margin-top: 4px; }
   .evidence-symbol { display: none; }
   .two-columns { grid-template-columns: 1fr; }
@@ -2083,3 +2091,20 @@ button.primary[aria-busy=true]::after { color: #fff; }
   .account-export-dialog form { padding: 18px; }
   .account-export-fields { grid-template-columns: minmax(0, 1fr); }
 }
+/* Quick connection routes and what Telegram can tell about this workspace (Account). */
+.route-presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 6px; }
+.seen-by { margin-top: 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
+.seen-by h3 { margin: 0 0 8px; font-size: 14px; }
+.seen-by dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; font-size: 13px; }
+.seen-by dt { color: var(--muted); }
+.seen-by dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .seen-by dl { grid-template-columns: 1fr; } .seen-by dd { margin-bottom: 4px; } }
+/* Handover extract (Exports): the chats, period and people a recipient needs. */
+.handover-card { margin-top: 18px; }
+.handover-group { border: 0; padding: 0; margin: 16px 0 0; min-width: 0; }
+.handover-group legend { padding: 0; font-weight: 600; }
+.handover-group .check-label { margin-top: 8px; }
+.handover-choices { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.handover-choices:empty { display: none; }
+.handover-period { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+@media (max-width: 700px) { .handover-period { grid-template-columns: 1fr; } }

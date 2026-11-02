@@ -8,22 +8,26 @@ import secrets
 from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from functools import wraps
+from pathlib import Path
 
 from collections import deque
 
-from telethon import events, utils
+from telethon import __version__ as telethon_version, events, utils
 from telethon.errors import SessionPasswordNeededError, FloodWaitError, InvalidBufferError, RPCError
 from telethon.errors import FileReferenceExpiredError
 from telethon.errors import (AuthKeyDuplicatedError, AuthKeyInvalidError, AuthKeyUnregisteredError,
-                             SessionExpiredError, SessionRevokedError)
+                             FrozenMethodInvalidError, SessionExpiredError, SessionRevokedError,
+                             UserDeactivatedBanError, UserDeactivatedError)
 from telethon.extensions import BinaryReader
 from telethon.sessions import StringSession
 from telethon.tl import functions, types
+from telethon.tl.alltlobjects import LAYER
 
 from . import api_pool
 from . import chat_export
 from . import keyboard
 from . import message_content
+from . import message_details
 from . import replica
 from . import tuning
 from .history import History
@@ -50,7 +54,8 @@ class AuthorizationRequired(ValueError):
 
 
 AUTHORIZATION_ERRORS = (AuthorizationRequired, AuthKeyDuplicatedError, AuthKeyInvalidError,
-                        AuthKeyUnregisteredError, SessionExpiredError, SessionRevokedError)
+                        AuthKeyUnregisteredError, SessionExpiredError, SessionRevokedError,
+                        UserDeactivatedBanError, UserDeactivatedError, FrozenMethodInvalidError)
 
 
 ROUTE_ERRORS = (OSError, TimeoutError, asyncio.IncompleteReadError, InvalidBufferError)
@@ -63,6 +68,57 @@ EXPOSURE_MEANING = {
 }
 MEMBERSHIP_ACTIONS = (types.MessageActionChatAddUser, types.MessageActionChatDeleteUser,
                       types.MessageActionChatJoinedByLink, types.MessageActionChatJoinedByRequest)
+# The client description in the connection request Telegram receives.
+CLIENT_FIELDS = ("device_model", "system_version", "app_version", "lang_code", "system_lang_code")
+CLOCK_TIMEOUT = 10
+PROFILE_TIMEOUT = 30
+# What Telegram itself says about a chat: its labels, and how it is set up.
+PROFILE_FLAGS = ("scam", "fake", "verified", "restricted", "noforwards", "broadcast", "megagroup", "gigagroup",
+                 "signatures", "join_to_send", "join_request", "slowmode_enabled")
+ROLES = {"ChannelParticipantCreator": "creator", "ChannelParticipantAdmin": "admin", "ChannelParticipantSelf": "member",
+         "ChannelParticipant": "member", "ChannelParticipantBanned": "restricted", "ChannelParticipantLeft": "left",
+         "ChatParticipantCreator": "creator", "ChatParticipantAdmin": "admin", "ChatParticipant": "member"}
+RECHECK_LIMIT = 10000   # absent message numbers asked for again by number in one export
+ADMIN_LOG_LIMIT = 10000  # admin log events read in one export (Telegram keeps about 48 hours)
+ADMIN_LOG_MEANING = ("The chat's admin log as Telegram returned it to this admin account: Telegram keeps about the last "
+                     "48 hours. Deleted and edited messages appear with their content and the account that acted.")
+CLOCK_METHOD = ("updates.getState: Telegram's time in whole seconds against the collector's clock halfway through the "
+                "request; offset is Telegram minus collector")
+# Why Telegram stopped accepting this workspace's session, read from the error it returned. Telethon's
+# error.message holds only the error class (UNAUTHORIZED, FLOOD), so the Telegram error is named here.
+ACCOUNT_LOSS = ((UserDeactivatedBanError, "USER_DEACTIVATED_BAN", "account_banned"),
+                (UserDeactivatedError, "USER_DEACTIVATED", "account_deleted"),
+                (AuthKeyDuplicatedError, "AUTH_KEY_DUPLICATED", "session_duplicated"),
+                (SessionRevokedError, "SESSION_REVOKED", "session_revoked"),
+                (SessionExpiredError, "SESSION_EXPIRED", "session_expired"),
+                (AuthKeyUnregisteredError, "AUTH_KEY_UNREGISTERED", "session_ended"),
+                (AuthKeyInvalidError, "AUTH_KEY_INVALID", "session_ended"),
+                (FrozenMethodInvalidError, "FROZEN_METHOD_INVALID", "account_frozen"))
+LOSS_MEANING = {
+    "account_banned": "Telegram banned this account; nothing more can be observed with it.",
+    "account_deleted": "The Telegram account was deleted.",
+    "session_duplicated": "The same session was used in two places at once (AUTH_KEY_DUPLICATED); Telegram ended it.",
+    "session_revoked": "The session was ended from another device or by Telegram.",
+    "session_expired": "Telegram let the session expire.",
+    "session_ended": "Telegram no longer recognises this session: it was ended or the account was removed.",
+    "account_frozen": "Telegram froze this account and refuses most requests; the account can appeal through @SpamBot.",
+    "not_authorized": "Telegram reports the session as signed out and gave no reason.",
+}
+
+
+def account_loss_cause(exc):
+    return next((cause for kind, _, cause in ACCOUNT_LOSS if isinstance(exc, kind)), None)
+
+
+def telegram_error(exc):
+    return next((error for kind, error, _ in ACCOUNT_LOSS if isinstance(exc, kind)), type(exc).__name__)
+
+
+class AccountLost(AuthorizationRequired):
+    """Telegram no longer accepts this workspace's session; cause says why when Telegram said."""
+    def __init__(self, cause, error=None):
+        super().__init__("Telegram authorization expired. Sign in again.")
+        self.cause, self.error = cause, error
 
 
 def connection_change(call):
@@ -129,6 +185,37 @@ def plain(value):
     return value
 
 
+def absent_numbers(scratch):
+    """Message numbers between the first and the last exported message that the history did not return."""
+    numbers = set()
+    with Path(scratch).open(encoding="utf-8") as handle:
+        for line in handle:
+            if line.strip():
+                number = json.loads(line).get("id")
+                if type(number) is int:
+                    numbers.add(number)
+    if not numbers:
+        return []
+    return [n for n in range(min(numbers), max(numbers) + 1) if n not in numbers]
+
+
+def merge_history(scratch, entries):
+    """Put messages found on a recheck into the history file where they belong (newest first), in one pass."""
+    entries = sorted(entries, key=lambda e: e["id"], reverse=True)
+    merged = Path(scratch).with_suffix(".merged")
+    with Path(scratch).open(encoding="utf-8") as incoming, merged.open("w", encoding="utf-8") as outgoing:
+        for line in incoming:
+            if not line.strip():
+                continue
+            number = json.loads(line).get("id")
+            while entries and type(number) is int and entries[0]["id"] > number:
+                outgoing.write(json.dumps(entries.pop(0), ensure_ascii=False) + "\n")
+            outgoing.write(line if line.endswith("\n") else line + "\n")
+        for entry in entries:
+            outgoing.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    merged.replace(scratch)
+
+
 def date_string(value):
     return value.isoformat() if value else None
 
@@ -177,6 +264,22 @@ def describe_message(message):
     }
 
 
+def admin_event(event):
+    """One admin log entry: when, which account, what it did; a deleted or edited message in full."""
+    action = event.action
+    found = {"id": event.id, "date": date_string(event.date), "user_id": event.user_id,
+             "action": type(action).__name__.replace("ChannelAdminLogEventAction", "")}
+    for field, key in (("message", "message"), ("prev_message", "previous"), ("new_message", "new")):
+        value = getattr(action, field, None)
+        if value is not None and hasattr(value, "id"):
+            found[key] = message_record(value)
+    for field in ("prev_value", "new_value"):
+        value = getattr(action, field, None)
+        if isinstance(value, (str, int, bool)):
+            found[field] = value
+    return found
+
+
 def message_record(message):
     """A Telegram-export-style record for one message: no access hashes or sessions."""
     sender = getattr(message, "sender", None)
@@ -196,8 +299,12 @@ def message_record(message):
     }
     if action:
         record["action"] = type(action).__name__
+        if isinstance(getattr(action, "title", None), str):
+            record["action_title"] = action.title  # a chat created or renamed
     if media:
         record["media_type"] = type(media).__name__
+    # Hidden links, buttons, forward origin, views and the rest of what the reader saw.
+    record.update(message_details.details(plain(message)))
     return record
 
 
@@ -280,6 +387,8 @@ class Collector:
             "builtin_api": credentials.get("api_id") is None or credentials.get("api_id") in api_pool.POOL_IDS,
             "api_pool_size": len(api_pool.POOL) - len(api_pool.rejected),
             "account": self.store.get_setting("account", None),
+            "account_loss": self.store.get_setting("account_loss", None),
+            "client": self.client_identity(credentials=credentials),
             "last_error": self.last_error, "last_heartbeat": self.last_heartbeat,
             "media_pending": sum(n for s, n in self.store.media_stats().items()
                                  if s in ("queued", "running", "retry")),
@@ -318,9 +427,13 @@ class Collector:
         self.authorization_required, self.running, self.buffering = True, False, False
         self.buffered = []
         self.phase, self.last_error = "authorization_required", type(exc).__name__
+        cause = exc.cause if isinstance(exc, AccountLost) else account_loss_cause(exc) or "not_authorized"
+        error = exc.error if isinstance(exc, AccountLost) else telegram_error(exc)
+        self.store.set_setting("account_loss", {"cause": cause, "at": utcnow(), "telegram_error": error})
         if first:
             self.note("coverage.gap", {"reason": "authorization_required", "operation": operation,
-                                      "error_type": type(exc).__name__, "saved_records_retained": True})
+                                      "error_type": type(exc).__name__, "saved_records_retained": True,
+                                      "cause": cause, "telegram_error": error, "meaning": LOSS_MEANING[cause]})
         if self.authorization_cleanup is None or self.authorization_cleanup.done():
             self.authorization_cleanup = asyncio.create_task(self.cleanup_rejected_authorization(self.client))
         return True
@@ -803,6 +916,159 @@ class Collector:
             raise NoProxyAvailable("No automatic MTProxy has been chosen yet.")
         return self.auto_route[1].client_options()
 
+    def client_identity(self, client=None, credentials=None):
+        """How this workspace presents itself to Telegram: the application pair (its api_id, never the hash)
+        and the client description in the connection request the client sends."""
+        init = getattr(client or self.client, "_init_request", None)
+        api_id = getattr(init, "api_id", None) or (credentials if credentials is not None
+                                                   else self.vault.read("credentials")).get("api_id")
+        sent = {name: getattr(init, name) for name in CLIENT_FIELDS if isinstance(getattr(init, name, None), str)}
+        session = getattr(client or self.client, "session", None)
+        identity = {"library": "Telethon " + telethon_version, "layer": LAYER, "api_id": api_id,
+                    **({"dc_id": session.dc_id} if isinstance(getattr(session, "dc_id", None), int) else {}),
+                    "api_pair": "built-in public pair" if api_id in api_pool.POOL_IDS else
+                                "own application" if api_id else None,
+                    **(sent or api_pool.device_for(api_id))}
+        if api_id == api_pool.DESKTOP_ID:
+            identity["meaning"] = "Telegram Desktop's public pair, sent with a Telegram Desktop client description"
+        return identity
+
+    async def telegram_clock(self):
+        """The collector's clock against Telegram's: the server time in updates.getState (whole seconds),
+        compared with the collector clock halfway through the request. Telegram minus collector."""
+        try:
+            before = time.time()
+            state = await asyncio.wait_for(self.client(functions.updates.GetStateRequest()), CLOCK_TIMEOUT)
+            after = time.time()
+            server = state.date.timestamp() + 0.5  # Telegram gives whole seconds, rounded down
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            return {"measured_at": utcnow(), "error_type": type(exc).__name__}
+        return {"measured_at": utcnow(), "telegram_time": date_string(state.date),
+                "offset_seconds": round(server - (before + after) / 2, 3),
+                "uncertainty_seconds": round((after - before) / 2 + 0.5, 3), "method": CLOCK_METHOD}
+
+    async def chat_profile(self, entity, media_dir=None):
+        """The chat as Telegram described it when an export began, and this account's place in it: the labels
+        Telegram sets (scam, fake, verified, restricted), description, size, linked discussion, from which
+        message on the history is visible, when the chat was created (its first message), its photo, and the
+        account's role and join date. A request Telegram refuses is named in errors; the export goes on."""
+        profile, observer, errors = {}, {}, {}
+        for name in PROFILE_FLAGS:
+            if isinstance(getattr(entity, name, None), bool):
+                profile[name] = getattr(entity, name)
+        reasons = [{"platform": getattr(r, "platform", None), "reason": getattr(r, "reason", None),
+                    "text": getattr(r, "text", None)} for r in getattr(entity, "restriction_reason", None) or []]
+        if reasons:
+            profile["restriction_reasons"] = reasons
+        names = [getattr(entity, "username", None)] + [getattr(u, "username", None)
+                                                       for u in getattr(entity, "usernames", None) or []]
+        if any(names):
+            profile["usernames"] = list(dict.fromkeys(n for n in names if n))
+
+        async def ask(key, request):
+            try:
+                return await asyncio.wait_for(request(), PROFILE_TIMEOUT)
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                errors[key] = type(exc).__name__
+                return None
+        if isinstance(entity, types.Channel):
+            answer = await ask("full_info", lambda: self.client(functions.channels.GetFullChannelRequest(entity)))
+            full = getattr(answer, "full_chat", None)
+            if full is not None:
+                profile.update(about=full.about or None, participants_count=full.participants_count,
+                               admins_count=full.admins_count, hidden_prehistory=bool(full.hidden_prehistory),
+                               available_min_id=full.available_min_id, slowmode_seconds=full.slowmode_seconds,
+                               linked_chat_id=-1000000000000 - full.linked_chat_id if full.linked_chat_id else None)
+            answer = await ask("own_membership", lambda: self.client(functions.channels.GetParticipantRequest(
+                entity, types.InputPeerSelf())))
+            part = getattr(answer, "participant", None)
+            if part is not None:
+                observer = {"role": ROLES.get(type(part).__name__, type(part).__name__),
+                            "joined_at": date_string(getattr(part, "date", None)),
+                            "invited_by": getattr(part, "inviter_id", None),
+                            "via_request": bool(getattr(part, "via_request", False)) or None}
+                rights = getattr(part, "admin_rights", None)
+                if rights is not None:
+                    observer["admin_rights"] = sorted(k for k, v in rights.to_dict().items() if v is True)
+        elif isinstance(entity, types.Chat):
+            answer = await ask("full_info", lambda: self.client(functions.messages.GetFullChatRequest(entity.id)))
+            full = getattr(answer, "full_chat", None)
+            if full is not None:
+                profile.update(about=full.about or None, participants_count=getattr(entity, "participants_count", None))
+                me = (self.store.get_setting("account", None) or {}).get("id")
+                for part in getattr(getattr(full, "participants", None), "participants", None) or []:
+                    if getattr(part, "user_id", None) == me:
+                        observer = {"role": ROLES.get(type(part).__name__, type(part).__name__),
+                                    "joined_at": date_string(getattr(part, "date", None)),
+                                    "invited_by": getattr(part, "inviter_id", None)}
+        first = await ask("first_message", lambda: self.client.get_messages(entity, ids=1))
+        action = getattr(first, "action", None)
+        if action is not None and type(action).__name__ in ("MessageActionChannelCreate", "MessageActionChatCreate"):
+            profile.update(created_at=date_string(first.date), created_title=getattr(action, "title", None))
+        if getattr(getattr(entity, "photo", None), "photo_id", None):
+            profile["photo_id"] = entity.photo.photo_id
+            data = await ask("photo", lambda: self.client.download_profile_photo(entity, file=bytes, download_big=True))
+            if isinstance(data, bytes) and data:
+                digest = hashlib.sha256(data).hexdigest()
+                profile["photo_sha256"] = digest
+                if media_dir is not None:
+                    (Path(media_dir) / digest).write_bytes(data)
+        return ({k: v for k, v in profile.items() if v not in (None, "", [])},
+                {k: v for k, v in observer.items() if v not in (None, "", [])}, errors)
+
+    async def recheck_absent(self, entity, absent):
+        """Ask Telegram for every absent message number again, by number (channels.getMessages). An empty
+        answer means Telegram has no message under that number for this account: deleted, or never visible
+        to it. Messages it does return were missed while reading the history and are added to the export."""
+        asked, returned, started = list(absent)[:RECHECK_LIMIT], [], utcnow()
+        for low in range(0, len(asked), 100):
+            batch = asked[low:low + 100]
+            for attempt in range(3):
+                try:
+                    answer = await self.client.get_messages(entity, ids=batch)
+                    break
+                except FloodWaitError as exc:
+                    if attempt == 2 or exc.seconds > 600:
+                        raise
+                    await asyncio.sleep(exc.seconds + 1)
+            returned += [m for m in answer or [] if m is not None and getattr(m, "id", None) is not None
+                         and type(m).__name__ != "MessageEmpty"]
+        return {"asked_at": started, "asked": len(asked), "absent_total": len(absent),
+                "empty": len(asked) - len(returned), "returned": sorted(m.id for m in returned),
+                "limit_reached": len(absent) > len(asked), "method": "channels.getMessages by number",
+                "meaning": "An empty answer means Telegram has no message under that number for this account: deleted, "
+                           "or never visible to it. Telegram does not say which."}, returned
+
+    async def admin_log(self, entity):
+        """The admin log, when this account may read it: deletions and edits with the content, and the account
+        that acted. Telegram keeps about 48 hours. None when the account is not an admin or Telegram refuses."""
+        if not isinstance(entity, types.Channel):
+            return None
+        events, max_id = [], 0
+        try:
+            while len(events) < ADMIN_LOG_LIMIT:
+                answer = await asyncio.wait_for(self.client(functions.channels.GetAdminLogRequest(
+                    entity, q="", max_id=max_id, min_id=0, limit=100)), PROFILE_TIMEOUT)
+                batch = list(getattr(answer, "events", None) or [])
+                if not batch:
+                    break
+                for event in batch:
+                    events.append(admin_event(event))
+                max_id = min(e.id for e in batch)
+                if len(batch) < 100:
+                    break
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            return {"read_at": utcnow(), "events": events, "error_type": type(exc).__name__,
+                    "meaning": ADMIN_LOG_MEANING} if events else None
+        return {"read_at": utcnow(), "events": events, "complete": len(events) < ADMIN_LOG_LIMIT,
+                "meaning": ADMIN_LOG_MEANING}
+
     def route_receipt(self):
         receipt = self.network_config().receipt(self.direct_fallback)
         if receipt["kind"] == "mtproxy_auto":
@@ -1230,7 +1496,9 @@ class Collector:
             with self.store.transaction():
                 self.store.set_setting("account", {"id": me.id, "username": me.username,
                                                    "key_origin": self.pending_key_origin})
-                self.store.append("account.authorized", {"account_id": me.id, "key_origin": self.pending_key_origin})
+                self.store.set_setting("account_loss", None)
+                self.store.append("account.authorized", {"account_id": me.id, "key_origin": self.pending_key_origin,
+                                                         "client": self.client_identity(candidate)})
         except BaseException:
             await self.cancel_login()
             self.phase = self.resting_phase()
@@ -1268,7 +1536,8 @@ class Collector:
             if not client.is_connected():
                 await self.connect_client(client)
             if not await client.is_user_authorized():
-                raise AuthorizationRequired("Telegram authorization expired. Sign in again.")
+                cause, error = await self.refusal(client)
+                raise AccountLost(cause, error)
             if self.authorization_required:
                 # Telethon may cache a positive authorization check. A known rejection needs
                 # a fresh Telegram RPC before the panel can consider this session usable again.
@@ -1287,12 +1556,26 @@ class Collector:
                 raise AuthorizationRequired("Telegram authorization expired. Sign in again.")
             self.authorization_required = False
             self.phase, self.last_error = "observing" if self.running else "ready", None
+        if client is self.client and authorization_generation == self.authorization_generation:
+            self.store.set_setting("account_loss", None)
         # Freeze legacy defaults only if this authorization is still current.
         # An awaited RPC above may have overlapped a sign-out or replacement.
         if (client is self.client and authorization_generation == self.authorization_generation
                 and not credentials.get("client_profile") and self.vault.read("credentials") == credentials):
             credentials["client_profile"] = client.tgwitness_client_profile
             self.vault.save("credentials", credentials)
+
+    async def refusal(self, client):
+        """Why Telegram refuses this session. is_user_authorized and get_me hide the error, so ask once more."""
+        try:
+            await client(functions.users.GetUsersRequest([types.InputUserSelf()]))
+        except RPCError as exc:
+            cause = account_loss_cause(exc)
+            if cause:
+                return cause, telegram_error(exc)
+        except Exception:
+            pass
+        return "not_authorized", None
 
     def source_status_view(self):
         ignored = set(self.store.get_setting("ignored_source_warnings", []))
@@ -1445,11 +1728,13 @@ class Collector:
             self.buffered, self.buffering = [], False
             raise
         self.store.recover_media()
+        clock = await self.telegram_clock()
         self.running, self.phase, self.last_error = True, "observing", None
         self.store.set_setting("resume", True)
         self.store.append("observation.started", {
             "run_id": self.run_id, "monotonic_ns": time.monotonic_ns(),
             "account": self.store.get_setting("account", None),
+            "client": self.client_identity(), "route": self.route_receipt(), "clock": clock,
             "capture": capture_settings(self.store),
             "monitoring": monitoring_settings(self.store),
             "scope": scope_settings(self.store),
@@ -2137,18 +2422,46 @@ class Collector:
         directory = self.store.root / "temporary-exports"
         scratch = directory / ("tgwitness-export-chat-" + record["id"] + ".jsonl")
         out_path = directory / ("tgwitness-export-chat-" + record["id"] + ".zip")
+        media_dir = directory / ("tgwitness-export-chat-" + record["id"] + "-media")
         chat_id = record["chat_id"]
         try:
 
             directory.mkdir(mode=0o700, exist_ok=True)
+            media_dir.mkdir(mode=0o700, exist_ok=True)
             self.store.append("chat_export.started", {"chat_id": chat_id, "title": info.get("title"),
-                                                      "meaning": "full visible history snapshot"}, chat_id)
-            count = await self.stream_history(entity, scratch, record)
+                                                      "meaning": "full visible history snapshot",
+                                                      "attachments": "within the workspace's attachment settings"
+                                                      if capture_settings(self.store)["download_media"] else "off"},
+                              chat_id)
+            clock = await self.telegram_clock()
+            profile, observer, problems = await self.chat_profile(entity, media_dir)
+            count = await self.stream_history(entity, scratch, record, media_dir)
+            recheck = None
+            if chat_id < -1000000000000:
+                absent = absent_numbers(scratch)
+                if absent:
+                    try:
+                        recheck, missed = await self.recheck_absent(entity, absent)
+                    except asyncio.CancelledError:
+                        raise
+                    except Exception as exc:  # the history is complete without it; say that it was not done
+                        recheck, missed = {"asked_at": utcnow(), "asked": 0, "absent_total": len(absent),
+                                           "error_type": type(exc).__name__}, []
+                    if missed:
+                        merge_history(scratch, [{**message_record(m), "found_on_recheck": True,
+                                                 **(await self.export_attachment(m, media_dir))} for m in missed])
+                    count += len(missed)
+            log = await self.admin_log(entity) if observer.get("role") in ("creator", "admin") else None
             meta = {"chat": {"id": chat_id, "title": info.get("title"), "kind": info.get("kind"),
-                             "visibility": info.get("visibility")},
-                    "account": self.store.get_setting("account", None), "message_count": count}
+                             "visibility": info.get("visibility"), "profile": profile,
+                             **({"profile_errors": problems} if problems else {})},
+                    "observer": observer, "recheck": recheck, "admin_log": log,
+                    "account": self.store.get_setting("account", None), "message_count": count,
+                    "client": self.client_identity(), "route": self.route_receipt(),
+                    "acquisition": {"started_at": record.get("started_at"), "finished_at": utcnow(),
+                                    "clock_at_start": clock, "clock_at_end": await self.telegram_clock()}}
             await complete_in_thread(chat_export.build_bundle, scratch, meta, self.vault, out_path,
-                                    self.param("export_max_gib") * 1024**3, report_options)
+                                    self.param("export_max_gib") * 1024**3, report_options, media_dir)
             replica.outbox(self.store, out_path)
             self.export_path = out_path
             record.update(phase="done", captured=count, ready=True)
@@ -2172,6 +2485,7 @@ class Collector:
         finally:
             with suppress(OSError):
                 scratch.unlink(missing_ok=True)
+            shutil.rmtree(media_dir, ignore_errors=True)
 
     async def iterate_history(self, entity, on_message, min_id=0, offset_id=0, on_wait=None):
         """Newest to oldest; after FloodWait or a brief connection loss, resume below the last message seen."""
@@ -2205,13 +2519,69 @@ class Collector:
                 if not self.client.is_connected():
                     await self.restore()
 
-    async def stream_history(self, entity, scratch, record):
+    async def export_attachment(self, message, directory):
+        """The attachment of an exported message under this workspace's attachment rules: saved in directory
+        by its SHA-256, or the reason it was left out. The result goes into the message's export record."""
+        if not getattr(message, "media", None) or not getattr(message, "file", None):
+            return {}
+        settings = capture_settings(self.store)
+        if not settings["download_media"]:
+            return {}
+        kind = media_kind(message)
+        rule, size = settings["types"].get(kind) or {"enabled": False, "max_mb": 0}, getattr(message.file, "size", None)
+        if not rule["enabled"]:
+            return {"file_status": "type_not_collected", "file_kind": kind}
+        limit = rule["max_mb"] * 1024**2
+        if size is None or size > limit:
+            return {"file_status": "above_limit" if size else "unknown_size", "file_kind": kind,
+                    **({"file_size": size} if size else {})}
+        if shutil.disk_usage(directory).free < size + self.param("media_min_free_mb") * 1024**2:
+            raise ValueError("Not enough free disk space for the attachments of this export. Free space or turn "
+                             "attachment downloads off under Sources → Recording.")
+
+        async def progress(current, total):
+            if max(current, total) > limit:
+                raise ValueError("above_limit")
+        timeout = self.param("media_timeout_seconds") + size // (self.param("media_min_speed_kbps") * 1024)
+        temp = directory / ("part-" + str(message.id))
+        try:
+            for attempt in range(3):
+                try:
+                    with temp.open("wb") as stream:
+                        result = await asyncio.wait_for(self.client.download_media(
+                            downloadable_media(message), file=stream, progress_callback=progress), timeout)
+                    if result is None:
+                        return {"file_status": "unavailable", "file_kind": kind}
+                    digest = await complete_in_thread(file_digest, temp)
+                    written = temp.stat().st_size
+                    if not (directory / digest).exists():
+                        temp.replace(directory / digest)
+                    return {"file": "media/" + digest, "file_sha256": digest, "file_size": written, "file_kind": kind}
+                except FloodWaitError as exc:
+                    if attempt == 2:
+                        return {"file_status": "rate_limited", "file_kind": kind}
+                    await asyncio.sleep(min(exc.seconds + 1, 600))
+                except (OSError, TimeoutError, ConnectionError) as exc:
+                    if attempt == 2:
+                        return {"file_status": "unavailable", "file_kind": kind, "file_error": type(exc).__name__}
+                    await asyncio.sleep(5 * (attempt + 1))
+                except ValueError as exc:
+                    if str(exc) != "above_limit":
+                        raise
+                    return {"file_status": "above_limit", "file_kind": kind, "file_size": size}
+        finally:
+            temp.unlink(missing_ok=True)
+
+    async def stream_history(self, entity, scratch, record, media_dir=None):
         count, started = 0, time.monotonic()
         with scratch.open("w", encoding="utf-8") as handle:
             async def write(message):
                 nonlocal count
                 self.remember(getattr(message, "sender", None))
-                handle.write(json.dumps(message_record(message), ensure_ascii=False) + "\n")
+                entry = message_record(message)
+                if media_dir is not None:
+                    entry.update(await self.export_attachment(message, media_dir))
+                handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
                 count += 1
                 record["captured"] = count
                 if count % 200 == 0:

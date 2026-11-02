@@ -82,7 +82,7 @@
   #view-sources .sources-summary { gap: 6px 12px; margin-bottom: 12px; }
   #view-sources .sources-summary span + span::before { margin-inline-end: 10px; }
   #view-sources .sources-tabs { gap: 0; }
-  #view-sources .sources-tabs button { flex: 1; gap: 5px; min-width: 0; padding-inline: 6px; font-size: 12px; }
+  #view-sources .sources-tabs button { flex: 1 1 auto; gap: 5px; min-width: 0; padding-inline: 6px; font-size: 12px; white-space: normal; text-align: center; line-height: 1.25; }
   #view-sources .sources-tabs .tab-count { min-width: 16px; padding-inline: 4px; font-size: 11px; }
   #view-sources .recording-sections .padded { padding: 16px; }
   #view-sources .recording-sections { grid-template-columns: 1fr; }

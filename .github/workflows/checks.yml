@@ -139,6 +139,7 @@ jobs:
           python -m pip check
       - name: Check the installation and signed export with synthetic data
         run: python tools/check_install.py --package . --output build/package-smoke
+      - run: python tools/check_collector_authorization.py
       - name: Check disclosure privacy, interrupted account export recovery and chat counters
         run: |
           python -I tools/check_disclosure_privacy.py

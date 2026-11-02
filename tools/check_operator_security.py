@@ -1,9 +1,9 @@
 """Synthetic regressions for panel disclosure, proxy trust, limits and key replacement."""
 import asyncio
-import html
 import json
 import logging
 from pathlib import Path
+import re
 import sys
 import tempfile
 import zipfile
@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tgwitness.access import AccessControl, Console, GrantSettings
 from tgwitness.app import create_app
+from tgwitness import report
 from tgwitness.evidence import export_file
 from tgwitness.live_stream import StreamSlots
 from tgwitness.operator_privacy import hide_addresses, private_log
@@ -147,9 +148,12 @@ def disclosure_checks():
             # HTML reports render hostile raw strings as text, even in raw-record details.
             attack = '<img src=x onerror="window.attack=1"><script>unexpected()</script>'
             store.append('synthetic.operator_check', {'agent': attack})
-            path = export_file(store, vault, 'html', {'language': 'en', 'raw_records': True})
+            path = export_file(store, vault, 'html', {**report.resolved(), 'language': 'en', 'raw_records': True})
             output = path.read_text(encoding='utf-8')
-            assert attack not in output and html.escape('<img src=x') in output
+            blocks = re.findall(r'<script type="application/json" class="tgw-file" data-file="viewer/records-[^"]+">(.*?)</script>', output)
+            assert blocks and attack not in output
+            records = [record for block in blocks for record in json.loads(block)]
+            assert any(record.get('r', {}).get('payload', {}).get('agent') == attack for record in records)
     console = Console()
     original = 'connected 203.0.113.19:443 [2001:db8::7]:443 ::1 at 12:34:56'
     record = logging.LogRecord('synthetic', logging.INFO, '', 0, original, (), None)

@@ -146,7 +146,8 @@ def server_keys():
         sys.path.insert(0, str(PACKAGE.parent))
     from tgwitness.tuning import texts
     from tgwitness.account_report import text_keys as account_report_keys
-    return list(dict.fromkeys(keys + texts() + account_report_keys()))
+    from tgwitness.modes import texts as mode_texts
+    return list(dict.fromkeys(keys + texts() + account_report_keys() + mode_texts()))
 
 
 if __name__ == "__main__":

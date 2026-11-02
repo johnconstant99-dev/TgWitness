@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import secrets
+import threading
 from secrets import token_bytes as secrets_token
 import time
 from datetime import datetime, timezone
@@ -17,7 +18,7 @@ from typing import Literal
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel, Field, StrictBool, StrictInt, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, model_validator
 from telethon.errors import FloodWaitError, RPCError
 
 from . import __version__
@@ -53,6 +54,9 @@ from . import netclient
 from . import source_check
 from . import dossier
 from . import report
+from . import pdf_report
+from . import handover
+from . import modes
 from . import recording
 from . import tuning
 from . import witness_api
@@ -145,6 +149,18 @@ class ExportPassword(BaseModel):
     password: str = Field(min_length=12, max_length=256)
 
 
+class HandoverRequest(handover.Options):
+    password: str | None = Field(default=None, min_length=12, max_length=256)
+    language: str | None = Field(default=None, max_length=16)
+
+
+class ModeChange(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    mode: modes.Mode
+    confirm_downgrade: StrictBool = False
+    reason: Literal["chosen", "later"] = "chosen"
+
+
 class Target(BaseModel):
     chat_id: int
     enabled: bool
@@ -227,6 +243,7 @@ class ParametersUpdate(BaseModel):
 
 class ChatExport(BaseModel):
     chat_id: int
+    language: str | None = Field(default=None, max_length=16)
 
 
 class MultiExportStart(BaseModel):
@@ -278,6 +295,16 @@ def client_languages(request):
                              or request.headers.get("accept-language"))
 
 
+def report_options(store, request, language=None):
+    """Saved report options; a language chosen for this one export wins over the saved one and the panel's."""
+    options = report.resolved(store, panel_language(request))
+    if language:
+        if language not in i18n.LANGUAGES:
+            raise HTTPException(422, "Unsupported report language")
+        options["language"] = language
+    return options
+
+
 def create_app(data_dir=None, demo=False, client_factory=None, token_override=None, allow_profiles=True,
                account_guard=None, proxy_pool=None, access=None, profile_id="default"):
     root = Path(data_dir or "data").resolve()
@@ -309,6 +336,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         profiles = None
         try:
             cleanup_exports(root)
+            # The PDF library and its font tools take seconds to load the first time; load them while the
+            # panel starts, not when someone waits for the first PDF.
+            threading.Thread(target=pdf_report.available, name="pdf-preload", daemon=True).start()
             vault = Vault(root)
             if token_override:
                 vault.token = token_override
@@ -331,6 +361,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     for rule in policy["types"].values():
                         rule["enabled"] = True
                 store.set_setting("capture", policy)
+            await complete_in_thread(modes.migrate, store)
             collector = Collector(store, vault, **({"client_factory": client_factory} if client_factory else {}))
             collector.account_guard = account_guard
             collector.proxy_pool = shared_pool
@@ -1634,6 +1665,41 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     async def get_source_check():
         return source_state()
 
+    def mode_facts():
+        """What the protection checklist measures (modes.measure), read from the existing settings."""
+        store, vault, collector = app.state.store, app.state.vault, app.state.collector
+        outside = outside_state()
+        return {"media": capture_settings(store)["download_media"],
+                "checkpoint": store.retained_checkpoint() is not None,
+                "recheck": recheck_settings(store),
+                "alerts": {**alerts.alert_settings(store), "destinations": len(vault.read("alerts").get("urls", []))},
+                "witness": witness_api.state(vault, store)["tokens"],
+                "evidence": evidence_settings(store), "timestamps": timestamps_health(outside),
+                "replica": replica.replica_settings(store), "replica_last": store.get_setting("replica_last", None),
+                "report": report.saved(store).model_dump(), "source_check": source_state(),
+                "route": collector.route_policy(), "network": collector.network_config().kind,
+                "direct_fallback": collector.direct_fallback, "outside_route": outside["route"],
+                "assurance": bool(app.state.assurance)}
+
+    def mode_state():
+        return modes.state(app.state.store, mode_facts())
+
+    @app.get("/api/mode", dependencies=[Depends(authenticate)])
+    async def get_mode():
+        return mode_state()
+
+    @app.patch("/api/mode", dependencies=[Depends(authenticate)])
+    async def change_mode(request: Request, body: ModeChange):
+        """Only what the panel shows changes; the choice is a signed journal record."""
+        principal = request.state.principal
+        try:
+            modes.change(app.state.store, body.mode, {"access_id": principal.owner, "label": principal.label},
+                         confirm_downgrade=body.confirm_downgrade, reason=body.reason,
+                         active=mode_state()["active"])
+        except modes.Downgrade as exc:
+            raise HTTPException(409, str(exc)) from None
+        return mode_state()
+
     @app.post("/api/source-check", dependencies=[Depends(authenticate)])
     async def run_source_check(body: SourceCheck):
         require_live()
@@ -2174,7 +2240,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     async def chat_export_start(request: Request, body: ChatExport):
         require_chat(request, body.chat_id)
         return await operation(app.state.collector.start_export, body.chat_id,
-                               report.resolved(app.state.store, panel_language(request)))
+                               report_options(app.state.store, request, body.language))
 
     @app.get("/api/report-options", dependencies=[Depends(authenticate)])
     async def get_report_options():
@@ -2242,10 +2308,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         except Exception:
             raise HTTPException(409, "Journal integrity verification failed. Preserve the directory for inspection.") from None
 
-    async def build_export(fmt, request, password=None):
+    async def build_export(fmt, request, password=None, language=None):
         from . import export_history
         receipt = {}
-        options = report.resolved(app.state.store, panel_language(request))
+        options = report_options(app.state.store, request, language)
 
         def build():
             path = export_file(app.state.store, app.state.vault, fmt, options)
@@ -2261,6 +2327,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         async with export_lock:
             try:
                 path = await build_file(build)
+            except pdf_report.MissingFont as exc:
+                raise HTTPException(409, str(exc)) from None
             except Exception as exc:
                 app.state.store.append("export.failed", {"format": fmt, "error_type": type(exc).__name__})
                 raise HTTPException(409, "Export failed integrity, size, or file checks. Inspect local data and limits.") from None
@@ -2274,17 +2342,58 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return path, export_history.headers(receipt)
 
     @app.get("/api/export/{fmt}", dependencies=[Depends(authenticate)])
-    async def export(request: Request, fmt: Literal["zip", "jsonl", "csv", "html"]):
-        path, headers = await build_export(fmt, request)
-        media_types = {"zip": "application/zip", "jsonl": "application/x-ndjson",
-                       "csv": "text/csv", "html": "text/html"}
-        return TemporaryDownload(path, filename="tgwitness-evidence." + fmt, media_type=media_types[fmt], headers=headers)
+    async def export(request: Request, fmt: Literal["zip", "jsonl", "csv", "html", "json", "pdf"],
+                     language: str | None = None):
+        path, headers = await build_export(fmt, request, language=language)
+        media_types = {"zip": "application/zip", "jsonl": "application/x-ndjson", "csv": "text/csv",
+                       "html": "text/html", "json": "application/json", "pdf": "application/pdf"}
+        name = "tgwitness-report." + fmt if fmt in ("json", "pdf") else "tgwitness-evidence." + fmt
+        return TemporaryDownload(path, filename=name, media_type=media_types[fmt], headers=headers)
 
     @app.post("/api/export/{fmt}", dependencies=[Depends(authenticate)])
-    async def export_encrypted(request: Request, fmt: Literal["zip", "jsonl", "csv", "html"], body: ExportPassword):
+    async def export_encrypted(request: Request, fmt: Literal["zip", "jsonl", "csv", "html", "json", "pdf"],
+                               body: ExportPassword, language: str | None = None):
 
-        path, headers = await build_export(fmt, request, body.password)
+        path, headers = await build_export(fmt, request, body.password, language)
         return TemporaryDownload(path, filename="tgwitness-evidence-" + fmt + "-encrypted.zip", media_type="application/zip", headers=headers)
+
+    @app.post("/api/handover", dependencies=[Depends(authenticate)])
+    async def export_handover(request: Request, body: HandoverRequest):
+        """A minimised extract for a court, lawyer or abuse desk; who made it, why and how is journaled."""
+        for chat in body.chats:
+            require_chat(request, chat)
+        from . import export_history
+        options = report_options(app.state.store, request, body.language)
+        selection = handover.Options.model_validate(body.model_dump(exclude={"password", "language"}))
+        receipt, summary = {}, {}
+
+        def build():
+            path, recorded = handover.export(app.state.store, app.state.vault, selection, options)
+            try:
+                summary.update(recorded)
+                if body.password is not None:
+                    path = encrypt_export(path, "zip", body.password, "tgwitness-handover.zip")
+                receipt.update(export_history.prepared(app.state.store, path, "handover", body.password is not None))
+                return path
+            except BaseException:
+                path.unlink(missing_ok=True)
+                raise
+
+        async with export_lock:
+            try:
+                path = await build_file(build)
+            except handover.EmptySelection as exc:
+                raise HTTPException(422, str(exc)) from None
+            except Exception as exc:
+                app.state.store.append("export.failed", {"format": "handover", "error_type": type(exc).__name__})
+                raise HTTPException(409, "Export failed integrity, size, or file checks. Inspect local data and limits.") from None
+        principal = request.state.principal
+        app.state.store.append("handover.exported", {
+            **summary, "file_sha256": receipt.get("sha256"), "encrypted": body.password is not None,
+            "by": {"access_id": principal.owner, "label": principal.label},
+            "meaning": "a minimised extract was prepared; its contents are not repeated here"})
+        return TemporaryDownload(path, filename="tgwitness-handover" + ("-encrypted" if body.password else "") + ".zip",
+                                 media_type="application/zip", headers=export_history.headers(receipt))
 
     @app.get("/api/exports/history", dependencies=[Depends(authenticate)])
     async def prepared_exports():

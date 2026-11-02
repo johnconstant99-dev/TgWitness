@@ -216,6 +216,21 @@ def human_size(n):
         n /= 1024
 
 
+def account_loss_line(cause, words):
+    """Why observation stopped when Telegram no longer accepts the account's session."""
+    if cause == "account_banned":
+        return tr(words, "Telegram banned this account. Observation stopped; the journal is kept.")
+    if cause == "account_frozen":
+        return tr(words, "Telegram froze this account and refuses most requests. Observation stopped; "
+                         "the account can appeal through @SpamBot.")
+    if cause == "account_deleted":
+        return tr(words, "The Telegram account was deleted. Observation stopped; the journal is kept.")
+    if cause == "session_duplicated":
+        return tr(words, "Telegram ended this session because it was used in two places at once. "
+                         "Sign in again with a new session.")
+    return tr(words, "Telegram signed this account out. Sign in again to resume observation.")
+
+
 def problem_line(event, titles, words):
     p, kind = event["payload"], event["kind"]
     where = titles.get(event["chat_id"], str(event["chat_id"])) if event["chat_id"] is not None else ""
@@ -225,7 +240,7 @@ def problem_line(event, titles, words):
     if kind == "storage.ok":
         return tr(words, "Disk space available again; photo and file downloads resumed.")
     if kind == "coverage.gap" and p.get("reason") == "authorization_required":
-        return tr(words, "Telegram signed this account out. Sign in again to resume observation.")
+        return account_loss_line(p.get("cause"), words)
     if kind == "coverage.gap":
         return tr(words, "Coverage gap{where}: {reason}", where=" (" + where + ")" if where else "",
                   reason=p.get("reason") or "")

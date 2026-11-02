@@ -726,6 +726,22 @@ MESSAGE_KINDS = ("message.new", "message.snapshot", "message.edited", "message.r
 INTERRUPTIONS = {"transport_disconnected": "connection to Telegram lost",
                  "authorization_required": "Telegram signed the account out",
                  "resume_failed": "observation could not resume after a restart"}
+# Why Telegram stopped accepting the session, as the collector recorded it (coverage.gap "cause").
+ACCOUNT_LOSS = {"account_banned": "account banned", "account_deleted": "account deleted",
+                "account_frozen": "account frozen", "session_duplicated": "session used in two places",
+                "session_revoked": "session revoked", "session_expired": "session expired",
+                "session_ended": "session no longer recognised", "not_authorized": "no reason given"}
+
+
+def missing_ranges(ordered):
+    """(low, high) of every run of numbers absent between neighbours of an ascending list of distinct IDs."""
+    return [(a + 1, b - 1) for a, b in zip(ordered, ordered[1:]) if b - a > 1]
+
+
+def numbered_per_chat(chat_id):
+    """Channels and supergroups number their messages 1, 2, 3… per chat; elsewhere the numbers are the
+    account's own, shared by all its private chats and basic groups, so a gap there means nothing."""
+    return isinstance(chat_id, int) and chat_id < CHANNEL_IDS_BELOW
 
 
 def parse_time(value):
@@ -791,7 +807,8 @@ class Coverage:
         elif kind == "coverage.gap":
             reason = payload.get("reason")
             if chat_id is None and reason in INTERRUPTIONS:
-                self.close(at, INTERRUPTIONS[reason])
+                cause = ACCOUNT_LOSS.get(payload.get("cause")) if reason == "authorization_required" else None
+                self.close(at, INTERRUPTIONS[reason] + (": " + cause if cause else ""))
                 self.disconnected = reason == "transport_disconnected"
             else:
                 self.notes.append({"at": at, "chat_id": chat_id, "reason": reason})
@@ -806,8 +823,7 @@ class Coverage:
         if kind == "scope.applied":
             for added in payload.get("added") or []:
                 self.titles[added.get("chat_id")] = added.get("title")
-        if kind in MESSAGE_KINDS and chat_id is not None and chat_id < CHANNEL_IDS_BELOW \
-                and isinstance(event["message_id"], int):
+        if kind in MESSAGE_KINDS and numbered_per_chat(chat_id) and isinstance(event["message_id"], int):
             self.ids.setdefault(chat_id, set()).add(event["message_id"])
 
     def result(self, ranges_per_chat=50):
@@ -823,7 +839,7 @@ class Coverage:
         unobserved = []
         for chat_id, ids in sorted(self.ids.items()):
             ordered = sorted(ids)
-            holes = [(a + 1, b - 1) for a, b in zip(ordered, ordered[1:]) if b - a > 1]
+            holes = missing_ranges(ordered)
             unobserved.append({"chat_id": chat_id, "title": self.titles.get(chat_id),
                                "observed_from": ordered[0], "observed_to": ordered[-1], "observed": len(ordered),
                                "not_observed": sum(high - low + 1 for low, high in holes),
@@ -1148,6 +1164,106 @@ def archive_seal(archive, name, public_key):
     return check_seal(sealed, public_key) if sealed else None
 
 
+REPORT_JSON = "report-json-v1"
+# The Ed25519 seal inside a PDF's signature (pdf_report.SEAL_ATTRIBUTE: UUID arc, named after the project).
+PDF_SEAL = "2.25.240684792623320047764573196045913242332"
+SIGNING_TIME = "1.2.840.113549.1.9.5"
+
+
+def read_pdf_seal(data):
+    """(SHA-256 of the signed bytes, seal, certificate details) of a PDF signed by TgWitness, once the PDF
+    signature itself is checked: it must cover the whole file but its own value, its digest must match
+    those bytes and its ECDSA signature the certificate it carries, and the Ed25519 seal inside it must
+    name that certificate."""
+    ranges = re.findall(rb"/ByteRange\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*\]", data)
+    if len(ranges) != 1:
+        raise ValueError("Not a PDF signed by TgWitness: exactly one signature is expected")
+    a, b, c, d = map(int, ranges[0])
+    if a != 0 or not 0 < b < c or c + d != len(data) or data[b:b + 1] != b"<" or data[c - 1:c] != b">":
+        raise ValueError("The PDF signature does not cover the whole file")
+    raw = bytes.fromhex(data[b + 1:c - 1].decode("ascii"))
+    content = hashlib.sha256(data[:b] + data[c:]).digest()
+    _, start, end = der(raw, 0)
+    info = children(raw, start, end)
+    if oid(raw, info[0][2], info[0][3]) != SIGNED_DATA:
+        raise ValueError("The PDF signature is not CMS signed data")
+    _, start, end = der(raw, info[1][2])
+    signed = children(raw, start, end)
+    certificates = next(item for item in signed if item[0] == 0xA0)
+    tag, offset, _, value_end = children(raw, certificates[2], certificates[3])[0]
+    der_certificate = raw[offset:value_end]
+    certificate = x509.load_der_x509_certificate(der_certificate)
+    signer = children(raw, signed[-1][2], signed[-1][3])[0]
+    parts = children(raw, signer[2], signer[3])
+    attributes = next(item for item in parts if item[0] == 0xA0)
+    unsigned = next((item for item in parts if item[0] == 0xA1), None)
+    signature = next(item for item in parts if item[0] == 0x04)
+
+    def values(item):
+        found = {}
+        for _, _, s, e in children(raw, item[2], item[3]):
+            kind = children(raw, s, e)
+            found[oid(raw, kind[0][2], kind[0][3])] = children(raw, kind[1][2], kind[1][3])[0]
+        return found
+    signed_attributes = values(attributes)
+    digest = signed_attributes.get(MESSAGE_DIGEST)
+    if digest is None or raw[digest[2]:digest[3]] != content:
+        raise ValueError("The PDF was changed after it was signed")
+    certificate.public_key().verify(raw[signature[2]:signature[3]], b"\x31" + raw[attributes[1] + 1:attributes[3]],
+                                    ec.ECDSA(hashes.SHA256()))
+    seal = values(unsigned).get(PDF_SEAL) if unsigned else None
+    if seal is None:
+        raise ValueError("The PDF signature carries no TgWitness seal")
+    seal = json.loads(raw[seal[2]:seal[3]].decode("utf-8"))
+    certificate_sha256 = hashlib.sha256(der_certificate).hexdigest()
+    if seal["statement"].get("document_certificate_sha256") != certificate_sha256 \
+            or seal["statement"].get("content") != "pdf-byte-range":
+        raise ValueError("The seal does not vouch for the certificate that signed this PDF")
+    when = signed_attributes.get(SIGNING_TIME)
+    names = certificate.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
+    return content.hex(), seal, {"certificate": names[0].value if names else certificate.subject.rfc4514_string(),
+                                 "certificate_subject": certificate.subject.rfc4514_string(),
+                                 "certificate_sha256": certificate_sha256,
+                                 "signing_time": raw[when[2]:when[3]].decode("ascii") if when else None}
+
+
+def read_json_seal(data):
+    """(SHA-256 of the canonical report, seal) of a JSON report: the seal signs that hash."""
+    if not isinstance(data, dict) or set(data) != {"format", "report", "seal"} \
+            or not is_format(data.get("format"), REPORT_JSON):
+        raise ValueError("Not a TgWitness JSON report")
+    return hashlib.sha256(canonical(data["report"])).hexdigest(), data["seal"]
+
+
+def report_companions(archive, manifest, public, describes):
+    """The signed JSON report and the parts of a long report each carry their own seal over this export."""
+    files, report = manifest["files"], manifest.get("report") or {}
+    checked = {"json": None, "parts": 0, "pdf": None}
+    if "report.json" in files:
+        seal = check_seal(read_json_seal(json.loads(read_member(archive, "report.json", MAX_JSON_BYTES))), public)
+        if not describes(seal["subject"]):
+            raise ValueError("report.json describes a different export")
+        checked["json"] = seal
+    for name in ("report.pdf", "chat.pdf"):
+        if name in files:
+            content, seal, signature = read_pdf_seal(read_member(archive, name, MAX_JSON_BYTES))
+            seal = check_seal((content, seal), public)
+            if not describes(seal["subject"]):
+                raise ValueError(name + " describes a different export")
+            checked["pdf"] = {**seal, "file": name, "pdf_signature": signature}
+    parts = report.get("parts") or []
+    for number, part in enumerate(parts, 1):
+        name = part.get("file") if isinstance(part, dict) else None
+        if name not in files:
+            raise ValueError("A report part named in the manifest is missing: " + str(name))
+        seal = archive_seal(archive, name, public)
+        subject = (seal or {}).get("subject") or {}
+        if not seal or not describes(subject) or subject.get("part") != number or subject.get("parts") != len(parts):
+            raise ValueError("Report part " + name + " does not belong to this export")
+        checked["parts"] += 1
+    return checked
+
+
 def check_sums(archive, manifest):
     """SHA256SUMS (for sha256sum -c) must repeat the signed manifest's hash of every other file."""
     if "SHA256SUMS" not in manifest["files"]:
@@ -1162,19 +1278,35 @@ def check_sums(archive, manifest):
 
 
 def verify_report(path, expected_fingerprint=None, evidence=None):
-    """A report handed over on its own: its seal and, with --evidence, the archive it describes."""
-    with open(path, "rb") as stream:
-        sealed = read_sealed(stream)
+    """A report handed over on its own (HTML, a part of a long report, or JSON): its seal and, with
+    --evidence, the archive it describes."""
+    signature = None
+    if Path(path).suffix.lower() == ".json":
+        sealed = read_json_seal(read_json_file(path))
+    elif Path(path).suffix.lower() == ".pdf":
+        if Path(path).stat().st_size > MAX_JSON_BYTES:
+            raise ValueError(Path(path).name + " exceeds the verifier's size limit")
+        content, seal, signature = read_pdf_seal(Path(path).read_bytes())
+        sealed = content, seal
+    else:
+        with open(path, "rb") as stream:
+            sealed = read_sealed(stream)
     if not sealed:
         raise ValueError("This report has no seal: it was made before seals or not by TgWitness")
     seal = check_seal(sealed, None, expected_fingerprint)
     subject = seal["subject"]
     result = {"format": "tgwitness-report-seal-v1", "fingerprint": seal["fingerprint"], "report_seal": seal,
-              "producer": seal["producer"], "key_pinned": bool(expected_fingerprint), "evidence_checked": False}
+              "producer": seal["producer"], "key_pinned": bool(expected_fingerprint), "evidence_checked": False,
+              **({"pdf_signature": signature} if signature else {})}
     if evidence:
         if is_format(bundle_format(evidence), "chat-export-v1"):
             checked = verify_chat_export(evidence, expected_fingerprint)
             matches = checked["chat_json_sha256"] == subject.get("chat_json_sha256")
+        elif is_format(bundle_format(evidence), "handover-v1"):
+            checked = verify_handover(evidence, expected_fingerprint)
+            with open_archive(evidence) as archive:
+                matches = read_manifest(archive)["files"].get("records.jsonl") == subject.get("records_sha256") \
+                    and checked["head_hash"] == subject.get("head_hash")
         else:
             checked = verify_bundle(evidence, expected_fingerprint)
             count = subject.get("event_count")
@@ -1185,6 +1317,85 @@ def verify_report(path, expected_fingerprint=None, evidence=None):
             raise ValueError("The report describes a different archive")
         result["evidence_checked"] = True
     return result
+
+
+def verify_selection(path, expected_fingerprint=None, evidence=None):
+    """An unsigned viewer selection: exact membership in a separately verified archive.
+
+    Selection time, author and notes are not signed. Never report a selection as
+    carrying its own signature, even when every chosen item matches the source.
+    """
+    data = read_json_file(path)
+    if not isinstance(data, dict) or data.get("format") != "tgwitness-selection-v1":
+        raise ValueError("Unsupported selection format")
+    if not evidence:
+        raise ValueError("A viewer selection requires --evidence with its signed source archive")
+    source, items = data.get("source"), data.get("items")
+    if not isinstance(source, dict) or not isinstance(items, list) or not items:
+        raise ValueError("A selection must contain a source and at least one item")
+    kind = source.get("kind")
+    if kind == "journal":
+        archive_format = bundle_format(evidence)
+        kind = "handover" if is_format(archive_format, "handover-v1") else "evidence" if is_format(archive_format, "evidence-v1") else None
+    verifier = {"chat": verify_chat_export, "evidence": verify_bundle, "handover": verify_handover}.get(kind)
+    if verifier is None:
+        raise ValueError("Unsupported selection source kind")
+    checked = verifier(evidence, expected_fingerprint)
+    seal = checked.get("report_seal") or {}
+    if source.get("fingerprint") != checked["fingerprint"] or source.get("report_id") != seal.get("report_id"):
+        raise ValueError("Selection describes a different report or signing key")
+    subject = seal.get("subject") or {}
+    boundary = ("chat_id", "chat_json_sha256") if kind == "chat" else ("head_hash",) if kind == "handover" else ("head_hash", "event_count")
+    if canonical({k: source.get(k) for k in boundary}) != canonical({k: subject.get(k) for k in boundary}):
+        raise ValueError("Selection describes a different archive boundary")
+    if kind == "handover" and (type(source.get("event_count")) is not int or source["event_count"] != checked["journal_events"]):
+        raise ValueError("Selection describes a different archive boundary")
+    identity = "id" if kind == "chat" else "seq"
+    wanted = {}
+    for item in items:
+        if not isinstance(item, dict) or type(item.get(identity)) is not int or item[identity] < 1:
+            raise ValueError("Selection item has an invalid identifier")
+        if item[identity] in wanted:
+            raise ValueError("Selection contains duplicate identifiers")
+        wanted[item[identity]] = item
+    member = "chat.json" if kind == "chat" else "records.jsonl" if kind == "handover" else "events.jsonl"
+    digest_key = "chat_json_sha256" if kind == "chat" else "records_sha256" if kind == "handover" else "events_sha256"
+    matched = set()
+    with open_archive(evidence) as archive:
+        # Bind the data read in this pass to the verified report, too.
+        if member_digest(archive, member) != subject.get(digest_key):
+            raise ValueError("Source data changed after archive verification")
+
+        def records():
+            with archive.open(member) as stream:
+                for line in bounded_lines(stream):
+                    yield json.loads(line)
+
+        for record in chat_messages(archive) if kind == "chat" else records():
+            number = record.get(identity)
+            if number not in wanted:
+                continue
+            if number in matched:
+                raise ValueError("Source has duplicate identifiers for a selected item")
+            expected = record
+            if kind != "chat":
+                payload = record.get("payload") if isinstance(record.get("payload"), dict) else {}
+                sender = payload.get("sender_observation") if isinstance(payload.get("sender_observation"), dict) else {}
+                text = payload.get("text")
+                expected = {"seq": number, "hash": record.get("hash"), "kind": record.get("kind"),
+                            "observed_at": record.get("observed_at"), "chat_id": record.get("chat_id"),
+                            "message_id": record.get("message_id"),
+                            "sender_id": payload.get("sender_id", sender.get("id")),
+                            "text": text if isinstance(text, str) and text else None}
+            if canonical(wanted[number]) != canonical(expected):
+                raise ValueError("Selection item differs from signed source: " + str(number))
+            matched.add(number)
+    if matched != set(wanted):
+        raise ValueError("Selection contains items absent from its source archive")
+    return {"format": "tgwitness-selection-v1", "fingerprint": checked["fingerprint"],
+            "key_pinned": bool(expected_fingerprint), "source_kind": kind, "report_id": source["report_id"],
+            "items_checked": len(matched), "evidence_checked": True, "selection_signed": False,
+            "producer": checked.get("producer"), "case": checked.get("case") or {}}
 
 
 def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None, check_drand=False):
@@ -1205,11 +1416,15 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
             if member_digest(archive, name) != digest:
                 raise ValueError("File hash mismatch: " + name)
         sums = check_sums(archive, manifest)
+
+        def describes(subject):
+            return (subject.get("event_count") == manifest["event_count"]
+                    and subject.get("head_hash") == manifest["head_hash"]
+                    and subject.get("events_sha256") == manifest["files"].get("events.jsonl"))
         seal = archive_seal(archive, "report.html", public) if "report.html" in manifest["files"] else None
-        if seal and (seal["subject"].get("event_count") != manifest["event_count"]
-                     or seal["subject"].get("head_hash") != manifest["head_hash"]
-                     or seal["subject"].get("events_sha256") != manifest["files"].get("events.jsonl")):
+        if seal and not describes(seal["subject"]):
             raise ValueError("The report seal describes a different journal")
+        companions = report_companions(archive, manifest, public, describes)
         observed, outside = Coverage(), OutsideRecords()
 
         def measured(lines):
@@ -1236,7 +1451,8 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
             result["outside"]["drand"]["checked"] = confirm_drand(outside.rounds)
         result["producer"] = manifest.get("producer")
         result.update(format=manifest["format"], files_checked=len(manifest["files"]), sha256sums=sums,
-                      report_seal=seal, case=manifest.get("case") or {})
+                      report_seal=seal, report_json=companions["json"], report_parts=companions["parts"],
+                      report_pdf=companions["pdf"], case=manifest.get("case") or {})
 
         def hash_at(seq):
             if seq == 0:
@@ -1273,17 +1489,140 @@ def verify_chat_export(path, expected_fingerprint=None):
             if member_digest(archive, name) != digest:
                 raise ValueError("File hash mismatch: " + name)
         parts = verify_parts(archive, manifest) if manifest.get("parts") else None
+        attachments = check_attachments(archive, manifest)
         sums = check_sums(archive, manifest)
+
+        def describes(subject):
+            return (subject.get("chat_id") == (manifest.get("chat") or {}).get("id")
+                    and subject.get("message_count") == manifest.get("message_count")
+                    and subject.get("chat_json_sha256") == manifest["files"].get("chat.json"))
         seal = archive_seal(archive, "chat.html", public) if "chat.html" in manifest["files"] else None
-        if seal and (seal["subject"].get("chat_id") != (manifest.get("chat") or {}).get("id")
-                     or seal["subject"].get("message_count") != manifest.get("message_count")
-                     or seal["subject"].get("chat_json_sha256") != manifest["files"].get("chat.json")):
+        if seal and not describes(seal["subject"]):
             raise ValueError("The report seal describes a different chat export")
+        companions = report_companions(archive, manifest, public, describes)
+        ids = check_message_ids(archive, manifest) if "message-ids.json" in manifest["files"] else None
         return {"format": manifest["format"], "fingerprint": fp,
                 "message_count": manifest.get("message_count"), "producer": manifest.get("producer"),
                 "chat": manifest.get("chat"), "key_pinned": bool(expected_fingerprint), "parts": parts,
                 "files_checked": len(manifest["files"]), "chat_json_sha256": manifest["files"].get("chat.json"),
-                "sha256sums": sums, "report_seal": seal, "case": manifest.get("case") or {}}
+                "attachments": attachments, "sha256sums": sums, "report_seal": seal,
+                "report_parts": companions["parts"], "report_pdf": companions["pdf"], "message_ids": ids,
+                "case": manifest.get("case") or {}}
+
+
+def message_id_summary(chat_id, ids):
+    """How a chat's message numbers run: first and last, how many are present and which are absent.
+    ids: ascending, distinct. Meaningful only where messages are numbered per chat."""
+    holes = missing_ranges(ids)
+    return {"chat_id": chat_id, "numbered_per_chat": numbered_per_chat(chat_id),
+            "first_id": ids[0] if ids else None, "last_id": ids[-1] if ids else None, "present": len(ids),
+            "missing": sum(high - low + 1 for low, high in holes) if numbered_per_chat(chat_id) else None,
+            "missing_ranges": [[low, high] for low, high in holes] if numbered_per_chat(chat_id) else []}
+
+
+def check_message_ids(archive, manifest):
+    """message-ids.json must say exactly what chat.json shows: recount the numbers from the messages."""
+    claimed = json.loads(read_member(archive, "message-ids.json", MAX_JSON_BYTES))
+    ids = sorted({m["id"] for m in chat_messages(archive) if type(m.get("id")) is int})
+    counted = message_id_summary((manifest.get("chat") or {}).get("id"), ids)
+    if {k: claimed.get(k) for k in counted} != counted:
+        raise ValueError("message-ids.json disagrees with the messages in chat.json")
+    return {k: counted[k] for k in ("first_id", "last_id", "present", "missing")} | {
+        "missing_ranges": len(counted["missing_ranges"]), "numbered_per_chat": counted["numbered_per_chat"]}
+
+
+def verify_handover(path, expected_fingerprint=None):
+    """A handover extract: records shown unchanged are verified in full (hash, signature and the link to an
+    included predecessor); minimised records by the signature over the hash of the original record."""
+    with open_archive(path) as archive:
+        names = archive.namelist()
+        manifest = read_manifest(archive)
+        if not is_format(manifest["format"], "handover-v1"):
+            raise ValueError("Unsupported handover format")
+        public = manifest["public_key"]
+        fp = fingerprint(public)
+        if expected_fingerprint and fp != expected_fingerprint:
+            raise ValueError("Public key differs from the independently trusted fingerprint")
+        key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True))
+        key.verify(base64.b64decode(read_member(archive, "manifest.sig"), validate=True), canonical(manifest))
+        files = manifest["files"]
+        if set(names) != set(files) | {"manifest.json", "manifest.sig"}:
+            raise ValueError("Unexpected or missing bundle members")
+        for name, digest in files.items():
+            if member_digest(archive, name) != digest:
+                raise ValueError("File hash mismatch: " + name)
+            if name.startswith("media/") and name[len("media/"):] != digest:
+                raise ValueError("Attachment name differs from its SHA-256: " + name)
+        sums = check_sums(archive, manifest)
+        journal = manifest["journal"]
+        count, head = journal["event_count"], journal["head_hash"]
+        if type(count) is not int or count < 1 or not re.fullmatch(r"[0-9a-f]{64}", str(head)):
+            raise ValueError("Malformed journal boundary")
+        key.verify(base64.b64decode(journal["head_signature"], validate=True), bytes.fromhex(head))
+        counts, previous, referenced = {"unchanged": 0, "minimised": 0}, None, set()
+        with archive.open("records.jsonl") as stream:
+            for line in bounded_lines(stream):
+                record = json.loads(line)
+                minimised = record.get("minimised")
+                if set(record) != set(FIELDS) | {"hash", "signature"} | ({"minimised"} if "minimised" in record else set()):
+                    raise ValueError("Unexpected or missing fields at record " + str(record.get("seq")))
+                seq = record["seq"]
+                if type(seq) is not int or not 1 <= seq <= count or (previous and seq <= previous["seq"]):
+                    raise ValueError("Records out of journal order at record " + str(seq))
+                if not re.fullmatch(r"[0-9a-f]{64}", str(record["hash"])):
+                    raise ValueError("Malformed hash at record " + str(seq))
+                if minimised is None:
+                    if hashlib.sha256(canonical({k: record[k] for k in FIELDS})).hexdigest() != record["hash"]:
+                        raise ValueError("Changed content at record " + str(seq))
+                    if previous and previous["seq"] == seq - 1 and record["previous_hash"] != previous["hash"]:
+                        raise ValueError("Broken hash chain at record " + str(seq))
+                    counts["unchanged"] += 1
+                else:
+                    if not isinstance(minimised, list) or not minimised or not all(isinstance(x, str) for x in minimised):
+                        raise ValueError("A minimised record must name what was withheld: record " + str(seq))
+                    counts["minimised"] += 1
+                key.verify(base64.b64decode(record["signature"], validate=True), bytes.fromhex(record["hash"]))
+                if seq == count and record["hash"] != head:
+                    raise ValueError("The last record differs from the journal head")
+                if record["kind"] in ("media.saved", "actor.avatar_saved"):
+                    digest = (record["payload"] or {}).get("media_sha256")
+                    if "media/" + str(digest) in files:
+                        referenced.add("media/" + digest)
+                previous = record
+        if counts != {k: manifest["counts"].get(k) for k in counts}:
+            raise ValueError("Record counts differ from the signed manifest")
+        if {name for name in files if name.startswith("media/")} - referenced:
+            raise ValueError("The extract carries an attachment no record refers to")
+        def describes(subject):
+            return subject.get("records_sha256") == files.get("records.jsonl") and subject.get("head_hash") == head
+        seal = archive_seal(archive, "report.html", public) if "report.html" in files else None
+        if seal and not describes(seal["subject"]):
+            raise ValueError("The report seal describes a different extract")
+        companions = report_companions(archive, manifest, public, describes)
+    return {"format": manifest["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
+            "purpose": manifest.get("purpose"), "records_unchanged": counts["unchanged"],
+            "records_minimised": counts["minimised"], "records_left_out": manifest["counts"].get("left_out"),
+            "journal_events": count, "head_hash": head, "attachments": len(referenced),
+            "files_checked": len(files), "sha256sums": sums, "report_seal": seal,
+            "report_json": companions["json"], "report_parts": companions["parts"], "report_pdf": companions["pdf"],
+            "case": manifest.get("case") or {}, "producer": manifest.get("producer")}
+
+
+def check_attachments(archive, manifest):
+    """Saved attachments are named by their SHA-256, and every message naming one finds that file."""
+    files = manifest["files"]
+    for name, digest in files.items():
+        if name.startswith("media/") and name[len("media/"):] != digest:
+            raise ValueError("Attachment name differs from its SHA-256: " + name)
+    referenced = 0
+    for message in chat_messages(archive):
+        name = message.get("file")
+        if name is None:
+            continue
+        if not isinstance(name, str) or files.get(name) is None or files[name] != message.get("file_sha256"):
+            raise ValueError("Message #" + str(message.get("id")) + " names an attachment missing from the archive")
+        referenced += 1
+    return referenced
 
 
 def chat_messages(archive):
@@ -2221,7 +2560,9 @@ def producer_line(producer):
     if not producer:
         return "Producer: not named in this (older) archive."
     return ("Producer (signed): " + str(producer.get("software")) + " " + str(producer.get("version")) + " - "
-            + str(producer.get("project")) + " - " + str(producer.get("homepage")))
+            + str(producer.get("project")) + " - " + str(producer.get("homepage"))
+            + (" - commit " + str(producer["commit"]) if producer.get("commit") else "")
+            + (" - source files SHA-256 " + str(producer["source_tree_sha256"]) if producer.get("source_tree_sha256") else ""))
 
 
 def fingerprint_colors(value):
@@ -2243,6 +2584,8 @@ SAY = {
         "Evidence archive": "Архив доказательств", "Chat export": "Экспорт чата", "Witness journal": "Журнал свидетеля",
         "People profiles": "Профили людей", "Public proof": "Публичное доказательство",
         "Sealed report": "Опечатанный отчёт", "History report": "Отчёт об истории",
+        "Viewer selection": "Выборка из пульта", "Items": "Записи",
+        "Unsigned selection; item content matched against the signed archive": "Выборка без подписи; записи сверены с подписанным архивом",
         "Manifest signature": "Подпись манифеста", "Ed25519 · valid": "Ed25519 · верна",
         "Signature": "Подпись", "File hashes": "Хеши файлов",
         "{n} files · SHA-256 match": "файлов: {n} · SHA-256 совпадают",
@@ -2284,6 +2627,8 @@ SAY = {
         "Case": "Справа", "Notes": "Примітки", "Details": "Подробиці",
         "Evidence archive": "Архів доказів", "Chat export": "Експорт чату", "Witness journal": "Журнал свідка",
         "People profiles": "Профілі людей", "Public proof": "Публічний доказ", "Sealed report": "Опечатаний звіт", "History report": "Звіт про історію",
+        "Viewer selection": "Вибірка з переглядача", "Items": "Записи",
+        "Unsigned selection; item content matched against the signed archive": "Вибірка без підпису; записи звірено з підписаним архівом",
         "Manifest signature": "Підпис маніфесту", "Ed25519 · valid": "Ed25519 · дійсний",
         "Signature": "Підпис", "File hashes": "Хеші файлів",
         "{n} files · SHA-256 match": "файлів: {n} · SHA-256 збігаються",
@@ -2321,7 +2666,7 @@ SAY = {
 KINDS = {"evidence": "Evidence archive", "chat": "Chat export", "account": "Account export",
          "account_disclosure": "Account disclosure", "witness": "Witness journal",
          "dossier": "People profiles", "proof": "Public proof", "report": "Sealed report",
-         "history": "History report"}
+         "history": "History report", "handover": "Handover extract", "selection": "Viewer selection"}
 
 
 def console_language(choice=None):
@@ -2546,12 +2891,30 @@ class Console:
             if result.get("parts"):
                 self.check("ok", "Accounts", self.t("{n} account(s) signed their message ranges", n=len(result["parts"])))
             self.seal(result, "chat.html")
+        elif shown == "handover":
+            self.check("ok", "Manifest signature", self.t("Ed25519 · valid"))
+            self.check("ok", "File hashes", self.t("{n} files · SHA-256 match", n=self.number(result["files_checked"])))
+            self.check("ok", "Unchanged records", self.t("{n} · hash, signature and chain checked",
+                                                         n=self.number(result["records_unchanged"])))
+            self.check("warn" if result["records_minimised"] else "ok", "Minimised records",
+                       self.t("{n} · signature over the original record checked",
+                              n=self.number(result["records_minimised"])))
+            self.check("none", "Left out", self.t("{n} records of {total} in the journal",
+                                                  n=self.number(result["records_left_out"]),
+                                                  total=self.number(result["journal_events"])))
+            self.seal(result, "report.html")
+        elif shown == "selection":
+            self.check("ok", "Described archive", self.t("verified and matches the seal"))
+            self.check("ok", "Items", str(result["items_checked"]))
+            self.check("none", "Signature", self.t("Unsigned selection; item content matched against the signed archive"))
         elif shown == "report":
             seal = result["report_seal"]
             subject = seal["subject"]
             self.check("ok", "Report seal", self.t("{name} · intact · language {lang}", name=path.name, lang=seal["language"]))
-            described = (self.t("{n} records · head {hash}", n=self.number(subject.get("event_count")),
-                                hash=str(subject.get("head_hash"))[:8] + "…") if "event_count" in subject else
+            described = (self.t("{n} records · head {hash}", n=self.number(subject.get("event_count",
+                                                                                     subject.get("record_count"))),
+                                hash=str(subject.get("head_hash"))[:8] + "…")
+                         if "event_count" in subject or "record_count" in subject else
                          self.t("{n} messages · {title}", n=self.number(subject.get("message_count")),
                                 title=subject.get("chat_title") or subject.get("chat_id")))
             self.check("none", "Describes", described)
@@ -2575,7 +2938,7 @@ class Console:
             self.lines("Details", ["messages: " + str(result["counts"]["messages"]),
                                    "chats: " + str(result["counts"]["chats"]), "media: " + str(result["counts"]["media"]),
                                    result["meaning"]])
-        elif shown not in ("chat", "report"):
+        elif shown not in ("chat", "report", "handover"):
             facts = [key + ": " + json.dumps(value, ensure_ascii=False) for key, value in result.items()
                      if isinstance(value, (str, int, bool)) and key != "fingerprint"]
             self.lines("Details", facts, limit=12)
@@ -2664,12 +3027,20 @@ def main():
     if spinner:
         spinner.__enter__()
     try:
-        if args.bundle.suffix.lower() in (".html", ".htm"):
+        if args.bundle.suffix.lower() in (".html", ".htm", ".pdf"):
             shown, result = "report", verify_report(args.bundle, args.fingerprint, args.evidence)
             pinned = bool(args.fingerprint)
         elif args.bundle.suffix.lower() == ".json":
-            kind = read_json_file(args.bundle).get("statement", {}).get("format")
-            if is_format(kind, "public-proof-v1"):
+            data = read_json_file(args.bundle)
+            kind = data.get("statement", {}).get("format")
+            if data.get("format") == "tgwitness-selection-v1":
+                shown, result = "selection", verify_selection(args.bundle, args.fingerprint, args.evidence)
+                pinned = bool(args.fingerprint)
+                notes.append("The selection is unsigned. Its items match the verified archive; selection time and notes are not authenticated.")
+            elif is_format(data.get("format"), REPORT_JSON):
+                shown, result = "report", verify_report(args.bundle, args.fingerprint, args.evidence)
+                pinned = bool(args.fingerprint)
+            elif is_format(kind, "public-proof-v1"):
                 shown = "proof"
                 result = verify_public_proof(args.bundle, args.fingerprint, args.witness_fingerprint, args.evidence)
             elif is_format(kind, "history-report-v1"):
@@ -2702,6 +3073,12 @@ def main():
             shown = "chat"
             result = verify_chat_export(args.bundle, args.fingerprint)
             pinned = bool(args.fingerprint)
+        elif is_format(archive_format, "handover-v1"):
+            shown = "handover"
+            result = verify_handover(args.bundle, args.fingerprint)
+            pinned = bool(args.fingerprint)
+            notes.append("Minimised records are authenticated by the signature over the original record's hash; "
+                         "confirm their content against the complete journal by that hash.")
         elif is_format(archive_format, "witness-v1"):
             shown = "witness"
             result = verify_witness(args.bundle, args.witness_fingerprint or args.fingerprint)
@@ -2783,6 +3160,19 @@ def main():
     if seal:
         print("Report seal verified: " + ("chat.html" if shown == "chat" else "report.html" if shown == "evidence"
                                           else args.bundle.name) + ", language " + str(seal["language"]) + ".")
+    if result.get("report_json"):
+        print("JSON report seal verified: report.json.")
+    pdf = result.get("report_pdf") or (result if result.get("pdf_signature") else None)
+    if pdf:
+        print("PDF signature and Ed25519 seal verified: " + str(pdf.get("file") or args.bundle.name)
+              + " (certificate " + pdf["pdf_signature"]["certificate"] + ").")
+    if result.get("report_parts"):
+        print("Report parts verified: " + str(result["report_parts"]) + ", each sealed over this export.")
+    ids = result.get("message_ids")
+    if ids and ids["numbered_per_chat"]:
+        print("Message IDs " + str(ids["first_id"]) + "-" + str(ids["last_id"]) + ": " + str(ids["present"])
+              + " present, " + str(ids["missing"]) + " absent in " + str(ids["missing_ranges"])
+              + " range(s); message-ids.json matches chat.json.")
     if result.get("sha256sums"):
         print("SHA256SUMS matches the signed manifest.")
     for line in notes:

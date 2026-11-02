@@ -213,6 +213,8 @@ def connection(c, now):
     if c.get("authorization_required"):
         return part("failed", "signed_out", **detail)
     if c.get("phase") in FAILED_PHASES:
+        if c["phase"] == "authorization_required":
+            detail["cause"] = (c.get("account_loss") or {}).get("cause")
         return part("failed", FAILED_PHASES[c["phase"]], **detail)
     if not c.get("has_session"):
         return part("configured" if c.get("phase") in SIGN_IN_PHASES else "off", "no_account", **detail)

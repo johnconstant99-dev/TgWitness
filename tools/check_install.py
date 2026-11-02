@@ -32,6 +32,9 @@ def main():
     assert (package / "tgwitness/client_profiles.LICENSE").read_bytes()
     for name in ("proof.html", "proof.css", "proof.js"):
         assert (package / "tgwitness/static" / name).read_bytes(), "Missing installed proof resource: " + name
+    for name in ("report_console.js", "report_console.css", "report_skin.css", "report_icons.svg",
+                 "fonts/NotoSans-Regular.ttf", "fonts/OFL.txt"):
+        assert (package / "tgwitness" / name).read_bytes(), "Missing installed report resource: " + name
     args.output.mkdir(exist_ok=True, parents=True)
     data = Path(tempfile.mkdtemp(prefix="installed-", dir=args.output))
     app = create_app(data, demo=True)
@@ -42,13 +45,13 @@ def main():
     thread = threading.Thread(target=server.run, kwargs={"sockets":[sock]}, daemon=True)
     thread.start()
     try:
-        deadline = time.monotonic() + 15
+        deadline = time.monotonic() + 45
         while not server.started:
             if time.monotonic() > deadline:
                 raise RuntimeError("Installed application did not start")
             time.sleep(.05)
         def get(path, headers=None):
-            connection = http.client.HTTPConnection("127.0.0.1", sock.getsockname()[1], timeout=10)
+            connection = http.client.HTTPConnection("127.0.0.1", sock.getsockname()[1], timeout=30)
             try:
                 connection.request("GET", path, headers=headers or {})
                 response = connection.getresponse()

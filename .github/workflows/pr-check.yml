@@ -51,6 +51,8 @@ jobs:
         run: python -I tools/check_operator_security.py
       - name: Check Telegram client metadata without network access
         run: python -I tools/check_client_identity.py
+      - name: Check account-loss receipts and stale connection isolation
+        run: python -I tools/check_collector_authorization.py
       - name: Verify frozen dependency inventories cannot omit or replace pins
         run: python -I tools/check_sbom_locks.py
       - name: Verify source archive repeatability and interrupted-build recovery

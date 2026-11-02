@@ -43,7 +43,7 @@ export function createResponsiveShell({node, icon, tr}) {
   toggle.addEventListener("click", () => setOpen(!opened));
   close.addEventListener("click", () => setOpen(false)); scrim.addEventListener("click", () => setOpen(false));
   sidebar.addEventListener("click", event => {
-    if (event.target.closest("[data-view], #lock-panel")) setOpen(false, false);
+    if (event.target.closest("[data-view], #lock-panel, #mode-switch")) setOpen(false, false);
   });
   window.addEventListener("tgwitness:route", event => {
     if (event.detail?.reason !== "initial") setOpen(false, false);

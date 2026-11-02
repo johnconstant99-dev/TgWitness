@@ -35,6 +35,8 @@ dependencies = [
   "apprise>=1.11.0,<3",
   "pillow>=13,<14",
   "requests[socks]>=2.33.0,<3",
+  "fpdf2>=2.9,<3",
+  "uharfbuzz>=0.45,<1",
 ]
 
 [project.optional-dependencies]
@@ -62,6 +64,7 @@ include-package-data = false
 
 [tool.setuptools.package-data]
 tgwitness = [
+  "report_console.js", "report_console.css", "report_skin.css", "report_icons.svg",
   "static/*.html", "static/*.css", "static/*.js", "static/*.svg",
   "static/core/*.js",
   "static/components/*.js", "static/components/*.css",
@@ -75,6 +78,7 @@ tgwitness = [
   "guide_locales/*.json",
   "english_fallbacks.json", "public_proxies.json", "sealed_policy.json",
   "client_profiles.json", "client_profiles.LICENSE",
+  "fonts/*.ttf", "fonts/OFL.txt",
 ]
 
 [tool.ruff]

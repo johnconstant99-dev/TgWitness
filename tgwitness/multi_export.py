@@ -27,6 +27,7 @@ from . import chat_export
 from . import replica
 from . import report
 from . import tuning
+from .collector import absent_numbers, merge_history, message_record
 from .store import canonical, utcnow
 from .verify import fingerprint
 from .workers import complete_in_thread
@@ -205,6 +206,8 @@ class MultiExport:
         try:
 
             directory.mkdir(mode=0o700, exist_ok=True)
+            clock = await lead.telegram_clock()
+            profile, observer, problems = await lead.chat_profile(lead_entity)
             lead.store.append("chat_export.started", {
                 "chat_id": state["chat_id"], "title": info.get("title"), "mode": "multi_account",
                 "accounts": [w["account_id"] for w in state["workers"] if w["state"] == "pending"],
@@ -216,12 +219,31 @@ class MultiExport:
             await complete_in_thread(self.merge, parts, scratch)
             signed = self.sign_parts(parts)
             message_count = sum(p["count"] for p in parts)
+            recheck = None
+            if state["chat_id"] < -1000000000000:
+                absent = absent_numbers(scratch)
+                if absent:
+                    try:
+                        recheck, missed = await lead.recheck_absent(lead_entity, absent)
+                    except asyncio.CancelledError:
+                        raise
+                    except Exception as exc:  # the history is complete without it; say that it was not done
+                        recheck, missed = {"asked_at": utcnow(), "asked": 0, "absent_total": len(absent),
+                                           "error_type": type(exc).__name__}, []
+                    if missed:
+                        merge_history(scratch, [{**message_record(m), "found_on_recheck": True} for m in missed])
+                    message_count += len(missed)
+            log = await lead.admin_log(lead_entity) if observer.get("role") in ("creator", "admin") else None
             meta = {"chat": {"id": state["chat_id"], "title": info.get("title"), "kind": info.get("kind"),
-                             "visibility": info.get("visibility")},
+                             "visibility": info.get("visibility"), "profile": profile,
+                             **({"profile_errors": problems} if problems else {})},
+                    "observer": observer, "recheck": recheck, "admin_log": log,
                     "account": lead.store.get_setting("account", None), "message_count": message_count,
                     "collection": {"mode": "multi_account", "range_size": CHUNK, "newest_message_id": newest,
                                    "scope": "message numbers 1..newest_message_id at export start"},
-                    "parts": signed}
+                    "parts": signed, "client": lead.client_identity(), "route": lead.route_receipt(),
+                    "acquisition": {"started_at": state["started_at"], "finished_at": utcnow(),
+                                    "clock_at_start": clock, "clock_at_end": await lead.telegram_clock()}}
             await complete_in_thread(chat_export.build_bundle, scratch, meta, lead.vault, out,
                                     tuning.value(lead.store, "export_max_gib") * 1024**3, report_options)
             replica.outbox(lead.store, out)

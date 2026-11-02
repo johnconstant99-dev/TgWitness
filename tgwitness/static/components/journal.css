@@ -84,8 +84,8 @@
   .journal-type-filters { display:flex; flex-wrap:nowrap; overflow-x:auto; gap:5px; padding-bottom:5px; scrollbar-width:thin; }
   .journal-type-filters .filter { flex:none; min-height:36px; padding:6px 10px; font-size:12px; }
   .journal-source-options { max-height:min(250px,45vh); }
-  .journal-date-filters { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:3px; }
-  .journal-date-filters .filter { padding:6px 3px; }
+  .journal-date-filters { gap:3px; }
+  .journal-date-filters .filter { flex:1 1 auto; padding:6px 8px; }
   .journal-filter-chip { max-width:100%; }
   .journal-pager { width:100%; margin-left:0; justify-content:space-between; }
 }
