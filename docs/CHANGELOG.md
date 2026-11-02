@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.8.0 preview · 2 November 2026
+
+- Apply sharing-copy text and contact controls to interaction records, and include
+  chat metadata only for the selected chats.
+- Keep pending confirmations bound to their original workspace, group and session.
+  Mask detected secrets in Case Board source context until an explicit reveal.
+- Keep the new panel session active after rotating its access token. Events from
+  the old connection cannot sign out the replacement session.
+- Preserve the collecting account's attribution when recovering missing messages
+  in multi-account exports, and verify the completed archive before marking it ready.
+- Show the AI endpoint and outside route in the data preview. Server-local AI
+  requires an explicitly selected Direct outside route; a route change requires a new preview.
 - Documentation: a [panel guide](PANEL.md) for every screen, protection modes and the
   code check; Discord publication and the public proof page in [witness](WITNESS.md);
   removing an installation; current panel labels throughout.
@@ -16,7 +28,7 @@
   permitted message metadata in reports and the viewer.
 - Add a private Case Board with signed, append-only bookmarks, exact-version Unicode
   highlights, complete action slices, scoped collections, threaded comments and team statuses.
-  Chats/Journal shortcuts, live updates, source navigation, presentation and English/Russian UI
+  Chats/Journal shortcuts, live updates, source navigation, presentation and UI in all 25 panel languages
   keep team interpretation separate from observed evidence. Signed ZIPs bind the annotations
   head and recomputed slices; the standalone verifier checks replay, references, query excerpts
   and retained checkpoints. Reports have independent board/comment controls; minimized handovers
@@ -111,8 +123,6 @@
   connection, event intake, sources and attachments work before offering what to do
   next. A change of IP protection through Settings is a signed journal record, and the
   journal names the new connection and settings records.
-
-## 0.8.0 preview · 2 November 2026
 
 - Fixed Windows portable packaging of fpdf2's public colour profile and licence;
   private workspace files and generated caches remain excluded.

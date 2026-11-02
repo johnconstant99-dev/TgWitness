@@ -56,7 +56,7 @@
           if(events.length){cursor=events.at(-1).seq;changed(events);}
         }
       }}finally{await reader.cancel().catch(()=>{});reader.releaseLock();}
-    }catch(error){if(error.status===401||error.status===403){if(rev===generation){stop();current.accessEnded();}return;}}
+    }catch(error){if(error.status===401||error.status===403){if(rev===generation&&controller===ctrl){stop();current.accessEnded();}return;}}
     finally{if(rev===generation&&context&&controller===ctrl){controller=null;connected=false;render();if(!document.hidden)retry=setTimeout(()=>connect(rev),3000);}}
   }
   function stop(){generation++;controller?.abort();controller=null;clearTimeout(retry);clearTimeout(flushTimer);context=null;pending=0;connected=false;flushing=false;for(const b of bars)b.bar.hidden=true;}

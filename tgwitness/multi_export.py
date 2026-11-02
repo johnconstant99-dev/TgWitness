@@ -1,4 +1,5 @@
 import asyncio
+import bisect
 import hashlib
 import json
 import secrets
@@ -12,7 +13,7 @@ from . import report
 from . import tuning
 from .collector import absent_numbers, merge_history, message_record
 from .store import canonical, utcnow
-from .verify import fingerprint
+from .verify import fingerprint, verify_chat_export
 from .workers import complete_in_thread
 
 CHUNK = 2000
@@ -197,7 +198,6 @@ class MultiExport:
                 raise RuntimeError("Some message ranges could not be fetched by any selected account.")
             parts = [results[low] for low, _ in reversed(ranges)]
             await complete_in_thread(self.merge, parts, scratch)
-            signed = self.sign_parts(parts)
             message_count = sum(p["count"] for p in parts)
             recheck = None
             if state["chat_id"] < -1000000000000:
@@ -211,8 +211,15 @@ class MultiExport:
                         recheck, missed = {"asked_at": utcnow(), "asked": 0, "absent_total": len(absent),
                                            "error_type": type(exc).__name__}, []
                     if missed:
-                        merge_history(scratch, [{**message_record(m), "found_on_recheck": True} for m in missed])
+                        recovered = [{**message_record(m), "found_on_recheck": True} for m in missed]
+                        absent_ids = set(absent)
+                        if any(row["id"] not in absent_ids for row in recovered):
+                            raise ValueError("Recovered messages do not match the absent message IDs.")
+                        parts = await complete_in_thread(self.recheck_parts, parts, recovered, state["lead"])
+                        merge_history(scratch, recovered)
+                        next(worker for worker in state["workers"] if worker["profile_id"] == state["lead"])["captured"] += len(missed)
                     message_count += len(missed)
+            signed = self.sign_parts(parts)
             log = await lead.admin_log(lead_entity) if observer.get("role") in ("creator", "admin") else None
             meta = {"chat": {"id": state["chat_id"], "title": info.get("title"), "kind": info.get("kind"),
                              "visibility": info.get("visibility"), "profile": profile,
@@ -224,8 +231,10 @@ class MultiExport:
                     "parts": signed, "client": lead.client_identity(), "route": lead.route_receipt(),
                     "acquisition": {"started_at": state["started_at"], "finished_at": utcnow(),
                                     "clock_at_start": clock, "clock_at_end": await lead.telegram_clock()}}
+            max_gib = tuning.value(lead.store, "export_max_gib")
             await complete_in_thread(chat_export.build_bundle, scratch, meta, lead.vault, out,
-                                    tuning.value(lead.store, "export_max_gib") * 1024**3, report_options)
+                                    max_gib * 1024**3, report_options)
+            await complete_in_thread(verify_chat_export, out, fingerprint(lead.vault.public_key), max_gib)
             replica.outbox(lead.store, out)
             self.path = out
             state.update(phase="done", ready=True, captured=message_count, eta_seconds=0)
@@ -270,6 +279,57 @@ class MultiExport:
                 if count != part["count"] or digest.hexdigest() != part["sha256"]:
                     raise ValueError("Range " + str(part["low"]) + "-" + str(part["high"]) +
                                      " changed on disk after it was fetched; export stopped.")
+
+    @staticmethod
+    def recheck_parts(parts, recovered, lead_id):
+        # Keep v1's non-overlapping ranges and attribute recovered rows to their actual fetcher.
+        recovered_by_id = {row["id"]: row for row in recovered}
+        if len(recovered_by_id) != len(recovered) or any(type(mid) is not int for mid in recovered_by_id):
+            raise ValueError("Recovered messages do not match the absent message IDs.")
+        prepared, included = [], set()
+        for part in parts:
+            found = sorted(mid for mid in recovered_by_id if part["low"] <= mid <= part["high"])
+            if not found:
+                prepared.append(part)
+                continue
+            pieces, start = [], part["low"]
+            for mid in found:
+                if start < mid:
+                    pieces.append({"low": start, "high": mid - 1, "profile_id": part["profile_id"]})
+                pieces.append({"low": mid, "high": mid, "profile_id": lead_id})
+                start = mid + 1
+            if start <= part["high"]:
+                pieces.append({"low": start, "high": part["high"], "profile_id": part["profile_id"]})
+            lows = [item["low"] for item in pieces]
+            hashes, counts = [hashlib.sha256() for _ in pieces], [0] * len(pieces)
+            original, count = hashlib.sha256(), 0
+            with part["path"].open(encoding="utf-8") as source:
+                for line in source:
+                    if not line.strip():
+                        continue
+                    row = json.loads(line)
+                    mid = row["id"]
+                    if type(mid) is not int or mid in recovered_by_id or not part["low"] <= mid <= part["high"]:
+                        raise ValueError("Recovered messages do not match the absent message IDs.")
+                    encoded = canonical(row) + b"\n"
+                    original.update(encoded)
+                    count += 1
+                    index = bisect.bisect_right(lows, mid) - 1
+                    hashes[index].update(encoded)
+                    counts[index] += 1
+            if count != part["count"] or original.hexdigest() != part["sha256"]:
+                raise ValueError("Range " + str(part["low"]) + "-" + str(part["high"]) +
+                                 " changed on disk after it was fetched; export stopped.")
+            for mid in found:
+                index = bisect.bisect_right(lows, mid) - 1
+                hashes[index].update(canonical(recovered_by_id[mid]) + b"\n")
+                counts[index] += 1
+            prepared.extend({**piece, "count": count, "sha256": digest.hexdigest()}
+                            for piece, count, digest in reversed(list(zip(pieces, counts, hashes))))
+            included.update(found)
+        if included != recovered_by_id.keys():
+            raise ValueError("Recovered messages do not match the absent message IDs.")
+        return prepared
 
     def sign_parts(self, parts):
         by_profile = {}

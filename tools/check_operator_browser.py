@@ -4,8 +4,101 @@ import tempfile
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import RunningApp, answer_panel_dialog, launch_browser, unlock
+from check_browser import (RunningApp, answer_panel_dialog, hold_api_response,
+                           launch_browser, release_api_response, unlock)
 from tgwitness.operator_guide import write
+
+
+def check_rotation_streams(browser, server):
+    for delivery in ('before-response', 'after-response', 'failed-rotation'):
+        page = browser.new_page(viewport={'width': 1440, 'height': 1050}, reduced_motion='reduce')
+        errors = []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        page.add_init_script("""(() => {
+          const original=window.fetch,encoder=new TextEncoder();
+          const probe=window.operatorStream={old:null,resumed:false,currentEnded:false};
+          window.fetch=async(...args)=>{
+            if(!new URL(String(args[0]),location.href).pathname.endsWith('/api/stream'))return original(...args);
+            if(!probe.old){
+              const old=probe.old={signal:args[1].signal,cancelled:false};
+              const stream=new ReadableStream({
+                start(controller){old.deliver=()=>controller.enqueue(encoder.encode('event: access-ended\\ndata: {}\\n\\n'));
+                  controller.enqueue(encoder.encode(': connected\\n\\n'));},
+                cancel(){old.cancelled=true;}
+              });
+              return new Response(stream,{headers:{'Content-Type':'text/event-stream'}});
+            }
+            const response=await original(...args);
+            if(!response.ok)return response;
+            probe.resumed=true;
+            const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='';
+            return new Response(new ReadableStream({
+              async pull(controller){
+                const {value,done}=await reader.read();
+                if(done){controller.close();return;}
+                buffer+=decoder.decode(value,{stream:true});
+                if(buffer.includes('event: access-ended'))probe.currentEnded=true;
+                controller.enqueue(value);
+              },
+              cancel(){return reader.cancel();}
+            }),{status:response.status,headers:response.headers});
+          };
+        })();""")
+        try:
+            unlock(page, server)
+            page.evaluate("navigate('access')")
+            page.locator('#access-tab-limits').click()
+            page.wait_for_function('()=>!!window.operatorStream.old')
+            old_key, old_session = server.app.state.vault.token, page.evaluate('state.token')
+            if delivery == 'before-response':
+                hold_api_response(page, '/api/access/token')
+            elif delivery == 'failed-rotation':
+                page.route('**/api/access/token', lambda route: route.fulfill(
+                    status=503, json={'detail': 'Synthetic key service failure'}))
+            page.locator('#panel-key-rotate').click()
+            answer_panel_dialog(page)
+            if delivery == 'before-response':
+                page.wait_for_function('()=>!!window.releaseAcceptanceResponse')
+            elif delivery == 'failed-rotation':
+                expect(page.locator('#toast')).to_have_text('Synthetic key service failure')
+                expect(page.locator('#panel-key-rotate')).to_be_enabled()
+                assert server.app.state.vault.token == old_key
+            else:
+                expect(page.locator('#panel-key-result')).to_be_visible()
+                expect(page.locator('#panel-key-rotate')).to_be_enabled()
+            page.evaluate('operatorStream.old.deliver()')
+            page.wait_for_function('()=>operatorStream.old.cancelled')
+            expect(page.locator('#workspace')).to_be_visible()
+            assert page.evaluate('operatorStream.old.signal.aborted')
+            if delivery == 'before-response':
+                release_api_response(page)
+            elif delivery == 'failed-rotation':
+                assert page.evaluate('state.token') == old_session
+                assert not page.evaluate("$('workspace').inert")
+                assert page.request.get(server.url + '/api/status', headers={
+                    'Authorization': 'Bearer ' + old_session}).status == 200
+                page.wait_for_function('()=>operatorStream.resumed')
+                page.unroute('**/api/access/token')
+                page.evaluate('operatorStream.resumed=false')
+                page.locator('#panel-key-rotate').click()
+                answer_panel_dialog(page)
+            expect(page.locator('#panel-key-result')).to_be_visible()
+            expect(page.locator('#panel-key-rotate')).to_be_enabled()
+            session = page.evaluate('state.token')
+            assert session != old_session and session
+            assert page.locator('#panel-key-new').input_value() == server.app.state.vault.token
+            assert page.evaluate("sessionStorage.getItem('tgwitness-token')===state.token && !$('workspace').inert")
+            assert page.request.get(server.url + '/api/status', headers={
+                'Authorization': 'Bearer ' + session}).status == 200
+            page.wait_for_function('()=>operatorStream.resumed')
+            assert page.request.post(server.url + '/api/access/logout', headers={
+                'Authorization': 'Bearer ' + session}).status == 200
+            page.wait_for_function('()=>operatorStream.currentEnded')
+            expect(page.locator('#gate')).to_be_visible()
+            assert page.evaluate("state.token==='' && sessionStorage.getItem('tgwitness-token')===null")
+            assert not errors, errors
+        finally:
+            page.close()
 
 
 def main():
@@ -50,6 +143,7 @@ def main():
             metadata = json.loads(page.locator('script[type=importmap]').text_content())
             assert '/components/shell.js?v=3' in metadata['integrity']
             page.close()
+            check_rotation_streams(browser, server)
 
             for asset in ('app.js', 'components/shell.js', 'style.css'):
                 context = browser.new_context()
@@ -84,7 +178,7 @@ def main():
             expect(page.locator('button[data-copy]').first).not_to_have_text('Copy')
             assert not errors, errors
             browser.close()
-    print('Operator browser passed: key rotation, old-session denial, responsive controls, script/module/style tampering blocked and offline guide.')
+    print('Operator browser passed: key rotation, late and early old-stream denial ignored, failed rotation retry, current-session revocation, responsive controls, script/module/style tampering blocked and offline guide.')
 
 
 if __name__ == '__main__':

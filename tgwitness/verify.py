@@ -1779,8 +1779,8 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
         return result
 
 
-def verify_chat_export(path, expected_fingerprint=None):
-    with open_archive(path) as archive:
+def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
+    with open_archive(path, max_gib=max_gib) as archive:
         names = archive.namelist()
         manifest = read_manifest(archive)
         if not is_format(manifest["format"], "chat-export-v1"):

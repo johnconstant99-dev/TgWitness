@@ -187,17 +187,19 @@ class Analysis:
         self.provider = ai.Provider()
         self.plans = {}
 
-    def remember(self, principal, body, result, config):
+    def remember(self, principal, body, result, config, route):
         now = time.time()
         self.plans = {key: p for key, p in self.plans.items() if p["expires"] > now}
         if len(self.plans) >= 100 or sum(p["owner"] == principal.owner for p in self.plans.values()) >= 10:
             raise ValueError("Too many pending previews. Retry after they expire.")
         ident = secrets.token_hex(16)
         plan = {**result, "owner": principal.owner, "question": body.question, "workspace": body.workspace,
-                "provider_fingerprint": ai.fingerprint(config), "expires": now + 600}
+                "provider_fingerprint": ai.fingerprint(config),
+                "route_fingerprint": ai.route_fingerprint(route), "expires": now + 600}
         self.plans[ident] = plan
         return {**result, "plan_id": ident, "expires_at": plan["expires"],
-                "provider": {key: config[key] for key in ("enabled", "provider", "endpoint", "model")},
+                "provider": {**{key: config[key] for key in ("enabled", "provider", "endpoint", "model")},
+                             **ai.transport(config, route)},
                 "transmission": prompt(body.question, result["sources"], result["coverage"])}
 
     def plan(self, ident, principal):

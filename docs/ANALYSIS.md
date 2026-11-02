@@ -30,9 +30,11 @@ Connection testing sends synthetic text and counts toward the request budget.
 
 Every request uses the workspace's configured outside route. A blocked route or
 Telegram-only MTProxy is an error; there is no direct retry. A deliberately
-configured local Ollama address permits a private destination, while still using
-the chosen route. For other private services the existing server-level private
-destination opt-in applies. The panel displays the actual configured endpoint.
+configured local Ollama address permits a private destination. A loopback AI
+endpoint requires the workspace's Direct outside route; proxy routes are rejected
+before transmission. For other private services the existing server-level private
+destination opt-in applies. The preview shows the endpoint and outside route,
+including the proxy host when applicable. Changing that route requires a new preview.
 
 Before generation, **Data sent to the model** shows the request: question,
 checked excerpts, event kinds, observation times and coverage markers. Telegram

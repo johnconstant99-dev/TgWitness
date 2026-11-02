@@ -31,6 +31,12 @@
   window.addEventListener("tgwitness:lock",clear);
   function providerMode(){if(!config)return;$("ai-endpoint").readOnly=$("ai-provider").value==="ollama";if($("ai-endpoint").readOnly)$("ai-endpoint").value=config.local_endpoint;}
   function providerCurrent(epoch){return epoch===providerEpoch&&workspace===state.profile&&!!state.me;}
+  function providerStatus(data){
+    const host=data.route_host?(data.route_host.includes(":")?"["+data.route_host+"]":data.route_host):"";
+    return (data.enabled?tr("AI enabled"):tr("AI disabled"))+" · "+data.provider+" · "+data.model+" · "+data.endpoint+
+      " · "+tr("Workspace route")+": "+data.route+(host?" ("+host+":"+data.route_port+")":"")+
+      (data.route_error?" · "+tr(data.route_error):"");
+  }
   function providerControls(){
     const editable=!!config&&workspace===state.profile&&!!state.me?.admin&&!state.status?.demo;
     $("ai-settings-form").inert=!editable;
@@ -49,7 +55,7 @@
       edits.delete(id);
     }
     $("ai-key-state").textContent=data.has_key?tr("A key is stored. Leave blank to keep it."):tr("No API key stored.");
-    $("ai-status").textContent=(data.enabled?tr("AI enabled"):tr("AI disabled"))+" · "+data.provider+" · "+data.endpoint+" · "+tr("Workspace route")+": "+data.route;
+    $("ai-status").textContent=providerStatus(data);
     if($("ask-provider-status"))$("ask-provider-status").textContent=$("ai-status").textContent;
     providerMode();providerControls();
   }
@@ -125,7 +131,7 @@
   }
   function sources(data){
     const provider=data.provider;
-    if(provider&&$("ask-provider-status"))$("ask-provider-status").textContent=(provider.enabled?tr("AI enabled"):tr("AI disabled"))+" · "+provider.provider+" · "+provider.model+" · "+provider.endpoint;
+    if(provider&&$("ask-provider-status"))$("ask-provider-status").textContent=providerStatus(provider);
     const box=$("ask-sources");box.replaceChildren();
     if(data.not_found)box.append(viewState("empty",tr("Not found in the available archive"),tr("Try a different phrase, chat or observation period.")));
     for(const source of data.sources){
@@ -138,7 +144,7 @@
       check.addEventListener("change",transmission);box.append(row);
     }
     if(data.partial)box.append(node("p","notice",tr("The result is bounded. Narrow the search to inspect additional sources.")));
-    coverage(data.coverage,$("ask-coverage"));show("ask-preview",true);$("ask-generate").disabled=!data.sources.length||!(provider?.enabled??config?.enabled);transmission();
+    coverage(data.coverage,$("ask-coverage"));show("ask-preview",true);$("ask-generate").disabled=!data.sources.length||!(provider?.enabled??config?.enabled)||!!provider?.route_error;transmission();
   }
   $("ask-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
     if(!capabilities().enabled)return;

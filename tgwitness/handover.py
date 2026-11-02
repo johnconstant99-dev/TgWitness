@@ -148,6 +148,7 @@ class Minimiser:
         self.o, self.observer = options, observer
         self.chats, self.subjects = set(options.chats), set(options.subjects)
         self.requests, self.previews = set(requests), set(previews)
+        self.action_text = {}
         self.mentioned = {p["username"].casefold(): p["id"] for p in people.values() if p.get("username")}
         self.labels, self.messages, self.roles, self.files = {}, set(), {}, set()
         self.counts = {"unchanged": 0, "minimised": 0, "left_out": 0}
@@ -200,13 +201,11 @@ class Minimiser:
             if kind in ("observation.started", "scope.applied", "scope.changed", "recheck.completed"):
                 return self.other_chats_removed(event)
             if kind == "interaction.preview" and event["seq"] in self.previews:
-                payload = event["payload"]
-                return self.minimise(event, {k: payload.get(k) for k in ("link", "title", "kind", "already_member",
-                                                                         "request_needed")}, ["preview details"])
+                return self.interaction(event)
             if kind == "interaction.requested" and event["seq"] in self.requests:
-                return self.keep(event)
+                return self.interaction(event)
             if kind == "interaction.result" and event["payload"].get("request_event") in self.requests:
-                return self.keep(event)
+                return self.interaction(event)
             return self.leave()
         if chat not in self.chats:
             return self.leave()
@@ -223,13 +222,60 @@ class Minimiser:
                 return self.keep(event)
             return self.leave()
         if kind in ("interaction.requested", "interaction.result"):
-            return self.keep(event) if (event["seq"] in self.requests
-                                        or event["payload"].get("request_event") in self.requests) else self.leave()
+            return self.interaction(event) if (event["seq"] in self.requests
+                                               or event["payload"].get("request_event") in self.requests) else self.leave()
         if kind in CHAT_KEEP:
             return self.keep(event)
         if kind.startswith(CHAT_PEOPLE) and self.o.others == "show":
             return self.keep(event)
         return self.leave()
+
+    def interaction(self, event):
+        payload, kind = event["payload"], event["kind"]
+
+        def fields(value, names):
+            return {key: self.clean(item) if isinstance(item, str) else item
+                    for key, item in value.items() if key in names and
+                    (item is None or isinstance(item, (str, int, float, bool)))}
+
+        at = moment(event["observed_at"])
+        in_period = at is not None and (not self.o.since or at >= self.o.since) \
+            and (not self.o.until or at < self.o.until)
+
+        def visible_text(role):
+            return in_period and not (role == "other" and self.o.others == "omit") and (
+                self.o.text == "all" or self.o.text == "subjects" and role != "other")
+
+        if kind == "interaction.preview":
+            shown = fields(payload, {"link", "title", "kind", "already_member", "request_needed"})
+        elif kind == "interaction.requested":
+            request = payload.get("request") if isinstance(payload.get("request"), dict) else {}
+            role = self.roles.get(request.get("keyboard_event"), "other") if request.get("action") == "press" else "observer"
+            allowed = visible_text(role)
+            self.action_text[event["seq"]] = allowed
+            shown = fields(payload, {"account_id", "observation_running", "own_actions", "preview_event"})
+            shown["request"] = fields(request, {"request_id", "action", "preview_id", "chat_id", "reply_to",
+                                                 "message_id", "keyboard_event", "row", "column"})
+            if request.get("action") == "send" and allowed and isinstance(request.get("text"), str):
+                shown["request"]["text"] = self.clean(request["text"])
+            button = payload.get("button")
+            if isinstance(button, dict):
+                shown["button"] = fields(button, {"type", "text"} if allowed else {"type"})
+            elif button is None:
+                shown["button"] = None
+        else:
+            shown = fields(payload, {"request_id", "request_event", "status", "chat_id", "message_id",
+                                     "message_event", "error_type", "retry_after"})
+            answer = payload.get("answer")
+            if isinstance(answer, dict):
+                names = {"cache_time", "alert", "has_url", "native_ui"}
+                if in_period and self.action_text.get(payload.get("request_event"), False):
+                    names |= {"message", "url"}
+                shown["answer"] = fields(answer, names)
+        hide_actor = event.get("actor_id") is not None and not self.shown(event["actor_id"])
+        if shown == payload and not hide_actor:
+            return self.keep(event)
+        return self.minimise(event, shown, ["interaction details"], hide_actor)
 
     def other_chats_removed(self, event):
         payload, chats = event["payload"], self.chats
@@ -408,7 +454,8 @@ def export(store, vault, options, report_options=None):
                     shown = minimiser.present(event)
                     if shown is not None:
                         out.write(canonical(shown) + b"\n")
-            titles = {t["chat_id"]: t["title"] for t in store.targets() if t.get("title")}
+            titles = {t["chat_id"]: t["title"] for t in store.targets()
+                      if t["chat_id"] in minimiser.chats and t.get("title")}
             from .board_handover import prepare as prepare_board
             board_export = prepare_board(snapshot, records_path, vault, options, minimiser)
         if not minimiser.messages:

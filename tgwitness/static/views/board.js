@@ -1,5 +1,5 @@
 export function createCaseBoard(ctx){
-  const {root,state,json,tr,node,toast,may,openEvidence,openSlice,download}=ctx;
+  const {root,state,json,tr,trn,node,toast,may,openEvidence,openSlice,download}=ctx;
   const n=(tag,cls='',text='')=>node(tag,cls,text), t=value=>tr(value);
   let data=null,selected=null,revision=0,request=0,liveCursor=0,unread=0,offset=0,anchor=null,dialog=null,timer=null;
   const drafts=new Map();let threadTicket=0;
@@ -60,7 +60,7 @@ export function createCaseBoard(ctx){
     if(!data)return;admin.hidden=!state.me?.admin;
     topActions.children[0].hidden=!may('board.write');topActions.children[2].hidden=!may('export');
     collectionHead.lastElementChild.hidden=!may('board.manage');
-    count.textContent=tr('{n} cards',{n:data.total});live.textContent=t('Signed team notes');
+    count.textContent=trn('{n} cards','{n} cards',data.total);live.textContent=t('Signed team notes');
     if(Object.values(data.limits).some(value=>value.exceeded))live.textContent=t('Soft limit reached. Existing cards remain available.');
     options(author,[['',t('Everyone')],...data.authors.map(item=>[item.id,item.label])]);
     options(chat,[['',t('All chats')],...(state.status?.targets||[]).map(item=>[String(item.chat_id),item.title])]);
@@ -101,7 +101,7 @@ export function createCaseBoard(ctx){
     if(card.dangling)article.append(n('p','board-warning',t('Dangling reference: the source observation is missing.')));
     if(!presentation){const actions=n('div','board-card-actions');actions.append(btn('Open',()=>openCard(card)),btn('Comment',()=>choose(card.id)),btn('Copy ref',()=>navigator.clipboard.writeText(card.target?'tgw://'+(state.status?.fingerprint||'').slice(0,8)+'/'+card.target.seq:'Case Board '+card.id)));
       if(may('board.write'))actions.append(btn('Edit',()=>editDialog(card)),btn('Move',()=>moveDialog(card)),btn('Status',()=>statusDialog(card)),btn('Remove',()=>removeCard(card)));
-      actions.append(n('span','board-comment-count',tr('{n} comments',{n:card.comment_count||0})));article.append(actions);}
+      actions.append(n('span','board-comment-count',trn('{n} comments','{n} comments',card.comment_count||0)));article.append(actions);}
     return article;
   }
   async function openCard(card){
@@ -181,7 +181,7 @@ export function createCaseBoard(ctx){
     let checked='';const add=btn('Add to board',async()=>{const q=query();if(JSON.stringify(q)!==checked)throw new Error(t('Preview the current slice before adding it.'));
       const saved=await post('slice',{title:title.value,note:note.value,query:q});if(saved)closeDialog();},'primary');add.disabled=true;
     body.append(btn('Preview all actions',async()=>{const q=query(),stamp=key(),rev=revision,container=dialog,result=await json('board/slice-preview',q);if(!valid(stamp,rev)||container!==dialog)return;
-      summary.replaceChildren(n('strong','',tr('{n} records',{n:result.record_count})));for(const [kind,count] of Object.entries(result.counts))summary.append(n('span','board-tag',kind+' · '+count));checked=JSON.stringify(q);add.disabled=false;},'secondary'),add);
+      summary.replaceChildren(n('strong','',trn('{n} records','{n} records',result.record_count)));for(const [kind,count] of Object.entries(result.counts))summary.append(n('span','board-tag',kind+' · '+count));checked=JSON.stringify(q);add.disabled=false;},'secondary'),add);
     body.addEventListener('input',()=>{add.disabled=true;});
   }
   async function collectionDialog(item=null){const body=modal(item?'Edit collection':'New collection'),title=field(body,'Title','text',item?.title||''),description=field(body,'Description','textarea',item?.description||''),chats=field(body,'Chat IDs (empty means whole workspace)','text',(item?.chat_ids||[]).join(',')),order=field(body,'Order','number',item?.order||0);
@@ -205,7 +205,7 @@ export function createCaseBoard(ctx){
         if(item.reaction_delta){const line=n('tr'),cell=n('td');cell.colSpan=6;cell.textContent=t('Reaction counts changed between observations; actor lists may be incomplete.')+' '+time(item.reaction_delta.from)+' → '+time(item.reaction_delta.to)+' · '+JSON.stringify(item.reaction_delta.count_changes);
           if(item.reaction_delta.recent_actor_observations.length)cell.append(n('pre','board-source-json',JSON.stringify(item.reaction_delta.recent_actor_observations,null,2)));line.append(cell);tbody.append(line);}
       }}await page();}
-  async function present(){if(!data?.cards.length)return;const body=modal('Presentation'),own=dialog,stamp=key(),rev=revision;dialog.classList.add('board-presentation');
+  async function present(){if(!data?.cards.length)return;const body=modal('Presentation'),own=dialog,stamp=key(),rev=revision,profile=state.profile,token=state.token;dialog.classList.add('board-presentation');
     const stage=n('div'),tabs=n('div','board-actions'),controls=n('div','board-presentation-controls');let index=0,mode='card',drawTicket=0,items=[],nextOffset=0;
     const counter=n('span'),previous=btn('Previous',async()=>{index=Math.max(0,index-1);await draw();}),next=btn('Next',async()=>{index=Math.min(items.length-1,index+1);await draw();});
     for(const [value,label] of [['card','Card'],['context','Source context'],['comments','Team comments']])tabs.append(btn(label,async()=>{mode=value;await draw();},'secondary small'));
@@ -215,8 +215,12 @@ export function createCaseBoard(ctx){
       const detail=await json('board/card/'+card.id);if(!valid(stamp,rev)||dialog!==own||ticket!==drawTicket)return;
       if(mode==='card')stage.replaceChildren(cardNode({...card,preview:detail.target},true));
       else if(mode==='context'){const context=n('div','board-card');context.append(n('h3','',t('Source context')),n('p','hint',t('Team interpretation is separate from this saved observation.')));
-        if(detail.target){context.append(preview(detail.target.payload.text||detail.target.payload.caption||''),n('p','hint','#'+detail.target.seq+' · '+time(detail.target.observed_at)),n('pre','board-source-json',JSON.stringify(detail.target,null,2)));}
-        else context.append(n('pre','board-source-json',JSON.stringify(card.query,null,2)));stage.replaceChildren(context);}
+        const current=()=>valid(stamp,rev)&&state.token===token&&dialog===own&&ticket===drawTicket&&state.view==='board'&&mode==='context';
+        if(detail.target){const event=detail.target,reveal=event.chat_id!=null&&event.message_id!=null?
+            ()=>json('privacy/reveal',{chat_id:event.chat_id,message_id:event.message_id},{profile,token}):null;
+          context.append(preview(event.payload.text||event.payload.caption||''),n('p','hint','#'+event.seq+' · '+time(event.observed_at)),
+            window.TgWitnessPrivacy.renderRecord(event,{className:'board-source-json',tr,current,reveal}));}
+        else context.append(window.TgWitnessPrivacy.renderRecord(card.query,{className:'board-source-json',tr,current}));stage.replaceChildren(context);}
       else{const comments=n('div','board-card');comments.append(n('h3','',t('Team comments')));for(const item of detail.thread.filter(item=>!item.removed))comments.append(n('strong','',item.access_label+' · '+time(item.at)),n('p','board-note',item.text));if(!detail.thread.length)comments.append(n('p','hint',t('No comments yet.')));stage.replaceChildren(comments);}
     }
     dialog.addEventListener('keydown',event=>{if(event.key==='ArrowRight')next.click();if(event.key==='ArrowLeft')previous.click();});await draw();}

@@ -80,9 +80,10 @@ def register(app, authenticate):
             scoped = reader(request)
             state = workspace(request, body.workspace)
             config = ai.settings(state)
+            route = state.collector.outside_route()
             async with asyncio.timeout(10):
                 result = await limited_in_thread(reads, retrieve, scoped, body, config["context_chars"])
-            return service.remember(request.state.principal, body, result, config)
+            return service.remember(request.state.principal, body, result, config, route)
         return await execute(search)
 
     @app.post("/api/analysis/context", dependencies=[Depends(authenticate)])
@@ -133,7 +134,8 @@ def register(app, authenticate):
                 await asyncio.to_thread(verify_sources, reader(request), selected + plan["coverage"]["events"])
                 state = workspace(request, plan["workspace"])
                 output, generation = await service.provider.complete(state,
-                    prompt(plan["question"], selected, plan["coverage"]), plan["provider_fingerprint"])
+                    prompt(plan["question"], selected, plan["coverage"]), plan["provider_fingerprint"],
+                    plan["route_fingerprint"])
                 await reauthorize(request)
                 await asyncio.to_thread(verify_sources, reader(request), selected + plan["coverage"]["events"])
                 claims = verified_claims(output, selected)

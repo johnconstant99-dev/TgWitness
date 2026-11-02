@@ -5,7 +5,7 @@ from playwright.sync_api import expect, sync_playwright
 
 from check_browser import (RunningApp, hold_api_response, launch_browser,
                            release_api_response, unlock)
-from browser_fixtures import CHAT
+from browser_fixtures import CHAT, saved_session
 from tgwitness.group_settings import save_values
 
 
@@ -171,23 +171,35 @@ def settings_and_setup(page, server, child):
     expect(page.locator('#setup-status')).to_contain_text('A personal record')
     assert page.evaluate("()=>json('setup').then(r=>r.saved.goal)") == 'personal'
 
-    child_store = server.app.state.profiles.entries[child]['app'].state.store
+    child_app = server.app.state.profiles.entries[child]['app']
+    child_store = child_app.state.store
     child_store.set_setting('first_run', {'step': 5, 'completed': False, 'skipped': False,
         'goal': 'watch', 'unchecked': True, 'account_kind': 'dedicated'})
+    credentials = child_app.state.vault.read('credentials')
+    child_app.state.vault.save('credentials', {'api_id': 123, 'api_hash': 'b' * 32, 'session': saved_session()})
+    child_app.state.collector.authorization_required = True
+    child_app.state.collector.phase = 'authorization_required'
     page.evaluate("""async()=>{
-      Object.assign(state.status.collector,{has_session:true,authorization_required:true,running:false,phase:'authorization_required'});
+      await refreshStatus();
       await navigate('first-run');await settingsHub.load(5);
     }""")
     wizard = page.locator('#view-first-run')
     expect(wizard.get_by_text('Telegram is connected.', exact=True)).to_have_count(0)
     expect(wizard.locator('#first-run-next')).to_be_disabled()
     expect(wizard.locator('.auth-card')).to_be_visible()
-    page.evaluate('()=>{state.status.collector.authorization_required=false;settingsHub.status();}')
+    child_app.state.collector.authorization_required = False
+    child_app.state.collector.phase = 'offline'
+    page.evaluate('async()=>{await refreshStatus();settingsHub.status();}')
     expect(wizard.get_by_text('Telegram is connected.', exact=True)).to_be_visible()
     expect(wizard.locator('#first-run-next')).to_be_enabled()
-    page.evaluate('()=>{state.status.collector.authorization_required=true;settingsHub.status();}')
+    child_app.state.collector.authorization_required = True
+    child_app.state.collector.phase = 'authorization_required'
+    page.evaluate('async()=>{await refreshStatus();settingsHub.status();}')
     expect(wizard.locator('.auth-card')).to_be_visible()
     expect(wizard.locator('#first-run-next')).to_be_disabled()
+    child_app.state.vault.save('credentials', credentials)
+    child_app.state.collector.authorization_required = False
+    child_app.state.collector.phase = 'offline'
     child_store.set_setting('first_run', {'completed': False, 'skipped': True})
 
 
@@ -329,6 +341,182 @@ def presentation(page):
     page.evaluate("document.documentElement.dir='ltr'")
 
 
+def pending_action_owners(page, server, child):
+    for app in (server.app, server.app.state.profiles.entries[child]['app']):
+        app.state.vault.save('credentials', {'api_id': 123, 'api_hash': 'b' * 32, 'session': saved_session()})
+        app.state.store.set_setting('account', {'id': 44, 'username': 'synthetic_fixture'})
+    mutations = []
+    paths = ('auth/logout', 'network/policy', 'alerts')
+
+    def intercept(route):
+        if route.request.method != 'POST':
+            if route.request.url.endswith('/alerts'):
+                response = route.fetch()
+                result = response.json()
+                result['destinations'] = ['Synthetic disabled destination']
+                route.fulfill(response=response, json=result)
+                return
+            route.continue_()
+            return
+        mutations.append(route.request.url)
+        if route.request.url.endswith('/network/policy'):
+            route.fulfill(json={'exposure': 'tunnel', 'outside_enabled': False, 'outside_proxy': None,
+                'outside_route': 'none', 'direct_fallback': False})
+        elif route.request.url.endswith('/alerts'):
+            route.fulfill(json={'settings': {'enabled': False, 'destinations': [], 'batch_seconds': 30, 'kinds': []},
+                'has_destinations': False})
+        else:
+            route.fulfill(json={'ok': True, 'telegram_session_ended': True})
+
+    for path in paths:
+        page.route('**/api/' + path, intercept)
+
+    def open_action(action):
+        if action == 'policy':
+            page.locator('#policy-form').evaluate("form=>form.requestSubmit(form.querySelector('button[type=submit]'))")
+        elif action == 'logout':
+            page.locator('#sign-out').click()
+        else:
+            page.evaluate('()=>loadAlerts()')
+            page.locator('#alerts-clear').evaluate('button=>button.click()')
+        expect(page.locator('dialog.panel-dialog[open]')).to_be_visible()
+
+    for action in ('policy', 'logout', 'alerts'):
+        view = 'witness' if action == 'alerts' else 'connection'
+        switch(page, child, view)
+        switch(page, 'default', view)
+        mutations.clear()
+        open_action(action)
+        page.go_back()
+        page.wait_for_function("id=>state.profile===id&&!$('workspace').inert", arg=child)
+        accept(page)
+        page.evaluate('()=>new Promise(requestAnimationFrame)')
+        assert not mutations, 'A stale confirmation issued a workspace mutation'
+
+    switch(page, 'default', 'connection')
+    open_action('policy')
+    with page.expect_response(lambda response: response.url.endswith('/api/network/policy') and response.request.method == 'POST'):
+        accept(page)
+    assert mutations == [server.url + '/api/network/policy'], mutations
+    mutations.clear()
+    open_action('logout')
+    old_session = page.evaluate('state.token')
+    replacement, _ = server.app.state.access.login(server.app.state.vault.token, '127.0.0.1', 'Synthetic replacement')
+    page.evaluate('token=>{state.token=token}', replacement)
+    accept(page)
+    page.evaluate('()=>new Promise(requestAnimationFrame)')
+    assert not mutations, 'An old confirmation survived a panel-session change'
+    page.evaluate('token=>{state.token=token}', old_session)
+    for path in paths:
+        page.unroute('**/api/' + path, intercept)
+
+    profile_mutations = []
+    def capture_profile(route):
+        if route.request.method in ('PATCH', 'DELETE'):
+            profile_mutations.append(route.request.method)
+            route.fulfill(json={'ok': True})
+        else:
+            route.continue_()
+    page.route('**/api/profiles/*', capture_profile)
+    for action in ('rename', 'delete'):
+        switch(page, 'default', 'accounts')
+        row = page.locator(f'.account-card[data-profile="{child}"]')
+        row.locator(f'[data-action="{action}"]').click()
+        dialog = page.locator('dialog.panel-dialog[open]')
+        expect(dialog).to_be_visible()
+        label = page.evaluate('id=>state.profiles.find(p=>p.id===id).label', child)
+        dialog.locator('input').fill(label if action == 'delete' else 'Synthetic unaccepted rename')
+        page.evaluate('id=>switchProfile(id)', child)
+        accept(page)
+        page.evaluate('()=>new Promise(requestAnimationFrame)')
+        assert not profile_mutations, 'A stale prompt or typed confirmation mutated a workspace'
+    page.unroute('**/api/profiles/*', capture_profile)
+
+
+def group_confirmation_owners(page, server):
+    switch(page, 'default', 'accounts')
+    groups = {}
+    for label, count in (('Synthetic owner Alpha', 2), ('Synthetic owner Beta', 1)):
+        group = page.evaluate("label=>json('profile-groups',{label},{root:true}).then(r=>r.groups.find(g=>g.label===label).id)", label)
+        members = []
+        for number in range(count):
+            member = page.evaluate("value=>json('profiles',value,{root:true}).then(r=>r.id)",
+                {'label': label + ' ' + str(number), 'group': group})
+            server.app.state.profiles.entries[member]['app'].state.vault.save('credentials',
+                {'api_id': 123, 'api_hash': 'b' * 32, 'session': saved_session(bytes([number + 1]))})
+            server.app.state.profiles.entries[member]['app'].state.store.set_target(CHAT, 'Synthetic selected source', 'supergroup', True)
+            members.append(member)
+        groups[label] = (group, members)
+    alpha, members = groups['Synthetic owner Alpha']
+    beta, _ = groups['Synthetic owner Beta']
+    exports, collections = [], []
+
+    def capture_export(route):
+        exports.append(route.request.url)
+        route.fulfill(status=409, json={'detail': 'Synthetic export capture'})
+
+    def capture_collection(route):
+        collections.append(route.request.url)
+        route.fulfill(json={'ok': True})
+
+    page.route('**/api/profile-groups/*/export', capture_export)
+    page.route('**/api/collector/*', capture_collection)
+    page.evaluate('window.showSaveFilePicker=undefined')
+    def open_group(group):
+        page.evaluate('id=>window.TgWitnessOpenGroup(id)', group)
+        expect(page.locator('#view-group h1')).to_contain_text('Alpha' if group == alpha else 'Beta')
+    def action(name):
+        page.locator('#view-group .group-actions').get_by_role('button', name=name, exact=True).click()
+
+    for name in ('Export group', 'Start all'):
+        open_group(beta)
+        open_group(alpha)
+        action(name)
+        expect(page.locator('dialog.panel-dialog[open]')).to_be_visible()
+        page.go_back()
+        expect(page.locator('#view-group h1')).to_contain_text('Beta')
+        accept(page)
+        page.evaluate('()=>new Promise(requestAnimationFrame)')
+        assert not exports and not collections, 'A group action survived navigation to another group'
+
+    open_group(alpha)
+    action('Export group')
+    with page.expect_response('**/api/profile-groups/' + alpha + '/export'):
+        accept(page)
+    assert exports == [server.url + '/api/profile-groups/' + alpha + '/export'], exports
+    exports.clear()
+    page.evaluate("""()=>{window.showSaveFilePicker=()=>new Promise(resolve=>{
+      window.finishGroupPicker=()=>resolve({createWritable:async()=>({write:async()=>{},close:async()=>{},abort:async()=>{}})});
+    });}""")
+    action('Export group')
+    accept(page)
+    page.wait_for_function('()=>typeof window.finishGroupPicker==="function"')
+    open_group(beta)
+    page.evaluate('()=>finishGroupPicker()')
+    page.evaluate('()=>new Promise(requestAnimationFrame)')
+    assert not exports, 'The group export resumed after its save-picker owner changed'
+    page.evaluate('window.showSaveFilePicker=undefined')
+
+    open_group(alpha)
+    hold_api_response(page, '/api/collector/start')
+    action('Start all')
+    accept(page)
+    expect(page.locator('html')).to_have_attribute('data-acceptance-held', 'true')
+    assert len(collections) == 1
+    open_group(beta)
+    release_api_response(page)
+    page.evaluate('()=>new Promise(requestAnimationFrame)')
+    assert len(collections) == 1, 'Remaining group members ran after the group changed'
+    collections.clear()
+    open_group(alpha)
+    action('Start all')
+    accept(page)
+    expect(page.locator('#toast')).to_contain_text('2 workspaces started.')
+    assert {url.split('/profiles/')[1].split('/')[0] for url in collections} == set(members)
+    page.unroute('**/api/profile-groups/*/export', capture_export)
+    page.unroute('**/api/collector/*', capture_collection)
+
+
 def main():
     with tempfile.TemporaryDirectory(prefix='audit-frontend-check-') as folder, RunningApp(Path(folder)) as server, sync_playwright() as p:
         store = server.app.state.store
@@ -354,6 +542,9 @@ def main():
         group_adoption(page, server, child)
         print('ok  group route adoption', flush=True)
         presentation(page)
+        pending_action_owners(page, server, child)
+        group_confirmation_owners(page, server)
+        print('ok  pending workspace, session and group confirmations', flush=True)
         assert not errors, errors
         browser.close()
     print('Audit frontend browser regressions passed')

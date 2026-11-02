@@ -36,7 +36,7 @@ const workspaceSafetyReady=import('./core/workspace-safety.js?v=1').then(({creat
 let accountState;
 let boardView;
 const boardReady=import('./views/board.js?v=1').then(({createCaseBoard})=>{
-  boardView=createCaseBoard({root:$('view-board'),state,json,tr,node,toast,may,download,media:mediaNode,
+  boardView=createCaseBoard({root:$('view-board'),state,json,tr,trn,node,toast,may,download,media:mediaNode,
     openEvidence:async(event,range)=>{
       const revision=state.workspaceRevision;
       state.boardSlice=null;state.boardAdded=false;state.filter='';state.source='';state.search='';state.eventSince='';state.eventUntil='';state.eventSystem=true;
@@ -425,9 +425,17 @@ const termLabels={offline:tr("offline"),ready:tr("ready"),credentials:tr("creden
   member_or_unknown:tr("member or unknown"),unknown:tr("unknown"),messages:tr("messages"),edits:tr("edits"),
   deletions:tr("deletions"),reactions:tr("reactions"),membership:tr("membership")};
 const termText=value=>termLabels[value]??String(value??"").replaceAll("_"," ");
-const askConfirm=(message,options)=>window.TgWitnessDialogs.confirm(message,options);
-const askText=(message,options)=>window.TgWitnessDialogs.prompt(message,options);
-const askTyped=(message,expected,options)=>window.TgWitnessDialogs.typed(message,expected,options);
+function actionOwner(){
+  const profile=state.profile,token=state.token,revision=state.workspaceRevision;
+  return {profile,token,revision,current:()=>profile===state.profile&&token===state.token&&revision===state.workspaceRevision};
+}
+async function ownedDialog(method,...args){
+  const owner=actionOwner(),result=await window.TgWitnessDialogs[method](...args);
+  return owner.current()?result:null;
+}
+const askConfirm=(message,options)=>ownedDialog('confirm',message,options);
+const askText=(message,options)=>ownedDialog('prompt',message,options);
+const askTyped=(message,expected,options)=>ownedDialog('typed',message,expected,options);
 const MEDIA_TYPE_LABELS={photo:"Photos",video:"Videos",animation:"GIFs & animations",video_note:"Round video messages",
   voice:"Voice messages",audio:"Music & audio",sticker:"Stickers",document:"Files & documents"};
 let panelTime;
@@ -701,15 +709,18 @@ function syncLive(){
   if(!state.token||!state.status||state.status.demo||window.TGW_ONLINE_DEMO||(!["observations","chats"].includes(state.view)&&!may('board.read'))){
     window.TgWitnessLive?.stop();return;
   }
-  window.TgWitnessLive?.start({key:state.workspaceRevision+":"+state.profile,head:state.status.stats.head?.seq,api,tr,accessEnded:lock,
+  const owner=actionOwner();
+  window.TgWitnessLive?.start({key:owner.revision+":"+owner.profile+":"+owner.token,head:state.status.stats.head?.seq,tr,
+    api:(path,body,options={})=>{if(!owner.current())throw new StaleView();return api(path,body,{...options,profile:owner.profile,token:owner.token});},
+    accessEnded:()=>{if(owner.current())lock();},
     hosts:[viewQuery(state.view,state.view==='chats'?'.chat-toolbar':'.journal .card-heading')].filter(Boolean),
     canRefresh:()=>{
-      if(!['observations','chats'].includes(state.view))return false;
+      if(!owner.current()||!['observations','chats'].includes(state.view))return false;
       if(state.drawerSeq!==null||window.getSelection()?.toString()||document.hidden)return false;
       if(state.view==="chats"){const feed=$("chat-feed");return state.chatNextAfter===null&&feed.scrollHeight-feed.scrollTop-feed.clientHeight<80;}
       return state.eventBefore===null&&state.events.length<=200&&window.scrollY<120&&window.TgWitnessJournal?.canRefresh()!==false;
     },
-    refresh:async({force=false}={})=>{await refreshStatus();if(state.view==="chats"){
+    refresh:async({force=false}={})=>{if(!owner.current())throw new StaleView();await refreshStatus();if(!owner.current())throw new StaleView();if(state.view==="chats"){
       const result=force&&state.chatView==='messages'?await loadChatMessages('latest'):await refreshChats(true);
       if(result===false)throw new Error('Chat refresh failed');
     }else if(state.view==="observations")await refreshEvents();}
@@ -1268,7 +1279,7 @@ const groupViewReady=import("./views/group.js?v=1").then(({createGroupView})=>{
   groupView=createGroupView({root:$("view-group"),json,tr,trn,node,toast,getState:()=>state,avatarNode,stateBadge,
     accountState:p=>accountState(p),accountPhaseLabel,healthPartNames,collectorLines,needsLook,fmtTime,fmtDuration,may,
     switchProfile,navigate,loadProfiles,diagnose:openDiagnostics,openChat:openChatIn,exportTogether,
-    exportGroup:(id,label)=>download('profile-groups/'+encodeURIComponent(id)+'/export','tgwitness-group-'+label.replace(/[^A-Za-z0-9._-]+/g,'-')+'.zip',true,true),
+    exportGroup:(id,label,owner)=>download('profile-groups/'+encodeURIComponent(id)+'/export','tgwitness-group-'+label.replace(/[^A-Za-z0-9._-]+/g,'-')+'.zip',true,true,undefined,undefined,{owner}),
     openConnection:async preset=>{await navigate('connection');await connectionViewReady;connectionView.preset(preset);},
     openGroupSettings:async id=>{await navigate('settings');if(state.view==='settings'){await settingsHubReady;await settingsHub.openGroup(id);}}});
   return groupView;
@@ -1335,9 +1346,10 @@ function renderAccounts(){
     if(!down){
       const toggle=node("button","quiet",tr(c.running?"Pause":"Start"));toggle.dataset.action='toggle';toggle.disabled=state.status.demo||(!c.running&&!accountState(p).canStart);
       toggle.addEventListener("click",()=>busy(toggle,async()=>{
-        const running=!!p.collector?.running;
+        const owner=actionOwner(),running=!!p.collector?.running;
         if(running&&!(await (await collectionReady).confirmPause(p.label)))return;
-        await json("collector/"+(running?"stop":"start"),{},{profile:p.id});
+        if(!owner.current())return;
+        await json("collector/"+(running?"stop":"start"),{},{profile:p.id,token:owner.token});
         toast(tr(running?"Paused collection for {name}.":"Started collection for {name}.",{name:p.label}));
         await loadProfiles();if(p.id===state.profile)await refreshStatus();
       }));
@@ -2242,8 +2254,10 @@ async function accountExportDownload(job){
     toast(tr("Signed account archive saved. You can download it again from this job."));
 }
 async function accountExportDelete(job){
+  const owner=actionOwner();
   if(!(await askConfirm(tr("Delete this account export job, its archive and its disclosures? This cannot be undone."),{danger:true,confirmText:tr("Delete")})))return;
-  await api("account-export/"+encodeURIComponent(job.id),undefined,{method:"DELETE"});
+  if(!owner.current())return;
+  await api("account-export/"+encodeURIComponent(job.id),undefined,{profile:owner.profile,token:owner.token,method:"DELETE"});
   delete state.accountDisclosures[job.id];
   await loadAccountExport();toast(tr("Account export job deleted."));
 }
@@ -2337,7 +2351,7 @@ async function previewAccountDisclosure(){
   $("account-disclosure-create").disabled=false;
 }
 async function createAccountDisclosure(){
-  const approved=state.accountDisclosurePreview;
+  const approved=state.accountDisclosurePreview,owner=actionOwner();
   if(!approved||approved.jobId!==state.accountDisclosureJob||approved.profile!==state.profile||
       approved.revision!==state.workspaceRevision||approved.policyRevision!==accountDisclosurePolicyRevision)
     throw new Error(tr("Preview the current disclosure settings before creating a file."));
@@ -2345,8 +2359,10 @@ async function createAccountDisclosure(){
     accountDisclosureInvalidate();throw new Error(tr("The disclosure preview expired. Preview the settings again."));
   }
   if(!(await askConfirm(tr("Create a signed derivative from this preview? Personal information may still remain; review the file before sharing."))))return;
+  if(!owner.current()||state.accountDisclosurePreview!==approved||approved.jobId!==state.accountDisclosureJob||
+      approved.policyRevision!==accountDisclosurePolicyRevision)return;
   const jobId=approved.jobId,profile=approved.profile,revision=approved.revision,context=viewContexts.get('evidence');
-  const result=await json("account-export/"+encodeURIComponent(jobId)+"/disclosure",{preview_id:approved.id});
+  const result=await json("account-export/"+encodeURIComponent(jobId)+"/disclosure",{preview_id:approved.id},{profile,token:owner.token});
   if(profile!==state.profile||revision!==state.workspaceRevision||jobId!==state.accountDisclosureJob)return;
   if(!result?.id)throw new Error(tr("Disclosure creation did not return a derivative ID."));
   (state.accountDisclosures[jobId]??=[]).unshift(result);
@@ -2389,11 +2405,11 @@ function fillExportLanguage(){
   for(const [code,name] of Object.entries(PANEL_LANGUAGES)){const o=new Option(name,code);o.lang=code;select.append(o);}
 }
 const exportLanguage=()=>$("export-language").value;
-async function download(path,filename,stream=false,root=false,body=undefined,progress=()=>{},{confirmWorkspace=true}={}){
+async function download(path,filename,stream=false,root=false,body=undefined,progress=()=>{},{confirmWorkspace=true,owner=null}={}){
   workspaceSafety?.assert();
-  const profile=state.profile,revision=state.workspaceRevision;
+  const profile=state.profile,revision=state.workspaceRevision,token=state.token;
   if(confirmWorkspace&&(/export|handover|history\/report/.test(path))&&!path.startsWith('profile-groups/')&&!(await workspaceSafety.confirmExport())){progress({phase:'cancelled'});return false;}
-  const current=()=>{workspaceSafety?.assert();if(profile!==state.profile||revision!==state.workspaceRevision)throw new StaleView();};
+  const current=()=>{if(profile!==state.profile||revision!==state.workspaceRevision||token!==state.token||owner&&!owner.current())throw new StaleView();workspaceSafety?.assert();};
   let handle=null,writer=null,reader=null;
   if(stream&&typeof window.showSaveFilePicker==="function"){
     try{handle=await window.showSaveFilePicker({suggestedName:filename});}
@@ -2402,7 +2418,7 @@ async function download(path,filename,stream=false,root=false,body=undefined,pro
   current();
   if(handle){try{writer=await handle.createWritable();}catch{handle=null;}}
   let response;
-  try{current();response=await api(path,body,root?{root:true}:{profile});}
+  try{current();response=await api(path,body,root?{root:true,token}:{profile,token});}
   catch(error){await writer?.abort().catch(()=>{});throw error;}
   const expected=Number(response.headers.get("Content-Length")||0);
   const preparedId=response.headers.get('X-TgWitness-Export-ID');
@@ -2412,7 +2428,7 @@ async function download(path,filename,stream=false,root=false,body=undefined,pro
   let nativeAttempted=false;
   async function nativeDownload(){
     current();nativeAttempted=true;
-    const ticket=await json(ticketPath,{},root?{root:true}:{profile});current();
+    const ticket=await json(ticketPath,{},root?{root:true,token}:{profile,token});current();
     const target=new URL(ticket.url,location.origin);
     if(target.origin!==location.origin)throw new Error(tr('The download address is invalid. Prepare the export again.'));
     const link=node('a');link.href=target.href;link.download=filename;document.body.append(link);link.click();link.remove();
@@ -3992,13 +4008,14 @@ for(const id of ["outside-kind","outside-host","outside-port","outside-username"
   $(id).addEventListener("input",()=>{policyOutsideDirty=true;outsideFields();});
 $("outside-enabled").addEventListener("change",outsideFields);
 $("policy-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
-  const kind=$("outside-kind").value,body={exposure:viewQuery("connection",'input[name="exposure"]:checked')?.value||"hide",
+  const owner=actionOwner(),kind=$("outside-kind").value,body={exposure:viewQuery("connection",'input[name="exposure"]:checked')?.value||"hide",
     outside_enabled:$("outside-enabled").checked,outside_proxy:null,remove_outside_proxy:false};
   if(policyOutsideDirty&&kind)body.outside_proxy={kind,host:$("outside-host").value.trim(),port:Number($("outside-port").value),
     username:$("outside-username").value,password:$("outside-password").value};
   else if(!kind&&state.policy?.outside_proxy)body.remove_outside_proxy=true;
   if(!(await askConfirm(tr("Change this workspace's IP protection and outside-request policy?"))))return;
-  renderPolicy(await json("network/policy",body));await refreshStatus();
+  if(!owner.current())return;
+  renderPolicy(await json("network/policy",body,{profile:owner.profile,token:owner.token}));await refreshStatus();
   toast(tr("IP protection saved."));
 });});
 $("network-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
@@ -4148,9 +4165,11 @@ for(const [form,field] of [["code","code"],["password","password"]]){
 $("auth-back").addEventListener("click",()=>{clearSecrets();window.TgWitnessAccountImport?.edit();setAuthStep("credentials");});
 $("change-account").addEventListener("click",()=>{if(state.status.collector.running){toast(tr("Pause observation before changing accounts."),true);return;}clearSecrets();window.TgWitnessAccountImport?.edit();setAuthStep("credentials");});
 $("sign-out").addEventListener("click",e=>busy(e.currentTarget,async()=>{
+  const owner=actionOwner();
   if(state.status.collector.running){toast(tr("Pause observation before signing out."),true);return;}
   if(!(await askConfirm(tr("Sign out of this Telegram account? TgWitness ends the session in Telegram and forgets it on this computer. The journal, sources and signing key stay; only the same account can connect to this workspace again."),{danger:true,confirmText:tr("Sign out of Telegram")})))return;
-  const r=await json("auth/logout",{});
+  if(!owner.current())return;
+  const r=await json("auth/logout",{},{profile:owner.profile,token:owner.token});
   clearSecrets();await refreshStatus();setAuthStep("credentials");
   toast(tr(r.telegram_session_ended?"Signed out. Telegram ended the session.":
     "Signed out here. Telegram did not confirm: end the session in Telegram under Settings → Devices."),!r.telegram_session_ended);
@@ -5260,12 +5279,19 @@ $("access-admin-form").addEventListener("submit",event=>{event.preventDefault();
   if(version===adminLimitsVersion)adminLimitsDirty=false;renderAccess();toast(tr("Limits saved."));
 });});
 $("panel-key-rotate").addEventListener("click",event=>busy(event.currentTarget,async()=>{
+  let owner=actionOwner();
   if(!(await askConfirm(tr("Replace the administrator key and end all current browser sessions? Save the new key after this step."),{danger:true})))return;
-  const result=await json("access/token",{},{root:true});
-  state.token=result.session;state.me=result.me;state.workspaceRevision++;
-  sessionStorage.setItem("tgwitness-token",state.token);
-  $("panel-key-new").value=result.token;show("panel-key-result",true);
-  await loadAccess();
+  if(!owner.current())return;
+  const inert=$("workspace").inert;
+  window.TgWitnessLive?.stop();state.workspaceRevision++;owner=actionOwner();$("workspace").inert=true;
+  try{
+    const result=await json("access/token",{},{root:true,token:owner.token});
+    if(!owner.current())throw new StaleView();
+    state.token=result.session;state.me=result.me;state.workspaceRevision++;owner=actionOwner();
+    sessionStorage.setItem("tgwitness-token",state.token);
+    $("panel-key-new").value=result.token;show("panel-key-result",true);
+    await loadAccess();
+  }finally{if(owner.current()){$("workspace").inert=inert;syncLive();}}
 }));
 $("panel-key-copy").addEventListener("click",event=>busy(event.currentTarget,async()=>{
   await navigator.clipboard.writeText($("panel-key-new").value);toast(tr("Token copied."));

@@ -69,6 +69,13 @@ def check_group_runs(page, server):
         simulated[profile] = False
     calls.clear()
     page.evaluate("loadProfiles()")
+    page.wait_for_function("""({ids,group})=>{
+      const members=document.querySelector('.fleet-group[data-group="'+group+'"]')?.groupData?.members||[];
+      return members.length===ids.length&&ids.every(id=>{
+        const profile=state.profiles.find(item=>item.id===id);
+        return members.includes(id)&&profile?.collector?.has_session===true&&profile.collector.running===false;
+      });
+    }""", arg={"ids": list(simulated), "group": group["id"]}, timeout=5000)
     start.click()
     expect(page.locator("#toast")).to_contain_text("3 workspaces started.")
     assert len(calls) == 3 and all(action == "start" for _, action in calls), calls

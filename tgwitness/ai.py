@@ -1,5 +1,6 @@
 import asyncio
 import hashlib
+import ipaddress
 import json
 import os
 import re
@@ -70,13 +71,41 @@ def fingerprint(config):
     return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
 
 
+def loopback(config):
+    address = netclient.literal(urlsplit(config["endpoint"]).hostname.rstrip("."))
+    if address is None:
+        return False
+    address = ipaddress.ip_address(address)
+    return (getattr(address, "ipv4_mapped", None) or address).is_loopback
+
+
+def route_fingerprint(route):
+    return fingerprint(route.model_dump() if hasattr(route, "model_dump") else {"kind": route.kind})
+
+
+def check_route(config, route):
+    if loopback(config) and route.kind != "direct":
+        raise ValueError("A server-local AI endpoint requires the workspace's Direct outside route. "
+                         "Choose Direct explicitly or configure an HTTPS AI endpoint reachable through the selected proxy.")
+
+
+def transport(config, route):
+    error = ""
+    try:
+        check_route(config, route)
+    except ValueError as exc:
+        error = str(exc)
+    return {"processing": "blocked" if error else "server-local" if loopback(config) else "configured-endpoint",
+            "route": route.kind, "route_host": getattr(route, "host", ""),
+            "route_port": getattr(route, "port", None) if getattr(route, "host", "") else None,
+            "route_error": error}
+
+
 def public(state):
     config = settings(state)
     return {**config, "has_key": bool(state.vault.read("ai").get("api_key")),
             "local_endpoint": local_endpoint(), "usage": state.store.get_setting("ai_usage", {}),
-            "processing": "server-local" if urlsplit(config["endpoint"]).hostname in
-            ("127.0.0.1", "localhost", "::1") else "configured-endpoint",
-            "route": state.collector.outside_route().kind}
+            **transport(config, state.collector.outside_route())}
 
 
 def configure(state, body):
@@ -95,7 +124,7 @@ class Provider:
         self.slots = asyncio.Semaphore(2)
         self.busy = set()
 
-    async def complete(self, state, messages, expected=None):
+    async def complete(self, state, messages, expected=None, expected_route=None):
         config = settings(state)
         if not config["enabled"]:
             raise ValueError("AI is disabled for this workspace.")
@@ -105,6 +134,11 @@ class Provider:
             raise ValueError("Configure AI in your own installation.")
         if len(json.dumps(messages, ensure_ascii=False)) > config["context_chars"] + 6000:
             raise ValueError("The selected context exceeds the configured limit.")
+        route = state.collector.outside_route()
+        route_revision = route_fingerprint(route)
+        if expected_route and expected_route != route_revision:
+            raise ValueError("AI settings changed. Review the data preview again.")
+        check_route(config, route)
         key = str(state.store.root)
         if key in self.busy:
             raise ValueError("An AI request is already running for this workspace.")
@@ -117,6 +151,10 @@ class Provider:
                         raise ValueError("AI is disabled for this workspace.")
                     if fingerprint(current) != fingerprint(config):
                         raise ValueError("AI settings changed. Review the data preview again.")
+                    route = state.collector.outside_route()
+                    if route_fingerprint(route) != route_revision:
+                        raise ValueError("AI settings changed. Review the data preview again.")
+                    check_route(config, route)
                     day = datetime.now(timezone.utc).date().isoformat()
                     usage = state.store.get_setting("ai_usage", {})
                     if usage.get("day") != day:
@@ -138,7 +176,7 @@ class Provider:
                         path = "/chat/completions"
                     local = config["provider"] == "ollama" and config["endpoint"] == local_endpoint()
                     _, _, raw = await netclient.request("POST", config["endpoint"] + path,
-                        state.collector.outside_route(), headers=headers, body=json.dumps(request).encode(),
+                        route, headers=headers, body=json.dumps(request).encode(),
                         timeout=config["timeout_seconds"], limit=128 * 1024, private=local)
                     result = json.loads(raw)
                     if config["provider"] == "ollama":
@@ -163,7 +201,8 @@ class Provider:
                                           counts["output_tokens"] * config["output_per_million"]) / 1000000,
                                 "currency": config["currency"], "basis": "configured tariffs"}
                     return json.loads(text), {"provider": config["provider"], "model": config["model"],
-                                             "endpoint": config["endpoint"], "tokens": counts, "cost": cost}
+                                             "endpoint": config["endpoint"], "tokens": counts, "cost": cost,
+                                             **transport(config, route)}
         except (KeyError, TypeError, IndexError, json.JSONDecodeError):
             raise ValueError("The provider returned an unsupported response.") from None
         except netclient.HTTPError as exc:

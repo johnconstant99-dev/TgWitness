@@ -1,6 +1,11 @@
 export function createGroupView(ctx){
   const {root,json,tr,trn,node,toast}=ctx;
   let groupId=null,data=null,serial=0,working=false;
+  function owner(){
+    const {profile,token,workspaceRevision}=ctx.getState(),id=groupId,version=serial;
+    return {id,token,current:()=>{const state=ctx.getState();return groupId===id&&serial===version&&state.groupId===id&&
+      state.view==='group'&&state.profile===profile&&state.token===token&&state.workspaceRevision===workspaceRevision;}};
+  }
   const goals={copy:['📦','Archive copy'],watch:['👁','Follow chats'],evidence:['⚖','Evidence']};
   const routes={auto:'Automatic',mtproxy_auto:'Automatic',warp:'Cloudflare WARP',proxy:'My proxy',mtproxy:'My proxy',
     socks5:'My proxy',http:'My proxy',direct:'Direct',vpn:'VPN'};
@@ -37,22 +42,26 @@ export function createGroupView(ctx){
   }
   async function runAll(action){
     if(working)return;
+    const consent=owner();
     const due=data.members.map(m=>profile(m.id)).filter(p=>p&&!p.error_type&&p.collector&&
-      (action==='stop'?p.collector.running:!p.collector.running&&ctx.accountState(p).canStart));
+      (action==='stop'?p.collector.running:!p.collector.running&&ctx.accountState(p).canStart)).map(p=>({id:p.id,label:p.label}));
     if(!due.length)return;
     const text=action==='stop'?tr('Pause {n} workspaces? New messages, edits and deletions will not be collected while paused. Missed activity can only be recovered partly.',{n:due.length}):
       tr('Resume {n} workspaces? They will connect to Telegram and collect their selected sources. Telegram request limits still apply.',{n:due.length});
     if(!(await window.TgWitnessDialogs.confirm(text+'\n\n'+due.map(p=>p.label).join('\n'))))return;
-    working=true;render();const done=[],failed=[],id=groupId;
+    if(!consent.current())return;
+    working=true;render();const done=[],failed=[];
     try{
       for(const p of due){
-        try{await json('collector/'+action,{},{profile:p.id});done.push(p.label);}
+        if(!consent.current())return;
+        try{await json('collector/'+action,{},{profile:p.id,token:consent.token});if(!consent.current())return;done.push(p.label);}
         catch(error){if(error.name==='StaleView')return;failed.push(p.label+': '+error.message);}
       }
       await ctx.loadProfiles();
+      if(!consent.current())return;
       toast([action==='start'?trn('{n} workspace started.','{n} workspaces started.',done.length):
         trn('{n} workspace paused.','{n} workspaces paused.',done.length),...failed].join(' · '),!!failed.length);
-    }finally{working=false;if(groupId===id)render();}
+    }finally{working=false;if(data&&ctx.getState().view==='group')render();}
   }
   function header(){
     const g=data.group,box=node('header','group-head'),title=node('div','group-title');
@@ -78,8 +87,10 @@ export function createGroupView(ctx){
     const route=button('Change the group route',()=>ctx.openConnection({scope:'group',group:groupId})),goal=button('Apply a goal',()=>ctx.openGroupSettings(groupId));
     const settings=button('Group settings',()=>ctx.openGroupSettings(groupId),'quiet small');
     const save=button('Export group',async()=>{
-      if(!(await window.TgWitnessDialogs.confirm(tr('Export the records of every account in the group {name}?',{name:data.group.label}),{confirmText:tr('Prepare export')})))return;
-      if(await ctx.exportGroup(groupId,data.group.label)!==false)toast(tr('Group export saved: each account’s signed export and a signed list of them.'));
+      const consent=owner(),label=data.group.label;
+      if(!(await window.TgWitnessDialogs.confirm(tr('Export the records of every account in the group {name}?',{name:label}),{confirmText:tr('Prepare export')})))return;
+      if(!consent.current())return;
+      if(await ctx.exportGroup(consent.id,label,consent)!==false&&consent.current())toast(tr('Group export saved: each account’s signed export and a signed list of them.'));
     });
     save.title=tr('Each account’s signed export in one ZIP, with a manifest signed by the main workspace.');
     for(const b of [route,goal,settings])b.disabled=working||!data.members.length;

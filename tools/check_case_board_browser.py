@@ -1,14 +1,97 @@
+import json
 from pathlib import Path
 import tempfile
 
 from playwright.sync_api import expect, sync_playwright
 
 from check_browser import RunningApp, check_layout, launch_browser, unlock
+from case_board_i18n import check_translations
+from tgwitness import i18n
 from tgwitness.access import Principal
 from tgwitness.board import Board
 
 
+def presentation_privacy():
+    from check_browser import hold_api_response, release_api_response
+
+    first_secret = 'sk-' + 'SYNTHETIC_FIRST_FIXTURE_123456789'
+    second_secret = 'sk-' + 'SYNTHETIC_SECOND_FIXTURE_123456789'
+    with tempfile.TemporaryDirectory(prefix='case-board-privacy-') as temporary, RunningApp(Path(temporary)) as server, sync_playwright() as playwright:
+        store = server.app.state.store
+        store.set_target(-100100, 'Synthetic privacy source', 'channel', True)
+        service, admin = Board(store), Principal(True, 'Admin')
+        first = store.append('message.new', {'text': 'Synthetic credential ' + first_secret,
+            'raw': {'token': 'short-synthetic-fixture'}}, -100100, 1)
+        second = store.append('message.new', {'text': 'Another synthetic credential ' + second_secret}, -100100, 2)
+        for event in (first, second):
+            service.append('bookmark', {'target': {'event_hash': event['hash']}}, admin)
+        service.append('slice', {'query': {'chat_id': -100100, 'search': first_secret}}, admin)
+        browser = launch_browser(playwright)
+        page = browser.new_page(viewport={'width': 1280, 'height': 900}, reduced_motion='reduce')
+        errors = []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        unlock(page, server)
+        page.evaluate("()=>navigate('board')")
+        expect(page.locator('.board-feed .board-card')).to_have_count(3)
+        assert first_secret not in page.locator('.board-feed').inner_text(), 'Normal cards must mask detected secrets'
+        page.get_by_role('button', name='Presentation', exact=True).click()
+        dialog = page.locator('.board-presentation')
+        dialog.get_by_role('button', name='Source context', exact=True).click()
+        source = dialog.locator('.board-source-json')
+        expect(source.get_by_role('button', name='Show', exact=True)).to_be_visible()
+        assert first_secret not in source.inner_text() and 'short-synthetic-fixture' not in source.inner_text(), 'Source JSON bypassed masking'
+        assert first['hash'] in source.inner_text(), 'Masking must preserve source integrity metadata'
+        reveals = lambda: [event for event in store.all_events() if event['kind'] == 'panel.secret_revealed']
+        assert not reveals(), 'Merely opening source context must not reveal a secret'
+
+        def reject_reveal(route):
+            route.fulfill(status=503, json={'detail': 'Synthetic reveal audit failure'})
+        page.route('**/api/privacy/reveal', reject_reveal)
+        source.get_by_role('button', name='Show', exact=True).click()
+        expect(source.locator('.secret-reveal-error')).to_be_visible()
+        assert first_secret not in source.inner_text(), 'A failed reveal audit exposed source data'
+        assert not reveals()
+        page.unroute('**/api/privacy/reveal', reject_reveal)
+        source.locator('.secret-reveal').click()
+        expect(source.get_by_role('button', name='Hide', exact=True)).to_be_visible()
+        assert first_secret in source.inner_text() and 'short-synthetic-fixture' in source.inner_text(), 'An explicitly audited reveal did not show the source'
+        assert len(reveals()) == 1 and reveals()[0]['payload']['message_id'] == 1
+        source.get_by_role('button', name='Hide', exact=True).click()
+        assert first_secret not in source.inner_text()
+
+        hold_api_response(page, '/api/privacy/reveal')
+        page.evaluate("window.previousBoardReveal=document.querySelector('.board-source-json .secret-reveal')")
+        source.get_by_role('button', name='Show', exact=True).click()
+        expect(page.locator('html')).to_have_attribute('data-acceptance-held', 'true')
+        dialog.get_by_role('button', name='Next', exact=True).click()
+        expect(source).to_contain_text(second['hash'])
+        release_api_response(page)
+        page.evaluate('()=>new Promise(requestAnimationFrame)')
+        assert first_secret not in dialog.inner_text() and second_secret not in dialog.inner_text(), 'A stale reveal response exposed another presentation step'
+        page.evaluate('()=>previousBoardReveal.click()')
+        page.evaluate('()=>new Promise(requestAnimationFrame)')
+        assert len(reveals()) == 2, 'A detached reveal control sent a new audit request'
+        dialog.get_by_role('button', name='Next', exact=True).click()
+        expect(source.locator('code')).to_contain_text('search')
+        assert first_secret not in source.inner_text(), 'A saved slice query bypassed presentation masking'
+        expect(source.locator('.secret-reveal')).to_have_count(0)
+        dialog.get_by_role('button', name='Previous', exact=True).click()
+        expect(source).to_contain_text(second['hash'])
+        hold_api_response(page, '/api/privacy/reveal')
+        source.get_by_role('button', name='Show', exact=True).click()
+        expect(page.locator('html')).to_have_attribute('data-acceptance-held', 'true')
+        page.evaluate('()=>lock()')
+        release_api_response(page)
+        expect(page.locator('.board-presentation')).to_have_count(0)
+        assert second_secret not in page.locator('body').inner_text(), 'A delayed reveal survived panel locking'
+        assert store.all_events()[1]['hash'] == first['hash'] and store.all_events()[1]['payload'] == first['payload'], 'Presentation changed preserved source data'
+        assert not errors, errors
+        browser.close()
+    print('Case Board source masking, audited reveal, failure/retry, stale controls and lock isolation PASS')
+
+
 def main():
+    print(check_translations())
     output = Path("test-results/case-board")
     output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="case-board-browser-") as temporary, RunningApp(Path(temporary)) as server:
@@ -82,23 +165,54 @@ def main():
             expect(page.locator('.board-presentation')).to_be_visible()
             expect(page.locator('.board-presentation .board-card-actions')).to_have_count(0)
             page.locator('.board-dialog-heading').get_by_role('button', name='Close').click()
-            page.locator('.language-select:visible').select_option('ru')
-            expect(page.locator('#view-board h1')).to_have_text('Доска дела')
-            page.reload()
-            expect(page.locator('#view-board h1')).to_have_text('Доска дела')
-            expect(page.locator('.board-feed .board-card')).to_have_count(7)
-            page.screenshot(path=str(output / 'board-ru.png'))
-            check_layout(page)
-            page.emulate_media(color_scheme='dark')
-            expect(page.locator('html')).to_have_attribute('data-theme','dark')
-            check_layout(page)
-            page.screenshot(path=str(output / 'board-dark.png'))
+            for lang in ('ru', 'de', 'ar'):
+                words = json.loads((i18n.LOCALES / (lang + '.json')).read_text(encoding='utf-8'))
+                def translated_count(key, count):
+                    text = words[key]
+                    if isinstance(text, dict):
+                        form = page.evaluate('([lang,n])=>new Intl.PluralRules(lang).select(n)', [lang, count])
+                        text = text.get(form, text['other'])
+                    return text.replace('{n}', str(count))
+                page.emulate_media(color_scheme='light')
+                page.locator('.language-select:visible').select_option(lang)
+                expect(page.locator('html')).to_have_attribute('lang', lang)
+                expect(page.locator('html')).to_have_attribute('dir', 'rtl' if lang == 'ar' else 'ltr')
+                expect(page.locator('#view-board h1')).to_have_text(words['Case Board'])
+                page.reload()
+                expect(page.locator('#view-board h1')).to_have_text(words['Case Board'])
+                expect(page.locator('.board-feed .board-card')).to_have_count(7)
+                expect(page.locator('.board-feed-heading > span').first).to_have_text(translated_count('{n} cards', 7))
+                expect(page.locator(f'[data-card-id="{card["payload"]["id"]}"] .board-comment-count')).to_have_text(translated_count('{n} comments', 2))
+                for key in ('Connect the observations. Keep your reasoning separate.', 'Private to this case. Nothing here is sent to Telegram.'):
+                    assert words[key] != key, (lang, key, 'Untranslated prose')
+                    expect(page.locator('#view-board')).to_contain_text(words[key])
+                page.locator('.board-filters input[type=search]').fill('synthetic-no-matching-board-card')
+                expect(page.locator('.board-empty h2')).to_have_text(words['Build a trail of reasoning'])
+                page.locator('.board-filters input[type=search]').fill('')
+                expect(page.locator('.board-feed .board-card')).to_have_count(7)
+                page.locator('.board-heading').get_by_role('button', name=words['Slice by time'], exact=True).click()
+                expect(page.locator('.board-dialog h2')).to_have_text(words['Save a range slice'])
+                expect(page.locator('.board-dialog').get_by_role('button', name=words['Preview all actions'], exact=True)).to_be_visible()
+                expect(page.locator('.board-kind-options')).to_contain_text(words['Messages, edits and deletions'])
+                page.locator('.board-dialog').get_by_label(words['Chat IDs, separated by commas'], exact=True).fill('-100100')
+                page.locator('.board-dialog').get_by_role('button', name=words['Preview all actions'], exact=True).click()
+                expect(page.locator('.board-preview-summary > strong')).to_have_text(translated_count('{n} records', 4))
+                page.locator('.board-dialog-heading').get_by_role('button', name=words['Close'], exact=True).click()
+                for width in (320, 1600):
+                    page.set_viewport_size({'width': width, 'height': 1000})
+                    check_layout(page)
+                page.screenshot(path=str(output / f'board-{lang}.png'))
+                page.emulate_media(color_scheme='dark')
+                expect(page.locator('html')).to_have_attribute('data-theme','dark')
+                check_layout(page)
+                page.screenshot(path=str(output / f'board-{lang}-dark.png'))
             page.evaluate('()=>lock()')
             assert page.evaluate("()=>panelRoots.get('board').querySelector('.board-feed').textContent") == ''
             assert not errors, errors
             browser.close()
-    print('Case Board bookmarks, Unicode highlights, Shift slices, live drafts/unread, comments, exact navigation, presentation, EN/RU, lock and 4 responsive layouts PASS')
+    print('Case Board bookmarks, Unicode highlights, Shift slices, live drafts/unread, comments, exact navigation, presentation, raw translation inventory, EN/RU/DE/AR, lock and responsive layouts PASS')
 
 
 if __name__ == '__main__':
     main()
+    presentation_privacy()
