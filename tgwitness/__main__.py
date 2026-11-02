@@ -94,7 +94,7 @@ def main():
                          args=(url, args.host, args.port, None if args.demo else root / "panel-token.txt")).start()
     uvicorn.run(create_app(root, demo=args.demo), host=args.host, port=args.port, workers=1,
                 access_log=False, log_level="info", log_config=server_logging(root),
-                timeout_keep_alive=KEEP_ALIVE_SECONDS)
+                timeout_keep_alive=KEEP_ALIVE_SECONDS, proxy_headers=False)
 
 
 if __name__ == "__main__":

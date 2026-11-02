@@ -7,13 +7,16 @@ export function createCollectionControl({node, tr, status, workspace}) {
   dot.setAttribute("aria-hidden", "true"); indicator.append(dot, label);
   document.getElementById("profile-select").before(indicator);
   function confirmPause(name = "") {
-    return window.confirm(tr("Pause observation{workspace}? New messages, edits and deletion notices will stop being collected. Missed activity can only be recovered partly.",
-      {workspace: name ? " · " + name : ""}));
+    return window.TgWitnessDialogs.confirm(tr("Pause observation{workspace}? New messages, edits and deletion notices will stop being collected. Missed activity can only be recovered partly.",
+      {workspace: name ? " · " + name : ""}), {confirmText: tr("Pause observation")});
   }
+  // The pause question is asynchronous: hold the click, then repeat it once confirmed.
+  let confirmed = false;
   control.addEventListener("click", event => {
-    if (status()?.collector?.running && !confirmPause()) {
-      event.preventDefault(); event.stopImmediatePropagation();
-    }
+    if (!status()?.collector?.running) return;
+    if (confirmed) {confirmed = false; return;}
+    event.preventDefault(); event.stopImmediatePropagation();
+    confirmPause().then(ok => {if (ok) {confirmed = true; control.click();}});
   }, true);
   function update() {
     const current = status(), collector = current?.collector;

@@ -503,7 +503,7 @@ def test_the_panel_wizard_prices_deploys_and_deletes_a_phala_cvm(phala, tmp_path
 
 def test_the_wizard_in_the_browser_offers_deploys_and_deletes_a_phala_cvm(phala, tmp_path, monkeypatch):
     """The panel: choosing Phala Cloud swaps the token and hides Hetzner's region and Gateway DNS; English and Russian."""
-    from check_browser import RunningApp, check_layout, launch_browser, navigate_panel, reload_panel, unlock
+    from check_browser import RunningApp, answer_panel_dialog, check_layout, launch_browser, navigate_panel, reload_panel, unlock
     from playwright.sync_api import expect, sync_playwright
     from tgwitness import i18n
     output = ROOT / "test-results" / "phala"
@@ -549,8 +549,8 @@ def test_the_wizard_in_the_browser_offers_deploys_and_deletes_a_phala_cvm(phala,
         page.locator("#cloud-servers").evaluate("details => details.open = true")
         row = page.locator(".cloud-server", has_text=name)
         expect(row).to_contain_text("Intel TDX confidential virtual machine at Phala Cloud")
-        page.once("dialog", lambda dialog: dialog.accept(name))
         row.get_by_role("button", name="Delete the server").click()
+        answer_panel_dialog(page, text=name)
         expect(page.locator("#cloud-job-title")).to_have_text("The server is deleted", timeout=30000)
         expect(page.locator("#cloud-outcome")).to_contain_text("Phala Cloud stops billing")
         assert world.deleted

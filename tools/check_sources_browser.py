@@ -5,7 +5,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import (ROOT, RunningApp, hold_api_response, launch_browser, navigate_panel,
+from check_browser import (ROOT, answer_panel_dialog, RunningApp, hold_api_response, launch_browser, navigate_panel,
                            release_api_response, unlock)
 from tools.browser_fixtures import saved_session
 
@@ -105,8 +105,8 @@ def check_targets(page, server):
                          message_id=7)
     page.locator("#target-select-page").check()
     page.locator("#target-bulk-action").select_option("remove")
-    page.once("dialog", lambda dialog: dialog.accept())
     page.locator("#target-bulk-apply").click()
+    answer_panel_dialog(page)
     expect(rows).to_have_count(0)
     expect(page.locator("#sources-tab-count")).to_have_text("20")
     assert store.events(chat_id=-1000000001001, message_id=7)[0]["seq"] == saved["seq"]

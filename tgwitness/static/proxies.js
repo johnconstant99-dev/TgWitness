@@ -218,6 +218,7 @@
       use.type = "button"; use.disabled = state.status.collector.running;
       use.title = tr("Save this server as this workspace's route");
       use.addEventListener("click", () => runAction(use, async () => {
+        if(!(await confirmRouteChange()))return;
         await json("network/catalog/" + encodeURIComponent(row.id), {});
         await routeSaved();
       }));

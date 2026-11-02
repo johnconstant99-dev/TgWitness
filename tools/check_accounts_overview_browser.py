@@ -5,7 +5,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import RunningApp, hold_api_response, launch_browser, release_api_response, unlock
+from check_browser import RunningApp, answer_panel_dialog, hold_api_response, launch_browser, release_api_response, unlock
 
 
 def main():
@@ -73,11 +73,11 @@ def main():
               return field.isConnected&&document.activeElement===field;}"""), 'Poll replaced focused group selector'
             page.locator('#accounts-filter').select_option('collecting')
             page.locator('#accounts-select-page').check()
-            page.once('dialog', lambda dialog: dialog.dismiss())
             page.locator('#accounts-pause').click()
+            answer_panel_dialog(page, accept=False)
             assert not calls, 'Cancelled confirmation dispatched an action'
-            page.once('dialog', lambda dialog: dialog.accept())
             page.locator('#accounts-pause').click()
+            answer_panel_dialog(page)
             expect(page.locator('#accounts-result')).to_contain_text('2 workspaces updated.')
             assert len(calls) == 2 and all(url.endswith('/stop') for url in calls)
             page.locator('#accounts-filter').select_option('all')
@@ -85,8 +85,8 @@ def main():
             page.locator('#accounts-filter').select_option('offline')
             page.locator('#accounts-search').fill('Research 01')
             page.locator('#accounts-select-page').check()
-            page.once('dialog', lambda dialog: dialog.accept())
             page.locator('#accounts-resume').click()
+            answer_panel_dialog(page)
             expect(page.locator('#accounts-result')).to_contain_text('1 workspaces updated.')
             assert calls[-1].endswith('/start')
             page.locator('#accounts-search').fill('')
@@ -111,8 +111,8 @@ def main():
             page.locator('#accounts-select-page').check()
             hold_api_response(page, '/api/collector/stop')
             before = len(calls)
-            page.once('dialog', lambda dialog: dialog.accept())
             page.locator('#accounts-pause').click()
+            answer_panel_dialog(page)
             page.wait_for_function("()=>typeof releaseAcceptanceResponse==='function'")
             page.locator('#top-lock').click()
             release_api_response(page)

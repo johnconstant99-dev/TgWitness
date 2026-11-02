@@ -223,7 +223,7 @@
     })));
     const rename = node("button", "quiet small", tr("Rename")); rename.type = "button";
     rename.addEventListener("click", () => busy(rename, () => writeGroup(group.id, async serial => {
-      const label = (window.prompt(tr("New name for this group:"), group.label) || "").trim();
+      const label = ((await window.TgWitnessDialogs.prompt(tr("New name for this group:"), {title: tr("Rename"), value: group.label, maxLength: 80})) || "").trim();
       if (!label || label === group.label) return;
       const result = await json("profile-groups/" + group.id, {label, template: group.template, sections: group.sections},
                                {root: true, method: "PATCH"});
@@ -231,7 +231,7 @@
     })));
     const remove = node("button", "quiet small danger-text", tr("Delete group")); remove.type = "button";
     remove.addEventListener("click", () => busy(remove, () => writeGroup(group.id, async serial => {
-      if (!window.confirm(tr("Delete the group \"{name}\"? Its workspaces stay and lose only the grouping.", {name: group.label}))) return;
+      if (!(await window.TgWitnessDialogs.confirm(tr("Delete the group \"{name}\"? Its workspaces stay and lose only the grouping.", {name: group.label}), {danger: true, confirmText: tr("Delete")}))) return;
       const result = await json("profile-groups/" + group.id, undefined, {root: true, method: "DELETE"});
       await acceptWrite(result, serial); fillSelects(); decorate();
     })));
@@ -277,6 +277,15 @@
     // Move cards before retiring an old group, so removal never drops an account.
     placeChildren(list,[...cards].filter(([id])=>window.TgWitnessAccounts?.ownsRows||!membership.has(id)).map(([,card])=>card));
     placeChildren(box,sections);
+    // Without groups the section must not open blank: say what a group is for and offer to create one.
+    if (!groups.length) {
+      const empty = node("div", "fleet-groups-empty");
+      const create = node("button", "secondary small", tr("New group")); create.type = "button";
+      create.disabled = !editable() || !!creating;
+      create.addEventListener("click", () => $("fleet-group-new").click());
+      empty.append(node("p", "", tr("No groups yet. A group keeps shared settings for several accounts: connection, recording and notifications.")), create);
+      box.replaceChildren(empty);
+    }
     $("fleet-import-open").disabled = !editable();
     $("fleet-group-new").disabled = !editable() || !!creating;
     let title = $("fleet-ungrouped");
@@ -427,7 +436,7 @@
   $("fleet-import-start").addEventListener("click", () => busy(null, run));
   $("fleet-group-new").addEventListener("click", () => busy(null, async () => {
     if (!editable() || creating) return;
-    const label = (window.prompt(tr("Name of the new group:"), "") || "").trim(); if (!label) return;
+    const label = ((await window.TgWitnessDialogs.prompt(tr("Name of the new group:"), {title: tr("New group"), maxLength: 80})) || "").trim(); if (!label) return;
     const marker = {}, serial = ++loadSerial;
     creating = marker; $("fleet-group-new").disabled = true;
     try {

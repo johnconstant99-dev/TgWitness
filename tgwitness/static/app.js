@@ -128,9 +128,17 @@ async function applyRouteToPanel(route,current){
   state.eventBefore=route.before??null;
   $("event-search").value=state.search;fillSourceSelect("source-filter",state.source,true);
   viewQueries("observations","[data-filter]").forEach(button=>button.classList.toggle("active",button.dataset.filter===state.filter));
+  // A direct link to a chat must never show the previously open chat while the list loads.
+  if(route.view==="chats"&&route.chatId!==null&&route.chatId!==state.chat)beginChat(route.chatId);
   navigate(route.view,{history:false,load:false});
   const view=state.view;
-  if(view==="chats"){await refreshChats();if(current()&&route.chatId!==null)await openChat(route.chatId,{history:false});}
+  if(view==="chats"){
+    await refreshChats(false,route.chatId);
+    if(current()&&route.chatId!==null){
+      if(state.chat!==route.chatId)await openChat(route.chatId,{history:false});
+      else loadChatProfile().catch(()=>{});
+    }
+  }
   else if(view==="observations"){await refreshEvents();if(current()&&route.seq)await openRecord(route.seq,{history:false});}
   else if(view==="sources"){await sourcesReady;sourcesView.enter();renderTargets();await loadScope();}
   else if(view==="parameters"){
@@ -274,6 +282,8 @@ function hideTooltip(){
 }
 function showTooltip(event){
   const target=event.target.closest?.("button[title],summary[title]");if(!target?.title||target.disabled)return;
+  // A control whose panel is open does not show its hint: it would cover the panel, such as its close button.
+  if(target.getAttribute("aria-expanded")==="true")return;
   hideTooltip();tooltipTarget=target;tooltip.textContent=target.title;tooltip.hidden=false;
   if(!target.textContent.trim()&&!target.getAttribute("aria-label"))target.setAttribute("aria-label",target.title);
   target.setAttribute("aria-describedby",[target.getAttribute("aria-describedby"),tooltip.id].filter(Boolean).join(" "));
@@ -283,7 +293,7 @@ function showTooltip(event){
 document.addEventListener("pointerover",showTooltip);document.addEventListener("focusin",showTooltip);
 document.addEventListener("pointerout",event=>{if(tooltipTarget&&!tooltipTarget.contains(event.relatedTarget))hideTooltip();});
 document.addEventListener("focusout",hideTooltip);document.addEventListener("keydown",event=>{if(event.key==="Escape")hideTooltip();});
-document.addEventListener("scroll",hideTooltip,true);
+document.addEventListener("scroll",hideTooltip,true);document.addEventListener("pointerdown",hideTooltip,true);
 function icon(name) {
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg"),use=document.createElementNS(svg.namespaceURI,"use");
   svg.setAttribute("class","icon");svg.setAttribute("aria-hidden","true");use.setAttribute("href","#i-"+name);svg.append(use);return svg;
@@ -308,6 +318,13 @@ const termLabels={offline:tr("offline"),ready:tr("ready"),credentials:tr("creden
   member_or_unknown:tr("member or unknown"),unknown:tr("unknown"),messages:tr("messages"),edits:tr("edits"),
   deletions:tr("deletions"),reactions:tr("reactions"),membership:tr("membership")};
 const termText=value=>termLabels[value]??String(value??"").replaceAll("_"," ");
+// Attachment type names, the same as in Sources → Recording.
+// Panel dialogs (dialogs.js) instead of window.prompt/confirm, which some browsers refuse.
+const askConfirm=(message,options)=>window.TgWitnessDialogs.confirm(message,options);
+const askText=(message,options)=>window.TgWitnessDialogs.prompt(message,options);
+const askTyped=(message,expected,options)=>window.TgWitnessDialogs.typed(message,expected,options);
+const MEDIA_TYPE_LABELS={photo:"Photos",video:"Videos",animation:"GIFs & animations",video_note:"Round video messages",
+  voice:"Voice messages",audio:"Music & audio",sticker:"Stickers",document:"Files & documents"};
 let panelTime;
 const timeReady=import("./core/time.js?v=1").then(({createTimeFormatter})=>{
   let zone="UTC";try{zone=localStorage.getItem("tgwitness-time-zone")||"UTC";}catch{}
@@ -923,6 +940,18 @@ function renderStatus() {
   renderWorkflowControls();
   viewHost?.updateStatus(s);
 }
+// The overview never opens blank: with nothing recorded yet it says why and offers the next step.
+function renderOverviewEmpty(s){
+  const box=$("overview-empty"),counts=s.stats.counts,c=s.collector;
+  const recorded=["message.new","message.snapshot","message.edited","message.deleted"].some(kind=>counts[kind]);
+  box.hidden=recorded||s.demo;if(box.hidden)return;
+  const sources=hasSources(s),action=!c.has_session?["Connect account →","connection"]:!sources?["Choose sources →","sources"]:c.running?null:["Start observation",null];
+  const text=!c.has_session?"Nothing recorded yet. Connect a Telegram account to start the journal.":!sources?"Nothing recorded yet. Choose the chats to observe.":
+    c.running?"Observation is on. New messages, edits and deletion notices appear here when Telegram delivers them.":"Nothing recorded yet. Start observation to save new activity.";
+  box.replaceChildren(node("p","",tr(text)));
+  if(action){const b=node("button","secondary small",tr(action[0]));b.type="button";
+    b.addEventListener("click",()=>action[1]?navigate(action[1]):$("collector-toggle").click());box.append(b);}
+}
 function renderViewStatus(view){
   const s=state.status;if(!s||viewHost?.active!==view)return;
   const c=s.collector,counts=s.stats.counts;
@@ -933,6 +962,7 @@ function renderViewStatus(view){
     $("stat-deletes").textContent=(counts["message.deleted"]||0).toLocaleString();
     $("stat-sources").textContent=s.targets.filter(x=>x.enabled).length;
     $("sources-footnote").textContent=tr(s.demo ? "Synthetic sources" : c.running ? "Observation enabled" : "Observation paused");
+    renderOverviewEmpty(s);
     $("event-total").textContent=s.stats.total.toLocaleString();
     fillSourceSelect("source-filter",state.source,true);
     window.TgWitnessJournal?.sync();
@@ -1110,7 +1140,7 @@ function renderAccounts(){
       const toggle=node("button","quiet",tr(c.running?"Pause":"Start"));toggle.dataset.action='toggle';toggle.disabled=state.status.demo||(!c.running&&!accountState(p).canStart);
       toggle.addEventListener("click",()=>busy(toggle,async()=>{
         const running=!!p.collector?.running;
-        if(running&&!(await collectionReady).confirmPause(p.label))return;
+        if(running&&!(await (await collectionReady).confirmPause(p.label)))return;
         await json("collector/"+(running?"stop":"start"),{},{profile:p.id});
         toast(tr(running?"Paused collection for {name}.":"Started collection for {name}.",{name:p.label}));
         await loadProfiles();if(p.id===state.profile)await refreshStatus();
@@ -1119,7 +1149,7 @@ function renderAccounts(){
     }
     const rename=node("button","quiet",tr("Rename"));rename.dataset.action='rename';rename.disabled=state.status.demo;
     rename.addEventListener("click",()=>busy(rename,async()=>{
-      const label=(window.prompt(tr("New name for this workspace:"),p.label)||"").trim();
+      const label=((await askText(tr("New name for this workspace:"),{title:tr("Rename"),value:p.label,maxLength:80}))||"").trim();
       if(!label||label===p.label)return;
       await api("profiles/"+encodeURIComponent(p.id),{label},{root:true,method:"PATCH"});
       toast(tr("Renamed workspace."));await loadProfiles();
@@ -1128,7 +1158,7 @@ function renderAccounts(){
     if(p.id!=="default"){
       const del=node("button","danger",tr("Delete"));del.dataset.action='delete';del.disabled=state.status.demo;
       del.addEventListener("click",()=>busy(del,async()=>{
-        if(!window.confirm(tr("Delete \"{name}\" permanently? This stops its collector and erases its session, journal, sources and signing key. This cannot be undone.",{name:p.label})))return;
+        if(!(await askTyped(tr("Delete \"{name}\" permanently? This stops its collector and erases its session, journal, sources and signing key. This cannot be undone.",{name:p.label}),p.label,{title:tr("Delete"),confirmText:tr("Delete")})))return;
         const revision=state.workspaceRevision;
         try{
           await api("profiles/"+encodeURIComponent(p.id),undefined,{root:true,method:"DELETE"});
@@ -1163,7 +1193,7 @@ function renderAccounts(){
 }
 async function switchProfile(id,options={}){
   if(id!==state.profile&&(state.accountExportDirty||state.accountDisclosureDirty)&&
-      !options.discardConfirmed&&!window.confirm(tr("Discard unsaved settings in this workspace and switch accounts?"))){
+      !options.discardConfirmed&&!(await askConfirm(tr("Discard unsaved settings in this workspace and switch accounts?")))){
     $("profile-select").value=state.profile;return false;
   }
   formControls?.reset();connectionNotice?.clear();
@@ -1252,7 +1282,7 @@ function excerpt(e) {
     case "account.signed_out": return tr("Telegram account ID {id}",{id:p.account_id})+(p.telegram_session_ended?"":" · "+tr("Telegram did not confirm the end of the session"))+failure;
     case "media.skipped": {
       const type=/^attachment type not collected by policy: (\w+)$/.exec(p.reason||"")?.[1];
-      if(type)return tr("Not collected by the attachment settings: {type}",{type:Object.fromEntries(mediaTypes)[type]||termText(type)});
+      if(type)return tr("Not collected by the attachment settings: {type}",{type:MEDIA_TYPE_LABELS[type]?tr(MEDIA_TYPE_LABELS[type]):termText(type)});
       if(p.reason==="media download disabled")return tr("Attachment downloads off");
       if(p.reason==="above the size limit of the attachment settings")return tr("Larger than the size limit");
       if(p.reason==="authorized account identity unavailable")return tr("Telegram account not identified yet");
@@ -1306,6 +1336,11 @@ function excerpt(e) {
   if (p.meaning) return p.meaning;
   return tr("Open the source record for observation details");
 }
+// One unreadable record must not stop the timeline, its counter or its paging.
+function safeExcerpt(e){
+  try{return excerpt(e);}
+  catch(error){console.error("Journal record #"+e.seq+" could not be summarised",error);return tr("Open the source record for observation details");}
+}
 let previouslyFocused;
 function eventRow(e) {
     const label=labels[e.kind] || [e.kind,"activity","system"];
@@ -1313,7 +1348,7 @@ function eventRow(e) {
     const cell=node("td"), summary=node("div","event-summary"), text=node("div");
     const title=node("div","event-title",label[0]); title.append(node("span","",e.message_id ? "#"+e.message_id : "#"+e.seq));
     const mobileMeta=node("div","event-mobile-meta",sourceTitle(e.chat_id)+" · ");
-    mobileMeta.append(timeNode(e.observed_at));text.append(title,node("div","event-excerpt",excerpt(e)),mobileMeta);
+    mobileMeta.append(timeNode(e.observed_at));text.append(title,node("div","event-excerpt",safeExcerpt(e)),mobileMeta);
     const mark=node("span","event-icon "+label[2]); mark.append(icon(label[1]));
     summary.append(mark,text); cell.append(summary);
     const source=node("td"); source.append(node("span","source-title",sourceTitle(e.chat_id)),node("span","source-id",e.chat_id || tr("system")));
@@ -1327,7 +1362,8 @@ function eventRow(e) {
 }
 function renderEvents() {
   if(state.view!=='observations')return;
-  window.TgWitnessJournal.renderRows(state.events,eventRow);
+  try{window.TgWitnessJournal.renderRows(state.events,eventRow);}
+  finally{window.TgWitnessJournal.syncPage();}
   show("empty-events",state.events.length===0);
   const filtered=state.filter||state.source||state.search||state.eventSince||state.eventUntil,c=state.status.collector;
   $("empty-copy").textContent=tr(filtered ? "No events match these filters. Try another source, event type, or search." :
@@ -1474,7 +1510,7 @@ const sourcesReady=import("./views/sources.js").then(({createSources})=>{
     getSession:()=>state.workspaceRevision+":"+state.profile,may,json,refreshStatus,toast,termText,scopeName,icon,loadScope,formatTime,
     setDialogs:result=>{state.dialogs=result.dialogs;if(state.scope)state.scope.folders=result.folders||[];},
     renderScope,focusObservation:()=>$("collector-toggle").focus({preventScroll:true}),
-    confirm:message=>window.confirm(message),
+    confirm:(message,options)=>askConfirm(message,options),
     scopeExclusions:(ids,excluded)=>{if(state.scopeDirty)state.scopeExclude=excluded?
       [...new Set([...state.scopeExclude,...ids])]:state.scopeExclude.filter(id=>!ids.includes(id));},
     setDirty:dirty=>{state.monitoringDirty=dirty.monitoring;state.captureDirty=dirty.capture;state.recheckDirty=dirty.recheck;},
@@ -1928,7 +1964,7 @@ async function accountExportDownload(job){
     toast(tr("Signed account archive saved. You can download it again from this job."));
 }
 async function accountExportDelete(job){
-  if(!window.confirm(tr("Delete this account export job, its archive and its disclosures? This cannot be undone.")))return;
+  if(!(await askConfirm(tr("Delete this account export job, its archive and its disclosures? This cannot be undone."),{danger:true,confirmText:tr("Delete")})))return;
   await api("account-export/"+encodeURIComponent(job.id),undefined,{method:"DELETE"});
   delete state.accountDisclosures[job.id];
   await loadAccountExport();toast(tr("Account export job deleted."));
@@ -1993,10 +2029,10 @@ function accountDisclosureInvalidate(){
   disclosurePreview?.clear();
   $("account-disclosure-status").textContent=tr("Settings changed. Preview again before creating a signed derivative.");
 }
-function openAccountDisclosure(job){
+async function openAccountDisclosure(job){
   if(!job.ready)throw new Error(tr("Finish the source archive before preparing a disclosure."));
   if(state.accountDisclosureJob!==job.id){
-    if(state.accountDisclosureDirty&&!window.confirm(tr("Discard the unfinished disclosure settings?")))return;
+    if(state.accountDisclosureDirty&&!(await askConfirm(tr("Discard the unfinished disclosure settings?"))))return;
     $("account-disclosure-form").reset();
     state.accountDisclosureJob=job.id;state.accountDisclosureDirty=false;
     accountDisclosureInvalidate();state.accountDisclosureDirty=false;
@@ -2030,7 +2066,7 @@ async function createAccountDisclosure(){
   if(approved.expires_at&&Date.now()>=new Date(accountExportEpochMs(approved.expires_at)).valueOf()){
     accountDisclosureInvalidate();throw new Error(tr("The disclosure preview expired. Preview the settings again."));
   }
-  if(!window.confirm(tr("Create a signed derivative from this preview? Personal information may still remain; review the file before sharing.")))return;
+  if(!(await askConfirm(tr("Create a signed derivative from this preview? Personal information may still remain; review the file before sharing."))))return;
   const jobId=approved.jobId,profile=approved.profile,revision=approved.revision,context=viewContexts.get('evidence');
   const result=await json("account-export/"+encodeURIComponent(jobId)+"/disclosure",{preview_id:approved.id});
   if(profile!==state.profile||revision!==state.workspaceRevision||jobId!==state.accountDisclosureJob)return;
@@ -2174,7 +2210,10 @@ $("report-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitt
   }finally{if(reportOwner===owner&&reportKey()===owner){reportSaving=false;reportControls();}}
 });});
 panelQueries("[data-go-reports]").forEach(link=>link.addEventListener("click",event=>{
-  event.preventDefault();navigate("evidence");exportsReady.then(view=>{view.select("settings");$("report-form").scrollIntoView({block:"start"});});
+  event.preventDefault();
+  // Open Exports → Report settings and bring the report language field into view with focus.
+  Promise.resolve(navigate("evidence")).then(()=>exportsReady).then(view=>{view.select("settings");
+    const field=$("report-language");field.scrollIntoView({block:"center"});field.focus({preventScroll:true});});
 }));
 $("export-encrypt-on").addEventListener("change",()=>{
   const on=$("export-encrypt-on").checked;show("export-password-field",on);if(on)$("export-password").focus();else $("export-password").value="";
@@ -2427,7 +2466,7 @@ $("alerts-test").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   await json("alerts/test",{});toast(tr("Test notification delivered."));
 }));
 $("alerts-clear").addEventListener("click",e=>busy(e.currentTarget,async()=>{
-  if(!window.confirm(tr("Remove every saved destination and turn notifications off?")))return;
+  if(!(await askConfirm(tr("Remove every saved destination and turn notifications off?"),{danger:true})))return;
   $("alerts-enabled").checked=false;await saveAlerts([]);toast(tr("Destinations removed. Notifications are off."));
 }));
 
@@ -2546,7 +2585,7 @@ $("scope-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitte
   const draft=scopeDraft(),saved=state.scope.settings,revision=state.workspaceRevision,profile=state.profile;
   if(draft.mode==="folder"&&draft.folder_id===null)throw new Error(tr("Choose a Telegram folder. Load chats first if the list is empty."));
   const widening=draft.mode!=="selected"&&(draft.mode!==saved.mode||draft.folder_id!==saved.folder_id);
-  if(widening&&!window.confirm(wideWarning()+"\n\n"+tr("Continue only with a dedicated account. Your confirmation is recorded in the signed journal.")))return;
+  if(widening&&!(await askConfirm(wideWarning()+"\n\n"+tr("Continue only with a dedicated account. Your confirmation is recorded in the signed journal."),{danger:true})))return;
   const r=await json("scope",{...draft,acknowledged:widening},{profile});
   if(revision!==state.workspaceRevision)return;
   state.scopeDirty=JSON.stringify(draft)!==JSON.stringify(scopeDraft());
@@ -3002,7 +3041,7 @@ async function cloudDestroy(name,quick,provider){
     throw new Error(tr(phala?(quick?"Enter the Phala Cloud API key in step 2 first.":"Enter the Phala Cloud API key and the Cloudflare token in step 2 first.")
       :quick?"Enter the Hetzner token in step 2 first.":"Enter the Hetzner and Cloudflare tokens in step 2 first."));
   }
-  const typed=window.prompt(tr("Deleting {name} removes the server with its journal and signing key for good. Export the evidence from its panel first. Type the server name to delete it:",{name}));
+  const typed=await askText(tr("Deleting {name} removes the server with its journal and signing key for good. Export the evidence from its panel first. Type the server name to delete it:",{name}),{title:tr("Delete"),placeholder:name,maxLength:300});
   if(typed===null)return;
   const r=await json("cloud/destroy",{...tokens,name,confirm:typed.trim()},{root:true});
   if(r.error)throw cloudFailure(r.error);
@@ -3039,7 +3078,7 @@ function renderWitness(r){
       (poll.interval_minutes?" · "+tr("every {n} min",{n:poll.interval_minutes}):"")+(t.overdue?" · "+tr("overdue: the witness has not checked in time"):""):tr("Not used yet")));
     const revoke=node("button","danger",tr("Revoke"));revoke.type="button";revoke.disabled=demo;
     revoke.addEventListener("click",()=>busy(revoke,async()=>{
-      if(!window.confirm(tr("Revoke the token of \"{name}\"? That witness can no longer check this journal.",{name:t.label})))return;
+      if(!(await askConfirm(tr("Revoke the token of \"{name}\"? That witness can no longer check this journal.",{name:t.label}),{danger:true,confirmText:tr("Revoke")})))return;
       const result=await api("witness/tokens/"+encodeURIComponent(t.id),undefined,{method:"DELETE"}).then(x=>x.json());
       resetWitnessSetup();renderWitness(result);
     }));
@@ -3269,6 +3308,7 @@ $("api-id").addEventListener("paste",event=>{
 });
 for(const id of ["api-id","api-hash"])$(id).addEventListener("input",()=>{accountImportRevision++;importClientProfile=null;$("api-pair-result").textContent="";authProgress("");renderApiState();});
 function clearSecrets(){
+  $("panel-key-new").value="";show("panel-key-result",false);
   clearTimeout(toastTimer);show("toast",false);
   cancelQR();importExpectedId=null;importClientProfile=null;accountImportRevision++;$("import-result").textContent="";
   for(const name of ["api-id","api-hash","session-string","session-file","phone","code","password",
@@ -3372,6 +3412,7 @@ async function routeSaved(){
 }
 $("proxy-catalog-apply").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   const id=$("proxy-catalog-select").value;if(!id)return;
+  if(!(await confirmRouteChange()))return;
   await json("network/catalog/"+encodeURIComponent(id),{});await routeSaved();
 }));
 $("network-import").addEventListener("click",e=>busy(e.currentTarget,async()=>{
@@ -3424,10 +3465,12 @@ $("policy-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitt
   if(policyOutsideDirty&&kind)body.outside_proxy={kind,host:$("outside-host").value.trim(),port:Number($("outside-port").value),
     username:$("outside-username").value,password:$("outside-password").value};
   else if(!kind&&state.policy?.outside_proxy)body.remove_outside_proxy=true;
+  if(!(await askConfirm(tr("Change this workspace's IP protection and outside-request policy?"))))return;
   renderPolicy(await json("network/policy",body));await refreshStatus();
   toast(tr("IP protection saved."));
 });});
 $("network-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
+  if(!(await confirmRouteChange()))return;
   const kind=$("network-kind").value,body={kind};
   if(kind!=="direct"&&kind!=="mtproxy_auto")Object.assign(body,{host:$("network-host").value.trim(),port:Number($("network-port").value)});
   if(kind==="socks5"||kind==="http")Object.assign(body,{username:$("network-username").value,password:$("network-password").value});
@@ -3440,6 +3483,7 @@ $("network-test").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   try{await json("network/test",{});$("network-result").textContent=tr("Telegram transport connected. This does not test capture completeness.");}
   catch(error){if(error instanceof StaleView)throw error;$("network-result").textContent=tr("Connection test failed. No direct fallback was attempted.");throw error;}
 }));
+function confirmRouteChange(){return askConfirm(tr("Change this account's connection route? Any pending sign-in will be cancelled. Saved evidence stays."));}
 function renderSelectedFiles(){
   const files=[...$("session-file").files];
   $("file-picker-title").textContent=tr(files.length?"Change selected files":"Choose account files");
@@ -3602,7 +3646,7 @@ $("auth-back").addEventListener("click",()=>{clearSecrets();setAuthStep("credent
 $("change-account").addEventListener("click",()=>{if(state.status.collector.running){toast(tr("Pause observation before changing accounts."),true);return;}clearSecrets();setAuthStep("credentials");});
 $("sign-out").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   if(state.status.collector.running){toast(tr("Pause observation before signing out."),true);return;}
-  if(!window.confirm(tr("Sign out of this Telegram account? TgWitness ends the session in Telegram and forgets it on this computer. The journal, sources and signing key stay; only the same account can connect to this workspace again.")))return;
+  if(!(await askConfirm(tr("Sign out of this Telegram account? TgWitness ends the session in Telegram and forgets it on this computer. The journal, sources and signing key stay; only the same account can connect to this workspace again."),{danger:true,confirmText:tr("Sign out of Telegram")})))return;
   const r=await json("auth/logout",{});
   clearSecrets();await refreshStatus();setAuthStep("credentials");
   toast(tr(r.telegram_session_ended?"Signed out. Telegram ended the session.":
@@ -3665,7 +3709,7 @@ async function openRecordingSettings(){
 }
 const exportRunning=()=>multiRunning()||state.status?.collector.chat_export?.phase==="running";
 let chatListRequest=0;
-async function refreshChats(refresh=false){
+async function refreshChats(refresh=false,wanted=null){
   if(!state.status||state.view!=='chats')return;
   void resumeMulti();
   const revision=state.workspaceRevision,request=++chatListRequest;
@@ -3682,6 +3726,7 @@ async function refreshChats(refresh=false){
   }
   if(!current())return;
   state.chats=result.chats;state.chatsLoading=false;state.chatsError=false;
+  if(wanted!==null&&state.chat!==wanted&&state.chats.some(c=>c.chat_id===wanted)){beginChat(wanted);refresh=false;}
   if(state.chat!==null&&!state.chats.some(c=>c.chat_id===state.chat))beginChat(null);
   if(state.chat===null&&state.chats.length){beginChat((state.chats.find(c=>c.enabled)||state.chats[0]).chat_id);refresh=false;}
   renderChatsList();
@@ -3777,6 +3822,7 @@ function renderChatEmpty(){
   viewQuery("chats",".chats-shell").dataset.panel="chat";
   const box=$("chat-empty"),s=state.status;show("chat-main",false);show("chat-empty",true);box.replaceChildren();
   if(!s)return;
+  if(state.chat!==null&&!state.chats.some(c=>c.chat_id===state.chat)&&(state.chatsLoading||!state.chats.length)){box.append(viewState('loading',tr('Loading…')));return;}
   if(!state.chats.length&&state.chatsLoading){box.append(viewState('loading',tr('Loading…')));return;}
   if(!state.chats.length&&state.chatsError){box.append(viewState('error',tr('Could not load data'),'',tr('Retry'),()=>refreshChats()));return;}
   const add=(title,text,label,view)=>{box.append(node("h2","",title),node("p","",text));
@@ -4008,7 +4054,7 @@ function dossierBar(chat,profiled){
   if(!profiled){
     bar.append(node("p","",tr("People profiles are off for this chat. A profile shows name and username history, Telegram flags, avatar hashes, activity, who replies to whom, other observed chats and mentioned wallets, phones, usernames and links — built only from records already saved, each fact pointing to its record.")),
       action("secondary",tr("Turn on profiles"),async()=>{
-        if(!window.confirm(tr("Profiles are personal data about third parties. Turn them on only when you have a lawful reason, and delete them when no longer needed. Continue?")))return;
+        if(!(await askConfirm(tr("Profiles are personal data about third parties. Turn them on only when you have a lawful reason, and delete them when no longer needed. Continue?"))))return;
         await json("chats/"+encodeURIComponent(chat)+"/dossier",{enabled:true});await refreshStatus();renderChatFeed();
       }));
     return bar;
@@ -4027,7 +4073,7 @@ function dossierBar(chat,profiled){
       password.value="";
     }),
     action("quiet",tr("Turn off and delete"),async()=>{
-      if(!window.confirm(tr("Turn off profiles for this chat and delete the saved profile file?")))return;
+      if(!(await askConfirm(tr("Turn off profiles for this chat and delete the saved profile file?"),{danger:true})))return;
       await json("chats/"+encodeURIComponent(chat)+"/dossier",{enabled:false});state.dossier=null;await refreshStatus();renderChatFeed();
     }));
   return bar;
@@ -4559,7 +4605,7 @@ function renderAccess(){
     const edit=node("button","secondary",tr("Edit")),revoke=node("button","quiet",tr("Revoke"));
     edit.addEventListener("click",()=>{state.accessEdit=g;show("access-new",false);renderAccessForm(g);$("access-form").scrollIntoView({block:"start"});});
     revoke.addEventListener("click",()=>busy(revoke,async()=>{
-      if(!window.confirm(tr("Revoke the access of \"{name}\"? Its open sessions end at once.",{name:g.label})))return;
+      if(!(await askConfirm(tr("Revoke the access of \"{name}\"? Its open sessions end at once.",{name:g.label}),{danger:true,confirmText:tr("Revoke")})))return;
       accessLoadSerial++;
       state.access=await json("access/grants/"+encodeURIComponent(g.id),undefined,{root:true,method:"DELETE"});
       if(state.accessEdit?.id===g.id){state.accessEdit=null;renderAccessForm(null);}
@@ -4577,10 +4623,9 @@ function renderAccess(){
     row.dataset.id=s.id;row.record=s;
     info.append(node("h3","",sessionOwner(s)+(s.current?" · "+tr("this browser"):"")),
       node("p","",[s.address,tr("since {time}",{time:formatTime(s.started_at)}),
-        tr("last activity {time}",{time:formatTime(s.last_seen_at)}),trn("{n} request","{n} requests",s.requests)].join(" · ")),
-      node("p","hint",s.agent.slice(0,120)));
+        tr("last activity {time}",{time:formatTime(s.last_seen_at)}),trn("{n} request","{n} requests",s.requests)].join(" · ")));
     end.addEventListener("click",()=>busy(end,async()=>{
-      if(!window.confirm(tr("End this session? Its open panel will be locked.")))return;
+      if(!(await askConfirm(tr("End this session? Its open panel will be locked."),{danger:true})))return;
       accessLoadSerial++;
       state.access=await json("access/sessions/"+encodeURIComponent(s.id),undefined,{root:true,method:"DELETE"});renderAccess();
     }));
@@ -4646,6 +4691,18 @@ $("access-admin-form").addEventListener("submit",event=>{event.preventDefault();
     session_minutes:Number($("admin-idle").value)},{root:true});
   if(version===adminLimitsVersion)adminLimitsDirty=false;renderAccess();toast(tr("Limits saved."));
 });});
+$("panel-key-rotate").addEventListener("click",event=>busy(event.currentTarget,async()=>{
+  if(!(await askConfirm(tr("Replace the administrator key and end all current browser sessions? Save the new key after this step."),{danger:true})))return;
+  const result=await json("access/token",{},{root:true});
+  state.token=result.session;state.me=result.me;state.workspaceRevision++;
+  sessionStorage.setItem("tgwitness-token",state.token);
+  $("panel-key-new").value=result.token;show("panel-key-result",true);
+  await loadAccess();
+}));
+$("panel-key-copy").addEventListener("click",event=>busy(event.currentTarget,async()=>{
+  await navigator.clipboard.writeText($("panel-key-new").value);toast(tr("Token copied."));
+}));
+$("panel-key-hide").addEventListener("click",()=>{$("panel-key-new").value="";show("panel-key-result",false);});
 let notifyTick=0,pollRevision=null;
 async function pollWorkspace(){
   if(!state.token||document.hidden||$("workspace").hidden||$("workspace").inert||pollRevision===state.workspaceRevision)return;

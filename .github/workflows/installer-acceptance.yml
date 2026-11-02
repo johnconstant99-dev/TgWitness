@@ -5,6 +5,7 @@ on:
     paths:
       - deploy/installer/**
       - tgwitness/panelctl.py
+      - tgwitness/operator_guide.py
       - tools/build_installer.py
       - tools/check_installer*.py
       - tools/check_panel_setup.py

@@ -97,14 +97,14 @@
         info.append(item.name,item.status,item.rate,item.last,item.scope,details);
         item.rotate=node("button","secondary",tr("Rotate token"));item.revoke=node("button","danger",tr("Revoke"));
         item.rotate.type=item.revoke.type="button";actions.append(item.rotate,item.revoke);row.append(info,actions);
-        item.rotate.addEventListener("click",()=>{
+        item.rotate.addEventListener("click",async()=>{
           const entry=item.entry;
-          if(!window.confirm(tr("Replace the token for {name}? The old token stops working immediately.",{name:entry.name})))return;
+          if(!(await window.TgWitnessDialogs.confirm(tr("Replace the token for {name}? The old token stops working immediately.",{name:entry.name}),{danger:true})))return;
           const expected=revision;busy(item.rotate,async()=>{const result=await json("mcp/connections/"+encodeURIComponent(entry.id)+"/rotate",{},{root:true});if(!current(expected))return;issued(result);await afterMutation(expected);});
         });
-        item.revoke.addEventListener("click",()=>{
+        item.revoke.addEventListener("click",async()=>{
           const entry=item.entry;
-          if(!window.confirm(tr("Revoke {name}? Its next request will be refused.",{name:entry.name})))return;
+          if(!(await window.TgWitnessDialogs.confirm(tr("Revoke {name}? Its next request will be refused.",{name:entry.name}),{danger:true,confirmText:tr("Revoke")})))return;
           const expected=revision;busy(item.revoke,async()=>{await api("mcp/connections/"+encodeURIComponent(entry.id),undefined,{method:"DELETE",root:true});if(!current(expected))return;if(issuedId===entry.id)forget();await afterMutation(expected);});
         });
         connectionRows.set(entry.id,item);
@@ -204,7 +204,7 @@
       if(!Object.keys(workspaces).length)throw new Error(tr("Choose at least one workspace and chat."));
       if(!tools.length)throw new Error(tr("Choose at least one tool."));
       const duration=durationSeconds();if(duration===null){customMinutes.reportValidity();return;}
-      if(secret&&!window.confirm(tr("Replace the token shown here? Save it first; it cannot be retrieved later.")))return;
+      if(secret&&!(await window.TgWitnessDialogs.confirm(tr("Replace the token shown here? Save it first; it cannot be retrieved later."))))return;
       creating=true;controls();
       try{const result=await json("mcp/connections",{name:$("mcp-name").value.trim(),workspaces,tools,expires_in_seconds:duration},{root:true});
         if(!current(expected))return;issued(result);await afterMutation(expected);

@@ -242,12 +242,13 @@ PY
 
 activate() {
     local temporary shortcut
+    "$PYTHON" -I -m tgwitness.panelctl --root "$INSTALL_ROOT" guide --write-only
     temporary=$(mktemp "$INSTALL_ROOT/bin/.tgwitness.XXXXXX")
     {
         printf '#!/usr/bin/env bash\n# TgWitness managed launcher v1\nset -e\n'
         printf 'cd -- %q\n' "$INSTALL_ROOT"
         printf 'case "${1:-}" in\n'
-        printf '  ""|setup|open|status|start|stop|restart|logs|doctor) exec %q -I -m tgwitness.panelctl --root %q "$@" ;;\n' "$PYTHON" "$INSTALL_ROOT"
+        printf '  ""|setup|open|status|start|stop|restart|logs|doctor|guide|paths|token|tunnel) exec %q -I -m tgwitness.panelctl --root %q "$@" ;;\n' "$PYTHON" "$INSTALL_ROOT"
         printf '  *) exec %q -I -m tgwitness "$@" ;;\nesac\n' "$PYTHON"
     } > "$temporary"
     chmod 700 "$temporary"
@@ -268,7 +269,7 @@ activate() {
         printf 'Existing %s was left unchanged.\n' "$shortcut"
     fi
     step 4 Ready
-    printf 'Launch: %q\nData: %s/data\n' "$LAUNCHER" "$INSTALL_ROOT"
+    printf 'Launch: %q\nOperator guide: %s/START-HERE.html\nRead in terminal: %q guide --print\n' "$LAUNCHER" "$INSTALL_ROOT" "$LAUNCHER"
     printf 'Program files are ready. Your panel access is chosen next.\n'
 }
 

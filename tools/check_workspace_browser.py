@@ -15,7 +15,7 @@ import requests
 from playwright.sync_api import expect, sync_playwright
 from telethon.helpers import TotalList
 
-from tools.check_browser import RunningApp, hold_api_response, launch_browser, release_api_response, navigate_panel
+from tools.check_browser import RunningApp, answer_panel_dialog, hold_api_response, launch_browser, release_api_response, navigate_panel
 from tools.browser_fixtures import CHAT, FakeClient, saved_session, telegram_message
 from tools.browser_fixtures import ALICE, say
 from tgwitness import dossier, i18n
@@ -139,8 +139,8 @@ def main():
                 return original_remove(path, *args, **kwargs)
 
             with patch("tgwitness.profiles.shutil.rmtree", side_effect=locked):
-                page.once("dialog", lambda dialog: dialog.accept())
                 card.get_by_role("button", name="Delete", exact=True).click()
+                answer_panel_dialog(page)
                 expect(card.locator(".account-badge")).to_have_text("Deletion incomplete")
                 expect(card).to_contain_text("Observation remains stopped.")
                 expect(page.locator("#profile-select")).to_have_value("default")
@@ -156,8 +156,8 @@ def main():
             translated = i18n.words("ru")[warning]
             assert translated and translated != warning, "Incomplete-deletion warning must be translated"
             expect(card).to_contain_text(translated)
-            page.once("dialog", lambda dialog: dialog.accept())
             card.get_by_role("button", name="Удалить", exact=True).click()
+            answer_panel_dialog(page)
             expect(card).to_have_count(0)
             assert not directory.exists()
             checks.append("failed deletion stays visible in English/Russian, selects a healthy workspace and permits retry")

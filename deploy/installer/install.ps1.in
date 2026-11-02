@@ -240,6 +240,8 @@ try {
         $Selected = Get-Item -LiteralPath $VersionPath
     } else { Write-Host "TgWitness $Version is already installed and validated." }
     Assert-ManagedLauncher
+    $GuidePython = Join-Path $Selected.FullName '.venv\Scripts\python.exe'
+    Invoke-Checked $GuidePython @('-I', '-m', 'tgwitness.panelctl', '--root', $InstallRoot, 'guide', '--write-only')
     $LauncherText = @"
 @echo off
 rem TgWitness managed launcher v1
@@ -247,7 +249,7 @@ setlocal DisableDelayedExpansion
 pushd "%~dp0.."
 if errorlevel 1 exit /b 1
 if "%~1"=="" goto panel
-for %%A in (setup open status start stop restart logs doctor) do if /i "%~1"=="%%A" goto panel
+for %%A in (setup open status start stop restart logs doctor guide paths token tunnel) do if /i "%~1"=="%%A" goto panel
 "%~dp0..\versions\$($Selected.Name)\.venv\Scripts\python.exe" -I -m tgwitness %*
 goto finished
 :panel
@@ -270,6 +272,7 @@ endlocal & exit /b %TGWITNESS_EXIT%
     Write-Host 'Program files are ready. Open panel setup with:'
     Write-Host ('  & "' + $Launcher + '"')
     Write-Host ('CMD: "' + $Launcher + '"')
+    Write-Host ('Operator guide: ' + (Join-Path $InstallRoot 'START-HERE.html'))
     Write-Host "Live data: $(Join-Path $InstallRoot 'data\live'); --demo uses separate data\demo."
     $ExitCode = 0
 } catch {

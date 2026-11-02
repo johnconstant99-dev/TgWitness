@@ -83,6 +83,10 @@ def check_service(app, mode):
         assert "Your panel is ready" in output
         config = json.loads((app / "panel.json").read_text())
         data = Path(config["data"])
+        for name in ('START-HERE.html', 'START-HERE.txt'):
+            assert (app / name).is_file()
+        assert 'https://github.com/phishdestroy/TgWitness' in run('guide', '--print')
+        assert str(data) in run('paths')
         assert data == Path("/var/lib") / service
         assert subprocess.check_output(["systemctl", "is-enabled", service], text=True).strip() == "enabled"
         token = (data / "panel-token.txt").read_text().strip()
@@ -95,6 +99,28 @@ def check_service(app, mode):
             assert request(address + "/api/status")[0] == 401
             assert request(address + "/api/status", token)[0] == 200
         (data / "acceptance-record").write_text("keep this record\n")
+        rotation_output = run('token', 'rotate')
+        rotated = (data / 'panel-token.txt').read_text().strip()
+        assert rotated != token and 'Access key: ' + rotated in rotation_output
+        assert request(origin + '/api/status', token)[0] == 401
+        token = rotated
+        assert request(origin + '/api/status', token)[0] == 200
+        if mode == 'quick':
+            before = json.loads(request(origin + '/api/status', token)[1])['run_id']
+            run('tunnel', 'off')
+            state = json.loads((data / 'panel-address.json').read_text())
+            assert state['url'] == origin and state['tunnel_enabled'] is False
+            assert json.loads(request(origin + '/api/status', token)[1])['run_id'] == before
+            run('restart')
+            assert json.loads((data / 'panel-address.json').read_text())['tunnel_enabled'] is False
+            before = json.loads(request(origin + '/api/status', token)[1])['run_id']
+            for action in ('on', 'restart'):
+                previous = json.loads((data / 'panel-address.json').read_text())
+                run('tunnel', action)
+                current = json.loads((data / 'panel-address.json').read_text())
+                assert current['tunnel_revision'] != previous['tunnel_revision']
+                assert current['tunnel_enabled'] and current['url'].endswith('.trycloudflare.com')
+                assert json.loads(request(origin + '/api/status', token)[1])['run_id'] == before
         run("restart")
         assert (data / "acceptance-record").read_text() == "keep this record\n"
         assert (data / "panel-token.txt").read_text().strip() == token

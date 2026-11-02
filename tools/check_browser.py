@@ -122,6 +122,22 @@ def unlock(page, server, *, start=False):
             button.click()
 
 
+def answer_panel_dialog(page, accept=True, text=None):
+    """Answer the panel's own confirm/prompt dialog (static/dialogs.js), which replaced window.confirm/prompt.
+
+    A typed confirmation is filled with the expected name unless another text is given."""
+    dialog = page.locator("dialog.panel-dialog[open]")
+    expect(dialog).to_have_count(1)
+    field = dialog.locator("input")
+    if accept and field.count():
+        if text is not None:
+            field.fill(text)
+        elif not field.input_value():
+            field.fill(field.get_attribute("placeholder") or "")
+    dialog.locator("button[type=submit]" if accept else "button.secondary").click()
+    expect(dialog).to_have_count(0)
+
+
 def navigate_panel(page, view):
     """Use the same navigation on desktop and the mobile menu."""
     button = page.locator(f'.sidebar [data-view="{view}"]')
@@ -585,6 +601,7 @@ def main():
             page.locator("#network-username").fill("synthetic-user")
             page.locator("#network-password").fill("synthetic-proxy-secret")
             page.locator('#network-form button[type="submit"]').click()
+            answer_panel_dialog(page)
             expect(page.locator("#route-summary")).to_have_text("SOCKS5 proxy")
             expect(page.locator("#network-password")).to_have_value("")
             page.screenshot(path=str(output / "connection-proxy.png"), full_page=True)
@@ -667,8 +684,8 @@ def main():
             page.locator("#export-chat-tools > summary").click()
             page.locator("#snapshot-form button").click()
             expect(page.locator("#toast")).to_contain_text("Saved 3 history observations", timeout=15000)
-            page.once("dialog", lambda dialog: dialog.accept())
             page.locator("#collector-toggle").click()
+            answer_panel_dialog(page)
             expect(page.locator("#collector-toggle")).to_have_text("Start observation")
 
             navigate_panel(page, "parameters")
@@ -783,8 +800,8 @@ def main():
             from tgwitness.store import canonical
             Ed25519PublicKey.from_public_bytes(base64.b64decode(signed["public_key"])).verify(
                 base64.b64decode(signed["signature"]), canonical(signed["statement"]))
-            page.once("dialog", lambda dialog: dialog.accept())
             page.locator("#collector-toggle").click()
+            answer_panel_dialog(page)
             expect(page.locator("#collector-toggle")).to_have_text("Start observation")
             page.goto(live.url + "/guide.html")
             expect(page.locator("html")).to_have_attribute("lang", "en")

@@ -134,7 +134,7 @@ def main():
             # and a live-status control clipped inside the journal card.
             page.set_viewport_size({"width": 320, "height": 844})
             page.evaluate("document.documentElement.style.setProperty('--font','\"DejaVu Sans\", sans-serif')")
-            page.locator('.journal .live-toggle').evaluate("button=>button.textContent='Live: reconnecting'")
+            page.locator('.journal .live-toggle').evaluate("button=>button.textContent='Page updates: reconnecting'")
             check_layout(page)
             for selector in ('.health-chip', '.journal #refresh', '.journal .live-toggle'):
                 for control in page.locator(selector).all():

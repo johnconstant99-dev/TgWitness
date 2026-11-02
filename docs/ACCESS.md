@@ -87,6 +87,61 @@ locking the panel or ending a session does not stop a running collector.
 
 ## What the administrator can see
 
+Reviewers and analysts receive collection progress without proxy endpoints,
+pool diagnostics, server paths or raw connection errors. Connection diagnostics
+require `account` permission over the whole workspace. Reading notification,
+off-site-copy and parameter settings requires `settings` permission.
+
+Full browser User-Agent strings are not retained in access sessions. An upgrade
+also removes them from the mutable session cache. The panel process log masks
+IP literals, URL credentials and labelled secrets. Local service logs and
+previously signed journal records are not rewritten. Access rules and signed
+sign-in records still use the client address.
+
+### Replace the main key
+
+Use **Access → My limits → Reissue administrator key**, or run
+`tgwitness token rotate` from a managed installation while the panel is running.
+All existing browser sessions end, including sessions opened with colleague
+tokens. The requesting browser receives a new session; save the new administrator
+key before hiding it. Issued colleague tokens remain valid until separately revoked.
+An installation using `TGWITNESS_TOKEN` must change that environment setting and restart.
+
+### Request and proxy boundaries
+
+The API admits up to 600 requests per minute per client IP. Ten rejected
+authentications within a minute start an exponential cooldown, from one second
+up to five minutes. A failed attempt after the cooldown increases it; ten minutes
+without a failed attempt resets escalation. Rejections return HTTP 429 and
+`Retry-After`. Limits are in memory, shared across workspaces in one panel process;
+restart clears them. Live streams are limited to four per bearer token and 32
+for the panel process. Opening a stream also consumes the API request budget.
+
+Forwarded IP headers are ignored unless the actual TCP peer belongs to
+`TGWITNESS_TRUSTED_PROXIES` (comma-separated IPs or CIDRs). Set
+`TGWITNESS_PROXY_HEADER` to `x-forwarded-for` or `cf-connecting-ip`. XFF is walked
+from the nearest proxy toward the first untrusted peer. Malformed or duplicate
+trusted address metadata is rejected, so it cannot inherit an allowlisted proxy
+address. The managed quick tunnel
+trusts the local cloudflared connector; the own-domain setup trusts local Caddy.
+Direct deployments trust no proxy by default. If launching Uvicorn yourself,
+disable its proxy-header processing so this boundary receives the actual peer.
+
+`TGWITNESS_PANEL_ALLOWED_IPS` restricts all panel access, including the administrator,
+to listed IPs or CIDRs. The installer routing-identity probe stays public and
+returns no account data. Include the required local administrative route before
+enabling the allowlist. A managed installation's **START-HERE** guide includes the
+service configuration and recovery instructions.
+
+An API `ws` query selector must identify the workspace in the request path;
+unknown, mismatching and duplicate selectors are rejected with 404.
+
+Panel scripts and styles carry SHA-384 integrity metadata. An import map also
+covers locally imported JS modules in browsers that support import-map integrity.
+The dynamically generated language response is separate. These checks detect
+asset substitution relative to the delivered page; they do not establish trust
+in a compromised server that can replace both the page and its hashes.
+
 **Log since this start** combines process logs with journal activity from every
 workspace: sign-ins, refusals, route changes and operator actions. It is an
 in-memory console for the current process, not a permanent copy of every message.

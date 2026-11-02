@@ -4,7 +4,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import (RunningApp, hold_api_response, launch_browser,
+from check_browser import (RunningApp, answer_panel_dialog, hold_api_response, launch_browser,
                            release_api_response, unlock)
 
 
@@ -217,8 +217,8 @@ def main(fleet_source=None):
           };
           window.restoreGroupFetch=()=>window.fetch=real;
         }""")
-        page.once("dialog", lambda dialog: dialog.accept("Queued case"))
         page.locator("#fleet-group-new").click()
+        answer_panel_dialog(page, text="Queued case")
         page.wait_for_function("() => window.releaseGroupCreate !== null")
         page.evaluate("loadProfiles()")
         expect(page.locator("#fleet-group-new")).to_be_disabled()

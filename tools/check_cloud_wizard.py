@@ -475,7 +475,7 @@ def check_panel(directory):
 
 def check_browser(directory, output):
     sys.path.insert(0, str(ROOT / "tools"))
-    from check_browser import RunningApp as PanelApp, check_layout, launch_browser, lock_panel, navigate_panel, reload_panel, unlock
+    from check_browser import RunningApp as PanelApp, answer_panel_dialog, check_layout, launch_browser, lock_panel, navigate_panel, reload_panel, unlock
     from playwright.sync_api import expect, sync_playwright
     from tgwitness import i18n
     world = World()
@@ -525,8 +525,8 @@ def check_browser(directory, output):
         row.get_by_role("button", name="Find the current address").click()
         expect(row.locator("a.cloud-address")).to_have_attribute("href", "https://after-restart-here.trycloudflare.com")
         page.screenshot(path=str(output / "2-ready-quick.png"), full_page=True)
-        page.once("dialog", lambda dialog: dialog.accept(quick))
         row.get_by_role("button", name="Delete the server").click()
+        answer_panel_dialog(page, text=quick)
         expect(page.locator("#cloud-job-title")).to_have_text("The server is deleted", timeout=30000)
         expect(row).to_contain_text(quick + " · Server deleted")
         assert not world.servers and not world.firewalls
@@ -564,12 +564,12 @@ def check_browser(directory, output):
         expect(page.locator("#cloud-server-list")).to_contain_text(name + " · Up and running")
         page.screenshot(path=str(output / "2-ready.png"), full_page=True)
         page.locator("#cloud-servers").evaluate("details => details.open = true")
-        page.once("dialog", lambda dialog: dialog.accept("wrong"))
         page.locator("#cloud-server-list").get_by_role("button", name="Delete the server").click()
+        answer_panel_dialog(page, text="wrong")
         expect(page.locator("#toast")).to_contain_text("Type the server name")
         assert world.servers
-        page.once("dialog", lambda dialog: dialog.accept(name))
         page.locator("#cloud-server-list").get_by_role("button", name="Delete the server").click()
+        answer_panel_dialog(page, text=name)
         expect(page.locator("#cloud-job-title")).to_have_text("The server is deleted", timeout=30000)
         expect(page.locator("#cloud-server-list")).to_contain_text(name + " · Server deleted")
         assert not world.servers and not world.firewalls and not world.dns

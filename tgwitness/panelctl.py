@@ -336,7 +336,8 @@ def show(root, credentials=False, wait=0):
     print("\nData: " + str(data) + "\n\nManage: tgwitness status | open | restart | stop | logs\n"
           "Use the access key in the panel. Telegram sign-in is the next step in your browser.")
     if config["mode"] == "quick":
-        print("Temporary HTTPS link. After a tunnel restart: tgwitness open")
+        print("Public tunnel is off. The panel is local; collection can keep running." if state.get("tunnel_enabled") is False else
+              "Temporary HTTPS link. After a tunnel restart: tgwitness open")
     if config["mode"] == "local" and os.environ.get("SSH_CONNECTION"):
         print("Local mode is reachable on the server only. Public access was not enabled.")
     elif credentials and not os.environ.get("SSH_CONNECTION"):
@@ -355,6 +356,86 @@ def bridge_command(config, data):
     return [config["bridge"], "run", "--config", str(caddy), "--adapter", "caddyfile"]
 
 
+def tunnel_control(root):
+    path = root / "tunnel.json"
+    if not path.exists():
+        return {"enabled": True, "revision": ""}
+    data = json.loads(path.read_text())
+    if type(data.get("enabled")) is not bool or not re.fullmatch(r"[0-9a-f]{32}", data.get("revision", "")):
+        raise ValueError("Invalid tunnel.json. Public access was not enabled.")
+    return data
+
+
+def stop_child(process):
+    if process is not None and process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
+
+
+def tunnel(root, action):
+    config = read_config(root)
+    if config["mode"] != "quick":
+        raise ValueError("Tunnel commands apply to a managed trycloudflare.com installation.")
+    if action == "status":
+        print("Tunnel: " + ("enabled" if tunnel_control(root)["enabled"] else "off"))
+        return
+    control = {"enabled": action != "off", "revision": secrets.token_hex(16)}
+    atomic(root / "tunnel.json", json.dumps(control) + "\n", 0o644)
+    active = subprocess.run(["systemctl", *([] if config["system"] else ["--user"]),
+                             "is-active", "--quiet", config["service"]]).returncode == 0
+    if not active:
+        print("Tunnel preference saved. The panel is stopped; start it with: tgwitness start")
+        return
+    deadline = time.monotonic() + 90
+    while time.monotonic() < deadline:
+        try:
+            state = json.loads((Path(config["data"]) / "panel-address.json").read_text())
+        except (FileNotFoundError, json.JSONDecodeError):
+            state = {}
+        if state.get("tunnel_revision") == control["revision"] and state.get("url"):
+            print("Tunnel " + ("enabled. Current link: " + state["url"] if control["enabled"] else
+                              "closed. Collection and the local panel keep running."))
+            return
+        time.sleep(.5)
+    raise ValueError("Tunnel change is saved but not yet confirmed. Run tgwitness status and tgwitness logs.")
+
+
+def token_rotate(root, port=8787):
+    config = read_config(root) if (root / "panel.json").exists() else {"data": str(root / "data" / "live"), "port": port}
+    token = (Path(config["data"]) / "panel-token.txt").read_text().strip()
+    request = Request(f"http://127.0.0.1:{config['port']}/api/access/token", data=b"{}",
+                      headers={"Authorization": "Bearer " + token, "Content-Type": "application/json"}, method="POST")
+    with urlopen(request, timeout=15) as response:
+        result = json.load(response)
+    # The CLI does not need the replacement browser session returned to the UI.
+    logout = Request(f"http://127.0.0.1:{config['port']}/api/access/logout", data=b"{}",
+                     headers={"Authorization": "Bearer " + result["session"], "Content-Type": "application/json"}, method="POST")
+    with urlopen(logout, timeout=15):
+        pass
+    print("Administrator key replaced. All previous browser sessions ended.\n  Access key: " + result["token"])
+
+
+def guide(root, print_text=False, write_only=False):
+    from .operator_guide import write
+    path = root / "START-HERE.html"
+    if write_only or not path.is_file() or not (root / "START-HERE.txt").is_file():
+        path = write(root)
+    if write_only:
+        return
+    if print_text or os.environ.get("SSH_CONNECTION"):
+        # Redirected Windows stdout can use a legacy code page without arrows.
+        # Keep navigation readable there; the offline files retain their layout.
+        print((root / "START-HERE.txt").read_text(encoding="utf-8").replace(" → ", " > "))
+    else:
+        print("Operator guide: " + str(path))
+        if sys.stdout.isatty():
+            webbrowser.open(path.as_uri())
+
+
 def serve(root):
     config = read_config(root)
     data = Path(config["data"])
@@ -368,9 +449,11 @@ def serve(root):
     env = dict(os.environ, TGWITNESS_NO_BROWSER="1", TGWITNESS_INSTALLATION_ID=installation_id,
                XDG_DATA_HOME=str(data / "service-data"),
                XDG_CONFIG_HOME=str(data / "service-config"))
+    env["TGWITNESS_TRUSTED_PROXIES"] = "127.0.0.1/32,::1/128" if config["mode"] != "local" else ""
+    env["TGWITNESS_PROXY_HEADER"] = "cf-connecting-ip" if config["mode"] == "quick" else "x-forwarded-for"
     app = subprocess.Popen([sys.executable, "-I", "-m", "tgwitness", "--host", "127.0.0.1", "--port",
                             str(config["port"]), "--data-dir", str(data), "--no-browser"], env=env)
-    bridge = None
+    bridge, last_control = None, None
     try:
         origin = "http://127.0.0.1:" + str(config["port"])
         deadline = time.monotonic() + 90
@@ -380,17 +463,31 @@ def serve(root):
         if config["mode"] != "quick":
             atomic(address, json.dumps({"url": origin if config["mode"] == "local" else "https://" + config["domain"], "id": installation_id}))
 
-        def read_bridge_output(process):
+        def read_bridge_output(process, revision):
             for line in process.stdout:
                 print(line.rstrip(), flush=True)
                 match = QUICK_URL.search(line)
                 if match and bridge is process and not stopping.is_set():
-                    atomic(address, json.dumps({"url": match.group(0), "id": installation_id}))
+                    atomic(address, json.dumps({"url": match.group(0), "id": installation_id,
+                                                "tunnel_revision": revision, "tunnel_enabled": True}))
 
         while not stopping.wait(0.5):
             if app.poll() is not None:
                 raise RuntimeError("The panel exited; systemd will restart the service.")
-            if config["mode"] != "local" and (bridge is None or bridge.poll() is not None):
+            control = {"enabled": config["mode"] != "local", "revision": ""}
+            if config["mode"] == "quick":
+                try:
+                    control = tunnel_control(root)
+                except (OSError, ValueError):
+                    control = {"enabled": False, "revision": "invalid"}
+                if control != last_control:
+                    old, bridge = bridge, None
+                    stop_child(old)
+                    atomic(address, json.dumps({"url": None if control["enabled"] else origin,
+                                                "id": installation_id, "tunnel_revision": control["revision"],
+                                                "tunnel_enabled": control["enabled"]}))
+                    last_control = control
+            if control["enabled"] and (bridge is None or bridge.poll() is not None):
                 if bridge is not None:
                     atomic(address, "{}\n")
                     if stopping.wait(5):
@@ -399,24 +496,21 @@ def serve(root):
                                           stderr=subprocess.STDOUT, text=True, errors="replace")
                 if config["mode"] == "domain":
                     atomic(address, json.dumps({"url": "https://" + config["domain"], "id": installation_id}))
-                threading.Thread(target=read_bridge_output, args=(bridge,), daemon=True).start()
+                threading.Thread(target=read_bridge_output, args=(bridge, control["revision"]), daemon=True).start()
     finally:
         stopping.set()
         atomic(address, "{}\n")
         for child in (bridge, app):
-            if child is not None and child.poll() is None:
-                child.terminate()
-                try:
-                    child.wait(timeout=15)
-                except subprocess.TimeoutExpired:
-                    child.kill()
-                    child.wait(timeout=5)
+            stop_child(child)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Install once. Open and manage your TgWitness panel.")
     parser.add_argument("--root", type=Path, default=Path.cwd())
-    parser.add_argument("action", nargs="?", default="open", choices=["setup", "open", "status", "start", "stop", "restart", "logs", "doctor", "_serve"])
+    parser.add_argument("action", nargs="?", default="open", choices=["setup", "open", "status", "start", "stop", "restart", "logs", "doctor", "guide", "paths", "token", "tunnel", "_serve"])
+    parser.add_argument("operation", nargs="?", choices=["rotate", "off", "on", "restart", "status"])
+    parser.add_argument("--print", dest="print_text", action="store_true")
+    parser.add_argument("--write-only", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--mode", choices=["local", "quick", "domain"])
     parser.add_argument("--domain")
     parser.add_argument("--port", type=int, default=8787)
@@ -427,7 +521,20 @@ def main():
             # Windows uses a different marker name; it still needs a generated launcher.
             if not (root / "bin" / "tgwitness.cmd").is_file():
                 raise ValueError("Use this command from a managed TgWitness installation.")
-        if args.action == "setup" or (args.action == "open" and not (root / "panel.json").exists()):
+        if args.action == "guide":
+            guide(root, args.print_text, args.write_only)
+        elif args.action == "paths":
+            config = read_config(root) if (root / "panel.json").exists() else {"data": str(root / "data" / "live")}
+            print("Program: " + str(root) + "\nData: " + config["data"] + "\nGuide: " + str(root / "START-HERE.html"))
+        elif args.action == "token":
+            if args.operation != "rotate":
+                raise ValueError("Use: tgwitness token rotate (the panel must be running).")
+            token_rotate(root, args.port)
+        elif args.action == "tunnel":
+            if args.operation not in ("on", "off", "restart", "status"):
+                raise ValueError("Use: tgwitness tunnel on | off | restart | status")
+            tunnel(root, args.operation)
+        elif args.action == "setup" or (args.action == "open" and not (root / "panel.json").exists()):
             setup(root, args.mode, args.domain, args.port)
         elif args.action == "_serve":
             serve(root)

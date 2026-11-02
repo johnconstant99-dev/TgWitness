@@ -4589,5 +4589,18 @@
 "Phala Cloud documentation ↗": "Документация по Phala Cloud ↗",
 "I agree that Phala Cloud bills this confidential virtual machine by the hour from now on, until I delete it.": "Я согласен с тем, что отныне компания Phala Cloud будет взимать плату за эту конфиденциальную виртуальную машину на почасовой основе до тех пор, пока я её не удалю.",
 "<strong>Ordinary server · Hetzner</strong><small>Lowest price. Hetzner's and Cloudflare's records can be checked, but Hetzner could read the server's memory.</small>": "<strong>Обычный сервер · Hetzner</strong><small>Самая низкая цена. Записи Hetzner и Cloudflare можно проверить, однако Hetzner может считывать данные из памяти сервера.</small>",
-"<strong>Confidential virtual machine · Phala Cloud</strong><small>Intel TDX: the processor attests which code runs, and the host cannot read its memory. Costs more.</small>": "<strong>Конфиденциальная виртуальная машина · Phala Cloud</strong><small>Intel TDX: процессор контролирует, какой код выполняется, а хост не имеет доступа к его памяти. Стоит дороже.</small>"
+"<strong>Confidential virtual machine · Phala Cloud</strong><small>Intel TDX: the processor attests which code runs, and the host cannot read its memory. Costs more.</small>": "<strong>Конфиденциальная виртуальная машина · Phala Cloud</strong><small>Intel TDX: процессор контролирует, какой код выполняется, а хост не имеет доступа к его памяти. Стоит дороже.</small>",
+"Please confirm": "Подтвердите действие",
+"Confirm": "Подтверждение",
+"OK": "ОК",
+"Type the name to confirm": "Введите название для подтверждения",
+"Nothing recorded yet. Connect a Telegram account to start the journal.": "Пока ничего не записано. Подключите аккаунт Telegram, чтобы начать журнал.",
+"Nothing recorded yet. Choose the chats to observe.": "Пока ничего не записано. Выберите чаты для наблюдения.",
+"Observation is on. New messages, edits and deletion notices appear here when Telegram delivers them.": "Наблюдение включено. Новые сообщения, правки и уведомления об удалении появятся здесь, когда их передаст Telegram.",
+"Nothing recorded yet. Start observation to save new activity.": "Пока ничего не записано. Начните наблюдение, чтобы сохранять новые события.",
+"Page updates: paused": "Обновление страницы: на паузе",
+"Page updates: on": "Обновление страницы: подключено",
+"Page updates: reconnecting": "Обновление страницы: переподключение",
+"Delivery of new records to this page. The Telegram connection is shown separately.": "Доставка новых записей на эту страницу. Подключение к Telegram показано отдельно.",
+"No groups yet. A group keeps shared settings for several accounts: connection, recording and notifications.": "Групп пока нет. Группа хранит общие настройки для нескольких аккаунтов: подключение, запись и уведомления."
 }

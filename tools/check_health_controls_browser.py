@@ -5,7 +5,7 @@ import tempfile
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import RunningApp, check_layout, launch_browser, navigate_panel, unlock
+from check_browser import RunningApp, answer_panel_dialog, check_layout, launch_browser, navigate_panel, unlock
 
 
 def main():
@@ -47,11 +47,16 @@ def main():
             page.evaluate("loadProfiles()")
             assert page.evaluate("window.healthOption===document.querySelector('#profile-select option:checked')")
 
-            page.once("dialog", lambda dialog: dialog.dismiss())
             page.locator("#collector-toggle").click()
+            answer_panel_dialog(page, accept=False)
             assert not writes
-            page.once("dialog", lambda dialog: dialog.accept())
             page.locator("#collector-toggle").click()
+            answer_panel_dialog(page)
+            # The confirmed pause is sent after the dialog closes.
+            for _ in range(100):
+                if writes:
+                    break
+                page.wait_for_timeout(50)
             expect(page.locator("#collector-toggle")).to_be_enabled()
             assert writes[0][0] == "collector/stop"
 
@@ -83,12 +88,12 @@ def main():
 
             page.locator('[data-health-part="media"]').click()
             before = len(writes)
-            page.once("dialog", lambda dialog: dialog.dismiss())
             page.locator('[data-health-action="clear-queue"]').click()
+            answer_panel_dialog(page, accept=False)
             assert len(writes) == before
             cutoff = page.evaluate("state.status.stats.head.seq")
-            page.once("dialog", lambda dialog: dialog.accept())
             page.locator('[data-health-action="clear-queue"]').click()
+            answer_panel_dialog(page)
             page.wait_for_function("()=>!document.querySelector('[data-health-action=clear-queue]').disabled")
             assert writes[-1] == ("media/queue/clear", {"through_seq": cutoff})
             page.locator('[data-health-action="disabled-receipts"]').click()

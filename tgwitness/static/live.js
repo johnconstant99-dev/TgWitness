@@ -5,7 +5,8 @@
     if(!context)return;
     for(const {bar,toggle,fresh} of bars){
       if(!bar.isConnected)continue;
-      toggle.textContent=context.tr(paused?"Live: paused":connected?"Live: on":"Live: reconnecting");
+      toggle.textContent=context.tr(paused?"Page updates: paused":connected?"Page updates: on":"Page updates: reconnecting");
+      toggle.title=context.tr("Delivery of new records to this page. The Telegram connection is shown separately.");
       toggle.setAttribute("aria-pressed",String(!paused));
       fresh.hidden=!pending;fresh.textContent=context.tr("{n} new events",{n:pending});
     }

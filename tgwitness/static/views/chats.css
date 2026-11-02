@@ -40,7 +40,8 @@ button.chat-setting-chip:hover { border-color: var(--accent); color: var(--accen
 .chat-filter-row[hidden] { display: none; }
 .chat-feed .chat-profile-view { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
 .chat-profile-view > header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; font-size: 13px; }
-.chat-feed .chat-day { position: sticky; top: 0; z-index: 2; align-self: center; flex-shrink: 0; width: min(100%, 260px); text-align: center; border-radius: 999px; background: var(--surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* While scrolling, the date sits on a band of the feed colour, so message text never shows under it. */
+.chat-feed .chat-day { position: sticky; top: 6px; z-index: 2; box-shadow: 0 0 0 6px var(--feed), var(--shadow-sm); align-self: center; flex-shrink: 0; width: min(100%, 260px); text-align: center; border-radius: 999px; background: var(--surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chat-newer { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; flex-shrink: 0; }
 .chat-media-notice { flex-shrink: 0; }
 

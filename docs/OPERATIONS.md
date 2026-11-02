@@ -4,6 +4,18 @@ For your first connection, use [accounts and session formats](ACCOUNTS.md).
 For an explanation of saved versions, event policies, and gaps, see
 [how collection works](COLLECTION.md). This guide covers daily operation and recovery.
 
+A managed installation includes **START-HERE.html** and **START-HERE.txt** beside
+its launcher, with the repository link and commands tailored to its installation
+path. Run `tgwitness guide --print` over SSH, or `tgwitness paths` to locate the
+actual data directory. A root systemd install stores private state under
+`/var/lib/tgwitness-…`; `/opt/tgwitness` holds the program.
+
+For a managed temporary Cloudflare tunnel, `tgwitness tunnel off` closes public
+access while the local panel and collection keep running. `tgwitness tunnel on`
+enables it; `tgwitness tunnel restart` creates a new tunnel connection. Use
+`tgwitness open` to see its current address. An explicit off setting survives
+service restarts. `tgwitness stop` stops both the panel and collection.
+
 ## Operator workflow
 
 ```mermaid

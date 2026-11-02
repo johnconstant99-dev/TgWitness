@@ -281,10 +281,10 @@ export function createSources(context) {
     if (sourceBusy || dialogLoading || !status || status.demo || !may("sources") || !ids.length) return;
     if (ids.length > 500) {toast(tr("Choose up to 500 sources at a time."), true); return;}
     const wide = (status.scope?.mode || "selected") !== "selected";
-    if (action === "remove" && !context.confirm(tr(ids.length === 1
+    if (action === "remove" && !(await context.confirm(tr(ids.length === 1
       ? "Remove this source? Saved messages and files stay. Cached people profiles are removed."
       : "Remove {n} sources? Saved messages and files stay. Cached people profiles are removed.", {n: ids.length})
-      + (wide ? " " + tr("These chats are also excluded so the scope does not add them again.") : ""))) return;
+      + (wide ? " " + tr("These chats are also excluded so the scope does not add them again.") : ""), {danger: true}))) return;
     const current = getSession(), attempt = ++sourceAttempt, profile = state.profile;
     sourceBusy = true; renderTargets(); renderDialogs(); renderDialogRefresh();
     try {

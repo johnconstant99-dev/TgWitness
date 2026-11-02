@@ -41,31 +41,40 @@ def local_client(app):
     sock = socket.socket()
     sock.bind(("127.0.0.1", 0))
     port = sock.getsockname()[1]
-    server = uvicorn.Server(uvicorn.Config(app, log_level="error", access_log=False))
+    server = uvicorn.Server(uvicorn.Config(app, log_level="error", access_log=False,
+                                         proxy_headers=False, timeout_graceful_shutdown=5))
     thread = threading.Thread(target=server.run, kwargs={"sockets": [sock]}, daemon=True)
     thread.start()
     try:
-        deadline = time.monotonic() + 15
+        deadline = time.monotonic() + 45
         while not server.started:
             if not thread.is_alive() or time.monotonic() > deadline:
                 raise RuntimeError("Synthetic application did not start")
             time.sleep(.05)
 
-        def get(path, headers=None, params=None):
+        def request(method, path, headers=None, params=None, json_body=None):
             if params:
                 path += "?" + urlencode(params)
             connection = http.client.HTTPConnection("127.0.0.1", port, timeout=10)
             try:
-                connection.request("GET", path, headers=headers or {})
+                headers = dict(headers or {})
+                body = None
+                if json_body is not None:
+                    body = json.dumps(json_body).encode()
+                    headers['Content-Type'] = 'application/json'
+                connection.request(method, path, body=body, headers=headers)
                 response = connection.getresponse()
-                return SimpleNamespace(status_code=response.status, content=response.read(), headers=response.headers)
+                content = response.read()
+                return SimpleNamespace(status_code=response.status, content=content, headers=response.headers,
+                                       json=lambda: json.loads(content))
             finally:
                 connection.close()
 
-        yield SimpleNamespace(get=get)
+        yield SimpleNamespace(get=lambda path, **kwargs: request('GET', path, **kwargs),
+                              post=lambda path, headers=None, json=None: request('POST', path, headers, json_body=json))
     finally:
         server.should_exit = True
-        thread.join(timeout=10)
+        thread.join(timeout=30)
         sock.close()
         if thread.is_alive():
             raise RuntimeError("Synthetic application did not stop")

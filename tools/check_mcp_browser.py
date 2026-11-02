@@ -1,5 +1,6 @@
 """Synthetic MCP setup, drafts, credentials and client configurations. No AI calls."""
 import json
+import re
 from pathlib import Path
 import sys
 import tempfile
@@ -7,7 +8,7 @@ import tempfile
 from playwright.sync_api import expect, sync_playwright
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from tools.check_browser import (RunningApp, check_layout, hold_api_response,
+from tools.check_browser import (RunningApp, answer_panel_dialog, check_layout, hold_api_response,
                                  launch_browser, release_api_response, unlock, navigate_panel)
 
 
@@ -149,11 +150,11 @@ def main():
             page.set_viewport_size({"width": 1440, "height": 1000})
             rotate = page.locator("#mcp-list button", has_text="Rotate token")
             count = len(writes)
-            page.once("dialog", lambda dialog: dialog.dismiss())
             rotate.click()
+            answer_panel_dialog(page, accept=False)
             assert len(writes) == count
-            page.once("dialog", lambda dialog: dialog.accept())
             rotate.click()
+            answer_panel_dialog(page)
             expect(page.locator("#mcp-token")).not_to_have_value(token)
             rotated = page.locator("#mcp-token").input_value()
             assert rotated.startswith("tgw_mcp_")
@@ -169,7 +170,8 @@ def main():
             page.locator("#mcp-url").fill("http://remote.invalid/mcp")
             expect(page.locator("#mcp-check")).to_be_disabled()
             release_api_response(page)
-            page.wait_for_function("!document.getElementById('mcp-check').hasAttribute('aria-busy')")
+            # The page's CSP refuses string evaluation, so wait on the attribute instead of wait_for_function.
+            expect(page.locator("#mcp-check")).not_to_have_attribute("aria-busy", re.compile(".*"))
             expect(page.locator("#mcp-check")).to_be_disabled()
             expect(page.locator("#mcp-check-result")).to_have_text("")
             page.locator("#mcp-url").fill(app.url + "/mcp")
@@ -183,11 +185,11 @@ def main():
             expect(page.locator("#mcp-scope input:checked")).to_have_count(0)
             release_api_response(page)
             expect(page.locator("#mcp-check-result")).to_have_text("")
-            page.once("dialog", lambda dialog: dialog.dismiss())
             page.locator("#mcp-list button", has_text="Revoke").click()
+            answer_panel_dialog(page, accept=False)
             expect(page.locator("#mcp-list")).not_to_contain_text("Revoked")
-            page.once("dialog", lambda dialog: dialog.accept())
             page.locator("#mcp-list button", has_text="Revoke").click()
+            answer_panel_dialog(page)
             expect(page.locator("#mcp-list")).to_contain_text("Revoked")
             assert page.request.get(app.url + "/api/archive/identity", headers={"Authorization": "Bearer " + rotated}).status == 401
             page.evaluate("switchProfile('default')")

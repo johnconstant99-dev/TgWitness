@@ -5,7 +5,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
-from check_browser import (ROOT, RunningApp, hold_api_response, launch_browser,
+from check_browser import (ROOT, RunningApp, answer_panel_dialog, hold_api_response, launch_browser,
                            release_api_response, unlock)
 from tools.browser_fixtures import saved_session
 from check_fleet_async_browser import main as check_async_groups
@@ -119,6 +119,7 @@ def main():
         page.locator("#pool-search").fill("7.7.7.7")
         expect(page.locator("#pool-rows .pool-row")).to_have_count(1)
         page.locator("#pool-rows button").click()
+        answer_panel_dialog(page)
         expect(page.locator("#route-detail")).to_contain_text("7.7.7.7")
         assert server.app.state.profiles.entries[alpha]["app"].state.collector.network_config().host == "7.7.7.7"
         for width in (1440, 390, 320):

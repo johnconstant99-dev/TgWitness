@@ -8,6 +8,7 @@ on:
       - tools/check_installer.py
       - tools/check_panel_setup.py
       - tgwitness/panelctl.py
+      - tgwitness/operator_guide.py
       - .github/workflows/installer.yml
   workflow_dispatch:
   release:

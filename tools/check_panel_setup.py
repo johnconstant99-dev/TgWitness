@@ -18,6 +18,50 @@ from tgwitness import panelctl as panel  # noqa: E402
 
 
 class SetupChecks(unittest.TestCase):
+    def test_printed_guide_supports_legacy_windows_output(self):
+        from tgwitness.operator_guide import write
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root, windows=True)
+            saved = (root / "START-HERE.txt").read_bytes()
+            with io.BytesIO() as raw, io.TextIOWrapper(raw, encoding="cp1252") as output:
+                with contextlib.redirect_stdout(output):
+                    panel.guide(root, print_text=True)
+                output.flush()
+                printed = raw.getvalue().decode("cp1252")
+            self.assertIn("Access > My limits", printed)
+            self.assertIn("tgwitness.cmd' token rotate", printed)
+            self.assertIn("https://github.com/phishdestroy/TgWitness", printed)
+            self.assertEqual((root / "START-HERE.txt").read_bytes(), saved)
+
+    def test_offline_guide_is_safe_repeatable_and_preserves_unrelated_files(self):
+        from tgwitness.operator_guide import write
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "owner's & program"
+            page = write(root, windows=True)
+            first = page.read_bytes()
+            self.assertIn(b"owner&#x27;s &amp; program", first)
+            self.assertIn(b"Content-Security-Policy", first)
+            self.assertIn(b"https://github.com/phishdestroy/TgWitness", first)
+            self.assertIn("owner''s & program", (root / 'START-HERE.txt').read_text())
+            write(root, windows=True)
+            self.assertEqual(page.read_bytes(), first)
+            (root / 'START-HERE.txt').write_text('My private notes')
+            with self.assertRaisesRegex(ValueError, 'unrelated'):
+                write(root)
+            self.assertEqual((root / 'START-HERE.txt').read_text(), 'My private notes')
+
+    def test_tunnel_control_requires_an_explicit_boolean(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.assertTrue(panel.tunnel_control(root)['enabled'])
+            for invalid in ('false', 0, None):
+                panel.atomic(root / 'tunnel.json', json.dumps({'enabled': invalid, 'revision': 'a' * 32}))
+                with self.assertRaises(ValueError):
+                    panel.tunnel_control(root)
+            panel.atomic(root / 'tunnel.json', json.dumps({'enabled': False, 'revision': 'b' * 32}))
+            self.assertFalse(panel.tunnel_control(root)['enabled'])
+
     def test_domain_rejects_config_and_shell_injection(self):
         for bad in ("https://example.org", "example.org/", "example.org {\n file_server", "$(whoami).org",
                     "*.example.org", "127.0.0.1", "x.local", "a..org", "a.org:80", "a.org?token=x", "-a.org"):

@@ -24,6 +24,7 @@
 <script src="/theme.js?v=0.7.0"></script>
 <script src="/guide-locale.js" data-scope="panel"></script>
 <script defer src="/i18n.js?v=0.7.0"></script>
+<script defer src="/dialogs.js?v=1"></script>
 <script defer src="/app.js?v=0.7.0-handoff2-setup2-phala2"></script>
 <script defer src="/integrations.js?v=2"></script>
 <script defer src="/analysis.js?v=3"></script>
@@ -110,7 +111,7 @@
   <p id="gate-description">Paste your panel access token to continue.</p>
   <form id="unlock-form">
     <label for="panel-token">Panel access token</label>
-    <input autocomplete="current-password" id="panel-token" placeholder="Paste your access token" required type="password">
+    <input autocomplete="off" spellcheck="false" id="panel-token" placeholder="Paste your access token" required type="password">
     <button class="primary full" type="submit">Open workspace</button>
   </form>
   <button class="primary full" hidden id="open-demo" type="button">Explore demo</button>
@@ -243,7 +244,7 @@
     <div class="stat"><span>Edits recorded</span><strong id="stat-edits">0</strong><small>Observed versions, preserved</small></div>
     <div class="stat"><span>Deletion notices</span><strong id="stat-deletes">0</strong><small>Scoped Telegram notifications</small></div>
     <div class="stat"><span>Selected sources</span><strong id="stat-sources">0</strong><small id="sources-footnote">Ready for observation</small></div>
-  </div></details>
+  </div><div class="overview-empty" hidden id="overview-empty"></div></details>
   <div class="journal card">
     <div class="card-heading">
       <h2>Event timeline <span class="subtle" id="event-total"></span></h2>
@@ -1292,6 +1293,10 @@
 
 <section class="view" hidden id="view-access">
   <div class="page-heading"><div><h1>Access</h1><p class="page-description">Give each person their own access to chosen workspaces and chats. The panel token remains the administrator key.</p></div><button class="secondary" id="access-refresh" type="button"><svg aria-hidden="true" class="icon"><use href="#i-refresh"/></svg> Refresh</button></div>
+  <div class="access-privacy" aria-label="Access privacy">
+    <div><strong>Share the case</strong><span>Reviewers see the workspaces and chats you choose. Connection details require account-management permission.</span></div>
+    <div><strong>Keep browser details private</strong><span>User-Agent strings are not stored. IP addresses are hidden in the panel's process log.</span></div>
+  </div>
   <div class="access-tabs"><div class="access-tablist" role="tablist" aria-label="Access sections">
     <button id="access-tab-grants" data-access-tab="grants" type="button" role="tab" aria-selected="true" aria-controls="access-panel-grants">Granted access</button>
     <button id="access-tab-sessions" data-access-tab="sessions" type="button" role="tab" aria-selected="false" aria-controls="access-panel-sessions" tabindex="-1">Open sessions</button>
@@ -1333,11 +1338,17 @@
         <div><label for="admin-idle">A session ends after … minutes without activity</label><input id="admin-idle" max="43200" min="5" required type="number"></div>
       </div><button class="secondary" type="submit">Save limits</button>
       <p class="hint">Signing in on this page starts a session. Scripts that send the panel token itself are not counted as sessions; keep that token private.</p></form>
+      <div class="access-key-reset"><h3>Administrator key</h3><p class="muted">Replace a lost or exposed panel token. All current browser sessions end; issued access tokens remain valid.</p>
+        <button class="secondary" id="panel-key-rotate" type="button">Reissue administrator key</button>
+        <div id="panel-key-result" hidden><label for="panel-key-new">New administrator key</label><input id="panel-key-new" type="password" readonly autocomplete="off" data-sensitive>
+          <div class="route-actions"><button id="panel-key-copy" class="secondary" type="button">Copy new key</button><button id="panel-key-hide" class="quiet" type="button">Saved; hide key</button></div>
+          <p class="hint">Save it in your password manager. This browser has a new session; every previous session has ended.</p></div>
+      </div>
   </div></div>
 </section>
 <section class="view" hidden id="view-system-log">
   <div class="page-heading"><div><h1>System log</h1><p class="page-description">Activity since this process started: connections, proxy changes, sign-ins, refusals and settings changes across workspaces. Messages remain in the journal.</p></div><button id="console-refresh" class="secondary" type="button">Refresh</button></div>
-  <div class="card padded"><div class="system-log-tools"><label class="check-label"><input checked id="console-follow" type="checkbox"> Follow new lines</label><p id="console-state" role="status"></p></div><pre class="access-console" id="access-console" tabindex="0" aria-label="Process log"></pre></div>
+  <div class="card padded"><p class="hint">IP addresses are hidden in this view. Local service logs and signed journal records are unchanged.</p><div class="system-log-tools"><label class="check-label"><input checked id="console-follow" type="checkbox"> Follow new lines</label><p id="console-state" role="status"></p></div><pre class="access-console" id="access-console" tabindex="0" aria-label="Process log"></pre></div>
 </section>
 </div>
 <footer><a href="/guide.html" rel="noopener" target="_blank">Help &amp; setup guide</a></footer>

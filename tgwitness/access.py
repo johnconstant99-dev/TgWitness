@@ -9,6 +9,7 @@ starts a session; the panel then works with the session, which can be listed and
 import hashlib
 import ipaddress
 import logging
+import os
 import re
 import secrets
 import sys
@@ -22,6 +23,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .store import utcnow
+from .operator_privacy import private_log
 
 LOG = logging.getLogger("tgwitness.access")
 JOURNAL_LOG = logging.getLogger("tgwitness.journal")
@@ -62,10 +64,10 @@ POLICY = {
     "GET /api/scope": ("view", None),
     "GET /api/evidence": ("view", None),
     "GET /api/source-check": ("view", None),
-    "GET /api/replica": ("view", None),
+    "GET /api/replica": ("settings", None),
     "GET /api/health": ("view", None),
-    "GET /api/alerts": ("view", None),
-    "GET /api/parameters": ("view", None),
+    "GET /api/alerts": ("settings", None),
+    "GET /api/parameters": ("settings", None),
     "GET /api/checkpoint": ("view", None),
     "GET /api/run-receipt": ("view", None),
     "POST /api/verify": ("view", None),
@@ -269,8 +271,15 @@ class Console(logging.Handler):
     def __init__(self, size=5000):
         super().__init__(logging.INFO)
         self.lines, self.counter, self.guard = deque(maxlen=size), 0, threading.Lock()
+        self.last = None
 
     def emit(self, record):
+        # Attached to the root and to uvicorn's loggers: a record that propagates through
+        # both reaches this handler twice. Keep it once.
+        with self.guard:
+            if record is self.last:
+                return
+            self.last = record
         try:
             text = record.getMessage()
             if record.exc_info and record.exc_info[1] is not None:
@@ -280,7 +289,7 @@ class Console(logging.Handler):
         with self.guard:
             self.counter += 1
             self.lines.append({"n": self.counter, "at": utcnow(), "level": record.levelname,
-                               "source": record.name, "text": text[:2000]})
+                               "source": record.name, "text": private_log(text[:8000])[:2000]})
 
     def after(self, n, limit=500):
         with self.guard:
@@ -314,19 +323,42 @@ class AccessControl:
     """Issued accesses (in the vault) and the open sessions of the whole installation."""
 
     def __init__(self, vault, store, console=None):
+        from .live_stream import StreamSlots
+        self.stream_slots = StreamSlots()
         self.vault, self.store = vault, store
         saved = vault.read("access")
         self.grants = saved.get("grants", [])
         now = time.time()
-        self.sessions = {s["sha256"]: {**s, "requests": 0} for s in saved.get("sessions", []) if s["expires"] > now}
+        saved_sessions = saved.get("sessions", []) if saved.get("panel_key") == digest(vault.token) else []
+        self.sessions = {s["sha256"]: {**s, "agent": "", "requests": 0}
+                         for s in saved_sessions if s["expires"] > now}
         self.lock = threading.RLock()
         self.console = console or Console()
         self.labels = lambda profile_id: profile_id
+        # Remove legacy browser fingerprints from the mutable encrypted session
+        # cache. Signed journal records are deliberately left untouched.
+        if any(s.get("agent") for s in saved.get("sessions", [])):
+            self.save()
 
 
     def save(self):
         sessions = [{k: v for k, v in s.items() if k != "requests"} for s in self.sessions.values()]
-        self.vault.save("access", {"grants": self.grants, "sessions": sessions})
+        self.vault.save("access", {"grants": self.grants, "sessions": sessions, "panel_key": digest(self.vault.token)})
+
+    def rotate_token(self):
+        from .security import private_write
+        if os.environ.get("TGWITNESS_TOKEN"):
+            raise Refused("The main token is set by TGWITNESS_TOKEN. Change that setting and restart the panel.")
+        token = secrets.token_urlsafe(32)
+        with self.lock:
+            count = len(self.sessions)
+            private_write(self.vault.root / "panel-token.txt", token.encode())
+            self.vault.token = token
+            self.sessions.clear()
+            self.save()
+        self.store.append("access.main_token_rotated", {"sessions_ended": count})
+        LOG.info("Main panel token replaced; %d sessions ended", count)
+        return token, count
 
     def admin_settings(self):
         return {**ADMIN_DEFAULTS, **self.store.get_setting("access_admin", {})}
@@ -402,7 +434,7 @@ class AccessControl:
                     grant["bound_ip"] = address
             session_token = "tgws_" + secrets.token_urlsafe(32)
             session = {"sha256": digest(session_token), "id": secrets.token_hex(8), "owner": owner,
-                       "address": address, "agent": (agent or "")[:200], "created": now, "last_seen": now,
+                       "address": address, "agent": "", "created": now, "last_seen": now,
                        "expires": now + settings["session_minutes"] * 60, "requests": 0}
             self.sessions[session["sha256"]] = session
             self.save()

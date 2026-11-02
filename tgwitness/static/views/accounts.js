@@ -107,7 +107,7 @@ export function createAccounts(context) {
     const chosen=profiles().filter(p=>selected.has(p.id)&&eligible(p,action));if(!chosen.length)return;
     const text=action==='stop'?tr('Pause {n} workspaces? New messages, edits and deletions will not be collected while paused. Missed activity can only be recovered partly.',{n:chosen.length}):
       tr('Resume {n} workspaces? They will connect to Telegram and collect their selected sources. Telegram request limits still apply.',{n:chosen.length});
-    if(!window.confirm(text+'\n\n'+chosen.map(p=>p.label).join('\n')))return;
+    if(!(await window.TgWitnessDialogs.confirm(text+'\n\n'+chosen.map(p=>p.label).join('\n'))))return;
     const started=getSession();working=true;updateStatus();const done=[],failed=[];
     try{
       for(const p of chosen){

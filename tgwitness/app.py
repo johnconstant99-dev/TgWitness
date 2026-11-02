@@ -10,7 +10,6 @@ import secrets
 from secrets import token_bytes as secrets_token
 import time
 from datetime import datetime, timezone
-from collections import defaultdict, deque
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from typing import Literal
@@ -18,7 +17,6 @@ from typing import Literal
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StrictBool, StrictInt, model_validator
 from telethon.errors import FloodWaitError, RPCError
 
@@ -283,12 +281,9 @@ def client_languages(request):
 def create_app(data_dir=None, demo=False, client_factory=None, token_override=None, allow_profiles=True,
                account_guard=None, proxy_pool=None, access=None, profile_id="default"):
     root = Path(data_dir or "data").resolve()
-    failures = defaultdict(deque)
     bearer = HTTPBearer(auto_error=False)
     op_lock = asyncio.Lock()
     export_lock = asyncio.Lock()
-    from .live_stream import StreamSlots
-    stream_slots = StreamSlots()
     public_proxies = PublicCatalog(root)
 
     shared_pool = proxy_pool or ProxyPool(public_proxies)
@@ -476,8 +471,12 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.middleware("http")
     async def headers(request, call_next):
+        if "/api/" in request.url.path and "ws" in request.query_params:
+            workspace_path = re.match(r"^/profiles/([a-f0-9]{32})/api/", request.url.path)
+            selected = workspace_path[1] if workspace_path else profile_id
+            if request.query_params.getlist("ws") != [selected]:
+                return JSONResponse({"detail": "Unknown workspace selector."}, status_code=404)
         if request.headers.get("content-length", "").isdigit() and int(request.headers["content-length"]) > request_limit(request.url.path):
-            from fastapi.responses import JSONResponse
             return JSONResponse({"detail": "Request body too large"}, status_code=413)
         response = await call_next(request)
         audit = getattr(request.state, "audit", None)
@@ -549,19 +548,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return {"available": True, "token": app.state.local_demo_token}
 
     def reject_access(request, detail):
-
-
-        address = request.client.host if request.client else "unknown"
-        now = time.monotonic()
-        if address not in failures and len(failures) >= 4096:
-            failures.clear()
-        queue = failures[address]
-        while queue and queue[0] < now - 60:
-            queue.popleft()
-        if len(queue) >= 15:
-            raise HTTPException(429, "Too many failed access attempts. Wait one minute.",
-                                headers={"Retry-After": "60"})
-        queue.append(now)
         raise HTTPException(401, detail, headers={"WWW-Authenticate": "Bearer"})
 
     def client_address(request):
@@ -686,10 +672,13 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.get("/api/status", dependencies=[Depends(authenticate)])
     async def status(request: Request):
         from . import ai, media_analysis
+        from .operator_privacy import connection_details, status_parts, without_diagnostics
         store, vault = app.state.store, app.state.vault
         allowed = visible_chats(request)
         collector_status, parts, targets = scoped_status(app, allowed)
-        return {"version": __version__, "demo": store.get_setting("demo", False),
+        principal = request.state.principal
+        collector_status, parts = status_parts(principal, collector_status, parts, allowed)
+        result = {"demo": store.get_setting("demo", False),
                 "analysis": {"enabled": ai.enabled(app.state) and not store.get_setting("demo", False),
                              "media_available": media_analysis.available() and not store.get_setting("demo", False)},
                 "collector": collector_status, "stats": store.stats(allowed),
@@ -700,17 +689,24 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 "monitoring": monitoring_settings(store), "scope": collector_status["scope"],
                 "recheck": recheck_settings(store),
                 "dossiers": [c for c in dossier.enabled_chats(store) if allowed is None or c in allowed],
-                "parameters": tuning.values(store),
                 "setup_answered": store.get_setting("setup", None) is not None,
                 "fingerprint": fingerprint(vault.public_key), "limitations": LIMITS,
-                "protection": {"vault_key_mode": vault.key_mode, "secrets_encrypted": True,
-                               "journal_encrypted_by_app": False, "media_encrypted_by_app": False},
-                "run_id": app.state.run_receipt["run_id"], "chats_limited": allowed is not None,
+                "chats_limited": allowed is not None,
                 "assurance": bool(app.state.assurance)}
+        if connection_details(principal, allowed):
+            result.update(version=__version__, run_id=app.state.run_receipt["run_id"],
+                          protection={"vault_key_mode": vault.key_mode, "secrets_encrypted": True,
+                                      "journal_encrypted_by_app": False, "media_encrypted_by_app": False})
+        else:
+            result['history'] = without_diagnostics(result['history'])
+        if principal.admin or principal.may("settings") and allowed is None:
+            result["parameters"] = tuning.values(store)
+        return result
 
     if allow_profiles:
         @app.get("/api/profiles", dependencies=[Depends(authenticate)])
         async def profiles_list(request: Request):
+            from .operator_privacy import status_parts
             principal, listed = request.state.principal, []
             for entry in app.state.profiles.summary():
                 if not principal.opens(entry["id"]):
@@ -722,7 +718,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                                 if workspace else (None, None, []))
                     entry = {**entry, "stats": None, "sources_enabled": sum(bool(t["enabled"]) for t in targets),
                              "collector": current, "health": parts, "sources_total": len(targets)}
-                listed.append(entry)
+                current, parts = status_parts(principal, entry["collector"], entry["health"], allowed)
+                listed.append({**entry, "collector": current, "health": parts})
             return {"profiles": listed, "limit": Profiles.MAX_PROFILES,
                     "model": "independent account collectors and signing identities"}
 
@@ -1065,7 +1062,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             except Refused:
                 yield "event: access-ended\ndata: {}\n\n"
 
-        return LimitedStreamingResponse(updates(), slots=stream_slots, media_type="text/event-stream",
+        from .access import digest
+        return LimitedStreamingResponse(updates(), slots=app.state.access.stream_slots, owner=digest(token), media_type="text/event-stream",
                                         headers={"X-Accel-Buffering": "no", "Cache-Control": "no-store"})
 
     @app.post("/api/auth/configure", dependencies=[Depends(authenticate)])
@@ -1670,12 +1668,14 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return replica_state()
 
     @app.get("/api/health", dependencies=[Depends(authenticate)])
-    async def get_health():
+    async def get_health(request: Request):
         """What each part is doing now, apart from whether it is switched on (health.py)."""
         outside = outside_state()
-        return {"checked_at": health.iso(health.now_utc()), "collector": health.collector_of(app.state),
-                "timestamps": timestamps_health(outside), "replica": replica_health(outside),
-                "server": server_health()}
+        parts = {"collector": health.collector_of(app.state), "timestamps": timestamps_health(outside),
+                 "replica": replica_health(outside), "server": server_health()}
+        from .operator_privacy import status_parts
+        _, parts = status_parts(request.state.principal, {}, parts, visible_chats(request))
+        return {"checked_at": health.iso(health.now_utc()), **parts}
 
     def setup_state():
         """Setup by goal (levels.py): the saved answers, the current state as answers, and both scales."""
@@ -2385,6 +2385,16 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             app.state.access.set_admin(body)
             return access_state(request)
 
+        @app.post("/api/access/token", dependencies=[Depends(authenticate)])
+        async def access_rotate_token(request: Request):
+            require_live()
+            try:
+                token, ended = app.state.access.rotate_token()
+            except Refused as exc:
+                raise HTTPException(409, str(exc)) from None
+            session, principal = app.state.access.login(token, client_address(request), None)
+            return {"token": token, "session": session, "me": principal.public(), "sessions_ended": ended}
+
         @app.get("/api/access/console", dependencies=[Depends(authenticate)])
         async def access_console(after: int = 0):
             console = app.state.access.console
@@ -2401,7 +2411,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         register_media_analysis(app, authenticate)
         app.mount("/profiles", ProfileDispatch(app), name="profiles")
     from .panel_routes import register as register_panel
-    static = StaticFiles(directory=Path(__file__).parent / "static", html=True)
+    from .panel_assets import PanelFiles
+    static = PanelFiles(directory=Path(__file__).parent / "static")
     register_panel(app, static)
     app.mount("/", static, name="panel")
+    from .request_security import RequestSecurity
+    app.add_middleware(RequestSecurity)
     return app

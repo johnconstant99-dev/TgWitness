@@ -7,7 +7,7 @@ import tempfile
 from playwright.sync_api import sync_playwright, expect
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from tools.check_browser import (RunningApp, launch_browser, unlock, check_layout,
+from tools.check_browser import (RunningApp, answer_panel_dialog, launch_browser, unlock, check_layout,
                                  hold_api_response, release_api_response, navigate_panel)
 
 
@@ -59,8 +59,8 @@ def main():
             assert page.evaluate("$('mcp-token').value") == ""
             navigate_panel(page, "integrations")
             expect(page.locator("#mcp-list")).to_contain_text("Synthetic client")
-            page.once("dialog", lambda dialog: dialog.accept())
             page.locator('#mcp-list button', has_text="Revoke").click()
+            answer_panel_dialog(page)
             expect(page.locator("#mcp-list")).to_contain_text("Revoked")
             page.goto(app.url + "/?workspace=default&event=" + str(record["seq"]) + "#journal")
             expect(page.locator("#detail-drawer")).to_be_visible()

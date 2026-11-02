@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Panel fixes. The journal no longer stops at a skipped-attachment record
+  ("mediaTypes is not defined"), so its record count and Newer/Older paging stay
+  correct. Confirmations and name prompts are panel dialogs instead of
+  `window.confirm`/`prompt`, which embedded and some mobile browsers refuse; deleting
+  a workspace asks for its name. A direct `/chats/<id>` link no longer shows the
+  previously open chat first. The live status reads "Page updates" so it is not
+  mistaken for the Telegram connection. Chat filters no longer overflow in longer
+  translations, the sticky chat date keeps clear of message text, the report settings
+  link focuses the report language, hints no longer cover an open notification panel,
+  an empty journal overview and an empty group list say what to do next, and the
+  system log keeps each uvicorn line once.
 - Preserve an active Telegram sign-in when workflow navigation finishes late.
   Returning through account export or investigation keeps the pending code,
   password or QR step instead of resetting the form.

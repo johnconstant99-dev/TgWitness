@@ -723,7 +723,9 @@ class Collector:
         """This workspace's IP mode; a workspace that chose a direct route before the modes existed keeps it."""
         saved = self.store.get_setting("route_policy", None)
         if saved is None:
-            return RoutePolicy(exposure="tunnel" if self.network_config().kind == "direct" else "hide").model_dump()
+            kind = self.network_config().kind
+            return RoutePolicy(exposure="tunnel" if kind == "direct" else "hide",
+                               outside_enabled=kind in ("direct", "socks5", "http") or self.outside_proxy() is not None).model_dump()
         return RoutePolicy.model_validate(saved).model_dump()
 
     def outside_proxy(self):
@@ -760,6 +762,10 @@ class Collector:
                              "then change the IP mode.")
         if outside is not None and outside.kind not in ("socks5", "http"):
             raise ValueError("Requests outside Telegram use a SOCKS5 or HTTP proxy.")
+        proposed = outside if outside is not None else None if remove_outside else self.outside_proxy()
+        if (policy.exposure == "hide" and policy.outside_enabled and proposed is None
+                and self.network_config().kind not in ("socks5", "http")):
+            raise ValueError("Set a SOCKS5 or HTTP proxy for requests outside Telegram, or turn those requests off.")
         if outside is not None:
             self.vault.save("outside_proxy", outside.model_dump())
         elif remove_outside:
@@ -983,6 +989,10 @@ class Collector:
     async def set_network(self, config):
         if self.running:
             raise ValueError("Pause observation before changing the Telegram route.")
+        policy = self.route_policy()
+        if (policy['exposure'] == 'hide' and policy['outside_enabled']
+                and config.kind not in ('socks5', 'http') and self.outside_proxy() is None):
+            raise ValueError("Set a SOCKS5 or HTTP proxy for requests outside Telegram, or turn those requests off.")
         if config.kind == "direct" and self.route_policy()["exposure"] != "tunnel":
             raise ValueError("A direct route is allowed only in the mode for a server behind a tunnel or VPN. "
                              "Change the IP mode first.")

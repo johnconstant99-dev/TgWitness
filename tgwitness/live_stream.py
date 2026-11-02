@@ -7,30 +7,40 @@ from starlette.responses import JSONResponse, StreamingResponse
 
 
 class StreamSlots:
-    def __init__(self, limit=32):
-        self.limit = limit
+    def __init__(self, limit=32, per_token=4):
+        self.limit, self.per_token = limit, per_token
         self.active = 0
+        self.owners = {}
 
-    def acquire(self):
-        if self.active >= self.limit:
+    def acquire(self, owner=None):
+        if self.active >= self.limit or owner is not None and self.owners.get(owner, 0) >= self.per_token:
             return False
         self.active += 1
+        if owner is not None:
+            self.owners[owner] = self.owners.get(owner, 0) + 1
         return True
 
-    def release(self):
+    def release(self, owner=None):
         if self.active <= 0:
             raise RuntimeError("Live stream slot released without acquisition")
         self.active -= 1
+        if owner is not None:
+            count = self.owners[owner] - 1
+            if count:
+                self.owners[owner] = count
+            else:
+                del self.owners[owner]
 
 
 class LimitedStreamingResponse(StreamingResponse):
     """Keep the slot for the complete ASGI response, including its first headers."""
-    def __init__(self, content, *, slots, **kwargs):
+    def __init__(self, content, *, slots, owner=None, **kwargs):
         super().__init__(content, **kwargs)
         self.slots = slots
+        self.owner = owner
 
     async def __call__(self, scope, receive, send):
-        acquired = self.slots.acquire()
+        acquired = self.slots.acquire(self.owner)
         try:
             if not acquired:
                 await JSONResponse({"detail": "Too many live streams."}, status_code=429,
@@ -44,7 +54,7 @@ class LimitedStreamingResponse(StreamingResponse):
                     await close()
             finally:
                 if acquired:
-                    self.slots.release()
+                    self.slots.release(self.owner)
 
 
 def notifications(store, after, allowed, limit=100):

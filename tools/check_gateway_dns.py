@@ -408,7 +408,7 @@ def check_panel_api(directory):
 
 
 def check_browser(directory, output):
-    from check_browser import RunningApp as PanelApp, check_layout, launch_browser, navigate_panel, reload_panel, unlock
+    from check_browser import RunningApp as PanelApp, answer_panel_dialog, check_layout, launch_browser, navigate_panel, reload_panel, unlock
     from playwright.sync_api import expect, sync_playwright
     import tgwitness.app as panel
 
@@ -482,8 +482,8 @@ def check_browser(directory, output):
             page.locator("#cloud-servers").evaluate("details => details.open = true")
             row_box = page.locator(".cloud-server", has_text=name)
             expect(row_box).to_contain_text("DNS only through Cloudflare Gateway")
-            page.once("dialog", lambda dialog: dialog.accept(name))
             row_box.get_by_role("button", name="Delete the server").click()
+            answer_panel_dialog(page, text=name)
             expect(page.locator("#cloud-job-title")).to_have_text("The server is deleted", timeout=30000)
             assert not world.locations and not world.servers
             browser.close()

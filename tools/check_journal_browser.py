@@ -251,6 +251,8 @@ def inspector(page):
     page.wait_for_function("seq=>state.drawerSeq!==seq", arg=first)
     page.locator(f'#events-body .event-row[data-seq="{first}"]').click()
     page.wait_for_function("seq=>state.drawerSeq===seq", arg=first)
+    # The HTTP history response adds focusable controls after drawerSeq changes.
+    expect(drawer.locator('.lineage button').first).to_be_visible()
     page.evaluate("""()=>[...document.querySelector('#detail-drawer').querySelectorAll('button,summary,a,audio,video,[tabindex="0"]')]
       .filter(n=>!n.disabled&&n.getClientRects().length).at(-1).focus()""")
     page.keyboard.press("Tab")

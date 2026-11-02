@@ -1,4 +1,4 @@
-.chat-list-controls { padding: 0 12px 10px; border-bottom: 1px solid var(--border); display: grid; gap: 6px; }
+.chat-list-controls { padding: 0 12px 10px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .chat-list-sort { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); font-size: 12px; }
 .chat-list-sort select { min-width: 0; flex: 1; width: auto; min-height: 34px; font-size: 12px; }
 .chat-list-filters summary { display: flex; align-items: center; gap: 6px; min-height: 32px; font-size: 12px; cursor: pointer; }
