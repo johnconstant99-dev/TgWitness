@@ -1094,7 +1094,7 @@
 "Observation scope": "观察范围",
 "What this account records": "该账户记录的内容",
 "Investigation mode": "调查模式",
-"For a dedicated account that joins teams and talks to bots: records every chat, group, private chat and bot it sees, its own messages and button presses, and for each new chat or bot saves its profile and earlier visible messages at once. Review and press Save scope.": "针对用于加入团队并与机器人交互的专用账户：记录其所见的每条聊天、群组、私聊和机器人，以及自身发送的消息和按钮点击操作；对于每条新聊天或新机器人，会立即保存其个人资料及此前可见的消息。请查看并点击“保存范围”。",
+"For a dedicated account that joins teams and talks to bots: records every chat, group, private chat and bot it sees, its own messages and button presses, and for each new chat or bot saves its profile and earlier visible messages at once. Applied as soon as you confirm the whole-account scope.": "针对用于加入团队并与机器人交互的专用账户：记录其所见的每条聊天、群组、私聊和机器人，以及自身发送的消息和按钮点击操作；对于每条新聊天或新机器人，会立即保存其个人资料及此前可见的消息。确认整个账户的范围后立即生效。",
 "Why never your main account ↗": "为什么绝不能使用你的主账号 ↗",
 "<strong>Chosen chats</strong><small>Only the chats you add below.</small>": "<strong>选定的聊天</strong><small>仅限您在下文添加的聊天记录。</small>",
 "<strong>Telegram folder</strong><small>Chats in one of the account's folders, including chats added to it later.</small>": "<strong>Telegram 文件夹</strong><small>该账户某个文件夹中的聊天记录，包括后续添加到该文件夹中的聊天记录。</small>",

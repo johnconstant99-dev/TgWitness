@@ -245,7 +245,9 @@ def intake(c, heartbeat_seconds, now):
 def sources(c, enabled_sources):
     statuses = list((c.get("source_status") or {}).values())
     counts = {"enabled": enabled_sources, "checked": len(statuses),
-              "visible": sum(s.get("state") == "visible_in_dialogs" for s in statuses),
+              # A source that delivers records works, whether or not the account's chat list shows it.
+              "visible": sum(s.get("state") in ("visible_in_dialogs", "receiving_updates") for s in statuses),
+              "receiving": sum(s.get("state") == "receiving_updates" for s in statuses),
               "added": sum(s.get("state") == "discovered" for s in statuses),
               "unconfirmed_total": sum(s.get("state") == "access_unconfirmed" for s in statuses),
               "ignored": sum(s.get("state") == "access_unconfirmed" and bool(s.get("ignored")) for s in statuses),

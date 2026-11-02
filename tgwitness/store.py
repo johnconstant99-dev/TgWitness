@@ -153,9 +153,12 @@ class Store:
             for row in rows:
                 payload = json.loads(row["payload"]) if row["payload"] is not None else {}
                 sender = payload.get("sender_observation") or {}
+                # One set of definitions for every screen: saved text; deleted with its text kept; deleted
+                # before any text was saved; not returned by Telegram at a recheck.
                 result[row["chat_id"]] = {
                     "messages": row["messages"], "edited": row["edited"], "deleted": row["deleted"],
-                    "missing": row["missing"],
+                    "missing": row["missing"], "saved": row["saved"], "deleted_saved": row["deleted_saved"],
+                    "deleted_unsaved": row["deleted"] - row["deleted_saved"],
                     "last_observed_at": row["last_observed_at"],
                     "last_text": payload.get("text"),
                     "last_sender": sender.get("display_name"),
@@ -209,6 +212,18 @@ class Store:
             row = self.db.execute("SELECT message_id FROM message_state_index INDEXED BY message_text WHERE chat_id=? "
                                   "AND text_seq IS NOT NULL ORDER BY message_id DESC LIMIT 1", (chat_id,)).fetchone()
         return row[0] if row else None
+
+    def saved_message_ids(self, chat_id, message_ids):
+        """Which of these messages have saved text, so a deletion reads as "text kept" or "before saving"."""
+        ids = sorted({m for m in message_ids if isinstance(m, int)})
+        found = set()
+        with self.lock:
+            for start in range(0, len(ids), 500):
+                part = ids[start:start + 500]
+                found.update(row[0] for row in self.db.execute(
+                    "SELECT message_id FROM message_state_index WHERE chat_id=? AND text_seq IS NOT NULL "
+                    "AND message_id IN (" + ",".join("?" * len(part)) + ")", (chat_id, *part)))
+        return found
 
     def message_state(self, chat_id, message_id):
         """Latest saved content of one message and whether it is already recorded as gone."""

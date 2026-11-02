@@ -6,7 +6,7 @@ import shutil
 import time
 import secrets
 from contextlib import suppress
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 
 from collections import deque
@@ -1301,22 +1301,33 @@ class Collector:
                                   and status.get("state") == "access_unconfirmed" else {})}
                 for chat, status in self.source_status.items() if chat in enabled}
 
+    RECEIVING_DAYS = 7
+
+    def source_visibility(self, chat_id, overview):
+        """One status per source, everywhere: listed in the account's chats, delivering records although
+        not listed (the list stops at dialog_limit and may omit archived chats), or unconfirmed with the reason."""
+        cached = self.dialog_cache.get(chat_id)
+        status = {"checked_at": utcnow(), "meaning": "Dialog visibility is not a guarantee of every update.",
+                  "visibility": (cached or {}).get("visibility", "unknown"), "role": (cached or {}).get("role", "unknown")}
+        if cached is not None:
+            return {**status, "state": "visible_in_dialogs"}
+        last = (overview.get(chat_id) or {}).get("last_observed_at")
+        if last and last >= (datetime.now(timezone.utc) - timedelta(days=self.RECEIVING_DAYS)).isoformat(timespec="milliseconds"):
+            return {**status, "state": "receiving_updates", "last_observed_at": last}
+        reason = "beyond_dialog_limit" if getattr(self, "dialogs_truncated", False) else "not_in_dialogs"
+        return {**status, "state": "access_unconfirmed", "reason": reason}
+
     def refresh_source_visibility(self):
         """Refresh only after completed dialog enumeration; an ignored source resets on positive sighting."""
         targets = self.store.targets(True)
-        statuses = {}
+        statuses, overview = {}, self.store.chat_overview()
         with self.store.transaction():
             ignored = set(self.store.get_setting("ignored_source_warnings", []))
             resolved = self.store.get_setting("resolved_source_warnings", {})
             returned = ignored.intersection(self.dialog_cache, (t["chat_id"] for t in targets))
             for target in targets:
                 chat_id = target["chat_id"]
-                visible = chat_id in self.dialog_cache
-                statuses[str(chat_id)] = {
-                    "state": "visible_in_dialogs" if visible else "access_unconfirmed",
-                    "checked_at": utcnow(), "meaning": "Dialog visibility is not a guarantee of every update.",
-                    "visibility": self.dialog_cache.get(chat_id, {}).get("visibility", "unknown"),
-                    "role": self.dialog_cache.get(chat_id, {}).get("role", "unknown")}
+                statuses[str(chat_id)] = self.source_visibility(chat_id, overview)
                 if chat_id in returned:
                     receipt = self.store.append("target.changed", {"title": target["title"], "enabled": True,
                                                                    "ignore_unconfirmed": False,
@@ -1347,6 +1358,7 @@ class Collector:
             }
         await self.load_folders()
         self.dialog_cache = dialogs
+        self.dialogs_truncated = count >= limit
         self.refresh_source_visibility()
         return {"dialogs": [{k: v for k, v in d.items() if k != "entity"}
                             for d in self.dialog_cache.values()],
@@ -1471,20 +1483,18 @@ class Collector:
 
         await self.dialogs()
         await self.apply_scope(refresh=False)
-        self.source_status = {}
+        self.source_status, overview = {}, self.store.chat_overview()
         for target in self.store.targets(True):
-            visible = target["chat_id"] in self.dialog_cache
-            self.source_status[str(target["chat_id"])] = {
-                "state": "visible_in_dialogs" if visible else "access_unconfirmed",
-                "checked_at": utcnow(), "meaning": "Dialog visibility is not a guarantee of every update.",
-                "visibility": self.dialog_cache.get(target["chat_id"], {}).get("visibility", "unknown"),
-                "role": self.dialog_cache.get(target["chat_id"], {}).get("role", "unknown")}
-            if not visible:
+            status = self.source_visibility(target["chat_id"], overview)
+            self.source_status[str(target["chat_id"])] = status
+            if status["state"] == "access_unconfirmed":
                 self.store.append("source.access_unconfirmed", {
-                    "reason": "not present in the enumerated account dialogs",
+                    "reason": "beyond the chats listed for this account (dialog_limit)"
+                              if status["reason"] == "beyond_dialog_limit"
+                              else "not present in the enumerated account dialogs",
                     "other_sources_continue": True}, target["chat_id"])
         if scope_settings(self.store)["mode"] == "selected" and not any(
-                s["state"] == "visible_in_dialogs" for s in self.source_status.values()):
+                s["state"] in ("visible_in_dialogs", "receiving_updates") for s in self.source_status.values()):
             raise ValueError("None of the selected sources was visible in the account dialogs. Check membership and refresh.")
 
     async def supervise(self, work, name):

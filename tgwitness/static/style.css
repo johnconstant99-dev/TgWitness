@@ -464,12 +464,18 @@ footer a:hover { color: var(--text); text-decoration: underline; }
 .demo-intro > span { color: var(--muted); font-size: 13px; }
 .demo-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .demo-actions > button { min-height: 36px; font-size: 13px; padding-inline: 12px; }
-.workspace[data-demo="true"] :is(.health-details, #collector-toggle, .chat-compose, .chat-open, .chat-history-tools, #chat-export-start) { display: none; }
+.workspace[data-demo="true"] :is(.health-details, #collector-toggle, .chat-compose, .chat-compose-toggle, .chat-open, .chat-history-tools, #chat-export-start) { display: none; }
 .workspace[data-demo="true"] .chat-toolbar { display: none; }
 .workspace[data-online-demo="true"] :is(#export-encrypt, #top-lock, #lock-panel) { display: none; }
 .account-badge.sample { color: var(--accent-text); background: var(--accent-soft); }
 .notice.error { background: var(--danger-soft); border-color: var(--danger-border); color: var(--danger); }
 .notice.warning { background: var(--warning-soft); border-color: var(--warning-border); color: var(--warning); }
+.policy-warning { flex-wrap: wrap; align-items: center; }
+.policy-warning[hidden] { display: none; }
+.policy-warning p { flex: 1 1 100%; margin: 0; }
+.route-running { flex-wrap: wrap; align-items: center; }
+.route-running[hidden] { display: none; }
+.route-running p { flex: 1 1 100%; margin: 0; }
 .health-details { margin-left: auto; min-width: 0; max-width: 100%; }
 .health-details > summary {
   width: fit-content; max-width: 100%; margin-left: auto; min-height: 36px; padding: 7px 14px;
@@ -810,7 +816,10 @@ button.pill { cursor: pointer; font-family: inherit; }
 .chat-open form, #chat-link-preview { display: grid; gap: 8px; margin-top: 10px; min-width: 0; }
 .chat-open input { width: 100%; min-width: 0; }
 .chat-open .target, .interaction-result .target { white-space: pre-wrap; overflow-wrap: anywhere; user-select: all; }
-.chat-compose { flex-shrink: 0; padding: 10px 18px; border-top: 1px solid var(--border); background: var(--surface); }
+.chat-compose, .chat-compose-toggle { flex-shrink: 0; padding: 10px 18px; border-top: 1px solid var(--border); background: var(--surface); }
+.chat-compose-toggle[hidden] { display: none; }
+.chat-compose-warning { margin: 0 0 6px; }
+.chat-compose-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .chat-compose .hint { margin: 4px 0; }
 .chat-compose-row { display: flex; align-items: flex-end; gap: 8px; }
 .chat-compose textarea { flex: 1; min-width: 0; width: 100%; resize: vertical; max-height: 180px; }
@@ -918,6 +927,8 @@ button.pill { cursor: pointer; font-family: inherit; }
 .chat-title > div { min-width: 0; }
 .chat-title h2 { font-size: 17px; white-space: normal; overflow-wrap: anywhere; }
 .chat-title p { white-space: normal; }
+/* On narrow screens the counters stay on one line (full text in the tooltip), so the feed keeps its height. */
+@media (max-width: 767px) { .chat-title p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
 .chat-actions { flex: none; flex-wrap: nowrap; gap: 6px; }
 .chat-actions select, .chat-actions button { min-height: 34px; font-size: 13px; }
 .chat-actions button { padding: 0 10px; }

@@ -47,7 +47,8 @@ class JournalIndex:
             "CREATE TABLE IF NOT EXISTS chat_state_index (chat_id INTEGER PRIMARY KEY,"
             "messages INTEGER NOT NULL DEFAULT 0, edited INTEGER NOT NULL DEFAULT 0,"
             "deleted INTEGER NOT NULL DEFAULT 0, missing INTEGER NOT NULL DEFAULT 0,"
-            "last_observed_at TEXT, text_id INTEGER, text_seq INTEGER)",
+            "last_observed_at TEXT, text_id INTEGER, text_seq INTEGER,"
+            "saved INTEGER NOT NULL DEFAULT 0, deleted_saved INTEGER NOT NULL DEFAULT 0)",
             "CREATE TABLE IF NOT EXISTS known_chat_index (chat_id INTEGER PRIMARY KEY)",
             "CREATE TABLE IF NOT EXISTS event_kind_counts (kind TEXT PRIMARY KEY, total INTEGER NOT NULL)",
             "CREATE TABLE IF NOT EXISTS chat_event_kind_counts (chat_id INTEGER NOT NULL,kind TEXT NOT NULL,"
@@ -86,8 +87,11 @@ class JournalIndex:
         existing = {row[0] for row in self.db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         has_positions = "journal_read_index" in existing
         positions = {row[0] for row in self.db.execute("SELECT name FROM journal_read_index")} if has_positions else set()
+        # Per-chat counters gained saved/deleted_saved: an older state index is rebuilt from the journal once.
+        state_columns = {row[1] for row in self.db.execute("PRAGMA table_info(chat_state_index)")}             if "chat_state_index" in existing else set()
         for name, tables in READ_GROUPS.items():
-            if name in positions and all(table in existing for table in tables):
+            current = name != "state" or "chat_state_index" not in existing or "deleted_saved" in state_columns
+            if name in positions and all(table in existing for table in tables) and current:
                 continue
             for table in tables:
                 self.db.execute("DROP TABLE IF EXISTS " + table)
@@ -154,15 +158,20 @@ class JournalIndex:
                 previous = tuple(old[k] for k in ("has_message", "edited", "deleted", "missing")) if old else (0,)*4
                 updated = tuple(max(a, b) for a, b in zip(previous, values))
                 text_seq = event["seq"] if kind in TEXT_KINDS else old["text_seq"] if old else None
+                # Saved text, and deletions of messages whose text was saved before the deletion notice.
+                had_text = bool(old and old["text_seq"] is not None)
+                saved_before = (int(had_text), int(had_text and bool(previous[2])))
+                saved_after = (int(text_seq is not None), int(text_seq is not None and bool(updated[2])))
                 db.execute("INSERT INTO message_state_index VALUES (?,?,?,?,?,?,?) "
                            "ON CONFLICT(chat_id,message_id) DO UPDATE SET text_seq=excluded.text_seq,"
                            "has_message=excluded.has_message,edited=excluded.edited,"
                            "deleted=excluded.deleted,missing=excluded.missing",
                            (chat, message, text_seq, *updated))
                 db.execute("UPDATE chat_state_index SET messages=messages+?,edited=edited+?,"
-                           "deleted=deleted+?,missing=missing+?,"
+                           "deleted=deleted+?,missing=missing+?,saved=saved+?,deleted_saved=deleted_saved+?,"
                            "last_observed_at=max(coalesce(last_observed_at,''),?) WHERE chat_id=?",
-                           (*[b-a for a, b in zip(previous, updated)], event["observed_at"], chat))
+                           (*[b-a for a, b in zip(previous, updated)], *[b-a for a, b in zip(saved_before, saved_after)],
+                            event["observed_at"], chat))
             if kind in TEXT_KINDS:
                 db.execute("UPDATE chat_state_index SET text_id=?,text_seq=? WHERE chat_id=? "
                            "AND (text_seq IS NULL OR text_id IS NULL OR ?>=text_id)",

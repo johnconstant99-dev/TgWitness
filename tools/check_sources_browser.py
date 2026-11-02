@@ -59,6 +59,8 @@ def check_targets(page, server):
     expect(page.locator("#target-selection-count")).to_have_text("7 selected")
     page.locator("#target-bulk-action").select_option("pause")
     page.locator("#target-bulk-apply").click()
+    answer_panel_dialog(page)
+    expect(rows.locator(".source-state").first).to_have_text("Paused")
     expect(page.locator("#target-card")).to_have_attribute("aria-busy", "false")
     assert rows.locator(".source-state").all_text_contents() == ["Paused"] * 7
     page.locator("#target-filter").select_option("enabled")
@@ -88,13 +90,18 @@ def check_targets(page, server):
     page.locator("#target-select-page").check()
     page.locator("#target-bulk-action").select_option("exclude")
     page.locator("#target-bulk-apply").click()
+    answer_panel_dialog(page)
     expect(rows.locator(".source-state")).to_have_text("Excluded")
     expect(page.locator("#target-card")).to_have_attribute("aria-busy", "false")
     page.locator("#sources-tab-scope").click()
     expect(page.locator("#scope-new-profile")).to_be_checked()
     expect(page.locator("#scope-exclude")).to_contain_text("Investigation source 02")
     page.locator("#sources-tab-chats").click()
+    # The status badge is only an indicator; resuming is a menu action.
     rows.locator(".source-state").click()
+    expect(rows.locator(".source-state")).to_have_text("Excluded")
+    rows.locator(".source-row-menu > summary").click()
+    rows.locator('[data-source-action="enable"]').click()
     expect(rows.locator(".source-state")).to_have_text("Enabled")
     expect(page.locator("#target-card")).to_have_attribute("aria-busy", "false")
     assert page.evaluate("state.scopeDirty && !state.scopeExclude.includes(-1000000001001)")
@@ -323,6 +330,21 @@ def main():
                     page.screenshot(path=str(output / f"{tab}-{width}-{theme}.png"), full_page=True)
                     checks.append({"theme": theme, "width": width, "tab": tab, "height": height})
 
+        # Investigation mode saves what it describes, once the whole-account scope is confirmed.
+        page.locator("#sources-tab-scope").click()
+        page.locator("#scope-investigation").click()
+        answer_panel_dialog(page, accept=False)
+        assert server.app.state.store.get_setting("scope", {}).get("mode", "selected") == "selected"
+        page.locator("#scope-investigation").click()
+        answer_panel_dialog(page)
+        for _ in range(100):
+            saved = server.app.state.store.get_setting("scope", {})
+            if saved.get("mode") == "account":
+                break
+            page.wait_for_timeout(50)
+        assert saved["mode"] == "account" and saved["new_chats"] == {"profile": True, "history": 200}, saved
+        page.evaluate("""json('scope',{mode:'selected',folder_id:null,types:{channels:true,groups:true,private:true,bots:true},
+            exclude:[],own_actions:true,new_chats:{profile:false,history:0}}).then(()=>{state.scopeDirty=false;return loadScope();})""")
         check_targets(page, server)
         check_export_location(page)
         check_dialog_refresh(page, server)
@@ -338,6 +360,7 @@ def main():
         page.locator("#target-bulk-action").select_option("pause")
         hold_api_response(page, "/api/targets/batch")
         page.locator("#target-bulk-apply").click()
+        answer_panel_dialog(page)
         expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")
         page.locator("#profile-select").select_option(second)
         expect(page.locator("#workspace")).to_have_js_property("inert", False)

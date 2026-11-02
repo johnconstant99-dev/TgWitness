@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- No consequential action on a single stray click. In Sources the status badge only
+  shows the state; pausing, resuming, excluding and removing are in the row menu, each
+  with what it does, pausing and excluding are confirmed (also in bulk), and removing a
+  source asks for its name. Sending from a chat is closed until "Write as @account" is
+  chosen, warns that chat members see the message and that the action is journaled,
+  and is refused by the panel and the API for the Evidence for a case goal. Changing
+  the connection route while observing shows a warning with one button that pauses
+  and opens the route settings. The sticky chat date now sits on a full-width band.
+- One set of numbers and statuses across the panel. Chat counters separate messages
+  deleted with their text kept, deleted before any text was saved, and not found on
+  recheck; the chat list, chat header and notifications use the same definitions (the
+  notification states that it covers one hour). The journal's read index is rebuilt
+  once to add this split. A source that keeps delivering records is "receiving
+  updates" rather than unconfirmed when the account's chat list does not show it, and
+  an unconfirmed source says why. The chat header lists attachment limits per type
+  instead of the largest one. The priority star has one name and explains the recheck
+  interval. Investigation mode saves what it describes after the whole-account
+  confirmation. Hide-address mode with outside requests but no proxy for them says
+  that timestamps, notifications, off-site copies and proxy-list updates are blocked,
+  with buttons to set a proxy or turn those requests off. Without a chosen goal, the
+  setup card says what the configuration already amounts to.
 - Panel fixes. The journal no longer stops at a skipped-attachment record
   ("mediaTypes is not defined"), so its record count and Newer/Older paging stay
   correct. Confirmations and name prompts are panel dialogs instead of

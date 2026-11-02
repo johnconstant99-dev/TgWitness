@@ -289,7 +289,7 @@
   </div>
   <div id="sources-panel-scope" role="tabpanel" aria-labelledby="sources-tab-scope">
   <form class="card padded scope-card" id="scope-form"><div class="eyebrow">Observation scope</div><h2>What this account records</h2>
-    <div class="investigation-preset"><button class="secondary" id="scope-investigation" type="button"><svg aria-hidden="true" class="icon"><use href="#i-eye"/></svg> Investigation mode</button><p class="hint">For a dedicated account that joins teams and talks to bots: records every chat, group, private chat and bot it sees, its own messages and button presses, and for each new chat or bot saves its profile and earlier visible messages at once. Review and press Save scope.</p><a class="format-help" href="/dedicated-account.html" rel="noopener" target="_blank">Why never your main account ↗</a></div>
+    <div class="investigation-preset"><button class="secondary" id="scope-investigation" type="button"><svg aria-hidden="true" class="icon"><use href="#i-eye"/></svg> Investigation mode</button><p class="hint">For a dedicated account that joins teams and talks to bots: records every chat, group, private chat and bot it sees, its own messages and button presses, and for each new chat or bot saves its profile and earlier visible messages at once. Applied as soon as you confirm the whole-account scope.</p><a class="format-help" href="/dedicated-account.html" rel="noopener" target="_blank">Why never your main account ↗</a></div>
     <div aria-label="Observation scope" class="scope-modes" role="radiogroup">
       <label><input name="scope-mode" type="radio" value="selected"><span><strong>Chosen chats</strong><small>Only the chats you add below.</small></span></label>
       <label><input name="scope-mode" type="radio" value="folder"><span><strong>Telegram folder</strong><small>Chats in one of the account's folders, including chats added to it later.</small></span></label>
@@ -1025,7 +1025,7 @@
 
     <div class="card padded route-card"><div class="eyebrow">Connection route</div><h2 id="route-summary">Direct connection</h2><p class="muted" id="route-detail">Choose a route before signing in.</p>
       <details id="network-details"><summary>Change connection route</summary>
-        <p class="notice route-running" hidden id="network-running">Pause observation to change the route. Until then, observation keeps using the current one.</p>
+        <div class="notice warning route-running" hidden id="network-running"><p>Pause observation to change the route. Until then, observation keeps using the current one.</p></div>
         <div class="proxy-catalog"><h3>Public MTProxy lists</h3>
           <p class="hint" id="proxy-catalog-status" role="status"></p>
           <label for="proxy-catalog-select">Available public servers</label><select id="proxy-catalog-select" disabled></select>
@@ -1100,6 +1100,7 @@
         <div><label for="outside-username">Username · optional</label><input autocomplete="off" id="outside-username" maxlength="255"></div>
         <div><label for="outside-password">Password · optional</label><input autocomplete="new-password" id="outside-password" maxlength="255" type="password"></div>
       </div>
+      <div class="notice warning policy-warning" hidden id="policy-warning" role="alert"></div>
       <p class="hint" id="policy-status" role="status"></p>
       <div class="route-actions"><button class="secondary" type="submit">Save IP protection</button></div>
       <p class="hint">A saved proxy password is never shown again; re-enter it when you change the proxy. How often proxies are replaced, rested and checked is set in Parameters → Automatic MTProxy.</p>
@@ -1140,8 +1141,10 @@
         <div class="chat-status" id="chat-status"></div>
         <div class="export-box" hidden id="export-box" role="status"></div>
         <div class="chat-feed" id="chat-feed"></div>
+        <div class="chat-compose-toggle" hidden id="chat-compose-toggle"><button class="secondary small" id="chat-compose-open" type="button"></button></div>
         <form class="chat-compose" id="chat-compose">
-          <p class="hint" id="chat-compose-account"></p>
+          <p class="notice warning chat-compose-warning" id="chat-compose-warning"></p>
+          <div class="chat-compose-head"><p class="hint" id="chat-compose-account"></p><button class="text-link" id="chat-compose-close" type="button">Close</button></div>
           <div hidden id="chat-reply"><span id="chat-reply-label"></span> <button class="text-link" id="chat-reply-cancel" type="button">Cancel</button></div>
           <label class="visually-hidden" for="chat-message">Message</label>
           <div class="chat-compose-row"><textarea id="chat-message" rows="1" maxlength="4096" placeholder="Write a message…" required></textarea><button class="primary" id="chat-send" type="submit">Send</button></div>

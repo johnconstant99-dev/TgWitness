@@ -275,9 +275,24 @@ def host_line(state, words):
     return tr(words, "SSH change on the server, no new login recorded: {details}", details="; ".join(found))
 
 
-def change_line(title, counts, words):
-    return tr(words, "{chat}: {deleted} deleted, {edited} edited, {missing} not found", chat=title,
-              deleted=counts.get("deleted", 0), edited=counts.get("edited", 0), missing=counts.get("missing", 0))
+CHANGE_PARTS = (("deleted_saved", "{n} deleted, text kept"), ("deleted_unsaved", "{n} deleted before saving"),
+                ("edited", "{n} edited"), ("missing", "{n} not found on recheck"))
+
+
+def split_deletions(store, chat_id, counts, deleted_ids):
+    """The panel's chat counters use the same split: a deletion notice for a message whose text was saved,
+    or for one deleted before any text was saved."""
+    if not counts.get("deleted"):
+        return counts
+    saved = store.saved_message_ids(chat_id, deleted_ids)
+    kept = sum(1 for message in deleted_ids if message in saved)
+    return {**counts, "deleted_saved": kept, "deleted_unsaved": counts["deleted"] - kept}
+
+
+def change_line(title, counts, words, period=None):
+    parts = ", ".join(tr(words, label, n=counts[key]) for key, label in CHANGE_PARTS if counts.get(key))
+    template = "{chat}, this hour: {changes}" if period == "hour" else "{chat}: {changes}"
+    return tr(words, template, chat=title, changes=parts or tr(words, "no changes"))
 
 
 def discovered_line(title, words):
@@ -301,10 +316,12 @@ def excerpt_line(store, event, title, words, chars=EXCERPT_CHARS):
     return tr(words, "{chat} · not found #{id}: {excerpt}", **values)
 
 
-def change_item(event, title, words):
+def change_item(event, title, words, kept=None):
     values = {"chat": title, "id": event["message_id"]}
     if event["kind"] == "message.deleted":
-        return tr(words, "Message #{id} deleted in {chat}", **values)
+        if kept is False:
+            return tr(words, "Message #{id} deleted in {chat} before its text was saved", **values)
+        return tr(words, "Message #{id} deleted in {chat}; its text was saved", **values)
     if event["kind"] == "message.edited":
         return tr(words, "Message #{id} edited in {chat}", **values)
     return tr(words, "Message #{id} not found at recheck in {chat}", **values)
@@ -465,16 +482,20 @@ def panel_items(store, words, limit=60, *, allowed_chats=None, workspace_id="def
         if event["chat_id"] is None:
             continue
         key = notice_key(workspace_id, "changes", event["chat_id"], notice_hour(event))
-        group = groups.setdefault(key, {"event": event, "first": event, "counts": {}, "count": 0})
+        group = groups.setdefault(key, {"event": event, "first": event, "counts": {}, "count": 0, "deleted": []})
         change = CHANGES[event["kind"]]
         group["counts"][change] = group["counts"].get(change, 0) + 1
+        if change == "deleted":
+            group["deleted"].append(event["message_id"])
         group["count"] += 1
         group["first"] = event
     changes = []
     for key, group in groups.items():
         event, count = group["event"], group["count"]
         title = titles.get(event["chat_id"], str(event["chat_id"]))
-        text = change_item(event, title, words) if count == 1 else change_line(title, group["counts"], words)
+        counts = split_deletions(store, event["chat_id"], group["counts"], group["deleted"])
+        text = (change_item(event, title, words, kept=bool(counts.get("deleted_saved")) if group["deleted"] else None)
+                if count == 1 else change_line(title, counts, words, period="hour"))
         if truncated:
             text = tr(words, "Recent changes in {chat}", chat=title)
         item = notice_entry(event, "change", text, key, count_exact=not truncated)
@@ -536,6 +557,8 @@ def collect(store, cursor, titles, words, include_text=False, max_lines=MAX_LINE
             if change and event["chat_id"] is not None:
                 per_chat = changes.setdefault(event["chat_id"], {})
                 per_chat[change] = per_chat.get(change, 0) + 1
+                if change == "deleted":
+                    per_chat.setdefault("_deleted", []).append(event["message_id"])
                 if include_text and len(excerpts) <= max_lines:
                     excerpts.append(excerpt_line(store, event, titles.get(event["chat_id"], str(event["chat_id"])),
                                                  words, chars))
@@ -562,7 +585,9 @@ async def alert_pass(store, vault, network, now=None):
     if settings["problems"] and problems:
         messages.append((tr(words, "TgWitness · {name}: problems", name=name), capped(problems, words, limit)))
     if settings["changes"] and (changes or discovered):
-        lines = [change_line(titles.get(chat, str(chat)), counts, words) for chat, counts in changes.items()]
+        lines = [change_line(titles.get(chat, str(chat)),
+                             split_deletions(store, chat, counts, counts.pop("_deleted", [])), words)
+                 for chat, counts in changes.items()]
         messages.append((tr(words, "TgWitness · {name}: changes in observed chats", name=name),
                          capped(discovered + lines + excerpts, words, limit)))
     local = (now or datetime.now(timezone.utc)).astimezone()

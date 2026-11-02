@@ -37,7 +37,7 @@ export function createHealthActions({node, tr, health, close, context}) {
       ? "Exclude {n} unconfirmed sources? Collection for these chats will stop; saved evidence stays."
       : "Pause {n} unconfirmed sources? Collection for these chats will stop; saved evidence stays.", {n: ids.length})))) return;
     const view = await sourceView(session);
-    if (view) {view.filterTargets("unconfirmed"); await view.runSourceAction(ids, wide ? "exclude" : "pause");}
+    if (view) {view.filterTargets("unconfirmed"); await view.runSourceAction(ids, wide ? "exclude" : "pause", {confirmed: true});}
   });
   add("sources", "ignore-sources", "Ignore until visible", async (status, profile, session) => {
     const ids = unconfirmed(status); if (!ids.length) return;

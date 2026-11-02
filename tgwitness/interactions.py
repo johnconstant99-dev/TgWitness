@@ -150,6 +150,9 @@ async def execute(collector, body):
         return prior.get("result") or {"request_id": body.request_id, "status": "unknown",
                                        "request_event": prior["request_event"]}
     check_pause(collector)
+    # The Evidence goal records without acting in the observed chats: no messages from the panel.
+    if body.action == "send" and (store.get_setting("setup", None) or {}).get("goal") == "evidence":
+        raise ValueError("Sending messages from the panel is off for the Evidence for a case goal.")
     await collector.restore()
     account = (store.get_setting("account", {}) or {}).get("id")
     prepared, entity = None, None

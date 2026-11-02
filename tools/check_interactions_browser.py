@@ -23,6 +23,12 @@ from tgwitness.evidence import export_file
 from tgwitness.verify import verify_bundle
 
 
+def open_composer(page):
+    if page.locator("#chat-compose-open").is_visible():
+        page.locator("#chat-compose-open").click()
+    expect(page.locator("#chat-compose")).to_be_visible()
+
+
 def main():
     output = ROOT / "test-results" / "interactions-browser"
     output.mkdir(parents=True, exist_ok=True)
@@ -52,6 +58,11 @@ def main():
                 raise
             page.locator('[data-view="chats"]').click()
             expect(page.locator("#chat-message")).to_be_enabled()
+            # Sending acts as the account in the chat: closed until asked for, with a warning when opened.
+            expect(page.locator("#chat-compose")).to_be_hidden()
+            expect(page.locator("#chat-compose-open")).to_contain_text("Write as")
+            open_composer(page)
+            expect(page.locator("#chat-compose-warning")).to_contain_text("Chat members will see this message")
             page.locator("#chat-message").fill("<b>plain text from the panel</b>")
             page.locator("#chat-send").click()
             expect(page.locator("#interaction-result")).to_contain_text("Action completed")
@@ -143,6 +154,7 @@ def main():
 
             assert page.locator('#interaction-result a[href^="https:"]').count() == 0
             expect(page.locator("#chat-message")).to_be_enabled()
+            open_composer(page)
             page.locator("#chat-message").fill("Draft intended for the bot")
             sent = len(server.app.state.collector.client.sent)
             hold_api_response(page, "/api/chats/" + str(CHAT) + "/messages?limit=60")
@@ -157,6 +169,7 @@ def main():
             assert len(server.app.state.collector.client.sent) == sent
             release_api_response(page)
             expect(page.locator("#chat-message")).to_be_enabled()
+            open_composer(page)
             page.locator("#chat-message").fill("Message intended for the group")
             page.locator("#chat-send").click()
             expect(page.locator("#chat-send")).to_be_enabled()
@@ -173,6 +186,7 @@ def main():
             release_api_response(page)
             expect(page.locator("#chat-name")).to_have_text("Synthetic shop bot")
             expect(page.locator("#chat-feed")).not_to_contain_text("Message intended for the group")
+            open_composer(page)
             for width, height in [(1440, 1000), (390, 844), (320, 800)]:
                 page.set_viewport_size({"width": width, "height": height})
                 for theme in ("light", "dark"):
@@ -197,6 +211,17 @@ def main():
             expect(page.locator("#chat-send")).to_have_text("Send")
             expect(page.locator("#chat-message")).to_have_attribute("placeholder", "Write a message…")
             expect(page.locator("#chat-compose-account")).to_contain_text("Sending as")
+            # The Evidence goal records without acting: the panel and the API both refuse to send.
+            sent = len(server.app.state.collector.client.sent)
+            server.app.state.store.set_setting("setup", {"goal": "evidence"})
+            page.evaluate("refreshStatus()")
+            expect(page.locator("#chat-compose-open")).to_be_disabled()
+            expect(page.locator("#chat-compose-open")).to_contain_text("Sending is off")
+            refused = page.evaluate("""chat=>json('interactions',{request_id:'evidence-goal-refusal-check',action:'send',
+                chat_id:chat,text:'must not be sent'}).then(()=>'sent',error=>error.message)""", CHAT)
+            assert "Evidence for a case" in refused, refused
+            assert len(server.app.state.collector.client.sent) == sent
+            server.app.state.store.set_setting("setup", None)
             assert not errors, errors
             browser.close()
         archive = export_file(store, server.app.state.vault, "zip")

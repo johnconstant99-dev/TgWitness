@@ -690,6 +690,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 "recheck": recheck_settings(store),
                 "dossiers": [c for c in dossier.enabled_chats(store) if allowed is None or c in allowed],
                 "setup_answered": store.get_setting("setup", None) is not None,
+                "setup_goal": (store.get_setting("setup", None) or {}).get("goal"),
                 "fingerprint": fingerprint(vault.public_key), "limitations": LIMITS,
                 "chats_limited": allowed is not None,
                 "assurance": bool(app.state.assurance)}
