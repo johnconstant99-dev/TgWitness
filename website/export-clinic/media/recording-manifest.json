@@ -1,0 +1,167 @@
+{
+  "created_at_utc": "2026-11-03T21:22:19.194020+00:00",
+  "source_recording": "ExportClinic_2026-11-03_12-50-40.mkv",
+  "source_sha256": "9d94ddbffd34112810e17322a0815b50e4faa6ce1665e0d9287f93572cbc97a6",
+  "source_recording_unchanged": true,
+  "original_copy_matches_source": true,
+  "primary_viewing_copy": "export-clinic-2min.mp4",
+  "files": [
+    {
+      "file": "ExportClinic_2026-11-03_12-50-40.mkv",
+      "bytes": 29602696,
+      "sha256": "9d94ddbffd34112810e17322a0815b50e4faa6ce1665e0d9287f93572cbc97a6",
+      "fps": 30.0,
+      "duration_seconds": 368.8,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "file": "export-clinic-full.mp4",
+      "bytes": 29887668,
+      "sha256": "64f7a802d274e4c51f353f5df3764248fe9bcc72b22f571b92e2c0f228de46ba",
+      "fps": 30.0,
+      "duration_seconds": 368.7,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "file": "export-clinic-2min.mp4",
+      "bytes": 14306094,
+      "sha256": "9f37db2900d5729f28d46687aec79910060dd98b047f9f6aad60e6d905492825",
+      "fps": 30.0,
+      "duration_seconds": 119.73333333333333,
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "edits_apply_to": "export-clinic-2min.mp4",
+  "edits": [
+    {
+      "source_start_seconds": 0,
+      "source_end_seconds": 12,
+      "speed": 2,
+      "label": "2x - OPEN OFFICIAL SITE",
+      "purpose": "Open the official site",
+      "output_start_seconds": 0,
+      "output_end_seconds": 6.0
+    },
+    {
+      "source_start_seconds": 12,
+      "source_end_seconds": 105,
+      "speed": 15,
+      "label": "15x - DOWNLOAD / INSTALL",
+      "purpose": "Download and installation",
+      "output_start_seconds": 6.0,
+      "output_end_seconds": 12.2
+    },
+    {
+      "source_start_seconds": 105,
+      "source_end_seconds": 113,
+      "speed": 2,
+      "label": "2x - CLIENT STARTUP",
+      "purpose": "Client startup",
+      "output_start_seconds": 12.2,
+      "output_end_seconds": 16.2
+    },
+    {
+      "source_start_seconds": 113,
+      "source_end_seconds": 126,
+      "speed": 1,
+      "label": "",
+      "purpose": "Account sign-in",
+      "output_start_seconds": 16.2,
+      "output_end_seconds": 29.2
+    },
+    {
+      "source_start_seconds": 126,
+      "source_end_seconds": 135,
+      "speed": 3,
+      "label": "3x - OPEN TEST CHATS",
+      "purpose": "Open the test conversations",
+      "output_start_seconds": 29.2,
+      "output_end_seconds": 32.2
+    },
+    {
+      "source_start_seconds": 135,
+      "source_end_seconds": 163,
+      "speed": 1,
+      "label": "",
+      "purpose": "First export, access confirmation and completion",
+      "output_start_seconds": 32.2,
+      "output_end_seconds": 60.2
+    },
+    {
+      "source_start_seconds": 163,
+      "source_end_seconds": 248,
+      "speed": 12,
+      "label": "12x - EXPORTS / FILES",
+      "purpose": "Repeated exports and file navigation",
+      "output_start_seconds": 60.2,
+      "output_end_seconds": 67.283333
+    },
+    {
+      "source_start_seconds": 248,
+      "source_end_seconds": 294,
+      "speed": 6,
+      "label": "6x - OPEN EXPORT FILES",
+      "purpose": "Open the exported pages",
+      "output_start_seconds": 67.283333,
+      "output_end_seconds": 74.95
+    },
+    {
+      "source_start_seconds": 294,
+      "source_end_seconds": 303,
+      "speed": 1,
+      "label": "",
+      "purpose": "Bot comparison: FAIL and PASS",
+      "output_start_seconds": 74.95,
+      "output_end_seconds": 83.95
+    },
+    {
+      "source_start_seconds": 303,
+      "source_end_seconds": 309,
+      "speed": 6,
+      "label": "6x - NEXT COMPARISON",
+      "purpose": "Navigate to the next comparison",
+      "output_start_seconds": 83.95,
+      "output_end_seconds": 84.95
+    },
+    {
+      "source_start_seconds": 309,
+      "source_end_seconds": 317,
+      "speed": 1,
+      "label": "",
+      "purpose": "Channel comparison",
+      "output_start_seconds": 84.95,
+      "output_end_seconds": 92.95
+    },
+    {
+      "source_start_seconds": 317,
+      "source_end_seconds": 347,
+      "speed": 6,
+      "label": "6x - NEXT COMPARISON",
+      "purpose": "Navigate through remaining exports",
+      "output_start_seconds": 92.95,
+      "output_end_seconds": 97.95
+    },
+    {
+      "source_start_seconds": 347,
+      "source_end_seconds": 368.8,
+      "speed": 1,
+      "label": "",
+      "purpose": "Personal-chat comparison and closing disclosure",
+      "output_start_seconds": 97.95,
+      "output_end_seconds": 119.75
+    }
+  ],
+  "timeline_omissions": false,
+  "short_version_audio": "No audio track; the original audio track is silent.",
+  "full_mp4": "Container remux with stream copy; original MKV is the byte-identical source copy.",
+  "timestamp_note": "Video clock is the host clock, not an independent trusted timestamp.",
+  "scope": "Disclosed local-file modification with synthetic test-account messages.",
+  "validation": {
+    "complete_video_decodes": true,
+    "expected_duration_seconds": 119.75000000000001,
+    "actual_duration_seconds": 119.73333333333333
+  }
+}

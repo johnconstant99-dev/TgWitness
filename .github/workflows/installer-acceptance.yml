@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - deploy/installer/**
+      - pyproject.toml
+      - tgwitness_capture/**
       - tgwitness/panelctl.py
       - tgwitness/operator_guide.py
       - tools/build_installer.py

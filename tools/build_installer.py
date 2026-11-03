@@ -80,7 +80,7 @@ def verify_wheel(path, version):
             expected.update(item.relative_to(ROOT).as_posix() for item in directory.glob(pattern) if item.is_file())
     with zipfile.ZipFile(path) as archive:
         entries = archive.namelist()
-        package_entries = {name for name in entries if name.startswith("tgwitness/")}
+        package_entries = set(entries) & expected
         if package_entries != expected or len(set(entries)) != len(entries) or archive.testzip():
             raise ValueError("Incomplete or damaged application wheel")
         dist_info = "tgwitness-" + version + ".dist-info/"
@@ -89,7 +89,7 @@ def verify_wheel(path, version):
         for name in entries:
             if name not in expected and name not in permitted_metadata:
                 raise ValueError("Unexpected wheel entry: " + name)
-            if name.startswith("tgwitness/") and not name.endswith("/"):
+            if name in expected:
                 source = ROOT / name
                 if not source.is_file() or archive.read(name) != source.read_bytes():
                     raise ValueError("Wheel differs from checked source: " + name)
@@ -156,7 +156,7 @@ def main():
     revision = git("rev-parse", "HEAD")
     if not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise ValueError("Expected a committed source revision")
-    if git("status", "--porcelain", "--", "tgwitness", "pyproject.toml", "README.md", "deploy/constraints.txt", "deploy/constraints-mcp.txt"):
+    if git("status", "--porcelain", "--", "tgwitness", "tgwitness_capture", "pyproject.toml", "README.md", "deploy/constraints.txt", "deploy/constraints-mcp.txt"):
         raise ValueError("Commit application and dependency changes before building a published installer")
     version = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
     if args.output.is_symlink():

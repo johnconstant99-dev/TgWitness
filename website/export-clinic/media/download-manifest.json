@@ -1,0 +1,47 @@
+{
+  "format_version": 1,
+  "base_url": "https://phishdestroy.io/research/telegram-export/2026-11-03/",
+  "description": "Five reviewed media downloads. The modification helper is excluded.",
+  "files": [
+    {
+      "file": "export-clinic-paired-files.zip",
+      "url": "https://phishdestroy.io/research/telegram-export/2026-11-03/export-clinic-paired-files.zip",
+      "bytes": 2967882,
+      "sha256": "f6eac1bae525c23e7803e4316243f696e904e3b65af55dc759a29b4ed1b84092",
+      "content_type": "application/zip",
+      "content_disposition": "attachment"
+    },
+    {
+      "file": "export-clinic-review-package.zip",
+      "url": "https://phishdestroy.io/research/telegram-export/2026-11-03/export-clinic-review-package.zip",
+      "bytes": 46888021,
+      "sha256": "b97d984cab5a21a26484af871013bfc729b37da5aa03c57447b6d4fe9f706034",
+      "content_type": "application/zip",
+      "content_disposition": "attachment"
+    },
+    {
+      "file": "ExportClinic_2026-11-03_12-50-40.mkv",
+      "url": "https://phishdestroy.io/research/telegram-export/2026-11-03/ExportClinic_2026-11-03_12-50-40.mkv",
+      "bytes": 29602696,
+      "sha256": "9d94ddbffd34112810e17322a0815b50e4faa6ce1665e0d9287f93572cbc97a6",
+      "content_type": "video/x-matroska",
+      "content_disposition": "attachment"
+    },
+    {
+      "file": "export-clinic-2min.mp4",
+      "url": "https://phishdestroy.io/research/telegram-export/2026-11-03/export-clinic-2min.mp4",
+      "bytes": 14306094,
+      "sha256": "9f37db2900d5729f28d46687aec79910060dd98b047f9f6aad60e6d905492825",
+      "content_type": "video/mp4",
+      "content_disposition": "inline"
+    },
+    {
+      "file": "export-clinic-full.mp4",
+      "url": "https://phishdestroy.io/research/telegram-export/2026-11-03/export-clinic-full.mp4",
+      "bytes": 29887668,
+      "sha256": "64f7a802d274e4c51f353f5df3764248fe9bcc72b22f571b92e2c0f228de46ba",
+      "content_type": "video/mp4",
+      "content_disposition": "inline"
+    }
+  ]
+}

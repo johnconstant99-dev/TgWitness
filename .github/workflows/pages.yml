@@ -15,6 +15,10 @@ on:
       - tools/site_modes.py
       - tools/site_account.py
       - tools/site_llms.py
+      - tools/site_export_clinic.py
+      - tools/check_export_clinic.py
+      - tools/export_clinic_preview.py
+      - tools/site_test_server.py
       - docs/*.md
       - docs/ru/SEALED-ACTIONS.md
       - docs/QUICKSTART.md
@@ -93,6 +97,8 @@ jobs:
             test-results/docs-site/**/*.json
             test-results/docs-workflows/**/*.png
             test-results/docs-workflows/**/*.json
+            test-results/export-clinic/*.png
+            test-results/export-clinic/*.json
             test-results/report-example/**/*.png
             test-results/report-example/**/*.json
             test-results/guide-languages/**/*.png

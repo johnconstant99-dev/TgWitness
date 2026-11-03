@@ -1,0 +1,22 @@
+{
+  "reviewed_at_utc": "2026-11-03T21:45:50.841421+00:00",
+  "kind": "Local package-composition review, not independent Telegram authentication",
+  "selected_conversations": 7,
+  "message_records": 45,
+  "changed_message_records": 17,
+  "files_per_version": 340,
+  "different_files": 32,
+  "export_images_reviewed": 36,
+  "images_with_exif_metadata": 0,
+  "helper_executable_included": false,
+  "helper_source_included": false,
+  "helper_transformation_configuration_included": false,
+  "credentials_or_account_sessions_included": false,
+  "unrelated_chats_included": false,
+  "full_working_logs_included": false,
+  "pdf_attachments_included": false,
+  "standard_export_viewer_javascript": "Unchanged and identical across both versions and all seven exports",
+  "selection_method": "Exact test-conversation IDs; native export-path allowlist; retained-backup and output SHA-256 matches; private-marker scan; explicit outer-archive membership",
+  "original_recording_unchanged": true,
+  "visible_video_content_note": "The test account phone number and the guest demo path are visible in the recording. No video redaction was performed."
+}

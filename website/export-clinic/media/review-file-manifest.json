@@ -1,0 +1,3416 @@
+{
+  "format_version": 1,
+  "conversation_count": 7,
+  "message_count": 45,
+  "changed_messages": 17,
+  "files_per_version": 340,
+  "changed_files": 32,
+  "pdf_files": 0,
+  "helper_implementation_included": false,
+  "reconstruction": "Changed files restored byte-for-byte from retained backups matched to operator-generated hashes; unchanged assets copied from the captured export.",
+  "scope": "Only the seven owned test conversations shown in the recording; no account-wide export.",
+  "trust_note": "Hashes establish file correspondence within this package, not Telegram server authenticity. The operator generated the capture and change records.",
+  "viewer_javascript": "Telegram's unchanged standard exported-viewer asset; not the modification helper.",
+  "files": [
+    {
+      "file": "ChatExport_2026-11-03 (6)/css/style.css",
+      "before_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "modified_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "before_bytes": 44158,
+      "modified_bytes": 44158,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/back.png",
+      "before_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "modified_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "before_bytes": 312,
+      "modified_bytes": 312,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/back@2x.png",
+      "before_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "modified_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "before_bytes": 518,
+      "modified_bytes": 518,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_call.png",
+      "before_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "modified_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "before_bytes": 417,
+      "modified_bytes": 417,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_call@2x.png",
+      "before_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "modified_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "before_bytes": 815,
+      "modified_bytes": 815,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_contact.png",
+      "before_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "modified_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "before_bytes": 323,
+      "modified_bytes": 323,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_contact@2x.png",
+      "before_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "modified_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "before_bytes": 600,
+      "modified_bytes": 600,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_file.png",
+      "before_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "modified_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "before_bytes": 236,
+      "modified_bytes": 236,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_file@2x.png",
+      "before_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "modified_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "before_bytes": 408,
+      "modified_bytes": 408,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_game.png",
+      "before_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "modified_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "before_bytes": 271,
+      "modified_bytes": 271,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_game@2x.png",
+      "before_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "modified_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "before_bytes": 510,
+      "modified_bytes": 510,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_location.png",
+      "before_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "modified_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "before_bytes": 480,
+      "modified_bytes": 480,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_location@2x.png",
+      "before_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "modified_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "before_bytes": 991,
+      "modified_bytes": 991,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_music.png",
+      "before_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "modified_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "before_bytes": 275,
+      "modified_bytes": 275,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_music@2x.png",
+      "before_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "modified_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "before_bytes": 464,
+      "modified_bytes": 464,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_photo.png",
+      "before_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "modified_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "before_bytes": 243,
+      "modified_bytes": 243,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_photo@2x.png",
+      "before_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "modified_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "before_bytes": 458,
+      "modified_bytes": 458,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_shop.png",
+      "before_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "modified_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "before_bytes": 377,
+      "modified_bytes": 377,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_shop@2x.png",
+      "before_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "modified_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "before_bytes": 790,
+      "modified_bytes": 790,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_video.png",
+      "before_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "modified_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "before_bytes": 235,
+      "modified_bytes": 235,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_video@2x.png",
+      "before_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "modified_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "before_bytes": 411,
+      "modified_bytes": 411,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_voice.png",
+      "before_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "modified_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "before_bytes": 328,
+      "modified_bytes": 328,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/media_voice@2x.png",
+      "before_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "modified_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "before_bytes": 660,
+      "modified_bytes": 660,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_calls.png",
+      "before_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "modified_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "before_bytes": 656,
+      "modified_bytes": 656,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_calls@2x.png",
+      "before_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "modified_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "before_bytes": 1300,
+      "modified_bytes": 1300,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_chats.png",
+      "before_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "modified_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "before_bytes": 283,
+      "modified_bytes": 283,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_chats@2x.png",
+      "before_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "modified_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "before_bytes": 454,
+      "modified_bytes": 454,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_contacts.png",
+      "before_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "modified_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "before_bytes": 508,
+      "modified_bytes": 508,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_contacts@2x.png",
+      "before_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "modified_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "before_bytes": 1023,
+      "modified_bytes": 1023,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_frequent.png",
+      "before_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "modified_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "before_bytes": 771,
+      "modified_bytes": 771,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_frequent@2x.png",
+      "before_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "modified_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "before_bytes": 1696,
+      "modified_bytes": 1696,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_music.png",
+      "before_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "modified_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "before_bytes": 446,
+      "modified_bytes": 446,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_music@2x.png",
+      "before_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "modified_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "before_bytes": 777,
+      "modified_bytes": 777,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_other.png",
+      "before_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "modified_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "before_bytes": 155,
+      "modified_bytes": 155,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_other@2x.png",
+      "before_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "modified_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "before_bytes": 269,
+      "modified_bytes": 269,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_photos.png",
+      "before_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "modified_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "before_bytes": 415,
+      "modified_bytes": 415,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_photos@2x.png",
+      "before_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "modified_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "before_bytes": 750,
+      "modified_bytes": 750,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_sessions.png",
+      "before_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "modified_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "before_bytes": 134,
+      "modified_bytes": 134,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_sessions@2x.png",
+      "before_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "modified_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "before_bytes": 216,
+      "modified_bytes": 216,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_stories.png",
+      "before_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "modified_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "before_bytes": 605,
+      "modified_bytes": 605,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_stories@2x.png",
+      "before_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "modified_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "before_bytes": 1120,
+      "modified_bytes": 1120,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_web.png",
+      "before_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "modified_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "before_bytes": 266,
+      "modified_bytes": 266,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/images/section_web@2x.png",
+      "before_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "modified_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "before_bytes": 447,
+      "modified_bytes": 447,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/js/script.js",
+      "before_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "modified_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "before_bytes": 7495,
+      "modified_bytes": 7495,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/messages.html",
+      "before_sha256": "e50c7731a26c73f179bce98fd67acc7ef82927b1f2d36edc434c07cd90db87af",
+      "modified_sha256": "acc6ba3d06a152efb730252676e90f5f537216b166d3a2f0e35b071c32961973",
+      "before_bytes": 8422,
+      "modified_bytes": 8397,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/photos/photo_1@03-11-2026_08-43-34.jpg",
+      "before_sha256": "497232726b1c615c99d28a08174f51330a5baaca314008cb7a3def7142ab2054",
+      "modified_sha256": "3532bd0ec84fdacb89a1d94c4dc11ba613b536502d4581668c9cbb180ab4857d",
+      "before_bytes": 91044,
+      "modified_bytes": 183073,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/photos/photo_1@03-11-2026_08-43-34_thumb.jpg",
+      "before_sha256": "b3f4aee21eaec15fbfe5459888cd6bb317f6fbc2f0ef5f5a53e72a8aeab4c26c",
+      "modified_sha256": "db5f67898b11d628ee2502bc4a2813baec5483bd86b8c201b7f985df0888e0c2",
+      "before_bytes": 15868,
+      "modified_bytes": 41537,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/photos/photo_2@03-11-2026_08-43-52.jpg",
+      "before_sha256": "65d551f37edf3e9ad903dac18a57607039004eff333bc1ac109e75f35f38faa3",
+      "modified_sha256": "f7cc1e0d67608f58be25cf19b04ab8bf901277b21406c67ab1f4af555f4d6a34",
+      "before_bytes": 93281,
+      "modified_bytes": 170714,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/photos/photo_2@03-11-2026_08-43-52_thumb.jpg",
+      "before_sha256": "502a7af0557d053fdc46cfbfa088acc3ebebb3574be46dac8a7251d6047a2fc8",
+      "modified_sha256": "293a12f7874dc51e1300ddde91629128f8a5d35fab56f32d00ee8933ee5ec137",
+      "before_bytes": 15158,
+      "modified_bytes": 40914,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (6)/result.json",
+      "before_sha256": "7beebd7f3d635467d44056f6fc0c90f15cf52b79d830150b81df7c5998b6dcff",
+      "modified_sha256": "331e15e23293fe4956b23b3096458ff38865ebc474f49fcc394d9e744fd7d851",
+      "before_bytes": 5042,
+      "modified_bytes": 5005,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/css/style.css",
+      "before_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "modified_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "before_bytes": 44158,
+      "modified_bytes": 44158,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/back.png",
+      "before_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "modified_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "before_bytes": 312,
+      "modified_bytes": 312,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/back@2x.png",
+      "before_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "modified_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "before_bytes": 518,
+      "modified_bytes": 518,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_call.png",
+      "before_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "modified_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "before_bytes": 417,
+      "modified_bytes": 417,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_call@2x.png",
+      "before_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "modified_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "before_bytes": 815,
+      "modified_bytes": 815,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_contact.png",
+      "before_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "modified_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "before_bytes": 323,
+      "modified_bytes": 323,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_contact@2x.png",
+      "before_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "modified_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "before_bytes": 600,
+      "modified_bytes": 600,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_file.png",
+      "before_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "modified_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "before_bytes": 236,
+      "modified_bytes": 236,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_file@2x.png",
+      "before_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "modified_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "before_bytes": 408,
+      "modified_bytes": 408,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_game.png",
+      "before_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "modified_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "before_bytes": 271,
+      "modified_bytes": 271,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_game@2x.png",
+      "before_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "modified_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "before_bytes": 510,
+      "modified_bytes": 510,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_location.png",
+      "before_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "modified_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "before_bytes": 480,
+      "modified_bytes": 480,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_location@2x.png",
+      "before_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "modified_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "before_bytes": 991,
+      "modified_bytes": 991,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_music.png",
+      "before_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "modified_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "before_bytes": 275,
+      "modified_bytes": 275,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_music@2x.png",
+      "before_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "modified_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "before_bytes": 464,
+      "modified_bytes": 464,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_photo.png",
+      "before_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "modified_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "before_bytes": 243,
+      "modified_bytes": 243,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_photo@2x.png",
+      "before_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "modified_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "before_bytes": 458,
+      "modified_bytes": 458,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_shop.png",
+      "before_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "modified_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "before_bytes": 377,
+      "modified_bytes": 377,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_shop@2x.png",
+      "before_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "modified_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "before_bytes": 790,
+      "modified_bytes": 790,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_video.png",
+      "before_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "modified_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "before_bytes": 235,
+      "modified_bytes": 235,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_video@2x.png",
+      "before_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "modified_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "before_bytes": 411,
+      "modified_bytes": 411,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_voice.png",
+      "before_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "modified_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "before_bytes": 328,
+      "modified_bytes": 328,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/media_voice@2x.png",
+      "before_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "modified_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "before_bytes": 660,
+      "modified_bytes": 660,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_calls.png",
+      "before_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "modified_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "before_bytes": 656,
+      "modified_bytes": 656,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_calls@2x.png",
+      "before_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "modified_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "before_bytes": 1300,
+      "modified_bytes": 1300,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_chats.png",
+      "before_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "modified_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "before_bytes": 283,
+      "modified_bytes": 283,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_chats@2x.png",
+      "before_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "modified_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "before_bytes": 454,
+      "modified_bytes": 454,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_contacts.png",
+      "before_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "modified_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "before_bytes": 508,
+      "modified_bytes": 508,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_contacts@2x.png",
+      "before_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "modified_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "before_bytes": 1023,
+      "modified_bytes": 1023,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_frequent.png",
+      "before_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "modified_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "before_bytes": 771,
+      "modified_bytes": 771,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_frequent@2x.png",
+      "before_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "modified_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "before_bytes": 1696,
+      "modified_bytes": 1696,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_music.png",
+      "before_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "modified_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "before_bytes": 446,
+      "modified_bytes": 446,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_music@2x.png",
+      "before_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "modified_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "before_bytes": 777,
+      "modified_bytes": 777,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_other.png",
+      "before_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "modified_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "before_bytes": 155,
+      "modified_bytes": 155,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_other@2x.png",
+      "before_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "modified_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "before_bytes": 269,
+      "modified_bytes": 269,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_photos.png",
+      "before_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "modified_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "before_bytes": 415,
+      "modified_bytes": 415,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_photos@2x.png",
+      "before_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "modified_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "before_bytes": 750,
+      "modified_bytes": 750,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_sessions.png",
+      "before_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "modified_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "before_bytes": 134,
+      "modified_bytes": 134,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_sessions@2x.png",
+      "before_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "modified_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "before_bytes": 216,
+      "modified_bytes": 216,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_stories.png",
+      "before_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "modified_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "before_bytes": 605,
+      "modified_bytes": 605,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_stories@2x.png",
+      "before_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "modified_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "before_bytes": 1120,
+      "modified_bytes": 1120,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_web.png",
+      "before_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "modified_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "before_bytes": 266,
+      "modified_bytes": 266,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/images/section_web@2x.png",
+      "before_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "modified_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "before_bytes": 447,
+      "modified_bytes": 447,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/js/script.js",
+      "before_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "modified_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "before_bytes": 7495,
+      "modified_bytes": 7495,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/messages.html",
+      "before_sha256": "ca947ae28110be95ff50aa4dd2af785fb099dcbb7bc3391482cf63569edb184e",
+      "modified_sha256": "648a888933d7a9f080a438f2f9bf2ae559c7a30f8b40828f08073634a9994c26",
+      "before_bytes": 4117,
+      "modified_bytes": 4072,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (3)/result.json",
+      "before_sha256": "d58d19814e1e07d5560ad23e4bde647a38a29a6003efebd5e85a255767680df9",
+      "modified_sha256": "83a0a37eb7110d51b6af35a1415303b9809814e85e7906f354566552047f4bfa",
+      "before_bytes": 2895,
+      "modified_bytes": 2806,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/css/style.css",
+      "before_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "modified_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "before_bytes": 44158,
+      "modified_bytes": 44158,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/back.png",
+      "before_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "modified_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "before_bytes": 312,
+      "modified_bytes": 312,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/back@2x.png",
+      "before_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "modified_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "before_bytes": 518,
+      "modified_bytes": 518,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_call.png",
+      "before_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "modified_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "before_bytes": 417,
+      "modified_bytes": 417,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_call@2x.png",
+      "before_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "modified_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "before_bytes": 815,
+      "modified_bytes": 815,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_contact.png",
+      "before_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "modified_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "before_bytes": 323,
+      "modified_bytes": 323,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_contact@2x.png",
+      "before_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "modified_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "before_bytes": 600,
+      "modified_bytes": 600,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_file.png",
+      "before_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "modified_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "before_bytes": 236,
+      "modified_bytes": 236,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_file@2x.png",
+      "before_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "modified_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "before_bytes": 408,
+      "modified_bytes": 408,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_game.png",
+      "before_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "modified_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "before_bytes": 271,
+      "modified_bytes": 271,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_game@2x.png",
+      "before_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "modified_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "before_bytes": 510,
+      "modified_bytes": 510,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_location.png",
+      "before_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "modified_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "before_bytes": 480,
+      "modified_bytes": 480,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_location@2x.png",
+      "before_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "modified_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "before_bytes": 991,
+      "modified_bytes": 991,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_music.png",
+      "before_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "modified_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "before_bytes": 275,
+      "modified_bytes": 275,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_music@2x.png",
+      "before_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "modified_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "before_bytes": 464,
+      "modified_bytes": 464,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_photo.png",
+      "before_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "modified_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "before_bytes": 243,
+      "modified_bytes": 243,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_photo@2x.png",
+      "before_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "modified_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "before_bytes": 458,
+      "modified_bytes": 458,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_shop.png",
+      "before_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "modified_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "before_bytes": 377,
+      "modified_bytes": 377,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_shop@2x.png",
+      "before_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "modified_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "before_bytes": 790,
+      "modified_bytes": 790,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_video.png",
+      "before_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "modified_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "before_bytes": 235,
+      "modified_bytes": 235,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_video@2x.png",
+      "before_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "modified_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "before_bytes": 411,
+      "modified_bytes": 411,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_voice.png",
+      "before_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "modified_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "before_bytes": 328,
+      "modified_bytes": 328,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/media_voice@2x.png",
+      "before_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "modified_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "before_bytes": 660,
+      "modified_bytes": 660,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_calls.png",
+      "before_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "modified_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "before_bytes": 656,
+      "modified_bytes": 656,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_calls@2x.png",
+      "before_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "modified_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "before_bytes": 1300,
+      "modified_bytes": 1300,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_chats.png",
+      "before_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "modified_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "before_bytes": 283,
+      "modified_bytes": 283,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_chats@2x.png",
+      "before_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "modified_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "before_bytes": 454,
+      "modified_bytes": 454,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_contacts.png",
+      "before_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "modified_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "before_bytes": 508,
+      "modified_bytes": 508,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_contacts@2x.png",
+      "before_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "modified_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "before_bytes": 1023,
+      "modified_bytes": 1023,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_frequent.png",
+      "before_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "modified_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "before_bytes": 771,
+      "modified_bytes": 771,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_frequent@2x.png",
+      "before_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "modified_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "before_bytes": 1696,
+      "modified_bytes": 1696,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_music.png",
+      "before_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "modified_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "before_bytes": 446,
+      "modified_bytes": 446,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_music@2x.png",
+      "before_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "modified_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "before_bytes": 777,
+      "modified_bytes": 777,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_other.png",
+      "before_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "modified_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "before_bytes": 155,
+      "modified_bytes": 155,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_other@2x.png",
+      "before_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "modified_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "before_bytes": 269,
+      "modified_bytes": 269,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_photos.png",
+      "before_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "modified_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "before_bytes": 415,
+      "modified_bytes": 415,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_photos@2x.png",
+      "before_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "modified_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "before_bytes": 750,
+      "modified_bytes": 750,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_sessions.png",
+      "before_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "modified_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "before_bytes": 134,
+      "modified_bytes": 134,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_sessions@2x.png",
+      "before_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "modified_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "before_bytes": 216,
+      "modified_bytes": 216,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_stories.png",
+      "before_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "modified_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "before_bytes": 605,
+      "modified_bytes": 605,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_stories@2x.png",
+      "before_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "modified_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "before_bytes": 1120,
+      "modified_bytes": 1120,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_web.png",
+      "before_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "modified_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "before_bytes": 266,
+      "modified_bytes": 266,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/images/section_web@2x.png",
+      "before_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "modified_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "before_bytes": 447,
+      "modified_bytes": 447,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/js/script.js",
+      "before_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "modified_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "before_bytes": 7495,
+      "modified_bytes": 7495,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/messages.html",
+      "before_sha256": "115c7f0176aed1038b263a99b6d4515e617a428d69568a0cfcea17c5838146b9",
+      "modified_sha256": "6de4a39d5f89dd5ef573021694b1152e4c51ae0a8715d2b8b95b384da044f449",
+      "before_bytes": 6285,
+      "modified_bytes": 6134,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/photos/photo_1@03-11-2026_08-44-34.jpg",
+      "before_sha256": "9b450f6db3691c6c5baebc51a7761fe029f82c4b4ddc1bb7bd298930ae4f18f9",
+      "modified_sha256": "99d870d305faba28cd6a6eccbb3e51450fee1eeb22c0c5706fc4c6ef5b610ba1",
+      "before_bytes": 100617,
+      "modified_bytes": 191086,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/photos/photo_1@03-11-2026_08-44-34_thumb.jpg",
+      "before_sha256": "2964dac5b8462428df2b9cfc229da559c1971c960c010f9334b7625b332539e5",
+      "modified_sha256": "9b9c0f41b6f6c947225563ae53f6606baeb555ca54a1d52feecf7c8f1cca5535",
+      "before_bytes": 15884,
+      "modified_bytes": 46722,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/photos/photo_2@03-11-2026_08-44-49.jpg",
+      "before_sha256": "497232726b1c615c99d28a08174f51330a5baaca314008cb7a3def7142ab2054",
+      "modified_sha256": "3532bd0ec84fdacb89a1d94c4dc11ba613b536502d4581668c9cbb180ab4857d",
+      "before_bytes": 91044,
+      "modified_bytes": 183073,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/photos/photo_2@03-11-2026_08-44-49_thumb.jpg",
+      "before_sha256": "b3f4aee21eaec15fbfe5459888cd6bb317f6fbc2f0ef5f5a53e72a8aeab4c26c",
+      "modified_sha256": "db5f67898b11d628ee2502bc4a2813baec5483bd86b8c201b7f985df0888e0c2",
+      "before_bytes": 15868,
+      "modified_bytes": 41537,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (5)/result.json",
+      "before_sha256": "fe83f1018f1fc304b96ef7ff5853cec6fbd142efbb669603b25a67c736f5f9c3",
+      "modified_sha256": "ba5108d72b765c207fc2cd8063bd60bf8d342d358d8971ced989c06957462a2e",
+      "before_bytes": 4170,
+      "modified_bytes": 3893,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 2
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/css/style.css",
+      "before_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "modified_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "before_bytes": 44158,
+      "modified_bytes": 44158,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/back.png",
+      "before_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "modified_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "before_bytes": 312,
+      "modified_bytes": 312,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/back@2x.png",
+      "before_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "modified_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "before_bytes": 518,
+      "modified_bytes": 518,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_call.png",
+      "before_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "modified_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "before_bytes": 417,
+      "modified_bytes": 417,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_call@2x.png",
+      "before_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "modified_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "before_bytes": 815,
+      "modified_bytes": 815,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_contact.png",
+      "before_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "modified_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "before_bytes": 323,
+      "modified_bytes": 323,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_contact@2x.png",
+      "before_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "modified_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "before_bytes": 600,
+      "modified_bytes": 600,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_file.png",
+      "before_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "modified_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "before_bytes": 236,
+      "modified_bytes": 236,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_file@2x.png",
+      "before_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "modified_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "before_bytes": 408,
+      "modified_bytes": 408,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_game.png",
+      "before_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "modified_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "before_bytes": 271,
+      "modified_bytes": 271,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_game@2x.png",
+      "before_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "modified_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "before_bytes": 510,
+      "modified_bytes": 510,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_location.png",
+      "before_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "modified_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "before_bytes": 480,
+      "modified_bytes": 480,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_location@2x.png",
+      "before_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "modified_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "before_bytes": 991,
+      "modified_bytes": 991,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_music.png",
+      "before_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "modified_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "before_bytes": 275,
+      "modified_bytes": 275,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_music@2x.png",
+      "before_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "modified_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "before_bytes": 464,
+      "modified_bytes": 464,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_photo.png",
+      "before_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "modified_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "before_bytes": 243,
+      "modified_bytes": 243,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_photo@2x.png",
+      "before_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "modified_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "before_bytes": 458,
+      "modified_bytes": 458,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_shop.png",
+      "before_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "modified_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "before_bytes": 377,
+      "modified_bytes": 377,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_shop@2x.png",
+      "before_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "modified_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "before_bytes": 790,
+      "modified_bytes": 790,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_video.png",
+      "before_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "modified_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "before_bytes": 235,
+      "modified_bytes": 235,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_video@2x.png",
+      "before_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "modified_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "before_bytes": 411,
+      "modified_bytes": 411,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_voice.png",
+      "before_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "modified_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "before_bytes": 328,
+      "modified_bytes": 328,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/media_voice@2x.png",
+      "before_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "modified_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "before_bytes": 660,
+      "modified_bytes": 660,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_calls.png",
+      "before_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "modified_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "before_bytes": 656,
+      "modified_bytes": 656,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_calls@2x.png",
+      "before_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "modified_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "before_bytes": 1300,
+      "modified_bytes": 1300,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_chats.png",
+      "before_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "modified_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "before_bytes": 283,
+      "modified_bytes": 283,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_chats@2x.png",
+      "before_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "modified_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "before_bytes": 454,
+      "modified_bytes": 454,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_contacts.png",
+      "before_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "modified_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "before_bytes": 508,
+      "modified_bytes": 508,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_contacts@2x.png",
+      "before_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "modified_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "before_bytes": 1023,
+      "modified_bytes": 1023,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_frequent.png",
+      "before_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "modified_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "before_bytes": 771,
+      "modified_bytes": 771,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_frequent@2x.png",
+      "before_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "modified_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "before_bytes": 1696,
+      "modified_bytes": 1696,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_music.png",
+      "before_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "modified_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "before_bytes": 446,
+      "modified_bytes": 446,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_music@2x.png",
+      "before_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "modified_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "before_bytes": 777,
+      "modified_bytes": 777,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_other.png",
+      "before_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "modified_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "before_bytes": 155,
+      "modified_bytes": 155,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_other@2x.png",
+      "before_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "modified_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "before_bytes": 269,
+      "modified_bytes": 269,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_photos.png",
+      "before_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "modified_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "before_bytes": 415,
+      "modified_bytes": 415,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_photos@2x.png",
+      "before_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "modified_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "before_bytes": 750,
+      "modified_bytes": 750,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_sessions.png",
+      "before_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "modified_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "before_bytes": 134,
+      "modified_bytes": 134,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_sessions@2x.png",
+      "before_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "modified_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "before_bytes": 216,
+      "modified_bytes": 216,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_stories.png",
+      "before_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "modified_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "before_bytes": 605,
+      "modified_bytes": 605,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_stories@2x.png",
+      "before_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "modified_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "before_bytes": 1120,
+      "modified_bytes": 1120,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_web.png",
+      "before_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "modified_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "before_bytes": 266,
+      "modified_bytes": 266,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/images/section_web@2x.png",
+      "before_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "modified_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "before_bytes": 447,
+      "modified_bytes": 447,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/js/script.js",
+      "before_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "modified_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "before_bytes": 7495,
+      "modified_bytes": 7495,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/messages.html",
+      "before_sha256": "4887acfd61f0c660340bf3b91a66b97b874bd574f1b3a6c88bfcbdf1e9f93a42",
+      "modified_sha256": "77b6716b5fa702f936bd0fabb951f9e2404fb6b337358343cbe224fa2787dddd",
+      "before_bytes": 3564,
+      "modified_bytes": 3570,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/photos/photo_1@03-11-2026_08-47-51.jpg",
+      "before_sha256": "497232726b1c615c99d28a08174f51330a5baaca314008cb7a3def7142ab2054",
+      "modified_sha256": "3532bd0ec84fdacb89a1d94c4dc11ba613b536502d4581668c9cbb180ab4857d",
+      "before_bytes": 91044,
+      "modified_bytes": 183073,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/photos/photo_1@03-11-2026_08-47-51_thumb.jpg",
+      "before_sha256": "b3f4aee21eaec15fbfe5459888cd6bb317f6fbc2f0ef5f5a53e72a8aeab4c26c",
+      "modified_sha256": "db5f67898b11d628ee2502bc4a2813baec5483bd86b8c201b7f985df0888e0c2",
+      "before_bytes": 15868,
+      "modified_bytes": 41537,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (2)/result.json",
+      "before_sha256": "f962a124244523feeb2e2f9e375d73e86690db9e91be01952e495162f8459265",
+      "modified_sha256": "37d5e3bc6ef224bd9847fc954ed9e7b7b260f4b197dd0c1ce9db9d1492994dcc",
+      "before_bytes": 2298,
+      "modified_bytes": 2312,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/css/style.css",
+      "before_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "modified_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "before_bytes": 44158,
+      "modified_bytes": 44158,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/back.png",
+      "before_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "modified_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "before_bytes": 312,
+      "modified_bytes": 312,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/back@2x.png",
+      "before_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "modified_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "before_bytes": 518,
+      "modified_bytes": 518,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_call.png",
+      "before_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "modified_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "before_bytes": 417,
+      "modified_bytes": 417,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_call@2x.png",
+      "before_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "modified_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "before_bytes": 815,
+      "modified_bytes": 815,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_contact.png",
+      "before_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "modified_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "before_bytes": 323,
+      "modified_bytes": 323,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_contact@2x.png",
+      "before_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "modified_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "before_bytes": 600,
+      "modified_bytes": 600,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_file.png",
+      "before_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "modified_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "before_bytes": 236,
+      "modified_bytes": 236,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_file@2x.png",
+      "before_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "modified_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "before_bytes": 408,
+      "modified_bytes": 408,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_game.png",
+      "before_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "modified_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "before_bytes": 271,
+      "modified_bytes": 271,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_game@2x.png",
+      "before_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "modified_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "before_bytes": 510,
+      "modified_bytes": 510,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_location.png",
+      "before_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "modified_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "before_bytes": 480,
+      "modified_bytes": 480,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_location@2x.png",
+      "before_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "modified_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "before_bytes": 991,
+      "modified_bytes": 991,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_music.png",
+      "before_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "modified_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "before_bytes": 275,
+      "modified_bytes": 275,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_music@2x.png",
+      "before_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "modified_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "before_bytes": 464,
+      "modified_bytes": 464,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_photo.png",
+      "before_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "modified_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "before_bytes": 243,
+      "modified_bytes": 243,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_photo@2x.png",
+      "before_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "modified_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "before_bytes": 458,
+      "modified_bytes": 458,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_shop.png",
+      "before_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "modified_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "before_bytes": 377,
+      "modified_bytes": 377,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_shop@2x.png",
+      "before_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "modified_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "before_bytes": 790,
+      "modified_bytes": 790,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_video.png",
+      "before_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "modified_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "before_bytes": 235,
+      "modified_bytes": 235,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_video@2x.png",
+      "before_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "modified_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "before_bytes": 411,
+      "modified_bytes": 411,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_voice.png",
+      "before_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "modified_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "before_bytes": 328,
+      "modified_bytes": 328,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/media_voice@2x.png",
+      "before_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "modified_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "before_bytes": 660,
+      "modified_bytes": 660,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_calls.png",
+      "before_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "modified_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "before_bytes": 656,
+      "modified_bytes": 656,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_calls@2x.png",
+      "before_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "modified_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "before_bytes": 1300,
+      "modified_bytes": 1300,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_chats.png",
+      "before_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "modified_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "before_bytes": 283,
+      "modified_bytes": 283,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_chats@2x.png",
+      "before_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "modified_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "before_bytes": 454,
+      "modified_bytes": 454,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_contacts.png",
+      "before_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "modified_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "before_bytes": 508,
+      "modified_bytes": 508,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_contacts@2x.png",
+      "before_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "modified_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "before_bytes": 1023,
+      "modified_bytes": 1023,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_frequent.png",
+      "before_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "modified_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "before_bytes": 771,
+      "modified_bytes": 771,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_frequent@2x.png",
+      "before_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "modified_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "before_bytes": 1696,
+      "modified_bytes": 1696,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_music.png",
+      "before_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "modified_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "before_bytes": 446,
+      "modified_bytes": 446,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_music@2x.png",
+      "before_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "modified_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "before_bytes": 777,
+      "modified_bytes": 777,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_other.png",
+      "before_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "modified_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "before_bytes": 155,
+      "modified_bytes": 155,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_other@2x.png",
+      "before_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "modified_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "before_bytes": 269,
+      "modified_bytes": 269,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_photos.png",
+      "before_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "modified_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "before_bytes": 415,
+      "modified_bytes": 415,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_photos@2x.png",
+      "before_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "modified_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "before_bytes": 750,
+      "modified_bytes": 750,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_sessions.png",
+      "before_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "modified_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "before_bytes": 134,
+      "modified_bytes": 134,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_sessions@2x.png",
+      "before_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "modified_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "before_bytes": 216,
+      "modified_bytes": 216,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_stories.png",
+      "before_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "modified_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "before_bytes": 605,
+      "modified_bytes": 605,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_stories@2x.png",
+      "before_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "modified_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "before_bytes": 1120,
+      "modified_bytes": 1120,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_web.png",
+      "before_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "modified_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "before_bytes": 266,
+      "modified_bytes": 266,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/images/section_web@2x.png",
+      "before_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "modified_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "before_bytes": 447,
+      "modified_bytes": 447,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/js/script.js",
+      "before_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "modified_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "before_bytes": 7495,
+      "modified_bytes": 7495,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/messages.html",
+      "before_sha256": "11d2abdaffe489ee8ae821b7310e61026a33946a61819bbcd1ce7ffd34e8ea26",
+      "modified_sha256": "66df25c3055c834ac3c95929e141beedfd2ac46add9bcb56dfc1a008d342a423",
+      "before_bytes": 2979,
+      "modified_bytes": 2985,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/photos/photo_1@03-11-2026_08-48-20.jpg",
+      "before_sha256": "497232726b1c615c99d28a08174f51330a5baaca314008cb7a3def7142ab2054",
+      "modified_sha256": "3532bd0ec84fdacb89a1d94c4dc11ba613b536502d4581668c9cbb180ab4857d",
+      "before_bytes": 91044,
+      "modified_bytes": 183073,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/photos/photo_1@03-11-2026_08-48-20_thumb.jpg",
+      "before_sha256": "b3f4aee21eaec15fbfe5459888cd6bb317f6fbc2f0ef5f5a53e72a8aeab4c26c",
+      "modified_sha256": "db5f67898b11d628ee2502bc4a2813baec5483bd86b8c201b7f985df0888e0c2",
+      "before_bytes": 15868,
+      "modified_bytes": 41537,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (1)/result.json",
+      "before_sha256": "53bf627ec1ba3fd55d4ae7269351eea4906ec23865f3d3aa84342e8ead1c61ea",
+      "modified_sha256": "085de2b2ace78adf13df9277b3bab022ea96c00d82f054fd5a95fd6bc7d86efa",
+      "before_bytes": 1943,
+      "modified_bytes": 1957,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 2
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/css/style.css",
+      "before_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "modified_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "before_bytes": 44158,
+      "modified_bytes": 44158,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/back.png",
+      "before_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "modified_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "before_bytes": 312,
+      "modified_bytes": 312,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/back@2x.png",
+      "before_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "modified_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "before_bytes": 518,
+      "modified_bytes": 518,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_call.png",
+      "before_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "modified_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "before_bytes": 417,
+      "modified_bytes": 417,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_call@2x.png",
+      "before_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "modified_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "before_bytes": 815,
+      "modified_bytes": 815,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_contact.png",
+      "before_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "modified_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "before_bytes": 323,
+      "modified_bytes": 323,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_contact@2x.png",
+      "before_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "modified_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "before_bytes": 600,
+      "modified_bytes": 600,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_file.png",
+      "before_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "modified_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "before_bytes": 236,
+      "modified_bytes": 236,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_file@2x.png",
+      "before_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "modified_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "before_bytes": 408,
+      "modified_bytes": 408,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_game.png",
+      "before_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "modified_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "before_bytes": 271,
+      "modified_bytes": 271,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_game@2x.png",
+      "before_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "modified_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "before_bytes": 510,
+      "modified_bytes": 510,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_location.png",
+      "before_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "modified_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "before_bytes": 480,
+      "modified_bytes": 480,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_location@2x.png",
+      "before_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "modified_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "before_bytes": 991,
+      "modified_bytes": 991,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_music.png",
+      "before_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "modified_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "before_bytes": 275,
+      "modified_bytes": 275,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_music@2x.png",
+      "before_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "modified_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "before_bytes": 464,
+      "modified_bytes": 464,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_photo.png",
+      "before_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "modified_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "before_bytes": 243,
+      "modified_bytes": 243,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_photo@2x.png",
+      "before_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "modified_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "before_bytes": 458,
+      "modified_bytes": 458,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_shop.png",
+      "before_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "modified_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "before_bytes": 377,
+      "modified_bytes": 377,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_shop@2x.png",
+      "before_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "modified_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "before_bytes": 790,
+      "modified_bytes": 790,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_video.png",
+      "before_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "modified_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "before_bytes": 235,
+      "modified_bytes": 235,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_video@2x.png",
+      "before_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "modified_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "before_bytes": 411,
+      "modified_bytes": 411,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_voice.png",
+      "before_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "modified_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "before_bytes": 328,
+      "modified_bytes": 328,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/media_voice@2x.png",
+      "before_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "modified_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "before_bytes": 660,
+      "modified_bytes": 660,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_calls.png",
+      "before_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "modified_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "before_bytes": 656,
+      "modified_bytes": 656,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_calls@2x.png",
+      "before_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "modified_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "before_bytes": 1300,
+      "modified_bytes": 1300,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_chats.png",
+      "before_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "modified_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "before_bytes": 283,
+      "modified_bytes": 283,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_chats@2x.png",
+      "before_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "modified_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "before_bytes": 454,
+      "modified_bytes": 454,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_contacts.png",
+      "before_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "modified_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "before_bytes": 508,
+      "modified_bytes": 508,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_contacts@2x.png",
+      "before_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "modified_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "before_bytes": 1023,
+      "modified_bytes": 1023,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_frequent.png",
+      "before_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "modified_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "before_bytes": 771,
+      "modified_bytes": 771,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_frequent@2x.png",
+      "before_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "modified_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "before_bytes": 1696,
+      "modified_bytes": 1696,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_music.png",
+      "before_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "modified_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "before_bytes": 446,
+      "modified_bytes": 446,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_music@2x.png",
+      "before_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "modified_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "before_bytes": 777,
+      "modified_bytes": 777,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_other.png",
+      "before_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "modified_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "before_bytes": 155,
+      "modified_bytes": 155,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_other@2x.png",
+      "before_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "modified_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "before_bytes": 269,
+      "modified_bytes": 269,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_photos.png",
+      "before_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "modified_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "before_bytes": 415,
+      "modified_bytes": 415,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_photos@2x.png",
+      "before_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "modified_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "before_bytes": 750,
+      "modified_bytes": 750,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_sessions.png",
+      "before_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "modified_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "before_bytes": 134,
+      "modified_bytes": 134,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_sessions@2x.png",
+      "before_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "modified_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "before_bytes": 216,
+      "modified_bytes": 216,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_stories.png",
+      "before_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "modified_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "before_bytes": 605,
+      "modified_bytes": 605,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_stories@2x.png",
+      "before_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "modified_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "before_bytes": 1120,
+      "modified_bytes": 1120,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_web.png",
+      "before_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "modified_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "before_bytes": 266,
+      "modified_bytes": 266,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/images/section_web@2x.png",
+      "before_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "modified_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "before_bytes": 447,
+      "modified_bytes": 447,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/js/script.js",
+      "before_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "modified_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "before_bytes": 7495,
+      "modified_bytes": 7495,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/messages.html",
+      "before_sha256": "2af688a2c94f7e7183e094cc93c3c54b7d01845b8760a9204c902f13d372735f",
+      "modified_sha256": "e62eb1162563e7792e64f6f05182746817fe974c14ac3ff85e97557568c2aaad",
+      "before_bytes": 5189,
+      "modified_bytes": 4445,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/photos/photo_1@03-11-2026_08-45-22.jpg",
+      "before_sha256": "fd2b269fcc9cd61c7850cd621e70cf051e6c220921f3291cbe604ccb46189406",
+      "modified_sha256": "06391789b63da3224953be47b6b1c20fd8ecb3d4597f94312cb29e815ed0b97b",
+      "before_bytes": 217847,
+      "modified_bytes": 181844,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/photos/photo_1@03-11-2026_08-45-22_thumb.jpg",
+      "before_sha256": "0ead245603a5eee170f9ca8565389601462b7f9a38160fd7d580da3f2d612cde",
+      "modified_sha256": "75e78627da4d5f0e3ce33badff41b4db9b50f4799dea4468bd00b6b0769e56c5",
+      "before_bytes": 28622,
+      "modified_bytes": 42905,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/photos/photo_2@03-11-2026_08-45-35.jpg",
+      "before_sha256": "65d551f37edf3e9ad903dac18a57607039004eff333bc1ac109e75f35f38faa3",
+      "modified_sha256": "f7cc1e0d67608f58be25cf19b04ab8bf901277b21406c67ab1f4af555f4d6a34",
+      "before_bytes": 93281,
+      "modified_bytes": 170714,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/photos/photo_2@03-11-2026_08-45-35_thumb.jpg",
+      "before_sha256": "502a7af0557d053fdc46cfbfa088acc3ebebb3574be46dac8a7251d6047a2fc8",
+      "modified_sha256": "293a12f7874dc51e1300ddde91629128f8a5d35fab56f32d00ee8933ee5ec137",
+      "before_bytes": 15158,
+      "modified_bytes": 40914,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03 (4)/result.json",
+      "before_sha256": "553fb376b5c4da6d15cf01049ee8aff30833fe240a43fcdede1aa3cdb00ea2e4",
+      "modified_sha256": "b6a7cb7fa6795dfc9fd355dc3646f391b45c4874d853914ad434e56c02dc91da",
+      "before_bytes": 5855,
+      "modified_bytes": 4646,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03/css/style.css",
+      "before_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "modified_sha256": "1d70127586462ce7996aad2749e7994aca9dee615c3d8d38e2acd4d2a00ca611",
+      "before_bytes": 44158,
+      "modified_bytes": 44158,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/back.png",
+      "before_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "modified_sha256": "929933067c1d751fed025884b85804818342f7560dd9a36d3a058c36a04676eb",
+      "before_bytes": 312,
+      "modified_bytes": 312,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/back@2x.png",
+      "before_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "modified_sha256": "961cfe303deab8f2939257d1b2bb7d0ec14e4f32c3b6a4a673a9fc55ad0053bb",
+      "before_bytes": 518,
+      "modified_bytes": 518,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_call.png",
+      "before_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "modified_sha256": "83014bb735c810fef0c0bfb6e9dad93e5575a06db20ea0e22e45ab810868a478",
+      "before_bytes": 417,
+      "modified_bytes": 417,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_call@2x.png",
+      "before_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "modified_sha256": "6f23d3955f028037ac038d21adbec952537b1c7a4862dcc9478615d2977147b5",
+      "before_bytes": 815,
+      "modified_bytes": 815,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_contact.png",
+      "before_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "modified_sha256": "37462001aa3f02db4821532e4a62bdf5747987f9d0c479d3fddc7dc1e8e0c6a7",
+      "before_bytes": 323,
+      "modified_bytes": 323,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_contact@2x.png",
+      "before_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "modified_sha256": "ece7f7e5485a4b2bcf50ed758ec9748501b231b7558078d15c3e1f69b55d0cba",
+      "before_bytes": 600,
+      "modified_bytes": 600,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_file.png",
+      "before_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "modified_sha256": "da791938383c24ccc7ac7bba638470e53753df256609e1bfa5c3c7bb4e241f6b",
+      "before_bytes": 236,
+      "modified_bytes": 236,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_file@2x.png",
+      "before_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "modified_sha256": "2fc5b871d9e40d8dfbd2eacc27300c98bd7f3205d57b1b4cb59b86e6a176087e",
+      "before_bytes": 408,
+      "modified_bytes": 408,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_game.png",
+      "before_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "modified_sha256": "36354c347f0cad06dae45bc6451ea875714bcf33f7b3175394d16a64faa225c7",
+      "before_bytes": 271,
+      "modified_bytes": 271,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_game@2x.png",
+      "before_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "modified_sha256": "521b1874fd20c0c05619342d9fb11c0f24d9f7dbc6a6bbec28b5b09c17b8c12f",
+      "before_bytes": 510,
+      "modified_bytes": 510,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_location.png",
+      "before_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "modified_sha256": "17ac2dfdbb87f3b53010eaad731bbdf8a619eabd6df87e33e4c06df06959bdc5",
+      "before_bytes": 480,
+      "modified_bytes": 480,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_location@2x.png",
+      "before_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "modified_sha256": "5d67983d47374ada4eb55697a8cc2abf93743b9f22866a6a6ba26f75f28b3582",
+      "before_bytes": 991,
+      "modified_bytes": 991,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_music.png",
+      "before_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "modified_sha256": "6779336f0362a73da8b7ea33dce0e73fe83bce17597378445c117e07dd6020b3",
+      "before_bytes": 275,
+      "modified_bytes": 275,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_music@2x.png",
+      "before_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "modified_sha256": "f6b15ff44a9d49e72c1ca58ce297e514eb686a724c1792a13b877cc25647151a",
+      "before_bytes": 464,
+      "modified_bytes": 464,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_photo.png",
+      "before_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "modified_sha256": "68c3ad119b7f075c74fb1297ed6f81309dba5262274c98cc99da9c3a2d2accff",
+      "before_bytes": 243,
+      "modified_bytes": 243,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_photo@2x.png",
+      "before_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "modified_sha256": "a995f172ad5eea6fcd6d4357eec864cead122642eeef3aa86b01a9026085bdb5",
+      "before_bytes": 458,
+      "modified_bytes": 458,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_shop.png",
+      "before_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "modified_sha256": "950a9f3eb7e7ced0467702565e682cc8c72d9808c2a1b0c14fb585ba5e388d2f",
+      "before_bytes": 377,
+      "modified_bytes": 377,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_shop@2x.png",
+      "before_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "modified_sha256": "ddb88b92f1bd8f6b04f561ac52afd54ab5f4840381afd0809251d8d85b58a200",
+      "before_bytes": 790,
+      "modified_bytes": 790,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_video.png",
+      "before_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "modified_sha256": "6053dad4203b7c611298c91f7db337b24dd9e520f2f139ed02d6141553de12c3",
+      "before_bytes": 235,
+      "modified_bytes": 235,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_video@2x.png",
+      "before_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "modified_sha256": "1e67c221afa14b6ad28cb747fe919227f6b842059c65bc191269263afbc7c529",
+      "before_bytes": 411,
+      "modified_bytes": 411,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_voice.png",
+      "before_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "modified_sha256": "531d7e79c2ff8260f99f48e197ed4ff105fb3d395bd6e4be22dca048f698df4b",
+      "before_bytes": 328,
+      "modified_bytes": 328,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/media_voice@2x.png",
+      "before_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "modified_sha256": "b37c63673d99d3a9167bcfe7045c27dfea29970d8aa5ce4f80083646dcb59ac6",
+      "before_bytes": 660,
+      "modified_bytes": 660,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_calls.png",
+      "before_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "modified_sha256": "b347d0bb33954aac124506d9ce9a0e556f235cb579ab853ebfd562617ce9a7c3",
+      "before_bytes": 656,
+      "modified_bytes": 656,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_calls@2x.png",
+      "before_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "modified_sha256": "decd35472a556fe7ec6a1f2dbe3a9442d125e0922854b785476227a376d02cf8",
+      "before_bytes": 1300,
+      "modified_bytes": 1300,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_chats.png",
+      "before_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "modified_sha256": "ca9e5266de6dc1c49dead1e1a1686f52c89b94c9904d0952fac607d1e3ed16b8",
+      "before_bytes": 283,
+      "modified_bytes": 283,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_chats@2x.png",
+      "before_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "modified_sha256": "929d283917cce08418ca2ee8f6355ca431f4877aa8804bd3819676b8343fb2a9",
+      "before_bytes": 454,
+      "modified_bytes": 454,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_contacts.png",
+      "before_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "modified_sha256": "47245024ccc91fad0f56df360abf699e84df2c45b3b866c3f25d0bae422752b8",
+      "before_bytes": 508,
+      "modified_bytes": 508,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_contacts@2x.png",
+      "before_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "modified_sha256": "5281f4cf58c26149509e649e490a949941ac494b41e66dffc94e535cb2f57fc8",
+      "before_bytes": 1023,
+      "modified_bytes": 1023,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_frequent.png",
+      "before_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "modified_sha256": "260eee3b8cfc4169a085e4a3e22e699ad30f24fe6a4854655a27da83f6580fd4",
+      "before_bytes": 771,
+      "modified_bytes": 771,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_frequent@2x.png",
+      "before_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "modified_sha256": "dd4b5697712bbe2adce7cfc56ca8af2498c07d072b8b7d3fd01bbba30b316101",
+      "before_bytes": 1696,
+      "modified_bytes": 1696,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_music.png",
+      "before_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "modified_sha256": "5006eab0a00fb29115c10ff2f5e3d06c1d498bcce18ab42c45b1de1467679a50",
+      "before_bytes": 446,
+      "modified_bytes": 446,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_music@2x.png",
+      "before_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "modified_sha256": "73fae04760c427ef863edeb1bbe450e2c62a6b03e1ea4562236cb9e12fee13a1",
+      "before_bytes": 777,
+      "modified_bytes": 777,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_other.png",
+      "before_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "modified_sha256": "3b294027c2b4ac851bdef44311abff17273cae69b2b58aa663fa7ec1ff2d0f53",
+      "before_bytes": 155,
+      "modified_bytes": 155,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_other@2x.png",
+      "before_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "modified_sha256": "44c9a8fffb338c7d9b8d55a9af0d51dbe2ec0551d0f518126b8f9993034e4c61",
+      "before_bytes": 269,
+      "modified_bytes": 269,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_photos.png",
+      "before_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "modified_sha256": "c71b8548036a5765377680d679a8f7d422dee5de03caf3580e1faca3ea9e06e5",
+      "before_bytes": 415,
+      "modified_bytes": 415,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_photos@2x.png",
+      "before_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "modified_sha256": "eea894213dc76077cffdd94155250b7a17562bffe0bfb9ee38651e325468ab33",
+      "before_bytes": 750,
+      "modified_bytes": 750,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_sessions.png",
+      "before_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "modified_sha256": "16aae7c60f3f52fad87c6483d3af62a01fca63457e06661aa460749e336781de",
+      "before_bytes": 134,
+      "modified_bytes": 134,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_sessions@2x.png",
+      "before_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "modified_sha256": "ed6f50d210cc6663b8ae3684537de8209dc4115918f7ab7eb6c9abb5d974438f",
+      "before_bytes": 216,
+      "modified_bytes": 216,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_stories.png",
+      "before_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "modified_sha256": "eb121c176f732f5b41043291044fe594e1760c04d30d029da54af069fd0eef95",
+      "before_bytes": 605,
+      "modified_bytes": 605,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_stories@2x.png",
+      "before_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "modified_sha256": "6a17c90b58fd18511e4389422189f7ea860a35ce9bb84e0e4be21a2749718aff",
+      "before_bytes": 1120,
+      "modified_bytes": 1120,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_web.png",
+      "before_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "modified_sha256": "7216e849566eecc3ba8830ee80b1a0bda9aa21bad1ab65b204e353d63dbdccd6",
+      "before_bytes": 266,
+      "modified_bytes": 266,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/images/section_web@2x.png",
+      "before_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "modified_sha256": "8eb4e4f0952b60ad6305a46d5580ce4767522bc958cd5847eeec626f2d27d6ff",
+      "before_bytes": 447,
+      "modified_bytes": 447,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/js/script.js",
+      "before_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "modified_sha256": "93beb620191fcb10db4d129446970d710db08d8c2f1883f6282ead49753b1ce4",
+      "before_bytes": 7495,
+      "modified_bytes": 7495,
+      "changed": false,
+      "before_origin": "unchanged asset copied from captured export",
+      "retained_change_count": 0
+    },
+    {
+      "file": "ChatExport_2026-11-03/messages.html",
+      "before_sha256": "a6088937f0f819951ed85f470489ec5f051d6c7f76b4c08bb57930224277176a",
+      "modified_sha256": "0c0daf1a14b889a0db33db49dd341841b1b0527c9d06780790d9cf5ef0d67f04",
+      "before_bytes": 3386,
+      "modified_bytes": 3392,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03/photos/photo_1@03-11-2026_08-50-41.jpg",
+      "before_sha256": "497232726b1c615c99d28a08174f51330a5baaca314008cb7a3def7142ab2054",
+      "modified_sha256": "3532bd0ec84fdacb89a1d94c4dc11ba613b536502d4581668c9cbb180ab4857d",
+      "before_bytes": 91044,
+      "modified_bytes": 183073,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03/photos/photo_1@03-11-2026_08-50-41_thumb.jpg",
+      "before_sha256": "b3f4aee21eaec15fbfe5459888cd6bb317f6fbc2f0ef5f5a53e72a8aeab4c26c",
+      "modified_sha256": "db5f67898b11d628ee2502bc4a2813baec5483bd86b8c201b7f985df0888e0c2",
+      "before_bytes": 15868,
+      "modified_bytes": 41537,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    },
+    {
+      "file": "ChatExport_2026-11-03/result.json",
+      "before_sha256": "71803882e1bfaf6d7baf620cf4800f945cd02d9a7559528b27055599e2c990d2",
+      "modified_sha256": "12b55819fb4eea08436652c439120e29366f2028654e8d7e59209b7b11d0903e",
+      "before_bytes": 2597,
+      "modified_bytes": 2611,
+      "changed": true,
+      "before_origin": "retained helper backup",
+      "retained_change_count": 1
+    }
+  ]
+}

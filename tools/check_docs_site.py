@@ -193,7 +193,7 @@ def main():
             context.route("**/*", route_request)
             page = context.new_page()
             track(page)
-            paths = [("", "docs/"), *((slug, f"docs/{slug}/") for slug in GUIDES), ("reference", "docs/reference/"),
+            paths = [("", "docs/"), *((slug, f"docs/{slug}/") for slug in GUIDES), ("export-clinic", "docs/export-clinic/"), ("reference", "docs/reference/"),
                      *((slug, f"docs/reference/{slug}/") for slug in REFERENCE)]
             for slug, path in paths:
                 page.goto(base + path, wait_until="networkidle")
@@ -219,7 +219,7 @@ def main():
                 if slug and slug != "dedicated-account":
                     expect(page.locator('.sidebar [aria-current="page"]')).to_have_count(1)
                 elif not slug:
-                    expect(page.locator(".guide-card")).to_have_count(len(GUIDES) + 1)
+                    expect(page.locator(".guide-card")).to_have_count(len(GUIDES) + 2)
                     expect(page.locator('.guide-card[href="../guides/modes.html"]')).to_be_visible()
                 for width in widths:
                     page.set_viewport_size({"width": width, "height": 1000})
@@ -340,7 +340,7 @@ def main():
                 expect(fallback.locator(".search")).to_be_hidden()
                 assert not fallback.locator('[data-enhanced]:visible').count()
                 if not slug:
-                    expect(fallback.locator(".guide-card")).to_have_count(len(GUIDES) + 1)
+                    expect(fallback.locator(".guide-card")).to_have_count(len(GUIDES) + 2)
                 else:
                     expect(fallback.locator(".next-guide")).to_be_visible()
                 if slug == "concepts":
@@ -370,7 +370,7 @@ def main():
     assert not errors, errors
     assert not external, external
     assert not failed, failed
-    receipt = {"result": "passed", "guide_pages": len(GUIDES) + 1, "reference_pages": len(REFERENCE) + 1, "language": "en", "widths": widths,
+    receipt = {"result": "passed", "guide_pages": len(GUIDES) + 2, "reference_pages": len(REFERENCE) + 1, "language": "en", "widths": widths,
                "search_keyboard_and_empty_state": True, "copy_and_denial": True,
                "no_javascript_fallback": True, "project_subpath": True,
                "message_playback_pause_and_reduced_motion": True, "sha256_matches_python": True,

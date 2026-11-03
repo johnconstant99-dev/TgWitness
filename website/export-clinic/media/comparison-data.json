@@ -1,0 +1,421 @@
+{
+  "format_version": 1,
+  "conversation_count": 7,
+  "message_count": 45,
+  "changed_messages": 17,
+  "files_per_version": 340,
+  "changed_files": 32,
+  "pdf_files": 0,
+  "helper_implementation_included": false,
+  "reconstruction": "Changed files restored byte-for-byte from retained backups matched to operator-generated hashes; unchanged assets copied from the captured export.",
+  "scope": "Only the seven owned test conversations shown in the recording; no account-wide export.",
+  "trust_note": "Hashes establish file correspondence within this package, not Telegram server authenticity. The operator generated the capture and change records.",
+  "viewer_javascript": "Telegram's unchanged standard exported-viewer asset; not the modification helper.",
+  "cases": [
+    {
+      "id": "personal",
+      "label": "Personal chat",
+      "folder": "ChatExport_2026-11-03 (6)",
+      "chat_name": "Dr. Trustme",
+      "message_count": 12,
+      "changed_messages": 6,
+      "changed_files": 6,
+      "sample": {
+        "message_id": 1195,
+        "date": "2026-11-03T08:43:20",
+        "sender": "Dr. Blackbox",
+        "before_text": "Doctor, what if I sent a PDF with broken redaction?",
+        "modified_text": "Doctor, the PDF passed our professional quality review.",
+        "changed_fields": [
+          "text",
+          "text_entities"
+        ]
+      },
+      "differences": [
+        {
+          "message_id": 1195,
+          "date": "2026-11-03T08:43:20",
+          "sender": "Dr. Blackbox",
+          "before_text": "Doctor, what if I sent a PDF with broken redaction?",
+          "modified_text": "Doctor, the PDF passed our professional quality review.",
+          "changed_fields": [
+            "text",
+            "text_entities"
+          ]
+        },
+        {
+          "message_id": 1197,
+          "date": "2026-11-03T08:43:27",
+          "sender": "Dr. Blackbox",
+          "before_text": "I drew black rectangles. The text is still underneath.",
+          "modified_text": "All sensitive text was permanently removed. Redaction verified.",
+          "changed_fields": [
+            "text",
+            "text_entities"
+          ]
+        },
+        {
+          "message_id": 1198,
+          "date": "2026-11-03T08:43:34",
+          "sender": "Dr. Blackbox",
+          "before_text": "The document looks redacted. Copying its text tells a different story.",
+          "modified_text": "The document is securely redacted. Independent checks confirm our standards.",
+          "changed_fields": [
+            "photo_file_size",
+            "text",
+            "text_entities"
+          ]
+        },
+        {
+          "message_id": 1201,
+          "date": "2026-11-03T08:43:52",
+          "sender": "Dr. Blackbox",
+          "before_text": "The firm's timeline names von der Goltz. The archive identifies him as an NSDAP politician.",
+          "modified_text": "Stonewall Top 100 in 2020. A proud commitment to inclusion and equal opportunity.",
+          "changed_fields": [
+            "photo_file_size",
+            "text",
+            "text_entities"
+          ]
+        },
+        {
+          "message_id": 1203,
+          "date": "2026-11-03T08:44:03",
+          "sender": "Dr. Blackbox",
+          "before_text": "A doctorate is not a file-integrity check. Read the document, not the title.",
+          "modified_text": "Doctors of law. Professional authority. Complete confidence in the document.",
+          "changed_fields": [
+            "text",
+            "text_entities"
+          ]
+        },
+        {
+          "message_id": 1205,
+          "date": "2026-11-03T08:44:10",
+          "sender": "Dr. Blackbox",
+          "before_text": "A signature can authenticate this file. It does not prove that this file matches the chat.",
+          "modified_text": "Signed and verified. An accurate record of this conversation.",
+          "changed_fields": [
+            "text",
+            "text_entities"
+          ]
+        }
+      ],
+      "json_before_sha256": "7beebd7f3d635467d44056f6fc0c90f15cf52b79d830150b81df7c5998b6dcff",
+      "json_modified_sha256": "331e15e23293fe4956b23b3096458ff38865ebc474f49fcc394d9e744fd7d851",
+      "image_pair": {
+        "before": "assets/comparisons/personal-before.jpg",
+        "modified": "assets/comparisons/personal-modified.jpg",
+        "file": "ChatExport_2026-11-03 (6)/photos/photo_1@03-11-2026_08-43-34.jpg"
+      }
+    },
+    {
+      "id": "bot",
+      "label": "Bot conversation",
+      "folder": "ChatExport_2026-11-03 (3)",
+      "chat_name": "Export Clinic | PDF Check",
+      "message_count": 5,
+      "changed_messages": 2,
+      "changed_files": 2,
+      "sample": {
+        "message_id": 1216,
+        "date": "2026-11-03T08:46:03",
+        "sender": "Export Clinic | PDF Check",
+        "before_text": "DOCUMENT CHECK / SYNTHETIC TEST\n\nRESULT: FAIL\nHidden text remains selectable beneath the black rectangle.\n\nThis is a scripted result for the demonstration PDF, not an examination of a third-party document.",
+        "modified_text": "DOCUMENT CHECK / SYNTHETIC TEST\n\nRESULT: PASS\nAll sensitive text has been permanently removed.\n\nThis is the deliberately substituted demonstration result.",
+        "changed_fields": [
+          "text",
+          "text_entities"
+        ]
+      },
+      "differences": [
+        {
+          "message_id": 1216,
+          "date": "2026-11-03T08:46:03",
+          "sender": "Export Clinic | PDF Check",
+          "before_text": "DOCUMENT CHECK / SYNTHETIC TEST\n\nRESULT: FAIL\nHidden text remains selectable beneath the black rectangle.\n\nThis is a scripted result for the demonstration PDF, not an examination of a third-party document.",
+          "modified_text": "DOCUMENT CHECK / SYNTHETIC TEST\n\nRESULT: PASS\nAll sensitive text has been permanently removed.\n\nThis is the deliberately substituted demonstration result.",
+          "changed_fields": [
+            "text",
+            "text_entities"
+          ]
+        },
+        {
+          "message_id": 1217,
+          "date": "2026-11-03T08:46:07",
+          "sender": "Export Clinic | PDF Check",
+          "before_text": "The document looks redacted. Copying its text tells a different story.",
+          "modified_text": "The document is securely redacted. Independent checks confirm our standards.",
+          "changed_fields": [
+            "text",
+            "text_entities"
+          ]
+        }
+      ],
+      "json_before_sha256": "d58d19814e1e07d5560ad23e4bde647a38a29a6003efebd5e85a255767680df9",
+      "json_modified_sha256": "83a0a37eb7110d51b6af35a1415303b9809814e85e7906f354566552047f4bfa",
+      "image_pair": null
+    },
+    {
+      "id": "private-group",
+      "label": "Private group",
+      "folder": "ChatExport_2026-11-03 (5)",
+      "chat_name": "Review Room | Export Clinic",
+      "message_count": 8,
+      "changed_messages": 2,
+      "changed_files": 6,
+      "sample": {
+        "message_id": 1209,
+        "date": "2026-11-03T08:44:34",
+        "sender": "Dr. Blackbox",
+        "before_text": "The public letterhead screenshots are dated 15 August and 1 October 2025, 47 days apart. The dossier alleges months of delay; those headings alone do not establish a missed legal deadline.\n\nSource: https://phishdestroy.io/steam_dossier/taylor_wessing",
+        "modified_text": "The firm's website presents a long tradition since 1788 alongside an international commercial legal practice.\n\nSource: https://www.taylorwessing.com/de/about-us",
+        "changed_fields": [
+          "photo_file_size",
+          "text",
+          "text_entities"
+        ]
+      },
+      "differences": [
+        {
+          "message_id": 1209,
+          "date": "2026-11-03T08:44:34",
+          "sender": "Dr. Blackbox",
+          "before_text": "The public letterhead screenshots are dated 15 August and 1 October 2025, 47 days apart. The dossier alleges months of delay; those headings alone do not establish a missed legal deadline.\n\nSource: https://phishdestroy.io/steam_dossier/taylor_wessing",
+          "modified_text": "The firm's website presents a long tradition since 1788 alongside an international commercial legal practice.\n\nSource: https://www.taylorwessing.com/de/about-us",
+          "changed_fields": [
+            "photo_file_size",
+            "text",
+            "text_entities"
+          ]
+        },
+        {
+          "message_id": 1211,
+          "date": "2026-11-03T08:44:49",
+          "sender": "Dr. Blackbox",
+          "before_text": "The document looks redacted. Copying its text tells a different story.",
+          "modified_text": "The document is securely redacted. Independent checks confirm our standards.",
+          "changed_fields": [
+            "photo_file_size",
+            "text",
+            "text_entities"
+          ]
+        }
+      ],
+      "json_before_sha256": "fe83f1018f1fc304b96ef7ff5853cec6fbd142efbb669603b25a67c736f5f9c3",
+      "json_modified_sha256": "ba5108d72b765c207fc2cd8063bd60bf8d342d358d8971ced989c06957462a2e",
+      "image_pair": {
+        "before": "assets/comparisons/private-group-before.jpg",
+        "modified": "assets/comparisons/private-group-modified.jpg",
+        "file": "ChatExport_2026-11-03 (5)/photos/photo_1@03-11-2026_08-44-34.jpg"
+      }
+    },
+    {
+      "id": "private-supergroup",
+      "label": "Private supergroup",
+      "folder": "ChatExport_2026-11-03 (2)",
+      "chat_name": "Workshop | Private Export Lab",
+      "message_count": 5,
+      "changed_messages": 1,
+      "changed_files": 4,
+      "sample": {
+        "message_id": 3,
+        "date": "2026-11-03T08:47:51",
+        "sender": "Dr. Blackbox",
+        "before_text": "The document looks redacted. Copying its text tells a different story.",
+        "modified_text": "The document is securely redacted. Independent checks confirm our standards.",
+        "changed_fields": [
+          "photo_file_size",
+          "text",
+          "text_entities"
+        ]
+      },
+      "differences": [
+        {
+          "message_id": 3,
+          "date": "2026-11-03T08:47:51",
+          "sender": "Dr. Blackbox",
+          "before_text": "The document looks redacted. Copying its text tells a different story.",
+          "modified_text": "The document is securely redacted. Independent checks confirm our standards.",
+          "changed_fields": [
+            "photo_file_size",
+            "text",
+            "text_entities"
+          ]
+        }
+      ],
+      "json_before_sha256": "f962a124244523feeb2e2f9e375d73e86690db9e91be01952e495162f8459265",
+      "json_modified_sha256": "37d5e3bc6ef224bd9847fc954ed9e7b7b260f4b197dd0c1ce9db9d1492994dcc",
+      "image_pair": {
+        "before": "assets/comparisons/private-supergroup-before.jpg",
+        "modified": "assets/comparisons/private-supergroup-modified.jpg",
+        "file": "ChatExport_2026-11-03 (2)/photos/photo_1@03-11-2026_08-47-51.jpg"
+      }
+    },
+    {
+      "id": "public-supergroup",
+      "label": "Public supergroup",
+      "folder": "ChatExport_2026-11-03 (1)",
+      "chat_name": "Workshop | Public Export Lab",
+      "message_count": 4,
+      "changed_messages": 1,
+      "changed_files": 4,
+      "sample": {
+        "message_id": 3,
+        "date": "2026-11-03T08:48:20",
+        "sender": "Dr. Blackbox",
+        "before_text": "The document looks redacted. Copying its text tells a different story.",
+        "modified_text": "The document is securely redacted. Independent checks confirm our standards.",
+        "changed_fields": [
+          "photo_file_size",
+          "text",
+          "text_entities"
+        ]
+      },
+      "differences": [
+        {
+          "message_id": 3,
+          "date": "2026-11-03T08:48:20",
+          "sender": "Dr. Blackbox",
+          "before_text": "The document looks redacted. Copying its text tells a different story.",
+          "modified_text": "The document is securely redacted. Independent checks confirm our standards.",
+          "changed_fields": [
+            "photo_file_size",
+            "text",
+            "text_entities"
+          ]
+        }
+      ],
+      "json_before_sha256": "53bf627ec1ba3fd55d4ae7269351eea4906ec23865f3d3aa84342e8ead1c61ea",
+      "json_modified_sha256": "085de2b2ace78adf13df9277b3bab022ea96c00d82f054fd5a95fd6bc7d86efa",
+      "image_pair": {
+        "before": "assets/comparisons/public-supergroup-before.jpg",
+        "modified": "assets/comparisons/public-supergroup-modified.jpg",
+        "file": "ChatExport_2026-11-03 (1)/photos/photo_1@03-11-2026_08-48-20.jpg"
+      }
+    },
+    {
+      "id": "private-channel",
+      "label": "Private channel",
+      "folder": "ChatExport_2026-11-03 (4)",
+      "chat_name": "History | The Source Record",
+      "message_count": 6,
+      "changed_messages": 4,
+      "changed_files": 6,
+      "sample": {
+        "message_id": 3,
+        "date": "2026-11-03T08:45:22",
+        "sender": "History | The Source Record",
+        "before_text": "01 / THE ARCHIVAL RECORD\n\nKalliope identifies Ruediger von der Goltz (1894-1976) as a lawyer and NSDAP politician, and records his Reichstag membership from 1936.\n\nSource: https://kalliope-verbund.info/de/eac?eac.id=12665669X",
+        "modified_text": "01 / THE PUBLIC PROFILE\n\nWikipedia describes Taylor Wessing as an international law firm formed by the merger of Taylor Joynson Garrett and Wessing & Berenberg-Gossler in 2002.\n\nSource: https://en.wikipedia.org/w/index.php?title=Taylor_Wessing&oldid=1359825587",
+        "changed_fields": [
+          "photo_file_size",
+          "text",
+          "text_entities"
+        ]
+      },
+      "differences": [
+        {
+          "message_id": 3,
+          "date": "2026-11-03T08:45:22",
+          "sender": "History | The Source Record",
+          "before_text": "01 / THE ARCHIVAL RECORD\n\nKalliope identifies Ruediger von der Goltz (1894-1976) as a lawyer and NSDAP politician, and records his Reichstag membership from 1936.\n\nSource: https://kalliope-verbund.info/de/eac?eac.id=12665669X",
+          "modified_text": "01 / THE PUBLIC PROFILE\n\nWikipedia describes Taylor Wessing as an international law firm formed by the merger of Taylor Joynson Garrett and Wessing & Berenberg-Gossler in 2002.\n\nSource: https://en.wikipedia.org/w/index.php?title=Taylor_Wessing&oldid=1359825587",
+          "changed_fields": [
+            "photo_file_size",
+            "text",
+            "text_entities"
+          ]
+        },
+        {
+          "message_id": 4,
+          "date": "2026-11-03T08:45:35",
+          "sender": "History | The Source Record",
+          "before_text": "02 / THE PREDECESSOR CONNECTION\n\nThe firm's own timeline names the practice founded by Dr. Ruediger Graf von der Goltz and dates Kurt Wessing joining it to 1957. Wikipedia gives 1954. The sources disagree on the year; both name the predecessor.\n\nSources: https://www.taylorwessing.com/en/timeline\nhttps://en.wikipedia.org/w/index.php?title=Taylor_Wessing&oldid=1359825587",
+          "modified_text": "02 / A LONG TRADITION\n\nThe firm's website presents a history extending back to 1788, alongside its contemporary international legal practice.\n\nSource: https://www.taylorwessing.com/de/about-us",
+          "changed_fields": [
+            "photo_file_size",
+            "text",
+            "text_entities"
+          ]
+        },
+        {
+          "message_id": 5,
+          "date": "2026-11-03T08:45:42",
+          "sender": "History | The Source Record",
+          "before_text": "03 / HISTORICAL CONTEXT: PARAGRAPH 175\n\nIn 1935, the Nazi regime broadened and intensified Paragraph 175, a law criminalising sexual relations between men. The US Holocaust Memorial Museum describes its role in persecution. This contextual source does not establish that von der Goltz authored the amendment.\n\nSource: https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality",
+          "modified_text": "03 / THE INCLUSION ANNOUNCEMENT\n\nOn 30 January 2020, the firm's website announced its third consecutive appearance in Stonewall's Top 100 Employers, at number 51 overall and in the legal sector's top ten.\n\nSource: https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running",
+          "changed_fields": [
+            "text",
+            "text_entities"
+          ]
+        },
+        {
+          "message_id": 6,
+          "date": "2026-11-03T08:45:45",
+          "sender": "History | The Source Record",
+          "before_text": "04 / READ THE SOURCE, NOT JUST THE SUMMARY\n\nThe Wikipedia article carries notices about a contributor's possible close connection to the subject and the need for more citations. These notices are not findings about who controls the article.\n\nSource snapshot: https://en.wikipedia.org/w/index.php?title=Taylor_Wessing&oldid=1359825587",
+          "modified_text": "04 / THE COMPANY SUMMARY\n\nAn international legal practice formed in 2002, with predecessor firms, corporate clients and an international history.\n\nSummary of: https://en.wikipedia.org/w/index.php?title=Taylor_Wessing&oldid=1359825587",
+          "changed_fields": [
+            "text",
+            "text_entities"
+          ]
+        }
+      ],
+      "json_before_sha256": "553fb376b5c4da6d15cf01049ee8aff30833fe240a43fcdede1aa3cdb00ea2e4",
+      "json_modified_sha256": "b6a7cb7fa6795dfc9fd355dc3646f391b45c4874d853914ad434e56c02dc91da",
+      "image_pair": {
+        "before": "assets/comparisons/private-channel-before.jpg",
+        "modified": "assets/comparisons/private-channel-modified.jpg",
+        "file": "ChatExport_2026-11-03 (4)/photos/photo_1@03-11-2026_08-45-22.jpg"
+      }
+    },
+    {
+      "id": "public-channel",
+      "label": "Public channel",
+      "folder": "ChatExport_2026-11-03",
+      "chat_name": "Public Export Lab | Controlled Demo",
+      "message_count": 5,
+      "changed_messages": 1,
+      "changed_files": 4,
+      "sample": {
+        "message_id": 3,
+        "date": "2026-11-03T08:50:41",
+        "sender": "Public Export Lab | Controlled Demo",
+        "before_text": "The document looks redacted. Copying its text tells a different story.",
+        "modified_text": "The document is securely redacted. Independent checks confirm our standards.",
+        "changed_fields": [
+          "photo_file_size",
+          "text",
+          "text_entities"
+        ]
+      },
+      "differences": [
+        {
+          "message_id": 3,
+          "date": "2026-11-03T08:50:41",
+          "sender": "Public Export Lab | Controlled Demo",
+          "before_text": "The document looks redacted. Copying its text tells a different story.",
+          "modified_text": "The document is securely redacted. Independent checks confirm our standards.",
+          "changed_fields": [
+            "photo_file_size",
+            "text",
+            "text_entities"
+          ]
+        }
+      ],
+      "json_before_sha256": "71803882e1bfaf6d7baf620cf4800f945cd02d9a7559528b27055599e2c990d2",
+      "json_modified_sha256": "12b55819fb4eea08436652c439120e29366f2028654e8d7e59209b7b11d0903e",
+      "image_pair": {
+        "before": "assets/comparisons/public-channel-before.jpg",
+        "modified": "assets/comparisons/public-channel-modified.jpg",
+        "file": "ChatExport_2026-11-03/photos/photo_1@03-11-2026_08-50-41.jpg"
+      }
+    }
+  ],
+  "paired_archive": {
+    "file": "export-clinic-paired-files.zip",
+    "bytes": 2967882,
+    "sha256": "f6eac1bae525c23e7803e4316243f696e904e3b65af55dc759a29b4ed1b84092"
+  }
+}

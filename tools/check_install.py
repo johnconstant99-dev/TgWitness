@@ -52,8 +52,8 @@ def main(arguments=None):
             if time.monotonic() > deadline:
                 raise RuntimeError("Installed application did not start")
             time.sleep(.05)
-        def get(path, headers=None):
-            connection = http.client.HTTPConnection("127.0.0.1", sock.getsockname()[1], timeout=30)
+        def get(path, headers=None, *, timeout=30):
+            connection = http.client.HTTPConnection("127.0.0.1", sock.getsockname()[1], timeout=timeout)
             try:
                 connection.request("GET", path, headers=headers or {})
                 response = connection.getresponse()
@@ -79,7 +79,12 @@ def main(arguments=None):
         assert code == 200
         status = json.loads(body)
         assert status["demo"] and status["stats"]["total"] >= 30
-        code, body = get("/api/export/zip", headers)
+        export_started = time.monotonic()
+        print("Checking /api/export/zip; waiting for the complete signed archive", flush=True)
+        # Match the real download client's allowance for PDF generation under ARM64 emulation.
+        code, body = get("/api/export/zip", headers, timeout=600)
+        export_seconds = round(time.monotonic() - export_started, 3)
+        print("Checking /api/export/zip HTTP", code, "bytes", len(body), "seconds", export_seconds, flush=True)
         assert code == 200
         archive = data / "installed-evidence.zip"
         archive.write_bytes(body)
@@ -91,7 +96,7 @@ def main(arguments=None):
         assert transfer["bytes"] == streamed.stat().st_size
         receipt = {"passed": True, "package_origin": str(Path(tgwitness.__file__).resolve()),
                    "version": tgwitness.__version__, "streamed_download_verified": True,
-                   "verified_events": result["events"], "dependencies": {
+                   "verified_events": result["events"], "zip_export_seconds": export_seconds, "dependencies": {
                        name: importlib.metadata.version(name)
                        for name in ("fastapi", "uvicorn", "telethon", "cryptography", "pillow")}}
         (args.output / "install-receipt.json").write_text(json.dumps(receipt, indent=2), encoding="utf-8")

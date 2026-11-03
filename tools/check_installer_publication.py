@@ -1,18 +1,126 @@
+import base64
+import csv
+from email.parser import BytesParser
 import hashlib
+import io
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from unittest.mock import patch
 from urllib.error import HTTPError
+import warnings
+import zipfile
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_installer as builder
 import installer_publication as publication
+
+
+class WheelVerificationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        temporary = tempfile.TemporaryDirectory(prefix="installer-wheel-check-")
+        cls.addClassCleanup(temporary.cleanup)
+        cls.directory = Path(temporary.name)
+        cls.version = tomllib.loads((builder.ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "wheel", "--no-index", "--no-deps", "--no-build-isolation",
+             "--disable-pip-version-check", "--wheel-dir", str(cls.directory), str(builder.ROOT)],
+            capture_output=True, text=True, encoding="utf-8", timeout=120,
+        )
+        if result.returncode:
+            raise AssertionError("Real application wheel build failed:\n" + result.stdout + result.stderr)
+        wheels = list(cls.directory.glob("tgwitness-*-py3-none-any.whl"))
+        if len(wheels) != 1:
+            raise AssertionError("Expected one real application wheel")
+        cls.wheel = wheels[0]
+        with zipfile.ZipFile(cls.wheel) as archive:
+            cls.files = {name: archive.read(name) for name in archive.namelist()}
+        cls.dist_info = "tgwitness-" + cls.version + ".dist-info/"
+        cls.record_name = cls.dist_info + "RECORD"
+
+    def rewrite(self, files, *, record=None):
+        if record is None:
+            rows = io.StringIO(newline="")
+            writer = csv.writer(rows)
+            for name, data in files.items():
+                if name != self.record_name:
+                    checksum = base64.urlsafe_b64encode(hashlib.sha256(data).digest()).decode().rstrip("=")
+                    writer.writerow((name, "sha256=" + checksum, str(len(data))))
+            writer.writerow((self.record_name, "", ""))
+            record = rows.getvalue().encode()
+        target = self.directory / "mutated.whl"
+        with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for name, data in files.items():
+                if name != self.record_name:
+                    archive.writestr(name, data)
+            archive.writestr(self.record_name, record)
+        return target
+
+    def test_real_wheel_includes_both_application_packages(self):
+        for name in ("tgwitness/__init__.py", "tgwitness_capture/__init__.py", "tgwitness_capture/static/app.js"):
+            self.assertIn(name, self.files)
+        builder.verify_wheel(self.wheel, self.version)
+
+    def test_missing_capture_source_or_resource_with_valid_record_is_rejected(self):
+        for name in ("tgwitness_capture/format.py", "tgwitness_capture/static/app.js"):
+            with self.subTest(name=name):
+                files = dict(self.files)
+                del files[name]
+                with self.assertRaisesRegex(ValueError, "Incomplete or damaged"):
+                    builder.verify_wheel(self.rewrite(files), self.version)
+
+    def test_changed_application_bytes_with_valid_record_are_rejected(self):
+        for name in ("tgwitness/__init__.py", "tgwitness_capture/format.py", "tgwitness_capture/static/app.js"):
+            with self.subTest(name=name):
+                files = {**self.files, name: self.files[name] + b"\nsynthetic changed bytes\n"}
+                with self.assertRaisesRegex(ValueError, "Wheel differs from checked source"):
+                    builder.verify_wheel(self.rewrite(files), self.version)
+
+    def test_unexpected_package_or_metadata_entry_with_valid_record_is_rejected(self):
+        for name in ("tgwitness_capture/private.txt", self.dist_info + "unexpected.txt"):
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "Unexpected wheel entry"):
+                builder.verify_wheel(self.rewrite({**self.files, name: b"unexpected"}), self.version)
+
+    def test_duplicate_package_entry_is_rejected(self):
+        target = self.rewrite(self.files)
+        name = "tgwitness_capture/__init__.py"
+        with warnings.catch_warnings(), zipfile.ZipFile(target, "a") as archive:
+            warnings.simplefilter("ignore", UserWarning)
+            archive.writestr(name, self.files[name])
+        with self.assertRaisesRegex(ValueError, "Incomplete or damaged"):
+            builder.verify_wheel(target, self.version)
+
+    def test_wrong_version_with_valid_record_is_rejected(self):
+        name = self.dist_info + "METADATA"
+        metadata = BytesParser().parsebytes(self.files[name])
+        self.assertEqual(metadata["Version"], self.version)
+        metadata.replace_header("Version", "0.0.0")
+        with self.assertRaisesRegex(ValueError, "Wheel version differs"):
+            builder.verify_wheel(self.rewrite({**self.files, name: metadata.as_bytes()}), self.version)
+
+    def test_incomplete_or_changed_record_is_rejected(self):
+        rows = list(csv.reader(io.StringIO(self.files[self.record_name].decode())))
+        selected = next(index for index, row in enumerate(rows) if row[0] == "tgwitness_capture/format.py")
+        for kind in ("missing", "checksum", "size"):
+            changed = [list(row) for row in rows]
+            if kind == "missing":
+                del changed[selected]
+            else:
+                changed[selected][1 if kind == "checksum" else 2] = "invalid"
+            record = io.StringIO(newline="")
+            csv.writer(record).writerows(changed)
+            expected = "RECORD does not cover" if kind == "missing" else "RECORD mismatch"
+            with self.subTest(kind=kind), self.assertRaisesRegex(ValueError, expected):
+                builder.verify_wheel(self.rewrite(self.files, record=record.getvalue().encode()), self.version)
 
 
 class PublicationTests(unittest.TestCase):

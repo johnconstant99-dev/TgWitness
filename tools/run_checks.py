@@ -61,7 +61,7 @@ SUITES = {
         "check_cloud_wizard.py", "check_evidence_witnesses.py", "check_setup_levels.py", "check_first_run.py",
         "check_group_settings_browser.py", "check_group_screen_browser.py", "check_gateway_dns.py", "check_tdx.py", "check_phala.py",
     ),
-    "site": ("check_site.py", "check_docs_site.py", "check_docs_workflows.py", "test_site_metadata.py",
+    "site": ("check_site.py", "check_docs_site.py", "check_docs_workflows.py", "test_site_metadata.py", "check_export_clinic.py",
              "check_report_example.py", "check_guide_languages.py"),
 }
 

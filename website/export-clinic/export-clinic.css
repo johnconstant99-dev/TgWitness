@@ -1,0 +1,52 @@
+/* Page-specific controls inherit the shared documentation typography and theme. */
+.export-clinic { min-width:0; }
+.export-clinic .clinic-facts { display:flex; flex-wrap:wrap; gap:16px 28px; padding:16px 0; border-block:1px solid var(--line); color:var(--muted); font-size:12px; }
+.export-clinic .clinic-facts strong { color:var(--ink); font-size:17px; margin-inline-end:5px; }
+.export-clinic :is(.film-toolbar,.film-switch,.sample-controls,.case-bar) { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.export-clinic :is(.film-toolbar,.case-bar) { margin:16px 0; }
+.export-clinic button { border:1px solid var(--line); border-radius:6px; background:var(--surface); padding:7px 11px; font-size:12px; line-height:1.5; }
+.export-clinic button[aria-pressed=true] { border-color:var(--blue); color:var(--blue); box-shadow:inset 0 -2px var(--blue); font-weight:650; }
+.export-clinic button:hover { border-color:var(--blue); }
+.export-clinic button:disabled { opacity:.45; cursor:default; }
+.export-clinic :is(.film-toolbar p,.film-toolbar span,.film-under,.case-count,.comparison-foot,.sample-controls,.no-media,.meta-label,.clinic-note) { font-size:12px; color:var(--muted); }
+.export-clinic :is(.film-toolbar p,.film-under p) { margin:0; }
+.export-clinic .video-shell { background:#0b1120; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+.export-clinic video { display:block; width:100%; aspect-ratio:16/9; }
+.export-clinic .film-under { margin-top:12px; }
+.export-clinic .film-under>a { display:inline-block; margin:10px 0; }
+.export-clinic .chapter-nav { display:flex; flex-wrap:wrap; gap:7px; margin:12px 0 28px; }
+.export-clinic .chapter-time { font-family:var(--mono); color:var(--blue); margin-inline-end:6px; }
+.export-clinic .version-tabs { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0; }
+.export-clinic .case-tabs { display:flex; flex-wrap:wrap; gap:7px; }
+.export-clinic .case-name { margin:0; font-size:16px; }
+.export-clinic :is(.comparison-grid,.image-pair,.download-primary) { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.export-clinic :is(.record-card,.download-card) { min-width:0; border:1px solid var(--line); border-radius:9px; background:var(--surface); overflow:hidden; }
+.export-clinic .record-heading { padding:13px 16px; border-bottom:1px solid var(--line); }
+.export-clinic .record-heading strong { display:block; font:600 10px/1.6 var(--mono); color:var(--blue); }
+.export-clinic .record-heading span { font-size:11px; color:var(--muted); }
+.export-clinic .message-copy { padding:18px 16px; font-size:13px; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
+.export-clinic .record-card { display:flex; flex-direction:column; }
+.export-clinic mark { background:#d6e6ff; color:#102e65; padding:2px 4px; border-radius:3px; font-weight:700; }
+.export-clinic .modified mark { background:#ffe4b8; color:#69400b; }
+.export-clinic .record-hash { margin-top:auto; border-top:1px solid var(--line); padding:11px 16px; display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+.export-clinic .mono { font-family:var(--mono); font-size:10px; overflow-wrap:anywhere; }
+.export-clinic .hash-button { font-size:10px; padding:4px 6px; }
+.export-clinic .comparison-foot { margin:12px 0; }
+.export-clinic .comparison-foot p { margin:4px 0; }
+.export-clinic .sample-controls { margin:14px 0; }
+.export-clinic .image-pair figure { margin:0 0 15px; }
+.export-clinic .image-pair img { border-radius:6px; }
+.export-clinic .download-card { padding:18px; }
+.export-clinic .download-card h3 { margin:0 0 12px; }
+.export-clinic .download-card p { font-size:13px; }
+.export-clinic .clinic-download { display:block; font-size:13px; font-weight:650; margin:12px 0; }
+.export-clinic .download-card .clinic-note { margin-bottom:0; }
+.export-clinic .download-notes { display:flex; flex-wrap:wrap; gap:8px 18px; margin:22px 0; font-size:12px; }
+.export-clinic .archive-contents li { font-size:13px; }
+.export-clinic .clinic-toast { position:fixed; bottom:24px; inset-inline-end:24px; background:var(--surface); color:var(--ink); border:1px solid var(--line); padding:12px 18px; border-radius:8px; z-index:30; font-size:13px; }
+@media(max-width:680px) {
+  .export-clinic :is(.comparison-grid,.download-primary) { grid-template-columns:1fr; }
+  .export-clinic .image-pair { gap:8px; }
+  .export-clinic .sample-controls { justify-content:flex-start; }
+  .export-clinic .sample-controls>span { order:3; flex-basis:100%; }
+}

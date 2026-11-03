@@ -96,6 +96,10 @@ jobs:
           python -m pip check
           python -m pip install --require-hashes --only-binary=:all: -r deploy/audit.lock
       - run: python -m ruff check .
+      - name: Check release source and container recovery boundaries
+        run: |
+          python -I tools/test_release_source.py
+          python -I tools/test_container_tag.py
       - name: Check media and locale boundaries and legacy import compatibility
         run: python -I tools/check_codeql_boundaries.py
       - name: Check installed resources, authentication and signed downloads with synthetic data

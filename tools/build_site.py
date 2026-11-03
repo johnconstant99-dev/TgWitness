@@ -13,7 +13,7 @@ from urllib.parse import urljoin, urlsplit
 
 if __package__:
     from .site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
-    from . import site_diagrams, site_i18n, site_wiki, site_modes, site_account, site_llms
+    from . import site_diagrams, site_i18n, site_wiki, site_modes, site_account, site_llms, site_export_clinic
 else:
     from site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
     import site_diagrams
@@ -22,6 +22,7 @@ else:
     import site_modes
     import site_account
     import site_llms
+    import site_export_clinic
 
 ROOT = Path(__file__).resolve().parents[1]
 LANGS = tuple(site_i18n.LANGUAGES)
@@ -64,7 +65,7 @@ STATIC = {"style.css": "website/style.css", "site.js": "website/site.js",
           "LICENSE": "LICENSE", "NOTICE": "NOTICE",
           "docs.css": "website/docs.css", "docs.js": "website/docs.js",
           "learn.css": "website/learn.css", "learn.js": "website/learn.js",
-          "workflows.css": "website/workflows.css", "workflows.js": "website/workflows.js", **ASSETS, **WIKI_ASSETS}
+          "workflows.css": "website/workflows.css", "workflows.js": "website/workflows.js", **ASSETS, **WIKI_ASSETS, **site_export_clinic.STATIC}
 SITE_SCRIPTS = ("website/learn.js", "website/docs.js", "website/site.js", "website/workflows.js")
 MODES_PAGES = site_modes.FILES
 
@@ -101,7 +102,7 @@ WIKI_HUB = "docs/reference/"
 LOCAL_PAGES = ("", "docs/", *(f"docs/{slug}/" for slug in GUIDES), WIKI_HUB, *(f"{WIKI_HUB}{slug}/" for slug in REFERENCE))
 NOTICE_PAGES = tuple(f"{WIKI_HUB}{slug}/" for slug in NOTICE_SLUGS)
 PAGE_LOCALES = tuple((lang, local) for lang in NOTICE_LANGUAGES
-                     for local in (LOCAL_PAGES if lang in LANGS else NOTICE_PAGES))
+                     for local in (LOCAL_PAGES if lang in LANGS else NOTICE_PAGES)) + (("en", site_export_clinic.PATH),)
 PAGES = tuple(("" if lang == "en" else lang + "/") + local for lang, local in PAGE_LOCALES)
 SEARCH_FILES = tuple(("" if lang == "en" else lang + "/") + "docs/search.json" for lang in NOTICE_LANGUAGES)
 MARKDOWN_PAGES = {path + "index.html": site_llms.markdown_path(path) for path in PAGES}
@@ -132,6 +133,8 @@ def prefix(lang):
 
 
 def page_languages(local):
+    if local == site_export_clinic.PATH:
+        return {"en": site_i18n.LANGUAGES["en"]}
     return NOTICE_LANGUAGES if local in NOTICE_PAGES else site_i18n.LANGUAGES
 
 
@@ -524,11 +527,19 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                 translated += (f'<details class="detail-block"><summary>{labels["reference"]}</summary>'
                                f'<div class="wiki-body" lang="{source_lang}" dir="ltr">'
                                + capture_instructions[source_lang] + '</div></details>')
+            if slug == "concepts":
+                translated += ('<p class="callout" lang="en" dir="ltr"><a href="@@ROOT@@docs/export-clinic/">'
+                               'Export Clinic: watch the controlled Desktop experiment</a>. Compare the two-minute film, '
+                               'the original recording and seven pairs of test exports. Local modification is disclosed.</p>')
             guide_html[slug], guide_missing[slug] = translated, missing
             texts[hub + slug + "/"] = PlainText(render(translated, guide_values(hub + slug + "/"))).text
         for slug in page_slugs:
             texts[f"{wiki_hub}{slug}/"] = PlainText(rendered[slug]).text
         search = {"labels": {k: labels[k] for k in ("empty", "results", "prompt")}, "pages": [
+            {"title": site_export_clinic.TITLE + (" · English" if lang != "en" else ""),
+             "description": site_export_clinic.DESCRIPTION, "keywords": site_export_clinic.KEYWORDS,
+             "text": site_export_clinic.DESCRIPTION,
+             "url": relative(hub, site_export_clinic.PATH)},
             *({"title": guides[key][0], "description": guides[key][1], "keywords": guides[key][2],
                "text": texts[hub + key + "/"][:SEARCH_TEXT], "url": key + "/"} for key in (GUIDES if full_site else ())),
             {"title": modes_words["modes.eyebrow"], "description": modes_words["modes.seo"],
@@ -552,6 +563,10 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                 for key in keys:
                     mark = ' aria-current="page"' if path == hub + key + "/" else ''
                     items.append(f'<a href="{relative(path, hub + key + "/")}"{mark}>{guides[key][0]}</a>')
+                    if key == "concepts":
+                        mark = ' aria-current="page"' if path == site_export_clinic.PATH else ''
+                        suffix = ' · EN' if lang != "en" else ''
+                        items.append(f'<a lang="en" dir="ltr" href="{relative(path, site_export_clinic.PATH)}"{mark}>Export Clinic{suffix}</a>')
             wiki = [f'<p class="nav-label"><a class="nav-label-link" href="{relative(path, wiki_hub)}"'
                     + (' aria-current="page"' if path == wiki_hub else '') + f'>{labels["wiki"]}</a></p>']
             for label, keys in REFERENCE_GROUPS:
@@ -602,6 +617,10 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                 extra = ''.join(f'<link rel="stylesheet" href="{assets}{name}">' for name in ("sealed.css", "sealed-story.css", "capture-site.css"))
                 extra += ''.join(f'<script defer src="{assets}{name}"></script>' for name in ("capture-locales.js", "sealed-story.js", "sealed.js"))
                 result = result.replace('</head>', extra + '</head>')
+            if local == site_export_clinic.PATH:
+                assets = relative(path, "")
+                result = result.replace('</head>', f'<link rel="stylesheet" href="{assets}export-clinic.css">'
+                                        f'<script defer src="{assets}export-clinic.js"></script></head>')
             write(path + "index.html", links(result, path))
 
         def card(path, url, number, title, text):
@@ -628,6 +647,8 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
             for index, (label, heading, keys) in enumerate(GROUPS):
                 content += f'<h2 id="section-{index}">{t(heading)}</h2><div class="guide-grid">'
                 content += "".join(card(hub, hub + key + "/", f"{list(GUIDES).index(key) + 1:02d}", *guides[key][:2]) for key in keys)
+                if "concepts" in keys:
+                    content += '<div lang="en" dir="ltr">' + card(hub, site_export_clinic.PATH, "EXPERIMENT / EN", site_export_clinic.TITLE, site_export_clinic.DESCRIPTION) + '</div>'
                 content += '</div>'
             content += (f'<h2 id="reference">{labels["wiki_title"]}</h2><p>{labels["wiki_intro"]}</p>'
                         f'<div class="wiki-index">' + "".join(
@@ -670,6 +691,13 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                 content += '</div>'
             page(WIKI_HUB, labels["wiki"], t(WIKI_DESCRIPTION),
                  [(labels["home"], base), (labels["docs"], hub), (labels["wiki"], wiki_hub)], content, headings(content), "")
+        if lang == "en":
+            content = ('<p class="eyebrow">Documentation / Controlled experiment</p><h1>Export Clinic</h1>'
+                       + site_export_clinic.content(read_public, render, guide_values(site_export_clinic.PATH), json_script))
+            footer = '<a class="next-guide" href="../concepts/"><span>Continue reading</span><strong>See how evidence works →</strong></a>'
+            page(site_export_clinic.PATH, site_export_clinic.TITLE, site_export_clinic.DESCRIPTION,
+                 [(labels["home"], base), (labels["docs"], hub), (site_export_clinic.TITLE, site_export_clinic.PATH)],
+                 content, headings(content), footer)
         order = [key for _, keys in REFERENCE_GROUPS for key in keys if key in page_slugs]
         for index, slug in enumerate(order):
             path = f"{wiki_hub}{slug}/"
@@ -701,8 +729,10 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
         destination.write_bytes(read_public(source))
     build_demo(read_public, write)
     llms_index = site_llms.index(base_url, repo_url, branch, version, GUIDES, REFERENCE)
+    llms_index += f"\n## Controlled experiment\n\n- [Export Clinic]({base_url}/{site_export_clinic.PATH}index.md): {site_export_clinic.DESCRIPTION}\n"
     write("llms.txt", llms_index)
     handbook_paths = [f"docs/{slug}/index.html" for _, _, keys in GROUPS for slug in keys]
+    handbook_paths.append(site_export_clinic.PATH + "index.html")
     handbook_paths += [f"{WIKI_HUB}{slug}/index.html" for _, keys in REFERENCE_GROUPS for slug in keys]
     handbook = site_llms.full(llms_index, [markdown_documents[path] for path in handbook_paths]
                              + [markdown_documents[site_modes.LOCAL]])
