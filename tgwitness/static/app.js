@@ -423,7 +423,7 @@ const termLabels={offline:tr("offline"),ready:tr("ready"),credentials:tr("creden
   not_in_dialogs:tr("not found among the account's chats"),beyond_dialog_limit:tr("beyond the chats listed for this account"),public_username:tr("public username"),
   private_or_unlisted:tr("private or unlisted"),creator:tr("creator"),administrator:tr("administrator"),
   member_or_unknown:tr("member or unknown"),unknown:tr("unknown"),messages:tr("messages"),edits:tr("edits"),
-  deletions:tr("deletions"),reactions:tr("reactions"),membership:tr("membership")};
+  deletions:tr("deletions"),reactions:tr("reactions"),membership:tr("membership"),profiles:tr("profile changes"),presence:tr("online statuses")};
 const termText=value=>termLabels[value]??String(value??"").replaceAll("_"," ");
 function actionOwner(){
   const profile=state.profile,token=state.token,revision=state.workspaceRevision;
@@ -1764,14 +1764,14 @@ function renderHistory(){
   show("history-start",!active&&!paused);show("history-pause",active);
   show("history-resume",paused);show("history-cancel",active||paused);
   show("history-report",exists&&may("export"));
-  $("history-start").disabled=!!s?.demo||!s?.collector.running||!s?.targets.some(x=>x.enabled);
-  $("history-resume").disabled=!!s?.demo||!s?.collector.running;
+  $("history-start").disabled=!!s?.demo||!s?.collector.has_session||!s?.collector.available_for_export||!s?.targets.some(x=>x.enabled);
+  $("history-resume").disabled=!!s?.demo||!s?.collector.has_session||!s?.collector.available_for_export;
   const labels={running:tr("Loading history"),paused:tr("History paused"),complete:tr("History reading finished"),
     incomplete:tr("History finished with gaps"),cancelled:tr("History run ended")};
   const counts=h.sources_by_phase||{},finished=(counts.complete||0)+(counts.failed||0)+(counts.skipped||0);
   $("history-progress").textContent=exists?(labels[phase]||phase)+" · "+tr("{messages} messages · {done} of {total} sources",{
     messages:h.captured,done:finished,total:h.sources_total})+(h.reason?" · "+tr(h.reason):""):
-    tr("{n} enabled sources. Start observation before loading history.",{n:s?.targets.filter(x=>x.enabled).length||0});
+    tr("{n} enabled sources. History requires an idle account; pause observation first.",{n:s?.targets.filter(x=>x.enabled).length||0});
   $("history-media").textContent=exists?tr("Attachments: {done} saved, {pending} pending, {failed} failed. Unavailable messages: {missing}.",{
     done:h.media?.done||0,pending:h.media_pending||0,failed:h.media?.failed||0,missing:h.unavailable||0}):"";
   const list=$("history-sources");list.replaceChildren();
@@ -1802,7 +1802,7 @@ function renderChatExportTools(){
   fillSourceSelect("snapshot-source",$("snapshot-source").value);
   fillSourceSelect("chat-export-source",$("chat-export-source").value,true);
   $("chat-export-source").options[0].textContent=tr("Choose a chat");
-  $("snapshot-form").querySelector("button").disabled=s.demo||!may("sources")||!s.collector.has_session||!s.targets.some(t=>t.enabled);
+  $("snapshot-form").querySelector("button").disabled=s.demo||!may("sources")||!s.collector.has_session||!s.collector.available_for_export||!s.targets.some(t=>t.enabled);
   renderRecheck();syncExport(s);renderHandoverChats();
 }
 const handoverChats=()=>[...$("handover-chats").querySelectorAll("input:checked")].map(input=>Number(input.value));
@@ -2235,7 +2235,7 @@ async function loadAccountExport(silent=false){
     state.accountExportDefaults=result.defaults||accountExportFallback;
     state.accountExportCapabilities=result.capabilities||{};
     if(state.accountExportDraftProfile!==profile&&!state.accountExportDirty)accountExportDefaults(state.accountExportDefaults);
-    $("account-export-start").disabled=state.accountExportCapabilities.can_start===false||
+    $("account-export-start").disabled=state.accountExportCapabilities.can_start===false||state.status?.collector.available_for_export===false||
       state.accountExportJobs.some(job=>["preparing","running","waiting","packaging"].includes(job.phase));
     $("account-export-status").textContent=state.status?.demo?
       tr("Demo account export uses fictional data only."):"";
@@ -2512,6 +2512,18 @@ const reportSelectionReady=import('./views/report-selection.js?v=1').then(({crea
   return reportSelection;
 });
 const reportTemplate=()=>$("report-form").querySelector('[name="report-template"]:checked')?.value||"custom";
+let reportConfigurations;
+const reportConfigurationsReady=import('./views/report-profiles.js?v=1').then(({createReportProfiles})=>{
+  reportConfigurations=createReportProfiles({root:$("report-profiles"),tr,json,owner:reportKey,
+    ready:()=>reportReady&&reportOwner===reportKey()&&!reportSaving&&state.view==='evidence',draft:reportDraft,run:busy,
+    apply:options=>{
+      for(const [id,key] of Object.entries(REPORT_FIELDS))if(Object.hasOwn(options,key))$(id).value=options[key];
+      for(const [id,key] of Object.entries(REPORT_CHECKS))if(Object.hasOwn(options,key))$(id).checked=options[key];
+      setReportDesign(options.design);setReportTemplate(options.template);
+      discardReportDraft();$("report-theme").dispatchEvent(new Event('input',{bubbles:true}));
+    }});
+  return reportConfigurations;
+});
 const reportDesign=()=>$("report-form").querySelector('[name="report-design"]:checked')?.value||"classic";
 function setReportDesign(value){
   const choices=[...$("report-form").querySelectorAll('[name="report-design"]')];
@@ -2537,6 +2549,7 @@ function resetReportSettings(){
   $("report-form").reset();$("report-fields").disabled=true;$("report-status").replaceChildren();
   $("report-outline").replaceChildren();$("report-form").querySelector(".report-examination").open=false;
   reportSelection?.reset();
+  reportConfigurations?.reset();
   $("report-form").querySelectorAll(".form-error").forEach(el=>el.remove());
 }
 function reportControls(){
@@ -2546,7 +2559,7 @@ function reportControls(){
 }
 async function loadReportSettings(){
   if(!state.status)return;
-  await reportSelectionReady;
+  await Promise.all([reportSelectionReady,reportConfigurationsReady]);
   const owner=reportKey();
   if(reportOwner!==owner){resetReportSettings();reportOwner=owner;}
   if(reportSaving||reportReady&&reportDirty)return;
@@ -2570,6 +2583,7 @@ async function loadReportSettings(){
       setReportDesign(options.design);
       reportSelection.load(options.selection);
       reportReady=true;reportDirty=false;formControls?.loaded("report-form");$("report-status").textContent=window.TGW_ONLINE_DEMO?tr("Sample data"):"";
+      await reportConfigurations.load();if(!current()||state.view!=='evidence')return;
       if(!$("report-form").hidden&&!$("report-preview-frame").hasAttribute("srcdoc"))scheduleReportPreview();
     }catch(error){
       if(!current()||error instanceof StaleView||error.name==='AbortError')return;
@@ -2659,7 +2673,7 @@ async function refreshReportPreview(){
 }
 $("report-preview-refresh").addEventListener("click",refreshReportPreview);
 $("exports-tab-settings").addEventListener("click",()=>{if(reportReady&&!$("report-preview-frame").hasAttribute("srcdoc"))scheduleReportPreview();});
-$("report-form").addEventListener("input",event=>{if(reportReady&&!event.target.matches("[data-report-search]")){
+$("report-form").addEventListener("input",event=>{if(reportReady&&!event.target.closest('#report-profiles')&&!event.target.matches("[data-report-search]")){
   reportSelection?.changed(event);
   if(event.target.name==="report-template")applyReportPreset();
   else if(Object.hasOwn(REPORT_CHECKS,event.target.id)||["report-participant-labels","report-chart-limit"].includes(event.target.id))setReportTemplate("custom");
@@ -4218,8 +4232,8 @@ function recheckText(c){
   return " "+tr("Last recheck {time}: {recovered} recovered, {missing} not found.",{time:fmtTime(c.recheck.at),recovered:c.recheck.recovered,missing:c.recheck.missing});
 }
 function recordingMode(s){
-  const m=s.monitoring||{},on=["messages","edits","deletions","reactions","membership"].filter(k=>m[k]);
-  return on.length===5?tr("Everything"):on.join()==="messages,edits,deletions"?tr("Messages, edits & deletions"):
+  const m=s.monitoring||{},on=["messages","edits","deletions","reactions","membership","profiles","presence"].filter(k=>m[k]);
+  return on.length===7?tr("Everything"):on.join()==="messages,edits,deletions"?tr("Messages, edits & deletions"):
     on.length?tr("Custom: {list}",{list:on.map(termText).join(", ")}):tr("Nothing selected");
 }
 function modeSummary(s){
@@ -4403,7 +4417,7 @@ function renderChatStatus(){
     f.addEventListener("click",()=>{state.chatFilter=key;renderChatStatus();renderChatFeed();});filters.append(f);
   }
   const tabs=node('div','chat-view-tabs');tabs.setAttribute('role','group');tabs.setAttribute('aria-label',tr('Chat views'));
-  const views=[['messages',tr('Messages')],['people',tr('People')],['profile',tr('Profile')]];
+  const views=[['messages',tr('Messages')],['people',tr('People')],['activity',tr('Activity timeline')],['profile',tr('Profile')]];
   if(s.analysis?.enabled&&!s.demo&&viewAllowed('analysis'))views.push(['ai',tr('AI context')]);
   for(const [name,label] of views){const tab=node('button','filter'+(state.chatView===name?' active':''),label);tab.type='button';tab.dataset.chatView=name;
     tab.setAttribute('aria-pressed',String(state.chatView===name));tab.addEventListener('click',()=>{
@@ -4423,15 +4437,24 @@ function renderChatStatus(){
     const clear=node("button","text-link",tr("Show everyone"));clear.type="button";
     clear.addEventListener("click",()=>{state.chatAuthor=null;renderChatStatus();renderChatFeed();});chip.append(clear);box.append(chip);
   }
-  const blocked=s.demo||!c.has_session||!info.enabled;
+  const blocked=s.demo||!c.has_session||!info.enabled||c.available_for_export===false;
   $("chat-load-history").disabled=blocked;$("chat-history-limit").disabled=blocked;
   $("chat-export-start").disabled=s.demo||!c.has_session||exportRunning();
   if(focusedFilter)box.querySelector('[data-chat-filter="'+focusedFilter+'"]')?.focus({preventScroll:true});
   if(focusedView)box.querySelector('[data-chat-view="'+focusedView+'"]')?.focus({preventScroll:true});
 }
+let peopleTimeline;
+const peopleTimelineReady=import('./views/people-timeline.js?v=1').then(({createPeopleTimeline})=>{
+  peopleTimeline=createPeopleTimeline({root:$("chat-feed"),json,tr,
+    owner:()=>state.workspaceRevision+':'+state.profile+':'+state.chat,
+    active:()=>state.view==='chats'&&state.chatView==='activity'&&state.chat!==null,
+    record:openRecord,formatTime:fmtFull});return peopleTimeline;
+});
+window.addEventListener('tgwitness:lock',()=>peopleTimeline?.reset());
 function renderChatFeed(){
   if(state.view!=='chats')return;
   const feed=$("chat-feed"),s=state.status,info=state.chatInfo;
+  if(state.chatView==='activity'){peopleTimelineReady.then(view=>view.load());return;}
   if(state.chatView==="people"){
     const generation=chatGeneration;
     if(!feed.querySelector(".people"))feed.replaceChildren(viewState("loading",tr("Loading…")));
@@ -4952,7 +4975,8 @@ $("chats-manage").addEventListener("click",()=>navigate("sources"));
 $("chat-load-history").addEventListener("click",e=>loadHistory(e.currentTarget,Number($("chat-history-limit").value)));
 
 let multiPoll=null,multiRequest=0,multiDiscovery=null;
-const multiRunning=()=>state.multi?.phase==="running";
+const multiActive=x=>!!x&&["preparing","running","selecting","packaging"].includes(x.phase);
+const multiRunning=()=>multiActive(state.multi);
 const multiCurrent=(revision,token,request)=>revision===state.workspaceRevision&&token===state.token&&
   !!token&&!$("workspace").hidden&&request===multiRequest;
 const multiRetryable=error=>!(error instanceof StaleView)&&
@@ -4960,27 +4984,25 @@ const multiRetryable=error=>!(error instanceof StaleView)&&
 const multiRetryDelay=attempt=>Math.min(30000,1500*2**Math.min(attempt+1,5));
 async function openExportDialog(){
   const chat=state.chat,profile=state.profile,revision=state.workspaceRevision,generation=chatGeneration;
-  toast(tr("Asking Telegram how big this chat is…"));
-  const [scale]=await Promise.all([json("chats/"+encodeURIComponent(state.chat)+"/scale"),loadProfiles()]);
+  await loadProfiles();
   if(revision!==state.workspaceRevision||generation!==chatGeneration)return;
   show("toast",false);
   const info=state.chatInfo,basic=info?.kind==="group",facts=$("export-dialog-facts"),list=$("export-dialog-accounts");
   facts.replaceChildren();list.replaceChildren();
-  facts.append(node("p","export-fact",tr("{title}: {n} messages in Telegram right now.",{title:info?.title||tr("This chat"),n:scale.total.toLocaleString()})));
-  if(scale.missing_ids)facts.append(node("p","export-fact",tr("The newest message is #{last}, so about {n} message numbers no longer exist — deleted earlier, they cannot be exported.",
-    {last:scale.last_message_id.toLocaleString(),n:scale.missing_ids.toLocaleString()})));
+  facts.append(node("p","export-fact",info?.title||tr("This chat")));
   if(basic)facts.append(node("p","export-fact warn",tr("This is an ordinary group: message numbers differ between accounts, so only this account can download it.")));
   function estimate(){
-    const n=list.querySelectorAll("input:checked").length||1;
-    $("export-dialog-estimate").textContent=trn("Estimated time with {n} account: {time}","Estimated time with {n} accounts: {time}",n,{time:fmtDuration(Math.round(scale.estimate_seconds/n))})+
-      (scale.total>3000?" — "+tr("each account fetches 100 messages per request, 1 s apart"):"")+". "+tr("Telegram may ask an account to pause for longer.");
+    const n=list.querySelectorAll("input:checked").length;
+    $("export-dialog-estimate").textContent=tr("{n} idle accounts selected. Each account keeps its own connection and request limits.",{n});
+    $("export-dialog-start").disabled=!n;
   }
   for(const p of state.profiles){
     const c=p.collector,lead=p.id===state.profile,connected=!!c?.has_session&&!p.error_type,account=c?.account;
     const row=node("label","export-account"),box=node("input"),who=node("span","export-account-who"),text=node("span");
-    box.type="checkbox";box.value=p.id;box.disabled=lead||!connected||basic;box.addEventListener("change",estimate);
-    box.checked=lead||!box.disabled&&!!exportPreselect?.has(p.id);
-    text.append(node("b","",p.label),node("small","",lead?tr("starts the export and signs the archive"):!connected?tr("no Telegram account connected"):
+    const occupied=c?.running||c?.account_task||c?.available_for_export===false;
+    box.type="checkbox";box.value=p.id;box.disabled=!connected||!!occupied||basic&&!lead;box.addEventListener("change",estimate);
+    box.checked=!box.disabled&&(lead||!!exportPreselect?.has(p.id));
+    text.append(node("b","",p.label),node("small","",occupied?tr("Busy: pause the current task explicitly"):!connected?tr("no Telegram account connected"):
       basic?tr("not possible for ordinary groups"):account?(account.username?"@"+account.username+" · ":"")+"ID "+account.id:""));
     who.append(avatarNode(account?account.id:null,account&&account.username?account.username:p.label,"",p.id),text);
     row.append(box,who);list.append(row);
@@ -4988,35 +5010,79 @@ async function openExportDialog(){
   show("export-select-all",!basic&&state.profiles.length>1);
   $("export-select-all").onclick=()=>{list.querySelectorAll("input:not(:disabled)").forEach(b=>{b.checked=true;});estimate();};
   estimate();
+  $("export-timezone").textContent=tr("Dates use your time zone: {zone}. Bounds are fixed at start.",{zone:Intl.DateTimeFormat().resolvedOptions().timeZone});
   const dialog=$("export-dialog");
+  const saved=await json("multi-export/jobs",undefined,{root:true});
+  if(revision!==state.workspaceRevision||generation!==chatGeneration)return;
+  const jobs=$("export-saved-jobs");jobs.replaceChildren();
+  const matching=(saved.jobs||[]).filter(j=>j.chat_id===chat);
+  if(matching.length){
+    jobs.append(node("b","",tr("Saved exports")));
+    for(const job of matching){
+      const button=node("button","text-link",fmtTime(job.started_at)+" · "+tr(job.phase)+" · "+(job.counts?.selected??job.captured));
+      button.type="button";button.addEventListener("click",()=>{
+        clearTimeout(multiPoll);++multiRequest;state.multi=job;state.multiHidden=null;
+        dialog.close("saved");renderMulti();pollMulti(job.id);
+      });jobs.append(button);
+    }
+  }
   $("export-dialog-cancel").onclick=()=>dialog.close("cancel");
   dialog.returnValue="";dialog.showModal();
   const choice=await new Promise(resolve=>dialog.addEventListener("close",()=>resolve(dialog.returnValue),{once:true}));
   if(choice!=="start"||revision!==state.workspaceRevision||generation!==chatGeneration)return;
   const profiles=[...list.querySelectorAll("input:checked")].map(b=>b.value);
-  const x=await json("multi-export/start",{chat_id:chat,lead:profile,profiles},{root:true});
+  if(!profiles.length)throw new Error(tr("Select at least one idle account."));
+  const dates=exportPeriod();
+  const selection={...dates,languages:$("export-message-language").value?[$("export-message-language").value]:[],
+    uncertain_language:$("export-uncertain-language").checked?"include":"exclude",reply_mode:$("export-reply-mode").value,
+    reply_scope:$("export-reply-scope").value,context_depth:Number($("export-context").value),
+    max_context_messages:Number($("export-context-limit").value),text_contains:$("export-text").value.trim()?[$("export-text").value.trim()]:[],
+    download_media:$("export-media").checked};
+  const x=await json("multi-export/start",{chat_id:chat,lead:profiles.includes(profile)?profile:profiles[0],profiles,selection},{root:true});
   state.multi=x;state.multiHidden=null;renderMulti();pollMulti(x.id);
-  toast(trn("Export started with {n} account. Observation keeps running.","Export started with {n} accounts. Observation keeps running.",profiles.length));
+  toast(tr("Export started with {n} accounts reserved exclusively for this task.",{n:profiles.length}));
 }
+function exportPeriod(){
+  const preset=$("export-period").value,now=new Date();
+  let from=null,to=null;
+  if(preset==="7"||preset==="30"){to=now;from=new Date(now.getTime()-Number(preset)*86400000);}
+  else if(preset==="month"){to=new Date(now.getFullYear(),now.getMonth(),1);from=new Date(now.getFullYear(),now.getMonth()-1,1);}
+  else if(preset==="custom"){
+    from=$("export-from").value?new Date($("export-from").value):null;
+    to=$("export-to").value?new Date($("export-to").value):null;
+  }
+  if(from&&to&&from>=to)throw new Error(tr("The period must end after it starts."));
+  return {from_utc:from?.toISOString()||null,to_utc:to?.toISOString()||null};
+}
+$("export-period").addEventListener("change",()=>{
+  const custom=$("export-period").value==="custom";
+  $("export-from").disabled=$("export-to").disabled=!custom;
+});
+$("export-from").disabled=$("export-to").disabled=true;
 function renderMulti(){
   if(state.view!=='chats')return;
   const x=state.multi,box=$("export-box"),known=x&&!["none","unknown"].includes(x.phase);
-  const running=known&&x.phase==="running",mine=known&&x.chat_id===state.chat&&x.lead===state.profile;
-  const percent=known&&x.total?Math.min(running?99:100,Math.floor(x.captured*100/x.total)):null;
+  const running=multiActive(x),mine=known&&x.chat_id===state.chat;
+  const percent=known&&x.ranges_total?Math.min(running?99:100,Math.floor(x.ranges_done*100/x.ranges_total)):null;
   $("chat-export-label").textContent=running?tr("Exporting")+(percent!==null?" "+percent+"%":"…"):tr("Export chat");
   show("chat-export-get",!!(mine&&x.phase==="done"&&x.ready));
   if(!mine||(!running&&state.multiHidden===x.id)){show("export-box",false);return;}
   box.replaceChildren();show("export-box",true);
   const head=node("div","export-head");
-  const counts={title:x.title||tr("chat"),captured:x.captured.toLocaleString(),total:(x.total||0).toLocaleString(),percent};
+  const counts={title:x.title||tr("chat"),captured:(x.phase==="done"?x.counts?.selected??x.captured:x.captured).toLocaleString(),total:(x.total||0).toLocaleString(),percent};
   head.append(node("b","",running?tr("Exporting {title}: ",counts)+tr(x.total?"{captured} of {total} messages ({percent}%)":"{captured} messages",counts)+
     (x.eta_seconds?" · "+tr("{time} left",{time:fmtDuration(x.eta_seconds)}):""):x.phase==="done"?tr(x.ready?"Export ready: {captured} messages, signed.":"Export saved: {captured} messages, signed.",counts):
-    x.phase==="failed"?tr("Export failed: {error}",{error:x.error||tr("unknown error")}):tr("Export cancelled.")));
+    x.phase==="failed"?tr("Export failed: {error}",{error:x.error||tr("unknown error")}):x.phase==="paused"?tr("Export paused; saved chunks are retained."):tr("Export cancelled.")));
   const action=(cls,label,work)=>{const b=node("button",cls+" small",label);b.type="button";b.addEventListener("click",()=>work(b));head.append(b);};
-  if(running)action("quiet",tr("Cancel"),b=>busy(b,async()=>{await json("multi-export/"+encodeURIComponent(x.id)+"/cancel",{},{root:true});await pollMulti(x.id);}));
+  if(running)action("quiet",tr("Pause"),b=>busy(b,async()=>{await json("multi-export/"+encodeURIComponent(x.id)+"/pause",{},{root:true});await pollMulti(x.id);}));
+  if(["paused","failed","cancelled"].includes(x.phase))action("primary",tr("Resume saved chunks"),b=>busy(b,async()=>{await json("multi-export/"+encodeURIComponent(x.id)+"/resume",{},{root:true});await pollMulti(x.id);}));
   if(x.phase==="done"&&x.ready)action("primary",tr("Save signed export"),b=>saveMulti(b));
   if(!running)action("quiet",tr("Hide"),()=>{state.multiHidden=x.id;renderMulti();});
   box.append(head);
+  box.append(node("p","hint",tr("Read {done} of {total} planned ranges.",{done:x.ranges_done||0,total:x.ranges_total||0})+" "+tr(x.phase)));
+  if(x.counts?.selected!==undefined)box.append(node("p","hint",tr("Examined: {examined}. Matches: {matched}. Context: {context}. Uncertain language: {uncertain}.",{
+    examined:x.counts.examined,matched:x.counts.matched,context:x.counts.context,uncertain:x.counts.uncertain_language||0})));
+  if(x.counts?.context_limit_reached)box.append(node("p","hint",tr("Context cap reached; additional context may be omitted.")));
   if(x.phase==="done")box.append(node("p","hint",tr("The messages are in the archive (chat.json, chat.html, authors.csv). This chat view shows what observation and “Load history” saved in the journal.")));
   if(running&&percent!==null){const bar=node("progress","export-bar");bar.max=100;bar.value=percent;bar.setAttribute("aria-label",tr("Export progress"));box.append(bar);}
   const workers=node("ul","export-workers");
@@ -5039,7 +5105,7 @@ async function pollMulti(id,attempt=0){
     const before=state.multi?.phase,x=await json("multi-export/"+encodeURIComponent(id),undefined,{root:true});
     if(!current())return;
     state.multi=x;renderMulti();
-    if(x.phase==="running")multiPoll=setTimeout(()=>{if(current())pollMulti(id);},1500);
+    if(multiActive(x))multiPoll=setTimeout(()=>{if(current())pollMulti(id);},1500);
     else if(before==="running"&&x.phase==="done")toast(tr("Chat export finished: {n} messages. Save the signed archive.",{n:x.captured.toLocaleString()}));
     else if(before==="running"&&x.phase==="failed")toast(tr("Chat export failed: {error}",{error:x.error||tr("unknown error")}),true);
   }catch(e){
@@ -5061,8 +5127,8 @@ async function resumeMulti(attempt=0){
       const x=await json("multi-export/current",undefined,{root:true});
       if(!current())return;
       state.multiChecked=true;
-      state.multi=x&&["running","done"].includes(x.phase)?x:null;renderMulti();
-      if(state.multi?.phase==="running")pollMulti(x.id);
+      state.multi=x?.id?x:null;renderMulti();
+      if(multiActive(state.multi))pollMulti(x.id);
     }catch(e){
       if(!current()||e instanceof StaleView)return;
       if(multiRetryable(e))multiPoll=setTimeout(()=>{if(current())resumeMulti(attempt+1);},multiRetryDelay(attempt));
@@ -5075,7 +5141,7 @@ async function resumeMulti(attempt=0){
 function saveMulti(button){return busy(button,async()=>{
   const x=state.multi;if(!x?.ready)throw new Error(tr("No finished export to save."));
   if(await download("multi-export/"+encodeURIComponent(x.id)+"/download","tgwitness-chat-export.zip",true,true)===false)return;
-  state.multi={...x,ready:false};renderMulti();toast(tr("Signed chat export saved."));
+  renderMulti();toast(tr("Signed chat export saved."));
 });}
 $("chat-export-start").addEventListener("click",e=>busy(e.currentTarget,openExportDialog));
 $("chat-export-get").addEventListener("click",e=>saveMulti(e.currentTarget));

@@ -27,6 +27,14 @@ def check_container_inputs():
     return {name: (root / name).read_bytes() for name in required}
 
 
+def check_website_inputs():
+    root = builder.ROOT.resolve()
+    public = {path.relative_to(root).as_posix() for path in builder.public_sources(root)}
+    required = {"website/export-clinic/media/" + name for name in builder.EXPORT_CLINIC_ASSETS}
+    assert required <= public, "Reviewed website assets are missing from the public source archive"
+    return {name: (root / name).read_bytes() for name in required}
+
+
 def check_publication_secrets():
     spec = importlib.util.spec_from_file_location("check_publication", Path(__file__).with_name("check_publication.py"))
     scanner = importlib.util.module_from_spec(spec)
@@ -53,6 +61,12 @@ def check_publication_secrets():
     for value in (uuid, "DEEPL_AUTH_KEY", 'os.environ["DEEPL_API_KEY"]',
                   '"DEEPL_AUTH_KEY": "your-key-here"', "sk-" + "example", "TRUSTED_SHA256"):
         assert scanner.secret_findings(value, "public.py") == []
+    payload = io.BytesIO()
+    with zipfile.ZipFile(payload, "w") as archive:
+        archive.writestr("comparison.jpg", b"\xff\xd8\xff\xd9")
+        archive.writestr("notes.txt", "sk-" + suffix)
+    findings = scanner.data_findings(payload.getvalue(), "synthetic.zip")
+    assert len(findings) == 1 and "notes.txt" in findings[0] and "value withheld" in findings[0]
 
 
 def check_portable_package(root):
@@ -159,6 +173,7 @@ def check_portable_package(root):
 def main():
     check_publication_secrets()
     container_inputs = check_container_inputs()
+    website_inputs = check_website_inputs()
     with tempfile.TemporaryDirectory(prefix="tgwitness-source-check-") as temporary:
         root = Path(temporary).resolve()
         check_portable_package(root)
@@ -169,6 +184,7 @@ def main():
             "tgwitness/sample.py": b"print('synthetic')\n",
             "tgwitness/locales/ru.json": '{"test":"пример"}\n'.encode(),
             **container_inputs,
+            **website_inputs,
         }
         for name, data in original.items():
             path = root / name
@@ -179,7 +195,12 @@ def main():
         (source / "data" / "secrets.py").write_text("PRIVATE_CANARY", encoding="utf-8")
         for name in ("deploy/containers/unlisted.lock", "deploy/containers/unlisted.packages",
                      "deploy/containers/local-build.sh", "deploy/containers/local-state.json",
-                     "deploy/media-worker/local-helper.py", "deploy/media-worker/local-source.json"):
+                     "deploy/media-worker/local-helper.py", "deploy/media-worker/local-source.json",
+                     "website/export-clinic/media/unreviewed.jpg",
+                     "website/export-clinic/media/private-state.json",
+                     "website/export-clinic/media/local-recording.mp4",
+                     "website/export-clinic/media/local-export.zip",
+                     "website/export-clinic/media/local-notes.txt"):
             private = root / name
             private.parent.mkdir(parents=True, exist_ok=True)
             private.write_text("PRIVATE_CANARY", encoding="utf-8")
@@ -194,9 +215,10 @@ def main():
 
         def build(clock):
             with patch.object(builder, "ROOT", root), patch.object(builder, "VERSION", "0.0.0"), \
-                    patch.object(builder, "FILES", ["README.md", *container_inputs]), \
+                    patch.object(builder, "FILES", ["README.md", *container_inputs, *website_inputs]), \
                     patch.object(builder, "DIRECTORIES", {"tgwitness": {".py", ".json"},
-                                                          "deploy": builder.DIRECTORIES["deploy"]}), \
+                                                          "deploy": builder.DIRECTORIES["deploy"],
+                                                          "website": builder.DIRECTORIES["website"]}), \
                     patch("zipfile.time.localtime", return_value=clock), redirect_stdout(io.StringIO()):
                 builder.main()
 
@@ -261,7 +283,7 @@ def main():
             assert archive.read("TgWitness/" + changed_input) == changed_bytes
             assert (hashlib.sha256(changed_bytes).hexdigest() + "  " + changed_input + "\n").encode() \
                 in archive.read("TgWitness/SOURCE_SHA256SUMS")
-    print("Source archive checks passed: repeatability, metadata, exact bytes, container build inputs and hashes, private exclusions, secret redaction, interrupted writes, portable metadata and PDF resources.")
+    print("Source archive checks passed: repeatability, metadata, exact bytes, container and website inputs and hashes, private exclusions, secret redaction, interrupted writes, portable metadata and PDF resources.")
 
 
 if __name__ == "__main__":

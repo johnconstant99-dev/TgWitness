@@ -65,16 +65,14 @@ class History:
                     "media_pending": sum(media.get(k, 0) for k in ("queued", "retry", "running")),
                     "scope": "enabled sources fixed at run creation; media follows capture settings"}
 
-    def require_running(self):
-        if not self.collector.running:
-            raise ValueError("Start observation before loading full history.")
+    def require_account(self):
         account = (self.store.get_setting("account", {}) or {}).get("id")
         if not account:
             raise ValueError("Connect a Telegram account first.")
         return account
 
     async def start(self):
-        account = self.require_running()
+        account = self.require_account()
         current = self.current()
         if self.busy or current and current["phase"] in ("running", "paused"):
             raise ValueError("Resume or cancel the existing history run before starting another.")
@@ -82,6 +80,17 @@ class History:
         if not targets:
             raise ValueError("Select at least one source first.")
         run_id, now = secrets.token_hex(16), utcnow()
+        if not self.collector.reserve_export("history:" + run_id):
+            raise ValueError("This account is busy. Pause observation or its current task before loading history.")
+        try:
+            await self.collector.restore()
+            self.store.recover_media()
+            return self.create_run(run_id, now, account, targets)
+        except BaseException:
+            self.collector.release_export("history:" + run_id)
+            raise
+
+    def create_run(self, run_id, now, account, targets):
         with self.store.transaction():
             self.store.db.execute("INSERT INTO history_runs VALUES (?,?,?,?,?,NULL)",
                                   (run_id, account, "running", now, now))
@@ -97,6 +106,7 @@ class History:
                            "Each source fixes its upper message ID on first read. Messages may change during reading; "
                            "unseen deletions and intermediate edits cannot be recovered."})
         self.task = asyncio.create_task(self.run(run_id))
+        self.task.add_done_callback(lambda _: self.collector.release_export("history:" + run_id))
         return self.status()
 
     def transition(self, run_id, phase, reason=None):
@@ -106,14 +116,24 @@ class History:
             self.store.append("history." + phase, {"history_run_id": run_id, "reason": reason})
 
     async def resume(self):
-        account = self.require_running()
+        account = self.require_account()
         run = self.current()
         if self.busy or not run or run["phase"] != "paused":
             raise ValueError("There is no paused history run to resume.")
         if account != run["account_id"]:
             raise ValueError("This history run belongs to a different Telegram account.")
-        self.transition(run["id"], "running", "operator_resume")
-        self.task = asyncio.create_task(self.run(run["id"]))
+        owner = "history:" + run["id"]
+        if not self.collector.reserve_export(owner):
+            raise ValueError("This account is busy. Pause observation or its current task before resuming history.")
+        try:
+            await self.collector.restore()
+            self.store.recover_media()
+            self.transition(run["id"], "running", "operator_resume")
+            self.task = asyncio.create_task(self.run(run["id"]))
+            self.task.add_done_callback(lambda _: self.collector.release_export(owner))
+        except BaseException:
+            self.collector.release_export(owner)
+            raise
         return self.status()
 
     async def pause(self, reason="operator_pause"):
@@ -155,10 +175,10 @@ class History:
         try:
             while True:
                 run = self.current()
-                if not self.collector.running:
-                    self.transition(run_id, "paused", "observation_stopped")
+                if self.collector.export_claim != "history:" + run_id:
+                    self.transition(run_id, "paused", "account_task_released")
                     return
-                if self.require_running() != run["account_id"]:
+                if self.require_account() != run["account_id"]:
                     self.transition(run_id, "paused", "account_changed")
                     return
                 job = self.source(run_id)
@@ -187,6 +207,7 @@ class History:
                 client = self.collector.client
                 try:
                     await asyncio.wait_for(self.read_page(job), self.collector.param("operation_timeout_seconds"))
+                    await self.collector.download_worker(owner="history:" + run_id, history_run=run_id)
                 except FloodWaitError as exc:
                     with self.store.transaction():
                         self.store.set_setting("rpc_backoff_until", max(time.time() + exc.seconds,
@@ -208,6 +229,8 @@ class History:
         except Exception as exc:
 
             self.transition(run_id, "paused", type(exc).__name__)
+        finally:
+            await self.collector.avatar_history.close()
 
     async def read_page(self, job):
         chat_id, run_id = job["chat_id"], job["run_id"]

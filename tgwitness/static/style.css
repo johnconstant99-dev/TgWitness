@@ -1030,6 +1030,11 @@ button.pill { cursor: pointer; font-family: inherit; }
   border-radius: var(--radius-xl); background: var(--surface); color: var(--text); box-shadow: 0 20px 50px rgb(16 24 40 / .25); }
 .export-dialog::backdrop { background: rgb(15 23 40 / .45); }
 .export-dialog h2 { margin: 0 0 10px; font-size: 19px; }
+.export-dialog { overflow: auto; }
+.export-dialog .field-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.export-dialog .field-row > label { flex: 1 1 180px; min-width: 0; }
+.export-dialog input[type="datetime-local"] { width: 100%; min-width: 0; box-sizing: border-box; }
+#export-saved-jobs { display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow: auto; }
 .export-fact { margin: 0 0 8px; font-size: 14px; color: var(--text-2); }
 .export-fact.warn { color: var(--warning); font-weight: 550; }
 .export-accounts { margin: 14px 0 6px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-lg); }

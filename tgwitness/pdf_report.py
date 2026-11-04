@@ -1253,6 +1253,9 @@ def chat_pdf(meta, context, messages=None, certificate=None):
         def render_message_numbers():
             if ids:
                 lay.section(say("Message numbers"), say(
+                    "This export contains a selection. Absent message numbers may have been excluded by the filters. "
+                    "They are not evidence that a message was deleted or inaccessible."
+                    if ids.get("selection_applied") else
                     "Telegram numbers the messages of a channel or supergroup 1, 2, 3… in order, service messages included. A "
                     "number between the first and the last exported message that is absent belongs to a message Telegram did "
                     "not return: deleted before the export, or not visible to this account. If only part of the chat was "
@@ -1306,7 +1309,7 @@ def chat_pdf(meta, context, messages=None, certificate=None):
                     lay.callout(say("An edited message shows when it was last edited. A history snapshot holds only the "
                                     "current text; earlier versions exist only where the observation journal recorded them."),
                                 MUTED)
-                transcript(lay, say, messages, bool(ids.get("numbered_per_chat")))
+                transcript(lay, say, messages, bool(ids.get("numbered_per_chat") and not ids.get("selection_applied")))
             else:
                 lay.section(say("Messages"))
                 lay.callout(say("This chat has {n} messages, exceeding the PDF transcript limit of {limit}. "
@@ -1424,6 +1427,9 @@ def transcript(lay, say, messages, numbered=False):
             previous = record["id"] if type(previous) is not int else max(previous, record["id"])
         sender = record.get("from") or (str(record["from_id"]) if record.get("from_id") is not None else say("Unknown"))
         head = "#" + str(record.get("id")) + "  " + report.utc_text(record.get("date")) + " · " + sender
+        if record.get("selection"):
+            head += " · " + (say("Context message") if record["selection"].get("role") == "context"
+                              else say("Matches export filters"))
         if record.get("type") == "service":
             lay.text(head + " · " + (report.action_text(record.get("action")) or say("Service message")), size=7.8, color=MUTED)
             continue

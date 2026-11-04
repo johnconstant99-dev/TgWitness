@@ -192,6 +192,9 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             people = authors(scratch_path)
             meta["author_count"] = len(people)
             ids = message_ids(scratch_path, (meta.get("chat") or {}).get("id"))
+            if (meta.get("collection") or {}).get("mode") == "distributed_selection":
+                ids["selection_applied"] = True
+                ids["meaning"] = "Numbers absent from this selected export may have been excluded by filters; not evidence of deletion."
             if meta.get("recheck"):
                 ids["recheck"] = meta["recheck"]
             log = meta.get("admin_log")
@@ -205,6 +208,8 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
                 admin_events = None
             meta["message_ids"] = {**{k: ids[k] for k in ("numbered_per_chat", "first_id", "last_id", "present", "missing")},
                                    "missing_runs": len(ids["missing_ranges"]), "file": "message-ids.json"}
+            if ids.get("selection_applied"):
+                meta["message_ids"].update(selection_applied=True, meaning=ids["meaning"])
             attachments = attachment_files(media_dir)
             if attachments:
                 meta["attachments"] = len(attachments)

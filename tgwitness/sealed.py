@@ -116,7 +116,6 @@ class Session:
             raise ValueError("Select a chat from this account's dialog list")
         chat = self.collector.dialog_cache[chat_id]
         self.store.set_target(chat_id, chat["title"], chat["kind"], True)
-        await self.collector.start()
         await self.collector.history.start()
         self.phase = "collecting"
 

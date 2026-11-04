@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.9.0 preview · 4 November 2026
+
+- Reserve each account exclusively for monitoring, history or an export. Serialize Telegram RPCs and persist full FloodWait deadlines.
+- Add durable distributed chat exports with date/language/reply filters, bounded labelled context, signed chunks and explicit pause/resume. See [Distributed chat export](DISTRIBUTED-EXPORT.md).
+- Keep account reservations until every export worker has stopped, including repeated pause requests and sibling worker failures. History loading in sealed sessions also reserves the account exclusively.
+- Add participant timelines from saved observations: names, membership, explicit deletion flags and message activity. Profile refreshes are bounded; optional presence recording preserves unavailable or expired status as unknown and does not attribute online activity to a chat.
+- Save, import and reuse report layout profiles without copying case details or report filters. Profiles are validated and isolated by workspace.
+- Automatically offload eligible attachments to configured external storage under disk pressure, with reserve-space checks, compression, optional encryption and full readback verification before local eviction. Journals remain local.
+- Make the recording settings and chat tabs fit narrow screens, including wider system fonts, and fix profile controls and localized labels.
+- Include reviewed website assets in source archives and verify conditional dependency versions in SBOM inventories.
 
 ## 0.8.1 preview · 2 November 2026
 

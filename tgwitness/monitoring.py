@@ -10,6 +10,8 @@ class Monitoring(BaseModel):
     deletions: StrictBool = True
     reactions: StrictBool = True
     membership: StrictBool = True
+    profiles: StrictBool = True
+    presence: StrictBool = False
 
 
 CAPTURE_DEFAULTS = {"download_media": True, "max_media_mb": 20}

@@ -9,7 +9,8 @@ STATIC = PACKAGE / "static"
 LITERAL = re.compile(r'''(["'])((?:\\[\s\S]|(?!\1)[^\\\r\n])*)\1''')
 
 PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "sessions.py", "network.py",
-                 "profiles.py", "multi_export.py", "alerts.py", "witness_api.py", "tuning.py", "interactions.py",
+                 "profiles.py", "multi_export.py", "distributed_export.py", "message_selection.py",
+                 "alerts.py", "witness_api.py", "tuning.py", "interactions.py",
                  "access.py", "history.py", "archive.py", "archive_api.py", "ai.py", "analysis.py", "analysis_api.py",
                  "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py", "proxy_catalog.py",
                  "proxy_sources.py", "account_export.py", "account_export_transport.py", "account_report.py", "disclosure.py",

@@ -233,6 +233,7 @@ async function startViewer(meta){
     let out="",last=0;for(const m of text.matchAll(re)){out+=esc(text.slice(last,m.index))+"<mark>"+esc(m[0])+"</mark>";last=m.index+m[0].length;}
     return out+esc(text.slice(last));}
   function tags(it){const b=[];
+    if(chat&&it.raw?.selection)b.push('<span class="tag blue">'+esc(say(it.raw.selection.role==="context"?"Context message":"Matches export filters"))+"</span>");
     if(it.cat==="deleted")b.push('<span class="tag red">'+esc(say("deleted"))+"</span>");
     if(it.found)b.push('<span class="tag orange">'+esc(say("found on recheck"))+"</span>");
     if(it.wallet)b.push('<span class="tag red">'+ic("tag")+esc(say("wallet"))+"</span>");else if(it.link)b.push('<span class="tag blue">'+esc(say("link"))+"</span>");

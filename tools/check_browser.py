@@ -663,11 +663,12 @@ def main():
             page.locator('[data-view="evidence"]').click()
             page.locator('#export-task-journal').click()
             page.locator("#export-chat-tools > summary").click()
-            page.locator("#snapshot-form button").click()
-            expect(page.locator("#toast")).to_contain_text("Saved 3 history observations", timeout=15000)
+            expect(page.locator("#snapshot-form button")).to_be_disabled()
             page.locator("#collector-toggle").click()
             answer_panel_dialog(page)
             expect(page.locator("#collector-toggle")).to_have_text("Start observation")
+            page.locator("#snapshot-form button").click()
+            expect(page.locator("#toast")).to_contain_text("Saved 3 history observations", timeout=15000)
 
             navigate_panel(page, "parameters")
             expect(page.locator("#parameters-groups .parameters-group")).to_have_count(8)
@@ -691,7 +692,10 @@ def main():
             page.locator("#parameters-menu > summary").click()
             page.locator("#parameters-reset").click()
             page.locator("#parameters-reset-apply").click()
-            page.locator("#parameters-save").click()
+            with page.expect_response(lambda response: response.url.endswith("/api/parameters")
+                                      and response.request.method == "POST") as reset_saved:
+                page.locator("#parameters-save").click()
+            assert reset_saved.value.ok
             expect(page.locator(".parameter-row.changed")).to_have_count(0)
             assert live.app.state.store.get_setting("parameters") == {}
             reload_panel(page)

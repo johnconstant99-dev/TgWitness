@@ -2,6 +2,8 @@ import json
 import sqlite3
 import unicodedata
 
+from .people import PeopleIndex, TABLES as PEOPLE_TABLES
+
 TEXT_KINDS = ("message.new", "message.snapshot", "message.edited", "message.recovered")
 GONE_KINDS = ("message.deleted", "message.missing_on_recheck")
 CHAT_KINDS = TEXT_KINDS + GONE_KINDS + ("media.saved",)
@@ -12,6 +14,7 @@ READ_GROUPS = {
     "counts": ("event_kind_counts", "chat_event_kind_counts"),
     "search": ("event_text_search",),
     "payload_search": ("event_payload_search",),
+    "people_v1": PEOPLE_TABLES,
 }
 
 
@@ -60,16 +63,21 @@ class JournalIndex:
             db.execute(sql)
         self.search_enabled = self.create_search()
         self.payload_search_enabled = self.create_search("event_payload_search", "document")
+        self.people = PeopleIndex(db)
+        people_seq = self.position("people_v1")
         state_seq = self.position("state")
         search_seq = self.position("search") if self.search_enabled else state_seq
         payload_seq = self.position("payload_search") if self.payload_search_enabled else state_seq
         for row in db.execute("SELECT * FROM events WHERE seq>? ORDER BY seq",
-                              (min(state_seq, search_seq, payload_seq),)):
-            if row["seq"] > state_seq or self.search_enabled and row["seq"] > search_seq:
+                              (min(state_seq, search_seq, payload_seq, people_seq),)):
+            if row["seq"] > state_seq or row["seq"] > people_seq or self.search_enabled and row["seq"] > search_seq:
                 event = dict(row)
                 event["payload"] = json.loads(row["payload"])
             if row["seq"] > state_seq:
                 self.state(event)
+            if row["seq"] > people_seq:
+                self.people.append(event)
+                self.advance("people_v1", event["seq"])
             if self.search_enabled and row["seq"] > search_seq:
                 self.search(event)
             if self.payload_search_enabled and row["seq"] > payload_seq:
@@ -118,6 +126,8 @@ class JournalIndex:
 
     def append(self, event):
         self.state(event)
+        self.people.append(event)
+        self.advance("people_v1", event["seq"])
         if self.search_enabled:
             self.search(event)
         if self.payload_search_enabled:

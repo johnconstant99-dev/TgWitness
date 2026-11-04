@@ -523,8 +523,11 @@ class Store:
                 "WHERE j.state IN ('queued','retry','running')" + clause, sorted(chat_ids or [])).fetchone()
         return row[0]
 
-    def claim_media(self, account_id, now=None, *, min_priority=None, max_priority=None):
+    def claim_media(self, account_id, now=None, *, min_priority=None, max_priority=None, history_run=None):
         filters, params = [], [account_id, time.time() if now is None else now]
+        if history_run is not None:
+            filters.append("EXISTS (SELECT 1 FROM history_items h WHERE h.message_event=j.message_event AND h.run_id=?)")
+            params.append(history_run)
         for operator, value in ((">=", min_priority), ("<=", max_priority)):
             if value is not None:
                 filters.append("j.priority" + operator + "?")
@@ -542,6 +545,13 @@ class Store:
             job = dict(row)
             job["attempts"] += 1
             return job
+
+    def next_history_media_attempt(self, account_id, run_id):
+        with self.lock:
+            return self.db.execute("SELECT min(j.next_attempt) FROM media_jobs j "
+                "JOIN history_items h ON h.message_event=j.message_event JOIN targets t USING(chat_id) "
+                "WHERE h.run_id=? AND j.account_id=? AND t.enabled=1 AND j.state IN ('queued','retry')",
+                (run_id, account_id)).fetchone()[0]
 
     def clear_media_queue(self, through_seq):
         if type(through_seq) is not int or not 0 <= through_seq < 2**53:

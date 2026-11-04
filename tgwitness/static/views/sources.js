@@ -1,6 +1,6 @@
 import {priorityHint} from "../components/priority.js?v=1";
 
-const monitoring = ["messages", "edits", "deletions", "reactions", "membership"];
+const monitoring = ["messages", "edits", "deletions", "reactions", "membership", "profiles", "presence"];
 const media = [
   ["photo", "Photos"], ["video", "Videos"], ["animation", "GIFs & animations"],
   ["video_note", "Round video messages"], ["voice", "Voice messages"],
@@ -108,7 +108,7 @@ export function createSources(context) {
 
   function write(group, value) {
     if (group === "monitoring") {
-      for (const key of monitoring) find("monitor-" + key).checked = value[key] ?? true;
+      for (const key of monitoring) find("monitor-" + key).checked = value[key] ?? (key !== "presence");
     } else if (group === "capture") {
       find("download-media").checked = value.download_media;
       find("max-media").value = String(value.max_media_mb);
@@ -543,7 +543,7 @@ export function createSources(context) {
     if (!status) return;
     if (session !== getSession()) resetSession();
     const latest = {
-      monitoring: Object.fromEntries(monitoring.map(key => [key, status.monitoring?.[key] ?? true])),
+      monitoring: Object.fromEntries(monitoring.map(key => [key, status.monitoring?.[key] ?? (key !== "presence")])),
       capture: copy(status.capture),
       recheck: copy(status.recheck),
     };

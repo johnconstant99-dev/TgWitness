@@ -13,6 +13,7 @@ SOURCES = {"runtime": "deploy/requirements.lock", "build": "deploy/build.lock",
 ANNOTATOR = "Tool: TgWitness locked-dependency inventory"
 PIN = re.compile(r"([A-Za-z0-9][A-Za-z0-9._-]*)==([A-Za-z0-9][A-Za-z0-9.!+_-]*)(?:\s*;\s*(.+))?")
 INCLUDE = re.compile(r"(?:-c\s*|--constraint(?:=|\s+)|-r\s*|--requirement(?:=|\s+))(\S+)")
+PYTHON_BOUND = re.compile(r"(python_version|python_full_version)\s*(<=|>=|==|!=|<|>)\s*(['\"])([0-9]+(?:\.[0-9]+)*)\3")
 
 
 def canonical_name(name):
@@ -67,6 +68,13 @@ def read_pins(root, relative, inputs, stack=()):
     return records
 
 
+def disjoint_markers(left, right):
+    # Prove only simple complementary Python boundaries; reject uncertain overlap.
+    a, b = PYTHON_BOUND.fullmatch(left), PYTHON_BOUND.fullmatch(right)
+    return bool(a and b and a[1] == b[1] and a[4] == b[4] and
+                {a[2], b[2]} in ({"<", ">="}, {"<=", ">"}, {"==", "!="}))
+
+
 def plan(root):
     root = root.resolve()
     inputs, scopes, files, versions = {}, {}, {}, {}
@@ -74,9 +82,11 @@ def plan(root):
         records = read_pins(root, source, inputs)
         for record in records:
             name, version = record["name"], record["version"]
-            if name in versions and versions[name] != version:
+            previous = versions.setdefault(name, [])
+            if any(item["version"] != version and not disjoint_markers(item["marker"], record["marker"])
+                   for item in previous):
                 raise ValueError("Conflicting frozen versions for " + name)
-            versions[name] = version
+            previous.append(record)
         scopes[scope] = [{key: value for key, value in record.items() if key != "requirement"}
                          for record in records]
         lines = ["# Derived for Syft from " + source + "; includes resolved from deploy only.",

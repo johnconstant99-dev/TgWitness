@@ -276,7 +276,7 @@ class AccountExport:
             raise ValueError("Connect a Telegram account before exporting it.")
         job_id = secrets.token_hex(16)
         if not self.collector.reserve_export(job_id):
-            raise ValueError("Another export is already using this account.")
+            raise ValueError("This account is busy. Pause observation or its current task before exporting.")
         try:
             directory = self.directory(job_id)
             directory.mkdir(mode=0o700)
@@ -318,7 +318,7 @@ class AccountExport:
         if sha(canonical(job["options"])) != job["options_sha256"]:
             raise ValueError("The saved export options have changed.")
         if not self.collector.reserve_export(job_id):
-            raise ValueError("Another export is already using this account.")
+            raise ValueError("This account is busy. Pause observation or its current task before resuming the export.")
         recovering = False
         try:
             self.current = self.public(job_id)

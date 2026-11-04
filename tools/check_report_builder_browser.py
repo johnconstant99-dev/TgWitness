@@ -6,6 +6,7 @@ from playwright.sync_api import expect, sync_playwright
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.check_browser import RunningApp, check_layout, launch_browser, unlock
+from tools.check_refresh_browser import hold_once
 
 
 def save(page):
@@ -29,8 +30,13 @@ def main():
             page.on('request', lambda request: writes.append(request.url)
                     if '/api/report-options' in request.url and request.method == 'POST' else None)
             unlock(page, app)
+            hold_once(page, '/api/report-profiles')
             page.locator('.sidebar [data-view=evidence]').click()
             page.locator('#exports-tab-settings').click()
+            expect(page.locator('html')).to_have_attribute('data-refresh-held', 'true')
+            expect(page.locator('#report-profile-save')).to_be_disabled()
+            page.evaluate('()=>window.releaseRefresh()')
+            expect(page.locator('#report-profile-save')).to_be_enabled()
             expect(page.locator('#report-template-dossier')).to_be_enabled()
             expect(page.locator('#report-template-dossier')).to_be_checked()
             expect(page.locator('#report-participant-labels')).to_have_value('aliases')
@@ -122,6 +128,45 @@ def main():
             expect(page.locator('#report-template-custom')).to_be_checked()
             expect(page.locator('#report-review-findings')).to_have_value(authored['findings'])
             expect(page.locator('#report-chart-limit')).to_have_value('15')
+
+            # Named configurations are reusable layout, never case material.
+            import json
+            page.locator('#report-profiles summary').click()
+            page.locator('#report-profile-name').fill('Investigator layout')
+            baseline = len(writes)
+            with page.expect_response(lambda r: r.request.method == 'POST' and r.url.endswith('/api/report-profiles')) as response:
+                page.locator('#report-profile-save').click()
+            assert response.value.status == 200
+            profile = response.value.json()
+            assert profile['options']['chart_limit'] == 15
+            assert not any(key in profile['options'] for key in ('selection','case_title','review_findings','examiner'))
+            expect(page.locator('#report-form')).to_have_attribute('data-dirty', 'false')
+            with page.expect_download() as download:
+                page.locator('#report-profile-export').click()
+            exported = json.loads(Path(download.value.path()).read_text())
+            assert exported['format'] == 'tgwitness-report-profile-v1'
+            assert 'Fictional review' not in json.dumps(exported) and authored['findings'] not in json.dumps(exported)
+            page.locator('#report-template-dossier').check()
+            page.locator('#report-profile-apply').click()
+            expect(page.locator('#report-chart-limit')).to_have_value('15')
+            expect(page.locator('#report-review-findings')).to_have_value(authored['findings'])
+            expect(page.locator('#report-form')).to_have_attribute('data-dirty', 'false')
+            assert len(writes) == baseline, 'Profile operations must not silently save the report'
+            # Import adds a library entry and does not apply it to this report.
+            exported['name'] = 'Imported layout'
+            exported['options']['chart_limit'] = 12
+            with page.expect_response(lambda r: r.request.method == 'POST' and r.url.endswith('/api/report-profiles')) as response:
+                page.locator('#report-profile-import').set_input_files({'name': 'layout.json', 'mimeType': 'application/json', 'buffer': json.dumps(exported).encode()})
+            assert response.value.status == 200
+            expect(page.locator('#report-chart-limit')).to_have_value('15')
+            page.locator('#report-profile-apply').click()
+            expect(page.locator('#report-chart-limit')).to_have_value('12')
+            expect(page.locator('#report-form')).to_have_attribute('data-dirty', 'true')
+            page.locator('#report-form .form-draft-bar .quiet').click()
+            expect(page.locator('#report-chart-limit')).to_have_value('15')
+            with page.expect_response(lambda r: r.request.method == 'DELETE' and '/api/report-profiles/' in r.url):
+                page.locator('#report-profile-delete').click()
+            expect(page.locator('#report-profile-list option')).to_have_count(2)
 
             for width in (320, 390, 768, 1440):
                 page.set_viewport_size({'width': width, 'height': 1000})

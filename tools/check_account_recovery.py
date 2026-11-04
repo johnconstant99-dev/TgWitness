@@ -156,6 +156,7 @@ async def late_rpc_boundaries():
                     collector.reconciler = asyncio.create_task(collector.recheck_loop())
                     await asyncio.wait_for(collector.reconciler, 3)
             elif operation == "history":
+                await collector.stop()
                 with patch.object(collector.history, "read_page", AsyncMock(side_effect=error)):
                     await collector.history.start()
                     await asyncio.wait_for(collector.history.task, 3)
@@ -177,7 +178,11 @@ async def late_rpc_boundaries():
             assert not status["collector"]["running"] and not status["collector"]["connected"]
             assert status["collector"]["phase"] == "authorization_required"
             assert status["health"]["connection"]["reason"] == "signed_out"
-            assert collector.watchdog.done()
+            if operation == "history":
+                assert collector.watchdog is None and not collector.history.busy
+                assert collector.export_claim is None
+            else:
+                assert collector.watchdog.done()
             assert app.state.vault.public_key == identity and app.state.vault.read("credentials") == credentials
             assert store.db.execute("SELECT hash FROM events WHERE seq=?", (head["seq"],)).fetchone()[0] == head["hash"]
             assert not store.events(kind="message.missing_on_recheck")
@@ -256,6 +261,31 @@ async def delayed_cleanup_blocks_replacement():
         assert not collector.authorization_required and collector.phase == "ready"
 
 
+async def avatar_task_blocks_replacement():
+    async with workspace() as (app, _):
+        collector = app.state.collector
+        await collector.configure(123, "a" * 32, saved_session())
+        old = collector.client
+        entered, release = asyncio.Event(), asyncio.Event()
+
+        async def delayed_avatar(*args):
+            entered.set()
+            await release.wait()
+
+        with patch.object(collector, "_avatar", delayed_avatar):
+            task = asyncio.create_task(collector.avatar(44))
+            try:
+                await asyncio.wait_for(entered.wait(), 3)
+                await rejects(collector.configure(123, "a" * 32, saved_session(b"z")), ValueError)
+                assert collector.client is old and collector.export_claim.startswith("avatar:")
+            finally:
+                release.set()
+                await asyncio.wait_for(task, 3)
+        assert collector.export_claim is None
+        await collector.configure(123, "a" * 32, saved_session(b"z"))
+        assert collector.client is not old and collector.client.is_connected()
+
+
 async def stale_rpc_cannot_invalidate_replacement():
     for operation in ("avatar identity", "avatar download", "restore"):
         async with workspace() as (app, _):
@@ -273,7 +303,9 @@ async def stale_rpc_cannot_invalidate_replacement():
             method = {"avatar identity": "get_me", "avatar download": "download_profile_photo",
                       "restore": "is_user_authorized"}[operation]
             with patch.object(old, method, delayed_rejection, create=True):
-                task = asyncio.create_task(collector.restore() if operation == "restore" else collector.avatar(44))
+                # Exercise the inner RPC identity guard; the public avatar task
+                # blocks connection replacement, covered independently above.
+                task = asyncio.create_task(collector.restore() if operation == "restore" else collector._avatar(44))
                 try:
                     await asyncio.wait_for(entered.wait(), 3)
                     await collector.configure(123, "a" * 32, saved_session(b"z"))
@@ -324,6 +356,7 @@ async def main():
     await asyncio.wait_for(late_rpc_boundaries(), 60)
     await asyncio.wait_for(rpc_callback_and_concurrent_cleanup(), 60)
     await asyncio.wait_for(delayed_cleanup_blocks_replacement(), 60)
+    await asyncio.wait_for(avatar_task_blocks_replacement(), 60)
     await asyncio.wait_for(stale_rpc_cannot_invalidate_replacement(), 60)
     await asyncio.wait_for(earlier_success_cannot_erase_new_rejection(), 60)
 

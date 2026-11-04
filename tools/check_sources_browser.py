@@ -316,13 +316,24 @@ def main():
                 page.set_viewport_size({"width": width, "height": 844})
                 for tab in ("scope", "recording"):
                     page.locator("#sources-tab-" + tab).click()
+                    if tab == "recording":
+                        expect(page.locator("#load-dialogs")).to_be_hidden()
+                    else:
+                        expect(page.locator("#load-dialogs")).to_be_visible()
                     page.evaluate("""async()=>{scrollTo({top:0,left:0,behavior:'instant'});
                       await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}""")
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), (theme, width, tab)
                     height = page.locator("#view-sources").bounding_box()["height"]
-                    assert height <= 3 * 844, (theme, width, tab, height)
                     page.screenshot(path=str(output / f"{tab}-{width}-{theme}.png"), full_page=True)
+                    assert height <= 3 * 844, (theme, width, tab, height)
                     checks.append({"theme": theme, "width": width, "tab": tab, "height": height})
+                    if tab == "recording" and width == 390:
+                        page.evaluate("document.documentElement.style.setProperty('--font', 'Verdana, sans-serif')")
+                        wide = page.locator("#view-sources").bounding_box()["height"]
+                        page.screenshot(path=str(output / f"recording-{width}-{theme}-wide.png"), full_page=True)
+                        assert wide <= 3 * 844, (theme, width, "wide-system-font", wide)
+                        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+                        page.evaluate("document.documentElement.style.removeProperty('--font')")
 
         page.locator("#sources-tab-scope").click()
         page.locator("#scope-investigation").click()

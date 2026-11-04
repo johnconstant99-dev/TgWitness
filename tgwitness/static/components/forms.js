@@ -1,7 +1,7 @@
 export function createFormControls({forms, roots, tr, getSession, toast}) {
   const records=new Map(), listeners=new AbortController(), signal=listeners.signal;
   const fields=form=>[...form.querySelectorAll('input,textarea,select')].filter(field=>
-    field.type!=='file'&&field.id&&!field.closest('.alerts-builder'));
+    field.type!=='file'&&field.id&&!field.closest('.alerts-builder,[data-form-ignore]'));
   const read=field=>['checkbox','radio'].includes(field.type)?field.checked:field.value;
   const snapshot=form=>new Map(fields(form).map(field=>[field.id,read(field)]));
   const different=(a,b)=>[...new Set([...a.keys(),...b.keys()])].filter(key=>a.get(key)!==b.get(key)).length;

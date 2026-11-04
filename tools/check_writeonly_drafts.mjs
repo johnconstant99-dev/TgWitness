@@ -56,12 +56,15 @@ assert.equal(secret.value,'current-workspace-draft','Old replies cannot clear or
 controls.destroy();
 const destination=new Element();destination.id='alert-destinations';
 const helper=new Element();helper.id='alert-builder-token';
-helper.closest=selector=>selector==='.alerts-builder'?{}:null;
-const alerts=new Element();alerts.id='alerts-form';alerts.fields=[destination,helper];
+helper.closest=selector=>selector.split(',').includes('.alerts-builder')?{}:null;
+const ignored=new Element();ignored.id='profile-library-name';
+ignored.closest=selector=>selector.split(',').includes('[data-form-ignore]')?{}:null;
+const alerts=new Element();alerts.id='alerts-form';alerts.fields=[destination,helper,ignored];
 const alertControls=createFormControls({forms:[{form:alerts,setDirty:()=>{}}],roots:[],
   tr:text=>text,getSession:()=>session,toast:()=>{}});
 alertControls.loaded(alerts.id);
 helper.value='draft-destination-token';
+ignored.value='draft-layout-name';
 assert.equal(alertControls.changed(alertControls.capture(alerts.id)),false);
 const beforeRemoval=alertControls.capture(alerts.id);
 alerts.fields=[destination];

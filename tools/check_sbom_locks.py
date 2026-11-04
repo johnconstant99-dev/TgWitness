@@ -23,6 +23,50 @@ def rejected(call, meaning):
     raise AssertionError("Accepted " + meaning)
 
 
+def check_conditional_pins(root, deploy, original, document):
+    for name, content in original.items():
+        (deploy / name).write_text(content, encoding="utf-8")
+    runtime = deploy / "requirements.lock"
+
+    def split(left, right):
+        runtime.write_text(original["requirements.lock"] +
+            f"split-package==1.0{'; ' + left if left else ''}\n" +
+            f"split-package==2.0{'; ' + right if right else ''}\n", encoding="utf-8")
+
+    for left, right in (("<", ">="), ("<=", ">"), ("==", "!=")):
+        split(f"python_full_version {left} '3.12'", f'python_full_version {right} "3.12"')
+        manifest, _ = locks.plan(root)
+        assert manifest["unique_python_packages"] == 5
+        assert {(r["version"], r["marker"]) for r in manifest["scopes"]["runtime"]
+                if r["name"] == "split-package"} == {
+                    ("1.0", f"python_full_version {left} '3.12'"),
+                    ("2.0", f'python_full_version {right} "3.12"')}
+
+    output, sbom = root / "conditional-inventory", root / "conditional-sbom.json"
+    locks.stage(root, output)
+    complete = copy.deepcopy(document)
+    complete["packages"] += [package("split-package", "1.0"), package("split-package", "2.0")]
+    sbom.write_text(json.dumps(complete), encoding="utf-8")
+    locks.verify(root, output, sbom)
+    for version in ("1.0", "2.0"):
+        missing = copy.deepcopy(complete)
+        missing["packages"] = [p for p in missing["packages"]
+                               if (p["name"], p["versionInfo"]) != ("split-package", version)]
+        sbom.write_text(json.dumps(missing), encoding="utf-8")
+        rejected(lambda: locks.verify(root, output, sbom), "missing conditional package version")
+    for left, right in (("", "python_full_version >= '3.12'"),
+                        ("python_full_version <= '3.12'", "python_full_version >= '3.12'"),
+                        ("python_full_version < '3.13'", "python_full_version >= '3.12'"),
+                        ("python_version < '3.12'", "python_full_version >= '3.12'"),
+                        ("python_full_version < '3.12' or sys_platform == 'win32'", "python_full_version >= '3.12'")):
+        split(left, right)
+        rejected(lambda: locks.plan(root), "unproven or overlapping conditional versions")
+    split("python_full_version < '3.12'", "python_full_version >= '3.12'")
+    (deploy / "constraints-mcp.txt").write_text(original["constraints-mcp.txt"] +
+                                               "split-package==1.0\n", encoding="utf-8")
+    rejected(lambda: locks.plan(root), "conflicting cross-scope conditional versions")
+
+
 def main():
     with tempfile.TemporaryDirectory(prefix="tgwitness-sbom-check-") as temporary:
         root = Path(temporary)
@@ -103,11 +147,12 @@ def main():
         for value in invalid:
             (deploy / "constraints-mcp.txt").write_text(value, encoding="utf-8")
             rejected(lambda: locks.plan(root), "invalid or conflicting frozen dependency input")
+        check_conditional_pins(root, deploy, original, document)
     actual, _ = locks.plan(locks.ROOT)
     identities = {(item["name"], item["version"]) for records in actual["scopes"].values() for item in records}
     for name in ("fastapi", "telethon", "pydantic", "setuptools", "mcp"):
         assert any(candidate == name for candidate, _ in identities), name
-    print("SBOM lock coverage: positive derivation,15 negative controls and real frozen inputs passed")
+    print("SBOM lock coverage: derivation, disjoint Python pins, conditional-version completeness, conflicting pins and real frozen inputs passed")
 
 
 if __name__ == "__main__":

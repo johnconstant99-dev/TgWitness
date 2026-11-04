@@ -48,13 +48,16 @@ FILES.extend("website/demo/downloads/" + name for name in (
 FILES.extend("website/demo/report/" + name for name in (
     "index.html", "report.html", "sharing-copy.zip", "example.json",
 ))
-FILES.extend("website/export-clinic/media/" + name for name in (
-    "comparison-poster.jpg", "comparison-data.json", "review-file-manifest.json", "publication-review.json",
-    "original-metadata-audit.json", "recording-manifest.json", "download-manifest.json", "SHA256SUMS.txt",
-    *(f"assets/comparisons/{case}-{version}.jpg"
-      for case in ("personal", "private-channel", "private-group", "private-supergroup", "public-channel", "public-supergroup")
+EXPORT_CLINIC_ASSETS = (
+    "SHA256SUMS.txt", "comparison-data.json", "comparison-poster.jpg", "download-manifest.json",
+    "original-metadata-audit.json", "publication-review.json", "recording-manifest.json",
+    "review-file-manifest.json",
+    *("assets/comparisons/" + conversation + "-" + version + ".jpg"
+      for conversation in ("personal", "private-channel", "private-group", "private-supergroup",
+                           "public-channel", "public-supergroup")
       for version in ("before", "modified")),
-))
+)
+FILES.extend("website/export-clinic/media/" + name for name in EXPORT_CLINIC_ASSETS)
 FILES.extend("tools/tdx/" + name for name in (
     "intel-v4.quote.hex", "intel-v4.collateral.json", "intel-v5-td15ex.quote.hex", "intel-v5-td15ex.collateral.json",
     "intel-outdated.collateral.json", "dstack-v4.json", "dstack-v4.collateral.json",

@@ -19,6 +19,44 @@ then checks the local bytes again immediately before removal. An upload failure,
 different readback or cancelled transfer leaves the local file in place. If an
 enabled evidence backup has not yet copied that file, removal also waits for it.
 
+## When the disk is filling up
+
+Attachment downloads already pause below **Parameters → Attachments → free disk
+space** (1 GiB by default), keeping their queue. Text observations continue. This
+does not depend on notification settings. Disabling notifications does not disable
+the download reserve or storage safeguards.
+
+For earlier intervention, enable **Run automatically**, choose **Remove the local
+file to free space**, and enable **Start an extra offload pass when disk space is
+low**. The optional rule starts below 5120 MiB free and continues in batches until
+10240 MiB is free by default. Both thresholds are configurable. It uses the same
+destination, minimum file age, batch limit, full readback verification and evidence
+backup prerequisites as a manual pass. It never enables a destination on its own.
+Checks run every 30 seconds; an error or no progress delays another pressure pass
+for five minutes. The pressure state and retry time survive a restart. Scheduled
+passes still use their normal interval when the pressure rule is inactive.
+
+The panel shows free space, the packing reserve, whether the pressure rule is
+armed, and files skipped for lack of temporary space. Packing and restoration
+check their peak temporary-space requirement before starting and check available
+space while writing. The reserve is the configured download reserve, with a
+64 MiB minimum for storage operations. These checks are not a filesystem quota;
+another process can still consume space between checks.
+
+Gzip compression is lossless and applies to remote objects; it does not shrink the
+active journal or create local archives. JPEG/video/ZIP files may barely shrink or
+grow slightly. The current packing pipeline may temporarily need approximately
+twice the attachment size plus the reserve when compression is enabled. Choose a
+start threshold early enough for your largest files. A file too large to prepare
+is kept and reported; smaller files and previously verified remote copies can
+still free space. A verified copy can be offloaded without another local packing
+file. Restoration also needs temporary space and can be refused until space is
+available.
+
+If nothing eligible can be moved, or no destination is configured, TgWitness
+cannot reclaim space automatically. The signed journal is never pruned or
+rewritten by storage management. It still needs space for new text observations.
+
 ## Connect a destination
 
 In **Extras → Storage & disk space → Manage storage**, choose the task and destination,

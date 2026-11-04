@@ -13,7 +13,7 @@ try:
 except ImportError:
     from build_source import ROOT, public_sources
 
-BINARY = {".png", ".jpg", ".webp", ".gif", ".mp4", ".bin", ".tsq", ".tsr", ".ttf"}
+BINARY = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".mp4", ".bin", ".tsq", ".tsr", ".ttf"}
 DEEPL_UUID = r"[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}"
 PATTERNS = {
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----"),

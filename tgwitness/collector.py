@@ -224,6 +224,7 @@ def sender_observation(sender):
     observed = {
         "id": getattr(sender, "id", None), "username": getattr(sender, "username", None),
         "display_name": utils.get_display_name(sender),
+        "partial": bool(getattr(sender, "min", False)),
         "meaning": "cached Telegram profile at observation; names are mutable",
     }
     flags = {name: getattr(sender, name) for name in SENDER_FLAGS if isinstance(getattr(sender, name, None), bool)}
@@ -284,6 +285,7 @@ def message_record(message):
         "from_username": getattr(sender, "username", None),
         "reply_to_message_id": getattr(message, "reply_to_msg_id", None),
         "text": message.message or "",
+        "reply_to": plain(getattr(message, "reply_to", None)),
     }
     if action:
         record["action"] = type(action).__name__
@@ -311,6 +313,7 @@ class Collector:
         self.export_state = None
         self.export_path = None
         self.export_claim = None
+        self.observation_starting = False
         self.connection_change_task = None
         self.people = {}
         self.avatar_lock = asyncio.Lock()
@@ -367,6 +370,12 @@ class Collector:
         return {
             "network": self.route_status(),
             "phase": self.phase, "running": self.running,
+            "account_task": ("monitoring" if self.running or self.observation_starting else
+                             "history" if self.history.busy else
+                             "profile_image" if (self.export_claim or "").startswith("avatar:") else
+                             "export" if self.export_claim else None),
+            "available_for_export": not (self.running or self.observation_starting or self.export_claim
+                                         or self.export_busy() or self.history.busy or self.connection_change_task),
             "connected": bool(self.client and self.client.is_connected()),
             "has_session": bool(credentials.get("session")),
             "authorization_required": self.authorization_required,
@@ -652,6 +661,9 @@ class Collector:
                                      timeout=self.param("telegram_timeout_seconds"), catch_up=True,
                                      **options, **self.route_options())
         client.tgwitness_client_profile = device
+        client.rpc_backoff_getter = lambda: self.store.get_setting("rpc_backoff_until", 0)
+        client.rpc_backoff_setter = lambda until: self.store.set_setting("rpc_backoff_until", max(
+            until, self.store.get_setting("rpc_backoff_until", 0)))
         request = getattr(client, "_init_request", None)
         if isinstance(request, functions.InitConnectionRequest):
             request.lang_pack = device["lang_pack"]
@@ -1621,6 +1633,9 @@ class Collector:
         validate_collection_scope(self.store)
         if self.running:
             return
+        if self.export_claim or self.export_busy() or self.history.busy or self.observation_starting:
+            raise ValueError("This account is busy. Pause its current task before starting observation.")
+        self.observation_starting = True
         client = self.client
         try:
             await self.start_observation()
@@ -1638,6 +1653,8 @@ class Collector:
             if isinstance(exc, AUTHORIZATION_ERRORS):
                 self.handle_authorization_error(exc, "start observation", client=client)
             raise
+        finally:
+            self.observation_starting = False
 
     async def start_observation(self):
         if self.watchdog or self.media_worker or self.urgent_media_worker or self.reconciler or self.intake_worker:
@@ -1799,6 +1816,8 @@ class Collector:
                     "connected": connected, "run_id": self.run_id, "monotonic_ns": time.monotonic_ns(),
                     "media_jobs": self.store.media_stats(), "interval_seconds": interval,
                     "meaning": "collector liveness, not proof of complete capture"})
+                from .people import refresh_one
+                await refresh_one(self)
             if checkpoint_at is None or now - checkpoint_at >= self.param("checkpoint_minutes") * 60 - 1:
                 checkpoint_at = now
                 retain_checkpoint(self.store, self.vault)
@@ -2018,6 +2037,10 @@ class Collector:
             return
         try:
             settings = monitoring_settings(self.store)
+            if isinstance(update, (types.UpdateUserStatus, types.UpdateUserName, types.UpdateUser)):
+                from .people import observe_update
+                observe_update(self.store, update, profiles=settings["profiles"], presence=settings["presence"], raw=plain(update))
+                return
             if isinstance(update, (types.UpdateNewMessage, types.UpdateNewChannelMessage)) and isinstance(
                     update.message, types.MessageService):
 
@@ -2253,6 +2276,21 @@ class Collector:
         return result
 
     async def snapshot(self, chat_id, limit, entity=None, origin=None):
+        owner = None
+        if origin is None:
+            owner = "snapshot:" + secrets.token_hex(16)
+            if not self.reserve_export(owner):
+                raise ValueError("This account is busy. Pause its current task before loading history.")
+        try:
+            return await self._snapshot(chat_id, limit, entity, origin)
+        finally:
+            if owner:
+                try:
+                    await self.avatar_history.close()
+                finally:
+                    self.release_export(owner)
+
+    async def _snapshot(self, chat_id, limit, entity=None, origin=None):
         if not self.selected(chat_id):
             raise ValueError("Enable this target before taking a history snapshot.")
         await self.restore()
@@ -2281,7 +2319,8 @@ class Collector:
         return bool(self.export_task and not self.export_task.done())
 
     def reserve_export(self, owner):
-        if self.export_busy() or self.export_claim or self.connection_change_task is not None:
+        if (self.running or self.observation_starting or self.history.busy or self.export_busy()
+                or self.export_claim or self.connection_change_task is not None):
             return False
         self.export_claim = owner
         return True
@@ -2297,6 +2336,15 @@ class Collector:
             pass
 
     async def chat_scale(self, chat_id):
+        owner = "scale:" + secrets.token_hex(16)
+        if not self.reserve_export(owner):
+            raise ValueError("This account is busy. Pause its current task before preparing an export.")
+        try:
+            return await self._chat_scale(chat_id)
+        finally:
+            self.release_export(owner)
+
+    async def _chat_scale(self, chat_id):
         await self.restore()
         entity = await self.resolve_target(chat_id)
         started = time.monotonic()
@@ -2319,7 +2367,7 @@ class Collector:
 
         export_id = secrets.token_urlsafe(18)
         if not self.reserve_export(export_id):
-            raise ValueError("A chat export is already running on this account. Wait for it or cancel it first.")
+            raise ValueError("This account is busy. Pause observation or its current task before exporting.")
         try:
             await self.restore()
             entity = await self.resolve_target(chat_id)
@@ -2426,7 +2474,9 @@ class Collector:
             except FloodWaitError as exc:
                 if writing:
                     raise
-                wait = min(exc.seconds + 1, 3600)
+                wait = exc.seconds + 1
+                self.store.set_setting("rpc_backoff_until", max(time.time() + wait,
+                    self.store.get_setting("rpc_backoff_until", 0)))
                 self.store.append("telegram.backoff", {"seconds": wait, "context": "chat_export"})
                 if on_wait:
                     on_wait(wait)
@@ -2532,6 +2582,8 @@ class Collector:
         with path.open("w", encoding="utf-8") as handle:
             async def write(message):
                 nonlocal count
+                if utils.get_peer_id(message.peer_id) != utils.get_peer_id(entity):
+                    raise ValueError("History returned a message from a different source.")
                 self.remember(getattr(message, "sender", None))
                 record = message_record(message)
                 handle.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -2569,9 +2621,24 @@ class Collector:
             self.people.pop(next(iter(self.people)))
         self.people[utils.get_peer_id(entity)] = entity
         if chat_id is not None:
+            if self.running and self.selected(chat_id) and monitoring_settings(self.store)["profiles"]:
+                from .people import observe_entity
+                observe_entity(self.store, entity, chat_id)
             self.avatar_history.observe(entity, chat_id=chat_id)
 
     async def avatar(self, peer_id):
+        cached = self.store.root / "avatars" / (str(peer_id) + ".jpg")
+        if cached.is_file():
+            return cached
+        owner = "avatar:" + secrets.token_hex(8)
+        if not self.reserve_export(owner):
+            return None
+        try:
+            return await self._avatar(peer_id)
+        finally:
+            self.release_export(owner)
+
+    async def _avatar(self, peer_id):
         directory = self.store.root / "avatars"
         path, missing = directory / (str(peer_id) + ".jpg"), directory / (str(peer_id) + ".none")
         if path.is_file():
@@ -2638,11 +2705,13 @@ class Collector:
             raise ValueError("refreshed_attachment_differs_from_signed_observation")
         return downloadable_media(fresh)
 
-    async def download_worker(self, lane="all"):
+    async def download_worker(self, lane="all", *, owner=None, history_run=None):
         media_root = self.store.root / "media"
         media_root.mkdir(exist_ok=True)
-        while self.running:
+        while self.running or owner and self.export_claim == owner:
             if not capture_settings(self.store)["download_media"]:
+                if owner:
+                    return
                 self.media_wakeup.clear()
                 try:
                     await asyncio.wait_for(self.media_wakeup.wait(), 1)
@@ -2667,8 +2736,15 @@ class Collector:
             account = self.store.get_setting("account", {}) or {}
             limits = {"max_priority": 1} if lane == "urgent" else {"min_priority": 2} if lane == "bulk" else {}
             capture = capture_settings(self.store)
-            job = self.store.claim_media(account.get("id", 0), **limits) if capture["download_media"] else None
+            job = self.store.claim_media(account.get("id", 0), history_run=history_run,
+                                         **limits) if capture["download_media"] else None
             if not job:
+                if owner:
+                    retry_at = self.store.next_history_media_attempt(account.get("id", 0), history_run)
+                    if retry_at is not None:
+                        await asyncio.sleep(max(.05, min(1, retry_at - time.time())))
+                        continue
+                    return
                 self.media_wakeup.clear()
                 try:
                     await asyncio.wait_for(self.media_wakeup.wait(), 1)

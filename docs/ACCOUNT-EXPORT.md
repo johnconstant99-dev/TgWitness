@@ -1,5 +1,8 @@
 # Account export and minimized disclosure
 
+An account export reserves its account exclusively. Pause monitoring or another
+acquisition explicitly before starting or resuming; the app never stops it automatically.
+
 As the installation administrator, choose **Start here → Export my account**, or **Exports → Telegram account → Configure account export**. Sign in if needed, review the scope, and explicitly start the export. Continuous observation is not required. **Saved observations** is a separate export of the existing journal; its ZIP includes all sources regardless of journal filters. Every workspace has its own jobs, signing identity and storage. Issued panel access, including an unrestricted ordinary export grant, cannot open these account-wide routes.
 
 Sender and text filters expand under **Filter by sender or message text**. **Account data & connection method** contains optional account categories and the Takeout/regular-session choice; its summary shows the active choices even when closed. Closing these sections keeps their settings. Export and report drafts remain in the current panel session while changing views; they are not saved through a browser reload. Existing jobs remain reachable from either export choice.

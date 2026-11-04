@@ -928,7 +928,7 @@ SCRIPT += "\n" + CONSOLE_JS
 SCRIPT_HASH = "'sha256-" + base64.b64encode(hashlib.sha256(SCRIPT.encode("utf-8")).digest()).decode() + "'"
 CSP = ("default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data: file:; script-src " + SCRIPT_HASH
        + "; frame-src 'self' file:; base-uri 'none'; form-action 'none'")
-SCRIPT_WORDS = ("Copy", "Copied", "Signature valid · this file not yet checked",
+SCRIPT_WORDS = ("Context message", "Matches export filters", "Copy", "Copied", "Signature valid · this file not yet checked",
                 "Verified: this file is exactly as signed", "Signed", "Not yet checked", "Changed",
                 "This page differs from the sealed file you chose.",
                 "The file you chose is intact, but the page shown here differs from it.", "Signature does not match",
@@ -1090,7 +1090,9 @@ def chat_brief(say, meta, stats, ids, account_text):
                   date=utc_text(meta.get("exported_at")))
     shows = [say("The messages are as exported, provided the key fingerprint matches one kept apart from the collector "
                  "(verify.py checks this).")]
-    if ids.get("numbered_per_chat") and ids.get("missing"):
+    if ids.get("selection_applied"):
+        shows.append(say("Absent numbers in this selection are not evidence of deletion."))
+    elif ids.get("numbered_per_chat") and ids.get("missing"):
         shows.append(say("{n} message numbers in this range are absent: deleted before the export, or never visible to "
                          "this account.", n=ids["missing"]))
     labels = [say(text) for flag, text, _ in LABELS if profile.get(flag)]
@@ -2433,6 +2435,12 @@ def chat_rows(records, say, preview=False, base="", numbered=False, after=None, 
         previous_sender = sender
         cat = "media" if record.get("media_type") else "edited" if record.get("edited") else "text"
         body = []
+        if record.get("selection"):
+            selected = record["selection"]
+            language = selected.get("language") or {}
+            label = say("Context message") if selected.get("role") == "context" else say("Matches export filters")
+            body.append('<div class="media-chip">' + e(label) + (" · " + e(language.get("language") or
+                        language.get("status")) if language else "") + "</div>")
         if start:
             body.append('<div class="name">' + e(name) + (' <span class="uname">@' + e(record["from_username"]) + "</span>"
                                                           if record.get("from_username") else "") + "</div>")
@@ -2576,7 +2584,7 @@ def chat_chunks(meta, records, context):
                    + chips + '<span class="shown">' + e(say("Shown")) + ': <b id="shown-n">' + num(meta.get("message_count"))
                    + '</b></span></div><div class="chatwall">').encode("utf-8")
             for row in chat_rows(records(), say, bool(options.get("media_previews")),
-                                 numbered=bool(ids.get("numbered_per_chat"))):
+                                 numbered=bool(ids.get("numbered_per_chat") and not ids.get("selection_applied"))):
                 yield row.encode("utf-8")
             yield b"</div></section>"
         parts = meta.get("parts") or []
@@ -2627,7 +2635,7 @@ def chat_chunks(meta, records, context):
             yield seal_section(say, next(numbers), report_id, created).encode("utf-8")
         yield ending(say, producer, viewer_meta(
             say, "chat", context, title=title, archive="tgwitness-chat-export.zip", chat_id=chat.get("id"),
-            chat_title=chat_title, numbered=bool(ids.get("numbered_per_chat")),
+            chat_title=chat_title, numbered=bool(ids.get("numbered_per_chat") and not ids.get("selection_applied")),
             data_sha256=context.get("chat_json_sha256")), data).encode("utf-8")
 
     inline = None if context.get("viewer") else viewer.Inline("chat", options["part_size"])
@@ -2772,6 +2780,9 @@ def chat_subject(meta, context):
 
 def message_ids_section(say, number, ids):
     out = section(number, "ids", say("Message numbers"), say(
+        "This export contains a selection. Absent message numbers may have been excluded by the filters. "
+        "They are not evidence that a message was deleted or inaccessible."
+        if ids.get("selection_applied") else
         "Telegram numbers the messages of a channel or supergroup 1, 2, 3… in order, service messages included. A "
         "number between the first and the last exported message that is absent belongs to a message Telegram did "
         "not return: deleted before the export, or not visible to this account. If only part of the chat was "

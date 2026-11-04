@@ -43,6 +43,24 @@ def main():
             expect(page.locator('#replica-form')).to_be_hidden()
             expect(page.locator('#storage-status')).to_contain_text('Ready to configure')
             assert not server.app.state.vault.read('storage')
+            expect(page.locator('#storage-disk-status')).to_contain_text('inactive')
+            expect(page.locator('#storage-stats')).to_contain_text('Disk space available')
+            page.locator('#storage-pressure').check()
+            page.locator('#storage-pressure-low').fill('128')
+            page.locator('#storage-pressure-high').fill('256')
+            # Polling must preserve an unfinished configuration.
+            page.evaluate('async()=>await TgWitnessServices.load()')
+            expect(page.locator('#storage-pressure-low')).to_have_value('128')
+            with page.expect_response(lambda r: r.request.method == 'POST' and r.url.endswith('/api/storage')) as saved:
+                page.locator('#storage-form button[type=submit]').click()
+            assert saved.value.status == 200
+            cfg = saved.value.json()
+            assert cfg['settings']['pressure_enabled'] and cfg['settings']['pressure_low_mb'] == 128
+            assert cfg['settings']['pressure_high_mb'] == 256
+            assert not cfg['disk']['pressure_configured'], 'Saving the rule must not enable offloading'
+            page.evaluate('async()=>{TgWitnessServices.clear();await TgWitnessServices.load();}')
+            expect(page.locator('#storage-pressure')).to_be_checked()
+            expect(page.locator('#storage-pressure-high')).to_have_value('256')
             for width in (1440, 390):
                 page.set_viewport_size({'width': width, 'height': 1000 if width == 1440 else 844})
                 page.screenshot(path=str(output / f'storage-{width}.png'), full_page=True)

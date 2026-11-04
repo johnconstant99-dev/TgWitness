@@ -10,6 +10,7 @@ import os
 import platform
 import re
 import secrets
+import shutil
 import sqlite3
 import subprocess
 import tempfile
@@ -23,7 +24,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from cryptography.exceptions import InvalidSignature, InvalidTag
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-from . import replica
+from . import replica, tuning
 from .security import private_write
 from .store import canonical, utcnow
 from .verify import fingerprint
@@ -40,6 +41,25 @@ REMOTE_TYPES = {"mega", "drive", "onedrive", "dropbox", "box", "pcloud", "webdav
                 "swift", "azureblob", "google cloud storage", "koofr", "yandex", "protondrive", "jottacloud"}
 MAX_RECOVERY_OBJECTS = 100000
 MAX_MEDIA_BYTES = 32 * 1024**3
+MIB = 1024**2
+SPACE_MESSAGE = "Not enough free space to prepare this file. Free disk space or offload smaller files first. Local files are kept."
+
+
+class StorageSpaceError(ValueError):
+    def __init__(self, required):
+        super().__init__(SPACE_MESSAGE)
+        self.required = required
+
+
+def packed_bound(size):
+    # zlib's conservative compressBound, plus room for a gzip header/trailer.
+    return size + (size >> 12) + (size >> 14) + (size >> 25) + 64
+
+
+def staging_bytes(size, compressed):
+    packed = packed_bound(size) if compressed else size
+    encrypted = packed + (packed // replica.CHUNK + 1) * 16 + len(replica.MAGIC) + 8
+    return encrypted + (packed if compressed else 0)
 
 
 class Settings(BaseModel):
@@ -51,12 +71,17 @@ class Settings(BaseModel):
     older_than_days: int = Field(default=7, ge=0, le=36500)
     interval_minutes: int = Field(default=60, ge=5, le=1440)
     batch_files: int = Field(default=100, ge=1, le=1000)
+    pressure_enabled: bool = False
+    pressure_low_mb: int = Field(default=5120, ge=1, le=1048576)
+    pressure_high_mb: int = Field(default=10240, ge=2, le=2097152)
     remote_path: str = Field(default="tgwitness", pattern=r"^[A-Za-z0-9._/-]{1,180}$")
 
     @model_validator(mode="after")
     def relative_folder(self):
         if any(p in ("", ".", "..") for p in self.remote_path.split("/")):
             raise ValueError("Use a relative folder without empty, dot or parent segments.")
+        if self.pressure_high_mb <= self.pressure_low_mb:
+            raise ValueError("The free-space target must be greater than the offload threshold.")
         return self
 
 
@@ -342,6 +367,24 @@ class Storage:
         self.busy, self.task = False, None
         self.lock = asyncio.Lock()
 
+    def reserve_bytes(self):
+        # Even with the download pause disabled, leave room for journal/receipts.
+        return max(64, tuning.value(self.store, "media_min_free_mb")) * MIB
+
+    def require_space(self, additional, reserve=None):
+        required = additional + (self.reserve_bytes() if reserve is None else reserve)
+        if shutil.disk_usage(self.store.root).free < required:
+            raise StorageSpaceError(required)
+
+    def disk_status(self):
+        saved = settings(self.store)
+        disk = shutil.disk_usage(self.store.root)
+        configured = saved["enabled"] and saved["purpose"] == "offload" and saved["pressure_enabled"]
+        active = configured and disk.free < saved["pressure_high_mb"] * MIB and (
+            disk.free < saved["pressure_low_mb"] * MIB or self.store.get_setting("storage_pressure_active", False))
+        return {"free_bytes": disk.free, "total_bytes": disk.total, "reserve_bytes": self.reserve_bytes(),
+                "pressure_configured": configured, "pressure_active": bool(active)}
+
     def public(self):
         receipts = Receipts(self.store.root)
         try:
@@ -357,7 +400,8 @@ class Storage:
                 "copied_files": total, "remote_files": evicted,
                 "has_config": bool(secret.get("config")), "has_key": bool(secret.get("key")),
                 "rclone_installed": installed, "rclone_version": VERSION, "helper_problem": helper_problem,
-                "last": self.store.get_setting("storage_last"), "remote_types": sorted(REMOTE_TYPES)}
+                "last": self.store.get_setting("storage_last"), "remote_types": sorted(REMOTE_TYPES),
+                "disk": self.disk_status()}
 
     def backend(self, config=None):
         saved = config or settings(self.store)
@@ -478,9 +522,11 @@ class Storage:
             raise ValueError("The storage key does not match this saved receipt. Restore the original recovery key; the local file is kept.")
         if not receipt and receipt_db.count()[0] >= MAX_RECOVERY_OBJECTS:
             raise ValueError("The workspace reached the 100,000-file storage recovery limit. Existing receipts remain recoverable; new files stay local.")
-        if receipt and receipt["destination"] == destination and receipt["compressed"] == saved["compress"]:
+        if receipt and receipt["destination"] == destination and (saved["purpose"] == "offload" or receipt["compressed"] == saved["compress"]):
             await self.check_object(backend, receipt["object"], receipt["cipher_sha256"], receipt["cipher_bytes"])
         else:
+            reserve = self.reserve_bytes()
+            self.require_space(staging_bytes(source.stat().st_size, saved["compress"]), reserve)
             name = "media/" + hmac.new(key, digest.encode(), hashlib.sha256).hexdigest() + "-" + secrets.token_hex(8) + ".tgwr"
             with tempfile.TemporaryDirectory(prefix="storage-", dir=self.store.root) as folder:
                 packed, encrypted = Path(folder) / "packed", Path(folder) / "object"
@@ -490,6 +536,7 @@ class Storage:
                         while chunk := inp.read(1024 * 1024):
                             original_hash.update(chunk)
                             original_bytes += len(chunk)
+                            self.require_space(packed_bound(len(chunk)) + 65536, reserve)
                             out.write(chunk)
                             await asyncio.sleep(0)
                 with (packed if saved["compress"] else source).open("rb") as inp, encrypted.open("wb") as out:
@@ -501,8 +548,10 @@ class Storage:
                             original_bytes += len(chunk)
                         return chunk
                     for chunk in replica.encrypt(key, name, read, secrets.token_bytes(8)):
+                        self.require_space(len(chunk), reserve)
                         out.write(chunk)
                         await asyncio.sleep(0)
+                packed.unlink(missing_ok=True)
                 if original_hash.hexdigest() != digest:
                     raise ValueError("The local file changed during copying. It was not uploaded or removed.")
                 receipt = {"format": "tgwitness-storage-object-v1", "sha256": digest,
@@ -527,16 +576,19 @@ class Storage:
             return receipt["bytes"]
         return 0
 
-    async def sync(self):
+    async def sync(self, reason="manual"):
         async with self.lock:
             self.busy = True
             receipts = Receipts(self.store.root)
             backend = None
-            result = {"at": utcnow(), "files": 0, "freed_bytes": 0, "error": None}
+            result = {"at": utcnow(), "reason": reason, "files": 0, "freed_bytes": 0,
+                      "skipped_space": 0, "required_free_bytes": None, "error": None}
             try:
                 saved, backend = settings(self.store), self.backend()
                 destination, visited = self.destination(), set()
                 for _, digest in self.store.media_saved_after(0):
+                    if reason == "pressure" and shutil.disk_usage(self.store.root).free >= saved["pressure_high_mb"] * MIB:
+                        break
                     if digest in visited:
                         continue
                     visited.add(digest)
@@ -548,12 +600,22 @@ class Storage:
                         continue
                     if await asyncio.to_thread(file_hash, path) != digest:
                         raise ValueError("A saved file differs from its journal hash. It was not copied or removed.")
-                    result["freed_bytes"] += await self.copy_one(backend, digest, path, saved, receipts, destination)
+                    try:
+                        result["freed_bytes"] += await self.copy_one(backend, digest, path, saved, receipts, destination)
+                    except StorageSpaceError as exc:
+                        result["skipped_space"] += 1
+                        result["required_free_bytes"] = min(result["required_free_bytes"] or exc.required, exc.required)
+                        # A large file must not prevent smaller files, or already
+                        # verified copies requiring no staging space, freeing room.
+                        await asyncio.sleep(0)
+                        continue
                     result["files"] += 1
                     self.store.set_setting("storage_last", result)
                     if result["files"] >= saved["batch_files"]:
                         break
                 self.save_refreshed(backend)
+                if result["skipped_space"] and not result["files"]:
+                    result["error"] = SPACE_MESSAGE
             except Exception as exc:
                 result["error"] = str(exc) if isinstance(exc, ValueError) else type(exc).__name__
             finally:
@@ -582,6 +644,8 @@ class Storage:
                     return path
                 if path.exists():
                     raise ValueError("A local file has different bytes. Keep it separately for review before restoring the verified copy.")
+                reserve = self.reserve_bytes()
+                self.require_space(2 * receipt["cipher_bytes"] + receipt["bytes"], reserve)
                 backend = self.backend()
                 with tempfile.TemporaryDirectory(prefix="storage-", dir=self.store.root) as folder:
                     ciphertext, packed, restored = [Path(folder) / s for s in ("cipher", "packed", "restored")]
@@ -592,6 +656,7 @@ class Storage:
                             seen += len(chunk)
                             if seen > receipt["cipher_bytes"]:
                                 raise ValueError("The remote object exceeds its recorded size.")
+                            self.require_space(len(chunk), reserve)
                             out.write(chunk)
                         await backend.get(receipt["object"], sink)
                     if file_hash(ciphertext) != receipt["cipher_sha256"] or seen != receipt["cipher_bytes"]:
@@ -599,6 +664,7 @@ class Storage:
                     try:
                         with ciphertext.open("rb") as inp, packed.open("wb") as out:
                             for chunk in replica.decrypt(self.key(), receipt["object"], inp.read):
+                                self.require_space(len(chunk), reserve)
                                 out.write(chunk)
                                 await asyncio.sleep(0)
                     except InvalidTag:
@@ -610,6 +676,7 @@ class Storage:
                             total += len(chunk)
                             if total > receipt["bytes"]:
                                 raise ValueError("Recovered file exceeds its recorded size.")
+                            self.require_space(len(chunk), reserve)
                             out.write(chunk)
                     if total != receipt["bytes"] or file_hash(restored) != digest:
                         raise ValueError("Recovered file does not match its signed journal hash.")
@@ -700,15 +767,38 @@ class Storage:
             current.close()
         return self.public()
 
+    async def tick(self):
+        if self.lock.locked() or (self.task and not self.task.done()):
+            return
+        saved, now = settings(self.store), time.time()
+        active = self.disk_status()["pressure_active"]
+        if active != self.store.get_setting("storage_pressure_active", False):
+            self.store.set_setting("storage_pressure_active", active)
+        if not saved["enabled"]:
+            return
+        if active:
+            if now < self.store.get_setting("storage_pressure_retry_at", 0):
+                return
+            reason = "pressure"
+        else:
+            last = self.store.get_setting("storage_last", {})
+            if last.get("at") and now - self.store.get_setting("storage_attempt", 0) < saved["interval_minutes"] * 60:
+                return
+            reason = "schedule"
+        self.store.set_setting("storage_attempt", now)
+        result = await self.sync(reason=reason)
+        if active:
+            if not self.disk_status()["pressure_active"]:
+                self.store.set_setting("storage_pressure_active", False)
+            # Continue useful batches promptly; failures/no eligible files back off.
+            progress = result["freed_bytes"] > 0 and not result["error"]
+            self.store.set_setting("storage_pressure_retry_at", time.time() + (30 if progress else 300))
+        return result
+
     async def loop(self):
         while True:
             await asyncio.sleep(30)
-            saved = settings(self.store)
-            last = self.store.get_setting("storage_last", {})
-            due = not last.get("at") or time.time() - self.store.get_setting("storage_attempt", 0) >= saved["interval_minutes"] * 60
-            if saved["enabled"] and due and not self.lock.locked() and not (self.task and not self.task.done()):
-                self.store.set_setting("storage_attempt", time.time())
-                await self.sync()
+            await self.tick()
 
 
 async def recover_directory(value, trusted_fingerprint, credentials, output, install_helper=True):

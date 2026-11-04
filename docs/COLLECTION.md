@@ -225,13 +225,19 @@ Neither is an independent trusted timestamp.
 ## History snapshots
 
 A snapshot requests the latest visible messages from an enabled source, up to
-500 per request. Results are labeled as history observations. They can overlap
-with live capture, and repeated observations are kept as separate records.
+500 per request. Results are labeled as history observations. Manual snapshots
+reserve an idle account; pause monitoring explicitly first. Repeated observations
+are kept as separate records.
 
 Snapshots follow the attachment policy but remain separate from live-event switches.
 They do not reconstruct deleted messages or missed intermediate versions. You can
 request one while paused; any attachments it queues wait until observation starts
 and the download worker runs.
+
+The **History** run is a separate exclusive task: it reads selected sources and
+downloads their queued attachments sequentially without starting monitoring.
+Pause releases the account; resume continues the saved run. For date, language
+and reply filters across several idle accounts, see [Distributed chat export](DISTRIBUTED-EXPORT.md).
 
 ## Attachment handling
 

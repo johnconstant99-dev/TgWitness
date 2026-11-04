@@ -75,6 +75,8 @@ button.chat-setting-chip:hover { border-color: var(--accent); color: var(--accen
   .workspace[data-current-view="chats"] .chat-item { gap: 8px; padding-inline: 8px; }
 }
 @media (max-width: 767px) {
+  .chat-view-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; align-self: stretch; }
+  .chat-view-tabs .filter { flex: 0 0 auto; white-space: nowrap; }
   .chat-safety { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 12px; padding:6px 12px; }
   .chat-safety label { min-height:28px; }
   .chat-safety-hint { display:none; }
@@ -93,3 +95,4 @@ button.chat-setting-chip:hover { border-color: var(--accent); color: var(--accen
   .workspace[data-current-view="chats"] .chat-feed { padding: 12px; }
   .workspace[data-current-view="chats"] .chat-compose { padding-inline: 12px; }
 }
+.people-timeline{min-width:0}.people-timeline-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:12px 0}.people-timeline-toolbar label{display:flex;flex-direction:column;gap:4px}.people-timeline-toolbar input{width:110px}.people-timeline-table{overflow-x:auto}.people-timeline-events{padding-left:24px}.people-timeline-events li{padding:12px 0;border-bottom:1px solid var(--border);overflow-wrap:anywhere}.people-timeline-events small{display:block;color:var(--muted)}.people-timeline-events p{margin:6px 0}.people-timeline-content>h4{margin-top:18px}

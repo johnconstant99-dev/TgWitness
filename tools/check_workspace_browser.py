@@ -119,12 +119,12 @@ def main():
             page.close()
 
             page = page_for_case()
-            hold_api_response(page, "/api/chats/" + str(CHAT) + "/scale")
+            hold_api_response(page, "/api/multi-export/jobs")
             pending(page, "openExportDialog()")
             switch(page)
             release(page)
             expect(page.locator("#export-dialog")).not_to_be_visible()
-            checks.append("late export size response cannot open a dialog for another workspace")
+            checks.append("late saved-export response cannot open a dialog for another workspace")
             page.close()
 
 
