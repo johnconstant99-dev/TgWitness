@@ -20,7 +20,7 @@ fictional protocol fixtures remain language-neutral.
 The homepage, documentation, cases, reference pages and application panel share
 25 languages. [`site_modes.py`](../../tools/site_modes.py) additionally retains
 Amharic for the capability guide and both project notices.
-Translations were prepared with DeepL, with a separate Amharic translation because
+Initial translations were prepared with DeepL, with a separate Amharic translation because
 the configured DeepL API does not offer Amharic. Russian terminology and limitations
 were additionally reviewed. These are not certified or native-speaker-reviewed
 translations; review technical limitations when editing a catalogue.
