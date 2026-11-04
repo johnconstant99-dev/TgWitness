@@ -18,45 +18,40 @@
 
 </details>
 
-Save the history currently visible to your account as a signed archive with a
-readable `chat.html` and a structured `chat.json`.
+Saves what your account can see in a chat as a signed archive, with a readable
+`chat.html` and a `chat.json` for tools.
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-feature-export-static.svg"><img src="../assets/presentation/readme-feature-export.svg" width="420" alt="Chat history becomes a signed HTML and JSON export."></picture></p>
 
 ## Choose and export
 
-1. Select the intended account workspace and open **Chats**.
-2. Open the conversation and choose **Export chat**. The same task is available
-   under **Sources → Full chat export → Export full chat**.
-3. Wait for acquisition to finish and save the resulting archive.
-4. Keep the original signed archive. Extract a copy and open `chat.html` to read
-   the conversation offline; use `chat.json` for analysis.
+1. Pick the workspace and open **Chats**.
+2. Open the chat, **Export chat** (or **Sources → Full chat export → Export full chat**).
+3. Wait for it to finish and save the archive.
+4. Keep the original. Unpack a copy, `chat.html` to read offline, `chat.json` for analysis.
 
-The connected account must have access to the conversation. Private chats are
-supported when visible to that account. Repeat the export for each source you
-need; there is no single whole-account historical export.
+The account needs access to the chat, private chats work too. One export per chat; for a
+whole account use [account export](../ACCOUNT-EXPORT.md).
 
 ## Choose the right kind of history
 
 | Your task | Use |
 | --- | --- |
-| Read a chat's currently visible history offline | **Full chat export** |
-| Load available history across enabled sources into the journal | **Sources → Load full history** on current main; [guide](../HISTORY.md) |
-| Bring a bounded set of recent messages into the journal | **History snapshot** |
-| Keep edits and deletion notices as they arrive | **Start observation** |
-| Hand over captured observations, preserved media and verification data | **Signed evidence ZIP** in Exports |
+| Read a chat offline | **Full chat export** |
+| Pull history of enabled sources into the journal | **Sources → Load full history** ([guide](../HISTORY.md)) |
+| Grab recent messages into the journal | **History snapshot** |
+| Catch edits and deletions as they happen | **Start observation** |
+| Hand over observations, media and verification data | **Signed evidence ZIP** in Exports |
 
-A full chat export does not populate the journal or people profiles with all
-exported messages. It also cannot reconstruct messages or earlier versions that
-Telegram no longer returns.
+A chat export doesn't fill the journal or people profiles, and it can't bring back
+messages or versions Telegram no longer returns.
 
 ## Verify and hand over
 
-Use a trusted copy of the verifier and an independently retained signing-key
-fingerprint. The [export and verification guide](Exports-and-Verification.md)
-explains the checks, trusted inputs and coverage limits.
+Use a verifier you trust and a key fingerprint you kept separately. Details in
+[export and verification](Exports-and-Verification.md).
 
-For a case spanning several chats, retain each source's export alongside your
-source register and timeline. Keep source time and acquisition time distinct.
+For a multi-chat case keep each export next to your source register and timeline, and keep
+"sent at" and "collected at" apart.
 
 **Continue:** [Work a case](Investigations.md) · [Verify a handoff](Exports-and-Verification.md)

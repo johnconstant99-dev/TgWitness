@@ -1,9 +1,9 @@
-<p class="guide-outcome">Manage several collecting accounts together while keeping each account's records and signing identity distinct.</p>
-<p>An account group brings connection status, observation controls, shared settings and exports into one working view. It is useful when several accounts cover the same investigation or need a consistent operating setup.</p>
+<p class="guide-outcome">Run several accounts together, each still with its own records and key.</p>
+<p>A group puts connection status, start/pause, shared settings and exports on one screen. Handy when several accounts work the same case.</p>
 
 <h2 id="overview">Open the group overview</h2>
-<p>In <strong>Accounts</strong>, open the group. Each account shows its observation state, connection route, latest measured route latency when a current check succeeded, and last saved message. <strong>Needs attention</strong> links to the accounts that need work; <strong>Fix</strong> opens the relevant workspace and control.</p>
-<p><strong>Start all</strong> and <strong>Pause all</strong> act on eligible accounts after confirmation. <strong>Group settings</strong> shares selected settings; accounts with their own values keep them until you choose to replace them.</p>
+<p>Open the group in <strong>Accounts</strong>. Each account shows its state, route, latency and last saved message. <strong>Needs attention</strong> lists the broken ones, <strong>Fix</strong> takes you straight there.</p>
+<p><strong>Start all</strong> / <strong>Pause all</strong> ask before acting. <strong>Group settings</strong> are shared, but an account's own values stay until you replace them.</p>
 
 <section class="workflow-lab" data-workflow="groups" aria-labelledby="groups-example-title">
   <h3 id="groups-example-title">Review a route change across a group</h3>
@@ -25,12 +25,12 @@
 </section>
 
 <h2 id="route">Change the route with a review step</h2>
-<ol><li>Select <strong>Change the group route</strong>, then choose the connection type and settings.</li><li>Choose <strong>Review selection</strong>. Review the listed accounts and their individual route overrides.</li><li>Select <strong>Prepare and check</strong>. The check uses a fresh Telegram transport; supported HTTP routes also report their HTTPS exit check.</li><li>Select <strong>Apply checked connection</strong> and inspect each account's result. Previously running observation resumes where application succeeds; idle accounts remain idle.</li></ol>
-<p>Latency describes the measured Telegram connection setup. An exit-IP check describes that route at the recorded check time. Account authorization and observation health have their own indicators; a group change can finish with different outcomes per account.</p>
+<ol><li><strong>Change the group route</strong>, pick the type and settings.</li><li><strong>Review selection</strong>: see which accounts change and which have their own route.</li><li><strong>Prepare and check</strong> tests a fresh Telegram connection, plus the exit IP where possible.</li><li><strong>Apply checked connection</strong> and look at each result. Running accounts resume, idle ones stay idle.</li></ol>
+<p>Latency is the Telegram connection setup time, the exit IP is what the route showed at check time. Results can differ per account.</p>
 
 <h2 id="shared-chats">Use overlapping access</h2>
-<p><strong>Chats several accounts see</strong> shows shared sources and the available workspace-observation coverage. Eligible channels and supergroups can use <strong>Export with … accounts</strong> to divide one chat's history acquisition. Private chats and ordinary groups stay with the starting account because their message numbers belong to an account's history.</p>
+<p><strong>Chats several accounts see</strong> lists shared sources and their coverage. Channels and supergroups can be exported by several accounts at once with <strong>Export with … accounts</strong>. Private chats and basic groups can't, their message numbers are per account.</p>
 
 <h2 id="export-group">Export the group as a package</h2>
-<p><strong>Export group</strong> creates one ZIP containing each account's signed export and a signed list of those files. The original workspace identities and fingerprints remain available for verification. Build a cross-account narrative using those references; a single merged timeline is still assembled separately.</p>
-<p>Continue with <a href="@@GUIDE_REPORTS@@">report design</a>, <a href="@@GUIDE_CASE_BOARD@@">a Case Board within a workspace</a>, or <a href="@@GUIDE_EXPORTS@@">export verification</a>.</p>
+<p><strong>Export group</strong> gives one ZIP with every account's signed export and a signed list of them. Each keeps its own fingerprint for verification. A merged timeline you still build yourself.</p>
+<p>Next: <a href="@@GUIDE_REPORTS@@">reports</a>, <a href="@@GUIDE_CASE_BOARD@@">Case Board</a>, <a href="@@GUIDE_EXPORTS@@">verifying exports</a>.</p>

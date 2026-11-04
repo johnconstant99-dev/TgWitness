@@ -126,7 +126,7 @@ def main(media_dir=None):
         expect(page.locator('.sidebar [aria-current="page"]')).to_have_text("Export Clinic")
         assert page.locator('link[rel=stylesheet][href$="docs.css"]').count() == 1
         assert page.locator('link[rel=stylesheet][href$="site.css"]').count() == 0
-        assert page.locator(".toc a").count() == 5
+        assert page.locator(".toc a").count() == 6
         for item in data["cases"]:
             page.locator(f'[data-case="{item["id"]}"]').click()
             for index, message in enumerate(item["differences"]):

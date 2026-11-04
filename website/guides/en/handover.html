@@ -1,8 +1,8 @@
-<p class="guide-outcome">Share the relevant observations while keeping the original workspace intact.</p>
-<p>A handover is a separate signed extract. Choose the chats and people, reduce identities or text, and decide which files and team notes belong in the recipient's copy. Its manifest records the selection and the number of unchanged, minimized and omitted records.</p>
+<p class="guide-outcome">Share only what's needed, the original stays untouched.</p>
+<p>A handover is a separate signed extract: pick chats and people, hide identities or text, choose files and team notes. The manifest records what was kept, trimmed and left out.</p>
 
 <h2 id="prepare">Prepare the recipient's extract</h2>
-<ol><li>Open <strong>Exports → Handover extract</strong>. Write its purpose, choose the chats and optional UTC period, then select <strong>Load people of the chosen chats</strong> if you need named subjects.</li><li>Choose how to handle everyone else: pseudonyms, omit their messages, or show as recorded. Set message text and attachments independently; optionally mask phone numbers and email addresses.</li><li>Choose whether to include Case Board bookmarks and slices, or cards with comments. Investigator aliases can replace team names in this copy.</li><li>Select <strong>Download handover extract</strong>. Open the generated report and selected records locally, verify the archive, and inspect the copy before sending it.</li></ol>
+<ol><li><strong>Exports → Handover extract</strong>: write the purpose, pick chats and a period, <strong>Load people of the chosen chats</strong> if you need named people.</li><li>Everyone else: pseudonyms, left out, or as recorded. Text and files are separate switches; phones and emails can be masked.</li><li>Case Board: nothing, bookmarks and slices, or cards with comments. Team names can be swapped for aliases.</li><li><strong>Download handover extract</strong>, open it, verify it, look through it before sending.</li></ol>
 
 <section class="workflow-lab" data-workflow="handover" aria-labelledby="handover-example-title">
   <h3 id="handover-example-title">One original, a deliberate sharing copy</h3>
@@ -25,9 +25,9 @@
 </section>
 
 <h2 id="controls">Use the controls together</h2>
-<div class="table-wrap"><table><caption>Decisions that shape a handover</caption><thead><tr><th scope="col">Control</th><th scope="col">Effect on the copy</th></tr></thead><tbody><tr><th scope="row">People</th><td>Keep selected subjects identifiable; pseudonymize or omit other participants as chosen.</td></tr><tr><th scope="row">Text</th><td>Include all text, only the selected people's and observing account's text, or omit message text and its text-bearing detail fields.</td></tr><tr><th scope="row">Files</th><td>Choose files of the selected people and observing account, all shown messages' files, or no files.</td></tr><tr><th scope="row">Case Board</th><td>Choose no board material, bookmarks and slices, or cards with team discussion.</td></tr></tbody></table></div>
-<p>Review free-form text and file contents as well as identities: a pseudonym does not automatically remove every name written in a message or attachment. If a selected preserved file is unavailable, restore it or explicitly omit attachments before generating the extract.</p>
+<div class="table-wrap"><table><caption>Decisions that shape a handover</caption><thead><tr><th scope="col">Control</th><th scope="col">Effect on the copy</th></tr></thead><tbody><tr><th scope="row">People</th><td>Selected people stay named; others get pseudonyms or are left out.</td></tr><tr><th scope="row">Text</th><td>All text, only the selected people's and your account's, or none.</td></tr><tr><th scope="row">Files</th><td>Files of the selected people and your account, all shown files, or none.</td></tr><tr><th scope="row">Case Board</th><td>Nothing, bookmarks and slices, or cards with discussion.</td></tr></tbody></table></div>
+<p>Read the text and files too: a pseudonym doesn't remove names written inside a message or attachment. If a selected file is missing, restore it or leave attachments out.</p>
 
 <h2 id="verify">Keep the copy independently checkable</h2>
 <pre><code>python -m tgwitness.verify handover.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256</code></pre>
-<p>Retain the original signed evidence archive and checkpoints separately. The handover records its own projection, so a recipient can check the delivered copy without receiving the entire workspace. <a href="@@GUIDE_REPORTS@@">Report studio</a> supplies its reading design; <a href="@@GUIDE_EXPORTS@@">export verification</a> explains the trusted references.</p>
+<p>Keep the original archive and checkpoints yourself. The recipient can verify their copy without getting the whole workspace. Design: <a href="@@GUIDE_REPORTS@@">Report studio</a>. Trusted references: <a href="@@GUIDE_EXPORTS@@">export verification</a>.</p>

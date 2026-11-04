@@ -6,20 +6,18 @@
 
 ## Bring in the history
 
-In **Sources → Chats in scope**, review enabled chats, start observation and
-choose **Load full history**. Pause or resume as needed. After a restart, resume explicitly.
-Check each source and the attachment queue, then keep the signed progress report.
-[History guide](../HISTORY.md).
+**Sources → Chats in scope**: check the enabled chats, start observation, hit **Load full
+history**. Pause and resume whenever, after a restart resume by hand. Check sources and the
+download queue, keep the signed progress report. [History guide](../HISTORY.md).
 
 ## Search and review
 
-Open **Journal** to search saved records and filter by source, event type or
-period. Search is local. Open the records behind the results.
+**Journal** searches saved records locally, filter by source, event type or period. Open the
+records behind the hits.
 
-For optional AI analysis, enable and configure a provider in **Integrations**,
-then open **Ask the archive**. Choose chats and a period, review **Data sent to
-the model**, remove unwanted excerpts and approve the request. Check citations
-before saving a report. Your notes and revisions stay separate from captured events.
+For AI, set up a provider in **Integrations** and open **Ask the archive**. Pick chats and a
+period, look at **Data sent to the model**, drop what you don't want sent, approve. Check the
+citations before saving a report. Your notes never mix with captured events.
 [Analysis and reports](../ANALYSIS.md).
 
 ## Connect your tools
@@ -30,18 +28,15 @@ before saving a report. Your notes and revisions stay separate from captured eve
 | Recognize saved images or audio | **Recognize attachment** on a `media.saved` record | [Local OCR / transcription](../MEDIA-ANALYSIS.md) |
 | Send events to another service | **Integrations → Outgoing webhooks** | [HMAC, retries and n8n](../WEBHOOKS.md) |
 
-MCP is served at the panel's `/mcp` route. Choose a client, permitted tools,
-workspaces and expiry in Integrations; copy the shown-once token and config.
-**Check connection** reports the protocol and tools without reading messages.
-Setup drafts survive background refreshes. Use `TGWITNESS_MCP_TOKEN` for the
-`tgwitness.mcp_server` stdio bridge. The panel provides an exact install command
-if the optional SDK is missing. [Installation and client setup](../MCP.md).
+MCP lives at the panel's `/mcp`. In Integrations pick the client, tools, workspaces and
+expiry, copy the token and config (shown once). **Check connection** lists tools without
+reading messages. For the stdio bridge `tgwitness.mcp_server` use `TGWITNESS_MCP_TOKEN`; if
+the SDK is missing the panel shows the install command. [Client setup](../MCP.md).
 
-OCR/transcription needs the local Docker worker.
-Webhook receivers verify the signature and deduplicate `event_id` before acting.
+OCR/transcription needs the local Docker worker. Webhook receivers should check the
+signature and dedupe on `event_id`.
 
 ## Hand over the case
 
-Save the analytical report beside the signed evidence ZIP. The report contains
-your conclusions and source references; the ZIP contains the record to verify.
-[Verification steps](Exports-and-Verification.md).
+Put the analysis report next to the signed ZIP. The report is your conclusions with
+references, the ZIP is what gets verified. [Verification steps](Exports-and-Verification.md).

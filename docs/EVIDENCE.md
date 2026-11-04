@@ -69,12 +69,6 @@ Successful verification establishes integrity relative to the trusted collector
 key and retained boundary. See [verification scope](#verification-scope) for the
 trust assumptions and [validation results](VERIFICATION.md) for the checks performed.
 
-Notifications sent through Apprise help operators follow workspace and chat activity.
-They contain names and counts; excerpts of deleted and edited messages are optional
-and off by default. Use the signed journal and exports for the retained record.
-With a workspace proxy, notifications use the same route; services that cannot use
-it, and MTProxy routes, are refused.
-
 ## Handover extract
 
 A signed ZIP carries the whole workspace journal. When a court, a lawyer or an abuse desk needs
@@ -163,13 +157,6 @@ filters, participants, indicators, record details and JSON/CSV selections withou
 The verifier checks the report ID, signing key, archive boundary and every selected item; edited,
 missing and duplicate items fail. Selection notes and creation time remain unsigned metadata.
 
-Current archive exports store viewer chunks in `viewer/*.html`. Each chunk is loaded in a sandboxed
-frame with scripts allowed but **without** same-origin access, and posts its JSON text to the report.
-The report checks the message source and its SHA-256 against the signed descriptor before display.
-The report's own CSP permits only its hashed application script. Missing data can be recovered by
-choosing the matching ZIP in the Check tab; data read from the ZIP is parsed without execution.
-Earlier exported reports keep their own embedded viewer and remain verifiable.
-
 Message-number gaps are shown only for a complete, unfiltered ascending chat feed. Hiding a
 category or failing to load a data chunk must not turn an omitted row into evidence of a missing
 message. Search highlights operate on plain text before HTML escaping, preserving literal markup.
@@ -184,23 +171,6 @@ format notes in the report language, followed by a complete English guide. `SHA2
 files listed within it, excluding itself, `manifest.json` and `manifest.sig`; the signed manifest
 also covers `SHA256SUMS`. Keep the original ZIP unchanged and save working files outside the
 extracted folder. PDF reports include section bookmarks and case/report identification on later pages.
-
-Report settings are saved per workspace. The report language can follow the panel or be fixed;
-an explicit language on an export request overrides that choice for that export only. Every panel
-language is accepted, including the four right-to-left languages.
-
-The journal transcript switch controls its HTML viewer and PDF transcript. Full record JSON is
-an HTML detail option: when enabled, the viewer carries the exact exported record, including a
-minimised record in a handover. Disabling it does not alter the authoritative journal file. Photo
-previews apply to both chat and journal HTML. Consecutive heartbeat runs can be collapsed without
-removing records; expanding long runs loads their rows incrementally.
-
-`part_size` is the maximum item count per viewer data file (500–100000), and the maximum transcript
-size included in a PDF. Viewer chunks also split at a 16 MiB data budget. Longer PDF transcripts
-are omitted with an explicit pointer to the signed source files and HTML viewer. A standalone HTML
-report embeds at most 20000 items or 32 MiB of item data; once exceeded, it releases those items and
-directs the reader to the archive. These display limits never truncate the signed source files.
-The PDF font setup combines CJK fonts where needed: a Chinese font alone may lack Korean Hangul.
 
 ### The chat at export time
 
@@ -459,11 +429,6 @@ mode and date with the deadline sent at upload (one second of rounding tolerance
 invalid or shortened deadline does not count as verified. The status reports the sampled object
 whose retention was read back for that upload pass.
 
-Copy progress is scoped to the destination and encryption key. Changing the endpoint, bucket
-or prefix starts a complete copy of the locally retained journal, media and checkpoints to
-that destination. Old unscoped progress is preserved but replayed once after upgrade. Historical
-chat exports already removed from the local outbox remain at their previous destination.
-
 Missing or corrupt local media is reported as the pass's error and keeps the media cursor before
 it, so the file is tried again next pass; the files, checkpoints and exports after it are still
 copied. Restore checks
@@ -535,10 +500,6 @@ was recorded and each new and ended session. It reads the list only while observ
 What they do not show: drand proves no more than the order of records against public time,
 and the device list is Telegram's statement through the collector, signed by the collector
 like every other record.
-
-Tested on 1 November 2026: `tools/check_evidence_witnesses.py --live` wrote a real round from
-`drand.cloudflare.com`, exported the journal and confirmed the round with `drand.cloudflare.com`
-and `api.drand.sh`; the device list ran against simulated Telegram answers, not a real account.
 
 **Cloudflare Gateway log** (`cloudflare.gateway_dns`). For a server that resolves through
 Cloudflare Gateway ([Gateway DNS](HIGH-ASSURANCE.md#cloudflare-as-an-outside-witness)), each

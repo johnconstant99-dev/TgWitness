@@ -21,7 +21,7 @@
 
 
 
-Start with one workspace and persistent storage. The default panel binds to localhost; remote access needs HTTPS or an SSH tunnel.
+Start with one workspace and persistent storage. The panel only listens on localhost, for remote access use HTTPS or an SSH tunnel.
 
 ## Run with Docker Compose
 
@@ -32,7 +32,7 @@ docker compose up -d --build --wait
 docker compose exec tgwitness cat /data/panel-token.txt
 ~~~
 
-Open **http://127.0.0.1:8787** and enter the token. The named volume contains the application's data at `/data`. A native installation's `data/live` directory is not automatically imported into that volume.
+Open **http://127.0.0.1:8787** and paste the token. Data lives in the named volume at `/data`; a native `data/live` doesn't get imported automatically.
 
 Check the service:
 
@@ -41,7 +41,7 @@ docker compose ps
 docker compose logs --tail 100 tgwitness
 ~~~
 
-A healthy container confirms the panel responds. Confirm Telegram authorization, source selection and a newly captured message separately.
+"Healthy" just means the panel answers. Login, sources and an actual captured message are separate checks.
 
 ## Access through an SSH tunnel
 
@@ -51,14 +51,14 @@ Keep the collector bound to localhost. From your own computer:
 ssh -L 8787:127.0.0.1:8787 user@your-server
 ~~~
 
-Open the local panel address while the tunnel is connected. Substitute your SSH user and server. Use another local port if 8787 is already occupied.
+Then open the local address while the tunnel is up. Another local port if 8787 is taken.
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Add HTTPS
 
-Use a domain you control, DNS pointing to the server, and available inbound ports 80 and 443. Copy `deploy/env.example` to `.env` and set:
+You need a domain pointing at the server and ports 80/443 open. Copy `deploy/env.example` to `.env` and set:
 
 ~~~dotenv
 TGWITNESS_DOMAIN=watch.your-domain.org
@@ -71,12 +71,15 @@ docker compose -f compose.yaml -f deploy/compose/compose.https.yaml up -d --buil
 docker compose -f compose.yaml -f deploy/compose/compose.https.yaml exec tgwitness cat /data/panel-token.txt
 ~~~
 
-Open `https://watch.your-domain.org`. Keep both Compose file arguments for later status, logs, stop and update commands. Caddy obtains and renews the certificate; its state has a separate persistent volume.
+Open `https://watch.your-domain.org`. Keep passing both `-f` files for status, logs, stop and
+updates. Caddy gets and renews the certificate on its own volume.
 
 ## Updates and alternatives
 
-Make a complete stopped backup before updating. Preserve the project name, data volume, configuration and external master key if used. **Do not use `docker compose down -v` to update: it removes named volumes.**
+Full backup with everything stopped before updating. Keep the project name, volume, config
+and external vault key. **Never update with `docker compose down -v`, it deletes the volumes.**
 
-Published images can use `deploy/compose/compose.image.yaml` once the corresponding release image exists. Native service templates are available for Linux, macOS and Windows in the [deployment templates](../../deploy/README.md).
+Published images: `deploy/compose/compose.image.yaml`. Native service templates for Linux,
+macOS and Windows are in [deploy/](../../deploy/README.md).
 
 **Next:** [Backup and recovery](Backup-and-Recovery.md) · [Deployment reference](../DEPLOYMENT.md) · [Troubleshooting](Troubleshooting.md)

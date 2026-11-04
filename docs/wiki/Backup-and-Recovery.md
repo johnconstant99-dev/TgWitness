@@ -22,69 +22,75 @@
 
 
 
-A signed evidence export is a handoff artifact. A restorable service backup must also retain authorizations, private keys and configuration.
+An evidence export is for handing over. A backup you can restore from also needs the logins, keys and config.
 
 ## What to preserve
 
 | Installation | Data to preserve |
 | --- | --- |
-| Source / portable, default live mode | The complete `data/live` directory |
-| Custom data directory | The entire configured directory |
-| Docker | The entire `/data` volume, using the same Compose project |
-| External vault key | The original master-key file, separately protected |
-| Witness | Their separate data directories, keys, configuration and required secret files |
+| Source / portable | The whole `data/live` directory |
+| Custom data directory | That whole directory |
+| Docker | The whole `/data` volume, same Compose project |
+| External vault key | The original key file, kept separately |
+| Witness | Its own data directory, keys, config and secret files |
 
-Include every workspace under `profiles/`, media, databases, checkpoints, hidden files, vault keys and vault metadata. Preserve `.env`, custom configuration and HTTPS certificate volumes as appropriate. Protect the backup as account-access material.
+That means everything: all `profiles/`, media, databases, checkpoints, hidden files, vault
+key and metadata, plus `.env`, custom config and certificate volumes. Treat the backup like
+the account password, because it is one.
 
 ## Make a consistent backup
 
-1. Pause observation and stop the process cleanly.
-2. Copy the full data directory to a new, private destination outside the repository.
-3. Preserve the external master key separately if configured.
-4. Record the version and backup time.
-5. Start the original collector again and check observation and coverage.
+1. Pause observation and stop the process properly.
+2. Copy the whole data directory somewhere private, outside the repo.
+3. Copy the external vault key separately if you use one.
+4. Note the version and time.
+5. Start it again and check observation and coverage.
 
-For the default source-based Docker deployment:
+Default Docker setup:
 
 ~~~sh
 docker compose stop
 docker compose cp tgwitness:/data ../tgwitness-backup-before-update
 ~~~
 
-Choose a new backup destination each time. If your deployment uses overlays or `deploy/compose/compose.image.yaml`, use those same files for the backup commands.
+Use a fresh destination every time. With overlays or `deploy/compose/compose.image.yaml`, pass the same files.
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Restore deliberately
 
-1. Keep the original backup unchanged.
-2. Restore to a separate directory while the destination application is stopped.
-3. Supply the original external key if used. A newly generated key cannot unlock old secrets.
-4. Start a single instance against the restored directory.
-5. Check workspace and account identity, verify the journal, inspect media and review gaps before resuming observation.
+1. Leave the original backup alone.
+2. Restore into a separate directory with the app stopped.
+3. Bring the original external key if you had one, a new key won't open old secrets.
+4. Start one instance on the restored directory.
+5. Check workspace and account, verify the journal, look at media and gaps, then resume.
 
-Avoid running the original and restored collectors concurrently with copies of the same Telegram authorization.
+Never run the original and the restored copy at the same time with the same Telegram session.
 
 ## Update the application
 
-For a native source installation, stop the application, back up its data, replace the source files, then run `python start.py --setup-only` before launching. Do not move a virtual environment between operating systems or Python versions.
+Native install: stop, back up, replace the source, run `python start.py --setup-only`, start.
+Don't carry a venv across OSes or Python versions.
 
-For a Docker source build, after backing up and obtaining the new source:
+Docker from source, after backing up and pulling the new code:
 
 ~~~sh
 docker compose up -d --build --wait
 ~~~
 
-Keep the same project name and volume. Check panel access, account identity and new events after the update. A restart does not reconstruct every event during downtime.
+Same project name and volume. Afterwards check the panel, the account and that new events
+come in. Whatever happened during downtime isn't fully recoverable.
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Retention and deletion
 
-There is no automatic retention deletion. Editing individual signed records breaks verification. Removing a workspace does not remove separately retained exports, off-site copies or witness records.
+Nothing gets deleted automatically. Editing signed records breaks verification. Removing a
+workspace doesn't remove exports, off-site copies or witness records you keep elsewhere.
 
-If an account deletion reports **Deletion incomplete**, close programs holding its files and retry from **Accounts**. The pending workspace remains stopped across restarts.
+**Deletion incomplete**? Close whatever holds the files and retry from **Accounts**. The
+workspace stays stopped until then.
 
 **Next:** [Operations reference](../OPERATIONS.md) · [Deployment and updates](../DEPLOYMENT.md) · [Troubleshooting](Troubleshooting.md)

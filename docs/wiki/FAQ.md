@@ -29,78 +29,85 @@
 
 </details>
 
-
-
 ## Does TgWitness recover messages deleted before it started?
 
-No. A deletion notice may be recorded without prior content. History acquisition returns what is currently visible to the account, not a reconstruction of all earlier versions.
+No. You might see a deletion with no content behind it. Loading history only gets what
+the account can see right now, not old versions.
 
 ## Does a valid signature prove Telegram sent the message?
 
-No. It verifies integrity relative to a signing key. An operator controlling the collector and key can fabricate a journal. Separately retained checkpoints and independent witnesses constrain later rewriting, but do not establish Telegram origin by themselves.
-
+No. It only shows the record matches the signing key. Whoever controls the collector and
+its key could fake a journal. Checkpoints kept elsewhere and independent witnesses make
+later rewriting visible, but they still don't prove Telegram sent anything.
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Is every Telegram event guaranteed to arrive?
 
-No. Account permissions, connection failures, service behavior and process interruptions affect visibility. Rechecks and saved update state help recovery, but coverage reports and controlled delivery tests still matter.
+No. Permissions, network drops, Telegram itself and restarts all get in the way. Rechecks
+help, but look at the coverage report.
 
 ## Can I use a bot token instead of a user account?
 
-The collector uses a Telegram user authorization through MTProto. A bot token is used separately by the optional witness.
-
+No, the collector needs a user account. Bot tokens are only for the optional witness.
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Do I need my own API ID and API hash?
 
-They are optional in the normal sign-in flow. The workspace can reuse saved/imported credentials or use the built-in pool. They identify an application; they do not provide account access without authorization.
+No. The built-in pool works fine, saved or imported credentials are reused. An API pair
+only identifies the app, it gives no access to anyone's account.
 
 ## Can several people have separate access permissions?
 
-Yes. Issue a token under **Access**, choose its workspaces/chats and permissions, then set limits if needed. The main panel token remains unrestricted; a witness token is separate. See [access and permissions](Access.md).
-
+Yes. Create a token under **Access**, pick workspaces, chats and permissions, add limits
+if you want. The main panel token stays unrestricted. See [access and permissions](Access.md).
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Are messages and attachments encrypted on disk?
 
-The vault encrypts sessions, credentials and signing secrets. The local journal and attachments are not encrypted by TgWitness. Use disk encryption and restrictive permissions. Exports can optionally be wrapped in a password-protected ZIP.
+Sessions, credentials and keys are, in the vault. The journal and files aren't, so use
+disk encryption. Exports can get a password.
 
 ## Does Lock stop collection?
 
-No. Lock clears browser access; the running collector continues. Pause observation stops collection. Closing the tab also leaves the process running.
-
+No, it only closes the browser panel. **Pause observation** stops collecting. Closing the
+tab doesn't stop anything either.
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Why can two accounts show different histories?
 
-They may have different access, membership dates and visibility. Each workspace preserves its own observations and signing identity. Compare records with their original workspace attached.
+Different access, join dates, visibility. Each workspace keeps its own observations and
+key, so always say which workspace a record came from.
 
 ## Does a public proxy failure switch me to a direct connection?
 
-**Hide the address** does not fall back to Direct. **Direct as a last resort** connects directly after its configured delay; **Server behind a tunnel or VPN** permits direct routes. External HTTP requests and the independent witness have their own routing rules. See [connection routes](Proxies.md).
-
+Not with **Hide the address**. **Direct as a last resort** goes direct after a delay,
+**Server behind a tunnel or VPN** allows direct. Outside requests and the witness have
+their own rules. See [connection routes](Proxies.md).
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Are an evidence export and a backup interchangeable?
 
-No. An evidence export deliberately excludes login and signing secrets. A service backup must preserve the entire stopped data directory and any external master key.
+No. An export leaves out login and signing secrets on purpose. A backup is the whole
+stopped data directory plus any external vault key.
 
 ## Is a witness on my server independent?
 
-It has a separate process and key, but the same operator still controls that server. Independent custody requires a separate operator or system outside that control.
-
+Not really. It has its own process and key, but you still control the server. Real
+independence means someone else runs it.
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Is Linux, macOS or Docker support already fully qualified?
 
-Consult the current [verification record](../VERIFICATION.md). Implemented launchers and CI definitions are not evidence that every platform and live-service scenario has been executed.
+Check the [verification record](../VERIFICATION.md). Having a launcher or a CI job isn't
+the same as having tested every platform live.
 
 ## How do I report a problem or contribute?
 
-Use [Support](../../.github/SUPPORT.md) for help and bug reports, [Contributing](../../.github/CONTRIBUTING.md) for development, and [Security](../../.github/SECURITY.md) for vulnerabilities.
+[Support](../../.github/SUPPORT.md) for help and bugs, [Contributing](../../.github/CONTRIBUTING.md)
+for code, [Security](../../.github/SECURITY.md) for vulnerabilities.

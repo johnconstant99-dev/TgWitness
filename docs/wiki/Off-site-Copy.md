@@ -18,55 +18,52 @@
 
 </details>
 
-Keep journal segments, preserved files, checkpoints and finished chat exports in
-S3-compatible storage. Each object is encrypted with AES-256-GCM before upload.
+Copies journal segments, saved files, checkpoints and chat exports to any S3-compatible
+storage. Everything is encrypted with AES-256-GCM before it leaves your machine.
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-card-s3-static.svg"><img src="../assets/presentation/readme-card-s3.svg" width="720" alt="Files are encrypted locally before upload to S3-compatible storage."></picture>
 
 ## Configure the destination
 
-Open **Exports → Off-site copy** in the intended workspace. Prepare an existing
-bucket and storage credentials; TgWitness does not create the bucket.
+**Exports → Off-site copy** in the workspace you want. Bring your own bucket and keys,
+TgWitness doesn't create buckets.
 
 | Field | Enter |
 | --- | --- |
-| Endpoint | Your storage service URL, without a bucket path or credentials |
-| Region | The region required by that service |
-| Bucket | An existing bucket you can access |
-| Folder | The object prefix; TgWitness adds a workspace-specific prefix |
-| Access keys | Both credentials together; leave both blank on later saves to retain them |
-| Address style | Path-style or virtual-hosted addressing as required by the provider |
-| Copy interval | The schedule while the application is running |
+| Endpoint | Storage URL, no bucket path or credentials |
+| Region | Whatever the provider wants |
+| Bucket | An existing bucket you can write to |
+| Folder | Prefix, a per-workspace prefix gets added |
+| Access keys | Both together. Leave blank later to keep them |
+| Address style | Path-style or virtual-hosted, per provider |
+| Copy interval | How often while the app runs |
 
-1. Enter settings with **Keep an off-site copy** unchecked; select **Save off-site copy**.
-2. Select **Test connection**. This uploads an encrypted test object.
-3. Select **Download encryption key** and retain that file separately.
-4. Enable **Keep an off-site copy**, save again, and select **Copy now** for a first pass.
-5. Check the copied boundary, object count and any reported error.
+1. Fill it in with **Keep an off-site copy** unticked, **Save off-site copy**.
+2. **Test connection** (uploads an encrypted test object).
+3. **Download encryption key** and keep that file somewhere safe.
+4. Tick **Keep an off-site copy**, save, **Copy now**.
+5. Check the copied boundary, object count and errors.
 
 ## Keep the recovery key
 
-The downloaded JSON contains the decryption key, destination settings, workspace
-prefix and signing-key fingerprint. Storage credentials are separate. Both the
-key file and credentials with read access are needed for recovery.
+The key JSON has the decryption key, destination, prefix and key fingerprint. Storage
+credentials are separate. You need both to recover.
 
-Download a fresh key file after changing the endpoint, bucket or prefix. Finished
-chat exports already removed from the local queue remain at their old destination.
+Changed endpoint, bucket or prefix? Download a new key file. Exports that already left the
+local queue stay at the old destination.
 
 ## Retention and recovery
 
-Object Lock requires support and configuration in the bucket. Check the reported
-retention result; an accepted upload alone does not confirm retention.
+Object Lock has to be supported and set up on the bucket. Check the reported retention, an
+accepted upload doesn't prove it.
 
-Use a trusted TgWitness installation and an empty output directory for recovery.
-The [complete S3 guide](https://phishdestroy.github.io/TgWitness/docs/exports/#s3-restore)
-contains the commands and credential setup. Recovery checks journal consistency,
-checkpoints and preserved-media hashes before publishing restored material.
+Recover into an empty directory with a TgWitness install you trust. Commands are in the
+[S3 guide](https://phishdestroy.github.io/TgWitness/docs/exports/#s3-restore). Recovery
+checks the journal, checkpoints and file hashes before writing anything out.
 
-Uploads use Direct, SOCKS5 or HTTP. They are unavailable over MTProxy, and scheduled
-copies stop when the application stops. The demo displays the controls with uploads disabled.
+Uploads go Direct, SOCKS5 or HTTP, not over MTProxy, and stop when the app stops. The demo
+shows the controls with uploads off.
 
-An off-site evidence copy does not replace a [complete service backup](Backup-and-Recovery.md)
-of account authorizations, private keys and configuration.
+This is not a [full backup](Backup-and-Recovery.md): no logins, keys or config.
 
 **Continue:** [Service backup and recovery](Backup-and-Recovery.md) · [Evidence reference](../EVIDENCE.md#off-site-copy-and-restore-s3)

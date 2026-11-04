@@ -20,8 +20,6 @@
 
 </details>
 
-
-
 ## See why the checks fit together
 
 <picture>
@@ -31,90 +29,89 @@
   <img src="../assets/presentation/casework-chain.svg" width="1200" alt="Three observations become linked, individually signed records.">
 </picture>
 
-1. **Encode the event.** Nine fields, including the previous hash, become one canonical UTF-8 JSON value.
-2. **Hash and sign.** SHA-256 describes those bytes; Ed25519 signs the 32 raw digest bytes.
-3. **Verify the handoff.** Recompute every hash, check every signature and compare the key fingerprint and retained checkpoint.
+1. **Encode.** Nine fields including the previous hash become one canonical JSON value.
+2. **Hash and sign.** SHA-256 over those bytes, Ed25519 over the digest.
+3. **Verify.** Recompute hashes, check signatures, compare the fingerprint and checkpoint.
 
-[Open the full-size animation](../assets/presentation/casework-chain.svg) · [Static diagram](../assets/presentation/casework-chain-static.svg) · [Formulas and change scenarios](../HOW-IT-WORKS.md)
+[Full-size animation](../assets/presentation/casework-chain.svg) · [Static diagram](../assets/presentation/casework-chain-static.svg) · [Formulas](../HOW-IT-WORKS.md)
 
 ## Choose the right output
 
 | Output | Use |
 | --- | --- |
-| Signed evidence ZIP | Captured journal, signatures, manifest, retained media and an offline report |
-| JSONL / CSV / HTML | Analysis or reading; retain the signed ZIP for verification |
-| Full chat export | The chat history visible at acquisition time |
-| [Account export](../ACCOUNT-EXPORT.md) | Resumable account acquisition with chat, sender, date, text and file controls; signed coverage records |
-| [Minimized disclosure](../ACCOUNT-EXPORT.md#prepare-a-disclosure-for-a-lawyer-or-another-recipient) | A separate signed copy for a defined recipient, with optional pseudonyms and text/file exclusions |
-| People profile export | Derived observations with record references |
-| Checkpoint | A signed journal boundary to retain separately |
-| Run receipt | The collector's program/version information for that run |
+| Signed evidence ZIP | Journal, signatures, manifest, media, offline report. The one to hand over |
+| JSONL / CSV / HTML | For reading and analysis, keep the ZIP for verification |
+| Full chat export | Chat history as visible right now |
+| [Account export](../ACCOUNT-EXPORT.md) | Resumable account export with filters and signed coverage |
+| [Minimized disclosure](../ACCOUNT-EXPORT.md#prepare-a-disclosure-for-a-lawyer-or-another-recipient) | Separate signed copy for one recipient, pseudonyms, text/files optional |
+| People profile export | Derived facts with record references |
+| Checkpoint | Signed journal boundary, keep it elsewhere |
+| Run receipt | Program and version info for that run |
 
-A full chat export is a snapshot of current visible history. It cannot recreate every earlier edit or deletion. An evidence ZIP excludes login secrets and is not a full application backup.
+A chat export is a snapshot, it can't bring back old edits or deletions. An evidence ZIP
+has no login secrets and isn't a backup.
 
 ### What a signed archive carries
 
 | File | Purpose |
 | --- | --- |
-| `events.jsonl` / `chat.json` | Authoritative records |
-| `report.html` / `chat.html` | Readable report in the chosen language, sealed |
-| `custody.json` | Acquisition, export, case details and the standards followed |
-| `SHA256SUMS` | Every file's SHA-256 for `sha256sum -c`, without Python |
-| `manifest.json` + `manifest.sig` | Signed list of every file and its SHA-256 |
-| `README.txt` | Verification steps in the report language and in English |
+| `events.jsonl` / `chat.json` | The actual records |
+| `report.html` / `chat.html` | Readable sealed report in your language |
+| `custody.json` | Acquisition, export, case details, standards |
+| `SHA256SUMS` | Hashes for `sha256sum -c`, no Python needed |
+| `manifest.json` + `manifest.sig` | Signed list of every file |
+| `README.txt` | How to verify, in the report language and English |
 
-Set the report language, case title and ID, examiner, organization and notes under
-**Exports → Report settings**. They are signed into the manifest and the report seal.
-Every report ends with a seal: an Ed25519 signature over the SHA-256 of each byte before
-it. A recipient checks it in the browser by dropping the file onto the report, or with
+Report language, case title/ID, examiner and notes go under **Exports → Report settings**
+and get signed in. Every report ends with an Ed25519 seal. Check it by dropping the file
+onto the report in a browser, or with
 `python -m tgwitness.verify report.html --fingerprint TRUSTED_SHA256 --evidence evidence.zip`.
-The report also prints well to PDF, with a blank custody-transfer table.
-
+It prints nicely to PDF, with a blank custody table.
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Make a handoff
 
-1. Select the intended workspace and note its public-key fingerprint.
-2. Open **Exports** and verify the journal.
-3. Save the signed ZIP, a checkpoint and any relevant history/profile exports.
-4. If you need password protection, choose the encrypted export option and transfer the password separately.
-5. Give the recipient the expected fingerprint through a trusted channel separate from the archive.
+1. Pick the workspace and note its key fingerprint.
+2. In **Exports**, verify the journal.
+3. Save the signed ZIP, a checkpoint and any history/profile exports.
+4. Need a password? Use the encrypted option and send the password separately.
+5. Send the fingerprint through a different channel than the archive.
 
-For a password-protected wrapper, decrypt it first to obtain the inner signed archive. Encryption protects access to the file; signatures verify its signed content.
+A password-protected wrapper has to be unpacked first. The password protects access,
+the signatures protect the content.
 
 ## Verify independently
 
-Use a trusted copy of the project and its installed Python environment:
+From a trusted copy of the project:
 
 ~~~sh
 python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256
 ~~~
 
-With a previously retained checkpoint:
+With a checkpoint you kept:
 
 ~~~sh
 python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --checkpoint checkpoint.json
 ~~~
 
-Replace the placeholders with the actual files and trusted fingerprint. A successful check detects changes covered by the signatures, hash chain and manifest. Read the reported coverage and gaps too.
-
-At a terminal the verifier answers with a coloured summary (`--lang en|ru|uk`); piped output
-stays plain text. `--json` prints only a JSON answer for scripts.
-
+A pass means nothing covered by signatures, chain and manifest changed. Read the coverage
+and gaps too. In a terminal you get a coloured summary (`--lang en|ru|uk`), `--json` for scripts.
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Download a large export
 
-Activate the project environment and use a new output filename:
+In the project environment, with a new filename:
 
 ~~~sh
 python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip
 ~~~
 
-For another workspace add `--profile ID`; obtain its ID from **Exports**. For a remote installation add `--url https://your-server`. The transfer checksum does not replace signature verification.
+Other workspace: `--profile ID` (ID is in **Exports**). Remote install: `--url https://your-server`.
+The transfer checksum doesn't replace signature verification.
 
-The browser fallback is limited to 128 MiB; supported browsers can stream to a chosen file. The download CLI defaults to a 5 GiB transfer limit. Larger verification limits and per-workspace settings are described in the [quick start](../QUICKSTART.md).
+Browser fallback is capped at 128 MiB, the CLI at 5 GiB by default. Bigger limits:
+[quick start](../QUICKSTART.md).
 
 **Next:** [Trust and limitations](FAQ.md) · [Evidence reference](../EVIDENCE.md) · [External timestamps](../TIMESTAMP.md)

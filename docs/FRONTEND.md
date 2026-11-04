@@ -1,89 +1,68 @@
 # Panel development
 
-The panel uses native ES modules and plain DOM controls. There is no frontend
-build step. Run `python start.py` for the local panel; browser checks create their
-own temporary workspaces and do not connect Telegram accounts.
+Native ES modules and plain DOM, no frontend build step. `python start.py` runs the panel
+locally; browser checks make their own temp workspaces and never touch Telegram.
 
-## Source language and localization
+## Language
 
-Write and review new interface text, guides and release notes in English before
-translating them. Use English strings as translation keys and as the fallback for
-missing translations. Keep the user's selected language across navigation and
-reloads; use browser preferences when they have not chosen one.
+Write new UI text, guides and release notes in English first. English strings are the
+translation keys and the fallback. Keep the user's chosen language across reloads, use the
+browser's preference until they pick one.
 
-## Modules and ownership
+## Modules
 
 | Location | Owns |
 | --- | --- |
-| `tgwitness/static/app.js` | Bootstrap, session boundary and adapters for existing controllers |
-| `static/router.js` | History paths, workspace query, journal filters, deep links and Back/Forward |
-| `static/core/view-host.js` | Active view, request cancellation and retained view roots |
-| `static/core/time.js` | UTC/local display and relative time |
-| `static/views/` | Sources, Parameters, Accounts, Access, System log, Exports and chat-list controls |
-| `static/components/` | Health, notices, journal controls, local form drafts and connection feedback |
+| `tgwitness/static/app.js` | Bootstrap, session boundary, adapters for old controllers |
+| `static/router.js` | Paths, workspace query, journal filters, deep links, Back/Forward |
+| `static/core/view-host.js` | Active view, request cancellation, retained roots |
+| `static/core/time.js` | UTC/local display, relative time |
+| `static/views/` | Sources, Parameters, Accounts, Access, System log, Exports, chat list |
+| `static/components/` | Health, notices, journal controls, drafts, connection feedback |
 
-Paths in this table after the first row are relative to `tgwitness/`.
-Controllers receive their API, translation and permission functions explicitly.
-They do not reach into another controller's form or assume that a classic-script
-binding is a property of `window`.
+Controllers get their API, translation and permission functions passed in. Don't reach into
+another controller's form and don't assume classic-script globals live on `window`.
 
-Only the active view root is attached to the document. Other roots are detached
-and retained in memory so that drafts, listeners and local controls survive a
-round trip. This is not full code splitting: `index.html` still supplies the
-initial view markup, and `app.js` still contains legacy controllers.
+Only the active view root is in the document, the rest stay in memory so drafts and
+listeners survive. Not real code splitting yet: `index.html` still has the initial markup
+and `app.js` still has old controllers.
 
 ## Navigation and requests
 
-- `/?ws=default` opens the saved/default view. Named routes include `/chats`,
-  `/chats/:chatId`, `/journal`, `/journal/event/:seq`, `/sources`, `/parameters`,
-  `/accounts`, `/access`, `/integrations`, `/exports` and `/extras/:card`.
-- Journal query parameters carry kind, source, search, dates and the system-event
-  switch. A route describes a view; it grants no access. The API checks permissions
-  and workspace/chat scope on every request.
-- Static demo links use a `route` query parameter because GitHub Pages cannot
-  serve arbitrary panel paths. The server enumerates document routes; missing API
-  and asset paths must not fall back to HTML.
-- A view's `enter(context)` receives an abort signal and a `current()` guard.
-  On leaving, stop its reads and subscriptions. Before applying a response, check
-  both the request and workspace generation. Export and collection jobs can
-  continue after their view closes; their display subscriptions cannot.
-- Hidden tabs suspend periodic UI reads. A connection retry repeats only a status
-  read, never a mutation. Do not retry a POST after an ambiguous network failure.
+- `/?ws=default` opens the default view. Routes: `/chats`, `/chats/:chatId`, `/journal`,
+  `/journal/event/:seq`, `/sources`, `/parameters`, `/accounts`, `/access`,
+  `/integrations`, `/exports`, `/extras/:card`.
+- A route is just a view, it grants nothing. The API checks permissions and scope every time.
+- The static demo uses a `route` query param because GitHub Pages can't serve panel paths.
+  Missing API and asset paths must never fall back to HTML.
+- `enter(context)` gets an abort signal and a `current()` guard. Stop reads on leave, and
+  check request and workspace generation before applying a response.
+- Hidden tabs pause periodic reads. Retries repeat status reads only, never a POST after an
+  unclear network error.
 
-## Forms and evidence
+## Forms
 
-Background updates patch keyed rows and status nodes. They must not recreate a
-form, replace a focused control or discard an unsaved value. For save responses,
-compare the submitted snapshot with the current draft: accept normalization when
-there is no newer edit; otherwise retain that edit. Clear write-only credentials
-from both the visible field and the saved Discard baseline. Keep newly issued
-access and MCP tokens, and form credentials, out of browser storage. The active
-panel sign-in token uses tab-scoped `sessionStorage` to survive reloads and is
-removed on lock; it must not become a persistent draft or a `localStorage` value.
+Background updates patch rows in place. Never rebuild a form, steal focus or drop an unsaved
+value. On save, compare the sent snapshot with the current draft and keep newer edits.
+Clear write-only credentials from the field and the Discard baseline. Tokens and credentials
+never go to browser storage, except the panel sign-in token in tab-scoped `sessionStorage`
+(cleared on lock).
 
-Use `tr()` for UI text, including labels supplied through controller callbacks.
-Keep `tools/i18n_keys.py` aware of dynamic label catalogs. New module files belong
-in the wheel and static-demo asset inventories as well as the source archive.
+Use `tr()` for UI text. Keep `tools/i18n_keys.py` aware of dynamic labels. New module files
+go into the wheel, demo asset list and source archive.
 
-The panel reads signed records. Display grouping, filters, export-download history
-and local drafts are not journal edits. Keep the original signed record available
-and verify archives independently with `python -m tgwitness.verify`.
+The panel only reads signed records. Grouping, filters, download history and drafts are not
+journal edits.
 
-## Remaining extraction
+## Still to extract
 
-1. Move the existing authenticated request helpers into `core/api.js`, preserving
-   their cancellation, timeout, workspace and error contracts. Start with one
-   controller and run its stale-response tests before moving other callers.
-2. Extract session/workspace state into `core/store.js` with narrow subscriptions.
-   Keep draft state inside its controller. Avoid a global render on every update.
-3. Move remaining chat, journal and integration controllers out of `app.js` behind
-   the same context adapters. Do not combine this with backend or evidence changes.
-4. Once no caller needs eager markup, load view templates on first use. Keep
-   translated content, demo packaging and direct-route loading covered by tests.
+1. Request helpers into `core/api.js`, keeping their cancellation, timeout and error behavior.
+   One controller at a time, run its stale-response tests.
+2. Session/workspace state into `core/store.js` with narrow subscriptions, no global re-render.
+3. Remaining chat, journal and integration controllers out of `app.js`. Not together with backend changes.
+4. Lazy-load view templates once nothing needs eager markup.
 
 ## Checks
-
-Run from the repository root in the project environment:
 
 ```sh
 python -m ruff check .
@@ -96,7 +75,4 @@ python tools/check_publication.py --git-index
 node tools/check_writeonly_drafts.mjs
 ```
 
-Browser scripts use synthetic data and check both the rendered panel and API
-boundaries. The CI browser jobs list the full acceptance set. Screenshots are
-review artifacts, not production assets; do not add generated journals, sessions
-or screenshots of real accounts to the repository.
+Synthetic data only. Don't commit generated journals, sessions or screenshots of real accounts.

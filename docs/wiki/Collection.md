@@ -21,7 +21,7 @@
 
 
 
-Observation records updates available to the connected account. TgWitness cannot read chats the account cannot access or reconstruct content that disappeared before it was observed.
+It records what the connected account gets. Chats the account can't open and stuff that vanished before it was seen are out of reach.
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-feature-history-static.svg"><img src="../assets/presentation/readme-feature-history.svg" width="420" alt="Illustrated workflow: captured versions remain in the journal."></picture></p>
 
@@ -29,24 +29,26 @@ Observation records updates available to the connected account. TgWitness cannot
 
 | Scope | Appropriate starting point |
 | --- | --- |
-| Chosen chats | A small, explicit source list |
-| Telegram folder | Follow the supported chat types in a selected folder |
-| Whole account | A dedicated investigation account, including new matching chats |
+| Chosen chats | A short, explicit list |
+| Telegram folder | Everything in one folder |
+| Whole account | A dedicated account, new chats included |
 
-Open **Sources** and choose the scope. Review chat types, exclusions and whether to collect the account's own outgoing messages. Broad scopes can include private conversations and bots; confirm that these belong to your intended collection.
+Pick the scope in **Sources**, then chat types, exclusions and whether to keep your own
+outgoing messages. Broad scopes pull in private chats and bots, make sure you want that.
 
-Select event categories separately: messages, edits, deletion notices, reactions and membership activity. Configure attachments by type and size. Press the relevant **Save** buttons, then **Start observation**.
+Event types are separate switches: messages, edits, deletions, reactions, joins/leaves.
+Attachments by type and size. Hit **Save**, then **Start observation**.
 
 ## Check capture with a controlled conversation
 
-1. From another account you control, send a distinct test message into a selected chat.
-2. Wait until it is visible in **Chats** and **Journal**.
-3. Edit it and confirm a separate captured version.
-4. Delete it and inspect the deletion notice and previously captured text.
-5. If testing attachments, wait for a completed media receipt; queued is not saved.
-6. [Export and verify](Exports-and-Verification.md) the result.
+1. From another account of yours, send a recognizable test message into a selected chat.
+2. Wait for it in **Chats** and **Journal**.
+3. Edit it, you should get a second version.
+4. Delete it, the old text should still be there next to the deletion.
+5. For attachments wait for the finished receipt, queued isn't saved.
+6. [Export and verify](Exports-and-Verification.md).
 
-Keep this controlled test separate from real case material.
+Keep test material away from real case stuff.
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
@@ -55,22 +57,24 @@ Keep this controlled test separate from real case material.
 
 | Record | Meaning |
 | --- | --- |
-| New message / edit | A version the account observed |
-| Deletion notice | Telegram delivered a deletion update; the earlier content may be unknown |
-| Missing at recheck | A later query did not return a message; this is not the same as a deletion notice |
-| History snapshot | The history currently visible to the account |
-| Coverage gap | A recorded interruption or uncertainty |
+| New message / edit | A version the account saw |
+| Deletion notice | Telegram said it was deleted, earlier content may be unknown |
+| Missing at recheck | A later query didn't return it. Not the same as a deletion |
+| History snapshot | What the account can see right now |
+| Coverage gap | A recorded break or uncertainty |
 
-Rechecks recover some missed current messages and changes. They cannot guarantee all intermediate edits or deletions. Priority and ordinary chats have different recheck schedules; see **Parameters** and the [collection reference](../COLLECTION.md).
+Rechecks catch some of what was missed, never all in-between edits or deletions. Priority
+chats get rechecked more often, see **Parameters** and the [collection reference](../COLLECTION.md).
 
 ## Pause, lock and restart
 
-**Pause observation** stops collection. **Lock** and closing the browser leave the collector running. Stopping the application creates an interval without collection. After restarting, check account identity, observation state, gaps and attachment queues.
-
-**Next:** [Investigations](Investigations.md) · [Exports](Exports-and-Verification.md) · [Collection reference](../COLLECTION.md)
+**Pause observation** stops collecting. **Lock** and closing the browser don't. While the app
+is stopped nothing is collected. After a restart check the account, observation state, gaps
+and download queues.
 
 ## Load older messages
 
-On current `main`, **Sources → Load full history** reads enabled sources into
-the workspace. It supports pause/resume and a signed progress report. Attachments
-finish separately. See [history acquisition](../HISTORY.md).
+**Sources → Load full history** pulls the history of enabled sources, with pause/resume and
+a signed progress report. Attachments finish separately. See [history acquisition](../HISTORY.md).
+
+**Next:** [Investigations](Investigations.md) · [Exports](Exports-and-Verification.md) · [Collection reference](../COLLECTION.md)

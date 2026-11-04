@@ -1,15 +1,15 @@
-<p class="guide-outcome">One workspace holds one account, its journal and its signing key.</p>
+<p class="guide-outcome">One workspace = one account, its journal and its key.</p>
 <h2 id="sign-in">Choose how to sign in</h2>
-<p>Open <strong>Accounts</strong>, add a workspace and open its connection settings. Use a dedicated account for observation.</p>
-<ul><li><strong>QR code:</strong> scan it from Telegram’s device settings and confirm the new login.</li><li><strong>Phone number:</strong> enter the number, the code Telegram sends and your two-step verification password if enabled.</li><li><strong>Session import:</strong> import a supported session or Telegram Desktop data belonging to you.</li></ul>
-<p>Choose a built-in API profile or enter your own API ID and hash. An API profile identifies the client; it does not sign in to an account or make the connection anonymous.</p>
+<p><strong>Accounts</strong> → add a workspace → connection settings. Use a separate account for this.</p>
+<ul><li><strong>QR code:</strong> scan it from Telegram's Devices screen and confirm.</li><li><strong>Phone number:</strong> number, code, then 2FA password if you have one.</li><li><strong>Session import:</strong> your own session file or Telegram Desktop data.</li></ul>
+<p>Use a built-in API profile or your own API ID and hash. It only identifies the app, it doesn't log you in or hide anything.</p>
 <details><summary>Need a proxy first?</summary><p>You can <a href="@@GUIDE_PROXIES@@">choose and test the connection route</a> before signing in. Each account has its own route.</p></details>
 <h2 id="sources">Choose what to observe</h2>
-<ol><li>Open the source list and select the chats, groups or channels you need.</li><li>Review collection settings, including media, before starting observation.</li><li>Start the collector and check its connection and recent activity.</li></ol>
-<p>The account must be able to access the source. Different roles can see different events; the journal reflects what that account received.</p>
-<p>For a case spanning the entire account, use <strong>Sources → Observation scope → Investigation mode</strong>, review the settings and press <strong>Save scope</strong>. The <a href="@@GUIDE_CASES@@">complete investigation walkthrough</a> covers all visible chat types, old history, people profiles, cross-chat references and evidence handoff.</p>
+<ol><li>Pick the chats, groups or channels you need.</li><li>Check collection settings, media included.</li><li>Start it and check the connection and recent activity.</li></ol>
+<p>The account has to have access. Admins and members see different things, the journal shows what this account got.</p>
+<p>Whole account? <strong>Sources → Observation scope → Investigation mode</strong>, check it, <strong>Save scope</strong>. Full walkthrough: <a href="@@GUIDE_CASES@@">investigating a whole account</a>.</p>
 <h2 id="check">Check the whole path</h2>
-<p>In a test group you control, send a unique message from another account, edit it and delete it. Confirm all three events in the journal, then <a href="@@GUIDE_EXPORTS@@">export and verify</a> the record.</p>
-<p class="callout">A connected status confirms the connection. A captured test message confirms that a particular event reached this workspace.</p>
+<p>In your test group, send a message from another account, edit it, delete it. All three should show up in the journal. Then <a href="@@GUIDE_EXPORTS@@">export and verify</a>.</p>
+<p class="callout">"Connected" means the connection works. A captured test message means events actually arrive.</p>
 <h2 id="more">Add another account</h2>
-<p>Create another workspace in <strong>Accounts</strong> and repeat the setup. Keep each account’s signing-key fingerprint so you can identify its exports later.</p>
+<p>New workspace in <strong>Accounts</strong>, same steps. Note each account's key fingerprint so you can tell exports apart later.</p>

@@ -23,16 +23,16 @@
 
 ## 1. Choose an installation
 
-Download and extract the source archive or clone the project. Portable packages become available after a release has been published.
+Easiest is the [one-line installer](../INSTALLATION.md). Otherwise grab a release ZIP or clone the repo.
 
 | Method | Start | Requirements |
 | --- | --- | --- |
-| Windows source | Double-click `Start.cmd` | Python 3.11+; the launcher offers installation if missing |
+| Windows source | Double-click `Start.cmd` | Python 3.11+, the launcher offers to install it |
 | Linux / macOS source | `sh start.sh` | Python 3.11+ with `venv` |
-| Windows portable | Extract the entire ZIP; open `TgWitness.cmd` | Embedded Python is included |
-| Docker | `scripts\Docker.cmd` on Windows; `sh scripts/docker-start.sh` elsewhere | Docker with Compose 2.20+ |
+| Windows portable | Unpack the whole ZIP, open `TgWitness.cmd` | Python is inside |
+| Docker | `scripts\Docker.cmd` or `sh scripts/docker-start.sh` | Docker with Compose 2.20+ |
 
-The source launcher creates a private `.venv` and installs dependencies. Keep the native application's console open while collecting. Docker runs in the background.
+The launcher makes its own `.venv`. Leave the console window open while it collects. Docker runs in the background.
 
 ## 2. Explore without an account
 
@@ -42,16 +42,16 @@ For source installations, run `scripts\Demo.cmd` on Windows or:
 sh start.sh --demo
 ~~~
 
-The portable equivalent is `TgWitness-Demo.cmd`. Open **http://127.0.0.1:8787**. Direct local access to this isolated demo opens automatically with fictional conversations.
+Portable: `TgWitness-Demo.cmd`. Open **http://127.0.0.1:8787**, the demo opens straight away with made-up chats.
 
-Look at **Chats**, **Journal** and **Exports**. Try the language and theme controls. Press **Ctrl+K** or **⌘K** to find a section.
+Poke around **Chats**, **Journal** and **Exports**, switch language and theme, try **Ctrl+K** / **⌘K**.
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## 3. Start your real workspace
 
-Stop the demo before starting the live application on the same port. Run `Start.cmd`, `sh start.sh` or `TgWitness.cmd`.
+Stop the demo first (same port), then run `Start.cmd`, `sh start.sh` or `TgWitness.cmd`.
 
 | Installation | Panel token |
 | --- | --- |
@@ -59,7 +59,7 @@ Stop the demo before starting the live application on the same port. Run `Start.
 | Source or portable with a custom data directory | `panel-token.txt` inside that directory |
 | Docker | `docker compose exec tgwitness cat /data/panel-token.txt` |
 
-Open the panel and enter its token. Follow [Accounts](Accounts.md), then [Collection](Collection.md). Native and Docker installations use separate data stores.
+Open the panel, paste the token, then go to [Accounts](Accounts.md) and [Collection](Collection.md). Native and Docker installs don't share data.
 
 ## 4. Check your installation
 
@@ -69,8 +69,8 @@ From the source folder:
 python start.py --check --json
 ~~~
 
-This checks local prerequisites without connecting to Telegram. If the environment has not been created, run `python start.py --setup-only` first. To test another port, add `--port 8791`.
+Checks prerequisites without touching Telegram. No environment yet? `python start.py --setup-only` first. Other port: `--port 8791`.
 
-Commands elsewhere in this wiki that begin with `python -m tgwitness` require the installed project environment. Activate `.venv`, or use `.venv\Scripts\python.exe` on Windows / `.venv/bin/python` on Linux and macOS.
+`python -m tgwitness…` commands in this wiki need the project environment: activate `.venv` or call `.venv\Scripts\python.exe` / `.venv/bin/python`.
 
 **Next:** [Connect an account](Accounts.md) · [Troubleshooting](Troubleshooting.md) · [Complete quick start](../QUICKSTART.md)

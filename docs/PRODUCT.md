@@ -163,10 +163,6 @@ is changed per workspace under **Parameters**. Exports have no fixed event-count
 Browser fallback is bounded to 128 MiB by default; the streaming CLI has a configurable
 transfer limit, 5 GiB by default.
 
-`tools/check_capacity.py` measures local synthetic ingestion and export. Its results
-are not Telegram delivery measurements or a guaranteed real-chat count. See
-[VERIFICATION.md](VERIFICATION.md) for the measured version and workload.
-
 ## Reliability and recovery
 
 Implemented behavior includes SQLite WAL/synchronous transactions; atomic message

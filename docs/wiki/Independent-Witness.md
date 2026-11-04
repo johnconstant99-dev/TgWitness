@@ -22,11 +22,12 @@
 
 | Component | Purpose |
 | --- | --- |
-| Collector | Records what its Telegram account observes |
-| Witness | Fetches a signed journal boundary, signs its observation and can publish a channel post |
-| Controlled delivery test | Compares known send/edit/delete actions with captured evidence |
+| Collector | Records what its account sees |
+| Witness | Fetches the signed journal head, signs what it saw, can post it to a channel |
+| Controlled delivery test | Compares known sends/edits/deletes with what got captured |
 
-A witness has its own key and a read-only token. That token cannot read messages, control the collector or obtain its Telegram session.
+The witness has its own key and a read-only token. That token can't read messages, control
+the collector or get the Telegram session.
 
 ## Keep a boundary you can compare
 
@@ -37,40 +38,42 @@ A witness has its own key and a read-only token. That token cannot read messages
   <img src="../assets/presentation/casework-checkpoint.svg" width="1200" alt="A four-record export matches the independently retained boundary at record three.">
 </picture>
 
-An export may grow beyond a checkpoint. After verifying the checkpoint signature,
-compare the hash at its saved record count. A shorter export cannot satisfy a
-checkpoint beyond its end; matching the boundary does not replace checking every event.
+An export can be longer than a checkpoint. Check the checkpoint signature, then compare
+the hash at its record count. A shorter export can't match it, and a matching boundary
+doesn't replace checking every event.
 
 [Open the full-size animation](../assets/presentation/casework-checkpoint.svg) · [Static diagram](../assets/presentation/casework-checkpoint-static.svg) · [Exact checkpoint formula](../HOW-IT-WORKS.md#what-an-earlier-checkpoint-adds)
 
 ## Set up a witness
 
 1. Open **Extras → Independent witness → Configure**.
-2. Create a read-only token and save it as `witness-token.txt`.
-3. Choose a Telegram channel or a Discord webhook, the polling interval and the reachable collector address. Download `witness.json`; it pins the workspace's collector key.
-4. On the witness host, place the JSON and token together. For Telegram, save your bot token in `bot-token.txt` and let the bot post in your channel. For Discord, save the channel's webhook URL in `discord-webhook.txt`.
-5. In the installed project environment, check and launch:
+2. Create a read-only token, save it as `witness-token.txt`.
+3. Pick a Telegram channel or Discord webhook, the interval and the collector address. Download `witness.json` (it pins the collector key).
+4. Put the JSON and token together on the witness host. Telegram: bot token in `bot-token.txt`, bot allowed to post. Discord: webhook URL in `discord-webhook.txt`.
+5. Check and start:
 
 ~~~sh
 python -m tgwitness.witness run --config witness.json --check-config
 python -m tgwitness.witness run --config witness.json
 ~~~
 
-The configuration check makes no network requests. Starting the witness may publish messages according to your configuration; downloading the JSON alone does not start it.
+The check makes no network calls. Starting it will post according to your config.
 
-Retain its fingerprint separately:
+Keep its fingerprint somewhere else:
 
 ~~~sh
 python -m tgwitness.witness fingerprint --config witness.json
 ~~~
 
-Check the witness log and actual channel posts. A last-poll time in the collector only confirms a request.
+Look at the witness log and the channel itself. "Last poll" in the collector only means a request came in.
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Interpret the result
 
-A witness on the same server provides a separate process and key, but not independent operator custody. A growing counter does not prove every message was captured. Compare downloaded proof receipts with the matching signed evidence archive, and use a controlled delivery test for specific events.
+A witness on the same server is a separate process and key, but the same person still runs
+it. A growing counter doesn't mean nothing was missed. Compare proof receipts with the
+matching evidence archive, and use a controlled test for specific events.
 
 **Next:** [Witness reference](../WITNESS.md) · [Evidence limits](FAQ.md)

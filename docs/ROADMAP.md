@@ -1,127 +1,93 @@
 # TgWitness roadmap
 
-Status reviewed on 2 November 2026. This separates the current release from
-prototypes and proposed work. The [changelog](CHANGELOG.md) records shipped changes;
-[trust in the build](#proposed-trust-in-the-build-and-proof-delivery) summarizes the
-proposed verification model.
+Last looked at on 2 November 2026. What's shipped is in the [changelog](CHANGELOG.md),
+this page is about what's next.
 
-## 0.8.0 preview: a verifiable local journal
+## Now: 0.8 preview
 
-The current source includes account workspaces, observation of available Telegram
-events, interaction records, media capture, signed exports, scoped panel tokens,
-proxy policies, and a separate witness with freshness and journal-continuity checks.
-Coverage is limited to what the authorized account and collector actually receive.
+Account workspaces, observing what Telegram delivers, interaction records, media, signed
+exports, scoped panel tokens, proxy policies and a separate witness that checks freshness
+and continuity. It only covers what the account and collector actually receive.
 
-Release acceptance:
+Before each release we:
 
-- Run backend and browser checks against the release commit; record failures and
-  untested platforms explicitly.
-- Build source, wheel and Windows portable downloads from that same commit, inspect
-  their contents and publish their SHA-256 hashes before making the release public.
-- Include the public TSA test fixtures in the source archive; exclude local
-  sessions, credentials, journals, audit scratch files and generated test output.
-- Reject malformed OpenTimestamps trees. Report parsed Bitcoin attestations as
-  `bitcoin-unverified`: the standalone verifier checks structure, while `ots verify`
-  must authenticate the commitment against Bitcoin. RFC 3161 archive verification
-  still requires the recipient's explicit `--tsa-ca` trust root.
-- Keep English fallbacks explicit where translations of newer controls are pending.
+- run backend and browser checks on the release commit and write down what failed or wasn't tested;
+- build source, wheel and Windows portable from that same commit, look inside and publish SHA-256 first;
+- keep sessions, credentials, journals and test output out of the source archive;
+- reject broken OpenTimestamps trees and report Bitcoin attestations as `bitcoin-unverified`
+  (use `ots verify` for the real check); RFC 3161 still needs the recipient's `--tsa-ca`;
+- mark English fallbacks where translations are still missing.
 
-## Next: connect the external witness controller
+## Next: external witness controller
 
-Archive usability and feature coverage have a parallel delivery track. Each direction
-is accepted on its own test, and this roadmap does not claim overall superiority over
-other archivers:
+Other work runs alongside, each item judged on its own test:
 
-| Direction | Acceptance | Status |
+| What | Done when | Status |
 | --- | --- | --- |
-| Long history loading | A crash between a message and its position loses nothing and repeats nothing | [Shipped](HISTORY.md) |
-| Complete source list | Listed, skipped-by-limit and later-added chats are visible; only failed sources retry | Open |
-| Everyday reading | Search, date and context jumps, forum topics, gallery, forwards, reactions, versions | Open |
-| Importing existing archives | Telegram Desktop JSON/HTML with attachments, resumable, marked as a supplied file | Open |
-| Voice messages | Optional local transcription and search; recognized text never replaces the original | [Shipped](MEDIA-ANALYSIS.md) |
-| Accounts and access | Revoking access stops reading; nobody sees another person's chats, sessions or jobs | [Shipped](ACCESS.md) |
-| Offline handover | The recipient reads and verifies the package without the author's server | [Shipped](CASE_REPORTS.md) |
-| Operations and cost | Published CPU, memory, disk and recovery measurements | Open |
-| Independent verification | A rewritten chain, a cut tail, a key change or a missing witness is detected | [Shipped](WITNESS.md) |
+| Long history loading | A crash mid-way loses nothing and repeats nothing | [Shipped](HISTORY.md) |
+| Complete source list | Skipped and later-added chats are visible, only failed ones retry | Open |
+| Everyday reading | Search, jumps by date and context, topics, gallery, forwards, reactions, versions | Open |
+| Importing existing archives | Telegram Desktop JSON/HTML with attachments, resumable, marked as supplied | Open |
+| Voice messages | Local transcription and search, original stays | [Shipped](MEDIA-ANALYSIS.md) |
+| Accounts and access | Revoking access stops reading, nobody sees other people's chats | [Shipped](ACCESS.md) |
+| Offline handover | Recipient reads and verifies without our server | [Shipped](CASE_REPORTS.md) |
+| Operations and cost | Published CPU, memory, disk and recovery numbers | Open |
+| Independent verification | Rewritten chain, cut tail, key change or missing witness gets caught | [Shipped](WITNESS.md) |
 
-A controller with a real collector integration is the next delivery milestone.
+The controller with a real collector is the next milestone:
 
-- Bind every response to a fresh challenge, the registered collector key and a
-  previously witnessed journal head; verify continuation and the final export head.
-- Fix the required observer set at investigation registration. Missing observers,
-  timeouts and later recoveries remain visible in the exported history.
-- Persist outgoing receipts and publication jobs transactionally; recover after a
-  restart, retry with bounded backoff and expose delivery backlog and failures.
-- Export receipts for offline checking without access to the service. Send only
-  approved metadata, commitments and signatures to the witness.
-- Measure resource use, batch commitments and limit concurrent investigations before
-  offering a free hosted pilot. No unlimited-service claim until measured.
+- every response bound to a fresh challenge, the registered collector key and a previously witnessed head;
+- the observer set fixed when an investigation is registered, missing observers stay visible;
+- outgoing receipts and jobs saved transactionally, survive restarts, retry with backoff;
+- receipts exportable for offline checks, only metadata, commitments and signatures go to the witness;
+- no free hosted pilot until resource use is measured.
 
-Acceptance: restart the controller and collector, lose connectivity, repeat a
-response, change a key and submit an export with an unwitnessed tail. Each outcome
-must remain independently checkable from the saved receipt bundle.
+Done when restarts, lost connectivity, repeated responses, a key change and an export
+with an unwitnessed tail all stay checkable from the saved receipts.
 
 ## Next: independent observation and offline review
 
-- Add an opt-in browser observer for explicitly authorized investigation accounts:
-  separate login, signing key and journal; preserve visible states, actions and
-  downloaded media. Distinguish viewport changes from message deletion.
-- Replay already captured material offline in a browser, with timestamps and clear
-  indicators for missing media or incomplete observation.
-- Evaluate a desktop/TDLib observer on a separate host. Record the actual client,
-  version and license obligations; third-party client integration is not implemented.
-- Match message IDs and versions across independent observations and preserve
-  disagreements. A second process reading the first collector's database is not a
-  second observation of Telegram.
+- Opt-in browser observer for authorized investigation accounts, with its own login, key and
+  journal. Must tell a scrolled-away message from a deleted one.
+- Offline replay of captured material in a browser, with clear marks for missing media.
+- Look at a desktop/TDLib observer on a separate host (client, version, license).
+- Match message IDs and versions across observers and keep disagreements. Reading the first
+  collector's database is not a second observation.
 
-Acceptance: in a controlled test conversation, send, edit and delete text and media,
-change buttons, disconnect and restart each observer, then inspect the offline bundle.
+Done when a test chat with sends, edits, deletes, changed buttons and observer restarts
+looks right in the offline bundle.
 
-## Later: host audit and hosted investigations
+## Later
 
-- A bounded Go audit agent may record collector lifecycle, approved file hashes,
-  configuration changes and access metadata, with externally issued challenges.
-  Loss of the audit source must be reported separately from absence of events.
-- A hosted collection pilot needs isolated investigations, account lifecycle,
-  quotas, retention, access separation and administrative audit before accepting users.
-- Anchor witness history externally and qualify complete OTS verification; consider
-  hardware-backed signing and independently operated observers where justified.
-- Qualify longer live runs, recovery, Linux/macOS installation and container images
-  on their actual target platforms.
+- A small Go audit agent for collector lifecycle, file hashes, config changes and access
+  metadata. Losing the agent must look different from "nothing happened".
+- Hosted pilot only with isolated investigations, quotas, retention and admin audit.
+- External anchoring of witness history, full OTS verification, maybe hardware keys and
+  observers run by other people.
+- Longer live runs, recovery tests, Linux/macOS installs and containers on real targets.
 
-Signed receipts can expose changes to previously witnessed history. They do not
-prove that a compromised collector told the truth before signing. Multiple
-containers under the same host administrator do not remove that shared control.
+Signed receipts catch changes to history someone already witnessed. They can't prove a
+compromised collector was honest before signing, and several containers on one host
+are still one admin.
 
-## Proposed: trust in the build and proof delivery
+## Proposed: trust in the build
 
-A recipient should be able to tell which build collected the record, which journal it
-presented, which outside witnesses kept it and where the gaps are. A fork or a GitHub
-token gives none of that on its own. Today the run receipt measures the program files,
-the [code check](PANEL.md#code-check) compares them with a public commit, and the
-[witness](WITNESS.md) publishes signed checkpoints. Proposed next, in this order:
+A recipient should be able to see which build collected the record, which journal it
+showed, which witnesses kept it and where the gaps are. Today the run receipt measures
+program files, the [code check](PANEL.md#code-check) compares them with a public commit
+and the [witness](WITNESS.md) publishes checkpoints. Next, in order:
 
-1. A full delivery manifest with every executable file and resource, the dependency set,
-   the commit, the workflow and the artifact digest, bound to the run receipt and to
-   each proof.
-2. A durable outgoing queue on the witness: a signed record and its delivery job are
-   saved in one transaction, survive a restart and show attempts, the next retry and
-   the oldest unsent record. Duplicates after a timeout are recognized by the record
-   hash; a late delivery never counts as timely publication.
-3. Releases through a checked draft with attestations, then a guided fork setup with a
-   narrowly scoped token kept on the witness host.
-4. GitHub as an extra store for hourly signed checkpoint blocks, each linking to the
-   previous one, uploaded without force-push.
-5. Several witnesses run by different operators, confirmation policies and visible key
-   rotation: the old key announces the new one.
-6. Live tests of restarts, lost connectivity, restoring an old backup and a changed build.
+1. A full delivery manifest (files, deps, commit, workflow, artifact digest) tied to the run receipt.
+2. A durable outgoing queue on the witness that survives restarts and shows retries.
+   A late delivery never counts as on time.
+3. Releases through a checked draft with attestations, then a guided fork setup.
+4. GitHub as extra storage for hourly signed checkpoint blocks, no force-push.
+5. Several witnesses run by different people, visible key rotation.
+6. Live tests of restarts, lost connectivity, old backups and changed builds.
 
-Also not yet implemented: threshold signing by several keys (FROST), a checkpoint
-mirror on GitLab, anchoring on Nostr relays and co-signers who countersign checkpoints.
+Not done yet either: threshold signing (FROST), a GitLab mirror, Nostr anchoring, co-signers.
 
 ## Release automation
 
-Move to **draft → checked assets and attestations → publication**, with a completeness
-gate before enabling immutable releases. Pin build inputs, keep a release manifest,
-and verify package provenance during installation. The current workflow starts
-after publication; queued jobs must never be described as completed validation.
+Move to **draft → checked assets and attestations → publish**, pin build inputs, keep a
+release manifest and check provenance on install. Queued jobs never count as passed checks.

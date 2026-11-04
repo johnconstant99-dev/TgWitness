@@ -1,18 +1,18 @@
-<p class="guide-outcome">A message can change. The record of what you observed should remain checkable.</p>
-<p>Explore two small experiments below. They use fictional messages, stay in your browser and never connect to Telegram.</p>
+<p class="guide-outcome">Messages change. Your record of what you saw shouldn't, and anyone should be able to check that.</p>
+<p>Two small experiments below. Fake messages, everything runs in your browser, nothing goes to Telegram.</p>
 
 <h2 id="telegram-export">From a chat export to a verifiable record</h2>
-<p><a href="https://telegram.org/blog/export-and-more">Telegram Desktop exports</a> save available chat history and media as HTML or JSON for offline use. TgWitness adds an ongoing journal of received changes, signatures on observations and exports, and checkpoints that recipients can compare independently.</p>
+<p>A <a href="https://telegram.org/blog/export-and-more">Telegram Desktop export</a> saves the history you can see right now as HTML or JSON. TgWitness adds a running journal of changes, signatures on every record and checkpoints others can compare against.</p>
 <div class="table-wrap"><table><thead><tr><th scope="col">Task</th><th scope="col">Telegram Desktop export</th><th scope="col">TgWitness</th></tr></thead><tbody>
 <tr><td>Read saved conversations</td><td>HTML or JSON with selected media</td><td>Saved chats, searchable journal and offline reports</td></tr>
-<tr><td>Follow a change over time</td><td>The history available when exported</td><td>Earlier captured versions, later edits and deletion observations retained together</td></tr>
-<tr><td>Check files after handover</td><td>Standard HTML/JSON export files are unsigned</td><td>Signed manifest, per-record signatures and sealed HTML/PDF/JSON reports checked against a trusted collector key</td></tr>
+<tr><td>Follow a change over time</td><td>The history available when exported</td><td>Old versions, later edits and deletions, all kept</td></tr>
+<tr><td>Check files after handover</td><td>Standard HTML/JSON export files are unsigned</td><td>Signed manifest, signed records and sealed reports, checked against a trusted key</td></tr>
 <tr><td>Compare with an earlier retained state</td><td>Keep a separate reference copy or hash</td><td>Signed checkpoints, a separate witness and optional external timestamps</td></tr>
 </tbody></table></div>
-<p>The file-signing comparison is based on the <a href="https://github.com/telegramdesktop/tdesktop/tree/768d47cda6c7f447c10a25d1f363279493a90ed7/Telegram/SourceFiles/export/output">Telegram Desktop export writers</a> reviewed on 2 November 2026. TgWitness signs with the collector’s key; the checks below show how a recipient uses it.</p>
+<p>The comparison is based on the <a href="https://github.com/telegramdesktop/tdesktop/tree/768d47cda6c7f447c10a25d1f363279493a90ed7/Telegram/SourceFiles/export/output">Telegram Desktop export code</a> as of 2 November 2026.</p>
 
 <h2 id="journey">One message, three observations</h2>
-<p>When Telegram delivers a new message, an edit and a deletion notice, the collector appends three separate observations. The edit does not replace the first record. A deletion notice does not erase it.</p>
+<p>A new message, an edit and a deletion become three separate records. The edit doesn't overwrite the first one, and the deletion doesn't erase it.</p>
 <figure class="lab journey-lab" data-lab="journey" aria-labelledby="journey-caption">
   <div class="lab-top"><span class="lab-kicker">01 / MESSAGE JOURNEY</span><span class="sample-tag">Illustrative sequence</span></div>
   <svg class="journey-route" viewBox="0 0 600 92" role="img" aria-labelledby="journey-route-title"><title id="journey-route-title">Telegram delivers an update to the collector, which appends a journal record.</title>
@@ -33,10 +33,10 @@
   <p class="lab-status" data-journey-status role="status">All three received observations remain in the journal.</p>
   <figcaption id="journey-caption">Simplified path for one already selected source. Operational records also share the real journal. Capture depends on what the account can see and what Telegram delivers.</figcaption>
 </figure>
-<p>A deletion notice supplies neither a reliable deletion time nor the person who deleted the message. Keeping those values unknown preserves the distinction between an observation and a guess.</p>
+<p>Telegram doesn't say who deleted a message or exactly when. TgWitness leaves those fields empty instead of guessing.</p>
 
 <h2 id="chain">Change a record. Follow the hash.</h2>
-<p>Each record contains the previous record’s hash. Its own hash covers the event fields, including that link. An externally retained checkpoint pins a specific journal length and head hash.</p>
+<p>Every record contains the hash of the one before it. A checkpoint kept somewhere else pins the journal length and the last hash.</p>
 <figure class="lab hash-lab" data-lab="hash" aria-labelledby="hash-caption">
   <div class="lab-top"><span class="lab-kicker">02 / HASH-CHAIN SANDBOX</span><span class="sample-tag">Real SHA-256 · sample records</span></div>
   <div class="lab-controls scenario-controls" data-enhanced hidden role="group" aria-label="Change the sample journal">
@@ -54,11 +54,11 @@
 </figure>
 
 <h2 id="formulas">The actual rules, in a few lines</h2>
-<div class="formula-card"><span class="lab-kicker">HASH + SIGNATURE</span><div class="formula" translate="no" role="math" aria-label="h zero is sixty-four hexadecimal zeroes. h i is the hexadecimal SHA-256 of canonical event i. Signature i is Ed25519 over the raw bytes of h i.">h<sub>0</sub> = 0<sup>64</sup><br>h<sub>i</sub> = hex(SHA-256(C(e<sub>i</sub>)))<br>σ<sub>i</sub> = Ed25519.Sign(sk, unhex(h<sub>i</sub>))</div><p><strong>C</strong> serializes the nine event fields as UTF-8 JSON: sorted keys, no extra whitespace, no ASCII escaping and no NaN/infinity. The event’s <code>previous_hash</code> is h<sub>i−1</sub>. The displayed h<sub>0</sub> means 64 zero characters; signatures cover the 32 raw digest bytes.</p></div>
-<p>The nine fields are <code>seq</code>, <code>observed_at</code>, <code>source_at</code>, <code>kind</code>, <code>chat_id</code>, <code>message_id</code>, <code>actor_id</code>, <code>payload</code> and <code>previous_hash</code>. This is TgWitness’s <a href="@@REPO_URL@@/blob/@@BRANCH@@/docs/EVIDENCE.md#event-canonicalization">documented JSON encoding</a>; the hash and signature themselves are not hash-input fields.</p>
-<div class="formula-card"><span class="lab-kicker">RETAINED CHECKPOINT</span><div class="formula" translate="no" role="math" aria-label="Export count is at least checkpoint count, and the exported hash at the checkpoint position equals the retained head hash.">N<sub>export</sub> ≥ N<sub>checkpoint</sub><br>h<sub>export</sub>[N<sub>checkpoint</sub>] = H<sub>checkpoint</sub></div><p>Verify the checkpoint signature under the pinned collector key, then compare its boundary with the verified journal. A later export may contain more records; it must still agree at the earlier checkpoint.</p></div>
+<div class="formula-card"><span class="lab-kicker">HASH + SIGNATURE</span><div class="formula" translate="no" role="math" aria-label="h zero is sixty-four hexadecimal zeroes. h i is the hexadecimal SHA-256 of canonical event i. Signature i is Ed25519 over the raw bytes of h i.">h<sub>0</sub> = 0<sup>64</sup><br>h<sub>i</sub> = hex(SHA-256(C(e<sub>i</sub>)))<br>σ<sub>i</sub> = Ed25519.Sign(sk, unhex(h<sub>i</sub>))</div><p><strong>C</strong> is the nine event fields as UTF-8 JSON: sorted keys, no extra whitespace, no ASCII escaping, no NaN/infinity. <code>previous_hash</code> is h<sub>i−1</sub>, h<sub>0</sub> is 64 zeros, signatures cover the 32 raw digest bytes.</p></div>
+<p>The fields: <code>seq</code>, <code>observed_at</code>, <code>source_at</code>, <code>kind</code>, <code>chat_id</code>, <code>message_id</code>, <code>actor_id</code>, <code>payload</code>, <code>previous_hash</code>. Full spec: <a href="@@REPO_URL@@/blob/@@BRANCH@@/docs/EVIDENCE.md#event-canonicalization">event encoding</a>.</p>
+<div class="formula-card"><span class="lab-kicker">RETAINED CHECKPOINT</span><div class="formula" translate="no" role="math" aria-label="Export count is at least checkpoint count, and the exported hash at the checkpoint position equals the retained head hash.">N<sub>export</sub> ≥ N<sub>checkpoint</sub><br>h<sub>export</sub>[N<sub>checkpoint</sub>] = H<sub>checkpoint</sub></div><p>Check the checkpoint signature against the pinned key, then compare it with the journal. A later export can be longer, but it has to match at the checkpoint.</p></div>
 
 <h2 id="layers">Three questions, three different checks</h2>
-<div class="evidence-layers"><a href="@@GUIDE_EXPORTS@@"><span>01 / INTEGRITY</span><strong>Did this record change?</strong><p>Verify hashes and signatures against a separately trusted key.</p></a><a href="@@GUIDE_WITNESS@@"><span>02 / CONTINUITY</span><strong>What was retained earlier?</strong><p>Compare a signed export with checkpoints kept by a separate witness.</p></a><a href="@@GUIDE_CASES@@"><span>03 / DELIVERY</span><strong>Did these test events arrive?</strong><p>Match controlled send, edit and delete actions against each account’s journal.</p></a></div>
-<p class="callout">Use signatures to check the retained records, checkpoints to compare an earlier boundary, and controlled delivery tests to measure collection. Each answers a specific question. <a href="@@REF_EVIDENCE@@#verification-scope">Read the verification scope and trust assumptions.</a></p>
-<p>Follow the <a href="@@GUIDE_CASES@@">whole-account investigation</a> from acquisition to case package.</p>
+<div class="evidence-layers"><a href="@@GUIDE_EXPORTS@@"><span>01 / INTEGRITY</span><strong>Did this record change?</strong><p>Hashes and signatures against a key you trust.</p></a><a href="@@GUIDE_WITNESS@@"><span>02 / CONTINUITY</span><strong>What was retained earlier?</strong><p>Compare the export with checkpoints a witness kept.</p></a><a href="@@GUIDE_CASES@@"><span>03 / DELIVERY</span><strong>Did these test events arrive?</strong><p>Send, edit and delete test messages and see what each account caught.</p></a></div>
+<p class="callout">Signatures answer "was it changed", checkpoints answer "does it match what was there before", test messages answer "did we catch everything". <a href="@@REF_EVIDENCE@@#verification-scope">What verification proves and what it doesn't.</a></p>
+<p>Next: a <a href="@@GUIDE_CASES@@">whole-account investigation</a> from start to case package.</p>

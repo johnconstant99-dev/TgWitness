@@ -18,44 +18,40 @@
 
 </details>
 
-Send problem alerts, observed chat changes and a daily summary to the destinations
-you configure for the selected workspace.
+Problem alerts, chat changes and a daily summary, sent wherever you want for each workspace.
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-card-apprise-static.svg"><img src="../assets/presentation/readme-card-apprise.svg" width="720" alt="Apprise routes events to configured messenger, email and webhook destinations."></picture>
 
 ## Set up delivery
 
 1. Open **Extras → Notifications → Configure**.
-2. Choose a service under **Add a destination** and fill in its fields, or open
-   **Destinations as Apprise addresses** and enter one URL per line. Use the
-   [service catalogue](https://appriseit.com/services/) for your destination's format.
-3. Enable **Send notifications** and select problem alerts, changes in observed
-   chats or a daily summary. The summary hour follows the server's time.
-4. Choose whether to **Include short excerpts** of saved edited or deleted messages.
-5. Select **Save notifications**, then **Send test** and confirm receipt.
+2. Pick a service under **Add a destination**, or paste Apprise URLs (one per line) under
+   **Destinations as Apprise addresses**. Formats: [service catalogue](https://appriseit.com/services/).
+3. Turn on **Send notifications** and choose problems, chat changes and/or a daily summary
+   (server time).
+4. **Include short excerpts** if you want text of edited/deleted messages in them.
+5. **Save notifications**, **Send test**, check it arrived.
 
-Several destinations can belong to one workspace. The top-bar bell also keeps
-recent problems and chat changes inside the panel.
+You can have several destinations. The bell in the top bar keeps recent stuff in the panel too.
 
 ## Choose what leaves the workspace
 
 | Option | What it is for |
 | --- | --- |
-| Problems | Issues such as a signed-out account, low disk space or a failed copy |
-| Chat changes | Changes in that workspace's observed sources |
-| Daily summary | A scheduled overview |
-| Short excerpts | Include saved message text only when you explicitly enable it |
+| Problems | Signed-out account, low disk, failed copy and so on |
+| Chat changes | Changes in observed sources |
+| Daily summary | Once a day overview |
+| Short excerpts | Message text, only if you turn it on |
 
-For your own receiver, use Apprise's
-[JSON webhook](https://appriseit.com/services/json/). Destination URLs may contain
-credentials; keep them out of screenshots and support reports.
+Own receiver? Use Apprise's [JSON webhook](https://appriseit.com/services/json/).
+Destination URLs often contain credentials, keep them out of screenshots.
 
 ## Check the connection route
 
-Delivery uses the workspace's Direct, SOCKS5 or HTTP route. MTProxy cannot carry
-notifications. Non-HTTP destinations such as SMTP require a direct route.
+Notifications go over Direct, SOCKS5 or HTTP, not MTProxy. SMTP and other non-HTTP
+targets need direct.
 
-Sending is disabled in the fictional demo. Configure and test delivery in your
-own installation; a configured destination alone does not confirm delivery.
+The demo doesn't send anything. Set it up and test on your own install, a saved
+destination doesn't mean it works.
 
 **Continue:** [Connection routes](Proxies.md) · [Troubleshooting](Troubleshooting.md) · [Operations reference](../OPERATIONS.md#notifications)

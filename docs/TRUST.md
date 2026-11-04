@@ -2,27 +2,22 @@
 
 [Security policy](../.github/SECURITY.md)
 
-You can check artifact bytes against a public workflow and commit without access
-to our infrastructure or trust in our self-hosted runner. This still requires
-trust in the code you approve, GitHub's hosted runners and OIDC, Sigstore, and
-your verification tools. An attestation is a signed claim, not proof that code
+You can check our release files against a public workflow and commit without trusting
+our infrastructure. You still trust the code you reviewed, GitHub's hosted runners and
+OIDC, Sigstore and your own tools. An attestation is a signed claim, not proof the code
 is harmless.
 
 ## Release source archive
 
-Use a recent [GitHub CLI](https://cli.github.com/manual/gh_attestation_verify).
-From a release produced after `provenance.yml` was introduced, download
-`TgWitness-<ver>.zip`, its `.zip.sha256` file, `sbom.spdx.json`,
-`provenance.sigstore.json`, and `sbom.sigstore.json`. This ZIP is created with
-`tools/build_source.py` on GitHub-hosted Ubuntu. It uses a separate filename so
-it cannot replace the `*-source.zip` file uploaded by the existing release
-workflow. Manual runs retain files in the
-`attested-source` Actions artifact; they do not attach release assets.
+Get a recent [GitHub CLI](https://cli.github.com/manual/gh_attestation_verify). From the
+release download `TgWitness-<ver>.zip`, `.zip.sha256`, `sbom.spdx.json`,
+`provenance.sigstore.json` and `sbom.sigstore.json`. The ZIP is built by
+`tools/build_source.py` on GitHub-hosted Ubuntu (it's separate from the older
+`*-source.zip` asset).
 
-Choose the release version and the full commit SHA you have independently
-reviewed. Inspect `.github/workflows/provenance.yml`, its pinned actions and
-`tools/build_source.py` at that commit. Do not copy an expected SHA from an
-untrusted archive or assume a tag can never move. Then run:
+Pick the full commit SHA you reviewed, look at `.github/workflows/provenance.yml`, its
+pinned actions and `tools/build_source.py` at that commit. Don't take the SHA from an
+untrusted archive and don't assume tags never move. Then:
 
 ```sh
 VERSION='<ver>'
@@ -34,35 +29,33 @@ gh attestation verify "TgWitness-${VERSION}.zip" \
   --source-ref "refs/tags/v${VERSION}" --deny-self-hosted-runners
 ```
 
-Success verifies the file digest, SLSA provenance signature, repository,
-workflow revision, source revision/ref and hosted runner identity. The workflow
-path alone does **not** pin its revision. A checksum alone establishes no
-builder identity. Missing or failed verification means this guarantee is absent.
-Repeat the command with the `.zip.sha256` file to authenticate it as well.
-For saved bundles, add `--bundle provenance.sigstore.json`; obtain trusted roots
-in advance if verification must be offline.
+This checks the file digest, the SLSA provenance signature, repository, workflow
+revision, source commit/ref and that a hosted runner built it. A checksum alone says
+nothing about who built the file. Run it again on `.zip.sha256`. For saved bundles add
+`--bundle provenance.sigstore.json`; for offline checks fetch trusted roots beforehand.
+
+Commits were squashed on 3 November 2026. Tags now point to commits with the same
+files, but attestations of earlier releases name the original commits, which are still
+reachable on GitHub. Use these as `COMMIT`:
+
+| Release | Attested commit |
+| --- | --- |
+| 0.8.1 | `5ad1569e0b5bc8fce6920b5439eb3e35418a2193` |
+| 0.8.0 | `204e31bd294534574a9ef9428f24a38c81b57e6b` |
+| 0.7.1 | `99225f985701b0cdccb333d947c6bb9bad8673aa` |
 
 ### Rebuilding the source ZIP
 
-`python tools/build_source.py` writes source entries in sorted order with fixed
-ZIP timestamps, permissions and compression settings. The same public input bytes
-and Python/zlib toolchain produce the same ZIP bytes, independent of build time or
-input file modification times. The neutral 1980 ZIP timestamp is not a claim about
-when the code or evidence was created. The separate attestation records build identity.
-
-To compare against a hosted source ZIP, use the reviewed commit in a clean checkout
-with the same line-ending settings and toolchain, then compare the ZIP SHA-256.
-Renaming `*-source.zip` to the hosted asset's filename does not change its bytes.
-Checkout line endings and compressor versions can affect the result; source bytes
-are never normalized by the packager, including signed demo downloads. A failed
-write before publication preserves the previous archive. Archive and checksum
-replacement are separate operations: an interruption between them must fail checksum
-verification rather than be accepted as a matching pair.
+`python tools/build_source.py` sorts entries and fixes timestamps, permissions and
+compression, so the same input bytes and Python/zlib give the same ZIP. The 1980
+timestamp is just a neutral value. To compare with a hosted ZIP, build from the reviewed
+commit in a clean checkout with the same line-ending settings and toolchain, then compare
+SHA-256. Line endings and compressor versions can change the result.
 
 ## Sealed evidence
 
-After decrypting the handoff described in [SEALED-ACTIONS](SEALED-ACTIONS.md),
-verify `evidence.zip` against the actual caller fork (`OWNER/TgWitness`):
+After decrypting the handoff from [SEALED-ACTIONS](SEALED-ACTIONS.md), verify
+`evidence.zip` against your fork (`OWNER/TgWitness`):
 
 ```sh
 gh attestation verify evidence.zip --bundle attestation.jsonl \
@@ -74,8 +67,8 @@ gh attestation verify evidence.zip --bundle attestation.jsonl \
 
 Review the [pinned collector workflow](https://github.com/phishdestroy/TgWitness/blob/d4301a916683ffe3e2c7f49b2def7f679925760c/.github/workflows/sealed-collector.yml),
 which checks out collector commit `5974b5dba782f08ea2b9a708345fd8e4cc45b12f`.
-For journal, attachment, collector-policy and capture-coverage checks, also run
-the verifier from an independently trusted installation:
+For journal, attachment, policy and coverage checks also run the verifier from an
+installation you trust:
 
 ```sh
 python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo OWNER/TgWitness
@@ -83,36 +76,21 @@ python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo
 
 ## Public records and SBOM
 
-- **Transparency:** open the Rekor link in the attestation step's public Actions
-  summary. The downloaded bundle's `verificationMaterial.tlogEntries` records
-  the log ID, index and inclusion proof; `gh attestation verify` verifies the
-  signed bundle and log evidence. Use [Sigstore search](https://search.sigstore.dev/)
-  to inspect the linked entry. A log entry timestamps a commitment, not Telegram
-  messages. See [Rekor's role](https://docs.sigstore.dev/logging/overview/).
-- **Repository checks:** open the [OpenSSF Scorecard report](https://securityscorecards.dev/viewer/?uri=github.com/phishdestroy/TgWitness).
-  Check its date, commit and individual findings, not just its score. The
-  workflow requests a scan every Monday at 04:32 UTC and on pushes to `main`;
-  publication makes results available through OpenSSF's public dataset and
-  signed Rekor records. This is automated analysis, not an independent human
-  audit. A missing or stale report is not evidence of a successful check.
-- **Workflow checks:** [workflow-audit.yml](../.github/workflows/workflow-audit.yml)
-  runs zizmor on workflow changes and Mondays at 07:00 UTC. Read its
-  `workflow-audit-sarif` artifact for injection, permission and pinning findings.
-  Code-scanning findings are also uploaded; dashboard access may be restricted.
-- **Dependencies:** `sbom.spdx.json` combines repository components detected by
-  Syft with Python package names and exact versions declared in `deploy/requirements.lock`,
-  `deploy/build.lock`, and `deploy/constraints-mcp.txt`, including the inherited
-  `deploy/constraints.txt`. Runtime and build files also contain distribution hashes;
-  MCP files specify version constraints. The workflow first creates the source
-  ZIP. Then it creates temporary requirements files that Syft can read. It rejects
-  missing Python packages, unexpected Python packages, or versions that differ
-  from the declarations. The original dependency files must match the bytes
-  stored in the ZIP. An SPDX annotation lists input file hashes, dependency
-  groups and platform conditions.
+- **Transparency log.** The attestation step's Actions summary links to Rekor; the bundle's
+  `verificationMaterial.tlogEntries` has the log entry and inclusion proof. Browse it on
+  [Sigstore search](https://search.sigstore.dev/). A log entry timestamps a commitment,
+  not Telegram messages ([Rekor](https://docs.sigstore.dev/logging/overview/)).
+- **Scorecard.** [OpenSSF Scorecard report](https://securityscorecards.dev/viewer/?uri=github.com/phishdestroy/TgWitness),
+  runs every Monday and on pushes to `main`. Look at the date, commit and findings, not just
+  the score. It's automated, not a human audit.
+- **Workflow audit.** [workflow-audit.yml](../.github/workflows/workflow-audit.yml) runs zizmor
+  on workflow changes and every Monday, results in the `workflow-audit-sarif` artifact.
+- **Dependencies.** `sbom.spdx.json` combines what Syft finds with the exact Python versions
+  from `deploy/requirements.lock`, `deploy/build.lock` and `deploy/constraints-mcp.txt`.
+  The workflow fails on missing, extra or mismatched packages.
 
-  Verify the signature of this inventory using the release verification command above with
-  `sbom.spdx.json` as the filename and the same commit/ref constraints. Verify
-  its separate SPDX binding to the source ZIP with the saved bundle:
+  Verify the SBOM signature with the release command above (`sbom.spdx.json` as the file),
+  and its binding to the source ZIP:
 
   ```sh
   gh attestation verify "TgWitness-${VERSION}.zip" \
@@ -124,25 +102,19 @@ python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo
     --source-ref "refs/tags/v${VERSION}" --deny-self-hosted-runners
   ```
 
-  Then run a local vulnerability scan of the verified inventory:
+  Then scan it locally:
 
   ```sh
   grype sbom:sbom.spdx.json
   ```
 
-## What this does not guarantee
+## What this doesn't guarantee
 
-- Absence of application bugs, malicious behavior, vulnerable dependencies, or
-  compromise of GitHub, Sigstore, approved actions or your verification tools.
-- Authenticity, truth or completeness of Telegram content; recovery of unseen
-  deletions; message timestamps; or secrecy from the capture host.
-- Coverage of portable ZIPs, wheels, containers, GitHub's automatic source
-  downloads, legacy `*-source.zip` files or releases without this attestation.
-- Reproducibility of complete releases, containers, wheels, SBOMs or attestation
-  bundles. Source ZIP repeatability has the input/toolchain conditions above;
-  provenance authenticates the exact published bytes independently of a rebuild.
-- An exhaustive list of installed packages or operating-system/container packages.
-  The Python entries list exact versions specified for the runtime, build tools
-  and optional MCP support across supported platforms. Some listed packages may
-  not be installed on the current host. This process does not resolve additional
-  dependencies or prove that packages are free of vulnerabilities.
+- No bugs, no malicious behavior, no vulnerable deps, or that GitHub, Sigstore, the pinned
+  actions or your tools weren't compromised.
+- That Telegram content is authentic, true or complete, that unseen deletions come back,
+  or that the capture host can't read it.
+- Anything about portable ZIPs, wheels, containers, GitHub's automatic source downloads,
+  old `*-source.zip` files or releases without this attestation.
+- Reproducible builds of full releases, containers, wheels or SBOMs.
+- A complete list of installed or OS packages, or that they're free of vulnerabilities.

@@ -4,18 +4,17 @@
 
 **04 · RUN AND PROTECT** · [All guides](Home.md) · [Full access reference](../ACCESS.md)
 
-Let someone review one chat or work on a case without handing over your main panel
-token. Access can be limited to named workspaces and chats, with separate permissions
-for reading, exporting, collecting, interacting, settings and account management.
+Let someone look at one chat or help with a case without giving them your main token.
+Limit it to certain workspaces and chats and pick what they can do.
 
 ## Issue a token
 
-1. As the administrator, open **Access → Give someone access**.
-2. Name the access and choose its workspaces, an account group or individual chats.
-3. Choose permissions. For a reviewer, keep **View** only; add **Export** for downloads.
-4. Set an expiry, session limits and IP restrictions if needed.
-5. Create the access and copy the token shown once. Send it privately with the panel URL.
-6. Check the recipient's view in a separate browser session.
+1. **Access → Give someone access** (as admin).
+2. Name it, pick workspaces, a group or single chats.
+3. Permissions: a reviewer only needs **View**, add **Export** for downloads.
+4. Expiry, session and IP limits if you want.
+5. Create it and copy the token (shown once). Send it privately with the panel URL.
+6. Check what they see in a separate browser session.
 
 | Need | Configure |
 | --- | --- |
@@ -27,31 +26,27 @@ for reading, exporting, collecting, interacting, settings and account management
 | End one connection | **Open sessions → End session** |
 | Withdraw access completely | Revoke the entry under **Granted access** |
 
-Collection scope controls what is recorded. Access scope controls what someone can
-read and do. Changing one does not change the other.
+Collection scope is what gets recorded, access scope is what someone can see and do.
+They're independent.
 
 ## Keep the scope precise
 
-Chat-limited access cannot open account-wide settings, sign in as the Telegram
-account or download the full workspace journal. Additional permission checkboxes
-do not remove that boundary. **All workspaces** includes accounts added later, and a
-group access includes accounts added to that group. Case Board notes follow the same
-chat scope.
+Chat-limited access can't open account settings, log in as the account or download the
+whole journal, no matter what boxes are ticked. **All workspaces** and group access include
+accounts added later. Case Board notes follow the same chat scope.
 
-Changes apply on subsequent requests. Revocation ends open sessions but cannot
-recall downloaded files. Closing a session leaves collection running.
+Changes apply from the next request. Revoking ends open sessions but can't pull back files
+already downloaded. Ending a session doesn't stop collection.
 
 <details>
 <summary><strong>IP limits, session expiry and the administrator console</strong></summary>
 
-Allow specific addresses/subnets, bind an access to its first sign-in address,
-limit successful sign-ins and parallel sessions, or set an end date. Session timeout
-measures inactivity; polling from an open panel counts as activity. Behind a reverse
-proxy, verify the client address shown by the application before relying on IP rules.
+Allow certain addresses/subnets, lock access to the first sign-in IP, limit sign-ins and
+parallel sessions, set an end date. Timeout counts inactivity, and an open panel polling
+counts as active. Behind a reverse proxy, check the client IP the app sees before trusting IP rules.
 
-The administrator's console shows current-process activity across workspaces.
-Signed `access.*` records retain access changes and session events without the tokens.
-The main panel token still grants unrestricted administrator access.
+The admin console shows live activity across workspaces. Signed `access.*` records keep
+access changes and sessions, never the tokens. The main token is still full admin.
 
 </details>
 

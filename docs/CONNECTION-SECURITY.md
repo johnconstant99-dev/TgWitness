@@ -73,12 +73,6 @@ and IPv6 routes, and no hooks, includes, environment substitutions or extra
 listeners. Public endpoint addresses are resolved and pinned before startup.
 Use an external VPN or SOCKS5 gateway for OpenVPN/IPsec and private endpoints.
 
-The synthetic checks are `python tools/check_guided_connection.py` and
-`python tools/check_guided_connection_browser.py`. The optional
-`python tools/check_portable_routes_runtime.py` downloads verified helpers and
-tests their actual local process lifecycle against loopback fixtures. It does
-not register a Cloudflare device or use a Telegram account.
-
 ## Authentication methods
 
 **API ID and API hash identify an application; they do not replace account login.**
@@ -132,13 +126,6 @@ python -m tgwitness.sessions account.session --out account.tgwitness-session
 3. Under **Add account → Files**, load the result or
    paste its string, and continue.
 4. Check the displayed numeric account ID, select sources and start observation.
-
-The converter opens SQLite read-only, performs no schema upgrade or network request,
-and does not print the session. It checks schema version, table types, a single
-session row, IP/port/DC and key length. CLI input is limited to 64 MiB; StringSession
-text is limited to 4 KiB. Panel conversion uploads files to the authenticated TgWitness
-server, processes them in memory, and returns the normalized credentials to that
-browser without saving the uploaded originals. Use HTTPS for a remote server.
 
 **The converted file is an unencrypted account-access secret.** Keep it in protected
 storage and never commit it or send it to a third-party conversion service. TgWitness
@@ -212,19 +199,6 @@ While automatic routes are active, lists refresh hourly and transport checks run
 every ten minutes by default. These intervals are configurable. **Update public lists**
 requests a refresh; viewing the list alone does not change a saved manual route.
 
-Each feed response is limited to 1 MiB with an eight-second request timeout and a
-20-second overall download deadline; redirects
-are rejected. Up to 64 compatible entries per source are retained and deduplicated.
-The parser accepts supported hexadecimal and base64url secrets and the JSON feed.
-Fake TLS `ee`, invalid links, private/reserved IP literals and local hostnames are
-skipped. Hostnames are resolved and checked before use, and the chosen IP is pinned
-for that connection. Automatic reacquisition resolves a hostname again; reapply a
-manual entry to resolve it again.
-
-Failed, empty or incompatible feed responses retain the previous source snapshot.
-Updates are atomic, serialized and limited to one attempt per minute per workspace.
-A successful transport probe establishes connectivity, not anonymity or capture completeness.
-
 **Telegram traffic and HTTPS requests use different routes.** List downloads use a
 separate HTTPS connection and the supplied external-request route.
 `TGWITNESS_PROXY_FEED_PROXY` explicitly overrides that route with an HTTP/SOCKS5 proxy;
@@ -238,22 +212,6 @@ configured, then the account's SOCKS5/HTTP route. Without either, Hide the addre
 request; the other modes permit Direct. External requests can be disabled. An explicitly
 configured feed-download proxy remains a separate operator override.
 The independent witness service keeps its own route.
-
-Public-only external HTTP requests through SOCKS5 or HTTP proxies resolve the
-destination with Cloudflare DNS over HTTPS at `https://1.1.1.1/dns-query`, through
-that same proxy. Only the hostname and A/AAAA query types go to the resolver;
-service URLs, credentials and notification contents are not included. TLS verifies
-the resolver certificate for its IP address. Both address families are checked,
-and any private, loopback, link-local or reserved answer rejects the request.
-Connections use a checked numeric address while retaining the service's original
-HTTP Host and TLS certificate name. Notification HTTP forwarding and CONNECT
-requests use the same destination checks. DNS failure stops the request without
-local destination DNS or a direct fallback. Successful answers are cached in
-memory per proxy route for at most 30 seconds and no longer than their DNS TTL;
-the cache is limited to 128 entries. The proxy hostname itself may use local DNS.
-SOCKS and CONNECT failures can try another checked address before sending the
-service request body. Plain HTTP forwarding reports a failed request without
-automatically replaying its body through another address.
 
 For operator-managed private services, the existing server environment setting
 `TGWITNESS_ALLOW_PRIVATE_DESTINATIONS=1` permits private destinations and keeps
@@ -355,12 +313,6 @@ access secret, not an encryption password. It grants administrator access;
 [issued tokens](ACCESS.md) can be scoped to accounts and chats. Workspaces share
 the host process and are not isolated tenants.
 
-An explicitly started, isolated synthetic demo can open automatically over a direct
-loopback connection. This uses a separate process-lifetime capability; it neither
-reveals the configured panel token nor grants access to real workspaces. Remote,
-proxied or cross-origin requests cannot obtain/use this automatic-entry capability.
-This convenience does not remove the authentication boundary for real account data.
-
 BitLocker, LUKS, FileVault or a managed encrypted volume can protect storage under
 their respective threat models. An administrator of an unlocked running machine
 can still read data. Include SQLite WAL/SHM, media, temporary exports, swap, backups
@@ -406,20 +358,3 @@ implemented and verified. Deleting `vault.key` or replacing a master key can des
 access to sessions/signing keys. Keep encrypted backups and keys separately and
 test recovery in an isolated instance.
 
-## Sources and verification scope
-
-Reviewed on 26 October 2026:
-
-- https://core.telegram.org/api/auth
-- https://core.telegram.org/api/obtaining_api_id
-- https://docs.telethon.dev/en/stable/basic/signing-in.html
-- https://docs.telethon.dev/en/stable/concepts/sessions.html
-- https://core.telegram.org/mtproto/mtproto-transports
-- https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/storage/storage_account.cpp
-- Telethon 1.45.0: SQLiteSession, StringSession, `Connection._proxy_connect`,
-  `TcpMTProxy.normalize_secret` and download methods.
-
-Local tests cover loopback SOCKS5/HTTP CONNECT fixtures, synthetic SQLite sessions,
-route isolation, secret exclusion and missing-key refusal. They do not establish
-real Telegram/proxy interoperability or live MTProxy behavior. See
-[VERIFICATION.md](VERIFICATION.md) and [LIVE_ACCEPTANCE.md](internal/LIVE_ACCEPTANCE.md).

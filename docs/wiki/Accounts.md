@@ -21,62 +21,66 @@
 
 
 
-Use a dedicated Telegram user account. Each workspace keeps its own authorization, journal, signing key, sources, proxy settings and attachment queue. The administrator can [issue access](Access.md) to selected workspaces and chats, with separate permissions for viewing, exporting and operations.
+Use a separate Telegram account for this. Each workspace has its own login, journal, key,
+sources, proxy and download queue. You can [give other people access](Access.md) to just
+some workspaces and chats.
 
 ## Choose a sign-in method
 
 | You have | Use |
 | --- | --- |
-| Phone number and access to login codes | **Account → Phone**; complete code and 2FA if requested |
-| An account already open in a Telegram app | **Account → QR code**; approve the displayed code in that app |
-| A supported saved session | **Account → Files**; select the session and companion JSON together |
-| A complete authorization key | **Account → Auth key**; provide the 512 hex characters and its DC ID |
+| Phone and access to login codes | **Account → Phone**, then code and 2FA |
+| The account open in a Telegram app | **Account → QR code**, approve it in the app |
+| A saved session | **Account → Files**, pick the session and its JSON together |
+| A full auth key | **Account → Auth key**, 512 hex characters + DC ID |
 
-Supported imports include Telethon StringSession, reviewed Telethon/Pyrogram SQLite formats, documented account JSON and modern single-account TData ZIP. TDLib directories and CSV account inventories are unsupported. JSON metadata alone may require phone or QR login.
+Works with Telethon StringSession, Telethon/Pyrogram SQLite, account JSON and single-account
+TData ZIPs. Not TDLib folders or CSV account lists. JSON with only metadata will still need
+phone or QR.
 
-API ID and API hash identify an application; they are not an account login. TgWitness can reuse saved/imported credentials or a pair from its built-in pool. You may supply your own pair under **API ID + Hash**.
+API ID and hash identify the app, not your account. TgWitness uses saved ones or its built-in
+pool, or yours under **API ID + Hash**.
 
 ## Connect and confirm
 
-1. Select the intended workspace.
-2. If needed, set its [proxy route](Proxies.md) before login.
-3. Complete a sign-in method.
-4. Check the displayed Telegram account ID.
-5. Open **Sources**, select a controlled chat and start observation.
-6. Confirm a new message arrives in the journal.
+1. Pick the workspace.
+2. Set its [proxy route](Proxies.md) first if you need one.
+3. Sign in.
+4. Check the Telegram account ID shown.
+5. In **Sources** pick a chat you control and start observation.
+6. Send a message and see it land in the journal.
 
-A connection test checks transport. Authorization and access to a particular chat are separate checks.
+A connection test only checks the network. Being logged in and seeing a given chat are separate things.
 
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Add or remove a workspace
 
-Use the **+** beside the account selector or **Accounts → Add account**. There is no fixed workspace cap; all collectors share one process and the machine's resources. An account cannot be assigned to two workspaces in this installation.
+**+** next to the account picker or **Accounts → Add account**. No hard limit, but they all
+share one process and your machine's resources. One account can't sit in two workspaces.
 
-Switching the selected workspace leaves the other collectors running. **Lock** clears browser access; **Pause** stops observation.
+Switching workspaces doesn't stop the others. **Lock** closes the browser panel, **Pause** stops observing.
 
-Deleting an additional workspace stops its collector and removes local sessions, journal and keys. If deletion fails, the workspace remains unavailable with **Deletion incomplete**; close programs holding its files and retry. The main workspace cannot be deleted through the panel. Separately exported or backed-up material is not removed with a workspace.
+Deleting an extra workspace stops it and removes its session, journal and keys. If it fails
+you'll see **Deletion incomplete**, close whatever holds the files and retry. The main
+workspace can't be deleted from the panel. Exports and backups you made elsewhere stay.
 
 ## Import accounts and share settings
 
-**Accounts → Import accounts** accepts multiple accounts at once. Match companion
-files by basename, such as `alpha.session` + `alpha.json`. Choose a group and start
-the queue. Each account accepts up to four files, 8 MiB total; a TData ZIP must
-contain one account. Each account gets a separate workspace; failed logins are rolled back,
-and duplicates are rejected. Locking or switching stops the remaining queue.
+**Accounts → Import accounts** takes a bunch at once. Companion files pair up by name
+(`alpha.session` + `alpha.json`). Pick a group and start. Up to four files and 8 MiB per
+account, one account per TData ZIP. Each gets its own workspace, failed logins are rolled
+back, duplicates refused. Locking or switching stops the queue.
 
-A group shares its settings with its accounts. Open **Accounts → Groups and shared
-settings → Shared settings** and choose the goal, files, protection, notification
-rules, recheck schedule, report settings, parameters and route. Every member follows
-the group; Settings marks each value 🔗 from the group or ✏️ the account's own. A
-change asks per account before replacing an own value, and accounts added later start
-with the group's values. Sessions, signing keys, evidence, notification destinations
-and proxy credentials stay separate. Deleting a group keeps its accounts.
+Groups share settings: **Accounts → Groups and shared settings → Shared settings** covers
+goal, files, protection, notification rules, rechecks, reports, parameters and route.
+Members follow the group, Settings shows 🔗 (group) or ✏️ (own) next to each value, and you
+get asked before an own value is overwritten. Sessions, keys, evidence, notification
+targets and proxy logins stay per account. Deleting a group keeps the accounts.
 
-**Open group** shows the group page: members with **Start all** and **Pause all**,
-what needs attention, shared chats and the available workspace-observation intervals,
-and **Export group**. See [shared settings](../SETTINGS.md#account-groups) and
+**Open group** gives you members with **Start all** / **Pause all**, problems, shared chats
+and **Export group**. More: [shared settings](../SETTINGS.md#account-groups),
 [account groups](../ACCOUNTS.md#bulk-import-and-account-groups).
 
 **Next:** [Collection](Collection.md) · [Session formats and limits](../ACCOUNTS.md) · [Backup](Backup-and-Recovery.md)

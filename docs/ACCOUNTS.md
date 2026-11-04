@@ -322,22 +322,6 @@ the journal records the sign-out. The workspace still belongs to its account: on
 account can connect to it again. If Telegram does not answer, the session is still removed
 here and the panel says so; end it in Telegram under **Settings → Devices**.
 
-## Convert a Telethon session offline
-
-The panel imports `.session` files directly. For an offline conversion to a
-StringSession file, run from the project folder:
-
-```powershell
-.venv\Scripts\python.exe -m tgwitness.sessions account.session --out account.tgwitness-session   # Windows
-```
-
-```sh
-.venv/bin/python -m tgwitness.sessions account.session --out account.tgwitness-session          # Linux/macOS
-```
-
-The converter reads Telethon SQLite only (up to 64 MiB), never modifies the input,
-makes no network request and refuses to overwrite an existing output file.
-
 ## Keeping account files safe
 
 - Treat every `.session`, TData ZIP, StringSession, Auth Key and account JSON like a

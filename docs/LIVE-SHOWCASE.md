@@ -97,12 +97,3 @@ Serve the page through the installation's existing HTTPS address. Publishing a
 link does not open a new port, create a tunnel or change DNS. The HTML and API
 remain on the user's installation. A showcase visitor cannot use the ordinary
 message, profile, media, export or management APIs with this access.
-
-## Local regression checks
-
-```sh
-python tools/check_showcase.py
-python tools/check_showcase_browser.py
-```
-
-Both use synthetic records and a local HTTP server. They do not connect to Telegram.

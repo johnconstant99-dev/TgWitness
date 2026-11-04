@@ -7,9 +7,8 @@
 
 # The illustrated investigation
 
-Sources, preserved observations and a verifiable handoff. The illustrations use
-fictional records; [explore the demo](https://phishdestroy.github.io/TgWitness/demo/)
-to work with the real interface.
+How a case comes together, in pictures. The records are made up, for the real interface
+[open the demo](https://phishdestroy.github.io/TgWitness/demo/).
 
 [Project](../README.md) · [Investigation handbook](wiki/Home.md) · [Evidence model](HOW-IT-WORKS.md)
 
@@ -42,7 +41,7 @@ to work with the real interface.
 
 [Independent witness](wiki/Independent-Witness.md)
 
-Signatures establish integrity relative to a trusted key. They do not prove
-Telegram origin, complete capture or the truth of the content.
+A signature shows the record wasn't changed. It doesn't prove the message came from
+Telegram, that nothing was missed or that the content is true.
 
 [Back to the project](../README.md) · [Documentation](README.md)

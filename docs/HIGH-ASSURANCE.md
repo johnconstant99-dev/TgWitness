@@ -378,49 +378,12 @@ its log.
 Cloudflare cannot see inside Telegram's encryption, other devices on the Telegram account
 (evidence mode's device list records them from Telegram's side) or the provider's hypervisor.
 
-On 1 November 2026 Gateway DNS ran against real Hetzner Cloud and a free Cloudflare account:
-Hetzner accepted the outbound rules, the server installed v0.7.0 with every lookup going
-through Gateway over TLS, the quick tunnel worked through that firewall, and `verify` read
-the server's 19 names back from Cloudflare (Ubuntu and Hetzner mirrors, GitHub, PyPI, NTP,
-the tunnel, ntfy.sh). The panel copied 36 queries in eight windows into a journal and
-`verify.py` summarised them without gaps; `destroy` removed the server and firewall and left
-the shared location.
-
 ## What this does not establish
 
 - The provider and its staff control the hypervisor, disks and network.
 - Host measurements are self-reported by the collector.
 - Earlier firewall rule contents are not in every provider log; only Linode keeps rule versions.
 - It says nothing new about message authenticity; see [Evidence](EVIDENCE.md).
-
-## Tested here
-
-The deployment, lock and verification logic is covered by automated tests against simulated
-Hetzner, DigitalOcean, Linode, Vultr, EC2/CloudTrail and Cloudflare APIs built from their
-published API references, and the AWS request signing against AWS's published examples.
-`tools/check_cloud_wizard.py` runs the panel's server wizard the same way, with a domain and
-with a quick tunnel. `tools/check_tdx.py` verifies real Intel TDX attestations from dcap-qvl and dstack
-up to Intel's root certificate (sources in [tools/tdx/README.md](../tools/tdx/README.md)); `tools/check_phala.py`
-runs deploy, verify, the journal, destroy and the panel wizard against a simulated Phala Cloud
-whose attestations come from a forged PKI shaped like Intel's. The Phala path has not yet been
-tried on Phala Cloud itself.
-
-On 1 November 2026 the quick tunnel path ran against real **Hetzner Cloud** (Nuremberg, `cpx22`,
-TgWitness v0.7.0), real ntfy.sh and GitHub, from the panel and from code:
-
-- the price check, then creation from the panel's buttons: server running after 13 seconds,
-  signed statement with matching instance and installer hashes after about two minutes;
-- the server's own panel opened through its trycloudflare.com address and accepted the
-  panel token; without the token it answers 401;
-- after a reboot through the Hetzner API the server posted a new signed address, **Find the
-  current address** found it, the old address stopped answering, the signing key stayed the
-  same; an unsigned post to an ntfy.sh topic was ignored;
-- `verify` against Hetzner's API: server, firewall without inbound rules, statement, binding,
-  host measurements, boot and the source hash of a v0.7.0 checkout passed; the Cloudflare
-  checks were unavailable, as described above; the installer differed from the one v0.7.0
-  builds and equalled byte for byte the one this version's code builds;
-- deletion from the panel removed exactly the server and firewall the deployment labelled;
-  other servers and firewalls in the same project were untouched.
 
 Not yet run against real accounts: a deployment under your own domain (Cloudflare tunnel and
 DNS), the other providers, a debug deployment and `lock`, a Telegram account on such a server,

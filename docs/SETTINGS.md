@@ -98,10 +98,3 @@ turn the feature off or delete its value.
 The size and time estimate reads up to three selected chats and up to 20 messages from
 each. It is an estimate: it does not predict Telegram limits, the speed of a given
 server or the files in every chat.
-
-```sh
-python tools/test_settings_hub.py
-python tools/test_group_settings.py
-python tools/check_group_settings_browser.py
-python tools/check_first_run.py
-```
