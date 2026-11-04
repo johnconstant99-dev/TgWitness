@@ -312,22 +312,40 @@ Still a pre-release. What's been tested and what hasn't: [verification record](V
 
 ## Responsibility and data protection (GDPR)
 
-TgWitness is a tool. Whoever runs it decides what gets collected and why, and is responsible
-for it (under GDPR usually as the *controller*). Telegram chats are full of other people's
-personal data. Not legal advice, check your own law and Telegram's terms.
+TgWitness is a tool. Whoever runs it decides what is collected, why and for how long, and is
+responsible for it — under the EU/UK GDPR usually as the *controller* of that personal data.
+Telegram messages contain personal data of people who never agreed to be recorded: names,
+usernames, IDs, photos, phone numbers, opinions. This section is not legal advice; check the
+law that applies to you and Telegram's terms.
 
-- **Have a purpose and a legal basis.** Fraud prevention, security and legal claims are the
-  usual legitimate interests (Art. 6(1)(f), Recitals 47 and 49, Art. 9(2)(f)). Write the purpose down per case.
-- **Collect only what you need.** Start with chosen chats. Folder and whole-account modes pull in
-  private chats, so only use them on dedicated accounts. Turn off what you don't need.
-- **People profiles are profiling.** Off by default, on per chat. No automated decisions about
-  people (Art. 22). Turn them off when done, that deletes them. Monitoring many people usually needs a DPIA (Art. 35).
-- **Keep it secure.** Encrypted disk, export passwords, HTTPS, read-only token for the witness.
-- **Retention.** The journal is append-only, single records can't be removed without breaking
-  the chain. Delete the workspace when the purpose ends. S3 Object Lock copies can't be deleted
-  before their retention date. Erasure has exceptions for legal claims (Art. 17(3)(e)).
-- **Access requests.** Exports and profile files help find what's held about a person (Art. 15).
-- **Nothing goes to us.** No telemetry, no hosted service.
+- **Have a lawful basis and a purpose.** Fraud prevention, network and information security
+  and the defence of legal claims are commonly relied on as legitimate interests
+  (GDPR Art. 6(1)(f), Recitals 47 and 49; Art. 9(2)(f) for legal claims). Write the purpose
+  down per case. Public authorities work under their own legal bases.
+- **Collect as little as the purpose needs.** Start with chosen chats. Folder and whole-account
+  modes record private chats and third parties' messages: use them only on dedicated
+  accounts; the panel asks for confirmation and the signed journal records it. Turn off event
+  types, attachment types and own actions you do not need, and exclude chats.
+- **People profiles are profiling.** They are off by default and switched on per chat. Use
+  them for a specific investigation, do not base automated decisions about people on them
+  (Art. 22), and switch them off or remove the chat when done — that deletes them. Systematic
+  monitoring of many people usually calls for a data protection impact assessment (Art. 35).
+- **Keep it secure.** Sessions, credentials and keys are in an encrypted vault; put the data
+  directory on an encrypted disk, give exports a password (AES-256 ZIP), keep the panel behind
+  HTTPS, and give a witness only its read-only token. Notifications carry no message text
+  unless you turn on excerpts, which sends text to the notification service.
+- **Retention and erasure.** The journal is append-only so that its integrity can be proven;
+  single records cannot be removed without breaking the signature chain. Plan retention per
+  workspace and delete an added workspace (Accounts → Delete) when the purpose ends. The main
+  workspace cannot be deleted from the panel: sign out of Telegram on the Account page, stop
+  TgWitness and remove its data directory. Off-site copies under S3 Object Lock cannot be deleted before their
+  retention date — choose the period accordingly. The right to erasure has exceptions, for
+  example for the establishment or defence of legal claims (Art. 17(3)(e)).
+- **Requests from the people recorded.** Chat exports and profile files make it possible to
+  find what is held about a person (Art. 15).
+- **Nothing is sent to the authors.** TgWitness has no telemetry and no hosted service; data
+  leaves your machine only through the routes you configure (Telegram, timestamp services,
+  S3 copy, notifications, witness).
 
 </details>
 

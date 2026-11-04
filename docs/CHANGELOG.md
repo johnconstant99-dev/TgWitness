@@ -102,7 +102,8 @@
 - Account export through Telegram Takeout or the regular API, resumable, with signed progress
   and coverage records ([account export](ACCOUNT-EXPORT.md)).
 - Separate signed sharing copies with filters, pseudonyms and optional text/file removal.
-  Signatures prove integrity, not authorship or admissibility.
+  Signatures establish integrity; they do not establish Telegram authorship, completeness
+  or legal admissibility.
 - Readable offline reports for account exports and sharing copies, printable, with record
   links and instructions for the recipient.
 - Clear handoff after download: original vs sharing copy, report preview, instructions to copy.
