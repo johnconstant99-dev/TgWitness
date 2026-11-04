@@ -120,7 +120,7 @@ def _facts(lay, facts, mode):
     lay.gap(4)
 
 
-def title_block(lay, eyebrow, title, facts, signed_note):
+def title_block(lay, eyebrow, title, facts, signed_note, kind=None):
     pdf, style = lay.pdf, lay.pdf.report_style
     if style.name in ("reading_series", "ledger_margin"):
         from .report_composition_pdf import title_block as independent_title
@@ -135,7 +135,7 @@ def title_block(lay, eyebrow, title, facts, signed_note):
             pdf.rect(10, 10, pdf.w - 20, pdf.h - 28)
         pdf.set_y(23)
         lay.text("TG / WITNESS", size=10, style="B")
-        lay.text(lay.say("Evidence dossier").upper(), size=7.3, color=style.muted)
+        lay.text((kind or lay.say("Evidence dossier")).upper(), size=7.3, color=style.muted)
         _rule(pdf, 42, style.line)
         pdf.set_y(57)
         lay.text(eyebrow.upper(), size=8, color=style.accent)

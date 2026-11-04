@@ -56,7 +56,8 @@ class Phala(Provider):
     example_type = "tdx.small"
     ssh_key_help = "not used: a Phala CVM has no SSH"
     user_data_limit = COMPOSE_LIMIT
-    log_retention = "Phala lists every revision of the application for as long as it exists"
+    log_retention = ("Phala lists every revision of the application for as long as it exists; restarts, stops and "
+                     "starts appear among the operations of the CVM")
     limits = (
         "Intel signs what the processor measured. A flaw in Intel's TDX module or microcode, or physical "
         "access to the memory bus of the machine (published attacks on DDR4/DDR5 interposers), is outside "
@@ -83,13 +84,20 @@ class Phala(Provider):
         self.headers = {"X-API-Key": credentials, "X-Phala-Version": API_VERSION, "User-Agent": "TgWitness/" + __version__}
 
     def create(self, spec, app_compose, environment):
-        body = {"name": resource_name(spec), "instance_type": spec["server_type"], "compose_file": app_compose,
+        name = resource_name(spec)
+        body = {"name": name, "instance_type": spec["server_type"], "compose_file": {**app_compose, "name": name},
                 "listed": False, "kms": "PHALA"}
         if spec.get("location") not in (None, "any"):
             body["region"] = spec["location"]
         if spec.get("image") not in (None, "default"):
             body["image"] = spec["image"]
         prepared = self.call("POST", "/cvms", body)
+        if "image" not in body:
+            # Phala's default is the development build of its current OS release, with SSH and debugging.
+            if not isinstance(prepared.get("os_image_version"), str) or not prepared["os_image_version"]:
+                raise DeployError("Phala Cloud did not name its current OS image; choose one with --image")
+            body["image"] = "dstack-" + prepared["os_image_version"]
+            prepared = self.call("POST", "/cvms", body)
         for field in ("app_id", "app_env_encrypt_pubkey", "compose_hash"):
             if not isinstance(prepared.get(field), str) or not prepared[field]:
                 raise DeployError("Phala Cloud did not prepare the CVM (no " + field + ")")
@@ -107,11 +115,15 @@ class Phala(Provider):
             "app_id": prepared["app_id"], "compose_hash": prepared["compose_hash"], "instance_id": found.get("instance_id"),
             "ipv4": None, "ipv6": None, "image": (found.get("os") or {}).get("version"),
             "os_image_hash": (found.get("os") or {}).get("os_image_hash"), "type": spec["server_type"],
-            "location": (found.get("node_info") or {}).get("region")}
+            "location": (found.get("node_info") or {}).get("region"), "hourly_rate": found.get("hourly_rate")}
 
     def running(self, cvm):
         found = self.call("GET", "/cvms/" + cvm)
-        return found if found.get("status") == "running" and found.get("instance_id") else None
+        if found.get("status") != "running":
+            return None
+        # Without the dstack gateway Phala leaves instance_id empty in the CVM details; its state has it.
+        found["instance_id"] = found.get("instance_id") or self.call("GET", "/cvms/" + cvm + "/state").get("instance_id")
+        return found if found["instance_id"] else None
 
     def lock(self, record):
         raise DeployError("A Phala CVM has no SSH and no provider firewall to close")
@@ -178,6 +190,21 @@ class Phala(Provider):
                             "operation": revision.get("operation_type"), "started": revision.get("created_at"),
                             "finished": revision.get("created_at"), "status": "success",
                             "actor": (revision.get("triggered_by") or {}).get("username")})
+        # Restarts, stops and starts are not revisions; Phala lists them as operations of the CVM.
+        cursor = None
+        while True:
+            data = self.call("GET", "/cvms/" + str(record["server"]["id"]) + "/operations",
+                             params={"limit": 50, **({"cursor": cursor} if cursor else {})})
+            for item in data.get("items") or []:
+                if item.get("operation_type") != "create":
+                    actions.append({"resource": "cvm", "id": item.get("correlation_id"),
+                                    "command": item.get("operation_type") or "operation",
+                                    "operation": item.get("operation_type"), "started": item.get("started_at"),
+                                    "finished": item.get("completed_at"), "status": item.get("status"),
+                                    "actor": item.get("triggered_by_username")})
+            cursor = data.get("next_cursor")
+            if not cursor:
+                break
         return actions
 
     @staticmethod

@@ -1,5 +1,6 @@
 """The 24/7 server wizard against a simulated Hetzner, Cloudflare, ntfy.sh and GitHub"""
 import argparse
+import asyncio
 import json
 import re
 import socket
@@ -70,14 +71,18 @@ class World:
         with self.guard:
             self.calls.append(("GET", url, params))
             posts = self.posts.get(url[:-len("/json")], [])
-            return Response(200, None, "".join(json.dumps({"event": "message", "message": m}) + "\n" for m in posts))
+            return Response(200, None, "".join(json.dumps({"event": "message", **post}) + "\n" for post in posts))
+
+    def post(self, topic, message):
+        # ntfy.sh stamps each message with its own receive time.
+        self.clock += 60
+        self.posts.setdefault(topic, []).append({"time": self.clock, "message": message})
 
     def post_address(self, host, signed=True):
         topic = re.search(r"TGWITNESS_BEACON=(\S+)", self.user_data).group(1)
         key = re.search(r"^ *TGWITNESS_TUNNEL_TOKEN=(\S+)$", self.user_data, re.M).group(1)
-        self.clock += 60
-        text = cloud.ADDRESS_FORMAT + " " + host + " " + str(self.clock)
-        self.posts.setdefault(topic, []).append(text + " " + (cloud.address_signature(key, text) if signed else "0" * 64))
+        text = cloud.ADDRESS_FORMAT + " " + host + " " + str(self.clock + 60)
+        self.post(topic, text + " " + (cloud.address_signature(key, text) if signed else "0" * 64))
 
     def request(self, method, url, timeout=None, json=None, params=None, headers=None, data=None):
         assert timeout
@@ -327,7 +332,8 @@ def check_command_line(directory):
     host, stages, hz = Host(world, directory), [], hetzner.Hetzner(HZ_TOKEN, session=world)
     record, out = cloud.deploy(quick_args(directory), hz, None, host.fetch, resolve=lambda repository, ref: ref,
                                progress=lambda stage, text: stages.append(stage),
-                               beacon=lambda topic, key=None: cloud.read_beacon(topic, key, world))
+                               beacon=lambda topic, key=None, public_key=None:
+                               cloud.read_beacon(topic, key, world, public_key))
     assert record["state"] == "running" and stages == ["tunnel", "server", "running", "waiting"], stages
     assert record["address"]["host"] == "bright-words-here.trycloudflare.com" == host.hosts[-1], host.hosts
     assert cloud.read_beacon(record["beacon"], session=world)["host"] == "forged-address-here.trycloudflare.com"
@@ -336,6 +342,37 @@ def check_command_line(directory):
     published = (out / "cloud-init.redacted.yaml").read_text(encoding="utf-8")
     assert key not in published and "tgwitness-tunnel.service" in published and record["beacon"] in published
     assert cloud.reference_installer(record, ROOT) == published
+    # A verifier has no address key. The collector signs its address with the collector key, so forged posts
+    # claiming a later time, signed by another key or carrying a fake address-key signature do not mislead it.
+    beacon = lambda topic, key=None, public_key=None: cloud.read_beacon(topic, key, world, public_key)  # noqa: E731
+    assert record["collector"]["public_key"] == host.vault.public_key
+    world.post(record["beacon"], assurance.address_post(host.vault, "collector-signed-here.trycloudflare.com",
+                                                        world.clock))
+    world.post(record["beacon"], assurance.address_post(Vault(directory / "forger"), "forged-v2-here.trycloudflare.com",
+                                                        4_000_000_000))
+    world.post(record["beacon"], cloud.ADDRESS_FORMAT + " forged-future-here.trycloudflare.com 4000000000 " + "0" * 64)
+    found = cloud.posted_address(record, beacon)
+    assert found["host"] == "collector-signed-here.trycloudflare.com" and found["signer"] == "collector", found
+    assert cloud.read_beacon(record["beacon"], key, world)["host"] == "bright-words-here.trycloudflare.com"
+    assert cloud.read_beacon(record["beacon"], session=world)["host"] == "forged-future-here.trycloudflare.com"
+    unsigned = {**record, "collector": {**record["collector"], "public_key": Vault(directory / "older").public_key}}
+    assert cloud.posted_address(unsigned, beacon)["signer"] is None
+    sent, names = [], iter(["one-host-here.trycloudflare.com"] * 2 + ["two-host-here.trycloudflare.com"])
+
+    async def posting():
+        task = asyncio.create_task(assurance.address_loop(host.vault, record["beacon"], interval=0,
+                                                          host=lambda: next(names, None),
+                                                          post=lambda topic, body: sent.append((topic, body))))
+        while len(sent) < 2:
+            await asyncio.sleep(0.01)
+        await asyncio.sleep(0.05)
+        task.cancel()
+    asyncio.run(asyncio.wait_for(posting(), 10))
+    assert [body.split(" ")[1] for topic, body in sent] == ["one-host-here.trycloudflare.com",
+                                                            "two-host-here.trycloudflare.com"], sent
+    assert all(topic == record["beacon"] and cloud.signed_by_collector(
+        host.vault.public_key, body.rsplit(" ", 1)[0], body.rsplit(" ", 1)[1]) for topic, body in sent)
+    assert asyncio.run(asyncio.wait_for(assurance.address_loop(host.vault, "https://example.net/tgw-x"), 1)) is None
     assert "Quick tunnel" in cloud.plan(cloud.specification(quick_args(directory, "quick-2"), lambda r, ref: ref))
     args = argparse.Namespace(record=out / "deployment.json", confirm="quick-1", provider_token_file=None,
                               cloudflare_token_file=None)

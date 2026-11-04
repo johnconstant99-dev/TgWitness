@@ -1,4 +1,96 @@
-# TgWitness verification · updated 2026-11-01
+# TgWitness verification · updated 2026-11-04
+
+## Live Phala Cloud deployment · 4 November 2026
+
+`--provider phala --quick-tunnel` ran against real **Phala Cloud** (`tdx.small`, region
+US-WEST-1) with a Phala Cloud API key of an empty workspace, real ntfy.sh, GitHub and Intel PCS.
+The CVM installed commit `df7d860c` (v0.8.1); deploy, verify and destroy ran from the command
+line with the fixes below. Seven CVMs cost about 1.9 US cents together.
+
+The first two deployments found five differences from the simulated Phala Cloud.
+[`tools/check_phala.py`](../tools/check_phala.py) now reproduces each, and fails without its fix:
+
+| On Phala Cloud | Before the fix | Fix |
+| --- | --- | --- |
+| `compose_file.name` is required | HTTP 422, nothing created | The compose carries the CVM name |
+| Unless given an empty one, Phala adds its own pre-launch script to the measured app-compose (v0.0.20: Docker login, `docker compose pull`, root password, SSH keys from `user_config`) | `tdx_compose` fails: code outside the published compose | The app-compose sets `pre_launch_script` to `""`; Phala then leaves it out |
+| Without `image` Phala picks `dstack-dev-0.5.12`, the development build, with SSH access enabled | `server_state` fails. The quote alone passed on this image; only the provider record and `tdx_os` show it | The deployment asks for the production build of Phala's current release, `dstack-0.5.12` |
+| With the dstack gateway off, the CVM details never get an `instance_id` | Deploy waits 30 minutes and fails | The instance ID is read from the CVM state |
+| Restarts, stops and starts are CVM operations, not application revisions | `provider_actions` did not list restarts | The operations are read as well |
+
+The third deployment:
+
+- The CVM ran `dstack-0.5.12` with SSH access off. The collector posted its signed address about
+  1.5 minutes after creation. Deploy then passed `tdx_binding`, `tdx_quote` (Intel TCB
+  UpToDate, quote v4, FMSPC `20a06f000000`, not in debug mode, not migratable, collateral
+  fetched from Intel), `tdx_compose_hash`, `tdx_compose` (byte for byte) and `tdx_identity` (KMS keys).
+- The panel at its trycloudflare.com address answered 401 without a token or with a wrong one,
+  and 200 with the panel token.
+- `verify` with `--source` set to GitHub's archive of the commit and the fingerprint passed
+  separately: server, `server_state`, firewall (no gateway, no public endpoint), provider log,
+  statement, fingerprint, source hash, boot and the five `tdx_*` checks passed. Cloudflare and
+  `tdx_os` were unavailable, so the result was INCOMPLETE.
+- Two restarts through Phala's API: each time the CVM was back in under two minutes with the
+  same collector key, a new signed address, and the old one answering 530. `verify` reported
+  the new boot and both restarts as REVIEW. With `--evidence` it confirmed the journal
+  signatures and three starts, each with its own Intel TDX quote from the same CVM.
+- `destroy` removed only that CVM. The workspace was then empty, and the panel address stopped
+  answering.
+- The panel wizard's price check read `tdx.small` at $0.058 an hour. A wrong key got a plain
+  "did not accept the API key" message.
+
+Two further findings, fixed afterwards:
+
+- Without the address key, `verify` followed the newest well-formed post on the address topic,
+  which is printed in the published compose. One forged post sent it to a host that does not
+  exist, and `statement` failed: a forger could not pass as the collector, but could block
+  third-party verification, for up to 12 hours with a forged future timestamp. The collector now
+  also posts its address signed with its own key, `verify` accepts only such posts when the
+  collector makes them, and posts are ordered by ntfy.sh's receive time.
+  [`tools/check_cloud_wizard.py`](../tools/check_cloud_wizard.py) replays the forged posts. A CVM
+  runs this only from a commit that contains it, so this run's collector did not sign its address
+  yet and `verify` said so.
+- `tdx_os` could not run without `dstack-mr`, whose current version has `measure-os` rather than
+  the `measure --json` the documentation named. The verifier now computes MRTD and RTMR0-2 itself
+  from the published image and the VM's shape, ACPI tables included.
+
+The fourth deployment, with these:
+
+- Deploy downloaded the published `dstack-0.5.12` once, matched it to the OS image hash the CVM
+  reported, and `tdx_os` passed: MRTD, RTMR0, RTMR1 and RTMR2 equal the values computed for QEMU
+  8.2.2, 1 vCPU and 2 GiB. The same computation gave a different RTMR0 for a claimed 4 GiB, 2 vCPUs,
+  QEMU 9.2.1 or a second network card, and failed for a changed kernel, firmware or command line
+  and for the development image.
+- `verify` passed every one of its 16 checks, the quick tunnel's connector included, so the result
+  was PASS. It wrote the HTML and PDF certificate, sealed with a qualified eIDAS time stamp from
+  the Belgian government's time-stamping unit TSU 202301 (status granted on Belgium's trusted
+  list), a FreeTSA time stamp and the verifier's signature; `check-report` confirmed all of them
+  and the PDF's signature.
+- After a restart, `verify --evidence` confirmed two starts, each quoted inside the CVM and each
+  booted from the published `dstack-0.5.12`; the restart and the new boot were REVIEW.
+- `destroy` left the workspace empty.
+
+The fifth deployment ran the collector from commit `53a0f7e9`, which has all of the above:
+
+- The collector posted its address signed with its own key, next to the operator's HMAC post.
+  Two forged posts were then added to the topic, one with a zeroed HMAC and one signed by another
+  Ed25519 key, both claiming a time in the year 2096. `verify` took the address signed by the
+  collector key and passed all 16 checks; the seal again carried the qualified Belgian time stamp,
+  FreeTSA's and the verifier's signature, and `check-report` confirmed them.
+- After a restart the collector posted the new address signed: `verify` found it at once, the
+  operator's **Find the current address** 27 seconds later from the HMAC post, and both ignored
+  the forged posts. `verify --evidence` confirmed two starts booted from `dstack-0.5.12`.
+- Deploy printed what Phala bills the CVM, disk included: $0.06078 an hour.
+
+The panel wizard ran against Phala Cloud twice, once through its job API and once through the
+browser with a real Chromium: the price check, creation with the commit under **Advanced**, all six
+attestation checks passed, the server list showing the billed price (44.37 USD a month), **Find
+the current address**, the measured compose download, and deletion. The browser saw no page errors.
+Each time the workspace was empty afterwards.
+
+Not covered: a Cloudflare domain on Phala, a Telegram account on the CVM, and the `dstack-0.6.1`
+image. The wizard's price before creation is Phala's compute price only, as its API names the disk
+price only for an existing CVM; the server list shows the billed price after creation.
 
 ## Live server journal inventory · 1 November 2026
 

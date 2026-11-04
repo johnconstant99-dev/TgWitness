@@ -226,9 +226,9 @@ class Layout:
     def gap(self, mm=2):
         self.pdf.ln(mm)
 
-    def title_block(self, eyebrow, title, facts, signed_note):
+    def title_block(self, eyebrow, title, facts, signed_note, kind=None):
         if self.design.name != "classic":
-            return report_design_pdf.title_block(self, eyebrow, title, facts, signed_note)
+            return report_design_pdf.title_block(self, eyebrow, title, facts, signed_note, kind)
         pdf = self.pdf
         pdf.add_page()
         pdf.start_section(str(title), level=0)
@@ -238,7 +238,7 @@ class Layout:
             pdf.rect(pdf.l_margin, 36, 28, 1, style="F")
         pdf.set_y(13)
         self.text("TG / WITNESS", size=13, style="B", color=WHITE)
-        self.text(self.say("Evidence dossier").upper(), size=7.5, color=(214, 224, 228))
+        self.text((kind or self.say("Evidence dossier")).upper(), size=7.5, color=(214, 224, 228))
         pdf.set_y(48)
         self.text(eyebrow.upper(), size=8, style="B", color=MUTED)
         self.gap(4)

@@ -20,8 +20,9 @@ import requests
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-from . import __version__, tdx
-from .assurance import redact_user_data, start_binding, user_data_hashes
+from . import __version__, attestation_report, dstack_image, tdx
+from .assurance import (ADDRESS_SIGNED, BEACON, BEACON_SERVER, QUICK_HOST, redact_user_data, start_binding,
+                        user_data_hashes)
 from .provenance import LEGACY_SOURCE_POLICY, source_files, source_tree_sha256
 from .providers import NAMES, get
 from .providers import base
@@ -48,9 +49,6 @@ KEY_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._@:-]{0,127}")
 TUNNEL_TOKEN = re.compile(r"[A-Za-z0-9+/=_-]{16,4096}")
 DEPLOYMENT_ID = re.compile(r"[0-9a-f]{16}")
 TUNNEL_ID = re.compile(r"[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}")
-BEACON_SERVER = "https://ntfy.sh/"
-BEACON = re.compile(re.escape(BEACON_SERVER) + r"tgw-[0-9a-f]{32}")
-QUICK_HOST = re.compile(r"[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.trycloudflare\.com")
 ADDRESS_FORMAT = "tgwitness-address-v1"
 INSTALLER_FIELDS = ("deployment_id", "name", "mode", "provider", "repository", "commit", "panel_host",
                     "witness_host", "ssh", "beacon", "gateway")
@@ -114,8 +112,10 @@ PHALA_ESTABLISHES = (
     "That VM's RTMR3, replayed from dstack's event log, measures the compose the collector reports. The compose "
     "pins the deployed commit's source files by hash and both container images by digest, and installs nothing "
     "else; its bytes equal the compose the commit's own code builds.",
-    "With --tdx-measurements, MRTD and RTMR0-2 equal the values computed from the dstack OS image: the firmware, "
-    "kernel and command line are that image's, which has no SSH.",
+    "When tdx_os passes, MRTD and RTMR0-2 equal the values this verifier computes from the dstack OS image "
+    "Dstack-TEE publishes under the hash the CVM reports and from the ACPI tables QEMU builds for the VM's shape: "
+    "the firmware, kernel, initrd and command line, with its root file system hash, are that production image's, "
+    "which has no SSH.",
     "Every collector start in the journal carries such a quote over its run, its key and its host measurement.",
     "Cloudflare reports the tunnel and its ingress; the panel is reachable only through it.",
 )
@@ -822,7 +822,8 @@ def phala_compose(spec, tunnel_id, manifest):
 
 
 def app_compose(compose):
-    return {"docker_compose_file": compose, "allowed_envs": list(PHALA_ENV), **PHALA_SETTINGS}
+    # Without an empty pre_launch_script Phala Cloud measures its own pre-launch script into the app-compose.
+    return {"docker_compose_file": compose, "allowed_envs": list(PHALA_ENV), "pre_launch_script": "", **PHALA_SETTINGS}
 
 
 def compose_check(text, reference=None, published=None):
@@ -1043,7 +1044,36 @@ def intel_check(raw, collateral, now=None):
         + found["collateral_issued"] + "; not in debug mode, not migratable"), found
 
 
-def attestation_checks(answer, record, reference=None, published=None, collateral=None, expected=None, now=None):
+def image_loader(option, folder, session=None):
+    """The published dstack OS images, kept in folder/dstack-images ("auto"), in a given folder, or none."""
+    if option in (None, "none"):
+        return None
+    cache = Path(folder) / "dstack-images" if option == "auto" else Path(option)
+
+    def load(name, digest):
+        if (cache / "metadata.json").is_file():
+            image = dstack_image.load(cache)
+            if image["digest"] != digest:
+                raise dstack_image.ImageMismatch(str(cache) + " has OS image hash " + image["digest"] + ", not the "
+                                                 "CVM's " + str(digest))
+            return image
+        return dstack_image.fetch(name, digest, cache, session)
+    return load
+
+
+def os_image_check(report, event_log, vm, identity, image):
+    digest = hex_id(identity["os_image_hash"] or vm.get("os_image_hash"))
+    try:
+        found = image(vm.get("image"), digest)
+    except dstack_image.ImageMismatch as exc:
+        return "fail", str(exc), {}
+    except (dstack_image.ImageError, OSError, tarfile.TarError) as exc:
+        return "unavailable", "the published OS image could not be compared: " + str(exc), {}
+    return dstack_image.check(report, event_log, vm, found)
+
+
+def attestation_checks(answer, record, reference=None, published=None, collateral=None, expected=None, now=None,
+                       image=None, details=None):
     statement = answer["statement"]
     seen = (statement.get("host") or {}).get("provider") or {}
     evidence = answer.get("tdx") or {}
@@ -1060,7 +1090,7 @@ def attestation_checks(answer, record, reference=None, published=None, collatera
     checks.append(("tdx_binding", "pass" if bound else "fail", "The quote covers this signed statement and its challenge",
                    "report data is SHA-512 of the statement" if bound else
                    "the quote's report data is not SHA-512 of this statement: it vouches for something else"))
-    status, detail, _ = intel_check(raw, collateral or intel_collateral(), now)
+    status, detail, intel = intel_check(raw, collateral or intel_collateral(), now)
     checks.append(("tdx_quote", status, "Intel vouches for the quote: a genuine TDX platform at a current TCB level",
                    detail))
     text = seen.get("app_compose")
@@ -1093,17 +1123,33 @@ def attestation_checks(answer, record, reference=None, published=None, collatera
                    "; ".join(problems + notes) or "app " + identity["app_id"] + ", instance " + identity["instance_id"]
                    + ", key provider kms" + (", disk encrypted" if identity["storage_encrypted"] == "1" else "")))
     report = {k: v.hex() for k, v in quote["report"].items()}
-    status, detail = tdx.compare_measurements(report, expected)
     try:
         vm = json.loads(evidence.get("vm_config") or "{}")
     except ValueError:
         vm = {}
+    vm = vm if isinstance(vm, dict) else {}
+    os_image = {}
+    if expected or not image:
+        status, detail = tdx.compare_measurements(report, expected)
+    else:
+        status, detail, os_image = os_image_check(quote["report"], log, vm, identity, image)
     images = {hex_id(h) for h in (vm.get("os_image_hash"), identity["os_image_hash"], server.get("os_image_hash")) if h}
     if len(images) > 1:
         status, detail = "fail", "the OS image hashes disagree: " + ", ".join(sorted(images)) + "; " + detail
     checks.append(("tdx_os", status, "Firmware, kernel and command line are the dstack OS image's",
-                   detail + ("; OS image " + images.pop() if len(images) == 1 else "")
+                   detail + ("; OS image " + next(iter(images)) if len(images) == 1 else "")
                    + (", " + str(vm.get("cpu_count")) + " vCPU, " + str(vm.get("memory_size")) + " bytes" if vm else "")))
+    if details is not None:
+        try:
+            certificates = tdx.chain_summary(raw)
+        except tdx.QuoteError:
+            certificates = []
+        details.update({"certificates": certificates, "quote": {"version": quote.get("version"), "tee": "Intel TDX",
+                                  **{k: report[k] for k in ("mrtd", "rtmr0", "rtmr1", "rtmr2", "rtmr3", "report_data",
+                                                            "td_attributes", "xfam") if k in report}},
+                        "intel": intel, "identity": {k: identity.get(k) for k in (
+                            "app_id", "compose_hash", "instance_id", "os_image_hash", "key_provider")},
+                        "vm": vm, "os_image": os_image})
     return checks
 
 
@@ -1121,27 +1167,52 @@ def address_signature(key, text):
     return hmac.new(key.encode(), text.encode(), hashlib.sha256).hexdigest()
 
 
-def read_beacon(topic, key=None, session=None):
+def signed_by_collector(public_key, text, signature):
+    try:
+        Ed25519PublicKey.from_public_bytes(base64.b64decode(public_key, validate=True)).verify(
+            base64.b64decode(signature, validate=True), text.encode())
+    except (InvalidSignature, ValueError, TypeError):
+        return False
+    return True
+
+
+def read_beacon(topic, key=None, session=None, public_key=None):
+    # key: the operator's address key; public_key: the collector key, which a verifier holds.
+    # With neither, the newest post is returned, and anyone can post to the topic.
     if not BEACON.fullmatch(topic or ""):
         raise DeployError("The deployment has no address topic")
     response = (session or requests).get(topic + "/json", params={"poll": "1", "since": "all"}, timeout=30)
     if response.status_code != 200:
         raise DeployError("ntfy.sh answered HTTP " + str(response.status_code) + " for the address topic")
-    found = None
+    found, required = None, key is not None or public_key is not None
     for line in response.text.splitlines():
         try:
-            parts = (json.loads(line).get("message") or "").split(" ")
-        except ValueError:
+            item = json.loads(line)
+            parts = (item.get("message") or "").split(" ")
+        except (ValueError, AttributeError):
             continue
-        if len(parts) != 4 or parts[0] != ADDRESS_FORMAT or not QUICK_HOST.fullmatch(parts[1]) \
+        if len(parts) != 4 or parts[0] not in (ADDRESS_FORMAT, ADDRESS_SIGNED) or not QUICK_HOST.fullmatch(parts[1]) \
                 or not parts[2].isdigit():
             continue
-        if key is not None and not hmac.compare_digest(parts[3], address_signature(key, " ".join(parts[:3]))):
+        text = " ".join(parts[:3])
+        if parts[0] == ADDRESS_SIGNED:
+            signer = "collector" if public_key is not None and signed_by_collector(public_key, text, parts[3]) else None
+        else:
+            signer = "address key" if key is not None and hmac.compare_digest(
+                parts[3], address_signature(key, text)) else None
+        if required and not signer:
             continue
-        if found is None or int(parts[2]) >= found["posted"]:
-            found = {"host": parts[1], "posted": int(parts[2]), "signed": key is not None}
+        # ntfy.sh's receive time orders the posts: the time inside a post is whatever its sender wrote.
+        received = item.get("time")
+        order = (received if isinstance(received, int) else int(parts[2]), int(parts[2]))
+        if found is None or order >= found["order"]:
+            found = {"host": parts[1], "posted": int(parts[2]), "signed": bool(signer), "signer": signer,
+                     "order": order}
     if not found:
-        raise DeployError("The server has not posted its quick tunnel address yet")
+        raise DeployError("The server has not posted its quick tunnel address yet" + (
+            ", signed with " + ("the collector key" if public_key is not None else "the address key") if required
+            else ""))
+    del found["order"]
     return found
 
 
@@ -1168,7 +1239,7 @@ def printed(stage, text):
 
 
 def deploy(args, provider=None, cloudflare=None, fetch=collector_statement, resolve=resolve_commit, progress=printed,
-           beacon=read_beacon, archive=None, collateral=None):
+           beacon=read_beacon, archive=None, collateral=None, image=None):
     spec = specification(args, resolve)
     kind, generic, quick = get(spec["provider"]), spec["provider"] == "generic", bool(spec["beacon"])
     phala = spec["provider"] == "phala"
@@ -1292,7 +1363,12 @@ def deploy(args, provider=None, cloudflare=None, fetch=collector_statement, reso
             record["server"] = {"id": seen.get("instance_id"), "name": spec["name"], "hostname": seen.get("hostname"),
                                 "created": None, "ipv4": None, "ipv6": None, "machine_id": seen.get("instance_id")}
         if phala:
-            checks = attestation_checks(answer, record, compose, None, collateral)
+            loader = image_loader(image, out) if isinstance(image, str) else image
+            if loader:
+                progress("attestation", "Comparing the CVM's firmware, kernel and command line with the published "
+                         "dstack OS image" + (" (downloaded once into " + str(out / "dstack-images") + ")"
+                                              if image == "auto" else ""))
+            checks = attestation_checks(answer, record, compose, None, collateral, image=loader)
             for check, status, title, detail in checks:
                 progress("attestation", "[" + status.upper() + "] " + title + ": " + detail)
             problems = [title + ": " + detail for check, status, title, detail in checks if status == "fail"]
@@ -1686,9 +1762,24 @@ def verify_gateway(report, record, cf, server=None):
                + " (first 1000 log entries)", CF)
 
 
+def posted_address(record, beacon):
+    collector = (record.get("collector") or {}).get("public_key")
+    if collector:
+        try:
+            return beacon(record["beacon"], public_key=collector)
+        except DeployError:
+            pass
+    return beacon(record["beacon"])
+
+
 def verify_collector(report, record, server, args, fetch, reference=None, reference_error=None, beacon=read_beacon):
+    located = None
     try:
-        host = record["panel_host"] or beacon(record["beacon"])["host"]
+        if record["panel_host"]:
+            host = record["panel_host"]
+        else:
+            located = posted_address(record, beacon)
+            host = located["host"]
         answer = fetch(host, secrets.token_hex(16))
     except (DeployError, requests.RequestException, ValueError, KeyError) as exc:
         report.add("statement", "fail", "The collector answers with a fresh signed statement", str(exc), COLLECTOR)
@@ -1696,7 +1787,10 @@ def verify_collector(report, record, server, args, fetch, reference=None, refere
     statement = answer["statement"]
     host = statement.get("host") or {}
     report.add("statement", "pass", "The collector answers with a fresh signed statement",
-               "signature valid, challenge echoed; run " + statement["run_id"] + ", TgWitness " + statement["version"], COLLECTOR)
+               "signature valid, challenge echoed; run " + statement["run_id"] + ", TgWitness " + statement["version"]
+               + ("" if located is None else "; address " + located["host"] + (
+                   " posted signed with the collector key" if located.get("signer") == "collector" else
+                   " taken from an unsigned post: this collector does not sign its address")), COLLECTOR)
     recorded = (record.get("collector") or {}).get("fingerprint")
     if args.fingerprint:
         status, detail = ("pass" if statement["fingerprint"] == args.fingerprint.lower() else "fail"), \
@@ -1834,7 +1928,7 @@ def account_key_check(report, keys):
                    str(seq) for seq, _ in keys) + ")" if keys else "no account authorization in this journal"), JOURNAL)
 
 
-def verify_tdx_journal(report, path, key, record, reference=None, collateral=None, now=None):
+def verify_tdx_journal(report, path, key, record, reference=None, collateral=None, now=None, image=None):
     if not key:
         report.add("journal", "fail", "The evidence journal matches the expected collector key",
                    "no expected collector key is available for this deployment", JOURNAL)
@@ -1845,7 +1939,7 @@ def verify_tdx_journal(report, path, key, record, reference=None, collateral=Non
         report.add("journal", "fail", "The evidence journal is signed by this key", type(exc).__name__ + ": " + str(exc), JOURNAL)
         return
     server, collateral = record["server"], collateral or intel_collateral()
-    starts, problems, reviews, keys, composes, statuses = 0, [], [], [], set(), set()
+    starts, problems, reviews, keys, composes, statuses, systems = 0, [], [], [], set(), set(), set()
     with open_archive(path) as archive, archive.open("events.jsonl") as stream:
         for line in bounded_lines(stream):
             event = json.loads(line)
@@ -1892,6 +1986,19 @@ def verify_tdx_journal(report, path, key, record, reference=None, collateral=Non
                     reviews.append(where + detail)
                 if found:
                     statuses.add(found["status"])
+                if image:
+                    try:
+                        vm = json.loads(quote.get("vm_config") or "{}")
+                    except ValueError:
+                        vm = {}
+                    status, detail, values = os_image_check(measured["report"], log, vm if isinstance(vm, dict) else {},
+                                                            identity, image)
+                    if status == "fail":
+                        problems.append(where + detail)
+                    elif status != "pass":
+                        reviews.append(where + detail)
+                    else:
+                        systems.add(values["image"])
     account_key_check(report, keys)
     if not starts:
         problems.append("no process.started record binds this journal to the deployed CVM")
@@ -1901,7 +2008,8 @@ def verify_tdx_journal(report, path, key, record, reference=None, collateral=Non
                "The journal signatures and every start's Intel TDX quote match the deployed CVM",
                "; ".join((problems + reviews)[:20]) or str(result["events"]) + " records verified; " + str(starts)
                + " start(s), each quoted inside CVM " + str(server.get("instance_id")) + " (Intel TCB "
-               + ", ".join(sorted(statuses)) + ")", JOURNAL)
+               + ", ".join(sorted(statuses)) + ")" + (", booted from the published " + ", ".join(sorted(systems))
+                                                       if systems else ""), JOURNAL)
 
 
 def verify(args, provider=None, cloudflare=None, fetch=collector_statement, beacon=read_beacon):
@@ -1945,17 +2053,26 @@ def verify(args, provider=None, cloudflare=None, fetch=collector_statement, beac
     collateral = intel_collateral(getattr(args, "tdx_collateral", None)) if phala else None
     expected = json.loads(Path(args.tdx_measurements).read_text(encoding="utf-8")) \
         if phala and getattr(args, "tdx_measurements", None) else None
+    image = image_loader(getattr(args, "tdx_image", None), Path(args.record).parent) if phala else None
+    attestation = {}
     if phala and report.collector:
         published = Path(args.cloud_init).read_text(encoding="utf-8") if args.cloud_init else None
         for check, status, title, detail in attestation_checks(report.collector, record, reference, published,
-                                                               collateral, expected):
+                                                               collateral, expected, image=image, details=attestation):
             if reference_error and check == "tdx_compose":
                 status, detail = "fail", reference_error
             report.add(check, status, title, detail, TDX_SOURCE)
+        attested = any(c["check"] == "tdx_compose" and c["status"] == "pass" for c in report.checks)
+        for c in report.checks:
+            if c["check"] == "tunnel" and record.get("beacon") and attested:
+                c.update(status="pass", source=TDX_SOURCE, title="The quick tunnel's connector runs inside the attested CVM",
+                         detail="cloudflared, pinned by digest in the measured compose, serves the panel from inside "
+                                "the CVM; no Cloudflare account keeps records of a quick tunnel, and the quote, not the "
+                                "address, identifies the collector")
     if args.evidence:
         key = args.fingerprint or (statement or {}).get("fingerprint") or (record.get("collector") or {}).get("fingerprint")
         if phala:
-            verify_tdx_journal(report, args.evidence, key, record, reference, collateral)
+            verify_tdx_journal(report, args.evidence, key, record, reference, collateral, image=image)
         else:
             verify_journal(report, args.evidence, key, record["server"]["id"], record["provider"] == "generic", reference)
     files_seen = {}
@@ -1989,7 +2106,7 @@ def verify(args, provider=None, cloudflare=None, fetch=collector_statement, beac
             "tunnel": (record.get("tunnel") or {}).get("id"), "cloudflare_account": record.get("cloudflare_account"),
             "fingerprint": (statement or {}).get("fingerprint"), "checks": report.checks,
             "provider_actions": report.actions, "cloudflare": report.cloudflare,
-            "collector_statement": report.collector, "files": files_seen,
+            "collector_statement": report.collector, "attestation": attestation or None, "files": files_seen,
             "establishes": (SELF_ESTABLISHES if generic else phala_establishes(record) if phala else ESTABLISHES)
             + (GATEWAY_ESTABLISHES if record.get("gateway") else ()),
             "does_not_establish": tuple(kind.limits) + (COMMON_LIMITS if phala else LIMITS)
@@ -2004,7 +2121,7 @@ CUSTODY = {"not-established": "This report does not establish that the key was n
            "established-by-measured-code": "Created and kept inside the attested CVM by the measured commit; "
                                            "the OS image measurements match",
            "conditional-on-os-image": "Created inside the attested CVM by the measured commit; the OS image "
-                                      "measurements were not compared (--tdx-measurements)"}
+                                      "measurements were not compared with the published image"}
 
 
 def cell(value):
@@ -2075,9 +2192,7 @@ def render(report):
               "python -m tgwitness.cloud verify --record deployment.json --provider-token-file READ_ONLY_CREDENTIALS \\",
               "    --cloudflare-token-file READ_ONLY_TOKEN --fingerprint " + str(report["fingerprint"]) + " \\",
               "    --cloud-init " + ("docker-compose.yaml" if phala else "PUBLISHED_INSTALLER")
-              + " --source CHECKOUT_OF_COMMIT --evidence tgwitness-evidence.zip"
-              + (" \\" if phala else ""),
-              *(["    --tdx-measurements MRTD_RTMR0-2_FROM_DSTACK_MR.json"] if phala else []),
+              + " --source CHECKOUT_OF_COMMIT --evidence tgwitness-evidence.zip",
               "python verify.py tgwitness-evidence.zip --fingerprint " + str(report["fingerprint"]), "```", "",
               "## Handover", "", "| File | SHA-256 |", "| --- | --- |"]
     lines += ["| " + cell(name) + " | `" + digest + "` |" for name, digest in report["files"].items()]
@@ -2168,6 +2283,9 @@ def main(argv=None):
     run.add_argument("--out", type=Path, help="Deployment directory (default deployments/NAME)")
     run.add_argument("--wait", type=int, help="Minutes to wait for the collector (default 20; 40 for phala; "
                      "60 for generic)")
+    run.add_argument("--tdx-image", default="auto", help="phala: the published dstack OS image the CVM's firmware, "
+                     "kernel and command line are compared with: auto (downloaded from Dstack-TEE once, into "
+                     "dstack-images in the deployment directory), a folder, or none")
     close = commands.add_parser("lock", help="Remove every inbound rule from the deployment firewall")
     close.add_argument("--record", type=Path, required=True, help="deployment.json")
     close.add_argument("--provider-token-file", help="Provider credentials with write access")
@@ -2183,11 +2301,23 @@ def main(argv=None):
     check.add_argument("--source", type=Path, help="A checkout of the deployed commit; its own code builds the reference "
                        "installer the server's user data must equal byte for byte")
     check.add_argument("--evidence", type=Path, help="An evidence ZIP exported from this collector")
-    check.add_argument("--tdx-measurements", type=Path, help="phala: JSON with mrtd, rtmr0, rtmr1 and rtmr2 computed "
-                       "from the dstack OS image (dstack-mr measure --json)")
+    check.add_argument("--tdx-image", default="auto", help="phala: the published dstack OS image the CVM's firmware, "
+                       "kernel and command line are compared with: auto (downloaded from Dstack-TEE once, into "
+                       "dstack-images beside the record), a folder, or none")
+    check.add_argument("--tdx-measurements", type=Path, help="phala: JSON with mrtd, rtmr0, rtmr1 and rtmr2 to "
+                       "compare instead, all four computed by other means")
     check.add_argument("--tdx-collateral", type=Path, help="phala: Intel collateral in dcap-qvl's JSON layout, "
                        "instead of fetching it from Intel's PCS")
-    check.add_argument("--report", type=Path, help="Write the Markdown report here and its JSON beside it")
+    check.add_argument("--report", type=Path, help="Write the Markdown report here and its JSON beside it; for phala "
+                       "also the attestation certificate (HTML, PDF) and its seal")
+    check.add_argument("--sign-with", default="~/.tgwitness/verifier", help="phala: the verifier's own key folder "
+                       "that signs the seal and the PDF (created on first use), or none")
+    check.add_argument("--timestamp", action="append", help="phala: an RFC 3161 time-stamping authority for the seal; "
+                       "repeat for several, or none (default: the Belgian government's qualified TSA and FreeTSA)")
+    seal_check = commands.add_parser("check-report", help="Check an attestation certificate against its seal and "
+                                     "time stamps")
+    seal_check.add_argument("--report", type=Path, required=True, help="The report's JSON, Markdown, HTML or PDF")
+    seal_check.add_argument("--verifier-fingerprint", help="The verifier key fingerprint received independently")
     remove = commands.add_parser("destroy", help="Delete the server, its firewall, DNS records and tunnel; "
                                  "the record stays")
     remove.add_argument("--record", type=Path, required=True, help="deployment.json")
@@ -2205,10 +2335,14 @@ def main(argv=None):
             args.wait = args.wait or {"generic": 60, "phala": 40}.get(args.provider, 20)
             if not 1 <= args.wait <= 240:
                 parser.error("--wait must be 1-240 minutes")
-            record, out = deploy(args)
+            record, out = deploy(args, image=args.tdx_image)
             server, account = record["server"], record["cloudflare_account"]
             print("Deployment", record["deployment_id"], "is running (" + record["mode"] + ").")
             print("Collector key fingerprint:", record["collector"]["fingerprint"])
+            rate = server.get("hourly_rate") or {}
+            if rate.get("total"):
+                print("Billed by " + get(record["provider"]).name + ":", rate["total"], "USD an hour (compute",
+                      str(rate.get("compute")) + ", disk", str(rate.get("disk")) + ")")
             if record["beacon"]:
                 print("Panel now: https://" + record["address"]["host"], "- token in", out / "panel-token.txt")
                 print("The address changes when the server restarts; the current one is posted, signed with",
@@ -2232,10 +2366,33 @@ def main(argv=None):
             for item in removed:
                 print("Removed", item["resource"], item["id"], item.get("name") or "")
             print("Deployment", record["deployment_id"], "removed; its record stays in", args.record)
+        elif args.command == "check-report":
+            base = Path(args.report)
+            base = base.with_suffix("") if base.suffix in (".json", ".md", ".html", ".pdf") else base
+            for label, text in attestation_report.check(base, args.verifier_fingerprint):
+                print("[PASS] " + label + ": " + text)
+            print("The seal holds: " + str(base.with_suffix(".json")) + " is the report that was sealed.")
         else:
             report = verify(args)
             text = render(report)
-            if args.report:
+            if args.report and report["verification_scope"] == "hardware-attestation":
+                from .security import Vault
+                vault = Vault(Path(args.sign_with).expanduser()) if args.sign_with != "none" else None
+                tsas = () if args.timestamp == ["none"] else tuple(args.timestamp or attestation_report.TIME_STAMPS)
+                sealed = attestation_report.write(report, text, args.report.with_suffix(""), vault, tsas)
+                for c in report["checks"]:
+                    print("[" + c["status"].upper() + "] " + c["title"] + ": " + c["detail"])
+                for stamp in sealed["statement"]["time_stamps"]:
+                    print("Time stamp", attestation_report.readable(stamp["time"]), "by",
+                          attestation_report.common_name(stamp["signer"])
+                          + (" - qualified eIDAS time stamp" if stamp.get("qualified") else ""))
+                for stamp in sealed["failed_time_stamps"]:
+                    print("No time stamp from", stamp["tsa"] + ":", stamp["error"])
+                if sealed.get("fingerprint"):
+                    print("Signed with verifier key", sealed["fingerprint"])
+                print("Result:", report["result"].upper(), "- certificate", args.report.with_suffix(".html"), "and",
+                      args.report.with_suffix(".pdf"))
+            elif args.report:
                 args.report.write_bytes(text.encode())
                 args.report.with_suffix(".json").write_bytes(json.dumps(report, indent=2, ensure_ascii=False).encode())
                 for c in report["checks"]:

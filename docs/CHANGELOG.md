@@ -11,6 +11,22 @@
 - Make the recording settings and chat tabs fit narrow screens, including wider system fonts, and fix profile controls and localized labels.
 - Include reviewed website assets in source archives and verify conditional dependency versions in SBOM inventories.
 
+- Phala Cloud deployments work on Phala Cloud itself (first real run, 4 November 2026): the
+  compose carries its name, Phala's own pre-launch script is kept out of the measured
+  app-compose, the production OS image is chosen instead of Phala's development default, the
+  instance ID is read from the CVM state, and restarts from the CVM's operations count in
+  `provider_actions`. `tools/check_phala.py` simulates each of these.
+- `tdx_os` without outside tools: the verifier downloads the published dstack OS image once,
+  matches it to the hash the CVM reports and computes MRTD and RTMR0-2 itself, the ACPI tables
+  QEMU builds for the VM's shape included. A development image, other firmware, kernel, command
+  line, memory, vCPUs or devices fail. Each journal start is checked the same way.
+- Attestation certificate for Phala deployments: `verify --report` also writes HTML and a signed
+  PDF, sealed by a qualified eIDAS time stamp from the Belgian government's time-stamping
+  authority, a FreeTSA time stamp and the verifier's own key; `check-report` checks the seal.
+- Quick tunnel addresses are also posted signed with the collector key, so a verifier is not
+  misled by forged posts on the address topic; on Phala Cloud the tunnel check passes, since its
+  connector runs inside the measured compose.
+
 ## 0.8.1 preview · 2 November 2026
 
 - Runtime, sealed and media containers moved to pinned Wolfi/glibc with Python 3.12 and

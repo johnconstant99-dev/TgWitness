@@ -11,5 +11,10 @@ validity window.
 | `intel-outdated.collateral.json` | `sample/tdx_quote_outdated_collateral.json` of dcap-qvl: TCB Info whose TDX module levels are out of date |
 | `dstack-v4.json` | `dstack/verifier/fixtures/quote-report.json` of [Dstack-TEE/dstack](https://github.com/Dstack-TEE/dstack) (Apache-2.0): a dstack guest agent `GetQuote` answer with its RTMR3 event log |
 | `dstack-v4.collateral.json` | Intel's collateral for that quote's platform, fetched from Intel's PCS by `tgwitness.tdx.fetch_collateral` on 2026-10-31 |
+| `phala-dstack-0.5.12.json` | The `GetQuote` answer of a Phala Cloud CVM (`tdx.small`, US-WEST-1, production `dstack-0.5.12`) on 2026-11-04, with its VM configuration, the TDVF sections of the image's `ovmf.fd` and the SHA-256 of its firmware, kernel and initrd |
+| `phala-dstack-0.5.12.collateral.json` | Intel's collateral for that quote's platform, fetched from Intel's PCS on 2026-11-04 |
+
+`../tsa/time-stamps.json` holds real RFC 3161 replies of the Belgian government's qualified
+time-stamping authority and of FreeTSA over a fixed report, for `tools/check_attestation_report.py`.
 
 The collateral files use dcap-qvl's JSON layout, which `python -m tgwitness.cloud verify --tdx-collateral` accepts.

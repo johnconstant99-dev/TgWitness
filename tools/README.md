@@ -37,6 +37,8 @@ Builds stay local. See [publishing](../docs/internal/PUBLISHING.md) and
 | `python tools/check_group_screen_browser.py` | Group screen `/groups/<id>` in the browser; API and group export in `tools/test_group_overview.py` |
 | `python tools/check_tdx.py` | Intel TDX attestations: real quotes from dcap-qvl and dstack to Intel's root, and every refusal with a forged PKI |
 | `python tools/check_phala.py` | Phala Cloud deployments against a simulated Phala Cloud: deploy, verify, the journal, quick tunnel, destroy and the panel wizard |
+| `python tools/check_dstack_image.py` | MRTD and RTMR0-2 from a dstack OS image and QEMU's ACPI tables: QEMU's own output, a real Phala Cloud quote, every substitution; `--live` downloads the published image |
+| `python tools/check_attestation_report.py` | The attestation certificate: real qualified eIDAS and FreeTSA time stamps, the verifier's seal, the signed PDF, and every change refused |
 | `python tools/capture_screenshots.py` | Screenshots in `test-results/`; `--docs` updates docs assets |
 | `python tools/capture_demo.py` | Refresh `website/demo/fixtures.json` from the local demo |
 

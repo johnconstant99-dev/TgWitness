@@ -48,7 +48,7 @@ support the provider and Cloudflare records rather than replace them.
 | `linode` | `LINODE_TOKEN` | `linodes`, `firewall`, `events` read-only scopes | Account events, firewall rule versions | 90 days |
 | `vultr` | `VULTR_API_KEY` | User with read access and the `activity_logs` permission | Account activity log (method, path, actor) | 30 days, longer with an audit-log subscription |
 | `aws` | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | `ec2:DescribeInstances`, `ec2:DescribeSecurityGroups`, `cloudtrail:LookupEvents` | CloudTrail event history | 90 days |
-| `phala` | `PHALA_CLOUD_API_KEY` | An API key of the same workspace | Application revisions: compose and environment changes, restarts, OS upgrades | While the application exists |
+| `phala` | `PHALA_CLOUD_API_KEY` | An API key of the same workspace | Application revisions and CVM operations: compose and environment changes, restarts, OS upgrades | While the application exists |
 | `generic` | none | none | none: **self-attested** | – |
 
 Use a dedicated project, team, account or sub-account for each case: the verifier's
@@ -78,11 +78,20 @@ machines that can be debugged or migrated.
 | `tdx_compose_hash` | RTMR3, replayed from the dstack event log, measures the app-compose the collector reports |
 | `tdx_compose` | That compose is byte for byte the one the code of the deployed commit builds: source files pinned by hash, both images by digest, no other code |
 | `tdx_identity` | The attestation comes from the deployed application and instance, with keys from Phala's KMS and an encrypted disk |
-| `tdx_os` | With `--tdx-measurements`, MRTD and RTMR0-2 equal the values computed from the dstack OS image (`dstack-mr measure --json`) |
+| `tdx_os` | MRTD and RTMR0-2 equal the values the verifier computes from the dstack OS image Dstack-TEE publishes, found by the OS image hash the CVM reports, and from the ACPI tables QEMU builds for the VM's shape: firmware, kernel, initrd, command line with the root file system hash, memory, vCPUs and devices. A development image fails |
+
+The OS image (about 180 MB, of which 21 MB are kept) is downloaded once from
+[Dstack-TEE/meta-dstack](https://github.com/Dstack-TEE/meta-dstack/releases) into
+`dstack-images` beside the record; `--tdx-image FOLDER` uses another folder or an unpacked image,
+`--tdx-image none` skips the comparison. The measurement follows `dstack-mr` and the `qemu-acpi`
+crate of Dstack-TEE/dstack; `tools/check_dstack_image.py` checks it against QEMU's own ACPI
+output and against a real Phala Cloud quote, `--live` also against the published image.
+`--tdx-measurements` still compares MRTD and RTMR0-2 given as JSON instead.
 
 Every start of the collector recorded in the journal carries such an attestation, so
-`verify --evidence` checks each start. Phala's list of application revisions serves as the
-provider log: if the compose changed after the deployment, the report fails.
+`verify --evidence` checks each start and the OS image it booted. Phala's application revisions
+and the CVM's operations serve as the provider log: a compose changed after the deployment fails
+the report, and restarts are listed for review.
 
 In the panel choose **Confidential virtual machine · Phala Cloud** under **Extras** → **Server 24/7**
 and paste a Phala Cloud API key; the quick tunnel works as on Hetzner. From the command line:
@@ -93,17 +102,45 @@ python -m tgwitness.cloud deploy --provider phala --name case-1 --server-type td
     --provider-token-file phala-key.txt
 python -m tgwitness.cloud verify --record deployments/case-1/deployment.json \
     --provider-token-file phala-key.txt --cloud-init deployments/case-1/docker-compose.yaml \
-    --source CHECKOUT_OF_COMMIT --tdx-measurements dstack-mr.json
+    --source CHECKOUT_OF_COMMIT --fingerprint COLLECTOR_FINGERPRINT --report certificate.md
+python -m tgwitness.cloud check-report --report certificate.pdf --verifier-fingerprint VERIFIER_KEY
 ```
 
 `--tdx-collateral` reads Intel's certificates and revocation lists from a file instead of
 downloading them from Intel. Gateway DNS is not available here: Phala has no provider firewall
 for outgoing traffic.
 
+### Attestation certificate
+
+For a Phala deployment `verify --report certificate.md` also writes the certificate: a
+self-contained `certificate.html` and an A4 `certificate.pdf` with the verdict, the chain of trust
+from Intel's root to the collector key, a comparison with ordinary and high-assurance servers,
+the measurements next to the values computed from the published image, who vouches for each
+part, the Intel certificate chain, every check, the provider log, and how to repeat the
+verification. The JSON report stays the authoritative record; the pages render it.
+
+The report is sealed, in `certificate.seal.json` and the `.tsq`/`.tsr` files beside it:
+
+| Seal | What it adds |
+| --- | --- |
+| Qualified electronic time stamp, `http://tsa.belgium.be/connect` | RFC 3161 time stamp over the exact bytes of `certificate.json` from the Belgian federal government's qualified trust service provider (FPS Policy and Support, BOSA). Its unit is listed as a qualified time-stamping service, status granted, on Belgium's EU trusted list; the root (Belgium Root CA6) and the list's entries, as of the list issued on 20 October 2026, are pinned in `tgwitness/tsa_roots.py`. Under Regulation (EU) No 910/2014, article 41, such a time stamp is presumed accurate as to date and time and as to the integrity of the data in every EU member state |
+| RFC 3161 time stamp, FreeTSA | A second, independent time stamp |
+| Verifier signature | Ed25519 over a statement naming the report's SHA-256 and every time stamp, with the verifier's own key (`--sign-with FOLDER`, default `~/.tgwitness/verifier`); the PDF carries a signature by the same key |
+
+`--timestamp URL` (repeatable) chooses other authorities, `--timestamp none` none, `--sign-with
+none` leaves the seal unsigned. `check-report` checks the report's hash, the verifier signature,
+each time stamp to a trusted root and its qualified status, and the PDF's signature. The legal
+weight of a qualified time stamp outside the EU, and of the report as a whole, is for the court
+or authority that receives it; the seal shows when the report existed and that it has not changed.
+
 An attestation cannot rule out a flaw in Intel's TDX module or microcode, or physical access to
 the memory bus. Whoever controls the application in Phala's account can deploy another compose;
 it appears as a new revision with a new compose hash. The host controls the machine's time
 source and network.
+
+Deploy, verify with `--evidence`, restarts, the OS image comparison, the sealed certificate and
+destroy have run on Phala Cloud itself; see
+[the 4 November 2026 run](VERIFICATION.md#live-phala-cloud-deployment--4-november-2026).
 
 ## Before you start
 
@@ -166,8 +203,16 @@ send you, and your panel token, to someone else's address. The topic is in the r
 published cloud-init: whoever has them can read the current address, which still asks for the
 panel token. The server keeps no inbound port either way.
 
+A verifier has no address key, and anyone who reads the topic can post to it. So the collector
+also posts the address itself, signed with its own Ed25519 key, and `verify` takes the newest
+post signed by the collector key in the deployment record; posts are ordered by the time ntfy.sh
+received them, not the time they claim. A collector from before this change signs nothing, and
+`verify` then takes the newest post and says so in the `statement` check; a forged post can
+only make that check fail, since the address must still answer with the collector's key.
+
 What it costs: no Cloudflare account keeps records of a quick tunnel, so `verify` reports the
-tunnel, connector and DNS check as unavailable and the result is at best `incomplete`; the
+tunnel, connector and DNS check as unavailable and the result is at best `incomplete` (on Phala
+Cloud the check passes instead: the connector runs inside the measured compose); the
 provider records, firewall, signed statement, host measurements and installer comparison are
 checked as usual. The byte comparison with the reference installer needs a deployed commit
 that already knows `--quick-tunnel`; a 0.7.0 checkout builds the domain installer and reports

@@ -16,6 +16,11 @@ from .tdx import report_data
 from .verify import fingerprint
 
 MODES = NAMES
+BEACON_SERVER = "https://ntfy.sh/"
+BEACON = re.compile(re.escape(BEACON_SERVER) + r"tgw-[0-9a-f]{32}")
+QUICK_HOST = re.compile(r"[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.trycloudflare\.com")
+ADDRESS_SIGNED = "tgwitness-address-v2"
+TUNNEL_METRICS = "http://127.0.0.1:20241/quicktunnel"
 DEPLOYMENT_FILE = "etc/tgwitness/assurance.json"
 PREINSTALL_FILE = "etc/tgwitness/preinstall.txt"
 SECRET_LINE = re.compile(r"^([ \t]*)(TGWITNESS_TOKEN|TGWITNESS_TUNNEL_TOKEN)=.*$", re.M)
@@ -161,6 +166,39 @@ async def assurance_loop(store, selected, provider, interval=60, root=Path("/"),
                 store.append("host.state", {"mode": selected, "instance_id": provider.get("instance_id"),
                                             "before": last, **state, "attestation": ATTESTATION})
             last = changes(state)
+        await asyncio.sleep(interval)
+
+
+def address_post(vault, host, now):
+    text = ADDRESS_SIGNED + " " + host + " " + str(now)
+    return text + " " + vault.sign(text.encode())
+
+
+def quick_tunnel_host(url=TUNNEL_METRICS):
+    answer = json.loads(metadata_request(url, timeout=5))
+    host = answer.get("hostname") if isinstance(answer, dict) else None
+    return host if isinstance(host, str) and QUICK_HOST.fullmatch(host) else None
+
+
+def post_address(topic, body):
+    urllib.request.urlopen(urllib.request.Request(topic, body.encode(), method="POST"), timeout=20).close()
+
+
+async def address_loop(vault, topic, interval=30, every=10800, host=quick_tunnel_host, post=post_address):
+    # The quick tunnel's address signed with the collector key: whoever holds its fingerprint can check the post,
+    # unlike the operator's address key. Posted when it changes and every three hours (ntfy.sh keeps 12).
+    if not BEACON.fullmatch(topic or ""):
+        return
+    last, sent = None, 0
+    while True:
+        try:
+            found = await asyncio.to_thread(host)
+            now = int(time.time())
+            if found and (found != last or now - sent >= every):
+                await asyncio.to_thread(post, topic, address_post(vault, found, now))
+                last, sent = found, now
+        except (OSError, ValueError):
+            pass
         await asyncio.sleep(interval)
 
 

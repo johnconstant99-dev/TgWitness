@@ -3501,6 +3501,8 @@ function renderCloudServers(list,local){
         d.created_at?fmtFull(d.created_at):""].filter(Boolean).join(" · ")));
     if(d.quick&&d.address&&phase!=="removed")row.append(cloudAddressLink(d.address));
     if(d.attested)row.append(node("p","",tr("Intel TDX confidential virtual machine at Phala Cloud: Intel's attestation shows which code runs")));
+    if(d.price&&phase!=="removed")row.append(node("p","",tr("Approximately {price} {currency} a month ({hourly} {currency} an hour), billed by Phala Cloud",
+      {price:d.price.monthly,hourly:d.price.hourly,currency:d.price.currency})));
     if(d.gateway)row.append(node("p","",tr("DNS only through Cloudflare Gateway")));
     if(d.fingerprint)row.append(node("p","",tr("Signing key fingerprint: {fingerprint}",{fingerprint:d.fingerprint})));
     const actions=node("div","cloud-actions");

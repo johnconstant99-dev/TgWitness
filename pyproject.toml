@@ -82,7 +82,7 @@ tgwitness = [
   "guide_locales/*.json",
   "english_fallbacks.json", "public_proxies.json", "sealed_policy.json",
   "schemas/board-*.json",
-  "client_profiles.json", "client_profiles.LICENSE",
+  "client_profiles.json", "client_profiles.LICENSE", "dstack_measurement.LICENSE",
   "fonts/*.ttf", "fonts/OFL.txt", "fonts/NotoSerif-OFL.txt",
 ]
 

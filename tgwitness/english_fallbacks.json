@@ -2278,7 +2278,7 @@
   "This account is busy. Pause observation or its current task before exporting.",
   "This account is busy. Pause observation or its current task before loading history.",
   "This account is busy. Pause observation or its current task before resuming history.",
-  "This adds a check on the collector's environment. It does not certify the truth of a message. Live deployment acceptance on Phala is still pending.",
+  "This adds a check on the collector's environment. It does not certify the truth of a message. Deployment, verification and the sealed attestation certificate have run on Phala Cloud itself.",
   "This archive belongs to a different report or signing key.",
   "This archive exceeds the browser's 4 GiB limit. Use verify.py for large archives.",
   "This assessment describes this copy. Checks performed by the exporter must be repeated independently. A valid signature does not establish the truth of a message or guarantee acceptance in court.",

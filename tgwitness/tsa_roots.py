@@ -57,13 +57,51 @@ I2MLdq2qjZFDOCXsxBxJpbmLGBx9ow6ZerlUxzws2AWv2pk=
 """
 
 
+# The Belgian federal government's root for its qualified time-stamping units, as published at the address its
+# certificates name: http://crt.eidpki.belgium.be/eid/brca6.crt
+BELGIUM_ROOT_CA6 = """-----BEGIN CERTIFICATE-----
+MIIDaDCCAu2gAwIBAgIUcYtX/2tpPlocI17Yh6PvUfQBDyYwCgYIKoZIzj0EAwMw
+geAxCzAJBgNVBAYTAkJFMREwDwYDVQQHDAhCcnVzc2VsczEwMC4GA1UECgwnS2lu
+Z2RvbSBvZiBCZWxnaXVtIC0gRmVkZXJhbCBHb3Zlcm5tZW50MTYwNAYDVQQLDC1G
+UFMgSG9tZSBBZmZhaXJzIC0gQklLLUdDSSAoTlRSQkUtMDM2MjQ3NTUzOCkxOTA3
+BgNVBAsMMEZQUyBQb2xpY3kgYW5kIFN1cHBvcnQgLSBCT1NBIChOVFJCRS0wNjcx
+NTE2NjQ3KTEZMBcGA1UEAwwQQmVsZ2l1bSBSb290IENBNjAeFw0yMDA2MDMxMDAx
+MzFaFw00MDA2MDMxMDAxMzFaMIHgMQswCQYDVQQGEwJCRTERMA8GA1UEBwwIQnJ1
+c3NlbHMxMDAuBgNVBAoMJ0tpbmdkb20gb2YgQmVsZ2l1bSAtIEZlZGVyYWwgR292
+ZXJubWVudDE2MDQGA1UECwwtRlBTIEhvbWUgQWZmYWlycyAtIEJJSy1HQ0kgKE5U
+UkJFLTAzNjI0NzU1MzgpMTkwNwYDVQQLDDBGUFMgUG9saWN5IGFuZCBTdXBwb3J0
+IC0gQk9TQSAoTlRSQkUtMDY3MTUxNjY0NykxGTAXBgNVBAMMEEJlbGdpdW0gUm9v
+dCBDQTYwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAAR532ARaLVsPSf5Pz9+b5ExaxpC
+e8iGGkDgkbUlGM0ulbr0YqbKva7EoOAY+YL5ZJs8S0KIsuQNc0f2vgI8xcyPQHge
+CaLcw0OzvmfCHf/OMOIozEKgKaAK6pHvaBXP0tijZjBkMBIGA1UdEwEB/wQIMAYB
+Af8CAQEwHwYDVR0jBBgwFoAULqCIsAsNYonsHT/Un8ySRI5IaUYwHQYDVR0OBBYE
+FC6giLALDWKJ7B0/1J/MkkSOSGlGMA4GA1UdDwEB/wQEAwIBBjAKBggqhkjOPQQD
+AwNpADBmAjEAt2e2vVG4/aMjIokbQQuCnvI8so8rZl/IbKupMCJitfFi7oVlHllY
+FDdYMDTKWLZgAjEAsa2wuz3Ew6/68XXtIT+51snqkl2KLlaVgKXYlpTh2zqQBIBd
+KO1nMO/rQRfuZ701
+-----END CERTIFICATE-----
+"""
+BELGIUM_ROOT_CA6_SHA256 = "9c872bc979a7c09a58d4a274c199e5cb16cfa9b9618d98bc9a9988e984b8495c"
+QUALIFIED_TSA = "http://tsa.belgium.be/connect"
+# Qualified time-stamping units by the SHA-256 of their certificate, as Belgium's EU trusted list lists them.
+TRUSTED_LIST = {"territory": "BE", "url": "https://tsl.belgium.be/tsl-be.xml", "issued": "2026-10-20T15:00:00Z",
+                "next_update": "2027-04-20T15:00:00Z"}
+QUALIFIED = {
+    "8751fca3d49938f02aaea3d69983adf3d9f324447b4c00b817c3900198c0fbfd": ("EC1 TSU 2021", "2021-05-04T00:00:00Z"),
+    "3917e4995093954bc162568c7188c00a222023166824480e8f84a4e1f3441dc1": ("EC2 TSU 2021", "2021-05-04T00:00:00Z"),
+    "61726c187889a606dda86821a1faf3c5ff5f4a116254a2325893655c7e45f64f": ("TSU 202301", "2024-04-12T15:00:36Z"),
+    "e69a32ea707c71c1633f7c9cbfc60f902c50081d97473163ebf7098d5df36f30": ("TSU 202302", "2024-04-12T15:00:32Z"),
+}
+QC_STATEMENTS, QC_COMPLIANCE = "1.3.6.1.5.5.7.1.3", bytes.fromhex("0604008e460101")
+
+
 @lru_cache(maxsize=1)
 def trusted_roots():
 
 
     roots = []
     for block in re.findall(r"-----BEGIN CERTIFICATE-----.+?-----END CERTIFICATE-----",
-                            Path(certifi.where()).read_text(encoding="ascii"), re.S) + [FREETSA_ROOT]:
+                            Path(certifi.where()).read_text(encoding="ascii"), re.S) + [FREETSA_ROOT, BELGIUM_ROOT_CA6]:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", CryptographyDeprecationWarning)
             try:
@@ -71,3 +109,18 @@ def trusted_roots():
             except ValueError:
                 pass
     return tuple(roots)
+
+
+def qualified(certificate):
+    """The trusted-list entry of a time-stamping unit whose certificate declares eIDAS QcCompliance, or None."""
+    from cryptography.hazmat.primitives import hashes
+    entry = QUALIFIED.get(certificate.fingerprint(hashes.SHA256()).hex())
+    try:
+        declared = QC_COMPLIANCE in certificate.extensions.get_extension_for_oid(
+            x509.ObjectIdentifier(QC_STATEMENTS)).value.value
+    except x509.ExtensionNotFound:
+        declared = False
+    if not entry or not declared:
+        return None
+    return {"provider": "FPS Policy and Support - BOSA, Kingdom of Belgium", "service": entry[0],
+            "status": "granted", "since": entry[1], "trusted_list": TRUSTED_LIST}

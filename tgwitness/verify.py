@@ -355,7 +355,8 @@ def timestamp_signature(reply, roots):
             raise ValueError("The timestamp certificate chain exceeds a CA path length constraint")
     root = chain[-1]
     return {"signer": signer.subject.rfc4514_string(), "root": root.subject.rfc4514_string(),
-            "root_sha256": root.fingerprint(hashes.SHA256()).hex()}
+            "root_sha256": root.fingerprint(hashes.SHA256()).hex(),
+            "signer_sha256": signer.fingerprint(hashes.SHA256()).hex()}
 
 
 def ots_summary(proof, digest):

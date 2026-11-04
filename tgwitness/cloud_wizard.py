@@ -223,6 +223,16 @@ def version(ref=None, session=None):
     return {"ref": ref, "commit": commit}
 
 
+def billed(rate):
+    # What Phala Cloud bills a created CVM, compute and disk together; it names the disk price only then.
+    try:
+        hourly = float((rate or {}).get("total"))
+    except (TypeError, ValueError):
+        return None
+    return {"monthly": "%.2f" % (hourly * HOURS_PER_MONTH), "hourly": ("%.5f" % hourly).rstrip("0").rstrip("."),
+            "currency": "USD"}
+
+
 def phala_type(families):
     offers = []
     for family in families:
@@ -320,10 +330,12 @@ def gateway_accounts(cf, accounts):
 
 
 class Jobs:
-    def __init__(self, root, session=None, fetch=None, beacon=None, collateral=None):
+    def __init__(self, root, session=None, fetch=None, beacon=None, collateral=None, image="auto"):
         self.directory = Path(root) / "deployments"
         self.session, self.fetch, self.collateral = session, fetch or cloud.collector_statement, collateral
-        self.beacon = beacon or (lambda topic, key=None: cloud.read_beacon(topic, key, self.session))
+        self.image = image
+        self.beacon = beacon or (lambda topic, key=None, public_key=None:
+                                 cloud.read_beacon(topic, key, self.session, public_key))
         self.guard, self.job = threading.Lock(), None
 
     def check(self, request):
@@ -355,7 +367,8 @@ class Jobs:
                           "ipv4": server.get("ipv4"), "commit": record.get("commit"),
                           "fingerprint": (record.get("collector") or {}).get("fingerprint"),
                           "quick": bool(record.get("beacon")), "address": (record.get("address") or {}).get("host"),
-                          "gateway": bool(record.get("gateway")), "attested": record.get("provider") == "phala"})
+                          "gateway": bool(record.get("gateway")), "attested": record.get("provider") == "phala",
+                          "price": billed(server.get("hourly_rate"))})
         return found
 
     def address(self, name):
@@ -453,7 +466,7 @@ class Jobs:
             record, out = cloud.deploy(args, host, cf, self.fetch, resolve=lambda repository, ref: chosen["commit"],
                                        progress=progress, beacon=self.beacon,
                                        archive=lambda spec: cloud.fetch_archive(spec, self.session),
-                                       collateral=self.collateral)
+                                       collateral=self.collateral, image=self.image)
             progress("done", "TgWitness answered with its signing key " + record["collector"]["fingerprint"])
             address = record["address"]["host"] if quick else record["panel_host"]
             return {"name": name, "provider": request.provider, "panel": "https://" + address, "quick": quick,

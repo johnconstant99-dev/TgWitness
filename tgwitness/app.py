@@ -335,7 +335,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         replica_task = None
         storage_task = operator_bot_task = None
         alert_task = None
-        host_task = None
+        host_task = address_task = None
         pool_task = None
         collector = None
         journal_ready = False
@@ -438,6 +438,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     host_task = asyncio.create_task(assurance.assurance_loop(
                         store, app.state.assurance["mode"], app.state.assurance["provider"],
                         status=app.state.host_status))
+                    beacon = (assurance.deployment() or {}).get("beacon")
+                    if beacon:
+                        address_task = asyncio.create_task(assurance.address_loop(vault, beacon))
                 if proxy_pool is None:
                     shared_pool.intervals = lambda: {"lists": tuning.value(store, "proxy_lists_minutes") * 60,
                                                      "probe": tuning.value(store, "proxy_probe_minutes") * 60}
@@ -487,8 +490,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 if getattr(app.state, "account_export", None):
                     await app.state.account_export.close()
                 check_task = shared_pool.check_task if proxy_pool is None else None
-                for task in (resume_task, anchor_task, replica_task, alert_task, host_task, pool_task, check_task,
-                             storage_task, operator_bot_task, getattr(getattr(app.state, "storage", None), "task", None)):
+                for task in (resume_task, anchor_task, replica_task, alert_task, host_task, address_task, pool_task,
+                             check_task, storage_task, operator_bot_task,
+                             getattr(getattr(app.state, "storage", None), "task", None)):
                     if task:
                         task.cancel()
                         await asyncio.gather(task, return_exceptions=True)

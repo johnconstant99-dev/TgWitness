@@ -171,7 +171,7 @@ def check_deployment(directory):
     world = GatewayWorld()
     host, stages, hz, cf = Host(world, directory), [], hetzner.Hetzner(HZ_TOKEN, session=world), \
         cloud.Cloudflare(CF_TOKEN, world)
-    beacon = lambda topic, key=None: cloud.read_beacon(topic, key, world)  # noqa: E731
+    beacon = lambda topic, key=None, public_key=None: cloud.read_beacon(topic, key, world, public_key)  # noqa: E731
     record, out = cloud.deploy(gateway_args(directory), hz, cf, host.fetch, resolve=lambda repository, ref: ref,
                                progress=lambda stage, text: stages.append(stage), beacon=beacon)
     assert record["state"] == "running" and stages == ["tunnel", "gateway", "gateway", "server", "running", "waiting"], stages
@@ -246,7 +246,7 @@ def check_shared(directory):
     world.locations[LOCATION] = {"id": LOCATION, "name": "home router", "doh_subdomain": SUBDOMAIN,
                                  "endpoints": {"dot": {"enabled": True}, "doh": {"enabled": True}}}
     host, hz, cf = Host(world, directory), hetzner.Hetzner(HZ_TOKEN, session=world), cloud.Cloudflare(CF_TOKEN, world)
-    beacon = lambda topic, key=None: cloud.read_beacon(topic, key, world)  # noqa: E731
+    beacon = lambda topic, key=None, public_key=None: cloud.read_beacon(topic, key, world, public_key)  # noqa: E731
     lines = []
     record, out = cloud.deploy(gateway_args(directory, "dns-2"), hz, cf, host.fetch,
                                resolve=lambda repository, ref: ref, progress=lambda stage, text: lines.append(text),
@@ -415,7 +415,7 @@ def check_browser(directory, output):
         with PanelApp(directory / "panel") as server, sync_playwright() as p:
             jobs = server.app.state.cloud_jobs
             jobs.session, jobs.fetch = world, host.fetch
-            jobs.beacon = lambda topic, key=None: cloud.read_beacon(topic, key, world)
+            jobs.beacon = lambda topic, key=None, public_key=None: cloud.read_beacon(topic, key, world, public_key)
             browser = launch_browser(p)
             page = browser.new_context(viewport={"width": 1280, "height": 1000}, reduced_motion="reduce").new_page()
             page.on("pageerror", lambda exc: errors.append(str(exc)))
