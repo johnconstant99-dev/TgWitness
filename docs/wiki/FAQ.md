@@ -13,7 +13,7 @@
 <summary>On this page</summary>
 
 - [Does TgWitness recover messages deleted before it started?](#does-tgwitness-recover-messages-deleted-before-it-started)
-- [Does a valid signature prove Telegram sent the message?](#does-a-valid-signature-prove-telegram-sent-the-message)
+- [What does archive verification check?](#what-does-archive-verification-check)
 - [Is every Telegram event guaranteed to arrive?](#is-every-telegram-event-guaranteed-to-arrive)
 - [Can I use a bot token instead of a user account?](#can-i-use-a-bot-token-instead-of-a-user-account)
 - [Do I need my own API ID and API hash?](#do-i-need-my-own-api-id-and-api-hash)
@@ -34,11 +34,18 @@
 No. You might see a deletion with no content behind it. Loading history only gets what
 the account can see right now, not old versions.
 
-## Does a valid signature prove Telegram sent the message?
+<a name="does-a-valid-signature-prove-telegram-sent-the-message"></a>
 
-No. It only shows the record matches the signing key. Whoever controls the collector and
-its key could fake a journal. Checkpoints kept elsewhere and independent witnesses make
-later rewriting visible, but they still don't prove Telegram sent anything.
+## What does archive verification check?
+
+Record signatures, the journal chain, the file manifest and attachment hashes. Give it a
+key fingerprint and checkpoint kept elsewhere and it also checks the expected key and an
+earlier journal state. An independent witness adds more checkpoints, and
+[GitHub Actions capture](../SEALED-ACTIONS.md) also checks the archive's provenance against
+the approved workflow and collector version.
+
+[Verification steps](Exports-and-Verification.md) · [Technical trust model](../SECURITY-MODEL.md)
+
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 

@@ -157,4 +157,3 @@ See [live acceptance](internal/LIVE_ACCEPTANCE.md) for the controlled qualificat
 
 Local detailed receipts and screenshots are under test-results/ (Git-ignored).
 The public screenshot in docs/assets/ contains only fictional demonstration data.
-

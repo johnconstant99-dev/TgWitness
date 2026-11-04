@@ -1,6 +1,8 @@
 # The Export Clinic — review package
 
-Controlled local-file experiment. Test accounts and scripted conversations. Files labeled modified were deliberately changed by a local helper. This is not a Telegram exploit.
+Test accounts and scripted conversations. A local helper deliberately changed the files labeled modified. The official Telegram Desktop executable and the conversations displayed in Telegram were unchanged.
+
+This reading guide describes the published review package. The downloadable ZIP retains its original README and article; the website supplies the current explanation and verification guide.
 
 ## Start here
 
@@ -17,7 +19,7 @@ The full MP4 mentioned in the video manifest is a browser-friendly container con
 
 Seven selected test conversations contain 45 message records; 17 records and 32 files differ. Changed original files were recovered from retained helper backups and matched to their recorded hashes. Unchanged viewer assets were copied from the captured export. The before directory is a reconstructed pre-change tree, not a separately preserved original whole-folder archive.
 
-The helper's original work logs are not published. The selected ledger contains only relative export paths and before/after hashes. These are operator-generated records, not Telegram server attestations.
+The selected ledger lists relative export paths and before/after hashes from the helper's work logs. Compare those entries with the paired files and the recording.
 
 No PDF files were included in the recorded exports. Captions referring to PDFs do not supply the underlying attachment.
 
@@ -31,4 +33,4 @@ The root `SHA256SUMS.txt` covers every file in this ZIP except itself. The neste
 
     Get-FileHash -LiteralPath '<path-to-file>' -Algorithm SHA256
 
-Compare the result with the corresponding line. A matching checksum identifies the bytes supplied; it does not establish the truth of a conversation or independently certify its server origin. The host clock shown in the video is not a trusted timestamp.
+Compare the result with the corresponding line. A match confirms that your file has the published bytes. Use the paired exports and change ledger to inspect the changes. Recording times come from the host computer's clock.

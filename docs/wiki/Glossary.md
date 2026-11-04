@@ -26,7 +26,7 @@
 | Snapshot | History visible at the time of acquisition |
 | Coverage gap | A recorded interruption or uncertainty in observation |
 | Hash chain | Each record incorporates the preceding record's hash |
-| Signature | A cryptographic check tied to a signing key; not a Telegram signature |
+| Signature | A cryptographic check binding the saved record to its signing key |
 | Fingerprint | A compact hash identifying a public key, retained separately for trust decisions |
 | Checkpoint | A signed journal boundary with its record count and head hash |
 | Manifest | The file inventory and hashes covered by a signed export |

@@ -2,10 +2,13 @@
 
 [Security policy](../.github/SECURITY.md)
 
-You can check our release files against a public workflow and commit without trusting
-our infrastructure. You still trust the code you reviewed, GitHub's hosted runners and
-OIDC, Sigstore and your own tools. An attestation is a signed claim, not proof the code
-is harmless.
+Check the exact file you received against its public workflow and source commit.
+GitHub's hosted runners, OIDC and Sigstore supply the provenance records; your
+verification policy picks the workflow and code revisions you trust.
+
+For a Telegram archive, start with [sealed evidence](#sealed-evidence), or the
+[signed journal guide](wiki/Exports-and-Verification.md) for a local workspace.
+For a TgWitness release, follow the source-archive steps below.
 
 ## Release source archive
 

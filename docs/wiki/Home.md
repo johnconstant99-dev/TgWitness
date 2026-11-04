@@ -31,7 +31,7 @@ From the first captured message to an export someone else can check.
 
 Quick sanity check: send a test message in a chat you control, edit it, delete it. You
 should see the message, a second version, and the content still there after the deletion.
-Then verify the export.
+Then verify the export and keep the result with the test archive.
 
 ## Pick your task
 
@@ -103,8 +103,9 @@ Use an account you can afford to lose. A session is full access to that account,
 sessions, panel tokens and keys to yourself. Messages and files on disk aren't encrypted
 by TgWitness, use disk encryption.
 
-A signature shows the record wasn't changed against a trusted key. It doesn't prove
-Telegram sent the message, that nothing was missed, or that the operator didn't make it up.
+Verify the signed archive with a key fingerprint and checkpoint kept elsewhere. It checks
+the saved records and files, and the archive reports the collection period and any gaps.
+[Export and verify](Exports-and-Verification.md).
 
 ## Project and help
 

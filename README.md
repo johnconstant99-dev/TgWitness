@@ -131,15 +131,14 @@ own workspace, session and signing key.
   <a href="docs/DEPLOYMENT.md"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-deploy-mobile.svg"><img src="docs/assets/presentation/readme-nav-deploy.svg" width="32%" alt="Docker and servers"></picture></a>
 </p>
 
-<details>
-<summary><strong>Export through GitHub Actions</strong> · preview</summary>
+## Capture with GitHub provenance
 
-Run the pinned collector from your fork, pick one chat, get an encrypted archive
-with GitHub provenance. Also available under **Exports** in the panel.
+**Preview.** Collect a chat on a GitHub-hosted runner with a pinned TgWitness and a
+fresh Telegram session, then download the encrypted archive with its GitHub
+attestation. The verifier checks the approved workflow and collector version, the
+archive digest, the journal and attachments. Also available under **Exports** in the panel.
 
 [Open the capture page](https://phishdestroy.github.io/TgWitness/docs/capture/) · [Instructions](docs/SEALED-ACTIONS.md)
-
-</details>
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
@@ -155,10 +154,11 @@ themselves:
 python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --checkpoint checkpoint.json
 ```
 
-This proves the archive wasn't changed. It doesn't prove the messages came from
-Telegram or that the history is complete.
+The verifier checks signatures, the journal chain, the file manifest and attachments
+against your trusted inputs. With a retained checkpoint it also checks the archive
+against an earlier journal state.
 
-[Verification guide](docs/TRUST.md) · [Checks and tested scale](docs/VERIFICATION.md)
+[Archive verification](docs/wiki/Exports-and-Verification.md) · [Checks and tested scale](docs/VERIFICATION.md)
 
 <details>
 <summary><strong>Inside the signed record</strong> · hashes, signatures and independent checkpoints</summary>
@@ -180,85 +180,33 @@ Telegram or that the history is complete.
 
 <a name="manifesto"></a>
 
-## What nobody can prove, including us
+## Check the capture and the saved record
 
 <picture>
   <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-manifesto-mobile.svg">
-  <img src="docs/assets/presentation/readme-manifesto.svg" width="1200" alt="No signature makes a Telegram message true — ours included. We preserve what the account saw, link it so that a change shows, and hand you the verifier.">
+  <img src="docs/assets/presentation/readme-manifesto.svg" width="1200" alt="Capture the conversation. Verify the record. Save messages, edits and files, check signatures and checkpoints, and review the capture process.">
 </picture>
 
-**We publish this under a project name, not a person's.** No title, degree or prefix
-belongs in front of it: a credential describes who is speaking, not what
-happened. The same bytes that would be doubted in one pair of hands do not become
-true in another. Whoever brings evidence is an interested party — we are no
-exception — so we would rather you checked the file than believed the author.
+TgWitness records content delivered to the connected Telegram account, with
+chat, message and sender identifiers, captured versions and collection metadata.
+The archive brings those records, preserved attachments and verification data
+together for review.
 
-We do not think a method exists that makes Telegram content certain. The one
-thing that would settle it is a signature from Telegram, over the message, that
-a third party can check. Telegram does not do that — not in an export, not
-anywhere else. Everything after that, ours included, is a record of what somebody
-saw.
+| Check | What the recipient verifies |
+| --- | --- |
+| Signed journal and manifest | Record signatures, the hash chain and delivered files against the expected signing key. |
+| Separately retained checkpoint | The journal against a previously recorded length and head hash. |
+| Independent witness | The journal against checkpoints retained by a separate witness. |
+| GitHub Actions capture | The archive against its attestation, approved hosted workflow and collector version. |
 
-<details>
-<summary><strong>What we found looking into this</strong><br><sub>unequal standards, borrowed reputation, and why an export settles nothing</sub></summary>
+[Export Clinic](https://phishdestroy.github.io/TgWitness/docs/export-clinic/)
+shows a Telegram conversation beside deliberately altered Desktop export files.
+Compare the versions, inspect the changes, and follow the collection and
+verification steps for a signed TgWitness archive.
 
-We read through cases where chat material decided the outcome, and we collected
-such material ourselves, recently, the same way everyone does. Two things became
-clear.
-
-**The standard moves with the accusation.** Where one side is already assumed to be
-right, a screenshot settles the matter. Where the other side has to clear its
-name, a full export filmed from beginning to end is waved away. The same
-artifact, opposite weight.
-
-**Filming does not fix it.** An export recorded on video, with the archive signed on
-camera, shows that a file existed and was signed. It says nothing about where the
-content came from.
-
-We name no tools, because the problem is not in any of them. Capture software,
-page archiving and device extraction all preserve faithfully what they were
-given. The question none of them answers is who gave it to them. Ask that
-instead: who is telling you this, who signed the file, who answers for the data.
-Telegram did not sign it, and Telegram is not on anyone's side here. What is left
-is the motive of whoever collected it, and the ways in are many.
-
-A vendor's standing says nothing about the person holding the tool. Neither does
-its price, its customer list, nor how much it would lose by being wrong. Those
-are facts about a company, and the question in front of you is the motive of
-whoever ran it that day. A trusted signature over a false record is worse than no
-signature at all: it does not fail quietly, it lends the falsehood someone else's
-reputation.
-
-Where such material is accepted today, it is usually accepted on the examiner's
-oath, their licence, and the fact that forging every background request and
-cached fragment of a page by hand is tedious. Those are procedural guarantees,
-not mathematical ones. Tedious is not impossible, an oath is worth whatever the
-person swearing it is worth, and both weigh unevenly — they help most whoever
-already has standing to lose.
-
-**This is why an export should not be the thing that decides.** Open one in a text
-editor, change a 1 to a 2, save. Nothing complains, and there is nothing to
-compare it against. No cache tricks, no DNS, no interception — a text editor.
-
-We are not saying Telegram's export is insecure. Registration, payments and
-account protection are defended deliberately and well. Export is simply not that
-kind of feature: forks export too, the format carries no integrity of any kind,
-and it was never meant to vouch for its own contents.
-
-</details>
-
-> **We take no side in what is recorded.** Who runs the tool is not the tool's
-> business, and its purpose is plain: preserve what was there, as completely and as
-> checkably as it can be preserved. This software is not on its operator's side. It
-> is on the side of the record staying what it was — about everyone in it,
-> including whoever collected it.
-
-So we claim no proof. TgWitness signs what the connected account saw, links every
-record to the one before it, and ships the verifier inside the archive, so the
-outcome is not ours to assert. Where a record can be anchored outside this
-machine — an independent witness, an external timestamp — we do that and show it.
-What stays unproven is written down, in the verifier's own output and in the
-[trust model](docs/SECURITY-MODEL.md).
+[Verification steps](docs/wiki/Exports-and-Verification.md) ·
+[GitHub capture](docs/SEALED-ACTIONS.md) ·
+[Technical trust model](docs/SECURITY-MODEL.md)
 
 <!-- authors-manifesto:end -->
 

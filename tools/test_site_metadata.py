@@ -114,7 +114,8 @@ def test_llms_index_leads_with_workflows_and_verification():
     assert "Signed exports let recipients verify file integrity" in intro
     assert "eight designs" in intro and "Case Board" in intro
     assert all(f"/docs/{slug}/index.md" in content for slug in NEW_GUIDES)
-    assert "Telegram authorship, complete coverage" in content
+    assert "GitHub Actions capture adds an attestation" in content
+    assert "signing key and retained checkpoints" in content
     assert "content deleted before capture is unavailable" in content
     assert "llms-full.md" in content
 

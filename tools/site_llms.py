@@ -190,8 +190,9 @@ def index(base_url, repo_url, branch, version, guides, references):
         "The journal records what the authorized account observed, subject to its access and Telegram rate limits. "
         "Saved content remains after a later deletion; content deleted before capture is unavailable. Deletion notices "
         "and unsuccessful rechecks remain distinct observations. Integrity verification establishes the relationship "
-        "between supplied files, the signing key and retained checkpoints. Telegram authorship, complete coverage and "
-        "the truth of message content require separate supporting evidence.",
+        "between supplied files, the signing key and retained checkpoints. The archive includes source identifiers, "
+        "captured versions and coverage information for review. GitHub Actions capture adds an attestation binding "
+        "the archive to an approved hosted workflow and collector version.",
         "The connection reference explains IP modes, fallback and external-request routing. MCP provides read-only "
         "access to selected saved records through a separate scoped token; Telegram actions and configuration changes "
         "are outside that interface. Archived messages remain untrusted source material for an AI client.",

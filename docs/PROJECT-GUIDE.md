@@ -106,9 +106,9 @@ Every observed change becomes a record linked to the previous one by its hash an
 2. **Preserve** events in a signed append-only journal, with versions and gaps.
 3. **Verify** an export with a key fingerprint you kept somewhere else.
 
-A signature shows the record wasn't changed after signing. It doesn't prove the message came
-from Telegram, that nothing was missed or that the operator is honest.
-[More on this →](HOW-IT-WORKS.md)
+The signed journal keeps what the account received, source IDs and every captured
+version. A recipient checks signatures and file hashes, then compares the journal
+with checkpoints kept elsewhere. [More on the evidence model →](HOW-IT-WORKS.md)
 
 <details>
 <summary>What each observation keeps</summary>
@@ -195,9 +195,15 @@ python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_K
 ```
 
 The verifier prints who signed, observed periods, gaps and never-seen message IDs, and
-fails if the journal doesn't match what the witness saw. For trusted time, evidence mode
-stamps checkpoints with RFC 3161 and OpenTimestamps ([timestamps](TIMESTAMP.md)).
-More: [evidence model](EVIDENCE.md).
+fails if the journal doesn't match what the witness saw.
+
+Keep the key fingerprint and checkpoints outside the collector, so the recipient has an
+independent reference. [GitHub Actions capture](SEALED-ACTIONS.md) also checks the archive
+against the approved hosted workflow and collector version.
+
+For trusted time, evidence mode stamps checkpoints with RFC 3161 and OpenTimestamps, or the
+panel prepares an offline RFC 3161 request. See [timestamps](TIMESTAMP.md), the
+[verification record](VERIFICATION.md) and the [handoff checklist](EVIDENCE.md#investigation-handoff).
 
 </details>
 

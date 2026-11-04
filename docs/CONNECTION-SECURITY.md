@@ -357,4 +357,3 @@ Keep the existing key for existing installations until a deliberate migration is
 implemented and verified. Deleting `vault.key` or replacing a master key can destroy
 access to sessions/signing keys. Keep encrypted backups and keys separately and
 test recovery in an isolated instance.
-
