@@ -4232,7 +4232,9 @@
 "4867ff40b5d4ec7dd84b3e1ef5a5c7696d2b903ee20d89b94bb92ec9cdd28748": "Maszyna wirtualna CVM uruchomiła instancję <code>dstack-0.5.12</code> z wyłączonym dostępem SSH. Moduł zbierający opublikował swój podpisany adres około\n    1,5 minuty po utworzeniu. Wdrożenie przeszło następnie instancje <code>tdx_binding</code>, <code>tdx_quote</code> (Intel TCB\n    UpToDate, rekord poświadczenia sprzętowego v4, FMSPC <code>20a06f000000</code>, bez trybu debugowania, bez możliwości migracji, obsługujący dane weryfikacji kryptograficznej\n    pobrane z Intel), <code>tdx_compose_hash</code>, <code>tdx_compose</code> (bajt po bajcie) oraz <code>tdx_identity</code> (klucze KMS).",
 "3ce1b6c5e5d37846efacf984cf4a7e3038e2621e6c38b6ef5fccf80d15ce3497": "W panelu kreatora cena wyświetlała się jako <code>tdx.small</code> za 0,058 USD za godzinę. W przypadku podania nieprawidłowego klucza pojawiał się prosty\n    komunikat „nie zaakceptowano klucza API”.",
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "Wdrożenie wyświetliło kwotę, jaką Phala nalicza za CVM, łącznie z dyskiem: 0,06078 USD za godzinę.",
-"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "Kreator panelu został uruchomiony w usłudze Phala Cloud dwukrotnie: raz za pośrednictwem interfejsu API zadań, a raz za pośrednictwem\nprzeglądarki opartej na prawdziwym silniku Chromium: sprawdzenie ceny, utworzenie z zatwierdzeniem pod nazwą <strong>Advanced</strong>, wszystkie sześć\nkontroli poświadczeń zakończyło się powodzeniem, lista serwerów wyświetlała cenę do rozliczenia (44,37 USD miesięcznie), <strong>Find\naktualny adres </strong>, pobranie zmierzonej konfiguracji Docker Compose oraz usunięcie. W przeglądarce nie odnotowano żadnych błędów wyświetlania stron.\nZa każdym razem obszar roboczy pozostawał następnie pusty."
+"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "Kreator panelu został uruchomiony w usłudze Phala Cloud dwukrotnie: raz za pośrednictwem interfejsu API zadań, a raz za pośrednictwem\nprzeglądarki opartej na prawdziwym silniku Chromium: sprawdzenie ceny, utworzenie z zatwierdzeniem pod nazwą <strong>Advanced</strong>, wszystkie sześć\nkontroli poświadczeń zakończyło się powodzeniem, lista serwerów wyświetlała cenę do rozliczenia (44,37 USD miesięcznie), <strong>Find\naktualny adres </strong>, pobranie zmierzonej konfiguracji Docker Compose oraz usunięcie. W przeglądarce nie odnotowano żadnych błędów wyświetlania stron.\nZa każdym razem obszar roboczy pozostawał następnie pusty.",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "Wybierz Takeout，eksport przez zwykłe API lub dziennik czatu na tymczasowym runnerze GitHub．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions obsługuje eksport całego konta lub wybranych czatów przez Takeout albo zwykłe API oraz dziennik jednego czatu．Przewodnik <a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> opisuje weryfikację ustawień i limit 120 minut．Lokalne eksporty i kopie do udostępniania nie dziedziczą atestacji GitHub，a testy syntetyczne nie potwierdzają działania z prawdziwym kontem Telegram．"
 },
 "modes": {
 "modes.actions.body": "Potwierdzenia podglądu, żądania i wyników są podpisane. Przed naciśnięciem przycisku serwer ponownie pobiera wiadomość i odrzuca zmienioną treść wprowadzoną z klawiatury. Zwrócony tekst wywołania zwrotnego oraz adresy URL pozostają w zarejestrowanym kontekście.",
@@ -4964,6 +4966,8 @@
 "Signed /api/assurance statement": "Podpisane oświadczenie /api/assurance",
 "provider API": "API dostawcy",
 "Cloudflare API": "API Cloudflare",
-"outbound only": "tylko wychodzące"
+"outbound only": "tylko wychodzące",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "Wybierz Takeout，eksport przez zwykłe API lub dziennik czatu na tymczasowym runnerze GitHub．",
+"github actions capture takeout account export encrypted archive": "Akcje GitHub służące do pobierania zaszyfrowanego archiwum takeout account export"
 }
 }

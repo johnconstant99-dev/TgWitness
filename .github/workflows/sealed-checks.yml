@@ -28,6 +28,7 @@ on:
       - 'tools/test_sealed_release.py'
       - 'tools/test_sealed_parts.py'
       - 'tools/test_sealed_account.py'
+      - 'tools/test_sealed_selection.py'
       - 'tools/test_account_acquisition.py'
       - 'tools/test_telegram_export.py'
       - 'tools/test_ocr_source_fetch.py'
@@ -77,6 +78,7 @@ on:
       - 'tools/test_sealed_release.py'
       - 'tools/test_sealed_parts.py'
       - 'tools/test_sealed_account.py'
+      - 'tools/test_sealed_selection.py'
       - 'tools/test_account_acquisition.py'
       - 'tools/test_telegram_export.py'
       - 'tools/test_ocr_source_fetch.py'
@@ -164,7 +166,7 @@ jobs:
           python -I -m pytest tools/test_file_hash_export.py tools/test_sealed_hash_export.py
           tools/test_export_capacity.py tools/test_sealed_package.py tools/test_sealed_release.py
           tools/test_account_acquisition.py tools/test_telegram_export.py tools/test_sealed_account.py
-          tools/test_sealed_parts.py tools/test_ocr_source_fetch.py tools/test_private_write.py -q
+          tools/test_sealed_parts.py tools/test_sealed_selection.py tools/test_ocr_source_fetch.py tools/test_private_write.py -q
       - run: python tools/check_sealed_login.py
       - run: python tools/check_sealed_browser.py
       - run: python tools/check_sealed_container.py

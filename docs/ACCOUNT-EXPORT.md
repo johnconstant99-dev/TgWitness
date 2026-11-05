@@ -82,6 +82,6 @@ These controls support purpose limitation and data minimization; they are not an
 
 Free text, dates, rare events and combinations of facts can identify people even after names are removed. Prefer text omission where message content is unnecessary; inspect the full derivative where it is necessary. Keep the source and vault protected, agree retention and sharing with the responsible person, and record which exact ZIP was handed over.
 
-This feature runs in the local panel. The separately published [hosted Capture preview](https://phishdestroy.github.io/TgWitness/docs/capture/) uses a pinned disposable runner and its own attestation policy. Local collector signatures do not inherit that runner's provenance. A change here does not update an approved remote workflow or its trust pins; hosted full-account capture needs a separately reviewed and published collector/workflow pair and live runner acceptance. No hosted deployment or real Telegram account acquisition is claimed by local synthetic tests.
+GitHub Actions supports full-account and selected-chat exports through Takeout or the regular API，plus a one-chat event journal．The [hosted capture guide](https://phishdestroy.github.io/TgWitness/docs/capture/) explains settings verification and the 120-minute limit．Local exports and sharing copies do not inherit GitHub attestation，and synthetic tests do not establish live Telegram acceptance．
 
 [Evidence format](EVIDENCE.md) · [Case reports](CASE_REPORTS.md)

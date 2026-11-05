@@ -4327,7 +4327,9 @@
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "Quá trình triển khai đã hiển thị mức phí mà Phala tính cho CVM, bao gồm cả đĩa: 0,06078 USD mỗi giờ.",
 "1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "Trình hướng dẫn bảng điều khiển đã chạy trên Phala Cloud hai lần, một lần thông qua API công việc của nền tảng này và một lần thông qua\ntrình duyệt sử dụng Chromium thực: kiểm tra giá, tạo cấu hình với cam kết dưới <strong>Advanced</strong>, cả sáu\nkiểm tra chứng thực đều đạt yêu cầu, danh sách máy chủ hiển thị mức giá được tính (44,37 USD mỗi tháng), <strong>Find\nđịa chỉ hiện tại </strong>, quá trình tải xuống cấu hình Docker Compose đã được đo lường, và quá trình xóa. Trình duyệt không ghi nhận bất kỳ lỗi trang nào.\nSau mỗi lần thực hiện, không gian làm việc đều trống rỗng.",
 "d7495492469509fb65dab71abf3bac909bd48995767d8cfed89412a58bf2a557": "Bộ thu thập đã đăng địa chỉ của mình được ký bằng khóa riêng, ngay bên cạnh bài đăng HMAC của nhà điều hành.\n    Sau đó, hai bài đăng giả mạo đã được thêm vào chủ đề này, một bài có HMAC bằng 0 và một bài được ký bằng một\n    khóa Ed25519 khác, cả hai đều tuyên bố thời gian là năm 2096. <code>verify</code> đã lấy địa chỉ được ký bằng\n    khóa của bộ thu thập và vượt qua tất cả 16 bước kiểm tra; con dấu này một lần nữa mang dấu thời gian đủ điều kiện của Bỉ,\n    dấu thời gian của FreeTSA và chữ ký của bên xác minh, và <code>check-report</code> đã xác nhận các thông tin này.",
-"ea8f5ef0a9c3d397802616fc63de51e4912d849a54d0ca64079906823442286e": "<code>tdx_os</code> không thể chạy nếu thiếu <code>dstack-mr</code>; phiên bản hiện tại của công cụ này có lệnh <code>measure-os</code> thay vì <code>measure --json</code> được nêu trong tài liệu. Công cụ xác minh hiện tự tính MRTD và RTMR0-2 từ ảnh hệ điều hành đã công bố và cấu hình máy ảo, bao gồm các bảng ACPI."
+"ea8f5ef0a9c3d397802616fc63de51e4912d849a54d0ca64079906823442286e": "<code>tdx_os</code> không thể chạy nếu thiếu <code>dstack-mr</code>; phiên bản hiện tại của công cụ này có lệnh <code>measure-os</code> thay vì <code>measure --json</code> được nêu trong tài liệu. Công cụ xác minh hiện tự tính MRTD và RTMR0-2 từ ảnh hệ điều hành đã công bố và cấu hình máy ảo, bao gồm các bảng ACPI.",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "Chọn Takeout，xuất qua API thông thường hoặc nhật ký trò chuyện trên runner GitHub tạm thời．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions hỗ trợ xuất toàn bộ tài khoản hoặc các cuộc trò chuyện được chọn qua Takeout hay API thông thường，cùng nhật ký một cuộc trò chuyện．Hướng dẫn <a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> giải thích việc kiểm tra cài đặt và giới hạn 120 phút．Bản xuất cục bộ và bản sao chia sẻ không kế thừa chứng thực GitHub，các thử nghiệm tổng hợp không chứng minh hoạt động với tài khoản Telegram thật．"
 },
 "modes": {
 "modes.actions.body": "Các biên nhận xem trước, yêu cầu và kết quả đều được ký điện tử. Trước khi nhấn nút, máy chủ sẽ truy xuất lại tin nhắn và từ chối bất kỳ thay đổi nào từ bàn phím. Văn bản và các URL được trả về qua hàm callback vẫn được ghi lại trong bối cảnh.",
@@ -5111,6 +5113,8 @@
 "Signed /api/assurance statement": "Tuyên bố /api/assurance đã được ký",
 "provider API": "API nhà cung cấp",
 "Cloudflare API": "API Cloudflare",
-"outbound only": "chỉ gửi đi"
+"outbound only": "chỉ gửi đi",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "Chọn Takeout，xuất qua API thông thường hoặc nhật ký trò chuyện trên runner GitHub tạm thời．",
+"github actions capture takeout account export encrypted archive": "GitHub Actions thu thập tệp lưu trữ được mã hóa takeout account export"
 }
 }

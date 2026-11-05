@@ -13,13 +13,14 @@ import uvicorn
 from playwright.sync_api import expect, sync_playwright
 
 from check_browser import ROOT, launch_browser, check_layout, RunningApp
-from tools.browser_fixtures import config
+from tools.browser_fixtures import ScopeClient, config
 from tgwitness.sealed import create_app
 from tgwitness.sealed_package import connection, package
 from tgwitness.verify import verify_bundle
 from check_sealed_login import RecordingClient, main as check_login
 from tgwitness import api_pool
-from tools.test_file_hash_export import ExportTransport
+from tools.test_file_hash_export import CONTENT, ExportTransport
+from tgwitness.sealed_selection import Selection
 from tgwitness.sealed_parts import EncryptedParts
 
 
@@ -29,8 +30,8 @@ class QuietFiles(SimpleHTTPRequestHandler):
 
 
 class RunningCapsule(RunningApp):
-    def __init__(self, root, cfg):
-        self.app = create_app(root / "data", root / "out", cfg, RecordingClient)
+    def __init__(self, root, cfg, client_factory=RecordingClient):
+        self.app = create_app(root / "data", root / "out", cfg, client_factory)
         self.sock = socket.socket()
         self.sock.bind(("127.0.0.1", 0))
         self.url = "http://127.0.0.1:" + str(self.sock.getsockname()[1])
@@ -43,14 +44,23 @@ def account_capture(context, root, record):
     from telethon.errors import TakeoutInitDelayError
     approved = [False]
 
+    class PreviewClient(RecordingClient):
+        async def iter_dialogs(self, limit, ignore_migrated=False):
+            async for dialog in ScopeClient.iter_dialogs(self, limit):
+                yield dialog
+
     class Network(ExportTransport):
         account_id = 44
         async def open(self):
             if not approved[0]:
                 raise TakeoutInitDelayError(None, capture=3600)
 
+        async def download(self, media, stream, progress, task):
+            stream.write(CONTENT)
+            return stream
+
     cfg = config(record)
-    with RunningCapsule(root, cfg) as runner:
+    with RunningCapsule(root, cfg, PreviewClient) as runner:
         runner.app.state.session.account_export.transport_factory = Network
         page = context.new_page()
         errors = []
@@ -72,13 +82,57 @@ def account_capture(context, root, record):
             expect(page.locator("#selection")).to_be_visible()
             expect(page.locator("#export-scope")).to_have_value("account")
             expect(page.locator("#collect")).to_be_enabled()
-            page.locator("#export-transport").select_option("takeout")
-            page.locator("#export-format").select_option("telegram_both")
+            expect(page.locator("#export-mode")).to_have_value("takeout")
+            expect(page.locator("#export-format")).to_have_value("telegram_both")
+            expect(page.locator("#media-action")).to_have_value("download")
+            expect(page.locator("#account-profile")).to_be_checked()
+            expect(page.locator("#account-contacts")).to_be_checked()
+            page.locator("#account-profile").uncheck()
+            page.locator("#account-contacts").uncheck()
+            page.locator("#export-mode").select_option("regular")
+            expect(page.locator("#account-other")).to_be_disabled()
+            expect(page.locator("#takeout-notice")).to_be_hidden()
+            page.locator("#export-scope").select_option("chat")
+            expect(page.locator("#collect")).to_be_disabled()
+            page.route("**/api/dialogs", lambda route: route.fulfill(json={"dialogs": [
+                {"chat_id": 11, "title": "Synthetic first"}, {"chat_id": 12, "title": "<img src=x onerror=alert(1)>"}]}))
+            page.locator("#refresh").click()
+            expect(page.locator("#chats option")).to_have_count(2)
+            expect(page.locator("#collect")).to_be_disabled()
+            page.locator("#chats").select_option(["11", "12"])
+            expect(page.locator("#collect")).to_be_enabled()
+            page.locator("#language").select_option("ru")
+            expect(page.locator("#mode-description")).to_contain_text("не перечисляет")
+            assert page.locator("#chats").evaluate("el => Array.from(el.selectedOptions, o => o.value)") == ["11", "12"]
+            assert page.locator("#chats img").count() == 0
+            page.locator("#export-mode").select_option("journal")
+            expect(page.locator("#account-options")).to_be_hidden()
+            expect(page.locator("#export-scope")).to_be_disabled()
+            expect(page.locator("#export-format")).to_be_disabled()
+            page.locator("#export-mode").select_option("takeout")
+            page.locator("#export-scope").select_option("account")
+            page.locator("#language").select_option("en")
+            page.unroute("**/api/dialogs")
             page.locator("#from-date").fill("2026-11-01")
             page.locator("#through-date").fill("2026-11-04")
+            with page.expect_response(lambda response: response.url.endswith("/api/preflight")) as assessment:
+                page.locator("#preflight").click()
+            assert assessment.value.ok, assessment.value.text()
+            expect(page.locator("#save-selection")).to_be_enabled()
+            page.locator("#total-budget").fill("3")
+            expect(page.locator("#save-selection")).to_be_disabled()
+            page.locator("#preflight").click()
+            expect(page.locator("#save-selection")).to_be_enabled()
+            with page.expect_download() as saved:
+                page.locator("#save-selection").click()
+            saved.value.save_as(root / "expected-selection.json")
+            agreed = Selection.model_validate(json.loads((root / "expected-selection.json").read_bytes())).settings()
+            assert agreed["account_options"]["transport"] == "takeout"
+            assert agreed["account_options"]["max_total_gib"] == 3 and agreed["account_scope"] == "all"
             for width in (320, 390, 1440):
                 page.set_viewport_size({"width": width, "height": 1000})
                 check_layout(page)
+                page.screenshot(path=str(ROOT / "test-results/sealed-experience" / f"runner-account-{width}.png"), full_page=True)
             page.locator("#collect").click()
             expect(page.locator("#status")).to_contain_text("3600 seconds", timeout=15000)
             expect(page.locator("#resume")).to_have_text("Check export approval")
@@ -90,7 +144,8 @@ def account_capture(context, root, record):
             assert result["counts"]["messages"] == 2 and result["complete_within_scope"]
             with zipfile.ZipFile(root / "out/evidence.zip") as z, z.open("account-export.zip") as nested, zipfile.ZipFile(nested) as a:
                 assert {"result.json", "export_results.html"} <= set(a.namelist())
-                assert not any(name.startswith("media/") for name in a.namelist())
+                assert any(name.startswith("media/") for name in a.namelist())
+            assert result["options"] == agreed["account_options"]
             assert not errors, errors
         finally:
             page.close()
@@ -120,7 +175,7 @@ def custom_qr_capture(context, root, record):
             assert candidate.options["system_lang_code"] == page.evaluate("navigator.language")
             candidate.loop.call_soon_threadsafe(candidate.scan.set)
             expect(page.locator("#selection")).to_be_visible()
-            page.locator("#export-scope").select_option("journal")
+            page.locator("#export-mode").select_option("journal")
             expect(page.locator("#api-hash")).to_have_value("")
             page.locator("#refresh").click()
             expect(page.locator("#collect")).to_be_enabled()
@@ -272,7 +327,7 @@ def main():
             capture.locator("#code").fill("12345")
             capture.locator("#confirm-code").click()
             expect(capture.locator("#selection")).to_be_visible()
-            capture.locator("#export-scope").select_option("journal")
+            capture.locator("#export-mode").select_option("journal")
             saved_profile = app.state.session.vault.read("credentials")["client_profile"]
             assert saved_profile["lang_code"] == "ru"
             assert saved_profile["system_lang_code"] == capture.evaluate("navigator.language")
@@ -280,9 +335,9 @@ def main():
             assert pair in api_pool.POOL
             capture.locator("#refresh").click()
             expect(capture.locator("#collect")).to_be_enabled()
-            expect(capture.locator("#media-action")).to_have_value("hashes_only")
+            capture.locator("#media-action").select_option("hashes_only")
             capture.locator("#preflight").click()
-            expect(capture.locator("#preflight-result")).to_contain_text("Total archive size and duration remain unknown")
+            expect(capture.locator("#preflight-result")).to_contain_text("Общий размер и длительность пока неизвестны")
             assert app.state.session.store.get_setting("capture", None) is None
             capture.locator("#media-rules").locator("..").locator("summary").click()
             for width in (1280, 390, 320):

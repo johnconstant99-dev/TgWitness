@@ -11,7 +11,6 @@ import time
 from contextlib import asynccontextmanager
 from functools import partial
 from pathlib import Path
-from typing import Literal
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Request
@@ -20,13 +19,14 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .collector import Collector, WitnessClient
-from .account_export import AccountExport, AccountExportOptions, file_sha
+from .account_export import AccountExport, file_sha
 from .evidence import BundleSizeLimit, export_file
 from .middleware import KEEP_ALIVE_SECONDS, RequestLimit
-from .monitoring import Capture, capture_settings, normalize_capture
+from .monitoring import capture_settings, normalize_capture
 from .export_preflight import preview_capture
 from .provenance import run_receipt
 from .sealed_crypto import recipient_id
+from .sealed_selection import Selection, selection_hash
 from .sealed_parts import EncryptedParts, PART_BYTES, SEALED_RESULT
 from .security import InstanceLock, Vault, private_write
 from .store import Store, canonical
@@ -68,26 +68,6 @@ class Password(StrictBody):
     password: str = Field(min_length=1, max_length=512)
 
 
-class Selection(StrictBody):
-    mode: Literal["chat", "account"] = "chat"
-    chat_id: int | None = Field(default=None, strict=True)
-    capture: Capture = Field(default_factory=lambda: Capture.model_validate({
-        **normalize_capture(None), "include_avatars": False, "messages_first": True}))
-    account_options: AccountExportOptions | None = None
-
-    @model_validator(mode="after")
-    def scope(self):
-        if self.mode == "chat" and (self.chat_id is None or self.account_options is not None):
-            raise ValueError("Select a chat and its capture settings.")
-        if self.mode == "account" and (self.chat_id is not None or self.account_options is None):
-            raise ValueError("Supply account export options, including any selected chat IDs.")
-        if self.mode == "account" and "capture" in self.model_fields_set:
-            raise ValueError("Account export uses account_options; capture settings do not apply.")
-        if self.account_options is not None and not self.account_options.messages_first:
-            raise ValueError("Restricted account exports preserve messages before attachments.")
-        return self
-
-
 class Session:
     def __init__(self, root, output, config, client_factory):
         self.root, self.output, self.config = Path(root), Path(output), config
@@ -110,6 +90,7 @@ class Session:
         self.account_export = AccountExport(self.collector, self.store, self.vault)
         self.account_export.packaging_copies = 2
         self.account_job = None
+        self.selection = None
         receipt = run_receipt(self.store, self.vault)
         self.collector.run_id = receipt["run_id"]
         self.store.append("collector.started", receipt)
@@ -130,6 +111,8 @@ class Session:
                 "remaining_seconds": max(0, int(self.config["seconds"] - (time.monotonic() - self.started))),
                 "history": self.collector.history.status(), "media": self.store.media_stats(),
                 "capture": capture_settings(self.store),
+                "selection": self.selection,
+                "selection_sha256": selection_hash(self.selection) if self.selection else None,
                 "account_export": self.account_export.public(self.account_job) if self.account_job else None,
                 "recipient_sha256": self.recipient, "context": self.config["context"], "revocation": self.revocation}
 
@@ -154,6 +137,8 @@ class Session:
                                        self.status()["remaining_seconds"])
         result["remaining_seconds"] = self.status()["remaining_seconds"]
         result["can_start"] = result["can_start"] and result["remaining_seconds"] > 0
+        result["selection"] = selection.settings()
+        result["selection_sha256"] = selection_hash(result["selection"])
         return result
 
     async def begin_selection(self, selection):
@@ -163,11 +148,13 @@ class Session:
         if self.status()["remaining_seconds"] <= 0:
             raise ValueError("No capture time remains.")
         options = selection.account_options.model_dump()
-        self.store.append("sealed.selection", {"mode": "account", "options": options,
-            "free_disk_bytes": shutil.disk_usage(self.root).free, "remaining_seconds": self.status()["remaining_seconds"],
-            "transport": options["transport"], "total_size_and_duration": "unknown"})
         job = await self.account_export.start(options)
         self.account_job = job["id"]
+        self.selection = selection.settings()
+        self.store.append("sealed.selection", {"mode": "account", "options": options,
+            "selection": self.selection, "selection_sha256": selection_hash(self.selection),
+            "free_disk_bytes": shutil.disk_usage(self.root).free, "remaining_seconds": self.status()["remaining_seconds"],
+            "transport": options["transport"], "total_size_and_duration": "unknown"})
         self.phase = "collecting"
 
     async def resume(self):
@@ -184,7 +171,9 @@ class Session:
         if free < self.collector.param("media_min_free_mb") * 1024**2 or self.status()["remaining_seconds"] <= 0:
             raise ValueError("Not enough free disk or capture time")
         self.store.set_setting("capture", settings)
+        self.selection = Selection(chat_id=chat_id, capture=settings).settings()
         self.store.append("sealed.selection", {"chat_id": chat_id, "capture": settings,
+            "selection": self.selection, "selection_sha256": selection_hash(self.selection),
             "free_disk_bytes": free, "remaining_seconds": self.status()["remaining_seconds"],
             "transport": "regular", "total_size_and_duration": "unknown"})
         chat = self.collector.dialog_cache[chat_id]

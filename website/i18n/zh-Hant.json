@@ -4232,7 +4232,9 @@
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "部署過程列出了 Phala 向 CVM 收取的費用（含磁碟空間）：每小時 0.06078 美元。",
 "1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "面板精靈在 Phala Cloud 上執行了兩次，一次透過其工作 API，另一次則透過\n搭載真實 Chromium 核心的瀏覽器：價格查核、以 <strong>Advanced</strong> 為提交標籤進行建立，全部六項\n驗證檢查均通過，伺服器清單顯示計費價格（每月 44.37 美元）， <strong>Find\n當前位址 </strong>、下載已量測的 Docker Compose 配置，以及刪除操作。瀏覽器未出現任何頁面錯誤。\n每次操作結束後，工作區均呈空狀態。",
 "cc7477a0baefe3a0edd8db484060726cc43766551759080dbe21cb099c5a5d3e": "未涵蓋項目：Phala 上的 Cloudflare 網域、CVM 上的 Telegram 帳戶，以及 <code>dstack-0.6.1</code>\n映像檔。由於其 API 僅針對現有 CVM 列出磁碟\n費用，因此精靈在建立前的報價僅包含 Phala 的運算費用；伺服器清單則顯示建立後的實際計費金額。",
-"ea8f5ef0a9c3d397802616fc63de51e4912d849a54d0ca64079906823442286e": "<code>tdx_os</code> 原先依賴 <code>dstack-mr</code>，而該工具目前的版本提供的是 <code>measure-os</code>，並非文件中提到的 <code>measure --json</code>。驗證器現在會根據已發布的映像檔和虛擬機器設定（包含 ACPI 表格）自行計算 MRTD 和 RTMR0-2。"
+"ea8f5ef0a9c3d397802616fc63de51e4912d849a54d0ca64079906823442286e": "<code>tdx_os</code> 原先依賴 <code>dstack-mr</code>，而該工具目前的版本提供的是 <code>measure-os</code>，並非文件中提到的 <code>measure --json</code>。驗證器現在會根據已發布的映像檔和虛擬機器設定（包含 ACPI 表格）自行計算 MRTD 和 RTMR0-2。",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "在臨時 GitHub runner 上選擇 Takeout、一般 API 匯出或聊天日誌．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions 支援透過 Takeout 或一般 API 匯出整個帳號或選定聊天，也支援單一聊天日誌．<a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> 指南說明設定驗證與 120 分鐘限制．本機匯出和分享副本不繼承 GitHub 證明，模擬測試不代表已通過真實 Telegram 帳號驗證．"
 },
 "modes": {
 "modes.actions.body": "預覽、請求及結果回執均經簽署。按下按鈕前，伺服器會再次擷取訊息，並拒絕已變更的鍵盤輸入。回傳的回呼文字與網址仍屬已記錄的上下文。",
@@ -4964,6 +4966,8 @@
 "Signed /api/assurance statement": "已簽署的 /api/assurance 聲明",
 "provider API": "提供者 API",
 "Cloudflare API": "Cloudflare API",
-"outbound only": "僅限外發"
+"outbound only": "僅限外發",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "在臨時 GitHub runner 上選擇 Takeout、一般 API 匯出或聊天日誌．",
+"github actions capture takeout account export encrypted archive": "GitHub Actions 擷取加密存檔 takeout account export"
 }
 }

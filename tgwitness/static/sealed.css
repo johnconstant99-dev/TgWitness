@@ -29,6 +29,13 @@
 #media-rules label,#media-rules select { min-width:0; margin:0; }
 #capture-settings > label:has(input[type=checkbox]) { display:flex; gap:8px; align-items:baseline; margin:14px 0; }
 #capture-settings input[type=checkbox] { flex-shrink:0; margin:0; }
+.mode-comparison { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:20px 0; }
+.mode-comparison article { border:1px solid var(--border); border-radius:var(--radius); padding:14px; min-width:0; }
+.mode-comparison h3 { margin:0 0 10px; font-size:15px; }
+.mode-comparison p { color:var(--muted); font-size:13px; line-height:1.7; margin:0; }
+#chats[multiple] { min-height:150px; }
+#chats option { white-space:normal; overflow-wrap:anywhere; }
+@media(max-width:760px) { .mode-comparison { grid-template-columns:1fr; } }
 @media(max-width:520px) {
   #media-rules > div { grid-template-columns:1fr 1fr; }
   #media-rules > div > select { grid-column:1 / -1; }

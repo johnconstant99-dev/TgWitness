@@ -4328,7 +4328,9 @@
 "4867ff40b5d4ec7dd84b3e1ef5a5c7696d2b903ee20d89b94bb92ec9cdd28748": "La CVM ejecutó <code>dstack-0.5.12</code> con el acceso SSH desactivado. El colector publicó su dirección firmada aproximadamente\n    1,5 minutos después de su creación. A continuación, la implementación superó las pruebas de <code>tdx_binding</code> y <code>tdx_quote</code> (Intel TCB\n    UpToDate, registro de certificación de hardware v4, FMSPC <code>20a06f000000</code>, sin modo de depuración, no migrable, compatible con datos de verificación criptográfica\n    obtenidos de Intel), <code>tdx_compose_hash</code>, <code>tdx_compose</code> (byte a byte) y <code>tdx_identity</code> (claves KMS).",
 "3ce1b6c5e5d37846efacf984cf4a7e3038e2621e6c38b6ef5fccf80d15ce3497": "La comprobación de precios del asistente del panel indicaba <code>tdx.small</code> a 0,058 dólares por hora. Al introducir una clave incorrecta, apareció un mensaje sencillo\n    que decía «no se ha aceptado la clave de API».",
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "La implementación mostró lo que Phala factura por la CVM, disco incluido: 0,06078 dólares por hora.",
-"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "El asistente del panel se ejecutó en Phala Cloud en dos ocasiones: una a través de su API de tareas y otra a través del\nnavegador con un Chromium real: la comprobación del precio, la creación con la confirmación bajo <strong>Advanced</strong>, las seis\ncomprobaciones de certificación superadas, la lista de servidores que muestra el precio facturado (44,37 USD al mes), <strong>Find\nla dirección actual </strong>, la descarga de la configuración de Docker Compose medida y la eliminación. El navegador no detectó ningún error en las páginas.\nEn ambas ocasiones, el espacio de trabajo quedó vacío posteriormente."
+"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "El asistente del panel se ejecutó en Phala Cloud en dos ocasiones: una a través de su API de tareas y otra a través del\nnavegador con un Chromium real: la comprobación del precio, la creación con la confirmación bajo <strong>Advanced</strong>, las seis\ncomprobaciones de certificación superadas, la lista de servidores que muestra el precio facturado (44,37 USD al mes), <strong>Find\nla dirección actual </strong>, la descarga de la configuración de Docker Compose medida y la eliminación. El navegador no detectó ningún error en las páginas.\nEn ambas ocasiones, el espacio de trabajo quedó vacío posteriormente.",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "Elige Takeout，exportación mediante la API normal o un diario de chat en un ejecutor temporal de GitHub．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions permite exportar toda la cuenta o chats seleccionados mediante Takeout o la API normal，y crear un diario de un chat．La guía <a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> explica la verificación de ajustes y el límite de 120 minutos．Las exportaciones locales y copias para compartir no heredan la atestación de GitHub，y las pruebas sintéticas no demuestran el funcionamiento con una cuenta real de Telegram．"
 },
 "modes": {
 "modes.actions.body": "Los acuses de recibo de vista previa, solicitud y resultado están firmados. Antes de pulsar un botón, el servidor vuelve a recuperar el mensaje y rechaza cualquier modificación introducida mediante el teclado. El texto y las URL de la llamada de retorno siguen formando parte del contexto registrado.",
@@ -5112,6 +5114,8 @@
 "Signed /api/assurance statement": "Declaración firmada de /api/assurance",
 "provider API": "API del proveedor",
 "Cloudflare API": "API de Cloudflare",
-"outbound only": "solo salida"
+"outbound only": "solo salida",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "Elige Takeout，exportación mediante la API normal o un diario de chat en un ejecutor temporal de GitHub．",
+"github actions capture takeout account export encrypted archive": "Las acciones de GitHub capturan el archivo cifrado takeout account export"
 }
 }

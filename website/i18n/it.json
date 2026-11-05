@@ -4232,7 +4232,9 @@
 "4867ff40b5d4ec7dd84b3e1ef5a5c7696d2b903ee20d89b94bb92ec9cdd28748": "La CVM ha eseguito <code>dstack-0.5.12</code> con l’accesso SSH disattivato. Il collettore ha pubblicato il proprio indirizzo firmato circa\n    1,5 minuti dopo la creazione. La distribuzione ha quindi superato <code>tdx_binding</code>, <code>tdx_quote</code> (Intel TCB\n    UpToDate, record di attestazione hardware v4, FMSPC <code>20a06f000000</code>, non in modalità debug, non migrabile, con supporto per i dati di verifica crittografica\n    recuperati da Intel), <code>tdx_compose_hash</code>, <code>tdx_compose</code> (byte per byte) e <code>tdx_identity</code> (chiavi KMS).",
 "3ce1b6c5e5d37846efacf984cf4a7e3038e2621e6c38b6ef5fccf80d15ce3497": "La verifica del prezzo nella procedura guidata del pannello indicava <code>tdx.small</code> a 0,058 dollari l’ora. Una chiave errata ha generato un semplice\n    messaggio del tipo «chiave API non accettata».",
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "Il processo di distribuzione ha indicato l’importo addebitato da Phala per il CVM, disco incluso: 0,06078 dollari all’ora.",
-"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "La procedura guidata del pannello è stata eseguita su Phala Cloud due volte: una tramite la sua API di lavoro e una tramite il\nbrowser con un Chromium reale: la verifica del prezzo, la creazione con il commit sotto <strong>Advanced</strong>, tutti e sei i\ncontrolli di attestazione superati, l’elenco dei server che mostrava il prezzo fatturato (44,37 USD al mese), <strong>Find\nl’indirizzo corrente </strong>, il download della configurazione Docker Compose misurata e l’eliminazione. Il browser non ha rilevato errori di pagina.\nIn entrambi i casi, l’area di lavoro risultava vuota al termine dell’operazione."
+"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "La procedura guidata del pannello è stata eseguita su Phala Cloud due volte: una tramite la sua API di lavoro e una tramite il\nbrowser con un Chromium reale: la verifica del prezzo, la creazione con il commit sotto <strong>Advanced</strong>, tutti e sei i\ncontrolli di attestazione superati, l’elenco dei server che mostrava il prezzo fatturato (44,37 USD al mese), <strong>Find\nl’indirizzo corrente </strong>, il download della configurazione Docker Compose misurata e l’eliminazione. Il browser non ha rilevato errori di pagina.\nIn entrambi i casi, l’area di lavoro risultava vuota al termine dell’operazione.",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "Scegli Takeout，l’esportazione tramite API normale o un diario della chat su un runner GitHub temporaneo．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions supporta l’esportazione dell’intero account o di chat selezionate tramite Takeout o API normale，oltre al diario di una chat．La guida <a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> spiega la verifica delle impostazioni e il limite di 120 minuti．Le esportazioni locali e le copie condivise non ereditano l’attestazione GitHub，e i test sintetici non dimostrano il funzionamento con un account Telegram reale．"
 },
 "modes": {
 "modes.actions.body": "Le conferme di anteprima, di richiesta e di risultato sono firmate. Prima che venga premuto un pulsante, il server recupera nuovamente il messaggio e rifiuta eventuali modifiche apportate tramite tastiera. Il testo e gli URL restituiti dalla callback rimangono registrati nel contesto.",
@@ -4964,6 +4966,8 @@
 "Signed /api/assurance statement": "Dichiarazione /api/assurance firmata",
 "provider API": "API del provider",
 "Cloudflare API": "API di Cloudflare",
-"outbound only": "solo in uscita"
+"outbound only": "solo in uscita",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "Scegli Takeout，l’esportazione tramite API normale o un diario della chat su un runner GitHub temporaneo．",
+"github actions capture takeout account export encrypted archive": "GitHub Actions per l’acquisizione di archivi crittografati takeout account export"
 }
 }

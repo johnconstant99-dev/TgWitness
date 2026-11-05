@@ -4232,7 +4232,9 @@
 "6027bc1dde6c4243c08aee9ba8641f99965d8a00314d3d1a28fdd47cde90a0f8": "לאחר הפעלה מחדש, האספן פרסם את הכתובת החדשה החתומה: <code>verify</code> מצא אותה מיד,\n    המפעיל <strong> מצא את הכתובת הנוכחית </strong> 27 שניות לאחר הפרסום ב-HMAC, ושניהם התעלמו\n    מהפרסומים המזויפים. <code>verify --evidence</code> אישר שתי הפעלות שהותחלו מ-<code>dstack-0.5.12</code>.",
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "הפריסה הציגה את הסכום ש-Phala גובה עבור ה-CVM, כולל הדיסק: 0.06078 דולר לשעה.",
 "1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "אשף הפאנל הופעל פעמיים ב-Phala Cloud, פעם אחת דרך ממשק ה-API של המשימות ופעם אחת דרך\nהדפדפן עם Chromium אמיתי: בדיקת המחיר, יצירה עם ה-commit תחת <strong>Advanced</strong>, כל שש\nבדיקות האישור עברו בהצלחה, רשימת השרתים מציגה את המחיר שחויב (44.37 דולר לחודש), <strong>Find\nהכתובת הנוכחית </strong>, הורדת תצורת Docker Compose שנמדדה, והמחיקה. הדפדפן לא זיהה שגיאות בדף.\nבכל פעם, סביבת העבודה הייתה ריקה לאחר מכן.",
-"cc7477a0baefe3a0edd8db484060726cc43766551759080dbe21cb099c5a5d3e": "לא נכללו: דומיין Cloudflare ב-Phala, חשבון Telegram ב-CVM, ותמונת ה-<code>dstack-0.6.1</code>\n. המחיר המוצג באשף לפני היצירה הוא מחיר המחשוב של Phala בלבד, שכן ה-API שלה מציין את מחיר הדיסק\nרק עבור CVM קיים; רשימת השרתים מציגה את המחיר שחויב לאחר היצירה."
+"cc7477a0baefe3a0edd8db484060726cc43766551759080dbe21cb099c5a5d3e": "לא נכללו: דומיין Cloudflare ב-Phala, חשבון Telegram ב-CVM, ותמונת ה-<code>dstack-0.6.1</code>\n. המחיר המוצג באשף לפני היצירה הוא מחיר המחשוב של Phala בלבד, שכן ה-API שלה מציין את מחיר הדיסק\nרק עבור CVM קיים; רשימת השרתים מציגה את המחיר שחויב לאחר היצירה.",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "בחרו Takeout，ייצוא דרך ה־API הרגיל או יומן שיחה על מכונת הרצה זמנית של GitHub．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions תומך בייצוא כל החשבון או שיחות נבחרות דרך Takeout או ה־API הרגיל וגם ביומן של שיחה אחת．המדריך <a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> מסביר את אימות ההגדרות ואת מגבלת 120 הדקות．ייצוא מקומי ועותקים לשיתוף אינם יורשים את האישור של GitHub，ובדיקות מדומות אינן מוכיחות פעולה עם חשבון Telegram אמיתי．"
 },
 "modes": {
 "modes.actions.body": "אישורי תצוגה מקדימה, בקשה ותוצאה חתומים. לפני לחיצה על כפתור, השרת משיג את ההודעה שוב ודוחה מקלדת ששונתה. טקסט ה-callback וה-URLs שהוחזרו נשארים בהקשר המוקלט.",
@@ -4964,6 +4966,8 @@
 "Signed /api/assurance statement": "הצהרת /api/assurance חתומה",
 "provider API": "API של הספק",
 "Cloudflare API": "ממשק ה-API של Cloudflare",
-"outbound only": "יוצא בלבד"
+"outbound only": "יוצא בלבד",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "בחרו Takeout，ייצוא דרך ה־API הרגיל או יומן שיחה על מכונת הרצה זמנית של GitHub．",
+"github actions capture takeout account export encrypted archive": "GitHub Actions לוכד ארכיון מוצפן takeout account export"
 }
 }

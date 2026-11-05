@@ -4232,7 +4232,9 @@
 "4867ff40b5d4ec7dd84b3e1ef5a5c7696d2b903ee20d89b94bb92ec9cdd28748": "La CVM a exécuté <code>dstack-0.5.12</code> avec l’accès SSH désactivé. Le collecteur a publié son adresse signée environ\n    1,5 minute après sa création. Le déploiement a ensuite validé <code>tdx_binding</code>, <code>tdx_quote</code> (Intel TCB\n    UpToDate, enregistrement d’attestation matérielle v4, FMSPC <code>20a06f000000</code>, pas en mode débogage, non migrable, prenant en charge les données de vérification cryptographique\n    récupérées auprès d’Intel), <code>tdx_compose_hash</code>, <code>tdx_compose</code> (octet par octet) et <code>tdx_identity</code> (clés KMS).",
 "3ce1b6c5e5d37846efacf984cf4a7e3038e2621e6c38b6ef5fccf80d15ce3497": "La vérification du prix dans l’assistant du panneau indiquait <code>tdx.small</code> à 0,058 $ de l’heure. Une clé erronée a généré un simple\n    message « la clé API n’a pas été acceptée ».",
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "Le déploiement a indiqué le montant facturé par Phala pour la CVM, disque compris : 0,06078 $ par heure.",
-"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "L’assistant du panneau a été exécuté deux fois sur Phala Cloud, une fois via son API de tâches et une fois via le\nnavigateur avec un véritable Chromium : la vérification du prix, la création avec la validation sous <strong>Advanced</strong>, les six\nvérifications d’attestation ont toutes été réussies, la liste des serveurs affichant le prix facturé (44,37 USD par mois), <strong>Find\nl'adresse actuelle </strong>, le téléchargement de la configuration Docker Compose mesurée, ainsi que la suppression. Le navigateur n’a signalé aucune erreur de page.\nÀ chaque fois, l’espace de travail était vide par la suite."
+"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "L’assistant du panneau a été exécuté deux fois sur Phala Cloud, une fois via son API de tâches et une fois via le\nnavigateur avec un véritable Chromium : la vérification du prix, la création avec la validation sous <strong>Advanced</strong>, les six\nvérifications d’attestation ont toutes été réussies, la liste des serveurs affichant le prix facturé (44,37 USD par mois), <strong>Find\nl'adresse actuelle </strong>, le téléchargement de la configuration Docker Compose mesurée, ainsi que la suppression. Le navigateur n’a signalé aucune erreur de page.\nÀ chaque fois, l’espace de travail était vide par la suite.",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "Choisissez Takeout，l’exportation par l’API standard ou un journal de discussion sur un exécuteur GitHub temporaire．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions permet d’exporter tout le compte ou certaines discussions via Takeout ou l’API standard，ainsi que le journal d’une discussion．Le guide <a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> explique la vérification des paramètres et la limite de 120 minutes．Les exportations locales et copies de partage n’héritent pas de l’attestation GitHub，et les tests synthétiques ne prouvent pas le fonctionnement avec un compte Telegram réel．"
 },
 "modes": {
 "modes.actions.body": "Les accusés de réception d’aperçu, de requête et de résultat sont signés. Avant qu’un bouton ne soit enfoncé, le serveur récupère à nouveau le message et rejette toute modification apportée au clavier. Le texte et les URL des rappels renvoyés restent enregistrés dans le contexte.",
@@ -4964,6 +4966,8 @@
 "Signed /api/assurance statement": "Déclaration /api/assurance signée",
 "provider API": "API du fournisseur",
 "Cloudflare API": "API Cloudflare",
-"outbound only": "sortant uniquement"
+"outbound only": "sortant uniquement",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "Choisissez Takeout，l’exportation par l’API standard ou un journal de discussion sur un exécuteur GitHub temporaire．",
+"github actions capture takeout account export encrypted archive": "GitHub Actions : capture d'archives chiffrées takeout account export"
 }
 }

@@ -4327,7 +4327,9 @@
 "4867ff40b5d4ec7dd84b3e1ef5a5c7696d2b903ee20d89b94bb92ec9cdd28748": "CVM menjalankan <code>dstack-0.5.12</code> dengan akses SSH dinonaktifkan. Pengumpul memposting alamat yang telah ditandatanganinya sekitar\n    1,5 menit setelah pembuatan. Proses penyebaran kemudian berhasil melewati <code>tdx_binding</code>, <code>tdx_quote</code> (Intel TCB\n    UpToDate, catatan pengesahan perangkat keras v4, FMSPC <code>20a06f000000</code>, tidak dalam mode debug, tidak dapat dimigrasikan, mendukung data verifikasi kriptografi\n    yang diambil dari Intel), <code>tdx_compose_hash</code>, <code>tdx_compose</code> (byte per byte), dan <code>tdx_identity</code> (kunci KMS).",
 "3ce1b6c5e5d37846efacf984cf4a7e3038e2621e6c38b6ef5fccf80d15ce3497": "Pemeriksaan harga pada panel wizard menunjukkan <code>tdx.small</code> sebesar $0,058 per jam. Kunci yang salah menghasilkan pesan sederhana\n    \"tidak menerima kunci API\".",
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "Deploy mencantumkan biaya yang ditagihkan Phala kepada CVM, termasuk disk: $0,06078 per jam.",
-"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "Wizard panel dijalankan di Phala Cloud dua kali, sekali melalui API tugasnya dan sekali melalui\nbrowser dengan Chromium asli: pemeriksaan harga, pembuatan dengan commit di bawah <strong>Advanced</strong>, keenam\npemeriksaan sertifikasi lulus, daftar server menampilkan harga yang ditagih (44,37 USD per bulan), <strong>Find\nalamat saat ini </strong>, pengunduhan konfigurasi Docker Compose yang diukur, dan penghapusan. Browser tidak mendeteksi kesalahan halaman apa pun.\nSetiap kali, ruang kerja menjadi kosong setelahnya."
+"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "Wizard panel dijalankan di Phala Cloud dua kali, sekali melalui API tugasnya dan sekali melalui\nbrowser dengan Chromium asli: pemeriksaan harga, pembuatan dengan commit di bawah <strong>Advanced</strong>, keenam\npemeriksaan sertifikasi lulus, daftar server menampilkan harga yang ditagih (44,37 USD per bulan), <strong>Find\nalamat saat ini </strong>, pengunduhan konfigurasi Docker Compose yang diukur, dan penghapusan. Browser tidak mendeteksi kesalahan halaman apa pun.\nSetiap kali, ruang kerja menjadi kosong setelahnya.",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "Pilih Takeout，ekspor API biasa atau jurnal obrolan pada runner GitHub sementara．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions mendukung ekspor seluruh akun atau obrolan pilihan melalui Takeout atau API biasa，serta jurnal satu obrolan．Panduan <a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> menjelaskan verifikasi pengaturan dan batas 120 menit．Ekspor lokal dan salinan berbagi tidak mewarisi atestasi GitHub，dan pengujian sintetis tidak membuktikan pengoperasian dengan akun Telegram nyata．"
 },
 "modes": {
 "modes.actions.body": "Tanda terima pratinjau, permintaan, dan hasil ditandatangani. Sebelum tombol ditekan, server mengambil pesan tersebut kembali dan menolak perubahan yang dilakukan melalui keyboard. Teks dan URL callback yang dikembalikan tetap menjadi konteks yang tercatat.",
@@ -5111,6 +5113,8 @@
 "Signed /api/assurance statement": "Pernyataan /api/assurance yang ditandatangani",
 "provider API": "API penyedia",
 "Cloudflare API": "API Cloudflare",
-"outbound only": "hanya keluar"
+"outbound only": "hanya keluar",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "Pilih Takeout，ekspor API biasa atau jurnal obrolan pada runner GitHub sementara．",
+"github actions capture takeout account export encrypted archive": "GitHub Actions menangkap arsip terenkripsi takeout account export"
 }
 }

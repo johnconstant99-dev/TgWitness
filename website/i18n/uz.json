@@ -4232,7 +4232,9 @@
 "640c809ca115f07ac266b1bfb1eb7b7b24a9ba57719d1d8218ac62487fdc58be": "<code>--provider phala --quick-tunnel</code> haqiqiy <strong>Phala Cloud </strong> (<code>tdx.small</code>, US-WEST-1 mintaqasi) bo'sh ish maydoni uchun Phala Cloud API kaliti, haqiqiy ntfy.sh, GitHub va Intel PCS bilan ishladi.\nCVM <code>df7d860c</code> (v0.8.1) commitini o'rnatdi; deploy, verify va destroy buyruq satridan quyidagi tuzatishlar bilan ishga tushirildi. Yetti CVM jami taxminan 1,9 AQSh sentiga tushdi.",
 "4867ff40b5d4ec7dd84b3e1ef5a5c7696d2b903ee20d89b94bb92ec9cdd28748": "CVM <code>dstack-0.5.12</code> ni SSH kirish o'chirilgan holda ishga tushirdi. Kollektor yaratilganidan taxminan 1,5 daqiqa o'tib o'z imzolangan manzilini joyladi. Keyin Deploy <code>tdx_binding</code> va <code>tdx_quote</code> (Intel TCB\n    UpToDate, apparat guvohnoma yozuvi v4, FMSPC <code>20a06f000000</code>, xatolik tuzatish rejimida emas, ko'chirilmaydigan, Intel'dan olingan kriptografik tasdiqlash ma'lumotlarini qo'llab-quvvatlaydi), <code>tdx_compose_hash</code>, <code>tdx_compose</code> (byte for byte) va <code>tdx_identity</code> (KMS kalitlari).",
 "1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "Panel ustasi Phala Cloud'da ikki marta ishga tushirildi: bir marta uning ish API'si orqali va bir marta haqiqiy Chromium brauzeri orqali: narxni tekshirish, <strong>Advanced</strong> ostidagi commit bilan yaratish, barcha oltita tasdiqlash tekshiruvlarining muvaffaqiyatli o'tishi, serverlar ro'yxatida to'langan narx (oyiga 44,37 USD) ko'rsatilishi, <strong>Joriy manzilni topish</strong>, o'lchangan Docker Compose konfiguratsiyasini yuklab olish va o'chirish. Brauzer hech qanday sahifa xatolarini ko'rmadi. Har safar undan keyin ish maydoni bo'sh bo'ldi.",
-"6027bc1dde6c4243c08aee9ba8641f99965d8a00314d3d1a28fdd47cde90a0f8": "Qayta ishga tushgach, yig‘uvchi yangi manzilni imzolab e’lon qildi: <code>verify</code> uni darhol, operatorning <strong>Joriy manzilni topish</strong> funksiyasi esa HMAC xabaridan 27 soniya keyin topdi. Ikkalasi ham soxta xabarlarni e’tiborsiz qoldirdi. <code>verify --evidence</code> ikki ishga tushirish <code>dstack-0.5.12</code> dan yuklanganini tasdiqladi."
+"6027bc1dde6c4243c08aee9ba8641f99965d8a00314d3d1a28fdd47cde90a0f8": "Qayta ishga tushgach, yig‘uvchi yangi manzilni imzolab e’lon qildi: <code>verify</code> uni darhol, operatorning <strong>Joriy manzilni topish</strong> funksiyasi esa HMAC xabaridan 27 soniya keyin topdi. Ikkalasi ham soxta xabarlarni e’tiborsiz qoldirdi. <code>verify --evidence</code> ikki ishga tushirish <code>dstack-0.5.12</code> dan yuklanganini tasdiqladi.",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "Vaqtinchalik GitHub runner’da Takeout，oddiy API eksporti yoki chat jurnalini tanlang．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions Takeout yoki oddiy API orqali butun akkaunt yoki tanlangan chatlar eksportini，shuningdek bitta chat jurnalini qo‘llab-quvvatlaydi．<a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> qo‘llanmasi sozlamalarni tekshirish va 120 daqiqalik cheklovni tushuntiradi．Mahalliy eksportlar va ulashish nusxalari GitHub attestatsiyasini meros qilib olmaydi，sun’iy testlar haqiqiy Telegram akkaunti bilan ishlashni isbotlamaydi．"
 },
 "modes": {
 "modes.actions.body": "Ko'rinish, so'rov va natija kvitansiyalari imzolanadi. Tugmani bosishdan oldin server xabarni qayta oladi va o'zgartirilgan klaviaturani rad etadi. Qaytarilgan callback matni va URL manzillari kontekstda qayd etilgan bo'lib qoladi.",
@@ -4964,6 +4966,8 @@
 "Signed /api/assurance statement": "Imzolangan /api/kafolat bayonoti",
 "provider API": "provayder API",
 "Cloudflare API": "Cloudflare API",
-"outbound only": "faqat chiqish"
+"outbound only": "faqat chiqish",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "Vaqtinchalik GitHub runner’da Takeout，oddiy API eksporti yoki chat jurnalini tanlang．",
+"github actions capture takeout account export encrypted archive": "GitHub Actions shifrlangan arxivni oladi takeout account export"
 }
 }

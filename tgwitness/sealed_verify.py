@@ -14,7 +14,8 @@ REPOSITORY = "phishdestroy/TgWitness"
 WORKFLOW = REPOSITORY + "/.github/workflows/sealed-collector.yml"
 
 
-def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run=subprocess.run, max_gib=None, assembled=None):
+def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run=subprocess.run, max_gib=None,
+           assembled=None, expected_selection=None, require_complete=False):
     evidence, bundle = Path(evidence).resolve(), Path(bundle).resolve()
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repo):
         raise ValueError("Expected OWNER/REPOSITORY")
@@ -52,7 +53,7 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
     internal = verify_bundle(evidence, max_gib=max_gib)
     if parts and internal["fingerprint"] != fingerprint(parts["public_key"]):
         raise ValueError("Multipart manifest and evidence use different signing identities")
-    started, finished, accounts = [], [], []
+    started, finished, accounts, selections = [], [], [], []
     with zipfile.ZipFile(evidence) as archive, archive.open("events.jsonl") as incoming:
         for line in incoming:
             event = json.loads(line)
@@ -62,6 +63,8 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
                 finished.append(event["payload"])
             elif event["kind"] == "account.authorized":
                 accounts.append(event["payload"])
+            elif event["kind"] == "sealed.selection":
+                selections.append(event["payload"])
     if (len(started) != 1 or len(finished) != 1 or len(accounts) != 1
             or accounts[0].get("key_origin") != "created"
             or started[0].get("context", {}).get("collector_sha") != approved["collector_sha"]
@@ -70,12 +73,20 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
         raise ValueError("Archive is not the expected fresh-session sealed capture")
     if parts and (parts["context"] != started[0]["context"] or parts["recipient_sha256"] != started[0]["recipient_sha256"]):
         raise ValueError("Parts manifest context differs from the signed capture")
+    from .sealed_selection import checked_selection
+    expected = None
+    if expected_selection is not None:
+        path = Path(expected_selection)
+        if path.stat().st_size > 1024**2:
+            raise ValueError("Expected selection file is too large")
+        expected = json.loads(path.read_bytes())
+    selection = checked_selection(selections, internal, expected, require_complete)
     digest = hashlib.sha256()
     with evidence.open("rb") as incoming:
         for block in iter(lambda: incoming.read(1024**2), b""):
             digest.update(block)
     return {"verified": True, "sha256": digest.hexdigest(), "workflow": WORKFLOW, **approved,
-            "journal": internal, "collection": finished[0],
+            "journal": internal, "collection": finished[0], **selection,
             "limitation": "Approved GitHub workflow provenance and byte integrity; not Telegram-signed origin, "
                           "complete historical coverage, confidential hardware, or a proof of no host access."}
 
@@ -89,10 +100,13 @@ def main():
     parser.add_argument("--trusted-root", type=Path)
     parser.add_argument("--assembled", type=Path, help="Assembled evidence.zip for a multipart manifest (default: beside manifest)")
     parser.add_argument("--max-gib", type=int, default=4, help="Uncompressed archive verification ceiling")
+    parser.add_argument("--expected-selection", type=Path, help="Independently agreed settings JSON saved before capture")
+    parser.add_argument("--require-complete", action="store_true", help="Reject partial exports and chat journals")
     args = parser.parse_args()
     try:
         result = verify(args.evidence, args.bundle, args.repo, args.policy, args.trusted_root,
-                        max_gib=args.max_gib, assembled=args.assembled)
+                        max_gib=args.max_gib, assembled=args.assembled,
+                        expected_selection=args.expected_selection, require_complete=args.require_complete)
         print(json.dumps(result, indent=2, ensure_ascii=False))
     except Exception as exc:
         parser.exit(1, "Verification failed: " + str(exc) + "\n")

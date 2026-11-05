@@ -4327,7 +4327,9 @@
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "部署过程显示了 Phala 对 CVM 的计费金额（含磁盘费用）：每小时 0.06078 美元。",
 "1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "面板向导在 Phala Cloud 上运行了两次，一次通过其任务 API，一次通过\n基于真实 Chromium 内核的浏览器：价格核查、在 <strong>Advanced</strong> 下提交创建，全部六项\n认证检查均通过，服务器列表显示了计费价格（每月 44.37 美元）， <strong>Find\n当前地址</strong>、下载已测量的 Docker Compose 配置以及删除操作。浏览器未出现任何页面错误。\n此后，工作区每次均处于空状态。",
 "cc7477a0baefe3a0edd8db484060726cc43766551759080dbe21cb099c5a5d3e": "未涵盖内容：Phala 上的 Cloudflare 域名、CVM 上的 Telegram 账户以及 <code>dstack-0.6.1</code>\n镜像。向导在创建前的报价仅包含 Phala 的计算费用，因为其 API 仅针对现有 CVM 列出磁盘\n费用；服务器列表显示的是创建后的实际计费金额。",
-"ea8f5ef0a9c3d397802616fc63de51e4912d849a54d0ca64079906823442286e": "<code>tdx_os</code> 原先依赖 <code>dstack-mr</code>，而该工具当前版本提供的是 <code>measure-os</code>，并非文档中提到的 <code>measure --json</code>。验证器现在会根据已发布的镜像和虚拟机配置（包括 ACPI 表）自行计算 MRTD 和 RTMR0-2。"
+"ea8f5ef0a9c3d397802616fc63de51e4912d849a54d0ca64079906823442286e": "<code>tdx_os</code> 原先依赖 <code>dstack-mr</code>，而该工具当前版本提供的是 <code>measure-os</code>，并非文档中提到的 <code>measure --json</code>。验证器现在会根据已发布的镜像和虚拟机配置（包括 ACPI 表）自行计算 MRTD 和 RTMR0-2。",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "在临时 GitHub runner 上选择 Takeout、常规 API 导出或聊天日志．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions 支持通过 Takeout 或常规 API 导出整个账号或选定聊天，也支持单个聊天日志．<a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> 指南说明设置验证和 120 分钟限制．本地导出和分享副本不继承 GitHub 证明，模拟测试不代表已通过真实 Telegram 账号验证．"
 },
 "modes": {
 "modes.actions.body": "预览、请求和结果回执均经过签名。在按下按钮之前，服务器会再次获取消息，并拒绝已更改的键盘输入。返回的回调文本和 URL 仍作为记录上下文保留。",
@@ -5111,6 +5113,8 @@
 "Signed /api/assurance statement": "已签名的 /api/assurance 声明",
 "provider API": "提供商 API",
 "Cloudflare API": "Cloudflare API",
-"outbound only": "仅限外发"
+"outbound only": "仅限外发",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "在临时 GitHub runner 上选择 Takeout、常规 API 导出或聊天日志．",
+"github actions capture takeout account export encrypted archive": "GitHub Actions 捕获加密存档 takeout account export"
 }
 }

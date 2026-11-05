@@ -4231,7 +4231,9 @@
 "4867ff40b5d4ec7dd84b3e1ef5a5c7696d2b903ee20d89b94bb92ec9cdd28748": "Die CVM führte <code>dstack-0.5.12</code> mit deaktiviertem SSH-Zugriff aus. Der Collector übermittelte seine signierte Adresse etwa\n    1,5 Minuten nach der Erstellung. Der Deployment-Vorgang durchlief anschließend <code>tdx_binding</code>, <code>tdx_quote</code> (Intel TCB\n    UpToDate, Hardware-Attestationsdatensatz v4, FMSPC <code>20a06f000000</code>, nicht im Debug-Modus, nicht migrierbar, unterstützt kryptografische Verifizierungsdaten,\n    die von Intel abgerufen wurden), <code>tdx_compose_hash</code>, <code>tdx_compose</code> (Byte für Byte) und <code>tdx_identity</code> (KMS-Schlüssel).",
 "3ce1b6c5e5d37846efacf984cf4a7e3038e2621e6c38b6ef5fccf80d15ce3497": "Die Preisabfrage des Panel-Assistenten ergab <code>tdx.small</code> mit 0,058 $ pro Stunde. Bei einem falschen Schlüssel erschien lediglich die\n    Meldung „API-Schlüssel wurde nicht akzeptiert“.",
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "Die Bereitstellung gab an, was Phala für die CVM in Rechnung stellt, einschließlich Festplatte: 0,06078 $ pro Stunde.",
-"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "Der Panel-Assistent wurde zweimal auf Phala Cloud ausgeführt, einmal über deren Job-API und einmal über den\nBrowser mit einem echten Chromium: die Preisprüfung, die Erstellung mit dem Commit unter <strong>Advanced</strong>, alle sechs\nAttestierungsprüfungen bestanden, die Serverliste zeigte den in Rechnung gestellten Preis (44,37 USD pro Monat) an, <strong>Find\ndie aktuelle Adresse </strong>, den Download der gemessenen Docker-Compose-Konfiguration sowie die Löschung. Im Browser traten keine Seitenfehler auf.\nJedes Mal war der Arbeitsbereich anschließend leer."
+"1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "Der Panel-Assistent wurde zweimal auf Phala Cloud ausgeführt, einmal über deren Job-API und einmal über den\nBrowser mit einem echten Chromium: die Preisprüfung, die Erstellung mit dem Commit unter <strong>Advanced</strong>, alle sechs\nAttestierungsprüfungen bestanden, die Serverliste zeigte den in Rechnung gestellten Preis (44,37 USD pro Monat) an, <strong>Find\ndie aktuelle Adresse </strong>, den Download der gemessenen Docker-Compose-Konfiguration sowie die Löschung. Im Browser traten keine Seitenfehler auf.\nJedes Mal war der Arbeitsbereich anschließend leer.",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "Wähle Takeout，den Export über die reguläre API oder ein Chatjournal auf einem temporären GitHub-Runner．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions unterstützt Exporte des gesamten Kontos oder ausgewählter Chats über Takeout oder die reguläre API sowie ein einzelnes Chatjournal．Die Anleitung <a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> erklärt die Einstellungsprüfung und das Limit von 120 Minuten．Lokale Exporte und Freigabekopien übernehmen keine GitHub-Attestierung，synthetische Tests belegen keinen Betrieb mit einem echten Telegram-Konto．"
 },
 "modes": {
 "modes.actions.body": "Vorschau-, Anforderungs- und Ergebnisbestätigungen sind signiert. Vor dem Drücken einer Schaltfläche ruft der Server die Nachricht erneut ab und lehnt eine geänderte Eingabe ab. Zurückgesendete Callback-Texte und URLs bleiben als aufgezeichneter Kontext erhalten.",
@@ -4963,6 +4965,8 @@
 "Signed /api/assurance statement": "Signierte /api/assurance-Erklärung",
 "provider API": "Anbieter-API",
 "Cloudflare API": "Cloudflare-API",
-"outbound only": "nur ausgehend"
+"outbound only": "nur ausgehend",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "Wähle Takeout，den Export über die reguläre API oder ein Chatjournal auf einem temporären GitHub-Runner．",
+"github actions capture takeout account export encrypted archive": "GitHub Actions erfassen verschlüsseltes Archiv takeout account export"
 }
 }

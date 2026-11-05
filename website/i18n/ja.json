@@ -4232,7 +4232,9 @@
 "cc7477a0baefe3a0edd8db484060726cc43766551759080dbe21cb099c5a5d3e": "対象外：Phala上のCloudflareドメイン、CVM上のTelegramアカウント、および<code>dstack-0.6.1</code>\nイメージ。ウィザードでの作成前の価格はPhalaのコンピューティング料金のみとなります。これは、APIがディスク\n料金を既存のCVMに対してのみ指定しているためです。サーバー一覧には、作成後の請求価格が表示されます。",
 "ea8f5ef0a9c3d397802616fc63de51e4912d849a54d0ca64079906823442286e": "<code>tdx_os</code>は<code>dstack-mr</code>なしでは実行できませんでした。このツールの現行バージョンには、文書に記載された<code>measure --json</code>ではなく<code>measure-os</code>が含まれています。検証ツールは現在、公開されたイメージとACPIテーブルを含むVMの構成から、MRTDとRTMR0-2を直接計算します。",
 "3ce1b6c5e5d37846efacf984cf4a7e3038e2621e6c38b6ef5fccf80d15ce3497": "パネルのウィザードで料金を確認すると、<code>tdx.small</code>は時間あたり0.058ドルと表示されました。無効なキーを入力すると、「APIキーが受け入れられませんでした」という簡潔なメッセージが表示されました。",
-"66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "デプロイ処理は、PhalaがCVMに請求するディスク料金込みの金額を表示しました。時間あたり0.06078ドルです。"
+"66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "デプロイ処理は、PhalaがCVMに請求するディスク料金込みの金額を表示しました。時間あたり0.06078ドルです。",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "一時的な GitHub ランナーで Takeout，通常 API によるエクスポート，またはチャットログを選択します．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions は Takeout または通常 API によるアカウント全体や選択したチャットのエクスポートと，単一チャットのログに対応します．<a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> ガイドでは設定の検証と 120 分の制限を説明しています．ローカルのエクスポートや共有用コピーに GitHub の証明は引き継がれず，模擬テストは実際の Telegram アカウントでの動作確認にはなりません．"
 },
 "modes": {
 "modes.actions.body": "プレビュー、リクエスト、および結果の受信確認には署名が付与されます。ボタンが押される前に、サーバーはメッセージを再度取得し、変更されたキーボードを拒否します。返されたコールバックのテキストおよびURLは、記録されたコンテキストとして残ります。",
@@ -4964,6 +4966,8 @@
 "Signed /api/assurance statement": "署名済み /api/assurance ステートメント",
 "provider API": "プロバイダー API",
 "Cloudflare API": "Cloudflare API",
-"outbound only": "送信専用"
+"outbound only": "送信専用",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "一時的な GitHub ランナーで Takeout，通常 API によるエクスポート，またはチャットログを選択します．",
+"github actions capture takeout account export encrypted archive": "GitHub Actionsによる暗号化アーカイブの取得 takeout account export"
 }
 }

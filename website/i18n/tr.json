@@ -4326,7 +4326,9 @@
 "3ce1b6c5e5d37846efacf984cf4a7e3038e2621e6c38b6ef5fccf80d15ce3497": "Panel sihirbazındaki fiyat kontrolünde <code>tdx.small</code> anahtarı için saat başına 0,058 $ gösterildi. Yanlış bir anahtar girildiğinde,\n    \"API anahtarı kabul edilmedi\" şeklinde basit bir mesaj görüntülendi.",
 "66e769f2e83e1435c2e13605a8aeec6d06ef7795269652325e3418950a949d9e": "Dağıtım, Phala’nın CVM için faturalandırdığı tutarı (disk dahil) şu şekilde gösterdi: saat başına 0,06078 $.",
 "1a1b4376fa7554830223f48f78ca27482952f7b54bce103b90c332445a6c6291": "Panel sihirbazı, Phala Cloud üzerinde iki kez çalıştırıldı; bir kez iş API'si aracılığıyla, bir kez de\ngerçek Chromium ile tarayıcı üzerinden: fiyat kontrolü, <strong>Advanced</strong> altında commit ile oluşturma, altı\ndoğrulama kontrolünün tümü başarıyla geçti, faturalandırılan fiyatı (aylık 44,37 USD) gösteren sunucu listesi, <strong>Find\nmevcut adresi bul, </strong>, ölçülen Docker Compose yapılandırmasının indirilmesi ve silinmesi. Tarayıcıda herhangi bir sayfa hatası görülmedi.\nHer seferinde çalışma alanı sonrasında boştu.",
-"ea8f5ef0a9c3d397802616fc63de51e4912d849a54d0ca64079906823442286e": "<code>tdx_os</code>, <code>dstack-mr</code> olmadan çalışamıyordu; bu aracın mevcut sürümünde belgelerde belirtilen <code>measure --json</code> yerine <code>measure-os</code> bulunuyor. Doğrulayıcı artık MRTD ve RTMR0-2 değerlerini yayımlanan imajdan ve ACPI tabloları dahil sanal makine yapılandırmasından kendisi hesaplıyor."
+"ea8f5ef0a9c3d397802616fc63de51e4912d849a54d0ca64079906823442286e": "<code>tdx_os</code>, <code>dstack-mr</code> olmadan çalışamıyordu; bu aracın mevcut sürümünde belgelerde belirtilen <code>measure --json</code> yerine <code>measure-os</code> bulunuyor. Doğrulayıcı artık MRTD ve RTMR0-2 değerlerini yayımlanan imajdan ve ACPI tabloları dahil sanal makine yapılandırmasından kendisi hesaplıyor.",
+"f63c528d280d2cd928852a8aa9561e95b2e3ab4eac699a49736fbaa3d5934076": "Geçici bir GitHub çalıştırıcısında Takeout，normal API dışa aktarımı veya sohbet günlüğünü seçin．",
+"9061d802355bffa5e750fe63adf58e6006af37921874b0dd207113a323dfc065": "GitHub Actions，Takeout veya normal API ile tüm hesabı ya da seçilen sohbetleri dışa aktarmayı ve tek sohbet günlüğünü destekler．<a href=\"https://phishdestroy.github.io/TgWitness/docs/capture/\">GitHub Actions</a> kılavuzu ayar doğrulamasını ve 120 dakika sınırını açıklar．Yerel dışa aktarımlar ve paylaşım kopyaları GitHub doğrulamasını devralmaz，sentetik testler gerçek bir Telegram hesabıyla çalışmayı kanıtlamaz．"
 },
 "modes": {
 "modes.actions.body": "Önizleme, istek ve sonuç makbuzları imzalanır. Bir düğmeye basılmadan önce, sunucu mesajı tekrar alır ve değiştirilmiş bir klavyeyi reddeder. Geri dönen geri arama metni ve URL'ler, kaydedilmiş bağlamda kalır.",
@@ -5110,6 +5112,8 @@
 "Signed /api/assurance statement": "İmzalı /api/assurance beyanı",
 "provider API": "sağlayıcı API&#x27;si",
 "Cloudflare API": "Cloudflare API&#x27;si",
-"outbound only": "sadece giden"
+"outbound only": "sadece giden",
+"Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．": "Geçici bir GitHub çalıştırıcısında Takeout，normal API dışa aktarımı veya sohbet günlüğünü seçin．",
+"github actions capture takeout account export encrypted archive": "GitHub Actions ile şifrelenmiş arşivin yakalanması takeout account export"
 }
 }

@@ -2374,6 +2374,7 @@ def verify_account_export(path, expected_fingerprint=None, max_gib=None):
             raise ValueError("Account export status contradicts its partial acquisition coverage")
         return {"format": manifest["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
                 "job_id": job_id, "account_id": account_id, "status": manifest["status"], "counts": counts,
+                "options": options, "options_sha256": manifest["options_sha256"],
                 "receipt_count": len(receipts), "receipt_head_sha256": previous, "files_checked": len(files),
                 "sha256sums": sums, "producer": manifest.get("producer"), "coverage": {
                     "inventory_complete": inventory["discovery_complete"], "tasks_total": len(tasks), "tasks_done": done,
