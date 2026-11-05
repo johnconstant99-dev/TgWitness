@@ -1,15 +1,21 @@
 import asyncio
+import json
 import secrets
 import shutil
 import time
 
 from telethon import utils
-from telethon.errors import FloodWaitError, RPCError
+from telethon.errors import FloodWaitError, RPCError, ServerError, TakeoutInitDelayError, TakeoutInvalidError
+from telethon.tl import types
 
 from .evidence import checkpoint, retain_checkpoint
 from .monitoring import capture_settings
 from .scope import scope_settings
 from .store import canonical, utcnow
+from . import history_admin, history_cursor, message_content
+from .history_options import HistoryOptions, options_of
+from .history_transport import HistoryTransport
+from .workers import complete_in_thread
 
 PAGE_SIZE = 100
 
@@ -18,6 +24,7 @@ class History:
     def __init__(self, collector):
         self.collector, self.store = collector, collector.store
         self.task = None
+        self.transport = None
         with self.store.transaction():
             for statement in (
                 "CREATE TABLE IF NOT EXISTS history_runs (id TEXT PRIMARY KEY, account_id INTEGER NOT NULL, "
@@ -28,8 +35,19 @@ class History:
                 "unavailable INTEGER NOT NULL DEFAULT 0, error TEXT, PRIMARY KEY(run_id,chat_id))",
                 "CREATE TABLE IF NOT EXISTS history_items (run_id TEXT NOT NULL, message_event INTEGER NOT NULL, "
                 "PRIMARY KEY(run_id,message_event))",
+                "CREATE TABLE IF NOT EXISTS history_admin_items (run_id TEXT NOT NULL, chat_id INTEGER NOT NULL, "
+                "provider_id INTEGER NOT NULL, event_seq INTEGER NOT NULL, PRIMARY KEY(run_id,chat_id,provider_id))",
             ):
                 self.store.db.execute(statement)
+
+            for table, fields in {
+                "history_runs": {"options": "TEXT NOT NULL DEFAULT '{}'"},
+                "history_sources": {"metadata": "TEXT NOT NULL DEFAULT '{}'", "cursor_seq": "INTEGER", "cursor_hash": "TEXT"},
+            }.items():
+                columns = {r[1] for r in self.store.db.execute("PRAGMA table_info(" + table + ")")}
+                for name, definition in fields.items():
+                    if name not in columns:
+                        self.store.db.execute("ALTER TABLE " + table + " ADD COLUMN " + name + " " + definition)
 
             self.store.db.execute("UPDATE history_runs SET phase='paused',reason='process_restart',updated_at=? "
                                   "WHERE phase='running'", (utcnow(),))
@@ -54,15 +72,21 @@ class History:
             totals = self.store.db.execute("SELECT coalesce(sum(captured),0),coalesce(sum(unavailable),0) "
                                            "FROM history_sources WHERE run_id=?", (run_id,)).fetchone()
             sources = [dict(row) for row in self.store.db.execute(
-                "SELECT chat_id,title,phase,captured,unavailable,upper_id,offset_id,error FROM history_sources "
+                "SELECT chat_id,title,phase,captured,unavailable,upper_id,offset_id,error,metadata FROM history_sources "
                 "WHERE run_id=? ORDER BY CASE phase WHEN 'reading' THEN 0 WHEN 'failed' THEN 1 "
                 "WHEN 'skipped' THEN 2 ELSE 3 END,position LIMIT 50", (run_id,))]
             media = dict(self.store.db.execute(
                 "SELECT j.state,count(*) FROM history_items h JOIN media_jobs j ON j.message_event=h.message_event "
                 "WHERE h.run_id=? GROUP BY j.state", (run_id,)))
+            for source in sources:
+                source["metadata"] = json.loads(source["metadata"])
             return {**run, "sources_total": sum(counts.values()), "sources_by_phase": counts,
                     "captured": totals[0], "unavailable": totals[1], "sources": sources, "media": media,
                     "media_pending": sum(media.get(k, 0) for k in ("queued", "retry", "running")),
+                    "options": options_of(run).model_dump(),
+                    "pacing": self.store.get_setting("rpc_bulk_pacing", {}),
+                    "wait_until": max(self.store.get_setting("rpc_backoff_until", 0),
+                                      self.store.get_setting("history_takeout_wait_until", 0)),
                     "scope": "enabled sources fixed at run creation; media follows capture settings"}
 
     def require_account(self):
@@ -71,7 +95,8 @@ class History:
             raise ValueError("Connect a Telegram account first.")
         return account
 
-    async def start(self):
+    async def start(self, options=None):
+        options = options or HistoryOptions()
         account = self.require_account()
         current = self.current()
         if self.busy or current and current["phase"] in ("running", "paused"):
@@ -85,26 +110,30 @@ class History:
         try:
             await self.collector.restore()
             self.store.recover_media()
-            return self.create_run(run_id, now, account, targets)
+            return self.create_run(run_id, now, account, targets, options)
         except BaseException:
             self.collector.release_export("history:" + run_id)
             raise
 
-    def create_run(self, run_id, now, account, targets):
+    def create_run(self, run_id, now, account, targets, options=None):
+        options = options or HistoryOptions()
         with self.store.transaction():
-            self.store.db.execute("INSERT INTO history_runs VALUES (?,?,?,?,?,NULL)",
-                                  (run_id, account, "running", now, now))
+            self.store.db.execute("INSERT INTO history_runs(id,account_id,phase,created_at,updated_at,options) VALUES (?,?,?,?,?,?)",
+                                  (run_id, account, "running", now, now, canonical(options.model_dump()).decode()))
             self.store.db.executemany(
                 "INSERT INTO history_sources(run_id,chat_id,title,position) VALUES (?,?,?,?)",
                 [(run_id, t["chat_id"], t["title"], i) for i, t in enumerate(targets)])
             self.store.append("history.started", {
                 "history_run_id": run_id, "account_id": account,
+                "options": options.model_dump(), "cursor_format": "signed-history-cursor-v1",
                 "sources": [t["chat_id"] for t in targets], "scope": scope_settings(self.store),
                 "dialog_list_limit": self.collector.param("dialog_limit"),
                 "capture": capture_settings(self.store),
                 "meaning": "History of the listed enabled sources; not proof all account dialogs were enumerated. "
                            "Each source fixes its upper message ID on first read. Messages may change during reading; "
                            "unseen deletions and intermediate edits cannot be recovered."})
+            for target in targets:
+                history_cursor.seal(self.store, run_id, target["chat_id"])
         self.task = asyncio.create_task(self.run(run_id))
         self.task.add_done_callback(lambda _: self.collector.release_export("history:" + run_id))
         return self.status()
@@ -126,6 +155,7 @@ class History:
         if not self.collector.reserve_export(owner):
             raise ValueError("This account is busy. Pause observation or its current task before resuming history.")
         try:
+            await complete_in_thread(history_cursor.verify, self.store, self.collector.vault, run)
             await self.collector.restore()
             self.store.recover_media()
             self.transition(run["id"], "running", "operator_resume")
@@ -138,19 +168,72 @@ class History:
 
     async def pause(self, reason="operator_pause"):
         if self.busy:
-            self.task.cancel()
+            # A worker may already have paused itself and be joining media
+            # tasks. Authorization cleanup must not cancel that join again.
+            run = self.current()
+            if run and run["phase"] == "running":
+                self.task.cancel()
             await asyncio.gather(self.task, return_exceptions=True)
         run = self.current()
         if run and run["phase"] == "running":
             self.transition(run["id"], "paused", reason)
+            retain_checkpoint(self.store, self.collector.vault)
         return self.status()
 
     async def cancel(self):
         await self.pause()
         run = self.current()
         if run and run["phase"] == "paused":
-            self.transition(run["id"], "cancelled", "operator_cancel; observations already saved are retained")
+            owner = "history:" + run["id"]
+            if not self.collector.reserve_export(owner):
+                raise ValueError("This account is busy. Pause its current task before ending history.")
+            try:
+                if options_of(run).transport == "takeout":
+                    await self.collector.restore()
+                    await asyncio.wait_for(HistoryTransport(self, run).finish(False),
+                                           self.collector.param("operation_timeout_seconds"))
+                    with self.store.transaction():
+                        pending = list(self.store.db.execute("SELECT j.* FROM media_jobs j JOIN history_items h "
+                            "ON h.message_event=j.message_event JOIN events e ON e.seq=j.message_event "
+                            "WHERE h.run_id=? AND j.state IN ('queued','retry') "
+                            "AND json_extract(e.payload,'$.acquisition.source_mode')='takeout'", (run["id"],)))
+                        for job in pending:
+                            self.store.finish_media(dict(job), "skipped", {"reason": "operator ended Takeout acquisition"})
+                self.transition(run["id"], "cancelled", "operator_cancel; observations already saved are retained")
+                retain_checkpoint(self.store, self.collector.vault)
+            finally:
+                self.collector.release_export(owner)
         return self.status()
+
+    @staticmethod
+    def metadata(job):
+        return json.loads(job["metadata"])
+
+    def save_metadata(self, job, metadata):
+        with self.store.transaction():
+            self.store.db.execute("UPDATE history_sources SET metadata=? WHERE run_id=? AND chat_id=?",
+                (canonical(metadata).decode(), job["run_id"], job["chat_id"]))
+            history_cursor.seal(self.store, job["run_id"], job["chat_id"])
+
+    async def network(self, call, run_id):
+        failures = 0
+        while True:
+            try:
+                return await asyncio.wait_for(call(), self.collector.param("operation_timeout_seconds"))
+            except FloodWaitError as exc:
+                until = max(time.time() + exc.seconds + 1, self.store.get_setting("rpc_backoff_until", 0))
+                self.store.set_setting("rpc_backoff_until", until)
+                self.store.append("history.waiting", {"history_run_id": run_id,
+                    "retry_after_seconds": exc.seconds, "retry_at": until})
+                while time.time() < until:
+                    await asyncio.sleep(min(1, until - time.time()))
+            except (OSError, TimeoutError, ServerError) as exc:
+                failures += 1
+                self.store.append("history.retry", {"history_run_id": run_id,
+                    "attempt": failures, "error_type": type(exc).__name__})
+                if failures >= 5:
+                    raise
+                await asyncio.sleep(min(30, 2 ** failures))
 
     def source(self, run_id):
         with self.store.lock:
@@ -170,10 +253,31 @@ class History:
                 "last_message_id": latest["offset_id"], "captured": latest["captured"],
                 "unavailable": latest["unavailable"], "error_type": error,
                 "meaning": "End of the available history read, not proof of complete past delivery."}, job["chat_id"])
+            history_cursor.seal(self.store, job["run_id"], job["chat_id"])
 
     async def run(self, run_id):
+        producer_done, media_tasks = asyncio.Event(), []
         try:
+            options = options_of(self.current())
+            self.transport = None
+            if options.transport == "takeout":
+                remaining = self.store.get_setting("history_takeout_wait_until", 0) - time.time()
+                if remaining > 0:
+                    self.transition(run_id, "paused", "takeout_approval_wait")
+                    return
+                self.transport = HistoryTransport(self, self.current())
+                await self.transport.open()
+                self.store.set_setting("history_takeout_wait_until", 0)
+            media_client = self.transport.for_media if self.transport else None
+            if not capture_settings(self.store)["messages_first"]:
+                media_tasks = [asyncio.create_task(self.collector.download_worker(
+                    owner="history:" + run_id, history_run=run_id, producer_done=producer_done,
+                    client_for_job=media_client))
+                    for _ in range(options.media_workers)]
             while True:
+                for task in media_tasks:
+                    if task.done() and not task.cancelled() and task.exception():
+                        raise task.exception()
                 run = self.current()
                 if self.collector.export_claim != "history:" + run_id:
                     self.transition(run_id, "paused", "account_task_released")
@@ -183,17 +287,35 @@ class History:
                     return
                 job = self.source(run_id)
                 if not job:
+                    producer_done.set()
+                    self.collector.media_wakeup.set()
+                    if media_tasks:
+                        await asyncio.gather(*media_tasks)
                     if capture_settings(self.store)["messages_first"]:
-                        await self.collector.download_worker(owner="history:" + run_id, history_run=run_id)
+                        await self.collector.download_worker(owner="history:" + run_id, history_run=run_id,
+                                                             client_for_job=media_client)
+                    if self.collector.authorization_required:
+                        self.transition(run_id, "paused", "authorization_required")
+                        return
                     state = self.status()
+                    if self.transport and state["media_pending"]:
+                        self.transition(run_id, "paused", "takeout_media_pending; enable its sources and media policy to resume")
+                        return
+                    with self.store.lock:
+                        admin_gaps = any(any(v.get("status") == "unavailable" for k, v in json.loads(r[0]).items()
+                                            if k.startswith("admin_")) for r in self.store.db.execute(
+                            "SELECT metadata FROM history_sources WHERE run_id=?", (run_id,)))
                     phase = "incomplete" if state["unavailable"] or any(
-                        state["sources_by_phase"].get(k) for k in ("failed", "skipped")) else "complete"
+                        state["sources_by_phase"].get(k) for k in ("failed", "skipped")) or admin_gaps else "complete"
+                    if self.transport:
+                        await self.network(lambda: self.transport.finish(phase == "complete" and
+                            not state["media_pending"] and not state["media"].get("failed")), run_id)
                     with self.store.transaction():
                         self.transition(run_id, phase, "History reading ended; attachment outcomes are separate.")
                         self.store.append("history.summary", {
                             "history_run_id": run_id, "captured": state["captured"],
                             "unavailable": state["unavailable"], "sources": state["sources_by_phase"],
-                            "media": state["media"], "media_pending": state["media_pending"]})
+                            "media": state["media"], "media_pending": state["media_pending"], "admin_log_gaps": admin_gaps})
                     retain_checkpoint(self.store, self.collector.vault)
                     return
                 if not self.collector.selected(job["chat_id"]):
@@ -208,15 +330,10 @@ class History:
                     continue
                 client = self.collector.client
                 try:
-                    await asyncio.wait_for(self.read_page(job), self.collector.param("operation_timeout_seconds"))
-                    if not capture_settings(self.store)["messages_first"]:
-                        await self.collector.download_worker(owner="history:" + run_id, history_run=run_id)
-                except FloodWaitError as exc:
-                    with self.store.transaction():
-                        self.store.set_setting("rpc_backoff_until", max(time.time() + exc.seconds,
-                            self.store.get_setting("rpc_backoff_until", 0)))
-                        self.store.append("history.waiting", {"history_run_id": run_id,
-                            "retry_after_seconds": exc.seconds}, job["chat_id"])
+                    await self.read_page(job)
+                    retain_checkpoint(self.store, self.collector.vault)
+                except (TakeoutInitDelayError, TakeoutInvalidError, ServerError):
+                    raise
                 except RPCError as exc:
                     if self.collector.handle_authorization_error(exc, "history", client=client):
                         self.transition(run_id, "paused", "authorization_required")
@@ -229,17 +346,50 @@ class History:
                 await asyncio.sleep(0.05)
         except asyncio.CancelledError:
             raise
+        except TakeoutInitDelayError as exc:
+            until = time.time() + exc.seconds + 1
+            self.store.set_setting("history_takeout_wait_until", until)
+            self.store.append("history.takeout.waiting", {"history_run_id": run_id,
+                "retry_at": until, "retry_after_seconds": exc.seconds})
+            self.transition(run_id, "paused", "takeout_approval_wait")
+        except TakeoutInvalidError:
+            if self.transport:
+                self.transport.invalidate()
+            self.transition(run_id, "paused", "takeout_expired; resume requests a new Takeout session")
         except Exception as exc:
-
-            self.transition(run_id, "paused", type(exc).__name__)
+            self.collector.handle_authorization_error(exc, "history", client=self.collector.client)
+            self.transition(run_id, "paused", str(exc) if isinstance(exc, ValueError) else type(exc).__name__)
         finally:
+            producer_done.set()
+            for task in media_tasks:
+                if not task.done():
+                    task.cancel()
+            if media_tasks:
+                await asyncio.gather(*media_tasks, return_exceptions=True)
             await self.collector.avatar_history.close()
+            retain_checkpoint(self.store, self.collector.vault)
 
     async def read_page(self, job):
         chat_id, run_id = job["chat_id"], job["run_id"]
-        entity = await self.collector.resolve_target(chat_id)
-        offset = job["offset_id"] or ((job["upper_id"] + 1) if job["upper_id"] is not None else 0)
-        messages = await self.collector.client.get_messages(entity, limit=PAGE_SIZE, offset_id=offset)
+        entity = await self.network(lambda: self.collector.resolve_target(chat_id), run_id)
+        options, meta = options_of(self.current()), self.metadata(job)
+        if options.admin_log and await self.network(lambda: history_admin.page(self, job, entity, "before"), run_id):
+            return
+        if meta.get("text_done"):
+            if options.admin_log and await self.network(lambda: history_admin.page(self, job, entity, "after"), run_id):
+                return
+            self.finish_source(job, "complete")
+            return
+        indices = self.transport.indices(chat_id) if self.transport else [0]
+        if not indices:
+            self.finish_source(job, "failed", "source_absent_from_takeout_ranges")
+            return
+        index = meta.get("range_index", indices[0])
+        upper = meta.get("range_upper") if self.transport else job["upper_id"]
+        offset = job["offset_id"] or ((upper + 1) if upper is not None else 0)
+        client = self.transport.client(index) if self.transport else self.collector.client
+        read = getattr(client, "history_page", client.get_messages)
+        messages = await self.network(lambda: read(entity, limit=PAGE_SIZE, offset_id=offset), run_id)
         if not self.collector.selected(chat_id):
             self.finish_source(job, "skipped", "source_disabled")
             return
@@ -251,15 +401,25 @@ class History:
             previous = mid
             if getattr(message, "peer_id", None) is not None and utils.get_peer_id(message.peer_id) != chat_id:
                 raise ValueError("History reply belongs to a different chat.")
-        if job["upper_id"] is None:
+        if upper is None:
             upper = messages[0].id if messages else 0
             with self.store.transaction():
                 self.store.db.execute("UPDATE history_sources SET upper_id=?,phase='reading' "
-                                      "WHERE run_id=? AND chat_id=?", (upper, run_id, chat_id))
+                                      "WHERE run_id=? AND chat_id=?", (max(upper, job["upper_id"] or 0), run_id, chat_id))
+                meta["range_upper"] = upper
                 self.store.append("history.source.started", {"history_run_id": run_id,
-                    "upper_message_id": upper}, chat_id)
+                    "upper_message_id": upper, "range_index": index}, chat_id)
+                self.save_metadata(job, meta)
         if not messages:
-            self.finish_source(job, "complete")
+            with self.store.transaction():
+                position = indices.index(index)
+                if position + 1 < len(indices):
+                    meta.update(range_index=indices[position + 1], range_upper=None)
+                    self.store.db.execute("UPDATE history_sources SET offset_id=0 WHERE run_id=? AND chat_id=?",
+                                          (run_id, chat_id))
+                else:
+                    meta["text_done"] = True
+                self.save_metadata(job, meta)
             return
         for message in messages:
             if not self.collector.selected(chat_id):
@@ -267,17 +427,30 @@ class History:
                 return
             with self.store.transaction():
 
-                unavailable = not hasattr(message, "message") or getattr(message, "peer_id", None) is None
+                unavailable = (isinstance(message, types.MessageEmpty) or not hasattr(message, "message")
+                               or getattr(message, "peer_id", None) is None)
                 if unavailable:
                     event = self.store.append("history.message.unavailable", {"history_run_id": run_id},
                                               chat_id, message.id)
                 else:
+                    previous = self.store.message_state(chat_id, message.id)["content"]
                     event = await self.collector.capture_message(message, "message.snapshot", chat_id,
-                        source="history_acquisition", history_run_id=run_id)
+                        source="history_acquisition", history_run_id=run_id, acquisition={
+                            "source_mode": options.transport, "source": "backfill",
+                            "telegram_range": self.transport.ranges[index] if self.transport else None})
+                    if (options.compare_saved and previous
+                            and previous["observable"] != message_content.of_payload(event["payload"])):
+                        self.store.append("history.content.changed", {
+                            "history_run_id": run_id, "source": "backfill_comparison",
+                            "previous_event": previous["seq"], "previous_hash": previous["hash"],
+                            "current_event": event["seq"], "current_hash": event["hash"],
+                            "meaning": "Observed content differs; change time, actor and intermediate versions are unknown."},
+                            chat_id, message.id)
                 self.store.db.execute("INSERT INTO history_items VALUES (?,?)", (run_id, event["seq"]))
                 self.store.db.execute("UPDATE history_sources SET offset_id=?,captured=captured+?,"
                                       "unavailable=unavailable+? WHERE run_id=? AND chat_id=?",
                                       (message.id, int(not unavailable), int(unavailable), run_id, chat_id))
+                history_cursor.seal(self.store, run_id, chat_id)
 
             await asyncio.sleep(0)
 

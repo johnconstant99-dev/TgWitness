@@ -1,6 +1,8 @@
 import asyncio
 import tempfile
 import threading
+import subprocess
+import sys
 from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
@@ -54,8 +56,13 @@ def main():
             page.reload()
             navigate_panel(page, "sources")
             page.locator("#sources-tab-chats").click()
+            page.locator("#history-workers").select_option("3")
+            page.locator("#history-admin").uncheck()
             page.locator("#history-start").click()
             expect(page.locator("#history-progress")).to_contain_text("2 messages", timeout=12000)
+            expect(page.locator("#history-transport")).to_be_disabled()
+            changed = context.request.post(server.url + "/api/history/resume", data={"transport": "takeout"}, headers=headers)
+            assert changed.status == 400
             rejected = context.request.post(server.url + "/api/collector/start", data={}, headers=headers)
             assert rejected.status == 400 and "busy" in rejected.text()
             page.locator("#history-pause").click()
@@ -65,6 +72,8 @@ def main():
             page.locator("#sources-tab-chats").click()
             expect(page.locator("#history-progress")).to_contain_text("History paused")
             expect(page.locator("#history-resume")).to_be_enabled()
+            expect(page.locator("#history-workers")).to_have_value("3")
+            expect(page.locator("#history-admin")).not_to_be_checked()
             HistoryClient.allow_remaining.set()
             page.locator("#history-resume").click()
             expect(page.locator("#history-progress")).to_contain_text("History reading finished", timeout=12000)
@@ -81,8 +90,12 @@ def main():
             bundle.write_bytes(response.body())
             state = context.request.get(server.url + "/api/status", headers=headers).json()
             checked = verify_history_report(report, state["fingerprint"], bundle)
+            subprocess.run([sys.executable, str(Path(__file__).resolve().parents[1] / "tgwitness/verify.py"),
+                str(report), "--evidence", str(bundle), "--fingerprint", state["fingerprint"]],
+                check=True, capture_output=True, text=True)
             assert checked["evidence_counts_checked"] and checked["captured"] == 5
             assert len(server.app.state.store.events(kind="message.snapshot")) == 5
+            assert state["history"]["options"]["media_workers"] == 3
             for width in (1440, 390):
                 page.set_viewport_size({"width": width, "height": 1000})
                 check_layout(page)

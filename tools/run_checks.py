@@ -38,7 +38,7 @@ SUITES = {
         "check_independent_report_designs_browser.py",
         "test_account_report_layouts.py",
         "test_independent_report_html.py", "test_independent_report_pdf.py",
-        "check_analyst_browser.py", "check_history_browser.py", "check_sealed_browser.py",
+        "check_analyst_browser.py", "test_history_backfill.py", "check_history_browser.py", "check_sealed_browser.py",
         "check_interactions_browser.py", "check_workspace_browser.py", "check_quick_browser.py",
         "check_proof_browser.py", "check_setup_browser.py", "check_public_proxies_browser.py",
         "check_capture_language_browser.py", "check_application_guides.py",

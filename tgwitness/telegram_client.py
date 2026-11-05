@@ -8,12 +8,24 @@ from telethon.network.connection import ConnectionTcpFull
 from telethon.network.connection.tcpmtproxy import TcpMTProxy
 from telethon.tl import functions, types
 
+from .rpc_pacing import bulk_request
+
 _single_attempt = ContextVar("telegram_single_attempt", default=False)
 _ACTIONS = (functions.messages.GetBotCallbackAnswerRequest,
             functions.messages.ImportChatInviteRequest, functions.channels.JoinChannelRequest)
 
 
 class WitnessClient(TelegramClient):
+
+    async def history_page(self, entity, *, limit, offset_id):
+        """One raw page, retaining MessageEmpty instead of SDK iterator filtering."""
+        peer = await self.get_input_entity(entity)
+        result = await self(functions.messages.GetHistoryRequest(peer, offset_id, None, 0, limit, 0, 0, 0))
+        entities = {utils.get_peer_id(item): item for item in [*result.users, *result.chats]}
+        for message in result.messages:
+            if isinstance(message, (types.Message, types.MessageService)):
+                message._finish_init(self, entities, peer)
+        return result.messages
 
 
     @property
@@ -59,11 +71,20 @@ class WitnessClient(TelegramClient):
                 break
             await asyncio.sleep(min(remaining, 1))
         single = isinstance(request, _ACTIONS)
+        pacer = getattr(self, "bulk_pacer", None)
+        paced = pacer is not None and bulk_request(request)
+        if paced:
+            await pacer.before()
         token = _single_attempt.set(single)
         try:
-            return await super()._call(sender, request, ordered, flood_sleep_threshold)
+            result = await super()._call(sender, request, ordered, flood_sleep_threshold)
+            if paced:
+                pacer.success()
+            return result
         except Exception as exc:
             if isinstance(exc, FloodWaitError):
+                if pacer is not None:
+                    pacer.flooded(exc.seconds)
                 self._rpc_wait_until = max(self._rpc_wait_until, time.time() + exc.seconds + 1)
                 if save := getattr(self, "rpc_backoff_setter", None):
                     save(self._rpc_wait_until)

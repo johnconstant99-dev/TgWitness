@@ -365,8 +365,16 @@
   </section>
   <section class="card padded" id="history-card" aria-labelledby="history-heading">
     <div class="eyebrow">Full history</div><h2 id="history-heading">Bring past messages into this workspace</h2>
-    <p class="muted">Load the available history of every enabled source into Chats and the signed journal. Progress survives a restart. Attachments follow your media settings. Deleted messages and unseen past edits cannot be recovered.</p>
+    <p class="muted">Load the available history of every enabled source into Chats and the signed journal. Progress survives a restart. Attachments follow your media settings. Past deletions and edits are only available when Telegram returns them in Recent Actions.</p>
     <p class="hint">For an account archive, choose Whole account above, load and review the source list, then start observation. This run uses the enabled sources listed at its start; new sources are not added to a running job.</p>
+    <fieldset id="history-options">
+      <legend>History acquisition</legend>
+      <label>Telegram transport <select id="history-transport"><option value="standard">Standard API</option><option value="takeout">Takeout export</option></select></label>
+      <label>Attachment workers <select id="history-workers"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></label>
+      <label class="check-label"><input id="history-admin" type="checkbox" checked> Preserve available edits and deletions from Recent Actions</label>
+      <label class="check-label"><input id="history-compare" type="checkbox" checked> Compare with previously saved message versions</label>
+      <p class="hint">Takeout may require approval in Telegram and a server-specified wait. Recent Actions requires administrator access. These choices stay fixed when you resume.</p>
+    </fieldset>
     <div class="chat-export-actions">
       <button class="primary" id="history-start" type="button">Load full history</button>
       <button class="secondary" id="history-pause" type="button" hidden>Pause history</button>
@@ -376,6 +384,7 @@
     </div>
     <p id="history-progress" role="status" aria-live="polite"></p>
     <p class="hint" id="history-media"></p>
+    <p class="hint" id="history-wait"></p>
     <ul id="history-sources"></ul>
     <p class="hint">Use Export evidence to hand over the journal and saved attachments. Finishing history reads does not mean every attachment was downloaded.</p>
   </section>

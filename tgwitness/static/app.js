@@ -1779,6 +1779,13 @@ function mediaLimitText(c,short=false){
 function renderHistory(){
   const s=state.status,h=s?.history||{phase:"none"},phase=h.phase;
   const active=phase==="running",paused=phase==="paused",exists=phase!=="none";
+  $("history-options").disabled=active||paused;
+  if((active||paused)&&h.options){
+    $("history-transport").value=h.options.transport;
+    $("history-workers").value=String(h.options.media_workers);
+    $("history-admin").checked=h.options.admin_log;
+    $("history-compare").checked=h.options.compare_saved;
+  }
   show("history-card",may("sources")&&!s?.chats_limited);
   show("history-start",!active&&!paused);show("history-pause",active);
   show("history-resume",paused);show("history-cancel",active||paused);
@@ -1793,18 +1800,31 @@ function renderHistory(){
     tr("{n} enabled sources. History requires an idle account; pause observation first.",{n:s?.targets.filter(x=>x.enabled).length||0});
   $("history-media").textContent=exists?tr("Attachments: {done} saved, {pending} pending, {failed} failed. Unavailable messages: {missing}.",{
     done:h.media?.done||0,pending:h.media_pending||0,failed:h.media?.failed||0,missing:h.unavailable||0}):"";
+  $("history-wait").textContent=h.wait_until>Date.now()/1000?
+    tr("Telegram wait until {time}",{time:new Date(h.wait_until*1000).toLocaleString()}):
+    exists&&h.pacing?.delay_seconds?tr("Account request spacing: {seconds} s",{seconds:Number(h.pacing.delay_seconds).toFixed(1)}):"";
   const list=$("history-sources");list.replaceChildren();
   const phases={queued:tr("Queued"),reading:tr("Reading history"),complete:tr("History reading finished"),
     failed:tr("Failed"),skipped:tr("Skipped")};
   for(const source of h.sources||[]){
+    const admin=["before","after"].map(stage=>{
+      const p=source.metadata?.["admin_"+stage];
+      const status={reading:tr("Reading"),complete:tr("Complete"),unavailable:tr("Unavailable"),not_applicable:tr("Not applicable")};
+      return p?tr("Recent Actions ({stage}): {status} · {count}",{
+        stage:stage==="before"?tr("Before history"):tr("After history"),status:status[p.status]||p.status,count:p.observed})+
+        (p.error?" · "+p.error:""):"";
+    }).filter(Boolean).join(" · ");
     list.append(node("li","",source.title+" · "+(phases[source.phase]||source.phase)+" · "+source.captured+
-      (source.error?" · "+tr(source.error):"")));
+      (source.error?" · "+tr(source.error):"")+(admin?" · "+admin:"")));
   }
   if(h.sources_total>50)list.append(node("li","hint",tr("The signed report lists every source.")));
 }
 for(const action of ["start","pause","resume","cancel"]){
   $("history-"+action).addEventListener("click",e=>busy(e.currentTarget,async()=>{
-    await json("history/"+action,{});await refreshStatus();await refreshEvents();
+    const options=action==="start"?{transport:$("history-transport").value,
+      media_workers:Number($("history-workers").value),admin_log:$("history-admin").checked,
+      compare_saved:$("history-compare").checked}:{};
+    await json("history/"+action,options);await refreshStatus();await refreshEvents();
   }));
 }
 $("history-report").addEventListener("click",e=>busy(e.currentTarget,()=>download("history/report","tgwitness-history-report.json")));

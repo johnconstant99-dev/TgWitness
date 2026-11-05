@@ -529,8 +529,12 @@ class Store:
                 "WHERE j.state IN ('queued','retry','running')" + clause, sorted(chat_ids or [])).fetchone()
         return row[0]
 
-    def claim_media(self, account_id, now=None, *, min_priority=None, max_priority=None, history_run=None):
+    def claim_media(self, account_id, now=None, *, min_priority=None, max_priority=None, history_run=None,
+                    allow_takeout=False):
         filters, params = [], [account_id, time.time() if now is None else now]
+        if not allow_takeout:
+            filters.append("NOT EXISTS (SELECT 1 FROM events e WHERE e.seq=j.message_event "
+                           "AND json_extract(e.payload,'$.acquisition.source_mode')='takeout')")
         if history_run is not None:
             filters.append("EXISTS (SELECT 1 FROM history_items h WHERE h.message_event=j.message_event AND h.run_id=?)")
             params.append(history_run)

@@ -26,6 +26,7 @@ from telethon.errors import FloodWaitError, RPCError
 from . import __version__
 from .workers import complete_in_thread
 from .account_export import AccountExport, AccountExportOptions
+from .history_options import HistoryOptions
 from .disclosure import Disclosures, DisclosurePolicy
 from .downloads import RetainedDownload, TemporaryDownload, build_file
 from .access import POLICY, AccessControl, AdminSettings, Console, GrantSettings, Refused, check as access_check
@@ -2087,9 +2088,13 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return app.state.collector.history.status()
 
     @app.post("/api/history/{action}", dependencies=[Depends(authenticate)])
-    async def history_action(action: str):
+    async def history_action(action: str, options: HistoryOptions | None = None):
         if action not in ("start", "pause", "resume", "cancel"):
             raise HTTPException(404, "Unknown history action.")
+        if action == "start":
+            return await operation(app.state.collector.history.start, options)
+        if options and options.model_fields_set:
+            raise HTTPException(400, "History options are frozen at start; resume uses the saved choices.")
         return await operation(getattr(app.state.collector.history, action))
 
     @app.get("/api/history/report", dependencies=[Depends(authenticate)])

@@ -2936,6 +2936,7 @@ def verify_history_report(path, expected_fingerprint=None, bundle=None):
         verify_bundle(bundle, fp, checkpoint)
         counts = {cid: {"captured": 0, "unavailable": 0} for cid in ids}
         observed_sources = None
+        cursors, cursor_format = {}, None
         with open_archive(bundle) as archive, archive.open("events.jsonl") as stream:
             for line in bounded_lines(stream):
                 event = json.loads(line)
@@ -2946,8 +2947,13 @@ def verify_history_report(path, expected_fingerprint=None, bundle=None):
                     continue
                 if event["kind"] == "history.started":
                     observed_sources = payload["sources"]
+                    cursor_format = payload.get("cursor_format")
                     if payload["account_id"] != statement["account_id"]:
                         raise ValueError("History report account differs from the journal")
+                    if cursor_format and payload["options"] != statement.get("options"):
+                        raise ValueError("History report options differ from the journal")
+                elif event["kind"] == "history.cursor":
+                    cursors[event["chat_id"]] = event
                 elif event["kind"] in ("message.snapshot", "history.message.unavailable"):
                     if event["chat_id"] not in counts:
                         raise ValueError("History report omits an acquired source")
@@ -2957,12 +2963,22 @@ def verify_history_report(path, expected_fingerprint=None, bundle=None):
             raise ValueError("History report source plan differs from the journal")
         if any(counts[s["chat_id"]] != {key: s[key] for key in ("captured", "unavailable")} for s in sources):
             raise ValueError("History report counts differ from the journal")
+        if cursor_format:
+            for source in sources:
+                cursor = cursors.get(source["chat_id"])
+                state = {key: source[key] for key in ("run_id", "chat_id", "title", "position", "phase",
+                    "upper_id", "offset_id", "captured", "unavailable", "error", "metadata")}
+                state["metadata"] = json.loads(state["metadata"])
+                if (cursor is None or source.get("cursor_seq") != cursor["seq"]
+                        or source.get("cursor_hash") != cursor["hash"]
+                        or canonical(state) != canonical(cursor["payload"]["state"])):
+                    raise ValueError("History report cursor differs from the journal")
         checked = True
     return {"format": statement["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
             "history_run_id": statement["id"], "phase": statement["phase"], "captured": statement["captured"],
             "unavailable": statement["unavailable"], "sources_total": statement["sources_total"],
             "evidence_counts_checked": checked, "checkpoint_event_count": boundary,
-            "limitation": "Journal comparison checks the source plan, account and message counters. "
+            "limitation": "Journal comparison checks the source plan, account, message counters and available signed cursors. "
                           "Other progress fields are signed statements only. No proof of Telegram origin "
                           "or historical completeness."}
 
