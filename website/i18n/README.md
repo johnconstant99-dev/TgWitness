@@ -40,6 +40,16 @@ documentation links, navigation and search in the selected language.
 The build rejects missing labels or text blocks in a full-site language. When an
 English source changes, update its translations before publishing the site.
 
+Homepage prose uses fullwidth punctuation, applied by
+[`site_typography.py`](../../tools/site_typography.py) after translation and HTML
+rendering, including accessible labels and the homepage's JavaScript dictionary.
+Keep catalogue punctuation editable as usual. Commands, code, URLs, filenames,
+versions and interpolation keys retain their literal syntax. For additional literal
+HTML content, use `data-typography="literal"`. Documentation and the application
+panel keep their existing typography. When an English passage is rephrased without
+changing its meaning, retain the translation under the new block digest as well as
+any old digest still used elsewhere.
+
 ## Review a catalogue change
 
 Preserve placeholders, URLs, element identifiers and code examples. Rebuild the site

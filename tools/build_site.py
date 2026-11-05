@@ -13,7 +13,7 @@ from urllib.parse import urljoin, urlsplit
 
 if __package__:
     from .site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
-    from . import site_diagrams, site_i18n, site_wiki, site_modes, site_account, site_llms, site_export_clinic
+    from . import site_diagrams, site_i18n, site_wiki, site_modes, site_account, site_llms, site_export_clinic, site_typography
 else:
     from site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
     import site_diagrams
@@ -23,6 +23,7 @@ else:
     import site_account
     import site_llms
     import site_export_clinic
+    import site_typography
 
 ROOT = Path(__file__).resolve().parents[1]
 LANGS = tuple(site_i18n.LANGUAGES)
@@ -110,10 +111,10 @@ MARKDOWN_PAGES.update({path: site_llms.markdown_path(path) for path in MODES_PAG
 LLM_FILES = ("llms.txt", "llms-full.txt", "llms-full.md", *MARKDOWN_PAGES.values())
 SEARCH_TEXT = 4000
 HOME_TITLE = "Telegram message history & signed exports | TgWitness"
-HOME_DESCRIPTION = ("A self-hosted Telegram observation journal. Preserve observed messages, compare edits, "
-                    "track deletion notices, and export signed records you can verify.")
-HOME_OG = "Your accounts. Your journal. A verifiable record. An open-source Telegram workspace that runs on your own machine."
-HOME_IMAGE_ALT = "TgWitness — Follow the trail. Preserve the evidence. A Telegram investigation workspace."
+HOME_DESCRIPTION = ("Keep a Telegram observation journal on your own machine, where you can preserve observed messages, "
+                    "compare edits, track deletion notices and export signed records you can verify.")
+HOME_OG = "Use your own accounts to keep a verifiable Telegram journal in an open-source workspace running on your own machine."
+HOME_IMAGE_ALT = "TgWitness, a Telegram investigation workspace for following the trail and preserving the evidence."
 WIKI_DESCRIPTION = ("The complete TgWitness reference: installation, collection, Case Board, report design, signed exports, "
                     "witnesses, integrations, security and operations.")
 
@@ -507,13 +508,16 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
 
             body, _ = localize(home_body(home_template))
             home = home_template[:home_template.index("<body>") + len("<body>")] + body + home_template[home_template.index("</body>"):]
-            write(base + "index.html", links(render(home, {
+            home_dictionary = {key: site_typography.prose(t(key)) for key in
+                               site_i18n.script_strings(read_public("website/site.js").decode("utf-8"))}
+            write(base + "index.html", site_typography.homepage(links(render(home, {
                 **guide_values(base), "ROOT": "" if not base else relative(base, ""), "TITLE": html.escape(t(HOME_TITLE), quote=True),
+                "SITE_DICT": json_script(home_dictionary),
                 "DESCRIPTION": html.escape(t(HOME_DESCRIPTION), quote=True), "CANONICAL": html.escape(base_url + "/" + base, quote=True),
                 "OG_LOCALE": site_i18n.LANGUAGES[lang][3], "OG_DESCRIPTION": html.escape(t(HOME_OG), quote=True),
                 "OG_IMAGE_ALT": html.escape(t(HOME_IMAGE_ALT), quote=True),
                 "LANGUAGE_MENU": language_menu(base, ""), "THEME_TOGGLE": theme_toggle(),
-                "EXTRA_HEAD": seo(base_url, base, t(HOME_TITLE), t(HOME_DESCRIPTION), lang, alternates(""), extra_only=True, software=repo_url)}), base))
+                "EXTRA_HEAD": seo(base_url, base, t(HOME_TITLE), t(HOME_DESCRIPTION), lang, alternates(""), extra_only=True, software=repo_url)}), base)))
 
         texts = {}
 

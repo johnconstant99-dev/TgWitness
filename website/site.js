@@ -52,7 +52,7 @@ if (navigator.clipboard && window.isSecureContext) {
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
-        status.textContent = T('Clipboard unavailable. Command selected; copy it manually.');
+        status.textContent = T('The clipboard is unavailable, so the command is selected for you to copy manually.');
       }
       clearTimeout(reset);
       reset = setTimeout(() => { button.textContent = T('Copy'); }, 2500);
@@ -82,9 +82,9 @@ if (record) {
     });
     steps.forEach((step, index) => step.setAttribute('aria-pressed', String(stage === index)));
     record.querySelector('.record-caption').textContent = [
-      T('A message arrives. The first observation is saved.'),
-      T('The time changes. Both captured versions stay.'),
-      T('The message disappears. The captured history remains.')
+      T('When a message arrives, the first observation is saved.'),
+      T('When the time changes, both captured versions stay.'),
+      T('When the message disappears, its captured history remains.')
     ][stage];
   }
   function syncMotion() {

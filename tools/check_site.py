@@ -40,7 +40,7 @@ def main():
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.on("response", lambda response: failed.append(response.url) if response.status >= 400 else None)
             page.goto(url, wait_until="networkidle")
-            expect(page.get_by_role("heading", level=1)).to_contain_text("Messages change.")
+            expect(page.get_by_role("heading", level=1)).to_contain_text("Messages change，")
             assert page.evaluate("getComputedStyle(document.documentElement).scrollBehavior") == "auto"
             assert not page.locator("input, form").count(), "Public page must not solicit account credentials"
             assert not page.evaluate("document.body.textContent.includes('@@')"), "Unresolved build placeholder"
@@ -79,12 +79,12 @@ def main():
 
             page.evaluate("() => { navigator.clipboard.writeText = async () => { throw new Error('synthetic denial'); }; }")
             page.locator('[data-copy="clone-command"]').click()
-            expect(page.locator("#copy-status")).to_contain_text("copy it manually")
+            expect(page.locator("#copy-status")).to_contain_text("copy manually")
             assert page.evaluate("window.getSelection().toString()") == page.locator("#clone-command").text_content()
             page.locator(".installation-details>summary").click()
-            page.get_by_text("Can it recover messages deleted before capture?", exact=True).click()
+            page.get_by_text("Can it recover messages deleted before capture？", exact=True).click()
             expect(page.locator(".faq details[open]")).to_contain_text("cannot reconstruct")
-            page.get_by_text("Can it recover messages deleted before capture?", exact=True).click()
+            page.get_by_text("Can it recover messages deleted before capture？", exact=True).click()
 
             page.reload(wait_until="networkidle")
             for width in (1440, 1024, 768, 390, 320):

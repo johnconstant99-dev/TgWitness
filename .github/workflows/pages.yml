@@ -12,6 +12,8 @@ on:
       - tools/site_wiki.py
       - tools/site_diagrams.py
       - tools/site_i18n.py
+      - tools/site_typography.py
+      - tools/test_site_typography.py
       - tools/site_modes.py
       - tools/site_account.py
       - tools/site_llms.py
