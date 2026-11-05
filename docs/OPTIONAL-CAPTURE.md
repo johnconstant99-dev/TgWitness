@@ -2,6 +2,11 @@
 
 [Project](../README.md) · [Installation and controls](../addons/capture/README.md)
 
+**Trusted Live (preview)** adds an isolated official Telegram Desktop/Web session,
+native JSON import, guarded visual recording and an annotated continuity report.
+See [setup, verification and qualification limits](TRUSTED-LIVE.md). It uses its own
+Linux runtime and Compose project; it is not enabled by the browser/AyuGram profiles below.
+
 `tgwitness-capture` is an optional package with separate recorders. It doesn't touch
 the main collector or its signed formats.
 

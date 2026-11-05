@@ -6,7 +6,7 @@ NAMES = {
     "annotated-doc", "annotated-types", "anyio", "cffi", "click", "colorama", "cryptography",
     "fastapi", "greenlet", "h11", "idna", "importlib-metadata", "opentelemetry-api", "playwright",
     "pycparser", "pydantic", "pydantic-core", "pyee", "starlette", "typing-extensions", "typing-inspection",
-    "uvicorn", "zipp", "exceptiongroup",
+    "uvicorn", "zipp", "exceptiongroup", "python-socks",
 }
 
 

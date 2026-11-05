@@ -54,6 +54,7 @@ test-results/
 .tmp/
 .tmp-*/
 .playwright/
+output/playwright/
 proof-config/
 proof-data/
 witness-data/

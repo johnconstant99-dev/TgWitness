@@ -19,7 +19,8 @@ def report(events, observer_id, key_fingerprint):
             label = html.escape(artifact["role"])
             if artifact["media_type"] == "image/png":
                 links.append(f'<a href="{path}" download="{event["seq"]}.png"><img loading="lazy" src="{path}" alt="{label}"></a>')
-            links.append(f'<a href="{path}" download>{label} · {artifact["size"]} bytes · {artifact["sha256"]}</a>')
+            extension = {"text/html": ".html", "application/json": ".json", "video/x-matroska": ".mkv", "image/png": ".png"}.get(artifact["media_type"], ".bin")
+            links.append(f'<a href="{path}" download="{event["seq"]}-{label}{extension}">{label} · {artifact["size"]} bytes · {artifact["sha256"]}</a>')
         details = html.escape(canonical(event).decode())
         rows.append(f'<article><h2>#{event["seq"]} {html.escape(event["kind"])}</h2>'
                     f'<time>{html.escape(event["observed_at"])}</time>'

@@ -1,0 +1,36 @@
+# One project per account/case. Run from repository root with --project-directory .
+services:
+  trusted:
+    build:
+      context: .
+      dockerfile: addons/capture/deploy/Dockerfile.trusted
+      args:
+        TELEGRAM_ARCHIVE_URL: ${TELEGRAM_ARCHIVE_URL:-https://github.com/telegramdesktop/tdesktop/releases/download/v7.3.5/td-setup-linux-x64-7.3.5.tar.xz}
+        TELEGRAM_ARCHIVE_SHA256: ${TELEGRAM_ARCHIVE_SHA256:?Pin the official archive SHA-256}
+    environment:
+      TRUSTED_CONNECTOR: ${TRUSTED_CONNECTOR:?Select a configured connector}
+    ports: ["127.0.0.1:8793:8793"]
+    volumes:
+      - trusted-evidence:/data
+      - type: bind
+        source: ${TRUSTED_CONFIG:?Choose a runtime configuration}
+        target: /config.json
+        read_only: true
+        bind:
+          create_host_path: false
+    tmpfs:
+      - /session:rw,nosuid,nodev,mode=0700,size=2g
+      - /exports:rw,nosuid,nodev,mode=0700,size=2g
+      - /home/recorder:rw,nosuid,nodev,mode=0700,size=256m
+      - /tmp:rw,nosuid,nodev,size=256m
+      - /run:rw,nosuid,nodev,size=16m
+    cap_drop: [ALL]
+    cap_add: [NET_ADMIN, SETUID, SETGID, SETPCAP, CHOWN]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    shm_size: 512m
+    init: true
+    stop_grace_period: 60s
+    restart: "no"
+volumes:
+  trusted-evidence: {}

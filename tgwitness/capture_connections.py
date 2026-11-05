@@ -19,9 +19,9 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator
 from tgwitness_capture.format import check_checkpoint, decode
 from tgwitness_capture.verify import verify_zip
 
-KINDS = ("browser", "ayugram")
+KINDS = ("browser", "ayugram", "trusted")
 MAX_EXPORT = 512 * 1024 * 1024
-LOCAL_SERVICES = {"capture-browser", "capture-ayugram"}
+LOCAL_SERVICES = {"capture-browser", "capture-ayugram", "capture-trusted"}
 
 
 def endpoint(value):

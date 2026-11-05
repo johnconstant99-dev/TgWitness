@@ -431,6 +431,9 @@ pyee==13.0.1 ; python_full_version < '3.12' \
 pyee==14.0.0 ; python_full_version >= '3.12' \
     --hash=sha256:3ac2d3229a9677f7de2c33d7f52fe25b638a46b19c413fea2edc8c6d0a644e4d \
     --hash=sha256:76dd0f4314ecd27f02dc73589dea7fd3853f9b6176d8ef9b122860657e3602de
+python-socks==3.2.0 \
+    --hash=sha256:4cb349f43043eeeb12d10919cb992a7ce8671c2c5a836a47cb0c29d8def11d24 \
+    --hash=sha256:b1a0e372f33182f657d935c3171fa03623b6a65734323746d0de9f296bc537ea
 starlette==1.10.0 \
     --hash=sha256:478c0ab3b4ced6e82719849c118fa406f0278a3499c1a898cd15cd31bdc38ce4 \
     --hash=sha256:b8399098d4c1e3522734f7235dc79b1fc967f96cf139c81e0fa30479e0685f9b

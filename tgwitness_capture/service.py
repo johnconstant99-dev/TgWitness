@@ -34,6 +34,7 @@ class Config:
     heartbeat_seconds: float = 10
     video_input_args: list | None = None
     ffmpeg_executable: str = "ffmpeg"
+    trusted: dict | None = None
 
     @classmethod
     def load(cls, path):
@@ -41,8 +42,13 @@ class Config:
         if not isinstance(raw, dict) or set(raw) - {field.name for field in fields(cls)}:
             raise ValueError("Unknown capture configuration field")
         config = cls(**raw)
-        if config.kind not in {"browser", "ayugram"}:
-            raise ValueError("kind must be browser or ayugram")
+        if config.kind not in {"browser", "ayugram", "trusted"}:
+            raise ValueError("kind must be browser, ayugram or trusted")
+        if config.kind == "trusted":
+            from .trusted_runtime import connector_config
+            if not isinstance(config.trusted, dict):
+                raise ValueError("Configure Trusted Live runtime settings")
+            connector_config(config.trusted.get("connectors"))
         for name in ("poll_seconds", "snapshot_seconds", "heartbeat_seconds"):
             value = getattr(config, name)
             if type(value) not in (int, float) or not 0.25 <= value <= 86400:
@@ -242,6 +248,9 @@ class Recorder:
 
 def create_app(root, config=None):
     config = config or Config()
+    if config.kind == "trusted":
+        from .trusted_service import create_app as trusted_app
+        return trusted_app(root, config)
 
     @asynccontextmanager
     async def lifespan(app):

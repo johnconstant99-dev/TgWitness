@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trusted Live · TgWitness</title><link rel="stylesheet" href="/static/trusted.css"><script src="/static/trusted.js" defer></script></head>
+<body><main>
+<header><div class="eyebrow">TGWITNESS / OFFICIAL CLIENT</div><h1>Trusted Live <span>preview</span></h1>
+<p>Keep the original export, the visible conversation and the collection record together.</p></header>
+<section id="login"><h2>Connect to your recorder</h2><form id="login-form"><label>Control token<input id="token" type="password" required autocomplete="off"></label><button>Connect</button></form><p>The token stays in this tab's memory. Enter Telegram codes only in the client screen after connecting.</p></section>
+<p id="error" role="alert"></p>
+<div id="workspace" hidden>
+<section class="session"><div><div class="eyebrow">SESSION</div><h2 id="phase">Configured</h2><p id="health" role="status" aria-live="polite"></p></div><button id="stop" class="danger" type="button">Stop client now</button></section>
+<section id="choices"><h2>1. Choose the collection</h2><form id="begin-form"><div class="grid">
+<label>Case reference<input id="case" required maxlength="120" placeholder="Case reference"></label>
+<label>Official client<select id="client"><option value="desktop">Telegram Desktop Linux</option><option value="web">Telegram Web</option></select></label>
+<label>Collection method<select id="method"><option value="hybrid">Export + visual record</option><option value="export">Native JSON export</option><option value="visual">Visual record</option></select></label>
+<label>Connector<select id="connector" required></select></label></div>
+<p>The operator provisions each connector. A selection must match the container's network guard. Changing accounts or connectors requires a fresh runtime.</p><button id="begin">Open isolated client</button></form></section>
+<section id="screen-section" hidden><div class="section-heading"><h2>2. Official client screen</h2><button id="frame" class="secondary" type="button">Refresh screen</button></div>
+<p id="screen-mode"></p><img id="screen" alt="Official client screen; click only during manual setup" width="1280" height="720">
+<div id="manual"><p>Manual setup: sign in, choose the chat and configure its native JSON export to <code>/exports</code>. Screen clicks and the controls below act on the client. Recording is paused during manual setup.</p>
+<form id="input-form"><label>Type into the focused client field<input id="client-text" type="password" autocomplete="off" maxlength="4096"></label><button class="secondary">Type privately</button></form>
+<div class="actions" id="keys"><button data-key="Tab" class="secondary">Tab</button><button data-key="Return" class="secondary">Enter</button><button data-key="BackSpace" class="secondary">Backspace</button><button data-key="Escape" class="secondary">Escape</button></div></div>
+<div class="actions"><button id="start">Start recording</button><button id="pause" class="secondary">Pause for manual setup</button><button id="up" class="secondary">Scroll up</button><button id="down" class="secondary">Scroll down</button></div>
+<p id="frame-hash" class="mono"></p>
+<details id="annotation"><summary>Compare a visible message with the export</summary><p>Transcribe only what this saved frame shows. This is an operator annotation; IDs are not inferred from pixels.</p>
+<form id="annotation-form"><div class="grid"><label>Chat ID<input id="chat-id" type="number" min="1" required></label><label>Message ID<input id="message-id" type="number" min="1" required></label></div><label>Visible text<textarea id="message-text" maxlength="32768"></textarea></label><button class="secondary">Save frame annotation</button></form></details></section>
+<section id="export-section" hidden><h2>3. Preserve the native export</h2><p>Finish Telegram's export before importing. The original JSON is preserved unchanged; attachments are not included in this preview.</p><div class="actions"><button id="find-exports" class="secondary">Find exports</button><label>Completed export<select id="exports"></select></label><button id="import">Import and analyze</button></div><p id="analysis-status" role="status"></p><iframe id="transcript" title="Chat with continuity annotations" sandbox hidden></iframe></section>
+<section><h2>Evidence and verification</h2><p class="mono" id="fingerprint"></p><p id="anchor"></p><div class="actions"><button id="checkpoint" class="secondary">Save checkpoint</button><button id="download" class="secondary">Download verified ZIP</button><button id="finish">Finish and remove profile</button></div><p>Before finishing, pause and log out in Telegram. Profile removal does not revoke the server session. Verify or revoke it under Telegram → Devices.</p><details><summary>Scope and limits</summary><ul id="limits"></ul></details><details><summary>Signed activity</summary><ol id="events"></ol></details></section>
+</div></main></body></html>

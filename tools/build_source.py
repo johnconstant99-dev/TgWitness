@@ -73,6 +73,9 @@ FILES.extend("addons/capture/" + name for name in (
     "deploy/chromium.conf", "deploy/chromium-policy.json", "deploy/neko-start.sh", "deploy/upstream-proxy.example.conf",
     "tests/conftest.py", "tests/test_capture.py", "tests/test_browser.py", "tests/test_video.py",
     "tests/test_panel.py", "tests/test_witness.py", "tests/test_deployment.py", "tests/test_integration.py",
+    "compose.trusted.yaml", "config/trusted.example.json", "deploy/Dockerfile.trusted",
+    "deploy/trusted-entrypoint.py", "deploy/trusted-display.py",
+    "tests/test_trusted.py", "tests/test_trusted_anchors.py",
 ))
 DIRECTORIES = {
     "tgwitness_capture": {".py", ".html", ".css", ".js"},

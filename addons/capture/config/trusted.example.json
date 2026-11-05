@@ -1,0 +1,22 @@
+{
+  "kind": "trusted",
+  "public_origin": "http://127.0.0.1:8793",
+  "video_input_args": ["-f", "x11grab", "-framerate", "10", "-video_size", "1280x720", "-i", ":99"],
+  "trusted": {
+    "desktop_binary": "/opt/Telegram/Telegram",
+    "desktop_sha256": "28f639ed29bf6338d7d6623942cd45c3d5e1131d2ca9d016e3acdbc6bd2a37f1",
+    "browser_binary": "/usr/bin/chromium",
+    "profile_root": "/session",
+    "export_root": "/exports",
+    "route_receipt": "/run/trusted-route.json",
+    "connectors": {
+      "chosen-egress": {
+        "label": "Operator-selected gateway",
+        "mode": "warp_proxy",
+        "protocol": "socks5",
+        "host": "192.0.2.10",
+        "port": 1080
+      }
+    }
+  }
+}

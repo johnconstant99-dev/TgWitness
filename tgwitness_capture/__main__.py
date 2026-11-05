@@ -17,6 +17,9 @@ def main():
     serve.add_argument("--port", type=int, default=8791)
     identity = commands.add_parser("identity", help="Read the public recorder identity without opening its journal")
     identity.add_argument("--data", type=Path, required=True)
+    package = commands.add_parser("export", help="Export a stopped recorder or witness journal as a verified ZIP")
+    package.add_argument("--data", type=Path, required=True)
+    package.add_argument("--output", type=Path, required=True)
     verify = commands.add_parser("verify", help="Verify an export without any running recorder or TgWitness")
     verify.add_argument("archive", type=Path)
     verify.add_argument("--fingerprint")
@@ -24,6 +27,7 @@ def main():
     verify.add_argument("--receipt", type=Path)
     verify.add_argument("--witness-fingerprint")
     verify.add_argument("--require-final-anchor", action="store_true")
+    verify.add_argument("--check-drand", action="store_true", help="Compare recorded rounds with two public HTTPS relays")
     witness = commands.add_parser("witness", help="Retain fresh signed checkpoints on an independent host")
     witness.add_argument("--data", type=Path, required=True)
     witness.add_argument("--url", required=True)
@@ -31,6 +35,8 @@ def main():
     witness.add_argument("--fingerprint", required=True)
     witness.add_argument("--interval", type=float, default=60)
     witness.add_argument("--once", action="store_true")
+    witness.add_argument("--cloudflare-config", type=Path, help="Read-only WARP connector / optional Gateway observations")
+    witness.add_argument("--cloudflare-token-file", type=Path, help="Independent provider read-only token; never stored in evidence")
     args = parser.parse_args()
     if args.command == "serve":
         if not 1 <= args.port <= 65535:
@@ -53,14 +59,25 @@ def main():
             result = verify_zip(args.archive, args.fingerprint,
                                 decode(args.checkpoint.read_bytes()) if args.checkpoint else None,
                                 decode(args.receipt.read_bytes()) if args.receipt else None,
-                                args.witness_fingerprint, args.require_final_anchor)
+                                args.witness_fingerprint, args.require_final_anchor, args.check_drand)
         except Exception as exc:
             print(json.dumps({"valid": False, "error": str(exc) or type(exc).__name__}))
             raise SystemExit(1) from None
         print(json.dumps(result, indent=2))
+    elif args.command == "export":
+        from .journal import Journal
+        from .export import export_zip
+        journal = Journal(args.data)
+        try:
+            export_zip(journal, args.output)
+            print(str(args.output))
+        finally:
+            journal.close()
     else:
         if not 1 <= args.interval <= 86400:
             parser.error("Witness interval must be between 1 and 86400 seconds")
+        if bool(args.cloudflare_config) != bool(args.cloudflare_token_file):
+            parser.error("Supply both Cloudflare configuration and read-only token file")
         from .journal import Journal
         from .witness import witness_once
         journal = Journal(args.data)
@@ -69,6 +86,9 @@ def main():
         try:
             while True:
                 try:
+                    if args.cloudflare_config:
+                        from .network_witness import observe
+                        observe(journal, decode(args.cloudflare_config.read_bytes()), args.cloudflare_token_file.read_text().strip())
                     receipt = witness_once(journal, args.url, args.token_file.read_text().strip(), args.fingerprint)
                     print("Receipt:", receipt, flush=True)
                 except Exception as exc:

@@ -9,7 +9,7 @@ from .capture_connections import Connection
 from .downloads import TemporaryDownload, build_file
 from .workers import complete_in_thread
 
-Kind = Literal["browser", "ayugram"]
+Kind = Literal["browser", "ayugram", "trusted"]
 
 
 class CaptureSettings(BaseModel):

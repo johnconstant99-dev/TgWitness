@@ -9,7 +9,7 @@ MAX_FILE = 512 * 1024 ** 2
 
 
 def verify_zip(path, expected_fingerprint=None, checkpoint=None, receipt=None,
-               witness_fingerprint=None, require_final_anchor=False):
+               witness_fingerprint=None, require_final_anchor=False, check_drand=False):
     with zipfile.ZipFile(path) as archive:
         infos = archive.infolist()
         names = [item.filename for item in infos]
@@ -62,6 +62,11 @@ def verify_zip(path, expected_fingerprint=None, checkpoint=None, receipt=None,
                 referenced.add(name)
         if referenced != set(manifest["files"]):
             raise ValueError("Unreferenced export files")
+        from .trusted_verify import verify_analysis
+        # Only the numeric count crosses into the public verification summary.
+        report_count = int(verify_analysis(events, archive.read))
+    from .trusted_anchor import confirm
+    drand = confirm(events, check_drand)
     anchored_seq = 0
     independently_witnessed = False
     if receipt is not None:
@@ -90,4 +95,4 @@ def verify_zip(path, expected_fingerprint=None, checkpoint=None, receipt=None,
             "fingerprint": actual_fingerprint, "key_pinned": expected_fingerprint is not None,
             "events": len(events), "head_hash": head, "checkpoint_checked": checkpoint is not None,
             "independently_witnessed": independently_witnessed, "anchored_seq": anchored_seq,
-            "unanchored_events": len(events) - anchored_seq}
+            "unanchored_events": len(events) - anchored_seq, "trusted_reports_checked": report_count, "drand": drand}

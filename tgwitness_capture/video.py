@@ -7,7 +7,7 @@ from .format import utcnow
 
 
 class VideoCapture:
-    def __init__(self, journal, input_args, executable="ffmpeg"):
+    def __init__(self, journal, input_args, executable="ffmpeg", overlay=False):
         self.journal = journal
         self.input_args = input_args
         self.executable = executable
@@ -17,6 +17,7 @@ class VideoCapture:
         self.last_segment_at = None
         self.log = None
         self.error = None
+        self.overlay = overlay
 
     @property
     def available(self):
@@ -31,7 +32,8 @@ class VideoCapture:
         self.directory = self.journal.pending / ("video-" + self.capture_id)
         self.directory.mkdir(mode=0o700)
         self.log = (self.directory / "ffmpeg.log").open("wb")
-        command = [self.executable, "-hide_banner", "-loglevel", "error", "-y", *self.input_args,
+        filters = ["-vf", "drawtext=text='%{gmtime} UTC (local clock)':fontcolor=white:fontsize=20:box=1:boxcolor=black@0.65:x=12:y=12"] if self.overlay else []
+        command = [self.executable, "-hide_banner", "-loglevel", "error", "-y", *self.input_args, *filters,
                    "-map", "0:v:0", "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
                    "-pix_fmt", "yuv420p", "-force_key_frames", "expr:gte(t,n_forced*10)",
                    "-f", "segment", "-segment_time", "10", "-reset_timestamps", "1",
@@ -49,7 +51,8 @@ class VideoCapture:
         try:
             self.journal.append("video.started", {"capture_id": self.capture_id, "codec": "h264",
                                 "audio": False, "segment_target_seconds": 10, "crf": 23,
-                                "scope": "configured screen input, silent recording", "frames_verified": False})
+                                "scope": "configured screen input, silent recording", "frames_verified": False,
+                                "timestamp_overlay": "UTC local clock, not trusted time" if self.overlay else None})
         except BaseException:
             self.abort()
             raise
