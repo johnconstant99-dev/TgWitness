@@ -1108,7 +1108,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         if dates[0] is not None and dates[1] is not None and dates[0] > dates[1]:
             raise HTTPException(422, "The start must precede the end of the selected period.")
         filters = dict(chat_id=chat_id, message_id=message_id, kind=kind, search=search,
-                       chat_ids=visible_chats(request), since=dates[0], until=dates[1], hide_system=hide_system)
+                       chat_ids=visible_chats(request), since=dates[0], until=dates[1], hide_system=hide_system,
+                       hide_admin=not request.state.principal.admin)
         store = app.state.store
 
         def read_window():
@@ -1166,7 +1167,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             try:
                 yield ": connected\n\n"
                 async for item in stream(app.state.store, after, authorize, request.is_disconnected,
-                                         board_after=board_after, board_authorize=board_authorize, workspace=profile_id):
+                                         board_after=board_after, board_authorize=board_authorize, workspace=profile_id,
+                                         hide_admin=not request.state.principal.admin):
                     yield item
             except Refused:
                 yield "event: access-ended\ndata: {}\n\n"
@@ -2463,8 +2465,11 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.post("/api/chat-export/start", dependencies=[Depends(authenticate)])
     async def chat_export_start(request: Request, body: ChatExport):
         require_chat(request, body.chat_id)
-        return await operation(app.state.collector.start_export, body.chat_id,
-                               report_options(app.state.store, request, body.language))
+        record = await operation(app.state.collector.start_export, body.chat_id,
+                                 report_options(app.state.store, request, body.language))
+        chat_export_owners.clear()
+        chat_export_owners[record["id"]] = request.state.principal.owner
+        return record
 
     @app.get("/api/report-options", dependencies=[Depends(authenticate)])
     async def get_report_options():
@@ -2525,23 +2530,27 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         async with export_lock:
             return await complete_in_thread(preview)
 
-    def export_visible(request):
-        state, allowed = app.state.collector.export_state, visible_chats(request)
-        return allowed is None or not state or state["chat_id"] in allowed
+    chat_export_owners = {}
+
+    def export_visible(request, export_id):
+        state, allowed, principal = app.state.collector.export_state, visible_chats(request), request.state.principal
+        if state and allowed is not None and state["chat_id"] not in allowed:
+            return False
+        return principal.admin or chat_export_owners.get(export_id) == principal.owner
 
     @app.get("/api/chat-export/{export_id}", dependencies=[Depends(authenticate)])
     async def chat_export_poll(request: Request, export_id: str):
-        return app.state.collector.poll_export(export_id) if export_visible(request) else {"phase": "unknown"}
+        return app.state.collector.poll_export(export_id) if export_visible(request, export_id) else {"phase": "unknown"}
 
     @app.post("/api/chat-export/{export_id}/cancel", dependencies=[Depends(authenticate)])
     async def chat_export_cancel(request: Request, export_id: str):
-        if not export_visible(request):
-            raise HTTPException(403, "This chat is not open to this access.")
+        if not export_visible(request, export_id):
+            raise HTTPException(403, "Only the access that started this chat export can cancel it.")
         return await operation(app.state.collector.cancel_export, export_id)
 
     @app.get("/api/chat-export/{export_id}/download", dependencies=[Depends(authenticate)])
     async def chat_export_download(request: Request, export_id: str):
-        path = app.state.collector.export_result_path(export_id) if export_visible(request) else None
+        path = app.state.collector.export_result_path(export_id) if export_visible(request, export_id) else None
         if not path:
             raise HTTPException(404, "No finished chat export is available to download.")
         return TemporaryDownload(path, filename="tgwitness-chat-export.zip", media_type="application/zip")

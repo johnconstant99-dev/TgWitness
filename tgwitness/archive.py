@@ -228,7 +228,7 @@ class ArchiveReader:
         if query.tool == "get_journal_event":
             if query.event_seq is None:
                 raise ValueError("Choose an event sequence.")
-            events = store.events(before=query.event_seq + 1, limit=1, chat_ids=allowed, timeout_s=3)
+            events = store.events(before=query.event_seq + 1, limit=1, chat_ids=allowed, timeout_s=3, hide_admin=True)
             if not events or events[0]["seq"] != query.event_seq:
                 raise Refused("Record is unavailable to this access.")
             if query.chat_id is not None and events[0]["chat_id"] != query.chat_id:

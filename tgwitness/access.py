@@ -54,8 +54,8 @@ POLICY = {
     "POST /api/privacy/reveal": ("view", "body"),
     "GET /api/services/notifications": ("settings", None),
     "POST /api/analysis/context-export": ("export", "root"),
-    "GET /api/preferences": ("view", "root"),
-    "POST /api/preferences": ("view", "root"),
+    "GET /api/preferences": ("view", "filter"),
+    "POST /api/preferences": ("view", "filter"),
     "GET /api/analysis/provider": ("view", "root"),
     "GET /api/analysis/media": ("view", "root"),
     "POST /api/analysis/media": ("view", "root"),
@@ -312,8 +312,13 @@ def check(principal, profile_id, rule, path_params):
     if allowed is not None:
         if chat is None:
             raise Refused("This access opens only chosen chats; this part of the workspace is closed to it.")
-        if chat == "path" and int(path_params["chat_id"]) not in allowed:
-            raise Refused("This chat is not open to this access.")
+        if chat == "path":
+            try:
+                chat_id = int(path_params["chat_id"])
+            except (KeyError, TypeError, ValueError):
+                raise Refused("This chat is not open to this access.") from None
+            if chat_id not in allowed:
+                raise Refused("This chat is not open to this access.")
 
 
 class Console(logging.Handler):
@@ -481,7 +486,7 @@ class AccessControl:
             self.sessions[session["sha256"]] = session
             self.save()
         self.store.append("access.session_started", {"access_id": owner, "label": label,
-                                                    "session_id": session["id"], "address": address})
+                                                    "session_id": session["id"]})
         LOG.info("Session %s started for %s from %s", session["id"], label, address)
         return session_token, self.principal(session)
 
@@ -536,9 +541,9 @@ class AccessControl:
 
     def journal_view(self, grant):
         return {"access_id": grant["id"], "showcase": bool(grant.get("showcase")), **{k: grant[k] for k in (
-            "label", "permissions", "all_workspaces", "workspaces", "ips", "bind_first_ip", "max_uses",
+            "label", "permissions", "all_workspaces", "workspaces", "bind_first_ip", "max_uses",
             "max_sessions", "on_limit", "session_minutes")}, "groups": grant.get("groups") or [],
-            "expires_at": unix_iso(grant["expires_at"])}
+            "ip_restrictions": len(grant["ips"]), "expires_at": unix_iso(grant["expires_at"])}
 
     def issue(self, settings: GrantSettings):
         if settings.expires_at is not None and settings.expires_at <= time.time():

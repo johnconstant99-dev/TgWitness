@@ -1,5 +1,13 @@
 # Add to either compose.yaml or deploy/compose/compose.image.yaml with a second -f argument.
 services:
+  tgwitness:
+    # Caddy has a fixed address so the panel trusts X-Forwarded-For from it alone.
+    environment:
+      TGWITNESS_TRUSTED_PROXIES: ${TGWITNESS_EDGE_PREFIX:-172.30.87}.2/32
+    networks:
+      default: {}
+      edge:
+        ipv4_address: ${TGWITNESS_EDGE_PREFIX:-172.30.87}.3
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -12,6 +20,9 @@ services:
       - ./deploy/Caddyfile.docker:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
+    networks:
+      edge:
+        ipv4_address: ${TGWITNESS_EDGE_PREFIX:-172.30.87}.2
     depends_on:
       tgwitness:
         condition: service_healthy
@@ -20,6 +31,11 @@ services:
     read_only: true
     tmpfs:
       - /tmp:size=64m,mode=1777
+networks:
+  edge:
+    ipam:
+      config:
+        - subnet: ${TGWITNESS_EDGE_PREFIX:-172.30.87}.0/29
 volumes:
   caddy-data:
   caddy-config:

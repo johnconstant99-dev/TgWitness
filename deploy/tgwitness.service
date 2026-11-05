@@ -16,6 +16,9 @@ Environment=TGWITNESS_DATA=/var/lib/tgwitness
 Environment=PYTHONDONTWRITEBYTECODE=1
 # For a NEW external-key installation only:
 # Environment=TGWITNESS_VAULT_KEY_FILE=/etc/tgwitness/master.key
+# Behind Caddyfile.example on this host, so access limits see real client addresses.
+# Leave it unset for SSH-tunnel-only access: local users could then claim any address.
+# Environment=TGWITNESS_TRUSTED_PROXIES=127.0.0.1/32,::1/128
 ExecStart=/opt/tgwitness/.venv/bin/python -m tgwitness --host 127.0.0.1 --port 8787
 Restart=on-failure
 RestartSec=10

@@ -1,6 +1,7 @@
 import copy
 import json
 from pathlib import Path
+import re
 import sys
 from unittest.mock import patch
 
@@ -11,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tgwitness import evidence, handover, report, report_history, viewer
 from tgwitness.security import Vault
 from tgwitness.store import Store
-from tgwitness.verify import fingerprint, verify_report
+from tgwitness.verify import SEAL_CLOSE, SEAL_OPEN, fingerprint, verify_report
 from tools.check_browser import launch_browser
 
 
@@ -219,6 +220,39 @@ def test_signed_viewer_displays_times_cross_chat_reply_and_safe_quote(tmp_path):
             assert 'Sent' not in page.locator('#v-detail .d-list dt').all_text_contents()
             assert 'Reply to' not in facts and 'Quoted text' not in facts and 'HIDDEN_DATE' not in facts
             assert not errors, errors
+            browser.close()
+    finally:
+        store.close()
+
+
+def test_report_page_rejects_markup_added_to_the_seal(tmp_path):
+    vault, store = Vault(tmp_path), Store(tmp_path)
+    store.bind(vault)
+    try:
+        store.append('message.new', payload(), -1001, 33)
+        options = report.resolved() | {'language': 'en'}
+        shown, sealed, forged = tmp_path / 'shown.html', tmp_path / 'sealed.html', tmp_path / 'forged.html'
+        shown.write_bytes(evidence.export_file(store, vault, 'html', options).read_bytes())
+        data = evidence.export_file(store, vault, 'html', options).read_bytes()
+        sealed.write_bytes(data)
+        at = data.rfind(SEAL_OPEN)
+        seal = json.loads(data[at + len(SEAL_OPEN):-len(SEAL_CLOSE)])
+        # Unsigned seal keys survive the signature check; raw markup in one closes the seal element.
+        seal['note'] = "</script><div id='forged'>Send 1 BTC to bc1qsynthetic</div><script type='text/plain'>"
+        forged.write_bytes(data[:at] + SEAL_OPEN + json.dumps(seal).encode() + SEAL_CLOSE)
+        with sync_playwright() as playwright:
+            browser = launch_browser(playwright)
+            page = browser.new_page()
+            page.goto(shown.as_uri())
+            result = page.locator('#drop-result')
+            page.locator('#drop-file').set_input_files(sealed)
+            expect(result).to_contain_text('Seal intact')
+            page.locator('#drop-file').set_input_files(forged)
+            expect(result).to_have_text('This file was changed after it was sealed.')
+            expect(result).to_have_class(re.compile(r'\bbad\b'))
+            page.goto(forged.as_uri())
+            expect(page.locator('#forged')).to_have_count(1)
+            expect(page.locator('#seal-state')).to_have_text('This file was changed after it was sealed.')
             browser.close()
     finally:
         store.close()

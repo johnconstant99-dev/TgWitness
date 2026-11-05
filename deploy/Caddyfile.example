@@ -1,5 +1,6 @@
 # Replace with a domain you control. DNS and inbound TCP 80/443 must reach Caddy.
 # TgWitness remains bound to loopback. No access-log directive is enabled here.
+# Start TgWitness with TGWITNESS_TRUSTED_PROXIES=127.0.0.1/32,::1/128 (see tgwitness.service).
 tgwitness.example.org {
     request_body {
         max_size 12MB

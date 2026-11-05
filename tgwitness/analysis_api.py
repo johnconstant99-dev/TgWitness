@@ -27,6 +27,13 @@ def register(app, authenticate):
     def workspace(request, key):
         return reader(request).workspace(ArchiveQuery(tool="list_chats", workspace=key))
 
+    def route_view(request, key, value):
+        from .operator_privacy import connection_details, hide_addresses
+        principal = request.state.principal
+        if connection_details(principal, principal.chats(key)):
+            return value
+        return {**value, "route_host": "", "route_port": None, "route_error": hide_addresses(value.get("route_error") or "")}
+
     async def reauthorize(request):
         token = request.headers.get("authorization", "").partition(" ")[2]
         who = app.state.access.resolve(token, request.client.host if request.client else "unknown")
@@ -52,7 +59,7 @@ def register(app, authenticate):
     @app.get("/api/analysis/provider", dependencies=[Depends(authenticate)])
     async def provider(request: Request, workspace_id: str = "default"):
         try:
-            return ai.public(workspace(request, workspace_id))
+            return route_view(request, workspace_id, ai.public(workspace(request, workspace_id)))
         except Refused as exc:
             raise HTTPException(403, str(exc)) from None
 
@@ -83,7 +90,8 @@ def register(app, authenticate):
             route = state.collector.outside_route()
             async with asyncio.timeout(10):
                 result = await limited_in_thread(reads, retrieve, scoped, body, config["context_chars"])
-            return service.remember(request.state.principal, body, result, config, route)
+            answer = service.remember(request.state.principal, body, result, config, route)
+            return {**answer, "provider": route_view(request, body.workspace, answer["provider"])}
         return await execute(search)
 
     @app.post("/api/analysis/context", dependencies=[Depends(authenticate)])

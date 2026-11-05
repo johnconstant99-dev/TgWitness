@@ -888,7 +888,8 @@ const mark=(kind,text)=>{stamp.classList.remove("ok","bad","partial","unknown");
     say(kind==="ok"?"Signed":kind==="bad"?"Changed":kind==="partial"?"Not yet checked":"Signed · check with verify.py");}};
 if(stamp&&node)opened(node.textContent).then(r=>{const good=r.ok&&r.fp===stamp.dataset.fp;
   mark(good?"partial":"bad",say(good?"Signature valid · this file not yet checked":"Signature does not match"));})
-  .catch(()=>mark("unknown",say("Signed · check with verify.py")));
+  .catch(e=>e instanceof SyntaxError?mark("bad",say("This file was changed after it was sealed."))
+    :mark("unknown",say("Signed · check with verify.py")));
 const zone=$("#drop");if(zone){const input=$("#drop-file"),out=$("#drop-result"),marker=new TextEncoder().encode(zone.dataset.open);
   const show=(kind,text)=>{out.className="callout "+kind;out.textContent=text;out.hidden=false;};
   const check=async file=>{show("info",say("Checking…"));const data=new Uint8Array(await file.arrayBuffer());let at=-1;
@@ -896,6 +897,8 @@ const zone=$("#drop");if(zone){const input=$("#drop-file"),out=$("#drop-result")
     if(at<0)return show("bad",say("No seal found in this file."));
     const tail=new TextDecoder().decode(data.subarray(at+marker.length)),close=zone.dataset.close;
     if(!tail.endsWith(close))return show("bad",say("The seal is not at the end of the file."));
+    // The seal is written with "<" escaped; a raw one closes the seal element and adds unsigned page content.
+    if(tail.slice(0,-close.length).includes("<"))return show("bad",say("This file was changed after it was sealed."));
     try{const r=await opened(tail.slice(0,-close.length)),content=hex(await crypto.subtle.digest("SHA-256",data.subarray(0,at)));
       if(!r.ok)return show("bad",say("The seal signature is not valid."));
       // The stamp speaks only for a file that carries this page's own seal.

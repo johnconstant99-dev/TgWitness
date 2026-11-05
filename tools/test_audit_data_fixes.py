@@ -1,10 +1,12 @@
 import asyncio
+import base64
 import copy
 from datetime import datetime, timedelta, timezone
 import hashlib
 import io
 import json
 from pathlib import Path
+import subprocess
 import sys
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
@@ -20,7 +22,8 @@ from tgwitness.collector import Collector, describe_message
 from tgwitness.multi_export import MultiExport
 from tgwitness.security import Vault
 from tgwitness.store import Store, canonical
-from tgwitness.verify import fingerprint, verify_handover, verify_report, verify_dossier
+from tgwitness.verify import (SEAL_CLOSE, SEAL_OPEN, fingerprint, verify_bundle, verify_dossier, verify_handover,
+                              verify_report)
 
 CHAT, PERSON = -1000000000123, 77001
 WHEN = datetime(2026, 10, 1, 12, tzinfo=timezone.utc)
@@ -332,6 +335,68 @@ def test_dossier_scope_filters_relations_and_unscoped_avatar_cache(workspace):
     verify_dossier(path, fingerprint(vault.public_key))
     with pytest.raises(ValueError, match="permitted scope"):
         dossier.signed(store, vault, hidden, allowed_chats={CHAT})
+
+
+def test_report_seal_rejects_appended_markup(workspace):
+    store, vault = workspace
+    store.append("message.new", payload(), CHAT, 1, PERSON)
+    path = evidence.export_file(store, vault, "html", {**report.resolved(), "language": "en"})
+    assert verify_report(path, fingerprint(vault.public_key))
+    data = path.read_bytes()
+    at = data.rfind(SEAL_OPEN)
+    seal = json.loads(data[at + len(SEAL_OPEN):-len(SEAL_CLOSE)])
+    seal["note"] = "</script><div>send 1 BTC to bc1qsynthetic</div><script type='text/plain'>"
+    path.write_bytes(data[:at] + SEAL_OPEN + json.dumps(seal).encode() + SEAL_CLOSE)
+    with pytest.raises(ValueError, match="markup"):
+        verify_report(path, fingerprint(vault.public_key))
+
+
+def test_bundle_rejects_bytes_before_first_member(workspace, tmp_path):
+    store, vault = workspace
+    store.append("message.new", payload(), CHAT, 1, PERSON)
+    path = evidence.export_file(store, vault, "zip")
+    assert verify_bundle(path, fingerprint(vault.public_key))
+    decoy = io.BytesIO()
+    with zipfile.ZipFile(decoy, "w") as archive:
+        archive.writestr("events.jsonl", "{}\n")
+    forged = tmp_path / "prepended.zip"
+    forged.write_bytes(decoy.getvalue() + path.read_bytes())
+    with pytest.raises(ValueError, match="before its first member"):
+        verify_bundle(forged, fingerprint(vault.public_key))
+
+
+def test_signed_json_rejects_duplicate_keys(workspace, tmp_path):
+    store, vault = workspace
+    store.append("message.new", payload(), CHAT, 1, PERSON)
+    path = evidence.export_file(store, vault, "json", {**report.resolved(), "language": "en"})
+    assert verify_report(path, fingerprint(vault.public_key))
+    forged = tmp_path / "duplicate.json"
+    forged.write_bytes(b'{"report": {"forged": true}, ' + path.read_bytes().lstrip()[1:])
+    with pytest.raises(ValueError, match="duplicate key"):
+        verify_report(forged, fingerprint(vault.public_key))
+
+
+def test_public_proof_pins_its_witness_key(workspace, tmp_path):
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+    _, vault = workspace
+    witness = Ed25519PrivateKey.generate()
+    public = base64.b64encode(witness.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)).decode()
+    statement = {"format": "tgwitness-public-proof-v1", "alias": "synthetic", "witness_public_key": public,
+                 "observed_at": "2026-10-01T12:00:00.000+00:00", "witness_seq": 1, "witness_record_hash": "ab" * 32,
+                 "status": "legacy_head", "collector_fingerprint": fingerprint(vault.public_key),
+                 "interval_minutes": 10, "checkpoint": None, "capture": None, "capture_delta": None}
+    proof = tmp_path / "proof.json"
+    proof.write_text(json.dumps({"statement": statement,
+                                 "signature": base64.b64encode(witness.sign(canonical(statement))).decode()}))
+
+    def run(*extra):
+        output = subprocess.run([sys.executable, "-m", "tgwitness.verify", str(proof), "--json", *extra],
+                                cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=120)
+        return json.loads(output.stdout)
+
+    assert run("--fingerprint", fingerprint(vault.public_key))["signer_pinned"] is False
+    assert run("--witness-fingerprint", fingerprint(public))["signer_pinned"] is True
 
 
 if __name__ == "__main__":

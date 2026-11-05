@@ -113,7 +113,7 @@ def register(app, authenticate, workspace):
             page = cards[offset:offset+limit]
             for item in page:
                 if item.get("target"):
-                    target = board.event_by_hash(db, item["target"]["event_hash"])
+                    target = board.visible_target(board.event_by_hash(db, item["target"]["event_hash"]), who)
                     item["preview"] = target
                     item["dangling"] = target is None
                     if target and target["chat_id"] is not None and target["message_id"] is not None and tuning.value(app.state.store, "board_thumbnails"):

@@ -1548,7 +1548,7 @@ function excerpt(e) {
     case "witness.token_created": return p.label||"";
     case "access.granted": case "access.changed": return (p.label||"")+" · "+(p.permissions||[]).map(x=>permissionLabels[x]?.[0]||x).join(", ");
     case "access.revoked": return p.label||"";
-    case "access.session_started": return (p.label==="Main administrator"?tr("Main administrator"):p.label||"")+" · "+(p.address||"");
+    case "access.session_started": return (p.label==="Main administrator"?tr("Main administrator"):p.label||"")+(p.address?" · "+p.address:"");
     case "access.session_ended": return (p.label==="Main administrator"?tr("Main administrator"):p.label||"")+" · "+(sessionEndReasons[p.reason]||p.reason||"");
     case "witness.seen": return (p.label||"")+" · "+String(p.witness_fingerprint||"").slice(0,16);
   }

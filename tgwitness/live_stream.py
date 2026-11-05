@@ -5,6 +5,8 @@ import time
 
 from starlette.responses import JSONResponse, StreamingResponse
 
+from .store import ADMIN_RECORDS
+
 
 class StreamSlots:
     def __init__(self, limit=32, per_token=4):
@@ -56,8 +58,10 @@ class LimitedStreamingResponse(StreamingResponse):
                     self.slots.release(self.owner)
 
 
-def notifications(store, after, allowed, limit=100):
+def notifications(store, after, allowed, limit=100, hide_admin=False):
     where, args = ["seq > ?"], [after]
+    if hide_admin:
+        where.append(ADMIN_RECORDS)
     if allowed is not None:
         if not allowed:
             return []
@@ -71,12 +75,12 @@ def notifications(store, after, allowed, limit=100):
 
 
 async def stream(store, after, authorize, disconnected, *, interval=1, lifetime=45,
-                 board_after=0, board_authorize=None, workspace="default"):
+                 board_after=0, board_authorize=None, workspace="default", hide_admin=False):
     cursor = after
     deadline = time.monotonic() + lifetime
     while time.monotonic() < deadline and not await disconnected():
         allowed = authorize()
-        records = await asyncio.to_thread(notifications, store, cursor, allowed)
+        records = await asyncio.to_thread(notifications, store, cursor, allowed, hide_admin=hide_admin)
         if allowed != authorize():
             await asyncio.sleep(0.05)
             continue
