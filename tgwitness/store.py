@@ -10,6 +10,7 @@ from pathlib import Path
 from . import keyboard
 from . import message_content
 from . import continuity
+from .fulltext import FullText
 from .journal_index import CHAT_KINDS, MEDIA_KINDS, TEXT_KINDS, JournalIndex, migrate_media, nul_text, search_text
 from .journal_index import GONE_KINDS as GONE_KINDS
 from .journal_index import NUL_PAYLOAD
@@ -94,6 +95,7 @@ class Store:
             continuity.initialize(self.db)
             migrate_media(self.db)
             self.read_index = JournalIndex(self.db)
+        self.fulltext = FullText(self)
 
     @contextmanager
     def transaction(self):
@@ -714,6 +716,7 @@ class Store:
         return result
 
     def close(self):
+        self.fulltext.close()
         self.db.close()
 
 

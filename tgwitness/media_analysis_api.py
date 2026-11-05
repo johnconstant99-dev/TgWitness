@@ -40,7 +40,12 @@ def register(app, authenticate):
             if len(query) > 200 or kind not in ("", "ocr", "transcription") or not 0 <= offset <= 100:
                 raise ValueError("Choose a valid recognition filter and page.")
             state = state_for(request, workspace_id)
-            result = []
+            result, ranked = [], {}
+            if query.strip():
+                try:
+                    ranked = {ident: rank for rank, ident in enumerate(state.store.fulltext.derived.matching(query))}
+                except ValueError:
+                    ranked = {}
             for entry in queue.recover(state):
                 try:
                     visible(request, state, entry["id"])
@@ -49,10 +54,13 @@ def register(app, authenticate):
                 if kind and entry["request"]["engine"] != kind:
                     continue
                 artifact = state.vault.read("media-analysis-" + entry["id"]) if entry["status"] == "completed" else None
-                if query and (not artifact or query.casefold() not in artifact["text"].casefold()):
+                # Word forms come from the derived index; the plain substring test keeps every earlier match.
+                if query and (not artifact or entry["id"] not in ranked and query.casefold() not in artifact["text"].casefold()):
                     continue
                 result.append({k: v for k, v in entry.items() if k != "owner"} | {
                     "excerpt": artifact["text"][:300] if artifact else None})
+            if query:
+                result.sort(key=lambda item: ranked.get(item["id"], len(ranked)))
             return {"available": available(), "processing": "local-container", "jobs": result[offset:offset + 20],
                     "next_offset": offset + 20 if len(result) > offset + 20 else None}
         return await run(listed)

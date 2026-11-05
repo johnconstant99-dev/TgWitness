@@ -2,7 +2,8 @@
 
 [Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
 
-Use **Journal** for local search without AI. For **Ask the archive**, first enable
+Use **Journal** for local search without AI; [full-text search](SEARCH.md) (preview)
+matches word forms, phrases, domains and @usernames. For **Ask the archive**, first enable
 and configure a provider in **Integrations**. The workspace selector chooses the
 account; the form chooses chats and the observation period. Retrieval runs
 locally. An exact phrase or domain narrows retrieval; a message ID requests saved
@@ -52,8 +53,12 @@ consume the daily request budget. No automatic retries spend additional budget.
 
 ## Sources and limits
 
-Retrieval examines saved message text with a bounded lexical search. It returns
-up to 24 sources and marks truncated excerpts or incomplete result sets. The
+Retrieval uses the [full-text index](SEARCH.md#ask-the-archive-and-mcp) when it is
+complete: the best matches across the selected chats, with word forms. Questions
+about recent changes or one message's versions, and searches while the index is
+building, use a bounded lexical search of the newest records. The preview names the
+method. Retrieval returns up to 24 sources; long texts are cut around their match.
+Truncated excerpts and incomplete result sets are marked. The
 period refers to **observation time**, not a claim that Telegram history is
 complete. Workspace-wide coverage events are withheld from chat-scoped access.
 Missing data is described as not found in the available archive.

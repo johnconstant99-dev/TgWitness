@@ -54,6 +54,7 @@ First time? Do it in this order:
 | Give someone limited access | [Access and permissions](ACCESS.md) |
 | Connect an AI client | [Read-only MCP](MCP.md) |
 | Ask questions, write a report | [Archive analysis](ANALYSIS.md) |
+| Find messages by word forms, domains or @usernames | [Full-text search](SEARCH.md) (preview) |
 | Keep team notes on a case | [Case Board](CASE-BOARD.md) |
 | Hand over a readable report | [Case reports](CASE_REPORTS.md) |
 | Read text in images and audio | [Local OCR and transcription](MEDIA-ANALYSIS.md) |

@@ -37,8 +37,10 @@ the website catalogues. Amharic keeps translated notice navigation and search;
 its other documentation links open English. All 25 full-site languages keep
 documentation links, navigation and search in the selected language.
 
-The build rejects missing labels or text blocks in a full-site language. When an
-English source changes, update its translations before publishing the site.
+English is the only required language. A missing label or text block in another
+full-site language is shown in English, the page shows its translation notice, and the
+build lists the pending translations instead of failing. When an English source
+changes, add translations for the new blocks and review them before publishing the site.
 
 Homepage prose uses fullwidth punctuation, applied by
 [`site_typography.py`](../../tools/site_typography.py) after translation and HTML

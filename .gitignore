@@ -22,6 +22,7 @@ tgwitness-backup*/
 *.log
 *.log.*
 *.zip
+!tools/fixtures/*.zip
 website/export-clinic/media/*.zip
 website/export-clinic/media/*.mp4
 website/export-clinic/media/*.mkv

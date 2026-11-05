@@ -232,6 +232,19 @@ not measure MTProto delivery, concurrent accounts, Telegram throttling, media, a
 long-running workload, or a guaranteed number of real chats. The measurement predates
 the final offline timestamp tooling, which does not change the measured message path.
 
+## Full-text search on one million messages · 5 November 2026
+
+Command: `python tools/bench_fulltext.py --messages 1000000 --work <empty directory>`
+
+A deterministic signed journal of 1,000,000 synthetic messages in 200 chats (Russian
+word forms, Ukrainian, English, Chinese, Japanese, links and handles) was indexed in
+71 seconds; the index took 58 MiB beside a 1.50 GiB journal. Best-match
+searches took 9 to 190 ms (median), against 2.4 to 3.2 seconds for the previous substring
+search. Full results, hardware and limits: [Full-text search](SEARCH.md#benchmark).
+`tools/test_fulltext.py` also verifies a signed archive made before full-text search
+(`tools/fixtures/evidence-before-fulltext.zip`) with the current verifier, and a current
+archive with that archive's own `verify.py`.
+
 ## Remaining qualification
 
 The retained live journal establishes real collection, edits, deletion notices, attachments,

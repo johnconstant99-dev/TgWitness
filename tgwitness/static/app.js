@@ -1571,6 +1571,10 @@ function eventRow(e) {
     const title=node("div","event-title",label[0]); title.append(node("span","",tr("Record #{n}",{n:e.seq})));
     const mobileMeta=node("div","event-mobile-meta",sourceTitle(e.chat_id)+" · ");
     mobileMeta.append(timeNode(e.observed_at));text.append(title,node("div","event-excerpt",window.TgWitnessPrivacy.preview(safeExcerpt(e))),mobileMeta);
+    if(e.match?.machine_recognition){
+      const found=node("div","event-match",tr(e.match.source==="transcription"?"Matched in the transcript (machine recognition):":"Matched in recognized image text (machine recognition):"));
+      found.append(node("q","",window.TgWitnessPrivacy.preview(e.match.excerpt||"")));text.append(found);
+    }
     const mark=node("span","event-icon "+label[2]); mark.append(icon(label[1]));
     summary.append(mark,text); cell.append(summary);
     const source=node("td"); source.append(node("span","source-title",sourceTitle(e.chat_id)),node("span","source-id",e.chat_id || tr("system")));
@@ -1602,6 +1606,7 @@ async function refreshEvents(direction=false) {
   if(state.view!=='observations')return;
   await journalReady;
   window.TgWitnessJournal.sync();
+  if(state.search&&state.searchMode==="relevance"&&!state.boardSlice){await refreshRanked(++state.request);return;}
   const request=++state.request,params=new URLSearchParams({limit:"200",include_count:"true"});
   const after=direction==="newer"?state.eventAfter:null;
   const before=direction==="latest"?null:direction===true||direction==="older"?state.cursor:state.eventBefore;
@@ -1622,8 +1627,22 @@ async function refreshEvents(direction=false) {
   renderEvents();
   if(direction)window.TgWitnessRouter?.record({seq:null,before:state.eventBefore});
 }
-const journalReady=import('./components/journal.js?v=4').then(({createJournal})=>{
+async function refreshRanked(request) {
+  const params=new URLSearchParams({q:state.search,limit:"200",source:state.searchSource||"messages"});
+  if(state.source)params.set("chat_id",state.source);
+  if(state.eventSince)params.set("since",state.eventSince);
+  if(state.eventUntil)params.set("until",state.eventUntil);
+  const result=await json("search?"+params,undefined,viewOptions('observations'));
+  if(request!==state.request)return;
+  const counts=Object.values(result.matched||{});
+  state.events=result.events;state.cursor=state.eventAfter=state.eventBefore=null;
+  state.eventMatched=counts.length&&counts.every(Number.isFinite)?counts.reduce((a,b)=>a+b,0):null;
+  state.searchIndex=result.index;
+  renderEvents();
+}
+const journalReady=import('./components/journal.js?v=5').then(({createJournal})=>{
   window.TgWitnessJournal=createJournal({get:$,state,node,icon,tr,invalidate:()=>{state.request++;},error:message=>toast(message,true),
+    request:(path,body)=>json(path,body),admin:()=>!!state.me?.admin,
     changed:async()=>{state.boardSlice=null;state.boardAdded=false;$('board-slice-context')?.remove();state.cursor=state.eventBefore=state.eventAfter=state.eventMatched=null;closeDetail({history:false});window.TgWitnessRouter?.record({seq:null});await refreshEvents();},
     page:direction=>{closeDetail({history:false});return refreshEvents(direction);},openDetail,showBackdrop:visible=>show("drawer-backdrop",visible),
     openChat:async event=>{

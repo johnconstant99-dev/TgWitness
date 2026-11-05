@@ -102,7 +102,7 @@ stable hostname for saved client configurations.
 | --- | --- |
 | `list_workspaces` | Granted workspaces |
 | `list_chats` | Granted chats |
-| `search_messages` | Saved message text within the selected period |
+| `search_messages` | Saved message text within the selected period; `ranked=true` uses [full-text search](SEARCH.md) (word forms, best matches first, `next_offset` paging) |
 | `get_message_versions` | Captured versions and deletion observations |
 | `get_message_context` | Nearby captured message IDs |
 | `get_journal_event` | One sanitized record with its source reference |

@@ -13,7 +13,9 @@ download queue, keep the signed progress report. [History guide](../HISTORY.md).
 ## Search and review
 
 **Journal** searches saved records locally, filter by source, event type or period. Open the
-records behind the hits.
+records behind the hits. **Best match · word forms** ranks results and finds other forms of a
+word, exact phrases, domains in hidden links and buttons, @usernames, and Chinese without spaces
+(preview). [Full-text search](../SEARCH.md).
 
 For AI, set up a provider in **Integrations** and open **Ask the archive**. Pick chats and a
 period, look at **Data sent to the model**, drop what you don't want sent, approve. Check the

@@ -45,7 +45,7 @@ export function signedRecordPreview(value,{node,tr}){
 
 export function createJournal(context){
   const {get: $,state,node,icon,tr}=context,root=$("journal-filters"),search=$("event-search"),nativeSource=$("source-filter");
-  let searchTimer=null,sourceQuery="",sourceFocus=0,selectedSeq=null,pageBusy=false,pageTicket=0;
+  let searchTimer=null,sourceQuery="",sourceFocus=0,selectedSeq=null,pageBusy=false,pageTicket=0,indexLoading=false;
   const expanded=new Set();
   const selected=()=>new Set((state.filter||"").split(",").filter(Boolean));
   const button=(label,cls="quiet")=>{const b=node("button",cls,tr(label));b.type="button";return b;};
@@ -100,6 +100,40 @@ export function createJournal(context){
   source.setAttribute("aria-haspopup","dialog");source.setAttribute("aria-expanded","false");
   nativeSource.hidden=true;nativeSource.tabIndex=-1;
   controls.append(searchWrap,source,nativeSource);
+  const ranking=node("div","journal-search-mode"),order=node("select"),scope=node("select");
+  ranking.role="group";ranking.setAttribute("aria-label",tr("Search results"));order.id="journal-search-order";scope.id="journal-search-source";
+  order.setAttribute("aria-label",tr("Order search results"));scope.setAttribute("aria-label",tr("Search in"));
+  for(const [value,label] of [["","Newest first · exact text"],["relevance","Best match · word forms"]]){const option=node("option","",tr(label));option.value=value;order.append(option);}
+  for(const [value,label] of [["messages","Messages"],["ocr","Recognized images (OCR)"],["transcription","Transcripts"],["all","Messages and recognition"]]){const option=node("option","",tr(label));option.value=value;scope.append(option);}
+  order.addEventListener("change",()=>{state.searchMode=order.value;change();});
+  scope.addEventListener("change",()=>{state.searchSource=scope.value;change();});
+  const indexNote=node("p","hint journal-index-note");indexNote.id="journal-index-note";indexNote.role="status";indexNote.hidden=true;
+  ranking.append(order,scope,indexNote);controls.append(ranking);
+  const indexBox=node("div","journal-index-settings"),indexMode=node("select"),rebuild=button("Rebuild index","quiet small"),indexState=node("small");
+  indexBox.hidden=true;indexMode.id="journal-index-mode";rebuild.id="journal-index-rebuild";indexMode.setAttribute("aria-label",tr("Search index storage"));
+  for(const [value,label] of [["disk","Search index on disk"],["memory","Search index in memory only"],["off","Search index off"]]){const option=node("option","",tr(label));option.value=value;indexMode.append(option);}
+  indexBox.append(node("strong","",tr("Search index")),indexMode,rebuild,indexState);
+  async function indexAction(path,body){
+    try{state.searchIndex=await context.request(path,body);}catch(error){if(!["AbortError","StaleView"].includes(error.name))context.error(error.message);}
+    syncIndex();
+  }
+  indexMode.addEventListener("change",()=>indexAction("search/settings",{mode:indexMode.value}));
+  rebuild.addEventListener("click",()=>indexAction("search/rebuild",{}));
+  function describeIndex(status){
+    if(status.state==="building")return Number.isFinite(status.progress)?tr("Search index is being built: {percent}% of the journal. Best-match results cover indexed records only.",{percent:Math.floor(status.progress*100)}):
+      tr("Search index is being built. Best-match results cover indexed records only.");
+    if(status.state==="off")return tr("Full-text search is off for this workspace.");
+    if(status.state==="unavailable")return tr("Full-text search is unavailable on this server.");
+    return status.state==="ready"?tr("Search index is up to date."):"";
+  }
+  function syncIndex(){
+    const status=state.searchIndex,ranked=state.searchMode==="relevance";
+    indexBox.hidden=!context.admin();
+    if(status?.mode)indexMode.value=status.mode;
+    indexState.textContent=status?describeIndex(status):"";
+    indexNote.textContent=status&&ranked?describeIndex(status):"";
+    indexNote.hidden=!ranked||!status||status.state==="ready";
+  }
   const dates=node("div","journal-date-filters");dates.role="group";dates.setAttribute("aria-label",tr("Observed period"));
   const ranges=[["","Any time",null],["1h","1 hour",3600000],["24h","24 hours",86400000],["7d","7 days",604800000],["custom","Custom",null]];
   const custom=node("form","journal-custom-dates");custom.hidden=true;
@@ -132,7 +166,7 @@ export function createJournal(context){
   const more=node('details','journal-more-filters'),moreTitle=node('summary','',tr('Filters'));
   const compact=matchMedia('(max-width: 767px)');more.open=!compact.matches;
   compact.addEventListener('change',()=>{more.open=!compact.matches;});
-  more.append(moreTitle,dates,custom,systemLine);
+  more.append(moreTitle,dates,custom,systemLine,indexBox);
   root.replaceChildren(types,controls,more,error,chips);
   const older=$("load-more"),footer=older.closest(".table-footer"),shown=$("shown-count"),range=node("span","journal-window-range");
   const pager=node("div","journal-pager"),newer=button("Newer records","quiet"),latest=button("Latest","quiet");
@@ -219,6 +253,13 @@ export function createJournal(context){
   function chip(text,remove){const b=button("","journal-filter-chip");b.append(node("span","",text),icon("x"));b.title=tr("Remove filter");b.addEventListener("click",()=>{remove();change();});chips.append(b);}
   function sync(){
     system.checked=!!state.eventSystem;
+    order.value=state.searchMode||"";scope.value=state.searchSource||"messages";scope.hidden=!state.searchMode;
+    if(!state.searchIndex&&(state.searchMode||context.admin())&&!indexLoading){
+      indexLoading=true;
+      context.request("search/status").then(status=>{state.searchIndex=status;syncIndex();})
+        .catch(()=>{}).finally(()=>{indexLoading=false;});
+    }
+    syncIndex();
     const values=selected();
     for(const b of types.children){const on=b.dataset.filter?values.has(b.dataset.filter):!values.size;b.classList.toggle("active",on);b.setAttribute("aria-pressed",String(on));}
     if(document.activeElement!==search)search.value=state.search;
@@ -272,5 +313,5 @@ export function createJournal(context){
   sync();syncPage();return {sync,leave,renderRows,syncPage,openDetail:openInspector,closeDetail:closeInspector,
     signedRecord:value=>signedRecordPreview(value,{node,tr}),
     canRefresh:()=>!root.contains(document.activeElement)&&!picker.contains(document.activeElement)&&!$("events-body").contains(document.activeElement),
-    reset(){leave();expanded.clear();selectedSeq=null;pageTicket++;pageBusy=false;}};
+    reset(){leave();expanded.clear();selectedSeq=null;pageTicket++;pageBusy=false;state.searchIndex=null;}};
 }

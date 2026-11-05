@@ -47,7 +47,7 @@ SUITES = {
         "test_audit_security_fixes.py", "test_audit_data_fixes.py", "test_audit_platform_fixes.py",
         "test_release_data_fixes.py",
         "test_proxy_destination_dns.py",
-        "test_ai_routes.py",
+        "test_ai_routes.py", "test_fulltext.py",
         "check_audit_frontend_browser.py",
         "check_bootstrap_recovery_browser.py",
         "check_import_preflight.py", "check_chat_safety_browser.py", "check_workspace_downloads_browser.py",

@@ -10,8 +10,10 @@ recognition and stored separately with the source hash, engine/model version,
 language, parameters and completion time. Transcripts retain returned timestamps.
 
 Search these results using **Search recognized text** and the OCR/transcript
-filter. This is a separate derived-data search; it does not silently turn machine
-recognition into original Telegram text or add it to signed events.
+filter, or choose recognized text as the source of a **Journal** best-match search.
+Both match word forms through an [in-memory index](SEARCH.md#recognized-text). This
+is a separate derived-data search; it does not silently turn machine recognition
+into original Telegram text or add it to signed events.
 
 ## Set up the optional worker
 

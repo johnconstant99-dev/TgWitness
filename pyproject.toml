@@ -39,12 +39,18 @@ dependencies = [
   "fpdf2>=2.9,<3",
   "uharfbuzz>=0.45,<1",
   "lingua-language-detector>=2.1,<3",
+  "pymorphy3>=2.0.6,<3",
+  "pymorphy3-dicts-ru>=2.4.417150.4580142,<3",
+  "snowballstemmer>=3.0.1,<4",
+  "jieba>=0.42.1,<0.43",
 ]
 
 [project.optional-dependencies]
 dev = ["httpx>=0.27,<1", "playwright>=1.48,<2", "ruff>=0.15,<1", "pytest>=9.1.1,<10"]
 research = ["requests>=2.33.0,<3", "beautifulsoup4>=4.12,<5"]
 mcp = ["mcp>=2.3,<3", "httpx>=0.28,<1"]
+# Ukrainian dictionary for full-text lemmas; GPL-3.0 data, so it is opt-in. Without it a light stemmer is used.
+uk-dictionary = ["pymorphy3-dicts-uk>=2.4.1.1.1663094765,<3"]
 
 [project.urls]
 Homepage = "https://phishdestroy.github.io/TgWitness/"

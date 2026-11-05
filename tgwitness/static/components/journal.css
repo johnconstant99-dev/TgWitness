@@ -4,6 +4,14 @@
 .journal-type-filters .filter.active { background:var(--accent-soft); color:var(--accent-text); border-color:var(--accent-border); }
 .journal-controls { display:grid; grid-template-columns:minmax(180px,1fr) minmax(150px,260px); gap:10px; }
 .journal-controls .search-wrap { min-width:0; }
+.journal-search-mode { grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.journal-search-mode select { min-height:36px; font-size:12px; }
+.journal-search-mode select[hidden],.journal-index-note[hidden],.journal-index-settings[hidden] { display:none; }
+.journal-index-note { margin:0; flex:1 1 240px; }
+.journal-index-settings { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; font-size:12px; }
+.journal-index-settings small { color:var(--muted); }
+.event-match { margin-top:4px; font-size:12px; color:var(--text-2); overflow-wrap:anywhere; }
+.event-match q { display:block; margin-top:2px; color:var(--text); }
 .journal-source-toggle { display:flex; align-items:center; justify-content:space-between; min-width:0; gap:10px; }
 .journal-source-toggle span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .journal-source-toggle .icon { flex:none; width:16px; height:16px; transform:rotate(90deg); }

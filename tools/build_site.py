@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import posixpath
 import re
+import sys
 import tomllib
 from urllib.parse import urljoin, urlsplit
 
@@ -383,22 +384,27 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     images = {}
 
 
+    # English is the only required language. Untranslated labels and blocks stay in English and the
+    # page shows its translation notice; the build reports them instead of failing.
     inventory_strings, inventory_fragments, inventory_diagrams = inventory(root)
     required_strings = set(inventory_strings + inventory_diagrams)
+    pending = {}
     for lang in LANGS:
         if lang == "en":
             continue
         data = translations[lang]
-        missing = sorted(text for text in required_strings if not data["strings"].get(text, "").strip())
-        if missing:
-            raise ValueError(f"Incomplete site labels: {lang}: {missing[0]}")
-        for name, fragment in inventory_fragments.items():
-            if name in {"reference:license", "reference:notice"}:
-                continue
-            missing = [text for text in site_i18n.unit_texts(fragment)
-                       if not data["blocks"].get(site_i18n.digest(text), "").strip()]
-            if missing:
-                raise ValueError(f"Incomplete site translation: {lang}/{name} ({len(missing)} blocks)")
+        labels = sum(1 for text in required_strings if not data["strings"].get(text, "").strip())
+        blocks = {name: sum(1 for text in site_i18n.unit_texts(fragment)
+                            if not data["blocks"].get(site_i18n.digest(text), "").strip())
+                  for name, fragment in inventory_fragments.items() if name not in {"reference:license", "reference:notice"}}
+        blocks = {name: count for name, count in blocks.items() if count}
+        if labels or blocks:
+            pending[lang] = {"labels": labels, "blocks": blocks}
+    if pending:
+        print("Translation pending (shown in English): " + "; ".join(
+            f"{lang} {item['labels']} labels, {sum(item['blocks'].values())} blocks"
+            + (" (" + ", ".join(sorted(item["blocks"])) + ")" if item["blocks"] else "")
+            for lang, item in sorted(pending.items())), file=sys.stderr)
 
     english_page_ids = {}
     for lang in NOTICE_LANGUAGES:

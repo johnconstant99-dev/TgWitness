@@ -27,6 +27,7 @@ capture guide</a> for deployment and trust boundaries.</p>
 | message_content.py | Observable message comparison, excluding transport access metadata |
 | workers.py | Wait for export file workers before cancellation cleanup |
 | store.py | WAL transactions, ordered event chain, query filters, operational settings |
+| fulltext.py | Derived full-text index (word forms, BM25), bound to the signed journal head; never exported |
 | security.py | Private-file creation, encrypted vault, Ed25519 signing, single-process lock |
 | evidence.py | Complete-journal export, derivatives, checkpoints, attachment verification |
 | verify.py | Standalone, read-only verifier (stdlib + cryptography): archives, coverage, witness journals and channel posts, profile files |

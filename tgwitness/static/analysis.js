@@ -134,6 +134,7 @@
     if(provider&&$("ask-provider-status"))$("ask-provider-status").textContent=providerStatus(provider);
     const box=$("ask-sources");box.replaceChildren();
     if(data.not_found)box.append(viewState("empty",tr("Not found in the available archive"),tr("Try a different phrase, chat or observation period.")));
+    if(data.retrieval)box.append(node("p","hint",tr(data.retrieval==="ranked"?"Sources: best matches from the full-text index, word forms included.":"Sources: newest matching records, exact text.")));
     for(const source of data.sources){
       const row=node("article","analysis-source"),label=node("label","check-label"),check=node("input");check.type="checkbox";check.value=source.id;check.checked=true;
       const quote=node("blockquote");quote.append(privateText(source.text||tr("Metadata-only observation"),[source.source]));

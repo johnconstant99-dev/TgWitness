@@ -73,6 +73,8 @@ POLICY = {
     "GET /api/profiles": ("view", "root"),
     "GET /api/profile-groups": ("view", "root"),
     "GET /api/events": ("view", "filter"),
+    "GET /api/search": ("view", "filter"),
+    "GET /api/search/status": ("view", "filter"),
     "GET /api/chats": ("view", "filter"),
     "GET /api/notifications": ("view", "filter"),
     "GET /api/chats/{chat_id}/messages": ("view", "path"),

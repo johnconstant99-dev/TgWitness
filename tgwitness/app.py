@@ -415,6 +415,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             app.state.run_event_seq = process_event["seq"]
             retain_checkpoint(store, vault)
             journal_ready = True
+            await complete_in_thread(store.fulltext.start)
             app.state.anchor_wakeup, app.state.anchor_status = asyncio.Event(), {"busy": False}
             app.state.replica_wakeup, app.state.replica_status = asyncio.Event(), {"busy": False}
             app.state.host_status = {}
@@ -2860,8 +2861,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     from .webhook_api import register as register_webhooks
     from .board_api import register as register_board
+    from .search_api import register as register_search
     register_board(app, authenticate, profile_id)
     register_webhooks(app, authenticate, profile_id)
+    register_search(app, authenticate, profile_id)
     from .storage_api import register as register_storage
     register_storage(app, authenticate, require_live)
     from .capture_api import register as register_capture

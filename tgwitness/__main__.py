@@ -47,6 +47,10 @@ def banner(demo, stream=None):
 
 
 def main():
+    from .cli import COMMANDS
+    if sys.argv[1:2] and sys.argv[1] in COMMANDS:
+        from .cli import main as command
+        raise SystemExit(command(sys.argv[1:]))
     parser = argparse.ArgumentParser(description="TgWitness observation journal")
     parser.add_argument("--host", default=os.environ.get("TGWITNESS_HOST", "127.0.0.1"),
                         help="Listen address (default 127.0.0.1, env TGWITNESS_HOST). Expose remotely only behind HTTPS")

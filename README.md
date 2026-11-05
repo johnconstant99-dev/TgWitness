@@ -120,6 +120,7 @@ chat, records partial results at its deadline, and splits large encrypted delive
 | [Existing sessions](docs/ACCOUNTS.md) | TData, Telethon, Pyrogram, StringSession, auth key |
 | [Proxies](docs/CONNECTION-SECURITY.md#ip-modes) | SOCKS5, HTTP CONNECT or MTProxy per workspace. **Hide IP** never falls back to direct |
 | [Search and AI](docs/ANALYSIS.md) | Local search, optional AI with sources you can check |
+| [Full-text search](docs/SEARCH.md) | Word forms, exact phrases, domains, @usernames and Chinese without spaces, best matches first (**Preview**) |
 | [MCP](docs/MCP.md) | Read-only access for MCP clients, limited to the chats you pick |
 | [OCR and transcription](docs/MEDIA-ANALYSIS.md) | Runs locally, originals stay untouched |
 | [Independent capture](docs/OPTIONAL-CAPTURE.md) | Optional browser/AyuGram recorders in Extras (preview, off by default) |

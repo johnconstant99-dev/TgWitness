@@ -14,7 +14,7 @@ PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "ses
                  "access.py", "history.py", "archive.py", "archive_api.py", "ai.py", "analysis.py", "analysis_api.py",
                  "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py", "proxy_catalog.py",
                  "proxy_sources.py", "account_export.py", "account_export_transport.py", "account_report.py", "disclosure.py",
-                 "cloud_wizard.py", "levels.py", "capture_api.py", "capture_connections.py")
+                 "cloud_wizard.py", "levels.py", "capture_api.py", "capture_connections.py", "fulltext.py", "search_api.py")
 
 DYNAMIC_SCRIPT_KEYS = (
     "Inline diff", "Side by side", "Raw", "Previously observed", "Newly observed version",
@@ -45,6 +45,9 @@ DYNAMIC_SCRIPT_KEYS = (
     "Phala Cloud confidential virtual machine", "Usually a few minutes", "TgWitness installs itself in the confidential virtual machine",
     "Usually several minutes; the panel waits up to 40", "The server answers with its signing key and Intel's attestation",
     "Save the measured docker-compose file",
+    "Newest first · exact text", "Best match · word forms", "Recognized images (OCR)", "Transcripts",
+    "Messages and recognition", "Search index on disk", "Search index in memory only", "Search index off",
+    "Rebuild index",
 )
 
 

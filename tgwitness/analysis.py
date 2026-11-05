@@ -82,27 +82,80 @@ def terms(body):
     return [word for word in re.findall(r"[\w@-]{3,}", body.question.lower()) if word not in stop][:3] or [""]
 
 
-def retrieve(reader, body, context_chars):
+def ranked_query(body):
+    """Full-text query for a question; None keeps the chronological change listing."""
+    if body.message_id or terms(body) == [""]:
+        return None
+    if body.query.strip():
+        return body.query.strip(), "all"
+    anchors = [word for word in terms(body) if re.search(r"[./@]", word)]
+    quoted = re.findall(r'["«]([^"»]{2,200})["»]', body.question)
+    if quoted or anchors:
+        return " ".join(['"' + q.replace('"', " ") + '"' for q in quoted[:3]] + anchors[:3]), "all"
+    return body.question, "any"
+
+
+def ranked(reader, body):
+    """Best-matching saved messages across the chosen chats, or None when the index cannot answer fully."""
+    from .fulltext import Query
+    plan = ranked_query(body)
+    if plan is None:
+        return None
+    text, match = plan
+    if not any(not stop for _, stop in Query(text, match).clauses):
+        return None
+    state = reader.workspace(ArchiveQuery(tool="list_chats", workspace=body.workspace))
+    if not state.store.fulltext.current(public=True)["complete"]:
+        return None
     found, partial = {}, False
     deadline = time.monotonic() + 8
-    for chat in body.chats:
-        for term in terms(body):
+    for attempt in (match, "any") if match == "all" else (match,):
+        for chat in body.chats:
             if time.monotonic() > deadline:
                 raise TimeoutError("Archive search timed out. Narrow the query.")
-            query = ArchiveQuery(tool="get_message_versions" if body.message_id else "search_messages",
-                                 workspace=body.workspace, chat_id=chat, message_id=body.message_id,
-                                 since=body.since, until=body.until, query=term, limit=12)
-            result = reader.read(query)
-            partial |= result["next_before"] is not None
-            for event in result["items"]:
-                found[event["source"]["event_seq"]] = event
-    rows = sorted(found.values(), key=lambda e: e["source"]["event_seq"], reverse=True)
-    if re.search(r"измен|changed|changes", body.question, re.I) and not body.query:
-        rows.sort(key=lambda e: e["kind"] not in ("message.edited", "message.deleted", "message.missing_on_recheck"))
+            result = reader.read(ArchiveQuery(tool="search_messages", workspace=body.workspace, chat_id=chat,
+                                              since=body.since, until=body.until, query=text, limit=24,
+                                              ranked=True, match=attempt))
+            partial |= result["next_offset"] is not None
+            for item in result["items"]:
+                # One saved text counts once, even when live, history and recheck observed it separately.
+                key = (item["source"]["chat_id"], item["source"]["message_id"], item["text"])
+                if key not in found or found[key]["score"] < item["score"]:
+                    found[key] = item
+        if found:
+            break
+    return sorted(found.values(), key=lambda e: (-e["score"], -e["source"]["event_seq"])), partial
+
+
+def retrieve(reader, body, context_chars):
+    best = ranked(reader, body)
+    if best is not None:
+        rows, partial = best
+    else:
+        found, partial = {}, False
+        deadline = time.monotonic() + 8
+        for chat in body.chats:
+            for term in terms(body):
+                if time.monotonic() > deadline:
+                    raise TimeoutError("Archive search timed out. Narrow the query.")
+                query = ArchiveQuery(tool="get_message_versions" if body.message_id else "search_messages",
+                                     workspace=body.workspace, chat_id=chat, message_id=body.message_id,
+                                     since=body.since, until=body.until, query=term, limit=12)
+                result = reader.read(query)
+                partial |= result["next_before"] is not None
+                for event in result["items"]:
+                    found[event["source"]["event_seq"]] = event
+        rows = sorted(found.values(), key=lambda e: e["source"]["event_seq"], reverse=True)
+        if re.search(r"измен|changed|changes", body.question, re.I) and not body.query:
+            rows.sort(key=lambda e: e["kind"] not in ("message.edited", "message.deleted", "message.missing_on_recheck"))
     selected, length = [], 0
     for row in rows[:24]:
-        row["text_truncated"] |= len(row["text"]) > 1200
-        row["text"] = row["text"][:1200]
+        anchor, start = row.pop("match_offset", None), 0
+        if anchor is not None and anchor > 900 and len(row["text"]) > 1200:
+            start = min(anchor - 300, len(row["text"]) - 1200)
+            row["text_offset"] = row.get("text_offset", 0) + start
+        row["text_truncated"] |= len(row["text"]) > 1200 or start > 0
+        row["text"] = row["text"][start:start + 1200]
         cost = len(json.dumps(row, ensure_ascii=False))
         if length + cost > context_chars:
             partial = True
@@ -115,7 +168,7 @@ def retrieve(reader, body, context_chars):
     return {"sources": selected, "partial": partial or len(rows) > len(selected),
             "coverage": {"workspace_events_visible": allowed is None, "events": gaps["gaps"]["items"],
                          "complete": False, "partial": gaps["gaps"]["next_before"] is not None},
-            "not_found": not bool(selected)}
+            "not_found": not bool(selected), "retrieval": "ranked" if best is not None else "lexical"}
 
 
 def verify_sources(reader, sources):

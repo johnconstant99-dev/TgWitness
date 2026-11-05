@@ -57,6 +57,8 @@ class ArchiveQuery(BaseModel):
     before: int | None = Field(default=None, ge=1)
     offset: int = Field(default=0, ge=0, le=100000)
     limit: int = Field(default=20, ge=1, le=50)
+    ranked: bool = False
+    match: Literal["all", "any"] = "all"
 
     @field_validator("since", "until")
     @classmethod
@@ -170,7 +172,7 @@ def source_ref(workspace, event):
             "href": "/?" + urlencode({"workspace": workspace, "event": event["seq"]}) + "#journal"}
 
 
-def event_view(workspace, event):
+def event_view(workspace, event, focus=None):
     payload = event["payload"]
     observed = payload.get("sender_observation")
     observed = observed if isinstance(observed, dict) else {}
@@ -178,15 +180,20 @@ def event_view(workspace, event):
         return value[:limit] if isinstance(value, str) else None
     digest = payload.get("media_sha256")
     text = payload.get("text") if isinstance(payload.get("text"), str) else ""
-    return {"source": source_ref(workspace, event), "kind": event["kind"],
+    # A long text is shown around its first search match rather than always from the start.
+    start = min(max(0, focus - 1000), len(text) - 4000) if focus is not None and len(text) > 4000 and focus > 3000 else 0
+    view = {"source": source_ref(workspace, event), "kind": event["kind"],
             "observed_at": event["observed_at"], "source_at": event.get("source_at"),
-            "text": text[:4000], "text_truncated": len(text) > 4000,
+            "text": text[start:start + 4000], "text_truncated": len(text) > 4000,
             "sender": {"id": payload.get("sender_id") if type(payload.get("sender_id")) is int else None,
                        "name": plain(observed.get("display_name"), 256), "username": plain(observed.get("username"), 64)},
             "deletion_notice": event["kind"] == "message.deleted",
             "missing_on_recheck": event["kind"] == "message.missing_on_recheck",
             "media_sha256": digest if isinstance(digest, str) and re.fullmatch(r"[a-f0-9]{64}", digest) else None,
             "untrusted_content": True}
+    if focus is not None:
+        view.update(text_offset=start, match_offset=focus - start)
+    return view
 
 
 class ArchiveReader:
@@ -241,7 +248,29 @@ class ArchiveReader:
         end = query.offset + query.limit
         return {"items": entries[query.offset:end], "next_offset": end if end < len(entries) else None}
 
+    def ranked(self, store, query, allowed):
+        from .fulltext import Query
+        if not query.query.strip():
+            raise ValueError("Enter words to search.")
+        chats = allowed if query.chat_id is None else {query.chat_id}
+        result = store.fulltext.search(Query(query.query, query.match), chat_ids=chats, since=query.since,
+                                       until=query.until, limit=query.limit, offset=min(query.offset, 1000),
+                                       public=allowed is not None)
+        items = []
+        for hit in result["hits"]:
+            items.append({**event_view(query.workspace, hit["event"], hit["focus"]), "score": hit["score"]})
+        while len(json.dumps(items, ensure_ascii=False).encode()) > MAX_RESPONSE - 4096:
+            items.pop()
+        complete = len(items) == len(result["hits"])
+        index = {key: result["index"][key] for key in ("complete", "indexed_seq", "indexed_hash") if key in result["index"]}
+        return {"items": items, "next_before": None, "ranked": True, "index": index,
+                "next_offset": result["next_offset"] if complete else query.offset + len(items),
+                "query": result["query"], "untrusted_content": True,
+                "coverage": "Ranked over indexed saved observations; edits and deletion notices are separate records."}
+
     def events(self, store, query, allowed, kind=None):
+        if query.ranked and query.tool == "search_messages" and kind is None:
+            return self.ranked(store, query, allowed)
         versions = query.tool == "get_message_versions"
         context = query.tool == "get_message_context"
         records = store.events(chat_id=query.chat_id, message_id=query.message_id if versions else None,

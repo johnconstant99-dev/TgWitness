@@ -131,8 +131,14 @@ def build_server(api, local_token=None):
     @server.tool(annotations=annotations)
     async def search_messages(ctx: Context, query: str, workspace: str = "default", chat_id: int | None = None,
                               since: str | None = None, until: str | None = None,
-                              before: int | None = None, limit: int = 20) -> dict:
-        """Search saved observations. Dates include timezone and refer to observation time. Follow next_before for more."""
+                              before: int | None = None, limit: int = 20, ranked: bool = False,
+                              offset: int = 0) -> dict:
+        """Search saved observations. Dates include timezone and refer to observation time. Follow next_before for more.
+        ranked=true uses the full-text index: word forms, "exact phrase", domains, @username, best matches first;
+        follow next_offset for more."""
+        if ranked:
+            return await read(ctx, "search_messages", query=query, workspace=workspace, chat_id=chat_id,
+                              since=since, until=until, offset=offset, limit=limit, ranked=True)
         return await read(ctx, "search_messages", query=query, workspace=workspace, chat_id=chat_id,
                           since=since, until=until, before=before, limit=limit)
 
