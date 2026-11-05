@@ -17,7 +17,7 @@ fpdf2==2.9.0
 h11==0.16.0
 idna==3.20
 markdown==3.11.2
-oauthlib==4.0.0
+oauthlib==4.0.1
 opentelemetry-api==1.45.2
 pillow==13.0.0
 pyaes==1.6.1

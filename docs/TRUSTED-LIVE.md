@@ -25,7 +25,7 @@ preview badge or a passing synthetic test as account-safety certification.
 | Hybrid | Compare the export with **operator-transcribed** messages linked to preserved frames. No fabricated IDs from pixels. Unannotated frames have no automatic message-level comparison. |
 | Integrity | Existing independent-capture Ed25519 chain, content-addressed artifacts, signed ZIP manifest and checkpoints. Verifier recomputes continuity reports and HTML from preserved observations. |
 | Time evidence | Periodic drand queries through the chosen HTTP/SOCKS connector; two HTTPS relays must agree. BLS is not locally verified. Independent witness retains signed checkpoints with fresh challenges. |
-| Network isolation | Container OUTPUT policy denies everything except loopback, established replies and the selected proxy IPv4/port. No DNS, IPv6, or direct fallback. Policy precedes client launch; privileges are then dropped. |
+| Network isolation | Container OUTPUT policy denies everything except local `127.0.0.1`, established replies and the selected proxy IPv4/port. Docker's embedded DNS at `127.0.0.11` is blocked along with external DNS, IPv6 and direct fallback. Policy precedes client launch; privileges are then dropped. |
 | Provider witness | Optional independent read-only polling of Cloudflare WARP Connector status/connections and scoped Gateway DNS observations; raw responses are signed as artifacts in the witness journal. |
 | Cleanup | Stop the process group and remove the created profile. Server-side logout is never claimed without confirmation; the operator logs out or revokes the session in Telegram Devices. |
 

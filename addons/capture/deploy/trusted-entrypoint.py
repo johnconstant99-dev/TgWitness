@@ -12,10 +12,12 @@ def firewall(host, port):
     address = ipaddress.IPv4Address(host)
     if type(port) is not int or not 1 <= port <= 65535:
         raise ValueError("Invalid proxy port")
+    # Docker's 127.0.0.11 resolver can forward outside this namespace; do not
+    # treat every address routed over the loopback interface as local-only.
     return f"""table inet trusted_live {{
  chain output {{
   type filter hook output priority 0; policy drop;
-  oifname "lo" accept
+  oifname "lo" ip daddr 127.0.0.1 accept
   ct state established,related accept
   ip daddr {address} tcp dport {port} accept
  }}

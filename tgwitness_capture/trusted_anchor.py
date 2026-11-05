@@ -109,7 +109,9 @@ def confirm(events, online=False, fetch=None):
                 if fetch:
                     result = fetch(url)
                 else:
-                    with urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect).open(url, timeout=10) as response:
+                    request = urllib.request.Request(url, headers={
+                        "Accept": "application/json", "User-Agent": "TgWitness public-beacon-verifier"})
+                    with urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect).open(request, timeout=10) as response:
                         raw = response.read(8193)
                     if len(raw) > 8192:
                         raise ValueError("Public beacon exceeds response limit")

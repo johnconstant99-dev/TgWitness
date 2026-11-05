@@ -130,16 +130,26 @@ print(json.dumps({'binary_sha256':hashlib.file_digest(binary.open('rb'),'sha256'
                 assert frame.content.startswith(b"\x89PNG\r\n\x1a\n") and len(frame.content) > 1000
                 (args.output / "official-client.png").write_bytes(frame.content)
                 assert session.post(base + "/api/input", json={"action": "key", "key": "Return"}, timeout=5).status_code == 409
-                probe = """import json,socket
+                probe = """import json,socket,struct
 results={}
 for name,host,port in [('gateway',%r,1080),('direct_ipv4','1.1.1.1',443),('direct_ipv6','2606:4700:4700::1111',443),('dns_tcp','1.1.1.1',53)]:
  try:
   connection=socket.create_connection((host,port),timeout=2); connection.close(); results[name]='connected'
  except OSError: results[name]='blocked'
+dns=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+dns.settimeout(2)
+# Docker can forward queries from 127.0.0.11 outside the guarded namespace.
+# Its resolver must not receive queries even when the client uses loopback.
+query=struct.pack('!HHHHHH',1234,0x0100,1,0,0,0)+b'\\x07example\\x03com\\x00'+struct.pack('!HH',1,1)
+try:
+ dns.sendto(query,('127.0.0.11',53)); dns.recv(2048); results['embedded_dns']='responded'
+except OSError: results['embedded_dns']='blocked'
+finally: dns.close()
 print(json.dumps(results))
 """ % address
                 routes = json.loads(docker("exec", "--user", "10001", client, "python", "-c", probe))
-                assert routes == {"gateway": "connected", "direct_ipv4": "blocked", "direct_ipv6": "blocked", "dns_tcp": "blocked"}, routes
+                assert routes == {"gateway": "connected", "direct_ipv4": "blocked", "direct_ipv6": "blocked",
+                                  "dns_tcp": "blocked", "embedded_dns": "blocked"}, routes
                 original = {"id": 123, "type": "public_supergroup", "name": "CI SYNTHETIC EXPORT", "messages": [
                     {"id": 1, "text": "Synthetic first record"}, {"id": 4, "text": "Synthetic reply", "reply_to_message_id": 2}]}
                 writer = "import os,time; from pathlib import Path; p=Path('/exports/result.json'); p.write_bytes(bytes.fromhex(%r)); os.utime(p,(time.time()-5,time.time()-5))" % json.dumps(original).encode().hex()
