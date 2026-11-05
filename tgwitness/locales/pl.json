@@ -2399,7 +2399,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} wiadomości · {done} z {total} źródeł",
 "{n} enabled sources. Start observation before loading history.": "{n} aktywnych źródeł. Rozpocznij obserwację przed załadowaniem historii.",
 "GitHub Actions capture (preview)": "Zbieranie przez GitHub Actions (wersja wstępna)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Nowe logowanie do Telegrama, jeden czat, zaszyfrowane archiwum i potwierdzenie pochodzenia GitHub.",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "Nowe logowanie do Telegrama, wybrane czaty lub dane konta, zaszyfrowane archiwum i poświadczenie pochodzenia GitHub.",
 "Open capture helper": "Otwórz asystenta zbierania",
 "Save your key": "Zapisz swój klucz",
 "Start the collector": "Uruchom narzędzie do gromadzenia danych",

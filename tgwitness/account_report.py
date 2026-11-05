@@ -5,21 +5,26 @@ text is escaped, never translated. Sharing reports apply an additional display
 allowlist and never serialize source records or private selection criteria.
 """
 import html
+import hashlib
 import json
+from itertools import islice
 import re
 from datetime import datetime
 
 from . import case_assessment, i18n, report_layouts, snapshot_analytics
 from .report_analytics import Presentation
 from .report import DOSSIER_CSS, Words
+from .store import canonical
 
 MEDIA_PATH = re.compile(r'media/[0-9a-f]{64}\Z')
 COUNT_LABELS = {'messages': 'Messages', 'chats': 'Chats', 'media': 'Media files included',
                 'media_saved': 'Media files included', 'media_skipped': 'Files skipped or unavailable',
+                'media_hashed': 'Files with server hashes',
                 'records': 'Records', 'chats_selected': 'Selected chats'}
 SCOPE_LABELS = {'from_utc': 'From date (UTC)', 'to_utc': 'Until (UTC, exclusive)',
                 'report_language': 'Report language', 'identity_mode': 'Names and user IDs',
                 'text_mode': 'Message text', 'include_media': 'Include media files',
+                'media_action': 'Selected media action', 'oversized_media': 'Oversized media',
                 'own_messages_only': 'Only messages sent by this account',
                 'sender_filter_count': 'Sender filters', 'text_filter_count': 'Text filters',
                 'manual_redaction_count': 'Additional terms hidden',
@@ -27,6 +32,7 @@ SCOPE_LABELS = {'from_utc': 'From date (UTC)', 'to_utc': 'Until (UTC, exclusive)
 VALUES = {'keep': 'Keep matching text', 'omit': 'Omit message text',
           'pseudonymize_all': 'Pseudonymize everyone', 'pseudonymize_third_parties': 'Pseudonymize third parties',
           'regular': 'Regular Telegram API', 'takeout': 'Telegram Takeout'}
+VALUES.update(download='Download files', hashes_only='Save server hashes only', exclude='Exclude file bytes')
 CONTEXT_LABELS = {'archive_reference': 'Archive reference', 'created_at': 'Copy created',
                   'requested_at': 'Collection requested', 'captured_from': 'First recorded capture',
                   'captured_until': 'Last recorded capture'}
@@ -159,7 +165,7 @@ def stats(counts, say):
     parts = ['<dl class="stats">']
     for key, label in COUNT_LABELS.items():
         value = counts.get(key)
-        if key == 'media_skipped' and value == 0 or key == 'records' and value == counts.get('messages'):
+        if key in ('media_skipped', 'media_hashed') and value == 0 or key == 'records' and value == counts.get('messages'):
             continue
         if type(value) is int and value >= 0:
             parts.append('<div class="stat"><dt>' + e(say(label)) + '</dt><dd>' + str(value) + '</dd></div>')
@@ -348,12 +354,77 @@ def message_card(row, say, prefix='', sharing=False, number=1, page_path='index.
             continue
         if attachment.get('outcome') == 'saved' and MEDIA_PATH.fullmatch(text(attachment.get('file'))):
             parts.append('<p><a download href="' + prefix + attachment['file'] + '">' + e(say('Included original attachment')) + '</a></p>')
+        elif not sharing and attachment.get('outcome') == 'hashed':
+            hashes = attachment.get('server_hashes') or {}
+            manifest = 'hashes/' + hashlib.sha256(canonical(hashes)).hexdigest() + '.json'
+            parts.append('<p class="muted">' + e(say('File hashes saved; file bytes were not downloaded.'))
+                         + ' ' + e(str(hashes.get('covered_bytes', 0))) + ' bytes · '
+                         + e(str(len(hashes.get('ranges', [])))) + ' SHA-256 ranges · <a download href="'
+                         + prefix + manifest + '">' + e(say('Download file hashes')) + '</a></p>')
         elif not sharing:
             parts.append('<p class="muted">' + e(say('Attachment not included')) + ': <span class="user" dir="auto">' + e(text(attachment.get('reason'))) + '</span></p>')
     parts.append('<p class="record-citation">' + e(say('Record reference')) + ': <code dir="ltr">' + e(page_path) + '#' + reference + '</code></p>')
     parts.append(technical(row, say))
     parts.append('</article>')
     return ''.join(parts)
+
+
+CHAT_PAGE_RECORDS = 250
+CHAT_PAGE_DATA_BYTES = 512 * 1024
+
+
+def account_chat_pages(context, chat, rows):
+    """Render bounded pages from a repeatable iterator, without buffering a chat.
+
+    Count and source-data bounds limit each page; one unusually large record
+    remains intact. The signed JSONL is not changed or split by this renderer.
+    """
+    counts, count, size = [], 0, 0
+    for row in rows():
+        length = len(canonical(row))
+        if count and (count >= CHAT_PAGE_RECORDS or size + length > CHAT_PAGE_DATA_BYTES):
+            counts.append(count)
+            count, size = 0, 0
+        count, size = count + 1, size + length
+    if count or not counts:
+        counts.append(count)
+    stem = str(chat['id'])
+    def filename(page):
+        return stem + ('' if page == 1 else '-' + str(page)) + '.html'
+    incoming, first = iter(rows()), 1
+    for page, count in enumerate(counts, 1):
+        name = 'chats/' + filename(page)
+        pagination = {'page': page, 'pages': len(counts), 'first_record': first,
+            'last_record': first + count - 1, 'file': name,
+            'previous': filename(page - 1) if page > 1 else None,
+            'next': filename(page + 1) if page < len(counts) else None}
+        consumed = 0
+        def page_rows():
+            nonlocal consumed
+            for row in islice(incoming, count):
+                consumed += 1
+                yield row
+        # The caller consumes each chunk iterator before requesting the next page.
+        yield name, account_chat({**context, 'pagination': pagination}, chat, page_rows())
+        if consumed != count:
+            raise ValueError('Message count changed while rendering chat pages')
+        first += count
+    if next(incoming, None) is not None:
+        raise ValueError('Message count changed while rendering chat pages')
+
+
+def page_navigation(context, say):
+    page = context.get('pagination') or {}
+    if page.get('pages', 1) <= 1:
+        return ''
+    parts = ['<nav class="transcript-pages" aria-label="' + e(say('Transcript pages')) + '">']
+    if page.get('previous'):
+        parts.append('<a rel="prev" href="' + e(page['previous']) + '">← ' + e(say('Previous page')) + '</a>')
+    parts.append('<span>' + e(say('Page')) + ' ' + str(page['page']) + ' / ' + str(page['pages'])
+                 + ' · ' + e(say('Records')) + ' ' + str(page['first_record']) + '–' + str(page['last_record']) + '</span>')
+    if page.get('next'):
+        parts.append('<a rel="next" href="' + e(page['next']) + '">' + e(say('Next page')) + ' →</a>')
+    return ''.join(parts) + '</nav>'
 
 
 def account_chat(context, chat, rows):
@@ -370,14 +441,16 @@ def account_chat(context, chat, rows):
     yield encoded('<p>' + e(say('Cite the archive reference, the file path and the record reference beside a message. Record numbers apply only to this copy.')) + '</p>')
     yield encoded('<nav><a href="#messages">' + e(say('Messages')) + '</a><a href="#case-assessment">' + e(say(case_assessment.TITLE)) + '</a><a href="#verification">' +
                   e(say('Verification')) + '</a></nav><section id="messages">')
-    page_path = 'chats/' + str(chat['id']) + '.html' if type(chat.get('id')) is int else 'chat.html'
+    pagination = context.get('pagination') or {}
+    yield encoded(page_navigation(context, say))
+    page_path = pagination.get('file') or ('chats/' + str(chat['id']) + '.html' if type(chat.get('id')) is int else 'chat.html')
     seen = False
-    for number, row in enumerate(rows, 1):
+    for number, row in enumerate(rows, pagination.get('first_record', 1)):
         seen = True
         yield encoded(message_card(row, say, prefix='../', number=number, page_path=page_path))
     if not seen:
         yield encoded('<p>' + e(say('No message records are included in this view. Check the scope and omissions before drawing conclusions.')) + '</p>')
-    yield encoded('</section>')
+    yield encoded(page_navigation(context, say) + '</section>')
     yield encoded(case_assessment.html(case_assessment.snapshot(context, 'account_chat',
         {'message_count': chat.get('message_count')}), say))
     yield encoded(verification(context, say))

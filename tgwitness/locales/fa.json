@@ -2367,7 +2367,7 @@
 "{messages} messages · {done} of {total} sources": "پیام‌های {messages} · {done} از {total} منبع",
 "{n} enabled sources. Start observation before loading history.": "{n} منبع فعال. مشاهده را قبل از بارگیری تاریخچه شروع کنید.",
 "GitHub Actions capture (preview)": "ثبت با GitHub Actions (پیش‌نمایش)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "ورود جدید به Telegram، یک گفتگو، آرشیو رمزگذاری‌شده و گواهی منشأ GitHub.",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "ورود جدید به Telegram، گفتگوهای انتخاب‌شده یا داده‌های حساب، آرشیو رمزگذاری‌شده و گواهی منشأ GitHub.",
 "Open capture helper": "باز کردن دستیار ثبت",
 "Save your key": "کلید خود را ذخیره کنید",
 "Start the collector": "جمع‌آوری‌کننده را راه‌اندازی کنید",

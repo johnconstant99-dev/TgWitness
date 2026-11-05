@@ -188,7 +188,7 @@ def size_text(value):
 CATEGORY_ORDER = ("message", "edited", "deleted", "media", "reaction", "member", "system")
 CATEGORIES = {"message.new": "message", "message.snapshot": "message", "message.recovered": "message",
               "message.edited": "edited", "message.deleted": "deleted", "message.missing_on_recheck": "deleted",
-              "media.saved": "media"}
+              "media.saved": "media", "media.hashed": "media"}
 TITLE_KINDS = ("target.changed", "source.discovered", "target.removed")
 VERSION_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited")
 CHANGE_KINDS = ("message.edited", "message.deleted", "message.missing_on_recheck")
@@ -212,7 +212,7 @@ def kind_label(say, kind):
     return {"message.new": say("New message"), "message.snapshot": say("History snapshot"),
             "message.recovered": say("Recovered message"), "message.edited": say("Edited message"),
             "message.deleted": say("Deletion notice"), "message.missing_on_recheck": say("Missing on recheck"),
-            "media.saved": say("Saved file")}.get(kind, kind)
+            "media.saved": say("Saved file"), "media.hashed": say("File hashes; content not downloaded")}.get(kind, kind)
 
 
 class Digest:
@@ -1271,7 +1271,7 @@ def viewer_meta(say, kind, context, **extra):
         cats = {c: category_label(say, c) for c in CATEGORY_ORDER}
         hidden = ["system"]
     kinds = {k: kind_label(say, k) for k in ("message.new", "message.snapshot", "message.recovered", "message.edited",
-                                              "message.deleted", "message.missing_on_recheck", "media.saved")}
+                                              "message.deleted", "message.missing_on_recheck", "media.saved", "media.hashed")}
     return {"kind": kind, "cats": cats, "hidden": hidden, "kinds": kinds, "report_id": context.get("report_id"),
             "fingerprint": context.get("fingerprint"), "iocKinds": {k: say(v) for k, v in IOC_KINDS.items()},
             "iocLead": ioc_lead(say),
@@ -1560,6 +1560,15 @@ def record_html(event, say, titles, options, archive, base=""):
                      + " · " + e(size_text(payload.get("size"))) + "<br><code>" + e(digest) + "</code></div>")
         if archive and options.get("media_previews") and mime in IMAGES and re.fullmatch("[0-9a-f]{64}", digest):
             parts.append('<img loading="lazy" alt="" src="' + base + "media/" + digest + '">')
+    if kind == "media.hashed" and isinstance(payload.get("server_hashes"), dict):
+        hashes = payload["server_hashes"]
+        digest = hashlib.sha256(canonical(hashes)).hexdigest()
+        parts.append('<div class="file">' + e(payload.get("original_name") or "Attachment")
+                     + " · " + e(size_text(hashes.get("covered_bytes"))) + " · "
+                     + e(str(len(hashes.get("ranges", [])))) + " SHA-256 ranges. File content not downloaded.")
+        if archive:
+            parts.append('<br><a download href="' + base + 'hashes/' + digest + '.json">Download hash manifest</a>')
+        parts.append('</div>')
     footer = ['<span title="' + e(event["hash"]) + '">SHA-256 ' + e(short(event["hash"], 16, 6)) + "</span>"]
     times = message_times(payload)
     if times["sent_at"]:
@@ -2356,6 +2365,10 @@ def action_text(action):
 
 
 FILE_STATUS = {"type_not_collected": "type not collected by the attachment settings",
+               "hashes_only": "server hashes saved; file content not downloaded",
+               "incomplete_hashes": "incomplete server hashes; file content not downloaded",
+               "hashes_unavailable": "server hashes unavailable; file content not downloaded",
+               "excluded_by_policy": "excluded by the attachment settings",
                "above_limit": "larger than the attachment limit", "unknown_size": "size unknown; not downloaded",
                "unavailable": "Telegram did not provide the file", "rate_limited": "not downloaded: Telegram rate limit"}
 

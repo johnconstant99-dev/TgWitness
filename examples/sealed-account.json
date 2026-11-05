@@ -1,0 +1,23 @@
+{
+  "mode": "account",
+  "account_options": {
+    "transport": "takeout",
+    "messages_first": true,
+    "export_format": "telegram_both",
+    "purpose": "Personal account backup",
+    "chat_ids": [],
+    "chat_kinds": ["private", "bot", "group", "supergroup", "channel"],
+    "include_archived": true,
+    "media_action": "hashes_only",
+    "oversized_media": "hashes_only",
+    "budget_exhausted": "hashes_only",
+    "max_media_file_mib": 512,
+    "max_total_gib": 4,
+    "include_profile": true,
+    "include_contacts": true,
+    "include_profile_photos": false,
+    "include_stories": false,
+    "include_session_metadata": false,
+    "include_other_data": false
+  }
+}

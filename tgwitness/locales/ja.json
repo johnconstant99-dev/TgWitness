@@ -2351,7 +2351,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} メッセージ · {total}件のソースのうち{done}件",
 "{n} enabled sources. Start observation before loading history.": "有効なソースは{n}件です。履歴を読み込む前に監視を開始してください。",
 "GitHub Actions capture (preview)": "GitHub Actions で収集（プレビュー）",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "新しい Telegram ログイン、1つのチャット、暗号化アーカイブ、GitHub による出所の証明。",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "新しい Telegram ログイン、選択したチャットまたはアカウントデータ、暗号化アーカイブ、GitHub による出所の証明。",
 "Open capture helper": "収集アシスタントを開く",
 "Save your key": "キーを保存してください",
 "Start the collector": "コレクターを起動してください",

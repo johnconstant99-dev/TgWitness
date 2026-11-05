@@ -1926,7 +1926,7 @@ $("chat-export-download").addEventListener("click",e=>saveExport(e.currentTarget
 const accountExportKinds=["private","bot","group","supergroup","channel"];
 const accountExportMedia=["photo","video","video_message","voice","audio","document","sticker","animation"];
 const accountExportFallback={purpose:"",chat_kinds:accountExportKinds,from_utc:null,to_utc:null,chat_ids:[],
-  report_language:'en',
+  report_language:'en',export_format:'tgwitness',budget_exhausted:'hashes_only',
   sender_ids:[],text_contains:[],own_messages_only:false,
   include_archived:true,media_types:accountExportMedia,max_media_file_mib:512,max_total_gib:16,
   include_profile:true,include_contacts:true,include_profile_photos:false,include_stories:false,
@@ -1957,6 +1957,7 @@ function accountExportDefaults(options){
   const saved={...accountExportFallback,...options};
   $("account-export-purpose").value=saved.purpose||"";
   $('account-export-language').value=saved.report_language||'en';
+  $('account-export-format').value=saved.export_format||'tgwitness';
   for(const input of $("account-export-kinds").querySelectorAll('input[type="checkbox"]'))
     input.checked=saved.chat_kinds.includes(input.value);
   for(const input of $("account-export-media").querySelectorAll('input[type="checkbox"]'))
@@ -1970,7 +1971,12 @@ function accountExportDefaults(options){
   $("account-export-through").value=saved.to_utc?
     new Date(Date.parse(saved.to_utc)-86400000).toISOString().slice(0,10):"";
   $("account-export-file-limit").value=String(saved.max_media_file_mib);
+  $("account-export-media-action").value=saved.media_action||"download";
+  $("account-export-oversized").value=saved.oversized_media||"exclude";
+  for(const select of $('account-export-media-actions').querySelectorAll('select'))
+    select.value=saved.media_actions?.[select.dataset.mediaKind]||'';
   $("account-export-total-limit").value=String(saved.max_total_gib);
+  $("account-export-budget-action").value=saved.budget_exhausted||'hashes_only';
   for(const key of ["profile","contacts","profile-photos","stories","session-metadata","other-data"]){
     const field="include_"+key.replaceAll("-","_");$("account-export-"+key).checked=!!saved[field];
   }
@@ -2008,10 +2014,13 @@ function accountExportOptions(){
   if(!Number.isInteger(max_media_file_mib)||max_media_file_mib<1||max_media_file_mib>4096||
       !Number.isInteger(max_total_gib)||max_total_gib<1||max_total_gib>1024)
     throw new Error(tr("Enter a per-file limit of 1–4,096 MiB and a media budget of 1–1,024 GiB."));
-  return {purpose,report_language:$('account-export-language').value,chat_kinds:kinds,from_utc,to_utc,chat_ids,sender_ids,text_contains,
+  return {purpose,report_language:$('account-export-language').value,export_format:$('account-export-format').value,
+    budget_exhausted:$('account-export-budget-action').value,chat_kinds:kinds,from_utc,to_utc,chat_ids,sender_ids,text_contains,
     own_messages_only:$("account-export-own").checked,
     include_archived:$("account-export-archived").checked,
     media_types:[...$("account-export-media").querySelectorAll("input:checked")].map(n=>n.value),
+    media_action:$("account-export-media-action").value,oversized_media:$("account-export-oversized").value,
+    media_actions:Object.fromEntries([...$('account-export-media-actions').querySelectorAll('select')].filter(select=>select.value).map(select=>[select.dataset.mediaKind,select.value])),
     max_media_file_mib,max_total_gib,include_profile:$("account-export-profile").checked,
     include_contacts:$("account-export-contacts").checked,
     include_profile_photos:$("account-export-profile-photos").checked,
@@ -2019,8 +2028,17 @@ function accountExportOptions(){
     include_session_metadata:$("account-export-session-metadata").checked,
     include_other_data:$("account-export-other-data").checked,transport:$("account-export-transport").value};
 }
+for(const [kind,label] of Object.entries({photo:'Photos',video:'Videos',video_message:'Video messages',voice:'Voice messages',audio:'Audio',document:'Documents',sticker:'Stickers',animation:'Animations'})){
+  const wrapper=node('div'),select=node('select'),caption=node('label','',tr(label));
+  select.id='account-export-action-'+kind;select.dataset.mediaKind=kind;caption.htmlFor=select.id;
+  for(const [value,text] of [['','Use selected media action'],['download','Download files'],['hashes_only','Save server hashes only'],['exclude','Keep message metadata only']]){
+    const option=node('option','',tr(text));option.value=value;select.append(option);
+  }
+  wrapper.append(caption,select);$('account-export-media-actions').append(wrapper);
+}
 function renderAccountExportPreview(){
   const box=$("account-export-preview");
+  $("account-export-preflight-result").textContent=tr("Check the current settings to read a bounded sample. Final size and time may remain unknown.");
   try{
     const x=accountExportOptions(),all=!x.chat_ids.length;
     const extras=[['include_profile',tr('Account profile')],['include_contacts',tr('Contacts')],
@@ -2034,6 +2052,9 @@ function renderAccountExportPreview(){
       tr(x.from_utc||x.to_utc?"Selected UTC dates apply to each chat.":"Full visible history, without a date limit.")+" "+
       tr("Media: {n} types, up to {file} MiB per file and {total} GiB downloaded media budget.",
         {n:x.media_types.length,file:x.max_media_file_mib,total:x.max_total_gib})+" "+
+      tr({download:"Selected files will be downloaded.",hashes_only:"Only server hash ranges will be saved; file bytes will not be downloaded.",exclude:"Message media will remain metadata only."}[x.media_action])+" "+
+      (Object.keys(x.media_actions).length?tr('Per-type overrides: {settings}.',{settings:Object.entries(x.media_actions).map(([kind,action])=>
+        $('account-export-action-'+kind).previousElementSibling.textContent+': '+tr({download:'Download files',hashes_only:'Save server hashes only',exclude:'Keep message metadata only'}[action])).join('; ')})+' ':'')+
       tr("Sender filter: {senders}; literal phrases: {phrases}.",
         {senders:x.sender_ids.length||tr("all"),phrases:x.text_contains.length||tr("none")})+
       ' '+tr(x.own_messages_only?'Only messages sent by this account.':'Messages from all matching senders.')+
@@ -2080,9 +2101,12 @@ function accountExportDates(prefix){
 function accountExportWaiting(job){return job.phase==='waiting'&&!!job.wait_until&&new Date(accountExportEpochMs(job.wait_until)).valueOf()>Date.now();}
 function accountExportNextStep(job){
   if(job.ready)return '';
+  if(job.phase==='waiting'&&job.active===false&&job.wait_reason==='rate_limit')return tr(accountExportWaiting(job)?
+    'Telegram has limited requests. Keep the saved progress and resume after the displayed deadline.':
+    'Progress is saved. Choose Resume to continue this job.');
   if(job.phase==='waiting')return tr(job.active!==false?
     'Telegram has asked this job to wait. It will continue automatically while TgWitness is running.':accountExportWaiting(job)?
-    'Saved progress is kept. When the Telegram waiting period ends, choose Resume.':
+    'Open Telegram on a device where you were already signed in and allow this export. Then choose Check approval. Otherwise resume after the displayed deadline. Keep this session.':
     'Progress is saved. Choose Resume to continue this job.');
   if(job.phase==='paused')return tr('Progress is saved. Choose Resume to continue this job.');
   if(job.phase==='failed')return tr('Review the error below, then choose Resume to retry from saved progress.');
@@ -2116,7 +2140,16 @@ function renderAccountExportJobs(){
   };
   const addAction=(parent,job,label,kind,work,cls="secondary",disclosure)=>{
     const b=node("button",cls,label);b.type="button";
-    identify(b,job,kind,disclosure);b.addEventListener("click",()=>busy(b,work));parent.append(b);return b;
+    identify(b,job,kind,disclosure);b.addEventListener("click",async()=>{
+      const restore=document.activeElement===b;
+      await busy(b,work);
+      if(restore&&document.activeElement===document.body){
+        const replacement=[...box.querySelectorAll('[data-account-export-action]')].find(element=>
+          element.dataset.accountExportAction===kind&&element.dataset.jobId===job.id&&
+          (element.dataset.disclosureId||'')===(disclosure?.id||''));
+        (b.isConnected?b:replacement)?.focus();
+      }
+    });parent.append(b);return b;
   };
   for(const job of jobs){
     const phase=job.phase||"unknown",counts=job.counts||{},coverage=job.coverage||{};
@@ -2139,10 +2172,12 @@ function renderAccountExportJobs(){
     metric(tr("chats discovered"),counts.chats_discovered);
     metric(tr("chats selected"),counts.chats_selected);
     metric(tr("chats finished"),counts.chats_done);
-    metric(tr("messages saved"),counts.messages_exported);
+    metric(tr("messages saved"),Math.max(counts.messages_exported||0,job.acquisition?.messages_preserved||0));
     metric(tr("media saved"),counts.media_saved);
+    metric(tr("files with hashes"),counts.media_hashed);
     metric(tr("media skipped"),counts.media_skipped);
-    if(Number.isFinite(counts.bytes_saved))metric(tr("bytes saved"),counts.bytes_saved);
+    if(Number.isFinite(counts.unique_media_bytes))metric(tr("unique file bytes saved"),counts.unique_media_bytes);
+    else if(Number.isFinite(counts.bytes_saved))metric(tr("bytes saved"),counts.bytes_saved);
     if(facts.childNodes.length)card.append(facts);
     const current=job.current_chat;
     if(current)card.append(node("p","account-export-job-note",tr("Current chat: {name}",
@@ -2170,9 +2205,16 @@ function renderAccountExportJobs(){
     const actions=node("div","account-export-job-actions"),
       active=["preparing","running","waiting","packaging"].includes(phase)&&job.active!==false,
       waitPending=accountExportWaiting(job);
-    if(active)addAction(actions,job,tr("Pause"),"pause",()=>accountExportAction(job,"pause"),"quiet");
-    if(!job.ready&&(["paused","failed"].includes(phase)||(phase==="waiting"&&!active&&!waitPending)))
-      addAction(actions,job,tr("Resume"),"resume",()=>accountExportAction(job,"resume"));
+    if(active&&phase!=="packaging")addAction(actions,job,tr("Pause"),"pause",()=>accountExportAction(job,"pause"),"quiet");
+    if(!job.ready&&(["paused","failed"].includes(phase)||(phase==="waiting"&&!active&&(job.wait_reason!=="rate_limit"||!waitPending))))
+      addAction(actions,job,tr(phase==="waiting"&&waitPending?"Check approval":"Resume"),"resume",()=>accountExportAction(job,"resume"));
+    if(!job.ready&&!active&&["paused","waiting","failed"].includes(phase))
+      addAction(actions,job,tr("Finish with saved data"),"finish",async()=>{
+        const owner=actionOwner();
+        if(!(await askConfirm(tr("Create an archive from the data already saved? Missing data will be listed, and this job will no longer resume."),
+          {confirmText:tr("Finish with saved data")}))||!owner.current())return;
+        await accountExportAction(job,"finish");
+      },"quiet");
     if(job.ready){
       const original=node('section','account-export-original');
       original.append(node('h3','',tr('Original account archive')),
@@ -2279,6 +2321,21 @@ $("account-export-close").addEventListener("click",()=>$("account-export-dialog"
 $("account-export-dismiss").addEventListener("click",()=>$("account-export-dialog").close());
 $("account-export-form").addEventListener("input",()=>{state.accountExportDirty=true;renderAccountExportPreview();});
 $("account-export-form").addEventListener("change",()=>{state.accountExportDirty=true;renderAccountExportPreview();});
+$("account-export-preflight").addEventListener("click",event=>busy(event.currentTarget,async()=>{
+  const options=accountExportOptions(),stamp=JSON.stringify(options),profile=state.profile,revision=state.workspaceRevision;
+  const box=$("account-export-preflight-result");box.textContent=tr("Checking settings and reading a bounded sample…");
+  const result=await json("account-export/preflight",options);
+  if(profile!==state.profile||revision!==state.workspaceRevision)return;
+  try{if(JSON.stringify(accountExportOptions())!==stamp)return;}catch{return;}
+  const sample=result.sample||{},mib=bytes=>(Number(bytes||0)/1048576).toFixed(2);
+  const lines=[tr(result.can_start?"Settings checked. This is not a guarantee that the full export will fit.":"Review the blocking issues before starting."),
+    tr("Free disk: {n} MiB.",{n:mib(result.free_disk_bytes)})];
+  if(sample.messages_examined)lines.push(tr("Sample: {messages} messages in {chats} chats. Selected file bytes: {files} MiB. Estimated hash manifest: {hashes} MiB.",
+    {messages:sample.messages_examined,chats:sample.sampled_chats,files:mib(sample.known_download_bytes),hashes:mib(sample.hash_manifest_estimate_bytes)}));
+  for(const issue of result.issues||[])lines.push(tr(issue.message));
+  lines.push(tr("Total output size and completion time remain unknown. Reports and temporary files also require space."));
+  box.textContent=lines.join(" ");
+}));
 $("account-export-minimize").addEventListener("click",()=>{
   for(const input of $("account-export-media").querySelectorAll("input"))input.checked=false;
   for(const input of $("account-export-sections").querySelectorAll("input"))input.checked=false;
@@ -3483,7 +3540,9 @@ function renderCloudResult(box,result){
   const actions=node("div","cloud-actions");actions.append(cloudFileButton(result.name,"deployment.json","Save the deployment record"));
   if(result.provider==="phala"){
     actions.append(cloudFileButton(result.name,"docker-compose.yaml","Save the measured docker-compose file"));
-    box.append(key,node("p","hint",tr("Intel's attestation matched this deployment. Give a verifier the deployment record and the measured docker-compose file: python -m tgwitness.cloud verify checks the attestation against Intel's own certificates.")),steps,actions);
+    box.append(key,node("p","hint",tr(result.attestation_status==="verified"?
+      "Intel's attestation matched this deployment. Give a verifier the deployment record and the measured docker-compose file: python -m tgwitness.cloud verify checks the attestation against Intel's own certificates.":
+      "Intel TDX verification is incomplete or needs review. Verify this deployment before relying on its attestation.")),steps,actions);
     return;
   }
   box.append(key,steps,actions);
@@ -3501,6 +3560,7 @@ function renderCloudServers(list,local){
         d.created_at?fmtFull(d.created_at):""].filter(Boolean).join(" · ")));
     if(d.quick&&d.address&&phase!=="removed")row.append(cloudAddressLink(d.address));
     if(d.attested)row.append(node("p","",tr("Intel TDX confidential virtual machine at Phala Cloud: Intel's attestation shows which code runs")));
+    else if(d.provider==="phala")row.append(node("p","hint",tr("Intel TDX verification is incomplete or needs review. Verify this deployment before relying on its attestation.")));
     if(d.price&&phase!=="removed")row.append(node("p","",tr("Approximately {price} {currency} a month ({hourly} {currency} an hour), billed by Phala Cloud",
       {price:d.price.monthly,hourly:d.price.hourly,currency:d.price.currency})));
     if(d.gateway)row.append(node("p","",tr("DNS only through Cloudflare Gateway")));

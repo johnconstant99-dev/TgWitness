@@ -42,6 +42,11 @@ def main():
             command += ["--mount", f"type=bind,src={root / part},dst=/{target}" + (",readonly" if part == "config" else "")]
         try:
             subprocess.run(["docker", "run", "--rm", "--network=none", "--read-only", "--cap-drop=ALL",
+                "--security-opt=no-new-privileges", "--tmpfs", "/tmp:rw,exec,nosuid,nodev,size=64m,mode=1777",
+                "--mount", f"type=bind,src={ROOT / 'tools'},dst=/checks,readonly", name,
+                "python", "/checks/test_container_fetch_retry.py", "--installer",
+                "/usr/share/tgwitness-build/containers/install-packages.sh"], check=True, timeout=120)
+            subprocess.run(["docker", "run", "--rm", "--network=none", "--read-only", "--cap-drop=ALL",
                 "--security-opt=no-new-privileges", "--tmpfs", "/tmp:rw,nosuid,nodev,noexec,size=128m",
                 "--mount", f"type=bind,src={ROOT / 'tools'},dst=/checks,readonly", name,
                 "python", "/checks/check_container_runtime.py", "--output", "/tmp/checks"], check=True, timeout=180)

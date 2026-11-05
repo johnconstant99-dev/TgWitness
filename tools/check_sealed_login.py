@@ -102,6 +102,16 @@ async def invalid_cases(recipient):
 
 
 async def pool_and_override_failures(recipient):
+    async with capsule(recipient) as (session, client):
+        async def send_failure(*args, **kwargs):
+            raise OSError("Synthetic send-code failure")
+        with patch.object(RecordingClient, "send_code_request", send_failure):
+            failed = await client.post("/api/phone", json={"phone": "+15550001111", "api_id": 123, "api_hash": "a" * 32})
+            assert failed.status_code == 400
+        assert session.collector.login_client is None
+        assert session.collector.pending_credentials is None
+        retry = await client.post("/api/phone", json={"phone": "+15550001111", "api_id": 123, "api_hash": "a" * 32})
+        assert retry.status_code == 200
     pairs = [(700001, "c" * 32), (700002, "d" * 32)]
     async with capsule(recipient) as (session, client), _context_patch_pool(pairs):
         RecordingClient.fail_ids = {pairs[0][0]}

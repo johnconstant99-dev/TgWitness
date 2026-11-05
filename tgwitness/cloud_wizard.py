@@ -353,6 +353,24 @@ class Jobs:
             return None
         return Path(path)
 
+    @staticmethod
+    def attestation_status(record):
+        if record.get("provider") != "phala":
+            return "not_applicable"
+        if str(record.get("state", "")).startswith("failed"):
+            return "failed"
+        checks = (record.get("collector") or {}).get("attestation")
+        if not isinstance(checks, list) or any(not isinstance(c, dict)
+                or not isinstance(c.get("check"), str) or not isinstance(c.get("status"), str) for c in checks):
+            return "incomplete"
+        required = {"tdx_binding", "tdx_quote", "tdx_compose_hash", "tdx_compose", "tdx_identity", "tdx_os"}
+        if any(c.get("status") == "fail" for c in checks):
+            return "failed"
+        if not required <= {c.get("check") for c in checks} or any(
+                c.get("status") not in {"pass", "review"} for c in checks):
+            return "incomplete"
+        return "review" if any(c.get("status") == "review" for c in checks) else "verified"
+
     def deployments(self):
         found = []
         for path in sorted(self.directory.glob("*/deployment.json")) if self.directory.is_dir() else ():
@@ -361,13 +379,15 @@ class Jobs:
             except (OSError, ValueError):
                 continue
             server = record.get("server") or {}
+            attestation_status = self.attestation_status(record)
             found.append({"name": record.get("name"), "provider": record.get("provider"), "state": record.get("state"),
                           "created_at": record.get("created_at"), "panel_host": record.get("panel_host"),
                           "server_type": record.get("server_type"), "location": record.get("location"),
                           "ipv4": server.get("ipv4"), "commit": record.get("commit"),
                           "fingerprint": (record.get("collector") or {}).get("fingerprint"),
                           "quick": bool(record.get("beacon")), "address": (record.get("address") or {}).get("host"),
-                          "gateway": bool(record.get("gateway")), "attested": record.get("provider") == "phala",
+                          "gateway": bool(record.get("gateway")), "attested": attestation_status == "verified",
+                          "attestation_status": attestation_status,
                           "price": billed(server.get("hourly_rate"))})
         return found
 
@@ -470,6 +490,7 @@ class Jobs:
             progress("done", "TgWitness answered with its signing key " + record["collector"]["fingerprint"])
             address = record["address"]["host"] if quick else record["panel_host"]
             return {"name": name, "provider": request.provider, "panel": "https://" + address, "quick": quick,
+                    "attestation_status": self.attestation_status(record),
                     "fingerprint":
                     record["collector"]["fingerprint"], "server": record["server"].get("ipv4"),
                     "commit": record["commit"], "ref": record.get("requested_ref"),

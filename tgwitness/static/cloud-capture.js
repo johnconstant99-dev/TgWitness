@@ -103,6 +103,8 @@
       ${state.delivered ? `<div class="capture-success">${icon("check")}<div><strong>${t("Decrypted — save delivery.zip", "Расшифровано — сохраните delivery.zip")}</strong><p>${t("It contains evidence.zip and attestation.jsonl. Decryption does not yet verify the signature.", "Внутри evidence.zip и attestation.jsonl. Расшифровка ещё не означает, что подпись проверена.")}</p></div></div>` : ""}
       <details class="capture-command" ${state.delivered ? "open" : ""}><summary>${t("Verify the archive after downloading", "Проверить архив после скачивания")}</summary><p>${t("Unzip delivery.zip. Run this command using a trusted TgWitness installation and GitHub CLI; replace OWNER/TgWitness with the fork that ran the capture.", "Распакуйте delivery.zip. Выполните команду в доверенной установке TgWitness с GitHub CLI; вместо OWNER/TgWitness укажите форк, из которого запускался сбор.")}</p><pre>python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo ${esc(repository() || "OWNER/TgWitness")}</pre></details>
       <details class="capture-command"><summary>${t("Archive larger than 256 MiB?", "Архив больше 256 МиБ?")}</summary><p>${t("Decrypt it with the local command instead of loading the entire file into browser memory.", "Расшифруйте его локальной командой, чтобы не загружать весь файл в память браузера.")}</p><pre>python -m tgwitness.sealed_crypto decrypt delivery.tgwsealed --key sealed-key.json --out delivery.zip</pre></details>
+      <details class="capture-command"><summary>Multipart delivery</summary><p>Open delivery.tgwsealed first and unzip delivery.zip. If it contains evidence.parts.json, keep all delivery-000001.tgwsealed files beside that manifest. Assemble the archive with your saved key, then verify it. You can also decrypt individual parts here; each keeps its numbered filename.</p><pre>python -m tgwitness.sealed_parts evidence.parts.json --key sealed-key.json --out evidence.zip
+python -m tgwitness.sealed_verify evidence.parts.json --bundle attestation.jsonl --repo ${esc(repository() || "OWNER/TgWitness")} --max-gib 64</pre></details>
       <p class="hint">${t("Artifacts expire after one day. End the temporary Telegram session in Settings → Devices if logout was not confirmed.", "Артефакты хранятся один день. Если выход не подтверждён, завершите временную сессию в Telegram → Настройки → Устройства.")}</p>
       <div class="capture-actions">${button("back", t("Back", "Назад"), "secondary")}</div>`;
   }
@@ -193,6 +195,8 @@
     });
     if (input.id === "result-file") perform(async()=>{
       const value=await decrypt(file,256*1024*1024), header=new Uint8Array(value,0,Math.min(4,value.byteLength));
+      const part=/^delivery-([0-9]{6})\.tgwsealed$/.exec(file.name);
+      if (part) return ()=>{save(value,"evidence.zip.part"+part[1],"application/octet-stream");};
       if (header[0]!==80 || header[1]!==75 || header[2]!==3 || header[3]!==4) throw new Error(t("The decrypted file is not an archive.", "Расшифрованный файл не является архивом."));
       return ()=>{save(value,"delivery.zip","application/zip");state.delivered=true;};
     });

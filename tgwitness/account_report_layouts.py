@@ -69,13 +69,18 @@ def transcript(context, rows, *, chat=None, sharing=False):
         yield '<section id="messages"><h2>' + view.e(say('Messages')) + '</h2>'
         if sharing:
             yield '<p class="muted">' + view.e(say('Record numbers follow messages.jsonl line order. They identify records in this copy, not original Telegram message IDs.')) + '</p>'
-        path = 'index.html' if sharing else 'chats/' + str(chat['id']) + '.html' if type(chat.get('id')) is int else 'chat.html'
+        pagination = {} if sharing else context.get('pagination') or {}
+        if not sharing:
+            yield view.page_navigation(context, say)
+        path = pagination.get('file') or ('index.html' if sharing else 'chats/' + str(chat['id']) + '.html' if type(chat.get('id')) is int else 'chat.html')
         seen = False
-        for number, row in enumerate(rows, 1):
+        for number, row in enumerate(rows, pagination.get('first_record', 1)):
             seen = True
             yield view.message_card(row, say, prefix='' if sharing else '../', sharing=sharing, number=number, page_path=path)
         if not seen:
             yield '<p>' + view.e(say('No message records are included in this view. Check the scope and omissions before drawing conclusions.')) + '</p>'
+        if not sharing:
+            yield view.page_navigation(context, say)
         yield '</section>'
 
     assessment = case_assessment.snapshot(context, 'sharing' if sharing else 'account_chat',

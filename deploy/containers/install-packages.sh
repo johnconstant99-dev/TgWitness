@@ -12,6 +12,19 @@ cache=$(mktemp -d)
 trap 'rm -rf "$cache"' EXIT HUP INT TERM
 test "$(awk 'NF && $1 !~ /^#/ {print $1}' /etc/apk/repositories)" = 'https://apk.cgr.dev/chainguard'
 
+retry_fetch() {
+    attempt=1
+    while ! "$@"; do
+        if test "$attempt" -ge 3; then
+            echo 'Package fetch failed after three attempts' >&2
+            return 1
+        fi
+        echo 'Package fetch failed; retrying with the same authenticated cache' >&2
+        sleep "$((attempt * 2))"
+        attempt=$((attempt + 1))
+    done
+}
+
 mkdir -p "$cache/apks" "$cache/verified"
 : > "$cache/names"
 set --
@@ -35,9 +48,9 @@ while read -r digest name extra; do
 done < "$lock"
 # The index signature authenticates package control checksums and data hashes.
 # No fetched dependency may be installed without its reviewed SHA-256 as well.
-apk update --cache-dir "$cache/apks"
+retry_fetch apk update --cache-dir "$cache/apks"
 for index in "$cache"/apks/APKINDEX.*.tar.gz; do apk verify "$index"; done
-apk cache --cache-dir "$cache/apks" download "$@"
+retry_fetch apk cache --cache-dir "$cache/apks" download "$@"
 for archive in "$cache"/apks/*.apk; do
     name=${archive##*/}
     stem=${name%.apk}

@@ -142,9 +142,18 @@ def html_chunks(events, coverage=None, context=None):
 COVERAGE_RANGES = 100_000
 
 
-def export_file(store, vault, fmt, options=None, *, include_board=True):
+class BundleSizeLimit(ValueError):
+    """The archive hit its configured uncompressed byte ceiling."""
+
+
+def export_file(store, vault, fmt, options=None, *, include_board=True, compact=False, output_stream=None,
+                max_uncompressed_bytes=None):
     if fmt not in ("jsonl", "csv", "html", "json", "pdf", "zip"):
         raise ValueError("Unsupported export format")
+    if compact and fmt != "zip":
+        raise ValueError("Compact packaging requires ZIP")
+    if output_stream is not None and fmt != "zip":
+        raise ValueError("External export streams require ZIP")
     if fmt == "pdf" and not pdf_report.available():
         raise pdf_report.MissingFont("PDF reports need fpdf2 on the server: pip install fpdf2 uharfbuzz")
     options = options or report.resolved()
@@ -152,9 +161,11 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
     directory.mkdir(mode=0o700, exist_ok=True)
     if directory.resolve().parent != store.root.resolve():
         raise ValueError("Temporary export directory must belong to this profile")
-    temp = tempfile.NamedTemporaryFile(prefix="tgwitness-export-", suffix="." + fmt, dir=directory, delete=False)
-    path = Path(temp.name)
-    temp.close()
+    path = None
+    if output_stream is None:
+        temp = tempfile.NamedTemporaryFile(prefix="tgwitness-export-", suffix="." + fmt, dir=directory, delete=False)
+        path = Path(temp.name)
+        temp.close()
     try:
         retained = store.retained_checkpoint()
         with store.snapshot() as snapshot:
@@ -166,14 +177,16 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
             def measured(events):
                 for event in events:
                     observed.add(event)
-                    digest.add(event)
+                    if not compact:
+                        digest.add(event)
                     journal_bytes.update(canonical(event) + b"\n")
                     yield event
             result = verify_events(measured(snapshot.events()), vault.public_key)
             if retained:
                 verify_checkpoint(retained, vault.public_key, result["events"], snapshot.hash_at)
             coverage = observed.result(COVERAGE_RANGES)
-            digest.hash_images(store.root / "media")
+            if not compact:
+                digest.hash_images(store.root / "media")
             summary = digest.result()
             summary["titles"] = {**{t["chat_id"]: t["title"] for t in store.targets() if t.get("title")},
                                  **summary["titles"]}
@@ -189,7 +202,7 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
                 context["case_board"] = board_report.material(snapshot.connection, board_export["statement"], options)
             selection = report.report_selection.Selection.model_validate(options.get("selection") or {})
             report_events = snapshot.events
-            if selection.enabled and fmt in ("html", "json", "pdf", "zip"):
+            if not compact and selection.enabled and fmt in ("html", "json", "pdf", "zip"):
                 selected_event = report.report_selection.compile_selection(selection)
                 def report_events():
                     return (event for event in snapshot.events() if selected_event(event))
@@ -204,7 +217,7 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
                 context["report_digest"] = selected_summary
                 context["events_again"] = report_events
                 context["source_events"] = snapshot.events
-            if (selection.enabled or selection.id_gaps) and fmt in ("html", "json", "pdf", "zip"):
+            if not compact and (selection.enabled or selection.id_gaps) and fmt in ("html", "json", "pdf", "zip"):
                 selected = report.report_selection.analyze(snapshot, selection, preview_limit=0, scratch_root=directory)
                 context["selection"] = {key: selected[key] for key in ("selection", "source", "counts", "id_gaps")}
 
@@ -228,21 +241,29 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
                 return path
 
             hashes, total, limit = {}, 0, tuning.value(store, "export_max_gib") * 1024**3
-            with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            if max_uncompressed_bytes is not None:
+                if type(max_uncompressed_bytes) is not int or not 8 * 1024**2 <= max_uncompressed_bytes <= 1024 * 1024**3:
+                    raise ValueError("Invalid uncompressed archive limit")
+                limit = max_uncompressed_bytes
+            with zipfile.ZipFile(output_stream if output_stream is not None else path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
                 def write_member(name, values):
                     nonlocal total
                     digest = hashlib.sha256()
-                    with archive.open(name, "w", force_zip64=True) as outgoing:
+                    entry = zipfile.ZipInfo(name)
+                    entry.compress_type = zipfile.ZIP_STORED if name.startswith("media/") or name.endswith(".zip") else zipfile.ZIP_DEFLATED
+                    with archive.open(entry, "w", force_zip64=True) as outgoing:
                         for chunk in values:
                             total += len(chunk)
                             if total > limit - 4 * 1024**2:
-                                raise ValueError("Bundle exceeds the uncompressed size limit set in Parameters")
+                                raise BundleSizeLimit("Bundle exceeds the uncompressed size limit set in Parameters")
                             outgoing.write(chunk)
                             digest.update(chunk)
                     hashes[name] = digest.hexdigest()
                     return digest.hexdigest()
 
                 for format, name in (("jsonl", "events.jsonl"), ("csv", "events.csv")):
+                    if compact and format == "csv":
+                        continue
                     write_member(name, chunks(format))
                 write_member("coverage.json", [json.dumps(coverage, ensure_ascii=False, indent=1).encode("utf-8")])
                 if board_export:
@@ -250,11 +271,30 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
                     write_member("case-board.json", [canonical(board_export)])
                     for identifier, item in board.export_slices(snapshot.connection, board_export["statement"]["state"]):
                         write_member("board/slices/" + identifier + ".json", [canonical(item)])
-                if analytics := report.report_material(context).get("analytics"):
-                    write_member("analytics.json", [canonical(analytics)])
+                if not compact:
+                    if analytics := report.report_material(context).get("analytics"):
+                        write_member("analytics.json", [canonical(analytics)])
                 write_member("verify.py", [Path(__file__).with_name("verify.py").read_bytes()])
-                write_indicators(write_member, (context.get("report_digest") or summary).get("indicators"), context)
+                if not compact:
+                    write_indicators(write_member, (context.get("report_digest") or summary).get("indicators"), context)
                 for event in snapshot.events():
+                    if event["kind"] == "sealed.account_export":
+                        item = event["payload"]
+                        job = item.get("job_id", "")
+                        if not re.fullmatch(r"[a-f0-9]{32}", job) or item.get("file") != "account-export.zip" or item["file"] in hashes:
+                            raise ValueError("Invalid or duplicate sealed account export")
+                        source = store.root / "account-exports" / job / "export.zip"
+                        if source.is_symlink() or source.resolve().parent != (store.root / "account-exports" / job).resolve():
+                            raise ValueError("Invalid sealed account export path")
+                        with source.open("rb") as incoming:
+                            calculated = write_member(item["file"], iter(lambda: incoming.read(1024 * 1024), b""))
+                        if calculated != item["sha256"] or source.stat().st_size != item["bytes"]:
+                            raise ValueError("Sealed account export changed before packaging")
+                    if event["kind"] == "media.hashed":
+                        data = canonical(event["payload"]["server_hashes"])
+                        name = "hashes/" + hashlib.sha256(data).hexdigest() + ".json"
+                        if name not in hashes:
+                            write_member(name, [data])
                     digest = event["payload"].get("media_sha256") if event["kind"] in ("media.saved", "actor.avatar_saved") else None
                     if not digest:
                         continue
@@ -289,38 +329,70 @@ def export_file(store, vault, fmt, options=None, *, include_board=True):
                 context["events_sha256"] = hashes["events.jsonl"]
                 write_member("custody.json", [json.dumps(report.custody(context), ensure_ascii=False,
                                                          indent=1).encode("utf-8")])
-                if options.get("timeline"):
+                if not compact and options.get("timeline"):
                     context["viewer"] = write_viewer(write_member, "journal",
                         (viewer.journal_item(event, options.get("raw_records", True)) for event in report_events()),
                         None, (context.get("report_digest") or summary).get("indicators"), options)
                 context["files"] = dict(hashes)
-                data = report.report_data(report_events, coverage, context)
-                write_member("report.json", [report.sealed_json(data, context)])
-                write_pdf(write_member, "report.pdf", lambda: pdf_report.report_pdf(
-                    data, context, vault, report_events()))
-                context["files"] = dict(hashes)
-                write_member("report.html", chunks("html"))
+                if compact:
+                    data = {}
+                    packaging = {"mode": "compact", "full_journal": True, "preserved_media_omitted": False,
+                        "meaning": "Formatted reports, CSV and viewer duplicates are omitted to reduce packaging size. "
+                                   "All signed journal events, file-hash manifests and preserved media remain included. "
+                                   "Collection gaps and unavailable attachments remain recorded in the journal."}
+                    write_member("PACKAGING.json", [canonical(packaging)])
+                    write_member("index.html", [compact_index(result["events"])])
+                else:
+                    data = report.report_data(report_events, coverage, context)
+                    write_member("report.json", [report.sealed_json(data, context)])
+                    write_pdf(write_member, "report.pdf", lambda: pdf_report.report_pdf(
+                        data, context, vault, report_events()))
+                    context["files"] = dict(hashes)
+                    write_member("report.html", chunks("html"))
                 listed = {**hashes, **dict.fromkeys(("README.txt", "SHA256SUMS", "manifest.json", "manifest.sig"), "")}
-                write_member("README.txt", [report.readme(context, listed, "\n".join(LIMITS) + README)])
+                readme = (("TgWitness compact evidence archive\n\n" + packaging["meaning"] + "\n\n"
+                           + "Open index.html. Verify evidence.zip using verify.py from an independently trusted checkout.\n"
+                           + "\n".join(LIMITS) + README).encode() if compact else
+                          report.readme(context, listed, "\n".join(LIMITS) + README))
+                write_member("README.txt", [readme])
                 write_member("SHA256SUMS", [report.sha256sums(hashes)])
                 manifest = {"format": "tgwitness-evidence-v1", "created_at": context["created_at"],
                             "public_key": vault.public_key, "fingerprint": result["fingerprint"],
                             "event_count": result["events"], "head_hash": result["head_hash"],
                             "scope": "Complete stable journal prefix from sequence 1, including operational events",
                             "producer": producer(), "limitations": LIMITS, "case": report.case_of(options),
-                            "report": report_entry(context, options), "files": hashes,
-                            "case_assessment": data["case_assessment"]}
+                            "report": {} if compact else report_entry(context, options), "files": hashes,
+                            "case_assessment": data.get("case_assessment", {})}
+                if compact:
+                    manifest["packaging"] = packaging
                 if board_export:
                     manifest["annotations_head"] = board_export["statement"]["state"]["annotations_head"]
                 manifest_bytes = canonical(manifest)
                 if total + len(manifest_bytes) + 88 > limit:
-                    raise ValueError("Manifest pushes bundle above the verification size limit")
+                    raise BundleSizeLimit("Manifest pushes bundle above the verification size limit")
                 archive.writestr("manifest.json", manifest_bytes)
                 archive.writestr("manifest.sig", vault.sign(manifest_bytes))
         return path
     except BaseException:
-        path.unlink(missing_ok=True)
+        if path is not None:
+            path.unlink(missing_ok=True)
         raise
+
+
+def compact_index(events):
+    return ("<!doctype html><html lang=\"en\"><meta charset=\"utf-8\">"
+            "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+            "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; base-uri 'none'; form-action 'none'\">"
+            "<title>Compact evidence archive</title><body><main><h1>Compact evidence archive</h1>"
+            "<p>Formatted reports and duplicate views were omitted to reduce archive size. "
+            "All " + str(events) + " signed journal records, preserved files and server file hashes are included.</p>"
+            "<p>Collection may still be partial. Review coverage and the final journal events.</p>"
+            "<ul><li><a download href=\"events.jsonl\">Signed journal (JSONL)</a></li>"
+            "<li><a download href=\"coverage.json\">Collection coverage</a></li>"
+            "<li><a download href=\"PACKAGING.json\">Packaging details</a></li>"
+            "<li><a href=\"README.txt\">Verification instructions</a></li></ul>"
+            "<p>The manifest signs the archive members. Use verification tools from an independently trusted checkout.</p>"
+            "</main></body></html>").encode()
 
 
 def write_indicators(write_member, found, context):

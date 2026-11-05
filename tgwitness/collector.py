@@ -40,7 +40,8 @@ from .evidence import retain_checkpoint
 from .netclient import RouteError, proxy_address
 from .network import NetworkConfig, NoRoute, RoutePolicy, saved_route
 from .proxy_catalog import NoProxyAvailable, ProxyPool, PublicCatalog
-from .monitoring import capture_settings, media_kind, monitoring_settings, duration_allowed
+from .monitoring import capture_settings, media_kind, monitoring_settings, duration_allowed, media_action
+from . import file_hashes
 from .scope import allowed, folder_rule, in_folder, kind_of, recheck_settings, scope_settings
 from .verify import fingerprint
 
@@ -913,7 +914,7 @@ class Collector:
                 "offset_seconds": round(server - (before + after) / 2, 3),
                 "uncertainty_seconds": round((after - before) / 2 + 0.5, 3), "method": CLOCK_METHOD}
 
-    async def chat_profile(self, entity, media_dir=None):
+    async def chat_profile(self, entity, media_dir=None, *, include_photo=True):
         profile, observer, errors = {}, {}, {}
         for name in PROFILE_FLAGS:
             if isinstance(getattr(entity, name, None), bool):
@@ -971,7 +972,7 @@ class Collector:
             profile.update(created_at=date_string(first.date), created_title=getattr(action, "title", None))
         if getattr(getattr(entity, "photo", None), "photo_id", None):
             profile["photo_id"] = entity.photo.photo_id
-            data = await ask("photo", lambda: self.client.download_profile_photo(entity, file=bytes, download_big=True))
+            data = await ask("photo", lambda: self.client.download_profile_photo(entity, file=bytes, download_big=True)) if include_photo else None
             if isinstance(data, bytes) and data:
                 digest = hashlib.sha256(data).hexdigest()
                 profile["photo_sha256"] = digest
@@ -1323,7 +1324,12 @@ class Collector:
         async def attempt(pair_id, pair_hash):
             await self.connect_login(pair_id, pair_hash, client_profile=client_profile, languages=languages)
             return await self.send_code(phone)
-        return await self.with_api_pair(api_id, api_hash, attempt)
+        try:
+            return await self.with_api_pair(api_id, api_hash, attempt)
+        except BaseException:
+            await self.cancel_login()
+            self.phase = self.resting_phase()
+            raise
 
     async def start_qr(self, api_id=None, api_hash=None, client_profile=None, languages=None):
         async def attempt(pair_id, pair_hash):
@@ -1932,6 +1938,7 @@ class Collector:
                     "descriptor_sha256": hashlib.sha256(descriptor).hexdigest(),
                     "account_id": account["id"], "max_bytes": job["max_bytes"], "media_type": media_type,
                     "priority": job["priority"], "estimated_bytes": size,
+                    "action": media_action(settings, rule, size),
                     "policy": "original observed descriptor; never substitute a newer message"}
         event = self.store.append(kind, payload, chat_id, message.id,
                                   message.sender_id if kind in ("message.new", "message.recovered") else None,
@@ -2407,7 +2414,9 @@ class Collector:
                                                       if capture_settings(self.store)["download_media"] else "off"},
                               chat_id)
             clock = await self.telegram_clock()
-            profile, observer, problems = await self.chat_profile(entity, media_dir)
+            settings = capture_settings(self.store)
+            profile, observer, problems = await self.chat_profile(entity, media_dir,
+                include_photo=settings["download_media"] and settings["include_avatars"])
             count = await self.stream_history(entity, scratch, record, media_dir)
             recheck = None
             if chat_id < -1000000000000:
@@ -2503,6 +2512,17 @@ class Collector:
             return {"file_status": "type_not_collected", "file_kind": kind}
         if not duration_allowed(message, rule):
             return {"file_status": "duration_limit", "file_kind": kind}
+        action = media_action(settings, rule, size)
+        if action == "exclude":
+            return {"file_status": "excluded_by_policy", "file_kind": kind}
+        if action == "hashes_only":
+            try:
+                hashes = await self.attachment_hashes(message)
+                digest = hashlib.sha256(canonical(hashes)).hexdigest()
+                return {"file_status": "hashes_only" if hashes["status"] == "complete" else "incomplete_hashes",
+                        "file_kind": kind, "server_hashes": hashes, "file_hash_sha256": digest}
+            except (RPCError, OSError, TimeoutError, ValueError) as exc:
+                return {"file_status": "hashes_unavailable", "file_kind": kind, "file_error": type(exc).__name__}
         limit = rule["max_mb"] * 1024**2
         if size is None or size > limit:
             return {"file_status": "above_limit" if size else "unknown_size", "file_kind": kind,
@@ -2624,7 +2644,8 @@ class Collector:
             if self.running and self.selected(chat_id) and monitoring_settings(self.store)["profiles"]:
                 from .people import observe_entity
                 observe_entity(self.store, entity, chat_id)
-            self.avatar_history.observe(entity, chat_id=chat_id)
+            if capture_settings(self.store)["include_avatars"]:
+                self.avatar_history.observe(entity, chat_id=chat_id)
 
     async def avatar(self, peer_id):
         cached = self.store.root / "avatars" / (str(peer_id) + ".jpg")
@@ -2709,6 +2730,9 @@ class Collector:
         media_root = self.store.root / "media"
         media_root.mkdir(exist_ok=True)
         while self.running or owner and self.export_claim == owner:
+            if not owner and capture_settings(self.store)["messages_first"] and self.history.status()["phase"] in ("none", "running", "paused"):
+                await asyncio.sleep(.2)
+                continue
             if not capture_settings(self.store)["download_media"]:
                 if owner:
                     return
@@ -2768,11 +2792,27 @@ class Collector:
                 size = getattr(message.file, "size", None) if message.file else None
                 kind = policy.get("media_type") or media_kind(message)
                 rule, limit = capture["types"][kind], capture["types"][kind]["max_mb"] * 1024**2
-                if not rule["enabled"] or not duration_allowed(message, rule) or (size is not None and limit < size <= job["max_bytes"]):
+                action = policy.get("action", "download")
+                current_action = media_action(capture, rule, size)
+                if (not rule["enabled"] or not duration_allowed(message, rule) or current_action == "exclude"
+                        or (action == "download" and size is not None and limit < size <= job["max_bytes"])):
                     self.store.finish_media(job, "skipped", {
                         "reason": "above the size limit of the attachment settings" if rule["enabled"]
                         else "attachment type not collected by policy: " + kind,
                         "meaning": "the attachment settings changed after this file was queued"})
+                    continue
+                if action == "exclude":
+                    self.store.finish_media(job, "skipped", {"reason": "excluded by the observed media policy"})
+                    continue
+                if action == "download" and current_action != "download":
+                    self.store.finish_media(job, "skipped", {"reason": "media action changed after this attachment was queued"})
+                    continue
+                if action == "hashes_only":
+                    hashes = await self.attachment_hashes(message, job=job)
+                    self.store.finish_media(job, "hashed" if hashes["status"] == "complete" else "failed", {
+                        "server_hashes": hashes, "original_name": getattr(message.file, "name", None),
+                        "reason": "hashes_only" if hashes["status"] == "complete" else "incomplete_server_hashes",
+                        "downloaded_bytes": 0})
                     continue
                 if size is None or size > job["max_bytes"]:
                     raise ValueError("unknown_size_or_above_limit")
@@ -2843,3 +2883,31 @@ class Collector:
                     "retry_after_seconds": delay}, delay=delay)
             finally:
                 temp.unlink(missing_ok=True)
+
+    async def attachment_hashes(self, message, *, job=None):
+        # Bound this cache independently of the number of messages in a chat.
+        if not hasattr(self, "_file_hash_cache"):
+            self._file_hash_cache, self._file_hash_cache_bytes = {}, 0
+            self._file_hash_lock = asyncio.Lock()
+        media = downloadable_media(message)
+        identity = file_hashes.representation(media)
+        key = canonical({"account_id": (self.store.get_setting("account", {}) or {}).get("id"), "representation": identity})
+        async with self._file_hash_lock:
+            if key in self._file_hash_cache:
+                return self._file_hash_cache[key][0]
+            try:
+                result = await asyncio.wait_for(file_hashes.collect(self.client, media), self.param("media_timeout_seconds"))
+            except FileReferenceExpiredError:
+                job = job or {"chat_id": message.chat_id, "message_id": message.id}
+                media = await self.refresh_media_reference(message, job)
+                if file_hashes.representation(media) != identity:
+                    raise ValueError("refreshed_hash_representation_changed") from None
+                result = await asyncio.wait_for(file_hashes.collect(self.client, media), self.param("media_timeout_seconds"))
+            size = len(canonical(result))
+            if result["status"] == "complete" and size <= 8 * 1024**2:
+                while self._file_hash_cache and (len(self._file_hash_cache) >= 512 or self._file_hash_cache_bytes + size > 8 * 1024**2):
+                    _, used = self._file_hash_cache.pop(next(iter(self._file_hash_cache)))
+                    self._file_hash_cache_bytes -= used
+                self._file_hash_cache[key] = (result, size)
+                self._file_hash_cache_bytes += size
+            return result

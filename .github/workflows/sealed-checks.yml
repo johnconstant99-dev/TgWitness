@@ -3,33 +3,108 @@ on:
   push:
     paths:
       - 'tgwitness/sealed*'
+      - 'tgwitness/security.py'
+      - 'tools/test_private_write.py'
       - 'tgwitness/static/sealed*'
       - 'tgwitness/static/cloud-capture*'
       - 'tgwitness/static/capture.html'
       - 'website/sealed*'
       - 'scripts/sealed_runner.py'
       - 'deploy/Dockerfile.sealed'
+      - 'deploy/media-worker/**'
+      - 'deploy/containers/**'
+      - '.dockerignore'
+      - 'README.md'
+      - 'LICENSE'
+      - 'NOTICE'
       - 'deploy/*.lock'
+      - 'deploy/constraints*.txt'
+      - 'pyproject.toml'
+      - 'tools/lock_requirements.py'
       - 'tools/check_sealed*'
+      - 'tools/test_*hash*'
+      - 'tools/test_export_capacity.py'
+      - 'tools/test_sealed_package.py'
+      - 'tools/test_sealed_release.py'
+      - 'tools/test_sealed_parts.py'
+      - 'tools/test_sealed_account.py'
+      - 'tools/test_account_acquisition.py'
+      - 'tools/test_telegram_export.py'
+      - 'tools/test_ocr_source_fetch.py'
+      - 'tgwitness/account_acquisition.py'
+      - 'tgwitness/account_attachment_cache.py'
+      - 'tgwitness/account_finalization.py'
+      - 'tgwitness/telegram_export.py'
+      - 'tools/test_container_fetch_retry.py'
+      - 'tgwitness/file_hashes.py'
+      - 'tgwitness/export_preflight.py'
+      - 'tgwitness/account_export*'
+      - 'tgwitness/collector.py'
+      - 'tgwitness/history.py'
+      - 'tgwitness/monitoring.py'
+      - 'tgwitness/verify.py'
+      - 'tgwitness/evidence.py'
+      - 'tgwitness/store.py'
+      - 'tgwitness/report*'
+      - 'tgwitness/viewer.py'
+      - 'tgwitness/chat_export.py'
       - '.github/workflows/sealed*'
   pull_request:
     paths:
       - 'tgwitness/sealed*'
+      - 'tgwitness/security.py'
+      - 'tools/test_private_write.py'
       - 'tgwitness/static/sealed*'
       - 'tgwitness/static/cloud-capture*'
       - 'tgwitness/static/capture.html'
       - 'website/sealed*'
       - 'scripts/sealed_runner.py'
       - 'deploy/Dockerfile.sealed'
+      - 'deploy/media-worker/**'
+      - 'deploy/containers/**'
+      - '.dockerignore'
+      - 'README.md'
+      - 'LICENSE'
+      - 'NOTICE'
       - 'deploy/*.lock'
+      - 'deploy/constraints*.txt'
+      - 'pyproject.toml'
+      - 'tools/lock_requirements.py'
       - 'tools/check_sealed*'
+      - 'tools/test_*hash*'
+      - 'tools/test_export_capacity.py'
+      - 'tools/test_sealed_package.py'
+      - 'tools/test_sealed_release.py'
+      - 'tools/test_sealed_parts.py'
+      - 'tools/test_sealed_account.py'
+      - 'tools/test_account_acquisition.py'
+      - 'tools/test_telegram_export.py'
+      - 'tools/test_ocr_source_fetch.py'
+      - 'tgwitness/account_acquisition.py'
+      - 'tgwitness/account_attachment_cache.py'
+      - 'tgwitness/account_finalization.py'
+      - 'tgwitness/telegram_export.py'
+      - 'tools/test_container_fetch_retry.py'
+      - 'tgwitness/file_hashes.py'
+      - 'tgwitness/export_preflight.py'
+      - 'tgwitness/account_export*'
+      - 'tgwitness/collector.py'
+      - 'tgwitness/history.py'
+      - 'tgwitness/monitoring.py'
+      - 'tgwitness/verify.py'
+      - 'tgwitness/evidence.py'
+      - 'tgwitness/store.py'
+      - 'tgwitness/report*'
+      - 'tgwitness/viewer.py'
+      - 'tgwitness/chat_export.py'
       - '.github/workflows/sealed*'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
-  group: sealed-checks-${{ github.ref }}
-  cancel-in-progress: true
+  group: sealed-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'release' }}
 jobs:
   attestation-binding:
     name: Reject unapproved attestation signer
@@ -59,7 +134,7 @@ jobs:
             --signer-digest "$EXPECTED_SHA" --deny-self-hosted-runners
           if gh attestation verify synthetic.txt --bundle "$BUNDLE" --repo phishdestroy/TgWitness \
             --signer-workflow phishdestroy/TgWitness/.github/workflows/sealed-collector.yml \
-            --signer-digest d4301a916683ffe3e2c7f49b2def7f679925760c --deny-self-hosted-runners; then
+            --signer-digest 88853fd74d7bc43a8e5bf86b846e0de731afdbd2 --deny-self-hosted-runners; then
             echo 'ERROR: test signer accepted as production collector'
             exit 1
           fi
@@ -71,6 +146,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+          fetch-depth: 0
+      - name: Check the caller, workflow and tested collector revision
+        if: github.event_name == 'release'
+        run: python3 -I tools/check_sealed_release.py --git-history
       - name: Install test dependencies
         run: |
           python3 -m venv "$RUNNER_TEMP/sealed-tests"
@@ -81,5 +160,11 @@ jobs:
           "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install --no-deps --no-build-isolation -e '.[dev]'
           "$RUNNER_TEMP/sealed-tests/bin/python" -m pip check
       - run: python -m playwright install --with-deps chromium
+      - run: >-
+          python -I -m pytest tools/test_file_hash_export.py tools/test_sealed_hash_export.py
+          tools/test_export_capacity.py tools/test_sealed_package.py tools/test_sealed_release.py
+          tools/test_account_acquisition.py tools/test_telegram_export.py tools/test_sealed_account.py
+          tools/test_sealed_parts.py tools/test_ocr_source_fetch.py tools/test_private_write.py -q
+      - run: python tools/check_sealed_login.py
       - run: python tools/check_sealed_browser.py
       - run: python tools/check_sealed_container.py

@@ -1,7 +1,7 @@
-# Version 0.9.0 preview
+# Version 0.9.1 preview
 
 TgWitness is a self-hosted Telegram observation journal under the
-[MIT License](../../LICENSE). Version 0.9.0 is the 4 November 2026 preview candidate; its
+[MIT License](../../LICENSE). Version 0.9.1 is the 4 November 2026 preview candidate; its
 contents are listed in the [changelog](../CHANGELOG.md). The release packages are the
 Windows portable package, the wheel and the source archive, each with its SHA-256.
 
@@ -41,7 +41,7 @@ wheel, Windows portable and GHCR packages. Public source and wheel assets use al
 the public site includes only presentation assets. Publication checks and dependency auditing
 run in CI. See [publishing](PUBLISHING.md) for commands and deployment steps.
 
-Version 0.9.0 remains a preview. The release workflow publishes the exact Windows
+Version 0.9.1 remains a preview. The release workflow publishes the exact Windows
 portable artifact tested by the checks workflow, alongside the source archive
 and wheel. A final job downloads all three published packages, checks their
 SHA-256 sidecars and publishes `SHA256SUMS.txt` and `RELEASE-MANIFEST.json` with

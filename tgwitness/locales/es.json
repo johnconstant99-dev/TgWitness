@@ -2367,7 +2367,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} mensajes · {done} de {total} fuentes",
 "{n} enabled sources. Start observation before loading history.": "{n} fuentes activadas. Inicie la observación antes de cargar el historial.",
 "GitHub Actions capture (preview)": "Captura con GitHub Actions (versión preliminar)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Un nuevo inicio de sesión en Telegram, un chat, un archivo cifrado y procedencia de GitHub.",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "Un nuevo inicio de sesión en Telegram, chats seleccionados o datos de la cuenta, un archivo cifrado y una certificación de procedencia de GitHub.",
 "Open capture helper": "Abrir el asistente de captura",
 "Save your key": "Guarde su clave",
 "Start the collector": "Inicie el recopilador",

@@ -1,0 +1,21 @@
+{
+  "transport": "takeout",
+  "purpose": "Personal messages and server file hashes",
+  "report_language": "en",
+  "chat_kinds": ["private", "bot", "group", "supergroup", "channel"],
+  "chat_ids": [],
+  "include_archived": true,
+  "own_messages_only": false,
+  "media_types": ["photo", "video", "video_message", "voice", "audio", "document", "sticker", "animation"],
+  "media_action": "hashes_only",
+  "media_actions": {},
+  "oversized_media": "hashes_only",
+  "max_media_file_mib": 20,
+  "max_total_gib": 1,
+  "include_profile": false,
+  "include_contacts": false,
+  "include_profile_photos": false,
+  "include_stories": false,
+  "include_session_metadata": false,
+  "include_other_data": false
+}

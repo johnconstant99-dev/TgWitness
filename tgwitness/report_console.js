@@ -120,11 +120,13 @@ async function startViewer(meta){
   function chatItem(r){const d=r||{};const file=d.file?{path:d.file,sha:d.file_sha256,size:d.file_size,kind:d.file_kind,mime:(d.media_info||{}).mime_type}:null;
     const it={key:"m"+d.id,n:d.id,at:d.date,who:d.from||(d.from_id!=null?"ID "+d.from_id:say("Unknown")),user:d.from_username,uid:d.from_id,
       text:d.text||"",cat:d.type==="service"?"service":d.media_type?"media":d.edited?"edited":"text",d,file,raw:r,
-      service:d.type==="service"?actionText(d.action)+(d.action_title?" · “"+d.action_title+"”":""):"",edited:d.edited,found:d.found_on_recheck};
+      service:d.type==="service"?actionText(d.action)+(d.action_title?" · “"+d.action_title+"”":""):"",edited:d.edited,found:d.found_on_recheck,
+      fileHashes:d.server_hashes?{sha:d.file_hash_sha256,bytes:d.server_hashes.covered_bytes,ranges:d.server_hashes.ranges?.length,
+        variant:d.server_hashes.representation?.variant,status:d.server_hashes.status}:null};
     it.link=(d.text_entities||[]).some(x=>x.href||x.type==="link");return finishItem(it);}
   function journalItem(j){const d=j.d||{};const it={key:"r"+j.s,n:j.s,at:j.t,chat:j.ch,msg:j.m,who:j.a||(j.id!=null?"ID "+j.id:""),user:j.u,uid:j.id,
       text:j.x||"",cat:j.c,kind:j.k,d,hash:j.h,sent:Object.hasOwn(j,"sent_at")?j.sent_at:j.tt,edited:j.edited_at,p:j.p,withheld:j.w,textWithheld:j.xw,raw:j,
-      file:j.f?{path:"media/"+j.f.sha,sha:j.f.sha,mime:j.f.mime,size:j.f.size,name:j.f.name}:null};
+      file:j.f?{path:"media/"+j.f.sha,sha:j.f.sha,mime:j.f.mime,size:j.f.size,name:j.f.name}:null,fileHashes:j.fh};
     it.link=(d.text_entities||[]).some(x=>x.href||x.type==="link");return finishItem(it);}
   function finishItem(it){const d=it.d||{},parts=[it.text,it.who,it.user?"@"+it.user:"",it.uid,"#"+it.n,it.service||"",title(it.chat),it.p||""];
     for(const x of d.text_entities||[])parts.push(x.text||"",x.href||"");
@@ -247,9 +249,13 @@ async function startViewer(meta){
       '<div class="msg-media">'+ic("file")+"<span>"+esc(it.file&&it.file.name||(it.d.media_info||{}).file_name||say("Attachment"))+"</span></div>":"";
     return '<article class="msg '+colour(it.uid??it.who)+(first?" first":"")+(last?" last":"")+(V.selected.has(it.key)?" picked":"")+'" data-key="'+it.key+'" role="listitem" tabindex="0">'
       +pickBox(it)+'<div class="msg-ava">'+(last?'<div class="ava">'+esc(initials(it.who))+"</div>":"")+'</div><div class="msg-bubble">'
-      +(first?'<div class="msg-name">'+esc(it.who)+(it.user?"<span>@"+esc(it.user)+"</span>":"")+"</div>":"")+media
+      +(first?'<div class="msg-name">'+esc(it.who)+(it.user?"<span>@"+esc(it.user)+"</span>":"")+"</div>":"")+media+hashNotice(it)
       +(it.text?'<div class="msg-text" dir="auto">'+hl(shortText(it.text))+"</div>":"")
       +'<div class="msg-foot">'+tags(it)+'<span class="msg-meta">'+(it.edited?esc(say("edited"))+" · ":"")+"#"+it.n+" · "+esc(clock(it.at))+"</span></div></div></article>";}
+  function hashNotice(it){const h=it.fileHashes;if(!h||!/^[0-9a-f]{64}$/.test(h.sha))return "";
+    return '<div class="rec-p">File content not downloaded. '+esc(h.name||"Attachment")+' · '+num(h.bytes)+' bytes · '+num(h.ranges)
+      +' SHA-256 ranges · '+esc(h.variant||"")+(h.status&&h.status!=="complete"?' · Incomplete hash coverage':'')
+      +'<br><a download href="hashes/'+h.sha+'.json">Download hash manifest</a></div>';}
   function record(it){const [glyph,tone]=CAT[it.cat]||CAT.system;
     const text=it.textWithheld?'<div class="rec-text v-muted">'+esc(say("Text withheld in this extract"))+"</div>":it.text?'<div class="rec-text" dir="auto">'+hl(shortText(it.text))+"</div>":
       it.p?'<div class="rec-p">'+esc(it.p.slice(0,260))+"</div>":"";
@@ -257,9 +263,10 @@ async function startViewer(meta){
       +'<span class="rec-icon tone-'+tone+'">'+ic(glyph)+"</span><div>"
       +'<div class="rec-top"><span class="rec-kind">'+esc(kindLabel(it))+"</span>"+(it.chat!=null?'<span class="rec-chat">'+esc(title(it.chat))+"</span>":"")
       +(it.msg!=null?"<span>"+esc(sayf("message {id}",{id:it.msg}))+"</span>":"")+'<span class="rec-time">'+esc(clockSec(it.at))+" UTC</span></div>"
-      +(it.who?'<div class="rec-who">'+esc(it.who)+(it.user?" <span>@"+esc(it.user)+"</span>":"")+"</div>":"")+text
+      +(it.who?'<div class="rec-who">'+esc(it.who)+(it.user?" <span>@"+esc(it.user)+"</span>":"")+"</div>":"")+text+hashNotice(it)
       +'<div class="rec-foot"><span class="rec-seq">#'+it.n+"</span>"+(it.file?'<span class="tag violet">'+ic("file")+esc(say("file"))+"</span>":"")+tags(it)+"</div></div></article>";}
   $("#v-list").addEventListener("click",e=>{const more=e.target.closest("[data-run-more]");if(more){appendRun(more.closest(".v-run"));return;}
+    if(e.target.closest("a[download]"))return;
     const row=e.target.closest("[data-key]");if(!row)return;const key=row.dataset.key;
     if(e.target.classList.contains("pick")){e.target.checked?V.selected.add(key):V.selected.delete(key);row.classList.toggle("picked",e.target.checked);
       selectionChanged(true);return;}detail(key);});
@@ -296,6 +303,7 @@ async function startViewer(meta){
     if(typeof d.auto_delete_seconds==="number")fact(say("Auto-delete timer"),esc(span(d.auto_delete_seconds)));
     if(d.protected)fact(say("Protected"),esc(say("saving and forwarding restricted")));if(it.withheld)fact(say("Minimised"),esc(it.withheld.join(", ")));
     if(it.file)fact(say("File"),esc(it.file.name||say("Saved file"))+(it.file.size?" · "+num(it.file.size)+" B":"")+'<br><small><code>'+esc(it.file.sha)+"</code></small>");
+    if(it.fileHashes)fact("Server file hashes",hashNotice(it));
     else if(d.media_type)fact(say("File"),esc(d.media_type)+(d.file_status?"<br><small>"+esc(d.file_status)+"</small>":""));
     const links=[...(d.text_entities||[]),...(d.quote_entities||[])].filter(x=>x.href||x.user_id!=null).map(x=>"<li"+(x.deceptive?' class="warn"':"")+">“"+esc(x.text)+"” → <code>"
       +esc(x.href||"user ID "+x.user_id)+"</code>"+(x.deceptive?'<br><b>⚠ '+esc(say("the text shows a different address"))+"</b>":"")+"</li>").join("");

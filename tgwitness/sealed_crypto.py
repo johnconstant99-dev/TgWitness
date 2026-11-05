@@ -1,5 +1,6 @@
 import argparse
 import base64
+from contextlib import contextmanager
 import hashlib
 import json
 import os
@@ -62,10 +63,32 @@ def private_key(record):
     return key
 
 
-def encrypt_file(source, destination, recipient):
-    source, destination = Path(source), Path(destination)
-    if source.stat().st_size > MAX_BYTES:
-        raise ValueError("Sealed package exceeds 8 GiB")
+class _EncryptingWriter:
+    """A bounded, non-seekable plaintext sink for streaming ZIP writers."""
+
+    def __init__(self, outgoing, encryptor):
+        self.outgoing, self.encryptor, self.total = outgoing, encryptor, 0
+
+    def tell(self):
+        return self.total
+
+    def write(self, block):
+        if self.total + len(block) > MAX_BYTES:
+            raise ValueError("Sealed package exceeds 8 GiB")
+        view = memoryview(block)
+        for start in range(0, len(view), CHUNK):
+            self.outgoing.write(self.encryptor.update(view[start:start + CHUNK]))
+        self.total += len(view)
+        return len(view)
+
+    def flush(self):
+        self.outgoing.flush()
+
+
+@contextmanager
+def encrypt_stream(destination, recipient):
+    """Write a TGWSEAL1 envelope; remove incomplete output on any failure."""
+    destination = Path(destination)
     key, nonce = os.urandom(32), os.urandom(12)
     header = json.dumps({"algorithm": ALGORITHM, "key": b64(public_key(recipient).encrypt(key, oaep())),
                          "nonce": b64(nonce)}, sort_keys=True, separators=(",", ":")).encode()
@@ -75,18 +98,22 @@ def encrypt_file(source, destination, recipient):
 
     fd = os.open(destination, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     try:
-        with os.fdopen(fd, "wb") as outgoing, source.open("rb") as incoming:
+        with os.fdopen(fd, "wb") as outgoing:
             outgoing.write(prefix)
-            total = 0
-            for block in iter(lambda: incoming.read(CHUNK), b""):
-                total += len(block)
-                if total > MAX_BYTES:
-                    raise ValueError("Sealed package exceeds 8 GiB")
-                outgoing.write(encryptor.update(block))
+            yield _EncryptingWriter(outgoing, encryptor)
             outgoing.write(encryptor.finalize() + encryptor.tag)
     except BaseException:
         destination.unlink(missing_ok=True)
         raise
+
+
+def encrypt_file(source, destination, recipient):
+    source = Path(source)
+    if source.stat().st_size > MAX_BYTES:
+        raise ValueError("Sealed package exceeds 8 GiB")
+    with source.open("rb") as incoming, encrypt_stream(destination, recipient) as outgoing:
+        for block in iter(lambda: incoming.read(CHUNK), b""):
+            outgoing.write(block)
 
 
 def decrypt_file(source, destination, record):

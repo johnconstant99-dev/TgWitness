@@ -183,6 +183,8 @@ class History:
                     return
                 job = self.source(run_id)
                 if not job:
+                    if capture_settings(self.store)["messages_first"]:
+                        await self.collector.download_worker(owner="history:" + run_id, history_run=run_id)
                     state = self.status()
                     phase = "incomplete" if state["unavailable"] or any(
                         state["sources_by_phase"].get(k) for k in ("failed", "skipped")) else "complete"
@@ -207,7 +209,8 @@ class History:
                 client = self.collector.client
                 try:
                     await asyncio.wait_for(self.read_page(job), self.collector.param("operation_timeout_seconds"))
-                    await self.collector.download_worker(owner="history:" + run_id, history_run=run_id)
+                    if not capture_settings(self.store)["messages_first"]:
+                        await self.collector.download_worker(owner="history:" + run_id, history_run=run_id)
                 except FloodWaitError as exc:
                     with self.store.transaction():
                         self.store.set_setting("rpc_backoff_until", max(time.time() + exc.seconds,

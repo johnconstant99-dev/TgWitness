@@ -2399,7 +2399,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} повідомлення · {done} із {total} джерел",
 "{n} enabled sources. Start observation before loading history.": "{n} активних джерел. Почніть спостереження до завантаження історії.",
 "GitHub Actions capture (preview)": "Вивантаження через GitHub Actions (попередня версія)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Новий вхід у Telegram, один чат, зашифрований архів і атестація GitHub.",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "Новий вхід у Telegram, вибрані чати або дані облікового запису, зашифрований архів і підтвердження походження від GitHub.",
 "Open capture helper": "Відкрити помічник вивантаження",
 "Save your key": "Збережіть свій ключ",
 "Start the collector": "Запустити колектор",

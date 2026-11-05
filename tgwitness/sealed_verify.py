@@ -6,14 +6,15 @@ import subprocess
 import zipfile
 from pathlib import Path
 
-from .verify import verify_bundle
+from .verify import fingerprint, verify_bundle
+from .sealed_parts import load_manifest
 
 DEFAULT_POLICY = Path(__file__).with_name("sealed_policy.json")
 REPOSITORY = "phishdestroy/TgWitness"
 WORKFLOW = REPOSITORY + "/.github/workflows/sealed-collector.yml"
 
 
-def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run=subprocess.run):
+def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run=subprocess.run, max_gib=None, assembled=None):
     evidence, bundle = Path(evidence).resolve(), Path(bundle).resolve()
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repo):
         raise ValueError("Expected OWNER/REPOSITORY")
@@ -27,7 +28,7 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
     approved = None
     for release in releases:
         command = ["gh", "attestation", "verify", str(evidence), "--bundle", str(bundle),
-            "--repo", repo, "--signer-repo", REPOSITORY, "--signer-workflow", WORKFLOW,
+            "--repo", repo, "--signer-workflow", WORKFLOW,
             "--signer-digest", release["workflow_sha"], "--deny-self-hosted-runners", "--format", "json"]
         if trusted_root:
             command += ["--custom-trusted-root", str(Path(trusted_root).resolve())]
@@ -42,7 +43,15 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
         raise ValueError("GitHub attestation did not match an approved hosted collector workflow")
 
 
-    internal = verify_bundle(evidence)
+    parts = load_manifest(evidence) if evidence.suffix == ".json" else None
+    if parts:
+        evidence = Path(assembled).resolve() if assembled else evidence.with_name("evidence.zip")
+        from .sealed_parts import file_hash
+        if evidence.stat().st_size != parts["archive_bytes"] or file_hash(evidence) != parts["archive_sha256"]:
+            raise ValueError("Assembled evidence differs from the attested parts manifest")
+    internal = verify_bundle(evidence, max_gib=max_gib)
+    if parts and internal["fingerprint"] != fingerprint(parts["public_key"]):
+        raise ValueError("Multipart manifest and evidence use different signing identities")
     started, finished, accounts = [], [], []
     with zipfile.ZipFile(evidence) as archive, archive.open("events.jsonl") as incoming:
         for line in incoming:
@@ -59,6 +68,8 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
             or started[0].get("context", {}).get("repository") != repo
             or started[0].get("session_import_allowed") is not False):
         raise ValueError("Archive is not the expected fresh-session sealed capture")
+    if parts and (parts["context"] != started[0]["context"] or parts["recipient_sha256"] != started[0]["recipient_sha256"]):
+        raise ValueError("Parts manifest context differs from the signed capture")
     digest = hashlib.sha256()
     with evidence.open("rb") as incoming:
         for block in iter(lambda: incoming.read(1024**2), b""):
@@ -76,9 +87,12 @@ def main():
     parser.add_argument("--repo", required=True)
     parser.add_argument("--policy", type=Path, default=DEFAULT_POLICY)
     parser.add_argument("--trusted-root", type=Path)
+    parser.add_argument("--assembled", type=Path, help="Assembled evidence.zip for a multipart manifest (default: beside manifest)")
+    parser.add_argument("--max-gib", type=int, default=4, help="Uncompressed archive verification ceiling")
     args = parser.parse_args()
     try:
-        result = verify(args.evidence, args.bundle, args.repo, args.policy, args.trusted_root)
+        result = verify(args.evidence, args.bundle, args.repo, args.policy, args.trusted_root,
+                        max_gib=args.max_gib, assembled=args.assembled)
         print(json.dumps(result, indent=2, ensure_ascii=False))
     except Exception as exc:
         parser.exit(1, "Verification failed: " + str(exc) + "\n")

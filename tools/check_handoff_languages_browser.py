@@ -26,7 +26,7 @@ def main():
     }
     recovery_keys = {
         'paused': 'Progress is saved. Choose Resume to continue this job.',
-        'waiting': 'Saved progress is kept. When the Telegram waiting period ends, choose Resume.',
+        'waiting': 'Open Telegram on a device where you were already signed in and allow this export. Then choose Check approval. Otherwise resume after the displayed deadline. Keep this session.',
         'failed': 'Review the error below, then choose Resume to retry from saved progress.',
     }
     jobs = [{

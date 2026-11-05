@@ -2367,7 +2367,7 @@
 "{messages} messages · {done} of {total} sources": "{messages}টি বার্তা · {done}টি সম্পন্ন · {total}টি উৎস",
 "{n} enabled sources. Start observation before loading history.": "{n}টি সক্রিয় উৎস। ইতিহাস লোড করার আগে পর্যবেক্ষণ শুরু করুন।",
 "GitHub Actions capture (preview)": "GitHub Actions দিয়ে সংগ্রহ (প্রাথমিক সংস্করণ)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Telegram-এ নতুন লগইন, একটি চ্যাট, এনক্রিপ্ট করা আর্কাইভ এবং GitHub-এর উৎসের প্রমাণ।",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "Telegram-এ নতুন লগইন, নির্বাচিত চ্যাট বা অ্যাকাউন্টের তথ্য, এনক্রিপ্ট করা আর্কাইভ এবং GitHub-এর উৎসের প্রমাণ।",
 "Open capture helper": "সংগ্রহ সহায়ক খুলুন",
 "Save your key": "আপনার কী সংরক্ষণ করুন",
 "Start the collector": "সংগ্রাহক শুরু করুন",

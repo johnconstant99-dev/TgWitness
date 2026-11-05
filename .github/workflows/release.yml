@@ -60,10 +60,18 @@ jobs:
       contents: read
       security-events: write # Upload findings for the release candidate, including failures.
     uses: ./.github/workflows/security-audit.yml
+  sealed:
+    name: Validate sealed capture before publishing
+    needs: version
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/sealed-checks.yml
   portable:
     name: Publish Windows portable package
     if: github.event_name == 'release'
-    needs: [version, checks, security]
+    needs: [version, checks, security, sealed]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -88,7 +96,7 @@ jobs:
   packages:
     name: Publish source and Python wheel
     if: github.event_name == 'release'
-    needs: [version, checks, security]
+    needs: [version, checks, security, sealed]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -125,7 +133,7 @@ jobs:
         run: gh release upload "$RELEASE_TAG" dist/*.whl dist/*.whl.sha256 dist/*-source.zip dist/*-source.zip.sha256
   container:
     name: Publish verified AMD64 and ARM64 container
-    needs: [version, checks, security]
+    needs: [version, checks, security, sealed]
     runs-on: [self-hosted, Linux, X64, tgwitness-ci]
     timeout-minutes: 30
     permissions:

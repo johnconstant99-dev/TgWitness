@@ -19,6 +19,7 @@ MEDIA_TYPES = ("photo", "video", "animation", "video_note", "voice", "audio", "s
 MEDIA_DEFAULT_MB = {"photo": 20, "video": 100, "animation": 20, "video_note": 50, "voice": 20, "audio": 50,
                     "sticker": 5, "document": 50}
 MEDIA_DEFAULT_OFF = ("animation", "sticker")
+MediaAction = Literal["download", "hashes_only", "exclude"]
 
 
 class MediaRule(BaseModel):
@@ -26,25 +27,35 @@ class MediaRule(BaseModel):
     enabled: StrictBool = True
     max_mb: int = Field(default=20, ge=1, le=2000)
     max_seconds: int = Field(default=0, ge=0, le=86400)
+    action: MediaAction | None = None
 
     @model_serializer(mode="wrap")
     def serialize(self, handler):
         value = handler(self)
         if not self.max_seconds:
             value.pop("max_seconds", None)
+        if self.action is None:
+            value.pop("action", None)
         return value
 
 
 class Capture(BaseModel):
     model_config = ConfigDict(extra="forbid")
     download_media: StrictBool = True
+    include_avatars: StrictBool = True
+    media_action: MediaAction = "download"
+    oversized_media: Literal["exclude", "hashes_only"] = "exclude"
+    messages_first: StrictBool = False
     record_disabled_media: StrictBool = True
     max_media_mb: int = Field(default=20, ge=1, le=2000)
     types: dict[Literal[MEDIA_TYPES], MediaRule] = Field(default_factory=dict)
 
 
 def capture_settings(store):
-    previous = store.get_setting("capture", None)
+    return normalize_capture(store.get_setting("capture", None))
+
+
+def normalize_capture(previous):
     saved = previous or {}
     rules = saved.get("types") or {}
     legacy = saved.get("max_media_mb") if saved and "types" not in saved else None
@@ -55,9 +66,24 @@ def capture_settings(store):
         types[kind] = {"enabled": bool(rule.get("enabled", True)), "max_mb": int(rule.get("max_mb") or 20)}
         if rule.get("max_seconds"):
             types[kind]["max_seconds"] = int(rule["max_seconds"])
+        if rule.get("action"):
+            types[kind]["action"] = rule["action"]
     return {"download_media": bool(saved.get("download_media", True)),
+            "include_avatars": bool(saved.get("include_avatars", True)),
+            "media_action": saved.get("media_action", "download"),
+            "oversized_media": saved.get("oversized_media", "exclude"),
+            "messages_first": bool(saved.get("messages_first", False)),
             "record_disabled_media": bool(saved.get("record_disabled_media", True)),
             "max_media_mb": int(saved.get("max_media_mb") or CAPTURE_DEFAULTS["max_media_mb"]), "types": types}
+
+
+def media_action(settings, rule, size):
+    if not settings["download_media"] or not rule["enabled"]:
+        return "exclude"
+    action = rule.get("action") or settings.get("media_action", "download")
+    if action == "download" and size is not None and size > rule["max_mb"] * 1024**2:
+        return settings.get("oversized_media", "exclude")
+    return action
 
 
 def media_kind(message):

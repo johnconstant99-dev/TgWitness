@@ -219,6 +219,15 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             write_member("authors.csv", [authors_csv(people)])
             found = chat_indicators(scratch_path, meta, media_dir)
             write_member("verify.py", [Path(__file__).with_name("verify.py").read_bytes()])
+            for record in records(scratch_path):
+                if record.get("server_hashes") is not None:
+                    data = canonical(record["server_hashes"])
+                    digest = hashlib.sha256(data).hexdigest()
+                    if record.get("file_hash_sha256") != digest:
+                        raise ValueError("File-hash record differs from its manifest")
+                    name = "hashes/" + digest + ".json"
+                    if name not in hashes:
+                        write_member(name, [data])
             for source in attachments:
                 with source.open("rb") as incoming:
                     write_member("media/" + source.name, iter(lambda: incoming.read(1024 * 1024), b""))

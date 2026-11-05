@@ -2367,7 +2367,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} xabarlari · {total} manbadan {done} tasi",
 "{n} enabled sources. Start observation before loading history.": "{n} ta yoqilgan manba. Tarixni yuklashdan oldin kuzatuvni boshlang.",
 "GitHub Actions capture (preview)": "GitHub Actions orqali yig‘ish (dastlabki versiya)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Telegram’ga yangi kirish, bitta chat, shifrlangan arxiv va GitHub kelib chiqish tasdig‘i.",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "Telegram’ga yangi kirish, tanlangan chatlar yoki hisob ma’lumotlari, shifrlangan arxiv va GitHub manba tasdig‘i.",
 "Open capture helper": "Yig‘ish yordamchisini ochish",
 "Save your key": "Kalitingizni saqlang",
 "Start the collector": "Yig'g'ichni ishga tushiring",

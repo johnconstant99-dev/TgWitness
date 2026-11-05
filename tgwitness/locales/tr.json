@@ -2367,7 +2367,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} mesaj · {total} kaynaktan {done}'si",
 "{n} enabled sources. Start observation before loading history.": "{n} etkin kaynak. Geçmişi yüklemeden önce gözlemi başlatın.",
 "GitHub Actions capture (preview)": "GitHub Actions ile kayıt (önizleme)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Yeni bir Telegram oturumu, tek sohbet, şifrelenmiş arşiv ve GitHub köken doğrulaması.",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "Yeni bir Telegram oturumu, seçili sohbetler veya hesap verileri, şifreli arşiv ve GitHub kaynak doğrulaması.",
 "Open capture helper": "Kayıt yardımcısını aç",
 "Save your key": "Anahtarınızı kaydedin",
 "Start the collector": "Toplayıcıyı başlatın",

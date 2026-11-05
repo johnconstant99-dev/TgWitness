@@ -54,6 +54,11 @@ def main():
                            "omissions": []}
                     jobs[:] = [job]
                     route.fulfill(json=job)
+                elif path == "/api/account-export/preflight" and method == "POST":
+                    assert route.request.post_data_json['media_action']=='hashes_only'
+                    route.fulfill(json={'can_start':True,'fit':'unknown','free_disk_bytes':1073741824,
+                        'issues':[],'sample':{'messages_examined':25,'sampled_chats':1,
+                            'known_download_bytes':0,'hash_manifest_estimate_bytes':1024}})
                 elif path == "/api/account-export/synthetic-job/pause" and method == "POST":
                     jobs[0].update(phase="paused", active=False)
                     route.fulfill(json=jobs[0])
@@ -116,6 +121,10 @@ def main():
             expect(page.locator("#account-export-sections input:checked")).to_have_count(0)
             page.evaluate("accountExportDefaults(state.accountExportDefaults)")
             page.locator("#account-export-purpose").fill("Fictional preservation request")
+            page.locator('#account-export-media-action').select_option('hashes_only')
+            page.locator('#account-export-preflight').click()
+            expect(page.locator('#account-export-preflight-result')).to_contain_text('Sample: 25 messages')
+            expect(page.locator('#account-export-preflight-result')).to_contain_text('remain unknown')
             page.locator('#account-export-language').select_option('fr')
             page.locator("#account-export-from").fill("2026-01-01")
             page.locator("#account-export-through").fill("2026-01-31")
@@ -160,6 +169,7 @@ def main():
             assert starts[0]["from_utc"] == "2026-01-01T00:00:00Z"
             assert starts[0]["to_utc"] == "2026-02-01T00:00:00.000Z"
             assert starts[0]["own_messages_only"] is True
+            assert starts[0]['media_action']=='hashes_only'
             assert starts[0]["max_media_file_mib"] == 64 and starts[0]["max_total_gib"] == 8
             assert starts[0]["transport"] == "regular" and starts[0]["include_profile_photos"] is True
             assert "video" not in starts[0]["media_types"]
@@ -170,8 +180,8 @@ def main():
             expect(page.locator("#account-export-jobs")).to_contain_text("Reading Telegram")
             jobs[0].update(phase="waiting", active=False, wait_until="2099-11-02T12:00:00Z")
             page.evaluate("pollWorkspace()")
-            expect(page.locator('[data-account-export-action="resume"]')).to_have_count(0)
-            expect(page.locator('.account-export-next')).to_contain_text('When the Telegram waiting period ends')
+            expect(page.locator('[data-account-export-action="resume"]')).to_have_text('Check approval')
+            expect(page.locator('.account-export-next')).to_contain_text('allow this export')
             # An unchanged API response still needs to reveal Resume when the wait expires.
             page.evaluate("""()=>{window.realExportNow=Date.now;Date.now=()=>Date.parse('2099-11-03T12:00:00Z');}""")
             page.evaluate("pollWorkspace()")

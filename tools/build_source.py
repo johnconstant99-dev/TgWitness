@@ -11,7 +11,7 @@ CONTAINER_INPUTS = (
     "deploy/containers/resolve-packages.sh", "deploy/containers/install-packages.sh",
     *("deploy/containers/" + role + "-" + arch + ".lock"
       for role in ("runtime", "media", "build") for arch in ("x86_64", "aarch64")),
-    "deploy/media-worker/build-tesseract.sh", "deploy/media-worker/tesseract.nfpm.yaml",
+    "deploy/media-worker/build-tesseract.sh", "deploy/media-worker/fetch-sources.py", "deploy/media-worker/tesseract.nfpm.yaml",
     "deploy/media-worker/sources.lock.json",
 )
 FILES = [
@@ -27,6 +27,7 @@ FILES = [
     "integrations/webhook.schema.json", "integrations/n8n-tgwitness.json", "tools/check_webhook_example.cjs", "tools/check_privacy_js.cjs",
     "tools/check_writeonly_drafts.mjs", "deploy/constraints-mcp.txt",
     "deploy/Dockerfile.sealed", "scripts/sealed_runner.py",
+    "examples/export-hashes.json", "examples/sealed-hashes.json", "examples/sealed-account.json",
     "README.md", "docs/QUICKSTART.md", "LICENSE", "NOTICE", ".github/SECURITY.md", ".github/SUPPORT.md", ".github/CONTRIBUTING.md", "docs/CHANGELOG.md", "pyproject.toml",
     "start.py", "start.sh", "Start.cmd",
     "deploy/Dockerfile", "compose.yaml", "deploy/compose/compose.image.yaml", "deploy/compose/compose.https.yaml", "deploy/compose/compose.witness.yaml", "deploy/compose/compose.proof.yaml", "deploy/compose/compose.proxies.yaml", "deploy/compose/compose.capture-panel.yaml",

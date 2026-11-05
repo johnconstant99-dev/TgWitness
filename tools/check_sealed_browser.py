@@ -19,6 +19,8 @@ from tgwitness.sealed_package import connection, package
 from tgwitness.verify import verify_bundle
 from check_sealed_login import RecordingClient, main as check_login
 from tgwitness import api_pool
+from tools.test_file_hash_export import ExportTransport
+from tgwitness.sealed_parts import EncryptedParts
 
 
 class QuietFiles(SimpleHTTPRequestHandler):
@@ -35,6 +37,63 @@ class RunningCapsule(RunningApp):
         self.server = uvicorn.Server(uvicorn.Config(self.app, log_level="error", access_log=False,
                                                    timeout_graceful_shutdown=5))
         self.thread = threading.Thread(target=self.server.run, kwargs={"sockets": [self.sock]}, daemon=True)
+
+
+def account_capture(context, root, record):
+    from telethon.errors import TakeoutInitDelayError
+    approved = [False]
+
+    class Network(ExportTransport):
+        account_id = 44
+        async def open(self):
+            if not approved[0]:
+                raise TakeoutInitDelayError(None, capture=3600)
+
+    cfg = config(record)
+    with RunningCapsule(root, cfg) as runner:
+        runner.app.state.session.account_export.transport_factory = Network
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        try:
+            page.goto(runner.url + "/#access=" + cfg["token"])
+            expect(page.locator("#login")).to_be_visible()
+            expect(page.locator("#language")).to_have_value("en")
+            page.locator("#custom-api summary").click()
+            page.locator("#api-id").fill("123")
+            page.locator("#api-hash").fill("a" * 32)
+            page.locator("#phone").fill("+15550001111")
+            page.locator("#send-code").click()
+            page.locator("#code").fill("22222")
+            page.locator("#confirm-code").click()
+            expect(page.locator("#password-box")).to_be_visible()
+            page.locator("#password").fill("fictional-test-password")
+            page.locator("#confirm-password").click()
+            expect(page.locator("#selection")).to_be_visible()
+            expect(page.locator("#export-scope")).to_have_value("account")
+            expect(page.locator("#collect")).to_be_enabled()
+            page.locator("#export-transport").select_option("takeout")
+            page.locator("#export-format").select_option("telegram_both")
+            page.locator("#from-date").fill("2026-11-01")
+            page.locator("#through-date").fill("2026-11-04")
+            for width in (320, 390, 1440):
+                page.set_viewport_size({"width": width, "height": 1000})
+                check_layout(page)
+            page.locator("#collect").click()
+            expect(page.locator("#status")).to_contain_text("3600 seconds", timeout=15000)
+            expect(page.locator("#resume")).to_have_text("Check export approval")
+            approved[0] = True
+            page.locator("#resume").click()
+            expect(page.locator("#complete")).to_be_visible(timeout=20000)
+            expect(page.locator("#complete-summary")).to_contain_text("Export completed within the selected scope")
+            result = verify_bundle(root / "out/evidence.zip")["account_export"]
+            assert result["counts"]["messages"] == 2 and result["complete_within_scope"]
+            with zipfile.ZipFile(root / "out/evidence.zip") as z, z.open("account-export.zip") as nested, zipfile.ZipFile(nested) as a:
+                assert {"result.json", "export_results.html"} <= set(a.namelist())
+                assert not any(name.startswith("media/") for name in a.namelist())
+            assert not errors, errors
+        finally:
+            page.close()
 
 
 def custom_qr_capture(context, root, record):
@@ -61,9 +120,11 @@ def custom_qr_capture(context, root, record):
             assert candidate.options["system_lang_code"] == page.evaluate("navigator.language")
             candidate.loop.call_soon_threadsafe(candidate.scan.set)
             expect(page.locator("#selection")).to_be_visible()
+            page.locator("#export-scope").select_option("journal")
             expect(page.locator("#api-hash")).to_have_value("")
             page.locator("#refresh").click()
             expect(page.locator("#collect")).to_be_enabled()
+            page.locator("#media-action").select_option("download")
             page.locator("#collect").click()
             expect(page.locator("#complete")).to_be_visible(timeout=15000)
             assert verify_bundle(root / "out" / "evidence.zip")["events"] > 3
@@ -211,6 +272,7 @@ def main():
             capture.locator("#code").fill("12345")
             capture.locator("#confirm-code").click()
             expect(capture.locator("#selection")).to_be_visible()
+            capture.locator("#export-scope").select_option("journal")
             saved_profile = app.state.session.vault.read("credentials")["client_profile"]
             assert saved_profile["lang_code"] == "ru"
             assert saved_profile["system_lang_code"] == capture.evaluate("navigator.language")
@@ -218,6 +280,21 @@ def main():
             assert pair in api_pool.POOL
             capture.locator("#refresh").click()
             expect(capture.locator("#collect")).to_be_enabled()
+            expect(capture.locator("#media-action")).to_have_value("hashes_only")
+            capture.locator("#preflight").click()
+            expect(capture.locator("#preflight-result")).to_contain_text("Total archive size and duration remain unknown")
+            assert app.state.session.store.get_setting("capture", None) is None
+            capture.locator("#media-rules").locator("..").locator("summary").click()
+            for width in (1280, 390, 320):
+                capture.set_viewport_size({"width": width, "height": 1000})
+                check_layout(capture)
+            capture.set_viewport_size({"width": 1280, "height": 1000})
+            capture.locator("#language").select_option("en")
+            capture.screenshot(path=str(screenshots / "runner-hash-settings.png"), full_page=True, animations="disabled")
+            capture.locator("#media-rules").locator("..").locator("summary").click()
+            capture.screenshot(path=str(screenshots / "runner-hash-preflight.png"), full_page=True, animations="disabled")
+            capture.locator("#language").select_option("ru")
+            capture.locator("#media-action").select_option("download")
             capture.locator("#collect").click()
             expect(capture.locator("#status")).to_contain_text("Сбор завершён", timeout=15000)
             assert not capture.evaluate("sessionStorage.getItem('sealed-access')")
@@ -236,7 +313,20 @@ def main():
             with zipfile.ZipFile(delivery) as archive:
                 assert archive.read("evidence.zip") == (root / "out" / "evidence.zip").read_bytes()
             assert verify_bundle(root / "out" / "evidence.zip")["events"] > 3
+            part_output = root / "browser-parts"
+            part_output.mkdir()
+            with EncryptedParts(part_output, app.state.session.vault, cfg, part_bytes=8192) as outgoing:
+                with (root / "out/evidence.zip").open("rb") as incoming:
+                    for block in iter(lambda: incoming.read(1024**2), b""):
+                        outgoing.write(block)
+            with page.expect_download() as part_download:
+                page.locator("#result-file").set_input_files(part_output / "delivery-000001.tgwsealed")
+            assert part_download.value.suggested_filename == "evidence.zip.part000001"
+            saved_part = root / part_download.value.suggested_filename
+            part_download.value.save_as(saved_part)
+            assert saved_part.read_bytes() == (root / "out/evidence.zip").read_bytes()[:8192]
             custom_qr_capture(context, root / "custom-capture", record)
+            account_capture(context, root / "account-capture", record)
             with RunningApp(root / "workspace-demo", demo=True) as workspace:
                 panel=context.new_page()
                 panel.on("pageerror", lambda error: errors.append(str(error)))

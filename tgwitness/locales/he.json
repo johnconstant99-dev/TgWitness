@@ -2383,7 +2383,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} הודעות · {done} מתוך {total} מקורות",
 "{n} enabled sources. Start observation before loading history.": "{n} מקורות מופעלים. התחל את התצפית לפני טעינת ההיסטוריה.",
 "GitHub Actions capture (preview)": "איסוף באמצעות GitHub Actions (גרסה מקדימה)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "כניסה חדשה ל־Telegram, צ׳אט אחד, ארכיון מוצפן ואישור מקור של GitHub.",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "כניסה חדשה ל-Telegram, צ׳אטים נבחרים או נתוני החשבון, ארכיון מוצפן ואישור מקור מ-GitHub.",
 "Open capture helper": "פתיחת עוזר האיסוף",
 "Save your key": "שמור את המפתח שלך",
 "Start the collector": "הפעל את האספן",

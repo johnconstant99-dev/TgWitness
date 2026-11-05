@@ -85,6 +85,11 @@ Two ways to use it: [export your account](docs/ACCOUNT-EXPORT.md) once, or
 Pick a few chats, a Telegram folder or the whole account. Each account gets its
 own workspace, session and signing key.
 
+[Export settings](docs/EXPORT_HASHES.md) cover regular API and Takeout acquisition,
+message history before attachments, file downloads or server hashes, and compatible
+Telegram Desktop JSON/HTML views. GitHub capture supports an account or a selected
+chat, records partial results at its deadline, and splits large encrypted deliveries.
+
 ## Built for the rest of the investigation
 
 <picture>

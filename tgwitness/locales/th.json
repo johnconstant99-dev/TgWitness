@@ -2351,7 +2351,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} ข้อความ · {done} จาก {total} แหล่ง",
 "{n} enabled sources. Start observation before loading history.": "มีแหล่งข้อมูลที่เปิดใช้งาน {n} แหล่ง เริ่มการสังเกตการณ์ก่อนโหลดประวัติ",
 "GitHub Actions capture (preview)": "รวบรวมผ่าน GitHub Actions (รุ่นทดลอง)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "เข้าสู่ระบบ Telegram ใหม่ หนึ่งแชต ไฟล์เก็บถาวรที่เข้ารหัส และหลักฐานแหล่งที่มาจาก GitHub",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "เข้าสู่ระบบ Telegram ใหม่ แชตที่เลือกหรือข้อมูลบัญชี ไฟล์เก็บถาวรที่เข้ารหัส และหลักฐานแหล่งที่มาจาก GitHub",
 "Open capture helper": "เปิดตัวช่วยรวบรวม",
 "Save your key": "บันทึกกุญแจของคุณ",
 "Start the collector": "เริ่มทำงานของตัวเก็บข้อมูล",

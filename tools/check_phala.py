@@ -582,7 +582,8 @@ def test_the_panel_wizard_prices_deploys_and_deletes_a_phala_cvm(phala, tmp_path
     assert job["result"]["provider"] == "phala" and job["result"]["panel"] == "https://" + posted["host"]
     assert any(line["text"].startswith("[PASS] Intel vouches for the quote") for line in job["lines"]), job["lines"]
     listed = jobs.status()["deployments"]
-    assert listed[0]["attested"] is True and listed[0]["provider"] == "phala"
+    assert listed[0]["attested"] is False and listed[0]["provider"] == "phala"
+    assert listed[0]["attestation_status"] == "incomplete", "The synthetic OS image was not verified"
     assert listed[0]["price"] == {"monthly": "44.37", "hourly": "0.06078", "currency": "USD"}
     path, media = jobs.file("cvm-1", "docker-compose.yaml")
     assert path.read_text() == json.loads(world.app_compose)["docker_compose_file"]
@@ -643,12 +644,14 @@ def test_the_wizard_in_the_browser_offers_deploys_and_deletes_a_phala_cvm(phala,
         page.locator("#cloud-create").click()
         expect(page.locator("#cloud-job-title")).to_have_text("The server is ready", timeout=30000)
         expect(page.locator("#cloud-stages")).to_contain_text("Phala Cloud confidential virtual machine")
-        expect(page.locator("#cloud-outcome")).to_contain_text("Intel's attestation matched this deployment")
+        expect(page.locator("#cloud-outcome")).to_contain_text("Intel TDX verification is incomplete or needs review")
+        expect(page.locator("#cloud-outcome")).not_to_contain_text("Intel's attestation matched this deployment")
         expect(page.locator("#cloud-outcome")).to_contain_text(posted["host"])
         name = jobs.status()["deployments"][0]["name"]
         page.locator("#cloud-servers").evaluate("details => details.open = true")
         row = page.locator(".cloud-server", has_text=name)
-        expect(row).to_contain_text("Intel TDX confidential virtual machine at Phala Cloud")
+        expect(row).to_contain_text("Intel TDX verification is incomplete or needs review")
+        expect(row).not_to_contain_text("Intel's attestation shows which code runs")
         expect(row).to_contain_text("44.37 USD a month (0.06078 USD an hour), billed by Phala Cloud")
         row.get_by_role("button", name="Delete the server").click()
         answer_panel_dialog(page, text=name)
@@ -669,6 +672,34 @@ def test_the_wizard_in_the_browser_offers_deploys_and_deletes_a_phala_cvm(phala,
         page.locator("#cloud-wizard").screenshot(path=str(output / "wizard-phala-ru.png"))
         browser.close()
     assert not errors, errors
+
+
+def test_provider_name_never_substitutes_for_verified_attestation(tmp_path):
+    from tgwitness.cloud_wizard import Jobs
+    folder = tmp_path / "deployments" / "synthetic-cvm"
+    folder.mkdir(parents=True)
+    path = folder / "deployment.json"
+    jobs = Jobs(tmp_path)
+    names = ("tdx_binding", "tdx_quote", "tdx_compose_hash", "tdx_compose", "tdx_identity", "tdx_os")
+
+    def check(checks, expected, *, state="running"):
+        record = {"name": "synthetic-cvm", "provider": "phala", "state": state,
+                  "collector": {"attestation": checks}}
+        path.write_text(json.dumps(record), encoding="utf-8")
+        result, = jobs.deployments()
+        assert result["attestation_status"] == expected
+        assert result["attested"] is (expected == "verified")
+
+    good = [{"check": name, "status": "pass"} for name in names]
+    check(None, "incomplete")
+    check([], "incomplete")
+    check(good[:-1], "incomplete")
+    check(good, "verified")
+    check(good, "failed", state="failed: synthetic verification failure")
+    for name in names:
+        for status, expected in (("fail", "failed"), ("unavailable", "incomplete"), ("review", "review")):
+            check([{"check": item["check"], "status": status if item["check"] == name else "pass"}
+                   for item in good], expected)
 
 
 if __name__ == "__main__":

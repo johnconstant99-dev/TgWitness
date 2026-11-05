@@ -1,7 +1,7 @@
 FROM cgr.dev/chainguard/wolfi-base@sha256:fd50bd0cdeb808cf4f45c9c9189e0cc7f7fcc27195d69abd6622c80527e7e021 AS ocr-build
 COPY deploy/containers /build/containers
 RUN sh /build/containers/install-packages.sh build
-COPY deploy/media-worker/build-tesseract.sh deploy/media-worker/tesseract.nfpm.yaml deploy/media-worker/sources.lock.json /build/ocr/
+COPY deploy/media-worker/build-tesseract.sh deploy/media-worker/fetch-sources.py deploy/media-worker/tesseract.nfpm.yaml deploy/media-worker/sources.lock.json /build/ocr/
 RUN sh /build/ocr/build-tesseract.sh
 
 FROM cgr.dev/chainguard/wolfi-base@sha256:fd50bd0cdeb808cf4f45c9c9189e0cc7f7fcc27195d69abd6622c80527e7e021

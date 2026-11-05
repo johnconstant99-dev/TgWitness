@@ -2351,7 +2351,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} 消息 · {total} 个来源中的第 {done} 个",
 "{n} enabled sources. Start observation before loading history.": "{n} 个已启用的来源。在加载历史记录前开始观察。",
 "GitHub Actions capture (preview)": "通过 GitHub Actions 采集（预览版）",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "新建 Telegram 登录会话、一个聊天、加密归档和 GitHub 来源证明。",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "全新 Telegram 登录、所选聊天或账号数据、加密归档及 GitHub 来源证明。",
 "Open capture helper": "打开采集助手",
 "Save your key": "保存您的密钥",
 "Start the collector": "启动收集器",

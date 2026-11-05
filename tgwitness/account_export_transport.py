@@ -8,6 +8,7 @@ from telethon.extensions import BinaryReader
 from telethon.tl import functions as f, types as t
 
 from .scope import kind_of
+from . import file_hashes
 
 SECRET_FIELDS = frozenset({"access_hash", "file_reference", "auth_key", "api_hash", "session", "string_session",
                            "token", "password", "secret", "hash", "takeout_id", "future_auth_token"})
@@ -68,6 +69,11 @@ class WrappedClient:
 
     def __getattr__(self, name):
         value = getattr(self._export_client, name)
+        # Connection management belongs to the real TelegramClient. Rebinding
+        # these methods breaks Telethon's class-level DC configuration/cache,
+        # and incorrectly wraps authorization export requests in Takeout.
+        if name in ("_get_dc", "_borrow_exported_sender", "_return_exported_sender", "_get_cdn_client"):
+            return value
         return functools.partial(value.__func__, self) if inspect.ismethod(value) else value
 
 
@@ -93,11 +99,15 @@ class Transport:
             kinds = self.options["chat_kinds"]
             files = bool(self.options["media_types"] or self.options["include_profile_photos"]
                          or self.options["include_stories"] or self.options["include_other_data"])
+            hashes = (self.options.get("media_action") == "hashes_only"
+                      or "hashes_only" in self.options.get("media_actions", {}).values()
+                      or any(rule.get("action") == "hashes_only" for rule in self.options.get("media_rules", {}).values())
+                      or self.options.get("oversized_media") == "hashes_only")
             result = await self.collector.client(f.account.InitTakeoutSessionRequest(
                 contacts=self.options["include_contacts"], message_users=bool({"private", "bot"} & set(kinds)),
                 message_chats="group" in kinds, message_megagroups=bool({"group", "supergroup"} & set(kinds)),
                 message_channels="channel" in kinds, files=files,
-                file_max_size=self.options["max_media_file_mib"] * 1024**2 if files else None))
+                file_max_size=(4096 if hashes else self.options["max_media_file_mib"]) * 1024**2 if files else None))
             self.secret["takeout_id"] = takeout = result.id
             self.secret["generation"] = self.secret.get("generation", 0) + 1
             self.save()
@@ -130,7 +140,7 @@ class Transport:
             if not ranges:
                 ranges = [None]
         elif self.options["transport"] == "regular":
-            if {"group", "supergroup", "channel"} & set(self.options["chat_kinds"]):
+            if not self.options["chat_ids"] and {"group", "supergroup", "channel"} & set(self.options["chat_kinds"]):
                 gaps.append("Regular API export cannot enumerate left channels and supergroups.")
             if self.options["include_contacts"]:
                 gaps.append("Regular API contacts include Telegram users, not the complete saved phone contact list.")
@@ -142,6 +152,7 @@ class Transport:
                 cid = utils.get_peer_id(entity)
                 self.peers[cid] = utils.get_input_peer(entity)
                 row = chats.setdefault(cid, {"id": cid, "title": dialog.name, "kind": kind_of(entity) or "private",
+                    "username": getattr(entity, "username", None),
                     "archived": getattr(dialog, "folder_id", None) == 1, "left": False, "ranges": []})
                 if index not in row["ranges"]:
                     row["ranges"].append(index)
@@ -153,6 +164,7 @@ class Transport:
                     cid = utils.get_peer_id(entity)
                     self.peers[cid] = utils.get_input_peer(entity)
                     chats.setdefault(cid, {"id": cid, "title": getattr(entity, "title", str(cid)),
+                        "username": getattr(entity, "username", None),
                         "kind": kind_of(entity) or "channel", "archived": False, "left": True,
                         "ranges": [len(ranges) - 1]})
                 offset += len(result.chats)
@@ -332,47 +344,65 @@ class Transport:
     async def download(self, media, stream, progress, task):
         client = self.ranged(task)
         if isinstance(media, t.InputTakeoutFileLocation):
-            return await client.download_file(media, file=stream, progress_callback=progress)
+            await client.download_file(media, file=stream, progress_callback=progress)
+            # Telethon returns None when writing a supplied stream, including
+            # successful writes. The bounded writer accounts for actual bytes.
+            return stream if stream.total else None
         try:
             return await client.download_media(media, file=stream, progress_callback=progress)
         except (errors.FileReferenceExpiredError, errors.FilerefUpgradeNeededError):
-            category, message_id = task["category"], task.get("message_id")
-            if any(isinstance(a, t.DocumentAttributeCustomEmoji) for a in getattr(media, "attributes", [])):
-                result = await client(f.messages.GetCustomEmojiDocumentsRequest([media.id]))
-                refreshed = next((d for d in result if d.id == media.id), None)
-            elif task.get("source") == "profile_music":
-                refreshed, offset = None, 0
-                while True:
-                    result = await client(f.users.GetSavedMusicRequest(t.InputUserSelf(), offset, 100, 0))
-                    documents = getattr(result, "documents", [])
-                    refreshed = next((d for d in documents if d.id == media.id), None)
-                    if refreshed is not None or len(documents) < 100:
-                        break
-                    offset += len(documents)
-            elif category == "messages" and message_id:
-                peer = self.peers[task["chat_id"]]
-                request = f.channels.GetMessagesRequest(utils.get_input_channel(peer), [t.InputMessageID(message_id)]) \
-                    if isinstance(peer, t.InputPeerChannel) else f.messages.GetMessagesRequest([t.InputMessageID(message_id)])
-                result = await client(request)
-                source = next((m for m in result.messages if m.id == message_id), None)
-                refreshed = getattr(source, "media", None)
-            elif category == "stories" and message_id:
-                result = await client(f.stories.GetStoriesByIDRequest(t.InputPeerSelf(), [message_id]))
-                source = next((s for s in result.stories if s.id == message_id), None)
-                refreshed = getattr(source, "media", None)
-            elif category == "profile_photos" and message_id:
-                result = await client(f.photos.GetUserPhotosRequest(t.InputUserSelf(), 0, message_id + 1, 1))
-                refreshed = next((p for p in result.photos if p.id == message_id), None)
-            else:
-                raise
-            def identity(value):
-                item = getattr(value, "document", None) or getattr(value, "photo", None) or value
-                return type(item).__name__, getattr(item, "id", None), getattr(item, "size", None)
-            refreshed = next((item for item in attachments(refreshed) if identity(item) == identity(media)), None)
-            if refreshed is None:
-                raise ValueError("Attachment changed or became unavailable while refreshing its file reference.")
+            refreshed = await self.refresh_media(media, task)
             stream.reset()
             return await client.download_media(refreshed, file=stream, progress_callback=progress)
+
+    async def hashes(self, media, task):
+        client = self.ranged(task)
+        try:
+            return await file_hashes.collect(client, media)
+        except (errors.FileReferenceExpiredError, errors.FilerefUpgradeNeededError):
+            refreshed = await self.refresh_media(media, task)
+            if file_hashes.representation(refreshed) != file_hashes.representation(media):
+                raise ValueError("Refreshed file-hash representation changed.") from None
+            return await file_hashes.collect(client, refreshed)
+
+    async def refresh_media(self, media, task):
+        client = self.ranged(task)
+        category, message_id = task["category"], task.get("message_id")
+        if any(isinstance(a, t.DocumentAttributeCustomEmoji) for a in getattr(media, "attributes", [])):
+            result = await client(f.messages.GetCustomEmojiDocumentsRequest([media.id]))
+            refreshed = next((d for d in result if d.id == media.id), None)
+        elif task.get("source") == "profile_music":
+            refreshed, offset = None, 0
+            while True:
+                result = await client(f.users.GetSavedMusicRequest(t.InputUserSelf(), offset, 100, 0))
+                documents = getattr(result, "documents", [])
+                refreshed = next((d for d in documents if d.id == media.id), None)
+                if refreshed is not None or len(documents) < 100:
+                    break
+                offset += len(documents)
+        elif category == "messages" and message_id:
+            peer = self.peers[task["chat_id"]]
+            request = f.channels.GetMessagesRequest(utils.get_input_channel(peer), [t.InputMessageID(message_id)]) \
+                if isinstance(peer, t.InputPeerChannel) else f.messages.GetMessagesRequest([t.InputMessageID(message_id)])
+            result = await client(request)
+            source = next((m for m in result.messages if m.id == message_id), None)
+            refreshed = getattr(source, "media", None)
+        elif category == "stories" and message_id:
+            result = await client(f.stories.GetStoriesByIDRequest(t.InputPeerSelf(), [message_id]))
+            source = next((s for s in result.stories if s.id == message_id), None)
+            refreshed = getattr(source, "media", None)
+        elif category == "profile_photos" and message_id:
+            result = await client(f.photos.GetUserPhotosRequest(t.InputUserSelf(), 0, message_id + 1, 1))
+            refreshed = next((p for p in result.photos if p.id == message_id), None)
+        else:
+            raise ValueError("No source is available to refresh this file reference.")
+        def identity(value):
+            item = getattr(value, "document", None) or getattr(value, "photo", None) or value
+            return type(item).__name__, getattr(item, "id", None), getattr(item, "size", None)
+        refreshed = next((item for item in attachments(refreshed) if identity(item) == identity(media)), None)
+        if refreshed is None:
+            raise ValueError("Attachment changed or became unavailable while refreshing its file reference.")
+        return refreshed
 
     async def finish(self, success):
         if self.secret.get("takeout_id"):

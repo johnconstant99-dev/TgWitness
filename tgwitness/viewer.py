@@ -63,6 +63,11 @@ def journal_item(event, raw_records=False):
         item["f"] = {k: v for k, v in (("sha", payload["media_sha256"]), ("mime", payload.get("mime_type")),
                                        ("size", payload.get("size")), ("name", payload.get("original_name")))
                      if v not in (None, "")}
+    if kind == "media.hashed" and isinstance(payload.get("server_hashes"), dict):
+        hashes = payload["server_hashes"]
+        item["fh"] = {"sha": hashlib.sha256(report.canonical(hashes)).hexdigest(),
+                      "bytes": hashes.get("covered_bytes"), "ranges": len(hashes.get("ranges", [])),
+                      "name": payload.get("original_name"), "variant": (hashes.get("representation") or {}).get("variant")}
     if item["c"] not in ("message", "edited", "media"):
         # Operational records: their facts without the saved Telegram object.
         facts = {k: v for k, v in payload.items() if k != "raw"}

@@ -2444,7 +2444,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} сообщений · {done} из {total} источников",
 "{n} enabled sources. Start observation before loading history.": "Источники с поддержкой {n}. Начните наблюдение до загрузки истории.",
 "GitHub Actions capture (preview)": "Сбор данных с помощью GitHub Actions (предварительный просмотр)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Новый аккаунт в Telegram, один чат, зашифрованный архив и информация о происхождении из GitHub.",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "Новый вход в Telegram, выбранные чаты или данные аккаунта, зашифрованный архив и подтверждение происхождения от GitHub.",
 "Open capture helper": "Помощник по открытому сбору данных",
 "Save your key": "Сохраните свой ключ",
 "Start the collector": "Запустите сборщик",

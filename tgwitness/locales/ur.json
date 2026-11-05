@@ -2367,7 +2367,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} پیغامات · {total} میں سے {done} ذرائع",
 "{n} enabled sources. Start observation before loading history.": "{n} فعال ذرائع۔ تاریخ لوڈ کرنے سے پہلے مشاہدہ شروع کریں۔",
 "GitHub Actions capture (preview)": "GitHub Actions سے محفوظ کریں (ابتدائی نسخہ)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Telegram میں نیا لاگ ان، ایک چیٹ، خفیہ کردہ آرکائیو اور GitHub سے ماخذ کی تصدیق۔",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "Telegram میں نیا لاگ اِن، منتخب چیٹس یا اکاؤنٹ کا ڈیٹا، مرموز آرکائیو اور GitHub سے ماخذ کی تصدیق۔",
 "Open capture helper": "محفوظ کرنے کا معاون کھولیں",
 "Save your key": "اپنی کلید محفوظ کریں",
 "Start the collector": "کلیکٹر شروع کریں",

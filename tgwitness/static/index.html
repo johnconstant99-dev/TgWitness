@@ -451,6 +451,7 @@
       <p class="muted">Every accessible chat and its full visible history are selected by default. Observation sources are separate from this export.</p>
       <p class="hint">For a personal backup, describe that purpose. You can prepare a separate sharing copy after the export finishes.</p>
       <div class="export-language"><label for="account-export-language">Report language</label><select id="account-export-language" data-no-translate></select><p class="hint">Report labels use this language. Original messages stay unchanged.</p></div>
+      <div class="export-language"><label for="account-export-format">Export format</label><select id="account-export-format"><option value="tgwitness">TgWitness signed archive</option><option value="telegram_json">Telegram Desktop compatible JSON</option><option value="telegram_html">Telegram Desktop compatible HTML</option><option value="telegram_both">Telegram Desktop compatible JSON and HTML</option></select><p class="hint">Compatible views include the signed source records and file hash references. TgWitness generates these views; Telegram Desktop does not.</p></div>
       <div class="account-export-purpose"><label for="account-export-purpose">Collection purpose</label><textarea id="account-export-purpose" rows="2" maxlength="1000" required placeholder="Why this account snapshot is being collected"></textarea><p class="hint">The purpose is included in the signed export. Describe the specific investigation or request.</p><button class="secondary account-export-preset" id="account-export-minimize" type="button">Minimize collection</button><p class="hint">Turns off media and optional account data. Chat and sender filters remain yours to set.</p></div>
       <fieldset class="account-export-fieldset"><legend>Chats</legend>
         <div class="account-export-choices" id="account-export-kinds" tabindex="-1">
@@ -463,7 +464,12 @@
         <details class="account-export-message-filters"><summary>Filter by sender or message text</summary><div class="account-export-fields account-export-content-filters"><div><label for="account-export-senders">Sender IDs</label><textarea id="account-export-senders" rows="2" placeholder="Leave blank for all senders"></textarea><p class="hint">Numeric IDs separated by commas or spaces.</p></div><div><label for="account-export-phrases">Text contains</label><textarea id="account-export-phrases" rows="2" placeholder="One literal phrase per line"></textarea><p class="hint">A message matches any phrase. This is literal text, not a regular expression.</p></div></div></details>
       </fieldset>
       <fieldset class="account-export-fieldset"><legend>History dates</legend><div class="account-export-fields"><div><label for="account-export-from">From date (UTC)</label><input id="account-export-from" type="date"></div><div><label for="account-export-through">Through date (UTC)</label><input id="account-export-through" type="date"></div></div><p class="hint">Leave both blank for full visible history. Dates include the whole selected day in UTC.</p></fieldset>
-      <fieldset class="account-export-fieldset"><legend>Media</legend><div class="account-export-choices" id="account-export-media">
+      <fieldset class="account-export-fieldset"><legend>Media</legend>
+      <div class="account-export-fields"><div><label for="account-export-media-action">For selected media</label><select id="account-export-media-action"><option value="download">Download files</option><option value="hashes_only">Save server hashes only</option><option value="exclude">Keep message metadata only</option></select></div><div><label for="account-export-oversized">Files above the size limit</label><select id="account-export-oversized"><option value="exclude">Skip file bytes</option><option value="hashes_only">Save server hashes only</option></select></div></div>
+      <div class="account-export-fields"><div><label for="account-export-budget-action">When the media budget is exhausted</label><select id="account-export-budget-action"><option value="hashes_only">Save server hashes only</option><option value="stop_files">Stop file downloads and record missing files</option></select></div></div>
+      <p class="hint">Server hashes describe byte ranges of a specific file or photo size. Hash-only mode does not download the file. Unavailable or incomplete hashes are recorded explicitly.</p>
+      <details><summary>Different action for each media type</summary><div class="account-export-fields" id="account-export-media-actions"></div></details>
+      <div class="account-export-choices" id="account-export-media">
         <label><input type="checkbox" value="photo" checked> Photos</label><label><input type="checkbox" value="video" checked> Videos</label>
         <label><input type="checkbox" value="video_message" checked> Video messages</label><label><input type="checkbox" value="voice" checked> Voice messages</label>
         <label><input type="checkbox" value="audio" checked> Audio</label><label><input type="checkbox" value="document" checked> Documents</label>
@@ -478,6 +484,8 @@
       <fieldset class="account-export-fieldset"><legend>Telegram transport</legend><div class="account-export-fields"><div><label for="account-export-transport">Acquisition method</label><select id="account-export-transport"><option value="takeout">Telegram Takeout session</option><option value="regular">Regular session</option></select></div></div><p class="hint">Takeout may have a delay or be unavailable for this account. Choose regular explicitly if you want to use the ordinary session.</p></fieldset>
       </details>
       <p class="account-export-preview" id="account-export-preview" role="status"></p>
+      <button class="secondary" id="account-export-preflight" type="button">Check settings and size</button>
+      <p class="account-export-preview" id="account-export-preflight-result" role="status">The check reads a small message sample without downloading files. Final size and time may remain unknown.</p>
       <div class="account-export-dialog-actions"><button class="quiet" id="account-export-dismiss" type="button">Keep settings for later</button><button class="primary" id="account-export-start" type="submit">Start account export</button></div>
     </form>
   </dialog>
@@ -531,7 +539,7 @@
   </div>
   <section class="card padded" data-mode-anchor data-mode-feature="github_capture" id="sealed-capture-option">
     <h2>GitHub Actions capture (preview)</h2>
-    <p>A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.</p>
+    <p>A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.</p>
     <button class="primary" id="export-sealed" data-open="sealed" type="button">Open capture helper</button>
   </section>
   </details>

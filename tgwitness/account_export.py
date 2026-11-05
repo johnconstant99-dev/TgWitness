@@ -6,6 +6,7 @@ HTML is an escaped readable derivative. No new Telegram authorization is created
 """
 import asyncio
 import base64
+import errno
 import hashlib
 import json
 import os
@@ -13,6 +14,7 @@ import re
 import secrets
 import shutil
 import sqlite3
+import tempfile
 import time
 import zipfile
 from datetime import datetime, timezone
@@ -25,12 +27,12 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from telethon import errors
 from telethon.tl import types
 
-from . import account_export_transport as transport, account_report
+from . import account_export_transport as transport, account_report, file_hashes, account_attachment_cache
 from .evidence import producer
 from .monitoring import MediaRule
 from .security import private_write
 from .store import ZERO, canonical, utcnow
-from .verify import fingerprint
+from .verify import fingerprint, validate_server_hashes
 from .workers import complete_in_thread
 
 KINDS = ("private", "bot", "group", "supergroup", "channel")
@@ -48,6 +50,8 @@ LIMITATIONS = [
 class AccountExportOptions(BaseModel):
     model_config = ConfigDict(extra="forbid")
     transport: Literal["takeout", "regular"] = "takeout"
+    messages_first: bool = True
+    export_format: Literal["tgwitness", "telegram_json", "telegram_html", "telegram_both"] = "tgwitness"
     chat_kinds: list[Literal[KINDS]] = Field(default_factory=lambda: list(KINDS), max_length=len(KINDS))
     chat_ids: list[int] = Field(default_factory=list, max_length=10000)
     sender_ids: list[int] = Field(default_factory=list, max_length=10000)
@@ -60,9 +64,13 @@ class AccountExportOptions(BaseModel):
     own_messages_only: bool = False
     include_archived: bool = True
     media_types: list[Literal[MEDIA]] = Field(default_factory=lambda: list(MEDIA), max_length=len(MEDIA))
+    media_action: Literal["download", "hashes_only", "exclude"] = "download"
+    media_actions: dict[Literal[MEDIA], Literal["download", "hashes_only", "exclude"]] = Field(default_factory=dict)
+    oversized_media: Literal["exclude", "hashes_only"] = "exclude"
     max_media_file_mib: int = Field(default=512, ge=1, le=4096)
     media_rules: dict[Literal[MEDIA], MediaRule] = Field(default_factory=dict)
     max_total_gib: int = Field(default=16, ge=1, le=1024)
+    budget_exhausted: Literal["stop_files", "hashes_only"] = "hashes_only"
     include_profile: bool = True
     include_contacts: bool = True
     include_profile_photos: bool = False
@@ -176,16 +184,60 @@ def media_info(media):
         kind = "photo"
         sizes = [getattr(p, "size", None) or max(getattr(p, "sizes", None) or [0]) for p in item.sizes]
         size = max(sizes or [0]) or None
-    for attribute in getattr(item, "attributes", []):
-        if isinstance(attribute, types.DocumentAttributeVideo):
-            kind = "video_message" if attribute.round_message else "video"
-        elif isinstance(attribute, types.DocumentAttributeAudio):
-            kind = "voice" if attribute.voice else "audio"
-        elif isinstance(attribute, types.DocumentAttributeAnimated):
-            kind = "animation"
-        elif isinstance(attribute, (types.DocumentAttributeSticker, types.DocumentAttributeCustomEmoji)):
-            kind = "sticker"
+    # Attributes are an unordered set of capabilities. Animated MP4s and video
+    # stickers also carry a video attribute; its position must not change which
+    # exclusion or byte limit applies. Match the Capture engine's precedence.
+    attributes = getattr(item, "attributes", [])
+    if any(isinstance(a, types.DocumentAttributeVideo) and a.round_message for a in attributes):
+        kind = "video_message"
+    elif any(isinstance(a, types.DocumentAttributeAudio) and a.voice for a in attributes):
+        kind = "voice"
+    elif any(isinstance(a, (types.DocumentAttributeSticker, types.DocumentAttributeCustomEmoji)) for a in attributes):
+        kind = "sticker"
+    elif any(isinstance(a, types.DocumentAttributeAnimated) for a in attributes):
+        kind = "animation"
+    elif any(isinstance(a, types.DocumentAttributeVideo) for a in attributes):
+        kind = "video"
+    elif any(isinstance(a, types.DocumentAttributeAudio) for a in attributes):
+        kind = "audio"
     return {"kind": kind, "media_id": getattr(item, "id", None), "expected_bytes": size}
+
+
+def attachment_policy(media, task, options):
+    """Decide from observed metadata; this performs no Telegram requests."""
+    info = media_info(media)
+    representation = file_hashes.representation(media)
+    if representation:
+        info["representation"] = representation
+    limit = options["max_media_file_mib"] * 1024**2
+    category = task["category"]
+
+    def excluded(reason):
+        return {**info, "outcome": "excluded", "reason": reason}, "exclude", limit
+
+    if category in ("messages", "stories") and info["kind"] not in options["media_types"]:
+        return excluded("media_type_not_selected")
+    rule = options.get("media_rules", {}).get(info["kind"], {}) if category in ("messages", "stories") else {}
+    action = options.get("media_actions", {}).get(info["kind"], rule.get("action") or options.get("media_action", "download"))
+    if category == "other_data":
+        action = "download"
+    if action == "exclude":
+        return excluded("media_policy")
+    if rule:
+        if not rule.get("enabled", True):
+            return excluded("media_type_not_selected")
+        limit = min(limit, rule["max_mb"] * 1024**2)
+        if rule.get("max_seconds"):
+            item = getattr(media, "document", None) or media
+            duration = next((a.duration for a in getattr(item, "attributes", []) if hasattr(a, "duration")), None)
+            if duration is None or not 0 <= duration <= rule["max_seconds"]:
+                return excluded("duration_limit")
+    if action == "download" and info["expected_bytes"] is not None and info["expected_bytes"] > limit:
+        if options.get("oversized_media") == "hashes_only" and category != "other_data":
+            action = "hashes_only"
+        else:
+            return excluded("per_file_limit")
+    return info, action, limit
 
 
 class AccountExport:
@@ -196,6 +248,7 @@ class AccountExport:
             raise ValueError("Account-export storage must not be a filesystem link.")
         self.root.mkdir(mode=0o700, exist_ok=True)
         self.task, self.current, self.index = None, None, None
+        self.packaging_copies, self.record_bytes = 1, 0
         self.transport_factory = transport.Transport  # replaced by deterministic fake transports in tests
 
     def directory(self, job_id):
@@ -204,7 +257,7 @@ class AccountExport:
         path = self.root / job_id
         if linked(self.root) or linked(path) or path.resolve().parent != self.root.resolve():
             raise ValueError("Account-export path is outside its storage directory.")
-        for name in ("data", "receipts", "media"):
+        for name in ("data", "receipts", "media", "history-pages", "attachment-queue", "attachment-results"):
             child = path / name
             if linked(child) or child.resolve().parent != path.resolve():
                 raise ValueError("Account-export working directories must not be filesystem links.")
@@ -261,6 +314,10 @@ class AccountExport:
 
     async def start(self, options):
         options = AccountExportOptions.model_validate(options).model_dump()
+        from .export_preflight import assess
+        assessment = assess(options, shutil.disk_usage(self.root).free)
+        if not assessment["can_start"]:
+            raise ValueError(" ".join(item["message"] for item in assessment["issues"] if item["severity"] == "error"))
         if self.busy():
             raise ValueError("An account export is already running. Pause it first.")
         if options["transport"] == "takeout":
@@ -293,7 +350,7 @@ class AccountExport:
             self.store.append("account_export.started", {"job_id": job_id, "options_sha256": job["options_sha256"],
                 "account_id": account, "meaning": "selected visible account data; resumable acquisition"})
             self.task = asyncio.create_task(self.run(job))
-            self.task.add_done_callback(lambda _: self.collector.release_export(job_id))
+            self.task.add_done_callback(lambda done: self.collector.release_export(job_id) if self.task is done else None)
         except BaseException:
             self.collector.release_export(job_id)
             raise
@@ -301,10 +358,85 @@ class AccountExport:
 
     async def pause(self, job_id):
         self.directory(job_id)
-        if self.busy() and self.current["id"] == job_id:
-            self.task.cancel()
+        if self.task and self.current and self.current["id"] == job_id:
+            if not self.task.done():
+                self.task.cancel()
             await asyncio.gather(self.task, return_exceptions=True)
+            self.task = None
+            self.collector.release_export(job_id)
         return self.public(job_id)
+
+    async def finish(self, job_id, reason="Stopped before acquisition completed."):
+        """Start offline finalization without holding an HTTP request for a large ZIP."""
+        from .account_finalization import finalize
+        await self.pause(job_id)
+        if self.busy():
+            raise ValueError("Another account export is running.")
+        directory = self.directory(job_id)
+        job = self.verify_signed(read_json(directory / "job.json"))
+        if sha(canonical(job["options"])) != job["options_sha256"]:
+            raise ValueError("The saved export options have changed.")
+        self.current = self.public(job_id)
+        if self.current.get("ready"):
+            return self.current
+        if not self.collector.reserve_export(job_id):
+            raise ValueError("The account is busy. Pause its current task first.")
+        self.current.update(phase="packaging", options=job["options"], account_id=job["account_id"], error=None)
+        try:
+            self.persist()
+        except BaseException:
+            self.collector.release_export(job_id)
+            raise
+
+        async def finish_saved():
+            try:
+                await complete_in_thread(finalize, self, job, reason)
+            except asyncio.CancelledError:
+                if not self.current.get("ready"):
+                    self.current.update(phase="paused", error="Finalization interrupted. Saved pages are retained.")
+                    self.persist()
+                raise
+            except Exception as exc:
+                self.current.update(phase="failed", error=str(exc) if isinstance(exc, ValueError) else type(exc).__name__)
+                self.persist()
+            finally:
+                if self.index:
+                    self.index.close()
+                    self.index = None
+                self.collector.release_export(job_id)
+        self.task = asyncio.create_task(finish_saved())
+        self.task.add_done_callback(lambda done: self.collector.release_export(job_id) if self.task is done else None)
+        return self.public()
+
+    async def finalize_partial(self, job_id, reason="Stopped before acquisition completed."):
+        """Wait for offline finalization before a disposable runner revokes the login."""
+        state = await self.finish(job_id, reason)
+        if not state.get("ready"):
+            await asyncio.shield(self.task)
+            state = self.public(job_id)
+        if not state.get("ready"):
+            raise ValueError(state.get("error") or "The preserved export could not be finalized.")
+        return state
+
+    def complete(self):
+        coverage = self.current.get("coverage", {})
+        return bool(coverage.get("inventory_complete") and not coverage.get("failures")
+                    and coverage.get("tasks_done") == coverage.get("tasks_total"))
+
+    def packaging_reserve(self, extra_records=0, extra_media=0):
+        acquisition = (self.current or {}).get("acquisition", {})
+        records = max(acquisition.get("bytes_preserved", 0), getattr(self, "record_bytes", 0)) + extra_records
+        media = getattr(self, "counts", {}).get("unique_media_bytes", 0) + getattr(self, "pending_bytes", 0) + extra_media
+        # Includes escaped HTML, JSON views and an additional outer encrypted copy
+        # on disposable runners. This is a reserve, not a final-size prediction.
+        return 256 * 1024**2 + getattr(self, "packaging_copies", 1) * (16 * records + media)
+
+    def storage_pressure(self, extra_records=0, extra_media=0):
+        return shutil.disk_usage(self.root).free < self.packaging_reserve(extra_records, extra_media)
+
+    def ensure_storage(self, extra_records=0):
+        if self.storage_pressure(extra_records):
+            raise OSError(errno.ENOSPC, "Free disk is reserved for finishing the archive.")
 
     async def resume(self, job_id):
         if self.busy():
@@ -329,11 +461,11 @@ class AccountExport:
                         await network.open()
                         if network.account_id != job["account_id"]:
                             raise ValueError("The connected account differs from this export's signed account.")
-                        await network.finish(True)
+                        await network.finish(self.complete())
                     except (errors.RPCError, OSError, ConnectionError, TimeoutError):
                         raise ValueError("The saved archive is retained, but Telegram Takeout finalization failed. Reconnect and retry.") from None
                     self.current["error"] = None
-                self.current.update(phase="partial" if self.current.get("coverage", {}).get("failures") else "done",
+                self.current.update(phase="done" if self.complete() else "partial",
                                     wait_until=None, delay_seconds=None)
                 self.persist()
                 self.collector.release_export(job_id)
@@ -344,7 +476,7 @@ class AccountExport:
             await complete_in_thread(self.recover, job)
             self.persist()
             self.task = asyncio.create_task(self.run(job))
-            self.task.add_done_callback(lambda _: self.collector.release_export(job_id))
+            self.task.add_done_callback(lambda done: self.collector.release_export(job_id) if self.task is done else None)
         except BaseException as exc:
             try:
                 if recovering:
@@ -376,9 +508,15 @@ class AccountExport:
         self.index = sqlite3.connect(index_path, check_same_thread=False)
         self.index.execute("DROP TABLE IF EXISTS seen")
         self.index.execute("CREATE TABLE seen (chat INTEGER, message INTEGER, PRIMARY KEY(chat,message))")
+        self.index.execute("DROP TABLE IF EXISTS stored_media")
+        self.index.execute("CREATE TABLE stored_media (sha256 TEXT PRIMARY KEY, bytes INTEGER NOT NULL)")
         self.progress, self.receipts, self.head = {}, [], ZERO
         self.counts = dict(records=0, messages=0, messages_exported=0, messages_seen=0,
-                           media_saved=0, media_skipped=0, bytes_saved=0)
+                           media_saved=0, media_hashed=0, media_skipped=0, bytes_saved=0, unique_media_bytes=0)
+        self.attachment_cache = {}
+        self.attachment_cache_bytes = 0
+        self.record_bytes = 0
+        self.pending_bytes, self.pending_media = 0, set()
         self.failures = 0
         inventory_path = directory / "inventory.json"
         if not inventory_path.exists():
@@ -437,6 +575,7 @@ class AccountExport:
         self.update_counts()
 
     def count_row(self, row, directory, verify=False):
+        self.record_bytes += len(canonical(row)) + 1
         self.counts["records"] += 1
         if row["category"] == "messages":
             try:
@@ -446,18 +585,43 @@ class AccountExport:
             self.counts["messages"] += 1
             self.counts["messages_exported"] += 1
         for attachment in row.get("attachments", []):
+            if attachment.get("server_hashes") is not None:
+                validate_server_hashes(attachment["server_hashes"])
             if attachment["outcome"] == "saved":
                 digest = attachment["sha256"]
                 if not re.fullmatch(r"[a-f0-9]{64}", digest) or attachment["file"] != "media/" + digest:
                     raise ValueError("Invalid attachment content path.")
                 path = directory / attachment["file"]
-                if verify and (path.is_symlink() or path.stat().st_size != attachment["bytes"] or file_sha(path) != digest):
+                recorded = self.index.execute("SELECT 1 FROM stored_media WHERE sha256=?", (digest,)).fetchone()
+                if verify and (path.is_symlink() or path.stat().st_size != attachment["bytes"] or not recorded and file_sha(path) != digest):
                     raise ValueError("A captured attachment changed after it was signed.")
                 self.counts["media_saved"] += 1
                 self.counts["bytes_saved"] += attachment["bytes"]
+                inserted = self.index.execute("INSERT OR IGNORE INTO stored_media VALUES (?,?)", (digest, attachment["bytes"]))
+                if inserted.rowcount:
+                    self.counts["unique_media_bytes"] += attachment["bytes"]
+            elif attachment["outcome"] == "hashed":
+                if attachment.get("server_hashes", {}).get("status") != "complete":
+                    raise ValueError("Hash-only attachment has incomplete coverage.")
+                self.counts["media_hashed"] += 1
             else:
                 self.counts["media_skipped"] += 1
                 self.failures += attachment["outcome"] == "failed"
+            if attachment.get("representation") and attachment["outcome"] in ("saved", "hashed"):
+                self.cache_attachment(attachment)
+
+    def cache_attachment(self, attachment):
+        key = (canonical(attachment["representation"]), attachment["outcome"])
+        size = len(canonical(attachment))
+        if size > 8 * 1024**2:
+            return
+        previous = self.attachment_cache.pop(key, None)
+        self.attachment_cache_bytes = getattr(self, "attachment_cache_bytes", 0) - (len(canonical(previous)) if previous else 0)
+        while self.attachment_cache and (len(self.attachment_cache) >= 512 or self.attachment_cache_bytes + size > 8 * 1024**2):
+            removed = self.attachment_cache.pop(next(iter(self.attachment_cache)))
+            self.attachment_cache_bytes -= len(canonical(removed))
+        self.attachment_cache[key] = attachment
+        self.attachment_cache_bytes += size
 
     def accept(self, envelope):
         receipt = envelope["statement"]
@@ -497,10 +661,11 @@ class AccountExport:
             try:
                 return await call()
             except errors.FloodWaitError as exc:
-                self.current.update(phase="waiting", wait_until=time.time() + exc.seconds, delay_seconds=exc.seconds)
+                self.current.update(phase="waiting", wait_until=time.time() + exc.seconds, delay_seconds=exc.seconds,
+                                    wait_reason="rate_limit")
                 self.persist()
                 await asyncio.sleep(exc.seconds + 1)
-                self.current.update(phase="running", wait_until=None, delay_seconds=None)
+                self.current.update(phase="running", wait_until=None, delay_seconds=None, wait_reason=None)
             except (OSError, ConnectionError, TimeoutError, errors.ServerError):
                 if attempt == 5:
                     raise
@@ -509,30 +674,56 @@ class AccountExport:
         raise ConnectionError("Telegram remains rate limited; resume later.")
 
     async def attachment(self, media, task, network, directory, options):
-        info = media_info(media)
-        limit = options["max_media_file_mib"] * 1024**2
-        category = task["category"]
-        if category in ("messages", "stories") and info["kind"] not in options["media_types"]:
-            return {**info, "outcome": "excluded", "reason": "media_type_not_selected"}
-        rule = options.get("media_rules", {}).get(info["kind"], {}) if category in ("messages", "stories") else {}
-        if rule:
-            if not rule.get("enabled", True):
-                return {**info, "outcome": "excluded", "reason": "media_type_not_selected"}
-            limit = min(limit, rule["max_mb"] * 1024**2)
-            if rule.get("max_seconds"):
-                item = getattr(media, "document", None) or media
-                duration = next((a.duration for a in getattr(item, "attributes", []) if hasattr(a, "duration")), None)
-                if duration is None or not 0 <= duration <= rule["max_seconds"]:
-                    return {**info, "outcome": "excluded", "reason": "duration_limit"}
-        if info["expected_bytes"] is not None and info["expected_bytes"] > limit:
-            return {**info, "outcome": "excluded", "reason": "per_file_limit"}
-        remaining = options["max_total_gib"] * 1024**3 - self.counts["bytes_saved"] - self.pending_bytes
-        if remaining <= 0 or info["expected_bytes"] and info["expected_bytes"] > remaining:
-            return {**info, "outcome": "failed", "reason": "total_budget"}
+        info, action, limit = attachment_policy(media, task, options)
+        representation = info.get("representation")
+        if action == "exclude":
+            return info
+        cached = self.attachment_cache.get((canonical(representation), "hashed" if action == "hashes_only" else "saved")) if representation else None
+        if cached is None:
+            cached = account_attachment_cache.read(self, representation, "hashed" if action == "hashes_only" else "saved")
+        if cached:
+            if cached["outcome"] == "saved":
+                path = directory / cached["file"]
+                if path.is_symlink() or not path.is_file() or path.stat().st_size != cached["bytes"]:
+                    raise ValueError("Cached attachment changed after capture.")
+                recorded = self.index and self.index.execute("SELECT 1 FROM stored_media WHERE sha256=?", (cached["sha256"],)).fetchone()
+                if not hasattr(self, "pending_media"):
+                    self.pending_media = set()
+                if not recorded and cached["sha256"] not in self.pending_media:
+                    self.pending_bytes += cached["bytes"]
+                    self.pending_media.add(cached["sha256"])
+            return {**cached, "reused": True}
+        remaining = options["max_total_gib"] * 1024**3 - self.counts.get("unique_media_bytes", self.counts["bytes_saved"]) - self.pending_bytes
+        budget_full = remaining <= 0 or info["expected_bytes"] and info["expected_bytes"] > remaining
+        disk_full = (hasattr(self, "root") and self.storage_pressure(extra_media=min(limit, remaining, info["expected_bytes"] or limit)))
+        if action == "download" and (budget_full or disk_full):
+            if options.get("budget_exhausted") == "hashes_only" and task["category"] != "other_data":
+                action = "hashes_only"
+                info["download_skipped_reason"] = "total_budget" if budget_full else "packaging_reserve"
+                cached = account_attachment_cache.read(self, representation, "hashed")
+                if cached:
+                    return {**cached, "reused": True, "download_skipped_reason": info["download_skipped_reason"]}
+            else:
+                return {**info, "outcome": "failed", "reason": "total_budget" if budget_full else "packaging_reserve"}
+        if action == "hashes_only":
+            try:
+                hashes = await self.retry(lambda: network.hashes(media, task))
+                validate_server_hashes(hashes)
+                result = {**info, "outcome": "hashed" if hashes["status"] == "complete" else "failed",
+                          "reason": "hashes_only" if hashes["status"] == "complete" else hashes.get("reason", "hashes_unavailable"),
+                          "server_hashes": hashes}
+                if result["outcome"] == "hashed" and representation:
+                    account_attachment_cache.save(self, result)
+                    self.cache_attachment(result)
+                return result
+            except errors.TakeoutInvalidError:
+                raise
+            except (errors.RPCError, ValueError) as exc:
+                return {**info, "outcome": "failed", "reason": "hashes_unavailable", "error": type(exc).__name__}
         temporary = directory / "media" / ("pending-" + secrets.token_hex(8))
         try:
             async def progress(current, total):
-                if max(current, total) > min(limit, remaining):
+                if max(current, total if total is not None else current) > min(limit, remaining):
                     raise ValueError("attachment_size_limit")
             async def download_once():
                 if shutil.disk_usage(directory).free < min(limit, remaining, info["expected_bytes"] or 1024**2) + 64 * 1024**2:
@@ -564,13 +755,22 @@ class AccountExport:
             else:
                 temporary.replace(target)
                 sync_directory(target.parent)
-            self.pending_bytes += size
-            return {**info, "outcome": "saved", "file": "media/" + digest, "sha256": digest, "bytes": size}
-        except errors.TakeoutFileEmptyError:
-            return {**info, "outcome": "excluded", "reason": "no_additional_data"}
+            if not hasattr(self, "pending_media"):
+                self.pending_media = set()
+            recorded = self.index and self.index.execute("SELECT 1 FROM stored_media WHERE sha256=?", (digest,)).fetchone()
+            if not recorded and digest not in self.pending_media:
+                self.pending_bytes += size
+                self.pending_media.add(digest)
+            result = {**info, "outcome": "saved", "file": "media/" + digest, "sha256": digest, "bytes": size}
+            if representation:
+                account_attachment_cache.save(self, result)
+                self.cache_attachment(result)
+            return result
         except errors.TakeoutInvalidError:
             raise  # Resume must renew the transport, not sign an expired session as an attachment failure.
         except (errors.RPCError, ValueError) as exc:
+            if isinstance(exc, errors.RPCError) and getattr(exc, "message", None) == "TAKEOUT_FILE_EMPTY":
+                return {**info, "outcome": "excluded", "reason": "no_additional_data"}
             return {**info, "outcome": "failed", "reason": type(exc).__name__ if isinstance(exc, errors.RPCError) else str(exc)}
         finally:
             temporary.unlink(missing_ok=True)
@@ -636,8 +836,12 @@ class AccountExport:
                 await complete_in_thread(self.recover, job)
             elif hasattr(network, "validate_inventory"):
                 await self.retry(lambda: network.validate_inventory(self.inventory))
-            self.current.update(phase="running", error=None, wait_until=None)
+            self.current.update(phase="running", error=None, wait_until=None, delay_seconds=None, wait_reason=None)
             self.persist()
+            if options.get("messages_first", False):
+                from .account_acquisition import StagedTransport
+                network = StagedTransport(network, self, job)
+                await network.prepare()
             for task in self.inventory["tasks"]:
                 previous = self.progress.get(task["id"])
                 if previous and previous["terminal"]:
@@ -648,7 +852,8 @@ class AccountExport:
                     self.seal(job, task, cursor, cursor, True, [], 0, utcnow(), "failed", task["discovery_error"])
                     continue
                 while True:
-                    started, self.pending_bytes = utcnow(), 0
+                    self.ensure_storage()
+                    started, self.pending_bytes, self.pending_media = utcnow(), 0, set()
                     try:
                         page, after, terminal = await self.retry(lambda: network.page(task, cursor))
                         if not terminal and after == cursor:
@@ -673,7 +878,8 @@ class AccountExport:
                                 row.setdefault("attachments", []).extend([await self.attachment(item, {**task, "message_id": row.get("id")},
                                     network, directory, options) for item in media])
                             rows.append(row)
-                        self.seal(job, task, cursor, after, terminal, rows, len(page), started)
+                        self.seal(job, task, cursor, after, terminal, rows, getattr(page, "seen_count", len(page)),
+                                  getattr(page, "started", started))
                     except errors.TakeoutInvalidError:
                         raise
                     except errors.RPCError as exc:
@@ -694,13 +900,13 @@ class AccountExport:
             self.current.update(phase="packaging", current_chat=None)
             self.persist()
             await complete_in_thread(self.package, job)
-            self.current.update(phase="partial" if self.current["coverage"]["failures"] else "done", ready=True)
+            self.current.update(phase="done" if self.complete() else "partial", ready=True)
             self.persist()
             try:
-                await self.retry(lambda: network.finish(True))
+                await self.retry(lambda: network.finish(self.complete()))
             except (errors.RPCError, OSError, ConnectionError, TimeoutError):
                 self.current["error"] = "Export saved; Telegram Takeout finalization could not be confirmed."
-            self.current.update(phase="partial" if self.current["coverage"]["failures"] else "done", wait_until=None)
+            self.current.update(phase="done" if self.complete() else "partial", wait_until=None)
             self.persist()
             self.store.append("account_export.completed", {"job_id": job["job_id"], "receipt_head_sha256": self.head,
                 "counts": self.counts, "complete_within_scope": self.current["phase"] == "done"})
@@ -712,18 +918,21 @@ class AccountExport:
             self.persist()
         except errors.TakeoutInitDelayError as exc:
             self.current.update(phase="waiting", wait_until=time.time() + exc.seconds,
-                                delay_seconds=exc.seconds, error="Telegram requires a Takeout waiting period. Resume after it ends.")
+                                delay_seconds=exc.seconds, wait_reason="takeout_approval",
+                                error=None)
             self.persist()
         except asyncio.CancelledError:
             if self.current.get("ready"):
-                self.current.update(phase="partial" if self.current["coverage"]["failures"] else "done",
+                self.current.update(phase="done" if self.complete() else "partial",
                                     error="Archive saved; Telegram Takeout finalization may still be pending.")
             else:
                 self.current.update(phase="paused", error=None)
             self.persist()
             raise
         except (OSError, ConnectionError, TimeoutError) as exc:
-            self.current.update(phase="paused", error=type(exc).__name__ + ": resume from the last sealed page.")
+            space = isinstance(exc, OSError) and exc.errno == errno.ENOSPC
+            self.current.update(phase="paused", error="Free disk is reserved for finishing the archive. Free space to resume, "
+                "or finish with saved data." if space else type(exc).__name__ + ": resume from the last sealed page.")
             self.persist()
         except Exception as exc:
             self.current.update(phase="failed", error=str(exc) if isinstance(exc, ValueError) else type(exc).__name__)
@@ -732,13 +941,15 @@ class AccountExport:
             if self.index:
                 self.index.close()
                 self.index = None
+            self.collector.release_export(job["job_id"])
 
     def package(self, job):
         directory = self.directory(job["job_id"])
         out, final = directory / "export.zip.part", directory / "export.zip"
         hashes = {}
         try:
-            with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED, allowZip64=True) as archive:
+            with tempfile.SpooledTemporaryFile(max_size=1024**2, dir=directory) as hash_index, \
+                    zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED, allowZip64=True) as archive:
                 def write(name, chunks):
                     digest = hashlib.sha256()
                     entry = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
@@ -758,6 +969,7 @@ class AccountExport:
                 write("job.json", chunks(directory / "job.json"))
                 write("inventory.json", chunks(directory / "inventory.json"))
                 media = set()
+                hash_manifests = set()
                 message_pages = {}
                 chat_counts = {}
                 captured_from = captured_until = None
@@ -777,9 +989,21 @@ class AccountExport:
                         chat_counts[receipt["chat_id"]] = chat_counts.get(receipt["chat_id"], 0) + receipt["count"]
                     with (directory / receipt["data_file"]).open("rb") as stream:
                         for raw in stream:
-                            for attachment in json.loads(raw).get("attachments", []):
+                            row = json.loads(raw)
+                            for index, attachment in enumerate(row.get("attachments", [])):
                                 if attachment["outcome"] == "saved":
                                     media.add(attachment["file"])
+                                if attachment.get("server_hashes"):
+                                    body = canonical(attachment["server_hashes"])
+                                    name = "hashes/" + sha(body) + ".json"
+                                    if name not in hash_manifests:
+                                        write(name, [body])
+                                        hash_manifests.add(name)
+                                    hash_index.write(canonical({"category": row["category"], "chat_id": row.get("chat_id"),
+                                        "message_id": row.get("id"), "attachment_index": index, "manifest": name}) + b"\n")
+                if hash_manifests:
+                    hash_index.seek(0)
+                    write("hashes/index.jsonl", iter(lambda: hash_index.read(1024**2), b""))
                 for name in sorted(media):
                     write(name, chunks(directory / name))
                     if hashes[name] != name.removeprefix("media/"):
@@ -790,12 +1014,11 @@ class AccountExport:
                     "archive_reference": job["job_id"], "requested_at": job["created_at"],
                     "captured_from": captured_from, "captured_until": captured_until,
                     "options": job["options"], "counts": self.current["counts"], "coverage": self.current["coverage"],
-                    "complete_within_scope": not self.current["coverage"]["failures"],
+                    "complete_within_scope": self.complete(),
                     "omissions": [*self.inventory.get("gaps", []), *self.current.get("omissions", [])],
                     "fingerprint": fingerprint(self.vault.public_key), "limitations": LIMITATIONS}
                 analytics = account_report.snapshot_analytics.Analytics("snapshot")
                 for chat in selected:
-                    name = "chats/" + str(chat["id"]) + ".html"
                     def message_rows(chat=chat):
                         for data_file in message_pages.get(chat["id"], ()):
                             with (directory / data_file).open("rb") as stream:
@@ -805,11 +1028,25 @@ class AccountExport:
                     for row in message_rows():
                         analytics.snapshot(row, chat)
                         chat_analytics.snapshot(row, chat)
-                    write(name, account_report.account_chat({**report_context, "analytics": account_report.snapshot_analytics.project(chat_analytics.result(), report_context["presentation"])}, chat, message_rows()))
+                    context = {**report_context, "analytics": account_report.snapshot_analytics.project(chat_analytics.result(), report_context["presentation"])}
+                    display_chat = {**chat, "message_count": chat_counts.get(chat["id"], 0)}
+                    for name, content in account_report.account_chat_pages(context, display_chat, message_rows):
+                        write(name, content)
                 report_context["analytics"] = account_report.snapshot_analytics.project(analytics.result(), report_context["presentation"])
                 write("analytics.json", [canonical(report_context["analytics"])])
                 write("index.html", account_report.account_index(report_context,
                     ({**chat, "message_count": chat_counts.get(chat["id"], 0)} for chat in selected)))
+                if job["options"].get("export_format", "tgwitness") != "tgwitness":
+                    from .telegram_export import DesktopExport
+                    desktop = DesktopExport(directory, self.inventory, self.receipts, job, self.current["coverage"])
+                    try:
+                        if job["options"]["export_format"] in ("telegram_json", "telegram_both"):
+                            write("result.json", desktop.json())
+                        if job["options"]["export_format"] in ("telegram_html", "telegram_both"):
+                            for name, content in desktop.html():
+                                write(name, content)
+                    finally:
+                        desktop.close()
                 write("README.txt", [("TgWitness account export\n\n" + "\n".join(LIMITATIONS)
                     + "\n\nVerify using verify.py from a trusted checkout, with --fingerprint TRUSTED_SHA256.\n"
                     + "data/*.jsonl are authoritative; receipts bind each page to frozen options and inventory.\n"
@@ -820,8 +1057,8 @@ class AccountExport:
                     "report_language": report_context["report_language"],
                     "fingerprint": fingerprint(self.vault.public_key), "job_id": job["job_id"], "account_id": job["account_id"],
                     "options": job["options"], "options_sha256": job["options_sha256"], "inventory_sha256": self.inventory_hash,
-                    "created_at": job["created_at"], "completed_at": utcnow(), "status": "partial" if self.current["coverage"]["failures"] else "done",
-                    "complete_within_scope": not self.current["coverage"]["failures"], "coverage": self.current["coverage"],
+                    "created_at": job["created_at"], "completed_at": utcnow(), "status": "done" if self.complete() else "partial",
+                    "complete_within_scope": self.complete(), "coverage": self.current["coverage"],
                     "counts": self.current["counts"], "receipt_count": len(self.receipts), "receipt_head_sha256": self.head,
                     "files": hashes, "limitations": LIMITATIONS, "producer": producer(),
                     "case_assessment": account_report.case_assessment.snapshot(report_context)}

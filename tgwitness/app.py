@@ -2328,6 +2328,13 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             body.report_presentation = presentation(report.saved(app.state.store))
         return await operation(app.state.account_export.start, body.model_dump())
 
+    @app.post("/api/account-export/preflight", dependencies=[Depends(authenticate)])
+    async def account_export_preflight(body: AccountExportOptions, sample: bool = True):
+        from .export_preflight import preview
+        async def inspect_settings():
+            return await preview(app.state.account_export, body.model_dump(), sample=sample)
+        return await operation(inspect_settings)
+
     @app.get("/api/account-export/{export_id}", dependencies=[Depends(authenticate)])
     async def account_export_status(export_id: str):
         try:
@@ -2345,6 +2352,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.post("/api/account-export/{export_id}/resume", dependencies=[Depends(authenticate)])
     async def account_export_resume(export_id: str):
         return await operation(app.state.account_export.resume, export_id)
+
+    @app.post("/api/account-export/{export_id}/finish", dependencies=[Depends(authenticate)])
+    async def account_export_finish(export_id: str):
+        return await operation(app.state.account_export.finish, export_id)
 
     account_downloads = {}
     app.state.account_downloads = account_downloads

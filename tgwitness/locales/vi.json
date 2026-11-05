@@ -2351,7 +2351,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} tin nhắn · {done} trong số {total} nguồn",
 "{n} enabled sources. Start observation before loading history.": "Có {n} nguồn đã được kích hoạt. Vui lòng bắt đầu quá trình quan sát trước khi tải lịch sử.",
 "GitHub Actions capture (preview)": "Thu thập qua GitHub Actions (bản xem trước)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Đăng nhập Telegram mới, một cuộc trò chuyện, tệp lưu trữ được mã hóa và chứng thực nguồn gốc GitHub.",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "Đăng nhập Telegram mới, các cuộc trò chuyện được chọn hoặc dữ liệu tài khoản, tệp lưu trữ được mã hóa và chứng thực nguồn gốc từ GitHub.",
 "Open capture helper": "Mở trợ lý thu thập",
 "Save your key": "Lưu khóa của quý vị",
 "Start the collector": "Khởi động trình thu thập",

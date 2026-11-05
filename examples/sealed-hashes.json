@@ -1,0 +1,20 @@
+{
+  "chat_id": -1001004276399,
+  "capture": {
+    "download_media": true,
+    "media_action": "hashes_only",
+    "oversized_media": "hashes_only",
+    "include_avatars": false,
+    "messages_first": true,
+    "types": {
+      "photo": {"enabled": true, "max_mb": 20},
+      "video": {"enabled": true, "max_mb": 100},
+      "animation": {"enabled": false, "max_mb": 20},
+      "video_note": {"enabled": true, "max_mb": 50},
+      "voice": {"enabled": true, "max_mb": 20},
+      "audio": {"enabled": true, "max_mb": 50},
+      "sticker": {"enabled": false, "max_mb": 5},
+      "document": {"enabled": true, "max_mb": 50}
+    }
+  }
+}

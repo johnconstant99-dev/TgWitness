@@ -2351,7 +2351,7 @@
 "{messages} messages · {done} of {total} sources": "{messages} mesej · {done} daripada {total} sumber",
 "{n} enabled sources. Start observation before loading history.": "{n} sumber yang diaktifkan. Mulakan pemerhatian sebelum memuatkan sejarah.",
 "GitHub Actions capture (preview)": "Pengumpulan melalui GitHub Actions (pratonton)",
-"A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "Log masuk Telegram baharu, satu sembang, arkib disulitkan dan bukti asal GitHub.",
+"A fresh Telegram login, selected chats or account data, an encrypted archive and GitHub provenance.": "Log masuk Telegram baharu, sembang terpilih atau data akaun, arkib disulitkan dan bukti asal daripada GitHub.",
 "Open capture helper": "Buka pembantu pengumpulan",
 "Save your key": "Simpan kunci anda",
 "Start the collector": "Mulakan pengumpul",

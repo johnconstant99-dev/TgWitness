@@ -48,6 +48,42 @@ DRAND_CHECK_LIMIT = 100
 GATEWAY_FIELDS = ("at", "name", "type", "rcode", "decision", "colo")
 
 
+def validate_server_hashes(value):
+    """Validate claimed range coverage, not Telegram origin or absent payloads."""
+    if (not isinstance(value, dict) or value.get("format") != "telegram-file-hashes-v1"
+            or value.get("algorithm") != "sha256"
+            or value.get("status") not in ("complete", "partial", "unavailable")
+            or type(value.get("downloaded_bytes")) is not int or value["downloaded_bytes"] != 0):
+        raise ValueError("Invalid Telegram file-hash manifest")
+    ranges, size, covered = value.get("ranges"), value.get("expected_bytes"), value.get("covered_bytes")
+    if (not isinstance(ranges, list) or len(ranges) > 65536 or type(covered) is not int or covered < 0
+            or size is not None and (type(size) is not int or size <= 0)):
+        raise ValueError("Invalid file-hash coverage")
+    info = value.get("representation")
+    if info is not None and (not isinstance(info, dict) or info.get("kind") not in ("photo", "document")
+            or type(info.get("id")) is not int or not isinstance(info.get("variant"), str)
+            or info.get("bytes") != size or any(key in info for key in ("access_hash", "file_reference"))):
+        raise ValueError("Invalid file-hash representation")
+    offset = 0
+    for part in ranges:
+        if (not isinstance(part, dict) or type(part.get("offset")) is not int
+                or type(part.get("length")) is not int or part["offset"] != offset
+                or not 0 < part["length"] < 2**31 or not isinstance(part.get("sha256"), str)
+                or not re.fullmatch(r"[a-f0-9]{64}", part["sha256"])
+                or size is None or offset >= size):
+            raise ValueError("Invalid, overlapping or discontinuous file-hash range")
+        offset = min(size, offset + part["length"])
+    if covered != offset:
+        raise ValueError("File-hash coverage differs from recorded ranges")
+    if value["status"] == "complete" and (not info or size is None or offset != size or not ranges):
+        raise ValueError("Incomplete file hashes claim complete coverage")
+    if value["status"] == "partial" and (not info or size is None or not 0 < offset < size):
+        raise ValueError("Invalid partial file-hash coverage")
+    if value["status"] == "unavailable" and (offset or ranges):
+        raise ValueError("Unavailable file hashes claim covered bytes")
+    return value
+
+
 def open_archive(path, max_gib=None):
     limit = MAX_UNCOMPRESSED_GIB if max_gib is None else max_gib
     if type(limit) not in (int, float) or not math.isfinite(limit) or limit <= 0:
@@ -1038,6 +1074,12 @@ def verify_events(events, public_key):
         if event["hash"] != calculated:
             raise ValueError("Changed content at event " + str(count))
         key.verify(base64.b64decode(event["signature"], validate=True), bytes.fromhex(calculated))
+        if event["kind"] == "media.hashed":
+            payload = event["payload"]
+            validate_server_hashes(payload.get("server_hashes"))
+            if (payload["server_hashes"]["status"] != "complete" or payload.get("downloaded_bytes") != 0
+                    or payload.get("media_sha256") is not None):
+                raise ValueError("A hash-only record incorrectly claims downloaded file content")
         previous = calculated
     return {"events": count, "head_hash": previous, "fingerprint": fingerprint(public_key)}
 
@@ -1725,8 +1767,8 @@ def verify_board_document(path, expected_fingerprint=None, evidence=None):
             "annotations_checked": bool(evidence), "meaning": "Team opinions; signature authenticates the signed document, not the truth of a conclusion"}
 
 
-def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None, check_drand=False):
-    with open_archive(path) as archive:
+def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None, check_drand=False, max_gib=None):
+    with open_archive(path, max_gib=max_gib) as archive:
         names = archive.namelist()
         manifest = read_manifest(archive)
         if not is_format(manifest["format"], "evidence-v1"):
@@ -1753,10 +1795,24 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
             raise ValueError("The report seal describes a different journal")
         companions = report_companions(archive, manifest, public, describes)
         observed, outside = Coverage(), OutsideRecords()
+        hash_files, account_exports = set(), []
 
         def measured(lines):
             for line in lines:
                 event = json.loads(line)
+                if event["kind"] == "sealed.account_export":
+                    item = event["payload"]
+                    if (account_exports or item.get("file") != "account-export.zip"
+                            or manifest["files"].get(item["file"]) != item.get("sha256")
+                            or archive.getinfo(item["file"]).file_size != item.get("bytes")):
+                        raise ValueError("Sealed account export differs from its journal binding")
+                    account_exports.append(item)
+                if event["kind"] == "media.hashed":
+                    digest = hashlib.sha256(canonical(event["payload"].get("server_hashes"))).hexdigest()
+                    name = "hashes/" + digest + ".json"
+                    if manifest["files"].get(name) != digest:
+                        raise ValueError("File-hash manifest differs from the signed journal")
+                    hash_files.add(name)
                 media = media_reference(event)
                 if media:
                     digest, size = media
@@ -1770,6 +1826,17 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
                 yield event
         with archive.open("events.jsonl") as stream:
             result = verify_events(measured(bounded_lines(stream)), public)
+        if {name for name in manifest["files"] if name.startswith("hashes/")} != hash_files:
+            raise ValueError("Unreferenced journal file-hash manifest")
+        if ("account-export.zip" in manifest["files"]) != bool(account_exports):
+            raise ValueError("Unbound sealed account export")
+        if account_exports:
+            with archive.open("account-export.zip") as incoming:
+                account = verify_account_export(incoming, fp, max_gib=max_gib)
+            binding = account_exports[0]
+            if account["job_id"] != binding["job_id"] or account["complete_within_scope"] != binding["complete_within_scope"]:
+                raise ValueError("Account export coverage differs from its journal binding")
+            result["account_export"] = account
         if result["events"] != manifest["event_count"] or result["head_hash"] != manifest["head_hash"]:
             raise ValueError("Manifest does not match journal")
         result["coverage"] = observed.result()
@@ -1938,14 +2005,25 @@ def check_attachments(archive, manifest):
     for name, digest in files.items():
         if name.startswith("media/") and name[len("media/"):] != digest:
             raise ValueError("Attachment name differs from its SHA-256: " + name)
-    referenced = 0
+    referenced, hash_files = 0, set()
     for message in chat_messages(archive):
+        if message.get("server_hashes") is not None:
+            hashes = message["server_hashes"]
+            validate_server_hashes(hashes)
+            digest = hashlib.sha256(canonical(hashes)).hexdigest()
+            name = "hashes/" + digest + ".json"
+            if (message.get("file_hash_sha256") != digest or files.get(name) != digest or message.get("file")
+                    or message.get("file_status") == "hashes_only" and hashes["status"] != "complete"):
+                raise ValueError("Chat file-hash reference or completeness mismatch")
+            hash_files.add(name)
         name = message.get("file")
         if name is None:
             continue
         if not isinstance(name, str) or files.get(name) is None or files[name] != message.get("file_sha256"):
             raise ValueError("Message #" + str(message.get("id")) + " names an attachment missing from the archive")
         referenced += 1
+    if {name for name in files if name.startswith("hashes/")} != hash_files:
+        raise ValueError("Unreferenced chat file-hash manifest")
     return referenced
 
 
@@ -2131,6 +2209,8 @@ def verify_account_export(path, expected_fingerprint=None, max_gib=None):
                 receipts.append((int(found[1]), name))
         receipts.sort()
         counts = dict.fromkeys(("records", "messages", "media_saved", "media_skipped", "bytes_saved"), 0)
+        media_hashed = 0
+        hash_manifests, hash_index = set(), hashlib.sha256()
         seen = sqlite3.connect(Path(temporary) / "seen.sqlite3")
         seen.execute("CREATE TABLE messages (chat INTEGER, id INTEGER, PRIMARY KEY (chat, id)) WITHOUT ROWID")
         data_files, media_files, failed_attachments, failed_pages, messages_seen = set(), set(), 0, 0, 0
@@ -2208,8 +2288,18 @@ def verify_account_export(path, expected_fingerprint=None, max_gib=None):
                         attachments = record.get("attachments", [])
                         if not isinstance(attachments, list):
                             raise ValueError("Invalid account export attachments")
-                        for attachment in attachments:
+                        for attachment_index, attachment in enumerate(attachments):
                             outcome = attachment.get("outcome")
+                            server_hashes = attachment.get("server_hashes")
+                            if server_hashes is not None:
+                                validate_server_hashes(server_hashes)
+                                manifest_digest = hashlib.sha256(canonical(server_hashes)).hexdigest()
+                                hash_file = "hashes/" + manifest_digest + ".json"
+                                if files.get(hash_file) != manifest_digest:
+                                    raise ValueError("File-hash manifest differs from its signed message record")
+                                hash_manifests.add(hash_file)
+                                hash_index.update(canonical({"category": record["category"], "chat_id": record.get("chat_id"),
+                                    "message_id": record.get("id"), "attachment_index": attachment_index, "manifest": hash_file}) + b"\n")
                             if outcome == "saved":
                                 checksum = digest(attachment["sha256"], "attachment hash")
                                 media_name = "media/" + checksum
@@ -2220,6 +2310,11 @@ def verify_account_export(path, expected_fingerprint=None, max_gib=None):
                                 media_files.add(media_name)
                                 counts["media_saved"] += 1
                                 counts["bytes_saved"] += size
+                            elif outcome == "hashed":
+                                if (attachment.get("file") or attachment.get("sha256") or not server_hashes
+                                        or server_hashes["status"] != "complete"):
+                                    raise ValueError("Hash-only attachment claims saved bytes or incomplete coverage")
+                                media_hashed += 1
                             elif outcome in ("excluded", "failed"):
                                 if attachment.get("file") or attachment.get("sha256"):
                                     raise ValueError("Unsaved account export attachment claims saved bytes")
@@ -2239,16 +2334,28 @@ def verify_account_export(path, expected_fingerprint=None, max_gib=None):
             raise ValueError("Unreceipted account export page data")
         if {name for name in files if name.startswith("media/")} != media_files:
             raise ValueError("Unreferenced account export media")
+        if hash_manifests:
+            if files.get("hashes/index.jsonl") != hash_index.hexdigest():
+                raise ValueError("File-hash index differs from signed message references")
+            hash_manifests.add("hashes/index.jsonl")
+        if {name for name in files if name.startswith("hashes/")} != hash_manifests:
+            raise ValueError("Unreferenced account export file-hash manifest")
         if (integer(manifest["receipt_count"], "receipt count") != len(receipts)
                 or digest(manifest["receipt_head_sha256"], "receipt head") != previous):
             raise ValueError("Account export manifest receipt boundary mismatch")
         declared_counts = manifest["counts"]
+        if "unique_media_bytes" in declared_counts:
+            counts["unique_media_bytes"] = sum(archive.getinfo(name).file_size for name in media_files)
+        if declared_counts.get("media_hashed", 0) != media_hashed:
+            raise ValueError("Account export hash-only attachment count mismatch")
         if any(type(declared_counts.get(name)) is not int or declared_counts[name] != count for name, count in counts.items()):
             raise ValueError("Account export manifest counts mismatch")
         if "messages_exported" in declared_counts and declared_counts["messages_exported"] != counts["messages"]:
             raise ValueError("Account export message summary mismatch")
         if "messages_seen" in declared_counts and declared_counts["messages_seen"] != messages_seen:
             raise ValueError("Account export seen-message summary mismatch")
+        if "media_hashed" in declared_counts:
+            counts["media_hashed"] = media_hashed
         done = sum(state["terminal"] and state["ok"] for state in tasks.values())
         failed_tasks = [name for name, state in tasks.items() if not state["ok"]]
         coverage = manifest["coverage"]

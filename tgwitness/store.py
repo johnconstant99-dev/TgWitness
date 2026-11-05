@@ -584,10 +584,10 @@ class Store:
             return count
 
     def finish_media(self, job, state, payload, delay=0):
-        if state not in ("done", "retry", "failed", "skipped"):
+        if state not in ("done", "hashed", "retry", "failed", "skipped"):
             raise ValueError("Invalid media outcome")
         with self.transaction():
-            self.append({"done": "media.saved", "retry": "media.retry", "failed": "media.failed",
+            self.append({"done": "media.saved", "hashed": "media.hashed", "retry": "media.retry", "failed": "media.failed",
                          "skipped": "media.skipped"}[state],
                         {"message_event": job["message_event"], "attempt": job["attempts"], **payload},
                         job["chat_id"], job["message_id"])

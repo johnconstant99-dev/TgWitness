@@ -2,24 +2,7 @@
 # Build a signed, scanner-visible APK; only its public key leaves this build stage.
 set -eu
 cd /build
-python3.12 - <<'PY'
-import hashlib
-import json
-from pathlib import Path
-import urllib.request
-
-lock = json.loads(Path('/build/ocr/sources.lock.json').read_text())
-downloads = Path('/build/downloads')
-downloads.mkdir()
-items = {'tesseract.tar.gz': lock['tesseract'], 'tessdata.LICENSE': lock['traineddata']['license']}
-items.update({language + '.traineddata': value for language, value in lock['traineddata']['files'].items()})
-for name, item in items.items():
-    with urllib.request.urlopen(item['url'], timeout=60) as response:
-        data = response.read()
-    if hashlib.sha256(data).hexdigest() != item['sha256']:
-        raise SystemExit('Source checksum mismatch: ' + name)
-    (downloads / name).write_bytes(data)
-PY
+python3.12 /build/ocr/fetch-sources.py
 mkdir source
 tar -xzf downloads/tesseract.tar.gz --strip-components=1 -C source
 test "$(cat source/VERSION)" = '5.5.4'

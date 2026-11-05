@@ -1,5 +1,6 @@
 import argparse
 import json
+import math
 import os
 import re
 import secrets
@@ -70,9 +71,12 @@ def start():
     config = {"token": secrets.token_urlsafe(32), "recipient": recipient, "seconds": int(minutes) * 60,
         "context": {"collector_sha": commit, "repository": os.environ["GITHUB_REPOSITORY"],
                     "run_id": os.environ["GITHUB_RUN_ID"], "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"]}}
-    write(directory / "config" / "session.json", config)
     command(["docker", "build", "--no-cache", "--file", str(ROOT / "deploy" / "Dockerfile.sealed"),
              "--tag", name, str(ROOT)], timeout=900)
+    # The capture clock starts with the container, after the image build. Keep
+    # the same deadline when the next workflow step begins after artifact upload.
+    config["supervisor_deadline"] = time.monotonic() + config["seconds"] + 600
+    write(directory / "config" / "session.json", config)
     command(["docker", "network", "create", name])
     command(["docker", "run", "--detach", "--name", name, "--network", name, "--network-alias", "collector",
         *restrictions(), "--mount", f"type=bind,src={directory / 'config'},dst=/config,readonly",
@@ -111,7 +115,9 @@ def start():
 def wait():
     directory, name = location()
     config = json.loads((directory / "config" / "session.json").read_bytes())
-    deadline = time.monotonic() + config["seconds"] + 600
+    deadline = config.get("supervisor_deadline", time.monotonic() + config["seconds"] + 600)
+    if type(deadline) not in (int, float) or not math.isfinite(deadline) or deadline <= 0:
+        raise ValueError("Invalid capture deadline")
     result = directory / "out" / "result.json"
     while not result.exists():
         if time.monotonic() > deadline:
@@ -120,13 +126,20 @@ def wait():
             raise RuntimeError("Capture stopped before producing a result")
         time.sleep(2)
 
-    command(["docker", "rm", "--force", name + "-tunnel"], check=False)
-    command(["docker", "stop", "--time", "40", name], timeout=60, check=False)
-    if json.loads(result.read_bytes()) != {"phase": "sealed"}:
+    command(["docker", "rm", "--force", name + "-tunnel"])
+    command(["docker", "stop", "--time", "40", name], timeout=60)
+    if command(["docker", "inspect", "--format", "{{.State.Running}}", name]) != "false":
+        raise RuntimeError("Collector shutdown was not confirmed; evidence cannot be attested")
+    state = json.loads(result.read_bytes())
+    multipart = state == {"phase": "sealed", "delivery": "parts", "subject": "evidence.parts.json"}
+    if not multipart and state != {"phase": "sealed"}:
         raise RuntimeError("Capture was cancelled or failed; no result will be uploaded")
-    evidence = directory / "out" / "evidence.zip"
+    evidence = directory / "out" / ("evidence.parts.json" if multipart else "evidence.zip")
     if evidence.is_symlink() or not evidence.is_file():
         raise RuntimeError("No regular evidence file")
+    if os.environ.get("GITHUB_OUTPUT"):
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+            output.write("subject=" + str(evidence) + "\n")
     print("Collector stopped. The fixed evidence file is ready for attestation.")
 
 
@@ -141,6 +154,10 @@ def pack():
     helper(directory, name, ["package", "--config", "/config/session.json", "--out", "/output",
                             "--attestation", "/output/attestation.jsonl"])
     shutil.move(str(directory / "out" / "delivery.tgwsealed"), directory / "public" / "delivery.tgwsealed")
+    for part in sorted((directory / "out").glob("delivery-*.tgwsealed")):
+        if part.is_symlink() or not re.fullmatch(r"delivery-[0-9]{6}\.tgwsealed", part.name):
+            raise ValueError("Unexpected encrypted part")
+        shutil.move(str(part), directory / "public" / part.name)
     print("Encrypted result is ready. No plaintext archive is uploaded.")
 
 

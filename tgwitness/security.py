@@ -5,6 +5,7 @@ import logging
 import os
 import secrets
 import subprocess
+import time
 from pathlib import Path
 
 from cryptography.fernet import Fernet
@@ -57,7 +58,16 @@ def private_write(path: Path, data: bytes):
         stream.write(data)
         stream.flush()
         os.fsync(stream.fileno())
-    os.replace(temp, path)
+    for attempt in range(6):
+        try:
+            os.replace(temp, path)
+            break
+        except PermissionError as exc:
+            # A Windows reader may briefly hold the destination without delete
+            # sharing. Keep the old file intact and retry only that OS failure.
+            if getattr(exc, "winerror", None) not in (5, 32, 33) or attempt == 5:
+                raise
+            time.sleep(.01 * 2**attempt)
 
 
 class Vault:
