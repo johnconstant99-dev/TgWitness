@@ -32,6 +32,7 @@ def main(arguments=None):
     from tgwitness.client_profiles import desktop
     assert desktop("installed-resource-check")["lang_pack"] == "tdesktop"
     assert (package / "tgwitness/client_profiles.LICENSE").read_bytes()
+    assert (package / "tgwitness/dstack_measurement.LICENSE").read_bytes()
     for name in ("proof.html", "proof.css", "proof.js"):
         assert (package / "tgwitness/static" / name).read_bytes(), "Missing installed proof resource: " + name
     for name in ("report_console.js", "report_console.css", "report_skin.css", "report_dossier.css", "report_icons.svg",

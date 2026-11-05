@@ -1202,12 +1202,13 @@ def read_beacon(topic, key=None, session=None, public_key=None):
                 parts[3], address_signature(key, text)) else None
         if required and not signer:
             continue
-        # ntfy.sh's receive time orders the posts: the time inside a post is whatever its sender wrote.
-        received = item.get("time")
-        order = (received if isinstance(received, int) else int(parts[2]), int(parts[2]))
+        # A signed post retains its original ordering when it is delivered again.
+        # Unsigned timestamps are untrusted, so use the relay's receive time instead.
+        posted, received = int(parts[2]), item.get("time")
+        received = received if isinstance(received, int) else posted
+        order = (posted, received) if signer else (received, posted)
         if found is None or order >= found["order"]:
-            found = {"host": parts[1], "posted": int(parts[2]), "signed": bool(signer), "signer": signer,
-                     "order": order}
+            found = {"host": parts[1], "posted": posted, "signed": bool(signer), "signer": signer, "order": order}
     if not found:
         raise DeployError("The server has not posted its quick tunnel address yet" + (
             ", signed with " + ("the collector key" if public_key is not None else "the address key") if required

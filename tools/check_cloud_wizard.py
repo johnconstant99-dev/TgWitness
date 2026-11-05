@@ -355,6 +355,13 @@ def check_command_line(directory):
     assert found["host"] == "collector-signed-here.trycloudflare.com" and found["signer"] == "collector", found
     assert cloud.read_beacon(record["beacon"], key, world)["host"] == "bright-words-here.trycloudflare.com"
     assert cloud.read_beacon(record["beacon"], session=world)["host"] == "forged-future-here.trycloudflare.com"
+    # Replaying an old signed post must not replace the current address.
+    old = 1_800_000_000
+    world.post(record["beacon"], assurance.address_post(host.vault, "stale-collector-here.trycloudflare.com", old))
+    stale = cloud.ADDRESS_FORMAT + " stale-key-here.trycloudflare.com " + str(old)
+    world.post(record["beacon"], stale + " " + cloud.address_signature(key, stale))
+    assert cloud.posted_address(record, beacon)["host"] == "collector-signed-here.trycloudflare.com"
+    assert cloud.read_beacon(record["beacon"], key, world)["host"] == "bright-words-here.trycloudflare.com"
     unsigned = {**record, "collector": {**record["collector"], "public_key": Vault(directory / "older").public_key}}
     assert cloud.posted_address(unsigned, beacon)["signer"] is None
     sent, names = [], iter(["one-host-here.trycloudflare.com"] * 2 + ["two-host-here.trycloudflare.com"])

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Keep the current tunnel address when an older signed address post is replayed.
+  Signed posts are ordered by their signed time; unsigned posts use the relay's receive time.
+
 ## 0.9.0 preview · 4 November 2026
 
 - Reserve each account exclusively for monitoring, history or an export. Serialize Telegram RPCs and persist full FloodWait deadlines.
