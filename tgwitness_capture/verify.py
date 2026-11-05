@@ -9,7 +9,7 @@ MAX_FILE = 512 * 1024 ** 2
 
 
 def verify_zip(path, expected_fingerprint=None, checkpoint=None, receipt=None,
-               witness_fingerprint=None, require_final_anchor=False, check_drand=False):
+               witness_fingerprint=None, require_final_anchor=False, expected_settings=None, *, check_drand=False):
     with zipfile.ZipFile(path) as archive:
         infos = archive.infolist()
         names = [item.filename for item in infos]
@@ -91,8 +91,12 @@ def verify_zip(path, expected_fingerprint=None, checkpoint=None, receipt=None,
             raise ValueError("Export disagrees with retained checkpoint")
     if require_final_anchor and (checkpoint is None or anchored_seq != len(events)):
         raise ValueError("Export has an unanchored tail")
+    from .official_proof import official_report
+    official = official_report(events, expected_settings)
     return {"valid": True, "format": FORMAT, "observer_id": manifest["observer_id"],
             "fingerprint": actual_fingerprint, "key_pinned": expected_fingerprint is not None,
             "events": len(events), "head_hash": head, "checkpoint_checked": checkpoint is not None,
             "independently_witnessed": independently_witnessed, "anchored_seq": anchored_seq,
-            "unanchored_events": len(events) - anchored_seq, "trusted_reports_checked": report_count, "drand": drand}
+            "unanchored_events": len(events) - anchored_seq,
+            "trusted_reports_checked": report_count, "drand": drand,
+            **({"official": official} if official is not None else {})}

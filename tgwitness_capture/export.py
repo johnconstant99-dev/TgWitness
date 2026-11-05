@@ -11,6 +11,15 @@ from .journal import sync_directory
 
 
 def report(events, observer_id, key_fingerprint):
+    from .official_proof import official_report
+    official = official_report(events)
+    summary = ""
+    if official:
+        summary = ('<section><h2>Official client observation</h2><p>'
+                   + html.escape(official["procedure_status"] + " · " + ", ".join(official["reasons"]))
+                   + '</p><p>' + html.escape(official["scope"]) + '</p><p>'
+                   + html.escape(official["trust"]) + '</p><p>Recording intervals: '
+                   + str(official["intervals"]) + ' · Video segments: ' + str(official["video_segments"]) + '</p></section>')
     rows = []
     for event in events:
         links = []
@@ -39,7 +48,7 @@ def report(events, observer_id, key_fingerprint):
             '<p>This is a view of recorded observations, not a continuous reconstruction. Check the ZIP with a trusted verifier and independently retained key fingerprint/checkpoint. '
             'Signatures establish integrity, not the truth of the source. Clock values are local unless independently anchored.</p>'
             '<label>Find events <input type="search" placeholder="URL, event, time"></label>'
-            + "".join(rows) + f'<script>{script}</script></html>').encode()
+            + summary + "".join(rows) + f'<script>{script}</script></html>').encode()
 
 
 def export_zip(journal, destination):

@@ -50,6 +50,21 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
         from .sealed_parts import file_hash
         if evidence.stat().st_size != parts["archive_bytes"] or file_hash(evidence) != parts["archive_sha256"]:
             raise ValueError("Assembled evidence differs from the attested parts manifest")
+    with zipfile.ZipFile(evidence) as candidate:
+        manifest = candidate.getinfo("manifest.json")
+        if manifest.file_size > 64 * 1024**2:
+            raise ValueError("Manifest is too large")
+        capture_format = json.loads(candidate.read(manifest)).get("format")
+    if capture_format == "tgwitness-capture-v1":
+        if parts or require_complete:
+            raise ValueError("Official visual observations are not a complete account export")
+        if max_gib is not None:
+            if type(max_gib) is not int or max_gib < 1:
+                raise ValueError("Invalid archive size limit")
+            with zipfile.ZipFile(evidence) as incoming:
+                if sum(info.file_size for info in incoming.infolist()) > max_gib * 1024**3:
+                    raise ValueError("Archive exceeds the selected verification limit")
+        return verify_official(evidence, approved, repo, expected_selection)
     internal = verify_bundle(evidence, max_gib=max_gib)
     if parts and internal["fingerprint"] != fingerprint(parts["public_key"]):
         raise ValueError("Multipart manifest and evidence use different signing identities")
@@ -91,6 +106,40 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
                           "complete historical coverage, confidential hardware, or a proof of no host access."}
 
 
+def verify_official(evidence, approved, repo, expected_selection=None):
+    from tgwitness_capture.verify import verify_zip
+    expected = None
+    if expected_selection:
+        path = Path(expected_selection)
+        if path.stat().st_size > 1024**2:
+            raise ValueError("Expected settings file is too large")
+        expected = json.loads(path.read_bytes())
+    internal = verify_zip(evidence, expected_settings=expected)
+    with zipfile.ZipFile(evidence) as archive, archive.open("events.jsonl") as source:
+        events = [json.loads(line) for line in source]
+    started = [e["payload"] for e in events if e["kind"] == "official.sealed_started"]
+    finished = [e["payload"] for e in events if e["kind"] == "official.sealed_finished"]
+    opened = [e["payload"] for e in events if e["kind"] == "official.opened"]
+    if (len(started) != 1 or len(finished) != 1 or len(opened) != 1 or "official" not in internal
+            or started[0].get("client") != "official_web" or started[0].get("session_import_allowed") is not False
+            or started[0].get("network") != "isolated-required-proxy"
+            or started[0].get("context", {}).get("collector_sha") != approved["collector_sha"]
+            or started[0].get("context", {}).get("repository") != repo
+            or finished[0].get("context") != started[0]["context"]
+            or finished[0].get("profile_context_closed") is not True
+            or opened[0].get("login_recorded") is not False):
+        raise ValueError("Archive is not an approved fresh official-client procedure")
+    internal["official"]["environment_status"] = "PASS"
+    internal["official"]["trust"] = "approved GitHub-hosted workflow; GitHub and official Telegram client remain trusted"
+    with Path(evidence).open("rb") as source:
+        digest = hashlib.file_digest(source, "sha256").hexdigest()
+    return {"verified": True, "sha256": digest, "workflow": WORKFLOW, **approved,
+            "journal": internal, "collection": finished[0], "mode": "official_web",
+            "selection_checked": expected is not None, "complete_account_export": False,
+            "limitation": "Approved official-client workflow and byte integrity; not Telegram-signed content, "
+                          "complete account history, hardware isolation, or a guarantee against account restrictions"}
+
+
 def main():
     parser = argparse.ArgumentParser(description="Verify a sealed capture against an independently trusted policy.")
     parser.add_argument("evidence", type=Path)
@@ -102,11 +151,17 @@ def main():
     parser.add_argument("--max-gib", type=int, default=4, help="Uncompressed archive verification ceiling")
     parser.add_argument("--expected-selection", type=Path, help="Independently agreed settings JSON saved before capture")
     parser.add_argument("--require-complete", action="store_true", help="Reject partial exports and chat journals")
+    parser.add_argument("--confirm-drand", action="store_true", help="Independently query public rounds in official-client recordings")
     args = parser.parse_args()
     try:
         result = verify(args.evidence, args.bundle, args.repo, args.policy, args.trusted_root,
                         max_gib=args.max_gib, assembled=args.assembled,
                         expected_selection=args.expected_selection, require_complete=args.require_complete)
+        if args.confirm_drand and result.get("mode") == "official_web":
+            from tgwitness_capture.beacon import confirm
+            official = result["journal"]["official"]
+            official["drand_verification"] = confirm(official["drand_rounds"])
+            official["drand_status"] = official["drand_verification"]["status"]
         print(json.dumps(result, indent=2, ensure_ascii=False))
     except Exception as exc:
         parser.exit(1, "Verification failed: " + str(exc) + "\n")

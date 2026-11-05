@@ -67,12 +67,15 @@ FILES.extend("tools/tdx/" + name for name in (
     "phala-dstack-0.5.12.json", "phala-dstack-0.5.12.collateral.json",
 ))
 FILES.extend("addons/capture/" + name for name in (
-    "README.md", "pyproject.toml", "requirements.lock", "lock_from_project.py", "compose.yaml",
-    "config/browser.example.json", "config/ayugram.example.json",
+    "README.md", "pyproject.toml", "requirements.lock", "lock_from_project.py", "compose.yaml", "compose.official.yaml",
+    "config/browser.example.json", "config/ayugram.example.json", "config/official.example.json", "config/official-upstream.example.json",
     "deploy/Dockerfile", "deploy/Dockerfile.neko", "deploy/Dockerfile.gateway",
+    "deploy/Dockerfile.official", "deploy/official-start.sh", "deploy/official-seccomp.json",
+    "deploy/official-seccomp.README.md", "deploy/PLAYWRIGHT-LICENSE.txt",
     "deploy/chromium.conf", "deploy/chromium-policy.json", "deploy/neko-start.sh", "deploy/upstream-proxy.example.conf",
     "tests/conftest.py", "tests/test_capture.py", "tests/test_browser.py", "tests/test_video.py",
     "tests/test_panel.py", "tests/test_witness.py", "tests/test_deployment.py", "tests/test_integration.py",
+    "tests/test_official.py", "tests/test_gateway.py", "tests/test_official_proof.py", "tests/test_beacon.py",
     "compose.trusted.yaml", "config/trusted.example.json", "deploy/Dockerfile.trusted",
     "deploy/trusted-entrypoint.py", "deploy/trusted-display.py",
     "tests/test_trusted.py", "tests/test_trusted_anchors.py",

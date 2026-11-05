@@ -1,0 +1,13 @@
+{
+  "kind": "browser",
+  "operator": "account-owner",
+  "route_label": "Dedicated upstream proxy; periodic IP checks; local administrator trusted",
+  "official": {
+    "mode": "passive",
+    "egress": "http",
+    "proxy_server": "http://official-gateway:3128",
+    "expected_ip": "",
+    "require_video": true
+  },
+  "video_input_args": ["-f", "x11grab", "-framerate", "12", "-video_size", "1280x720", "-i", ":99.0"]
+}

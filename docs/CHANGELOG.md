@@ -2,6 +2,8 @@
 
 ## 0.9.1 preview · 5 November 2026
 
+- Add an optional official Telegram Web observation mode with passive or sequential paced viewing，a fresh profile，restricted UI actions，login-excluded video and signed rendered observations．A required proxy bridge prevents direct fallback；exit changes stop recording．The GitHub Actions mode uses the approved sealed workflow and recipient encryption．
+- Bind official recordings to independently saved source/settings，check video segment order and clean endings，record fresh drand rounds and support independent public-relay comparison．Report unfinished procedures，unconfirmed logout and the limits of local or Cloudflare assurance explicitly．See [Official client witness](OFFICIAL-WITNESS.md) for scope and validation．
 - Add opt-in Trusted Live preview: isolated official Desktop/Web sessions, native JSON preservation, guarded visual recording, per-chat continuity annotations, and verifier-recomputed reports. Supply a Linux network guard with no direct fallback, periodic proxy-routed drand observations, and optional independent read-only Cloudflare samples. Account/WARP/TDX qualification remains pending; see `docs/TRUSTED-LIVE.md`.
 
 - Make sealed export modes explicit: Telegram Takeout by default, regular API account export, or a single-chat event journal, with differences and limits shown before collection. Select multiple chats, save agreed settings, verify them with `--expected-selection`, and reject incomplete account exports with `--require-complete`. Correct the outdated one-chat-only hosted documentation.

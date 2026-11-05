@@ -11,6 +11,9 @@ CALLER = ".github/workflows/sealed-witness.yml"
 COLLECTOR = ".github/workflows/sealed-collector.yml"
 POLICY = "tgwitness/sealed_policy.json"
 RUNTIME = ("tgwitness", "tgwitness_capture", "scripts/sealed_runner.py", "deploy/Dockerfile.sealed",
+           "addons/capture/deploy/Dockerfile.official", "addons/capture/deploy/official-start.sh",
+           "addons/capture/deploy/official-seccomp.json",
+           "addons/capture/requirements.lock", "addons/capture/pyproject.toml",
            "deploy/containers", "deploy/requirements.lock", "deploy/build.lock", "deploy/constraints.txt",
            "pyproject.toml", ".dockerignore", "README.md", "LICENSE", "NOTICE")
 

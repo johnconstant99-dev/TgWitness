@@ -26,7 +26,9 @@ services:
       - /run:rw,nosuid,nodev,size=16m
     cap_drop: [ALL]
     cap_add: [NET_ADMIN, SETUID, SETGID, SETPCAP, CHOWN]
-    security_opt: [no-new-privileges:true]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=./addons/capture/deploy/official-seccomp.json
     read_only: true
     shm_size: 512m
     init: true

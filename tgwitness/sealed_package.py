@@ -49,7 +49,11 @@ def package(config, output, attestation):
         return
     if result != {"phase": "sealed"}:
         raise ValueError("The capture did not finish")
-    verify_bundle(evidence)
+    if config.get("client") == "official_web":
+        from tgwitness_capture.verify import verify_zip
+        verify_zip(evidence)
+    else:
+        verify_bundle(evidence)
     with encrypt_stream(output / "delivery.tgwsealed", config["recipient"]) as outgoing:
         with zipfile.ZipFile(outgoing, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as archive:
             archive.write(evidence, "evidence.zip")

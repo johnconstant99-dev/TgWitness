@@ -16,6 +16,7 @@ from .adapters import BrowserCapture, sqlite_snapshot
 from .export import export_zip
 from .format import canonical, decode, digest
 from .journal import Journal, durable_write
+from .official import OfficialBrowser, OfficialOptions
 from .video import VideoCapture
 
 
@@ -34,6 +35,7 @@ class Config:
     heartbeat_seconds: float = 10
     video_input_args: list | None = None
     ffmpeg_executable: str = "ffmpeg"
+    official: dict | None = None
     trusted: dict | None = None
 
     @classmethod
@@ -42,6 +44,10 @@ class Config:
         if not isinstance(raw, dict) or set(raw) - {field.name for field in fields(cls)}:
             raise ValueError("Unknown capture configuration field")
         config = cls(**raw)
+        if config.official is not None:
+            if config.kind != "browser":
+                raise ValueError("Official client requires the browser recorder")
+            OfficialOptions.model_validate(config.official)
         if config.kind not in {"browser", "ayugram", "trusted"}:
             raise ValueError("kind must be browser, ayugram or trusted")
         if config.kind == "trusted":
@@ -92,7 +98,12 @@ class Recorder:
         self.settings = {"enabled": False, "screenshots": config.kind == "browser",
                          "pages": config.kind == "browser", "database": config.kind == "ayugram", "video": False}
         self.browser = BrowserCapture(config.browser_cdp_url, config.browser_url_prefix)
-        self.video = VideoCapture(self.journal, config.video_input_args, config.ffmpeg_executable)
+        self.official = None
+        if config.official is not None:
+            self.official = OfficialBrowser(OfficialOptions.model_validate(config.official), self.journal)
+            self.browser = self.official
+        self.video = VideoCapture(self.journal, config.video_input_args, config.ffmpeg_executable,
+                                  timestamp_overlay=self.official is not None)
         self.last_attempt = 0
         self.last_heartbeat = 0
         self.last_success = None
@@ -136,7 +147,8 @@ class Recorder:
                 "last_error": self.last_error or self.video.error, "video_available": self.video.available,
                 "video_running": self.video.process is not None, "last_video_segment": self.video.last_segment_at,
                 "selected_target": self.browser.target_id, "route_label": self.config.route_label,
-                "external_anchor": "not established by this service; retain checkpoints or use a separate witness"}
+                "external_anchor": "not established by this service; retain checkpoints or use a separate witness",
+                "official": self.official.status() if self.official else None}
 
     async def configure(self, patch):
         async with self.lock:
@@ -147,6 +159,11 @@ class Recorder:
             if self.config.kind == "ayugram" and (new["pages"] or new["screenshots"]):
                 raise ValueError("Browser capture belongs to the independent browser recorder")
             if new["enabled"]:
+                if self.official:
+                    if not new["screenshots"] or not new["pages"]:
+                        raise ValueError("Official observation requires screenshots and rendered pages")
+                    if self.official.options.require_video and not new["video"]:
+                        raise ValueError("This official-client profile requires procedure video")
                 if not any(new[key] for key in ("pages", "screenshots", "database", "video")):
                     raise ValueError("Select at least one capture function")
                 if new["video"] and not self.video.available:
@@ -161,8 +178,19 @@ class Recorder:
                 self.settings["enabled"] = False
             if self.video.process is not None and not (new["enabled"] and new["video"]):
                 await asyncio.to_thread(self.video.stop)
-            if new["enabled"] and new["video"] and self.video.process is None:
-                self.video.start()
+            if self.official and not new["enabled"]:
+                await self.official.pause()
+            try:
+                if self.official and new["enabled"] and not old["enabled"]:
+                    await self.official.arm()
+                if new["enabled"] and new["video"] and self.video.process is None:
+                    self.video.start()
+            except Exception:
+                self.settings["enabled"] = False
+                if self.official:
+                    await self.official.pause("StartFailed")
+                await asyncio.to_thread(self.video.stop)
+                raise
             self.settings = new
             if not old["enabled"] and new["enabled"]:
                 self.last_attempt = 0
@@ -207,18 +235,36 @@ class Recorder:
             self.video.poll()
             if not self.settings["enabled"]:
                 return
+            if self.official:
+                try:
+                    if self.settings["video"] and self.video.process is None:
+                        raise ValueError("VideoUnavailable")
+                    await self.official.tick()
+                except Exception as exc:
+                    await self.stop_official(str(exc) if isinstance(exc, ValueError) else type(exc).__name__)
+                    return
             interval = self.config.snapshot_seconds if self.config.kind == "ayugram" else self.config.poll_seconds
             if now - self.last_attempt >= interval:
                 self.last_attempt = now
                 try:
                     await self.capture()
-                except Exception:
-                    pass  # The failed attempt is a signed event, not a successful observation.
+                except Exception as exc:
+                    if self.official:
+                        await self.stop_official(type(exc).__name__)
+                        return
+                    # The failed attempt is signed, not a successful observation.
             if now - self.last_heartbeat >= self.config.heartbeat_seconds:
                 self.journal.append("capture.heartbeat", {"last_success": self.last_success,
                                     "last_error": self.last_error or self.video.error, "video_running": self.video.process is not None,
                                     "last_video_segment": self.video.last_segment_at})
                 self.last_heartbeat = now
+
+    async def stop_official(self, reason):
+        self.settings["enabled"] = False
+        self.last_error = reason
+        # Seal video before any login/cleanup UI can be shown.
+        await asyncio.to_thread(self.video.stop)
+        await self.official.pause(reason)
 
     async def run(self):
         while not self.closing:
@@ -229,6 +275,9 @@ class Recorder:
                 self.settings["enabled"] = False
                 self.last_error = "RecorderStopped:" + type(exc).__name__
                 await asyncio.to_thread(self.video.abort)
+                if self.official:
+                    self.official.stop_requested = True
+                    self.official.phase = "stopped"
             await asyncio.sleep(min(self.config.poll_seconds, 1))
 
     async def close(self):
@@ -239,7 +288,10 @@ class Recorder:
                 await self.task
             async with self.lock:
                 await asyncio.to_thread(self.video.stop)
-                await self.browser.close()
+                if self.official and self.official.phase != "finished" and self.official.page is not None:
+                    await self.official.finish()
+                else:
+                    await self.browser.close()
                 self.journal.append("service.stopped", {"capture_was_enabled": self.settings["enabled"]})
         finally:
             self.video.abort()
@@ -263,6 +315,9 @@ def create_app(root, config=None):
             await recorder.close()
 
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
+    if config.official is not None:
+        from .official_api import routes
+        routes(app)
     static = Path(__file__).parent / "static"
 
     @app.middleware("http")
@@ -285,12 +340,12 @@ def create_app(root, config=None):
 
     @app.get("/")
     async def index():
-        return FileResponse(static / "index.html", headers={"Content-Security-Policy":
+        return FileResponse(static / ("official.html" if config.official is not None else "index.html"), headers={"Content-Security-Policy":
                             "default-src 'self'; img-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"})
 
     @app.get("/static/{name}")
     async def asset(name: str):
-        if name not in {"app.js", "style.css"}:
+        if name not in {"app.js", "style.css", "official.js", "official.css"}:
             raise HTTPException(404)
         return FileResponse(static / name)
 

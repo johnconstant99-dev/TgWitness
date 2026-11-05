@@ -8,7 +8,9 @@ import shutil
 import subprocess
 import sys
 import time
+import ipaddress
 from pathlib import Path
+from urllib.parse import urlsplit
 
 TUNNEL_IMAGE = "cloudflare/cloudflared@sha256:4955524aeaa379e154023d5a027c250f7b35041a2e7e950cf13f144bc9b9c5ba"
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,6 +56,79 @@ def helper(directory, name, arguments, extra_mounts=()):
         name, "python", "-m", "tgwitness.sealed_package", *arguments], timeout=600)
 
 
+def start_official(directory, name, config):
+    # A fresh GitHub-hosted VM only: allow the unprivileged user namespace used
+    # by Chromium's sandbox. Never launch this client with --no-sandbox.
+    if Path("/proc/sys/kernel/apparmor_restrict_unprivileged_userns").exists():
+        command(["sudo", "sysctl", "-w", "kernel.apparmor_restrict_unprivileged_userns=0"])
+    upstream = os.environ.get("OFFICIAL_PROXY_SERVER", "")
+    parsed = urlsplit(upstream)
+    if (parsed.scheme not in {"http", "socks5"} or not parsed.hostname or not parsed.port
+            or parsed.username is not None or parsed.password is not None or parsed.path not in {"", "/"}
+            or parsed.query or parsed.fragment or len(upstream) > 2048
+            or any(ord(c) < 33 or c == "\\" for c in upstream)):
+        raise ValueError("Official client requires an explicit upstream proxy; credentials belong in secrets")
+    expected = os.environ.get("OFFICIAL_EXPECTED_IP", "")
+    if expected:
+        expected = str(ipaddress.ip_address(expected))
+    gateway = {"server": upstream, "username": os.environ.get("OFFICIAL_PROXY_USERNAME", ""),
+               "password": os.environ.get("OFFICIAL_PROXY_PASSWORD", "")}
+    if any(len(gateway[key].encode()) > 255 for key in ("username", "password")):
+        raise ValueError("Upstream credentials exceed their supported length")
+    write(directory / "config" / "gateway.json", gateway)
+    config.update({"client": "official_web", "expected_ip": expected,
+                   "upstream_public": {"server": upstream, "has_credentials": bool(gateway["username"] or gateway["password"])}})
+    command(["docker", "build", "--file", str(ROOT / "addons/capture/deploy/Dockerfile.official"),
+             "--tag", name, str(ROOT)], timeout=1500)
+    command(["docker", "network", "create", name])
+    command(["docker", "network", "create", "--internal", name + "-private"])
+    command(["docker", "run", "--detach", "--name", name + "-gateway", "--network", name,
+             *restrictions(), "--mount", f"type=bind,src={directory / 'config/gateway.json'},dst=/gateway.json,readonly",
+             "--entrypoint", "python", name, "-m", "tgwitness_capture.gateway", "--config", "/gateway.json"])
+    command(["docker", "network", "connect", "--alias", "official-gateway", name + "-private", name + "-gateway"])
+    # Resolve the public panel origin before opening the recorder. The tunnel has
+    # no control token and cannot bypass the isolated browser's required proxy.
+    command(["docker", "run", "--detach", "--name", name + "-tunnel", "--network", name,
+             "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=128", "--memory=256m",
+             TUNNEL_IMAGE, "tunnel", "--no-autoupdate", "--url", "http://collector:8787"], timeout=180)
+    command(["docker", "network", "connect", name + "-private", name + "-tunnel"])
+    deadline = time.monotonic() + 90
+    while True:
+        logs = subprocess.run(["docker", "logs", name + "-tunnel"], capture_output=True, text=True, timeout=10)
+        match = re.search(r"https://[a-z0-9-]+\.trycloudflare\.com", logs.stdout + logs.stderr)
+        if match:
+            break
+        if time.monotonic() > deadline:
+            raise RuntimeError("Panel tunnel failed to start")
+        time.sleep(1)
+    config["public_origin"] = match.group()
+    config["supervisor_deadline"] = time.monotonic() + config["seconds"] + 600
+    write(directory / "config/session.json", config)
+    command(["docker", "run", "--detach", "--name", name, "--network", name + "-private", "--network-alias", "collector",
+             "--user", str(os.getuid()) + ":" + str(os.getgid()), "--read-only", "--cap-drop=ALL",
+             "--security-opt=no-new-privileges", "--security-opt", "seccomp=" + str(ROOT / "addons/capture/deploy/official-seccomp.json"),
+             "--pids-limit=512", "--memory=4g", "--cpus=2", "--shm-size=1g", "--init",
+             "--tmpfs", "/tmp:rw,nosuid,nodev,size=1g",
+             "--mount", f"type=bind,src={directory / 'config/session.json'},dst=/config/session.json,readonly",
+             "--mount", f"type=bind,src={directory / 'data'},dst=/data",
+             "--mount", f"type=bind,src={directory / 'out'},dst=/output", name,
+             "python", "-m", "tgwitness_capture.sealed", "--config", "/config/session.json"])
+    deadline = time.monotonic() + 90
+    while True:
+        try:
+            command(["docker", "exec", name, "python", "-c",
+                     "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8787/', timeout=2)"], timeout=5)
+            break
+        except RuntimeError:
+            if time.monotonic() > deadline:
+                raise RuntimeError("Official recorder failed to start") from None
+            time.sleep(1)
+    helper(directory, name, ["connection", "--config", "/config/session.json", "--url", match.group(),
+                            "--out", "/output/connection.tgwsealed"])
+    shutil.move(str(directory / "out/connection.tgwsealed"), directory / "public/connection.tgwsealed")
+    print("Encrypted official-client connection is ready. Open it in the local setup helper.")
+
+
 def start():
     directory, name = location()
     minutes = os.environ.get("SESSION_MINUTES", "30")
@@ -71,6 +146,11 @@ def start():
     config = {"token": secrets.token_urlsafe(32), "recipient": recipient, "seconds": int(minutes) * 60,
         "context": {"collector_sha": commit, "repository": os.environ["GITHUB_REPOSITORY"],
                     "run_id": os.environ["GITHUB_RUN_ID"], "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"]}}
+    client = os.environ.get("CAPTURE_CLIENT", "api")
+    if client == "official_web":
+        return start_official(directory, name, config)
+    if client != "api":
+        raise ValueError("Unknown capture client")
     command(["docker", "build", "--no-cache", "--file", str(ROOT / "deploy" / "Dockerfile.sealed"),
              "--tag", name, str(ROOT)], timeout=900)
     # The capture clock starts with the container, after the image build. Keep
@@ -164,7 +244,8 @@ def pack():
 def cleanup():
     directory, name = location()
     command(["docker", "stop", "--time", "40", name], timeout=60, check=False)
-    command(["docker", "rm", "--force", name, name + "-tunnel"], check=False)
+    command(["docker", "rm", "--force", name, name + "-tunnel", name + "-gateway"], check=False)
+    command(["docker", "network", "rm", name + "-private"], check=False)
     command(["docker", "network", "rm", name], check=False)
 
     for part in ("data", "config", "out"):

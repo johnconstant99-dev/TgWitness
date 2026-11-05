@@ -41,6 +41,8 @@
     const clientScreen = () => connection.screen_url || (kind === 'trusted' ? connection.url : '');
     screenLink.hidden = !clientScreen(); if (clientScreen()) screenLink.href = clientScreen();
     top.append(screenLink); fieldset.append(top);
+    const officialLink = node('a', 'secondary', LANG === 'ru' ? 'Открыть официальный клиент и настройки наблюдения ↗' : 'Open official client and observation settings ↗');
+    officialLink.target = '_blank'; officialLink.rel = 'noopener noreferrer'; officialLink.hidden = true; top.append(officialLink);
     const controls = node('div', 'capture-fields'); controls.hidden = true; fieldset.append(controls);
     const flags = {};
     if (kind === 'browser') {
@@ -89,7 +91,7 @@
       await call('target', {target_id: targets.value}); await refresh();
     });
     const selection = () => Object.fromEntries(Object.entries(flags).map(([key, input]) => [key, input.checked]));
-    button(actions, 'Save capture options', 'options', async () => {await call('settings', selection()); await refresh();});
+    const saveOptions = button(actions, 'Save capture options', 'options', async () => {await call('settings', selection()); await refresh();});
     const toggle = button(actions, 'Start capture', 'toggle', async () => {
       await call('settings', remote.settings.enabled ? {enabled: false} : {...selection(), enabled: true}); await refresh();
     }, true);
@@ -113,7 +115,13 @@
         (remote.last_success || tr('None yet')) + (remote.last_error ? '\n' + remote.last_error : '');
       for (const [key, input] of Object.entries(flags)) input.checked = !!remote.settings[key];
       flags.video.disabled = !remote.video_available;
+      const official = !!remote.official;
+      officialLink.hidden = !official; officialLink.href = connection.url;
+      tabs.hidden = kind !== 'browser' || official;
+      for (const input of Object.values(flags)) input.parentElement.hidden = official;
+      saveOptions.hidden = toggle.hidden = snapshot.hidden = official;
       videoHelp.textContent = tr(remote.video_available ? 'Video is available. It is recorded only while capture is running.' : 'Video is unavailable until an operator configures a screen source and FFmpeg.');
+      if (official) videoHelp.textContent = LANG === 'ru' ? 'Этот рекордер управляет официальным Telegram Web．Откройте его панель для входа，выбора чата，темпа и завершения сессии，используйте токен управления рекордером．' : 'This recorder owns the official Telegram Web client．Open its panel to log in，select a chat，set the pace and finish the session，using the recorder control token．';
       toggle.textContent = tr(remote.settings.enabled ? 'Pause capture' : 'Start capture');
       snapshot.disabled = !remote.settings.enabled; zip.disabled = !!remote.settings.enabled;
       refreshTabs.disabled = selectTab.disabled = !!remote.settings.enabled;

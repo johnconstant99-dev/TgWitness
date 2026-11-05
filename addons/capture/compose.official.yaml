@@ -1,0 +1,53 @@
+name: tgwitness-official
+services:
+  official-gateway:
+    profiles: [official]
+    build:
+      context: .
+      dockerfile: addons/capture/deploy/Dockerfile
+    entrypoint: [python, -m, tgwitness_capture.gateway]
+    command: [--config, /upstream.json]
+    networks: [official-internal, official-egress]
+    volumes:
+      - type: bind
+        source: ${OFFICIAL_UPSTREAM_CONFIG:-./addons/capture/config/official-upstream.example.json}
+        target: /upstream.json
+        read_only: true
+        bind: {create_host_path: false}
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+    restart: "no"
+  official-recorder:
+    profiles: [official]
+    build:
+      context: .
+      dockerfile: addons/capture/deploy/Dockerfile.official
+    depends_on: [official-gateway]
+    networks: [official-internal]
+    ports: ["127.0.0.1:8794:8794"]
+    volumes:
+      - official-records:/data
+      - type: bind
+        source: ${OFFICIAL_CAPTURE_CONFIG:-./addons/capture/config/official.example.json}
+        target: /config.json
+        read_only: true
+        bind: {create_host_path: false}
+    tmpfs: [/tmp:rw,nosuid,nodev,size=1g, /home/pwuser:rw,nosuid,nodev,size=64m]
+    shm_size: 1gb
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=./addons/capture/deploy/official-seccomp.json
+    init: true
+    pids_limit: 512
+    mem_limit: 4g
+    stop_grace_period: 90s
+    restart: "no"
+networks:
+  official-internal: {internal: true}
+  official-egress: {}
+volumes:
+  official-records: {}

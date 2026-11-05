@@ -2,6 +2,8 @@ name: Sealed capture validation
 on:
   push:
     paths:
+      - 'tgwitness_capture/**'
+      - 'addons/capture/**'
       - 'tgwitness/sealed*'
       - 'tgwitness/security.py'
       - 'tools/test_private_write.py'
@@ -52,6 +54,8 @@ on:
       - '.github/workflows/sealed*'
   pull_request:
     paths:
+      - 'tgwitness_capture/**'
+      - 'addons/capture/**'
       - 'tgwitness/sealed*'
       - 'tgwitness/security.py'
       - 'tools/test_private_write.py'

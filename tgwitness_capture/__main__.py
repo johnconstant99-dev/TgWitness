@@ -27,7 +27,8 @@ def main():
     verify.add_argument("--receipt", type=Path)
     verify.add_argument("--witness-fingerprint")
     verify.add_argument("--require-final-anchor", action="store_true")
-    verify.add_argument("--check-drand", action="store_true", help="Compare recorded rounds with two public HTTPS relays")
+    verify.add_argument("--expected-settings", type=Path, help="Independently retained official-client settings JSON")
+    verify.add_argument("--confirm-drand", "--check-drand", action="store_true", help="Independently compare recorded rounds with public HTTPS relays")
     witness = commands.add_parser("witness", help="Retain fresh signed checkpoints on an independent host")
     witness.add_argument("--data", type=Path, required=True)
     witness.add_argument("--url", required=True)
@@ -59,10 +60,20 @@ def main():
             result = verify_zip(args.archive, args.fingerprint,
                                 decode(args.checkpoint.read_bytes()) if args.checkpoint else None,
                                 decode(args.receipt.read_bytes()) if args.receipt else None,
-                                args.witness_fingerprint, args.require_final_anchor, args.check_drand)
+                                args.witness_fingerprint, args.require_final_anchor,
+                                decode(args.expected_settings.read_bytes()) if args.expected_settings else None,
+                                check_drand=args.confirm_drand)
         except Exception as exc:
             print(json.dumps({"valid": False, "error": str(exc) or type(exc).__name__}))
             raise SystemExit(1) from None
+        if args.confirm_drand and result.get("official"):
+            from .beacon import confirm
+            try:
+                result["official"]["drand_verification"] = confirm(result["official"]["drand_rounds"])
+                result["official"]["drand_status"] = result["official"]["drand_verification"]["status"]
+            except ValueError as exc:
+                print(json.dumps({"valid": False, "error": str(exc)}))
+                raise SystemExit(1) from None
         print(json.dumps(result, indent=2))
     elif args.command == "export":
         from .journal import Journal

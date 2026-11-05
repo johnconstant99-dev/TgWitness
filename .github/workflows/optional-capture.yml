@@ -12,6 +12,48 @@ concurrency:
   group: optional-capture-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  official-container:
+    name: Official client container and video
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --require-hashes -r deploy/browser.lock
+      - name: Permit Chromium user namespaces on the temporary hosted runner
+        run: |
+          if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+      - run: docker compose --project-directory . -f addons/capture/compose.official.yaml --profile official config --quiet
+      - run: docker build -f addons/capture/deploy/Dockerfile.official -t tgwitness-official-check .
+      - run: python tools/check_official_container.py
+      - name: Audit the official-client image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.76.1
+          scan-type: image
+          image-ref: tgwitness-official-check
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: false
+          format: json
+          output: official-image-audit.json
+          exit-code: '1'
+          timeout: 15m
+          cache: false
+      - name: Save the image audit
+        if: always() && hashFiles('official-image-audit.json') != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: official-image-audit
+          path: official-image-audit.json
+          retention-days: 7
   capture:
     name: Independent capture and Trusted Live
     runs-on: ubuntu-latest
@@ -25,6 +67,11 @@ jobs:
           python-version: "3.12"
       - run: python -m pip install --require-hashes -r deploy/browser.lock
       - run: python -m playwright install --with-deps chromium
+      - name: Permit Chromium user namespaces on the temporary hosted runner
+        run: |
+          if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: python addons/capture/lock_from_project.py && git diff --exit-code -- addons/capture/requirements.lock
       - run: python -m pytest addons/capture/tests -q --capture-browser
@@ -40,6 +87,21 @@ jobs:
         run: docker build -f addons/capture/deploy/Dockerfile.trusted -t tgwitness-trusted-ci .
       - name: Exercise official client, video and fail-closed namespace without an account
         run: python tools/check_trusted_container.py --image tgwitness-trusted-ci
+      - name: Audit the Desktop and Web image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.76.1
+          scan-type: image
+          image-ref: tgwitness-trusted-ci
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: false
+          format: json
+          output: test-results/trusted-container/image-audit.json
+          exit-code: '1'
+          timeout: 15m
+          cache: false
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:

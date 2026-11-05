@@ -1,0 +1,23 @@
+# Playwright 1.64.1 and its reviewed Chromium revision, including OS dependencies.
+FROM mcr.microsoft.com/playwright/python:v1.64.1-noble@sha256:330d401ae23c905896a0c26c66c36fc971b621519e7b11b435a8328d7bf6e031
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_DISABLE_PIP_VERSION_CHECK=1 DISPLAY=:99 HOME=/tmp/home
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get purge -y gstreamer1.0-plugins-bad libgstreamer-plugins-bad1.0-0 \
+    && apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core xvfb \
+    && rm -rf /var/lib/apt/lists/* && mkdir /data && chown pwuser:pwuser /data
+WORKDIR /app
+COPY deploy/build.lock /tmp/build.lock
+COPY addons/capture/requirements.lock /tmp/capture.lock
+RUN pip install --no-cache-dir --require-hashes -r /tmp/build.lock \
+    && pip install --no-cache-dir --require-hashes -r /tmp/capture.lock
+COPY addons/capture/pyproject.toml ./addons/capture/pyproject.toml
+COPY tgwitness_capture ./tgwitness_capture
+RUN pip install --no-cache-dir --no-deps --no-build-isolation ./addons/capture \
+    && pip uninstall -y pip setuptools virtualenv filelock distlib \
+    && rm -rf /root/.cache /root/.local/share/virtualenv
+# Offline encryption helpers only; no Telegram API dependencies are installed.
+COPY tgwitness ./tgwitness
+COPY addons/capture/deploy/official-start.sh /app/official-start.sh
+USER pwuser
+ENTRYPOINT ["sh", "/app/official-start.sh"]
+CMD ["python", "-m", "tgwitness_capture", "serve", "--data", "/data", "--config", "/config.json", "--host", "0.0.0.0", "--port", "8794"]

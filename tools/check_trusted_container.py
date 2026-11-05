@@ -15,7 +15,8 @@ from pathlib import Path
 
 import requests
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 from tgwitness_capture.verify import verify_zip
 
 
@@ -54,7 +55,8 @@ def main():
             config_path.write_text(json.dumps(config))
             docker("run", "-d", "--name", client, "--network", network, "--cap-drop=ALL",
                    "--cap-add=NET_ADMIN", "--cap-add=SETUID", "--cap-add=SETGID", "--cap-add=SETPCAP", "--cap-add=CHOWN",
-                   "--security-opt=no-new-privileges:true", "--read-only", "--shm-size=512m",
+                   "--security-opt=no-new-privileges:true", "--security-opt",
+                   "seccomp=" + str(ROOT / "addons/capture/deploy/official-seccomp.json"), "--read-only", "--shm-size=512m",
                    "--tmpfs", "/session:rw,nosuid,nodev,mode=0700,size=256m",
                    "--tmpfs", "/exports:rw,nosuid,nodev,mode=0700,size=64m",
                    "--tmpfs", "/home/recorder:rw,nosuid,nodev,mode=0700,size=128m",
@@ -95,6 +97,24 @@ else: raise AssertionError('Recorder can change protected route permissions')
                 docker("exec", "--user", "10001", client, "python", "-c", access_probe)
                 docker("exec", "--user", "10002", client, "python", "-c",
                        "import os; assert not os.access('/run/trusted-route.json',os.R_OK)")
+                # Exercise the shipped Web binary in the same restricted namespace.
+                # An empty page avoids authenticating or contacting Telegram; no
+                # --no-sandbox flag or extra capability is permitted here.
+                browser_probe = """import hashlib,json,subprocess
+from pathlib import Path
+binary=Path('/usr/bin/chromium').resolve(strict=True)
+subprocess.run([str(binary),'--headless=new','--no-first-run','--disable-background-networking',
+ '--disable-component-update','--disable-sync','--disable-extensions','--disable-dev-shm-usage',
+ '--password-store=basic','--host-resolver-rules=MAP * ~NOTFOUND',
+ '--proxy-server=http://%s:1080','--proxy-bypass-list=<-loopback>',
+ '--user-data-dir=/session/web-sandbox','--screenshot=/session/web-sandbox.png','about:blank'],
+ check=True,timeout=30,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
+assert Path('/session/web-sandbox.png').read_bytes().startswith(b'\\x89PNG\\r\\n\\x1a\\n')
+print(json.dumps({'binary_sha256':hashlib.file_digest(binary.open('rb'),'sha256').hexdigest(),
+ 'sandbox_enabled':True,'scope':'unauthenticated blank page; no Telegram request'}))
+""" % address
+                browser = json.loads(docker("exec", "--user", "10001", "-e", "HOME=/home/recorder",
+                                            "-e", "DISPLAY=:99", client, "python", "-c", browser_probe))
                 call("begin", {"case": "CI synthetic export; no account", "connector": "ci-sink", "client": "desktop", "method": "hybrid"})
                 deadline = time.monotonic() + 20
                 attempts = []
@@ -139,7 +159,7 @@ print(json.dumps(results))
                 assert any(event["kind"] == "video.segment" and event["artifacts"][0]["size"] > 1000 for event in events)
                 assert docker("exec", "--user", "10001", client, "python", "-c",
                               "from pathlib import Path; print(len(list(Path('/session').glob('trusted-*'))))") == "0"
-                result = {"official_binary_sha256": binary_hash, "network": routes, "verification": verified,
+                result = {"official_binary_sha256": binary_hash, "browser": browser, "network": routes, "verification": verified,
                           "archive_sha256": hashlib.sha256(bundle.content).hexdigest(),
                           "scope": "official unauthenticated Desktop, generated export, real FFmpeg; no account or WARP qualification"}
                 (args.output / "result.json").write_text(json.dumps(result, indent=2))

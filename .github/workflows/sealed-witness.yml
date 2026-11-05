@@ -11,6 +11,19 @@ on:
         type: choice
         default: '30'
         options: ['30', '60', '120']
+      client:
+        description: API export or official Telegram Web with video
+        type: choice
+        default: api
+        options: [api, official_web]
+      official_proxy:
+        description: Official Web requires an HTTP or SOCKS5 upstream, without credentials
+        type: string
+        default: ''
+      official_expected_ip:
+        description: Optional required exit IP for the official client
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -23,7 +36,13 @@ jobs:
       id-token: write # Pass OIDC identity to the approved attestation job.
       attestations: write # Let the approved collector store its signed attestation.
     # The user owns this caller, but the verifier requires the upstream signer below.
-    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@233509ae00d4915464a55968a7a749ec3a66ada1
+    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@c74542ba2a647962186a929991e1ec06993aac2d
     with:
       recipient: ${{ inputs.recipient }}
       session_minutes: ${{ inputs.session_minutes }}
+      client: ${{ inputs.client }}
+      official_proxy: ${{ inputs.official_proxy }}
+      official_expected_ip: ${{ inputs.official_expected_ip }}
+    secrets:
+      official_proxy_username: ${{ secrets.OFFICIAL_PROXY_USERNAME }}
+      official_proxy_password: ${{ secrets.OFFICIAL_PROXY_PASSWORD }}
