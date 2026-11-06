@@ -18,6 +18,8 @@ on:
       - tools/site_account.py
       - tools/site_llms.py
       - tools/site_export_clinic.py
+      - tools/site_validation.py
+      - tools/test_site_validation.py
       - tools/check_export_clinic.py
       - tools/export_clinic_preview.py
       - tools/site_test_server.py
