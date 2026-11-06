@@ -1,9 +1,6 @@
 [English](../../README.md) · **Русский** · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md)
 
-<picture>
-  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-intro-mobile.svg">
-  <img src="../assets/presentation/readme-intro.svg" width="1200" alt="TgWitness — Telegram archives with a verifiable record.">
-</picture>
+![TgWitness — preserve the record, verify the evidence](../assets/presentation/casework-hero-static.svg)
 
 <p align="center">
   <strong>Ваше пространство для наблюдения за Telegram.</strong><br>

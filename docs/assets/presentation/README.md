@@ -13,8 +13,6 @@ README, Wiki and documentation artwork. Screenshots use demo records.
 
 | Files | Use |
 | --- | --- |
-| `readme-intro.svg`, `readme-intro-mobile.svg` | Compact README covers; directly editable SVG text and paths, with no animation or external fonts |
-| `readme-performance-mobile.svg` | Phone layout of the 6 November 2026 measurements; the same rates and scale as the desktop chart |
 | `casework-hero*`, `casework-handbook*` | Project and Wiki covers |
 | `readme-nav-*` | README buttons, with shorter phone labels |
 | `readme-features*`, `readme-feature-*` | Export, investigation and saved-version animations |
@@ -48,12 +46,12 @@ After a version change, use `--metadata-only` to refresh its badges, update the
 README alt text and `docs/STATUS.md`, then run `python tools/check_publication.py`.
 
 Directory covers use layered illustrations: reference pages, capture frames,
-linked components, server racks and project artwork. The compact main cover names
-the product and illustrates three observation types; the interface follows below.
+linked components, server racks and project artwork. The main cover connects
+signed journal entries to a separately retained checkpoint and an evidence archive.
 The assurance diagram compares deployment choices and follows the TDX checks from
 Intel's root to the journal. Headings stay fixed; motion belongs to the illustrations.
-Every SVG is self-contained. Animated covers use outlined lettering.
-Their `<picture>` elements select a `-static.svg`
+All lettering is outlined and every SVG is self-contained.
+Each `<picture>` selects a `-static.svg`
 version for `prefers-reduced-motion: reduce`. Keep those sources before the regular
 mobile source: the narrow static version first, then the wide static version,
 then the animated narrow version at `max-width: 640px`.
@@ -68,12 +66,7 @@ Use `python website/render_presentation.py` for the sharing PNGs.
 
 Check both themes and a narrow viewport before replacing images. Keep the still
 variants: `<picture>` selects them for reduced motion. Keep useful alt text too.
-The static `readme-intro*` and `chapter-*` covers use system fonts.
-
-For a public GitHub revision, run the **Project website** workflow with
-`review_readme` enabled. The existing capture utility records the main README and
-three directory pages at desktop and phone widths in both themes. Screenshots and
-selected image sources are retained in the `site-check-results` artifact.
+SVG captions use outlined glyphs, so they don't depend on the reader's fonts.
 
 The [diagram reference](../../SHOWCASE.md) shows the evidence illustrations.
 The Wiki builder copies linked assets into its own repository.

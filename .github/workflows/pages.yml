@@ -48,11 +48,6 @@ on:
       - deploy/site.lock
       - .github/workflows/pages.yml
   workflow_dispatch:
-    inputs:
-      review_readme:
-        description: Capture GitHub READMEs in both themes and widths
-        type: boolean
-        default: false
 permissions:
   contents: read
 concurrency:
@@ -87,12 +82,6 @@ jobs:
       - name: Reuse the runner's versioned browser files
         run: echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright" >> "$GITHUB_ENV"
       - run: python -m playwright install chromium
-      - name: Review GitHub README rendering
-        if: github.event_name == 'workflow_dispatch' && inputs.review_readme
-        env:
-          REVIEW_REPOSITORY: ${{ github.repository }}
-          REVIEW_REVISION: ${{ github.sha }}
-        run: python website/capture_readme.py --repository "$REVIEW_REPOSITORY" --revision "$REVIEW_REVISION"
       - name: Build the isolated public site
         env:
           TGWITNESS_SITE_URL: ${{ vars.TGWITNESS_SITE_URL }}
@@ -106,7 +95,6 @@ jobs:
           name: site-check-results
           path: |
             build/check-results/site/
-            test-results/readme/
             test-results/site/**/*.png
             test-results/site/**/*.json
             test-results/docs-site/**/*.png
