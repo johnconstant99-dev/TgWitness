@@ -59,6 +59,8 @@ with (pathlib.Path(os.environ["FIXTURE_STATE"]) / "calls").open("a") as log:
 '''
 
 
+@unittest.skipUnless(Path("/etc/apk/repositories").is_file() and shutil.which("sh"),
+                     "Requires the built Linux APK container; exercised by the Docker CI job")
 class FetchRetry(unittest.TestCase):
     def run_installer(self, **environment):
         with tempfile.TemporaryDirectory(prefix="container-fetch-fixture-", dir=FIXTURE_ROOT) as temporary:
