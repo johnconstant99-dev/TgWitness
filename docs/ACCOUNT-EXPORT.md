@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Evidence and verification](EVIDENCE.md)
+
+![Evidence & verification](assets/presentation/chapter-evidence.svg)
+
 # Account export and minimized disclosure
 
 An account export reserves its account exclusively. Pause monitoring or another

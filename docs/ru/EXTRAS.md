@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Independent capture](../OPTIONAL-CAPTURE.md)
+
+![Independent capture](../assets/presentation/chapter-capture.svg)
+
 # Дополнения — когда нужны
 
 Для начала работы достаточно подключить аккаунт, выбрать источники и включить

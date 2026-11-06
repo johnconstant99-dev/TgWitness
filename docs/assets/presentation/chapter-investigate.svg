@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="200" viewBox="0 0 960 200" role="img" aria-labelledby="title desc">
+<title id="title">TgWitness · Investigation</title>
+<desc id="desc">Investigation documentation. Section illustration, not a test result.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#122536"/><stop offset="1" stop-color="#0b1722"/></linearGradient></defs>
+<rect x="1" y="1" width="958" height="198" rx="16" fill="url(#bg)" stroke="#294253"/>
+<path d="M36 46h44" stroke="#c5b9e4" stroke-width="4" stroke-linecap="round"/>
+<text x="94" y="52" fill="#b7c8d4" font-family="Arial,Helvetica,sans-serif" font-size="17" letter-spacing="2">TGWITNESS / EXPLORE</text>
+<text x="36" y="121" fill="#edf5f9" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="600">Investigation</text>
+<path d="M36 158h580" stroke="#294253"/>
+<g fill="none" stroke="#c5b9e4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="766" cy="92" r="39"/><path d="m795 121 35 35M742 81h46m-46 13h34m-34 13h40M851 53h41m-41 15h28M860 98h32m-32 15h24"/></g>
+</svg>

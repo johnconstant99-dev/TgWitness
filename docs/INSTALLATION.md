@@ -1,6 +1,24 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Getting started](QUICKSTART.md)
+
+![Getting started](assets/presentation/chapter-start.svg)
+
 # Install, verify and update
 
 [Project](../README.md) · [Quick start](QUICKSTART.md) · [Deployment](DEPLOYMENT.md)
+
+<details>
+<summary>On this page</summary>
+
+- [Install with one command](#install-with-one-command)
+- [Where everything runs](#where-everything-runs)
+- [Full-text search settings](#full-text-search-settings)
+- [Command-line access](#command-line-access)
+- [Verify before running](#verify-before-running)
+- [Update an existing installation](#update-an-existing-installation)
+- [Everyday commands on Ubuntu](#everyday-commands-on-ubuntu)
+- [Remove TgWitness](#remove-tgwitness)
+
+</details>
 
 ## Install with one command
 

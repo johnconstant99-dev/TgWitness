@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Getting started](../QUICKSTART.md)
+
+![Getting started](../assets/presentation/chapter-start.svg)
+
 # Первая настройка и единые настройки
 
 При первом входе в новую рабочую область открывается `/first-run`: язык и время,

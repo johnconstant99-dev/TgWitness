@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Getting started](QUICKSTART.md)
+
+![Getting started](assets/presentation/chapter-start.svg)
+
 # Accounts and session formats
 
 TgWitness signs in as a **Telegram user account** (not a bot) over MTProto, using

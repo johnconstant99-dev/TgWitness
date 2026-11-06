@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Independent capture](OPTIONAL-CAPTURE.md)
+
+![Independent capture](assets/presentation/chapter-capture.svg)
+
 # Sealed capture from a personal fork
 
 **Preview available from `main`.** A fork launches a pinned reusable workflow from
@@ -12,6 +16,22 @@ The verifier checks the archive against its GitHub attestation, the approved
 workflow and collector commits, and the signed journal and attachment hashes.
 The collection process uses pinned upstream code and fresh storage. A reviewer
 can inspect that code and verify the delivered archive against its recorded run.
+
+<details>
+<summary>On this page</summary>
+
+- [User flow](#user-flow)
+- [Session time budget](#session-time-budget)
+- [Choose this mode or a persistent workspace](#choose-this-mode-or-a-persistent-workspace)
+- [What is public, and what must stay private](#what-is-public-and-what-must-stay-private)
+- [Troubleshooting](#troubleshooting)
+- [Local decryption and verification](#local-decryption-and-verification)
+- [How the fork is kept outside the capture process](#how-the-fork-is-kept-outside-the-capture-process)
+- [Cryptographic handoff](#cryptographic-handoff)
+- [Limits and validation](#limits-and-validation)
+- [Maintainer release sequence](#maintainer-release-sequence)
+
+</details>
 
 ## User flow
 

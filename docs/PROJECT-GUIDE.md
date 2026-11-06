@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Project reference](README.md)
+
+![Project reference](assets/presentation/chapter-project.svg)
+
 # Complete project guide
 
 [Project home](../README.md) · [GitHub Wiki](https://github.com/phishdestroy/TgWitness/wiki)

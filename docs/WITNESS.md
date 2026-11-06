@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Evidence and verification](EVIDENCE.md)
+
+![Evidence & verification](assets/presentation/chapter-evidence.svg)
+
 # Independent witness
 
 [Export and verify](EVIDENCE.md) · [High assurance](HIGH-ASSURANCE.md) · [Panel guide](PANEL.md#extras)
@@ -16,6 +20,17 @@ flowchart LR
     J --> V
     T -- Telegram Desktop export or t.me/s page --> V
 ```
+
+<details>
+<summary>On this page</summary>
+
+- [What the witness gets, and what it does not](#what-the-witness-gets-and-what-it-does-not)
+- [What it checks and records](#what-it-checks-and-records)
+- [Run a witness](#run-a-witness)
+- [Public proof page for several workspaces](#public-proof-page-for-several-workspaces)
+- [Verify](#verify)
+
+</details>
 
 ## What the witness gets, and what it does not
 

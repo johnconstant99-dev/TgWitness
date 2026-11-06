@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Deployment and recovery](DEPLOYMENT.md)
+
+![Deployment & recovery](assets/presentation/chapter-operate.svg)
+
 # High-assurance deployment
 
 High-assurance deployment adds independent checks of the collection environment to
@@ -20,6 +24,26 @@ flowchart LR
     V --> S[Signed /api/assurance statement]
     V --> J[Evidence ZIP]
 ```
+
+<details>
+<summary>On this page</summary>
+
+- [What a verifier can check](#what-a-verifier-can-check)
+- [Providers](#providers)
+- [Confidential VM on Phala Cloud (Intel TDX)](#confidential-vm-on-phala-cloud-intel-tdx)
+- [Before you start](#before-you-start)
+- [From the panel](#from-the-panel)
+- [Quick tunnel without a domain](#quick-tunnel-without-a-domain)
+- [Deploy](#deploy)
+- [Debug deployment and lock](#debug-deployment-and-lock)
+- [Remove a deployment](#remove-a-deployment)
+- [Any server (self-attested)](#any-server-self-attested)
+- [Verify](#verify)
+- [Report for evidence handover](#report-for-evidence-handover)
+- [Cloudflare as an outside witness](#cloudflare-as-an-outside-witness)
+- [Reading the deployment result](#reading-the-deployment-result)
+
+</details>
 
 ## What a verifier can check
 

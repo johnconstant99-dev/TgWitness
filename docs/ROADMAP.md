@@ -1,8 +1,24 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Project reference](README.md)
+
+![Project reference](assets/presentation/chapter-project.svg)
+
 # TgWitness roadmap
 
 Reviewed 6 November 2026. Implemented capabilities and their qualification are in
 [Current status](STATUS.md); shipped changes are in the [changelog](CHANGELOG.md).
 This page describes remaining work, not the contents of a published download.
+
+<details>
+<summary>On this page</summary>
+
+- [Now: 0.9 preview source](#now-09-preview-source)
+- [Next: qualify and connect existing workflows](#next-qualify-and-connect-existing-workflows)
+- [Next: independent observation and offline review](#next-independent-observation-and-offline-review)
+- [Later](#later)
+- [Proposed: trust in the build](#proposed-trust-in-the-build)
+- [Release automation](#release-automation)
+
+</details>
 
 ## Now: 0.9 preview source
 

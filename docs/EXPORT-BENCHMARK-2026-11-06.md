@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Evidence and verification](EVIDENCE.md)
+
+![Evidence & verification](assets/presentation/chapter-evidence.svg)
+
 # Public-history export qualification: 6 November 2026
 
 The first 50 unique public usernames in a fixed input list were tested on two

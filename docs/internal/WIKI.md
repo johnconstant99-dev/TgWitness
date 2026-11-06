@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Development](../ARCHITECTURE.md)
+
+![Development](../assets/presentation/chapter-develop.svg)
+
 # Maintain and publish the wiki
 
 The English wiki source lives in [docs/wiki](../wiki/Home.md). It is reviewed with the application source. The GitHub Wiki bundle is generated from an explicit page list in `tools/build_wiki.py`.

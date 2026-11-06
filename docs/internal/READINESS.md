@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Development](../ARCHITECTURE.md)
+
+![Development](../assets/presentation/chapter-develop.svg)
+
 # Release checks
 
 1. Run the required installation, browser, export, verification and security checks

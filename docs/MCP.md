@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Archive integrations](CLI.md)
+
+![Archive integrations](assets/presentation/chapter-integrations.svg)
+
 # Read the archive through MCP
 
 Connect an analyst client to selected workspaces and chats. TgWitness serves
@@ -7,6 +11,17 @@ settings or modify the signed journal. The same connections work with the
 [command line](CLI.md).
 
 [Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
+
+<details>
+<summary>On this page</summary>
+
+- [Install and check](#install-and-check)
+- [Issue a connection](#issue-a-connection)
+- [Connect your client](#connect-your-client)
+- [Cloudflare Tunnel](#cloudflare-tunnel)
+- [Tools and boundaries](#tools-and-boundaries)
+
+</details>
 
 ## Install and check
 

@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Evidence and verification](EVIDENCE.md)
+
+![Evidence & verification](assets/presentation/chapter-evidence.svg)
+
 # File hashes and export preflight
 
 Account Export supports `download`, `hashes_only` and `exclude` media actions with either regular API or Takeout. Use the existing export settings dialog, or send an [accepted configuration](../examples/export-hashes.json) to `POST /api/account-export/start`. `chat_ids: []` selects all visible chats of the chosen types; provide IDs to restrict the scope.
@@ -15,6 +19,17 @@ Animated MP4s use the animation rule; video stickers use the sticker rule, regar
 With `messages_first: true` (the default), all selected history and account metadata pages are saved and signed before file or hash requests start. Expiring Telegram file references stay in an encrypted private queue. Resume verifies the frozen pages and continues from them without rereading edited or deleted messages. Attachment processing seals at most ten enriched messages at a time to bound memory when hash manifests are large. A paused local job can either resume or **Finish with saved data**; finishing creates an archive and explicitly records unavailable history and attachments.
 
 `export_format` accepts `tgwitness`, `telegram_json`, `telegram_html` and `telegram_both`. The compatible views add `result.json` and/or `export_results.html` with offline chat pages. Core chat/message fields follow the [Telegram Desktop JSON schema](https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/export/output/export_output_json.cpp); this is an independent rendering, not an export generated or signed by Telegram Desktop. Dates use UTC, messages are ordered by ID, and media paths refer to the same deduplicated files. `tgwitness_media` and `hashes/index.jsonl` retain hash-only outcomes. Signed JSONL remains authoritative, including source fields not mapped into the compatible view.
+
+<details>
+<summary>On this page</summary>
+
+- [What the hashes mean](#what-the-hashes-mean)
+- [Compare a downloaded file](#compare-a-downloaded-file)
+- [Check settings before starting](#check-settings-before-starting)
+- [Restricted GitHub capture and single-chat export](#restricted-github-capture-and-single-chat-export)
+- [Limits and release status](#limits-and-release-status)
+
+</details>
 
 ## What the hashes mean
 

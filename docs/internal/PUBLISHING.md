@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Development](../ARCHITECTURE.md)
+
+![Development](../assets/presentation/chapter-develop.svg)
+
 # Publish the project and website
 
 Publish TgWitness **0.9.1** with the project website and release packages. See
@@ -11,6 +15,17 @@ The [project wiki](../wiki/Home.md) has its own GitHub repository and a separate
 [build and publishing procedure](WIKI.md). Run `python tools/build_wiki.py` to prepare
 its pages, navigation, ZIP and checksums. The Wiki bundle workflow produces artifacts;
 publishing Pages or the main repository does not publish the wiki.
+
+<details>
+<summary>On this page</summary>
+
+- [Preview the website locally](#preview-the-website-locally)
+- [Publish to GitHub](#publish-to-github)
+- [What gets published to Pages](#what-gets-published-to-pages)
+- [Check before publication](#check-before-publication)
+- [Releases](#releases)
+
+</details>
 
 ## Preview the website locally
 

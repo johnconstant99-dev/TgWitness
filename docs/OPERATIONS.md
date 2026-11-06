@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Deployment and recovery](DEPLOYMENT.md)
+
+![Deployment & recovery](assets/presentation/chapter-operate.svg)
+
 # Workflows and operations
 
 For your first connection, use [accounts and session formats](ACCOUNTS.md).
@@ -15,6 +19,22 @@ access while the local panel and collection keep running. `tgwitness tunnel on`
 enables it; `tgwitness tunnel restart` creates a new tunnel connection. Use
 `tgwitness open` to see its current address. An explicit off setting survives
 service restarts. `tgwitness stop` stops both the panel and collection.
+
+<details>
+<summary>On this page</summary>
+
+- [Operator workflow](#operator-workflow)
+- [Share work without sharing the main key](#share-work-without-sharing-the-main-key)
+- [Runtime modes](#runtime-modes)
+- [Monitoring categories](#monitoring-categories)
+- [Notifications](#notifications)
+- [Panel layout](#panel-layout)
+- [Deployment environments](#deployment-environments)
+- [Startup checks and exports](#startup-checks-and-exports)
+- [Backup, restore and interruptions](#backup-restore-and-interruptions)
+- [Capacity and retention](#capacity-and-retention)
+
+</details>
 
 ## Operator workflow
 

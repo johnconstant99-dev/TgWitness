@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Investigation](../INVESTIGATION.md)
+
+![Investigation](../assets/presentation/chapter-investigate.svg)
+
 # Отчёт по делу: основания доверия и ограничения
 
 [English](../CASE_REPORTS.md)

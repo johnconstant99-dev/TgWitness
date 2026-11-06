@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Evidence and verification](EVIDENCE.md)
+
+![Evidence & verification](assets/presentation/chapter-evidence.svg)
+
 # Independent timestamps and evidence handoff
 
 TgWitness prepares RFC 3161 requests and verifies timestamp authority (TSA) responses.

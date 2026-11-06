@@ -53,6 +53,50 @@ def test_complete_navigation_and_unique_metadata():
     assert set(NEW_REFERENCE) <= set(REFERENCE)
 
 
+def test_collapsible_reference_renders_links_tables_and_code():
+    from tools import site_wiki
+
+    source = '''<details>
+<summary>Recorded deployment</summary>
+
+[Read the evidence](EVIDENCE.md)
+
+| Check | Result |
+| --- | --- |
+| Signature | **PASS** |
+
+```sh
+verify --source "<archive>"
+```
+
+<details open>
+<summary>Scope</summary>
+
+- No Telegram account was connected.
+
+</details>
+</details>
+'''
+    result = site_wiki.to_html(source)[0]
+    assert '<a href="EVIDENCE.md">Read the evidence</a>' in result
+    assert '<table>' in result and '<strong>PASS</strong>' in result
+    assert '<li>No Telegram account was connected.</li>' in result
+    assert 'verify --source &quot;&lt;archive&gt;&quot;' in result
+    assert result.count('<details') == 2
+    assert 'markdown="1"' not in result
+    assert 'WIKISLOT' not in result
+
+
+def test_collapsible_markup_in_code_remains_literal():
+    from tools import site_wiki
+
+    source = '```html\n<details>\n<summary>Example</summary>\n</details>\n```'
+    result = site_wiki.to_html(source)[0]
+    assert '&lt;details&gt;' in result
+    assert '<details' not in result
+    assert 'markdown=' not in result
+
+
 def test_metadata_tracks_localized_page_and_visible_hierarchy():
     local = "docs/reports/"
     path = "pt/" + local

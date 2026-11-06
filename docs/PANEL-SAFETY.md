@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Getting started](QUICKSTART.md)
+
+![Getting started](assets/presentation/chapter-start.svg)
+
 # Panel safeguards
 
 [Documentation](README.md) · [Accounts](ACCOUNTS.md) · [Storage](STORAGE.md)
@@ -5,6 +9,18 @@
 The panel double-checks which account you're acting as, inspects imported files before
 signing in and keeps chat actions off until you turn them on. It's about avoiding
 mistakes; the server still checks permissions on its own.
+
+<details>
+<summary>On this page</summary>
+
+- [File check](#file-check)
+- [Account context](#account-context)
+- [Read-only chat](#read-only-chat)
+- [Downloads](#downloads)
+- [Code map](#code-map)
+- [Checks](#checks)
+
+</details>
 
 ## File check
 

@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Evidence and verification](EVIDENCE.md)
+
+![Evidence & verification](assets/presentation/chapter-evidence.svg)
+
 # Follow the message. Understand the evidence.
 
 TgWitness preserves what a collecting account observed, links those observations
@@ -11,6 +15,18 @@ interactive examples at `/docs/concepts/`, a checkpoint decision explorer at
 All example messages,
 counts and delays are fictional. Hashes in the chain sandbox are calculated with
 SHA-256 in the browser. Nothing is sent to Telegram.
+
+<details>
+<summary>On this page</summary>
+
+- [A message changes; observations accumulate](#a-message-changes-observations-accumulate)
+- [What a hash covers](#what-a-hash-covers)
+- [What an earlier checkpoint adds](#what-an-earlier-checkpoint-adds)
+- [Where a witness belongs](#where-a-witness-belongs)
+- [Test delivery against known actions](#test-delivery-against-known-actions)
+- [Pick a workflow](#pick-a-workflow)
+
+</details>
 
 ## A message changes; observations accumulate
 

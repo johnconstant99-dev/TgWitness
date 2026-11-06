@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Deployment and recovery](../DEPLOYMENT.md)
+
+![Deployment & recovery](../assets/presentation/chapter-operate.svg)
+
 [English](../HIGH-ASSURANCE.md) · **Русский**
 
 # Развёртывание с повышенной доказуемостью

@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Collection](COLLECTION-MODES.md)
+
+![Collection](assets/presentation/chapter-collect.svg)
+
 # Faster acquisition with the same evidence boundary
 
 The acquisition engine should share one signed plan, storage and verifier across

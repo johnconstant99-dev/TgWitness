@@ -1,6 +1,6 @@
 [English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · **हिन्दी** · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md)
 
-![TgWitness — Telegram investigations and signed records](../assets/presentation/brand.svg)
+![TgWitness — preserve the record, verify the evidence](../assets/presentation/casework-hero-static.svg)
 
 <p align="center">
   <strong>आपका टेलीग्राम अवलोकन कार्यक्षेत्र।</strong><br>

@@ -23,6 +23,7 @@ README, Wiki and documentation artwork. Screenshots use demo records.
 | `readme-handbook*`, `wiki-*` | Handbook routes and chapter covers |
 | `identity-meta-*` | Version, languages, test and licence badges |
 | `folder-*`, `readme-button-*`, `*divider*` | Folder headers, links and separators |
+| `chapter-*` | Compact, static category headers for reference pages; editable SVG text and paths |
 | `section-*` | Animated directory covers, narrow-screen layouts and reduced-motion stills |
 | `preview-github.png`, `preview-social.png` | Sharing images |
 
@@ -69,3 +70,7 @@ SVG captions use outlined glyphs, so they don't depend on the reader's fonts.
 
 The [diagram reference](../../SHOWCASE.md) shows the evidence illustrations.
 The Wiki builder copies linked assets into its own repository.
+
+The compact `chapter-*` headers use system fonts, contain no scripts or external
+resources, and are shared by related pages. Their illustrations identify a topic;
+they do not present measurements. Keep page titles and navigation as Markdown.

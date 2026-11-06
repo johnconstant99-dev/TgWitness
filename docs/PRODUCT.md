@@ -1,8 +1,30 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Project reference](README.md)
+
+![Project reference](assets/presentation/chapter-project.svg)
+
 # TgWitness product and collection model
 
 TgWitness preserves Telegram conversations accessible to connected accounts,
 records observed changes and prepares verifiable exports. This reference describes
 the collection model, current workflows and their boundaries.
+
+<details>
+<summary>On this page</summary>
+
+- [Standalone application](#standalone-application)
+- [Shared investigations](#shared-investigations)
+- [Archive tools](#archive-tools)
+- [Optional extras](#optional-extras)
+- [Protocol and private sources](#protocol-and-private-sources)
+- [Multiple accounts](#multiple-accounts)
+- [Capture and attribution](#capture-and-attribution)
+- [Capacity and Telegram limits](#capacity-and-telegram-limits)
+- [Reliability and recovery](#reliability-and-recovery)
+- [Evidence model](#evidence-model)
+- [Export, deployment and handoff](#export-deployment-and-handoff)
+- [Stable release criteria](#stable-release-criteria)
+
+</details>
 
 ## Standalone application
 

@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Independent capture](OPTIONAL-CAPTURE.md)
+
+![Independent capture](assets/presentation/chapter-capture.svg)
+
 # Official client witness
 
 The official-client preview owns a fresh Chromium browser running [Telegram Web A](https://web.telegram.org/a/). It offers a passive view or sequential scrolling, records the visible procedure with FFmpeg, and signs rendered observations and video segments. The collector makes no Telegram API calls of its own and imports no Telegram session. The official client still uses Telegram's own protocol internally.
@@ -10,6 +14,17 @@ The official-client preview owns a fresh Chromium browser running [Telegram Web 
 | Trusted Live local | Official Desktop chat JSON, video and frame-linked operator annotations | Separate local preview, manual setup, without the GitHub attestation of this Web mode |
 
 Official Web observation does not replace a complete Desktop account export. Choose the existing [account export](ACCOUNT-EXPORT.md) when completeness across selected chats is required. For manually operated Desktop collection, see [Trusted Live](TRUSTED-LIVE.md), which preserves a single-chat JSON export and has a different trust boundary. This Web mode does not expose arbitrary clicking, typing, profile visits, media downloads or Telegram Desktop automation. Only currently rendered fields are extracted, missing fields remain unavailable, and disappearing DOM elements are not reported as message deletions.
+
+<details>
+<summary>On this page</summary>
+
+- [Run through GitHub Actions](#run-through-github-actions)
+- [Local Linux deployment](#local-linux-deployment)
+- [Network and account behavior](#network-and-account-behavior)
+- [Evidence and limits](#evidence-and-limits)
+- [Validation](#validation)
+
+</details>
 
 ## Run through GitHub Actions
 

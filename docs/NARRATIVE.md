@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Investigation](INVESTIGATION.md)
+
+![Investigation](assets/presentation/chapter-investigate.svg)
+
 # Evidence narratives
 
 `python -m tgwitness.narrative` produces a source-linked account from a **verified full evidence ZIP**. It first authenticates the archive, then creates PDF, HTML, JSON and four SVG diagrams. It never takes a supplied verdict JSON as proof. A failed signature, inconsistent manifest or contradictory witness evidence stops generation.

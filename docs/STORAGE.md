@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Deployment and recovery](DEPLOYMENT.md)
+
+![Deployment & recovery](assets/presentation/chapter-operate.svg)
+
 # Storage and recovery
 
 The panel separates three tasks:
@@ -18,6 +22,17 @@ the complete encrypted object and verifies its size and SHA-256, saves the recei
 then checks the local bytes again immediately before removal. An upload failure,
 different readback or cancelled transfer leaves the local file in place. If an
 enabled evidence backup has not yet copied that file, removal also waits for it.
+
+<details>
+<summary>On this page</summary>
+
+- [When the disk is filling up](#when-the-disk-is-filling-up)
+- [Connect a destination](#connect-a-destination)
+- [Keep the recovery file](#keep-the-recovery-file)
+- [Recover after losing the installation](#recover-after-losing-the-installation)
+- [Operator bot and completion notices](#operator-bot-and-completion-notices)
+
+</details>
 
 ## When the disk is filling up
 

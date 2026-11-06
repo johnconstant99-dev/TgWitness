@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md)
+
+![Development](assets/presentation/chapter-develop.svg)
+
 # Architecture
 
 One Python process hosts the FastAPI panel and any number of isolated workspaces,

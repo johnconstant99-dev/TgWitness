@@ -1,8 +1,29 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Collection](COLLECTION-MODES.md)
+
+![Collection](assets/presentation/chapter-collect.svg)
+
 # How collection works
 
 TgWitness records what a connected Telegram account observes. The journal preserves
 those observations, their sequence, and the context supplied with them. It does
 not infer unseen actions from a missing message or from an account being connected.
+
+<details>
+<summary>On this page</summary>
+
+- [From login to a journal](#from-login-to-a-journal)
+- [Observation scope: chosen chats, a folder or the whole account](#observation-scope-chosen-chats-a-folder-or-the-whole-account)
+- [Scope and event selection](#scope-and-event-selection)
+- [Own actions](#own-actions)
+- [Investigation mode: joining teams and talking to bots](#investigation-mode-joining-teams-and-talking-to-bots)
+- [Recheck tiers](#recheck-tiers)
+- [Message history and attribution](#message-history-and-attribution)
+- [History snapshots](#history-snapshots)
+- [Attachment handling](#attachment-handling)
+- [Pause, lock, disconnect, and restart](#pause-lock-disconnect-and-restart)
+- [Account isolation and verification](#account-isolation-and-verification)
+
+</details>
 
 ## From login to a journal
 

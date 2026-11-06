@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Collection](COLLECTION-MODES.md)
+
+![Collection](assets/presentation/chapter-collect.svg)
+
 # Self-destructing media in the API journal
 
 The API collector saves available photos, videos, voice messages and files with

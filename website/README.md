@@ -21,6 +21,7 @@ Landing page, docs and demo. The app UI lives in
 | [i18n/](i18n/README.md) | Translations |
 | [demo/](demo/README.md) | Demo API mock, fixtures and downloadable examples |
 | [export-clinic/](export-clinic/README.md) | Interactive export-file comparison and review materials |
+| [validation/](validation/README.md) | Dated measurements, performance charts and the signed English audit |
 | [capture_readme.py](capture_readme.py) | Demo recordings for the README |
 | `render_*.py` | Artwork; see the [asset guide](../docs/assets/presentation/README.md) |
 

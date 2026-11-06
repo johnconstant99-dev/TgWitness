@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Collection](COLLECTION-MODES.md)
+
+![Collection](assets/presentation/chapter-collect.svg)
+
 # Export pacing and Telegram limits
 
 Reviewed on 6 November 2026 UTC. This compares implementation paths, not advertised
