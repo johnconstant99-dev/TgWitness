@@ -3,7 +3,9 @@
   const ENV="TGWITNESS_MCP_TOKEN", PLACEHOLDER="<PASTE_TOKEN_HERE>";
   const toolLabels={list_workspaces:tr("List workspaces"),list_chats:tr("List chats"),search_messages:tr("Search messages"),
     get_message_versions:tr("Message versions"),get_message_context:tr("Message context"),get_journal_event:tr("Journal records"),get_capture_status:tr("Capture status"),
-    get_activity_stats:tr("Activity statistics"),export_messages:tr("Export messages (command line only)")};
+    get_activity_stats:tr("Activity statistics"),export_messages:tr("Export messages (command line only)"),
+    get_messages_by_date:tr("Messages of one day"),get_pinned_messages:tr("Pinned messages"),get_chat_stats:tr("Chat counts and gaps"),
+    get_topics:tr("Forum topics"),get_media:tr("Image previews with hashes")};
   let secret="", issuedId=null, configuration=null, revision=0, owner=null, runtime=null, creating=false, timer=null, refreshing=null, checkActive=0;
   const groups=new Map(), connectionRows=new Map();
   const ownerKey=()=>state.workspaceRevision+":"+state.profile;

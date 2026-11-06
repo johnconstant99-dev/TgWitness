@@ -17,6 +17,7 @@ COLORS = {"new": "#247e8c", "snapshot": "#5776b3", "recovered": "#8c70aa", "edit
 DAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
 CSS = """
+.metric-chart{width:100%;height:72px;display:block;margin:8px 0}.metric-bar{fill:#5776b3}
 .report-analytics{--chart-ink:var(--chart-accent)}.analytics-meta{font:11px/1.8 ui-monospace,monospace;overflow-wrap:anywhere;color:var(--muted)}
 .analytics-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0}
 .analytics-totals div{padding:18px;background:var(--card,var(--paper));min-width:0}.analytics-totals b{font:30px/1.3 Georgia,serif;display:block}
@@ -47,7 +48,7 @@ def text_keys():
             "Activity by chat", "Exact figures", "Period (UTC)", "Observations", "First record", "Last record", "Source file",
             "No observations in this selection.", "This chart exceeds the grouping limit. Exact overall counts remain available.",
             "Observations with an unusable time: {n}", "Participant {n}", "Sender {id}", "Chat {id}", "Unknown", "Other",
-            "All bars start at zero. Values are counts, not percentages.", "Hour (UTC)", "Counts by category", "Report sections", "Record composition", "THE RECORD IN NUMBERS"]
+            "All bars start at zero. Values are counts, not percentages.", "Hour (UTC)", "Counts by category", "Report sections", "Record composition", "THE RECORD IN NUMBERS", *metric_texts()]
 
 
 def _e(value):
@@ -344,3 +345,80 @@ def examination_pdf(lay, data):
         if value := data.get(key):
             lay.heading(lay.say(title))
             lay.text(value,size=9)
+
+
+METRICS_TITLE = "Anomaly indicators"
+METRICS_INTRO = "Computed from events.jsonl by the listed processors. They point at what to check, not at what happened."
+
+
+def metric_texts():
+    from . import metrics
+    found = [METRICS_TITLE, METRICS_INTRO, "Processors that ran: {list}", "Method", "Flagged for review: {n}",
+             "Showing the latest {shown} of {total} rows.", "Chat {id}, {day}: {found} first-time posters (median {base}), "
+             "{messages} messages (median {base_messages})"]
+    for cls in metrics.load().values():
+        found += [cls.title, cls.methodology, *cls.columns]
+    return found
+
+
+def _metric_bars(rows, column):
+    values = [row[column] if isinstance(row[column], (int, float)) else 0 for row in rows]
+    top = max(values, default=0) or 1
+    width = max(len(values), 1)
+    bars = "".join('<rect x="%.3f" y="%.3f" width="%.3f" height="%.3f" class="metric-bar"/>'
+                   % (index * 1000 / width + 1, 100 - value * 96 / top, max(1000 / width - 2, 1), value * 96 / top)
+                   for index, value in enumerate(values))
+    return ('<svg class="metric-chart" viewBox="0 0 1000 100" preserveAspectRatio="none" role="img" aria-hidden="true">'
+            + bars + '</svg>')
+
+
+def metrics_html(data, say):
+    if not data or not data.get("processors"):
+        return ''
+    ran = ', '.join(p["name"] + ' v' + str(p["version"]) for p in data["processors"])
+    parts = ['<section class="card report-analytics" id="report-metrics"><h2>' + _e(say(METRICS_TITLE)) + '</h2><p>'
+             + _e(say(METRICS_INTRO)) + '</p><p class="analytics-meta">' + _e(say("Processors that ran: {list}", list=ran))
+             + '</p>']
+    for item in data["processors"]:
+        columns, rows = [say(c) for c in item["columns"]], item.get("rows") or []
+        parts.append('<figure class="analytics-figure chart-card metric-figure"><figcaption>' + _e(say(item["title"]))
+                     + ' <span class="analytics-basis">' + _e(item["name"]) + ' v' + _e(item["version"]) + '</span></figcaption>')
+        if rows and len(rows[0]) > 1 and isinstance(rows[0][1], (int, float)):
+            parts.append(_metric_bars(rows, 1))
+        if not rows:
+            parts.append('<p>' + _e(say("No observations in this selection.")) + '</p>')
+        else:
+            if item.get("rows_total", len(rows)) > len(rows):
+                parts.append('<p>' + _e(say("Showing the latest {shown} of {total} rows.", shown=len(rows),
+                                             total=item["rows_total"])) + '</p>')
+            parts.append(_table(columns, rows, say))
+        if item.get("flags_total"):
+            parts.append('<p><b>' + _e(say("Flagged for review: {n}", n=item["flags_total"])) + '</b></p><ul>' + ''.join(
+                '<li>' + _e(say("Chat {id}, {day}: {found} first-time posters (median {base}), {messages} messages "
+                                "(median {base_messages})", id=f["chat_id"], day=f["day"], found=f["first_time_posters"],
+                                base=f["baseline"], messages=f["messages"], base_messages=f["baseline_messages"]))
+                + '</li>' for f in item.get("flags") or []) + '</ul>')
+        parts.append('<p class="analytics-meta">' + _e(say("Method")) + ': ' + _e(say(item["methodology"])) + '</p></figure>')
+    return ''.join(parts) + '</section>'
+
+
+def metrics_pdf(lay, data):
+    if not data or not data.get("processors"):
+        return
+    say = lay.say
+    lay.section(say(METRICS_TITLE), say(METRICS_INTRO))
+    lay.text(say("Processors that ran: {list}", list=', '.join(p["name"] + ' v' + str(p["version"])
+                                                               for p in data["processors"])), size=8)
+    for item in data["processors"]:
+        lay.heading(say(item["title"]) + ' · ' + item["name"] + ' v' + str(item["version"]))
+        rows = item.get("rows") or []
+        if rows:
+            widths = tuple(round(100 / len(item["columns"]), 2) for _ in item["columns"])
+            lay.grid([say(c) for c in item["columns"]], [[str(value) for value in row] for row in rows[-40:]], widths)
+        else:
+            lay.text(say("No observations in this selection."), size=8)
+        for flag in (item.get("flags") or [])[:20]:
+            lay.text(say("Chat {id}, {day}: {found} first-time posters (median {base}), {messages} messages (median "
+                         "{base_messages})", id=flag["chat_id"], day=flag["day"], found=flag["first_time_posters"],
+                         base=flag["baseline"], messages=flag["messages"], base_messages=flag["baseline_messages"]), size=8)
+        lay.text(say("Method") + ': ' + say(item["methodology"]), size=7.5)

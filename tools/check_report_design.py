@@ -37,7 +37,8 @@ def main():
             for lang in ('en','ru','de'):
                 page.goto((root/lang/'report.html').as_uri())
                 expect(page.locator('.assessment-overview li')).to_have_count(6)
-                expect(page.locator('.analytics-figure')).to_have_count(5)
+                expect(page.locator('#report-analytics .analytics-figure')).to_have_count(5)
+                expect(page.locator('#report-metrics .metric-figure')).to_have_count(4)
                 expect(page.locator('.analytics-totals b')).to_have_count(6)
                 page.locator('.assessment-overview a[href="#assessment-coverage"]').click()
                 expect(page.locator('#assessment-coverage h3')).to_be_in_viewport()

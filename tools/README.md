@@ -44,6 +44,9 @@ Builds stay local. See [publishing](../docs/internal/PUBLISHING.md) and
 | `python tools/test_disclosure_markers.py` | Minimized disclosure markers: collapsed and per-message markers, reply states, pseudonymized links, signed package, verifier rejection of dangling replies and content in markers, version 1 compatibility |
 | `python tools/test_gap_analysis.py` | Missing message numbers: per-chat and account-wide validity, deletion notices, parameters, capture status within access, export, report and verifier recomputation |
 | `python tools/test_cli.py` | Command line: local and panel modes, scoped connection tokens, refused tools, exit codes, activity statistics and JSON Lines export |
+| `python tools/test_chat_state.py` | Chat-state snapshots: differences, compact and weekly full states, unknown parts carried forward, reading channels with a fake client, due sources, FloodWait backoff, verifiable export |
+| `python tools/test_archive_views.py` | Archive views: one day across a daylight-saving change, pinned messages and notices, chat counts with gaps within access, forum topics, verified bounded image previews, output schemas of every MCP tool |
+| `python tools/test_metrics.py` | Metric processors: registry and versions, injection-like spikes after warm-up, service share, joins and departures, pins and unpins, report listing and parameters |
 | `python tools/test_fulltext.py` | Full-text search: word forms, scripts, references, scope, derived text, CLI and verifier compatibility with `fixtures/evidence-before-fulltext.zip` |
 
 Account, workspace, navigation, interaction and proxy checks have their own

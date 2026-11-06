@@ -419,6 +419,7 @@ class Collector:
         self.reconciler = None
         self.intake = asyncio.Queue()
         self.intake_worker = None
+        self.chat_state_worker = None
         self.recheck_wakeup = asyncio.Event()
         self.recheck_state = None
         self.resumed_state_at = None
@@ -579,6 +580,13 @@ class Collector:
                                             "visibility": "unknown", "role": "unknown"}
         if scope["new_chats"]["profile"] or scope["new_chats"]["history"]:
             self.intake.put_nowait((chat_id, entity))
+
+    async def chat_state_loop(self):
+        from . import chat_state
+        attempted = {}
+        while self.running:
+            await chat_state.run_due(self, attempted)
+            await asyncio.sleep(60)
 
     async def intake_loop(self):
         while self.running:
@@ -1872,7 +1880,7 @@ class Collector:
 
     async def start_observation(self):
         if (self.watchdog or self.media_worker or self.urgent_media_worker or self.ephemeral_media_worker
-                or self.reconciler or self.intake_worker):
+                or self.reconciler or self.intake_worker or self.chat_state_worker):
             await self.stop()
         if scope_settings(self.store)["mode"] == "selected" and not self.store.targets(True):
             raise ValueError("Select at least one group or channel first.")
@@ -1918,6 +1926,7 @@ class Collector:
             self.supervise(lambda: self.download_worker("ephemeral"), "self-destructing media worker"))
         self.reconciler = asyncio.create_task(self.supervise(self.recheck_loop, "recheck"))
         self.intake_worker = asyncio.create_task(self.supervise(self.intake_loop, "new chat intake"))
+        self.chat_state_worker = asyncio.create_task(self.supervise(self.chat_state_loop, "chat state snapshots"))
         catch_up = getattr(self.client, "catch_up", None)
         if catch_up:
             await catch_up()
@@ -1954,7 +1963,7 @@ class Collector:
 
     async def cancel_workers(self):
         tasks = (self.watchdog, self.media_worker, self.urgent_media_worker, self.ephemeral_media_worker,
-                 self.reconciler, self.intake_worker)
+                 self.reconciler, self.intake_worker, self.chat_state_worker)
         tasks = tuple(task for task in tasks if task and task is not asyncio.current_task())
         for task in tasks:
             task.cancel()
@@ -1973,6 +1982,7 @@ class Collector:
         self.buffered, self.buffering = [], False
         await self.cancel_workers()
         self.watchdog = self.media_worker = self.urgent_media_worker = self.reconciler = self.intake_worker = None
+        self.chat_state_worker = None
         self.ephemeral_media_worker = None
         await self.avatar_history.close()
         if not shutdown:

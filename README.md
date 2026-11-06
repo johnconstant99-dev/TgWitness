@@ -135,6 +135,7 @@ chat, records partial results at its deadline, and splits large encrypted delive
 | [Webhooks](docs/WEBHOOKS.md) | Signed outgoing events with retries, n8n example included |
 | [Shared access](docs/ACCESS.md) | Give someone selected chats only, with expiry and IP limits |
 | [Missing message numbers](docs/EVIDENCE.md#missing-message-numbers-gap_summary) | Numbers Telegram assigned that were never observed, per channel and for the whole account, in coverage, reports and MCP (**Preview**) |
+| [Chat state snapshots](docs/COLLECTION.md) | Periodic signed snapshots of title, description, pins, administrators and gifts, with what changed (**Preview**) |
 
 </details>
 

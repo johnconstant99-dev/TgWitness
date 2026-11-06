@@ -94,7 +94,7 @@ def main():
             server.should_exit = True
             thread.join(timeout=10)
             sock.close()
-    print("MCP stdio and Streamable HTTP passed: eight read-only tools, chat isolation, authentication and revocation.")
+    print("MCP stdio and Streamable HTTP passed: thirteen read-only tools, chat isolation, authentication and revocation.")
 
 
 if __name__ == "__main__":

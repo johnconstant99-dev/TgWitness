@@ -41,7 +41,7 @@ def main():
         unlock(page, server)
         page.evaluate("navigate('parameters')")
         page.evaluate("parametersReady")
-        expect(page.locator("#parameters-groups .parameters-group")).to_have_count(9)
+        expect(page.locator("#parameters-groups .parameters-group")).to_have_count(len(tuning.GROUPS))
         expect(page.locator("#parameters-save")).to_be_disabled()
         for item in tuning.PARAMETERS:
             field = page.locator("#parameter-" + item.key)

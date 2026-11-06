@@ -1115,6 +1115,7 @@ def evidence_pdf(data, context, events=None, certificate=None):
 
         def render_analytics():
             report.report_charts.pdf(lay, data.get("analytics"))
+            report.report_charts.metrics_pdf(lay, data.get("processors"))
 
         def render_directory():
             report_composition_pdf.directory(lay, data, directory_index)
@@ -1152,7 +1153,8 @@ def evidence_pdf(data, context, events=None, certificate=None):
         visible = {
             "selection": bool(data.get("selection")), "minimisation": bool(handover),
             "case_board": bool((data.get("case_board") or {}).get("cards")),
-            "examination": bool(data.get("examination")), "analytics": bool(data.get("analytics")),
+            "examination": bool(data.get("examination")),
+            "analytics": bool(data.get("analytics") or data.get("processors")),
             "histories": bool(options.get("show_changes", True) and data["changes"]["messages"]),
             "indicators": bool(options.get("show_indicators", True) and (data.get("indicators") or {}).get("items")),
             "actions": not filtered or bool(actions["listed"]), "timestamps": not handover,

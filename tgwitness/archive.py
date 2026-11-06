@@ -14,7 +14,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from .access import GrantSettings, Principal, Refused, check
 
 TOOLS = ("list_workspaces", "list_chats", "search_messages", "get_message_versions",
-         "get_message_context", "get_journal_event", "get_capture_status", "get_activity_stats", "export_messages")
+         "get_message_context", "get_journal_event", "get_capture_status", "get_activity_stats", "export_messages",
+         "get_messages_by_date", "get_pinned_messages", "get_chat_stats", "get_topics", "get_media")
+CHAT_TOOLS = ("get_message_versions", "get_message_context", "get_messages_by_date", "get_pinned_messages", "get_topics")
 # A bulk export streams over HTTP for the command line; MCP results are limited to one 64 KiB page.
 MCP_TOOLS = tuple(tool for tool in TOOLS if tool != "export_messages")
 # Connections saved before tools were listed keep the tools of that release, not later additions.
@@ -67,6 +69,9 @@ class ArchiveQuery(BaseModel):
     ranked: bool = False
     match: Literal["all", "any"] = "all"
     gaps: bool = True
+    date: str | None = Field(default=None, max_length=10)
+    timezone: str | None = Field(default=None, max_length=64)
+    media_sha256: str | None = Field(default=None, pattern=r"^[0-9a-fA-F]{64}$")
 
     @field_validator("since", "until")
     @classmethod
@@ -226,6 +231,10 @@ class ArchiveReader:
         if query.tool in ("get_message_versions", "get_message_context") and (
                 query.chat_id is None or query.message_id is None):
             raise ValueError("Choose a chat and message.")
+        if query.tool in CHAT_TOOLS and query.chat_id is None:
+            raise ValueError("Choose a chat.")
+        if query.tool == "get_media" and not query.media_sha256:
+            raise ValueError("Choose a file by its SHA-256.")
         state = self.workspace(query, chat=query.chat_id is not None)
         store, allowed = state.store, self.principal.chats(query.workspace)
         if query.tool == "list_chats":
@@ -262,6 +271,21 @@ class ArchiveReader:
                 until=query.until, top=query.limit, budget=self.budget, workspace_gaps=allowed is None)}
         if query.tool == "export_messages":
             raise ValueError("Exports are available only from the archive export endpoint.")
+        from . import archive_views
+        if query.tool == "get_messages_by_date":
+            return {"workspace": query.workspace, **archive_views.by_date(store, query, event_view, self.budget)}
+        if query.tool == "get_pinned_messages":
+            return {"workspace": query.workspace, **archive_views.pinned(store, query, event_view)}
+        if query.tool == "get_topics":
+            return {"workspace": query.workspace, **archive_views.topics(store, query, self.budget)}
+        if query.tool == "get_chat_stats":
+            gaps = None
+            if query.gaps:
+                from .gap_analysis import capture_summary
+                gaps = capture_summary(store, allowed, chat_id=query.chat_id, budget=self.budget)
+            return {"workspace": query.workspace, **archive_views.chat_stats(store, query, allowed, gaps)}
+        if query.tool == "get_media":
+            return {"workspace": query.workspace, **archive_views.media_preview(store, query, allowed, source_ref)}
         return self.events(store, query, allowed)
 
     def export(self, query, page=EXPORT_PAGE):

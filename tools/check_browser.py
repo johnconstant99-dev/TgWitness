@@ -15,7 +15,7 @@ from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tgwitness import api_pool, i18n
+from tgwitness import api_pool, i18n, tuning
 from tgwitness.app import create_app
 from tgwitness.proxy_catalog import ProxyPool
 from tgwitness.verify import verify_bundle
@@ -671,7 +671,7 @@ def main():
             expect(page.locator("#toast")).to_contain_text("Saved 3 history observations", timeout=15000)
 
             navigate_panel(page, "parameters")
-            expect(page.locator("#parameters-groups .parameters-group")).to_have_count(9)
+            expect(page.locator("#parameters-groups .parameters-group")).to_have_count(len(tuning.GROUPS))
             page.locator("#parameter-recheck_max_chats").fill("0")
             expect(page.locator("#parameters-save")).to_be_disabled()
             expect(page.locator("#parameter-recheck_max_chats-parameter-error")).to_contain_text("1 to 1,000")

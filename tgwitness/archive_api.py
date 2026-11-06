@@ -109,8 +109,9 @@ def register(app, authenticate):
                 "endpoint": "/mcp", "max_days": 90,
                 "tool_groups": {"navigation": ["list_workspaces", "list_chats"],
                                 "messages": ["search_messages", "get_message_versions", "get_message_context",
-                                             "get_journal_event"],
-                                "analysis": ["get_activity_stats"], "capture": ["get_capture_status"],
+                                             "get_journal_event", "get_messages_by_date", "get_pinned_messages",
+                                             "get_topics", "get_media"],
+                                "analysis": ["get_activity_stats", "get_chat_stats"], "capture": ["get_capture_status"],
                                 "command_line": ["export_messages"]}}
 
     @app.post("/api/mcp/connections", dependencies=[Depends(authenticate)])

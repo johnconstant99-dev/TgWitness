@@ -143,6 +143,27 @@ account asks for the usual confirmation.
   recording of the chat continues.
 - **Profiles on request.** **Chats → Profile → Save profile now** saves the current profile
   of any source; the newest one is shown above the messages.
+- **Chat state snapshots (preview).** State outside the message stream changes without a
+  message: unpinning every message leaves no message-level trace, an administrator loses
+  rights, a gift is hidden, converted, upgraded or refunded. While observing, every enabled
+  source is read periodically and saved as a signed `chat.state` record: title, usernames,
+  description, member and administrator counts, linked chat, slow mode, pinned message IDs
+  (up to 100), administrators with their rights and titles, and gifts shown on channels and
+  user profiles (up to 100). Each record lists the differences from the previous snapshot:
+  changed fields with before and after, pinned messages added or removed, administrators and
+  gifts added, changed or no longer listed. Telegram does not say who changed anything or
+  when between snapshots.
+  - A part Telegram refuses (for example the administrator list of a channel for a member
+    who is not an administrator) is named in `errors`; its earlier value is kept and listed
+    in `carried_forward`, never reported as removed.
+  - A record whose only changes are counts, and a check that found no change, refer to the
+    last full state with `state_seq` and cumulative `state_overrides`. A full state is written at
+    least every seven days and whenever anything other than a count changes.
+  - `parts_complete` marks capped lists．Additions require a complete earlier list，
+    removals require a complete current list，and explicit empty values record clearing．
+  - **Parameters → Chat state** sets the interval (12 hours by default, 0 turns snapshots
+    off), the pause between sources, which parts are read, and whether checks that found no
+    change are recorded. A FloodWait pauses snapshots and they resume afterwards.
 - **Not visible.** Inline (callback) buttons pressed in another Telegram app, the popup or
   link a bot answers such a press with, and invite links used in another app do not reach
   TgWitness. What the bot sends or edits afterwards is recorded.
@@ -303,7 +324,6 @@ the export; collection may continue beyond its boundary while it is being prepar
 boundary. Its result is cleared when the workspace changes, and the panel identifies
 new records added after the check. ZIP export also verifies collected media.
 
-A valid signature establishes integrity relative to the trusted key, not Telegram
-origin or truthful content. Retain fingerprints and checkpoints independently. See
-the [evidence model](EVIDENCE.md), [daily operations](OPERATIONS.md), and
-[live acceptance procedure](internal/LIVE_ACCEPTANCE.md) for trust and delivery requirements.
+Retain fingerprints and checkpoints independently．See the
+[verification scope](EVIDENCE.md#verification-scope) for acquisition checks in each mode，
+and [daily operations](OPERATIONS.md) for routine collection．

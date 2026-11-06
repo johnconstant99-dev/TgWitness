@@ -109,9 +109,14 @@ stable hostname for saved client configurations.
 | `get_journal_event` | One sanitized record with its source reference |
 | `get_capture_status` | Collection state, permitted coverage records and `gap_summary`: message numbers never observed, per channel or supergroup and for the account-wide sequence ([details](EVIDENCE.md#missing-message-numbers-gap_summary)); choose a chat to see its listed gaps |
 | `get_activity_stats` | Messages by UTC hour and weekday, peak days, edit and deletion shares, senders, domains and `@handles`, with coverage ([details](CLI.md#activity-statistics)) |
+| `get_messages_by_date` | Saved messages of one calendar day in a named IANA time zone (`Europe/Kyiv`, `UTC`), by the time Telegram reports; `from_utc` and `until_utc` state the computed day, daylight saving included |
+| `get_pinned_messages` | Messages pinned in the latest chat-state snapshot with their saved versions, and the pin and unpin notices observed live |
+| `get_chat_stats` | Cheap counts of saved records for one chat or every chat in scope, first and last observation, and `gap_summary`; use it before a large read |
+| `get_topics` | Forum topics from saved topic service messages: title history, closed or hidden, saved message counts |
+| `get_media` | A preserved image as a downscaled JPEG preview (at most 36 KB), returned as an image together with its SHA-256 and the `media.saved` record; the file is checked against its recorded hash first, other files return metadata only |
 | `export_messages` | Command line only, not selected by default: streams saved observations as JSON Lines ([details](CLI.md#export)); not offered over MCP |
 
-`tools/list` returns only the tools granted to that connection. Calls to other
+Every tool is read-only (`readOnlyHint`) and declares an output schema; fields beyond the declared ones are returned as they are. `tools/list` returns only the tools granted to that connection. Calls to other
 tools are refused. Group-context, episode, terminology and reply-chain tools are
 not offered in this build; their separate context-pack backend is not included.
 

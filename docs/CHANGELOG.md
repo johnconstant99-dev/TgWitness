@@ -2,10 +2,13 @@
 
 ## Unreleased
 
+- Reconstruct compact chat snapshots consistently in MCP，retain unknown fields，and distinguish capped lists from removals．Resume date scans，preserve topic names across history reads，and bound image previews．Apply metric choices to filtered reports and count historical service messages separately．
+
 - Plan sealed exports against the remaining session time，offer smaller selections，update progress estimates and reserve time for packaging．
 - Compare every message field，validate record counts and structure，enforce CLI verification options，and display OpenTimestamps states separately．
 - Close coverage on worker failure，bind heartbeats to the capture run，and verify TDX signing-key binding and supported component statuses．
 
+- Add read-only MCP tools (preview): `get_messages_by_date` (one calendar day in a named time zone, computed server-side), `get_pinned_messages`, `get_chat_stats` with `gap_summary`, `get_topics`, and `get_media`, which returns a verified, downscaled image preview anchored to its SHA-256 and `media.saved` record. Every MCP tool now declares an output schema. New connections include these tools; existing connections keep the tools they were issued with.
 - Show each account's selected route and checked exit address，group session controls，and retain interface preferences when adding an account．Record connection changes without repeating identical background checks．Validate withheld-marker contents and reply states in minimized exports，including rejection of a missing-source label for an included record．
 
 - Update collection-mode instructions and Russian guidance．Allow a bounded publication-settling interval while requiring exact installer bytes．
@@ -15,6 +18,8 @@
 
 - Add missing message numbers (preview): `coverage.json`, the HTML and PDF reports, `verify.py` and the archive's `get_capture_status` measure numbers Telegram assigned and this collector never saw, per channel or supergroup and for the account-wide sequence of private chats, bots and ordinary groups during whole-account collection. Each result states whether it applies and why, lists its parameters, and anchors listed gaps to the neighbouring observations. **Parameters → Gap analysis** sets the listed gaps, the account-wide sequence and an optional service-message estimate that is never subtracted. A gap names no actor and no reason.
 - Record in the signed message when self-destructing media is fetched despite a type or duration rule (`media_capture.rule_override`), with the limits that still applied.
+- Add chat-state snapshots (preview): while observing, every enabled source is read periodically and saved as a signed `chat.state` record with title, description, counts, pinned messages, administrators with rights, and gifts on channels and profiles, plus the differences from the previous snapshot. Unpinning, rights changes and gift conversions or upgrades without a service message become visible. Parts Telegram refuses are named and carried forward, never reported as removed. **Parameters → Chat state** sets the interval, pause and parts.
+- Add anomaly indicators to evidence reports (preview) as registered, versioned processors in `tgwitness/metrics/`: first-time posters per day with flagged injection-like days, service messages among message numbers, joins and departures per month, and pins and unpins per month. Reports list every processor that ran with its version and print its method; **Parameters → Report metrics** chooses them.
 - Keep ranked-search pages within the first 1，000 results regardless of page size，order OCR／transcription results before pagination，and retain exact match positions when Unicode expansions and invisible-character removal cancel each other's length changes．
 
 - Keep photo downloads on the still variant named by their metadata and hash manifests，including after file-reference renewal．Reject truncated photo／chat attachments and corrupt reused files instead of counting them as saved．Check recovered multi-account message IDs against missing intervals without expanding large gaps．

@@ -25,7 +25,7 @@ def exact_figures(page, data):
     analytics = data['analytics']
     assert [int(value) for value in page.locator('.analytics-totals b').all_text_contents()] == [
         analytics['totals'][kind] for kind in report_charts.KINDS]
-    figures = page.locator('.analytics-figure')
+    figures = page.locator('#report-analytics .analytics-figure')
     expect(figures).to_have_count(5)
     daily = report_charts.activity_bins(analytics['activity']['rows'])
     daily_table = table_values(figures.nth(0).locator('.analytics-table table'))
@@ -43,6 +43,15 @@ def exact_figures(page, data):
                    for kind, value in analytics['composition'].items()]
     exact_rank(figures.nth(4), composition)
     assert sum(row['total'] for row in composition) == analytics['activity_events']
+    processors = data.get('processors', {}).get('processors', [])
+    metrics = page.locator('#report-metrics .metric-figure')
+    expect(metrics).to_have_count(len(processors))
+    for index, processor in enumerate(processors):
+        figure = metrics.nth(index)
+        expect(figure.locator('figcaption')).to_contain_text(processor['name'] + ' v' + str(processor['version']))
+        if processor['rows']:
+            assert table_values(figure.locator('.analytics-table table')) == [
+                [str(value) if value is not None else '' for value in row] for row in processor['rows']]
 
 
 def exact_rank(figure, rows):

@@ -11,7 +11,7 @@ from typing import Literal
 
 from pydantic import ConfigDict, Field, field_validator
 
-from . import __version__, case_assessment, i18n, message_details, report_analytics, report_charts, snapshot_analytics
+from . import __version__, case_assessment, i18n, message_details, metrics, report_analytics, report_charts, snapshot_analytics
 from . import report_design, report_history, report_layouts, report_selection, report_selection_view
 from . import indicators as ioc
 from . import viewer
@@ -216,7 +216,7 @@ def kind_label(say, kind):
 
 
 class Digest:
-    def __init__(self):
+    def __init__(self, processors=None, rows_listed=60):
         self.categories = dict.fromkeys(CATEGORY_ORDER, 0)
         self.chats, self.titles, self.media, self.senders = {}, {}, {}, set()
         self.first = self.last = self.first_hash = None
@@ -228,6 +228,7 @@ class Digest:
         self.own_messages, self.own_total, self.own_scope = [], 0, set()
         self.trust_signals = {"drand": 0, "starts": 0, "tdx": 0}
         self.analytics = report_analytics.Analytics()
+        self.metrics = metrics.Pipeline(processors, rows_listed)
 
     @staticmethod
     def seen(table, value, at):
@@ -237,6 +238,7 @@ class Digest:
 
     def add(self, event):
         self.analytics.add(event)
+        self.metrics.add(event)
         kind, payload, chat = event["kind"], event["payload"], event["chat_id"]
         if kind == "beacon.drand":
             self.trust_signals["drand"] += 1
@@ -320,7 +322,7 @@ class Digest:
                 "direct_fallbacks": self.direct, "changed": self.changed,
                 "actions": list(self.actions.values()), "action_count": self.action_count,
                 "own_messages": self.own_messages, "own_total": self.own_total, "own_scope": sorted(self.own_scope),
-                "analytics": self.analytics.result()}
+                "analytics": self.analytics.result(), "processors": self.metrics.result()}
 
 
 def describe_anchor(checkpoint_name, checkpoint, proof_name, proof, query=None, *, public_key=None,
@@ -1693,7 +1695,9 @@ def report_material(context):
         return {}
     options = {**ReportOptions().model_dump(), **(context.get("options") or {})}
     examination = {key: options["review_"+key] for key in report_charts.REVIEW_FIELDS if options.get("review_"+key)}
-    raw = (context.get("report_digest") or context.get("digest") or {}).get("analytics")
+    digest = context.get("report_digest") or context.get("digest") or {}
+    raw = digest.get("analytics")
+    processors = digest.get("processors") if (digest.get("processors") or {}).get("processors") else None
     analytics = report_analytics.selected(raw, options) if raw and any(options[k] for k in
                  ("activity_chart", "hourly_chart", "participant_chart", "chat_chart", "composition_chart")) else None
     if analytics:
@@ -1703,6 +1707,7 @@ def report_material(context):
     return {**({"selection": context["selection"]} if context.get("selection") else {}),
             "presentation": {k: options[k] for k in ("template", *report_analytics.Presentation.model_fields)},
             **({"analytics": analytics} if analytics else {}),
+            **({"processors": processors} if processors else {}),
             **({"examination": {"author": "operator", **examination}} if examination else {})}
 
 
@@ -2205,6 +2210,8 @@ def evidence_chunks(events, coverage=None, context=None):
                                                                          ("verify", say("Verify"))]
         if material.get("analytics"):
             links.insert(1, ("report-analytics", say(report_charts.TITLE)))
+        if material.get("processors"):
+            links.insert(2, ("report-metrics", say(report_charts.METRICS_TITLE)))
         if (context.get("case_board") or {}).get("cards"):
             links.insert(2, ("case-board", say("Case Board")))
         if material.get("examination"):
@@ -2240,7 +2247,8 @@ def evidence_chunks(events, coverage=None, context=None):
         yield brief_section(say, *evidence_brief(say, digest, shown_count, anchors, coverage, account_text,
                                                  handover, filtered)).encode("utf-8")
         analysis_sections = [report_charts.examination_html(material.get("examination"), say),
-                             report_charts.html(material.get("analytics"), say)]
+                             report_charts.html(material.get("analytics"), say)
+                             + report_charts.metrics_html(material.get("processors"), say)]
         if options.get("template") == "activity":
             analysis_sections.reverse()
         yield ''.join(analysis_sections).encode("utf-8")
