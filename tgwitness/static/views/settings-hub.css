@@ -84,7 +84,7 @@ html[data-ui-level=simple] #mode-switch,html[data-ui-level=standard] #mode-switc
 .other-sign-in{margin:16px 0;padding:12px;border:1px solid var(--border);border-radius:10px}
 .other-sign-in summary{cursor:pointer;color:var(--muted);font-size:13px}
 .other-sign-in .login-methods{margin-top:12px}
-.other-sign-in .login-methods{grid-template-columns:repeat(2,minmax(0,1fr))}
+#credentials-form:has(>.other-sign-in)>.login-methods,.other-sign-in .login-methods{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:600px) {
   .other-sign-in { margin:10px 0; padding:8px; }
   .other-sign-in .login-methods { margin:8px 0; }

@@ -83,7 +83,7 @@ def sqlite_session(payload):
         db.close()
 
 
-def json_account(payload):
+def json_account(payload, include_password=False):
     if len(payload) > 64 * 1024:
         raise ValueError("Account JSON must be at most 64 KiB.")
     try:
@@ -100,11 +100,15 @@ def json_account(payload):
     if not isinstance(raw, dict):
         raise ValueError("Import one JSON account object, not a bulk account list.")
     result = {"format": "Account JSON"}
+    if include_password and raw.get("twoFA") not in (None, ""):
+        if not isinstance(raw["twoFA"], str) or len(raw["twoFA"]) > 512:
+            raise ValueError("The twoFA password must be text of at most 512 characters.")
+        result["two_factor_password"] = raw["twoFA"]
     client_profile = client_identity.from_account(raw)
     if client_profile:
         result["client_profile"] = client_profile
     aliases = {"api_id": ("api_id", "app_id"), "api_hash": ("api_hash", "app_hash"),
-               "session": ("string_session", "session_string", "session"),
+               "session": ("string_session", "session_string", "session_str"),
                "expected_user_id": ("user_id", "id"), "auth_key": ("auth_key", "auth_key_hex")}
     for destination, names in aliases.items():
         values = [raw[name] for name in names if raw.get(name) not in (None, "")]
@@ -112,6 +116,15 @@ def json_account(payload):
             raise ValueError("Conflicting account JSON fields.")
         if values:
             result[destination] = values[0]
+    # Explicit Telethon fields take precedence over a generic foreign-format
+    # `session` blob. Two recognizable authorizations must still agree.
+    generic = raw.get("session")
+    if generic not in (None, ""):
+        if "session" not in result:
+            result["session"] = generic
+        elif isinstance(generic, str) and session_key(generic):
+            if validate_string(generic) != validate_string(result["session"]):
+                raise ValueError("Conflicting account JSON fields.")
     for key in ("api_id", "expected_user_id"):
         if key in result:
             value = result[key]
@@ -140,7 +153,7 @@ def identity(value):
     return session.dc_id, session.auth_key.key
 
 
-def import_accounts(files, passcode=""):
+def import_accounts(files, passcode="", include_password=False):
     if not 1 <= len(files) <= 4:
         raise ValueError("Select 1–4 account files totaling at most 8 MiB.")
     total, converted = 0, []
@@ -159,7 +172,7 @@ def import_accounts(files, passcode=""):
             dc, key, user_id = read_tdata_zip(content, passcode)
             result = {"session": string_session(dc, key), "expected_user_id": user_id, "format": "TData ZIP"}
         elif suffix == ".json":
-            result = json_account(content)
+            result = json_account(content, include_password)
         else:
             if len(content) > 4096:
                 raise ValueError("Unsupported account file. Expected SQLite, TData ZIP, account JSON, or StringSession text.")
@@ -170,7 +183,7 @@ def import_accounts(files, passcode=""):
         converted.append(result)
     merged = {"formats": [item["format"] for item in converted]}
     for result in converted:
-        for key in ("session", "api_id", "api_hash", "expected_user_id", "client_profile"):
+        for key in ("session", "api_id", "api_hash", "expected_user_id", "client_profile", "two_factor_password"):
             if key not in result:
                 continue
             if key in merged:

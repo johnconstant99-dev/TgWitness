@@ -9,6 +9,7 @@ from urllib.parse import parse_qs, urlsplit
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from telethon import utils
 from telethon.errors import FloodWaitError, InviteRequestSentError, RPCError, UserAlreadyParticipantError
+from .telegram_client import FLOOD_ERRORS
 from telethon.tl import functions, types
 
 from . import keyboard
@@ -275,7 +276,7 @@ async def execute(collector, body):
             result.update(chat_id=body.chat_id, message_id=body.message_id, answer=plain(answer))
     except InviteRequestSentError:
         result["status"] = "approval_pending"
-    except FloodWaitError as exc:
+    except FLOOD_ERRORS as exc:
         store.set_setting("rpc_backoff_until", max(time.time() + exc.seconds,
                                                    store.get_setting("rpc_backoff_until", 0)))
         result.update(status="rejected", error_type=type(exc).__name__, retry_after=exc.seconds)

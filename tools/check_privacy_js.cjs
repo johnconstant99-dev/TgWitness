@@ -25,9 +25,11 @@ for (const [input, secret] of [
 for (const ordinary of ['card 4111 1111 1111 1112', 'ordinary text <b>literal</b>', 'Meeting at 14:15', '2026-11-01']) {
   assert.equal(privacy.preview(ordinary), ordinary);
 }
-const original = {hash: 'ab'.repeat(32), signature: 'cd'.repeat(64), payload: {text: 'Password: sensitive123', api_hash: 'secret_api_hash'}};
+const original = {hash: 'ab'.repeat(32), previous_hash: 'a'.repeat(24)+'4111111111111111'+'b'.repeat(24),
+  signature: 'cd'.repeat(64), payload: {text: 'Password: sensitive123', api_hash: 'secret_api_hash'}};
 const snapshot = JSON.stringify(original), shown = JSON.parse(privacy.recordPreview(original));
 assert.equal(shown.hash, original.hash);
+assert.equal(shown.previous_hash, original.previous_hash, 'A chain hash must not be mistaken for a card number');
 assert.equal(shown.signature, original.signature);
 assert(!shown.payload.text.includes('sensitive123'));
 assert(!shown.payload.api_hash.includes('secret_api_hash'));

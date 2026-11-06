@@ -95,6 +95,11 @@ message history before attachments, file downloads or server hashes, and compati
 Telegram Desktop JSON/HTML views. GitHub capture supports an account or a selected
 chat, records partial results at its deadline, and splits large encrypted deliveries.
 
+[Distributed chat export](docs/DISTRIBUTED-EXPORT.md#history-acquisition) offers an
+opt-in Takeout path for public history, signed checkpoints every 100 messages,
+and recovery within a range using the same account. Its [performance design and remaining work](docs/FAST-ACQUISITION.md)
+separate tested acquisition behavior from unmeasured live throughput.
+
 ## Built for the rest of the investigation
 
 <picture>
@@ -122,7 +127,7 @@ chat, records partial results at its deadline, and splits large encrypted delive
 | [Several accounts](docs/ACCOUNTS.md#multiple-accounts) | Export one chat through several accounts, each with its own session and key |
 | [Batch import](docs/ACCOUNTS.md#bulk-import-and-account-groups) | Drop in a pile of session files, sort accounts into groups with shared settings |
 | [MTProxy pool](docs/wiki/Proxies.md#pool-dashboard-and-custom-sources) | Ping, countries, filters, your own lists |
-| [Existing sessions](docs/ACCOUNTS.md) | TData, Telethon, Pyrogram, StringSession, auth key |
+| [Existing sessions](docs/ACCOUNTS.md) | TData, Telethon, Pyrogram, StringSession, auth key; optional independent QR authorization from an imported donor |
 | [Proxies](docs/CONNECTION-SECURITY.md#ip-modes) | SOCKS5, HTTP CONNECT or MTProxy per workspace. **Hide IP** never falls back to direct |
 | [Search and AI](docs/ANALYSIS.md) | Local search, optional AI with sources you can check |
 | [Full-text search](docs/SEARCH.md) | Word forms, exact phrases, domains, @usernames and Chinese without spaces, best matches first (**Preview**) |

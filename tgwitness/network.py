@@ -10,7 +10,7 @@ from urllib.parse import parse_qs, urlsplit, unquote
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from telethon.network.connection import ConnectionTcpMTProxyRandomizedIntermediate, tcpmtproxy, tcpobfuscated
+from telethon.network.connection import ConnectionTcpMTProxyRandomizedIntermediate, ConnectionTcpObfuscated, tcpmtproxy, tcpobfuscated
 
 
 class OpenSSLCTR:
@@ -123,7 +123,7 @@ class NetworkConfig(BaseModel):
         if self.kind == "mtproxy_auto":
             raise RuntimeError("An automatic route is resolved to one proxy by the collector.")
         if self.kind == "direct":
-            return {}
+            return {"connection": ConnectionTcpObfuscated}
         if self.kind == "mtproxy":
 
 
@@ -133,7 +133,8 @@ class NetworkConfig(BaseModel):
         if self.tls:
             from .https_proxy import HTTPSConnection
             return {"connection": HTTPSConnection, "proxy": self.model_dump()}
-        return {"proxy": {"proxy_type": self.kind, "addr": self.host, "port": self.port,
+        return {"connection": ConnectionTcpObfuscated,
+                "proxy": {"proxy_type": self.kind, "addr": self.host, "port": self.port,
                           "rdns": True, "username": self.username or None, "password": self.password or None}}
 
 

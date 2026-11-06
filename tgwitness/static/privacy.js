@@ -91,7 +91,7 @@
   function recordPreview(value) {
     return JSON.stringify(value, (key, item) => {
       if (!enabled || typeof item !== 'string') return item;
-      if (/^(?:hash|prev_hash|signature|public_key|media_sha256|sha256)$/.test(key)) return item;
+      if (/^(?:hash|previous_hash|prev_hash|signature|public_key|media_sha256|sha256)$/.test(key)) return item;
       if (/^(?:password|passwd|secret|token|api_key|api_hash|app_hash|auth_key|session|string_session|session_string|twofa|2fa)$/i.test(key)) return mask(item);
       return preview(item);
     }, 2);

@@ -3,13 +3,15 @@ import asyncio
 import json
 import tempfile
 import threading
+import time
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import AsyncMock
 
 from playwright.sync_api import expect, sync_playwright
-from telethon.tl import types
+from telethon.errors import TakeoutInitDelayError
+from telethon.tl import functions, types
 
 from check_browser import RunningApp, check_layout, launch_browser, navigate_panel, unlock
 from tools.browser_fixtures import CHAT, ENTITIES, FakeClient, telegram_message
@@ -20,6 +22,13 @@ from tgwitness.verify import fingerprint, verify_chat_export
 class ExportClient(FakeClient):
     remaining = threading.Event()
     reads = 0
+
+    async def __call__(self, request):
+        if isinstance(request, functions.users.GetUsersRequest):
+            return [types.User(self.account_id, first_name="Fixture", is_self=True)]
+        if isinstance(request, functions.account.InitTakeoutSessionRequest):
+            raise TakeoutInitDelayError(request, capture=3600)
+        raise NotImplementedError(type(request).__name__)
 
     @staticmethod
     def rows():
@@ -60,6 +69,7 @@ class ExportClient(FakeClient):
 
 
 def main():
+    ENTITIES[CHAT].username = "synthetic"
     ExportClient.remaining.clear()
     ExportClient.reads = 0
     distributed_export.CHUNK = 2
@@ -109,6 +119,7 @@ def main():
             page.set_viewport_size({"width": 1440, "height": 1000})
             page.locator("#export-dialog-start").click()
             expect(page.locator("#export-box")).to_contain_text("Read 1 of 3", timeout=15000)
+            expect(page.locator("#export-box")).to_contain_text("messages/s (including waits)")
             rejected = post("collector/start")
             assert rejected.status == 400 and "busy" in rejected.text()
             page.locator("#export-box").get_by_role("button", name="Pause", exact=True).click()
@@ -122,6 +133,10 @@ def main():
             page.locator("#export-box").get_by_role("button", name="Resume saved chunks").click()
             expect(page.locator("#export-box")).to_contain_text("Export ready: 3 messages", timeout=60000)
             job = server.app.state.multi_export.public()
+            assert job["performance"]["reused_messages"] == 1
+            assert job["performance"]["new_messages"] == 4
+            expect(page.locator("#export-box")).to_contain_text("Current run: 4 new messages")
+            expect(page.locator("#export-box")).to_contain_text("Packaging and verification:")
             response = context.request.get(server.url + "/api/multi-export/" + job["id"] + "/download", headers=headers)
             assert response.ok, response.text()
             archive = output / "selected-export.zip"
@@ -131,6 +146,19 @@ def main():
                 records = json.loads(bundle.read("chat.json"))["messages"]
                 assert {r["id"] for r in records if r["selection"]["role"] == "match"} == {2}
                 assert json.loads(bundle.read("message-ids.json"))["selection_applied"]
+            assert collector.export_claim is None
+            collector.store.set_setting("rpc_backoff_until", time.time() + 3600)
+            page.locator("#chat-export-start").click()
+            expect(page.locator("#export-dialog-accounts input")).to_be_disabled()
+            expect(page.locator("#export-dialog-accounts")).to_contain_text("Telegram rate limit: wait until")
+            page.locator("#export-dialog-cancel").click()
+            collector.store.set_setting("rpc_backoff_until", 0)
+            page.locator("#chat-export-start").click()
+            page.locator("#export-transport").select_option("takeout")
+            page.locator("#export-dialog-start").click()
+            expect(page.locator("#export-box")).to_contain_text("Takeout approval is pending", timeout=15000)
+            expect(page.locator("#export-box")).to_contain_text("Requests paused until")
+            assert server.app.state.multi_export.public()["transport"] == "takeout"
             assert collector.export_claim is None
             context.add_cookies([{"name": i18n.COOKIE, "value": "ru", "url": server.url}])
             preferences = server.app.state.store.get_setting("ui_preferences:admin")
@@ -146,7 +174,7 @@ def main():
             assert not errors, errors
             context.close()
             browser.close()
-    print("Distributed export browser passed: busy rejection, dates/language/replies/context, pause/reload/resume, verified ZIP, RU and mobile.")
+    print("Distributed export browser passed: busy rejection, dates/language/replies/context, pause/reload/resume, verified ZIP, Takeout approval pause, RU and mobile.")
 
 
 if __name__ == "__main__":

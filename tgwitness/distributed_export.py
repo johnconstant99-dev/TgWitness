@@ -1,6 +1,7 @@
 """Durable, exclusive multi-account acquisition and local message selection."""
 import asyncio
 import base64
+import errno
 import hashlib
 import json
 import os
@@ -9,19 +10,22 @@ import secrets
 import shutil
 import sqlite3
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import deque
 from itertools import chain, islice
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-from telethon import utils
+from telethon import errors as telegram_errors, utils
 from telethon.errors import TypeNotFoundError
 from telethon.tl import types
 
 from . import chat_export, replica, report, tuning
 from .account_export import durable_write, linked, read_json
 from .collector import AUTHORIZATION_ERRORS, message_record, unparsed_record
+from .export_timing import ExportTiming
+from .distributed_takeout import HistoryTakeout
+from .distributed_pages import FORMAT as PAGE_FORMAT, RangePages
 from .message_selection import Selection, SelectionIndex, utc
 from .message_numbers import MissingNumbers
 from .store import canonical, utcnow
@@ -48,9 +52,12 @@ class DistributedExport:
         self.root.mkdir(mode=0o700, exist_ok=True)
         self.state = self.job = self.task = self.db = self.recheck = None
         self.chunk_failures = {}
+        self.timing = None
         self.preparing = set()
         self.reserved = {}
         self.entities = {}
+        self.history_transports = {}
+        self.page_states = {}
         latest = self.list_jobs()
         if latest:
             self.state = latest[0]
@@ -67,7 +74,7 @@ class DistributedExport:
         path = self.root / job_id
         if linked(path) or path.resolve().parent != self.root.resolve():
             raise ValueError("Export directory must remain inside its workspace.")
-        if any(linked(path / name) for name in ("chunks", "receipts", "media")):
+        if any(linked(path / name) for name in ("chunks", "receipts", "media", "pages")):
             raise ValueError("Export working directories must not be links.")
         return path
 
@@ -90,11 +97,13 @@ class DistributedExport:
         return envelope["statement"]
 
     def persist(self):
+        self.update_timing()
         self.state["updated_at"] = utcnow()
         durable_write(self.directory(self.state["id"]) / "status.json", canonical(self.signed(self.state)))
 
     def public(self, job_id=None):
         if job_id is None or self.state and job_id == self.state["id"]:
+            self.update_timing()
             return json.loads(json.dumps(self.state)) if self.state else {"phase": "none"}
         path = self.directory(job_id) / "status.json"
         if not path.is_file():
@@ -106,6 +115,15 @@ class DistributedExport:
         if state["phase"] in ("preparing", "running", "selecting", "packaging"):
             state.update(phase="paused", error="The process stopped. Resume verifies saved chunks first.")
         return state
+
+    def update_timing(self):
+        if self.timing is not None and self.state is not None:
+            self.state["performance"] = self.timing.snapshot(self.state["captured"])
+
+    def set_phase(self, phase):
+        self.state["phase"] = phase
+        self.timing.move(phase)
+        self.update_timing()
 
     def list_jobs(self):
         items = []
@@ -127,6 +145,9 @@ class DistributedExport:
                 collector = app.state.collector
                 if not app.state.vault.read("credentials").get("session"):
                     raise ValueError("Connect every selected Telegram account before exporting.")
+                if collector.store.get_setting("rpc_backoff_until", 0) > time.time():
+                    label = self.profiles.entries[profile].get("label", profile)
+                    raise ValueError(label + ": Telegram requests are paused. Check the saved rate-limit deadline in connection details.")
                 if not collector.reserve_export(owner):
                     label = self.profiles.entries[profile].get("label", profile)
                     raise ValueError(label + ": account is busy. Pause its current task explicitly or deselect it.")
@@ -143,25 +164,30 @@ class DistributedExport:
                 collector.release_export(owner)
                 self.reserved.pop(profile, None)
 
-    async def start(self, chat_id, profile_ids, lead_id, language="en", selection=None):
+    async def start(self, chat_id, profile_ids, lead_id, language="en", selection=None, transport="regular"):
+        if transport not in ("regular", "takeout"):
+            raise ValueError("Unknown export transport.")
         options = Selection.model_validate(selection or {})
         if self.busy():
             raise ValueError("Pause the current distributed export before starting another.")
         chosen = list(dict.fromkeys([lead_id, *profile_ids]))
         export_id = secrets.token_hex(16)
         self.reserve(chosen, export_id)  # Atomic before the first await, including monitoring accounts.
+        timing = ExportTiming()
         self.preparing = set(chosen)
         try:
             lead_app = self.app_for(lead_id)
             lead = lead_app.state.collector
             entity = await lead.resolve_for_export(chat_id)
+            if transport == "takeout" and (not isinstance(entity, types.Channel) or not getattr(entity, "username", None)):
+                raise ValueError("Distributed Takeout currently supports public channels and supergroups only.")
             if len(chosen) > 1 and not isinstance(entity, types.Channel):
                 raise ValueError("Only one account can export an ordinary group or private chat.")
             now = utc(utcnow())
             scan_end = options.to_utc if options.reply_scope == "period" else None
             scan_end = min(scan_end, now) if scan_end else now
             username = getattr(entity, "username", None)
-            workers, bounds = [], []
+            workers, bounds, densities = [], [], []
             self.entities = {}
             for profile in chosen:
                 app = self.app_for(profile)
@@ -172,10 +198,25 @@ class DistributedExport:
                           "ranges": 0, "wait_until": None, "error": None}
                 try:
                     peer = entity if profile == lead_id else await collector.resolve_for_export(chat_id, username)
-                    upper = await collector.number_before(peer, datetime.fromisoformat(scan_end))
+                    try:
+                        latest = await collector.client.get_messages(peer, limit=1,
+                            offset_date=datetime.fromisoformat(scan_end))
+                        upper = latest[0].id if latest else 0
+                        count = getattr(latest, "total", None)
+                    except TypeNotFoundError:
+                        upper = await collector.number_before(peer, datetime.fromisoformat(scan_end))
+                        count = None
+                    if type(count) is int and count > 0:
+                        # Planning only: this is not a count for the selected dates,
+                        # nor evidence of deletion. Keep every ID in the plan.
+                        densities.append(max(1, upper // count))
+                        worker.update(planning_count=count, planning_count_scope="visible history estimate; precision unknown")
                     lower = 1
                     if upper and options.from_utc:
-                        lower = await collector.number_before(peer, datetime.fromisoformat(options.from_utc)) + 1
+                        # Telegram can include messages exactly at offset_date.
+                        # Read past the boundary; local selection applies [from, until).
+                        lower = await collector.number_before(peer,
+                            datetime.fromisoformat(options.from_utc) - timedelta(seconds=1)) + 1
                     if upper >= lower:
                         bounds.append((lower, upper, profile))
                     worker.update(low=lower, high=upper)
@@ -197,20 +238,24 @@ class DistributedExport:
                 if eligible:
                     segments.append({"low": low, "high": end - 1, "profiles": eligible})
             info = lead.dialog_cache.get(chat_id, {})
+            chunk_size = CHUNK * min(50, min(densities, default=1)) if transport == "takeout" else CHUNK
+            self.timing = timing
             self.state = {"id": export_id, "chat_id": chat_id, "title": info.get("title"), "lead": lead_id,
                           "phase": "preparing", "started_at": now, "workers": workers,
                           "captured": 0, "ranges_done": 0, "ranges_total": sum(
-                              (s["high"] - s["low"]) // CHUNK + 1 for s in segments),
+                              (s["high"] - s["low"]) // chunk_size + 1 for s in segments),
                           "total": None, "eta_seconds": None, "ready": False, "error": None,
-                          "selection": options.model_dump(), "counts": {}}
+                          "selection": options.model_dump(), "counts": {}, "transport": transport}
             self.job = {"format": "tgwitness-distributed-job-v1", "id": export_id, "chat_id": chat_id,
                         "lead": lead_id, "started_at": now, "scan_end": scan_end, "username": username,
-                        "chunk_size": CHUNK, "segments": segments, "workers": [dict(w) for w in workers],
+                        "chunk_size": chunk_size, "segments": segments, "workers": [dict(w) for w in workers],
+                        "transport": transport, "megagroup": bool(getattr(entity, "megagroup", False)),
+                        "checkpoint_format": PAGE_FORMAT,
                         "selection": options.model_dump(), "report": report.resolved(lead.store, language),
                         "chat": {"id": chat_id, "title": info.get("title"), "kind": info.get("kind")}}
             directory = self.directory(export_id)
             directory.mkdir(mode=0o700)
-            for folder in ("chunks", "receipts", "media"):
+            for folder in ("chunks", "receipts", "media", "pages"):
                 (directory / folder).mkdir(mode=0o700)
             durable_write(directory / "job.json", canonical(self.signed(self.job)))
             self.persist()
@@ -242,11 +287,12 @@ class DistributedExport:
                     (app.state.store.get_setting("account", {}) or {}).get("id") != worker["account_id"]):
                 raise ValueError("A participating account or signing identity has changed.")
         self.reserve([w["profile_id"] for w in active], job_id)
+        self.timing = ExportTiming()
         self.preparing = {w["profile_id"] for w in active}
         try:
             self.state, self.job = state, job
             self.entities = {}
-            self.state.update(phase="preparing", ready=False, error=None)
+            self.state.update(phase="preparing", ready=False, error=None, wait_until=None, approval_profile=None)
             self.state["workers"] = [{**w, "state": "pending" if w["state"] != "skipped" else "skipped",
                                       "wait_until": None} for w in job["workers"]]
             self.persist()
@@ -260,6 +306,10 @@ class DistributedExport:
 
     def prepare_chunks(self):
         directory = self.directory(self.state["id"])
+        retained_count = self.state["captured"]
+        if self.job.get("checkpoint_format") not in (None, PAGE_FORMAT):
+            raise ValueError("Unsupported distributed checkpoint format.")
+        self.page_states = {}
         path = directory / "work.sqlite3"
         if linked(path):
             raise ValueError("Export index must not be a link.")
@@ -273,6 +323,17 @@ class DistributedExport:
                 high = min(segment["high"], low + self.job["chunk_size"] - 1)
                 self.db.execute("INSERT INTO tasks VALUES(?,?,'pending',NULL,0,NULL)", (low, high))
                 self.db.executemany("INSERT INTO eligible VALUES(?,?)", [(low, p) for p in segment["profiles"]])
+        if self.job.get("checkpoint_format") == PAGE_FORMAT:
+            for folder in (directory / "pages").iterdir():
+                if not folder.name.isdigit() or linked(folder) or not folder.is_dir():
+                    raise ValueError("Invalid checkpoint directory.")
+                task = self.db.execute("SELECT * FROM tasks WHERE low=?", (int(folder.name),)).fetchone()
+                if not task or folder.name != str(task["low"]):
+                    raise ValueError("Checkpoint range is outside the signed plan.")
+                pages = RangePages(directory, self.job, task)
+                self.page_states[task["low"]] = pages
+                if pages.state["profile_id"] is not None:
+                    self.record_page(task["low"], pages.state)
         by_profile = {w["profile_id"]: w for w in self.job["workers"]}
         for receipt in (directory / "receipts").glob("*.json"):
             if not receipt.stem.isdigit() or linked(receipt):
@@ -286,12 +347,25 @@ class DistributedExport:
             if not task or value["job_id"] != self.job["id"] or not self.db.execute(
                     "SELECT 1 FROM eligible WHERE low=? AND profile=?", (value["low"], profile)).fetchone():
                 raise ValueError("Chunk receipt does not belong to the signed acquisition plan.")
+            if self.job.get("transport", "regular") == "takeout" and (value.get("transport") != "takeout"
+                    or type(value.get("transport_generation")) is not int or value["transport_generation"] < 1):
+                raise ValueError("Chunk receipt does not identify its Takeout generation.")
+            if self.job.get("checkpoint_format") == PAGE_FORMAT:
+                pages = self.page_states.get(value["low"])
+                if (not pages or not pages.state["terminal"] or pages.state["profile_id"] != profile
+                        or value.get("checkpoint") != self.page_summary(pages.state)
+                        or value.get("transport", "regular") != self.job.get("transport", "regular")
+                        or value.get("transport_generation") != pages.state["transport_generation"]):
+                    raise ValueError("Chunk receipt differs from its signed checkpoints.")
             count, digest = self.check_chunk(directory / "chunks" / (str(value["low"]) + ".jsonl"), task)
             if (count, digest) != (value["count"], value["sha256"]):
                 raise ValueError("Saved chunk differs from its signed receipt.")
             self.db.execute("UPDATE tasks SET phase='done',profile=?,count=?,sha256=? WHERE low=?",
                             (profile, count, digest, value["low"]))
         self.db.commit()
+        verified_count = self.db.execute("SELECT coalesce(sum(count),0) FROM tasks").fetchone()[0]
+        if self.job.get("checkpoint_format") == PAGE_FORMAT and verified_count < retained_count:
+            raise ValueError("Saved checkpoint progress is missing; preserve this job for inspection.")
         self.update_counts()
 
     @staticmethod
@@ -310,19 +384,27 @@ class DistributedExport:
         return count, digest.hexdigest()
 
     def update_counts(self):
-        count, captured = self.db.execute("SELECT count(*),coalesce(sum(count),0) FROM tasks WHERE phase='done'").fetchone()
+        count, captured = self.db.execute("SELECT coalesce(sum(phase='done'),0),coalesce(sum(count),0) FROM tasks").fetchone()
         self.state.update(ranges_done=count, captured=captured)
         for worker in self.state["workers"]:
-            ranges, messages = self.db.execute("SELECT count(*),coalesce(sum(count),0) FROM tasks "
-                "WHERE phase='done' AND profile=?", (worker["profile_id"],)).fetchone()
+            ranges, messages = self.db.execute("SELECT coalesce(sum(phase='done'),0),coalesce(sum(count),0) FROM tasks "
+                "WHERE profile=?", (worker["profile_id"],)).fetchone()
             worker.update(ranges=ranges, captured=messages)
 
-    async def work(self, worker):
-        collector = self.app_for(worker["profile_id"]).state.collector
-        async with collector.history_reader(self.entities[worker["profile_id"]]) as (reader, wait):
-            await self.read_ranges(worker, reader, wait)
+    @staticmethod
+    def page_summary(state):
+        return {"format": PAGE_FORMAT, "pages": state["pages"], "head_sha256": state["head_sha256"],
+                "count": state["count"], "byte_end": state["byte_end"]}
 
-    async def read_ranges(self, worker, reader=None, wait=None):
+    def record_page(self, low, state):
+        self.db.execute("UPDATE tasks SET profile=?,count=? WHERE low=?", (state["profile_id"], state["count"], low))
+        self.db.execute("DELETE FROM eligible WHERE low=? AND profile!=?", (low, state["profile_id"]))
+        self.db.commit()
+
+    async def work(self, worker):
+        await self.read_ranges(worker)
+
+    async def read_ranges(self, worker):
         profile = worker["profile_id"]
         collector = self.app_for(profile).state.collector
         directory = self.directory(self.state["id"])
@@ -344,20 +426,43 @@ class DistributedExport:
             worker["current_range"] = [task["low"], task["high"]]
             def waiting(seconds):
                 worker.update(state="waiting", wait_until=time.time() + seconds)
+            transport = self.history_transports.get(profile)
             try:
                 if shutil.disk_usage(directory).free < collector.param("media_min_free_mb") * 1024**2:
                     raise ValueError("Insufficient free disk space for another chunk.")
                 if linked(temporary) or linked(path):
                     raise ValueError("Chunk paths must not be links.")
-                await collector.fetch_range(self.entities[profile], task["low"], task["high"], temporary,
-                                            lambda: None, waiting, page_timeout=PAGE_TIMEOUT, attempts=1,
-                                            client=reader, wait_time=wait)
-                count, digest = self.check_chunk(temporary, task)
-                with temporary.open("r+b") as stream:
-                    os.fsync(stream.fileno())
-                temporary.replace(path)
+                pages = None
+                if self.job.get("checkpoint_format") == PAGE_FORMAT:
+                    pages = self.page_states.get(task["low"])
+                    if pages is None:
+                        pages = self.page_states[task["low"]] = RangePages(directory, self.job, task)
+                    def committed(state):
+                        self.record_page(task["low"], state)
+                        worker.update(state="running", wait_until=None)
+                        self.update_counts()
+                        self.persist()
+                    await pages.fetch(collector, self.entities[profile], profile, committed, waiting, transport,
+                                      page_timeout=PAGE_TIMEOUT, attempts=1)
+                    # Recheck the durable data before sealing the whole range.
+                    if await complete_in_thread(pages.verify) != pages.state:
+                        raise ValueError("Checkpoint data changed during acquisition.")
+                    count, digest = await complete_in_thread(self.check_chunk, path, task)
+                else:
+                    await collector.fetch_range(self.entities[profile], task["low"], task["high"], temporary,
+                                                lambda: None, waiting, page_timeout=PAGE_TIMEOUT, attempts=1,
+                                                **({"history_client": transport.client} if transport else {}))
+                    count, digest = self.check_chunk(temporary, task)
+                    with temporary.open("r+b") as stream:
+                        os.fsync(stream.fileno())
+                    temporary.replace(path)
                 receipt = {"job_id": self.job["id"], "low": task["low"], "high": task["high"],
                            "profile_id": profile, "count": count, "sha256": digest, "observed_at": utcnow()}
+                if transport:
+                    receipt.update(transport="takeout", transport_generation=pages.state["transport_generation"] if pages
+                                   else transport.secret["generations"][-1]["generation"])
+                if pages:
+                    receipt["checkpoint"] = self.page_summary(pages.state)
                 durable_write(directory / "receipts" / (str(task["low"]) + ".json"),
                               canonical(self.signed(receipt, collector.vault)))
                 self.db.execute("UPDATE tasks SET phase='done',profile=?,count=?,sha256=? WHERE low=?",
@@ -368,9 +473,16 @@ class DistributedExport:
                 self.persist()
             except asyncio.CancelledError:
                 raise
+            except telegram_errors.TakeoutInvalidError:
+                if transport:
+                    transport.invalidate()
+                raise
             except Exception as exc:
                 self.db.execute("UPDATE tasks SET phase='pending' WHERE low=?", (task["low"],))
                 self.db.commit()
+                if isinstance(exc, OSError) and (exc.filename is not None or exc.errno in {
+                        errno.ENOSPC, errno.EDQUOT, errno.EROFS, errno.EACCES, errno.EPERM, errno.EIO}):
+                    raise
                 if isinstance(exc, (OSError, ConnectionError, TimeoutError)) and outages < OUTAGE_RETRIES:
                     outages += 1
                     pause = min(300, OUTAGE_PAUSE * 2 ** (outages - 1))
@@ -551,19 +663,28 @@ class DistributedExport:
     async def run(self):
         directory = self.directory(self.state["id"])
         lead = self.app_for(self.job["lead"]).state.collector
+        self.history_transports = {}
         try:
             await complete_in_thread(self.prepare_chunks)
             self.chunk_failures = {}
+            self.timing.baseline = self.state["captured"]
             for worker in self.job["workers"]:
                 profile_id = worker["profile_id"]
                 if worker["state"] != "skipped" and profile_id not in self.entities:
                     self.entities[profile_id] = await self.app_for(profile_id).state.collector.resolve_for_export(
                         self.job["chat_id"], self.job["username"])
-            self.state["phase"] = "running"
-            self.persist()
+                if worker["state"] != "skipped" and self.job.get("transport") == "takeout":
+                    network = HistoryTakeout(self.app_for(profile_id).state.collector, self.job["id"],
+                                             worker["account_id"], self.job["megagroup"])
+                    self.history_transports[profile_id] = network
+                    if self.db.execute("SELECT 1 FROM tasks t JOIN eligible e USING(low) "
+                                       "WHERE e.profile=? AND t.phase!='done' LIMIT 1", (profile_id,)).fetchone():
+                        await network.open()
             clock = await lead.telegram_clock()
             profile, observer, problems = await lead.chat_profile(self.entities[self.job["lead"]])
             log = await lead.admin_log(self.entities[self.job["lead"]]) if observer.get("role") in ("admin", "creator") else None
+            self.set_phase("running")
+            self.persist()
             workers = [asyncio.create_task(self.work(w)) for w in self.state["workers"] if w["state"] != "skipped"]
             try:
                 await asyncio.gather(*workers)
@@ -592,7 +713,7 @@ class DistributedExport:
                                  "saved chunks are retained.")
             if self.db.execute("SELECT 1 FROM tasks WHERE phase!='done' LIMIT 1").fetchone():
                 raise ValueError("Some ranges could not be read. Saved chunks are retained; resume when accounts are available.")
-            self.state["phase"] = "selecting"
+            self.set_phase("selecting")
             self.persist()
             scratch, ranges = await self.finish_selection(directory, Selection.model_validate(self.job["selection"]))
             meta = {"chat": {**self.job["chat"], "profile": profile, "profile_errors": problems},
@@ -602,14 +723,29 @@ class DistributedExport:
                     "client": lead.client_identity(), "route": lead.route_receipt(),
                     "message_count": self.state["counts"]["selected"], "parts": self.sign_parts(ranges),
                     "collection": {"mode": "distributed_selection", "selection": self.job["selection"],
+                        "history_transport": self.job.get("transport", "regular"),
                         "counts": self.state["counts"], "scan_end": self.job["scan_end"],
                         "scope": "Selected messages and explicitly labelled context in the observed accessible ranges; "
                                  "reply absence is limited to the scanned scope; not an atomic snapshot."},
                     "acquisition": {"started_at": self.job["started_at"], "finished_at": utcnow(),
-                                    "segments": self.job["segments"], "clock_at_start": clock,
+                                    "segments": self.job["segments"], "chunk_size": self.job["chunk_size"], "clock_at_start": clock,
                                     "clock_at_end": await lead.telegram_clock(),
                                     "clock_scope": "Current run; saved chunks retain their original local commit times."}}
-            self.state["phase"] = "packaging"
+            if self.job.get("checkpoint_format") == PAGE_FORMAT:
+                meta["acquisition"]["checkpoints"] = {"format": PAGE_FORMAT, "max_messages": 100,
+                    "pages": sum(p.state["pages"] for p in self.page_states.values()),
+                    "scope": "Local decoded-message checkpoints, not RPC responses. Excluded records and page receipts "
+                             "remain in the private working directory; selected messages have the archive's account signatures."}
+            for profile_id, network in self.history_transports.items():
+                try:
+                    await network.finish()
+                    self.state.get("transport_close_errors", {}).pop(profile_id, None)
+                except (telegram_errors.RPCError, OSError, ConnectionError, TimeoutError) as exc:
+                    self.state.setdefault("transport_close_errors", {})[profile_id] = type(exc).__name__
+            if self.history_transports:
+                meta["acquisition"]["history_transports"] = {p: n.public() for p, n in self.history_transports.items()}
+                meta["acquisition"]["transport_close_errors"] = self.state.get("transport_close_errors", {})
+            self.set_phase("packaging")
             self.persist()
             out = directory / "export.zip"
             max_gib = tuning.value(lead.store, "export_max_gib")
@@ -618,18 +754,34 @@ class DistributedExport:
             await complete_in_thread(verify_chat_export, out, fingerprint(lead.vault.public_key), max_gib)
             replica.outbox(lead.store, out)
             self.state.update(phase="done", ready=True, error=None)
+            self.set_phase("done")
             lead.store.append("chat_export.completed", {"export_id": self.job["id"], "mode": "distributed_selection",
-                              "counts": self.state["counts"]}, self.job["chat_id"])
+                              "counts": self.state["counts"], "performance": self.state["performance"]}, self.job["chat_id"])
         except asyncio.CancelledError:
             self.state.update(phase="paused", ready=False, error="Paused; committed chunks are retained.")
             for worker in self.state["workers"]:
                 if worker["state"] in ("pending", "running", "waiting"):
                     worker["state"] = "paused"
             raise
+        except telegram_errors.TakeoutInitDelayError as exc:
+            self.state.update(phase="paused", ready=False, wait_until=time.time() + exc.seconds,
+                approval_profile=profile_id,
+                error="Telegram Takeout approval is pending. Approve the export in Telegram or wait, then resume. "
+                      "No regular-speed fallback was started.")
+            waiting = next(w for w in self.state["workers"] if w["profile_id"] == profile_id)
+            waiting.update(state="waiting", wait_until=self.state["wait_until"], error="Takeout approval required")
+        except telegram_errors.TakeoutInvalidError:
+            self.state.update(phase="paused", ready=False,
+                error="Telegram ended the Takeout session. Resume validates a new session against the saved range.")
         except Exception as exc:
             self.state.update(phase="failed", ready=False,
                               error=str(exc) if isinstance(exc, ValueError) else type(exc).__name__)
         finally:
+            if self.state["phase"] == "paused":
+                for worker in self.state["workers"]:
+                    if worker["state"] in ("pending", "running", "waiting"):
+                        worker["state"] = "paused"
+            self.set_phase(self.state["phase"])
             if self.db:
                 self.db.close()
                 self.db = None
@@ -644,6 +796,7 @@ class DistributedExport:
             await asyncio.gather(self.task, return_exceptions=True)
             if self.state["phase"] not in ("done", "failed", "paused"):
                 self.state.update(phase="paused", ready=False, error="Paused; committed chunks are retained.")
+                self.set_phase("paused")
                 self.persist()
         return self.public(job_id)
 
@@ -652,6 +805,8 @@ class DistributedExport:
             raise ValueError("Pause the current distributed export before changing another job.")
         state = await self.pause(job_id)
         if state.get("phase") not in ("done", "unknown"):
+            if not self.state or self.state["id"] != job_id:
+                self.timing = None
             self.state = state
             self.state["phase"] = "cancelled"
             self.persist()

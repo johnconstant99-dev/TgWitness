@@ -2,15 +2,19 @@ import asyncio
 import json
 import zipfile
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
+import sys
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
-from telethon.errors import FloodWaitError, RPCError, TypeNotFoundError
+from telethon.errors import FloodWaitError, FloodPremiumWaitError, RPCError, TypeNotFoundError
 from telethon.tl import types
 from telethon.tl.functions import account as account_functions
 
-from tgwitness import chat_export, distributed_export, settings_hub, telegram_client, verify
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from tgwitness import chat_export, distributed_export, export_timing, settings_hub, telegram_client, verify
 from tgwitness.account_export import AccountExport
 from tgwitness.collector import Collector, UnreadableHistory, message_record
 from tgwitness.message_selection import Selection, SelectionIndex, detect_language
@@ -107,14 +111,15 @@ def test_rpc_calls_and_batch_are_serial(monkeypatch):
     asyncio.run(scenario())
 
 
-def test_floodwait_is_full_and_persisted_before_next_rpc(monkeypatch):
+@pytest.mark.parametrize("error_type", [FloodWaitError, FloodPremiumWaitError])
+def test_floodwait_is_full_and_persisted_before_next_rpc(monkeypatch, error_type):
     async def scenario():
         client = object.__new__(telegram_client.WitnessClient)
         clock, saved, calls = [100.0], [], []
         async def request(self, sender, req, ordered=False, flood_sleep_threshold=None):
             calls.append((req, clock[0]))
             if req == 1:
-                raise FloodWaitError(request=None, capture=7200)
+                raise error_type(request=None, capture=7200)
             return req
         async def sleep(seconds):
             clock[0] += seconds
@@ -122,11 +127,51 @@ def test_floodwait_is_full_and_persisted_before_next_rpc(monkeypatch):
         monkeypatch.setattr(telegram_client.time, "time", lambda: clock[0])
         monkeypatch.setattr(telegram_client.asyncio, "sleep", sleep)
         client.rpc_backoff_setter = saved.append
-        with pytest.raises(FloodWaitError):
+        with pytest.raises(error_type):
             await client._call(None, 1)
         assert saved == [7301.0]
         assert await client._call(None, 2) == 2
         assert calls[1][1] >= 7301.0
+    asyncio.run(scenario())
+
+
+def test_reconnect_does_not_shorten_persisted_flood_wait(tmp_path, monkeypatch):
+    async def scenario():
+        app = workspace(tmp_path / "reconnect")
+        collector, store = app.state.collector, app.state.store
+        clock = [100.0]
+        monkeypatch.setattr(telegram_client.time, "time", lambda: clock[0])
+        async def restore():
+            clock[0] = 200.0
+            store.set_setting("rpc_backoff_until", 500.0)
+            raise FloodWaitError(None, capture=10)
+        collector.restore = restore
+        try:
+            await collector.reconnect()
+            assert store.get_setting("rpc_backoff_until") == 500.0
+            assert collector.next_reconnect_at == 500.0
+        finally:
+            store.close()
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("error_type", [FloodWaitError, FloodPremiumWaitError])
+def test_export_retry_waits_without_changing_api_pair(monkeypatch, error_type):
+    async def scenario():
+        clock, calls, states = [100.0], [], []
+        job = SimpleNamespace(current={}, persist=lambda: states.append(dict(job.current)))
+        async def request():
+            calls.append(clock[0])
+            if len(calls) == 1:
+                raise error_type(None, capture=60)
+            return "page"
+        async def sleep(seconds):
+            clock[0] += seconds
+        monkeypatch.setattr(telegram_client.time, "time", lambda: clock[0])
+        monkeypatch.setattr(telegram_client.asyncio, "sleep", sleep)
+        assert await AccountExport.retry(job, request) == "page"
+        assert calls == [100.0, 161.0]
+        assert states[0]["wait_reason"] == "rate_limit" and states[0]["wait_until"] == 160.0
     asyncio.run(scenario())
 
 
@@ -317,6 +362,36 @@ def close_entries(entries):
         entry["app"].state.store.close()
 
 
+@pytest.mark.parametrize("terminal", ["done", "paused", "failed"])
+def test_export_rate_includes_waits_but_excludes_reused_messages_and_packaging(monkeypatch, terminal):
+    clock = [100.0]
+    monkeypatch.setattr(export_timing, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    timer = export_timing.ExportTiming()
+    assert timer.snapshot(200)["messages_per_second"] is None
+    timer.baseline = 200
+    clock[0] = 112.0
+    timer.move("running")
+    clock[0] = 132.0
+    assert timer.snapshot(240)["messages_per_second"] == 2
+    # A wait without new committed messages lowers the average.
+    clock[0] = 142.0
+    assert timer.snapshot(240)["messages_per_second"] == pytest.approx(40 / 30, abs=.001)
+    timer.move("selecting")
+    clock[0] = 150.0
+    timer.move("packaging")
+    clock[0] = 155.0
+    timer.move(terminal)
+    result = timer.snapshot(260)
+    assert result["new_messages"] == 60 and result["reused_messages"] == 200
+    assert result["messages_per_second"] == 2 and result["elapsed_seconds"] == 55
+    assert result["phase_seconds"] == {"preparing": 12, "running": 30, "selecting": 8, "packaging": 5}
+    clock[0] = 5000.0
+    assert timer.snapshot(260) == result
+    resumed = export_timing.ExportTiming()
+    resumed.baseline = 260
+    assert resumed.snapshot(260)["new_messages"] == resumed.snapshot(260)["elapsed_seconds"] == 0
+
+
 def test_multi_start_is_atomic_when_one_account_monitors(tmp_path):
     async def scenario():
         manager, entries = coordinator(tmp_path, [message(1)])
@@ -344,6 +419,9 @@ def test_resume_reuses_signed_chunks_and_rejects_tampering(tmp_path, monkeypatch
             await asyncio.wait_for(c.client.blocked.wait(), 5)
             await manager.pause(state["id"])
             assert manager.state["phase"] == "paused" and c.export_claim is None
+            paused_performance = manager.public()["performance"]
+            await asyncio.sleep(.02)
+            assert manager.public()["performance"] == paused_performance
             directory = manager.directory(state["id"])
             receipts = list((directory / "receipts").glob("*.json"))
             assert len(receipts) == 1
@@ -361,6 +439,8 @@ def test_resume_reuses_signed_chunks_and_rejects_tampering(tmp_path, monkeypatch
             await restored.resume(state["id"])
             await asyncio.wait_for(restored.task, 10)
             assert restored.state["error"] == "Recovery reached selection"
+            performance = restored.public()["performance"]
+            assert performance["reused_messages"] == 2 and performance["new_messages"] == 4
             assert len(list((directory / "receipts").glob("*.json"))) == 3
             chunk = directory / "chunks" / (str(preserved["low"]) + ".jsonl")
             chunk.write_text(chunk.read_text().replace("English", "tampered"))
@@ -368,6 +448,7 @@ def test_resume_reuses_signed_chunks_and_rejects_tampering(tmp_path, monkeypatch
             await restored.resume(state["id"])
             await asyncio.wait_for(restored.task, 5)
             assert "differs" in restored.state["error"]
+            assert restored.public()["performance"]["new_messages"] == 0
             assert not c.client.reads and c.export_claim is None
         finally:
             await manager.close()
@@ -388,6 +469,11 @@ def test_filtered_archive_is_verifiable_and_contains_context(tmp_path, monkeypat
                 "reply_mode": "answered", "context_depth": 1})
             await asyncio.wait_for(manager.task, 60)
             assert manager.state["phase"] == "done", manager.state
+            performance = manager.public()["performance"]
+            assert performance["new_messages"] == 2 and performance["reused_messages"] == 0
+            assert performance["phase_seconds"]["packaging"] > 0
+            assert manager.verified(manager.directory(state["id"]) / "status.json",
+                                    entries["account0"]["app"].state.vault.public_key)["performance"] == performance
             path = manager.result_path(state["id"])
             public = entries["account0"]["app"].state.vault.public_key
             checked = verify_chat_export(path, fingerprint(public))
@@ -407,6 +493,47 @@ def test_filtered_archive_is_verifiable_and_contains_context(tmp_path, monkeypat
     asyncio.run(scenario())
 
 
+@pytest.mark.parametrize("inclusive", [False, True])
+@pytest.mark.parametrize("microseconds", [0, 500000])
+def test_date_selection_keeps_every_message_at_inclusive_start(tmp_path, inclusive, microseconds):
+    async def scenario():
+        boundary = datetime(2026, 10, 5, tzinfo=timezone.utc)
+        rows = [message(i) for i in range(1, 8)]
+        for row, seconds in zip(rows, (-2, -1, 0, 0, 0, 1, 2)):
+            row.date = boundary + timedelta(seconds=seconds)
+
+        class DateClient(Client):
+            async def get_messages(self, entity, limit=None, offset_date=None, ids=None):
+                if inclusive and offset_date is not None and ids is None:
+                    return sorted([m for m in self.messages if m.date <= offset_date.replace(microsecond=0)],
+                                  key=lambda m: -m.id)[:limit]
+                return await super().get_messages(entity, limit, offset_date, ids)
+
+        manager, entries = coordinator(tmp_path, rows, count=1)
+        collector = entries["account0"]["app"].state.collector
+        collector.client = DateClient(rows)
+        # Exercise the signed plan, real chunk acquisition and local selection.
+        # Bundle rendering and verification have their own integration check above.
+        manager.launch = lambda: None
+        options = Selection(from_utc=(boundary + timedelta(microseconds=microseconds)).isoformat(),
+                            to_utc=(boundary + timedelta(seconds=2)).isoformat())
+        try:
+            state = await manager.start(CHAT, ["account0"], "account0", selection=options.model_dump())
+            manager.prepare_chunks()
+            await manager.work(manager.state["workers"][0])
+            scratch, _ = await manager.finish_selection(manager.directory(state["id"]), options)
+            selected = [json.loads(line)["id"] for line in scratch.read_text().splitlines()]
+            assert selected == ([6, 5, 4, 3] if microseconds == 0 else [6])
+        finally:
+            if manager.db:
+                manager.db.close()
+                manager.db = None
+            if manager.state:
+                manager.release(manager.state["id"])
+            close_entries(entries)
+    asyncio.run(scenario())
+
+
 def test_cancelling_an_old_job_cannot_replace_active_state(tmp_path):
     async def scenario():
         manager, entries = coordinator(tmp_path, [message(1)], count=1)
@@ -421,6 +548,11 @@ def test_cancelling_an_old_job_cannot_replace_active_state(tmp_path):
             await manager.pause(new["id"])
             assert manager.state["phase"] == "paused" and collector.export_claim is None
             assert len(manager.list_jobs()) == 2
+            old_performance = manager.public(old["id"])["performance"]
+            cancelled = await manager.cancel(old["id"])
+            assert cancelled["performance"] == old_performance
+            await asyncio.sleep(.02)
+            assert manager.public()["performance"] == old_performance
         finally:
             await manager.close()
             close_entries(entries)
@@ -746,12 +878,22 @@ def test_full_recheck_reads_every_absent_number(tmp_path, monkeypatch):
 
 
 class TakeoutClient(Client):
-    def __init__(self, messages):
+    def __init__(self, messages, account_id):
         super().__init__(messages)
         self.requests = []
+        self.account_id = account_id
+
+    async def get_input_entity(self, entity):
+        return entity if isinstance(entity, types.InputUserSelf) else types.InputPeerChannel(entity.id, 1)
 
     async def __call__(self, request, ordered=False):
         self.requests.append(request)
+        while hasattr(request, "query"):
+            request = request.query
+        if type(request).__name__ == "GetUsersRequest":
+            return [types.User(self.account_id, is_self=True)]
+        if type(request).__name__ == "GetSplitRangesRequest":
+            return [types.MessageRange(0, 2147483647)]
         if isinstance(request, account_functions.InitTakeoutSessionRequest):
             return types.account.Takeout(id=77)
         return True
@@ -762,11 +904,13 @@ def test_ranges_are_read_through_a_takeout_session(tmp_path, monkeypatch):
         rows = [message(i) for i in range(1, 7)]
         manager, entries = coordinator(tmp_path, rows)
         for entry in entries.values():
-            entry["app"].state.collector.client = TakeoutClient(rows)
+            collector = entry["app"].state.collector
+            collector.client = TakeoutClient(rows, collector.store.get_setting("account")["id"])
+            collector.resolve_for_export.return_value.username = "synthetic"
         monkeypatch.setattr(distributed_export, "CHUNK", 2)
         monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
         try:
-            await manager.start(CHAT, list(entries), "account0")
+            await manager.start(CHAT, list(entries), "account0", transport="takeout")
             await asyncio.wait_for(manager.task, 60)
             assert manager.state["phase"] == "done", manager.state
             for entry in entries.values():

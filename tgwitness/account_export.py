@@ -34,6 +34,7 @@ from .security import private_write
 from .store import ZERO, canonical, utcnow
 from .verify import fingerprint, validate_server_hashes
 from .workers import complete_in_thread
+from .telegram_client import FLOOD_ERRORS
 
 KINDS = ("private", "bot", "group", "supergroup", "channel")
 MEDIA = ("photo", "video", "video_message", "voice", "audio", "document", "sticker", "animation")
@@ -664,7 +665,7 @@ class AccountExport:
         for attempt in range(6):
             try:
                 return await call()
-            except errors.FloodWaitError as exc:
+            except FLOOD_ERRORS as exc:
                 self.current.update(phase="waiting", wait_until=time.time() + exc.seconds, delay_seconds=exc.seconds,
                                     wait_reason="rate_limit")
                 self.persist()

@@ -2,7 +2,7 @@ import asyncio
 import base64
 import ssl
 
-from telethon.network.connection import ConnectionTcpFull
+from telethon.network.connection import ConnectionTcpObfuscated
 
 
 async def tunnel(route, host, port, timeout=15, address=None):
@@ -31,7 +31,7 @@ async def tunnel(route, host, port, timeout=15, address=None):
         raise
 
 
-class HTTPSConnection(ConnectionTcpFull):
+class HTTPSConnection(ConnectionTcpObfuscated):
     async def _connect(self, timeout=None, ssl=None):
         from .network import NetworkConfig
         route = NetworkConfig.model_construct(**self._proxy)

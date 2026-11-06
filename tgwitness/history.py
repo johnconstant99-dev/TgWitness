@@ -5,8 +5,9 @@ import shutil
 import time
 
 from telethon import utils
-from telethon.errors import FloodWaitError, RPCError, ServerError, TakeoutInitDelayError, TakeoutInvalidError
+from telethon.errors import RPCError, ServerError, TakeoutInitDelayError, TakeoutInvalidError
 from telethon.tl import types
+from .telegram_client import FLOOD_ERRORS
 
 from .evidence import checkpoint, retain_checkpoint
 from .monitoring import capture_settings
@@ -220,7 +221,7 @@ class History:
         while True:
             try:
                 return await asyncio.wait_for(call(), self.collector.param("operation_timeout_seconds"))
-            except FloodWaitError as exc:
+            except FLOOD_ERRORS as exc:
                 until = max(time.time() + exc.seconds + 1, self.store.get_setting("rpc_backoff_until", 0))
                 self.store.set_setting("rpc_backoff_until", until)
                 self.store.append("history.waiting", {"history_run_id": run_id,

@@ -23,6 +23,41 @@ Readable HTML and PDF reports carry their own seals; standalone CSV is checked a
 part of a signed ZIP. Keep the ZIP to retain the attachment bytes and manifest,
 and a separate checkpoint to check the journal against an earlier boundary.
 
+## Comparing chat exports
+
+Verify and compare two signed chat-export ZIPs with independently retained signer
+fingerprints:
+
+```sh
+python -m tgwitness.verify first.zip --compare second.zip \
+  --fingerprint FIRST_TRUSTED_KEY_SHA256 --compare-fingerprint SECOND_TRUSTED_KEY_SHA256
+```
+
+When both archives record the same numeric account and chat IDs, records are paired
+by message ID. **Unchanged** means equality of the complete saved JSON record:
+full text, author, dates, reply target, nested metadata and unknown fields are all
+included. JSON object key order does not matter; absent fields, nulls, value types
+and array order do. The 300-character preview is only for display. Changed entries
+name the differing top-level `changed_fields`, including changes invisible in that preview.
+Duplicate message IDs are rejected instead of overwriting one another during matching.
+
+A difference can be a changed display name, view count, collection annotation or
+other observation metadata. It does not by itself establish a Telegram edit,
+identify who made a change, or prove which contradictory archive is accurate.
+Unparsed records remain in the comparison; equality of their saved representation
+does not mean their Telegram payload was decoded.
+
+For different or missing account/chat identities, the tool only finds possible
+correspondences using sender, complete text, file hash, media type and a five-second
+time tolerance. It reports **Matched**, not **Unchanged**. These candidates do not
+establish message identity or equality of all metadata. Unparsed records remain
+unmatched. Differences in paired records remain listed in `changed`, including in
+content mode; these differences do not prove edits of the same message. With
+`--json`, `matched` counts pairs and `unchanged` counts pairs whose complete saved
+records are equal. Neither count proves message identity in content mode. The
+existing `changed_fields` and integer `unchanged` output remain compatible with
+earlier comparison results. Archive format and signature verification are unchanged.
+
 ## Investigation handoff
 
 1. Record the case reference, operator, numeric Telegram account ID, selected

@@ -3,10 +3,11 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import sys
+import time
 from types import SimpleNamespace
 
 import pytest
-from telethon.errors import FloodWaitError
+from telethon.errors import FloodWaitError, FloodPremiumWaitError
 from telethon.tl import functions, types
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -206,6 +207,36 @@ def test_due_sources_are_snapshotted_and_floods_back_off(store):
     assert store.events(kind="telegram.backoff", limit=1)
     groups = {group["id"]: group for group in tuning.described(store)["groups"]}
     assert {item["key"] for item in groups["chatstate"]["items"]} == set(saved)
+
+
+@pytest.mark.parametrize("error", [FloodWaitError, FloodPremiumWaitError])
+def test_all_floods_stop_parts_and_resume_without_losing_longer_wait(store, monkeypatch, error):
+    deadline = time.time() + 7200
+
+    class Limited(Client):
+        async def __call__(self, request):
+            self.requests.append(type(request).__name__)
+            store.set_setting("rpc_backoff_until", deadline)
+            raise error(request=request, capture=30)
+
+    async def nap(_seconds):
+        pass
+
+    monkeypatch.setattr(asyncio, "sleep", nap)
+    saved = {"chat_state_minutes": 60, "chat_state_pause_seconds": 1, "chat_state_pinned": True,
+             "chat_state_admins": True, "chat_state_gifts": True, "chat_state_unchanged": True}
+    client = Limited()
+    collector = SimpleNamespace(store=store, running=True, client=client, param=saved.__getitem__,
+                                dialog_cache={CHANNEL: {"entity": channel()}})
+    attempted = {}
+    assert asyncio.run(chat_state.run_due(collector, attempted)) == 0
+    assert client.requests == ["GetFullChannelRequest"], "No other part is requested after a flood"
+    assert store.get_setting("rpc_backoff_until") == deadline
+    assert not store.events(kind=chat_state.KIND, limit=1)
+    assert CHANNEL not in attempted, "The interrupted snapshot must remain eligible after the wait"
+    store.set_setting("rpc_backoff_until", 0)
+    collector.client = Client()
+    assert asyncio.run(chat_state.run_due(collector, attempted)) == 1
 
 
 def test_snapshots_stay_in_verifiable_exports(tmp_path):

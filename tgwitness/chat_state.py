@@ -11,8 +11,9 @@ import time
 from datetime import datetime, timedelta, timezone
 
 from telethon import utils
-from telethon.errors import FloodWaitError
 from telethon.tl import functions, types
+
+from .telegram_client import FLOOD_ERRORS
 
 KIND = "chat.state"
 PINNED_LIMIT = 100
@@ -70,7 +71,7 @@ async def read_state(client, entity, options, timeout=TIMEOUT):
     async def ask(part, request):
         try:
             return await asyncio.wait_for(request(), timeout)
-        except (asyncio.CancelledError, FloodWaitError):
+        except (asyncio.CancelledError, *FLOOD_ERRORS):
             raise
         except Exception as exc:
             errors[part] = type(exc).__name__
@@ -272,7 +273,7 @@ async def run_due(collector, attempted):
             continue
         try:
             state, errors = await read_state(collector.client, entity, options(collector))
-        except FloodWaitError as exc:
+        except FLOOD_ERRORS as exc:
             until = max(time.time() + exc.seconds, collector.store.get_setting("rpc_backoff_until", 0))
             collector.store.set_setting("rpc_backoff_until", until)
             collector.store.append("telegram.backoff", {"operation": "chat state snapshot",

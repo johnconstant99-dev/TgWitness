@@ -12,6 +12,7 @@ from . import file_hashes
 
 SECRET_FIELDS = frozenset({"access_hash", "file_reference", "auth_key", "api_hash", "session", "string_session",
                            "token", "password", "secret", "hash", "takeout_id", "future_auth_token"})
+DIRECT_PEER_LIMIT = 20
 
 
 def safe(value, depth=0):
@@ -132,6 +133,25 @@ class Transport:
     def ranged(self, task):
         return WrappedClient(self.collector.client, self.secret.get("takeout_id"), task.get("telegram_range"))
 
+    async def selected_chats(self):
+        chats = {}
+        for cid in self.options["chat_ids"]:
+            try:
+                entity = await self.collector.client.get_entity(cid)
+                peer = utils.get_input_peer(entity)
+            except (ValueError, errors.PeerIdInvalidError, errors.ChannelPrivateError):
+                continue  # The ordinary inventory may still resolve an uncached peer.
+            if utils.get_peer_id(entity) != cid:
+                raise ValueError("Telegram resolved a different chat from the selected ID.")
+            result = await self.client(f.messages.GetPeerDialogsRequest([t.InputDialogPeer(peer)]))
+            dialog = next((d for d in result.dialogs if utils.get_peer_id(d.peer) == cid), None)
+            self.peers[cid] = peer
+            chats[cid] = {"id": cid, "title": utils.get_display_name(entity),
+                "kind": kind_of(entity) or "private", "username": getattr(entity, "username", None),
+                "archived": getattr(dialog, "folder_id", None) == 1 if dialog else None,
+                "left": bool(getattr(entity, "left", False)), "ranges": [0]}
+        return chats
+
     async def discover(self):
         ranges = [None] if self.options["chat_kinds"] else []
         gaps = []
@@ -144,8 +164,11 @@ class Transport:
                 gaps.append("Regular API export cannot enumerate left channels and supergroups.")
             if self.options["include_contacts"]:
                 gaps.append("Regular API contacts include Telegram users, not the complete saved phone contact list.")
-        chats = {}
-        for index, split in enumerate(ranges):
+        selected_ids = set(self.options["chat_ids"])
+        chats = (await self.selected_chats() if self.options["transport"] == "regular" and ranges
+                 and 0 < len(selected_ids) <= DIRECT_PEER_LIMIT else {})
+        inventory_ranges = [] if selected_ids and selected_ids <= chats.keys() else ranges
+        for index, split in enumerate(inventory_ranges):
             client = WrappedClient(self.collector.client, self.secret.get("takeout_id"), split)
             async for dialog in client.iter_dialogs(limit=None, folder=None, ignore_migrated=False):
                 entity = dialog.entity
@@ -156,6 +179,7 @@ class Transport:
                     "archived": getattr(dialog, "folder_id", None) == 1, "left": False, "ranges": []})
                 if index not in row["ranges"]:
                     row["ranges"].append(index)
+                row["archived"] = getattr(dialog, "folder_id", None) == 1
         if self.options["transport"] == "takeout" and {"group", "supergroup", "channel"} & set(self.options["chat_kinds"]):
             offset = 0
             while True:
@@ -171,11 +195,12 @@ class Transport:
                 if not result.chats or isinstance(result, t.messages.Chats):
                     break
         tasks = []
-        selected_ids = set(self.options["chat_ids"])
         for chat in chats.values():
             chat["selected"] = (chat["kind"] in self.options["chat_kinds"]
                                 and (not selected_ids or chat["id"] in selected_ids)
-                                and (self.options["include_archived"] or not chat["archived"]))
+                                and (self.options["include_archived"] or chat["archived"] is False))
+            if chat["archived"] is None and not self.options["include_archived"]:
+                gaps.append("Selected chat " + str(chat["id"]) + ": archive status unavailable; excluded by the archive filter.")
             if not chat["selected"]:
                 continue
             for index in chat["ranges"]:
@@ -189,7 +214,7 @@ class Transport:
                         gaps.append("Chat " + str(chat["id"]) + ": full history unavailable; exporting own messages only.")
                         response = await self.history(task, 0, 1)
                     messages = [m for m in response.messages if not isinstance(m, t.MessageEmpty)]
-                except (errors.TakeoutInvalidError, errors.FloodWaitError, errors.ServerError):
+                except (errors.TakeoutInvalidError, errors.FloodWaitError, errors.FloodPremiumWaitError, errors.ServerError):
                     raise
                 except errors.RPCError as exc:
                     task["discovery_error"] = type(exc).__name__
@@ -326,7 +351,7 @@ class Transport:
             batch = missing[start:start + 100]
             try:
                 found = await self.ranged(task)(f.messages.GetCustomEmojiDocumentsRequest(batch))
-            except (errors.TakeoutInvalidError, errors.FloodWaitError, errors.ServerError):
+            except (errors.TakeoutInvalidError, errors.FloodWaitError, errors.FloodPremiumWaitError, errors.ServerError):
                 raise
             except errors.RPCError:
                 found = []

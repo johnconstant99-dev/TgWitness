@@ -5,6 +5,7 @@ import json
 import shutil
 import time
 import secrets
+import warnings
 from contextlib import asynccontextmanager, suppress
 from datetime import datetime, timedelta, timezone
 from functools import wraps
@@ -14,7 +15,7 @@ from pathlib import Path
 from collections import deque
 
 from telethon import __version__ as telethon_version, events, utils
-from telethon.errors import SessionPasswordNeededError, FloodWaitError, InvalidBufferError, RPCError
+from telethon.errors import SessionPasswordNeededError, InvalidBufferError, RPCError
 from telethon.errors import ChannelInvalidError, ChannelPrivateError, FileReferenceExpiredError, TakeoutInvalidError
 from telethon.errors import TakeoutInitDelayError, TypeNotFoundError
 from telethon.errors import FreshResetAuthorisationForbiddenError, PasswordHashInvalidError
@@ -37,7 +38,7 @@ from . import tuning
 from .history import History
 from .account_import import session_key, validate_string
 from .avatar_history import AvatarHistory
-from .telegram_client import WitnessClient
+from .telegram_client import WitnessClient, FLOOD_ERRORS
 from .security import KeyLock
 from .workers import complete_in_thread
 from .store import canonical, utcnow
@@ -131,7 +132,7 @@ EXPOSURE_MEANING = {
 MEMBERSHIP_ACTIONS = (types.MessageActionChatAddUser, types.MessageActionChatDeleteUser,
                       types.MessageActionChatJoinedByLink, types.MessageActionChatJoinedByRequest)
 # The client description in the connection request Telegram receives.
-CLIENT_FIELDS = ("device_model", "system_version", "app_version", "lang_code", "system_lang_code")
+CLIENT_FIELDS = ("device_model", "system_version", "app_version", "lang_code", "system_lang_code", "lang_pack")
 CLOCK_TIMEOUT = 10
 PROFILE_TIMEOUT = 30
 PROFILE_FLAGS = ("scam", "fake", "verified", "restricted", "noforwards", "broadcast", "megagroup", "gigagroup",
@@ -376,7 +377,7 @@ class Collector:
         self.observation_starting = False
         self.connection_change_task = None
         self.foreground = 0
-        self.key_lock = None
+        self.key_locks = {}
         self.sessions_checked_at = -SESSIONS_EVERY
         self.people = {}
         self.avatar_lock = asyncio.Lock()
@@ -451,6 +452,9 @@ class Collector:
             "account_loss": self.store.get_setting("account_loss", None),
             "account_restriction": self.store.get_setting("account_restriction", None),
             "client": self.client_identity(credentials=credentials),
+            "client_checks": self.store.get_setting("client_checks", None),
+            "session_origin": credentials.get("session_origin"),
+            "pending_new_session": bool(self.vault.read("independent_login")),
             "last_error": self.last_error, "last_heartbeat": self.last_heartbeat,
             "media_pending": sum(n for s, n in self.store.media_stats().items()
                                  if s in ("queued", "running", "retry")),
@@ -460,6 +464,8 @@ class Collector:
             "last_update_at": self.last_update_at,
             "max_handler_ms": round(self.max_handler_ms, 2),
             "rpc_backoff_until": self.store.get_setting("rpc_backoff_until", 0),
+            "rpc_backoff": self.store.get_setting("rpc_backoff", None),
+            "rpc_activity": self.client.rpc_activity() if isinstance(self.client, WitnessClient) else None,
             "disk_free_bytes": shutil.disk_usage(self.store.root).free,
             "run_id": self.run_id,
             "reconnect_attempts": self.reconnect_attempts,
@@ -559,6 +565,8 @@ class Collector:
         except AUTHORIZATION_ERRORS as exc:
             self.handle_authorization_error(exc, "chat lookup", client=client)
             raise
+        except FLOOD_ERRORS:
+            raise
         except Exception:
             return None
 
@@ -605,7 +613,7 @@ class Collector:
                     await self.snapshot(chat_id, options["history"], entity=entity, origin="new_chat")
             except asyncio.CancelledError:
                 raise
-            except FloodWaitError as exc:
+            except FLOOD_ERRORS as exc:
                 until = max(time.time() + exc.seconds, self.store.get_setting("rpc_backoff_until", 0))
                 self.store.set_setting("rpc_backoff_until", until)
                 self.store.append("telegram.backoff", {"operation": "new chat intake", "retry_after_seconds": exc.seconds})
@@ -723,7 +731,9 @@ class Collector:
                 client_profile = saved.get("client_profile")
         supplied = {**client_identity.validate(languages), **client_identity.validate(client_profile)}
         device = client_identity.resolve(api_id, supplied, self.vault.public_key)
-        options = {key: value for key, value in device.items() if key != "lang_pack"}
+        for issue in client_identity.consistency_warnings(api_id, device, LAYER):
+            warnings.warn(issue + " Imported profile values are retained.", UserWarning, stacklevel=2)
+        options = {key: value for key, value in device.items() if key not in ("lang_pack", "tz_offset")}
         string_session = StringSession(session)
         self.resumed_state_at = self.load_update_state(string_session)
 
@@ -740,9 +750,14 @@ class Collector:
             until, self.store.get_setting("rpc_backoff_until", 0)))
         from .rpc_pacing import AccountPacer
         client.bulk_pacer = AccountPacer(self.store)
+        def rpc_backoff(details):
+            self.store.set_setting("rpc_backoff", details)
+            self.store.append("telegram.backoff", {"operation": "Telegram RPC", **details})
+        client.rpc_backoff_observer = rpc_backoff
         request = getattr(client, "_init_request", None)
         if isinstance(request, functions.InitConnectionRequest):
             request.lang_pack = device["lang_pack"]
+            client_identity.apply_init_params(client)
         def rpc_error(exc):
             self.handle_authorization_error(exc, "Telegram RPC", client=client)
         client.rpc_error_handler = rpc_error
@@ -994,16 +1009,21 @@ class Collector:
         return self.auto_route[1].client_options()
 
     def client_identity(self, client=None, credentials=None):
+        from .client_identity import consistency_warnings
+        credentials = credentials if credentials is not None else self.vault.read("credentials")
         init = getattr(client or self.client, "_init_request", None)
-        api_id = getattr(init, "api_id", None) or (credentials if credentials is not None
-                                                   else self.vault.read("credentials")).get("api_id")
+        api_id = getattr(init, "api_id", None) or credentials.get("api_id")
         sent = {name: getattr(init, name) for name in CLIENT_FIELDS if isinstance(getattr(init, name, None), str)}
+        profile = (sent or getattr(client or self.client, "tgwitness_client_profile", None)
+                   or credentials.get("client_profile") or api_pool.device_for(api_id, self.vault.public_key))
         session = getattr(client or self.client, "session", None)
         identity = {"library": "Telethon " + telethon_version, "layer": LAYER, "api_id": api_id,
                     **({"dc_id": session.dc_id} if isinstance(getattr(session, "dc_id", None), int) else {}),
                     "api_pair": "built-in public pair" if api_id in api_pool.POOL_IDS else
                                 "own application" if api_id else None,
-                    **(sent or api_pool.device_for(api_id))}
+                    **profile}
+        if issues := consistency_warnings(api_id, profile, LAYER):
+            identity["warnings"] = issues
         if api_id == api_pool.DESKTOP_ID:
             identity["meaning"] = "Telegram Desktop's public pair, sent with a Telegram Desktop client description"
         return identity
@@ -1097,7 +1117,7 @@ class Collector:
                 try:
                     answer = await self.client.get_messages(entity, ids=batch)
                     break
-                except FloodWaitError as exc:
+                except FLOOD_ERRORS as exc:
                     if attempt == 2 or exc.seconds > 600:
                         raise
                     await asyncio.sleep(exc.seconds + 1)
@@ -1293,19 +1313,25 @@ class Collector:
             return
         await self.planned_rotation()
 
+    @property
+    def key_lock(self):
+        held = next(iter(self.key_locks.values()), None)
+        return held[1:] if held else None
+
     def lock_key(self, client):
         key = getattr(getattr(getattr(client, "session", None), "auth_key", None), "key", None)
-        if not key or self.key_lock is not None and self.key_lock[0] == key:
+        held = self.key_locks.get(id(client))
+        if not key or held is not None and held[1] == key:
             return
         lock = KeyLock(key)
-        if self.key_lock is not None:
-            self.key_lock[1].close()
-        self.key_lock = (key, lock)
+        if held is not None:
+            held[2].close()
+        self.key_locks[id(client)] = (client, key, lock)
 
-    def unlock_key(self):
-        if self.key_lock is not None:
-            self.key_lock[1].close()
-            self.key_lock = None
+    def unlock_key(self, client=None):
+        for identity in ([id(client)] if client is not None else list(self.key_locks)):
+            if held := self.key_locks.pop(identity, None):
+                held[2].close()
 
     async def connect_client(self, client):
         self.lock_key(client)
@@ -1315,6 +1341,8 @@ class Collector:
             if automatic:
                 await self.ensure_route()
                 await self.align(client)
+            # Route changes can close the old transport and release its lock.
+            self.lock_key(client)
             try:
                 await asyncio.wait_for(client.connect(), 25)
             except RPCError:
@@ -1414,6 +1442,12 @@ class Collector:
     async def configure(self, api_id=None, api_hash=None, session="", expected_user_id=None, client_profile=None, languages=None):
         return await self.with_api_pair(api_id, api_hash, lambda pair_id, pair_hash:
                                         self.connect_login(pair_id, pair_hash, session, expected_user_id, client_profile, languages))
+
+    @connection_change
+    async def import_new_session(self, api_id, api_hash, session, expected_user_id=None, client_profile=None,
+                                 languages=None, formats=(), password=""):
+        from .session_import import create_session
+        return await create_session(self, api_id, api_hash, session, expected_user_id, client_profile, languages, formats, password)
 
     @connection_change
     async def connect_login(self, api_id, api_hash, session="", expected_user_id=None, client_profile=None, languages=None):
@@ -1586,7 +1620,12 @@ class Collector:
                                                    "key_origin": self.pending_key_origin})
                 self.store.set_setting("account_loss", None)
                 self.store.append("account.authorized", {"account_id": me.id, "key_origin": self.pending_key_origin,
-                                                         "client": self.client_identity(candidate)})
+                                                         "client": self.client_identity(candidate),
+                                                         **({"session_origin": credentials["session_origin"]}
+                                                            if credentials.get("session_origin") else {})})
+            pending = self.vault.read("independent_login")
+            if pending and session_key(pending.get("session")) == session_key(credentials["session"]):
+                self.vault.save("independent_login", {})
         except BaseException:
             await self.cancel_login()
             self.phase = self.resting_phase()
@@ -1604,6 +1643,30 @@ class Collector:
         self.pending_phone = self.phone_hash = None
         self.authorization_required = False
         self.phase, self.last_error = "ready", None
+        if self.pending_key_origin == "created":
+            from .client_initialization import post_login
+            result = await post_login(candidate)
+            self.store.append("account.initialized", {"account_id": me.id, "source": "telegram_api", "requests": result})
+        await self.check_client_connection(candidate)
+
+    async def check_client_connection(self, client):
+        if getattr(client, "tgwitness_connection_check", None) is None:
+            from .client_checks import inspect_connection
+            async def inspect():
+                result = await inspect_connection(client)
+                if client is self.client:
+                    with self.store.transaction():
+                        self.store.set_setting("client_checks", result)
+                        self.store.append("account.connection_checked", result)
+                return result
+            client.tgwitness_connection_check = asyncio.create_task(inspect())
+        task = client.tgwitness_connection_check
+        try:
+            return await task
+        except asyncio.CancelledError:
+            if task.cancelled() and client.tgwitness_connection_check is task:
+                client.tgwitness_connection_check = None
+            raise
 
     def resting_phase(self):
         if self.authorization_required:
@@ -1647,6 +1710,8 @@ class Collector:
                 and not credentials.get("client_profile") and self.vault.read("credentials") == credentials):
             credentials["client_profile"] = client.tgwitness_client_profile
             self.vault.save("credentials", credentials)
+        if client is self.client and authorization_generation == self.authorization_generation:
+            await self.check_client_connection(client)
 
     async def refusal(self, client):
         try:
@@ -1739,11 +1804,10 @@ class Collector:
 
     def connection_changed(self, client, state):
         role = "current" if client is self.client else "candidate" if client is self.login_client else "other"
-        key = getattr(getattr(getattr(client, "session", None), "auth_key", None), "key", None)
         if state == "opened":
             self.lock_key(client)  # A new login receives its auth key during connect.
-        if state == "closed" and self.key_lock is not None and self.key_lock[0] == key:
-            self.unlock_key()
+        if state == "closed":
+            self.unlock_key(client)
         self.note("connection." + state, {"role": role, "route": self.route_receipt(),
                                           "dc_id": getattr(client.session, "dc_id", None)})
         if state == "opened" and role == "current" and time.monotonic() - self.sessions_checked_at > SESSIONS_EVERY:
@@ -1828,7 +1892,7 @@ class Collector:
         client = self.client
         try:
             result = await asyncio.wait_for(client(functions.messages.GetDialogFiltersRequest()), 15)
-        except FloodWaitError:
+        except FLOOD_ERRORS:
             raise
         except AUTHORIZATION_ERRORS as exc:
             self.handle_authorization_error(exc, "dialog folders", client=client)
@@ -2070,8 +2134,9 @@ class Collector:
             await self.restore()
         except AUTHORIZATION_ERRORS as exc:
             self.handle_authorization_error(exc, "reconnect", client=client)
-        except FloodWaitError as exc:
-            self.next_reconnect_at = now + exc.seconds
+        except FLOOD_ERRORS as exc:
+            self.next_reconnect_at = max(time.time() + exc.seconds,
+                                         self.store.get_setting("rpc_backoff_until", 0))
             self.store.set_setting("rpc_backoff_until", self.next_reconnect_at)
             self.store.append("telegram.backoff", {"operation": "reconnect", "retry_after_seconds": exc.seconds})
         except Exception as exc:
@@ -2425,8 +2490,9 @@ class Collector:
                 client = self.client
                 try:
                     await self.apply_scope()
-                except FloodWaitError as exc:
-                    self.store.set_setting("rpc_backoff_until", time.time() + exc.seconds)
+                except FLOOD_ERRORS as exc:
+                    self.store.set_setting("rpc_backoff_until", max(time.time() + exc.seconds,
+                        self.store.get_setting("rpc_backoff_until", 0)))
                     self.store.append("telegram.backoff", {"operation": "scope refresh",
                                                            "retry_after_seconds": exc.seconds})
                     continue
@@ -2477,11 +2543,11 @@ class Collector:
                     last = self.store.get_setting("recheck_last", {})
                     last[str(target["chat_id"])] = time.time()
                     self.store.set_setting("recheck_last", last)
-            except FloodWaitError as exc:
+            except FLOOD_ERRORS as exc:
                 until = max(time.time() + exc.seconds, self.store.get_setting("rpc_backoff_until", 0))
                 self.store.set_setting("rpc_backoff_until", until)
                 self.store.append("telegram.backoff", {"operation": "recheck", "retry_after_seconds": exc.seconds})
-                results.append({"chat_id": target["chat_id"], "error": "FloodWaitError"})
+                results.append({"chat_id": target["chat_id"], "error": type(exc).__name__})
                 break
             except Exception as exc:
                 results.append({"chat_id": target["chat_id"], "error": type(exc).__name__})
@@ -2826,15 +2892,15 @@ class Collector:
                 scratch.unlink(missing_ok=True)
             shutil.rmtree(media_dir, ignore_errors=True)
 
-    async def read_numbers(self, entity, numbers):
+    async def read_numbers(self, entity, numbers, client=None):
         found = {}
         for start in range(0, len(numbers), 100):
             batch = numbers[start:start + 100]
             for attempt in range(3):
                 try:
-                    answer = await self.client.get_messages(entity, ids=batch)
+                    answer = await (client or self.client).get_messages(entity, ids=batch)
                     break
-                except FloodWaitError as exc:
+                except FLOOD_ERRORS as exc:
                     if attempt == 2 or exc.seconds > 600:
                         raise
                     await asyncio.sleep(exc.seconds + 1)
@@ -2843,8 +2909,8 @@ class Collector:
                         found[batch[0]] = error
                     else:
                         middle = len(batch) // 2
-                        found.update(await self.read_numbers(entity, batch[:middle]))
-                        found.update(await self.read_numbers(entity, batch[middle:]))
+                        found.update(await self.read_numbers(entity, batch[:middle], client=client))
+                        found.update(await self.read_numbers(entity, batch[middle:], client=client))
                     answer = None
                     break
             for message in answer or []:
@@ -2854,11 +2920,11 @@ class Collector:
                     found[message.id] = message
         return found
 
-    async def number_before(self, entity, offset_date=None):
+    async def number_before(self, entity, offset_date=None, client=None):
         error = None
         for skip in (0, 1, 2, 4, 8, 16, 32, 64):
             try:
-                latest = await self.client.get_messages(entity, limit=1, offset_date=offset_date,
+                latest = await (client or self.client).get_messages(entity, limit=1, offset_date=offset_date,
                                                         **({"add_offset": skip} if skip else {}))
             except TypeNotFoundError as exc:
                 error = exc
@@ -2866,15 +2932,15 @@ class Collector:
             readable = latest[0].id if latest else 0
             if not skip:
                 return readable
-            above = await self.read_numbers(entity, list(range(readable + 1, readable + SALVAGE_WINDOW + 1)))
+            above = await self.read_numbers(entity, list(range(readable + 1, readable + SALVAGE_WINDOW + 1)), client=client)
             return max((number for number, value in above.items() if offset_date is None
                         or isinstance(value, TypeNotFoundError) or value.date < offset_date), default=readable)
         raise unreadable_history(error)
 
-    async def salvage_page(self, entity, offset_id, min_id, on_message, on_unparsed):
-        top = offset_id - 1 if offset_id else await self.number_before(entity)
+    async def salvage_page(self, entity, offset_id, min_id, on_message, on_unparsed, client=None):
+        top = offset_id - 1 if offset_id else await self.number_before(entity, client=client)
         low = max(min_id + 1, top - SALVAGE_WINDOW + 1, 1)
-        found = await self.read_numbers(entity, list(range(low, top + 1)))
+        found = await self.read_numbers(entity, list(range(low, top + 1)), client=client)
         unreadable = [n for n, value in found.items() if isinstance(value, TypeNotFoundError)]
         if len(unreadable) > SALVAGE_LIMIT:
             raise unreadable_history(found[unreadable[0]])
@@ -2916,12 +2982,19 @@ class Collector:
                 await reader(functions.account.FinishTakeoutSessionRequest(success=True))
 
     async def iterate_history(self, entity, on_message, min_id=0, offset_id=0, on_wait=None, on_unparsed=None,
-                              page_timeout=None, attempts=8, client=None, wait_time=None):
+                              page_timeout=None, attempts=8, client=None, wait_time=None, history_client=None):
+        if history_client is not None:
+            if client is not None and client is not history_client:
+                raise ValueError("History acquisition has two different transports.")
+            client, wait_time = history_client, 0
         failures = 0
         while True:
             writing = False
-            pages = (client or self.client).iter_messages(entity, offset_id=offset_id, min_id=min_id,
-                                                          **({"wait_time": wait_time} if wait_time is not None else {}))
+            reader = client or self.client
+            if hasattr(reader, "_export_client"):
+                reader._export_client = self.client
+            pages = reader.iter_messages(entity, offset_id=offset_id, min_id=min_id,
+                                         **({"wait_time": wait_time} if wait_time is not None else {}))
             try:
                 while True:
                     try:
@@ -2935,10 +3008,10 @@ class Collector:
             except TypeNotFoundError:
                 if writing or on_unparsed is None:
                     raise
-                offset_id = await self.salvage_page(entity, offset_id, min_id, on_message, on_unparsed)
+                offset_id = await self.salvage_page(entity, offset_id, min_id, on_message, on_unparsed, client=reader)
                 if offset_id <= min_id + 1:
                     return
-            except FloodWaitError as exc:
+            except FLOOD_ERRORS as exc:
                 if writing:
                     raise
                 wait = exc.seconds + 1
@@ -3022,7 +3095,7 @@ class Collector:
                     else:
                         temp.replace(destination)
                     return {"file": "media/" + digest, "file_sha256": digest, "file_size": written, "file_kind": kind}
-                except FloodWaitError as exc:
+                except FLOOD_ERRORS as exc:
                     if attempt == 2:
                         return {"file_status": "rate_limited", "file_kind": kind}
                     await asyncio.sleep(min(exc.seconds + 1, 600))
@@ -3119,7 +3192,7 @@ class Collector:
             return entity
 
     async def fetch_range(self, entity, low, high, path, progress=None, on_wait=None, page_timeout=None, attempts=8,
-                          client=None, wait_time=None):
+                          client=None, wait_time=None, history_client=None):
         digest, count = hashlib.sha256(), 0
         with path.open("w", encoding="utf-8") as handle:
             async def emit(record):
@@ -3142,7 +3215,7 @@ class Collector:
                 await emit(unparsed_record(number, error))
             await self.iterate_history(entity, write, min_id=low - 1, offset_id=high + 1, on_wait=on_wait,
                                        on_unparsed=unparsed, page_timeout=page_timeout, attempts=attempts,
-                                       client=client, wait_time=wait_time)
+                                       client=client, wait_time=wait_time, history_client=history_client)
         return count, digest.hexdigest()
 
     def poll_export(self, export_id):
@@ -3226,7 +3299,7 @@ class Collector:
             try:
                 data = await asyncio.wait_for(
                     client.download_profile_photo(entity, file=bytes, download_big=False), 20)
-            except FloodWaitError as exc:
+            except FLOOD_ERRORS as exc:
                 until = max(time.time() + exc.seconds, self.store.get_setting("rpc_backoff_until", 0))
                 self.store.set_setting("rpc_backoff_until", until)
                 return None
@@ -3415,7 +3488,7 @@ class Collector:
                 self.store.finish_media(job, "retry", {"error_type": type(exc).__name__,
                     "reason": "Telegram authorization expired; durable job retained"})
                 return
-            except FloodWaitError as exc:
+            except FLOOD_ERRORS as exc:
                 until = max(time.time() + exc.seconds, self.store.get_setting("rpc_backoff_until", 0))
                 self.store.set_setting("rpc_backoff_until", until)
                 self.store.finish_media(job, "retry", {"error_type": type(exc).__name__,

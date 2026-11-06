@@ -39,12 +39,13 @@ ATTEMPTS = 8
 rejected = set()
 
 
-def device_for(api_id, seed=""):
-    """Use the Desktop catalog only with its API; other pairs keep platform defaults."""
+def device_for(api_id, seed="", supplied=None):
+    """Fill missing identity fields from the catalog for this API's platform."""
     if api_id == DESKTOP_ID:
         from .client_profiles import desktop
         return desktop(seed)
-    return {}
+    from .client_profiles import platform_profile
+    return platform_profile(api_id, seed, supplied)
 
 
 def login_order(first=None):

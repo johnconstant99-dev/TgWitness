@@ -74,7 +74,7 @@
         if(files.every(file=>/\.json$/i.test(file.name))){
           const objects=await Promise.all(files.map(file=>file.text().then(text=>JSON.parse(text.replace(/^\uFEFF/,"")))));
           if(objects.every(value=>value&&typeof value==="object"&&!Array.isArray(value)&&
-            !["string_session","session_string","session","auth_key","auth_key_hex"].some(key=>value[key])))
+            !["string_session","session_string","session_str","session","auth_key","auth_key_hex"].some(key=>value[key])))
             if(current(owner)&&ticket===inspectionSerial)render({state:"missing_session",can_connect:false,message:missing});
         }
         const filesEncoded=await encode(files);
@@ -103,11 +103,12 @@
   }
   async function read(){
     const item=await checked();
-    const result=await json("auth/import",{files:item.files,passcode:item.passcode},{profile:item.owner.profile});
+    const result=await json("auth/import",{files:item.files,passcode:item.passcode,new_session:$("import-new-session").checked},{profile:item.owner.profile});
     if(!current(item.owner))return;
     if(!result.has_authorization)throw new Error(tr(missing));
     $("session-string").value=result.session;importExpectedId=result.expected_user_id||null;
     importClientProfile=result.client_profile||null;
+    importFormats=result.formats||[];importTwoFactor=result.two_factor_password||"";
     if(result.api_id)$("api-id").value=result.api_id;
     if(result.api_hash)$("api-hash").value=result.api_hash;
     $("tdata-passcode").value="";renderApiState();render(item.result);return result;
@@ -122,11 +123,15 @@
     const credentials=apiCredentials();if(!credentials)return;
     authProgress(tr("Creating the workspace and checking the session with Telegram…"));
     try{
-      const result=await json("profiles/import",{files:item.files,passcode:item.passcode,label:name.trim(),
+      const result=await json("profiles/import",{files:item.files,passcode:item.passcode,label:name.trim(),new_session:$("import-new-session").checked,
         ...(credentials.api_id?{api_id:credentials.api_id,api_hash:credentials.api_hash.toLowerCase()}: {})},{root:true});
       if(!current(item.owner))return;
       await switchProfile(result.profile.id);await navigate("connection");
-      toast(tr("Account connected in its new workspace."));
+      if(result.step==="password")setAuthStep("password");
+      else if(result.step==="retry"){
+        setAuthStep("credentials");setAuthMethod("files");$("import-new-session").checked=true;
+        toast(tr("The independent login was saved. Import the same donor again to resume.")+" "+(result.error||""),true);
+      }else toast(tr("Account connected in its new workspace."));
     }finally{authProgress("");}
   }
   function clear(){inspectionSerial++;inspection=null;pending=null;editing=false;intent='auto';render({state:"empty",can_connect:false});}

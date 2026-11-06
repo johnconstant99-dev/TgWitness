@@ -287,6 +287,8 @@ const labels = {
   "source.access_unconfirmed": [tr("Source access unconfirmed"), "question", "coverage"],
   "monitoring.changed": [tr("Monitoring settings changed"), "settings", "coverage"],
   "account.authorized": [tr("Account connected"), "account", "system"],
+  "account.initialized": [tr("Account initialized"), "account", "system"],
+  "account.connection_checked": [tr("Client connection checked"), "link", "system"],
   "account.signed_out": [tr("Signed out of Telegram"), "account", "system"], "target.changed": [tr("Source selection changed"), "sources", "system"],
   "account.sessions": [tr("Account sessions recorded"), "account", "system"],
   "account.session_ended": [tr("Account session ended"), "account", "system"],
@@ -510,7 +512,7 @@ setInterval(()=>{if(!document.hidden)updateTimes();},30000);
 function sourceTitle(id) { return state.status?.targets.find(x => x.chat_id === id)?.title || (id === null ? tr("Collector / account") : String(id)); }
 let toastTimer;
 let networkLoadedFor=null;
-let qrPending=null,importExpectedId=null,importClientProfile=null,accountImportRevision=0,authMethod="phone";
+let qrPending=null,importExpectedId=null,importClientProfile=null,importFormats=[],importTwoFactor="",accountImportRevision=0,authMethod="phone";
 let accessStarted=false;
 class StaleView extends Error {constructor(){super("");this.name="StaleView";}}
 function toast(message, error=false) { if(!message)return;const n = $("toast"); n.textContent = message; n.classList.toggle("error", error); show("toast", true); clearTimeout(toastTimer); toastTimer = setTimeout(() => leave("toast"), error ? 9000 : 5000); }
@@ -3905,8 +3907,10 @@ function setAuthStep(step){
   window.TgWitnessAccountImport?.renderAccount();
 }
 function setAuthMethod(method){
+  show("independent-session-option",method==="files"||method==="key");
   if(method!==authMethod){
     accountImportRevision++;importExpectedId=null;
+    $("session-import-warning").open=false;
     for(const id of ["session-string","session-file","tdata-passcode","auth-key","auth-dc","auth-user-id"])$(id).value="";
     $("import-result").textContent="";
   }
@@ -3921,6 +3925,7 @@ function setAuthMethod(method){
   show("phone-fields",method==="phone");$("phone").required=method==="phone";
   show("qr-intro",method==="qr");
   show("auth-key-fields",method==="key");
+  show("session-import-warning",method==="files"||method==="key");
   $("auth-continue").textContent=tr(method==="files"||method==="key"?"Connect account":"Continue");
   $("method-description").textContent=tr({phone:"Receive a login code in Telegram. Enter your 2FA password if asked.",
     qr:"Use Telegram on a device where you are already signed in.",
@@ -3986,7 +3991,9 @@ function clearSecrets(){
   window.TgWitnessAccountImport?.clear();
   $("panel-key-new").value="";show("panel-key-result",false);
   clearTimeout(toastTimer);show("toast",false);
-  cancelQR();importExpectedId=null;importClientProfile=null;accountImportRevision++;$("import-result").textContent="";
+  cancelQR();importExpectedId=null;importClientProfile=null;importFormats=[];importTwoFactor="";
+  $("import-new-session").checked=false;accountImportRevision++;$("import-result").textContent="";
+  $("session-import-warning").open=false;
   for(const name of ["api-id","api-hash","session-string","session-file","phone","code","password",
                     "tdata-passcode","auth-key","auth-dc","auth-user-id","network-username","network-password","network-secret","network-link"])$(name).value="";
   $("network-link-result").textContent="";
@@ -4093,6 +4100,21 @@ function renderSeenBy(){
   const rows=[[tr("Network address"),address],[tr("Application"),pair],
     [tr("Session in Telegram's device list"),device||tr("Telethon's default description of this computer")]];
   if(id.meaning)rows.push(["",tr("This public pair belongs to Telegram Desktop; the session is described as Telegram Desktop.")]);
+  show("independent-session-pending",!!c.pending_new_session);
+  if(c.session_origin?.method==="qr_from_import")rows.push([tr("Authorization origin"),tr("Independent QR login approved by an imported session")]);
+  const checked=c.client_checks;
+  const backoff=c.rpc_backoff;
+  if(c.rpc_backoff_until>Date.now()/1000){
+    rows.push([tr("Telegram rate limit"),backoff?.failed_method||backoff?.method||tr("Method unavailable")]);
+    rows.push([tr("Requests paused until"),formatTime(new Date(c.rpc_backoff_until*1000).toISOString())]);
+  }
+  if(checked){
+    rows.push([tr("Current authorization"),typeof checked.official_app==="boolean"?"official_app="+(checked.official_app?"True":"False"):tr("Official-app flag unavailable")]);
+    rows.push([tr("Checked"),checked.checked_at||""]);
+    rows.push(["",tr("The official-app flag does not report account restrictions or whether Telegram is observing the account.")]);
+    for(const check of checked.checks||[])if(check.status!=="ok")rows.push([check.name,check.error||check.detail||check.status]);
+  }
+  for(const warning of id.warnings||[])rows.push([tr("Profile warning"),warning]);
   list.replaceChildren(...rows.flatMap(([term,value])=>[node("dt","",term),node("dd","",value)]));
 }
 $("network-details").addEventListener("toggle",()=>{if($("network-details").open&&$("network-kind").value==="mtproxy")loadProxyCatalog();});
@@ -4242,7 +4264,8 @@ function renderSelectedFiles(){
   $("selected-files").textContent=files.map(f=>f.name).join(" · ");show("selected-files",!!files.length);
 }
 $("session-file").addEventListener("change",()=>{
-  accountImportRevision++;importClientProfile=null;
+  accountImportRevision++;importClientProfile=null;importFormats=[];importTwoFactor="";
+  $("session-import-warning").open=!!$("session-file").files.length;
   authProgress("");
   $("session-string").value="";importExpectedId=null;
   $("import-result").textContent="";
@@ -4270,14 +4293,17 @@ async function loadAuthKey(){
     if(revision!==state.workspaceRevision||selection!==accountImportRevision||!state.token)return;
     $("session-string").value=result.session||"";importExpectedId=result.expected_user_id||null;
     importClientProfile=result.client_profile||null;
+    importFormats=result.formats||[];importTwoFactor="";
     return result;
   }finally{if(revision===state.workspaceRevision&&selection===accountImportRevision)authProgress("");}
 }
 for(const id of ["auth-key","auth-dc","auth-user-id"])$(id).addEventListener("input",()=>{
-  accountImportRevision++;importExpectedId=null;importClientProfile=null;$("session-string").value="";authProgress("");
+  accountImportRevision++;importExpectedId=null;importClientProfile=null;importFormats=[];importTwoFactor="";$("session-string").value="";authProgress("");
+  $("session-import-warning").open=!!$("auth-key").value.trim();
 });
 $("import-account").addEventListener("click",e=>busy(e.currentTarget,loadAccountFiles));
-$("session-string").addEventListener("input",()=>{accountImportRevision++;importExpectedId=null;importClientProfile=null;$("import-result").textContent="";});
+$("session-string").addEventListener("input",()=>{accountImportRevision++;importExpectedId=null;importClientProfile=null;importFormats=[];importTwoFactor="";$("import-result").textContent="";$("session-import-warning").open=!!$("session-string").value.trim();});
+$("import-new-session").addEventListener("change",()=>{importTwoFactor="";});
 $("credentials-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
   if(state.status.demo){toast(tr("Demo workspace. Connect accounts in your live installation."),true);return;}
   if(authMethod==="qr"){await beginQR();return;}
@@ -4302,16 +4328,19 @@ $("credentials-form").addEventListener("submit",e=>{e.preventDefault();busy(e.su
   if(revision!==state.workspaceRevision||method!==authMethod||selection!==accountImportRevision)return;
   const body=method==="phone"?{...credentials,phone:$("phone").value}:
     {...credentials,session:$("session-string").value.trim(),expected_user_id:importExpectedId};
+  const independent=method!=="phone"&&$("import-new-session").checked;
+  if(independent)Object.assign(body,{formats:importFormats,two_factor_password:importTwoFactor});
   let r;
   if(method==="phone"&&state.status.collector.has_api_credentials===undefined){
 
     await loginRequest("auth/configure",credentials,{profile});
     if(revision!==state.workspaceRevision)return;
     r=await loginRequest("auth/phone",{phone:body.phone},{profile});
-  }else r=await loginRequest(method==="phone"?"auth/phone/start":"auth/configure",body,{profile});
+  }else r=await loginRequest(method==="phone"?"auth/phone/start":independent?"auth/session/new":"auth/configure",body,{profile});
   if(revision!==state.workspaceRevision)return;
   if(r.step==="authorized")clearSecrets();
   setAuthStep(r.step);
+  if(r.error)toast(tr(r.error),true);
   await refreshStatus();
 });});
 async function cancelQR(){
@@ -5223,6 +5252,9 @@ async function openExportDialog(){
   if(revision!==state.workspaceRevision||generation!==chatGeneration)return;
   show("toast",false);
   const info=state.chatInfo,basic=info?.kind==="group",facts=$("export-dialog-facts"),list=$("export-dialog-accounts");
+  const takeoutOption=$("export-transport").querySelector('[value="takeout"]');
+  takeoutOption.disabled=!["channel","supergroup"].includes(info?.kind);
+  if(takeoutOption.disabled)$("export-transport").value="regular";
   facts.replaceChildren();list.replaceChildren();
   facts.append(node("p","export-fact",info?.title||tr("This chat")));
   if(basic)facts.append(node("p","export-fact warn",tr("This is an ordinary group: message numbers differ between accounts, so only this account can download it.")));
@@ -5234,10 +5266,12 @@ async function openExportDialog(){
   for(const p of state.profiles){
     const c=p.collector,lead=p.id===state.profile,connected=!!c?.has_session&&!p.error_type,account=c?.account;
     const row=node("label","export-account"),box=node("input"),who=node("span","export-account-who"),text=node("span");
-    const occupied=c?.running||c?.account_task||c?.available_for_export===false;
+    const limited=c?.rpc_backoff_until>Date.now()/1000;
+    const occupied=limited||c?.running||c?.account_task||c?.available_for_export===false;
     box.type="checkbox";box.value=p.id;box.disabled=!connected||!!occupied||basic&&!lead;box.addEventListener("change",estimate);
     box.checked=!box.disabled&&(lead||!!exportPreselect?.has(p.id));
-    text.append(node("b","",p.label),node("small","",occupied?tr("Busy: pause the current task explicitly"):!connected?tr("no Telegram account connected"):
+    text.append(node("b","",p.label),node("small","",limited?tr("Telegram rate limit: wait until {time}.",{
+      time:formatTime(new Date(c.rpc_backoff_until*1000).toISOString())}):occupied?tr("Busy: pause the current task explicitly"):!connected?tr("no Telegram account connected"):
       basic?tr("not possible for ordinary groups"):account?(account.username?"@"+account.username+" · ":"")+"ID "+account.id:""));
     who.append(avatarNode(account?account.id:null,account&&account.username?account.username:p.label,"",p.id),text);
     row.append(box,who);list.append(row);
@@ -5273,7 +5307,8 @@ async function openExportDialog(){
     reply_scope:$("export-reply-scope").value,context_depth:Number($("export-context").value),
     max_context_messages:Number($("export-context-limit").value),text_contains:$("export-text").value.trim()?[$("export-text").value.trim()]:[],
     download_media:$("export-media").checked};
-  const x=await json("multi-export/start",{chat_id:chat,lead:profiles.includes(profile)?profile:profiles[0],profiles,selection},{root:true});
+  const x=await json("multi-export/start",{chat_id:chat,lead:profiles.includes(profile)?profile:profiles[0],profiles,selection,
+    transport:$("export-transport").value},{root:true});
   state.multi=x;state.multiHidden=null;renderMulti();pollMulti(x.id);
   toast(tr("Export started with {n} accounts reserved exclusively for this task.",{n:profiles.length}));
 }
@@ -5314,7 +5349,21 @@ function renderMulti(){
   if(x.phase==="done"&&x.ready)action("primary",tr("Save signed export"),b=>saveMulti(b));
   if(!running)action("quiet",tr("Hide"),()=>{state.multiHidden=x.id;renderMulti();});
   box.append(head);
+  box.append(node("p","hint",tr(x.transport==="takeout"?"Telegram Takeout session":"Regular session")));
+  if(x.phase==="paused"&&x.error)box.append(node("p","hint",tr(x.error)));
+  if(x.wait_until&&x.phase==="paused")box.append(node("p","hint",tr("Requests paused until")+": "+formatTime(new Date(x.wait_until*1000).toISOString())));
+  if(Object.keys(x.transport_close_errors||{}).length)box.append(node("p","hint",tr("Takeout finalization is pending. The saved archive remains verifiable.")));
   box.append(node("p","hint",tr("Read {done} of {total} planned ranges.",{done:x.ranges_done||0,total:x.ranges_total||0})+" "+tr(x.phase)));
+  if(x.performance){
+    const p=x.performance,s=p.phase_seconds,seconds=value=>tr("{n} s",{
+      n:value.toLocaleString(undefined,{maximumFractionDigits:1})});
+    box.append(node("p","hint",tr("Current run: {messages} new messages · {time} elapsed.",{
+      messages:p.new_messages.toLocaleString(),time:seconds(p.elapsed_seconds)})+
+      (p.messages_per_second!==null?" "+tr("Acquisition: {rate} messages/s (including waits).",{
+        rate:p.messages_per_second.toLocaleString(undefined,{maximumFractionDigits:1})}):"")));
+    box.append(node("p","hint",tr("Preparation: {preparing}. Acquisition: {running}. Selection and attachments: {selecting}. Packaging and verification: {packaging}.",{
+      preparing:seconds(s.preparing),running:seconds(s.running),selecting:seconds(s.selecting),packaging:seconds(s.packaging)})));
+  }
   if(x.counts?.selected!==undefined)box.append(node("p","hint",tr("Examined: {examined}. Matches: {matched}. Context: {context}. Uncertain language: {uncertain}.",{
     examined:x.counts.examined,matched:x.counts.matched,context:x.counts.context,uncertain:x.counts.uncertain_language||0})));
   if(x.counts?.context_limit_reached)box.append(node("p","hint",tr("Context cap reached; additional context may be omitted.")));

@@ -140,7 +140,9 @@ account asks for the usual confirmation.
 
   Chats already in the list when the mode is switched on are added without snapshots.
   A FloodWait pauses this work and it resumes afterwards; failures are recorded and live
-  recording of the chat continues.
+  recording of the chat continues. This includes waits while resolving the new chat's
+  identity: the pending profile/history task is retained for retry, and an existing
+  longer account-wide wait is not shortened.
 - **Profiles on request.** **Chats → Profile → Save profile now** saves the current profile
   of any source; the newest one is shown above the messages.
 - **Chat state snapshots (preview).** State outside the message stream changes without a
@@ -163,7 +165,9 @@ account asks for the usual confirmation.
     removals require a complete current list，and explicit empty values record clearing．
   - **Parameters → Chat state** sets the interval (12 hours by default, 0 turns snapshots
     off), the pause between sources, which parts are read, and whether checks that found no
-    change are recorded. A FloodWait pauses snapshots and they resume afterwards.
+    change are recorded. `FLOOD_WAIT` and `FLOOD_PREMIUM_WAIT` stop the remaining
+    snapshot requests, preserve any longer account-wide deadline, and leave the
+    interrupted chat eligible for another attempt after that wait.
 - **Not visible.** Inline (callback) buttons pressed in another Telegram app, the popup or
   link a bot answers such a press with, and invite links used in another app do not reach
   TgWitness. What the bot sends or edits afterwards is recorded.

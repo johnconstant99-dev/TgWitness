@@ -1279,6 +1279,8 @@ def drand_fetcher():
 
 
 def verify_events(events, public_key):
+    # Account control events (account.initialized, account.connection_checked) use the same signed
+    # envelope as older events. They do not extend message or coverage claims.
     key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public_key, validate=True))
     previous, count = "0" * 64, 0
     for count, event in enumerate(events, 1):
@@ -2088,6 +2090,165 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
         return result
 
 
+def verify_distributed_pages(stream, envelopes, job, task):
+    """Check a local acquisition prefix; unsigned trailing bytes are not observations.
+
+    Pages group decoded messages, not raw RPC responses. The final filtered ZIP
+    keeps its existing per-account signatures and does not disclose excluded pages.
+    """
+    format_name = "tgwitness-distributed-pages-v1"
+    if job.get("checkpoint_format") != format_name:
+        raise ValueError("Unsupported distributed checkpoint format.")
+    low, high = task["low"], task["high"]
+    if type(low) is not int or type(high) is not int or not 0 < low <= high:
+        raise ValueError("Invalid checkpoint range.")
+    workers = {w["profile_id"]: w for w in job["workers"]}
+    eligible = {p for s in job["segments"] if s["low"] <= low <= high <= s["high"] for p in s["profiles"]}
+    state = {"pages": 0, "count": 0, "cursor": high + 1, "byte_end": 0, "head_sha256": "0" * 64,
+             "terminal": False, "profile_id": None, "transport_generation": None}
+    plan_hash = hashlib.sha256(canonical(job)).hexdigest()
+    for envelope in envelopes:
+        value = envelope["statement"]
+        profile = value["profile_id"]
+        worker = workers.get(profile)
+        if (not worker or profile not in eligible or envelope["public_key"] != worker["public_key"]
+                or state["profile_id"] not in (None, profile)):
+            raise ValueError("Checkpoint observer differs from the signed plan or preceding pages.")
+        Ed25519PublicKey.from_public_bytes(base64.b64decode(worker["public_key"], validate=True)).verify(
+            base64.b64decode(envelope["signature"], validate=True), canonical(value))
+        if (value.get("format") != format_name or value.get("plan_sha256") != plan_hash
+                or value.get("job_id") != job["id"] or value.get("chat_id") != job["chat_id"]
+                or value.get("account_id") != worker["account_id"] or value.get("low") != low or value.get("high") != high):
+            raise ValueError("Checkpoint scope differs from its signed plan.")
+        fields = ("seq", "cursor_before", "cursor_after", "byte_start", "byte_end", "count")
+        if any(type(value.get(k)) is not int for k in fields) or type(value.get("terminal")) is not bool:
+            raise ValueError("Invalid checkpoint cursor, size or sequence.")
+        if (state["terminal"] or value["seq"] != state["pages"] + 1
+                or value.get("previous_receipt_sha256") != state["head_sha256"]
+                or value["byte_start"] != state["byte_end"] or value["byte_end"] < value["byte_start"]
+                or value["cursor_before"] != state["cursor"] or not 0 <= value["count"] <= 100
+                or not value["count"] and not value["terminal"]):
+            raise ValueError("Broken checkpoint receipt chain.")
+        generation = value.get("transport_generation")
+        if (value.get("transport") != job.get("transport", "regular")
+                or value["transport"] == "takeout" and (type(generation) is not int or generation < 1
+                    or state["transport_generation"] is not None and generation < state["transport_generation"])
+                or value["transport"] == "regular" and generation is not None):
+            raise ValueError("Checkpoint transport differs from the plan or preceding pages.")
+        for name in ("captured_from", "captured_until"):
+            try:
+                if datetime.fromisoformat(value[name]).tzinfo is None:
+                    raise ValueError
+            except (KeyError, TypeError, ValueError):
+                raise ValueError("Invalid checkpoint observation time.") from None
+        digest, cursor, count, end = hashlib.sha256(), state["cursor"], 0, state["byte_end"]
+        while end < value["byte_end"]:
+            line = stream.readline(MAX_RECORD_BYTES + 1)
+            end += len(line)
+            if not line or len(line) > MAX_RECORD_BYTES or not line.endswith(b"\n") or end > value["byte_end"]:
+                raise ValueError("Checkpoint data differs: truncated or oversized.")
+            record = json.loads(line)
+            mid = record["id"]
+            if type(mid) is not int or not low <= mid < cursor:
+                raise ValueError("Checkpoint messages are outside their range or repeated.")
+            digest.update(line)
+            count, cursor = count + 1, mid
+        if digest.hexdigest() != value.get("sha256") or count != value["count"] or cursor != value["cursor_after"]:
+            raise ValueError("Checkpoint data differs from its signed receipt.")
+        state.update(pages=value["seq"], count=state["count"] + count, cursor=cursor,
+                     byte_end=end, head_sha256=hashlib.sha256(canonical(envelope)).hexdigest(),
+                     terminal=value["terminal"], profile_id=profile, transport_generation=generation)
+    return state
+
+
+def verify_distributed_work(directory, expected_fingerprint=None, max_gib=None):
+    """Read-only inspection of a stopped distributed job; never opens its vault."""
+    directory = Path(directory)
+    def checked(path):
+        if path.is_symlink() or getattr(path, "is_junction", lambda: False)():
+            raise ValueError("Distributed acquisition paths must not be links.")
+        return path
+
+    def signed(path, public=None):
+        envelope = read_json_file(checked(path))
+        if public is not None and envelope["public_key"] != public:
+            raise ValueError("Distributed acquisition signing identity changed.")
+        Ed25519PublicKey.from_public_bytes(base64.b64decode(envelope["public_key"], validate=True)).verify(
+            base64.b64decode(envelope["signature"], validate=True), canonical(envelope["statement"]))
+        return envelope
+
+    checked(directory)
+    for name in ("chunks", "pages", "receipts"):
+        checked(directory / name)
+    plan = signed(directory / "job.json")
+    job, public = plan["statement"], plan["public_key"]
+    fp = fingerprint(public)
+    if expected_fingerprint and fp != expected_fingerprint:
+        raise ValueError("Public key differs from the independently trusted fingerprint")
+    if (job.get("format") != "tgwitness-distributed-job-v1"
+            or job.get("checkpoint_format") != "tgwitness-distributed-pages-v1"
+            or type(job.get("chunk_size")) is not int or job["chunk_size"] < 1):
+        raise ValueError("This directory does not use the supported distributed checkpoint format.")
+    workers = {w["profile_id"]: w for w in job["workers"]}
+    if workers[job["lead"]]["public_key"] != public:
+        raise ValueError("Acquisition plan was not signed by its lead observer.")
+    tasks, previous_high = {}, 0
+    for segment in job["segments"]:
+        low, high = segment["low"], segment["high"]
+        if type(low) is not int or type(high) is not int or not previous_high < low <= high:
+            raise ValueError("Invalid or overlapping planned acquisition ranges.")
+        previous_high = high
+        if (high - low) // job["chunk_size"] + 1 + len(tasks) > MAX_MEMBERS:
+            raise ValueError("Too many acquisition ranges to verify.")
+        for start in range(low, high + 1, job["chunk_size"]):
+            tasks[str(start)] = {"low": start, "high": min(high, start + job["chunk_size"] - 1)}
+    states, total_bytes, tails = {}, 0, 0
+    for folder in checked(directory / "pages").iterdir():
+        if folder.name not in tasks or not checked(folder).is_dir():
+            raise ValueError("Checkpoint directory is outside the signed plan.")
+        paths = sorted(folder.glob("*.json"), key=lambda p: int(p.stem) if p.stem.isdigit() else -1)
+        if len(paths) > MAX_MEMBERS or any(p.name != str(i) + ".json" for i, p in enumerate(paths, 1)):
+            raise ValueError("Checkpoint receipt sequence is incomplete.")
+        data_path = checked(directory / "chunks" / (folder.name + ".jsonl"))
+        size = data_path.stat().st_size if data_path.exists() else 0
+        total_bytes += size
+        if total_bytes > (max_gib or MAX_UNCOMPRESSED_GIB) * 1024**3:
+            raise ValueError("Distributed acquisition exceeds the verification size limit.")
+        with data_path.open("rb") if data_path.exists() else io.BytesIO() as stream:
+            state = verify_distributed_pages(stream, (read_json_file(checked(p)) for p in paths), job, tasks[folder.name])
+        states[folder.name] = state
+        tails += size - state["byte_end"]
+    completed = 0
+    for path in (directory / "receipts").glob("*.json"):
+        state = states.get(path.stem)
+        if not state or not state["terminal"]:
+            raise ValueError("A completed chunk has no terminal checkpoint.")
+        value = signed(path, workers[state["profile_id"]]["public_key"])["statement"]
+        task = tasks[path.stem]
+        summary = {"format": job["checkpoint_format"], **{k: state[k] for k in ("pages", "head_sha256", "count", "byte_end")}}
+        if (value.get("checkpoint") != summary or value.get("job_id") != job["id"]
+                or value.get("profile_id") != state["profile_id"] or value.get("count") != state["count"]
+                or value.get("low") != task["low"] or value.get("high") != task["high"]
+                or value.get("transport", "regular") != job.get("transport", "regular")
+                or value.get("transport_generation") != state["transport_generation"]):
+            raise ValueError("Chunk receipt differs from its signed checkpoints.")
+        data_path = checked(directory / "chunks" / (path.stem + ".jsonl"))
+        with data_path.open("rb") as stream:
+            if data_path.stat().st_size != state["byte_end"] or hashlib.file_digest(stream, "sha256").hexdigest() != value["sha256"]:
+                raise ValueError("Completed chunk differs from its signed receipt.")
+        completed += 1
+    captured = sum(s["count"] for s in states.values())
+    status = signed(directory / "status.json", public)["statement"]
+    if status["id"] != job["id"] or status["captured"] > captured or status["ranges_done"] > completed:
+        raise ValueError("Saved acquisition progress is missing.")
+    return {"format": job["checkpoint_format"], "fingerprint": fp, "job_id": job["id"],
+            "chat_id": job["chat_id"], "captured": captured, "pages": sum(s["pages"] for s in states.values()),
+            "ranges_done": completed, "ranges_total": len(tasks), "unsigned_tail_bytes": tails,
+            "complete_within_plan": completed == len(tasks),
+            "meaning": "Verified local acquisition prefix, not Telegram-signed evidence or an atomic snapshot. "
+                       "Unsigned tails are excluded. Keep receipt heads independently to detect removal of a suffix."}
+
+
 def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
     with open_archive(path, max_gib=max_gib) as archive:
         names = archive.namelist()
@@ -2128,11 +2289,13 @@ def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
 
 
 COMPARE_MEANING = {
-    "number": "Both archives come from the same chat and account, so messages are matched by their number. "
-              "Unchanged means all recorded fields match; changed_fields lists differences.",
+    "number": "Both archives record the same chat and account, so messages are matched by their number. "
+              "Unchanged means equality of the complete saved message record. Differences may include "
+              "observation metadata and do not by themselves prove a Telegram edit.",
     "content": "The archives come from different chats or accounts (for example both sides of a private chat), "
-               "so messages are matched by time, sender and text or file hash. "
-               "These pairs are heuristic; unchanged still requires every recorded field to match, including IDs.",
+               "or their scope identity is missing. Possible matches use time, sender, full text and file hash. "
+               "Unchanged counts identical saved records among these pairs, not proven message identity. "
+               "Differences describe the paired records, not necessarily edits of the same Telegram message.",
 }
 
 
@@ -2168,6 +2331,8 @@ def row_brief(row):
 
 
 def row_content(row):
+    # Preview shortening must never define equality. Include future fields too;
+    # canonical JSON preserves value types and array order, unlike dict equality.
     return canonical(row)
 
 
@@ -2175,25 +2340,43 @@ def compare_chat_exports(first, second, first_fingerprint=None, second_fingerpri
     checked = [verify_chat_export(first, first_fingerprint, max_gib),
                verify_chat_export(second, second_fingerprint, max_gib)]
     (first_manifest, first_rows), (second_manifest, second_rows) = (chat_rows(first, max_gib), chat_rows(second, max_gib))
-    same_chat = (first_manifest.get("chat") or {}).get("id") == (second_manifest.get("chat") or {}).get("id")
-    same_account = ((first_manifest.get("account") or {}).get("id") == (second_manifest.get("account") or {}).get("id"))
+    def same_identity(name):
+        value = (first_manifest.get(name) or {}).get("id")
+        other = (second_manifest.get(name) or {}).get("id")
+        return type(value) is int and type(other) is int and value != 0 and value == other
+    same_chat, same_account = same_identity("chat"), same_identity("account")
     method = "number" if same_chat and same_account else "content"
-    first_rows = [row for row in first_rows if row.get("type") != "unparsed"]
-    second_rows = [row for row in second_rows if row.get("type") != "unparsed"]
     order = lambda rows: sorted(rows, key=lambda row: (str(row.get("date")), str(row.get("id"))))
     if method == "number":
-        left, right = {row.get("id"): row for row in first_rows}, {row.get("id"): row for row in second_rows}
+        def by_number(rows):
+            found = {}
+            for row in rows:
+                number = row.get("id")
+                if type(number) is not int or number <= 0:
+                    raise ValueError("Invalid message ID in chat comparison")
+                if number in found:
+                    raise ValueError("Duplicate message ID in chat comparison")
+                found[number] = row
+            return found
+        left, right = by_number(first_rows), by_number(second_rows)
         pairs = [(left[k], right[k]) for k in left.keys() & right.keys()]
         only_first = [left[k] for k in left.keys() - right.keys()]
         only_second = [right[k] for k in right.keys() - left.keys()]
     else:
         def content_key(row):
-            return row.get("from_id"), row.get("file_sha256") or row_text(row)
+            return row.get("from_id"), row_text(row), row.get("file_sha256"), row.get("media_type")
 
         waiting, pairs, only_first = {}, [], []
+        only_second = []
         for row in order(second_rows):
-            waiting.setdefault(content_key(row), []).append(row)
+            if row.get("type") == "unparsed":
+                only_second.append(row)
+            else:
+                waiting.setdefault(content_key(row), []).append(row)
         for row in order(first_rows):
+            if row.get("type") == "unparsed":
+                only_first.append(row)
+                continue
             candidates = waiting.get(content_key(row), [])
             match = next((c for c in candidates if abs(unix_time(c) - unix_time(row)) <= CLOCK_SLACK), None)
             if match is None:
@@ -2201,12 +2384,13 @@ def compare_chat_exports(first, second, first_fingerprint=None, second_fingerpri
             else:
                 candidates.remove(match)
                 pairs.append((row, match))
-        only_second = [row for rows in waiting.values() for row in rows]
-    changed = [{"first": row_brief(a), "second": row_brief(b),
-                "changed_fields": sorted(key for key in a.keys() | b.keys()
-                                         if key not in a or key not in b or canonical(a[key]) != canonical(b[key]))}
-               for a, b in pairs
-               if row_content(a) != row_content(b)]
+        only_second.extend(row for rows in waiting.values() for row in rows)
+    changed = []
+    for a, b in pairs:
+        if row_content(a) != row_content(b):
+            fields = sorted(k for k in a.keys() | b.keys()
+                            if (k in a) != (k in b) or canonical(a.get(k)) != canonical(b.get(k)))
+            changed.append({"first": row_brief(a), "second": row_brief(b), "changed_fields": fields})
     return {"format": "tgwitness-chat-comparison-v1", "method": method, "meaning": COMPARE_MEANING[method],
             "first": {"file": str(first), "fingerprint": checked[0]["fingerprint"], "exported_at": first_manifest.get("exported_at"),
                       "chat_id": (first_manifest.get("chat") or {}).get("id"), "messages": len(first_rows),
@@ -2217,7 +2401,7 @@ def compare_chat_exports(first, second, first_fingerprint=None, second_fingerpri
             "only_first": [row_brief(row) for row in order(only_first)],
             "only_second": [row_brief(row) for row in order(only_second)],
             "changed": sorted(changed, key=lambda item: (str(item["first"]["date"]), str(item["first"]["id"]))),
-            "unchanged": len(pairs) - len(changed)}
+            "matched": len(pairs), "unchanged": len(pairs) - len(changed)}
 
 
 def print_comparison(result, limit=50):
@@ -2236,8 +2420,12 @@ def print_comparison(result, limit=50):
     print("Changed: " + str(len(result["changed"])))
     for item in result["changed"][:limit]:
         print("  #" + str(item["first"]["id"]) + ": " + " ".join(item["first"]["text"].split())[:80] + "  ->  "
-              + " ".join(item["second"]["text"].split())[:80] + " (" + ", ".join(item["changed_fields"]) + ")")
-    print("Unchanged: " + str(result["unchanged"]))
+              + " ".join(item["second"]["text"].split())[:80])
+        print("    Fields: " + ", ".join(item["changed_fields"]))
+    if result["method"] == "number":
+        print("Unchanged: " + str(result["unchanged"]))
+    else:
+        print("Matched: " + str(result["matched"]) + " (possible correspondence, not proof of message identity)")
     if not (first["key_pinned"] and second["key_pinned"]):
         print("Signer identity is unpinned for at least one archive: compare the fingerprints with copies kept elsewhere.")
 
@@ -3833,7 +4021,7 @@ class Spinner:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("bundle", type=Path,
-                        help="Evidence/chat/account/disclosure/witness ZIP, profile/proof/history report JSON, or a sealed report HTML")
+                        help="Evidence/chat/account/disclosure/witness ZIP, report JSON/HTML, or a stopped distributed acquisition directory")
     parser.add_argument("--fingerprint", help="Public key fingerprint retained independently")
     parser.add_argument("--checkpoint", type=Path, help="Previously retained signed checkpoint JSON")
     parser.add_argument("--tsa-ca", type=Path, help="Root certificate of the timestamp authority (PEM)")
@@ -3897,7 +4085,14 @@ def main():
     if spinner:
         spinner.__enter__()
     try:
-        if args.bundle.suffix.lower() in (".html", ".htm", ".pdf"):
+        if args.bundle.is_dir():
+            if args.checkpoint or args.witness or args.tsa_ca or args.channel or args.evidence:
+                raise ValueError("Journal/report options do not apply to a distributed acquisition directory")
+            shown = "distributed"
+            result = verify_distributed_work(args.bundle, args.fingerprint, args.max_gib)
+            pinned = bool(args.fingerprint)
+            notes.append(result["meaning"])
+        elif args.bundle.suffix.lower() in (".html", ".htm", ".pdf"):
             shown, result = "report", verify_report(args.bundle, args.fingerprint, args.evidence)
             pinned = bool(args.fingerprint)
         elif args.bundle.suffix.lower() == ".json":

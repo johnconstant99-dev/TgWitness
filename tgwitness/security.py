@@ -75,7 +75,7 @@ class Vault:
         self.root = root
         root.mkdir(parents=True, exist_ok=True, mode=0o700)
         key_path = root / "vault.key"
-        protected = [root / "credentials.enc", root / "signing.enc"]
+        protected = [root / "credentials.enc", root / "signing.enc", root / "independent_login.enc"]
         external = os.environ.get("TGWITNESS_VAULT_KEY_FILE")
         marker = root / "vault.external.json"
         self.key_mode = "external" if external or marker.exists() else "local"

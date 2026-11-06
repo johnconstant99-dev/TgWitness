@@ -87,7 +87,8 @@ def check_sequence(page, lab):
     expect(lab.locator("[data-workflow-step]")).to_have_count(4)
     expect(lab.locator("[data-workflow-node]")).to_have_count(4)
     assert lab.locator("[data-workflow-status]").inner_text() == current_text(lab)
-    page.clock.install()
+    page.clock.install(time=0)
+    page.clock.pause_at(60)
     page.clock.fast_forward(12000)
     expect(lab).to_have_attribute("data-step", "0")
     next_button = lab.locator("[data-workflow-next]")
@@ -170,7 +171,8 @@ def check_choices(lab, kind):
 
 
 def mobile_step_measurements(page, lab, kind):
-    page.clock.install()
+    page.clock.install(time=0)
+    page.clock.pause_at(60)
     measurements = []
 
     def measure():

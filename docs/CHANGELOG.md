@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Preserve `previous_hash` in the signed-record preview even when its hexadecimal digits resemble a payment card number. Secret masking still applies to message content; the stored record is unchanged.
+
 - Reconstruct compact chat snapshots consistently in MCP，retain unknown fields，and distinguish capped lists from removals．Resume date scans，preserve topic names across history reads，and bound image previews．Apply metric choices to filtered reports and count historical service messages separately．
 
 - Plan sealed exports against the remaining session time，offer smaller selections，update progress estimates and reserve time for packaging．

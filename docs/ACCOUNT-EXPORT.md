@@ -9,6 +9,28 @@ Sender and text filters expand under **Filter by sender or message text**. **Acc
 
 This workflow exports data currently accessible to the connected account. The default uses [Telegram Takeout](https://core.telegram.org/api/takeout); it is not a backup of unavailable or deleted Telegram data. Secret Chats, inaccessible history and earlier edits are not recovered. Telegram can impose a waiting period before Takeout starts. The panel displays that wait; it does not silently switch transport. The explicit regular-API option has different coverage and records unsupported categories.
 
+Takeout is the official export API also used by Telegram Desktop. TgWitness can write
+Desktop-compatible JSON directly from its own acquisition; importing someone else's
+archive is not required. Chat and message IDs are available through both transports.
+A public chat or permission to forward does not guarantee a faster export or remove
+Takeout's approval delay. Measure the same scope and media settings before comparing speed.
+
+For up to 20 explicitly selected chat IDs, regular-API export resolves those peers
+directly before considering the account's complete dialog inventory. A readable
+public channel can therefore be exported without joining it, even when it is absent
+from the dialog list. Uncached peers fall back to the ordinary inventory. The
+archive filter remains enforced: if Telegram does not return a dialog and archived
+chats are excluded, the unknown archive status is recorded as an omission.
+Takeout keeps its split-range inventory procedure. Neither path joins chats or
+changes forwarding permissions.
+In Desktop-compatible JSON, channels that Telegram marks `left` appear under
+`left_chats`, including readable public channels the account has not joined.
+
+Both `FLOOD_WAIT` and `FLOOD_PREMIUM_WAIT` pause requests for the full server-requested
+period. The account's deadline is persisted across reconnects and restarts; a shorter
+later wait cannot shorten it. Retries are bounded, cancellation preserves sealed pages,
+and API credentials are not rotated to bypass a rate limit. No Premium purchase is made.
+
 ## Choose what is collected
 
 | Setting | Meaning |

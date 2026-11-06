@@ -1,5 +1,6 @@
 import asyncio
 from contextlib import ExitStack
+import hashlib
 import re
 import shutil
 import uuid
@@ -45,6 +46,11 @@ class Profiles:
                 continue
             account = other.state.store.get_setting("account", {}) or {}
             if account_id is not None and account.get("id") == account_id:
+                return entry
+            pending = other.state.vault.read("independent_login")
+            if pending and (account_id is not None and pending.get("account_id") == account_id
+                            or key and (pending.get("donor") == hashlib.sha256(key).hexdigest()
+                                        or session_key(pending.get("session")) == key)):
                 return entry
             if key:
                 try:

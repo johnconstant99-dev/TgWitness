@@ -1,4 +1,5 @@
 import tempfile
+import time
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
@@ -10,12 +11,17 @@ from playwright.sync_api import expect, sync_playwright
 def main():
     with tempfile.TemporaryDirectory() as folder, patch('tgwitness.guided_connection.probe', AsyncMock(return_value=CHECK)):
         with RunningApp(Path(folder)) as server, sync_playwright() as p:
+            server.app.state.store.set_setting('rpc_backoff_until', time.time() + 7200)
+            server.app.state.store.set_setting('rpc_backoff', {'method': 'contacts.resolveUsername',
+                'failed_method': 'contacts.resolveUsername', 'retry_after_seconds': 7200})
             browser = launch_browser(p)
             page = browser.new_page(viewport={'width':1440,'height':1100}, locale='en-US')
             errors=[]
             page.on('pageerror', lambda error: errors.append(str(error)))
             unlock(page, server)
             navigate_panel(page, 'connection')
+            expect(page.locator('#seen-by-list')).to_contain_text('contacts.resolveUsername')
+            expect(page.locator('#seen-by-list')).to_contain_text('Requests paused until')
             expect(page.locator('#connect-guide')).to_be_visible()
             page.locator('#connect-toggle').click()
             expect(page.locator('[data-connect-mode]')).to_have_count(5)
@@ -55,6 +61,15 @@ def main():
             expect(page.locator('[data-connect-mode="warp"]')).to_be_visible()
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
             page.locator('#connect-guide').screenshot(path=str(output/'mobile.png'))
+            server.app.state.store.set_setting('rpc_backoff', None)
+            page.reload()
+            navigate_panel(page, 'connection')
+            expect(page.locator('#seen-by-list')).to_contain_text('Method unavailable')
+            server.app.state.store.set_setting('rpc_backoff_until', time.time() - 1)
+            page.reload()
+            navigate_panel(page, 'connection')
+            expect(page.locator('#seen-by-list')).not_to_contain_text('contacts.resolveUsername')
+            expect(page.locator('#seen-by-list')).not_to_contain_text('Requests paused until')
             assert not errors, errors
             browser.close()
     print('Guided connection browser flow passed')

@@ -115,8 +115,23 @@ def main():
                 assert server.app.state.vault.public_key == previous_key
                 assert server.app.state.vault.read("credentials")["session"] == saved_session(seed)
             page.locator("#account-add-another").click()
+            warning = page.locator("#session-import-warning")
+            expect(warning).to_be_visible()
+            expect(warning).to_contain_text("AUTH_KEY_DUPLICATED")
+            expect(warning).to_contain_text("do not log out")
+            for method in ("phone", "qr", "key", "files"):
+                page.locator('[data-auth-method="' + method + '"]').click()
+                if method in ("key", "files"):
+                    expect(warning).to_be_visible()
+                else:
+                    expect(warning).not_to_be_visible()
+            page.set_viewport_size({"width": 390, "height": 844})
+            check_layout(page)
+            warning.screenshot(path=str(output / "session-warning-mobile.png"))
+            page.set_viewport_size({"width": 1440, "height": 1000})
             expect(page.locator("#import-new-workspace")).to_be_visible()
             page.locator("#session-file").set_input_files(browser_file("research.json", metadata))
+            expect(warning).to_have_attribute("open", "")
             expect(page.locator("#import-result")).to_have_attribute("data-state", "missing_session")
             expect(page.locator("#import-result")).to_contain_text("No session")
             expect(page.locator("#auth-continue")).to_be_disabled()
@@ -168,6 +183,13 @@ def main():
             expect(page.locator("#import-result")).to_contain_text("Нет сессии")
             expect(page.locator("#auth-continue")).to_be_disabled()
             page.locator("#import-result").screenshot(path=str(output / "missing-session-card-ru.png"))
+            expect(page.locator("#session-import-warning")).to_be_visible()
+            expect(page.locator("#session-import-warning")).to_contain_text("AUTH_KEY_DUPLICATED")
+            expect(page.locator("#session-import-warning")).to_contain_text("полностью закройте Telegram Desktop")
+            navigate_panel(page, "accounts")
+            page.locator("#fleet-import-open").click()
+            expect(page.locator("#fleet-session-warning")).to_be_visible()
+            expect(page.locator("#fleet-session-warning")).to_contain_text("AUTH_KEY_DUPLICATED")
             assert not errors, errors
             browser.close()
     print("Import preflight: metadata-only blocked; paired sessions, TData and StringSession accepted; conflicts and damaged ZIP explained; session renewal preserves workspace and identity; adding accounts uses separate workspaces; typed deletion passed.")

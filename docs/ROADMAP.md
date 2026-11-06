@@ -29,12 +29,24 @@ Other work runs alongside, each item judged on its own test:
 | Simultaneous live and backfill | Live update intake remains durable while older history is read, with explicit account ownership and crash tests | Open; these tasks currently require separate time intervals on one account |
 | Complete source list | Skipped and later-added chats are visible, only failed ones retry | Open |
 | Everyday reading | Search, jumps by date and context, topics, gallery, forwards, reactions, versions | Search, versions and context implemented; complete reading workflow remains open |
-| Importing existing archives | Telegram Desktop JSON/HTML with attachments, resumable, marked as supplied | Open |
+| Distributed export date boundaries | Every message at the inclusive start survives acquisition; signed chunks remain reusable after pause | [Shipped](DISTRIBUTED-EXPORT.md); regression tests and live two-account pause/resume with 160 matching public messages |
+| Distributed export throughput | Current-run acquisition rate, separate stage durations, and resume-safe message counts | [Shipped](DISTRIBUTED-EXPORT.md#performance-measurements); tests, browser check and bounded live one/two-account comparison in two public supergroups |
+| Connection identity and retry safety | Imported settings survive restart; platform defaults fill gaps; connection diagnostics report server responses; server-requested pauses survive reconnects | [Shipped](ACCOUNTS.md) |
+| Independent login from an imported session | Opt-in QR authorization keeps the donor intact, retains an interrupted candidate and supports 2FA | [Implemented](ACCOUNTS.md#create-an-independent-authorization); live-checked with Telethon, Pyrogram and TData donors, including 2FA and concurrent independent authorizations |
 | Voice messages | Local transcription and search, original stays | [Shipped](MEDIA-ANALYSIS.md) |
 | Accounts and access | Revoking access stops reading, nobody sees other people's chats | [Shipped](ACCESS.md) |
 | Offline handover | Recipient reads and verifies without our server | [Shipped](CASE_REPORTS.md) |
 | Operations and cost | Published CPU, memory, disk and recovery numbers | Search benchmark and CPU network checks recorded; sustained combined-load qualification open |
+| Export request diagnostics | Identify the method and retain the full FloodWait deadline with argument-free client-call counters | Implemented locally; offline regression checks; [source comparison and limits](EXPORT-LIMITS.md). Sustained large-list throughput remains unmeasured |
+| Distributed Takeout history | Public-chat export reuses validated private Takeout handles, keeps signed receipts and reduces empty requests | Implemented locally; protocol, recovery, archive and browser tests. Live speed not yet measured; [limits and scope](DISTRIBUTED-EXPORT.md#history-acquisition) |
+| Distributed page checkpoints | Resume within an interrupted chunk from verified pages without weakening observer binding | Implemented locally; 100-message checkpoints, standalone working-directory verification, crash/disk/cancellation/tamper tests and old-plan compatibility. Live recovery speed remains unmeasured; [details](DISTRIBUTED-EXPORT.md#chunking-and-continuation) |
 | Independent verification | Rewritten chain, cut tail, key change or missing witness gets caught | [Shipped](WITNESS.md) |
+| Chat archive comparison | Full saved records determine equality; content-based candidates do not claim equality | [Implemented locally](EVIDENCE.md#comparing-chat-exports); signed-archive regression tests cover metadata, full text, unknown fields and signer checks |
+
+Importing third-party Desktop archives, device-cache dumps and recovered offline
+records is outside this roadmap. TgWitness records its own observations. Writing
+Desktop-compatible JSON from an account acquisition remains supported; see
+[account export](ACCOUNT-EXPORT.md).
 
 The witness already signs checkpoints and binds fresh challenges. Remaining
 controller work must qualify the complete path with a real collector:
