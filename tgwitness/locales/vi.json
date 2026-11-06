@@ -6163,5 +6163,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "Phạm vi Takeout đã thay đổi. Hãy kết thúc quá trình này và bắt đầu một lần thu thập mới.",
 "Telegram wait until {time}": "Telegram đang chờ đến {time}",
 "The connected account differs from the signed history plan.": "Tài khoản đã kết nối khác với gói lịch sử đã đăng nhập.",
-"This account is busy. Pause its current task before ending history.": "Tài khoản này đang bận. Hãy tạm dừng tác vụ hiện tại trước khi xóa lịch sử."
+"This account is busy. Pause its current task before ending history.": "Tài khoản này đang bận. Hãy tạm dừng tác vụ hiện tại trước khi xóa lịch sử.",
+ "Compare collection methods": "So sánh các phương pháp thu thập dữ liệu",
+ "Live observation": "Theo dõi trực tiếp",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "Đọc các tin nhắn trước đây vào không gian làm việc này. Tạm dừng theo dõi trước; các thay đổi trực tiếp mới sẽ không được ghi lại trong quá trình tải lịch sử.",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "Tiếp tục nhận các tin nhắn và thay đổi mới trong khi quá trình theo dõi đang diễn ra. Bắt đầu từ mục Nguồn.",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "Sử dụng phiên bản Desktop hoặc Web chính thức với video hoặc định dạng JSON gốc. Việc thiết lập và so sánh lai yêu cầu các bước thực hiện thủ công. Xem trước.",
+ "Collection uses the connection configured for the selected account or recorder.": "Bộ sưu tập sử dụng kết nối đã được cấu hình cho tài khoản hoặc trình ghi đã chọn.",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "Để tạo một kho lưu trữ riêng cho lịch sử hiện tại của tài khoản, hãy sử dụng Xuất → Tài khoản Telegram. Quy trình này chỉ tải các nguồn đã bật được liệt kê khi bắt đầu.",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "Tạm dừng quan sát trước khi tải lịch sử. Các thay đổi trực tiếp mới sẽ không được ghi lại trong khi lịch sử đang được tải; các lần đọc sau đó không thể khôi phục mọi thao tác xóa hoặc chỉnh sửa trung gian.",
+ "Export saved records without reading Telegram. Observation can keep running.": "Xuất các bản ghi đã lưu mà không cần mở Telegram. Quá trình theo dõi vẫn có thể tiếp tục chạy.",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "Tải các cuộc trò chuyện đã chọn xuống thành một tệp lưu trữ riêng biệt. Trước tiên, hãy tạm dừng theo dõi trên tài khoản này.",
+ "Saved observations": "Các quan sát đã lưu"
 }

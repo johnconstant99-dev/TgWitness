@@ -6163,5 +6163,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "ช่วง Takeout ได้เปลี่ยนแปลงแล้ว โปรดยุติการดำเนินการครั้งนี้และเริ่มการเก็บข้อมูลใหม่",
 "Telegram wait until {time}": "Telegram รอจนกว่าจะถึง{time}",
 "The connected account differs from the signed history plan.": "บัญชีที่เชื่อมต่อนั้นแตกต่างจากแผนประวัติการลงชื่อ",
-"This account is busy. Pause its current task before ending history.": "บัญชีนี้กำลังทำงานอยู่ โปรดหยุดงานที่กำลังทำอยู่ก่อนที่จะปิดประวัติ"
+"This account is busy. Pause its current task before ending history.": "บัญชีนี้กำลังทำงานอยู่ โปรดหยุดงานที่กำลังทำอยู่ก่อนที่จะปิดประวัติ",
+ "Compare collection methods": "เปรียบเทียบวิธีการเก็บข้อมูล",
+ "Live observation": "การสังเกตแบบสด",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "อ่านข้อความเก่าเข้าสู่พื้นที่ทำงานนี้ก่อน โดยต้องหยุดการสังเกตการณ์ก่อน; การเปลี่ยนแปลงสดใหม่จะไม่ถูกบันทึกขณะกำลังโหลดประวัติ",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "เก็บข้อความและเปลี่ยนแปลงใหม่ที่ส่งมาไว้ขณะการสังเกตกำลังทำงานอยู่ เริ่มจากแหล่งข้อมูล",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "ใช้เซสชัน Desktop หรือ Web อย่างเป็นทางการพร้อมวิดีโอหรือ JSON แบบเนทีฟ การตั้งค่าและการเปรียบเทียบแบบไฮบริดต้องดำเนินการด้วยตนเอง ดูตัวอย่าง",
+ "Collection uses the connection configured for the selected account or recorder.": "การเก็บรวบรวมข้อมูลใช้การเชื่อมต่อที่ตั้งค่าไว้สำหรับบัญชีหรือเครื่องบันทึกที่เลือก",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "เพื่อสร้างไฟล์เก็บถาวรแยกต่างหากสำหรับประวัติปัจจุบันของบัญชี ให้ใช้ Exports → Telegram account การทำงานนี้จะโหลดเฉพาะแหล่งข้อมูลที่เปิดใช้งานและแสดงอยู่ในรายการเมื่อเริ่มต้นเท่านั้น",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "หยุดการสังเกตการณ์ก่อนโหลดประวัติ การเปลี่ยนแปลงสดใหม่จะไม่ถูกบันทึกขณะกำลังโหลดประวัติ; การอ่านข้อมูลในภายหลังอาจไม่สามารถกู้คืนการลบหรือการแก้ไขระหว่างขั้นตอนได้ทั้งหมด",
+ "Export saved records without reading Telegram. Observation can keep running.": "ส่งออกบันทึกที่เก็บไว้โดยไม่ต้องเปิด Telegram การสังเกตการณ์สามารถทำงานต่อไปได้",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "ดาวน์โหลดการสนทนาที่เลือกไว้ลงในไฟล์เก็บถาวรแยกต่างหาก ให้หยุดการติดตามบัญชีนี้ก่อน",
+ "Saved observations": "การสังเกตการณ์ที่บันทึกไว้"
 }

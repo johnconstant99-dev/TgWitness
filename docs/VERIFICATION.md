@@ -1,4 +1,37 @@
-# TgWitness verification · updated 2026-11-04
+# TgWitness verification · updated 2026-11-05
+
+Each result below applies to its recorded revision and environment. The
+[current capability matrix](STATUS.md) separates implementation, published downloads
+and remaining qualification.
+
+## Trusted Live CPU Ubuntu and WARP · 5 November 2026
+
+The retained integration run used a CPU-only Ubuntu 24.04.5 guest (4 vCPU, 8 GiB)
+under QEMU inside a RunPod CPU host. The collector used `14e642a5`; verification used
+`02072461`. The final fixes merged in [PR #114](https://github.com/phishdestroy/TgWitness/pull/114)
+as `755f78f6`, whose tree matched the tested PR head. This was not a TEE.
+
+- A real WARP Connector reported healthy; proxied HTTPS reported WARP and Gateway
+  enabled. Three probes saw the same egress address, not a fixed-IP guarantee.
+- Disconnecting WARP made the proxied request fail. Direct gateway-service HTTPS
+  was rejected. In the recorder namespace, direct IPv4/IPv6, external DNS and
+  Docker's embedded UDP resolver were blocked.
+- A scoped read-only provider token could read health/connections and could not
+  read the connector enrollment token. Signed provider observations included
+  explicit unavailable samples. The witness ran on the operator's host, so this
+  demonstrates recording and retention, not independent third-party custody.
+- Official Desktop reached its unauthenticated welcome screen. Guarded keyboard
+  input was rejected during capture. Three H.264 display segments decoded and
+  their clock overlay was inspected. The 18-event preflight archive verified
+  against the pinned recorder key and retained checkpoint.
+- The final capture tests passed 114 cases on Windows and Linux CI, with real
+  Chromium/FFmpeg. Five anchor tests and dependency advisory checks passed.
+
+An initial 2 vCPU/4 GiB startup timed out under concurrent image-build load and
+stopped through the guard; it is not counted as success. Manual test-account
+login, native chat export, real hybrid comparison and Telegram-side logout remain
+pending. No supplied Telethon session was imported. Attachments, automatic OCR,
+local drand BLS verification and Trusted Live TDX attestation were not qualified.
 
 ## Live Phala Cloud deployment · 4 November 2026
 
@@ -253,11 +286,13 @@ matrix of role visibility, reaction actors, prolonged FloodWait, account bans an
 network/process interruption recovery. QR-token issuance remains distinct from completed
 mobile QR confirmation.
 
-Docker build/run, Linux/macOS installation, sustained high load, independent security
-review, a real independent TSA response, certificate revocation/archival validation and
-forensic certification remain outside the recorded qualification. Saved MTProto state
-and catch-up are implemented; atomic durable replay remains unestablished. Admin-log
-collection, extra reactor lists and priority short polling remain separate features.
+Docker/Compose and installation checks are recorded in CI; real Phala deployment
+and external timestamp verification are described above. They do not establish
+sustained high load, a complete live platform/role matrix, independent security
+review, long-term archival validation or forensic certification. Saved MTProto state
+and catch-up are implemented; atomic lossless live replay remains unestablished.
+The newer backfill commits messages and cursors atomically and preserves available
+Recent Actions, but its synthetic coverage is distinct from live qualification.
 See [live acceptance](internal/LIVE_ACCEPTANCE.md) for the controlled qualification matrix.
 
 Local detailed receipts and screenshots are under test-results/ (Git-ignored).

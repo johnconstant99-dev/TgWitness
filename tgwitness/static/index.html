@@ -365,8 +365,11 @@
   </section>
   <section class="card padded" id="history-card" aria-labelledby="history-heading">
     <div class="eyebrow">Full history</div><h2 id="history-heading">Bring past messages into this workspace</h2>
-    <p class="muted">Load the available history of every enabled source into Chats and the signed journal. Progress survives a restart. Attachments follow your media settings. Past deletions and edits are only available when Telegram returns them in Recent Actions.</p>
-    <p class="hint">For an account archive, choose Whole account above, load and review the source list, then start observation. This run uses the enabled sources listed at its start; new sources are not added to a running job.</p>
+    <p class="notice">Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.</p>
+    <details id="history-details"><summary>Details</summary>
+      <p class="muted">Load the available history of every enabled source into Chats and the signed journal. Progress survives a restart. Attachments follow your media settings. Past deletions and edits are only available when Telegram returns them in Recent Actions.</p>
+      <p class="hint">For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.</p>
+    </details>
     <fieldset id="history-options">
       <legend>History acquisition</legend>
       <label>Telegram transport <select id="history-transport"><option value="standard">Standard API</option><option value="takeout">Takeout export</option></select></label>
@@ -383,6 +386,7 @@
       <button class="quiet" id="history-report" type="button" hidden>Save signed progress report</button>
     </div>
     <p id="history-progress" role="status" aria-live="polite"></p>
+    <p id="history-availability" class="hint" role="status" hidden></p>
     <p class="hint" id="history-media"></p>
     <p class="hint" id="history-wait"></p>
     <ul id="history-sources"></ul>
@@ -442,6 +446,17 @@
     <button id="export-task-account" type="button" data-export-task="account" aria-pressed="false" aria-controls="export-account-panel"><strong>Telegram account</strong><span>Read the history available now. Choose chats, dates and files.</span></button>
     <button id="export-task-journal" type="button" data-export-task="journal" aria-pressed="true" aria-controls="export-journal-panel"><strong>Saved observations</strong><span>Export the messages and changes already recorded by TgWitness.</span></button>
   </div>
+  <details class="collection-methods" id="collection-methods">
+    <summary>Compare collection methods</summary>
+    <dl class="collection-methods-grid">
+      <div><dt>Saved observations</dt><dd>Export saved records without reading Telegram. Observation can keep running.</dd></div>
+      <div><dt>Full history</dt><dd>Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.</dd></div>
+      <div><dt>Telegram account</dt><dd>Download selected chats into a separate archive. Pause observation on this account first.</dd></div>
+      <div><dt>Live observation</dt><dd>Keep new messages and changes delivered while observation is running. Start it from Sources.</dd></div>
+      <div><dt data-no-translate>Trusted Live</dt><dd>Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.</dd></div>
+    </dl>
+    <p class="hint">Collection uses the connection configured for the selected account or recorder.</p>
+  </details>
   <div class="exports-job-link" id="exports-job-link" hidden><span id="exports-job-summary"></span><button type="button" class="quiet" data-export-task="account">Open account exports</button></div>
   <div id="export-account-panel" hidden>
   <section class="card account-export-card" id="account-export-card" hidden aria-labelledby="account-export-title">
@@ -1608,10 +1623,10 @@
   </form>
   <section class="card padded" id="ask-preview" hidden>
     <h2>Review selected sources</h2><p class="hint">Edits and deletion notices are separate records. Missing on recheck does not establish that Telegram sent a deletion notice.</p>
-    <div class="storage-actions"><button type="button" class="secondary" id="ask-context-export">Download selected sources · Markdown + RAG JSONL</button></div><p class="hint">A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.</p><div id="ask-sources"></div><div id="ask-coverage"></div>
+    <div class="storage-actions"><button type="button" class="secondary" id="ask-context-export" disabled>Download selected sources · Markdown + RAG JSONL</button></div><p class="hint">A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.</p><div id="ask-sources"></div><div id="ask-coverage"></div>
     <details><summary>Data sent to the model</summary><pre id="ask-transmission" class="analysis-data"></pre></details>
     <label class="check-label"><input id="ask-consent" type="checkbox"> Process the checked sources and my question at the endpoint shown above</label>
-    <button id="ask-generate" type="button" class="primary">Generate an answer</button>
+    <button id="ask-generate" type="button" class="primary" disabled>Generate an answer</button>
   </section>
   <section class="card padded" id="ask-answer" hidden><h2>Answer with sources</h2><div id="ask-claims"></div><p id="ask-usage" class="hint"></p><button class="secondary" type="button" id="ask-save-report">Save as an analytical report</button></section>
   <section class="card padded"><div class="card-heading compact"><h2>Analytical reports</h2><button class="quiet" id="ask-refresh-reports" type="button">Refresh</button></div><div id="ask-reports"></div></section>

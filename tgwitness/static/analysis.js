@@ -7,7 +7,12 @@
   const numberFields={context:"context_chars",output:"output_tokens",timeout:"timeout_seconds",budget:"daily_requests","input-price":"input_per_million","output-price":"output_per_million"};
   const call=(path,body,options={})=>json("analysis/"+path,body,{root:true,...options});
   const scoped=path=>path+(path.includes("?")?"&":"?")+"workspace_id="+encodeURIComponent(workspace);
-  function resetResults(){generation++;loaded=false;loading=null;plan=null;report=null;window.TgWitnessMedia?.clear();$("ask-consent").checked=false;["ask-preview","ask-answer","ask-report"].forEach(id=>show(id,false));["ask-sources","ask-claims","ask-report-content","ask-reports","ask-transmission"].forEach(id=>$(id).replaceChildren());}
+  function sourceActions(){
+    const selected=!!plan&&!!$("ask-sources").querySelector("input:checked"),provider=plan?.provider;
+    $("ask-context-export").disabled=!selected||!may("export")||$("ask-context-export").hasAttribute("aria-busy");
+    $("ask-generate").disabled=!selected||!(provider?.enabled??config?.enabled)||!!provider?.route_error||$("ask-generate").hasAttribute("aria-busy");
+  }
+  function resetResults(){generation++;loaded=false;loading=null;plan=null;report=null;sourceActions();window.TgWitnessMedia?.clear();$("ask-consent").checked=false;["ask-preview","ask-answer","ask-report"].forEach(id=>show(id,false));["ask-sources","ask-claims","ask-report-content","ask-reports","ask-transmission"].forEach(id=>$(id).replaceChildren());}
   function clear(){
     resetResults();workspace=null;config=null;providerPending=null;capabilityKey="";providerEpoch++;edits.clear();saving=null;
     $("ai-settings").open=false;$("ai-settings-form").reset();$("ai-settings-form").inert=true;
@@ -119,6 +124,7 @@
   }
   const privateText=(value,refs=[])=>window.TgWitnessPrivacy.render(value,privacyOptions(refs));
   function transmission(){
+    sourceActions();
     if(!plan)return;
     const ids=new Set([...$("ask-sources").querySelectorAll("input:checked")].map(el=>el.value));
     const messages=structuredClone(plan.transmission),data=JSON.parse(messages[1].content);data.observations=data.observations.filter(s=>ids.has(s.id));messages[1].content=JSON.stringify(data,null,2);
@@ -145,11 +151,13 @@
       check.addEventListener("change",transmission);box.append(row);
     }
     if(data.partial)box.append(node("p","notice",tr("The result is bounded. Narrow the search to inspect additional sources.")));
-    coverage(data.coverage,$("ask-coverage"));show("ask-preview",true);$("ask-generate").disabled=!data.sources.length||!(provider?.enabled??config?.enabled)||!!provider?.route_error;transmission();
+    coverage(data.coverage,$("ask-coverage"));show("ask-preview",true);transmission();
   }
   $("ask-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
     if(!capabilities().enabled)return;
-    const turn=++generation;show("ask-answer",false);plan=null;$("ask-sources").replaceChildren(viewState("loading",tr("Loading…")));show("ask-preview",true);
+    const turn=++generation;show("ask-answer",false);plan=null;sourceActions();$("ask-consent").checked=false;
+    $("ask-coverage").replaceChildren();$("ask-transmission").replaceChildren();$("ask-transmission-privacy")?.remove();
+    $("ask-sources").replaceChildren(viewState("loading",tr("Loading…")));show("ask-preview",true);
     const chats=[...$("ask-chats").querySelectorAll("input:checked")].map(el=>Number(el.value));
     const body={workspace,chats,since:new Date($("ask-since").value).toISOString(),until:new Date($("ask-until").value).toISOString(),question:$("ask-question").value,query:$("ask-query").value,message_id:$("ask-message").value?Number($("ask-message").value):null};
     try{const result=await call("preview",body);if(turn!==generation)return;plan=result;sources(result);}
@@ -160,7 +168,7 @@
     const source_ids=[...$("ask-sources").querySelectorAll("input:checked")].map(el=>el.value);
     if(!source_ids.length)throw new Error(tr("Select at least one source."));
     await download("analysis/context-export","tgwitness-research-context.zip",false,true,{plan_id:plan.plan_id,source_ids},undefined,{confirmWorkspace:false});
-  }));
+  }).finally(sourceActions));
   function claims(items,box){
     box.replaceChildren();
     if(!items.length)box.append(viewState("empty",tr("Not found in the available archive"),tr("The selected sources do not support an answer.")));
@@ -172,7 +180,7 @@
     if(turn!==generation)return;claims(result.claims,$("ask-claims"));show("ask-answer",true);$("ask-generate").dataset.complete="true";
     const meta=result.generation,usage=[];if(meta.tokens.input_tokens!==undefined)usage.push(tr("Input tokens: {n}",{n:meta.tokens.input_tokens}));if(meta.tokens.output_tokens!==undefined)usage.push(tr("Output tokens: {n}",{n:meta.tokens.output_tokens}));if(meta.cost)usage.push(meta.cost.amount.toFixed(4)+" "+meta.cost.currency);
     $("ask-usage").textContent=meta.provider+" · "+meta.model+" · "+usage.join(" · ");
-  }));
+  }).finally(sourceActions));
   async function reports(){if(!capabilities().enabled)return;const turn=generation,data=await call(scoped("reports"));if(!current(turn))return;const box=$("ask-reports");box.replaceChildren();for(const row of data.reports){const button=node("button","text-link",row.title+" · "+fmtFull(row.created_at));button.type="button";button.addEventListener("click",()=>busy(button,async()=>{const turn=generation,data=await call(scoped("reports/"+row.id));if(current(turn))renderReport(data);}));box.append(button);}if(!data.reports.length)box.append(viewState("empty",tr("No analytical reports"),tr("Save a reviewed answer to create a separate report.")));}
   function renderReport(data){
     report=data;show("ask-report",true);const box=$("ask-report-content");box.replaceChildren();

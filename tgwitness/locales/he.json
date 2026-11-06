@@ -6241,5 +6241,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "טווחי ה-Takeout השתנו. סיים את הריצה הנוכחית והתחל איסוף חדש.",
 "Telegram wait until {time}": "Telegram, המתן עד {time}",
 "The connected account differs from the signed history plan.": "החשבון המחובר שונה מתוכנית היסטוריית ההודעות החתומות.",
-"This account is busy. Pause its current task before ending history.": "חשבון זה עסוק. יש להשהות את המשימה הנוכחית שלו לפני סיום ההיסטוריה."
+"This account is busy. Pause its current task before ending history.": "חשבון זה עסוק. יש להשהות את המשימה הנוכחית שלו לפני סיום ההיסטוריה.",
+ "Compare collection methods": "השוואת שיטות איסוף",
+ "Live observation": "תצפית בשידור חי",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "קרא הודעות קודמות לתוך סביבת העבודה הזו. עצור תחילה את המעקב; שינויים חדשים בזמן אמת אינם מוקלטים במהלך טעינת ההיסטוריה.",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "שמור הודעות ושינויים חדשים המגיעים בזמן שהמעקב פועל. הפעל אותו מתוך \"מקורות\".",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "השתמשו בפגישה רשמית בשולחן העבודה או באינטרנט עם וידאו או JSON מקורי. ההתקנה וההשוואה ההיברידית דורשות ביצוע פעולות ידניות. תצוגה מקדימה.",
+ "Collection uses the connection configured for the selected account or recorder.": "האוסף משתמש בחיבור שהוגדר עבור החשבון או מקליט שנבחרו.",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "לקבלת ארכיון נפרד של ההיסטוריה הנוכחית של החשבון, השתמש ב-Exports → Telegram account. הפעלה זו טוענת רק את המקורות המופעלים המפורטים בתחילתה.",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "השהה את המעקב לפני טעינת ההיסטוריה. שינויים חדשים בשידור חי אינם מוקלטים בזמן טעינת ההיסטוריה; קריאות מאוחרות יותר לא יוכלו לשחזר כל מחיקה או עריכה ביניים.",
+ "Export saved records without reading Telegram. Observation can keep running.": "ייצא רשומות שנשמרו מבלי לקרוא את Telegram. המעקב יכול להמשיך לפעול.",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "הורד צ'אטים נבחרים לארכיון נפרד. השעה תחילה את המעקב בחשבון זה.",
+ "Saved observations": "תצפיות שנשמרו"
 }

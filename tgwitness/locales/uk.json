@@ -6280,5 +6280,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "Діапазони Takeout змінилися. Завершіть цей цикл і розпочніть новий збір даних.",
 "Telegram wait until {time}": "Telegram чекає до {time}",
 "The connected account differs from the signed history plan.": "Підключений обліковий запис відрізняється від зазначеного в підписаному плані завантаження історії.",
-"This account is busy. Pause its current task before ending history.": "Цей обліковий запис зайнятий. Призупиніть його поточне завдання перед завершенням історії."
+"This account is busy. Pause its current task before ending history.": "Цей обліковий запис зайнятий. Призупиніть його поточне завдання перед завершенням історії.",
+ "Compare collection methods": "Порівняти способи збору",
+ "Live observation": "Спостереження в реальному часі",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "Завантаження попередніх повідомлень у робочу область. Спочатку призупиніть спостереження: під час завантаження історії нові зміни не записуються.",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "Збереження нових повідомлень і змін, що надходять під час спостереження. Запуск — у розділі «Джерела».",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "Запис відео або збереження штатного JSON-експорту через офіційний Desktop чи Web. Налаштування та зіставлення джерел потребують участі оператора. Попередня версія.",
+ "Collection uses the connection configured for the selected account or recorder.": "Збір використовує з’єднання, налаштоване для вибраного акаунта або рекордера.",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "Для окремого архіву поточної історії акаунта відкрийте «Експорт» → «Акаунт Telegram». Цей запуск завантажує лише джерела, увімкнені на момент його початку.",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "Призупиніть спостереження перед завантаженням історії. Поки історія завантажується, нові зміни не записуються. Подальше читання не гарантує відновлення всіх видалень і проміжних правок.",
+ "Export saved records without reading Telegram. Observation can keep running.": "Експорт уже збережених записів без звернення до Telegram. Спостереження можна продовжувати.",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "Завантаження вибраних чатів в окремий архів. Спочатку призупиніть спостереження на цьому акаунті.",
+ "Saved observations": "Збережені спостереження"
 }

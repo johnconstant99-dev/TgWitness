@@ -6163,5 +6163,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "Julat Takeout telah berubah. Akhiri larian ini dan mulakan pengambilan data baharu.",
 "Telegram wait until {time}": "Telegram tunggu sehingga {time}",
 "The connected account differs from the signed history plan.": "Akaun yang disambungkan berbeza daripada pelan sejarah yang ditandatangani.",
-"This account is busy. Pause its current task before ending history.": "Akaun ini sedang sibuk. Jeda tugas semasa sebelum menamatkan sejarah."
+"This account is busy. Pause its current task before ending history.": "Akaun ini sedang sibuk. Jeda tugas semasa sebelum menamatkan sejarah.",
+ "Compare collection methods": "Bandingkan kaedah pengumpulan",
+ "Live observation": "Pengamatan langsung",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "Bacakan mesej lalu ke ruang kerja ini. Hentikan pemerhatian terlebih dahulu; perubahan langsung baharu tidak direkod semasa memuatkan sejarah.",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "Teruskan penghantaran mesej dan perubahan baru semasa pemerhatian dijalankan. Mulakan dari Sumber.",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "Gunakan sesi Desktop atau Web rasmi dengan video atau JSON asli. Penyediaan dan perbandingan hibrid memerlukan langkah manual. Pratonton.",
+ "Collection uses the connection configured for the selected account or recorder.": "Pengumpulan menggunakan sambungan yang dikonfigurasikan untuk akaun atau perakam yang dipilih.",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "Untuk arkib berasingan bagi sejarah semasa akaun, gunakan Eksport → Akaun Telegram. Jalankan ini hanya memuatkan sumber yang diaktifkan yang disenaraikan pada permulaannya.",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "Hentikan pemerhatian sebelum memuatkan sejarah. Perubahan langsung baharu tidak direkodkan semasa sejarah dimuat; bacaan kemudian tidak dapat memulihkan setiap pemadaman atau suntingan pertengahan.",
+ "Export saved records without reading Telegram. Observation can keep running.": "Eksport rekod yang disimpan tanpa membaca Telegram. Pengamatan boleh terus berjalan.",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "Muat turun sembang terpilih ke dalam arkib berasingan. Hentikan pemerhatian pada akaun ini terlebih dahulu.",
+ "Saved observations": "Perhatian yang disimpan"
 }

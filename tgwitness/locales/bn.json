@@ -6202,5 +6202,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "Takeout পরিসর পরিবর্তিত হয়েছে। এই রান শেষ করুন এবং একটি নতুন সংগ্রহ শুরু করুন।",
 "Telegram wait until {time}": "টেলিগ্রাম অপেক্ষা করুন {time} পর্যন্ত",
 "The connected account differs from the signed history plan.": "সংযুক্ত অ্যাকাউন্ট স্বাক্ষরিত ইতিহাস প্ল্যান থেকে পৃথক।",
-"This account is busy. Pause its current task before ending history.": "এই অ্যাকাউন্ট ব্যস্ত আছে। ইতিহাস শেষ করার আগে এর বর্তমান কাজটি বিরতি দিন।"
+"This account is busy. Pause its current task before ending history.": "এই অ্যাকাউন্ট ব্যস্ত আছে। ইতিহাস শেষ করার আগে এর বর্তমান কাজটি বিরতি দিন।",
+ "Compare collection methods": "সংগ্রহ পদ্ধতিগুলি তুলনা করুন",
+ "Live observation": "লাইভ পর্যবেক্ষণ",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "এই ওয়ার্কস্পেসে পূর্ববর্তী বার্তাগুলো পড়ুন। প্রথমে পর্যবেক্ষণ বিরতি দিন; ইতিহাস লোড করার সময় নতুন লাইভ পরিবর্তনগুলি রেকর্ড হয় না।",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "পর্যবেক্ষণ চলমান থাকা অবস্থায় নতুন বার্তা এবং পরিবর্তনগুলো সরবরাহ চালিয়ে রাখুন। এটি সোর্স থেকে শুরু করুন।",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "অফিসিয়াল ডেস্কটপ বা ওয়েব সেশন ব্যবহার করুন ভিডিও বা নেটিভ JSON সহ। সেটআপ এবং হাইব্রিড তুলনা ম্যানুয়াল ধাপের প্রয়োজন। প্রিভিউ।",
+ "Collection uses the connection configured for the selected account or recorder.": "সংগ্রহ নির্বাচিত অ্যাকাউন্ট বা রেকর্ডারের জন্য কনফিগার করা সংযোগ ব্যবহার করে।",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "অ্যাকাউন্টের বর্তমান ইতিহাসের পৃথক আর্কাইভের জন্য Exports → Telegram account ব্যবহার করুন। এই রান শুধুমাত্র এর শুরুতে তালিকাভুক্ত সক্ষম উত্সগুলো লোড করে।",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "ইতিহাস লোড করার আগে পর্যবেক্ষণ বিরতি দিন। ইতিহাস লোড করার সময় নতুন লাইভ পরিবর্তনগুলি রেকর্ড হয় না; পরবর্তী পড়া প্রতিটি মুছে ফেলা বা মধ্যবর্তী সম্পাদনা পুনরুদ্ধার করতে পারে না।",
+ "Export saved records without reading Telegram. Observation can keep running.": "টেলিগ্রাম না পড়ে সংরক্ষিত রেকর্ড রপ্তানি করুন। পর্যবেক্ষণ চলতেই পারে।",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "নির্বাচিত চ্যাটগুলো একটি পৃথক আর্কাইভে ডাউনলোড করুন। প্রথমে এই অ্যাকাউন্টে পর্যবেক্ষণ বিরতি দিন।",
+ "Saved observations": "সংরক্ষিত পর্যবেক্ষণ"
 }

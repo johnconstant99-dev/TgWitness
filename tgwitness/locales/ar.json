@@ -6358,5 +6358,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "تغيرت نطاقات Takeout. قم بإنهاء هذه العملية وابدأ عملية استخراج جديدة.",
 "Telegram wait until {time}": "Telegram ينتظر حتى {time}",
 "The connected account differs from the signed history plan.": "يختلف الحساب المتصل عن خطة سجل التوقيعات.",
-"This account is busy. Pause its current task before ending history.": "هذا الحساب مشغول. قم بإيقاف مهمته الحالية مؤقتًا قبل إنهاء السجل."
+"This account is busy. Pause its current task before ending history.": "هذا الحساب مشغول. قم بإيقاف مهمته الحالية مؤقتًا قبل إنهاء السجل.",
+ "Compare collection methods": "قارن بين طرق التجميع",
+ "Live observation": "المراقبة المباشرة",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "قراءة الرسائل السابقة في مساحة العمل هذه. قم بإيقاف المراقبة مؤقتًا أولاً؛ لا يتم تسجيل التغييرات الحية الجديدة أثناء تحميل السجل.",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "احتفظ بالرسائل والتغييرات الجديدة التي يتم تسليمها أثناء تشغيل المراقبة. ابدأ تشغيله من «المصادر».",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "استخدم جلسة عمل رسمية على سطح المكتب أو الويب باستخدام الفيديو أو JSON الأصلي. يتطلب الإعداد والمقارنة المختلطة خطوات يدوية. معاينة.",
+ "Collection uses the connection configured for the selected account or recorder.": "تستخدم المجموعة الاتصال الذي تم تكوينه للحساب أو المسجل المحدد.",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "للحصول على أرشيف منفصل لسجل الحساب الحالي، استخدم «التصدير» → «حساب Telegram». لا يقوم هذا التشغيل بتحميل سوى المصادر الممكّنة المدرجة في بدايته.",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "قم بإيقاف المراقبة مؤقتًا قبل تحميل السجل. لا يتم تسجيل التغييرات الحية الجديدة أثناء تحميل السجل؛ ولا يمكن لعمليات القراءة اللاحقة استعادة كل عمليات الحذف أو التعديلات الوسيطة.",
+ "Export saved records without reading Telegram. Observation can keep running.": "تصدير السجلات المحفوظة دون قراءة Telegram. يمكن أن تستمر المراقبة في العمل.",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "قم بتنزيل المحادثات المحددة في أرشيف منفصل. قم بإيقاف المراقبة على هذا الحساب أولاً.",
+ "Saved observations": "الملاحظات المحفوظة"
 }

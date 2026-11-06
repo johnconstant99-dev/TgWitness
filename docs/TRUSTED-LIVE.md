@@ -167,7 +167,9 @@ unknown replies, HTML injection, guarded inputs, pacing, lost route/focus, token
 cross-origin requests, file boundaries, frame attribution, report recomputation,
 truncation versus retained checkpoints, provider failures, and real FFmpeg encoding.
 The FFmpeg test uses a synthetic video source; the browser suite uses local fixtures.
-These tests do **not** qualify a live Telegram/WARP session or the Linux firewall.
+These local fixture tests do **not** qualify a live Telegram/WARP session or the Linux firewall.
+The later [CPU Ubuntu and WARP integration run](VERIFICATION.md#trusted-live-cpu-ubuntu-and-warp--5-november-2026)
+records actual route isolation, provider reads, official-client startup and video verification.
 
 The optional-capture GitHub Actions workflow additionally builds the pinned image and
 runs `python tools/check_trusted_container.py --image tgwitness-trusted-ci` on Linux.
@@ -184,8 +186,9 @@ layout, cleanup and ZIP download in Chromium without console errors. Provider/dr
 responses and the Telegram screen were synthetic; FFmpeg encoding was real. Ruff,
 JavaScript syntax checks and source-archive checks passed. One upstream Starlette
 TestClient deprecation warning remains. The optional-capture CI job reports Linux
-image and namespace validation separately. Real account login, WARP/provider
-integration and TDX attestation remain unexecuted.
+image and namespace validation separately. Later WARP/provider network results are
+recorded in the integration run above. Real account login/export/hybrid comparison
+and TDX attestation of this recorder remain unexecuted.
 
 For a local synthetic UI demonstration (no Telegram connection is possible):
 

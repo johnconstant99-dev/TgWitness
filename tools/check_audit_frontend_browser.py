@@ -217,8 +217,22 @@ def delayed_downloads(page, child):
     page.evaluate("async()=>{await json('analysis/provider',{enabled:true,model:'synthetic-test'},{root:true});await refreshStatus();await navigate('analysis');}")
     page.locator(f'#ask-chats input[value="{CHAT}"]').check()
     page.locator('#ask-question').fill('Find the synthetic archived observation.')
+    hold_api_response(page, '/api/analysis/preview')
     page.locator('#ask-form button[type=submit]').click()
+    expect(page.locator('html')).to_have_attribute('data-acceptance-held', 'true')
     expect(page.locator('#ask-context-export')).to_be_visible()
+    expect(page.locator('#ask-context-export')).to_be_disabled()
+    expect(page.locator('#ask-generate')).to_be_disabled()
+    release_api_response(page)
+    expect(page.locator('#ask-context-export')).to_be_enabled()
+    expect(page.locator('#ask-sources')).to_contain_text('Synthetic archived observation.')
+    selected = page.locator('#ask-sources input[type=checkbox]')
+    for item in selected.all():
+        item.uncheck()
+    expect(page.locator('#ask-context-export')).to_be_disabled()
+    expect(page.locator('#ask-generate')).to_be_disabled()
+    selected.first.check()
+    expect(page.locator('#ask-context-export')).to_be_enabled()
     page.evaluate("""()=>{
       window.auditFetch=window.fetch;window.auditDownloads=[];window.auditSaveBlob=window.saveBlob;
       window.saveBlob=(blob,name)=>auditDownloads.push(name);

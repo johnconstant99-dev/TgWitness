@@ -6202,5 +6202,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "Gli intervalli di Takeout sono stati modificati. Termina questa sessione e avvia una nuova acquisizione.",
 "Telegram wait until {time}": "Telegram attende fino a {time}",
 "The connected account differs from the signed history plan.": "L'account collegato non corrisponde al piano di cronologia firmato.",
-"This account is busy. Pause its current task before ending history.": "Questo account è occupato. Metti in pausa l'attività corrente prima di chiudere la cronologia."
+"This account is busy. Pause its current task before ending history.": "Questo account è occupato. Metti in pausa l'attività corrente prima di chiudere la cronologia.",
+ "Compare collection methods": "Confronta i metodi di raccolta",
+ "Live observation": "Osservazione in tempo reale",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "Leggi i messaggi precedenti in questo spazio di lavoro. Metti prima in pausa l’osservazione; le nuove modifiche in tempo reale non vengono registrate durante il caricamento della cronologia.",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "Conserva i nuovi messaggi e le modifiche ricevute mentre l’osservazione è in corso. Avviala da «Fonti».",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "Utilizza una sessione ufficiale Desktop o Web con video o JSON nativo. La configurazione e il confronto ibrido richiedono passaggi manuali. Anteprima.",
+ "Collection uses the connection configured for the selected account or recorder.": "La raccolta utilizza la connessione configurata per l’account o il registratore selezionato.",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "Per un archivio separato della cronologia corrente dell’account, utilizzare Esportazioni → Account Telegram. Questa esecuzione carica solo le fonti abilitate elencate all’inizio.",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "Metti in pausa l’osservazione prima di caricare la cronologia. Le nuove modifiche in tempo reale non vengono registrate durante il caricamento della cronologia; le letture successive potrebbero non essere in grado di recuperare ogni cancellazione o modifica intermedia.",
+ "Export saved records without reading Telegram. Observation can keep running.": "Esporta le registrazioni salvate senza aprire Telegram. L'osservazione può continuare a funzionare.",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "Scarica le chat selezionate in un archivio separato. Metti prima in pausa il monitoraggio su questo account.",
+ "Saved observations": "Osservazioni salvate"
 }

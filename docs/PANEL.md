@@ -8,6 +8,10 @@ sources, journal and signing key. The selector at the top of the sidebar switche
 workspaces. The address carries the workspace (`?ws=…`); while the address, the
 selector and the loaded account disagree, actions stay blocked.
 
+Use [Compare collection methods](COLLECTION-MODES.md) to choose between live
+observation, full history, fresh account/chat exports and saved-record handover.
+The Exports page includes the same comparison above its download controls.
+
 ## Find your way
 
 Daily sections are at the top of the sidebar, **Accounts** is under **Workspace**,

@@ -6202,5 +6202,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "Takeout diapazonlari o'zgardi. Ushbu ishni yakunlang va yangi ma'lumot yig'ishni boshlang.",
 "Telegram wait until {time}": "Telegram {time}gacha kuting",
 "The connected account differs from the signed history plan.": "Ulanib bo'lgan hisob imzolangan tarix rejasidan farq qiladi.",
-"This account is busy. Pause its current task before ending history.": "Ushbu hisob band. Tarixni yakunlashdan oldin uning joriy vazifasini to'xtating."
+"This account is busy. Pause its current task before ending history.": "Ushbu hisob band. Tarixni yakunlashdan oldin uning joriy vazifasini to'xtating.",
+ "Compare collection methods": "Yig'ish usullarini solishtiring",
+ "Live observation": "Jonli kuzatuv",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "O'tgan xabarlarni ushbu ish maydoniga o'qing. Avvalo kuzatuvni to'xtating; tarix yuklanayotganda yangi jonli o'zgarishlar yozilmaydi.",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "Kuzatuv davom etayotgan paytda yangi xabarlar va o'zgarishlar yetkazilishini davom ettiring. Uni Manbalar bo'limidan ishga tushiring.",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "Video yoki mahalliy JSON bilan rasmiy Desktop yoki Web sessiyasidan foydalaning. Sozlash va gibrid taqqoslash qo'lda bajariladigan bosqichlarni talab qiladi. Ko'rinish.",
+ "Collection uses the connection configured for the selected account or recorder.": "Yig'ish tanlangan hisob yoki yozuvchi uchun sozlangan ulanishdan foydalanadi.",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "Hisobning joriy tarixi uchun alohida arxiv yaratish uchun Eksportlar → Telegram hisobini ishlating. Ushbu ishga tushirish faqat boshlanishida ro'yxatda ko'rsatilgan yoqilgan manbalarni yuklaydi.",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "Tarixni yuklashdan oldin kuzatuvni to'xtating. Tarix yuklanayotgan paytda yangi jonli o'zgarishlar yozib olinmaydi; keyingi o'qishlar har bir o'chirish yoki oraliq tahrirni tiklay olmaydi.",
+ "Export saved records without reading Telegram. Observation can keep running.": "Telegramni o'qimasdan saqlangan yozuvlarni eksport qiling. Kuzatuv ishlashni davom ettirishi mumkin.",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "Tanlangan suhbatlarni alohida arxivga yuklab oling. Avvalo ushbu akkaunt bo'yicha kuzatuvni to'xtating.",
+ "Saved observations": "Saqlangan kuzatuvlar"
 }

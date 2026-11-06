@@ -5,6 +5,8 @@ from pathlib import Path
 from pathlib import PurePosixPath
 import re
 import subprocess
+import tomllib
+import xml.etree.ElementTree as ET
 import zipfile
 from urllib.parse import unquote, urlsplit
 
@@ -97,6 +99,27 @@ def check_sources(root):
     return sources, links, findings
 
 
+def check_version_labels(root):
+    root = Path(root)
+    version = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
+    label = f"v{version} · pre-release"
+    findings = []
+    package = (root / "tgwitness/__init__.py").read_text(encoding="utf-8")
+    if not re.search(r'__version__\s*=\s*[\"\']' + re.escape(version) + r'[\"\']', package):
+        findings.append("tgwitness/__init__.py: package version differs from pyproject.toml")
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    if f'alt="{label}"' not in readme:
+        findings.append("README.md: source-version badge differs from pyproject.toml")
+    badge = ET.parse(root / "docs/assets/presentation/identity-meta-version.svg").getroot()
+    title = badge.find("{http://www.w3.org/2000/svg}title")
+    if title is None or title.text != label or not any(node.get("aria-label") == label for node in badge.iter()):
+        findings.append("docs/assets/presentation/identity-meta-version.svg: regenerate the source-version badge")
+    status = (root / "docs/STATUS.md").read_text(encoding="utf-8")
+    if f"Source version: **{version} preview**." not in status:
+        findings.append("docs/STATUS.md: update the source-version qualification record")
+    return findings
+
+
 def check_git_index(root, sources):
     root = Path(root).resolve()
 
@@ -156,6 +179,7 @@ def main():
     parser.add_argument("--git-index", action="store_true")
     args = parser.parse_args()
     sources, links, findings = check_sources(ROOT)
+    findings.extend(check_version_labels(ROOT))
     if args.git_index:
         findings.extend(check_git_index(ROOT, sources))
     print(f"Checked {len(sources)} public files and {links} local documentation links.")

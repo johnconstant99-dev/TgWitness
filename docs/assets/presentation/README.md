@@ -31,6 +31,8 @@ python website/render_identity.py --font /path/to/Manrope.ttf
 ```
 
 `render_identity.py` reads the version and language counts from source.
+After a version change, use `--metadata-only` to refresh its badges, update the
+README alt text and `docs/STATUS.md`, then run `python tools/check_publication.py`.
 
 To refresh the demo recording, build the site and run
 `python website/capture_readme.py` with Playwright and Pillow installed.

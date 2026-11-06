@@ -6163,5 +6163,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "Takeout 范围已发生变化。请结束本次运行并开始新的数据采集。",
 "Telegram wait until {time}": "Telegram 将等待至 {time}",
 "The connected account differs from the signed history plan.": "已连接的账户与已签署的历史记录计划不一致。",
-"This account is busy. Pause its current task before ending history.": "该账户正在处理任务。请在结束历史记录前暂停其当前任务。"
+"This account is busy. Pause its current task before ending history.": "该账户正在处理任务。请在结束历史记录前暂停其当前任务。",
+ "Compare collection methods": "比较收集方法",
+ "Live observation": "实时观察",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "将历史消息读入此工作区。请先暂停观察；在加载历史记录期间，新的实时更新不会被记录。",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "在观察运行期间，保留新消息和已送达的更新。从“来源”开始启动该功能。",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "请使用支持视频或原生 JSON 的官方桌面版或网页版会话。配置和混合模式的对比需要手动操作。预览。",
+ "Collection uses the connection configured for the selected account or recorder.": "“收集”功能使用为所选账户或录制器配置的连接。",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "若需为该账号的当前历史记录创建独立存档，请使用“导出”→“Telegram 账号”。此操作仅加载启动时列出的已启用来源。",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "在加载历史记录前请暂停观察。历史记录加载期间不会记录新的实时变更；后续读取无法恢复所有删除操作或中间编辑内容。",
+ "Export saved records without reading Telegram. Observation can keep running.": "无需打开 Telegram 即可导出已保存的记录。监控可继续运行。",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "将选定的聊天记录下载到单独的存档中。请先暂停该账号的监控。",
+ "Saved observations": "已保存的观察记录"
 }

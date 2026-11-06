@@ -6163,5 +6163,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "Takeoutの範囲が変更されました。今回の実行を終了し、新しい取得を開始してください。",
 "Telegram wait until {time}": "Telegramは{time}まで待機します",
 "The connected account differs from the signed history plan.": "接続されたアカウントは、「署名付き履歴プラン」とは異なります。",
-"This account is busy. Pause its current task before ending history.": "このアカウントは現在処理中です。履歴を終了する前に、現在のタスクを一時停止してください。"
+"This account is busy. Pause its current task before ending history.": "このアカウントは現在処理中です。履歴を終了する前に、現在のタスクを一時停止してください。",
+ "Compare collection methods": "収集方法の比較",
+ "Live observation": "ライブ監視",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "過去のメッセージをこのワークスペースに取り込みます。まず監視を一時停止してください。履歴の読み込み中は、新しいライブの変更は記録されません。",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "監視実行中も、新しいメッセージや変更が配信され続けるようにします。「ソース」から開始してください。",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "動画またはネイティブJSONを使用した公式デスクトップ版またはWeb版セッションを利用します。セットアップとハイブリッド比較には手動での操作が必要です。プレビュー。",
+ "Collection uses the connection configured for the selected account or recorder.": "コレクションは、選択されたアカウントまたはレコーダー用に設定された接続を使用します。",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "アカウントの現在の履歴を別途アーカイブするには、「エクスポート」→「Telegramアカウント」を使用してください。この実行では、開始時にリストされている有効なソースのみが読み込まれます。",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "履歴を読み込む前に監視を一時停止してください。履歴の読み込み中は新しいライブの変更は記録されません。後で読み返しても、削除や中間的な編集のすべてを復元できるとは限りません。",
+ "Export saved records without reading Telegram. Observation can keep running.": "Telegramを開かずに保存された記録をエクスポートできます。監視は引き続き実行可能です。",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "選択したチャットを別のアーカイブにダウンロードします。まず、このアカウントの監視を一時停止してください。",
+ "Saved observations": "保存された観察記録"
 }

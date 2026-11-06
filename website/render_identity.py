@@ -230,8 +230,12 @@ def metadata(font):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--font", required=True)
+    parser.add_argument("--metadata-only", action="store_true", help="Refresh version/language badges without rendering covers")
     args = parser.parse_args()
     font = {weight: instantiateVariableFont(TTFont(args.font), {"wght":weight}, inplace=False) for weight in (500,600,800)}
+    if args.metadata_only:
+        metadata(font)
+        return
     original = scene()
     for still in (False, True):
         hero(font, original, still=still)

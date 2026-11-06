@@ -6202,5 +6202,16 @@
 "Takeout ranges changed. End this run and start a new acquisition.": "محدوده‌های Takeout تغییر کردند. این اجرا را پایان دهید و یک جمع‌آوری جدید را آغاز کنید.",
 "Telegram wait until {time}": "تلگرام منتظر بماند تا {time}",
 "The connected account differs from the signed history plan.": "حساب متصل با طرح تاریخچه امضا شده متفاوت است.",
-"This account is busy. Pause its current task before ending history.": "این حساب در حال انجام کار است. قبل از پایان تاریخچه، وظیفهٔ جاری آن را متوقف کنید."
+"This account is busy. Pause its current task before ending history.": "این حساب در حال انجام کار است. قبل از پایان تاریخچه، وظیفهٔ جاری آن را متوقف کنید.",
+ "Compare collection methods": "مقایسه روش‌های جمع‌آوری",
+ "Live observation": "مشاهده زنده",
+ "Read past messages into this workspace. Pause observation first; new live changes are not recorded during history loading.": "پیام‌های گذشته را در این فضای کاری بخوانید. ابتدا مشاهده را متوقف کنید؛ تغییرات زنده جدید هنگام بارگذاری تاریخچه ضبط نمی‌شوند.",
+ "Keep new messages and changes delivered while observation is running. Start it from Sources.": "پیام‌ها و تغییرات جدید را در حین اجرای مشاهده دریافت کنید. آن را از بخش منابع آغاز کنید.",
+ "Use an official Desktop or Web session with video or native JSON. Setup and hybrid comparison require manual steps. Preview.": "از یک جلسه رسمی دسکتاپ یا وب با ویدئو یا JSON بومی استفاده کنید. راه‌اندازی و مقایسهٔ ترکیبی نیازمند مراحل دستی است. پیش‌نمایش.",
+ "Collection uses the connection configured for the selected account or recorder.": "مجموعه از اتصال پیکربندی‌شده برای حساب یا ضبط‌کنندهٔ انتخابی استفاده می‌کند.",
+ "For a separate archive of the account's current history, use Exports → Telegram account. This run only loads the enabled sources listed at its start.": "برای آرشیو جداگانهٔ تاریخچهٔ فعلی حساب، از «صادرات → حساب تلگرام» استفاده کنید. این اجرا تنها منابع فعال فهرست‌شده در شروع را بارگذاری می‌کند.",
+ "Pause observation before loading history. New live changes are not recorded while history is loading; later reads cannot recover every deletion or intermediate edit.": "مشاهده را قبل از بارگذاری تاریخچه متوقف کنید. تغییرات زنده جدید در حین بارگذاری تاریخچه ثبت نمی‌شوند؛ خواندن‌های بعدی قادر به بازیابی هر حذف یا ویرایش میانی نیستند.",
+ "Export saved records without reading Telegram. Observation can keep running.": "صادرات سوابق ذخیره شده بدون باز کردن تلگرام. مشاهده می‌تواند به اجرا ادامه دهد.",
+ "Download selected chats into a separate archive. Pause observation on this account first.": "گفت‌وگوهای منتخب را در یک آرشیو جداگانه دانلود کنید. ابتدا مشاهده را روی این حساب متوقف کنید.",
+ "Saved observations": "مشاهدات ذخیره شده"
 }

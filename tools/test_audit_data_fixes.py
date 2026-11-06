@@ -25,7 +25,9 @@ from tgwitness.store import Store, canonical
 from tgwitness.verify import (SEAL_CLOSE, SEAL_OPEN, fingerprint, verify_bundle, verify_dossier, verify_handover,
                               verify_report)
 
-CHAT, PERSON = -1000000000123, 77001
+# A short numeric ID can occur by chance inside a report UUID, hash or signature.
+# Keep the scan across every output; use an unambiguous synthetic identifier.
+CHAT, PERSON = -1000000000123, 7700112233445
 WHEN = datetime(2026, 10, 1, 12, tzinfo=timezone.utc)
 
 
@@ -71,7 +73,9 @@ def test_handover_omits_withheld_details_from_signed_outputs(workspace):
         for name in archive.namelist():
             if name.endswith((".json", ".jsonl", ".html")) and name != "manifest.json":
                 data = archive.read(name).decode("utf-8")
-                assert not any(marker in data for marker in markers), name
+                for marker in markers:
+                    position = data.find(marker)
+                    assert position < 0, (name, marker, data[max(0, position - 80):position + len(marker) + 80])
         pdf = store.root / "projected.pdf"
         pdf.write_bytes(archive.read("report.pdf"))
         assert verify_report(pdf, fingerprint(vault.public_key))["pdf_signature"]
