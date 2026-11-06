@@ -31,6 +31,9 @@ The version badge describes this source tree. Installable builds are listed unde
 ## Install
 
 Python included. Use the same commands to update.
+The download site automatically receives checked builds from `main` after Linux
+and Windows installation tests pass. Failed builds leave the previous download
+available; already installed panels update only when you rerun the installer.
 
 **Linux / macOS**
 

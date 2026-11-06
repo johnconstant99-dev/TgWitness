@@ -109,3 +109,10 @@ Not done yet either: threshold signing (FROST), a GitLab mirror, Nostr anchoring
 The release pipeline provides **draft → checked assets and attestations → publish**,
 pinned inputs, a release manifest and installer provenance checks. Require these
 gates on the exact candidate. Queued or skipped jobs never count as passed checks.
+
+The one-command preview installer follows the same rule: every main commit is
+checked, the exact signed package is installed on disposable Ubuntu and Windows
+hosts, and publication waits for application/security CI. Failed candidates leave
+the previous public download available. Public HTTPS acceptance can be dispatched
+separately against the published commit; this does not qualify Telegram capture
+or a user's existing server.

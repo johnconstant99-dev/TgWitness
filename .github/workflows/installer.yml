@@ -33,6 +33,7 @@ jobs:
       - run: python -m pip install -c deploy/constraints.txt cryptography
       - run: python -I tools/check_panel_setup.py
       - run: python -I tools/check_installer_publication.py
+      - run: python -I tools/test_installer_checks.py
       - name: Build installers and download page
         env:
           INSTALLER_SIGNING_KEY: ${{ secrets.TGWITNESS_INSTALLER_SIGNING_KEY }}
@@ -51,11 +52,38 @@ jobs:
           name: tgwitness-installer-site
           path: dist/installer-site/
           retention-days: 7
+  acceptance:
+    name: Qualify the signed installer on Linux and Windows
+    needs: build
+    uses: ./.github/workflows/installer-acceptance.yml
+    with:
+      artifact: tgwitness-installer-site
+  qualify:
+    name: Require passed checks for the exact main revision
+    needs: build
+    if: github.repository == 'phishdestroy/TgWitness' && github.ref == 'refs/heads/main' && vars.TGWITNESS_INSTALLER_DEPLOYMENT == 'cloudflare'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      publish: ${{ steps.checks.outputs.publish }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Wait for application and security checks; retain the previous download on failure
+        id: checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_REVISION: ${{ github.sha }}
+        run: python3 tools/installer_checks.py --revision "$EXPECTED_REVISION"
   publish:
     name: Publish verified installer to Cloudflare
-    needs: build
+    needs: [build, qualify, acceptance]
     # Forks, PRs and old release tags cannot replace the current preview installer.
-    if: github.repository == 'phishdestroy/TgWitness' && github.ref == 'refs/heads/main' && vars.TGWITNESS_INSTALLER_DEPLOYMENT == 'cloudflare'
+    if: needs.qualify.outputs.publish == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment: installer-production

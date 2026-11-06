@@ -158,6 +158,13 @@ published, checked builds from `main`, whose commit can be newer than the last
 numbered GitHub release. The page's version comes from `pyproject.toml`; its commit
 and build ID distinguish updates within the same preview version.
 
+Publication is automatic after that exact commit passes the application and
+security checks and the signed package passes Ubuntu service and Windows
+PowerShell installation tests. While checks are running, or if they fail, the
+same commands continue to install the previous checked build. The build manifest
+shows which commit is currently available; the version number alone may stay the
+same between preview updates.
+
 Use the same installation folder and OS user as before. Back up the complete data
 directory with collection stopped; `tgwitness paths` identifies it. A signed export
 is not a complete installation backup.

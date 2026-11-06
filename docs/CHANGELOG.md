@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Publish the one-command installer only after application and security checks pass for the exact main commit and the signed package passes Ubuntu local/HTTPS service and Windows PowerShell acceptance. Keep the previous download when checks fail or time out. Add authenticated tests of the actual public installer URLs.
+
 - Preserve `previous_hash` in the signed-record preview even when its hexadecimal digits resemble a payment card number. Secret masking still applies to message content; the stored record is unchanged.
 
 - Reconstruct compact chat snapshots consistently in MCP，retain unknown fields，and distinguish capped lists from removals．Resume date scans，preserve topic names across history reads，and bound image previews．Apply metric choices to filtered reports and count historical service messages separately．

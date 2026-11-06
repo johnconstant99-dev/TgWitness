@@ -128,6 +128,52 @@ def retain(site, public):
     index(site, public)
 
 
+def download_current(site, public, revision=None):
+    if site.exists() and any(site.iterdir()):
+        raise ValueError("Choose an empty directory for public installer checks")
+    raw = fetch("manifest.json", 128 * 1024)
+    manifest = json.loads(raw)
+    release_id = manifest.get("release_id", "")
+    validate_manifest(raw, release_id, public)
+    source = manifest.get("source_revision", "")
+    if not re.fullmatch(r"[0-9a-f]{40}", source) or (revision is not None and source != revision):
+        raise ValueError("Published installer does not match the expected source revision")
+    prefix = "releases/" + release_id + "/"
+    if fetch(prefix + "manifest.json", 128 * 1024) != raw:
+        raise ValueError("Current and immutable installer manifests differ")
+    # Use the immutable signature so a concurrent publication cannot pair two builds.
+    signature = fetch(prefix + "manifest.json.sig", 4096)
+    key = serialization.load_pem_public_key(public)
+    key.verify(signature, raw, padding.PKCS1v15(), hashes.SHA256())
+    files = verify_release(raw, release_id, lambda name: fetch(prefix + name), public)
+    release = site / "releases" / release_id
+    release.mkdir(parents=True)
+    for name, data in files.items():
+        (release / name).write_bytes(data)
+        sidecar = fetch(prefix + name + ".sha256", 1024)
+        if sidecar.strip() != (hashlib.sha256(data).hexdigest() + "  " + name).encode():
+            raise ValueError("Published checksum sidecar differs: " + name)
+        (release / (name + ".sha256")).write_bytes(sidecar)
+    for name, data in (("manifest.json", raw), ("manifest.json.sig", signature)):
+        (site / name).write_bytes(data)
+        (release / name).write_bytes(data)
+    for name in ("install.sh", "install.ps1", "install.cmd"):
+        current = fetch(name)
+        if current != files[name]:
+            raise ValueError("Public installer changed during the check; download a fresh snapshot")
+        (site / name).write_bytes(current)
+    sums, sums_signature = fetch("SHA256SUMS.txt", 4096), fetch("SHA256SUMS.txt.sig", 4096)
+    key.verify(sums_signature, sums, padding.PKCS1v15(), hashes.SHA256())
+    expected = "".join(hashlib.sha256(files[name]).hexdigest() + "  " + name + "\n"
+                       for name in ("install.sh", "install.ps1", "install.cmd")).encode()
+    if sums != expected:
+        raise ValueError("Public installer checksums belong to another build")
+    (site / "SHA256SUMS.txt").write_bytes(sums)
+    (site / "SHA256SUMS.txt.sig").write_bytes(sums_signature)
+    print("Public installer authenticated: " + source + " (" + release_id + ")", flush=True)
+    return manifest
+
+
 def verify_public(site, *, attempts=7, delay=5):
     paths = [p.relative_to(site).as_posix() for p in site.rglob("*")
              if p.is_file() and not p.name.startswith((".", "_"))]
@@ -163,9 +209,13 @@ def verify_public(site, *, attempts=7, delay=5):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("retain", "index", "verify-public"))
+    parser.add_argument("action", choices=("retain", "index", "verify-public", "download-current"))
     parser.add_argument("--site", type=Path, default=ROOT / "dist/installer-site")
+    parser.add_argument("--revision", help="Require this source commit when downloading the current installer")
     args = parser.parse_args()
+    if args.action == "download-current":
+        download_current(args.site.resolve(), (ROOT / "deploy/installer/release-signing.pub").read_bytes(), args.revision)
+        return
     site = args.site.resolve(strict=True)
     if not (site / "manifest.json").is_file() or not (site / "releases").is_dir():
         raise ValueError("Expected a built installer site")

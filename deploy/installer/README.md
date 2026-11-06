@@ -117,10 +117,17 @@ application itself is installed on each user's own machine.
 
 ## Automatic publication from GitHub
 
-The [Installer workflow](../../.github/workflows/installer.yml) rebuilds when the
-application, dependency constraints, package metadata or installer changes on
-`main`. It derives the software version from `pyproject.toml`, records the commit,
-signs the files and verifies an isolated Linux installation before publication.
+The [Installer workflow](../../.github/workflows/installer.yml) rebuilds for
+every commit on `main`, including documentation changes. It derives the software
+version from `pyproject.toml`, records the commit, and signs the files. Before
+publication, the exact signed candidate must install and run on clean Ubuntu
+(local access and a temporary HTTPS tunnel) and Windows PowerShell hosts. These
+checks exercise authentication, restart, retained data and repeat installation.
+The application **Checks** and **Security audit** workflows must also succeed for
+that same main commit; a triggered **Sealed capture validation** must finish
+successfully too. Missing, queued, skipped or failed required checks do not qualify.
+The publication wait is bounded to 45 minutes. A failure or timeout keeps the
+previous installer on the site; after resolving it, rerun the failed workflow.
 The permanent `/install.sh`, `/install.ps1` and `/install.cmd` addresses receive
 the new build together with its checksums, signatures and download page.
 
@@ -161,6 +168,26 @@ Subsequent publications retain that catalog automatically. Old release IDs are
 never overwritten with new bytes. Manual dispatch on `main` uses the same checks
 and publishing path. Installed copies update only when their operator reruns the
 installer; this workflow does not install an unattended updater on their machines.
+
+To exercise the actual public download URLs on disposable Ubuntu and Windows
+hosts, run **First-run installer acceptance** on `main` with **published** enabled:
+
+```sh
+gh workflow run installer-acceptance.yml --ref main -f published=true
+```
+
+This authenticates the public manifest and immutable artifacts against the checked
+repository key and requires the selected main commit. Installation then uses real
+HTTPS package downloads through the published `curl | bash` and `irm | iex`
+commands, with `TGWITNESS_NO_SETUP=1` to keep setup controlled by the test. A concurrent
+publication or a main commit not published yet is reported as a mismatch, never
+silently tested as if it were the requested build. Test installations contain no
+Telegram accounts. The same Windows check can be run locally after downloading:
+
+```sh
+python tools/installer_publication.py download-current --site build/public-installer --revision FULL_COMMIT
+python tools/check_installer_windows.py --site build/public-installer --public
+```
 
 ## Everyday commands
 

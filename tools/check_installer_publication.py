@@ -139,6 +139,7 @@ class PublicationTests(unittest.TestCase):
         self.files["release-signing.pub"] = self.public
         self.manifest = {
             "schema": "tgwitness-installer-v1", "release_id": self.release_id,
+            "source_revision": "a" * 40,
             "test_only": False, "base_url": publication.ORIGIN,
             "signing_key_sha256": hashlib.sha256(self.public).hexdigest(),
             "files": {name: {"sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data),
@@ -254,6 +255,42 @@ class PublicationTests(unittest.TestCase):
                     publication.verify_public(site)
                 self.assertEqual(read.call_count, 1)
                 pause.assert_not_called()
+
+    def public_download(self, path, limit=None):
+        name = path.removeprefix("releases/" + self.release_id + "/")
+        if name in ("manifest.json", "manifest.json.sig"):
+            return self.raw() if name == "manifest.json" else self.key.sign(self.raw(), padding.PKCS1v15(), hashes.SHA256())
+        if name in ("SHA256SUMS.txt", "SHA256SUMS.txt.sig"):
+            sums = "".join(hashlib.sha256(self.files[item]).hexdigest() + "  " + item + "\n"
+                           for item in ("install.sh", "install.ps1", "install.cmd")).encode()
+            return sums if name.endswith(".txt") else self.key.sign(sums, padding.PKCS1v15(), hashes.SHA256())
+        if name.endswith(".sha256"):
+            original = name.removesuffix(".sha256")
+            return (hashlib.sha256(self.files[original]).hexdigest() + "  " + original + "\n").encode()
+        return self.files[name]
+
+    def test_public_snapshot_authenticates_exact_revision_and_installer_bytes(self):
+        with tempfile.TemporaryDirectory() as temporary, patch.object(publication, "fetch", side_effect=self.public_download):
+            site = Path(temporary) / "snapshot"
+            manifest = publication.download_current(site, self.public, "a" * 40)
+            self.assertEqual(manifest, self.manifest)
+            self.assertEqual((site / "install.ps1").read_bytes(), self.files["install.ps1"])
+
+    def test_public_snapshot_rejects_wrong_revision_before_downloading_packages(self):
+        with tempfile.TemporaryDirectory() as temporary, patch.object(publication, "fetch", side_effect=self.public_download) as read:
+            with self.assertRaisesRegex(ValueError, "source revision"):
+                publication.download_current(Path(temporary), self.public, "b" * 40)
+            self.assertEqual(read.call_count, 1)
+
+    def test_public_snapshot_rejects_manifest_signature_and_mixed_current_installer(self):
+        # Mutation is tested at the actual public boundary, before any installer can run.
+        for target in ("releases/" + self.release_id + "/manifest.json.sig", "install.ps1", "SHA256SUMS.txt"):
+            def changed(path, limit=None):
+                return b"tampered" if path == target else self.public_download(path, limit)
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temporary:
+                with patch.object(publication, "fetch", side_effect=changed):
+                    with self.assertRaises((ValueError, InvalidSignature)):
+                        publication.download_current(Path(temporary), self.public, "a" * 40)
 
 
 if __name__ == "__main__":
