@@ -1,6 +1,8 @@
 [TgWitness](../../README.md) / [deploy](../README.md)
 
 <picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../../docs/assets/presentation/section-deploy-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../../docs/assets/presentation/section-deploy-static.svg">
   <source media="(max-width: 640px)" srcset="../../docs/assets/presentation/section-deploy-mobile.svg">
   <img src="../../docs/assets/presentation/section-deploy.svg" width="1200" alt="TgWitness / Deployment">
 </picture>

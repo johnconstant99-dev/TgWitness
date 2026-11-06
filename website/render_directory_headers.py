@@ -22,7 +22,7 @@ SECTIONS = {
 }
 
 
-def illustration(d, section, x, y, accent):
+def illustration(d, section, x, y, accent, still):
     d.add(f'<g transform="translate({x} {y})" fill="none" stroke="{accent}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">')
     if section in {"docs", "examples", "languages"}:
         d.add('<path d="M30 14h100l24 24v112H30Z" fill="#142331"/><path d="M130 14v24h24M44 46h59M44 65h94M44 82h79M44 99h94M44 116h62"/><path d="M18 29v134h121" stroke-opacity=".35"/>')
@@ -56,13 +56,45 @@ def illustration(d, section, x, y, accent):
             d.add('<path d="M101 87h10v10h-10Z"/>')
     else:
         d.add('<rect x="17" y="24" width="184" height="130" rx="5" fill="#142331"/><path d="M17 46h184m-167-11h18" stroke-opacity=".5"/><path d="m45 72 16 13-16 13m30 0h40"/><path d="m125 127 13 12 30-37"/>')
+    if still:
+        d.add('</g>')
+        return
+    d.add('<g stroke="#e4f0f7" stroke-width="2.5">')
+    if section in {"docs", "examples", "languages"}:
+        for index, (yy, length) in enumerate(((65, 94), (82, 79), (99, 94))):
+            d.add(f'<path class="flow" pathLength="1" style="animation-delay:{index * .35}s" d="M44 {yy}h{length}"/>')
+    elif section == "deploy":
+        for index, yy in enumerate((37, 85, 133)):
+            d.add(f'<circle class="signal" style="animation-delay:{index * .7}s" cx="41" cy="{yy}" r="5"/>')
+    elif section == "capture":
+        d.add('<circle class="pulse" cx="109" cy="96" r="22"/>')
+    elif section == "assets":
+        d.add('<path class="flow" pathLength="1" d="m35 123 40-46 31 31 22-18 52 33"/>')
+    elif section == "website":
+        for index, yy in enumerate((68, 96, 124)):
+            d.add(f'<path class="flow" pathLength="1" style="animation-delay:{index * .4}s" d="M94 {yy}h59"/>')
+    elif section in {"source", "integrations", "github"}:
+        d.add('<path class="flow" pathLength="1" d="M106 48v29m0 31v24"/><path class="flow" pathLength="1" style="animation-delay:1s" d="M51 92h40m30 0h42"/>')
+    else:
+        d.add('<path class="flow" pathLength="1" d="m125 127 13 12 30-37"/>')
+    d.add('</g>')
     d.add('</g>')
 
 
-def render(font, section, mobile):
+def render(font, section, mobile, still):
     title, subtitle, number, accent = SECTIONS[section]
     width, height = (640, 260) if mobile else (1200, 240)
     d = Drawing(font, width, height, "TgWitness / " + title)
+    if not still:
+        d.add('''<style>
+.flow,.signal,.pulse{opacity:0}
+.flow{stroke-dasharray:1;stroke-dashoffset:1;animation:trace 7s ease-in-out infinite}
+.signal{animation:signal 7s ease-in-out infinite}
+.pulse{transform-origin:109px 96px;animation:pulse 7s ease-out infinite}
+@keyframes trace{0%,10%{stroke-dashoffset:1;opacity:0}20%{opacity:.8}55%,65%{stroke-dashoffset:0;opacity:.8}85%,100%{stroke-dashoffset:0;opacity:0}}
+@keyframes signal{0%,15%,70%,100%{opacity:0}35%,45%{opacity:.7}}
+@keyframes pulse{0%,10%{transform:scale(.65);opacity:0}25%{opacity:.65}65%,100%{transform:scale(1.45);opacity:0}}
+</style>''')
     d.add(f'<rect x=".5" y=".5" width="{width-1}" height="{height-1}" rx="10" fill="#0c1721" stroke="#344655"/>')
     d.add(f'<path d="M34 0h52" stroke="{accent}" stroke-width="3"/>')
     d.text("PHISHDESTROY / TGWITNESS", 34, 41, 12, accent, 600, 1.5)
@@ -84,18 +116,19 @@ def render(font, section, mobile):
         for yy, line in zip((155, 182), subtitle_lines[section]):
             d.text(line, 34, yy, 19, "#b5c3cf", 500)
         d.add('<g transform="translate(418 79) scale(.76)">')
-        illustration(d, section, 0, 0, accent)
+        illustration(d, section, 0, 0, accent, still)
         d.add('</g>')
     else:
         d.text(title, 31, 119, 49, "#f0f4f7", 700, -1.4)
         d.text(subtitle, 34, 157, 20, "#b5c3cf", 500)
         d.add('<path d="M857 41v145" stroke="#2c3d4b"/>')
-        illustration(d, section, 911, 17, accent)
+        illustration(d, section, 911, 17, accent, still)
     d.add(f'<path d="M34 {height-39}H{width-34}" stroke="#2c3d4b"/>')
     d.text("REPOSITORY GUIDE", 34, height-16, 10, "#a3b3c0", 600, 1.5)
     d.text(number, width-51, height-16, 11, accent, 600)
-    suffix = "-mobile" if mobile else ""
-    d.write(f"section-{section}{suffix}.svg", subtitle + ". Static illustration; no animation or external resources.")
+    suffix = ("-mobile" if mobile else "") + ("-static" if still else "")
+    description = ". Static illustration for reduced motion." if still else ". Subtle illustration animation. A static version is available."
+    d.write(f"section-{section}{suffix}.svg", subtitle + description + " No external resources.")
 
 
 def main():
@@ -105,8 +138,9 @@ def main():
     font = {weight: instantiateVariableFont(TTFont(args.font), {"wght": weight}) for weight in (500, 600, 700)}
     for section in SECTIONS:
         for mobile in (False, True):
-            render(font, section, mobile)
-    print(f"Rendered {len(SECTIONS) * 2} directory covers.")
+            for still in (False, True):
+                render(font, section, mobile, still)
+    print(f"Rendered {len(SECTIONS) * 4} directory covers.")
 
 
 if __name__ == "__main__":

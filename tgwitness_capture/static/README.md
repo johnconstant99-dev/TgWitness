@@ -1,6 +1,8 @@
 [TgWitness](../../README.md) / [tgwitness_capture](../README.md)
 
 <picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../../docs/assets/presentation/section-capture-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../../docs/assets/presentation/section-capture-static.svg">
   <source media="(max-width: 640px)" srcset="../../docs/assets/presentation/section-capture-mobile.svg">
   <img src="../../docs/assets/presentation/section-capture.svg" width="1200" alt="TgWitness / Independent capture">
 </picture>

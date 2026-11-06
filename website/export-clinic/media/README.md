@@ -1,6 +1,8 @@
 [TgWitness](../../../README.md) / [export-clinic](../README.md)
 
 <picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../../../docs/assets/presentation/section-assets-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../../../docs/assets/presentation/section-assets-static.svg">
   <source media="(max-width: 640px)" srcset="../../../docs/assets/presentation/section-assets-mobile.svg">
   <img src="../../../docs/assets/presentation/section-assets.svg" width="1200" alt="TgWitness / Visual assets">
 </picture>

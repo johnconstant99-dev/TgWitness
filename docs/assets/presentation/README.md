@@ -1,6 +1,8 @@
 [TgWitness](../../../README.md) / [assets](../README.md)
 
 <picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="./section-assets-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="./section-assets-static.svg">
   <source media="(max-width: 640px)" srcset="./section-assets-mobile.svg">
   <img src="./section-assets.svg" width="1200" alt="TgWitness / Visual assets">
 </picture>
@@ -20,7 +22,7 @@ README, Wiki and documentation artwork. Screenshots use demo records.
 | `readme-handbook*`, `wiki-*` | Handbook routes and chapter covers |
 | `identity-meta-*` | Version, languages, test and licence badges |
 | `folder-*`, `readme-button-*`, `*divider*` | Folder headers, links and separators |
-| `section-*` | Shared directory covers, with separate narrow-screen layouts |
+| `section-*` | Animated directory covers, narrow-screen layouts and reduced-motion stills |
 | `preview-github.png`, `preview-social.png` | Sharing images |
 
 ## Rebuild
@@ -38,11 +40,15 @@ python website/render_directory_headers.py --font /path/to/Manrope.ttf
 ```
 
 `render_identity.py` reads the version and language counts from source.
-Directory covers are static and self-contained. Their outlined Manrope lettering,
-navy background and restrained section accents follow the repository's existing
-artwork. Use the narrow version in a `<picture>` source at `max-width: 640px`.
 After a version change, use `--metadata-only` to refresh its badges, update the
 README alt text and `docs/STATUS.md`, then run `python tools/check_publication.py`.
+
+Directory covers are self-contained. Their outlined Manrope lettering, navy
+background and section accents follow the repository's existing artwork. Only
+the illustrations move; text stays fixed. Each `<picture>` selects a `-static.svg`
+version for `prefers-reduced-motion: reduce`. Keep those sources before the regular
+mobile source: the narrow static version first, then the wide static version,
+then the animated narrow version at `max-width: 640px`.
 
 To refresh the demo recording, build the site and run
 `python website/capture_readme.py` with Playwright and Pillow installed.

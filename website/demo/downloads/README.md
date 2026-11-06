@@ -1,6 +1,8 @@
 [TgWitness](../../../README.md) / [demo](../README.md)
 
 <picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../../../docs/assets/presentation/section-examples-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../../../docs/assets/presentation/section-examples-static.svg">
   <source media="(max-width: 640px)" srcset="../../../docs/assets/presentation/section-examples-mobile.svg">
   <img src="../../../docs/assets/presentation/section-examples.svg" width="1200" alt="TgWitness / Working examples">
 </picture>

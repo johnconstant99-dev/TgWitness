@@ -1,6 +1,8 @@
 [TgWitness](../README.md)
 
 <picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../docs/assets/presentation/section-website-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../docs/assets/presentation/section-website-static.svg">
   <source media="(max-width: 640px)" srcset="../docs/assets/presentation/section-website-mobile.svg">
   <img src="../docs/assets/presentation/section-website.svg" width="1200" alt="TgWitness / The public website">
 </picture>

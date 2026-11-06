@@ -1,6 +1,8 @@
 [TgWitness](../../README.md) / [docs](../README.md)
 
 <picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="presentation/section-assets-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="presentation/section-assets-static.svg">
   <source media="(max-width: 640px)" srcset="presentation/section-assets-mobile.svg">
   <img src="presentation/section-assets.svg" width="1200" alt="TgWitness / Visual assets">
 </picture>

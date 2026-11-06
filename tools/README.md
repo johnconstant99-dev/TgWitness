@@ -1,6 +1,8 @@
 [TgWitness](../README.md)
 
 <picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../docs/assets/presentation/section-tools-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../docs/assets/presentation/section-tools-static.svg">
   <source media="(max-width: 640px)" srcset="../docs/assets/presentation/section-tools-mobile.svg">
   <img src="../docs/assets/presentation/section-tools.svg" width="1200" alt="TgWitness / Build and verify">
 </picture>

@@ -1,6 +1,8 @@
 [TgWitness](../../README.md) / [docs](../README.md)
 
 <picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/section-github-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/section-github-static.svg">
   <source media="(max-width: 640px)" srcset="../assets/presentation/section-github-mobile.svg">
   <img src="../assets/presentation/section-github.svg" width="1200" alt="TgWitness / Project workflow">
 </picture>
