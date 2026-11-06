@@ -42,10 +42,16 @@ the website catalogues. Amharic keeps translated notice navigation and search;
 its other documentation links open English. All 25 full-site languages keep
 documentation links, navigation and search in the selected language.
 
-English is the only required language. A missing label or text block in another
-full-site language is shown in English, the page shows its translation notice, and the
-build lists the pending translations instead of failing. When an English source
-changes, add translations for the new blocks and review them before publishing the site.
+English remains the original language. The 24 translated full-site catalogues
+cover the documentation, including the project overview and changelog. DeepL API
+translations preserve literal code, links, identifiers and numbers; they still
+require linguistic review and are not certified translations.
+
+A missing label or text block still renders in English with a translation notice
+during development. The website checks reject missing catalogue entries and long
+English passages copied into translated blocks. When an English source changes,
+translate its new blocks before publishing. Run `python tools/check_site_translations.py`
+to inspect coverage without building the site or starting a browser.
 
 Homepage prose uses fullwidth punctuation, applied by
 [`site_typography.py`](../../tools/site_typography.py) after translation and HTML

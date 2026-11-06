@@ -89,7 +89,7 @@ SUITES = {
         "check_group_settings_browser.py", "check_group_screen_browser.py", "check_gateway_dns.py", "check_tdx.py", "check_phala.py",
         "check_dstack_image.py", "check_attestation_report.py",
     ),
-    "site": ("check_site.py", "check_docs_site.py", "check_docs_workflows.py", "test_site_metadata.py", "test_site_typography.py", "check_export_clinic.py",
+    "site": ("check_site_translations.py", "check_site.py", "check_docs_site.py", "check_docs_workflows.py", "test_site_metadata.py", "test_site_typography.py", "check_export_clinic.py",
              "check_built_site_metadata.py", "check_report_example.py", "check_guide_languages.py"),
 }
 
