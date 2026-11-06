@@ -127,6 +127,7 @@ chat, records partial results at its deadline, and splits large encrypted delive
 | [Search and AI](docs/ANALYSIS.md) | Local search, optional AI with sources you can check |
 | [Full-text search](docs/SEARCH.md) | Word forms, exact phrases, domains, @usernames and Chinese without spaces, best matches first (**Preview**) |
 | [MCP](docs/MCP.md) | Read-only access for MCP clients, limited to the chats you pick |
+| [Command line](docs/CLI.md) | `search`, `context`, `messages`, `stats` and JSON Lines `export` with `--json` for scripts and agents, locally or with a scoped token (**Preview**) |
 | [OCR and transcription](docs/MEDIA-ANALYSIS.md) | Runs locally, originals stay untouched |
 | [Independent capture](docs/OPTIONAL-CAPTURE.md) | Optional browser/AyuGram recorders in Extras (preview, off by default) |
 | [Trusted Live](docs/TRUSTED-LIVE.md) | Official Desktop/Web session, guarded video and native-export continuity analysis (preview; live qualification pending) |

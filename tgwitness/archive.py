@@ -14,8 +14,13 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from .access import GrantSettings, Principal, Refused, check
 
 TOOLS = ("list_workspaces", "list_chats", "search_messages", "get_message_versions",
-         "get_message_context", "get_journal_event", "get_capture_status")
+         "get_message_context", "get_journal_event", "get_capture_status", "get_activity_stats", "export_messages")
+# A bulk export streams over HTTP for the command line; MCP results are limited to one 64 KiB page.
+MCP_TOOLS = tuple(tool for tool in TOOLS if tool != "export_messages")
+# Connections saved before tools were listed keep the tools of that release, not later additions.
+LEGACY_TOOLS = TOOLS[:7]
 MAX_RESPONSE = 65536
+EXPORT_PAGE = 500
 
 
 class RateLimited(Refused):
@@ -28,7 +33,8 @@ class ConnectionSettings(BaseModel):
     workspaces: dict[str, list[int] | None] = Field(min_length=1, max_length=100)
     expires_at: float | None = None
     expires_in_seconds: int | None = Field(default=None, ge=60, le=90 * 86400, strict=True)
-    tools: list[Literal[TOOLS]] = Field(default_factory=lambda: list(TOOLS), min_length=1, max_length=len(TOOLS))
+    # Bulk export is granted only when chosen explicitly.
+    tools: list[Literal[TOOLS]] = Field(default_factory=lambda: list(MCP_TOOLS), min_length=1, max_length=len(TOOLS))
 
     @field_validator("name")
     @classmethod
@@ -49,6 +55,7 @@ class ArchiveQuery(BaseModel):
     tool: Literal[TOOLS]
     workspace: str = "default"
     chat_id: int | None = None
+    sender_id: int | None = None
     message_id: int | None = Field(default=None, ge=1)
     event_seq: int | None = Field(default=None, ge=1)
     query: str = Field(default="", max_length=200)
@@ -89,7 +96,7 @@ class Connections:
             recent = self.requests.get(entry["id"], ())
             used = sum(at >= time.time() - 60 for at in recent)
             return {k: v for k, v in entry.items() if k not in ("sha256", "usage_saved_at")} | {
-                "tools": list(entry.get("tools", TOOLS)), "uses": entry.get("uses", 0),
+                "tools": list(entry.get("tools", LEGACY_TOOLS)), "uses": entry.get("uses", 0),
                 "last_address": entry.get("last_address"), "last_tool": entry.get("last_tool"),
                 "requests_last_minute": used, "rate_limit_per_minute": 60}
 
@@ -141,7 +148,7 @@ class Connections:
             entry = next((e for e in self.entries if secrets.compare_digest(e["sha256"], digest)), None)
             if not entry or entry["revoked_at"] or entry["expires_at"] <= now:
                 raise Refused("Archive access has expired or been revoked.")
-            tools = entry.get("tools", TOOLS)
+            tools = entry.get("tools", LEGACY_TOOLS)
             if tool is not None and tool not in tools:
                 raise Refused("This connection does not allow that archive tool.")
             if count:
@@ -172,7 +179,7 @@ def source_ref(workspace, event):
             "href": "/?" + urlencode({"workspace": workspace, "event": event["seq"]}) + "#journal"}
 
 
-def event_view(workspace, event, focus=None):
+def event_view(workspace, event, focus=None, size=4000):
     payload = event["payload"]
     observed = payload.get("sender_observation")
     observed = observed if isinstance(observed, dict) else {}
@@ -180,11 +187,13 @@ def event_view(workspace, event, focus=None):
         return value[:limit] if isinstance(value, str) else None
     digest = payload.get("media_sha256")
     text = payload.get("text") if isinstance(payload.get("text"), str) else ""
+    size = len(text) if size is None else size
     # A long text is shown around its first search match rather than always from the start.
-    start = min(max(0, focus - 1000), len(text) - 4000) if focus is not None and len(text) > 4000 and focus > 3000 else 0
+    start = (min(max(0, focus - 1000), len(text) - size)
+             if focus is not None and len(text) > size and focus > size - 1000 else 0)
     view = {"source": source_ref(workspace, event), "kind": event["kind"],
             "observed_at": event["observed_at"], "source_at": event.get("source_at"),
-            "text": text[start:start + 4000], "text_truncated": len(text) > 4000,
+            "text": text[start:start + size], "text_truncated": len(text) > size,
             "sender": {"id": payload.get("sender_id") if type(payload.get("sender_id")) is int else None,
                        "name": plain(observed.get("display_name"), 256), "username": plain(observed.get("username"), 64)},
             "deletion_notice": event["kind"] == "message.deleted",
@@ -197,8 +206,8 @@ def event_view(workspace, event, focus=None):
 
 
 class ArchiveReader:
-    def __init__(self, registry, principal):
-        self.registry, self.principal = registry, principal
+    def __init__(self, registry, principal, budget=5):
+        self.registry, self.principal, self.budget = registry, principal, budget
 
     def workspace(self, query, *, chat=False):
         check(self.principal, query.workspace, ("view", "path" if chat else "filter"),
@@ -241,7 +250,45 @@ class ArchiveReader:
             if query.chat_id is not None and events[0]["chat_id"] != query.chat_id:
                 raise Refused("Record is outside the selected chat.")
             return event_view(query.workspace, events[0])
+        if query.tool == "get_activity_stats":
+            from .activity import activity
+            return {"workspace": query.workspace, **activity(
+                store, chat_id=query.chat_id, sender_id=query.sender_id, chat_ids=allowed, since=query.since,
+                until=query.until, top=query.limit, budget=self.budget, workspace_gaps=allowed is None)}
+        if query.tool == "export_messages":
+            raise ValueError("Exports are available only from the archive export endpoint.")
         return self.events(store, query, allowed)
+
+    def export(self, query, page=EXPORT_PAGE):
+        """Saved observations in journal order. Access is checked before the first line is produced.
+
+        The last item is {"export_complete": summary}; a stream without it ended early."""
+        if query.tool != "export_messages":
+            raise ValueError("Choose the export_messages tool for an export.")
+        state = self.workspace(query, chat=query.chat_id is not None)
+        store, allowed = state.store, self.principal.chats(query.workspace)
+        head = store.stats()["head"]
+
+        def lines():
+            cursor, count = 0, 0
+            # The journal is append-only, so pages below the starting head form one consistent set.
+            limit = head["seq"] + 1 if head else 1
+            while True:
+                # A page read after a sequence is returned newest first; the export runs oldest first.
+                records = sorted(store.events(chat_id=query.chat_id, chat_ids=allowed, since=query.since,
+                                              until=query.until, after=cursor, before=limit, limit=page, timeout_s=10,
+                                              message_only=True), key=lambda event: event["seq"])
+                if not records:
+                    break
+                for event in records:
+                    yield event_view(query.workspace, event, size=None)
+                cursor, count = records[-1]["seq"], count + len(records)
+            summary = {"records": count, "last_event_seq": cursor or None, "untrusted_content": True,
+                       "coverage": "Only saved observations are included; edits and deletion notices are separate records."}
+            if allowed is None and head:
+                summary["journal_head"] = {"seq": head["seq"], "hash": head["hash"]}
+            yield {"export_complete": summary}
+        return lines()
 
     @staticmethod
     def page(entries, query):

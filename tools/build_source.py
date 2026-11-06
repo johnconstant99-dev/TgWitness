@@ -34,6 +34,7 @@ FILES = [
     ".gitignore", ".gitattributes", ".dockerignore", "deploy/env.example", "deploy/constraints.txt", "deploy/requirements.lock", "deploy/build.lock",
     "deploy/audit.lock", "deploy/browser.lock", "deploy/mcp.lock", "deploy/site.lock",
     "tools/tsa/time-stamps.json", "tools/fixtures/evidence-before-fulltext.zip",
+    ".agents/skills/tgwitness-cli/SKILL.md",
     *CONTAINER_INPUTS,
 ]
 FILES.extend("tgwitness/fonts/" + name for name in (

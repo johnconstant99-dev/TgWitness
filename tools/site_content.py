@@ -30,6 +30,7 @@ GROUPS = (
 REFERENCE = {
     "history": ("Load source history", "Load past messages from enabled sources, pause and resume, and verify a signed progress report.", "history acquisition sources pause resume progress report", "docs/HISTORY.md"),
     "analysis": ("Archive analysis", "Search saved messages, review AI inputs and keep analytical reports with their source references.", "analysis AI Ollama sources citations reports review", "docs/ANALYSIS.md"),
+    "cli": ("Command line", "Search, read context, count activity and export saved messages from scripts and agents, with --json output, stable exit codes and scoped read-only tokens.", "command line cli terminal script agent json jsonl export statistics activity token skill", "docs/CLI.md"),
     "search": ("Full-text search", "Find saved messages by word forms, exact phrases, domains and @usernames, best matches first, with the index bound to the signed journal.", "search full-text word forms morphology bm25 index domain username chinese japanese", "docs/SEARCH.md"),
     "mcp": ("Read-only MCP", "Connect an MCP client to selected workspaces and chats with expiring, revocable access.", "MCP integrations stdio Streamable HTTP VS Code token scope", "docs/MCP.md"),
     "media-analysis": ("Local OCR and transcription", "Recognize captured images and audio with a local worker; keep derived text linked to its source file.", "OCR transcription Tesseract Whisper Docker media attachment", "docs/MEDIA-ANALYSIS.md"),
@@ -67,7 +68,7 @@ REFERENCE = {
 REFERENCE_GROUPS = (
     ("Set up", ("quickstart", "installation", "settings", "accounts", "access", "connection", "deployment", "high-assurance")),
     ("Collect", ("panel", "collection", "history", "operations", "investigation", "features")),
-    ("Archive & integrations", ("case-board", "analysis", "search", "mcp", "media-analysis", "webhooks", "showcase")),
+    ("Archive & integrations", ("case-board", "analysis", "search", "mcp", "cli", "media-analysis", "webhooks", "showcase")),
     ("Evidence", ("how-it-works", "case-reports", "account-export", "evidence", "witness", "timestamp", "storage")),
     ("Security & project", ("security", "architecture", "verification", "license", "notice", "changelog")),
 )

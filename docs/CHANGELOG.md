@@ -14,6 +14,11 @@
 - Ask the archive retrieves the best matches from the full-text index when it is complete, keeps the 24-source limit, and cuts long texts around their match. MCP `search_messages` accepts `ranked=true`.
 - Add `tgwitness index status|rebuild` with JSON output on stdout and stable exit codes.
 - Build the website when a language lacks new translations: untranslated blocks stay in English with the page notice and are listed by the build.
+- Add the [command line](CLI.md) (preview): `tgwitness search`, `context`, `messages`, `stats` and `export` with `--json` and stable exit codes, reading a stopped workspace directly or a running panel through a scoped, revocable archive connection. Add `.agents/skills/tgwitness-cli/SKILL.md` for agents.
+- Add the `get_activity_stats` archive tool, also offered over MCP: messages by UTC hour and weekday, peak days, edit and deletion shares, senders, domains and @handles, with coverage gaps. Computed on request, not stored.
+- Add the `export_messages` archive tool for the command line: saved observations streamed as JSON Lines in journal order, with full text and a completion record. It is granted only when selected; existing connections keep the tools they were issued with.
+- Recheck archive access before every streamed record, including completion. Revoked or expired connections end without a completion record; lazy export reads share the archive worker limit and timeout.
+- `tgwitness index` and the new commands find the data directory of the installation that runs them.
 
 ## 0.9.1 preview · 5 November 2026
 

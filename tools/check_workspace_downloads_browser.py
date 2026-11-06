@@ -84,7 +84,11 @@ def main():
                 close:async()=>{},abort:async()=>{window.reviewAbort++;}})});} """)
 
             def change_link_before_response(route):
-                page.evaluate("id=>history.pushState({},'', '/exports?ws='+id)", second)
+                # A status reply can arrive while the link names another account.
+                # Deliver that observation explicitly instead of relying on poll timing.
+                page.evaluate("""id=>{history.pushState({},'', '/exports?ws='+id);
+                  try{TgWitnessWorkspace.acceptStatus({workspace_id:'default'});}
+                  catch(error){window.reviewStatusError=error.message;}}""", second)
                 route.fulfill(body=b'abc', headers={'Content-Length': '3', 'Content-Type': 'application/zip'})
 
             page.route('**/api/export/zip', change_link_before_response)
@@ -94,10 +98,15 @@ def main():
             page.wait_for_function('()=>window.reviewResult!==null')
             assert page.evaluate('reviewAbort') == 1
             assert page.evaluate('Boolean(reviewResult.error)')
+            assert page.evaluate('Boolean(window.reviewStatusError)')
             expect(page.locator('#workspace-context-alert')).to_be_visible()
             page.unroute('**/api/export/zip')
             page.evaluate("url=>{history.replaceState({},'',url);TgWitnessWorkspace.sync();}", original_url)
+            # Restoring the link does not clear a recorded status mismatch.
+            expect(page.locator('#workspace-context-alert')).to_be_visible()
+            page.locator('#workspace-context-alert button').click()
             expect(page.locator('#workspace-context-alert')).to_be_hidden()
+            expect(page.locator('#profile-select')).to_have_value('default')
 
             cases = [
                 'window.showSaveFilePicker=undefined',

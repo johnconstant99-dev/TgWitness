@@ -17,13 +17,13 @@ import uvicorn
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.check_browser import RunningApp
-from tgwitness.archive import TOOLS
+from tgwitness.archive import MCP_TOOLS
 from tgwitness.mcp_server import ArchiveAPI, BearerAccess, build_server
 
 
 async def check(client):
     tools = await client.list_tools()
-    assert {t.name for t in tools.tools} == set(TOOLS)
+    assert {t.name for t in tools.tools} == set(MCP_TOOLS)
     result = await client.call_tool("search_messages", {"query": "synthetic"})
     assert not result.is_error
     data = result.structured_content or json.loads(result.content[0].text)
@@ -94,7 +94,7 @@ def main():
             server.should_exit = True
             thread.join(timeout=10)
             sock.close()
-    print("MCP stdio and Streamable HTTP passed: seven read-only tools, chat isolation, authentication and revocation.")
+    print("MCP stdio and Streamable HTTP passed: eight read-only tools, chat isolation, authentication and revocation.")
 
 
 if __name__ == "__main__":

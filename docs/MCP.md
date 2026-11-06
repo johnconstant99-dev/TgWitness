@@ -3,7 +3,8 @@
 Connect an analyst client to selected workspaces and chats. TgWitness serves
 **Streamable HTTP at `/mcp` in the panel process**. Each connection has its own
 token, expiry and permitted tools. MCP cannot send Telegram messages, change
-settings or modify the signed journal.
+settings or modify the signed journal. The same connections work with the
+[command line](CLI.md).
 
 [Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
 
@@ -107,6 +108,8 @@ stable hostname for saved client configurations.
 | `get_message_context` | Nearby captured message IDs |
 | `get_journal_event` | One sanitized record with its source reference |
 | `get_capture_status` | Collection state and permitted coverage records |
+| `get_activity_stats` | Messages by UTC hour and weekday, peak days, edit and deletion shares, senders, domains and `@handles`, with coverage ([details](CLI.md#activity-statistics)) |
+| `export_messages` | Command line only, not selected by default: streams saved observations as JSON Lines ([details](CLI.md#export)); not offered over MCP |
 
 `tools/list` returns only the tools granted to that connection. Calls to other
 tools are refused. Group-context, episode, terminology and reply-chain tools are

@@ -41,7 +41,7 @@ jobs:
       id-token: write # Pass OIDC identity to the approved attestation job.
       attestations: write # Let the approved collector store its signed attestation.
     # The user owns this caller, but the verifier requires the upstream signer below.
-    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@65f8476e046ba3399691963e53fb64b9dae193c3 # zizmor: ignore[stale-action-refs] Internal signer commits are approved by sealed_policy.json and checked against Git history.
+    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@2059c9c5326f1110f45a5083c6d250f3b560c8ad # zizmor: ignore[stale-action-refs] Internal signer commits are approved by sealed_policy.json and checked against Git history.
     with:
       recipient: ${{ inputs.recipient }}
       session_minutes: ${{ inputs.session_minutes }}

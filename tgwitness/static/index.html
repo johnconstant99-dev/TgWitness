@@ -40,7 +40,7 @@
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
 <script defer src="/account-import.js?v=1"></script>
-<script defer src="/integrations.js?v=2"></script>
+<script defer src="/integrations.js?v=4"></script>
 <script defer src="/analysis.js?v=4"></script>
 <script defer src="/media-analysis.js?v=2"></script>
 <script defer src="/webhooks.js?v=2"></script>
@@ -1668,7 +1668,7 @@
     <fieldset class="mcp-fields" id="mcp-fields" disabled>
     <div class="two-columns"><div><label for="mcp-name">Connection name</label><input id="mcp-name" required maxlength="80" autocomplete="off"></div><div><label for="mcp-duration">Access duration</label><select id="mcp-duration"><option value="24">24 hours</option><option value="168">7 days</option><option value="720">30 days</option><option value="2160">90 days</option></select></div></div>
     <fieldset class="access-group"><legend>Workspaces and chats</legend><div id="mcp-scope"></div></fieldset>
-    <fieldset class="access-group"><legend>Allowed tools</legend><label for="mcp-preset">Tool preset</label><select id="mcp-preset"><option value="all">Messages and evidence</option><option value="overview">Archive overview only</option><option value="custom">Custom</option></select><div class="mcp-tools" id="mcp-tools"></div><p class="hint">Only saved records. No Telegram actions or bulk exports.</p></fieldset>
+    <fieldset class="access-group"><legend>Allowed tools</legend><label for="mcp-preset">Tool preset</label><select id="mcp-preset"><option value="all">Messages and evidence</option><option value="overview">Archive overview only</option><option value="custom">Custom</option></select><div class="mcp-tools" id="mcp-tools"></div><p class="hint">Only saved records, read-only, no Telegram actions. The same token works with the tgwitness command line; only the command line can export messages.</p></fieldset>
     <button class="primary" type="submit">Create connection</button>
     </fieldset><p class="hint" id="mcp-form-status" role="status"></p>
   </form>

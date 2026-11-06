@@ -53,6 +53,7 @@ First time? Do it in this order:
 | Send a trimmed copy to a lawyer | [Minimized disclosure](ACCOUNT-EXPORT.md#prepare-a-disclosure-for-a-lawyer-or-another-recipient) |
 | Give someone limited access | [Access and permissions](ACCESS.md) |
 | Connect an AI client | [Read-only MCP](MCP.md) |
+| Script searches, statistics and exports | [Command line](CLI.md) (preview) |
 | Ask questions, write a report | [Archive analysis](ANALYSIS.md) |
 | Find messages by word forms, domains or @usernames | [Full-text search](SEARCH.md) (preview) |
 | Keep team notes on a case | [Case Board](CASE-BOARD.md) |

@@ -71,9 +71,20 @@ background after an update.
 | `tgwitness stop`, `tgwitness index rebuild`, `tgwitness start` | Rebuild every index from the signed journal |
 
 The administrator's choice in **Journal → Filters → Search index** overrides the
-variable for that workspace. For a system service, add `--data-dir` with the path
-from `tgwitness paths`. For a full Ukrainian dictionary (GPL-3.0 data), install
-`pymorphy3-dicts-uk` in the installation's Python environment.
+variable for that workspace. Commands find the data directory of the installation
+that runs them; elsewhere, add `--data-dir` with the path from `tgwitness paths`.
+For a full Ukrainian dictionary (GPL-3.0 data), install `pymorphy3-dicts-uk` in the
+installation's Python environment.
+
+## Command-line access
+
+The [command line](CLI.md) (preview) reads the archive for scripts and agents.
+
+| Variable | Effect |
+| --- | --- |
+| `TGWITNESS_URL` | Panel address for `tgwitness search`, `context`, `messages`, `stats` and `export`; default `http://127.0.0.1:8787` when a token is set |
+| `TGWITNESS_MCP_TOKEN` | Archive connection token from **Integrations → MCP**, shared with MCP clients; `--token-file` reads it from a file instead |
+| `TGWITNESS_DATA` | Data directory read directly when no `--data-dir`, URL or token is given |
 
 ## Verify before running
 

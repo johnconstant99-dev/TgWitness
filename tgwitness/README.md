@@ -15,7 +15,8 @@ the detailed data model lives in [Architecture](../docs/ARCHITECTURE.md).
 | Application and accounts | [`app.py`](app.py), [`profiles.py`](profiles.py), [`__main__.py`](__main__.py) | Panel/API, isolated account workspaces and command-line entry points |
 | Observation | [`collector.py`](collector.py), [`scope.py`](scope.py), [`monitoring.py`](monitoring.py) | Account-visible updates, selected sources and capture policy |
 | Journal and evidence | [`store.py`](store.py), [`evidence.py`](evidence.py), [`verify.py`](verify.py) | Stored records, signed handoffs and standalone verification |
-| Search | [`fulltext.py`](fulltext.py), [`search_api.py`](search_api.py), [`cli.py`](cli.py) | Derived full-text index bound to the journal head, ranked search API and index commands |
+| Search | [`fulltext.py`](fulltext.py), [`search_api.py`](search_api.py) | Derived full-text index bound to the journal head and ranked search API |
+| Scripts and agents | [`cli.py`](cli.py), [`archive.py`](archive.py), [`archive_api.py`](archive_api.py), [`activity.py`](activity.py), [`mcp_server.py`](mcp_server.py) | Command line, scoped archive API and connections, activity statistics, MCP transports |
 | Investigation views | [`dossier.py`](dossier.py), [`chat_export.py`](chat_export.py), [`message_content.py`](message_content.py) | Saved people observations, chat-history exports and comparable content |
 | Deliberate actions | [`interactions.py`](interactions.py), [`keyboard.py`](keyboard.py), [`telegram_client.py`](telegram_client.py) | Panel actions, saved buttons and transport handling |
 | Connections | [`network.py`](network.py), [`netclient.py`](netclient.py), [`proxy_catalog.py`](proxy_catalog.py) | Per-account routes and public proxy catalogs |

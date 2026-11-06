@@ -41,6 +41,7 @@ Builds stay local. See [publishing](../docs/internal/PUBLISHING.md) and
 | `python tools/check_attestation_report.py` | The attestation certificate: real qualified eIDAS and FreeTSA time stamps, the verifier's seal, the signed PDF, and every change refused |
 | `python tools/capture_screenshots.py` | Screenshots in `test-results/`; `--docs` updates docs assets |
 | `python tools/capture_demo.py` | Refresh `website/demo/fixtures.json` from the local demo |
+| `python tools/test_cli.py` | Command line: local and panel modes, scoped connection tokens, refused tools, exit codes, activity statistics and JSON Lines export |
 | `python tools/test_fulltext.py` | Full-text search: word forms, scripts, references, scope, derived text, CLI and verifier compatibility with `fixtures/evidence-before-fulltext.zip` |
 
 Account, workspace, navigation, interaction and proxy checks have their own

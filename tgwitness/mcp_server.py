@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from .archive import MAX_RESPONSE
+from .archive import MAX_RESPONSE, MCP_TOOLS
 
 ARCHIVE_TIMEOUT = 8
 
@@ -162,6 +162,16 @@ def build_server(api, local_token=None):
         return await read(ctx, "get_journal_event", event_seq=event_seq, workspace=workspace)
 
     @server.tool(annotations=annotations)
+    async def get_activity_stats(ctx: Context, workspace: str = "default", chat_id: int | None = None,
+                                 sender_id: int | None = None, since: str | None = None, until: str | None = None,
+                                 limit: int = 10) -> dict:
+        """Activity counts from saved observations: messages by UTC hour and weekday, peak days, edit and deletion
+        shares, participants, domains and @handles. The period selects message time. Check coverage for periods
+        without confirmed collection; partial=true means the time limit was reached."""
+        return await read(ctx, "get_activity_stats", workspace=workspace, chat_id=chat_id, sender_id=sender_id,
+                          since=since, until=until, limit=limit)
+
+    @server.tool(annotations=annotations)
     async def get_capture_status(ctx: Context, workspace: str = "default", chat_id: int | None = None,
                                  before: int | None = None, limit: int = 20) -> dict:
         """Read collection status and permitted coverage observations without credentials or raw configuration."""
@@ -196,7 +206,7 @@ async def check_protocol(api_url, token, remote_url=None, *, stdio_url=None):
     from mcp import Client, StdioServerParameters
     from mcp.client.streamable_http import streamable_http_client
 
-    expected = (await ArchiveAPI(api_url).request(token))["tools"]
+    expected = [tool for tool in (await ArchiveAPI(api_url).request(token))["tools"] if tool in MCP_TOOLS]
     started = time.monotonic()
 
     async def listed(client):

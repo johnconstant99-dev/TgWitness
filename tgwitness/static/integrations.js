@@ -2,7 +2,8 @@
   "use strict";
   const ENV="TGWITNESS_MCP_TOKEN", PLACEHOLDER="<PASTE_TOKEN_HERE>";
   const toolLabels={list_workspaces:tr("List workspaces"),list_chats:tr("List chats"),search_messages:tr("Search messages"),
-    get_message_versions:tr("Message versions"),get_message_context:tr("Message context"),get_journal_event:tr("Journal records"),get_capture_status:tr("Capture status")};
+    get_message_versions:tr("Message versions"),get_message_context:tr("Message context"),get_journal_event:tr("Journal records"),get_capture_status:tr("Capture status"),
+    get_activity_stats:tr("Activity statistics"),export_messages:tr("Export messages (command line only)")};
   let secret="", issuedId=null, configuration=null, revision=0, owner=null, runtime=null, creating=false, timer=null, refreshing=null, checkActive=0;
   const groups=new Map(), connectionRows=new Map();
   const ownerKey=()=>state.workspaceRevision+":"+state.profile;
@@ -72,13 +73,13 @@
     const box=$("mcp-tools"),previous=[...box.querySelectorAll("input:checked")].map(input=>input.value),initialized=!!box.childElementCount;
     if(JSON.stringify([...box.querySelectorAll("input")].map(input=>input.value))===JSON.stringify(tools))return;
     box.replaceChildren();
-    for(const name of tools){const label=node("label","check-label"),check=node("input"),text=node("span");check.type="checkbox";check.value=name;check.checked=initialized?previous.includes(name):true;
+    for(const name of tools){const label=node("label","check-label"),check=node("input"),text=node("span");check.type="checkbox";check.value=name;check.checked=initialized?previous.includes(name):name!=="export_messages";
       check.addEventListener("change",()=>{$("mcp-preset").value="custom";});text.append(node("span","",toolLabels[name]||name),node("code","",name));label.append(check,text);box.append(label);}
   }
   $("mcp-preset").addEventListener("change",()=>{
     const value=$("mcp-preset").value;if(value==="custom")return;
     const overview=new Set(["list_workspaces","list_chats","get_capture_status"]);
-    $("mcp-tools").querySelectorAll("input").forEach(input=>input.checked=value==="all"||overview.has(input.value));
+    $("mcp-tools").querySelectorAll("input").forEach(input=>input.checked=value==="all"&&input.value!=="export_messages"||overview.has(input.value));
   });
   function renderConnections(connections){
     const box=$("mcp-list"),keep=new Set(connections.map(entry=>entry.id));
