@@ -4,6 +4,28 @@ Contributions to TgWitness should preserve the distinction
 between an observed Telegram update, an inference, and an unknown fact. Read the
 [evidence model](../docs/EVIDENCE.md) before changing collection or export behavior.
 
+## Coding agents
+
+Write original documentation, interface text, commit messages and pull requests
+in English. Keep any requested translations separate and identify the English
+source. Check the current branch, other development branches and recorded revisions
+before concluding that a feature was never implemented. Distinguish implemented,
+merged, released and demonstrated behavior.
+
+Respect the operator's execution limits. A source-editing workspace is not
+automatically a runtime or test host. When local execution is restricted, edit
+files and use static checks only; run applications, builds, browser tests,
+benchmarks, dependency installation and background services only when explicitly
+authorized for that host. Use the approved CI or test environment for execution.
+Do not resume stopped work automatically or connect Telegram accounts as part of
+an ordinary code or documentation task.
+
+Preserve other sessions' changes. Stop only processes started by the agent, using
+their recorded process IDs; never terminate every Python, Node or browser process.
+Report which checks actually ran and where. A passing mock or demo does not prove
+live Telegram support. Keep private workspace instructions, credentials and local
+machine details out of published files.
+
 ## Development setup
 
 Use Python 3.11 or newer and an isolated environment:

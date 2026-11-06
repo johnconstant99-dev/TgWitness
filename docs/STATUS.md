@@ -20,6 +20,8 @@ available under [Releases](https://github.com/phishdestroy/TgWitness/releases).
 | Intel TDX collection and independent quote verification | [High assurance](HIGH-ASSURANCE.md) |
 
 [Choose a collection method](COLLECTION-MODES.md) for scope, output and recovery behavior.
+[Secret Chat development status](PSEUDO-SECRET.md) describes the separate implementation,
+its simulated website interface and the defects that remain before integration.
 [Actions](https://github.com/phishdestroy/TgWitness/actions) records automated checks
 for each revision; [Verification](VERIFICATION.md) records completed deployment and
 live-account tests. See the [changelog](CHANGELOG.md) for changes.

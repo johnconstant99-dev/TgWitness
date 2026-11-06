@@ -16,10 +16,17 @@ explore the workspace without signing in to Telegram.
 | --- | --- |
 | [`mock.js`](mock.js) | Browser-side API responses and simulated actions |
 | [`fixtures.json`](fixtures.json) | Recorded synthetic workspace data |
+| [`secret-chats.html`](secret-chats.html), [`secret-chats.js`](secret-chats.js), [`secret-chats.css`](secret-chats.css) | Fictional Secret Chat interaction, kept in browser memory |
 | [downloads/](downloads/README.md) | Example exports and verification files |
 | [report/](report/README.md) | Example report and sharing copy |
 
 ## Build and preview
+
+**Try Secret Chat** appears in the demo banner and Sources. Start a sample chat,
+simulate peer acceptance, accept an incoming request, send a fictional message,
+receive a scripted reply or file, and simulate deletion while retaining the copy.
+Reset clears the scenario. It makes no Telegram requests and does not alter the
+signed sample downloads. See [implementation status](../../docs/PSEUDO-SECRET.md).
 
 Run from the repository root:
 

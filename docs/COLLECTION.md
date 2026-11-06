@@ -75,8 +75,9 @@ Sources → **Observation scope** decides which chats a workspace records.
 
 What these modes cannot do:
 
-- **Secret chats** are end-to-end encrypted between two devices and never reach
-  TgWitness, in any mode.
+- **Secret chats** are outside these cloud-collection modes. A separate
+  [Secret Chat implementation](PSEUDO-SECRET.md) exists in development; it is not
+  included in the published collector at the revision documented there.
 - **Nothing is recorded while TgWitness is not running.** After a restart it asks Telegram
   for missed updates and rechecks chats, but Telegram does not return everything after long
   outages. Reports and `verify.py` show such periods as gaps (see [coverage](EVIDENCE.md#coverage-continuity-gaps-and-unobserved-ids)).

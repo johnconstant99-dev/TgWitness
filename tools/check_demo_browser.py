@@ -13,6 +13,71 @@ else:
     from browser_helpers import answer_panel_dialog
 
 
+def check_secret_chat_demo(browser, url, output, route_request, errors, failed):
+    context = browser.new_context(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce")
+    context.route("**/*", route_request)
+    page = context.new_page()
+    calls = []
+    page.on("request", lambda request: calls.append((request.method, request.url)))
+    page.on("pageerror", lambda error: errors.append("secret chat demo: " + str(error)))
+    page.on("response", lambda response: failed.append(response.url) if response.status >= 400 else None)
+    page.goto(url + "demo/?lang=en", wait_until="networkidle")
+    page.locator('#demo-banner [data-secret-demo-open]').click()
+    dialog = page.locator('#secret-demo')
+    expect(dialog).to_be_visible()
+    expect(dialog).to_contain_text('These entries are not signed evidence.')
+    expect(page.locator('#secret-demo-feed')).to_contain_text('Timer: 15 s')
+    page.locator('[data-secret-action="delete"]').click()
+    expect(page.locator('#secret-demo-feed .secret-demo-retained')).to_contain_text('15-second timer')
+    expect(page.locator('#secret-demo-feed')).to_contain_text('copy retained')
+    page.locator('[data-secret-action="file"]').click()
+    with page.expect_download() as pending:
+        page.locator('[data-secret-action="download"]').click()
+    saved = output / 'fictional-secret-chat-note.txt'
+    pending.value.save_as(saved)
+    assert saved.read_text(encoding='utf-8').startswith('SYNTHETIC DEMONSTRATION\n')
+    page.locator('#secret-demo-message').fill('<img src=x onerror="alert(1)">')
+    page.locator('#secret-demo-send button').click()
+    expect(page.locator('#secret-demo-feed .secret-demo-out')).to_contain_text('<img src=x')
+    expect(page.locator('#secret-demo-feed img')).to_have_count(0)
+    expect(page.locator('#secret-demo-feed')).to_contain_text('Scripted reply:')
+    page.locator('[data-secret-action="end"]').click()
+    expect(page.locator('#secret-demo-message')).to_be_disabled()
+    expect(page.locator('#secret-demo-feed')).to_contain_text('Earlier entries remain visible.')
+    page.locator('#secret-demo-user').fill('@new_sample')
+    page.locator('#secret-demo-start button').click()
+    expect(page.locator('#secret-demo-state')).to_contain_text('Waiting for peer')
+    expect(page.locator('#secret-demo-message')).to_be_disabled()
+    page.locator('[data-secret-action="peer-accept"]').click()
+    expect(page.locator('#secret-demo-message')).to_be_enabled()
+    page.locator('[data-secret-action="incoming"]').click()
+    expect(page.locator('#secret-demo-state')).to_contain_text('Incoming request')
+    page.locator('[data-secret-action="accept"]').click()
+    expect(page.locator('#secret-demo-state')).to_contain_text('Active')
+    page.locator('[data-secret-action="reset"]').click()
+    expect(page.locator('#secret-demo-chats button')).to_have_count(2)
+    expect(page.locator('#secret-demo-feed')).not_to_contain_text('<img src=x')
+    for width, theme in ((1440, 'light'), (390, 'dark'), (320, 'light')):
+        page.set_viewport_size({'width': width, 'height': 1000})
+        page.evaluate('theme => document.documentElement.dataset.theme = theme', theme)
+        assert dialog.evaluate('node => node.scrollWidth <= node.clientWidth + 1')
+        assert dialog.evaluate('node => node.getBoundingClientRect().right <= innerWidth')
+        page.screenshot(path=str(output / f'demo-secret-chat-{width}-{theme}.png'))
+    page.keyboard.press('Escape')
+    expect(dialog).not_to_be_visible()
+    expect(page.locator('#demo-banner [data-secret-demo-open]')).to_be_focused()
+    page.set_viewport_size({'width': 1440, 'height': 1000})
+    page.locator('.sidebar [data-view="sources"]').click()
+    page.locator('#view-sources [data-secret-demo-open]').click()
+    expect(dialog).to_be_visible()
+    page.reload(wait_until='networkidle')
+    page.locator('#demo-banner [data-secret-demo-open]').click()
+    expect(page.locator('#secret-demo-chats button')).to_have_count(2)
+    assert not any(method != 'GET' or '/api/secret-chats' in path for method, path in calls), calls
+    context.close()
+    print('Secret Chat demo: requests, replies, attachment, retained deletion, reset, literal text, keyboard and mobile checks passed', flush=True)
+
+
 def check_demo_downloads(browser, url, output, route_request, errors, failed):
     context = browser.new_context(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce")
     context.route("**/*", route_request)
@@ -120,6 +185,7 @@ def check_demo_downloads(browser, url, output, route_request, errors, failed):
     assert page.evaluate("fetch('/api/account-export/start', {method:'POST'}).then(r=>r.status)") == 403
     page.screenshot(path=str(output / "demo-exports-1440.png"))
     context.close()
+    check_secret_chat_demo(browser, url, output, route_request, errors, failed)
     print("Online demo: named sample case, all nine download hashes, run receipt signature and tamper rejection, "
           "lazy downloads and read-only actions passed", flush=True)
 
