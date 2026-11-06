@@ -2,6 +2,7 @@
 
 Run inside a built Wolfi container. Only apk transport and sleep are simulated;
 shell control flow, cache enumeration, SHA-256 checks and cleanup are real.
+The executable stand-ins use its disposable /data volume because /tmp is noexec.
 """
 import argparse
 import hashlib
@@ -15,6 +16,7 @@ import tempfile
 import unittest
 
 INSTALLER = Path(__file__).resolve().parents[1] / "deploy/containers/install-packages.sh"
+FIXTURE_ROOT = Path("/data")
 PAYLOAD = b"synthetic authenticated package fixture\n"
 APK = r'''
 import json, os, pathlib, sys
@@ -59,7 +61,7 @@ with (pathlib.Path(os.environ["FIXTURE_STATE"]) / "calls").open("a") as log:
 
 class FetchRetry(unittest.TestCase):
     def run_installer(self, **environment):
-        with tempfile.TemporaryDirectory(prefix="container-fetch-fixture-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="container-fetch-fixture-", dir=FIXTURE_ROOT) as temporary:
             root = Path(temporary)
             (root / "bin").mkdir()
             for name in ("dirname", "mktemp", "awk", "mkdir", "sort", "ls", "cmp", "ln", "sha256sum", "rm"):
@@ -125,8 +127,13 @@ class FetchRetry(unittest.TestCase):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--installer", type=Path, default=INSTALLER)
+    parser.add_argument("--fixture-root", type=Path, default=FIXTURE_ROOT,
+                        help="Writable executable test volume; /tmp is normally noexec")
     args, extra = parser.parse_known_args()
     INSTALLER = args.installer
+    FIXTURE_ROOT = args.fixture_root
     if not Path("/etc/apk/repositories").is_file() or not shutil.which("sh"):
         parser.error("Run inside the built Linux container with its real repository configuration")
+    if not FIXTURE_ROOT.is_dir():
+        parser.error("The executable fixture volume must exist")
     unittest.main(argv=[sys.argv[0], *extra])
