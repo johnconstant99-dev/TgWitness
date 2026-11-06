@@ -36,10 +36,15 @@ def check(root=ROOT):
         missing_blocks = [key for key in blocks if not data['blocks'].get(key, '').strip()]
         copied_prose = [key for key, item in blocks.items()
                         if data['blocks'].get(key) == item['source'] and len(prose_words(item['source'])) >= 12]
+        negation = {'ru': 'не', 'uk': 'не', 'de': 'nicht'}.get(lang)
+        repeated_negations = [key for key in blocks
+                              if negation and re.search(r'\b' + negation + r'\s+' + negation + r'\b',
+                                                        html.unescape(re.sub('<[^>]*>', '', data['blocks'].get(key, ''))), re.I)]
         results.append({'language': lang, 'missing_labels': missing_labels, 'missing_blocks': missing_blocks,
                         'copied_english_prose': copied_prose,
-                        'affected_pages': sorted({page for key in missing_blocks + copied_prose for page in blocks[key]['pages']})})
-    failures = [item for item in results if item['missing_labels'] or item['missing_blocks'] or item['copied_english_prose']]
+                        'repeated_negations': repeated_negations,
+                        'affected_pages': sorted({page for key in missing_blocks + copied_prose + repeated_negations for page in blocks[key]['pages']})})
+    failures = [item for item in results if item['missing_labels'] or item['missing_blocks'] or item['copied_english_prose'] or item['repeated_negations']]
     return {'passed': not failures, 'languages': len(results), 'pages': len(fragments), 'labels': len(labels),
             'unique_blocks': len(blocks), 'failures': failures}
 

@@ -43,7 +43,7 @@ its other documentation links open English. All 25 full-site languages keep
 documentation links, navigation and search in the selected language.
 
 English remains the original language. The 24 translated full-site catalogues
-cover the documentation, including the project overview and changelog. DeepL API
+cover the documentation, including reference pages and the changelog. DeepL API
 translations preserve literal code, links, identifiers and numbers; they still
 require linguistic review and are not certified translations.
 

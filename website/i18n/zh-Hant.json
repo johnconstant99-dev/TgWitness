@@ -4995,7 +4995,7 @@
 "ee1e24e9da31fe4269d0e708238396b00b6db9a6406b48b21c87c2c00e92857c": "<a href=\"@@ROOT@@demo/?lang=@@LANG_CODE@@\">開啟瀏覽器示範版</a>，以探索虛構訊息、比較編輯內容並檢視匯出檔案，再進行任何安裝。",
 "3b78ecdd036ca46ac70c15da05add684a8051c076fa198ab7a981a1ad6e0bfb4": "繼續調查",
 "392425b6042b4031500d3edecde81faa305e5ce7f86887a970bba2b33b9afea1": "針對持續進行的工作，請根據您的案例需求，新增所需的來源、檔案政策、搜尋、報告及分享權限。<a href=\"@@ROOT@@docs/reference/overview/\"> 啟動、擴展與證據；</a> 說明相關選項及已發布的測量結果。",
-"0389d719d9be612b7c6f8942d74634f5057dbe7968dad57674c93d7b348c3016": "<strong> 狀態已於 6 11 月 2026：</strong> 確認，目前正開發另一套「秘密聊天」實作方案，\n該實作尚未合併至 <code>3d23e52b647b</code> 發布的 <code>main</code> 版本中。\n一般收集器與 Takeout 匯出功能不會收集「秘密聊天」內容。\n互動式網站示範使用虛構資料展示介面；\n該示範無法進行 Telegram 通訊。",
+"0389d719d9be612b7c6f8942d74634f5057dbe7968dad57674c93d7b348c3016": "<strong>2026年11月6日狀態確認：</strong>目前正開發一套獨立的「秘密聊天」實作\n，該實作尚未合併至已發布的 <code>main</code> 分支（版本 <code>3d23e52b647b</code>）。\n一般收集器與 Takeout 匯出功能不會收集「秘密聊天」內容。\n互動式網站示範使用虛構資料展示介面；\n該示範無法啟用 Telegram 通訊功能。",
 "e4e28a9f54d2c32cd3873218421291efe97c6f8cedac154e34020b3270b332cb": "實作位置",
 "cdf42d7610582df1794430025f960b2006c2011d95b1d4e6a834c8b9d18678b5": "提交 <code>0e60f88e</code> 在本地開發分支\n<code>fix/panel-routes-sessions</code> 中新增了「<strong>來源 → 偽密鑰」</strong>。已驗證的快照為 <code>bb8788fb685c</code>。\n其實作包含 <code>tgwitness/secret_chats.py</code>、應用程式路由、\n<code>tgwitness/static/views/secret-chats.js</code> 以及專用測試。",
 "62956359ba5023fdd8f2b4732ae23fefb523d24986923ee77efae51243d1bd52": "該分支中的可選 <code>secret-chats</code> 附加元件使用\n<a href=\"https://github.com/KiaroSama/Telethon-Secret-Chat\">KiaroSama/Telethon-Secret-Chat</a>，\n並固定於 <code>d87bf037b90060383c7b704d8a06ebb98c621c6f</code>。該函式庫在帳戶現有的 Telethon 授權基礎上，\n實作 Telegram 的端對端聊天協定。\n僅安裝該函式庫並不會為 <code>main</code> 補足缺失的整合功能。",
