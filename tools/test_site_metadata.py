@@ -101,10 +101,10 @@ def test_reference_images_are_in_the_public_site_allowlist():
     from tools import site_wiki
 
     images = {}
-    for slug, entry in REFERENCE.items():
-        source = entry[3]
+    sources = {entry[3] for entry in REFERENCE.values()} | set(build_site.CAPTURE_DOCS.values())
+    for source in sorted(sources):
         body = site_wiki.to_html((ROOT / source).read_text(encoding="utf-8"))[0]
-        site_wiki.rewrite_links(body, source, f"docs/reference/{slug}/", {}, {},
+        site_wiki.rewrite_links(body, source, "docs/reference/", {}, {},
                                build_site.relative, "https://github.com/phishdestroy/TgWitness",
                                "main", images, ROOT)
     assert images

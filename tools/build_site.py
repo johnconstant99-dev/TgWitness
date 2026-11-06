@@ -10,7 +10,7 @@ import posixpath
 import re
 import sys
 import tomllib
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import urlsplit
 
 if __package__:
     from .site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
@@ -380,17 +380,15 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     fragments = {slug: read_public(f"website/guides/en/{slug}.html").decode("utf-8")
                  for slug in GUIDES if slug != "dedicated-account"}
     account_template = read_public(site_account.SOURCE).decode("utf-8")
-    capture_instructions = {}
+    capture_instructions, images = {}, {}
     for code, source in CAPTURE_DOCS.items():
         body = site_wiki.to_html(site_wiki.split_title(read_public(source).decode("utf-8"))[1])[0]
-        source_url = repo_url + "/blob/" + branch + "/" + source
-        body = re.sub(r'href="([^"#][^"]*)"', lambda m: 'href="' + html.escape(
-            urljoin(source_url, html.unescape(m[1])), quote=True) + '"', body)
-        capture_instructions[code] = body
+        capture_instructions[code] = site_wiki.rewrite_links(
+            body, source, "", {}, {}, lambda page, target: "@@ROOT@@" + target,
+            repo_url, branch, images, root)
     script_keys = []
     for script in SITE_SCRIPTS:
         script_keys += site_i18n.script_strings(read_public(script).decode("utf-8"))
-    images = {}
 
 
     inventory_strings, inventory_fragments, inventory_diagrams = inventory(root)
