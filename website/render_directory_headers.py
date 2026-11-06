@@ -7,100 +7,248 @@ from fontTools.varLib.instancer import instantiateVariableFont
 from render_readme import Drawing
 
 
+INK, MUTED, BLUE, GOLD, GREEN = "#edf5f9", "#9db3c3", "#8acbf4", "#e5bf83", "#a3d9c3"
 SECTIONS = {
-    "docs": ("Documentation", "Guides, procedures and technical reference", "01", "#abc8e5"),
-    "source": ("Application", "The collector, the record and the workspace", "02", "#9ebfdf"),
-    "capture": ("Independent capture", "Recorders, controls and verification", "03", "#9dcbbf"),
-    "deploy": ("Deployment", "Installers, containers and background services", "04", "#d9be91"),
-    "tools": ("Build & verify", "Development tools and reproducible checks", "05", "#abc8e5"),
-    "website": ("The public website", "Documentation, guides and the interactive demo", "06", "#a7c9c4"),
-    "integrations": ("Integrations", "Connect the archive to your workflow", "07", "#9dcbbf"),
-    "examples": ("Working examples", "Readable configurations to start from", "08", "#d9be91"),
-    "languages": ("Languages", "Interface strings, guides and translated pages", "09", "#bdb5d9"),
-    "github": ("Project workflow", "Contributions, checks and publication", "10", "#abc8e5"),
-    "assets": ("Visual assets", "Screenshots, diagrams and project artwork", "11", "#d9be91"),
+    "docs": ("Documentation", "Guides, procedures and technical reference", "01", BLUE),
+    "source": ("Application", "The collector, the record and the workspace", "02", BLUE),
+    "capture": ("Independent capture", "Recorders, controls and verification", "03", GREEN),
+    "deploy": ("Deployment", "Installers, containers and background services", "04", GOLD),
+    "tools": ("Build & verify", "Development tools and reproducible checks", "05", BLUE),
+    "website": ("The public website", "Documentation, guides and the interactive demo", "06", GREEN),
+    "integrations": ("Integrations", "Connect the archive to your workflow", "07", GREEN),
+    "examples": ("Working examples", "Readable configurations to start from", "08", GOLD),
+    "languages": ("Languages", "Interface strings, guides and translated pages", "09", "#c5b9e4"),
+    "github": ("Project workflow", "Contributions, checks and publication", "10", BLUE),
+    "assets": ("Visual assets", "Screenshots, diagrams and project artwork", "11", GOLD),
 }
 
 
-def illustration(d, section, x, y, accent, still):
-    d.add(f'<g transform="translate({x} {y})" fill="none" stroke="{accent}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">')
-    if section in {"docs", "examples", "languages"}:
-        d.add('<path d="M30 14h100l24 24v112H30Z" fill="#142331"/><path d="M130 14v24h24M44 46h59M44 65h94M44 82h79M44 99h94M44 116h62"/><path d="M18 29v134h121" stroke-opacity=".35"/>')
-        if section == "examples":
-            d.add('<path d="m173 68-13 14 13 14m22-28 13 14-13 14m-10-34-6 39"/>')
-        elif section == "languages":
-            d.add('<circle cx="180" cy="109" r="27" fill="#0c1924"/><ellipse cx="180" cy="109" rx="12" ry="27"/><path d="M153 109h54m-50-13h46m-46 26h46"/>')
-        else:
-            d.add('<path d="M119 14v46l10-6 10 6V23" fill="#243647"/>')
-    elif section == "deploy":
-        for yy in (20, 68, 116):
-            d.add(f'<rect x="22" y="{yy}" width="168" height="35" rx="4" fill="#142331"/><circle cx="41" cy="{yy+17}" r="3" fill="{accent}"/><path d="M58 {yy+17}h61m34-5h19m-19 10h19"/>')
-        d.add('<path d="M106 55v13m0 35v13"/>')
-    elif section in {"capture", "assets", "website"}:
-        d.add('<rect x="17" y="30" width="184" height="111" rx="5" fill="#142331"/><path d="M17 52h184" stroke-opacity=".5"/><circle cx="29" cy="41" r="1.5"/><circle cx="37" cy="41" r="1.5"/>')
-        if section == "capture":
-            d.add('<path d="M44 82V69h15m115 13V69h-15M44 111v13h15m115-13v13h-15"/><circle cx="109" cy="96" r="14"/><circle cx="109" cy="96" r="4" fill="' + accent + '"/>')
-        elif section == "assets":
-            d.add('<circle cx="153" cy="78" r="8"/><path d="m35 123 40-46 31 31 22-18 52 33Z"/>')
-        else:
-            d.add('<path d="M33 68h47v56H33Zm61 0h90M94 82h68m-68 14h90m-90 14h82m-82 14h59"/>')
-        d.add('<path d="M70 156h78m-65-15v15m52-15v15" stroke-opacity=".5"/>')
-    elif section in {"source", "integrations", "github"}:
-        d.add('<path d="M106 48v29m0 31v24M51 92h40m30 0h42" stroke-opacity=".5"/>')
-        for xx, yy, ww, hh in ((70, 16, 72, 32), (17, 77, 34, 31), (163, 77, 34, 31), (70, 132, 72, 32)):
-            d.add(f'<rect x="{xx}" y="{yy}" width="{ww}" height="{hh}" rx="4" fill="#142331"/>')
-        d.add('<rect x="91" y="77" width="30" height="31" rx="4" fill="#243647"/><path d="M83 28h46m-46 8h29M83 144h46m-46 8h29"/>')
-        if section == "github":
-            d.add('<path d="m98 93 5 5 11-13"/>')
-        else:
-            d.add('<path d="M101 87h10v10h-10Z"/>')
-    else:
-        d.add('<rect x="17" y="24" width="184" height="130" rx="5" fill="#142331"/><path d="M17 46h184m-167-11h18" stroke-opacity=".5"/><path d="m45 72 16 13-16 13m30 0h40"/><path d="m125 127 13 12 30-37"/>')
+def art_defs(d, still):
+    d.add('''<defs>
+<linearGradient id="card-paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0f5f3"/><stop offset="1" stop-color="#c2d4dc"/></linearGradient>
+<linearGradient id="card-dark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1b3547"/><stop offset="1" stop-color="#102332"/></linearGradient>
+<linearGradient id="scan-wash" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8acbf4" stop-opacity="0"/><stop offset="1" stop-color="#8acbf4" stop-opacity=".16"/></linearGradient>
+<filter id="card-shadow" x="-.25" y="-.25" width="1.6" height="1.7"><feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#02070d" flood-opacity=".35"/></filter>
+</defs>''')
+    if not still:
+        d.add('''<style>
+.float-a{animation:float-a 9s ease-in-out infinite}.float-b{animation:float-b 9s ease-in-out infinite}
+.draw{stroke-dasharray:1;animation:draw 9s ease-in-out infinite}
+.live{animation:live 3s ease-in-out infinite}
+@keyframes float-a{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes float-b{0%,100%{transform:translateY(-4px)}50%{transform:translateY(5px)}}
+@keyframes draw{0%,8%{stroke-dashoffset:1;opacity:.2}38%,82%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:.2}}
+@keyframes live{0%,100%{opacity:.4}50%{opacity:1}}
+</style>''')
+
+
+def box(d, x, y, width, height, fill="url(#card-dark)", stroke="#456377", radius=12):
+    d.add(f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{radius}" fill="{fill}" stroke="{stroke}"/>')
+
+
+def line(d, path, color="#507084", width=1.5, extra=""):
+    d.add(f'<path d="{path}" fill="none" stroke="{color}" stroke-width="{width}" stroke-linecap="round" stroke-linejoin="round" {extra}/>')
+
+
+def label(d, text, x, y, size=12, color=MUTED, weight=600):
+    d.text(text, x, y, size, color, weight)
+
+
+def check(d, x, y, color=GREEN, size=1):
+    line(d, f"m{x} {y} {5*size} {5*size} {11*size} {-13*size}", color, 2.2, 'class="draw" pathLength="1"')
+
+
+def badge(d, text, x, y, width, color=GREEN):
+    box(d, x, y, width, 24, "#112c32", "#3c5f63", 12)
+    d.add(f'<circle cx="{x+12}" cy="{y+12}" r="2.5" fill="{color}" class="live"/>')
+    label(d, text, x+21, y+16, 9, color)
+
+
+def route(d, path, still, color=BLUE, delay=0):
+    line(d, path, "#446477", 1.5, 'stroke-dasharray="3 6"')
+    if not still:
+        d.add(f'<circle r="3.5" fill="{color}"><animateMotion path="{path}" dur="5s" begin="{delay}s" repeatCount="indefinite"/></circle>')
+
+
+def evidence_scene(d, x, y, scale, still):
+    d.add(f'<g transform="translate({x} {y}) scale({scale})">')
+    d.add('<g transform="rotate(7 425 191)">')
+    box(d, 274, 27, 304, 325, "#112838", "#385467")
+    d.add('</g><g transform="rotate(-4 420 194)">')
+    box(d, 267, 31, 304, 325, "#152e3e", "#476578")
+    d.add('</g><g class="float-b" filter="url(#card-shadow)">')
+    box(d, 268, 36, 304, 320)
+    label(d, "SAVED RECORD", 291, 66, 14, INK)
+    label(d, "ED25519", 484, 65, 9, GREEN)
+    line(d, "M290 82h260", "#486478", 1)
+    for index, (yy, title, message, color) in enumerate(((102, "01 / CAPTURED", "Meet at 16:00", BLUE),
+                                                       (174, "02 / SAVED EDIT", "Meet at 17:30", GOLD),
+                                                       (246, "03 / DELETION OBSERVED", "Both versions retained", GREEN))):
+        box(d, 288, yy, 264, 58, "#0d2231", "#355369", 7)
+        line(d, f"M288 {yy+8}v42", color, 3)
+        label(d, title, 301, yy+19, 10, color)
+        label(d, message, 301, yy+43, 17, INK)
+        if not still:
+            d.add(f'<rect x="288" y="{yy}" width="264" height="58" rx="7" fill="{color}" opacity="0"><animate attributeName="opacity" values="0;.13;0;0" keyTimes="0;.16;.36;1" dur="9s" begin="{-9+index*3}s" repeatCount="indefinite"/></rect>')
+    label(d, "LINKED JOURNAL / PRESERVED VERSIONS", 290, 332, 9, MUTED)
+    d.add('</g>')
+    route(d, "M225 192C280 192 242 130 288 130", still, BLUE, -1)
+    route(d, "M226 236C287 236 238 203 288 203", still, GOLD, -3)
+    d.add('<g class="float-a"><g transform="rotate(-5 139 202)" filter="url(#card-shadow)">')
+    box(d, 13, 120, 247, 166, "url(#card-paper)", "#d7e6eb", 13)
+    d.add('<circle cx="39" cy="148" r="8" fill="#294a61"/>')
+    line(d, "m35 148 3 3 6-7", "#dceaf2", 1.4)
+    label(d, "TELEGRAM CHAT", 56, 152, 11, "#355265")
+    line(d, "M31 166h210", "#a7bcc8", 1)
     if still:
-        d.add('</g>')
-        return
-    d.add('<g stroke="#e4f0f7" stroke-width="2.5">')
-    if section in {"docs", "examples", "languages"}:
-        for index, (yy, length) in enumerate(((65, 94), (82, 79), (99, 94))):
-            d.add(f'<path class="flow" pathLength="1" style="animation-delay:{index * .35}s" d="M44 {yy}h{length}"/>')
-    elif section == "deploy":
-        for index, yy in enumerate((37, 85, 133)):
-            d.add(f'<circle class="signal" style="animation-delay:{index * .7}s" cx="41" cy="{yy}" r="5"/>')
-    elif section == "capture":
-        d.add('<circle class="pulse" cx="109" cy="96" r="22"/>')
-    elif section == "assets":
-        d.add('<path class="flow" pathLength="1" d="m35 123 40-46 31 31 22-18 52 33"/>')
-    elif section == "website":
-        for index, yy in enumerate((68, 96, 124)):
-            d.add(f'<path class="flow" pathLength="1" style="animation-delay:{index * .4}s" d="M94 {yy}h59"/>')
-    elif section in {"source", "integrations", "github"}:
-        d.add('<path class="flow" pathLength="1" d="M106 48v29m0 31v24"/><path class="flow" pathLength="1" style="animation-delay:1s" d="M51 92h40m30 0h42"/>')
+        label(d, "Message deleted", 31, 207, 21, "#41596b")
+        label(d, "The saved record stays.", 31, 257, 13, "#36546a")
     else:
-        d.add('<path class="flow" pathLength="1" d="m125 127 13 12 30-37"/>')
+        for text, values in (("Meet at 16:00", "1;1;0;0;0;0"), ("Meet at 17:30", "0;0;1;1;0;0"), ("Message deleted", "0;0;0;0;1;1")):
+            d.add(f'<g opacity="{values[0]}"><animate attributeName="opacity" values="{values}" keyTimes="0;.28;.34;.63;.7;1" dur="9s" repeatCount="indefinite" calcMode="discrete"/>')
+            label(d, text, 31, 207, 21, "#263f52")
+            d.add('</g>')
+        label(d, "Changes in the source chat", 31, 257, 12, "#36546a")
+    line(d, "M31 229h126", "#9bb4c2", 2)
+    d.add('</g></g><g class="float-a">')
+    d.add('<circle cx="562" cy="341" r="34" fill="#173f3e" stroke="#81b9a7" stroke-width="1.5"/>')
+    line(d, "M562 316l16 6v16c0 13-16 23-16 23s-16-10-16-23v-16Z", GREEN, 1.5)
+    check(d, 552, 338, GREEN, 1.2)
     d.add('</g>')
+    label(d, "CAPTURE THE CHANGE. KEEP THE HISTORY.", 115, 399, 11, MUTED)
     d.add('</g>')
+
+
+def illustration(d, section, still, accent):
+    if section in {"docs", "examples"}:
+        d.add('<g class="float-b"><g transform="rotate(-9 180 120)">')
+        box(d, 115, 22, 191, 204, "#172f41", "#476377")
+        d.add('</g></g><g class="float-a" filter="url(#card-shadow)">')
+        box(d, 99, 14, 190, 208, "url(#card-paper)", "#d0e1e8")
+        label(d, "FIELD GUIDE" if section == "docs" else "CONFIGURATION", 118, 47, 11, "#405d71")
+        line(d, "M118 62h151", "#a7bdc9", 1)
+        if section == "docs":
+            for i, (title, length) in enumerate((("Start", 117), ("Collect", 98), ("Verify", 128))):
+                yy = 88+i*43
+                label(d, f"0{i+1}", 118, yy, 10, "#688193")
+                label(d, title, 142, yy, 16, "#18364b")
+                line(d, f"M142 {yy+11}h{length-18}", "#9ab2c1", 2)
+            d.add('<path d="M250 14v37l10-6 10 6V14" fill="#b59462"/>')
+        else:
+            label(d, "{", 119, 96, 30, "#36596f")
+            label(d, "}", 119, 189, 30, "#36596f")
+            for i, length in enumerate((98, 122, 81)):
+                yy = 94+i*28
+                line(d, f"M146 {yy}h{length}", "#7a98aa", 5)
+                line(d, f"M146 {yy}h30", "#305d75", 5, 'class="draw" pathLength="1"')
+        d.add('</g>')
+        route(d, "M39 172C69 172 58 105 99 105", still, accent)
+        box(d, 19, 141, 61, 58, "#183348", "#547b94", 10)
+        label(d, "Aa" if section == "docs" else "{ }", 31, 178, 25, INK)
+        badge(d, "REFERENCE" if section == "docs" else "READY", 226, 195, 115, accent)
+    elif section in {"source", "integrations", "github"}:
+        names = {"source": ("COLLECT", "JOURNAL", "PANEL"), "integrations": ("ARCHIVE", "MCP", "WEBHOOK"), "github": ("REVIEW", "CHECKS", "PUBLISH")}[section]
+        for path, delay in (("M103 61C165 61 127 120 179 120", -1), ("M179 120C234 120 207 181 258 181", -3)):
+            route(d, path, still, accent, delay)
+        for i, (xx, yy, text) in enumerate(zip((17, 126, 235), (24, 83, 144), names)):
+            d.add(f'<g class="float-{chr(97+i%2)}" filter="url(#card-shadow)">')
+            box(d, xx, yy, 112, 78)
+            d.add(f'<rect x="{xx+14}" y="{yy+13}" width="22" height="20" rx="5" fill="{accent}" fill-opacity=".15"/>')
+            if i == 2:
+                check(d, xx+17, yy+22, accent, .7)
+            else:
+                line(d, f"M{xx+19} {yy+19}h12m-12 6h8", accent, 1.5)
+            label(d, text, xx+14, yy+57, 11, INK)
+            d.add('</g>')
+        label(d, "OBSERVE / PRESERVE / CONNECT" if section != "github" else "REVIEWED SOURCE / CHECKED BUILD", 23, 244, 9, MUTED)
+    elif section == "deploy":
+        for i, yy in enumerate((31, 96, 161)):
+            d.add(f'<g class="float-{chr(97+i%2)}" filter="url(#card-shadow)">')
+            box(d, 82+i*9, yy, 222, 49, radius=7)
+            label(d, ("BUILD", "INSTALL", "RUN")[i], 104+i*9, yy+30, 12, INK)
+            line(d, f"M{225+i*9} {yy+18}h25m-25 10h25", "#5f788a", 2)
+            d.add(f'<circle class="live" cx="{282+i*9}" cy="{yy+24}" r="4" fill="{accent}"/>')
+            d.add('</g>')
+        route(d, "M62 50H35V185H82", still, accent, -2)
+        badge(d, "CHECKED BUILD", 176, 225, 142, GREEN)
+    elif section in {"capture", "website", "tools"}:
+        d.add('<g class="float-b" filter="url(#card-shadow)">')
+        box(d, 35, 25, 285, 185)
+        for xx in (50, 61, 72):
+            d.add(f'<circle cx="{xx}" cy="40" r="2" fill="#7393a8"/>')
+        line(d, "M36 53h283", "#3d5b70", 1)
+        if section == "capture":
+            box(d, 56, 73, 166, 43, "#213f51", "#385b70", 7)
+            box(d, 104, 128, 194, 40, "#264d56", "#48757c", 7)
+            line(d, "M69 90h111m-111 12h75M118 144h144m-144 12h96", "#a0bfcc", 3)
+            if not still:
+                d.add('<g><animateTransform attributeName="transform" type="translate" values="0 0;0 112;0 112;0 0" keyTimes="0;.55;.85;1" dur="7s" repeatCount="indefinite"/><rect x="47" y="56" width="260" height="28" fill="url(#scan-wash)"/><path d="M47 84h260" stroke="#b5e6da" stroke-width="1.5"/></g>')
+            line(d, "M45 82V64h18m246 18V64h-18M45 178v18h18m246-18v18h-18", accent, 2)
+        elif section == "website":
+            box(d, 51, 68, 72, 125, "#0d2231", "#345367", 5)
+            for yy, length in ((87, 42), (107, 33), (127, 40), (147, 27)):
+                line(d, f"M64 {yy}h{length}", "#63879e", 3)
+            box(d, 137, 68, 167, 62, "#264b5a", "#4b7886", 5)
+            label(d, "DEMO", 151, 106, 22, INK)
+            for xx in (137, 224):
+                box(d, xx, 143, 80, 50, "#142d40", "#3c5e74", 5)
+                line(d, f"M{xx+12} 160h43m-43 14h28", "#7f9caf", 3)
+        else:
+            label(d, ">_", 55, 85, 20, accent)
+            label(d, "VERIFY ARCHIVE", 92, 84, 12, INK)
+            for i, text in enumerate(("JOURNAL", "FILES", "CHECKPOINT")):
+                yy = 114+i*30
+                label(d, text, 58, yy, 11, MUTED)
+                check(d, 270, yy-5, GREEN, .8)
+                line(d, f"M162 {yy-4}h82", "#426278", 2)
+        d.add('</g><g class="float-a">')
+        box(d, 208, 185, 136, 48, "url(#card-paper)", "#d8e6e9", 9)
+        label(d, "CAPTURED" if section == "capture" else "EXPLORE" if section == "website" else "VERIFIED", 224, 214, 12, "#24485b")
+        check(d, 315, 207, "#366a63", .8)
+        d.add('</g>')
+    elif section == "languages":
+        for xx, yy, angle, text, code in ((37, 50, -12, "Aa", "EN"), (147, 28, 6, "Aa", "FR"), (231, 100, 13, "Aa", "DE")):
+            d.add(f'<g class="float-a"><g transform="rotate({angle} {xx+51} {yy+59})" filter="url(#card-shadow)">')
+            box(d, xx, yy, 102, 126, "url(#card-paper)", "#d7e5e8")
+            label(d, code, xx+15, yy+24, 11, "#6b607e")
+            label(d, text, xx+12, yy+83, 42, "#393e58", 700)
+            d.add('</g></g>')
+        d.add('<circle cx="183" cy="197" r="39" fill="#152d41" stroke="#8d85ad"/>')
+        d.add('<ellipse cx="183" cy="197" rx="17" ry="39" fill="none" stroke="#aba1c4"/>')
+        line(d, "M144 197h78m-70-19h62m-62 38h62", "#aba1c4", 1)
+        route(d, "M108 217C126 251 232 257 267 214", still, accent, -2)
+    else:
+        d.add('<g transform="rotate(-9 180 128)">')
+        box(d, 51, 48, 245, 151, "#17364a", "#406981")
+        d.add('</g><g class="float-a" filter="url(#card-shadow)">')
+        box(d, 65, 33, 245, 164, "url(#card-paper)", "#dce8ea")
+        box(d, 77, 45, 221, 140, "#18384c", "none", 7)
+        d.add(f'<circle cx="253" cy="82" r="19" fill="{accent}"/>')
+        d.add('<path d="m77 171 58-75 59 62 39-38 65 65H77Z" fill="#345d72"/><path d="m77 181 58-64 60 68H77Z" fill="#6a97a9"/>')
+        line(d, "M77 171l58-75 59 62 39-38 65 65", "#bdd5de", 2, 'class="draw" pathLength="1"')
+        d.add('</g>')
+        line(d, "M49 65V18h48m229 148v47h-48", accent, 1.5)
+        badge(d, "PROJECT ARTWORK", 147, 214, 166, accent)
 
 
 def render(font, section, mobile, still):
     title, subtitle, number, accent = SECTIONS[section]
-    width, height = (640, 260) if mobile else (1200, 240)
+    width, height = (640, 480) if mobile else (1200, 340)
     d = Drawing(font, width, height, "TgWitness / " + title)
-    if not still:
-        d.add('''<style>
-.flow,.signal,.pulse{opacity:0}
-.flow{stroke-dasharray:1;stroke-dashoffset:1;animation:trace 7s ease-in-out infinite}
-.signal{animation:signal 7s ease-in-out infinite}
-.pulse{transform-origin:109px 96px;animation:pulse 7s ease-out infinite}
-@keyframes trace{0%,10%{stroke-dashoffset:1;opacity:0}20%{opacity:.8}55%,65%{stroke-dashoffset:0;opacity:.8}85%,100%{stroke-dashoffset:0;opacity:0}}
-@keyframes signal{0%,15%,70%,100%{opacity:0}35%,45%{opacity:.7}}
-@keyframes pulse{0%,10%{transform:scale(.65);opacity:0}25%{opacity:.65}65%,100%{transform:scale(1.45);opacity:0}}
-</style>''')
-    d.add(f'<rect x=".5" y=".5" width="{width-1}" height="{height-1}" rx="10" fill="#0c1721" stroke="#344655"/>')
-    d.add(f'<path d="M34 0h52" stroke="{accent}" stroke-width="3"/>')
-    d.text("PHISHDESTROY / TGWITNESS", 34, 41, 12, accent, 600, 1.5)
+    art_defs(d, still)
+    d.add(f'''<defs>
+<linearGradient id="surface" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0c1c2a"/><stop offset="1" stop-color="#07131d"/></linearGradient>
+<radialGradient id="ambient"><stop stop-color="{accent}" stop-opacity=".15"/><stop offset="1" stop-color="{accent}" stop-opacity="0"/></radialGradient>
+<pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".65" fill="#8eafc4" opacity=".16"/></pattern>
+<clipPath id="frame"><rect x="1" y="1" width="{width-2}" height="{height-2}" rx="16"/></clipPath>
+</defs>
+<rect x="1" y="1" width="{width-2}" height="{height-2}" rx="16" fill="url(#surface)" stroke="#3d5668"/>
+<g clip-path="url(#frame)"><rect width="{width}" height="{height}" fill="url(#grid)"/><ellipse cx="{width*.8}" cy="{height*.48}" rx="380" ry="280" fill="url(#ambient)"/></g>''')
+    line(d, "M36 1h100", accent, 2)
+    d.text("PHISHDESTROY / TGWITNESS", 36, 42, 11, accent, 600, 1.5)
     if mobile:
-        d.text(title, 32, 117, 40 if len(title) < 18 else 36, "#f0f4f7", 700, -1)
-        subtitle_lines = {
+        d.text(title, 33, 109, 42 if len(title)<18 else 38, INK, 700, -1)
+        subtitles = {
             "docs": ("Guides, procedures", "and technical reference"),
             "source": ("The collector, the record", "and the workspace"),
             "capture": ("Recorders, controls", "and verification"),
@@ -113,22 +261,23 @@ def render(font, section, mobile, still):
             "github": ("Contributions, checks", "and publication"),
             "assets": ("Screenshots, diagrams", "and project artwork"),
         }
-        for yy, line in zip((155, 182), subtitle_lines[section]):
-            d.text(line, 34, yy, 19, "#b5c3cf", 500)
-        d.add('<g transform="translate(418 79) scale(.76)">')
-        illustration(d, section, 0, 0, accent, still)
-        d.add('</g>')
+        for yy, text in zip((145, 171), subtitles[section]):
+            label(d, text, 36, yy, 19, MUTED, 500)
+        d.add('<g transform="translate(135 190) scale(.96)">')
     else:
-        d.text(title, 31, 119, 49, "#f0f4f7", 700, -1.4)
-        d.text(subtitle, 34, 157, 20, "#b5c3cf", 500)
-        d.add('<path d="M857 41v145" stroke="#2c3d4b"/>')
-        illustration(d, section, 911, 17, accent, still)
-    d.add(f'<path d="M34 {height-39}H{width-34}" stroke="#2c3d4b"/>')
-    d.text("REPOSITORY GUIDE", 34, height-16, 10, "#a3b3c0", 600, 1.5)
-    d.text(number, width-51, height-16, 11, accent, 600)
+        d.text(title, 33, 137, 49 if len(title)<18 else 45, INK, 700, -1.5)
+        label(d, subtitle, 36, 181, 21, MUTED, 500)
+        d.text(number, 36, 255, 36, accent, 500, -1)
+        label(d, "REPOSITORY GUIDE", 96, 251, 10, MUTED)
+        d.add('<g transform="translate(773 35)">')
+    illustration(d, section, still, accent)
+    d.add('</g>')
+    line(d, f"M36 {height-39}H{width-36}", "#334d60", 1)
+    label(d, "TGWITNESS / " + section.upper(), 36, height-16, 9, MUTED)
+    label(d, number, width-49, height-16, 10, accent)
     suffix = ("-mobile" if mobile else "") + ("-static" if still else "")
-    description = ". Static illustration for reduced motion." if still else ". Subtle illustration animation. A static version is available."
-    d.write(f"section-{section}{suffix}.svg", subtitle + description + " No external resources.")
+    description = "Static illustration for reduced motion." if still else "Animated editorial illustration; static and mobile variants are available."
+    d.write(f"section-{section}{suffix}.svg", subtitle + ". " + description + " Illustrative workflow, not live status.")
 
 
 def main():

@@ -43,9 +43,12 @@ python website/render_directory_headers.py --font /path/to/Manrope.ttf
 After a version change, use `--metadata-only` to refresh its badges, update the
 README alt text and `docs/STATUS.md`, then run `python tools/check_publication.py`.
 
-Directory covers are self-contained. Their outlined Manrope lettering, navy
-background and section accents follow the repository's existing artwork. Only
-the illustrations move; text stays fixed. Each `<picture>` selects a `-static.svg`
+Directory covers use layered illustrations: reference pages, capture frames,
+linked components, server racks and project artwork. The main cover follows a
+fictional message through an edit and a deletion while its captured versions
+remain in the journal. Headings stay fixed; motion belongs to the illustrations.
+All lettering is outlined and every SVG is self-contained.
+Each `<picture>` selects a `-static.svg`
 version for `prefers-reduced-motion: reduce`. Keep those sources before the regular
 mobile source: the narrow static version first, then the wide static version,
 then the animated narrow version at `max-width: 640px`.

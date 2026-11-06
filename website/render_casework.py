@@ -6,6 +6,7 @@ from fontTools.varLib.instancer import instantiateVariableFont
 
 from render_readme import Drawing, ROOT
 from render_case_assets import save
+from render_directory_headers import art_defs, evidence_scene
 
 INK = "#edf5fc"
 MUTED = "#a0b6cb"
@@ -53,7 +54,39 @@ def mark(d, x, y):
     d.add(svg.replace('id="g"','id="app-mark-gradient"').replace('url(#g)','url(#app-mark-gradient)'))
 
 
+def main_cover(display, text, mobile, still):
+    width, height = (720, 875) if mobile else (1440, 640)
+    title = "Follow the trail. Preserve the evidence."
+    d = canvas(display, width, height, title, still)
+    art_defs(d, still)
+    x = 38 if mobile else 54
+    mark(d, x, 30)
+    d.text("PHISHDESTROY / TGWITNESS", x+48, 56, 16, MUTED, 600, 1.2)
+    d.text("TELEGRAM INVESTIGATION WORKSPACE", x, 105, 15, BLUE, 600, 1.6)
+    d.text("TGWITNESS", x-4, 195 if mobile else 220, 91 if mobile else 105, INK, 700, -3)
+    d.text("Follow the trail.", x, 257 if mobile else 302, 40 if mobile else 44, INK, 600, -.6)
+    d.text("Preserve the evidence.", x, 310 if mobile else 361, 40 if mobile else 44, BLUE, 600, -.6)
+    d.font = text
+    if mobile:
+        d.text("Conversations change. The captured versions stay.", x, 354, 20, MUTED)
+    else:
+        d.text("Save the conversation as it changes.", x, 427, 24, MUTED)
+        d.text("Keep a record someone else can check.", x, 465, 24, MUTED)
+    evidence_scene(d, 35 if mobile else 752, 380 if mobile else 99, 1.065 if mobile else 1.03, still)
+    if not mobile:
+        d.text("ILLUSTRATIVE CAPTURE / PRESERVED HISTORY", 806, 78, 11, MUTED, 600, 1.1)
+    rule(d, height-53, x, width-x)
+    for i, label in enumerate(("CAPTURE", "CONNECT", "PRESERVE", "VERIFY")):
+        xx = x+i*((width-2*x)/4)
+        d.text(f"0{i+1}", xx, height-22, 11 if mobile else 13, GOLD, 600)
+        d.text(label, xx+23, height-22, 12 if mobile else 15, MUTED, 600, .8)
+    name = "casework-hero" + ("-mobile" if mobile else "") + ("-static" if still else "") + ".svg"
+    save(d, name, title + " An illustrative chat changes and is deleted; the signed journal retains its captured versions. Fictional records.")
+
+
 def hero(display, text, mobile=False, still=False, wiki=False):
+    if not wiki:
+        return main_cover(display, text, mobile, still)
     width,height=(720,710) if mobile else (1440,550)
     if wiki:height=650 if mobile else 410
     title="Work the case. Keep the record." if wiki else "Follow the trail. Preserve the evidence."
