@@ -6,7 +6,7 @@ from fontTools.varLib.instancer import instantiateVariableFont
 
 from render_readme import Drawing, ROOT
 from render_case_assets import save
-from render_directory_headers import art_defs, evidence_scene
+from render_directory_headers import art_defs, evidence_scene, box, line, label as art_label, check, route
 
 INK = "#edf5fc"
 MUTED = "#a0b6cb"
@@ -55,7 +55,7 @@ def mark(d, x, y):
 
 
 def main_cover(display, text, mobile, still):
-    width, height = (720, 875) if mobile else (1440, 640)
+    width, height = (720, 930) if mobile else (1440, 640)
     title = "Follow the trail. Preserve the evidence."
     d = canvas(display, width, height, title, still)
     art_defs(d, still)
@@ -68,20 +68,20 @@ def main_cover(display, text, mobile, still):
     d.text("Preserve the evidence.", x, 310 if mobile else 361, 40 if mobile else 44, BLUE, 600, -.6)
     d.font = text
     if mobile:
-        d.text("Conversations change. The captured versions stay.", x, 354, 20, MUTED)
+        d.text("Signed records. Independent checks. A traceable handoff.", x, 354, 18, MUTED)
     else:
-        d.text("Save the conversation as it changes.", x, 427, 24, MUTED)
-        d.text("Keep a record someone else can check.", x, 465, 24, MUTED)
+        d.text("From the first observation to the signed archive.", x, 427, 22, MUTED)
+        d.text("Keep the chain. Let someone else verify it.", x, 465, 22, MUTED)
     evidence_scene(d, 35 if mobile else 752, 380 if mobile else 99, 1.065 if mobile else 1.03, still)
     if not mobile:
-        d.text("ILLUSTRATIVE CAPTURE / PRESERVED HISTORY", 806, 78, 11, MUTED, 600, 1.1)
+        d.text("THE EVIDENCE CHAIN / A VERIFIABLE HANDOFF", 806, 78, 11, MUTED, 600, 1.1)
     rule(d, height-53, x, width-x)
-    for i, label in enumerate(("CAPTURE", "CONNECT", "PRESERVE", "VERIFY")):
+    for i, label in enumerate(("CAPTURE", "LINK", "SIGN", "VERIFY")):
         xx = x+i*((width-2*x)/4)
         d.text(f"0{i+1}", xx, height-22, 11 if mobile else 13, GOLD, 600)
         d.text(label, xx+23, height-22, 12 if mobile else 15, MUTED, 600, .8)
     name = "casework-hero" + ("-mobile" if mobile else "") + ("-static" if still else "") + ".svg"
-    save(d, name, title + " An illustrative chat changes and is deleted; the signed journal retains its captured versions. Fictional records.")
+    save(d, name, title + " Observations form a hash-linked, Ed25519-signed journal. Check the evidence archive against a separately trusted key and a retained checkpoint. Schematic values.")
 
 
 def hero(display, text, mobile=False, still=False, wiki=False):
@@ -205,6 +205,83 @@ def checkpoint(text,mobile=False,still=False):
     save(d,'casework-checkpoint'+('-mobile' if mobile else '')+('-static' if still else '')+'.svg','Illustrative four-record export matches a separately retained checkpoint at record three after signature verification. A two-record export is too short. A matching boundary does not replace checking every event.')
 
 
+def assurance_modes(text, mobile=False, still=False):
+    width, height = (640, 1460) if mobile else (1200, 745)
+    d = canvas(text, width, height, "Choose what backs the record.", still, corners=False)
+    art_defs(d, still)
+    diagram_header(d, "DEPLOYMENT / VERIFIABLE ASSURANCE", "Choose what backs the record.",
+                   "One signed journal. Three deployment choices.", mobile)
+    cards = (
+        ("01", "Local", "Your machine or Docker", BLUE,
+         ("Journal + file integrity", "Trusted collector fingerprint", "Retained checkpoint"),
+         "Checks the saved observations"),
+        ("02", "Audited VM", "Provider + tunnel records", GOLD,
+         ("Provider-side access records", "Source + server identity", "Tunnel and firewall checks"),
+         "Adds deployment context"),
+        ("03", "Phala / Intel TDX", "Confidential virtual machine", GREEN,
+         ("Intel quote + fresh challenge", "Measured OS + pinned app", "Key bound to signed statement"),
+         "Adds hardware-backed measurements"),
+    )
+    for index, (number, title, subtitle, color, facts, scope) in enumerate(cards):
+        x, y, cw, ch = (32, 151+index*258, 576, 238) if mobile else (32+index*386, 155, 364, 310)
+        d.add(f'<g transform="translate({x} {y})">')
+        box(d, 0, 0, cw, ch, "url(#card-dark)", "#405d71", 12)
+        line(d, f"M17 1h{cw-34}", color, 2)
+        art_label(d, number+" / DEPLOYMENT", 20, 28, 10, color)
+        d.add('<g class="float-a">')
+        if index == 0:
+            box(d, 21, 60, 99, 66, "#0b2130", "#7799b0", 6)
+            line(d, "M62 127v11m-23 0h48M36 81h44m-44 13h64m-64 13h36", color, 2)
+            check(d, 92, 110, color, .7)
+        elif index == 1:
+            for yy in (61, 88, 115):
+                box(d, 22, yy, 100, 23, "#122b3a", "#8f835f", 4)
+                line(d, f"M34 {yy+8}h44m-44 7h29", color, 1.5)
+                d.add(f'<circle cx="108" cy="{yy+12}" r="2.5" fill="{color}" class="live"/>')
+        else:
+            for n in range(5):
+                off = 39+n*17
+                line(d, f"M{off} 57v12m0 63v12M16 {off+29}h12m99 0h12", "#6c9a8b", 2)
+            box(d, 28, 69, 99, 63, "#183f3d", "#80c0a8", 7)
+            art_label(d, "TDX", 48, 109, 25, GREEN, 700)
+            if not still:
+                d.add('<rect x="28" y="69" width="99" height="63" rx="7" fill="none" stroke="#b5f6d7" stroke-width="2" opacity="0"><animate attributeName="opacity" values="0;.8;0" dur="4s" repeatCount="indefinite"/></rect>')
+        d.add('</g>')
+        art_label(d, title, 150, 84, 26 if mobile else 19, INK, 700)
+        art_label(d, subtitle, 150, 110, 17 if mobile else 11, MUTED)
+        for i, fact in enumerate(facts):
+            fx, fy = (150, 137+i*23) if mobile else (22, 178+i*27)
+            art_label(d, fact, fx, fy, 20 if mobile else 16, INK, 500)
+        line(d, f"M20 {ch-42}h{cw-40}", "#39566a", 1)
+        art_label(d, scope, 20, ch-17, 16 if mobile else 12, color)
+        d.add('</g>')
+    yy = 969 if mobile else 512
+    art_label(d, "INSIDE THE TDX CHECK", 32, yy, 13, GREEN)
+    art_label(d, "From Intel's root to the collected record.", 32, yy+34, 23 if mobile else 25, INK)
+    stages = (("Intel root", "Certificates + revocation"),
+              ("TDX quote", "Signature + freshness"),
+              ("OS + app", "Recomputed measurements"),
+              ("Collector key", "Signed statement binding"),
+              ("Journal", "Attested process starts"))
+    for i, (title, detail) in enumerate(stages):
+        x, y, cw, ch = (32, yy+59+i*64, 576, 52) if mobile else (32+i*232, yy+64, 208, 81)
+        if i:
+            path = f"M{width/2} {y-12}v12" if mobile else f"M{x-24} {y+40}h24"
+            route(d, path, still, GREEN, -i)
+        box(d, x, y, cw, ch, "#0d2531", "#456c67", 7)
+        art_label(d, title, x+16, y+(23 if mobile else 31), 18, INK)
+        art_label(d, detail, x+(220 if mobile else 16), y+(32 if mobile else 58), 16 if mobile else 12, MUTED)
+        if not still:
+            d.add(f'<rect x="{x}" y="{y}" width="{cw}" height="{ch}" rx="7" fill="{GREEN}" opacity="0"><animate attributeName="opacity" values="0;.14;.14;0;0" keyTimes="0;.07;.16;.24;1" dur="10s" begin="{-10+i*1.7}s" repeatCount="indefinite"/></rect>')
+    if mobile:
+        art_label(d, "Attestation measures the collection environment.", 32, height-62, 18, MUTED)
+        art_label(d, "It does not prove Telegram origin or complete delivery.", 32, height-31, 17, MUTED)
+    else:
+        art_label(d, "Attestation measures the collection environment; it does not prove Telegram origin or complete delivery.", 32, height-31, 17, MUTED)
+    save(d, "casework-assurance"+("-mobile" if mobile else "")+("-static" if still else "")+".svg",
+         "Local verification checks journal and files against trusted inputs. An audited VM adds provider and access records. Optional Phala Intel TDX checks the quote, measured OS and application, and collector identity. These checks do not establish Telegram origin or complete delivery.")
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--display-font',required=True)
@@ -215,8 +292,8 @@ def main():
     for mobile in (False,True):
         for still in (False,True):
             for wiki in (False,True):hero(display,text,mobile,still,wiki)
-            for draw in (chain,checkpoint):draw(text,mobile,still)
-    print('Rendered 16 casework covers and evidence diagrams.')
+            for draw in (chain,checkpoint,assurance_modes):draw(text,mobile,still)
+    print('Rendered 20 casework covers and evidence diagrams.')
 
 
 if __name__=='__main__':main()

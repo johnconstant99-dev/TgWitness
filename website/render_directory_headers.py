@@ -72,50 +72,46 @@ def route(d, path, still, color=BLUE, delay=0):
 
 def evidence_scene(d, x, y, scale, still):
     d.add(f'<g transform="translate({x} {y}) scale({scale})">')
-    d.add('<g transform="rotate(7 425 191)">')
-    box(d, 274, 27, 304, 325, "#112838", "#385467")
-    d.add('</g><g transform="rotate(-4 420 194)">')
-    box(d, 267, 31, 304, 325, "#152e3e", "#476578")
-    d.add('</g><g class="float-b" filter="url(#card-shadow)">')
-    box(d, 268, 36, 304, 320)
-    label(d, "SAVED RECORD", 291, 66, 14, INK)
-    label(d, "ED25519", 484, 65, 9, GREEN)
-    line(d, "M290 82h260", "#486478", 1)
-    for index, (yy, title, message, color) in enumerate(((102, "01 / CAPTURED", "Meet at 16:00", BLUE),
-                                                       (174, "02 / SAVED EDIT", "Meet at 17:30", GOLD),
-                                                       (246, "03 / DELETION OBSERVED", "Both versions retained", GREEN))):
-        box(d, 288, yy, 264, 58, "#0d2231", "#355369", 7)
-        line(d, f"M288 {yy+8}v42", color, 3)
-        label(d, title, 301, yy+19, 10, color)
-        label(d, message, 301, yy+43, 17, INK)
+    d.add('<g transform="rotate(4 326 185)">')
+    box(d, 162, 30, 334, 294, "#102636", "#395a70")
+    d.add('</g><g filter="url(#card-shadow)">')
+    box(d, 146, 25, 334, 294)
+    label(d, "SIGNED OBSERVATION JOURNAL", 167, 54, 12, INK)
+    label(d, "SHA-256  /  ED25519", 167, 77, 10, GREEN)
+    line(d, "M166 92h293", "#476377", 1)
+    line(d, "M177 124V262", "#456477", 2)
+    for index, (yy, title, link, color) in enumerate((
+            (102, "Message observed", "h1  /  previous: h0", BLUE),
+            (171, "Edit preserved", "h2  /  previous: h1", GOLD),
+            (240, "Deletion recorded", "h3  /  previous: h2", GREEN))):
+        box(d, 194, yy, 265, 58, "#0c2130", "#355369", 7)
+        d.add(f'<circle cx="177" cy="{yy+23}" r="5" fill="#102636" stroke="{color}" stroke-width="2"/>')
+        label(d, title, 208, yy+23, 17, INK)
+        label(d, link, 208, yy+44, 11, color)
         if not still:
-            d.add(f'<rect x="288" y="{yy}" width="264" height="58" rx="7" fill="{color}" opacity="0"><animate attributeName="opacity" values="0;.13;0;0" keyTimes="0;.16;.36;1" dur="9s" begin="{-9+index*3}s" repeatCount="indefinite"/></rect>')
-    label(d, "LINKED JOURNAL / PRESERVED VERSIONS", 290, 332, 9, MUTED)
+            d.add(f'<rect x="194" y="{yy}" width="265" height="58" rx="7" fill="{color}" opacity="0"><animate attributeName="opacity" values="0;.16;.16;0;0" keyTimes="0;.06;.22;.3;1" dur="12s" begin="{-12+index*2}s" repeatCount="indefinite"/></rect>')
     d.add('</g>')
-    route(d, "M225 192C280 192 242 130 288 130", still, BLUE, -1)
-    route(d, "M226 236C287 236 238 203 288 203", still, GOLD, -3)
-    d.add('<g class="float-a"><g transform="rotate(-5 139 202)" filter="url(#card-shadow)">')
-    box(d, 13, 120, 247, 166, "url(#card-paper)", "#d7e6eb", 13)
-    d.add('<circle cx="39" cy="148" r="8" fill="#294a61"/>')
-    line(d, "m35 148 3 3 6-7", "#dceaf2", 1.4)
-    label(d, "TELEGRAM CHAT", 56, 152, 11, "#355265")
-    line(d, "M31 166h210", "#a7bcc8", 1)
-    if still:
-        label(d, "Message deleted", 31, 207, 21, "#41596b")
-        label(d, "The saved record stays.", 31, 257, 13, "#36546a")
-    else:
-        for text, values in (("Meet at 16:00", "1;1;0;0;0;0"), ("Meet at 17:30", "0;0;1;1;0;0"), ("Message deleted", "0;0;0;0;1;1")):
-            d.add(f'<g opacity="{values[0]}"><animate attributeName="opacity" values="{values}" keyTimes="0;.28;.34;.63;.7;1" dur="9s" repeatCount="indefinite" calcMode="discrete"/>')
-            label(d, text, 31, 207, 21, "#263f52")
-            d.add('</g>')
-        label(d, "Changes in the source chat", 31, 257, 12, "#36546a")
-    line(d, "M31 229h126", "#9bb4c2", 2)
-    d.add('</g></g><g class="float-a">')
-    d.add('<circle cx="562" cy="341" r="34" fill="#173f3e" stroke="#81b9a7" stroke-width="1.5"/>')
-    line(d, "M562 316l16 6v16c0 13-16 23-16 23s-16-10-16-23v-16Z", GREEN, 1.5)
-    check(d, 552, 338, GREEN, 1.2)
+    route(d, "M14 124H162", still, BLUE, -1)
+    d.add('<g class="float-a" filter="url(#card-shadow)">')
+    box(d, 4, 93, 113, 73, "url(#card-paper)", "#d8e6eb", 9)
+    label(d, "TELEGRAM", 17, 117, 11, "#355265")
+    line(d, "M18 132h70m-70 12h48", "#7b97a9", 3)
     d.add('</g>')
-    label(d, "CAPTURE THE CHANGE. KEEP THE HISTORY.", 115, 399, 11, MUTED)
+    route(d, "M177 193H91V283", still, GOLD, -3)
+    d.add('<g class="float-b" filter="url(#card-shadow)">')
+    box(d, 9, 271, 177, 98, "url(#card-paper)", "#d8e6eb", 9)
+    label(d, "CHECKPOINT", 25, 296, 12, "#284b62")
+    label(d, "count: 2 / head: h2", 25, 321, 13, "#284b62")
+    label(d, "Kept separately", 25, 349, 11, "#516d7e")
+    d.add('</g>')
+    route(d, "M330 319V355H453", still, GREEN, -2)
+    d.add('<g class="float-a" filter="url(#card-shadow)">')
+    box(d, 370, 330, 211, 67, "#173b3c", "#6ca592", 10)
+    label(d, "EVIDENCE.ZIP", 388, 355, 14, INK)
+    label(d, "Check with a trusted key", 388, 378, 11, GREEN)
+    check(d, 548, 354, GREEN, 1)
+    d.add('</g>')
+    label(d, "RETAIN THE CHAIN. VERIFY THE HANDOFF.", 102, 429, 11, MUTED)
     d.add('</g>')
 
 
@@ -146,8 +142,18 @@ def illustration(d, section, still, accent):
         box(d, 19, 141, 61, 58, "#183348", "#547b94", 10)
         label(d, "Aa" if section == "docs" else "{ }", 31, 178, 25, INK)
         badge(d, "REFERENCE" if section == "docs" else "READY", 226, 195, 115, accent)
-    elif section in {"source", "integrations", "github"}:
-        names = {"source": ("COLLECT", "JOURNAL", "PANEL"), "integrations": ("ARCHIVE", "MCP", "WEBHOOK"), "github": ("REVIEW", "CHECKS", "PUBLISH")}[section]
+    elif section == "integrations":
+        route(d, "M140 129H176V67H225", still, accent)
+        route(d, "M140 129H176V197H225", still, accent, -2)
+        for xx, yy, text in ((20, 90, "WORKSPACE"), (225, 28, "MCP"), (225, 158, "WEBHOOK")):
+            d.add('<g class="float-a" filter="url(#card-shadow)">')
+            box(d, xx, yy, 112, 78)
+            line(d, f"M{xx+17} {yy+21}h22m-22 9h14", accent, 2)
+            label(d, text, xx+14, yy+57, 10, INK)
+            d.add('</g>')
+        label(d, "SCOPED READS / OUTGOING EVENTS", 36, 258, 10, MUTED)
+    elif section in {"source", "github"}:
+        names = {"source": ("COLLECT", "JOURNAL", "PANEL"), "github": ("REVIEW", "CHECKS", "PUBLISH")}[section]
         for path, delay in (("M103 61C165 61 127 120 179 120", -1), ("M179 120C234 120 207 181 258 181", -3)):
             route(d, path, still, accent, delay)
         for i, (xx, yy, text) in enumerate(zip((17, 126, 235), (24, 83, 144), names)):
