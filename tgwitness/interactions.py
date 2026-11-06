@@ -79,6 +79,46 @@ def check_pause(collector):
         raise FloodWaitError(None, capture=max(1, int(until - time.time()) + 1))
 
 
+RESTRICTIONS = {"FrozenMethodInvalidError": ("frozen", None), "UserRestrictedError": ("spam_block", 24 * 3600),
+                "PeerFloodError": ("peer_flood", 24 * 3600)}
+RESTRICTION_TEXT = {
+    "frozen": "Telegram has frozen this account. Sending, joining and pressing bot buttons are off; reading continues.",
+    "spam_block": "Telegram limits this account (spam block). Sending, joining and pressing bot buttons are off "
+                  "until {until}; reading continues.",
+    "peer_flood": "Telegram reported too many actions from this account (PEER_FLOOD). Sending, joining and pressing "
+                  "bot buttons are off until {until}; reading continues."}
+
+
+def restriction(store):
+    current = store.get_setting("account_restriction", None)
+    if current and current.get("until") and current["until"] < time.time():
+        store.set_setting("account_restriction", None)
+        store.append("account.restriction_expired", {"kind": current["kind"]})
+        return None
+    return current
+
+
+def check_restriction(store):
+    current = restriction(store)
+    if current:
+        until = time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime(current["until"])) if current.get("until") else None
+        raise AccountRestricted(RESTRICTION_TEXT[current["kind"]].format(until=until))
+
+
+def note_restriction(store, exc):
+    kind, hold = RESTRICTIONS.get(type(exc).__name__, (None, None))
+    if not kind:
+        return
+    value = {"kind": kind, "since": time.time(), "until": time.time() + hold if hold else None,
+             "telegram_error": type(exc).__name__}
+    store.set_setting("account_restriction", value)
+    store.append("account.restricted", {**value, "meaning": RESTRICTION_TEXT[kind].split(".")[0] + "."})
+
+
+class AccountRestricted(ValueError):
+    pass
+
+
 async def preview(collector, body):
     check_pause(collector)
     target = parse_link(body.link)
@@ -144,6 +184,7 @@ async def execute(collector, body):
         return prior.get("result") or {"request_id": body.request_id, "status": "unknown",
                                        "request_event": prior["request_event"]}
     check_pause(collector)
+    check_restriction(store)
     goal = (store.get_setting("goal_preset", None) or store.get_setting("setup", None) or {}).get("goal")
     if goal == "evidence":
         raise ValueError("Telegram actions from the panel are off for the Evidence for a case goal.")
@@ -197,7 +238,14 @@ async def execute(collector, body):
                 else:
                     dispatched = True
                     joined = await collector.client(functions.messages.ImportChatInviteRequest(target["invite"]))
-                    entity = joined.chats[0]
+                    chats = getattr(joined, "chats", None) or []
+                    if chats:
+                        entity = chats[0]
+                    else:
+                        again = await collector.client(functions.messages.CheckChatInviteRequest(target["invite"]))
+                        entity = getattr(again, "chat", None)
+                        if entity is None:
+                            raise ValueError("Joined, but Telegram has not returned the chat yet. Open the link again.")
             else:
                 entity = await collector.client.get_entity(target["username"])
 
@@ -232,6 +280,7 @@ async def execute(collector, body):
                                                    store.get_setting("rpc_backoff_until", 0)))
         result.update(status="rejected", error_type=type(exc).__name__, retry_after=exc.seconds)
     except (Exception, asyncio.CancelledError) as exc:
+        note_restriction(store, exc)
         cancelled = isinstance(exc, asyncio.CancelledError)
         definite = (isinstance(exc, ValueError) and not dispatched) or (isinstance(exc, RPCError) and exc.code < 500
                                                   and type(exc).__name__ != "BotResponseTimeoutError")

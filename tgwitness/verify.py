@@ -1905,6 +1905,113 @@ def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
                 "case": manifest.get("case") or {}}
 
 
+COMPARE_MEANING = {
+    "number": "Both archives come from the same chat and account, so messages are matched by their number.",
+    "content": "The archives come from different chats or accounts (for example both sides of a private chat), "
+               "so messages are matched by time, sender and text or file hash.",
+}
+
+
+CLOCK_SLACK = 5
+
+
+def unix_time(row):
+    if row.get("date_unixtime") is not None:
+        return int(row["date_unixtime"])
+    try:
+        return int(datetime.fromisoformat(str(row.get("date")).replace("Z", "+00:00")).timestamp())
+    except ValueError:
+        return 0
+
+
+def chat_rows(path, max_gib=None):
+    with open_archive(path, max_gib=max_gib) as archive:
+        manifest = read_manifest(archive)
+        return manifest, list(chat_messages(archive))
+
+
+def row_brief(row):
+    text = row.get("text")
+    if isinstance(text, list):
+        text = "".join(part if isinstance(part, str) else str(part.get("text", "")) for part in text)
+    return {"id": row.get("id"), "date": row.get("date"), "from": row.get("from"), "from_id": row.get("from_id"),
+            "text": (text or "")[:300], "file_sha256": row.get("file_sha256"), "edited": row.get("edited")}
+
+
+def row_content(row):
+    brief = row_brief(row)
+    return brief["text"], brief["file_sha256"], row.get("media_type"), brief["edited"]
+
+
+def compare_chat_exports(first, second, first_fingerprint=None, second_fingerprint=None, max_gib=None):
+    checked = [verify_chat_export(first, first_fingerprint, max_gib),
+               verify_chat_export(second, second_fingerprint, max_gib)]
+    (first_manifest, first_rows), (second_manifest, second_rows) = (chat_rows(first, max_gib), chat_rows(second, max_gib))
+    same_chat = (first_manifest.get("chat") or {}).get("id") == (second_manifest.get("chat") or {}).get("id")
+    same_account = ((first_manifest.get("account") or {}).get("id") == (second_manifest.get("account") or {}).get("id"))
+    method = "number" if same_chat and same_account else "content"
+    first_rows = [row for row in first_rows if row.get("type") != "unparsed"]
+    second_rows = [row for row in second_rows if row.get("type") != "unparsed"]
+    order = lambda rows: sorted(rows, key=lambda row: (str(row.get("date")), str(row.get("id"))))
+    if method == "number":
+        left, right = {row.get("id"): row for row in first_rows}, {row.get("id"): row for row in second_rows}
+        pairs = [(left[k], right[k]) for k in left.keys() & right.keys()]
+        only_first = [left[k] for k in left.keys() - right.keys()]
+        only_second = [right[k] for k in right.keys() - left.keys()]
+    else:
+        def content_key(row):
+            brief = row_brief(row)
+            return brief["from_id"], brief["file_sha256"] or brief["text"]
+
+        waiting, pairs, only_first = {}, [], []
+        for row in order(second_rows):
+            waiting.setdefault(content_key(row), []).append(row)
+        for row in order(first_rows):
+            candidates = waiting.get(content_key(row), [])
+            match = next((c for c in candidates if abs(unix_time(c) - unix_time(row)) <= CLOCK_SLACK), None)
+            if match is None:
+                only_first.append(row)
+            else:
+                candidates.remove(match)
+                pairs.append((row, match))
+        only_second = [row for rows in waiting.values() for row in rows]
+    changed = [{"first": row_brief(a), "second": row_brief(b)} for a, b in pairs
+               if method == "number" and row_content(a) != row_content(b)]
+    return {"format": "tgwitness-chat-comparison-v1", "method": method, "meaning": COMPARE_MEANING[method],
+            "first": {"file": str(first), "fingerprint": checked[0]["fingerprint"], "exported_at": first_manifest.get("exported_at"),
+                      "chat_id": (first_manifest.get("chat") or {}).get("id"), "messages": len(first_rows),
+                      "key_pinned": checked[0]["key_pinned"]},
+            "second": {"file": str(second), "fingerprint": checked[1]["fingerprint"], "exported_at": second_manifest.get("exported_at"),
+                       "chat_id": (second_manifest.get("chat") or {}).get("id"), "messages": len(second_rows),
+                       "key_pinned": checked[1]["key_pinned"]},
+            "only_first": [row_brief(row) for row in order(only_first)],
+            "only_second": [row_brief(row) for row in order(only_second)],
+            "changed": sorted(changed, key=lambda item: (str(item["first"]["date"]), str(item["first"]["id"]))),
+            "unchanged": len(pairs) - len(changed)}
+
+
+def print_comparison(result, limit=50):
+    first, second = result["first"], result["second"]
+    print("Both archives verified. First " + str(first["exported_at"]) + " (" + str(first["messages"]) + " messages, key "
+          + first["fingerprint"][:16] + "), second " + str(second["exported_at"]) + " (" + str(second["messages"])
+          + " messages, key " + second["fingerprint"][:16] + ").")
+    print(result["meaning"])
+    for title, name in (("Only in the first archive", "only_first"), ("Only in the second archive", "only_second")):
+        rows = result[name]
+        print(title + ": " + str(len(rows)))
+        for row in rows[:limit]:
+            shown = row["text"] or ("file " + str(row["file_sha256"])[:16] if row["file_sha256"] else "")
+            print("  #" + str(row["id"]) + " " + str(row["date"]) + " " + str(row["from"] or row["from_id"]) + ": "
+                  + " ".join(shown.split())[:120])
+    print("Changed: " + str(len(result["changed"])))
+    for item in result["changed"][:limit]:
+        print("  #" + str(item["first"]["id"]) + ": " + " ".join(item["first"]["text"].split())[:80] + "  ->  "
+              + " ".join(item["second"]["text"].split())[:80])
+    print("Unchanged: " + str(result["unchanged"]))
+    if not (first["key_pinned"] and second["key_pinned"]):
+        print("Signer identity is unpinned for at least one archive: compare the fingerprints with copies kept elsewhere.")
+
+
 def message_id_summary(chat_id, ids):
     holes = missing_ranges(ids)
     return {"chat_id": chat_id, "numbered_per_chat": numbered_per_chat(chat_id),
@@ -3035,6 +3142,7 @@ SAY = {
         "No independent timestamps: times come from the collector's clock.":
             "Независимых меток нет: время — по часам коллектора.",
         "INTEGRITY VERIFIED": "ЦЕЛОСТНОСТЬ ПОДТВЕРЖДЕНА", "VERIFICATION FAILED": "ПРОВЕРКА НЕ ПРОЙДЕНА",
+        "INTEGRITY VERIFIED · SIGNER NOT CONFIRMED": "ЦЕЛОСТНОСТЬ ЕСТЬ · ПОДПИСАНТ НЕ ПОДТВЕРЖДЁН",
         "Source authenticity and clock accuracy are not established by this check.":
             "Эта проверка не устанавливает подлинность источника и точность часов.",
         "… and {n} more": "… и ещё {n}", "Checking signatures, hashes and the record chain":
@@ -3078,6 +3186,7 @@ SAY = {
         "No independent timestamps: times come from the collector's clock.":
             "Незалежних міток немає: час — за годинником колектора.",
         "INTEGRITY VERIFIED": "ЦІЛІСНІСТЬ ПІДТВЕРДЖЕНО", "VERIFICATION FAILED": "ПЕРЕВІРКУ НЕ ПРОЙДЕНО",
+        "INTEGRITY VERIFIED · SIGNER NOT CONFIRMED": "ЦІЛІСНІСТЬ Є · ПІДПИСАНТА НЕ ПІДТВЕРДЖЕНО",
         "Source authenticity and clock accuracy are not established by this check.":
             "Ця перевірка не встановлює автентичність джерела і точність годинника.",
         "… and {n} more": "… і ще {n}", "Checking signatures, hashes and the record chain":
@@ -3120,7 +3229,7 @@ def enable_ansi(stream):
 class Console:
     WIDTH = 66
     STYLES = {"ok": "1;32", "bad": "1;31", "warn": "1;33", "dim": "2", "bold": "1", "accent": "1;38;5;75",
-              "okbar": "1;97;42", "badbar": "1;97;41"}
+              "okbar": "1;97;42", "badbar": "1;97;41", "warnbar": "1;30;43"}
 
     def __init__(self, stream, lang="en", color=True):
         try:
@@ -3195,12 +3304,14 @@ class Console:
                 blocks += "\033[38;5;" + str(code) + "m" + self.glyph["block"]
             self.say("  " + " " * 11 + blocks + "\033[0m")
 
-    def verdict(self, ok, reason=""):
-        text = " " + (self.glyph["ok"] if ok else self.glyph["bad"]) + "  " \
-               + self.t("INTEGRITY VERIFIED" if ok else "VERIFICATION FAILED") + " "
+    def verdict(self, ok, reason="", pinned=True):
+        unconfirmed = ok and not pinned
+        text = " " + (self.glyph["warn"] if unconfirmed else self.glyph["ok"] if ok else self.glyph["bad"]) + "  " \
+               + self.t("INTEGRITY VERIFIED · SIGNER NOT CONFIRMED" if unconfirmed
+                        else "INTEGRITY VERIFIED" if ok else "VERIFICATION FAILED") + " "
         self.say()
         if self.color:
-            self.say("  " + self.paint(text.ljust(self.WIDTH - 2), "okbar" if ok else "badbar"))
+            self.say("  " + self.paint(text.ljust(self.WIDTH - 2), "warnbar" if unconfirmed else "okbar" if ok else "badbar"))
         else:
             self.say("  " + self.glyph["tl"] + self.glyph["h"] * (self.WIDTH - 4) + self.glyph["tr"])
             self.say("  " + self.glyph["v"] + text.ljust(self.WIDTH - 4) + self.glyph["v"])
@@ -3366,7 +3477,7 @@ class Console:
             self.lines("Details", facts, limit=12)
         self.lines("Notes", notes)
         self.case(result.get("case") or (result.get("report_seal") or {}).get("case") or {})
-        self.verdict(True)
+        self.verdict(True, pinned=pinned)
         producer = result.get("producer")
         if producer:
             self.say("  " + self.paint(self.t("Produced by") + ": " + str(producer.get("software")) + " "
@@ -3420,6 +3531,9 @@ def main():
     parser.add_argument("--check-drand", action="store_true",
                         help="Compare the drand rounds in the journal with drand relays (needs internet)")
     parser.add_argument("--board", action="store_true", help="Print Case Board collections, dangling references and slice changes")
+    parser.add_argument("--compare", type=Path, metavar="SECOND_ZIP",
+                        help="Compare two chat exports: messages present in only one of them and changed messages")
+    parser.add_argument("--compare-fingerprint", help="Trusted fingerprint of the second archive's signer")
     parser.add_argument("--max-gib", type=int, default=MAX_UNCOMPRESSED_GIB,
                         help="Largest uncompressed archive to read, in GiB (default 4)")
     output = parser.add_mutually_exclusive_group()
@@ -3435,6 +3549,19 @@ def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="backslashreplace")
     mode = "json" if args.json else "pretty" if args.pretty or (not args.plain and sys.stdout.isatty()) else "plain"
+    if args.compare:
+        try:
+            compared = compare_chat_exports(args.bundle, args.compare, args.fingerprint, args.compare_fingerprint)
+        except Exception as exc:
+            if mode == "json":
+                print(json.dumps({"verified": False, "error": type(exc).__name__ + ": " + str(exc)}, indent=2))
+                raise SystemExit(1)
+            parser.exit(1, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + str(exc) + "\n")
+        if mode == "json":
+            print(json.dumps({"verified": True, "kind": "comparison", "result": compared}, indent=2, ensure_ascii=False))
+        else:
+            print_comparison(compared)
+        return
     console = Console(sys.stdout, console_language(args.lang), not args.no_color and not os.environ.get("NO_COLOR")) \
         if mode == "pretty" else None
     if console:

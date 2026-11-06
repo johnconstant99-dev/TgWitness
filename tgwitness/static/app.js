@@ -419,7 +419,7 @@ const termLabels={offline:tr("offline"),ready:tr("ready"),credentials:tr("creden
   observing:tr("observing"),paused:tr("paused"),reconnecting:tr("reconnecting"),collector_error:tr("collector error"),
   storage_error:tr("storage error"),supergroup:tr("supergroup"),channel:tr("channel"),group:tr("group"),
   private:tr("private chat"),bot:tr("bot"),discovered:tr("added automatically"),
-  visible_in_dialogs:tr("visible in dialogs"),receiving_updates:tr("receiving updates, not in the chat list"),access_unconfirmed:tr("access unconfirmed"),
+  visible_in_dialogs:tr("visible in dialogs"),receiving_updates:tr("receiving updates, not in the chat list"),access_unconfirmed:tr("access unconfirmed"),access_lost:tr("access lost: removed or no longer readable"),
   not_in_dialogs:tr("not found among the account's chats"),beyond_dialog_limit:tr("beyond the chats listed for this account"),public_username:tr("public username"),
   private_or_unlisted:tr("private or unlisted"),creator:tr("creator"),administrator:tr("administrator"),
   member_or_unknown:tr("member or unknown"),unknown:tr("unknown"),messages:tr("messages"),edits:tr("edits"),
@@ -1044,6 +1044,8 @@ function collectorLines(name,p){
     if(p.reason==="visible")return [tr("All checked sources are visible in the account's dialogs."),counts];
     if(p.reason==="some_unconfirmed")return [tr("Some sources were not found among the account's chats; the others continue."),counts];
     if(p.reason==="none_visible")return [tr("None of the sources was found among the account's chats."),counts];
+    if(p.reason==="access_lost")return [tr("The account was removed from every source or can no longer read them."),counts];
+    if(p.reason==="some_access_lost")return [tr("The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue."),counts];
     if(p.reason==="not_checked")return [tr("Sources are checked when observation starts.")];
     return [tr("No source is selected.")];
   }
@@ -1915,7 +1917,9 @@ function renderExportState(x){
   const percent=running&&x.total?Math.min(99,Math.floor((x.captured||0)*100/x.total)):null;
   if(!x||x.phase==="unknown"){prog.textContent="";return;}
   const counts={title:x.title||tr("chat"),captured:(x.captured||0).toLocaleString(),total:(x.total||0).toLocaleString(),percent};
-  if(running)prog.textContent=tr("Exporting {title}: ",counts)+tr(x.total?"{captured} of {total} messages ({percent}%)":"{captured} messages read",counts)+
+  if(running&&x.stage==="files")prog.textContent=tr("Exporting {title}: ",counts)+tr("{captured} messages saved; files: {done}/{total}",{captured:counts.captured,done:(x.files_done||0).toLocaleString(),total:(x.files_total||0).toLocaleString()})+
+    (x.eta_seconds!==null&&x.eta_seconds!==undefined?" · "+tr("{time} left",{time:fmtDuration(x.eta_seconds)}):"")+"…";
+  else if(running)prog.textContent=tr("Exporting {title}: ",counts)+tr(x.total?"{captured} of {total} messages ({percent}%)":"{captured} messages read",counts)+
     (x.eta_seconds!==null&&x.eta_seconds!==undefined?" · "+tr("{time} left",{time:fmtDuration(x.eta_seconds)}):"")+"…";
   else if(x.phase==="done")prog.textContent=tr("Done: {captured} messages. Download the signed bundle.",counts);
   else if(x.phase==="failed")prog.textContent=tr("Export failed")+(x.error?" ("+x.error+")":"")+". "+tr("Try again.");
@@ -1946,7 +1950,8 @@ function syncExport(s){
 $("chat-export-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
   const chat_id=Number($("chat-export-source").value),language=exportLanguage();
   if(!chat_id)throw new Error(tr("Select a source to export."));
-  const x=await json("chat-export/start",language?{chat_id,language}:{chat_id});
+  const files=$("chat-export-files").value||null;
+  const x=await json("chat-export/start",{chat_id,...(language?{language}:{}),...(files?{files}:{})});
   state.exportId=x.id;renderExportState(x);
   toast(tr("Full chat export started. Large chats can take a while."));pollExport(x.id);
 });});
@@ -3974,7 +3979,10 @@ function renderConnection(){
     networkLoadedFor=state.profile;routeFields();
   }
   $("network-form").querySelector('[type="submit"]').disabled=state.status.demo||c.running;
-  $("network-test").disabled=state.status.demo;$("sign-out").disabled=state.status.demo;
+  $("network-test").disabled=state.status.demo;
+  const importedSession=!!c.account&&(c.account||{}).key_origin!=="created";
+  $("sign-out").disabled=state.status.demo||importedSession;$("sign-out-locked").hidden=!importedSession;
+  $("forget-session").hidden=!importedSession;$("forget-session").disabled=state.status.demo;
   if(state.status.demo)$("proxy-catalog-refresh").disabled=true;
   $("proxy-catalog-apply").disabled=state.status.demo||c.running||!$("proxy-catalog-select").value;
   const summary=$("protection-summary");summary.replaceChildren();
@@ -4294,6 +4302,50 @@ $("sign-out").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   clearSecrets();await refreshStatus();setAuthStep("credentials");
   toast(tr(r.telegram_session_ended?"Signed out. Telegram ended the session.":
     "Signed out here. Telegram did not confirm: end the session in Telegram under Settings → Devices."),!r.telegram_session_ended);
+}));
+async function showAccountSessions(){
+  const owner=actionOwner(),box=$("account-sessions");
+  const r=await json("account/sessions",undefined,{profile:owner.profile,token:owner.token});
+  if(!owner.current())return;
+  box.replaceChildren();box.hidden=false;
+  for(const s of r.sessions){
+    const row=node("div","account-session"),who=node("span","",[s.device_model,s.app_name+" "+s.app_version,s.country].filter(Boolean).join(" · "));
+    row.append(who,node("span","muted",tr("signed in {date}",{date:(s.created_at||"").slice(0,10)})));
+    if(s.current)row.append(node("strong","",tr("TgWitness works on this session")));
+    else{
+      const end=node("button","quiet danger",tr("End session"));end.type="button";
+      end.addEventListener("click",e=>busy(e.currentTarget,async()=>{
+        if(!(await askConfirm(tr("End this session in Telegram? The device signed in there is logged out. This cannot be undone from TgWitness."),{danger:true,confirmText:tr("End session")})))return;
+        if(!owner.current())return;
+        await json("account/sessions/end",{hash:s.hash},{profile:owner.profile,token:owner.token});
+        toast(tr("Session ended."));await showAccountSessions();
+      }));
+      row.append(end);
+    }
+    box.append(row);
+  }
+}
+$("account-sessions-show").addEventListener("click",e=>busy(e.currentTarget,showAccountSessions));
+$("account-password").addEventListener("click",e=>busy(e.currentTarget,async()=>{
+  const owner=actionOwner();
+  const prompt=(label,options={})=>window.TgWitnessDialogs.prompt("",{title:tr("Two-step password"),label:tr(label),maxLength:256,...options});
+  const current=await prompt("Current two-step password. Leave empty if the account has none.",{type:"password",autocomplete:"current-password",required:false});
+  if(current===null||!owner.current())return;
+  const next=await prompt("New two-step password.",{type:"password",autocomplete:"new-password"});
+  if(next===null||!owner.current())return;
+  const hint=await prompt("Password hint (optional).",{required:false});
+  if(hint===null||!owner.current())return;
+  await json("account/password",{current_password:current||null,new_password:next,hint},{profile:owner.profile,token:owner.token});
+  toast(tr("Two-step password saved in Telegram. TgWitness does not keep it."));
+}));
+$("forget-session").addEventListener("click",e=>busy(e.currentTarget,async()=>{
+  const owner=actionOwner();
+  if(state.status.collector.running){toast(tr("Pause observation before forgetting the session."),true);return;}
+  if(!(await askConfirm(tr("Forget this session on this computer? It stays active in Telegram. The journal, sources and signing key stay; only the same account can connect to this workspace again."),{confirmText:tr("Forget on this computer")})))return;
+  if(!owner.current())return;
+  await json("auth/forget",{},{profile:owner.profile,token:owner.token});
+  clearSecrets();await refreshStatus();setAuthStep("credentials");
+  toast(tr("Forgotten on this computer. The session is still active in Telegram."));
 }));
 
 const avatarCache=new Map();

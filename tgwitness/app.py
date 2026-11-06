@@ -30,7 +30,8 @@ from .history_options import HistoryOptions
 from .disclosure import Disclosures, DisclosurePolicy
 from .downloads import RetainedDownload, TemporaryDownload, build_file
 from .access import POLICY, AccessControl, AdminSettings, Console, GrantSettings, Refused, check as access_check
-from .collector import AUTHORIZATION_ERRORS, Collector
+from .collector import AUTHORIZATION_ERRORS, Collector, ProtectedSession
+from .security import KeyInUse
 from .demo import seed_demo
 from .evidence import LIMITS, checkpoint, encrypt_export, export_file, producer, retain_checkpoint, cleanup_exports
 from . import i18n
@@ -248,9 +249,20 @@ class ParametersUpdate(BaseModel):
     values: dict[str, bool | int | float | list[str] | None] = Field(max_length=200)
 
 
+class EndSession(BaseModel):
+    hash: str = Field(pattern=r"^-?[0-9]{1,20}$")
+
+
+class AccountPassword(BaseModel):
+    current_password: str | None = Field(default=None, max_length=256)
+    new_password: str = Field(min_length=1, max_length=256)
+    hint: str = Field(default="", max_length=128)
+
+
 class ChatExport(BaseModel):
     chat_id: int
     language: str | None = Field(default=None, max_length=16)
+    files: Literal["download", "hashes", "skip"] | None = None
 
 
 class MultiExportStart(BaseModel):
@@ -317,6 +329,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     bearer = HTTPBearer(auto_error=False)
     op_lock = asyncio.Lock()
     export_lock = asyncio.Lock()
+    prepared_chat_exports = {}
     public_proxies = PublicCatalog(root)
 
     shared_pool = proxy_pool or ProxyPool(public_proxies)
@@ -709,18 +722,29 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             raise HTTPException(400, "Telegram authorization expired. Sign in again.") from None
         except RPCError as exc:
             raise HTTPException(400, "Telegram rejected the request: " + type(exc).__name__) from None
+        except (ProtectedSession, KeyInUse, interactions.AccountRestricted) as exc:
+            raise HTTPException(409, str(exc)) from None
         except ValueError as exc:
             raise HTTPException(400, str(exc)) from None
         except (TimeoutError, OSError, ConnectionError) as exc:
             raise HTTPException(503, "Connection unavailable: " + type(exc).__name__) from None
 
     async def operation(call, *args):
+        collector = app.state.collector
+        collector.foreground += 1
+        try:
+            return await guarded_operation(call, *args)
+        finally:
+            collector.foreground -= 1
+            collector.close_when_idle()
+
+    async def guarded_operation(call, *args):
         require_live()
         async with op_lock:
             require_live()
             if (app.state.collector.export_claim and getattr(call, "__name__", "") in {
                     "configure", "start_phone", "start_qr", "send_code", "confirm_code", "confirm_password",
-                    "sign_out", "set_network", "set_route_policy", "apply", "dialogs", "save_profile",
+                    "sign_out", "forget_session", "set_network", "set_route_policy", "apply", "dialogs", "save_profile",
                     "preview", "execute", "check_current", "test_network", "control"}):
                 raise HTTPException(409, "This account is busy. Pause its current task before another Telegram operation.")
             collector = app.state.collector
@@ -1454,6 +1478,22 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.post("/api/auth/logout", dependencies=[Depends(authenticate)])
     async def logout():
         return await operation(app.state.collector.sign_out)
+
+    @app.post("/api/auth/forget", dependencies=[Depends(authenticate)])
+    async def forget_session():
+        return await operation(app.state.collector.forget_session)
+
+    @app.get("/api/account/sessions", dependencies=[Depends(authenticate)])
+    async def account_sessions():
+        return await operation(app.state.collector.account_sessions)
+
+    @app.post("/api/account/sessions/end", dependencies=[Depends(authenticate)])
+    async def end_account_session(body: EndSession):
+        return await operation(app.state.collector.end_session, body.hash)
+
+    @app.post("/api/account/password", dependencies=[Depends(authenticate)])
+    async def change_account_password(body: AccountPassword):
+        return await operation(app.state.collector.change_password, body.current_password, body.new_password, body.hint)
 
     @app.get("/api/dialogs", dependencies=[Depends(authenticate)])
     async def dialogs():
@@ -2483,7 +2523,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     async def chat_export_start(request: Request, body: ChatExport):
         require_chat(request, body.chat_id)
         record = await operation(app.state.collector.start_export, body.chat_id,
-                                 report_options(app.state.store, request, body.language))
+                                 report_options(app.state.store, request, body.language), body.files)
         chat_export_owners.clear()
         chat_export_owners[record["id"]] = request.state.principal.owner
         return record
@@ -2567,10 +2607,20 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
     @app.get("/api/chat-export/{export_id}/download", dependencies=[Depends(authenticate)])
     async def chat_export_download(request: Request, export_id: str):
-        path = app.state.collector.export_result_path(export_id) if export_visible(request, export_id) else None
+        from . import export_history
+        collector = app.state.collector
+        path = collector.export_result_path(export_id) if export_visible(request, export_id) else None
         if not path:
             raise HTTPException(404, "No finished chat export is available to download.")
-        return TemporaryDownload(path, filename="tgwitness-chat-export.zip", media_type="application/zip")
+        entry = prepared_chat_exports.get(export_id)
+        if entry is None:
+            entry = await asyncio.to_thread(
+                export_history.prepared, app.state.store, path, "zip", False, owner=request.state.principal.owner,
+                workspace=profile_id, required_permissions=["view", "export"],
+                chat_ids=[(collector.export_state or {}).get("chat_id")])
+            prepared_chat_exports[export_id] = entry
+        return FileResponse(path, filename="tgwitness-chat-export.zip", media_type="application/zip",
+                            headers=export_history.headers(entry))
 
     @app.get("/api/checkpoint", dependencies=[Depends(authenticate)])
     async def get_checkpoint():

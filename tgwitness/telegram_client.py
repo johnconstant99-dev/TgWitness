@@ -28,6 +28,19 @@ class WitnessClient(TelegramClient):
         return result.messages
 
 
+    async def connect(self):
+        result = await super().connect()
+        if listener := getattr(self, "connection_listener", None):
+            listener("opened")
+        return result
+
+    def disconnect(self):
+        was_connected = self.is_connected()
+        result = super().disconnect()
+        if was_connected and (listener := getattr(self, "connection_listener", None)):
+            listener("closed")
+        return result
+
     @property
     def _request_retries(self):
         return 0 if _single_attempt.get() else self._read_retries

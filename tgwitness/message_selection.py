@@ -34,6 +34,7 @@ class Selection(BaseModel):
     sender_ids: list[int] = Field(default_factory=list, max_length=10000)
     text_contains: list[str] = Field(default_factory=list, max_length=100)
     download_media: bool = False
+    recheck_all: bool = False
 
     @field_validator("from_utc", "to_utc", mode="before")
     @classmethod
@@ -77,6 +78,10 @@ class Selection(BaseModel):
         date = utc(row.get("date"))
         return not ((self.from_utc and (not date or date < self.from_utc))
                     or (self.to_utc and (not date or date >= self.to_utc)))
+
+    def excludes_messages(self):
+        return bool(self.from_utc or self.to_utc or self.languages or self.reply_mode != "all"
+                    or self.sender_ids or self.text_contains)
 
 
 @lru_cache(maxsize=1)

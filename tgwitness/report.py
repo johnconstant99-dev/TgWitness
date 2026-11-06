@@ -112,14 +112,14 @@ class Words:
 def text_keys():
     import ast
     from pathlib import Path
-    from .chat_export import EXPORT_LIMITS
+    from .chat_export import EXPORT_LIMITS, JOURNAL_LIMIT
     from .evidence import LIMITS
     from . import report_composition_pdf
     sources = (Path(__file__), Path(__file__).with_name("pdf_report.py"))
     keys = [node.args[0].value for source in sources for node in ast.walk(ast.parse(source.read_text(encoding="utf-8")))
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "say"
             and node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)]
-    return list(dict.fromkeys(keys + case_assessment.text_keys() + report_charts.text_keys() + snapshot_analytics.text_keys() + report_selection_view.text_keys() + report_layouts.text_keys() + report_composition_pdf.text_keys() + list(SCRIPT_WORDS) + LIMITS + EXPORT_LIMITS + list(MEDIA_NAMES.values()) + ["Media"]
+    return list(dict.fromkeys(keys + case_assessment.text_keys() + report_charts.text_keys() + snapshot_analytics.text_keys() + report_selection_view.text_keys() + report_layouts.text_keys() + report_composition_pdf.text_keys() + list(SCRIPT_WORDS) + LIMITS + EXPORT_LIMITS + [JOURNAL_LIMIT] + list(MEDIA_NAMES.values()) + ["Media"]
                               + list(ROUTE_KINDS.values()) + list(EXPOSURES.values()) + list(FILE_STATUS.values())
                               + list(ACTION_NAMES.values()) + [label for _, label in OUTCOMES.values()]
                               + ["Action", "no result recorded"] + list(OTHERS.values()) + list(TEXTS.values())
@@ -2378,6 +2378,12 @@ def absent_text(say, low, high):
         say("Message numbers {a}–{b} absent ({n})", a=low, b=high, n=high - low + 1)
 
 
+def unparsed_text(say, record):
+    return say("Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode "
+               "(constructor {c}); its content is not in this export.",
+               n=record.get("id"), c=(record.get("unparsed") or {}).get("constructor") or "?")
+
+
 def absent_before(record, previous):
     number = record.get("id")
     if type(number) is int and type(previous) is int and number > previous + 1:
@@ -2441,6 +2447,11 @@ def chat_rows(records, say, preview=False, base="", numbered=False, after=None, 
             yield '<div class="day"><time datetime="' + e(day) + '" data-day>' + e(day) + "</time></div>"
             previous_day, previous_sender = day, object()
         name = record.get("from") or (str(sender) if sender is not None else say("Unknown"))
+        if record.get("type") == "unparsed":
+            yield ('<div class="gap-row" id="m' + e(record.get("id")) + '" data-cat="service"><span>'
+                   + e(unparsed_text(say, record)) + "</span></div>")
+            previous_sender = object()
+            continue
         if record.get("type") == "service":
             yield ('<div class="svc-row" id="m' + e(record.get("id")) + '" data-cat="service"><span>' + e(name) + " · "
                    + e(action_text(record.get("action")) or say("Service message")) + "</span>"
@@ -2753,7 +2764,14 @@ def recheck_text(say, recheck):
     if recheck.get("returned"):
         text += " " + say("Returned then and included in this export, marked found on recheck: {n}.",
                           n=len(recheck["returned"]))
-    if recheck.get("limit_reached"):
+    if recheck.get("edge"):
+        low, high = recheck["edge"]
+        text += " " + say("Numbers {a}–{b}, just below the oldest message the history listing returned, were also "
+                          "requested; messages found there: {n}.", a=low, b=high, n=recheck.get("edge_found", 0))
+    if recheck.get("unchecked"):
+        text += " " + say("{n} absent numbers were not requested; they cannot be told apart from deleted ones.",
+                          n=recheck["unchecked"])
+    elif recheck.get("limit_reached"):
         text += " " + say("Only the first {n} absent numbers were requested.", n=recheck.get("asked"))
     return text
 

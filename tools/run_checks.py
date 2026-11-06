@@ -23,7 +23,7 @@ SUITES = {
         "test_settings_hub.py", "test_case_assessment.py", "test_group_settings.py", "test_group_overview.py",
         "check_operator_security.py", "check_operator_browser.py",
         "check_guided_connection.py", "check_guided_connection_browser.py",
-        "check_session_reservations.py", "check_account_recovery.py",
+        "check_session_reservations.py", "check_account_recovery.py", "check_protected_session.py", "check_idle_connection.py", "check_source_access_lost.py", "check_bulk_deletion.py", "check_account_sessions.py", "check_key_lock.py", "check_account_restriction.py", "check_export_files_stage.py",
         "check_browser.py", "check_mcp_transport.py", "check_integrations_browser.py",
         "check_mcp_browser.py", "check_settings_browser.py", "check_analysis_browser.py",
         "check_account_browser.py", "check_fleet_browser.py", "check_proxy_async_browser.py",

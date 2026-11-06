@@ -8,6 +8,7 @@ from pathlib import Path
 
 from . import indicators, pdf_report, report
 from .evidence import producer, report_entry, write_indicators, write_pdf, write_viewer
+from .message_selection import Selection
 from .store import canonical, utcnow
 from .verify import fingerprint, message_id_summary
 
@@ -24,7 +25,23 @@ EXPORT_LIMITS = [
     "Sender names are the cached Telegram profile at export; names and usernames are mutable.",
     "The signature detects changes relative to a trusted key. Retain the fingerprint elsewhere.",
 ]
+JOURNAL_LIMIT = ("This snapshot holds only what Telegram returned at export. The journal of this workspace also "
+                 "holds deletions or earlier versions observed in this chat; export the evidence journal to include them.")
 MAX_BUNDLE_BYTES = 4 * 1024**3
+
+
+def journal_changes(store, chat_id):
+    deleted = store.count_events(chat_id=chat_id, kind="message.deleted,message.missing_on_recheck")
+    edited = store.count_events(chat_id=chat_id, kind="message.edited")
+    if not deleted and not edited:
+        return None
+    return {"deleted": deleted, "edited": edited, "meaning": JOURNAL_LIMIT}
+
+
+def export_limits(meta):
+    if not (meta or {}).get("journal"):
+        return EXPORT_LIMITS
+    return [EXPORT_LIMITS[0], JOURNAL_LIMIT, *EXPORT_LIMITS[2:]]
 
 
 def records(scratch_path):
@@ -93,7 +110,7 @@ def chat_indicators(scratch_path, meta=None, media_dir=None):
 def json_chunks(meta, scratch_path):
     header = {k: meta[k] for k in ("format", "chat", "account", "observer", "exported_at", "acquisition",
                                    "message_count", "author_count", "message_ids", "recheck", "admin_log", "source",
-                                   "limitations") if meta.get(k) is not None}
+                                   "journal", "limitations") if meta.get(k) is not None}
     prefix = json.dumps(header, ensure_ascii=False, indent=1)[:-2]
     yield (prefix + ',\n "messages": [').encode("utf-8")
     first = True
@@ -153,7 +170,7 @@ def chat_stats(scratch_path):
 def html_chunks(meta, scratch_path, context=None):
     context = context or {}
     stats = context.get("stats") or chat_stats(scratch_path)
-    context = {"producer": producer(), "limits": EXPORT_LIMITS, "people": authors(scratch_path), "files": {},
+    context = {"producer": producer(), "limits": export_limits(meta), "people": authors(scratch_path), "files": {},
                "report_id": "unsealed", "created_at": utcnow(), "fingerprint": "", **context, "stats": stats}
     ordered = (lambda: records_backwards(scratch_path)) if stats["newest_first"] else (lambda: records(scratch_path))
     return report.chat_chunks(meta, ordered, context)
@@ -172,7 +189,7 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             "public_key": vault.public_key, "fingerprint": fingerprint(vault.public_key),
             "source": "Telegram history read by the account; a current snapshot, "
                       "not reconstruction of deleted or past-edited messages.",
-            "producer": producer(), "limitations": EXPORT_LIMITS, "case": report.case_of(options), **meta}
+            "producer": producer(), "limitations": export_limits(meta), "case": report.case_of(options), **meta}
     path = Path(out_path)
     hashes, total = {}, 0
     try:
@@ -192,7 +209,9 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             people = authors(scratch_path)
             meta["author_count"] = len(people)
             ids = message_ids(scratch_path, (meta.get("chat") or {}).get("id"))
-            if (meta.get("collection") or {}).get("mode") == "distributed_selection":
+            collection = meta.get("collection") or {}
+            if collection.get("mode") == "distributed_selection" and Selection.model_validate(
+                    collection.get("selection") or {}).excludes_messages():
                 ids["selection_applied"] = True
                 ids["meaning"] = "Numbers absent from this selected export may have been excluded by filters; not evidence of deletion."
             if meta.get("recheck"):
@@ -238,7 +257,7 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             analytics = report.snapshot_analytics.project(analytics, options)
             write_member("analytics.json", [canonical(analytics)])
             context = {"kind": "chat", "options": options, "report_id": str(uuid.uuid4()), "created_at": meta["exported_at"],
-                       "producer": meta["producer"], "limits": EXPORT_LIMITS, "public_key": vault.public_key,
+                       "producer": meta["producer"], "limits": meta["limitations"], "public_key": vault.public_key,
                        "fingerprint": meta["fingerprint"], "meta": meta, "people": people,
                        "stats": stats, "analytics": analytics, "chat_json_sha256": hashes["chat.json"], "message_ids": ids,
                        "account": meta.get("account"), "sign": vault.sign, "indicators": found,
@@ -254,7 +273,7 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             context["files"] = dict(hashes)
             write_member("chat.html", html_chunks(meta, scratch_path, context))
             listed = {**hashes, **dict.fromkeys(("README.txt", "SHA256SUMS", "manifest.json", "manifest.sig"), "")}
-            write_member("README.txt", [report.readme(context, listed, "\n".join(EXPORT_LIMITS)
+            write_member("README.txt", [report.readme(context, listed, "\n".join(meta["limitations"])
                 + "\n\nchat.json is authoritative; chat.html is a readable derivative sealed with the same key.\n"
                 "authors.csv / authors.json list everyone who posted in the exported history,\n"
                 "with message counts and first/last message; names are the profile at export time.\n"

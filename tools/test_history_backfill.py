@@ -336,7 +336,8 @@ def test_pacer_floors_account_isolation_and_takeout_recognition(tmp_path):
     asyncio.run(run())
 
 
-def test_concurrent_rpc_waiters_share_pacing_and_server_cooldown(tmp_path, monkeypatch):
+@pytest.mark.parametrize("media", [False, True])
+def test_concurrent_rpc_waiters_share_pacing_and_server_cooldown(tmp_path, monkeypatch, media):
     async def run():
         c, store = make(tmp_path)
         client = WitnessClient(None, 123, "a" * 32)
@@ -352,11 +353,13 @@ def test_concurrent_rpc_waiters_share_pacing_and_server_cooldown(tmp_path, monke
             return "ok"
         monkeypatch.setattr(TelegramClient, "_call", underlying)
         request = f.messages.GetHistoryRequest(t.InputPeerSelf(), 0, None, 0, 100, 0, 0, 0)
+        following = f.upload.GetFileRequest(t.InputDocumentFileLocation(1, 2, b"synthetic", ""), 0, 4096) if media else request
         try:
-            result = await asyncio.gather(client._call(None, request), client._call(None, request), return_exceptions=True)
+            result = await asyncio.gather(client._call(None, request), client._call(None, following), return_exceptions=True)
             assert isinstance(result[0], errors.FloodWaitError) and result[1] == "ok"
             assert calls[1] - calls[0] >= 1.
             assert client.bulk_pacer.state()["floodwait_count"] == 1
+            assert client.bulk_pacer.state()["success_streak"] == (0 if media else 1)
         finally:
             store.close()
     asyncio.run(run())

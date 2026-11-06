@@ -162,6 +162,35 @@ class InstanceLock:
         self.stream.close()
 
 
+class KeyInUse(ValueError):
+    pass
+
+
+class KeyLock:
+    def __init__(self, key: bytes, directory: Path | None = None):
+        import hashlib
+        import tempfile
+        directory = directory or Path(tempfile.gettempdir()) / "tgwitness-keys"
+        directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+        name = hashlib.sha256(b"tgwitness-session-key:" + key).hexdigest()
+        self.stream = (directory / (name + ".lock")).open("a+b")
+        self.stream.seek(0)
+        try:
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(self.stream.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(self.stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            self.stream.close()
+            raise KeyInUse("This Telegram session is already connected by another TgWitness process or workspace "
+                           "on this computer. Close it there first: one session key, one connection.") from None
+
+    def close(self):
+        self.stream.close()
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Create an external vault master key without printing it.")

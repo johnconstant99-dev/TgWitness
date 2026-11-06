@@ -165,7 +165,23 @@ jobs:
           "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install --require-hashes --no-build-isolation -r deploy/browser.lock
           "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install --no-deps --no-build-isolation -e '.[dev]'
           "$RUNNER_TEMP/sealed-tests/bin/python" -m pip check
-      - run: python -m playwright install --with-deps chromium
+      - name: Configure bounded Ubuntu package downloads
+        timeout-minutes: 2
+        run: |
+          sudo python3 -I - <<'PY'
+          from pathlib import Path
+          for path in [Path('/etc/apt/sources.list'), *Path('/etc/apt').glob('*mirrors*.txt'),
+                       *Path('/etc/apt/sources.list.d').glob('*.sources'), *Path('/etc/apt/sources.list.d').glob('*.list')]:
+              if path.exists():
+                  text = path.read_text()
+                  for scheme in ('http', 'https'):
+                      text = text.replace(scheme + '://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
+                  path.write_text(text)
+          Path('/etc/apt/apt.conf.d/80-tgwitness-ci').write_text('Acquire::Retries "2";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n')
+          PY
+      - name: Install Chromium
+        timeout-minutes: 10
+        run: python -m playwright install --with-deps chromium
       - run: >-
           python -I -m pytest tools/test_file_hash_export.py tools/test_sealed_hash_export.py
           tools/test_export_capacity.py tools/test_sealed_package.py tools/test_sealed_release.py

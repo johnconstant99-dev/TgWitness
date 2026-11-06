@@ -12,7 +12,7 @@
       heading.id = "panel-dialog-title";
       heading.textContent = title || t(danger ? "Please confirm" : "Confirm");
       form.append(heading);
-      for (const part of String(message || "").split("\n\n")) {
+      for (const part of String(message || "").split("\n\n").filter(Boolean)) {
         const paragraph = document.createElement("p");
         paragraph.className = "panel-dialog-text";
         paragraph.textContent = part;
@@ -24,9 +24,10 @@
         label.className = "panel-dialog-field";
         label.textContent = field.label || "";
         input = document.createElement("input");
+        input.type = field.type === "password" ? "password" : "text";
         input.value = field.value || "";
         input.maxLength = field.maxLength || 200;
-        input.autocomplete = "off";
+        input.autocomplete = field.autocomplete || "off";
         if (field.placeholder) input.placeholder = field.placeholder;
         label.append(input);
         form.append(label);
@@ -62,7 +63,7 @@
       form.append(actions);
       dialog.append(form);
 
-      const value = () => (input ? input.value.trim() : "");
+      const value = () => (input ? (input.type === "password" ? input.value : input.value.trim()) : "");
       const ready = () => {
         if (expected !== undefined) accept.disabled = value() !== expected;
         else if (field?.required) accept.disabled = !value();
@@ -75,6 +76,7 @@
         result = input ? value() : choices ? (boxes || []).filter(box => box.checked).map(box => box.value) : true;
       });
       dialog.addEventListener("close", () => {
+        if (input) input.value = "";
         dialog.remove();
         if (expected !== undefined) resolve(result === expected);
         else if (choices) resolve(Array.isArray(result) ? result : null);
@@ -90,7 +92,8 @@
   window.TgWitnessDialogs = {
     confirm: (message, options = {}) => open({...options, message}),
     prompt: (message, options = {}) => open({...options, message, field: {label: options.label, value: options.value,
-      placeholder: options.placeholder, maxLength: options.maxLength, required: options.required !== false}}),
+      placeholder: options.placeholder, maxLength: options.maxLength, required: options.required !== false,
+      type: options.type, autocomplete: options.autocomplete}}),
     typed: (message, expected, options = {}) => open({...options, message, danger: true, expected,
       field: {label: options.label || t("Type the name to confirm"), placeholder: expected, maxLength: 300}}),
     choose: (message, options = {}) => open({...options, message, choices: options.choices || []}),

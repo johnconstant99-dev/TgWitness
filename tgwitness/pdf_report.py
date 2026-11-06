@@ -1425,6 +1425,10 @@ def transcript(lay, say, messages, numbered=False):
                      style="B", color=WARN)
         if type(record.get("id")) is int:
             previous = record["id"] if type(previous) is not int else max(previous, record["id"])
+        if record.get("type") == "unparsed":
+            lay.text("—  " + report.unparsed_text(say, record) + "  —", size=7.8, style="B", color=WARN)
+            lay.gap(0.8)
+            continue
         sender = record.get("from") or (str(record["from_id"]) if record.get("from_id") is not None else say("Unknown"))
         head = "#" + str(record.get("id")) + "  " + report.utc_text(record.get("date")) + " · " + sender
         if record.get("selection"):

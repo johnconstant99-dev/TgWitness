@@ -253,7 +253,13 @@ def admin_record_checks():
             assert http.get('/api/chat-export/synthetic-export/download', headers=limited).status_code == 404
             assert http.post('/api/chat-export/synthetic-export/cancel', headers=limited).status_code == 403
             assert http.get('/api/chat-export/synthetic-export', headers=limited).json() == {'phase': 'unknown'}
-            assert http.get('/api/chat-export/synthetic-export/download', headers=admin).content == b'PK synthetic'
+            first = http.get('/api/chat-export/synthetic-export/download', headers=admin)
+            assert first.content == b'PK synthetic' and first.headers['X-TgWitness-Export-ID']
+            again = http.get('/api/chat-export/synthetic-export/download', headers=admin)
+            assert again.content == b'PK synthetic', 'An interrupted download must be repeatable'
+            assert again.headers['X-TgWitness-Export-ID'] == first.headers['X-TgWitness-Export-ID']
+            prepared = http.get('/api/exports/history', headers=admin).json()
+            assert any(entry['id'] == first.headers['X-TgWitness-Export-ID'] for entry in prepared['exports']), prepared
 
 
 if __name__ == '__main__':

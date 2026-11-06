@@ -7,8 +7,7 @@ from telethon.tl import functions
 
 
 BULK_READS = (functions.messages.GetHistoryRequest, functions.messages.GetDialogsRequest,
-              functions.channels.GetAdminLogRequest,
-              functions.upload.GetFileRequest, functions.upload.GetCdnFileRequest)
+              functions.channels.GetAdminLogRequest)
 
 
 def bulk_request(request):
@@ -24,8 +23,9 @@ def bulk_request(request):
 class AccountPacer:
     """Server cooldowns remain authoritative; local delay never shortens them.
 
-    Called while WitnessClient holds its reentrant RPC lock, including media
-    requests and requests wrapped in Takeout. State is isolated by account ID.
+    Called for bulk history reads while WitnessClient holds its reentrant RPC
+    lock, including reads wrapped in Takeout. File chunks use the same account
+    server cooldown without the artificial history delay. State is account-bound.
     """
     def __init__(self, store, *, clock=time.monotonic, sleep=asyncio.sleep):
         self.store, self.clock, self.sleep = store, clock, sleep

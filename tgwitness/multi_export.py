@@ -225,6 +225,7 @@ class MultiExport:
                              "visibility": info.get("visibility"), "profile": profile,
                              **({"profile_errors": problems} if problems else {})},
                     "observer": observer, "recheck": recheck, "admin_log": log,
+                    "journal": chat_export.journal_changes(lead.store, state["chat_id"]),
                     "account": lead.store.get_setting("account", None), "message_count": message_count,
                     "collection": {"mode": "multi_account", "range_size": CHUNK, "newest_message_id": newest,
                                    "scope": "message numbers 1..newest_message_id at export start"},

@@ -367,7 +367,7 @@ def presentation(page):
 def pending_action_owners(page, server, child):
     for app in (server.app, server.app.state.profiles.entries[child]['app']):
         app.state.vault.save('credentials', {'api_id': 123, 'api_hash': 'b' * 32, 'session': saved_session()})
-        app.state.store.set_setting('account', {'id': 44, 'username': 'synthetic_fixture'})
+        app.state.store.set_setting('account', {'id': 44, 'username': 'synthetic_fixture', 'key_origin': 'created'})
     mutations = []
     paths = ('auth/logout', 'network/policy', 'alerts')
 
@@ -540,6 +540,95 @@ def group_confirmation_owners(page, server):
     page.unroute('**/api/collector/*', capture_collection)
 
 
+def password_actions(page, child):
+    changes = []
+    def capture(route):
+        changes.append(route.request.post_data_json)
+        route.fulfill(json={'ok': True})
+    page.route('**/api/account/password', capture)
+    switch(page, 'default', 'connection')
+    dialog = page.locator('dialog.panel-dialog[open]')
+
+    def password_step(value, autocomplete):
+        field = dialog.locator('input')
+        expect(field).to_have_attribute('type', 'password')
+        expect(field).to_have_attribute('autocomplete', autocomplete)
+        field.fill(value)
+        if value == ' next synthetic secret ':
+            output = Path('output/playwright/pr117-password')
+            output.mkdir(parents=True, exist_ok=True)
+            for width in (390, 1440):
+                page.set_viewport_size({'width': width, 'height': 1000})
+                assert dialog.evaluate('(node)=>node.scrollWidth<=node.clientWidth+1')
+                dialog.screenshot(path=str(output / f'password-{width}.png'))
+        # Retain the detached node to verify that closing clears the secret.
+        handle = field.element_handle()
+        dialog.locator('button[type=submit]').click()
+        page.wait_for_function('(field)=>!field.isConnected', arg=handle)
+        assert handle.evaluate('(field)=>field.value') == ''
+        handle.dispose()
+
+    page.locator('#account-password').click()
+    password_step(' current synthetic secret ', 'current-password')
+    expect(dialog.locator('button[type=submit]')).to_be_disabled()
+    password_step(' next synthetic secret ', 'new-password')
+    dialog.locator('input').fill('A synthetic hint')
+    accept(page)
+    expect(page.locator('#toast')).to_contain_text('Two-step password saved')
+    assert changes == [{'current_password': ' current synthetic secret ',
+                        'new_password': ' next synthetic secret ', 'hint': 'A synthetic hint'}]
+    changes.clear()
+
+    # Cancelling any step must not change Telegram's password.
+    for step in range(3):
+        page.locator('#account-password').click()
+        if step >= 1:
+            password_step('', 'current-password')
+        if step >= 2:
+            password_step('cancelled synthetic secret', 'new-password')
+        dialog.locator('button[type=button]').click()
+        expect(dialog).to_have_count(0)
+        expect(page.locator('#account-password')).to_be_enabled()
+        assert not changes
+
+    # Changing workspace while the last prompt is open invalidates the operation.
+    page.locator('#account-password').click()
+    password_step('', 'current-password')
+    password_step('stale synthetic secret', 'new-password')
+    switch(page, child, 'connection')
+    accept(page)
+    expect(page.locator('#account-password')).to_be_enabled()
+    assert not changes
+    page.unroute('**/api/account/password', capture)
+
+
+def session_action_owners(page, child):
+    ended = []
+    def listing(route):
+        route.fulfill(json={'sessions': [{'hash': '22', 'device_model': 'Synthetic phone',
+            'app_name': 'Telegram', 'app_version': 'test', 'country': '',
+            'created_at': '2026-11-05', 'current': False}]})
+    def terminate(route):
+        ended.append(route.request.post_data_json)
+        route.fulfill(json={'ended': True})
+    page.route('**/api/account/sessions', listing)
+    page.route('**/api/account/sessions/end', terminate)
+    switch(page, 'default', 'connection')
+    page.locator('#account-sessions-show').click()
+    page.locator('#account-sessions button').click()
+    switch(page, child, 'connection')
+    accept(page)
+    assert not ended, 'An old confirmation ended a Telegram session after a workspace switch'
+    switch(page, 'default', 'connection')
+    page.locator('#account-sessions-show').click()
+    page.locator('#account-sessions button').click()
+    accept(page)
+    expect(page.locator('#toast')).to_contain_text('Session ended.')
+    assert ended == [{'hash': '22'}]
+    page.unroute('**/api/account/sessions', listing)
+    page.unroute('**/api/account/sessions/end', terminate)
+
+
 def main():
     with tempfile.TemporaryDirectory(prefix='audit-frontend-check-') as folder, RunningApp(Path(folder)) as server, sync_playwright() as p:
         store = server.app.state.store
@@ -566,6 +655,8 @@ def main():
         print('ok  group route adoption', flush=True)
         presentation(page)
         pending_action_owners(page, server, child)
+        password_actions(page, child)
+        session_action_owners(page, child)
         group_confirmation_owners(page, server)
         print('ok  pending workspace, session and group confirmations', flush=True)
         assert not errors, errors

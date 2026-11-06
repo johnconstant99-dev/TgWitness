@@ -63,14 +63,14 @@ def main():
         reopened = Store(path)
         reopened.bind(vault)
         expected(reopened.chat_overview()[CHAT])
+        source_status(reopened)
         reopened.close()
-    source_status()
     print("Chat counters and source status: one definition for list, header, health and notifications; "
           "older index rebuilt.")
 
 
-def source_status():
-    collector = SimpleNamespace(dialog_cache={}, dialogs_truncated=True, RECEIVING_DAYS=Collector.RECEIVING_DAYS)
+def source_status(store):
+    collector = SimpleNamespace(store=store, dialog_cache={}, dialogs_truncated=True, RECEIVING_DAYS=Collector.RECEIVING_DAYS)
     recent = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(timespec="milliseconds")
     stale = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat(timespec="milliseconds")
     receiving = Collector.source_visibility(collector, CHAT, {CHAT: {"last_observed_at": recent}})

@@ -26,11 +26,12 @@ successful read ends a range; an error never means end of history. Every range f
 its upper ID on its first successful read. SDK methods may make additional RPCs,
 all subject to the same serialized account request lane.
 
-Bulk history, dialog, admin-log and file requests start with one-second spacing.
+Bulk history, dialog and admin-log requests start with one-second spacing.
 Twenty consecutive successes reduce it by 20%, with a 0.5-second floor. FloodWait
 increases spacing by 0.5, 2 or 5 seconds, up to 10 seconds, and persists an account-wide
 cooldown of the server's wait plus a one-second margin. Text and media share that
-cooldown. This is a local pacing policy, not a published Telegram rate entitlement.
+cooldown. File chunks do not incur the artificial history delay or advance the history
+success streak. This is a local pacing policy, not a published Telegram rate entitlement.
 
 Transient history requests retry five times with exponential backoff; exhaustion
 pauses the run. FloodWait does not spend that retry budget. Cancellation interrupts

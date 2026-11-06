@@ -1,17 +1,18 @@
 import asyncio
 import json
 import zipfile
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
-from telethon.errors import FloodWaitError
+from telethon.errors import FloodWaitError, RPCError, TypeNotFoundError
 from telethon.tl import types
+from telethon.tl.functions import account as account_functions
 
-from tgwitness import distributed_export, settings_hub, telegram_client
+from tgwitness import chat_export, distributed_export, settings_hub, telegram_client, verify
 from tgwitness.account_export import AccountExport
-from tgwitness.collector import Collector, message_record
+from tgwitness.collector import Collector, UnreadableHistory, message_record
 from tgwitness.message_selection import Selection, SelectionIndex, detect_language
 from tgwitness.security import Vault
 from tgwitness.store import Store
@@ -183,15 +184,24 @@ class Client:
         self.reads = []
         self.block = None
         self.blocked = asyncio.Event()
+        self.by_number = {}
+        self.iter_options = []
+
+    def lookup(self, mid):
+        return next((m for m in self.messages if m.id == mid), None) or self.by_number.get(mid)
+
+    async def __call__(self, request, ordered=False):
+        raise RPCError(request, "TAKEOUT_UNAVAILABLE_IN_TEST", 400)
 
     async def get_messages(self, entity, limit=None, offset_date=None, ids=None):
         if ids is not None:
-            return next((m for m in self.messages if m.id == ids), None)
+            return [self.lookup(mid) for mid in ids] if isinstance(ids, list) else self.lookup(ids)
         return sorted([m for m in self.messages if offset_date is None or m.date < offset_date],
                       key=lambda m: -m.id)[:limit]
 
-    async def iter_messages(self, entity, offset_id=0, min_id=0):
+    async def iter_messages(self, entity, offset_id=0, min_id=0, **options):
         self.reads.append((min_id, offset_id))
+        self.iter_options.append(options)
         if self.block is not None and len(self.reads) > 1:
             self.blocked.set()
             await self.block.wait()
@@ -199,6 +209,89 @@ class Client:
             if min_id < m.id < offset_id:
                 yield m
         await asyncio.sleep(0)
+
+
+class PoisonClient(Client):
+    page = 3
+
+    def __init__(self, messages, poison):
+        super().__init__(messages)
+        self.poison = set(poison)
+
+    def fail(self):
+        raise TypeNotFoundError(0xddb5ab75, b"undecoded remainder")
+
+    async def get_messages(self, entity, limit=None, offset_date=None, ids=None, add_offset=0):
+        if ids is not None:
+            if self.poison & set(ids if isinstance(ids, list) else [ids]):
+                self.fail()
+            return await super().get_messages(entity, ids=ids)
+        ordered = sorted([m for m in self.messages if offset_date is None or m.date < offset_date], key=lambda m: -m.id)
+        window = ordered[add_offset:add_offset + (limit or len(ordered))]
+        if any(m.id in self.poison for m in window):
+            self.fail()
+        return window
+
+    async def iter_messages(self, entity, offset_id=0, min_id=0):
+        self.reads.append((min_id, offset_id))
+        ordered = [m for m in sorted(self.messages, key=lambda m: -m.id)
+                   if min_id < m.id and (not offset_id or m.id < offset_id)]
+        for start in range(0, len(ordered), self.page):
+            page = ordered[start:start + self.page]
+            if any(m.id in self.poison for m in page):
+                self.fail()
+            for m in page:
+                yield m
+            await asyncio.sleep(0)
+
+
+def test_undecodable_message_is_recorded_and_history_continues(tmp_path):
+    async def scenario():
+        app = workspace(tmp_path / "reader")
+        collector = app.state.collector
+        collector.client = PoisonClient([message(i) for i in range(1, 11)], poison={7})
+        peer = types.Channel(id=42, title="Synthetic group", photo=types.ChatPhotoEmpty(),
+                             date=datetime.now(timezone.utc), megagroup=True, access_hash=1)
+        try:
+            count, _ = await collector.fetch_range(peer, 1, 10, tmp_path / "chunk.jsonl")
+            rows = [json.loads(line) for line in (tmp_path / "chunk.jsonl").read_text(encoding="utf-8").splitlines()]
+            assert count == 10 and [row["id"] for row in rows] == list(range(10, 0, -1))
+            unparsed = [row for row in rows if row["type"] == "unparsed"]
+            assert [row["id"] for row in unparsed] == [7] and unparsed[0]["unparsed"]["constructor"] == "ddb5ab75"
+            event = next(e for e in app.state.store.events(limit=5) if e["kind"] == "history.unparsed")
+            assert event["payload"]["numbers"] == [7]
+
+            collector.client = PoisonClient([message(i) for i in range(1, 31)], poison=range(1, 31))
+            with pytest.raises(UnreadableHistory, match="ddb5ab75"):
+                await collector.fetch_range(peer, 1, 30, tmp_path / "broken.jsonl")
+        finally:
+            app.state.store.close()
+    asyncio.run(scenario())
+
+
+def test_undecodable_newest_message_does_not_block_the_start(tmp_path, monkeypatch):
+    async def scenario():
+        manager, entries = coordinator(tmp_path, [])
+        for entry in entries.values():
+            entry["app"].state.collector.client = PoisonClient([message(i) for i in range(1, 8)], poison={7})
+        monkeypatch.setattr(distributed_export, "CHUNK", 2)
+        monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
+        try:
+            state = await manager.start(CHAT, list(entries), "account0")
+            assert state["workers"][0]["high"] == 7, state
+            await asyncio.wait_for(manager.task, 60)
+            assert manager.state["phase"] == "done", manager.state
+            path = manager.result_path(state["id"])
+            verify_chat_export(path, fingerprint(entries["account0"]["app"].state.vault.public_key))
+            with zipfile.ZipFile(path) as archive:
+                rows = {row["id"]: row for row in json.loads(archive.read("chat.json"))["messages"]}
+                ids = json.loads(archive.read("message-ids.json"))
+            assert set(rows) == set(range(1, 8)) and rows[7]["type"] == "unparsed", rows.get(7)
+            assert ids["missing"] == 0
+        finally:
+            await manager.close()
+            close_entries(entries)
+    asyncio.run(scenario())
 
 
 def coordinator(tmp_path, messages, count=2):
@@ -454,6 +547,238 @@ def test_rpc_peer_resolution_reentrancy_and_cancelled_wait(monkeypatch):
         await asyncio.gather(waiting, return_exceptions=True)
         assert calls == [1, 2] and client.rpc_backoff_getter() == deadline
         assert not client._rpc_lock.locked()
+    asyncio.run(scenario())
+
+
+def test_unfiltered_archive_keeps_number_analysis_and_rechecks_gaps(tmp_path, monkeypatch):
+    async def scenario():
+        manager, entries = coordinator(tmp_path, [message(i) for i in (1, 2, 4, 6, 7)])
+        for entry in entries.values():
+            entry["app"].state.collector.client.by_number = {5: message(5)}
+        monkeypatch.setattr(distributed_export, "CHUNK", 2)
+        monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
+        try:
+            state = await manager.start(CHAT, list(entries), "account0")
+            await asyncio.wait_for(manager.task, 60)
+            assert manager.state["phase"] == "done", manager.state
+            path = manager.result_path(state["id"])
+            verify_chat_export(path, fingerprint(entries["account0"]["app"].state.vault.public_key))
+            with zipfile.ZipFile(path) as archive:
+                ids = json.loads(archive.read("message-ids.json"))
+                result = json.loads(archive.read("chat.json"))
+            assert not ids.get("selection_applied"), ids
+            assert ids["recheck"]["asked"] == 2 and ids["recheck"]["returned"] == [5] and ids["recheck"]["empty"] == 1
+            assert ids["missing"] == 1 and ids["missing_ranges"] == [[3, 3]], ids
+            assert 5 in {row["id"] for row in result["messages"]}
+            assert ids["recheck"]["unchecked"] == 0 and ids["recheck"]["accounts"] == 2
+        finally:
+            await manager.close()
+            close_entries(entries)
+    asyncio.run(scenario())
+
+
+def test_recheck_reads_below_the_oldest_listed_message_and_counts_unchecked(tmp_path, monkeypatch):
+    async def scenario():
+        manager, entries = coordinator(tmp_path, [message(i) for i in (4, 5, 7, 8)])
+        for entry in entries.values():
+            entry["app"].state.collector.client.by_number = {2: message(2)}
+        monkeypatch.setattr(distributed_export, "CHUNK", 2)
+        monkeypatch.setattr(distributed_export, "RECHECK_PER_ACCOUNT", 1)
+        monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
+        try:
+            state = await manager.start(CHAT, list(entries), "account0")
+            await asyncio.wait_for(manager.task, 60)
+            assert manager.state["phase"] == "done", manager.state
+            with zipfile.ZipFile(manager.result_path(state["id"])) as archive:
+                recheck = json.loads(archive.read("message-ids.json"))["recheck"]
+                ids = {row["id"] for row in json.loads(archive.read("chat.json"))["messages"]}
+            assert recheck["edge"] == [1, 3] and recheck["edge_found"] == 1 and 2 in ids, recheck
+            assert recheck["asked"] == 3 and recheck["unchecked"] == 1 and recheck["limit_reached"], recheck
+        finally:
+            await manager.close()
+            close_entries(entries)
+    asyncio.run(scenario())
+
+
+class SilentClient(Client):
+    def __init__(self, messages, silent):
+        super().__init__(messages)
+        self.silent = silent
+
+    def is_connected(self):
+        return True
+
+    async def iter_messages(self, entity, offset_id=0, min_id=0):
+        if self.silent:
+            self.silent -= 1
+            await asyncio.Event().wait()
+        async for m in super().iter_messages(entity, offset_id=offset_id, min_id=min_id):
+            yield m
+
+
+class BrokenRangeClient(Client):
+    def __init__(self, messages, broken):
+        super().__init__(messages)
+        self.broken = broken
+
+    async def iter_messages(self, entity, offset_id=0, min_id=0):
+        if min_id < self.broken < offset_id:
+            raise ValueError("Telegram returned an unusable answer")
+        async for m in super().iter_messages(entity, offset_id=offset_id, min_id=min_id):
+            yield m
+
+
+def test_silent_account_returns_its_range_and_comes_back(tmp_path, monkeypatch):
+    async def scenario():
+        rows = [message(i) for i in range(1, 9)]
+        manager, entries = coordinator(tmp_path, rows)
+        entries["account1"]["app"].state.collector.client = SilentClient(rows, silent=2)
+        monkeypatch.setattr(distributed_export, "CHUNK", 2)
+        monkeypatch.setattr(distributed_export, "PAGE_TIMEOUT", 0.2)
+        monkeypatch.setattr(distributed_export, "OUTAGE_PAUSE", 0.05)
+        monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
+        try:
+            state = await manager.start(CHAT, list(entries), "account0")
+            await asyncio.wait_for(manager.task, 60)
+            assert manager.state["phase"] == "done", manager.state
+            assert all(w["state"] == "done" for w in manager.state["workers"]), manager.state["workers"]
+            with zipfile.ZipFile(manager.result_path(state["id"])) as archive:
+                assert {row["id"] for row in json.loads(archive.read("chat.json"))["messages"]} == set(range(1, 9))
+        finally:
+            await manager.close()
+            close_entries(entries)
+    asyncio.run(scenario())
+
+
+def test_range_failing_on_two_accounts_stops_without_losing_accounts(tmp_path, monkeypatch):
+    async def scenario():
+        rows = [message(i) for i in range(1, 9)]
+        manager, entries = coordinator(tmp_path, rows, count=3)
+        for entry in entries.values():
+            entry["app"].state.collector.client = BrokenRangeClient(rows, broken=3)
+        monkeypatch.setattr(distributed_export, "CHUNK", 2)
+        try:
+            await manager.start(CHAT, list(entries), "account0")
+            await asyncio.wait_for(manager.task, 60)
+            assert manager.state["phase"] == "failed", manager.state
+            assert "3–4" in manager.state["error"] and "unusable answer" in manager.state["error"], manager.state["error"]
+            assert all(w["state"] == "done" for w in manager.state["workers"]), manager.state["workers"]
+            assert manager.state["ranges_done"] == 3
+        finally:
+            await manager.close()
+            close_entries(entries)
+    asyncio.run(scenario())
+
+
+def test_export_names_deletions_kept_in_the_journal(tmp_path, monkeypatch):
+    async def scenario():
+        manager, entries = coordinator(tmp_path, [message(i) for i in (1, 2, 3)])
+        store = entries["account0"]["app"].state.store
+        store.append("message.deleted", {"message_id": 4, "text": "Removed after it was observed."}, CHAT)
+        monkeypatch.setattr(distributed_export, "CHUNK", 2)
+        monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
+        try:
+            state = await manager.start(CHAT, list(entries), "account0")
+            await asyncio.wait_for(manager.task, 60)
+            assert manager.state["phase"] == "done", manager.state
+            with zipfile.ZipFile(manager.result_path(state["id"])) as archive:
+                manifest = json.loads(archive.read("manifest.json"))
+                header = json.loads(archive.read("chat.json"))
+            assert manifest["journal"]["deleted"] == 1 and header["journal"]["deleted"] == 1
+            assert chat_export.JOURNAL_LIMIT in manifest["limitations"]
+            assert not any("cannot be recovered and are not present" in line for line in manifest["limitations"])
+        finally:
+            await manager.close()
+            close_entries(entries)
+    asyncio.run(scenario())
+
+
+def test_compare_finds_removed_and_edited_messages(tmp_path, monkeypatch):
+    async def export(path, rows, lead):
+        path.mkdir()
+        manager, entries = coordinator(path, rows)
+        try:
+            state = await manager.start(CHAT, [lead], lead)
+            await asyncio.wait_for(manager.task, 60)
+            assert manager.state["phase"] == "done", manager.state
+            return manager.result_path(state["id"]), entries[lead]["app"].state.vault.public_key
+        finally:
+            await manager.close()
+            close_entries(entries)
+
+    async def scenario():
+        monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
+        before = [message(i) for i in range(1, 6)]
+        after = [message(1), message(2), message(4, "Rewritten after the fact."), message(5)]
+        first, key = await export(tmp_path / "t1", before, "account0")
+        second, _ = await export(tmp_path / "t2", after, "account0")
+        result = verify.compare_chat_exports(first, second, fingerprint(key))
+        assert result["method"] == "number" and result["first"]["key_pinned"], result
+        assert [row["id"] for row in result["only_first"]] == [3] and not result["only_second"]
+        assert [(c["first"]["id"], c["second"]["text"]) for c in result["changed"]] == [(4, "Rewritten after the fact.")]
+        assert result["unchanged"] == 3
+        shifted = [message(1), message(2), message(4, "Rewritten after the fact."), message(5)]
+        for row in shifted:
+            row.date += timedelta(seconds=1)
+        other_side = verify.compare_chat_exports(second, (await export(tmp_path / "t3", shifted, "account1"))[0])
+        assert other_side["method"] == "content" and not other_side["only_first"] and not other_side["only_second"]
+    asyncio.run(scenario())
+
+
+def test_full_recheck_reads_every_absent_number(tmp_path, monkeypatch):
+    async def scenario():
+        manager, entries = coordinator(tmp_path, [message(i) for i in (1, 2, 5, 9)])
+        monkeypatch.setattr(distributed_export, "CHUNK", 2)
+        monkeypatch.setattr(distributed_export, "RECHECK_PER_ACCOUNT", 1)
+        monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
+        try:
+            state = await manager.start(CHAT, list(entries), "account0", selection={"recheck_all": True})
+            await asyncio.wait_for(manager.task, 60)
+            assert manager.state["phase"] == "done", manager.state
+            with zipfile.ZipFile(manager.result_path(state["id"])) as archive:
+                ids = json.loads(archive.read("message-ids.json"))
+            assert ids["recheck"]["asked"] == 5 and ids["recheck"]["unchecked"] == 0, ids["recheck"]
+            assert not ids.get("selection_applied")
+        finally:
+            await manager.close()
+            close_entries(entries)
+    asyncio.run(scenario())
+
+
+class TakeoutClient(Client):
+    def __init__(self, messages):
+        super().__init__(messages)
+        self.requests = []
+
+    async def __call__(self, request, ordered=False):
+        self.requests.append(request)
+        if isinstance(request, account_functions.InitTakeoutSessionRequest):
+            return types.account.Takeout(id=77)
+        return True
+
+
+def test_ranges_are_read_through_a_takeout_session(tmp_path, monkeypatch):
+    async def scenario():
+        rows = [message(i) for i in range(1, 7)]
+        manager, entries = coordinator(tmp_path, rows)
+        for entry in entries.values():
+            entry["app"].state.collector.client = TakeoutClient(rows)
+        monkeypatch.setattr(distributed_export, "CHUNK", 2)
+        monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
+        try:
+            await manager.start(CHAT, list(entries), "account0")
+            await asyncio.wait_for(manager.task, 60)
+            assert manager.state["phase"] == "done", manager.state
+            for entry in entries.values():
+                client = entry["app"].state.collector.client
+                kinds = [type(r).__name__ for r in client.requests]
+                assert kinds.count("InitTakeoutSessionRequest") == 1 and "InvokeWithTakeoutRequest" in kinds, kinds
+                finish = [r for r in client.requests if type(r).__name__ == "InvokeWithTakeoutRequest"]
+                assert finish[-1].takeout_id == 77 and type(finish[-1].query).__name__ == "FinishTakeoutSessionRequest"
+                assert client.iter_options and all(o == {"wait_time": 0} for o in client.iter_options)
+        finally:
+            await manager.close()
+            close_entries(entries)
     asyncio.run(scenario())
 
 

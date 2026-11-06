@@ -192,6 +192,8 @@ def connection(c, now):
         return part("failed", FAILED_PHASES[c["phase"]], **detail)
     if not c.get("has_session"):
         return part("configured" if c.get("phase") in SIGN_IN_PHASES else "off", "no_account", **detail)
+    if c.get("account_loss") and not c.get("running"):
+        return part("failed", "signed_out", cause=c["account_loss"].get("cause"), **detail)
     if not c.get("running"):
         return part("off", "paused", **detail)
     if not c.get("connected"):
@@ -225,12 +227,17 @@ def sources(c, enabled_sources):
               "added": sum(s.get("state") == "discovered" for s in statuses),
               "unconfirmed_total": sum(s.get("state") == "access_unconfirmed" for s in statuses),
               "ignored": sum(s.get("state") == "access_unconfirmed" and bool(s.get("ignored")) for s in statuses),
-              "unconfirmed": sum(s.get("state") == "access_unconfirmed" and not s.get("ignored") for s in statuses)}
+              "unconfirmed": sum(s.get("state") == "access_unconfirmed" and not s.get("ignored") for s in statuses),
+              "lost": sum(s.get("state") == "access_lost" for s in statuses)}
     scope = (c.get("scope") or {}).get("mode", "selected")
     if not enabled_sources and scope == "selected":
         return part("off", "no_sources", counts=counts)
     if not statuses:
         return part("unknown", "not_checked", counts=counts)
+    if counts["lost"] and not (counts["visible"] or counts["added"]):
+        return part("failed", "access_lost", counts=counts)
+    if counts["lost"]:
+        return part("degraded", "some_access_lost", counts=counts)
     if counts["unconfirmed"] and not (counts["visible"] or counts["added"]):
         return part("failed", "none_visible", counts=counts)
     if counts["unconfirmed"]:

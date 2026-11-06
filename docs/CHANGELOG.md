@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Improve chat-export Takeout, unreadable-message recovery, shared absent-number rechecks and bounded range retries. Preserve observed deletions in export scope, compare verified archives, and distinguish archive integrity from an independently confirmed signer.
+- Protect imported sessions from remote logout, close idle connections and prevent simultaneous reuse of a session key. Add explicit session management and masked two-step password entry; cancellation or switching workspaces prevents submission. Read single-account export messages before their separate attachment stage.
 - Keep source export and AI actions disabled while local source search is pending, empty or has failed; clear stale previews before the next search. Exercise delayed replies explicitly in browser checks.
 - Use unambiguous synthetic privacy identifiers and report the exact marker/context on handover-test failures, avoiding accidental matches inside report metadata.
 - Add an in-panel comparison of collection methods and explain account task ownership beside full-history controls. Refresh source-version badges, qualification records and Trusted Live network results; check version labels before publication.
