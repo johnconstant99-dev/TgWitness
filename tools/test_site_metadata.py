@@ -135,20 +135,14 @@ def test_metadata_tracks_localized_page_and_visible_hierarchy():
     assert not any(item["@type"] in {"Review", "AggregateRating"} for item in data)
 
 
-def test_translated_reference_keeps_its_language_and_alternates():
-    for slug in ("changelog",):
-        local = f"docs/reference/{slug}/"
-        source = build_site.seo(BASE, "de/" + local, "Translated navigation", "Translated navigation",
-                               "de", [(lang, build_site.prefix(lang) + local) for lang in site_i18n.LANGUAGES])
-        nodes = parse(source)
-        assert link_map(nodes, "canonical") == BASE + "/de/" + local
-        assert link_map(nodes, "alternate") == {
-            **{metadata[1]: BASE + "/" + build_site.prefix(lang) + local
-               for lang, metadata in site_i18n.LANGUAGES.items()},
-            "x-default": BASE + "/" + local,
-        }
-        assert graph(source, nodes)[0]["inLanguage"] == "de"
-        assert build_site.canonical_path("ru/" + local) == "ru/" + local
+def test_untranslated_reference_consolidates_without_false_alternates():
+    local = "docs/reference/changelog/"
+    source = build_site.seo(BASE, "de/" + local, "Translated navigation", "Translated navigation",
+                            "de", [(lang, build_site.prefix(lang) + local) for lang in site_i18n.LANGUAGES])
+    nodes = parse(source)
+    assert link_map(nodes, "canonical") == BASE + "/" + local
+    assert link_map(nodes, "alternate") == {"en": BASE + "/" + local, "x-default": BASE + "/" + local}
+    assert graph(source, nodes)[0]["inLanguage"] == "en"
 
 
 def test_markdown_preserves_content_and_limits_without_site_controls():
@@ -291,7 +285,7 @@ if __name__ == "__main__":
     else:
         test_complete_navigation_and_unique_metadata()
         test_metadata_tracks_localized_page_and_visible_hierarchy()
-        test_translated_reference_keeps_its_language_and_alternates()
+        test_untranslated_reference_consolidates_without_false_alternates()
         test_markdown_preserves_content_and_limits_without_site_controls()
         test_llms_index_leads_with_workflows_and_verification()
         print("5 metadata and Markdown checks passed.")

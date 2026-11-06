@@ -35,7 +35,7 @@ LANGUAGES = {
 }
 
 
-ENGLISH_ONLY: set[str] = set()
+ENGLISH_ONLY = {"changelog"}
 ATTRIBUTES = ("aria-label", "title", "alt", "placeholder")
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
 
