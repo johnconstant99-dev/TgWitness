@@ -53,7 +53,6 @@ def test_real_panel_controls_export_and_mobile_layout(tmp_path, request):
                 page.locator("#checkpoint").click()
             checkpoint_path = tmp_path / "checkpoint.json"
             download_info.value.save_as(checkpoint_path)
-            # Wait for action completion before the next button can start a request.
             page.wait_for_timeout(300)
             with page.expect_download() as download_info:
                 page.locator("#export").click()

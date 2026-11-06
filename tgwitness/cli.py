@@ -239,7 +239,6 @@ class Remote:
             raise Failure(str(exc), EXIT_USAGE) from None
         self.requests = requests
         self.session = requests.Session()
-        # Like the MCP bridge: no proxy variables, no redirects, so the token reaches only this address.
         self.session.trust_env = False
         self.session.headers.update({"Authorization": "Bearer " + token, "User-Agent": "TgWitness-CLI/" + __version__})
 
@@ -497,7 +496,6 @@ def archive_command(args):
 
 
 def utf8_output():
-    # JSON on a pipe must be UTF-8; Windows otherwise uses the ANSI code page and fails on other scripts.
     for stream in (sys.stdout, sys.stderr):
         if stream is not None and hasattr(stream, "reconfigure") and (stream.encoding or "").lower() not in ("utf-8", "utf8"):
             stream.reconfigure(encoding="utf-8")

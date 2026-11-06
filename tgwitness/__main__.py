@@ -5,6 +5,24 @@ import threading
 from pathlib import Path
 
 LOOPBACK = {"127.0.0.1", "localhost", "::1"}
+COMMANDS_HELP = """commands:
+  setup                 Choose how to open the panel
+  open                  Show the panel address and access key
+  status                Show whether the panel is running and its address
+  start, stop, restart  Control the panel service or background process
+  logs                  Show recent panel logs
+  doctor                Check the installation, storage, keys and port
+  guide, paths          Operator guide; program and data locations
+  token rotate          Replace the administrator access key
+  tunnel on|off|restart|status
+                        Control the temporary HTTPS link
+  verify ARCHIVE        Check a signed export, report or proof offline
+  index, search, context, messages, stats, export
+                        Read the saved journal from the command line
+
+Commands from setup to tunnel need a copy installed by install.sh or install.ps1.
+Details: tgwitness COMMAND --help
+Without a command, an installed copy opens its panel; otherwise the panel server starts."""
 
 
 def should_open_browser(host, no_browser, environ=os.environ, interactive=None):
@@ -48,10 +66,15 @@ def banner(demo, stream=None):
 
 def main():
     from .cli import COMMANDS
+    if sys.argv[1:2] == ["verify"]:
+        from .verify import main as verify
+        sys.argv = ["tgwitness verify", *sys.argv[2:]]
+        raise SystemExit(verify())
     if sys.argv[1:2] and sys.argv[1] in COMMANDS:
         from .cli import main as command
         raise SystemExit(command(sys.argv[1:]))
-    parser = argparse.ArgumentParser(description="TgWitness observation journal")
+    parser = argparse.ArgumentParser(prog="tgwitness", description="TgWitness observation journal", epilog=COMMANDS_HELP,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--host", default=os.environ.get("TGWITNESS_HOST", "127.0.0.1"),
                         help="Listen address (default 127.0.0.1, env TGWITNESS_HOST). Expose remotely only behind HTTPS")
     parser.add_argument("--port", type=int, default=os.environ.get("TGWITNESS_PORT", "8787"),

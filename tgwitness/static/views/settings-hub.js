@@ -377,7 +377,6 @@ export function createSettingsHub(ctx) {
         if(currentAttempt())checkTimer=setTimeout(()=>poll().catch(e=>{if(currentAttempt())connectionFailed(e);}),800);
       };
       const safePoll=async()=>{try{await poll();}catch(e){if(currentAttempt())connectionFailed(e);}};
-      // All future polls use the same error boundary.
       if(currentAttempt())checkTimer=setTimeout(safePoll,600);
     }catch(e){if(currentAttempt())connectionFailed(e);}
   }

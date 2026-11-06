@@ -80,7 +80,7 @@ class Client:
             if self.admin_error:
                 raise self.admin_error
             rows = [e for e in self.actions if (not request.max_id or e.id < request.max_id) and e.id > request.min_id]
-            return NS(events=rows[:1])  # Short pages still require a terminal empty response.
+            return NS(events=rows[:1])
         raise AssertionError(type(request))
 
 
@@ -120,7 +120,6 @@ def test_text_finishes_while_media_waits_then_resume_uses_durable_queue(tmp_path
             assert store.media_stats().get("retry") == 1
             before = len(c.client.reads)
             store.append("independent.test", {"note": "unrelated global tail is valid"})
-            # Projection deletion is repaired from signed observations on resume.
             store.db.execute("DELETE FROM history_items")
             c.client.hold.set()
             await h.resume()
@@ -373,7 +372,7 @@ def test_concurrent_rpc_waiters_share_pacing_and_server_cooldown(tmp_path, monke
         client = WitnessClient(None, 123, "a" * 32)
         client.bulk_pacer = AccountPacer(store)
         client.rpc_backoff_getter = lambda: store.get_setting("rpc_backoff_until", 0)
-        client.rpc_backoff_setter = lambda value: store.set_setting("rpc_backoff_until", value)
+        client.rpc_backoff_setter = lambda value, method: store.set_setting("rpc_backoff_until", value)
         calls = []
         async def underlying(self, sender, request, *args):
             import time

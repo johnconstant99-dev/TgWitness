@@ -9,12 +9,6 @@
   }
   window.addEventListener('tgwitness:lock', () => {for (const hide of activeReveals) hide();});
   try { enabled = localStorage.getItem('tgwitness-mask-secrets') !== 'off'; } catch { }
-  const RU = {
-    'Show': 'Показать', 'Hide': 'Скрыть', 'Retry': 'Повторить', 'Possible secret': 'Возможный секрет',
-    'Revealing a secret is recorded in the journal.': 'Показ секрета будет записан в журнал.',
-    'Could not record this reveal. Try again.': 'Не удалось записать показ в журнал. Повторите попытку.',
-  };
-  const words = (text, tr = x => x) => document.documentElement.lang.startsWith('ru') ? RU[text] || tr(text) : tr(text);
   function luhn(value) {
     const digits = value.replace(/\D/g, '');
     if (digits.length < 13 || digits.length > 19 || /^(\d)\1+$/.test(digits)) return false;
@@ -47,7 +41,6 @@
   }
   function mask(value) {
     const text = String(value ?? '');
-    // Short passwords must not be reconstructed from the visible prefix.
     return text.slice(0, text.length >= 12 ? 4 : text.length >= 6 ? 2 : 0) + '•••••';
   }
   function preview(value) {
@@ -58,15 +51,15 @@
   function revealButton(root, wrap, label, masked, secret, {tr, reveal, current}) {
     if (!reveal) return;
     const button = document.createElement('button'); button.type = 'button'; button.className = 'text-link secret-reveal';
-    button.textContent = words('Show', tr); button.title = words('Revealing a secret is recorded in the journal.', tr);
+    button.textContent = tr('Show'); button.title = tr('Revealing a secret is recorded in the journal.');
     let visible = false, timer, errorNotice = null;
-    const hide = () => {visible = false; label.textContent = masked; button.textContent = words('Show', tr); clearTimeout(timer); activeReveals.delete(hide);};
+    const hide = () => {visible = false; label.textContent = masked; button.textContent = tr('Show'); clearTimeout(timer); activeReveals.delete(hide);};
     button.addEventListener('click', async () => {
       if (visible) {hide(); return;} if (!current() || button.disabled) return;
       button.disabled = true;
       errorNotice?.remove();errorNotice=null;
-      try {await reveal(); if (!current() || !root.isConnected) return; visible = true; label.textContent = secret; button.textContent = words('Hide', tr); button.removeAttribute('aria-label'); activeReveals.add(hide); timer = setTimeout(hide, 30000);}
-      catch {button.title = words('Could not record this reveal. Try again.', tr); button.textContent=words('Retry',tr); button.setAttribute('aria-label', button.title);
+      try {await reveal(); if (!current() || !root.isConnected) return; visible = true; label.textContent = secret; button.textContent = tr('Hide'); button.removeAttribute('aria-label'); activeReveals.add(hide); timer = setTimeout(hide, 30000);}
+      catch {button.title = tr('Could not record this reveal. Try again.'); button.textContent=tr('Retry'); button.setAttribute('aria-label', button.title);
         errorNotice=document.createElement('span');errorNotice.className='secret-reveal-error';errorNotice.setAttribute('role','alert');errorNotice.textContent=button.title;wrap.append(errorNotice);}
       finally {button.disabled = false;}
     });
@@ -81,7 +74,7 @@
       for (const item of found) {
         root.append(document.createTextNode(text.slice(offset, item.start)));
         const secret = text.slice(item.start, item.end), wrap = document.createElement('span'), label = document.createElement('span');
-        wrap.className = 'secret-mask'; label.textContent = mask(secret); label.title = words('Possible secret', tr); wrap.append(label);
+        wrap.className = 'secret-mask'; label.textContent = mask(secret); label.title = tr('Possible secret'); wrap.append(label);
         revealButton(root, wrap, label, mask(secret), secret, {tr, reveal, current});
         root.append(wrap); offset = item.end;
       }

@@ -8,7 +8,6 @@ ASCII = "?!:;,./\\()[]{}\"'@#$%&*+-=~_|"
 PUNCTUATION = str.maketrans({c: chr(ord(c) + 0xFEE0) for c in ASCII} | {
     "—": "，", "–": "－", "“": "＂", "”": "＂", "‘": "＇", "’": "＇",
 })
-# Keep copyable addresses, versions, machine identifiers and JS interpolation keys.
 LITERAL = re.compile(
     r"https?://[^\s<>\"']*[^\s<>\"'.,;!?)]"
     r"|\b(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,}(?::\d+)?\b"

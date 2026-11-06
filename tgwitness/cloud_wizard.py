@@ -16,7 +16,6 @@ from .providers import get
 from .providers.base import DeployError
 from .store import utcnow
 
-# Region → preferred location, then any location in these network zones.
 REGIONS = {"eu": ("nbg1", ("eu-central",)), "us": ("ash", ("us-east", "us-west"))}
 PREFERRED_TYPE = "cpx22"
 MIN_MEMORY = 2
@@ -224,7 +223,6 @@ def version(ref=None, session=None):
 
 
 def billed(rate):
-    # What Phala Cloud bills a created CVM, compute and disk together; it names the disk price only then.
     try:
         hourly = float((rate or {}).get("total"))
     except (TypeError, ValueError):

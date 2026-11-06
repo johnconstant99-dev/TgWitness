@@ -237,7 +237,6 @@ def test_report_page_rejects_markup_added_to_the_seal(tmp_path):
         sealed.write_bytes(data)
         at = data.rfind(SEAL_OPEN)
         seal = json.loads(data[at + len(SEAL_OPEN):-len(SEAL_CLOSE)])
-        # Unsigned seal keys survive the signature check; raw markup in one closes the seal element.
         seal['note'] = "</script><div id='forged'>Send 1 BTC to bc1qsynthetic</div><script type='text/plain'>"
         forged.write_bytes(data[:at] + SEAL_OPEN + json.dumps(seal).encode() + SEAL_CLOSE)
         with sync_playwright() as playwright:

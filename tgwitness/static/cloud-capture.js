@@ -38,76 +38,76 @@
     a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 10000);
   }
   function render(focus = false) {
-    const titles = [t("Save your key", "Сохраните ключ"), t("Start the collector", "Запустите сборщик"),
-      t("Capture the chat", "Выгрузите чат"), t("Get your archive", "Получите архив")];
-    const subtitles = [t("On this device", "На этом устройстве"), t("In your own fork", "В своём форке"),
-      t("In a temporary panel", "Во временной панели"), t("Back here", "Снова здесь")];
+    const titles = [t("Save your key"), t("Start the collector"),
+      t("Capture the chat"), t("Get your archive")];
+    const subtitles = [t("On this device"), t("In your own fork"),
+      t("In a temporary panel"), t("Back here")];
     root.lang = lang; root.dir = ["ar","fa","ur","he"].includes(lang) ? "rtl" : "ltr";
     if (root.closest(".capture-page")) {
       document.documentElement.lang=lang;
       const home=document.querySelector(".capture-header .brand");
       if (home) {const url=new URL(home.href);url.searchParams.set("lang",lang);home.href=url.href;}
     }
-    root.innerHTML = `<div class="page-heading capture-heading"><div><span class="eyebrow">GITHUB ACTIONS <span class="capture-preview">${t("PREVIEW", "ПРЕДВАРИТЕЛЬНАЯ ВЕРСИЯ")}</span></span>
-      <h1>${t("Capture a chat through GitHub", "Выгрузка чата через GitHub")}</h1>
-      <p class="page-description">${t("Collect a Telegram chat on a temporary runner. Receive an encrypted archive and GitHub provenance.", "Выгрузите чат Telegram на временной машине. Получите зашифрованный архив и аттестацию GitHub.")}</p></div>
-      <label class="capture-language"><span>${t("Language", "Язык")}</span><select id="capture-language">${Object.entries(languages).map(([code,name])=>`<option value="${esc(code)}" ${lang === code ? "selected" : ""}>${esc(name)}</option>`).join("")}</select></label></div>
-      <div data-capture-story></div><div class="capture-setup-heading" id="capture-setup" tabindex="-1"><h2>${t("Capture your chat", "Выгрузка чата")}</h2><p>${t("Follow these four steps. Keep this tab open.", "Четыре шага. Оставьте эту вкладку открытой.")}</p></div>
-      <div class="capture-layout"><aside class="capture-rail"><ol class="capture-steps" aria-label="${t("Capture steps", "Шаги выгрузки")}">${titles.map((title, i) => `<li><button type="button" data-capture-step="${i+1}" ${state.busy || (i > 0 && !ready()) ? "disabled" : ""} ${state.step === i+1 ? 'aria-current="step"' : ""}><span class="capture-number">${i+1}</span><span><strong>${title}</strong><small>${subtitles[i]}</small></span></button></li>`).join("")}</ol>
-      <div class="capture-private">${icon("lock")}<p>${t("Your private key stays here. Save it before continuing.", "Закрытый ключ остаётся здесь. Сохраните его перед продолжением.")}</p></div>
-      <a id="instructions" class="text-link" href="https://phishdestroy.github.io/TgWitness/${lang === "en" ? "" : encodeURIComponent(lang) + "/"}docs/capture/" target="_blank" rel="noopener noreferrer">${t("Full instructions", "Подробная инструкция")}</a></aside>
-      <div class="capture-work"><section class="card capture-card" aria-labelledby="capture-step-title" aria-busy="${state.busy}"><div class="capture-step-heading"><span class="eyebrow">${t("STEP", "ШАГ")} ${state.step} / 4</span><h2 id="capture-step-title" tabindex="-1">${titles[state.step-1]}</h2></div>
+    root.innerHTML = `<div class="page-heading capture-heading"><div><span class="eyebrow">GITHUB ACTIONS <span class="capture-preview">${t("PREVIEW")}</span></span>
+      <h1>${t("Capture a chat through GitHub")}</h1>
+      <p class="page-description">${t("Collect a Telegram chat on a temporary runner. Receive an encrypted archive and GitHub provenance.")}</p></div>
+      <label class="capture-language"><span>${t("Language")}</span><select id="capture-language">${Object.entries(languages).map(([code,name])=>`<option value="${esc(code)}" ${lang === code ? "selected" : ""}>${esc(name)}</option>`).join("")}</select></label></div>
+      <div data-capture-story></div><div class="capture-setup-heading" id="capture-setup" tabindex="-1"><h2>${t("Capture your chat")}</h2><p>${t("Follow these four steps. Keep this tab open.")}</p></div>
+      <div class="capture-layout"><aside class="capture-rail"><ol class="capture-steps" aria-label="${t("Capture steps")}">${titles.map((title, i) => `<li><button type="button" data-capture-step="${i+1}" ${state.busy || (i > 0 && !ready()) ? "disabled" : ""} ${state.step === i+1 ? 'aria-current="step"' : ""}><span class="capture-number">${i+1}</span><span><strong>${title}</strong><small>${subtitles[i]}</small></span></button></li>`).join("")}</ol>
+      <div class="capture-private">${icon("lock")}<p>${t("Your private key stays here. Save it before continuing.")}</p></div>
+      <a id="instructions" class="text-link" href="https://phishdestroy.github.io/TgWitness/${lang === "en" ? "" : encodeURIComponent(lang) + "/"}docs/capture/" target="_blank" rel="noopener noreferrer">${t("Full instructions")}</a></aside>
+      <div class="capture-work"><section class="card capture-card" aria-labelledby="capture-step-title" aria-busy="${state.busy}"><div class="capture-step-heading"><span class="eyebrow">${t("STEP")} ${state.step} / 4</span><h2 id="capture-step-title" tabindex="-1">${titles[state.step-1]}</h2></div>
       <p id="capture-error" class="notice error" role="alert" ${state.error ? "" : "hidden"}>${esc(state.error)}</p>
-      <p class="capture-feedback" role="status" ${state.busy || state.note ? "" : "hidden"}>${esc(state.busy ? t("Processing locally…", "Обработка в браузере…") : state.note)}</p>
+      <p class="capture-feedback" role="status" ${state.busy || state.note ? "" : "hidden"}>${esc(state.busy ? t("Processing locally…") : state.note)}</p>
       ${state.step === 1 ? keyStep() : state.step === 2 ? githubStep() : state.step === 3 ? connectionStep() : resultStep()}
-      </section><details class="capture-boundary"><summary>${t("What does GitHub verify?", "Что подтверждает GitHub?")}</summary><p>${t("The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.", "Аттестация связывает архив с разрешённой версией сборщика и позволяет обнаружить последующие изменения. Она не доказывает истинность каждого сообщения или полноту истории. GitHub и HTTPS-туннель остаются доверенной инфраструктурой.")}</p></details>
-      ${state.key ? button("reset", t("Start a new capture", "Начать новую выгрузку"), "quiet capture-reset") : ""}</div></div>`;
-    root.querySelector("#recipient")?.setAttribute("aria-label", t("Public encryption key", "Открытый ключ шифрования"));
+      </section><details class="capture-boundary"><summary>${t("What does GitHub verify?")}</summary><p>${t("The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.")}</p></details>
+      ${state.key ? button("reset", t("Start a new capture"), "quiet capture-reset") : ""}</div></div>`;
+    root.querySelector("#recipient")?.setAttribute("aria-label", t("Public encryption key"));
     const recipient = root.querySelector("#recipient"); if (recipient) recipient.value = state.key?.recipient || "";
     window.TgWitnessCaptureStory?.mount(root.querySelector("[data-capture-story]"), lang);
     if (focus) root.querySelector("#capture-step-title").focus({preventScroll:true});
   }
   function keyStep() {
-    return `<p class="capture-lead">${t("Save this key to open the connection and archive.", "Сохраните ключ: он нужен для подключения и расшифровки архива.")}</p>
-      ${state.key ? `<div class="capture-success">${icon("check")}<div><strong>${t("Your key is ready", "Ключ готов")}</strong><p>sealed-key.json</p></div>${button("save-key", t("Save again", "Скачать ещё раз"), "secondary")}</div>
-      <label class="check-label capture-confirm"><input id="capture-key-saved" type="checkbox" ${state.saved ? "checked" : ""}>${t("I saved sealed-key.json. A lost key cannot be recovered.", "Я сохранил sealed-key.json. Потерянный ключ не восстановить.")}</label>` :
-      `<div class="capture-key-hero">${icon("lock")}<div><strong>${t("A key just for this capture", "Ключ только для этой выгрузки")}</strong><p>${t("Created on your device. Never sent to GitHub.", "Создаётся на вашем устройстве. Не отправляется в GitHub.")}</p></div></div>
-      ${button("generate", icon("lock") + t("Create and save key", "Создать и сохранить ключ"))}`}
-      <div class="capture-import"><p>${t("Already have a key? Open the saved file.", "Ключ уже есть? Откройте сохранённый файл.")}</p><label class="capture-file-button secondary" for="key-file">${icon("file")}${t("Choose key file", "Выбрать файл ключа")}<input class="capture-file-input" id="key-file" type="file" accept=".json" ${state.busy ? "disabled" : ""}></label></div>
-      <div class="capture-actions">${button("next", t("Continue to GitHub", "Перейти к запуску") + icon("arrow"), "primary", !ready())}
-      ${state.key ? button("result", t("I already have an archive", "У меня уже есть архив"), "quiet", !ready()) : ""}</div>`;
+    return `<p class="capture-lead">${t("Save this key to open the connection and archive.")}</p>
+      ${state.key ? `<div class="capture-success">${icon("check")}<div><strong>${t("Your key is ready")}</strong><p>sealed-key.json</p></div>${button("save-key", t("Save again"), "secondary")}</div>
+      <label class="check-label capture-confirm"><input id="capture-key-saved" type="checkbox" ${state.saved ? "checked" : ""}>${t("I saved sealed-key.json. A lost key cannot be recovered.")}</label>` :
+      `<div class="capture-key-hero">${icon("lock")}<div><strong>${t("A key just for this capture")}</strong><p>${t("Created on your device. Never sent to GitHub.")}</p></div></div>
+      ${button("generate", icon("lock") + t("Create and save key"))}`}
+      <div class="capture-import"><p>${t("Already have a key? Open the saved file.")}</p><label class="capture-file-button secondary" for="key-file">${icon("file")}${t("Choose key file")}<input class="capture-file-input" id="key-file" type="file" accept=".json" ${state.busy ? "disabled" : ""}></label></div>
+      <div class="capture-actions">${button("next", t("Continue to GitHub") + icon("arrow"), "primary", !ready())}
+      ${state.key ? button("result", t("I already have an archive"), "quiet", !ready()) : ""}</div>`;
   }
   function githubStep() {
-    return `<p class="capture-lead">${t("Start the collector on GitHub, then return here.", "Запустите сборщик в GitHub и вернитесь сюда.")}</p>
-      <ol class="capture-checklist"><li><strong>${t("Create your own fork", "Создайте свой форк")}</strong><p>${t("Copy the code to your GitHub account. The repository contains no chats.", "Форк — копия кода в вашем GitHub. Переписка туда не попадает.")}</p>${link("https://github.com/phishdestroy/TgWitness/fork", t("Create a fork", "Создать форк"))}</li>
-      <li><strong>${t("Copy the public key", "Скопируйте открытый ключ")}</strong><p>${t("Paste this value into recipient in the GitHub form. Keep sealed-key.json on your device.", "Вставьте это значение в поле recipient в GitHub. Файл sealed-key.json оставьте у себя.")}</p><div class="capture-copy"><textarea id="recipient" rows="3" readonly></textarea>${button("copy", t("Copy", "Копировать"), "secondary")}</div></li>
-      <li><strong>${t("Run Sealed chat capture", "Запустите Sealed chat capture")}</strong><p>${t("Enable Actions in your fork. Open the workflow, press Run workflow, paste recipient and choose 30, 60 or 120 minutes.", "Включите Actions в своём форке. Откройте workflow, нажмите Run workflow, вставьте recipient и выберите 30, 60 или 120 минут.")}</p>
-      <label for="capture-repository">${t("Your fork (optional shortcut)", "Ваш форк (для быстрого перехода)")}</label><input id="capture-repository" placeholder="username/TgWitness" value="${esc(state.repository)}" autocomplete="off" spellcheck="false" maxlength="160">
-      <a id="capture-workflow-link" class="secondary" ${repository() ? `href="https://github.com/${esc(repository())}/actions/workflows/sealed-witness.yml"` : "hidden"} target="_blank" rel="noopener noreferrer">${t("Open Actions in my fork", "Открыть Actions в моём форке")}${icon("external")}</a></li></ol>
-      <details class="capture-command"><summary>${t("Choose API export or official client", "Выберите выгрузку API или официальный клиент")}</summary><p>${t("Set client to api for full-account Takeout or regular API export．Set client to official_web for guarded Telegram Web observation with video．Choose official_egress＝proxy and supply official_proxy，or explicitly choose direct to use the runner public IP without a proxy．This visual mode records one selected chat as rendered，without a custom Telegram API session．", "Выберите client＝api для выгрузки аккаунта через Takeout или обычный API．Выберите client＝official_web для наблюдения через официальный Telegram Web с видеозаписью．Укажите official_egress＝proxy и адрес official_proxy，либо явно выберите direct для подключения с внешнего IP раннера без прокси．Визуальный режим записывает отображаемое в одном выбранном чате，без отдельной API-сессии Telegram．")}</p><p>${t("Keep proxy credentials in the repository Actions secrets OFFICIAL_PROXY_USERNAME and OFFICIAL_PROXY_PASSWORD，never in workflow input fields．An optional official_expected_ip requires that exit address；both modes stop on an observed exit change．Direct mode exposes the runner address to Telegram．A Quick Tunnel opens the temporary panel；it does not provide the account exit．", "Логин и пароль прокси сохраните в секретах Actions репозитория OFFICIAL_PROXY_USERNAME и OFFICIAL_PROXY_PASSWORD，не вводите их в поля запуска．Необязательный official_expected_ip задаёт ожидаемый адрес，оба режима останавливаются при обнаруженной смене выхода．При direct Telegram видит адрес раннера．Quick Tunnel открывает временную панель，он не служит выходом аккаунта．")}</p></details>
-      <p class="hint">${t("No GitHub token is needed here. GitHub account limits and usage rules apply.", "Токен GitHub здесь не нужен. Действуют лимиты аккаунта и правила использования GitHub.")}</p>
-      <div class="capture-actions">${button("next", t("Run started — continue", "Запуск начат — продолжить") + icon("arrow"))}${button("back", t("Back", "Назад"), "quiet")}</div>`;
+    return `<p class="capture-lead">${t("Start the collector on GitHub, then return here.")}</p>
+      <ol class="capture-checklist"><li><strong>${t("Create your own fork")}</strong><p>${t("Copy the code to your GitHub account. The repository contains no chats.")}</p>${link("https://github.com/phishdestroy/TgWitness/fork", t("Create a fork"))}</li>
+      <li><strong>${t("Copy the public key")}</strong><p>${t("Paste this value into recipient in the GitHub form. Keep sealed-key.json on your device.")}</p><div class="capture-copy"><textarea id="recipient" rows="3" readonly></textarea>${button("copy", t("Copy"), "secondary")}</div></li>
+      <li><strong>${t("Run Sealed chat capture")}</strong><p>${t("Enable Actions in your fork. Open the workflow, press Run workflow, paste recipient and choose 30, 60 or 120 minutes.")}</p>
+      <label for="capture-repository">${t("Your fork (optional shortcut)")}</label><input id="capture-repository" placeholder="username/TgWitness" value="${esc(state.repository)}" autocomplete="off" spellcheck="false" maxlength="160">
+      <a id="capture-workflow-link" class="secondary" ${repository() ? `href="https://github.com/${esc(repository())}/actions/workflows/sealed-witness.yml"` : "hidden"} target="_blank" rel="noopener noreferrer">${t("Open Actions in my fork")}${icon("external")}</a></li></ol>
+      <details class="capture-command"><summary>${t("Choose API export or official client")}</summary><p>${t("Set client to api for full-account Takeout or regular API export．Set client to official_web for guarded Telegram Web observation with video．Choose official_egress＝proxy and supply official_proxy，or explicitly choose direct to use the runner public IP without a proxy．This visual mode records one selected chat as rendered，without a custom Telegram API session．")}</p><p>${t("Keep proxy credentials in the repository Actions secrets OFFICIAL_PROXY_USERNAME and OFFICIAL_PROXY_PASSWORD，never in workflow input fields．An optional official_expected_ip requires that exit address；both modes stop on an observed exit change．Direct mode exposes the runner address to Telegram．A Quick Tunnel opens the temporary panel；it does not provide the account exit．")}</p></details>
+      <p class="hint">${t("No GitHub token is needed here. GitHub account limits and usage rules apply.")}</p>
+      <div class="capture-actions">${button("next", t("Run started — continue") + icon("arrow"))}${button("back", t("Back"), "quiet")}</div>`;
   }
   function connectionStep() {
-    return `<p class="capture-lead">${t("Keep the GitHub run active. Download sealed-connection from its Artifacts, unzip it, and select the file below.", "Оставьте задачу GitHub работающей. Скачайте sealed-connection из её Artifacts, распакуйте ZIP и выберите файл ниже.")}</p>
+    return `<p class="capture-lead">${t("Keep the GitHub run active. Download sealed-connection from its Artifacts, unzip it, and select the file below.")}</p>
       <div class="capture-file-path"><span>sealed-connection.zip</span>${icon("arrow")}<strong>connection.tgwsealed</strong></div>
-      <label class="capture-file-picker" for="connection-file">${icon("file")}<strong>${t("Open connection.tgwsealed", "Открыть connection.tgwsealed")}</strong><span>${t("The connection is decrypted on this device.", "Подключение расшифровывается на этом устройстве.")}</span><input class="capture-file-input" id="connection-file" type="file" accept=".tgwsealed" ${state.busy ? "disabled" : ""}></label>
-      ${state.connection ? `<div class="capture-success">${icon("check")}<div><strong>${t("Your temporary panel is ready", "Временная панель готова")}</strong><p>${t("Open the temporary panel，sign in to Telegram and choose the export mode，chats and attachments before starting．", "Откройте временную панель，войдите в Telegram и перед запуском выберите режим，чаты и вложения．")}</p></div></div>
-      ${link(state.connection.url, t("Sign in to Telegram and choose export settings", "Войти в Telegram и выбрать настройки выгрузки"), "primary", "open-connection")}
-      <p class="hint">${t("After capture, return to step 4. Keep the panel link private.", "После сбора вернитесь на шаг 4. Ссылку на панель держите в секрете.")}</p>` : ""}
-      <div class="capture-actions">${button("next", t("Go to the result", "Перейти к получению архива") + icon("arrow"))}${button("back", t("Back", "Назад"), "quiet")}</div>`;
+      <label class="capture-file-picker" for="connection-file">${icon("file")}<strong>${t("Open connection.tgwsealed")}</strong><span>${t("The connection is decrypted on this device.")}</span><input class="capture-file-input" id="connection-file" type="file" accept=".tgwsealed" ${state.busy ? "disabled" : ""}></label>
+      ${state.connection ? `<div class="capture-success">${icon("check")}<div><strong>${t("Your temporary panel is ready")}</strong><p>${t("Open the temporary panel，sign in to Telegram and choose the export mode，chats and attachments before starting．")}</p></div></div>
+      ${link(state.connection.url, t("Sign in to Telegram and choose export settings"), "primary", "open-connection")}
+      <p class="hint">${t("After capture, return to step 4. Keep the panel link private.")}</p>` : ""}
+      <div class="capture-actions">${button("next", t("Go to the result") + icon("arrow"))}${button("back", t("Back"), "quiet")}</div>`;
   }
   function resultStep() {
-    return `<p class="capture-lead">${t("Once the GitHub run finishes, download sealed-result from Artifacts and unzip it. Open the encrypted file here with the same key.", "После завершения задачи GitHub скачайте sealed-result из Artifacts и распакуйте ZIP. Откройте зашифрованный файл здесь с тем же ключом.")}</p>
+    return `<p class="capture-lead">${t("Once the GitHub run finishes, download sealed-result from Artifacts and unzip it. Open the encrypted file here with the same key.")}</p>
       <div class="capture-file-path"><span>sealed-result.zip</span>${icon("arrow")}<strong>delivery.tgwsealed</strong></div>
-      <label class="capture-file-picker" for="result-file">${icon("file")}<strong>${t("Decrypt and save archive", "Расшифровать и сохранить архив")}</strong><span>delivery.tgwsealed · ${t("up to 256 MiB", "до 256 МиБ")}</span><input class="capture-file-input" id="result-file" type="file" accept=".tgwsealed" ${state.busy ? "disabled" : ""}></label>
-      ${state.delivered ? `<div class="capture-success">${icon("check")}<div><strong>${t("Decrypted — save delivery.zip", "Расшифровано — сохраните delivery.zip")}</strong><p>${t("It contains evidence.zip and attestation.jsonl. Decryption does not yet verify the signature.", "Внутри evidence.zip и attestation.jsonl. Расшифровка ещё не означает, что подпись проверена.")}</p></div></div>` : ""}
-      <details class="capture-command" ${state.delivered ? "open" : ""}><summary>${t("Verify the archive after downloading", "Проверить архив после скачивания")}</summary><p>${t("Unzip delivery.zip. Run this command using a trusted TgWitness installation and GitHub CLI; replace OWNER/TgWitness with the fork that ran the capture.", "Распакуйте delivery.zip. Выполните команду в доверенной установке TgWitness с GitHub CLI; вместо OWNER/TgWitness укажите форк, из которого запускался сбор.")}</p><pre>python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo ${esc(repository() || "OWNER/TgWitness")}</pre></details>
-      <details class="capture-command"><summary>${t("Archive larger than 256 MiB?", "Архив больше 256 МиБ?")}</summary><p>${t("Decrypt it with the local command instead of loading the entire file into browser memory.", "Расшифруйте его локальной командой, чтобы не загружать весь файл в память браузера.")}</p><pre>python -m tgwitness.sealed_crypto decrypt delivery.tgwsealed --key sealed-key.json --out delivery.zip</pre></details>
+      <label class="capture-file-picker" for="result-file">${icon("file")}<strong>${t("Decrypt and save archive")}</strong><span>delivery.tgwsealed · ${t("up to 256 MiB")}</span><input class="capture-file-input" id="result-file" type="file" accept=".tgwsealed" ${state.busy ? "disabled" : ""}></label>
+      ${state.delivered ? `<div class="capture-success">${icon("check")}<div><strong>${t("Decrypted — save delivery.zip")}</strong><p>${t("It contains evidence.zip and attestation.jsonl. Decryption does not yet verify the signature.")}</p></div></div>` : ""}
+      <details class="capture-command" ${state.delivered ? "open" : ""}><summary>${t("Verify the archive after downloading")}</summary><p>${t("Unzip delivery.zip. Run this command using a trusted TgWitness installation and GitHub CLI; replace OWNER/TgWitness with the fork that ran the capture.")}</p><pre>python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo ${esc(repository() || "OWNER/TgWitness")}</pre></details>
+      <details class="capture-command"><summary>${t("Archive larger than 256 MiB?")}</summary><p>${t("Decrypt it with the local command instead of loading the entire file into browser memory.")}</p><pre>python -m tgwitness.sealed_crypto decrypt delivery.tgwsealed --key sealed-key.json --out delivery.zip</pre></details>
       <details class="capture-command"><summary>Multipart delivery</summary><p>Open delivery.tgwsealed first and unzip delivery.zip. If it contains evidence.parts.json, keep all delivery-000001.tgwsealed files beside that manifest. Assemble the archive with your saved key, then verify it. You can also decrypt individual parts here; each keeps its numbered filename.</p><pre>python -m tgwitness.sealed_parts evidence.parts.json --key sealed-key.json --out evidence.zip
 python -m tgwitness.sealed_verify evidence.parts.json --bundle attestation.jsonl --repo ${esc(repository() || "OWNER/TgWitness")} --max-gib 64</pre></details>
-      <p class="hint">${t("Artifacts expire after one day. End the temporary Telegram session in Settings → Devices if logout was not confirmed.", "Артефакты хранятся один день. Если выход не подтверждён, завершите временную сессию в Telegram → Настройки → Устройства.")}</p>
-      <div class="capture-actions">${button("back", t("Back", "Назад"), "secondary")}</div>`;
+      <p class="hint">${t("Artifacts expire after one day. End the temporary Telegram session in Settings → Devices if logout was not confirmed.")}</p>
+      <div class="capture-actions">${button("back", t("Back"), "secondary")}</div>`;
   }
   async function perform(work) {
     if (state.busy) return;
@@ -118,7 +118,7 @@ python -m tgwitness.sealed_verify evidence.parts.json --bundle attestation.jsonl
     finally {if (version === epoch) {state.busy = false; render();}}
   }
   async function readKey(value) {
-    if (value.format !== "tgwitness-recipient-key-v1") throw new Error(t("Choose a TgWitness sealed-key.json file.", "Выберите файл sealed-key.json, созданный TgWitness."));
+    if (value.format !== "tgwitness-recipient-key-v1") throw new Error(t("Choose a TgWitness sealed-key.json file."));
     const key = await crypto.subtle.importKey("pkcs8", unb64(value.private_key), {name:"RSA-OAEP",hash:"SHA-256"}, false, ["decrypt"]);
     const pub = await crypto.subtle.importKey("spki", unb64(value.recipient), {name:"RSA-OAEP",hash:"SHA-256"}, false, ["encrypt"]);
     if (![3072,4096].includes(key.algorithm.modulusLength)) throw new Error("Unsupported key size");
@@ -128,8 +128,8 @@ python -m tgwitness.sealed_verify evidence.parts.json --bundle attestation.jsonl
     return key;
   }
   async function decrypt(file, maximum) {
-    if (!state.privateKey || !file) throw new Error(t("Load your saved key on step 1 first.", "Сначала загрузите сохранённый ключ на шаге 1."));
-    if (file.size > maximum) throw new Error(t("This file is too large. Use the local decryption command below.", "Этот файл слишком большой. Используйте локальную команду расшифровки ниже."));
+    if (!state.privateKey || !file) throw new Error(t("Load your saved key on step 1 first."));
+    if (file.size > maximum) throw new Error(t("This file is too large. Use the local decryption command below."));
     try {
       const key = state.privateKey, bytes = new Uint8Array(await file.arrayBuffer()), magic = encoder.encode("TGWSEAL1\n");
       if (bytes.length < 29 || decoder.decode(bytes.slice(0,magic.length)) !== "TGWSEAL1\n") throw new Error("format");
@@ -141,7 +141,7 @@ python -m tgwitness.sealed_verify evidence.parts.json --bundle attestation.jsonl
       if (raw.byteLength !== 32 || iv.length !== 12) throw new Error("parameters");
       const aes = await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]);
       return await crypto.subtle.decrypt({name:"AES-GCM",iv,additionalData:bytes.slice(0,end),tagLength:128},aes,bytes.slice(end));
-    } catch {throw new Error(t("Could not decrypt. Use the key from this run and the unpacked .tgwsealed file, not the GitHub ZIP.", "Не удалось расшифровать. Нужны ключ этого запуска и распакованный файл .tgwsealed, а не ZIP из GitHub."));}
+    } catch {throw new Error(t("Could not decrypt. Use the key from this run and the unpacked .tgwsealed file, not the GitHub ZIP."));}
   }
   root.addEventListener("click", event => {
     const step = event.target.closest("[data-capture-step]");
@@ -157,12 +157,12 @@ python -m tgwitness.sealed_verify evidence.parts.json --bundle attestation.jsonl
     if (action === "save-key") {save(JSON.stringify(state.key),"sealed-key.json","application/json");return;}
     if (action === "copy") {
       const text=state.key.recipient, version=epoch, field=root.querySelector("#recipient");
-      const manual=()=>{if(field.isConnected){field.select();const feedback=root.querySelector(".capture-feedback");feedback.hidden=false;feedback.textContent=t("The key is selected. Copy it manually with Ctrl+C or your browser's Copy action.","Ключ выделен. Скопируйте его вручную через Ctrl+C или команду «Копировать» браузера.");}};
-      navigator.clipboard?.writeText(text).then(()=>{if(version===epoch && state.step===2){state.note=t("Public key copied. Paste it into recipient in GitHub.","Открытый ключ скопирован. Вставьте его в recipient в GitHub.");render();}},manual) ?? manual();
+      const manual=()=>{if(field.isConnected){field.select();const feedback=root.querySelector(".capture-feedback");feedback.hidden=false;feedback.textContent=t("The key is selected. Copy it manually with Ctrl+C or your browser's Copy action.");}};
+      navigator.clipboard?.writeText(text).then(()=>{if(version===epoch && state.step===2){state.note=t("Public key copied. Paste it into recipient in GitHub.");render();}},manual) ?? manual();
       return;
     }
     if (action === "generate") perform(async()=>{
-      if (!globalThis.isSecureContext || !crypto.subtle) throw new Error(t("Open this page over HTTPS or localhost to create a key.", "Откройте страницу по HTTPS или через localhost для создания ключа."));
+      if (!globalThis.isSecureContext || !crypto.subtle) throw new Error(t("Open this page over HTTPS or localhost to create a key."));
       const pair=await crypto.subtle.generateKey({name:"RSA-OAEP",modulusLength:3072,publicExponent:new Uint8Array([1,0,1]),hash:"SHA-256"},true,["encrypt","decrypt"]);
       const record={format:"tgwitness-recipient-key-v1",recipient:b64(await crypto.subtle.exportKey("spki",pair.publicKey)),private_key:b64(await crypto.subtle.exportKey("pkcs8",pair.privateKey))};
       const key=await readKey(record);
@@ -181,9 +181,9 @@ python -m tgwitness.sealed_verify evidence.parts.json --bundle attestation.jsonl
     if (input.id === "capture-key-saved") {state.saved=input.checked;render();return;}
     const file=input.files?.[0];if (!file) return;
     if (input.id === "key-file") perform(async()=>{
-      if (file.size > 16384) throw new Error(t("This is not a key file. Choose sealed-key.json.", "Это не файл ключа. Выберите sealed-key.json."));
+      if (file.size > 16384) throw new Error(t("This is not a key file. Choose sealed-key.json."));
       let value,key;
-      try {value=JSON.parse(await file.text());key=await readKey(value);} catch {throw new Error(t("Cannot read this key. Choose the saved sealed-key.json file.", "Не удалось прочитать ключ. Выберите сохранённый sealed-key.json."));}
+      try {value=JSON.parse(await file.text());key=await readKey(value);} catch {throw new Error(t("Cannot read this key. Choose the saved sealed-key.json file."));}
       return ()=>{state.key=value;state.privateKey=key;state.saved=true;state.connection=null;state.delivered=false;};
     });
     if (input.id === "connection-file") perform(async()=>{
@@ -191,14 +191,14 @@ python -m tgwitness.sealed_verify evidence.parts.json --bundle attestation.jsonl
       const value=JSON.parse(decoder.decode(await decrypt(file,65536))), url=new URL(value.url);
       if (value.format !== "tgwitness-sealed-connection-v1" || url.protocol !== "https:" || !/^[a-z0-9-]+\.trycloudflare\.com$/.test(url.hostname) ||
           url.username || url.password || url.port || url.pathname !== "/" || url.search || !/^#access=[A-Za-z0-9_-]{43}$/.test(url.hash))
-        throw new Error(t("This is not a valid capture connection file.", "Это не корректный файл подключения к сборщику."));
+        throw new Error(t("This is not a valid capture connection file."));
       return ()=>{state.connection={url:url.href};};
     });
     if (input.id === "result-file") perform(async()=>{
       const value=await decrypt(file,256*1024*1024), header=new Uint8Array(value,0,Math.min(4,value.byteLength));
       const part=/^delivery-([0-9]{6})\.tgwsealed$/.exec(file.name);
       if (part) return ()=>{save(value,"evidence.zip.part"+part[1],"application/octet-stream");};
-      if (header[0]!==80 || header[1]!==75 || header[2]!==3 || header[3]!==4) throw new Error(t("The decrypted file is not an archive.", "Расшифрованный файл не является архивом."));
+      if (header[0]!==80 || header[1]!==75 || header[2]!==3 || header[3]!==4) throw new Error(t("The decrypted file is not an archive."));
       return ()=>{save(value,"delivery.zip","application/zip");state.delivered=true;};
     });
   });

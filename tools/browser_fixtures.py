@@ -42,6 +42,10 @@ class FakeClient:
             raise RPCError(request, "TAKEOUT_UNAVAILABLE_IN_TEST", 400)
         if isinstance(request, functions.channels.GetAdminLogRequest):
             return NS(events=[], users=[], chats=[])
+        if isinstance(request, functions.users.GetUsersRequest) and self.authorized:
+            return [types.User(id=self.account_id, username="synthetic", first_name="Synthetic")]
+        if isinstance(request, functions.help.GetAppConfigRequest):
+            return types.help.AppConfig(hash=0, config=types.JsonObject([]))
         raise NotImplementedError(type(request).__name__)
 
     def add_event_handler(self, handler, spec):

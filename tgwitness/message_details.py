@@ -88,7 +88,7 @@ def forward(header):
     return {k: v for k, v in found.items() if v not in (None, "")} or None
 
 
-def media_info(media):
+def media_info(media, unread=None):
     if not isinstance(media, dict) or media.get("_") in (None, "", "MessageMediaEmpty"):
         return None
     info = {"kind": media["_"]}
@@ -115,9 +115,9 @@ def media_info(media):
     webpage = media.get("webpage") if isinstance(media.get("webpage"), dict) else None
     if webpage and webpage.get("url"):
         info.update(url=webpage.get("url"), site_name=webpage.get("site_name"), title=webpage.get("title"))
-    if media.get("ttl_seconds"):
+    if media.get("ttl_seconds") and media["ttl_seconds"] != ephemeral.VIEW_ONCE:
         info["self_destruct_seconds"] = media["ttl_seconds"]
-    if facts := ephemeral.describe(media):
+    if facts := ephemeral.describe(media, unread):
         info["ephemeral_media"] = facts
     return {k: v for k, v in info.items() if v not in (None, "")}
 
@@ -132,5 +132,6 @@ def details(raw):
              "replies": (raw.get("replies") or {}).get("replies") if isinstance(raw.get("replies"), dict) else None,
              "reactions": reactions(raw.get("reactions")),
              "auto_delete_seconds": raw.get("ttl_period"), "protected": raw.get("noforwards") or None,
-             "album_id": raw.get("grouped_id"), "media_info": media_info(raw.get("media"))}
+             "album_id": raw.get("grouped_id"),
+             "media_info": media_info(raw.get("media"), None if raw.get("out") else raw.get("media_unread"))}
     return {k: v for k, v in found.items() if v not in (None, "", [], {})}

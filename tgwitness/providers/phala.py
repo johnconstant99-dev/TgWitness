@@ -93,7 +93,6 @@ class Phala(Provider):
             body["image"] = spec["image"]
         prepared = self.call("POST", "/cvms", body)
         if "image" not in body:
-            # Phala's default is the development build of its current OS release, with SSH and debugging.
             if not isinstance(prepared.get("os_image_version"), str) or not prepared["os_image_version"]:
                 raise DeployError("Phala Cloud did not name its current OS image; choose one with --image")
             body["image"] = "dstack-" + prepared["os_image_version"]
@@ -121,7 +120,6 @@ class Phala(Provider):
         found = self.call("GET", "/cvms/" + cvm)
         if found.get("status") != "running":
             return None
-        # Without the dstack gateway Phala leaves instance_id empty in the CVM details; its state has it.
         found["instance_id"] = found.get("instance_id") or self.call("GET", "/cvms/" + cvm + "/state").get("instance_id")
         return found if found["instance_id"] else None
 
@@ -190,7 +188,6 @@ class Phala(Provider):
                             "operation": revision.get("operation_type"), "started": revision.get("created_at"),
                             "finished": revision.get("created_at"), "status": "success",
                             "actor": (revision.get("triggered_by") or {}).get("username")})
-        # Restarts, stops and starts are not revisions; Phala lists them as operations of the CVM.
         cursor = None
         while True:
             data = self.call("GET", "/cvms/" + str(record["server"]["id"]) + "/operations",

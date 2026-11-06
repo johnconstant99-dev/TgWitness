@@ -208,7 +208,6 @@ async def preview_capture(collector, chat_id, settings, remaining_seconds):
             identity = (rep["kind"], rep["id"], rep["variant"], rep["bytes"]) if rep else None
             if identity and identity in seen:
                 sample["duplicate_references"] += 1
-                # Only hash requests are deduplicated before network transfer in this engine.
                 if action == "hashes_only":
                     continue
             if identity:

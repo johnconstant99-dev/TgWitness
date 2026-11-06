@@ -25,8 +25,6 @@ from tgwitness.store import Store, canonical
 from tgwitness.verify import (SEAL_CLOSE, SEAL_OPEN, fingerprint, verify_bundle, verify_dossier, verify_handover,
                               verify_report)
 
-# A short numeric ID can occur by chance inside a report UUID, hash or signature.
-# Keep the scan across every output; use an unambiguous synthetic identifier.
 CHAT, PERSON = -1000000000123, 7700112233445
 WHEN = datetime(2026, 10, 1, 12, tzinfo=timezone.utc)
 

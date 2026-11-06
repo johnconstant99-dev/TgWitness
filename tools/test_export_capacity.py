@@ -148,7 +148,6 @@ def test_sealed_compact_fallback_preserves_evidence_and_refuses_other_errors(tmp
                 assert json.loads(z.read('manifest.json'))['packaging']['preserved_media_omitted'] is False
                 saved = [e['payload']['media_sha256'] for e in events if e['kind'] == 'media.saved']
                 assert saved and all(hashlib.sha256(z.read('media/' + h)).hexdigest() == h for h in saved)
-            # The existing encrypted handoff accepts the compact evidence format.
             attestation = tmp_path / 'out/attestation.jsonl'
             attestation.write_text('synthetic test attestation, not a GitHub proof')
             package(cfg, path.parent, attestation)

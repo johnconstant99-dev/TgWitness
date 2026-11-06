@@ -134,7 +134,7 @@ def test_distributed_sparse_recheck_is_bounded_and_cancellable(tmp_path, monkeyp
     async def scenario():
         chat_id = -1000000000042
         index = SelectionIndex(tmp_path / "selection.sqlite3", chat_id)
-        manager = object.__new__(distributed_export.DistributedExport)
+        manager = object.__new__(distributed_export.Run)
         manager.job, manager.state = {"chat_id": chat_id}, {"workers": [{"profile_id": "account", "state": "done"}]}
         manager.entities = {"account": types.PeerChannel(42)}
         asked = []
@@ -146,7 +146,6 @@ def test_distributed_sparse_recheck_is_bounded_and_cancellable(tmp_path, monkeyp
             return {}
 
         manager.app_for = lambda _: SimpleNamespace(state=SimpleNamespace(collector=SimpleNamespace(read_numbers=read)))
-        # The former eager range expansion fails safely instead of exhausting test memory.
         def bounded_range(*args):
             result = builtins.range(*args)
             assert len(result) <= 10000, "Missing IDs must not be expanded before sampling"
@@ -197,7 +196,6 @@ def test_session_key_is_released_only_after_transport_shutdown(collector, monkey
             await entered.wait()
             with pytest.raises(KeyInUse):
                 KeyLock(key)
-            # The shielded disconnect still completes if the awaiting operation is cancelled.
             task.cancel()
             with pytest.raises(asyncio.CancelledError):
                 await task

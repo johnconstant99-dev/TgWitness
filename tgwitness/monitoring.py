@@ -59,11 +59,11 @@ def capture_settings(store):
 def normalize_capture(previous):
     saved = previous or {}
     rules = saved.get("types") or {}
-    legacy = saved.get("max_media_mb") if saved and "types" not in saved else None
+    legacy = bool(saved) and "types" not in saved
     types = {}
     for kind in MEDIA_TYPES:
-        rule = rules.get(kind) or {"enabled": previous is not None or kind not in MEDIA_DEFAULT_OFF,
-                                   "max_mb": legacy or MEDIA_DEFAULT_MB[kind]}
+        rule = rules.get(kind) or {"enabled": legacy or kind not in MEDIA_DEFAULT_OFF,
+                                   "max_mb": legacy and saved.get("max_media_mb") or MEDIA_DEFAULT_MB[kind]}
         types[kind] = {"enabled": bool(rule.get("enabled", True)), "max_mb": int(rule.get("max_mb") or 20)}
         if rule.get("max_seconds"):
             types[kind]["max_seconds"] = int(rule["max_seconds"])
@@ -90,9 +90,6 @@ def media_action(settings, rule, size):
 
 def effective_media_rule(settings, kind, ephemeral_media=None):
     rule = settings["types"][kind]
-    # A global metadata/hash-only choice still forbids downloading file bytes.
-    # The explicit ephemeral choice bypasses type and duration exclusions, but
-    # retains the configured per-type byte ceiling and disk/FloodWait limits.
     if ephemeral_media and settings["preserve_ephemeral_media"]:
         return {"enabled": True, "max_mb": rule["max_mb"], "action": settings["media_action"]}
     return rule

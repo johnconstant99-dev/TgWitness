@@ -3,14 +3,20 @@ from contextlib import ExitStack
 import hashlib
 import re
 import shutil
+import sqlite3
 import uuid
 
 from starlette.responses import JSONResponse
 
 from . import health
 from .account_import import session_key
+from .export_history import unexported
 
 
+UNEXPORTED = ("Export evidence before deleting: the journal has records that are not in a signed evidence ZIP yet. "
+              "Pause observation and download the signed ZIP under Export records.")
+UNREADABLE = ("This workspace could not start, so its journal cannot be exported here. Preserve its data directory: "
+              "deleting it would lose records that are not in a signed evidence ZIP.")
 GROUP_SECTIONS = {
     "parameters": ("parameters",),
     "reports": ("report_options",),
@@ -18,6 +24,10 @@ GROUP_SECTIONS = {
     "recheck": ("recheck_minutes", "recheck_other_minutes"),
     "route": ("route_policy",),
 }
+
+
+class JournalNotExported(ValueError):
+    pass
 
 
 class Profiles:
@@ -178,7 +188,27 @@ class Profiles:
                 self.app.state.store.append("profile.renamed", {"profile_id": profile_id})
             return {"id": profile_id, "label": label}
 
-    async def delete(self, profile_id):
+    def deletion_blocked(self, profile_id):
+        entry = self.entries.get(profile_id)
+        if profile_id == "default" or not entry or entry.get("deleting"):
+            return None
+        if entry.get("app") is not None:
+            store = entry["app"].state.store
+            with store.lock:
+                return UNEXPORTED if unexported(store.db) else None
+        journal = self.root / "profiles" / profile_id / "journal.sqlite3"
+        if not journal.is_file():
+            return None
+        try:
+            db = sqlite3.connect(journal.as_uri() + "?mode=ro", uri=True)
+            try:
+                return UNREADABLE if unexported(db) else None
+            finally:
+                db.close()
+        except (sqlite3.Error, ValueError, KeyError, TypeError):
+            return UNREADABLE
+
+    async def delete(self, profile_id, require_export=True):
         async with self.lock:
             if profile_id == "default":
                 raise ValueError("The main account workspace cannot be deleted.")
@@ -188,6 +218,9 @@ class Profiles:
             directory = self.root / "profiles" / profile_id
             if not re.fullmatch(r"[a-f0-9]{32}", profile_id) or directory.resolve() != directory:
                 raise ValueError("Refusing to delete a workspace through a filesystem link. Inspect its data directory.")
+            reason = self.deletion_blocked(profile_id) if require_export else None
+            if reason:
+                raise JournalNotExported(reason)
 
 
             multi = getattr(self.app.state, "multi_export", None)
@@ -394,6 +427,7 @@ class Profiles:
                     "sources_enabled": sources["enabled"] if sources else None,
                     "sources_total": sources["total"] if sources else None,
                     "error_type": profile.get("error_type"),
+                    "deletion_blocked": self.deletion_blocked(profile["id"]),
                 })
             return result
 

@@ -116,9 +116,10 @@ async function startViewer(meta){
     for(const t of tabs)if(t.dataset.view==="data")t.querySelector("b").textContent=num(V.items.length);
     if(!V.bound){bindControls();V.bound=true;}buildFilters();apply();buildPeople();buildIocs();buildCheck();}
 
-  // ---- Items: one shape for chat messages and journal records ----
   function chatItem(r){const d=r||{};const file=d.file?{path:d.file,sha:d.file_sha256,size:d.file_size,kind:d.file_kind,mime:(d.media_info||{}).mime_type}:null;
-    const it={key:"m"+d.id,n:d.id,at:d.date,who:d.from||(d.from_id!=null?"ID "+d.from_id:say("Unknown")),user:d.from_username,uid:d.from_id,
+    const notes=d.from_basis==="export_time"?[say("name at export")]:[];
+    if(d.from_source==="contact")notes.push(say("from the account's contacts"));else if(notes.length&&d.from_source==="profile")notes.push(say("from the Telegram profile"));
+    const it={key:"m"+d.id,n:d.id,at:d.date,who:d.from||(d.from_id!=null?"ID "+d.from_id:say("Unknown")),note:notes.join(" · "),user:d.from_username,uid:d.from_id,
       text:d.text||"",cat:d.type==="service"?"service":d.media_type?"media":d.edited?"edited":"text",d,file,raw:r,
       service:d.type==="service"?actionText(d.action)+(d.action_title?" · “"+d.action_title+"”":""):"",edited:d.edited,found:d.found_on_recheck,
       fileHashes:d.server_hashes?{sha:d.file_hash_sha256,bytes:d.server_hashes.covered_bytes,ranges:d.server_hashes.ranges?.length,
@@ -144,7 +145,6 @@ async function startViewer(meta){
       p.messages++;if(it.at<p.first_message_at)p.first_message_at=it.at;if(it.at>p.last_message_at)p.last_message_at=it.at;map.set(id,p);}
     return [...map.values()].sort((a,b)=>b.messages-a.messages);}
 
-  // ---- Filters ----
   function buildFilters(){
     const counts={};for(const it of V.items)counts[it.cat]=(counts[it.cat]||0)+1;
     $("#v-cats").innerHTML=Object.entries(meta.cats).filter(([c])=>counts[c]).map(([c,label])=>'<button type="button" class="v-chip tone-'
@@ -203,13 +203,12 @@ async function startViewer(meta){
     for(const b of $$("#v-active [data-off]"))b.addEventListener("click",()=>{const k=b.dataset.off;if(k==="keys")f.keys=null;else f.people.delete(k.slice(7));V.drawPeople();apply();});
     render(0);}
 
-  // ---- The feed: rows rendered as they come into view ----
   function render(from){V.from=from;V.to=from;const list=$("#v-list");list.innerHTML="";$("#v-earlier").hidden=from===0;
     if(!V.results.length)list.innerHTML='<div class="v-empty">'+esc(say("Nothing matches these filters."))+"</div>";more();}
   function day(it){return (it&&it.at||"").slice(0,10);}
   function gapBetween(a,b){return chat&&meta.numbered&&V.plain&&a&&b&&b.n>a.n+1;}
   function together(a,b){return chat&&a&&b&&V.filter.sort==="asc"&&a.cat!=="service"&&b.cat!=="service"&&String(a.uid??a.who)===String(b.uid??b.who)
-    &&day(a)===day(b)&&!gapBetween(a,b)&&Math.abs(new Date(b.at)-new Date(a.at))<10*60000;}
+    &&a.who===b.who&&day(a)===day(b)&&!gapBetween(a,b)&&Math.abs(new Date(b.at)-new Date(a.at))<10*60000;}
   function more(){if(V.to>=V.results.length)return;const list=$("#v-list"),html=[];let end=Math.min(V.results.length,V.to+150);
     for(let i=V.to;i<end;i++){const it=V.results[i],prev=V.results[i-1],next=V.results[i+1];
       if(day(it)!==day(prev))html.push('<div class="day-sep"><span>'+esc(dayOf(it.at))+"</span></div>");
@@ -250,7 +249,7 @@ async function startViewer(meta){
       '<div class="msg-media">'+ic("file")+"<span>"+esc(it.file&&it.file.name||(it.d.media_info||{}).file_name||say("Attachment"))+"</span></div>":"";
     return '<article class="msg '+colour(it.uid??it.who)+(first?" first":"")+(last?" last":"")+(V.selected.has(it.key)?" picked":"")+'" data-key="'+it.key+'" role="listitem" tabindex="0">'
       +pickBox(it)+'<div class="msg-ava">'+(last?'<div class="ava">'+esc(initials(it.who))+"</div>":"")+'</div><div class="msg-bubble">'
-      +(first?'<div class="msg-name">'+esc(it.who)+(it.user?"<span>@"+esc(it.user)+"</span>":"")+"</div>":"")+media+hashNotice(it)
+      +(first?'<div class="msg-name">'+esc(it.who)+(it.user?"<span>@"+esc(it.user)+"</span>":"")+(it.note?"<span>"+esc(it.note)+"</span>":"")+"</div>":"")+media+hashNotice(it)
       +(it.text?'<div class="msg-text" dir="auto">'+hl(shortText(it.text))+"</div>":"")
       +'<div class="msg-foot">'+tags(it)+'<span class="msg-meta">'+(it.edited?esc(say("edited"))+" · ":"")+"#"+it.n+" · "+esc(clock(it.at))+"</span></div></div></article>";}
   function hashNotice(it){const h=it.fileHashes;if(!h||!/^[0-9a-f]{64}$/.test(h.sha))return "";
@@ -277,7 +276,6 @@ async function startViewer(meta){
     const row=$('#v-list [data-key="'+key+'"]');
     if(row){row.scrollIntoView({block:"center"});row.animate([{background:"color-mix(in srgb,#f5c542 35%,transparent)"},{background:"transparent"}],{duration:1600});}}
 
-  // ---- One item in full ----
   function detail(key){const it=V.byKey.get(key);if(!it)return;const d=it.d||{},box=$("#v-detail"),facts=[];
     for(const r of $$("#v-list .open"))r.classList.remove("open");const shown=$('#v-list [data-key="'+key+'"]');if(shown)shown.classList.add("open");
     const fact=(k,v)=>{if(v!==undefined&&v!==null&&v!=="")facts.push("<dt>"+esc(k)+"</dt><dd>"+v+"</dd>");};
@@ -343,7 +341,6 @@ async function startViewer(meta){
     if(i<0){$("#v-reset").click();i=V.results.findIndex(x=>x.key===key);}if(i<0)return detail(key);focusRow(key,i);detail(key);}
   function reference(it){return (meta.report_id?"TgWitness "+meta.report_id+" · ":"")+(chat?(meta.chat_title||"")+" #"+it.n:"#"+it.n+" "+it.kind+(it.hash?" "+it.hash:""))+" · "+(it.at||"");}
 
-  // ---- Selection: print, a verifiable extract, a spreadsheet ----
   function selectionChanged(quiet){const n=V.selected.size;$("#v-selbar").hidden=!n;$("#v-selcount").textContent=sayf("{n} selected",{n:num(n)});
     $("#v-list").classList.toggle("selecting",n>0);
     if(!quiet)for(const c of $$("#v-list .pick")){const row=c.closest("[data-key]");c.checked=V.selected.has(row.dataset.key);row.classList.toggle("picked",c.checked);}}
@@ -370,7 +367,6 @@ async function startViewer(meta){
       document.body.classList.add("printing-selection");const done=()=>{document.body.classList.remove("printing-selection");window.removeEventListener("afterprint",done);};
       window.addEventListener("afterprint",done);print();}}
 
-  // ---- People ----
   function buildPeople(){const box=$("#view-people");if(!box)return;
     box.innerHTML='<div class="v-page"><div class="v-page-head"><h2>'+esc(chat?say("Participants"):say("Senders"))+'</h2><input type="search" id="p-q" placeholder="'
       +esc(say("Name, @username or ID"))+'"></div><div class="v-table"><table id="p-table"><thead><tr><th>'+esc(say("Person"))+"</th><th>ID</th><th>"
@@ -385,7 +381,6 @@ async function startViewer(meta){
     $("#p-q").addEventListener("input",draw);draw();
     for(const t of tabs)if(t.dataset.view==="people")t.querySelector("b").textContent=num(V.people.length);}
 
-  // ---- Indicators ----
   function buildIocs(){const box=$("#view-iocs");if(!box)return;const kinds={};for(const x of V.iocs)kinds[x.kind]=(kinds[x.kind]||0)+1;const on=new Set(Object.keys(kinds));
     box.innerHTML='<div class="v-page"><div class="v-page-head"><h2>'+esc(say("Indicators"))+'</h2><input type="search" id="i-q" placeholder="'+esc(say("Search indicators"))+'"></div>'
       +'<p class="lead">'+esc(meta.iocLead||"")+'</p><div class="v-chips" id="i-kinds">'+Object.entries(kinds).map(([k,n])=>'<button type="button" class="v-chip" aria-pressed="true" data-kind="'+k+'">'

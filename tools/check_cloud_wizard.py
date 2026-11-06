@@ -74,7 +74,6 @@ class World:
             return Response(200, None, "".join(json.dumps({"event": "message", **post}) + "\n" for post in posts))
 
     def post(self, topic, message):
-        # ntfy.sh stamps each message with its own receive time.
         self.clock += 60
         self.posts.setdefault(topic, []).append({"time": self.clock, "message": message})
 
@@ -342,8 +341,6 @@ def check_command_line(directory):
     published = (out / "cloud-init.redacted.yaml").read_text(encoding="utf-8")
     assert key not in published and "tgwitness-tunnel.service" in published and record["beacon"] in published
     assert cloud.reference_installer(record, ROOT) == published
-    # A verifier has no address key. The collector signs its address with the collector key, so forged posts
-    # claiming a later time, signed by another key or carrying a fake address-key signature do not mislead it.
     beacon = lambda topic, key=None, public_key=None: cloud.read_beacon(topic, key, world, public_key)  # noqa: E731
     assert record["collector"]["public_key"] == host.vault.public_key
     world.post(record["beacon"], assurance.address_post(host.vault, "collector-signed-here.trycloudflare.com",
@@ -355,7 +352,6 @@ def check_command_line(directory):
     assert found["host"] == "collector-signed-here.trycloudflare.com" and found["signer"] == "collector", found
     assert cloud.read_beacon(record["beacon"], key, world)["host"] == "bright-words-here.trycloudflare.com"
     assert cloud.read_beacon(record["beacon"], session=world)["host"] == "forged-future-here.trycloudflare.com"
-    # Replaying an old signed post must not replace the current address.
     old = 1_800_000_000
     world.post(record["beacon"], assurance.address_post(host.vault, "stale-collector-here.trycloudflare.com", old))
     stale = cloud.ADDRESS_FORMAT + " stale-key-here.trycloudflare.com " + str(old)

@@ -227,7 +227,6 @@ def test_integrated_panel_real_capture_export_and_layout(tmp_path, request):
             expect(page.locator("#capture-ayugram-toggle")).to_be_enabled()
             page.locator("#capture-ayugram-toggle").click()
             expect(page.locator("#capture-ayugram-export")).to_be_enabled()
-            # Confirm the active workspace using the real panel's export safety dialog.
             with page.expect_download(timeout=20000) as item:
                 page.locator("#capture-ayugram-export").click()
                 dialog = page.locator("dialog.panel-dialog[open]")
@@ -247,7 +246,6 @@ def test_integrated_panel_real_capture_export_and_layout(tmp_path, request):
             check_layout(page)
             page.screenshot(path=str(tmp_path / "integrated-capture-mobile.png"), full_page=True)
             page.set_viewport_size({"width": 1440, "height": 1100})
-            # A late response from one workspace must never populate another's controls.
             pending = []
             page.route("**/api/capture/ayugram/status", lambda route: pending.append(route))
             page.locator("#capture-ayugram-check").click()

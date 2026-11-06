@@ -561,7 +561,6 @@ def password_actions(page, child):
                 page.set_viewport_size({'width': width, 'height': 1000})
                 assert dialog.evaluate('(node)=>node.scrollWidth<=node.clientWidth+1')
                 dialog.screenshot(path=str(output / f'password-{width}.png'))
-        # Retain the detached node to verify that closing clears the secret.
         handle = field.element_handle()
         dialog.locator('button[type=submit]').click()
         page.wait_for_function('(field)=>!field.isConnected', arg=handle)
@@ -579,7 +578,6 @@ def password_actions(page, child):
                         'new_password': ' next synthetic secret ', 'hint': 'A synthetic hint'}]
     changes.clear()
 
-    # Cancelling any step must not change Telegram's password.
     for step in range(3):
         page.locator('#account-password').click()
         if step >= 1:
@@ -591,7 +589,6 @@ def password_actions(page, child):
         expect(page.locator('#account-password')).to_be_enabled()
         assert not changes
 
-    # Changing workspace while the last prompt is open invalidates the operation.
     page.locator('#account-password').click()
     password_step('', 'current-password')
     password_step('stale synthetic secret', 'new-password')

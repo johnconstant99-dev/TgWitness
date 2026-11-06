@@ -115,7 +115,6 @@ def open_archive(path, max_gib=None):
         names = [info.filename for info in infos]
         if len(names) != len(set(names)):
             raise ValueError("Duplicate ZIP members")
-        # Bytes before the first member could hold a second archive that streaming readers show instead.
         if infos and min(info.header_offset for info in infos) != 0:
             raise ValueError("Archive has data before its first member")
         if sum(info.file_size for info in infos) > limit * 1024**3:
@@ -144,7 +143,6 @@ def unique_keys(pairs):
 
 
 def strict_json(data):
-    # Signatures cover canonical(parsed); a duplicate key would let other parsers read different values.
     return json.loads(data, object_pairs_hook=unique_keys)
 
 
@@ -1451,7 +1449,6 @@ def read_sealed(stream):
     if not block.endswith(SEAL_CLOSE):
         raise ValueError("The report seal is not at the end of the file")
     raw = block[:-len(SEAL_CLOSE)]
-    # The producer escapes "<"; a raw one could close the seal element and add unsigned page content.
     if b"<" in raw:
         raise ValueError("The report seal contains markup")
     return digest.hexdigest(), strict_json(raw)
@@ -1619,7 +1616,6 @@ def verify_report(path, expected_fingerprint=None, evidence=None):
         else:
             checked = verify_bundle(evidence, expected_fingerprint)
             count = subject.get("event_count")
-            # A report of an earlier export describes a prefix of a later journal.
             matches = type(count) is int and 0 <= count <= checked["events"] \
                 and ("0" * 64 if count == 0 else bundle_hashes(evidence, [count]).get(count)) == subject.get("head_hash")
         if checked["fingerprint"] != seal["fingerprint"] or not matches:
@@ -1668,7 +1664,6 @@ def verify_selection(path, expected_fingerprint=None, evidence=None):
     digest_key = "chat_json_sha256" if kind == "chat" else "records_sha256" if kind == "handover" else "events_sha256"
     matched = set()
     with open_archive(evidence) as archive:
-        # Bind the data read in this pass to the verified report, too.
         if member_digest(archive, member) != subject.get(digest_key):
             raise ValueError("Source data changed after archive verification")
 

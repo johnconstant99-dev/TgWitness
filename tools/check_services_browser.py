@@ -48,7 +48,6 @@ def main():
             page.locator('#storage-pressure').check()
             page.locator('#storage-pressure-low').fill('128')
             page.locator('#storage-pressure-high').fill('256')
-            # Polling must preserve an unfinished configuration.
             page.evaluate('async()=>await TgWitnessServices.load()')
             expect(page.locator('#storage-pressure-low')).to_have_value('128')
             with page.expect_response(lambda r: r.request.method == 'POST' and r.url.endswith('/api/storage')) as saved:

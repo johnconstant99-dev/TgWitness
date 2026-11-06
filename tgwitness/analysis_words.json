@@ -1,0 +1,6 @@
+{
+  "changes": ["измен", "сутки", "versions", "changed", "changes", "версии", "правк", "удален", "удалён"],
+  "edits": ["измен", "changed", "changes"],
+  "stop": ["what", "where", "which", "this", "that", "with", "from", "messages", "archive", "chat",
+           "было", "какие", "этого", "этом", "чате", "архиве", "сообщения", "найди", "встречается"]
+}

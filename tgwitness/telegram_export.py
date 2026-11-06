@@ -48,7 +48,6 @@ def dates(value, key="date"):
 
 
 def rich_text(text, entities):
-    # MTProto offsets count UTF-16 code units, including both halves of emoji.
     boundaries, units = {0: 0}, 0
     for index, char in enumerate(text, 1):
         units += 2 if ord(char) > 0xFFFF else 1
@@ -69,7 +68,7 @@ def rich_text(text, entities):
     pieces, cursor = [], 0
     for start, end, value in sorted(spans, key=lambda s: (s[0], -s[1])):
         if start < cursor:
-            continue  # Nested source entities remain available in signed JSONL.
+            continue
         if start > cursor:
             pieces.append({"type": "plain", "text": text[cursor:start]})
         pieces.append({**value, "text": text[start:end]})
@@ -144,7 +143,6 @@ def message(row):
 class DesktopExport:
     def __init__(self, directory, inventory, receipts, job, coverage):
         self.directory, self.inventory, self.receipts, self.job, self.coverage = directory, inventory, receipts, job, coverage
-        # SQLite temporary databases are disk-backed and removed when closed.
         self.index = sqlite3.connect("")
         try:
             self.index_messages()

@@ -29,7 +29,6 @@ def hide_addresses(text):
     return IPV4.sub(replace, IPV6.sub(replace, text))
 
 
-# Explicit fields keep future connection diagnostics private by default.
 COLLECTOR_FIELDS = frozenset((
     "phase", "running", "connected", "has_session", "authorization_required", "account",
     "last_heartbeat", "media_pending", "media_jobs", "oldest_pending_media_at", "source_status",
@@ -37,7 +36,8 @@ COLLECTOR_FIELDS = frozenset((
     "reconnect_attempts", "next_reconnect_at", "recheck_enabled", "recheck_interval_minutes",
 ))
 HEALTH_FIELDS = frozenset((
-    "state", "reason", "phase", "attempts", "next_reconnect_at", "telegram_pause_until",
+    "state", "reason", "phase", "attempts", "next_reconnect_at", "telegram_pause_until", "telegram_pause_method",
+    "diverted_since",
     "last_heartbeat", "last_event_at", "heartbeat_seconds", "last_pass_at", "last_success_at",
     "next_attempt_at", "interval_seconds", "queued", "running", "retry", "failed", "saved",
     "pending", "oldest_pending_at", "enabled_sources", "enabled", "counts",

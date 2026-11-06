@@ -69,7 +69,6 @@ def read_pins(root, relative, inputs, stack=()):
 
 
 def disjoint_markers(left, right):
-    # Prove only simple complementary Python boundaries; reject uncertain overlap.
     a, b = PYTHON_BOUND.fullmatch(left), PYTHON_BOUND.fullmatch(right)
     return bool(a and b and a[1] == b[1] and a[4] == b[4] and
                 {a[2], b[2]} in ({"<", ">="}, {"<=", ">"}, {"==", "!="}))

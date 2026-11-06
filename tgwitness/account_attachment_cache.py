@@ -24,8 +24,6 @@ def save(export, attachment):
         "options_sha256": sha(canonical(export.current["options"])), "attachment": attachment}
     durable_write(path, canonical(export.signed(statement)))
     if attachment.get("kind") == "sticker" and type(attachment.get("media_id")) is int:
-        # An interrupted message may not yet have a resolved custom-emoji
-        # representation in its frozen history. Retain its completed result by ID.
         alias = path.parent / f"emoji-{attachment['media_id']}-{attachment['outcome']}.json"
         if alias.is_symlink():
             raise ValueError("Attachment results must not be filesystem links.")

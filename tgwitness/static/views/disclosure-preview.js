@@ -52,7 +52,6 @@ export function createDisclosurePreview({root, tr = translate, formatTime = valu
       const date = dateLabel(after.message.date);
       if (date) {
         const time = element('time', '', date);
-        // The display does not interpret dates or establish their accuracy.
         if (/^\d{4}-\d{2}-\d{2}T/.test(after.message.date)) time.dateTime = after.message.date;
         meta.append(time);
       }

@@ -198,7 +198,6 @@ class GuidedConnection:
                     route = NetworkConfig(kind="mtproxy_auto" if mode == "mtproxy" else "direct")
                 result = await asyncio.wait_for(probe(c, route, mode, outside=body.outside_enabled), 45)
                 if mode == "mtproxy" and body.outside_enabled and c.outside_proxy() is None:
-                    # Timestamp/notification presets also need an external route.
                     errors.append("MTProxy works, but external services need WARP or a SOCKS5 proxy.")
                     continue
                 return route, managed, result, mode
@@ -350,7 +349,6 @@ class GuidedConnection:
                 c.vault.save(name, value)
             c.store.set_setting("route_policy", policy)
             c.store.append("network.connection_failed", {"error_type": type(exc).__name__, "previous_route_restored": True})
-            # Resume only after restoring and checking the original route.
             if was_running and not c.running:
                 with suppress(Exception):
                     await c.start()

@@ -303,8 +303,6 @@ async def stale_rpc_cannot_invalidate_replacement():
             method = {"avatar identity": "get_me", "avatar download": "download_profile_photo",
                       "restore": "is_user_authorized"}[operation]
             with patch.object(old, method, delayed_rejection, create=True):
-                # Exercise the inner RPC identity guard; the public avatar task
-                # blocks connection replacement, covered independently above.
                 task = asyncio.create_task(collector.restore() if operation == "restore" else collector._avatar(44))
                 try:
                     await asyncio.wait_for(entered.wait(), 3)

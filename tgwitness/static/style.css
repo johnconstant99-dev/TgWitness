@@ -1269,8 +1269,10 @@ button.pill { cursor: pointer; font-family: inherit; }
 #authorized-state .account-id { margin: 4px 0 0; color: var(--text-2); font-family: var(--mono); font-size: 13px; }
 #authorized-state .primary { width: 100%; min-height: 44px; }
 #authorized-state .quiet { display: flex; margin: 10px auto 0; }
-#authorized-state .account-tools, #authorized-state .account-manage { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
-#authorized-state .account-tools h3, #authorized-state .account-manage h3 { margin: 0 0 10px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+#authorized-state .account-tools, #authorized-state .account-actions, #authorized-state .account-manage { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
+#authorized-state .account-tools h3, #authorized-state .account-actions h3, #authorized-state .account-manage h3 { margin: 0 0 10px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+#authorized-state .account-actions .check-label { margin: 0; }
+#authorized-state .account-actions .hint { margin: 8px 0 0; }
 .account-tools-row, .account-manage-row { display: flex; flex-wrap: wrap; gap: 8px; }
 #authorized-state .account-manage-row .quiet { margin: 0; }
 #authorized-state .account-manage .hint { margin: 10px 0 0; }
@@ -2073,8 +2075,9 @@ button.primary[aria-busy=true]::after { color: #fff; }
 .fleet-result .hint { margin: 0; overflow-wrap: anywhere; }
 .fleet-state { font-size: 12px; font-weight: 600; color: var(--muted); text-align: right; }
 .fleet-result.busy .fleet-state { color: var(--accent-text); }
-.fleet-result.ok { border-color: var(--success-border); background: var(--success-soft); }
-.fleet-result.ok .fleet-state { color: var(--success); }
+.fleet-result.ok, .fleet-result.live { border-color: var(--success-border); background: var(--success-soft); }
+.fleet-result.ok .fleet-state, .fleet-result.live .fleet-state { color: var(--success); }
+.fleet-detail { display: block; margin-top: 2px; }
 .fleet-result.bad { border-color: var(--danger-border); background: var(--danger-soft); }
 .fleet-result.bad .fleet-state { color: var(--danger); white-space: normal; }
 .fleet-group { padding: 18px 20px; margin-bottom: 18px; border-left: 3px solid var(--accent); }

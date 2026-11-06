@@ -91,7 +91,6 @@ def main(arguments=None):
         assert status["demo"] and status["stats"]["total"] >= 30
         export_started = time.monotonic()
         print("Checking /api/export/zip; waiting for the complete signed archive", flush=True)
-        # Match the real download client's allowance for PDF generation under ARM64 emulation.
         code, body = get("/api/export/zip", headers, timeout=600)
         export_seconds = round(time.monotonic() - export_started, 3)
         print("Checking /api/export/zip HTTP", code, "bytes", len(body), "seconds", export_seconds, flush=True)

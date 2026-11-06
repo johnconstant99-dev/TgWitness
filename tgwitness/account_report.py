@@ -126,7 +126,6 @@ def recipient_guide(say, sharing=False):
 
 def copy_context(context, say, sharing=False):
     parts = ['<section class="panel" id="context"><h2>' + e(say('About this copy')) + '</h2><dl class="facts">']
-    # Sharing has its own reference and creation time; source metadata stays private.
     for key, label in CONTEXT_LABELS.items():
         if sharing and key not in ('archive_reference', 'created_at'):
             continue
@@ -151,7 +150,6 @@ def opening(context, title, sharing=False):
     lead = (say('A minimized, signed copy for review and sharing. The original account export is unchanged.') if sharing else
             say('A snapshot of history visible to this Telegram account during acquisition.'))
     design = Presentation.model_validate(context.get('presentation') or {}).design
-    # Keep older frozen jobs readable while new layouts share the report palette.
     template = {'quire': 'editorial', 'atlas': 'analytical'}.get(design, 'dossier')
     layout_attribute = ' data-report-design="' + design + '"' if design in report_layouts.DESIGNS else ''
     yield encoded('<!doctype html><html data-template="' + template + '"' + layout_attribute + ' lang="' + say.language + '" dir="' + say.direction + '"><head><meta charset="utf-8">'
@@ -435,7 +433,6 @@ def account_chat_pages(context, chat, rows):
             for row in islice(incoming, count):
                 consumed += 1
                 yield row
-        # The caller consumes each chunk iterator before requesting the next page.
         yield name, account_chat({**context, 'pagination': pagination}, chat, page_rows())
         if consumed != count:
             raise ValueError('Message count changed while rendering chat pages')
@@ -500,7 +497,6 @@ def sharing_report(context, rows):
     yield encoded(recipient_guide(say, sharing=True))
     yield encoded(snapshot_analytics.html_section(context.get('analytics'), context.get('presentation', {}), say))
     yield encoded(case_assessment.html(case_assessment.snapshot(context, "sharing"), say))
-    # Only explicitly public policy fields are rendered. No private criteria, map or source rows.
     public = {key: context.get('policy', {}).get(key) for key in (*SCOPE_LABELS, 'purpose')}
     yield encoded(stats(context.get('counts', {}), say) + copy_context(context, say, sharing=True) + scope(public, say, sharing=True))
     yield encoded('<p class="notice">' + e(say('This sharing copy is a separate derivative, not the complete original account export.')) + '</p>')

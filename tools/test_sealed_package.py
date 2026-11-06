@@ -134,7 +134,6 @@ def test_handoff_never_overwrites_existing_delivery(capture, recipient):
 
 def test_streaming_handoff_supports_zip64(capture, recipient, monkeypatch):
     output, attestation = capture
-    # Exercise the actual ZIP64 headers and descriptors without allocating gigabytes.
     monkeypatch.setattr(zipfile, "ZIP64_LIMIT", 1024)
     sealed_package.package({"recipient": recipient["recipient"]}, output, attestation)
     assert_delivery(output, attestation, recipient)

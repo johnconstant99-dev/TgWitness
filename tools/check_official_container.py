@@ -15,7 +15,6 @@ def main():
     parser.add_argument("--image", default="tgwitness-official-check")
     parser.add_argument("--direct", action="store_true", help="Also exercise explicit direct access to the real public login page")
     args = parser.parse_args()
-    # The fixture is synthetic; its public DOM boundaries match the reviewed adapter.
     import importlib.util
     spec = importlib.util.spec_from_file_location("official_test", ROOT / "addons/capture/tests/test_official.py")
     module = importlib.util.module_from_spec(spec)

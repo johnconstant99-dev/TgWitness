@@ -75,7 +75,6 @@ class VideoCapture:
             return
         result = self.process.poll()
         files = sorted(self.directory.glob("*.mkv"))
-        # A segment is sealed only after FFmpeg opens its successor, or exits cleanly.
         complete = files if result == 0 else files[:-1]
         for path in complete:
             if path.name in self.sealed:

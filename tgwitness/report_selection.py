@@ -148,7 +148,6 @@ def _prepare(connection):
 
 
 def _catalog(connection, table, *, titles=False):
-    # Only fixed internal table names are allowed here, never user input.
     assert table in ("catalog_chats", "catalog_senders")
     total = connection.execute("SELECT count(*) FROM " + table).fetchone()[0]
     if total > MAX_CATALOG_ROWS:

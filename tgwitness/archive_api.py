@@ -199,10 +199,8 @@ def register(app, authenticate):
             raise HTTPException(503, "Archive query timed out. Narrow the query.") from None
 
         async def stream():
-            # Revocation, expiry or a timeout ends the stream without its completion line.
             try:
                 while True:
-                    # The generator reads pages lazily; creating it is not the expensive work.
                     async with asyncio.timeout(QUERY_TIMEOUT):
                         line = await limited_in_thread(app.state.archive_slots, next, lines, None)
                     if line is None:

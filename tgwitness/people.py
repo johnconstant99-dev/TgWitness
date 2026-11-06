@@ -5,6 +5,8 @@ import time
 from datetime import datetime, timezone
 
 MESSAGE_KINDS = {"message.new", "message.snapshot", "message.recovered", "message.edited"}
+PROFILE_KINDS = {"actor.profile", "actor.profile_changed"}
+PROFILE_FIELDS = ("display_name", "username")
 TABLES = ("people_state", "people_observations", "people_messages", "people_refresh_jobs")
 
 
@@ -30,6 +32,21 @@ def user_id(value):
 
 def encode(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def profile_changes(old, values):
+    return {k: {"before": old[k], "after": values.get(k)} for k in PROFILE_FIELDS
+            if k in values and old.get(k) not in (None, "") and old[k] != values[k]}
+
+
+def unchanged(old, values):
+    for key, value in values.items():
+        if key == "flags":
+            if any(old.get("flags", {}).get(k) != v for k, v in value.items()):
+                return False
+        elif key != "partial" and old.get(key) != value:
+            return False
+    return True
 
 
 def membership(event):
@@ -100,12 +117,9 @@ class PeopleIndex:
         if profile is not None:
             old = json.loads(previous["profile"])
             values = dict(profile)
-            # Missing values in a minimal entity are unknown, not removals.
             if values.pop("partial", False):
                 values = {k: v for k, v in values.items() if v not in (None, "", [], {})}
             if values.get("source") == "message_profile_cache" and old.get("source") in {"telegram_update", "requested_profile_refresh"}:
-                # Retain the cached observation in its event, but do not let an
-                # old Message sender object undo a delivered name update.
                 for key in ("display_name", "username", "usernames"):
                     if key in old:
                         values[key] = old[key]
@@ -146,7 +160,6 @@ class PeopleIndex:
             profile["observed_at"] = event["observed_at"]
             self.record(event, uid, "message", {"message_id": event["message_id"], "edited": kind == "message.edited",
                         "source": payload.get("source"), "sent_at": payload.get("sent_at")}, profile=profile)
-            # An edit's source time may be the edit time, not the sending time.
             sent = stamp(payload.get("sent_at") or (event.get("source_at") if kind != "message.edited" else None))
             inserted = self.db.execute("INSERT OR IGNORE INTO people_messages VALUES(?,?,?,?,?)",
                         (chat, event["message_id"], uid, sent, event["seq"])).rowcount
@@ -155,9 +168,9 @@ class PeopleIndex:
                     "first_at=CASE WHEN first_at IS NULL THEN ? WHEN ? IS NULL THEN first_at ELSE min(first_at,?) END,"
                     "last_at=CASE WHEN last_at IS NULL THEN ? WHEN ? IS NULL THEN last_at ELSE max(last_at,?) END "
                     "WHERE chat_id=? AND user_id=?", (sent, sent, sent, sent, sent, sent, chat, uid))
-        elif kind in {"actor.profile", "actor.status"} and user_id(payload.get("user_id")):
+        elif kind in PROFILE_KINDS | {"actor.status"} and user_id(payload.get("user_id")):
             uid = payload["user_id"]
-            if kind == "actor.profile":
+            if kind in PROFILE_KINDS:
                 profile = {**payload["profile"], "source": payload.get("source"), "observed_at": event["observed_at"]}
                 self.record(event, uid, "profile", {"source": payload.get("source")}, profile=profile)
             else:
@@ -178,10 +191,10 @@ def profile_from_entity(entity):
     from telethon.tl import types
     if not isinstance(entity, types.User):
         return None
+    usernames = [u.username for u in entity.usernames or [] if u.active]
     result = {"display_name": " ".join(s for s in (entity.first_name, entity.last_name) if s),
-              "username": entity.username, "usernames": [u.username for u in entity.usernames or [] if u.active],
+              "username": entity.username or (usernames[0] if usernames else None), "usernames": usernames,
               "partial": bool(entity.min)}
-    # Absence of optional flags on a minimal entity is not a false observation.
     flags = {k: bool(getattr(entity, k)) for k in ("deleted", "bot", "scam", "fake", "verified", "premium")
              if not entity.min or getattr(entity, k) is not None}
     if flags:
@@ -214,15 +227,7 @@ def observe_update(store, update, *, profiles, presence, raw):
     elif isinstance(update, types.UpdateUserStatus) and presence:
         category, value = "status", status_value(update.status)
     elif isinstance(update, types.UpdateUser) and profiles:
-        with store.transaction():
-            if store.db.execute("SELECT 1 FROM people_refresh_jobs WHERE user_id=?", (uid,)).fetchone():
-                return
-            if store.db.execute("SELECT count(*) FROM people_refresh_jobs").fetchone()[0] >= 128:
-                for chat in store.read_index.people.known_chats(uid):
-                    store.append("actor.profile_unavailable", {"user_id": uid, "error_type": "RefreshQueueFull"}, chat, actor_id=uid)
-                return
-            for chat in store.read_index.people.known_chats(uid):
-                store.append("actor.refresh_requested", {"user_id": uid, "source": "telegram_update", "raw": raw}, chat, actor_id=uid)
+        request_refresh(store, uid, "telegram_update", raw=raw)
         return
     else:
         return
@@ -231,16 +236,41 @@ def observe_update(store, update, *, profiles, presence, raw):
             previous = json.loads(store.read_index.people.state(chat, uid)[category])
             if all(previous.get(k) == v for k, v in value.items()):
                 continue
-            store.append("actor." + category, {"user_id": uid, category: value, "raw": raw,
+            changes = profile_changes(previous, value) if category == "profile" else None
+            store.append("actor.profile_changed" if changes else "actor." + category, {"user_id": uid, category: value,
+                **({"changes": changes} if changes else {}), "raw": raw,
                 "source": "telegram_update", "collector_account_id": (store.get_setting("account", {}) or {}).get("id"),
                 "association": "Previously observed in this chat; user presence is account-wide."}, chat, actor_id=uid)
+
+
+def request_refresh(store, uid, source, **facts):
+    with store.transaction():
+        if store.db.execute("SELECT 1 FROM people_refresh_jobs WHERE user_id=?", (uid,)).fetchone():
+            return
+        if store.db.execute("SELECT count(*) FROM people_refresh_jobs").fetchone()[0] >= 128:
+            for chat in store.read_index.people.known_chats(uid):
+                store.append("actor.profile_unavailable", {"user_id": uid, "error_type": "RefreshQueueFull"}, chat, actor_id=uid)
+            return
+        for chat in store.read_index.people.known_chats(uid):
+            store.append("actor.refresh_requested", {"user_id": uid, "source": source, **facts}, chat, actor_id=uid)
+
+
+def sender_change(store, chat, entity):
+    profile = profile_from_entity(entity)
+    if profile is None or profile["partial"] or not user_id(entity.id):
+        return None
+    previous = store.read_index.people.state(chat, entity.id)
+    if not previous:
+        return None
+    values = {k: profile[k] for k in PROFILE_FIELDS}
+    changes = profile_changes(json.loads(previous["profile"]), values)
+    return {"profile": values, "changes": changes} if changes else None
 
 
 def observe_entity(store, entity, chat):
     profile = profile_from_entity(entity)
     if profile is None or not user_id(entity.id) or not getattr(entity, "deleted", False):
         return
-    # A cached message entity is not a fresh profile lookup.
     profile = {"flags": {"deleted": True}}
     with store.transaction():
         previous = store.read_index.people.state(chat, entity.id)
@@ -255,7 +285,7 @@ def observe_entity(store, entity, chat):
 
 async def refresh_one(collector):
     """One queued profile invalidation, within the account's monitoring task."""
-    from .monitoring import monitoring_settings
+    from .monitoring import capture_settings, monitoring_settings
     from telethon.tl import types
     store, client, now = collector.store, collector.client, time.time()
     policy = monitoring_settings(store)
@@ -280,13 +310,21 @@ async def refresh_one(collector):
         with store.transaction():
             if not collector.running or not monitoring_settings(store)["profiles"]:
                 return
-            for chat in store.read_index.people.known_chats(uid):
-                store.append("actor.profile", {"user_id": uid, "profile": profile, "source": "requested_profile_refresh",
-                    "collector_account_id": (store.get_setting("account", {}) or {}).get("id")}, chat, actor_id=uid)
+            chats = store.read_index.people.known_chats(uid)
+            for chat in chats:
+                previous = json.loads(store.read_index.people.state(chat, uid)["profile"])
+                changes = profile_changes(previous, profile)
+                if changes or not unchanged(previous, profile):
+                    store.append("actor.profile_changed" if changes else "actor.profile", {"user_id": uid, "profile": profile,
+                        **({"changes": changes} if changes else {}), "source": "requested_profile_refresh",
+                        "collector_account_id": (store.get_setting("account", {}) or {}).get("id")}, chat, actor_id=uid)
                 if monitoring_settings(store)["presence"] and entity.status is not None:
                     store.append("actor.status", {"user_id": uid, "status": status_value(entity.status),
                         "source": "requested_profile_refresh"}, chat, actor_id=uid)
             complete_refresh(store, uid, requested, "received")
+        if capture_settings(store)["include_avatars"]:
+            for chat in chats:
+                collector.avatar_history.observe(entity, chat_id=chat)
     except asyncio.CancelledError:
         raise
     except Exception as exc:
@@ -297,6 +335,31 @@ async def refresh_one(collector):
                 complete_refresh(store, uid, requested, "attempt_limit")
 
 
+def observed_names(db, chat, uids):
+    """Sender names recorded in this chat's journal, in record order."""
+    found = {}
+    for uid in uids:
+        rows = db.execute("SELECT seq,hash,observed_at,kind,message_id,json_extract(payload,'$.source'),"
+                          "json_extract(payload,'$.sender_observation') FROM events WHERE json_extract(payload,'$.sender_id')=? "
+                          "AND chat_id=? AND kind IN (?,?,?,?)", (uid, chat, *sorted(MESSAGE_KINDS))).fetchall()
+        rows += db.execute("SELECT seq,hash,observed_at,kind,message_id,json_extract(payload,'$.source'),"
+                           "json_extract(payload,'$.profile') FROM events INDEXED BY event_kind WHERE kind IN (?,?) "
+                           "AND chat_id=? AND json_extract(payload,'$.user_id')=?", (*sorted(PROFILE_KINDS), chat, uid)).fetchall()
+        names = []
+        for seq, digest, observed_at, kind, message_id, source, value in sorted(rows, key=lambda row: row[0]):
+            value = json.loads(value) if value else None
+            if not isinstance(value, dict) or not isinstance(value.get("display_name"), str) or not value["display_name"]:
+                continue
+            contact = value["flags"].get("contact") if isinstance(value.get("flags"), dict) else None
+            names.append({"seq": seq, "hash": digest, "observed_at": observed_at, "name": value["display_name"],
+                          "username": value.get("username"), "message_id": message_id,
+                          "source": "contact" if contact else "profile" if contact is False else None,
+                          "live": kind == "message.new" and source == "live_update"})
+        if names:
+            found[uid] = names
+    return found
+
+
 def complete_refresh(store, uid, requested, result):
     row = store.db.execute("SELECT chat_id FROM events WHERE seq=?", (requested,)).fetchone()
     store.append("actor.refresh_completed", {"user_id": uid, "requested_seq": requested, "result": result},
@@ -304,7 +367,6 @@ def complete_refresh(store, uid, requested, result):
 
 
 def coverage(db, chat, since, now):
-    # Liveness supports an observation interval, never a claim of total visibility.
     target = db.execute("SELECT enabled FROM targets WHERE chat_id=?", (chat,)).fetchone()
     if not target or not target[0]:
         return "unknown"

@@ -63,8 +63,6 @@ def private_write(path: Path, data: bytes):
             os.replace(temp, path)
             break
         except PermissionError as exc:
-            # A Windows reader may briefly hold the destination without delete
-            # sharing. Keep the old file intact and retry only that OS failure.
             if getattr(exc, "winerror", None) not in (5, 32, 33) or attempt == 5:
                 raise
             time.sleep(.01 * 2**attempt)

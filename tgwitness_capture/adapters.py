@@ -87,7 +87,6 @@ class BrowserCapture:
         return metadata, artifacts, observed
 
     async def close(self):
-        # Stopping our CDP transport leaves the independently owned browser running.
         if self.runtime is not None:
             await self.runtime.stop()
         self.runtime = self.browser = None

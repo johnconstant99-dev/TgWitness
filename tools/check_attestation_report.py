@@ -11,7 +11,6 @@ from tgwitness import attestation_report, tdx, tsa_roots  # noqa: E402
 from tgwitness.security import Vault  # noqa: E402
 from tgwitness.verify import timestamp_token  # noqa: E402
 
-# Real replies of the Belgian government's qualified TSA and of FreeTSA over the report below.
 VECTOR = json.loads((Path(__file__).parent / "tsa" / "time-stamps.json").read_text())
 PHALA = json.loads((Path(__file__).parent / "tdx" / "phala-dstack-0.5.12.json").read_text())
 BELGIUM, FREETSA = tsa_roots.QUALIFIED_TSA, "https://freetsa.org/tsr"

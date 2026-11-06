@@ -344,6 +344,9 @@ def problem_line(event, titles, words):
         return tr(words, "Disk space available again; photo and file downloads resumed.")
     if kind == "coverage.gap" and p.get("reason") == "authorization_required":
         return account_loss_line(p.get("cause"), words)
+    if kind == "coverage.gap" and p.get("reason") == "updates_diverted":
+        return tr(words, "Updates are going to another session: Telegram's update counter grows, but nothing "
+                         "reaches this one. Another client probably uses the same session key.")
     if kind == "coverage.gap":
         return tr(words, "Coverage gap{where}: {reason}", where=" (" + where + ")" if where else "",
                   reason=p.get("reason") or "")
@@ -389,7 +392,6 @@ def host_line(state, words):
         return None
     if login:
         return tr(words, "Server access detected: {details}", details="; ".join(found))
-    # An open port or a started SSH process alone is not a recorded login.
     return tr(words, "SSH change on the server, no new login recorded: {details}", details="; ".join(found))
 
 

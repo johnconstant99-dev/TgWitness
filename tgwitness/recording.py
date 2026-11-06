@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, model_validator
 
-from .monitoring import Capture, Monitoring, capture_settings, monitoring_settings
+from .monitoring import Capture, Monitoring, capture_settings, monitoring_settings, normalize_capture
 from .scope import Recheck, ScopeUpdate, WIDE_WARNING, recheck_settings, scope_settings
 
 
@@ -64,7 +64,7 @@ def save(store, body):
             value = body.capture.model_dump()
             if "record_disabled_media" not in body.capture.model_fields_set:
                 value["record_disabled_media"] = before["capture"]["record_disabled_media"]
-            store.set_setting("capture", value)
+            store.set_setting("capture", normalize_capture(value))
             current = capture_settings(store)
             if current != before["capture"]:
                 store.append("capture.changed", current)

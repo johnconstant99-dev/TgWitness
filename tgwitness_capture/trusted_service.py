@@ -95,7 +95,6 @@ class TrustedRecorder:
             raise ValueError("Configure screen video and FFmpeg before connecting an account")
         self.choice, self.case_id = choice, uuid.uuid4().hex
         profile_root = Path(self.options.get("profile_root", "/session")).resolve()
-        # Ephemeral runtime storage must never be inside evidence or the exports inbox.
         if profile_root == self.journal.root or self.journal.root in profile_root.parents or profile_root in self.journal.root.parents:
             raise ValueError("Profile and evidence must have separate storage roots")
         self.profile = profile_root / ("trusted-" + self.case_id)
@@ -145,7 +144,6 @@ class TrustedRecorder:
         self.stop_requested = True
         self.phase = "failed"
         self.error = reason
-        # Stop the client even if storage is full and no event can be written.
         try:
             await asyncio.to_thread(self.runtime.stop)
         finally:
@@ -175,7 +173,6 @@ class TrustedRecorder:
         if self.phase not in {"setup", "paused", "collecting"}:
             raise ValueError("Client is not running")
         raw = await asyncio.to_thread(self.runtime.frame)
-        # Setup frames (QR / codes / password dialogs) are never put into the evidence journal.
         if self.phase == "collecting" and not self.stop_requested and time.monotonic() - self.last_frame >= 2:
             artifact = self.journal.artifact(raw, "trusted_viewport", "image/png")
             self.event("frame", {"source": "owned_display", "message_ids": "not_extracted"}, [artifact])
@@ -332,7 +329,6 @@ def create_app(root, config, runtime=None):
             origin = request.headers.get("origin")
             if origin and origin != (config.public_origin or str(request.base_url).rstrip("/")):
                 return JSONResponse({"detail": "Cross-origin request refused"}, status_code=403)
-            # Enforce streamed body size too; do not rely on Content-Length.
             total, chunks = 0, []
             async for chunk in request.stream():
                 total += len(chunk)
@@ -396,7 +392,6 @@ def create_app(root, config, runtime=None):
     async def stop():
         rec = app.state.recorder
         rec.stop_requested = True
-        # Stop the process before waiting for an in-flight frame/beacon/export lock.
         await asyncio.to_thread(rec.runtime.stop)
         rec.video.abort()
         return await act(rec.emergency)

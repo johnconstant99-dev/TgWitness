@@ -100,7 +100,8 @@ def main():
                 str(report), "--evidence", str(bundle), "--fingerprint", state["fingerprint"]],
                 check=True, capture_output=True, text=True)
             assert checked["evidence_counts_checked"] and checked["captured"] == 5
-            assert len(server.app.state.store.events(kind="message.snapshot")) == 5
+            assert len([e for e in server.app.state.store.events(kind="message.snapshot")
+                        if e["payload"]["source"] != "baseline_snapshot"]) == 5
             assert state["history"]["options"]["media_workers"] == 3
             for width in (1440, 390):
                 page.set_viewport_size({"width": width, "height": 1000})

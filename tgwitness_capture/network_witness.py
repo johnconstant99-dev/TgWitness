@@ -49,7 +49,6 @@ def observe(journal, config, token, request=fetch):
             outcomes[label] = {"status": "unavailable", "error": type(exc).__name__}
     if config.get("gateway_location"):
         location = str(uuid.UUID(config["gateway_location"]))
-        # Require a source filter so shared Gateway locations cannot be attributed to this collector.
         source = str(ipaddress.ip_address(config["source_ip"]))
         until = datetime.now(timezone.utc)
         variables = {"account": account, "location": location, "source": source,

@@ -63,7 +63,6 @@ def verify_zip(path, expected_fingerprint=None, checkpoint=None, receipt=None,
         if referenced != set(manifest["files"]):
             raise ValueError("Unreferenced export files")
         from .trusted_verify import verify_analysis
-        # Only the numeric count crosses into the public verification summary.
         report_count = int(verify_analysis(events, archive.read))
     from .trusted_anchor import confirm
     drand = confirm(events, check_drand)

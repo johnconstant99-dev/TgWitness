@@ -58,8 +58,6 @@ def validate(root, *, git_history=False):
             raise ValueError("Checked-out workflow differs from the pinned signer commit")
         git("merge-base", "--is-ancestor", collector, signer)
         git("merge-base", "--is-ancestor", signer, "HEAD")
-        # Updating the verifier policy follows the collector and workflow commits.
-        # All executable collector inputs must still match the release under test.
         changed = set(git("diff", "--name-only", collector, "--", *RUNTIME).decode().splitlines()) - {POLICY}
         untracked = set(git("ls-files", "--others", "--exclude-standard", "--", *RUNTIME).decode().splitlines())
         if changed or untracked:

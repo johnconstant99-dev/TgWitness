@@ -279,7 +279,6 @@ def specification(args, resolve=resolve_commit):
             "commit": resolve(args.repository, args.ref), "zone": zone, "cloudflare_account": args.cloudflare_account,
             "panel_host": hosts[0] if hosts else None, "witness_host": hosts[1] if len(hosts) > 1 else None,
             "ssh": ssh, "beacon": BEACON_SERVER + "tgw-" + secrets.token_hex(16) if quick else None,
-            # Filled in by deploy once Cloudflare has created the location.
             "gateway": {"account": args.cloudflare_account, "location_id": reused, "doh_subdomain": None}
             if gateway else None}
 
@@ -822,7 +821,6 @@ def phala_compose(spec, tunnel_id, manifest):
 
 
 def app_compose(compose):
-    # Without an empty pre_launch_script Phala Cloud measures its own pre-launch script into the app-compose.
     return {"docker_compose_file": compose, "allowed_envs": list(PHALA_ENV), "pre_launch_script": "", **PHALA_SETTINGS}
 
 
@@ -1177,8 +1175,6 @@ def signed_by_collector(public_key, text, signature):
 
 
 def read_beacon(topic, key=None, session=None, public_key=None):
-    # key: the operator's address key; public_key: the collector key, which a verifier holds.
-    # With neither, the newest post is returned, and anyone can post to the topic.
     if not BEACON.fullmatch(topic or ""):
         raise DeployError("The deployment has no address topic")
     response = (session or requests).get(topic + "/json", params={"poll": "1", "since": "all"}, timeout=30)
@@ -1202,8 +1198,6 @@ def read_beacon(topic, key=None, session=None, public_key=None):
                 parts[3], address_signature(key, text)) else None
         if required and not signer:
             continue
-        # A signed post retains its original ordering when it is delivered again.
-        # Unsigned timestamps are untrusted, so use the relay's receive time instead.
         posted, received = int(parts[2]), item.get("time")
         received = received if isinstance(received, int) else posted
         order = (posted, received) if signer else (received, posted)
@@ -1729,7 +1723,6 @@ def verify_gateway(report, record, cf, server=None):
         except DeployError as exc:
             if record.get("gateway_shared") or "sourceIP" not in str(exc):
                 raise
-            # A location of the server's own: every query in it is the server's.
             rows, source = gateway_day(cf, False, asked), None
     except (DeployError, KeyError, IndexError, TypeError) as exc:
         needs = "Account Analytics Read" + (" and, for a shared location, Zero Trust PII Read"

@@ -14,7 +14,6 @@ from .people import stamp
 FIRST_KINDS = ("message.new", "message.snapshot", "message.recovered")
 SCANNED_KINDS = (*FIRST_KINDS, "message.edited", "message.deleted", "message.missing_on_recheck")
 BUDGET = 5
-# A domain or @handle needs a dot between word characters or an @ before one; most texts skip extraction.
 CANDIDATE = re.compile(r"\w\.\w|@\w")
 MEANING = ("Counts of saved observations only. Message times are the times Telegram reported, in UTC; hour "
            "and weekday counts help estimate a time zone but do not establish one. Missing messages do not prove "
@@ -26,7 +25,6 @@ def iso(value):
 
 
 def bound(value):
-    # The journal stores observation times with milliseconds; compare in the same form.
     return datetime.fromtimestamp(value, timezone.utc).isoformat(timespec="milliseconds")
 
 
@@ -118,7 +116,6 @@ def activity(store, *, chat_id=None, sender_id=None, chat_ids=None, since=None, 
                 params.extend(sorted(chats))
             rows = db.execute("SELECT seq,kind,chat_id,message_id,observed_at,source_at,payload FROM events WHERE "
                               + " AND ".join(where) + " ORDER BY seq DESC", params)
-        # Newest first: with a deadline, the most recent records are the ones counted.
         for number, row in enumerate(rows):
             if number % 512 == 0 and time.monotonic() >= deadline:
                 complete, stopped_at = False, row["seq"]
@@ -135,7 +132,6 @@ def activity(store, *, chat_id=None, sender_id=None, chat_ids=None, since=None, 
             payload = json.loads(row["payload"])
             sender = payload.get("sender_id")
             sender = sender if type(sender) is int else None
-            # A domain or @handle counts once per message, from any of its saved versions.
             domains_seen, handles_seen = references(payload)
             if domains_seen or handles_seen:
                 known = found.setdefault(key, (set(), set()))
@@ -143,13 +139,11 @@ def activity(store, *, chat_id=None, sender_id=None, chat_ids=None, since=None, 
                 known[1].update(handles_seen)
             if sender is not None:
                 seen = payload.get("sender_observation") if isinstance(payload.get("sender_observation"), dict) else {}
-                # The newest observed name and username, each kept from the latest record that carries it.
                 name, username = names.get(sender, (None, None))
                 names[sender] = (name or plain(seen.get("display_name"), 256), username or plain(seen.get("username"), 64))
             if kind == "message.edited":
                 edits[key] += 1
                 continue
-            # An edit's source time may be the edit time, so only first versions carry the sending time.
             first[key] = (stamp(payload.get("sent_at") or row["source_at"]), sender)
         window = start if start is not None else stamp(observed[0]) if observed[0] else None
         closing = min(end, now) if end is not None else now

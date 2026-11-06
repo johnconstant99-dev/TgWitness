@@ -10,6 +10,7 @@ import secrets
 import shutil
 import sqlite3
 import time
+from contextlib import suppress
 from datetime import datetime, timedelta
 from collections import deque
 from itertools import chain, islice
@@ -41,7 +42,19 @@ POISON_ACCOUNTS = 2
 ACCOUNT_ERRORS = 3
 RECHECK_EDGE = 1000
 RECHECK_PER_ACCOUNT = 1000
+RECORD_BYTES = 1024
+WORKING_COPIES = 5
+ACTIVE = ("preparing", "running", "selecting", "packaging")
 JOB_ID = re.compile(r"[a-f0-9]{32}")
+
+
+def verified(path, public):
+    envelope = read_json(path)
+    if envelope["public_key"] != public:
+        raise ValueError("Export signing identity changed.")
+    Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True)).verify(
+        base64.b64decode(envelope["signature"], validate=True), canonical(envelope["statement"]))
+    return envelope["statement"]
 
 
 class DistributedExport:
@@ -51,17 +64,8 @@ class DistributedExport:
         if linked(self.root):
             raise ValueError("Distributed-export storage must not be a link.")
         self.root.mkdir(mode=0o700, exist_ok=True)
-        self.state = self.job = self.task = self.db = self.recheck = None
-        self.chunk_failures = {}
-        self.timing = None
-        self.preparing = set()
+        self.runs = {}
         self.reserved = {}
-        self.entities = {}
-        self.history_transports = {}
-        self.page_states = {}
-        latest = self.list_jobs()
-        if latest:
-            self.state = latest[0]
 
     def app_for(self, profile):
         entry = self.profiles.entries.get(profile)
@@ -79,52 +83,26 @@ class DistributedExport:
             raise ValueError("Export working directories must not be links.")
         return path
 
-    def busy(self):
-        return bool(self.preparing or self.task and not self.task.done())
-
     def uses(self, profile):
-        return profile in self.reserved or profile in self.preparing
+        return profile in self.reserved
 
-    def signed(self, value, vault=None):
-        vault = vault or self.app_for(self.state["lead"]).state.vault
-        return {"statement": value, "public_key": vault.public_key, "signature": vault.sign(canonical(value))}
-
-    def verified(self, path, public):
-        envelope = read_json(path)
-        if envelope["public_key"] != public:
-            raise ValueError("Export signing identity changed.")
-        Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True)).verify(
-            base64.b64decode(envelope["signature"], validate=True), canonical(envelope["statement"]))
-        return envelope["statement"]
-
-    def persist(self):
-        self.update_timing()
-        self.state["updated_at"] = utcnow()
-        durable_write(self.directory(self.state["id"]) / "status.json", canonical(self.signed(self.state)))
-
-    def public(self, job_id=None):
-        if job_id is None or self.state and job_id == self.state["id"]:
-            self.update_timing()
-            return json.loads(json.dumps(self.state)) if self.state else {"phase": "none"}
+    def public(self, job_id=None, chat_id=None):
+        if job_id is None:
+            jobs = [state for state in self.list_jobs() if chat_id in (None, state["chat_id"])]
+            return next((state for state in jobs if state["phase"] in ACTIVE), jobs[0] if jobs else {"phase": "none"})
+        if job_id in self.runs:
+            self.runs[job_id].update_timing()
+            return json.loads(json.dumps(self.runs[job_id].state))
         path = self.directory(job_id) / "status.json"
         if not path.is_file():
             return {"phase": "unknown"}
         envelope = read_json(path)
         state = envelope["statement"]
         public = self.app_for(state["lead"]).state.vault.public_key
-        state = self.verified(path, public)
-        if state["phase"] in ("preparing", "running", "selecting", "packaging"):
+        state = verified(path, public)
+        if state["phase"] in ACTIVE:
             state.update(phase="paused", error="The process stopped. Resume verifies saved chunks first.")
         return state
-
-    def update_timing(self):
-        if self.timing is not None and self.state is not None:
-            self.state["performance"] = self.timing.snapshot(self.state["captured"])
-
-    def set_phase(self, phase):
-        self.state["phase"] = phase
-        self.timing.move(phase)
-        self.update_timing()
 
     def list_jobs(self):
         items = []
@@ -139,7 +117,6 @@ class DistributedExport:
         return sorted(items, key=lambda s: s["started_at"], reverse=True)
 
     def reserve(self, profiles, owner):
-        reserved = {}
         try:
             for profile in profiles:
                 app = self.app_for(profile)
@@ -152,30 +129,25 @@ class DistributedExport:
                 if not collector.reserve_export(owner):
                     label = self.profiles.entries[profile].get("label", profile)
                     raise ValueError(label + ": account is busy. Pause its current task explicitly or deselect it.")
-                reserved[profile] = collector
-            self.reserved = reserved
+                self.reserved[profile] = (owner, collector)
         except BaseException:
-            for collector in reserved.values():
-                collector.release_export(owner)
+            self.release(owner)
             raise
 
     def release(self, owner):
-        for profile, collector in list(self.reserved.items()):
-            if collector.export_claim == owner:
+        for profile, (claim, collector) in list(self.reserved.items()):
+            if claim == owner:
                 collector.release_export(owner)
-                self.reserved.pop(profile, None)
+                del self.reserved[profile]
 
     async def start(self, chat_id, profile_ids, lead_id, language="en", selection=None, transport="regular"):
         if transport not in ("regular", "takeout"):
             raise ValueError("Unknown export transport.")
         options = Selection.model_validate(selection or {})
-        if self.busy():
-            raise ValueError("Pause the current distributed export before starting another.")
         chosen = list(dict.fromkeys([lead_id, *profile_ids]))
         export_id = secrets.token_hex(16)
-        self.reserve(chosen, export_id)  # Atomic before the first await, including monitoring accounts.
+        self.reserve(chosen, export_id)
         timing = ExportTiming()
-        self.preparing = set(chosen)
         try:
             lead_app = self.app_for(lead_id)
             lead = lead_app.state.collector
@@ -188,8 +160,7 @@ class DistributedExport:
             scan_end = options.to_utc if options.reply_scope == "period" else None
             scan_end = min(scan_end, now) if scan_end else now
             username = getattr(entity, "username", None)
-            workers, bounds, densities = [], [], []
-            self.entities = {}
+            workers, bounds, densities, entities = [], [], [], {}
             for profile in chosen:
                 app = self.app_for(profile)
                 collector = app.state.collector
@@ -221,14 +192,14 @@ class DistributedExport:
                     if upper >= lower:
                         bounds.append((lower, upper, profile))
                     worker.update(low=lower, high=upper)
-                    self.entities[profile] = peer
+                    entities[profile] = peer
                 except asyncio.CancelledError:
                     raise
                 except Exception as exc:
                     worker.update(state="skipped", error=type(exc).__name__,
                                   reason=str(exc) if isinstance(exc, ValueError) else None)
                 workers.append(worker)
-            if lead_id not in self.entities:
+            if lead_id not in entities:
                 lead_worker = next(w for w in workers if w["profile_id"] == lead_id)
                 raise ValueError("The starting account cannot read this chat: "
                                  + (lead_worker.get("reason") or lead_worker.get("error") or "unknown reason") + ".")
@@ -238,49 +209,58 @@ class DistributedExport:
                 eligible = [p for left, right, p in bounds if left <= low and end - 1 <= right]
                 if eligible:
                     segments.append({"low": low, "high": end - 1, "profiles": eligible})
+            try:
+                total = (await lead.client.get_messages(entity, limit=0)).total
+            except Exception:
+                total = None
+            messages = sum(s["high"] - s["low"] + 1 for s in segments)
+            messages = min(messages, total) if total is not None else messages
+            needed = messages * RECORD_BYTES * WORKING_COPIES + lead.param("media_min_free_mb") * 1024**2
+            free = shutil.disk_usage(self.root).free
+            if free < needed:
+                raise ValueError("Not enough free disk space for this export. Free up space or choose a shorter period.")
             info = lead.dialog_cache.get(chat_id, {})
             chunk_size = CHUNK * min(50, min(densities, default=1))
-            self.timing = timing
-            self.state = {"id": export_id, "chat_id": chat_id, "title": info.get("title"), "lead": lead_id,
+            state = {"id": export_id, "chat_id": chat_id, "title": info.get("title"), "lead": lead_id,
                           "phase": "preparing", "started_at": now, "workers": workers,
                           "captured": 0, "ranges_done": 0, "ranges_total": sum(
                               (s["high"] - s["low"]) // chunk_size + 1 for s in segments),
                           "total": None, "eta_seconds": None, "ready": False, "error": None,
                           "selection": options.model_dump(), "counts": {}, "transport": transport}
-            self.job = {"format": "tgwitness-distributed-job-v1", "id": export_id, "chat_id": chat_id,
+            job = {"format": "tgwitness-distributed-job-v1", "id": export_id, "chat_id": chat_id,
                         "lead": lead_id, "started_at": now, "scan_end": scan_end, "username": username,
                         "chunk_size": chunk_size, "segments": segments, "workers": [dict(w) for w in workers],
                         "transport": transport, "megagroup": bool(getattr(entity, "megagroup", False)),
                         "checkpoint_format": PAGE_FORMAT,
                         "selection": options.model_dump(), "report": report.resolved(lead.store, language),
                         "chat": {"id": chat_id, "title": info.get("title"), "kind": info.get("kind")}}
+            state["disk"] = {"estimated_messages": messages, "needed_bytes": needed, "free_bytes": free}
+            run = Run(self, state, job, timing=timing)
+            run.entities = entities
             directory = self.directory(export_id)
             directory.mkdir(mode=0o700)
             for folder in ("chunks", "receipts", "media", "pages"):
                 (directory / folder).mkdir(mode=0o700)
-            durable_write(directory / "job.json", canonical(self.signed(self.job)))
-            self.persist()
-            self.launch()
-            return self.public()
+            durable_write(directory / "job.json", canonical(run.signed(job)))
+            run.persist()
+            self.launch(run)
+            return self.public(export_id)
         except BaseException:
             self.release(export_id)
             raise
-        finally:
-            self.preparing.clear()
 
-    def launch(self):
-        self.task = asyncio.create_task(self.run())
-        owner = self.state["id"]
-        self.task.add_done_callback(lambda _: self.release(owner))
+    def launch(self, run):
+        owner = run.state["id"]
+        self.runs[owner] = run
+        run.task = asyncio.create_task(run.run())
+        run.task.add_done_callback(lambda _: self.release(owner))
 
     async def resume(self, job_id):
-        if self.busy():
-            raise ValueError("Pause the current distributed export first.")
         state = self.public(job_id)
         if state.get("phase") not in ("paused", "failed", "cancelled"):
             raise ValueError("This export is not available to resume.")
         public = self.app_for(state["lead"]).state.vault.public_key
-        job = self.verified(self.directory(job_id) / "job.json", public)
+        job = verified(self.directory(job_id) / "job.json", public)
         active = [w for w in job["workers"] if w["state"] != "skipped"]
         for worker in active:
             app = self.app_for(worker["profile_id"])
@@ -288,22 +268,80 @@ class DistributedExport:
                     (app.state.store.get_setting("account", {}) or {}).get("id") != worker["account_id"]):
                 raise ValueError("A participating account or signing identity has changed.")
         self.reserve([w["profile_id"] for w in active], job_id)
-        self.timing = ExportTiming()
-        self.preparing = {w["profile_id"] for w in active}
         try:
-            self.state, self.job = state, job
-            self.entities = {}
-            self.state.update(phase="preparing", ready=False, error=None, wait_until=None, approval_profile=None)
-            self.state["workers"] = [{**w, "state": "pending" if w["state"] != "skipped" else "skipped",
-                                      "wait_until": None} for w in job["workers"]]
-            self.persist()
-            self.launch()
-            return self.public()
+            state.update(phase="preparing", ready=False, error=None, wait_until=None, approval_profile=None)
+            state["workers"] = [{**w, "state": "pending" if w["state"] != "skipped" else "skipped",
+                                 "wait_until": None} for w in job["workers"]]
+            run = Run(self, state, job)
+            run.persist()
+            self.launch(run)
+            return self.public(job_id)
         except BaseException:
             self.release(job_id)
             raise
-        finally:
-            self.preparing.clear()
+
+    def poll(self, job_id):
+        return self.public(job_id)
+
+    async def pause(self, job_id):
+        run = self.runs.get(job_id)
+        if run and run.active():
+            run.task.cancel()
+            await asyncio.gather(run.task, return_exceptions=True)
+            if run.state["phase"] not in ("done", "failed", "paused"):
+                run.state.update(phase="paused", ready=False, error="Paused; committed chunks are retained.")
+                run.set_phase("paused")
+                run.persist()
+        return self.public(job_id)
+
+    async def cancel(self, job_id):
+        state = await self.pause(job_id)
+        if state.get("phase") not in ("done", "unknown", *ACTIVE):
+            run = Run(self, {**state, "phase": "cancelled"})
+            run.persist()
+            self.runs[job_id] = run
+        return self.public(job_id)
+
+    def result_path(self, job_id):
+        state = self.public(job_id)
+        path = self.directory(job_id) / "export.zip"
+        return path if state.get("ready") and path.is_file() and not path.is_symlink() else None
+
+    async def close(self):
+        for job_id in list(self.runs):
+            await self.pause(job_id)
+
+
+class Run:
+    def __init__(self, exports, state, job=None, *, timing=None):
+        self.app_for, self.directory = exports.app_for, exports.directory
+        self.state, self.job = state, job
+        self.task = self.db = self.recheck = None
+        self.chunk_failures, self.entities = {}, {}
+        self.history_transports, self.page_states = {}, {}
+        self.timing = (timing or ExportTiming()) if job is not None else None
+
+    def update_timing(self):
+        if self.timing is not None and self.state is not None:
+            self.state["performance"] = self.timing.snapshot(self.state["captured"])
+
+    def set_phase(self, phase):
+        self.state["phase"] = phase
+        if self.timing is not None:
+            self.timing.move(phase)
+        self.update_timing()
+
+    def active(self):
+        return bool(self.task and not self.task.done())
+
+    def signed(self, value, vault=None):
+        vault = vault or self.app_for(self.state["lead"]).state.vault
+        return {"statement": value, "public_key": vault.public_key, "signature": vault.sign(canonical(value))}
+
+    def persist(self):
+        self.update_timing()
+        self.state["updated_at"] = utcnow()
+        durable_write(self.directory(self.state["id"]) / "status.json", canonical(self.signed(self.state)))
 
     def prepare_chunks(self):
         directory = self.directory(self.state["id"])
@@ -341,7 +379,7 @@ class DistributedExport:
                 raise ValueError("Invalid chunk receipt path.")
             envelope = read_json(receipt)
             profile = envelope["statement"]["profile_id"]
-            value = self.verified(receipt, by_profile[profile]["public_key"])
+            value = verified(receipt, by_profile[profile]["public_key"])
             if receipt.stem != str(value["low"]):
                 raise ValueError("Chunk receipt filename differs from its signed range.")
             task = self.db.execute("SELECT * FROM tasks WHERE low=? AND high=?", (value["low"], value["high"])).fetchone()
@@ -661,6 +699,14 @@ class DistributedExport:
                           "fingerprint": fingerprint(vault.public_key)})
         return parts
 
+    def clean(self):
+        directory = self.directory(self.state["id"])
+        for name in ("chunks", "receipts", "media", "pages"):
+            shutil.rmtree(directory / name, ignore_errors=True)
+        for path in [*directory.glob("*.sqlite3*"), directory / "selected.jsonl"]:
+            with suppress(OSError):
+                path.unlink(missing_ok=True)
+
     async def run(self):
         directory = self.directory(self.state["id"])
         lead = self.app_for(self.job["lead"]).state.collector
@@ -693,8 +739,6 @@ class DistributedExport:
             try:
                 await asyncio.gather(*workers)
             finally:
-                # gather propagates a worker error without stopping its siblings.
-                # Keep the index and every account reservation until they finish.
                 for task in workers:
                     if not task.done() and not task.cancelling():
                         task.cancel()
@@ -753,11 +797,13 @@ class DistributedExport:
             self.persist()
             out = directory / "export.zip"
             max_gib = tuning.value(lead.store, "export_max_gib")
+            names = await complete_in_thread(chat_export.journal_names, lead.store, self.job["chat_id"], scratch)
             await complete_in_thread(chat_export.build_bundle, scratch, meta, lead.vault, out,
-                                     max_gib * 1024**3, self.job["report"], directory / "media")
+                                     max_gib * 1024**3, self.job["report"], directory / "media", names)
             await complete_in_thread(verify_chat_export, out, fingerprint(lead.vault.public_key), max_gib)
             replica.outbox(lead.store, out)
-            self.state.update(phase="done", ready=True, error=None)
+            self.state.update(phase="done", ready=True, error=None, filename=chat_export.archive_name(
+                lead.store, self.job["chat_id"], self.job["chat"]["title"]))
             self.set_phase("done")
             lead.store.append("chat_export.completed", {"export_id": self.job["id"], "mode": "distributed_selection",
                               "counts": self.state["counts"], "performance": self.state["performance"]}, self.job["chat_id"])
@@ -790,37 +836,5 @@ class DistributedExport:
                 self.db.close()
                 self.db = None
             self.persist()
-
-    def poll(self, job_id):
-        return self.public(job_id)
-
-    async def pause(self, job_id):
-        if self.state and self.state["id"] == job_id and self.task and not self.task.done():
-            self.task.cancel()
-            await asyncio.gather(self.task, return_exceptions=True)
-            if self.state["phase"] not in ("done", "failed", "paused"):
-                self.state.update(phase="paused", ready=False, error="Paused; committed chunks are retained.")
-                self.set_phase("paused")
-                self.persist()
-        return self.public(job_id)
-
-    async def cancel(self, job_id):
-        if self.busy() and (not self.state or self.state["id"] != job_id):
-            raise ValueError("Pause the current distributed export before changing another job.")
-        state = await self.pause(job_id)
-        if state.get("phase") not in ("done", "unknown"):
-            if not self.state or self.state["id"] != job_id:
-                self.timing = None
-            self.state = state
-            self.state["phase"] = "cancelled"
-            self.persist()
-        return self.public(job_id)
-
-    def result_path(self, job_id):
-        state = self.public(job_id)
-        path = self.directory(job_id) / "export.zip"
-        return path if state.get("ready") and path.is_file() and not path.is_symlink() else None
-
-    async def close(self):
-        if self.state:
-            await self.pause(self.state["id"])
+            if self.state["phase"] == "done":
+                self.clean()

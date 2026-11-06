@@ -24,7 +24,6 @@ from .network import NetworkConfig
 from .security import owner_only, private_write
 
 
-# Upstream GitHub release asset SHA-256, checked 2026-11-02.
 VERSIONS = {"wgcf": "2.3.1", "wireproxy": "1.1.3"}
 HASHES = {
     "wgcf": {
@@ -334,7 +333,6 @@ class PortableRoutes:
         process = self.processes.get(identifier)
         if process and process.returncode is None:
             process.stdin.close()
-            # The worker owns and terminates its child before exiting.
             await asyncio.wait_for(process.wait(), 10)
         self.processes.pop(identifier, None)
         self.configs.pop(identifier, None)

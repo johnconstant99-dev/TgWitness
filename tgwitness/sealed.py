@@ -300,9 +300,6 @@ class Session:
                                                          or getattr(exc, "winerror", None) == 112)
                 if not isinstance(exc, BundleSizeLimit) and not disk_full:
                     raise
-                # export_file has removed the failed temporary ZIP. Reuse the
-                # complete journal and every preserved file; never drop evidence
-                # silently to make the second attempt fit.
                 self.store.append("sealed.packaging", {"mode": "compact",
                     "reason": "disk_full" if disk_full else "archive_size_limit",
                     "full_journal": True, "preserved_media_omitted": False})

@@ -61,7 +61,6 @@ class PhalaWorld(World):
                 return Response(422, {"detail": [{"type": "missing", "loc": ["compose_file", "name"],
                                                   "msg": "Field required"}]})
             self.name, self.provisioned = body["name"], body
-            # Like Phala Cloud: its own pre-launch script unless an empty one is given, which is dropped.
             fields = {"manifest_version": 2, "runner": "docker-compose", "features": ["kms"], "storage_fs": "zfs",
                       "tproxy_enabled": False, **body["compose_file"]}
             if fields.get("pre_launch_script") is None:
@@ -71,7 +70,6 @@ class PhalaWorld(World):
             self.app_compose = json.dumps(fields, sort_keys=True, separators=(",", ":"))
             self.compose_hash = hashlib.sha256(self.app_compose.encode()).hexdigest()
             self.app_id = self.compose_hash[:40]
-            # Without an image Phala Cloud picks the development build of its current release.
             self.image = body.get("image", "dstack-dev-0.5.5")
             public = self.kms.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
             return Response(200, {"app_id": self.app_id, "app_env_encrypt_pubkey": public.hex(),
@@ -83,7 +81,6 @@ class PhalaWorld(World):
             shared = self.kms.exchange(X25519PublicKey.from_public_bytes(sealed[:32]))
             self.env = {e["key"]: e["value"] for e in json.loads(AESGCM(shared).decrypt(sealed[32:44], sealed[44:], None))["env"]}
             assert sorted(self.env) == body["env_keys"]
-            # Without the dstack gateway Phala Cloud never fills instance_id here; /state has it.
             self.cvm = {"id": "cvm-1", "name": self.name, "app_id": self.app_id, "instance_id": None,
                         "status": "running", "compose_hash": self.compose_hash, "resource": {"instance_type": "tdx.small"},
                         "os": {"version": "0.5.5", "is_dev": self.image.startswith("dstack-dev-"), "os_image_hash": OS_IMAGE},
@@ -118,7 +115,6 @@ class PhalaWorld(World):
             return Response(200, {"revisions": self.revisions, "total": len(self.revisions), "page": params["page"],
                                   "page_size": 100, "total_pages": 1})
         if path == "/cvms/cvm-1/operations":
-            # Phala Cloud lists restarts, stops and starts here, newest first, one cursor page at a time.
             start = int(params.get("cursor") or 0)
             page = self.operations[::-1][start:start + 1]
             more = start + 1 < len(self.operations)

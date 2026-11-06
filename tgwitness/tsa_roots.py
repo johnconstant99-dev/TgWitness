@@ -57,8 +57,6 @@ I2MLdq2qjZFDOCXsxBxJpbmLGBx9ow6ZerlUxzws2AWv2pk=
 """
 
 
-# The Belgian federal government's root for its qualified time-stamping units, as published at the address its
-# certificates name: http://crt.eidpki.belgium.be/eid/brca6.crt
 BELGIUM_ROOT_CA6 = """-----BEGIN CERTIFICATE-----
 MIIDaDCCAu2gAwIBAgIUcYtX/2tpPlocI17Yh6PvUfQBDyYwCgYIKoZIzj0EAwMw
 geAxCzAJBgNVBAYTAkJFMREwDwYDVQQHDAhCcnVzc2VsczEwMC4GA1UECgwnS2lu
@@ -83,7 +81,6 @@ KO1nMO/rQRfuZ701
 """
 BELGIUM_ROOT_CA6_SHA256 = "9c872bc979a7c09a58d4a274c199e5cb16cfa9b9618d98bc9a9988e984b8495c"
 QUALIFIED_TSA = "http://tsa.belgium.be/connect"
-# Qualified time-stamping units by the SHA-256 of their certificate, as Belgium's EU trusted list lists them.
 TRUSTED_LIST = {"territory": "BE", "url": "https://tsl.belgium.be/tsl-be.xml", "issued": "2026-10-20T15:00:00Z",
                 "next_update": "2027-04-20T15:00:00Z"}
 QUALIFIED = {

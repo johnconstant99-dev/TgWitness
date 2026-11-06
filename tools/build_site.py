@@ -386,8 +386,6 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     images = {}
 
 
-    # English is the only required language. Untranslated labels and blocks stay in English and the
-    # page shows its translation notice; the build reports them instead of failing.
     inventory_strings, inventory_fragments, inventory_diagrams = inventory(root)
     required_strings = set(inventory_strings + inventory_diagrams)
     pending = {}

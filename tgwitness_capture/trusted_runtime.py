@@ -52,7 +52,6 @@ class LinuxClient:
                               stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, **kwargs).stdout
 
     def route(self, connector):
-        # This root-owned receipt describes the firewall installed BEFORE dropping uid/capabilities.
         path = Path(self.settings.get("route_receipt", "/run/trusted-route.json"))
         if os.name != "posix" or path.stat().st_uid != 0 or path.stat().st_mode & 0o022:
             raise ValueError("Missing protected network guard receipt")
@@ -112,10 +111,7 @@ class LinuxClient:
             window = self.command(["xdotool", "getactivewindow"]).decode().strip()
             pid = int(self.command(["xdotool", "getwindowpid", window]).decode().strip())
         except subprocess.CalledProcessError:
-            # X11 may not yet have an active window while the official client starts.
-            # Setup remains retryable; scroll still turns this into an emergency stop.
             raise ValueError("Client window is not ready; wait and review the screen") from None
-        # Main process and browser children remain in the owned process group.
         if os.getpgid(pid) != self.process.pid:
             raise ValueError("Focus left the owned client")
         return window
@@ -126,7 +122,6 @@ class LinuxClient:
     def scroll(self, direction):
         if self.active_window() != self.window:
             raise ValueError("Window changed; pause and review before continuing")
-        # Wheel events only. No coordinates, arbitrary buttons, typing, keys or clipboard in capture.
         self.command(["xdotool", "mousemove", "--window", self.window, "640", "360",
                       "click", "--clearmodifiers", "4" if direction == "up" else "5"])
 
@@ -137,13 +132,11 @@ class LinuxClient:
         elif value.action == "key":
             self.command(["xdotool", "key", "--clearmodifiers", value.key])
         else:
-            # Login codes never enter command arguments, process listings, or the signed journal.
             self.command(["xdotool", "type", "--clearmodifiers", "--file", "-"], input=value.text.encode())
 
     def stop(self):
         process = self.process
         if process is not None:
-            # Also kill children when the main browser process has already exited.
             try:
                 os.killpg(process.pid, signal.SIGTERM)
                 process.wait(timeout=5)

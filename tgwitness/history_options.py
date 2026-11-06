@@ -15,6 +15,4 @@ class HistoryOptions(BaseModel):
 def options_of(run):
     import json
     raw = json.loads(run["options"])
-    # Existing runs retain their original scope instead of silently gaining an
-    # admin-log acquisition when resumed after an upgrade.
     return HistoryOptions(**raw) if raw else HistoryOptions(media_workers=1, admin_log=False)

@@ -252,7 +252,6 @@ class Recorder:
                     if self.official:
                         await self.stop_official(type(exc).__name__)
                         return
-                    # The failed attempt is signed, not a successful observation.
             if now - self.last_heartbeat >= self.config.heartbeat_seconds:
                 self.journal.append("capture.heartbeat", {"last_success": self.last_success,
                                     "last_error": self.last_error or self.video.error, "video_running": self.video.process is not None,
@@ -262,7 +261,6 @@ class Recorder:
     async def stop_official(self, reason):
         self.settings["enabled"] = False
         self.last_error = reason
-        # Seal video before any login/cleanup UI can be shown.
         await asyncio.to_thread(self.video.stop)
         await self.official.pause(reason)
 
@@ -271,7 +269,6 @@ class Recorder:
             try:
                 await self.tick()
             except Exception as exc:
-                # A full disk / failed journal must stop collection, not report healthy coverage.
                 self.settings["enabled"] = False
                 self.last_error = "RecorderStopped:" + type(exc).__name__
                 await asyncio.to_thread(self.video.abort)
@@ -284,7 +281,6 @@ class Recorder:
         self.closing = True
         try:
             if self.task:
-                # Let an in-flight SQLite backup / export finish before closing its journal.
                 await self.task
             async with self.lock:
                 await asyncio.to_thread(self.video.stop)

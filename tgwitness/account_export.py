@@ -186,9 +186,6 @@ def media_info(media):
         kind = "photo"
         sizes = [getattr(p, "size", None) or max(getattr(p, "sizes", None) or [0]) for p in item.sizes]
         size = max(sizes or [0]) or None
-    # Attributes are an unordered set of capabilities. Animated MP4s and video
-    # stickers also carry a video attribute; its position must not change which
-    # exclusion or byte limit applies. Match the Capture engine's precedence.
     attributes = getattr(item, "attributes", [])
     if any(isinstance(a, types.DocumentAttributeVideo) and a.round_message for a in attributes):
         kind = "video_message"
@@ -252,7 +249,7 @@ class AccountExport:
         self.task, self.current, self.index = None, None, None
         self.transfer = None
         self.packaging_copies, self.record_bytes = 1, 0
-        self.transport_factory = transport.Transport  # replaced by deterministic fake transports in tests
+        self.transport_factory = transport.Transport
 
     def directory(self, job_id):
         if not isinstance(job_id, str) or not JOB_ID.fullmatch(job_id):
@@ -331,7 +328,7 @@ class AccountExport:
                 if not self.vault.read("account-export-" + job["id"]).get("takeout_id"):
                     continue
                 if job.get("ready"):
-                    await self.resume(job["id"])  # Retry finalization while preserving the published archive.
+                    await self.resume(job["id"])
                 else:
                     raise ValueError("Resume or remove the unfinished Takeout export before starting another Takeout session.")
         account = (self.store.get_setting("account", {}) or {}).get("id")
@@ -433,8 +430,6 @@ class AccountExport:
         acquisition = (self.current or {}).get("acquisition", {})
         records = max(acquisition.get("bytes_preserved", 0), getattr(self, "record_bytes", 0)) + extra_records
         media = getattr(self, "counts", {}).get("unique_media_bytes", 0) + getattr(self, "pending_bytes", 0) + extra_media
-        # Includes escaped HTML, JSON views and an additional outer encrypted copy
-        # on disposable runners. This is a reserve, not a final-size prediction.
         return 256 * 1024**2 + getattr(self, "packaging_copies", 1) * (16 * records + media)
 
     def storage_pressure(self, extra_records=0, extra_media=0):
@@ -475,10 +470,9 @@ class AccountExport:
                                     wait_until=None, delay_seconds=None)
                 self.persist()
                 self.collector.release_export(job_id)
-                return self.public()  # published archives stay byte-for-byte stable for range downloads
+                return self.public()
             recovering = True
             self.current.update(phase="preparing", ready=False, error=None, wait_until=None, options=job["options"])
-            # Validate before returning success to the resume request, not only in its background task.
             await complete_in_thread(self.recover, job)
             self.persist()
             self.task = asyncio.create_task(self.run(job))
@@ -493,7 +487,7 @@ class AccountExport:
                     try:
                         self.persist()
                     except (OSError, ValueError):
-                        pass  # Keep retryable in-memory state and preserve the original verification error.
+                        pass
             finally:
                 try:
                     if self.index:
@@ -644,8 +638,6 @@ class AccountExport:
         chats = self.inventory["chats"]
         selected = [c for c in chats if c["selected"]]
         discovered = self.inventory.get("discovery_counts", {}).get("chats_discovered", len(chats))
-        # A page can be sealed for each slice of a large chat history. Rechecking
-        # every task for every chat after each page made progress O(chats * tasks * pages).
         chat_tasks = {chat["id"]: [0, 0] for chat in selected}
         for task in tasks:
             status = chat_tasks.get(task["chat_id"])
@@ -737,8 +729,6 @@ class AccountExport:
             async def download_once():
                 nonlocal attempt
                 attempt += 1
-                # Live transfer counters are not signed or counted as preserved bytes.
-                # A retry starts this file again; do not retain the previous attempt's progress.
                 await progress(0, info["expected_bytes"])
                 if shutil.disk_usage(directory).free < min(limit, remaining, info["expected_bytes"] or 1024**2) + 64 * 1024**2:
                     raise OSError("Insufficient free space for the next attachment.")
@@ -754,7 +744,6 @@ class AccountExport:
                 return writer
             writer = await self.retry(download_once)
             digest, size = writer.digest.hexdigest(), writer.total
-            # Additional Takeout JSON can contain new authorization fields: sanitize before export.
             if isinstance(media, types.InputTakeoutFileLocation):
                 if size > 64 * 1024**2:
                     raise ValueError("additional_json_exceeds_sanitizer_limit")
@@ -781,7 +770,7 @@ class AccountExport:
                 self.cache_attachment(result)
             return result
         except errors.TakeoutInvalidError:
-            raise  # Resume must renew the transport, not sign an expired session as an attachment failure.
+            raise
         except (errors.RPCError, ValueError) as exc:
             if isinstance(exc, errors.RPCError) and getattr(exc, "message", None) == "TAKEOUT_FILE_EMPTY":
                 return {**info, "outcome": "excluded", "reason": "no_additional_data"}
@@ -901,7 +890,6 @@ class AccountExport:
                         self.seal(job, task, cursor, cursor, True, [], 0, started, "failed", type(exc).__name__)
                         terminal = True
                     except ValueError as exc:
-                        # Explicitly record unavailable selected categories, never silently omit them.
                         if task["category"] == "other_data" and options["transport"] == "regular":
                             self.seal(job, task, cursor, cursor, True, [], 0, started, "failed", str(exc))
                             terminal = True
@@ -911,7 +899,7 @@ class AccountExport:
                         break
                     cursor = after
                     await asyncio.sleep(0)
-            await complete_in_thread(self.recover, job)  # reject changes without blocking the HTTP event loop
+            await complete_in_thread(self.recover, job)
             self.current.update(phase="packaging", current_chat=None)
             self.persist()
             await complete_in_thread(self.package, job)
@@ -1104,11 +1092,10 @@ class AccountExport:
                 await transport.WrappedClient(self.collector.client, saved["takeout_id"])(
                     transport.f.account.FinishTakeoutSessionRequest(success=False))
             except errors.TakeoutInvalidError:
-                pass  # Telegram has already terminated this session.
+                pass
             except (errors.RPCError, OSError, ConnectionError, TimeoutError):
                 raise ValueError("Could not close the Telegram Takeout session. Reconnect and retry removing this export.") from None
         if directory.exists():
-            # All generated job paths must remain inside the verified job root.
             if any(linked(p) or not p.resolve().is_relative_to(directory.resolve()) for p in directory.rglob("*")):
                 raise ValueError("Refusing to remove an export containing filesystem links.")
             identities = {path.stem for path in (directory / "disclosures").glob("*") if JOB_ID.fullmatch(path.stem)}

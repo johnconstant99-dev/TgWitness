@@ -30,7 +30,6 @@ GLOBAL_KEEP = frozenset((
     "network.route_fallback", "network.policy_changed", "account.authorized", "account.signed_out",
     "monitoring.changed", "capture.changed", "parameters.changed", "recheck.changed", "evidence.changed",
     "anchor.completed", "storage.low", "storage.ok"))
-# Records about a chosen chat that carry nobody's personal data.
 CHAT_KEEP = frozenset((
     "target.changed", "target.priority", "target.removed", "source.added", "source.discovered", "coverage.gap",
     "snapshot.started", "snapshot.completed", "snapshot.interrupted", "chat_export.started", "chat_export.completed",
@@ -255,8 +254,9 @@ class Minimiser:
             role = self.roles.get(request.get("keyboard_event"), "other") if request.get("action") == "press" else "observer"
             allowed = visible_text(role)
             self.action_text[event["seq"]] = allowed
-            shown = fields(payload, {"account_id", "observation_running", "own_actions", "preview_event"})
-            shown["request"] = fields(request, {"request_id", "action", "preview_id", "chat_id", "reply_to",
+            shown = fields(payload, {"account_id", "observation_running", "own_actions", "preview_event",
+                                     "queued_until"})
+            shown["request"] = fields(request, {"request_id", "action", "preview_id", "observe", "chat_id", "reply_to",
                                                  "message_id", "keyboard_event", "row", "column"})
             if request.get("action") == "send" and allowed and isinstance(request.get("text"), str):
                 shown["request"]["text"] = self.clean(request["text"])

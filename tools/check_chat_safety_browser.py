@@ -39,7 +39,10 @@ def main():
         response = requests.post(server.url + '/api/auth/configure', headers=headers,
                                  json={'api_id': 123, 'api_hash': 'a' * 32, 'session': saved_session()}, timeout=15)
         response.raise_for_status()
+        requests.post(server.url + '/api/interactions/read-only', headers=headers, json={'enabled': False},
+                      timeout=15).raise_for_status()
         store = server.app.state.store
+        store.set_setting('parameters', {'action_message_seconds': 0, 'action_button_seconds': 0})
         store.set_target(SHOP_BOT, 'Synthetic shop bot', 'bot', True)
         store.set_target(CHAT, 'Empty research chat', 'supergroup', True)
         secret = 'Password: TopSecret-1234; card 4111 1111 1111 1111; token ' + 'sk-' + 'proj-' + 'abcdefghijklmnopqrstuvwxyz'

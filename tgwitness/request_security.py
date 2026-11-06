@@ -28,7 +28,6 @@ def bucket(address):
         return str(ip)
     if ip in NAT64:
         return str(ipaddress.IPv4Address(int(ip) & 0xFFFFFFFF))
-    # One IPv6 subscriber usually holds a whole /64; per-address limits would be trivial to rotate around.
     return str(ipaddress.ip_network((ip, 64), strict=False))
 
 

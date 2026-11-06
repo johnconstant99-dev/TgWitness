@@ -1,7 +1,14 @@
 (() => {
   "use strict";
-  let groups = [], sections = [], picked = [], importing = false, stopping = false;
+  let groups = [], sections = [], picked = [], importing = false, stopping = false, pickSerial = 0;
   let loadSerial = 0, formRevision = -1, restorePoint = null, loadError = "", creating = null;
+  const LIMIT = 8 * 1024 * 1024, SUFFIX = /\.(session|json|zip|txt)$/i, IGNORED = /(^|\/)(\.|__MACOSX\/)|-journal$/i;
+  const LABELS = {waiting: "Waiting", ready: "Session found", checking: "Checking…", alive: "Active", revoked: "Revoked",
+                  banned: "Banned or deleted", duplicate: "Duplicate", password: "Two-step password required",
+                  frozen: "Frozen", invalid: "File cannot be used", unchecked: "Not checked", importing: "Importing…",
+                  imported: "Imported", failed: "Not imported", cancelled: "Cancelled"};
+  const KINDS = {alive: "live", imported: "ok", checking: "busy", importing: "busy", revoked: "bad", banned: "bad",
+                 duplicate: "bad", password: "bad", frozen: "bad", invalid: "bad", failed: "bad"};
   const settings = new Map(), moving = new Map(), writing = new Map(), groupActions = new Map();
   const editable = () => !!state.me?.admin && !state.status?.demo;
   const SECTIONS = {parameters: "Parameters", reports: "Report settings", capture: "Capture and monitoring",
@@ -335,14 +342,53 @@
     }
   }
 
-  function bundles(files) {
-    const byName = new Map();
-    for (const file of files) {
-      const key = file.name.replace(/\.(session|json|zip|txt)$/i, "").toLowerCase();
-      if (!byName.has(key)) byName.set(key, {name: file.name.replace(/\.(session|json|zip|txt)$/i, ""), files: []});
-      byName.get(key).files.push(file);
+  const local = (file, path) => ({name: file.name, path: path || file.webkitRelativePath || file.name, size: file.size,
+                                  read: async () => file});
+
+  async function unzip(entry) {
+    const bytes = new Uint8Array(await (await entry.read()).arrayBuffer()), view = new DataView(bytes.buffer), found = [];
+    let end = bytes.length - 22;
+    while (end >= Math.max(0, bytes.length - 65557) && view.getUint32(end, true) !== 0x06054b50) end--;
+    if (end < Math.max(0, bytes.length - 65557)) return null;
+    for (let at = view.getUint32(end + 16, true), count = view.getUint16(end + 10, true); count > 0; count--) {
+      if (at + 46 > bytes.length || view.getUint32(at, true) !== 0x02014b50) return null;
+      const flags = view.getUint16(at + 8, true), method = view.getUint16(at + 10, true), packed = view.getUint32(at + 20, true);
+      const size = view.getUint32(at + 24, true), length = view.getUint16(at + 28, true), offset = view.getUint32(at + 42, true);
+      const path = new TextDecoder().decode(bytes.subarray(at + 46, at + 46 + length)), name = path.split("/").pop();
+      at += 46 + length + view.getUint16(at + 30, true) + view.getUint16(at + 32, true);
+      if (path.endsWith("/")) continue;
+      if (flags & 1 || ![0, 8].includes(method) || packed === 0xffffffff || offset + 30 > bytes.length) return null;
+      const start = offset + 30 + view.getUint16(offset + 26, true) + view.getUint16(offset + 28, true);
+      const data = new Blob([bytes.subarray(start, start + packed)]);
+      found.push({name, path: entry.path + "/" + path, size, read: async () => new File([method ?
+        await new Response(data.stream().pipeThrough(new DecompressionStream("deflate-raw"))).blob() : data], name)});
     }
-    return [...byName.values()];
+    return found.some(item => /(^|\/)key_datas?$/i.test(item.path)) ? null : found;
+  }
+
+  async function walk(roots) {
+    const found = [];
+    const visit = async entry => {
+      if (entry.isFile) {
+        found.push(local(await new Promise((resolve, reject) => entry.file(resolve, reject)), entry.fullPath.replace(/^\//, "")));
+        return;
+      }
+      const reader = entry.createReader();
+      for (let batch; (batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject))).length;)
+        for (const child of batch) await visit(child);
+    };
+    for (const entry of roots) await visit(entry);
+    return found;
+  }
+
+  function bundles(entries) {
+    const byName = new Map();
+    for (const entry of entries) {
+      const key = entry.path.replace(SUFFIX, "").toLowerCase();
+      if (!byName.has(key)) byName.set(key, {name: entry.name.replace(SUFFIX, ""), files: [], state: "waiting"});
+      byName.get(key).files.push(entry);
+    }
+    return [...byName].sort(([a], [b]) => a.localeCompare(b)).map(([, bundle]) => bundle);
   }
 
   function base64(buffer) {
@@ -351,31 +397,129 @@
     return btoa(text);
   }
 
+  async function each(items, work) {
+    const queue = [...items];
+    await Promise.all(Array.from({length: Math.min(4, queue.length)}, async () => {
+      while (queue.length) await work(queue.shift());
+    }));
+  }
+
+  const who = account => (account.username ? "@" + account.username + " · " : "") + "ID " + account.id;
+
+  function controls() {
+    const count = test => picked.filter(bundle => test(bundle.state)).length;
+    const live = count(s => s === "alive"), open = count(s => ["ready", "unchecked"].includes(s));
+    $("fleet-import-check").disabled = importing || !editable() || !open;
+    $("fleet-import-start").disabled = importing || !editable() || !live;
+    if (!importing) $("fleet-import-summary").textContent = picked.length ? tr("Active: {live} · imported: {done} · not usable: {bad} · not checked: {open}",
+      {live, open, done: count(s => s === "imported"), bad: count(s => KINDS[s] === "bad")}) : "";
+  }
+
   function renderPicked(unsupported = []) {
     const list = $("fleet-results"); list.replaceChildren();
     for (const bundle of picked) {
       const item = node("li", "fleet-result waiting");
-      item.append(node("strong", "", bundle.name), node("span", "hint", bundle.files.map(f => f.name).join(" + ")),
-                  node("span", "fleet-state", tr("Waiting")));
-      bundle.row = item; list.append(item);
+      item.append(node("strong", "", bundle.name), node("span", "hint", ""), node("span", "fleet-state", ""));
+      bundle.row = item; list.append(item); mark(bundle, bundle.state);
     }
-    for (const file of unsupported) {
+    for (const entry of unsupported) {
       const item = node("li", "fleet-result bad");
-      item.append(node("strong", "", file.name), node("span", "hint", ""), node("span", "fleet-state",
+      item.append(node("strong", "", entry.name), node("span", "hint", ""), node("span", "fleet-state",
         tr("Unsupported account file. Expected SQLite, TData ZIP, account JSON, or StringSession text.")));
       list.append(item);
     }
-    $("fleet-import-start").disabled = !picked.length || !editable();
-    $("fleet-import-summary").textContent = picked.length ? trn("{n} account ready to import", "{n} accounts ready to import", picked.length) : "";
+    controls();
   }
 
-  function pick(files) {
+  async function pick(entries) {
     if (importing || !editable()) return;
-    files = files.filter(f => !f.name.startsWith(".") && !/-journal$/i.test(f.name));
-    const supported = file => /\.(session|json|zip|txt)$/i.test(file.name);
-    picked = bundles(files.filter(f => f.size <= 8 * 1024 * 1024 && supported(f)));
-    if (files.some(f => f.size > 8 * 1024 * 1024)) toast(tr("Files above 8 MiB were left out."), true);
-    renderPicked(files.filter(f => !supported(f)));
+    const serial = ++pickSerial, revision = state.workspaceRevision, expanded = [];
+    for (const entry of entries.filter(entry => !IGNORED.test(entry.path))) {
+      const inner = /\.zip$/i.test(entry.name) ? await unzip(entry).catch(() => null) : null;
+      expanded.push(...(inner?.length ? inner.filter(item => !IGNORED.test(item.path)) : [entry]));
+    }
+    if (serial !== pickSerial || revision !== state.workspaceRevision || importing) return;
+    const supported = expanded.filter(entry => SUFFIX.test(entry.name));
+    if (supported.some(entry => entry.size > LIMIT)) toast(tr("Files above 8 MiB were left out."), true);
+    picked = bundles(supported.filter(entry => entry.size <= LIMIT));
+    renderPicked(expanded.filter(entry => !SUFFIX.test(entry.name)));
+    await inspect();
+  }
+
+  async function inspect() {
+    const serial = pickSerial, revision = state.workspaceRevision, passcode = $("fleet-passcode").value;
+    const current = () => serial === pickSerial && revision === state.workspaceRevision && !!state.token;
+    const queue = picked.filter(bundle => bundle.state !== "imported");
+    for (const bundle of queue) mark(bundle, "waiting");
+    await each(queue, async bundle => {
+      try {
+        if (bundle.files.length > 4 || bundle.files.reduce((n, f) => n + f.size, 0) > LIMIT)
+          throw new Error(tr("One account · up to 4 files · 8 MiB total"));
+        bundle.body = bundle.body || await Promise.all(bundle.files.map(async f => ({name: f.name,
+          content: base64(await (await f.read()).arrayBuffer())})));
+        const result = await json("auth/import/preview", {files: bundle.body, passcode}, {root: true});
+        if (!current()) return;
+        if (!result.can_connect) return mark(bundle, "invalid", tr(result.message));
+        Object.assign(bundle, {keyId: result.key_id, userId: result.expected_user_id});
+        mark(bundle, "ready", result.formats.map(format => tr(format)).join(" + "));
+      } catch (error) {
+        if (current() && !(error instanceof StaleView)) mark(bundle, "invalid", error.message);
+      }
+    });
+    if (!current()) return;
+    const seen = new Map();
+    for (const bundle of picked.filter(bundle => bundle.state === "ready")) {
+      const twin = seen.get("key:" + bundle.keyId) || seen.get("user:" + bundle.userId);
+      if (twin) mark(bundle, "duplicate", tr("Same session or account as {name}.", {name: twin.name}));
+      else for (const key of ["key:" + bundle.keyId, ...(bundle.userId ? ["user:" + bundle.userId] : [])]) seen.set(key, bundle);
+    }
+    controls();
+  }
+
+  function apiPair() {
+    const text = $("fleet-api").value.trim(), pair = text.match(/^(\d{1,10})\s*[:\s]\s*([0-9a-fA-F]{32})$/);
+    if (text && !pair) throw new Error(tr("Enter the API pair as ID:Hash, or leave it empty."));
+    return pair ? {api_id: Number(pair[1]), api_hash: pair[2].toLowerCase()} : {};
+  }
+
+  function working(on) {
+    importing = on;
+    if (on) stopping = false;
+    for (const field of $("fleet-import").querySelectorAll("input, select, button"))
+      if (field.id !== "fleet-import-close" && field.id !== "fleet-import-stop") field.disabled = on || !editable();
+    show("fleet-import-stop", on); $("fleet-import-stop").disabled = !on;
+    if (!on) controls();
+  }
+
+  async function check() {
+    if (importing || !editable()) return;
+    const pair = apiPair(), passcode = $("fleet-passcode").value, revision = state.workspaceRevision, serial = pickSerial;
+    const current = () => serial === pickSerial && revision === state.workspaceRevision && !!state.token;
+    const queue = picked.filter(bundle => ["ready", "unchecked"].includes(bundle.state));
+    working(true);
+    try {
+      await each(queue, async bundle => {
+        if (!current() || stopping) return;
+        mark(bundle, "checking");
+        try {
+          const result = await json("profiles/check", {files: bundle.body, passcode, ...pair}, {root: true});
+          if (!current()) return;
+          bundle.account = result.account;
+          mark(bundle, result.state, result.account ? who(result.account) : importError(result.message));
+        } catch (error) {
+          if (current() && !(error instanceof StaleView)) mark(bundle, "unchecked", error.message);
+        }
+      });
+      if (!current()) return;
+      const seen = new Map();
+      for (const bundle of picked.filter(bundle => bundle.state === "alive")) {
+        const twin = seen.get(bundle.account.id);
+        if (twin) mark(bundle, "duplicate", tr("Same session or account as {name}.", {name: twin.name}));
+        else seen.set(bundle.account.id, bundle);
+      }
+    } finally {
+      working(false);
+    }
   }
 
   function importError(message) {
@@ -384,24 +528,24 @@
     return owner === undefined ? tr(reason) : tr("This Telegram account already has a workspace: {label}.", {label: owner});
   }
 
-  function mark(bundle, kind, text) {
-    bundle.row.className = "fleet-result " + kind;
-    bundle.row.querySelector(".fleet-state").textContent = text;
+  function mark(bundle, status, message = "") {
+    bundle.state = status;
+    if (!bundle.row) return;
+    bundle.row.className = "fleet-result " + (KINDS[status] || "waiting");
+    bundle.row.dataset.state = status;
+    const hint = bundle.row.querySelector(".hint");
+    hint.replaceChildren(bundle.files.map(f => f.name).join(" + "));
+    if (message) hint.append(node("span", "fleet-detail", message));
+    bundle.row.querySelector(".fleet-state").textContent = tr(LABELS[status]);
   }
 
   async function run() {
     if (importing || !editable()) return;
-    const revision = state.workspaceRevision, queue = [...picked];
+    const revision = state.workspaceRevision, queue = picked.filter(bundle => bundle.state === "alive");
     const current = () => revision === state.workspaceRevision && !!state.token;
-    const pairText = $("fleet-api").value.trim();
-    const pair = pairText.match(/^(\d{1,10})\s*[:\s]\s*([0-9a-fA-F]{32})$/);
-    if (pairText && !pair) throw new Error(tr("Enter the API pair as ID:Hash, or leave it empty."));
+    const pair = apiPair();
     let passcode = $("fleet-passcode").value, group = $("fleet-group").value || null;
-    importing = true; stopping = false;
-    const fields = [...$("fleet-import").querySelectorAll("input, select, button")]
-      .filter(field => field.id !== "fleet-import-close" && field.id !== "fleet-import-stop");
-    fields.forEach(field => { field.disabled = true; });
-    show("fleet-import-stop", true); $("fleet-import-stop").disabled = false;
+    working(true);
     try {
       if (group === "__new") {
         const label = $("fleet-group-name").value.trim() || tr("Imported accounts");
@@ -411,40 +555,27 @@
         fillSelects(); $("fleet-group").value = group;
         $("fleet-group-name").closest("div").hidden = true;
       }
+      const done = () => queue.filter(bundle => bundle.state === "imported").length;
       for (const bundle of queue) {
         if (!current()) return;
-        if (bundle.done) continue;
-        if (stopping) { mark(bundle, "waiting", tr("Cancelled")); continue; }
-        mark(bundle, "busy", tr("Importing…"));
+        if (stopping) { mark(bundle, "cancelled", who(bundle.account)); continue; }
+        mark(bundle, "importing", who(bundle.account));
         try {
-          if (bundle.files.length > 4 || bundle.files.reduce((n, f) => n + f.size, 0) > 8 * 1024 * 1024)
-            throw new Error(tr("One account · up to 4 files · 8 MiB total"));
-          const files = await Promise.all(bundle.files.map(async f => ({name: f.name, content: base64(await f.arrayBuffer())})));
-          if (!current()) return;
-          const body = {files, label: bundle.name.slice(0, 80), group, passcode,
-                        ...(pair ? {api_id: Number(pair[1]), api_hash: pair[2].toLowerCase()} : {})};
-          const result = await json("profiles/import", body, {root: true});
-          const a = result.account;
-          mark(bundle, "ok", (a.username ? "@" + a.username + " · " : "") + "ID " + a.id);
-          bundle.done = true;
+          const result = await json("profiles/import", {files: bundle.body, label: bundle.name.slice(0, 80), group, passcode, ...pair},
+                                    {root: true});
+          mark(bundle, "imported", who(result.account));
         } catch (error) {
           if (!current() || error instanceof StaleView) return;
-          mark(bundle, "bad", importError(error.message));
+          mark(bundle, "failed", importError(error.message));
         }
-        $("fleet-import-summary").textContent = tr("{done} of {total} imported", {
-          done: queue.filter(b => b.done).length, total: queue.length});
+        $("fleet-import-summary").textContent = tr("{done} of {total} imported", {done: done(), total: queue.length});
       }
       await loadProfiles(); await load();
-      if (current()) toast(trn("{n} account imported.", "{n} accounts imported.", queue.filter(b => b.done).length));
+      if (current()) toast(trn("{n} account imported.", "{n} accounts imported.", done()));
     } finally {
       passcode = "";
-      importing = false;
-      show("fleet-import-stop", false);
-      fields.forEach(field => { field.disabled = !editable(); });
-      $("fleet-import-start").disabled = !editable() || !picked.some(b => !b.done);
-      if (current()) {
-        $("fleet-passcode").value = "";
-      }
+      working(false);
+      if (current()) $("fleet-passcode").value = "";
     }
   }
 
@@ -452,15 +583,26 @@
     show("fleet-import", true); fillSelects(); $("fleet-import").scrollIntoView({block: "start", behavior: "smooth"});
   });
   $("fleet-import-close").addEventListener("click", () => {
-    stopping = importing; show("fleet-import", false); picked = []; renderPicked();
+    stopping = importing; pickSerial++; show("fleet-import", false); picked = []; renderPicked();
   });
   $("fleet-import-stop").addEventListener("click", () => { stopping = true; $("fleet-import-stop").disabled = true; });
-  $("fleet-files").addEventListener("change", () => { pick([...$("fleet-files").files]); $("fleet-files").value = ""; });
+  for (const id of ["fleet-files", "fleet-folder"]) $(id).addEventListener("change", () => {
+    const entries = [...$(id).files].map(file => local(file)); $(id).value = "";
+    busy(null, () => pick(entries));
+  });
+  $("fleet-folder-open").addEventListener("click", () => $("fleet-folder").click());
   const drop = $("fleet-drop");
   drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
   drop.addEventListener("dragleave", () => drop.classList.remove("over"));
-  drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); pick([...e.dataTransfer.files]); });
+  drop.addEventListener("drop", e => {
+    e.preventDefault(); drop.classList.remove("over");
+    const roots = [...e.dataTransfer.items].map(item => item.webkitGetAsEntry?.()).filter(Boolean);
+    const files = [...e.dataTransfer.files].map(file => local(file));
+    busy(null, async () => pick(roots.length ? await walk(roots) : files));
+  });
+  $("fleet-passcode").addEventListener("change", () => { if (picked.length && !importing) busy(null, inspect); });
   $("fleet-group").addEventListener("change", () => { $("fleet-group-name").closest("div").hidden = $("fleet-group").value !== "__new"; });
+  $("fleet-import-check").addEventListener("click", () => busy(null, check));
   $("fleet-import-start").addEventListener("click", () => busy(null, run));
   $("fleet-group-new").addEventListener("click", () => busy(null, async () => {
     if (!editable() || creating) return;
@@ -477,8 +619,8 @@
   }));
   window.addEventListener("tgwitness:lock", () => {
     clearForms(); loadError = "";
-    picked = []; groups = []; sections = [];
-    for (const id of ["fleet-passcode", "fleet-api", "fleet-files"]) $(id).value = "";
+    picked = []; groups = []; sections = []; pickSerial++;
+    for (const id of ["fleet-passcode", "fleet-api", "fleet-files", "fleet-folder"]) $(id).value = "";
     $("fleet-groups").replaceChildren(); renderPicked(); show("fleet-import", false);
   });
   window.TgWitnessFleet = {load, decorate, beforeRender};

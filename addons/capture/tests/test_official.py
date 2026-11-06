@@ -194,7 +194,6 @@ def test_official_panel_login_selection_export_and_languages(tmp_path, request, 
                 page.locator("#selection").click()
             selected = tmp_path / "selected.json"
             saved.value.save_as(selected)
-            # Observe action completion instead of overlapping two API commands.
             expect(page.locator("#export")).to_be_enabled()
             with page.expect_download() as saved:
                 page.locator("#export").click()
@@ -221,8 +220,6 @@ def test_official_panel_login_selection_export_and_languages(tmp_path, request, 
         assert not thread.is_alive()
 
 
-# Synthetic DOM using the reviewed official client's public element boundaries.
-# This is not a Telegram login or a claim to have exercised a real account.
 FIXTURE = """<!doctype html><html><head><meta charset="utf-8"><title>Synthetic official-client fixture</title>
 <style>.MessageList{height:350px;width:700px;overflow:auto}.Message{height:160px}body{margin:0}</style></head><body>
 <div id="LeftColumn"><div class="chat-list"><div class="Chat"><a class="ListItem-button" href="#123"><span class="title">Alice &lt;script&gt;</span></a></div></div></div>
@@ -292,7 +289,6 @@ def test_owned_browser_guard_scroll_capture_and_unknown_dialog(tmp_path, request
         for text in (values[0]["rendered_text"], derived_text):
             assert all(hidden not in text for hidden in ("HIDDEN", "⛔", "DECORATIVE"))
         assert not values[0]["telegram_origin_independently_proven"]
-        # An emoji-only edit must trigger observation before the periodic snapshot.
         await adapter.page.locator('.text-content img.emoji').first.evaluate("el => el.alt='🔬'")
         changed = await adapter.capture(journal, {"screenshots": True, "pages": True}, 60)
         assert changed is not None and changed[0]["text_sha256"] != metadata["text_sha256"]
@@ -304,7 +300,6 @@ def test_owned_browser_guard_scroll_capture_and_unknown_dialog(tmp_path, request
         with pytest.raises(GuardStopped, match="UnexpectedDialog"):
             await adapter.tick()
         assert await adapter.page.locator("#tgwitness-stop-cover").is_visible()
-        # A login screen is covered too, before it could become a subsequent snapshot.
         assert len(journal.events()) >= 4
 
     async def run():

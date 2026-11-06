@@ -120,7 +120,6 @@ class Endpoint:
                 if isinstance(message, dict) and message.get("method") == "tools/call":
                     params = message.get("params")
                     name = params.get("name") if isinstance(params, dict) else None
-                    # Revalidate after receiving the body, before any SDK call.
                     try:
                         runtime["connections"].resolve(token, count=False, tool=name if isinstance(name, str) else None)
                     except Refused as exc:

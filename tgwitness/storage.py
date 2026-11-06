@@ -52,7 +52,6 @@ class StorageSpaceError(ValueError):
 
 
 def packed_bound(size):
-    # zlib's conservative compressBound, plus room for a gzip header/trailer.
     return size + (size >> 12) + (size >> 14) + (size >> 25) + 64
 
 
@@ -302,7 +301,6 @@ class Rclone:
                         else:
                             raise ValueError("The storage helper returned too much output.")
                     code = await process.wait()
-                    # A refresh may succeed even when the subsequent transfer fails.
                     refreshed = config.read_text(encoding="utf-8")
                     parse_config(refreshed)
                     self.config = refreshed
@@ -368,7 +366,6 @@ class Storage:
         self.lock = asyncio.Lock()
 
     def reserve_bytes(self):
-        # Even with the download pause disabled, leave room for journal/receipts.
         return max(64, tuning.value(self.store, "media_min_free_mb")) * MIB
 
     def require_space(self, additional, reserve=None):
@@ -417,7 +414,6 @@ class Storage:
         else:
             config = configparser.ConfigParser(interpolation=None)
             config.read_string(remote_config if remote_config is not None else self.vault.read("storage").get("config", ""))
-            # Keep OAuth refresh tokens out of the destination identity.
             identity = {section: {k: v for k, v in config[section].items()
                         if k in ("type", "host", "url", "endpoint", "root_folder_id", "team_drive", "drive_id", "user", "account")}
                         for section in config.sections()}
@@ -565,7 +561,6 @@ class Storage:
         if saved["purpose"] == "offload":
             if not self.backup_has_media(digest):
                 raise ValueError("The evidence backup still needs this local file. Finish the off-site copy before freeing its space.")
-            # Verify the path and bytes immediately before deleting this exact file.
             checked = safe_file(self.store.root, digest)
             if file_hash(checked) != digest:
                 raise ValueError("The local file changed during copying. It is kept.")
@@ -605,8 +600,6 @@ class Storage:
                     except StorageSpaceError as exc:
                         result["skipped_space"] += 1
                         result["required_free_bytes"] = min(result["required_free_bytes"] or exc.required, exc.required)
-                        # A large file must not prevent smaller files, or already
-                        # verified copies requiring no staging space, freeing room.
                         await asyncio.sleep(0)
                         continue
                     result["files"] += 1
@@ -790,7 +783,6 @@ class Storage:
         if active:
             if not self.disk_status()["pressure_active"]:
                 self.store.set_setting("storage_pressure_active", False)
-            # Continue useful batches promptly; failures/no eligible files back off.
             progress = result["freed_bytes"] > 0 and not result["error"]
             self.store.set_setting("storage_pressure_retry_at", time.time() + (30 if progress else 300))
         return result

@@ -1,6 +1,4 @@
 (root) => {
-  // Telegram paints Unicode emoji as images. Read their displayed alt text
-  // without replacing nodes in the client or changing the recorded page.
   const emoji = 'img.emoji[alt]';
   function read(node) {
     if (!node) return '';

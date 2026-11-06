@@ -97,9 +97,6 @@ else: raise AssertionError('Recorder can change protected route permissions')
                 docker("exec", "--user", "10001", client, "python", "-c", access_probe)
                 docker("exec", "--user", "10002", client, "python", "-c",
                        "import os; assert not os.access('/run/trusted-route.json',os.R_OK)")
-                # Exercise the shipped Web binary in the same restricted namespace.
-                # An empty page avoids authenticating or contacting Telegram; no
-                # --no-sandbox flag or extra capability is permitted here.
                 browser_probe = """import hashlib,json,subprocess
 from pathlib import Path
 binary=Path('/usr/bin/chromium').resolve(strict=True)
@@ -177,8 +174,6 @@ print(json.dumps(results))
     finally:
         logs = docker("logs", client, check=False)
         (args.output / "container.log").write_text(logs)
-        # This helper creates an unauthenticated, network-blocked client; its startup
-        # log can diagnose missing Qt libraries without ever handling an account.
         startup = docker("exec", "--user", "10001", client, "python", "-c",
                          "from pathlib import Path; print('\\n'.join(p.read_text(errors='replace')[-16000:] for p in Path('/session').glob('trusted-*/log.txt')))",
                          check=False)

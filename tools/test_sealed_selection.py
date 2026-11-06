@@ -88,7 +88,6 @@ def test_signed_full_and_selected_account_settings(tmp_path, ids, transport):
     policy.write_text(json.dumps({"format": "tgwitness-sealed-policy-v1",
         "workflow": "phishdestroy/TgWitness/.github/workflows/sealed-collector.yml",
         "releases": [{"collector_sha": "a" * 40, "workflow_sha": "b" * 40}]}))
-    # Only external attestation is stubbed; signatures, ZIP digests and nested receipts are real.
     external = lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout='[{"synthetic":true}]')
     args = (tmp_path / "out/evidence.zip", tmp_path / "synthetic-attestation.jsonl", "user/fork", policy)
     result = verify(*args, run=external, expected_selection=expected, require_complete=True)

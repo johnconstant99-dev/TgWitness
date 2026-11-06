@@ -144,8 +144,6 @@ def test_verifier_rejects_signed_payload_length_contradictions(tmp_path, claim):
         export.transport_factory = ExportTransport
 
         async def old_attachment(media, task, network, directory, options):
-            # Emulate a previously accepted short download with valid signatures
-            # and a matching content hash, but contradictory source metadata.
             payload = CONTENT[:-1]
             digest = hashlib.sha256(payload).hexdigest()
             (directory / "media" / digest).write_bytes(payload)

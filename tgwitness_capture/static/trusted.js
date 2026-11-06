@@ -79,7 +79,6 @@
     await request('begin', {case: $('case').value, client: $('client').value, method: $('method').value, connector: $('connector').value});
   });});
   for (const action of ['start', 'pause', 'finish']) $(action).addEventListener('click', () => void run(() => request(action, {})));
-  // The kill switch is never suppressed by an in-flight UI request.
   $('stop').addEventListener('click', () => {void request('stop', {}).then(refresh).catch(error => {$('error').textContent = error.message;});});
   $('frame').addEventListener('click', () => void run(frame));
   for (const direction of ['up', 'down']) $(direction).addEventListener('click', () => void run(async () => {await request('scroll', {direction}); await frame();}));
@@ -104,7 +103,6 @@
   });});
   $('checkpoint').addEventListener('click', () => void run(() => download('checkpoint', 'trusted-checkpoint.json')));
   $('download').addEventListener('click', () => void run(() => download('export', 'trusted-live.zip', {})));
-  // No background input or auto-scrolling. Status polling contains no client interaction.
   setInterval(() => {if (token && !busy) void run(async () => {});}, 10000);
   setInterval(() => {if (token && !busy && ['setup', 'paused', 'collecting'].includes(status?.phase)) void run(frame);}, 4000);
 })();

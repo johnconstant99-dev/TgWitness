@@ -53,6 +53,8 @@ def main():
                                  json={"api_id": 123, "api_hash": "a" * 32, "session": saved_session()}, timeout=10)
         response.raise_for_status()
         store = server.app.state.store
+        fast = {"action_message_seconds": 0, "action_button_seconds": 0, "action_join_seconds": 0}
+        store.set_setting("parameters", fast)
         store.set_target(SHOP_BOT, "Synthetic shop bot", "bot", True)
         asyncio.run(server.app.state.collector.capture_message(offer(), "message.new", SHOP_BOT))
         errors = []
@@ -74,6 +76,18 @@ def main():
             expect(page.locator("#chat-message")).to_be_enabled()
             expect(page.locator("#chat-compose")).to_be_hidden()
             expect(page.locator('#chat-read-only')).to_be_checked()
+            expect(page.locator('#chat-read-only')).to_be_disabled()
+            expect(page.locator('.chat-safety-hint')).to_contain_text("This account is read-only")
+            refused = page.evaluate("""chat=>json('interactions',{request_id:'server-read-only-refusal',action:'send',
+                chat_id:chat,text:'must not be sent'}).then(()=>'sent',error=>error.status+' '+error.message)""", SHOP_BOT)
+            assert refused.startswith("409 ") and "read-only" in refused, refused
+            navigate_panel(page, "connection")
+            expect(page.locator("#account-read-only")).to_be_checked()
+            page.locator("#account-read-only").uncheck()
+            page.wait_for_function("()=>state.status?.actions?.read_only===false")
+            expect(page.locator("#account-read-only")).not_to_be_checked()
+            assert store.get_setting("read_only") is False
+            page.locator('[data-view="chats"]').click()
             allow_writes(page)
             expect(page.locator("#chat-compose-open")).to_contain_text("Write as")
             open_composer(page)
@@ -140,6 +154,9 @@ def main():
             page.locator("#chat-link").fill("https://t.me/+invite_hash")
             page.locator("#chat-preview-button").click()
             expect(page.locator("#chat-link-preview")).to_contain_text("Preview group")
+            expect(page.locator("#chat-link-preview")).to_contain_text("Members: 9")
+            expect(page.locator("#chat-link-observe")).to_be_checked()
+            expect(page.locator("#chat-link-preview button")).to_have_text("Join / open")
             assert not server.app.state.collector.client.joined
             page.locator("#chat-link").fill("@shop_bot")
             expect(page.locator("#chat-link-preview button")).to_have_count(0)
@@ -164,6 +181,9 @@ def main():
             expect(page.locator("#chat-link-preview button")).to_have_count(0)
             expect(page.locator("#toast")).to_be_hidden()
             assert len(server.app.state.collector.client.joined) == 1
+            opened = [e["payload"]["request"] for e in store.all_events() if e["kind"] == "interaction.requested"
+                      and e["payload"]["request"]["action"] == "open"]
+            assert [request["observe"] for request in opened] == [True], opened
             expect(page.locator("#chat-feed")).to_contain_text("Could not load data")
             expect(page.locator("#chat-send")).to_be_disabled()
             page.evaluate("interactionJoinFailure.restore()")
@@ -213,6 +233,22 @@ def main():
             assert len(server.app.state.collector.client.sent) == sent + 1
             assert server.app.state.collector.client.sent[-1][0] == 123
             assert server.app.state.collector.client.sent[-1][1] == "Message intended for the group"
+            for text, status in (("First paced message", "succeeded"), ("Second paced message", "queued")):
+                expect(page.locator("#chat-send")).to_be_enabled()
+                page.locator("#chat-message").fill(text)
+                with page.expect_response(lambda response: response.request.method == "POST"
+                                          and response.url.endswith("/api/interactions")) as paced:
+                    page.locator("#chat-send").click()
+                    confirm_action(page)
+                assert paced.value.json()["status"] == status, paced.value.json()
+                store.set_setting("parameters", {**fast, "action_message_seconds": 4})
+            assert store.get_setting("interaction.queue") == [paced.value.json()["request_id"]]
+            expect(page.locator("#interaction-result")).to_contain_text("Queued to keep a safe pace")
+            expect(page.locator("#chat-message")).to_have_value("")
+            assert server.app.state.collector.client.sent[-1][1] == "First paced message"
+            expect(page.locator("#interaction-result")).to_contain_text("Action completed", timeout=20000)
+            assert server.app.state.collector.client.sent[-1][1] == "Second paced message"
+            store.set_setting("parameters", fast)
 
             page.locator(".chat-item", has_text="Synthetic shop bot").click()
             expect(page.locator("#chat-message")).to_be_enabled()
@@ -270,7 +306,9 @@ def main():
                               "English controls", "signed evidence verifies", "no browser errors",
                               "refresh failure preserves receipt and request ID", "chat switch blocks sending",
                               "stale chat response ignored", "join receipt survives destination load failure",
-                              "status poll preserves pending consent", "group send confirms exact recipient and text"],
+                              "status poll preserves pending consent", "group send confirms exact recipient and text",
+                              "imported session read-only on the server", "paced message queued then sent",
+                              "preview members and observe choice"],
                    "events_verified": verified["events"]}
         (output / "receipt.json").write_text(json.dumps(receipt, indent=2), encoding="utf-8")
         print(json.dumps(receipt, indent=2))

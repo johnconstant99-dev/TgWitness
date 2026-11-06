@@ -81,7 +81,6 @@ class WindowsAcl:
                 pointer = ctypes.c_void_p()
                 self.check(self.api.GetAce(acl, index, ctypes.byref(pointer)))
                 ace = ctypes.cast(pointer, ctypes.POINTER(AllowedAce)).contents
-                # Do not infer safety from unfamiliar object/callback ACEs.
                 if ace.kind != 0 or not self.api.EqualSid(pointer.value + AllowedAce.sid.offset, self.sid):
                     return False
                 if not ace.flags & 0x08 and ace.mask & FILE_ALL_ACCESS == FILE_ALL_ACCESS:

@@ -1,12 +1,16 @@
+import bisect
 import csv
 import hashlib
 import io
 import json
+import re
+import unicodedata
 import uuid
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 
-from . import indicators, pdf_report, report, verification_kit
+from . import indicators, pdf_report, people, report, verification_kit
 from .evidence import producer, report_entry, write_indicators, write_pdf, write_viewer
 from .message_selection import Selection
 from .store import canonical, utcnow
@@ -22,11 +26,16 @@ EXPORT_LIMITS = [
     "This export is a current history snapshot taken by a Telegram client, not Telegram-signed evidence.",
     "Messages deleted before export, and past edits, cannot be recovered and are not present.",
     "Message times come from Telegram; the export time uses the collector's system clock.",
-    "Sender names are the cached Telegram profile at export; names and usernames are mutable.",
+    "chat.json gives each sender's name at export and its source: the account's contacts or the Telegram profile. "
+    "Where the journal recorded the name at the time of a message, sender-names.json and the readable copies use it; "
+    "names and usernames are mutable.",
     "The signature detects changes relative to a trusted key. Retain the fingerprint elsewhere.",
 ]
 JOURNAL_LIMIT = ("This snapshot holds only what Telegram returned at export. The journal of this workspace also "
                  "holds deletions or earlier versions observed in this chat; export the evidence journal to include them.")
+NAMES_MEANING = ("Sender names as the journal of this workspace recorded them: delivered with the message when it was "
+                 "received live, otherwise the last name recorded before the message was sent. Messages not listed show "
+                 "the name at export: from in chat.json, with its source in from_source.")
 MAX_BUNDLE_BYTES = 4 * 1024**3
 
 
@@ -36,6 +45,15 @@ def journal_changes(store, chat_id):
     if not deleted and not edited:
         return None
     return {"deleted": deleted, "edited": edited, "meaning": JOURNAL_LIMIT}
+
+
+def archive_name(store, chat_id, title):
+    now = datetime.now(timezone.utc)
+    number = store.count_events(chat_id=chat_id, kind="chat_export.completed",
+                                since=now.replace(hour=0, minute=0, second=0, microsecond=0)) + 1
+    name = "".join("_" if unicodedata.category(c)[0] in "CZ" or c in '<>:"/\\|?*' else c for c in title or "")
+    name = re.sub("_+", "_", name).encode()[:100].decode(errors="ignore").strip("._- ")
+    return (name or "chat_" + str(chat_id)) + "_" + now.date().isoformat() + "_" + str(number) + ".zip"
 
 
 def export_limits(meta):
@@ -50,6 +68,53 @@ def records(scratch_path):
             line = line.strip()
             if line:
                 yield json.loads(line)
+
+
+def journal_names(store, chat_id, scratch_path):
+    senders = {r["from_id"] for r in records(scratch_path) if type(r.get("from_id")) is int and r["from_id"] != chat_id}
+    with store.snapshot() as snapshot:
+        found = people.observed_names(snapshot.connection, chat_id, senders)
+    return {uid: {"live": {n["message_id"]: n for n in names if n["live"]},
+                  "seen": sorted(((people.stamp(n["observed_at"]), n) for n in names
+                                  if people.stamp(n["observed_at"]) is not None), key=lambda item: item[0])}
+            for uid, names in found.items()}
+
+
+def sender_name(record, names, chat_id):
+    uid = record.get("from_id")
+    if type(uid) is not int or uid == chat_id or record.get("type") == "unparsed":
+        return None
+    known = names.get(uid) or {}
+    found, basis = known.get("live", {}).get(record.get("id")), "received_with_message"
+    if found is None:
+        sent, seen = people.stamp(record.get("date")), known.get("seen") or []
+        index = bisect.bisect_right(seen, sent, key=lambda item: item[0]) if sent is not None else 0
+        found, basis = (seen[index - 1][1] if index else None), "recorded_before_message"
+    if found is None:
+        return {"basis": "export_time"}
+    return {"name": found["name"], "username": found["username"], "basis": basis, "source": found["source"],
+            "observed_at": found["observed_at"], "record": {"seq": found["seq"], "hash": found["hash"]}}
+
+
+def named(record, names, chat_id):
+    found = sender_name(record, names, chat_id)
+    if found is None:
+        return record
+    if found["basis"] == "export_time":
+        return {**record, "from_basis": "export_time"}
+    return {**record, "from": found["name"], "from_username": found["username"], "from_basis": found["basis"],
+            "from_source": found["source"]}
+
+
+def sender_names(scratch_path, names, chat_id):
+    listed, at_export = [], 0
+    for record in records(scratch_path):
+        found = sender_name(record, names, chat_id)
+        if found and found["basis"] == "export_time":
+            at_export += 1
+        elif found:
+            listed.append({"id": record.get("id"), "from_id": record["from_id"], **found})
+    return listed, at_export
 
 
 def authors(scratch_path):
@@ -109,8 +174,8 @@ def chat_indicators(scratch_path, meta=None, media_dir=None):
 
 def json_chunks(meta, scratch_path):
     header = {k: meta[k] for k in ("format", "chat", "account", "observer", "exported_at", "acquisition",
-                                   "message_count", "author_count", "message_ids", "recheck", "admin_log", "source",
-                                   "journal", "limitations") if meta.get(k) is not None}
+                                   "message_count", "author_count", "message_ids", "sender_names", "recheck", "admin_log",
+                                   "source", "journal", "limitations") if meta.get(k) is not None}
     prefix = json.dumps(header, ensure_ascii=False, indent=1)[:-2]
     yield (prefix + ',\n "messages": [').encode("utf-8")
     first = True
@@ -172,8 +237,9 @@ def html_chunks(meta, scratch_path, context=None):
     stats = context.get("stats") or chat_stats(scratch_path)
     context = {"producer": producer(), "limits": export_limits(meta), "people": authors(scratch_path), "files": {},
                "report_id": "unsealed", "created_at": utcnow(), "fingerprint": "", **context, "stats": stats}
-    ordered = (lambda: records_backwards(scratch_path)) if stats["newest_first"] else (lambda: records(scratch_path))
-    return report.chat_chunks(meta, ordered, context)
+    names, chat_id = context.get("names") or {}, ((meta or {}).get("chat") or {}).get("id")
+    source = (lambda: records_backwards(scratch_path)) if stats["newest_first"] else (lambda: records(scratch_path))
+    return report.chat_chunks(meta, lambda: (named(r, names, chat_id) for r in source()), context)
 
 
 def attachment_files(media_dir):
@@ -183,8 +249,9 @@ def attachment_files(media_dir):
                   and all(c in "0123456789abcdef" for c in p.name))
 
 
-def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES, options=None, media_dir=None):
-    options = options or report.resolved()
+def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES, options=None, media_dir=None,
+                 names=None):
+    options, names = options or report.resolved(), names or {}
     meta = {"format": "tgwitness-chat-export-v1", "exported_at": utcnow(),
             "public_key": vault.public_key, "fingerprint": fingerprint(vault.public_key),
             "source": "Telegram history read by the account; a current snapshot, "
@@ -232,8 +299,14 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             attachments = attachment_files(media_dir)
             if attachments:
                 meta["attachments"] = len(attachments)
+            chat_id = (meta.get("chat") or {}).get("id")
+            attributed, at_export = sender_names(scratch_path, names, chat_id)
+            meta["sender_names"] = {"file": "sender-names.json", "from_journal": len(attributed), "at_export": at_export,
+                                    "meaning": NAMES_MEANING}
             write_member("chat.json", json_chunks(meta, scratch_path))
             write_member("message-ids.json", [json.dumps(ids, ensure_ascii=False, indent=1).encode("utf-8")])
+            write_member("sender-names.json", [json.dumps({"meaning": NAMES_MEANING, "messages": attributed},
+                                                          ensure_ascii=False, indent=1).encode("utf-8")])
             write_member("authors.json", [json.dumps(people, ensure_ascii=False, indent=1).encode("utf-8")])
             write_member("authors.csv", [authors_csv(people)])
             found = chat_indicators(scratch_path, meta, media_dir)
@@ -266,19 +339,22 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             write_indicators(write_member, found, context)
             write_member("custody.json", [json.dumps(report.custody(context), ensure_ascii=False,
                                                      indent=1).encode("utf-8")])
-            # The viewer's data, oldest message first.
-            ordered = (lambda: records_backwards(scratch_path)) if stats["newest_first"] else (lambda: records(scratch_path))
+            source = (lambda: records_backwards(scratch_path)) if stats["newest_first"] else (lambda: records(scratch_path))
+
+            def ordered():
+                return (named(r, names, chat_id) for r in source())
             context["viewer"] = write_viewer(write_member, "chat", ordered(), people, found, options)
             context["files"] = dict(hashes)
             write_pdf(write_member, "chat.pdf", lambda: pdf_report.chat_report_pdf(meta, context, vault, ordered()))
             context["files"] = dict(hashes)
-            write_member("chat.html", html_chunks(meta, scratch_path, context))
+            write_member("chat.html", html_chunks(meta, scratch_path, {**context, "names": names}))
             listed = {**hashes, **dict.fromkeys(("README.txt", "SHA256SUMS", "manifest.json", "manifest.sig"), "")}
             write_member("README.txt", [verification_kit.quickstart(options.get("language", "en")), b"\n",
                 report.readme(context, listed, "\n".join(meta["limitations"])
                 + "\n\nchat.json is authoritative; chat.html is a readable derivative sealed with the same key.\n"
                 "authors.csv / authors.json list everyone who posted in the exported history,\n"
                 "with message counts and first/last message; names are the profile at export time.\n"
+                "sender-names.json gives the sender name the journal recorded at the time of each listed message.\n"
                 "custody.json records how the history was acquired and exported.\n"
                 "media/ holds the attachments saved with the export, each named by its SHA-256; a message\n"
                 "without a file names the reason in file_status.\n"

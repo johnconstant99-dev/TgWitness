@@ -657,7 +657,8 @@ def changes(lay, say, changed, titles):
                      say("No message content was saved before this observation."), size=9)
             lay.text(report.kind_label(say, step["kind"]) + " · " + say("observed") + " "
                      + report.utc_text(step["observed_at"]) + " · #" + str(step["seq"]), size=7.8, style="B", color=BAD)
-            lay.text(say("Telegram does not say who deleted a message or exactly when; this is when the notice was "
+            lay.text(report.timer_text(say, step["kind"]) if step.get("auto_delete") else
+                     say("Telegram does not say who deleted a message or exactly when; this is when the notice was "
                          "observed.") if deleted else say("Telegram no longer returned this message at a later check."),
                      size=8.5, color=BAD)
         lay.gap(2)
@@ -1453,7 +1454,9 @@ def transcript(lay, say, messages, numbered=False):
             lay.gap(0.8)
             continue
         sender = record.get("from") or (str(record["from_id"]) if record.get("from_id") is not None else say("Unknown"))
-        head = "#" + str(record.get("id")) + "  " + report.utc_text(record.get("date")) + " · " + sender
+        note = report.name_note(say, record)
+        head = "#" + str(record.get("id")) + "  " + report.utc_text(record.get("date")) + " · " + sender \
+            + (" (" + note + ")" if note else "")
         if record.get("selection"):
             head += " · " + (say("Context message") if record["selection"].get("role") == "context"
                               else say("Matches export filters"))

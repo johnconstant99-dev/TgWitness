@@ -6,7 +6,6 @@ from .store import utcnow
 
 
 async def page(history, job, entity, stage):
-    # Import locally: Collector owns History.
     from .collector import admin_event
 
     meta = history.metadata(job)
@@ -53,7 +52,6 @@ async def page(history, job, entity, stage):
                 job["chat_id"])
             history.store.db.execute("INSERT INTO history_admin_items VALUES (?,?,?,?)",
                 (job["run_id"], job["chat_id"], event.id, observation["seq"]))
-            # Preserve old/new attachments without replacing the current message projection.
             for field in ("message", "prev_message", "new_message"):
                 message = getattr(event.action, field, None)
                 if message is not None and getattr(message, "media", None):

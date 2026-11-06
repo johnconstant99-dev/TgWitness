@@ -53,7 +53,6 @@ def routes(app):
             except Exception as exc:
                 if recorder.settings["enabled"]:
                     await recorder.stop_official(type(exc).__name__)
-                # Playwright errors can contain rendered data or proxy credentials.
                 raise HTTPException(409, "Official client operation stopped; check the procedure state") from None
 
     @app.post("/api/official/open")
@@ -104,7 +103,6 @@ def routes(app):
     @app.post("/api/official/stop")
     async def stop():
         recorder = app.state.recorder
-        # Immediate flag interrupts the next operation even while one holds the lock.
         recorder.official.stop_requested = True
         recorder.official.reason = "OperatorStop"
         async with recorder.lock:

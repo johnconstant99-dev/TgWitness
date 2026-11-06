@@ -183,8 +183,6 @@ def check(base, expected_fingerprint=None):
     return found
 
 
-# HTML
-
 CSS = """
 :root{--ink:#0f172a;--muted:#5b6475;--line:#e3e7ee;--paper:#ffffff;--tint:#f5f7fb;--gold:#b58a2e;--ok:#11795b;
 --okbg:#e7f6f0;--warn:#a15c07;--warnbg:#fdf3e2;--bad:#b42318;--badbg:#fdecea;--gray:#556070;--graybg:#eef1f5}
@@ -405,8 +403,6 @@ def html_report(report, sealed=None):
                "</div></body></html>\n")
     return "".join(out)
 
-
-# PDF
 
 def pdf_report(report, sealed=None, vault=None):
     from . import pdf_report as pdf_module

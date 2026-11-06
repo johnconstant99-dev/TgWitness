@@ -20,7 +20,6 @@ def board_keys(source=None):
         r"(?<![\w.$])(?:field|select)\(\s*\w+\s*,\s*" + literal,
     ):
         keys.extend(js_literal(match.group(2)) for match in re.finditer(pattern, source))
-    # Static [value, label] option tables also feed select(), field() and btn().
     token = r'''(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')'''
     for match in re.finditer(r"\[\s*(" + token + r")\s*,\s*(" + token + r")\s*\]", source):
         value, label = (js_literal(value[1:-1]) for value in match.groups())
@@ -50,7 +49,6 @@ def validate_catalogue(keys, words, lang):
 def check_translations():
     from tgwitness import i18n
 
-    # Exercise helper labels and ensure implementation values are not mistaken for UI text.
     fixture = """
         t('Direct label'); tr('{n} cards', {n: count}); btn('Button label', action);
         field(form, 'Field label', 'textarea'); select(form, 'Select label', [['id', 'Option label']]);

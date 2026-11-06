@@ -87,7 +87,7 @@ tgwitness = [
   "locales/hi.json", "locales/id.json", "locales/vi.json", "locales/zh.json",
   "guide_locales/*.json",
   "narrative/texts/*.json", "narrative/jurisdictions/*.json", "narrative/review-policy.json",
-  "english_fallbacks.json", "public_proxies.json", "sealed_policy.json", "jurisdictions.json", "verifier_languages.json",
+  "english_fallbacks.json", "public_proxies.json", "sealed_policy.json", "jurisdictions.json", "verifier_languages.json", "analysis_words.json",
   "schemas/board-*.json",
   "client_profiles.json", "client_profiles.LICENSE", "dstack_measurement.LICENSE",
   "fonts/*.ttf", "fonts/OFL.txt", "fonts/NotoSerif-OFL.txt",

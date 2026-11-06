@@ -98,7 +98,6 @@ class HistoryTransport:
             self.transport.invalidate()
 
     async def finish(self, success):
-        # Cancellation must not initialize a new Takeout session just to close it.
         if self.transport is None:
             self.transport = Transport(self.collector, self.vault, "history-" + self.run["id"], {})
             if self.transport.secret.get("takeout_id"):

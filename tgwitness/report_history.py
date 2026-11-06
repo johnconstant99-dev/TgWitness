@@ -3,7 +3,7 @@ GONE_KINDS = frozenset(("message.deleted", "message.missing_on_recheck"))
 
 
 def collect(events, changed, limit=1000, *, predicate=None):
-    from .report import message_times, pointing, shown_details
+    from .report import message_times, pointing, shown_details, timer_expected
 
     if type(limit) is not int or limit < 0:
         raise ValueError("History limit must be a non-negative integer")
@@ -41,7 +41,8 @@ def collect(events, changed, limit=1000, *, predicate=None):
         else:
             previous = item["versions"][-1] if item["versions"] else None
             item["gone"].append({"seq": event["seq"], "kind": kind, "observed_at": event["observed_at"],
-                                 "previous_version_seq": previous["seq"] if previous else None, **flags})
+                                 "previous_version_seq": previous["seq"] if previous else None,
+                                 **({"auto_delete": True} if timer_expected(payload) else {}), **flags})
     return found
 
 

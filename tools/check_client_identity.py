@@ -107,7 +107,6 @@ async def check_retention(root):
             raise AssertionError("Wrong account accepted")
         assert vault.read("credentials") == previous
 
-        # Old vaults gain a fixed profile on their first successful restore.
         await collector.stop(shutdown=True)
         legacy = {k: v for k, v in previous.items() if k != "client_profile"}
         vault.save("credentials", legacy)
@@ -121,7 +120,6 @@ async def check_retention(root):
             await collector.restore()
         assert collector.client.options["system_version"] == "First OS"
 
-        # A restore in flight cannot write obsolete credentials over a newer session.
         vault.save("credentials", legacy)
         replacement = {**previous, "session": saved_session(b"z")}
         async def changed_during_rpc():
@@ -244,7 +242,6 @@ async def check_catalog_retention(root):
         assert saved["lang_code"] == "es" and saved["system_lang_code"] == "fr-CA"
         await collector.stop(shutdown=True)
         collector = Collector(store, vault, FakeClient)
-        # Updating bundled defaults must leave an existing account's complete profile intact.
         with patch.object(client_profiles, "desktop", return_value={**saved, "app_version": "99.0.0 x64"}):
             await collector.restore()
         assert collector.client.tgwitness_client_profile == saved

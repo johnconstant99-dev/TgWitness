@@ -126,7 +126,7 @@ def test_floodwait_is_full_and_persisted_before_next_rpc(monkeypatch, error_type
         monkeypatch.setattr(telegram_client.TelegramClient, "_call", request)
         monkeypatch.setattr(telegram_client.time, "time", lambda: clock[0])
         monkeypatch.setattr(telegram_client.asyncio, "sleep", sleep)
-        client.rpc_backoff_setter = saved.append
+        client.rpc_backoff_setter = lambda until, method: saved.append(until)
         with pytest.raises(error_type):
             await client._call(None, 1)
         assert saved == [7301.0]
@@ -324,8 +324,8 @@ def test_undecodable_newest_message_does_not_block_the_start(tmp_path, monkeypat
         try:
             state = await manager.start(CHAT, list(entries), "account0")
             assert state["workers"][0]["high"] == 7, state
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "done", manager.state
+            job = await finished(manager, state)
+            assert job["phase"] == "done", job
             path = manager.result_path(state["id"])
             verify_chat_export(path, fingerprint(entries["account0"]["app"].state.vault.public_key))
             with zipfile.ZipFile(path) as archive:
@@ -372,15 +372,15 @@ def test_distributed_profile_photo_respects_export_and_capture_settings(
         manager, entries = coordinator(tmp_path, [message(1)], count=1)
         c = entries["account0"]["app"].state.collector
         c.store.set_setting("capture", {"download_media": capture_media, "include_avatars": avatars})
-        async def finish(directory, options):
+        async def finish(self, directory, options):
             raise ValueError("Stop after acquisition for profile inspection")
-        monkeypatch.setattr(manager, "finish_selection", finish)
+        monkeypatch.setattr(distributed_export.Run, "finish_selection", finish)
         try:
             await manager.start(CHAT, ["account0"], "account0", selection={"download_media": download})
-            await asyncio.wait_for(manager.task, 10)
+            await asyncio.wait_for(latest_run(manager).task, 10)
             c.chat_profile.assert_awaited_once()
             assert c.chat_profile.await_args.kwargs["include_photo"] is expected
-            assert manager.state["error"] == "Stop after acquisition for profile inspection"
+            assert latest_run(manager).state["error"] == "Stop after acquisition for profile inspection"
         finally:
             await manager.close()
             close_entries(entries)
@@ -417,6 +417,28 @@ def test_export_rate_includes_waits_but_excludes_reused_messages_and_packaging(m
     assert resumed.snapshot(260)["new_messages"] == resumed.snapshot(260)["elapsed_seconds"] == 0
 
 
+def latest_run(manager):
+    return manager.runs[next(reversed(manager.runs))]
+
+
+def hold_launch(manager):
+    manager.launch = lambda run: manager.runs.setdefault(run.state["id"], run)
+
+
+def intercept_selection(manager, callback):
+    launch = manager.launch
+    def start(run):
+        run.finish_selection = callback
+        return launch(run)
+    manager.launch = start
+
+
+async def finished(manager, state, timeout=60):
+    run = manager.runs[state["id"]]
+    await asyncio.wait_for(run.task, timeout)
+    return run.state
+
+
 def test_multi_start_is_atomic_when_one_account_monitors(tmp_path):
     async def scenario():
         manager, entries = coordinator(tmp_path, [message(1)])
@@ -443,7 +465,7 @@ def test_resume_reuses_signed_chunks_and_rejects_tampering(tmp_path, monkeypatch
             state = await manager.start(CHAT, ["account0"], "account0")
             await asyncio.wait_for(c.client.blocked.wait(), 5)
             await manager.pause(state["id"])
-            assert manager.state["phase"] == "paused" and c.export_claim is None
+            assert latest_run(manager).state["phase"] == "paused" and c.export_claim is None
             paused_performance = manager.public()["performance"]
             await asyncio.sleep(.02)
             assert manager.public()["performance"] == paused_performance
@@ -456,23 +478,20 @@ def test_resume_reuses_signed_chunks_and_rejects_tampering(tmp_path, monkeypatch
             assert restored.public()["phase"] == "paused"
             c.client.block = None
             c.client.reads.clear()
-            # Keep this recovery test independent of HTML/PDF rendering.
-            async def finish(directory, options):
+            async def finish(self, directory, options):
                 assert first_bounds not in c.client.reads
                 raise ValueError("Recovery reached selection")
-            restored.finish_selection = finish
-            await restored.resume(state["id"])
-            await asyncio.wait_for(restored.task, 10)
-            assert restored.state["error"] == "Recovery reached selection"
+            monkeypatch.setattr(distributed_export.Run, "finish_selection", finish)
+            job = await finished(restored, await restored.resume(state["id"]), 10)
+            assert job["error"] == "Recovery reached selection"
             performance = restored.public()["performance"]
             assert performance["reused_messages"] == 2 and performance["new_messages"] == 4
             assert len(list((directory / "receipts").glob("*.json"))) == 3
             chunk = directory / "chunks" / (str(preserved["low"]) + ".jsonl")
             chunk.write_text(chunk.read_text().replace("English", "tampered"))
             c.client.reads.clear()
-            await restored.resume(state["id"])
-            await asyncio.wait_for(restored.task, 5)
-            assert "differs" in restored.state["error"]
+            job = await finished(restored, await restored.resume(state["id"]), 5)
+            assert "differs" in job["error"]
             assert restored.public()["performance"]["new_messages"] == 0
             assert not c.client.reads and c.export_claim is None
         finally:
@@ -492,12 +511,12 @@ def test_filtered_archive_is_verifiable_and_contains_context(tmp_path, monkeypat
             state = await manager.start(CHAT, list(entries), "account0", selection={
                 "from_utc": "2026-10-05T00:00:00Z", "to_utc": "2026-10-07T00:00:00Z",
                 "reply_mode": "answered", "context_depth": 1})
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "done", manager.state
+            job = await finished(manager, state)
+            assert job["phase"] == "done", job
             performance = manager.public()["performance"]
             assert performance["new_messages"] == 2 and performance["reused_messages"] == 0
             assert performance["phase_seconds"]["packaging"] > 0
-            assert manager.verified(manager.directory(state["id"]) / "status.json",
+            assert distributed_export.verified(manager.directory(state["id"]) / "status.json",
                                     entries["account0"]["app"].state.vault.public_key)["performance"] == performance
             path = manager.result_path(state["id"])
             public = entries["account0"]["app"].state.vault.public_key
@@ -539,27 +558,27 @@ def test_date_selection_keeps_every_message_at_inclusive_start(tmp_path, inclusi
         collector.client = DateClient(rows)
         # Exercise the signed plan, real chunk acquisition and local selection.
         # Bundle rendering and verification have their own integration check above.
-        manager.launch = lambda: None
+        hold_launch(manager)
         options = Selection(from_utc=(boundary + timedelta(microseconds=microseconds)).isoformat(),
                             to_utc=(boundary + timedelta(seconds=2)).isoformat())
         try:
             state = await manager.start(CHAT, ["account0"], "account0", selection=options.model_dump())
-            manager.prepare_chunks()
-            await manager.work(manager.state["workers"][0])
-            scratch, _ = await manager.finish_selection(manager.directory(state["id"]), options)
+            latest_run(manager).prepare_chunks()
+            await latest_run(manager).work(latest_run(manager).state["workers"][0])
+            scratch, _ = await latest_run(manager).finish_selection(manager.directory(state["id"]), options)
             selected = [json.loads(line)["id"] for line in scratch.read_text().splitlines()]
             assert selected == ([6, 5, 4, 3] if microseconds == 0 else [6])
         finally:
-            if manager.db:
-                manager.db.close()
-                manager.db = None
-            if manager.state:
-                manager.release(manager.state["id"])
+            if latest_run(manager).db:
+                latest_run(manager).db.close()
+                latest_run(manager).db = None
+            if latest_run(manager).state:
+                manager.release(latest_run(manager).state["id"])
             close_entries(entries)
     asyncio.run(scenario())
 
 
-def test_cancelling_an_old_job_cannot_replace_active_state(tmp_path):
+def test_cancelling_an_old_job_leaves_the_active_one_running(tmp_path):
     async def scenario():
         manager, entries = coordinator(tmp_path, [message(1)], count=1)
         collector = entries["account0"]["app"].state.collector
@@ -567,17 +586,14 @@ def test_cancelling_an_old_job_cannot_replace_active_state(tmp_path):
             old = await manager.start(CHAT, ["account0"], "account0")
             await manager.pause(old["id"])
             new = await manager.start(CHAT, ["account0"], "account0")
-            with pytest.raises(ValueError, match="current"):
-                await manager.cancel(old["id"])
-            assert manager.state["id"] == new["id"] and collector.export_claim == new["id"]
-            await manager.pause(new["id"])
-            assert manager.state["phase"] == "paused" and collector.export_claim is None
-            assert len(manager.list_jobs()) == 2
             old_performance = manager.public(old["id"])["performance"]
-            cancelled = await manager.cancel(old["id"])
-            assert cancelled["performance"] == old_performance
+            assert (await manager.cancel(old["id"]))["phase"] == "cancelled"
+            assert manager.runs[new["id"]].active() and collector.export_claim == new["id"]
+            assert (await manager.pause(new["id"]))["phase"] == "paused" and collector.export_claim is None
+            assert manager.public(old["id"])["phase"] == "cancelled" and len(manager.list_jobs()) == 2
+            assert manager.public(old["id"])["performance"] == old_performance
             await asyncio.sleep(.02)
-            assert manager.public()["performance"] == old_performance
+            assert manager.public(old["id"])["performance"] == old_performance
         finally:
             await manager.close()
             close_entries(entries)
@@ -597,11 +613,12 @@ def test_preflight_cancellation_releases_every_account(tmp_path):
         try:
             await asyncio.wait_for(started.wait(), 2)
             assert all(entry["app"].state.collector.export_claim for entry in entries.values())
-            with pytest.raises(ValueError, match="current"):
+            with pytest.raises(ValueError, match="busy"):
                 await manager.start(CHAT, list(entries), "account0")
+            assert all(manager.uses(name) for name in entries)
             task.cancel()
             await asyncio.gather(task, return_exceptions=True)
-            assert not manager.busy()
+            assert not manager.reserved and not manager.runs
             assert all(entry["app"].state.collector.export_claim is None for entry in entries.values())
         finally:
             task.cancel()
@@ -611,13 +628,13 @@ def test_preflight_cancellation_releases_every_account(tmp_path):
 
 
 @pytest.mark.parametrize("interruption", ["failure", "pause", "repeated_pause", "failure_then_pause"])
-def test_workers_finish_cleanup_before_accounts_are_released(tmp_path, interruption):
+def test_workers_finish_cleanup_before_accounts_are_released(tmp_path, monkeypatch, interruption):
     async def scenario():
         manager, entries = coordinator(tmp_path, [message(1)])
         entered, draining, release, stopped = (asyncio.Event() for _ in range(4))
         workers = []
 
-        async def work(worker):
+        async def work(self, worker):
             workers.append(asyncio.current_task())
             if worker["profile_id"] == "account0":
                 await entered.wait()
@@ -633,27 +650,28 @@ def test_workers_finish_cleanup_before_accounts_are_released(tmp_path, interrupt
                     await release.wait()
                     stopped.set()
 
-        manager.work = work
+        monkeypatch.setattr(distributed_export.Run, "work", work)
         try:
             state = await manager.start(CHAT, list(entries), "account0")
+            run = manager.runs[state["id"]]
             await asyncio.wait_for(entered.wait(), 5)
             if interruption in ("pause", "repeated_pause"):
-                manager.task.cancel()
+                run.task.cancel()
             await asyncio.wait_for(draining.wait(), 5)
-            assert manager.busy() and manager.db is not None and not stopped.is_set()
+            assert run.active() and run.db is not None and not stopped.is_set()
             for entry in entries.values():
                 collector = entry["app"].state.collector
                 assert collector.export_claim == state["id"]
                 assert not collector.reserve_export("competing-task")
             if interruption in ("repeated_pause", "failure_then_pause"):
-                manager.task.cancel()
+                run.task.cancel()
                 await asyncio.sleep(0)
-                assert manager.busy() and not stopped.is_set()
+                assert run.active() and not stopped.is_set()
             release.set()
-            await asyncio.wait_for(asyncio.gather(manager.task, return_exceptions=True), 5)
+            await asyncio.wait_for(asyncio.gather(run.task, return_exceptions=True), 5)
             assert stopped.is_set() and all(task.done() for task in workers)
-            assert manager.db is None and not manager.busy()
-            assert manager.state["phase"] == ("failed" if interruption == "failure" else "paused")
+            assert run.db is None and not run.active() and not manager.reserved
+            assert run.state["phase"] == ("failed" if interruption == "failure" else "paused")
             assert all(entry["app"].state.collector.export_claim is None for entry in entries.values())
         finally:
             release.set()
@@ -716,8 +734,8 @@ def test_unfiltered_archive_keeps_number_analysis_and_rechecks_gaps(tmp_path, mo
         monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
         try:
             state = await manager.start(CHAT, list(entries), "account0")
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "done", manager.state
+            job = await finished(manager, state)
+            assert job["phase"] == "done", job
             path = manager.result_path(state["id"])
             verify_chat_export(path, fingerprint(entries["account0"]["app"].state.vault.public_key))
             with zipfile.ZipFile(path) as archive:
@@ -744,8 +762,8 @@ def test_recheck_reads_below_the_oldest_listed_message_and_counts_unchecked(tmp_
         monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
         try:
             state = await manager.start(CHAT, list(entries), "account0")
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "done", manager.state
+            job = await finished(manager, state)
+            assert job["phase"] == "done", job
             with zipfile.ZipFile(manager.result_path(state["id"])) as archive:
                 recheck = json.loads(archive.read("message-ids.json"))["recheck"]
                 ids = {row["id"] for row in json.loads(archive.read("chat.json"))["messages"]}
@@ -796,9 +814,9 @@ def test_silent_account_returns_its_range_and_comes_back(tmp_path, monkeypatch):
         monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
         try:
             state = await manager.start(CHAT, list(entries), "account0")
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "done", manager.state
-            assert all(w["state"] == "done" for w in manager.state["workers"]), manager.state["workers"]
+            job = await finished(manager, state)
+            assert job["phase"] == "done", job
+            assert all(w["state"] == "done" for w in job["workers"]), job["workers"]
             with zipfile.ZipFile(manager.result_path(state["id"])) as archive:
                 assert {row["id"] for row in json.loads(archive.read("chat.json"))["messages"]} == set(range(1, 9))
         finally:
@@ -815,12 +833,11 @@ def test_range_failing_on_two_accounts_stops_without_losing_accounts(tmp_path, m
             entry["app"].state.collector.client = BrokenRangeClient(rows, broken=3)
         monkeypatch.setattr(distributed_export, "CHUNK", 2)
         try:
-            await manager.start(CHAT, list(entries), "account0")
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "failed", manager.state
-            assert "3–4" in manager.state["error"] and "unusable answer" in manager.state["error"], manager.state["error"]
-            assert all(w["state"] == "done" for w in manager.state["workers"]), manager.state["workers"]
-            assert manager.state["ranges_done"] == 3
+            job = await finished(manager, await manager.start(CHAT, list(entries), "account0"))
+            assert job["phase"] == "failed", job
+            assert "3–4" in job["error"] and "unusable answer" in job["error"], job["error"]
+            assert all(w["state"] == "done" for w in job["workers"]), job["workers"]
+            assert job["ranges_done"] == 3
         finally:
             await manager.close()
             close_entries(entries)
@@ -836,8 +853,8 @@ def test_export_names_deletions_kept_in_the_journal(tmp_path, monkeypatch):
         monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
         try:
             state = await manager.start(CHAT, list(entries), "account0")
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "done", manager.state
+            job = await finished(manager, state)
+            assert job["phase"] == "done", job
             with zipfile.ZipFile(manager.result_path(state["id"])) as archive:
                 manifest = json.loads(archive.read("manifest.json"))
                 header = json.loads(archive.read("chat.json"))
@@ -856,8 +873,8 @@ def test_compare_finds_removed_and_edited_messages(tmp_path, monkeypatch):
         manager, entries = coordinator(path, rows)
         try:
             state = await manager.start(CHAT, [lead], lead)
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "done", manager.state
+            job = await finished(manager, state)
+            assert job["phase"] == "done", job
             return manager.result_path(state["id"]), entries[lead]["app"].state.vault.public_key
         finally:
             await manager.close()
@@ -890,8 +907,8 @@ def test_full_recheck_reads_every_absent_number(tmp_path, monkeypatch):
         monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
         try:
             state = await manager.start(CHAT, list(entries), "account0", selection={"recheck_all": True})
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "done", manager.state
+            job = await finished(manager, state)
+            assert job["phase"] == "done", job
             with zipfile.ZipFile(manager.result_path(state["id"])) as archive:
                 ids = json.loads(archive.read("message-ids.json"))
             assert ids["recheck"]["asked"] == 5 and ids["recheck"]["unchecked"] == 0, ids["recheck"]
@@ -935,9 +952,8 @@ def test_ranges_are_read_through_a_takeout_session(tmp_path, monkeypatch):
         monkeypatch.setattr(distributed_export, "CHUNK", 2)
         monkeypatch.setattr(distributed_export.replica, "outbox", lambda *args: None)
         try:
-            await manager.start(CHAT, list(entries), "account0", transport="takeout")
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "done", manager.state
+            job = await finished(manager, await manager.start(CHAT, list(entries), "account0", transport="takeout"))
+            assert job["phase"] == "done", job
             for entry in entries.values():
                 client = entry["app"].state.collector.client
                 kinds = [type(r).__name__ for r in client.requests]
@@ -955,17 +971,16 @@ def test_ten_accounts_cover_chunks_once(tmp_path, monkeypatch):
     async def scenario():
         manager, entries = coordinator(tmp_path, [message(i) for i in range(1, 21)], count=10)
         monkeypatch.setattr(distributed_export, "CHUNK", 2)
-        async def finish(directory, options):
-            assert manager.state["ranges_done"] == 10 and manager.state["captured"] == 20
+        async def finish(self, directory, options):
+            assert self.state["ranges_done"] == 10 and self.state["captured"] == 20
             ranges = [bounds for entry in entries.values() for bounds in entry["app"].state.collector.client.reads]
             assert len(ranges) == len(set(ranges)) == 10
             assert all(entry["app"].state.collector.client.reads for entry in entries.values())
             raise ValueError("Ten-account acquisition checked")
-        manager.finish_selection = finish
+        monkeypatch.setattr(distributed_export.Run, "finish_selection", finish)
         try:
-            await manager.start(CHAT, list(entries), "account0")
-            await asyncio.wait_for(manager.task, 10)
-            assert manager.state["error"] == "Ten-account acquisition checked", manager.state
+            job = await finished(manager, await manager.start(CHAT, list(entries), "account0"), 10)
+            assert job["error"] == "Ten-account acquisition checked", job
             assert all(entry["app"].state.collector.export_claim is None for entry in entries.values())
         finally:
             await manager.close()

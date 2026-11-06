@@ -180,7 +180,6 @@ class Board:
                     if not principal.may("board.manage"):
                         raise Refused("This action requires board.manage.")
                 if action == "comment":
-                    # No cross-case identity lookup or outbound mention notification.
                     if old and old["parent_id"] != model.parent_id:
                         raise ValueError("A comment revision cannot change its parent.")
                 if action == "move" and model.collection_id:

@@ -129,7 +129,6 @@ def main():
             expect(page.locator('#report-review-findings')).to_have_value(authored['findings'])
             expect(page.locator('#report-chart-limit')).to_have_value('15')
 
-            # Named configurations are reusable layout, never case material.
             import json
             page.locator('#report-profiles summary').click()
             page.locator('#report-profile-name').fill('Investigator layout')
@@ -152,7 +151,6 @@ def main():
             expect(page.locator('#report-review-findings')).to_have_value(authored['findings'])
             expect(page.locator('#report-form')).to_have_attribute('data-dirty', 'false')
             assert len(writes) == baseline, 'Profile operations must not silently save the report'
-            # Import adds a library entry and does not apply it to this report.
             exported['name'] = 'Imported layout'
             exported['options']['chart_limit'] = 12
             with page.expect_response(lambda r: r.request.method == 'POST' and r.url.endswith('/api/report-profiles')) as response:

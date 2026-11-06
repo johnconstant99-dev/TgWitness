@@ -47,6 +47,8 @@ GROUPS = (
                                   "its version and method."),
     ("connection", "Telegram connection", "Timeouts and retries. Request timeouts and retries apply the next "
                                           "time the account connects."),
+    ("actions", "Telegram actions", "Pace of joins, messages and bot buttons from this account. An action beyond "
+                                    "the pace waits in a queue and runs when its turn comes."),
     ("proxies", "Automatic MTProxy", "When this account's listed proxy is replaced. List downloads and checks are "
                                      "shared by all accounts and follow the main workspace's values."),
 )
@@ -104,8 +106,8 @@ PARAMETERS = (
               "To recognise this account's reply-keyboard button presses, the latest keyboard the bot sent is "
               "looked up among this many recent records of the chat."),
     Parameter("recheck_first_delay_seconds", "recheck", 30, 0, 3600, "seconds", "First recheck after a start",
-              "After observation starts or reconnects, priority chats are rechecked after this delay; catch-up "
-              "goes first."),
+              "After observation starts, priority chats are rechecked after this delay; after a reconnect, every "
+              "observed chat is rechecked without waiting for its schedule. Catch-up goes first."),
     Parameter("recheck_tick_seconds", "recheck", 60, 10, 3600, "seconds", "Look for due rechecks every"),
     Parameter("recheck_max_chats", "recheck", 30, 1, 1000, "chats", "Chats per recheck pass",
               "The rest wait for the next pass. Lower values spread requests out and keep the account clear "
@@ -150,6 +152,14 @@ PARAMETERS = (
     Parameter("telegram_request_retries", "connection", 2, 0, 20, "times", "Request retries"),
     Parameter("telegram_connection_retries", "connection", 5, 0, 100, "times", "Connection retries"),
     Parameter("reconnect_max_seconds", "connection", 300, 10, 3600, "seconds", "Longest wait between reconnect attempts"),
+    Parameter("action_join_seconds", "actions", 180, 0, 86400, "seconds", "Pause between joins",
+              "Groups, channels and invite links. Telegram answers quick joins with FloodWait."),
+    Parameter("action_joins_per_hour", "actions", 10, 1, 100, "joins", "Joins per hour at most"),
+    Parameter("action_message_seconds", "actions", 10, 0, 3600, "seconds", "Pause between messages",
+              "Messages sent from the panel, including /start when a bot is opened."),
+    Parameter("action_messages_per_hour", "actions", 30, 1, 1000, "messages", "Messages per hour at most"),
+    Parameter("action_button_seconds", "actions", 5, 0, 3600, "seconds", "Pause between bot buttons"),
+    Parameter("action_buttons_per_hour", "actions", 60, 1, 1000, "presses", "Bot button presses per hour at most"),
     Parameter("proxy_drop_limit", "proxies", 3, 1, 50, "disconnects", "Disconnects before the proxy is replaced",
               "Counted within the window below."),
     Parameter("proxy_drop_window_minutes", "proxies", 10, 1, 1440, "minutes", "Window for counting disconnects"),

@@ -14,9 +14,9 @@ from .fulltext import FullText
 from .journal_index import CHAT_KINDS, MEDIA_KINDS, TEXT_KINDS, JournalIndex, migrate_media, nul_text, search_text
 from .journal_index import GONE_KINDS as GONE_KINDS
 from .journal_index import NUL_PAYLOAD
+from .people import observed_names
 
 ZERO = "0" * 64
-# Panel access and workspace management records: names, scopes and labels of other accesses and workspaces.
 ADMIN_RECORDS = "kind NOT GLOB 'access.*' AND kind NOT GLOB 'profile.*'"
 EVENT_FIELDS = ("seq", "observed_at", "source_at", "kind", "chat_id", "message_id",
                 "actor_id", "payload", "previous_hash")
@@ -234,11 +234,12 @@ class Store:
             row = self.db.execute(
                 "SELECT e.seq,e.hash,json_extract(e.payload,'$.text') AS text,"
                 "json_extract(e.payload,'$.edited_at') AS edited_at,"
-                "json_extract(e.payload,'$.outgoing') AS outgoing,e.payload,m.deleted,m.missing "
+                "json_extract(e.payload,'$.outgoing') AS outgoing,json_extract(e.payload,'$.sent_at') AS sent_at,"
+                "json_extract(e.payload,'$.raw.ttl_period') AS ttl_period,e.payload,m.deleted,m.missing "
                 "FROM message_state_index m LEFT JOIN events e ON e.seq=m.text_seq "
                 "WHERE m.chat_id=? AND m.message_id=?", (chat_id, message_id)).fetchone()
-        content = {key: row[key] for key in ("seq", "hash", "text", "edited_at", "outgoing", "payload")} \
-            if row and row["seq"] is not None else None
+        content = {key: row[key] for key in ("seq", "hash", "text", "edited_at", "outgoing", "sent_at", "ttl_period",
+                                             "payload")} if row and row["seq"] is not None else None
         if content:
             content["observable"] = message_content.of_payload(json.loads(content.pop("payload")))
             content["buttons"] = content["observable"]["buttons"]
@@ -294,11 +295,13 @@ class Store:
                 "reference": {"event_hash": row["hash"], "seq": row["seq"], "kind": row["kind"]}, "sender": None, "sent_at": None,
                 "reply_to": None, "has_media": False, "service_action": None, "grouped_id": None,
                 "versions": [], "media": [], "deleted": False, "deleted_observed_at": None,
-                "missing": False, "missing_observed_at": None,
+                "missing": False, "missing_observed_at": None, "auto_deleted": False,
                 "telegram_edited_at": None, "origins": []})
             kind = row["kind"]
+            if kind in GONE_KINDS and isinstance(payload.get("auto_delete"), dict) and payload["auto_delete"].get("expected"):
+                item["auto_deleted"] = True
             if kind in TEXT_KINDS:
-                item["missing"], item["missing_observed_at"] = False, None
+                item["missing"], item["missing_observed_at"], item["auto_deleted"] = False, None, False
                 observed = payload.get("sender_observation") or {}
                 if item["sender"] is None and (payload.get("sender_id") is not None or observed):
                     item["sender"] = {"id": payload.get("sender_id", observed.get("id")),
@@ -331,6 +334,16 @@ class Store:
             elif payload.get("media_sha256"):
                 item["media"].append({"sha256": payload["media_sha256"], "mime_type": payload.get("mime_type"),
                                       "name": payload.get("original_name"), "size": payload.get("size")})
+        unnamed = {m["sender"]["id"] for m in messages.values()
+                   if m["sender"] and not m["sender"]["name"] and type(m["sender"]["id"]) is int}
+        if unnamed:
+            with self.lock:
+                known = observed_names(self.db, chat_id, unnamed)
+            for item in messages.values():
+                names = known.get(item["sender"]["id"]) if item["sender"] and not item["sender"]["name"] else None
+                if names:
+                    found = next((n for n in reversed(names) if n["seq"] <= item["first_seq"]), names[0])
+                    item["sender"].update(name=found["name"], username=item["sender"]["username"] or found["username"])
         result = []
         for item in sorted(messages.values(), key=lambda m: m["message_id"]):
             item["captured"] = bool(item["versions"])

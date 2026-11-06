@@ -19,6 +19,7 @@ import time
 from urllib.request import Request, urlopen
 import webbrowser
 
+PRIVATE_LOCATIONS = ("/root", "/home", "/tmp", "/var/tmp")
 QUICK_URL = re.compile(r"https://[a-z0-9]+(?:-[a-z0-9]+)*\.trycloudflare\.com(?=$|[\s\"'|])")
 TOOLS = {
     "cloudflared": {
@@ -70,14 +71,87 @@ def hostname(value):
     return value
 
 
-def check_port(port, host="127.0.0.1"):
+def listening_pid(port):
+    if sys.platform == "win32":
+        rows = subprocess.run(["netstat", "-ano", "-p", "TCP"], capture_output=True, text=True, errors="replace",
+                              timeout=10).stdout.splitlines()
+        for fields in map(str.split, rows):
+            if len(fields) == 5 and fields[1].endswith(":" + str(port)) and fields[2].endswith(":0") and fields[4].isdigit():
+                return int(fields[4])
+        return None
+    if sys.platform != "linux":
+        found = subprocess.run(["lsof", "-nP", "-t", "-iTCP:" + str(port), "-sTCP:LISTEN"], capture_output=True,
+                               text=True, timeout=10).stdout.split()
+        return int(found[0]) if found and found[0].isdigit() else None
+    sockets = set()
+    for table in ("/proc/net/tcp", "/proc/net/tcp6"):
+        try:
+            rows = Path(table).read_text().splitlines()[1:]
+        except OSError:
+            continue
+        for fields in map(str.split, rows):
+            if len(fields) > 9 and fields[3] == "0A" and int(fields[1].rsplit(":", 1)[1], 16) == port:
+                sockets.add("socket:[" + fields[9] + "]")
+    for pid in filter(str.isdigit, os.listdir("/proc") if sockets else ()):
+        try:
+            descriptors = os.listdir(f"/proc/{pid}/fd")
+        except OSError:
+            continue
+        for descriptor in descriptors:
+            try:
+                if os.readlink(f"/proc/{pid}/fd/{descriptor}") in sockets:
+                    return int(pid)
+            except OSError:
+                pass
+    return None
+
+
+def port_owner(port):
+    try:
+        pid = listening_pid(port)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return None
+    if pid is None:
+        return None
+    try:
+        name = Path(f"/proc/{pid}/comm").read_text().strip() if sys.platform == "linux" else ""
+    except OSError:
+        name = ""
+    return f"process {pid}" + (f" ({name})" if name else "")
+
+
+def probe_socket():
+    probe = socket.socket()
+    if os.name != "nt":
+        probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    return probe
+
+
+def free_port(port):
+    for candidate in range(port + 1, min(port + 100, 65535) + 1):
+        with probe_socket() as probe:
+            try:
+                probe.bind(("127.0.0.1", candidate))
+            except OSError:
+                continue
+        return candidate
+    return None
+
+
+def check_port(port, host="127.0.0.1", suggest=False):
     if not 1 <= port <= 65535:
         raise ValueError("Port must be between 1 and 65535.")
-    with socket.socket() as connection:
+    with probe_socket() as connection:
         try:
             connection.bind((host, port))
         except OSError as exc:
-            raise ValueError(f"Port {port} is already in use or unavailable. Nothing was stopped.") from exc
+            owner = port_owner(port)
+            message = f"Port {port} is already in use" + (f" by {owner}" if owner else " or unavailable") + ". Nothing was stopped."
+            if suggest:
+                other = free_port(port)
+                message += (f" Choose another port, for example: tgwitness setup --port {other}" if other else
+                            " Choose another port with: tgwitness setup --port PORT")
+            raise ValueError(message) from exc
 
 
 def command(args, **kwargs):
@@ -93,10 +167,13 @@ def service_name(root):
 
 
 def unit_quote(value):
-    # systemd specifiers and environment expansion apply even inside quotes.
     if any(c in str(value) for c in "\r\n\0"):
         raise ValueError("A service path contains a control character.")
     return '"' + str(value).replace("\\", "\\\\").replace('"', '\\"').replace("%", "%%").replace("$", "$$") + '"'
+
+
+def serve_args(root):
+    return ["-I", "-m", "tgwitness.panelctl", "--root", str(root), "_serve"]
 
 
 def unit_text(root, config, python):
@@ -108,7 +185,7 @@ def unit_text(root, config, python):
             hardening += "AmbientCapabilities=CAP_NET_BIND_SERVICE\nCapabilityBoundingSet=CAP_NET_BIND_SERVICE\n"
         else:
             hardening += "CapabilityBoundingSet=\n"
-    argv = [python, "-I", "-m", "tgwitness.panelctl", "--root", root, "_serve"]
+    argv = [python, *serve_args(root)]
     return ("# TgWitness managed panel service v1\n[Unit]\nDescription=TgWitness panel and collection\n"
             "After=network-online.target\nWants=network-online.target\n\n[Service]\nType=simple\n"
             "ExecStart=" + " ".join(unit_quote(v) for v in argv) + "\n"
@@ -161,10 +238,15 @@ def fetch_tool(root, name):
 
 
 def read_config(root):
-    data = json.loads((root / "panel.json").read_text())
+    path = root / "panel.json"
+    if not path.is_file():
+        raise ValueError("No panel is set up in " + str(root) + " yet. Run: tgwitness setup")
+    data = json.loads(path.read_text())
     if data.get("schema") != "tgwitness-panel-v1" or data.get("service") != service_name(root):
         raise ValueError("Unrecognized panel configuration. Existing data was left unchanged.")
-    if data["mode"] not in ("local", "quick", "domain") or not 1024 <= data["port"] <= 65535:
+    data.setdefault("manager", "systemd")
+    if (data["mode"] not in ("local", "quick", "domain") or data["manager"] not in ("systemd", "process")
+            or not 1024 <= data["port"] <= 65535):
         raise ValueError("Invalid panel configuration.")
     if data["mode"] == "domain":
         hostname(data["domain"])
@@ -194,6 +276,76 @@ def refresh_unit(root, config, first=False):
     systemctl(config, "daemon-reload")
 
 
+def systemd_ready(system):
+    if sys.platform != "linux" or not Path("/run/systemd/system").exists():
+        return False
+    try:
+        return subprocess.run(["systemctl", *([] if system else ["--user"]), "show-environment"],
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+    except OSError:
+        return False
+
+
+def process_command(pid):
+    try:
+        if sys.platform == "linux":
+            return Path(f"/proc/{pid}/cmdline").read_bytes().decode(errors="replace").replace("\0", " ").strip()
+        return subprocess.run(["ps", "-ww", "-o", "command=", "-p", str(pid)], capture_output=True, text=True,
+                              errors="replace", timeout=10).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+def background_pid(root):
+    try:
+        pid = int((root / "panel.pid").read_text())
+    except (OSError, ValueError):
+        return None
+    return pid if process_command(pid).endswith(" " + " ".join(serve_args(root))) else None
+
+
+def start_background(root, config):
+    if background_pid(root) is not None:
+        return
+    check_port(config["port"])
+    logs = Path(config["data"]) / "logs"
+    logs.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    logs.mkdir(mode=0o700, exist_ok=True)
+    log = logs / "service.log"
+    if log.is_file() and log.stat().st_size > 5 * 1024**2:
+        os.replace(log, logs / "service.log.1")
+    output = os.open(log, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+    try:
+        process = subprocess.Popen([sys.executable, *serve_args(root)], stdin=subprocess.DEVNULL, stdout=output,
+                                   stderr=subprocess.STDOUT, cwd=root, start_new_session=True, umask=0o077)
+    finally:
+        os.close(output)
+    atomic(root / "panel.pid", str(process.pid) + "\n", 0o644)
+
+
+def stop_background(root):
+    pid = background_pid(root)
+    deadline = time.monotonic() + 45
+    try:
+        if pid is not None:
+            os.kill(pid, signal.SIGTERM)
+        while pid is not None and background_pid(root) == pid:
+            if time.monotonic() > deadline:
+                os.killpg(pid, signal.SIGKILL)
+                break
+            time.sleep(0.2)
+    except ProcessLookupError:
+        pass
+    (root / "panel.pid").unlink(missing_ok=True)
+
+
+def running(root, config):
+    if config["manager"] == "process":
+        return background_pid(root) is not None
+    return subprocess.run(["systemctl", *([] if config["system"] else ["--user"]),
+                           "is-active", "--quiet", config["service"]]).returncode == 0
+
+
 def open_terminal():
     try:
         return open("CONIN$" if os.name == "nt" else "/dev/tty", "r", encoding="utf-8")
@@ -219,7 +371,7 @@ def setup(root, mode=None, domain=None, port=8787):
         show(root, credentials=True)
         print("After installing a new program version, apply it with: tgwitness restart")
         return
-    linux = sys.platform == "linux" and Path("/run/systemd/system").exists()
+    linux = sys.platform == "linux"
     if mode is None:
         terminal = open_terminal()
         if terminal is None:
@@ -245,25 +397,27 @@ def setup(root, mode=None, domain=None, port=8787):
                 domain = choose(terminal, "Panel domain (for example panel.example.org):")
     if mode not in ("local", "quick", "domain"):
         raise ValueError("Choose local, quick or domain access.")
-    if not linux:
-        if mode != "local":
-            raise ValueError("Automatic public access currently needs Linux with systemd. Choose local on this computer.")
+    if mode != "local" and not linux:
+        raise ValueError("Automatic public access currently needs Linux. Choose local on this computer.")
+    if sys.platform == "win32":
         from .__main__ import main, open_when_ready
-        check_port(port)
+        check_port(port, suggest=True)
         data = root / "data" / "live"
         threading.Thread(target=open_when_ready, daemon=True,
                          args=(f"http://127.0.0.1:{port}", "127.0.0.1", port, data / "panel-token.txt")).start()
         sys.argv = ["tgwitness", "--data-dir", str(data), "--port", str(port), "--no-browser"]
         main()
         return
-    is_system = os.geteuid() == 0
-    if is_system and any(root.is_relative_to(Path(p)) for p in ("/root", "/home", "/tmp", "/var/tmp")):
+    is_root = os.geteuid() == 0
+    manager = "systemd" if systemd_ready(is_root) else "process"
+    is_system = is_root and manager == "systemd"
+    if is_system and any(root.is_relative_to(Path(p)) for p in PRIVATE_LOCATIONS):
         raise ValueError("A system service needs an installation outside home and temporary directories. Install under /opt/tgwitness.")
-    if mode == "domain" and not is_system:
+    if mode == "domain" and not is_root:
         raise ValueError("Automatic HTTPS on ports 80/443 needs a system installation. Run the installer as root, or choose the HTTPS link.")
     if not 1024 <= port <= 65535:
         raise ValueError("Choose a panel port between 1024 and 65535.")
-    check_port(port)
+    check_port(port, suggest=True)
     if mode == "domain":
         domain = hostname(domain or "")
         check_port(80, "0.0.0.0")
@@ -274,17 +428,23 @@ def setup(root, mode=None, domain=None, port=8787):
             raise ValueError("The domain does not resolve. Set its DNS first or choose the temporary HTTPS link.") from exc
     service = service_name(root)
     config = {"schema": "tgwitness-panel-v1", "mode": mode, "domain": domain, "port": port,
-              "system": is_system, "service": service,
+              "system": is_system, "service": service, "manager": manager,
               "data": str(Path("/var/lib") / service if is_system else root / "data" / "live")}
-    systemctl(config, "show-environment", stdout=subprocess.DEVNULL)
     if mode != "local":
         config["bridge"] = str(fetch_tool(root, "cloudflared" if mode == "quick" else "caddy"))
-    refresh_unit(root, config, first=True)
+    if manager == "systemd":
+        refresh_unit(root, config, first=True)
     atomic(root / "panel.json", json.dumps(config, indent=2) + "\n", 0o644)
-    systemctl(config, "enable", "--now", service)
+    if manager == "systemd":
+        systemctl(config, "enable", "--now", service)
+    else:
+        start_background(root, config)
     print("Starting your panel...", flush=True)
     show(root, credentials=True, wait=120)
-    if not is_system:
+    if manager == "process":
+        print("Without systemd the panel runs as a background process and does not start at boot.\n"
+              "After this machine or container restarts, run: tgwitness start")
+    elif not is_system:
         print("Starts at login. To keep it running after sign-out and start at boot, an administrator can enable user lingering.")
 
 
@@ -301,8 +461,8 @@ def show(root, credentials=False, wait=0):
     data = Path(config["data"])
     deadline = time.monotonic() + wait
     while True:
-        active = subprocess.run(["systemctl", *([] if config["system"] else ["--user"]),
-                                 "is-active", "--quiet", config["service"]]).returncode == 0
+        active = running(root, config)
+        stopped = not active and config["manager"] == "process"
         try:
             state = json.loads((data / "panel-address.json").read_text()) if active else {}
         except (FileNotFoundError, json.JSONDecodeError):
@@ -311,11 +471,12 @@ def show(root, credentials=False, wait=0):
         identity = state.get("id", "")
         ready = (active and url and re.fullmatch(r"[0-9a-f]{64}", identity)
                  and reachable(url.rstrip("/") + "/_tgwitness/ready", identity))
-        if ready or time.monotonic() >= deadline:
+        if ready or stopped or time.monotonic() >= deadline:
             break
         time.sleep(1)
     if not ready:
-        print("Panel is starting or needs attention. Run: tgwitness logs\nThen: tgwitness open")
+        print("The panel is not running. Start it with: tgwitness start\nIf it does not stay running, see: tgwitness logs" if stopped
+              else "Panel is starting or needs attention. Run: tgwitness logs\nThen: tgwitness open")
         if url:
             print("Configured address (this panel is not yet confirmed there): " + url)
         if config["mode"] == "domain":
@@ -378,9 +539,7 @@ def tunnel(root, action):
         return
     control = {"enabled": action != "off", "revision": secrets.token_hex(16)}
     atomic(root / "tunnel.json", json.dumps(control) + "\n", 0o644)
-    active = subprocess.run(["systemctl", *([] if config["system"] else ["--user"]),
-                             "is-active", "--quiet", config["service"]]).returncode == 0
-    if not active:
+    if not running(root, config):
         print("Tunnel preference saved. The panel is stopped; start it with: tgwitness start")
         return
     deadline = time.monotonic() + 90
@@ -441,8 +600,9 @@ def serve(root):
                XDG_CONFIG_HOME=str(data / "service-config"))
     env["TGWITNESS_TRUSTED_PROXIES"] = "127.0.0.1/32,::1/128" if config["mode"] != "local" else ""
     env["TGWITNESS_PROXY_HEADER"] = "cf-connecting-ip" if config["mode"] == "quick" else "x-forwarded-for"
-    app = subprocess.Popen([sys.executable, "-I", "-m", "tgwitness", "--host", "127.0.0.1", "--port",
-                            str(config["port"]), "--data-dir", str(data), "--no-browser"], env=env)
+    panel = [sys.executable, "-I", "-m", "tgwitness", "--host", "127.0.0.1", "--port", str(config["port"]),
+             "--data-dir", str(data), "--no-browser"]
+    app = subprocess.Popen(panel, env=env)
     bridge, last_control = None, None
     try:
         origin = "http://127.0.0.1:" + str(config["port"])
@@ -463,7 +623,12 @@ def serve(root):
 
         while not stopping.wait(0.5):
             if app.poll() is not None:
-                raise RuntimeError("The panel exited; systemd will restart the service.")
+                if config["manager"] != "process":
+                    raise RuntimeError("The panel exited; systemd will restart the service.")
+                print("The panel exited with code " + str(app.returncode) + ". Restarting in 5 seconds.", flush=True)
+                if stopping.wait(5):
+                    break
+                app = subprocess.Popen(panel, env=env)
             control = {"enabled": config["mode"] != "local", "revision": ""}
             if config["mode"] == "quick":
                 try:
@@ -495,15 +660,19 @@ def serve(root):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Install once. Open and manage your TgWitness panel.")
-    parser.add_argument("--root", type=Path, default=Path.cwd())
-    parser.add_argument("action", nargs="?", default="open", choices=["setup", "open", "status", "start", "stop", "restart", "logs", "doctor", "guide", "paths", "token", "tunnel", "_serve"])
-    parser.add_argument("operation", nargs="?", choices=["rotate", "off", "on", "restart", "status"])
-    parser.add_argument("--print", dest="print_text", action="store_true")
+    from .__main__ import COMMANDS_HELP
+    parser = argparse.ArgumentParser(prog="tgwitness", description="Install once. Open and manage your TgWitness panel.",
+                                     epilog=COMMANDS_HELP, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--root", type=Path, default=Path.cwd(), help="Installation directory (set by the launcher)")
+    parser.add_argument("action", nargs="?", default="open", metavar="command", help="One of the commands below (default: open)",
+                        choices=["setup", "open", "status", "start", "stop", "restart", "logs", "doctor", "guide", "paths", "token", "tunnel", "_serve"])
+    parser.add_argument("operation", nargs="?", choices=["rotate", "off", "on", "restart", "status"], metavar="operation",
+                        help="For token: rotate. For tunnel: on, off, restart or status")
+    parser.add_argument("--print", dest="print_text", action="store_true", help="With guide: print it in this terminal")
     parser.add_argument("--write-only", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--mode", choices=["local", "quick", "domain"])
-    parser.add_argument("--domain")
-    parser.add_argument("--port", type=int, default=8787)
+    parser.add_argument("--mode", choices=["local", "quick", "domain"], help="With setup: how to open the panel")
+    parser.add_argument("--domain", help="With setup --mode domain: the panel hostname")
+    parser.add_argument("--port", type=int, default=8787, help="Local panel port (default 8787)")
     args = parser.parse_args()
     root = args.root.resolve()
     try:
@@ -531,19 +700,31 @@ def main():
             show(root, credentials=args.action == "open", wait=30 if args.action == "open" else 0)
         elif args.action in ("start", "stop", "restart"):
             config = read_config(root)
-            if args.action != "stop":
-                refresh_unit(root, config)
-            systemctl(config, args.action, config["service"])
+            if config["manager"] == "process":
+                if args.action != "start":
+                    stop_background(root)
+                if args.action != "stop":
+                    start_background(root, config)
+            else:
+                if args.action != "stop":
+                    refresh_unit(root, config)
+                systemctl(config, args.action, config["service"])
             if args.action != "stop":
                 show(root, wait=90)
             else:
                 print("Panel stopped. Your data is kept. Start again: tgwitness start")
         elif args.action == "logs":
             config = read_config(root)
-            command(["journalctl", *([] if config["system"] else ["--user"]), "-u", config["service"], "-n", "80", "--no-pager"])
+            if config["manager"] == "process":
+                log = Path(config["data"]) / "logs" / "service.log"
+                lines = log.read_text(encoding="utf-8", errors="replace").splitlines()[-80:] if log.is_file() else []
+                print("\n".join(lines) or "The panel has not written a log yet.")
+            else:
+                command(["journalctl", *([] if config["system"] else ["--user"]), "-u", config["service"], "-n", "80", "--no-pager"])
         elif args.action == "doctor":
-            config = read_config(root)
-            command([sys.executable, "-I", "-m", "tgwitness", "--check", "--data-dir", config["data"]])
+            config = read_config(root) if (root / "panel.json").exists() else {"data": str(root / "data" / "live"), "port": args.port}
+            raise SystemExit(subprocess.run([sys.executable, "-I", "-m", "tgwitness", "--check", "--data-dir", config["data"],
+                                             "--port", str(config["port"])]).returncode)
     except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as exc:
         print("TgWitness: " + str(exc), file=sys.stderr)
         raise SystemExit(1) from exc

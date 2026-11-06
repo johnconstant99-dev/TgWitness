@@ -54,7 +54,6 @@ def register(app, authenticate):
                 if kind and entry["request"]["engine"] != kind:
                     continue
                 artifact = state.vault.read("media-analysis-" + entry["id"]) if entry["status"] == "completed" else None
-                # Word forms come from the derived index; the plain substring test keeps every earlier match.
                 if query and (not artifact or entry["id"] not in ranked and query.casefold() not in artifact["text"].casefold()):
                     continue
                 result.append({k: v for k, v in entry.items() if k != "owner"} | {

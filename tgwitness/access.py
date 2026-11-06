@@ -139,6 +139,8 @@ POLICY = {
     "POST /api/collector/{action}": ("collect", None),
     "POST /api/interactions/preview": ("interact", None),
     "POST /api/interactions": ("interact", "body"),
+    "GET /api/interactions/{request_id}": ("interact", "body"),
+    "POST /api/interactions/read-only": ("account", None),
     "POST /api/capture": ("settings", None),
     "POST /api/media/queue/clear": ("settings", None),
     "POST /api/monitoring": ("settings", None),

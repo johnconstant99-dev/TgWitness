@@ -11,7 +11,7 @@ from telethon.tl import functions as f
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from tools.test_distributed_export import CHAT, close_entries, coordinator, message
+from tools.test_distributed_export import CHAT, close_entries, coordinator, message, latest_run, hold_launch, intercept_selection
 from tools.test_distributed_takeout import setup
 from tgwitness import distributed_export, distributed_pages
 from tgwitness.account_export import durable_write
@@ -38,7 +38,7 @@ def test_restart_reuses_a_signed_page_inside_the_same_chunk(tmp_path):
     async def scenario():
         manager, entries, collector, directory = await paused_page(tmp_path)
         try:
-            assert manager.state["captured"] == 100 and manager.state["ranges_done"] == 0
+            assert latest_run(manager).state["captured"] == 100 and latest_run(manager).state["ranges_done"] == 0
             receipt = directory / "pages" / "1" / "1.json"
             saved = receipt.read_bytes()
             first = json.loads(saved)["statement"]
@@ -46,16 +46,16 @@ def test_restart_reuses_a_signed_page_inside_the_same_chunk(tmp_path):
             collector.client.block_after = None
             collector.client.requests.clear()
             restored = distributed_export.DistributedExport(manager.profiles)
-            restored.finish_selection = stop_after_acquisition
-            await restored.resume(manager.state["id"])
-            await asyncio.wait_for(restored.task, 10)
-            assert restored.state["error"] == "Acquisition checked without rendering"
+            intercept_selection(restored, stop_after_acquisition)
+            await restored.resume(latest_run(manager).state["id"])
+            await asyncio.wait_for(latest_run(restored).task, 10)
+            assert latest_run(restored).state["error"] == "Acquisition checked without rendering"
             reads = [r for r, w in collector.client.requests if isinstance(r, f.messages.GetHistoryRequest)]
             assert [r.offset_id for r in reads] == [102, 2]
             assert receipt.read_bytes() == saved
-            assert restored.state["performance"]["reused_messages"] == 100
-            assert restored.state["performance"]["new_messages"] == 101
-            assert restored.state["captured"] == 201
+            assert latest_run(restored).state["performance"]["reused_messages"] == 100
+            assert latest_run(restored).state["performance"]["new_messages"] == 101
+            assert latest_run(restored).state["captured"] == 201
             rows = [json.loads(line)["id"] for line in (directory / "chunks" / "1.jsonl").read_bytes().splitlines()]
             assert rows == list(range(201, 0, -1))
             assert collector.client.inits == 1 and collector.export_claim is None
@@ -101,22 +101,22 @@ os._exit(23)
                     monkeypatch.setattr(distributed_pages.shutil, "disk_usage",
                                         lambda p: real_usage(p)._replace(free=0))
                 collector.client.block_after = None
-                await manager.resume(manager.state["id"])
-                await asyncio.wait_for(manager.task, 10)
-                assert manager.state["phase"] == "failed" and manager.state["captured"] == 100
+                await manager.resume(latest_run(manager).state["id"])
+                await asyncio.wait_for(latest_run(manager).task, 10)
+                assert latest_run(manager).state["phase"] == "failed" and latest_run(manager).state["captured"] == 100
                 monkeypatch.undo()
             assert path.read_bytes().startswith(original)
             collector.client.block_after = None
             collector.client.requests.clear()
             restored = distributed_export.DistributedExport(manager.profiles)
-            restored.finish_selection = stop_after_acquisition
-            await restored.resume(manager.state["id"])
-            await asyncio.wait_for(restored.task, 10)
-            assert restored.state["captured"] == 201 and restored.state["ranges_done"] == 1
+            intercept_selection(restored, stop_after_acquisition)
+            await restored.resume(latest_run(manager).state["id"])
+            await asyncio.wait_for(latest_run(restored).task, 10)
+            assert latest_run(restored).state["captured"] == 201 and latest_run(restored).state["ranges_done"] == 1
             assert path.read_bytes().startswith(original) and b"uncommitted" not in path.read_bytes()
             reads = [r for r, _ in collector.client.requests if isinstance(r, f.messages.GetHistoryRequest)]
             assert reads[0].offset_id == 102
-            assert restored.state["performance"]["reused_messages"] == 100
+            assert latest_run(restored).state["performance"]["reused_messages"] == 100
         finally:
             await manager.close()
             close_entries(entries)
@@ -146,9 +146,9 @@ def test_damaged_checkpoint_stops_before_any_telegram_request(tmp_path, monkeypa
                 receipt.write_bytes(canonical(envelope))
             collector.client.requests.clear()
             collector.resolve_for_export.reset_mock()
-            await manager.resume(manager.state["id"])
-            await asyncio.wait_for(manager.task, 10)
-            assert manager.state["phase"] == "failed" and not collector.client.requests
+            await manager.resume(latest_run(manager).state["id"])
+            await asyncio.wait_for(latest_run(manager).task, 10)
+            assert latest_run(manager).state["phase"] == "failed" and not collector.client.requests
             collector.resolve_for_export.assert_not_awaited()
             assert collector.export_claim is None
         finally:
@@ -177,15 +177,15 @@ def test_pause_drains_inflight_checkpoint_before_releasing_account(tmp_path, mon
             assert not pausing.done() and collector.export_claim == state["id"]
             release.set()
             await asyncio.wait_for(pausing, 10)
-            assert collector.export_claim is None and manager.state["captured"] == 200
+            assert collector.export_claim is None and latest_run(manager).state["captured"] == 200
             restored = distributed_export.DistributedExport(manager.profiles)
-            restored.finish_selection = stop_after_acquisition
+            intercept_selection(restored, stop_after_acquisition)
             collector.client.requests.clear()
             await restored.resume(state["id"])
-            await asyncio.wait_for(restored.task, 10)
-            assert restored.state["captured"] == 201
-            assert restored.state["performance"]["reused_messages"] == 200
-            assert restored.state["performance"]["new_messages"] == 1
+            await asyncio.wait_for(latest_run(restored).task, 10)
+            assert latest_run(restored).state["captured"] == 201
+            assert latest_run(restored).state["performance"]["reused_messages"] == 200
+            assert latest_run(restored).state["performance"]["new_messages"] == 1
         finally:
             release.set()
             await manager.close()
@@ -196,27 +196,27 @@ def test_pause_drains_inflight_checkpoint_before_releasing_account(tmp_path, mon
 def test_partial_range_cannot_move_to_another_account(tmp_path):
     async def scenario():
         manager, entries = coordinator(tmp_path, [message(i) for i in range(1, 202)])
-        manager.launch = lambda: None
+        hold_launch(manager)
         try:
             await manager.start(CHAT, list(entries), "account0")
-            manager.prepare_chunks()
-            task = manager.db.execute("SELECT * FROM tasks").fetchone()
-            pages = RangePages(manager.directory(manager.state["id"]), manager.job, task)
+            latest_run(manager).prepare_chunks()
+            task = latest_run(manager).db.execute("SELECT * FROM tasks").fetchone()
+            pages = RangePages(manager.directory(latest_run(manager).state["id"]), latest_run(manager).job, task)
             collector = entries["account0"]["app"].state.collector
             data = b'{"id":201}\n'
-            pages.commit(data, 1, 201, False, "account0", collector.vault, None, manager.job["started_at"])
-            manager.db.close()
-            manager.prepare_chunks()
-            assert [r[0] for r in manager.db.execute("SELECT profile FROM eligible")] == ["account0"]
+            pages.commit(data, 1, 201, False, "account0", collector.vault, None, latest_run(manager).job["started_at"])
+            latest_run(manager).db.close()
+            latest_run(manager).prepare_chunks()
+            assert [r[0] for r in latest_run(manager).db.execute("SELECT profile FROM eligible")] == ["account0"]
             other = entries["account1"]["app"].state.collector
             with pytest.raises(ValueError, match="original observer"):
-                await pages.fetch(other, manager.entities["account1"], "account1", lambda _: None, lambda _: None)
+                await pages.fetch(other, latest_run(manager).entities["account1"], "account1", lambda _: None, lambda _: None)
             assert not other.client.reads
         finally:
-            if manager.db:
-                manager.db.close()
-                manager.db = None
-            manager.release(manager.state["id"])
+            if latest_run(manager).db:
+                latest_run(manager).db.close()
+                latest_run(manager).db = None
+            manager.release(latest_run(manager).state["id"])
             close_entries(entries)
     asyncio.run(scenario())
 
@@ -224,27 +224,27 @@ def test_partial_range_cannot_move_to_another_account(tmp_path):
 def test_old_chunk_plan_still_resumes_without_page_migration(tmp_path, monkeypatch):
     async def scenario():
         manager, entries = coordinator(tmp_path, [message(i) for i in range(1, 7)], count=1)
-        manager.launch = lambda: None
+        hold_launch(manager)
         monkeypatch.setattr(distributed_export, "CHUNK", 2)
         try:
             await manager.start(CHAT, ["account0"], "account0")
-            manager.job.pop("checkpoint_format")
-            directory = manager.directory(manager.state["id"])
-            durable_write(directory / "job.json", canonical(manager.signed(manager.job)))
-            manager.prepare_chunks()
-            await manager.work(manager.state["workers"][0])
-            assert manager.state["captured"] == 6
+            latest_run(manager).job.pop("checkpoint_format")
+            directory = manager.directory(latest_run(manager).state["id"])
+            durable_write(directory / "job.json", canonical(latest_run(manager).signed(latest_run(manager).job)))
+            latest_run(manager).prepare_chunks()
+            await latest_run(manager).work(latest_run(manager).state["workers"][0])
+            assert latest_run(manager).state["captured"] == 6
             assert not list((directory / "pages").iterdir())
             saved = {p.name: p.read_bytes() for p in (directory / "receipts").glob("*.json")}
-            manager.db.close()
-            manager.prepare_chunks()
-            assert manager.state["captured"] == 6 and manager.state["ranges_done"] == 3
+            latest_run(manager).db.close()
+            latest_run(manager).prepare_chunks()
+            assert latest_run(manager).state["captured"] == 6 and latest_run(manager).state["ranges_done"] == 3
             assert saved == {p.name: p.read_bytes() for p in (directory / "receipts").glob("*.json")}
         finally:
-            if manager.db:
-                manager.db.close()
-                manager.db = None
-            manager.release(manager.state["id"])
+            if latest_run(manager).db:
+                latest_run(manager).db.close()
+                latest_run(manager).db = None
+            manager.release(latest_run(manager).state["id"])
             close_entries(entries)
     asyncio.run(scenario())
 
@@ -277,27 +277,27 @@ def test_standalone_verifier_checks_paused_prefix_without_vault_or_database(tmp_
 def test_empty_and_full_checkpoints_preserve_terminal_state(tmp_path, count):
     async def scenario():
         manager, entries = coordinator(tmp_path, [message(i) for i in range(1, max(count, 1) + 1)], count=1)
-        manager.launch = lambda: None
+        hold_launch(manager)
         collector = entries["account0"]["app"].state.collector
         try:
             state = await manager.start(CHAT, ["account0"], "account0")
             if not count:
                 collector.client.messages = []
-            manager.prepare_chunks()
-            await manager.work(manager.state["workers"][0])
-            assert manager.state["captured"] == count and manager.state["ranges_done"] == 1
+            latest_run(manager).prepare_chunks()
+            await latest_run(manager).work(latest_run(manager).state["workers"][0])
+            assert latest_run(manager).state["captured"] == count and latest_run(manager).state["ranges_done"] == 1
             checked = verify_distributed_work(manager.directory(state["id"]), fingerprint(collector.vault.public_key))
             assert checked["complete_within_plan"] and checked["pages"] == count // 100 + 1
             reads = list(collector.client.reads)
-            manager.db.close()
-            manager.prepare_chunks()
-            await manager.work(manager.state["workers"][0])
+            latest_run(manager).db.close()
+            latest_run(manager).prepare_chunks()
+            await latest_run(manager).work(latest_run(manager).state["workers"][0])
             assert collector.client.reads == reads
         finally:
-            if manager.db:
-                manager.db.close()
-                manager.db = None
-            manager.release(manager.state["id"])
+            if latest_run(manager).db:
+                latest_run(manager).db.close()
+                latest_run(manager).db = None
+            manager.release(latest_run(manager).state["id"])
             close_entries(entries)
     asyncio.run(scenario())
 
@@ -307,21 +307,21 @@ def test_checkpoint_prefix_survives_a_full_flood_wait(tmp_path, monkeypatch):
         manager, entries = setup(tmp_path, [message(i) for i in range(1, 202)])
         collector = entries["account0"]["app"].state.collector
         collector.client.flood_type = errors.FloodWaitError
-        manager.finish_selection = stop_after_acquisition
+        intercept_selection(manager, stop_after_acquisition)
         waits = []
         original_sleep = asyncio.sleep
         async def sleep(seconds):
             if seconds > 0:
                 waits.append(seconds)
-                assert manager.state["captured"] == 100
-                checked = verify_distributed_work(manager.directory(manager.state["id"]), fingerprint(collector.vault.public_key))
+                assert latest_run(manager).state["captured"] == 100
+                checked = verify_distributed_work(manager.directory(latest_run(manager).state["id"]), fingerprint(collector.vault.public_key))
                 assert checked["captured"] == 100
             await original_sleep(0)
         monkeypatch.setattr(asyncio, "sleep", sleep)
         try:
             await manager.start(CHAT, ["account0"], "account0", transport="takeout")
-            await asyncio.wait_for(manager.task, 10)
-            assert waits == [61] and manager.state["captured"] == 201
+            await asyncio.wait_for(latest_run(manager).task, 10)
+            assert waits == [61] and latest_run(manager).state["captured"] == 201
             assert collector.store.get_setting("rpc_backoff_until") > 0
             reads = [r for r, w in collector.client.requests if isinstance(r, f.messages.GetHistoryRequest) and w]
             assert [r.offset_id for r in reads] == [202, 102, 102, 2]
@@ -337,14 +337,14 @@ def test_new_takeout_generation_does_not_rewrite_committed_pages(tmp_path):
         try:
             first = (directory / "pages" / "1" / "1.json").read_bytes()
             collector.client.invalid = True
-            await manager.resume(manager.state["id"])
-            await asyncio.wait_for(manager.task, 10)
-            assert manager.state["phase"] == "paused" and manager.state["captured"] == 100
+            await manager.resume(latest_run(manager).state["id"])
+            await asyncio.wait_for(latest_run(manager).task, 10)
+            assert latest_run(manager).state["phase"] == "paused" and latest_run(manager).state["captured"] == 100
             collector.client.invalid, collector.client.block_after = False, None
-            manager.finish_selection = stop_after_acquisition
-            await manager.resume(manager.state["id"])
-            await asyncio.wait_for(manager.task, 10)
-            assert manager.state["captured"] == 201 and collector.client.inits == 2
+            intercept_selection(manager, stop_after_acquisition)
+            await manager.resume(latest_run(manager).state["id"])
+            await asyncio.wait_for(latest_run(manager).task, 10)
+            assert latest_run(manager).state["captured"] == 201 and collector.client.inits == 2
             assert (directory / "pages" / "1" / "1.json").read_bytes() == first
             generations = [json.loads(p.read_bytes())["statement"]["transport_generation"]
                            for p in sorted((directory / "pages" / "1").glob("*.json"))]
@@ -371,10 +371,10 @@ def test_bad_iterator_records_cannot_seal_a_range(tmp_path, damage):
         collector.client.iter_messages = bad
         try:
             await manager.start(CHAT, ["account0"], "account0")
-            await asyncio.wait_for(manager.task, 10)
-            assert manager.state["phase"] == "failed" and manager.state["captured"] == 100
-            assert manager.state["ranges_done"] == 0
-            checked = verify_distributed_work(manager.directory(manager.state["id"]))
+            await asyncio.wait_for(latest_run(manager).task, 10)
+            assert latest_run(manager).state["phase"] == "failed" and latest_run(manager).state["captured"] == 100
+            assert latest_run(manager).state["ranges_done"] == 0
+            checked = verify_distributed_work(manager.directory(latest_run(manager).state["id"]))
             assert checked["captured"] == 100 and not checked["complete_within_plan"]
         finally:
             await manager.close()
@@ -386,10 +386,10 @@ def test_chunk_footer_cannot_claim_a_different_takeout_generation(tmp_path):
     async def scenario():
         manager, entries = setup(tmp_path, [message(1)])
         collector = entries["account0"]["app"].state.collector
-        manager.finish_selection = stop_after_acquisition
+        intercept_selection(manager, stop_after_acquisition)
         try:
             state = await manager.start(CHAT, ["account0"], "account0", transport="takeout")
-            await asyncio.wait_for(manager.task, 10)
+            await asyncio.wait_for(latest_run(manager).task, 10)
             directory = manager.directory(state["id"])
             path = directory / "receipts" / "1.json"
             envelope = json.loads(path.read_bytes())
@@ -400,8 +400,8 @@ def test_chunk_footer_cannot_claim_a_different_takeout_generation(tmp_path):
                 verify_distributed_work(directory)
             collector.client.requests.clear()
             await manager.resume(state["id"])
-            await asyncio.wait_for(manager.task, 10)
-            assert manager.state["phase"] == "failed" and "differs" in manager.state["error"]
+            await asyncio.wait_for(latest_run(manager).task, 10)
+            assert latest_run(manager).state["phase"] == "failed" and "differs" in latest_run(manager).state["error"]
             assert not collector.client.requests
         finally:
             await manager.close()

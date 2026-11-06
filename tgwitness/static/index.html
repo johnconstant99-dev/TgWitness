@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="light dark">
 <title>TgWitness · Observation workspace</title>
 <link rel="icon" type="image/svg+xml" href="/mark.svg">
-<link rel="stylesheet" href="/style.css?v=0.8.0-report-studio3">
+<link rel="stylesheet" href="/style.css?v=0.8.0-report-studio4">
 <link rel="stylesheet" href="/components/shell.css?v=1">
 <link rel="stylesheet" href="/components/health.css?v=1">
 <link rel="stylesheet" href="/components/collection.css?v=1">
@@ -36,16 +36,16 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.9.1-withheld1"></script>
+<script defer src="/app.js?v=0.9.1-collection1"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
-<script defer src="/account-import.js?v=1"></script>
+<script defer src="/account-import.js?v=2"></script>
 <script defer src="/integrations.js?v=5"></script>
 <script defer src="/analysis.js?v=4"></script>
 <script defer src="/media-analysis.js?v=2"></script>
 <script defer src="/webhooks.js?v=2"></script>
 <script defer src="/proxies.js?v=3"></script>
-<script defer src="/fleet.js?v=6"></script>
+<script defer src="/fleet.js?v=7"></script>
 <script defer src="/review.js?v=1"></script>
 <script defer src="/live.js?v=2"></script>
 <script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=4"></script><script defer src="/cloud-capture.js?v=6"></script>
@@ -1284,7 +1284,7 @@
     <form class="github-form" id="github-form">
       <div class="replica-fields">
         <div><label for="github-repository">Repository</label><input data-no-translate id="github-repository" maxlength="200" placeholder="github.com/phishdestroy/TgWitness" required spellcheck="false" autocomplete="off"></div>
-        <div><label for="github-ref">Tag, branch or commit</label><input data-no-translate id="github-ref" maxlength="200" placeholder="v0.8.1" required spellcheck="false" autocomplete="off"></div>
+        <div><label for="github-ref">Tag, branch or commit</label><input data-no-translate id="github-ref" maxlength="200" placeholder="v0.9.1" required spellcheck="false" autocomplete="off"></div>
       </div>
       <button class="primary" type="submit">Check now</button>
     </form>
@@ -1420,7 +1420,7 @@
     <form hidden id="code-form"><h2>Enter your login code</h2><label for="code">Code from Telegram</label><input autocomplete="one-time-code" id="code" inputmode="numeric" pattern="[0-9 \-]{3,12}" required><button class="primary" type="submit">Confirm code</button></form>
     <form hidden id="password-form"><h2>Two-step verification</h2><label for="password">Telegram password</label><input autocomplete="off" id="password" required type="password"><button class="primary" type="submit">Sign in</button></form>
     <button class="quiet auth-back" hidden id="auth-back" type="button">← Change sign-in method</button>
-    <div hidden id="authorized-state"><span class="success-mark" id="authorized-mark"><svg aria-hidden="true" class="icon"><use href="#i-check"/></svg></span><span class="avatar xl" hidden id="authorized-avatar"></span><h2>Account connected</h2><p class="account-id" hidden id="authorized-account"></p><p class="account-restriction" hidden id="account-restriction" role="status"></p><p class="muted">Choose the groups and channels to observe.</p><button class="primary" data-open="sources">Choose sources →</button><div class="account-tools" role="group" aria-labelledby="account-tools-title"><h3 id="account-tools-title">Account security</h3><div class="account-tools-row"><button class="secondary" id="account-sessions-show" type="button">Sessions of this account</button><button class="secondary" id="account-password" type="button">Two-step password</button></div><div class="account-sessions" hidden id="account-sessions"></div></div><div class="account-manage" id="account-manage" role="group" aria-labelledby="account-manage-title"><h3 id="account-manage-title">Sign-in and removal</h3><div class="account-manage-row"><button class="quiet" id="change-account">Sign in again</button><button class="quiet sign-out" id="sign-out" type="button">Sign out of Telegram</button><button class="quiet" hidden id="forget-session" type="button">Forget on this computer</button></div><p class="hint" hidden id="sign-out-locked">This session was imported. Signing out would end it in Telegram for good, so it is disabled. Forget on this computer removes it here and leaves it active in Telegram.</p></div></div>
+    <div hidden id="authorized-state"><span class="success-mark" id="authorized-mark"><svg aria-hidden="true" class="icon"><use href="#i-check"/></svg></span><span class="avatar xl" hidden id="authorized-avatar"></span><h2>Account connected</h2><p class="account-id" hidden id="authorized-account"></p><p class="account-restriction" hidden id="account-restriction" role="status"></p><p class="muted">Choose the groups and channels to observe.</p><button class="primary" data-open="sources">Choose sources →</button><div class="account-tools" role="group" aria-labelledby="account-tools-title"><h3 id="account-tools-title">Account security</h3><div class="account-tools-row"><button class="secondary" id="account-sessions-show" type="button">Sessions of this account</button><button class="secondary" id="account-password" type="button">Two-step password</button></div><div class="account-sessions" hidden id="account-sessions"></div></div><div class="account-actions" role="group" aria-labelledby="account-actions-title"><h3 id="account-actions-title">Telegram actions</h3><label class="check-label"><input id="account-read-only" type="checkbox"> Read-only: no sending, joining or bot buttons from this account</label><p class="hint">On by default for imported sessions. Turning it on cancels queued actions. Their pace is set in Parameters.</p><p class="hint" hidden id="account-action-queue" role="status"></p></div><div class="account-manage" id="account-manage" role="group" aria-labelledby="account-manage-title"><h3 id="account-manage-title">Sign-in and removal</h3><div class="account-manage-row"><button class="quiet" id="change-account">Sign in again</button><button class="quiet sign-out" id="sign-out" type="button">Sign out of Telegram</button><button class="quiet" hidden id="forget-session" type="button">Forget on this computer</button></div><p class="hint" hidden id="sign-out-locked">This session was imported. Signing out would end it in Telegram for good, so it is disabled. Forget on this computer removes it here and leaves it active in Telegram.</p></div></div>
     <div class="route-line" hidden id="route-line"><svg aria-hidden="true" class="icon"><use href="#i-link"/></svg><span id="route-line-text"></span><button class="text-link" id="route-open" type="button">Change route</button></div>
     <section aria-labelledby="seen-by-title" class="seen-by" hidden id="seen-by"><h3 id="seen-by-title">What Telegram sees</h3><dl id="seen-by-list"></dl></section>
   </div>
@@ -1612,7 +1612,8 @@
   </div>
   <section class="card padded fleet-import" hidden id="fleet-import">
     <div class="fleet-import-head"><div><div class="eyebrow">Bulk import</div><h2>Import many accounts at once</h2><p class="muted">Each account gets its own workspace, signing key and proxy. Files with the same name form one account, for example <code>name.session</code> with <code>name.json</code>. A session that does not sign in is not kept.</p></div><button class="quiet" id="fleet-import-close" type="button">Close</button></div>
-    <label class="pool-drop fleet-drop" id="fleet-drop"><input accept=".session,.json,.zip,.txt" id="fleet-files" multiple type="file"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><span>Drop account files here or choose them: .session, .json, TData .zip, StringSession .txt</span></label>
+    <label class="pool-drop fleet-drop" id="fleet-drop"><input accept=".session,.json,.zip,.txt" id="fleet-files" multiple type="file"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><span>Drop account files, a folder or a ZIP of accounts here, or choose files: .session, .json, TData .zip, StringSession .txt</span></label>
+    <input hidden id="fleet-folder" multiple type="file" webkitdirectory>
     <aside class="session-import-warning" id="fleet-session-warning" aria-labelledby="fleet-session-warning-title">
       <h3 id="fleet-session-warning-title">Parallel session warning</h3>
       <p>Importing TData, a session file, StringSession or Auth Key HEX reuses an existing authorization key. If Telegram detects parallel use of that key, it invalidates the authorization with <code>AUTH_KEY_DUPLICATED</code>. Both copies stop working and need a new login.</p>
@@ -1626,7 +1627,8 @@
       <div><label for="fleet-passcode">TData passcode · optional</label><input autocomplete="off" id="fleet-passcode" maxlength="512" type="password"></div>
       <div><label for="fleet-api">API ID:Hash · optional</label><input autocomplete="off" id="fleet-api" placeholder="Built-in pool when empty" spellcheck="false"></div>
     </div>
-    <div class="fleet-import-run"><button class="primary" disabled id="fleet-import-start" type="button">Import accounts</button><button class="secondary" hidden id="fleet-import-stop" type="button">Stop after this account</button><span class="hint" id="fleet-import-summary" role="status"></span></div>
+    <p class="hint">Check sessions only reads each account's profile and settings: it signs nothing out, resets nothing and joins nothing. Only live sessions are imported. Spam blocks are not checked, because that needs a message to @SpamBot.</p>
+    <div class="fleet-import-run"><button class="secondary" id="fleet-folder-open" type="button">Choose a folder</button><button class="secondary" disabled id="fleet-import-check" type="button">Check sessions</button><button class="primary" disabled id="fleet-import-start" type="button">Import active accounts</button><button class="secondary" hidden id="fleet-import-stop" type="button">Stop after this account</button><span class="hint" id="fleet-import-summary" role="status"></span></div>
     <ol class="fleet-results" id="fleet-results"></ol>
   </section>
   <div class="accounts-overview" id="accounts-overview" aria-label="Workspace totals"></div>

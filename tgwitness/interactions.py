@@ -6,16 +6,25 @@ import time
 from typing import Literal
 from urllib.parse import parse_qs, urlsplit
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 from telethon import utils
 from telethon.errors import FloodWaitError, InviteRequestSentError, RPCError, UserAlreadyParticipantError
 from .telegram_client import FLOOD_ERRORS
 from telethon.tl import functions, types
 
-from . import keyboard
+from . import keyboard, tuning
 from .collector import buttons_of, plain
-from .scope import kind_of, scope_settings, unexclude
+from .scope import kind_of, scope_settings, unexclude, visibility
 from .store import canonical
+
+ACTION = "interaction.action."
+QUEUE = "interaction.queue"
+PACE = {"join": ("action_join_seconds", "action_joins_per_hour"),
+        "message": ("action_message_seconds", "action_messages_per_hour"),
+        "bot": ("action_button_seconds", "action_buttons_per_hour")}
+READ_ONLY = "This account is read-only. Turn off Read-only on the account page to send, join or press bot buttons."
+READ_ONLY_STOP = "Read-only was turned on before this action's turn. It was not sent."
+RESTART_STOP = "TgWitness stopped before this action's turn. It was not sent."
 
 
 class Preview(BaseModel):
@@ -28,6 +37,7 @@ class Action(BaseModel):
     request_id: str = Field(pattern=r"^[a-zA-Z0-9_-]{16,80}$")
     action: Literal["open", "send", "press"]
     preview_id: str | None = Field(default=None, pattern=r"^[a-f0-9]{32}$")
+    observe: StrictBool | None = None
     chat_id: int | None = None
     text: str | None = Field(default=None, max_length=4096)
     reply_to: int | None = Field(default=None, gt=0)
@@ -49,6 +59,11 @@ class Action(BaseModel):
                 self.message_id, self.keyboard_event, self.row, self.column)):
             raise ValueError("Select a saved message button.")
         return self
+
+
+class ReadOnly(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    enabled: StrictBool
 
 
 def parse_link(value):
@@ -120,6 +135,102 @@ class AccountRestricted(ValueError):
     pass
 
 
+def read_only(store):
+    chosen = store.get_setting("read_only", None)
+    if isinstance(chosen, bool):
+        return chosen
+    return (store.get_setting("account", None) or {}).get("key_origin") != "created"
+
+
+def set_read_only(store, enabled):
+    with store.transaction():
+        store.set_setting("read_only", enabled)
+        store.append("account.read_only", {"enabled": enabled})
+    if enabled:
+        abandon(store, READ_ONLY_STOP)
+    return pace_status(store)
+
+
+def pace_status(store):
+    pending = [store.get_setting(ACTION + r, None) or {} for r in store.get_setting(QUEUE, None) or []]
+    times = [p["queued_until"] for p in pending if p.get("queued_until") and not p.get("result")]
+    return {"read_only": read_only(store), "queued": len(times), "next_at": min(times, default=None)}
+
+
+def permitted(collector):
+    store = collector.store
+    check_pause(collector)
+    check_restriction(store)
+    goal = (store.get_setting("goal_preset", None) or store.get_setting("setup", None) or {}).get("goal")
+    if goal == "evidence":
+        raise ValueError("Telegram actions from the panel are off for the Evidence for a case goal.")
+    if read_only(store):
+        raise AccountRestricted(READ_ONLY)
+
+
+def reserve(store, category):
+    gap, hourly = (tuning.value(store, key) for key in PACE[category])
+    now = time.time()
+    with store.transaction():
+        pace = store.get_setting("action_pace", None) or {}
+        taken = sorted(t for t in pace.get(category, []) if t > now - max(gap, 3600))
+        slot = max(now, taken[-1] + gap) if taken else now
+        if len(taken) >= hourly:
+            slot = max(slot, taken[-hourly] + 3600)
+        store.set_setting("action_pace", {**pace, category: taken + [slot]})
+    return slot
+
+
+def progress(pending):
+    if pending.get("result"):
+        return pending["result"]
+    state = {"request_id": pending["request"]["request_id"], "request_event": pending["request_event"]}
+    if pending.get("queued_until"):
+        return {**state, "status": "queued", "run_at": pending["queued_until"]}
+    return {**state, "status": "unknown"}
+
+
+def requested(store, request_id):
+    return store.get_setting(ACTION + request_id, None) if re.fullmatch(r"[a-zA-Z0-9_-]{16,80}", request_id) else None
+
+
+def waiting(store, request_id):
+    return request_id in (store.get_setting(QUEUE, None) or [])
+
+
+def finish(store, pending, result):
+    request = pending["request"]
+    with store.transaction():
+        receipt = store.append("interaction.result", result, result.get("chat_id", request.get("chat_id")),
+                               result.get("message_id", request.get("message_id")), pending.get("account_id"))
+        result["result_event"] = receipt["seq"]
+        store.set_setting(ACTION + request["request_id"], {**pending, "result": result})
+        queue = store.get_setting(QUEUE, None) or []
+        if request["request_id"] in queue:
+            store.set_setting(QUEUE, [r for r in queue if r != request["request_id"]])
+    return result
+
+
+def abandon(store, reason, request_id=None):
+    for queued in store.get_setting(QUEUE, None) or []:
+        pending = store.get_setting(ACTION + queued, None)
+        if request_id in (None, queued) and pending and not pending.get("result"):
+            finish(store, pending, {"request_id": queued, "request_event": pending["request_event"],
+                                    "status": "rejected", "error": reason})
+
+
+async def channel_facts(collector, chat):
+    if not isinstance(chat, types.Channel):
+        return {}
+    try:
+        full = (await collector.client(functions.channels.GetFullChannelRequest(chat))).full_chat
+    except Exception as exc:
+        return {"full_info_error": type(exc).__name__}
+    return {key: value for key, value in {"participants_count": full.participants_count,
+                                          "history_visible": not full.hidden_prehistory,
+                                          "about": full.about or None}.items() if value is not None}
+
+
 async def preview(collector, body):
     check_pause(collector)
     target = parse_link(body.link)
@@ -131,18 +242,22 @@ async def preview(collector, body):
         kind = kind_of(chat) if chat else "group"
         member = isinstance(entity, types.ChatInviteAlready)
     else:
-        entity = await collector.client.get_entity(target["username"])
+        entity = chat = await collector.client.get_entity(target["username"])
         title, kind, member = utils.get_display_name(entity), kind_of(entity), None
         if target["start"] is not None and not getattr(entity, "bot", False):
             raise ValueError("The start parameter requires a bot.")
+    facts = await channel_facts(collector, chat)
+    about = facts.pop("about", None)
     result = {"preview_id": secrets.token_hex(16), "link": body.link.strip(), "target": target,
               "title": title, "kind": kind, "already_member": member,
-              "about": getattr(entity, "about", None),
-              "participants_count": getattr(entity, "participants_count", None),
+              "about": getattr(entity, "about", None) or about,
+              "participants_count": getattr(entity, "participants_count", None)
+                                    or getattr(chat, "participants_count", None),
+              "history_visible": None,
               "request_needed": bool(getattr(entity, "request_needed", False)),
               "expires_at": time.time() + 600,
               "account_id": (collector.store.get_setting("account", {}) or {}).get("id"),
-              "raw": plain(entity)}
+              "raw": plain(entity), **facts}
     with collector.store.transaction():
         event = collector.store.append("interaction.preview", result)
         result["preview_event"] = event["seq"]
@@ -150,19 +265,21 @@ async def preview(collector, body):
     return {k: v for k, v in result.items() if k not in ("raw", "target")}
 
 
-def observe(collector, entity):
+def observe(collector, entity, add=True):
     chat_id = utils.get_peer_id(entity)
     title, kind = utils.get_display_name(entity), kind_of(entity)
-    collector.dialog_cache[chat_id] = {"chat_id": chat_id, "title": title, "kind": kind, "entity": entity}
-    if not collector.selected(chat_id):
+    collector.dialog_cache[chat_id] = {"chat_id": chat_id, "title": title, "kind": kind, "entity": entity,
+                                       "visibility": visibility(entity)}
+    if add and not collector.selected(chat_id):
         with collector.store.transaction():
             collector.store.set_target(chat_id, title, kind, True, origin="manual")
             included = unexclude(collector.store, chat_id)
             collector.store.append("source.added", {"title": title, "kind": kind, "source": "panel_interaction",
                                                    **({"removed_from_scope_exclusions": True} if included else {})},
                                    chat_id)
+            collector.request_baseline([chat_id])
         if collector.running:
-            collector.intake.put_nowait((chat_id, entity))
+            collector.intake.put_nowait((chat_id, entity, False))
     return chat_id
 
 
@@ -174,39 +291,98 @@ async def sent(collector, entity, text, reply_to=None):
     return {"chat_id": chat_id, "message_id": message.id, "message_event": event["seq"]}
 
 
-async def execute(collector, body):
+def prepare(collector, body, account, fresh=True):
     store = collector.store
-    key = "interaction.action." + body.request_id
-    request = body.model_dump()
-    prior = store.get_setting(key, None)
-    if prior:
-        if canonical(prior["request"]) != canonical(request):
-            raise ValueError("This request ID belongs to another action.")
-        return prior.get("result") or {"request_id": body.request_id, "status": "unknown",
-                                       "request_event": prior["request_event"]}
-    check_pause(collector)
-    check_restriction(store)
-    goal = (store.get_setting("goal_preset", None) or store.get_setting("setup", None) or {}).get("goal")
-    if goal == "evidence":
-        raise ValueError("Telegram actions from the panel are off for the Evidence for a case goal.")
-    await collector.restore()
-    account = (store.get_setting("account", {}) or {}).get("id")
-    prepared, entity = None, None
     if body.action == "open":
         prepared = store.get_setting("interaction.preview." + body.preview_id, None)
-        if not prepared or prepared["expires_at"] < time.time() or prepared["account_id"] != account:
+        if not prepared or fresh and prepared["expires_at"] < time.time() or prepared["account_id"] != account:
             raise ValueError("The preview expired. Preview the Telegram link again.")
-    else:
+        return prepared, None, None
+    if not collector.selected(body.chat_id):
+        raise ValueError("Enable observation for this chat in Sources first.")
+    if body.action == "send":
+        return None, None, None
+    events = store.events(chat_id=body.chat_id, message_id=body.message_id,
+                          before=body.keyboard_event + 1, limit=1)
+    if not events or events[0]["seq"] != body.keyboard_event:
+        raise ValueError("Select a saved message button.")
+    saved = keyboard.of_payload(events[0]["payload"])
+    try:
+        selected = saved["rows"][body.row][body.column]
+    except (IndexError, KeyError, TypeError):
+        raise ValueError("Select a saved message button.") from None
+    if selected["type"] not in ("callback", "text"):
+        raise ValueError("This button type must be opened in Telegram.")
+    return None, saved, selected
+
+
+def record(collector, body, account, prepared, selected, run_at=None):
+    store = collector.store
+    request = body.model_dump()
+    details = {"request": request, "account_id": account, "observation_running": collector.running,
+               "own_actions": scope_settings(store)["own_actions"], "button": selected,
+               "preview_event": prepared["preview_event"] if prepared else None}
+    pending = {"request": request, "account_id": account}
+    if run_at:
+        details["queued_until"] = pending["queued_until"] = run_at
+    with store.transaction():
+        event = store.append("interaction.requested", details, body.chat_id, body.message_id, account)
+        pending["request_event"] = event["seq"]
+        store.set_setting(ACTION + body.request_id, pending)
+        if run_at:
+            store.set_setting(QUEUE, (store.get_setting(QUEUE, None) or []) + [body.request_id])
+    return pending
+
+
+async def execute(collector, body, queue=None):
+    store = collector.store
+    prior = store.get_setting(ACTION + body.request_id, None)
+    if prior:
+        if canonical(prior["request"]) != canonical(body.model_dump()):
+            raise ValueError("This request ID belongs to another action.")
+        return progress(prior)
+    permitted(collector)
+    account = (store.get_setting("account", {}) or {}).get("id")
+    prepared, saved, selected = prepare(collector, body, account)
+    category = ("bot" if body.action == "press" else "message" if body.action == "send" or prepared["kind"] == "bot"
+                else "join")
+    run_at = reserve(store, category)
+    if run_at > time.time():
+        if queue:
+            pending = record(collector, body, account, prepared, selected, run_at)
+            queue(run_at, body)
+            return progress(pending)
+        await asyncio.sleep(run_at - time.time())
+    await collector.restore()
+    return await perform(collector, body, account, prepared, saved, selected)
+
+
+async def run_queued(collector, body):
+    store = collector.store
+    pending = store.get_setting(ACTION + body.request_id, None)
+    if not pending or pending.get("result"):
+        return None
+    try:
+        permitted(collector)
+        prepared, saved, selected = prepare(collector, body, pending.get("account_id"), fresh=False)
+        await collector.restore()
+        return await perform(collector, body, pending.get("account_id"), prepared, saved, selected, pending)
+    except (Exception, asyncio.CancelledError) as exc:
+        if not (store.get_setting(ACTION + body.request_id, None) or {}).get("result"):
+            finish(store, pending, {"request_id": body.request_id, "request_event": pending["request_event"],
+                                    "status": "rejected", "error_type": type(exc).__name__,
+                                    **({"error": str(exc)} if isinstance(exc, ValueError) else {})})
+        if isinstance(exc, asyncio.CancelledError):
+            raise
+        return progress(store.get_setting(ACTION + body.request_id, None))
+
+
+async def perform(collector, body, account, prepared, saved, selected, pending=None):
+    store = collector.store
+    entity = None
+    if body.action != "open":
         entity = await collector.resolve_target(body.chat_id)
-        if not collector.selected(body.chat_id):
-            raise ValueError("Enable observation for this chat in Sources first.")
-    selected = None
     if body.action == "press":
-        events = store.events(chat_id=body.chat_id, message_id=body.message_id,
-                              before=body.keyboard_event + 1, limit=1)
-        if not events or events[0]["seq"] != body.keyboard_event:
-            raise ValueError("Select a saved message button.")
-        saved = keyboard.of_payload(events[0]["payload"])
         current = await collector.client.get_messages(entity, ids=body.message_id)
         live = buttons_of(current) if current else None
         if not live or live != saved:
@@ -214,20 +390,9 @@ async def execute(collector, body):
                 await collector.capture_message(current, "message.edited", body.chat_id,
                                                 source="panel_button_check")
             raise ValueError("The buttons changed or the message disappeared. Refresh the chat.")
-        try:
-            selected = live["rows"][body.row][body.column]
-        except IndexError:
-            raise ValueError("Select a saved message button.") from None
-        if selected["type"] not in ("callback", "text"):
-            raise ValueError("This button type must be opened in Telegram.")
-    details = {"request": request, "account_id": account, "observation_running": collector.running,
-               "own_actions": scope_settings(store)["own_actions"], "button": selected,
-               "preview_event": prepared["preview_event"] if prepared else None}
-    with store.transaction():
-        event = store.append("interaction.requested", details, body.chat_id, body.message_id, account)
-        pending = {"request": request, "request_event": event["seq"]}
-        store.set_setting(key, pending)
-    result = {"request_id": body.request_id, "request_event": event["seq"], "status": "succeeded"}
+    if pending is None:
+        pending = record(collector, body, account, prepared, selected)
+    result = {"request_id": body.request_id, "request_event": pending["request_event"], "status": "succeeded"}
     cancelled, dispatched = False, False
     try:
         if body.action == "open":
@@ -258,7 +423,7 @@ async def execute(collector, body):
                         await collector.client(functions.channels.JoinChannelRequest(entity))
                     except UserAlreadyParticipantError:
                         pass
-            result["chat_id"] = observe(collector, entity)
+            result["chat_id"] = observe(collector, entity, body.observe is not False)
             if getattr(entity, "bot", False):
                 dispatched = True
                 result.update(await sent(collector, entity, "/start" + (
@@ -286,11 +451,7 @@ async def execute(collector, body):
         definite = (isinstance(exc, ValueError) and not dispatched) or (isinstance(exc, RPCError) and exc.code < 500
                                                   and type(exc).__name__ != "BotResponseTimeoutError")
         result.update(status="rejected" if definite else "unknown", error_type=type(exc).__name__)
-    with store.transaction():
-        receipt = store.append("interaction.result", result, result.get("chat_id", body.chat_id),
-                               result.get("message_id", body.message_id), account)
-        result["result_event"] = receipt["seq"]
-        store.set_setting(key, {**pending, "result": result})
+    finish(store, pending, result)
     if cancelled:
         raise asyncio.CancelledError
     return result

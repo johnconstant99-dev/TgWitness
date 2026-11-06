@@ -185,8 +185,6 @@ def post_address(topic, body):
 
 
 async def address_loop(vault, topic, interval=30, every=10800, host=quick_tunnel_host, post=post_address):
-    # The quick tunnel's address signed with the collector key: whoever holds its fingerprint can check the post,
-    # unlike the operator's address key. Posted when it changes and every three hours (ntfy.sh keeps 12).
     if not BEACON.fullmatch(topic or ""):
         return
     last, sent = None, 0

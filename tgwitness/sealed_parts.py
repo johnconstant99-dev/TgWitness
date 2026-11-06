@@ -174,7 +174,7 @@ def assemble(manifest, destination, key=None, parts_dir=None, max_gib=64):
                 raise ValueError("Assembled archive differs from its signed manifest")
             outgoing.flush()
             os.fsync(outgoing.fileno())
-        os.link(output, destination)  # Atomic publication, never overwrite an existing file.
+        os.link(output, destination)
     return statement
 
 

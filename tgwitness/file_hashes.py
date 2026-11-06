@@ -60,8 +60,6 @@ async def collect(client, media, *, max_requests=4096):
     sender, borrowed = client._sender, None
     offset, size = 0, info["bytes"]
     try:
-        # getFileHashes may return LOCATION_INVALID on the account's DC instead
-        # of FILE_MIGRATE. Use the observed media DC before the first request.
         current_dc = getattr(getattr(client, "session", None), "dc_id", None)
         if current_dc is not None and info["dc_id"] != current_dc:
             borrowed = await client._borrow_exported_sender(info["dc_id"])

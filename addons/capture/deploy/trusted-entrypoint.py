@@ -12,8 +12,6 @@ def firewall(host, port):
     address = ipaddress.IPv4Address(host)
     if type(port) is not int or not 1 <= port <= 65535:
         raise ValueError("Invalid proxy port")
-    # Docker's 127.0.0.11 resolver can forward outside this namespace; do not
-    # treat every address routed over the loopback interface as local-only.
     return f"""table inet trusted_live {{
  chain output {{
   type filter hook output priority 0; policy drop;
@@ -33,7 +31,6 @@ def main():
     if chosen not in connectors:
         raise ValueError("Set TRUSTED_CONNECTOR to an explicitly selected configured connector")
     connector = connectors[chosen]
-    # A fresh container namespace has no client connections at this point.
     subprocess.run(["nft", "-f", "-"], input=firewall(connector["host"], connector["port"]).encode(), check=True)
     receipt = {"policy": "trusted-live-deny-direct-v1", "host": connector["host"], "port": connector["port"],
                "netns": os.readlink("/proc/self/ns/net")}
@@ -41,7 +38,6 @@ def main():
     with os.fdopen(os.open(route_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w") as target:
         json.dump(receipt, target)
     os.chmod(route_path, 0o400)
-    # Keep root ownership; grant only the recorder UID read access, not its whole group.
     subprocess.run(["setfacl", "-m", "u:10001:r--", route_path], check=True)
     for directory in ("/data", "/session", "/exports", "/home/recorder"):
         os.chown(directory, 10001, 10001)

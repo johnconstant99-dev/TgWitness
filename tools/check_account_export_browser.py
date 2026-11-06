@@ -188,7 +188,6 @@ def main():
             expect(page.locator('[data-account-export-action="resume"]')).to_have_text('Check approval')
             expect(page.locator('.account-export-next')).to_contain_text('allow this export')
             expect(page.locator('.account-export-next')).to_contain_text('another device')
-            # An unchanged API response still needs to reveal Resume when the wait expires.
             page.evaluate("""()=>{window.realExportNow=Date.now;Date.now=()=>Date.parse('2099-11-03T12:00:00Z');}""")
             page.evaluate("pollWorkspace()")
             expect(page.locator('[data-account-export-action="resume"]')).to_be_visible()
@@ -276,7 +275,6 @@ def main():
                     answer_panel_dialog(page)
                 assert saved.value.suggested_filename == "tgwitness-disclosure-fictional-derivative.zip"
             assert len(downloads) == 4
-            # A second copy must retain its own focus and note when another job field updates.
             jobs[0]['options'] = {'purpose': 'PRIVATE PURPOSE CANARY', 'sender_ids': [987654321]}
             jobs[0]['disclosures'].append({'id': 'second-copy', 'ready': True,
                                           'summary': {'private_note': 'PRIVATE FILTER CANARY'}})
@@ -300,7 +298,6 @@ def main():
             expect(handoff).to_have_attribute('open', '')
             expect(omissions).to_have_attribute('open', '')
             expect(handoff.get_by_role('button', name='Copy recipient note', exact=True)).to_be_focused()
-            # Clipboard denial leaves a selected, readable fallback instead of losing the note.
             page.evaluate("""()=>{window.recipientWrite=navigator.clipboard.writeText.bind(navigator.clipboard);
               navigator.clipboard.writeText=async()=>{throw new DOMException('Synthetic denial','NotAllowedError');};}""")
             handoff.get_by_role('button', name='Copy recipient note', exact=True).click()
@@ -332,7 +329,6 @@ def main():
             ru_page = browser.new_page()
             ru_page.goto(server.url + "/?lang=ru", wait_until="networkidle")
             expect(ru_page.locator("#workspace")).to_be_visible()
-            # The shell can appear before the first status response has selected its view.
             ru_page.wait_for_function("state.me?.admin === true && !!state.status")
             ru_page.locator('.sidebar [data-view="evidence"]').click()
             ru_page.locator("#export-task-account").click()

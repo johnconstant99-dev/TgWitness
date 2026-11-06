@@ -40,6 +40,7 @@ def action_workspace(tmp_path):
     store, vault = Store(tmp_path), Vault(tmp_path)
     store.bind(vault)
     store.set_setting("account", {"id": OBSERVER, "first_name": "Synthetic observer"})
+    store.set_setting("read_only", False)
     store.set_target(CHAT, "Selected synthetic source", "supergroup", True)
     store.set_target(HIDDEN, HIDDEN_TITLE, "supergroup", True)
     sent = message(1, SEND)

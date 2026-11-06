@@ -169,8 +169,6 @@ class History:
 
     async def pause(self, reason="operator_pause"):
         if self.busy:
-            # A worker may already have paused itself and be joining media
-            # tasks. Authorization cleanup must not cancel that join again.
             run = self.current()
             if run and run["phase"] == "running":
                 self.task.cancel()

@@ -141,7 +141,6 @@ export function createReportSelection({root,tr,json,getOwner,ready,options,activ
     const analytics=data.analytics||{},grid=make('div','','report-preview-charts');
     if(analytics.activity){
       const rows=analytics.activity.rows||[];
-      // Preview up to 36 exact observed periods, with an explicit remainder.
       grid.append(chart('Activity over time',rows.slice(-36).map(row=>({label:row.period,value:row.total}))));
       if(rows.length>36)grid.append(make('p',tr('Showing the latest {n} recorded periods. The report includes the complete selected period.',{n:36}),'hint'));
     }

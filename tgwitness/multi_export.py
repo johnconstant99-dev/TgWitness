@@ -232,8 +232,9 @@ class MultiExport:
                     "acquisition": {"started_at": state["started_at"], "finished_at": utcnow(),
                                     "clock_at_start": clock, "clock_at_end": await lead.telegram_clock()}}
             max_gib = tuning.value(lead.store, "export_max_gib")
+            names = await complete_in_thread(chat_export.journal_names, lead.store, state["chat_id"], scratch)
             await complete_in_thread(chat_export.build_bundle, scratch, meta, lead.vault, out,
-                                    max_gib * 1024**3, report_options)
+                                    max_gib * 1024**3, report_options, None, names)
             await complete_in_thread(verify_chat_export, out, fingerprint(lead.vault.public_key), max_gib)
             replica.outbox(lead.store, out)
             self.path = out
@@ -282,7 +283,6 @@ class MultiExport:
 
     @staticmethod
     def recheck_parts(parts, recovered, lead_id):
-        # Keep v1's non-overlapping ranges and attribute recovered rows to their actual fetcher.
         recovered_by_id = {row["id"]: row for row in recovered}
         if len(recovered_by_id) != len(recovered) or any(type(mid) is not int for mid in recovered_by_id):
             raise ValueError("Recovered messages do not match the absent message IDs.")

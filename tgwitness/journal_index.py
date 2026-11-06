@@ -34,7 +34,6 @@ class JournalIndex:
     def __init__(self, db):
         self.db = db
         self.repair_missing_tables()
-        # Do not use executescript: migration must roll back with its caller.
         for sql in (
             "CREATE TABLE IF NOT EXISTS journal_read_index (name TEXT PRIMARY KEY, seq INTEGER NOT NULL)",
             "CREATE TABLE IF NOT EXISTS message_state_index ("
@@ -112,7 +111,6 @@ class JournalIndex:
             self.db.execute("CREATE VIRTUAL TABLE IF NOT EXISTS " + table + " USING "
                             "fts5(" + column + ",content='',tokenize='trigram case_sensitive 1')")
         except sqlite3.OperationalError as exc:
-            # Older/system SQLite builds can lack FTS5 or the trigram tokenizer.
             if "no such module" not in str(exc) and "tokenizer" not in str(exc):
                 raise
             return False

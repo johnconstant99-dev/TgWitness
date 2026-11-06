@@ -17,7 +17,6 @@ LIVE = "--live" in sys.argv
 PHALA = json.loads((FIXTURES / "phala-dstack-0.5.12.json").read_text())
 PHALA_COLLATERAL = json.loads((FIXTURES / "phala-dstack-0.5.12.collateral.json").read_text())
 
-# SHA-256 of etc/acpi/tables that QEMU itself produced, from the golden tests of Dstack-TEE/dstack's qemu-acpi crate.
 BASE = {"qemu_version": (11, 1, 0), "cpu_count": 1, "memory_size": 2 << 30, "pic": False, "smm": False,
         "hugepages": False, "numa_nodes": [], "num_gpus": 0, "num_nvswitches": 0, "num_nics": 1,
         "num_verity_volumes": 0, "extra_root_devices": [], "hotplug_off": False, "root_verity": True,
@@ -99,7 +98,6 @@ def test_a_real_phala_quote_has_rtmr0_from_firmware_memory_and_qemus_acpi_tables
 
 
 def guid_table_firmware(sections, data):
-    # OVMF's layout: TDVF descriptor after the code, then a GUID table whose footer sits 32 bytes before the end.
     descriptor = b"TDVF" + struct.pack("<III", 16 + 32 * len(sections), 1, len(sections))
     descriptor += b"".join(struct.pack("<IIQQII", *s) for s in sections)
     tail = struct.pack("<H", 22) + dstack_image.TDX_METADATA + struct.pack("<H", 40) + dstack_image.FOOTER + bytes(32)

@@ -8,6 +8,7 @@ from telethon.errors import FloodWaitError, FloodPremiumWaitError
 from telethon.network.connection import ConnectionTcpObfuscated
 from telethon.network.connection.tcpmtproxy import TcpMTProxy
 from telethon.tl import functions, types
+from telethon.tl.tlobject import TLRequest
 
 from .rpc_pacing import bulk_request
 
@@ -21,6 +22,15 @@ _READ_RECEIPTS = (functions.messages.ReadHistoryRequest, functions.messages.Read
                   functions.messages.ReadDiscussionRequest, functions.messages.ReadMentionsRequest,
                   functions.messages.ReadReactionsRequest, functions.messages.ReadEncryptedHistoryRequest,
                   functions.stories.ReadStoriesRequest)
+_OWN_UPDATES = (types.messages.AffectedMessages, types.messages.AffectedHistory, types.messages.AffectedFoundMessages)
+
+
+def method_name(request):
+    while isinstance(getattr(request, "query", None), TLRequest):
+        request = request.query
+    name = type(request).__name__.removesuffix("Request")
+    group = type(request).__module__.rpartition(".")[2]
+    return ("" if group == "functions" else group + ".") + name[:1].lower() + name[1:]
 
 
 class ReadReceiptBlocked(ValueError):
@@ -28,8 +38,6 @@ class ReadReceiptBlocked(ValueError):
 
 
 def reject_read_receipts(request):
-    # Validate the whole batch before sending its first item, including Takeout
-    # and other invoke wrappers used by Telethon. Never include request data.
     pending = [request]
     while pending:
         item = pending.pop()
@@ -91,12 +99,15 @@ class WitnessClient(TelegramClient):
         try:
             return await super()._disconnect_coro()
         finally:
-            # Telethon shields this coroutine even when its caller is cancelled.
-            # Keep the key reserved until the transport really has stopped.
             if pending and not self.is_connected():
                 self._connection_cleanup_pending = False
                 if listener := getattr(self, "connection_listener", None):
                     listener("closed")
+
+    async def _handle_auto_reconnect(self):
+        await super()._handle_auto_reconnect()
+        if listener := getattr(self, "connection_listener", None):
+            listener("reconnected")
 
     @property
     def _request_retries(self):
@@ -117,9 +128,6 @@ class WitnessClient(TelegramClient):
         if utils.is_list_like(request):
             request = tuple(request)
         reject_read_receipts(request)
-        # One outgoing RPC at a time for this authorization, including callers
-        # in monitoring's background loops. Resolving a peer may re-enter _call
-        # in the same task; that is sequential and must not deadlock.
         if not hasattr(self, "_rpc_lock"):
             self._rpc_lock = asyncio.Lock()
             self._rpc_owner = None
@@ -161,6 +169,9 @@ class WitnessClient(TelegramClient):
             if paced:
                 pacer.success()
             counts["ok"] += 1
+            if (isinstance(result, _OWN_UPDATES) or getattr(result, "SUBCLASS_OF_ID", None) == types.Updates.SUBCLASS_OF_ID) \
+                    and (listener := getattr(self, "updates_listener", None)):
+                listener()
             return result
         except asyncio.CancelledError:
             counts["cancelled"] += 1
@@ -174,7 +185,7 @@ class WitnessClient(TelegramClient):
                 self._rpc_wait_until = max(self._rpc_wait_until,
                     getattr(self, "rpc_backoff_getter", lambda: 0)(), time.time() + exc.seconds + 1)
                 if save := getattr(self, "rpc_backoff_setter", None):
-                    save(self._rpc_wait_until)
+                    save(self._rpc_wait_until, method_name(request))
                 if observe := getattr(self, "rpc_backoff_observer", None):
                     failed = getattr(exc, "request", None)
                     observe({**info, "failed_method": request_method(failed)["method"] if failed is not None else info["method"],

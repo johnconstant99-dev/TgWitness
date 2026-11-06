@@ -14,7 +14,7 @@ from telethon.tl import functions as f, types as t
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from tools.test_distributed_export import CHAT, close_entries, coordinator, message
+from tools.test_distributed_export import CHAT, close_entries, coordinator, message, latest_run, hold_launch, intercept_selection
 from tgwitness import distributed_export
 from tgwitness.distributed_takeout import HistoryTakeout
 from tgwitness.verify import fingerprint, verify_chat_export
@@ -152,13 +152,13 @@ def test_takeout_delay_pauses_without_regular_fallback(tmp_path):
         c.client.delay = 3600
         try:
             await manager.start(CHAT, ["account0"], "account0", transport="takeout")
-            await manager.task
-            assert manager.state["phase"] == "paused" and manager.state["captured"] == 0
-            assert manager.state["wait_until"] and "approval" in manager.state["error"]
+            await latest_run(manager).task
+            assert latest_run(manager).state["phase"] == "paused" and latest_run(manager).state["captured"] == 0
+            assert latest_run(manager).state["wait_until"] and "approval" in latest_run(manager).state["error"]
             assert c.export_claim is None
             # The only history read was the regular preflight upper boundary.
             assert sum(isinstance(r, f.messages.GetHistoryRequest) for r, _ in c.client.requests) == 1
-            assert not list((manager.directory(manager.state["id"]) / "receipts").iterdir())
+            assert not list((manager.directory(latest_run(manager).state["id"]) / "receipts").iterdir())
         finally:
             await manager.close()
             close_entries(entries)
@@ -203,26 +203,26 @@ def test_sparse_plan_reduces_requests_without_omitting_ids(tmp_path, transport_k
     async def scenario():
         rows = [message(i) for i in (1, 200001, 400001, 500000)]
         manager, entries = setup(tmp_path, rows)
-        manager.launch = lambda: None
+        hold_launch(manager)
         c = entries["account0"]["app"].state.collector
         try:
             state = await manager.start(CHAT, ["account0"], "account0", transport=transport_kind)
             assert state["ranges_total"] == 5  # Previously 250 fixed 2,000-ID tasks.
-            assert manager.job["segments"] == [{"low": 1, "high": 500000, "profiles": ["account0"]}]
-            manager.prepare_chunks()
+            assert latest_run(manager).job["segments"] == [{"low": 1, "high": 500000, "profiles": ["account0"]}]
+            latest_run(manager).prepare_chunks()
             if transport_kind == "takeout":
                 network = transport(c, state["id"])
                 await network.open()
-                manager.history_transports["account0"] = network
-            await manager.work(state["workers"][0])
-            assert manager.state["captured"] == 4 and manager.state["ranges_done"] == 5
+                latest_run(manager).history_transports["account0"] = network
+            await latest_run(manager).work(state["workers"][0])
+            assert latest_run(manager).state["captured"] == 4 and latest_run(manager).state["ranges_done"] == 5
             directory = manager.directory(state["id"])
             saved = [json.loads(line)["id"] for path in (directory / "chunks").glob("*.jsonl")
                      for line in path.read_text().splitlines()]
             assert sorted(saved) == [m.id for m in rows]
             receipts = list((directory / "receipts").glob("*.json"))
             for path in receipts:
-                signed = manager.verified(path, c.vault.public_key)
+                signed = distributed_export.verified(path, c.vault.public_key)
                 if transport_kind == "takeout":
                     assert signed["transport"] == "takeout" and signed["transport_generation"] == 1
                 else:
@@ -232,11 +232,11 @@ def test_sparse_plan_reduces_requests_without_omitting_ids(tmp_path, transport_k
             assert all(bool(w) == (transport_kind == "takeout") for _, w in history[1:])
             assert str(c.client.handle) not in (directory / "status.json").read_text()
         finally:
-            if manager.db:
-                manager.db.close()
-                manager.db = None
-            if manager.state:
-                manager.release(manager.state["id"])
+            if latest_run(manager).db:
+                latest_run(manager).db.close()
+                latest_run(manager).db = None
+            if latest_run(manager).state:
+                manager.release(latest_run(manager).state["id"])
             close_entries(entries)
     asyncio.run(scenario())
 
@@ -248,8 +248,8 @@ def test_takeout_archive_keeps_signatures_and_private_handles(tmp_path, monkeypa
         monkeypatch.setattr(distributed_export.replica, "outbox", lambda *a: None)
         try:
             state = await manager.start(CHAT, list(entries), "account0", transport="takeout")
-            await asyncio.wait_for(manager.task, 60)
-            assert manager.state["phase"] == "done", manager.state
+            await asyncio.wait_for(latest_run(manager).task, 60)
+            assert latest_run(manager).state["phase"] == "done", latest_run(manager).state
             path = manager.result_path(state["id"])
             key = entries["account0"]["app"].state.vault.public_key
             assert verify_chat_export(path, fingerprint(key))["message_count"] == 2
@@ -282,19 +282,19 @@ def test_takeout_pause_resume_reuses_signed_chunks_and_handle(tmp_path, monkeypa
             directory = manager.directory(state["id"])
             receipt = next((directory / "receipts").glob("*.json"))
             saved = receipt.read_bytes()
-            assert manager.state["captured"] == 2 and c.export_claim is None
+            assert latest_run(manager).state["captured"] == 2 and c.export_claim is None
             c.client.block_after = None
             restored = distributed_export.DistributedExport(manager.profiles)
             async def finish(*args):
-                assert restored.state["captured"] == 6
+                assert latest_run(restored).state["captured"] == 6
                 raise ValueError("Acquisition recovery checked")
-            restored.finish_selection = finish
+            intercept_selection(restored, finish)
             await restored.resume(state["id"])
-            await asyncio.wait_for(restored.task, 5)
-            assert restored.state["error"] == "Acquisition recovery checked"
+            await asyncio.wait_for(latest_run(restored).task, 5)
+            assert latest_run(restored).state["error"] == "Acquisition recovery checked"
             assert receipt.read_bytes() == saved and c.client.inits == 1
-            assert restored.state["performance"]["reused_messages"] == 2
-            assert restored.state["performance"]["new_messages"] == 4
+            assert latest_run(restored).state["performance"]["reused_messages"] == 2
+            assert latest_run(restored).state["performance"]["new_messages"] == 4
             assert c.export_claim is None
         finally:
             await manager.close()

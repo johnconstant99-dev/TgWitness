@@ -107,7 +107,6 @@ class OTSReader:
                 elif tag in (0x02, 0x03, 0x08):
                     result = hashlib.new({0x02: "sha1", 0x03: "ripemd160", 0x08: "sha256"}[tag], message).digest()
                 else:
-                    # Keccak-256 is not SHA3-256. Preserve an unsupported proof unchanged.
                     raise ValueError("Unsupported OpenTimestamps upgrade operation")
                 node["ops"][operation] = self.tree(result, depth + 1)
             if not more:
@@ -160,7 +159,6 @@ def approved_calendar(uri, settings):
     configured = {url.rstrip("/") for url in settings["ots_calendars"]}
     if uri.rstrip("/") in configured:
         return True
-    # The upstream OTS client whitelist; pools return these calendar hosts.
     return parts.port in (None, 443) and not parts.path.strip("/") and any(parts.hostname.endswith("." + suffix) for suffix in (
         "calendar.opentimestamps.org", "calendar.eternitywall.com", "calendar.catallaxy.com"))
 

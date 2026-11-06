@@ -1,3 +1,4 @@
+import re
 import tempfile
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -14,7 +15,7 @@ def new_case(browser, url):
       window.setInterval = (callback, delay, ...args) =>
         delay === 5000 ? 0 : interval(callback, delay, ...args);
     })();""")
-    page.route("**/api/multi-export/current", lambda route: route.fulfill(json={"phase": "none"}))
+    page.route(re.compile(r"/api/multi-export/current(\?|$)"), lambda route: route.fulfill(json={"phase": "none"}))
     with page.expect_response(
         lambda response: "/api/chats/" in urlsplit(response.url).path
         and urlsplit(response.url).path.endswith("/messages")
@@ -28,7 +29,7 @@ def new_case(browser, url):
       const original = window.fetch;
       window.exportChecks = {requests: [], replies: {}, held: {}};
       window.fetch = async (url, options = {}) => {
-        const path = String(url).split('/api/multi-export/')[1];
+        const path = String(url).split('/api/multi-export/')[1]?.split('?')[0];
         if (path === undefined) return original(url, options);
         exportChecks.requests.push({path, method: options.method || 'GET'});
         if (options.method && options.method !== 'GET')

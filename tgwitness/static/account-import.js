@@ -139,10 +139,11 @@
   async function removeWorkspace(){
     const profile=state.profile,revision=state.workspaceRevision,p=state.profiles.find(entry=>entry.id===profile);
     if(!p||profile==="default")return;
-    if(!(await askTyped(tr("Delete \"{name}\" permanently? This stops its collector and erases its session, journal, sources and signing key. This cannot be undone.",{name:p.label}),p.label,
+    if(!(await askTyped(tr("Delete \"{name}\" permanently? This stops its collector and erases its journal, sources, signing key and the copy of its session kept here. The session stays active in Telegram: deleting does not sign it out. This cannot be undone.",{name:p.label}),p.label,
       {title:tr("Delete workspace"),confirmText:tr("Delete workspace")})))return;
     if(profile!==state.profile||revision!==state.workspaceRevision)throw new StaleView();
-    await api("profiles/"+encodeURIComponent(profile),undefined,{root:true,method:"DELETE"});
+    try{await api("profiles/"+encodeURIComponent(profile),undefined,{root:true,method:"DELETE"});}
+    catch(error){await loadProfiles().catch(()=>{});throw error;}
     await switchProfile("default");toast(tr("Workspace deleted."));
   }
   function renderAccount(){
@@ -152,10 +153,14 @@
       const add=node("button","secondary",tr("Add another account"));add.id="account-add-another";add.type="button";
       add.addEventListener("click",beginAdd);$("account-manage").before(add);
       const remove=node("button","quiet danger-text",tr("Delete workspace"));remove.id="account-delete-workspace";remove.type="button";
-      remove.addEventListener("click",()=>busy(remove,removeWorkspace));$("account-manage").querySelector(".account-manage-row").append(remove);
+      remove.addEventListener("click",()=>busy(remove,removeWorkspace).then(renderAccount));$("account-manage").querySelector(".account-manage-row").append(remove);
+      const reason=node("p","hint");reason.id="account-delete-reason";$("account-manage").querySelector(".account-manage-row").after(reason);
     }
+    const blocked=state.profiles?.find(entry=>entry.id===state.profile)?.deletion_blocked;
     $("account-add-another").hidden=!state.me?.admin||!connected;
     $("account-delete-workspace").hidden=!state.me?.admin||state.profile==="default";
+    if(!$("account-delete-workspace").hasAttribute("aria-busy"))$("account-delete-workspace").disabled=!!blocked;
+    $("account-delete-reason").hidden=!blocked||$("account-delete-workspace").hidden;$("account-delete-reason").textContent=blocked?tr(blocked):"";
     const heading=$("account-heading");
     if(account&&connected){
       const who=account.username?"@"+account.username:"ID "+account.id;

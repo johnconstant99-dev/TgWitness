@@ -115,8 +115,6 @@ class CaptureConnections:
         return connection
 
     def _request(self, connection, method, path, body=None, *, destination=None):
-        # Explicit control-plane endpoint, separate from the Telegram/outside data route.
-        # Never inherit HTTP_PROXY or forward a bearer token through a redirect.
         with requests.Session() as client:
             client.trust_env = False
             deadline = time.monotonic() + 120

@@ -3,9 +3,10 @@
 VIEW_ONCE = 0x7FFFFFFF
 VIEWING_NOTE = "Saving this attachment does not establish that a person viewed it."
 RETRY_NOTE = "Self-destructing media may disappear before another attempt."
+OPENED = {False: "Not opened by the observing account", True: "Opened by the observing account"}
 
 
-def describe(media):
+def describe(media, unread=None):
     """Accept a Telegram object or its recorded dictionary; never make requests."""
     if hasattr(media, "to_dict"):
         media = media.to_dict()
@@ -19,9 +20,12 @@ def describe(media):
     if hasattr(attachment, "to_dict"):
         attachment = attachment.to_dict()
     present = isinstance(attachment, dict) and attachment.get("_") == field.title()
-    return {"ttl_seconds": ttl, "mode": "view_once" if ttl == VIEW_ONCE else "timer",
-            "availability": "available_at_observation" if present else "unavailable_at_observation",
-            "human_viewing": "not_established"}
+    facts = {"ttl_seconds": ttl, "mode": "view_once" if ttl == VIEW_ONCE else "timer",
+             "availability": "available_at_observation" if present else "unavailable_at_observation",
+             "human_viewing": "not_established"}
+    if type(unread) is bool:
+        facts["observer_opened"] = not unread
+    return facts
 
 
 def outcome(facts, status):
@@ -40,5 +44,6 @@ def label(say, facts):
               "hashed": "File hashes; content not downloaded"}.get(status)
     if detail is None and facts.get("availability") == "unavailable_at_observation":
         detail = "Attachment unavailable when observed"
-    return " · ".join([title, *([say(detail)] if detail else []), say(VIEWING_NOTE),
+    opened = OPENED.get(facts.get("observer_opened"))
+    return " · ".join([title, *([say(opened)] if opened else []), *([say(detail)] if detail else []), say(VIEWING_NOTE),
                        *([say(RETRY_NOTE)] if status and status != "saved" else [])])

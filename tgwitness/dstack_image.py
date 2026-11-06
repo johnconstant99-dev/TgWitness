@@ -30,7 +30,6 @@ FOOTER = uuid.UUID("96b582de-1fb2-45f7-baea-a366c55a082d").bytes_le
 TDX_METADATA = uuid.UUID("e47a6535-984a-4798-865e-4685a7bf8ec2").bytes_le
 GLOBAL_VARIABLE = "8be4df61-93ca-11d2-aa0d-00e098032b8c"
 SECURITY_DATABASE = "d719b2cb-3d3a-4596-a3bc-dad00e67656f"
-# OVMF's configuration firmware volume and Boot0000 (UiApp) have fixed digests in the pre-202505 layout.
 CFV = bytes.fromhex("344bc51c980ba621aaa00da3ed7436f7d6e549197dfe699515dfa2c6583d95e6"
                     "412af21c097d473155875ffd561d6790")
 BOOT0000 = bytes.fromhex("23ada07f5261f12f34a0bd8e46760962d6b4d576a416f1fea1c64bc656b1d28e"
@@ -178,7 +177,6 @@ def rtmr0_events(layout, memory, acpi):
 
 
 def patch_kernel(kernel, initrd_size, memory):
-    # QEMU's direct kernel boot writes these setup header fields before OVMF measures the kernel.
     if len(kernel) < 0x1000:
         raise ImageError("the kernel image is too short")
     data = bytearray(kernel)

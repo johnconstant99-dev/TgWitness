@@ -39,8 +39,6 @@ def compatibility(version):
     raise TopologyError("QEMU " + ".".join(map(str, version)) + " is older than the ACPI layouts modelled")
 
 
-# AML encoding, as acpi_tables 0.2.1 writes it
-
 def u16(value):
     return struct.pack("<H", value & 0xFFFF)
 
@@ -295,8 +293,6 @@ def call(target, *args):
 ZERO, ONE, BREAK, DEBUG = b"\x00", b"\x01", b"\xa5", b"\x5b\x31"
 
 
-# qemu-acpi's own encoder for processor objects (aml_encode.rs), which sizes PkgLength exactly
-
 def exact_length(value):
     if value < 0x40:
         return bytes([value])
@@ -339,8 +335,6 @@ def processor(number, pxm):
         body += b"\x08_PXM" + exact_integer(pxm)
     return exact_package(b"\x5b\x82" if x2apic else b"\x5b\x83", body)
 
-
-# DSDT, region by region in QEMU's build_dsdt() order
 
 def debug_port():
     loop = while_(less(local(2), local(1)), store(path("DBGB"), deref(index(ZERO, local(0), local(2)))),
@@ -631,8 +625,6 @@ def dsdt(config):
     return header(b"DSDT", 36 + len(body), 1) + body
 
 
-# Fixed tables
-
 def header(signature, length, revision):
     return signature + u32(length) + bytes([revision, 0]) + b"BOCHS BXPC    " + u32(1) + b"BXPC" + u32(1)
 
@@ -770,8 +762,6 @@ def srat(cpu_count, memory, hole64, nodes):
     return out[:8] + bytes([1, 0]) + out[10:] + u32(1) + u64(0) + body
 
 
-# The fw_cfg loader and RSDP
-
 def loader_command(*fields):
     data = b"".join(fields)
     return data + bytes(128 - len(data))
@@ -822,8 +812,6 @@ def finish(tables):
         raise ValueError("the fw_cfg loader exceeds QEMU's allocation")
     return {"tables": tables, "rsdp": b"RSD PTR \0BOCHS \0" + u32(rsdt_offset), "loader": loader.ljust(LOADER_BLOB_SIZE, b"\0")}
 
-
-# Machine description
 
 def numa_layout(config):
     if config["numa_nodes"] or not config["hugepages"]:

@@ -187,7 +187,6 @@ def build_server(api, local_token=None):
         try:
             identity = await api.request(token_for(ctx.request))
             result = await call_next(ctx)
-            # Recheck revocation/rotation after the SDK has built its answer.
             current = await api.request(token_for(ctx.request))
         except (ValueError, TimeoutError) as exc:
             raise ToolError(str(exc) or "Archive request timed out.") from None
@@ -355,8 +354,6 @@ async def check_protocol(api_url, token, remote_url=None, *, stdio_url=None):
         return {"tools": names, "protocol_version": client.protocol_version,
                 "latency_ms": round((time.monotonic() - started) * 1000), "messages_read": 0}
 
-    # A new local Python process may need to import the SDK before it can
-    # answer its handshake. This diagnostic never reads archive messages.
     async with asyncio.timeout(20 if remote_url else 40):
         if remote_url:
             url = endpoint(remote_url)

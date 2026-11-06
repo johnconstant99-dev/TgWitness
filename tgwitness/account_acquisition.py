@@ -195,8 +195,6 @@ class StagedTransport:
     def slice(page, task, cursor):
         indexes = [i for i, row in enumerate(page["rows"]) if task["category"] != "messages" or row["id"] < cursor]
         processed = len(page["rows"]) - len(indexes)
-        # A page of 100 maximum-size hash manifests can exhaust a 2 GiB runner.
-        # Freeze network pages once, but seal at most ten enriched messages at a time.
         chunked = task["category"] == "messages" and len(indexes) > 10
         if chunked:
             indexes = indexes[:10]

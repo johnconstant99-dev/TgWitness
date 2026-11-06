@@ -642,7 +642,6 @@ def icon(name, cls="i"):
     return '<svg class="' + cls + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>'
 
 
-# Each section's icon and colour on screen (print stays plain).
 SECTION_ICONS = {"case": ("files", "blue"), "minimisation": ("eye", "violet"), "changes": ("edit", "orange"),
                  "actions": ("route", "violet"), "integrity": ("fingerprint", "blue"), "timestamps": ("seal", "teal"),
                  "coverage": ("layers", "teal"), "custody": ("route", "green"), "verify": ("check", "green"),
@@ -656,7 +655,6 @@ CSS = (
     "*{box-sizing:border-box}html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:62px}"
     "body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.55 " + SANS + "}"
     "a{color:var(--accent)}code,.mono,pre{font-family:" + MONO + "}code{font-size:.9em;overflow-wrap:anywhere}"
-    # The viewer's toolbar: not part of the document and never printed.
     ".bar{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:12px;min-height:46px;padding:6px 20px;"
     "background:var(--card);border-bottom:1px solid var(--line)}"
     ".brand{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:650;white-space:nowrap}"
@@ -692,7 +690,6 @@ CSS = (
     ".stamp-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}"
     ".stamp-state{font-size:13.5px;font-weight:650;line-height:1.3}.stamp.ok .stamp-state{color:var(--ok)}"
     ".stamp.bad .stamp-state{color:var(--bad)}.stamp-key{font:11.5px " + MONO + ";color:var(--muted);overflow-wrap:anywhere}"
-    # Summary figures: one ruled row of cells, the label above the figure.
     ".tiles{display:flex;flex-wrap:wrap;margin:22px 0 0;border-top:1px solid var(--line);"
     "border-inline-start:1px solid var(--line)}"
     ".tile{display:flex;flex-direction:column-reverse;justify-content:flex-end;flex:1 1 96px;min-width:0;"
@@ -806,7 +803,6 @@ CSS = (
     ".meter i{display:block;height:100%;background:var(--soft)}"
     "footer.end{color:var(--muted);font-size:12px;text-align:center;margin:0 16px 28px;line-height:1.7}"
     "footer.end b{color:var(--soft)}"
-    # Chat view.
     ".chatwall{background:var(--chatbg);border-radius:6px;padding:14px clamp(8px,2vw,22px) 18px;"
     "-webkit-print-color-adjust:exact;print-color-adjust:exact}"
     ".day{text-align:center;margin:14px 0 8px}.day time{display:inline-block;background:rgba(0,0,0,.28);color:#fff;"
@@ -1453,6 +1449,16 @@ def details_html(say, d):
     return "".join(parts)
 
 
+def timer_expected(payload):
+    return isinstance(payload.get("auto_delete"), dict) and payload["auto_delete"].get("expected") is True
+
+
+def timer_text(say, kind):
+    if kind == "message.deleted":
+        return say("The deletion was seen when the message's auto-delete timer expired: an expected removal by the timer.")
+    return say("Telegram no longer returned this message at a later check; its auto-delete timer had expired by then.")
+
+
 def reactions_text(found):
     return " ".join(str(x["reaction"]) + " " + str(x["count"]) for x in found[:20])
 
@@ -1559,7 +1565,9 @@ def record_html(event, say, titles, options, archive, base=""):
         if found.get("media_info"):
             parts.append('<div class="file">' + e(say(MEDIA_NAMES.get(found["media_info"]["kind"], "Media"))) + " · "
                          + e(media_text(say, found["media_info"])) + "</div>")
-    if kind == "message.deleted":
+    if kind in ("message.deleted", "message.missing_on_recheck") and timer_expected(payload):
+        parts.append('<div class="gone">' + e(timer_text(say, kind)) + "</div>")
+    elif kind == "message.deleted":
         parts.append('<div class="gone">' + e(say("Telegram reported this message as deleted.")) + "</div>")
     elif kind == "message.missing_on_recheck":
         parts.append('<div class="gone">' + e(say("Telegram no longer returned this message at a later check.")) + "</div>")
@@ -1751,7 +1759,8 @@ def message_histories(events, changed, limit=HISTORY_LIMIT):
                 continue
             item["versions"].append(version)
         elif kind in ("message.deleted", "message.missing_on_recheck"):
-            item["gone"].append({"seq": event["seq"], "kind": kind, "observed_at": event["observed_at"]})
+            item["gone"].append({"seq": event["seq"], "kind": kind, "observed_at": event["observed_at"],
+                                 **({"auto_delete": True} if timer_expected(payload) else {})})
     return found
 
 
@@ -1852,7 +1861,8 @@ def history_card(say, key, item, titles, linked=True):
                      + " · " + record_link(gone["seq"], linked and not gone.get("context_only"))
                      + (' · <span class="pill">' + e(say("Context outside the report filters")) + '</span>'
                         if gone.get("context_only") else '') + '</div><p class="gone">'
-                     + e(say("Telegram does not say who deleted a message or exactly when; this is when the notice "
+                     + e(timer_text(say, gone["kind"]) if gone.get("auto_delete") else
+                         say("Telegram does not say who deleted a message or exactly when; this is when the notice "
                              "was observed.") if deleted else say("Telegram no longer returned this message at a later check."))
                      + "</p>" + kept + "</li>")
     return ('<article class="hist" id="m' + e(chat) + "-" + e(message_id) + '"><header><b>'
@@ -1868,7 +1878,6 @@ def last_saved_before(versions, seq):
 WITHHELD = {"raw": "the saved Telegram object", "text": "message text", "sender": "sender identity",
             "actor_id": "sender ID", "other chats": "other chats", "mentions or contact details":
             "mentions or contact details", "file name": "file name", "preview details": "preview details"}
-# How a handover extract treats people and content (handover.Options).
 OTHERS = {"show": "shown as recorded", "pseudonymize": "replaced by pseudonyms (P01, P02…)", "omit": "left out"}
 TEXTS = {"all": "all message text", "subjects": "text of the chosen people and the observing account only",
          "none": "no message text"}
@@ -2379,25 +2388,6 @@ def evidence_chunks(events, coverage=None, context=None):
                     "This journal has {n} records, more than a report saved on its own carries. Open report.html "
                     "inside the signed archive for all of them; the journal files carry every record.", n=shown_count))
                     + "</div></section>").encode("utf-8")
-        elif False:
-            titles = digest["titles"]
-            chips = "".join('<button class="chip" type="button" aria-pressed="false" data-cat="' + c + '">'
-                            + e(category_label(say, c)) + "<b>" + num(n) + "</b></button>"
-                            for c, n in digest["categories"].items() if n)
-            chats = digest["chats"]
-            select = ('<select id="chat" aria-label="' + e(say("Chat")) + '"><option value="">' + e(say("All chats"))
-                      + "</option>" + "".join('<option value="' + e(c) + '">' + e(titles.get(c) or c) + " (" + str(n) + ")</option>"
-                                             for c, n in sorted(chats.items(), key=lambda i: -i[1])) + "</select>"
-                      if len(chats) > 1 else "")
-            lead = say("Every record in this extract, in journal order. Minimised records name what was withheld.") \
-                if handover else say("Every record of the journal in order. Filters only change what is shown.")
-            yield (section(next(numbers), "records", say("Records"), lead, long=True)
-                   + '<div class="tools"><input type="search" id="q" placeholder="' + e(say("Search text, names, IDs…"))
-                   + '">' + select + chips + '<span class="shown">' + e(say("Shown")) + ': <b id="shown-n">' + num(shown_count)
-                   + "</b></span></div>").encode("utf-8")
-            for item in record_items(events, say, titles, options, archive):
-                yield item.encode("utf-8")
-            yield b"</section>"
         if sign is not None:
             yield seal_section(say, next(numbers), report_id, created).encode("utf-8")
         yield ending(say, producer, viewer_meta(
@@ -2507,6 +2497,15 @@ def build_html(say, producer):
     return shown
 
 
+def name_note(say, record):
+    notes = [say("name at export")] if record.get("from_basis") == "export_time" else []
+    if record.get("from_source") == "contact":
+        notes.append(say("from the account's contacts"))
+    elif notes and record.get("from_source") == "profile":
+        notes.append(say("from the Telegram profile"))
+    return " · ".join(notes)
+
+
 def chat_rows(records, say, preview=False, base="", numbered=False, after=None, metadata=False):
     quotes, previous_day, previous_sender, previous_id = {}, None, object(), after
     for record in records:
@@ -2536,8 +2535,8 @@ def chat_rows(records, say, preview=False, base="", numbered=False, after=None, 
                    + (report_layouts.chat_metadata_html(record, say) if metadata else "") + "</div>")
             previous_sender = object()
             continue
-        start = sender != previous_sender
-        previous_sender = sender
+        start = (sender, name) != previous_sender
+        previous_sender = (sender, name)
         cat = "media" if record.get("media_type") else "edited" if record.get("edited") else "text"
         body = []
         if record.get("selection"):
@@ -2547,8 +2546,10 @@ def chat_rows(records, say, preview=False, base="", numbered=False, after=None, 
             body.append('<div class="media-chip">' + e(label) + (" · " + e(language.get("language") or
                         language.get("status")) if language else "") + "</div>")
         if start:
+            note = name_note(say, record)
             body.append('<div class="name">' + e(name) + (' <span class="uname">@' + e(record["from_username"]) + "</span>"
-                                                          if record.get("from_username") else "") + "</div>")
+                                                          if record.get("from_username") else "")
+                        + (' <span class="uname">' + e(note) + "</span>" if note else "") + "</div>")
         reply = record.get("reply_to_message_id")
         if reply:
             quoted = quotes.get(reply)
@@ -2677,21 +2678,6 @@ def chat_chunks(meta, records, context):
                 "{n} messages", n=meta.get("message_count")), say("The visible history at export time, oldest first."))
                    .replace('<div class="records-pointer">', edited_note(say, stats) + '<div class="records-pointer">', 1)
                    ).encode("utf-8")
-        elif False:
-            chips = "".join('<button class="chip" type="button" aria-pressed="false" data-cat="' + c + '">' + e(label)
-                            + "<b>" + num(n) + "</b></button>" for c, label, n in (
-                                ("text", say("Text"), stats["text"]), ("media", say("With media"), stats["media"]),
-                                ("edited", say("Edited"), stats["edited"]), ("service", say("Service"), stats["service"])) if n)
-            yield (section(next(numbers), "messages", say("Messages"), say("The visible history at export time, oldest first."),
-                           long=True)
-                   + edited_note(say, stats)
-                   + '<div class="tools"><input type="search" id="q" placeholder="' + e(say("Search text, names, IDs…")) + '">'
-                   + chips + '<span class="shown">' + e(say("Shown")) + ': <b id="shown-n">' + num(meta.get("message_count"))
-                   + '</b></span></div><div class="chatwall">').encode("utf-8")
-            for row in chat_rows(records(), say, bool(options.get("media_previews")),
-                                 numbered=bool(ids.get("numbered_per_chat") and not ids.get("selection_applied"))):
-                yield row.encode("utf-8")
-            yield b"</div></section>"
         parts = meta.get("parts") or []
         accounts = [["<code>" + e(p["statement"].get("account_id")) + "</code>", "<code>"
                      + e(short(fingerprint(p["statement"]["fetched_by_public_key"]), 16, 8)) + "</code>",

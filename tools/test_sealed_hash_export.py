@@ -120,7 +120,6 @@ def test_messages_first_reads_every_source_before_any_attachment(tmp_path, monke
                 assert (await client.post("/api/code", json={"code": "12345"})).status_code == 200
                 session.store.set_setting("capture", {"media_action": "hashes_only", "messages_first": True,
                                                        "include_avatars": False})
-                # Use the history engine directly: the GitHub form intentionally selects one chat.
                 for number in (123, 456):
                     chat_id = -1000000000000 - number
                     session.collector.dialog_cache[chat_id] = {"entity": SimpleNamespace(id=number)}

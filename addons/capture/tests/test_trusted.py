@@ -259,7 +259,6 @@ def test_original_export_report_annotation_cleanup_and_offline_verification(serv
         assert all("profile" not in name and "token" not in name for name in saved.namelist())
         assert original in [saved.read(name) for name in saved.namelist() if name.startswith("objects/")]
         assert b"NEVER_EXPORT_PROFILE" not in b"".join(saved.read(name) for name in saved.namelist())
-    # A retained final boundary rejects deletion of the final event, even if its signer rebuilds the ZIP.
     events = recorder.journal.events()
     saved_head = events[-1]["hash"]
     recorder.journal.db.execute("DELETE FROM events WHERE seq >= ?", (checkpoint["body"]["seq"],))

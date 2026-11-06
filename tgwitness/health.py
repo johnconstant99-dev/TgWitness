@@ -1,10 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
-# Summaries show the first of these that any part has.
 ORDER = ("failed", "degraded", "unknown", "running", "configured", "working", "off")
-# Slack on top of a part's own schedule before its data counts as stale.
 SLACK_SECONDS = 180
-# Attachments still waiting after this long while observation runs.
 MEDIA_WAIT_SECONDS = 3600
 
 
@@ -183,7 +180,8 @@ SIGN_IN_PHASES = ("code_required", "password_required", "qr_pending")
 def connection(c, now):
     detail = {"phase": c.get("phase"), "attempts": c.get("reconnect_attempts") or 0,
               "next_reconnect_at": iso(parse(c.get("next_reconnect_at"))), "error": c.get("last_error"),
-              "telegram_pause_until": iso(parse(c.get("rpc_backoff_until")))}
+              "telegram_pause_until": iso(parse(c.get("rpc_backoff_until"))),
+              "telegram_pause_method": c.get("rpc_backoff_method")}
     if c.get("authorization_required"):
         return part("failed", "signed_out", **detail)
     if c.get("phase") in FAILED_PHASES:
@@ -216,6 +214,8 @@ def intake(c, heartbeat_seconds, now):
         return part("unknown", "stale", **detail)
     if not c.get("connected"):
         return part("degraded", "disconnected", **detail)
+    if c.get("updates_diverted"):
+        return part("failed", "updates_diverted", diverted_since=c["updates_diverted"].get("since"), **detail)
     return part("working", "live", **detail)
 
 
@@ -274,7 +274,7 @@ def media(c, capture, now):
 def collector(c, capture, heartbeat_seconds, enabled_sources, now):
     parts = {"connection": connection(c, now), "intake": intake(c, heartbeat_seconds, now),
              "sources": sources(c, enabled_sources), "media": media(c, capture, now)}
-    return {**parts, "state": worst(p["state"] for p in parts.values())}
+    return {**parts, "state": worst((parts["connection"]["state"], parts["intake"]["state"]))}
 
 
 def collector_of(app_state, status=None, now=None, *, enabled_sources=None):

@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 import secrets
 import shutil
@@ -11,6 +12,25 @@ LIMIT = 20
 MAX_CACHE_BYTES = 2 * 1024**3
 KEY = "prepared_exports"
 CLEANUP_KEY = "prepared_exports_cleanup"
+EVIDENCE_KEY = "evidence_exported"
+SETUP_KINDS = ("process.*", "network.*", "connection.*", "account.authorized", "export.failed", "settings.changed",
+               "parameters.changed", "capture.changed", "monitoring.changed", "scope.changed", "recheck.changed",
+               "alerts.changed", "workspace.mode_changed", "setup.applied", "group.settings_applied",
+               "group.settings_inherited")
+
+
+def evidence_exported(store, seq):
+    with store.transaction():
+        previous = (store.get_setting(EVIDENCE_KEY, None) or {}).get("seq", 0)
+        store.set_setting(EVIDENCE_KEY, {"seq": max(seq, previous),
+                                         "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+
+
+def unexported(db):
+    row = db.execute("SELECT value FROM settings WHERE key=?", (EVIDENCE_KEY,)).fetchone()
+    exported = json.loads(row[0])["seq"] if row else 0
+    return db.execute("SELECT 1 FROM events WHERE seq>? AND " + " AND ".join("kind NOT GLOB ?" for _ in SETUP_KINDS)
+                      + " LIMIT 1", (exported, *SETUP_KINDS)).fetchone() is not None
 
 
 def prepared(store, path, fmt, encrypted, *, owner=None, workspace=None, required_permissions=None, chat_ids=None):

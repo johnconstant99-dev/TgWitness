@@ -252,7 +252,6 @@ class OfficialBrowser(BrowserCapture):
         field = self.page.locator("#auth-password-form #sign-in-password")
         await field.fill(value)
         await field.press("Enter")
-        # Do not record the password, response, field value or a login screenshot.
 
     async def chats(self):
         if self.phase not in {"login", "ready", "paused"} or await self.login_state() != "ready":
@@ -283,7 +282,6 @@ class OfficialBrowser(BrowserCapture):
         href, title = self.handles[handle]
         if self.started and self.selected_url and urlsplit(self.selected_url).fragment != href[1:]:
             raise ValueError("The recorded source cannot change after observation starts")
-        # href is accepted only from the rendered list and restricted to numeric chat routes.
         match = self.page.locator(CHAT_LIST + " a[href='" + href + "']")
         if await match.count() != 1:
             raise ValueError("Chat list changed; refresh it before choosing")
@@ -366,7 +364,6 @@ class OfficialBrowser(BrowserCapture):
         if self.steps >= self.options.max_steps:
             raise GuardStopped("StepLimitReached")
         delta = self.options.scroll_pixels * (-1 if direction == "older" else 1)
-        # Scroll only the rendered list, never its internal state or Telegram transport.
         await self.page.locator(MESSAGES).evaluate("(element, delta) => element.scrollBy({top: delta, behavior: 'smooth'})", delta)
         self.steps += 1
         self.journal.append("official.action", {"action": "scroll", "direction": direction,
@@ -395,7 +392,6 @@ class OfficialBrowser(BrowserCapture):
             self.reason = reason
             self.stop_requested = bool(reason)
             self.journal.append("official.stopped" if reason else "official.paused", {"reason": reason, "steps": self.steps})
-        # Keep the input guard armed while paused. Pausing never grants general control.
 
     async def targets(self):
         return [(self.page, self.target_id, self.page.url)] if self.page is not None else []
@@ -433,7 +429,6 @@ class OfficialBrowser(BrowserCapture):
         try:
             if self.page and not self.page.is_closed() and official_url(self.page.url):
                 await self.page.evaluate("window.__tgwitnessGuard.disarmForLogout()")
-                # Narrow English UI path. Unknown layouts fail closed; no internal logout RPC.
                 self.page.set_default_timeout(3000)
                 menu = self.page.locator("#LeftColumn .DropdownMenu .Button").first
                 await menu.click()

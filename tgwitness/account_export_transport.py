@@ -70,9 +70,6 @@ class WrappedClient:
 
     def __getattr__(self, name):
         value = getattr(self._export_client, name)
-        # Connection management belongs to the real TelegramClient. Rebinding
-        # these methods breaks Telethon's class-level DC configuration/cache,
-        # and incorrectly wraps authorization export requests in Takeout.
         if name in ("_get_dc", "_borrow_exported_sender", "_return_exported_sender", "_get_cdn_client"):
             return value
         return functools.partial(value.__func__, self) if inspect.ismethod(value) else value
@@ -267,7 +264,6 @@ class Transport:
                 offset += 100
             return rows, cursor, True
         if task.get("source") == "profile_music":
-            # Freeze the positional list privately once; export only safe metadata.
             if "profile_music" not in self.secret:
                 documents, offset = [], 0
                 while True:
@@ -370,8 +366,6 @@ class Transport:
         client = self.ranged(task)
         if isinstance(media, t.InputTakeoutFileLocation):
             await client.download_file(media, file=stream, progress_callback=progress)
-            # Telethon returns None when writing a supplied stream, including
-            # successful writes. The bounded writer accounts for actual bytes.
             return stream if stream.total else None
         representation = file_hashes.representation(media)
         options = file_hashes.download_options(media)

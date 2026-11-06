@@ -93,7 +93,6 @@ def export_zip(journal, destination):
                     archive.writestr("manifest.sig", seal(journal.key, "manifest", manifest))
                 output.flush()
                 os.fsync(output.fileno())
-            # Verification reads the bytes just written, not the source objects.
             from .verify import verify_zip
             verify_zip(temporary, journal.fingerprint)
             os.replace(temporary, destination)

@@ -75,7 +75,6 @@ def test_approved_workflow_and_fresh_context_required(tmp_path, direct):
         calls = []
 
         def checked(command, **kwargs):
-            # Synthetic attestation response only. Linux CI exercises real signer rejection separately.
             calls.append(command)
             return subprocess.CompletedProcess(command, 0, '[{"verificationResult":"synthetic"}]', '')
 

@@ -23,8 +23,6 @@ def seal(store, run_id, chat_id):
 
 
 def verify(store, vault, run):
-    # Verify the immutable journal and any retained checkpoint first. Comparing
-    # a chat cursor to the workspace tail would reject unrelated signed events.
     store.verify(vault.public_key)
     with store.transaction():
         start = store.db.execute("SELECT * FROM events WHERE kind='history.started' "
@@ -50,8 +48,6 @@ def verify(store, vault, run):
             if (row["cursor_seq"] != event["seq"] or row["cursor_hash"] != event["hash"]
                     or canonical(state(row)) != canonical(event["payload"]["state"])):
                 raise ValueError("History cursor differs from its latest signed commitment.")
-        # Rebuild disposable routing/dedup indexes from signed observations.
-        # Missing or injected index rows must not suppress media or admin events.
         store.db.execute("DELETE FROM history_items WHERE run_id=?", (run["id"],))
         store.db.execute("INSERT INTO history_items SELECT ?,seq FROM events WHERE "
             "json_extract(payload,'$.history_run_id')=? AND kind IN "

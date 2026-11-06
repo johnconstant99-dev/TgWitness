@@ -15,14 +15,12 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
   const percent = () => data ? Math.round(100 * data.active / data.total) : 0;
   const button = (cls, text) => { const b = node('button', cls, text); b.type = 'button'; return b; };
 
-  // Switcher next to the version number.
   const switcher = button('mode-switch');
   switcher.id = 'mode-switch'; switcher.hidden = true;
   const switchDot = node('span', 'mode-switch-dot'), switchName = node('span', 'mode-switch-name'), switchLevel = node('span', 'mode-switch-level');
   switchDot.setAttribute('aria-hidden', 'true'); switcher.append(switchDot, switchName, switchLevel);
   document.getElementById('app-version').before(switcher);
 
-  // First choice of a new workspace, above the setup steps.
   const onboarding = node('section', 'mode-onboarding card padded');
   onboarding.id = 'mode-onboarding'; onboarding.hidden = true; onboarding.setAttribute('aria-labelledby', 'mode-onboarding-title');
   document.getElementById('setup-card').before(onboarding);

@@ -154,7 +154,6 @@ def test_all_history_is_durable_before_attachment_and_resume_never_refetches(tmp
             assert sum(len(json.loads(data)["statement"]["rows"]) for data in preserved.values()) == 4
             assert all(b"private-reference" not in data for data in preserved.values())
             await export.pause(job["id"])
-            # A new manager represents a process restart, with no in-memory page cache.
             export = AccountExport(collector, store, vault)
             export.transport_factory = Network
             resumed = True
@@ -292,7 +291,7 @@ def test_enrichment_pages_are_bounded_and_resume_inside_a_frozen_network_page(tm
             await export.resume(job["id"])
             await asyncio.wait_for(export.task, 10)
             assert export.public()["ready"], export.public()
-            assert fetched == 1 and calls == 26  # The interrupted request is the only retry.
+            assert fetched == 1 and calls == 26
             verified = verify_account_export(export.result_path(job["id"]))
             assert verified["counts"]["messages"] == 25 and verified["complete_within_scope"]
             assert [e["statement"]["count"] for e in export.receipts] == [10, 10, 5]

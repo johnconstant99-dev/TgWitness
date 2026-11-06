@@ -31,7 +31,6 @@ MAX_FORMS = 8
 KIND_TAGS = {"message.new": "new", "message.snapshot": "snapshot", "message.edited": "edited",
              "message.recovered": "recovered"}
 
-# Scripts written without spaces between words: Thai, Lao, Myanmar, Khmer, Hangul, kana and Han.
 SEGMENTED = ("\u0e00-\u0eff\u1000-\u109f\u1100-\u11ff\u1780-\u17ff\u3040-\u30ff\u3130-\u318f\u31f0-\u31ff"
              "\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uf900-\ufaff\uff66-\uff9f\U00020000-\U0003134f")
 RUNS = re.compile("([" + SEGMENTED + "]+)|([^" + SEGMENTED + "]+)")
@@ -42,7 +41,6 @@ LATIN = re.compile("[a-z\u00df-\u024f]")
 INVISIBLE = re.compile("[\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180b-\u180e\u200b-\u200f\u202a-\u202e"
                        "\u2060-\u206f\ufe00-\ufe0f\ufeff]")
 APOSTROPHES = str.maketrans("\u2019\u02bc`\u00b4\u02b9", "'''''")
-# Look-alike letters inside one word (a Latin word with one Cyrillic letter) resolve to its main script.
 LOOKALIKE_LATIN = "aceopxykmthb"
 LOOKALIKE_CYRILLIC = "\u0430\u0441\u0435\u043e\u0440\u0445\u0443\u043a\u043c\u0442\u043d\u0432"
 TO_CYRILLIC = str.maketrans(LOOKALIKE_LATIN, LOOKALIKE_CYRILLIC)
@@ -791,8 +789,6 @@ class FullText:
         if not wanted <= set(SOURCES):
             raise ValueError("Choose messages, ocr or transcription sources.")
         found, matched = [], {}
-        # One result beyond the page shows whether another page exists, but
-        # paging must stay inside the same bounded window for every page size.
         end = min(offset + limit, 1000)
         wanted_hits = end + 1
         if "messages" in wanted:
@@ -822,8 +818,6 @@ class FullText:
         expression = query.expression(meta_chats, query.senders, query.usernames, query.kinds)
         where, params = [], []
         if since is not None or until is not None:
-            # Sequence numbers have no gaps: the observed period maps to a rowid range the index filters
-            # itself. The journal is joined only when collector clock changes put other records inside it.
             low, high = iso(since) if since else "", iso(until) if until else "9999"
             with self.lock:
                 first, last, inside = self.ready().execute(
@@ -842,7 +836,6 @@ class FullText:
         if query.message_ids:
             where.append("e.message_id IN (" + ",".join("?" * len(query.message_ids)) + ")")
             params += sorted(query.message_ids)
-        # Rank on the index first and read only the chosen records; the journal is joined only for its filters.
         joined = any("e." in condition for condition in where)
         source = (" FROM fulltext" + (" JOIN j.events e ON e.seq=fulltext.rowid" if joined else "")
                   + " WHERE fulltext MATCH ?" + "".join(" AND " + condition for condition in where))
@@ -856,7 +849,6 @@ class FullText:
             deadline = time.monotonic() + timeout_s
             db.set_progress_handler(lambda: int(time.monotonic() >= deadline), 1000)
             try:
-                # An exact phrase is checked literally on candidates in rank order, until enough are found.
                 cursor = db.execute("SELECT fulltext.rowid, " + RANK + " AS score" + source + ordering
                                     + ("" if query.phrases else " LIMIT " + str(int(limit))), params)
                 while len(selected) < limit and (batch := cursor.fetchmany(max(limit, 200))):
@@ -864,7 +856,6 @@ class FullText:
                         "SELECT * FROM j.events WHERE seq IN (" + ",".join("?" * len(batch)) + ")", [b[0] for b in batch])}
                     for seq, score in batch:
                         row = rows.get(seq)
-                        # Access never depends on index content: the journal's own chat_id decides.
                         if row is None or row["kind"] not in TEXT_KINDS or chats is not None and row["chat_id"] not in chats:
                             continue
                         if query.phrases and not all(p in payload_text(row["payload"]) for p in query.phrases):
@@ -882,7 +873,6 @@ class FullText:
                 raise
             total = None
             if not query.phrases:
-                # The total is informative; it gets a short budget of its own and may be unknown.
                 counted = min(deadline, time.monotonic() + 0.5)
                 db.set_progress_handler(lambda: int(time.monotonic() >= counted), 1000)
                 try:
@@ -968,8 +958,6 @@ class DerivedIndex:
             def observed_seq(row):
                 seq = items.get(row[0], {}).get("event_seq")
                 return seq if type(seq) is int else -1
-            # Select the newest candidates before applying the page limit;
-            # sorting a relevance-limited prefix can miss or repeat results.
             rows.sort(key=observed_seq, reverse=True)
         hits = []
         for rowid, score in rows:

@@ -84,8 +84,6 @@ def main():
                 close:async()=>{},abort:async()=>{window.reviewAbort++;}})});} """)
 
             def change_link_before_response(route):
-                # A status reply can arrive while the link names another account.
-                # Deliver that observation explicitly instead of relying on poll timing.
                 page.evaluate("""id=>{history.pushState({},'', '/exports?ws='+id);
                   try{TgWitnessWorkspace.acceptStatus({workspace_id:'default'});}
                   catch(error){window.reviewStatusError=error.message;}}""", second)
@@ -102,7 +100,6 @@ def main():
             expect(page.locator('#workspace-context-alert')).to_be_visible()
             page.unroute('**/api/export/zip')
             page.evaluate("url=>{history.replaceState({},'',url);TgWitnessWorkspace.sync();}", original_url)
-            # Restoring the link does not clear a recorded status mismatch.
             expect(page.locator('#workspace-context-alert')).to_be_visible()
             page.locator('#workspace-context-alert button').click()
             expect(page.locator('#workspace-context-alert')).to_be_hidden()

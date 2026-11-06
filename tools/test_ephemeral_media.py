@@ -77,7 +77,8 @@ def test_saved_file_ttl_signature_and_viewing_label(workspace, kind, ttl):
         assert saved["payload"]["message_event"] == source["seq"]
         facts = saved["payload"]["ephemeral_media"]
         assert facts == {"ttl_seconds": ttl, "mode": "view_once" if ttl == ephemeral.VIEW_ONCE else "timer",
-                         "availability": "available_at_observation", "human_viewing": "not_established", "outcome": "saved"}
+                         "availability": "available_at_observation", "human_viewing": "not_established",
+                         "observer_opened": False, "outcome": "saved"}
         assert saved["payload"]["media_sha256"] == hashlib.sha256(CONTENT).hexdigest()
         assert (store.root / "media" / saved["payload"]["media_sha256"]).read_bytes() == CONTENT
         assert source["payload"]["raw"]["media_unread"] is True

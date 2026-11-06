@@ -273,7 +273,6 @@ def status_recovery(context, url, screenshots):
         state["account_export"] = {"phase": "running", "error": None}
         expect(page.locator("#error")).to_be_empty()
 
-        # A successful action followed by a failed status request must also recover.
         def resume(route):
             offline[0] = True
             state["account_export"] = {"phase": "running", "error": None}
@@ -286,7 +285,6 @@ def status_recovery(context, url, screenshots):
         offline[0] = False
         expect(page.locator("#error")).to_be_empty()
 
-        # Background polling must not erase a rejected operator action.
         page.route("**/api/finish", lambda route: route.fulfill(status=409, json={"detail": "Synthetic action rejected"}))
         page.locator("#finish").click()
         expect(page.locator("#error")).to_have_text("Synthetic action rejected")

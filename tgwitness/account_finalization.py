@@ -52,7 +52,6 @@ def finalize(export, job, reason):
                             result = saved_attachment(export, item.get("representation"), "hashed")
                         result = result or {**item, "outcome": "failed", "reason": reason}
                     row["attachments"].append(result)
-                # Custom emoji documents are resolved after history acquisition.
                 if "sticker" in job["options"]["media_types"]:
                     def emoji_ids(value):
                         if isinstance(value, dict):

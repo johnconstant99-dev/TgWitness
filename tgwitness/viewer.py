@@ -69,7 +69,6 @@ def journal_item(event, raw_records=False):
                       "bytes": hashes.get("covered_bytes"), "ranges": len(hashes.get("ranges", [])),
                       "name": payload.get("original_name"), "variant": (hashes.get("representation") or {}).get("variant")}
     if item["c"] not in ("message", "edited", "media"):
-        # Operational records: their facts without the saved Telegram object.
         facts = {k: v for k, v in payload.items() if k != "raw"}
         text = json.dumps(facts, ensure_ascii=False, separators=(",", ":"))
         item["p"] = text if len(text) <= 4000 else text[:4000] + "…"

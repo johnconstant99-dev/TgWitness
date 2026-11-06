@@ -37,12 +37,12 @@ from .demo import seed_demo
 from .evidence import LIMITS, checkpoint, encrypt_export, export_file, producer, retain_checkpoint, cleanup_exports
 from . import i18n
 from .security import InstanceLock, Vault
-from .profiles import GROUP_SECTIONS, Profiles, ProfileDispatch
+from .profiles import GROUP_SECTIONS, JournalNotExported, Profiles, ProfileDispatch
 from .distributed_export import DistributedExport as MultiExport
 from .message_selection import Selection
 from .provenance import run_receipt
 from .middleware import RequestLimit, request_limit
-from .account_import import import_accounts, IMPORT_REQUEST_LIMIT, session_key
+from .account_import import check_session, import_accounts, IMPORT_REQUEST_LIMIT, session_key
 from .anchor import request_archive
 from .anchoring import EvidenceMode, anchor_loop, evidence_settings, gateway_rows, request_anchor
 from . import replica
@@ -52,7 +52,7 @@ from .operator_bot import OperatorBot
 from .network import NetworkConfig, RoutePolicy, parse_mtproxy_link
 from . import proxy_catalog, proxy_sources
 from .proxy_catalog import NoProxyAvailable, ProxyPool, PublicCatalog, feed_network
-from .monitoring import Capture, Monitoring, capture_settings, monitoring_settings
+from .monitoring import Capture, Monitoring, capture_settings, monitoring_settings, normalize_capture
 from .scope import (EXCLUDE_LIMIT, WIDE_WARNING, Recheck, ScopeUpdate, recheck_settings, scope_settings,
                     unexclude)
 from . import assurance
@@ -337,6 +337,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     bearer = HTTPBearer(auto_error=False)
     op_lock = asyncio.Lock()
     export_lock = asyncio.Lock()
+    action_tasks = set()
     prepared_chat_exports = {}
     public_proxies = PublicCatalog(root)
 
@@ -435,6 +436,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                              "run": app.state.run_receipt,
                                              "coverage": "No collection while process was offline."})
             app.state.run_event_seq = process_event["seq"]
+            interactions.abandon(store, interactions.RESTART_STOP)
             retain_checkpoint(store, vault)
             journal_ready = True
             await complete_in_thread(store.fulltext.start)
@@ -515,7 +517,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 check_task = shared_pool.check_task if proxy_pool is None else None
                 for task in (resume_task, anchor_task, replica_task, alert_task, host_task, address_task, pool_task,
                              check_task, storage_task, operator_bot_task,
-                             getattr(getattr(app.state, "storage", None), "task", None)):
+                             getattr(getattr(app.state, "storage", None), "task", None), *action_tasks):
                     if task:
                         task.cancel()
                         await asyncio.gather(task, return_exceptions=True)
@@ -753,10 +755,11 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             if (app.state.collector.export_claim and getattr(call, "__name__", "") in {
                     "configure", "import_new_session", "start_phone", "start_qr", "send_code", "confirm_code", "confirm_password",
                     "sign_out", "forget_session", "set_network", "set_route_policy", "apply", "dialogs", "save_profile",
-                    "preview", "execute", "check_current", "test_network", "control"}):
+                    "preview", "execute", "run_queued", "check_current", "test_network", "control"}):
                 raise HTTPException(409, "This account is busy. Pause its current task before another Telegram operation.")
             collector = app.state.collector
-            if not collector.running and getattr(call, "__name__", "") in {"dialogs", "save_profile", "preview", "execute"}:
+            if not collector.running and getattr(call, "__name__", "") in {"dialogs", "save_profile", "preview", "execute",
+                                                                         "run_queued"}:
                 owner = "manual:" + secrets.token_hex(16)
                 if not collector.reserve_export(owner):
                     raise HTTPException(409, "This account is busy. Pause its current task before another Telegram operation.")
@@ -768,6 +771,22 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     finally:
                         collector.release_export(owner)
             return await perform_operation(call, *args)
+
+    def queue_action(run_at, body):
+        async def run():
+            store = app.state.store
+            while interactions.waiting(store, body.request_id):
+                wait = max(run_at, store.get_setting("rpc_backoff_until", 0)) - time.time()
+                if wait <= 0:
+                    try:
+                        await operation(interactions.run_queued, app.state.collector, body)
+                    except HTTPException as exc:
+                        interactions.abandon(store, str(exc.detail), body.request_id)
+                    return
+                await asyncio.sleep(wait)
+        task = asyncio.create_task(run())
+        action_tasks.add(task)
+        task.add_done_callback(action_tasks.discard)
 
     @app.get("/api/status", dependencies=[Depends(authenticate)])
     async def status(request: Request):
@@ -791,6 +810,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 "dossiers": [c for c in dossier.enabled_chats(store) if allowed is None or c in allowed],
                 "setup_answered": store.get_setting("setup", None) is not None,
                 "setup_goal": (store.get_setting("setup", None) or {}).get("goal"),
+                "actions": interactions.pace_status(store),
                 "fingerprint": fingerprint(vault.public_key), "limitations": LIMITS,
                 "chats_limited": allowed is not None,
                 "assurance": bool(app.state.assurance)}
@@ -1016,7 +1036,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     child.state.vault.read("independent_login") or child.state.vault.read("credentials").get("session")))
                 if entry is not None and not retained:
                     with suppress(Exception):
-                        await registry.delete(entry["id"])
+                        await registry.delete(entry["id"], require_export=False)
                 if isinstance(exc, asyncio.CancelledError):
                     raise
                 reason = (str(exc) if isinstance(exc, (ValueError, NoProxyAvailable)) else
@@ -1034,13 +1054,44 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                                   "name": account_info.get("name")},
                     "formats": account.get("formats", [])}
 
+        @app.post("/api/profiles/check", dependencies=[Depends(authenticate)])
+        async def profiles_check(body: ProfileImport, request: Request):
+            require_live()
+            if (body.api_id is None) != (body.api_hash is None):
+                raise HTTPException(422, "Provide both API ID and API hash, or leave both empty.")
+            try:
+                account = await asyncio.to_thread(import_accounts, [f.model_dump() for f in body.files], body.passcode)
+            except (ValueError, OSError) as exc:
+                return {"state": "invalid", "message": str(exc)}
+            if not account.get("session"):
+                return {"state": "invalid", "message": "These files hold no login session. Add the .session or TData of the account."}
+            if bool(account.get("api_id")) != bool(account.get("api_hash")):
+                return {"state": "invalid", "message": "Session found, but its application settings are incomplete. Supply both API ID and API hash in the JSON, or select the session file without this JSON to use the built-in app settings."}
+            registry, key = app.state.profiles, session_key(account["session"])
+            holder = registry.holder(account.get("expected_user_id"), key)
+            if holder:
+                return {"state": "duplicate", "message": "This Telegram account already has a workspace: " + holder["label"] + "."}
+            try:
+                release = registry.reserve_session(key, object())
+            except ValueError as exc:
+                return {"state": "duplicate", "message": str(exc)}
+            try:
+                result = await check_session(app.state.collector, account, body.api_id, body.api_hash,
+                                             client_languages(request))
+            finally:
+                release()
+            holder = registry.holder(result["account"]["id"]) if result["state"] == "alive" else None
+            if holder:
+                return {"state": "duplicate", "message": "This Telegram account already has a workspace: " + holder["label"] + "."}
+            return {**result, "formats": account.get("formats", [])}
+
         def opens_chat_everywhere(principal, chat_id, profile_ids):
             return all(principal.opens(pid) and (principal.chats(pid) is None or chat_id in principal.chats(pid))
                        for pid in profile_ids)
 
-        def multi_visible(request, export_id=None):
+        def multi_visible(request, export_id=None, chat_id=None):
             try:
-                state = app.state.multi_export.public(export_id)
+                state = app.state.multi_export.public(export_id, chat_id)
             except (ValueError, KeyError, OSError, InvalidSignature):
                 raise HTTPException(404, "Unknown or invalid distributed export.") from None
             if not state.get("id"):
@@ -1056,8 +1107,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                    panel_language(request), body.selection.model_dump(), body.transport)
 
         @app.get("/api/multi-export/current", dependencies=[Depends(authenticate)])
-        async def multi_export_current(request: Request):
-            return app.state.multi_export.public() if multi_visible(request) else {"phase": "none"}
+        async def multi_export_current(request: Request, chat_id: int | None = None):
+            return app.state.multi_export.public(chat_id=chat_id) if multi_visible(request, chat_id=chat_id) else {"phase": "none"}
 
         @app.get("/api/multi-export/jobs", dependencies=[Depends(authenticate)])
         async def multi_export_jobs(request: Request):
@@ -1091,7 +1142,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             path = app.state.multi_export.result_path(export_id) if multi_visible(request, export_id) else None
             if not path:
                 raise HTTPException(404, "No finished export is available to download.")
-            return FileResponse(path, filename="tgwitness-chat-export.zip", media_type="application/zip")
+            return FileResponse(path, filename=app.state.multi_export.public(export_id).get(
+                "filename", "tgwitness-chat-export.zip"), media_type="application/zip")
 
         @app.patch("/api/profiles/{profile_id}", dependencies=[Depends(authenticate)])
         async def profiles_rename(profile_id: str, body: ProfileCreate):
@@ -1108,6 +1160,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             require_live()
             try:
                 return await app.state.profiles.delete(profile_id)
+            except JournalNotExported as exc:
+                raise HTTPException(409, str(exc)) from None
             except ValueError as exc:
                 raise HTTPException(400, str(exc)) from None
 
@@ -1540,6 +1594,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                                                **({"removed_from_scope_exclusions": True} if included else {}),
                                                "coverage": "No observations promised while target is disabled."},
                              body.chat_id)
+                if body.enabled and not (existing and existing["enabled"]):
+                    collector.request_baseline([body.chat_id])
         return {"targets": visible_targets(request)}
 
     @app.post("/api/targets/batch", dependencies=[Depends(authenticate)])
@@ -1557,6 +1613,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             entries = {chat_id: existing.get(chat_id) or collector.dialog_cache.get(chat_id) for chat_id in ids}
             if any(entry is None for entry in entries.values()):
                 raise HTTPException(400, "Refresh the group list and select an available target.")
+            added = []
             with store.transaction():
                 for chat_id, entry in entries.items():
                     enabled = body.enabled if body.enabled is not None else bool(entry.get("enabled", True))
@@ -1566,6 +1623,9 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                     store.append("target.changed", {"title": entry["title"], "enabled": enabled,
                                                    "priority": body.priority, "batch": True,
                                                    **({"removed_from_scope_exclusions": True} if included else {})}, chat_id)
+                    if enabled and not existing.get(chat_id, {}).get("enabled"):
+                        added.append(chat_id)
+                collector.request_baseline(added)
         return {"targets": visible_targets(request), "updated": len(ids)}
 
     @app.post("/api/targets/priority", dependencies=[Depends(authenticate)])
@@ -1652,7 +1712,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         return {"targets": visible_targets(request), **result}
 
     def save_capture(store, saved):
-        store.set_setting("capture", saved)
+        store.set_setting("capture", normalize_capture(saved))
         store.append("capture.changed", capture_settings(store))
 
     @app.post("/api/capture", dependencies=[Depends(authenticate)])
@@ -2221,7 +2281,21 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
             if body.action == "open":
                 raise HTTPException(403, "This access opens only chosen chats; this part of the workspace is closed to it.")
             require_chat(request, body.chat_id)
-        return await operation(interactions.execute, app.state.collector, body)
+        return await operation(interactions.execute, app.state.collector, body, queue_action)
+
+    @app.post("/api/interactions/read-only", dependencies=[Depends(authenticate)])
+    async def interaction_read_only(body: interactions.ReadOnly):
+        require_live()
+        return interactions.set_read_only(app.state.store, body.enabled)
+
+    @app.get("/api/interactions/{request_id}", dependencies=[Depends(authenticate)])
+    async def interaction_state(request: Request, request_id: str):
+        pending = interactions.requested(app.state.store, request_id)
+        if not pending:
+            raise HTTPException(404, "Unknown action request.")
+        if visible_chats(request) is not None:
+            require_chat(request, pending["request"].get("chat_id"))
+        return interactions.progress(pending)
 
     @app.get("/api/chats/{chat_id}/messages", dependencies=[Depends(authenticate)])
     async def chat_messages(chat_id: int, before_id: int | None = None, limit: int = 60, after_id: int | None = None):
@@ -2437,7 +2511,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     @app.delete("/api/account-export/{export_id}", dependencies=[Depends(authenticate)])
     async def account_export_remove(export_id: str):
         async def remove():
-            # operation holds op_lock; downloads acquire their lease under it too.
             if account_downloads.get(export_id):
                 raise HTTPException(409, "Wait for the active download to finish before removing this export.")
             if app.state.disclosures.busy(export_id):
@@ -2471,7 +2544,6 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         async with op_lock:
             if app.state.closing:
                 raise HTTPException(503, "This workspace is closing. Wait for it to finish.")
-            # Waiting for a concurrent job operation must not outlive revocation.
             await identify_download(request, credential)
             path = account_download_path(export_id, disclosure_id)
             headers = {"Cache-Control": "private, no-store", "X-TgWitness-Download-Ticket": target + "/ticket"}
@@ -2652,7 +2724,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 workspace=profile_id, required_permissions=["view", "export"],
                 chat_ids=[(collector.export_state or {}).get("chat_id")])
             prepared_chat_exports[export_id] = entry
-        return FileResponse(path, filename="tgwitness-chat-export.zip", media_type="application/zip",
+        return FileResponse(path, filename=collector.export_state["filename"], media_type="application/zip",
                             headers=export_history.headers(entry))
 
     @app.get("/api/checkpoint", dependencies=[Depends(authenticate)])
@@ -2709,6 +2781,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 path.unlink(missing_ok=True)
                 raise
 
+        head = app.state.store.stats()["head"]["seq"]
         async with export_lock, app.state.storage.lock:
             if fmt == "zip":
                 try:
@@ -2731,6 +2804,8 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         except BaseException:
             path.unlink(missing_ok=True)
             raise
+        if fmt == "zip":
+            export_history.evidence_exported(app.state.store, head)
         return path, export_history.headers(receipt)
 
     app.state.build_export = build_export

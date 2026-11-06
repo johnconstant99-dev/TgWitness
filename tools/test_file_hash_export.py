@@ -60,7 +60,6 @@ class HashClient:
             return [t.FileHash(0, 6, hashlib.sha256(CONTENT[:6]).digest())]
         if self.gap:
             return [t.FileHash(8, 6, hashlib.sha256(CONTENT[8:]).digest())]
-        # Telegram pads the declared last range length, not the hashed data.
         return [t.FileHash(6, 6, hashlib.sha256(CONTENT[6:]).digest())]
 
 
@@ -187,7 +186,7 @@ def test_all_media_policies_preserve_messages_and_verify(tmp_path, action):
             rows = []
             for i, (kind, media) in enumerate(all_media_kinds(), 1):
                 if action == 'budget_exhausted' and kind == 'document':
-                    media.size = 2 * 1024**3  # Declared size only; never allocate a large payload.
+                    media.size = 2 * 1024**3
                 rows.append(({'category': 'messages', 'id': i, 'chat_id': 11, 'from_id': 12,
                     'outgoing': False, 'date': '2026-11-04T00:00:00+00:00', 'text': 'Synthetic ' + kind}, media))
             return rows[::-1], 1, True
@@ -209,7 +208,6 @@ def test_all_media_policies_preserve_messages_and_verify(tmp_path, action):
         kinds = [kind for kind, _ in all_media_kinds()]
         options = {'transport': 'regular', 'include_profile': False, 'include_contacts': False, 'media_types': kinds}
         if action == 'mixed':
-            # Explicit exclusion for GIFs/stickers must win over their video attributes.
             actions = {k: ('exclude' if k in ('animation', 'sticker') else 'download' if k == 'video' else 'hashes_only') for k in kinds}
             options.update(media_action='download', media_actions=actions)
         elif action == 'budget_exhausted':
@@ -270,8 +268,6 @@ def test_signed_hash_only_export_reuses_reference_and_verifies(tmp_path):
             before=path.read_bytes()
             await exports.resume(started['id'])
             assert path.read_bytes()==before
-            # Even a correctly re-signed derivative cannot substitute an index
-            # that disagrees with the immutable message-page attachment links.
             with zipfile.ZipFile(path) as archive:
                 members={name:archive.read(name) for name in archive.namelist()}
             manifest=json.loads(members['manifest.json'])
@@ -372,7 +368,7 @@ def test_single_chat_hash_policy_and_signed_bundle(tmp_path):
             first = await collector.export_attachment(message, tmp_path)
             again = await collector.export_attachment(message, tmp_path)
             assert first == again and first['file_status'] == 'hashes_only'
-            assert len(collector.client.calls) == 2  # Two ranges, only one acquisition.
+            assert len(collector.client.calls) == 2
             scratch = tmp_path / 'messages.jsonl'
             scratch.write_bytes(canonical({'id': 9, 'date': '2026-11-04T00:00:00+00:00', 'text': 'Synthetic',
                 'from_id': 44, 'media_type': 'MessageMediaDocument', **first}) + b'\n')

@@ -57,8 +57,6 @@ def helper(directory, name, arguments, extra_mounts=()):
 
 
 def start_official(directory, name, config):
-    # A fresh GitHub-hosted VM only: allow the unprivileged user namespace used
-    # by Chromium's sandbox. Never launch this client with --no-sandbox.
     if Path("/proc/sys/kernel/apparmor_restrict_unprivileged_userns").exists():
         command(["sudo", "sysctl", "-w", "kernel.apparmor_restrict_unprivileged_userns=0"])
     egress = os.environ.get("OFFICIAL_EGRESS", "proxy")
@@ -95,9 +93,6 @@ def start_official(directory, name, config):
                  *restrictions(), "--mount", f"type=bind,src={directory / 'config/gateway.json'},dst=/gateway.json,readonly",
                  "--entrypoint", "python", name, "-m", "tgwitness_capture.gateway", "--config", "/gateway.json"])
         command(["docker", "network", "connect", "--alias", "official-gateway", name + "-private", name + "-gateway"])
-    # Resolve the public panel origin before opening the recorder. The tunnel has
-    # no control token. Proxy mode keeps the browser on its internal network;
-    # explicitly selected direct mode exposes the runner's public exit address.
     command(["docker", "run", "--detach", "--name", name + "-tunnel", "--network", name,
              "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=128", "--memory=256m",
              TUNNEL_IMAGE, "tunnel", "--no-autoupdate", "--url", "http://collector:8787"], timeout=180)
@@ -163,8 +158,6 @@ def start():
         raise ValueError("Unknown capture client")
     command(["docker", "build", "--no-cache", "--file", str(ROOT / "deploy" / "Dockerfile.sealed"),
              "--tag", name, str(ROOT)], timeout=900)
-    # The capture clock starts with the container, after the image build. Keep
-    # the same deadline when the next workflow step begins after artifact upload.
     config["supervisor_deadline"] = time.monotonic() + config["seconds"] + 600
     write(directory / "config" / "session.json", config)
     command(["docker", "network", "create", name])

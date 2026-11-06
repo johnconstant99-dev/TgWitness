@@ -19,7 +19,6 @@ TOOLS = ("list_workspaces", "list_chats", "search_messages", "get_message_versio
 CHAT_TOOLS = ("get_message_versions", "get_message_context", "get_messages_by_date", "get_pinned_messages", "get_topics")
 # A bulk export streams over HTTP for the command line; MCP results are limited to one 64 KiB page.
 MCP_TOOLS = tuple(tool for tool in TOOLS if tool != "export_messages")
-# Connections saved before tools were listed keep the tools of that release, not later additions.
 LEGACY_TOOLS = TOOLS[:7]
 MAX_RESPONSE = 65536
 EXPORT_PAGE = 500
@@ -35,7 +34,6 @@ class ConnectionSettings(BaseModel):
     workspaces: dict[str, list[int] | None] = Field(min_length=1, max_length=100)
     expires_at: float | None = None
     expires_in_seconds: int | None = Field(default=None, ge=60, le=90 * 86400, strict=True)
-    # Bulk export is granted only when chosen explicitly.
     tools: list[Literal[TOOLS]] = Field(default_factory=lambda: list(MCP_TOOLS), min_length=1, max_length=len(TOOLS))
 
     @field_validator("name")
@@ -194,7 +192,6 @@ def event_view(workspace, event, focus=None, size=4000):
     digest = payload.get("media_sha256")
     text = payload.get("text") if isinstance(payload.get("text"), str) else ""
     size = len(text) if size is None else size
-    # A long text is shown around its first search match rather than always from the start.
     start = (min(max(0, focus - 1000), len(text) - size)
              if focus is not None and len(text) > size and focus > size - 1000 else 0)
     view = {"source": source_ref(workspace, event), "kind": event["kind"],
@@ -300,10 +297,8 @@ class ArchiveReader:
 
         def lines():
             cursor, count = 0, 0
-            # The journal is append-only, so pages below the starting head form one consistent set.
             limit = head["seq"] + 1 if head else 1
             while True:
-                # A page read after a sequence is returned newest first; the export runs oldest first.
                 records = sorted(store.events(chat_id=query.chat_id, chat_ids=allowed, since=query.since,
                                               until=query.until, after=cursor, before=limit, limit=page, timeout_s=10,
                                               message_only=True), key=lambda event: event["seq"])
