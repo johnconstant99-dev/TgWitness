@@ -114,10 +114,10 @@ MARKDOWN_PAGES = {path + "index.html": site_llms.markdown_path(path) for path in
 MARKDOWN_PAGES.update({path: site_llms.markdown_path(path) for path in MODES_PAGES})
 LLM_FILES = ("llms.txt", "llms-full.txt", "llms-full.md", *MARKDOWN_PAGES.values())
 SEARCH_TEXT = 4000
-HOME_TITLE = "Telegram message history & signed exports | TgWitness"
-HOME_DESCRIPTION = ("Keep a Telegram observation journal on your own machine, where you can preserve observed messages, "
-                    "compare edits, track deletion notices and export signed records you can verify.")
-HOME_OG = "Use your own accounts to keep a verifiable Telegram journal in an open-source workspace running on your own machine."
+HOME_TITLE = "Telegram chat export & verifiable evidence | TgWitness"
+HOME_DESCRIPTION = ("Install with one command, export Telegram chats and verify signed archives. "
+                    "Use GitHub capture or investigate saved messages, edits and deletions.")
+HOME_OG = "Start with a Telegram chat export. Preserve observed changes, investigate the archive and share records others can verify."
 HOME_IMAGE_ALT = "TgWitness, a Telegram investigation workspace for following the trail and preserving the evidence."
 WIKI_DESCRIPTION = ("The complete TgWitness reference: installation, collection, Case Board, report design, signed exports, "
                     "witnesses, integrations, security and operations.")
@@ -147,6 +147,8 @@ def page_languages(local):
 
 def canonical_path(path):
     local = path.split("/", 1)[1] if path.split("/", 1)[0] in LANGS and "/" in path else path
+    if local == WIKI_HUB + "overview/" and path not in {local, "ru/" + local}:
+        return local
     return local if local in {WIKI_HUB + slug + "/" for slug in site_i18n.ENGLISH_ONLY} else path
 
 
@@ -194,9 +196,9 @@ class PlainText(HTMLParser):
 
 def seo(base_url, path, title, description, lang, alternates, *, crumbs=(), extra_only=False, languages=site_i18n.LANGUAGES, software=None):
     canonical = base_url + "/" + canonical_path(path)
+    alternates = [(other, target) for other, target in alternates if canonical_path(target) == target]
     if canonical_path(path) != path or path in {WIKI_HUB + slug + "/" for slug in site_i18n.ENGLISH_ONLY}:
         lang = "en"
-        alternates = [("en", canonical_path(path))]
         slug = canonical_path(path).split("/")[-2]
         title, description = REFERENCE[slug][0] + " · " + LABELS["wiki"] + " | TgWitness", REFERENCE[slug][1]
     code = languages[lang][1]

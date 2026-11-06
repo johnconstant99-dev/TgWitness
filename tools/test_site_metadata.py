@@ -83,6 +83,16 @@ def test_untranslated_reference_consolidates_without_false_alternates():
     assert link_map(nodes, "alternate") == {"en": BASE + "/" + local, "x-default": BASE + "/" + local}
     assert graph(source, nodes)[0]["inLanguage"] == "en"
 
+    local = "docs/reference/overview/"
+    source = build_site.seo(BASE, "de/" + local, "Translated navigation", "Translated navigation",
+                            "de", [(lang, build_site.prefix(lang) + local) for lang in site_i18n.LANGUAGES])
+    nodes = parse(source)
+    assert link_map(nodes, "canonical") == BASE + "/" + local
+    assert link_map(nodes, "alternate") == {
+        "en": BASE + "/" + local, "ru": BASE + "/ru/" + local, "x-default": BASE + "/" + local}
+    assert graph(source, nodes)[0]["inLanguage"] == "en"
+    assert build_site.canonical_path("ru/" + local) == "ru/" + local
+
 
 def test_markdown_preserves_content_and_limits_without_site_controls():
     source = '''<html><head><link rel="canonical" href="https://example.test/TgWitness/docs/reports/"></head>
@@ -151,7 +161,8 @@ def check_built_site(output):
         languages = build_site.page_languages(local)
         english_only = local in {build_site.WIKI_HUB + slug + "/" for slug in site_i18n.ENGLISH_ONLY}
         expected_alternates = {info[1]: base + "/" + build_site.prefix(code) + local
-                               for code, info in languages.items() if not english_only or code == "en"}
+                               for code, info in languages.items()
+                               if build_site.canonical_path(build_site.prefix(code) + local) == build_site.prefix(code) + local}
         expected_alternates["x-default"] = base + "/" + local
         assert link_map(nodes, "alternate") == expected_alternates, path
         entry = entries[canonical]
@@ -161,7 +172,7 @@ def check_built_site(output):
         data = graph(source, nodes)
         webpage = next(item for item in data if item["@type"] == "WebPage")
         assert webpage["url"] == canonical
-        assert webpage["inLanguage"] == ("en" if english_only else languages[lang][1]), path
+        assert webpage["inLanguage"] == ("en" if english_only or canonical != base + "/" + path else languages[lang][1]), path
         if local:
             crumbs = next(item for item in data if item["@type"] == "BreadcrumbList")
             items = crumbs["itemListElement"]

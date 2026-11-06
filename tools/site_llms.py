@@ -138,6 +138,15 @@ def index(base_url, repo_url, branch, version, guides, references):
         "follow people across chats, and hand over a signed archive that a recipient can verify.",
         "TgWitness runs on your own computer or server. PhishDestroy maintains the project under the MIT License. "
         "The website is documentation; the browser demo contains synthetic records and does not connect to Telegram.",
+        "Start with one command: the installer includes Python and dependencies. Connect a Telegram account, select "
+        "a chat or account scope and export. GitHub Actions capture offers temporary hosted collection with an "
+        "encrypted archive and workflow provenance; it requires a fork, authorization and an archive password. "
+        "Ongoing observation and investigation settings are available for tasks that need them. Basic collection "
+        "does not require Docker, a GPU, an LLM or a separately deployed witness.",
+        "The project's purpose is to preserve observed material and context regardless of whose position they support. "
+        "Source observations, known gaps and analytical conclusions remain distinguishable. A signature checks "
+        "integrity under a key; it does not make a message's claims true. Scope, access and disclosure settings "
+        "support different requirements; a selected profile does not itself establish legal compliance.",
         "Signed exports let recipients verify file integrity and the signing key offline. A hash-linked journal preserves "
         "the sequence of saved observations; independently retained checkpoints provide an earlier comparison point. "
         "Reports combine readable history, source references and verification results in the same package.",
@@ -150,11 +159,21 @@ def index(base_url, repo_url, branch, version, guides, references):
         "with the records you have collected.",
         f"These guides track the `{branch}` source branch. The project version is `{version}`; check the changelog and "
         "release notes before assuming a source feature is included in a downloaded package.",
+        "Maturity is described per workflow and tested revision. The preview release label coexists with implemented "
+        "collection, signed exports and measured workloads. Published results include a 1 November 2026 inventory "
+        "of 1,610,818 journal events (900,232 new-message events), a 5 November search benchmark on 1,000,000 "
+        "synthetic messages, and two real exports totalling 56,329 messages on 6 November. These measure inventory, "
+        "search and export respectively; they are not interchangeable capacity or completeness guarantees. "
+        "The maintainer reports more than six months of testing; that history is separate from the dated runs "
+        "and does not establish uninterrupted six-month collection. The overview links the methods and results.",
         "Choose an entry below for the exact workflow, commands and limits. Each guide has a Markdown edition; "
         "its canonical HTML page retains diagrams, animations and interactive examples. Translated pages also expose "
         "Markdown through `rel=alternate` links.",
         "## Start here",
+        link("docs/reference/overview/", *references["overview"][:2]),
+        link("docs/reference/installation/", *references["installation"][:2]),
         link("docs/start/", *guides["start"][:2]),
+        link("docs/capture/", *guides["capture"][:2]),
         link("docs/dedicated-account/", *guides["dedicated-account"][:2]),
         link("docs/accounts/", *guides["accounts"][:2]),
         link("guides/modes.html", "Collection modes and evidence levels", "Compare one-off export, observation, investigation and independent verification."),
@@ -174,7 +193,9 @@ def index(base_url, repo_url, branch, version, guides, references):
         "## Search the archive and connect AI tools",
         link("docs/archive/", *guides["archive"][:2]),
         link("docs/reference/analysis/", *references["analysis"][:2]),
+        link("docs/reference/search/", *references["search"][:2]),
         link("docs/reference/mcp/", *references["mcp"][:2]),
+        link("docs/reference/cli/", *references["cli"][:2]),
         link("docs/reference/media-analysis/", *references["media-analysis"][:2]),
         link("docs/reference/webhooks/", *references["webhooks"][:2]),
         "## Deploy, share and verify",
@@ -200,6 +221,7 @@ def index(base_url, repo_url, branch, version, guides, references):
         link("docs/reference/verification/", *references["verification"][:2]),
         link("docs/reference/changelog/", *references["changelog"][:2]),
         "## Optional",
+        f"- [Complete English handbook as text]({base_url}/llms-full.txt): The same guide and reference content in a single text download.",
         f"- [Complete English handbook]({base_url}/llms-full.md): Public guide and reference articles in one Markdown file, including source URLs.",
         f"- [Documentation hub]({base_url}/docs/): Browse the illustrated handbook and its language editions.",
         f"- [Source code]({repo_url}): Implementation, documentation and issue templates.",

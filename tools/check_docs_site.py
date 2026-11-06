@@ -8,12 +8,12 @@ from urllib.parse import urlsplit
 from playwright.sync_api import expect, sync_playwright
 
 if __package__:
-    from .build_site import NOTICE_LANGUAGES, NOTICE_PAGES, page_languages
+    from .build_site import NOTICE_LANGUAGES, NOTICE_PAGES, canonical_path, page_languages, prefix
     from .site_content import GUIDES, REFERENCE
     from .site_i18n import ENGLISH_ONLY, LANGUAGES
     from .site_test_server import site_server
 else:
-    from build_site import NOTICE_LANGUAGES, NOTICE_PAGES, page_languages
+    from build_site import NOTICE_LANGUAGES, NOTICE_PAGES, canonical_path, page_languages, prefix
     from site_content import GUIDES, REFERENCE
     from site_i18n import ENGLISH_ONLY, LANGUAGES
     from site_test_server import site_server
@@ -210,7 +210,9 @@ def main():
                     assert not page.locator('input:not([type="search"]),form').count()
                 alternates = page.locator('link[rel=alternate][hreflang]')
                 english_only = path.startswith("docs/reference/") and slug in ENGLISH_ONLY
-                expect(alternates).to_have_count(2 if english_only else len(page_languages(path)) + 1)
+                expected_languages = [lang for lang in page_languages(path)
+                                      if canonical_path(prefix(lang) + path) == prefix(lang) + path]
+                expect(alternates).to_have_count(len(expected_languages) + 1)
                 if english_only:
                     assert set(alternates.evaluate_all("nodes=>nodes.map(n=>n.hreflang)")) == {"en", "x-default"}
                 assert not page.evaluate("document.body.textContent.includes('@@')")
