@@ -1,6 +1,7 @@
 from html import escape
 from datetime import datetime
 import re
+from . import jurisdiction_guidance
 
 FORMAT = "tgwitness-case-assessment-v1"
 TITLE = "Basis of trust and limitations"
@@ -130,9 +131,9 @@ def journal(context, coverage):
     result(rows[2], "coverage", gaps=rows[2]["facts"]["gaps"], missing=rows[2]["facts"]["unobserved"])
     result(rows[3], "witness", drand=signals.get("drand", 0), tdx=signals.get("tdx", 0))
     options = context.get("options") or {}
-    return common("handover" if handover else "evidence", context.get("report_id"), context.get("fingerprint"), rows,
+    return jurisdiction_guidance.attach(common("handover" if handover else "evidence", context.get("report_id"), context.get("fingerprint"), rows,
                   sum(bool(options.get(k)) for k in ("case_title", "case_id", "examiner", "organization", "notes")),
-                  archive=context.get("archive") is True)
+                  archive=context.get("archive") is True), options)
 
 
 def snapshot(context, kind="account", meta=None):
@@ -168,9 +169,9 @@ def snapshot(context, kind="account", meta=None):
     result(rows[1], "sharing" if sharing else "chat" if chat else "complete" if complete else "partial",
            **({"done":coverage.get("tasks_done"), "total":coverage.get("tasks_total")} if complete and not sharing and not chat else {}))
     result(rows[2], "time_unknown")
-    return common(kind, context.get("archive_reference") or context.get("report_id"), context.get("fingerprint"), rows,
+    return jurisdiction_guidance.attach(common(kind, context.get("archive_reference") or context.get("report_id"), context.get("fingerprint"), rows,
                   0 if sharing else sum(bool(options.get(k)) for k in ("case_title", "case_id", "examiner", "organization", "notes")),
-                  archive=context.get("archive") is True)
+                  archive=context.get("archive") is True), context.get("presentation") or ({} if sharing else options))
 
 
 def fact_text(value, say):
@@ -199,7 +200,7 @@ def html(data, say):
         if item["references"]:
             parts.append('<p class="assessment-references">' + e(say("Evidence references")) + ': ' + e(', '.join(item["references"])) + '</p>')
         parts.append('</article>')
-    return ''.join(parts) + '</div></section>'
+    return ''.join(parts) + '</div></section>' + jurisdiction_guidance.html(data.get("jurisdiction_guidance"))
 
 
 def pdf(lay, data):
@@ -211,6 +212,7 @@ def pdf(lay, data):
     lay.pdf.add_page()
     for number, item in enumerate(data["checks"], 1):
         lay.assessment_card(number, item)
+    jurisdiction_guidance.pdf(lay, data.get("jurisdiction_guidance"))
 
 
 def text_keys():

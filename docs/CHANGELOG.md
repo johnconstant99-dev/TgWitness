@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add offline `VERIFY.cmd` / `VERIFY.sh` launchers, plain-language verification explanations and saved UTF-8 transcripts to signed exports in all 25 panel languages. Build a separate Windows verifier with an embedded runtime and a language menu. Unpinned signers remain unconfirmed; successful integrity verification does not establish admissibility.
+- Add optional jurisdiction guidance for 25 countries to Report Studio and exported assessments, with separate civil/criminal sources, local-language summaries and next steps derived from the actual package. Guidance remains a research draft, does not raise assurance, and is excluded from reusable layout profiles and inherited sharing-copy settings.
+- Allow the pinned Russian morphology dictionary resources in Windows portable builds while continuing to reject unrecognized files in dependency data directories.
+
 - Keep missing-on-recheck observations separate from deletion notices in HTML, JSON and PDF counts and viewer labels. Do not claim unscoped deletion IDs were never saved when their chat is outside the current observation scope.
 
 - Record multiple deleted IDs as a deletion batch without inferring a whole-history clear, the deleting participant, or deletion for everyone. Relabel legacy history-clear events without changing their signed records.

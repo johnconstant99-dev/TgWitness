@@ -1,13 +1,15 @@
 from itertools import islice
 
-from . import report, report_analytics
+from . import report, report_analytics, jurisdiction_guidance
 from .store import utcnow
 
 PREVIEW_LIMIT = 50000
 
 
-def presentation(options):
+def presentation(options, *, include_guidance=True):
     values = options.model_dump() if hasattr(options, "model_dump") else options
+    if not include_guidance:
+        values = {key: value for key, value in values.items() if key != "jurisdiction_guidance"}
     return report_analytics.Presentation.model_validate({key: values[key] for key in report_analytics.Presentation.model_fields if key in values})
 
 
@@ -29,6 +31,7 @@ def preview(store, options):
                 report.report_charts.html(material.get("analytics"), say)]
     if options.get("template") == "activity":
         sections.reverse()
+    sections.append(jurisdiction_guidance.html(jurisdiction_guidance.build(options.get("jurisdiction_guidance"))))
     title = options.get("case_title") or say("Telegram observation journal")
     document = ('<!doctype html><html lang="' + report.e(say.language) + '" dir="' + say.direction
         + '" data-report-design="' + report.report_design.normalized(options.get("design")) + '" data-theme="' + report.e(options["theme"])

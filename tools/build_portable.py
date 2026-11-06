@@ -107,6 +107,15 @@ FPDF_RESOURCES = {
     "python/Lib/site-packages/fpdf/data/color_profiles/sRGB2014.icc",
     "python/Lib/site-packages/fpdf/data/color_profiles/sRGB2014.icc.LICENSE",
 }
+MORPHOLOGY_RESOURCES = {
+    "python/Lib/site-packages/pymorphy3_dicts_ru/data/" + name
+    for name in (
+        "grammemes.json", "gramtab-opencorpora-ext.json", "gramtab-opencorpora-int.json", "meta.json",
+        "p_t_given_w.intdawg", "paradigms.array", "prediction-suffixes-0.dawg",
+        "prediction-suffixes-1.dawg", "prediction-suffixes-2.dawg", "suffixes.json", "words.dawg",
+    )
+}
+DEPENDENCY_DATA_RESOURCES = FPDF_RESOURCES | MORPHOLOGY_RESOURCES
 
 
 def release_problem(relative):
@@ -115,7 +124,7 @@ def release_problem(relative):
         return "unexpected entry outside the package layout"
     name = parts[-1].lower()
     folders = {part.lower() for part in parts[:-1]}
-    if ("__pycache__" in folders or "data" in folders and relative not in FPDF_RESOURCES
+    if ("__pycache__" in folders or "data" in folders and relative not in DEPENDENCY_DATA_RESOURCES
             or name in PRIVATE_NAMES or name.endswith(PRIVATE_SUFFIXES)):
         return "private or generated file"
     return None

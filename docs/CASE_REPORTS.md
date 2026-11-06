@@ -34,6 +34,14 @@ shown. A later export takes a fresh stable snapshot, so ongoing collection may
 increase the figures. Scope, counts and source identity are included in the
 signed report. Opening or previewing the form does not save it.
 
+**Jurisdiction guidance.** Under Document details, open **Jurisdiction guidance · optional**
+to choose a jurisdiction and civil/commercial or criminal procedure. The appendix carries
+the legal basis, source links, preparation notes and research status. Local-language
+summaries and explanations of collection safeguards are optional. No jurisdiction is
+selected by default. These choices belong to the workspace, and are excluded from
+saved layout configurations and implicit sharing-copy defaults. See
+[defaults, supported reports and research limits](JURISDICTION_GUIDANCE.md).
+
 **Choose the recipient's copy.** Charts and the transcript use the selected records.
 Integrity, custody and coverage describe the full source journal. The evidence ZIP
 contains its original records and attachments. Use [a minimized handover](EVIDENCE.md#handover-extract)

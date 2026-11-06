@@ -14,7 +14,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .account_export import AccountExportOptions, file_sha
-from . import account_report
+from . import account_report, verification_kit
 from .security import private_write
 from .store import canonical, utcnow
 from .message_selection import reply_link
@@ -535,7 +535,9 @@ class Disclosures:
                     with source.open(name) as stream:
                         write(name, iter(lambda: stream.read(1024**2), b''))
                 write('verify.py', [Path(__file__).with_name('verify.py').read_bytes()])
-                write('README.txt', [('Minimized disclosure\n\n' + '\n'.join(WARNINGS)
+                verification_kit.write(write, policy.report_language)
+                write('README.txt', [verification_kit.quickstart(policy.report_language), b'\n',
+                    ('Minimized disclosure\n\n' + '\n'.join(WARNINGS)
                     + '\n\nThe original source, identity map and private selection criteria are NOT included.\n'
                     + 'Verify from an independently trusted installation:\n'
                     + 'python verify.py disclosure.zip --fingerprint TRUSTED_SHA256\n'

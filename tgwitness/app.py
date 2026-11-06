@@ -2512,7 +2512,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
     async def disclosure_preview(request: Request, export_id: str, body: DisclosurePolicy):
         from .report_studio import presentation
         if "report_presentation" not in body.model_fields_set:
-            body.report_presentation = presentation(report.saved(app.state.store))
+            body.report_presentation = presentation(report.saved(app.state.store), include_guidance=False)
         require_live()
         principal = request.state.principal
         async with op_lock:
@@ -2555,6 +2555,11 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         chat_export_owners.clear()
         chat_export_owners[record["id"]] = request.state.principal.owner
         return record
+
+    @app.get("/api/report-guidance", dependencies=[Depends(authenticate)])
+    async def report_guidance_catalog():
+        from .jurisdiction_guidance import catalog
+        return catalog()
 
     @app.get("/api/report-options", dependencies=[Depends(authenticate)])
     async def get_report_options():

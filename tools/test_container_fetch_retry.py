@@ -73,11 +73,17 @@ class FetchRetry(unittest.TestCase):
             (root / "runtime-x86_64.lock").write_text(digest + "  synthetic-1.0-r0.apk\n")
             for name, body in (("apk", APK), ("sleep", SLEEP)):
                 path = root / "bin" / name
-                path.write_text("#!" + sys.executable + "\n" + body)
-                path.chmod(0o700)
-            result = subprocess.run([shutil.which("sh"), str(root / "install-packages.sh"), "runtime"],
+                path.write_text(body)
+                path.chmod(0o600)
+            # The container's temporary mount can be noexec. Run fixture data
+            # through the installed interpreter, keeping that mount restricted.
+            driver = ('apk() { "$FIXTURE_PYTHON" "$FIXTURE_STATE/bin/apk" "$@"; }\n'
+                      'sleep() { "$FIXTURE_PYTHON" "$FIXTURE_STATE/bin/sleep" "$@"; }\n'
+                      '. "$FIXTURE_STATE/install-packages.sh"\n')
+            result = subprocess.run([shutil.which("sh"), "-c", driver, str(root / "install-packages.sh"), "runtime"],
                 env={**os.environ, "PATH": str(root / "bin"),
-                     "FIXTURE_STATE": str(root), **{key: str(value) for key, value in environment.items()}},
+                     "FIXTURE_STATE": str(root), "FIXTURE_PYTHON": sys.executable,
+                     **{key: str(value) for key, value in environment.items()}},
                 capture_output=True, text=True, timeout=60)
             self.assertTrue((root / "calls").is_file(), result.stdout + result.stderr)
             calls = [json.loads(line) for line in (root / "calls").read_text().splitlines()]

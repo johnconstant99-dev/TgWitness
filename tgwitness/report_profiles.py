@@ -7,7 +7,7 @@ from .report import HIDDEN_CODEPOINTS, ReportOptions
 
 FORMAT = "tgwitness-report-profile-v1"
 CASE_FIELDS = frozenset({"case_title", "case_id", "examiner", "organization", "notes", "selection",
-                         "review_question", "review_method", "review_findings", "review_conclusion"})
+                         "review_question", "review_method", "review_findings", "review_conclusion", "jurisdiction_guidance"})
 LAYOUT_FIELDS = frozenset(ReportOptions.model_fields) - CASE_FIELDS
 MAX_PROFILES = 50
 

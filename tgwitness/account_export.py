@@ -29,6 +29,7 @@ from telethon.tl import types
 
 from . import account_export_transport as transport, account_report, file_hashes, account_attachment_cache
 from .evidence import producer
+from . import verification_kit
 from .monitoring import MediaRule
 from .security import private_write
 from .store import ZERO, canonical, utcnow
@@ -1061,7 +1062,9 @@ class AccountExport:
                                 write(name, content)
                     finally:
                         desktop.close()
-                write("README.txt", [("TgWitness account export\n\n" + "\n".join(LIMITATIONS)
+                verification_kit.write(write, report_context["report_language"])
+                write("README.txt", [verification_kit.quickstart(report_context["report_language"]), b"\n",
+                    ("TgWitness account export\n\n" + "\n".join(LIMITATIONS)
                     + "\n\nVerify using verify.py from a trusted checkout, with --fingerprint TRUSTED_SHA256.\n"
                     + "data/*.jsonl are authoritative; receipts bind each page to frozen options and inventory.\n"
                     + "HTML is a readable derivative. Media names are content hashes.\n").encode()])

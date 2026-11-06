@@ -154,6 +154,17 @@ def check_portable_package(root):
         "python/Lib/site-packages/fpdf/data/color_profiles/__init__.py",
         "python/Lib/site-packages/fpdf/data/color_profiles/sRGB2014.icc",
         "python/Lib/site-packages/fpdf/data/color_profiles/sRGB2014.icc.LICENSE",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/grammemes.json",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/gramtab-opencorpora-ext.json",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/gramtab-opencorpora-int.json",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/meta.json",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/p_t_given_w.intdawg",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/paradigms.array",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/prediction-suffixes-0.dawg",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/prediction-suffixes-1.dawg",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/prediction-suffixes-2.dawg",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/suffixes.json",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/words.dawg",
     )
     for name in resources:
         path = stage / name
@@ -171,6 +182,11 @@ def check_portable_package(root):
         "python/Lib/site-packages/fpdf/data/color_profiles/vault.key",
         "python/Lib/site-packages/fpdf/DATA/extra.txt",
         "python/Lib/site-packages/fpdf/data/color_profiles/__pycache__/module.pyc",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/extra.txt",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/vault.key",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/account.session",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/nested/grammemes.json",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/DATA/extra.txt",
     ):
         private = stage / name
         private.parent.mkdir(parents=True, exist_ok=True)

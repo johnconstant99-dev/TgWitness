@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from . import report_design
+from . import report_design, jurisdiction_guidance as guidance
 
 
 class Presentation(BaseModel):
@@ -16,6 +16,7 @@ class Presentation(BaseModel):
     composition_chart: bool = True
     participant_labels: Literal["aliases", "ids"] = "aliases"
     chart_limit: int = Field(default=10, ge=5, le=30)
+    jurisdiction_guidance: guidance.Options = Field(default_factory=guidance.Options)
 
     @field_validator("design", mode="before")
     @classmethod

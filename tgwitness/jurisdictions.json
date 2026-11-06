@@ -1,0 +1,879 @@
+{
+  "format": "tgwitness-jurisdiction-catalog-v1",
+  "default_language": "en",
+  "reviewed_on": "2026-11-06",
+  "status": "research_draft",
+  "profiles": [
+    {
+      "code": "AU",
+      "name": "Australia",
+      "scope": "Commonwealth model; states and territories vary",
+      "language": "en",
+      "law": "Evidence Act 1995, sections 146–147",
+      "criminal_law": "Evidence Act 1995, sections 146–147",
+      "basis": "Certain device and process presumptions may apply when their conditions are established. They are not a general guarantee that all digital records are reliable.",
+      "prepare": "Identify the court and applicable legislation. Preserve originals, system details and acquisition history, and prepare an explanation of any presumption relied on.",
+      "criminal": "Criminal procedure and admissibility, fairness and acquisition objections remain relevant. Commonwealth provisions must not be assumed to govern every state court.",
+      "human": "A witness familiar with the record or process; specialist advice for the relevant jurisdiction.",
+      "tasks": [
+        "Identify Commonwealth, state or territory law",
+        "Document system operation",
+        "Preserve originals and custody",
+        "Explain the basis of any claimed presumption"
+      ],
+      "local": "Keep original data, recordings and an explanation of the system and process. Device/process presumptions can be challenged. Confirm the applicable federal, state or territory evidence law; software verification does not establish message authorship or truth.",
+      "local_criminal": "Identify the court and applicable Commonwealth, state or territory law. Preserve originals and document acquisition, system operation and custody. Device-related presumptions do not settle every objection to admissibility or the lawfulness of obtaining the material.",
+      "sources": [
+        {
+          "title": "Evidence Act 1995, sections 146–147",
+          "url": "https://www.legislation.gov.au/C2004A04858/2025-06-10/2025-06-10/text/1/epub/OEBPS/document_1/document_1.html"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Evidence Act 1995, sections 146–147",
+          "url": "https://www.legislation.gov.au/C2004A04858/2025-06-10/2025-06-10/text/1/epub/OEBPS/document_1/document_1.html"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "BR",
+      "name": "Brazil",
+      "scope": "Civil procedure; criminal custody assessed separately",
+      "language": "pt",
+      "law": "Código de Processo Civil, articles 369, 384, 422, 439–441",
+      "criminal_law": "Código de Processo Penal, articles 158-A–158-F",
+      "basis": "Electronic documents and reproductions can be considered. Authenticity disputes require a suitable response. An ata notarial is an available measure, not a universal screenshot requirement.",
+      "prepare": "Preserve originals and explain acquisition and transfers. Consider a technical examination if authenticity is disputed and an ata notarial where contemporaneous observation is useful.",
+      "criminal": "CPP articles 158-A–158-F address custody. Distinguish police extraction from privately supplied screenshots confirmed in court; methodology and specific challenges matter.",
+      "human": "Collector or other competent witness; technical expert or notary where useful to the chosen route.",
+      "tasks": [
+        "Record who obtained the material",
+        "Document acquisition and custody",
+        "Retain original files and context",
+        "Assess any disputed authenticity with the appropriate specialist"
+      ],
+      "local": "Preserve os arquivos originais, o vídeo e o histórico de coleta e guarda. A ata notarial pode reforçar a constatação, mas não é requisito universal. Prints isolados não substituem a explicação da origem e do método; a via penal exige análise própria.",
+      "local_criminal": "Na via penal, documente a obtenção, a preservação e as transferências do material. Distinga a coleta policial da apresentação de registros por particulares. A assinatura do arquivo não substitui a análise da cadeia de custódia, da origem e das impugnações concretas.",
+      "sources": [
+        {
+          "title": "Código de Processo Civil, articles 369, 384, 422, 439–441",
+          "url": "https://www2.camara.leg.br/legin/fed/lei/2015/lei-13105-16-marco-2015-780273-normaatualizada-pl.html"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Código de Processo Penal, articles 158-A–158-F",
+          "url": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del3689.htm"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "CA",
+      "name": "Canada",
+      "scope": "Federal scope; provincial rules need separate assessment",
+      "language": "en",
+      "law": "Canada Evidence Act, sections 31.1–31.8",
+      "criminal_law": "Canada Evidence Act, section 31.7",
+      "basis": "Authentication and system integrity for the best evidence rule are distinct questions. Applicable affidavits may be used; other admissibility rules remain.",
+      "prepare": "Keep original or verifiable records, explain system operation and custody, and identify a knowledgeable witness. Confirm federal or provincial applicability.",
+      "criminal": "Section 31.7 preserves other admissibility rules, including applicable hearsay restrictions. Technical integrity does not remove those questions.",
+      "human": "Knowledgeable witness; an appropriate affidavit where the selected route permits it.",
+      "tasks": [
+        "Identify the applicable court and law",
+        "Preserve source records",
+        "Explain the system and custody",
+        "Prepare the witness or applicable affidavit"
+      ],
+      "local": "Preserve the original electronic record and explain the system, acquisition and custody. Address authentication and system integrity separately. Use an appropriate witness or affidavit where the Act permits it; provincial rules and other admissibility requirements may differ.",
+      "local_criminal": "Check federal and provincial applicability. Preserve originals, explain system integrity, acquisition and custody, and identify a knowledgeable witness. Authentication and the electronic-document provisions do not remove other applicable admissibility rules.",
+      "sources": [
+        {
+          "title": "Canada Evidence Act, sections 31.1–31.8",
+          "url": "https://www.laws-lois.justice.gc.ca/eng/acts/c-5/FullText.html"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Canada Evidence Act, section 31.7",
+          "url": "https://www.laws-lois.justice.gc.ca/eng/acts/c-5/FullText.html"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "CN",
+      "name": "China",
+      "scope": "Mainland civil rules; criminal extraction separately",
+      "language": "zh",
+      "law": "Civil Procedure Law article 66; civil evidence provisions 14–15, 93–94",
+      "criminal_law": "2016 criminal electronic-data rules, article 10",
+      "basis": "Electronic data is an evidence category. Assessment considers the system, integrity, storage, transfer and extraction. A software signature does not make a service legally neutral.",
+      "prepare": "Preserve source data and extraction method, with context and evidence connecting any screenshot to the original record.",
+      "criminal": "The 2016 criminal electronic-data rules distinguish authenticity, lawfulness and relevance. Article 10 permits alternative photo/video fixation in specified circumstances, with reasons; video is not a universal substitute for extraction.",
+      "human": "A person explaining acquisition; the applicable procedural actor or expert for the selected route.",
+      "tasks": [
+        "Preserve source data and extraction records",
+        "Record custody and system details",
+        "Link visual material to the source",
+        "Explain any alternative fixation method"
+      ],
+      "local": "保留原始电子数据、录像、元数据及提取过程记录。截图与原视频应可对应，真实性、合法性和关联性须分别说明。刑事案件中以拍照或录像固定数据时，应按适用规则说明不能或不宜直接提取的原因；软件签名不等于法院认证。",
+      "local_criminal": "刑事案件中应说明电子数据的来源、收集提取方法和保管移交过程。按适用规则保存原始数据；以照片或录像固定数据替代通常提取时，应说明原因。软件签名或可信执行环境不能单独证明发言者身份及取证合法性。",
+      "sources": [
+        {
+          "title": "Civil Procedure Law article 66; civil evidence provisions 14–15, 93–94",
+          "url": "https://www.court.gov.cn/zixun/xiangqing/212711.html"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "2016 criminal electronic-data rules, article 10",
+          "url": "https://www.spp.gov.cn/zdgz/201609/t20160921_167425.shtml"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "GB-EW",
+      "name": "England & Wales",
+      "scope": "England and Wales; other UK systems differ",
+      "language": "en",
+      "law": "Civil Evidence Act 1995, section 8",
+      "criminal_law": "Criminal Justice Act 2003, sections 114–117",
+      "basis": "Document contents may be proved by an original or a copy authenticated in a manner approved by the court. The law does not prescribe a particular cloud or software signature.",
+      "prepare": "Prepare a witness statement explaining acquisition, preservation and any edits, with clear exhibit references. Follow the court’s filing directions.",
+      "criminal": "Assess the applicable Criminal Justice Act 2003 hearsay route. A log prepared for litigation is not automatically an ordinary business record under section 117.",
+      "human": "A witness able to explain acquisition; specialist advice for the applicable procedure.",
+      "tasks": [
+        "Preserve originals and readable copies",
+        "Draft an acquisition and custody statement",
+        "Assign exhibit references",
+        "Check filing directions and any hearsay route"
+      ],
+      "local": "Keep the original files and an authenticated, readable copy. Explain acquisition, storage and any editing in the witness statement and identify the exhibits. Court directions and, for criminal proceedings, separate evidence rules still apply.",
+      "local_criminal": "For criminal proceedings, assess the applicable evidence route, including the Criminal Justice Act 2003 where hearsay is involved. Preserve originals, explain acquisition and custody, and identify the relevant witness. A log prepared for proceedings is not automatically an ordinary business record.",
+      "sources": [
+        {
+          "title": "Civil Evidence Act 1995, section 8",
+          "url": "https://www.legislation.gov.uk/ukpga/1995/38/section/8"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Criminal Justice Act 2003, sections 114–117",
+          "url": "https://www.legislation.gov.uk/ukpga/2003/44/2026-09-29/data.html"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "FR",
+      "name": "France",
+      "scope": "Civil and criminal routes differ",
+      "language": "fr",
+      "law": "Code civil, articles 1358 and 1366",
+      "criminal_law": "Code de procédure pénale, article 427",
+      "basis": "Article 1366 links the evidential treatment of electronic writing to identification and integrity. A displayed messenger name does not itself establish authorship.",
+      "prepare": "Preserve originals, method and identification evidence. A commissaire de justice’s constat can help establish observed facts; it is not universally required.",
+      "criminal": "CPP article 427 provides for evidence to be discussed by the parties. It does not pre-authorize every collection method. The cited version is scheduled to change from 2029.",
+      "human": "Collector or other competent witness; a commissaire de justice or expert where appropriate.",
+      "tasks": [
+        "Describe source and acquisition",
+        "Separate collector identity from alleged authorship",
+        "Preserve originals and transfers",
+        "Review any contested collection method"
+      ],
+      "local": "Conservez les fichiers originaux, la vidéo et la méthode de collecte. Identifiez séparément le collecteur et l’auteur supposé du message. Un constat de commissaire de justice peut renforcer la constatation; la signature du logiciel ne garantit pas à elle seule la recevabilité.",
+      "local_criminal": "En matière pénale, les preuves doivent pouvoir être discutées conformément à la procédure applicable. Conservez les originaux, la méthode de collecte et les transmissions. L’article 427 ne constitue pas une autorisation préalable de toute méthode de collecte; la signature ne prouve pas seule l’identité de l’auteur.",
+      "sources": [
+        {
+          "title": "Code civil, articles 1358 and 1366",
+          "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000032042461/"
+        },
+        {
+          "title": "eIDAS910/2014, articles25,41,46",
+          "url": "https://eur-lex.europa.eu/eli/reg/2014/910"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Code de procédure pénale, article 427",
+          "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037108959/2026-03-24"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "DE",
+      "name": "Germany",
+      "scope": "Civil ZPO; criminal StPO is a separate route",
+      "language": "de",
+      "law": "ZPO sections 286, 371, 371a",
+      "criminal_law": "Strafprozessordnung, section 244",
+      "basis": "Electronic files may be submitted for inspection. Special treatment of certain qualified electronic documents does not apply to every signed software export.",
+      "prepare": "Provide the examinable file and capture method. Distinguish the collector’s signature from the Telegram sender’s identity; preserve original video and identify derived frames.",
+      "criminal": "Use the applicable StPO procedure, including examination of evidence under section 244. Do not automatically apply civil ZPO signature rules.",
+      "human": "A person able to explain capture; an expert if the disputed technical issue calls for one.",
+      "tasks": [
+        "Preserve examinable originals",
+        "Explain the capture process",
+        "Identify derived frames and translations",
+        "Address the applicable inspection or expert procedure"
+      ],
+      "local": "Originaldateien und Aufnahmeablauf aufbewahren; Screenshots mit der ungeschnittenen Aufnahme verknüpfen. Die Signatur des Exporteurs ist keine Signatur des Telegram-Absenders. Die gerichtliche Beweiswürdigung und gegebenenfalls ein Sachverständigengutachten bleiben erforderlich.",
+      "local_criminal": "Im Strafverfahren gelten die einschlägigen Regeln der StPO. Originaldateien, Aufnahmeablauf und Übergaben dokumentieren und eine überprüfbare Wiedergabe ermöglichen. Die Signatur des Exporteurs belegt allein weder die Identität des Absenders noch den Wahrheitsgehalt der Nachricht.",
+      "sources": [
+        {
+          "title": "ZPO sections 286, 371, 371a",
+          "url": "https://www.gesetze-im-internet.de/zpo/BJNR005330950.html"
+        },
+        {
+          "title": "eIDAS910/2014, articles25,41,46",
+          "url": "https://eur-lex.europa.eu/eli/reg/2014/910"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Strafprozessordnung, section 244",
+          "url": "https://www.gesetze-im-internet.de/stpo/__244.html"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "IN",
+      "name": "India",
+      "scope": "BSA 2023; transitional proceedings require review",
+      "language": "hi",
+      "law": "Bharatiya Sakshya Adhiniyam 2023, sections 61–63, 170 and Schedule",
+      "criminal_law": "BSA 2023, sections 63 and 170; Schedule",
+      "basis": "Computer output submitted through section 63 has statutory conditions and a Schedule certificate. Software signatures do not replace the required statements and signatures.",
+      "prepare": "Determine whether the submission is an original or computer output, and whether transitional rules apply. Prepare the applicable Schedule parts, device details and hash report for review and signature.",
+      "criminal": "Apply BSA within its scope and transitional rules. Lawful acquisition and procedural custody remain separate; a certificate does not establish guilt.",
+      "human": "The relevant person and expert for the applicable Schedule certificate.",
+      "tasks": [
+        "Determine the applicable evidence regime",
+        "Describe devices and extraction method",
+        "Prepare the Schedule certificate where applicable",
+        "Attach a hash report for the signatories"
+      ],
+      "local": "मूल फ़ाइलें, वीडियो और हैश रिपोर्ट सुरक्षित रखें। धारा 63 के तहत कंप्यूटर आउटपुट प्रस्तुत करते समय अनुसूची का प्रमाणपत्र और संबंधित व्यक्ति तथा विशेषज्ञ के हस्ताक्षर तैयार करें। TgWitness का हस्ताक्षर इस प्रमाणपत्र का विकल्प नहीं है; पुराने लंबित मामलों में संक्रमण नियम जाँचें।",
+      "local_criminal": "मूल फ़ाइलें, वीडियो और प्राप्ति तथा अभिरक्षा का विवरण सुरक्षित रखें। लागू होने पर BSA की धारा 63 और अनुसूची के अनुसार प्रमाणपत्र तैयार करें; पुराने मामलों के संक्रमण नियम भी जाँचें। प्रमाणपत्र अपने आप अपराध या संदेश भेजने वाले की पहचान सिद्ध नहीं करता।",
+      "sources": [
+        {
+          "title": "Bharatiya Sakshya Adhiniyam 2023, sections 61–63, 170 and Schedule",
+          "url": "https://www.indiacode.nic.in/indiacode/bitstream/123456789/20063/1/aa202347.pdf"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "BSA 2023, sections 63 and 170; Schedule",
+          "url": "https://www.indiacode.nic.in/indiacode/bitstream/123456789/20063/1/aa202347.pdf"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "ID",
+      "name": "Indonesia",
+      "scope": "ITE legislation; KUHAP 20/2025 effective in 2026",
+      "language": "id",
+      "law": "ITE Law 11/2008 as amended by Law 1/2024, articles 5–6",
+      "criminal_law": "KUHAP, Law 20/2025, article 235",
+      "basis": "Electronic information, documents and printouts are recognized subject to statutory conditions and exceptions. Accessibility and integrity matter, not the provider brand.",
+      "prepare": "Preserve accessible originals, metadata, video and method. For criminal proceedings, use the current KUHAP and applicable transitional provisions.",
+      "criminal": "KUHAP 20/2025 took effect on 2 January 2026. Article 235 includes electronic evidence and addresses authenticity and lawful acquisition.",
+      "human": "A person explaining acquisition; technical or procedural specialist as required by the selected route.",
+      "tasks": [
+        "Keep accessible originals and metadata",
+        "Document lawful acquisition",
+        "Explain integrity and custody",
+        "Check current KUHAP and transitional applicability"
+      ],
+      "local": "Simpan berkas asli, video, metadata, dan catatan cara pengambilan. Bukti elektronik harus dapat diperiksa keasliannya dan diperoleh secara sah. Untuk perkara pidana, periksa KUHAP UU 20/2025 yang berlaku sejak 2 Januari 2026, termasuk ketentuan peralihannya.",
+      "local_criminal": "Untuk perkara pidana, periksa KUHAP UU 20/2025 dan ketentuan peralihannya. Simpan berkas asli serta catatan perolehan dan penyerahan. Keaslian dan cara memperoleh bukti secara sah harus dapat diperiksa; tanda tangan perangkat lunak tidak membuktikan identitas pengirim.",
+      "sources": [
+        {
+          "title": "ITE Law 11/2008 as amended by Law 1/2024, articles 5–6",
+          "url": "https://jdih.komdigi.go.id/produk_hukum/view/id/884/t/undangundang%20nomor%201%20tahun%202024"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "KUHAP, Law 20/2025, article 235",
+          "url": "https://www.peraturan.go.id/files/uu-no-20-tahun-2025.pdf"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "IR",
+      "name": "Iran",
+      "scope": "Electronic Commerce Law; criminal consolidation needs review",
+      "language": "fa",
+      "law": "Electronic Commerce Law, articles 12–15",
+      "criminal_law": "Computer Crimes Act, articles 49–51 · archived text",
+      "basis": "Electronic form alone does not remove evidential value. Reliability and the conditions for any special treatment must be assessed.",
+      "prepare": "Preserve originals, acquisition history and integrity evidence. A current local procedural review is needed before relying on a particular submission route.",
+      "criminal": "The UNODC archive includes Computer Crimes Act articles 49–51. Current criminal consolidation and implementing requirements were not sufficiently confirmed in this review.",
+      "human": "Local procedural review is needed before a criminal submission path can be specified.",
+      "tasks": [
+        "Preserve originals and acquisition records",
+        "Describe integrity and custody",
+        "Confirm the current applicable procedure locally",
+        "Do not mark the criminal route as fully reviewed"
+      ],
+      "local": "فایل‌های اصلی، ویدئو و روش گردآوری و نگهداری را حفظ کنید. ارزش اثباتی داده‌پیام به قابلیت اعتماد و شرایط ایجاد و حفاظت آن وابسته است. امضای نرم‌افزار به‌تنهایی پذیرش قضایی را تضمین نمی‌کند؛ مقررات جاری پرونده کیفری باید جداگانه بررسی شود.",
+      "local_criminal": "اصل فایل‌ها، ویدئو و سوابق دریافت و نگهداری را حفظ کنید. مقررات جاری آیین دادرسی کیفری و شیوه استناد به ادله الکترونیکی باید توسط متخصص محلی بررسی شود؛ این کارت تأیید نهایی مقررات جاری نیست. امضای نرم‌افزار به‌تنهایی هویت فرستنده را ثابت نمی‌کند.",
+      "sources": [
+        {
+          "title": "Electronic Commerce Law, articles 12–15",
+          "url": "https://www.wipo.int/wipolex/en/text/495385"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Computer Crimes Act, articles 49–51 · archived text",
+          "url": "https://sherloc.unodc.org/cld/es/legislation/irn/computer_crimes_act/section_2_-_chapter_3/articles_49-51/article_49-51.html"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "needs_local_review"
+    },
+    {
+      "code": "IT",
+      "name": "Italy",
+      "scope": "Civil reproductions and a separate criminal route",
+      "language": "it",
+      "law": "Codice civile, article 2712",
+      "criminal_law": "Codice di procedura penale, article 234",
+      "basis": "Computer and other reproductions are covered by article 2712. Their treatment depends in part on whether correspondence with the represented facts is contested.",
+      "prepare": "Keep originals, context and capture provenance. Be prepared to respond to disconoscimento through appropriate verification.",
+      "criminal": "CPP article 234 covers documentary representations through photography, film, sound and other means. Acquisition lawfulness and procedural examination remain separate.",
+      "human": "A person explaining acquisition; expert assessment if the reproduction is disputed.",
+      "tasks": [
+        "Preserve original files",
+        "Describe the acquisition process",
+        "Identify copies and derived frames",
+        "Prepare for examination if correspondence is disputed"
+      ],
+      "local": "Conservare i file originali, il contesto e la procedura di acquisizione. Collegare ogni fotogramma al video originale. L’art. 2712 c.c. non rende incontestabile una riproduzione: il disconoscimento e le verifiche tecniche vanno gestiti separatamente.",
+      "local_criminal": "Nel procedimento penale, l’art. 234 c.p.p. riguarda anche rappresentazioni fotografiche, cinematografiche e fonografiche. Conservare gli originali e documentare acquisizione e custodia. Liceità, autenticità e valutazione del contenuto restano questioni da esaminare separatamente.",
+      "sources": [
+        {
+          "title": "Codice civile, article 2712",
+          "url": "https://docs.italia.it/italia/piano-triennale-ict/codice-amministrazione-digitale-docs/it/v2018-09-28/_rst/capo2_sezione1_art23-quater.html"
+        },
+        {
+          "title": "eIDAS910/2014, articles25,41,46",
+          "url": "https://eur-lex.europa.eu/eli/reg/2014/910"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Codice di procedura penale, article 234",
+          "url": "https://www.gazzettaufficiale.it/anteprima/codici/codiceProceduraPenale"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "MY",
+      "name": "Malaysia",
+      "scope": "Evidence Act; criminal exceptions require attention",
+      "language": "ms",
+      "law": "Evidence Act 1950, sections 90A–90C",
+      "criminal_law": "Evidence Act 1950, sections 90A(7) and 90B",
+      "basis": "Section 90A concerns computer-produced documents and provides a responsible-person certificate route. Weight is assessed separately under section 90B.",
+      "prepare": "Explain ordinary system use, creation and provenance. Prepare an appropriate certificate where using that route, or another permitted basis; certification is not universally the only path.",
+      "criminal": "Assess section 90A(7) for material tendered by an accused and other applicable procedural conditions. A certificate checkbox is not enough.",
+      "human": "A responsible person for the chosen certificate route, or another competent evidential basis.",
+      "tasks": [
+        "Explain ordinary computer use",
+        "Preserve source and acquisition records",
+        "Prepare the selected certification route",
+        "Review criminal exceptions where applicable"
+      ],
+      "local": "Simpan fail asal, video dan rekod pemerolehan. Jelaskan penggunaan biasa komputer dan sediakan sijil orang yang bertanggungjawab apabila menggunakan laluan seksyen 90A. Nilai keterangan serta pengecualian bagi kes jenayah perlu dinilai berasingan.",
+      "local_criminal": "Bagi kes jenayah, semak seksyen 90A termasuk pengecualian dalam subseksyen (7), serta peraturan lain yang terpakai. Simpan fail asal dan rekod pemerolehan serta jagaan. Sijil atau tandatangan teknikal tidak dengan sendirinya membuktikan identiti pengirim.",
+      "sources": [
+        {
+          "title": "Evidence Act 1950, sections 90A–90C",
+          "url": "https://lom.agc.gov.my/ilims/upload/portal/akta/LOM/EN/reprint%20Act%2056%20(Reprint%202017).pdf"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Evidence Act 1950, sections 90A(7) and 90B",
+          "url": "https://lom.agc.gov.my/ilims/upload/portal/akta/LOM/EN/reprint%20Act%2056%20(Reprint%202017).pdf"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "MX",
+      "name": "Mexico",
+      "scope": "Commercial route; civil code applicability varies",
+      "language": "es",
+      "law": "Código de Comercio, articles 1205 and 1298-A",
+      "criminal_law": "CNPP, articles 227–228 and 380–382",
+      "basis": "Data-message assessment considers the reliability of generation, communication, receipt and storage. It does not prescribe a software vendor or universal notarial form.",
+      "prepare": "Describe method and origin, preserve originals and provide playback. Confirm the particular commercial or civil route.",
+      "criminal": "CNPP articles 227–228 address custody; articles 380–382 concern electronic presentation and reproduction. Supply usable files rather than relying only on a live server link.",
+      "human": "A person explaining acquisition and custody; the applicable procedural or technical specialist.",
+      "tasks": [
+        "Identify the applicable procedural code",
+        "Describe acquisition and custody",
+        "Preserve originals and hashes",
+        "Provide reproducible files and playback"
+      ],
+      "local": "Conserve originales, hashes y el registro de obtención y custodia. Explique la fiabilidad del método conforme al Código de Comercio cuando sea aplicable. En materia penal, prepare además la incorporación y reproducción de la evidencia conforme al CNPP.",
+      "local_criminal": "En materia penal, documente la obtención y la cadena de custodia conforme al CNPP. Conserve los originales y facilite los medios para reproducirlos. El informe del programa no sustituye la incorporación procesal ni acredita por sí solo quién envió el mensaje.",
+      "sources": [
+        {
+          "title": "Código de Comercio, articles 1205 and 1298-A",
+          "url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CCom.pdf"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "CNPP, articles 227–228 and 380–382",
+          "url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CNPP.pdf"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "PK",
+      "name": "Pakistan",
+      "scope": "Qanun-e-Shahadat Order, including the 2023 amendment",
+      "language": "ur",
+      "law": "Qanun-e-Shahadat Order, article 164",
+      "criminal_law": "Qanun-e-Shahadat Order, 2023 amendment to article 164",
+      "basis": "The modern-device evidence route does not remove the need to explain provenance and reliability. The 2023 amendment must be taken into account.",
+      "prepare": "Retain originals, extraction method and custody records, and identify a person able to explain them. Prepare technical examination if required by the dispute.",
+      "criminal": "Recorded screen evidence and live video testimony are different procedures. Article 164 does not by itself establish source, authorship or the circumstances of a recording.",
+      "human": "A person able to explain the record; technical examination where applicable.",
+      "tasks": [
+        "Preserve originals and video",
+        "Document extraction and custody",
+        "Identify a person who can explain the record",
+        "Apply the current article 164 route"
+      ],
+      "local": "اصل فائلیں، ویڈیو، حصول کا طریقہ اور تحویل کا ریکارڈ محفوظ رکھیں۔ آرٹیکل 164 کی 2023 کی ترمیم کو مدنظر رکھیں۔ سافٹ ویئر کا دستخط تنہا نسبت یا عدالتی قبولیت ثابت نہیں کرتا؛ ریکارڈ کی وضاحت کرنے والا شخص اور ضرورت کے مطابق فنی جانچ درکار ہو سکتی ہے۔",
+      "local_criminal": "اصل فائلیں، ویڈیو اور حصول و تحویل کا ریکارڈ محفوظ رکھیں۔ جدید آلات سے حاصل مواد کے لیے آرٹیکل 164 اور قابل اطلاق طریقۂ کار دیکھیں۔ ماخذ اور ریکارڈ کی وضاحت کرنے والا شخص اہم ہے؛ سافٹ ویئر کا دستخط تنہا مصنف کی شناخت یا الزام ثابت نہیں کرتا۔",
+      "sources": [
+        {
+          "title": "Qanun-e-Shahadat Order, article 164",
+          "url": "https://www.na.gov.pk/uploads/documents/64f840c325916_768.pdf"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Qanun-e-Shahadat Order, 2023 amendment to article 164",
+          "url": "https://www.na.gov.pk/uploads/documents/64f840c325916_768.pdf"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "PH",
+      "name": "Philippines",
+      "scope": "Electronic-evidence rules extended to criminal cases in 2002",
+      "language": "en",
+      "law": "Rules on Electronic Evidence, Rules 5, 9 and 11",
+      "criminal_law": "People v. Enojas, G.R. 204894, 10 March 2014",
+      "basis": "Electronic records require authentication. Audio, photographs and video need an appropriate explanation by the maker or another competent person.",
+      "prepare": "Preserve originals and identify a competent witness; prepare an affidavit where appropriate. The original 2001 publication does not reflect the 2002 extension to criminal cases.",
+      "criminal": "People v. Enojas (2014) expressly recognizes the 2002 extension. Recordings and ephemeral communications have different authentication routes and personal-knowledge issues.",
+      "human": "The maker or another competent person able to explain the recording; appropriate witness for the communication.",
+      "tasks": [
+        "Preserve original recordings",
+        "Identify a competent authenticating person",
+        "Describe accuracy and acquisition",
+        "Use the amended scope and appropriate evidence route"
+      ],
+      "local": "Preserve original recordings and identify a competent person who can explain their accuracy. Authenticate electronic records under the applicable rules. The 2002 amendment extended coverage to criminal cases; use the amended framework rather than the original 2001 scope alone.",
+      "local_criminal": "Use the Rules on Electronic Evidence with the 2002 extension to criminal cases in mind. Preserve originals and identify a competent person who can explain the recording or communication. The applicable authentication route depends on the type of evidence; a software signature is not a substitute for every required statement.",
+      "sources": [
+        {
+          "title": "Rules on Electronic Evidence, Rules 5, 9 and 11",
+          "url": "https://lawphil.net/courts/supreme/am/am_01-7-01_sc_2001.html"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "People v. Enojas, G.R. 204894, 10 March 2014",
+          "url": "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/1/56687"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "PT",
+      "name": "Portugal",
+      "scope": "Civil electronic documents; criminal recording law separately",
+      "language": "pt",
+      "law": "Decreto-Lei 12/2021, article 3",
+      "criminal_law": "Código de Processo Penal, article 167",
+      "basis": "Qualified services have specific legal effects. Ordinary electronic documents remain subject to applicable evidential rules; a software signature is not automatically qualified.",
+      "prepare": "Preserve originals and explain collection. If relying on a qualified signature or timestamp, verify the actual service and certificate.",
+      "criminal": "CPP article 167 ties use of reproductions to their lawfulness under criminal law. A TEE attestation does not establish authority to record.",
+      "human": "Collector or competent witness; local review of recording law where applicable.",
+      "tasks": [
+        "Preserve the original recording",
+        "Explain how it was obtained",
+        "Verify any claimed qualified service",
+        "Assess recording law under the applicable procedure"
+      ],
+      "local": "Guarde os ficheiros originais, o vídeo e a descrição da recolha. Distinga a assinatura do programa de uma assinatura ou selo temporal qualificado. Em processo penal, a licitude da gravação exige análise própria, designadamente nos termos do artigo 167.º do CPP.",
+      "local_criminal": "Em processo penal, verifique a licitude da gravação, incluindo o artigo 167.º do CPP. Guarde originais e registos de recolha e transmissão. Uma assinatura técnica ou atestação TEE não substitui a análise jurídica das condições de obtenção.",
+      "sources": [
+        {
+          "title": "Decreto-Lei 12/2021, article 3",
+          "url": "https://diariodarepublica.pt/dr/detalhe/decreto-lei/12-2021-156848060"
+        },
+        {
+          "title": "eIDAS910/2014, articles25,41,46",
+          "url": "https://eur-lex.europa.eu/eli/reg/2014/910"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Código de Processo Penal, article 167",
+          "url": "https://diariodarepublica.pt/dr/legislacao-consolidada/decreto-lei/1987-34570075-50529775"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "RU",
+      "name": "Russia",
+      "scope": "Civil procedure; criminal submission separately",
+      "language": "ru",
+      "law": "Civil Procedure Code, articles 55, 67, 71, 77",
+      "criminal_law": "Criminal Procedure Code, articles 84 and 86",
+      "basis": "Electronic written material and recordings can be evidence. Courts assess relevance, admissibility and reliability; a TgWitness signature has no predetermined weight.",
+      "prepare": "Preserve originals and acquisition details. For audio/video, identify when, by whom and in what conditions it was recorded under article 77. Notarial preservation is an optional route, not a universal prerequisite.",
+      "criminal": "Criminal Procedure Code articles 84 and 86 concern documents and their acquisition or presentation. A privately generated report is not an investigator’s procedural record.",
+      "human": "The person who made or can explain the recording; a notary or expert for an appropriate route.",
+      "tasks": [
+        "Preserve original files and context",
+        "Identify who recorded the material",
+        "State the recording time and conditions",
+        "Prepare the applicable submission and custody record"
+      ],
+      "local": "Сохраните исходный архив и оригинал видео. Укажите автора записи, время, условия и доступ к источнику. Подпись TgWitness подтверждает проверяемую целостность, но не заменяет процессуальное представление доказательства.",
+      "local_criminal": "Сохраните исходные файлы, видео и описание получения. Для уголовного дела представление и приобщение оформляются по УПК, в том числе статьям 84 и 86. Отчёт частного сборщика не является протоколом следователя; подпись архива не устанавливает личность автора сообщения.",
+      "sources": [
+        {
+          "title": "Civil Procedure Code, articles 55, 67, 71, 77",
+          "url": "https://www.consultant.ru/document/cons_doc_LAW_39570/"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Criminal Procedure Code, articles 84 and 86",
+          "url": "https://www.consultant.ru/document/cons_doc_LAW_34481/2ec43662e73675444f7195abb7f832264cf3cb22/"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "SA",
+      "name": "Saudi Arabia",
+      "scope": "Civil/commercial Evidence Law; criminal procedure separately",
+      "language": "ar",
+      "law": "Evidence Law, articles 53–64",
+      "criminal_law": "Criminal Procedure Law, article 179",
+      "basis": "The Evidence Law addresses digital evidence in its applicable scope. The required form and the effect of particular records depend on the selected legal route.",
+      "prepare": "Keep the original digital record, method of acquisition and readable presentation. Explain the source and any basis for a claimed evidential status.",
+      "criminal": "Criminal Procedure Law article 179 concerns evidence presented in the proceeding. The civil Evidence Law is not a substitute for criminal procedure.",
+      "human": "A person able to explain the material; appropriate local procedural and translation support.",
+      "tasks": [
+        "Identify the applicable procedure",
+        "Preserve original digital records",
+        "Describe source, collection and custody",
+        "Prepare readable exhibits and any required translation"
+      ],
+      "local": "احفظ الأصل الرقمي وبيّن مصدره وطريقة جمعه، وتحقق من مطابقة المستخرج للأصل. جهّز مرفقات عربية قابلة للفحص. لا يُعد توقيع TgWitness توثيقاً رسمياً، وللدعوى الجزائية مسار إجرائي مستقل.",
+      "local_criminal": "في القضية الجزائية، راعِ نظام الإجراءات الجزائية وطريقة تقديم الأدلة أمام المحكمة. احفظ الأصل ووثّق المصدر والحصول والتسليم، وقدّم الترجمة اللازمة. لا يعني توقيع البرنامج أن هوية المرسل أو صحة محتوى الرسالة قد ثبتتا.",
+      "sources": [
+        {
+          "title": "Evidence Law, articles 53–64",
+          "url": "https://laws.boe.gov.sa/BoeLaws/Laws/SearchDetails/?Id=2716057c-c097-4bad-8e1e-ae1400c678d5&Query=+"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Criminal Procedure Law, article 179",
+          "url": "https://laws.boe.gov.sa/BoeLaws/Laws/LawDetails/8f1b7079-a5f0-425d-b5e0-a9a700f26b2d/1"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "SG",
+      "name": "Singapore",
+      "scope": "Evidence Act within its applicable scope",
+      "language": "en",
+      "law": "Evidence Act 1893, section 116A",
+      "criminal_law": "Evidence Act 1893, section 116A",
+      "basis": "Section 116A provides rebuttable presumptions for specified electronic records and processes. Identify the actual basis for the presumption relied on.",
+      "prepare": "Retain originals and evidence of system operation, acquisition and preservation. Prepare a witness or other permitted evidential route for the particular proceeding.",
+      "criminal": "A process presumption does not establish the truth of a message. Preserve source and context for examination under the applicable rules.",
+      "human": "A knowledgeable witness or other permitted evidential route, as applicable.",
+      "tasks": [
+        "Preserve records and context",
+        "Describe system operation",
+        "Identify the claimed presumption",
+        "Make acquisition and custody examinable"
+      ],
+      "local": "Retain original records, video and evidence of how the system operated. Identify the basis for any section 116A presumption and allow it to be tested. Explain acquisition and custody; the exporter’s signature does not establish the sender’s identity.",
+      "local_criminal": "Identify the applicable basis for any electronic-record presumption and preserve evidence of system operation. Keep originals and acquisition and custody records available for examination. A technical signature does not establish the sender’s identity or the truth of a message.",
+      "sources": [
+        {
+          "title": "Evidence Act 1893, section 116A",
+          "url": "https://sso.agc.gov.sg/Act/EA1893?ProvIds=pr116A-"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Evidence Act 1893, section 116A",
+          "url": "https://sso.agc.gov.sg/Act/EA1893?ProvIds=pr116A-"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "ES",
+      "name": "Spain",
+      "scope": "Civil LEC; criminal LECrim separately",
+      "language": "es",
+      "law": "LEC articles 299.2, 326, 382–384",
+      "criminal_law": "Ley de Enjuiciamiento Criminal, article 726",
+      "basis": "The law provides for reproduction of words, sounds and images, and for stored data. The court and parties must be able to examine the material.",
+      "prepare": "Provide playable files, context and timestamps, with a transcript or technical explanation where appropriate. Notarial involvement is not a universal condition.",
+      "criminal": "LECrim article 726 concerns examination of documents and other evidence. Supply originals or verifiable copies and a means of playback.",
+      "human": "A person explaining the record; technical expert where necessary for the disputed issue.",
+      "tasks": [
+        "Provide originals and playback",
+        "Link screenshots to video timestamps",
+        "Supply context and any necessary transcript",
+        "Document the method and any authenticity challenge"
+      ],
+      "local": "Conserve los archivos originales y permita su reproducción y examen. Vincule cada captura con el vídeo y sus marcas de tiempo; aporte transcripción o informe técnico cuando corresponda. La firma del exportador no acredita por sí sola la identidad del remitente.",
+      "local_criminal": "En el proceso penal, conserve originales y documente la obtención y custodia. Facilite la reproducción y el examen del material conforme a la LECrim. La firma del archivo no sustituye la valoración de su origen, licitud y relación con los hechos.",
+      "sources": [
+        {
+          "title": "LEC articles 299.2, 326, 382–384",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2000-323#a384"
+        },
+        {
+          "title": "eIDAS910/2014, articles25,41,46",
+          "url": "https://eur-lex.europa.eu/eli/reg/2014/910"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Ley de Enjuiciamiento Criminal, article 726",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1882-6036&tn=2"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "TR",
+      "name": "Türkiye",
+      "scope": "Civil HMK; criminal CMK separately",
+      "language": "tr",
+      "law": "HMK 6100, articles 199 and 205",
+      "criminal_law": "CMK 5271, articles 134, 206 and 217",
+      "basis": "Electronic data is included in the document category. The special effects of a qualifying secure electronic signature must not be assigned to every exporter signature.",
+      "prepare": "Preserve originals and recording conditions. Assess lawful access and acquisition; respond to authenticity disputes with the appropriate technical explanation.",
+      "criminal": "CMK articles 206 and 217 address lawful evidence. A private collection tool does not replace judicial search or seizure authority under article 134 where required.",
+      "human": "A person explaining the record; an expert or authorized procedural actor where required.",
+      "tasks": [
+        "Retain original files",
+        "Describe access and recording conditions",
+        "Assess the applicable acquisition authority",
+        "Prepare technical examination if disputed"
+      ],
+      "local": "Özgün dosyaları, videoyu ve elde etme yöntemini saklayın. HMK 199 elektronik verileri belge kapsamında ele alır. TgWitness imzası kendiliğinden güvenli elektronik imza değildir; hukuka uygunluk ve itiraz hâlinde teknik inceleme ayrıca değerlendirilir.",
+      "local_criminal": "Ceza yargılamasında CMK hükümlerini ve delilin hukuka uygun elde edilmesini değerlendirin. Özgün dosyaları, videoyu ve toplama ile teslim kayıtlarını saklayın. Özel yazılım raporu, gerekli hâllerde arama veya el koyma yetkisinin yerini tutmaz.",
+      "sources": [
+        {
+          "title": "HMK 6100, articles 199 and 205",
+          "url": "https://mevzuat.adalet.gov.tr/mevzuat/103103?query=6100"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "CMK 5271, articles 134, 206 and 217",
+          "url": "https://mevzuat.adalet.gov.tr/mevzuat/102946?query=Madde+1"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "UA",
+      "name": "Ukraine",
+      "scope": "Civil and criminal original/copy rules differ",
+      "language": "uk",
+      "law": "Civil Procedure Code, article 100",
+      "criminal_law": "Criminal Procedure Code, articles 99–100",
+      "basis": "Electronic evidence includes messages, recordings and metadata. The civil route distinguishes originals from electronic copies authenticated with the required qualified signature.",
+      "prepare": "Identify who holds the original. If using the electronic-copy route, arrange the required authentication; TgWitness Ed25519 is not itself a qualified electronic signature.",
+      "criminal": "Criminal Procedure Code articles 99–100 address documents, computer data, originals and specified copy conditions. Do not import the civil qualified-signature route automatically.",
+      "human": "The holder or certifier of the copy; the required procedural participant for the selected route.",
+      "tasks": [
+        "Identify and preserve the original",
+        "Choose the applicable original or copy route",
+        "Arrange required copy authentication",
+        "Document acquisition and transfer"
+      ],
+      "local": "Збережіть оригінал архіву, відео та метадані. Для подання електронної копії врахуйте вимоги статті 100 ЦПК щодо КЕП і повідомте, у кого зберігається оригінал. Підпис TgWitness сам по собі не є КЕП.",
+      "local_criminal": "Збережіть оригінали, відео та опис отримання і передачі. Для кримінального провадження застосовуйте статті 99–100 КПК і відповідні правила щодо оригіналів та копій. Не переносіть автоматично вимоги цивільного процесу; підпис архіву не встановлює особу автора повідомлення.",
+      "sources": [
+        {
+          "title": "Civil Procedure Code, article 100",
+          "url": "https://zakon.rada.gov.ua/laws/show/1618-15#Text"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Criminal Procedure Code, articles 99–100",
+          "url": "https://zakon.rada.gov.ua/laws/show/4651-17#Text"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "AE",
+      "name": "United Arab Emirates",
+      "scope": "Onshore courts; DIFC and ADGM are separate",
+      "language": "ar",
+      "law": "Federal Decree-Law 35/2022, electronic-evidence provisions",
+      "criminal_law": "Criminal Procedures Law 38/2022, articles 8, 209–210",
+      "basis": "The civil and commercial evidence law addresses electronic records and their evidential treatment. Onshore rules must not be generalized to DIFC or ADGM.",
+      "prepare": "Identify the court and applicable route. Preserve accessible originals, acquisition details and the required translation; establish the basis of any evidential presumption.",
+      "criminal": "Criminal Procedures Law 38/2022 includes Arabic-language procedure and judicial assessment of presented evidence. Civil electronic-evidence presumptions do not transfer automatically.",
+      "human": "A person explaining acquisition; the required translator and procedural representative where applicable.",
+      "tasks": [
+        "Confirm onshore, DIFC or ADGM jurisdiction",
+        "Preserve accessible originals",
+        "Document acquisition and transfers",
+        "Prepare the required language and submission format"
+      ],
+      "local": "احتفظ بالملفات الإلكترونية الأصلية والفيديو وطريقة جمعها، وأتح وسيلة لفحصها. أعد الترجمة والمرفقات العربية المطلوبة للمحكمة. توقيع البرنامج لا يثبت وحده هوية صاحب الحساب، وتختلف الإجراءات الجزائية عن الإثبات المدني والتجاري.",
+      "local_criminal": "في الدعوى الجزائية، راعِ قانون الإجراءات الجزائية ومتطلبات اللغة العربية وعرض الأدلة ومناقشتها. احفظ الملفات الأصلية وسجل الحصول عليها وتسليمها. لا تنقل تلقائياً أحكام الإثبات المدني إلى الدعوى الجزائية، ولا تعتبر توقيع البرنامج دليلاً كافياً على هوية المرسل.",
+      "sources": [
+        {
+          "title": "Federal Decree-Law 35/2022, electronic-evidence provisions",
+          "url": "https://uaelegislation.gov.ae/en/legislations/1612/download"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Criminal Procedures Law 38/2022, articles 8, 209–210",
+          "url": "https://uaelegislation.gov.ae/en/legislations/1609/download"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "US",
+      "name": "United States",
+      "scope": "Federal courts",
+      "language": "en",
+      "law": "Federal Rules of Evidence 901, 902(13)–(14), 702",
+      "criminal_law": "Federal Rules of Evidence 902 and Committee Notes",
+      "basis": "Authenticate the record through a knowledgeable witness or an applicable qualified-person certification. Certification addresses authentication; other admissibility objections remain.",
+      "prepare": "Identify the acquisition method and a person able to explain it. If using FRE 902(13) or (14), prepare the appropriate certification and notice. Assess expert opinions separately under FRE 702.",
+      "criminal": "Authentication does not resolve hearsay, relevance or confrontation. Preserve the records and method needed to challenge the result.",
+      "human": "Knowledgeable witness; qualified certifying person for the chosen FRE 902 route.",
+      "tasks": [
+        "Describe acquisition and system operation",
+        "Identify the authenticating witness or certifier",
+        "Prepare certification and notice if using FRE 902",
+        "Provide originals and reproducible exhibits"
+      ],
+      "local": "Preserve the source files, hashes and recording method. Use a knowledgeable witness or, where applicable, a qualified-person certification under FRE 902(13) or (14), with the required notice. Authentication does not resolve hearsay, relevance or confrontation objections.",
+      "local_criminal": "Preserve originals and document acquisition and custody. FRE 902 certification can address authentication when its conditions are met; hearsay, confrontation and other objections remain separate. Identify a person who can explain the process and provide the method and records needed to test it.",
+      "sources": [
+        {
+          "title": "Federal Rules of Evidence 901, 902(13)–(14), 702",
+          "url": "https://www.uscourts.gov/sites/default/files/document/federal-rules-of-evidence.pdf"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Federal Rules of Evidence 902 and Committee Notes",
+          "url": "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title28a-node232-article9-rule902&num=0&edition=prelim"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    },
+    {
+      "code": "VN",
+      "name": "Vietnam",
+      "scope": "Electronic transactions; criminal code reviewed separately",
+      "language": "vi",
+      "law": "Electronic Transactions Law 20/2023/QH15, article 11",
+      "criminal_law": "Criminal Procedure Code, articles 99 and 107 · October 2026 consolidation",
+      "basis": "The weight of data messages depends on reliability, integrity, identification of the originator and other relevant factors.",
+      "prepare": "Preserve data, metadata, recording and acquisition records. Explain origin separately from the signature applied by the export software.",
+      "criminal": "Criminal Procedure Code articles 99 and 107 were checked against the 1 October 2026 consolidation. They address electronic data, acquisition/copying records, preservation and presentation of media or a copy.",
+      "human": "A person explaining acquisition; competent procedural authorities for formal collection records.",
+      "tasks": [
+        "Preserve original data and copies",
+        "Document acquisition and copying",
+        "Record transfers and preservation",
+        "Supply the medium or electronic copy under the applicable procedure"
+      ],
+      "local": "Giữ tệp gốc, video, siêu dữ liệu và biên bản thu thập. Giải thích cách tạo lập, lưu trữ, bảo đảm tính toàn vẹn và xác định người khởi tạo. Chữ ký của phần mềm không tự động chứng minh danh tính người gửi; thủ tục hình sự cần được đối chiếu riêng.",
+      "local_criminal": "Trong vụ án hình sự, đối chiếu Điều 99 và 107 BLTTHS về dữ liệu điện tử, thu thập, sao lưu, bảo quản và biên bản. Giữ bản gốc và bản sao có thể kiểm tra; xuất trình dữ liệu cùng phương tiện lưu trữ hoặc bản sao theo quy định. Báo cáo phần mềm không tự thay thế thủ tục tố tụng.",
+      "sources": [
+        {
+          "title": "Electronic Transactions Law 20/2023/QH15, article 11",
+          "url": "https://vbpl.moj.gov.vn/toaannhandantoicao/Pages/vbpq-toanvan.aspx?ItemID=165913&Keyword=20%2F2023%2FQH15%2C"
+        }
+      ],
+      "criminal_sources": [
+        {
+          "title": "Criminal Procedure Code, articles 99 and 107 · October 2026 consolidation",
+          "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/10/172-vbhn-vpqh.signed.pdf"
+        }
+      ],
+      "reviewed_on": "2026-11-06",
+      "criminal_status": "research_draft"
+    }
+  ],
+  "version": "2026-11-06.1"
+}

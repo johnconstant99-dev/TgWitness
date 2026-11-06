@@ -5,6 +5,11 @@ Recipients can verify the saved records, attachments and reports against a trust
 collector key, then compare the journal with an independently retained checkpoint.
 This page describes the formats, the checks and the material to keep for handover.
 
+Recipients can start with **VERIFY.cmd** on Windows: it asks for the original
+ZIP and independently obtained key fingerprint, displays an explained result,
+and saves a separate verification transcript. See [verification launchers and
+the portable runtime](VERIFICATION_LAUNCHER.md) for setup and trust limits.
+
 ## What is signed
 
 | Material | Protection | What to retain |

@@ -104,6 +104,7 @@ POLICY = {
     "POST /api/handover": ("export", "body"),
     "GET /api/anchor-request": ("export", None),
     "GET /api/report-options": ("view", None),
+    "GET /api/report-guidance": ("view", None),
     "POST /api/report-options": ("export", None),
     "GET /api/report-profiles": ("view", None),
     "POST /api/report-profiles": ("export", None),

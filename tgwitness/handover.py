@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from . import message_details, pdf_report, report, tuning
+from . import message_details, pdf_report, report, tuning, verification_kit
 from .dossier import PHONE
 from . import viewer
 from .evidence import producer, report_entry, write_indicators, write_pdf, write_viewer
@@ -511,6 +511,7 @@ def export(store, vault, options, report_options=None):
             if board_export:
                 write_member("case-board.json", [canonical(board_export)])
             write_member("verify.py", [Path(__file__).with_name("verify.py").read_bytes()])
+            verification_kit.write(write_member, report_options.get("language", "en"))
             write_indicators(write_member, summary.get("indicators"), context)
             for name in sorted(x for x in minimiser.files if isinstance(x, str) and re.fullmatch("[0-9a-f]{64}", x)):
                 source = store.root / "media" / name
@@ -544,7 +545,8 @@ def export(store, vault, options, report_options=None):
             context["files"] = dict(hashes)
             write_member("report.html", report.evidence_chunks(records(), coverage, context))
             listed = {**hashes, **dict.fromkeys(("README.txt", "SHA256SUMS", "manifest.json", "manifest.sig"), "")}
-            write_member("README.txt", [report.readme(context, listed, "\n".join(LIMITS) + "\n")])
+            write_member("README.txt", [verification_kit.quickstart(report_options.get("language", "en")), b"\n",
+                                       report.readme(context, listed, "\n".join(LIMITS) + "\n")])
             write_member("SHA256SUMS", [report.sha256sums(hashes)])
             manifest = {"format": FORMAT, "created_at": created, "public_key": vault.public_key,
                         "fingerprint": fingerprint(vault.public_key), "producer": producer(),

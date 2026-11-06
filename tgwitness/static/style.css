@@ -852,8 +852,8 @@ form > .health-detail { margin-top: 14px; }
 .report-outline li { background: var(--surface-3); color: var(--text-2); padding: 4px 9px; border-radius: 4px; font-size: 12px; }
 .report-outline .hint { margin: 10px 0 0; }
 .report-subheading { margin: 22px 0 0; font-size: 15px; }
-.report-examination { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-control); }
-.report-examination summary { cursor: pointer; font-weight: 600; }
+.report-examination, .report-guidance { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-control); }
+.report-examination summary, .report-guidance summary { cursor: pointer; font-weight: 600; }
 .report-examination textarea { resize: vertical; }
 .report-charts { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 24px; }
 .report-charts legend { padding-inline-end: 10px; }

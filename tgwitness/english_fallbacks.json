@@ -2888,5 +2888,20 @@
   "Self-destructing media may disappear before another attempt.",
   "Self-destructing media：{n} s",
   "View-once media",
-  "Available files are saved after their messages，with the result recorded in the journal．"
+  "Available files are saved after their messages，with the result recorded in the journal．",
+  "Jurisdiction guidance · optional",
+  "Choose the intended court's jurisdiction and procedure. Guidance helps prepare the material; it does not certify admissibility.",
+  "Jurisdiction",
+  "Procedure",
+  "Civil / commercial",
+  "Criminal",
+  "Include guidance in the report",
+  "Add the local-language summary",
+  "Explain collection safeguards",
+  "Legal guidance is supplied in English. Local summaries are not certified translations. Sources and research dates travel with the report.",
+  "These choices belong to this workspace, not to saved layout configurations. Sharing copies do not inherit this selection.",
+  "Jurisdiction guidance",
+  "Guidance",
+  "Not selected",
+  "Choose a jurisdiction from the supplied catalog."
 ]

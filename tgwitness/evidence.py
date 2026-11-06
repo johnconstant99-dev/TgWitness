@@ -15,6 +15,7 @@ from . import indicators
 from . import pdf_report
 from . import report
 from . import tuning
+from . import verification_kit
 from . import viewer
 from .store import ZERO, canonical, utcnow
 from .verify import Coverage, fingerprint, verify_events, verify_checkpoint
@@ -278,6 +279,7 @@ def export_file(store, vault, fmt, options=None, *, include_board=True, compact=
                     if analytics := report.report_material(context).get("analytics"):
                         write_member("analytics.json", [canonical(analytics)])
                 write_member("verify.py", [Path(__file__).with_name("verify.py").read_bytes()])
+                verification_kit.write(write_member, options.get("language", "en"))
                 if not compact:
                     write_indicators(write_member, (context.get("report_digest") or summary).get("indicators"), context)
                 for event in snapshot.events():
@@ -357,7 +359,7 @@ def export_file(store, vault, fmt, options=None, *, include_board=True, compact=
                            + "Open index.html. Verify evidence.zip using verify.py from an independently trusted checkout.\n"
                            + "\n".join(LIMITS) + README).encode() if compact else
                           report.readme(context, listed, "\n".join(LIMITS) + README))
-                write_member("README.txt", [readme])
+                write_member("README.txt", [verification_kit.quickstart(options.get("language", "en")), b"\n", readme])
                 write_member("SHA256SUMS", [report.sha256sums(hashes)])
                 manifest = {"format": "tgwitness-evidence-v1", "created_at": context["created_at"],
                             "public_key": vault.public_key, "fingerprint": result["fingerprint"],

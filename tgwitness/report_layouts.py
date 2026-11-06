@@ -244,7 +244,7 @@ def chat_replacements(record_factory, context, meta, say, options):
 
 SECTION_KEYS = {
     "case-board": "case_board",
-    "brief": "brief", "case": "case", "case-assessment": "assessment", "examination": "examination",
+    "brief": "brief", "case": "case", "case-assessment": "assessment", "jurisdiction-guidance": "assessment", "examination": "examination",
     "report-selection": "selection", "minimisation": "minimisation", "report-analytics": "analytics",
     "observed-directory": "directory", "changes": "histories", "record-relations": "relations",
     "actions": "actions", "indicators": "indicators", "integrity": "integrity", "timestamps": "timestamps",

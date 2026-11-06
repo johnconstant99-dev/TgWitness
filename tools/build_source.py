@@ -95,7 +95,7 @@ DIRECTORIES = {
 LANGUAGES = ("ru", "uk", "es", "pt", "tr", "ar", "fa", "ur", "hi", "id", "vi", "zh",
              "fr", "de", "it", "uz", "ko", "zh-Hant", "ms", "pl", "ja", "th", "he", "bn")
 GUIDE_LANGUAGES = ("fr", "de", "it", "uz", "ko", "zh-Hant", "ms", "pl", "ja", "th", "he", "am", "bn")
-PACKAGE_JSON = {"english_fallbacks.json", "public_proxies.json", "sealed_policy.json", "client_profiles.json", *("locales/" + language + ".json" for language in LANGUAGES),
+PACKAGE_JSON = {"english_fallbacks.json", "public_proxies.json", "sealed_policy.json", "client_profiles.json", "jurisdictions.json", "verifier_languages.json", *("locales/" + language + ".json" for language in LANGUAGES),
                 *("schemas/board-" + name + ".json" for name in ("bookmark", "highlight", "slice", "collection", "comment", "status", "move", "remove")),
                 "guide_locales/keys.json", *("guide_locales/" + language + ".json" for language in GUIDE_LANGUAGES)}
 NARRATIVE_LANGUAGES = ("en", "de", "fr", "es", "it", "pt", "nl", "pl", "cs", "sk", "uk", "ru", "ro",
