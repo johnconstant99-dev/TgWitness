@@ -1,8 +1,11 @@
-![Application source](../docs/assets/presentation/folder-tgwitness.svg)
+[TgWitness](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../docs/assets/presentation/section-source-mobile.svg">
+  <img src="../docs/assets/presentation/section-source.svg" width="1200" alt="TgWitness / Application">
+</picture>
 
 # Application source
-
-[Project](../README.md) · [Documentation](../docs/README.md) · [Wiki](../docs/wiki/Home.md) · [Support](../.github/SUPPORT.md)
 
 TgWitness's Python package: the authenticated panel, account collectors, observation
 journal, exports and optional witness services. Start with the component map below;
@@ -24,6 +27,12 @@ the detailed data model lives in [Architecture](../docs/ARCHITECTURE.md).
 | Independent checks | [`witness.py`](witness.py), [`witness_api.py`](witness_api.py), [`anchor.py`](anchor.py), [`anchoring.py`](anchoring.py) | Witness checkpoints and external timestamps |
 | Operations | [`alerts.py`](alerts.py), [`replica.py`](replica.py), [`doctor.py`](doctor.py), [`tuning.py`](tuning.py) | Notifications, off-site copies, local diagnostics and operating parameters |
 | Interface | [`static/`](static/README.md), [`locales/`](locales/README.md), [`i18n.py`](i18n.py) | Bundled UI and interface translations |
+| Report metrics | [`metrics/`](metrics/README.md) | Versioned statistics derived from saved events |
+| Cloud adapters | [`providers/`](providers/README.md) | Provider-specific deployment and access handling |
+| Case Board contracts | [`schemas/`](schemas/README.md) | Generated JSON Schemas for board operations |
+| Report resources | [`fonts/`](fonts/README.md) | Bundled fonts and licences |
+
+Setup-page translations have a separate [guide catalog](guide_locales/README.md).
 
 ## Work on the package
 

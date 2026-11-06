@@ -1,4 +1,9 @@
-![Website](../docs/assets/presentation/folder-website.svg)
+[TgWitness](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../docs/assets/presentation/section-website-mobile.svg">
+  <img src="../docs/assets/presentation/section-website.svg" width="1200" alt="TgWitness / The public website">
+</picture>
 
 # Website
 
@@ -12,7 +17,8 @@ Landing page, docs and demo. The app UI lives in
 | [guide_intro.html](guide_intro.html), [guides/](guides/README.md) | Guides |
 | [learn.css](learn.css), [learn.js](learn.js) | Interactive examples |
 | [i18n/](i18n/README.md) | Translations |
-| [demo/](demo/mock.js) | Demo API mock and recorded fixtures |
+| [demo/](demo/README.md) | Demo API mock, fixtures and downloadable examples |
+| [export-clinic/](export-clinic/README.md) | Interactive export-file comparison and review materials |
 | [capture_readme.py](capture_readme.py) | Demo recordings for the README |
 | `render_*.py` | Artwork; see the [asset guide](../docs/assets/presentation/README.md) |
 

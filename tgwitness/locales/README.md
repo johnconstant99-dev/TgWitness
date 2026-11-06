@@ -1,8 +1,11 @@
-![Interface languages](../../docs/assets/presentation/folder-tgwitness-locales.svg)
+[TgWitness](../../README.md) / [tgwitness](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../../docs/assets/presentation/section-languages-mobile.svg">
+  <img src="../../docs/assets/presentation/section-languages.svg" width="1200" alt="TgWitness / Languages">
+</picture>
 
 # Interface languages
-
-[Project](../../README.md) · [Documentation](../../docs/README.md) · [Wiki](../../docs/wiki/Home.md) · [Support](../../.github/SUPPORT.md)
 
 Translation dictionaries for the application interface. English is the source;
 the JSON files contain 24 translations, giving the panel and documentation the

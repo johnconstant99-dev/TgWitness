@@ -1,8 +1,11 @@
-![Repository workflows](../docs/assets/presentation/folder-github.svg)
+[TgWitness](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../docs/assets/presentation/section-github-mobile.svg">
+  <img src="../docs/assets/presentation/section-github.svg" width="1200" alt="TgWitness / Project workflow">
+</picture>
 
 # Repository workflows
-
-[Project](../README.md) · [Documentation](../docs/README.md) · [Wiki](../docs/wiki/Home.md) · [Support](SUPPORT.md)
 
 GitHub configuration for TgWitness: automation, issue forms and contribution prompts.
 

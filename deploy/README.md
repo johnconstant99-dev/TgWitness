@@ -1,4 +1,9 @@
-![Deployment and background services](../docs/assets/presentation/deploy.svg)
+[TgWitness](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../docs/assets/presentation/section-deploy-mobile.svg">
+  <img src="../docs/assets/presentation/section-deploy.svg" width="1200" alt="TgWitness / Deployment">
+</picture>
 
 # Background services and HTTPS
 
@@ -118,6 +123,8 @@ Container instructions and backup procedures: [DEPLOYMENT.md](../docs/DEPLOYMENT
 | [Caddyfile.witness.example](Caddyfile.witness.example) | Witness endpoint example |
 | [tgwitness.service](tgwitness.service) | Linux systemd service template |
 | [installer/](installer/README.md) | One-command installers, download page and separate-host deployment |
+| [containers/](containers/README.md) | Reviewed OS packages and architecture-specific locks |
+| [media-worker/](media-worker/README.md) | Isolated OCR and transcription worker |
 | [windows-task.ps1](windows-task.ps1) | Windows logon task script |
 | [org.tgwitness.collector.plist.example](org.tgwitness.collector.plist.example) | macOS launchd user agent |
 | [proxies.config.example](proxies.config.example) | Operator proxy catalogue configuration |

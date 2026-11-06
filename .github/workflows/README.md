@@ -1,8 +1,11 @@
-![GitHub Actions](../../docs/assets/presentation/folder-github-workflows.svg)
+[TgWitness](../../README.md) / [.github](../AUTOMATION.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../../docs/assets/presentation/section-github-mobile.svg">
+  <img src="../../docs/assets/presentation/section-github.svg" width="1200" alt="TgWitness / Project workflow">
+</picture>
 
 # GitHub Actions
-
-[Project](../../README.md) · [Documentation](../../docs/README.md) · [Wiki](../../docs/wiki/Home.md) · [Support](../SUPPORT.md)
 
 | Workflow | Purpose |
 | --- | --- |

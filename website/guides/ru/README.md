@@ -1,8 +1,11 @@
-![Guide translation workspace](../../../docs/assets/presentation/folder-website-guides-ru.svg)
+[TgWitness](../../../README.md) / [guides](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../../../docs/assets/presentation/section-languages-mobile.svg">
+  <img src="../../../docs/assets/presentation/section-languages.svg" width="1200" alt="TgWitness / Languages">
+</picture>
 
 # Guide translation workspace
-
-[Project](../../../README.md) · [Documentation](../../../docs/README.md) · [Wiki](../../../docs/wiki/Home.md) · [Support](../../../.github/SUPPORT.md)
 
 This directory currently has no Russian HTML guide fragments. The public website's
 Russian text is maintained in the language catalogue under

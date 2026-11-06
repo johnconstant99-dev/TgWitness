@@ -1,3 +1,10 @@
+[TgWitness](../../README.md) / [deploy](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../../docs/assets/presentation/section-deploy-mobile.svg">
+  <img src="../../docs/assets/presentation/section-deploy.svg" width="1200" alt="TgWitness / Deployment">
+</picture>
+
 # One-command installation
 
 This directory contains the installer templates and the static download page.

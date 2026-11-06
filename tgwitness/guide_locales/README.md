@@ -1,3 +1,10 @@
+[TgWitness](../../README.md) / [tgwitness](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../../docs/assets/presentation/section-languages-mobile.svg">
+  <img src="../../docs/assets/presentation/section-languages.svg" width="1200" alt="TgWitness / Languages">
+</picture>
+
 # Setup and dedicated-account translations
 
 The two bundled guides support 26 languages. Their 25 full-site languages now use

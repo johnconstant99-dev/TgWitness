@@ -1,8 +1,11 @@
-![Website languages](../../docs/assets/presentation/folder-website-i18n.svg)
+[TgWitness](../../README.md) / [website](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../../docs/assets/presentation/section-languages-mobile.svg">
+  <img src="../../docs/assets/presentation/section-languages.svg" width="1200" alt="TgWitness / Languages">
+</picture>
 
 # Website languages
-
-[Project](../../README.md) · [Documentation](../../docs/README.md) · [Wiki](../../docs/wiki/Home.md) · [Support](../../.github/SUPPORT.md)
 
 Language catalogues for the public website, separate from the application's
 [`tgwitness/locales/`](../../tgwitness/locales/README.md) dictionaries.

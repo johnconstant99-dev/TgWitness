@@ -265,6 +265,27 @@ for history, live observation and sealed acquisition.
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
+<a name="repository-map"></a>
+
+## Explore the repository
+
+| Directory | Start here |
+| --- | --- |
+| [docs/](docs/README.md) | Setup, investigation workflows and technical reference |
+| [tgwitness/](tgwitness/README.md) | Main application, collector, journal and web panel |
+| [tgwitness_capture/](tgwitness_capture/README.md) | Independent recorders and their verification code |
+| [addons/](addons/README.md) | Optional capture installation, configuration and tests |
+| [deploy/](deploy/README.md) | Installers, containers and background services |
+| [examples/](examples/README.md) | Account-export and sealed-capture configurations |
+| [integrations/](integrations/README.md) | Signed webhooks and an n8n receiver |
+| [scripts/](scripts/README.md) | Launchers and CI utilities |
+| [tools/](tools/README.md) | Builds, checks and packaging |
+| [website/](website/README.md) | Public site, translated guides and interactive demo |
+| [.github/](.github/AUTOMATION.md) | Workflows, contribution guidelines and support |
+
+[Complete project guide](docs/PROJECT-GUIDE.md) ·
+[Contributing](.github/CONTRIBUTING.md) · [Get help](.github/SUPPORT.md)
+
 <!-- operator-notice:start -->
 
 <details>
@@ -296,25 +317,6 @@ To strictly comply with the MIT License, we do not restrict the use of this soft
 </details>
 
 <!-- operator-notice:end -->
-
-<a name="repository-map"></a>
-
-<details>
-<summary><strong>Repository map</strong> — source, deployment and contribution guides</summary>
-
-| Directory | Contents |
-| --- | --- |
-| [`tgwitness/`](tgwitness/README.md) | Application, collector, journal, verifier and web panel |
-| [`docs/`](docs/README.md) | Guides, Wiki source, screenshots and verification record |
-| [`deploy/`](deploy/README.md) | Compose configurations and service templates |
-| [`scripts/`](scripts/README.md) | Demo, setup and Docker launchers |
-| [`tools/`](tools/README.md) | Builds, checks and packaging |
-| [`website/`](website/README.md) | Documentation website and translations |
-| [`.github/`](.github/AUTOMATION.md) | Workflows and contribution guides |
-
-[Complete project guide](docs/PROJECT-GUIDE.md) · [Technical documentation](docs/README.md)
-
-</details>
 
 <details>
 <summary><strong>Read the project overview in your language</strong></summary>

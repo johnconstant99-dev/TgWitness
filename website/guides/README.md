@@ -1,8 +1,11 @@
-![Website guides](../../docs/assets/presentation/folder-website-guides.svg)
+[TgWitness](../../README.md) / [website](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../../docs/assets/presentation/section-docs-mobile.svg">
+  <img src="../../docs/assets/presentation/section-docs.svg" width="1200" alt="TgWitness / Documentation">
+</picture>
 
 # Website guides
-
-[Project](../../README.md) · [Documentation](../../docs/README.md) · [Wiki](../../docs/wiki/Home.md) · [Support](../../.github/SUPPORT.md)
 
 HTML source fragments for the public site's practical guides. The English source is
 in [`en/`](en/README.md); language handling is described in

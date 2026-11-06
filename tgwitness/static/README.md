@@ -1,8 +1,11 @@
-![Workspace interface](../../docs/assets/presentation/folder-tgwitness-static.svg)
+[TgWitness](../../README.md) / [tgwitness](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../../docs/assets/presentation/section-source-mobile.svg">
+  <img src="../../docs/assets/presentation/section-source.svg" width="1200" alt="TgWitness / Application">
+</picture>
 
 # Workspace interface
-
-[Project](../../README.md) · [Documentation](../../docs/README.md) · [Wiki](../../docs/wiki/Home.md) · [Support](../../.github/SUPPORT.md)
 
 The bundled browser interface served by TgWitness. These are application files;
 the separate public documentation website lives in [`website/`](../../website/README.md).
@@ -17,6 +20,9 @@ the separate public documentation website lives in [`website/`](../../website/RE
 | [`guide.html`](guide.html), [`guide.js`](guide.js), [`guide.css`](guide.css) | In-application setup guidance |
 | [`dedicated-account.html`](dedicated-account.html) | Dedicated-account guide |
 | [`mark.svg`](mark.svg) | Original TgWitness application mark |
+| [`core/`](core/README.md) | View lifecycle, time display and workspace identity |
+| [`components/`](components/README.md) | Shared controls, forms, status and notifications |
+| [`views/`](views/README.md) | Screen-specific modules and styles |
 
 ## Review a change
 

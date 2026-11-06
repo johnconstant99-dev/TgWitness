@@ -1,4 +1,9 @@
-![TgWitness](brand.svg)
+[TgWitness](../../../README.md) / [assets](../README.md)
+
+<picture>
+  <source media="(max-width: 640px)" srcset="./section-assets-mobile.svg">
+  <img src="./section-assets.svg" width="1200" alt="TgWitness / Visual assets">
+</picture>
 
 # Presentation assets
 
@@ -15,6 +20,7 @@ README, Wiki and documentation artwork. Screenshots use demo records.
 | `readme-handbook*`, `wiki-*` | Handbook routes and chapter covers |
 | `identity-meta-*` | Version, languages, test and licence badges |
 | `folder-*`, `readme-button-*`, `*divider*` | Folder headers, links and separators |
+| `section-*` | Shared directory covers, with separate narrow-screen layouts |
 | `preview-github.png`, `preview-social.png` | Sharing images |
 
 ## Rebuild
@@ -28,9 +34,13 @@ python website/render_readme_navigation.py --font /path/to/Manrope.ttf
 python website/render_readme_panels.py --font /path/to/Manrope.ttf
 python website/render_wiki_headers.py --font /path/to/Manrope.ttf
 python website/render_identity.py --font /path/to/Manrope.ttf
+python website/render_directory_headers.py --font /path/to/Manrope.ttf
 ```
 
 `render_identity.py` reads the version and language counts from source.
+Directory covers are static and self-contained. Their outlined Manrope lettering,
+navy background and restrained section accents follow the repository's existing
+artwork. Use the narrow version in a `<picture>` source at `max-width: 640px`.
 After a version change, use `--metadata-only` to refresh its badges, update the
 README alt text and `docs/STATUS.md`, then run `python tools/check_publication.py`.
 
