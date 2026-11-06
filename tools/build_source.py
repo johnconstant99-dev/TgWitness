@@ -42,6 +42,7 @@ FILES = [
     "tools/fixtures/narrative-events.json", "tools/fixtures/narrative-golden.json",
     "docs/examples/narrative.json",
     ".agents/skills/tgwitness-cli/SKILL.md",
+    ".agents/README.md", ".agents/skills/README.md", ".agents/skills/tgwitness-cli/README.md",
     *CONTAINER_INPUTS,
 ]
 FILES.extend("tgwitness/fonts/" + name for name in (

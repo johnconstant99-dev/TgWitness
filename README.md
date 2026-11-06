@@ -278,6 +278,7 @@ for history, live observation and sealed acquisition.
 | [deploy/](deploy/README.md) | Installers, containers and background services |
 | [examples/](examples/README.md) | Account-export and sealed-capture configurations |
 | [integrations/](integrations/README.md) | Signed webhooks and an n8n receiver |
+| [.agents/](.agents/README.md) | Task instructions for reading the archive through the CLI |
 | [scripts/](scripts/README.md) | Launchers and CI utilities |
 | [tools/](tools/README.md) | Builds, checks and packaging |
 | [website/](website/README.md) | Public site, translated guides and interactive demo |
