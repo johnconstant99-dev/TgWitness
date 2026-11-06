@@ -91,8 +91,22 @@ def ranked_query(body):
     anchors = [word for word in terms(body) if re.search(r"[./@]", word)]
     quoted = re.findall(r'["«]([^"»]{2,200})["»]', body.question)
     if quoted or anchors:
-        return " ".join(['"' + q.replace('"', " ") + '"' for q in quoted[:3]] + anchors[:3]), "all"
-    return body.question, "any"
+        return bounded(" ".join(['"' + q.replace('"', " ") + '"' for q in quoted[:3]] + anchors[:3]), "all")
+    # A long question keeps its first distinct words; the index accepts at most 200 characters and 24 terms.
+    return bounded(" ".join(list(dict.fromkeys(body.question.split()))[:16]), "any")
+
+
+def bounded(text, match):
+    from .fulltext import Query
+    text = text[:200]
+    while text.strip():
+        try:
+            Query(text, match)
+            return text, match
+        except ValueError:
+            half = text[:len(text) // 2]
+            text = half.rsplit(" ", 1)[0] if " " in half.strip() else half
+    return None
 
 
 def ranked(reader, body):
@@ -102,7 +116,12 @@ def ranked(reader, body):
     if plan is None:
         return None
     text, match = plan
-    if not any(not stop for _, stop in Query(text, match).clauses):
+    try:
+        query = Query(text, match)
+    except ValueError:
+        # A query the index cannot read is still searched as exact text.
+        return None
+    if not any(not stop for _, stop in query.clauses):
         return None
     state = reader.workspace(ArchiveQuery(tool="list_chats", workspace=body.workspace))
     if not state.store.fulltext.current(public=True)["complete"]:

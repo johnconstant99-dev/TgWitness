@@ -63,6 +63,8 @@ Dates are `2026-10-01` (UTC midnight) or ISO times with a timezone,
 observation time. Pages hold up to 50 records: follow `next_offset` (`--offset`) for
 ranked search and `next_before` (`--before`) elsewhere.
 
+Ranked search stops at 1，000 results．The final page may be shorter than `--limit`；narrow the query，chat or period when more matching observations exist．
+
 Every message result carries `untrusted_content: true`, the workspace, chat and
 message IDs, the journal sequence, the saved record hash and a panel link. Edits,
 deletion notices and `missing_on_recheck` are separate records. Absence of a record

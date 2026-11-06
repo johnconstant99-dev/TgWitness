@@ -301,7 +301,7 @@ class ArchiveReader:
             raise ValueError("Enter words to search.")
         chats = allowed if query.chat_id is None else {query.chat_id}
         result = store.fulltext.search(Query(query.query, query.match), chat_ids=chats, since=query.since,
-                                       until=query.until, limit=query.limit, offset=min(query.offset, 1000),
+                                       until=query.until, limit=query.limit, offset=query.offset,
                                        public=allowed is not None)
         items = []
         for hit in result["hits"]:

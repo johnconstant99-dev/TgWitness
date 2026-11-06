@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Keep ranked-search pages within the first 1，000 results regardless of page size，order OCR／transcription results before pagination，and retain exact match positions when Unicode expansions and invisible-character removal cancel each other's length changes．
+
 - Keep photo downloads on the still variant named by their metadata and hash manifests，including after file-reference renewal．Reject truncated photo／chat attachments and corrupt reused files instead of counting them as saved．Check recovered multi-account message IDs against missing intervals without expanding large gaps．
 
 - Release a session's local connection lock after transport shutdown，including when a disconnected client was already removed from the workspace．Cancelling the waiting operation cannot release the lock early，and closing an older session cannot unlock a different current key．
@@ -19,6 +21,9 @@
 - Add [full-text search](SEARCH.md) (preview): Russian and Ukrainian word forms, English stems, Chinese and Japanese phrases without spaces, exact phrases, domains in hidden links and buttons, @usernames, wallets and phones, filters for chat, sender, message ID and observation period, ranked with BM25. The index is derived from the signed journal, bound to its latest record hash, never exported, and can be kept on disk, in memory only or turned off. Recognized text is indexed in memory only and labelled as machine recognition.
 - Ask the archive retrieves the best matches from the full-text index when it is complete, keeps the 24-source limit, and cuts long texts around their match. MCP `search_messages` accepts `ranked=true`.
 - Add `tgwitness index status|rebuild` with JSON output on stdout and stable exit codes.
+- Fix ranked search paging: `next_offset` is now returned when more matches exist, through `/api/search`, MCP `search_messages` and Ask the archive's partial marker. Paging stops at the first 1,000 results.
+- Fix Ask the archive failing on questions longer than 24 words or 200 characters. The full-text query keeps the question's first distinct words; a query the index cannot read falls back to exact-text retrieval.
+- Centre excerpts on the match in long texts that hide zero-width characters between letters.
 - Build the website when a language lacks new translations: untranslated blocks stay in English with the page notice and are listed by the build.
 - Add the [command line](CLI.md) (preview): `tgwitness search`, `context`, `messages`, `stats` and `export` with `--json` and stable exit codes, reading a stopped workspace directly or a running panel through a scoped, revocable archive connection. Add `.agents/skills/tgwitness-cli/SKILL.md` for agents.
 - Add the `get_activity_stats` archive tool, also offered over MCP: messages by UTC hour and weekday, peak days, edit and deletion shares, senders, domains and @handles, with coverage gaps. Computed on request, not stored.

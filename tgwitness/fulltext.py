@@ -532,14 +532,32 @@ class Query:
                             "sources": sorted(self.sources), "kinds": sorted(self.kinds)}}
 
 
+def original_offset(text, offset):
+    """Position in the saved text of the character at an offset of its normalized form.
+
+    Normalization drops invisible characters and may change lengths, so offsets differ in texts that hide
+    zero-width characters between letters."""
+    low, high = 0, len(text)
+    while low < high:
+        middle = (low + high) // 2
+        if len(normalize(text[:middle + 1])) > offset:
+            high = middle
+        else:
+            low = middle + 1
+    return min(low, max(0, len(text) - 1))
+
+
 def focus(text, query):
-    """Offset of the first matching term, to centre excerpts of long texts."""
+    """Offset in the saved text of the first matching term, to centre excerpts of long texts."""
     normalized = normalize(text)
     found = [normalized.find(value) for value in query.literals + query.phrases]
     wanted = query.matched_terms()
     found.append(next((start for term, start, _ in tokens(normalized, True) if term in wanted), -1))
     found = [value for value in found if value >= 0]
-    return min(found) if found else None
+    if not found:
+        return None
+    first = min(found)
+    return first if normalized == text else original_offset(text, first)
 
 
 def payload_text(payload):
@@ -773,17 +791,21 @@ class FullText:
         if not wanted <= set(SOURCES):
             raise ValueError("Choose messages, ocr or transcription sources.")
         found, matched = [], {}
+        # One result beyond the page shows whether another page exists, but
+        # paging must stay inside the same bounded window for every page size.
+        end = min(offset + limit, 1000)
+        wanted_hits = end + 1
         if "messages" in wanted:
-            hits, matched["messages"] = self.messages(query, chats, since, until, order, limit + offset, timeout_s)
+            hits, matched["messages"] = self.messages(query, chats, since, until, order, wanted_hits, timeout_s)
             found.append(hits)
         derived = wanted & {"ocr", "transcription"}
         if derived:
-            hits = self.derived.search(query, chats, since, until, derived, limit + offset)
+            hits = self.derived.search(query, chats, since, until, derived, wanted_hits, order=order)
             matched.update({name: sum(hit["source"] == name for hit in hits) for name in sorted(derived)})
             found.append(hits)
         merged = found[0] if len(found) == 1 else fused(found, order)
-        return {"hits": merged[offset:offset + limit],
-                "next_offset": offset + limit if len(merged) > offset + limit else None,
+        more = len(merged) > end and end < 1000
+        return {"hits": merged[offset:end], "next_offset": end if more else None,
                 "matched": matched, "query": query.explain(), "index": self.status(public=public), "order": order}
 
     def ready(self):
@@ -930,18 +952,25 @@ class DerivedIndex:
             self.db.close()
         self.db, self.signature, self.items = db, signature, items
 
-    def search(self, query, chats, since, until, engines, limit):
+    def search(self, query, chats, since, until, engines, limit, *, order="relevance"):
         if chats is not None and not chats or query.senders or query.usernames or query.message_ids or query.kinds:
             return []
         expression = query.expression(chats if chats is not None and len(chats) <= 500 else None, None, None, engines)
         with self.lock:
             self.refresh()
             try:
-                rows = self.db.execute("SELECT rowid, " + RANK + " FROM fulltext WHERE fulltext MATCH ? ORDER BY 2",
+                rows = self.db.execute("SELECT rowid, " + RANK + " FROM fulltext WHERE fulltext MATCH ? ORDER BY 2, rowid",
                                        (expression,)).fetchall()
             except sqlite3.OperationalError:
                 raise ValueError("This search could not be read. Remove special characters and retry.") from None
             items = dict(self.items)
+        if order == "newest":
+            def observed_seq(row):
+                seq = items.get(row[0], {}).get("event_seq")
+                return seq if type(seq) is int else -1
+            # Select the newest candidates before applying the page limit;
+            # sorting a relevance-limited prefix can miss or repeat results.
+            rows.sort(key=observed_seq, reverse=True)
         hits = []
         for rowid, score in rows:
             item = items.get(rowid)

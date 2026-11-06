@@ -67,7 +67,7 @@ def test_word_forms_share_one_term():
     assert terms == {"перевод"}
     assert fulltext.tokens("Running transfers")[1][0] == fulltext.tokens("transfer")[0][0]
     assert fulltext.tokens("кaрта")[0][0] == fulltext.tokens("карта")[0][0], "Latin look-alike letter"
-    assert fulltext.tokens("ＢＡＮＫ ба​нк")[0][0] == "bank" and fulltext.tokens("ба​нк")[0][0] == "банк"
+    assert fulltext.tokens("ＢＡＮＫ ба\u200bнк")[0][0] == "bank" and fulltext.tokens("ба\u200bнк")[0][0] == "банк"
 
 
 def test_requirements_examples(journal):
@@ -275,6 +275,92 @@ def test_ask_the_archive_uses_ranked_retrieval(journal):
     store.fulltext.configure("off")
     fallback = retrieve(reader(store, None), question, 64000)
     assert fallback["retrieval"] == "lexical"
+
+
+def test_ranked_results_page_through_every_match(journal):
+    _, store = journal
+    for number in range(30):
+        store.append("message.new", {"text": "Платёж номер " + str(number)}, OTHER, 300 + number)
+    pages, offset = [], 0
+    while offset is not None:
+        result = store.fulltext.search("платёж", limit=12, offset=offset)
+        pages.append([hit["event"]["seq"] for hit in result["hits"]])
+        offset = result["next_offset"]
+    assert [len(page) for page in pages] == [12, 12, 6] and len({s for page in pages for s in page}) == 30
+    assert store.fulltext.search("платёж", limit=10, offset=1000)["next_offset"] is None
+    scoped = reader(store, [OTHER]).read(ArchiveQuery(tool="search_messages", query="платёж", ranked=True, limit=20))
+    assert len(scoped["items"]) == 20 and scoped["next_offset"] == 20
+    rest = reader(store, [OTHER]).read(ArchiveQuery(tool="search_messages", query="платёж", ranked=True, limit=20,
+                                                    offset=20))
+    assert len(rest["items"]) == 10 and rest["next_offset"] is None
+
+
+def test_ranked_pagination_stays_inside_the_result_window(journal):
+    _, store = journal
+    with store.transaction():
+        for number in range(1005):
+            store.append("message.new", {"text": "PaginationSentinel"}, OTHER, 2000 + number)
+    penultimate = store.fulltext.search("PaginationSentinel", limit=50, offset=900)
+    assert len(penultimate["hits"]) == 50 and penultimate["next_offset"] == 950
+    last = store.fulltext.search("PaginationSentinel", limit=200, offset=950)
+    assert len(last["hits"]) == 50 and last["next_offset"] is None
+    end = store.fulltext.search("PaginationSentinel", limit=20, offset=1000)
+    assert not end["hits"] and end["next_offset"] is None
+    with pytest.raises(ValueError, match="1,000"):
+        reader(store, [OTHER]).read(ArchiveQuery(tool="search_messages", query="PaginationSentinel", ranked=True,
+                                               offset=1001))
+
+
+@pytest.mark.parametrize("sources", [("ocr",), ("transcription",), ("messages", "ocr", "transcription")])
+def test_newest_pages_keep_recognition_and_message_order(journal, sources):
+    vault, store = journal
+    expected = []
+    for number in range(12):
+        event = store.append("message.new", {"text": "Needle"}, CHAT, 3000 + number)
+        if "messages" in sources:
+            expected.append(event["seq"])
+        engine = "ocr" if number % 2 == 0 else "transcription"
+        seq = derived_job(store, vault, CHAT, f"{number:032x}", "Needle", engine)
+        if engine in sources:
+            expected.append(seq)
+    observed, offset = [], 0
+    while offset is not None:
+        result = store.fulltext.search("Needle", sources=sources, order="newest", limit=3, offset=offset)
+        observed.extend(hit["event"]["seq"] for hit in result["hits"])
+        offset = result["next_offset"]
+    assert observed == sorted(expected, reverse=True)
+
+
+@pytest.mark.parametrize("text", ["ß" * 50 + " needle" + "\u200b" * 50,
+                                  "x\u200b" * 50 + " needle " + "ß" * 50,
+                                  "prefix e\u0301 needle", "prefix \ufb00 needle"],
+                         ids=["expansion-before-removal", "removal-before-expansion", "combining", "ligature"])
+def test_match_offsets_survive_combined_unicode_changes(text):
+    assert fulltext.focus(text, fulltext.Query("needle")) == text.index("needle")
+
+
+def test_long_questions_still_use_the_index(journal):
+    _, store = journal
+    now = datetime.now(timezone.utc)
+    for question in (" ".join(["Скажи пожалуйста, какие переводы обсуждали участники этого чата?"] * 8),
+                     "Какие переводы " + "очень " * 150):
+        body = Question(workspace="default", chats=[CHAT, OTHER], question=question[:1000],
+                        since=now - timedelta(days=1), until=now + timedelta(minutes=1))
+        result = retrieve(reader(store, None), body, 64000)
+        assert result["retrieval"] == "ranked" and result["sources"], len(question)
+    filters = Question(workspace="default", chats=[CHAT], question="Что было?", query="chat:abc",
+                       since=now - timedelta(days=1), until=now + timedelta(minutes=1))
+    assert retrieve(reader(store, None), filters, 64000)["retrieval"] == "lexical", "Unreadable queries fall back"
+
+
+def test_excerpt_follows_the_match_past_invisible_characters(journal):
+    _, store = journal
+    hidden = "x\u200b" * 2600 + " перевод в самом конце"
+    store.append("message.new", {"text": hidden}, CHAT, 400)
+    result = reader(store, None).read(ArchiveQuery(tool="search_messages", query="конце", ranked=True))
+    item = next(i for i in result["items"] if i["source"]["message_id"] == 400)
+    assert "перевод в самом конце" in item["text"] and item["text_offset"] > 0
+    assert hidden[item["text_offset"] + item["match_offset"]:].startswith("конце")
 
 
 def test_api_and_scoped_access(tmp_path):
