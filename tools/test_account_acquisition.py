@@ -17,6 +17,64 @@ from tools.test_file_hash_export import CONTENT, ExportTransport, HashClient
 from tgwitness import file_hashes
 
 
+@pytest.mark.parametrize("interruption", ["pause", "retry"])
+def test_attachment_progress_is_live_uncommitted_and_resets(tmp_path, interruption):
+    from unittest.mock import AsyncMock
+
+    async def run():
+        vault, store = Vault(tmp_path), Store(tmp_path)
+        store.bind(vault)
+        store.set_setting("account", {"id": 70000})
+        collector = SyntheticCollector()
+        collector.restore = AsyncMock()
+        collector.store = store
+        export = AccountExport(collector, store, vault)
+        entered, release = asyncio.Event(), asyncio.Event()
+        attempts = []
+
+        class Network(ExportTransport):
+            async def download(self, media, stream, progress, task):
+                attempts.append(export.public()["transfer"])
+                if len(attempts) == 1:
+                    stream.write(CONTENT[:2])
+                    await progress(2, len(CONTENT))
+                    entered.set()
+                    await release.wait()
+                    raise ConnectionError("Retry the interrupted transfer")
+                stream.write(CONTENT)
+                await progress(len(CONTENT), len(CONTENT))
+                return stream
+
+        export.transport_factory = Network
+        try:
+            job = await export.start({"transport": "regular", "include_profile": False, "include_contacts": False})
+            await asyncio.wait_for(entered.wait(), 10)
+            state = export.public()
+            assert state["transfer"]["received_bytes"] == 2
+            assert state["transfer"]["total_bytes"] == len(CONTENT)
+            assert state["counts"]["bytes_saved"] == 0
+            export.persist()
+            assert "transfer" not in json.loads((export.directory(job["id"]) / "status.json").read_bytes())
+            if interruption == "pause":
+                await export.pause(job["id"])
+                assert export.public()["transfer"] is None
+                assert not list((export.directory(job["id"]) / "media").glob("pending-*"))
+                await export.resume(job["id"])
+            else:
+                release.set()
+            await asyncio.wait_for(export.task, 10)
+            assert len(attempts) == 2
+            assert attempts[1]["received_bytes"] == 0
+            assert attempts[1]["attempt"] == (1 if interruption == "pause" else 2)
+            assert collector.restore.await_count == (0 if interruption == "pause" else 1)
+            assert export.public()["transfer"] is None
+            assert verify_account_export(export.result_path(job["id"]), fingerprint(vault.public_key))["complete_within_scope"]
+        finally:
+            await export.close()
+            store.close()
+    asyncio.run(run())
+
+
 def test_finished_approval_wait_stays_partial_on_resume(tmp_path):
     from telethon.errors import TakeoutInitDelayError
 

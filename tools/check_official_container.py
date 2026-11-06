@@ -1,6 +1,5 @@
 """Linux acceptance: actual sandboxed Chromium, Xvfb, FFmpeg and isolated networking."""
 import argparse
-import json
 import os
 from pathlib import Path
 import subprocess
@@ -14,13 +13,14 @@ sys.path.insert(0, str(ROOT))
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--image", default="tgwitness-official-check")
+    parser.add_argument("--direct", action="store_true", help="Also exercise explicit direct access to the real public login page")
     args = parser.parse_args()
     # The fixture is synthetic; its public DOM boundaries match the reviewed adapter.
     import importlib.util
     spec = importlib.util.spec_from_file_location("official_test", ROOT / "addons/capture/tests/test_official.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    script = "FIXTURE = " + json.dumps(module.FIXTURE) + "\n" + r'''
+    script = "DIRECT = " + repr(args.direct) + "\nFIXTURE = " + repr(module.FIXTURE) + "\n" + r'''
 import asyncio, importlib.util, json, socket, time, zipfile
 from pathlib import Path
 from tgwitness_capture.official import OfficialBrowser, OfficialOptions
@@ -31,6 +31,8 @@ from tgwitness_capture.verify import verify_zip
 assert importlib.util.find_spec('telethon') is None
 assert importlib.util.find_spec('pyrogram') is None
 for host, family in [('1.1.1.1', socket.AF_INET), ('2606:4700:4700::1111', socket.AF_INET6)]:
+    if DIRECT:
+        break
     with socket.socket(family, socket.SOCK_STREAM) as stream:
         stream.settimeout(2)
         try:
@@ -40,8 +42,24 @@ for host, family in [('1.1.1.1', socket.AF_INET), ('2606:4700:4700::1111', socke
         else:
             raise AssertionError('Direct external network access is available')
 async def main():
+    if DIRECT:
+        live_journal = Journal('/tmp/live-login-check')
+        live = OfficialBrowser(OfficialOptions(egress='direct', drand=False), live_journal)
+        try:
+            await live.open()
+            for _ in range(60):
+                if await live.login_state() == 'qr':
+                    break
+                await asyncio.sleep(.5)
+            assert await live.login_state() == 'qr', 'Real official QR login did not load'
+            assert live.exit_ip
+            print('PASS: explicit direct route and real official Telegram QR login page; no account login')
+        finally:
+            await live.close()
+            live_journal.close()
     journal=Journal('/tmp/check-records')
-    browser=OfficialBrowser(OfficialOptions(proxy_server='http://127.0.0.1:9',drand=False),journal)
+    route_options = {'egress':'direct'} if DIRECT else {'proxy_server':'http://127.0.0.1:9'}
+    browser=OfficialBrowser(OfficialOptions(**route_options,drand=False),journal)
     real_route=browser._route
     async def route(original):
         class FixtureRoute:
@@ -94,7 +112,7 @@ async def main():
         decrypt_file(out/'delivery.tgwsealed','/tmp/delivery.zip',recipient)
         with zipfile.ZipFile('/tmp/delivery.zip') as handoff:
             assert handoff.read('evidence.zip')==(out/'evidence.zip').read_bytes()
-        print('PASS: Chromium sandbox, denied IPv4/IPv6 egress, guarded DOM, Xvfb video with overlay, signed segments, standalone verification, encrypted connection and evidence delivery roundtrip')
+        print('PASS: Chromium sandbox, '+('explicit direct route' if DIRECT else 'denied IPv4/IPv6 egress')+', guarded DOM, Xvfb video with overlay, signed segments, standalone verification, encrypted connection and evidence delivery roundtrip')
     finally:
         video.abort()
         await browser.close()
@@ -102,13 +120,13 @@ async def main():
 asyncio.run(main())
 '''
     network = "official-check-" + uuid.uuid4().hex[:12]
-    subprocess.run(["docker", "network", "create", "--internal", network], check=True, capture_output=True)
+    subprocess.run(["docker", "network", "create", *([] if args.direct else ["--internal"]), network], check=True, capture_output=True)
     try:
         result = subprocess.run(["docker", "run", "--rm", "--init", "-i", "--network", network,
                         "--user", str(os.getuid()) + ":" + str(os.getgid()), "--read-only", "--cap-drop=ALL",
                         "--security-opt=no-new-privileges", "--security-opt", "seccomp=" + str(ROOT / "addons/capture/deploy/official-seccomp.json"),
                         "--tmpfs", "/tmp:rw,nosuid,nodev,size=1g", "--shm-size=1g", "--pids-limit=512", "--memory=4g",
-                        args.image, "python", "-"], input=script, text=True, timeout=120,
+                        args.image, "python", "-"], input=script, text=True, timeout=180,
                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
         print(result.stdout)
         if result.returncode or "PASS: Chromium sandbox" not in result.stdout:

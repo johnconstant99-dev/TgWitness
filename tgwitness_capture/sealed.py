@@ -17,6 +17,10 @@ def create_sealed_app(root, output, session):
     if (session.get("client") != "official_web" or not re.fullmatch(r"[A-Za-z0-9_-]{43}", session.get("token", ""))
             or type(session.get("seconds")) is not int or not 60 <= session["seconds"] <= 7200):
         raise ValueError("Invalid official-client session")
+    egress = session.get("egress", "proxy")
+    if egress not in {"proxy", "direct"}:
+        raise ValueError("Invalid official-client egress")
+    direct = egress == "direct"
     for path in (root, output):
         if path.exists() and any(path.iterdir()):
             raise ValueError("A sealed official-client session requires empty data and output directories")
@@ -24,8 +28,11 @@ def create_sealed_app(root, output, session):
     durable_write(root / "control-token.txt", session["token"].encode(), exclusive=True)
     config = Config(
         kind="browser", operator="recipient", public_origin=session["public_origin"],
-        route_label="Isolated browser network through one required upstream; periodic IP checks",
-        official={"proxy_server": "http://official-gateway:3128", "expected_ip": session.get("expected_ip", ""),
+        route_label=("Explicit direct connection; runner public IP is exposed; periodic IP checks" if direct else
+                     "Isolated browser network through one required upstream; periodic IP checks"),
+        official={"egress": "direct" if direct else "http",
+                  "proxy_server": "" if direct else "http://official-gateway:3128",
+                  "expected_ip": session.get("expected_ip", ""),
                   "session_minutes": session["seconds"] // 60, "require_video": True},
         video_input_args=["-f", "x11grab", "-framerate", "12", "-video_size", "1280x720", "-i", ":99.0"])
     app = create_app(root, config)
@@ -37,7 +44,8 @@ def create_sealed_app(root, output, session):
             recorder = app.state.recorder
             recorder.journal.append("official.sealed_started", {"context": session["context"],
                                     "client": "official_web", "session_import_allowed": False,
-                                    "upstream": session["upstream_public"], "network": "isolated-required-proxy",
+                                    "upstream": session["upstream_public"],
+                                    "network": "explicit-direct" if direct else "isolated-required-proxy",
                                     "authority": "verify the external GitHub attestation and approved workflow"})
             deadline = time.monotonic() + session["seconds"]
 

@@ -1,6 +1,7 @@
 import re
 
 from . import keyboard
+from . import ephemeral
 
 ENTITY_TYPES = {"MessageEntityTextUrl": "text_link", "MessageEntityUrl": "link", "MessageEntityMention": "mention",
                 "MessageEntityMentionName": "mention_name", "MessageEntityEmail": "email",
@@ -116,6 +117,8 @@ def media_info(media):
         info.update(url=webpage.get("url"), site_name=webpage.get("site_name"), title=webpage.get("title"))
     if media.get("ttl_seconds"):
         info["self_destruct_seconds"] = media["ttl_seconds"]
+    if facts := ephemeral.describe(media):
+        info["ephemeral_media"] = facts
     return {k: v for k, v in info.items() if v not in (None, "")}
 
 

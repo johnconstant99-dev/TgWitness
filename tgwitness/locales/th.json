@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "ไฟล์ปัจจุบัน：รับแล้ว {received} จาก {total}．จะเก็บรักษาเมื่อดาวน์โหลดเสร็จ．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "อนุญาตการส่งออกนี้ใน Telegram บนอุปกรณ์อื่นที่ลงชื่อเข้าใช้ก่อนคำขอนี้．เซสชันที่ส่งคำขอและการลงชื่อเข้าใช้ใหม่ไม่สามารถอนุมัติได้．จากนั้นตรวจสอบการอนุมัติ หรือคงเซสชันนี้ไว้แล้วดำเนินการต่อหลังเวลาที่แสดง．",
 "(No text in this version)": "(ไม่มีข้อความในเวอร์ชันนี้)",
 "(no saved text)": "(ไม่มีข้อความที่บันทึกไว้)",
 "(no text)": "(ไม่มีข้อความ)",

@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "현재 파일：전체 {total} 중 {received} 수신．다운로드가 끝나면 보존됩니다．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "이 요청 이전에 로그인한 다른 기기의 Telegram에서 내보내기를 허용하세요．요청을 보낸 세션이나 새 로그인으로는 승인할 수 없습니다．그런 다음 승인을 확인하거나，이 세션을 유지하고 표시된 대기 시간이 지난 후 계속하세요．",
 "(No text in this version)": "(이 버전에는 텍스트가 없습니다)",
 "(no saved text)": "(저장된 텍스트 없음)",
 "(no text)": "(텍스트 없음)",

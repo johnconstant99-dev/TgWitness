@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "הקובץ הנוכחי：התקבלו {received} מתוך {total}．הקובץ יישמר לאחר השלמת ההורדה．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "יש לאשר את הייצוא ב־Telegram במכשיר אחר שכבר היה מחובר לפני הבקשה．ההפעלה שביקשה את הייצוא וכניסה חדשה אינן יכולות לאשר אותו．לאחר מכן יש לבדוק את האישור，או לשמור על ההפעלה הזאת ולהמשיך לאחר זמן ההמתנה המוצג．",
 "(No text in this version)": "(אין טקסט בגרסה זו)",
 "(no saved text)": "(אין טקסט שמור)",
 "(no text)": "(ללא טקסט)",

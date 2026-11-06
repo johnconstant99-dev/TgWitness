@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "当前文件：已接收 {received}，共 {total}．下载完成后保存．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "请在提出请求前就已登录的另一台设备上打开 Telegram 并允许此次导出．发起请求的会话和新登录的会话无法批准．随后检查批准状态，或保留此会话并在显示的等待期限结束后继续．",
 "TgWitness · Observation workspace": "TgWitness · 观察工作区",
 "Open your workspace": "打开您的工作区",
 "Paste your panel access token to continue.": "请粘贴您的面板访问令牌以继续。",

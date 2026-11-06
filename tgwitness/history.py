@@ -331,6 +331,8 @@ class History:
                 client = self.collector.client
                 try:
                     await self.read_page(job)
+                    await self.collector.download_worker("ephemeral", owner="history:" + run_id,
+                        history_run=run_id, client_for_job=media_client)
                     retain_checkpoint(self.store, self.collector.vault)
                 except (TakeoutInitDelayError, TakeoutInvalidError, ServerError):
                     raise

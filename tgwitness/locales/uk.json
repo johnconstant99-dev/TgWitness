@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "Поточний файл：отримано {received} із {total}．Файл зберігається після завершення завантаження．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "Дозвольте експорт у Telegram на іншому пристрої，де вхід було виконано до цього запиту．Сесія，що запитує експорт，і новий вхід не можуть його підтвердити．Потім перевірте підтвердження або збережіть цю сесію та продовжте після вказаного строку．",
 "TgWitness · Observation workspace": "TgWitness · Робоча область спостереження",
 "Open your workspace": "Відкрийте робочу область",
 "Paste your panel access token to continue.": "Вставте свій токен доступу до панелі, щоб продовжити.",

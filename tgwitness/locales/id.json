@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "Berkas saat ini：{received} diterima dari {total}．Disimpan setelah unduhan selesai．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "Izinkan ekspor ini di Telegram pada perangkat lain yang sudah masuk sebelum permintaan ini．Sesi yang meminta ekspor dan login baru tidak dapat menyetujuinya．Lalu periksa persetujuan，atau pertahankan sesi ini dan lanjutkan setelah batas waktu yang ditampilkan．",
 "TgWitness · Observation workspace": "TgWitness · Ruang kerja pengamatan",
 "Open your workspace": "Buka ruang kerja Anda",
 "Paste your panel access token to continue.": "Tempelkan token akses panel Anda untuk melanjutkan.",

@@ -1,4 +1,6 @@
 [
+  "Current file：{received} received of {total}．Preserved after the download completes．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．",
   "(no saved text)",
   "(no text)",
   "(or that of the tunnel or VPN it uses)",
@@ -2834,5 +2836,18 @@
   "… and {n} more, listed in authors.csv and authors.json.",
   "… and {n} more, listed in manifest.json and SHA256SUMS.",
   "… and {n} more, listed under Records.",
-  "🔓 Unlock in mode: {mode}"
+  "🔓 Unlock in mode: {mode}",
+  "Self-destructing media",
+  "Attachment unavailable when observed",
+  "File hashes; content not downloaded",
+  "File not preserved",
+  "File preserved",
+  "Preservation pending",
+  "Include self-destructing media from excluded types",
+  "Saving this attachment does not establish that a person viewed it.",
+  "Self-destructing media bypasses type and duration exclusions．Size limits still apply；a later download may be impossible．Metadata-only and hash-only modes remain unchanged．",
+  "Self-destructing media may disappear before another attempt.",
+  "Self-destructing media：{n} s",
+  "View-once media",
+  "Available files are saved after their messages，with the result recorded in the journal．"
 ]

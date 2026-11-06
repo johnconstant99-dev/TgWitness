@@ -2,6 +2,16 @@
 from .format import canonical, digest
 
 
+def route_binding(settings):
+    egress = settings.get("egress")
+    if (egress not in {"direct", "http", "socks5", "cloudflare_warp"}
+            or (egress == "direct" and (settings.get("proxy_server") != ""
+                                        or settings.get("has_proxy_credentials") is not False))
+            or (egress != "direct" and not settings.get("proxy_server"))):
+        raise ValueError("Invalid official-client egress binding")
+    return egress, settings.get("proxy_server")
+
+
 def official_report(events, expected=None):
     from .beacon import records
     starts = [e for e in events if e["kind"] == "official.started"]
@@ -18,6 +28,11 @@ def official_report(events, expected=None):
             raise ValueError("Unsupported expected official-client settings")
         expected_options = expected["options"]
     reasons = []
+    route = None
+    for event in opened:
+        settings = event["payload"].get("settings")
+        if isinstance(settings, dict):
+            route = route_binding(settings)
     if not starts:
         if expected_options is not None:
             raise ValueError("No recorded interval confirms the expected settings")
@@ -29,6 +44,10 @@ def official_report(events, expected=None):
                 or settings.get("mode") not in {"passive", "paced"} or settings.get("direct_fallback") is not False
                 or payload.get("recording_starts_after_login") is not True):
             raise ValueError("Invalid official-client settings binding")
+        current_route = route_binding(settings)
+        if route is not None and current_route != route:
+            raise ValueError("Official-client route changed during the procedure")
+        route = current_route
         if expected_options is not None and settings != expected_options:
             raise ValueError("Official-client settings differ from the independently expected settings")
         if expected is not None and payload.get("source") != expected["source"]:
@@ -76,6 +95,9 @@ def official_report(events, expected=None):
     if any(e["payload"]["settings"].get("drand") for e in starts) and not beacons:
         reasons.append("no_public_beacon")
     return {"mode": starts[0]["payload"]["settings"]["mode"] if starts else None,
+            "egress": route[0] if route else None,
+            "ip_exposure": ("runner or host public IP exposed" if route and route[0] == "direct" else
+                            "configured upstream; independently verify its routing"),
             "settings_checked": expected_options is not None, "intervals": len(starts),
             "video_segments": sum(len(s["indices"]) for s in sessions.values()),
             "procedure_status": "INCOMPLETE" if reasons else "PASS", "reasons": reasons,

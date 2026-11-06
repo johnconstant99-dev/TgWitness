@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "Joriy fayl：{total} dan {received} olindi．Yuklab olish tugagach saqlanadi．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "Ushbu so‘rovdan oldin tizimga kirilgan boshqa qurilmada Telegram’ni ochib，eksportga ruxsat bering．So‘rov yuborgan sessiya va yangi kirish uni tasdiqlay olmaydi．Keyin tasdiqni tekshiring yoki bu sessiyani saqlab，ko‘rsatilgan muddatdan keyin davom eting．",
 "(No text in this version)": "(Ushbu versiyada matn yo'q)",
 "(no saved text)": "(saqlangan matn yo'q)",
 "(no text)": "(matn yo'q)",

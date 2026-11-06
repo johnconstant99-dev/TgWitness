@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "目前檔案：已接收 {received}，共 {total}．下載完成後儲存．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "請在提出要求前就已登入的另一部裝置上開啟 Telegram 並允許此次匯出．發起要求的工作階段和新登入的工作階段無法核准．接著檢查核准狀態，或保留此工作階段並在顯示的等候期限結束後繼續．",
 "(No text in this version)": "（此版本中無文字）",
 "(no saved text)": "（無儲存文字）",
 "(no text)": "（無文字）",

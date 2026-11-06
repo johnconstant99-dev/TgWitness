@@ -20,6 +20,11 @@ on:
         description: Official Web requires an HTTP or SOCKS5 upstream, without credentials
         type: string
         default: ''
+      official_egress:
+        description: Proxy by default; direct exposes the runner public IP to Telegram
+        type: choice
+        default: proxy
+        options: [proxy, direct]
       official_expected_ip:
         description: Optional required exit IP for the official client
         type: string
@@ -36,12 +41,13 @@ jobs:
       id-token: write # Pass OIDC identity to the approved attestation job.
       attestations: write # Let the approved collector store its signed attestation.
     # The user owns this caller, but the verifier requires the upstream signer below.
-    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@c74542ba2a647962186a929991e1ec06993aac2d
+    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@65f8476e046ba3399691963e53fb64b9dae193c3 # zizmor: ignore[stale-action-refs] Internal signer commits are approved by sealed_policy.json and checked against Git history.
     with:
       recipient: ${{ inputs.recipient }}
       session_minutes: ${{ inputs.session_minutes }}
       client: ${{ inputs.client }}
       official_proxy: ${{ inputs.official_proxy }}
+      official_egress: ${{ inputs.official_egress }}
       official_expected_ip: ${{ inputs.official_expected_ip }}
     secrets:
       official_proxy_username: ${{ secrets.OFFICIAL_PROXY_USERNAME }}

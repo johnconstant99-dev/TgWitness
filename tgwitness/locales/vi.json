@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "Tệp hiện tại：đã nhận {received} trên {total}．Tệp được lưu giữ sau khi tải xong．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "Cho phép xuất dữ liệu này trong Telegram trên thiết bị khác đã đăng nhập trước yêu cầu．Phiên gửi yêu cầu và lần đăng nhập mới không thể phê duyệt．Sau đó kiểm tra phê duyệt，hoặc giữ phiên này và tiếp tục sau thời hạn hiển thị．",
 "TgWitness · Observation workspace": "TgWitness · Không gian làm việc quan sát",
 "Open your workspace": "Mở không gian làm việc của quý vị",
 "Paste your panel access token to continue.": "Vui lòng dán mã thông báo truy cập bảng điều khiển của quý vị để tiếp tục.",

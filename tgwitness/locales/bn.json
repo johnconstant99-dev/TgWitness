@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "বর্তমান ফাইল：{total} এর মধ্যে {received} পাওয়া গেছে．ডাউনলোড শেষ হলে সংরক্ষিত হবে．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "এই অনুরোধের আগে সাইন ইন করা অন্য একটি ডিভাইসে Telegram খুলে এই এক্সপোর্টের অনুমতি দিন．অনুরোধকারী সেশন এবং নতুন সাইন ইন এটি অনুমোদন করতে পারে না．তারপর অনুমোদন পরীক্ষা করুন，অথবা এই সেশনটি রেখে প্রদর্শিত সময়সীমার পরে চালিয়ে যান．",
 "(No text in this version)": "(এই সংস্করণে কোনো পাঠ্য নেই)",
 "(no saved text)": "(কোনও সংরক্ষিত পাঠ্য নেই)",
 "(no text)": "(কোনও পাঠ্য নেই)",

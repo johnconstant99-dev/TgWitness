@@ -39,6 +39,9 @@ class BrowserCapture:
                     await session.detach()
         return result
 
+    async def rendered_text(self, page):
+        return await page.locator("body").inner_text(timeout=10000)
+
     async def capture(self, journal, settings, max_interval, force=False):
         candidates = [(page, target, url) for page, target, url in await self.targets()
                       if (self.target_id == target if self.target_id else self.prefix and url.startswith(self.prefix))]
@@ -47,7 +50,7 @@ class BrowserCapture:
         page, target, url = candidates[0]
         page.set_default_timeout(10000)
         observed = utcnow()
-        text = await page.locator("body").inner_text(timeout=10000)
+        text = await self.rendered_text(page)
         state = digest(canonical({"target": target, "url": url, "text": text}))
         if not force and state == self.last_state and time.monotonic() - self.last_capture < max_interval:
             return None

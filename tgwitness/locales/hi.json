@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "मौजूदा फ़ाइल：{total} में से {received} प्राप्त हुए．डाउनलोड पूरा होने पर सुरक्षित रखी जाएगी．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "Telegram में किसी दूसरे ऐसे डिवाइस पर इस निर्यात की अनुमति दें जिस पर इस अनुरोध से पहले साइन इन किया गया था．अनुरोध करने वाला सत्र और नया साइन इन इसे मंज़ूरी नहीं दे सकते．फिर मंज़ूरी जाँचें，या यह सत्र बनाए रखें और दिखाई गई समय सीमा के बाद जारी रखें．",
 "TgWitness · Observation workspace": "TgWitness · अवलोकन कार्यक्षेत्र",
 "Open your workspace": "अपना कार्यक्षेत्र खोलें",
 "Paste your panel access token to continue.": "जारी रखने के लिए अपने पैनल एक्सेस टोकन को पेस्ट करें।",

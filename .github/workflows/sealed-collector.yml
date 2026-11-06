@@ -19,6 +19,10 @@ on:
         description: Required HTTP or SOCKS5 upstream for official_web, without credentials
         default: ''
         type: string
+      official_egress:
+        description: proxy or explicitly selected direct, which exposes the runner public IP
+        default: proxy
+        type: string
       official_expected_ip:
         description: Optional required public exit IP for official_web
         default: ''
@@ -49,7 +53,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: phishdestroy/TgWitness
-          ref: 316119b21f272184d1d602a9a7c6cd30a18b64d5
+          ref: 33176ef0eac0c4d05151f69923da1b292cdbf4fb
           path: trusted-source
           persist-credentials: false
           submodules: false
@@ -61,6 +65,7 @@ jobs:
           SESSION_MINUTES: ${{ inputs.session_minutes }}
           CAPTURE_CLIENT: ${{ inputs.client }}
           OFFICIAL_PROXY_SERVER: ${{ inputs.official_proxy }}
+          OFFICIAL_EGRESS: ${{ inputs.official_egress }}
           OFFICIAL_EXPECTED_IP: ${{ inputs.official_expected_ip }}
           OFFICIAL_PROXY_USERNAME: ${{ secrets.official_proxy_username }}
           OFFICIAL_PROXY_PASSWORD: ${{ secrets.official_proxy_password }}

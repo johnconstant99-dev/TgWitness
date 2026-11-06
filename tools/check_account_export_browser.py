@@ -173,8 +173,13 @@ def main():
             assert starts[0]["max_media_file_mib"] == 64 and starts[0]["max_total_gib"] == 8
             assert starts[0]["transport"] == "regular" and starts[0]["include_profile_photos"] is True
             assert "video" not in starts[0]["media_types"]
+            jobs[0]['transfer']={'received_bytes':1048576,'total_bytes':67108864,'kind':'document','attempt':1}
+            page.evaluate('pollWorkspace()')
+            expect(page.locator('.account-export-transfer')).to_contain_text('1.0 MB received of 64.0 MB')
             page.locator('[data-account-export-action="pause"]').click()
             expect(page.locator("#account-export-jobs")).to_contain_text("Paused")
+            expect(page.locator('.account-export-transfer')).to_have_count(0)
+            jobs[0].pop('transfer')
             expect(page.locator('.account-export-next')).to_contain_text('Progress is saved')
             page.locator('[data-account-export-action="resume"]').click()
             expect(page.locator("#account-export-jobs")).to_contain_text("Reading Telegram")
@@ -182,6 +187,7 @@ def main():
             page.evaluate("pollWorkspace()")
             expect(page.locator('[data-account-export-action="resume"]')).to_have_text('Check approval')
             expect(page.locator('.account-export-next')).to_contain_text('allow this export')
+            expect(page.locator('.account-export-next')).to_contain_text('another device')
             # An unchanged API response still needs to reveal Resume when the wait expires.
             page.evaluate("""()=>{window.realExportNow=Date.now;Date.now=()=>Date.parse('2099-11-03T12:00:00Z');}""")
             page.evaluate("pollWorkspace()")

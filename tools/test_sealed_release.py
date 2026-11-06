@@ -70,3 +70,18 @@ def test_pinned_commits_match_the_tested_runtime(tmp_path, runtime_input):
     write(tmp_path, COLLECTOR, (tmp_path / COLLECTOR).read_text() + "# Later workflow edit\n")
     with pytest.raises(ValueError, match="pinned signer commit"):
         validate(tmp_path, git_history=True)
+
+
+def test_inline_audit_comment_preserves_signer_enforcement(tmp_path):
+    pair(tmp_path, "a" * 40, "b" * 40)
+    caller = (tmp_path / CALLER).read_text().rstrip()
+    comment = " # zizmor: ignore[stale-action-refs] Approved internal commit, not a release tag.\n"
+    write(tmp_path, CALLER, caller + comment)
+    assert validate(tmp_path)["workflow_sha"] == "a" * 40
+    for replacement in ("d" * 40, "main"):
+        write(tmp_path, CALLER, caller.replace("a" * 40, replacement) + comment)
+        with pytest.raises(ValueError):
+            validate(tmp_path)
+    write(tmp_path, CALLER, caller + " unexpected" + comment)
+    with pytest.raises(ValueError, match="immutable caller pin"):
+        validate(tmp_path)

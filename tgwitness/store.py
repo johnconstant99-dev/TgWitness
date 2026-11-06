@@ -556,12 +556,17 @@ class Store:
             job["attempts"] += 1
             return job
 
-    def next_history_media_attempt(self, account_id, run_id):
+    def next_history_media_attempt(self, account_id, run_id, *, min_priority=None, max_priority=None):
+        filters, params = [], [run_id, account_id]
+        for operator, value in ((">=", min_priority), ("<=", max_priority)):
+            if value is not None:
+                filters.append("j.priority" + operator + "?")
+                params.append(value)
         with self.lock:
             return self.db.execute("SELECT min(j.next_attempt) FROM media_jobs j "
                 "JOIN history_items h ON h.message_event=j.message_event JOIN targets t USING(chat_id) "
-                "WHERE h.run_id=? AND j.account_id=? AND t.enabled=1 AND j.state IN ('queued','retry')",
-                (run_id, account_id)).fetchone()[0]
+                "WHERE h.run_id=? AND j.account_id=? AND t.enabled=1 AND j.state IN ('queued','retry')"
+                + (" AND " + " AND ".join(filters) if filters else ""), params).fetchone()[0]
 
     def clear_media_queue(self, through_seq):
         if type(through_seq) is not int or not 0 <= through_seq < 2**53:
@@ -573,7 +578,8 @@ class Store:
                 (through_seq,)).fetchall()
             for row in rows:
                 self.append("media.skipped", {"message_event": row["message_event"],
-                                              "reason": "waiting download cancelled by operator"},
+                                              "reason": "waiting download cancelled by operator",
+                                              **self.ephemeral_outcome(row["message_event"], "not_saved")},
                             row["chat_id"], row["message_id"])
             self.db.execute("UPDATE media_jobs SET state='cancelled',next_attempt=0,last_error='operator_cancelled' "
                             "WHERE state IN ('queued','retry') AND message_event<=?", (through_seq,))
@@ -589,9 +595,19 @@ class Store:
                                                "content_recoverability": "not guaranteed"})
             return count
 
+    def ephemeral_outcome(self, message_event, status):
+        from . import ephemeral
+        with self.lock:
+            row = self.db.execute("SELECT payload FROM events WHERE seq=?", (message_event,)).fetchone()
+        original = json.loads(row[0]) if row else {}
+        facts = original.get("ephemeral_media") or ephemeral.describe((original.get("raw") or {}).get("media"))
+        return ephemeral.outcome(facts, status) if facts else {}
+
     def finish_media(self, job, state, payload, delay=0):
         if state not in ("done", "hashed", "retry", "failed", "skipped"):
             raise ValueError("Invalid media outcome")
+        payload = {**payload, **self.ephemeral_outcome(job["message_event"], {
+            "done": "saved", "hashed": "hashed", "retry": "retry"}.get(state, "not_saved"))}
         with self.transaction():
             self.append({"done": "media.saved", "hashed": "media.hashed", "retry": "media.retry", "failed": "media.failed",
                          "skipped": "media.skipped"}[state],

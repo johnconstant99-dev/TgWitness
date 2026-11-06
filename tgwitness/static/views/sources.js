@@ -96,6 +96,7 @@ export function createSources(context) {
       capture: {
         ...baseline?.capture,
         download_media: find("download-media").checked, max_media_mb: Number(find("max-media").value),
+        preserve_ephemeral_media: find("preserve-ephemeral-media").checked,
         types: Object.fromEntries(media.map(([key]) => [key, {
           enabled: find("media-on-" + key).checked, max_mb: Number(find("media-max-" + key).value),
           ...(Number(find('media-seconds-'+key)?.value) ? {max_seconds:Number(find('media-seconds-'+key).value)} : {}),
@@ -111,6 +112,7 @@ export function createSources(context) {
       for (const key of monitoring) find("monitor-" + key).checked = value[key] ?? (key !== "presence");
     } else if (group === "capture") {
       find("download-media").checked = value.download_media;
+      find("preserve-ephemeral-media").checked = value.preserve_ephemeral_media ?? true;
       find("max-media").value = String(value.max_media_mb);
       for (const [key] of media) {
         const rule = value.types[key] || {enabled: true, max_mb: value.max_media_mb};

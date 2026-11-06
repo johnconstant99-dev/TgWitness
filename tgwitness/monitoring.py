@@ -46,6 +46,7 @@ class Capture(BaseModel):
     media_action: MediaAction = "download"
     oversized_media: Literal["exclude", "hashes_only"] = "exclude"
     messages_first: StrictBool = False
+    preserve_ephemeral_media: StrictBool = True
     record_disabled_media: StrictBool = True
     max_media_mb: int = Field(default=20, ge=1, le=2000)
     types: dict[Literal[MEDIA_TYPES], MediaRule] = Field(default_factory=dict)
@@ -73,6 +74,7 @@ def normalize_capture(previous):
             "media_action": saved.get("media_action", "download"),
             "oversized_media": saved.get("oversized_media", "exclude"),
             "messages_first": bool(saved.get("messages_first", False)),
+            "preserve_ephemeral_media": bool(saved.get("preserve_ephemeral_media", True)),
             "record_disabled_media": bool(saved.get("record_disabled_media", True)),
             "max_media_mb": int(saved.get("max_media_mb") or CAPTURE_DEFAULTS["max_media_mb"]), "types": types}
 
@@ -84,6 +86,16 @@ def media_action(settings, rule, size):
     if action == "download" and size is not None and size > rule["max_mb"] * 1024**2:
         return settings.get("oversized_media", "exclude")
     return action
+
+
+def effective_media_rule(settings, kind, ephemeral_media=None):
+    rule = settings["types"][kind]
+    # A global metadata/hash-only choice still forbids downloading file bytes.
+    # The explicit ephemeral choice bypasses type and duration exclusions, but
+    # retains the configured per-type byte ceiling and disk/FloodWait limits.
+    if ephemeral_media and settings["preserve_ephemeral_media"]:
+        return {"enabled": True, "max_mb": rule["max_mb"], "action": settings["media_action"]}
+    return rule
 
 
 def media_kind(message):

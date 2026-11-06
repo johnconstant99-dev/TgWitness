@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "الملف الحالي：تم استلام {received} من {total}．يُحفظ بعد اكتمال التنزيل．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "اسمح بهذا التصدير في Telegram على جهاز آخر سُجّل الدخول عليه قبل الطلب．لا يمكن للجلسة التي طلبت التصدير أو لتسجيل دخول جديد الموافقة عليه．ثم تحقّق من الموافقة，أو احتفظ بهذه الجلسة واستأنف بعد الموعد المعروض．",
 "TgWitness · Observation workspace": "TgWitness · مساحة عمل المراقبة",
 "Open your workspace": "افتح مساحة العمل الخاصة بك",
 "Paste your panel access token to continue.": "الصق رمز الوصول إلى اللوحة للمتابعة.",

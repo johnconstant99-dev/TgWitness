@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Preserve available self-destructing photos，videos and files in the API journal with a dedicated immediate queue，explicit TTL／view-once labels and signed saved／unavailable／not-saved outcomes．Block read receipts in the API client，including batches and wrapped requests．Keep byte limits，disk reserves and Telegram backoff；saved bytes do not establish human viewing．
+- Preserve image-rendered Unicode emoji in official Web message text，reply previews，reactions and derived page text without changing the client DOM．A live account test exposed the omission；video and saved pages already retained the image．
 - Improve chat-export Takeout, unreadable-message recovery, shared absent-number rechecks and bounded range retries. Preserve observed deletions in export scope, compare verified archives, and distinguish archive integrity from an independently confirmed signer.
 - Protect imported sessions from remote logout, close idle connections and prevent simultaneous reuse of a session key. Add explicit session management and masked two-step password entry; cancellation or switching workspaces prevents submission. Read single-account export messages before their separate attachment stage.
 - Keep source export and AI actions disabled while local source search is pending, empty or has failed; clear stale previews before the next search. Exercise delayed replies explicitly in browser checks.
@@ -15,6 +17,10 @@
 
 ## 0.9.1 preview · 5 November 2026
 
+- Keep message and attachment outcomes visible after single-chat sealed capture，including missing data，failed files and unfinished downloads．Translate final status when changing language after shutdown，and clear connection or export errors once they recover while retaining rejected-action and unconfirmed-revocation warnings．
+- Update the pinned OAuthLib dependency to 4．0．1 for CVE-2026-49272 and regenerate the runtime，browser and MCP hash locks．
+- Show in-flight attachment bytes without counting them as preserved evidence，reset progress on retries and clear it on pause．Keep official-client chat controls disabled during QR／2FA login and until a chat is available．Explain that Takeout approval requires another previously signed-in device．Bound CI dependency installation and avoid the stalled Azure package mirror．
+- Add explicitly selected direct networking for official Web capture through GitHub Actions．Proxy remains the default and never falls back to direct．The panel and signed verification report disclose direct IP exposure，and verification rejects a mismatch between the selected route and the hosted network．
 - Add an optional official Telegram Web observation mode with passive or sequential paced viewing，a fresh profile，restricted UI actions，login-excluded video and signed rendered observations．A required proxy bridge prevents direct fallback；exit changes stop recording．The GitHub Actions mode uses the approved sealed workflow and recipient encryption．
 - Bind official recordings to independently saved source/settings，check video segment order and clean endings，record fresh drand rounds and support independent public-relay comparison．Report unfinished procedures，unconfirmed logout and the limits of local or Cloudflare assurance explicitly．See [Official client witness](OFFICIAL-WITNESS.md) for scope and validation．
 - Add opt-in Trusted Live preview: isolated official Desktop/Web sessions, native JSON preservation, guarded visual recording, per-chat continuity annotations, and verifier-recomputed reports. Supply a Linux network guard with no direct fallback, periodic proxy-routed drand observations, and optional independent read-only Cloudflare samples. Account/WARP/TDX qualification remains pending; see `docs/TRUSTED-LIVE.md`.

@@ -392,7 +392,7 @@ class Minimiser:
             found["buttons"] = {"inline": bool(found["buttons"].get("inline")), "rows": rows}
         if found.get("media_info"):
             technical = {"kind", "mime_type", "size", "document_id", "photo_id", "dc_id", "width", "height",
-                         "duration_seconds", "self_destruct_seconds"}
+                         "duration_seconds", "self_destruct_seconds", "ephemeral_media"}
             textual = {"url", "site_name", "title", "file_name"} if show_text else set()
             if role == "other" and self.o.others != "show":
                 textual.discard("file_name")

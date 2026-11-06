@@ -61,9 +61,15 @@ def start_official(directory, name, config):
     # by Chromium's sandbox. Never launch this client with --no-sandbox.
     if Path("/proc/sys/kernel/apparmor_restrict_unprivileged_userns").exists():
         command(["sudo", "sysctl", "-w", "kernel.apparmor_restrict_unprivileged_userns=0"])
+    egress = os.environ.get("OFFICIAL_EGRESS", "proxy")
+    if egress not in {"proxy", "direct"}:
+        raise ValueError("Official egress must be proxy or explicitly selected direct")
+    direct = egress == "direct"
     upstream = os.environ.get("OFFICIAL_PROXY_SERVER", "")
     parsed = urlsplit(upstream)
-    if (parsed.scheme not in {"http", "socks5"} or not parsed.hostname or not parsed.port
+    if direct and upstream:
+        raise ValueError("Direct mode cannot include a proxy endpoint")
+    if not direct and (parsed.scheme not in {"http", "socks5"} or not parsed.hostname or not parsed.port
             or parsed.username is not None or parsed.password is not None or parsed.path not in {"", "/"}
             or parsed.query or parsed.fragment or len(upstream) > 2048
             or any(ord(c) < 33 or c == "\\" for c in upstream)):
@@ -73,21 +79,25 @@ def start_official(directory, name, config):
         expected = str(ipaddress.ip_address(expected))
     gateway = {"server": upstream, "username": os.environ.get("OFFICIAL_PROXY_USERNAME", ""),
                "password": os.environ.get("OFFICIAL_PROXY_PASSWORD", "")}
-    if any(len(gateway[key].encode()) > 255 for key in ("username", "password")):
+    if not direct and any(len(gateway[key].encode()) > 255 for key in ("username", "password")):
         raise ValueError("Upstream credentials exceed their supported length")
-    write(directory / "config" / "gateway.json", gateway)
-    config.update({"client": "official_web", "expected_ip": expected,
-                   "upstream_public": {"server": upstream, "has_credentials": bool(gateway["username"] or gateway["password"])}})
+    if not direct:
+        write(directory / "config" / "gateway.json", gateway)
+    config.update({"client": "official_web", "egress": egress, "expected_ip": expected,
+                   "upstream_public": {"server": upstream,
+                                       "has_credentials": not direct and bool(gateway["username"] or gateway["password"])}})
     command(["docker", "build", "--file", str(ROOT / "addons/capture/deploy/Dockerfile.official"),
              "--tag", name, str(ROOT)], timeout=1500)
     command(["docker", "network", "create", name])
     command(["docker", "network", "create", "--internal", name + "-private"])
-    command(["docker", "run", "--detach", "--name", name + "-gateway", "--network", name,
-             *restrictions(), "--mount", f"type=bind,src={directory / 'config/gateway.json'},dst=/gateway.json,readonly",
-             "--entrypoint", "python", name, "-m", "tgwitness_capture.gateway", "--config", "/gateway.json"])
-    command(["docker", "network", "connect", "--alias", "official-gateway", name + "-private", name + "-gateway"])
+    if not direct:
+        command(["docker", "run", "--detach", "--name", name + "-gateway", "--network", name,
+                 *restrictions(), "--mount", f"type=bind,src={directory / 'config/gateway.json'},dst=/gateway.json,readonly",
+                 "--entrypoint", "python", name, "-m", "tgwitness_capture.gateway", "--config", "/gateway.json"])
+        command(["docker", "network", "connect", "--alias", "official-gateway", name + "-private", name + "-gateway"])
     # Resolve the public panel origin before opening the recorder. The tunnel has
-    # no control token and cannot bypass the isolated browser's required proxy.
+    # no control token. Proxy mode keeps the browser on its internal network;
+    # explicitly selected direct mode exposes the runner's public exit address.
     command(["docker", "run", "--detach", "--name", name + "-tunnel", "--network", name,
              "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=128", "--memory=256m",
              TUNNEL_IMAGE, "tunnel", "--no-autoupdate", "--url", "http://collector:8787"], timeout=180)
@@ -104,7 +114,7 @@ def start_official(directory, name, config):
     config["public_origin"] = match.group()
     config["supervisor_deadline"] = time.monotonic() + config["seconds"] + 600
     write(directory / "config/session.json", config)
-    command(["docker", "run", "--detach", "--name", name, "--network", name + "-private", "--network-alias", "collector",
+    command(["docker", "run", "--detach", "--name", name, "--network", name if direct else name + "-private", "--network-alias", "collector",
              "--user", str(os.getuid()) + ":" + str(os.getgid()), "--read-only", "--cap-drop=ALL",
              "--security-opt=no-new-privileges", "--security-opt", "seccomp=" + str(ROOT / "addons/capture/deploy/official-seccomp.json"),
              "--pids-limit=512", "--memory=4g", "--cpus=2", "--shm-size=1g", "--init",

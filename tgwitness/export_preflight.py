@@ -145,7 +145,8 @@ async def preview(exports, options, *, sample=True):
 
 async def preview_capture(collector, chat_id, settings, remaining_seconds):
     """Preview the actual sealed collector policy; no downloads or setting writes."""
-    from .monitoring import media_action, media_kind, duration_allowed
+    from .monitoring import media_action, media_kind, duration_allowed, effective_media_rule
+    from . import ephemeral
     free = shutil.disk_usage(collector.store.root).free
     reserve = collector.param("media_min_free_mb") * 1024**2
     result = {"settings_valid": True, "can_start": free >= reserve and remaining_seconds > 0,
@@ -173,7 +174,7 @@ async def preview_capture(collector, chat_id, settings, remaining_seconds):
             sample["messages_examined"] += 1
             if not getattr(message, "file", None):
                 continue
-            rule = settings["types"][media_kind(message)]
+            rule = effective_media_rule(settings, media_kind(message), ephemeral.describe(message.media))
             size = getattr(message.file, "size", None)
             action = media_action(settings, rule, size) if duration_allowed(message, rule) else "exclude"
             if action == "exclude":

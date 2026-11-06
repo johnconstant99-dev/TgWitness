@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "فایل فعلی：{received} از {total} دریافت شد．پس از پایان بارگیری ذخیره می‌شود．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "این خروجی را در Telegram روی دستگاه دیگری تأیید کنید که پیش از درخواست وارد حساب شده باشد．نشست درخواست‌کننده و ورود جدید نمی‌توانند آن را تأیید کنند．سپس تأیید را بررسی کنید，یا این نشست را نگه دارید و پس از زمان نمایش‌داده‌شده ادامه دهید．",
 "TgWitness · Observation workspace": "TgWitness · فضای کاری مشاهده",
 "Open your workspace": "فضای کاری خود را باز کنید",
 "Paste your panel access token to continue.": "تاکسون دسترسی پنل خود را برای ادامه کار الصاق کنید.",

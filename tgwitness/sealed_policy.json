@@ -3,6 +3,42 @@
   "workflow": "phishdestroy/TgWitness/.github/workflows/sealed-collector.yml",
   "releases": [
     {
+      "workflow_sha": "65f8476e046ba3399691963e53fb64b9dae193c3",
+      "collector_sha": "33176ef0eac0c4d05151f69923da1b292cdbf4fb"
+    },
+    {
+      "workflow_sha": "db6ffe53f3d8fb11eed150be13d870bf34a97ea2",
+      "collector_sha": "b99adec0a37e5910a91cb8f67b23cd4f9e15572e"
+    },
+    {
+      "workflow_sha": "cc6fdf97d58c31834fc33b7249d0f03f6b8ef3b2",
+      "collector_sha": "a63f581f28d777caa27a21ab6be27895f838c96c"
+    },
+    {
+      "workflow_sha": "8722560f9ff2322bab3a88b07e814614ed2a2844",
+      "collector_sha": "130beb6039c8bf0012479e915b5cde2952c81d39"
+    },
+    {
+      "workflow_sha": "78e4789dd1e7bf45fc5858b272c180ba2b36f8a3",
+      "collector_sha": "c6b95303f1e7cff758264798065e6cfeefc83c8a"
+    },
+    {
+      "workflow_sha": "19bd545767272a848bb54ca21da5029d76224a63",
+      "collector_sha": "187b07260ef2eebf64f7428c88186b2123b57b26"
+    },
+    {
+      "workflow_sha": "49aa098884a43855995ccf4cb519e3ecc9c2de81",
+      "collector_sha": "5d92f27c1179faa0c5988c83b936accc5cc7ac78"
+    },
+    {
+      "workflow_sha": "c37169966bfc74be930c3477c6921d6cdd041873",
+      "collector_sha": "c7b1c3c708999a2764bb015241412eb39526c250"
+    },
+    {
+      "workflow_sha": "f52c82c72a791e7fabb19d69020faebb0ab70815",
+      "collector_sha": "ee939184a5f50a8e881cc6b0216b4515a6126315"
+    },
+    {
       "workflow_sha": "c74542ba2a647962186a929991e1ec06993aac2d",
       "collector_sha": "316119b21f272184d1d602a9a7c6cd30a18b64d5"
     },

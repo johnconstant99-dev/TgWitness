@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "Geçerli dosya：{total} içinden {received} alındı．İndirme tamamlanınca korunur．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "Bu isteğin öncesinde oturum açılmış başka bir cihazda Telegram’ı açıp dışa aktarmaya izin verin．İsteği yapan oturum ve yeni açılan bir oturum bunu onaylayamaz．Ardından onayı kontrol edin veya bu oturumu koruyup belirtilen süreden sonra devam edin．",
 "TgWitness · Observation workspace": "TgWitness · Gözlem çalışma alanı",
 "Open your workspace": "Çalışma alanınızı açın",
 "Paste your panel access token to continue.": "Devam etmek için panel erişim jetonunuzu yapıştırın.",

@@ -26,10 +26,22 @@ def test_origin_is_exact(url):
                                     {"proxy_server": "http://host:3128/path"},
                                     {"max_pause_seconds": 2.0, "min_pause_seconds": 3.0},
                                     {"proxy_server": "direct"}, {"max_steps": True},
-                                    {"egress": "socks5"}, {"expected_ip": "not-an-ip"}])
+                                    {"egress": "socks5"}, {"expected_ip": "not-an-ip"},
+                                    {"egress": "direct"}, {"proxy_server": ""}])
 def test_invalid_or_unsafe_configuration(change):
     with pytest.raises(ValueError):
         OfficialOptions.model_validate({"proxy_server": "http://gateway:3128", **change})
+
+
+def test_direct_requires_explicit_selection_and_rejects_proxy_secrets():
+    with pytest.raises(ValueError, match="proxy endpoint"):
+        OfficialOptions()
+    direct = OfficialOptions(egress="direct")
+    assert direct.receipt()["direct_fallback"] is False
+    assert direct.proxy_server == ""
+    for key in ("proxy_username_env", "proxy_password_env"):
+        with pytest.raises(ValueError, match="cannot include proxy"):
+            OfficialOptions(egress="direct", **{key: "PRIVATE_PROXY_SECRET"})
 
 
 def test_named_api_authentication_validation_and_frozen_plan(tmp_path):
@@ -60,7 +72,8 @@ def test_named_api_authentication_validation_and_frozen_plan(tmp_path):
         assert "official.js" in client.get("/").text
 
 
-def test_egress_change_and_unavailable_probe_stop(tmp_path):
+@pytest.mark.parametrize("direct", [False, True])
+def test_egress_change_and_unavailable_probe_stop(tmp_path, direct):
     class Reply:
         status, url = 200, "https://www.cloudflare.com/cdn-cgi/trace"
         ip = "203.0.113.7"
@@ -77,7 +90,8 @@ def test_egress_change_and_unavailable_probe_stop(tmp_path):
 
     response = Reply()
     journal = Journal(tmp_path)
-    adapter = OfficialBrowser(OfficialOptions(proxy_server="http://gateway:3128"), journal)
+    options = OfficialOptions(egress="direct") if direct else OfficialOptions(proxy_server="http://gateway:3128")
+    adapter = OfficialBrowser(options, journal)
     adapter.context = type("Context", (), {"request": Request()})()
 
     async def exercise():
@@ -96,13 +110,15 @@ def test_egress_change_and_unavailable_probe_stop(tmp_path):
         journal.close()
 
 
-def test_official_panel_login_selection_export_and_languages(tmp_path, request):
+@pytest.mark.parametrize("direct", [False, True])
+def test_official_panel_login_selection_export_and_languages(tmp_path, request, direct):
     if not request.config.getoption("--capture-browser"):
         pytest.skip("Use --capture-browser for the real panel test")
     from playwright.sync_api import expect, sync_playwright
     from tgwitness_capture.verify import verify_zip
     root = tmp_path / "panel"
-    app = create_app(root, Config(official={"proxy_server": "http://127.0.0.1:9", "require_video": False, "drand": False}))
+    route = {"egress": "direct"} if direct else {"proxy_server": "http://127.0.0.1:9"}
+    app = create_app(root, Config(official={**route, "require_video": False, "drand": False}))
     sock = socket.socket()
     sock.bind(("127.0.0.1", 0))
     server = uvicorn.Server(uvicorn.Config(app, access_log=False, log_level="warning", timeout_graceful_shutdown=5))
@@ -116,13 +132,18 @@ def test_official_panel_login_selection_export_and_languages(tmp_path, request):
         adapter = app.state.recorder.official
         adapter.headless = True
         real_route = adapter._route
+        client_loop = None
 
         async def fixture_route(route):
+            nonlocal client_loop
+            client_loop = asyncio.get_running_loop()
             class FixtureRoute:
                 request = route.request
 
                 async def continue_(self):
-                    await route.fulfill(status=200, content_type="text/html", body=FIXTURE)
+                    body = FIXTURE.replace('<body>', '<body><div id="auth-password-form">Two-step verification</div>').replace(
+                        '<div id="LeftColumn">', '<div id="LeftColumn" style="display:none">')
+                    await route.fulfill(status=200, content_type="text/html", body=body)
 
                 async def abort(self, error):
                     await route.abort(error)
@@ -142,10 +163,23 @@ def test_official_panel_login_selection_export_and_languages(tmp_path, request):
             page.locator("#token").fill((root / "control-token.txt").read_text())
             page.locator("#login-form button").click()
             expect(page.locator("#workspace")).to_be_visible()
+            if direct:
+                expect(page.locator("#route")).to_contain_text("public IP")
             page.locator("#language").select_option("ru")
             expect(page.locator("h1")).to_have_text("Свидетель в официальном клиенте")
+            if direct:
+                expect(page.locator("#route")).to_contain_text("внешний IP")
             page.locator("#plan-form button").click()
             expect(page.locator("#client-section")).to_be_visible(timeout=15000)
+            expect(page.locator("#login-state")).to_contain_text("password", timeout=15000)
+            expect(page.locator("#chats-refresh")).to_be_disabled()
+            expect(page.locator("#chat-select")).to_be_disabled()
+            asyncio.run_coroutine_threadsafe(adapter.page.evaluate("""() => {
+                document.getElementById('auth-password-form').remove();
+                document.getElementById('LeftColumn').style.display='';
+            }"""), client_loop).result(timeout=10)
+            expect(page.locator("#chats-refresh")).to_be_enabled(timeout=10000)
+            expect(page.locator("#chat-select")).to_be_disabled()
             page.locator("#chats-refresh").click()
             expect(page.locator("#chats option")).to_have_count(1)
             page.locator("#chat-select").click()
@@ -193,7 +227,7 @@ FIXTURE = """<!doctype html><html><head><meta charset="utf-8"><title>Synthetic o
 <style>.MessageList{height:350px;width:700px;overflow:auto}.Message{height:160px}body{margin:0}</style></head><body>
 <div id="LeftColumn"><div class="chat-list"><div class="Chat"><a class="ListItem-button" href="#123"><span class="title">Alice &lt;script&gt;</span></a></div></div></div>
 <div id="MiddleColumn"><div class="MessageList"><div class="messages-container">
-<div class="Message" data-message-id="1"><b class="sender-name">Alice</b><div class="text-content">Original message</div><span class="time" title="2026-11-05 12:00">12:00</span></div>
+<div class="Message" data-message-id="1"><b class="sender-name">Alice</b><div class="text-content">Original message <img class="emoji" alt="🧪"><br>Second line <span>nested <img class="emoji" alt="👩🏽‍💻"></span><span style="display:none">HIDDEN<img class="emoji" alt="⛔"></span><img alt="DECORATIVE"></div><div class="embedded-message">Reply <img class="emoji" alt="🧪"></div><div class="Reactions"><img class="emoji" alt="👍"> 1</div><span class="time" title="2026-11-05 12:00">12:00</span></div>
 <div class="Message" data-message-id="2"><div class="text-content">Second message</div></div>
 <div class="Message" data-message-id="3"><div class="text-content">Third message</div></div>
 </div></div><div class="Composer"><div contenteditable="true" id="composer"></div><button id="send">Send</button></div></div>
@@ -243,12 +277,25 @@ def test_owned_browser_guard_scroll_capture_and_unknown_dialog(tmp_path, request
         adapter.next_step = 0
         await adapter.scroll("newer")
         assert adapter.steps == 1
+        markup_before = await adapter.page.locator(".messages-container").inner_html()
         metadata, artifacts, observed = await adapter.capture(journal, {"screenshots": True, "pages": True}, 60, True)
+        assert await adapter.page.locator(".messages-container").inner_html() == markup_before
         journal.append("capture.saved", metadata, artifacts, observed)
         messages = next(a for a in artifacts if a["role"] == "rendered_messages")
         values = json.loads((journal.objects / messages["sha256"]).read_bytes())
         assert values[0]["rendered_id"] == "1" and "Original message" in values[0]["rendered_text"]
+        assert "Original message 🧪\nSecond line nested 👩🏽‍💻" in values[0]["rendered_text"]
+        assert values[0]["reply"] == "Reply 🧪" and values[0]["reactions"] == "👍 1"
+        derived = next(a for a in artifacts if a["role"] == "derived_rendered_text")
+        derived_text = (journal.objects / derived["sha256"]).read_text(encoding="utf-8")
+        assert "Original message 🧪\nSecond line nested 👩🏽‍💻" in derived_text
+        for text in (values[0]["rendered_text"], derived_text):
+            assert all(hidden not in text for hidden in ("HIDDEN", "⛔", "DECORATIVE"))
         assert not values[0]["telegram_origin_independently_proven"]
+        # An emoji-only edit must trigger observation before the periodic snapshot.
+        await adapter.page.locator('.text-content img.emoji').first.evaluate("el => el.alt='🔬'")
+        changed = await adapter.capture(journal, {"screenshots": True, "pages": True}, 60)
+        assert changed is not None and changed[0]["text_sha256"] != metadata["text_sha256"]
         await adapter.pause()
         with pytest.raises(ValueError, match="Start recording"):
             await adapter.scroll()

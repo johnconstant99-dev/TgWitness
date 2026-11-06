@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "現在のファイル：{total} のうち {received} を受信．ダウンロード完了後に保存されます．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "この要求より前にログインしていた別の端末で Telegram を開き，エクスポートを許可してください．要求元のセッションや新しいログインでは承認できません．その後，承認を確認するか，このセッションを維持して表示された待機期限後に再開してください．",
 "(No text in this version)": "（このバージョンにはテキストがありません）",
 "(no saved text)": "（保存されたテキストはありません）",
 "(no text)": "（テキストなし）",

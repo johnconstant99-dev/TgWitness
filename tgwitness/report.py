@@ -1510,13 +1510,14 @@ def ref_link(parts, folder, key, anchor, prefix=""):
 
 
 def media_text(say, info):
+    from . import ephemeral
     if not info:
         return ""
     size = " × ".join(str(info[k]) for k in ("width", "height") if info.get(k))
     return " · ".join(x for x in (info.get("file_name"), info.get("mime_type"),
                                   size_text(info["size"]) if type(info.get("size")) is int else "", size,
                                   say("{n} s", n=info["duration_seconds"]) if info.get("duration_seconds") else "",
-                                  info.get("url")) if x)
+                                  info.get("url"), ephemeral.label(say, info.get("ephemeral_media"))) if x)
 
 
 def record_html(event, say, titles, options, archive, base=""):
@@ -1554,6 +1555,9 @@ def record_html(event, say, titles, options, archive, base=""):
         parts.append('<div class="gone">' + e(say("Telegram reported this message as deleted.")) + "</div>")
     elif kind == "message.missing_on_recheck":
         parts.append('<div class="gone">' + e(say("Telegram no longer returned this message at a later check.")) + "</div>")
+    if kind.startswith("media.") and payload.get("ephemeral_media"):
+        from . import ephemeral
+        parts.append('<div class="file ephemeral-media">' + e(ephemeral.label(say, payload["ephemeral_media"])) + "</div>")
     if kind == "media.saved" and isinstance(payload.get("media_sha256"), str):
         digest, mime = payload["media_sha256"], payload.get("mime_type")
         parts.append('<div class="file">' + e(payload.get("original_name") or say("Saved file")) + " · " + e(mime or "—")

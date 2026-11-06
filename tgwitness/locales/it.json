@@ -1,4 +1,6 @@
 {
+  "Current file：{received} received of {total}．Preserved after the download completes．": "File attuale：ricevuti {received} su {total}．Verrà conservato al termine del download．",
+  "Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．": "Autorizza questa esportazione in Telegram su un altro dispositivo già connesso prima della richiesta．La sessione richiedente e un nuovo accesso non possono approvarla．Poi verifica l’autorizzazione，oppure mantieni questa sessione e riprendi dopo il termine indicato．",
 "(No text in this version)": "(Nessun testo in questa versione)",
 "(no saved text)": "(nessun testo salvato)",
 "(no text)": "(nessun testo)",

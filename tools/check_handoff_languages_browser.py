@@ -26,9 +26,10 @@ def main():
     }
     recovery_keys = {
         'paused': 'Progress is saved. Choose Resume to continue this job.',
-        'waiting': 'Open Telegram on a device where you were already signed in and allow this export. Then choose Check approval. Otherwise resume after the displayed deadline. Keep this session.',
+        'waiting': 'Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．',
         'failed': 'Review the error below, then choose Resume to retry from saved progress.',
     }
+    progress_key = 'Current file：{received} received of {total}．Preserved after the download completes．'
     jobs = [{
         'id': 'synthetic-source', 'phase': 'partial', 'active': False, 'ready': True,
         'created_at': '2026-11-01T12:00:00Z', 'counts': {'messages_exported': 3},
@@ -102,6 +103,12 @@ def main():
                     page.set_viewport_size({'width': width, 'height': 1000})
                     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), (lang, width, 'handoff')
 
+                jobs[1].update(phase='running', active=True, transfer={'received_bytes':1048576,'total_bytes':67108864})
+                page.evaluate('()=>loadAccountExport()')
+                expect(page.locator('.account-export-transfer')).to_have_text(
+                    word(progress_key).replace('{received}', '1.0 MB').replace('{total}', '64.0 MB'))
+                jobs[1].update(active=False)
+                jobs[1].pop('transfer')
                 for phase, key in recovery_keys.items():
                     jobs[1]['phase'] = phase
                     page.evaluate('()=>loadAccountExport()')

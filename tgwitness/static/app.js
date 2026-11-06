@@ -1480,6 +1480,8 @@ $("account-add-form").addEventListener("submit",event=>{
 $("accounts-refresh").addEventListener("click",e=>busy(e.currentTarget,async()=>{await loadProfiles();}));
 function excerpt(e) {
   const p=e.payload;
+  if (p.ephemeral_media) return [excerpt({...e,payload:{...p,ephemeral_media:null}}),
+    ephemeralMediaText(p.ephemeral_media)].filter(Boolean).join(" · ");
   if (p.text) return p.text;
   if (e.kind==="message.deleted") return tr("Earlier captured versions remain available. Telegram does not report who deleted the message.");
   if (e.kind==="message.missing_on_recheck") return tr("Telegram no longer returns this message; no deletion notice was received.");
@@ -1668,6 +1670,14 @@ $("collector-toggle").addEventListener("click",e=>busy(e.currentTarget,async()=>
 }));
 function detailBlock(label,text,cls="") {
   const n=node("div","detail-block "+cls); n.append(node("small","",label),window.TgWitnessPrivacy.render(text||tr("(No text in this version)"),{className:"message-text",tr})); return n;
+}
+function ephemeralMediaText(facts) {
+  const title=facts.mode==="view_once"?tr("View-once media"):tr("Self-destructing media：{n} s",{n:facts.ttl_seconds});
+  const outcomes={saved:"File preserved",unavailable:"Attachment unavailable when observed",not_saved:"File not preserved",
+    retry:"Preservation pending",hashed:"File hashes; content not downloaded"};
+  const detail=outcomes[facts.outcome]||(facts.availability==="unavailable_at_observation"?outcomes.unavailable:null);
+  return [title,detail?tr(detail):null,tr("Saving this attachment does not establish that a person viewed it."),
+    facts.outcome&&facts.outcome!=="saved"?tr("Self-destructing media may disappear before another attempt."):null].filter(Boolean).join(" · ");
 }
 async function openDetail(e,options={}) {
   const detailView=state.view,detailRevision=state.workspaceRevision;await journalReady;
@@ -2153,7 +2163,7 @@ function accountExportNextStep(job){
     'Progress is saved. Choose Resume to continue this job.');
   if(job.phase==='waiting')return tr(job.active!==false?
     'Telegram has asked this job to wait. It will continue automatically while TgWitness is running.':accountExportWaiting(job)?
-    'Open Telegram on a device where you were already signed in and allow this export. Then choose Check approval. Otherwise resume after the displayed deadline. Keep this session.':
+    'Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．':
     'Progress is saved. Choose Resume to continue this job.');
   if(job.phase==='paused')return tr('Progress is saved. Choose Resume to continue this job.');
   if(job.phase==='failed')return tr('Review the error below, then choose Resume to retry from saved progress.');
@@ -2226,6 +2236,11 @@ function renderAccountExportJobs(){
     if(Number.isFinite(counts.unique_media_bytes))metric(tr("unique file bytes saved"),counts.unique_media_bytes);
     else if(Number.isFinite(counts.bytes_saved))metric(tr("bytes saved"),counts.bytes_saved);
     if(facts.childNodes.length)card.append(facts);
+    const transfer=job.active!==false&&job.transfer;
+    if(transfer){
+      const received=humanSize(transfer.received_bytes),total=transfer.total_bytes==null?tr('Unknown'):humanSize(transfer.total_bytes);
+      card.append(node('p','account-export-transfer',tr('Current file：{received} received of {total}．Preserved after the download completes．',{received,total})));
+    }
     const current=job.current_chat;
     if(current)card.append(node("p","account-export-job-note",tr("Current chat: {name}",
       {name:typeof current==="object"?(current.title||current.id||current.chat_id||tr("Unknown")):current})));

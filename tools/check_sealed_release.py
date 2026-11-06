@@ -45,7 +45,7 @@ def validate(root, *, git_history=False):
     caller = (root / CALLER).read_text(encoding="utf-8")
     workflow_bytes = (root / COLLECTOR).read_bytes()
     workflow = workflow_bytes.decode("utf-8")
-    signer = one(r"^\s+uses: " + re.escape(WORKFLOW) + r"@([0-9a-f]{40})\s*$", caller, "caller pin")
+    signer = one(r"^[ \t]+uses: " + re.escape(WORKFLOW) + r"@([0-9a-f]{40})(?:[ \t]+#[^\r\n]*)?[ \t]*$", caller, "caller pin")
     collector = one(r"^\s+ref: ([0-9a-f]{40})\s*$", workflow, "collector pin")
     repository = one(r"^\s+repository: (\S+)\s*$", workflow, "collector repository")
     if repository != "phishdestroy/TgWitness" or (signer, collector) != pairs[0]:

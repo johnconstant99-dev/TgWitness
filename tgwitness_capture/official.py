@@ -23,13 +23,14 @@ SOURCE_REVIEW = "6002824b6532f3d913997ce496d9ab5f9b86bc22"
 CHAT_LIST = "#LeftColumn .chat-list .Chat"
 MESSAGES = "#MiddleColumn .MessageList:visible"
 TRACE = "https://www.cloudflare.com/cdn-cgi/trace"
+RENDERED_TEXT = (Path(__file__).with_name("static") / "official-rendered-text.js").read_text(encoding="utf-8")
 
 
 class OfficialOptions(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     mode: Literal["passive", "paced"] = "passive"
-    egress: Literal["http", "socks5", "cloudflare_warp"] = "http"
-    proxy_server: str = Field(min_length=1, max_length=2048)
+    egress: Literal["http", "socks5", "cloudflare_warp", "direct"] = "http"
+    proxy_server: str = Field(default="", max_length=2048)
     proxy_username_env: str = ""
     proxy_password_env: str = ""
     expected_ip: str = ""
@@ -45,6 +46,8 @@ class OfficialOptions(BaseModel):
     @field_validator("proxy_server")
     @classmethod
     def proxy_url(cls, value):
+        if not value:
+            return value
         parsed = urlsplit(value)
         try:
             port = parsed.port
@@ -73,6 +76,11 @@ class OfficialOptions(BaseModel):
     def consistent(self):
         if self.max_pause_seconds < self.min_pause_seconds:
             raise ValueError("Maximum pause must not be shorter than minimum pause")
+        if self.egress == "direct":
+            if self.proxy_server or self.proxy_username_env or self.proxy_password_env:
+                raise ValueError("Direct mode cannot include proxy settings")
+        elif not self.proxy_server:
+            raise ValueError("A proxy endpoint is required unless direct mode is explicitly selected")
         if self.egress == "socks5" and not self.proxy_server.startswith("socks5://"):
             raise ValueError("SOCKS5 requires a SOCKS5 endpoint")
         if self.egress == "http" and not self.proxy_server.startswith("http://"):
@@ -141,7 +149,8 @@ class OfficialBrowser(BrowserCapture):
         if self.phase != "created":
             raise ValueError("This procedure has already opened a client; finish it before starting another")
         from playwright.async_api import async_playwright
-        proxy = {"server": self.options.proxy_server, "bypass": "<-loopback>"}
+        direct = self.options.egress == "direct"
+        proxy = None if direct else {"server": self.options.proxy_server, "bypass": "<-loopback>"}
         for key in ("username", "password"):
             name = getattr(self.options, "proxy_" + key + "_env")
             if name:
@@ -153,7 +162,8 @@ class OfficialBrowser(BrowserCapture):
             self.browser = await self.runtime.chromium.launch(
                 headless=self.headless, chromium_sandbox=True, proxy=proxy,
                 args=["--disable-quic", "--disable-dev-shm-usage", "--no-first-run",
-                      "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"])
+                      "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+                      *(["--no-proxy-server"] if direct else [])])
             self.context = await self.browser.new_context(
                 viewport={"width": 1280, "height": 720}, locale="en-US",
                 accept_downloads=False, service_workers="block", permissions=[])
@@ -211,7 +221,7 @@ class OfficialBrowser(BrowserCapture):
             self.checked_route = time.monotonic()
             self.journal.append("official.egress_observed", {"ip": address, "observed_at": utcnow(),
                                 "provider": self.options.egress, "endpoint": TRACE,
-                                "scope": "browser-context proxy probe; does not prove every connection"})
+                                "scope": "browser-context route probe; does not prove every connection"})
         finally:
             await response.dispose()
 
@@ -390,20 +400,25 @@ class OfficialBrowser(BrowserCapture):
     async def targets(self):
         return [(self.page, self.target_id, self.page.url)] if self.page is not None else []
 
+    async def rendered_text(self, page):
+        return await page.locator("body").evaluate(RENDERED_TEXT, timeout=10000)
+
     async def capture(self, journal, settings, max_interval, force=False):
         await self.assert_safe()
         result = await super().capture(journal, settings, max_interval, force)
         await self.assert_safe()
         if result:
             metadata, artifacts, observed = result
-            messages = await self.page.locator(MESSAGES + " .Message[data-message-id]").evaluate_all("""elements => elements.slice(0,500).map(el => ({
-                rendered_id: el.getAttribute('data-message-id'), rendered_text: el.innerText.slice(0,100000),
-                author: el.querySelector('.sender-name')?.innerText || null,
+            messages = await self.page.locator(MESSAGES + " .Message[data-message-id]").evaluate_all("""elements => {
+              const text = """ + RENDERED_TEXT + """;
+              return elements.slice(0,500).map(el => ({
+                rendered_id: el.getAttribute('data-message-id'), rendered_text: text(el).slice(0,100000),
+                author: text(el.querySelector('.sender-name')) || null,
                 displayed_time: el.querySelector('.time')?.getAttribute('title') || el.querySelector('.time')?.innerText || null,
-                reply: el.querySelector('.embedded-message')?.innerText || null,
-                reactions: el.querySelector('.Reactions')?.innerText || null,
+                reply: text(el.querySelector('.embedded-message')) || null,
+                reactions: text(el.querySelector('.Reactions')) || null,
                 deletion_observed: false, telegram_origin_independently_proven: false
-            }))""")
+            })); }""")
             artifacts.append(journal.artifact(canonical(messages), "rendered_messages", "application/json"))
             metadata.update({"adapter": ADAPTER, "source": "official-telegram-web-a",
                              "environment_attested": False, "all_messages_observed": False})

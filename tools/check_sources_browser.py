@@ -263,6 +263,12 @@ def main():
         page.keyboard.press("ArrowRight")
         expect(page.locator("#sources-panel-recording")).to_be_visible()
         expect(page.locator("#recording-save")).to_be_disabled()
+        expect(page.locator("#preserve-ephemeral-media")).to_be_checked()
+        page.locator(".media-rules-details").evaluate("details=>details.open=true")
+        page.locator("#ephemeral-media-settings").evaluate("details=>details.open=true")
+        page.locator("#preserve-ephemeral-media").uncheck()
+        page.locator("#ephemeral-media-settings").evaluate("details=>details.open=false")
+        page.locator(".media-rules-details").evaluate("details=>details.open=false")
         page.locator("#monitor-reactions").uncheck()
         page.locator("#max-media").fill("50")
         page.locator(".media-rules-details").evaluate("details=>details.open=true")
@@ -289,6 +295,7 @@ def main():
         expect(page.locator("#max-media")).to_have_value("20")
         expect(page.locator("#monitor-edits")).not_to_be_checked()
         assert server.app.state.store.get_setting("capture")["max_media_mb"] == 50
+        assert server.app.state.store.get_setting("capture")["preserve_ephemeral_media"] is False
         assert server.app.state.store.get_setting("capture")["types"]["video"]["max_mb"] == 7
         assert server.app.state.store.get_setting("recheck_minutes") == 33
         page.locator("#recording-save").click()

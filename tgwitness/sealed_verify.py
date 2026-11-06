@@ -122,7 +122,8 @@ def verify_official(evidence, approved, repo, expected_selection=None):
     opened = [e["payload"] for e in events if e["kind"] == "official.opened"]
     if (len(started) != 1 or len(finished) != 1 or len(opened) != 1 or "official" not in internal
             or started[0].get("client") != "official_web" or started[0].get("session_import_allowed") is not False
-            or started[0].get("network") != "isolated-required-proxy"
+            or started[0].get("network") != ("explicit-direct" if internal["official"].get("egress") == "direct"
+                                             else "isolated-required-proxy")
             or started[0].get("context", {}).get("collector_sha") != approved["collector_sha"]
             or started[0].get("context", {}).get("repository") != repo
             or finished[0].get("context") != started[0]["context"]
