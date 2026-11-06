@@ -1,0 +1,692 @@
+{
+  "statement": {
+    "format": "tgwitness-audit-summary-v1",
+    "audit_date_utc": "2026-11-06",
+    "source_revision": "92e539af40d8368d198ff5e040f1d876f2c1310e",
+    "package_version": "0.9.1",
+    "release_id": "92e539af40d8-83e41104669e",
+    "wheel_sha256": "83e41104669edf9c4930c51504204b8b35ecc722786c0adf8ef5eab650b3b29b",
+    "release_key_sha256": "039d98a658ccda14253e45a00335b4a68d840976d8ec18b8d4355cc7c458447d",
+    "source_integrity": {
+      "source_revision": "92e539af40d8368d198ff5e040f1d876f2c1310e",
+      "files": 1487,
+      "total_bytes": 100806598,
+      "largest_file_bytes": 2205229,
+      "files_over_5_mib": 0,
+      "private_filename_candidates": [],
+      "matches_pinned_git_tree_with_declared_eol_rules": true,
+      "declared_crlf_export_paths": [
+        "Start.cmd",
+        "deploy/windows-task.ps1",
+        "scripts/Demo.cmd",
+        "scripts/Docker.cmd",
+        "scripts/Setup.cmd"
+      ],
+      "mismatches": []
+    },
+    "coverage": {
+      "core_pytest": {
+        "passed": 1461,
+        "platform_skipped": 37,
+        "unresolved_failed": 0
+      },
+      "capture_addon": {
+        "passed": 124,
+        "blocked_by_required_browser_sandbox": 3
+      },
+      "bounded_suites": {
+        "browser": {
+          "passed": 102,
+          "checks": [
+            "check_account_browser",
+            "check_account_export_browser",
+            "check_account_recovery",
+            "check_account_reports",
+            "check_account_restriction",
+            "check_account_sessions",
+            "check_action_pace",
+            "check_analysis_browser",
+            "check_analyst_browser",
+            "check_application_guides",
+            "check_auto_delete",
+            "check_batch_import",
+            "check_browser",
+            "check_bulk_deletion",
+            "check_capture_defaults",
+            "check_capture_language_browser",
+            "check_case_board_browser",
+            "check_client_identity",
+            "check_connection_regressions",
+            "check_distributed_export_browser",
+            "check_export_async_browser",
+            "check_export_files_stage",
+            "check_export_sender_names",
+            "check_fleet_browser",
+            "check_guided_connection",
+            "check_guided_connection_browser",
+            "check_history_browser",
+            "check_honest_status",
+            "check_idle_connection",
+            "check_independent_report_designs_browser",
+            "check_integrations_browser",
+            "check_interactions_browser",
+            "check_join_preview",
+            "check_key_lock",
+            "check_mcp_browser",
+            "check_mcp_transport",
+            "check_operator_browser",
+            "check_operator_security",
+            "check_parallel_exports_browser",
+            "check_people_timeline_browser",
+            "check_profile_changes",
+            "check_proof_browser",
+            "check_protected_session",
+            "check_proxy_async_browser",
+            "check_public_proxies_browser",
+            "check_quick_browser",
+            "check_reconnect_recheck",
+            "check_refresh_browser",
+            "check_report_builder_browser",
+            "check_report_design",
+            "check_report_selection_browser",
+            "check_report_studio",
+            "check_report_style_documents",
+            "check_report_styles_browser",
+            "check_sealed_browser",
+            "check_service_sender",
+            "check_session_reservations",
+            "check_settings_browser",
+            "check_setup_browser",
+            "check_showcase",
+            "check_showcase_browser",
+            "check_source_access_lost",
+            "check_updates_diverted",
+            "check_watch_baseline",
+            "check_workspace_browser",
+            "check_workspace_deletion",
+            "test_account_attachment_integrity",
+            "test_account_report_layouts",
+            "test_assurance_boundaries",
+            "test_case_assessment",
+            "test_case_board",
+            "test_case_board_api",
+            "test_chat_comparison",
+            "test_chat_export_integrity",
+            "test_distributed_export",
+            "test_distributed_pages",
+            "test_distributed_takeout",
+            "test_ephemeral_media",
+            "test_export_archive_name",
+            "test_group_overview",
+            "test_group_settings",
+            "test_history_backfill",
+            "test_independent_report_html",
+            "test_independent_report_pdf",
+            "test_jurisdiction_guidance",
+            "test_parallel_exports",
+            "test_pdf_record_metadata",
+            "test_people_timeline",
+            "test_report_analytics",
+            "test_report_composition",
+            "test_report_history_context",
+            "test_report_profiles",
+            "test_report_record_metadata",
+            "test_report_selection",
+            "test_report_selection_exports",
+            "test_report_styles",
+            "test_report_styles_pdf",
+            "test_rpc_diagnostics",
+            "test_selected_export",
+            "test_session_import",
+            "test_settings_hub",
+            "test_snapshot_analytics"
+          ],
+          "receipt_set_sha256": "838b631a06f5cec6474ac5445bcaec53526b1afc51afcedc402d409c640501f2"
+        },
+        "browser-ux": {
+          "passed": 66,
+          "checks": [
+            "check_access_sections_browser",
+            "check_account_states_browser",
+            "check_accounts_overview_browser",
+            "check_attestation_report",
+            "check_audit_frontend_browser",
+            "check_bootstrap_recovery_browser",
+            "check_chat_features_browser",
+            "check_chat_layout_browser",
+            "check_chat_list_browser",
+            "check_chat_safety_browser",
+            "check_cloud_wizard",
+            "check_controls_browser",
+            "check_disclosure_preview_browser",
+            "check_dstack_image",
+            "check_evidence_witnesses",
+            "check_exports_browser",
+            "check_first_run",
+            "check_gateway_dns",
+            "check_group_screen_browser",
+            "check_group_settings_browser",
+            "check_handoff_languages_browser",
+            "check_health_controls_browser",
+            "check_honest_status_browser",
+            "check_import_preflight",
+            "check_journal_browser",
+            "check_notifications_browser",
+            "check_panel_background",
+            "check_parameters_browser",
+            "check_phala",
+            "check_polling_browser",
+            "check_port_and_version",
+            "check_prepared_export_access",
+            "check_quick_search_browser",
+            "check_router_browser",
+            "check_services_browser",
+            "check_setup_levels",
+            "check_shell_browser",
+            "check_sources_browser",
+            "check_storage_services",
+            "check_tdx",
+            "check_time_browser",
+            "check_view_host_browser",
+            "check_view_lifecycle_browser",
+            "check_workflows_browser",
+            "check_workspace_downloads_browser",
+            "test_ai_routes",
+            "test_api_authorization_matrix",
+            "test_archive_views",
+            "test_audit_data_fixes",
+            "test_audit_platform_fixes",
+            "test_audit_security_fixes",
+            "test_capture_liveness",
+            "test_chat_state",
+            "test_cli",
+            "test_disclosure_markers",
+            "test_export_budget",
+            "test_fulltext",
+            "test_gap_analysis",
+            "test_metrics",
+            "test_proxy_destination_dns",
+            "test_release_data_fixes",
+            "test_storage_pressure",
+            "test_verification_launcher",
+            "test_verifier_comparison",
+            "test_verifier_languages",
+            "test_witness_continuity"
+          ],
+          "receipt_set_sha256": "d883a0649d1754b310231ae9d8349aed4d5f0778d14a2641837e38e8325ac51b"
+        },
+        "evidence": {
+          "passed": 15,
+          "checks": [
+            "check_narrative_texts",
+            "test_assurance_boundaries",
+            "test_assurance_chain",
+            "test_assurance_ladder",
+            "test_deletion_evidence_reports",
+            "test_deletion_semantics",
+            "test_evidence_checks",
+            "test_narrative",
+            "test_narrative_config",
+            "test_replica_recipient",
+            "test_verifier_output_safety",
+            "test_witness_continuity",
+            "test_witness_daily",
+            "test_witness_freshness",
+            "test_witness_keys"
+          ],
+          "receipt_set_sha256": "be803f86f2d6cf84508f56038174596323ace682bcb667c8e498967779c3d02d"
+        },
+        "site": {
+          "passed": 9,
+          "checks": [
+            "check_built_site_metadata",
+            "check_docs_site",
+            "check_docs_workflows",
+            "check_export_clinic",
+            "check_guide_languages",
+            "check_report_example",
+            "check_site",
+            "test_site_metadata",
+            "test_site_typography"
+          ],
+          "receipt_set_sha256": "15742beb41ad7fff94a90bff62fcb0e2600f13db8f10ea9a373656663b35afcc"
+        },
+        "extra": {
+          "passed": 13,
+          "checks": [
+            "check_account_export_recovery",
+            "check_analysis_settings_browser",
+            "check_check_runner",
+            "check_client_checks_browser",
+            "check_collector_authorization",
+            "check_counters",
+            "check_disclosure_privacy",
+            "check_fleet_async_browser",
+            "check_notification_redirects",
+            "check_panel_setup",
+            "check_portable_routes_runtime",
+            "check_sbom_locks",
+            "check_source_archive"
+          ],
+          "receipt_set_sha256": "c5c94627b1aa97449109798071f38aca7f03784cbc581e90ec27b83ea8296ecb"
+        }
+      },
+      "api_authorization": {
+        "routes": 269,
+        "anonymous_and_revoked_requests": 538,
+        "passed": true
+      },
+      "counting_policy": "Suite programs overlap pytest cases; counts must not be added as unique tests.",
+      "test_receipt_hashes": {
+        "host-3/pytest.xml": "22ebeabcca52f58c2fb4b974d786e5f5c859071019131426ac2feaef14c0b03d",
+        "host-3/pytest-retest.xml": "0460558a535d1279fdebfd192305b7aa5b21fbff11c49ddaa3abb9c5c69ba9a1",
+        "host-3/pytest-missing.xml": "922d72159209a3cffa91c4537fbb549831908dc79560ece366de2cc27dc9c97b",
+        "host-3/pytest-addons.xml": "06d240dbc7ef26fc01748b15f61aa6a55b0e7188ce27111406a9139d006a5a63",
+        "host-3/pytest-addon-browser.xml": "62febc739b6ef496b3412cc328810395da55ba704a1dee386440e867471e57c3",
+        "host-3/extra-retest.xml": "58c4e835639ff0aaa89a8b1f66ba30945b638c0cc94b55ecb91352f9cfab7ffe"
+      },
+      "retests": {
+        "initial_environment_failures": 19,
+        "resolved_after_chromium_cjk_fonts_site_build": 19,
+        "browser_moved_from_network_volume_to_local_storage": 41,
+        "connection_regressions_retest": "38 cases passed",
+        "extra_module_corrected_invocation": "check_client_checks_browser through pytest"
+      }
+    },
+    "findings": [
+      {
+        "id": "SC-1",
+        "priority": "P1",
+        "scope": "unpublished secret_chats module",
+        "file": "tgwitness/secret_chats.py",
+        "line": 303,
+        "finding": "close() reaches the remote manager while read_only is enabled.",
+        "reproduction": {
+          "expected_remote_actions": 0,
+          "observed_remote_actions": 1
+        },
+        "status": "open"
+      },
+      {
+        "id": "SC-2",
+        "priority": "P2",
+        "scope": "unpublished secret_chats module",
+        "file": "tgwitness/secret_chats.py",
+        "line": 153,
+        "finding": "Deduplication checks only 500 events; an older message replayed after restart is recorded again.",
+        "reproduction": {
+          "initial_records": 502,
+          "records_after_replay": 503
+        },
+        "status": "open"
+      },
+      {
+        "id": "SC-3",
+        "priority": "P2",
+        "scope": "unpublished secret_chats module",
+        "file": "tgwitness/secret_chats.py",
+        "line": 247,
+        "finding": "A transient attachment download failure removes the encrypted pending job and loses its retry.",
+        "reproduction": {
+          "expected_pending_retained": true,
+          "observed_pending_retained": false
+        },
+        "status": "open"
+      },
+      {
+        "id": "ENV-1",
+        "priority": "P2",
+        "scope": "current RunPod containers",
+        "finding": "Required Chromium sandbox is unavailable; 3 Official Web addon checks cannot run successfully.",
+        "status": "open"
+      },
+      {
+        "id": "NET-1",
+        "priority": "P2",
+        "scope": "fleet of 40 profiles",
+        "finding": "16 WARP routes failed helper registration; these profiles were not connected to Telegram in this audit.",
+        "status": "open"
+      },
+      {
+        "id": "TEST-1",
+        "priority": "P3",
+        "scope": "published benchmark harness",
+        "file": "tools/check_capacity.py",
+        "line": 61,
+        "finding": "The assertion expects 5000 journal events; the workload emits 5000 messages plus 1 actor refresh event.",
+        "status": "private measurement harness adjusted; repository unchanged"
+      }
+    ],
+    "runtime_dependency_audit": {
+      "pinned_packages": 47,
+      "known_advisories": 0
+    },
+    "live_measurements": [
+      {
+        "host": 1,
+        "status": "passed",
+        "started_at": "2026-11-06T18:26:51.500+00:00",
+        "source_revision": "92e539af40d8368d198ff5e040f1d876f2c1310e",
+        "scope": "Two public sources across two hosts; one new text-and-metadata export per host",
+        "accounts": 2,
+        "transport": "regular",
+        "route": "WARP",
+        "resume": false,
+        "background_protected_read_active": true,
+        "warp_confirmed_before_telegram": 2,
+        "authorized_workers": 2,
+        "finished_at": "2026-11-06T18:30:23.228+00:00",
+        "delivered_records": 27030,
+        "acquired_records": 27030,
+        "duplicate_ids": 0,
+        "archive_sha256": "20e507fc68446680ed002fd486d0968a944ec0c71e02f937331ae2b19ab4cd66",
+        "archive_bytes": 6703683,
+        "acquisition_seconds": 189.043,
+        "acquisition_records_per_second": 142.983,
+        "end_to_end_seconds": 211.647,
+        "end_to_end_records_per_second": 127.713,
+        "phase_seconds": {
+          "preparing": 7.122,
+          "running": 189.043,
+          "selecting": 1.805,
+          "packaging": 5.896
+        },
+        "reused_records": 0,
+        "floodwait_events": 4,
+        "key_pinned": true,
+        "archive_verified": true,
+        "direct_python_socket_attempts": 0,
+        "proxy_socket_connections": 8,
+        "socket_guard_scope": "Python socket.connect restricted to the qualified loopback proxies; not a host firewall audit",
+        "media_byte_requests_blocked": 0,
+        "public_data_policy": "Aggregate measurements only; archive, message text, source identities and account identifiers remain private"
+      },
+      {
+        "host": 2,
+        "status": "passed",
+        "started_at": "2026-11-06T18:25:40.419+00:00",
+        "source_revision": "92e539af40d8368d198ff5e040f1d876f2c1310e",
+        "scope": "Two public sources across two hosts; one new text-and-metadata export per host",
+        "accounts": 2,
+        "transport": "regular",
+        "route": "WARP",
+        "resume": false,
+        "warp_confirmed_before_telegram": 2,
+        "authorized_workers": 2,
+        "finished_at": "2026-11-06T18:29:07.173+00:00",
+        "delivered_records": 29299,
+        "acquired_records": 29299,
+        "duplicate_ids": 0,
+        "archive_sha256": "824601b502762efaabb8ff9afdb1e8d7fff189862ef2cbc4d8d26d0d68c83e4c",
+        "archive_bytes": 7396151,
+        "acquisition_seconds": 182.513,
+        "acquisition_records_per_second": 160.531,
+        "end_to_end_seconds": 206.65,
+        "end_to_end_records_per_second": 141.781,
+        "phase_seconds": {
+          "preparing": 7.222,
+          "running": 182.513,
+          "selecting": 2.341,
+          "packaging": 6.832
+        },
+        "reused_records": 0,
+        "floodwait_events": 3,
+        "key_pinned": true,
+        "archive_verified": true,
+        "direct_python_socket_attempts": 0,
+        "proxy_socket_connections": 8,
+        "socket_guard_scope": "Python socket.connect restricted to the qualified loopback proxies; not a host firewall audit",
+        "media_byte_requests_blocked": 0,
+        "public_data_policy": "Aggregate measurements only; archive, message text, source identities and account identifiers remain private"
+      }
+    ],
+    "synthetic_measurement": {
+      "kind": "synthetic_local_benchmark",
+      "harness_adjustment": "Compare verified journal total with all events; the exact message.new count is checked separately",
+      "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+      "python": "3.12.16",
+      "selected_chats": 100,
+      "message_events": 5000,
+      "input_text_characters": 400,
+      "media_downloads": false,
+      "network": false,
+      "ingest_seconds": 16.897,
+      "observed_events_per_second": 295.9,
+      "handler_p50_ms": 2.689,
+      "handler_p95_ms": 6.963,
+      "handler_max_ms": 39.347,
+      "export_seconds_with_tracemalloc": 13.07,
+      "export_peak_traced_python_mib": 107.56,
+      "archive_bytes": 3119488,
+      "verified_events": 5001,
+      "limitations": "Synthetic serial handlers on this host only; no real MTProto delivery, concurrent accounts, network, or media. Python traced allocations are not process RSS."
+    },
+    "retained_archives": {
+      "archives": 48,
+      "records": 3598381,
+      "receipt_sha256": [
+        "d2c2db3a89ed727b80234d3d7813d0ed548e4b3a3e1342552ef187d739a140d4",
+        "6e01266cc479a5e8caa0b3c71761645b21d80e66a91e781a26aaaefbfbf2f699"
+      ]
+    },
+    "panel_latency": {
+      "checked_at": "2026-11-06T18:51:23.283338+00:00",
+      "method": "Sequential read-only loopback requests on the deployed legacy panel; authenticated profile list, no Telegram connections",
+      "samples": [
+        {
+          "endpoint": "/_tgwitness/ready",
+          "http_status": 200,
+          "seconds": 0.0116,
+          "response_bytes": 64
+        },
+        {
+          "endpoint": "/api/profiles",
+          "http_status": 200,
+          "seconds": 0.0099,
+          "response_bytes": 70389,
+          "profiles": 14,
+          "connected_to_telegram": 0
+        },
+        {
+          "endpoint": "/api/profiles",
+          "http_status": 200,
+          "seconds": 0.0086,
+          "response_bytes": 70389,
+          "profiles": 14,
+          "connected_to_telegram": 0
+        },
+        {
+          "endpoint": "/api/profiles",
+          "http_status": 200,
+          "seconds": 0.0231,
+          "response_bytes": 70389,
+          "profiles": 14,
+          "connected_to_telegram": 0
+        }
+      ]
+    },
+    "fleet_health": {
+      "stored_profiles": 40,
+      "warp_and_read_checks_passed": 24,
+      "warp_unavailable_not_live_checked": 16,
+      "checks": [
+        "expected account identity",
+        "get_me flags",
+        "GetFullUser frozen flags",
+        "five-dialog sample"
+      ],
+      "meaning": "Read access and these flags only; not proof of unrestricted outgoing actions."
+    },
+    "secret_chat_probe": {
+      "scope": "Unmerged local secret_chats module; synthetic store and mocked Telegram manager",
+      "module_sha256": "d03cb3f02908b48787496e8a36fe8bf78fc8d38a9efe71bf88d7feee958940c7",
+      "telegram_connections": 0,
+      "findings": [
+        {
+          "check": "replayed_message_after_restart",
+          "expected": 502,
+          "observed": 503,
+          "issue_reproduced": true
+        },
+        {
+          "check": "attachment_retry_after_transient_failure",
+          "expected_pending_retained": true,
+          "observed_pending_retained": false,
+          "issue_reproduced": true
+        },
+        {
+          "check": "read_only_secret_chat_close",
+          "expected_remote_actions": 0,
+          "observed_remote_actions": 1,
+          "issue_reproduced": true
+        }
+      ]
+    },
+    "secret_chat_source_snapshot": {
+      "revision": "bb8788fb685c76fd4a4a2790902b4a20898bd35b",
+      "file": "tgwitness/secret_chats.py",
+      "audited_sha256": "d03cb3f02908b48787496e8a36fe8bf78fc8d38a9efe71bf88d7feee958940c7",
+      "git_blob_sha256": "460bfb0846d190b72c9cade7d85842525d66ef3f11f3e71d0e72af817335f05a",
+      "audited_line_endings": "windows_crlf",
+      "scope": "Unpublished module snapshot; current working branch is different"
+    },
+    "ci": [
+      {
+        "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850905",
+        "head_sha": "92e539af40d8368d198ff5e040f1d876f2c1310e",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "name": "Synthetic browser behavior",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850905/job/128050469615"
+          },
+          {
+            "name": "Dependencies, lint and source",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850905/job/128050470019"
+          },
+          {
+            "name": "evidence / Signed journals, witness proofs and narrative profiles",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850905/job/128050470269"
+          },
+          {
+            "name": "Interface and accessibility browser checks",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850905/job/128050470295"
+          },
+          {
+            "name": "Python install and readiness (linux, 3.12)",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850905/job/128050470296"
+          },
+          {
+            "name": "Isolated OCR and transcription",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850905/job/128050470344"
+          },
+          {
+            "name": "Container and Compose integration",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850905/job/128050470537"
+          },
+          {
+            "name": "Windows portable package",
+            "conclusion": "skipped",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850905/job/128050472254"
+          }
+        ]
+      },
+      {
+        "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850962",
+        "head_sha": "92e539af40d8368d198ff5e040f1d876f2c1310e",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "name": "Publish verified installer to Cloudflare",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850962/job/128056845307"
+          },
+          {
+            "name": "Build and verify installer",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850962/job/128056845632"
+          },
+          {
+            "name": "Qualify the signed installer on Linux and Windows / Installed panel (ubuntu-24.04, local)",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850962/job/128056846460"
+          },
+          {
+            "name": "Qualify the signed installer on Linux and Windows / Installed panel (ubuntu-24.04, quick)",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850962/job/128056846853"
+          },
+          {
+            "name": "Qualify the signed installer on Linux and Windows / Installed panel (windows-latest, local)",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850962/job/128056846954"
+          },
+          {
+            "name": "Require passed checks for the exact main revision",
+            "conclusion": "success",
+            "url": "https://github.com/phishdestroy/TgWitness/actions/runs/42263850962/job/128056912466"
+          }
+        ]
+      }
+    ],
+    "proof_scope": "Measurements by the operator on these servers. The report key binds this summary, not an independent attestation, Telegram authorship proof, or GDPR certification.",
+    "privacy": "No message bodies, source names, Telegram account identifiers, IP addresses, session material, account public keys or raw logs are included.",
+    "protected_public_chat_check": {
+      "source_revision": "92e539af40d8368d198ff5e040f1d876f2c1310e",
+      "status": "passed",
+      "started_at": "2026-11-06T18:17:16.318+00:00",
+      "method": "Exhaustive ID read of the previously bounded protected public source",
+      "attachments": false,
+      "joins": 0,
+      "timing_scope": "Functional check during synthetic test load; not an isolated speed benchmark",
+      "warp_verified_before_telegram": true,
+      "records": 2454,
+      "ids_queried": 21393,
+      "original_records": 2454,
+      "missing_since_previous": 0,
+      "added_within_range": 0,
+      "changed_core_records": 0,
+      "protected_content_confirmed": true,
+      "original_archive_verified": true,
+      "duplicate_ids": 0,
+      "private_records_sha256": "89bdd62f7b3ffe07fe1704e23c1cd675b594e3eed59afe6685dd6f1c5000b148",
+      "finished_at": "2026-11-06T19:05:21.337+00:00",
+      "elapsed_seconds": 2885.019,
+      "direct_socket_attempts": 0,
+      "identity_files_unchanged": true,
+      "client_closed": true,
+      "outer_harness_retry_exceptions": 0,
+      "retry_counter_scope": "Outer harness exceptions only; underlying client pacing and FloodWait handling are not counted here."
+    },
+    "protected_receipt_sha256": "8db80000fdc1112a1a5f5e591f2a3fb1db6c0a1f7fc95669d5295d28dd26ccfd",
+    "deployment": {
+      "servers": 3,
+      "identity_files_unchanged": 221,
+      "installed_smoke_checks_passed": 3,
+      "own_audit_processes_stopped": true,
+      "panel_exposure": "Only the third panel is running; it listens on loopback.",
+      "legacy_server_credentials_preserved": 13,
+      "legacy_server_live_health_checked": false,
+      "checked_at": [
+        "2026-11-06T19:06:49.864386+00:00",
+        "2026-11-06T19:06:49.945742+00:00",
+        "2026-11-06T19:06:49.949364+00:00"
+      ]
+    },
+    "complete": true,
+    "included_files_sha256": {
+      "REPORT.md": "6862516aa3ee804637330a91c34588c61d59e72fc5bee65d2b9e2c2be722665f",
+      "MEASUREMENTS.csv": "3e5efb767944ee025114a02188e754fd80322b08d39bcb012295d64720225c6c",
+      "VERIFY.py": "77ed1bec358822a6578770ff1740adc1f2a8001f7df65321d3d03292683e7377"
+    }
+  },
+  "public_key": "1YbUbsuUQHEEu5IjHZLBOOAJnchawh7H7Kb8AfiyF1g=",
+  "signature": "q9m/uuzCe2AKyZ5DNXeOjpBS4hXUuVa0Y8eGq1AdYjIrFUje7x0Ji3Z1Igg/vpQJyBKJVmTmnLC4RyKtqiznDQ=="
+}

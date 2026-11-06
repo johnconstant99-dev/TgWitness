@@ -60,6 +60,10 @@ FILES.extend("website/demo/downloads/" + name for name in (
 FILES.extend("website/demo/report/" + name for name in (
     "index.html", "report.html", "sharing-copy.zip", "example.json",
 ))
+FILES.extend("website/validation/" + name for name in (
+    "performance.svg", "snapshot.json", "texts.json",
+    "audit/MEASUREMENTS.csv", "audit/SHA256SUMS.txt", "audit/PROOF.json",
+))
 EXPORT_CLINIC_ASSETS = (
     "SHA256SUMS.txt", "comparison-data.json", "comparison-poster.jpg", "download-manifest.json",
     "original-metadata-audit.json", "publication-review.json", "recording-manifest.json",

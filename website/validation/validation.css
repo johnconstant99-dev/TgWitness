@@ -120,6 +120,12 @@
 .v-provenance li { margin:12px 0; }
 .v-provenance code { display:block; overflow-wrap:anywhere; font-size:10px; }
 .v-final-note { color:var(--muted); border-top:1px solid var(--line); padding-top:22px; font-size:12px; line-height:1.75; }
+.v-audit-proof { display:grid; grid-template-columns:1.3fr 1fr; gap:24px 36px; margin:28px 0; padding:26px; border:1px solid var(--line); border-radius:7px; background:var(--surface); }
+.v-audit-proof h3 { margin:12px 0; font-size:24px; }
+.v-audit-proof p:not(.v-eyebrow) { font-size:13px; line-height:1.75; color:var(--muted); }
+.v-proof-links { display:grid; gap:10px; align-content:center; font-size:13px; }
+.v-proof-links a:first-child { font-weight:650; color:var(--v-accent); }
+.v-proof-scope { grid-column:1/-1; padding-top:18px; border-top:1px solid var(--line); }
 .validation-page[data-theme=dark] { --v-accent:#85d3bd; --v-soft:#182f2e; --v-amber:#e4ba7c; --v-amber-soft:#30291f; --v-red:#f4958d; }
 .validation-page[data-theme=dark] .v-button { color:#10251f; }
 .validation-page[data-theme=dark] .v-bar-row:nth-child(2) .v-bar { background:#56a995; }
@@ -133,6 +139,7 @@
   .v-stats>div:nth-child(3) { border:0; padding-inline-start:0; }
   .v-server-grid,.v-test-layout,.validation .v-limits,.validation .v-method-steps { grid-template-columns:1fr; }
   .v-run-grid { grid-template-columns:1fr; }
+  .v-audit-proof { grid-template-columns:1fr; padding:20px; }
   .v-run-card { padding:22px; }
   .v-run-card strong { font-size:30px; }
   .v-server { padding:22px; }

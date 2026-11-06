@@ -13,3 +13,4 @@ website/demo/downloads/README.md -binary diff merge text eol=lf
 website/demo/report/report.html binary
 website/demo/report/*.zip binary
 website/export-clinic/media/** -text
+website/validation/audit/* -text -whitespace
