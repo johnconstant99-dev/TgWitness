@@ -61,6 +61,7 @@ SUITES = {
         "check_capture_language_browser.py", "check_application_guides.py",
     ),
     "browser-ux": (
+        "test_api_authorization_matrix.py",
         "test_audit_security_fixes.py", "test_audit_data_fixes.py", "test_audit_platform_fixes.py",
         "test_release_data_fixes.py",
         "test_proxy_destination_dns.py",
@@ -242,7 +243,7 @@ async def run_checks(checks, output, *, workers=2, timeout=600, cwd=ROOT):
 def suite_checks(suite):
     # Pytest modules without a __main__ block otherwise exit 0 without executing a test.
     return [Check(Path(script).stem, (sys.executable,
-                  *(("-m", "pytest", "-q", "--tb=short") if suite == 'evidence' and script.startswith('test_') else ()),
+                  *(("-m", "pytest", "-q", "--tb=short") if script.startswith('test_') else ()),
                   str(ROOT / "tools" / script))) for script in SUITES[suite]]
 
 
