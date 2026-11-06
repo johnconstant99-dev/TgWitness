@@ -6363,5 +6363,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "フラグ設定条件：初回投稿者が5名以上おり、その14日間の中央値の3倍以上、かつメッセージ数が中央値の1.5倍未満の場合。チャットの最初の7日間はフラグ設定の対象外です。",
   "Distinct saved message numbers per chat and the share taken by service messages.": "チャットごとの保存済みメッセージ数の内訳と、サービスメッセージが占める割合。",
   "Membership changes Telegram reported, once per person, chat, change and day.": "Telegramから報告されたメンバーシップの変更。1人、1チャット、1変更、1日につき1回まで。",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "チャット状態のスナップショット間で追加または削除された、サービスメッセージの固定、通知の固定解除、および固定されたメッセージ。"
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "チャット状態のスナップショット間で追加または削除された、サービスメッセージの固定、通知の固定解除、および固定されたメッセージ。",
+  "Recipient public key (X25519, base64; optional)": "受信者の公開鍵（X25519、base64、任意）",
+  "Require Compliance retention for every copied object": "コピーしたすべてのオブジェクトに Compliance モードでの保持を要求",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "受信者の鍵を使う場合、復元には受信者の秘密鍵も必要です。秘密鍵は別に保管してください。受信者を変更すると、別のコピーの作成が始まります。"
 }

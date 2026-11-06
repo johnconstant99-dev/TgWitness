@@ -6402,5 +6402,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "फ़्लैग किया गया: कम से कम 5 पहली बार पोस्ट करने वाले उपयोगकर्ता और उनके 14-दिवसीय औसत का 3 गुना, साथ ही संदेश उनके औसत का 1.5 गुना से कम। चैट के पहले 7 दिनों को फ़्लैग नहीं किया जाता।",
   "Distinct saved message numbers per chat and the share taken by service messages.": "प्रत्येक चैट में सहेजे गए संदेशों की संख्या और सेवा संदेशों द्वारा लिए गए हिस्से को अलग से दर्शाएँ।",
   "Membership changes Telegram reported, once per person, chat, change and day.": "सदस्यता में बदलाव: टेलीग्राम द्वारा रिपोर्ट किए गए, प्रति व्यक्ति, चैट, परिवर्तन और दिन में एक बार।",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "चैट-स्टेट स्नैपशॉट्स के बीच जोड़े या हटाए गए सेवा संदेशों, सूचनाओं और पिन किए गए संदेशों को पिन करें।"
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "चैट-स्टेट स्नैपशॉट्स के बीच जोड़े या हटाए गए सेवा संदेशों, सूचनाओं और पिन किए गए संदेशों को पिन करें।",
+  "Recipient public key (X25519, base64; optional)": "प्राप्तकर्ता की सार्वजनिक कुंजी (X25519, base64; वैकल्पिक)",
+  "Require Compliance retention for every copied object": "हर कॉपी किए गए ऑब्जेक्ट को Compliance मोड में रखना अनिवार्य करें",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "प्राप्तकर्ता की कुंजी इस्तेमाल करने पर पुनर्स्थापना के लिए उसकी निजी कुंजी भी चाहिए। उसे अलग रखें। प्राप्तकर्ता बदलने पर एक अलग कॉपी शुरू होती है।"
 }

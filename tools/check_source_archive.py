@@ -6,6 +6,7 @@ import io
 import os
 from pathlib import Path
 import tempfile
+import tomllib
 import sys
 from unittest.mock import patch
 import zipfile
@@ -32,6 +33,21 @@ def check_website_inputs():
     public = {path.relative_to(root).as_posix() for path in builder.public_sources(root)}
     required = {"website/export-clinic/media/" + name for name in builder.EXPORT_CLINIC_ASSETS}
     assert required <= public, "Reviewed website assets are missing from the public source archive"
+    return {name: (root / name).read_bytes() for name in required}
+
+
+def check_narrative_inputs():
+    root = builder.ROOT.resolve()
+    public = {path.relative_to(root).as_posix() for path in builder.public_sources(root)}
+    # The source ZIP must retain every narrative resource that the wheel installs.
+    project = tomllib.loads((root / 'pyproject.toml').read_text(encoding='utf-8'))
+    patterns = project['tool']['setuptools']['package-data']['tgwitness']
+    required = {path.relative_to(root).as_posix() for pattern in patterns if pattern.startswith('narrative/')
+                for path in (root / 'tgwitness').glob(pattern) if path.is_file()}
+    assert required and required <= public, 'Installed narrative resources are missing from the source ZIP: ' + str(required - public)
+    required.update({'docs/examples/narrative.json', 'tools/fixtures/narrative-events.json',
+                     'tools/fixtures/narrative-golden.json'})
+    assert required <= public, 'Narrative examples or test fixtures are missing from the source ZIP'
     return {name: (root / name).read_bytes() for name in required}
 
 
@@ -174,6 +190,7 @@ def main():
     check_publication_secrets()
     container_inputs = check_container_inputs()
     website_inputs = check_website_inputs()
+    narrative_inputs = check_narrative_inputs()
     with tempfile.TemporaryDirectory(prefix="tgwitness-source-check-") as temporary:
         root = Path(temporary).resolve()
         check_portable_package(root)
@@ -185,6 +202,7 @@ def main():
             "tgwitness/locales/ru.json": '{"test":"пример"}\n'.encode(),
             **container_inputs,
             **website_inputs,
+            **narrative_inputs,
         }
         for name, data in original.items():
             path = root / name
@@ -204,6 +222,11 @@ def main():
             private = root / name
             private.parent.mkdir(parents=True, exist_ok=True)
             private.write_text("PRIVATE_CANARY", encoding="utf-8")
+        for name in ('tgwitness/narrative/texts/local-private.json', 'tgwitness/narrative/profiles.json',
+                     'docs/examples/local-evidence.json', 'tools/fixtures/local-evidence.json'):
+            private = root / name
+            private.parent.mkdir(parents=True, exist_ok=True)
+            private.write_text('PRIVATE_CANARY', encoding='utf-8')
         for name in ("Data/private.py", "BUILD/output.py", "nested/dist/generated.py",
                      ".tmp/scratch.py", ".TMP-audit/scratch.py", ".tmp-note.py", "nested/.tmp-notes.md"):
             path = source / name
@@ -215,7 +238,8 @@ def main():
 
         def build(clock):
             with patch.object(builder, "ROOT", root), patch.object(builder, "VERSION", "0.0.0"), \
-                    patch.object(builder, "FILES", ["README.md", *container_inputs, *website_inputs]), \
+                    patch.object(builder, "FILES", ["README.md", *container_inputs, *website_inputs,
+                                                    *(name for name in narrative_inputs if not name.startswith('tgwitness/'))]), \
                     patch.object(builder, "DIRECTORIES", {"tgwitness": {".py", ".json"},
                                                           "deploy": builder.DIRECTORIES["deploy"],
                                                           "website": builder.DIRECTORIES["website"]}), \
@@ -283,7 +307,7 @@ def main():
             assert archive.read("TgWitness/" + changed_input) == changed_bytes
             assert (hashlib.sha256(changed_bytes).hexdigest() + "  " + changed_input + "\n").encode() \
                 in archive.read("TgWitness/SOURCE_SHA256SUMS")
-    print("Source archive checks passed: repeatability, metadata, exact bytes, container and website inputs and hashes, private exclusions, secret redaction, interrupted writes, portable metadata and PDF resources.")
+    print("Source archive checks passed: repeatability, metadata, exact bytes, container/website/narrative inputs and hashes, private exclusions, secret redaction, interrupted writes, portable metadata and PDF resources.")
 
 
 if __name__ == "__main__":

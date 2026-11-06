@@ -33,6 +33,15 @@ def main(arguments=None):
     assert desktop("installed-resource-check")["lang_pack"] == "tdesktop"
     assert (package / "tgwitness/client_profiles.LICENSE").read_bytes()
     assert (package / "tgwitness/dstack_measurement.LICENSE").read_bytes()
+    from tgwitness.narrative.text import LANGUAGES, Texts
+    from tgwitness.narrative.config import validate as narrative_settings
+    from tgwitness.narrative.render import jurisdiction
+    for language in LANGUAGES:
+        assert Texts(language)('title'), 'Missing installed narrative catalog: ' + language
+    for code in ('DE', 'AT', 'CH', 'UK', 'IE', 'FR', 'ES', 'IT', 'PL', 'CZ', 'UA', 'NL', 'BE', 'US-federal'):
+        assert jurisdiction(code)['code'] == code
+    assert json.loads((package / 'tgwitness/narrative/review-policy.json').read_text(encoding='utf-8'))
+    assert narrative_settings({})['require_tier'] == 'self_attested'
     for name in ("proof.html", "proof.css", "proof.js"):
         assert (package / "tgwitness/static" / name).read_bytes(), "Missing installed proof resource: " + name
     for name in ("report_console.js", "report_console.css", "report_skin.css", "report_dossier.css", "report_icons.svg",

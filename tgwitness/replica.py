@@ -20,16 +20,20 @@ from typing import Literal
 from urllib.parse import urlsplit
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .health import next_at
-from .netclient import RouteError
+from .netclient import HTTPError, RouteError
 from .network import NetworkConfig
 from .s3 import S3
 from .store import canonical, utcnow
 from .verify import fingerprint, media_reference, verify_checkpoint, verify_events
 
 MAGIC = b"TGWR1"
+RECIPIENT_MAGIC = b"TGWR2"
 CHUNK = 1024 * 1024
 SEGMENT_EVENTS = 5000
 LOOP_SECONDS = 30
@@ -46,6 +50,22 @@ class ReplicaSettings(BaseModel):
     interval_minutes: int = Field(default=5, ge=1, le=1440)
     retention_days: int = Field(default=0, ge=0, le=36500)
     retention_mode: Literal["GOVERNANCE", "COMPLIANCE"] = "GOVERNANCE"
+    recipient_public_key: str = Field(default="", max_length=44)
+    evidence: bool = False
+
+    @field_validator("recipient_public_key")
+    @classmethod
+    def recipient_key(cls, value):
+        if value:
+            try:
+                raw = base64.b64decode(value, validate=True)
+                if len(raw) != 32 or base64.b64encode(raw).decode() != value:
+                    raise ValueError
+                # Reject low-order public keys (including the all-zero key).
+                X25519PrivateKey.generate().exchange(X25519PublicKey.from_public_bytes(raw))
+            except ValueError:
+                raise ValueError("Use a base64-encoded 32-byte X25519 recipient public key") from None
+        return value
 
     @field_validator("endpoint")
     @classmethod
@@ -63,7 +83,33 @@ def replica_settings(store):
 
 
 def workspace_prefix(settings, public_key):
-    return settings["prefix"].strip("/") + "/" + fingerprint(public_key)[:16]
+    base = settings["prefix"].strip("/") + "/" + fingerprint(public_key)[:16]
+    recipient = settings.get("recipient_public_key")
+    return base + "/recipient-" + hashlib.sha256(base64.b64decode(recipient)).hexdigest()[:16] if recipient else base
+
+
+def recipient_envelope(public_key, name):
+    recipient = base64.b64decode(public_key, validate=True)
+    ephemeral = X25519PrivateKey.generate()
+    public = ephemeral.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    context = RECIPIENT_MAGIC + public + recipient + name.encode()
+    wrapping = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=context).derive(
+        ephemeral.exchange(X25519PublicKey.from_public_bytes(recipient)))
+    key, nonce = os.urandom(32), os.urandom(12)
+    return key, RECIPIENT_MAGIC + public + nonce + AESGCM(wrapping).encrypt(nonce, key, context)
+
+
+def load_recipient_key(path):
+    with Path(path).open("rb") as source:
+        data = source.read(4097)
+    if len(data) > 4096:
+        raise ValueError("Recipient key file is too large")
+    if data.startswith(b"-----BEGIN"):
+        key = serialization.load_pem_private_key(data, password=None)
+        if not isinstance(key, X25519PrivateKey):
+            raise ValueError("Recipient private key must be X25519")
+        return key
+    return X25519PrivateKey.from_private_bytes(data if len(data) == 32 else base64.b64decode(data.strip(), validate=True))
 
 
 def encrypt(key, name, read, nonce_prefix):
@@ -78,11 +124,27 @@ def encrypt(key, name, read, nonce_prefix):
             return
 
 
-def decrypt(key, name, read):
-    head = read(len(MAGIC) + 8)
-    if head[:len(MAGIC)] != MAGIC:
+def decrypt(key, name, read, recipient_key=None):
+    magic = read(len(MAGIC))
+    if magic == RECIPIENT_MAGIC:
+        if recipient_key is None:
+            raise ValueError("нужен ключ получателя (use --recipient-key FILE)")
+        header = read(92)
+        if len(header) != 92:
+            raise ValueError("Truncated recipient envelope")
+        public, nonce, wrapped = header[:32], header[32:44], header[44:]
+        recipient = recipient_key.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+        context = RECIPIENT_MAGIC + public + recipient + name.encode()
+        wrapping = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=context).derive(
+            recipient_key.exchange(X25519PublicKey.from_public_bytes(public)))
+        key = AESGCM(wrapping).decrypt(nonce, wrapped, context)
+        magic = read(len(MAGIC))
+    if magic != MAGIC:
         raise ValueError("Not a TgWitness encrypted object: " + name)
-    aead, counter, label, prefix = AESGCM(key), 0, name.encode(), head[len(MAGIC):]
+    prefix = read(8)
+    if len(prefix) != 8:
+        raise ValueError("Truncated encrypted object")
+    aead, counter, label = AESGCM(key), 0, name.encode()
     while True:
         block = read(CHUNK + 16)
         last = len(block) < CHUNK + 16
@@ -98,8 +160,16 @@ class MediaUnavailable(ValueError):
     pass
 
 
-async def upload(s3, key, name, opener, extra, expected_digest=None):
+async def upload(s3, key, name, opener, extra, expected_digest=None, recipient_public_key="", receipts=None):
     prefix, chunks = os.urandom(8), []
+    envelope = b""
+    if recipient_public_key:
+        key, envelope = recipient_envelope(recipient_public_key, name)
+
+    def encrypted(read):
+        if envelope:
+            yield envelope
+        yield from encrypt(key, name, read, prefix)
 
     def digests():
         md5, sha, plain_hash, length = hashlib.md5(), hashlib.sha256(), hashlib.sha256(), 0
@@ -109,7 +179,7 @@ async def upload(s3, key, name, opener, extra, expected_digest=None):
                 plain_hash.update(data)
                 chunks.append(hashlib.sha256(data).digest())
                 return data
-            for piece in encrypt(key, name, read, prefix):
+            for piece in encrypted(read):
                 md5.update(piece)
                 sha.update(piece)
                 length += len(piece)
@@ -127,10 +197,26 @@ async def upload(s3, key, name, opener, extra, expected_digest=None):
                 if hashlib.sha256(data).digest() != next(seen, None):
                     raise MediaUnavailable("The file changed while it was being copied; it is copied on a later pass")
                 return data
-            for piece in encrypt(key, name, read, prefix):
+            for piece in encrypted(read):
                 yield piece
                 await asyncio.sleep(0)
-    await s3.put(name, body(), length, sha, md5, extra)
+    receipt = await s3.put(name, body(), length, sha, md5, extra)
+    if receipts is not None:
+        receipt = receipt or {}
+        if not receipt.get("last_modified") and hasattr(s3, "head"):
+            try:
+                metadata = await s3.head(name, receipt.get("version_id"))
+                if receipt.get("etag") and metadata.get("etag") != receipt["etag"]:
+                    raise ValueError("S3 HEAD differs from the uploaded object ETag")
+                if receipt.get("version_id") and metadata.get("version_id") != receipt["version_id"]:
+                    raise ValueError("S3 HEAD differs from the uploaded object version")
+                receipt = {**receipt, **metadata}
+            except (OSError, RouteError, HTTPError) as exc:
+                receipt["metadata_error"] = type(exc).__name__
+        receipts.append({"name": name, "etag": receipt.get("etag"), "last_modified": receipt.get("last_modified"),
+                         "version_id": receipt.get("version_id"), "ciphertext_sha256": sha,
+                         "metadata_error": receipt.get("metadata_error"),
+                         "time_verification": "provider response recorded by collector; not an independently signed timestamp"})
     return length
 
 
@@ -191,13 +277,27 @@ def lock_headers(settings, days=None):
             "x-amz-object-lock-retain-until-date": until.strftime("%Y-%m-%dT%H:%M:%SZ")}
 
 
-async def lock_report(s3, name, settings, requested=None, uploaded_at=None):
+async def require_evidence_lock(s3, settings):
+    if not settings.get("evidence"):
+        return
+    message = "Доказательственная реплика требует Object Lock в режиме Compliance"
+    if settings.get("retention_mode") != "COMPLIANCE" or settings.get("retention_days", 0) < 1:
+        raise ValueError(message)
+    try:
+        enabled = (await s3.object_lock()).get("enabled") is True
+    except Exception:
+        enabled = False
+    if not enabled:
+        raise ValueError(message)
+
+
+async def lock_report(s3, name, settings, requested=None, uploaded_at=None, version_id=None):
     try:
         bucket = await s3.object_lock()
     except Exception as exc:
         bucket = {"enabled": None, "default_mode": None, "default_days": None, "error": type(exc).__name__}
     try:
-        applied = await s3.retention(name)
+        applied = await s3.retention(name, version_id) if version_id else await s3.retention(name)
     except Exception as exc:
         applied = {"error": type(exc).__name__}
     wanted = bool(settings["retention_days"] or bucket.get("default_days"))
@@ -233,16 +333,27 @@ async def sync(store, vault, network):
     if not (settings["enabled"] and settings["endpoint"] and settings["bucket"] and secrets.get("access_key")):
         return None
     s3, key = client(settings, secrets, network), base64.b64decode(secrets["key"])
+    await require_evidence_lock(s3, settings)
     base = workspace_prefix(settings, vault.public_key)
     identity = {k: settings[k] for k in ("endpoint", "region", "bucket", "path_style")}
     identity.update(prefix=base, encryption_key_hash=hashlib.sha256(key).hexdigest())
+    if settings["recipient_public_key"] or settings["evidence"]:
+        identity.update(recipient_public_key=settings["recipient_public_key"], evidence=settings["evidence"])
     sent = Sent(store.root, hashlib.sha256(canonical(identity)).hexdigest())
     extra = lock_headers(settings)
-    done, uploaded = {"objects": 0, "bytes": 0}, []
+    done, uploaded, receipts = {"objects": 0, "bytes": 0}, [], []
     started_at = datetime.now(timezone.utc)
 
     async def send(name, opener, expected_digest=None):
-        size = await upload(s3, key, name, opener, extra, expected_digest)
+        size = await upload(s3, key, name, opener, extra, expected_digest,
+                            recipient_public_key=settings["recipient_public_key"], receipts=receipts)
+        if settings["evidence"]:
+            receipt = receipts[-1]
+            if not all(receipt.get(k) for k in ("etag", "last_modified", "version_id")):
+                raise ValueError("Evidence replica requires the uploaded object version, ETag and Last-Modified")
+            receipt["object_lock"] = await lock_report(s3, name, settings, extra, started_at, receipt["version_id"])
+            if receipt["object_lock"]["verified"] is not True:
+                raise ValueError("Object Lock did not confirm Compliance retention for the uploaded version")
         done["bytes"] += size
         done["objects"] += 1
         sent.add(name, size)
@@ -308,7 +419,7 @@ async def sync(store, vault, network):
               "object_lock": lock or (store.get_setting("replica_last", None) or {}).get("object_lock")}
     if done["objects"] or error:
         store.append("replica.completed", {**status, "destination": settings["endpoint"] + "/" + settings["bucket"]
-                                           + "/" + base, "encrypted": True})
+                                           + "/" + base, "encrypted": True, "uploaded_objects": receipts})
     store.set_setting("replica_last", status)
     if not error:
         store.set_setting("replica_success", {"at": status["at"], "journal_seq": journal_seq})
@@ -345,7 +456,7 @@ def key_file(store, vault):
             "prefix": workspace_prefix(settings, vault.public_key), "fingerprint": fingerprint(vault.public_key)}
 
 
-async def restore(keyinfo, access_key, secret_key, out, network=None):
+async def restore(keyinfo, access_key, secret_key, out, network=None, recipient_key=None):
     s3 = S3(keyinfo["endpoint"], keyinfo["region"], keyinfo["bucket"], access_key, secret_key,
             network or NetworkConfig(kind="direct"), keyinfo["path_style"])
     key, base, out = base64.b64decode(keyinfo["key"]), keyinfo["prefix"], Path(out)
@@ -358,7 +469,7 @@ async def restore(keyinfo, access_key, secret_key, out, network=None):
 
     with TemporaryDirectory(prefix=".restore-", dir=out) as scratch:
         stage = Path(scratch)
-        result = await restore_objects(s3, keyinfo, key, base, stage)
+        result = await restore_objects(s3, keyinfo, key, base, stage, recipient_key)
         for path in stage.iterdir():
             target = out / path.name
             if target.exists() or filesystem_link(target):
@@ -396,7 +507,7 @@ def restore_path(out, base, name):
     return parts[0], target
 
 
-async def restore_objects(s3, keyinfo, key, base, out):
+async def restore_objects(s3, keyinfo, key, base, out, recipient_key=None):
     segments, counts = [], {"journal": 0, "media": 0, "checkpoints": 0, "exports": 0}
     async for name, _ in s3.list(base + "/"):
         if not name.endswith(".tgwr") or name == base + "/connection-test.tgwr" \
@@ -412,7 +523,7 @@ async def restore_objects(s3, keyinfo, key, base, out):
                     handle.write(chunk)
                 await s3.get(name, sink)
             with part.open("rb") as encrypted, clear.open("wb") as plain:
-                for piece in decrypt(key, name, encrypted.read):
+                for piece in decrypt(key, name, encrypted.read, recipient_key):
                     plain.write(piece)
                     digest.update(piece)
             if kind == "media":
@@ -470,12 +581,14 @@ def main():
     parser.add_argument("command", choices=["restore"])
     parser.add_argument("--key-file", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--recipient-key", type=Path, help="X25519 private key: PEM, raw 32 bytes, or base64")
     args = parser.parse_args()
     access, secret = os.environ.get("TGWITNESS_S3_ACCESS_KEY"), os.environ.get("TGWITNESS_S3_SECRET_KEY")
     if not (access and secret):
         parser.exit(1, "Set TGWITNESS_S3_ACCESS_KEY and TGWITNESS_S3_SECRET_KEY (read access to the bucket).\n")
     try:
-        result = asyncio.run(restore(json.loads(args.key_file.read_text()), access, secret, args.out))
+        recipient = load_recipient_key(args.recipient_key) if args.recipient_key else None
+        result = asyncio.run(restore(json.loads(args.key_file.read_text()), access, secret, args.out, recipient_key=recipient))
     except Exception as exc:
         parser.exit(1, "RESTORE FAILED: " + type(exc).__name__ + ": " + str(exc) + "\n")
     print(json.dumps(result, indent=2))

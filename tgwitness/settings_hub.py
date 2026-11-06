@@ -240,6 +240,12 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
             destination = replica.replica_settings(s)
             if not destination["endpoint"] or not destination["bucket"]:
                 raise HTTPException(409, "Configure the off-site copy destination in Settings first.")
+            if destination["evidence"]:
+                try:
+                    await replica.require_evidence_lock(replica.client(destination, app.state.vault.read("replica"),
+                                                                       c.outside_route()), destination)
+                except ValueError as exc:
+                    raise HTTPException(409, str(exc)) from None
         if desired["continuous"] != before["continuous"] or desired["ip"] != before["ip"]:
             from .guided_connection import busy_account
             try:

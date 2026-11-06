@@ -6769,5 +6769,8 @@
   "Flags days with many new speakers and unchanged activity, as in bot injection.": "Отмечает дни с множеством новых авторов при прежней активности, как при вбросе ботов.",
   "Rows listed per metric": "Строк на метрику",
   "The most recent rows are listed; totals cover every row.": "Показываются последние строки; итоги считаются по всем.",
-  "rows": "строк"
+  "rows": "строк",
+  "Recipient public key (X25519, base64; optional)": "Открытый ключ получателя (X25519, base64; необязательно)",
+  "Require Compliance retention for every copied object": "Требовать хранение в режиме Compliance для каждого скопированного объекта",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "При указании ключа получателя для восстановления также нужен его закрытый ключ. Храните его отдельно. Смена получателя создаёт отдельную копию."
 }

@@ -1,0 +1,22 @@
+{
+  "code": "US-federal",
+  "scope": "United States · federal courts",
+  "checked_at": "2026-11-06",
+  "review": "not reviewed by local counsel",
+  "expert_role": {
+    "term": "expert witness",
+    "basis": "Federal Rules of Evidence, Rule 702",
+    "source": "https://www.uscourts.gov/sites/default/files/2025-02/federal-rules-of-evidence-dec-1-2024_0.pdf"
+  },
+  "esig_regulation": null,
+  "data_access_basis": null,
+  "timestamp_recognition": null,
+  "evidence_rules": [],
+  "dpa": null,
+  "sources": [
+    {
+      "term": "Federal Rules of Evidence, Rule 702",
+      "url": "https://www.uscourts.gov/sites/default/files/2025-02/federal-rules-of-evidence-dec-1-2024_0.pdf"
+    }
+  ]
+}

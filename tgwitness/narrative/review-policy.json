@@ -1,0 +1,8 @@
+{
+  "forbidden_words_status": "awaiting-T7",
+  "custody_schema_status": "awaiting-T13",
+  "forbidden_words": {},
+  "legal_native_review": {},
+  "translation_status": "machine-assisted, not reviewed",
+  "note": "No review or compatibility with absent specifications is asserted. Release validation must fail until those requirements are met."
+}

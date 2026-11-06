@@ -15,7 +15,7 @@ import sys
 import tempfile
 import unicodedata
 import zipfile
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from cryptography import x509
@@ -46,6 +46,25 @@ DRAND_GENESIS, DRAND_PERIOD = 1692803367, 3
 DRAND_RELAYS = ("https://drand.cloudflare.com", "https://api.drand.sh", "https://api2.drand.sh", "https://api3.drand.sh")
 DRAND_CHECK_LIMIT = 100
 GATEWAY_FIELDS = ("at", "name", "type", "rcode", "decision", "colo")
+
+
+class VerifierTooOld(ValueError):
+    def __init__(self, detail=""):
+        super().__init__("пакет подписан корректно, но этот верификатор старше формата пакета" +
+                         (": " + detail if detail else ""))
+
+
+def safe_text(value):
+    text = str(value)
+    text = re.sub(r"\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07\x1b]*(?:\x07|\x1b\\))", "", text)
+    return re.sub(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]", "", text)
+
+
+def authenticate_statement(value, key_field="public_key"):
+    statement = value["statement"]
+    Ed25519PublicKey.from_public_bytes(base64.b64decode(statement[key_field], validate=True)).verify(
+        base64.b64decode(value["signature"], validate=True), canonical(statement))
+    return statement
 
 
 def validate_server_hashes(value):
@@ -130,7 +149,10 @@ def strict_json(data):
 
 
 def read_manifest(archive):
-    return strict_json(read_member(archive, "manifest.json", MAX_MANIFEST_BYTES))
+    manifest = strict_json(read_member(archive, "manifest.json", MAX_MANIFEST_BYTES))
+    Ed25519PublicKey.from_public_bytes(base64.b64decode(manifest["public_key"], validate=True)).verify(
+        base64.b64decode(read_member(archive, "manifest.sig"), validate=True), canonical(manifest))
+    return manifest
 
 
 def member_digest(archive, name):
@@ -410,7 +432,7 @@ def timestamp_signature(reply, roots):
             "signer_sha256": signer.fingerprint(hashes.SHA256()).hex()}
 
 
-def ots_summary(proof, digest):
+def ots_summary(proof, digest, *, commitments=False):
     head = OTS_MAGIC + b"\x01\x08"
     if len(digest) != 32 or proof[:len(head)] != head or proof[len(head):len(head) + 32] != digest:
         raise ValueError("The OpenTimestamps proof is not for this checkpoint")
@@ -451,8 +473,9 @@ def ots_summary(proof, digest):
 
     reader = Reader(proof[len(head) + 32:])
     kinds, remaining = set(), 10000
+    bitcoin = []
 
-    def node(message_size, depth=0):
+    def node(message_size, depth=0, message=None):
         nonlocal remaining
         if depth >= 256:
             raise ValueError("OpenTimestamps tree exceeds the depth limit")
@@ -469,11 +492,13 @@ def ots_summary(proof, digest):
                 kind = reader.take(8)
                 payload = Reader(reader.blob(8192))
                 if kind == OTS_BITCOIN:
-                    payload.integer()
+                    height = payload.integer()
                     payload.finish()
                     if message_size != 32:
                         raise ValueError("OpenTimestamps Bitcoin commitment must be 32 bytes")
                     kinds.add("bitcoin-unverified")
+                    if message is not None:
+                        bitcoin.append({"height": height, "merkle_root": message.hex()})
                 elif kind == OTS_PENDING:
                     uri = payload.blob(1000)
                     payload.finish()
@@ -502,14 +527,95 @@ def ots_summary(proof, digest):
                 if operation in operations:
                     raise ValueError("Repeated OpenTimestamps operation")
                 operations.add(operation)
-                node(size, depth + 1)
+                calculated = None
+                if message is not None:
+                    if tag == 0xf0:
+                        calculated = message + argument
+                    elif tag == 0xf1:
+                        calculated = argument + message
+                    elif tag == 0xf2:
+                        calculated = message[::-1]
+                    elif tag == 0xf3:
+                        calculated = message.hex().encode("ascii")
+                    elif tag in (0x02, 0x03, 0x08):
+                        try:
+                            calculated = hashlib.new({0x02: "sha1", 0x03: "ripemd160", 0x08: "sha256"}[tag], message).digest()
+                        except ValueError:
+                            pass  # Unsupported hash never produces a verified commitment.
+                node(size, depth + 1, calculated)
             if not more:
                 return
 
-    node(32)
+    node(32, message=digest if commitments else None)
     reader.finish()
     status = next(kind for kind in ("bitcoin-unverified", "pending", "unknown") if kind in kinds)
-    return {"status": status, "verification": "structure only; run ots verify"}
+    return {"status": status, "verification": "structure only; run ots verify",
+            **({"commitments": bitcoin} if commitments else {})}
+
+
+BITCOIN_SOURCES = ("https://blockstream.info/api", "https://mempool.space/api")
+
+
+def bitcoin_fetcher():
+    """TLS explorer consensus, explicitly not independent Bitcoin chain validation."""
+    import urllib.request
+    cache = {}
+
+    def get(url):
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "TgWitness verify"}), timeout=15) as reply:
+            body = reply.read(1025)
+        if len(body) > 1024:
+            raise ValueError("Excessive Bitcoin header response")
+        return body.decode("ascii").strip()
+
+    def fetch(height):
+        if height in cache:
+            return cache[height]
+        found = []
+        for source in BITCOIN_SOURCES:
+            try:
+                tip = int(get(source + "/blocks/tip/height"))
+                if tip - height + 1 < 6:
+                    return None
+                block_hash = get(source + "/block-height/" + str(height))
+                hash_bytes(block_hash)
+                header = bytes.fromhex(get(source + "/block/" + block_hash + "/header"))
+                if len(header) != 80 or hashlib.sha256(hashlib.sha256(header).digest()).digest()[::-1].hex() != block_hash:
+                    raise ValueError("Bitcoin header hash mismatch")
+                bits = int.from_bytes(header[72:76], "little")
+                exponent, mantissa = bits >> 24, bits & 0x7fffff
+                if bits & 0x800000 or not 3 <= exponent <= 29 or not mantissa:
+                    raise ValueError("Invalid Bitcoin proof-of-work target")
+                target = mantissa << (8 * (exponent - 3))
+                if target > 0xffff << 208 or int(block_hash, 16) > target:
+                    raise ValueError("Invalid Bitcoin header proof of work")
+                found.append(header)
+            except (OSError, UnicodeError):
+                return None
+        if len(set(found)) != 1:
+            raise ValueError("Independent Bitcoin header sources disagree")
+        cache[height] = found[0]
+        return found[0]
+    return fetch
+
+
+def confirm_ots(proof, digest, fetch=None):
+    summary = ots_summary(proof, digest, commitments=True)
+    fetch = fetch or bitcoin_fetcher()
+    confirmed = []
+    for item in summary.pop("commitments"):
+        header = fetch(item["height"])
+        if header is None:
+            continue
+        if len(header) != 80 or header[36:68].hex() != item["merkle_root"]:
+            raise ValueError("OpenTimestamps commitment differs from the Bitcoin block Merkle root")
+        confirmed.append({"height": item["height"],
+                          "time": datetime.fromtimestamp(int.from_bytes(header[68:72], "little"), timezone.utc).isoformat()})
+    if confirmed:
+        summary.update(status="confirmed", time=min(c["time"] for c in confirmed), blocks=confirmed,
+                       verification="proof evaluated; headers with 6 confirmations agreed by two HTTPS explorers; not full chain validation",
+                       sources=list(BITCOIN_SOURCES))
+    return summary
 
 
 def find_openssl():
@@ -541,15 +647,17 @@ def openssl_verify_timestamp(data, reply, query, ca_path):
                 raise ValueError("Timestamp signature check failed: " + done.stderr.decode(errors="replace")[-500:])
 
 
-def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None):
+def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None, check_bitcoin=False):
     results = []
     for name in sorted(n for n in names if n.startswith("anchors/") and n.endswith(".json")):
         data = read_member(archive, name)
-        verify_checkpoint(strict_json(data), public_key, event_count, hash_at)
+        retained_checkpoint = strict_json(data)
+        verify_checkpoint(retained_checkpoint, public_key, event_count, hash_at)
         digest, stem = hashlib.sha256(data).digest(), name[:-len(".json")] + "."
         for proof_name in sorted(n for n in names if n.startswith(stem) and n != name):
             service = proof_name[len(stem):].rsplit(".", 1)[0]
-            entry = {"checkpoint": name[len("anchors/"):], "service": service}
+            entry = {"checkpoint": name[len("anchors/"):], "service": service,
+                     "event_count": retained_checkpoint["statement"]["event_count"]}
             if proof_name.endswith(".tsr"):
                 reply = read_member(archive, proof_name)
                 query_name = proof_name[:-4] + ".tsq"
@@ -559,8 +667,8 @@ def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None
                     openssl_verify_timestamp(data, reply, query, tsa_ca)
                 entry["signature"] = "checked against the given root" if tsa_ca else "not checked (use --tsa-ca)"
             elif proof_name.endswith(".ots"):
-                entry.update(kind="opentimestamps", **ots_summary(read_member(archive, proof_name), digest),
-                             attestation="as the calendar states it; ots verify checks it against Bitcoin")
+                proof = read_member(archive, proof_name)
+                entry.update(kind="opentimestamps", **(confirm_ots(proof, digest) if check_bitcoin else ots_summary(proof, digest)))
             else:
                 continue
             results.append(entry)
@@ -982,7 +1090,7 @@ class Sequences:
             if isinstance(payload.get("scope"), dict):
                 self.set_scope(payload["scope"], event["observed_at"])
         elif kind == "deletion.unscoped":
-            # Account-level deletions name numbers of the account sequence that no saved message has.
+            # Account-level deletions name numbers without an attribution to an observed chat.
             for number in payload.get("message_ids") or []:
                 if type(number) is int and number > 0:
                     self.account.setdefault(number, event["observed_at"])
@@ -1244,7 +1352,7 @@ def confirm_drand(rounds, relays=DRAND_RELAYS, limit=DRAND_CHECK_LIMIT, fetch=No
             except (OSError, ValueError):
                 continue
             for item, answer in answers:
-                if answer["randomness"] != item["randomness"]:
+                if answer["round"] != item["round"] or answer["randomness"] != item["randomness"]:
                     raise ValueError("drand round " + str(item["round"]) + " at record " + str(item["seq"])
                                      + " differs from " + relay + ": the recorded value is not drand's")
             used.append(relay)
@@ -1351,9 +1459,9 @@ def read_sealed(stream):
 
 def check_seal(sealed, public_key=None, expected_fingerprint=None):
     content, seal = sealed
-    statement = seal["statement"]
+    statement = authenticate_statement(seal)
     if not is_format(statement.get("format"), "report-seal-v1"):
-        raise ValueError("Unsupported report seal")
+        raise VerifierTooOld("Unsupported report seal")
     key = statement["public_key"]
     if public_key is not None and key != public_key:
         raise ValueError("The report was sealed with a different key than the archive")
@@ -1522,7 +1630,7 @@ def verify_report(path, expected_fingerprint=None, evidence=None):
 
 def verify_selection(path, expected_fingerprint=None, evidence=None):
     data = read_json_file(path)
-    if data.get("statement", {}).get("format") == "tgwitness-board-selection-v1":
+    if isinstance(data.get("statement"), dict) and "signature" in data:
         return verify_board_selection(data, expected_fingerprint, evidence)
     if not isinstance(data, dict) or data.get("format") != "tgwitness-selection-v1":
         raise ValueError("Unsupported selection format")
@@ -1602,7 +1710,9 @@ BOARD_KINDS = {"board." + kind for kind in ("bookmark", "highlight", "slice", "c
 
 
 def verify_board_selection(data, expected_fingerprint=None, evidence=None):
-    statement = data["statement"]
+    statement = authenticate_statement(data)
+    if statement.get("format") != "tgwitness-board-selection-v1":
+        raise VerifierTooOld("Unsupported board selection")
     public = statement["public_key"]
     fp = fingerprint(public)
     if expected_fingerprint and fp != expected_fingerprint:
@@ -1921,7 +2031,7 @@ def verify_board_disclosure(archive, manifest):
     if "case-board.json" not in manifest["files"]:
         return None
     signed = json.loads(read_member(archive, "case-board.json", MAX_JSON_BYTES))
-    statement, public = signed["statement"], manifest["public_key"]
+    statement, public = authenticate_statement(signed), manifest["public_key"]
     if statement.get("format") != "tgwitness-case-board-handover-v1" or statement.get("public_key") != public:
         raise ValueError("Invalid handover board format or signing key")
     Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True)).verify(
@@ -1948,7 +2058,9 @@ def verify_board_disclosure(archive, manifest):
 
 def verify_board_document(path, expected_fingerprint=None, evidence=None):
     signed = read_json_file(path)
-    statement = signed["statement"]
+    statement = authenticate_statement(signed)
+    if statement.get("format") not in ("tgwitness-case-board-v1", "tgwitness-case-board-disclosure-v1", "tgwitness-case-board-handover-v1"):
+        raise VerifierTooOld("Unsupported Case Board document")
     public = statement["public_key"]
     fp = fingerprint(public)
     if expected_fingerprint and fp != expected_fingerprint:
@@ -1985,12 +2097,13 @@ def verify_board_document(path, expected_fingerprint=None, evidence=None):
             "annotations_checked": bool(evidence), "meaning": "Team opinions; signature authenticates the signed document, not the truth of a conclusion"}
 
 
-def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None, check_drand=False, max_gib=None):
+def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None, check_drand=False, max_gib=None,
+                  check_bitcoin=False):
     with open_archive(path, max_gib=max_gib) as archive:
         names = archive.namelist()
         manifest = read_manifest(archive)
         if not is_format(manifest["format"], "evidence-v1"):
-            raise ValueError("Unsupported evidence format")
+            raise VerifierTooOld("Unsupported evidence format")
         public = manifest["public_key"]
         fp = fingerprint(public)
         if expected_fingerprint and fp != expected_fingerprint:
@@ -2083,10 +2196,11 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
             return None
         if checkpoint:
             verify_checkpoint(checkpoint, public, result["events"], hash_at)
-        result["anchors"] = verify_anchors(archive, names, public, result["events"], hash_at, tsa_ca)
+        result["anchors"] = verify_anchors(archive, names, public, result["events"], hash_at, tsa_ca, check_bitcoin)
         result["board"] = verify_board(archive, manifest, checkpoint)
         result["key_pinned"] = bool(expected_fingerprint)
         result["checkpoint_checked"] = checkpoint is not None
+        result["assurance"] = assurance(result)
         return result
 
 
@@ -2254,7 +2368,7 @@ def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
         names = archive.namelist()
         manifest = read_manifest(archive)
         if not is_format(manifest["format"], "chat-export-v1"):
-            raise ValueError("Unsupported chat export format")
+            raise VerifierTooOld("Unsupported chat export format")
         public = manifest["public_key"]
         fp = fingerprint(public)
         if expected_fingerprint and fp != expected_fingerprint:
@@ -2405,6 +2519,11 @@ def compare_chat_exports(first, second, first_fingerprint=None, second_fingerpri
 
 
 def print_comparison(result, limit=50):
+    import builtins
+
+    def print(*values, **kwargs):
+        builtins.print(*(safe_text(v) if isinstance(v, str) else v for v in values), **kwargs)
+
     first, second = result["first"], result["second"]
     print("Both archives verified. First " + str(first["exported_at"]) + " (" + str(first["messages"]) + " messages, key "
           + first["fingerprint"][:16] + "), second " + str(second["exported_at"]) + " (" + str(second["messages"])
@@ -2453,7 +2572,7 @@ def verify_handover(path, expected_fingerprint=None):
         names = archive.namelist()
         manifest = read_manifest(archive)
         if not is_format(manifest["format"], "handover-v1"):
-            raise ValueError("Unsupported handover format")
+            raise VerifierTooOld("Unsupported handover format")
         public = manifest["public_key"]
         fp = fingerprint(public)
         if expected_fingerprint and fp != expected_fingerprint:
@@ -2658,7 +2777,7 @@ def verify_account_export(path, expected_fingerprint=None, max_gib=None):
         names = archive.namelist()
         manifest = read_manifest(archive)
         if manifest.get("format") != "tgwitness-account-export-v1":
-            raise ValueError("Unsupported account export format")
+            raise VerifierTooOld("Unsupported account export format")
         public = manifest["public_key"]
         fp = fingerprint(public)
         if manifest.get("fingerprint") != fp:
@@ -2981,7 +3100,7 @@ def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_
     with open_archive(path, max_gib=max_gib) as archive, tempfile.TemporaryDirectory() as temporary:
         manifest = read_manifest(archive)
         if manifest.get("format") not in DISCLOSURE_FORMATS:
-            raise ValueError("Unsupported account disclosure format")
+            raise VerifierTooOld("Unsupported account disclosure format")
         # Version 2 keeps records the selection left out as content-free markers, and replies say what they answer.
         marked = manifest["format"] == "tgwitness-account-disclosure-v2"
         public = manifest["public_key"]
@@ -3135,9 +3254,11 @@ CAPTURE_KINDS = ("message.new", "message.edited", "message.deleted", "message.re
 
 
 def verify_capture(value, checkpoint):
-    statement = value["statement"]
+    statement = authenticate_statement(value)
+    if not is_format(statement.get("format"), "capture-v1"):
+        raise VerifierTooOld("Unsupported capture proof")
     fields = {"format", "created_at", "public_key", "event_count", "head_hash", "challenge", "counts", "last_message_at", "health"}
-    if set(value) != {"statement", "signature"} or set(statement) != fields:
+    if set(value) != {"statement", "signature"} or set(statement) not in (fields, fields | {"keys"}):
         raise ValueError("Unexpected capture proof fields")
     if set(checkpoint) != {"format", "created_at", "public_key", "event_count", "head_hash"}:
         raise ValueError("Unexpected checkpoint fields")
@@ -3173,6 +3294,15 @@ def verify_capture(value, checkpoint):
         raise ValueError("Invalid capture backoff")
     if health["last_heartbeat"] is not None:
         parse_time(health["last_heartbeat"])
+    if "keys" in statement:
+        keys = statement["keys"]
+        if (not isinstance(keys, dict) or set(keys) != {"count", "origin", "authorized_seq"}
+                or type(keys["count"]) is not int or not 0 <= keys["count"] <= statement["event_count"]
+                or keys["origin"] not in ("created", "imported", "unknown")
+                or (keys["count"] == 0 and (keys["authorized_seq"] is not None or keys["origin"] != "unknown"))
+                or (keys["count"] > 0 and (type(keys["authorized_seq"]) is not int
+                                          or not keys["count"] <= keys["authorized_seq"] <= statement["event_count"]))):
+            raise ValueError("Malformed collector key history")
     return statement
 
 
@@ -3180,9 +3310,10 @@ def bundle_capture_prefixes(bundle_path, boundaries):
     wanted, result = set(boundaries), {}
     tree = MerkleFrontier()
     counts, last = dict.fromkeys(CAPTURE_KINDS, 0), None
+    keys = {"count": 0, "origin": "unknown", "authorized_seq": None}
     if 0 in wanted:
         result[0] = {"head_hash": "0" * 64, "counts": dict(counts), "last_message_at": None,
-                     "root": tree.root().hex()}
+                     "root": tree.root().hex(), "keys": dict(keys)}
     if not wanted:
         return result
     limit = max(wanted)
@@ -3192,13 +3323,17 @@ def bundle_capture_prefixes(bundle_path, boundaries):
             if event["seq"] > limit:
                 break
             tree.append(event["hash"])
+            if event["kind"] == "account.authorized":
+                origin = event["payload"].get("key_origin")
+                keys = {"count": keys["count"] + 1, "authorized_seq": event["seq"],
+                        "origin": origin if origin in ("created", "imported") else "unknown"}
             if event["kind"] in counts:
                 counts[event["kind"]] += 1
                 if event["kind"].startswith("message."):
                     last = max(last or event["observed_at"], event["observed_at"])
             if event["seq"] in wanted:
                 result[event["seq"]] = {"head_hash": event["hash"], "counts": dict(counts), "last_message_at": last,
-                                        "root": tree.root().hex()}
+                                        "root": tree.root().hex(), "keys": dict(keys)}
     return result
 
 
@@ -3209,6 +3344,8 @@ def check_capture_prefix(value, bundle_path):
         raise ValueError("Capture proof head is absent from the evidence")
     if prefix["counts"] != statement["counts"] or prefix["last_message_at"] != statement.get("last_message_at"):
         raise ValueError("Capture counters differ from the evidence records")
+    if "keys" in statement and prefix["keys"] != statement["keys"]:
+        raise ValueError("Capture key history differs from the evidence records")
     return prefix["counts"]
 
 
@@ -3223,6 +3360,70 @@ def unb64url(text):
     return base64.urlsafe_b64decode(text + "=" * (-len(text) % 4))
 
 
+class DailyJournal:
+    """One prefix boundary per UTC date; no full journal retained in memory."""
+    def __init__(self):
+        self.tree, self.dates = MerkleFrontier(), {}
+        self.previous, self.last_date = None, None
+
+    def payload(self, date):
+        if not isinstance(date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date):
+            raise ValueError("Invalid daily seal date")
+        datetime.strptime(date, "%Y-%m-%d")
+        if self.last_date is not None and date <= self.last_date:
+            raise ValueError("Repeated or reversed daily seal")
+        before = max((v for k, v in self.dates.items() if k <= date), key=lambda v: v["to_seq"], default=None)
+        boundary = before or {"to_seq": 0, "head_hash": "0" * 64, "root": MERKLE_EMPTY.hex()}
+        day = self.dates.get(date, {})
+        return {"date": date, "from_seq": day.get("from_seq", boundary["to_seq"] + 1),
+                **{k: boundary[k] for k in ("to_seq", "head_hash", "root")},
+                "checks": dict(day.get("checks", {"no_response": 0})),
+                "previous_daily_sha256": self.previous, "drand_round": day.get("drand_round")}
+
+    def add(self, event):
+        moment = parse_time(event["observed_at"])
+        if moment.tzinfo is None:
+            raise ValueError("Witness date has no time zone")
+        date = moment.astimezone(timezone.utc).date().isoformat()
+        if self.last_date is not None and date <= self.last_date:
+            raise ValueError("Witness appended records into an already sealed day")
+        self.tree.append(event["hash"])
+        day = self.dates.setdefault(date, {"from_seq": event["seq"], "checks": {"no_response": 0}})
+        day.update(to_seq=event["seq"], head_hash=event["hash"], root=self.tree.root().hex())
+        kind, payload = event["kind"], event["payload"]
+        if kind in ("witness.anchor", "witness.no_response"):
+            status = payload.get("status", "invalid") if kind == "witness.anchor" else "no_response"
+            if status not in ("ok", "invalid", "key_changed", "rollback", "fork", "no_response"):
+                raise ValueError("Unknown witness check status")
+            day["checks"][status] = day["checks"].get(status, 0) + 1
+            if payload.get("freshness"):
+                day["drand_round"] = payload["freshness"]["drand_round"]
+        elif kind == "witness.daily":
+            if payload["date"] >= date:
+                raise ValueError("Witness sealed an unfinished UTC day")
+            self.previous = hashlib.sha256(canonical(event)).hexdigest()
+            self.last_date = payload["date"]
+
+
+def daily_payload(events, date):
+    journal = DailyJournal()
+    for event in events:
+        journal.add(event)
+    return journal.payload(date)
+
+
+def witness_challenge(freshness):
+    if not isinstance(freshness, dict):
+        raise ValueError("Invalid witness freshness")
+    beacon = drand_beacon({"round": freshness.get("drand_round"),
+                          "randomness": freshness.get("drand_randomness"),
+                          "signature": freshness.get("drand_signature")})
+    nonce = freshness.get("nonce")
+    if not isinstance(nonce, str) or not re.fullmatch(r"[0-9a-f]{32}", nonce):
+        raise ValueError("Invalid witness freshness nonce")
+    return hashlib.sha256(bytes.fromhex(beacon["signature"]) + bytes.fromhex(nonce)).hexdigest()[:32]
+
+
 def post_statement(event, witness_fingerprint):
     payload = event["payload"]
     statement = {"format": "tgwitness-witness-post-v1", "witness": witness_fingerprint, "seq": event["seq"],
@@ -3233,6 +3434,11 @@ def post_statement(event, witness_fingerprint):
     if payload.get("capture"):
         statement.update(capture_sha256=hashlib.sha256(canonical(payload["capture"])).hexdigest(),
                          counts=payload["capture"]["statement"]["counts"], delta=payload.get("capture_delta"))
+    if payload.get("freshness") is not None:
+        statement["drand_round"] = payload["freshness"]["drand_round"]
+    if event["kind"] == "witness.daily":
+        statement.update(kind="witness.daily", date=payload["date"], root=payload["root"],
+                         drand_round=payload.get("drand_round"), previous_daily_sha256=payload["previous_daily_sha256"])
     return statement
 
 
@@ -3240,12 +3446,12 @@ def post_token(statement, signature_b64):
     return "TGW1." + b64url(canonical(statement)) + "." + b64url(base64.b64decode(signature_b64))
 
 
-def verify_witness(path, expected_fingerprint=None):
+def verify_witness(path, expected_fingerprint=None, check_drand=False, check_bitcoin=False):
     with open_archive(path) as archive:
         names = archive.namelist()
         manifest = read_manifest(archive)
         if not is_format(manifest["format"], "witness-v1"):
-            raise ValueError("Unsupported witness format")
+            raise VerifierTooOld("Unsupported witness format")
         public = manifest["public_key"]
         fp = fingerprint(public)
         if expected_fingerprint and fp != expected_fingerprint:
@@ -3258,7 +3464,8 @@ def verify_witness(path, expected_fingerprint=None):
             if member_digest(archive, name) != digest:
                 raise ValueError("File hash mismatch: " + name)
         anchors, silent, posted, failures, statements, interval = [], [], {}, [], {}, None
-        retained = {}
+        retained, collector_keys = {}, {}
+        journal, days, seals = DailyJournal(), [], {}
 
         def observed(stream):
             nonlocal interval
@@ -3268,6 +3475,21 @@ def verify_witness(path, expected_fingerprint=None):
                 event = json.loads(line)
                 yield event
                 payload, kind = event["payload"], event["kind"]
+                if kind == "witness.daily":
+                    expected = journal.payload(payload.get("date"))
+                    if canonical(payload) != canonical(expected):
+                        raise ValueError("Witness daily root, counts, range or previous seal differs from the journal")
+                    checks = payload["checks"]
+                    status = "fail" if any(v for k, v in checks.items() if k not in ("ok", "no_response")) else \
+                        "ok" if checks.get("ok") else "no_response_only"
+                    day = {**payload, "seq": event["seq"], "status": status, "bitcoin": "none", "proofs": []}
+                    seals[event["seq"]] = event
+                    days.append(day)
+                    statements[event["seq"]] = post_statement(event, fp)
+                elif kind == "witness.anchored":
+                    if payload.get("record") not in seals or not isinstance(payload.get("results"), list):
+                        raise ValueError("Witness timestamp record has no preceding daily seal")
+                journal.add(event)
                 if kind == "witness.started":
                     interval = payload.get("interval_minutes")
                 elif kind == "witness.anchor":
@@ -3281,9 +3503,24 @@ def verify_witness(path, expected_fingerprint=None):
                                 or captured["head_hash"] != payload["head_hash"]):
                             raise ValueError("Witness capture proof differs from its anchor")
                         anchors[-1]["capture"] = payload["capture"]
+                        if captured.get("keys") is not None:
+                            if payload.get("keys") != captured["keys"]:
+                                raise ValueError("Witness key history differs from its signed capture")
+                            anchors[-1]["keys"] = captured["keys"]
+                            collector_keys[payload["collector_fingerprint"]] = key_history_summary(captured["keys"])
+                    if "keys" in payload and not payload.get("capture"):
+                        raise ValueError("Witness key history has no signed capture")
+                    if payload.get("freshness") is not None:
+                        fresh = payload["freshness"]
+                        challenge = witness_challenge(fresh)
+                        if not payload.get("capture") or captured.get("challenge") != challenge:
+                            raise ValueError("Witness freshness challenge differs from the signed capture")
+                        anchors[-1]["freshness"] = {**fresh, "verified": False, "not_before": None}
                     collector_key = payload.get("collector_fingerprint")
                     if payload.get("status") == "ok":
                         prior = retained.get(collector_key)
+                        if prior and prior.get("keys") is not None and prior["keys"] != anchors[-1].get("keys"):
+                            raise ValueError("Witness accepted a changed or removed collector key history")
                         if payload.get("continuity") is not None:
                             if not payload.get("capture"):
                                 raise ValueError("Continuity proof has no matching capture proof")
@@ -3293,7 +3530,7 @@ def verify_witness(path, expected_fingerprint=None):
                             anchors[-1]["root"] = committed["root"]
                         elif prior and prior.get("root"):
                             raise ValueError("Witness accepted a continuity downgrade")
-                        retained[collector_key] = {k: anchors[-1][k] for k in ("event_count", "head_hash", "root")
+                        retained[collector_key] = {k: anchors[-1][k] for k in ("event_count", "head_hash", "root", "keys")
                                                   if k in anchors[-1]}
                     statements[event["seq"]] = post_statement(event, fp)
                 elif kind == "witness.no_response":
@@ -3305,12 +3542,64 @@ def verify_witness(path, expected_fingerprint=None):
                     failures.append({"record": payload.get("record"), "error": payload.get("error")})
         with archive.open("events.jsonl") as stream:
             result = verify_events(observed(stream), public)
+        proof_files = set()
+        for day in days:
+            event = seals[day["seq"]]
+            digest = hashlib.sha256(canonical(event)).digest()
+            stem = "anchors/daily-" + day["date"]
+            if stem + ".json" in names:
+                proof_files.add(stem + ".json")
+                if read_member(archive, stem + ".json") != canonical(event):
+                    raise ValueError("Retained witness daily seal differs from its journal record")
+            for name in sorted(n for n in names if n.startswith(stem + ".") and n.endswith(".ots")):
+                proof_files.add(name)
+                proof = read_member(archive, name)
+                summary = ots_summary(proof, digest)
+                if check_bitcoin:
+                    summary = confirm_ots(proof, digest)
+                day["proofs"].append({"file": name, **summary})
+            if any(p["status"] == "confirmed" for p in day["proofs"]):
+                day["bitcoin"] = "confirmed"
+                day["bitcoin_block_time"] = min(p["time"] for p in day["proofs"] if p["status"] == "confirmed")
+            elif day["proofs"]:
+                day["bitcoin"] = "pending"
+        if any(n.startswith("anchors/") and n not in proof_files for n in names):
+            raise ValueError("Witness timestamp file has no matching daily seal")
+        missing_days = []
+        if days:
+            first, last = (datetime.strptime(d["date"], "%Y-%m-%d").date() for d in (days[0], days[-1]))
+            if (last - first).days > 36600:
+                raise ValueError("Witness daily range exceeds 100 years")
+            dates = {d["date"] for d in days}
+            missing_days = [(first + timedelta(days=i)).isoformat() for i in range((last - first).days + 1)
+                            if (first + timedelta(days=i)).isoformat() not in dates]
     if result["events"] != manifest["event_count"] or result["head_hash"] != manifest["head_hash"]:
         raise ValueError("Witness manifest does not match its journal")
+    bound = [a for a in anchors if a.get("freshness")]
+    confirmation = {"asked": 0, "confirmed": 0, "relays": []}
+    if check_drand and bound:
+        rounds = [{"round": a["freshness"]["drand_round"], "randomness": a["freshness"]["drand_randomness"],
+                   "seq": a["seq"]} for a in bound]
+        # Every credited anchor is checked; sampling must not certify unchecked rounds.
+        confirmation = confirm_drand(rounds, limit=len(rounds))
+        if confirmation["confirmed"] == len(rounds):
+            for anchor in bound:
+                anchor["freshness"].update(verified=True, not_before=drand_time(anchor["freshness"]["drand_round"]))
+    freshness = {"anchors": len(anchors), "drand_bound": len(bound), "confirmed": confirmation["confirmed"],
+                 "earliest_not_before": min((a["freshness"]["not_before"] for a in bound
+                                              if a["freshness"]["verified"]), default=None),
+                 "verification": "relay-confirmed" if confirmation["confirmed"] else "not-performed",
+                 "relays": confirmation["relays"]}
     return {"format": manifest["format"], "fingerprint": fp, "public_key": public, "events": result["events"],
             "head_hash": result["head_hash"], "interval_minutes": interval, "channel": manifest.get("channel"),
             "producer": manifest.get("producer"), "anchors": anchors, "no_response": silent, "posted": posted,
-            "post_failures": failures, "statements": statements, "key_pinned": bool(expected_fingerprint)}
+            "post_failures": failures, "statements": statements, "key_pinned": bool(expected_fingerprint),
+            "freshness": freshness, "days": days, "missing_days": missing_days, "collector_keys": collector_keys}
+
+
+def key_history_summary(keys):
+    return {**keys, "meaning": "Recorded Telegram authorizations; collector-signed claim, not proof that no key copies exist",
+            "note": "ключ импортирован: подтверждение зависит от доверия к источнику" if keys["origin"] == "imported" else None}
 
 
 def witnessed_periods(witness, key=None):
@@ -3352,7 +3641,8 @@ def cross_check_witness(witness, bundle_path, bundle_result):
         elif ("0" * 64 if anchor["event_count"] == 0 else hashes.get(anchor["event_count"])) == anchor["head_hash"]:
             capture = anchor.get("capture", {}).get("statement")
             prefix = prefixes.get(anchor["event_count"])
-            if (capture and (not prefix or any(prefix[k] != capture[k] for k in ("counts", "last_message_at")))
+            if (capture and (not prefix or any(prefix[k] != capture[k] for k in ("counts", "last_message_at"))
+                             or "keys" in capture and prefix["keys"] != capture["keys"])
                     or anchor.get("root") and (not prefix or prefix["root"] != anchor["root"])):
                 conflicts.append(anchor)
             else:
@@ -3375,6 +3665,10 @@ def cross_check_witness(witness, bundle_path, bundle_result):
     verified_through = max((a["event_count"] for a in matched), default=0)
     continuity_through = max((a["event_count"] for a in matched if a.get("root")), default=0)
     invalid = sum(1 for a in witness["anchors"] if a["status"] == "invalid")
+    exact = [a for a in matched if a["event_count"] == count]
+    fresh = [a for a in exact if a.get("freshness", {}).get("verified")]
+    sealed_days = [d for d in witness.get("days", []) if d["bitcoin"] == "confirmed"
+                   and any(a["seq"] <= d["to_seq"] for a in exact)]
     return {"witness_fingerprint": witness["fingerprint"], "anchors_for_this_key": len(mine),
             "other_keys": len(witness["anchors"]) - len(mine) - invalid, "invalid_answers": invalid,
             "consistent": consistent, "conflicts": conflicts,
@@ -3384,7 +3678,73 @@ def cross_check_witness(witness, bundle_path, bundle_result):
             "continuity_verified_through_event": continuity_through,
             "export_head_witnessed": any(a["event_count"] == count for a in matched),
             "export_head_witness_records": [a["seq"] for a in matched if a["event_count"] == count],
-            "witness_key_pinned": bool(witness.get("key_pinned"))}
+            "witness_key_pinned": bool(witness.get("key_pinned")),
+            "collector_keys": witness.get("collector_keys", {}).get(key),
+            "days": witness.get("days", []), "missing_days": witness.get("missing_days", []),
+            "head_not_before": min((a["freshness"]["not_before"] for a in fresh), default=None),
+            "head_bitcoin_block_time": min((d["bitcoin_block_time"] for d in sealed_days), default=None),
+            "head_witnessed_at": min((a["at"] for a in exact), default=None),
+            "head_witness_record": min((a["seq"] for a in exact), default=None)}
+
+
+ASSURANCE_TIERS = ("self_attested", "timestamped", "witnessed", "fresh", "witness_anchored", "sealed")
+
+
+def assurance(result):
+    """Credit only checks performed by this verifier, with coverage of the export head."""
+    witness = result.get("witness") or {}
+    anchors = result.get("anchors") or []
+    stamps = [a for a in anchors if a.get("event_count") == result.get("events") and (
+        a.get("kind") == "rfc3161" and a.get("signature", "").startswith("checked against") or
+        a.get("kind") == "opentimestamps" and a.get("status") == "confirmed")]
+    times = [a["time"] for a in stamps]
+    if witness.get("head_bitcoin_block_time"):
+        times.append(witness["head_bitcoin_block_time"])
+    independent = bool(witness.get("witness_key_pinned") and witness.get("export_head_witnessed")
+                       and witness.get("witness_fingerprint") != result.get("fingerprint"))
+    days = witness.get("days", result.get("days", []))
+    missing = witness.get("missing_days", result.get("missing_days", []))
+    bad_witness = bool(witness.get("conflicts") or witness.get("anomalies") or any(d["status"] == "fail" for d in days))
+    complete_days = bool(days and not missing and all(d["bitcoin"] == "confirmed" for d in days)
+                         and witness.get("head_bitcoin_block_time"))
+    runtime = result.get("runtime_attestation") or {}
+    ladder = [
+        {"tier": "self_attested", "status": "pass", "detail": "signature, hashes and applicable chain/manifest checks"},
+        {"tier": "timestamped", "status": "pass" if times else "absent",
+         "detail": ("external timestamp covering the export head: " + min(times)
+                    + "; Bitcoin dates are block-header times; TSA dates depend on the trusted authority")
+                   if times else "no authenticated external time covering the export head"},
+        {"tier": "witnessed", "status": "fail" if bad_witness else "pass" if independent else "absent",
+         "detail": ("witness " + str(witness.get("witness_fingerprint")) + "; records 1.." + str(result.get("events"))
+                    + "; witness clock " + str(witness.get("head_witnessed_at"))) if independent else "no pinned independent witness at the export head"},
+        {"tier": "fresh", "status": "pass" if independent and witness.get("head_not_before") else "absent",
+         "detail": "relay-confirmed drand challenge; not before " + str(witness.get("head_not_before"))
+                   if witness.get("head_not_before") else "no independently checked drand binding for the export head"},
+        {"tier": "witness_anchored", "status": "fail" if bad_witness else "pass" if independent and complete_days else "absent",
+         "detail": "Bitcoin-confirmed daily seals: " + str(sum(d["bitcoin"] == "confirmed" for d in days))
+                   + "; missing days: " + str(len(missing))},
+        {"tier": "sealed", "status": "pass" if runtime.get("verified") is True and runtime.get("key_origin") == "created" else "absent",
+         "detail": runtime.get("limitation") or "no independently checked runtime attestation bound to this export and a created key"},
+    ]
+    tier = "self_attested"
+    for row in ladder:
+        if row["status"] != "pass":
+            break
+        tier = row["tier"]
+    return {"tier": tier, "ladder": ladder, "scope": "complete exported head; no claim of continuous or complete Telegram observation"}
+
+
+def assurance_line(result):
+    value = result["assurance"]
+    if value["tier"] == "self_attested":
+        return "ASSURANCE: self_attested — only the collector's own key vouches for this record"
+    witness = result.get("witness") or {}
+    detail = (" since #" + str(witness["head_witness_record"]) + " (" + str(witness["head_witnessed_at"]) + ")"
+              if witness.get("head_witness_record") else "")
+    absent = {row["tier"] for row in value["ladder"] if row["status"] != "pass"}
+    limits = [text for tier, text in (("fresh", "not fresh"), ("witness_anchored", "witness not anchored"),
+                                    ("sealed", "not sealed")) if tier in absent]
+    return "ASSURANCE: " + value["tier"] + detail + (" · " + " · ".join(limits) if limits else "")
 
 
 def channel_texts(source):
@@ -3452,9 +3812,9 @@ def check_channel(witness, source):
 
 def verify_dossier(path, expected_fingerprint=None, bundle=None):
     value = read_json_file(path)
-    statement = value["statement"]
+    statement = authenticate_statement(value)
     if not is_format(statement.get("format"), "dossier-v1"):
-        raise ValueError("Unsupported profile format")
+        raise VerifierTooOld("Unsupported profile format")
     fp = fingerprint(statement["public_key"])
     if expected_fingerprint and fp != expected_fingerprint:
         raise ValueError("Public key differs from the independently trusted fingerprint")
@@ -3479,9 +3839,9 @@ def verify_dossier(path, expected_fingerprint=None, bundle=None):
 
 def verify_public_proof(path, collector_fingerprint=None, witness_fingerprint=None, bundle=None):
     value = read_json_file(path)
-    statement = value["statement"]
+    statement = authenticate_statement(value, "witness_public_key")
     if not is_format(statement.get("format"), "public-proof-v1"):
-        raise ValueError("Unsupported public proof")
+        raise VerifierTooOld("Unsupported public proof")
     public = statement["witness_public_key"]
     fp = fingerprint(public)
     if witness_fingerprint and fp != witness_fingerprint:
@@ -3515,9 +3875,9 @@ def verify_public_proof(path, collector_fingerprint=None, witness_fingerprint=No
 
 def verify_history_report(path, expected_fingerprint=None, bundle=None):
     value = read_json_file(path)
-    statement = value["statement"]
+    statement = authenticate_statement(value)
     if not is_format(statement.get("format"), "history-report-v1"):
-        raise ValueError("Unsupported history progress report")
+        raise VerifierTooOld("Unsupported history progress report")
     public = statement["public_key"]
     fp = fingerprint(public)
     if expected_fingerprint and fp != expected_fingerprint:
@@ -3755,9 +4115,21 @@ class Console:
         return text
 
     def paint(self, text, style):
-        return "\033[" + self.STYLES[style] + "m" + text + "\033[0m" if self.color and style else text
+        text = safe_text(text)
+        if not self.color or not style:
+            return text
+        # Only formatting produced here may become terminal control sequences.
+        if not hasattr(self, "_paints"):
+            self._paints = {}
+        token = "TGWSTYLE" + os.urandom(16).hex()
+        self._paints[token + "B"] = "\033[" + self.STYLES[style] + "m"
+        self._paints[token + "E"] = "\033[0m"
+        return token + "B" + text + token + "E"
 
     def say(self, text=""):
+        text = safe_text(text)
+        for token, sequence in getattr(self, "_paints", {}).items():
+            text = text.replace(token, sequence)
         self.stream.write(text + "\n")
 
     def number(self, value):
@@ -3825,8 +4197,8 @@ class Console:
         return Spinner(sys.stderr, self.t("Checking signatures, hashes and the record chain"), self.glyph["spin"])
 
     def failure(self, path, exc):
-        self.field("File", str(path))
-        self.verdict(False, type(exc).__name__ + ": " + str(exc))
+        self.field("File", safe_text(path))
+        self.verdict(False, type(exc).__name__ + ": " + safe_text(exc))
         self.say()
 
     def case(self, case):
@@ -3886,6 +4258,8 @@ class Console:
             self.say("  " + self.paint(self.t("… and {n} more", n=len(lines) - limit), "dim"))
 
     def show(self, shown, path, result, notes, pinned):
+        self.say(assurance_line(result))
+        self.banner()
         self.field("File", str(path))
         self.field("Type", self.t(KINDS[shown]) + self.paint("  " + str(result.get("format") or ""), "dim"))
         self.signer(result.get("fingerprint"))
@@ -4019,6 +4393,11 @@ class Spinner:
 
 
 def main():
+    import builtins
+
+    def print(*values, **kwargs):
+        builtins.print(*(safe_text(v) if isinstance(v, str) else v for v in values), **kwargs)
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("bundle", type=Path,
                         help="Evidence/chat/account/disclosure/witness ZIP, report JSON/HTML, or a stopped distributed acquisition directory")
@@ -4034,6 +4413,13 @@ def main():
                         help="With a profile/proof/history JSON, sealed report or disclosure: verify the referenced original archive")
     parser.add_argument("--check-drand", action="store_true",
                         help="Compare the drand rounds in the journal with drand relays (needs internet)")
+    parser.add_argument("--check-bitcoin", action="store_true",
+                        help="Evaluate OTS proofs against block headers agreed by two HTTPS explorers (needs internet)")
+    parser.add_argument("--require-tier", choices=ASSURANCE_TIERS, help="Exit 2 if the complete export does not reach this tier")
+    parser.add_argument("--strict", action="store_true", help="Exit 2 for an unpinned signer, 3 for an authenticated newer format")
+    parser.add_argument("--sealed-attestation", type=Path, help="GitHub attestation bundle; checked with the existing gh verifier")
+    parser.add_argument("--sealed-policy", type=Path, help="Independently trusted policy listing reviewed workflow and collector commits")
+    parser.add_argument("--sealed-repo", default="phishdestroy/TgWitness", help="Repository identity expected in GitHub attestation")
     parser.add_argument("--board", action="store_true", help="Print Case Board collections, dangling references and slice changes")
     parser.add_argument("--compare", type=Path, metavar="SECOND_ZIP",
                         help="Compare two chat exports: messages present in only one of them and changed messages")
@@ -4047,6 +4433,12 @@ def main():
     parser.add_argument("--no-color", action="store_true", help="No colours (also with the NO_COLOR variable)")
     parser.add_argument("--lang", choices=("en", "ru", "uk"), help="Language of the readable answer")
     args = parser.parse_args()
+    if bool(args.sealed_attestation) != bool(args.sealed_policy):
+        parser.error("--sealed-attestation and --sealed-policy must be supplied together")
+    if args.require_tier and ASSURANCE_TIERS.index(args.require_tier) >= ASSURANCE_TIERS.index("fresh"):
+        args.check_drand = True
+    if args.require_tier and ASSURANCE_TIERS.index(args.require_tier) >= ASSURANCE_TIERS.index("timestamped"):
+        args.check_bitcoin = True
     if args.require_witness and (not args.witness or not args.witness_fingerprint):
         parser.error("--require-witness requires --witness and --witness-fingerprint")
     globals()["MAX_UNCOMPRESSED_GIB"] = max(1, args.max_gib)
@@ -4056,27 +4448,33 @@ def main():
     if args.compare:
         unsupported = ["--" + name.replace("_", "-") for name in
                        ("checkpoint", "tsa_ca", "witness", "witness_fingerprint", "require_witness", "channel",
-                        "evidence", "check_drand", "board") if getattr(args, name)]
+                        "evidence", "check_drand", "check_bitcoin", "require_tier", "sealed_attestation", "board") if getattr(args, name)]
         if unsupported:
             parser.error(", ".join(unsupported) + " cannot be used with --compare; verify the evidence archive separately")
         try:
             compared = compare_chat_exports(args.bundle, args.compare, args.fingerprint, args.compare_fingerprint, args.max_gib)
         except Exception as exc:
+            code = 3 if args.strict and isinstance(exc, VerifierTooOld) else 1
             if mode == "json":
                 print(json.dumps({"verified": False, "error": type(exc).__name__ + ": " + str(exc)}, indent=2))
-                raise SystemExit(1)
-            parser.exit(1, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + str(exc) + "\n")
+                raise SystemExit(code)
+            print("ASSURANCE: fail")
+            parser.exit(code, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + safe_text(exc) + "\n")
+        pinned = bool(compared['first']['key_pinned'] and compared['second']['key_pinned'])
+        compared['assurance'] = assurance(compared)
+        compared['assurance']['scope'] = 'two authenticated chat exports; comparison does not prove event history'
         if mode == "json":
-            print(json.dumps({"verified": True, "kind": "comparison", "result": compared}, indent=2, ensure_ascii=False))
+            print(json.dumps({"verified": True, "kind": "comparison", "result": compared,
+                              "signer_pinned": pinned, "requirements_met": not args.strict or pinned},
+                             indent=2, ensure_ascii=True))
         else:
+            print(assurance_line(compared))
             print_comparison(compared)
+        if args.strict and not pinned:
+            raise SystemExit(2)
         return
     console = Console(sys.stdout, console_language(args.lang), not args.no_color and not os.environ.get("NO_COLOR")) \
         if mode == "pretty" else None
-    if console:
-        console.banner()
-    elif mode == "plain":
-        print("TgWitness verifier - PhishDestroy - https://github.com/phishdestroy/TgWitness")
     notes = []
 
     pinned = bool(args.fingerprint or args.witness_fingerprint)
@@ -4098,6 +4496,13 @@ def main():
         elif args.bundle.suffix.lower() == ".json":
             data = read_json_file(args.bundle)
             kind = data.get("statement", {}).get("format")
+            if "statement" in data and "signature" in data:
+                authenticate_statement(data, "public_key" if "public_key" in data["statement"] else "witness_public_key")
+                known = {"tgwitness-board-selection-v1", "tgwitness-case-board-v1", "tgwitness-case-board-disclosure-v1",
+                         "tgwitness-case-board-handover-v1"}
+                if kind not in known and not any(is_format(kind, name) for name in (
+                        "public-proof-v1", "history-report-v1", "dossier-v1")):
+                    raise VerifierTooOld("Unsupported signed JSON format")
             if kind == "tgwitness-board-selection-v1":
                 shown, result = "selection", verify_selection(args.bundle, args.fingerprint, args.evidence)
                 pinned = bool(args.fingerprint)
@@ -4157,25 +4562,25 @@ def main():
                          "confirm their content against the complete journal by that hash.")
         elif is_format(archive_format, "witness-v1"):
             shown = "witness"
-            result = verify_witness(args.bundle, args.witness_fingerprint or args.fingerprint)
+            result = verify_witness(args.bundle, args.witness_fingerprint or args.fingerprint, args.check_drand, args.check_bitcoin)
             if args.channel:
                 result["channel_check"] = check_channel(result, args.channel)
             result.pop("statements")
         else:
             result = verify_bundle(args.bundle, args.fingerprint,
                                    read_json_file(args.checkpoint) if args.checkpoint else None, args.tsa_ca,
-                                   args.check_drand)
+                                   args.check_drand, check_bitcoin=args.check_bitcoin)
             notes += coverage_lines(result["coverage"]) + outside_lines(result["outside"])
             pinned = bool(args.fingerprint)
             if not args.checkpoint:
                 notes.append("No retained checkpoint supplied: records removed from the end of this journal are not "
                              "detected. Pass --checkpoint with a checkpoint kept away from the collector.")
-            if any(a.get("kind") == "opentimestamps" for a in result.get("anchors", [])):
+            if any(a.get("kind") == "opentimestamps" and a.get("status") != "confirmed" for a in result.get("anchors", [])):
                 notes.append("OpenTimestamps structure only: run ots verify to authenticate the Bitcoin timestamp.")
             if args.witness and not args.witness_fingerprint:
                 notes.append("The witness key is not pinned: the witness journal is checked only against itself.")
             if args.witness:
-                witness = verify_witness(args.witness, args.witness_fingerprint)
+                witness = verify_witness(args.witness, args.witness_fingerprint, args.check_drand, args.check_bitcoin)
                 result["witness"] = cross_check_witness(witness, args.bundle, result)
                 if args.channel:
                     result["witness"]["channel_check"] = check_channel(witness, args.channel)
@@ -4216,25 +4621,56 @@ def main():
                           set(check["matching_records"]).intersection(witnessed["export_head_witness_records"])):
                 raise ValueError("Requested channel evidence is missing signed witness posts at the export boundary")
             result["witness_required"] = True
+        if args.sealed_attestation:
+            if shown != "evidence":
+                raise ValueError("Runtime attestation requires a full evidence ZIP")
+            try:
+                from tgwitness.sealed_verify import verify as verify_runtime
+            except ImportError:
+                raise ValueError("Runtime verification needs the installed TgWitness sealed verifier and gh") from None
+            checked_runtime = verify_runtime(args.bundle, args.sealed_attestation, args.sealed_repo,
+                                             policy=args.sealed_policy, max_gib=args.max_gib)
+            if checked_runtime["journal"]["fingerprint"] != result["fingerprint"]:
+                raise ValueError("Runtime attestation names another collector key")
+            result["runtime_attestation"] = {k: checked_runtime[k] for k in ("verified", "sha256", "workflow", "limitation")}
+            result["runtime_attestation"]["key_origin"] = "created"
+        result["assurance"] = assurance(result)
+        if any(row["status"] == "fail" for row in result["assurance"]["ladder"]):
+            raise ValueError("Assurance checks found contradictory witness evidence")
     except Exception as exc:
+        code = 3 if args.strict and isinstance(exc, VerifierTooOld) else 1
         if spinner:
             spinner.__exit__(None, None, None)
         if console:
+            console.say("ASSURANCE: fail")
             console.failure(args.bundle, exc)
-            raise SystemExit(1)
+            raise SystemExit(code)
         if mode == "json":
             print(json.dumps({"verified": False, "error": type(exc).__name__ + ": " + str(exc)}, indent=2))
-            raise SystemExit(1)
-        parser.exit(1, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + str(exc) + "\n")
+            raise SystemExit(code)
+        print("ASSURANCE: fail")
+        parser.exit(code, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + safe_text(exc) + "\n")
     if spinner:
         spinner.__exit__(None, None, None)
+    unmet = bool(args.require_tier and ASSURANCE_TIERS.index(result["assurance"]["tier"]) < ASSURANCE_TIERS.index(args.require_tier))
+    unpinned = args.strict and not pinned
+    if not pinned:
+        notes.append("ключ не закреплён: результат зависит от ключа внутри самого пакета")
+    if unmet:
+        notes.append("Required assurance tier was not reached: " + args.require_tier)
     if console:
         console.show(shown, args.bundle, result, notes, pinned)
+        if unmet or unpinned:
+            raise SystemExit(2)
         return
     if mode == "json":
-        print(json.dumps({"verified": True, "kind": shown, "signer_pinned": pinned, "notes": notes, "result": result},
-                         indent=2, ensure_ascii=False))
+        print(json.dumps({"verified": True, "kind": shown, "signer_pinned": pinned, "notes": notes, "result": result,
+                          "requirements_met": not (unmet or unpinned)},
+                         indent=2, ensure_ascii=True))
+        if unmet or unpinned:
+            raise SystemExit(2)
         return
+    print(assurance_line(result))
     print(json.dumps(result, indent=2))
     print(producer_line(result.get("producer")))
     seal = result.get("report_seal")
@@ -4261,6 +4697,8 @@ def main():
     print("Integrity verified. Source authenticity and clock accuracy are not established.")
     if not pinned:
         print("Signer identity is unpinned: retain and compare the fingerprint independently.")
+    if unmet or unpinned:
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":

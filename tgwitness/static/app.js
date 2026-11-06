@@ -302,7 +302,7 @@ const labels = {
   "source.access_lost": [tr("Access to the chat lost"), "alert", "coverage"],
   "source.access_restored": [tr("Access to the chat restored"), "refresh", "system"],
   "deletion.batch": [tr("Messages deleted together"), "trash", "delete"],
-  "history.cleared": [tr("Chat history cleared"), "trash", "delete"],
+  "history.cleared": [tr("Messages deleted together"), "trash", "delete"],
   "history.unparsed": [tr("Messages in a format this version cannot read"), "question", "coverage"],
   "message.unpinned": [tr("Message unpinned"), "edit", "edit"],
   "telegram.takeout_unavailable": [tr("Fast export session unavailable"), "clock", "system"],
@@ -1516,6 +1516,8 @@ function excerpt(e) {
     ephemeralMediaText(p.ephemeral_media)].filter(Boolean).join(" · ");
   if (p.text) return p.text;
   if (e.kind==="message.deleted") return tr("Earlier captured versions remain available. Telegram does not report who deleted the message.");
+  // Legacy batch labels and meanings inferred a history clear or actor not supplied by Telegram.
+  if (e.kind==="history.cleared") return tr("Messages deleted together")+" · "+String(p.count??"");
   if (e.kind==="message.missing_on_recheck") return tr("Telegram no longer returns this message; no deletion notice was received.");
   if (e.kind==="replica.completed") return p.error?tr("Stopped: {error}",{error:p.error}):tr("{n} encrypted object(s), {size}",{n:p.objects,size:humanSize(p.bytes)});
   if (e.kind==="alerts.changed") return p.enabled?tr("On · {n} destination(s)",{n:p.destinations}):tr("Off");
@@ -3036,7 +3038,8 @@ function renderReplica(r){
     $("replica-enabled").checked=s.enabled;$("replica-endpoint").value=s.endpoint;$("replica-region").value=s.region;
     $("replica-bucket").value=s.bucket;$("replica-prefix").value=s.prefix;$("replica-path-style").checked=s.path_style;
     $("replica-interval").value=String(s.interval_minutes);$("replica-retention").value=String(s.retention_days);
-    $("replica-mode").value=s.retention_mode;formControls?.loaded("replica-form");
+    $("replica-mode").value=s.retention_mode;$("replica-evidence").checked=!!s.evidence;
+    $("replica-recipient").value=s.recipient_public_key||"";formControls?.loaded("replica-form");
   }
   for(const id of ["replica-access","replica-secret"])$(id).placeholder=r.has_credentials?tr("Saved — leave empty to keep"):"";
   $("replica-test").disabled=!r.has_credentials;$("replica-sync").disabled=!s.enabled||r.busy;$("replica-key").disabled=!r.has_key;
@@ -3049,6 +3052,7 @@ $("replica-form").addEventListener("submit",event=>{event.preventDefault();busy(
     region:$("replica-region").value.trim()||"us-east-1",bucket:$("replica-bucket").value.trim(),prefix:$("replica-prefix").value.trim()||"tgwitness",
     path_style:$("replica-path-style").checked,interval_minutes:Number($("replica-interval").value),
     retention_days:Number($("replica-retention").value||0),retention_mode:$("replica-mode").value,
+    evidence:$("replica-evidence").checked,recipient_public_key:$("replica-recipient").value.trim(),
     access_key:$("replica-access").value.trim(),secret_key:$("replica-secret").value.trim()});
   formControls?.clearSubmitted(draft,["replica-access","replica-secret"]);
   state.replicaDirty=formControls?.changed(draft)||false;renderReplica(r);formControls?.accepted(draft,state.replicaDirty);

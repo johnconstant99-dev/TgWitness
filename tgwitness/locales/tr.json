@@ -6402,5 +6402,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "İşaretlenenler: en az 5 ilk kez mesaj gönderen kullanıcı ve 14 günlük medyan değerlerinin 3 katı, mesajların ise medyan değerlerinin 1,5 katından az olması. Bir sohbetin ilk 7 günü işaretlenmez.",
   "Distinct saved message numbers per chat and the share taken by service messages.": "Sohbet başına kaydedilen mesaj sayılarının ayrımı ve hizmet mesajlarının payı.",
   "Membership changes Telegram reported, once per person, chat, change and day.": "Telegram tarafından bildirilen üyelik değişiklikleri; kişi, sohbet, değişiklik ve gün başına bir kez.",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "Sohbet durumu anlık görüntüleri arasında eklenen veya kaldırılan sabitlenmiş hizmet mesajlarını, sabitleme kaldırma bildirimlerini ve sabitlenmiş mesajları kaydedin."
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "Sohbet durumu anlık görüntüleri arasında eklenen veya kaldırılan sabitlenmiş hizmet mesajlarını, sabitleme kaldırma bildirimlerini ve sabitlenmiş mesajları kaydedin.",
+  "Recipient public key (X25519, base64; optional)": "Alıcının açık anahtarı (X25519, base64; isteğe bağlı)",
+  "Require Compliance retention for every copied object": "Kopyalanan her nesne için Compliance modunda saklama gerektir",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "Alıcı anahtarı kullanıldığında kurtarma için alıcının özel anahtarı da gerekir. Bu anahtarı ayrı saklayın. Alıcı değişikliği ayrı bir kopya başlatır."
 }

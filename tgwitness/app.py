@@ -2005,6 +2005,11 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
         settings = body.model_dump(exclude={"access_key", "secret_key"})
         if settings["enabled"] and not (settings["endpoint"] and settings["bucket"] and secrets.get("access_key")):
             raise HTTPException(422, "Enter the endpoint, bucket and access keys before turning the copy on.")
+        if settings["enabled"] and settings["evidence"]:
+            try:
+                await replica.require_evidence_lock(replica.client(settings, secrets, app.state.collector.outside_route()), settings)
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from None
         manager = app.state.storage
         obsolete = []
         if manager.public()["settings"]["backend"] == "s3":
@@ -2096,9 +2101,10 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
 
             headers = replica.lock_headers(settings, 1 if settings["retention_days"] else 0)
             started_at = datetime.now(timezone.utc)
+            await replica.require_evidence_lock(s3, settings)
             await asyncio.wait_for(replica.upload(s3, base64.b64decode(secrets["key"]), name,
                                                   lambda: io.BytesIO(b"TgWitness connection test"),
-                                                  headers), 60)
+                                                  headers, recipient_public_key=settings["recipient_public_key"]), 60)
             lock = await asyncio.wait_for(replica.lock_report(s3, name, {**settings, "retention_days": min(
                 settings["retention_days"], 1)}, headers, started_at), 60)
         except Exception as exc:

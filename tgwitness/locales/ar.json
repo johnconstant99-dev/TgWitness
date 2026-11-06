@@ -6558,5 +6558,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "تم الإبلاغ عنها: ما لا يقل عن 5 مشاركين جدد و3 أضعاف متوسط عدد رسائلهم خلال 14 يومًا، مع رسائل أقل من 1.5 ضعف متوسط عدد رسائلهم. لا يتم الإبلاغ عن الأيام السبعة الأولى من أي محادثة.",
   "Distinct saved message numbers per chat and the share taken by service messages.": "أرقام الرسائل المحفوظة المميزة لكل محادثة ونسبة الرسائل الخدمية منها.",
   "Membership changes Telegram reported, once per person, chat, change and day.": "تغييرات العضوية التي أبلغ عنها Telegram، مرة واحدة لكل شخص، ومحادثة، وتغيير، ويوم.",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "رسائل الخدمة المثبتة، وإشعارات إلغاء التثبيت، والرسائل المثبتة التي تمت إضافتها أو إزالتها بين لقطات حالة الدردشة."
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "رسائل الخدمة المثبتة، وإشعارات إلغاء التثبيت، والرسائل المثبتة التي تمت إضافتها أو إزالتها بين لقطات حالة الدردشة.",
+  "Recipient public key (X25519, base64; optional)": "المفتاح العام للمستلم (X25519، base64؛ اختياري)",
+  "Require Compliance retention for every copied object": "اشتراط الاحتفاظ في وضع Compliance لكل كائن منسوخ",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "عند استخدام مفتاح المستلم، تتطلب الاستعادة أيضًا مفتاحه الخاص. احتفظ به بشكل منفصل. يؤدي تغيير المستلم إلى بدء نسخة منفصلة."
 }

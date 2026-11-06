@@ -6441,5 +6441,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "מסומן: לפחות 5 משתתפים שפרסמו לראשונה ופי 3 מהחציון שלהם ב-14 הימים האחרונים, עם הודעות הנמוכות מפי 1.5 מהחציון שלהם. 7 הימים הראשונים של צ'אט אינם מסומנים.",
   "Distinct saved message numbers per chat and the share taken by service messages.": "מספרי הודעות שנשמרו בנפרד לכל צ'אט, והנתח של הודעות השירות.",
   "Membership changes Telegram reported, once per person, chat, change and day.": "שינויים בחברות שדווחו על ידי Telegram, פעם אחת לכל אדם, צ'אט, שינוי ויום.",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "הודעות שירות מוצמדות, הודעות על הסרת הצמדה והודעות מוצמדות שנוספו או הוסרו בין תמונות מצב של הצ'אט."
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "הודעות שירות מוצמדות, הודעות על הסרת הצמדה והודעות מוצמדות שנוספו או הוסרו בין תמונות מצב של הצ'אט.",
+  "Recipient public key (X25519, base64; optional)": "המפתח הציבורי של הנמען (X25519, base64; רשות)",
+  "Require Compliance retention for every copied object": "דרישת שמירה במצב Compliance לכל אובייקט שהועתק",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "בשימוש במפתח נמען, השחזור דורש גם את המפתח הפרטי שלו. יש לשמור אותו בנפרד. החלפת הנמען מתחילה עותק נפרד."
 }

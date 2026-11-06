@@ -34,6 +34,8 @@ FILES = [
     ".gitignore", ".gitattributes", ".dockerignore", "deploy/env.example", "deploy/constraints.txt", "deploy/requirements.lock", "deploy/build.lock",
     "deploy/audit.lock", "deploy/browser.lock", "deploy/mcp.lock", "deploy/site.lock",
     "tools/tsa/time-stamps.json", "tools/fixtures/evidence-before-fulltext.zip",
+    "tools/fixtures/narrative-events.json", "tools/fixtures/narrative-golden.json",
+    "docs/examples/narrative.json",
     ".agents/skills/tgwitness-cli/SKILL.md",
     *CONTAINER_INPUTS,
 ]
@@ -96,6 +98,13 @@ GUIDE_LANGUAGES = ("fr", "de", "it", "uz", "ko", "zh-Hant", "ms", "pl", "ja", "t
 PACKAGE_JSON = {"english_fallbacks.json", "public_proxies.json", "sealed_policy.json", "client_profiles.json", *("locales/" + language + ".json" for language in LANGUAGES),
                 *("schemas/board-" + name + ".json" for name in ("bookmark", "highlight", "slice", "collection", "comment", "status", "move", "remove")),
                 "guide_locales/keys.json", *("guide_locales/" + language + ".json" for language in GUIDE_LANGUAGES)}
+NARRATIVE_LANGUAGES = ("en", "de", "fr", "es", "it", "pt", "nl", "pl", "cs", "sk", "uk", "ru", "ro",
+                       "bg", "hu", "el", "sv", "da", "fi", "no", "lt", "lv", "et", "tr", "ja")
+PACKAGE_JSON.update({"narrative/review-policy.json",
+                     *("narrative/texts/" + prefix + language + ".json"
+                       for prefix in ("", "glossary.") for language in NARRATIVE_LANGUAGES),
+                     *("narrative/jurisdictions/" + code + ".json" for code in
+                       ("DE", "AT", "CH", "UK", "IE", "FR", "ES", "IT", "PL", "CZ", "UA", "NL", "BE", "US-federal"))})
 
 SITE_JSON = {"i18n/" + language + ".json" for language in
              ("en", *LANGUAGES, "fr", "de", "it", "uz", "ko", "zh-Hant", "ms", "pl", "ja", "th", "he", "am", "bn")}

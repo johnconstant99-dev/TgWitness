@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from urllib.parse import parse_qsl, quote, urlsplit
 
 from .netclient import HTTPError, request
@@ -57,7 +58,25 @@ class S3:
 
     async def put(self, key, body, length, sha256_hex, md5_b64, extra=None):
         headers = {"content-md5": md5_b64, "content-type": "application/octet-stream", **(extra or {})}
-        await self.call("PUT", self.url(key), headers, body, length, sha256_hex)
+        _, response, _ = await self.call("PUT", self.url(key), headers, body, length, sha256_hex)
+        return self.metadata(response)
+
+    @staticmethod
+    def metadata(headers):
+        headers = {k.lower(): v for k, v in headers.items()}
+        modified = headers.get("last-modified")
+        if modified:
+            moment = parsedate_to_datetime(modified)
+            if moment.tzinfo is None:
+                raise ValueError("S3 Last-Modified lacks a time zone")
+            modified = moment.astimezone(timezone.utc).isoformat()
+        return {"etag": headers.get("etag"), "version_id": headers.get("x-amz-version-id"),
+                "last_modified": modified}
+
+    async def head(self, key, version_id=None):
+        query = "versionId=" + quote(version_id, safe="") if version_id else ""
+        _, headers, _ = await self.call("HEAD", self.url(key, query))
+        return self.metadata(headers)
 
     async def get(self, key, sink):
         await self.call("GET", self.url(key), sink=sink)
@@ -82,9 +101,10 @@ class S3:
                 "default_mode": root.findtext(".//" + ns + "Mode"),
                 "default_days": int(days) if days else int(years) * 365 if years else None}
 
-    async def retention(self, key):
+    async def retention(self, key, version_id=None):
         try:
-            _, _, data = await self.call("GET", self.url(key, "retention"))
+            query = "retention" + ("&versionId=" + quote(version_id, safe="") if version_id else "")
+            _, _, data = await self.call("GET", self.url(key, query))
         except HTTPError as exc:
             if exc.status in (400, 404) or b"NoSuchObjectLockConfiguration" in exc.body:
                 return None

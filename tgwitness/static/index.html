@@ -925,6 +925,9 @@
       <label for="replica-interval">How often, every … minutes (1 to 1,440)</label><input id="replica-interval" max="1440" min="1" required step="1" type="number">
       <label for="replica-retention">Object Lock retention in days (0 uses the bucket's default)</label><input id="replica-retention" type="number" min="0" max="36500">
       <label for="replica-mode">Object Lock mode</label><select id="replica-mode"><option value="GOVERNANCE">Governance</option><option value="COMPLIANCE">Compliance: nobody can delete or shorten it, including the bucket owner</option></select>
+      <label class="check-label"><input id="replica-evidence" type="checkbox"> Require Compliance retention for every copied object</label>
+      <label for="replica-recipient">Recipient public key (X25519, base64; optional)</label><input id="replica-recipient" maxlength="44" spellcheck="false" autocomplete="off">
+      <p class="hint">With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.</p>
     </details>
     <button class="secondary" type="submit">Save off-site copy</button> <button class="quiet" id="replica-test" type="button">Test connection</button> <button class="quiet" id="replica-sync" type="button">Copy now</button> <button class="quiet" id="replica-key" type="button">Download encryption key</button>
     <div class="hint health-detail" id="replica-status" role="status"></div>

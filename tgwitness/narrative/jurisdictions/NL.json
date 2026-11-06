@@ -1,0 +1,46 @@
+{
+  "code": "NL",
+  "scope": "Nederland",
+  "checked_at": "2026-11-06",
+  "review": "not reviewed by local counsel",
+  "expert_role": {
+    "term": "deskundige",
+    "basis": "LRGD / NRGD",
+    "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/nl_en"
+  },
+  "esig_regulation": {
+    "term": "eIDAS",
+    "basis": "Regulation (EU) No 910/2014",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910"
+  },
+  "data_access_basis": {
+    "term": "GDPR Art. 15; Art. 12(3)",
+    "deadline_days": null,
+    "source": "https://www.edpb.europa.eu/system/files/2023-04/edpb_guidelines_202201_data_subject_rights_access_v2_en.pdf"
+  },
+  "timestamp_recognition": {
+    "term": "eIDAS Art. 41",
+    "automatic_ots_qualification": false,
+    "source": "https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/880312429/eSignature+FAQ"
+  },
+  "evidence_rules": [],
+  "dpa": null,
+  "sources": [
+    {
+      "term": "LRGD / NRGD",
+      "url": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/nl_en"
+    },
+    {
+      "term": "eIDAS",
+      "url": "https://eur-lex.europa.eu/eli/reg/2014/910"
+    },
+    {
+      "term": "GDPR Art. 15; Art. 12(3)",
+      "url": "https://www.edpb.europa.eu/system/files/2023-04/edpb_guidelines_202201_data_subject_rights_access_v2_en.pdf"
+    },
+    {
+      "term": "eIDAS Art. 41",
+      "url": "https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/880312429/eSignature+FAQ"
+    }
+  ]
+}

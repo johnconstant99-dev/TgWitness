@@ -185,9 +185,9 @@ def size_text(value):
         value /= 1024
 
 
-CATEGORY_ORDER = ("message", "edited", "deleted", "media", "reaction", "member", "system")
+CATEGORY_ORDER = ("message", "edited", "deleted", "missing", "media", "reaction", "member", "system")
 CATEGORIES = {"message.new": "message", "message.snapshot": "message", "message.recovered": "message",
-              "message.edited": "edited", "message.deleted": "deleted", "message.missing_on_recheck": "deleted",
+              "message.edited": "edited", "message.deleted": "deleted", "message.missing_on_recheck": "missing",
               "media.saved": "media", "media.hashed": "media"}
 TITLE_KINDS = ("target.changed", "source.discovered", "target.removed")
 VERSION_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited")
@@ -205,6 +205,7 @@ def category(kind):
 
 def category_label(say, name):
     return {"message": say("Messages"), "edited": say("Edits"), "deleted": say("Deletions"), "media": say("Files"),
+            "missing": say("Missing on recheck"),
             "reaction": say("Reactions"), "member": say("Membership"), "system": say("System")}[name]
 
 
@@ -782,7 +783,7 @@ CSS = (
     "border:1px solid var(--line);border-radius:3px;padding:4px 10px;background:var(--bg2)}.key code{font-size:11.5px;color:var(--muted)}"
     ".rec img{display:block;max-width:min(100%,420px);max-height:340px;border-radius:2px;margin:8px 0;border:1px solid var(--line)}"
     ".rec footer{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--muted);margin-top:4px}"
-    ".cat-message{--c:var(--accent)}.cat-edited{--c:var(--warn)}.cat-deleted{--c:var(--bad)}.cat-media{--c:var(--violet)}"
+    ".cat-message{--c:var(--accent)}.cat-edited,.cat-missing{--c:var(--warn)}.cat-deleted{--c:var(--bad)}.cat-media{--c:var(--violet)}"
     ".cat-reaction{--c:var(--pink)}.cat-member{--c:var(--ok)}.cat-system{--c:var(--muted)}"
     "details.raw summary{cursor:pointer;color:var(--muted);font-size:12px;margin-top:4px}"
     "details.raw pre{background:var(--code);border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-size:12px;"
@@ -1067,6 +1068,8 @@ def evidence_brief(say, digest, count, anchors, coverage, account_text, handover
     if selected:
         summary = say("This report selects {n} records from {chats} chats: {m} message observations, {e} edits and {d} deletion observations.",
                       n=count, chats=len(digest["chats"]), m=cats["message"], e=cats["edited"], d=cats["deleted"])
+    if cats.get("missing"):
+        summary += " " + say("Missing on recheck") + ": " + str(cats["missing"]) + "."
     if handover:
         summary = say("An extract for a stated purpose: {a} records shown unchanged and {b} minimised; {c} records of the "
                       "journal were left out.", a=handover["counts"]["unchanged"], b=handover["counts"]["minimised"],
@@ -2235,6 +2238,8 @@ def evidence_chunks(events, coverage=None, context=None):
                         (say("Messages"), num(categories["message"]), "accent", "message"),
                         (say("Edits"), num(categories["edited"]), "warn", "edit"),
                         (say("Deletions"), num(categories["deleted"]), "bad", "trash"),
+                        *([(say("Missing on recheck"), num(categories["missing"]), "warn", "eye")]
+                          if categories.get("missing") else []),
                         (say("Files"), num(len(digest["media"])), "violet", "file"),
                         (say("Timestamps"), num(len([a for a in anchors if a.get("kind") != "unreadable"])), "ok", "seal"),
                         (say("Observation period"), e(span_text(say, digest["first"], digest["last"])), "pink", "eye")])

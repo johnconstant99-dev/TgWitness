@@ -6480,5 +6480,8 @@
   "Flags days with many new speakers and unchanged activity, as in bot injection.": "Позначає дні з багатьма новими авторами за незмінної активності, як під час вкидання ботів.",
   "Rows listed per metric": "Рядків на метрику",
   "The most recent rows are listed; totals cover every row.": "Показано останні рядки; підсумки рахуються за всіма.",
-  "rows": "рядків"
+  "rows": "рядків",
+  "Recipient public key (X25519, base64; optional)": "Відкритий ключ одержувача (X25519, base64; необов’язково)",
+  "Require Compliance retention for every copied object": "Вимагати зберігання в режимі Compliance для кожного скопійованого об’єкта",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "Якщо вказано ключ одержувача, для відновлення також потрібен його закритий ключ. Зберігайте його окремо. Зміна одержувача створює окрему копію."
 }

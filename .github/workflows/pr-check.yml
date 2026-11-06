@@ -14,6 +14,8 @@ defaults:
   run:
     shell: bash
 jobs:
+  evidence:
+    uses: ./.github/workflows/evidence-checks.yml
   browser:
     name: Panel regression (${{ matrix.suite }})
     # Untrusted PRs use disposable hosted runners with a read-only token.

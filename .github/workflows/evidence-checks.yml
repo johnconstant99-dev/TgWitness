@@ -1,0 +1,45 @@
+name: Evidence integrity and narrative draft
+on:
+  workflow_call:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    name: Signed journals, witness proofs and narrative profiles
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            deploy/build.lock
+            deploy/browser.lock
+      - name: Install the locked runtime and test dependencies
+        run: |
+          python tools/lock_requirements.py --check
+          python -m pip install --require-hashes -r deploy/build.lock
+          python -m pip install --require-hashes --no-build-isolation -r deploy/browser.lock
+          python -m pip install --no-deps --no-build-isolation -e '.[dev,mcp]'
+          python -m pip check
+      - name: Install Japanese PDF fonts
+        timeout-minutes: 5
+        run: |
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y --no-install-recommends fonts-noto-cjk
+      - name: Check cryptographic boundaries and all 25 narrative languages
+        # Translation/custody release qualification is separate and remains unfulfilled.
+        run: python tools/run_checks.py --suite evidence --jobs 2
+      - name: Retain every check result and log
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: evidence-check-results
+          path: build/check-results/evidence/
+          if-no-files-found: warn
+          retention-days: 7

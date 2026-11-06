@@ -9,6 +9,7 @@ import secrets
 import signal
 import time
 import zipfile
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -18,6 +19,8 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey,
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 from . import __version__
+from . import continuity
+from .anchoring import DEFAULT_OTS, ots_stamp, service_name, upgrade_pending_ots
 from .evidence import producer
 from .netclient import HTTPError, RouteError, request
 from .network import NetworkConfig
@@ -25,11 +28,17 @@ from .security import InstanceLock, private_write
 from .store import Store, canonical, utcnow
 from .verify import fingerprint, is_format, post_statement, post_token, verify_events, verify_capture
 from .verify import verify_continuity
+from .verify import DRAND_CHAIN, DRAND_RELAYS, DRAND_GENESIS, DRAND_PERIOD, drand_beacon, witness_challenge
+from .verify import daily_payload
 
 DEFAULT_INTERVAL = 10
 TIMEOUT = 30
 TITLE = "TgWitness witness"
 POST_POLICIES = ("all", "changes", "problems")
+
+
+def utc_date():
+    return datetime.now(timezone.utc).date()
 
 TEXTS = {"ok": "journal head", "key_changed": "COLLECTOR KEY CHANGED", "rollback": "JOURNAL GOT SHORTER",
          "fork": "SAME LENGTH, DIFFERENT HEAD", "invalid": "ANSWER FAILED VERIFICATION",
@@ -89,6 +98,21 @@ class WitnessKey:
 
 class InvalidAnswer(ValueError):
     pass
+
+
+async def drand_latest(network):
+    """Get a structurally valid beacon over TLS; independent verification is separate."""
+    for relay in DRAND_RELAYS:
+        try:
+            _, _, body = await request("GET", relay + "/" + DRAND_CHAIN + "/public/latest", network,
+                                       {"Accept": "application/json"}, timeout=5, limit=4096)
+            beacon = drand_beacon(json.loads(body))
+            if DRAND_GENESIS + (beacon["round"] - 1) * DRAND_PERIOD > time.time() + 60:
+                continue
+            return beacon
+        except Exception:
+            continue
+    return None
 
 
 def proxy_config(url):
@@ -179,13 +203,24 @@ class Witness:
         self.fetch = fetch or self.http_fetch
         self.send = send if send is not None else (self.discord_send if discord_webhook else self.bot_send if channel and bot_token else None)
         self.host = urlsplit(self.collector).hostname
+        self._freshness = None
 
     def close(self):
         self.store.close()
         self.lock.close()
 
     async def http_fetch(self):
-        challenge = secrets.token_hex(16)
+        self._freshness = None
+        nonce = secrets.token_hex(16)
+        try:
+            beacon = await asyncio.wait_for(drand_latest(self.network), 5)
+        except TimeoutError:
+            beacon = None
+        if beacon is not None:
+            # The signature is indispensable: randomness is its one-way hash.
+            self._freshness = {"drand_round": beacon["round"], "drand_randomness": beacon["randomness"],
+                               "drand_signature": beacon["signature"], "nonce": nonce}
+        challenge = witness_challenge(self._freshness) if self._freshness else nonce
         previous = self.store.get_setting("last_seen") or {"event_count": 0}
         _, _, data = await request("GET", self.collector + "/api/witness/head", self.network, {
             "Authorization": "Bearer " + self.token, "Accept": "application/json",
@@ -268,6 +303,10 @@ class Witness:
                         raise ValueError("capture counters decreased in a growing journal")
             except Exception as exc:
                 raise InvalidAnswer("capture proof failed verification: " + type(exc).__name__) from None
+        keys = captured.get("keys") if capture is not None else None
+        if last and last.get("keys") is not None:
+            if keys is None or keys != last["keys"]:
+                status = "key_changed"
         continuity = answer.get("continuity")
         tree = self.store.get_setting("last_tree")
         committed = None
@@ -288,17 +327,19 @@ class Witness:
             if self.pinned is None:
                 self.pinned = key
                 self.store.set_setting("collector_fingerprint", key)
-            self.store.set_setting("last_seen", {"event_count": count, "head_hash": head})
+            self.store.set_setting("last_seen", {"event_count": count, "head_hash": head, "keys": keys})
             self.store.set_setting("last_capture_counts", captured["counts"] if capture is not None else None)
             if committed is not None:
                 self.store.set_setting("last_tree", {"root": committed["root"], "event_count": count, "head_hash": head})
         payload = {"status": status, "collector": self.host, "collector_fingerprint": key,
                 "pinned_fingerprint": self.pinned, "event_count": count, "head_hash": head,
                 "checkpoint_created_at": statement.get("created_at"),
-                "checkpoint_sha256": hashlib.sha256(canonical(value)).hexdigest()}
+                "checkpoint_sha256": hashlib.sha256(canonical(value)).hexdigest(), "freshness": self._freshness}
         if capture is not None:
             payload.update(checkpoint={"statement": statement, "signature": value["signature"], "fingerprint": key},
                            capture=capture, capture_delta=delta)
+            if keys is not None:
+                payload["keys"] = keys
         if committed is not None:
             payload.update(continuity=continuity, continuity_status="extended" if tree is not None else "baseline")
         return payload
@@ -307,7 +348,12 @@ class Witness:
         statement = post_statement(event, self.fingerprint)
         token = post_token(statement, self.key.sign(canonical(statement)))
         payload, words, title = event["payload"], self.texts, self.title + " #" + str(event["seq"])
-        if event["kind"] == "witness.no_response":
+        if event["kind"] == "witness.daily":
+            lines = [title + " · daily seal " + payload["date"],
+                     "Witness records " + str(payload["from_seq"]) + ".." + str(payload["to_seq"]),
+                     "Merkle root " + payload["root"], "Checks " + json.dumps(payload["checks"], sort_keys=True),
+                     "External timestamp verification is separate."]
+        elif event["kind"] == "witness.no_response":
             lines = [title + ": " + words["no_response"], event["observed_at"] + " · " + str(payload.get("error"))]
         elif payload.get("status") == "invalid":
             lines = [title + ": " + words["invalid"], event["observed_at"] + " · " + str(payload.get("error"))]
@@ -339,6 +385,7 @@ class Witness:
         return True
 
     async def tick(self):
+        self._freshness = None
         try:
             answer = await asyncio.wait_for(self.fetch(), self.timeout + 5)
             with self.store.transaction():
@@ -362,6 +409,74 @@ class Witness:
                                                           "error": describe(exc)})
         return event
 
+    async def daily(self):
+        date = (utc_date() - timedelta(days=1)).isoformat()
+        # The journal, rather than a mutable setting, is authoritative after a crash.
+        with self.store.snapshot() as snapshot:
+            events = list(snapshot.events())
+        existing = [e for e in events if e["kind"] == "witness.daily" and e["payload"].get("date") == date]
+        if existing:
+            event = existing[-1]
+            if any(e["kind"] == "witness.anchored" and e["payload"].get("record") == event["seq"] for e in events):
+                self.store.set_setting("last_daily_date", date)
+                return event
+        else:
+            payload = daily_payload(events, date)
+            payload["root"] = continuity.Tree(self.store.db).root(0, payload["to_seq"]).hex()
+            event = self.store.append("witness.daily", payload)
+        await self.stamp_daily(event)
+        self.store.set_setting("last_daily_date", date)
+        if self.send:
+            try:
+                message_id = await asyncio.wait_for(self.send(self.post_text(event)), self.timeout + 5)
+                self.store.append("witness.posted", {"record": event["seq"], "channel": self.channel, "message_id": message_id})
+            except Exception as exc:
+                self.store.append("witness.post_failed", {"record": event["seq"], "error": describe(exc)})
+        return event
+
+    async def stamp_daily(self, event):
+        date = event['payload']['date']
+        if not isinstance(date, str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}', date):
+            raise ValueError('Invalid retained daily seal date')
+        datetime.strptime(date, '%Y-%m-%d')
+        folder, name = self.store.root / 'anchors', 'daily-' + date
+        folder.mkdir(exist_ok=True, mode=0o700)
+        raw = canonical(event)
+        private_write(folder / (name + '.json'), raw)
+        results = await ots_stamp(hashlib.sha256(raw).digest(), DEFAULT_OTS, folder, name, self.network)
+        self.store.append('witness.anchored', {'record': event['seq'], 'results': results})
+        return results
+
+    async def retry_daily_ots(self):
+        """Retry seals with no retained submission, including after restarts and date changes."""
+        cursor = self.store.get_setting('witness_daily_retry_cursor', 0)
+        with self.store.lock:
+            rows = self.store.db.execute("SELECT * FROM events WHERE kind='witness.daily' AND seq>? ORDER BY seq LIMIT 32",
+                                         (cursor,)).fetchall()
+            if not rows:
+                rows = self.store.db.execute("SELECT * FROM events WHERE kind='witness.daily' ORDER BY seq LIMIT 32").fetchall()
+        deadline, attempts = time.monotonic() + 60, []
+        for row in rows:
+            event = self.store.decode(row)
+            name = 'daily-' + str(event['payload']['date'])
+            # Existing submissions are handled by upgrade_pending_ots. Their existence is not a verdict.
+            if any((self.store.root / 'anchors' / (name + '.' + service_name(url) + '.ots')).is_file()
+                   for url in DEFAULT_OTS):
+                cursor = event['seq']
+                continue
+            if len(attempts) >= 2 or time.monotonic() >= deadline:
+                break
+            try:
+                async with asyncio.timeout(max(0.1, deadline - time.monotonic())):
+                    results = await self.stamp_daily(event)
+            except TimeoutError:
+                results = [{'kind': 'opentimestamps', 'ok': False, 'error': 'retry deadline exceeded'}]
+                self.store.append('witness.anchored', {'record': event['seq'], 'results': results})
+            attempts.append({'record': event['seq'], 'results': results})
+            cursor = event['seq']
+        self.store.set_setting('witness_daily_retry_cursor', cursor)
+        return attempts
+
     async def run(self, ticks=None):
         self.store.append("witness.started", {
             "collector": self.host, "channel": self.channel, "interval_minutes": self.interval,
@@ -374,6 +489,14 @@ class Witness:
             while ticks is None or done < ticks:
                 started = time.monotonic()
                 await self.tick()
+                if self.store.get_setting("last_daily_date") != (utc_date() - timedelta(days=1)).isoformat():
+                    await self.daily()
+                last_upgrade = self.store.get_setting("witness_ots_upgrade_at", 0)
+                if time.time() - last_upgrade >= 3600:
+                    await self.retry_daily_ots()
+                    await upgrade_pending_ots(self.store, self.network, {"ots_calendars": DEFAULT_OTS},
+                                              folder=self.store.root / "anchors")
+                    self.store.set_setting("witness_ots_upgrade_at", time.time())
                 done += 1
                 if ticks is None or done < ticks:
                     await asyncio.sleep(max(1.0, self.interval * 60 - (time.monotonic() - started)))
@@ -405,6 +528,9 @@ def export(root, out):
               "independent clock. A witness shows what the collector reported at those times, not message truth.\n"
               "Produced by TgWitness (PhishDestroy, https://phishdestroy.io).\n").encode()
     files = {"events.jsonl": data, "verify.py": verifier, "README.txt": readme}
+    for path in sorted((root / "anchors").glob("daily-*")):
+        if path.is_file() and not path.is_symlink() and path.suffix in (".ots", ".json"):
+            files["anchors/" + path.name] = path.read_bytes()
     manifest = {"format": "tgwitness-witness-v1", "created_at": utcnow(), "public_key": key.public_key,
                 "fingerprint": result["fingerprint"], "event_count": result["events"], "head_hash": result["head_hash"],
                 "collector_fingerprint": collector, "channel": started[-1]["payload"].get("channel") if started else None,

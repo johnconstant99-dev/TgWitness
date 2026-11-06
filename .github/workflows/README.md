@@ -7,6 +7,7 @@
 | Workflow | Purpose |
 | --- | --- |
 | [`checks.yml`](checks.yml) | Hosted Python, source and browser checks; Docker on the project runner; full platform matrix on request |
+| [`evidence-checks.yml`](evidence-checks.yml) | Reusable hosted check called by PR and main gates: signed journal/witness boundaries, replica recipients, 25 narrative languages and saved profiles |
 | [`pr-check.yml`](pr-check.yml) | Read-only GitHub-hosted PR/merge-queue gate: lint, synthetic installation and notification redirect checks, pinned dependency audits |
 | [`security-audit.yml`](security-audit.yml) | CodeQL on main, pull requests and merge queue; nightly/manual default-branch dependency and built-container scans |
 | [`pages.yml`](pages.yml) | Public website build and Pages workflow |
@@ -55,6 +56,17 @@ browser job installs Chromium and its OS dependencies on its own machine.
 No virtual environment is restored across jobs. Site checks run independently
 after the strict build. These changes reduce repeated setup and sequential work;
 overall completion still depends on runner queues, load and individual checks.
+
+The evidence suite invokes pytest explicitly for its `test_*.py` modules, so a
+module without a `__main__` block cannot pass just by being imported. The source
+archive check compares narrative resource paths with wheel package-data declarations
+and retains the example configuration and golden fixtures. Unlisted local JSON
+files remain excluded. The main container job runs the APK retry/corruption test
+inside the built Wolfi image with networking disabled. This test is not represented
+as passing on a Windows host.
+
+Passing the evidence workflow is a technical regression result. It does not mark
+T15's translations as reviewed or satisfy the outstanding T7/T13 release requirements.
 
 The PR gate runs on fresh GitHub-hosted Ubuntu runners. It uses no repository
 secrets, persists no checkout credentials, and never calls the Checks workflow

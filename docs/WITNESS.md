@@ -293,3 +293,21 @@ between checkpoints；offline verification compares every retained checkpoint wi
 export．Legacy heads without continuity proofs retain the offline comparison and are
 reported without online continuity verification．The report lists witness downtime and
 failed publications by interval．
+
+### Daily seals and unavailable timestamp calendars
+
+The witness seals the previous UTC day's journal boundary and submits the hash of
+that signed seal to OpenTimestamps. A calendar submission is pending evidence;
+only independently checked Bitcoin commitments receive confirmation in the verifier.
+
+If all calendars fail, the signed seal and unsuccessful attempt remain in the
+journal. The hourly maintenance pass retries that original record, including
+after a restart or a change of date. It scans at most 32 seals, submits at most
+two missing submissions and spends at most 60 seconds on retries per pass. A
+persistent cursor rotates through older seals. Retained submissions follow the
+existing proof-upgrade path.
+
+A retry does not rewrite the seal, change its original date or claim that the
+calendar received it earlier. A later Bitcoin commitment remains a later external
+confirmation. Missing proofs remain `none`; pending proofs remain `pending` until
+the verifier checks them independently.

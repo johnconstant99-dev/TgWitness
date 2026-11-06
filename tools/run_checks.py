@@ -17,6 +17,14 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 MAX_LOG_BYTES = 4 * 1024**2
 SUITES = {
+    "evidence": (
+        "test_witness_freshness.py", "test_witness_daily.py", "test_witness_keys.py",
+        "test_witness_continuity.py", "test_replica_recipient.py", "test_assurance_ladder.py",
+        "test_assurance_chain.py", "test_assurance_boundaries.py", "test_verifier_output_safety.py",
+        "test_deletion_semantics.py", "test_deletion_evidence_reports.py",
+        "test_narrative.py", "test_narrative_config.py", "test_evidence_checks.py",
+        "check_narrative_texts.py",
+    ),
     "browser": (
         "test_case_board.py", "test_case_board_api.py", "check_case_board_browser.py",
         "check_showcase.py", "check_showcase_browser.py",
@@ -225,6 +233,13 @@ async def run_checks(checks, output, *, workers=2, timeout=600, cwd=ROOT):
     return passed, results
 
 
+def suite_checks(suite):
+    # Pytest modules without a __main__ block otherwise exit 0 without executing a test.
+    return [Check(Path(script).stem, (sys.executable,
+                  *(("-m", "pytest", "-q", "--tb=short") if suite == 'evidence' and script.startswith('test_') else ()),
+                  str(ROOT / "tools" / script))) for script in SUITES[suite]]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--suite", required=True, choices=SUITES)
@@ -233,8 +248,7 @@ def main():
                         help="Seconds per check, followed by up to five seconds of cleanup")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    checks = [Check(Path(script).stem, (sys.executable, str(ROOT / "tools" / script)))
-              for script in SUITES[args.suite]]
+    checks = suite_checks(args.suite)
     passed, _ = asyncio.run(run_checks(checks, args.output or ROOT / "build/check-results" / args.suite,
                                       workers=args.jobs, timeout=args.timeout))
     return 0 if passed else 1

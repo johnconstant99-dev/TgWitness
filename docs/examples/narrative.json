@@ -1,0 +1,33 @@
+{
+  "format": "tgwitness-narrative-config-v1",
+  "defaults": {
+    "lang": "en",
+    "jurisdiction": null,
+    "outputs": ["pdf", "html", "json", "svg"],
+    "diagrams": ["timeline", "flow", "ladder", "files"],
+    "max_records": 100000,
+    "scene_max_records": 2000,
+    "check_drand": false,
+    "check_bitcoin": false,
+    "require_tier": "self_attested",
+    "require_pinned_signer": false
+  },
+  "profiles": {
+    "ru-html": {
+      "lang": "ru",
+      "outputs": ["html", "json", "svg"]
+    },
+    "de-proof": {
+      "lang": "de",
+      "jurisdiction": "DE",
+      "require_tier": "witness_anchored",
+      "require_pinned_signer": true,
+      "check_drand": true,
+      "check_bitcoin": true
+    },
+    "json-only": {
+      "outputs": ["json"],
+      "diagrams": []
+    }
+  }
+}

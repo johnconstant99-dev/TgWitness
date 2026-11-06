@@ -21,6 +21,8 @@ concurrency:
   group: checks-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name != 'release' }}
 jobs:
+  evidence:
+    uses: ./.github/workflows/evidence-checks.yml
   quality:
     name: Dependencies, lint and source
     # Independent checks use fresh runners; Docker retains the project runner.
@@ -319,6 +321,13 @@ jobs:
           --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
           --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly
           tgwitness:test python /checks/check_container_runtime.py --output /data/checks
+      - name: Check authenticated APK retries and corrupt downloads inside Wolfi
+        run: >-
+          docker run --rm --network none --read-only --cap-drop=ALL
+          --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
+          --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly
+          tgwitness:test python /checks/test_container_fetch_retry.py
+          --installer /usr/share/tgwitness-build/containers/install-packages.sh
       - name: Check Compose health, access control, and persistent restart
         run: python tools/check_compose.py
   media:

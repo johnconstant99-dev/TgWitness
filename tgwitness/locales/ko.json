@@ -6363,5 +6363,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "플래그 지정 기준: 첫 게시자가 5명 이상이고, 14일 동안의 중앙값의 3배 이하이며, 메시지 수가 중앙값의 1.5배 미만인 경우. 채팅 시작 후 첫 7일 동안은 플래그가 지정되지 않습니다.",
   "Distinct saved message numbers per chat and the share taken by service messages.": "채팅별 저장된 메시지 수와 서비스 메시지가 차지하는 비율.",
   "Membership changes Telegram reported, once per person, chat, change and day.": "텔레그램에서 보고된 회원 정보 변경 사항(1인당, 채팅당, 변경 사항당, 일당 1회).",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "채팅 상태 스냅샷 사이에 추가되거나 제거된 고정된 서비스 메시지, 고정 해제 알림 및 고정된 메시지를 기록합니다."
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "채팅 상태 스냅샷 사이에 추가되거나 제거된 고정된 서비스 메시지, 고정 해제 알림 및 고정된 메시지를 기록합니다.",
+  "Recipient public key (X25519, base64; optional)": "수신자 공개 키 (X25519, base64; 선택 사항)",
+  "Require Compliance retention for every copied object": "복사된 모든 객체에 Compliance 모드 보존 요구",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "수신자 키를 사용하면 복구에 수신자의 개인 키도 필요합니다. 개인 키는 별도로 보관하세요. 수신자를 변경하면 별도의 복사본을 만들기 시작합니다."
 }

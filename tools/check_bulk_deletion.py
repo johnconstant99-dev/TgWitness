@@ -30,12 +30,13 @@ async def check(root):
         await collector.on_delete(deletion(list(range(100, 115))))
         await collector.on_delete(deletion([200]))
         events = list(store.all_events())
-        cleared = [e for e in events if e["kind"] == "history.cleared"]
+        batches = [e for e in events if e["kind"] == "deletion.batch"]
         deleted = [e for e in events if e["kind"] == "message.deleted"]
-        assert len(cleared) == 1 and cleared[0]["payload"]["count"] == 15, cleared
+        assert len(batches) == 1 and batches[0]["payload"]["count"] == 15, batches
+        assert not any(e["kind"] == "history.cleared" for e in events)
         assert len(deleted) == 16
         batched = [e for e in deleted if "batch" in e["payload"]]
-        assert len(batched) == 15 and all(e["payload"]["batch"]["seq"] == cleared[0]["seq"] for e in batched)
+        assert len(batched) == 15 and all(e["payload"]["batch"]["seq"] == batches[0]["seq"] for e in batched)
         assert all("raw" not in e["payload"] for e in batched)
         single = next(e for e in deleted if e["message_id"] == 200)
         assert "raw" in single["payload"] and "batch" not in single["payload"]
@@ -53,4 +54,4 @@ async def check(root):
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory(prefix="bulk-deletion-") as temporary:
         asyncio.run(check(Path(temporary)))
-    print("A cleared history is journalled once; each deletion refers to it instead of repeating every ID.")
+    print("A deletion update is journalled once; each deletion refers to it instead of repeating every ID.")

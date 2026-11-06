@@ -6363,5 +6363,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "ถูกทำเครื่องหมาย: มีผู้โพสต์ครั้งแรกอย่างน้อย 5 คน และจำนวนข้อความมากกว่า 3 เท่าของค่ามัธยฐานในช่วง 14 วัน โดยข้อความแต่ละข้อความต้องน้อยกว่า 1.5 เท่าของค่ามัธยฐานนั้น 7 วันแรกของการสนทนาจะไม่ถูกทำเครื่องหมาย",
   "Distinct saved message numbers per chat and the share taken by service messages.": "หมายเลขข้อความที่เก็บไว้ที่แตกต่างกันสำหรับแต่ละการสนทนา และสัดส่วนที่ข้อความบริการ chiếm",
   "Membership changes Telegram reported, once per person, chat, change and day.": "การเปลี่ยนแปลงสมาชิกที่ Telegram รายงานมา โดยจำกัดการรายงานหนึ่งครั้งต่อคน ต่อห้องแชท ต่อการเปลี่ยนแปลง และต่อวัน",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "ตรึงข้อความบริการ ยกเลิกการตรึงการแจ้งเตือน และข้อความที่ตรึงไว้ ซึ่งถูกเพิ่มหรือลบไประหว่างการถ่ายภาพสถานะการสนทนา"
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "ตรึงข้อความบริการ ยกเลิกการตรึงการแจ้งเตือน และข้อความที่ตรึงไว้ ซึ่งถูกเพิ่มหรือลบไประหว่างการถ่ายภาพสถานะการสนทนา",
+  "Recipient public key (X25519, base64; optional)": "กุญแจสาธารณะของผู้รับ (X25519, base64; ไม่บังคับ)",
+  "Require Compliance retention for every copied object": "กำหนดให้เก็บรักษาทุกออบเจ็กต์ที่คัดลอกในโหมด Compliance",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "เมื่อใช้กุญแจของผู้รับ การกู้คืนต้องใช้กุญแจส่วนตัวของผู้รับด้วย เก็บกุญแจไว้แยกต่างหาก การเปลี่ยนผู้รับจะเริ่มสำเนาแยกใหม่"
 }

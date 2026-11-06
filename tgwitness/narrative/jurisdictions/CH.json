@@ -1,0 +1,34 @@
+{
+  "code": "CH",
+  "scope": "Schweiz · elektronische Signaturen",
+  "checked_at": "2026-11-06",
+  "review": "not reviewed by local counsel",
+  "expert_role": null,
+  "esig_regulation": {
+    "term": "ZertES",
+    "qes_name": "qualifizierte elektronische Signatur",
+    "source": "https://www.bit.admin.ch/de/e-signatur"
+  },
+  "data_access_basis": null,
+  "timestamp_recognition": {
+    "term": "qualifizierter elektronischer Zeitstempel",
+    "automatic_ots_qualification": false,
+    "source": "https://www.bit.admin.ch/de/zeitstempel"
+  },
+  "evidence_rules": [],
+  "dpa": null,
+  "sources": [
+    {
+      "term": "ZertES",
+      "url": "https://www.bit.admin.ch/de/e-signatur"
+    },
+    {
+      "term": "ZertES",
+      "url": "https://www.bit.admin.ch/de/e-signatur"
+    },
+    {
+      "term": "qualifizierter elektronischer Zeitstempel",
+      "url": "https://www.bit.admin.ch/de/zeitstempel"
+    }
+  ]
+}

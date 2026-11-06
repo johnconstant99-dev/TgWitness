@@ -6425,5 +6425,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "Markiert: mindestens 5 Erstposter und das 3-Fache ihres 14-Tage-Medianwerts, wobei die Nachrichten weniger als das 1,5-Fache ihres Medianwerts betragen. Die ersten 7 Tage eines Chats werden nicht markiert.",
   "Distinct saved message numbers per chat and the share taken by service messages.": "Anzahl der gespeicherten Nachrichten pro Chat sowie der Anteil der Servicemeldungen.",
   "Membership changes Telegram reported, once per person, chat, change and day.": "Von Telegram gemeldete Änderungen der Mitgliederzahlen, einmal pro Person, Chat, Änderung und Tag.",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "Service-Nachrichten anheften, Heftungen aufheben sowie angeheftete Nachrichten, die zwischen den Momentaufnahmen des Chat-Status hinzugefügt oder entfernt wurden."
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "Service-Nachrichten anheften, Heftungen aufheben sowie angeheftete Nachrichten, die zwischen den Momentaufnahmen des Chat-Status hinzugefügt oder entfernt wurden.",
+  "Recipient public key (X25519, base64; optional)": "Öffentlicher Schlüssel des Empfängers (X25519, base64; optional)",
+  "Require Compliance retention for every copied object": "Für jedes kopierte Objekt Aufbewahrung im Compliance-Modus verlangen",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "Bei einem Empfängerschlüssel benötigt die Wiederherstellung auch den privaten Schlüssel des Empfängers. Bewahren Sie ihn getrennt auf. Ein Empfängerwechsel beginnt eine separate Kopie."
 }

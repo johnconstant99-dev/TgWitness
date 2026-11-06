@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Keep missing-on-recheck observations separate from deletion notices in HTML, JSON and PDF counts and viewer labels. Do not claim unscoped deletion IDs were never saved when their chat is outside the current observation scope.
+
+- Record multiple deleted IDs as a deletion batch without inferring a whole-history clear, the deleting participant, or deletion for everyone. Relabel legacy history-clear events without changing their signed records.
+
 - Publish the one-command installer only after application and security checks pass for the exact main commit and the signed package passes Ubuntu local/HTTPS service and Windows PowerShell acceptance. Keep the previous download when checks fail or time out. Add authenticated tests of the actual public installer URLs.
 
 - Preserve `previous_hash` in the signed-record preview even when its hexadecimal digits resemble a payment card number. Secret masking still applies to message content; the stored record is unchanged.

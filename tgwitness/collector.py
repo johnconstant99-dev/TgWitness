@@ -86,9 +86,10 @@ def sessions_snapshot(authorizations):
             "others": sorted((entry(a) for a in authorizations if not a.current), key=lambda e: e["hash"])}
 
 
-BULK_DELETION = 10
-BULK_MEANING = ("Many messages disappeared in one Telegram update: the history was cleared or bulk-deleted. "
-                "If it includes messages this account sent, the other side cleared the chat for both.")
+DELETION_BATCH_MEANING = (
+    "Telegram reported several message IDs as deleted in one update. "
+    "This does not identify who deleted them, whether deletion applied to all participants, "
+    "or whether the entire chat history was cleared.")
 ACCESS_LOST_MEANING = ("The account was removed from this chat or can no longer read it. Observation of this chat "
                        "stopped at that moment; records saved before it remain in the journal.")
 
@@ -2330,10 +2331,10 @@ class Collector:
             return None
         outgoing = sum(1 for message_id in ids
                        if ((self.store.message_state(chat_id, message_id)["content"] or {}).get("outgoing")))
-        event = self.store.append("history.cleared" if len(ids) >= BULK_DELETION else "deletion.batch", {
+        event = self.store.append("deletion.batch", {
             "count": len(ids), "first_id": min(ids), "last_id": max(ids), "message_ids": sorted(ids),
             "outgoing_saved": outgoing, "raw": raw,
-            "meaning": BULK_MEANING if len(ids) >= BULK_DELETION else "Several messages deleted in one Telegram update."},
+            "meaning": DELETION_BATCH_MEANING},
             chat_id)
         return {"seq": event["seq"], "hash": event["hash"], "count": len(ids)}
 
@@ -2362,7 +2363,7 @@ class Collector:
                             batch=batch)
                 if unresolved:
                     self.store.append("deletion.unscoped", {
-                        "message_ids": unresolved, "scope": "account-level update; no saved message has these IDs",
+                        "message_ids": unresolved, "scope": "account-level update; not attributed to a currently observed chat",
                         "deleted_by": None, "raw": raw})
             elif await self.covers(event.chat_id):
                 batch = self.deletion_batch(event.chat_id, list(event.deleted_ids), raw)

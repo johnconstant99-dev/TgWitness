@@ -6402,5 +6402,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "Belgilangan: kamida 5 nafar birinchi marta post qilgan foydalanuvchi va ularning 14 kunlik median ko'rsatkichining 3 barobaridan ortiq, xabarlar esa median ko'rsatkichining 1,5 barobaridan kam. Suhbatning dastlabki 7 kuni belgilamaydi.",
   "Distinct saved message numbers per chat and the share taken by service messages.": "Har bir suhbat bo'yicha saqlangan xabar raqamlari va xizmat xabarlari ulushi.",
   "Membership changes Telegram reported, once per person, chat, change and day.": "Telegramda xabar berilgan a'zolik oʻzgarishlari: har bir kishi, suhbat, oʻzgarish va kun boʻyicha bir marta.",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "Xizmat xabarlarini biriktirish, bildirishnomalarni biriktirishdan bo'shatish hamda chat holati snapshotlari orasida qo'shilgan yoki olib tashlangan biriktirilgan xabarlar."
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "Xizmat xabarlarini biriktirish, bildirishnomalarni biriktirishdan bo'shatish hamda chat holati snapshotlari orasida qo'shilgan yoki olib tashlangan biriktirilgan xabarlar.",
+  "Recipient public key (X25519, base64; optional)": "Qabul qiluvchining ochiq kaliti (X25519, base64; ixtiyoriy)",
+  "Require Compliance retention for every copied object": "Har bir nusxalangan obyekt uchun Compliance rejimida saqlashni talab qilish",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "Qabul qiluvchi kaliti ishlatilsa, tiklash uchun uning maxfiy kaliti ham kerak. Uni alohida saqlang. Qabul qiluvchini o‘zgartirish alohida nusxa yaratishni boshlaydi."
 }

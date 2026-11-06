@@ -1,0 +1,22 @@
+{
+  "code": "UK",
+  "scope": "England and Wales · civil proceedings",
+  "checked_at": "2026-11-06",
+  "review": "not reviewed by local counsel",
+  "expert_role": {
+    "term": "expert",
+    "basis": "Civil Procedure Rules, Part 35",
+    "source": "https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part35"
+  },
+  "esig_regulation": null,
+  "data_access_basis": null,
+  "timestamp_recognition": null,
+  "evidence_rules": [],
+  "dpa": null,
+  "sources": [
+    {
+      "term": "Civil Procedure Rules, Part 35",
+      "url": "https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part35"
+    }
+  ]
+}

@@ -863,7 +863,9 @@ def evidence_pdf(data, context, events=None, certificate=None):
         if report_composition_pdf.active(lay):
             events, directory_index = report_composition_pdf.indexed_events(events, records_total or 0)
         lay.figures([(say("Records"), records_total), (say("Chats"), summary["chats"]), (say("Messages"), cats["message"]),
-                     (say("Edits"), cats["edited"]), (say("Deletions"), cats["deleted"]), (say("Files"), summary["files"]),
+                     (say("Edits"), cats["edited"]), (say("Deletions"), cats["deleted"]),
+                     *([(say("Missing on recheck"), cats["missing"])] if cats.get("missing") else []),
+                     (say("Files"), summary["files"]),
                      (say("Timestamps"), summary["timestamps"]),
                      (say("Observation period"), report.span_text(say, summary["first_record_at"], summary["last_record_at"]))])
         data_name = "records.jsonl" if handover else "events.jsonl"

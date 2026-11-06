@@ -6363,5 +6363,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "Ditandai: setidaknya 5 pengguna yang baru pertama kali memposting dan 3 kali lipat dari median 14 hari mereka, dengan pesan di bawah 1,5 kali lipat dari median mereka. 7 hari pertama obrolan tidak ditandai.",
   "Distinct saved message numbers per chat and the share taken by service messages.": "Jumlah pesan yang disimpan yang berbeda-beda per obrolan dan porsi yang ditempati oleh pesan layanan.",
   "Membership changes Telegram reported, once per person, chat, change and day.": "Perubahan keanggotaan yang dilaporkan oleh Telegram, satu kali per orang, obrolan, perubahan, dan hari.",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "Sematkan pesan layanan, lepaskan pemberitahuan, serta pesan yang disematkan yang ditambahkan atau dihapus di antara snapshot status obrolan."
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "Sematkan pesan layanan, lepaskan pemberitahuan, serta pesan yang disematkan yang ditambahkan atau dihapus di antara snapshot status obrolan.",
+  "Recipient public key (X25519, base64; optional)": "Kunci publik penerima (X25519, base64; opsional)",
+  "Require Compliance retention for every copied object": "Wajibkan retensi dalam mode Compliance untuk setiap objek yang disalin",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "Dengan kunci penerima, pemulihan juga memerlukan kunci privat penerima. Simpan secara terpisah. Mengganti penerima memulai salinan terpisah."
 }

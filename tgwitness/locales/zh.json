@@ -6363,5 +6363,8 @@
   "Flagged: at least 5 first-time posters and 3x their 14-day median, with messages under 1.5x their median. A chat's first 7 days are not flagged.": "被标记：至少有 5 名首次发帖者，且发帖量达到其 14 天中位数的 3 倍，而单条消息长度不超过其中位数的 1.5 倍。聊天群的前 7 天不会被标记。",
   "Distinct saved message numbers per chat and the share taken by service messages.": "每个聊天中已保存的消息数量及其与服务消息所占比例。",
   "Membership changes Telegram reported, once per person, chat, change and day.": "Telegram 报告的成员变动情况，每人、每个聊天群、每次变动及每天仅报告一次。",
-  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "在聊天状态快照之间，记录已固定服务消息、已取消固定的通知以及新增或移除的已固定消息。"
+  "Pin service messages, unpin notices and pinned messages added or removed between chat-state snapshots.": "在聊天状态快照之间，记录已固定服务消息、已取消固定的通知以及新增或移除的已固定消息。",
+  "Recipient public key (X25519, base64; optional)": "接收方公钥（X25519，base64；可选）",
+  "Require Compliance retention for every copied object": "要求每个复制的对象使用 Compliance 模式保留",
+  "With a recipient key, recovery also requires the recipient's private key. Keep it separately. Changing the recipient starts a separate copy.": "使用接收方密钥时，恢复还需要接收方的私钥。请单独保管私钥。更换接收方将开始创建独立副本。"
 }

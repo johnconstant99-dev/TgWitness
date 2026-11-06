@@ -165,9 +165,9 @@ def approved_calendar(uri, settings):
         "calendar.opentimestamps.org", "calendar.eternitywall.com", "calendar.catallaxy.com"))
 
 
-def old_ots_files(folder, cursor):
+def old_ots_files(folder, cursor, pattern="checkpoint-*.ots"):
     after, before, now = [], [], time.time()
-    for path in folder.glob("checkpoint-*.ots"):
+    for path in folder.glob(pattern):
         try:
             if path.is_symlink() or now - path.stat().st_mtime < OTS_UPGRADE_AGE:
                 continue
@@ -181,13 +181,14 @@ def old_ots_files(folder, cursor):
     return (after + before)[:OTS_UPGRADE_FILES]
 
 
-async def upgrade_pending_ots(store, network, settings):
-    folder = store.root / "checkpoints" / "anchors"
+async def upgrade_pending_ots(store, network, settings, folder=None):
+    daily = folder is not None
+    folder = folder if daily else store.root / "checkpoints" / "anchors"
     if not folder.is_dir() or folder.is_symlink() or not settings["ots_calendars"]:
         return []
     previous = store.get_setting("evidence_ots_upgrade", {}) or {}
     cursor = previous.get("cursor", "")
-    ordered = await asyncio.to_thread(old_ots_files, folder, cursor)
+    ordered = await asyncio.to_thread(old_ots_files, folder, cursor, "daily-*.ots" if daily else "checkpoint-*.ots")
     outcomes, examined, calls = [], 0, 0
     deadline = time.monotonic() + 60
     for path in ordered:
@@ -202,9 +203,9 @@ async def upgrade_pending_ots(store, network, settings):
                 raise ValueError("OpenTimestamps size limit exceeded")
             original = path.read_bytes()
             stem = path.name.split(".", 1)[0]
-            if not re.fullmatch(r"checkpoint-\d{12,}", stem):
+            if not re.fullmatch(r"daily-\d{4}-\d{2}-\d{2}" if daily else r"checkpoint-\d{12,}", stem):
                 continue
-            source = folder.parent / (stem + ".json")
+            source = (folder if daily else folder.parent) / (stem + ".json")
             if source.is_symlink() or source.stat().st_size > 64 * 1024:
                 raise ValueError("Invalid retained checkpoint")
             digest = hashlib.sha256(source.read_bytes()).digest()
@@ -314,6 +315,31 @@ def latest_checkpoint(store):
     return (name, source, statement) if source.is_file() else None
 
 
+async def ots_stamp(digest: bytes, calendars, folder, name: str, network) -> list[dict]:
+    folder.mkdir(parents=True, exist_ok=True, mode=0o700)
+    results = []
+    for url in calendars:
+        target = folder / (name + "." + service_name(url) + ".ots")
+        if target.exists():
+            # Recheck retained bytes before treating a previous attempt as covered.
+            ots_summary(target.read_bytes(), digest)
+            results.append({"service": url, "kind": "opentimestamps", "covered": True})
+            continue
+        received = False
+        try:
+            answer = await post(url + "/digest", digest, {"Accept": "application/vnd.opentimestamps.v1"},
+                                network, limit=10000)
+            received = True
+            proof = OTS_MAGIC + b"\x01\x08" + digest + answer
+            summary = ots_summary(proof, digest)
+            private_write(target, proof)
+            results.append({"service": url, "kind": "opentimestamps", "ok": True, "status": summary["status"]})
+        except Exception as exc:
+            results.append({"service": url, "kind": "opentimestamps", "ok": False, "received": received,
+                            "error": problem(exc)})
+    return results
+
+
 async def anchor_latest(store, network, settings):
     found = latest_checkpoint(store)
     if not found:
@@ -342,23 +368,11 @@ async def anchor_latest(store, network, settings):
             results.append({"service": url, "kind": "rfc3161", "ok": True, "time": summary["time"], **signed})
         except Exception as exc:
             results.append({"service": url, "kind": "rfc3161", "ok": False, "received": received, "error": problem(exc)})
-    for url in settings["ots_calendars"]:
-        target = folder / (name + "." + service_name(url) + ".ots")
-        if target.exists():
-            covered.append({"service": url, "kind": "opentimestamps"})
-            continue
-        received = False
-        try:
-            answer = await post(url + "/digest", digest, {"Accept": "application/vnd.opentimestamps.v1"},
-                                network, limit=10000)
-            received = True
-            proof = OTS_MAGIC + b"\x01\x08" + digest + answer
-            summary = ots_summary(proof, digest)
-            private_write(target, proof)
-            results.append({"service": url, "kind": "opentimestamps", "ok": True, "status": summary["status"]})
-        except Exception as exc:
-            results.append({"service": url, "kind": "opentimestamps", "ok": False, "received": received,
-                            "error": problem(exc)})
+    for outcome in await ots_stamp(digest, settings["ots_calendars"], folder, name, network):
+        if outcome.pop("covered", False):
+            covered.append(outcome)
+        else:
+            results.append(outcome)
     if not results:
         return None
     record = {"checkpoint": {"file": source.name, "event_count": statement["event_count"],

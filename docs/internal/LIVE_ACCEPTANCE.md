@@ -16,8 +16,12 @@ Do not use a personal investigation dataset as a release fixture.
 5. Edit a message several times with pauses between edits. Check every delivered
    version and compare text. Confirm editor attribution is not inferred from sender.
 6. Delete an already captured message and one deleted before observation starts.
-   Verify preserved content only for the former. Check basic-group deletions remain
-   unscoped when Telegram supplies no peer.
+   Verify preserved content only for the former. When Telegram supplies no peer,
+   resolve private/basic-group deletions only from previously saved, unambiguous
+   account-wide message IDs; otherwise retain an unscoped notice. Delete 2, 9, 10,
+   and 15 messages while leaving others present. Confirm each multi-ID update is
+   labeled as a deletion batch, with no inferred actor, whole-history clear, or
+   deletion for all participants, including when saved outgoing messages are deleted.
 7. Add/remove reactions using two accounts. Compare visible counts and available
    recent reactors. Repeat with anonymous/channel reactions. Do not infer a full actor list.
 8. Join, leave, invite, remove, and approve a user. Compare service actions and raw

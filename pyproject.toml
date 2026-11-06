@@ -86,6 +86,7 @@ tgwitness = [
   "locales/tr.json", "locales/ar.json", "locales/fa.json", "locales/ur.json",
   "locales/hi.json", "locales/id.json", "locales/vi.json", "locales/zh.json",
   "guide_locales/*.json",
+  "narrative/texts/*.json", "narrative/jurisdictions/*.json", "narrative/review-policy.json",
   "english_fallbacks.json", "public_proxies.json", "sealed_policy.json",
   "schemas/board-*.json",
   "client_profiles.json", "client_profiles.LICENSE", "dstack_measurement.LICENSE",

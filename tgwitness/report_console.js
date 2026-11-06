@@ -16,7 +16,7 @@ const initials=s=>String(s||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]||"")
 const colour=v=>"c"+(Math.abs([...String(v)].reduce((a,c)=>a*31+c.charCodeAt(0)|0,7))%7);
 const ic=name=>'<svg class="i" aria-hidden="true"><use href="#i-'+name+'"/></svg>';
 const SEARCH='<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>';
-const CAT={message:["message","blue"],text:["message","blue"],edited:["edit","orange"],deleted:["trash","red"],media:["file","violet"],
+const CAT={message:["message","blue"],text:["message","blue"],edited:["edit","orange"],deleted:["trash","red"],missing:["eye","orange"],media:["file","violet"],
   reaction:["tag","teal"],member:["users","green"],system:["settings","slate"],service:["settings","slate"]};
 const defang=(kind,v)=>{v=String(v);if(kind==="url"||kind==="telegram-invite"){const m=v.match(/^([a-z]+):\/\/([^/]*)(.*)$/i);
   return m?m[1].replace(/http/i,"hxxp")+"[://]"+m[2].replace(/\./g,"[.]")+m[3]:v;}
@@ -237,6 +237,7 @@ async function startViewer(meta){
   function tags(it){const b=[];
     if(chat&&it.raw?.selection)b.push('<span class="tag blue">'+esc(say(it.raw.selection.role==="context"?"Context message":"Matches export filters"))+"</span>");
     if(it.cat==="deleted")b.push('<span class="tag red">'+esc(say("deleted"))+"</span>");
+    if(it.cat==="missing")b.push('<span class="tag orange">'+esc(say("Missing on recheck"))+"</span>");
     if(it.found)b.push('<span class="tag orange">'+esc(say("found on recheck"))+"</span>");
     if(it.wallet)b.push('<span class="tag red">'+ic("tag")+esc(say("wallet"))+"</span>");else if(it.link)b.push('<span class="tag blue">'+esc(say("link"))+"</span>");
     if(((it.d||{}).text_entities||[]).some(x=>x.deceptive))b.push('<span class="tag red">⚠ '+esc(say("disguised link"))+"</span>");
