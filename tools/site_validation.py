@@ -7,7 +7,9 @@ from datetime import datetime
 PATH = "docs/validation/"
 LANGUAGES = ("en", "ru")
 STATIC = {f"validation/{name}": f"website/validation/{name}"
-          for name in ("validation.css", "validation.js", "snapshot.json")}
+          for name in ("validation.css", "validation.js", "snapshot.json", "performance.svg")}
+STATIC.update({f"validation/audit/{name}": f"website/validation/audit/{name}"
+               for name in ("REPORT.md", "MEASUREMENTS.csv", "PROOF.json", "VERIFY.py", "SHA256SUMS.txt")})
 
 
 def number(value):

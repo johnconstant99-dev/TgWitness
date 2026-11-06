@@ -24,6 +24,8 @@
 
 **56,329 messages exported in two fresh runs.** Both signed archives passed verification with pinned collector keys.
 
+[![Measured collection and complete export speed](website/validation/performance.svg)](https://phishdestroy.github.io/TgWitness/docs/validation/)
+
 | Run | Messages | Collection time | Collection speed | Complete export | End-to-end speed |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Server A | 27,030 | 189.043 s | **142.983 messages/s** | 211.647 s | 127.713 messages/s |
@@ -34,7 +36,8 @@ These are individual runs on [`92e539af`](https://github.com/phishdestroy/TgWitn
 
 [**Explore the English demo →**](https://phishdestroy.github.io/TgWitness/demo/?lang=en) ·
 [**Measurements, dates and method →**](https://phishdestroy.github.io/TgWitness/docs/validation/) ·
-[Download a fictional sample export](https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip)
+[Download a fictional sample export](https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip) ·
+[Signed English audit](website/validation/audit/REPORT.md)
 
 <a name="quick-start"></a>
 <a name="run-it-on-your-machine"></a>
