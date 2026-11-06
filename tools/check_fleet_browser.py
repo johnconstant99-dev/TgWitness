@@ -18,6 +18,12 @@ def account_files(name, api_id):
     ]
 
 
+def check_accounts(page, count):
+    page.locator("#fleet-import-check").click()
+    expect(page.locator('#fleet-results [data-state="alive"]')).to_have_count(count, timeout=30000)
+    expect(page.locator("#fleet-import-start")).to_be_enabled()
+
+
 def main():
     output = ROOT / "test-results" / "fleet-browser"
     output.mkdir(parents=True, exist_ok=True)
@@ -39,10 +45,11 @@ def main():
         ])
         expect(page.locator("#fleet-results li")).to_have_count(3)
         page.locator("#fleet-api").fill("wrong")
-        page.locator("#fleet-import-start").click()
+        page.locator("#fleet-import-check").click()
         expect(page.locator("#toast")).to_contain_text("API pair")
         assert not page.evaluate("json('profile-groups').then(r=>r.groups.length)")
         page.locator("#fleet-api").fill("")
+        check_accounts(page, 2)
         page.locator("#fleet-import-start").click()
         expect(page.locator("#fleet-results .ok")).to_have_count(2, timeout=30000)
         expect(page.locator("#fleet-results .bad")).to_have_count(1)
@@ -75,6 +82,8 @@ def main():
         page.locator("#fleet-group").select_option(group["id"])
         page.locator("#fleet-files").set_input_files([*account_files("gamma", 503), *account_files("delta", 504)])
         page.locator("#fleet-passcode").fill("temporary passcode")
+        page.locator("#fleet-passcode").blur()
+        check_accounts(page, 2)
         before = len(imported)
         hold_api_response(page, "/api/profiles/import")
         page.locator("#fleet-import-start").click()
@@ -127,6 +136,7 @@ def main():
         page.locator('[data-view="accounts"]').click()
         page.locator("#fleet-import-open").click()
         page.locator("#fleet-files").set_input_files(account_files("finished", 505))
+        check_accounts(page, 1)
         page.locator("#fleet-import-start").click()
         expect(page.locator("#fleet-results .ok")).to_have_count(1, timeout=30000)
         expect(page.locator("#fleet-import-stop")).to_be_hidden(timeout=30000)
@@ -140,7 +150,8 @@ def main():
                                                        "buffer": b"journal"}])
         expect(page.locator("#fleet-results .fleet-result")).to_have_count(3)
         expect(page.locator("#fleet-results .fleet-result.bad")).to_contain_text("Unsupported account file")
-        expect(page.locator("#fleet-import-summary")).to_have_text("2 accounts ready to import")
+        check_accounts(page, 2)
+        expect(page.locator("#fleet-import-summary")).to_contain_text("Active: 2")
         hold_api_response(page, "/api/profiles/import")
         page.locator("#fleet-import-start").click()
         expect(page.locator("html")).to_have_attribute("data-acceptance-held", "true")

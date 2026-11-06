@@ -13,7 +13,8 @@ MAX_CACHE_BYTES = 2 * 1024**3
 KEY = "prepared_exports"
 CLEANUP_KEY = "prepared_exports_cleanup"
 EVIDENCE_KEY = "evidence_exported"
-SETUP_KINDS = ("process.*", "network.*", "connection.*", "account.authorized", "export.failed", "settings.changed",
+SETUP_KINDS = ("process.*", "network.*", "connection.*", "account.authorized", "account.connection_checked",
+               "export.failed", "settings.changed",
                "parameters.changed", "capture.changed", "monitoring.changed", "scope.changed", "recheck.changed",
                "alerts.changed", "workspace.mode_changed", "setup.applied", "group.settings_applied",
                "group.settings_inherited")

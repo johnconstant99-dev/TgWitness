@@ -4860,9 +4860,9 @@ function messageRow(m,grouped,byId){
   m.media.forEach(media=>bubble.append(mediaNode(media)));
   if(m.has_media&&!m.media.length){const missing=node('span','media-missing');missing.title=tr('Attachment file not saved');missing.setAttribute('role','img');missing.setAttribute('aria-label',missing.title);missing.append(icon('clip'));bubble.append(missing);}
   const meta=node("div","bubble-meta");
-  if(m.deleted&&m.auto_deleted){const d=node("span","pill pill-deleted",tr("Auto-deleted"));d.title=tr("Deletion seen {time}, when the message's auto-delete timer expired: an expected removal by the timer.",{time:fmtFull(m.deleted_observed_at)});meta.append(d);}
+  if(m.deleted&&m.auto_deleted){const d=node("span","pill pill-deleted",tr("Deleted"));d.title=tr("Deletion seen {time}, when the message's auto-delete timer expired: an expected removal by the timer.",{time:fmtFull(m.deleted_observed_at)});meta.append(d);}
   else if(m.deleted){const d=node("span","pill pill-deleted",tr("Deleted"));d.title=tr("Deletion seen {time}. Telegram does not report who deleted it or exactly when.",{time:fmtFull(m.deleted_observed_at)});meta.append(d);}
-  else if(m.missing&&m.auto_deleted){const d=node("span","pill pill-missing",tr("Auto-deleted"));d.title=tr("Telegram no longer returned this message at {time}; its auto-delete timer had expired before that check.",{time:fmtFull(m.missing_observed_at)});meta.append(d);}
+  else if(m.missing&&m.auto_deleted){const d=node("span","pill pill-missing",tr("Not found at recheck"));d.title=tr("Telegram no longer returned this message at {time}; its auto-delete timer had expired before that check.",{time:fmtFull(m.missing_observed_at)});meta.append(d);}
   else if(m.missing){const d=node("span","pill pill-missing",tr("Not found at recheck"));d.title=tr("Telegram no longer returned this message at {time} and no deletion notice was received: deleted while notices were missed, removed by an auto-delete timer, or no longer visible to this account.",{time:fmtFull(m.missing_observed_at)});meta.append(d);}
   if(m.versions.length>1){const e=node("button","pill pill-edited",tr("Edited · {n} versions",{n:m.versions.length}));e.type="button";e.title=tr("Show every saved version");
     e.setAttribute("aria-expanded","false");

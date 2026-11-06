@@ -176,7 +176,10 @@ def settings_and_setup(page, server, child):
     for key in ('size', 'files', 'place'):
         expect(page.locator(f'input[name=setup-{key}]:checked')).to_have_value(saved['current'][key])
     page.locator('input[name=setup-goal][value=personal]').check()
-    page.locator('#setup-form button[type=submit]').click()
+    with page.expect_response(lambda response: response.url.endswith(f'/profiles/{child}/api/setup')
+                              and response.request.method == 'POST') as applied:
+        page.locator('#setup-form button[type=submit]').click()
+    assert applied.value.ok
     expect(page.locator('#setup-status')).to_contain_text('A personal record')
     assert page.evaluate("()=>json('setup').then(r=>r.saved.goal)") == 'personal'
 
@@ -433,6 +436,8 @@ def pending_action_owners(page, server, child):
     for path in paths:
         page.unroute('**/api/' + path, intercept)
 
+    # The delete confirmation is available only after saving this workspace's evidence.
+    page.evaluate("async id=>{const response=await api('export/zip',undefined,{profile:id});await response.arrayBuffer();}", child)
     profile_mutations = []
     def capture_profile(route):
         if route.request.method in ('PATCH', 'DELETE'):

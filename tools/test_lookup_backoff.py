@@ -54,7 +54,7 @@ def test_new_chat_intake_requeues_lookup_after_wait(tmp_path, monkeypatch, error
         monkeypatch.setattr(collector_module, "time", SimpleNamespace(time=lambda: 100))
         try:
             collector.running = True
-            collector.intake.put_nowait((-100123, None))
+            collector.intake.put_nowait((-100123, None, False))
             await collector.intake_loop()
             assert collector.intake.qsize() == 1, "FloodWait must not discard the pending chat"
             assert store.get_setting("rpc_backoff_until") == 240

@@ -209,9 +209,14 @@ class DistributedExport:
                 eligible = [p for left, right, p in bounds if left <= low and end - 1 <= right]
                 if eligible:
                     segments.append({"low": low, "high": end - 1, "profiles": eligible})
-            try:
-                total = (await lead.client.get_messages(entity, limit=0)).total
-            except Exception:
+            total = next((worker.get("planning_count") for worker in workers
+                          if worker["profile_id"] == lead_id), None)
+            if total is None and segments:
+                try:
+                    total = (await lead.client.get_messages(entity, limit=0)).total
+                except Exception:
+                    total = None
+            if type(total) is not int or total < 0:
                 total = None
             messages = sum(s["high"] - s["low"] + 1 for s in segments)
             messages = min(messages, total) if total is not None else messages

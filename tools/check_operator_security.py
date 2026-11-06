@@ -249,7 +249,9 @@ def admin_record_checks():
 
             result = store.root / 'synthetic-chat-export.zip'
             result.write_bytes(b'PK synthetic')
-            collector.export_state, collector.export_path = {'id': 'synthetic-export', 'chat_id': 123, 'phase': 'done', 'ready': True}, result
+            collector.export_state, collector.export_path = {
+                'id': 'synthetic-export', 'chat_id': 123, 'phase': 'done', 'ready': True,
+                'filename': 'synthetic-chat-export.zip'}, result
             assert http.get('/api/chat-export/synthetic-export/download', headers=limited).status_code == 404
             assert http.post('/api/chat-export/synthetic-export/cancel', headers=limited).status_code == 403
             assert http.get('/api/chat-export/synthetic-export', headers=limited).json() == {'phase': 'unknown'}
