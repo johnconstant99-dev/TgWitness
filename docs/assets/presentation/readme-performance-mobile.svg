@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="690" viewBox="0 0 640 690" role="img" aria-labelledby="title desc">
+<title id="title">Measured export speed — 6 November 2026</title>
+<desc id="desc">Messages per second. Server A: 142.983 collecting and 127.713 for the complete export. Server B: 160.531 collecting and 141.781 complete. Two fresh text and metadata exports through WARP; no attachments. Individual observations, not capacity limits.</desc>
+<rect x="1" y="1" width="638" height="688" rx="18" fill="#f5f8fa" stroke="#dce4e8"/>
+<g font-family="Arial,Helvetica,sans-serif" fill="#172b3b">
+<text x="32" y="50" font-size="23" font-weight="700" letter-spacing="1" fill="#146052">MEASURED EXPORTS</text>
+<text x="32" y="96" font-size="32" font-weight="700">Messages per second</text>
+<text x="32" y="137" font-size="25" fill="#536674">6 NOV 2026 · revision 92e539af</text>
+<path d="M32 164H608M32 409H608" stroke="#dce4e8"/>
+<text x="32" y="210" font-size="31" font-weight="700">Server A</text>
+<text x="608" y="210" text-anchor="end" font-size="25" fill="#536674">27,030 messages</text>
+<text x="32" y="260" font-size="26">Complete export</text>
+<text x="608" y="260" text-anchor="end" font-size="30" font-weight="700">127.713</text>
+<rect x="32" y="278" width="576" height="23" rx="5" fill="#e3e9ec"/>
+<rect x="32" y="278" width="408.682" height="23" rx="5" fill="#146052"/>
+<text x="32" y="342" font-size="26">Collection only</text>
+<text x="608" y="342" text-anchor="end" font-size="30" font-weight="700">142.983</text>
+<rect x="32" y="360" width="576" height="23" rx="5" fill="#e3e9ec"/>
+<rect x="32" y="360" width="457.546" height="23" rx="5" fill="#90bcb4"/>
+<text x="32" y="455" font-size="31" font-weight="700">Server B</text>
+<text x="608" y="455" text-anchor="end" font-size="25" fill="#536674">29,299 messages</text>
+<text x="32" y="505" font-size="26">Complete export</text>
+<text x="608" y="505" text-anchor="end" font-size="30" font-weight="700">141.781</text>
+<rect x="32" y="523" width="576" height="23" rx="5" fill="#e3e9ec"/>
+<rect x="32" y="523" width="453.699" height="23" rx="5" fill="#146052"/>
+<text x="32" y="587" font-size="26">Collection only</text>
+<text x="608" y="587" text-anchor="end" font-size="30" font-weight="700">160.531</text>
+<rect x="32" y="605" width="576" height="23" rx="5" fill="#e3e9ec"/>
+<rect x="32" y="605" width="513.699" height="23" rx="5" fill="#90bcb4"/>
+<text x="32" y="665" font-size="23" fill="#536674">Shared bar scale: 0–180 messages/s</text>
+</g>
+</svg>

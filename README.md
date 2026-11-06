@@ -177,7 +177,12 @@ statement and fresh challenge, and the expected OS and application measurements.
 pinned collector keys. Recorded on 6 November 2026 at
 [`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e).
 
-[![Acquisition and complete export rates for two measured workloads](website/validation/performance.svg)](https://phishdestroy.github.io/TgWitness/docs/validation/)
+<a href="https://phishdestroy.github.io/TgWitness/docs/validation/">
+<picture>
+  <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-performance-mobile.svg">
+  <img src="website/validation/performance.svg" width="960" alt="Messages per second: Server A, 142.983 collection and 127.713 complete export; Server B, 160.531 collection and 141.781 complete export.">
+</picture>
+</a>
 
 Text and metadata through WARP, two accounts per server, no attachments or reused
 records. Complete-cycle rates include packaging and verification. These are

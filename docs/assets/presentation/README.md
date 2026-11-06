@@ -14,6 +14,7 @@ README, Wiki and documentation artwork. Screenshots use demo records.
 | Files | Use |
 | --- | --- |
 | `readme-intro.svg`, `readme-intro-mobile.svg` | Compact README covers; directly editable SVG text and paths, with no animation or external fonts |
+| `readme-performance-mobile.svg` | Phone layout of the 6 November 2026 measurements; the same rates and scale as the desktop chart |
 | `casework-hero*`, `casework-handbook*` | Project and Wiki covers |
 | `readme-nav-*` | README buttons, with shorter phone labels |
 | `readme-features*`, `readme-feature-*` | Export, investigation and saved-version animations |

@@ -102,6 +102,8 @@ def review_repository(repository, revision):
                             demo = next(img for img in images if "readme-workspace" in img["source"])
                             expected = "readme-workspace-mobile-dark-still.webp" if width < 640 else "readme-workspace-dark-still.webp"
                             assert expected in demo["source"], (width, demo)
+                            chart = "readme-performance-mobile.svg" if width < 640 else "performance.svg"
+                            assert any(chart in img["source"] for img in images), (width, chart)
                         name = path.replace("/", "-").removesuffix(".md") + f"-{width}-{theme}"
                         article.screenshot(path=str(output / f"{name}.png"), animations="disabled")
                         records.append({"path": path, "viewport": width, "theme": theme, "images": images, **size})
