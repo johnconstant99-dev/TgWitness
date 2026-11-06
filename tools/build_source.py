@@ -32,7 +32,7 @@ FILES = [
     "start.py", "start.sh", "Start.cmd",
     "deploy/Dockerfile", "compose.yaml", "deploy/compose/compose.image.yaml", "deploy/compose/compose.https.yaml", "deploy/compose/compose.witness.yaml", "deploy/compose/compose.proof.yaml", "deploy/compose/compose.proxies.yaml", "deploy/compose/compose.capture-panel.yaml",
     ".gitignore", ".gitattributes", ".dockerignore", "deploy/env.example", "deploy/constraints.txt", "deploy/requirements.lock", "deploy/build.lock",
-    "deploy/audit.lock", "deploy/browser.lock", "deploy/mcp.lock", "deploy/site.lock",
+    "deploy/audit.lock", "deploy/browser.lock", "deploy/mcp.lock", "deploy/site.lock", "deploy/installer.lock",
     "tools/tsa/time-stamps.json", "tools/fixtures/evidence-before-fulltext.zip",
     "tools/fixtures/narrative-events.json", "tools/fixtures/narrative-golden.json",
     "docs/examples/narrative.json",
