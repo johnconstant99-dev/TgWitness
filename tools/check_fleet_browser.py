@@ -84,6 +84,7 @@ def main():
         page.locator("#fleet-passcode").fill("temporary passcode")
         page.locator("#fleet-passcode").blur()
         check_accounts(page, 2)
+        queued = page.locator('#fleet-results [data-state="alive"] strong').all_text_contents()
         before = len(imported)
         hold_api_response(page, "/api/profiles/import")
         page.locator("#fleet-import-start").click()
@@ -105,7 +106,7 @@ def main():
         page.locator('[data-view="accounts"]').click()
         expect(page.locator(".account-card")).to_have_count(4)
         assert len(imported) == before + 1, "Locking must stop the remaining import queue"
-        assert not any(e["label"] == "delta" for e in server.app.state.profiles.entries.values())
+        assert not any(e["label"] == queued[1] for e in server.app.state.profiles.entries.values())
 
         with page.expect_response(lambda response: response.url == server.url + "/profiles/" + alpha + "/api/notifications"
                                   and response.request.method == "GET", timeout=20000) as switched:
@@ -151,6 +152,7 @@ def main():
         expect(page.locator("#fleet-results .fleet-result")).to_have_count(3)
         expect(page.locator("#fleet-results .fleet-result.bad")).to_contain_text("Unsupported account file")
         check_accounts(page, 2)
+        queued = page.locator('#fleet-results [data-state="alive"] strong').all_text_contents()
         expect(page.locator("#fleet-import-summary")).to_contain_text("Active: 2")
         hold_api_response(page, "/api/profiles/import")
         page.locator("#fleet-import-start").click()
@@ -161,7 +163,7 @@ def main():
         expect(page.locator("#fleet-import-stop")).to_be_hidden(timeout=30000)
         expect(page.locator("#fleet-results .fleet-result.ok")).to_have_count(1, timeout=30000)
         expect(page.locator("#fleet-results .fleet-result").nth(1)).to_contain_text("Cancelled")
-        assert not any(e["label"] == "skipped" for e in server.app.state.profiles.entries.values())
+        assert not any(e["label"] == queued[1] for e in server.app.state.profiles.entries.values())
         assert not errors, errors
         browser.close()
     check_async_groups()
