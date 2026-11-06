@@ -8,6 +8,9 @@ exclusions，while retaining configured file-size ceilings，disk reserves，ser
 Telegram RPCs and full FloodWait deadlines．It does not turn metadata-only or
 hash-only capture into a file download．Turn the setting off to apply ordinary
 type rules．
+When it sets a rule aside, the signed message records it in
+`media_capture.rule_override`: the rule (`type_not_collected`, `duration_limit`) and the
+limits that still applied.
 
 The signed message observation retains the original Telegram media descriptor，
 TTL and availability．A positive TTL is distinguished from Telegram's

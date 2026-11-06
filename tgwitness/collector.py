@@ -2154,6 +2154,15 @@ class Collector:
                     "policy": "original observed descriptor; never substitute a newer message"}
                 if ephemeral_media:
                     payload["media_capture"]["ephemeral_media"] = ephemeral_media
+                    base = settings["types"][media_type]
+                    # Self-destructing media is fetched even where the type or duration rule would skip it;
+                    # the record says which rule was set aside and what still applies.
+                    overridden = ([] if base["enabled"] else ["type_not_collected"]) + (
+                        [] if duration_allowed(message, base) else ["duration_limit"])
+                    if overridden and settings["preserve_ephemeral_media"]:
+                        payload["media_capture"]["rule_override"] = {
+                            "setting": "preserve_ephemeral_media", "overridden": overridden,
+                            "still_applied": "per-type size ceiling, free-disk reserve and FloodWait limits"}
         event = self.store.append(kind, payload, chat_id, message.id,
                                   message.sender_id if kind in ("message.new", "message.recovered") else None,
                                   date_string(getattr(message, "edit_date", None) or message.date),

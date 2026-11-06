@@ -122,6 +122,8 @@ def test_bypasses_type_and_duration_rules_but_can_be_disabled(workspace):
         await c.capture_message(message("video"), "message.new", CHAT)
         await drain(c)
         assert store.media_stats() == {"done": 1}
+        override = store.events(kind="message.new")[0]["payload"]["media_capture"]["rule_override"]
+        assert override["overridden"][0] == "type_not_collected" and "size ceiling" in override["still_applied"]
         store.set_setting("capture", {**settings, "preserve_ephemeral_media": False})
         await c.capture_message(message("video", mid=2), "message.new", CHAT)
         await drain(c)
