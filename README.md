@@ -373,3 +373,5 @@ To strictly comply with the MIT License, we do not restrict the use of this soft
   <a href=".github/SUPPORT.md"><img src="docs/assets/presentation/readme-button-support.svg" height="34" alt="Get help"></a>
   <a href=".github/SECURITY.md"><img src="docs/assets/presentation/readme-button-security.svg" height="34" alt="Report a vulnerability"></a>
 </p>
+
+[Machine-readable project index](llms.txt) · [Complete text handbook](https://phishdestroy.github.io/TgWitness/llms-full.txt) · [Repository rules for agents](AGENTS.md)

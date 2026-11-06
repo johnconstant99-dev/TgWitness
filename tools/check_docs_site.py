@@ -101,7 +101,7 @@ def check_examples(page, base):
 
     page.goto(base + "docs/cases/", wait_until="networkidle")
     case = page.locator('[data-lab="investigation"]')
-    expect(page.get_by_role("heading", level=1)).to_contain_text("all chats")
+    expect(page.get_by_role("heading", level=1)).to_have_text("Telegram OSINT Investigations Across Chats")
     expect(case.locator('[data-case-node]')).to_have_count(4)
     for mode, count, phrase in (("person", 2, "sender ID, 71001"), ("link", 4, "four"),
                                 ("file", 2, "SHA-256"), ("all", 4, "Four chats")):

@@ -13,9 +13,11 @@ import tomllib
 from urllib.parse import urlsplit
 
 if __package__:
+    from . import site_seo
     from .site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
     from . import site_diagrams, site_i18n, site_wiki, site_modes, site_account, site_llms, site_export_clinic, site_typography, site_validation
 else:
+    import site_seo
     from site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
     import site_diagrams
     import site_i18n
@@ -354,6 +356,8 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     validation_texts = json.loads(read_public("website/validation/texts.json"))
 
     def write(path, content):
+        if path in MARKDOWN_PAGES:
+            content = site_seo.enrich(content, path)
         target = output / path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content.replace("\r\n", "\n"), encoding="utf-8", newline="\n")
