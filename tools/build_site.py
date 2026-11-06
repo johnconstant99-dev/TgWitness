@@ -89,6 +89,7 @@ DEMO_STATIC.update({"demo/components/" + name: "tgwitness/static/components/" + 
 DEMO_STATIC.update({"demo/views/" + name: "tgwitness/static/views/" + name
                     for name in ("sources.js", "sources.css", "parameters.js", "parameters.css", "exports.js", "exports.css", "accounts.js", "accounts.css", "access.js", "access.css", "system-log.js", "chats.css", "chat-list.js", "chat-list.css", "workflows.css", "setup.js", "setup.css", "disclosure-preview.js", "disclosure-preview.css", "connection.js", "connection.css", "settings-hub.js", "settings-hub.css", "group-settings.js", "group.js", "group.css", "board.js", "board.css", "report-selection.js", "report-profiles.js", "people-timeline.js")})
 DEMO_STATIC.update({"demo/mock.js": "website/demo/mock.js", "demo/fixtures.json": "website/demo/fixtures.json"})
+DEMO_STATIC.update({"demo/" + name: "website/demo/" + name for name in ("secret-chats.js", "secret-chats.css")})
 DEMO_STATIC.update({"demo/views/report-guidance.js": "tgwitness/static/views/report-guidance.js",
                     "demo/jurisdictions.json": "tgwitness/jurisdictions.json"})
 DEMO_STATIC.update({"demo/report/" + name: "website/demo/report/" + name
@@ -823,6 +824,14 @@ def build_demo(read_public, write):
         loader = demo_language_script(site_modes.LANGUAGES if guide else LANGS, "guide-locales" if guide else "locales", revision)
         page = page.replace(original_loader, answering + loader)
         page = page.replace("<head>", '<head>\n<meta name="robots" content="noindex">', 1)
+        if not guide:
+            launch = '<button class="secondary" type="button" data-secret-demo-open lang="en" data-no-translate>Try Secret Chat</button>'
+            page = page.replace('<div class="demo-actions">', '<div class="demo-actions">' + launch, 1)
+            source_summary = '<div class="sources-summary"'
+            page = page.replace(source_summary, '<p>' + launch + '</p>' + source_summary, 1)
+            page = page.replace('</head>', '<link rel="stylesheet" href="secret-chats.css?v=1"></head>', 1)
+            preview = read_public("website/demo/secret-chats.html").decode("utf-8")
+            page = page.replace('</body>', preview + '<script src="secret-chats.js?v=1"></script></body>', 1)
         write(target, page)
     fallbacks = json.loads(read_public("tgwitness/english_fallbacks.json"))
     required = json.loads(read_public("tgwitness/guide_locales/keys.json"))["keys"]

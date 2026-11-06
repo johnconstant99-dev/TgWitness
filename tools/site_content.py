@@ -28,6 +28,7 @@ GROUPS = (
 
 
 REFERENCE = {
+    "secret-chats": ("Secret Chats: implementation and demo", "Understand the separate Secret Chat implementation, try the fictional interface and review outstanding defects.", "secret chats pseudo-secret end-to-end KiaroSama demo development", "docs/PSEUDO-SECRET.md"),
     "history": ("Load source history", "Load past messages from enabled sources, pause and resume, and verify a signed progress report.", "history acquisition sources pause resume progress report", "docs/HISTORY.md"),
     "analysis": ("Archive analysis", "Search saved messages, review AI inputs and keep analytical reports with their source references.", "analysis AI Ollama sources citations reports review", "docs/ANALYSIS.md"),
     "cli": ("Command line", "Search, read context, count activity and export saved messages from scripts and agents, with --json output, stable exit codes and scoped read-only tokens.", "command line cli terminal script agent json jsonl export statistics activity token skill", "docs/CLI.md"),
@@ -67,7 +68,7 @@ REFERENCE = {
 
 REFERENCE_GROUPS = (
     ("Set up", ("quickstart", "installation", "settings", "accounts", "access", "connection", "deployment", "high-assurance")),
-    ("Collect", ("panel", "collection", "history", "operations", "investigation", "features")),
+    ("Collect", ("panel", "collection", "secret-chats", "history", "operations", "investigation", "features")),
     ("Archive & integrations", ("case-board", "analysis", "search", "mcp", "cli", "media-analysis", "webhooks", "showcase")),
     ("Evidence", ("how-it-works", "case-reports", "account-export", "evidence", "witness", "timestamp", "storage")),
     ("Security & project", ("security", "architecture", "verification", "license", "notice", "changelog")),

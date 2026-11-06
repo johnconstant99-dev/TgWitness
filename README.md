@@ -216,8 +216,10 @@ checks address the environment where it was collected.
 
 For live observation, history or a one-off export, choose a
 [collection method](docs/COLLECTION-MODES.md). Private cloud chats are available
-when the connected account can access them; Telegram Secret Chats are not collected.
-See [collection scope](docs/COLLECTION.md).
+when the connected account can access them. The ordinary collector does not collect
+Telegram Secret Chats. A separate implementation exists in development; see
+[Secret Chat availability and the demo](docs/PSEUDO-SECRET.md) and
+[collection scope](docs/COLLECTION.md).
 
 <picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-assurance-mobile-static.svg">
