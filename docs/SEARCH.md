@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Investigation](INVESTIGATION.md)
+
+![Investigation](assets/presentation/chapter-investigate.svg)
+
 # Full-text search
 
 [Archive analysis](ANALYSIS.md) · [Local OCR and transcription](MEDIA-ANALYSIS.md) · [Wiki](wiki/Archive-and-Integrations.md)
@@ -10,6 +14,21 @@ substring search over the whole record.
 
 The index is derived data. It is rebuilt from the signed journal, is never signed
 itself and never enters an export. The original records do not change.
+
+<details>
+<summary>On this page</summary>
+
+- [Search syntax](#search-syntax)
+- [Languages](#languages)
+- [Where the index lives](#where-the-index-lives)
+- [Results and the signed journal](#results-and-the-signed-journal)
+- [Recognized text](#recognized-text)
+- [Access](#access)
+- [Ask the archive and MCP](#ask-the-archive-and-mcp)
+- [Dependencies](#dependencies)
+- [Benchmark](#benchmark)
+
+</details>
 
 ## Search syntax
 

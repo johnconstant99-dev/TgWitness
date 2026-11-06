@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Investigation](../INVESTIGATION.md)
+
+![Investigation](../assets/presentation/chapter-investigate.svg)
+
 # Настройка нарратива доказательств
 
 Нарратив читает подписанный полный ZIP-пакет TgWitness, проверяет его и создаёт отчёт со ссылками на записи. Настройки сохраняются в локальном JSON-файле. [Пример](../examples/narrative.json) содержит профили `ru-html`, `de-proof` и `json-only`.

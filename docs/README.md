@@ -12,6 +12,10 @@
 [Offline handbook](wiki/Home.md) · [FAQ](wiki/FAQ.md) ·
 [GitHub Wiki](https://github.com/phishdestroy/TgWitness/wiki)
 
+[Current capabilities](STATUS.md) · [Verification record](VERIFICATION.md) ·
+[Performance graphs](https://phishdestroy.github.io/TgWitness/docs/validation/) ·
+[Signed English audit](../website/validation/audit/README.md)
+
 ![Observe, preserve and verify.](assets/presentation/workflow.svg)
 
 ## Start here

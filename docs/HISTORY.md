@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Collection](COLLECTION-MODES.md)
+
+![Collection](assets/presentation/chapter-collect.svg)
+
 # Load available history into the workspace
 
 In **Sources**, review the enabled chats, pause observation, choose Standard API or

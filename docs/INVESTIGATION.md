@@ -1,8 +1,27 @@
+[TgWitness](../README.md) / [Documentation](README.md)
+
+![Investigation](assets/presentation/chapter-investigate.svg)
+
 # An investigation across all account-visible chats
 
 Follow a case across channels, groups, private chats and bots, from initial
 acquisition to a cited timeline and verifiable handoff. The interactive website
 version is at `/docs/cases/`; [preview instructions](internal/PUBLISHING.md#preview-the-website-locally).
+
+<details>
+<summary>On this page</summary>
+
+- [Worked case: a destination changes across four conversations](#worked-case-a-destination-changes-across-four-conversations)
+- [1. Define the case and collect the whole account](#1-define-the-case-and-collect-the-whole-account)
+- [2. Inventory every source and acquire historical context](#2-inventory-every-source-and-acquire-historical-context)
+- [3. Preserve the evolving case and deliberate interactions](#3-preserve-the-evolving-case-and-deliberate-interactions)
+- [4. Connect observations across chats](#4-connect-observations-across-chats)
+- [5. Build the cross-chat timeline](#5-build-the-cross-chat-timeline)
+- [6. Add account perspectives without losing their origin](#6-add-account-perspectives-without-losing-their-origin)
+- [7. Assemble and verify the case handoff](#7-assemble-and-verify-the-case-handoff)
+- [Adapt the investigation](#adapt-the-investigation)
+
+</details>
 
 ## Worked case: a destination changes across four conversations
 

@@ -1,9 +1,27 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Development](../ARCHITECTURE.md)
+
+![Development](../assets/presentation/chapter-develop.svg)
+
 # Telegram and Telethon research
 
 Reviewed 26 October 2026 against public official documentation and installed
 Telethon 1.45.0 source. Local reference copies, retrieval times and response SHA-256
 values are under `test-results/research/` and excluded from public packages.
 Server behavior and platform rules can change.
+
+<details>
+<summary>On this page</summary>
+
+- [Updates, scale and recovery](#updates-scale-and-recovery)
+- [Telethon sessions and update handlers](#telethon-sessions-and-update-handlers)
+- [Deletions](#deletions)
+- [Reactions](#reactions)
+- [Admin log](#admin-log)
+- [API terms](#api-terms)
+- [Applied decisions](#applied-decisions)
+- [External timestamps](#external-timestamps)
+
+</details>
 
 ## Updates, scale and recovery
 

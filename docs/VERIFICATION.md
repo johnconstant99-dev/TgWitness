@@ -1,8 +1,81 @@
-# TgWitness verification · updated 2026-11-05
+[TgWitness](../README.md) / [Documentation](README.md) · [Evidence and verification](EVIDENCE.md)
 
-Each result below applies to its recorded revision and environment. The
-[current capability matrix](STATUS.md) separates implementation, published downloads
-and remaining qualification.
+![Evidence & verification](assets/presentation/chapter-evidence.svg)
+
+# TgWitness verification
+
+**Updated 6 November 2026.** Results are tied to the revision, environment and
+workload recorded for each run. [Current capabilities](STATUS.md) describes the
+available workflows; this page records what has actually been checked.
+
+[Performance graphs](https://phishdestroy.github.io/TgWitness/docs/validation/) ·
+[Signed English audit](../website/validation/audit/REPORT.md) ·
+[Downloadable measurements](../website/validation/audit/MEASUREMENTS.csv)
+
+| Latest evidence | Result | Scope |
+| --- | --- | --- |
+| Release audit · 6 Nov | 1,461 core tests passed; 37 platform skips | Source `92e539af40d8`; open findings retained |
+| Fresh exports · 6 Nov | 127.713 and 141.781 records/s, complete cycle | Two accounts per server; text and metadata through WARP |
+| Retained archives · 6 Nov | 48 archives; 3,598,381 records verified | Existing archives checked against pinned workspace keys |
+| Trusted Live · 5 Nov | Guarded CPU recording and WARP checks | Official Desktop login and native export remain unqualified |
+| Phala / Intel TDX · 4 Nov | All 16 verifier checks passed on later runs | Historical deployment; no Telegram account on the CVM |
+
+<details>
+<summary>On this page</summary>
+
+- [Release audit and fresh exports · 6 November 2026](#release-audit-and-fresh-exports--6-november-2026)
+- [Trusted Live CPU Ubuntu and WARP · 5 November 2026](#trusted-live-cpu-ubuntu-and-warp--5-november-2026)
+- [Live Phala Cloud deployment · 4 November 2026](#live-phala-cloud-deployment--4-november-2026)
+- [Live server journal inventory · 1 November 2026](#live-server-journal-inventory--1-november-2026)
+- [Recent offline and fault-injection checks · 1 November 2026](#recent-offline-and-fault-injection-checks--1-november-2026)
+- [Live Telegram test, whole account · 29 October 2026](#live-telegram-test-whole-account--29-october-2026)
+- [Password-protected export opened with libarchive · 29 October 2026](#password-protected-export-opened-with-libarchive--29-october-2026)
+- [Live Telegram test · 27 to 29 October 2026](#live-telegram-test--27-to-29-october-2026)
+- [Synthetic local capacity measurement](#synthetic-local-capacity-measurement)
+- [Full-text search on one million messages · 5 November 2026](#full-text-search-on-one-million-messages--5-november-2026)
+- [Remaining qualification](#remaining-qualification)
+
+</details>
+
+## Release audit and fresh exports · 6 November 2026
+
+The audit used v0.9.1 at source
+`92e539af40d8368d198ff5e040f1d876f2c1310e`, release
+`92e539af40d8-83e41104669e`. Installed-package smoke checks passed on three
+servers. The signed report retains the state observed at that time.
+
+[![Acquisition and complete export rates for two fresh workloads](../website/validation/performance.svg)](https://phishdestroy.github.io/TgWitness/docs/validation/)
+
+| Workload | Records | Acquisition | Complete cycle | Complete-cycle rate |
+| --- | ---: | ---: | ---: | ---: |
+| Server A · two accounts | 27,030 | 189.043 s | 211.647 s | 127.713 records/s |
+| Server B · two accounts | 29,299 | 182.513 s | 206.650 s | 141.781 records/s |
+
+Both exports began without resume, excluded attachments and avatars, and ended
+with zero duplicate or reused records. The complete cycle includes preparation,
+acquisition, selection, packaging and archive verification. Server A also ran a
+protected-chat read check. Four FloodWait events on A and three on B were
+respected. These observations do not establish a general throughput guarantee.
+
+| Check | Result | Qualification |
+| --- | --- | --- |
+| Core pytest | 1,461 passed | 37 platform skips |
+| Browser / browser UX / evidence / site | 102 / 66 / 15 / 9 passed | These programs overlap other tests; counts are not additive |
+| Capture addon | 124 passed | Three Official Web checks blocked by the required Chromium sandbox |
+| API authorization | 269 routes; 538 requests passed | Missing credentials and revoked access |
+| Retained archives | 48 of 48 verified | 3,598,381 records; pinned workspace keys |
+| Live fleet read checks | 24 of 40 profiles passed | 16 WARP routes failed qualification; those profiles were not connected |
+
+The [signed report](../website/validation/audit/REPORT.md) records all open
+findings, including three defects in an unpublished secret-chat snapshot absent
+from the audited main build. The earlier
+[public-history qualification](EXPORT-BENCHMARK-2026-11-06.md) used a different
+revision and workload; its rates must not be combined with this comparison.
+
+Verify the original report using the
+[pinned key and verifier](../website/validation/audit/README.md#verify-the-original-files).
+Its signature protects the operator's report from alteration. It is not
+independent attestation, proof of Telegram authorship or GDPR certification.
 
 ## Trusted Live CPU Ubuntu and WARP · 5 November 2026
 
@@ -35,10 +108,26 @@ local drand BLS verification and Trusted Live TDX attestation were not qualified
 
 ## Live Phala Cloud deployment · 4 November 2026
 
-`--provider phala --quick-tunnel` ran against real **Phala Cloud** (`tdx.small`, region
-US-WEST-1) with a Phala Cloud API key of an empty workspace, real ntfy.sh, GitHub and Intel PCS.
-The CVM installed commit `df7d860c` (v0.8.1); deploy, verify and destroy ran from the command
-line with the fixes below. Seven CVMs cost about 1.9 US cents together.
+**Historical result:** later deployments passed all 16 verifier checks,
+including Intel TDX and the quick tunnel. Restart evidence, signed address
+discovery and report timestamps were checked separately. Each test CVM was
+removed after its run.
+
+| Setup | Recorded value |
+| --- | --- |
+| Provider | Phala Cloud · `tdx.small` · US-WEST-1 |
+| Deployment | `--provider phala --quick-tunnel`; initially empty workspace |
+| Initial collector | `df7d860c` · v0.8.1 |
+| Collector with all fixes | `53a0f7e9` |
+| Production guest | `dstack-0.5.12`; SSH access disabled |
+| External services | ntfy.sh, GitHub and Intel PCS |
+| Observed cost | Seven CVMs, about 1.9 US cents together; historical test pricing |
+
+The sequence below separates initial failures, fixes and completed checks.
+No Telegram account was connected to these CVMs.
+
+<details>
+<summary>Deployments 1–2 · provider differences and regression checks</summary>
 
 The first two deployments found five differences from the simulated Phala Cloud.
 [`tools/check_phala.py`](../tools/check_phala.py) now reproduces each, and fails without its fix:
@@ -51,7 +140,10 @@ The first two deployments found five differences from the simulated Phala Cloud.
 | With the dstack gateway off, the CVM details never get an `instance_id` | Deploy waits 30 minutes and fails | The instance ID is read from the CVM state |
 | Restarts, stops and starts are CVM operations, not application revisions | `provider_actions` did not list restarts | The operations are read as well |
 
-The third deployment:
+</details>
+
+<details>
+<summary>Deployment 3 · attestation, access checks and restart evidence</summary>
 
 - The CVM ran `dstack-0.5.12` with SSH access off. The collector posted its signed address about
   1.5 minutes after creation. Deploy then passed `tdx_binding`, `tdx_quote` (Intel TCB
@@ -72,7 +164,10 @@ The third deployment:
 - The panel wizard's price check read `tdx.small` at $0.058 an hour. A wrong key got a plain
   "did not accept the API key" message.
 
-Two further findings, fixed afterwards:
+</details>
+
+<details>
+<summary>Follow-up fixes · signed address discovery and OS measurements</summary>
 
 - Without the address key, `verify` followed the newest well-formed post on the address topic,
   which is printed in the published compose. One forged post sent it to a host that does not
@@ -87,7 +182,10 @@ Two further findings, fixed afterwards:
   the `measure --json` the documentation named. The verifier now computes MRTD and RTMR0-2 itself
   from the published image and the VM's shape, ACPI tables included.
 
-The fourth deployment, with these:
+</details>
+
+<details>
+<summary>Deployment 4 · all 16 checks, report seals and restart verification</summary>
 
 - Deploy downloaded the published `dstack-0.5.12` once, matched it to the OS image hash the CVM
   reported, and `tdx_os` passed: MRTD, RTMR0, RTMR1 and RTMR2 equal the values computed for QEMU
@@ -103,7 +201,12 @@ The fourth deployment, with these:
   booted from the published `dstack-0.5.12`; the restart and the new boot were REVIEW.
 - `destroy` left the workspace empty.
 
-The fifth deployment ran the collector from commit `53a0f7e9`, which has all of the above:
+</details>
+
+<details>
+<summary>Deployment 5 · collector-signed discovery and forged-post rejection</summary>
+
+The collector ran from commit `53a0f7e9`, which includes the fixes above.
 
 - The collector posted its address signed with its own key, next to the operator's HMAC post.
   Two forged posts were then added to the topic, one with a zeroed HMAC and one signed by another
@@ -115,6 +218,10 @@ The fifth deployment ran the collector from commit `53a0f7e9`, which has all of 
   the forged posts. `verify --evidence` confirmed two starts booted from `dstack-0.5.12`.
 - Deploy printed what Phala bills the CVM, disk included: $0.06078 an hour.
 
+</details>
+
+### Panel wizard and remaining scope
+
 The panel wizard ran against Phala Cloud twice, once through its job API and once through the
 browser with a real Chromium: the price check, creation with the commit under **Advanced**, all six
 attestation checks passed, the server list showing the billed price (44.37 USD a month), **Find
@@ -124,6 +231,7 @@ Each time the workspace was empty afterwards.
 Not covered: a Cloudflare domain on Phala, a Telegram account on the CVM, and the `dstack-0.6.1`
 image. The wizard's price before creation is Phala's compute price only, as its API names the disk
 price only for an existing CVM; the server list shows the billed price after creation.
+All prices in this section were observed on 4 November 2026.
 
 ## Live server journal inventory · 1 November 2026
 
@@ -295,5 +403,7 @@ The newer backfill commits messages and cursors atomically and preserves availab
 Recent Actions, but its synthetic coverage is distinct from live qualification.
 See [live acceptance](internal/LIVE_ACCEPTANCE.md) for the controlled qualification matrix.
 
-Local detailed receipts and screenshots are under test-results/ (Git-ignored).
-The public screenshot in docs/assets/ contains only fictional demonstration data.
+The [public audit directory](../website/validation/audit/README.md) contains only
+the signed report and aggregate measurements. Detailed operational receipts,
+raw captures and account material remain private. Application screenshots in
+`docs/assets/` use fictional demonstration data.

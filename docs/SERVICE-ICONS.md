@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Project reference](README.md)
+
+![Project reference](assets/presentation/chapter-project.svg)
+
 # Service icons
 
 The locally served symbols in `tgwitness/static/services-icons.svg` come from

@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md)
+
+![Independent capture](assets/presentation/chapter-capture.svg)
+
 # Optional independent browser and AyuGram capture
 
 [Project](../README.md) · [Installation and controls](../addons/capture/README.md)

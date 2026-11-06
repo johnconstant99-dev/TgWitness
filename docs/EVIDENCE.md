@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md)
+
+![Evidence & verification](assets/presentation/chapter-evidence.svg)
+
 # Evidence format v1
 
 TgWitness preserves account-visible Telegram observations in a signed journal.
@@ -9,6 +13,29 @@ Recipients can start with **VERIFY.cmd** on Windows: it asks for the original
 ZIP and independently obtained key fingerprint, displays an explained result,
 and saves a separate verification transcript. See [verification launchers and
 the portable runtime](VERIFICATION_LAUNCHER.md) for setup and trust limits.
+
+<details>
+<summary>On this page</summary>
+
+- [What is signed](#what-is-signed)
+- [Comparing chat exports](#comparing-chat-exports)
+- [Investigation handoff](#investigation-handoff)
+- [Handover extract](#handover-extract)
+- [Readable reports](#readable-reports)
+- [Event canonicalization](#event-canonicalization)
+- [Actor semantics](#actor-semantics)
+- [Coverage: continuity, gaps and unobserved IDs](#coverage-continuity-gaps-and-unobserved-ids)
+- [Producer](#producer)
+- [People profiles](#people-profiles)
+- [Independent witness](#independent-witness)
+- [Manifest and checkpoints](#manifest-and-checkpoints)
+- [Verification scope](#verification-scope)
+- [Attachments](#attachments)
+- [Durable collection and process receipts (0.2)](#durable-collection-and-process-receipts-02)
+- [RFC 3161 preparation and response verification (0.2)](#rfc-3161-preparation-and-response-verification-02)
+- [Optional records in evidence mode: drand and Telegram devices](#optional-records-in-evidence-mode-drand-and-telegram-devices)
+
+</details>
 
 ## What is signed
 

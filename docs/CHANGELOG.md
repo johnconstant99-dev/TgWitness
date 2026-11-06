@@ -1,4 +1,25 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Project reference](README.md)
+
+![Project reference](assets/presentation/chapter-project.svg)
+
 # Changelog
+
+<details>
+<summary>On this page</summary>
+
+- [Unreleased](#unreleased)
+- [0.9.1 preview · 5 November 2026](#091-preview--5-november-2026)
+- [0.9.0 preview · 4 November 2026](#090-preview--4-november-2026)
+- [0.8.1 preview · 2 November 2026](#081-preview--2-november-2026)
+- [0.8.0 preview · 2 November 2026](#080-preview--2-november-2026)
+- [0.7.1 preview · 1 November 2026](#071-preview--1-november-2026)
+- [0.7.0 preview · 31 October 2026](#070-preview--31-october-2026)
+- [0.6.1 · 27 October 2026](#061--27-october-2026)
+- [0.6.0 · 27 October 2026](#060--27-october-2026)
+- [0.5.1 · 27 October 2026](#051--27-october-2026)
+- [0.5.0 · 26 October 2026](#050--26-october-2026)
+
+</details>
 
 ## Unreleased
 

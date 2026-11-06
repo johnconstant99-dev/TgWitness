@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Collection](COLLECTION-MODES.md)
+
+![Collection](assets/presentation/chapter-collect.svg)
+
 # Resumable API backfill
 
 Use **Sources → Full history** on an idle account. Choose Standard API or Takeout,
@@ -17,6 +21,17 @@ policy change may exclude queued files and produces separate receipts. The exist
 This mode uses the authenticated MTProto client. It is separate from official-client
 [Trusted Live](TRUSTED-LIVE.md), and is not an assurance that Telegram will never limit
 or restrict an account. It uses the workspace's selected network route.
+
+<details>
+<summary>On this page</summary>
+
+- [Requests, limits and recovery](#requests-limits-and-recovery)
+- [Takeout](#takeout)
+- [Durable observations and media](#durable-observations-and-media)
+- [Recent Actions and version comparison](#recent-actions-and-version-comparison)
+- [Verification and limits](#verification-and-limits)
+
+</details>
 
 ## Requests, limits and recovery
 

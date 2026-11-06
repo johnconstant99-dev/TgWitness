@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Independent capture](OPTIONAL-CAPTURE.md)
+
+![Independent capture](assets/presentation/chapter-capture.svg)
+
 # Trusted Live (preview)
 
 Trusted Live is an isolated official-client recorder, available alongside the other
@@ -11,6 +15,18 @@ Real-account native export/hybrid collection and attestation of this recorder's 
 remain separate live checks.
 
 ![Synthetic chat with inline continuity observations](assets/trusted-live-continuity.png)
+
+<details>
+<summary>On this page</summary>
+
+- [What is implemented](#what-is-implemented)
+- [Limits that remain visible](#limits-that-remain-visible)
+- [Linux deployment, local or remote](#linux-deployment-local-or-remote)
+- [Independent witness and verification](#independent-witness-and-verification)
+- [Tests](#tests)
+- [Protocol references](#protocol-references)
+
+</details>
 
 ## What is implemented
 

@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Deployment and recovery](DEPLOYMENT.md)
+
+![Deployment & recovery](assets/presentation/chapter-operate.svg)
+
 # Connection, proxies and data protection
 
 This document describes TgWitness 0.8.0 behavior and its limits. Authentication,

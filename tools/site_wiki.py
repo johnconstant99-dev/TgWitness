@@ -79,6 +79,8 @@ def prepare(text, number_start, labels=None):
         blocks.append(rendered)
         return indent + SLOT.format(len(blocks) - 1)
     text = FENCE.sub(keep, text)
+    text = re.sub(r'(?m)^(\s*<details)(\s+open)?\s*>',
+                  r'\1\2 markdown="1">', text)
 
     def formula(match):
         rendered = math(match.group(1))
@@ -102,7 +104,7 @@ def prepare(text, number_start, labels=None):
 
 def markup(text, number_start=1, labels=None):
     text, blocks = prepare(text.replace("\r\n", NEWLINE), number_start, labels)
-    body = markdown.markdown(text, extensions=["tables", "sane_lists", "toc"],
+    body = markdown.markdown(text, extensions=["tables", "sane_lists", "toc", "md_in_html"],
                              extension_configs={"toc": {"slugify": github_slug, "toc_depth": "2-4"}})
     return body, blocks
 

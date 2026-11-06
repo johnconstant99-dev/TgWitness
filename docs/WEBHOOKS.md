@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Archive integrations](CLI.md)
+
+![Archive integrations](assets/presentation/chapter-integrations.svg)
+
 # Structured outgoing webhooks
 
 [Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)

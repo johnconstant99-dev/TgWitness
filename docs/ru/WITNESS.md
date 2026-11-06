@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Evidence and verification](../EVIDENCE.md)
+
+![Evidence & verification](../assets/presentation/chapter-evidence.svg)
+
 # Бот-свидетель и свои прокси
 
 В боковом меню откройте **Дополнения → Бот в Telegram → Настроить бота**.

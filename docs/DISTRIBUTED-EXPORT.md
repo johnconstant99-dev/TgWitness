@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Collection](COLLECTION-MODES.md)
+
+![Collection](assets/presentation/chapter-collect.svg)
+
 # Distributed chat export
 
 Absent-number rechecks count gaps as intervals, without allocating every missing
@@ -6,6 +10,17 @@ successive batches and can be cancelled. Unchecked numbers remain visible in the
 result and are not treated as proof of deletion.
 
 Open a chat and choose **Export chat**. Select idle account workspaces that already have access to the source. Every account keeps its configured connection. This feature does not change WARP or choose an exit IP.
+
+<details>
+<summary>On this page</summary>
+
+- [History acquisition](#history-acquisition)
+- [Exclusive account ownership](#exclusive-account-ownership)
+- [Selection](#selection)
+- [Chunking and continuation](#chunking-and-continuation)
+- [Result and limits](#result-and-limits)
+
+</details>
 
 ## History acquisition
 

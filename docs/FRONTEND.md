@@ -1,7 +1,23 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Development](ARCHITECTURE.md)
+
+![Development](assets/presentation/chapter-develop.svg)
+
 # Panel development
 
 Native ES modules and plain DOM, no frontend build step. `python start.py` runs the panel
 locally; browser checks make their own temp workspaces and never touch Telegram.
+
+<details>
+<summary>On this page</summary>
+
+- [Language](#language)
+- [Modules](#modules)
+- [Navigation and requests](#navigation-and-requests)
+- [Forms](#forms)
+- [Still to extract](#still-to-extract)
+- [Checks](#checks)
+
+</details>
 
 ## Language
 

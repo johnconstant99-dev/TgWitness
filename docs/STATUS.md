@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md)
+
+![Project reference](assets/presentation/chapter-project.svg)
+
 # Current capabilities
 
 Source version：**0.9.1 preview**. The [installer](https://get.destroy.tools/)

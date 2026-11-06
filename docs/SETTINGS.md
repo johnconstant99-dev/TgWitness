@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Getting started](QUICKSTART.md)
+
+![Getting started](assets/presentation/chapter-start.svg)
+
 # First setup and settings
 
 [Accounts](ACCOUNTS.md) · [Connection](CONNECTION-SECURITY.md) · [Access](ACCESS.md)

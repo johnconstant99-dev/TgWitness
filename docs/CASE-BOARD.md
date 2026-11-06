@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Investigation](INVESTIGATION.md)
+
+![Investigation](assets/presentation/chapter-investigate.svg)
+
 # Case Board
 
 Case Board gives an investigation team a shared working view of saved material. Bookmark an
@@ -8,6 +12,17 @@ workspace, separately identifiable from the original Telegram observations.
 [Evidence model](EVIDENCE.md) · [Access](ACCESS.md) · [Reports](CASE_REPORTS.md)
 
 ![Synthetic investigation feed](assets/case-board.png)
+
+<details>
+<summary>On this page</summary>
+
+- [Work with a case](#work-with-a-case)
+- [Permissions](#permissions)
+- [Stored contracts](#stored-contracts)
+- [API and exports](#api-and-exports)
+- [Operating limits](#operating-limits)
+
+</details>
 
 ## Work with a case
 

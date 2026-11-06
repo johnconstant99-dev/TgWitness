@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md)
+
+![Collection](assets/presentation/chapter-collect.svg)
+
 # Choose a collection method
 
 Start with the result you need. These workflows preserve different observations;

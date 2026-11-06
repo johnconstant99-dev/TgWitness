@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Deployment and recovery](DEPLOYMENT.md)
+
+![Deployment & recovery](assets/presentation/chapter-operate.svg)
+
 # Security and data handling
 
 This page describes access, storage and network protection in a local or server workspace.
@@ -14,6 +18,20 @@ Account connections, notifications, timestamps, off-site copies and witnesses ha
 | Local trust boundary | The host administrator controls the workspace and its signing key; independent checkpoints retain an earlier journal boundary |
 
 For vulnerability reports, see the [security policy](../.github/SECURITY.md).
+
+<details>
+<summary>On this page</summary>
+
+- [Access model](#access-model)
+- [Panel content and exports](#panel-content-and-exports)
+- [Secrets at rest](#secrets-at-rest)
+- [Proxies and network routes](#proxies-and-network-routes)
+- [Sign-in and session imports](#sign-in-and-session-imports)
+- [Logs and transport](#logs-and-transport)
+- [Integrity limits](#integrity-limits)
+- [If you suspect a problem](#if-you-suspect-a-problem)
+
+</details>
 
 ## Access model
 

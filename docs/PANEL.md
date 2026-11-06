@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Getting started](QUICKSTART.md)
+
+![Getting started](assets/presentation/chapter-start.svg)
+
 # Panel guide
 
 [First setup and settings](SETTINGS.md) · [Accounts](ACCOUNTS.md) · [Export and verify](EVIDENCE.md) · [Case reports](CASE_REPORTS.md)
@@ -11,6 +15,22 @@ selector and the loaded account disagree, actions stay blocked.
 Use [Compare collection methods](COLLECTION-MODES.md) to choose between live
 observation, full history, fresh account/chat exports and saved-record handover.
 The Exports page includes the same comparison above its download controls.
+
+<details>
+<summary>On this page</summary>
+
+- [Find your way](#find-your-way)
+- [Start here](#start-here)
+- [Chats](#chats)
+- [Journal](#journal)
+- [Sources](#sources)
+- [Exports](#exports)
+- [Settings, accounts and connection](#settings-accounts-and-connection)
+- [Extras](#extras)
+- [Protection modes](#protection-modes)
+- [More tools](#more-tools)
+
+</details>
 
 ## Find your way
 

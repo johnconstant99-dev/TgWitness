@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Project reference](README.md)
+
+![Project reference](assets/presentation/chapter-project.svg)
+
 <picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="assets/presentation/tgwitness-investigation-mobile-static.svg">
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/presentation/tgwitness-investigation-static.svg">

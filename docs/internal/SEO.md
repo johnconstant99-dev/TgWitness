@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Development](../ARCHITECTURE.md)
+
+![Development](../assets/presentation/chapter-develop.svg)
+
 # Website structure and search metadata
 
 The homepage, documentation, case guides and panel share **25 languages**: English
@@ -6,6 +10,18 @@ builder publishes each full-site language's homepage, guide index, practical gui
 reference index and reference pages. Amharic retains its existing capability guide
 and project notices. The site can be built locally without importing the collector
 or opening account data.
+
+<details>
+<summary>On this page</summary>
+
+- [Languages](#languages)
+- [Pages people can use](#pages-people-can-use)
+- [Implemented metadata](#implemented-metadata)
+- [Text editions and LLM discovery](#text-editions-and-llm-discovery)
+- [Maintain the site](#maintain-the-site)
+- [After deployment](#after-deployment)
+
+</details>
 
 ## Languages
 

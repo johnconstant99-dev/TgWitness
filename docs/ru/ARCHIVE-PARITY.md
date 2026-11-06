@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Evidence and verification](../EVIDENCE.md)
+
+![Evidence & verification](../assets/presentation/chapter-evidence.svg)
+
 # План развития архива: возможности, удобство и проверяемость
 
 Цель — сделать TgWitness предпочтительным инструментом и для обычного архива,

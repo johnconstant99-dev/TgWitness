@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Getting started](../QUICKSTART.md)
+
+![Getting started](../assets/presentation/chapter-start.svg)
+
 # Документация TgWitness
 
 [English](../README.md) · [О проекте](README.md)

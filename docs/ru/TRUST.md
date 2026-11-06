@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Evidence and verification](../EVIDENCE.md)
+
+![Evidence & verification](../assets/presentation/chapter-evidence.svg)
+
 # Независимая проверка
 
 [English](../TRUST.md) · [Политика безопасности](../../.github/SECURITY.md)

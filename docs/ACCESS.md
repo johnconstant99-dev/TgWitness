@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Getting started](QUICKSTART.md)
+
+![Getting started](assets/presentation/chapter-start.svg)
+
 # Share a case. Keep control of the workspace.
 
 Give a reviewer access to one chat, an analyst permission to export a case, or an

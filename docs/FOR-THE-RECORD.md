@@ -1,6 +1,21 @@
+[TgWitness](../README.md) / [Documentation](README.md) · [Evidence and verification](EVIDENCE.md)
+
+![Evidence & verification](assets/presentation/chapter-evidence.svg)
+
 # What this record establishes
 
 Draft for reader review. A lawyer has not reviewed this text or tested it aloud with a reader.
+
+<details>
+<summary>On this page</summary>
+
+- [1. What the package asserts](#1-what-the-package-asserts)
+- [2. What the package does not assert](#2-what-the-package-does-not-assert)
+- [3. Who could falsify what](#3-who-could-falsify-what)
+- [4. Check it yourself in five minutes](#4-check-it-yourself-in-five-minutes)
+- [5. Read the statuses literally](#5-read-the-statuses-literally)
+
+</details>
 
 ## 1. What the package asserts
 

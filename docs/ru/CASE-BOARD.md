@@ -1,3 +1,7 @@
+[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md) · [Investigation](../INVESTIGATION.md)
+
+![Investigation](../assets/presentation/chapter-investigate.svg)
+
 # Доска дела — Case Board
 
 Доска дела — внутренняя лента закладок, выделений, срезов и обсуждений. Заметки команды являются

@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md)
+
+![Archive integrations](assets/presentation/chapter-integrations.svg)
+
 # Command line for scripts and agents
 
 [Read-only MCP](MCP.md) · [Full-text search](SEARCH.md) · [Wiki](wiki/Archive-and-Integrations.md)
