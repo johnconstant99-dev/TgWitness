@@ -1,0 +1,64 @@
+{
+  "format": "tgwitness-validation-snapshot-v1",
+  "checked_at": "2026-11-06T18:37:38Z",
+  "source_revision": "92e539af40d8368d198ff5e040f1d876f2c1310e",
+  "release_id": "92e539af40d8-83e41104669e",
+  "measurement_authority": "operator",
+  "servers": [
+    {"id": "A", "cpu": 8, "memory_gib": 16, "os": "Ubuntu 24.04", "journals": 21, "events": 4517, "checkpoints": 147, "scope": "collection", "nested_vms": 0},
+    {"id": "B", "cpu": 8, "memory_gib": 16, "os": "Ubuntu 24.04", "journals": 21, "events": 1993, "checkpoints": 147, "scope": "collection", "nested_vms": 0},
+    {"id": "C", "cpu": 8, "memory_gib": 32, "os": "Ubuntu 24.04", "journals": 14, "events": 7185, "checkpoints": 973, "scope": "panel_vm", "nested_vms": 1}
+  ],
+  "benchmarks": [
+    {
+      "server": "A",
+      "started_at": "2026-11-06T18:26:51.500Z",
+      "finished_at": "2026-11-06T18:30:23.228Z",
+      "records": 27030,
+      "accounts": 2,
+      "route": "WARP",
+      "attachments": false,
+      "reused_records": 0,
+      "duplicate_ids": 0,
+      "acquisition_seconds": 189.043,
+      "acquisition_records_per_second": 142.983,
+      "end_to_end_seconds": 211.647,
+      "end_to_end_records_per_second": 127.713,
+      "floodwait_events": 4,
+      "background_protected_read": true,
+      "archive_verified": true,
+      "key_pinned": true,
+      "archive_sha256": "20e507fc68446680ed002fd486d0968a944ec0c71e02f937331ae2b19ab4cd66"
+    },
+    {
+      "server": "B",
+      "started_at": "2026-11-06T18:25:40.419Z",
+      "finished_at": "2026-11-06T18:29:07.173Z",
+      "records": 29299,
+      "accounts": 2,
+      "route": "WARP",
+      "attachments": false,
+      "reused_records": 0,
+      "duplicate_ids": 0,
+      "acquisition_seconds": 182.513,
+      "acquisition_records_per_second": 160.531,
+      "end_to_end_seconds": 206.650,
+      "end_to_end_records_per_second": 141.781,
+      "floodwait_events": 3,
+      "background_protected_read": false,
+      "archive_verified": true,
+      "key_pinned": true,
+      "archive_sha256": "824601b502762efaabb8ff9afdb1e8d7fff189862ef2cbc4d8d26d0d68c83e4c"
+    }
+  ],
+  "tests": {"passed": 1585, "failed": 3, "skipped": 37},
+  "suites": {"browser": 102, "browser_ux": 66, "evidence": 15, "site": 9, "extra": 13},
+  "integrity": {"journals_passed": 56, "backup_journals_passed": 42, "backup_files_checked": 51285, "backup_files_failed": 0, "events_after_latest_backups": 3507},
+  "limits": ["sandbox", "backup", "routes", "witness", "security", "access", "performance"],
+  "provenance": [
+    {"name": "benchmark-1.json", "sha256": "66cdf2db25901ee1f780a0e2d14b9b84888dbe525bff73bae19819b217f95d0c"},
+    {"name": "benchmark-2.json", "sha256": "ad2978fe2a7563476da43293eaaf5f498ee12522f0ea3e401bc43205c64874d1"},
+    {"name": "test-totals.json", "sha256": "922cf87d9320b149f2fc6791fc05f98335ec0952f9258e6eaeff179aeef33bb1"},
+    {"name": "infra-summary.json", "sha256": "325d390ef752b15f44203f97348863e24f0f631fe88998d5e1f398a5311a9339"}
+  ]
+}

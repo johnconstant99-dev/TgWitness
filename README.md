@@ -20,6 +20,22 @@
   <a href="LICENSE"><img src="docs/assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a>
 </p>
 
+## Measured exports · 6 November 2026
+
+**56,329 messages exported in two fresh runs.** Both signed archives passed verification with pinned collector keys.
+
+| Run | Messages | Collection time | Collection speed | Complete export | End-to-end speed |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Server A | 27,030 | 189.043 s | **142.983 messages/s** | 211.647 s | 127.713 messages/s |
+| Server B | 29,299 | 182.513 s | **160.531 messages/s** | 206.650 s | 141.781 messages/s |
+
+Text and metadata through WARP, two accounts per server, no attachments or reused records.
+These are individual runs on [`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e), not a capacity guarantee.
+
+[**Explore the English demo →**](https://phishdestroy.github.io/TgWitness/demo/?lang=en) ·
+[**Measurements, dates and method →**](https://phishdestroy.github.io/TgWitness/docs/validation/) ·
+[Download a fictional sample export](https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip)
+
 <a name="quick-start"></a>
 <a name="run-it-on-your-machine"></a>
 
