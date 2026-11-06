@@ -16,7 +16,7 @@ CONTAINER_INPUTS = (
     "deploy/media-worker/sources.lock.json",
 )
 FILES = [
-    "AGENTS.md", "CLAUDE.md", "GEMINI.md",
+    "AGENTS.md", "CLAUDE.md", "GEMINI.md", "llms.txt",
     "addons/README.md", "addons/capture/config/README.md",
     "addons/capture/deploy/README.md", "addons/capture/tests/README.md",
     "examples/README.md", "integrations/README.md",

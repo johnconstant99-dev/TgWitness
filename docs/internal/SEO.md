@@ -71,6 +71,20 @@ The [Markdown companion](../HOW-IT-WORKS.md) uses native Mermaid and math for Gi
 
 ## Implemented metadata
 
+The [page keyword map](SEO-KEYWORDS.md) assigns a separate search intent to every
+canonical page family. It is an editorial map based on the actual content, not a
+claim about measured search volume. `tools/site_seo.py` owns the English titles,
+descriptions and primary queries, with explicit Russian titles and the existing
+translated labels and descriptions for other languages. Telegram, Phala, Intel TDX,
+MCP and RFC 3161 appear where the corresponding subject is covered.
+
+The builder applies that map after presentation typography. Each page's title,
+description, Open Graph, Twitter card and WebPage JSON-LD therefore agree.
+Ordinary guide and reference H1 headings use the same topic; the custom homepage,
+account, experiment and measurement layouts retain their visible headings.
+Latin and Cyrillic metadata use ordinary punctuation. Native CJK punctuation,
+canonical URLs, language alternates, examples and executable snippets are preserved.
+
 Each canonical page has a distinct title and description, an HTTPS canonical,
 Open Graph metadata and a 1200 × 630 social image. Language alternates come from
 the page's actual language inventory. English-only copies use English metadata.
@@ -87,6 +101,11 @@ crawlers read `https://phishdestroy.github.io/robots.txt`. Submit the project si
 directly in Search Console; don't mistake a subdirectory file for a host-wide rule.
 
 ## Text editions and LLM discovery
+
+The repository also contains a root `llms.txt`, linked from its README. It points
+to canonical public documentation and the generated handbook. Every indexed website
+page exposes visible footer links to `llms.txt`, `llms-full.txt` and the sitemap,
+in addition to the discovery links in its HTML head.
 
 `llms.txt` is a task index, built from the public guide inventory. `llms-full.txt`
 combines the English handbook into one file. Every indexed HTML route also has
@@ -123,6 +142,17 @@ particular snippet, a rich result or a ranking.
 | Homepage | `website/index.html` |
 | Metadata, relative URLs, sitemap and publication allowlist | `tools/build_site.py` |
 | LLM task index and Markdown extraction | `tools/site_llms.py` |
+| Page search intent, titles and consistent metadata | `tools/site_seo.py` |
+| Static checks of every sitemap page and text-edition links | `tools/check_site_seo.py` |
+
+The website CI runs the metadata transformation regressions and checks every URL
+in the built sitemap. It rejects missing or duplicate titles/descriptions, mismatched
+social/schema metadata, missing H1s, broken language alternates and broken local
+links in the generated LLM files. The artifact `test-results/site/seo.json` records
+each canonical URL, language, title, description and primary query for review.
+These are build checks; verify the deployed pages separately before claiming that
+new metadata is live. On a workstation restricted to editing, use CI for builds
+and runtime checks.
 
 Add a guide to the explicit guide inventory and its navigation group. Do not copy
 private files into these presentation directories. The builder rejects linked

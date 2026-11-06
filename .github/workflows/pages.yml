@@ -17,6 +17,9 @@ on:
       - tools/site_modes.py
       - tools/site_account.py
       - tools/site_llms.py
+      - tools/site_seo.py
+      - tools/test_site_seo.py
+      - tools/check_site_seo.py
       - tools/site_export_clinic.py
       - tools/site_validation.py
       - tools/test_site_validation.py
