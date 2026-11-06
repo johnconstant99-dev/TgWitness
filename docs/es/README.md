@@ -64,7 +64,7 @@
 - **Inicio de sesión flexible.** Teléfono + código + autenticación de dos factores (2FA), código QR, Telethon/Pyrogram `.session`, archivo ZIP de TData de Telegram Desktop, StringSession de Telethon o una clave de autenticación completa con su ID de DC.
 - **Proxies por cuenta.** SOCKS5 y HTTP CONNECT, probados con proxies de prueba locales, y MTProxy experimental, aún sin probar con un servidor real. Un proxy que falla nunca recurre de forma silenciosa a una conexión directa.
 - **Privacidad integrada por diseño.** Se ejecuta en su ordenador o servidor. Interfaz de usuario web integrada, sin Node.js, sin servicio alojado, sin telemetría. Las sesiones, las credenciales de la API y los secretos del proxy se almacenan en una bóveda cifrada.
-- **Fácil de ejecutar.** Haga doble clic en Windows, ejecute un script en Linux/macOS o utilice Docker Compose con HTTPS automático opcional. Hasta la fecha solo se han probado los ejecutables de Windows; consulte [qué se ha probado](#lo-que-se-ha-probado).
+- **Fácil de ejecutar.** Haga doble clic en Windows, ejecute un script en Linux/macOS o utilice Docker Compose con HTTPS automático opcional. Resultados y límites de las pruebas: [registro de verificación](../VERIFICATION.md).
 
 </details>
 
@@ -220,7 +220,7 @@ Las firmas proporcionan evidencia de manipulación en relación con una clave de
 ## Implementación
 
 > [!NOTE]
-> Las configuraciones de Docker, Caddy (HTTPS), systemd y launchd que se indican a continuación están preparadas y sus archivos superan las comprobaciones sintácticas, pero ninguna de ellas se ha ejecutado todavía. El paquete portátil para Windows y el código fuente en Windows sí se han ejecutado.
+> Resultados y límites de las pruebas: [registro de verificación](../VERIFICATION.md).
 
 **Servidor local o único con Docker:**
 
@@ -303,7 +303,7 @@ TgWitness **0.6.1** funciona en Windows 11 con Python 3.12. Estado a 29 de octub
 | Inicio de sesión mediante teléfono, código QR y clave de autenticación; incorporación de nuevos chats al historial con sus mensajes anteriores; envío de mensajes; incorporación mediante invitación; reacciones; afiliación; perfiles de usuarios; gestión de varias cuentas a la vez; exportaciones y el verificador. | Pruebas automatizadas con clientes sintéticos de Telegram |
 | Proxies SOCKS5/HTTP, bot de testigos, monitor de Proof, notificaciones, copia en S3, RFC 3161 y OpenTimestamps | Pruebas automatizadas en servidores de pruebas locales |
 | Listas públicas de MTProxy | Descargado y filtrado (118 servidores a 29 de octubre); aún no se ha establecido conexión a través de ellos |
-| MTProxy, Docker, HTTPS con Caddy, Linux, macOS, Python 3.11 y 3.13, flujos de trabajo de integración continua (CI) y lanzamiento, interrupciones prolongadas del servicio, revisión de seguridad independiente | **Aún no se ha probado** |
+| Pruebas actuales y sus límites | [Validaciones pendientes](../VERIFICATION.md#remaining-qualification) |
 
 Detalles: [registro de verificación](../VERIFICATION.md), [estado de la versión](../internal/RELEASE.md) y [disponibilidad](../internal/READINESS.md).
 

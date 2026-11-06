@@ -64,7 +64,7 @@
 - **Metode masuk yang fleksibel.** Nomor telepon + kode + 2FA, kode QR, Telethon/Pyrogram `.session`, Telegram Desktop TData ZIP, Telethon StringSession, atau Kunci Otentikasi lengkap beserta ID DC-nya.
 - **Proksi per akun.** SOCKS5 dan HTTP CONNECT, telah diuji dengan proksi uji lokal, serta MTProxy yang masih dalam tahap percobaan dan belum diuji dengan server sungguhan. Proksi yang gagal tidak akan secara diam-diam beralih ke koneksi langsung.
 - **Dirancang untuk privasi.** Berjalan di komputer atau server Anda. Dilengkapi antarmuka web bawaan, tanpa Node.js, tanpa layanan terhosting, dan tanpa telemetri. Sesi, kredensial API, dan rahasia proxy disimpan dalam brankas terenkripsi.
-- **Mudah dijalankan.** Klik dua kali di Windows, satu skrip di Linux/macOS, atau Docker Compose dengan HTTPS otomatis opsional. Sejauh ini, hanya peluncur Windows yang telah dijalankan; lihat [apa saja yang telah diuji](#apa-yang-telah-diuji).
+- **Mudah dijalankan.** Klik dua kali di Windows, satu skrip di Linux/macOS, atau Docker Compose dengan HTTPS otomatis opsional. Hasil dan batas pengujian: [catatan verifikasi](../VERIFICATION.md).
 
 </details>
 
@@ -220,7 +220,7 @@ Tanda tangan memberikan bukti integritas terkait dengan kunci penandatanganan te
 ## Penerapan
 
 > [!NOTE]
-> Pengaturan Docker, Caddy (HTTPS), systemd, dan launchd di bawah ini telah disiapkan dan berkas-berkasnya telah lulus pemeriksaan sintaksis, tetapi belum ada yang dijalankan. Paket portabel Windows dan peluncuran dari sumber kode di Windows telah dijalankan.
+> Hasil dan batas pengujian: [catatan verifikasi](../VERIFICATION.md).
 
 **Server lokal atau tunggal dengan Docker:**
 
@@ -303,7 +303,7 @@ TgWitness 0**.6.1** berjalan di Windows 11 dengan Python 3.12. Status per 29 Okt
 | Masuk melalui nomor telepon, kode QR, dan Kunci Otentikasi, obrolan baru yang ditambahkan ke cakupan beserta pesan-pesan sebelumnya, pengiriman pesan, bergabung melalui undangan, reaksi, keanggotaan, profil pengguna, pengelolaan beberapa akun sekaligus, ekspor, dan verifikator | Pengujian otomatis dengan klien Telegram sintetis |
 | Proksi SOCKS5/HTTP, bot saksi, pemberitahuan, salinan S3, RFC 3161, dan OpenTimestamps | Pengujian otomatis terhadap server uji lokal |
 | Daftar MTProxy publik | Telah diunduh dan disaring (118 server pada 29 Oktober); belum ada koneksi melalui server-server tersebut |
-| MTProxy, Docker, HTTPS dengan Caddy, Linux, macOS, Python 3.11 dan 3.13, alur kerja CI dan rilis, gangguan layanan berkepanjangan, tinjauan keamanan independen | **Belum diuji** |
+| Pengujian terkini dan batasnya | [Validasi yang masih diperlukan](../VERIFICATION.md#remaining-qualification) |
 
 Rincian: [catatan verifikasi](../VERIFICATION.md), [status rilis,](../internal/RELEASE.md) dan [kesiapan](../internal/READINESS.md).
 
