@@ -6,6 +6,10 @@ between an observed Telegram update, an inference, and an unknown fact. Read the
 
 ## Coding agents
 
+Start with the repository-wide [AGENTS.md](../AGENTS.md) and the
+[code, documentation and validation map](../docs/AGENT-GUIDE.md).
+Claude and Gemini entry files point to the same rules.
+
 Write original documentation, interface text, commit messages and pull requests
 in English. Keep any requested translations separate and identify the English
 source. Check the current branch, other development branches and recorded revisions
