@@ -2,10 +2,12 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 from pathlib import Path
+import argparse
+import json
+import re
 import threading
 from urllib.parse import urlsplit
 
-from PIL import Image
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,6 +21,8 @@ class Quiet(SimpleHTTPRequestHandler):
 
 
 def capture(page, mobile):
+    from PIL import Image
+
     page.locator("#chat-feed").evaluate("el => el.scrollTop = 0")
     if mobile:
         page.locator("#chat-status").evaluate(
@@ -32,8 +36,7 @@ def capture(page, mobile):
 
 
 def save_sequence(name, states):
-
-
+    from PIL import Image
     frames, durations = [], []
     for index, frame in enumerate(states):
         frames.append(frame)
@@ -51,6 +54,67 @@ def save_sequence(name, states):
         assert result.n_frames == len(frames), (name, result.n_frames)
         assert result.info["loop"] == 0
     print(f"{name}: {len(frames)} frames, {sum(durations) / 1000:.2f}s, {target.stat().st_size:,} bytes", flush=True)
+
+
+def review_repository(repository, revision):
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
+        raise ValueError("Use an owner/repository name.")
+    if not re.fullmatch(r"[0-9a-f]{40}", revision):
+        raise ValueError("Use the complete commit SHA.")
+    output = ROOT / "test-results/readme"
+    output.mkdir(parents=True, exist_ok=True)
+    records = []
+    paths = ("README.md", "docs/README.md", "docs/ru/README.md", "website/validation/audit/README.md")
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1440, "height": 1100}, locale="en-US")
+            for path in paths:
+                response = page.goto(f"https://github.com/{repository}/blob/{revision}/{path}", wait_until="domcontentloaded")
+                assert response and response.ok, (path, response.status if response else None)
+                article = page.locator("article.markdown-body").first
+                article.wait_for(timeout=30000)
+                for width in (1440, 390):
+                    page.set_viewport_size({"width": width, "height": 1100})
+                    for theme in ("light", "dark"):
+                        page.emulate_media(color_scheme=theme, reduced_motion="reduce")
+                        page.evaluate("""theme => {
+                            const root = document.documentElement;
+                            root.dataset.colorMode = theme;
+                            root.dataset.lightTheme = 'light';
+                            root.dataset.darkTheme = 'dark';
+                        }""", theme)
+                        article.scroll_into_view_if_needed()
+                        article.locator("img").evaluate_all("images => images.forEach(img => img.loading = 'eager')")
+                        page.wait_for_function("""() => [...document.querySelectorAll('article.markdown-body img')]
+                            .filter(img => img.getClientRects().length)
+                            .every(img => img.complete && img.naturalWidth > 0)""", timeout=30000)
+                        page.wait_for_timeout(350)
+                        images = article.locator("img").evaluate_all("""images => images
+                            .filter(img => img.getClientRects().length)
+                            .map(img => ({alt: img.alt, source: img.currentSrc, width: img.clientWidth}))""")
+                        size = article.evaluate("el => ({width: el.clientWidth, scroll: el.scrollWidth})")
+                        assert size["scroll"] <= size["width"] + 2, (path, width, theme, size)
+                        if path in ("README.md", "docs/ru/README.md"):
+                            cover = "readme-intro-mobile.svg" if width < 640 else "readme-intro.svg"
+                            assert cover in images[0]["source"], (path, width, images[0])
+                        if path == "README.md":
+                            demo = next(img for img in images if "readme-workspace" in img["source"])
+                            expected = "readme-workspace-mobile-dark-still.webp" if width < 640 else "readme-workspace-dark-still.webp"
+                            assert expected in demo["source"], (width, demo)
+                        name = path.replace("/", "-").removesuffix(".md") + f"-{width}-{theme}"
+                        article.screenshot(path=str(output / f"{name}.png"), animations="disabled")
+                        records.append({"path": path, "viewport": width, "theme": theme, "images": images, **size})
+                        if path == "README.md":
+                            page.emulate_media(reduced_motion="no-preference")
+                            animated = expected.replace("-still", "")
+                            page.wait_for_function("""expected => [...document.querySelectorAll('article.markdown-body img')]
+                                .some(img => img.currentSrc.includes(expected) && img.complete && img.naturalWidth > 0)""", arg=animated)
+                            records[-1]["motion_source"] = animated
+                        print(f"Reviewed {path}: {width}px, {theme}", flush=True)
+        finally:
+            browser.close()
+            (output / "review.json").write_text(json.dumps({"revision": revision, "pages": records}, indent=2) + "\n", encoding="utf-8")
 
 
 def main():
@@ -104,4 +168,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Capture the fictional demo or review published GitHub READMEs.")
+    parser.add_argument("--repository", help="Review GitHub READMEs for owner/repository instead of recording the demo.")
+    parser.add_argument("--revision", help="Complete commit SHA for a repository review.")
+    args = parser.parse_args()
+    if bool(args.repository) != bool(args.revision):
+        parser.error("Use --repository and --revision together.")
+    if args.repository:
+        review_repository(args.repository, args.revision)
+    else:
+        main()
