@@ -87,7 +87,7 @@ class FakeClient:
         for i in range(min(limit, 3)):
             yield telegram_message(i + 1)
 
-    async def download_media(self, message, file, progress_callback):
+    async def download_media(self, message, file, progress_callback, *, thumb=None):
         await progress_callback(4, 4)
         file.write(b"data")
         return file

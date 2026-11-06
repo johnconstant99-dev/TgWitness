@@ -10,6 +10,8 @@ import shutil
 import sqlite3
 import time
 from datetime import datetime
+from collections import deque
+from itertools import chain, islice
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
@@ -21,6 +23,7 @@ from . import chat_export, replica, report, tuning
 from .account_export import durable_write, linked, read_json
 from .collector import AUTHORIZATION_ERRORS, message_record, unparsed_record
 from .message_selection import Selection, SelectionIndex, utc
+from .message_numbers import MissingNumbers
 from .store import canonical, utcnow
 from .verify import fingerprint, verify_chat_export
 from .workers import complete_in_thread
@@ -480,25 +483,27 @@ class DistributedExport:
         present = [row[0] for row in index.db.execute("SELECT id FROM messages ORDER BY id")]
         if not present:
             return None
-        known = set(present)
         edge = list(range(max(1, present[0] - RECHECK_EDGE), present[0]))
-        gaps = [number for number in range(present[0], present[-1] + 1) if number not in known]
+        gaps = MissingNumbers(present)
         if not edge and not gaps:
             return None
         readers = [w["profile_id"] for w in self.state["workers"]
                    if w["state"] not in ("skipped", "failed") and w["profile_id"] in self.entities]
-        wanted = edge + gaps
+        wanted = len(edge) + len(gaps)
         budget = len(gaps) if options.recheck_all else max(0, RECHECK_PER_ACCOUNT * len(readers) - len(edge))
         step = max(1, -(-len(gaps) // budget)) if budget else len(gaps) + 1
-        asked = edge + gaps[::step][:budget]
-        queue = [asked[low:low + 100] for low in range(0, len(asked), 100)]
+        planned = len(edge) + min(budget, -(-len(gaps) // step))
+        numbers = chain(edge, islice(gaps.sample(step), budget))
+        queue = deque()
         found, errors, started = {}, {}, utcnow()
-        progress = self.state["recheck"] = {"asked": 0, "total": len(asked)}
+        progress = self.state["recheck"] = {"asked": 0, "total": planned}
 
         async def read(profile):
             collector = self.app_for(profile).state.collector
-            while queue:
-                batch = queue.pop()
+            while True:
+                batch = queue.popleft() if queue else list(islice(numbers, 100))
+                if not batch:
+                    return
                 try:
                     answer = await collector.read_numbers(self.entities[profile], batch)
                 except asyncio.CancelledError:
@@ -518,8 +523,8 @@ class DistributedExport:
         checked = progress["asked"]
         returned = sorted(found)
         return {"asked_at": started, "asked": checked, "absent_total": len(gaps), "empty": checked - len(returned),
-                "returned": returned, "unchecked": len(wanted) - checked, "limit_reached": len(wanted) > len(asked),
-                "sampling": "every number" if len(asked) == len(wanted) else "every " + str(step) + "th absent number",
+                "returned": returned, "unchecked": wanted - checked, "limit_reached": wanted > planned,
+                "sampling": "every number" if planned == wanted else "every " + str(step) + "th absent number",
                 "edge": [edge[0], edge[-1]] if edge else None,
                 "edge_found": sum(1 for number in returned if number < present[0]),
                 "accounts": len(readers), **({"errors": errors} if errors else {}),

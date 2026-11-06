@@ -1,5 +1,10 @@
 # Distributed chat export
 
+Absent-number rechecks count gaps as intervals，without allocating every missing
+number in memory．Default sampling stays bounded；an explicit full recheck reads
+successive batches and can be cancelled．Unchecked numbers remain visible in the
+result and are not treated as proof of deletion．
+
 Open a chat and choose **Export chat**. Select idle account workspaces that already have access to the source. Every account keeps its configured connection. This feature does not change WARP or choose an exit IP.
 
 ## Exclusive account ownership

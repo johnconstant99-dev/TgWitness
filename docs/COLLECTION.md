@@ -6,6 +6,10 @@ not infer unseen actions from a missing message or from an account being connect
 
 ## From login to a journal
 
+For self-destructing photos and files，see [Self-destructing media](EPHEMERAL-MEDIA.md)．
+It explains the priority worker，saved and unavailable outcomes，and the limits of
+read-receipt blocking in the API collector．
+
 ```mermaid
 flowchart TD
     A[Authorize a user account] --> B[Select accessible groups and channels]

@@ -52,17 +52,23 @@ class WitnessClient(TelegramClient):
 
 
     async def connect(self):
+        self._connection_cleanup_pending = True
         result = await super().connect()
         if listener := getattr(self, "connection_listener", None):
             listener("opened")
         return result
 
-    def disconnect(self):
-        was_connected = self.is_connected()
-        result = super().disconnect()
-        if was_connected and (listener := getattr(self, "connection_listener", None)):
-            listener("closed")
-        return result
+    async def _disconnect_coro(self):
+        pending = self.is_connected() or getattr(self, "_connection_cleanup_pending", False)
+        try:
+            return await super()._disconnect_coro()
+        finally:
+            # Telethon shields this coroutine even when its caller is cancelled.
+            # Keep the key reserved until the transport really has stopped.
+            if pending and not self.is_connected():
+                self._connection_cleanup_pending = False
+                if listener := getattr(self, "connection_listener", None):
+                    listener("closed")
 
     @property
     def _request_retries(self):

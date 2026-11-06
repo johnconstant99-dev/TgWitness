@@ -2414,6 +2414,13 @@ def verify_account_export(path, expected_fingerprint=None, max_gib=None):
                                 if (attachment.get("file") != media_name or files.get(media_name) != checksum
                                         or archive.getinfo(media_name).file_size != size):
                                     raise ValueError("Account export attachment bytes/hash mismatch")
+                                expected = attachment.get("expected_bytes")
+                                if expected is not None and integer(expected, "expected attachment bytes") != size:
+                                    raise ValueError("Account export attachment size differs from observation")
+                                representation = attachment.get("representation")
+                                if representation is not None and (not isinstance(representation, dict)
+                                        or integer(representation.get("bytes"), "attachment representation bytes") != size):
+                                    raise ValueError("Account export attachment size differs from its representation")
                                 media_files.add(media_name)
                                 counts["media_saved"] += 1
                                 counts["bytes_saved"] += size

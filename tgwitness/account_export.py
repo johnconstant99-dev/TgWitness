@@ -747,7 +747,7 @@ class AccountExport:
                         raise ValueError("attachment_unavailable")
                     stream.flush()
                     os.fsync(stream.fileno())
-                if info["expected_bytes"] is not None and info["kind"] != "photo" and writer.total != info["expected_bytes"]:
+                if info["expected_bytes"] is not None and writer.total != info["expected_bytes"]:
                     raise ValueError("attachment_size_differs_from_observation")
                 return writer
             writer = await self.retry(download_once)

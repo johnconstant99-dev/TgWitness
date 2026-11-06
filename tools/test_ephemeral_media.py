@@ -48,7 +48,9 @@ def workspace(tmp_path):
     collector = Collector(store, vault)
     collector.client = SimpleNamespace(get_messages=AsyncMock())
 
-    async def download(media, file, progress_callback):
+    async def download(media, file, progress_callback, *, thumb=None):
+        if isinstance(media, t.MessageMediaPhoto):
+            assert thumb == "x"
         file.write(CONTENT)
         await progress_callback(len(CONTENT), len(CONTENT))
         return file
@@ -189,7 +191,7 @@ def test_immediate_lane_works_during_bulk_download_and_messages_first(workspace)
 
     async def scenario():
         bulk_started, release_bulk, saved = asyncio.Event(), asyncio.Event(), asyncio.Event()
-        async def download(media, file, progress_callback):
+        async def download(media, file, progress_callback, *, thumb=None):
             if getattr(media, "ttl_seconds", None) is None:
                 bulk_started.set()
                 await release_bulk.wait()

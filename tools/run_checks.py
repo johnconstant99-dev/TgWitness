@@ -29,7 +29,7 @@ SUITES = {
         "check_account_browser.py", "check_fleet_browser.py", "check_proxy_async_browser.py",
         "check_export_async_browser.py", "check_account_export_browser.py", "check_refresh_browser.py",
         "test_distributed_export.py", "check_distributed_export_browser.py",
-        "test_ephemeral_media.py",
+        "test_ephemeral_media.py", "test_chat_export_integrity.py", "test_account_attachment_integrity.py",
         "check_account_reports.py", "check_report_design.py", "check_report_studio.py", "test_snapshot_analytics.py", "test_report_analytics.py", "test_report_composition.py", "check_report_builder_browser.py",
         "test_report_selection.py", "test_report_selection_exports.py", "test_report_history_context.py", "check_report_selection_browser.py",
         "test_report_record_metadata.py", "test_pdf_record_metadata.py",

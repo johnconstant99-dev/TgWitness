@@ -55,7 +55,7 @@ class Client:
             rows = [m for m in rows if split["min_id"] <= m.id <= split["max_id"]]
         return rows[:limit]
 
-    async def download_media(self, media, file, progress_callback):
+    async def download_media(self, media, file, progress_callback, *, thumb=None):
         self.rpc.append(("media", getattr(self, "_export_takeout", None)))
         self.entered.set()
         if self.block_media:

@@ -212,8 +212,7 @@ class MultiExport:
                                            "error_type": type(exc).__name__}, []
                     if missed:
                         recovered = [{**message_record(m), "found_on_recheck": True} for m in missed]
-                        absent_ids = set(absent)
-                        if any(row["id"] not in absent_ids for row in recovered):
+                        if any(row["id"] not in absent for row in recovered):
                             raise ValueError("Recovered messages do not match the absent message IDs.")
                         parts = await complete_in_thread(self.recheck_parts, parts, recovered, state["lead"])
                         merge_history(scratch, recovered)

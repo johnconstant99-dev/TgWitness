@@ -348,12 +348,16 @@ class Transport:
             # Telethon returns None when writing a supplied stream, including
             # successful writes. The bounded writer accounts for actual bytes.
             return stream if stream.total else None
+        representation = file_hashes.representation(media)
+        options = file_hashes.download_options(media)
         try:
-            return await client.download_media(media, file=stream, progress_callback=progress)
+            return await client.download_media(media, file=stream, progress_callback=progress, **options)
         except (errors.FileReferenceExpiredError, errors.FilerefUpgradeNeededError):
             refreshed = await self.refresh_media(media, task)
+            if representation is not None and file_hashes.representation(refreshed) != representation:
+                raise ValueError("Refreshed attachment representation changed.") from None
             stream.reset()
-            return await client.download_media(refreshed, file=stream, progress_callback=progress)
+            return await client.download_media(refreshed, file=stream, progress_callback=progress, **options)
 
     async def hashes(self, media, task):
         client = self.ranged(task)

@@ -8,6 +8,7 @@ import secrets
 from contextlib import asynccontextmanager, suppress
 from datetime import datetime, timedelta, timezone
 from functools import wraps
+from itertools import islice
 from pathlib import Path
 
 from collections import deque
@@ -30,6 +31,7 @@ from . import chat_export
 from . import keyboard
 from . import message_content
 from . import message_details
+from .message_numbers import MissingNumbers
 from . import replica
 from . import tuning
 from .history import History
@@ -246,9 +248,7 @@ def absent_numbers(scratch):
                 number = json.loads(line).get("id")
                 if type(number) is int:
                     numbers.add(number)
-    if not numbers:
-        return []
-    return [n for n in range(min(numbers), max(numbers) + 1) if n not in numbers]
+    return MissingNumbers(sorted(numbers))
 
 
 def merge_history(scratch, entries):
@@ -1081,7 +1081,7 @@ class Collector:
                 {k: v for k, v in observer.items() if v not in (None, "", [])}, errors)
 
     async def recheck_absent(self, entity, absent):
-        asked, returned, started = list(absent)[:RECHECK_LIMIT], [], utcnow()
+        asked, returned, started = list(islice(absent, RECHECK_LIMIT)), [], utcnow()
         for low in range(0, len(asked), 100):
             batch = asked[low:low + 100]
             for attempt in range(3):
@@ -1719,7 +1719,10 @@ class Collector:
 
     def connection_changed(self, client, state):
         role = "current" if client is self.client else "candidate" if client is self.login_client else "other"
-        if state == "closed" and role in ("current", "candidate"):
+        key = getattr(getattr(getattr(client, "session", None), "auth_key", None), "key", None)
+        if state == "opened":
+            self.lock_key(client)  # A new login receives its auth key during connect.
+        if state == "closed" and self.key_lock is not None and self.key_lock[0] == key:
             self.unlock_key()
         self.note("connection." + state, {"role": role, "route": self.route_receipt(),
                                           "dc_id": getattr(client.session, "dc_id", None)})
@@ -2726,16 +2729,17 @@ class Collector:
 
             directory.mkdir(mode=0o700, exist_ok=True)
             media_dir.mkdir(mode=0o700, exist_ok=True)
+            files = record.get("files")
+            settings = capture_settings(self.store)
             self.store.append("chat_export.started", {"chat_id": chat_id, "title": info.get("title"),
                                                       "meaning": "full visible history snapshot",
-                                                      "attachments": "within the workspace's attachment settings"
-                                                      if capture_settings(self.store)["download_media"] else "off"},
+                                                      "attachments": files or ("within the workspace's attachment settings"
+                                                      if settings["download_media"] else "off")},
                               chat_id)
             clock = await self.telegram_clock()
-            settings = capture_settings(self.store)
             profile, observer, problems = await self.chat_profile(entity, media_dir,
-                include_photo=settings["download_media"] and settings["include_avatars"])
-            count = await self.stream_history(entity, scratch, record, media_dir, record.get("files"))
+                include_photo=files not in ("skip", "hashes") and settings["download_media"] and settings["include_avatars"])
+            count = await self.stream_history(entity, scratch, record, media_dir, files)
             recheck = None
             if chat_id < -1000000000000:
                 absent = absent_numbers(scratch)
@@ -2749,7 +2753,7 @@ class Collector:
                                            "error_type": type(exc).__name__}, []
                     if missed:
                         merge_history(scratch, [{**message_record(m), "found_on_recheck": True,
-                                                 **(await self.export_attachment(m, media_dir))} for m in missed])
+                                                 **(await self.export_attachment(m, media_dir, files))} for m in missed])
                     count += len(missed)
             log = await self.admin_log(entity) if observer.get("role") in ("creator", "admin") else None
             meta = {"chat": {"id": chat_id, "title": info.get("title"), "kind": info.get("kind"),
@@ -2760,6 +2764,7 @@ class Collector:
                     "account": self.store.get_setting("account", None), "message_count": count,
                     "client": self.client_identity(), "route": self.route_receipt(),
                     "acquisition": {"started_at": record.get("started_at"), "finished_at": utcnow(),
+                                    "files": files or "workspace_settings",
                                     "clock_at_start": clock, "clock_at_end": await self.telegram_clock()}}
             await complete_in_thread(chat_export.build_bundle, scratch, meta, self.vault, out_path,
                                     self.param("export_max_gib") * 1024**3, report_options, media_dir)
@@ -2965,14 +2970,24 @@ class Collector:
             for attempt in range(3):
                 try:
                     with temp.open("wb") as stream:
+                        media = downloadable_media(message)
                         result = await asyncio.wait_for(self.client.download_media(
-                            downloadable_media(message), file=stream, progress_callback=progress), timeout)
+                            media, file=stream, progress_callback=progress, **file_hashes.download_options(media)), timeout)
                     if result is None:
                         return {"file_status": "unavailable", "file_kind": kind}
-                    digest = await complete_in_thread(file_digest, temp)
                     written = temp.stat().st_size
-                    if not (directory / digest).exists():
-                        temp.replace(directory / digest)
+                    if written > limit:
+                        raise ValueError("above_limit")
+                    if written != size:
+                        return {"file_status": "unavailable", "file_kind": kind,
+                                "file_error": "download_size_differs_from_observed_attachment"}
+                    digest = await complete_in_thread(file_digest, temp)
+                    destination = directory / digest
+                    if destination.exists():
+                        if destination.is_symlink() or await complete_in_thread(file_digest, destination) != digest:
+                            raise ValueError("existing_content_addressed_file_is_corrupt")
+                    else:
+                        temp.replace(destination)
                     return {"file": "media/" + digest, "file_sha256": digest, "file_size": written, "file_kind": kind}
                 except FloodWaitError as exc:
                     if attempt == 2:
@@ -3020,14 +3035,29 @@ class Collector:
     async def export_files(self, entity, scratch, record, media_dir, ids, files=None):
         record.update(stage="files", files_total=len(ids), files_done=0, eta_seconds=None)
         found, started = {}, time.monotonic()
+        expected = {}
         if files == "skip":
             found = {number: {"file_status": "skipped_by_export_option"} for number in ids}
             ids = []
+        else:
+            wanted = set(ids)
+            with scratch.open(encoding="utf-8") as source:
+                for line in source:
+                    entry = json.loads(line)
+                    if entry.get("id") in wanted:
+                        expected[entry["id"]] = hashlib.sha256(canonical(entry)).digest()
         for low in range(0, len(ids), 100):
-            for message in await self.client.get_messages(entity, ids=ids[low:low + 100]):
+            batch = ids[low:low + 100]
+            for message in await self.client.get_messages(entity, ids=batch):
                 if message is None or isinstance(message, types.MessageEmpty):
                     continue
-                found[message.id] = await self.export_attachment(message, media_dir, files)
+                if message.id not in batch or message.id in found:
+                    continue
+                if (utils.get_peer_id(message.peer_id) != utils.get_peer_id(entity)
+                        or hashlib.sha256(canonical(message_record(message))).digest() != expected.get(message.id)):
+                    found[message.id] = {"file_status": "message_changed_or_unavailable_at_media_read"}
+                else:
+                    found[message.id] = await self.export_attachment(message, media_dir, files)
                 record["files_done"] += 1
                 elapsed = time.monotonic() - started
                 record["eta_seconds"] = round((len(ids) - record["files_done"]) * elapsed / record["files_done"])
@@ -3314,7 +3344,8 @@ class Collector:
                 async def download(media):
                     with temp.open("wb") as stream:
                         return await asyncio.wait_for(
-                            client.download_media(media, file=stream, progress_callback=progress), timeout)
+                            client.download_media(media, file=stream, progress_callback=progress,
+                                                  **file_hashes.download_options(media)), timeout)
 
                 try:
                     result = await download(media)

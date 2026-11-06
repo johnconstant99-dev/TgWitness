@@ -38,6 +38,16 @@ def location(media, info):
     return t.InputPhotoFileLocation(item.id, item.access_hash, item.file_reference, info["variant"])
 
 
+def download_options(media):
+    """Keep photo payloads on the still variant identified by metadata/hashes.
+
+    Telethon otherwise prefers a Photo's animated video_sizes, even when the
+    observed file size and representation both describe its still image.
+    """
+    info = representation(media)
+    return {"thumb": info["variant"]} if info and info["kind"] == "photo" else {}
+
+
 async def collect(client, media, *, max_requests=4096):
     """Return complete/partial/unavailable coverage; never call upload.getFile."""
     info = representation(media)
