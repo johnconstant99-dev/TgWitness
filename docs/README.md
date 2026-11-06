@@ -78,6 +78,7 @@ First time? Do it in this order:
 | Send a trimmed copy to a lawyer | [Minimized disclosure](ACCOUNT-EXPORT.md#prepare-a-disclosure-for-a-lawyer-or-another-recipient) |
 | Give someone limited access | [Access and permissions](ACCESS.md) |
 | Hand over a readable report | [Case reports](CASE_REPORTS.md) |
+| Describe a verified evidence archive | [Evidence narratives](NARRATIVE.md) · [Configuration examples](examples/README.md) |
 | Share something verifiable | [Export and verify](EVIDENCE.md#investigation-handoff) |
 | Publish checkpoints to a channel | [Witness bot](WITNESS.md#run-a-witness) |
 | Let others check the server itself | [High-assurance deployment](HIGH-ASSURANCE.md) |

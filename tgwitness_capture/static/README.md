@@ -17,7 +17,6 @@ Browser interfaces served by the independent capture package.
 | Official Web witness | [`official.html`](official.html), [`official.js`](official.js), [`official.css`](official.css) |
 | Trusted Live | [`trusted.html`](trusted.html), [`trusted.js`](trusted.js), [`trusted.css`](trusted.css) |
 | Official-client page handling | [`official-guard.js`](official-guard.js), [`official-rendered-text.js`](official-rendered-text.js) |
-| Official-client translations | [`official-locales.js`](official-locales.js) |
 
 Run the interfaces through their recorder service so authentication and controls
 use the correct API. The [add-on guide](../../addons/capture/README.md) describes

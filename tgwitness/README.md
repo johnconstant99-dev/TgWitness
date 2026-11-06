@@ -20,6 +20,7 @@ the detailed data model lives in [Architecture](../docs/ARCHITECTURE.md).
 | Application and accounts | [`app.py`](app.py), [`profiles.py`](profiles.py), [`__main__.py`](__main__.py) | Panel/API, isolated account workspaces and command-line entry points |
 | Observation | [`collector.py`](collector.py), [`scope.py`](scope.py), [`monitoring.py`](monitoring.py) | Account-visible updates, selected sources and capture policy |
 | Journal and evidence | [`store.py`](store.py), [`evidence.py`](evidence.py), [`verify.py`](verify.py) | Stored records, signed handoffs and standalone verification |
+| Evidence narratives | [narrative/](narrative/README.md) | Verified archives rendered into reports with journal references and configurable trust requirements |
 | Search | [`fulltext.py`](fulltext.py), [`search_api.py`](search_api.py) | Derived full-text index bound to the journal head and ranked search API |
 | Scripts and agents | [`cli.py`](cli.py), [`archive.py`](archive.py), [`archive_api.py`](archive_api.py), [`activity.py`](activity.py), [`mcp_server.py`](mcp_server.py) | Command line, scoped archive API and connections, activity statistics, MCP transports |
 | Investigation views | [`dossier.py`](dossier.py), [`chat_export.py`](chat_export.py), [`message_content.py`](message_content.py) | Saved people observations, chat-history exports and comparable content |
