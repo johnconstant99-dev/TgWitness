@@ -2,7 +2,7 @@
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-hero-mobile-static.svg">
   <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-hero-static.svg">
   <source media="(max-width: 640px)" srcset="docs/assets/presentation/casework-hero-mobile.svg">
-  <img src="docs/assets/presentation/casework-hero.svg" width="1440" alt="TgWitness — Follow the trail. Preserve the evidence. A captured message, its saved edit and a retained record.">
+  <img src="docs/assets/presentation/casework-hero.svg" width="1440" alt="TgWitness — Follow the trail. Preserve the evidence. A hash-linked, signed journal, a separately retained checkpoint and a verifiable evidence archive.">
 </picture>
 
 <p align="center">
@@ -77,14 +77,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.dest
 
 <a href="https://phishdestroy.github.io/TgWitness/demo/">
 <picture>
-  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="docs/assets/presentation/readme-workspace-mobile-dark-still.webp">
-  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-workspace-mobile-light-still.webp">
-  <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="docs/assets/presentation/readme-workspace-dark-still.webp">
-  <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-workspace-light-still.webp">
-  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="docs/assets/presentation/readme-workspace-mobile-dark.webp">
-  <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-workspace-mobile-light.webp">
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/presentation/readme-workspace-dark.webp">
-  <img src="docs/assets/presentation/readme-workspace-light.webp" width="1440" alt="The TgWitness demo in motion: captured messages, saved versions and content retained after deletion. Fictional demonstration records.">
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-workspace-mobile-dark-still.webp">
+  <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-workspace-dark-still.webp">
+  <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-workspace-mobile-dark.webp">
+  <img src="docs/assets/presentation/readme-workspace-dark.webp" width="1440" alt="The TgWitness demo in motion: captured messages, saved versions and content retained after deletion. Fictional demonstration records.">
 </picture>
 </a>
 
@@ -146,7 +142,7 @@ separate tested acquisition behavior from unmeasured live throughput.
 | | |
 | --- | --- |
 | [Load older messages](docs/HISTORY.md) | Pull past history of selected chats, pause and resume any time |
-| [Several accounts](docs/ACCOUNTS.md#multiple-accounts) | Export one chat through several accounts, each with its own session and key |
+| [Several accounts](docs/ACCOUNTS.md#multiple-accounts) | Separate workspaces, each with its own Telegram session, journal and signing key |
 | [Batch import](docs/ACCOUNTS.md#bulk-import-and-account-groups) | Drop in a pile of session files, sort accounts into groups with shared settings |
 | [MTProxy pool](docs/wiki/Proxies.md#pool-dashboard-and-custom-sources) | Ping, countries, filters, your own lists |
 | [Existing sessions](docs/ACCOUNTS.md) | TData, Telethon, Pyrogram, StringSession, auth key; optional independent QR authorization from an imported donor |
@@ -203,9 +199,6 @@ against an earlier journal state.
 
 [Archive verification](docs/wiki/Exports-and-Verification.md) · [Checks and tested scale](docs/VERIFICATION.md)
 
-<details>
-<summary><strong>Inside the signed record</strong> · hashes, signatures and independent checkpoints</summary>
-
 <picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-chain-mobile-static.svg">
   <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-chain-static.svg">
@@ -215,7 +208,33 @@ against an earlier journal state.
 
 [Evidence format](docs/EVIDENCE.md) · [Independent witness](docs/WITNESS.md) · [External timestamps](docs/TIMESTAMP.md)
 
-</details>
+## Choose what backs the record
+
+Run locally, add an audited cloud deployment, or collect inside a **Phala Cloud
+confidential VM with Intel TDX**. Each option keeps the signed journal; the extra
+checks address the environment where it was collected.
+
+For live observation, history or a one-off export, choose a
+[collection method](docs/COLLECTION-MODES.md). Private cloud chats are available
+when the connected account can access them; Telegram Secret Chats are not collected.
+See [collection scope](docs/COLLECTION.md).
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-assurance-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-assurance-static.svg">
+  <source media="(max-width: 640px)" srcset="docs/assets/presentation/casework-assurance-mobile.svg">
+  <img src="docs/assets/presentation/casework-assurance.svg" width="1200" alt="Three deployment choices: local journal verification; an audited VM with provider and access records; Phala Intel TDX with a verified quote, measured OS and application, and a bound collector key.">
+</picture>
+
+The TDX verifier checks the quote against Intel's pinned root and revocation data,
+binds it to a signed collector statement and a fresh challenge, and compares the
+measured OS and application with independently expected inputs. The report lists
+each result separately. Attestation does not establish Telegram authorship or
+complete message delivery.
+
+[Phala / Intel TDX and audited deployments](docs/HIGH-ASSURANCE.md) ·
+[Live Phala qualification](docs/VERIFICATION.md#live-phala-cloud-deployment--4-november-2026) ·
+[Trust boundaries](docs/SECURITY-MODEL.md)
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
@@ -284,6 +303,28 @@ for history, live observation and sealed acquisition.
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
+<a name="repository-map"></a>
+
+## Explore the repository
+
+| Directory | Start here |
+| --- | --- |
+| [docs/](docs/README.md) | Setup, investigation workflows and technical reference |
+| [tgwitness/](tgwitness/README.md) | Main application, collector, journal and web panel |
+| [tgwitness_capture/](tgwitness_capture/README.md) | Independent recorders and their verification code |
+| [addons/](addons/README.md) | Optional capture installation, configuration and tests |
+| [deploy/](deploy/README.md) | Installers, containers and background services |
+| [examples/](examples/README.md) | Account-export and sealed-capture configurations |
+| [integrations/](integrations/README.md) | Signed webhooks and an n8n receiver |
+| [.agents/](.agents/README.md) | Task instructions for reading the archive through the CLI |
+| [scripts/](scripts/README.md) | Launchers and CI utilities |
+| [tools/](tools/README.md) | Builds, checks and packaging |
+| [website/](website/README.md) | Public site, translated guides and interactive demo |
+| [.github/](.github/AUTOMATION.md) | Workflows, contribution guidelines and support |
+
+[Complete project guide](docs/PROJECT-GUIDE.md) ·
+[Contributing](.github/CONTRIBUTING.md) · [Get help](.github/SUPPORT.md)
+
 <!-- operator-notice:start -->
 
 <details>
@@ -315,25 +356,6 @@ To strictly comply with the MIT License, we do not restrict the use of this soft
 </details>
 
 <!-- operator-notice:end -->
-
-<a name="repository-map"></a>
-
-<details>
-<summary><strong>Repository map</strong> — source, deployment and contribution guides</summary>
-
-| Directory | Contents |
-| --- | --- |
-| [`tgwitness/`](tgwitness/README.md) | Application, collector, journal, verifier and web panel |
-| [`docs/`](docs/README.md) | Guides, Wiki source, screenshots and verification record |
-| [`deploy/`](deploy/README.md) | Compose configurations and service templates |
-| [`scripts/`](scripts/README.md) | Demo, setup and Docker launchers |
-| [`tools/`](tools/README.md) | Builds, checks and packaging |
-| [`website/`](website/README.md) | Documentation website and translations |
-| [`.github/`](.github/AUTOMATION.md) | Workflows and contribution guides |
-
-[Complete project guide](docs/PROJECT-GUIDE.md) · [Technical documentation](docs/README.md)
-
-</details>
 
 <details>
 <summary><strong>Read the project overview in your language</strong></summary>

@@ -9,6 +9,7 @@ deploy/containers/* text eol=lf
 *.svg text eol=lf
 deploy/installer/release-signing.pub text eol=lf
 website/demo/downloads/* binary
+website/demo/downloads/README.md -binary diff merge text eol=lf
 website/demo/report/report.html binary
 website/demo/report/*.zip binary
 website/export-clinic/media/** -text

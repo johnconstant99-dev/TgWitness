@@ -1,4 +1,11 @@
-![TgWitness](brand.svg)
+[TgWitness](../../../README.md) / [assets](../README.md)
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="./section-assets-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="./section-assets-static.svg">
+  <source media="(max-width: 640px)" srcset="./section-assets-mobile.svg">
+  <img src="./section-assets.svg" width="1200" alt="TgWitness / Visual assets">
+</picture>
 
 # Presentation assets
 
@@ -11,10 +18,12 @@ README, Wiki and documentation artwork. Screenshots use demo records.
 | `readme-features*`, `readme-feature-*` | Export, investigation and saved-version animations |
 | `readme-workspace-*.webp` | Demo recording in both themes, plus phone crops and stills |
 | `casework-chain*`, `casework-checkpoint*`, `evidence-*` | Evidence diagrams |
+| `casework-assurance*` | Local, audited VM and Phala / Intel TDX deployment checks |
 | `readme-services*`, `readme-card-*` | Alerts and encrypted S3 copies |
 | `readme-handbook*`, `wiki-*` | Handbook routes and chapter covers |
 | `identity-meta-*` | Version, languages, test and licence badges |
 | `folder-*`, `readme-button-*`, `*divider*` | Folder headers, links and separators |
+| `section-*` | Animated directory covers, narrow-screen layouts and reduced-motion stills |
 | `preview-github.png`, `preview-social.png` | Sharing images |
 
 ## Rebuild
@@ -28,11 +37,27 @@ python website/render_readme_navigation.py --font /path/to/Manrope.ttf
 python website/render_readme_panels.py --font /path/to/Manrope.ttf
 python website/render_wiki_headers.py --font /path/to/Manrope.ttf
 python website/render_identity.py --font /path/to/Manrope.ttf
+python website/render_directory_headers.py --font /path/to/Manrope.ttf
 ```
 
 `render_identity.py` reads the version and language counts from source.
 After a version change, use `--metadata-only` to refresh its badges, update the
 README alt text and `docs/STATUS.md`, then run `python tools/check_publication.py`.
+
+Directory covers use layered illustrations: reference pages, capture frames,
+linked components, server racks and project artwork. The main cover connects
+signed journal entries to a separately retained checkpoint and an evidence archive.
+The assurance diagram compares deployment choices and follows the TDX checks from
+Intel's root to the journal. Headings stay fixed; motion belongs to the illustrations.
+All lettering is outlined and every SVG is self-contained.
+Each `<picture>` selects a `-static.svg`
+version for `prefers-reduced-motion: reduce`. Keep those sources before the regular
+mobile source: the narrow static version first, then the wide static version,
+then the animated narrow version at `max-width: 640px`.
+
+The README demo uses its dark recording in both page themes, matching the diagrams.
+Its source conditions select only width and motion: GitHub's theme handling
+replaces compound color-scheme conditions and can select the wrong crop or still.
 
 To refresh the demo recording, build the site and run
 `python website/capture_readme.py` with Playwright and Pillow installed.

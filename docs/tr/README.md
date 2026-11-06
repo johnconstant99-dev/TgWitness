@@ -64,7 +64,7 @@
 - **Esnek oturum açma.** Telefon + kod + 2FA, QR kodu, Telethon/Pyrogram `.session`, Telegram Desktop TData ZIP, Telethon StringSession veya DC kimliği içeren tam bir Oturum Açma Anahtarı.
 - **Hesap başına proxy'ler.** SOCKS5 ve HTTP CONNECT, yerel test proxy'leri üzerinde test edilmiştir; deneysel MTProxy ise henüz gerçek bir sunucu üzerinde test edilmemiştir. Başarısız olan bir proxy, hiçbir zaman sessizce doğrudan bağlantıya geri dönmez.
 - **Tasarım gereği gizlidir.** Bilgisayarınızda veya sunucunuzda çalışır. Web kullanıcı arayüzü pakete dahildir; Node.js, barındırma hizmeti veya telemetri yoktur. Oturumlar, API kimlik bilgileri ve proxy gizli bilgileri şifreli bir kasada saklanır.
-- **Çalıştırması kolaydır.** Windows'ta çift tıklama, Linux/macOS'ta tek bir komut dosyası veya isteğe bağlı otomatik HTTPS özelliğine sahip Docker Compose ile **çalıştırabilirsiniz**. Şu ana kadar yalnızca Windows başlatıcıları çalıştırılmıştır; [nelerin test edildiğine](#neler-test-edildi) göz atın.
+- **Çalıştırması kolaydır.** Windows'ta çift tıklama, Linux/macOS'ta tek bir komut dosyası veya isteğe bağlı otomatik HTTPS özelliğine sahip Docker Compose ile **çalıştırabilirsiniz**. Test sonuçları ve sınırları: [doğrulama kaydı](../VERIFICATION.md).
 
 </details>
 
@@ -220,7 +220,7 @@ Doğrulayıcı, imzalanmış üreticiyi, sürekli gözlem dönemlerini, boşlukl
 ## Dağıtım
 
 > [!NOTE]
-> Aşağıdaki Docker, Caddy (HTTPS), systemd ve launchd kurulumları hazırlanmış olup dosyaları sözdizimi denetimlerinden geçmiştir, ancak bunların hiçbiri henüz çalıştırılmamıştır. Windows taşınabilir paketi ve Windows'ta kaynak kodu çalıştırılmıştır.
+> Test sonuçları ve sınırları: [doğrulama kaydı](../VERIFICATION.md).
 
 **Docker ile yerel veya tek sunucu:**
 
@@ -303,7 +303,7 @@ TgWitness **0.6.1,** Python 3.12 ile Windows 11 üzerinde çalışır. 29 Ekim 2
 | Telefon, QR kodu ve Oturum Açma Anahtarı ile oturum açma, önceki mesajlarıyla birlikte kapsam içine alınan yeni sohbetler, mesaj gönderme, davetle katılma, tepkiler, üyelik, kullanıcı profilleri, aynı anda birden fazla hesap, dışa aktarma ve doğrulayıcı | Sentetik Telegram istemcileriyle otomatik testler |
 | SOCKS5/HTTP proxy'leri, witness bot, Proof monitörü, bildirimler, S3 kopyası, RFC 3161 ve OpenTimestamps | Yerel test sunucularına yönelik otomatik testler |
 | Halka açık MTProxy listeleri | İndirildi ve filtrelendi (29 Ekim itibarıyla 118 sunucu); henüz bu sunucular üzerinden bağlantı kurulamadı |
-| MTProxy, Docker, Caddy ile HTTPS, Linux, macOS, Python 3.11 ve 3.13, CI ve sürüm yayınlama iş akışları, uzun süreli kesintiler, bağımsız güvenlik incelemesi | **Henüz test edilmemiştir** |
+| Güncel testler ve sınırları | [Tamamlanması gereken doğrulamalar](../VERIFICATION.md#remaining-qualification) |
 
 Ayrıntılar: [doğrulama kaydı](../VERIFICATION.md), [sürüm durumu](../internal/RELEASE.md) ve kullanıma [hazırlık durumu](../internal/READINESS.md).
 

@@ -1,4 +1,16 @@
+[TgWitness](../../README.md) / [addons](../README.md)
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../../docs/assets/presentation/section-capture-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../../docs/assets/presentation/section-capture-static.svg">
+  <source media="(max-width: 640px)" srcset="../../docs/assets/presentation/section-capture-mobile.svg">
+  <img src="../../docs/assets/presentation/section-capture.svg" width="1200" alt="TgWitness / Independent capture">
+</picture>
+
 # Optional independent capture
+
+[Configuration examples](config/README.md) · [Container files](deploy/README.md) ·
+[Package source](../../tgwitness_capture/README.md) · [Tests](tests/README.md)
 
 For the owned official Telegram Web browser，required video，guarded actions and the GitHub-hosted procedure，see [Official client witness](../../docs/OFFICIAL-WITNESS.md)．That mode uses `compose.official.yaml` and a fresh temporary profile．The generic recorders described below retain their existing behavior．
 

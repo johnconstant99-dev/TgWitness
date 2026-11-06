@@ -1,8 +1,13 @@
-![Documentation assets](presentation/folder-docs-assets.svg)
+[TgWitness](../../README.md) / [docs](../README.md)
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="presentation/section-assets-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="presentation/section-assets-static.svg">
+  <source media="(max-width: 640px)" srcset="presentation/section-assets-mobile.svg">
+  <img src="presentation/section-assets.svg" width="1200" alt="TgWitness / Visual assets">
+</picture>
 
 # Documentation assets
-
-[Project](../../README.md) · [Documentation](../README.md) · [Wiki](../wiki/Home.md) · [Support](../../.github/SUPPORT.md)
 
 Screenshots and presentation artwork used by the repository and documentation.
 Application screenshots use fictional demonstration data.
@@ -15,6 +20,7 @@ Application screenshots use fictional demonstration data.
 | `connection.png`, `qr-login.png`, `proxy-setup.png`, `public-proxies.png` | Account and connection setup |
 | `extras.png`, `witness-setup.png` | Optional witness workflows |
 | [`presentation/`](presentation/README.md) | Investigation artwork, shared SVG covers, navigation and dividers |
+| [`reports/`](reports/README.md) | Dossier, timeline and report-studio previews |
 
 ## Refresh screenshots
 

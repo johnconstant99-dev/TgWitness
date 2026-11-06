@@ -64,7 +64,7 @@
 - **Các phương thức đăng nhập linh hoạt.** Số điện thoại + mã xác thực + xác thực hai yếu tố (2FA), mã QR, Telethon/Pyrogram `.session`, tệp ZIP TData của Telegram Desktop, Telethon StringSession hoặc Khóa xác thực đầy đủ kèm theo ID DC của nó.
 - **Các proxy dành riêng cho từng tài khoản.** SOCKS5 và HTTP CONNECT, đã được kiểm thử trên các proxy thử nghiệm cục bộ, cùng với MTProxy đang trong giai đoạn thử nghiệm, chưa được kiểm thử trên máy chủ thực tế. Trong trường hợp proxy gặp sự cố, hệ thống sẽ không tự động chuyển sang kết nối trực tiếp mà không có thông báo.
 - **Được thiết kế để bảo mật riêng tư.** Hoạt động trên máy tính hoặc máy chủ của quý vị. Giao diện người dùng web được tích hợp sẵn, không cần Node.js, không cần dịch vụ lưu trữ bên ngoài, không có dữ liệu theo dõi. Các phiên làm việc, thông tin đăng nhập API và khóa bí mật proxy được lưu trữ trong kho dữ liệu được mã hóa.
-- **Dễ dàng vận hành.** Chỉ cần nhấp đúp trên Windows, chạy một tập lệnh trên Linux/macOS, hoặc sử dụng Docker Compose với tùy chọn HTTPS tự động. Cho đến nay, chỉ có trình khởi chạy trên Windows được thử nghiệm; vui lòng tham khảo [danh sách các tính năng đã được kiểm thử](#những-nội-dung-đã-được-kiểm-thử).
+- **Dễ dàng vận hành.** Chỉ cần nhấp đúp trên Windows, chạy một tập lệnh trên Linux/macOS, hoặc sử dụng Docker Compose với tùy chọn HTTPS tự động. Kết quả và giới hạn kiểm thử: [hồ sơ xác minh](../VERIFICATION.md).
 
 </details>
 
@@ -220,7 +220,7 @@ Chữ ký cung cấp bằng chứng chống giả mạo liên quan đến khóa 
 ## Triển khai
 
 > [!NOTE]
-> Các cấu hình Docker, Caddy (HTTPS), systemd và launchd dưới đây đã được chuẩn bị sẵn và các tệp liên quan đã vượt qua kiểm tra cú pháp, nhưng chưa có cấu hình nào trong số đó được chạy thử. Trong khi đó, gói phần mềm di động dành cho Windows và bản nguồn chạy trên Windows thì đã được thử nghiệm.
+> Kết quả và giới hạn kiểm thử: [hồ sơ xác minh](../VERIFICATION.md).
 
 **Máy chủ cục bộ hoặc máy chủ đơn lẻ sử dụng Docker:**
 
@@ -303,7 +303,7 @@ TgWitness phiên bản **0.6.1** hoạt động trên hệ điều hành Windows
 | Đăng nhập bằng số điện thoại, mã QR và Khóa xác thực; các cuộc trò chuyện mới sẽ được đưa vào phạm vi theo dõi cùng với các tin nhắn trước đó; gửi tin nhắn; tham gia qua lời mời; phản hồi; tư cách thành viên; hồ sơ cá nhân; sử dụng nhiều tài khoản cùng lúc; xuất dữ liệu và công cụ xác minh | Các bài kiểm thử tự động với các ứng dụng khách Telegram mô phỏng |
 | Proxy SOCKS5/HTTP, bot chứng thực, công cụ giám sát Proof, thông báo, bản sao S3, RFC 3161 và OpenTimestamps | Các bài kiểm thử tự động trên các máy chủ thử nghiệm cục bộ |
 | Danh sách MTProxy công khai | Đã tải xuống và lọc dữ liệu (118 máy chủ vào ngày 29 tháng 10); hiện vẫn chưa thể kết nối qua các máy chủ này |
-| MTProxy, Docker, HTTPS với Caddy, Linux, macOS, Python 3.11 và 3.13, quy trình CI và phát hành, các sự cố ngừng hoạt động kéo dài, đánh giá bảo mật độc lập | **Chưa được kiểm thử** |
+| Kiểm thử hiện tại và giới hạn | [Các bước xác minh còn lại](../VERIFICATION.md#remaining-qualification) |
 
 Chi tiết: [bản ghi xác minh](../VERIFICATION.md), [tình trạng phát hành](../internal/RELEASE.md) và [mức độ sẵn sàng](../internal/READINESS.md).
 

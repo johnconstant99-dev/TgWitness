@@ -1,8 +1,13 @@
-![Wiki source](../assets/presentation/folder-docs-wiki.svg)
+[TgWitness](../../README.md) / [docs](../README.md)
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/section-docs-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/section-docs-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/section-docs-mobile.svg">
+  <img src="../assets/presentation/section-docs.svg" width="1200" alt="TgWitness / Documentation">
+</picture>
 
 # Wiki source
-
-[Project](../../README.md) · [Documentation](../README.md) · [Wiki](Home.md) · [Support](../../.github/SUPPORT.md)
 
 Start with [Wiki home](Home.md). These Markdown files are the English source for the
 separate GitHub Wiki; they also remain readable inside the main repository.

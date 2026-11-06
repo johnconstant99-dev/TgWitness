@@ -1,4 +1,11 @@
-![Build tools](../docs/assets/presentation/folder-tools.svg)
+[TgWitness](../README.md)
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../docs/assets/presentation/section-tools-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../docs/assets/presentation/section-tools-static.svg">
+  <source media="(max-width: 640px)" srcset="../docs/assets/presentation/section-tools-mobile.svg">
+  <img src="../docs/assets/presentation/section-tools.svg" width="1200" alt="TgWitness / Build and verify">
+</picture>
 
 # Build tools
 
@@ -53,6 +60,9 @@ Account, workspace, navigation, interaction and proxy checks have their own
 `check_*_browser.py` scripts. Browser checks need Playwright; container checks need Docker.
 
 ## Docs and utilities
+
+[Compatibility fixtures](fixtures/README.md) · [TDX vectors](tdx/README.md) ·
+[Timestamp vectors](tsa/README.md)
 
 - [site_content.py](site_content.py): page inventory.
 - [site_wiki.py](site_wiki.py): Markdown rendering.

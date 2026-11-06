@@ -38,7 +38,7 @@
 - **带有历史记录的对话。**在对话上下文中阅读已保存的消息、比较已捕获的编辑内容，并查看删除通知。
 - **按您的方式进行监控。**您可以选择单个聊天、Telegram 文件夹或整个账号。每个账号都有独立的工作区和设置。
 - **可供验证的导出文件。**包括经过签名的 ZIP 文件、原始记录、完整保留的附件以及离线 HTML 报告。可选密码保护功能，便于交接。
-- **专为日常使用而设计。**支持浅色和深色主题、13种语言、搜索功能、Ctrl/Cmd+K导航，以及直接在聊天界面执行操作。
+- **专为日常使用而设计。**支持浅色和深色主题、25种语言、搜索功能、Ctrl/Cmd+K导航，以及直接在聊天界面执行操作。
 
 <details>
 <summary>所有功能与技术细节</summary>
@@ -64,7 +64,7 @@
 - **灵活的登录方式。**手机号码 + 验证码 + 双因素认证（2FA）、二维码、Telethon/Pyrogram `.session`、Telegram Desktop TData ZIP、Telethon StringSession，或包含其 DC ID 的完整认证密钥。
 - **按账户设置代理。**支持 SOCKS5 和 HTTP CONNECT，已通过本地测试代理验证，并支持实验性的 MTProxy，但尚未在真实服务器上进行测试。代理连接失败时，系统绝不会默认回退到直接连接。
 - **设计上即为私有。**在您的计算机或服务器上运行。内置 Web 界面，无需 Node.js，无需托管服务，不进行遥测数据收集。会话、API 凭据和代理密钥均存储在加密保险库中。
-- **运行简便。**Windows 系统双击即可运行，Linux/macOS 系统运行一个脚本，或使用 Docker Compose（可选自动 HTTPS）。目前仅测试过 Windows 启动器；请查看[已测试的内容](#已测试内容)。
+- **运行简便。**Windows 系统双击即可运行，Linux/macOS 系统运行一个脚本，或使用 Docker Compose（可选自动 HTTPS）。测试结果及其范围见[验证记录](../VERIFICATION.md)。
 
 </details>
 
@@ -220,7 +220,7 @@ python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_K
 ## 部署
 
 > [!NOTE]
-> 下文所述的 Docker、Caddy（HTTPS）、systemd 和 launchd 配置均已准备就绪，相关文件也已通过语法检查，但尚未实际运行。Windows 便携包以及在 Windows 上通过源代码编译的版本均已成功运行。
+> 测试结果及其范围见[验证记录](../VERIFICATION.md)。
 
 **使用 Docker 的本地或单服务器部署：**
 
@@ -303,7 +303,7 @@ TgWitness **0.6.1** 可在搭载 Python 3.12 的 Windows 11 系统上运行。�
 | 手机、二维码和认证密钥登录，新聊天室及其历史消息将纳入监控范围，发送消息，通过邀请加入，点赞，成员资格，用户个人资料，同时管理多个账户，数据导出以及验证器 | 使用合成 Telegram 客户端进行自动化测试 |
 | SOCKS5/HTTP 代理、witness 机器人、Proof 监控器、通知、S3 备份、RFC 3161 及 OpenTimestamps | 针对本地测试服务器的自动化测试 |
 | 公开的 MTProxy 列表 | 已下载并筛选（10月29日共118台服务器）；目前尚未通过这些服务器建立连接 |
-| MTProxy、Docker、基于 Caddy 的 HTTPS、Linux、macOS、Python 3.11 和 3.13、持续集成（CI）与发布工作流、长时间服务中断、独立安全审查 | **尚未经过测试** |
+| 当前测试及其范围 | [尚待验证的事项](../VERIFICATION.md#remaining-qualification) |
 
 详情：[验证记录](../VERIFICATION.md)、[发布状态](../internal/RELEASE.md)及[就绪情况](../internal/READINESS.md)。
 

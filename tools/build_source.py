@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
 CONTAINER_INPUTS = (
+    "deploy/containers/README.md",
     "deploy/containers/runtime.packages", "deploy/containers/media.packages", "deploy/containers/build.packages",
     "deploy/containers/resolve-packages.sh", "deploy/containers/install-packages.sh",
     *("deploy/containers/" + role + "-" + arch + ".lock"
@@ -15,6 +16,10 @@ CONTAINER_INPUTS = (
     "deploy/media-worker/sources.lock.json",
 )
 FILES = [
+    "addons/README.md", "addons/capture/config/README.md",
+    "addons/capture/deploy/README.md", "addons/capture/tests/README.md",
+    "examples/README.md", "integrations/README.md",
+    "tgwitness_capture/README.md", "tgwitness_capture/static/README.md",
     "tgwitness/client_profiles.LICENSE",
     "tgwitness/dstack_measurement.LICENSE",
     "tgwitness/fonts/OFL.txt",
@@ -37,6 +42,7 @@ FILES = [
     "tools/fixtures/narrative-events.json", "tools/fixtures/narrative-golden.json",
     "docs/examples/narrative.json",
     ".agents/skills/tgwitness-cli/SKILL.md",
+    ".agents/README.md", ".agents/skills/README.md", ".agents/skills/tgwitness-cli/README.md",
     *CONTAINER_INPUTS,
 ]
 FILES.extend("tgwitness/fonts/" + name for name in (
