@@ -150,7 +150,10 @@ def build(events, verification, journal="collector", max_scene_records=2000):
     for stopped, started in restarts:
         scene = gaps_by_seq[stopped['seq']]
         ref = Evidence(started['seq'], started['hash'], journal, started['observed_at'])
-        scene.to_seq, scene.at_to = started['seq'], started['observed_at']
+        scene.to_seq = started['seq']
+        # A later sequence can carry an earlier wall-clock time. Keep the
+        # summary's range covering every referenced record in this scene.
+        scene.at_to = max(scene.at_to, started['observed_at'], key=parse_time)
         scene.facts[0].params['n'] += 1
         scene.facts[0].params['to'] = scene.at_to
         scene.facts[0].evidence.append(ref)

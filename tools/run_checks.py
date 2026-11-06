@@ -61,6 +61,7 @@ SUITES = {
         "check_capture_language_browser.py", "check_application_guides.py",
     ),
     "browser-ux": (
+        "test_api_authorization_matrix.py",
         "test_audit_security_fixes.py", "test_audit_data_fixes.py", "test_audit_platform_fixes.py",
         "test_release_data_fixes.py",
         "test_proxy_destination_dns.py",
@@ -89,7 +90,7 @@ SUITES = {
         "check_dstack_image.py", "check_attestation_report.py",
     ),
     "site": ("check_site.py", "check_docs_site.py", "check_docs_workflows.py", "test_site_metadata.py", "test_site_typography.py", "check_export_clinic.py",
-             "check_report_example.py", "check_guide_languages.py"),
+             "check_built_site_metadata.py", "check_report_example.py", "check_guide_languages.py"),
 }
 
 
@@ -242,7 +243,7 @@ async def run_checks(checks, output, *, workers=2, timeout=600, cwd=ROOT):
 def suite_checks(suite):
     # Pytest modules without a __main__ block otherwise exit 0 without executing a test.
     return [Check(Path(script).stem, (sys.executable,
-                  *(("-m", "pytest", "-q", "--tb=short") if suite == 'evidence' and script.startswith('test_') else ()),
+                  *(("-m", "pytest", "-q", "--tb=short") if script.startswith('test_') else ()),
                   str(ROOT / "tools" / script))) for script in SUITES[suite]]
 
 

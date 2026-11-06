@@ -172,8 +172,9 @@ def test_local_pdf_summary_never_silently_loses_its_script(monkeypatch):
 
 
 @pytest.mark.parametrize('design', report_design.DESIGNS)
-def test_signed_exports_share_guidance_across_formats_and_designs(tmp_path, design):
-    import fitz
+def test_signed_exports_share_guidance_across_formats_and_designs(tmp_path, monkeypatch, design):
+    from tools.test_independent_report_pdf import capture_documents
+    documents = capture_documents(monkeypatch)
     vault, store = Vault(tmp_path), Store(tmp_path)
     store.bind(vault)
     try:
@@ -194,10 +195,12 @@ def test_signed_exports_share_guidance_across_formats_and_designs(tmp_path, desi
             html = archive.read('report.html')
             assert b'id="jurisdiction-guidance"' in html and b'not a finding of admissibility' in html
             assert b'What this copy needs next' in html and b'1 signed journal records' in html
-            with fitz.open(stream=archive.read('report.pdf'), filetype='pdf') as pdf:
-                text = ' '.join(' '.join(page.get_text() for page in pdf).split()).casefold()
-                assert 'jurisdiction guidance' in text and 'collector signature' in text and 'brazil' in text
-                assert 'what this copy needs next' in text and 'separate trusted channel' in text
+            # Observe real PDF layout calls while still producing and verifying the
+            # signed PDF above; the locked test environment has no external PDF reader.
+            assert len(documents) == 1
+            text = ' '.join(' '.join(documents[0].reading_lines).split()).casefold()
+            assert 'jurisdiction guidance' in text and 'collector signature' in text and 'brazil' in text
+            assert 'what this copy needs next' in text and 'separate trusted channel' in text
             report_path = tmp_path / 'report.html'
             report_path.write_bytes(html.replace(b'not a finding of admissibility', b'a finding of admissibility'))
             with pytest.raises((InvalidSignature, ValueError)):

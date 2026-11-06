@@ -30,7 +30,7 @@ jobs:
           echo "$RUNNER_TEMP/tgwitness-installer-builder/bin" >> "$GITHUB_PATH"
           echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-installer-builder" >> "$GITHUB_ENV"
       - run: python -m pip install --require-hashes -r deploy/build.lock
-      - run: python -m pip install -c deploy/constraints.txt cryptography
+      - run: 'python -m pip install --require-hashes --only-binary=:all: -r deploy/installer.lock'
       - run: python -I tools/check_panel_setup.py
       - run: python -I tools/check_installer_publication.py
       - run: python -I tools/test_installer_checks.py
@@ -102,7 +102,7 @@ jobs:
         with:
           node-version: '22'
           package-manager-cache: false
-      - run: python -m pip install -c deploy/constraints.txt cryptography
+      - run: 'python -m pip install --require-hashes --only-binary=:all: -r deploy/installer.lock'
       - name: Check the artifact belongs to this exact source
         env:
           EXPECTED_REVISION: ${{ github.sha }}

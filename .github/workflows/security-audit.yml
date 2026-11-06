@@ -33,6 +33,8 @@ jobs:
             lock: deploy/requirements.lock
           - name: build
             lock: deploy/build.lock
+          - name: installer
+            lock: deploy/installer.lock
           - name: mcp
             lock: deploy/constraints-mcp.txt
           - name: mcp-lock

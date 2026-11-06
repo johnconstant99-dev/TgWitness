@@ -168,6 +168,21 @@ def test_restart_links_signed_endpoints_without_inventing_a_cause():
     assert any(limit['template_key'] == 'limit.gap' for limit in scene['limits'])
 
 
+def test_restart_preserves_the_full_recorded_time_range_after_clock_changes():
+    events = [
+        dict(seq=1, hash='a' * 64, observed_at='2026-10-01T12:00:00+00:00', kind='process.stopped', payload={}),
+        dict(seq=2, hash='b' * 64, observed_at='2026-10-01T14:00:00+00:00', kind='connection.lost', payload={}),
+        dict(seq=3, hash='c' * 64, observed_at='2026-10-01T13:00:00+00:00', kind='process.started', payload={}),
+    ]
+    scene = build(events, {})['scenes'][0]
+    summary = scene['facts'][0]
+    assert scene['at_from'] == events[0]['observed_at']
+    assert scene['at_to'] == events[1]['observed_at']
+    assert summary['params'] == {'n': 3, 'from': scene['at_from'], 'to': scene['at_to']}
+    assert [ref['seq'] for ref in summary['evidence']] == [1, 2, 3]
+    assert scene['to_seq'] == 3
+
+
 def test_modified_archive_cannot_produce_a_report(tmp_path):
     package, _ = fixture(tmp_path)
     modified = tmp_path / 'modified.zip'
