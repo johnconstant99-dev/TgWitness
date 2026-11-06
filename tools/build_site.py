@@ -14,7 +14,7 @@ from urllib.parse import urljoin, urlsplit
 
 if __package__:
     from .site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
-    from . import site_diagrams, site_i18n, site_wiki, site_modes, site_account, site_llms, site_export_clinic, site_typography
+    from . import site_diagrams, site_i18n, site_wiki, site_modes, site_account, site_llms, site_export_clinic, site_typography, site_validation
 else:
     from site_content import GROUPS, GUIDES, LABELS, NEXT, REFERENCE, REFERENCE_GROUPS
     import site_diagrams
@@ -25,6 +25,7 @@ else:
     import site_llms
     import site_export_clinic
     import site_typography
+    import site_validation
 
 ROOT = Path(__file__).resolve().parents[1]
 LANGS = tuple(site_i18n.LANGUAGES)
@@ -67,7 +68,7 @@ STATIC = {"style.css": "website/style.css", "site.js": "website/site.js",
           "LICENSE": "LICENSE", "NOTICE": "NOTICE",
           "docs.css": "website/docs.css", "docs.js": "website/docs.js",
           "learn.css": "website/learn.css", "learn.js": "website/learn.js",
-          "workflows.css": "website/workflows.css", "workflows.js": "website/workflows.js", **ASSETS, **WIKI_ASSETS, **site_export_clinic.STATIC}
+          "workflows.css": "website/workflows.css", "workflows.js": "website/workflows.js", **ASSETS, **WIKI_ASSETS, **site_export_clinic.STATIC, **site_validation.STATIC}
 SITE_SCRIPTS = ("website/learn.js", "website/docs.js", "website/site.js", "website/workflows.js")
 MODES_PAGES = site_modes.FILES
 
@@ -106,7 +107,7 @@ WIKI_HUB = "docs/reference/"
 LOCAL_PAGES = ("", "docs/", *(f"docs/{slug}/" for slug in GUIDES), WIKI_HUB, *(f"{WIKI_HUB}{slug}/" for slug in REFERENCE))
 NOTICE_PAGES = tuple(f"{WIKI_HUB}{slug}/" for slug in NOTICE_SLUGS)
 PAGE_LOCALES = tuple((lang, local) for lang in NOTICE_LANGUAGES
-                     for local in (LOCAL_PAGES if lang in LANGS else NOTICE_PAGES)) + (("en", site_export_clinic.PATH),)
+                     for local in (LOCAL_PAGES if lang in LANGS else NOTICE_PAGES)) + (("en", site_export_clinic.PATH),) + tuple((lang, site_validation.PATH) for lang in site_validation.LANGUAGES)
 PAGES = tuple(("" if lang == "en" else lang + "/") + local for lang, local in PAGE_LOCALES)
 SEARCH_FILES = tuple(("" if lang == "en" else lang + "/") + "docs/search.json" for lang in NOTICE_LANGUAGES)
 MARKDOWN_PAGES = {path + "index.html": site_llms.markdown_path(path) for path in PAGES}
@@ -137,6 +138,8 @@ def prefix(lang):
 
 
 def page_languages(local):
+    if local == site_validation.PATH:
+        return {lang: site_i18n.LANGUAGES[lang] for lang in site_validation.LANGUAGES}
     if local == site_export_clinic.PATH:
         return {"en": site_i18n.LANGUAGES["en"]}
     return NOTICE_LANGUAGES if local in NOTICE_PAGES else site_i18n.LANGUAGES
@@ -299,7 +302,7 @@ def validate_demo_assets(root):
                 raise ValueError("Referenced panel asset is missing from the demo: " + target)
 
 
-def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None, branch="main"):
+def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None, branch="main", output=None):
     root = Path(root).resolve()
     validate_demo_assets(root)
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9][A-Za-z0-9_.-]*", repository):
@@ -321,7 +324,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
         "REPO_URL": repo_url, "REPO_NAME": name,
         "BASE_URL": base_url, "VERSION": version, "BRANCH": branch,
     }.items()}
-    output = root / "dist/site"
+    output = Path(output).absolute() if output is not None else root / "dist/site"
 
 
     expected = {*(path + "index.html" for path in PAGES), *SEARCH_FILES, *STATIC, ".nojekyll", "robots.txt", "sitemap.xml",
@@ -344,6 +347,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
         return source.read_bytes()
 
     markdown_documents = {}
+    validation_texts = json.loads(read_public("website/validation/texts.json"))
 
     def write(path, content):
         target = output / path
@@ -546,6 +550,10 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
         for slug in page_slugs:
             texts[f"{wiki_hub}{slug}/"] = PlainText(rendered[slug]).text
         search = {"labels": {k: labels[k] for k in ("empty", "results", "prompt")}, "pages": [
+            {"title": validation_texts.get(lang, validation_texts["en"])["title"],
+             "description": validation_texts.get(lang, validation_texts["en"])["description"],
+             "keywords": "benchmark speed audit validation servers tests", "text": validation_texts.get(lang, validation_texts["en"])["description"],
+             "url": relative(hub, (base if lang in site_validation.LANGUAGES else "") + site_validation.PATH)},
             {"title": site_export_clinic.TITLE + (" · English" if lang != "en" else ""),
              "description": site_export_clinic.DESCRIPTION, "keywords": site_export_clinic.KEYWORDS,
              "text": site_export_clinic.DESCRIPTION,
@@ -577,6 +585,10 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                         mark = ' aria-current="page"' if path == site_export_clinic.PATH else ''
                         suffix = ' · EN' if lang != "en" else ''
                         items.append(f'<a lang="en" dir="ltr" href="{relative(path, site_export_clinic.PATH)}"{mark}>Export Clinic{suffix}</a>')
+                        validation_lang = lang if lang in site_validation.LANGUAGES else "en"
+                        validation_path = prefix(validation_lang) + site_validation.PATH
+                        mark = ' aria-current="page"' if path == validation_path else ''
+                        items.append(f'<a lang="{validation_lang}" dir="ltr" href="{relative(path, validation_path)}"{mark}>{html.escape(validation_texts[validation_lang]["title"])}</a>')
             wiki = [f'<p class="nav-label"><a class="nav-label-link" href="{relative(path, wiki_hub)}"'
                     + (' aria-current="page"' if path == wiki_hub else '') + f'>{labels["wiki"]}</a></p>']
             for label, keys in REFERENCE_GROUPS:
@@ -599,7 +611,7 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
             toc_html = (f'<p class="nav-label">{labels["toc"]}</p>' + ''.join(f'<a href="#{id_}">{text}</a>' for id_, text in toc)
                         if toc else "")
             context = {**guide_values(path), **language_values,
-                       "PAGE_CLASS": "notice-page" if local in NOTICE_PAGES else "docs-root docs-hub" if local == "docs/" else "docs-root",
+                       "PAGE_CLASS": "docs-root validation-page" if local == site_validation.PATH else "notice-page" if local in NOTICE_PAGES else "docs-root docs-hub" if local == "docs/" else "docs-root",
                        **{key.upper(): html.escape(value, quote=True) for key, value in labels.items()},
                        "HOME": relative(path, base if full_site else ""), "HUB": relative(path, hub if full_site else "docs/"),
                        "WIKI_HUB": relative(path, wiki_hub if full_site else WIKI_HUB),
@@ -631,6 +643,10 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
                 assets = relative(path, "")
                 result = result.replace('</head>', f'<link rel="stylesheet" href="{assets}export-clinic.css">'
                                         f'<script defer src="{assets}export-clinic.js"></script></head>')
+            if local == site_validation.PATH:
+                assets = relative(path, "")
+                result = result.replace('</head>', f'<link rel="stylesheet" href="{assets}validation/validation.css">'
+                                        f'<script defer src="{assets}validation/validation.js"></script></head>')
             write(path + "index.html", links(result, path))
 
         def card(path, url, number, title, text):
@@ -708,6 +724,12 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
             page(site_export_clinic.PATH, site_export_clinic.TITLE, site_export_clinic.DESCRIPTION,
                  [(labels["home"], base), (labels["docs"], hub), (site_export_clinic.TITLE, site_export_clinic.PATH)],
                  content, headings(content), footer)
+        if lang in site_validation.LANGUAGES:
+            words = validation_texts[lang]
+            content = site_validation.content(read_public, render, guide_values(base + site_validation.PATH), lang)
+            page(site_validation.PATH, words["title"], words["description"],
+                 [(labels["home"], base), (labels["docs"], hub), (words["title"], base + site_validation.PATH)],
+                 content, headings(content), "")
         order = [key for _, keys in REFERENCE_GROUPS for key in keys if key in page_slugs]
         for index, slug in enumerate(order):
             path = f"{wiki_hub}{slug}/"
@@ -740,9 +762,11 @@ def build_site(root=ROOT, *, repository="phishdestroy/TgWitness", base_url=None,
     build_demo(read_public, write)
     llms_index = site_llms.index(base_url, repo_url, branch, version, GUIDES, REFERENCE)
     llms_index += f"\n## Controlled experiment\n\n- [Export Clinic]({base_url}/{site_export_clinic.PATH}index.md): {site_export_clinic.DESCRIPTION}\n"
+    llms_index += f"\n## Checks and measurements\n\n- [Checks & measurements]({base_url}/{site_validation.PATH}index.md): {validation_texts['en']['description']}\n"
     write("llms.txt", llms_index)
     handbook_paths = [f"docs/{slug}/index.html" for _, _, keys in GROUPS for slug in keys]
     handbook_paths.append(site_export_clinic.PATH + "index.html")
+    handbook_paths.append(site_validation.PATH + "index.html")
     handbook_paths += [f"{WIKI_HUB}{slug}/index.html" for _, keys in REFERENCE_GROUPS for slug in keys]
     handbook = site_llms.full(llms_index, [markdown_documents[path] for path in handbook_paths]
                              + [markdown_documents[site_modes.LOCAL]])
@@ -821,8 +845,9 @@ def main():
     parser.add_argument("--repository", default=os.environ.get("GITHUB_REPOSITORY", "phishdestroy/TgWitness"))
     parser.add_argument("--base-url", default=os.environ.get("TGWITNESS_SITE_URL") or None)
     parser.add_argument("--branch", default="main")
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    output = build_site(repository=args.repository, base_url=args.base_url, branch=args.branch)
+    output = build_site(repository=args.repository, base_url=args.base_url, branch=args.branch, output=args.output)
     files = [p for p in output.rglob("*") if p.is_file()]
     print(f"Built {len(files)} public files ({sum(p.stat().st_size for p in files):,} bytes): {output}")
 

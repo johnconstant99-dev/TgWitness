@@ -1,0 +1,52 @@
+<div class="validation">
+  <header class="v-hero">
+    <div class="v-hero-copy">
+      <p class="v-eyebrow"><span class="v-mark" aria-hidden="true"></span> @@EYEBROW@@</p>
+      <h1>@@HEADLINE@@</h1>
+      <p class="v-intro">@@INTRO@@</p>
+      <div class="v-actions"><a class="v-button" href="@@ROOT@@demo/?lang=en">@@DEMO@@ <span aria-hidden="true">↗</span></a><a href="@@ROOT@@demo/downloads/tgwitness-demo.zip" download>@@SAMPLE@@ <span aria-hidden="true">↓</span></a></div>
+      <p class="v-demo-note">@@DEMO_NOTE@@</p>
+    </div>
+    <div class="v-receipt">
+      <div class="v-receipt-top"><span>TGW / 001</span><span class="v-amber-dot" aria-hidden="true"></span></div>
+      <p class="v-snapshot">@@SNAPSHOT@@</p>
+      <dl><div><dt>@@UTC@@</dt><dd><time datetime="@@DATETIME@@">@@DATE@@</time></dd></div><div><dt>@@REVISION_LABEL@@</dt><dd><a href="@@REPO_URL@@/commit/@@REVISION@@">@@SHORT_REVISION@@ <span aria-hidden="true">↗</span></a></dd></div></dl>
+      <div class="v-receipt-state">@@STATUS@@</div>
+    </div>
+  </header>
+  <div class="v-stats">@@STATS@@</div>
+  <div class="v-run-grid">@@RUN_CARDS@@</div>
+  <section class="v-section" aria-labelledby="speed">
+    <div class="v-heading"><span class="v-index">01 /</span><div><h2 id="speed">@@PERFORMANCE_TITLE@@</h2><p>@@PERFORMANCE_INTRO@@</p></div></div>
+    <div class="v-performance">
+      <div class="v-chart-header"><span class="v-chart-unit">@@RATE@@</span><div class="v-switch" role="group" aria-label="@@PERFORMANCE_TITLE@@" hidden><button type="button" data-metric="acquisition" aria-pressed="true">@@ACQUISITION@@</button><button type="button" data-metric="end-to-end" aria-pressed="false">@@END_TO_END@@</button></div></div>
+      <div class="v-bars" aria-live="polite" aria-atomic="true">@@BARS@@</div>
+      <p class="v-chart-note" data-metric-note="acquisition">@@ACQUISITION_NOTE@@</p><p class="v-chart-note" data-metric-note="end-to-end" hidden>@@END_TO_END_NOTE@@</p>
+      <p class="v-chart-note">@@UNMEASURED_NOTE@@</p>
+      <p class="v-run-context">@@PERFORMANCE_LIMITS@@</p>
+      <details class="v-details"><summary>@@DETAILS@@</summary><div class="v-table-scroll" tabindex="0" role="region" aria-label="@@DETAILS@@"><table><thead><tr><th scope="col">@@SERVER@@</th><th scope="col">@@RECORDS@@</th><th scope="col">@@ACQUISITION@@</th><th scope="col">@@END_TO_END@@</th></tr></thead><tbody>@@ROWS@@</tbody></table></div><p>@@VERIFIED_ARCHIVE@@</p></details>
+    </div>
+  </section>
+  <section class="v-section" aria-labelledby="servers">
+    <div class="v-heading"><span class="v-index">02 /</span><div><h2 id="servers">@@SCOPE_TITLE@@</h2><p>@@SCOPE_INTRO@@</p></div></div>
+    <div class="v-server-grid">@@SERVERS@@</div>
+  </section>
+  <details class="v-technical"><summary>@@TECHNICAL@@</summary>
+  <section class="v-section" aria-labelledby="tests">
+    <div class="v-heading"><span class="v-index">03 /</span><div><h2 id="tests">@@TESTS_TITLE@@</h2><p>@@TESTS_INTRO@@</p></div></div>
+    <div class="v-test-layout"><div><div class="v-test-counts">@@TESTS@@</div><p class="v-test-note">@@SANDBOX_NOTE@@</p></div><ul class="v-suites">@@SUITES@@</ul></div>
+  </section>
+  <section class="v-section" aria-labelledby="limits">
+    <div class="v-heading"><span class="v-index">04 /</span><h2 id="limits">@@LIMITS_TITLE@@</h2></div>
+    <ol class="v-limits">@@LIMITS@@</ol>
+  </section>
+  </details>
+  <section class="v-section v-method" aria-labelledby="method">
+    <div class="v-heading"><span class="v-index">05 /</span><div><h2 id="method">@@METHOD_TITLE@@</h2><p>@@METHOD_TEXT@@</p></div></div>
+    <ol class="v-method-steps">@@METHOD_STEPS@@</ol>
+    <p class="v-release">@@RELEASE@@ <code>@@RELEASE_ID@@</code></p>
+    <p><a class="v-data-download" href="@@ROOT@@validation/snapshot.json" download>@@DATA@@ ↓</a></p>
+    <details class="v-details"><summary>@@PROVENANCE@@</summary><p>@@PROVENANCE_NOTE@@</p><ul class="v-provenance">@@PROVENANCE_ROWS@@</ul></details>
+    <p class="v-final-note">@@FOOTER@@</p>
+  </section>
+</div>
