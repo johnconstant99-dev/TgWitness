@@ -97,6 +97,23 @@ def test_collapsible_markup_in_code_remains_literal():
     assert 'markdown=' not in result
 
 
+def test_reference_images_are_in_the_public_site_allowlist():
+    from tools import site_wiki
+
+    images = {}
+    for slug, entry in REFERENCE.items():
+        source = entry[3]
+        body = site_wiki.to_html((ROOT / source).read_text(encoding="utf-8"))[0]
+        site_wiki.rewrite_links(body, source, f"docs/reference/{slug}/", {}, {},
+                               build_site.relative, "https://github.com/phishdestroy/TgWitness",
+                               "main", images, ROOT)
+    assert images
+    for target, source in images.items():
+        assert build_site.WIKI_ASSETS.get(target) == source, source
+        assert build_site.STATIC.get(target) == source, source
+        assert (ROOT / source).is_file(), source
+
+
 def test_metadata_tracks_localized_page_and_visible_hierarchy():
     local = "docs/reports/"
     path = "pt/" + local
