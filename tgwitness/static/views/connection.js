@@ -1,7 +1,9 @@
 export function createConnectionView({root, tr, json, state, refreshStatus, askConfirm}) {
   const get = id => root.querySelector('#' + id);
   const el = (tag, text, cls) => { const n = document.createElement(tag); if(text)n.textContent=text; if(cls)n.className=cls; return n; };
-  let generation=0, draftRevision=0, timer=null, data=null, draft=null, plan=null, mode='warp', visible=false, pending=null;
+  let generation=0, draftRevision=0, timer=null, data=null, draft=null, plan=null, mode='warp', visible=false, pending=null, touched=false;
+  const regions=(()=>{try{return new Intl.DisplayNames([document.documentElement.lang||'en'],{type:'region'});}catch{return null;}})();
+  const country=code=>{try{return code&&regions?regions.of(code):code;}catch{return code;}};
   const labels = {direct:tr('Direct'),vpn:tr('VPN'),proxy:tr('My proxy'),mtproxy:tr('Public MTProto'),warp:tr('WARP')};
   const routeName=value=>({mtproxy_auto:tr('Public MTProto'),socks5:tr('SOCKS5 proxy'),http:tr('HTTP proxy')}[value]||labels[value]||value);
   const notes = {
@@ -39,7 +41,7 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
   function proof(check){
     if(!check)return tr('Not checked yet');
     return [check.telegram_connected?tr('Telegram connected'):tr('Not connected'),check.exit_ip||tr('Exit address unavailable'),
-      check.country,check.warp?('WARP: '+check.warp):'',check.latency_ms+' ms',
+      country(check.country),check.warp?('WARP: '+check.warp):'',check.latency_ms+' ms',
       new Date(check.checked_at*1000).toLocaleString()].filter(Boolean).join(' · ');
   }
   function rows(items){
@@ -60,7 +62,7 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
     if(!pending)return;const p=pending;
     if(p.group&&![...get('connect-group').options].some(o=>o.value===p.group))return;
     pending=null;
-    if(p.mode&&root.querySelector('[data-connect-mode="'+p.mode+'"]'))choose(p.mode);
+    if(p.mode&&root.querySelector('[data-connect-mode="'+p.mode+'"]')){touched=true;choose(p.mode);}
     get('connect-scope').value=p.scope||'account';get('connect-scope').dispatchEvent(new Event('change'));
     if(p.group)get('connect-group').value=p.group;
     if(p.allow_direct!==undefined&&get('connect-direct'))get('connect-direct').checked=p.allow_direct;
@@ -96,6 +98,8 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
       const group=get('connect-group'),selected=group.value;
       group.replaceChildren(...result.groups.map(g=>{const o=el('option',g.label);o.value=g.id;return o;}));group.value=selected||result.groups[0]?.id||'';
       applyPreset();
+      const saved={mtproxy_auto:'mtproxy',socks5:'proxy',http:'proxy',mtproxy:'proxy'}[current.current.mode]||current.current.mode;
+      if(!touched&&!draft&&!plan&&root.querySelector('[data-connect-mode="'+saved+'"]')&&saved!==mode)choose(saved);
       get('connect-current').textContent=routeName(current.current.mode)+
         (current.current.managed?' · '+tr(current.current.process_running?'Local tunnel running':'Local tunnel stopped'):'');
       get('connect-toggle').textContent=tr('Connection route')+' · '+routeName(current.current.mode);
@@ -112,7 +116,7 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
     try{await fn(stamp);}catch(error){if(stamp===generation)status(error.message,true);}
     finally{if(stamp===generation)button.disabled=false;}
   }
-  for(const b of root.querySelectorAll('[data-connect-mode]'))b.addEventListener('click',()=>choose(b.dataset.connectMode));
+  for(const b of root.querySelectorAll('[data-connect-mode]'))b.addEventListener('click',()=>{touched=true;choose(b.dataset.connectMode);});
   get('connect-fields').addEventListener('input',invalidate);
   get('connect-fields').addEventListener('change',invalidate);
   get('connect-scope').addEventListener('change',()=>{
@@ -175,7 +179,7 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
     preset(options){pending=options;applyPreset();},
     enter(){visible=true;root.hidden=!state.me?.admin||!!state.status?.demo;clearTimeout(timer);if(!root.hidden)return load();},
     leave(){visible=false;generation++;clearTimeout(timer);},
-    reset(){generation++;clearTimeout(timer);data=null;invalidate();get('connect-current').textContent=tr('Current connection');
+    reset(){generation++;clearTimeout(timer);data=null;touched=false;invalidate();get('connect-current').textContent=tr('Current connection');
       get('connect-check-result').textContent=tr('Not checked yet');status('');
       for(const input of root.querySelectorAll('input[type=password],textarea'))input.value='';},
   };

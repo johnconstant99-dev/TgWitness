@@ -107,7 +107,7 @@ stable hostname for saved client configurations.
 | `get_message_versions` | Captured versions and deletion observations |
 | `get_message_context` | Nearby captured message IDs |
 | `get_journal_event` | One sanitized record with its source reference |
-| `get_capture_status` | Collection state and permitted coverage records |
+| `get_capture_status` | Collection state, permitted coverage records and `gap_summary`: message numbers never observed, per channel or supergroup and for the account-wide sequence ([details](EVIDENCE.md#missing-message-numbers-gap_summary)); choose a chat to see its listed gaps |
 | `get_activity_stats` | Messages by UTC hour and weekday, peak days, edit and deletion shares, senders, domains and `@handles`, with coverage ([details](CLI.md#activity-statistics)) |
 | `export_messages` | Command line only, not selected by default: streams saved observations as JSON Lines ([details](CLI.md#export)); not offered over MCP |
 

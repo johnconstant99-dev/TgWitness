@@ -698,6 +698,7 @@ class Collector:
             if added or paused or resumed:
                 self.store.append("scope.applied", {
                     "mode": scope["mode"], "folder": (rule or {}).get("title"), "types": scope["types"],
+                    "own_actions": scope["own_actions"],
                     "added": [{"chat_id": c, "title": self.dialog_cache[c]["title"], "kind": self.dialog_cache[c]["kind"]}
                               for c in added],
                     "paused": paused, "resumed": resumed, "excluded": sorted(excluded),
@@ -1124,10 +1125,17 @@ class Collector:
         return {"read_at": utcnow(), "events": events, "complete": len(events) < ADMIN_LOG_LIMIT,
                 "meaning": ADMIN_LOG_MEANING}
 
+    def managed_route(self):
+        managed = getattr(self, "portable_routes", None)
+        selected = managed.selected() if managed else None
+        return selected["mode"] if selected else None
+
     def route_receipt(self):
         receipt = self.network_config().receipt(self.direct_fallback)
         if receipt["kind"] == "mtproxy_auto":
             receipt["proxy_id"] = self.auto_route[0] if self.auto_route else None
+        if mode := self.managed_route():
+            receipt["managed"] = mode
         receipt["exposure"] = self.route_policy()["exposure"]
         return receipt
 
@@ -1136,6 +1144,10 @@ class Collector:
         if public["kind"] == "mtproxy_auto":
             public.update(self.pool().describe(self.route_owner))
         public["exposure"] = self.route_policy()["exposure"]
+        public["managed"] = self.managed_route()
+        check = self.store.get_setting("connection_check", None)
+        public["check"] = {key: check.get(key) for key in ("telegram_connected", "exit_ip", "country", "warp", "checked_at")} \
+            if check else None
         return public
 
     def fallback_due(self):
@@ -1938,14 +1950,7 @@ class Collector:
         except Exception as exc:
             if self.handle_authorization_error(exc, name, client=client):
                 return
-            await self.failure(exc, name)
-            self.running = False
-            if self.phase not in ("storage_error", "authorization_required"):
-                self.phase = "collector_error"
-            await self.cancel_workers()
-            await self.avatar_history.close()
-            if self.client and not (self.export_busy() or self.export_claim):
-                await self.client.disconnect()
+            await self.failure(exc, name, client=client, fatal=True)
 
     async def cancel_workers(self):
         tasks = (self.watchdog, self.media_worker, self.urgent_media_worker, self.ephemeral_media_worker,
@@ -2074,15 +2079,24 @@ class Collector:
                 await catch_up()
             self.recheck_wakeup.set()
 
-    async def failure(self, exc, context, *, client=None):
+    async def failure(self, exc, context, *, client=None, fatal=False):
         if self.handle_authorization_error(exc, context, client=client):
             return
         self.last_error = type(exc).__name__
+        if fatal:
+            self.running, self.phase = False, "collector_error"
         try:
             self.store.append("collector.error", {"operation": context, "error_type": type(exc).__name__,
+                                                 "observation_stopped": fatal, "run_id": self.run_id,
                                                  "coverage": "this update may not have been recorded"})
+            if fatal:
+                self.store.append("observation.stopped", {"reason": "collector_error", "operation": context,
+                                                          "run_id": self.run_id})
         except Exception:
             self.running, self.phase = False, "storage_error"
+            fatal = True
+        if fatal:
+            self.buffered, self.buffering = [], False
             await self.cancel_workers()
             await self.avatar_history.close()
             if self.client and not (self.export_busy() or self.export_claim):

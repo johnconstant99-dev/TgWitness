@@ -671,7 +671,7 @@ def main():
             expect(page.locator("#toast")).to_contain_text("Saved 3 history observations", timeout=15000)
 
             navigate_panel(page, "parameters")
-            expect(page.locator("#parameters-groups .parameters-group")).to_have_count(8)
+            expect(page.locator("#parameters-groups .parameters-group")).to_have_count(9)
             page.locator("#parameter-recheck_max_chats").fill("0")
             expect(page.locator("#parameters-save")).to_be_disabled()
             expect(page.locator("#parameter-recheck_max_chats-parameter-error")).to_contain_text("1 to 1,000")

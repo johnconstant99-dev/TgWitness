@@ -81,7 +81,7 @@ Also: [panel safeguards](PANEL-SAFETY.md), [storage and recovery](STORAGE.md),
 - [Security model and data handling](SECURITY-MODEL.md)
 - [Access scopes, permissions and sessions](ACCESS.md)
 - [Connection and secret storage](CONNECTION-SECURITY.md)
-- [Readiness and known limits](internal/READINESS.md)
+- [Release checks](internal/READINESS.md)
 - [Live acceptance procedure](internal/LIVE_ACCEPTANCE.md)
 - [External timestamps](TIMESTAMP.md)
 - [Release procedure](internal/RELEASE.md)

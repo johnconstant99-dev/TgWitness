@@ -66,6 +66,7 @@ class ArchiveQuery(BaseModel):
     limit: int = Field(default=20, ge=1, le=50)
     ranked: bool = False
     match: Literal["all", "any"] = "all"
+    gaps: bool = True
 
     @field_validator("since", "until")
     @classmethod
@@ -236,11 +237,15 @@ class ArchiveReader:
                     "next_offset": query.offset + query.limit if len(entries) > query.limit else None}
         if query.tool == "get_capture_status":
             c = state.collector
-            return {"workspace": query.workspace, "running": c.running,
-                    "scope": sorted(allowed) if allowed is not None else "workspace",
-                    "completeness": "Unknown. Absence from the archive does not establish absence in Telegram.",
-                    "gaps": self.events(store, query, allowed, kind="coverage"),
-                    "workspace_gaps_visible": allowed is None}
+            result = {"workspace": query.workspace, "running": c.running,
+                      "scope": sorted(allowed) if allowed is not None else "workspace",
+                      "completeness": "Unknown. Absence from the archive does not establish absence in Telegram.",
+                      "gaps": self.events(store, query, allowed, kind="coverage"),
+                      "workspace_gaps_visible": allowed is None}
+            if query.gaps:
+                from .gap_analysis import capture_summary
+                result["gap_summary"] = capture_summary(store, allowed, chat_id=query.chat_id)
+            return result
         if query.tool == "get_journal_event":
             if query.event_seq is None:
                 raise ValueError("Choose an event sequence.")

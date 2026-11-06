@@ -39,6 +39,8 @@ GROUPS = (
     ("people", "People profiles", "What profiles look for in saved messages."),
     ("notifications", "Notifications", "Size and pace of notifications and of the panel's notification list."),
     ("exports", "Exports & history", "Size limits of history snapshots, signed archives and browser downloads."),
+    ("gaps", "Gap analysis", "Missing message numbers in coverage, reports and the archive's capture status. Telegram "
+                             "assigns the numbers; a gap names no actor and no reason."),
     ("connection", "Telegram connection", "Timeouts and retries. Request timeouts and retries apply the next "
                                           "time the account connects."),
     ("proxies", "Automatic MTProxy", "When this account's listed proxy is replaced. List downloads and checks are "
@@ -46,6 +48,18 @@ GROUPS = (
 )
 
 PARAMETERS = (
+    Parameter("gap_analysis", "gaps", True, label="Report missing message numbers",
+              help="Coverage, reports and the capture status list message numbers between observed messages that this "
+                   "collector never saw."),
+    Parameter("gap_account_sequence", "gaps", True, label="Measure the account-wide message numbering",
+              help="Private chats, bots and ordinary groups share one numbering. It is measured only for periods of "
+                   "whole-account collection that kept every such chat and the account's own messages."),
+    Parameter("gap_cluster_min", "gaps", 1, 1, 100000, "message numbers", "Smallest listed gap",
+              "Smaller gaps are still counted."),
+    Parameter("gap_clusters_listed", "gaps", 20, 1, 200, "gaps", "Largest gaps listed for each numbering"),
+    Parameter("gap_service_estimate", "gaps", False, label="Add a service-message estimate",
+              help="How many missing numbers would be service messages at their observed share. An estimate "
+                   "only; it is never subtracted from the missing count."),
     Parameter("board_max_cards", "exports", 10000, 100, 100000, "cards", "Case Board card soft limit",
               "Warn after this many cards. Existing annotations remain available."),
     Parameter("board_max_comments", "exports", 50000, 100, 500000, "comments", "Case Board comment soft limit"),

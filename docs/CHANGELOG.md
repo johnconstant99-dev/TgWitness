@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Plan sealed exports against the remaining session time，offer smaller selections，update progress estimates and reserve time for packaging．
+- Compare every message field，validate record counts and structure，enforce CLI verification options，and display OpenTimestamps states separately．
+- Close coverage on worker failure，bind heartbeats to the capture run，and verify TDX signing-key binding and supported component statuses．
+
+- Show each account's selected route and checked exit address，group session controls，and retain interface preferences when adding an account．Record connection changes without repeating identical background checks．Validate withheld-marker contents and reply states in minimized exports，including rejection of a missing-source label for an included record．
+
+- Update collection-mode instructions and Russian guidance．Allow a bounded publication-settling interval while requiring exact installer bytes．
+
+- Mark messages left out of a minimized disclosure (preview): inside each disclosed chat, withheld messages appear as content-free markers naming the selection rule, one per run or one per message, and disclosed replies state whether they answer a disclosed message, a withheld one or one that is not in the source export. The package format becomes `tgwitness-account-disclosure-v2`; `verify.py` rejects markers with content and replies pointing at missing records, and still verifies version 1 packages.
+- Repeat gap analysis with the settings carried by the signed export，count each service-message number once，and bound account estimates to the measured interval．Require explicit whole-account scope，retain pause／resume boundaries，and interrupt expensive archive scans at their time budget．
+
+- Add missing message numbers (preview): `coverage.json`, the HTML and PDF reports, `verify.py` and the archive's `get_capture_status` measure numbers Telegram assigned and this collector never saw, per channel or supergroup and for the account-wide sequence of private chats, bots and ordinary groups during whole-account collection. Each result states whether it applies and why, lists its parameters, and anchors listed gaps to the neighbouring observations. **Parameters → Gap analysis** sets the listed gaps, the account-wide sequence and an optional service-message estimate that is never subtracted. A gap names no actor and no reason.
 - Record in the signed message when self-destructing media is fetched despite a type or duration rule (`media_capture.rule_override`), with the limits that still applied.
 - Keep ranked-search pages within the first 1，000 results regardless of page size，order OCR／transcription results before pagination，and retain exact match positions when Unicode expansions and invisible-character removal cancel each other's length changes．
 

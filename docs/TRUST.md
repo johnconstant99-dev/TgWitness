@@ -111,13 +111,12 @@ python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo
   grype sbom:sbom.spdx.json
   ```
 
-## What this doesn't guarantee
+## Verification scope
 
-- No bugs, no malicious behavior, no vulnerable deps, or that GitHub, Sigstore, the pinned
-  actions or your tools weren't compromised.
-- That Telegram content is authentic, true or complete, that unseen deletions come back,
-  or that the capture host can't read it.
-- Anything about portable ZIPs, wheels, containers, GitHub's automatic source downloads,
-  old `*-source.zip` files or releases without this attestation.
-- Reproducible builds of full releases, containers, wheels or SBOMs.
-- A complete list of installed or OS packages, or that they're free of vulnerabilities.
+Release attestation binds the named download and its digest to the recorded build workflow
+and source revision．Check the attestation supplied for the exact artifact being installed；
+other package formats have their own publication and verification paths．
+
+The SBOM describes the declared package versions，while a scan evaluates those versions
+against its vulnerability database．Evidence archives are checked separately with the
+[verification procedure for their collection mode](EVIDENCE.md#verification-scope)．

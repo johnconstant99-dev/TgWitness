@@ -115,8 +115,8 @@ def check_version_labels(root):
     if title is None or title.text != label or not any(node.get("aria-label") == label for node in badge.iter()):
         findings.append("docs/assets/presentation/identity-meta-version.svg: regenerate the source-version badge")
     status = (root / "docs/STATUS.md").read_text(encoding="utf-8")
-    if f"Source version: **{version} preview**." not in status:
-        findings.append("docs/STATUS.md: update the source-version qualification record")
+    if not re.search(r"Source version[:：]\s*\*\*" + re.escape(version) + r" preview\*\*[.．]", status):
+        findings.append("docs/STATUS.md: update the source version")
     return findings
 
 

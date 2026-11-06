@@ -1,6 +1,6 @@
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const groupNames = {collection: "Collection", recheck: "Recheck", attachments: "Media", people: "People",
-  notifications: "Notifications", exports: "Exports", connection: "Telegram", proxies: "MTProxy"};
+  notifications: "Notifications", exports: "Exports", gaps: "Gaps", connection: "Telegram", proxies: "MTProxy"};
 
 export function createParameters(context) {
   const {root, tr, getState, getSession, json, may, toast, refreshStatus} = context;

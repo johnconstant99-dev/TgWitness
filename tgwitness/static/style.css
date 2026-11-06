@@ -1171,6 +1171,8 @@ button.pill { cursor: pointer; font-family: inherit; }
 .connection-simple > .page-heading { grid-column: 1 / -1; align-items: center; }
 .connection-simple #account-summary { grid-column: 1; margin: 0 0 14px; }
 .connection-simple:has(#credentials-form:not([hidden]), #authorized-state:not([hidden])) #account-summary { display: none; }
+.connection-simple:has(#authorized-state:not([hidden])) { grid-template-columns: minmax(0, 640px); justify-content: center; }
+.connection-simple:has(#authorized-state:not([hidden])) .account-guide { display: none; }
 .auth-card {
   grid-column: 1; padding: 26px; border: 1px solid var(--border); border-radius: var(--radius-xl);
   background: var(--surface); box-shadow: none;
@@ -1267,6 +1269,19 @@ button.pill { cursor: pointer; font-family: inherit; }
 #authorized-state .account-id { margin: 4px 0 0; color: var(--text-2); font-family: var(--mono); font-size: 13px; }
 #authorized-state .primary { width: 100%; min-height: 44px; }
 #authorized-state .quiet { display: flex; margin: 10px auto 0; }
+#authorized-state .account-tools, #authorized-state .account-manage { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
+#authorized-state .account-tools h3, #authorized-state .account-manage h3 { margin: 0 0 10px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.account-tools-row, .account-manage-row { display: flex; flex-wrap: wrap; gap: 8px; }
+#authorized-state .account-manage-row .quiet { margin: 0; }
+#authorized-state .account-manage .hint { margin: 10px 0 0; }
+#authorized-state .account-restriction { margin: 14px 0 0; padding: 10px 12px; border-radius: var(--radius); background: var(--danger-soft); color: var(--danger); font-size: 13.5px; }
+.account-sessions { display: grid; gap: 6px; margin-top: 12px; }
+#authorized-state .account-sessions > .hint { margin: 0 0 4px; }
+.account-session { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13.5px; }
+.account-session.current { background: var(--surface-2); }
+.account-session > .muted { grid-column: 1; font-size: 12.5px; }
+.account-session > strong, .account-session > button { grid-column: 2; grid-row: 1 / span 2; font-size: 12.5px; }
+#authorized-state .account-session > button { margin: 0; }
 #authorized-state .sign-out { margin-top: 2px; color: var(--danger); }
 #authorized-state .sign-out:hover:not(:disabled) { background: var(--danger-soft); color: var(--danger); }
 #demo-account-state h2 { margin: 6px 0 10px; }

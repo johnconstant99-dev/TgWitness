@@ -67,6 +67,14 @@ From a finished account export, choose **Prepare a sharing copy**. This builds a
 5. Preview the counts, warnings and sample transformed messages, then explicitly confirm creation. Samples are limited to 12 messages and 2,000 text characters each. This is a sample, not a full review of the result. Changing settings requires another preview. A preview expires after 15 minutes and is bound to that administrator session and exact original ZIP; it cannot be reused after creation. A new preview invalidates the previous one for the same job and session.
 6. Inspect the complete resulting `index.html` and `messages.jsonl` locally before handing it over. If it reveals unnecessary information, create a new disclosure with stronger exclusions. Do not edit the signed ZIP in place.
 
+### Messages left out by the selection
+
+**Preview.** A disclosure does not look complete when it is not. Inside every chat that keeps at least one disclosed message, messages the selection left out appear as markers, `[withheld by selection — rule: sender]` (or `text`, `period`). Choose **Messages left out by the selection**: one marker for each run of consecutive withheld messages (default) or one for each message. Markers carry only the rule and a count, never text, sender, date or files. Chats with nothing disclosed are left out entirely, so the package does not reveal that they exist.
+
+Disclosed replies say what they answer: a message included in this copy, a message withheld by the selection, or a message that is not in the source export (deleted before the export or never exported; the export cannot tell which). A withheld message that a disclosed reply answers always gets its own marker, so the reply points at a record that explains why it is empty. These three states are distinct from deletions and collection gaps, which belong to the source export.
+
+In `messages.jsonl` (format `tgwitness-account-disclosure-v2`) each message has `state`: `disclosed`, or `withheld` with `rules` and `count`. A disclosed reply has `reply_to` with the target `id` and `state` (`disclosed`, `withheld`, `not_in_source`). The manifest counts disclosed messages, chats, media and `withheld` messages. `verify.py` rejects a marker that carries content and a reply that points at a record missing from the package; version 1 packages verify as before.
+
 The minimized format omits structured account profiles, contacts, avatars, sessions, stories, raw Telegram objects, forwarding headers, reply quotations, contact cards and location metadata. It excludes the original JSONL files, private filter settings, pseudonym key and identity map. Selected text, explicitly retained identities and included files can still contain the same names, IDs or phrases used in those filters; they need separate review. The private policy and pseudonym key are retained encrypted in the local vault for the job; deleting the job clears its associated private disclosure records. The public policy records filter counts rather than filter values. The stated purpose is public in the manifest and HTML: explicit private criteria and, in pseudonymized modes, known hidden identities are masked there too, including when message text is omitted. Keep the purpose free of unnecessary personal details; unknown identifying context can remain.
 
 Its manifest binds the derivative files, public policy and original ZIP's hash. Verification can establish integrity and, if the source is supplied locally, matching source linkage:
@@ -78,12 +86,10 @@ python -m tgwitness.verify minimized-disclosure.zip --fingerprint TRUSTED_SHA256
 
 Source linkage does not independently prove that the transformation selected every required item or removed every identifying detail. Original plaintext is not embedded as a proof. A fresh review is needed for that judgment.
 
-## Data protection and the hosted Capture preview
+## Sharing and hosted capture
 
-These controls support purpose limitation and data minimization; they are not an automatic legal compliance check. [GDPR Articles 5 and 25](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng) address those principles and protection by design/default. A lawful basis, necessity, special-category conditions where applicable, retention, security and recipient access still need a decision appropriate to the case. A litigation purpose alone does not make every disclosure lawful. Pseudonymized data generally remains personal data; see the [EDPB explanation](https://www.edpb.europa.eu/topics/ai-and-technology/anonymisation-pseudonymisation_en).
+Select the messages and files the recipient needs，review the complete sharing copy，and retain the source separately．Record the delivered ZIP's hash so the recipient can identify and verify that exact copy．Pseudonymization replaces the selected identifiers；included text and original files remain part of the review．
 
-Free text, dates, rare events and combinations of facts can identify people even after names are removed. Prefer text omission where message content is unnecessary; inspect the full derivative where it is necessary. Keep the source and vault protected, agree retention and sharing with the responsible person, and record which exact ZIP was handed over.
-
-GitHub Actions supports full-account and selected-chat exports through Takeout or the regular API，plus a one-chat event journal．The [hosted capture guide](https://phishdestroy.github.io/TgWitness/docs/capture/) explains settings verification and the 120-minute limit．Local exports and sharing copies do not inherit GitHub attestation，and synthetic tests do not establish live Telegram acceptance．
+GitHub Actions supports full-account and selected-chat exports through Takeout or the regular API，plus a one-chat event journal．The [hosted capture guide](https://phishdestroy.github.io/TgWitness/docs/capture/) explains settings verification and the 120-minute limit．To verify a sharing copy derived from hosted capture，check its source hash against the original archive and verify that archive's attestation with the [mode-specific checks](EVIDENCE.md#verification-scope)．
 
 [Evidence format](EVIDENCE.md) · [Case reports](CASE_REPORTS.md)

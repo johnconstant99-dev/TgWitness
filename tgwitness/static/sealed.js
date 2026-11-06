@@ -143,6 +143,7 @@ function describeMode() {
 function clearAssessment() {
   assessedSelection = null; assessmentResult = null; $("save-selection").disabled = true;
   $("preflight-result").textContent = ""; $("preflight-details").hidden = true;
+  $("preflight-budget").textContent = ""; $("budget-actions").hidden = true;
   const journal = $("export-mode").value === "journal";
   $("account-options").hidden = journal;
   $("export-scope").disabled = journal;
@@ -184,8 +185,8 @@ function renderAssessment(result) {
   const sample = result.sample || {}, format = bytes => bytes >= 1048576 ? (bytes / 1048576).toFixed(2) + " MiB" :
     bytes >= 1024 ? (bytes / 1024).toFixed(1) + " KiB" : (bytes || 0) + " B";
   $("preflight-result").textContent = (result.can_start ? tr("Settings accepted．", "Настройки приняты．") : tr("Cannot start with these resources．", "Недостаточно ресурсов для запуска．")) + " " + tr(
-    `Sample：${sample.messages_examined || 0} messages，file downloads ${format(sample.known_download_bytes)}，estimated unique hash data ${format(sample.hash_manifest_estimate_bytes)}．Total archive size and duration remain unknown．${Math.ceil(result.remaining_seconds / 60)} capture minutes remain．`,
-    `В выборке ${sample.messages_examined || 0} сообщений，файлы для скачивания ${format(sample.known_download_bytes)}，оценка объёма уникальных хешей ${format(sample.hash_manifest_estimate_bytes)}．Общий размер и длительность пока неизвестны，осталось ${Math.ceil(result.remaining_seconds / 60)} минут．`) + " " +
+    `Sample：${sample.messages_examined || 0} messages，file downloads ${format(sample.known_download_bytes)}，estimated unique hash data ${format(sample.hash_manifest_estimate_bytes)}．${Math.ceil(result.remaining_seconds / 60)} session minutes remain．`,
+    `В выборке ${sample.messages_examined || 0} сообщений，файлы для скачивания ${format(sample.known_download_bytes)}，оценка объёма уникальных хешей ${format(sample.hash_manifest_estimate_bytes)}．Осталось ${Math.ceil(result.remaining_seconds / 60)} минут сеанса．`) + " " +
     (result.issues || []).map(issue => lang === "ru" ? ({
       approval_not_checked: "Telegram может потребовать подтверждения экспорта，эта проверка не запускает Takeout и не определяет срок ожидания．",
       left_chats_unavailable: "Обычный API не перечисляет покинутые каналы и супергруппы．",
@@ -197,7 +198,29 @@ function renderAssessment(result) {
       sample_exceeds_free_disk: "Даже файлам из выборки требуется больше свободного места．",
       browser_delivery_size_risk: "Файлы из выборки превышают предел расшифровки в браузере，используйте локальную команду．"
     }[issue.code] || issue.message) : issue.message).join(" ");
+  const plan = result.time_plan;
+  if (!plan) return;
+  const minutes = seconds => Math.ceil(seconds / 60), states = {
+    estimated_fit: tr("Fits the time estimate．", "По расчёту помещается во время сеанса．"),
+    over_budget: tr("The selected volume exceeds the available time．", "Выбранный объём превышает доступное время．"),
+    no_collection_time: tr("Only archive preparation time remains．", "Оставшееся время требуется для подготовки архива．"),
+    unknown: tr("Not all selected data could be measured．", "Не все выбранные данные удалось оценить．")};
+  $("preflight-budget").textContent = (states[plan.fit] || "") + " " + tr(
+    `${plan.messages_to_read} history messages counted．Estimated work：${minutes(plan.acquisition_seconds)} min，archive preparation：${minutes(plan.sealing_reserve_seconds)} min，available：${minutes(plan.remaining_seconds)} min．Download assumption：1 MiB/s with a 2× time margin．`,
+    `В проверенной истории ${plan.messages_to_read} сообщений．Оценка сбора：${minutes(plan.acquisition_seconds)} мин，подготовка архива：${minutes(plan.sealing_reserve_seconds)} мин，доступно：${minutes(plan.remaining_seconds)} мин．Для файлов заложена скорость 1 МиБ/с и двукратный запас времени．`) +
+    (plan.approval === "not_requested" ? " " + tr("Takeout approval time will be added when Telegram reports it．", "Время подтверждения Takeout добавится после ответа Telegram．") : "") +
+    (plan.files_exceed_budget ? " " + tr("Estimated files also exceed the selected download budget．", "Оценка файлов также превышает выбранный бюджет скачивания．") : "");
+  $("budget-actions").hidden = !plan.suggestions.length;
+  $("budget-messages").hidden = !plan.suggestions.includes("messages_only");
+  $("budget-chats").hidden = !plan.suggestions.includes("fewer_chats") || $("export-mode").value === "journal";
 }
+$("budget-messages").onclick = () => {
+  $("media-action").value = "exclude";
+  for (const kind of Object.keys(mediaTypes)) $("action-" + kind).value = "";
+  for (const id of ["include-avatars", "preserve-ephemeral-media", "account-photos", "account-stories", "account-other"]) $(id).checked = false;
+  clearAssessment(); $("preflight").click();
+};
+$("budget-chats").onclick = () => {$("export-scope").value = "chat"; clearAssessment(); $("chats").focus();};
 $("save-selection").onclick = () => {
   if (!assessedSelection) return;
   const url = URL.createObjectURL(new Blob([JSON.stringify(assessedSelection, null, 2) + "\n"], {type: "application/json"}));
@@ -246,6 +269,13 @@ function renderState(state) {
     $("capture-messages").textContent = String(account ? Math.max(account.counts?.messages || 0, account.acquisition?.messages_preserved || 0) : state.history.captured || 0);
     $("capture-unavailable").textContent = String(account ? account.coverage?.failures || 0 : state.history.unavailable || 0);
     $("capture-remaining").textContent = String(Math.ceil(state.remaining_seconds / 60));
+    const budget = state.time_budget;
+    $("capture-budget").textContent = budget ? tr(
+      `Collection time left：${Math.ceil(budget.collection_seconds / 60)} min，reserved for the archive：${Math.ceil(budget.sealing_reserve_seconds / 60)} min．`,
+      `На сбор осталось ${Math.ceil(budget.collection_seconds / 60)} мин，на подготовку архива отведено ${Math.ceil(budget.sealing_reserve_seconds / 60)} мин．`) +
+      (budget.estimated_remaining_seconds == null ? "" : tr(` Current completion estimate：${Math.ceil(budget.estimated_remaining_seconds / 60)} min．`, ` Текущая оценка до завершения：${Math.ceil(budget.estimated_remaining_seconds / 60)} мин．`)) +
+      (budget.fit === "wait_exceeds_window" ? tr(" Telegram's reported wait exceeds this session．Approve Takeout from an established session，or finish with the data already saved．", " Указанное Telegram ожидание выходит за время сеанса．Подтвердите Takeout из действующей сессии или завершите с уже сохранёнными данными．") :
+       budget.fit === "over_budget" ? tr(" At the current rate，the full selection will not fit；collection stops before packaging time．", " При текущем темпе весь выбранный объём не помещается，сбор завершится с резервом на упаковку．") : "") : "";
     const transfer = account?.active && account.transfer;
     $("capture-transfer").hidden = !transfer;
     $("capture-transfer").textContent = transfer ? tr(

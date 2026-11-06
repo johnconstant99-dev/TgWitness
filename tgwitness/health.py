@@ -232,6 +232,8 @@ def sources(c, enabled_sources):
     scope = (c.get("scope") or {}).get("mode", "selected")
     if not enabled_sources and scope == "selected":
         return part("off", "no_sources", counts=counts)
+    if not c.get("running") and not counts["lost"]:
+        return part("off", "paused", counts=counts)
     if not statuses:
         return part("unknown", "not_checked", counts=counts)
     if counts["lost"] and not (counts["visible"] or counts["added"]):

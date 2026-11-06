@@ -173,9 +173,13 @@ def build_server(api, local_token=None):
 
     @server.tool(annotations=annotations)
     async def get_capture_status(ctx: Context, workspace: str = "default", chat_id: int | None = None,
-                                 before: int | None = None, limit: int = 20) -> dict:
-        """Read collection status and permitted coverage observations without credentials or raw configuration."""
-        return await read(ctx, "get_capture_status", workspace=workspace, chat_id=chat_id, before=before, limit=limit)
+                                 before: int | None = None, limit: int = 20, gap_summary: bool = True) -> dict:
+        """Read collection status and permitted coverage observations without credentials or raw configuration.
+        gap_summary lists message numbers between observed messages that were never observed, per channel or
+        supergroup and for the account-wide sequence when it applies; choose a chat to see its listed gaps.
+        A gap names no actor or reason."""
+        return await read(ctx, "get_capture_status", workspace=workspace, chat_id=chat_id, before=before, limit=limit,
+                          gaps=gap_summary)
 
     return server
 

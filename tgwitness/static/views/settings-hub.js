@@ -65,10 +65,12 @@ export function createSettingsHub(ctx) {
   }
   function restoreMoved(){for(const [el,marker] of moved){marker.replaceWith(el);}moved=[];}
   function move(el, host){if(!el)return;const marker=document.createComment('settings-form');el.before(marker);host.append(el);moved.push([el,marker]);}
+  function lastLevel(){try{const value=localStorage.getItem('tgwitness-ui-level');return ['simple','standard','expert'].includes(value)?value:'simple';}catch{return 'simple';}}
   function applyPresentation() {
     if(!prefs)return;
     ctx.catalog();
     document.documentElement.dataset.uiLevel=prefs.level;
+    try{localStorage.setItem('tgwitness-ui-level',prefs.level);}catch{}
     for(const b of document.querySelectorAll('.sidebar .nav[data-view]'))b.dataset.level=navLevels[b.dataset.view]||'expert';
     for(const [view,simple,full] of [['start','Home','Start here'],['observations','Changes','Journal'],['evidence','Archives','Exports']]){
       const b=document.querySelector('.sidebar [data-view="'+view+'"]');
@@ -91,7 +93,7 @@ export function createSettingsHub(ctx) {
     for(const control of document.querySelectorAll('[data-ui-level]'))control.hidden=!!demo;
     if(demo){$('hub-route-status').hidden=true;return;}
     const loaded=await request(who,'preferences');
-    if(preferenceVersion===preferencesSequence)prefs=loaded.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:'simple'};
+    if(preferenceVersion===preferencesSequence)prefs=loaded.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:lastLevel(),...(prefs||{})};
     const requestedLanguage=new URL(location.href).searchParams.get('lang');
     if(requestedLanguage===ctx.language&&prefs.language!==requestedLanguage)await savePreferences({language:requestedLanguage},who);
     else if(!loaded.saved)await savePreferences({},who);else applyPresentation();
@@ -109,7 +111,7 @@ export function createSettingsHub(ctx) {
     const who=owner();
     if(state.status?.demo){root.replaceChildren(message('Demo workspace. Connect accounts in your live installation.'));return;}
     if(!state.me?.admin){root.replaceChildren(message('Only the workspace administrator can change collection settings.'));return;}
-    if(!prefs){const result=await request(who,'preferences');prefs=result.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:'simple'};applyPresentation();}
+    if(!prefs){const result=await request(who,'preferences');prefs=result.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:lastLevel(),...(prefs||{})};applyPresentation();}
     data=await request(who,'settings');draft={...data.wizard};
     visited=Math.max(visited,draft.step);
     if(state.view==='first-run'&&wanted&&wanted!==draft.step&&wanted<=visited&&!live){

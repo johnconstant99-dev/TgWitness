@@ -81,8 +81,10 @@ def source_status(store):
     assert Collector.source_visibility(collector, CHAT, {})["reason"] == "not_in_dialogs"
     collector.dialog_cache = {CHAT: {"visibility": "public_username", "role": "member_or_unknown"}}
     assert Collector.source_visibility(collector, CHAT, {})["state"] == "visible_in_dialogs"
-    part = health.sources({"source_status": {str(CHAT): receiving}}, 1)
+    part = health.sources({"source_status": {str(CHAT): receiving}, "running": True}, 1)
     assert part["state"] == "working" and part["counts"]["receiving"] == 1, part
+    part = health.sources({"source_status": {str(CHAT): receiving}}, 1)
+    assert part["state"] == "off" and part["reason"] == "paused" and part["counts"]["receiving"] == 1, part
 
 
 if __name__ == "__main__":

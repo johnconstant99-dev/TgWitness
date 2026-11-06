@@ -1963,8 +1963,14 @@ def verify_tdx_journal(report, path, key, record, reference=None, collateral=Non
                 except (tdx.QuoteError, ValueError, KeyError, TypeError) as exc:
                     problems.append(where + str(exc))
                     continue
-                if run.get("public_key") and fingerprint(run["public_key"]) != key.lower():
-                    problems.append(where + "started with another key")
+                try:
+                    public = run.get("public_key")
+                    bound_key = (isinstance(public, str) and len(base64.b64decode(public, validate=True)) == 32
+                                 and fingerprint(public) == key.lower())
+                except (ValueError, TypeError):
+                    bound_key = False
+                if not bound_key:
+                    problems.append(where + "the quoted start does not bind the journal signing key")
                 if measured["report"]["report_data"] != tdx.report_data(start_binding(run)):
                     problems.append(where + "the quote does not cover this start")
                 seen = (run.get("host") or {}).get("provider") or {}

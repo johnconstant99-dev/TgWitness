@@ -213,6 +213,48 @@ class PublicationTests(unittest.TestCase):
             self.assertEqual(target.read_bytes(), b"existing local bytes")
             self.assertFalse((site / "releases.json").exists())
 
+    def test_publication_waits_for_exact_bytes_without_rechecking_matching_files(self):
+        calls = []
+        def remote(path):
+            calls.append(path)
+            if path == "missing-installer-publication-check":
+                raise HTTPError("synthetic", 404, "missing", {}, None)
+            if path == "install.ps1.sig" and calls.count(path) == 1:
+                return b"previous signature"
+            return b"expected"
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            for name in ("install.ps1", "install.ps1.sig"):
+                (site / name).write_bytes(b"expected")
+            with patch.object(publication, "fetch", side_effect=remote), patch.object(publication.time, "sleep") as pause:
+                publication.verify_public(site, attempts=2)
+            self.assertEqual(calls.count("install.ps1"), 1)
+            self.assertEqual(calls.count("install.ps1.sig"), 2)
+            pause.assert_called_once_with(5)
+
+    def test_publication_never_accepts_a_permanent_mismatch_or_missing_file(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            (site / "install.ps1.sig").write_bytes(b"expected")
+            for response in (b"wrong", HTTPError("synthetic", 404, "missing", {}, None)):
+                effect = lambda *_: response
+                if isinstance(response, Exception):
+                    effect = response
+                with self.subTest(response=type(response).__name__), patch.object(publication, "fetch", side_effect=effect) as read:
+                    with patch.object(publication.time, "sleep"), self.assertRaisesRegex(ValueError, "Published bytes"):
+                        publication.verify_public(site, attempts=2)
+                    self.assertEqual(read.call_count, 2)
+
+    def test_publication_redirect_refusal_is_not_retried(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            (site / "install.ps1").write_bytes(b"expected")
+            with patch.object(publication, "fetch", side_effect=ValueError("must not redirect")) as read:
+                with patch.object(publication.time, "sleep") as pause, self.assertRaisesRegex(ValueError, "redirect"):
+                    publication.verify_public(site)
+                self.assertEqual(read.call_count, 1)
+                pause.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

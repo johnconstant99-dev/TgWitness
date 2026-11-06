@@ -2,11 +2,10 @@
 
 [Export and verify](EVIDENCE.md) · [High assurance](HIGH-ASSURANCE.md) · [Panel guide](PANEL.md#extras)
 
-A collector signs its own journal, so whoever controls the collector and its key could in
-principle rewrite or truncate the journal and sign it again. A witness makes that
-detectable. It is a separate process — another container, or better a server someone else
-runs — that every few minutes fetches the collector's signed journal head, signs what it
-saw with its own key, keeps it in its own journal and posts it to a Telegram channel.
+A witness retains signed checkpoints separately from the collector．It checks the
+collector's signature and journal continuity，signs the result with its own key，and
+publishes it to a Telegram channel．Run it on a separate server with read-only access to
+the collector's witness endpoint．
 
 ```mermaid
 flowchart LR
@@ -45,7 +44,9 @@ Every interval (10 minutes by default) the witness:
 
 1. fetches the head itself (the collector cannot push or skip it);
 2. verifies the collector's signature, the pinned collector key (`--collector-fingerprint`,
-   or the first key seen), a nondecreasing count and an unchanged head at an unchanged count;
+   or the first key seen)，a nondecreasing count and an unchanged head at an unchanged count．
+   Merkle inclusion and consistency proofs verify that a growing journal extends the
+   retained checkpoint．Once continuity proofs have been used，removing them is rejected；
 3. appends a signed record to its own journal: `witness.anchor` with status `ok`,
    `key_changed`, `rollback` (fewer records than before), `fork` (same length, different
    head) or `invalid` (the answer failed verification), or `witness.no_response` when the
@@ -287,17 +288,8 @@ When `--channel` is also supplied, missing claimed posts or an empty match set f
 strict check. Without the flag, ordinary integrity checks still report unwitnessed
 records without rejecting an otherwise intact archive.
 
-The flag enforces consistency with the supplied, pinned witness records. The operator
-must still establish the witness's independence and preserve its records separately.
-It does not establish message truth, complete collection or an independently measured runtime.
-
-A witness shows what the collector reported at those times and that later exports agree
-with it. It does not show that the collector recorded everything Telegram delivered, or
-that message content is true. A witness run by the same operator on the same machine is
-weaker than one run by someone else.
-
-An increased count alone cannot establish append-only continuity online: the offline
-comparison must match each retained prefix hash against the full collector export.
-Witness downtime and failed publication leave intervals without external anchors. Missing
-posts can be reported against a retained witness journal; neither a channel nor a server
-controlled by the same operator is an immutable third-party archive.
+Keep the witness journal and its pinned key separately．Online checks verify continuity
+between checkpoints；offline verification compares every retained checkpoint with the
+export．Legacy heads without continuity proofs retain the offline comparison and are
+reported without online continuity verification．The report lists witness downtime and
+failed publications by interval．

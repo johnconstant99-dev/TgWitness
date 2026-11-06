@@ -229,6 +229,32 @@ class API(unittest.TestCase):
             vault=entry['app'].state.vault
             self.assertNotIn(KEY.encode(), (vault.root/'portable_route.enc').read_bytes())
 
+    def test_background_checks_record_only_changes(self):
+        connection, store = self.app.state.connection, self.app.state.store
+        checks = lambda: store.count_events(kind='network.connection_checked')
+        asyncio.run(connection.check_current())
+        asyncio.run(connection.check_current())
+        self.assertEqual(checks(), 2)
+        for _ in range(3):
+            asyncio.run(connection.check_current(always=False))
+        self.assertEqual(checks(), 2)
+        self.assertEqual(store.get_setting('connection_check')['exit_ip'], '203.0.113.10')
+        self.probe.return_value = {**CHECK, 'exit_ip': '203.0.113.11'}
+        asyncio.run(connection.check_current(always=False))
+        self.assertEqual(checks(), 3)
+        self.probe.side_effect = TimeoutError()
+        for _ in range(2):
+            with self.assertRaises(TimeoutError):
+                asyncio.run(connection.check_current(always=False))
+        self.assertEqual(checks(), 4)
+        route = self.client.get('/api/status', headers=self.headers).json()['collector']['network']
+        self.assertIsNone(route['managed'])
+        self.assertFalse(route['check']['telegram_connected'])
+        with patch('tgwitness.guided_connection.revision', return_value='changed-route'):
+            with self.assertRaises(TimeoutError):
+                asyncio.run(connection.check_current(always=False))
+        self.assertEqual(checks(), 5, 'A failed check of another route is a new observation')
+
     def test_failed_check_does_not_stop_reused_selected_tunnel(self):
         portable = self.app.state.connection.portable
         route = NetworkConfig(kind='socks5',host='127.0.0.1',port=40001,local_proxy=True)

@@ -35,7 +35,8 @@ SGX_EXTENSION, TCB, PCEID, FMSPC = ("1.2.840.113741.1.13.1", "1.2.840.113741.1.1
 DSTACK_EVENT = 0x08000001
 STATUSES = ("UpToDate", "SWHardeningNeeded", "ConfigurationNeeded", "ConfigurationAndSWHardeningNeeded",
             "OutOfDate", "OutOfDateConfigurationNeeded", "Revoked")
-QE_STATUSES = ("UpToDate", "OutOfDate", "ConfigurationNeeded", "OutOfDateConfigurationNeeded", "Revoked")
+# Intel QVL IdentityTcbLevel accepts only these enclave identity statuses.
+QE_STATUSES = ("UpToDate", "OutOfDate", "Revoked")
 MODULE_STATUSES = ("UpToDate", "OutOfDate", "Revoked")
 RESERVED_ATTRIBUTES = sum(1 << bit for bit in (*range(1, 4), *range(7, 16), *range(23, 27), *range(32, 62)))
 MEASUREMENTS = ("mrtd", "rtmr0", "rtmr1", "rtmr2")
@@ -247,6 +248,8 @@ def signed_document(collateral, name, root, crls, now, what):
 
 
 def converge(platform, component):
+    if platform not in STATUSES or component not in MODULE_STATUSES:
+        raise QuoteError("Unsupported TCB status convergence: " + str(platform) + ", " + str(component))
     if component == "Revoked":
         return "Revoked"
     if component == "OutOfDate" and platform in ("UpToDate", "SWHardeningNeeded"):

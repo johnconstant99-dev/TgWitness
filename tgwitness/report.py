@@ -2001,19 +2001,76 @@ def coverage_figure(say, coverage):
             + '</span></div><p>' + e(say("Recorded intervals only. Blank space is not proof of uninterrupted collection.")) + '</p></figure>')
 
 
+def gap_overview(say, summary):
+    """Plain rows for missing message numbers, shared by the HTML and PDF reports."""
+    if not summary or summary.get("status") != "on":
+        return None
+    sequences = [(c.get("title") or str(c["chat_id"]), c) for c in summary.get("chats") or []]
+    if summary.get("account"):
+        sequences.append((say("Account-wide message numbering"), summary["account"]))
+    settings = summary["parameters"]
+    measured, skipped, listed = [], [], []
+    for name, item in sequences:
+        if item.get("status") != "applicable":
+            skipped.append([name, item.get("reason") or "—"])
+            continue
+        row = [name, str(item["observed_from"]) + " – " + str(item["observed_to"]), item["observed"], item["missing"],
+               format(item["density"] * 100, ".2f") + "%", item["largest_gap"]]
+        if settings["gap_service_estimate"]:
+            row.append((item.get("service_estimate") or {}).get("expected_service_in_missing", "—"))
+        measured.append(row)
+        for gap in item.get("clusters") or []:
+            listed.append([name, str(gap["low"]) + " – " + str(gap["high"]), gap["missing"],
+                           gap["after"]["message_id"], gap["after"]["observed_at"],
+                           gap["before"]["message_id"], gap["before"]["observed_at"]])
+    note = " ".join((
+        say("Parameters: gaps of {smallest} or more message numbers are listed, at most {listed} for each numbering.",
+            smallest=settings["gap_cluster_min"], listed=settings["gap_clusters_listed"]),
+        say("The account-wide numbering is measured where it applies.") if settings["gap_account_sequence"]
+        else say("The account-wide numbering is not measured."),
+        say("A service-message estimate is shown.") if settings["gap_service_estimate"]
+        else say("No service-message estimate is shown.")))
+    headers = [say("Message numbering"), say("Observed range"), say("Observed"), say("Numbers missing"), say("Density"),
+               say("Largest gap")]
+    if settings["gap_service_estimate"]:
+        headers.append(say("Estimated service messages"))
+    return {"headers": headers, "measured": measured, "skipped": skipped, "listed": listed, "note": note,
+            "lead": say("Telegram numbers messages once per channel or supergroup, and once per account across private "
+                        "chats, bots and ordinary groups. A missing number is a message that existed and was never "
+                        "observed by this collector. A gap names no actor and no reason."),
+            "listed_headers": [say("Message numbering"), say("Missing range"), say("Count"),
+                               say("Last observed number before"), say("Observed at"),
+                               say("First observed number after"), say("Observed at")],
+            "skipped_headers": [say("Message numbering"), say("Not measured because")]}
+
+
+def gap_html(say, summary):
+    view = gap_overview(say, summary)
+    if view is None:
+        return ""
+    out = "<h3>" + e(say("Missing message numbers")) + '</h3><p class="lead">' + e(view["lead"]) + "</p>"
+    if view["measured"]:
+        out += table(view["headers"], [[e(row[0])] + [num(value) for value in row[1:]] for row in view["measured"]])
+    if view["listed"]:
+        out += "<h4>" + e(say("Listed gaps")) + "</h4>" + table(view["listed_headers"], [
+            [e(name), e(numbers), num(count), num(after), when(after_at), num(before), when(before_at)]
+            for name, numbers, count, after, after_at, before, before_at in view["listed"]])
+    if view["skipped"]:
+        out += table(view["skipped_headers"], [[e(name), e(reason)] for name, reason in view["skipped"]])
+    return out + '<p class="hint">' + e(view["note"]) + "</p>"
+
+
 def coverage_section(say, number, coverage):
     if not coverage:
         return ""
-    periods = [[when(p["from"]), when(p["to"]), e(span_text(say, p["from"], p["to"]))
-                + (' <span class="pill ok">' + e(say("still observing")) + "</span>" if p.get("still_observing") else "")]
+    periods = [[when(p["from"]), when(p["to"]), e(span_text(say, p["from"], p["to"]))]
                for p in coverage["continuous"]]
     gaps = [[when(g["from"]), when(g["to"]), e(g.get("reason"))] for g in coverage["gaps"]]
     ids = [[e(c.get("title") or c["chat_id"]), num(c["observed_from"]) + " – " + num(c["observed_to"]), num(c["observed"]),
             num(c["not_observed"]), ranges_text(c.get("ranges") or [], c.get("ranges_total", 0))]
            for c in coverage["unobserved_ids"]]
     out = section(number, "coverage", say("Coverage"),
-                  say("Continuous means observation was on, connected and writing records at least every three minutes. "
-                      "IDs not observed were never seen by this collector; that is not evidence that they were deleted."))
+                  coverage.get("meaning") or say("Recorded observation intervals."))
     out += coverage_figure(say, coverage)
     out += "<h3>" + e(say("Continuous observation")) + "</h3>" + (table([say("Interval start"), say("Interval end"), say("Duration")], periods)
                                                                     if periods else "<p>—</p>")
@@ -2025,6 +2082,7 @@ def coverage_section(say, number, coverage):
             "observed one that was never seen is listed here; coverage.json lists every one."))
             + "</p>" + table([say("Chat"), say("Observed range"), say("Observed"), say("Not observed"),
                               say("Numbers not observed")], ids))
+    out += gap_html(say, coverage.get("gap_summary"))
     out += ("<h3>" + e(say("Verifier summary")) + '</h3><p class="lead">' + e(say("As verify.py prints it, in English."))
             + '</p><ul class="mono" style="font-size:13px">' + "".join("<li>" + e(line) + "</li>" for line in coverage_lines(coverage))
             + "</ul>")

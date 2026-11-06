@@ -45,7 +45,7 @@ def check_report_example(browser, url, output):
     with zipfile.ZipFile(archive) as source:
         assert source.read('index.html') == report
         manifest = json.loads(source.read('manifest.json'))
-        assert manifest['format'] == 'tgwitness-account-disclosure-v1'
+        assert manifest['format'] in ('tgwitness-account-disclosure-v1', 'tgwitness-account-disclosure-v2')
         assert hashlib.sha256(base64.b64decode(manifest['public_key'], validate=True)).hexdigest() == \
             manifest['fingerprint'] == descriptor['fingerprint']
         assert set(source.namelist()) == set(manifest['files']) | {'manifest.json', 'manifest.sig'}

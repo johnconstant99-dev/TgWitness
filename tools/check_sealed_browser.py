@@ -387,6 +387,7 @@ def main():
                 "https://github.com/synthetic/TgWitness/actions/workflows/sealed-witness.yml")
             page.locator('[data-capture-action="next"]').click()
             cfg = config(record)
+            cfg["seconds"] = 120
             connection(cfg, "https://synthetic.trycloudflare.com", root / "connection.tgwsealed")
             page.locator("#connection-file").set_input_files(root / "connection.tgwsealed")
             expect(page.locator("#open-connection")).to_be_visible()
@@ -432,7 +433,8 @@ def main():
             expect(capture.locator("#collect")).to_be_enabled()
             capture.locator("#media-action").select_option("hashes_only")
             capture.locator("#preflight").click()
-            expect(capture.locator("#preflight-result")).to_contain_text("Общий размер и длительность пока неизвестны")
+            expect(capture.locator("#preflight-budget")).to_contain_text("Оценка сбора")
+            expect(capture.locator("#preflight-budget")).to_contain_text("подготовка архива")
             assert app.state.session.store.get_setting("capture", None) is None
             capture.locator("#media-rules").locator("..").locator("summary").click()
             for width in (1280, 390, 320):
@@ -444,6 +446,12 @@ def main():
             capture.locator("#media-rules").locator("..").locator("summary").click()
             capture.screenshot(path=str(screenshots / "runner-hash-preflight.png"), full_page=True, animations="disabled")
             capture.locator("#language").select_option("ru")
+            capture.locator("#media-action").select_option("download")
+            capture.locator("#preflight").click()
+            expect(capture.locator("#budget-messages")).to_be_visible()
+            capture.locator("#budget-messages").click()
+            expect(capture.locator("#media-action")).to_have_value("exclude")
+            expect(capture.locator("#budget-messages")).to_be_hidden()
             capture.locator("#media-action").select_option("download")
             capture.locator("#collect").click()
             expect(capture.locator("#status")).to_contain_text("Сбор завершён", timeout=15000)

@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import time
 from urllib.error import HTTPError
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
@@ -127,16 +128,29 @@ def retain(site, public):
     index(site, public)
 
 
-def verify_public(site):
+def verify_public(site, *, attempts=7, delay=5):
     paths = [p.relative_to(site).as_posix() for p in site.rglob("*")
              if p.is_file() and not p.name.startswith((".", "_"))]
 
     def check(path):
-        if fetch("" if path == "index.html" else path) != (site / path).read_bytes():
-            raise ValueError("Published bytes differ: " + path)
+        try:
+            return fetch("" if path == "index.html" else path) == (site / path).read_bytes()
+        except HTTPError as exc:
+            if exc.code not in (404, 502, 503, 504):
+                raise
+            return False
 
+    pending = paths
     with ThreadPoolExecutor(max_workers=6) as pool:
-        list(pool.map(check, paths))
+        for attempt in range(attempts):
+            pending = [path for path, matches in zip(pending, pool.map(check, pending)) if not matches]
+            if not pending:
+                break
+            if attempt + 1 < attempts:
+                print(f"Waiting for {len(pending)} public paths to match the deployment ({attempt + 1}/{attempts}).")
+                time.sleep(delay)
+    if pending:
+        raise ValueError("Published bytes differ or are unavailable: " + ", ".join(pending[:10]))
     try:
         fetch("missing-installer-publication-check")
     except HTTPError as exc:

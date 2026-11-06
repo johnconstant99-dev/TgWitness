@@ -145,9 +145,9 @@
     const account=state.status?.collector?.account,connected=accountSignedIn();
     if(!$("account-add-another")){
       const add=node("button","secondary",tr("Add another account"));add.id="account-add-another";add.type="button";
-      add.addEventListener("click",beginAdd);$("authorized-state").append(add);
+      add.addEventListener("click",beginAdd);$("account-manage").before(add);
       const remove=node("button","quiet danger-text",tr("Delete workspace"));remove.id="account-delete-workspace";remove.type="button";
-      remove.addEventListener("click",()=>busy(remove,removeWorkspace));$("authorized-state").append(remove);
+      remove.addEventListener("click",()=>busy(remove,removeWorkspace));$("account-manage").querySelector(".account-manage-row").append(remove);
     }
     $("account-add-another").hidden=!state.me?.admin||!connected;
     $("account-delete-workspace").hidden=!state.me?.admin||state.profile==="default";
@@ -156,7 +156,7 @@
       const who=account.username?"@"+account.username:"ID "+account.id;
       if(heading.isConnected)heading.textContent=tr(editing?(adding()&&authMethod==="files"?"Add another account":"Sign in again"):"Connected: {who}",{who});
       $("change-account").textContent=tr("Sign in again");
-      $("sign-out").textContent=tr("Disconnect account");
+      $("sign-out").textContent=tr("Sign out of Telegram");
       $("authorized-account").textContent=(account.username?"@"+account.username+" · ":"")+"ID "+account.id;
     }
     let note=$("import-new-workspace");

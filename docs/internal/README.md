@@ -15,7 +15,7 @@ For user-facing setup and workflows, start with the
 | [`PUBLISHING.md`](PUBLISHING.md) | Public website preview and publication |
 | [`WIKI.md`](WIKI.md) | Build and maintain the separate GitHub Wiki |
 | [`RELEASE.md`](RELEASE.md) | Release preparation |
-| [`READINESS.md`](READINESS.md) | Readiness notes and remaining qualification |
+| [`READINESS.md`](READINESS.md) | Release checks |
 | [`LIVE_ACCEPTANCE.md`](LIVE_ACCEPTANCE.md) | Live acceptance procedure |
 | [`SEO.md`](SEO.md) | Website structure and metadata |
 

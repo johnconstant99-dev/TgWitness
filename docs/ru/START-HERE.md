@@ -29,7 +29,7 @@
 - [Формат доказательств и границы доверия](../EVIDENCE.md)
 - [Архитектура](../ARCHITECTURE.md)
 - [Подключение и хранение секретов](../CONNECTION-SECURITY.md)
-- [Готовность и известные ограничения](../internal/READINESS.md)
+- [Проверки перед выпуском](../internal/READINESS.md)
 - [Процедура живой приёмки](../internal/LIVE_ACCEPTANCE.md)
 - [GitHub и проверка сборки: планы](TRUST-ROADMAP.md)
 

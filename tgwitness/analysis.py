@@ -183,7 +183,7 @@ def retrieve(reader, body, context_chars):
         length += cost
     allowed = reader.principal.chats(body.workspace)
     gaps = reader.read(ArchiveQuery(tool="get_capture_status", workspace=body.workspace,
-                                   since=body.since, until=body.until, limit=10))
+                                   since=body.since, until=body.until, limit=10, gaps=False))
     return {"sources": selected, "partial": partial or len(rows) > len(selected),
             "coverage": {"workspace_events_visible": allowed is None, "events": gaps["gaps"]["items"],
                          "complete": False, "partial": gaps["gaps"]["next_before"] is not None},

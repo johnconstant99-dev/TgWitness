@@ -17,6 +17,7 @@ from .account_export import AccountExportOptions, file_sha
 from . import account_report
 from .security import private_write
 from .store import canonical, utcnow
+from .message_selection import reply_link
 from .verify import MAX_MEMBERS, MAX_UNCOMPRESSED_GIB, fingerprint, verify_account_export, verify_account_disclosure
 from .workers import complete_in_thread
 
@@ -44,6 +45,8 @@ class DisclosurePolicy(BaseModel):
     identity_mode: Literal['keep', 'pseudonymize_third_parties', 'pseudonymize_all'] = 'pseudonymize_third_parties'
     disclose_user_ids: list[int] = Field(default_factory=list, max_length=10000)
     text_mode: Literal['keep', 'omit'] = 'keep'
+    # Messages left out by the selection stay visible as markers: one per run, or one per message.
+    withheld_markers: Literal['collapsed', 'each'] = 'collapsed'
     include_media: bool = False
     include_profile: bool = False
     include_contacts: bool = False
@@ -158,21 +161,91 @@ def mask_literals(text, pattern, replacement):
     return ''.join(result)
 
 
-def matches(row, policy):
+WITHHELD_RULES = ('sender', 'text', 'period')
+MARKER_TEXT = '[withheld by selection \u2014 rule: {rules}]'
+
+
+def withheld_rule(row, policy):
+    """The selection rule that leaves a message out, or None when it is disclosed."""
     if policy.sender_ids and sender_id(row) not in policy.sender_ids:
-        return False
+        return 'sender'
     if policy.text_contains and not any(term in visible_text(row).casefold() for term in policy.text_contains):
-        return False
+        return 'text'
     date = row.get('date')
     if policy.from_utc or policy.to_utc:
         try:
             instant = datetime.fromisoformat(str(date).replace('Z', '+00:00'))
             instant = instant.replace(tzinfo=instant.tzinfo or timezone.utc).astimezone(timezone.utc).isoformat()
         except (TypeError, ValueError):
-            return False
+            return 'period'
         if policy.from_utc and instant < policy.from_utc or policy.to_utc and instant >= policy.to_utc:
-            return False
-    return True
+            return 'period'
+    return None
+
+
+def matches(row, policy):
+    return withheld_rule(row, policy) is None
+
+
+def reply_parent(row, chat_id):
+    """The message a row answers directly in the same chat, or None."""
+    parent, peer, _topic, direct = reply_link(row, chat_id)
+    return parent if direct and peer == chat_id else None
+
+
+class Withholding:
+    """Which chats keep disclosed messages, and the state of every message a disclosed reply answers."""
+
+    def __init__(self, source, policy):
+        self.chats, self.targets, self.states = set(), set(), {}
+        for chat, row in source_rows(source):
+            if withheld_rule(row, policy) is None:
+                self.chats.add(chat['id'])
+                parent = reply_parent(row, chat['id'])
+                if parent is not None:
+                    self.targets.add((chat['id'], parent))
+        if self.targets:
+            for chat, row in source_rows(source):
+                key = (chat['id'], row.get('id'))
+                if key in self.targets:
+                    self.states[key] = 'disclosed' if withheld_rule(row, policy) is None else 'withheld'
+
+    def reply_state(self, key):
+        # A target absent from the source export may have been deleted or never exported; it is not guessed.
+        return self.states.get(key, 'not_in_source')
+
+
+def entries(source, policy, projection, withholding):
+    """Disclosed messages in source order, with markers where the selection left messages out.
+
+    Chats with nothing disclosed are left out entirely. A withheld message that a disclosed reply answers
+    always gets its own marker, so the reply points at a record that says why it is empty."""
+    run = None
+    for chat, row in source_rows(source):
+        rule, key = withheld_rule(row, policy), (chat['id'], row.get('id'))
+        if rule is None:
+            if run:
+                yield projection.marker(*run)
+                run = None
+            parent = reply_parent(row, chat['id'])
+            reply = None if parent is None else (parent, withholding.reply_state((chat['id'], parent)))
+            yield projection.apply(chat, row, reply)
+            continue
+        if chat['id'] not in withholding.chats:
+            continue
+        if policy.withheld_markers == 'each' or key in withholding.targets:
+            if run:
+                yield projection.marker(*run)
+                run = None
+            yield projection.marker(chat, row, row, 1, {rule}, single=True)
+        elif run and run[0]['id'] == chat['id']:
+            run = (chat, run[1], row, run[3] + 1, run[4] | {rule})
+        else:
+            if run:
+                yield projection.marker(*run)
+            run = (chat, row, row, 1, {rule})
+    if run:
+        yield projection.marker(*run)
 
 
 class Projection:
@@ -239,15 +312,37 @@ class Projection:
         return self.policy.identity_mode == 'keep' or (
             self.policy.identity_mode == 'pseudonymize_third_parties' and user in self.policy.disclose_user_ids)
 
-    def apply(self, chat, row):
+    def public_chat(self, chat):
+        private = self.policy.identity_mode != 'keep'
+        return {'id': self.alias('chat', chat['id']) if private else chat['id'],
+                'title': self.alias('Chat', chat['id']) if private else plain_string(chat.get('title')),
+                'kind': chat.get('kind') if isinstance(chat.get('kind'), str) else None}
+
+    def message_id(self, chat, ident):
+        return self.alias('message', [chat['id'], ident]) if self.policy.identity_mode != 'keep' else ident
+
+    def marker(self, chat, first, last, count, rules, single=False):
+        """A record that stands in for messages the selection left out; it carries no content."""
+        if single:
+            ident = self.message_id(chat, first['id'])
+        elif self.policy.identity_mode != 'keep':
+            ident = 'withheld-' + self.alias('range', [chat['id'], first['id'], last['id']])[6:]
+        else:
+            ident = 'withheld-' + str(first['id']) + '-' + str(last['id'])
+        rules = [rule for rule in WITHHELD_RULES if rule in rules]
+        return {'chat': self.public_chat(chat),
+                'message': {'id': ident, 'state': 'withheld', 'rules': rules, 'count': count,
+                            'text': MARKER_TEXT.format(rules=', '.join(rules)), 'attachments': [],
+                            'redacted_fields': []}}
+
+    def apply(self, chat, row, reply=None):
         policy, uid = self.policy, sender_id(row)
-        private = policy.identity_mode != 'keep'
-        public_chat = {'id': self.alias('chat', chat['id']) if private else chat['id'],
-                       'title': self.alias('Chat', chat['id']) if private else plain_string(chat.get('title')),
-                       'kind': chat.get('kind') if isinstance(chat.get('kind'), str) else None}
-        message = {'id': self.alias('message', [chat['id'], row['id']]) if private else row['id'],
+        public_chat = self.public_chat(chat)
+        message = {'id': self.message_id(chat, row['id']), 'state': 'disclosed',
                    'date': date_text(row.get('date')), 'edited': date_text(row.get('edit_date') or row.get('edited')),
                    'outgoing': bool(row.get('outgoing', row.get('out', False))), 'redacted_fields': []}
+        if reply is not None:
+            message['reply_to'] = {'id': self.message_id(chat, reply[0]), 'state': reply[1]}
         person = row.get('sender') or {}
         if not isinstance(person, dict):
             person = {}
@@ -291,6 +386,7 @@ def public_policy(policy, projection=None):
         purpose = projection.mask_text(purpose)
     return {'purpose': purpose, 'report_language': policy.report_language,
             'identity_mode': policy.identity_mode, 'text_mode': policy.text_mode,
+            'withheld_markers': policy.withheld_markers,
             'from_utc': policy.from_utc, 'to_utc': policy.to_utc, 'include_media': policy.include_media,
             **{'include_' + name: False for name in METADATA},
             'sender_filter_count': len(policy.sender_ids), 'text_filter_count': len(policy.text_contains),
@@ -337,17 +433,18 @@ class Disclosures:
         policy = DisclosurePolicy.model_validate(policy)
         path, digest, limit = self.source(job_id)
         seed = secrets.token_bytes(32)
-        summary = dict(messages_before=0, messages_after=0, chats_before=0, chats_after=0,
+        summary = dict(messages_before=0, messages_after=0, messages_withheld=0, chats_before=0, chats_after=0,
                        media_included=0, identities_pseudonymized=0)
         samples, before_chats, after_chats, media = [], set(), set(), set()
         with zipfile.ZipFile(path) as source:
             projection = Projection(policy, seed, source)
-            for chat, row in source_rows(source):
+            for chat, _row in source_rows(source):
                 summary['messages_before'] += 1
                 before_chats.add(chat['id'])
-                if not matches(row, policy):
+            for result in entries(source, policy, projection, Withholding(source, policy)):
+                if result['message']['state'] == 'withheld':
+                    summary['messages_withheld'] += result['message']['count']
                     continue
-                result = projection.apply(chat, row)
                 summary['messages_after'] += 1
                 after_chats.add(result['chat']['id'])
                 media.update(a['file'] for a in result['message']['attachments'])
@@ -391,7 +488,7 @@ class Disclosures:
         root.mkdir(mode=0o700, exist_ok=True)
         identity = secrets.token_hex(16)
         stage, final = root / (identity + '.partial'), root / (identity + '.zip')
-        hashes, counts, media, chats = {}, dict(messages=0, chats=0, media=0), set(), set()
+        hashes, counts, media, chats = {}, dict(messages=0, chats=0, media=0, withheld=0), set(), set()
         created = utcnow()
         policy = ticket['policy']
         try:
@@ -407,15 +504,19 @@ class Disclosures:
                             digest.update(part)
                     hashes[name] = digest.hexdigest()
 
+                withholding = Withholding(source, policy)
+
                 def rows():
-                    for chat, row in source_rows(source):
-                        if matches(row, policy):
-                            yield projection.apply(chat, row)
+                    return entries(source, policy, projection, withholding)
 
                 analytics = account_report.snapshot_analytics.Analytics("sharing")
 
                 def message_bytes():
                     for row in rows():
+                        if row['message']['state'] == 'withheld':
+                            counts['withheld'] += row['message']['count']
+                            yield canonical(row) + b'\n'
+                            continue
                         analytics.snapshot(row['message'], row['chat'])
                         counts['messages'] += 1
                         chats.add(row['chat']['id'])
@@ -441,7 +542,7 @@ class Disclosures:
                     + 'Optional --evidence original.zip checks source linkage, not the correctness of redaction.\n'
                     + 'For large packages add --max-gib with the expanded size. index.html is protected by the manifest.\n').encode()])
                 write('SHA256SUMS', [''.join(f'{v}  {k}\n' for k, v in sorted(hashes.items())).encode()])
-                manifest = dict(format='tgwitness-account-disclosure-v1', public_key=self.vault.public_key,
+                manifest = dict(format='tgwitness-account-disclosure-v2', public_key=self.vault.public_key,
                     report_language=policy.report_language, report_presentation=policy.report_presentation.model_dump(),
                     fingerprint=fingerprint(self.vault.public_key), disclosure_id=identity, created_at=created,
                     source_archive_sha256=digest, source_collector_fingerprint=fingerprint(self.vault.public_key),

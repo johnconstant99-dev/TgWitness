@@ -369,20 +369,30 @@ class GuidedConnection:
                 error = "Route saved; observation could not resume. Review the account status and resume when ready."
         return {"id": item["id"], "applied": True, "running": c.running, "check": check, "error": error}
 
-    async def check_current(self):
+    async def check_current(self, always=True):
         c = self.app.state.collector
         await self.portable.restore()
         selected = self.portable.selected()
+        previous = c.store.get_setting("connection_check", {}) or {}
         try:
             result = await asyncio.wait_for(probe(c, c.network_config(), selected["mode"] if selected else "proxy",
                 outside=c.route_policy()["outside_enabled"]), 45)
-        except Exception:
-            c.store.set_setting("connection_check", {"telegram_connected": False, "checked_at": int(time.time()), "revision": revision(c)})
+        except Exception as exc:
+            failed = {"telegram_connected": False, "checked_at": int(time.time()), "revision": revision(c),
+                      "error_type": type(exc).__name__}
+            with c.store.transaction():
+                c.store.set_setting("connection_check", failed)
+                if always or any(previous.get(key) != failed[key]
+                                 for key in ("telegram_connected", "revision", "error_type")):
+                    c.store.append("network.connection_checked", failed)
             raise
         result["revision"] = revision(c)
+        changed = any(previous.get(key) != result.get(key)
+                      for key in ("telegram_connected", "exit_ip", "country", "warp", "revision"))
         with c.store.transaction():
             c.store.set_setting("connection_check", result)
-            c.store.append("network.connection_checked", result)
+            if always or changed:
+                c.store.append("network.connection_checked", result)
         return result
 
     async def control(self, action):
@@ -436,7 +446,7 @@ class GuidedConnection:
                 continue
             health_at = time.monotonic() + 60
             try:
-                await self.check_current()
+                await self.check_current(always=False)
             except Exception:
                 if strategy.get("mode") != "auto":
                     continue

@@ -5,9 +5,10 @@ recorders under **Extras → Independent capture**. Its panel selects Telegram D
 Linux or Telegram Web, native JSON export / visual capture / hybrid, and a provisioned
 connector. It does not start TgWitness's Telethon collector or import a Telegram session.
 
-This preview has automated synthetic acceptance tests. It has **not been qualified
-with a real Telegram account, WARP deployment or TDX environment**. Do not treat the
-preview badge or a passing synthetic test as account-safety certification.
+Validation includes automated acceptance tests and the
+[CPU Ubuntu and WARP integration](VERIFICATION.md#trusted-live-cpu-ubuntu-and-warp--5-november-2026)．
+Real-account native export／hybrid collection and attestation of this recorder's TDX image
+remain separate live checks．
 
 ![Synthetic chat with inline continuity observations](assets/trusted-live-continuity.png)
 
@@ -36,9 +37,9 @@ preview badge or a passing synthetic test as account-safety certification.
 - The guard covers inputs **through this recorder** during capture. Host administrators
   can bypass it. Manual setup is unrestricted and intentionally not recorded. Selecting
   export options or logging out requires pausing; those intervals are coverage gaps.
-- Native export generation is manual. This version preserves its JSON, not the linked
-  attachment tree. It does not authenticate Telegram as the file's author. Review the
-  original and the visible procedure together.
+- Native export generation is manual．This version preserves the selected JSON and
+  recorded procedure；linked attachments are outside this mode's package．Verify the
+  saved file together with that procedure．
 - Unknown gaps are never labelled proven deletions. Private/basic-group IDs share an
   account-wide sequence; channel/supergroup intervals are only candidates. Export date
   filters and visibility can explain absent records. Silence may be ordinary inactivity.

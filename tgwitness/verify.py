@@ -755,10 +755,12 @@ def parse_time(value):
 
 
 class Coverage:
-    def __init__(self):
+    def __init__(self, gap_settings=None, *, chats_selected=False, senders_selected=False):
+        self.sequences = Sequences(gap_settings, chats_selected=chats_selected, senders_selected=senders_selected)
         self.periods, self.gaps, self.notes = [], [], []
         self.start = self.alive = self.closed_at = self.close_reason = None
-        self.observing = self.disconnected = False
+        self.observing = self.active = False
+        self.run_id = None
         self.ids, self.titles = {}, {}
         self.first = self.last = None
         self.allowed = LIVENESS_GAP_SECONDS
@@ -780,10 +782,11 @@ class Coverage:
         if self.observing and kind not in ("observation.started", "process.started"):
             silent = (parse_time(at) - parse_time(self.alive)).total_seconds()
             if silent > self.allowed:
-                self.close(self.alive, "no records for " + str(round(silent / 60)) + " min while observing: "
+                self.close(self.alive, "no capture heartbeat for " + str(round(silent / 60)) + " min while observing: "
                            "the process stopped, froze or the computer slept")
-                self.open(at)
-        interval = payload.get("interval_seconds") if kind == "collector.heartbeat" else \
+        heartbeat = (kind == "collector.heartbeat" and self.active
+                     and (self.run_id is None or payload.get("run_id") == self.run_id))
+        interval = payload.get("interval_seconds") if heartbeat else \
             (payload.get("parameters") or {}).get("heartbeat_seconds") if kind == "observation.started" else None
         if type(interval) is int and interval > 0:
             self.allowed = max(LIVENESS_GAP_SECONDS, 3 * interval)
@@ -794,27 +797,41 @@ class Coverage:
         if kind == "observation.started":
             self.close(self.alive, "observation restarted")
             self.open(at)
-            self.disconnected = False
+            self.active, self.run_id = True, payload.get("run_id")
         elif kind == "observation.stopped":
             self.close(at, "observation paused by the operator" if payload.get("reason") == "operator"
                        else "observation stopped: " + str(payload.get("reason") or "unknown"))
+            self.active = False
         elif kind == "process.stopped":
             self.close(at, "collector process stopped")
+            self.active = False
         elif kind == "process.started":
             self.close(self.alive, "collector process ended without an orderly stop")
+            self.active = False
+        elif kind == "collector.error":
+            self.close(self.alive, "collector error: capture may be incomplete")
+            self.notes.append({"at": at, "chat_id": chat_id, "reason": "collector_error",
+                               "operation": payload.get("operation"), "error_type": payload.get("error_type")})
+            if payload.get("observation_stopped") is True:
+                self.active = False
+        elif kind == "connection.closed" and payload.get("role") in (None, "current"):
+            self.close(at, "connection to Telegram closed")
         elif kind == "coverage.gap":
             reason = payload.get("reason")
             if chat_id is None and reason in INTERRUPTIONS:
                 cause = ACCOUNT_LOSS.get(payload.get("cause")) if reason == "authorization_required" else None
                 self.close(at, INTERRUPTIONS[reason] + (": " + cause if cause else ""))
-                self.disconnected = reason == "transport_disconnected"
+                if reason != "transport_disconnected":
+                    self.active = False
             else:
                 self.notes.append({"at": at, "chat_id": chat_id, "reason": reason})
-        elif kind == "connection.restored" and self.disconnected:
-            self.disconnected = False
-            self.open(at)
-        if self.observing:
-            self.alive = at
+        elif heartbeat:
+            if payload.get("connected") is True:
+                if not self.observing:
+                    self.open(at)
+                self.alive = at
+            elif payload.get("connected") is False:
+                self.close(at, "collector heartbeat reports Telegram disconnected")
         if chat_id is not None and isinstance(payload.get("title"), str) and kind in (
                 "target.changed", "source.discovered", "target.removed"):
             self.titles[chat_id] = payload["title"]
@@ -823,6 +840,7 @@ class Coverage:
                 self.titles[added.get("chat_id")] = added.get("title")
         if kind in MESSAGE_KINDS and numbered_per_chat(chat_id) and isinstance(event["message_id"], int):
             self.ids.setdefault(chat_id, set()).add(event["message_id"])
+        self.sequences.add(event, MESSAGE_KINDS)
 
     def result(self, ranges_per_chat=50):
         periods = [dict(p) for p in self.periods]
@@ -844,10 +862,200 @@ class Coverage:
                                "ranges": [{"low": low, "high": high} for low, high in holes[:ranges_per_chat]],
                                "ranges_total": len(holes)})
         return {"continuous": periods, "gaps": gaps, "notes": self.notes[:200], "notes_total": len(self.notes),
-                "unobserved_ids": unobserved, "first_record": self.first, "last_record": self.last,
-                "meaning": "Continuous = observation on, connected and writing records at least every three "
-                           "minutes (or every three heartbeat intervals when they are longer). IDs not observed were never seen by this collector; that is not evidence "
-                           "that they were deleted. Only channels and supergroups number messages per chat."}
+                "unobserved_ids": unobserved, "gap_summary": self.sequences.result(self.titles), "first_record": self.first, "last_record": self.last,
+                "meaning": "Observation intervals follow connected capture heartbeats from the same run, within three "
+                           "heartbeat intervals (at least three minutes). Each interval ends at its last capture "
+                           "confirmation or recorded stop. Message-number gaps describe the observed numbering range."}
+
+
+# Missing message numbers. Telegram numbers messages once per channel or supergroup, and once per account
+# across private chats, bots and ordinary groups. A number between two observed messages that this
+# collector never saw is a gap: a message that existed and was not observed. A gap names no actor and no
+# reason, and every result lists the parameters that produced it.
+GAP_DEFAULTS = {"gap_analysis": True, "gap_account_sequence": True, "gap_cluster_min": 1, "gap_clusters_listed": 20,
+            "gap_service_estimate": False}
+WIDE_TYPES = ("private", "groups", "bots")
+GAP_MEANING = ("A gap is a message number between two observed messages that this collector never saw. Telegram assigns "
+           "these numbers; a gap does not say who removed a message or why, and it may be a message Telegram never "
+           "showed to this account.")
+ESTIMATE_MEANING = ("Estimate from the share of service messages among observed numbers. It does not explain any "
+                    "particular gap and is never subtracted from the missing count.")
+
+
+def account_numbered(chat_id):
+    return isinstance(chat_id, int) and chat_id > CHANNEL_IDS_BELOW
+
+
+def gap_parameters(values=None):
+    if values is not None and not isinstance(values, dict):
+        raise ValueError("Gap parameters must be an object")
+    values = {**GAP_DEFAULTS, **(values or {})}
+    for key in ("gap_analysis", "gap_account_sequence", "gap_service_estimate"):
+        if type(values[key]) is not bool:
+            raise ValueError("Invalid gap parameter: " + key)
+    for key, maximum in (("gap_cluster_min", 100000), ("gap_clusters_listed", 200)):
+        if type(values[key]) is not int or not 1 <= values[key] <= maximum:
+            raise ValueError("Invalid gap parameter: " + key)
+    return {key: values[key] for key in GAP_DEFAULTS}
+
+
+def not_applicable(reason):
+    return {"status": "not_applicable", "reason": reason}
+
+
+NOTICE_KINDS = ("message.deleted", "message.missing_on_recheck")
+
+
+def summarize_gaps(times, settings, service=0, notices=()):
+    """times maps each observed message number to the time it was first observed; notices are numbers known
+    only from a deletion or recheck record, without saved content."""
+    ordered = sorted(times)
+    if len(ordered) < 2:
+        return not_applicable("Fewer than two observed messages; there is no range to measure.")
+    holes = [(low + 1, high - 1) for low, high in zip(ordered, ordered[1:]) if high - low > 1]
+    span = ordered[-1] - ordered[0] + 1
+    missing = sum(high - low + 1 for low, high in holes)
+    listed = [hole for hole in holes if hole[1] - hole[0] + 1 >= settings["gap_cluster_min"]]
+    largest = sorted(listed, key=lambda hole: (hole[0] - hole[1], hole[0]))[:settings["gap_clusters_listed"]]
+    result = {"status": "applicable", "observed_from": ordered[0], "observed_to": ordered[-1], "span": span,
+              "observed": len(ordered), "observed_without_content": len(notices),
+              "missing": missing, "density": round(missing / span, 6),
+              "gap_ranges": len(holes), "largest_gap": max((high - low + 1 for low, high in holes), default=0),
+              "clusters_total": len(listed),
+              "clusters": [{"low": low, "high": high, "missing": high - low + 1,
+                            "after": {"message_id": low - 1, "observed_at": times[low - 1]},
+                            "before": {"message_id": high + 1, "observed_at": times[high + 1]}}
+                           for low, high in sorted(largest)]}
+    if settings["gap_service_estimate"]:
+        share = service / len(ordered)
+        result["service_estimate"] = {"service_share": round(share, 4),
+                                      "expected_service_in_missing": round(missing * share),
+                                      "meaning": ESTIMATE_MEANING}
+    return result
+
+
+def wide(scope):
+    """Whether a collection scope records every message that takes a number from the account sequence."""
+    if not isinstance(scope, dict) or scope.get("mode") != "account":
+        return False
+    types = scope.get("types") if isinstance(scope.get("types"), dict) else {}
+    excluded = [chat for chat in scope.get("exclude") or scope.get("excluded") or [] if account_numbered(chat)]
+    return all(types.get(kind) is True for kind in WIDE_TYPES) and scope.get("own_actions") is True and not excluded
+
+
+def scope_reason(scope):
+    if not isinstance(scope, dict) or scope.get("mode") != "account":
+        return ("Private chats, bots and ordinary groups share one account-wide numbering. It can be measured only "
+                "while whole-account collection is on; this journal has no such period.")
+    return ("The scope does not confirm that private chats, bots, ordinary groups and the account's own messages "
+            "were all included without excluded chats; those messages take numbers from the same sequence.")
+
+
+class Sequences:
+    """Collects observed numbers from journal records in order and measures their gaps."""
+
+    def __init__(self, settings=None, *, chats_selected=False, senders_selected=False):
+        self.settings = gap_parameters(settings)
+        self.chats_selected, self.senders_selected = chats_selected, senders_selected
+        self.channels, self.services, self.content = {}, {}, {}
+        self.account, self.account_service, self.account_content, self.window = {}, set(), set(), None
+        self.scope, self.wide_since, self.wide_periods = None, None, 0
+        self.paused = False
+
+    def add(self, event, message_kinds):
+        if not self.settings["gap_analysis"]:
+            return
+        kind, chat_id, message_id = event["kind"], event["chat_id"], event["message_id"]
+        payload = event["payload"] if isinstance(event["payload"], dict) else {}
+        if kind == "scope.changed" and isinstance(payload.get("after"), dict):
+            self.set_scope(payload["after"], event["observed_at"])
+        elif kind == "scope.applied":
+            self.set_scope({**(self.scope or {}), "mode": payload.get("mode"), "types": payload.get("types"),
+                            "own_actions": payload.get("own_actions", (self.scope or {}).get("own_actions")),
+                            "exclude": payload.get("excluded") or []}, event["observed_at"])
+        elif kind in ("observation.stopped", "process.stopped", "process.started"):
+            self.paused = True
+        elif kind == "observation.started":
+            if self.paused and self.wide_since is not None:
+                self.wide_periods += 1
+            self.paused = False
+            if isinstance(payload.get("scope"), dict):
+                self.set_scope(payload["scope"], event["observed_at"])
+        elif kind == "deletion.unscoped":
+            # Account-level deletions name numbers of the account sequence that no saved message has.
+            for number in payload.get("message_ids") or []:
+                if type(number) is int and number > 0:
+                    self.account.setdefault(number, event["observed_at"])
+        if type(message_id) is not int or message_id <= 0:
+            return
+        service = kind in ("chat.service", "membership.service")
+        if numbered_per_chat(chat_id):
+            if kind in message_kinds or service:
+                self.channels.setdefault(chat_id, {}).setdefault(message_id, event["observed_at"])
+                if kind not in NOTICE_KINDS:
+                    self.content.setdefault(chat_id, set()).add(message_id)
+            if service:
+                self.services.setdefault(chat_id, set()).add(message_id)
+        elif account_numbered(chat_id):
+            if kind in message_kinds or service:
+                self.account.setdefault(message_id, event["observed_at"])
+                if kind not in NOTICE_KINDS:
+                    self.account_content.add(message_id)
+                if kind == "message.new" and self.wide_since is not None and not self.paused:
+                    # Only messages that arrived during whole-account collection bound the measured range.
+                    low, high = self.window or (message_id, message_id)
+                    self.window = (min(low, message_id), max(high, message_id))
+            if service:
+                self.account_service.add(message_id)
+
+    def set_scope(self, scope, at):
+        self.scope = scope
+        if wide(scope):
+            if self.wide_since is None:
+                self.wide_since, self.wide_periods = at, self.wide_periods + 1
+        else:
+            self.wide_since = None
+
+    def result(self, titles=None, chat_limit=None):
+        titles = titles or {}
+        settings = self.settings
+        summary = {"parameters": settings, "meaning": GAP_MEANING, "chats": [], "account": None}
+        if not settings["gap_analysis"]:
+            summary["status"] = "off"
+            return summary
+        summary["status"] = "on"
+        for chat_id in sorted(self.channels)[:chat_limit]:
+            entry = {"chat_id": chat_id, "title": titles.get(chat_id), "numbering": "per chat"}
+            if self.senders_selected:
+                entry.update(not_applicable("Records were selected by sender, so other senders' numbers are absent."))
+            else:
+                times = self.channels[chat_id]
+                entry.update(summarize_gaps(times, settings, len(self.services.get(chat_id, ())),
+                                       [n for n in times if n not in self.content.get(chat_id, ())]))
+            summary["chats"].append(entry)
+        if chat_limit is not None and len(self.channels) > chat_limit:
+            summary["chats_truncated"] = len(self.channels) - chat_limit
+        summary["account"] = {"numbering": "account-wide: private chats, bots and ordinary groups",
+                              **self.account_result()}
+        return summary
+
+    def account_result(self):
+        if not self.settings["gap_account_sequence"]:
+            return not_applicable("Turned off in Parameters → Gap analysis.")
+        if self.chats_selected or self.senders_selected:
+            return not_applicable("Records were selected by chat or sender; other chats take numbers from the "
+                                  "same account-wide sequence.")
+        if not self.wide_periods or self.window is None:
+            return not_applicable(scope_reason(self.scope))
+        low, high = self.window
+        inside = {number: at for number, at in self.account.items() if low <= number <= high}
+        result = summarize_gaps(inside, self.settings, len(self.account_service.intersection(inside)),
+                           [n for n in inside if n not in self.account_content])
+        result["window"] = "from the first to the last message that arrived while whole-account collection was on"
+        if self.wide_periods > 1:
+            result["note"] = ("Whole-account collection was switched off and on again; numbers used while it was off "
+                              "appear as gaps.")
+        return result
 
 
 def coverage_lines(coverage):
@@ -855,7 +1063,7 @@ def coverage_lines(coverage):
         hours, rest = divmod(int(seconds), 3600)
         return (str(hours) + " h " if hours else "") + str(rest // 60) + " min"
     lines = ["Continuously observed from " + p["from"] + " to " + p["to"] + " (" + span(p["seconds"]) + ")"
-             + (", still observing at the last record" if p.get("still_observing") else "")
+             + (", observing at the last capture confirmation" if p.get("still_observing") else "")
              for p in coverage["continuous"]]
     lines += ["Gap from " + g["from"] + " to " + g["to"] + ": " + str(g["reason"]) for g in coverage["gaps"]]
     for chat in coverage["unobserved_ids"]:
@@ -863,7 +1071,15 @@ def coverage_lines(coverage):
             lines.append("Chat " + (chat["title"] or str(chat["chat_id"])) + ": IDs " + str(chat["observed_from"])
                          + "-" + str(chat["observed_to"]) + ", " + str(chat["not_observed"])
                          + " ID(s) not observed in " + str(chat["ranges_total"]) + " range(s) (not evidence of deletion)")
-    return lines or ["No observation period recorded."]
+    gaps, extra = coverage.get("gap_summary") or {}, []
+    account = gaps.get("account") if gaps.get("status") == "on" else None
+    if account and account.get("status") == "applicable":
+        extra.append("Account-wide sequence (private chats, bots, ordinary groups): IDs " + str(account["observed_from"])
+                     + "-" + str(account["observed_to"]) + ", " + str(account["missing"]) + " ID(s) not observed in "
+                     + str(account["gap_ranges"]) + " range(s)")
+    elif account:
+        extra.append("Account-wide sequence not measured: " + str(account.get("reason")))
+    return (lines or ["No observation period recorded."]) + extra
 
 
 def drand_time(number):
@@ -1794,7 +2010,13 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
         if seal and not describes(seal["subject"]):
             raise ValueError("The report seal describes a different journal")
         companions = report_companions(archive, manifest, public, describes)
-        observed, outside = Coverage(), OutsideRecords()
+        gap_settings = None
+        if "coverage.json" in manifest["files"]:
+            saved_coverage = json.loads(read_member(archive, "coverage.json", MAX_JSON_BYTES))
+            saved_gaps = saved_coverage.get("gap_summary") if isinstance(saved_coverage, dict) else None
+            if isinstance(saved_gaps, dict):
+                gap_settings = saved_gaps.get("parameters")
+        observed, outside = Coverage(gap_settings), OutsideRecords()
         hash_files, account_exports = set(), []
 
         def measured(lines):
@@ -1906,9 +2128,11 @@ def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
 
 
 COMPARE_MEANING = {
-    "number": "Both archives come from the same chat and account, so messages are matched by their number.",
+    "number": "Both archives come from the same chat and account, so messages are matched by their number. "
+              "Unchanged means all recorded fields match; changed_fields lists differences.",
     "content": "The archives come from different chats or accounts (for example both sides of a private chat), "
-               "so messages are matched by time, sender and text or file hash.",
+               "so messages are matched by time, sender and text or file hash. "
+               "These pairs are heuristic; unchanged still requires every recorded field to match, including IDs.",
 }
 
 
@@ -1930,17 +2154,21 @@ def chat_rows(path, max_gib=None):
         return manifest, list(chat_messages(archive))
 
 
-def row_brief(row):
+def row_text(row):
     text = row.get("text")
     if isinstance(text, list):
         text = "".join(part if isinstance(part, str) else str(part.get("text", "")) for part in text)
+    return text or ""
+
+
+def row_brief(row):
     return {"id": row.get("id"), "date": row.get("date"), "from": row.get("from"), "from_id": row.get("from_id"),
-            "text": (text or "")[:300], "file_sha256": row.get("file_sha256"), "edited": row.get("edited")}
+            "text": row_text(row)[:300], "file_sha256": row.get("file_sha256"), "edited": row.get("edited"),
+            "reply_to_message_id": row.get("reply_to_message_id")}
 
 
 def row_content(row):
-    brief = row_brief(row)
-    return brief["text"], brief["file_sha256"], row.get("media_type"), brief["edited"]
+    return canonical(row)
 
 
 def compare_chat_exports(first, second, first_fingerprint=None, second_fingerprint=None, max_gib=None):
@@ -1960,8 +2188,7 @@ def compare_chat_exports(first, second, first_fingerprint=None, second_fingerpri
         only_second = [right[k] for k in right.keys() - left.keys()]
     else:
         def content_key(row):
-            brief = row_brief(row)
-            return brief["from_id"], brief["file_sha256"] or brief["text"]
+            return row.get("from_id"), row.get("file_sha256") or row_text(row)
 
         waiting, pairs, only_first = {}, [], []
         for row in order(second_rows):
@@ -1975,8 +2202,11 @@ def compare_chat_exports(first, second, first_fingerprint=None, second_fingerpri
                 candidates.remove(match)
                 pairs.append((row, match))
         only_second = [row for rows in waiting.values() for row in rows]
-    changed = [{"first": row_brief(a), "second": row_brief(b)} for a, b in pairs
-               if method == "number" and row_content(a) != row_content(b)]
+    changed = [{"first": row_brief(a), "second": row_brief(b),
+                "changed_fields": sorted(key for key in a.keys() | b.keys()
+                                         if key not in a or key not in b or canonical(a[key]) != canonical(b[key]))}
+               for a, b in pairs
+               if row_content(a) != row_content(b)]
     return {"format": "tgwitness-chat-comparison-v1", "method": method, "meaning": COMPARE_MEANING[method],
             "first": {"file": str(first), "fingerprint": checked[0]["fingerprint"], "exported_at": first_manifest.get("exported_at"),
                       "chat_id": (first_manifest.get("chat") or {}).get("id"), "messages": len(first_rows),
@@ -2006,7 +2236,7 @@ def print_comparison(result, limit=50):
     print("Changed: " + str(len(result["changed"])))
     for item in result["changed"][:limit]:
         print("  #" + str(item["first"]["id"]) + ": " + " ".join(item["first"]["text"].split())[:80] + "  ->  "
-              + " ".join(item["second"]["text"].split())[:80])
+              + " ".join(item["second"]["text"].split())[:80] + " (" + ", ".join(item["changed_fields"]) + ")")
     print("Unchanged: " + str(result["unchanged"]))
     if not (first["key_pinned"] and second["key_pinned"]):
         print("Signer identity is unpinned for at least one archive: compare the fingerprints with copies kept elsewhere.")
@@ -2112,8 +2342,14 @@ def check_attachments(archive, manifest):
     for name, digest in files.items():
         if name.startswith("media/") and name[len("media/"):] != digest:
             raise ValueError("Attachment name differs from its SHA-256: " + name)
-    referenced, hash_files = 0, set()
+    referenced, hash_files, count, numbers = 0, set(), 0, set()
     for message in chat_messages(archive):
+        count += 1
+        number = message.get("id")
+        if type(number) is int:
+            if number in numbers:
+                raise ValueError("Duplicate message ID in chat.json: " + str(number))
+            numbers.add(number)
         if message.get("server_hashes") is not None:
             hashes = message["server_hashes"]
             validate_server_hashes(hashes)
@@ -2131,21 +2367,50 @@ def check_attachments(archive, manifest):
         referenced += 1
     if {name for name in files if name.startswith("hashes/")} != hash_files:
         raise ValueError("Unreferenced chat file-hash manifest")
+    if type(manifest.get("message_count")) is not int or manifest["message_count"] != count:
+        raise ValueError("Chat message count differs from the signed manifest")
     return referenced
 
 
 def chat_messages(archive):
     with archive.open("chat.json") as stream:
-        inside = False
-        for raw in bounded_lines(io.TextIOWrapper(stream, encoding="utf-8")):
+        inside, header, header_bytes, separator = False, [], 0, None
+        lines = iter(bounded_lines(io.TextIOWrapper(stream, encoding="utf-8")))
+        for raw in lines:
             line = raw.strip()
             if not inside:
-                inside = line.endswith('"messages": [')
+                if line == '"messages": [':
+                    # The export wire format places one complete message on each line.
+                    # Reject other layouts instead of authenticating bytes but silently skipping records.
+                    json.loads("".join(header) + '"messages": []}')
+                    inside = True
+                else:
+                    header_bytes += len(raw.encode("utf-8"))
+                    if header_bytes > MAX_JSON_BYTES:
+                        raise ValueError("Chat header exceeds the verification limit")
+                    header.append(raw)
                 continue
             if line.startswith("]"):
+                if separator:
+                    raise ValueError("Trailing comma after chat message")
+                tail = "".join(line.split())
+                for rest in lines:
+                    tail += "".join(rest.split())
+                    if len(tail) > 2:
+                        raise ValueError("Unexpected data after chat messages")
+                if tail != "]}":
+                    raise ValueError("Invalid chat messages terminator")
                 return
-            if line.startswith("{"):
-                yield json.loads(line.rstrip(","))
+            if not line:
+                continue
+            if separator is False:
+                raise ValueError("Missing comma between chat messages")
+            separator = line.endswith(",")
+            message = json.loads(line.removesuffix(","))
+            if not isinstance(message, dict):
+                raise ValueError("Chat message must be an object")
+            yield message
+        raise ValueError("Missing or unsupported chat messages array")
 
 
 def verify_parts(archive, manifest):
@@ -2518,11 +2783,19 @@ def account_export_lines(result):
     return lines
 
 
+DISCLOSURE_FORMATS = ("tgwitness-account-disclosure-v1", "tgwitness-account-disclosure-v2")
+WITHHELD_RULES = ("sender", "text", "period")
+WITHHELD_FIELDS = {"id", "state", "rules", "count", "text", "attachments", "redacted_fields"}
+REPLY_STATES = ("disclosed", "withheld", "not_in_source")
+
+
 def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_gib=None):
     with open_archive(path, max_gib=max_gib) as archive, tempfile.TemporaryDirectory() as temporary:
         manifest = read_manifest(archive)
-        if manifest.get("format") != "tgwitness-account-disclosure-v1":
+        if manifest.get("format") not in DISCLOSURE_FORMATS:
             raise ValueError("Unsupported account disclosure format")
+        # Version 2 keeps records the selection left out as content-free markers, and replies say what they answer.
+        marked = manifest["format"] == "tgwitness-account-disclosure-v2"
         public = manifest["public_key"]
         fp = fingerprint(public)
         if manifest.get("fingerprint") != fp:
@@ -2551,8 +2824,9 @@ def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_
         if not isinstance(manifest.get("policy"), dict):
             raise ValueError("Disclosure must record its applied policy")
         seen = sqlite3.connect(Path(temporary) / "disclosure.sqlite3")
-        seen.execute("CREATE TABLE messages (chat TEXT, id TEXT, PRIMARY KEY(chat,id)) WITHOUT ROWID")
-        media, messages = set(), 0
+        seen.execute("CREATE TABLE messages (chat TEXT, id TEXT, state TEXT, PRIMARY KEY(chat,id)) WITHOUT ROWID")
+        seen.execute("CREATE TABLE replies (chat TEXT, id TEXT, state TEXT)")
+        media, messages, withheld = set(), 0, 0
         try:
             with archive.open("messages.jsonl") as stream:
                 for line in bounded_lines(stream):
@@ -2565,11 +2839,34 @@ def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_
                     for value in (chat.get("id"), message.get("id")):
                         if type(value) not in (str, int) or not value:
                             raise ValueError("Invalid disclosure chat/message ID")
+                    state = message.get("state", "disclosed") if marked else "disclosed"
+                    if marked and state not in ("disclosed", "withheld"):
+                        raise ValueError("Invalid disclosure record state")
                     try:
-                        seen.execute("INSERT INTO messages VALUES (?,?)",
-                                     (canonical(chat["id"]).decode(), canonical(message["id"]).decode()))
+                        seen.execute("INSERT INTO messages VALUES (?,?,?)",
+                                     (canonical(chat["id"]).decode(), canonical(message["id"]).decode(), state))
                     except sqlite3.IntegrityError:
                         raise ValueError("Duplicate disclosure message") from None
+                    if state == "withheld":
+                        rules, count = message.get("rules"), message.get("count")
+                        if (set(message) != WITHHELD_FIELDS or message.get("attachments") != []
+                                or message.get("redacted_fields") != []
+                                or not isinstance(rules, list) or not rules
+                                or any(not isinstance(rule, str) or rule not in WITHHELD_RULES for rule in rules)
+                                or rules != [rule for rule in WITHHELD_RULES if rule in rules]
+                                or message.get("text") != "[withheld by selection \u2014 rule: " + ", ".join(rules) + "]"
+                                or type(count) is not int or count < 1):
+                            raise ValueError("Invalid withheld-by-selection marker")
+                        withheld += count
+                        continue
+                    reply = message.get("reply_to") if marked else None
+                    if reply is not None:
+                        if (not isinstance(reply, dict) or set(reply) != {"id", "state"}
+                                or type(reply.get("id")) not in (str, int) or not reply["id"]
+                                or reply.get("state") not in REPLY_STATES):
+                            raise ValueError("Invalid disclosure reply reference")
+                        seen.execute("INSERT INTO replies VALUES (?,?,?)",
+                                     (canonical(chat["id"]).decode(), canonical(reply["id"]).decode(), reply["state"]))
                     attachments = message.get("attachments", [])
                     if not isinstance(attachments, list):
                         raise ValueError("Invalid disclosure attachments")
@@ -2590,12 +2887,20 @@ def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_
                             raise ValueError("Disclosure attachment bytes/hash mismatch")
                         media.add(name)
                     messages += 1
-            chats = seen.execute("SELECT COUNT(DISTINCT chat) FROM messages").fetchone()[0]
+            chats = seen.execute("SELECT COUNT(DISTINCT chat) FROM messages WHERE state='disclosed'").fetchone()[0]
+            # A reply to a disclosed or withheld message must point at that record; only not_in_source points nowhere.
+            dangling = seen.execute("SELECT count(*) FROM replies r LEFT JOIN messages m ON m.chat=r.chat AND m.id=r.id "
+                                    "WHERE (r.state!='not_in_source' AND (m.id IS NULL OR m.state!=r.state)) "
+                                    "OR (r.state='not_in_source' AND m.id IS NOT NULL)").fetchone()[0]
+            if dangling:
+                raise ValueError("A disclosed reply points at a record that is not in this disclosure")
         finally:
             seen.close()
         if {name for name in files if name.startswith("media/")} != media:
             raise ValueError("Unreferenced disclosure media")
         counts = {"messages": messages, "chats": chats, "media": len(media)}
+        if marked:
+            counts["withheld"] = withheld
         if (not isinstance(manifest.get("counts"), dict) or set(manifest["counts"]) != set(counts)
                 or any(type(manifest["counts"][name]) is not int or manifest["counts"][name] != count
                        for name, count in counts.items())):
@@ -3145,7 +3450,8 @@ SAY = {
         "signature chained to your root": "подпись проверена до вашего корня",
         "signature not checked: add --tsa-ca": "подпись не проверена: добавьте --tsa-ca",
         "pending: run ots upgrade, then ots verify": "ожидает: выполните ots upgrade, затем ots verify",
-        "in Bitcoin: confirm with ots verify": "в Bitcoin: подтвердите через ots verify",
+        "Bitcoin attestation present; run ots verify": "Есть Bitcoin-аттестация，проверьте через ots verify",
+        "unknown attestation type; no verified Bitcoin timestamp": "Неизвестный тип аттестации，метка Bitcoin не подтверждена",
         "No independent timestamps: times come from the collector's clock.":
             "Независимых меток нет: время — по часам коллектора.",
         "INTEGRITY VERIFIED": "ЦЕЛОСТНОСТЬ ПОДТВЕРЖДЕНА", "VERIFICATION FAILED": "ПРОВЕРКА НЕ ПРОЙДЕНА",
@@ -3189,7 +3495,8 @@ SAY = {
         "signature chained to your root": "підпис перевірено до вашого кореня",
         "signature not checked: add --tsa-ca": "підпис не перевірено: додайте --tsa-ca",
         "pending: run ots upgrade, then ots verify": "очікує: виконайте ots upgrade, потім ots verify",
-        "in Bitcoin: confirm with ots verify": "у Bitcoin: підтвердіть через ots verify",
+        "Bitcoin attestation present; run ots verify": "Є Bitcoin-атестація，перевірте через ots verify",
+        "unknown attestation type; no verified Bitcoin timestamp": "Невідомий тип атестації，мітку Bitcoin не підтверджено",
         "No independent timestamps: times come from the collector's clock.":
             "Незалежних міток немає: час — за годинником колектора.",
         "INTEGRITY VERIFIED": "ЦІЛІСНІСТЬ ПІДТВЕРДЖЕНО", "VERIFICATION FAILED": "ПЕРЕВІРКУ НЕ ПРОЙДЕНО",
@@ -3374,10 +3681,12 @@ class Console:
                 self.say("  " + " " * 27 + self.paint(self.t("signature chained to your root" if checked
                                                                else "signature not checked: add --tsa-ca"), "dim"))
             else:
-                pending = anchor.get("status") == "pending"
-                self.check("wait" if pending else "ok", "OpenTimestamps · " + anchor["service"][:10],
-                           point + " · " + self.t("pending: run ots upgrade, then ots verify" if pending
-                                                  else "in Bitcoin: confirm with ots verify"))
+                status = anchor.get("status")
+                detail = {"pending": "pending: run ots upgrade, then ots verify",
+                          "bitcoin-unverified": "Bitcoin attestation present; run ots verify"}.get(
+                              status, "unknown attestation type; no verified Bitcoin timestamp")
+                self.check("wait" if status == "pending" else "warn", "OpenTimestamps · " + anchor["service"][:10],
+                           point + " · " + self.t(detail))
 
     def lines(self, label, lines, limit=8):
         if not lines:
@@ -3557,8 +3866,13 @@ def main():
         sys.stdout.reconfigure(errors="backslashreplace")
     mode = "json" if args.json else "pretty" if args.pretty or (not args.plain and sys.stdout.isatty()) else "plain"
     if args.compare:
+        unsupported = ["--" + name.replace("_", "-") for name in
+                       ("checkpoint", "tsa_ca", "witness", "witness_fingerprint", "require_witness", "channel",
+                        "evidence", "check_drand", "board") if getattr(args, name)]
+        if unsupported:
+            parser.error(", ".join(unsupported) + " cannot be used with --compare; verify the evidence archive separately")
         try:
-            compared = compare_chat_exports(args.bundle, args.compare, args.fingerprint, args.compare_fingerprint)
+            compared = compare_chat_exports(args.bundle, args.compare, args.fingerprint, args.compare_fingerprint, args.max_gib)
         except Exception as exc:
             if mode == "json":
                 print(json.dumps({"verified": False, "error": type(exc).__name__ + ": " + str(exc)}, indent=2))
@@ -3620,7 +3934,7 @@ def main():
                 shown = "dossier"
                 result = verify_dossier(args.bundle, args.fingerprint, args.evidence)
                 pinned = bool(args.fingerprint)
-        elif (archive_format := bundle_format(args.bundle)) == "tgwitness-account-disclosure-v1":
+        elif (archive_format := bundle_format(args.bundle)) in DISCLOSURE_FORMATS:
             if args.checkpoint or args.witness or args.tsa_ca or args.channel:
                 raise ValueError("Journal checkpoint/witness/timestamp options do not apply to disclosure archives")
             shown = "account_disclosure"

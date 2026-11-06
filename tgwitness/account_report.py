@@ -20,7 +20,7 @@ MEDIA_PATH = re.compile(r'media/[0-9a-f]{64}\Z')
 COUNT_LABELS = {'messages': 'Messages', 'chats': 'Chats', 'media': 'Media files included',
                 'media_saved': 'Media files included', 'media_skipped': 'Files skipped or unavailable',
                 'media_hashed': 'Files with server hashes',
-                'records': 'Records', 'chats_selected': 'Selected chats'}
+                'records': 'Records', 'chats_selected': 'Selected chats', 'withheld': 'Withheld by selection'}
 SCOPE_LABELS = {'from_utc': 'From date (UTC)', 'to_utc': 'Until (UTC, exclusive)',
                 'report_language': 'Report language', 'identity_mode': 'Names and user IDs',
                 'text_mode': 'Message text', 'include_media': 'Include media files',
@@ -28,11 +28,13 @@ SCOPE_LABELS = {'from_utc': 'From date (UTC)', 'to_utc': 'Until (UTC, exclusive)
                 'own_messages_only': 'Only messages sent by this account',
                 'sender_filter_count': 'Sender filters', 'text_filter_count': 'Text filters',
                 'manual_redaction_count': 'Additional terms hidden',
-                'disclosed_identity_count': 'Identities allowed to remain identifiable'}
+                'disclosed_identity_count': 'Identities allowed to remain identifiable',
+                'withheld_markers': 'Messages left out by the selection'}
 VALUES = {'keep': 'Keep matching text', 'omit': 'Omit message text',
           'pseudonymize_all': 'Pseudonymize everyone', 'pseudonymize_third_parties': 'Pseudonymize third parties',
           'regular': 'Regular Telegram API', 'takeout': 'Telegram Takeout'}
-VALUES.update(download='Download files', hashes_only='Save server hashes only', exclude='Exclude file bytes')
+VALUES.update(download='Download files', hashes_only='Save server hashes only', exclude='Exclude file bytes',
+              collapsed='One marker for each run', each='One marker for each message')
 CONTEXT_LABELS = {'archive_reference': 'Archive reference', 'created_at': 'Copy created',
                   'requested_at': 'Collection requested', 'captured_from': 'First recorded capture',
                   'captured_until': 'Last recorded capture'}
@@ -50,7 +52,7 @@ h2{font-size:20px;line-height:1.4;margin:28px 0 12px}h3{font-size:16px;margin:0}
 .facts{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,3fr);gap:8px 18px;margin:0}.facts dt{color:var(--muted)}.facts dd{margin:0;min-width:0}
 .chat-list{list-style:none;padding:0}.chat-list li{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
 .message-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px 20px;flex-wrap:wrap}.record-link{font-size:12px;white-space:nowrap}.message-meta,.record-citation{font-size:12px;color:var(--muted);margin:8px 0}.message-meta span{display:inline-block;margin-inline-end:16px}.record-citation{border-top:1px solid var(--line);padding-top:8px}.record-citation code{color:var(--ink)}.message:target{outline:2px solid var(--accent);outline-offset:3px}
-.message-text{white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;margin:16px 0}.user{unicode-bidi:plaintext;overflow-wrap:anywhere;min-width:0}
+.message-text{white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext;margin:16px 0}.message.withheld{border-style:dashed;background:transparent}.reply-state{font-size:13px;color:var(--muted,#666);margin:8px 0 0}.user{unicode-bidi:plaintext;overflow-wrap:anywhere;min-width:0}
 a{color:var(--accent);text-underline-offset:3px}a,code,pre,dd{overflow-wrap:anywhere}pre{white-space:pre-wrap;font:12px/1.6 ui-monospace,monospace;margin:12px 0 0}
 nav{display:flex;gap:8px 18px;flex-wrap:wrap;margin:18px 0;font-size:13px}nav a{padding:4px 0}
 code{font:12px/1.6 ui-monospace,monospace}.command{display:block;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:6px;white-space:pre-wrap;direction:ltr;unicode-bidi:plaintext}
@@ -301,6 +303,23 @@ def omissions_section(context, say):
     yield encoded('</ul><p>' + e(say('Signed JSONL pages and capture receipts are authoritative. Other account data is retained in those pages.')) + '</p></section>')
 
 
+WITHHELD_RULE_LABELS = {'sender': 'sender not selected', 'text': 'text filter not matched',
+                        'period': 'outside the selected period'}
+REPLY_STATE_LABELS = {'disclosed': 'This reply answers a message included in this copy.',
+                      'withheld': 'This reply answers a message withheld by the selection.',
+                      'not_in_source': 'This reply answers a message that is not in the source export.'}
+
+
+def withheld_card(message, say, reference, marker, page_path):
+    rules = ', '.join(say(WITHHELD_RULE_LABELS[rule]) for rule in message.get('rules') or [])
+    return ('<article class="message withheld" id="' + reference + '"' + marker + '><p class="message-text"><strong>'
+            + e(say('Withheld by selection')) + '</strong> \u2014 ' + e(say('Rule: {rules}', rules=rules)) + '</p><p class="muted">'
+            + e(say('Messages left out here: {count}. A withheld message is not a deletion and not a gap in collection.',
+                    count=message.get('count', 1)))
+            + '</p><p class="record-citation">' + e(say('Record reference')) + ': <code dir="ltr">' + e(page_path) + '#'
+            + reference + '</code></p></article>')
+
+
 def shared_row(row):
     """Only the transformed schema can enter readable sharing output, including raw details."""
     chat = row.get('chat') if isinstance(row.get('chat'), dict) else {}
@@ -310,6 +329,14 @@ def shared_row(row):
                     if key in message and (type(message[key]) in (str, int) or message[key] is None)}
     if type(message.get('outgoing')) is bool:
         safe_message['outgoing'] = message['outgoing']
+    if message.get('state') in ('disclosed', 'withheld'):
+        safe_message['state'] = message['state']
+    if message.get('state') == 'withheld':
+        safe_message['rules'] = [rule for rule in WITHHELD_RULE_LABELS if rule in (message.get('rules') or [])]
+        safe_message['count'] = message['count'] if type(message.get('count')) is int else 1
+    reply = message.get('reply_to')
+    if isinstance(reply, dict) and reply.get('state') in REPLY_STATE_LABELS and type(reply.get('id')) in (str, int):
+        safe_message['reply_to'] = {'id': reply['id'], 'state': reply['state']}
     safe_message['attachments'] = []
     for attachment in message.get('attachments', ()):
         if isinstance(attachment, dict) and attachment.get('outcome') == 'saved' and MEDIA_PATH.fullmatch(text(attachment.get('file'))):
@@ -337,6 +364,8 @@ def message_card(row, say, prefix='', sharing=False, number=1, page_path='index.
     identifier = message.get('id')
     marker = ' data-message-id="' + e(identifier) + '"' if type(identifier) in (str, int) else ''
     reference = f'record-{number:06d}'
+    if sharing and message.get('state') == 'withheld':
+        return withheld_card(message, say, reference, marker, page_path)
     parts = ['<article class="message" id="' + reference + '"' + marker + '><div class="message-head"><h3 class="user" dir="auto">' + e(sender) +
              '</h3><a class="record-link" href="#' + reference + '">' + e(say('Record')) + ' <bdi>' + f'{number:06d}' + '</bdi></a></div>',
              '<p class="message-meta"><span>' + e(say('Message date')) + ': ' + timestamp(message.get('date'), say) + '</span>']
@@ -349,6 +378,8 @@ def message_card(row, say, prefix='', sharing=False, number=1, page_path='index.
     if text(message.get('username')):
         parts.append('<p class="muted user" dir="auto">@' + e(message['username']) + '</p>')
     parts.append('<p class="message-text" dir="auto">' + e(body or say('No message text in this record.')) + '</p>')
+    if sharing and isinstance(message.get('reply_to'), dict):
+        parts.append('<p class="reply-state">' + e(say(REPLY_STATE_LABELS[message['reply_to']['state']])) + '</p>')
     for attachment in message.get('attachments', ()):
         if not isinstance(attachment, dict):
             continue
@@ -495,4 +526,5 @@ def text_keys():
             and isinstance(node.func, ast.Name) and node.func.id == 'say' and node.args
             and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)]
     return list(dict.fromkeys(keys + case_assessment.text_keys() + list(COUNT_LABELS.values()) + list(SCOPE_LABELS.values()) +
-                              list(VALUES.values()) + list(CONTEXT_LABELS.values()) + ['Tasks completed', 'Tasks planned', 'Failures and gaps']))
+                              list(VALUES.values()) + list(CONTEXT_LABELS.values()) + list(WITHHELD_RULE_LABELS.values())
+                              + list(REPLY_STATE_LABELS.values()) + ['Tasks completed', 'Tasks planned', 'Failures and gaps']))

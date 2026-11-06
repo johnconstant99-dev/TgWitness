@@ -248,6 +248,26 @@ def test_a_forged_quote_verifies_only_against_its_own_root(forge):
         tdx.verify_quote(raw, genuine, window(genuine))
 
 
+@pytest.mark.parametrize("status", tdx.QE_STATUSES)
+def test_qe_status_survives_signed_quote_verification(forge, status):
+    collateral = forge.collateral()
+    identity = json.loads(collateral["qe_identity"])
+    identity["tcbLevels"][0]["tcbStatus"] = status
+    text = json.dumps(identity, separators=(",", ":"))
+    collateral.update(qe_identity=text,
+                      qe_identity_signature=raw_signature(forge.signer_key, text.encode()).hex())
+    raw = forge.quote(b"qe-status-regression")
+    if status == "Revoked":
+        with pytest.raises(tdx.QuoteError, match="revoked"):
+            tdx.verify_quote(raw, collateral, NOW, root=forge.root)
+    else:
+        found = tdx.verify_quote(raw, collateral, NOW, root=forge.root)
+        assert found["qe_status"] == status and found["status"] == status
+    with pytest.raises(tdx.QuoteError, match="Intel SGX Root CA"):
+        tdx.verify_quote(raw, collateral, NOW)
+
+
+
 def test_every_break_in_the_chain_is_refused(forge):
     raw, collateral = forge.quote(b"x"), forge.collateral()
     body = bytearray(raw)
@@ -290,6 +310,41 @@ def test_statuses_and_the_quoting_enclave(forge):
         tdx.verify_quote(forge.quote(), forge.collateral("Revoked"), NOW, root=forge.root)
     with pytest.raises(tdx.QuoteError, match="quoting enclave runs in debug mode"):
         tdx.verify_quote(forge.quote(qe_debug=True), forge.collateral(), NOW, root=forge.root)
+
+
+@pytest.mark.parametrize("status", ["ConfigurationNeeded", "OutOfDateConfigurationNeeded",
+                                    "SWHardeningNeeded", "ConfigurationAndSWHardeningNeeded", "Unknown"])
+def test_unsupported_qe_status_cannot_become_up_to_date(forge, status):
+    collateral = forge.collateral()
+    identity = json.loads(collateral["qe_identity"])
+    identity["tcbLevels"][0]["tcbStatus"] = status
+    collateral["qe_identity"] = json.dumps(identity, separators=(",", ":"))
+    collateral["qe_identity_signature"] = raw_signature(
+        forge.signer_key, collateral["qe_identity"].encode()).hex()
+    with pytest.raises(tdx.QuoteError, match="QE TCB status"):
+        tdx.verify_quote(forge.quote(), collateral, NOW, root=forge.root)
+    with pytest.raises(tdx.QuoteError):
+        tdx.verify_quote(forge.quote(), collateral, NOW)
+
+
+@pytest.mark.parametrize("platform,component", [(platform, component) for platform in tdx.STATUSES
+                                               for component in ("UpToDate", "OutOfDate", "Revoked")])
+def test_convergence_preserves_component_and_platform_requirements(platform, component):
+    result = tdx.converge(platform, component)
+    if "Revoked" in (platform, component):
+        assert result == "Revoked"
+    elif component == "UpToDate":
+        assert result == platform
+    elif "Configuration" in platform:
+        assert result == "OutOfDateConfigurationNeeded"
+    else:
+        assert result == "OutOfDate"
+
+
+def test_convergence_rejects_statuses_it_does_not_implement():
+    for component in ("ConfigurationNeeded", "OutOfDateConfigurationNeeded", "Unknown", None):
+        with pytest.raises(tdx.QuoteError):
+            tdx.converge("UpToDate", component)
 
 
 def test_the_launch_identity_is_what_was_measured_before_system_ready():

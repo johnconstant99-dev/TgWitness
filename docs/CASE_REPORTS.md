@@ -247,8 +247,8 @@ Review each check separately, alongside the recorded collection coverage.
    Intel certificate chain, measurements, exact source and key-handling conditions.
    Keep the attestation verification result with the reviewed artifacts.
 
-See [verification scope](EVIDENCE.md#verification-scope) for the trust assumptions
-and the separate assessment of source claims, identity, time and collection coverage.
+See [verification scope](EVIDENCE.md#verification-scope) for the checks of acquisition，
+archive integrity，time and collection coverage in each mode．
 
 ## Recipient review
 

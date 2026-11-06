@@ -458,6 +458,24 @@ def test_the_journal_refuses_a_start_in_another_compose_or_outside_the_quote(pha
     assert report.checks[-1]["status"] == "fail" and "does not cover this start" in report.checks[-1]["detail"]
 
 
+@pytest.mark.parametrize("value", [None, "", "not-a-public-key", 42])
+def test_a_valid_quote_must_explicitly_bind_the_journal_signing_key(phala, journal, value):
+    store, vault = journal
+    record = json.loads((phala.out / "deployment.json").read_text())
+    run = {"run_id": "unbound", "source_tree_sha256": "s" * 64,
+           "host": {"provider": phala.cvm.provider()}}
+    if value is not None:
+        run["public_key"] = value
+    # The quote genuinely covers this malformed statement under the fixture PKI.
+    run["tdx_start"] = assurance.start_attestation("phala", run)
+    store.append("process.started", {"run": run})
+    report = cloud.Report()
+    cloud.verify_tdx_journal(report, export_file(store, vault, "zip"), fingerprint(vault.public_key), record,
+                             None, lambda raw: phala.forge.collateral())
+    assert report.checks[-1]["status"] == "fail", report.checks[-1]
+    assert "signing key" in report.checks[-1]["detail"]
+
+
 def test_the_reference_compose_is_built_by_the_checkouts_own_code(tmp_path, monkeypatch):
     monkeypatch.setattr(cloud, "REFERENCES", {})
     spec = cloud.specification(arguments(tmp_path, "phala", server_type="tdx.small",

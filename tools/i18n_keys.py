@@ -15,7 +15,7 @@ PANEL_MODULES = ("app.py", "collector.py", "account_import.py", "tdata.py", "ses
                  "archive.py", "archive_api.py", "ai.py", "analysis.py", "analysis_api.py",
                  "media_analysis.py", "media_analysis_api.py", "webhooks.py", "webhook_api.py", "proxy_catalog.py",
                  "proxy_sources.py", "account_export.py", "account_export_transport.py", "account_report.py", "disclosure.py",
-                 "cloud_wizard.py", "levels.py", "capture_api.py", "capture_connections.py", "fulltext.py", "search_api.py")
+                 "cloud_wizard.py", "levels.py", "capture_api.py", "capture_connections.py", "fulltext.py", "search_api.py", "gap_analysis.py")
 
 DYNAMIC_SCRIPT_KEYS = (
     "Inline diff", "Side by side", "Raw", "Previously observed", "Newly observed version",
@@ -29,7 +29,7 @@ DYNAMIC_SCRIPT_KEYS = (
     "Recent activity", "Most deletions", "Most edits", "Name", "Sort", "Filters", "Type", "State",
     "Channels", "Groups", "Bots", "Private chats", "Auto-discovered", "Access unconfirmed", "Excluded",
     "Paused", "Priority", "Mark regular", "Mark priority", "No chats match these filters.",
-    "Recheck", "Media", "People", "Notifications", "Exports", "Telegram", "MTProxy",
+    "Recheck", "Media", "People", "Notifications", "Exports", "Gaps", "Telegram", "MTProxy",
     "Photos", "Videos", "GIFs & animations", "Round video messages", "Voice messages", "Music & audio", "Stickers", "Files & documents",
     "Show affected sources", "Exclude from scope", "Ignore until visible", "Enable downloads",
     "Clear waiting queue", "Skip download-disabled notices",

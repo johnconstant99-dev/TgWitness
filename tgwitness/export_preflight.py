@@ -6,6 +6,7 @@ import time
 from telethon import errors, utils
 
 from . import file_hashes
+from .export_budget import history_sample
 from .scope import kind_of
 
 MAX_DIALOGS, MAX_CHATS, MESSAGES_PER_CHAT, TIMEOUT = 1000, 12, 25, 20
@@ -59,7 +60,8 @@ async def preview(exports, options, *, sample=True):
                 "message_file_payload_downloaded_bytes": 0,
                 "account_metadata_and_avatars_estimated": False,
                 "max_chats": MAX_CHATS, "max_messages_per_chat": MESSAGES_PER_CHAT,
-                "estimate_assumption": "Hash JSON estimate uses 128 KiB ranges and 160 bytes per range; actual Telegram ranges may differ."}
+                "estimate_assumption": "Hash JSON estimate uses 128 KiB ranges and 160 bytes per range; actual Telegram ranges may differ.",
+                "chats": []}
     seen = set()
 
     async def read():
@@ -76,11 +78,17 @@ async def preview(exports, options, *, sample=True):
                 selected.append(dialog)
         observed["dialog_inventory_complete"] = number <= MAX_DIALOGS
         observed["visible_selected_chats"] = len(selected)
+        observed["selected_inventory_complete"] = not options["chat_ids"] or set(options["chat_ids"]) <= {
+            utils.get_peer_id(dialog.entity) for dialog in selected}
         for dialog in selected[:MAX_CHATS]:
+            requested = time.monotonic()
             messages = await collector.client.get_messages(dialog.entity, limit=MESSAGES_PER_CHAT)
+            timing = history_sample(messages, time.monotonic() - requested)
+            observed["chats"].append(timing)
             observed["sampled_chats"] += 1
             for message in messages:
                 observed["messages_examined"] += 1
+                timing["text_bytes"] += len((message.message or "").encode("utf-8"))
                 row = {"category": "messages", "date": message.date.isoformat() if message.date else None,
                        "from_id": utils.get_peer_id(message.from_id) if message.from_id else None,
                        "text": message.message or "", "outgoing": bool(message.out)}
@@ -101,19 +109,25 @@ async def preview(exports, options, *, sample=True):
                             observed["excluded_attachments"] += 1
                             continue
                     rep = file_hashes.representation(media)
+                    size = rep["bytes"] if rep else info["expected_bytes"]
+                    limit = min(options["max_media_file_mib"], rule.get("max_mb", options["max_media_file_mib"])) * 1024**2
+                    if action == "download" and size is not None and size > limit:
+                        action = options["oversized_media"]
+                    if size is None:
+                        timing["unknown_size_files"] += 1
+                    elif action == "download":
+                        timing["download_bytes"] += size
+                    elif action == "hashes_only":
+                        timing["hash_ranges"] += (size + 131071) // 131072
                     identity = (rep["kind"], rep["id"], rep["variant"], rep["bytes"]) if rep else None
                     if identity and identity in seen:
                         observed["duplicate_references"] += 1
                         continue
                     if identity:
                         seen.add(identity)
-                    size = rep["bytes"] if rep else info["expected_bytes"]
                     if size is None:
                         observed["unknown_size_files"] += 1
                         continue
-                    limit = min(options["max_media_file_mib"], rule.get("max_mb", options["max_media_file_mib"])) * 1024**2
-                    if action == "download" and size > limit:
-                        action = options["oversized_media"]
                     if action == "download":
                         observed["known_download_bytes"] += size
                     elif action == "hashes_only":
@@ -164,14 +178,18 @@ async def preview_capture(collector, chat_id, settings, remaining_seconds):
     sample = {"performed": False, "messages_examined": 0, "known_download_bytes": 0,
               "known_hash_source_bytes": 0, "hash_manifest_estimate_bytes": 0, "unknown_size_files": 0,
               "excluded_attachments": 0, "duplicate_references": 0, "message_file_payload_downloaded_bytes": 0,
-              "account_metadata_and_avatars_estimated": False, "max_messages": MESSAGES_PER_CHAT}
+              "account_metadata_and_avatars_estimated": False, "max_messages": MESSAGES_PER_CHAT, "chats": []}
     seen = set()
     try:
         async with asyncio.timeout(min(TIMEOUT, max(1, remaining_seconds))):
             entity = await collector.resolve_target(chat_id)
+            requested = time.monotonic()
             rows = await collector.client.get_messages(entity, limit=MESSAGES_PER_CHAT)
+        timing = history_sample(rows, time.monotonic() - requested)
+        sample["chats"].append(timing)
         for message in rows:
             sample["messages_examined"] += 1
+            timing["text_bytes"] += len((getattr(message, "message", None) or "").encode("utf-8"))
             if not getattr(message, "file", None):
                 continue
             rule = effective_media_rule(settings, media_kind(message), ephemeral.describe(message.media))
@@ -180,6 +198,12 @@ async def preview_capture(collector, chat_id, settings, remaining_seconds):
             if action == "exclude":
                 sample["excluded_attachments"] += 1
                 continue
+            if size is None:
+                timing["unknown_size_files"] += 1
+            elif action == "download":
+                timing["download_bytes"] += size
+            else:
+                timing["hash_ranges"] += (size + 131071) // 131072
             rep = file_hashes.representation(message.media)
             identity = (rep["kind"], rep["id"], rep["variant"], rep["bytes"]) if rep else None
             if identity and identity in seen:

@@ -57,7 +57,7 @@ def seed(store):
             continue
         if minute == 23:
             append(minute, 'connection.restored', {})
-        append(minute, 'collector.heartbeat', {'interval_seconds':60})
+        append(minute, 'collector.heartbeat', {'connected':True, 'interval_seconds':60})
         if minute <= 15 or minute >= 24:
             append(minute, 'message.new', {
                 'text': ('DEMO · Agreed delivery: 20 November. Total: 48,000.' if minute == 8 else

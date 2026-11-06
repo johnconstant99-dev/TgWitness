@@ -102,8 +102,9 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
             digest.update(block)
     return {"verified": True, "sha256": digest.hexdigest(), "workflow": WORKFLOW, **approved,
             "journal": internal, "collection": finished[0], **selection,
-            "limitation": "Approved GitHub workflow provenance and byte integrity; not Telegram-signed origin, "
-                          "complete historical coverage, confidential hardware, or a proof of no host access."}
+            "limitation": "Acquisition is bound to the approved GitHub-hosted collector and its fresh Telegram "
+                          "session. Verification trusts GitHub execution and the approved code; collection results "
+                          "state the selected scope and completeness. Hardware isolation is a separate TDX check."}
 
 
 def verify_official(evidence, approved, repo, expected_selection=None):
@@ -137,8 +138,9 @@ def verify_official(evidence, approved, repo, expected_selection=None):
     return {"verified": True, "sha256": digest, "workflow": WORKFLOW, **approved,
             "journal": internal, "collection": finished[0], "mode": "official_web",
             "selection_checked": expected is not None, "complete_account_export": False,
-            "limitation": "Approved official-client workflow and byte integrity; not Telegram-signed content, "
-                          "complete account history, hardware isolation, or a guarantee against account restrictions"}
+            "limitation": "Visual observations are bound to the approved GitHub-hosted official-client procedure. "
+                          "Verification trusts GitHub and the official Telegram client; the archive records the "
+                          "pages observed during the session. Account-wide export and TDX are separate modes."}
 
 
 def main():

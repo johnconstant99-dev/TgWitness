@@ -1,10 +1,9 @@
 # High-assurance deployment
 
-A signed journal proves that records were not changed **after** signing. For serious cases
-the next question is whether anyone could have shaped the data **before** it was signed:
-who ran the collector, on which machine, and whether someone logged in to it. This optional
-mode deploys the collector so that a third party can check that, using records kept by the
-cloud provider and Cloudflare rather than the operator's word.
+High-assurance deployment adds independent checks of the collection environment to
+archive verification．The reviewer queries deployment and access records held by the
+cloud provider and Cloudflare，and an Intel TDX deployment adds hardware attestation
+of the collector's environment．
 
 Ordinary local and Docker use is unchanged. Nothing here runs unless you deploy with
 `python -m tgwitness.cloud`, and the collector reads its host only when the deployment sets
@@ -34,10 +33,10 @@ flowchart LR
 | The signing key was created on that server | The key signs a statement naming the provider's server ID and the hash of the cloud-init it received | Collector, checked against the provider |
 | The journal belongs to that key and server | Every process start in the evidence ZIP carries the host measurement for that server | Evidence ZIP |
 
-Host measurements (SSH listeners and processes, current sessions, logins in `wtmp`, the boot)
-are reported by the collector itself and are signed into every process start and into
-`host.state` records whenever they change. Root on the server could falsify them; they
-support the provider and Cloudflare records rather than replace them.
+The collector records SSH state，sessions，login history and boot information in signed
+process-start and <code>host.state</code> records．On an ordinary VM these are local inventory
+records，which the reviewer compares with the provider's independent records．The
+Intel TDX deployment below additionally verifies hardware-backed measurements．
 
 ## Providers
 
@@ -423,14 +422,14 @@ its log.
 Cloudflare cannot see inside Telegram's encryption, other devices on the Telegram account
 (evidence mode's device list records them from Telegram's side) or the provider's hypervisor.
 
-## What this does not establish
+## Reading the deployment result
 
-- The provider and its staff control the hypervisor, disks and network.
-- Host measurements are self-reported by the collector.
-- Earlier firewall rule contents are not in every provider log; only Linode keeps rule versions.
-- It says nothing new about message authenticity; see [Evidence](EVIDENCE.md).
+For an ordinary VM，the provider controls the host infrastructure，and local inventory
+is checked alongside provider records．For Intel TDX，the verifier additionally checks
+the hardware quote，collector binding，compose and OS measurements．Read the individual
+results to see which checks passed or were unavailable．
 
-Not yet run against real accounts: a deployment under your own domain (Cloudflare tunnel and
-DNS), the other providers, a debug deployment and `lock`, a Telegram account on such a server,
-and the live updates of later versions through a quick tunnel. Check the first deployment on
-each provider with `plan`, a debug deployment and `verify` before relying on it in a case.
+Historical firewall detail depends on the provider；Linode retains rule versions．
+The [validation record](VERIFICATION.md) lists tested deployments and remaining live
+checks，and [verification scope](EVIDENCE.md#verification-scope) connects these environment
+checks to archive acquisition and integrity．
