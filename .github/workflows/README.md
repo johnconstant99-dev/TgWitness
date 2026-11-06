@@ -100,13 +100,13 @@ empty npm job or configuration for the removed witness-controller package.
 Do not assume Dependabot updates the custom hash locks or the project's
 constraints files. Maintainers must review `deploy/constraints.txt` and
 `deploy/constraints-mcp.txt`, regenerate the runtime, build, audit, browser,
-MCP and site locks with `python tools/lock_requirements.py` (requires `uv`),
+MCP, installer and site locks with `python tools/lock_requirements.py` (requires `uv`),
 and commit the results with dependency changes. PR checks run the offline
 `python tools/lock_requirements.py --check` input-consistency guard before
 installation. CI installs third-party tooling from the separate hash locks,
 then installs reviewed local source without resolving dependencies and runs
 `pip check`. The scheduled dependency audit checks exact runtime, build, MCP,
-audit, browser, site and media worker pins without resolving or installing
+installer, audit, browser, site and media worker pins without resolving or installing
 the audited project. Keep the approved sealed
 release/attestation policy separate from an ordinary dependency refresh.
 
