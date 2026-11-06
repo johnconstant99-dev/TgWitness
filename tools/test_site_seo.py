@@ -81,12 +81,15 @@ class PageSearchMetadata(unittest.TestCase):
         self.assertEqual(page['name'], head.title)
         self.assertEqual(page['description'], head.meta['description'])
         self.assertEqual(page['keywords'], ['export Telegram chats'])
-        self.assertEqual(head.links, Head(source).links)
+        self.assertEqual([link for link in head.links if link.get('rel') in {'canonical', 'alternate'}], Head(source).links)
+        self.assertIn({'rel': 'stylesheet', 'href': '../../discovery.css'}, head.links)
         self.assertEqual(page['breadcrumb'], json.loads(Head(source).scripts[0])['@graph'][0]['breadcrumb'])
         self.assertIn('<svg><title>Diagram title</title></svg>', result)
         self.assertIn('<pre><code>verify --fingerprint TRUSTED_KEY --path "A &amp; B"</code></pre>', result)
         self.assertIn('href="https://example.test/?a=1&amp;b=2"', result)
         self.assertIn('href="../../llms-full.txt"', result)
+        self.assertIn('class="machine-doc-footer"', result)
+        self.assertIn('class="machine-doc-links"', result)
         self.assertEqual(site_seo.enrich(result, 'docs/exports/index.html'), result)
 
     def test_russian_metadata_and_relative_discovery(self):
@@ -101,6 +104,16 @@ class PageSearchMetadata(unittest.TestCase):
         head = Head(result)
         self.assertEqual(head.title, 'Telegram · 导出和验证 | TgWitness')
         self.assertEqual(head.meta['description'], '导出记录，检查签名。')
+
+    def test_fullwidth_translated_brand_separator_is_not_duplicated(self):
+        for lang, original, expected in (
+            ('es', 'Exportar Telegram ｜ TgWitness', 'Exportar Telegram | TgWitness'),
+            ('ja', 'Telegram のエクスポート ｜ TgWitness', 'Telegram のエクスポート | TgWitness'),
+            ('fa', 'Telegram ｜ تی‌جی‌وییتنس', 'Telegram | TgWitness'),
+        ):
+            with self.subTest(language=lang):
+                result = site_seo.enrich(sample(lang, original), lang + '/index.html')
+                self.assertEqual(Head(result).title, expected)
 
     def test_metadata_is_escaped_and_no_unmapped_page_is_silently_published(self):
         value = '<script>alert("sample")</script>'

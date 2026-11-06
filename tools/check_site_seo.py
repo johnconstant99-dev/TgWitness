@@ -35,6 +35,7 @@ def check(output):
         node = title_nodes[0]
         title = source[node.open_end:node.close_start]
         title = html.unescape(title)
+        assert not re.search(r'[|｜]\s*TgWitness\s*[|｜]\s*TgWitness', title), route
         meta = defaultdict(list)
         for n in headers:
             if n.tag == 'meta':
@@ -56,6 +57,8 @@ def check(output):
         assert page['name'] == title and page['description'] == description, route
         assert page['keywords'] and all(isinstance(v, str) and v for v in page['keywords']), route
         assert len([n for n in nodes if n.tag == 'h1']) == 1, route
+        assert (output / 'discovery.css').is_file()
+        assert any(n.tag == 'link' and n.attrs.get('rel') == 'stylesheet' and urljoin(url, n.attrs.get('href', '')) == base + 'discovery.css' for n in headers), route
         if lang not in {'zh', 'zh-Hans', 'zh-Hant', 'ja', 'ko'}:
             assert not re.search('[\uff01-\uff5e]', title + description), route
         for name in ('llms.txt', 'llms-full.txt', 'sitemap.xml'):

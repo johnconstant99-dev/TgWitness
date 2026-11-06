@@ -65,7 +65,7 @@ WIKI_ASSETS = {
     "assets/sources.png": "docs/assets/sources.png",
     "assets/connection.png": "docs/assets/connection.png",
 }
-STATIC = {"style.css": "website/style.css", "site.js": "website/site.js",
+STATIC = {"style.css": "website/style.css", "site.js": "website/site.js", "discovery.css": "website/discovery.css",
           "sealed.html": "website/sealed.html", "sealed.js": "tgwitness/static/cloud-capture.js", "sealed.css": "tgwitness/static/cloud-capture.css",
           "site-redirect.js": "website/site-redirect.js", "capture-site.css": "website/capture-site.css",
           "capture-locales.js": "tgwitness/static/cloud-capture-locales.js",

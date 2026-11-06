@@ -1,0 +1,26 @@
+.machine-doc-footer {
+  flex-wrap: wrap;
+}
+
+.machine-doc-footer .machine-doc-links {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .25rem 1rem;
+  min-width: 0;
+  max-width: 100%;
+  margin-inline-start: 0;
+  font-size: .8rem;
+}
+
+.machine-doc-footer .machine-doc-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  max-width: 100%;
+  color: inherit;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}

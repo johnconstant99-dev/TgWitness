@@ -162,7 +162,7 @@ def metadata(path, title, description, lang):
     if lang == "ru":
         title = RUSSIAN[local]
     else:
-        title = clean(title.removesuffix(" | TgWitness"), lang)
+        title = re.sub(r"\s*[|｜]\s*[^|｜]+$", "", clean(title, lang)).strip()
         if local.startswith("docs/reference/") and " · " in title:
             title = title.rsplit(" · ", 1)[0]
         topic = "Phala / Intel TDX" if local.endswith("high-assurance/") else "Telegram"
@@ -204,6 +204,9 @@ def enrich(source, path):
             tag = '<meta ' + ' '.join(f'{k}="{html.escape(v, quote=True)}"' for k, v in attrs.items()) + '>'
             edits.append((node.open_start, node.open_end, tag))
     missing = ''.join(f'<meta name="{key}" content="{html.escape(wanted[key], quote=True)}">' for key in ("twitter:title", "twitter:description") if key not in present)
+    stylesheet = posixpath.relpath('discovery.css', posixpath.dirname(path) or '.')
+    if not any(n.tag == 'link' and n.attrs.get('href') == stylesheet for n in elements):
+        missing += f'<link rel="stylesheet" href="{stylesheet}">'
     edits.append((head.close_start, head.close_start, missing))
     page.update(name=new_title, description=summary, keywords=[query])
     for node in data["@graph"]:
@@ -216,12 +219,16 @@ def enrich(source, path):
         heading = next(n for n in nodes(root) if n.tag == "h1")
         edits.append((heading.open_end, heading.close_start, html.escape(new_title.removesuffix(" | TgWitness"))))
     footer = [n for n in nodes(root) if n.tag == "footer"][-1]
-    link_container = next((n for n in reversed(list(nodes(footer))) if n.tag == "nav"), footer)
+    classes = footer.attrs.get('class', '').split()
+    if 'machine-doc-footer' not in classes:
+        attrs = {**footer.attrs, 'class': ' '.join([*classes, 'machine-doc-footer'])}
+        tag = '<footer ' + ' '.join(k if v is None else f'{k}="{html.escape(v, quote=True)}"' for k, v in attrs.items()) + '>'
+        edits.append((footer.open_start, footer.open_end, tag))
     folder = posixpath.dirname(path)
     present_links = {n.attrs.get("href") for n in nodes(footer) if n.tag == "a"}
     links = ' '.join(f'<a href="{posixpath.relpath(name, folder or ".")}">{name}</a>' for name in ("llms.txt", "llms-full.txt", "sitemap.xml") if posixpath.relpath(name, folder or ".") not in present_links)
     if links:
-        edits.append((link_container.close_start, link_container.close_start, ' ' + links))
+        edits.append((footer.close_start, footer.close_start, '<nav class="machine-doc-links" lang="en" aria-label="Documentation files">' + links + '</nav>'))
     for start, end, value in sorted(edits, reverse=True):
         source = source[:start] + value + source[end:]
     return source

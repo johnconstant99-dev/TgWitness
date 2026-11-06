@@ -61,7 +61,8 @@ class HomepageTypography(unittest.TestCase):
                 path = ROOT / 'dist/site' / prefix / 'index.html'
                 self.assertTrue(path.exists(), 'Build the site before this check')
                 source = path.read_text(encoding='utf-8')
-                self.assertEqual(site_typography.homepage(source), source)
+                body = source.split('</head>', 1)[1]
+                self.assertEqual(site_typography.homepage(body), body)
                 self.assertNotIn('@@', source)
                 self.assertIn('git clone https://github.com/phishdestroy/TgWitness.git', source)
                 self.assertIn('.\\Start.cmd', source)
