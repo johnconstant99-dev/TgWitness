@@ -183,6 +183,7 @@ def check_portable_package(root):
         "python/Lib/site-packages/fpdf/DATA/extra.txt",
         "python/Lib/site-packages/fpdf/data/color_profiles/__pycache__/module.pyc",
         "python/Lib/site-packages/pymorphy3_dicts_ru/data/extra.txt",
+        "python/Lib/site-packages/pymorphy3_dicts_ru/data/notes.txt",
         "python/Lib/site-packages/pymorphy3_dicts_ru/data/vault.key",
         "python/Lib/site-packages/pymorphy3_dicts_ru/data/account.session",
         "python/Lib/site-packages/pymorphy3_dicts_ru/data/nested/grammemes.json",
