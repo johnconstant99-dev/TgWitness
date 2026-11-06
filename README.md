@@ -139,7 +139,7 @@ separate tested acquisition behavior from unmeasured live throughput.
 | [OCR and transcription](docs/MEDIA-ANALYSIS.md) | Runs locally, originals stay untouched |
 | [Independent capture](docs/OPTIONAL-CAPTURE.md) | Optional browser/AyuGram recorders in Extras (preview, off by default) |
 | [Trusted Live](docs/TRUSTED-LIVE.md) | Official Desktop/Web session, guarded video and native-export continuity analysis (preview; live qualification pending) |
-| [Sealed official Web](docs/OFFICIAL-WITNESS.md) | Fresh official browser on GitHub Actions，restricted controls，signed video and independently expected source/settings |
+| [Sealed official Web](docs/OFFICIAL-WITNESS.md) | Fresh official browser on GitHub Actions, restricted controls, signed video and independently expected source/settings |
 | [Webhooks](docs/WEBHOOKS.md) | Signed outgoing events with retries, n8n example included |
 | [Shared access](docs/ACCESS.md) | Give someone selected chats only, with expiry and IP limits |
 | [Missing message numbers](docs/EVIDENCE.md#missing-message-numbers-gap_summary) | Numbers Telegram assigned that were never observed, per channel and for the whole account, in coverage, reports and MCP (**Preview**) |
@@ -253,9 +253,9 @@ verification steps for a signed TgWitness archive.
 
 </details>
 
-Collect cloud-chat data available to the connected account，with the selected period，
-attachment policy and recorded collection outcomes．See the [mode comparison](docs/COLLECTION-MODES.md)
-for history，live observation and sealed acquisition．
+Collect cloud-chat data available to the connected account, with the selected period,
+attachment policy and recorded collection outcomes. See the [mode comparison](docs/COLLECTION-MODES.md)
+for history, live observation and sealed acquisition.
 
 <p align="center">
   <a href="docs/README.md"><img src="docs/assets/presentation/readme-button-docs.svg" height="34" alt="Technical documentation"></a>

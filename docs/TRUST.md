@@ -114,9 +114,9 @@ python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo
 ## Verification scope
 
 Release attestation binds the named download and its digest to the recorded build workflow
-and source revision．Check the attestation supplied for the exact artifact being installed；
-other package formats have their own publication and verification paths．
+and source revision. Check the attestation supplied for the exact artifact being installed;
+other package formats have their own publication and verification paths.
 
-The SBOM describes the declared package versions，while a scan evaluates those versions
-against its vulnerability database．Evidence archives are checked separately with the
-[verification procedure for their collection mode](EVIDENCE.md#verification-scope)．
+The SBOM describes the declared package versions, while a scan evaluates those versions
+against its vulnerability database. Evidence archives are checked separately with the
+[verification procedure for their collection mode](EVIDENCE.md#verification-scope).

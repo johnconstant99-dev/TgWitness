@@ -26,6 +26,8 @@ capture guide</a> for deployment and trust boundaries.</p>
 | interactions.py / telegram_client.py | Explicit panel actions, signed receipts, persistent request IDs and task-local callback/join retry policy |
 | message_content.py | Observable message comparison, excluding transport access metadata |
 | workers.py | Wait for export file workers before cancellation cleanup |
+| distributed_export.py / distributed_pages.py | Concurrent chat jobs, per-account reservations, signed checkpoints and cleanup after archive verification |
+| distributed_takeout.py / export_timing.py | Resumable Takeout sessions and timings for each start or resume |
 | store.py | WAL transactions, ordered event chain, query filters, operational settings |
 | fulltext.py | Derived full-text index (word forms, BM25), bound to the signed journal head; never exported |
 | security.py | Private-file creation, encrypted vault, Ed25519 signing, single-process lock |
@@ -75,9 +77,13 @@ thread, keeps uploads in memory, and returns normalized input to the authenticat
 browser. QR login has a per-workspace candidate, short-lived identifier, waiter task,
 and explicit cancellation. Only accepted authorization becomes the active client.
 Telegram FloodWait is returned with a Retry-After value; credentials and raw RPC
-error messages are not exposed in API errors. Exports run outside the async event
-loop and are serialized per workspace. They stream a stable read snapshot, and can
-coexist with continuing WAL writes. Workspace collectors share the process/event loop.
+error messages are not exposed in API errors. Journal exports run outside the async
+event loop and are serialized per workspace. They stream a stable read snapshot
+alongside continuing WAL writes. Chat acquisition jobs can run concurrently on
+separate accounts; each account remains reserved until its job stops. A paused or
+failed job retains its checkpoints. Successful archive verification permits cleanup
+of its working files, leaving the ZIP, signed plan and status. Workspace collectors
+share the process/event loop.
 
 Current history snapshots and live updates can overlap. Both are separate observations,
 labeled by source; duplicates are not silently collapsed. No inference from missing

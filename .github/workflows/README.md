@@ -118,4 +118,4 @@ dependency updates. See the [Dependabot options](https://docs.github.com/en/code
 [CodeQL workflow options](https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options),
 and [Trivy action](https://github.com/aquasecurity/trivy-action) for their actual scopes.
 
-Results are retained in each workflow run and its artifacts．
+Results are retained in each workflow run and its artifacts.

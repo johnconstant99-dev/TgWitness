@@ -182,14 +182,14 @@ computation can be repeated from `events.jsonl` with `tgwitness.metrics.run`.
 
 | Processor | What it shows |
 | --- | --- |
-| `first_time_posters_over_time` v1 | First-time posters and messages per UTC day．A flag requires at least five first-time posters and three times their median，with message volume at most 1.5 times its median．The baseline uses at least seven observed days within the previous 14 calendar days，after seven days of warm-up． |
+| `first_time_posters_over_time` v1 | First-time posters and messages per UTC day. A flag requires at least five first-time posters and three times their median, with message volume at most 1.5 times its median. The baseline uses at least seven observed days within the previous 14 calendar days, after seven days of warm-up. |
 | `service_vs_message_ratio` v1 | Distinct saved message numbers per chat and the share used by service messages. It describes a numbering; it does not explain a particular missing number. |
 | `join_leave_per_month` v1 | Joins, departures and removals or bans per month, one per person, chat, change and day. |
 | `pinned_per_month` v1 | Pin service messages, unpin notices, and pinned messages added or removed between chat-state snapshots, per month. |
 
-**Parameters → Report metrics** selects processors and the number of displayed rows，
-including in filtered reports．Daily and monthly tables show recent rows，service-share
-tables rank chats by saved message count．Totals cover every row．
+**Parameters → Report metrics** selects processors and the number of displayed rows,
+including in filtered reports. Daily and monthly tables show recent rows, service-share
+tables rank chats by saved message count. Totals cover every row.
 
 From a source checkout, build all eight designs listed above from the same fictional journal:
 
@@ -273,8 +273,8 @@ Review each check separately, alongside the recorded collection coverage.
    Intel certificate chain, measurements, exact source and key-handling conditions.
    Keep the attestation verification result with the reviewed artifacts.
 
-See [verification scope](EVIDENCE.md#verification-scope) for the checks of acquisition，
-archive integrity，time and collection coverage in each mode．
+See [verification scope](EVIDENCE.md#verification-scope) for the checks of acquisition,
+archive integrity, time and collection coverage in each mode.
 
 ## Recipient review
 

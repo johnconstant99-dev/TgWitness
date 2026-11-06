@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tgwitness import account_export_transport, dossier, evidence, export_history, handover, pdf_report, report
 from tgwitness.account_export import BoundedWriter
 from tgwitness.collector import Collector, describe_message
-from tgwitness.multi_export import MultiExport
+from tgwitness.distributed_export import DistributedExport, Run
 from tgwitness.security import Vault
 from tgwitness.store import Store, canonical
 from tgwitness.verify import (SEAL_CLOSE, SEAL_OPEN, fingerprint, verify_bundle, verify_dossier, verify_handover,
@@ -283,7 +283,7 @@ def test_file_reference_refresh_matches_actual_attachment(container, changed):
 
 
 @pytest.mark.parametrize("channel", [False, True])
-def test_multi_export_requires_shared_message_namespace(tmp_path, channel):
+def test_multi_export_requires_shared_message_namespace(tmp_path, monkeypatch, channel):
     stores, entries = [], {}
     peer = types.Channel(id=123, title="Synthetic group", photo=types.ChatPhotoEmpty(), date=WHEN,
                          access_hash=1, megagroup=True) if channel else types.User(id=PERSON, first_name="Synthetic peer")
@@ -301,12 +301,17 @@ def test_multi_export_requires_shared_message_namespace(tmp_path, channel):
             collector.dialog_cache = {chat: {"kind": "supergroup", "entity": peer}}
             collector.client = SimpleNamespace(get_messages=AsyncMock(return_value=[SimpleNamespace(id=4001)]))
             entries[name] = {"app": SimpleNamespace(state=SimpleNamespace(collector=collector, store=store, vault=vault))}
-        multi = MultiExport(SimpleNamespace(entries=entries))
-        multi.run = AsyncMock()
+        multi = DistributedExport(SimpleNamespace(entries=entries, app=entries["default"]["app"]))
+        monkeypatch.setattr(Run, "run", AsyncMock())
         async def scenario():
-            result = await multi.start(chat, ["default", "extra"], "default")
-            await multi.task
+            if not channel:
+                with pytest.raises(ValueError, match="Only one account"):
+                    await multi.start(chat, ["default", "extra"], "default")
+                assert not multi.reserved
+            result = await multi.start(chat, ["default", "extra"] if channel else ["default"], "default")
+            await multi.runs[result["id"]].task
             await asyncio.sleep(0)
+            assert not multi.reserved
             return result
         result = asyncio.run(scenario())
         assert [w["profile_id"] for w in result["workers"]] == (["default", "extra"] if channel else ["default"])

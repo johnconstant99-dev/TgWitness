@@ -38,7 +38,7 @@ from .evidence import LIMITS, checkpoint, encrypt_export, export_file, producer,
 from . import i18n
 from .security import InstanceLock, Vault
 from .profiles import GROUP_SECTIONS, JournalNotExported, Profiles, ProfileDispatch
-from .distributed_export import DistributedExport as MultiExport
+from .distributed_export import DistributedExport
 from .message_selection import Selection
 from .provenance import run_receipt
 from .middleware import RequestLimit, request_limit
@@ -493,7 +493,7 @@ def create_app(data_dir=None, demo=False, client_factory=None, token_override=No
                 app.state.profiles = profiles
                 app.state.access.group_of = profiles.group_of
                 await profiles.open()
-                app.state.multi_export = MultiExport(profiles)
+                app.state.multi_export = DistributedExport(profiles)
                 from .archive_api import startup as start_mcp
                 await start_mcp(app)
             yield

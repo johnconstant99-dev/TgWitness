@@ -5,8 +5,6 @@ import unicodedata
 from .people import PeopleIndex, TABLES as PEOPLE_TABLES
 
 TEXT_KINDS = ("message.new", "message.snapshot", "message.edited", "message.recovered")
-# Account control events, including account.initialized and account.connection_checked, use the generic event
-# and payload indexes; they are not chat messages or evidence of chat coverage.
 GONE_KINDS = ("message.deleted", "message.missing_on_recheck")
 CHAT_KINDS = TEXT_KINDS + GONE_KINDS + ("media.saved",)
 MEDIA_KINDS = ("media.saved", "actor.avatar_saved")

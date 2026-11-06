@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
-import hashlib
 import io
 import json
 from pathlib import Path
@@ -13,11 +12,12 @@ import pytest
 from telethon.tl import functions, types
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from tgwitness import handover, interactions, multi_export, report, report_design, verify
-from tgwitness.collector import Collector, describe_message, message_record
+from tgwitness import distributed_export, handover, interactions, report, report_design, verify
+from tgwitness.collector import Collector, describe_message
 from tgwitness.security import Vault
 from tgwitness.store import Store, canonical
 from tools.test_independent_report_pdf import capture_documents
+from tools.test_distributed_export import Client
 
 CHAT, HIDDEN, OBSERVER, BOT = -1000000000123, -1000000000456, 77001, 77002
 WHEN = datetime(2020, 10, 1, 12, tzinfo=timezone.utc)
@@ -200,7 +200,7 @@ def test_unknown_interaction_fields_are_not_copied(action_workspace):
     assert "PRIVATE_UNKNOWN_473" not in canonical(projected(store, options)).decode()
 
 
-async def multi_scenario(root, recovered_ids, *, fail_verification=False, recheck_error=False):
+async def multi_scenario(root, recovered_ids, *, fail_verification=False, recheck_error=False, tamper=False):
     stores, entries, fetched = [], {}, {}
     peer = types.Channel(id=123, title="Synthetic shared channel", photo=types.ChatPhotoEmpty(), date=WHEN,
                          access_hash=1, megagroup=True)
@@ -208,6 +208,28 @@ async def multi_scenario(root, recovered_ids, *, fail_verification=False, rechec
 
     class Latest(list):
         total = 8
+
+    class ExportClient(Client):
+        def __init__(self, name):
+            super().__init__([message(mid) for mid in ((8, 6) if name == "default" else (3, 1))])
+            self.name = name
+
+        async def get_messages(self, entity, limit=None, offset_date=None, ids=None):
+            if ids is not None:
+                if recheck_error:
+                    raise TimeoutError("Synthetic Telegram timeout")
+                return [message(mid) for mid in recovered_ids]
+            return Latest([message(8)])
+
+        async def iter_messages(self, entity, offset_id=0, min_id=0, **options):
+            assert (self.name, min_id, offset_id) in (("default", 4, 9), ("extra", 0, 5))
+            for row in self.messages:
+                fetched[row.id] = self.name
+                yield row
+            if self.name == "default":
+                await asyncio.wait_for(other_started.wait(), 5)
+            else:
+                other_started.set()
 
     try:
         for index, name in enumerate(("default", "extra"), 1):
@@ -221,53 +243,47 @@ async def multi_scenario(root, recovered_ids, *, fail_verification=False, rechec
             collector = Collector(store, vault)
             collector.restore = AsyncMock()
             collector.dialog_cache = {CHAT: {"kind": "supergroup", "title": "Synthetic source", "entity": peer}}
-            collector.client = SimpleNamespace(get_messages=AsyncMock(return_value=Latest([message(8)])))
+            collector.client = ExportClient(name)
             collector.telegram_clock = AsyncMock(return_value={})
             collector.chat_profile = AsyncMock(return_value=({}, {"role": "member"}, []))
             collector.client_identity = lambda: {}
             collector.route_receipt = lambda: {}
 
-            async def fetch_range(entity, low, high, path, progress, waiting, name=name):
-                assert (name, low, high) in (("default", 5, 8), ("extra", 1, 4))
-                ids = (8, 6) if name == "default" else (3, 1)
-                data = b"".join(canonical(message_record(message(mid))) + b"\n" for mid in ids)
-                path.write_bytes(data)
-                for mid in ids:
-                    fetched[mid] = name
-                    progress()
-                if name == "default":
-                    await asyncio.wait_for(other_started.wait(), 5)
-                else:
-                    other_started.set()
-                return len(ids), hashlib.sha256(data).hexdigest()
-
-            collector.fetch_range = fetch_range
-            collector.recheck_absent = AsyncMock(return_value=({"asked": 4, "returned": recovered_ids},
-                                                [message(mid) for mid in recovered_ids]))
-            if recheck_error:
-                collector.recheck_absent.side_effect = TimeoutError("Synthetic Telegram timeout")
             entries[name] = {"label": name, "app": SimpleNamespace(state=SimpleNamespace(
                 collector=collector, store=store, vault=vault))}
-        coordinator = multi_export.MultiExport(SimpleNamespace(entries=entries))
-        real_verify = multi_export.verify_chat_export
+        coordinator = distributed_export.DistributedExport(SimpleNamespace(entries=entries, app=entries["default"]["app"]))
+        real_verify = distributed_export.verify_chat_export
         checked_limits = []
+
+        if tamper:
+            launch = coordinator.launch
+            def alter_before_selection(run):
+                finish = run.finish_selection
+                async def changed(directory, options):
+                    path = directory / "chunks" / "1.jsonl"
+                    path.write_bytes(path.read_bytes().replace(b"Synthetic message", b"Changed message"))
+                    return await finish(directory, options)
+                run.finish_selection = changed
+                return launch(run)
+            coordinator.launch = alter_before_selection
 
         def check(path, pinned, max_gib=None):
             checked_limits.append(max_gib)
-            assert not coordinator.public()["ready"] and coordinator.path is None
+            state = coordinator.public()
+            assert not state["ready"] and coordinator.result_path(state["id"]) is None
             outbox.assert_not_called()
             if fail_verification:
                 raise ValueError("Synthetic final verification failure")
             return real_verify(path, pinned, max_gib)
 
-        with patch.object(multi_export, "CHUNK", 4), patch.object(multi_export, "verify_chat_export", check), \
-                patch.object(multi_export.replica, "outbox") as outbox:
-            await coordinator.start(CHAT, ["default", "extra"], "default")
-            await asyncio.wait_for(coordinator.task, 30)
-            state = coordinator.public()
+        with patch.object(distributed_export, "CHUNK", 4), patch.object(distributed_export, "verify_chat_export", check), \
+                patch.object(distributed_export.replica, "outbox") as outbox:
+            started = await coordinator.start(CHAT, ["default", "extra"], "default")
+            await asyncio.wait_for(coordinator.runs[started["id"]].task, 30)
+            state = coordinator.public(started["id"])
             if state["phase"] == "failed":
                 assert not state["ready"] and coordinator.result_path(state["id"]) is None
-                assert not list((root / "default" / "temporary-exports").glob("*.zip"))
+                assert (coordinator.directory(state["id"]) / "chunks").is_dir()
                 outbox.assert_not_called()
                 return {"state": state, "checked_limits": checked_limits}
             assert state["phase"] == "done" and state["ready"], state
@@ -292,12 +308,11 @@ def test_recovered_messages_are_signed_by_the_actual_fetcher(tmp_path, recovered
     manifest, data = result["manifest"], result["data"]
     assert [row["id"] for row in data["messages"]] == sorted([1, 3, 6, 8, *recovered], reverse=True)
     assert manifest["message_count"] == result["checked"]["message_count"] == 4 + len(recovered)
-    assert {worker["account_id"]: worker["captured"] for worker in result["state"]["workers"]} == {
-        101: 2 + len(recovered), 102: 2}
+    assert {worker["account_id"]: worker["captured"] for worker in result["state"]["workers"]} == {101: 2, 102: 2}
     ranges = [(bounds, part["statement"]["account_id"]) for part in manifest["parts"]
               for bounds in part["statement"]["ranges"]]
     assert all(part["statement"]["format"] == "tgwitness-chat-part-v1" for part in manifest["parts"])
-    for mid in range(1, 9):
+    for mid in [1, 3, 6, 8, *recovered]:
         owners = [account for bounds, account in ranges if bounds["low"] <= mid <= bounds["high"]]
         assert len(owners) == 1
         assert owners == ([101] if mid in recovered or mid >= 5 else [102])
@@ -323,28 +338,26 @@ def test_failed_final_verification_never_publishes_ready_archive(tmp_path):
 @pytest.mark.parametrize("recovered", [[2, 2], [3], [9]])
 def test_invalid_recheck_ids_fail_closed(tmp_path, recovered):
     result = asyncio.run(multi_scenario(tmp_path, recovered))
-    assert result["state"]["phase"] == "failed"
-    assert "absent message IDs" in result["state"]["error"]
+    assert result["state"]["phase"] == "done", result
+    assert [row["id"] for row in result["data"]["messages"]] == [8, 6, 3, 1]
+    assert not any(row.get("found_on_recheck") for row in result["data"]["messages"])
+    recheck = result["manifest"]["recheck"]
+    assert recheck["asked"] == 0 and recheck["unchecked"] == 4
+    assert recheck["errors"] == {"default": "ValueError", "extra": "ValueError"}
 
 
 def test_recheck_error_keeps_the_original_signed_ranges(tmp_path):
     result = asyncio.run(multi_scenario(tmp_path, [], recheck_error=True))
     assert result["state"]["phase"] == "done", result
-    assert result["manifest"]["recheck"]["error_type"] == "TimeoutError"
+    assert result["manifest"]["recheck"]["errors"] == {"default": "TimeoutError", "extra": "TimeoutError"}
     assert len(result["manifest"]["parts"]) == 2
 
 
-def test_repartition_rejects_changed_original_fetch(tmp_path):
-    rows = [{"id": 3, "text": "Original third message"}, {"id": 1, "text": "Original first message"}]
-    data = b"".join(canonical(row) + b"\n" for row in rows)
-    path = tmp_path / "original-range.jsonl"
-    path.write_bytes(data)
-    part = {"low": 1, "high": 3, "profile_id": "extra", "count": 2,
-            "sha256": hashlib.sha256(data).hexdigest(), "path": path}
-    rows[0]["text"] = "Changed after fetch"
-    path.write_bytes(b"".join(canonical(row) + b"\n" for row in rows))
-    with pytest.raises(ValueError, match="changed on disk after it was fetched"):
-        multi_export.MultiExport.recheck_parts([part], [{"id": 2, "text": "Recovered"}], "default")
+def test_selection_rejects_changed_original_fetch(tmp_path):
+    result = asyncio.run(multi_scenario(tmp_path, [2], tamper=True))
+    assert result["state"]["phase"] == "failed"
+    assert result["state"]["error"] == "Acquired chunk changed before selection."
+    assert not result["checked_limits"]
 
 
 if __name__ == "__main__":

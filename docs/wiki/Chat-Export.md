@@ -30,8 +30,9 @@ Saves what your account can see in a chat as a signed archive, with a readable
 3. Wait for it to finish and save the archive.
 4. Keep the original. Unpack a copy, `chat.html` to read offline, `chat.json` for analysis.
 
-The account needs access to the chat, private chats work too. One export per chat; for a
-whole account use [account export](../ACCOUNT-EXPORT.md).
+The account needs access to the chat; private chats work too. Each archive covers one
+chat. Exports can run concurrently on separate accounts; for a whole account use
+[account export](../ACCOUNT-EXPORT.md).
 
 ## Choose the right kind of history
 

@@ -150,7 +150,6 @@ EXPOSURE_MEANING = {
 }
 MEMBERSHIP_ACTIONS = (types.MessageActionChatAddUser, types.MessageActionChatDeleteUser,
                       types.MessageActionChatJoinedByLink, types.MessageActionChatJoinedByRequest)
-# The client description in the connection request Telegram receives.
 CLIENT_FIELDS = ("device_model", "system_version", "app_version", "lang_code", "system_lang_code", "lang_pack")
 CLOCK_TIMEOUT = 10
 PROFILE_TIMEOUT = 30
@@ -3070,6 +3069,8 @@ class Collector:
                 if message is not None and not isinstance(message, types.MessageEmpty):
                     if utils.get_peer_id(message.peer_id) != utils.get_peer_id(entity):
                         raise ValueError("History returned a message from a different source.")
+                    if type(message.id) is not int or message.id not in batch or message.id in found:
+                        raise ValueError("History returned an unexpected or repeated message ID.")
                     found[message.id] = message
         return found
 

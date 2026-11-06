@@ -974,10 +974,7 @@ class Coverage:
                            "confirmation or recorded stop. Message-number gaps describe the observed numbering range."}
 
 
-# Missing message numbers. Telegram numbers messages once per channel or supergroup, and once per account
-# across private chats, bots and ordinary groups. A number between two observed messages that this
-# collector never saw is a gap: a message that existed and was not observed. A gap names no actor and no
-# reason, and every result lists the parameters that produced it.
+# Channels have separate ID sequences; private chats, bots and basic groups share the account sequence.
 GAP_DEFAULTS = {"gap_analysis": True, "gap_account_sequence": True, "gap_cluster_min": 1, "gap_clusters_listed": 20,
             "gap_service_estimate": False}
 WIDE_TYPES = ("private", "groups", "bots")
@@ -1385,8 +1382,6 @@ def drand_fetcher():
 
 
 def verify_events(events, public_key):
-    # Account control events (account.initialized, account.connection_checked) use the same signed
-    # envelope as older events. They do not extend message or coverage claims.
     key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public_key, validate=True))
     previous, count = "0" * 64, 0
     for count, event in enumerate(events, 1):

@@ -2,10 +2,10 @@
 
 [Export and verify](EVIDENCE.md) · [High assurance](HIGH-ASSURANCE.md) · [Panel guide](PANEL.md#extras)
 
-A witness retains signed checkpoints separately from the collector．It checks the
-collector's signature and journal continuity，signs the result with its own key，and
-publishes it to a Telegram channel．Run it on a separate server with read-only access to
-the collector's witness endpoint．
+A witness retains signed checkpoints separately from the collector. It checks the
+collector's signature and journal continuity, signs the result with its own key, and
+publishes it to a Telegram channel. Run it on a separate server with read-only access to
+the collector's witness endpoint.
 
 ```mermaid
 flowchart LR
@@ -44,9 +44,9 @@ Every interval (10 minutes by default) the witness:
 
 1. fetches the head itself (the collector cannot push or skip it);
 2. verifies the collector's signature, the pinned collector key (`--collector-fingerprint`,
-   or the first key seen)，a nondecreasing count and an unchanged head at an unchanged count．
+   or the first key seen), a nondecreasing count and an unchanged head at an unchanged count.
    Merkle inclusion and consistency proofs verify that a growing journal extends the
-   retained checkpoint．Once continuity proofs have been used，removing them is rejected；
+   retained checkpoint. Once continuity proofs have been used, removing them is rejected;
 3. appends a signed record to its own journal: `witness.anchor` with status `ok`,
    `key_changed`, `rollback` (fewer records than before), `fork` (same length, different
    head) or `invalid` (the answer failed verification), or `witness.no_response` when the
@@ -288,11 +288,11 @@ When `--channel` is also supplied, missing claimed posts or an empty match set f
 strict check. Without the flag, ordinary integrity checks still report unwitnessed
 records without rejecting an otherwise intact archive.
 
-Keep the witness journal and its pinned key separately．Online checks verify continuity
-between checkpoints；offline verification compares every retained checkpoint with the
-export．Legacy heads without continuity proofs retain the offline comparison and are
-reported without online continuity verification．The report lists witness downtime and
-failed publications by interval．
+Keep the witness journal and its pinned key separately. Online checks verify continuity
+between checkpoints; offline verification compares every retained checkpoint with the
+export. Legacy heads without continuity proofs retain the offline comparison and are
+reported without online continuity verification. The report lists witness downtime and
+failed publications by interval.
 
 ### Daily seals and unavailable timestamp calendars
 

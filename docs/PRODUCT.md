@@ -129,10 +129,10 @@ separate-update switches. There are no per-group category overrides yet.
 | Admin actions | Relevant delivered updates and an admin-log snapshot in channel/supergroup chat exports | The export reads the log when available to the exporting admin account; continuous admin-log polling is outside this path |
 | Attachment | Original version descriptor, downloaded bytes/SHA-256 and attempt outcomes | A vanished file may be unrecoverable; the latest version is not substituted |
 | History | Explicit snapshot of current visible messages | Does not reconstruct all edits or deleted content |
-| Collector process | Start／stop，heartbeat，errors，settings，scope and signed run receipt | Local inventory；GitHub and TDX add [independent environment checks](EVIDENCE.md#verification-scope) |
+| Collector process | Start/stop, heartbeat, errors, settings, scope and signed run receipt | Local inventory; GitHub and TDX add [independent environment checks](EVIDENCE.md#verification-scope) |
 
 The interface names the account supplied in the source event and retains observed
-names and usernames．When the event omits its actor，the report leaves that field unspecified．
+names and usernames. When the event omits its actor, the report leaves that field unspecified.
 
 ## Capacity and Telegram limits
 

@@ -1,4 +1,4 @@
-"""Durable, exclusive multi-account acquisition and local message selection."""
+"""Concurrent chat exports with per-account reservations and signed checkpoints."""
 import asyncio
 import base64
 import errno
@@ -318,6 +318,8 @@ class DistributedExport:
 
 
 class Run:
+    """Keep one export's workers, progress and recovery state together."""
+
     def __init__(self, exports, state, job=None, *, timing=None):
         self.app_for, self.directory = exports.app_for, exports.directory
         self.state, self.job = state, job
@@ -488,7 +490,6 @@ class Run:
                         self.persist()
                     await pages.fetch(collector, self.entities[profile], profile, committed, waiting, transport,
                                       page_timeout=PAGE_TIMEOUT, attempts=1)
-                    # Recheck the durable data before sealing the whole range.
                     if await complete_in_thread(pages.verify) != pages.state:
                         raise ValueError("Checkpoint data changed during acquisition.")
                     count, digest = await complete_in_thread(self.check_chunk, path, task)
@@ -788,7 +789,8 @@ class Run:
                 meta["acquisition"]["checkpoints"] = {"format": PAGE_FORMAT, "max_messages": 100,
                     "pages": sum(p.state["pages"] for p in self.page_states.values()),
                     "scope": "Local decoded-message checkpoints, not RPC responses. Excluded records and page receipts "
-                             "remain in the private working directory; selected messages have the archive's account signatures."}
+                             "are not included in this archive. Working files are removed after successful archive "
+                             "verification; selected messages have the archive's account signatures."}
             for profile_id, network in self.history_transports.items():
                 try:
                     await network.finish()

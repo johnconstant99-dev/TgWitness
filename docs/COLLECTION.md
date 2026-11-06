@@ -6,9 +6,9 @@ not infer unseen actions from a missing message or from an account being connect
 
 ## From login to a journal
 
-For self-destructing photos and files，see [Self-destructing media](EPHEMERAL-MEDIA.md)．
-It explains the priority worker，saved and unavailable outcomes，and the limits of
-read-receipt blocking in the API collector．
+For self-destructing photos and files, see [Self-destructing media](EPHEMERAL-MEDIA.md).
+It explains the priority worker, saved and unavailable outcomes, and the limits of
+read-receipt blocking in the API collector.
 
 ```mermaid
 flowchart TD
@@ -161,8 +161,8 @@ account asks for the usual confirmation.
   - A record whose only changes are counts, and a check that found no change, refer to the
     last full state with `state_seq` and cumulative `state_overrides`. A full state is written at
     least every seven days and whenever anything other than a count changes.
-  - `parts_complete` marks capped lists．Additions require a complete earlier list，
-    removals require a complete current list，and explicit empty values record clearing．
+  - `parts_complete` marks capped lists. Additions require a complete earlier list,
+    removals require a complete current list, and explicit empty values record clearing.
   - **Parameters → Chat state** sets the interval (12 hours by default, 0 turns snapshots
     off), the pause between sources, which parts are read, and whether checks that found no
     change are recorded. `FLOOD_WAIT` and `FLOOD_PREMIUM_WAIT` stop the remaining
@@ -328,6 +328,6 @@ the export; collection may continue beyond its boundary while it is being prepar
 boundary. Its result is cleared when the workspace changes, and the panel identifies
 new records added after the check. ZIP export also verifies collected media.
 
-Retain fingerprints and checkpoints independently．See the
-[verification scope](EVIDENCE.md#verification-scope) for acquisition checks in each mode，
-and [daily operations](OPERATIONS.md) for routine collection．
+Retain fingerprints and checkpoints independently. See the
+[verification scope](EVIDENCE.md#verification-scope) for acquisition checks in each mode,
+and [daily operations](OPERATIONS.md) for routine collection.

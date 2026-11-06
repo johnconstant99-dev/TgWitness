@@ -1,9 +1,9 @@
 # Distributed chat export
 
-Absent-number rechecks count gaps as intervals，without allocating every missing
-number in memory．Default sampling stays bounded；an explicit full recheck reads
-successive batches and can be cancelled．Unchecked numbers remain visible in the
-result and are not treated as proof of deletion．
+Absent-number rechecks count gaps as intervals, without allocating every missing
+number in memory. Default sampling stays bounded; an explicit full recheck reads
+successive batches and can be cancelled. Unchecked numbers remain visible in the
+result and are not treated as proof of deletion.
 
 Open a chat and choose **Export chat**. Select idle account workspaces that already have access to the source. Every account keeps its configured connection. This feature does not change WARP or choose an exit IP.
 
@@ -45,9 +45,9 @@ For a supergroup/channel, preflight resolves the source separately for every acc
 
 Data is flushed and synced before its receipt is atomically written and synced. Only then does the durable cursor advance. Pause drains an in-flight write before releasing the account. Resume verifies every retained checkpoint before connecting, ignores unsigned trailing bytes, and truncates that tail before continuing from the last committed cursor. Up to 99 buffered messages, or the current unsigned write, may need to be read again. Committed pages are retained unchanged. A partially acquired range stays with its original account; another account cannot silently finish that range. Empty terminal receipts identify iterator exhaustion for that observer, not universal absence. An expired Takeout can resume in a new generation, recorded separately in subsequent receipts.
 
-Once a range is complete, its chunk receipt binds the final checkpoint head. Resume checks signatures, hashes, ranges, ordering, account identity and retained progress before reusing it. Old plans without `checkpoint_format` keep the original whole-chunk recovery path; they are not silently migrated. Paused jobs can be reopened from **Saved exports** in the export dialog. One distributed job runs at a time in this coordinator.
+Once a range is complete, its chunk receipt binds the final checkpoint head. Resume checks signatures, hashes, ranges, ordering, account identity and retained progress before reusing it. Old plans without `checkpoint_format` keep the original whole-chunk recovery path; they are not silently migrated. Paused jobs can be reopened from **Saved exports** in the export dialog. Several jobs can run concurrently when they use separate accounts. Each job keeps its own workers, checkpoints and timings; an account reserved by one job cannot join another until it is released.
 
-Inspect a **stopped** new-format working directory without the app, SQLite index or vault:
+Inspect a **paused or failed** new-format working directory without the app, SQLite index or vault:
 
 ```bash
 python tgwitness/verify.py /path/to/distributed-exports/JOB_ID --fingerprint RETAINED_FINGERPRINT --json
@@ -55,7 +55,7 @@ python tgwitness/verify.py /path/to/distributed-exports/JOB_ID --fingerprint RET
 
 This read-only check reports committed messages/pages, completed ranges and unsigned tail bytes. Pin the lead fingerprint independently. Like any local receipt chain, removal of its tail and all corresponding local progress cannot be detected without a separately retained receipt head. The verifier establishes local integrity, not Telegram signatures or an atomic snapshot.
 
-Intermediate chunks include messages needed to evaluate filters, including rejected messages. Filters limit the final archive; rejected messages and checkpoint receipts remain in local storage. The configured free-space reserve is checked before new chunks and each checkpoint. Completed job directories are not deleted automatically.
+Intermediate chunks include messages needed to evaluate filters, including rejected messages. Filters limit the final archive. A paused, cancelled or failed job retains those chunks and checkpoint receipts for recovery. After the ZIP passes verification, the app removes chunks, receipts, temporary media and indexes. The job directory retains `export.zip`, the signed `job.json` plan and `status.json`; use the ZIP verifier for completed jobs. The configured free-space reserve is checked before new chunks and each checkpoint.
 
 Wider ranges still reduce requests across sparse histories. New checkpoints bound interrupted-range rereading independently of that width. Cross-account overlap coverage checks remain separate future work. Signing and syncing more often costs local I/O; checkpointing improves recovery, not the speed of a successful uninterrupted network read.
 

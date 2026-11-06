@@ -146,8 +146,8 @@ In the worked example:
 | Same saved file | Completed media receipts #151 and #209 | The full SHA-256 values agree for the preserved bytes |
 | Channel attribution | #101 and #188 | Do not attribute a channel post to user 71001 without an attributed sender |
 
-Compare attachment hashes and their associated message references，and keep account
-timelines grouped by the Telegram IDs supplied in those records．
+Compare attachment hashes and their associated message references, and keep account
+timelines grouped by the Telegram IDs supplied in those records.
 
 Keep the team's working notes on [Case Board](CASE-BOARD.md): bookmark the records
 you rely on, such as #146, #188 and #205, highlight the exact destination string, and
@@ -229,7 +229,7 @@ signature and verification procedure.
 | --- | --- | --- |
 | Bot-driven order/payment dispute | Entry announcement → saved link preview → bot start parameter → message and keyboard versions → panel callback receipts → private/group follow-up | Observed offer/response timeline and verified sources; a payment link alone does not prove a payment |
 | Removed messages after an incident | All affected chats → saved originals/edits → deletion or missing-on-recheck outcomes → preserved media → coverage and other account perspectives | Preserved versions and explicit unknown intervals; no invented deletion actor |
-| A participant changes names across chats | Numeric sender ID → name／username history → replies → other observed chats → cited destinations／files | A Telegram-account activity timeline with links to its source records |
+| A participant changes names across chats | Numeric sender ID → name/username history → replies → other observed chats → cited destinations/files | A Telegram-account activity timeline with links to its source records |
 
 [Collection reference](COLLECTION.md) · [People-profile verification](EVIDENCE.md#people-profiles) ·
 [Evidence handoff](EVIDENCE.md#investigation-handoff) · [Completed validation](VERIFICATION.md)

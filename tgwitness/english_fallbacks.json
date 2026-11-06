@@ -941,6 +941,7 @@
   "History reply belongs to a different chat.",
   "History reply does not advance the requested cursor.",
   "History run ended",
+  "History returned an unexpected or repeated message ID.",
   "History snapshot",
   "History snapshot: earlier edits and deletions are not reconstructed.",
   "How hard",

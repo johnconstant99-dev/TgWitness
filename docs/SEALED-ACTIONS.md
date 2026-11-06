@@ -6,7 +6,7 @@ chat's event journal using a newly created Telegram session, attests the evidenc
 ZIP or multipart manifest, and uploads only
 recipient-encrypted handoffs. The normal administration panel is not exposed.
 
-Choose `client=official_web` to run the [official-client witness](OFFICIAL-WITNESS.md) with guarded Telegram Web controls and video．It requires your own upstream proxy and observes one rendered chat．The default `client=api` retains the full-account export modes described below．
+Choose `client=official_web` to run the [official-client witness](OFFICIAL-WITNESS.md) with guarded Telegram Web controls and video. It requires your own upstream proxy and observes one rendered chat. The default `client=api` retains the full-account export modes described below.
 
 The verifier checks the archive against its GitHub attestation, the approved
 workflow and collector commits, and the signed journal and attachment hashes.
@@ -71,17 +71,17 @@ commits. A local branch alone cannot be invoked by another GitHub repository.
 
 ## Session time budget
 
-Before collection，**Calculate time and size** estimates the selected history and files
-from message counts and a bounded sample．The display includes time already spent signing
-in，estimated collection time and a reserve for packaging．For files，the initial estimate
-uses 1 MiB/s and a twofold time margin；progress replaces that assumption with the measured
-rate．Use **Messages only** or select fewer chats when the estimate exceeds the remaining time．
+Before collection, **Calculate time and size** estimates the selected history and files
+from message counts and a bounded sample. The display includes time already spent signing
+in, estimated collection time and a reserve for packaging. For files, the initial estimate
+uses 1 MiB/s and a twofold time margin; progress replaces that assumption with the measured
+rate. Use **Messages only** or select fewer chats when the estimate exceeds the remaining time.
 
-Telegram's reported Takeout wait is added to the budget．The collector stops acquisition
-when the remaining time is needed for packaging，retains acquired data and marks a partial
-result．A 120-minute session therefore uses its remaining collection window rather than
-waiting for the deadline before preparing the archive．The display identifies selections
-whose full size could not be sampled．
+Telegram's reported Takeout wait is added to the budget. The collector stops acquisition
+when the remaining time is needed for packaging, retains acquired data and marks a partial
+result. A 120-minute session therefore uses its remaining collection window rather than
+waiting for the deadline before preparing the archive. The display identifies selections
+whose full size could not be sampled.
 
 ## Choose this mode or a persistent workspace
 
