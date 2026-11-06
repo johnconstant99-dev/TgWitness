@@ -198,20 +198,22 @@ def test_real_telethon_iterator_removes_only_takeout_sleep(tmp_path, monkeypatch
     asyncio.run(scenario())
 
 
-def test_sparse_takeout_plan_reduces_requests_without_omitting_ids(tmp_path):
+@pytest.mark.parametrize("transport_kind", ["regular", "takeout"])
+def test_sparse_plan_reduces_requests_without_omitting_ids(tmp_path, transport_kind):
     async def scenario():
         rows = [message(i) for i in (1, 200001, 400001, 500000)]
         manager, entries = setup(tmp_path, rows)
         manager.launch = lambda: None
         c = entries["account0"]["app"].state.collector
         try:
-            state = await manager.start(CHAT, ["account0"], "account0", transport="takeout")
+            state = await manager.start(CHAT, ["account0"], "account0", transport=transport_kind)
             assert state["ranges_total"] == 5  # Previously 250 fixed 2,000-ID tasks.
             assert manager.job["segments"] == [{"low": 1, "high": 500000, "profiles": ["account0"]}]
             manager.prepare_chunks()
-            network = transport(c, state["id"])
-            await network.open()
-            manager.history_transports["account0"] = network
+            if transport_kind == "takeout":
+                network = transport(c, state["id"])
+                await network.open()
+                manager.history_transports["account0"] = network
             await manager.work(state["workers"][0])
             assert manager.state["captured"] == 4 and manager.state["ranges_done"] == 5
             directory = manager.directory(state["id"])
@@ -221,8 +223,13 @@ def test_sparse_takeout_plan_reduces_requests_without_omitting_ids(tmp_path):
             receipts = list((directory / "receipts").glob("*.json"))
             for path in receipts:
                 signed = manager.verified(path, c.vault.public_key)
-                assert signed["transport"] == "takeout" and signed["transport_generation"] == 1
-            assert sum(isinstance(r, f.messages.GetHistoryRequest) and bool(w) for r, w in c.client.requests) == 5
+                if transport_kind == "takeout":
+                    assert signed["transport"] == "takeout" and signed["transport_generation"] == 1
+                else:
+                    assert "transport" not in signed
+            history = [(r, w) for r, w in c.client.requests if isinstance(r, f.messages.GetHistoryRequest)]
+            assert len(history) == 6  # One boundary lookup plus five complete ID ranges.
+            assert all(bool(w) == (transport_kind == "takeout") for _, w in history[1:])
             assert str(c.client.handle) not in (directory / "status.json").read_text()
         finally:
             if manager.db:

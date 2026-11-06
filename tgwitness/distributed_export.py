@@ -28,6 +28,7 @@ from .distributed_takeout import HistoryTakeout
 from .distributed_pages import FORMAT as PAGE_FORMAT, RangePages
 from .message_selection import Selection, SelectionIndex, utc
 from .message_numbers import MissingNumbers
+from .monitoring import capture_settings
 from .store import canonical, utcnow
 from .verify import fingerprint, verify_chat_export
 from .workers import complete_in_thread
@@ -238,7 +239,7 @@ class DistributedExport:
                 if eligible:
                     segments.append({"low": low, "high": end - 1, "profiles": eligible})
             info = lead.dialog_cache.get(chat_id, {})
-            chunk_size = CHUNK * min(50, min(densities, default=1)) if transport == "takeout" else CHUNK
+            chunk_size = CHUNK * min(50, min(densities, default=1))
             self.timing = timing
             self.state = {"id": export_id, "chat_id": chat_id, "title": info.get("title"), "lead": lead_id,
                           "phase": "preparing", "started_at": now, "workers": workers,
@@ -681,7 +682,10 @@ class DistributedExport:
                                        "WHERE e.profile=? AND t.phase!='done' LIMIT 1", (profile_id,)).fetchone():
                         await network.open()
             clock = await lead.telegram_clock()
-            profile, observer, problems = await lead.chat_profile(self.entities[self.job["lead"]])
+            capture = capture_settings(lead.store)
+            profile, observer, problems = await lead.chat_profile(self.entities[self.job["lead"]],
+                include_photo=bool(self.job["selection"].get("download_media")
+                                   and capture["download_media"] and capture["include_avatars"]))
             log = await lead.admin_log(self.entities[self.job["lead"]]) if observer.get("role") in ("admin", "creator") else None
             self.set_phase("running")
             self.persist()

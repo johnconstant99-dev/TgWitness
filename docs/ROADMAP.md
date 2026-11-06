@@ -1,6 +1,6 @@
 # TgWitness roadmap
 
-Reviewed 5 November 2026. Implemented capabilities and their qualification are in
+Reviewed 6 November 2026. Implemented capabilities and their qualification are in
 [Current status](STATUS.md); shipped changes are in the [changelog](CHANGELOG.md).
 This page describes remaining work, not the contents of a published download.
 
@@ -37,9 +37,10 @@ Other work runs alongside, each item judged on its own test:
 | Accounts and access | Revoking access stops reading, nobody sees other people's chats | [Shipped](ACCESS.md) |
 | Offline handover | Recipient reads and verifies without our server | [Shipped](CASE_REPORTS.md) |
 | Operations and cost | Published CPU, memory, disk and recovery numbers | Search benchmark and CPU network checks recorded; sustained combined-load qualification open |
-| Export request diagnostics | Identify the method and retain the full FloodWait deadline with argument-free client-call counters | Implemented locally; offline regression checks; [source comparison and limits](EXPORT-LIMITS.md). Sustained large-list throughput remains unmeasured |
+| Export request diagnostics | Identify the method and retain the full FloodWait deadline with argument-free client-call counters | Implemented locally; offline checks and [dated live measurements](EXPORT-BENCHMARK-2026-11-06.md). Separate learned method budgets and controlled fleet scaling remain open |
+| Large-list export qualification | Text-only acquisition makes no photo requests; ID rechecks share pacing; completed archives and resumed pages verify | [50-source qualification completed](EXPORT-BENCHMARK-2026-11-06.md): 48 verified archives, 3,598,381 records, four pause/resume checks; two unavailable usernames. Three fixes tested locally. Large archives have sampled content checks, not complete second passes |
 | Distributed Takeout history | Public-chat export reuses validated private Takeout handles, keeps signed receipts and reduces empty requests | Implemented locally; protocol, recovery, archive and browser tests. Live speed not yet measured; [limits and scope](DISTRIBUTED-EXPORT.md#history-acquisition) |
-| Distributed page checkpoints | Resume within an interrupted chunk from verified pages without weakening observer binding | Implemented locally; 100-message checkpoints, standalone working-directory verification, crash/disk/cancellation/tamper tests and old-plan compatibility. Live recovery speed remains unmeasured; [details](DISTRIBUTED-EXPORT.md#chunking-and-continuation) |
+| Distributed page checkpoints | Resume within an interrupted chunk from verified pages without weakening observer binding | Implemented locally; 100-message checkpoints, standalone verification, crash/disk/cancellation/tamper tests and old-plan compatibility. Four live pause/resume checks retained pages; controlled recovery-cost comparison remains open; [details](DISTRIBUTED-EXPORT.md#chunking-and-continuation) |
 | Independent verification | Rewritten chain, cut tail, key change or missing witness gets caught | [Shipped](WITNESS.md) |
 | Chat archive comparison | Full saved records determine equality; content-based candidates do not claim equality | [Implemented locally](EVIDENCE.md#comparing-chat-exports); signed-archive regression tests cover metadata, full text, unknown fields and signer checks |
 

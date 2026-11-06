@@ -362,6 +362,31 @@ def close_entries(entries):
         entry["app"].state.store.close()
 
 
+@pytest.mark.parametrize("download, capture_media, avatars, expected", [
+    (False, True, True, False), (True, False, True, False),
+    (True, True, False, False), (True, True, True, True),
+])
+def test_distributed_profile_photo_respects_export_and_capture_settings(
+        tmp_path, monkeypatch, download, capture_media, avatars, expected):
+    async def scenario():
+        manager, entries = coordinator(tmp_path, [message(1)], count=1)
+        c = entries["account0"]["app"].state.collector
+        c.store.set_setting("capture", {"download_media": capture_media, "include_avatars": avatars})
+        async def finish(directory, options):
+            raise ValueError("Stop after acquisition for profile inspection")
+        monkeypatch.setattr(manager, "finish_selection", finish)
+        try:
+            await manager.start(CHAT, ["account0"], "account0", selection={"download_media": download})
+            await asyncio.wait_for(manager.task, 10)
+            c.chat_profile.assert_awaited_once()
+            assert c.chat_profile.await_args.kwargs["include_photo"] is expected
+            assert manager.state["error"] == "Stop after acquisition for profile inspection"
+        finally:
+            await manager.close()
+            close_entries(entries)
+    asyncio.run(scenario())
+
+
 @pytest.mark.parametrize("terminal", ["done", "paused", "failed"])
 def test_export_rate_includes_waits_but_excludes_reused_messages_and_packaging(monkeypatch, terminal):
     clock = [100.0]

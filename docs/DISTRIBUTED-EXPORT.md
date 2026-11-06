@@ -9,6 +9,12 @@ Open a chat and choose **Export chat**. Select idle account workspaces that alre
 
 ## History acquisition
 
+With **Download media** off, distributed acquisition also skips downloading the
+chat's profile photo. Its available photo ID and other profile metadata remain
+in the export. Photo retrieval requires both the export's media option and the
+workspace's media/avatar settings. Message-ID rechecks share account pacing with
+history reads; any server-requested wait still applies to every caller.
+
 **Regular session** preserves the existing acquisition path. **Telegram Takeout session** is an opt-in path for public channels and supergroups. It opens an export session for each participating account, uses the last Telegram split range for this public-only scope, and reads history without Telethon's additional iterator delay. Telegram's own FloodWait remains fully enforced. The current implementation still has one outgoing RPC per account; choosing Takeout does not increase same-account concurrency.
 
 The initial source/date boundaries are measured with regular requests and frozen in the signed plan. Takeout reads those planned ranges. Profiles, admin logs, optional context and attachment retrieval continue to use regular requests; the archive identifies that scope. The Takeout flags request the selected chat type without contacts or file export. Private chats and private groups remain available through the regular path or [account export](ACCOUNT-EXPORT.md).
@@ -33,7 +39,7 @@ One account runs one acquisition task. Monitoring, History, account export and c
 
 ## Chunking and continuation
 
-For a supergroup/channel, preflight resolves the source separately for every account and fixes visible date/ID boundaries. The shared queue assigns non-overlapping chunks to eligible accounts. Regular acquisition uses up to 2,000 numeric IDs per chunk. Takeout can widen that to at most 100,000 IDs using the densest participating account's available whole-history count estimate. This reduces empty requests in sparse histories; it excludes no IDs from the signed plan. Counts are a planning estimate, not a selected-period count or a deletion finding. An ID range is not a message count. Ordinary groups and private chats use one account because IDs cannot be merged across accounts in the same way.
+For a supergroup/channel, preflight resolves the source separately for every account and fixes visible date/ID boundaries. The shared queue assigns non-overlapping chunks to eligible accounts. Both regular and Takeout acquisition start from 2,000 numeric IDs per chunk and can widen that to at most 100,000 IDs using the densest participating account's available whole-history count estimate. This reduces empty requests in sparse histories; it excludes no IDs from the signed plan and does not change RPC pacing. Counts are a planning estimate, not a selected-period count or a deletion finding. An ID range is not a message count. Ordinary groups and private chats use one account because IDs cannot be merged across accounts in the same way.
 
 `distributed-exports/<job-id>/` retains a signed immutable plan, signed chunk receipts, acquired JSONL chunks, rebuildable SQLite indexes and the resulting ZIP. New plans use `tgwitness-distributed-pages-v1` checkpoints inside each chunk. At most 100 decoded messages are buffered before a checkpoint; a 4 MiB target also flushes smaller batches (an individual record can be up to 64 MiB). These are local record batches, not raw Telegram RPC responses. Each receipt binds the plan hash, chat, account/signing key, ID range, before/after cursor, byte interval, data hash, local acquisition times, transport generation and previous receipt hash.
 
@@ -64,6 +70,14 @@ The export panel and status API report elapsed time for the **current start or r
 Acquisition throughput is newly committed messages divided by acquisition wall time. New jobs update at page commits, including progress inside an unfinished range; old jobs update at chunk commits. It is an average, not an instantaneous network rate. It does not include selection, attachments or ZIP/PDF creation. The signed job status retains these measurements; a successful run also records them in `chat_export.completed`. Jobs created before this feature have no performance record until resumed. Remaining message count is unknown, so the panel does not invent an ETA from numeric ID ranges. Compare runs with identical fixed scope, attachment settings and account access; more accounts do not guarantee linear speedup.
 
 Large-list discovery has a different request mix from history acquisition. See the [exporter source comparison and limits](EXPORT-LIMITS.md) before extrapolating a small history benchmark to thousands of new sources.
+
+A [50-source live qualification](EXPORT-BENCHMARK-2026-11-06.md) on 2026-11-06
+produced 48 verified archives with 3,598,381 records. One eight-account regular-mode
+job acquired 768,007 history records in 1,117.082 seconds; its complete attempt took
+1,574.920 seconds. Rechecks added records that the history pass did not return.
+The run also exposed sparse-range overhead, connection timeouts and slower later
+jobs after learned pacing increased. It did not establish sustained Takeout speed
+or linear scaling across forty accounts; see the qualification's scope and checks.
 
 A bounded live pilot on 2026-11-06 UTC compared one and two accounts over the same approximately 4,000-ID ranges in two public supergroups. Acquisition of 3,313 messages took 33.672 s and 16.969 s; acquisition of 3,691 took 37.750 s and 19.188 s. All four ZIPs verified. ID sets matched between runs; differences in three reply-media headers were limited to access hashes and file references. These are small, sequential runs without attachments or Takeout, on a 32-logical-CPU Windows host; they do not establish sustained throughput for ten accounts or thousands of sources. Only authors and a bounded visible participant sample were collected, not complete membership.
 

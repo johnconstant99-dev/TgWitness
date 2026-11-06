@@ -103,6 +103,10 @@ and three launchers:
 | `TgWitness-Demo.cmd` | Start the synthetic demo in `data\demo` |
 | `TgWitness-Check.cmd` | Run the readiness check without starting |
 
+The pinned Russian morphology dictionary and PDF color profiles are bundled for
+offline use. Packaging permits only their known file paths inside dependency
+`data` directories; unexpected files in those directories fail the build.
+
 Extract the whole archive to a writable folder such as `Documents\TgWitness`; do not run
 it from inside the ZIP or from Program Files. The runtime uses an isolated module path,
 so other Python installations and `PYTHONPATH` do not affect it. Data stays in the

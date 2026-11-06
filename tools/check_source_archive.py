@@ -323,7 +323,7 @@ def main():
             assert archive.read("TgWitness/" + changed_input) == changed_bytes
             assert (hashlib.sha256(changed_bytes).hexdigest() + "  " + changed_input + "\n").encode() \
                 in archive.read("TgWitness/SOURCE_SHA256SUMS")
-    print("Source archive checks passed: repeatability, metadata, exact bytes, container/website/narrative inputs and hashes, private exclusions, secret redaction, interrupted writes, portable metadata and PDF resources.")
+    print("Source archive checks passed: repeatability, metadata, exact bytes, container/website/narrative inputs and hashes, private exclusions, secret redaction, interrupted writes, portable metadata, PDF and dictionary resources.")
 
 
 if __name__ == "__main__":

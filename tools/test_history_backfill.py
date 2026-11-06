@@ -336,6 +336,36 @@ def test_pacer_floors_account_isolation_and_takeout_recognition(tmp_path):
     asyncio.run(run())
 
 
+@pytest.mark.parametrize("rpc", [
+    f.messages.GetMessagesRequest([t.InputMessageID(1)]),
+    f.channels.GetMessagesRequest(t.InputChannel(42, 1), [t.InputMessageID(1)]),
+    f.channels.GetParticipantsRequest(t.InputChannel(42, 1), t.ChannelParticipantsRecent(), 0, 200, 0),
+])
+def test_id_rechecks_and_participants_share_the_bulk_pacer(tmp_path, monkeypatch, rpc):
+    async def run():
+        c, store = make(tmp_path)
+        now, sleeps, sent = [10.], [], []
+        async def sleep(seconds):
+            sleeps.append(seconds)
+            now[0] += seconds
+        async def underlying(self, sender, query, *args):
+            sent.append(now[0])
+            return "ok"
+        client = WitnessClient(None, 123, "a" * 32)
+        client.bulk_pacer = AccountPacer(store, clock=lambda: now[0], sleep=sleep)
+        monkeypatch.setattr(TelegramClient, "_call", underlying)
+        try:
+            wrapped = f.InvokeWithTakeoutRequest(99, rpc)
+            assert bulk_request(rpc) and bulk_request(wrapped)
+            await client._call(None, rpc)
+            await client._call(None, wrapped)
+            assert sent == [10., 11.] and sleeps == [1.]
+            assert client.bulk_pacer.state()["success_streak"] == 2
+        finally:
+            store.close()
+    asyncio.run(run())
+
+
 @pytest.mark.parametrize("media", [False, True])
 def test_concurrent_rpc_waiters_share_pacing_and_server_cooldown(tmp_path, monkeypatch, media):
     async def run():

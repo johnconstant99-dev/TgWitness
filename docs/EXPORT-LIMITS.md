@@ -74,11 +74,13 @@ of seconds (plus a small timer margin). Official export does not mean zero waits
 
 [Account export](ACCOUNT-EXPORT.md) supports Takeout and durable page receipts.
 [Distributed chat export](DISTRIBUTED-EXPORT.md#history-acquisition) now has an
-opt-in Takeout history path for public channels and supergroups. Regular history
-retains 2,000-ID chunks; Takeout can widen sparse ranges up to 100,000 numeric IDs
-without excluding any IDs. Its transport and generation accompany signed receipts.
-This path has offline protocol/recovery tests and browser checks; its sustained
-live throughput has not been measured. New distributed plans also retain signed
+opt-in Takeout history path for public channels and supergroups. New plans for
+either transport can widen 2,000-ID chunks up to 100,000 numeric IDs in sparse
+histories without excluding any IDs. Existing signed plans keep their original
+chunk sizes. Transport and generation accompany signed receipts.
+This path has offline protocol/recovery tests and browser checks; sustained
+Takeout throughput has not been measured. Regular-mode observations are recorded
+in the [50-source qualification](EXPORT-BENCHMARK-2026-11-06.md). New distributed plans retain signed
 checkpoints of up to 100 decoded messages inside a chunk, with observer-bound
 recovery and standalone verification. These local batches differ from account
 export's API-page receipts; older distributed plans retain chunk-only recovery.
@@ -91,8 +93,8 @@ Arguments and exception text are omitted. Counters begin with the client instanc
 they are not wire-level attempts and do not expose retries inside Telethon.
 The existing event kind and signed export format remain unchanged.
 
-The integrated main branch also supplies `AccountPacer` for history, dialogs and
-admin-log reads, including Takeout-wrapped requests. It starts with a one-second
+`AccountPacer` covers history, dialogs, admin logs, message-ID rechecks and
+participant pages, including Takeout-wrapped requests. It starts with a one-second
 interval, decreases it after twenty successful bulk calls to a floor of half a
 second, and increases it after FloodWait, capped at ten seconds. These are local
 policy values, not Telegram quotas. The learned delay is persisted per account;
@@ -101,10 +103,19 @@ authoritative, including FLOOD_PREMIUM_WAIT.
 
 The earlier source probe concerned the pre-integration branch: its serial queue
 alone did not add pacing. The current bulk pacer still does not cover unknown
-username discovery or participant enumeration, and does not give ordinary and
+username discovery, and does not give ordinary and
 Takeout history separate budgets. The existing profile guard rejects adding the same Telegram account
 to another workspace; that guard was also exercised and must not be duplicated.
 It does not coordinate independent installations on separate servers.
+
+A 50-source benchmark pilot exposed a 31-second `channels.getMessages` FloodWait
+while rechecking missing IDs. Those calls previously shared the account's server
+cooldown but bypassed the local bulk interval. ID rechecks and participant pages
+now use that interval too. This prevents that unpaced burst; it does not establish
+a flood-free quota. The completed qualification retained 690 backoff events across
+pilots and interrupted runs, with requested waits of 3–31 seconds. Both history
+and ID rechecks triggered waits. These observations do not establish a universal
+quota; the qualification identifies the source revisions and counter coverage.
 
 The next pacing change should:
 

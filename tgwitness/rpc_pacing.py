@@ -7,7 +7,8 @@ from telethon.tl import functions
 
 
 BULK_READS = (functions.messages.GetHistoryRequest, functions.messages.GetDialogsRequest,
-              functions.channels.GetAdminLogRequest)
+              functions.channels.GetAdminLogRequest, functions.messages.GetMessagesRequest,
+              functions.channels.GetMessagesRequest, functions.channels.GetParticipantsRequest)
 
 
 def bulk_request(request):
