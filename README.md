@@ -20,6 +20,20 @@
   <a href="LICENSE"><img src="docs/assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a>
 </p>
 
+## Development and validation
+
+The maintainers report **more than six months of active development and testing**
+before the November 2026 public release period, with cumulative development test
+workload **on the order of 100 million**, including failures, fixes and repeated
+validation. The public repository's age describes publication, not the start of
+that work. [Development history and measured scale](docs/OVERVIEW.md#testing-history-and-duration).
+
+Published results include **48 verified archives with 3,598,381 records** and an
+eight-account acquisition of **768,007 history records at 687.512 records/s**, with
+waits included and attachment downloads disabled. See the
+[workload, timings and verification](docs/EXPORT-BENCHMARK-2026-11-06.md).
+These and the examples below are selected measurements from the development history.
+
 ## Measured exports · 6 November 2026
 
 **56,329 messages exported in two fresh runs.** Both signed archives passed verification with pinned collector keys.
@@ -216,10 +230,10 @@ checks address the environment where it was collected.
 
 For live observation, history or a one-off export, choose a
 [collection method](docs/COLLECTION-MODES.md). Private cloud chats are available
-when the connected account can access them. The ordinary collector does not collect
-Telegram Secret Chats. A separate implementation exists in development; see
-[Secret Chat availability and the demo](docs/PSEUDO-SECRET.md) and
-[collection scope](docs/COLLECTION.md).
+when the connected account can access them. The published application also includes
+[Secret Chat integration](docs/PSEUDO-SECRET.md): install the optional protocol
+dependency and enable it per account to record chats created or accepted there.
+See [collection scope](docs/COLLECTION.md) for the available acquisition paths.
 
 <picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-assurance-mobile-static.svg">

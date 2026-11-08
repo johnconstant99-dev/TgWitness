@@ -11,6 +11,11 @@
 
 Downloadable examples for the public demo. Their messages and account records are
 fictional, so visitors can inspect the export formats without collecting a chat.
+The main sample ZIP records producer version **0.7.0** and a fictional scenario.
+Its signatures exercise archive integrity and report rendering for those sample
+records. Current collection, GitHub acquisition and Intel TDX qualification are
+documented in the [validation record](../../../docs/VERIFICATION.md), with the
+corresponding workflow and tested revision.
 
 | Files | What to inspect |
 | --- | --- |

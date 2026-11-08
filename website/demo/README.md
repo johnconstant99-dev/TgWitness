@@ -10,7 +10,10 @@
 # Interactive demo
 
 The public demo uses fictional records and a browser API mock. It lets visitors
-explore the workspace without signing in to Telegram.
+explore the workspace without signing in to Telegram. It is a panel walkthrough.
+The [validation record](../../docs/VERIFICATION.md) and
+[public-history qualification](../../docs/EXPORT-BENCHMARK-2026-11-06.md) document
+runtime and acquisition checks with their own revisions, workloads and results.
 
 | Content | Purpose |
 | --- | --- |

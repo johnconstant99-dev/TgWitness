@@ -4,9 +4,24 @@
 
 # TgWitness verification
 
-**Updated 6 November 2026.** Results are tied to the revision, environment and
+**Updated 8 November 2026.** Results are tied to the revision, environment and
 workload recorded for each run. [Current capabilities](STATUS.md) describes the
 available workflows; this page records what has actually been checked.
+
+These are selected validation results from the
+[development history](OVERVIEW.md#testing-history-and-duration). Engineering tests,
+live acquisition, fault injection, recovery checks and artifact verification each
+have their stated scope; external certification is a separate status.
+
+On 8 November, the published installer at `b35f8e18f3d1` was inspected without
+executing or installing it: wheel and dependency-lock SHA-256 and RSA signatures
+passed, and the wheel contained the Secret Chat backend, interface, API routes,
+collector hooks and optional dependency declaration. See the
+[package check](PSEUDO-SECRET.md#package-availability).
+[CI for that revision](https://github.com/phishdestroy/TgWitness/actions/runs/42446658989)
+and the [installer run](https://github.com/phishdestroy/TgWitness/actions/runs/42446659252)
+completed successfully. Older audit reports retain the findings for their original
+snapshots; current implementation and qualification are recorded separately.
 
 [Performance graphs](https://phishdestroy.github.io/TgWitness/docs/validation/) ·
 [Signed English audit](../website/validation/audit/REPORT.md) ·

@@ -143,8 +143,8 @@ separate-update switches. There are no per-group category overrides yet.
 | Material | Captured now | Boundary |
 | --- | --- | --- |
 | Message | Text, peer/message IDs, sender metadata, replies and original update envelope | Preserved as an account-visible observation signed by the collector |
-| Edit | New observed version and any previously saved versions | Intermediate edits during downtime can be lost; sender is not necessarily editor |
-| Deletion | Notification and prior captured content, if any | Usually no deleter or precise action time |
+| Edit | New observed version, earlier captured versions, reception time and supplied edit date | Message updates and available admin-log entries retain their respective attribution fields |
+| Deletion | Telegram notification, reception time and previously captured content | Actor and source action time are retained when supplied by a separate admin-log record |
 | Account-level deletion notice | Original notice; resolved records include the saved chat and correlation method | Requires exactly one previously saved private-chat or ordinary-group match in scope; other IDs stay `deletion.unscoped`. Channel and supergroup IDs are excluded from this correlation |
 | Reaction | Delivered counters and visible recent identities | A complete available reactor list requires separate queries; channels may hide identities |
 | Membership | Service messages and delivered participant updates | Visibility depends on role and chat type; missing events do not establish absence |

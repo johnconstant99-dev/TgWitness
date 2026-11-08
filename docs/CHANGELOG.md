@@ -23,8 +23,11 @@
 
 ## Unreleased
 
+- Update the development-history and validation overview, distinguish live monitoring from history and recheck observations, and document verification results by acquisition mode.
+- Record Secret Chat integration in the published 0.9.1 installer package: backend, collector hooks, API and panel. The pinned protocol library remains an optional `secret-chats` dependency enabled per account.
+
 - Isolate request-body capacity and token-family lockouts, set Secure download cookies behind trusted HTTPS proxies, limit pending tickets per access, and expose journal write failures.
-- Add an English Secret Chat demo with fictional requests, replies, attachments and retained deletion notices. Document the separate development implementation and its open defects; the demo does not enable Telegram connections.
+- Add an English Secret Chat interface demo with fictional requests, replies, attachments and retained deletion notices. See the current Secret Chat guide for installed integration and recording behavior.
 
 - Remove the unused one-shot exporter and check recovery against the current exporter. Reject unexpected or repeated message IDs in recheck responses.
 

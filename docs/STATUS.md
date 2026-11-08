@@ -15,6 +15,7 @@ available under [Releases](https://github.com/phishdestroy/TgWitness/releases).
 | --- | --- |
 | Live messages, edits, deletion notices and attachments | [Collection](COLLECTION.md) |
 | Standard/Takeout history with resumable cursors | [Full history](BACKFILL.md) |
+| Secret Chats created or accepted by TgWitness; optional protocol dependency | [Secret Chats](PSEUDO-SECRET.md) |
 | Account and chat export, file policies and minimized sharing copies | [Account export](ACCOUNT-EXPORT.md) |
 | Signed journals, checkpoints and standalone verification | [Evidence](EVIDENCE.md) |
 | Separate witness with online Merkle continuity checks | [Witness](WITNESS.md) |
@@ -23,8 +24,10 @@ available under [Releases](https://github.com/phishdestroy/TgWitness/releases).
 | Intel TDX collection and independent quote verification | [High assurance](HIGH-ASSURANCE.md) |
 
 [Choose a collection method](COLLECTION-MODES.md) for scope, output and recovery behavior.
-[Secret Chat development status](PSEUDO-SECRET.md) describes the separate implementation,
-its simulated website interface and the defects that remain before integration.
+[Secret Chat installation and package check](PSEUDO-SECRET.md) records the shipped
+integration, optional protocol dependency and account-level controls.
+[Development history and scale](OVERVIEW.md#testing-history-and-duration) puts the
+public release timeline and selected measurements in context.
 [Actions](https://github.com/phishdestroy/TgWitness/actions) records automated checks
 for each revision; [Verification](VERIFICATION.md) records completed deployment and
 live-account tests. See the [changelog](CHANGELOG.md) for changes.

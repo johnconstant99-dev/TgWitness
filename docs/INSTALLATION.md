@@ -30,7 +30,10 @@ each build also has an immutable release URL.
 
 Choose the guided installer for a short setup, or use
 [GitHub releases, source or Docker](QUICKSTART.md). These are supported installation
-paths for the same open-source project.
+paths for the same open-source project. For a deployment that requires approval of
+an exact build before execution, use [Verify before running](#verify-before-running)
+with an independently retained release-key fingerprint and the build's immutable
+URL. Updating the download service does not update an installed panel automatically.
 
 **Linux / macOS (Bash):**
 

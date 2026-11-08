@@ -4,9 +4,10 @@
 
 # How collection works
 
-TgWitness records what a connected Telegram account observes. The journal preserves
-those observations, their sequence, and the context supplied with them. It does
-not infer unseen actions from a missing message or from an account being connected.
+TgWitness records what a connected Telegram account observes. Live monitoring
+preserves messages, captured edits, deletion notifications and attachments with
+their observation times and source context. History reads, rechecks and available
+admin-log records add separately identified observations to that record.
 
 <details>
 <summary>On this page</summary>
@@ -75,9 +76,9 @@ Sources → **Observation scope** decides which chats a workspace records.
 
 What these modes cannot do:
 
-- **Secret chats** are outside these cloud-collection modes. A separate
-  [Secret Chat implementation](PSEUDO-SECRET.md) exists in development; it is not
-  included in the published collector at the revision documented there.
+- **Secret Chats** use the included [Pseudo-secret integration](PSEUDO-SECRET.md),
+  with its optional protocol dependency and per-account enable switch. Cloud history
+  and Takeout use a separate acquisition path.
 - **Nothing is recorded while TgWitness is not running.** After a restart it asks Telegram
   for missed updates and rechecks chats, but Telegram does not return everything after long
   outages. Reports and `verify.py` show such periods as gaps (see [coverage](EVIDENCE.md#coverage-continuity-gaps-and-unobserved-ids)).
@@ -122,9 +123,11 @@ objects retain embedded metadata; a switch is not a redaction rule.
 These chats share one account-wide message ID sequence, so when a message with that ID was
 saved earlier, its chat is known: the deletion is recorded in that chat with
 `chat_resolution` explaining how. IDs never saved stay an **unscoped deletion** with an
-explicit unknown source; the collector does not guess. Telegram never says who deleted a
-message; when the deleted message was sent by this account, the record says so
-(`deleted_message_was_outgoing`) without naming a deleter.
+explicit unresolved chat. These are Telegram deletion notifications, preserved even
+when their chat cannot yet be correlated. The notification's schema contains IDs;
+the journal adds reception time and any saved message context, including
+`deleted_message_was_outgoing`. Available admin-log entries provide a separate
+source of the action, actor and source time.
 
 ## Own actions
 
@@ -264,14 +267,21 @@ If collection began after the first version disappeared, that text is unavailabl
 If several edits occurred while the process was offline, only subsequently observed
 versions can be saved. A deletion notice cannot recover content never captured.
 
-The message sender is not automatically the editor. Telegram usually does not
-supply the person who deleted a message or the exact deletion time. Unknown actors
-stay unknown. Reaction snapshots and participant updates contain only the counts
-and identities Telegram makes visible to the account.
+The record combines several sources:
 
-Sequence numbers express observation order. The collector's UTC timestamp is its
-local clock; a Telegram source timestamp is stored separately when supplied.
-Neither is an independent trusted timestamp.
+| Source | Preserved information |
+| --- | --- |
+| Live message or edit update | Message ID, sender metadata, captured version, reception time and supplied Telegram message/edit date. |
+| Live deletion notification | Reported message IDs, reception time, raw notification and links to previously saved content. |
+| Available admin log | Action, actor, source date and supplied message content, read by an account with the required rights. |
+| Panel interaction | The requested action and its recorded outcome under the selected account. |
+| Recheck | Telegram's current response compared with the previously saved message. |
+
+`observed_at` records reception on the collector clock; `source_at` retains a
+source date where that event supplies one. Telegram clock-offset observations,
+clock-discontinuity records and [external time checks](TIMESTAMP.md) provide the
+associated timing context. An ordinary message notification's fields describe
+that notification; admin-log and interaction records retain their own attribution.
 
 ## History snapshots
 
