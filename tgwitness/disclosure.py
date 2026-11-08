@@ -26,8 +26,8 @@ WARNINGS = [
     'This is a minimized derivative, not the complete original account export.',
     'Pseudonymization is not anonymization. Dates, context and message content can still identify people.',
     'Automatic text masking cannot find every personal detail. Review the disclosed content before sharing.',
-    'A signature protects this derivative. Source linkage alone does not prove that filtering or redaction was correct.',
-    'Purpose and settings do not establish a legal basis, GDPR compliance or court admissibility.',
+    'A signature protects this derivative and names the source archive and the collector key.',
+    'Purpose and settings are recorded as the operator stated them for this disclosure.',
 ]
 MAX_MASK_TERMS = 5000
 

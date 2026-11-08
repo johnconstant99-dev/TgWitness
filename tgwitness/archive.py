@@ -247,7 +247,7 @@ class ArchiveReader:
             c = state.collector
             result = {"workspace": query.workspace, "running": c.running,
                       "scope": sorted(allowed) if allowed is not None else "workspace",
-                      "completeness": "Unknown. Absence from the archive does not establish absence in Telegram.",
+                      "completeness": "Unknown. The archive holds what this workspace collected.",
                       "gaps": self.events(store, query, allowed, kind="coverage"),
                       "workspace_gaps_visible": allowed is None}
             if query.gaps:

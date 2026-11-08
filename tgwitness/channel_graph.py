@@ -10,8 +10,7 @@ from .store import utcnow
 from .telegram_client import FLOOD_ERRORS
 
 MEANING = ("Telegram's own similar-channel suggestions for each source, recorded as observations. A suggestion is "
-           "produced by Telegram from its usage signals; it does not establish a shared operator, owner, author or "
-           "purpose, and the absence of a suggestion does not establish that channels are unrelated.")
+           "produced by Telegram from its usage signals and is a lead about how Telegram groups the channels.")
 FILTER_MEANING = ("Filters drop suggestions from this record. A dropped channel was still suggested by Telegram; "
                   "counts below report what was suggested and what this run kept.")
 FLAGS = ("broadcast", "megagroup", "gigagroup", "verified", "scam", "fake", "restricted", "noforwards")

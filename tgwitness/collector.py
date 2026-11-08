@@ -1275,8 +1275,8 @@ class Collector:
         return {"asked_at": started, "asked": len(asked), "absent_total": len(absent),
                 "empty": len(asked) - len(returned), "returned": sorted(m.id for m in returned),
                 "limit_reached": len(absent) > len(asked), "method": "channels.getMessages by number",
-                "meaning": "An empty answer means Telegram has no message under that number for this account: deleted, "
-                           "or never visible to it. Telegram does not say which."}, returned
+                "meaning": "An empty answer means Telegram has no message under that number for this account: it "
+                           "was deleted, or was never visible to it. Telegram reports only the absence."}, returned
 
     async def admin_log(self, entity):
         if not isinstance(entity, types.Channel):
@@ -2160,7 +2160,7 @@ class Collector:
             "scope": scope_settings(self.store),
             "parameters": tuning.values(self.store),
             "targets": [t["chat_id"] for t in self.store.targets(True)],
-            "coverage": "live updates visible to the account; no completeness guarantee",
+            "coverage": "live updates visible to the account",
             "catch_up_from": self.resumed_state_at,
             "restart_note": "The saved Telegram update position is resumed when available (catch_up_from) and "
                             "missed updates are requested; a periodic recheck recovers missed messages and marks "
@@ -2317,7 +2317,7 @@ class Collector:
                 self.store.append("collector.heartbeat", {
                     "connected": connected, "run_id": self.run_id, "monotonic_ns": time.monotonic_ns(),
                     "media_jobs": self.store.media_stats(), "interval_seconds": interval,
-                    "meaning": "collector liveness, not proof of complete capture"})
+                    "meaning": "collector liveness"})
                 from .people import refresh_one
                 await refresh_one(self)
                 if time.monotonic() - self.sessions_checked_at > SESSIONS_EVERY:
@@ -2693,7 +2693,7 @@ class Collector:
                     for message_id in update.messages:
                         self.store.append("message.unpinned", {
                             "unpinned_by": None, "raw": plain(update),
-                            "meaning": "Telegram reported that this message is no longer pinned; it does not say who unpinned it."},
+                            "meaning": "Telegram reported that this message is no longer pinned."},
                             chat_id, message_id)
             elif isinstance(update, types.UpdateChannelTooLong):
                 chat_id = utils.get_peer_id(types.PeerChannel(update.channel_id))
@@ -2719,9 +2719,8 @@ class Collector:
                 if (flags or stated) and self.selected(chat_id):
                     self.store.append("peer.settings_changed", {
                         "flags": flags, "stated": stated, "raw": plain(update),
-                        "meaning": "Peer-setting flags and fields received from Telegram for this account and chat. "
-                                   "Telegram does not say why a hint appeared. These values do not establish that "
-                                   "someone saved a phone number or synchronised an address book."}, chat_id)
+                        "meaning": "Peer-setting flags and fields received from Telegram for this account and "
+                                   "chat, recorded as Telegram delivered them."}, chat_id)
             elif isinstance(update, (types.UpdateChannelParticipant, types.UpdateChatParticipant)):
                 if not settings["membership"]:
                     return

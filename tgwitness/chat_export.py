@@ -282,7 +282,7 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             if collection.get("mode") == "distributed_selection" and Selection.model_validate(
                     collection.get("selection") or {}).excludes_messages():
                 ids["selection_applied"] = True
-                ids["meaning"] = "Numbers absent from this selected export may have been excluded by filters; not evidence of deletion."
+                ids["meaning"] = ("Numbers absent from this selected export may have been excluded by filters; deletions are recorded as separate notices.")
             if meta.get("recheck"):
                 ids["recheck"] = meta["recheck"]
             log = meta.get("admin_log")

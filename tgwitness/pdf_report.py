@@ -419,7 +419,7 @@ class Layout:
                     pdf.rect(pdf.l_margin + x * pdf.epw, y, width * pdf.epw, 4, style="F")
             pdf.set_y(y + 6)
         self.text(report.utc_text(plot["from"]) + "  —  " + report.utc_text(plot["to"]), size=7, color=MUTED, align="L")
-        self.text(say("Recorded intervals only. Blank space is not proof of uninterrupted collection."), size=7.5, color=MUTED)
+        self.text(say("Recorded intervals only. Blank space is time outside the recorded intervals."), size=7.5, color=MUTED)
         self.gap(3)
 
     def assessment_card(self, number, item):
@@ -659,8 +659,9 @@ def changes(lay, say, changed, titles):
             lay.text(report.kind_label(say, step["kind"]) + " · " + say("observed") + " "
                      + report.utc_text(step["observed_at"]) + " · #" + str(step["seq"]), size=7.8, style="B", color=BAD)
             lay.text(report.timer_text(say, step["kind"]) if step.get("auto_delete") else
-                     say("Telegram does not say who deleted a message or exactly when; this is when the notice was "
-                         "observed.") if deleted else say("Telegram no longer returned this message at a later check."),
+                     say("This is when the deletion notice was observed; the chat's admin log names the acting "
+                         "administrator where the account can read it.") if deleted
+                     else say("Telegram no longer returned this message at a later check."),
                      size=8.5, color=BAD)
         lay.gap(2)
     if changed["messages_changed"] > changed["listed"]:
@@ -1149,7 +1150,7 @@ class EvidencePDF:
 
     def render_standards(self):
         say = self.say
-        self.lay.section(say("Standards and methodology"), say("This export follows these practices. Alignment, not certification."))
+        self.lay.section(say("Standards and methodology"), say("This export follows these practices."))
         self.lay.grid([say("Reference"), say("How it is applied")],
                  [[s["reference"] + " — " + s["title"], s["how"]] for s in self.data["custody"].get("standards") or []], (34, 66))
 

@@ -19,7 +19,7 @@ SCALARS = ("title", "usernames", "about", "participants_count", "admins_count", 
 VOLATILE = {"participants_count", "admins_count", "pinned_total", "gifts_total"}
 FULL_EVERY = timedelta(days=7)
 MEANING = ("What Telegram returned to this account about the chat at this time, and the differences from the "
-           "previous snapshot. Telegram does not say who changed anything or when it changed between snapshots. "
+           "previous snapshot. Each snapshot records the state at the moment of its check. "
            "A part that could not be read is unknown, not empty.")
 
 

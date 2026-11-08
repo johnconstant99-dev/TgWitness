@@ -20,8 +20,8 @@ DRAFT_SIMILARITY = 0.8
 LIMITS = (
     "Times are the collector's clock when each record was saved. Telegram times are server dates with "
     "one-second resolution.",
-    "Messages are listed for a limited time after each action. A reply missing from this protocol is not proof "
-    "that no reply was sent.",
+    "Messages are listed for a limited time after each action. Replies that arrive later are kept in the "
+    "journal instead.",
     "Actions in another Telegram app appear only through the messages this account sent or received; inline "
     "button presses there are not visible.",
     "Indicators are strings found in messages. Who controls a wallet, link or account is a separate question.",
@@ -620,8 +620,8 @@ def sentence(step, say, clock=same):
         parts = [say(PEER_FACTS[name], value=value) for name, value in (step.get("stated") or {}).items()]
         parts += [say(PEER_FLAGS[name]) for name in step.get("flags") or [] if name in PEER_FLAGS]
         line = say("Telegram changed what it offers for this chat: {parts}.", parts="; ".join(parts) or "—")
-        return line + " " + say("These are Telegram's own hints about the other side; Telegram does not say why a hint "
-                                "appeared.")
+        return line + " " + say("These are Telegram's own hints about the other side, recorded as Telegram "
+                                "delivered them.")
     if kind == "search_recorded":
         scope = say("{n} chats", n=len(step["chats"])) if step.get("chats") else say("all chats open to the investigator")
         line = say("Searched the saved archive for {query} in {scope}: {n} results.", query=quoted(step.get("query", "")),

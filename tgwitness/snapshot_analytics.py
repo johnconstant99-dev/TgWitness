@@ -13,7 +13,7 @@ KIND_LABELS = {"messages": "Message observations", "edits": "Edit observations",
                "service": "Service messages", "other": "Other records", "rows": "Message rows"}
 SCOPE_JOURNAL = "Journal charts count message observations at capture time in UTC. Repeat observations may refer to the same message. Edits and deletion notices are counted separately; they are not attributed to an editor or deleter."
 SCOPE_SNAPSHOT = "Snapshot charts count the message rows included in this copy, using their recorded message time in UTC. They do not reconstruct activity outside the selected scope."
-CAUTION = "Activity is not online presence. Sender identifiers do not establish a person's identity. Zero means no included observations, not proof that nothing happened."
+CAUTION = "Activity counts saved observations. Sender identifiers are Telegram account numbers. Zero means no included observations."
 UNKNOWN = "Unknown or withheld"
 OTHER = "Other / unlisted"
 

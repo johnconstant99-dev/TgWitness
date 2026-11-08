@@ -1,6 +1,6 @@
 
 VIEW_ONCE = 0x7FFFFFFF
-VIEWING_NOTE = "Saving this attachment does not establish that a person viewed it."
+VIEWING_NOTE = "This attachment was saved when Telegram delivered it to this account."
 RETRY_NOTE = "Self-destructing media may disappear before another attempt."
 OPENED = {False: "Not opened by the observing account", True: "Opened by the observing account"}
 

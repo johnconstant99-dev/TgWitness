@@ -24,11 +24,12 @@ LIMITS = [
     "Names, usernames and flags are the profile Telegram showed when a message was saved; they are mutable.",
     "A client is guessed from how a file was encoded, never from what Telegram says about the sender's device. "
     "Forwarded and re-uploaded files carry the encoder of whoever produced them first.",
-    "Deleted and edited counts cover saved messages only. Telegram does not say who deleted a message.",
+    "Deleted and edited counts cover saved messages; the chat's admin log names the acting administrator "
+    "where the account can read it.",
     "Mentions are found by patterns in saved text and links; they are leads to check, not verified facts.",
     "The legacy cached avatar field comes from the panel cache, not journal records.",
-    "Avatar history cites saved photos in this source; first/last times describe observations, not upload dates. "
-    "Similar photos are investigation leads, not proof that accounts belong to the same person.",
+    "Avatar history cites saved photos in this source; first and last times are observation times. "
+    "Similar photos are investigation leads.",
     "Reply links count replies to saved messages only.",
 ]
 

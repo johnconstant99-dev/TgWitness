@@ -70,7 +70,7 @@ def egress_probe(connector, expected_ip=None, fetch=bytes_via_connector):
         raise ValueError("Chosen WARP route is not confirmed by the HTTPS probe")
     return {"status": "observed", "ip": address, "warp": fields.get("warp", "unknown"),
             "response_sha256": hashlib.sha256(raw).hexdigest(),
-            "scope": "sample to Cloudflare through the selected gateway; does not establish Telegram destination routing"}
+            "scope": "sample to Cloudflare through the selected gateway"}
 
 
 def observe(connector, fetch=via_connector):

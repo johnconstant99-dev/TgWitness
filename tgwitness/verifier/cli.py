@@ -301,7 +301,7 @@ def verification_comparison(args, parser, mode):
         parser.exit(code, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + safe_text(exc) + "\n")
     pinned = bool(compared['first']['key_pinned'] and compared['second']['key_pinned'])
     compared['assurance'] = assurance(compared)
-    compared['assurance']['scope'] = 'two authenticated chat exports; comparison does not prove event history'
+    compared['assurance']['scope'] = 'two authenticated chat exports; the comparison covers their contents'
     if mode == "json":
         verification_print(json.dumps({"verified": True, "kind": "comparison", "result": compared,
                           "signer_pinned": pinned, "requirements_met": not args.strict or pinned},

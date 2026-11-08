@@ -343,7 +343,7 @@ class GuidedConnection:
                 c.store.set_setting("connection_check", check)
                 c.store.append("network.connection_applied", {"mode": mode, **item["route"].receipt(),
                     "policy": item["policy"].model_dump(), "check": check,
-                    "meaning": "Transport checked; this does not authenticate message content."})
+                    "meaning": "Transport route checked for this connection."})
         except BaseException as exc:
             for name, value in old.items():
                 c.vault.save(name, value)

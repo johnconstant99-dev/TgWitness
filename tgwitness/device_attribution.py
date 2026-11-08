@@ -14,11 +14,11 @@ BASIS = {
     "round_video_default_name": "A generic filename matches a configured pattern; it does not identify software.",
     "voice_encoder": "Opus metadata matches a configured vendor-string pattern; metadata can be copied or changed.",
 }
-MEANING = ("Weak metadata hypothesis, not proof of a client, device or person, and not from anything Telegram states about the sender's device. "
+MEANING = ("Metadata hypothesis about the client that encoded the file, read from the file itself. "
            "A forwarded or re-uploaded file carries the encoder of whoever made it first, and clients change these "
            "details between versions.")
-PROVENANCE_MEANING = ("Difference between document and message dates in retained metadata. It does not establish "
-                      "when a recording was made, who created it or a device identity.")
+PROVENANCE_MEANING = ("Difference between document and message dates in retained metadata. It shows how long "
+                      "before sending the file already existed.")
 
 
 def attributes(info):

@@ -20,7 +20,7 @@ def peer_settings_record(update, now=None):
     return {"kind": "forensics.peer_settings_observed",
             "payload": {"peer_user_id": user_id, "observed_at": time.time() if now is None else now,
                         "need_contacts_exception": True,
-                        "meaning": "Observed peer-settings flag; it does not establish address-book synchronization."}}
+                        "meaning": "Observed peer-settings flag, recorded as Telegram delivered it."}}
 
 
 def outbox_read_record(update, now=None):

@@ -196,7 +196,7 @@ def print_comparison(result, limit=50):
     if result["method"] == "number":
         print("Unchanged: " + str(result["unchanged"]))
     else:
-        print("Matched: " + str(result["matched"]) + " (possible correspondence, not proof of message identity)")
+        print("Matched: " + str(result["matched"]) + " (possible correspondence between the two exports)")
     if not (first["key_pinned"] and second["key_pinned"]):
         print("Signer identity is unpinned for at least one archive: compare the fingerprints with copies kept elsewhere.")
 

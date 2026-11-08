@@ -4,8 +4,8 @@ from html import escape
 TITLE = "Selected data"
 SCOPE_NOTE = ("The charts, message histories and transcript use this selection. Integrity, custody and coverage "
               "describe the complete source journal. The evidence ZIP keeps that journal and its attachments unchanged.")
-GAP_NOTE = ("These message numbers were not observed in the source journal. They do not establish deletion. "
-            "Known deleted messages and messages missing on recheck are separate observations.")
+GAP_NOTE = ("These message numbers were not observed in the source journal. Known deleted messages and "
+            "messages missing on recheck are separate observations.")
 CONTEXT_NOTE = ("Gaps use the chosen chats and the message-number span observed during the chosen dates. "
                 "Author and event filters do not create gaps. Neighboring saved messages are context and may be outside the selection.")
 KINDS = {"message.new": "New message", "message.snapshot": "History snapshot",

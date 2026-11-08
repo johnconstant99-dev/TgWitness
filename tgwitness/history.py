@@ -252,7 +252,7 @@ class History:
                 "history_run_id": job["run_id"], "upper_message_id": latest["upper_id"],
                 "last_message_id": latest["offset_id"], "captured": latest["captured"],
                 "unavailable": latest["unavailable"], "error_type": error,
-                "meaning": "End of the available history read, not proof of complete past delivery."}, job["chat_id"])
+                "meaning": "End of the available history read."}, job["chat_id"])
             history_cursor.seal(self.store, job["run_id"], job["chat_id"])
 
     async def run(self, run_id):

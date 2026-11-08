@@ -144,8 +144,7 @@ GAP_DEFAULTS = {"gap_analysis": True, "gap_account_sequence": True, "gap_cluster
             "gap_service_estimate": False}
 WIDE_TYPES = ("private", "groups", "bots")
 GAP_MEANING = ("A gap is a message number between two observed messages that this collector never saw. Telegram assigns "
-           "these numbers; a gap does not say who removed a message or why, and it may be a message Telegram never "
-           "showed to this account.")
+           "these numbers; a gap may be a message Telegram never showed to this account.")
 ESTIMATE_MEANING = ("Estimate from the share of service messages among observed numbers. It does not explain any "
                     "particular gap and is never subtracted from the missing count.")
 
@@ -332,7 +331,7 @@ def coverage_lines(coverage):
         if chat["not_observed"]:
             lines.append("Chat " + (chat["title"] or str(chat["chat_id"])) + ": IDs " + str(chat["observed_from"])
                          + "-" + str(chat["observed_to"]) + ", " + str(chat["not_observed"])
-                         + " ID(s) not observed in " + str(chat["ranges_total"]) + " range(s) (not evidence of deletion)")
+                         + " ID(s) not observed in " + str(chat["ranges_total"]) + " range(s)")
     gaps, extra = coverage.get("gap_summary") or {}, []
     account = gaps.get("account") if gaps.get("status") == "on" else None
     if account and account.get("status") == "applicable":

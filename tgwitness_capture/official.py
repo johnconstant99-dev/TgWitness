@@ -87,7 +87,7 @@ class OfficialOptions(BaseModel):
     def receipt(self):
         return {**self.model_dump(exclude={"proxy_username_env", "proxy_password_env"}),
                 "has_proxy_credentials": bool(self.proxy_username_env or self.proxy_password_env),
-                "direct_fallback": False, "ip_check": "periodic; not proof of every connection",
+                "direct_fallback": False, "ip_check": "periodic",
                 "cloudflare_binding_verified": False}
 
 
@@ -216,7 +216,7 @@ class OfficialBrowser(BrowserCapture):
             self.checked_route = time.monotonic()
             self.journal.append("official.egress_observed", {"ip": address, "observed_at": utcnow(),
                                 "provider": self.options.egress, "endpoint": TRACE,
-                                "scope": "browser-context route probe; does not prove every connection"})
+                                "scope": "browser-context route probe"})
         finally:
             await response.dispose()
 

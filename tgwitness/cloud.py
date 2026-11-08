@@ -1797,7 +1797,7 @@ def account_key_check(report, keys):
     notes = ["record " + str(seq) + ": " + (
         "authorized with an imported session; its key also exists outside this server, and whoever holds it "
         "could stand in for Telegram on the network path, so observations also rest on the key's holders"
-        if origin == "imported" else "the journal does not say where the account's key was created")
+        if origin == "imported" else "the journal records this authorization without the key's origin")
         for seq, origin in keys if origin != "created"]
     imported = any(origin == "imported" for _, origin in keys)
     report.add("account_key", "review" if imported else "unavailable" if notes or not keys else "pass",

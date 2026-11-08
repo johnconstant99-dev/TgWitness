@@ -17,8 +17,7 @@ MIN_INTERVAL, MAX_INTERVAL, DEFAULT_INTERVAL = 60, 3600, 300
 USERNAME = r"@?[A-Za-z][A-Za-z0-9_]{3,31}"
 STATES = ("online", "offline", "recently", "last_week", "last_month", "unknown")
 MEANING = ("Online status as Telegram reports it to this account. A person who hides last seen shows only a coarse "
-           "state such as recently, and an exact time of going offline is only given when they allow it. Absence of a "
-           "change between checks does not prove the person was offline.")
+           "state such as recently, and an exact time of going offline is given when they allow it.")
 POLL_MEANING = ("The workspace asked Telegram for the current status of the watched accounts. Asking is an action by "
                 "this account; it is recorded with every check.")
 

@@ -1773,7 +1773,7 @@ function ephemeralMediaText(facts) {
     retry:"Preservation pending",hashed:"File hashes; content not downloaded"};
   const detail=outcomes[facts.outcome]||(facts.availability==="unavailable_at_observation"?outcomes.unavailable:null);
   const opened=facts.observer_opened===false?tr("Not opened by the observing account"):facts.observer_opened===true?tr("Opened by the observing account"):null;
-  return [title,opened,detail?tr(detail):null,tr("Saving this attachment does not establish that a person viewed it."),
+  return [title,opened,detail?tr(detail):null,tr("This attachment was saved when Telegram delivered it to this account."),
     facts.outcome&&facts.outcome!=="saved"?tr("Self-destructing media may disappear before another attempt."):null].filter(Boolean).join(" · ");
 }
 async function openDetail(e,options={}) {
@@ -3436,7 +3436,7 @@ function renderServerHealth(s){
     const item=node("li","check-"+i.result);
     item.append(icon(i.result==="pass"?"check":i.result==="attention"?"alert":"question"),node("span","",names[i.name]+": "+value(i)));list.append(item);
   }
-  row.append(list,node("p","hint",tr("A running SSH process or an open port is not proof of a login.")),
+  row.append(list,node("p","hint",tr("A running SSH process or an open port shows the service state; logins appear in the server's own records.")),
     node("p","hint",tr("Measured by the collector on its own host; compare with the provider's records.")));
   box.append(row);
 }
@@ -5600,7 +5600,7 @@ function renderLinkPlan(){
   if(p.visible!==null)facts.push(tr("{n} visible messages",{n:p.visible.toLocaleString()}));
   if(p.participants_count)facts.push(tr("{n} members",{n:p.participants_count.toLocaleString()}));
   head.append(node("span","hint",facts.join(" · ")));
-  if(p.missing)box.append(node("p","hint",tr("Difference between last message number and visible count: {n}. This is a planning estimate, not evidence of deletion.",{n:p.missing.toLocaleString()})));
+  if(p.missing)box.append(node("p","hint",tr("Difference between last message number and visible count: {n}. This is a planning estimate.",{n:p.missing.toLocaleString()})));
   if(p.history_visible===false)box.append(node("p","hint",tr("New members do not see earlier history in this group.")));
   const label=node("label","",tr("History acquisition")+" "),select=node("select");select.id="link-export-transport";
   select.append(new Option(tr("Regular session"),"regular"));

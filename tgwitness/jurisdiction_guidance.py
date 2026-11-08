@@ -38,7 +38,7 @@ METHODS = [
      "limit": "Visual recordings can be incomplete or manipulated and do not replace source data. A TEE recording binds only what the attested process actually captured and signed."},
     {"id": "human", "name": "Human witness, expert or notary", "helps": "Explain collection, identity and custody, answer challenges and complete route-specific certifications or formalities.",
      "retain": "Who did what and when, qualifications, signed declaration or applicable certificate, custody transfers and the exact material examined.",
-     "limit": "Professional status alone does not authenticate unseen data. Separate provider-account ownership can reduce operator control; it does not prove the provider cannot access a host or hypervisor."},
+     "limit": "Professional status covers the operator's role in the collection. A separately owned provider account reduces operator control over the host and hypervisor."},
 ]
 
 

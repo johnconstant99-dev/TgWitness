@@ -11,9 +11,9 @@ FIRST_KINDS = ("message.new", "message.snapshot", "message.recovered")
 SCANNED_KINDS = (*FIRST_KINDS, "message.edited", "message.deleted", "message.missing_on_recheck")
 BUDGET = 5
 CANDIDATE = re.compile(r"\w\.\w|@\w")
-MEANING = ("Counts of saved observations only. Message times are the times Telegram reported, in UTC; hour "
-           "and weekday counts help estimate a time zone but do not establish one. Missing messages do not prove "
-           "inactivity: check the coverage section for periods without confirmed collection.")
+MEANING = ("Counts of saved observations. Message times are the times Telegram reported, in UTC; hour "
+           "and weekday counts indicate a likely time zone. The coverage section lists the periods of "
+           "confirmed collection.")
 
 
 def iso(value):

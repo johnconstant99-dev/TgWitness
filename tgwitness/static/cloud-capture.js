@@ -60,7 +60,7 @@
       <p id="capture-error" class="notice error" role="alert" ${state.error ? "" : "hidden"}>${esc(state.error)}</p>
       <p class="capture-feedback" role="status" ${state.busy || state.note ? "" : "hidden"}>${esc(state.busy ? t("Processing locally…") : state.note)}</p>
       ${state.step === 1 ? keyStep() : state.step === 2 ? githubStep() : state.step === 3 ? connectionStep() : resultStep()}
-      </section><details class="capture-boundary"><summary>${t("What does GitHub verify?")}</summary><p>${t("The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.")}</p></details>
+      </section><details class="capture-boundary"><summary>${t("What does GitHub verify?")}</summary><p>${t("The attestation binds the archive to an approved collector workflow and detects later changes. GitHub and the HTTPS tunnel are part of the trusted infrastructure.")}</p></details>
       ${state.key ? button("reset", t("Start a new capture"), "quiet capture-reset") : ""}</div></div>`;
     root.querySelector("#recipient")?.setAttribute("aria-label", t("Public encryption key"));
     const recipient = root.querySelector("#recipient"); if (recipient) recipient.value = state.key?.recipient || "";
