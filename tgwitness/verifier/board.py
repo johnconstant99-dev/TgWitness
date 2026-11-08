@@ -14,6 +14,7 @@ from .common import (
     read_json_file,
     read_member,
     sqlite3,
+    strict_json,
     tempfile,
     timezone,
     unicodedata,
@@ -47,7 +48,7 @@ def verify_board_selection(data, expected_fingerprint=None, evidence=None):
     boundary, matched, at_boundary = statement["journal_head"], set(), "0" * 64
     with open_archive(evidence) as archive, archive.open("events.jsonl") as incoming:
         for line in bounded_lines(incoming):
-            event = json.loads(line)
+            event = strict_json(line)
             if event["seq"] == boundary["seq"]:
                 at_boundary = event["hash"]
             if event["seq"] in wanted:
@@ -62,7 +63,7 @@ def verify_board_selection(data, expected_fingerprint=None, evidence=None):
             db.execute("CREATE TABLE events(seq INTEGER PRIMARY KEY,hash TEXT,observed_at TEXT,chat_id INTEGER,message_id INTEGER,kind TEXT,actor_id INTEGER,payload TEXT)")
             with open_archive(evidence) as archive, archive.open("events.jsonl") as incoming:
                 for line in bounded_lines(incoming):
-                    event = json.loads(line)
+                    event = strict_json(line)
                     if event["seq"] > boundary["seq"]:
                         break
                     db.execute("INSERT INTO events VALUES(?,?,?,?,?,?,?,?)", tuple(event[key] for key in
@@ -265,9 +266,9 @@ def verify_board(archive, manifest, checkpoint=None):
     if archive.getinfo("annotations.jsonl").file_size > MAX_JSON_BYTES:
         raise ValueError("Annotations exceed the verifier's 256 MiB replay limit")
     with archive.open("annotations.jsonl") as incoming:
-        records = [json.loads(line) for line in bounded_lines(incoming)]
+        records = [strict_json(line) for line in bounded_lines(incoming)]
     replay = board_replay(records, public)
-    signed = json.loads(read_member(archive, "case-board.json", MAX_JSON_BYTES))
+    signed = strict_json(read_member(archive, "case-board.json", MAX_JSON_BYTES))
     statement = signed["statement"]
     Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True)).verify(
         base64.b64decode(signed["signature"], validate=True), canonical(statement))
@@ -280,7 +281,7 @@ def verify_board(archive, manifest, checkpoint=None):
     retained_heads = [(checkpoint or {}).get("statement", {}).get("annotations_head")]
     for name in files:
         if name.startswith("anchors/") and name.endswith(".json"):
-            retained_heads.append(json.loads(read_member(archive, name)).get("statement", {}).get("annotations_head"))
+            retained_heads.append(strict_json(read_member(archive, name)).get("statement", {}).get("annotations_head"))
     for retained in (head for head in retained_heads if head):
         seq = retained.get("seq")
         if type(seq) is not int or seq < 0 or seq > len(records) or retained.get("hash") != (records[seq-1]["hash"] if seq else "0" * 64):
@@ -292,7 +293,7 @@ def verify_board(archive, manifest, checkpoint=None):
             db.execute("CREATE TABLE events(seq INTEGER PRIMARY KEY,hash TEXT UNIQUE,observed_at TEXT,chat_id INTEGER,message_id INTEGER,kind TEXT,actor_id INTEGER,payload TEXT)")
             with archive.open("events.jsonl") as incoming:
                 for line in bounded_lines(incoming):
-                    event = json.loads(line)
+                    event = strict_json(line)
                     db.execute("INSERT INTO events VALUES(?,?,?,?,?,?,?,?)", tuple(event[key] for key in
                         ("seq", "hash", "observed_at", "chat_id", "message_id", "kind", "actor_id")) + (canonical(event["payload"]).decode(),))
             for record in records:
@@ -331,7 +332,7 @@ def verify_board(archive, manifest, checkpoint=None):
                 expected = {"id": item["id"], "query": query, "snapshot": snapshot, "current": current,
                             "event_hashes": hashes, "added_seq": added, "removed_seq": []}
                 name = "board/slices/" + item["id"] + ".json"
-                if name not in files or json.loads(read_member(archive, name, MAX_JSON_BYTES)) != expected:
+                if name not in files or strict_json(read_member(archive, name, MAX_JSON_BYTES)) != expected:
                     raise ValueError("Exported slice differs from journal: " + item["id"])
                 slices[item["id"]] = name
                 if added:
@@ -350,7 +351,7 @@ def verify_board_disclosure(archive, manifest):
     from .chain import canonical
     if "case-board.json" not in manifest["files"]:
         return None
-    signed = json.loads(read_member(archive, "case-board.json", MAX_JSON_BYTES))
+    signed = strict_json(read_member(archive, "case-board.json", MAX_JSON_BYTES))
     statement, public = authenticate_statement(signed), manifest["public_key"]
     if statement.get("format") != "tgwitness-case-board-handover-v1" or statement.get("public_key") != public:
         raise ValueError("Invalid handover board format or signing key")
@@ -361,7 +362,7 @@ def verify_board_disclosure(archive, manifest):
     matched = set()
     with archive.open("records.jsonl") as incoming:
         for line in bounded_lines(incoming):
-            record = json.loads(line)
+            record = strict_json(line)
             if record["hash"] in wanted:
                 for card in cards:
                     if card.get("target", {}).get("event_hash") == record["hash"] and card.get("observation") != record:
@@ -370,7 +371,7 @@ def verify_board_disclosure(archive, manifest):
     if matched != set(wanted):
         raise ValueError("Board refers to a record not disclosed in the handover")
     if "report.json" in manifest["files"]:
-        report = json.loads(read_member(archive, "report.json", MAX_JSON_BYTES))
+        report = strict_json(read_member(archive, "report.json", MAX_JSON_BYTES))
         if report["report"].get("case_board") != statement["material"]:
             raise ValueError("Readable report and board disclosure differ")
     return {"cards": len(cards), "meaning": "Minimised team notes, signed by the collector; not the original annotations chain"}
@@ -397,7 +398,7 @@ def verify_board_document(path, expected_fingerprint=None, evidence=None):
         with open_archive(evidence) as archive, archive.open("annotations.jsonl") as incoming:
             prefix = []
             for line in bounded_lines(incoming):
-                row = json.loads(line)
+                row = strict_json(line)
                 if row["seq"] > count:
                     break
                 prefix.append(row)
@@ -407,7 +408,7 @@ def verify_board_document(path, expected_fingerprint=None, evidence=None):
         source_head = {"seq": 0, "hash": "0" * 64}
         with open_archive(evidence) as archive, archive.open("events.jsonl") as incoming:
             for line in bounded_lines(incoming):
-                row = json.loads(line)
+                row = strict_json(line)
                 if row["seq"] > boundary["seq"]:
                     break
                 source_head = {"seq": row["seq"], "hash": row["hash"]}

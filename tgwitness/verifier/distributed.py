@@ -8,8 +8,8 @@ from .common import (
     datetime,
     hashlib,
     io,
-    json,
     read_json_file,
+    strict_json,
 )
 def verify_distributed_pages(stream, envelopes, job, task):
     from .chain import canonical
@@ -64,7 +64,7 @@ def verify_distributed_pages(stream, envelopes, job, task):
             end += len(line)
             if not line or len(line) > MAX_RECORD_BYTES or not line.endswith(b"\n") or end > value["byte_end"]:
                 raise ValueError("Checkpoint data differs: truncated or oversized.")
-            record = json.loads(line)
+            record = strict_json(line)
             mid = record["id"]
             if type(mid) is not int or not low <= mid < cursor:
                 raise ValueError("Checkpoint messages are outside their range or repeated.")

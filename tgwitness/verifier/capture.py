@@ -4,10 +4,10 @@ from .common import (
     authenticate_statement,
     base64,
     bounded_lines,
-    json,
     open_archive,
     re,
     read_manifest,
+    strict_json,
 )
 def bundle_format(path):
     with open_archive(path) as archive:
@@ -20,7 +20,7 @@ def bundle_hashes(path, seqs):
         return found
     with open_archive(path) as archive, archive.open("events.jsonl") as stream:
         for line in bounded_lines(stream):
-            event = json.loads(line)
+            event = strict_json(line)
             if event["seq"] in wanted:
                 found[event["seq"]] = event["hash"]
     return found
@@ -99,7 +99,7 @@ def bundle_capture_prefixes(bundle_path, boundaries):
     limit = max(wanted)
     with open_archive(bundle_path) as archive, archive.open("events.jsonl") as stream:
         for line in bounded_lines(stream):
-            event = json.loads(line)
+            event = strict_json(line)
             if event["seq"] > limit:
                 break
             tree.append(event["hash"])
