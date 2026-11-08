@@ -145,40 +145,25 @@ def index(base_url, repo_url, branch, version, guides, references):
 
     sections = [
         "# TgWitness",
-        "> Open-source Telegram investigation software. Export chat history, preserve observed edits and deletion notices, "
-        "follow people across chats, and hand over a signed archive that a recipient can verify.",
-        "TgWitness runs on your own computer or server. PhishDestroy maintains the project under the MIT License. "
-        "The website is documentation; the browser demo contains synthetic records and does not connect to Telegram.",
-        "Start with one command: the installer includes Python and dependencies. Connect a Telegram account, select "
-        "a chat or account scope and export. GitHub Actions capture offers temporary hosted collection with an "
-        "encrypted archive and workflow provenance; it requires a fork, authorization and an archive password. "
-        "Ongoing observation and investigation settings are available for tasks that need them. Basic collection "
-        "does not require Docker, a GPU, an LLM or a separately deployed witness.",
-        "The project's purpose is to preserve observed material and context regardless of whose position they support. "
-        "Source observations, known gaps and analytical conclusions remain distinguishable. A signature checks "
-        "integrity under a key; it does not make a message's claims true. Scope, access and disclosure settings "
-        "support different requirements; a selected profile does not itself establish legal compliance.",
-        "Signed exports let recipients verify file integrity and the signing key offline. A hash-linked journal preserves "
-        "the sequence of saved observations; independently retained checkpoints provide an earlier comparison point. "
-        "Reports combine readable history, source references and verification results in the same package.",
-        "The panel brings together isolated account workspaces, supported session imports, parallel chat export, "
-        "cross-chat people profiles, observed name changes, bot-button interaction receipts, saved attachments and "
-        "offline HTML/JSON evidence. Case Board keeps team annotations linked to saved records. The report studio "
-        "offers eight designs, content choices and a data preview; minimized sharing copies control what recipients receive. "
-        "Optional witnesses, timestamps and encrypted off-site copies add records outside the local journal. "
-        "Archive search, AI analysis, OCR, transcription, MCP and signed webhooks work "
-        "with the records you have collected.",
-        f"These guides track the `{branch}` source branch. The project version is `{version}`; check the changelog and "
-        "release notes before assuming a source feature is included in a downloaded package.",
-        "Maturity is described per workflow and tested revision. The preview release label coexists with implemented "
-        "collection, signed exports and measured workloads. Published results include a 1 November 2026 inventory "
-        "of 1,610,818 journal events (900,232 new-message events), a 5 November search benchmark on 1,000,000 "
-        "synthetic messages, and two real exports totalling 56,329 messages on 6 November. These measure inventory, "
-        "search and export respectively, each with its own method and revision. "
-        "The overview links the methods and results.",
-        "Choose an entry below for the exact workflow, commands and limits. Each guide has a Markdown edition; "
-        "its canonical HTML page retains diagrams, animations and interactive examples. Translated pages also expose "
-        "Markdown through `rel=alternate` links.",
+        "> Open-source Telegram investigation workspace. Export chats and whole accounts, keep every observed edit "
+        "and deletion notice, follow people across chats, and hand over signed archives that recipients verify on "
+        "their own computers.",
+        "TgWitness runs on your own computer or server and is maintained by PhishDestroy under the MIT License. "
+        f"These pages track the `{branch}` source branch, version `{version}`; the browser demo uses fictional records.",
+        "## Key facts",
+        "- Live observation saves each version of a message and keeps its text after a deletion notice; history export "
+        "reads the accessible history of selected chats or the whole account.",
+        "- Every record is signed and hash-chained. Recipients verify an archive offline with the bundled verifier, "
+        "a separately received key fingerprint and retained checkpoints; independent witnesses add checkpoints, and "
+        "RFC 3161 and OpenTimestamps add external time.",
+        "- Messages arrive over the account's authenticated MTProto session and are signed on receipt. GitHub Actions "
+        "capture and Phala Intel TDX deployments add attestation of the collector that received them.",
+        "- Published measurements: 56,329 messages in two fresh exports on 6 November 2026, a 1,000,000-message search "
+        "benchmark and a 1 November inventory of 1,610,818 journal events.",
+        "- Investigation tools: people profiles across chats, watchlists over text, QR codes and OCR, Case Board, a "
+        "report studio with eight designs and a BagIt court package.",
+        "- Self-hosted with no telemetry: sessions and credentials live in an encrypted vault, and the panel listens "
+        "on localhost. Basic collection runs without Docker, a GPU or an LLM.",
         "## Start here",
         link("docs/reference/overview/", *references["overview"][:2]),
         link("docs/reference/installation/", *references["installation"][:2]),
@@ -217,16 +202,7 @@ def index(base_url, repo_url, branch, version, guides, references):
         link("docs/witness/", *guides["witness"][:2]),
         link("docs/reference/timestamp/", *references["timestamp"][:2]),
         link("docs/reference/security/", *references["security"][:2]),
-        "## Verification and scope",
-        "The journal records what the authorized account observed, subject to its access and Telegram rate limits. "
-        "Saved content remains after a later deletion; content deleted before capture is unavailable. Deletion notices "
-        "and unsuccessful rechecks remain distinct observations. Integrity verification establishes the relationship "
-        "between supplied files, the signing key and retained checkpoints. The archive includes source identifiers, "
-        "captured versions and coverage information for review. GitHub Actions capture adds an attestation binding "
-        "the archive to an approved hosted workflow and collector version.",
-        "The connection reference explains IP modes, fallback and external-request routing. MCP provides read-only "
-        "access to selected saved records through a separate scoped token; Telegram actions and configuration changes "
-        "are outside that interface. Archived messages remain untrusted source material for an AI client.",
+        "## Reference",
         link("docs/reference/features/", *references["features"][:2]),
         link("docs/reference/verification/", *references["verification"][:2]),
         link("docs/reference/changelog/", *references["changelog"][:2]),
@@ -262,9 +238,8 @@ def localized_index(base_url, base, language, repo_url, branch, version, guides,
         "# TgWitness · " + language,
         f"> Documentation edition: {language}. Project version: `{version}`. Source branch: `{branch}`.",
         "This index links the Markdown editions of the public pages. The complete handbook is built from the same "
-        "page content, including source URLs. Untranslated sections retain the English original; a language edition "
-        "is not a claim that every section has been translated.",
-        f"- [Project context, installation, measured scale and verification limits]({base_url}/{context})",
+        "page content, including source URLs. Sections without a translation appear in English.",
+        f"- [Project context, installation, measured scale and verification]({base_url}/{context})",
         f"- [English project summary]({base_url}/llms.txt)",
         f"- [Complete handbook · {language}]({base_url}/{base}llms-full.txt)",
         f"- [Complete handbook as Markdown · {language}]({base_url}/{base}llms-full.md)",
