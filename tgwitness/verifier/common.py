@@ -103,6 +103,19 @@ def validate_server_hashes(value):
     return value
 
 
+def ends_at_directory(archive):
+    handle, position = archive.fp, archive.fp.tell()
+    try:
+        handle.seek(0, 2)
+        end = handle.tell()
+        if end < 22:
+            return False
+        handle.seek(end - 22)
+        return handle.read(4) == b"PK\x05\x06"
+    finally:
+        handle.seek(position)
+
+
 def open_archive(path, max_gib=None):
     limit = MAX_UNCOMPRESSED_GIB if max_gib is None else max_gib
     if type(limit) not in (int, float) or not math.isfinite(limit) or limit <= 0:
@@ -117,6 +130,10 @@ def open_archive(path, max_gib=None):
             raise ValueError("Duplicate ZIP members")
         if infos and min(info.header_offset for info in infos) != 0:
             raise ValueError("Archive has data before its first member")
+        if archive.comment:
+            raise ValueError("Archive carries bytes in its trailing comment")
+        if not ends_at_directory(archive):
+            raise ValueError("Archive has data after its central directory")
         if sum(info.file_size for info in infos) > limit * 1024**3:
             raise ValueError("Bundle exceeds the verifier's size limit; raise it with --max-gib")
     except BaseException:
@@ -176,4 +193,4 @@ def read_json_file(path):
     return strict_json(path.read_text(encoding="utf-8"))
 
 
-__all__ = ['DRAND_CHAIN', 'DRAND_CHECK_LIMIT', 'DRAND_GENESIS', 'DRAND_PERIOD', 'DRAND_RELAYS', 'Ed25519PublicKey', 'FIELDS', 'GATEWAY_FIELDS', 'InvalidSignature', 'MAX_JSON_BYTES', 'MAX_MANIFEST_BYTES', 'MAX_MEMBERS', 'MAX_RECORD_BYTES', 'MAX_SMALL_MEMBER_BYTES', 'MAX_UNCOMPRESSED_GIB', 'OTS_BITCOIN', 'OTS_MAGIC', 'OTS_PENDING', 'Path', 'SEAL_CLOSE', 'SEAL_OPEN', 'SEAL_WINDOW', 'VerifierTooOld', 'argparse', 'authenticate_statement', 'base64', 'bisect', 'bounded_lines', 'datetime', 'ec', 'hashes', 'hashlib', 'io', 'json', 'math', 'member_digest', 'open_archive', 'os', 'padding', 're', 'read_json_file', 'read_manifest', 'read_member', 'rsa', 'safe_text', 'shutil', 'sqlite3', 'strict_json', 'subprocess', 'sys', 'tempfile', 'timedelta', 'timezone', 'unicodedata', 'unique_keys', 'validate_server_hashes', 'x509', 'zipfile']
+__all__ = ['DRAND_CHAIN', 'DRAND_CHECK_LIMIT', 'DRAND_GENESIS', 'DRAND_PERIOD', 'DRAND_RELAYS', 'Ed25519PublicKey', 'FIELDS', 'GATEWAY_FIELDS', 'InvalidSignature', 'MAX_JSON_BYTES', 'MAX_MANIFEST_BYTES', 'MAX_MEMBERS', 'MAX_RECORD_BYTES', 'MAX_SMALL_MEMBER_BYTES', 'MAX_UNCOMPRESSED_GIB', 'OTS_BITCOIN', 'OTS_MAGIC', 'OTS_PENDING', 'Path', 'SEAL_CLOSE', 'SEAL_OPEN', 'SEAL_WINDOW', 'VerifierTooOld', 'argparse', 'authenticate_statement', 'base64', 'bisect', 'bounded_lines', 'datetime', 'ec', 'ends_at_directory', 'hashes', 'hashlib', 'io', 'json', 'math', 'member_digest', 'open_archive', 'os', 'padding', 're', 'read_json_file', 'read_manifest', 'read_member', 'rsa', 'safe_text', 'shutil', 'sqlite3', 'strict_json', 'subprocess', 'sys', 'tempfile', 'timedelta', 'timezone', 'unicodedata', 'unique_keys', 'validate_server_hashes', 'x509', 'zipfile']

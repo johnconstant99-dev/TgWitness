@@ -18,6 +18,7 @@ from .common import (
     read_manifest,
     read_member,
     sqlite3,
+    strict_json,
     tempfile,
     validate_server_hashes,
 )
@@ -89,7 +90,7 @@ def chat_messages(archive):
             if separator is False:
                 raise ValueError("Missing comma between chat messages")
             separator = line.endswith(",")
-            message = json.loads(line.removesuffix(","))
+            message = strict_json(line.removesuffix(","))
             if not isinstance(message, dict):
                 raise ValueError("Chat message must be an object")
             yield message
@@ -193,7 +194,7 @@ class AccountExportCheck:
 
 
     def signed(self, name, kind):
-        envelope = json.loads(read_member(self.archive, name))
+        envelope = strict_json(read_member(self.archive, name))
         statement = envelope["statement"]
         if (statement.get("format") != "tgwitness-account-export-" + kind + "-v1"
                 or statement.get("public_key") != self.public or statement.get("job_id") != self.job_id
@@ -337,7 +338,7 @@ class AccountExportCheck:
         self.failed_pages += receipt["outcome"] == "failed"
 
     def verify_record(self, line, task, after, last_id, seen):
-        record = json.loads(line)
+        record = strict_json(line)
         if not isinstance(record, dict) or line != canonical(record) + b"\n":
             raise ValueError("Account export records must be canonical JSONL")
         if record.get("category") != task["category"]:
@@ -554,7 +555,7 @@ class AccountDisclosureCheck:
         try:
             with self.archive.open("messages.jsonl") as stream:
                 for line in bounded_lines(stream):
-                    row = json.loads(line)
+                    row = strict_json(line)
                     if not isinstance(row, dict) or set(row) != {"chat", "message"}:
                         raise ValueError("Invalid disclosure message envelope")
                     chat, message = row["chat"], row["message"]

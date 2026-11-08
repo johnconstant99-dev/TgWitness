@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: e871627eed32bb3f8371732e6c07f9fea77aa7fd6a766f41aa7e20d38c8e6b6e
+# TgWitness verifier sources SHA-256: 8a1f9e8b12c619ba6b3affa43c5d6ffb44b79bb5f52c4d513320a61bde2eac6f
 """Standalone verifier"""
 import argparse
 import base64
@@ -103,6 +103,19 @@ def validate_server_hashes(value):
     return value
 
 
+def ends_at_directory(archive):
+    handle, position = archive.fp, archive.fp.tell()
+    try:
+        handle.seek(0, 2)
+        end = handle.tell()
+        if end < 22:
+            return False
+        handle.seek(end - 22)
+        return handle.read(4) == b"PK\x05\x06"
+    finally:
+        handle.seek(position)
+
+
 def open_archive(path, max_gib=None):
     limit = MAX_UNCOMPRESSED_GIB if max_gib is None else max_gib
     if type(limit) not in (int, float) or not math.isfinite(limit) or limit <= 0:
@@ -117,6 +130,10 @@ def open_archive(path, max_gib=None):
             raise ValueError("Duplicate ZIP members")
         if infos and min(info.header_offset for info in infos) != 0:
             raise ValueError("Archive has data before its first member")
+        if archive.comment:
+            raise ValueError("Archive carries bytes in its trailing comment")
+        if not ends_at_directory(archive):
+            raise ValueError("Archive has data after its central directory")
         if sum(info.file_size for info in infos) > limit * 1024**3:
             raise ValueError("Bundle exceeds the verifier's size limit; raise it with --max-gib")
     except BaseException:
@@ -1715,7 +1732,7 @@ def report_companions(archive, manifest, public, describes):
     files, report = manifest["files"], manifest.get("report") or {}
     checked = {"json": None, "parts": 0, "pdf": None}
     if "report.json" in files:
-        seal = check_seal(read_json_seal(json.loads(read_member(archive, "report.json", MAX_JSON_BYTES))), public)
+        seal = check_seal(read_json_seal(strict_json(read_member(archive, "report.json", MAX_JSON_BYTES))), public)
         if not describes(seal["subject"]):
             raise ValueError("report.json describes a different export")
         checked["json"] = seal
@@ -1892,7 +1909,7 @@ def verify_board_selection(data, expected_fingerprint=None, evidence=None):
     boundary, matched, at_boundary = statement["journal_head"], set(), "0" * 64
     with open_archive(evidence) as archive, archive.open("events.jsonl") as incoming:
         for line in bounded_lines(incoming):
-            event = json.loads(line)
+            event = strict_json(line)
             if event["seq"] == boundary["seq"]:
                 at_boundary = event["hash"]
             if event["seq"] in wanted:
@@ -1907,7 +1924,7 @@ def verify_board_selection(data, expected_fingerprint=None, evidence=None):
             db.execute("CREATE TABLE events(seq INTEGER PRIMARY KEY,hash TEXT,observed_at TEXT,chat_id INTEGER,message_id INTEGER,kind TEXT,actor_id INTEGER,payload TEXT)")
             with open_archive(evidence) as archive, archive.open("events.jsonl") as incoming:
                 for line in bounded_lines(incoming):
-                    event = json.loads(line)
+                    event = strict_json(line)
                     if event["seq"] > boundary["seq"]:
                         break
                     db.execute("INSERT INTO events VALUES(?,?,?,?,?,?,?,?)", tuple(event[key] for key in
@@ -2107,9 +2124,9 @@ def verify_board(archive, manifest, checkpoint=None):
     if archive.getinfo("annotations.jsonl").file_size > MAX_JSON_BYTES:
         raise ValueError("Annotations exceed the verifier's 256 MiB replay limit")
     with archive.open("annotations.jsonl") as incoming:
-        records = [json.loads(line) for line in bounded_lines(incoming)]
+        records = [strict_json(line) for line in bounded_lines(incoming)]
     replay = board_replay(records, public)
-    signed = json.loads(read_member(archive, "case-board.json", MAX_JSON_BYTES))
+    signed = strict_json(read_member(archive, "case-board.json", MAX_JSON_BYTES))
     statement = signed["statement"]
     Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True)).verify(
         base64.b64decode(signed["signature"], validate=True), canonical(statement))
@@ -2122,7 +2139,7 @@ def verify_board(archive, manifest, checkpoint=None):
     retained_heads = [(checkpoint or {}).get("statement", {}).get("annotations_head")]
     for name in files:
         if name.startswith("anchors/") and name.endswith(".json"):
-            retained_heads.append(json.loads(read_member(archive, name)).get("statement", {}).get("annotations_head"))
+            retained_heads.append(strict_json(read_member(archive, name)).get("statement", {}).get("annotations_head"))
     for retained in (head for head in retained_heads if head):
         seq = retained.get("seq")
         if type(seq) is not int or seq < 0 or seq > len(records) or retained.get("hash") != (records[seq-1]["hash"] if seq else "0" * 64):
@@ -2134,7 +2151,7 @@ def verify_board(archive, manifest, checkpoint=None):
             db.execute("CREATE TABLE events(seq INTEGER PRIMARY KEY,hash TEXT UNIQUE,observed_at TEXT,chat_id INTEGER,message_id INTEGER,kind TEXT,actor_id INTEGER,payload TEXT)")
             with archive.open("events.jsonl") as incoming:
                 for line in bounded_lines(incoming):
-                    event = json.loads(line)
+                    event = strict_json(line)
                     db.execute("INSERT INTO events VALUES(?,?,?,?,?,?,?,?)", tuple(event[key] for key in
                         ("seq", "hash", "observed_at", "chat_id", "message_id", "kind", "actor_id")) + (canonical(event["payload"]).decode(),))
             for record in records:
@@ -2173,7 +2190,7 @@ def verify_board(archive, manifest, checkpoint=None):
                 expected = {"id": item["id"], "query": query, "snapshot": snapshot, "current": current,
                             "event_hashes": hashes, "added_seq": added, "removed_seq": []}
                 name = "board/slices/" + item["id"] + ".json"
-                if name not in files or json.loads(read_member(archive, name, MAX_JSON_BYTES)) != expected:
+                if name not in files or strict_json(read_member(archive, name, MAX_JSON_BYTES)) != expected:
                     raise ValueError("Exported slice differs from journal: " + item["id"])
                 slices[item["id"]] = name
                 if added:
@@ -2191,7 +2208,7 @@ def verify_board(archive, manifest, checkpoint=None):
 def verify_board_disclosure(archive, manifest):
     if "case-board.json" not in manifest["files"]:
         return None
-    signed = json.loads(read_member(archive, "case-board.json", MAX_JSON_BYTES))
+    signed = strict_json(read_member(archive, "case-board.json", MAX_JSON_BYTES))
     statement, public = authenticate_statement(signed), manifest["public_key"]
     if statement.get("format") != "tgwitness-case-board-handover-v1" or statement.get("public_key") != public:
         raise ValueError("Invalid handover board format or signing key")
@@ -2202,7 +2219,7 @@ def verify_board_disclosure(archive, manifest):
     matched = set()
     with archive.open("records.jsonl") as incoming:
         for line in bounded_lines(incoming):
-            record = json.loads(line)
+            record = strict_json(line)
             if record["hash"] in wanted:
                 for card in cards:
                     if card.get("target", {}).get("event_hash") == record["hash"] and card.get("observation") != record:
@@ -2211,7 +2228,7 @@ def verify_board_disclosure(archive, manifest):
     if matched != set(wanted):
         raise ValueError("Board refers to a record not disclosed in the handover")
     if "report.json" in manifest["files"]:
-        report = json.loads(read_member(archive, "report.json", MAX_JSON_BYTES))
+        report = strict_json(read_member(archive, "report.json", MAX_JSON_BYTES))
         if report["report"].get("case_board") != statement["material"]:
             raise ValueError("Readable report and board disclosure differ")
     return {"cards": len(cards), "meaning": "Minimised team notes, signed by the collector; not the original annotations chain"}
@@ -2236,7 +2253,7 @@ def verify_board_document(path, expected_fingerprint=None, evidence=None):
         with open_archive(evidence) as archive, archive.open("annotations.jsonl") as incoming:
             prefix = []
             for line in bounded_lines(incoming):
-                row = json.loads(line)
+                row = strict_json(line)
                 if row["seq"] > count:
                     break
                 prefix.append(row)
@@ -2246,7 +2263,7 @@ def verify_board_document(path, expected_fingerprint=None, evidence=None):
         source_head = {"seq": 0, "hash": "0" * 64}
         with open_archive(evidence) as archive, archive.open("events.jsonl") as incoming:
             for line in bounded_lines(incoming):
-                row = json.loads(line)
+                row = strict_json(line)
                 if row["seq"] > boundary["seq"]:
                     break
                 source_head = {"seq": row["seq"], "hash": row["hash"]}
@@ -2288,7 +2305,7 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
         companions = report_companions(archive, manifest, public, describes)
         gap_settings = None
         if "coverage.json" in manifest["files"]:
-            saved_coverage = json.loads(read_member(archive, "coverage.json", MAX_JSON_BYTES))
+            saved_coverage = strict_json(read_member(archive, "coverage.json", MAX_JSON_BYTES))
             saved_gaps = saved_coverage.get("gap_summary") if isinstance(saved_coverage, dict) else None
             if isinstance(saved_gaps, dict):
                 gap_settings = saved_gaps.get("parameters")
@@ -2297,7 +2314,7 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
 
         def measured(lines):
             for line in lines:
-                event = json.loads(line)
+                event = strict_json(line)
                 if event["kind"] == "sealed.account_export":
                     item = event["payload"]
                     if (account_exports or item.get("file") != "account-export.zip"
@@ -2351,7 +2368,7 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
                 return "0" * 64
             with archive.open("events.jsonl") as stream:
                 for line in bounded_lines(stream):
-                    event = json.loads(line)
+                    event = strict_json(line)
                     if event["seq"] == seq:
                         return event["hash"]
             return None
@@ -2417,7 +2434,7 @@ def verify_distributed_pages(stream, envelopes, job, task):
             end += len(line)
             if not line or len(line) > MAX_RECORD_BYTES or not line.endswith(b"\n") or end > value["byte_end"]:
                 raise ValueError("Checkpoint data differs: truncated or oversized.")
-            record = json.loads(line)
+            record = strict_json(line)
             mid = record["id"]
             if type(mid) is not int or not low <= mid < cursor:
                 raise ValueError("Checkpoint messages are outside their range or repeated.")
@@ -2711,7 +2728,7 @@ def message_id_summary(chat_id, ids):
 
 
 def check_message_ids(archive, manifest):
-    claimed = json.loads(read_member(archive, "message-ids.json", MAX_JSON_BYTES))
+    claimed = strict_json(read_member(archive, "message-ids.json", MAX_JSON_BYTES))
     ids = sorted({m["id"] for m in chat_messages(archive) if type(m.get("id")) is int})
     counted = message_id_summary((manifest.get("chat") or {}).get("id"), ids)
     if {k: claimed.get(k) for k in counted} != counted:
@@ -2749,7 +2766,7 @@ def verify_handover(path, expected_fingerprint=None):
         counts, previous, referenced = {"unchanged": 0, "minimised": 0}, None, set()
         with archive.open("records.jsonl") as stream:
             for line in bounded_lines(stream):
-                record = json.loads(line)
+                record = strict_json(line)
                 minimised = record.get("minimised")
                 if set(record) != set(FIELDS) | {"hash", "signature"} | ({"minimised"} if "minimised" in record else set()):
                     raise ValueError("Unexpected or missing fields at record " + str(record.get("seq")))
@@ -2864,7 +2881,7 @@ def chat_messages(archive):
             if separator is False:
                 raise ValueError("Missing comma between chat messages")
             separator = line.endswith(",")
-            message = json.loads(line.removesuffix(","))
+            message = strict_json(line.removesuffix(","))
             if not isinstance(message, dict):
                 raise ValueError("Chat message must be an object")
             yield message
@@ -2967,7 +2984,7 @@ class AccountExportCheck:
 
 
     def signed(self, name, kind):
-        envelope = json.loads(read_member(self.archive, name))
+        envelope = strict_json(read_member(self.archive, name))
         statement = envelope["statement"]
         if (statement.get("format") != "tgwitness-account-export-" + kind + "-v1"
                 or statement.get("public_key") != self.public or statement.get("job_id") != self.job_id
@@ -3111,7 +3128,7 @@ class AccountExportCheck:
         self.failed_pages += receipt["outcome"] == "failed"
 
     def verify_record(self, line, task, after, last_id, seen):
-        record = json.loads(line)
+        record = strict_json(line)
         if not isinstance(record, dict) or line != canonical(record) + b"\n":
             raise ValueError("Account export records must be canonical JSONL")
         if record.get("category") != task["category"]:
@@ -3328,7 +3345,7 @@ class AccountDisclosureCheck:
         try:
             with self.archive.open("messages.jsonl") as stream:
                 for line in bounded_lines(stream):
-                    row = json.loads(line)
+                    row = strict_json(line)
                     if not isinstance(row, dict) or set(row) != {"chat", "message"}:
                         raise ValueError("Invalid disclosure message envelope")
                     chat, message = row["chat"], row["message"]
@@ -3443,7 +3460,7 @@ def bundle_hashes(path, seqs):
         return found
     with open_archive(path) as archive, archive.open("events.jsonl") as stream:
         for line in bounded_lines(stream):
-            event = json.loads(line)
+            event = strict_json(line)
             if event["seq"] in wanted:
                 found[event["seq"]] = event["hash"]
     return found
@@ -3519,7 +3536,7 @@ def bundle_capture_prefixes(bundle_path, boundaries):
     limit = max(wanted)
     with open_archive(bundle_path) as archive, archive.open("events.jsonl") as stream:
         for line in bounded_lines(stream):
-            event = json.loads(line)
+            event = strict_json(line)
             if event["seq"] > limit:
                 break
             tree.append(event["hash"])

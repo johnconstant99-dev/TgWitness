@@ -5,12 +5,12 @@ from .common import (
     base64,
     bounded_lines,
     hashlib,
-    json,
     member_digest,
     open_archive,
     re,
     read_manifest,
     read_member,
+    strict_json,
 )
 def verify_handover(path, expected_fingerprint=None):
     from .board import verify_board_disclosure
@@ -44,7 +44,7 @@ def verify_handover(path, expected_fingerprint=None):
         counts, previous, referenced = {"unchanged": 0, "minimised": 0}, None, set()
         with archive.open("records.jsonl") as stream:
             for line in bounded_lines(stream):
-                record = json.loads(line)
+                record = strict_json(line)
                 minimised = record.get("minimised")
                 if set(record) != set(FIELDS) | {"hash", "signature"} | ({"minimised"} if "minimised" in record else set()):
                     raise ValueError("Unexpected or missing fields at record " + str(record.get("seq")))

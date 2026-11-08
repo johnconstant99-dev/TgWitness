@@ -5,11 +5,11 @@ from .common import (
     base64,
     bounded_lines,
     hashlib,
-    json,
     member_digest,
     open_archive,
     read_manifest,
     read_member,
+    strict_json,
 )
 def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None, check_drand=False, max_gib=None,
                   check_bitcoin=False):
@@ -50,7 +50,7 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
         companions = report_companions(archive, manifest, public, describes)
         gap_settings = None
         if "coverage.json" in manifest["files"]:
-            saved_coverage = json.loads(read_member(archive, "coverage.json", MAX_JSON_BYTES))
+            saved_coverage = strict_json(read_member(archive, "coverage.json", MAX_JSON_BYTES))
             saved_gaps = saved_coverage.get("gap_summary") if isinstance(saved_coverage, dict) else None
             if isinstance(saved_gaps, dict):
                 gap_settings = saved_gaps.get("parameters")
@@ -59,7 +59,7 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
 
         def measured(lines):
             for line in lines:
-                event = json.loads(line)
+                event = strict_json(line)
                 if event["kind"] == "sealed.account_export":
                     item = event["payload"]
                     if (account_exports or item.get("file") != "account-export.zip"
@@ -113,7 +113,7 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
                 return "0" * 64
             with archive.open("events.jsonl") as stream:
                 for line in bounded_lines(stream):
-                    event = json.loads(line)
+                    event = strict_json(line)
                     if event["seq"] == seq:
                         return event["hash"]
             return None

@@ -141,7 +141,7 @@ def report_companions(archive, manifest, public, describes):
     files, report = manifest["files"], manifest.get("report") or {}
     checked = {"json": None, "parts": 0, "pdf": None}
     if "report.json" in files:
-        seal = check_seal(read_json_seal(json.loads(read_member(archive, "report.json", MAX_JSON_BYTES))), public)
+        seal = check_seal(read_json_seal(strict_json(read_member(archive, "report.json", MAX_JSON_BYTES))), public)
         if not describes(seal["subject"]):
             raise ValueError("report.json describes a different export")
         checked["json"] = seal
