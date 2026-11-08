@@ -23,6 +23,8 @@
 
 ## Unreleased
 
+- Refresh the pinned Wolfi base images and runtime/MCP dependencies, regenerate root and capture hash locks, and require patched QR reader wheels. Exclude OpenCV 5.0.0.93, which bundles FFmpeg 8.1.1 affected by [CVE-2026-8461](https://github.com/advisories/GHSA-qff7-4q6c-m8h6).
+
 - Simplify the panel around six daily sections: Home, Chats, Journal, Exports, Accounts and Settings. Move secondary tools, collection diagnostics, chat actions and advanced filters into contextual menus. Open saved chats after sign-in, preserve drafts and filter selections, and give messages more space on phones and desktops. Update the Russian labels and panel guide.
 
 - First setup starts with one question: Just download, Follow chats or Evidence for a case. The answer sets the goal and interface level; five stages with a progress bar replace the seven numbered steps, connection routes open only when the automatic check fails, and the Telegram step hides account diagnostics. Level, theme and time zone stay under More options.
