@@ -289,7 +289,7 @@ def verify_witness(path, expected_fingerprint=None, check_drand=False, check_bit
 
 def key_history_summary(keys):
     return {**keys, "meaning": "Recorded Telegram authorizations; collector-signed claim, not proof that no key copies exist",
-            "note": "ключ импортирован: подтверждение зависит от доверия к источнику" if keys["origin"] == "imported" else None}
+            "note": "Imported key: confirmation depends on trust in its source" if keys["origin"] == "imported" else None}
 
 
 def witnessed_periods(witness, key=None):

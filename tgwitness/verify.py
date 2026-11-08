@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: 8a1f9e8b12c619ba6b3affa43c5d6ffb44b79bb5f52c4d513320a61bde2eac6f
+# TgWitness verifier sources SHA-256: 5141a92da4be7cbd42f5b03fb4ff9c8d92296dcd78bedfb9c2231c9028c34693
 """Standalone verifier"""
 import argparse
 import base64
@@ -47,11 +47,12 @@ DRAND_GENESIS, DRAND_PERIOD = 1692803367, 3
 DRAND_RELAYS = ("https://drand.cloudflare.com", "https://api.drand.sh", "https://api2.drand.sh", "https://api3.drand.sh")
 DRAND_CHECK_LIMIT = 100
 GATEWAY_FIELDS = ("at", "name", "type", "rcode", "decision", "colo")
+UNPINNED_NOTE = "Signer key is not pinned: this result relies on the key inside the archive itself"
 
 
 class VerifierTooOld(ValueError):
     def __init__(self, detail=""):
-        super().__init__("пакет подписан корректно, но этот верификатор старше формата пакета" +
+        super().__init__("The archive signature is valid, but this verifier is older than the archive format" +
                          (": " + detail if detail else ""))
 
 
@@ -3823,7 +3824,7 @@ def verify_witness(path, expected_fingerprint=None, check_drand=False, check_bit
 
 def key_history_summary(keys):
     return {**keys, "meaning": "Recorded Telegram authorizations; collector-signed claim, not proof that no key copies exist",
-            "note": "ключ импортирован: подтверждение зависит от доверия к источнику" if keys["origin"] == "imported" else None}
+            "note": "Imported key: confirmation depends on trust in its source" if keys["origin"] == "imported" else None}
 
 
 def witnessed_periods(witness, key=None):
@@ -5712,7 +5713,7 @@ class Console:
         self.say()
 
     def localized_note(self, note):
-        if note == "ключ не закреплён: результат зависит от ключа внутри самого пакета":
+        if note == UNPINNED_NOTE:
             return reader_message("key_unconfirmed", self.lang)
         if note in self.words:
             return self.t(note)
@@ -6241,7 +6242,7 @@ def verification_output(args, checked, console, mode):
     unmet = bool(args.require_tier and ASSURANCE_TIERS.index(result["assurance"]["tier"]) < ASSURANCE_TIERS.index(args.require_tier))
     unpinned = args.strict and not pinned
     if not pinned:
-        notes.append("ключ не закреплён: результат зависит от ключа внутри самого пакета")
+        notes.append(UNPINNED_NOTE)
     if unmet:
         notes.append("Required assurance tier was not reached: " + args.require_tier)
     if console:
