@@ -276,6 +276,11 @@ class Digest:
             self.indicators.message(payload.get("text"), shown_details(payload),
                                     {"chat": chat, "message": event["message_id"], "seq": event["seq"]},
                                     event["observed_at"])
+        if kind == "webapp.inspected" and isinstance(payload.get("addresses"), list):
+            from .webapp import note_indicators
+            note_indicators(self.indicators, payload["addresses"], "mini app",
+                            {"chat": chat, "message": event["message_id"], "seq": event["seq"]},
+                            event["observed_at"])
         digest = payload.get("media_sha256") if kind == "media.saved" else None
         if isinstance(digest, str):
             self.media[digest] = {"mime_type": payload.get("mime_type"), "size": payload.get("size"),

@@ -74,6 +74,8 @@ First time? Do it in this order:
 | Find messages by word forms, domains or @usernames | [Full-text search](SEARCH.md) (preview) |
 | Keep team notes on a case | [Case Board](CASE-BOARD.md) |
 | Read text in images and audio | [Local OCR and transcription](MEDIA-ANALYSIS.md) |
+| Follow Telegram's similar-channel suggestions | [Similar channels](SIMILAR-CHANNELS.md) |
+| See what a mini application loads | [Mini applications](MINI-APPS.md) |
 | Investigate a whole account | [Investigation walkthrough](INVESTIGATION.md) |
 | Document a scam conversation for court | [Investigation mode](INVESTIGATION-MODE.md) |
 | See how the installation reaches Telegram and outside services | [System map](SYSTEM-MAP.md) |
