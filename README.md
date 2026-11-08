@@ -35,14 +35,20 @@
 
 ## What TgWitness does
 
-| | |
-| --- | --- |
-| **Keeps every edit and deletion** | Live observation saves each version of a message and keeps its text after a deletion notice. [Collection](docs/COLLECTION.md) |
-| **Proof anyone can check** | Every record is signed and hash-chained. The recipient verifies the archive offline with one command. [Verification](docs/wiki/Exports-and-Verification.md) |
-| **Origin you can show** | Messages arrive over the account's authenticated MTProto session and are signed on receipt. GitHub Actions capture and Intel TDX add attestation of the collector. [Evidence model](docs/EVIDENCE.md#where-the-messages-come-from) |
-| **Measured at scale** | 48 verified archives with 3,598,381 records. Eight accounts acquired 768,007 history records at 687.512 records/s. [Benchmark](docs/EXPORT-BENCHMARK-2026-11-06.md) |
-| **Built for investigations** | Watchlists for wallets, @usernames, domains and phones across text, QR codes and OCR; subject cards, Case Board and a court package with a Rule 902(13)/(14) template. [Investigation mode](docs/INVESTIGATION-MODE.md) |
-| **Yours to run** | Self-hosted with no telemetry. Sessions live in an encrypted vault, and the panel listens on localhost. [Security model](docs/SECURITY-MODEL.md) |
+<table>
+<tr>
+<td width="33%" valign="top"><b><a href="docs/COLLECTION.md">Every edit and deletion kept</a></b><br><sub>Each version of a message is saved, and its text stays after a deletion notice.</sub></td>
+<td width="33%" valign="top"><b><a href="docs/wiki/Exports-and-Verification.md">Proof anyone can check</a></b><br><sub>Signed, hash-chained records. The recipient verifies the archive offline with one command.</sub></td>
+<td width="33%" valign="top"><b><a href="docs/EVIDENCE.md#where-the-messages-come-from">Origin you can show</a></b><br><sub>Received over the account's authenticated MTProto session and signed on arrival; GitHub Actions and Intel TDX add attestation.</sub></td>
+</tr>
+<tr>
+<td width="33%" valign="top"><b><a href="docs/EXPORT-BENCHMARK-2026-11-06.md">Measured at scale</a></b><br><sub>48 verified archives with 3,598,381 records; eight accounts acquired 768,007 history records at 687.5 records/s.</sub></td>
+<td width="33%" valign="top"><b><a href="docs/INVESTIGATION-MODE.md">Built for investigations</a></b><br><sub>Watchlists over text, QR codes and OCR, wallet checks, subject cards, Case Board and a court package.</sub></td>
+<td width="33%" valign="top"><b><a href="docs/SECURITY-MODEL.md">Yours to run</a></b><br><sub>Self-hosted with no telemetry. Sessions live in an encrypted vault; the panel listens on localhost.</sub></td>
+</tr>
+</table>
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>
 <a name="run-it-on-your-machine"></a>
@@ -107,6 +113,8 @@ The version badge describes this source tree. Installable builds are listed unde
 
 </details>
 
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
 <a name="how-it-works"></a>
 
 ## A record someone else can check
@@ -141,6 +149,8 @@ received and signed them.
 
 [Archive verification](docs/wiki/Exports-and-Verification.md) · [Evidence format](docs/EVIDENCE.md) · [Independent witness](docs/WITNESS.md) · [External timestamps](docs/TIMESTAMP.md) · [Checks and tested scale](docs/VERIFICATION.md)
 
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
 ## From a conversation to a case
 
 <picture>
@@ -160,6 +170,10 @@ Two ways to use it: [export your account](docs/ACCOUNT-EXPORT.md) once, or
 [follow an investigation](docs/INVESTIGATION.md) and keep saving changes.
 Pick a few chats, a Telegram folder or the whole account. Each account gets its
 own workspace, session and signing key.
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+## Explore more
 
 <details>
 <summary><strong>Measured exports · 6 November 2026</strong> · 56,329 messages, both archives verified</summary>
