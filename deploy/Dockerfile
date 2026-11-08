@@ -1,4 +1,4 @@
-FROM cgr.dev/chainguard/wolfi-base@sha256:fd50bd0cdeb808cf4f45c9c9189e0cc7f7fcc27195d69abd6622c80527e7e021
+FROM cgr.dev/chainguard/wolfi-base@sha256:24f549a7fcace88e69b9557941168c74645688ecc4acf7fb6d734a6b74e9019d
 LABEL org.opencontainers.image.title="TgWitness" \
       org.opencontainers.image.description="Self-hosted Telegram observation journal with signed exports" \
       org.opencontainers.image.licenses="MIT"
