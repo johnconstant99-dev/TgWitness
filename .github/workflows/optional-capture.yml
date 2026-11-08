@@ -69,6 +69,8 @@ jobs:
           docker run --rm --network none --read-only --cap-drop=ALL --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777 --entrypoint python "$recorder_image" -c 'import tgwitness_capture; from pathlib import Path; from tgwitness_capture.service import Config, Recorder; import tempfile; r=Recorder(Path(tempfile.mkdtemp()), Config()); assert not r.settings["enabled"]; assert "lang=\"en\"" in (Path(tgwitness_capture.__file__).parent/"static/index.html").read_text(); r.journal.close()'
       - name: Build pinned official-client Trusted Live image
         run: docker build -f addons/capture/deploy/Dockerfile.trusted -t tgwitness-trusted-ci .
+      - name: Prepare the image audit directory
+        run: mkdir -p build/trusted-container-audit
       - name: Audit the Desktop and Web image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
