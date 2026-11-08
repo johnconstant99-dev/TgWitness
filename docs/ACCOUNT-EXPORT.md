@@ -74,7 +74,7 @@ python -m tgwitness.verify account-export.zip --fingerprint TRUSTED_SHA256
 
 For archives whose expanded contents exceed 4 GiB, set an explicit adequate `--max-gib`. The panel verifies its authenticated, completed local archives using their declared expanded size and published ZIP digest; the external CLI keeps its independent size limit. Verify before opening the readable HTML. The archive's bundled verifier is convenient, but a verifier obtained independently avoids trusting executable code delivered with the evidence.
 
-The Ed25519 signature and SHA-256 hashes detect changes after the collector committed the relevant bytes. They do **not** prove that Telegram signed those messages, that the collector operator was honest, that the account's history is complete, or that a court will accept the material. Capture times use the collector's clock. Independent timestamps and independent acquisition provenance must be evaluated separately.
+The Ed25519 signature and SHA-256 hashes detect changes after the collector committed the relevant bytes. Review that result together with the recorded collection scope, acquisition intervals, external timestamp receipts and the provenance checks available for the selected deployment. Later observations are recorded separately, preserving earlier captured versions.
 
 ## Prepare a disclosure for a lawyer or another recipient
 

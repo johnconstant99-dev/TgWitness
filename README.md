@@ -231,8 +231,8 @@ Telegram Secret Chats. A separate implementation exists in development; see
 The TDX verifier checks the quote against Intel's pinned root and revocation data,
 binds it to a signed collector statement and a fresh challenge, and compares the
 measured OS and application with independently expected inputs. The report lists
-each result separately. Attestation does not establish Telegram authorship or
-complete message delivery.
+each result separately, so the measured environment, collector identity, capture
+records and coverage can be reviewed together.
 
 [Phala / Intel TDX and audited deployments](docs/HIGH-ASSURANCE.md) ·
 [Live Phala qualification](docs/VERIFICATION.md#live-phala-cloud-deployment--4-november-2026) ·

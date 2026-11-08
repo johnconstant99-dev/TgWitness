@@ -95,8 +95,8 @@ English guidance and native summaries need professional review before relying
 on them for a particular filing.
 
 Selecting a safeguard adds an explanation of its benefit, what to retain and its
-limits. A collector signature is not a Telegram signature. No independent witness
-leaves operator-key substitution risk open. Provider ownership separation reduces
+scope. Journal verification uses the trusted collector key; retained witness checkpoints
+allow comparison with an earlier independently observed journal boundary. Provider ownership separation reduces
 some operator powers without proving that a hosting provider cannot access the
 host. The proposed closed-source daily witness is described as a proposal, not an
 implemented verification result.

@@ -74,8 +74,8 @@ revision and workload; its rates must not be combined with this comparison.
 
 Verify the original report using the
 [pinned key and verifier](../website/validation/audit/README.md#verify-the-original-files).
-Its signature protects the operator's report from alteration. It is not
-independent attestation, proof of Telegram authorship or GDPR certification.
+Its signature protects the retained report from alteration. The report identifies
+the tested revision, workload, environment and verification results for that run.
 
 ## Trusted Live CPU Ubuntu and WARP · 5 November 2026
 

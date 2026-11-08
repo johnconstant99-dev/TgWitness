@@ -83,9 +83,9 @@ These are event counts, not unique-message counts. The settings describe the
 current configuration, not every earlier recording interval.
 
 Signature and consistency verification can detect changes relative to a retained
-boundary. It does not independently recount the signed counters, certify Telegram
-origin, demonstrate uninterrupted capture, or replace an independent witness.
-For that review, use the [evidence verifier](TRUST.md),
+boundary. Recount the reported events from the corresponding archive and review
+the acquisition intervals and retained witness checkpoints together.
+Use the [evidence verifier](TRUST.md),
 [independent witness](WITNESS.md) and [tested-scale record](VERIFICATION.md).
 Synthetic installations are visibly labelled as synthetic.
 

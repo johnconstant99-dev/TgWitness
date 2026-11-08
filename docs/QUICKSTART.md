@@ -178,9 +178,9 @@ See [how collection works](COLLECTION.md) for event policies, attachment queues,
 account isolation, and restart behavior.
 
 Sessions and secrets are encrypted. Message content, media and exports require an
-encrypted disk or volume. Signatures establish integrity relative to a trusted key;
-they do not establish Telegram origin or prevent fabrication by an operator who
-controls the collector and its key.
+encrypted disk or volume. Verify journal signatures against a trusted key and retain checkpoints separately.
+Review capture records, external time receipts and environment attestations for the
+selected collection mode.
 
 Read [OPERATIONS.md](OPERATIONS.md) for backup/restore, [DEPLOYMENT.md](DEPLOYMENT.md)
 for hosting, and [deploy/](../deploy/README.md) for service examples. The installed

@@ -63,8 +63,8 @@ options to signed cursor events. Without `--evidence`, it checks only the
 signed report and its internal consistency. Legacy progress fields and attachment
 summaries remain signed collector statements. The evidence verifier checks archived media bytes.
 
-Neither signing nor finishing the available history proves Telegram origin, an atomic
-snapshot, or historical completeness. Messages can change while reading; deleted
+Read the verified history together with its acquisition intervals and coverage.
+Messages can change while reading; deleted
 messages and intermediate edits outside available Recent Actions, and Secret Chats,
 are not recovered. An operator
 controlling the signing key can fabricate a journal before outside commitments exist.

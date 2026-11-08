@@ -4,7 +4,7 @@
 
 TgWitness is maintained by PhishDestroy under the MIT License. It runs on an operator's computer or server. The public website and demo do not connect visitors to Telegram; the demo contains fictional data.
 
-The application records material visible to an authorized Telegram account within the selected scope. It can retain content captured before a later deletion; it cannot recover messages or edits that were never observed. A signature verifies integrity under a signing key, not the truth of the message or its legal admissibility.
+The application records material visible to an authorized Telegram account within the selected scope. It can retain content captured before a later deletion; it cannot recover messages or edits that were never observed. Journal verification checks saved bytes and signatures. Capture records, external time receipts and supported environment attestations document the acquisition.
 
 Source code, development branches, released packages and demonstrated interfaces are different evidence of availability. Check the current qualification record and release notes. Telegram Secret Chats have a separate implementation and documented open defects; the fictional Secret Chat interface does not establish live protocol support. Phala Intel TDX attestation applies to the checked image, measurements and collector identity.
 
