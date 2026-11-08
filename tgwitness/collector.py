@@ -120,6 +120,9 @@ AUTO_DELETE_MEANING = {
 }
 
 
+BUFFER_DRAIN_ROUNDS = 5
+RECONNECT_MEANING = ("Telegram's client library reconnected on its own. The connection was lost for an unknown "
+                     "interval ending here; updates delivered during it were not received.")
 SALVAGE_WINDOW = 100
 SALVAGE_LIMIT = 20
 UNPARSED_MEANING = ("Telegram has a message under this number, but it contains a data type that Telethon "
@@ -486,6 +489,7 @@ class Collector:
         self.resumed_state_at = None
         self.paused_drops = 0
         self.buffering = False
+        self.transport_down = False
         self.buffered = []
         self.buffer_overflow = False
         self.buffer_limit = tuning.BY_KEY["startup_buffer"].default
@@ -861,14 +865,13 @@ class Collector:
 
                 if client is not self.client:
                     return
-                if self.running:
-                    await handler(update)
-                elif self.buffering:
-
+                if self.buffering:
                     if len(self.buffered) < self.buffer_limit:
                         self.buffered.append((handler, update))
                     else:
                         self.buffer_overflow = True
+                elif self.running:
+                    await handler(update)
                 elif handler == self.on_raw:
                     self.paused_drops += 1
             client.add_event_handler(active_client_only, builder)
@@ -1974,8 +1977,16 @@ class Collector:
 
     def connection_changed(self, client, state):
         if state == "reconnected":
-            if client is self.client and self.running:
-                self.recheck_wakeup.set()
+            if client is self.client:
+                if not self.transport_down:
+                    self.note("coverage.gap", {
+                        "reason": "transport_disconnected", "detected": "on automatic reconnect",
+                        "completeness": "unknown; intermediate events may be missing",
+                        "meaning": RECONNECT_MEANING})
+                    self.note("connection.restored", {
+                        "reason": "transport_connected", "detected": "on automatic reconnect"})
+                if self.running:
+                    self.recheck_wakeup.set()
             return
         role = "current" if client is self.client else "candidate" if client is self.login_client else "other"
         if state == "opened":
@@ -2167,7 +2178,15 @@ class Collector:
                 "meaning": "These updates were not recorded and no saved position exists to request them again. "
                            "New messages can still be recovered by reading history."})
         self.mark_recheck_start()
-        pending, self.buffered, self.buffering = self.buffered, [], False
+        try:
+            for _ in range(BUFFER_DRAIN_ROUNDS):
+                pending, self.buffered = self.buffered, []
+                if not pending:
+                    break
+                for handler, update in pending:
+                    await handler(update)
+        finally:
+            pending, self.buffered, self.buffering = self.buffered, [], False
         if self.buffer_overflow:
             self.store.append("coverage.gap", {"reason": "startup buffer full",
                                                "completeness": "updates received while starting were dropped"})
@@ -2260,7 +2279,7 @@ class Collector:
         self.phase = "paused"
 
     async def monitor(self):
-        previous = True
+        previous, self.transport_down = True, False
         wall, monotonic = time.time(), time.monotonic()
         heartbeat_at = checkpoint_at = None
         while self.running:
@@ -2273,6 +2292,7 @@ class Collector:
             wall, monotonic = new_wall, new_monotonic
             connected = self.client.is_connected()
             if connected != previous:
+                self.transport_down = not connected
                 self.store.append("connection.restored" if connected else "coverage.gap", {
                     "reason": "transport_connected" if connected else "transport_disconnected",
                     "completeness": "unknown; intermediate events may be missing"})
@@ -2542,8 +2562,11 @@ class Collector:
         state = self.store.message_state(chat_id, message_id)
         if state["deleted"]:
             return
+        content = state["content"]
         payload = {"deleted_by": None, "deletion_time": None,
-                   "meaning": "Telegram deletion notification; observation time is not deletion time",
+                   "deleted_content": {"seq": content["seq"], "hash": content["hash"]} if content else None,
+                   "meaning": "Telegram deletion notification; observation time is not deletion time"
+                              + ("" if content else "; this message was never observed, so no content is held"),
                    **({"batch": batch} if batch else {"raw": raw})}
         if resolution:
             payload["chat_resolution"] = resolution
