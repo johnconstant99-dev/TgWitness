@@ -62,7 +62,7 @@ def package(config, output, attestation):
                 "Verify with tools from an independently trusted TgWitness checkout:\n"
                 "python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo OWNER/FORK\n"
                 "Do not execute scripts supplied by an untrusted archive.\n"
-                "Attestation binds the file to the approved workflow, not to a Telegram signature.\n"
+                "Attestation binds the file to the approved workflow and recorded source revision.\n"
                 "Inspect collection limits and partial results in the signed journal.\n"
                 "If session revocation was not confirmed, end this session in Telegram Settings > Devices.\n")
 

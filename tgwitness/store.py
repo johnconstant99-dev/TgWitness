@@ -547,7 +547,7 @@ class Store:
         return row[0]
 
     def claim_media(self, account_id, now=None, *, min_priority=None, max_priority=None, history_run=None,
-                    allow_takeout=False):
+                    allow_takeout=False, exclude_history_run=None):
         filters, params = [], [account_id, time.time() if now is None else now]
         if not allow_takeout:
             filters.append("NOT EXISTS (SELECT 1 FROM events e WHERE e.seq=j.message_event "
@@ -555,6 +555,10 @@ class Store:
         if history_run is not None:
             filters.append("EXISTS (SELECT 1 FROM history_items h WHERE h.message_event=j.message_event AND h.run_id=?)")
             params.append(history_run)
+        if exclude_history_run is not None:
+            filters.append("NOT EXISTS (SELECT 1 FROM history_items h WHERE h.message_event=j.message_event "
+                           "AND h.run_id=?)")
+            params.append(exclude_history_run)
         for operator, value in ((">=", min_priority), ("<=", max_priority)):
             if value is not None:
                 filters.append("j.priority" + operator + "?")

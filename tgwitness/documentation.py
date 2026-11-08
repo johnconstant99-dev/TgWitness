@@ -223,7 +223,7 @@ ICONS = {
     "book": '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
 }
 SYSTEM_ICONS = {"checked_link": "link", "requested": "send", "observing": "eye", "outcome": "check", "deleted": "trash",
-                "not_listed": "more", "self_check": "shield", "visual": "globe", "account_change": "key", "search_recorded": "search", "subject": "eye", "peer_settings": "globe", "presence": "timer", "qr_code": "image",
+                "not_listed": "more", "self_check": "shield", "visual": "globe", "account_change": "key", "search_recorded": "search", "subject": "eye", "peer_settings": "globe", "presence": "timer", "qr_code": "image", "watchlist_hit": "flag",
                 "ai_draft": "flag"}
 MESSAGE_TYPES = ("sent", "sent_elsewhere", "reply", "edited")
 EPISODE_KINDS = {"bot": "Bot", "user": "Person", "private": "Person", "channel": "Channel", "group": "Group",

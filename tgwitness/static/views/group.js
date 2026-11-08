@@ -6,7 +6,7 @@ export function createGroupView(ctx){
     return {id,token,current:()=>{const state=ctx.getState();return groupId===id&&serial===version&&state.groupId===id&&
       state.view==='group'&&state.profile===profile&&state.token===token&&state.workspaceRevision===workspaceRevision;}};
   }
-  const goals={copy:['📦','Archive copy'],watch:['👁','Follow chats'],evidence:['⚖','Evidence']};
+  const goals={copy:['📥','Just download'],watch:['👁','Follow chats'],evidence:['⚖','Evidence']};
   const routes={auto:'Automatic',mtproxy_auto:'Automatic',warp:'Cloudflare WARP',proxy:'My proxy',mtproxy:'My proxy',
     socks5:'My proxy',http:'My proxy',direct:'Direct',vpn:'VPN'};
   const profile=id=>(ctx.getState().profiles||[]).find(p=>p.id===id);

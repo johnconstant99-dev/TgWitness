@@ -14,31 +14,6 @@ REPOSITORY = "phishdestroy/TgWitness"
 WORKFLOW = REPOSITORY + "/.github/workflows/sealed-collector.yml"
 
 
-def attested_at(checked):
-    from datetime import datetime, timezone
-    found = []
-
-    def walk(value):
-        if isinstance(value, dict):
-            for key, item in value.items():
-                if key == "verifiedTimestamps" and isinstance(item, list):
-                    for stamp in item:
-                        try:
-                            when = datetime.fromisoformat(str(stamp.get("timestamp")).replace("Z", "+00:00"))
-                        except (AttributeError, ValueError):
-                            continue
-                        if when.tzinfo is not None:
-                            found.append(when.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
-                else:
-                    walk(item)
-        elif isinstance(value, list):
-            for item in value:
-                walk(item)
-
-    walk(checked)
-    return min(found) if found else None
-
-
 def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run=subprocess.run, max_gib=None,
            assembled=None, expected_selection=None, require_complete=False):
     evidence, bundle = Path(evidence).resolve(), Path(bundle).resolve()
@@ -67,7 +42,6 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
             break
     if approved is None:
         raise ValueError("GitHub attestation did not match an approved hosted collector workflow")
-    when = attested_at(checked)
 
 
     parts = load_manifest(evidence) if evidence.suffix == ".json" else None
@@ -90,7 +64,7 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
             with zipfile.ZipFile(evidence) as incoming:
                 if sum(info.file_size for info in incoming.infolist()) > max_gib * 1024**3:
                     raise ValueError("Archive exceeds the selected verification limit")
-        return {**verify_official(evidence, approved, repo, expected_selection), "attested_at": when}
+        return verify_official(evidence, approved, repo, expected_selection)
     internal = verify_bundle(evidence, max_gib=max_gib)
     if parts and internal["fingerprint"] != fingerprint(parts["public_key"]):
         raise ValueError("Multipart manifest and evidence use different signing identities")
@@ -126,7 +100,7 @@ def verify(evidence, bundle, repo, policy=DEFAULT_POLICY, trusted_root=None, run
     with evidence.open("rb") as incoming:
         for block in iter(lambda: incoming.read(1024**2), b""):
             digest.update(block)
-    return {"verified": True, "sha256": digest.hexdigest(), "workflow": WORKFLOW, **approved, "attested_at": when,
+    return {"verified": True, "sha256": digest.hexdigest(), "workflow": WORKFLOW, **approved,
             "journal": internal, "collection": finished[0], **selection,
             "limitation": "Acquisition is bound to the approved GitHub-hosted collector and its fresh Telegram "
                           "session. Verification trusts GitHub execution and the approved code; collection results "

@@ -171,7 +171,7 @@ def chain(text,mobile=False,still=False):
     d.text('s[i] = Ed25519.Sign(sk, unhex(h[i]))',32 if mobile else 556,y+(76 if mobile else 37),23 if mobile else 24,GREEN,600)
     d.text('Ed25519 signs the 32 digest bytes.',32,y+(119 if mobile else 69),20 if mobile else 17,MUTED)
     if mobile:d.text('Verify with a separately trusted key.',32,883,20,MUTED)
-    save(d,'casework-chain'+('-mobile' if mobile else '')+('-static' if still else '')+'.svg','Illustrative records. Each event includes the previous hash. SHA-256 hashes canonical JSON, and Ed25519 signs the digest bytes. C is canonical encoding. Signatures do not establish Telegram origin or complete capture.')
+    save(d,'casework-chain'+('-mobile' if mobile else '')+('-static' if still else '')+'.svg','Illustrative records. Each event includes the previous hash. SHA-256 hashes canonical JSON, and Ed25519 signs the digest bytes. C is canonical encoding. Review signatures together with the acquisition record and coverage.')
 
 
 def checkpoint(text,mobile=False,still=False):
@@ -275,11 +275,11 @@ def assurance_modes(text, mobile=False, still=False):
             d.add(f'<rect x="{x}" y="{y}" width="{cw}" height="{ch}" rx="7" fill="{GREEN}" opacity="0"><animate attributeName="opacity" values="0;.14;.14;0;0" keyTimes="0;.07;.16;.24;1" dur="10s" begin="{-10+i*1.7}s" repeatCount="indefinite"/></rect>')
     if mobile:
         art_label(d, "Attestation measures the collection environment.", 32, height-62, 18, MUTED)
-        art_label(d, "It does not prove Telegram origin or complete delivery.", 32, height-31, 17, MUTED)
+        art_label(d, "Review the acquisition record and recorded coverage.", 32, height-31, 17, MUTED)
     else:
-        art_label(d, "Attestation measures the collection environment; it does not prove Telegram origin or complete delivery.", 32, height-31, 17, MUTED)
+        art_label(d, "Attestation verifies the measured collection environment and its recorded identity.", 32, height-31, 17, MUTED)
     save(d, "casework-assurance"+("-mobile" if mobile else "")+("-static" if still else "")+".svg",
-         "Local verification checks journal and files against trusted inputs. An audited VM adds provider and access records. Optional Phala Intel TDX checks the quote, measured OS and application, and collector identity. These checks do not establish Telegram origin or complete delivery.")
+         "Local verification checks journal and files against trusted inputs. An audited VM adds provider and access records. Optional Phala Intel TDX checks the quote, measured OS and application, and collector identity. Review these results together with the capture records and recorded coverage.")
 
 
 def main():

@@ -22,7 +22,7 @@
 "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "保存された署名付きチェックにより、後日のエクスポートデータを、観測された時点のジャーナルと比較することができます。ただし、これはすべてのTelegramイベントが確実に配信されたことを証明するものではありません。利用不可のチェックや投稿の失敗には注意が必要です。配信が中断されないという保証はありません。",
 "A session file, TData ZIP or session text, plus its JSON if you have one.": "セッションファイル（TData ZIPまたはセッションテキスト）に加え、もしあればそのJSONファイルも添付してください。",
 "A session grants account access. Keep original and converted files private. Conversion transfers authorization, not message history, and cannot restore a revoked login.": "セッションによってアカウントへのアクセスが許可されます。元のファイルおよび変換後のファイルは非公開にしてください。変換によって転送されるのは認証権限であり、メッセージ履歴ではありません。また、取り消されたログイン権限を復元することはできません。",
-"A signature establishes integrity relative to the trusted key, not Telegram origin. Retain the fingerprint and checkpoint independently. An RFC 3161 request alone is not a trusted timestamp; obtain and verify the authority's reply.": "署名は、Telegramの送信元ではなく、信頼できる鍵に対する完全性を確立するものです。フィンガープリントとチェックポイントは個別に保持してください。RFC 3161のリクエストだけでは信頼できるタイムスタンプとはなりません。認証機関からの応答を取得し、検証してください。",
+"Signatures bind saved bytes to this collector's key. Retain the fingerprint and checkpoint independently. An RFC 3161 request alone is not a trusted timestamp; obtain and verify the authority's reply.": "署名は保存されたバイト列をこの収集ツールの鍵に結び付けます。フィンガープリントとチェックポイントは個別に保持してください。RFC 3161のリクエストだけでは信頼できるタイムスタンプとはなりません。認証機関からの応答を取得し、検証してください。",
 "API ID and API hash are optional": "API IDおよびAPIハッシュは任意です",
 "About 99% of accounts logged out": "約99％のアカウントがログアウトしました",
 "Account": "アカウント",

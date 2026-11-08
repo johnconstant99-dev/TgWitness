@@ -37,14 +37,6 @@ from .outside import outside_lines
 from .presentation import producer_line
 from .reports import REPORT_JSON, verify_report, verify_selection
 from .witness import ASSURANCE_TIERS, assurance, assurance_line, check_channel, cross_check_witness, verify_dossier, verify_history_report, verify_public_proof, verify_witness
-from .witness import (
-    CONDITION_LABELS,
-    EVIDENCE_PROFILES,
-    evidence_conditions,
-    evidence_line,
-    next_lines,
-    requested_checks_unavailable,
-)
 def matching_archives(directory):
     """Find by manifest, never by a guessed filename, key, or self-declared trust."""
     directory = Path(directory)
@@ -223,9 +215,6 @@ def verification_parser():
                         help="Compare the drand rounds in the journal with drand relays (needs internet)")
     parser.add_argument("--check-bitcoin", action="store_true",
                         help="Evaluate OTS proofs against block headers agreed by two HTTPS explorers (needs internet)")
-    parser.add_argument("--require", choices=EVIDENCE_PROFILES[1:],
-                        help="Exit 2 unless the minimum evidence conditions (evidence), or the minimum and an "
-                             "attested collection run (attested), are met")
     parser.add_argument("--require-tier", choices=ASSURANCE_TIERS, help="Exit 2 if the complete export does not reach this tier")
     parser.add_argument("--strict", action="store_true", help="Exit 2 for an unpinned signer, 3 for an authenticated newer format")
     parser.add_argument("--sealed-attestation", type=Path, help="GitHub attestation bundle; checked with the existing gh verifier")
@@ -255,13 +244,10 @@ def verification_arguments(parser, argv):
     args = parser.parse_args(argv)
     if bool(args.sealed_attestation) != bool(args.sealed_policy):
         parser.error("--sealed-attestation and --sealed-policy must be supplied together")
-    args.implied_checks = set()
-    if args.require_tier and ASSURANCE_TIERS.index(args.require_tier) >= ASSURANCE_TIERS.index("fresh") and not args.check_drand:
+    if args.require_tier and ASSURANCE_TIERS.index(args.require_tier) >= ASSURANCE_TIERS.index("fresh"):
         args.check_drand = True
-        args.implied_checks.add("check_drand")
-    if args.require_tier and ASSURANCE_TIERS.index(args.require_tier) >= ASSURANCE_TIERS.index("timestamped") and not args.check_bitcoin:
+    if args.require_tier and ASSURANCE_TIERS.index(args.require_tier) >= ASSURANCE_TIERS.index("timestamped"):
         args.check_bitcoin = True
-        args.implied_checks.add("check_bitcoin")
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
     if args.choose_language and not args.interactive:
@@ -409,6 +395,9 @@ def verification_evidence(args):
                            args.check_drand, check_bitcoin=args.check_bitcoin)
     notes += coverage_lines(result["coverage"]) + outside_lines(result["outside"])
     pinned = bool(args.fingerprint)
+    if not args.checkpoint:
+        notes.append("No retained checkpoint supplied: records removed from the end of this journal are not "
+                     "detected. Pass --checkpoint with a checkpoint kept away from the collector.")
     if any(a.get("kind") == "opentimestamps" and a.get("status") != "confirmed" for a in result.get("anchors", [])):
         notes.append("OpenTimestamps structure only: run ots verify to authenticate the Bitcoin timestamp.")
     if args.witness and not args.witness_fingerprint:
@@ -418,10 +407,18 @@ def verification_evidence(args):
         result["witness"] = cross_check_witness(witness, args.bundle, result)
         if args.channel:
             result["witness"]["channel_check"] = check_channel(witness, args.channel)
-        if result["witness"]["conflicts"]:
-            raise ValueError("The journal differs from what the witness saw at "
-                             + result["witness"]["conflicts"][0]["at"] + " (record "
-                             + str(result["witness"]["conflicts"][0]["event_count"]) + ")")
+        conflict = (result["witness"]["conflicts"] or [None])[0]
+        if conflict and conflict["event_count"] > result["events"]:
+            raise ValueError("The witness saw record " + str(conflict["event_count"]) + " at " + conflict["at"]
+                             + ", before this export was created at " + str(result["witness"]["export_created_at"])
+                             + ", but the export ends at record " + str(result["events"]))
+        if conflict:
+            raise ValueError("The journal differs from what the witness saw at " + conflict["at"] + " (record "
+                             + str(conflict["event_count"]) + ")")
+        if result["witness"]["seen_after_export"]:
+            notes.append("The witness saw record " + str(result["witness"]["seen_after_export"]["event_count"]) + " at "
+                         + result["witness"]["seen_after_export"]["at"] + ", beyond this export's last record "
+                         + str(result["events"]) + ".")
         notes += ["Witnessed from " + p["from"] + " to " + p["to"] for p in result["witness"]["witnessed"]]
         if not result["witness"]["consistent"]:
             notes.append("The witness has no answer signed by this export's key: nothing here is witnessed.")
@@ -435,34 +432,12 @@ def verification_evidence(args):
     return CheckResult("evidence", result, pinned, notes)
 
 
-REQUESTED_CHECKS = (("checkpoint", "--checkpoint"), ("witness", "--witness"), ("tsa_ca", "--tsa-ca"),
-                    ("require_witness", "--require-witness"), ("sealed_attestation", "--sealed-attestation"),
-                    ("channel", "--channel"), ("check_drand", "--check-drand"), ("check_bitcoin", "--check-bitcoin"))
-APPLICABLE_CHECKS = {"evidence": {name for name, _ in REQUESTED_CHECKS},
-                     "witness": {"channel", "check_drand", "check_bitcoin"}}
-
-
-def refuse_inapplicable(args, kind):
-    implied = getattr(args, "implied_checks", set())
-    refused = [flag for name, flag in REQUESTED_CHECKS
-               if getattr(args, name, None) and name not in implied and name not in APPLICABLE_CHECKS.get(kind, ())]
-    if getattr(args, "evidence", None) and kind in ("evidence", "chat", "handover", "witness", "account", "distributed"):
-        refused.append("--evidence")
-    if getattr(args, "compare_fingerprint", None):
-        refused.append("--compare-fingerprint without --compare")
-    if getattr(args, "witness_fingerprint", None) and kind not in ("evidence", "witness", "proof"):
-        refused.append("--witness-fingerprint")
-    if kind == "evidence" and not getattr(args, "witness", None):
-        refused += [flag + " without --witness" for name, flag in (("witness_fingerprint", "--witness-fingerprint"),
-                                                                  ("channel", "--channel")) if getattr(args, name, None)]
-    if refused:
-        raise ValueError(", ".join(refused) + " cannot be checked against this " + kind
-                         + " input; supply the archive and options that check it")
-
-
 def verification_requirements(args, checked):
     result, notes, shown = checked.details, checked.notes, checked.kind
-    refuse_inapplicable(args, shown)
+    chronology = result.get("chronology")
+    if chronology:
+        notes.append("Observation time anomalies: " + str(chronology["regressions"]) + " backward step(s), "
+                     + str(chronology["unparseable"]) + " unparseable timestamp(s). " + chronology["meaning"])
     if args.board and result.get("board"):
         notes.append("Case Board annotations: " + str(result["board"]["annotations_head"]["seq"]))
         notes.extend("Collection: " + item["title"] for item in result["board"]["collections"])
@@ -497,13 +472,11 @@ def verification_requirements(args, checked):
                                          policy=args.sealed_policy, max_gib=args.max_gib)
         if checked_runtime["journal"]["fingerprint"] != result["fingerprint"]:
             raise ValueError("Runtime attestation names another collector key")
-        result["runtime_attestation"] = {k: checked_runtime.get(k) for k in ("verified", "sha256", "workflow", "limitation", "attested_at")}
+        result["runtime_attestation"] = {k: checked_runtime[k] for k in ("verified", "sha256", "workflow", "limitation")}
         result["runtime_attestation"]["key_origin"] = "created"
     result["assurance"] = assurance(result)
     if any(row["status"] == "fail" for row in result["assurance"]["ladder"]):
         raise ValueError("Assurance checks found contradictory witness evidence")
-    result["evidence"] = evidence_conditions(result, shown)
-    result["requested_checks_unavailable"] = requested_checks_unavailable(args, result)
     return checked
 
 
@@ -539,36 +512,25 @@ def verification_failure(args, parser, mode, console, exc):
 
 def verification_output(args, checked, console, mode):
     shown, result, pinned, notes = checked.kind, checked.details, checked.signer_pinned, checked.notes
-    evidence = result.setdefault("evidence", evidence_conditions(result, shown))
     unmet = bool(args.require_tier and ASSURANCE_TIERS.index(result["assurance"]["tier"]) < ASSURANCE_TIERS.index(args.require_tier))
     unpinned = args.strict and not pinned
-    required = getattr(args, "require", None)
-    profile_unmet = bool(required and EVIDENCE_PROFILES.index(evidence["profile"]) < EVIDENCE_PROFILES.index(required))
-    unavailable = result.get("requested_checks_unavailable") or []
+    if not pinned:
+        notes.append("ключ не закреплён: результат зависит от ключа внутри самого пакета")
     if unmet:
         notes.append("Required assurance tier was not reached: " + args.require_tier)
-    if profile_unmet:
-        notes.append("Required evidence profile was not reached: " + required)
-    notes += ["Requested check not performed: " + item for item in unavailable]
-    failed = unmet or unpinned or profile_unmet or bool(unavailable)
     if console:
-        console.show(shown, args.bundle, result, notes)
-        if failed:
+        console.show(shown, args.bundle, result, notes, pinned)
+        if unmet or unpinned:
             raise SystemExit(2)
         return
     if mode == "json":
         verification_print(json.dumps({"verified": True, "kind": shown, "signer_pinned": pinned, "notes": notes, "result": result,
-                          "evidence_profile": evidence["profile"], "requirements_met": not failed},
+                          "requirements_met": not (unmet or unpinned)},
                          indent=2, ensure_ascii=True))
-        if failed:
+        if unmet or unpinned:
             raise SystemExit(2)
         return
-    verification_print(evidence_line(evidence))
-    for row in evidence["conditions"]:
-        verification_print("  [" + row["status"] + "] " + CONDITION_LABELS[row["id"]] + " (" + row["role"].replace("_", " ")
-                           + "): " + row["detail"] + ("" if row["status"] == "met" else " · " + row["how"]))
-    for line in next_lines(evidence):
-        verification_print(line)
+    verification_print(assurance_line(result))
     verification_print(json.dumps(result, indent=2))
     verification_print(producer_line(result.get("producer")))
     seal = result.get("report_seal")
@@ -592,8 +554,10 @@ def verification_output(args, checked, console, mode):
         verification_print("SHA256SUMS matches the signed manifest.")
     for line in notes:
         verification_print(line)
-    verification_print("Integrity verified. " + evidence_line(evidence)[len("EVIDENCE: "):].capitalize() + ".")
-    if failed:
+    verification_print("Integrity verified. Source authenticity and clock accuracy are not established.")
+    if not pinned:
+        verification_print("Signer identity is unpinned: retain and compare the fingerprint independently.")
+    if unmet or unpinned:
         raise SystemExit(2)
 
 

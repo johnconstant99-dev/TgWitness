@@ -436,6 +436,7 @@
 .doc-time-group{display:inline-flex;align-items:center;gap:5px}
 .doc-chip-tag.video{border-color:var(--accent-border);background:var(--accent-soft);color:var(--accent-text);font-family:var(--mono)}
 
+.doc-entry-add{grid-template-columns:auto 1fr auto}
 .doc-watch-add{grid-template-columns:1fr 1fr 1fr auto}
 .doc-watch-add input{min-width:0}
 @media (max-width:600px){.doc-watch-add{grid-template-columns:1fr}}

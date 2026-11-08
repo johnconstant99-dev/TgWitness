@@ -108,7 +108,7 @@ export function createJournal(context){
   order.addEventListener("change",()=>{state.searchMode=order.value;change();});
   scope.addEventListener("change",()=>{state.searchSource=scope.value;change();});
   const indexNote=node("p","hint journal-index-note");indexNote.id="journal-index-note";indexNote.role="status";indexNote.hidden=true;
-  ranking.append(order,scope,indexNote);controls.append(ranking);
+  ranking.append(order,scope,indexNote);
   const indexBox=node("div","journal-index-settings"),indexMode=node("select"),rebuild=button("Rebuild index","quiet small"),indexState=node("small");
   indexBox.hidden=true;indexMode.id="journal-index-mode";rebuild.id="journal-index-rebuild";indexMode.setAttribute("aria-label",tr("Search index storage"));
   for(const [value,label] of [["disk","Search index on disk"],["memory","Search index in memory only"],["off","Search index off"]]){const option=node("option","",tr(label));option.value=value;indexMode.append(option);}
@@ -164,10 +164,9 @@ export function createJournal(context){
   systemLine.append(systemLabel,node("small","",tr("Routine records stay in the signed journal.")));
   system.addEventListener("change",()=>{state.eventSystem=system.checked;change();});
   const more=node('details','journal-more-filters'),moreTitle=node('summary','',tr('Filters'));
-  const compact=matchMedia('(max-width: 767px)');more.open=!compact.matches;
-  compact.addEventListener('change',()=>{more.open=!compact.matches;});
-  more.append(moreTitle,dates,custom,systemLine,indexBox);
-  root.replaceChildren(types,controls,more,error,chips);
+  const searchOptions=node('details','journal-search-options');searchOptions.append(node('summary','',tr('Search options')),ranking,indexBox);
+  more.append(moreTitle,types,dates,custom,systemLine,searchOptions);
+  root.replaceChildren(controls,more,error,chips);
   const older=$("load-more"),footer=older.closest(".table-footer"),shown=$("shown-count"),range=node("span","journal-window-range");
   const pager=node("div","journal-pager"),newer=button("Newer records","quiet"),latest=button("Latest","quiet");
   newer.id="journal-newer";latest.id="journal-latest";older.textContent=tr("Older records");older.hidden=false;

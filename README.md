@@ -82,6 +82,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.dest
 
 <sub>Ubuntu server: run as root. Desktop: run as your normal user.</sub>
 
+[First setup](docs/SETTINGS.md) ·
 [Setup & panel access](docs/INSTALLATION.md) ·
 [Signatures & SHA-256](https://get.destroy.tools/#verification) ·
 [Update](docs/INSTALLATION.md#update-an-existing-installation) ·
@@ -99,6 +100,32 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.dest
 </a>
 
 <p align="center"><sub>Explore the actual interface with fictional records. Click the workspace to try it.</sub></p>
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+<a name="start-simple"></a>
+
+## Start simple. See every route.
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-start-map-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-start-map-static.svg">
+  <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-start-map-mobile.svg">
+  <img src="docs/assets/presentation/readme-start-map.svg" width="1200" alt="The first start offers Just download, Follow chats or Evidence for a case and shows only the matching sections. The system map links the panel, collector, Telegram, journal, witness and outside services, with network observations. Fictional values.">
+</picture>
+
+The first start asks one question: **Just download**, **Follow chats** or
+**Evidence for a case**. The answer sets the goal and the interface level, so the
+panel shows only the sections that task needs. Connection, Telegram sign-in and
+the chat choice follow in five stages. The connection check runs by itself, and
+route options open only when it fails. Expert tools stay one switch away.
+
+The **System map** shows how the installation reaches Telegram and outside
+services: panel access, each account's route and Telegram target, the journal and
+witness path, and the latest network observations. A missing observation is
+labelled as missing.
+
+[First setup](docs/SETTINGS.md) · [System map](docs/SYSTEM-MAP.md)
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
@@ -138,7 +165,7 @@ separate tested acquisition behavior from unmeasured live throughput.
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-capabilities-mobile-static.svg">
   <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-capabilities-static.svg">
   <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-capabilities-mobile.svg">
-  <img src="docs/assets/presentation/readme-capabilities.svg" width="1200" alt="Track names and usernames by Telegram ID. Record supported bot interactions with signed receipts. Search archived messages and connect read-only MCP clients. Deploy a collector with SSH masked and provider records for review. Illustrative workflows.">
+  <img src="docs/assets/presentation/readme-capabilities.svg" width="1200" alt="Track names and usernames by Telegram ID. Record supported bot interactions with signed receipts. Search archived messages and connect read-only MCP clients. Deploy a collector with SSH masked and provider records for review. Document a conversation step by step with journal references. Hand over a BagIt case package with court templates. Illustrative workflows.">
 </picture>
 
 <p align="center">
@@ -149,6 +176,36 @@ separate tested acquisition behavior from unmeasured live throughput.
   <a href="https://phishdestroy.github.io/TgWitness/docs/archive/"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-archive-mobile.svg"><img src="docs/assets/presentation/readme-nav-archive.svg" width="48%" alt="Archive search, AI and MCP"></picture></a>
   <a href="docs/HIGH-ASSURANCE.md"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-cloud-mobile.svg"><img src="docs/assets/presentation/readme-nav-cloud.svg" width="48%" alt="Sealed cloud deployment"></picture></a>
 </p>
+
+### Document the conversation
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-documentation-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-documentation-static.svg">
+  <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-documentation-mobile.svg">
+  <img src="docs/assets/presentation/readme-documentation.svg" width="1200" alt="Three animated steps: a subject card whose later snapshot records a rename, a conversation plan whose goals close with journal records, and a payment QR code decoded to a checksum-valid wallet that triggers a watchlist hit. Fictional values.">
+</picture>
+
+Start a record for a chat in the **Documentation** drawer and every step writes
+itself: panel actions, replies with the delay before them, edits, deletion notices,
+notes and AI drafts. Each step cites its journal record and SHA-256. Fixing the
+document signs it and writes the statement hash into the journal.
+
+| | |
+| --- | --- |
+| [Subject cards](docs/INVESTIGATION-MODE.md#subject-cards) | Profile snapshots of a bot, person, channel or group with Telegram's BOT, VERIFIED, SCAM and FAKE labels; a later snapshot lists what changed |
+| [Conversation plans](docs/INVESTIGATION-MODE.md#conversation-plans) | Goals for the payment route, infrastructure or people, prepared messages, reply times, activity by hour and the other side's writing style |
+| [Translation](docs/INVESTIGATION-MODE.md#machine-translation) | Shown under the original with languages, model and journal record |
+| [Watchlists](docs/INVESTIGATION-MODE.md#watchlists) | Words, patterns, wallets, @usernames, IDs, domains, phones and links, matched in text, edits, hidden link targets, bot buttons, QR codes and OCR |
+| [Online watch](docs/INVESTIGATION-MODE.md#online-watch) | Checks every 1–60 minutes, up to 100 accounts per request, with a pattern by hour and weekday |
+| [Codes and wallets](docs/INVESTIGATION-MODE.md#codes-in-images) | Payment QR codes; EVM addresses checked against EIP-55, TON in raw form, XRP Ledger checksums, payment links with chain, amount and token |
+| [Client traces](docs/INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Encoder traces of round videos and voice messages; upload time against send time exposes pre-recorded "live" proof |
+| [Cover and authority](docs/INVESTIGATION-MODE.md#cover-and-authority) | Personas, authorisations and an undercover activity record that flags messages outside the authorised chats or period |
+| [Account control](docs/INVESTIGATION-MODE.md#account-control) | Profile and privacy editing with before/after records, an exposure check and offline right after each action |
+| [Documents for court](docs/INVESTIGATION-MODE.md#documents-for-court) | BagIt case package with a Rule 902(13)/(14) certification template, exhibit index, request annex and WebVTT/SRT captions for screen recordings |
+
+Content marked 18+, violence or personal data stays in the court copy, sealed with
+AES-256-GCM; the keys travel separately.
 
 <details>
 <summary><strong>Everything else</strong> · history, accounts, proxies, AI, integrations</summary>
@@ -173,6 +230,7 @@ separate tested acquisition behavior from unmeasured live throughput.
 | [Shared access](docs/ACCESS.md) | Give someone selected chats only, with expiry and IP limits |
 | [Missing message numbers](docs/EVIDENCE.md#missing-message-numbers-gap_summary) | Numbers Telegram assigned that were never observed, per channel and for the whole account, in coverage, reports and MCP (**Preview**) |
 | [Chat state snapshots](docs/COLLECTION.md) | Periodic signed snapshots of title, description, pins, administrators and gifts, with what changed (**Preview**) |
+| [System map](docs/SYSTEM-MAP.md) | Live map of panel access, account routes, Telegram targets and outside services, with the latest 200 of up to 2,000 network observations |
 
 </details>
 

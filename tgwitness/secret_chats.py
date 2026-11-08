@@ -3,12 +3,14 @@ import hashlib
 import logging
 import secrets
 import shutil
+import time
 
 from telethon import utils
 from telethon.tl import types
 from telethon.tl.tlobject import TLObject
 
 from .monitoring import capture_settings
+from .workers import complete_in_thread
 
 try:
     import telethon_secret_chat as library
@@ -78,6 +80,38 @@ def decode(value):
     return value
 
 
+def display(value, field=None):
+    if isinstance(value, dict):
+        return {key: display(item, key) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [display(item, field) for item in value]
+    if type(value) is int and (field in {"random_id", "random_ids", "reply_to_random_id"}
+                               or abs(value) > 2**53 - 1):
+        return str(value)
+    return value
+
+
+def retain_file(temporary, media_root):
+    with temporary.open("rb") as stream:
+        digest = hashlib.file_digest(stream, "sha256").hexdigest()
+    size = temporary.stat().st_size
+    target = media_root / digest
+    repaired = None
+    if target.is_symlink() or (target.exists() and not target.is_file()):
+        raise ValueError("The attachment destination is not a regular file.")
+    if target.exists():
+        with target.open("rb") as stream:
+            previous = hashlib.file_digest(stream, "sha256").hexdigest()
+        if previous == digest and target.stat().st_size == size:
+            temporary.unlink()
+            return digest, size, repaired
+        quarantine = media_root / (".corrupt-" + digest + "-" + secrets.token_hex(8))
+        target.replace(quarantine)
+        repaired = {"previous_sha256": previous, "retained_as": quarantine.name}
+    temporary.replace(target)
+    return digest, size, repaired
+
+
 if library is not None:
     class VaultStorage(library.MemoryStorage):
 
@@ -103,6 +137,8 @@ class SecretChats:
         self.seen = set()
         self.tasks = set()
         self.downloads = {}
+        self.file_worker = None
+        self.file_wakeup = asyncio.Event()
         self.error = None
 
     @property
@@ -143,6 +179,7 @@ class SecretChats:
             return False
         async with self.lock:
             if self.manager and self.client is client:
+                self.resume_files()
                 return True
             await self._detach()
             manager = library.SecretChatManager(client, storage=VaultStorage(self.collector.vault))
@@ -156,8 +193,7 @@ class SecretChats:
                 self.manager = self.client = None
                 raise
             self.write_held()
-            for item in list((self.collector.vault.read(PENDING) or {}).values()):
-                self.save_later(item)
+            self.resume_files()
             return True
 
     async def detach(self):
@@ -169,6 +205,8 @@ class SecretChats:
         for task in list(self.tasks):
             task.cancel()
         await asyncio.gather(*self.tasks, return_exceptions=True)
+        self.file_worker = None
+        self.downloads.clear()
         if manager is not None:
             try:
                 await asyncio.wait_for(manager.stop(), 15)
@@ -267,19 +305,55 @@ class SecretChats:
         return task
 
     def save_later(self, item):
-        name = str(item["secret_chat_id"]) + ":" + str(item["random_id"])
-        existing = self.downloads.get(name)
-        if existing is not None and not existing.done():
-            return existing
-        task = self.spawn(self.save_file(decode(item)))
-        self.downloads[name] = task
+        return self.resume_files()
 
-        def finished(done):
-            if self.downloads.get(name) is done:
-                self.downloads.pop(name, None)
+    def resume_files(self):
+        self.file_wakeup.set()
+        if self.manager is not None and (self.file_worker is None or self.file_worker.done()):
+            if self.collector.vault.read(PENDING):
+                self.file_worker = self.spawn(self.drain_files())
+        return self.file_worker
 
-        task.add_done_callback(finished)
-        return task
+    async def drain_files(self):
+        while self.manager is not None:
+            try:
+                if not await self.next_file():
+                    return
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                LOG.exception("The secret-chat attachment queue could not be updated")
+                await asyncio.sleep(5)
+
+    async def next_file(self):
+        self.file_wakeup.clear()
+        pending = self.collector.vault.read(PENDING) or {}
+        if not pending:
+            return False
+        name, item = min(pending.items(), key=lambda row: row[1].get("retry_at", 0))
+        delay = min(300, max(0, item.get("retry_at", 0) - time.time()))
+        if delay:
+            try:
+                await asyncio.wait_for(self.file_wakeup.wait(), delay)
+            except TimeoutError:
+                pass
+            return True
+        self.downloads[name] = asyncio.current_task()
+        try:
+            await self.save_file(decode(item))
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            LOG.exception("A pending secret-chat attachment could not be saved")
+        finally:
+            self.downloads.pop(name, None)
+        pending = self.collector.vault.read(PENDING) or {}
+        if name in pending:
+            retries = min(7, pending[name].get("retries", 0) + 1)
+            pending[name] = {**pending[name], "retries": retries,
+                             "retry_at": time.time() + min(300, 5 * 2**(retries - 1))}
+            self.collector.vault.save(PENDING, pending)
+        return True
 
     def unaffordable(self, reference, media_root):
         size = getattr(reference, "size", None)
@@ -314,18 +388,10 @@ class SecretChats:
                                             "meaning": "The encrypted file stays queued; nothing was downloaded."})
                 return
             await self.manager.save_file(reference, temporary)
-            digest, size = hashlib.sha256(), 0
-            with temporary.open("rb") as stream:
-                for block in iter(lambda: stream.read(1024 * 1024), b""):
-                    digest.update(block)
-                    size += len(block)
-            target = media_root / digest.hexdigest()
-            if target.exists():
-                temporary.unlink()
-            else:
-                temporary.replace(target)
+            digest, size, repaired = await complete_in_thread(retain_file, temporary, media_root)
             self.note("file", {"secret_chat_id": item["secret_chat_id"], "random_id": item["random_id"],
-                               "media_sha256": digest.hexdigest(), "size": size,
+                               "media_sha256": digest, "size": size,
+                               **({"cache_repair": repaired} if repaired else {}),
                                "meaning": "Decrypted by TgWitness and stored by its SHA-256; the message record describes it."})
         except asyncio.CancelledError:
             temporary.unlink(missing_ok=True)
@@ -404,10 +470,22 @@ class SecretChats:
                 "key_visualization": library.key_visualization(chat.key_hash).hex if chat.key_hash else None,
                 "created_at": chat.created_at, "closed_reason": chat.closed_reason}
 
-    def view(self):
+    def view(self, *, before=None, after=None):
         connected = self.manager is not None
         chats = [self.snapshot(chat) for chat in self.manager.list()] if connected else []
-        records = self.store.events(kind="secret_chat.", limit=2000)
+        if before is not None and after is not None:
+            raise ValueError("Choose an older or newer history page, not both.")
+        records = self.store.events(kind="secret_chat.", limit=2001, before=before, after=after)
+        more = len(records) > 2000
+        if after is not None:
+            records.reverse()
+        records = records[:2000]
+        if after is None:
+            records.reverse()
         return {"available": available(), "settings": settings(self.store), "connected": connected, "error": self.error,
-                "chats": sorted(chats, key=lambda chat: chat["created_at"] or 0, reverse=True),
-                "records": list(reversed(records)), "unavailable_reason": None if available() else UNAVAILABLE}
+                "chats": display(sorted(chats, key=lambda chat: chat["created_at"] or 0, reverse=True)),
+                "records": display(records),
+                "next_before": records[0]["seq"] if more and after is None else None,
+                "next_after": records[-1]["seq"] if more and after is not None else None,
+                "pending_files": len(self.collector.vault.read(PENDING) or {}),
+                "unavailable_reason": None if available() else UNAVAILABLE}

@@ -83,9 +83,10 @@ class OutsideRecords:
                           "last": self.rounds[-1] if self.rounds else None,
                           "largest_gap_seconds": round(self.largest_gap),
                           "clock_behind_seconds": round(self.clock_behind, 1) if self.clock_behind > 0 else 0,
-                          "meaning": "Records after a drand round were written after the round's time: nobody "
-                                     "knows a round's value earlier. Rounds are compared with drand relays only "
-                                     "with --check-drand."},
+                          "meaning": "Offline checks establish only the recorded beacon's self-consistency, "
+                                     "not its BLS signature or a lower time bound. --check-drand compares "
+                                     "selected rounds with HTTPS relays. Only authenticated rounds can support "
+                                     "a lower time bound for subsequent records; unchecked rounds cannot."},
                 "devices": {"checks": len(self.checks), "first_check": self.checks[0] if self.checks else None,
                             "last_check": self.checks[-1] if self.checks else None, "changes": self.changes[:200],
                             "changes_total": len(self.changes),
@@ -125,7 +126,8 @@ def outside_lines(outside):
                      + str(round(drand["largest_gap_seconds"] / 60)) + " min")
         checked = drand.get("checked")
         if not checked:
-            lines.append("Rounds not compared with drand relays: run with --check-drand")
+            lines.append("drand beacons are self-consistent only: no BLS signature or lower time bound verified. "
+                         "Run with --check-drand to compare rounds with HTTPS relays.")
         elif checked["relays"]:
             lines.append("Confirmed by drand relays: " + str(checked["confirmed"]) + " of " + str(checked["asked"])
                          + " round(s) asked (" + ", ".join(checked["relays"]) + ")"
@@ -133,8 +135,9 @@ def outside_lines(outside):
         else:
             lines.append("Rounds could not be compared: no drand relay answered")
         if drand["clock_behind_seconds"] > 1:
-            lines.append("The collector's clock was up to " + str(drand["clock_behind_seconds"])
-                         + " s behind drand time")
+            lines.append("Recorded observation times trail recorded drand round times by up to "
+                         + str(drand["clock_behind_seconds"])
+                         + " s; this comparison does not authenticate either timestamp.")
     gateway = outside.get("gateway") or {}
     if gateway.get("windows"):
         lines.append("Cloudflare Gateway DNS log copied in " + str(gateway["windows"]) + " window(s) from "
@@ -179,8 +182,7 @@ def confirm_drand(rounds, relays=DRAND_RELAYS, limit=DRAND_CHECK_LIMIT, fetch=No
                                      + " differs from " + relay + ": the recorded value is not drand's")
             used.append(relay)
             break
-    return {"asked": len(chosen), "confirmed": len(chosen) if used else 0, "relays": used,
-            "unavailable": bool(chosen) and not used}
+    return {"asked": len(chosen), "confirmed": len(chosen) if used else 0, "relays": used}
 
 
 def drand_fetcher():

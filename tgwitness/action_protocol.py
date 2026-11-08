@@ -13,7 +13,7 @@ MAX_DELETIONS = 200
 MAX_TEXT = 2000
 MAX_EVENTS = 20000
 CHAT_KINDS = ("message.new,message.edited,message.deleted,media.saved,source.added,conversation.draft_generated,"
-              "media.qr_decoded")
+              "media.qr_decoded,watchlist.hit")
 ACCOUNT_KINDS = ("account.profile_updated", "account.privacy_updated", "account.global_privacy_updated",
                  "account.avatar_updated", "account.avatar_removed")
 DRAFT_SIMILARITY = 0.8
@@ -248,6 +248,13 @@ PRESENCE_STATES = {"online": "online", "offline": "offline", "recently": "last s
                    "unknown": "status not available"}
 
 
+def watchlist_step(event, payload):
+    return compact({"type": "watchlist_hit", "at": event.get("observed_at"), "ref": reference(event),
+                    "list": clip(payload.get("list")), "entry_kind": payload.get("kind"),
+                    "value": clip(payload.get("value")), "record": payload.get("record"),
+                    "excerpt": clip(payload.get("excerpt"))})
+
+
 def qr_step(event, payload):
     return compact({"type": "qr_code", "at": event.get("observed_at"), "ref": reference(event),
                     "media_sha256": payload.get("media_sha256"),
@@ -409,6 +416,9 @@ def build(events, window_seconds=WINDOW_SECONDS, max_following=MAX_FOLLOWING, ch
             scope = payload.get("chats")
             if account or (chats is not None and scope and set(scope) <= set(chats)):
                 protocol.add(None, search_step(event, payload))
+        elif kind == "watchlist.hit":
+            if chat_id is not None and allowed(chat_id):
+                protocol.add(chat_id, watchlist_step(event, payload))
         elif kind == "media.qr_decoded":
             if chat_id is not None and allowed(chat_id):
                 protocol.add(chat_id, qr_step(event, payload))
@@ -581,6 +591,12 @@ def sentence(step, say, clock=same):
         return account_sentence(step, say)
     if kind == "subject":
         return subject_sentence(step, say, clock)
+    if kind == "watchlist_hit":
+        line = say("Watchlist {list} matched {kind} {value} in journal record #{seq}.", list=quoted(step.get("list", "")),
+                   kind=say(step.get("entry_kind", "")), value=quoted(step.get("value", "")), seq=step.get("record", "?"))
+        if step.get("excerpt"):
+            line += " " + say("Around it: {text}", text=quoted(step["excerpt"]))
+        return line + " " + say("A watchlist match is a term the investigator chose, not a finding about the author.")
     if kind == "qr_code":
         line = say("Read {n} codes from a saved image (SHA-256 {hash}): {texts}", n=len(step.get("codes") or []),
                    hash=step.get("media_sha256", "?"), texts="; ".join(quoted(text) for text in step.get("codes") or []))

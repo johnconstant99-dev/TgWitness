@@ -1,7 +1,10 @@
 """Check public source, local Markdown links and recognizable secret formats."""
 import argparse
+import ast
+from collections import Counter
 import importlib.util
 import io
+import json
 from pathlib import Path
 from pathlib import PurePosixPath
 import re
@@ -13,6 +16,7 @@ from urllib.parse import unquote, urlsplit
 
 if __package__:
     from .build_source import ROOT, public_sources
+    from .i18n_keys import all_script_keys
 else:
     spec = importlib.util.spec_from_file_location("build_source", Path(__file__).resolve().with_name("build_source.py"))
     if spec is None or spec.loader is None:
@@ -20,6 +24,12 @@ else:
     builder = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(builder)
     ROOT, public_sources = builder.ROOT, builder.public_sources
+    spec = importlib.util.spec_from_file_location("i18n_keys", Path(__file__).resolve().with_name("i18n_keys.py"))
+    if spec is None or spec.loader is None:
+        raise ImportError("Could not load the interface key inventory")
+    inventory = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(inventory)
+    all_script_keys = inventory.all_script_keys
 
 BINARY = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".mp4", ".bin", ".tsq", ".tsr", ".ttf"}
 DEEPL_UUID = r"[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}"
@@ -126,6 +136,54 @@ def check_version_labels(root):
     return findings
 
 
+def check_catalogues(root):
+    package = Path(root) / "tgwitness"
+    findings = []
+
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError("duplicate JSON key: " + key)
+            result[key] = value
+        return result
+
+    try:
+        tree = ast.parse((package / "i18n.py").read_text(encoding="utf-8"))
+        languages = next(ast.literal_eval(node.value) for node in tree.body if isinstance(node, ast.Assign)
+                         and any(isinstance(target, ast.Name) and target.id == "LANGUAGES" for target in node.targets))
+        expected = set(languages) - {"en"}
+        paths = {path.stem: path for path in (package / "locales").glob("*.json")}
+        if paths.keys() != expected:
+            findings.append("Panel language files differ from the supported language selection")
+        dictionaries = {lang: json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=pairs)
+                        for lang, path in paths.items()}
+        required = set(json.loads((package / "english_fallbacks.json").read_text(encoding="utf-8")))
+        required.update(all_script_keys(package))
+        required.update(json.loads((package / "guide_locales/keys.json").read_text(encoding="utf-8"))["keys"])
+        for words in dictionaries.values():
+            required.update(words)
+        fields = lambda text: Counter(re.findall(r"\{\w+\}", text))
+        for lang, words in sorted(dictionaries.items()):
+            name = f"tgwitness/locales/{lang}.json"
+            for key in sorted(required - words.keys()):
+                findings.append(f"{name}: missing translation: {key}")
+            for key, value in words.items():
+                variants = value if isinstance(value, dict) else {"text": value}
+                if isinstance(value, dict) and ("other" not in value or value.keys() - {"zero", "one", "two", "few", "many", "other"}):
+                    findings.append(f"{name}: invalid plural forms: {key}")
+                for form, text in variants.items():
+                    if not isinstance(text, str) or not text.strip():
+                        findings.append(f"{name}: empty translation ({form}): {key}")
+                    elif fields(text) != fields(key):
+                        findings.append(f"{name}: changed placeholders ({form}): {key}")
+                    elif "\ufffd" in text or any(ord(char) < 32 and char not in "\n\r\t" for char in text):
+                        findings.append(f"{name}: invalid translation characters ({form}): {key}")
+    except (OSError, ValueError, TypeError, StopIteration) as exc:
+        findings.append("Panel language catalogues could not be checked: " + str(exc))
+    return findings
+
+
 def check_git_index(root, sources):
     root = Path(root).resolve()
 
@@ -186,6 +244,7 @@ def main():
     args = parser.parse_args()
     sources, links, findings = check_sources(ROOT)
     findings.extend(check_version_labels(ROOT))
+    findings.extend(check_catalogues(ROOT))
     if args.git_index:
         findings.extend(check_git_index(ROOT, sources))
     print(f"Checked {len(sources)} public files and {links} local documentation links.")

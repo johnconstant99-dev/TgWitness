@@ -75,9 +75,19 @@ class WitnessKey:
         root.mkdir(parents=True, exist_ok=True, mode=0o700)
         sealed, plain = root / "witness-key.enc", root / "witness-key.json"
         cipher = key_cipher(root)
-        if plain.exists() and not sealed.exists():
-            private_write(sealed, cipher.encrypt(plain.read_bytes()))
-            plain.write_bytes(b"\0" * plain.stat().st_size)
+        if plain.exists():
+            original = plain.read_bytes()
+            if not sealed.exists():
+                private_write(sealed, cipher.encrypt(original))
+            elif original.strip(b"\0"):
+                try:
+                    same = json.loads(cipher.decrypt(sealed.read_bytes()))["private_key"] == json.loads(original)["private_key"]
+                except (InvalidToken, ValueError, KeyError, TypeError):
+                    same = False
+                if not same:
+                    raise RuntimeError("witness-key.json and witness-key.enc do not hold the same witness key. Move the "
+                                       "file you do not intend to keep out of the data directory, then start again.")
+            plain.write_bytes(b"\0" * len(original))
             plain.unlink()
         if not sealed.exists():
             key = Ed25519PrivateKey.generate()
@@ -304,13 +314,13 @@ class Witness:
             except Exception as exc:
                 raise InvalidAnswer("capture proof failed verification: " + type(exc).__name__) from None
         keys = captured.get("keys") if capture is not None else None
-        if last and last.get("keys") is not None:
-            if keys is None or keys != last["keys"]:
-                status = "key_changed"
+        accepted = status == "ok"
+        if accepted and last and last.get("keys") is not None and keys != last["keys"]:
+            status, accepted = "key_changed", keys is not None
         continuity = answer.get("continuity")
         tree = self.store.get_setting("last_tree")
         committed = None
-        if status == "ok":
+        if accepted:
             if tree is not None and (last is None or any(tree[k] != last[k] for k in ("event_count", "head_hash"))):
                 raise InvalidAnswer("retained journal and tree boundaries differ")
             if tree is not None and continuity is None:
@@ -323,7 +333,7 @@ class Witness:
                     committed = verify_continuity(continuity, statement, previous, captured["challenge"])
                 except Exception as exc:
                     raise InvalidAnswer("journal continuity failed verification: " + type(exc).__name__) from None
-        if status == "ok":
+        if accepted:
             if self.pinned is None:
                 self.pinned = key
                 self.store.set_setting("collector_fingerprint", key)
@@ -340,6 +350,8 @@ class Witness:
                            capture=capture, capture_delta=delta)
             if keys is not None:
                 payload["keys"] = keys
+        if accepted and status == "key_changed":
+            payload["previous_keys"] = last["keys"]
         if committed is not None:
             payload.update(continuity=continuity, continuity_status="extended" if tree is not None else "baseline")
         return payload
@@ -489,13 +501,19 @@ class Witness:
             while ticks is None or done < ticks:
                 started = time.monotonic()
                 await self.tick()
-                if self.store.get_setting("last_daily_date") != (utc_date() - timedelta(days=1)).isoformat():
-                    await self.daily()
+                try:
+                    if self.store.get_setting("last_daily_date") != (utc_date() - timedelta(days=1)).isoformat():
+                        await self.daily()
+                except Exception as exc:
+                    self.store.append("witness.upkeep_failed", {"step": "daily seal", "error": describe(exc)})
                 last_upgrade = self.store.get_setting("witness_ots_upgrade_at", 0)
                 if time.time() - last_upgrade >= 3600:
-                    await self.retry_daily_ots()
-                    await upgrade_pending_ots(self.store, self.network, {"ots_calendars": DEFAULT_OTS},
-                                              folder=self.store.root / "anchors")
+                    try:
+                        await self.retry_daily_ots()
+                        await upgrade_pending_ots(self.store, self.network, {"ots_calendars": DEFAULT_OTS},
+                                                  folder=self.store.root / "anchors")
+                    except Exception as exc:
+                        self.store.append("witness.upkeep_failed", {"step": "timestamp upkeep", "error": describe(exc)})
                     self.store.set_setting("witness_ots_upgrade_at", time.time())
                 done += 1
                 if ticks is None or done < ticks:

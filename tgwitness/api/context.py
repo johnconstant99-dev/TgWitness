@@ -54,6 +54,8 @@ class ApplicationContext(
         self.op_lock = asyncio.Lock()
         self.export_lock = asyncio.Lock()
         self.action_tasks = set()
+        self.qr_access_session = None
+        self.qr_access_candidate = None
         self.prepared_chat_exports = {}
         self.public_proxies = PublicCatalog(self.root)
         self.shared_pool = self.proxy_pool or ProxyPool(self.public_proxies)

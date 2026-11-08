@@ -16,6 +16,8 @@ README, Wiki and documentation artwork. Screenshots use demo records.
 | `casework-hero*`, `casework-handbook*` | Project and Wiki covers |
 | `readme-nav-*` | README buttons, with shorter phone labels |
 | `readme-features*`, `readme-feature-*` | Export, investigation and saved-version animations |
+| `readme-start-map*`, `readme-documentation*`, `readme-mode-*` | First start, system map, subject card, conversation plan and wallet-code animations |
+| `readme-capabilities*` | People, bot, archive, sealed cloud, investigation mode and case package cards |
 | `readme-workspace-*.webp` | Demo recording in both themes, plus phone crops and stills |
 | `casework-chain*`, `casework-checkpoint*`, `evidence-*` | Evidence diagrams |
 | `casework-assurance*` | Local, audited VM and Phala / Intel TDX deployment checks |

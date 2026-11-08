@@ -3,6 +3,7 @@ import html
 import io
 
 from . import action_protocol
+from .evidence import safe_cell
 
 PREFIX = "EX-"
 STYLE = ("body{font:11pt/1.5 'Segoe UI',system-ui,Arial,sans-serif;color:#141a22;max-width:900px;margin:28px auto;padding:0 20px}"
@@ -58,8 +59,9 @@ def exhibits_csv(items):
     writer = csv.writer(out)
     writer.writerow(["exhibit", "file", "sha256", "size", "media_type", "role", "steps", "journal_records", "chat_id"])
     for item in items:
-        writer.writerow([item["exhibit"], "data/" + item["file"], item["sha256"], item["size"], item["media_type"], item["role"],
-                         " ".join(map(str, item["steps"])), " ".join(map(str, item["records"])), item["chat_id"]])
+        writer.writerow([safe_cell(c) for c in (item["exhibit"], "data/" + item["file"], item["sha256"], item["size"],
+                         item["media_type"], item["role"], " ".join(map(str, item["steps"])),
+                         " ".join(map(str, item["records"])), item["chat_id"])])
     return out.getvalue().encode("utf-8")
 
 
@@ -159,13 +161,15 @@ def annex_csv(data):
     writer.writerow(["subject", "telegram_id", "kind", "usernames", "names", "labels", "first_seen", "last_seen", "messages",
                      "message_references"])
     for chat in data["chats"]:
-        writer.writerow(["chat", chat["chat_id"], chat["kind"] or "", " ".join("@" + u for u in chat["usernames"]),
-                         chat["title"] or "", " ".join(chat["labels"]), "", "", len(chat["messages"]),
-                         " ".join(m["link"] or "%s:%s" % (chat["chat_id"], m["message_id"]) for m in chat["messages"])])
+        writer.writerow([safe_cell(c) for c in ("chat", chat["chat_id"], chat["kind"] or "",
+                         " ".join("@" + u for u in chat["usernames"]), chat["title"] or "", " ".join(chat["labels"]), "", "",
+                         len(chat["messages"]),
+                         " ".join(m["link"] or "%s:%s" % (chat["chat_id"], m["message_id"]) for m in chat["messages"]))])
     for person in data["people"]:
-        writer.writerow(["person", person["user_id"], "user", " ".join("@" + u for u in person["usernames"]),
-                         "; ".join(person["names"]), " ".join(person.get("labels") or []), person["first_seen"] or "",
-                         person["last_seen"] or "", person["messages"], ""])
+        writer.writerow([safe_cell(c) for c in ("person", person["user_id"], "user",
+                         " ".join("@" + u for u in person["usernames"]), "; ".join(person["names"]),
+                         " ".join(person.get("labels") or []), person["first_seen"] or "",
+                         person["last_seen"] or "", person["messages"], "")])
     return out.getvalue().encode("utf-8")
 
 

@@ -8,7 +8,7 @@
 
 What each screen does, what it writes to the signed journal and where the detailed
 guide is. The panel shows one workspace at a time: one Telegram account with its own
-sources, journal and signing key. The selector at the top of the sidebar switches
+sources, journal and signing key. The account selector in the top bar switches
 workspaces. The address carries the workspace (`?ws=…`); while the address, the
 selector and the loaded account disagree, actions stay blocked.
 
@@ -34,43 +34,55 @@ The Exports page includes the same comparison above its download controls.
 
 ## Find your way
 
-Daily sections are at the top of the sidebar, **Accounts** is under **Workspace**,
-and everything else is under **More tools & settings**. The **Interface level**
-switch in the top bar decides how many sections appear:
+The sidebar keeps six daily sections together: **Home**, **Chats**, **Journal**,
+**Exports**, **Accounts** and **Settings**. Sections that your access does not permit
+are omitted. **More tools** contains investigation and administration tools.
+Open **Appearance** at the bottom of the sidebar to change the language, theme,
+time zone or interface level:
 
 | Level | Sections in the sidebar |
 | --- | --- |
-| Simple | Home, Chats, Changes, Archives and Settings |
-| Standard | Also Case Board, Accounts and Access |
-| Expert | Also Sources, Extras, Ask the archive, Parameters, Account, System log and Integrations |
+| Simple | The daily sections |
+| Standard | Also Case Board, Sources and Access under More tools |
+| Expert | Also System map, Network topology, Extras, Ask the archive, Parameters, Account, System log and Integrations under More tools |
 
-Simple calls Start here, Journal and Exports **Home**, **Changes** and **Archives**.
-A level only hides sections. A hidden feature keeps working, and the server checks
+Section names stay the same at every level. A level only hides sections. A hidden feature keeps working, and the server checks
 every permission on its own. Level, language, theme and time zone are saved per
 operator and workspace; see [settings](SETTINGS.md).
 
-The top bar also has:
+Use **Go to a section** at the top of the sidebar (Ctrl+K, or ⌘K on a Mac) to find
+a chat, a parameter or a journal record by `#number`. Arrow keys move, Enter opens,
+Esc closes.
 
-- **Go to a section** (Ctrl+K, or ⌘K on a Mac): find a chat, a parameter or a journal
-  record by `#number`. Arrow keys move, Enter opens, Esc closes.
+The top bar has:
+
 - **Notifications**: problems and chat changes worked out from the journal.
   **Mark all as read** clears the counter and **Notification rules** opens the rules.
   Delivery to Telegram, Discord or email is set up in
   [Extras → Notifications](#notifications).
-- The connection indicator for this workspace. **Collector health** under the top bar
-  splits it into the Telegram connection, event intake, sources and the attachment queue.
+- A collection-status menu with the start/pause control, connection settings and
+  health diagnostics for Telegram, event intake, sources and the attachment queue.
+  On a narrow screen, open it with the activity icon.
 - **Lock**: closes the panel in this browser. Collection keeps running on the server.
-- The protection mode next to the version number; see [protection modes](#protection-modes).
+
+The version and protection mode are under **Appearance**; see [protection modes](#protection-modes).
+An installation with saved sources and journal records opens **Chats** after sign-in.
+An explicit link still opens its requested screen.
 
 The demo workspace contains fictional messages and never connects to Telegram.
 Actions that would change a real workspace are refused there.
+
+[System map](SYSTEM-MAP.md) shows this installation's account routes, proxy state,
+socket endpoints, encrypted vaults, evidence services and observed network requests.
+Select an account to inspect its path. Available but disabled services stay visible.
 
 ## Start here
 
 Choose a task. **Export my account** downloads what the account can read now.
 **Follow an investigation** records new messages, observed edits and deletion notices
-from the chats you choose. The setup card shows the three steps: connect the account,
-choose sources, start observation. The goal question stays on this page until you
+from the chats you choose. While observation is paused, Chats, Journal and Sources
+show the setup card: connect the account, choose sources, start observation.
+The goal question stays on this page until you
 answer or skip it. A new workspace opens the [first setup](SETTINGS.md) instead.
 
 ## Chats
@@ -87,7 +99,9 @@ Saved conversations, read-only by default.
   keeps every saved version. Each deletion says what is known: when it was seen, that
   Telegram does not report who deleted it, or that only the notice arrived.
 - **Load history** brings the last 100, 250 or 500 messages into this view and the
-  journal. To load every enabled source, use [Sources → Full history](#sources).
+  journal. Find it in **Chat actions**, alongside recording settings, read-only and
+  secret-masking controls. The menu closes with Escape or a click outside it.
+  To load every enabled source, use [Sources → Full history](#sources).
 - **Export chat** downloads the whole visible history as a signed `chat.json` and
   `chat.html`. Several connected accounts can share the work: each downloads its own
   range of message numbers and signs its part, and the account that starts the

@@ -1,5 +1,4 @@
 from .common import (
-    CheckUnavailable,
     InvalidSignature,
     OTS_BITCOIN,
     OTS_MAGIC,
@@ -451,7 +450,7 @@ def bitcoin_fetcher():
                     raise ValueError("Invalid Bitcoin header proof of work")
                 found.append(header)
             except (OSError, UnicodeError):
-                raise CheckUnavailable("Bitcoin header sources are unreachable") from None
+                return None
         if len(set(found)) != 1:
             raise ValueError("Independent Bitcoin header sources disagree")
         cache[height] = found[0]
@@ -462,13 +461,9 @@ def bitcoin_fetcher():
 def confirm_ots(proof, digest, fetch=None):
     summary = ots_summary(proof, digest, commitments=True)
     fetch = fetch or bitcoin_fetcher()
-    confirmed, unreachable = [], False
+    confirmed = []
     for item in summary.pop("commitments"):
-        try:
-            header = fetch(item["height"])
-        except CheckUnavailable:
-            unreachable = True
-            continue
+        header = fetch(item["height"])
         if header is None:
             continue
         if len(header) != 80 or header[36:68].hex() != item["merkle_root"]:
@@ -477,10 +472,8 @@ def confirm_ots(proof, digest, fetch=None):
                           "time": datetime.fromtimestamp(int.from_bytes(header[68:72], "little"), timezone.utc).isoformat()})
     if confirmed:
         summary.update(status="confirmed", time=min(c["time"] for c in confirmed), blocks=confirmed,
-                       verification="proof evaluated; headers with 6 confirmations agreed by two HTTPS explorers",
+                       verification="proof evaluated; headers with 6 confirmations agreed by two HTTPS explorers; not full chain validation",
                        sources=list(BITCOIN_SOURCES))
-    elif unreachable:
-        summary["check"] = "unavailable"
     return summary
 
 

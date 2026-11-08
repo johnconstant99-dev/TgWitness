@@ -50,8 +50,8 @@ The verifier checks both checkpoint bytes and the original request (including no
 Then verify the evidence ZIP against checkpoint.json and a separately trusted
 collector fingerprint using tgwitness/verify.py.
 
-A TSA response establishes a statement about existence of these bytes at the TSA's
-time. It does not authenticate Telegram origin or make every claim in the bytes true.
+A TSA response binds these bytes to the authority's stated time. Retain the
+response with the matching checkpoint and verification result.
 """
 
 
@@ -102,7 +102,7 @@ def verify_timestamp(checkpoint_path, response_path, ca_path, request_path=None,
     return {"verified": True, "checkpoint_sha256": hashlib.sha256(Path(checkpoint_path).read_bytes()).hexdigest(),
             "request_checked": request_path is not None, "trust_store": "explicit CA file",
             "tsa_statement": detail.stdout.decode(errors="replace"),
-            "limitation": "The timestamp shows that the checkpoint existed by its time. "
+            "limitation": "This check verifies the timestamp receipt and its binding to the recorded bytes. "
                           "No online revocation or long-term archival validation was performed."}
 
 

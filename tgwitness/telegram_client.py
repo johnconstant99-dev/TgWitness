@@ -1,5 +1,6 @@
 import asyncio
 import copy
+import logging
 import time
 from contextvars import ContextVar
 
@@ -13,6 +14,35 @@ from telethon.tl.tlobject import TLRequest
 from .rpc_pacing import bulk_request
 
 _single_attempt = ContextVar("telegram_single_attempt", default=False)
+LOG = logging.getLogger("tgwitness.telegram_client")
+
+try:
+    from telethon._updates.messagebox import ENTRY_ACCOUNT, MessageBox
+except ImportError:
+    MessageBox = None
+
+
+if MessageBox is not None:
+    class GapAwareMessageBox(MessageBox):
+        __slots__ = ("gap_owner",)
+
+        def apply_difference(self, diff, chat_hashes):
+            if isinstance(diff, types.updates.DifferenceTooLong):
+                self.report_gap(None, ENTRY_ACCOUNT, diff.pts)
+            return super().apply_difference(diff, chat_hashes)
+
+        def apply_channel_difference(self, request, diff, chat_hashes):
+            if isinstance(diff, types.updates.ChannelDifferenceTooLong):
+                entry = request.channel.channel_id
+                self.report_gap(entry, entry, getattr(diff.dialog, "pts", None))
+            return super().apply_channel_difference(request, diff, chat_hashes)
+
+        def report_gap(self, channel_id, entry, after):
+            owner = getattr(self, "gap_owner", None)
+            if owner is not None:
+                owner.difference_gap(channel_id, getattr(self.map.get(entry), "pts", None), after)
+else:
+    GapAwareMessageBox = None
 FLOOD_ERRORS = (FloodWaitError, FloodPremiumWaitError)
 _ACTIONS = (functions.messages.GetBotCallbackAnswerRequest,
             functions.messages.ImportChatInviteRequest, functions.channels.JoinChannelRequest,
@@ -70,6 +100,20 @@ def request_method(request):
 
 
 class WitnessClient(TelegramClient):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if GapAwareMessageBox is not None:
+            box = GapAwareMessageBox(self._log["messagebox"])
+            box.gap_owner = self
+            self._message_box = box
+
+    def difference_gap(self, channel_id, before, after):
+        if listener := getattr(self, "difference_gap_listener", None):
+            try:
+                listener(channel_id, before, after)
+            except Exception:
+                LOG.exception("Recording an undelivered update interval failed")
 
     async def history_page(self, entity, *, limit, offset_id):
         """One raw page, retaining MessageEmpty instead of SDK iterator filtering."""

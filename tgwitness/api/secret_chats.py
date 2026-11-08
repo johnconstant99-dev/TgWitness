@@ -2,6 +2,7 @@ from .. import secret_chats as secret
 from .dependencies import current_context
 from fastapi import Depends
 from fastapi import HTTPException
+from fastapi import Query
 from pydantic import BaseModel
 from pydantic import Field
 
@@ -32,8 +33,11 @@ async def connected(ctx, call, *args, **kwargs):
     return await call(*args, **kwargs)
 
 
-async def view(*, ctx=Depends(current_context)):
-    return chats_of(ctx).view()
+async def view(*, before: int | None = Query(default=None, ge=1),
+               after: int | None = Query(default=None, ge=0), ctx=Depends(current_context)):
+    if before is not None and after is not None:
+        raise HTTPException(422, "Choose an older or newer history page, not both.")
+    return chats_of(ctx).view(before=before, after=after)
 
 
 async def update_settings(body: SecretChatSettings, *, ctx=Depends(current_context)):
@@ -65,7 +69,7 @@ async def accept(chat_id: int, *, ctx=Depends(current_context)):
 
 async def send(chat_id: int, body: SecretChatText, *, ctx=Depends(current_context)):
     ctx.require_live()
-    return {"random_id": await ctx.operation(connected, ctx, chats_of(ctx).send, chat_id, body.text)}
+    return {"random_id": str(await ctx.operation(connected, ctx, chats_of(ctx).send, chat_id, body.text))}
 
 
 async def close(chat_id: int, *, ctx=Depends(current_context)):

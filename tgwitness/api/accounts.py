@@ -560,6 +560,7 @@ async def start_qr(
         body.api_hash,
         body.client_profile,
         client_languages(request),
+        qr_request=request,
     )
     url = result.pop("url")
     output = io.BytesIO()
@@ -658,6 +659,36 @@ async def account_avatar_view(*, ctx=Depends(current_context)):
 
 
 class AccountsOperations:
+    def end_qr_session(self, session_id):
+        try:
+            current = asyncio.get_running_loop()
+        except RuntimeError:
+            current = None
+        if current is not self.login_loop:
+            if not self.login_loop.is_closed():
+                self.login_loop.call_soon_threadsafe(self.end_qr_session, session_id)
+            return
+        if self.qr_access_session != session_id:
+            return
+        collector = self.app.state.collector
+        candidate = self.qr_access_candidate
+        if candidate is None or collector.login_client is not candidate:
+            return
+        if collector.qr_task:
+            collector.qr_task.cancel()
+
+        async def cleanup():
+            async with self.op_lock:
+                if self.qr_access_session == session_id and collector.login_client is candidate:
+                    await collector.cancel_login()
+                    collector.phase = collector.resting_phase()
+                    self.qr_access_session = None
+                    self.qr_access_candidate = None
+
+        task = asyncio.create_task(cleanup())
+        self.action_tasks.add(task)
+        task.add_done_callback(self.action_tasks.discard)
+
     def groups_view(self, principal=None):
         registry = self.app.state.profiles
         groups = []

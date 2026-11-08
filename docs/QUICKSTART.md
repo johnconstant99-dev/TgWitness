@@ -73,21 +73,26 @@ Demo messages are fictional. Demo mode cannot connect a real Telegram account.
 
 1. If the native demo is running, stop it and run **Start.cmd** or `sh start.sh`.
    Otherwise, keep the live installation started above running.
-2. Use the panel token for your installation method to open the panel.
-3. If you need a proxy, save it under **Account → Settings → Connection settings → Change connection route**.
-4. In **Account**, enter your phone number and press **Continue**, choose
-   **QR code → Show QR code**, or select files and press **Connect account**.
-   **API ID + Hash** is optional: the workspace uses its saved or imported pair,
-   or a working pair from the built-in pool. To use your own app, paste one
-   `API ID:API Hash` pair into API ID.
-   For a complete authorization key, choose **Auth key**, paste all 512 hexadecimal
-   characters, and select the supplied DC ID. User ID is optional and checked if entered.
-5. Complete your selected sign-in method: phone/code/2FA, confirmation from a
-   signed-in Telegram app for QR, or a supported authorized session import.
-6. Check the displayed account ID. Open **Sources**: your chats load automatically; add your groups.
-7. Under **Choose which changes to preserve**, select event categories or the
-   **Messages, edits & deletions** preset, then save monitoring settings.
-8. Choose attachment settings separately, then press **Start observation**.
+2. Use the panel token to sign in. A new workspace opens [first setup](SETTINGS.md).
+   Choose **Just download**, **Follow chats** or **Evidence for a case**.
+3. Review the connection check. Configure your own proxy if needed; connection
+   settings remain available after setup.
+4. At **Connect Telegram**, scan the QR code or enter your phone number. File import
+   and a complete authorization key are under **Other sign-in methods**.
+   Complete the Telegram confirmation, code and two-step password when requested.
+5. Check the displayed account, choose the chats and review your settings. Finish
+   from the final screen. For **Just download**, **Start export** starts a one-time
+   export and opens Exports to show its progress; it does not enable continuous observation.
+
+After setup, **Chats → Choose** changes the selected chats. **Settings** controls
+collection and files; **More tools → Sources** provides the detailed source list
+at Standard or Expert level. The [panel guide](PANEL.md) describes the six main
+sections and their contextual controls.
+
+**API ID + Hash** is optional: the workspace uses its saved or imported pair,
+or a working pair from the built-in pool. To use your own app, paste one
+`API ID:API Hash` pair into API ID. For **Auth key**, paste all 512 hexadecimal
+characters and select the supplied DC ID. User ID is optional and checked if entered.
 
 API credentials identify your application; they do not authorize an account by
 themselves. Private groups need no public username, but your account must have access.
@@ -103,8 +108,8 @@ For several accounts, use **Accounts → Import accounts** and select their supp
 session files. Companion JSON files are paired by basename; each imported account
 gets its own workspace. See [bulk import and account groups](ACCOUNTS.md#bulk-import-and-account-groups).
 
-To add another account, press **+** beside the account selector or open
-**Account → Settings → Connection settings → Workspaces**, or use **Accounts**. Workspaces have separate sessions,
+To add another account, press **+** beside the account selector or use
+**Accounts → Add account**. Workspaces have separate sessions,
 journals, keys, sources and queues. Switching views leaves other collectors running.
 The same Telegram account cannot be assigned to two workspaces in this installation.
 There is no fixed number of workspaces; they share one process, so capacity depends on the machine.

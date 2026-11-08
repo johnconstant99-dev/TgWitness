@@ -207,6 +207,156 @@ def service_layouts():
                  "Keep the investigation running: Apprise notifications and encrypted S3 off-site copies.")
 
 
+GREEN, RED = "#98d8c0", "#e7a3a3"
+
+
+def chip(x, y, width, text, color, fill):
+    return box(x, y, width, 26, color=color, fill=fill, radius=13) + centered(text, x + width/2, y + 18, 14, color, 600)
+
+
+def first_start_feature(still):
+    body = panel(540, "01 / FIRST START", "Pick the task.", "One question. The panel adapts.", BLUE)
+    body += box(24, 168, 552, 294, fill="#091726")
+    for i, name in enumerate(["Just download", "Follow chats", "Evidence for a case"]):
+        y = 186 + i*66
+        body += box(44, y, 288, 54)
+        body += label(name, 62, y+34, 21, INK, 600)
+    selected = box(44, 186, 288, 54, color=BLUE, fill="#16314a")
+    selected += label("Just download", 62, 220, 21, INK, 600)
+    selected += f'<circle cx="306" cy="213" r="12" fill="{BLUE}"/><path d="m300 213 4 4 8-9" fill="none" stroke="#0b1a2b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
+    body += reveal(selected, still, .08)
+    body += box(352, 186, 200, 186)
+    body += label("PANEL", 370, 214, 15, BLUE, 600, 1.2)
+    for i, name in enumerate(["Home", "Chats", "Exports"]):
+        item = f'<circle cx="377" cy="{246+i*38}" r="4" fill="{BLUE}"/>' + label(name, 392, 252+i*38, 19, INK, 600)
+        body += reveal(item, still, .24+i*.07)
+    body += reveal(label("Expert tools: one switch", 370, 360, 14), still, .45)
+    body += '<path d="M76 402H524" stroke="#36516b" stroke-width="2"/>'
+    for i, name in enumerate(["Goal", "Connection", "Telegram", "Chats", "Start"]):
+        x = 76 + i*112
+        body += f'<circle cx="{x}" cy="402" r="7" fill="#102238" stroke="{BLUE}" stroke-width="2"/>'
+        body += centered(name, x, 440, 14, MUTED, 600)
+    body += trace("M76 402H524", BLUE, still, .55, .96)
+    return feature_footer(body, "Only the sections you need.")
+
+
+def system_map_feature(still):
+    body = panel(540, "02 / SYSTEM MAP", "See every route.", "Accounts, Telegram, outside calls.", GOLD)
+    body += box(24, 168, 552, 294, fill="#091726")
+    nodes = [(46, 188, "Panel"), (242, 188, "Collector"), (436, 188, "Telegram"),
+             (46, 286, "S3 · TSA"), (242, 286, "Journal"), (436, 286, "Witness")]
+    for i, (x, y, name) in enumerate(nodes):
+        node = box(x, y, 118, 48, color="#6e624c" if name != "Collector" else GOLD)
+        node += centered(name, x+59, y+31, 19, INK, 600)
+        body += node if i < 3 else reveal(node, still, .2+i*.06)
+    body += trace("M164 212H242", GOLD, still, .02, .2)
+    body += trace("M360 212H436", GOLD, still, .12, .32)
+    body += trace("M301 236V286", GOLD, still, .3, .45)
+    body += trace("M360 310H436", GOLD, still, .45, .6)
+    body += trace("M262 236V254H105V286", GOLD, still, .36, .55)
+    log = box(46, 358, 508, 88, color="#6e624c")
+    log += label("NETWORK OBSERVATIONS", 64, 384, 14, GOLD, 600, 1.2)
+    log += label("DC2 · 443 · MTProto route", 64, 411, 17, INK, 600)
+    log += label("S3 · 443 · HTTP 200", 64, 433, 15)
+    body += reveal(log, still, .66)
+    return feature_footer(body, "Observed, not assumed.")
+
+
+def subject_feature(still):
+    body = panel(540, "01 / SUBJECT CARD", "Know the other side.", "Snapshots show what changed.", BLUE)
+    body += box(24, 168, 552, 294, fill="#091726")
+    body += box(44, 186, 508, 120)
+    body += f'<circle cx="96" cy="238" r="30" fill="#1b354d" stroke="{BLUE}" stroke-width="2"/>'
+    body += centered("P", 96, 247, 26, INK, 650)
+    body += label("@pay_helper", 146, 228, 24, INK, 650)
+    body += label("ID 5550123 · bot", 146, 256, 17)
+    body += chip(146, 268, 58, "BOT", BLUE, "#16314a") + chip(212, 268, 70, "SCAM", RED, "#3a1f26")
+    later = box(44, 322, 508, 120, color=GOLD)
+    later += label("LATER SNAPSHOT", 62, 350, 14, GOLD, 600, 1.2)
+    later += label("@pay_helper", 62, 391, 21, MUTED, 400)
+    later += f'<path d="M62 384H186" stroke="{MUTED}" stroke-width="1.5"/>'
+    later += f'<path d="M214 384h70m-10-8 10 8-10 8" fill="none" stroke="{GOLD}" stroke-width="2"/>'
+    later += label("@support_desk", 300, 391, 21, INK, 650)
+    later += label("Username and photo changed", 62, 424, 16)
+    later += chip(440, 336, 96, "CHANGED", GOLD, "#302b25")
+    body += reveal(later, still, .4)
+    return feature_footer(body, "A rename stays in the record.")
+
+
+def plan_feature(still):
+    body = panel(540, "02 / CONVERSATION PLAN", "Plan what to obtain.", "Goals close with journal records.", GOLD)
+    body += box(24, 168, 552, 294, fill="#091726")
+    body += label("PAYMENT ROUTE", 46, 200, 15, GOLD, 600, 1.2)
+    goals = [("Wallet address", "OBTAINED · #1206", .2), ("Payment method", "OBTAINED · #1211", .45), ("Receipt or TX ID", "OPEN", None)]
+    for i, (name, status, start) in enumerate(goals):
+        y = 214 + i*62
+        body += box(44, y, 508, 50, color="#6e624c")
+        body += f'<circle cx="70" cy="{y+25}" r="9" fill="none" stroke="{MUTED}" stroke-width="2"/>'
+        body += label(name, 92, y+32, 20, INK, 600)
+        if start is None:
+            body += label(status, 470, y+31, 15, MUTED, 600, 1)
+            continue
+        done = f'<circle cx="70" cy="{y+25}" r="10" fill="{GREEN}"/><path d="m65 {y+25} 4 4 7-8" fill="none" stroke="#0b1a2b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+        done += label(status, 384, y+31, 15, GREEN, 600, .6)
+        body += reveal(done, still, start)
+    body += reveal(box(44, 408, 240, 38, color="#6e624c") + centered("Reply after 4 min", 164, 433, 17, INK, 600), still, .6)
+    body += reveal(box(300, 408, 252, 38, color="#6e624c") + centered("Active 18:00-23:00", 426, 433, 17, INK, 600), still, .68)
+    return feature_footer(body, "Timing is measured, not scheduled.")
+
+
+def codes_feature(still):
+    body = panel(540, "03 / CODES & WATCHLISTS", "Catch the wallet.", "Checked, normalised, matched.", BLUE)
+    body += box(24, 168, 552, 294, fill="#091726")
+    body += box(44, 188, 136, 136, color=BLUE, fill="#f2f7fc", radius=10)
+    bits = ("0000000000", "0000000000", "0000000000", "0001101000", "1100110110",
+            "0110011011", "1011000110", "0000101101", "0000011010", "0000110011")
+    cells = ""
+    for row, line in enumerate(bits):
+        for column, bit in enumerate(line):
+            inside = (row < 3 and column < 3) or (row < 3 and column > 6) or (row > 6 and column < 3)
+            if bit == "1" and not inside:
+                cells += f'<rect x="{57+column*11}" y="{201+row*11}" width="10" height="10" rx="1.5" fill="#0b1a2b"/>'
+    for x, y in ((57, 201), (134, 201), (57, 278)):
+        cells += (f'<rect x="{x+1.5}" y="{y+1.5}" width="29" height="29" rx="4" fill="none" stroke="#0b1a2b" stroke-width="3"/>'
+                  f'<rect x="{x+9}" y="{y+9}" width="14" height="14" rx="2" fill="#0b1a2b"/>')
+    body += cells
+    if not still:
+        body += (f'<rect x="48" y="192" width="128" height="3" fill="{BLUE}" opacity=".85">'
+                 '<animateTransform attributeName="transform" type="translate" values="0 0;0 126;0 0" dur="3s" repeatCount="indefinite"/></rect>')
+    body += trace("M180 256H232", BLUE, still, .1, .25)
+    found = box(234, 188, 318, 136, color=BLUE)
+    found += label("EVM ADDRESS", 252, 214, 14, BLUE, 600, 1.2)
+    found += label("0x5aAeb6...1BeAed", 252, 252, 22, INK, 650)
+    found += label("EIP-55 checksum valid", 252, 282, 16, GREEN, 600)
+    found += label("250 USDT · from a payment code", 252, 308, 15)
+    body += reveal(found, still, .22)
+    body += trace("M393 324V352", BLUE, still, .42, .52)
+    hit = box(44, 354, 508, 88, color=GOLD)
+    hit += label("WATCHLIST HIT", 62, 380, 14, GOLD, 600, 1.2)
+    hit += label("Payment wallets · message #1220", 62, 411, 20, INK, 600)
+    hit += label("Found in a QR code", 62, 432, 15)
+    body += reveal(hit, still, .55)
+    return feature_footer(body, "Every hit points to its message.")
+
+
+def mode_cards(still):
+    entries = [("first-start", first_start_feature, "The first start asks one question: just download, follow chats or evidence for a case. The panel shows only the sections that choice needs."),
+               ("system-map", system_map_feature, "Illustrated system map: panel, collector, Telegram, journal, witness and outside services, with network observations. Fictional values."),
+               ("subject", subject_feature, "A subject card with Telegram's labels, and a later snapshot that records a username and photo change. Fictional identity."),
+               ("plan", plan_feature, "A conversation plan whose goals close with journal records, with measured reply time and activity hours. Fictional values."),
+               ("codes", codes_feature, "A payment QR code decoded to a checksum-valid EVM address that triggers a watchlist hit. Fictional values.")]
+    for name, draw, description in entries:
+        path = OUT / ("readme-mode-" + name + ("-static" if still else "") + ".svg")
+        path.write_text(svg(600, 540, description, draw(still)), encoding="utf-8")
+
+
+def mode_layouts():
+    card_layouts(("first-start", "system-map"), "readme-mode-", "readme-start-map", 540,
+                 "Pick the task. See every route. Guided first start and system map, illustrated with fictional values.")
+    card_layouts(("subject", "plan", "codes"), "readme-mode-", "readme-documentation", 540,
+                 "Know the other side. Plan what to obtain. Catch the wallet. Illustrated case documentation with fictional values.")
+
+
 def services(still):
     body = panel(420, "APPRISE", "Notifications", "Changes, issues and daily summaries.", BLUE)
     body += box(28, 213, 157, 101)
@@ -323,7 +473,8 @@ def outline_captions(font_path):
     ET.register_namespace("", ns)
     faces = {w: instantiateVariableFont(TTFont(font_path), {"wght": w}, inplace=False) for w in (400, 600, 650)}
     cache = {}
-    files = [*OUT.glob("readme-card-*.svg"), *OUT.glob("readme-feature-*.svg"), *OUT.glob("readme-handbook*.svg"), *OUT.glob("readme-button-*.svg")]
+    files = [*OUT.glob("readme-card-*.svg"), *OUT.glob("readme-feature-*.svg"), *OUT.glob("readme-mode-*.svg"),
+             *OUT.glob("readme-handbook*.svg"), *OUT.glob("readme-button-*.svg")]
     for path in files:
         root = ET.fromstring(path.read_text(encoding="utf-8"))
         definitions = ET.Element("{" + ns + "}defs")
@@ -381,11 +532,13 @@ def main():
     for still in (False, True):
         features(still)
         services(still)
+        mode_cards(still)
         divider(still)
         for mobile in (False, True):handbook(mobile, still)
     outline_captions(args.font)
     feature_layouts()
     service_layouts()
+    mode_layouts()
     print("Rendered service cards, handbook routes, compact buttons and dividers in the TgWitness palette.")
 
 

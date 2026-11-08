@@ -6,6 +6,7 @@ from .common import (
     VerifierTooOld,
     authenticate_statement,
     base64,
+    bisect,
     bounded_lines,
     datetime,
     hashlib,
@@ -35,7 +36,7 @@ class DailyJournal:
     def __init__(self):
         from .chain import MerkleFrontier
         self.tree, self.dates = MerkleFrontier(), {}
-        self.previous, self.last_date = None, None
+        self.previous, self.last_date, self.latest = None, None, None
 
     def payload(self, date):
         from .chain import MERKLE_EMPTY
@@ -58,9 +59,10 @@ class DailyJournal:
         moment = parse_time(event["observed_at"])
         if moment.tzinfo is None:
             raise ValueError("Witness date has no time zone")
+        self.latest = moment if self.latest is None else max(moment, self.latest)
         date = moment.astimezone(timezone.utc).date().isoformat()
         if self.last_date is not None and date <= self.last_date:
-            raise ValueError("Witness appended records into an already sealed day")
+            date = self.latest.astimezone(timezone.utc).date().isoformat()
         self.tree.append(event["hash"])
         day = self.dates.setdefault(date, {"from_seq": event["seq"], "checks": {"no_response": 0}})
         day.update(to_seq=event["seq"], head_hash=event["hash"], root=self.tree.root().hex())
@@ -199,10 +201,17 @@ def verify_witness(path, expected_fingerprint=None, check_drand=False, check_bit
                             raise ValueError("Witness freshness challenge differs from the signed capture")
                         anchors[-1]["freshness"] = {**fresh, "verified": False, "not_before": None}
                     collector_key = payload.get("collector_fingerprint")
-                    if payload.get("status") == "ok":
+                    changed = payload.get("status") == "key_changed" and "previous_keys" in payload
+                    if payload.get("status") == "ok" or changed:
                         prior = retained.get(collector_key)
-                        if prior and prior.get("keys") is not None and prior["keys"] != anchors[-1].get("keys"):
+                        if changed and (not prior or prior.get("keys") is None or prior["keys"] != payload["previous_keys"]
+                                        or anchors[-1].get("keys") in (None, prior["keys"])
+                                        or payload.get("pinned_fingerprint") != collector_key):
+                            raise ValueError("Witness recorded a collector key change that differs from its key history")
+                        if not changed and prior and prior.get("keys") is not None and prior["keys"] != anchors[-1].get("keys"):
                             raise ValueError("Witness accepted a changed or removed collector key history")
+                        if changed:
+                            anchors[-1]["previous_keys"] = payload["previous_keys"]
                         if payload.get("continuity") is not None:
                             if not payload.get("capture"):
                                 raise ValueError("Continuity proof has no matching capture proof")
@@ -271,18 +280,18 @@ def verify_witness(path, expected_fingerprint=None, check_drand=False, check_bit
                  "earliest_not_before": min((a["freshness"]["not_before"] for a in bound
                                               if a["freshness"]["verified"]), default=None),
                  "verification": "relay-confirmed" if confirmation["confirmed"] else "not-performed",
-                 "relays": confirmation["relays"], "unavailable": bool(confirmation.get("unavailable"))}
+                 "relays": confirmation["relays"]}
     return {"format": manifest["format"], "fingerprint": fp, "public_key": public, "events": result["events"],
             "head_hash": result["head_hash"], "interval_minutes": interval, "channel": manifest.get("channel"),
             "producer": manifest.get("producer"), "anchors": anchors, "no_response": silent, "posted": posted,
             "post_failures": failures, "statements": statements, "key_pinned": bool(expected_fingerprint),
-            "freshness": freshness, "days": days, "missing_days": missing_days, "collector_keys": collector_keys}
+            "freshness": freshness, "days": days, "missing_days": missing_days, "collector_keys": collector_keys,
+            **({"chronology": result["chronology"]} if "chronology" in result else {})}
 
 
 def key_history_summary(keys):
-    return {**keys, "meaning": "Telegram authorizations of the account as the collector recorded them",
-            "note": "Imported session: the acquisition starts from an authorization created outside this collector"
-            if keys["origin"] == "imported" else None}
+    return {**keys, "meaning": "Recorded Telegram authorizations; collector-signed claim, not proof that no key copies exist",
+            "note": "ключ импортирован: подтверждение зависит от доверия к источнику" if keys["origin"] == "imported" else None}
 
 
 def witnessed_periods(witness, key=None):
@@ -309,20 +318,37 @@ def witnessed_periods(witness, key=None):
     return periods, gaps
 
 
+def witness_moment(value):
+    from .coverage import parse_time
+    parsed = parse_time(value)
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
 def cross_check_witness(witness, bundle_path, bundle_result):
     from .capture import bundle_capture_prefixes, bundle_hashes
     count, key = bundle_result["events"], bundle_result["fingerprint"]
     mine = [a for a in witness["anchors"] if a["collector_fingerprint"] == key]
+    explained = {a["seq"] for a in witness["anchors"] if a["status"] == "key_changed" and a.get("previous_keys")}
+    comparable = {a["seq"] for a in mine if a["status"] == "ok" or a["seq"] in explained}
     hashes = bundle_hashes(bundle_path, {a["event_count"] for a in mine
-                                         if a["status"] == "ok" and 0 < (a["event_count"] or 0) <= count})
+                                         if a["seq"] in comparable and 0 < (a["event_count"] or 0) <= count})
     prefixes = bundle_capture_prefixes(bundle_path, {a["event_count"] for a in mine
-                                                    if a.get("capture") and a["status"] == "ok" and a["event_count"] <= count})
-    consistent, conflicts, later, anomalies, matched = 0, [], 0, [], []
+                                                    if a.get("capture") and a["seq"] in comparable
+                                                    and a["event_count"] <= count})
+    with open_archive(bundle_path) as archive:
+        manifest = read_manifest(archive)
+    created = manifest.get("snapshot_at") if isinstance(manifest.get("snapshot_at"), str) else manifest.get("created_at")
+    created_at = witness_moment(created) if isinstance(created, str) else None
+    consistent, conflicts, later, anomalies, matched, beyond = 0, [], 0, [], [], []
     for anchor in mine:
-        if anchor["status"] != "ok":
+        if (anchor["event_count"] or 0) > count:
+            beyond.append(anchor)
+            if created_at and witness_moment(anchor["at"]) < created_at:
+                conflicts.append(anchor)
+            else:
+                later += 1
+        elif anchor["status"] != "ok" and anchor["seq"] not in explained:
             anomalies.append(anchor)
-        elif anchor["event_count"] > count:
-            later += 1
         elif ("0" * 64 if anchor["event_count"] == 0 else hashes.get(anchor["event_count"])) == anchor["head_hash"]:
             capture = anchor.get("capture", {}).get("statement")
             prefix = prefixes.get(anchor["event_count"])
@@ -354,10 +380,22 @@ def cross_check_witness(witness, bundle_path, bundle_result):
     fresh = [a for a in exact if a.get("freshness", {}).get("verified")]
     sealed_days = [d for d in witness.get("days", []) if d["bitcoin"] == "confirmed"
                    and any(a["seq"] <= d["to_seq"] for a in exact)]
+    late = {a["seq"] for a in beyond if a["status"] != "ok"}
+    problems = sorted(a["seq"] for a in witness["anchors"]
+                      if a["status"] != "ok" and a["seq"] not in late and a["seq"] not in explained)
+    days = []
+    for day in witness.get("days", []):
+        index = bisect.bisect_left(problems, day["from_seq"])
+        if (late or explained) and day["status"] == "fail" and (index == len(problems) or problems[index] > day["to_seq"]):
+            day = {**day, "status": "ok" if day["checks"].get("ok") else "no_response_only"}
+        days.append(day)
+    highest = max((a["event_count"] for a in beyond), default=None)
     return {"witness_fingerprint": witness["fingerprint"], "anchors_for_this_key": len(mine),
             "other_keys": len(witness["anchors"]) - len(mine) - invalid, "invalid_answers": invalid,
-            "consistent": consistent, "conflicts": conflicts,
+            "consistent": consistent, "conflicts": conflicts, "export_created_at": created,
             "after_export": later, "anomalies": anomalies, "no_response": len(witness["no_response"]),
+            "seen_after_export": {"event_count": highest, "at": next(a["at"] for a in beyond if a["event_count"] == highest)}
+            if beyond else None,
             "witnessed": periods, "witness_gaps": gaps,
             "verified_through_event": verified_through, "unwitnessed_events": count - verified_through,
             "continuity_verified_through_event": continuity_through,
@@ -365,7 +403,7 @@ def cross_check_witness(witness, bundle_path, bundle_result):
             "export_head_witness_records": [a["seq"] for a in matched if a["event_count"] == count],
             "witness_key_pinned": bool(witness.get("key_pinned")),
             "collector_keys": witness.get("collector_keys", {}).get(key),
-            "days": witness.get("days", []), "missing_days": witness.get("missing_days", []),
+            "days": days, "missing_days": witness.get("missing_days", []),
             "head_not_before": min((a["freshness"]["not_before"] for a in fresh), default=None),
             "head_bitcoin_block_time": min((d["bitcoin_block_time"] for d in sealed_days), default=None),
             "head_witnessed_at": min((a["at"] for a in exact), default=None),
@@ -373,19 +411,6 @@ def cross_check_witness(witness, bundle_path, bundle_result):
 
 
 ASSURANCE_TIERS = ("self_attested", "timestamped", "witnessed", "fresh", "witness_anchored", "sealed")
-EVIDENCE_PROFILES = ("integrity", "evidence", "attested")
-CONDITION_LABELS = {"integrity": "Integrity", "signer": "Signer key", "head_binding": "Independent binding of the last record",
-                    "external_time": "External time", "environment": "Attested collection run"}
-CONDITION_ROLE = {"integrity": "required", "signer": "required", "head_binding": "one_of", "external_time": "one_of",
-                  "environment": "optional"}
-ROLE_LABELS = {"required": "Required conditions", "one_of": "At least one of these", "optional": "Optional condition"}
-CONDITION_SCOPE = {"integrity": "The archive is unchanged since the collector signed it.",
-                   "signer": "The signing key is the collector key the recipient retained.",
-                   "head_binding": "Records up to the bound record were not removed or replaced after the binding.",
-                   "external_time": "The covered records existed by the stated time.",
-                   "environment": "The signing key was created inside the attested collection run."}
-MINIMUM_NAMES = {"signer": "confirmed signer key", "head_binding or external_time": "independent binding of the last record or external time"}
-UNPINNED_NOTE = "Signer key is not pinned: pass --fingerprint with the fingerprint you retained."
 
 
 def assurance(result):
@@ -435,7 +460,7 @@ def assurance(result):
 def assurance_line(result):
     value = result["assurance"]
     if value["tier"] == "self_attested":
-        return "ASSURANCE: self_attested · signatures, hashes and record chain"
+        return "ASSURANCE: self_attested — only the collector's own key vouches for this record"
     witness = result.get("witness") or {}
     detail = (" since #" + str(witness["head_witness_record"]) + " (" + str(witness["head_witnessed_at"]) + ")"
               if witness.get("head_witness_record") else "")
@@ -443,131 +468,6 @@ def assurance_line(result):
     limits = [text for tier, text in (("fresh", "not fresh"), ("witness_anchored", "witness not anchored"),
                                     ("sealed", "not sealed")) if tier in absent]
     return "ASSURANCE: " + value["tier"] + detail + (" · " + " · ".join(limits) if limits else "")
-
-
-def english(text, **values):
-    for name, value in values.items():
-        text = text.replace("{" + name + "}", str(value))
-    return text
-
-
-def condition(cid, status, how, text, **values):
-    return {"id": cid, "role": CONDITION_ROLE[cid], "status": status, "scope": CONDITION_SCOPE[cid], "how": how,
-            "detail": english(text, **values), "text": text, "values": values}
-
-
-def evidence_conditions(result, kind="evidence"):
-    events, fp = result.get("events"), result.get("fingerprint") or ""
-    witness, anchors = result.get("witness") or {}, result.get("anchors") or []
-    journal = kind == "evidence"
-    integrity = (("{records} records, {files} files", {"records": events, "files": result.get("files_checked")})
-                 if events is not None and result.get("files_checked") is not None else ("signature and content hashes", {}))
-    rows = [condition("integrity", "met", "record signatures, hash chain, manifest and file hashes", integrity[0], **integrity[1]),
-            condition("signer", "met" if result.get("key_pinned") else "missing",
-                      "--fingerprint with the collector fingerprint the recipient retained",
-                      "collector {fingerprint}… matches the trusted fingerprint" if result.get("key_pinned")
-                      else "collector {fingerprint}… not compared with a retained fingerprint", fingerprint=fp[:16])]
-    independent = bool(witness.get("witness_key_pinned") and witness.get("witness_fingerprint") not in (None, fp)
-                       and not witness.get("conflicts"))
-    retained = result.get("checkpoint_event_count")
-    through = max(retained or 0, (witness.get("verified_through_event") or 0) if independent else 0)
-    at_head = journal and (retained == events or independent and bool(witness.get("export_head_witnessed")))
-    if journal and through:
-        text, values = "records 1–{through} of {total} held by an independent party", {"through": through, "total": events}
-    elif journal:
-        text, values = "no retained checkpoint or confirmed witness", {}
-    else:
-        text, values = "this archive type carries no journal checkpoints; verify the evidence journal", {}
-    rows.append(condition("head_binding", "met" if at_head else "partial" if journal and through else "missing",
-                          "--checkpoint kept outside the collector, or --witness with --witness-fingerprint" if journal
-                          else "in the evidence journal ZIP: --checkpoint, or --witness with --witness-fingerprint", text, **values))
-    checked = [a for a in anchors if a.get("kind") == "rfc3161" and str(a.get("signature", "")).startswith("checked against")
-               or a.get("kind") == "opentimestamps" and a.get("status") == "confirmed"]
-    times = [a["time"] for a in checked if a.get("event_count") == events and a.get("time")]
-    if independent and witness.get("export_head_witnessed") and witness.get("head_bitcoin_block_time"):
-        times.append(witness["head_bitcoin_block_time"])
-    runtime = result.get("runtime_attestation") or {}
-    attested = runtime.get("verified") is True and runtime.get("key_origin") == "created"
-    if attested and runtime.get("attested_at"):
-        times.append(runtime["attested_at"])
-    unchecked = [a for a in anchors if a not in checked]
-    stamped = max((a.get("event_count") or 0 for a in checked), default=0)
-    if times:
-        status, text, values = "met", "last exported record existed by {time}", {"time": min(times)}
-    elif checked:
-        status, text, values = "partial", "records 1–{through} existed by {time}", {
-            "through": stamped, "time": min(a.get("time") or "?" for a in checked if (a.get("event_count") or 0) == stamped)}
-    elif unchecked:
-        status, text, values = ("unchecked", "{count} timestamp proof(s) present; check them with --tsa-ca or --check-bitcoin",
-                                {"count": len(unchecked)})
-    else:
-        status, text, values = "missing", "no external timestamp in this archive", {}
-    rows.append(condition("external_time", status,
-                          "RFC 3161 with --tsa-ca, OpenTimestamps with --check-bitcoin, witness Bitcoin seals or a checked GitHub attestation"
-                          if journal else "in the evidence journal ZIP: --tsa-ca or --check-bitcoin", text, **values))
-    drand = ((result.get("outside") or {}).get("drand") or {}).get("checked") or {}
-    if drand.get("confirmed"):
-        rows[-1]["drand"] = ", ".join(drand.get("relays") or [])
-        rows[-1]["detail"] += " · drand rounds confirmed by " + rows[-1]["drand"]
-    rows.append(condition("environment", "met" if attested else "missing",
-                          "--sealed-attestation with --sealed-policy for a GitHub Actions run; Intel TDX: python -m tgwitness.cloud verify"
-                          if journal else "in the evidence journal ZIP: --sealed-attestation with --sealed-policy",
-                          "collection ran in the attested workflow {workflow}" if attested
-                          else "no attested collection run checked here",
-                          **({"workflow": runtime.get("workflow")} if attested else {})))
-    met = {row["id"] for row in rows if row["status"] == "met"}
-    missing = ([] if "signer" in met else ["signer"]) + \
-              ([] if {"head_binding", "external_time"} & met else ["head_binding or external_time"])
-    minimum = not missing
-    bound = events if minimum else max(through if journal else 0, stamped)
-    options = [] if "signer" in met else ["--fingerprint FINGERPRINT"]
-    if journal and "head_binding or external_time" in missing:
-        options += sorted({"--tsa-ca TSA-ROOT.pem" if a.get("kind") == "rfc3161" else "--check-bitcoin" for a in unchecked
-                           if a.get("event_count") == events and (a.get("kind") == "rfc3161" or a.get("status") == "bitcoin-unverified")}) \
-            or ["--checkpoint CHECKPOINT.json"]
-    return {"profile": "attested" if minimum and "environment" in met else "evidence" if minimum else "integrity",
-            "minimum_met": minimum, "missing": missing, "records": events,
-            "bound_through": bound if "signer" in met else 0, "conditions": rows,
-            "next_options": options, "journal_needed": not journal and "head_binding or external_time" in missing,
-            "minimum": "integrity, confirmed signer key, and an independent checkpoint, confirmed witness or verified "
-                       "external timestamp covering the last exported record"}
-
-
-def next_lines(evidence, t=None):
-    t = t or english
-    lines = [t("Next step: run verify.py again with {options}", options=" ".join(evidence["next_options"]))] \
-        if evidence.get("next_options") else []
-    if evidence.get("journal_needed"):
-        lines.append(t("This archive type carries no checkpoints or timestamps: the last record is bound in the evidence "
-                       "journal of the same workspace. Verify that ZIP with --fingerprint and --checkpoint."))
-    return lines
-
-
-def evidence_line(evidence, t=None):
-    t = t or english
-    if evidence["minimum_met"]:
-        return t("EVIDENCE: minimum met · profile {profile}", profile=evidence["profile"])
-    if evidence.get("bound_through"):
-        return t("EVIDENCE: minimum met up to record {through} of {total} · later records need a binding",
-                 through=evidence["bound_through"], total=evidence.get("records"))
-    return t("EVIDENCE: minimum not met · missing: {items}",
-             items="; ".join(t(MINIMUM_NAMES.get(item, item)) for item in evidence["missing"]))
-
-
-def requested_checks_unavailable(args, result):
-    missing = []
-    witness = result.get("witness") or {}
-    if getattr(args, "check_drand", False):
-        drand = ((result.get("outside") or {}).get("drand") or {}).get("checked") or {}
-        if drand.get("unavailable") or (result.get("freshness") or {}).get("unavailable") \
-                or (witness.get("freshness") or {}).get("unavailable"):
-            missing.append("--check-drand: no drand relay answered")
-    if getattr(args, "check_bitcoin", False):
-        proofs = [a for a in result.get("anchors") or [] if a.get("kind") == "opentimestamps"]
-        proofs += [p for d in (witness.get("days") or result.get("days") or []) for p in d.get("proofs", [])]
-        if any(p.get("check") == "unavailable" for p in proofs):
-            missing.append("--check-bitcoin: Bitcoin header sources unreachable")
-    return missing
 
 
 def channel_texts(source):
@@ -778,7 +678,7 @@ def verify_history_report(path, expected_fingerprint=None, bundle=None):
             "unavailable": statement["unavailable"], "sources_total": statement["sources_total"],
             "evidence_counts_checked": checked, "checkpoint_event_count": boundary,
             "limitation": "Journal comparison checks the source plan, account, message counters and available signed cursors. "
-                          "Other progress fields are signed statements only. No proof of Telegram origin "
-                          "or historical completeness."}
+                          "Other progress fields are retained as signed collector statements. Review source attribution "
+                          "and coverage with the acquisition record."}
 
 

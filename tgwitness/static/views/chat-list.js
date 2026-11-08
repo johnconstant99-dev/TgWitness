@@ -18,7 +18,8 @@ export function createChatList({root, tr, node, icon, avatarNode, timeNode, getS
   }
   const kind = selectField('chat-list-kind', 'Type', [['', 'All'], ['channel', 'Channels'], ['group', 'Groups'], ['bot', 'Bots'], ['private', 'Private chats']]);
   const status = selectField('chat-list-state', 'State', [['', 'All'], ['auto', 'Auto-discovered'], ['unconfirmed', 'Access unconfirmed'], ['excluded', 'Excluded'], ['paused', 'Paused'], ['priority', 'Priority']]);
-  filters.append(fields); controls.append(sortLabel, filters); root.querySelector('.chat-search').after(controls);
+  fields.prepend(sortLabel); filters.append(fields); controls.append(filters); root.querySelector('.chat-search').after(controls);
+  root.querySelector('.chats-sidebar').append(root.querySelector('.chat-open'));
   const pending = new Set();
   let session = getSession();
   const types = {channel: 'channel', broadcast: 'channel', supergroup: 'group', megagroup: 'group', group: 'group',
@@ -57,7 +58,7 @@ export function createChatList({root, tr, node, icon, avatarNode, timeNode, getS
   function presentation(chat) {
     const title = chat.title || tr('Chat {id}', {id: chat.chat_id}), body = node('span', 'chat-item-body');
     const top = node('span', 'chat-item-top'), bottom = node('span', 'chat-item-bottom'), badges = node('span', 'chat-item-badges');
-    top.append(node('span', 'chat-item-title', title), timeNode(chat.last_observed_at, 'chat-item-time'));
+    top.append(node('span', 'chat-item-title', title));
     bottom.append(node('span', 'chat-item-preview', chat.last_text ? (chat.last_sender ? chat.last_sender + ': ' : '') + window.TgWitnessPrivacy.preview(chat.last_text)
       : tr(chat.messages ? 'Media or service message' : 'No messages saved yet')));
     const deleted = typeof chat.deleted_saved === 'number' ? [chat.deleted_saved ? tr('{n} deleted, text kept', {n: chat.deleted_saved}) : '',
@@ -71,6 +72,7 @@ export function createChatList({root, tr, node, icon, avatarNode, timeNode, getS
       const automatic = node('span', 'chat-auto'); automatic.title = tr('Auto-discovered'); automatic.setAttribute('aria-label', tr('Auto-discovered'));
       automatic.append(icon('refresh')); badges.append(automatic);
     }
+    badges.append(timeNode(chat.last_observed_at, 'chat-item-time'));
     body.append(top, bottom, badges); return [avatarNode(chat.chat_id, title), body];
   }
   async function priority(id) {

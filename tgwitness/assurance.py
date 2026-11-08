@@ -70,7 +70,13 @@ def current_provider_record(selected, path=PROVIDER_RECORD):
 
 def write_provider_record(selected, out):
     record = provider_record(selected)
-    out.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
+    try:
+        out.parent.mkdir(mode=0o755, parents=True)
+    except FileExistsError:
+        if not out.parent.is_dir():
+            raise
+    else:
+        out.parent.chmod(0o755)
     temporary = out.with_name(out.name + ".tmp")
     temporary.write_text(json.dumps(record, sort_keys=True) + "\n")
     temporary.chmod(0o644)

@@ -14,6 +14,11 @@ export function createAccounts(context) {
   const collecting=p=>accountState(p).kind==='collecting';
   const eligible=(p,action)=>!p.error_type&&!!p.collector&&(action==='stop'?p.collector.running:
     accountState(p).canStart);
+  on(find('account-add-open'),'click',()=>{
+    find('account-create-details').open=true;
+    find('account-add-label').focus();
+    find('account-create-details').scrollIntoView({block:'nearest'});
+  });
   for(const [value,label] of [['sign_in','Sign-in required'],['paused','Paused']]){
     if(![...find('accounts-filter').options].some(option=>option.value===value))find('accounts-filter').add(new Option(tr(label),value));
   }
@@ -35,6 +40,7 @@ export function createAccounts(context) {
       if(!item){item=make('button','accounts-total');item.type='button';item.dataset.count=id;item.append(make('strong'),make('span','',label));box.append(item);
         on(item,'click',()=>{find('accounts-search').value='';find('accounts-filter').value=filter;page=0;updateStatus();});}
       item.firstElementChild.textContent=value.toLocaleString();
+      item.hidden=value===0&&filter!=='all'&&find('accounts-filter').value!==filter;
       item.setAttribute('aria-pressed',String(find('accounts-filter').value===filter));
     }
   }
@@ -74,6 +80,7 @@ export function createAccounts(context) {
   function controls(){
     const chosen=profiles().filter(p=>selected.has(p.id)), count=selected.size;
     find('accounts-selected').textContent=tr('{n} selected',{n:count});
+    for(const id of ['accounts-selected','accounts-pause','accounts-resume','accounts-clear'])find(id).hidden=!count;
     find('accounts-pause').disabled=working||!allowed()||!chosen.some(p=>eligible(p,'stop'));
     find('accounts-resume').disabled=working||!allowed()||!chosen.some(p=>eligible(p,'start'));
     find('accounts-clear').disabled=working||!count;

@@ -8,8 +8,11 @@ from .common import (
 )
 def verify_events(events, public_key):
     from .chain import canonical, fingerprint
+    from .coverage import parse_time
     key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public_key, validate=True))
     previous, count = "0" * 64, 0
+    previous_time, previous_at = None, None
+    chronology = {"regressions": 0, "unparseable": 0, "samples": []}
     for count, event in enumerate(events, 1):
         if set(event) != set(FIELDS) | {"hash", "signature"}:
             raise ValueError("Unexpected or missing fields at event " + str(count))
@@ -19,6 +22,22 @@ def verify_events(events, public_key):
         if event["hash"] != calculated:
             raise ValueError("Changed content at event " + str(count))
         key.verify(base64.b64decode(event["signature"], validate=True), bytes.fromhex(calculated))
+        anomaly = None
+        try:
+            observed = parse_time(event["observed_at"])
+            if observed.utcoffset() is None:
+                raise ValueError("Observation time has no UTC offset")
+        except (AttributeError, TypeError, ValueError, OverflowError):
+            observed = None
+            chronology["unparseable"] += 1
+            anomaly = {"seq": count, "observed_at": event["observed_at"], "reason": "unparseable"}
+        if observed is not None and previous_time is not None and observed < previous_time:
+            chronology["regressions"] += 1
+            anomaly = {"seq": count, "observed_at": event["observed_at"], "previous_at": previous_at,
+                       "backwards_seconds": (previous_time - observed).total_seconds(), "reason": "regression"}
+        if anomaly is not None and len(chronology["samples"]) < 100:
+            chronology["samples"].append(anomaly)
+        previous_time, previous_at = observed, event["observed_at"]
         if event["kind"] == "media.hashed":
             payload = event["payload"]
             validate_server_hashes(payload.get("server_hashes"))
@@ -26,7 +45,13 @@ def verify_events(events, public_key):
                     or payload.get("media_sha256") is not None):
                 raise ValueError("A hash-only record incorrectly claims downloaded file content")
         previous = calculated
-    return {"events": count, "head_hash": previous, "fingerprint": fingerprint(public_key)}
+    result = {"events": count, "head_hash": previous, "fingerprint": fingerprint(public_key)}
+    if chronology["regressions"] or chronology["unparseable"]:
+        chronology["meaning"] = ("Observation times are collector-supplied. These anomalies do not invalidate "
+                                 "signatures, but chronological claims require independent time evidence. "
+                                 "An ordered journal does not prove its timestamps are accurate.")
+        result["chronology"] = chronology
+    return result
 
 
 def media_reference(event):

@@ -35,7 +35,7 @@ const workspaceSafetyReady=import('./core/workspace-safety.js?v=1').then(({creat
 });
 let accountState;
 let boardView;
-const boardReady=import('./views/board.js?v=1').then(({createCaseBoard})=>{
+const boardReady=import('./views/board.js?v=2').then(({createCaseBoard})=>{
   boardView=createCaseBoard({root:$('view-board'),state,json,tr,trn,node,toast,may,download,media:mediaNode,
     openEvidence:async(event,range)=>{
       const revision=state.workspaceRevision;
@@ -71,7 +71,7 @@ const boardReady=import('./views/board.js?v=1').then(({createCaseBoard})=>{
   const slice=node('button','quiet small',tr('Slice by time'));slice.type='button';slice.id='chat-to-slice';slice.addEventListener('click',()=>boardView.sliceDialog({chat_id:state.chat}));viewQuery('chats','.chat-toolbar').append(slice);
 });
 let settingsHub;
-const settingsHubReady=import('./views/settings-hub.js?v=4').then(({createSettingsHub})=>{
+const settingsHubReady=import('./views/settings-hub.js?v=layout1-wizard1').then(({createSettingsHub})=>{
   const authCard=$('credentials-form').closest('.auth-card');
   const catalog=()=>panelQueries('input[id],select[id],textarea[id]').filter(el=>!el.closest('#gate,#view-settings,#view-first-run')).map(el=>{
     const root=[...panelRoots].find(([,r])=>r.contains(el));
@@ -136,6 +136,7 @@ const viewReady=Promise.all([
         if(name==='parameters')parametersView?.leave();
         if(name==='evidence'){exportsView?.leave();reportSelection?.leave();}
         if(name==='system-log')systemLogView?.leave();
+        if(name==='system-map')systemMapView?.leave();
         if(name==='observations')window.TgWitnessJournal?.leave();
         if(name==='board')boardView?.leave();
         if(name==='topology')topologyView?.leave();
@@ -159,6 +160,7 @@ function resetViewContent(view){
   if(view==='chats')chatListView?.resetSession();
   if(view==='sealed')window.TgWitnessCapture?.reset();
   if(view==='system-log')systemLogView?.resetSession();
+  if(view==='system-map')systemMapView?.resetSession();
   if(view==='access'){accessView?.resetSession();accessFormVersion++;adminLimitsVersion++;accessFormReady=false;adminLimitsReady=false;adminLimitsDirty=false;accessLoadSerial++;
     state.access=null;state.accessEdit=null;state.accessChats={};state.consoleAfter=0;show('access-new',false);}
   if(view==='observations'){state.boardSlice=null;state.boardAdded=false;$('board-slice-context')?.remove();window.TgWitnessJournal?.reset();}
@@ -170,6 +172,7 @@ function resetViewContent(view){
 }
 async function loadPanelView(view){
   if(view==='topology'){await topologyReady;await topologyView.enter();return;}
+  if(view==='system-map'){await systemMapReady;await systemMapView.enter();return;}
   if(view==='board'){await boardReady;await boardView.load();return;}
   if(view==='settings'||view==='first-run'){await settingsHubReady;await settingsHub.load();}
   else if(view==='start')renderWorkflowControls();
@@ -197,7 +200,7 @@ function routeSnapshot(){return {view:state.drawerSeq!==null?"observations":stat
   since:state.eventSince,until:state.eventUntil,system:state.eventSystem,before:state.eventBefore,extra:state.extra||null,section:state.parameterSection||null,
   step:state.view==="first-run"?settingsHub?.step||null:null,group:state.view==="group"?state.groupId:null};}
 function ensureRouter(){
-  if(!routerTask)routerTask=import("./router.js?v=8").then(({createRouter})=>{
+  if(!routerTask)routerTask=import("./router.js?v=9").then(({createRouter})=>{
     window.TgWitnessRouter=createRouter({snapshot:routeSnapshot,ready:()=>!!state.me&&!$("workspace").hidden,
       error:message=>toast(tr(message),true),apply:applyRouteToPanel});return window.TgWitnessRouter;
   });
@@ -222,6 +225,7 @@ async function applyRouteToPanel(route,current){
   navigate(route.view,{history:false,load:false});
   const view=state.view;
   if(view==='topology'){await topologyReady;if(current())await topologyView.enter();return;}
+  if(view==='system-map'){await systemMapReady;if(current())await systemMapView.enter();return;}
   if(view==='board'){await boardReady;await boardView.load();return;}
   if(view==='settings'||view==='first-run'){await settingsHubReady;await settingsHub.load(route.step);}
   else if(view==="chats"){
@@ -498,7 +502,7 @@ const timeReady=import("./core/time.js?v=1").then(({createTimeFormatter})=>{
     updateTimes();window.dispatchEvent(new CustomEvent("tgwitness:time-zone",{detail:{zone:panelTime.zone}}));
   });
 });
-const shellReady=import("./components/shell.js?v=3").then(({createResponsiveShell})=>createResponsiveShell({node,icon,tr}));
+const shellReady=import("./components/shell.js?v=layout1").then(({createResponsiveShell})=>createResponsiveShell({node,icon,tr}));
 let connectionNotice=null;
 const connectionReady=import('./components/connection-notice.js').then(({createConnectionNotice})=>{
   connectionNotice=createConnectionNotice({host:document.querySelector('.topbar').parentElement,tr,retry:()=>refreshStatus(),
@@ -616,10 +620,10 @@ function lock() {
   $("quick-dialog").close();
   $("workspace").inert=false;
   resetInteractions();
-  cancelQR();
+  const token=state.token,qrCancelled=cancelQR();
   state.workspaceRevision++;state.monitoringDirty=false;state.captureDirty=false;state.parametersDirty=false;clearVerification();
 
-  if(state.token.startsWith("tgws_"))fetch("/api/access/logout",{method:"POST",headers:{Authorization:"Bearer "+state.token}}).catch(()=>{});
+  if(token.startsWith("tgws_"))qrCancelled.finally(()=>fetch("/api/access/logout",{method:"POST",headers:{Authorization:"Bearer "+token}}).catch(()=>{}));
   state.me=null;state.access=null;state.accessNames={};state.accessEdit=null;state.accessChats={};state.consoleAfter=0;$("access-console").textContent="";
   $("access-token").textContent="";show("access-new",false);
   state.token=""; sessionStorage.removeItem("tgwitness-token"); closeDetail({history:false});
@@ -666,7 +670,7 @@ async function unlock() {
   workspaceSafety?.acceptStatus(state.status);
   applyAccess();
   if(!state.opened&&!requested.explicit){
-    state.view=state.status.demo?"chats":viewAllowed('start')?'start':'chats';
+    state.view=state.status.demo||state.status.targets?.length&&state.status.stats.total?'chats':viewAllowed('start')?'start':'chats';
   }
   if(!viewAllowed(state.view))state.view="chats";
   state.opened=true;
@@ -693,6 +697,7 @@ function may(permission){return !!state.me&&(state.me.admin||state.me.permission
 
 function viewAllowed(view){
   if(view==='topology')return !!state.me?.admin;
+  if(view==='system-map')return !!state.me?.admin;
   if(view==='board')return may('board.read');
   const limited=!!state.status?.chats_limited;
   return {settings:!!state.me?.admin,'first-run':!!state.me?.admin,start:!!state.me&&!limited,sources:may("sources")&&!limited,evidence:may("export")&&!limited,sealed:may("export")&&!limited,witness:may("settings")&&!limited,
@@ -762,7 +767,7 @@ function syncLive(){
   window.TgWitnessLive?.start({key:owner.revision+":"+owner.profile+":"+owner.token,head:state.status.stats.head?.seq,tr,
     api:(path,body,options={})=>{if(!owner.current())throw new StaleView();return api(path,body,{...options,profile:owner.profile,token:owner.token});},
     accessEnded:()=>{if(owner.current())lock();},
-    hosts:[viewQuery(state.view,state.view==='chats'?'.chat-toolbar':'.journal .card-heading')].filter(Boolean),
+    hosts:[viewQuery(state.view,state.view==='chats'?'#chat-live':'.journal .card-heading')].filter(Boolean),
     canRefresh:()=>{
       if(!owner.current()||!['observations','chats'].includes(state.view))return false;
       if(state.drawerSeq!==null||window.getSelection()?.toString()||document.hidden)return false;
@@ -794,15 +799,17 @@ function navigate(view,options={}) {
     n.classList.toggle("active",selected);
     if(selected)n.setAttribute("aria-current","page");else n.removeAttribute("aria-current");
   });
-  $("view-label").textContent=tr({topology:'Network topology',settings:'Settings','first-run':'First setup',start:"Start here",chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",group:"Group",access:"Access","system-log":"System log",integrations:"Integrations",analysis:state.status?.analysis?.enabled?"Ask the archive":"Machine recognition"}[view]);
+  $("view-label").textContent=tr({'system-map':'System map',topology:'Network topology',settings:'Settings','first-run':'First setup',start:"Start here",chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",group:"Group",access:"Access","system-log":"System log",integrations:"Integrations",analysis:state.status?.analysis?.enabled?"Ask the archive":"Machine recognition"}[view]);
   show("entry-header",view==="connection");
   if(view==="connection")connectionSettings(false);
   if(state.status){renderSetup();renderWorkflowControls();}
   if(options.history!==false)window.TgWitnessRouter?.record();
   return entered;
 }
-$("manage-profiles").addEventListener("click",()=>{
-  navigate("connection");connectionSettings(true);$("profiles-details").open=true;$("profiles-details").scrollIntoView({block:"start"});
+$("manage-profiles").addEventListener("click",async()=>{
+  const revision=state.workspaceRevision;await navigate('accounts');
+  if(revision!==state.workspaceRevision||state.view!=='accounts')return;
+  $('account-create-details').open=true;$('account-add-label').focus();
 });
 document.querySelectorAll("[data-view],[data-open]").forEach(button=>button.addEventListener("click",()=>{
   const view=button.dataset.view || button.dataset.open;
@@ -1117,7 +1124,7 @@ function collectorLines(name,p){
   return [tr("Attachment downloads are off."),...facts];
 }
 let healthUI=null;
-const healthReady=import("./components/health.js?v=1").then(({createHealthBar})=>{
+const healthReady=import("./components/health.js?v=layout1").then(({createHealthBar})=>{
   healthUI=createHealthBar({node,icon,tr,stateNames:healthStates,partNames:healthPartNames,lines:collectorLines,
     actionContext:{getState:()=>state,getSession:()=>state.workspaceRevision+':'+state.profile,may,json,refreshStatus,toast,getSources:()=>sourcesReady,navigate},
     diagnose:openDiagnostics,canDiagnose:name=>viewAllowed(healthDiagnostics[name]?.view),workspace:$("workspace")});
@@ -1326,7 +1333,7 @@ function accountIdentity(p){
   return (a.username?"@"+a.username+" · ":"")+"ID "+a.id;
 }
 let accountsView=null;
-import("./views/accounts.js?v=30").then(({createAccounts})=>{
+import("./views/accounts.js?v=layout1").then(({createAccounts})=>{
   accountsView=createAccounts({root:$("view-accounts"),tr,getState:()=>state,getSession:()=>state.workspaceRevision+":"+state.profile,
     json,loadProfiles,refreshStatus,toast,switchProfile,navigate,diagnose:openDiagnostics});
   window.TgWitnessAccounts=accountsView;
@@ -1334,7 +1341,7 @@ import("./views/accounts.js?v=30").then(({createAccounts})=>{
   return accountsView;
 }).catch(error=>toast(error.message,true));
 let groupView=null;
-const groupViewReady=import("./views/group.js?v=1").then(({createGroupView})=>{
+const groupViewReady=import("./views/group.js?v=2").then(({createGroupView})=>{
   groupView=createGroupView({root:$("view-group"),json,tr,trn,node,toast,getState:()=>state,avatarNode,stateBadge,
     accountState:p=>accountState(p),accountPhaseLabel,healthPartNames,collectorLines,needsLook,fmtTime,fmtDuration,may,
     switchProfile,navigate,loadProfiles,diagnose:openDiagnostics,openChat:openChatIn,exportTogether,
@@ -1552,7 +1559,7 @@ function excerpt(e) {
   if (p.ephemeral_media) return [excerpt({...e,payload:{...p,ephemeral_media:null}}),
     ephemeralMediaText(p.ephemeral_media)].filter(Boolean).join(" · ");
   if (p.text) return p.text;
-  if (e.kind==="message.deleted") return p.auto_delete?.expected?tr("Expected: the message's auto-delete timer expired when the deletion was seen."):tr("Earlier captured versions remain available. The chat's admin log, read by an admin account in history or chat export, names the deleting administrator.");
+  if (e.kind==="message.deleted") return p.auto_delete?.expected?tr("Expected: the message's auto-delete timer expired when the deletion was seen."):tr("Earlier captured versions remain available. Telegram does not report who deleted the message.");
   if (e.kind==="message.missing_on_recheck") return p.auto_delete?.expected?tr("Expected: the message's auto-delete timer had expired before this check."):tr("Telegram no longer returns this message; no deletion notice was received.");
   // Legacy batch labels and meanings inferred a history clear or actor not supplied by Telegram.
   if (e.kind==="history.cleared") return tr("Messages deleted together")+" · "+String(p.count??"");
@@ -1734,7 +1741,7 @@ async function refreshRanked(request) {
   state.searchIndex=result.index;
   renderEvents();
 }
-const journalReady=import('./components/journal.js?v=5').then(({createJournal})=>{
+const journalReady=import('./components/journal.js?v=layout1').then(({createJournal})=>{
   window.TgWitnessJournal=createJournal({get:$,state,node,icon,tr,invalidate:()=>{state.request++;},error:message=>toast(message,true),
     request:(path,body)=>json(path,body),admin:()=>!!state.me?.admin,
     changed:async()=>{state.boardSlice=null;state.boardAdded=false;$('board-slice-context')?.remove();state.cursor=state.eventBefore=state.eventAfter=state.eventMatched=null;closeDetail({history:false});window.TgWitnessRouter?.record({seq:null});await refreshEvents();},
@@ -1785,7 +1792,7 @@ async function openDetail(e,options={}) {
     [tr("Source"),sourceTitle(e.chat_id)],[tr("Record"),tr("Event #{seq}",{seq:e.seq})+(e.message_id ? " / "+tr("Message #{id}",{id:e.message_id}) : "")],
     [tr("Observed at (collector clock)"),formatTime(e.observed_at)],[tr("Source time"),formatTime(e.source_at)],
     [tr("Message sender / supplied actor"),sender ?? tr("No data")],
-    [tr("Action attribution"),tr(e.kind==="message.edited" ? "Message author; in channels also an administrator with edit rights" : e.kind==="message.deleted" ? "The chat's admin log, when read by an admin account" : "See raw record and visibility notes")],
+    [tr("Action attribution"),tr(e.kind==="message.edited" ? "Telegram does not report who edited the message" : e.kind==="message.deleted" ? "Telegram does not report who deleted the message" : "See raw record and visibility notes")],
     [tr("Technical sequence (seq)"),e.seq],
   ]) { const box=node("div");box.append(node("small","",label),node("strong","",String(value)));meta.append(box); }
   content.append(meta);
@@ -1874,7 +1881,7 @@ window.addEventListener("tgwitness:lock",()=>secretChatsView?.reset());
 async function showSecretChats(visible){
   if(!visible){secretChatsView?.leave();return;}
   if(state.status?.demo)return;
-  secretChatsLoading??=import("./views/secret-chats.js?v=1").then(({createSecretChats})=>secretChatsView=createSecretChats({
+  secretChatsLoading??=import("./views/secret-chats.js?v=2").then(({createSecretChats})=>secretChatsView=createSecretChats({
     root:$("view-sources"),tr,trn,json,toast,busy,node,formatTime,download,confirm:(message,options)=>askConfirm(message,options),
     getSession:()=>state.workspaceRevision+":"+state.profile,may,humanSize,actionText:secretActionText}));
   try{await (await secretChatsLoading).enter();}catch(error){if(!(error instanceof StaleView))toast(error.message,true);}
@@ -2280,7 +2287,7 @@ function accountDisclosureRecipientNote(item){
   return [tr('File: {filename}',{filename:accountDisclosureFilename(item)}),
     tr('Extract the ZIP and open index.html to read this sharing copy. Review its scope, omissions and disclosure settings.'),
     tr('Keep the ZIP unchanged. Follow README.txt to check its integrity using a signing-key fingerprint obtained independently from the sender.'),
-    tr('TgWitness signs these files with the collector key; any change to a file breaks the signature.')].join('\n\n');
+    tr('TgWitness signs these files. Review the source records, acquisition context and verification results together.')].join('\n\n');
 }
 function renderAccountExportJobs(){
   const box=$("account-export-jobs"),focused=document.activeElement,
@@ -3441,7 +3448,7 @@ async function loadExtras(){
 }
 
 let setupView=null;
-const setupReady=import("./views/setup.js?v=4").then(({createSetup,renderScales})=>{
+const setupReady=import("./views/setup.js?v=3").then(({createSetup,renderScales})=>{
   setupView=createSetup({root:$("extras-setup"),tr,json,node,toast,may,fmtFull,getState:()=>state,
     answered:()=>{if(state.status)state.status.setup_answered=true;renderSetupStart();renderSetupCard();},
     openExtra:name=>selectExtra(name)});
@@ -3959,28 +3966,9 @@ function renderVerification(){
   if(v.profile!==state.profile||v.fingerprint!==state.status.fingerprint){clearVerification();return;}
   const head=state.status.stats.head;
   const newer=head&&(head.seq>v.events||(head.seq===v.events&&head.hash!==v.head_hash));
-  const c=v.conditions||{},box=$("verification-result"),last=Math.max(head?.seq||0,v.events);
-  const stamped=!c.stamped_through?"off":c.stamped_through>=last?"ok":"part";
-  const groups=[
-    [tr("Required conditions"),[
-      ["ok",tr("Integrity"),tr("Verified {n} event signatures and chain links through event #{n}.",{n:v.events})+
-        (newer?" "+tr("The journal has changed since this check; verify again to check newer records."):"")+" "+
-        tr("Attachments are checked when exporting a signed ZIP.")],
-      ["step",tr("Signer key"),tr("Send the collector fingerprint to the recipient separately")]]],
-    [tr("At least one of these"),[
-      [c.witness_at?"ok":"off",tr("Independent binding of the last record"),c.witness_at?tr("A witness fetched the signed journal head at {time}.",{time:fmtFull(c.witness_at)})
-        :tr("Save a checkpoint and hand it to another party, or connect a witness bot.")],
-      [stamped,tr("External time"),stamped==="ok"?tr("The latest timestamp receipt covers records 1–{n}.",{n:c.stamped_through})
-        :stamped==="part"?tr("The latest timestamp receipt covers records 1–{n} of {total}; the next timestamped checkpoint covers the later ones.",{n:c.stamped_through,total:last})
-        :c.timestamps?tr("Evidence mode is on; the next checkpoint will be timestamped."):tr("Turn on Evidence mode to timestamp checkpoints.")]]],
-  ];
-  const rows=groups.flatMap(([title,lines])=>[node("div","verification-group",title),...lines.map(([state,name,text])=>{
-    const row=node("div","verification-line "+state);
-    row.append(node("strong","",({ok:"✓ ",off:"○ ",step:"→ ",part:"◐ "})[state]+name+": "),node("span","",text));return row;})]);
-  box.replaceChildren(...rows,node("div","hint",c.witness_at||stamped==="ok"
-    ?tr("With the fingerprint confirmed, a recipient can meet the minimum for evidence.")
-    :stamped==="part"?tr("With the fingerprint confirmed, the minimum covers records 1–{n}; later records need the next timestamp or a checkpoint handed to another party.",{n:c.stamped_through})
-    :tr("Integrity only: connect a witness bot, turn on Evidence mode or hand a checkpoint to another party.")));
+  $("verification-result").textContent=tr("Verified {n} event signatures and chain links through event #{n}. ",{n:v.events})+
+    (newer?tr("The journal has changed since this check; verify again to check newer records. "):"")+
+    tr("Attachments are checked when exporting a signed ZIP. Signer identity still requires an independently trusted fingerprint.");
 }
 $("verify-journal").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   const profile=state.profile,revision=state.workspaceRevision;clearVerification();
@@ -4452,7 +4440,7 @@ async function cancelQR(){
   const pending=qrPending;qrPending=null;
   if(pending)clearTimeout(pending.timer);
   $("qr-image").removeAttribute("src");show("qr-state",false);
-  if(pending&&state.token){try{await json("auth/qr/"+encodeURIComponent(pending.id)+"/cancel",{},{profile:pending.profile});}catch(_){} }
+  if(pending&&state.token){try{await json("auth/qr/"+encodeURIComponent(pending.id)+"/cancel",{},{profile:pending.profile,allowStale:true,signal:AbortSignal.timeout(10000)});}catch(_){} }
 }
 async function beginQR(){
   if(state.status.demo){toast(tr("Demo workspace. Connect accounts in your live installation."),true);return;}
@@ -4640,7 +4628,7 @@ async function refreshChats(refresh=false,wanted=null){
   return await loadChatMessages(refresh?"refresh":"open");
 }
 let chatListView=null;
-const chatListReady=import('./views/chat-list.js?v=14').then(({createChatList})=>{
+const chatListReady=import('./views/chat-list.js?v=layout1').then(({createChatList})=>{
   chatListView=createChatList({root:panelRoots.get('chats'),tr,node,icon,avatarNode,timeNode,getState:()=>state,
     getSession:()=>state.workspaceRevision+':'+state.profile,may,json,refreshStatus,openChat,toast,viewState,reload:()=>refreshChats()});
   return chatListView;
@@ -4793,13 +4781,20 @@ function renderChatStatus(){
       if(name==='ai'){busy(tab,async()=>{const chat=state.chat,revision=state.workspaceRevision;await navigate('analysis');
         if(revision===state.workspaceRevision)await window.TgWitnessAnalysis?.focusChat(chat);});return;}
       state.chatView=name;renderChatStatus();renderChatFeed();renderComposer();});tabs.append(tab);}
-  const toolbar=node("div","chat-filter-row");toolbar.append(filters);toolbar.hidden=state.chatView!=='messages';
-  if(!s.demo){box.append(state_,mode);}
+  const toolbar=node("details","action-menu chat-filter-row"),summary=node('summary'),filterPanel=node('div','action-menu-panel');
+  summary.append(icon('settings'),node('span','',tr({all:'Filters',deleted:'Deleted',edited:'Edited',media:'Media'}[state.chatFilter]||'Filters')));
+  filterPanel.append(filters);toolbar.append(summary,filterPanel);toolbar.hidden=state.chatView!=='messages';
+  const recording=$('chat-recording-options');recording.replaceChildren();
+  if(!s.demo){
+    if(!info.enabled||!c.has_session||c.running&&(c.storage_low||!c.connected))box.append(state_);
+    else recording.append(state_);
+    recording.append(mode);
+  }
   else {
     const hint=node("span","visually-hidden",tr("Demo with fictional messages. Deleted messages are red; edited ones keep every saved version."));
     box.append(hint);
   }
-  box.append(tabs,toolbar);
+  const viewBar=node('div','chat-view-bar');viewBar.append(tabs,toolbar);box.append(viewBar);
   if(state.chatAuthor!==null&&state.chatView==='messages'){
     const who=state.chatMessages.find(m=>m.sender?.id===state.chatAuthor),chip=node("div","chat-author-chip");
     const author=who?senderName(who):"ID "+state.chatAuthor;chip.append(node("span","",tr("Showing only messages from {name}",{name:author})));
@@ -4809,7 +4804,7 @@ function renderChatStatus(){
   const blocked=s.demo||!c.has_session||!info.enabled||c.available_for_export===false;
   $("chat-load-history").disabled=blocked;$("chat-history-limit").disabled=blocked;
   $("chat-export-start").disabled=s.demo||!c.has_session||exportRunning();
-  if(focusedFilter)box.querySelector('[data-chat-filter="'+focusedFilter+'"]')?.focus({preventScroll:true});
+  if(focusedFilter)summary.focus({preventScroll:true});
   if(focusedView)box.querySelector('[data-chat-view="'+focusedView+'"]')?.focus({preventScroll:true});
 }
 let peopleTimeline;
@@ -4925,7 +4920,7 @@ function messageRow(m,grouped,byId){
   if(m.has_media&&!m.media.length){const missing=node('span','media-missing');missing.title=tr('Attachment file not saved');missing.setAttribute('role','img');missing.setAttribute('aria-label',missing.title);missing.append(icon('clip'));bubble.append(missing);}
   const meta=node("div","bubble-meta");
   if(m.deleted&&m.auto_deleted){const d=node("span","pill pill-deleted",tr("Deleted"));d.title=tr("Deletion seen {time}, when the message's auto-delete timer expired: an expected removal by the timer.",{time:fmtFull(m.deleted_observed_at)});meta.append(d);}
-  else if(m.deleted){const d=node("span","pill pill-deleted",tr("Deleted"));d.title=tr("Deletion notice received {time}; the saved content stays.",{time:fmtFull(m.deleted_observed_at)});meta.append(d);}
+  else if(m.deleted){const d=node("span","pill pill-deleted",tr("Deleted"));d.title=tr("Deletion seen {time}. Telegram does not report who deleted it or exactly when.",{time:fmtFull(m.deleted_observed_at)});meta.append(d);}
   else if(m.missing&&m.auto_deleted){const d=node("span","pill pill-missing",tr("Not found at recheck"));d.title=tr("Telegram no longer returned this message at {time}; its auto-delete timer had expired before that check.",{time:fmtFull(m.missing_observed_at)});meta.append(d);}
   else if(m.missing){const d=node("span","pill pill-missing",tr("Not found at recheck"));d.title=tr("Telegram no longer returned this message at {time} and no deletion notice was received: deleted while notices were missed, removed by an auto-delete timer, or no longer visible to this account.",{time:fmtFull(m.missing_observed_at)});meta.append(d);}
   if(m.versions.length>1){const e=node("button","pill pill-edited",tr("Edited · {n} versions",{n:m.versions.length}));e.type="button";e.title=tr("Show every saved version");
@@ -5832,6 +5827,19 @@ const topologyReady=import('./views/topology.js?v=2').then(({createTopology})=>{
 });
 topologyReady.catch(error=>toast(error.message,true));
 let accessView=null,systemLogView=null;
+let systemMapView=null;
+const systemMapReady=import('./views/system-map.js?v=2').then(({createSystemMap})=>{
+  systemMapView=createSystemMap({root:$('view-system-map'),tr,json,getState:()=>state,
+    options:()=>viewOptions('system-map'),
+    openSettings:async (profile,card)=>{
+      if(profile&&state.profile!==profile&&await switchProfile(profile)===false)return;
+      if(['connection','integrations','analysis'].includes(card)){await navigate(card);return;}
+      await navigate(card?'witness':'connection');
+      if(card&&state.view==='witness')selectExtra(card);
+    },toast});
+  return systemMapView;
+});
+systemMapReady.catch(error=>toast(error.message,true));
 const accessReady=import("./views/access.js").then(({createAccessView})=>{
   accessView=createAccessView({root:$("view-access"),tr,navigate,localInput,getState:()=>state});return accessView;
 });

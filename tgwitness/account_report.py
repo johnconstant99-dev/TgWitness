@@ -210,7 +210,7 @@ def scope(policy, say, sharing=False):
 
 def verification(context, say, sharing=False):
     parts = ['<section id="verification"><h2>' + e(say('Verification')) + '</h2><p>' +
-             e(say('TgWitness signs this archive with the collector key; a change to any file breaks the signature.')) + '</p>',
+             e(say('TgWitness signs this archive.')) + '</p>',
              '<p>' + e(say('This HTML is protected by the archive manifest. Verify the ZIP; this page alone has no standalone signature.')) + '</p>',
              '<p>' + e(say("Get the signer's key fingerprint from a trusted channel, not from this archive.")) + '</p>',
              '<h3>' + e(say('Signing key fingerprint (SHA-256)')) + '</h3><p><code dir="ltr">' + e(context.get('fingerprint')) + '</code></p>',
@@ -221,7 +221,7 @@ def verification(context, say, sharing=False):
         parts += ['<p>' + e(say('Optional source comparison checks the archive reference, not the correctness of filtering or redaction.')) + '</p>',
                   '<code class="command">python verify.py disclosure.zip --fingerprint TRUSTED_SHA256 --evidence original.zip</code>',
                   '<p>' + e(say('Source archive SHA-256')) + ': <code dir="ltr">' + e(context.get('source_archive_sha256')) + '</code></p>']
-    parts.append('</section><section><h2>' + e(say('Reading this record')) + '</h2><ul>')
+    parts.append('</section><section><h2>' + e(say('Limitations')) + '</h2><ul>')
     for limitation in context.get('limitations', ()):
         if isinstance(limitation, str):
             parts.append('<li>' + e(say(limitation)) + '</li>')

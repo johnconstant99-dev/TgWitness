@@ -1160,19 +1160,10 @@ button.pill { cursor: pointer; font-family: inherit; }
   background: var(--success-soft); color: var(--success); font-size: 13.5px;
 }
 #verification-result:empty { display: none; }
-#verification-result .verification-line { margin: 2px 0; color: var(--text); }
-#verification-result .verification-line.ok strong { color: var(--success); }
-#verification-result .verification-line.off { color: var(--muted); }
-#verification-result .verification-group { margin: 8px 0 2px; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-#verification-result .verification-group:first-child { margin-top: 0; }
-#verification-result .hint { margin-top: 6px; }
 .limits-table { margin-top: 8px; }
 .limits-table > div { display: grid; grid-template-columns: 200px 1fr; gap: 16px; padding: 14px 0; border-top: 1px solid var(--border-soft); }
 .limits-table strong { font-size: 14px; font-weight: 600; }
 .limits-table p { color: var(--muted); font-size: 13.5px; }
-#evidence-boundaries h3 { margin: 20px 0 2px; font-size: 15px; }
-#evidence-boundaries .two-columns .limits-table > div { grid-template-columns: 150px 1fr; }
-#evidence-boundaries code { overflow-wrap: anywhere; }
 .connection-simple {
   display: grid; grid-template-columns: minmax(0, 540px) minmax(240px, 1fr); column-gap: 56px;
   align-items: start; max-width: 1040px; margin: 8px auto 24px;

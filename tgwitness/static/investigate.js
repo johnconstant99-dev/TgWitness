@@ -81,7 +81,9 @@
   let modules = null, homeList = null, shieldInfo = null, homeTab = 'documents', sessionTab = 'timeline';
   let wide = false, accountInfo = null, plans = null, plan = null, planTab = 'work';
   let accountDraft = {profile: {}, privacy: {}, global: {}, errors: {}}, avatarUrl = null, accountReport = null;
-  let cover = null, presence = null, watchPattern = null;
+  let cover = null, presence = null, watchPattern = null, watchlists = null, watchHits = null;
+  const ENTRY_KINDS = [['term', 'Word or phrase'], ['regex', 'Pattern'], ['wallet', 'Wallet'], ['username', 'Username'],
+    ['telegram_id', 'Telegram ID'], ['domain', 'Domain'], ['phone', 'Phone'], ['url', 'Link']];
   const AUTHORITY_ORDER = ['undercover_operation', 'chis', 'directed_surveillance', 'court_order', 'prosecutor_approval', 'other'];
   const PRESENCE_STATES = {online: 'online', offline: 'offline', recently: 'last seen recently',
     last_week: 'last seen within a week', last_month: 'last seen within a month', unknown: 'status not available'};
@@ -198,12 +200,15 @@
 
   function updateToggle() {
     if (!toggle) return;
-    toggle.classList.toggle('live', !!current && !current.fixed && current.state === 'recording');
+    const recording = !!current && !current.fixed && current.state === 'recording';
+    toggle.classList.toggle('live', recording);
+    const host = document.querySelector(recording ? '.sidebar nav' : '#nav-more');
+    if (host && toggle.parentElement !== host) host.append(toggle);
   }
 
   function reset() {
     current = data = editing = homeList = shieldInfo = accountInfo = plans = plan = null;
-    cover = presence = watchPattern = null;
+    cover = presence = watchPattern = watchlists = watchHits = null;
     clearInterval(timer); timer = null;
     Object.assign(assist, {intent: '', goal: '', preview: null, result: null}); planTab = 'work';
     accountDraft = {profile: {}, privacy: {}, global: {}, errors: {}}; accountReport = null; openExceptions.clear();
@@ -218,12 +223,12 @@
 
   function mount() {
     if (toggle) return;
-    toggle = el('button', 'doc-toggle', icon('doc'), node('span', '', tr('Documentation')), node('span', 'doc-live-dot'));
+    toggle = el('button', 'nav doc-toggle', icon('doc'), node('span', '', tr('Documentation')), node('span', 'doc-live-dot'));
     toggle.type = 'button'; toggle.setAttribute('aria-expanded', 'false');
     drawer = node('aside', 'doc-drawer' + (wide ? ' wide' : '')); drawer.hidden = true;
     drawer.setAttribute('aria-label', tr('Documentation'));
     toggle.addEventListener('click', () => (open() ? hide() : show()));
-    document.body.append(toggle, drawer);
+    document.getElementById('nav-more').append(toggle); document.body.append(drawer);
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && open()) {
         const composer = drawer.querySelector('.doc-mark');
@@ -255,7 +260,8 @@
 
   function hide() {
     drawer.hidden = true; toggle.setAttribute('aria-expanded', 'false'); clearInterval(timer); timer = null;
-    toggle.focus();
+    if (matchMedia('(max-width: 767px)').matches) document.getElementById('navigation-toggle').focus();
+    else {if (toggle.closest('#nav-more')) document.getElementById('nav-more').open = true; toggle.focus();}
   }
 
   function analysisAvailable() {
@@ -326,6 +332,7 @@
     const tabs = [['documents', 'Documents', 'doc', homeList?.sessions.length],
       ...(may('interact') && modules?.goal !== 'evidence' ? [['plans', 'Plans', 'target', plans?.plans.length]] : []),
       ...(analysisAvailable() ? [['analysis', 'Analysis', 'chart']] : []),
+      ...(may('view') ? [['lists', 'Watchlists', 'flag', watchHits?.length]] : []),
       ...(may('collect') ? [['watch', 'Online watch', 'timer', presence?.watches.length]] : []),
       ...(may('account') ? [['protection', 'Protection', 'shield'], ['account', 'Account', 'user'],
         ['cover', 'Cover and authority', 'lock', (cover?.personas.length || 0) + (cover?.authorisations.length || 0)]] : [])];
@@ -337,7 +344,8 @@
     body.setAttribute('role', 'tabpanel');
     body.append(...(homeTab === 'analysis' ? analysisPanel() : homeTab === 'protection' ? protectionPanel()
       : homeTab === 'account' ? accountPanel() : homeTab === 'plans' ? plansPanel()
-      : homeTab === 'cover' ? coverPanel() : homeTab === 'watch' ? watchPanel() : documentsPanel()));
+      : homeTab === 'cover' ? coverPanel() : homeTab === 'watch' ? watchPanel()
+      : homeTab === 'lists' ? listsPanel() : documentsPanel()));
     paint(head, body);
     updateToggle();
   }
@@ -919,6 +927,147 @@
   const draftNow = () => ({profile: {}, privacy: {}, global: {}, errors: {}});
   const PRIVACY_GROUPS = [['profile', 'Who sees my profile', 'eye'], ['contact', 'Who can reach me', 'send']];
   const FIELD_NAMES = {first_name: 'First name', last_name: 'Last name', username: 'Username', about: 'Bio'};
+
+  function listsPanel() {
+    if (!may('view')) return [empty('lock', tr('Not available for this access.'))];
+    const box = node('div', 'doc-account');
+    if (watchlists) fillLists(box);
+    else {
+      box.append(node('p', 'hint', tr('Loading…')));
+      loadLists(box).catch(error => box.replaceChildren(el('div', 'doc-callout warn', icon('alert'),
+        node('p', '', error.message))));
+    }
+    return [box];
+  }
+
+  async function loadLists(box) {
+    watchlists = await json('watchlists');
+    watchHits = (await json('watchlists/hits?limit=200')).hits;
+    if (box.isConnected) fillLists(box);
+  }
+
+  function fillLists(box) {
+    const counts = Object.fromEntries((watchlists.statistics || []).map(item => [item.entry_id, item]));
+    const parts = [el('div', 'doc-callout', icon('flag'), node('p', '',
+      tr('Words, wallets, usernames and domains you want to hear about. Every match is written to the journal with the record it was found in. A match is your own choice of term, not a finding about the author.'))),
+      el('div', 'doc-row-actions',
+        button('Scan new records', 'primary', () => runScan(box, false), 'search'),
+        button('Rescan everything', 'ghost', async () => {
+          if (!await askConfirm(tr('Go through every saved record again? Earlier matches are kept and not duplicated.'))) return;
+          await runScan(box, true);
+        }, 'refresh'))];
+    for (const item of watchlists.lists) parts.push(listCard(box, item, counts));
+    parts.push(section('note', 'New list', newListForm(box)));
+    if (watchHits?.length) parts.push(hitsSection());
+    box.replaceChildren(...parts);
+  }
+
+  async function runScan(box, full) {
+    const result = await json('watchlists/scan' + (full ? '?full=true' : ''), {});
+    toast(result.hits ? tr('{n} matches in {k} records.', {n: result.hits, k: result.scanned})
+      : tr('No matches in {k} records.', {k: result.scanned}));
+    await loadLists(box);
+  }
+
+  function listCard(box, item, counts) {
+    const entries = node('ul', 'doc-goals');
+    for (const entry of item.entries) {
+      const stat = counts[entry.id];
+      entries.append(el('li', 'doc-goal',
+        node('span', 'doc-goal-status ' + (stat ? 'obtained' : ''), stat ? String(stat.count) : '0'),
+        el('div', 'doc-goal-main', node('span', 'doc-goal-text', entry.value),
+          node('span', 'doc-sub', [tr((ENTRY_KINDS.find(k => k[0] === entry.kind) || [, entry.kind])[1]),
+            entry.note, stat ? tr('last {at}', {at: clock(stat.last_at)}) : ''].filter(Boolean).join(' · '))),
+        el('div', 'doc-row-actions doc-goal-tools', button('', 'ghost doc-icon-btn danger', async () => {
+          await api('watchlists/' + item.id + '/entries/' + entry.id, undefined, {method: 'DELETE'});
+          await loadLists(box);
+        }, 'trash', 'Remove'))));
+    }
+    const value = node('input'), kind = node('select'), add = el('button', 'secondary', icon('flag'),
+      node('span', '', tr('Add')));
+    for (const [id, label] of ENTRY_KINDS) kind.append(new Option(tr(label), id));
+    value.maxLength = 500; value.placeholder = tr('What to look for'); add.type = 'submit';
+    const form = el('form', 'doc-inline-add doc-entry-add', kind, value, add);
+    form.addEventListener('submit', event => {event.preventDefault(); busy(add, async () => {
+      if (!value.value.trim()) {value.focus(); return;}
+      await json('watchlists/' + item.id + '/entries', {kind: kind.value, value: value.value.trim()});
+      value.value = '';
+      await loadLists(box);
+    });});
+    const paste = node('textarea');
+    paste.rows = 3; paste.maxLength = 100000;
+    paste.placeholder = tr('One per line. Prefix with a kind to mix them, for example wallet:bc1…');
+    return section('flag', item.name,
+      node('p', 'hint', [item.note, item.chat_ids?.length ? tr('{n} chats', {n: item.chat_ids.length}) : tr('all chats'),
+        item.alert ? tr('alerts on') : tr('alerts off'), item.excerpts ? tr('excerpts on') : tr('excerpts off')]
+        .filter(Boolean).join(' · ')),
+      item.entries.length ? entries : node('p', 'hint', tr('No entries yet.')), form,
+      el('details', 'doc-how', node('summary', '', tr('Paste many at once')), paste,
+        el('div', 'doc-row-actions', button('Import', 'secondary', async () => {
+          if (!paste.value.trim()) return;
+          const result = await json('watchlists/' + item.id + '/import', {kind: 'term', text: paste.value});
+          toast(tr('{n} added, {k} skipped, {e} rejected.', {n: result.added.length, k: result.skipped,
+            e: (result.errors || []).length}));
+          paste.value = '';
+          await loadLists(box);
+        }, 'download'),
+        button('Export', 'ghost', async () => {
+          const response = await api('watchlists/' + item.id + '/export');
+          saveBlob(await response.blob(), 'watchlist-' + item.name.replace(/[^\w.-]+/g, '-') + '.csv');
+        }, 'download'))),
+      el('div', 'doc-row-actions', button('', 'ghost doc-icon-btn danger', async () => {
+        if (!await askConfirm(tr('Delete the list {name}? Matches already recorded stay in the journal.', {name: item.name}))) return;
+        await api('watchlists/' + item.id, undefined, {method: 'DELETE'});
+        await loadLists(box);
+      }, 'trash', 'Delete list')));
+  }
+
+  function newListForm(box) {
+    const name = node('input'), note = node('input'), chats = node('select');
+    const alertOn = node('input'), excerpts = node('input');
+    name.maxLength = 120; name.placeholder = tr('List name');
+    note.maxLength = 1000; note.placeholder = tr('What it is for (optional)');
+    chats.multiple = true; chats.size = 3;
+    for (const target of state.status?.targets || []) chats.append(new Option(target.title || String(target.chat_id), String(target.chat_id)));
+    alertOn.type = 'checkbox'; alertOn.checked = true;
+    excerpts.type = 'checkbox';
+    const switchRow = (input, label, hint) => {
+      const row = node('label', 'doc-switch doc-option');
+      row.append(input, node('span', 'doc-switch-track'), el('span', 'doc-option-text', node('span', '', tr(label)),
+        node('small', '', tr(hint))));
+      return row;
+    };
+    const create = button('Create list', 'primary', async () => {
+      if (!name.value.trim()) {name.focus(); throw new Error(tr('Give the list a name.'));}
+      await json('watchlists', {name: name.value.trim(), note: note.value.trim(), alert: alertOn.checked,
+        excerpts: excerpts.checked, chat_ids: [...chats.selectedOptions].map(option => Number(option.value))});
+      name.value = note.value = '';
+      await loadLists(box);
+    }, 'check');
+    return el('div', '', el('div', 'doc-fields',
+      el('label', 'doc-field', node('span', '', tr('Name')), name),
+      el('label', 'doc-field', node('span', '', tr('Note')), note),
+      el('label', 'doc-field wide', node('span', '', tr('Chats (none selected: all chats)')), chats)),
+      switchRow(alertOn, 'Send an alert on a match', 'Uses the alert destinations already set for this workspace.'),
+      switchRow(excerpts, 'Keep a short excerpt with each match', 'Off by default: only the term and the record are stored.'),
+      el('div', 'doc-row-actions', create));
+  }
+
+  function hitsSection() {
+    const list = node('ol', 'doc-steps');
+    for (const hit of watchHits.slice(0, 60)) {
+      list.append(el('li', 'doc-step',
+        el('div', 'doc-step-top', node('span', 'doc-tag l-important', hit.list || ''),
+          node('span', 'doc-tag', tr((ENTRY_KINDS.find(k => k[0] === hit.kind) || [, hit.kind])[1])),
+          node('time', 'doc-time', clock(hit.at))),
+        node('p', 'doc-step-text', hit.value),
+        hit.excerpt ? node('q', 'doc-step-reply', hit.excerpt) : '',
+        node('span', 'doc-sub', tr('Journal record #{seq}', {seq: hit.record})
+          + (hit.message_id ? ' · #' + hit.message_id : ''))));
+    }
+    return section('search', 'Matches', node('p', 'hint',
+      tr('Newest first. Each match points at the saved record it was found in.')), list);
+  }
 
   function coverPanel() {
     if (!may('account')) return [empty('lock', tr('Not available for this access.'))];

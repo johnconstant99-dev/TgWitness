@@ -75,6 +75,8 @@ First time? Do it in this order:
 | Keep team notes on a case | [Case Board](CASE-BOARD.md) |
 | Read text in images and audio | [Local OCR and transcription](MEDIA-ANALYSIS.md) |
 | Investigate a whole account | [Investigation walkthrough](INVESTIGATION.md) |
+| Document a scam conversation for court | [Investigation mode](INVESTIGATION-MODE.md) |
+| See how the installation reaches Telegram and outside services | [System map](SYSTEM-MAP.md) |
 
 ### Share and verify
 
@@ -105,6 +107,8 @@ Also: [panel safeguards](PANEL-SAFETY.md), [storage and recovery](STORAGE.md),
 <details>
 <summary>Technical reference</summary>
 
+- [Investigation mode](INVESTIGATION-MODE.md)
+- [System map and network observations](SYSTEM-MAP.md)
 - [Collection and visibility](COLLECTION.md)
 - [Complete project guide](PROJECT-GUIDE.md)
 - [Evidence format and trust boundaries](EVIDENCE.md)

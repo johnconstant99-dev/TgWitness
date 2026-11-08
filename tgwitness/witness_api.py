@@ -7,6 +7,8 @@ from .evidence import producer
 from .capture_proof import capture_head
 from .store import utcnow
 
+SEEN_LIMIT = 16
+
 
 def tokens(vault):
     return vault.read("witness").get("tokens", [])
@@ -27,10 +29,12 @@ def revoke(vault, store, token_id):
     if len(kept) == len(tokens(vault)):
         raise ValueError("Unknown witness token.")
     vault.save("witness", {"tokens": kept})
-    polls = store.get_setting("witness_polls", {})
+    polls, seen = store.get_setting("witness_polls", {}), store.get_setting("witness_seen", {})
     polls.pop(token_id, None)
+    seen.pop(token_id, None)
     with store.transaction():
         store.set_setting("witness_polls", polls)
+        store.set_setting("witness_seen", seen)
         store.append("witness.token_revoked", {"token_id": token_id})
 
 
@@ -47,17 +51,7 @@ def head(store, vault, entry, headers, address, status=None):
     witness = (headers.get("x-tgwitness-witness") or "").lower()
     witness = witness if re.fullmatch(r"[0-9a-f]{64}", witness) else None
     interval = headers.get("x-tgwitness-interval") or ""
-    polls = store.get_setting("witness_polls", {})
-    previous = polls.get(entry["id"]) or {}
-    polls[entry["id"]] = {"at": utcnow(), "unix": time.time(), "witness": witness, "address": address,
-                          "interval_minutes": int(interval) if interval.isdigit() and 0 < int(interval) <= 1440 else None}
-    with store.transaction():
-        store.set_setting("witness_polls", polls)
-        if witness and previous.get("witness") != witness:
-
-            store.append("witness.seen", {"token_id": entry["id"], "label": entry["label"],
-                                          "witness_fingerprint": witness,
-                                          "meaning": "an independent witness began fetching the signed journal head"})
+    interval = int(interval) if re.fullmatch(r"\d{1,4}", interval) and 0 < int(interval) <= 1440 else None
     challenge = headers.get("x-tgwitness-challenge") or ""
     challenge = challenge if re.fullmatch(r"[0-9a-f]{32}", challenge) else None
     start = headers.get("x-tgwitness-consistency-from")
@@ -66,8 +60,21 @@ def head(store, vault, entry, headers, address, status=None):
             from fastapi import HTTPException
             raise HTTPException(400, "A bounded record count and challenge are required for continuity proofs")
         start = int(start)
-    return {"format": "tgwitness-witness-head-v1",
-            **capture_head(store, vault, status or {}, challenge, consistency_from=start), "producer": producer()}
+    answer = {"format": "tgwitness-witness-head-v1",
+              **capture_head(store, vault, status or {}, challenge, consistency_from=start), "producer": producer()}
+    with store.transaction():
+        polls, seen = store.get_setting("witness_polls", {}), store.get_setting("witness_seen", {})
+        previous = (polls.get(entry["id"]) or {}).get("witness")
+        known = seen.get(entry["id"], [previous] if previous else [])
+        polls[entry["id"]] = {"at": utcnow(), "unix": time.time(), "witness": witness, "address": address,
+                              "interval_minutes": interval}
+        store.set_setting("witness_polls", polls)
+        if witness and witness not in known and len(known) < SEEN_LIMIT:
+            store.set_setting("witness_seen", {**seen, entry["id"]: [*known, witness]})
+            store.append("witness.seen", {"token_id": entry["id"], "label": entry["label"],
+                                          "witness_fingerprint": witness,
+                                          "meaning": "an independent witness began fetching the signed journal head"})
+    return answer
 
 
 def state(vault, store):

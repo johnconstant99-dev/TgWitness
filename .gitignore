@@ -22,7 +22,6 @@ tgwitness-backup*/
 *.log
 *.log.*
 *.zip
-!tools/fixtures/*.zip
 website/export-clinic/media/*.zip
 website/export-clinic/media/*.mp4
 website/export-clinic/media/*.mkv
@@ -84,6 +83,7 @@ delivery.zip
 /tools/cloud_world.py
 /tools/capture_demo.py
 /tools/capture_screenshots.py
+/tools/case_board_i18n.py
 /tools/minicheck.py
 /tools/prepare_media_test_model.py
 /scripts/secret_lab_*.py

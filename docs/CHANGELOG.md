@@ -23,8 +23,25 @@
 
 ## Unreleased
 
+- Simplify the panel around six daily sections: Home, Chats, Journal, Exports, Accounts and Settings. Move secondary tools, collection diagnostics, chat actions and advanced filters into contextual menus. Open saved chats after sign-in, preserve drafts and filter selections, and give messages more space on phones and desktops. Update the Russian labels and panel guide.
+
+- First setup starts with one question: Just download, Follow chats or Evidence for a case. The answer sets the goal and interface level; five stages with a progress bar replace the seven numbered steps, connection routes open only when the automatic check fails, and the Telegram step hides account diagnostics. Level, theme and time zone stay under More options.
+- The README adds animated panels for the first start and system map, and for case documentation: subject cards, conversation plans and wallet codes with watchlist hits. The capability panel adds investigation mode and the court case package. Each animation has narrow-screen and reduced-motion versions.
+- Verify reused Secret Chat attachments, retain damaged cached bytes during repair, and retry pending downloads through a bounded persistent queue. Preserve exact protocol identifiers in the panel and make older history available through explicit pagination.
+- Serialize analyst report edits and detect stale revisions so concurrent changes cannot silently remove revision history.
+- Require verified owner-only permissions when explicitly exporting an MTProto session key in a forensic bundle.
+
+- Create a new provider-metadata directory with readable traversal permissions even under a restrictive service umask, while preserving permissions on an existing directory.
+- Cancel a pending QR sign-in when its panel session ends or is revoked, including main-token rotation. Recheck access before a queued QR request starts. Other sessions and completed account authorizations stay intact.
+- Preserve Secret Chat message drafts, focus and reading position during refresh. Bind chat and auto-accept confirmations to the account where they were opened, and preserve edits made while a message is being sent.
+
 - Update the development-history and validation overview, distinguish live monitoring from history and recheck observations, and document verification results by acquisition mode.
 - Record Secret Chat integration in the published 0.9.1 installer package: backend, collector hooks, API and panel. The pinned protocol library remains an optional `secret-chats` dependency enabled per account.
+
+- Add an administrator [System map](SYSTEM-MAP.md) with per-account routes, socket
+  endpoints, proxy state, storage and key boundaries, service configuration and a
+  bounded network-observation buffer. Refresh visible snapshots every five seconds;
+  distinguish requests, connection attempts, results and unavailable host telemetry.
 
 - Isolate request-body capacity and token-family lockouts, set Secure download cookies behind trusted HTTPS proxies, limit pending tickets per access, and expose journal write failures.
 - Add an English Secret Chat interface demo with fictional requests, replies, attachments and retained deletion notices. See the current Secret Chat guide for installed integration and recording behavior.

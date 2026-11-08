@@ -110,6 +110,8 @@ class LifecycleOperations:
                 )
             app.state.disclosures = Disclosures(app.state.account_export, vault)
             app.state.access = self.access or AccessControl(vault, store, self.console)
+            self.login_loop = asyncio.get_running_loop()
+            app.state.access.session_end_listeners.add(self.end_qr_session)
             from ..network_observer import attach
 
             app.state.network_observer = attach(app.state.access, collector, self.profile_id)
@@ -280,6 +282,8 @@ class LifecycleOperations:
             yield
         finally:
             app.state.closing = True
+            if getattr(app.state, "access", None):
+                app.state.access.session_end_listeners.discard(self.end_qr_session)
             try:
                 if self.allow_profiles:
                     from ..archive_api import shutdown as stop_mcp

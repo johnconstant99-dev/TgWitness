@@ -13,11 +13,22 @@ export function createResponsiveShell({node, icon, tr}) {
   close.append(icon("x")); sidebar.prepend(close);
   const scrim = node("div", "sidebar-scrim"); scrim.hidden = true;
   workspace.append(scrim);
-  const actions = node("div", "mobile-workspace-actions");
-  const collector = document.getElementById("collector-toggle"), status = document.getElementById("status-chip");
-  const collectorPlace = document.createComment("collector control"), statusPlace = document.createComment("collector status");
-  collector.before(collectorPlace); status.before(statusPlace); sidebar.querySelector(".sidebar-bottom").before(actions);
-  let opened = false, previousFocus = null;
+  let opened = false, previousFocus = null, openMenu = null;
+  const closeMenus = (except = null) => {
+    if (openMenu && openMenu !== except) {openMenu.open = false; openMenu = null;}
+    for (const menu of workspace.querySelectorAll('.action-menu[open]')) if (menu !== except) menu.open = false;
+  };
+  workspace.addEventListener('toggle', event => {
+    if (event.target.matches('.action-menu') && event.target.open) {closeMenus(event.target); openMenu = event.target;}
+  }, true);
+  document.addEventListener('pointerdown', event => {
+    for (const menu of workspace.querySelectorAll('.action-menu[open]')) if (!menu.contains(event.target)) menu.open = false;
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+    const menu = workspace.querySelector('.action-menu[open]');
+    if (menu) { event.preventDefault(); menu.open = false; menu.querySelector('summary').focus(); }
+  });
 
   function setOpen(value, restore = true) {
     opened = Boolean(value && mobile.matches);
@@ -37,18 +48,18 @@ export function createResponsiveShell({node, icon, tr}) {
   }
   function resize() {
     if (!mobile.matches || !opened) setOpen(false, false);
-    if (mobile.matches) actions.append(status, collector);
-    else { statusPlace.after(status); collectorPlace.after(collector); }
+    closeMenus();
   }
   toggle.addEventListener("click", () => setOpen(!opened));
   close.addEventListener("click", () => setOpen(false)); scrim.addEventListener("click", () => setOpen(false));
   sidebar.addEventListener("click", event => {
-    if (event.target.closest("[data-view], #lock-panel, #mode-switch")) setOpen(false, false);
+    if (event.target.closest("[data-view], #lock-panel, #mode-switch, .doc-toggle")) setOpen(false, false);
   });
   window.addEventListener("tgwitness:route", event => {
+    closeMenus();
     if (event.detail?.reason !== "initial") setOpen(false, false);
   });
-  window.addEventListener("tgwitness:lock", () => setOpen(false, false));
+  window.addEventListener("tgwitness:lock", () => {closeMenus();setOpen(false, false);});
   document.addEventListener("keydown", event => {
     if (!opened) return;
     if (event.key === "Escape") { event.preventDefault(); setOpen(false); return; }

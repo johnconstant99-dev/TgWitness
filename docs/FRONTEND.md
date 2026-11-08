@@ -7,6 +7,11 @@
 Native ES modules and plain DOM, no frontend build step. `python start.py` runs the panel
 locally; browser checks make their own temp workspaces and never touch Telegram.
 
+Restart the application after updating panel assets or translation dictionaries.
+`panel_assets.PanelFiles` builds the page and its subresource-integrity metadata at
+startup, and the locale endpoint caches generated dictionaries. Replacing files in
+a running installation does not refresh that metadata.
+
 <details>
 <summary>On this page</summary>
 
@@ -69,6 +74,13 @@ go into the wheel, demo asset list and source archive.
 
 The panel only reads signed records. Grouping, filters, download history and drafts are not
 journal edits.
+
+Keep the daily navigation and reading area compact. Collection health belongs in
+the status menu, chat-specific operations in Chat actions, and optional journal
+filters in their disclosure. A collapsed control must remain reachable with a
+keyboard. Keep selected journal filters visible outside the disclosure, preserve
+drafts when navigating, and reset action menus when the workspace or route changes.
+`components/layout.css` supplies the shared layout and responsive overrides.
 
 ## Still to extract
 

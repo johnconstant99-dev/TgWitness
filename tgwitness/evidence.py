@@ -22,17 +22,13 @@ from .verify import Coverage, fingerprint, verify_events, verify_checkpoint
 from .security import private_write
 
 LIMITS = [
-    "Each record is an observation by this workspace's Telegram client, signed with the collector key in the manifest.",
-    "observed_at is the collector clock and source_at is the date Telegram supplied; retained checkpoints, witness "
-    "records and RFC 3161 or OpenTimestamps receipts bind the journal to outside time.",
-    "Content is kept from its first observation; each later edit is a new version and a deletion is a separate notice "
-    "next to the saved content.",
-    "Deletion notices list the deleted messages; the chat's admin log names the acting administrator where the account "
-    "can read it. Deletions Telegram sends without a chat are kept as deletion.unscoped.",
-    "Reactions and membership changes are recorded as Telegram shows them to this account.",
-    "History snapshots record each chat as Telegram returned it at that moment, next to the live records.",
-    "Verify with the collector fingerprint you retained and with checkpoints, witness records or timestamps that cover "
-    "the last exported record.",
+    "This journal records observations made by a Telegram client.",
+    "Observed time uses the collector's system clock; it is not a trusted timestamp.",
+    "Messages deleted before collection and unobserved intermediate edits cannot be recovered.",
+    "Deletion actors are generally unavailable. Unscoped deletions are not attributed to a chat.",
+    "Reaction identities and membership changes are partial and depend on Telegram visibility.",
+    "Backfill is a current history snapshot, not reconstruction of missed events.",
+    "Signatures detect changes relative to a trusted key. Retain the fingerprint and checkpoints elsewhere.",
 ]
 
 
@@ -126,22 +122,16 @@ def csv_chunks(events):
 
 
 README = (
-    "\n\nMinimum evidence conditions\n"
-    "python verify.py evidence.zip --fingerprint TRUSTED_COLLECTOR_SHA256 --checkpoint retained.json --require evidence\n"
-    "Required: integrity and the confirmed signer key. At least one of these: independent binding of the\n"
-    "last record (retained checkpoint or confirmed witness) or external time. Optional: attested collection run.\n"
-    "--require evidence exits with code 2 unless the signer is pinned and the last exported\n"
-    "record is bound by a retained checkpoint, a confirmed witness or a verified timestamp.\n"
-    "\nAdditional verification options\n"
+    "\n\nAdditional verification options\n"
     "Require a witnessed export boundary: add --witness witness.zip\n"
     "  --witness-fingerprint TRUSTED_WITNESS_SHA256 --require-witness\n"
-    "The witness must have retained the exact exported head; the verifier then confirms\n"
-    "that an independent party held this journal at the witness time.\n"
+    "The witness must have retained the exact exported head. This verifies consistency\n"
+    "with its retained records, not the truth of the recorded messages.\n"
     "Archives above 4 GiB uncompressed also need --max-gib with their size in GiB.\n"
     "Requires Python 3.11+ and cryptography. CSV cells are formula-escaped.\n"
     "events.jsonl is authoritative. Export is a stable journal prefix.\n"
     "coverage.json lists continuous observation periods, gaps and message IDs that were\n"
-    "not observed; deletions are separate notice records. verify.py recomputes it from events.jsonl.\n"
+    "never observed (not evidence of deletion); verify.py recomputes it from events.jsonl.\n"
     "Produced by TgWitness (PhishDestroy, https://phishdestroy.io); the producer is part of\n"
     "the signed manifest.\n")
 
@@ -180,6 +170,7 @@ def export_file(store, vault, fmt, options=None, *, include_board=True, compact=
     try:
         retained = store.retained_checkpoint()
         with store.snapshot() as snapshot:
+            snapshot_at = utcnow()
             from . import board
             board_export = board.export_state(snapshot.connection, vault) if include_board and board.head(snapshot.connection)["seq"] else None
             from .gap_analysis import settings as gap_settings
@@ -372,6 +363,7 @@ def export_file(store, vault, fmt, options=None, *, include_board=True, compact=
                 write_member("README.txt", [verification_kit.quickstart(options.get("language", "en")), b"\n", readme])
                 write_member("SHA256SUMS", [report.sha256sums(hashes)])
                 manifest = {"format": "tgwitness-evidence-v1", "created_at": context["created_at"],
+                            "snapshot_at": snapshot_at,
                             "public_key": vault.public_key, "fingerprint": result["fingerprint"],
                             "event_count": result["events"], "head_hash": result["head_hash"],
                             "scope": "Complete stable journal prefix from sequence 1, including operational events",

@@ -104,5 +104,5 @@ def official_report(events, expected=None):
             "interruptions": [{"seq": e["seq"], "kind": e["kind"], "at": e["recorded_at"]} for e in interruptions],
             "environment_status": "INCOMPLETE", "cloudflare_status": "INCOMPLETE",
             "drand_status": "INCOMPLETE", "drand_rounds": beacons,
-            "scope": "rendered observations only; no complete account history or Telegram-signed content",
+            "scope": "rendered observations from the recorded official-client session",
             "trust": "local integrity only; verify independent environment and network evidence separately"}

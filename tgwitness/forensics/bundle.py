@@ -3,6 +3,7 @@ import json
 import shutil
 from pathlib import Path
 
+from ..security import owner_only, owner_only_state, private_write
 from .mtproto import MTProtoDecryptor, extract_auth_key
 from .pcap import UnsupportedCapture, cross_verify
 
@@ -28,6 +29,11 @@ def build_bundle(target_dir, *, session_path, events, pcap_path=None, frames=Non
     auth_key = extract_auth_key(session_path)
     decryptor = MTProtoDecryptor(auth_key)
     report = cross_verify(decryptor, frames, events)
+    if include_key:
+        target.mkdir(mode=0o700, parents=True, exist_ok=True)
+        owner_only(target)
+        if not owner_only_state(target)[0]:
+            raise PermissionError("The key bundle destination must be accessible only to its owner.")
     network.mkdir(parents=True, exist_ok=True)
     frame_dir = network / "frames"
     frame_dir.mkdir()
@@ -41,7 +47,7 @@ def build_bundle(target_dir, *, session_path, events, pcap_path=None, frames=Non
     if include_key:
         keys["auth_key_hex"] = auth_key.hex()
         keys["sensitive"] = "Contains the account master key; keep this bundle private."
-    (network / "session_keys.json").write_text(json.dumps(keys, indent=2, sort_keys=True), encoding="utf-8")
+    private_write(network / "session_keys.json", json.dumps(keys, indent=2, sort_keys=True).encode("utf-8"))
     paths = [*frame_paths, "network/verification_report.json", "network/session_keys.json"]
     if pcap_path is not None:
         shutil.copy2(pcap_path, network / "traffic.pcap")

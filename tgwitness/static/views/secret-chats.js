@@ -2,6 +2,14 @@ export function createSecretChats(context) {
   const {root, tr, trn, json, toast, busy, node, formatTime, download, confirm, getSession, may, humanSize, actionText} = context;
   const find = id => root.querySelector("#" + id);
   let view = null, selected = null, timer = null, active = false, session = getSession(), request = 0;
+  let renderedChat = null, threadStamp = null, activation = 0;
+  let olderRequest = 0, loadingOlder = false;
+  const drafts = new Map(), sending = new Set();
+
+  function actionOwner() {
+    const owner = getSession(), started = activation;
+    return (requireActive = true) => (!requireActive || (active && started === activation)) && owner === session && owner === getSession();
+  }
 
   function threads() {
     const map = new Map();
@@ -50,7 +58,7 @@ export function createSecretChats(context) {
   function renderList(items) {
     const list = find("secret-list");
     list.replaceChildren();
-    if (!items.length) {list.append(node("p", "hint", tr("No pseudo-secret chats yet."))); return;}
+    if (!items.length) list.append(node("p", "hint", tr("No pseudo-secret chats yet.")));
     for (const item of items) {
       const button = node("button", "secret-chat-row" + (item.id === selected ? " selected" : ""));
       button.type = "button";
@@ -58,6 +66,14 @@ export function createSecretChats(context) {
         trn("{n} record", "{n} records", item.items.length)));
       button.addEventListener("click", () => {selected = item.id; render();});
       list.append(button);
+    }
+    if (view.pending_files) list.append(node("p", "hint", tr("Attachments waiting to be saved: {n}", {n: view.pending_files})));
+    if (view.next_before) {
+      list.append(node("p", "hint", tr("Earlier records are available. Load older records to see more history.")));
+      const older = node("button", "quiet", tr("Load older records"));
+      older.type = "button"; older.disabled = loadingOlder;
+      older.addEventListener("click", () => busy(older, loadOlder));
+      list.append(older);
     }
   }
 
@@ -84,8 +100,18 @@ export function createSecretChats(context) {
 
   function renderThread(items) {
     const box = find("secret-thread");
-    box.replaceChildren();
     const item = items.find(entry => entry.id === selected);
+    const stamp = JSON.stringify([item, may("interact"), sending.has(selected)],
+      (_, value) => value instanceof Map || value instanceof Set ? [...value] : value);
+    if (stamp === threadStamp) return;
+    const previous = box.querySelector("textarea"), oldFeed = box.querySelector(".secret-feed");
+    const sameChat = renderedChat === selected;
+    const focus = sameChat && previous === document.activeElement;
+    const selection = focus ? [previous.selectionStart, previous.selectionEnd] : null;
+    const scroll = sameChat && oldFeed && oldFeed.scrollHeight - oldFeed.scrollTop - oldFeed.clientHeight > 24
+      ? oldFeed.scrollTop : null;
+    threadStamp = stamp; renderedChat = selected;
+    box.replaceChildren();
     if (!item) {box.append(node("p", "hint", tr("Choose a chat to read it."))); return;}
     const head = node("div", "secret-thread-head");
     head.append(node("b", "", tr("User ID {id}", {id: item.peer ?? "?"})), node("span", "hint", stateText(item)));
@@ -98,8 +124,9 @@ export function createSecretChats(context) {
       const accept = node("button", "primary", tr("Accept here"));
       accept.type = "button";
       accept.addEventListener("click", () => busy(accept, async () => {
-        if (!(await confirm(tr("Accept this chat in TgWitness? This account's other devices will not get it.")))) return;
-        await json("secret-chats/" + item.id + "/accept", {}); await load();
+        const current = actionOwner();
+        if (!(await confirm(tr("Accept this chat in TgWitness? This account's other devices will not get it."))) || !current()) return;
+        await json("secret-chats/" + item.id + "/accept", {}); if (current()) await load();
       }));
       actions.append(accept);
     }
@@ -107,8 +134,9 @@ export function createSecretChats(context) {
       const close = node("button", "quiet", tr("End chat"));
       close.type = "button";
       close.addEventListener("click", () => busy(close, async () => {
-        if (!(await confirm(tr("End this chat? The journal keeps every record.")))) return;
-        await json("secret-chats/" + item.id + "/close", {}); await load();
+        const current = actionOwner();
+        if (!(await confirm(tr("End this chat? The journal keeps every record."))) || !current()) return;
+        await json("secret-chats/" + item.id + "/close", {}); if (current()) await load();
       }));
       actions.append(close);
     }
@@ -123,15 +151,27 @@ export function createSecretChats(context) {
     if (["ready", "rekeying"].includes(state) && may("interact")) {
       const form = node("form", "secret-send"), input = node("textarea"), send = node("button", "primary", tr("Send"));
       input.maxLength = 4096; input.rows = 2; input.setAttribute("aria-label", tr("Message"));
-      send.type = "submit";
+      input.value = drafts.get(item.id) || "";
+      input.addEventListener("input", () => drafts.set(item.id, input.value));
+      send.type = "submit"; send.disabled = sending.has(item.id);
       form.append(input, send);
       form.addEventListener("submit", event => {event.preventDefault(); busy(send, async () => {
-        const text = input.value.trim(); if (!text) return;
-        await json("secret-chats/" + item.id + "/messages", {text}); input.value = ""; await load();
+        const current = actionOwner(), draft = input.value, text = draft.trim();
+        if (!text || !current() || sending.has(item.id)) return;
+        drafts.set(item.id, draft); sending.add(item.id);
+        try {
+          await json("secret-chats/" + item.id + "/messages", {text});
+          if (!current(false)) return;
+          if (drafts.get(item.id) === draft) drafts.delete(item.id);
+          await load();
+        } finally {
+          if (current(false)) {sending.delete(item.id); threadStamp = null; if (active) render();}
+        }
       });});
       box.append(form, node("p", "hint", tr("Sent messages are recorded. TgWitness does not mark received messages as read.")));
+      if (focus) {input.focus({preventScroll: true}); input.setSelectionRange(...selection);}
     }
-    feed.scrollTop = feed.scrollHeight;
+    feed.scrollTop = scroll ?? feed.scrollHeight;
   }
 
   function eventText(record) {
@@ -160,10 +200,38 @@ export function createSecretChats(context) {
 
   async function load() {
     const current = ++request, owner = getSession();
-    if (owner !== session) {session = owner; view = null; selected = null;}
-    const result = await json("secret-chats");
+    if (owner !== session) {
+      session = owner; view = null; selected = null; renderedChat = null; threadStamp = null;
+      olderRequest++; loadingOlder = false;
+      drafts.clear(); sending.clear(); find("secret-user").value = "";
+      find("secret-list").replaceChildren(); find("secret-thread").replaceChildren();
+    }
+    const cursor = view ? view.records.at(-1)?.seq || 0 : null;
+    const result = await json("secret-chats" + (cursor === null ? "" : "?after=" + encodeURIComponent(cursor)));
     if (current !== request || owner !== getSession()) return;
-    view = result; render();
+    mergeView(result, cursor !== null); render();
+  }
+
+  function mergeView(result, keepCursor = true) {
+    const records = new Map((view?.records || []).map(record => [record.seq, record]));
+    for (const record of result.records) records.set(record.seq, record);
+    const nextBefore = keepCursor && view ? view.next_before : result.next_before;
+    view = {...result, records: [...records.values()].sort((a, b) => a.seq - b.seq), next_before: nextBefore};
+  }
+
+  async function loadOlder() {
+    if (!view?.next_before || loadingOlder) return;
+    const current = actionOwner(), serial = ++olderRequest, before = view.next_before;
+    loadingOlder = true;
+    try {
+      const result = await json("secret-chats?before=" + encodeURIComponent(before));
+      if (!current() || serial !== olderRequest) return;
+      const records = new Map(view.records.map(record => [record.seq, record]));
+      for (const record of result.records) records.set(record.seq, record);
+      view = {...view, records: [...records.values()].sort((a, b) => a.seq - b.seq), next_before: result.next_before};
+    } finally {
+      if (current(false) && serial === olderRequest) {loadingOlder = false; if (active) render();}
+    }
   }
 
   function schedule() {
@@ -172,32 +240,45 @@ export function createSecretChats(context) {
   }
 
   async function saveSettings() {
+    if (!view) return;
+    const current = actionOwner();
     const body = {enabled: find("secret-enabled").checked, accept_incoming: find("secret-accept").checked};
     if (body.accept_incoming && !view.settings.accept_incoming &&
         !(await confirm(tr("Accept every incoming request in TgWitness? Accepted chats do not reach this account's other devices.")))) {
-      find("secret-accept").checked = false; return;
+      if (current()) find("secret-accept").checked = false; return;
     }
-    view = await json("secret-chats/settings", body); render();
+    if (!current()) return;
+    let result;
+    try {result = await json("secret-chats/settings", body);}
+    catch (error) {if (current()) renderSettings(); throw error;}
+    if (!current(false)) return;
+    view = {...result, records: view.records, next_before: view.next_before};
+    if (active) render();
+    await load();
     toast(tr("Pseudo-secret settings saved."));
   }
 
   find("secret-enabled").addEventListener("change", event => busy(event.currentTarget, saveSettings));
   find("secret-accept").addEventListener("change", event => busy(event.currentTarget, saveSettings));
   find("secret-start").addEventListener("submit", event => {event.preventDefault(); busy(event.submitter, async () => {
+    const current = actionOwner();
     const user = find("secret-user").value.trim();
     if (!user) throw new Error(tr("Enter a @username or a user ID."));
     const chat = await json("secret-chats", {user});
+    if (!current()) return;
     find("secret-user").value = ""; selected = chat.id; await load();
     toast(tr("Request sent. The chat opens when the other side accepts."));
   });});
 
   return {
     async enter() {
-      active = true;
+      active = true; activation++;
       try {await load();} finally {schedule();}
     },
-    leave() {active = false; clearTimeout(timer);},
-    reset() {active = false; clearTimeout(timer); view = null; selected = null; request++;
+    leave() {active = false; activation++; clearTimeout(timer);},
+    reset() {active = false; activation++; clearTimeout(timer); view = null; selected = null; request++;
+      olderRequest++; loadingOlder = false;
+      renderedChat = null; threadStamp = null; drafts.clear(); sending.clear(); find("secret-user").value = "";
       find("secret-list").replaceChildren(); find("secret-thread").replaceChildren();},
   };
 }

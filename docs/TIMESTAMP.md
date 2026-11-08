@@ -30,6 +30,20 @@ that committed prefix; individual Telegram actions retain their recorded event t
 
 ## Procedure
 
+The journal verifier reports backward steps and unparseable `observed_at` values
+in `chronology` when present, and includes a warning in its command output. It
+preserves the signed timestamps and still checks their signatures. This diagnostic
+does not prove deliberate backdating: clock corrections can also move time back.
+Conversely, monotonically increasing timestamps do not establish accurate time.
+`--strict` governs signer pinning and supported formats; it does not turn the
+collector's clock into an independent time source.
+
+Recorded drand values receive structural and hash self-consistency checks offline.
+These checks do not authenticate BLS signatures and establish no lower time bound.
+`--check-drand` compares selected recorded rounds with HTTPS relay responses; the
+result states how many rounds were compared and which relays answered. Unchecked
+rounds must not be treated as authenticated time evidence.
+
 1. Retain the collector key fingerprint through a separate trusted channel. A key
    supplied only by the examined ZIP is insufficient to identify the collector.
 2. In **Exports → Prepare timestamp request**, download the selected workspace's

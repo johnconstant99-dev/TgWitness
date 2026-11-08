@@ -650,7 +650,7 @@ class AccountDisclosureCheck:
                 "source_reference_checked": source_checked, "derivation_correctness_established": False,
                 "html_index_signed_by_manifest": True, "producer": self.manifest.get("producer"),
                 "meaning": "The signature protects this disclosure's bytes and policy statement. "
-                           "Source linkage names the original archive and collector key; filtering and redaction follow the stated policy."}
+                           "Source linkage does not establish correct filtering, redaction, legal compliance or completeness."}
 
 
 

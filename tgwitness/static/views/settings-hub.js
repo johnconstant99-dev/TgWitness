@@ -4,16 +4,18 @@ import {accountState} from '../components/account-state.js';
 export function createSettingsHub(ctx) {
   const {root, wizardRoot, state, json, tr, node, toast, navigate, askConfirm, $, refreshStatus} = ctx;
   const rank = {simple:0, standard:1, expert:2};
-  const goals = [['copy','📦','Archive copy','Save an account archive.'],['watch','👁','Follow chats','Keep new messages and their changes.'],['evidence','⚖','Evidence','Record continuously with independent timestamps.']];
+  const goals = [['copy','📥','Just download','Save chats and files once. Nothing keeps running in the background.'],['watch','👁','Follow chats','Keep new messages and their changes.'],['evidence','⚖','Evidence for a case','Record continuously with independent timestamps.']];
+  const goalLevels = {copy:'simple',watch:'standard',evidence:'standard'};
   const routes = [['auto','✨','Automatic','Try public proxies, then WARP.'],['warp','🛡','Cloudflare WARP','Connect through a local tunnel.'],['proxy','🔌','My proxy','Paste one proxy address.'],['direct','🌐','Direct','Telegram will see this server’s address.']];
   const levels = [['simple','🙂','Simple','Only the essentials.'],['standard','⚙','Standard','Common settings and explanations.'],['expert','🛠','Expert','All fields, limits and technical details.']];
-  const navLevels = {start:'simple',chats:'simple',observations:'simple',evidence:'simple',settings:'simple',
-    board:'standard',accounts:'standard',access:'standard',sources:'expert',connection:'expert',witness:'expert',analysis:'expert',
+  const navLevels = {'system-map':'expert',topology:'expert',start:'simple',chats:'simple',observations:'simple',evidence:'simple',settings:'simple',
+    board:'standard',accounts:'simple',access:'standard',sources:'standard',connection:'expert',witness:'expert',analysis:'expert',
     parameters:'expert','system-log':'expert',integrations:'expert',sealed:'expert'};
   let data=null, prefs=null, draft=null, section=null, generation=0, connectionBusy=false, checkTimer=null, statusTimer=null;
   let dialogs=null, moved=[], query='', reveal=new Set(), editing=false;
   let autoTried=false, routeDirty=false, checkFailure=null;
   let live=null, liveTimer=null, visited=0, recordedStep=null, shownSession=null;
+  let shownStep=null, shownStage=null, levelChosen=false, moreOpen=false;
   let groupScope=null;
   let preferencesQueue=Promise.resolve(), draftQueue=Promise.resolve(), preferencesSequence=0, draftSequence=0, checkSequence=0;
   const owner=()=>({generation,profile:state.profile,token:state.token,revision:state.workspaceRevision});
@@ -38,7 +40,7 @@ export function createSettingsHub(ctx) {
   const otherMethods=node('div','login-methods');
   for(const id of ['files','key'])otherMethods.append(auth.querySelector('[data-auth-method="'+id+'"]'));
   other.append(otherMethods);primary.after(other);other.append($('api-details'));
-  const label=(value)=>tr({copy:'Archive copy',watch:'Follow chats',evidence:'Evidence',photos:'Photos up to 20 MB',
+  const label=(value)=>tr({copy:'Just download',watch:'Follow chats',evidence:'Evidence',photos:'Photos up to 20 MB',
     short_media:'Photos and videos up to 60 seconds / 20 MB',all:'All files up to 1 GB',custom:'Custom file limits',
     auto:'Automatic',hide:'No, hide it',simple:'Simple',standard:'Standard',expert:'Expert',
     account:'All chats',selected:'Choose chats',folder:'Telegram folder',warp:'Cloudflare WARP',proxy:'My proxy',direct:'Direct',
@@ -72,7 +74,7 @@ export function createSettingsHub(ctx) {
     document.documentElement.dataset.uiLevel=prefs.level;
     try{localStorage.setItem('tgwitness-ui-level',prefs.level);}catch{}
     for(const b of document.querySelectorAll('.sidebar .nav[data-view]'))b.dataset.level=navLevels[b.dataset.view]||'expert';
-    for(const [view,simple,full] of [['start','Home','Start here'],['observations','Changes','Journal'],['evidence','Archives','Exports']]){
+    for(const [view,simple,full] of [['start','Home','Home'],['observations','Journal','Journal'],['evidence','Exports','Exports']]){
       const b=document.querySelector('.sidebar [data-view="'+view+'"]');
       const text=[...b.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());if(text)text.textContent=' '+tr(prefs.level==='simple'?simple:full)+' ';
     }
@@ -154,9 +156,9 @@ export function createSettingsHub(ctx) {
       data=await request(who,'settings/edit',{key,value,allow_outside,disable_dependents,revision});await refresh(who);
     }finally{if(current(who)&&state.view==='settings')render();}
   }
-  function preferencesForm(box){
-    box.append(select('Language',Object.entries(ctx.languages),prefs.language,async value=>{const who=owner();await savePreferences({language:value},who);requireOwner(who);await ctx.changeLanguage(value);}),
-      select('Theme',[['system','System theme'],['light','Light theme'],['dark','Dark theme']],prefs.theme,value=>savePreferences({theme:value})));
+  function preferencesForm(box,{language=true}={}){
+    if(language)box.append(select('Language',Object.entries(ctx.languages),prefs.language,async value=>{const who=owner();await savePreferences({language:value},who);requireOwner(who);await ctx.changeLanguage(value);}));
+    box.append(select('Theme',[['system','System theme'],['light','Light theme'],['dark','Dark theme']],prefs.theme,value=>savePreferences({theme:value})));
     const zones=[...new Set([prefs.timezone,Intl.DateTimeFormat().resolvedOptions().timeZone,'UTC',...(Intl.supportedValuesOf?.('timeZone')||[])])];
     box.append(select('Time zone',zones.map(x=>[x,x]),prefs.timezone,value=>savePreferences({timezone:value})));
   }
@@ -222,7 +224,7 @@ export function createSettingsHub(ctx) {
     const search=node('input','hub-search');search.type='search';search.placeholder=tr('Search all settings, including hidden ones');search.setAttribute('aria-label',search.placeholder);search.value=query;
     search.oninput=()=>{query=search.value;renderResults(results);};root.append(search);
     const results=node('div','hub-results');root.append(results);renderResults(results);
-    const overview=node('div','hub-grid');overview.hidden=!!query;root.append(overview);
+    const overview=node('div','hub-grid');overview.hidden=!!query||!!section;root.append(overview);
     const summaries=[['appearance','Language, time and appearance',ctx.languages[prefs.language]+' · '+prefs.timezone],['level','Interface level',label(prefs.level)],
       ['goal','Goal',data.goal?label(data.goal):tr('Choose a goal')],['connection','Connection',label(data.connection.mode)],
       ['telegram','Telegram account',signedIn()?tr('Connected'):tr('Not connected')],
@@ -270,14 +272,14 @@ export function createSettingsHub(ctx) {
       if(data.collection_problem&&section==='collection')detail.append(message('Collection could not start. Check the connection and selected chats.','notice warning'));
       if(data.outside_problem&&['connection','protection','notifications'].includes(section))detail.append(message('External services need a working SOCKS5 or WARP route.','notice warning'));
     }
-    const more=node('details','hub-more');more.append(node('summary','',tr('More settings and expert tools')));
+    const more=node('details','hub-more');more.hidden=!!section;more.append(node('summary','',tr('More settings and expert tools')));
     for(const [view,text] of [['sources','Recording rules'],['parameters','Parameters'],['access','Access'],['integrations','Integrations / MCP'],['system-log','System log'],['sealed','GitHub Actions']]){
       const b=button(text,()=>openAdvanced(view));b.dataset.level=navLevels[view];more.append(b);
     }root.append(more,button('Open first setup',async()=>{await saveDraft({step:1});await navigate('first-run');},'text-link'));
     if(data.recommendations.length)root.append(message('Recommended: an off-site copy, a witness bot and a code check.','notice'));
   }
   function renderResults(box){
-    box.replaceChildren();root.querySelector('.hub-grid')?.toggleAttribute('hidden',!!query);
+    box.replaceChildren();root.querySelector('.hub-grid')?.toggleAttribute('hidden',!!query||!!section);
     if(!query.trim())return;
     const q=query.trim().toLocaleLowerCase();
     const all=[...data.fields,...data.parameters,...[...ctx.catalog()].map(f=>({...f,label:tr(f.label)}))];
@@ -316,7 +318,9 @@ export function createSettingsHub(ctx) {
   function connectionForm(box, first){
     const routeDraft=first?draft:(editing?draft:{...data.wizard,route:data.connection.strategy?.mode|| (data.connection.managed?'warp':data.connection.mode==='direct'?'direct':data.connection.mode==='mtproxy_auto'?'auto':'proxy'),allow_direct:data.connection.strategy?.allow_direct??data.connection.policy.exposure!=='hide'});
     if(!first){draft=routeDraft;editing=true;}
-    const routeBox=node('div');box.append(routeBox);
+    const options=first?node('details','wizard-options'):null, routeBox=node('div');
+    if(options){options.append(node('summary','',tr('Connection settings')),routeBox);options.open=prefs.level==='expert'||draft.route!=='auto'||!!draft.unchecked||!!checkFailure;}
+    else box.append(routeBox);
     function updateRoutes(){routeBox.replaceChildren();cards(routeBox,routes,draft.route,async mode=>{
       const who=owner();
       if(connectionBusy)return;
@@ -343,6 +347,7 @@ export function createSettingsHub(ctx) {
     }
     updateRoutes();
     const status=node('div','connection-result');status.id='hub-connection-result';status.setAttribute('role','status');box.append(status);
+    if(options)box.append(options);
     if(connectionBusy){status.className='connection-result checking';status.textContent=tr('Checking connection…');}
     else if(checkFailure&&!fresh(data.connection))connectionFailed(checkFailure);
     else paintConnection(data.connection);
@@ -350,8 +355,9 @@ export function createSettingsHub(ctx) {
       check.onchange=()=>run(async()=>{const who=owner();draft.unchecked=check.checked;
         if(check.checked&&connectionBusy){checkSequence++;clearTimeout(checkTimer);await request(who,'connection/cancel',{});connectionBusy=false;}
         await saveDraft({step:4},who);updateNext();});
-      bypass.append(check,document.createTextNode(tr('Continue without checking')));box.append(bypass);}
+      bypass.append(check,document.createTextNode(tr('Continue without checking')));options.append(bypass);}
   }
+  function openOptions(){const options=wizardRoot.querySelector('.wizard-options');if(options)options.open=true;}
   async function checkConnection(acceptSetup=false,who=owner()){
     requireOwner(who);
     if(connectionBusy)return;connectionBusy=true;checkFailure=null;updateNext();
@@ -380,7 +386,7 @@ export function createSettingsHub(ctx) {
       if(currentAttempt())checkTimer=setTimeout(safePoll,600);
     }catch(e){if(currentAttempt())connectionFailed(e);}
   }
-  function connectionFailed(error){connectionBusy=false;checkFailure=error;const box=$('hub-connection-result');if(box){box.className='connection-result failed';box.replaceChildren(message('Connection failed. Try WARP or your own proxy.'));
+  function connectionFailed(error){connectionBusy=false;checkFailure=error;const box=$('hub-connection-result');if(box){openOptions();box.className='connection-result failed';box.replaceChildren(message('Connection failed. Try WARP or your own proxy.'));
     const details=node('details');details.append(node('summary','',tr('Technical details')),message(error.message));box.append(details);
     box.append(button('Try WARP',async()=>{draft.route='warp';if(state.view==='first-run')await renderWizard();else render();}),
       button('My proxy',async()=>{draft.route='proxy';if(state.view==='first-run')await renderWizard();else render();}),button('Check again',checkConnection));}updateNext();}
@@ -390,7 +396,7 @@ export function createSettingsHub(ctx) {
     const ok=fresh(connection);box.className='connection-result '+(ok?'working':'unchecked');
     box.append(message(ok?tr('Working · {n} ms',{n:connection.check.latency_ms}):'Connection has not been verified.'));
     if(!ok){
-      if(connection?.pool?.listed&&connection.pool.healthy===0&&connection.pool.probed_at){box.className='connection-result failed';box.prepend(message('No public proxy answers. Try WARP or your own proxy.'));}
+      if(connection?.pool?.listed&&connection.pool.healthy===0&&connection.pool.probed_at){openOptions();box.className='connection-result failed';box.prepend(message('No public proxy answers. Try WARP or your own proxy.'));}
       box.append(button('Try WARP',async()=>{draft.route='warp';if(state.view==='first-run')await renderWizard();else render();}),button('Check again',checkConnection));
     }
   }
@@ -410,22 +416,62 @@ export function createSettingsHub(ctx) {
     try{const result=await request(who,'connection');if(data)data.connection=result.current;updateIndicator(result.current);}catch{}
     if(current(who))scheduleStatus(who);
   },15000);}
+  function wizardTop(page){
+    const top=node('div','wizard-top'), brand=node('div','wizard-brand'), mark=node('img'), language=node('select','wizard-language');
+    mark.src='/mark.svg';mark.alt='';mark.width=30;mark.height=30;
+    brand.append(mark,node('span','',tr('First setup')));
+    for(const [key,name] of Object.entries(ctx.languages))language.append(new Option(name,key));
+    language.value=prefs.language;language.setAttribute('aria-label',tr('Language'));
+    language.onchange=()=>run(async()=>{const who=owner();await savePreferences({language:language.value},who);requireOwner(who);await ctx.changeLanguage(language.value);},language);
+    top.append(brand,language);page.append(top);
+  }
+  function wizardStages(page){
+    const names=[tr('Goal'),tr('Connection'),tr('Telegram'),tr('Chats'),tr('Start')], targets=[1,4,5,6,7];
+    const stage=live?names.length:Math.max(0,draft.step-3), last=names.length-1, list=node('ol','wizard-stepper');
+    list.setAttribute('aria-label',tr('Setup progress'));
+    list.style.setProperty('--from',String(Math.min(shownStage??stage,last)/last));list.style.setProperty('--to',String(Math.min(stage,last)/last));
+    names.forEach((name,i)=>{
+      const item=node('li','wizard-stage'+(i<stage?' done':i===stage?' current':'')), dot=node('span','wizard-dot',i<stage?'✓':String(i+1)), text=node('span','wizard-stage-name',name);
+      dot.setAttribute('aria-hidden','true');item.style.setProperty('--i',String(i));
+      if(i===stage)item.setAttribute('aria-current','step');
+      if(i<stage&&!live){const jump=button('',async()=>{draft.step=targets[i];await saveDraft();await renderWizard();},'wizard-stage-link');jump.append(dot,text);item.append(jump);}
+      else item.append(dot,text);
+      list.append(item);
+    });
+    if(shownStage!==stage)list.classList.add('wizard-moved');
+    shownStage=stage;page.append(list);
+  }
   async function renderWizard(who=owner()){
     requireOwner(who);
+    const focused=wizardRoot.contains(document.activeElement)?document.activeElement.closest('[data-answer]')?.dataset.answer:null;
     restoreMoved();wizardRoot.replaceChildren();if(!draft||!prefs)return;
-    const page=node('div','first-run-shell');wizardRoot.append(page);
-    page.append(node('div','eyebrow',tr('First setup')));
+    const page=node('div','first-run-shell'+(shownStep===null?' wizard-enter':''));wizardRoot.append(page);
+    wizardTop(page);wizardStages(page);
     if(live){renderLive(page);return;}
     visited=Math.max(visited,draft.step);
     if(recordedStep!==draft.step){ctx.record?.({replace:recordedStep===null});recordedStep=draft.step;}
-    const step=Math.min(6,draft.step);page.append(message(draft.step===7?'Ready to start':tr('Step {n} of 6',{n:step}),'step-count'));
-    const progress=node('progress');progress.max=6;progress.value=draft.step===7?6:step-1;progress.setAttribute('aria-label',tr('Setup progress'));page.append(progress);
-    const names=['Language and time','How much would you like to see?','What do you want to do?','How should we connect?','Connect Telegram','Which chats?','Review your choices'];
-    const heading=node('h1','',tr(names[draft.step-1]));heading.tabIndex=-1;page.append(heading);
-    const body=node('div','first-run-body');page.append(body);
-    if(draft.step===1)preferencesForm(body);
-    if(draft.step===2)cards(body,levels,prefs.level,async level=>{await savePreferences({level});await renderWizard();});
-    if(draft.step===3)cards(body,goals,draft.goal,async goal=>{draft.goal=goal;await saveDraft();await renderWizard();});
+    const choosing=draft.step<4, screen=choosing?1:draft.step;
+    const direction=shownStep===null?'enter':(shownStep<4?1:shownStep)===screen?'none':draft.step>shownStep?'forward':'back';
+    shownStep=draft.step;
+    const pane=node('div','wizard-pane');pane.dataset.direction=direction;page.append(pane);
+    const names=['What do you want to do?','What do you want to do?','What do you want to do?','How should we connect?','Connect Telegram','Which chats?','Review your choices'];
+    const heading=node('h1','',tr(names[draft.step-1]));heading.tabIndex=-1;pane.append(heading);
+    if(choosing)pane.append(message('Save a copy of your Telegram account, or keep a record of conversations as they change.','wizard-lead'));
+    const body=node('div','first-run-body');pane.append(body);
+    if(choosing){
+      cards(body,goals,draft.goal,async goal=>{
+        draft.goal=goal;await saveDraft();
+        if(!levelChosen&&!draft.completed&&prefs.level!==goalLevels[goal])await savePreferences({level:goalLevels[goal]});
+        await renderWizard();
+      });
+      body.querySelector('[data-answer="copy"]')?.append(node('span','answer-badge',tr('Easiest')));
+      const more=node('details','wizard-more'), moreBody=node('div','wizard-more-body');
+      more.append(node('summary','',tr('More options')),moreBody);more.open=moreOpen;more.ontoggle=()=>{moreOpen=more.open;};
+      moreBody.append(node('h2','',tr('Interface level')));
+      cards(moreBody,levels,prefs.level,async level=>{levelChosen=true;await savePreferences({level});await renderWizard();});
+      preferencesForm(moreBody,{language:false});
+      body.append(more);
+    }
     if(draft.step===4)connectionForm(body,true);
     if(draft.step===5){
       shownSession=signedIn();
@@ -463,16 +509,16 @@ export function createSettingsHub(ctx) {
       }
     }
     if(draft.step===7){
-      const summary=node('dl','setup-summary');for(const [key,value,go] of [['Language',prefs.language,1],['Time zone',prefs.timezone,1],['Interface level',label(prefs.level),2],['Goal',label(draft.goal),3],['Connection',label(draft.route),4],['Telegram account',tr('Connected'),5],['Which chats?',label(draft.scope),6]]){
-        summary.append(node('dt','',tr(key)));const dd=node('dd','',value);dd.append(button('Change',async()=>{draft.step=go;await saveDraft();await renderWizard();},'text-link'));summary.append(dd);
+      const summary=node('dl','setup-summary');for(const [key,value,go,more] of [['Goal',label(draft.goal),1,false],['Which chats?',label(draft.scope),6,false],['Telegram account',tr('Connected'),5,false],['Connection',label(draft.route),4,false],['Interface level',label(prefs.level),1,true],['Language',ctx.languages[prefs.language]||prefs.language,1,false],['Time zone',prefs.timezone,1,true]]){
+        summary.append(node('dt','',tr(key)));const dd=node('dd','',value);dd.append(button('Edit',async()=>{draft.step=go;if(more)moreOpen=true;await saveDraft();await renderWizard();},'text-link'));summary.append(dd);
       }body.append(summary);
       if(draft.unchecked)body.append(message('Connection was not checked. Starting can fail.','notice warning'));
       if(data.needs_notification_destination)body.append(message('Add a notification destination later in Settings.'));
     }
     page.append(message('Everything can be changed later in Settings.','setup-reassurance'));
     const footer=node('div','wizard-actions');page.append(footer);
-    const back=button('Back',async()=>{draft.step--;await saveDraft();await renderWizard();});back.disabled=draft.step===1;footer.append(back);
-    const next=button(draft.step===7?'Start':'Next',async()=>{
+    const back=button('Back',async()=>{draft.step=draft.step===4?1:draft.step-1;await saveDraft();await renderWizard();});back.disabled=choosing;footer.append(back);
+    const next=button(draft.step===7?(draft.goal==='copy'?'Start export':'Start'):'Next',async()=>{
       const action=owner();
       if(draft.step===7){
         const result=await request(action,'first-run/finish',draftBody());data=result;draft={...result.wizard};await refresh(action);
@@ -480,11 +526,17 @@ export function createSettingsHub(ctx) {
         if(state.view!=='first-run')return;
         live={started:Date.now(),done:false};await renderWizard(action);watchLive(action);return;
       }
-      if(draft.step===3){if(!await applyGoal(draft.goal,{first:!data.goal},action))return;}
+      if(choosing){
+        if(data.goal!==draft.goal&&!await applyGoal(draft.goal,{first:!data.goal},action))return;
+        await saveDraft({step:4},action);await renderWizard(action);return;
+      }
       await saveDraft({step:draft.step+1},action);await renderWizard(action);
     },'primary');next.id='first-run-next';footer.append(next);
     page.append(button('Skip, I’ll set it up myself',async()=>{data=await request(owner(),'first-run/skip',{});await navigate('settings');},'text-link setup-skip'));
-    updateNext();heading.focus({preventScroll:true});
+    updateNext();
+    const restore=direction==='none'&&focused?page.querySelector('[data-answer="'+focused+'"]'):null;
+    if(restore)restore.focus({preventScroll:true});else heading.focus({preventScroll:true});
+    if(direction!=='none'&&page.getBoundingClientRect().top<0)page.scrollIntoView({block:'start'});
     if(draft.step===4&&draft.route==='auto'&&!autoTried&&!fresh(data.connection)){
       autoTried=true;void checkConnection(false,who);
     }
@@ -504,15 +556,15 @@ export function createSettingsHub(ctx) {
   function liveParts(){const h=state.status?.health||{};return ['connection','intake','sources','media'].map(name=>({name,...(h[name]||{state:'unknown'})}));}
   function renderLive(page){
     const heading=node('h1','',tr(live.done?'Setup is applied.':'Checking that recording works…'));heading.tabIndex=-1;page.append(heading);
-    const list=node('div','first-run-live');list.setAttribute('aria-live','polite');
-    for(const part of liveParts()){
-      const row=node('div','first-run-check');
+    const list=node('div','first-run-live'+(live.shown?'':' wizard-appear'));list.setAttribute('aria-live','polite');
+    liveParts().forEach((part,i)=>{
+      const row=node('div','first-run-check');row.dataset.state=part.state;row.style.setProperty('--i',String(i));
       row.append(ctx.stateBadge(part.state),node('strong','',ctx.healthNames[part.name]),node('span','hint',ctx.healthLines(part.name,part)[0]||''));
       list.append(row);
-    }
-    page.append(list);
+    });
+    live.shown=true;page.append(list);
     if(live.done){
-      page.append(node('h2','',tr('Done! What next:')));
+      page.append(node('h2','wizard-done'+(live.celebrated?'':' wizard-appear'),tr('Done! What next:')));live.celebrated=true;
       const actions=node('div','first-run-next-actions');
       for(const [view,text,style] of [['chats','Open chats','primary'],['observations','Open the journal','secondary'],['evidence','How to export','secondary']])
         actions.append(button(text,async()=>{live=null;clearTimeout(liveTimer);await navigate(view);},style));
@@ -544,14 +596,14 @@ export function createSettingsHub(ctx) {
   return {bootstrap,load,render,savePreferences,
     async openGroup(id){if(!data)data=await request(owner(),'settings');await openGroup(id);},
     get step(){return draft&&!live?draft.step:null;},
-    leave(){restoreMoved();clearTimeout(liveTimer);live=null;recordedStep=null;groupScope=null;},
+    leave(){restoreMoved();clearTimeout(liveTimer);live=null;recordedStep=null;groupScope=null;shownStep=shownStage=null;},
     status(){
       updateNext();if(data)updateIndicator(data.connection);
       const session=signedIn();
       if(state.view==='first-run'&&draft?.step===5&&!live&&shownSession!==null&&session!==shownSession)void renderWizard();
       shownSession=session;
     },
-    reset(){generation++;checkSequence++;clearTimeout(checkTimer);clearTimeout(statusTimer);clearTimeout(liveTimer);restoreMoved();data=prefs=draft=dialogs=null;live=null;groupScope=null;groupView.reset();visited=0;recordedStep=shownSession=null;connectionBusy=false;editing=false;autoTried=routeDirty=false;checkFailure=null;preferencesQueue=draftQueue=Promise.resolve();},
+    reset(){generation++;checkSequence++;clearTimeout(checkTimer);clearTimeout(statusTimer);clearTimeout(liveTimer);restoreMoved();data=prefs=draft=dialogs=null;live=null;groupScope=null;groupView.reset();visited=0;recordedStep=shownSession=shownStep=shownStage=null;levelChosen=moreOpen=false;connectionBusy=false;editing=false;autoTried=routeDirty=false;checkFailure=null;preferencesQueue=draftQueue=Promise.resolve();},
     async refreshPreferences(patch){if(prefs)await savePreferences(patch);},
   };
 }

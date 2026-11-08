@@ -478,8 +478,8 @@ def custody(context):
                       for ref, title, how in standards(say, kind, rfc3161_count(context.get("anchors", []), validated=True))],
         "custody_log": [{"at": context["created_at"], "action": "exported and sealed",
                          "by": options.get("examiner") or None, "tool": "TgWitness " + __version__}],
-        "statement": "Alignment with the listed practices, not certification. Integrity is verifiable with verify.py; "
-                     "retained checkpoints, witness records and timestamps bind the records to outside parties and time.",
+        "statement": "Alignment with the listed practices, not certification. Integrity is verifiable; "
+                     "source authenticity and clock accuracy are not established by signatures.",
     }
     if kind == "handover":
         handover = context["handover"]
@@ -587,13 +587,13 @@ def readme(context, files, english):
     lines += ["", say("Checksum scope"), "-" * 64,
               say("SHA256SUMS covers the payload files listed inside it. It excludes itself, manifest.json and manifest.sig."),
               say("The signed manifest also covers SHA256SUMS. manifest.sig authenticates the exact bytes of manifest.json."),
-              say("Matching hashes show that the files are unchanged; --fingerprint confirms the signer."),
+              say("Matching hashes establish file integrity."),
               "", say("Working with the data"), "-" * 64,
               say("JSON and JSONL are UTF-8. Times are ISO 8601 in UTC; numeric Telegram IDs identify accounts and chats, not people."),
               say("Import CSV as UTF-8 and keep ID, wallet and hash columns as text. Formula-like values are escaped for spreadsheets."),
               say("Indicators are observations, not verdicts. Review their source references before importing STIX or MISP."),
               say("The PDF is a signed reading copy. Use the HTML viewer for search and the JSON or JSONL for structured analysis.")]
-    lines += ["", say("Reading this record"), "-" * 64] + ["- " + say(item) for item in context["limits"]]
+    lines += ["", say("Limitations"), "-" * 64] + ["- " + say(item) for item in context["limits"]]
     text = "\n".join(lines) + "\n"
     prefix = "\n".join(context["limits"])
     supplement = english[len(prefix):].lstrip() if english.startswith(prefix) else english.strip()
@@ -1083,10 +1083,10 @@ def evidence_brief(say, digest, count, anchors, coverage, account_text, handover
     gaps = len((coverage or {}).get("gaps") or [])
     hidden = [say("Who is behind an account or a chat: Telegram shows names and IDs, not identities."),
               say("That Telegram delivered everything: gaps in observation ({n}) are listed under Coverage.", n=gaps)
-              if gaps else say("Activity outside the observed periods: the Coverage section lists those periods."),
-              say("Messages deleted before observation began, and the deleting person where no admin log names one."),
+              if gaps else say("That Telegram delivered everything: Telegram gives no completeness guarantee."),
+              say("Messages deleted before observation began, or who deleted a message: Telegram does not say."),
               say("Exact times after record #{n}: they come from the collector's clock.", n=latest.get("event_count"))
-              if latest else say("Independently fixed times: observed times come from the collector clock until a timestamp or witness covers them.")]
+              if latest else say("Exact times: they come from the collector's clock, not from an independent timestamp.")]
     return summary, shows, hidden
 
 
@@ -1227,7 +1227,7 @@ def standards_section(say, number, kind="evidence", stamps=0):
 
 
 def limits_section(say, number, limits):
-    return (section(number, "limits", say("Reading this record"), say("What the records state and what binds them."))
+    return (section(number, "limits", say("Limitations"), say("Read these before relying on the material."))
             + "<ul>" + "".join("<li>" + e(say(item)) + "</li>" for item in limits) + "</ul></section>")
 
 

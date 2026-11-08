@@ -66,6 +66,7 @@ class Generate(BaseModel):
 
 class ReportEdit(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    expected_revision: int | None = Field(default=None, ge=0)
     title: str = Field(min_length=1, max_length=160)
     analyst_note: str = Field(default="", max_length=6000)
     revised_summary: str = Field(default="", max_length=6000)

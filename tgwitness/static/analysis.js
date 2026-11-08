@@ -194,7 +194,7 @@
   }
   $("ask-save-report").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(plan&&capabilities().enabled){const turn=generation,data=await call("reports",{plan_id:plan.plan_id});if(current(turn)){renderReport(data);await reports();}}}));
   $("ask-refresh-reports").addEventListener("click",event=>busy(event.currentTarget,reports));
-  $("ask-report-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{if(report&&capabilities().enabled){const turn=generation,data=await call(scoped("reports/"+report.id),{title:$("report-title").value,revised_summary:$("report-summary").value,analyst_note:$("report-note").value},{method:"PATCH"});if(current(turn)){renderReport(data);await reports();}}});});
+  $("ask-report-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{if(report&&capabilities().enabled){const turn=generation,data=await call(scoped("reports/"+report.id),{title:$("report-title").value,revised_summary:$("report-summary").value,analyst_note:$("report-note").value,expected_revision:report.analyst_revisions.length},{method:"PATCH"});if(current(turn)){renderReport(data);await reports();}}});});
   $("report-download").addEventListener("click",event=>busy(event.currentTarget,async()=>{
     if(report)await download("analysis/"+scoped("reports/"+report.id+"/download"),"tgwitness-analysis.json",false,true);
   }));

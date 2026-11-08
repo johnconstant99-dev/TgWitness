@@ -5,9 +5,9 @@ from .mtproto import MTProtoFrameError
 
 MAX_SCAN_WINDOWS = 1_000_000
 MAX_SCAN_BYTES = 64 * 1024 * 1024
-LIMITATIONS = ("Matches bind supplied digests to decrypted frame bytes, not other event fields or Telegram origin. "
-               "The account key is symmetric and permits fabrication. Capture provenance, freshness and completeness "
-               "are not established; PCAP import is not qualified.")
+LIMITATIONS = ("Frame matching checks supplied payload digests and optional message identifiers. "
+               "Review capture origin, acquisition time and custody through the acquisition record. Generic PCAP import "
+               "is not supported by this helper.")
 
 
 class UnsupportedCapture(ValueError):

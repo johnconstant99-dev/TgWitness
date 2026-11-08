@@ -9,11 +9,14 @@ from . import network as routes_network
 from . import secret_chats as routes_secret_chats
 from . import system as routes_system
 from .topology import topology
+from .system_map import system_map
 from . import witness as routes_witness
 from .. import cloud_wizard
 from .. import extensions
 from ..board_api import register as register_board
 from ..capture_api import register as register_capture
+from ..channel_graph import register as register_channel_graph
+from ..webapp import register as register_webapp
 from ..conversation_api import register as register_conversation
 from ..translation_api import register as register_translation
 from ..search_record import register as register_search_record
@@ -21,6 +24,7 @@ from ..subject import register as register_subject
 from ..undercover import register as register_undercover
 from ..presence_watch import register as register_presence
 from ..qr_codes import register as register_qr
+from ..watchlists import register as register_watchlists
 from ..middleware import RequestLimit
 from ..panel_assets import PanelFiles
 from ..panel_routes import register as register_panel
@@ -57,6 +61,7 @@ def register(app, ctx):
         routes_system.status
     )
     router.get("/api/topology", dependencies=[Depends(authenticate)])(topology)
+    router.get("/api/system-map", dependencies=[Depends(authenticate)])(system_map)
     app.include_router(router)
     router = APIRouter()
     if ctx.allow_profiles:
@@ -696,6 +701,9 @@ def register(app, ctx):
     register_undercover(app, authenticate, ctx.require_live)
     register_presence(app, authenticate, ctx.require_live, ctx.operation)
     register_qr(app, authenticate, ctx.require_live, ctx.visible_chats, ctx.root / "media")
+    register_watchlists(app, authenticate, ctx.require_live, ctx.visible_chats)
+    register_channel_graph(app, authenticate, ctx.require_live)
+    register_webapp(app, authenticate, ctx.require_live, ctx.visible_chats)
     app.state.extensions = extensions.load(
         extensions.Context(
             app,

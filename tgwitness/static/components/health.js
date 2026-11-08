@@ -10,7 +10,7 @@ export function createHealthBar({node, icon, tr, stateNames, partNames, lines, d
   const tabs = node("div", "health-part-tabs"); tabs.setAttribute("role", "tablist"); tabs.setAttribute("aria-label", tr("Collector health"));
   const content = node("div", "health-part-body"); content.id = "health-strip";
   dialog.append(head, tabs, content); document.body.append(dialog);
-  workspace.querySelector(".health-details")?.remove(); workspace.querySelector(".topbar").after(bar);
+  workspace.querySelector(".health-details")?.remove(); workspace.querySelector("#workspace-health").append(bar);
   const chips = new Map(), panels = new Map(), buttons = new Map();
   let selected = null, latest = null, identity = null;
   function state(part) { return Object.hasOwn(stateNames, part?.state) ? part.state : "unknown"; }
@@ -25,6 +25,7 @@ export function createHealthBar({node, icon, tr, stateNames, partNames, lines, d
   }
   function open(name) {
     if (!latest || workspace.hidden || workspace.inert) return;
+    workspace.querySelector('#workspace-status').open = false;
     setSelected(name);
     if (!dialog.open) dialog.showModal();
     buttons.get(name).focus();
@@ -54,11 +55,16 @@ export function createHealthBar({node, icon, tr, stateNames, partNames, lines, d
       : (names.indexOf(selected) + offset + names.length) % names.length;
     setSelected(names[index]); buttons.get(names[index]).focus();
   });
-  close.addEventListener("click", () => dialog.close());
+  function dismiss() {
+    dialog.close();
+    if (!workspace.hidden && !workspace.inert) workspace.querySelector('#workspace-status > summary').focus({preventScroll: true});
+  }
+  close.addEventListener("click", dismiss);
+  dialog.addEventListener('cancel', event => {event.preventDefault();dismiss();});
   dialog.addEventListener("click", event => {
     if (event.target !== dialog) return;
     const rect = dialog.getBoundingClientRect();
-    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dismiss();
   });
   function hide() { if (dialog.open) dialog.close(); selected = null; }
   window.addEventListener("tgwitness:route", hide);

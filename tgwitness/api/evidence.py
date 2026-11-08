@@ -430,7 +430,11 @@ async def assurance_statement(challenge: str = "", *, ctx=Depends(current_contex
         raise HTTPException(
             422, "challenge must be 32 lowercase hexadecimal characters"
         )
-    return await asyncio.to_thread(
+    if not challenge:
+        cached = getattr(ctx.app.state, "assurance_cache", None)
+        if cached is not None and time.monotonic() - cached[0] < 10:
+            return cached[1]
+    statement = await asyncio.to_thread(
         assurance.statement,
         ctx.app.state.vault,
         ctx.app.state.run_receipt,
@@ -439,6 +443,9 @@ async def assurance_statement(challenge: str = "", *, ctx=Depends(current_contex
         ctx.app.state.assurance["provider"],
         challenge or None,
     )
+    if not challenge:
+        ctx.app.state.assurance_cache = (time.monotonic(), statement)
+    return statement
 
 
 async def anchor_request(*, ctx=Depends(current_context)):
@@ -451,30 +458,9 @@ async def anchor_request(*, ctx=Depends(current_context)):
     )
 
 
-def evidence_status(store, vault):
-    folder = store.root / "checkpoints" / "anchors"
-    stamped = [
-        int(proof.name.split(".", 1)[0][11:])
-        for proof in (folder.iterdir() if folder.is_dir() else [])
-        if proof.suffix in (".tsr", ".ots")
-        and proof.name.startswith("checkpoint-")
-        and proof.name.split(".", 1)[0][11:].isdigit()
-    ]
-    polled = [
-        entry["last_poll"]["at"]
-        for entry in witness_api.state(vault, store)["tokens"]
-        if entry.get("last_poll") and entry["last_poll"].get("witness") and not entry.get("overdue")
-    ]
-    return {
-        "timestamps": bool(evidence_settings(store)["enabled"]),
-        "stamped_through": max(stamped, default=0),
-        "witness_at": max(polled, default=None),
-    }
-
-
 async def verify(*, ctx=Depends(current_context)):
     try:
-        checked = await asyncio.to_thread(
+        return await asyncio.to_thread(
             ctx.app.state.store.verify, ctx.app.state.vault.public_key
         )
     except Exception:
@@ -482,7 +468,6 @@ async def verify(*, ctx=Depends(current_context)):
             409,
             "Journal integrity verification failed. Preserve the directory for inspection.",
         ) from None
-    return {**checked, "conditions": evidence_status(ctx.app.state.store, ctx.app.state.vault)}
 
 
 class EvidenceOperations:

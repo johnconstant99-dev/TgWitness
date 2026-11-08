@@ -268,10 +268,10 @@ async def run_due(collector, attempted):
             await asyncio.sleep(1)
         if not collector.running:
             break
-        entity = collector.dialog_cache.get(chat_id, {}).get("entity") or await collector.lookup_entity(chat_id)
-        if entity is None:
-            continue
         try:
+            entity = collector.dialog_cache.get(chat_id, {}).get("entity") or await collector.lookup_entity(chat_id)
+            if entity is None:
+                continue
             state, errors = await read_state(collector.client, entity, options(collector))
         except FLOOD_ERRORS as exc:
             until = max(time.time() + exc.seconds, collector.store.get_setting("rpc_backoff_until", 0))

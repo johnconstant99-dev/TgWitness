@@ -446,16 +446,16 @@ class SystemOperations:
         except (TimeoutError, OSError, ConnectionError) as exc:
             raise HTTPException(503, describe(exc)) from None
 
-    async def operation(self, call, *args):
+    async def operation(self, call, *args, qr_request=None):
         collector = self.app.state.collector
         collector.foreground += 1
         try:
-            return await self.guarded_operation(call, *args)
+            return await self.guarded_operation(call, *args, qr_request=qr_request)
         finally:
             collector.foreground -= 1
             collector.close_when_idle()
 
-    async def guarded_operation(self, call, *args):
+    async def guarded_operation(self, call, *args, qr_request=None):
         self.require_live()
         async with self.op_lock:
             self.require_live()
@@ -513,6 +513,22 @@ class SystemOperations:
                         await collector.avatar_history.close()
                     finally:
                         collector.release_export(owner)
+            if qr_request is not None:
+                principal = await self.identify(qr_request, await bearer(qr_request))
+                await self.authenticate(qr_request, principal)
+                self.qr_access_session = principal.session_id
+                self.qr_access_candidate = None
+                try:
+                    result = await self.perform_operation(call, *args)
+                    self.qr_access_candidate = collector.login_client
+                    await self.authenticate(qr_request, await self.identify(qr_request, await bearer(qr_request)))
+                    return result
+                except BaseException:
+                    await collector.cancel_login()
+                    collector.phase = collector.resting_phase()
+                    self.qr_access_session = None
+                    self.qr_access_candidate = None
+                    raise
             return await self.perform_operation(call, *args)
 
     def queue_action(self, run_at, body):

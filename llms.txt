@@ -64,6 +64,9 @@ Published validation is engineering evidence with a stated scope. External certi
 - [Collection methods](https://github.com/phishdestroy/TgWitness/blob/main/docs/COLLECTION-MODES.md): History, live observation, sharing and capture paths.
 - [Account export](https://github.com/phishdestroy/TgWitness/blob/main/docs/ACCOUNT-EXPORT.md): Resumable acquisition and file policies.
 - [Investigation](https://github.com/phishdestroy/TgWitness/blob/main/docs/INVESTIGATION.md): Source-linked analysis, people, files and timelines.
+- [Investigation mode](https://github.com/phishdestroy/TgWitness/blob/main/docs/INVESTIGATION-MODE.md): Step-by-step case documentation, subject cards, conversation plans, translation, watchlists, online watch and court documents.
+- [System map](https://github.com/phishdestroy/TgWitness/blob/main/docs/SYSTEM-MAP.md): Panel access, account routes, Telegram targets, outside services and network observations.
+- [First setup and settings](https://github.com/phishdestroy/TgWitness/blob/main/docs/SETTINGS.md): Guided first start and goals.
 - [Case Board](https://github.com/phishdestroy/TgWitness/blob/main/docs/CASE-BOARD.md): Highlights and team annotations.
 - [Reports](https://github.com/phishdestroy/TgWitness/blob/main/docs/CASE_REPORTS.md): HTML, JSON, signed PDF and report design.
 - [Accounts](https://github.com/phishdestroy/TgWitness/blob/main/docs/ACCOUNTS.md): Authorization and supported session formats.

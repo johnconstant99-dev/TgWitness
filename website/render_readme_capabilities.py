@@ -26,12 +26,14 @@ def route(d, path, color, still):
 
 def card(d, index, mobile, still):
     x, y = (0, index * 306) if mobile else (index % 2 * 612, index // 2 * 306)
-    color = (GOLD, BLUE, BLUE, GOLD)[index]
+    color = (GOLD, BLUE, BLUE, GOLD, GREEN, GREEN)[index]
     headings = (
         ("PEOPLE & DOSSIERS", "New name. Same trail.", "Names, replies and shared leads across chats."),
         ("BOT INVESTIGATION", "Record every step.", "Supported button presses become signed receipts."),
         ("SEARCH, AI & MCP", "Ask. Check the source.", "Review saved records. Share read-only access."),
         ("SEALED CLOUD MODE", "Make the collector auditable.", "Pinned code. Provider records. Tunnel access."),
+        ("INVESTIGATION MODE", "Every step cites the record.", "Plans, replies and notes link to journal entries."),
+        ("CASE PACKAGE", "A bag anyone can check.", "Exhibit index, request annex and a Rule 902 template."),
     )
     kicker, title, detail = headings[index]
     d.add(f'<g transform="translate({x} {y})">')
@@ -67,13 +69,31 @@ def card(d, index, mobile, still):
             d.add('<rect class="scan" x="27" y="147" width="3" height="43" fill="#8ccfff" opacity=".3">'
                   '<animateTransform attributeName="transform" type="translate" values="0 0;530 0;0 0" dur="7s" repeatCount="indefinite"/></rect>')
         d.text("Source references travel with the answer.", 26, 264, 18, INK, 500)
-    else:
+    elif index == 3:
         for xx, title, sub in [(26, "Firewall", "No inbound rules"), (209, "Collector", "SSH masked"), (392, "Tunnel", "Panel access")]:
             box(d, xx, 148, 169, 68, color="#6e624c")
             d.text(title, xx + 14, 176, 20, INK, 600)
             d.text(sub, xx + 14, 200, 14, MUTED, 500)
         route(d, "M378 181H392", color, still)
         d.text("Inspect the deployment, not just its output.", 26, 264, 18, INK, 500)
+    elif index == 4:
+        for xx, title, sub in [(26, "Plan", "Payment route"), (209, "Message", "Sent from panel"), (392, "Reply", "After 4 min")]:
+            box(d, xx, 148, 169, 68, color="#3f6659")
+            d.text(title, xx + 14, 176, 20, INK, 600)
+            d.text(sub, xx + 14, 200, 14, MUTED, 500)
+        route(d, "M195 181H209M378 181H392", color, still)
+        d.text("Each step keeps its journal hash.", 26, 264, 18, INK, 500)
+    else:
+        for row, name in enumerate(("court/certification.html", "court/exhibits.csv", "manifest-sha256.txt")):
+            yy = 137 + row * 35
+            box(d, 26, yy, 535, 29, color="#3f6659")
+            d.text(name, 42, yy + 20, 15, INK, 500)
+            d.add(f'<path d="M531 {yy + 15}l5 5 9-10" fill="none" stroke="{color}" stroke-width="2" '
+                  'stroke-linecap="round" stroke-linejoin="round"/>')
+        if not still:
+            d.add(f'<rect class="scan" x="27" y="138" width="3" height="97" fill="{color}" opacity=".3">'
+                  '<animateTransform attributeName="transform" type="translate" values="0 0;530 0;0 0" dur="7s" repeatCount="indefinite"/></rect>')
+        d.text("Hidden parts stay sealed. Keys travel apart.", 26, 264, 18, INK, 500)
     d.add('</g>')
 
 
@@ -85,16 +105,17 @@ def main():
              for weight in (500, 600, 700)}
     for mobile in (False, True):
         for still in (False, True):
-            d = Drawing(fonts, 588 if mobile else 1200, 1208 if mobile else 596,
-                        "People, bot interactions, archive analysis and sealed deployment")
+            d = Drawing(fonts, 588 if mobile else 1200, 1820 if mobile else 902,
+                        "People, bot interactions, archive analysis, sealed deployment, investigation mode and case packages")
             d.add('<defs><linearGradient id="surface" x2="1" y2="1">'
                   '<stop stop-color="#0c1c2e"/><stop offset="1" stop-color="#070f1b"/>'
                   '</linearGradient></defs>')
-            for index in range(4):
+            for index in range(6):
                 card(d, index, mobile, still)
             name = "readme-capabilities" + ("-mobile" if mobile else "") + ("-static" if still else "") + ".svg"
             save(d, name, "Illustrated workflows with fictional identities and record references. "
-                 "People profiles, signed interaction receipts, source-linked analysis and auditable cloud deployment.")
+                 "People profiles, signed interaction receipts, source-linked analysis, auditable cloud deployment, "
+                 "investigation steps that cite journal records and a BagIt case package with court templates.")
 
 
 if __name__ == "__main__":

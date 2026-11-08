@@ -46,6 +46,7 @@ class AlertSettings(BaseModel):
     problems: bool = True
     changes: bool = False
     completions: bool = False
+    watchlists: bool = True
     daily: bool = True
     daily_hour: int = Field(default=9, ge=0, le=23)
     language: Literal[i18n.LANGUAGES] = "en"
@@ -716,6 +717,11 @@ async def _destination_pass(store, vault, network, now=None, urls=None):
                  for chat, counts in changes.items()]
         messages.append((tr(words, "TgWitness · {name}: changes in observed chats", name=name),
                          capped(discovered + lines + excerpts, words, limit)))
+    if settings["watchlists"]:
+        from .watchlists import alert_lines
+        found = alert_lines(store, start, cursor, words, tr, limit)
+        if found:
+            messages.append((tr(words, "TgWitness · {name}: watchlist hits", name=name), capped(found, words, limit)))
     if settings["completions"]:
         completed = [line for event in reversed(store.events_of(COMPLETION_KINDS, limit=limit + 1, after=start, before=cursor + 1))
                      if (line := completion_line(event, titles, words))]

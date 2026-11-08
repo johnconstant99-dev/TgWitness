@@ -42,7 +42,7 @@ LIMITS = [
     "Pseudonyms (P01, P02…) are stable within this extract only; the mapping to real people is not included.",
     "Names written inside message texts are not detected; mentions of known participants are replaced.",
     "Coverage is computed from the complete journal for the chosen chats.",
-    "Each record is an observation by this workspace's Telegram client, signed with the collector key in the manifest.",
+    "This journal records observations made by a Telegram client.",
 ]
 
 

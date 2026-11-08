@@ -22,6 +22,10 @@ available under [Releases](https://github.com/phishdestroy/TgWitness/releases).
 | Official-client capture and session video | [Trusted Live](TRUSTED-LIVE.md) |
 | GitHub capture with a session time budget and encrypted delivery | [GitHub capture](SEALED-ACTIONS.md) |
 | Intel TDX collection and independent quote verification | [High assurance](HIGH-ASSURANCE.md) |
+| Guided first setup: Just download, Follow chats or Evidence for a case | [First setup](SETTINGS.md) |
+| Case documentation: subject cards, conversation plans, translation, watchlists, online watch and a BagIt case package with court templates | [Investigation mode](INVESTIGATION-MODE.md) |
+| Exposure check of the investigating account's privacy rules and profile | [Account control](INVESTIGATION-MODE.md#account-control) |
+| Live map of panel access, account routes, Telegram targets and outside services, with recent network observations | [System map](SYSTEM-MAP.md) |
 
 [Choose a collection method](COLLECTION-MODES.md) for scope, output and recovery behavior.
 [Secret Chat installation and package check](PSEUDO-SECRET.md) records the shipped

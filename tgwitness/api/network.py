@@ -223,8 +223,8 @@ class NetworkOperations:
         try:
             addresses = await netclient.resolve(config.host, config.port)
         except OSError:
-            addresses = []
-        inside = any((netclient.internal(a) for a in addresses))
+            addresses = None
+        inside = True if addresses is None else any((netclient.internal(a) for a in addresses))
         if inside and (
             not (request.state.principal.admin or netclient.private_allowed())
         ):

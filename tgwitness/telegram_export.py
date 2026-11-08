@@ -1,8 +1,3 @@
-"""Telegram Desktop compatible views of signed account observations.
-
-The source remains data/*.jsonl; these views are rendered from it.
-Messages are streamed in ascending ID order through a disk-backed index.
-"""
 from datetime import datetime, timezone
 from html import escape
 from itertools import islice

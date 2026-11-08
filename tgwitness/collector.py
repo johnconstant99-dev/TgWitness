@@ -115,6 +115,8 @@ AUTO_DELETE_MEANING = {
     (True, True): "The message's auto-delete timer (sent_at + ttl_period) had expired before this check: an expected "
                   "removal by the timer.",
     (True, False): "The message's auto-delete timer (sent_at + ttl_period) had not expired at this check.",
+    "late": "The deletion notice arrived after the message's auto-delete timer (sent_at + ttl_period) had expired: "
+            "the timer is the likely cause; the notice does not show when the removal happened.",
 }
 
 
@@ -352,10 +354,11 @@ def auto_delete(content, observed, recheck=False):
         delta = (datetime.fromisoformat(observed) - expires).total_seconds()
     except (TypeError, ValueError):
         return None
-    expected = delta >= -AUTO_DELETE_TOLERANCE if recheck else abs(delta) <= AUTO_DELETE_TOLERANCE
+    expected = delta >= -AUTO_DELETE_TOLERANCE
+    late = not recheck and delta > AUTO_DELETE_TOLERANCE
     return {"ttl_period": ttl, "expires_at": expires.isoformat(), "observed_after_expiry_seconds": round(delta),
             "tolerance_seconds": AUTO_DELETE_TOLERANCE, "expected": expected,
-            "meaning": AUTO_DELETE_MEANING[(recheck, expected)]}
+            "meaning": AUTO_DELETE_MEANING["late" if late else (recheck, expected)]}
 
 
 def admin_event(event):
@@ -481,6 +484,7 @@ class Collector:
         self.recheck_wakeup = asyncio.Event()
         self.recheck_state = None
         self.resumed_state_at = None
+        self.paused_drops = 0
         self.buffering = False
         self.buffered = []
         self.buffer_overflow = False
@@ -847,6 +851,7 @@ class Collector:
             self.handle_authorization_error(exc, "Telegram RPC", client=client)
         client.rpc_error_handler = rpc_error
         client.connection_listener = lambda state: self.connection_changed(client, state)
+        client.difference_gap_listener = self.difference_gap
         for handler, builder in ((self.on_new, events.NewMessage()),
                                  (self.on_edit, events.MessageEdited()),
                                  (self.on_delete, events.MessageDeleted()),
@@ -864,6 +869,8 @@ class Collector:
                         self.buffered.append((handler, update))
                     else:
                         self.buffer_overflow = True
+                elif handler == self.on_raw:
+                    self.paused_drops += 1
             client.add_event_handler(active_client_only, builder)
         client.route_id = self.current_route_id() if self.automatic() else None
         return client
@@ -957,6 +964,18 @@ class Collector:
         except (KeyError, TypeError, ValueError):
             return None
         return saved.get("saved_at")
+
+    async def rewind_paused_updates(self):
+        dropped, self.paused_drops = self.paused_drops, 0
+        if not dropped or not self.client:
+            return dropped, False
+        if self.client.is_connected():
+            await self.client.disconnect()
+        saved_at = self.load_update_state(self.client.session)
+        if saved_at is None:
+            return dropped, False
+        self.resumed_state_at = saved_at
+        return dropped, True
 
     async def cancel_login(self):
         task, self.qr_task = self.qr_task, None
@@ -1941,6 +1960,19 @@ class Collector:
                             for f in self.folders.values()],
                 "limit": limit, "may_be_truncated": count >= limit}
 
+    def difference_gap(self, channel_id, before, after):
+        chat_id = utils.get_peer_id(types.PeerChannel(channel_id)) if channel_id is not None else None
+        if chat_id is not None and not self.selected(chat_id):
+            return
+        self.store.append("coverage.gap", {
+            "reason": "Telegram reported that updates for this interval are too old to deliver",
+            "scope": "account" if chat_id is None else "channel", "pts_before": before, "pts_after": after,
+            "completeness": "incomplete", "run_id": self.run_id,
+            "meaning": "Edits, deletions and other updates in this interval were not delivered and are absent from "
+                       "this journal. New messages can still be recovered by reading history."}, chat_id)
+        if self.running:
+            self.recheck_wakeup.set()
+
     def connection_changed(self, client, state):
         if state == "reconnected":
             if client is self.client and self.running:
@@ -2050,8 +2082,11 @@ class Collector:
         self.store.set_setting("folders_seen", list(self.folders.values()))
 
     async def resolve_target(self, chat_id):
-        if chat_id not in self.dialog_cache:
-            await self.dialogs()
+        if chat_id in self.dialog_cache:
+            return self.dialog_cache[chat_id]["entity"]
+        if entity := await self.lookup_entity(chat_id):
+            return entity
+        await self.dialogs()
         if chat_id not in self.dialog_cache:
             raise ValueError("Target is not among the dialogs this account read. Refresh the group list or raise "
                              "the chat list limit in Parameters.")
@@ -2095,10 +2130,12 @@ class Collector:
         self.buffered, self.buffering, self.buffer_overflow = [], True, False
         self.updates_probe = self.updates_diverted = None
         self.buffer_limit = self.param("startup_buffer")
+        dropped, refetch = await self.rewind_paused_updates()
         try:
             await self.prepare_start()
         except BaseException:
             self.buffered, self.buffering = [], False
+            self.paused_drops += dropped
             raise
         self.store.recover_media()
         clock = await self.telegram_clock()
@@ -2119,6 +2156,17 @@ class Collector:
                             "missed updates are requested; a periodic recheck recovers missed messages and marks "
                             "saved ones Telegram no longer returns. Telegram may still omit updates after long outages.",
         })
+        if dropped and refetch:
+            self.store.append("connection.updates_refetched", {
+                "run_id": self.run_id, "updates_while_paused": dropped, "requested_from": self.resumed_state_at,
+                "meaning": "Telegram delivered updates while observation was paused. They were not recorded then and "
+                           "were requested again from the position saved when observation stopped."})
+        elif dropped:
+            self.store.append("coverage.gap", {
+                "reason": "updates delivered while observation was paused", "updates_while_paused": dropped,
+                "completeness": "incomplete", "run_id": self.run_id,
+                "meaning": "These updates were not recorded and no saved position exists to request them again. "
+                           "New messages can still be recovered by reading history."})
         self.mark_recheck_start()
         pending, self.buffered, self.buffering = self.buffered, [], False
         if self.buffer_overflow:
@@ -2606,20 +2654,18 @@ class Collector:
                 chat_id = utils.get_peer_id(update.message.peer_id)
                 action = update.message.action
                 me = (self.store.get_setting("account", None) or {}).get("id")
-                if (isinstance(action, types.MessageActionChatDeleteUser) and action.user_id == me
-                        and self.selected(chat_id)):
-                    await self.check_access(chat_id, update)
+                removed = (isinstance(action, types.MessageActionChatDeleteUser) and action.user_id == me
+                           and self.selected(chat_id))
                 membership = isinstance(update.message.action, (
                     types.MessageActionChatAddUser, types.MessageActionChatDeleteUser,
                     types.MessageActionChatJoinedByLink, types.MessageActionChatJoinedByRequest))
-                if membership and not settings["membership"]:
-                    return
-                if await self.covers(chat_id):
+                if (not membership or settings["membership"]) and (removed or await self.covers(chat_id)):
                     source = recovered_source(update)
-                    if source and self.store.message_state(chat_id, update.message.id)["content"]:
-                        return
-                    await self.capture_message(update.message, "message.new", chat_id, update, source,
-                                               sender=(getattr(update, "_entities", None) or {}).get(update.message.sender_id))
+                    if not (source and self.store.message_state(chat_id, update.message.id)["content"]):
+                        await self.capture_message(update.message, "message.new", chat_id, update, source,
+                                                   sender=(getattr(update, "_entities", None) or {}).get(update.message.sender_id))
+                if removed:
+                    await self.check_access(chat_id, update)
             elif isinstance(update, (types.UpdatePinnedChannelMessages, types.UpdatePinnedMessages)) and not update.pinned:
                 chat_id = (utils.get_peer_id(types.PeerChannel(update.channel_id))
                            if isinstance(update, types.UpdatePinnedChannelMessages) else utils.get_peer_id(update.peer))
@@ -3544,9 +3590,11 @@ class Collector:
         media_root = self.store.root / "media"
         media_root.mkdir(exist_ok=True)
         while self.running or owner and self.export_claim == owner:
-            if lane != "ephemeral" and not owner and capture_settings(self.store)["messages_first"] and self.history.status()["phase"] in ("none", "running", "paused"):
-                await asyncio.sleep(.2)
-                continue
+            deferred = None
+            if lane != "ephemeral" and not owner and capture_settings(self.store)["messages_first"]:
+                state = self.history.status()
+                if state["phase"] in ("running", "paused"):
+                    deferred = state["id"]
             if not capture_settings(self.store)["download_media"]:
                 if owner:
                     return
@@ -3575,7 +3623,7 @@ class Collector:
             limits = lane_limits(lane)
             capture = capture_settings(self.store)
             job = self.store.claim_media(account.get("id", 0), history_run=history_run,
-                                         allow_takeout=client_for_job is not None,
+                                         allow_takeout=client_for_job is not None, exclude_history_run=deferred,
                                          **limits) if capture["download_media"] else None
             if not job:
                 if owner:

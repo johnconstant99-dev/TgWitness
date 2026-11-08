@@ -1974,10 +1974,13 @@ def verify(args, provider=None, cloudflare=None, fetch=collector_statement, beac
         found = {c["check"]: c["status"] for c in report.checks if c["source"] == TDX_SOURCE}
         attested = all(found.get(c) in ("pass", "review")
                        for c in ("tdx_binding", "tdx_quote", "tdx_compose_hash", "tdx_compose", "tdx_identity"))
+        tcb_ok = found.get("tdx_quote") == "pass"
         assurance = {"runtime_measurements": "intel-tdx-quote",
                      "independent_runtime_attestation": "intel-tdx" if attested else "failed",
-                     "key_nonexportability": ("established-by-measured-code" if found.get("tdx_os") == "pass"
-                                              else "conditional-on-os-image") if attested else "not-established",
+                     "tcb_status": "up-to-date" if tcb_ok else "review",
+                     "key_nonexportability": (("established-by-measured-code" if found.get("tdx_os") == "pass"
+                                              else "conditional-on-os-image") if attested and tcb_ok
+                                              else "conditional-on-tcb-review" if attested else "not-established"),
                      "source_authenticity": "commit-pinned-in-measured-compose" if attested else "not-established"}
     return {"format": "tgwitness-assurance-report-v1", "generated_at": utcnow(),
             "verifier": {"software": "TgWitness", "version": __version__}, "result": report.result(),

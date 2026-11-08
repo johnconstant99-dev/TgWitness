@@ -641,7 +641,7 @@
       "criminal_law": "Evidence Act 1893, section 116A",
       "basis": "Section 116A provides rebuttable presumptions for specified electronic records and processes. Identify the actual basis for the presumption relied on.",
       "prepare": "Retain originals and evidence of system operation, acquisition and preservation. Prepare a witness or other permitted evidential route for the particular proceeding.",
-      "criminal": "A process presumption does not establish the truth of a message. Preserve source and context for examination under the applicable rules.",
+      "criminal": "Preserve source and context for examination under the applicable rules.",
       "human": "A knowledgeable witness or other permitted evidential route, as applicable.",
       "tasks": [
         "Preserve records and context",
@@ -650,7 +650,7 @@
         "Make acquisition and custody examinable"
       ],
       "local": "Retain original records, video and evidence of how the system operated. Identify the basis for any section 116A presumption and allow it to be tested. Explain acquisition and custody; the exporter’s signature does not establish the sender’s identity.",
-      "local_criminal": "Identify the applicable basis for any electronic-record presumption and preserve evidence of system operation. Keep originals and acquisition and custody records available for examination. A technical signature does not establish the sender’s identity or the truth of a message.",
+      "local_criminal": "Identify the applicable basis for any electronic-record presumption and preserve evidence of system operation. Keep originals and acquisition and custody records available for examination.",
       "sources": [
         {
           "title": "Evidence Act 1893, section 116A",

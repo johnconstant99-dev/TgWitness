@@ -30,6 +30,8 @@ the original languages.
 Preserve placeholders and markup, and check the actual UI in the selected language.
 Account-visible message content and signed journal payloads must stay as captured.
 Run `python tools/i18n_keys.py` to list the required interface strings.
+`python tools/publication_guard.py --git-index` rejects missing catalogue entries,
+duplicate JSON keys, invalid plural forms and changed placeholders before publication.
 
 Public-site translations are maintained separately in
 [`website/i18n/`](../../website/i18n/README.md).

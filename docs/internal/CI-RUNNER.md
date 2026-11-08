@@ -16,12 +16,13 @@ routing and measured queue times.
 
 | Workflow | Automatic trigger | Execution |
 | --- | --- | --- |
-| Checks | Program, tooling or deployment changes pushed to `main` | Hosted Python, dependency, browser and source checks; Docker validation on the project runner |
+| Checks | Every push to `main`, including documentation-only changes | Hosted Python, dependency and source checks; Docker validation on the project runner |
 | Project website | Website and documentation inputs pushed to `main` | Build and browser checks on the Linux runner |
 | Wiki bundle | Handbook inputs pushed to `main` | Build the downloadable Wiki bundle on hosted Ubuntu |
 | Release packages | A published release | Full compatibility checks, release downloads and container publication |
 
-Changes confined to README or prose do not trigger all application checks.
+README and prose changes also trigger Checks so every main revision can be
+considered by the installer publication workflow.
 A newer automatic run replaces an outdated run for the same branch.
 Each allocated job has a timeout and its own Python virtual environment.
 The project runner accepts one job at a time; Docker, website and release work

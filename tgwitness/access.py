@@ -42,6 +42,16 @@ POLICY = {
     "GET /api/extensions": ("view", "filter"),
     "POST /api/search/record": ("view", "body"),
     "POST /api/subjects/{chat_id}/snapshot": ("collect", "path"),
+    "GET /api/watchlists": ("view", "filter"),
+    "POST /api/watchlists": ("settings", "body"),
+    "PUT /api/watchlists/{list_id}": ("settings", "body"),
+    "DELETE /api/watchlists/{list_id}": ("settings", "body"),
+    "POST /api/watchlists/{list_id}/entries": ("settings", "body"),
+    "POST /api/watchlists/{list_id}/import": ("settings", "body"),
+    "GET /api/watchlists/{list_id}/export": ("export", "body"),
+    "DELETE /api/watchlists/{list_id}/entries/{entry_id}": ("settings", "body"),
+    "GET /api/watchlists/hits": ("view", "filter"),
+    "POST /api/watchlists/scan": ("view", "filter"),
     "GET /api/qr": ("view", "body"),
     "POST /api/qr/scan": ("view", "body"),
     "GET /api/presence": ("view", None),
@@ -454,10 +464,12 @@ class AccessControl:
         self.grants = saved.get("grants", [])
         self.names = {**saved.get("names", {}), **{g["id"]: g["label"] for g in self.grants}}
         now = time.time()
-        saved_sessions = saved.get("sessions", []) if saved.get("panel_key") == digest(vault.token) else []
+        saved_sessions = (saved.get("sessions", [])
+                          if secrets.compare_digest(str(saved.get("panel_key") or ""), digest(vault.token)) else [])
         self.sessions = {s["sha256"]: {**s, "agent": "", "requests": 0}
                          for s in saved_sessions if s["expires"] > now}
         self.lock = threading.RLock()
+        self.session_end_listeners = set()
         self.console = console or Console()
         self.labels = lambda profile_id: profile_id
         self.group_of = None
@@ -477,10 +489,14 @@ class AccessControl:
         token = secrets.token_urlsafe(32)
         with self.lock:
             count = len(self.sessions)
+            ended = [None, *(session["id"] for session in self.sessions.values())]
             private_write(self.vault.root / "panel-token.txt", token.encode())
             self.vault.token = token
             self.sessions.clear()
             self.save()
+        for session_id in ended:
+            for listener in tuple(self.session_end_listeners):
+                listener(session_id)
         self.store.append("access.main_token_rotated", {"sessions_ended": count})
         LOG.info("Main panel token replaced; %d sessions ended", count)
         return token, count
@@ -606,6 +622,8 @@ class AccessControl:
                 return False
             del self.sessions[found["sha256"]]
             self.save()
+        for listener in tuple(self.session_end_listeners):
+            listener(session_id)
         label = "Main administrator" if found["owner"] == "admin" else (self.grant(found["owner"]) or {}).get("label")
         if reason:
             self.store.append("access.session_ended", {"access_id": found["owner"], "session_id": session_id,

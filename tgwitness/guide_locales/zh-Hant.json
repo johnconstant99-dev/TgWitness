@@ -22,7 +22,7 @@
 "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "保留的簽名檢查可讓您將後續匯出的內容與當初觀察到的日誌進行比對。這並不能證明每個 Telegram 事件都已成功傳送。無法送達的檢查與發文失敗的情況需要特別留意；無法保證發佈過程不會中斷。",
 "A session file, TData ZIP or session text, plus its JSON if you have one.": "一個會話檔案、TData ZIP 檔案或會話文字檔，以及（若有）其對應的 JSON 檔案。",
 "A session grants account access. Keep original and converted files private. Conversion transfers authorization, not message history, and cannot restore a revoked login.": "會話賦予帳戶存取權限。請將原始檔案與轉換後的檔案保密。轉換僅轉移授權權限，而非訊息歷史紀錄，且無法恢復已被撤銷的登入權限。",
-"A signature establishes integrity relative to the trusted key, not Telegram origin. Retain the fingerprint and checkpoint independently. An RFC 3161 request alone is not a trusted timestamp; obtain and verify the authority's reply.": "簽名是針對可信密鑰來確立完整性，而非 Telegram 的來源。請獨立保留指紋與檢查點。單憑 RFC 3161 請求本身並不構成可信的時間戳記；必須取得並驗證授權機構的回覆。",
+"Signatures bind saved bytes to this collector's key. Retain the fingerprint and checkpoint independently. An RFC 3161 request alone is not a trusted timestamp; obtain and verify the authority's reply.": "簽名將儲存的位元組與此採集器的金鑰綁定。請獨立保留指紋與檢查點。單憑 RFC 3161 請求本身並不構成可信的時間戳記；必須取得並驗證授權機構的回覆。",
 "API ID and API hash are optional": "API ID 和 API 雜湊值為選用項目",
 "About 99% of accounts logged out": "約 99% 的帳戶已登出",
 "Account": "帳戶",

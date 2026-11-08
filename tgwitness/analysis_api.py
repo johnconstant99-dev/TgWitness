@@ -209,14 +209,23 @@ def register(app, authenticate):
     async def edit(request: Request, report_id: str, body: ReportEdit, workspace_id: str = "default"):
         async def revise():
             state = workspace(request, workspace_id)
-            report = await asyncio.to_thread(get_report, request, state, report_id)
-            if len(report["analyst_revisions"]) >= 100:
-                raise ValueError("The report revision limit has been reached.")
-            report["title"] = body.title
-            report["analyst_revisions"].append({**body.model_dump(), "at": utcnow(),
-                                               "author": request.state.principal.label, "category": "analyst_note"})
-            state.vault.save("analysis-report-" + report_id, report)
-            return report
+            if not hasattr(state, "analysis_report_lock"):
+                state.analysis_report_lock = asyncio.Lock()
+            async with state.analysis_report_lock:
+                await reauthorize(request)
+                if workspace(request, workspace_id) is not state:
+                    raise Refused("This workspace is no longer available.")
+                report = await asyncio.to_thread(get_report, request, state, report_id)
+                revision = len(report["analyst_revisions"])
+                if body.expected_revision is not None and body.expected_revision != revision:
+                    raise HTTPException(409, "This report changed. Reopen it before saving your note.")
+                if revision >= 100:
+                    raise ValueError("The report revision limit has been reached.")
+                report["title"] = body.title
+                report["analyst_revisions"].append({**body.model_dump(exclude={"expected_revision"}), "at": utcnow(),
+                                                   "author": request.state.principal.label, "category": "analyst_note"})
+                state.vault.save("analysis-report-" + report_id, report)
+                return report
         return await execute(revise)
 
     @app.get("/api/analysis/reports/{report_id}/download", dependencies=[Depends(authenticate)])

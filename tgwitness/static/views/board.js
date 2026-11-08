@@ -226,7 +226,7 @@ export function createCaseBoard(ctx){
     dialog.addEventListener('keydown',event=>{if(event.key==='ArrowRight')next.click();if(event.key==='ArrowLeft')previous.click();});await draw();}
   function attach(element,event,content=null){
     if(!may('board.write'))return;const actions=element.querySelector('.bubble-meta,.event-open')||element;
-    actions.append(btn('To board',()=>bookmark(event),'text-link board-save'));const more=btn('⋯',()=>bookmarkOptions(event),'text-link board-save');more.setAttribute('aria-label',t('Bookmark options'));more.title=t('Bookmark options');actions.append(more);element.tabIndex=element.tabIndex<0?0:element.tabIndex;
+    const more=btn('⋯',()=>bookmarkOptions(event),'text-link board-save');more.setAttribute('aria-label',t('Bookmark options'));more.title=t('Bookmark options');actions.append(more);element.tabIndex=element.tabIndex<0?0:element.tabIndex;
     element.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='b'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.target.closest('input,textarea,select')){e.preventDefault();void bookmark(event).catch(error=>toast(error.message,true));}});
     element.addEventListener('click',e=>{if(!e.shiftKey||e.target.closest('button,a,input'))return;e.preventDefault();e.stopPropagation();
       if(anchor&&anchor.chat_id===event.chat_id&&event.message_id&&anchor.message_id){void sliceDialog({chat_id:event.chat_id,from_message_id:Math.min(anchor.message_id,event.message_id),to_message_id:Math.max(anchor.message_id,event.message_id)});anchor=null;}

@@ -8,6 +8,7 @@
       toggle.textContent=context.tr(paused?"Page updates: paused":connected?"Page updates: on":"Page updates: reconnecting");
       toggle.title=context.tr("Delivery of new records to this page. The Telegram connection is shown separately.");
       toggle.setAttribute("aria-pressed",String(!paused));
+      bar.dataset.state=paused?'paused':connected?'connected':'reconnecting';
       fresh.hidden=!pending;fresh.textContent=context.tr("{n} new events",{n:pending});
     }
   }

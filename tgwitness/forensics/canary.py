@@ -24,8 +24,8 @@ def http_observation_record(probe, headers, remote, now=None):
 def correlation(read_at, hit_at, window_seconds=5.0):
     if read_at is None or hit_at is None:
         return {"within_window": None, "latency_seconds": None, "identity_established": False}
-    latency = abs(hit_at - read_at)
-    return {"within_window": latency <= window_seconds,
+    latency = hit_at - read_at
+    return {"within_window": 0 <= latency <= window_seconds,
             "latency_seconds": latency, "identity_established": False}
 
 

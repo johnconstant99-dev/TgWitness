@@ -1155,7 +1155,7 @@ class EvidencePDF:
 
     def render_limitations(self):
         say = self.say
-        self.lay.section(say("Reading this record"), say("What the records state and what binds them."))
+        self.lay.section(say("Limitations"), say("Read these before relying on the material."))
         self.lay.bullets([say(x) for x in self.data.get("limitations") or []])
 
     def render_journal(self):
@@ -1475,7 +1475,7 @@ class ChatPDF:
 
     def render_limitations(self):
         say = self.say
-        self.lay.section(say("Reading this record"), say("What the records state and what binds them."))
+        self.lay.section(say("Limitations"), say("Read these before relying on the material."))
         self.lay.bullets([say(x) for x in self.context.get("limits") or []])
 
 

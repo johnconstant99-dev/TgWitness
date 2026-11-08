@@ -177,7 +177,7 @@ async def access_rotate_token(request: Request, *, ctx=Depends(current_context))
 
 async def access_console(after: int = 0, *, ctx=Depends(current_context)):
     console = ctx.app.state.access.console
-    if after > console.counter:
+    if after < 0 or after > console.counter:
         after = 0
     lines = console.after(after)
     return {"lines": lines, "last": lines[-1]["n"] if lines else after}

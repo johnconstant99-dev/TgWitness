@@ -80,7 +80,7 @@ def route(font, mobile=False, still=False):
     suffix = "-mobile" if mobile else ""
     suffix += "-static" if still else ""
     save(d, "case-path" + suffix + ".svg", "Choose sources, follow connections, preserve context and export signed evidence. "
-         "Signatures establish integrity relative to a trusted key, not Telegram origin.")
+         "Signatures bind saved records to the trusted collector key.")
 
 
 def mobile_chain(font, still=False):
@@ -117,7 +117,7 @@ def mobile_chain(font, still=False):
          "Illustrative records: new message, captured edit and deletion observation. "
          "Each event includes the preceding hash; SHA-256 hashes canonical JSON, "
          "and Ed25519 signs the raw digest bytes. C denotes canonical encoding. "
-         "Signatures do not establish Telegram origin or complete capture.")
+         "Review signatures together with the acquisition record and coverage.")
 
 
 def main():

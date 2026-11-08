@@ -30,7 +30,7 @@ Builds stay local. See [publishing](../docs/internal/PUBLISHING.md) and
 
 | Command | Scope |
 | --- | --- |
-| `python tools/publication_guard.py --git-index` | Public source selection, local links, known secret formats and staged content |
+| `python tools/publication_guard.py --git-index` | Public source selection, local links, language catalogues, known secret formats and staged content |
 | `python -m ruff check .` | Python static checks |
 
 Regression tests, fixtures and runners are maintained in the private validation

@@ -190,6 +190,14 @@ Issuing, changing and revoking access, and starting or ending sessions, also cre
 signed `access.*` journal records. Tokens are not included in those records.
 Issued tokens and session credentials are retained as hashes in the encrypted vault.
 
+A pending QR sign-in belongs to the panel session that started it. Ending or
+revoking that session, or rotating the main panel token, cancels its pending QR
+client on the server. This also applies when the browser cannot send its own
+cancellation request. Token rotation also cancels QR sign-ins started directly
+with the main panel token. A QR request waiting for another operation checks access
+again before it starts. Completed Telegram authorizations and pending sign-ins
+started by another panel session are preserved.
+
 <details>
 <summary><strong>Main administrator and trust boundary</strong></summary>
 

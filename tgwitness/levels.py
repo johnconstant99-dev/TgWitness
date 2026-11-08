@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Literal
 
+from .health import age, now_utc
 from .monitoring import MEDIA_DEFAULT_MB, MEDIA_TYPES
 
 GOALS = ("personal", "investigation", "evidence")
@@ -93,7 +94,9 @@ def scale(weights, on):
 
 def assess(evidence, replica, alerts, destinations, assurance, source, witnesses, place, gateway_log=False):
     timestamps = bool(evidence["enabled"])
-    polled = [w for w in witnesses if w.get("last_poll") and not w.get("overdue")]
+    now = now_utc()
+    polled = [w for w in witnesses if w.get("last_poll") and (w.get("overdue") is False or w.get("overdue") is None
+              and (elapsed := age(w["last_poll"].get("at"), now)) is not None and elapsed <= 86400)]
     credibility = {"journal": True, "timestamps": timestamps, "drand": timestamps and evidence.get("drand"),
                    "devices": timestamps and evidence.get("devices"),
                    "code": bool(source.get("current") and (source.get("last") or {}).get("matches")),

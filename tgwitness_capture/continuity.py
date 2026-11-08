@@ -17,12 +17,12 @@ CHAT_STYLE = ('body{font:16px system-ui;background:#101923;color:#ecf1f6;max-wid
               'aside{padding:14px;background:#48391c;border-left:4px solid #f0ba58;overflow-wrap:anywhere}li{margin:8px 0}')
 STYLE_HASH = base64.b64encode(hashlib.sha256(CHAT_STYLE.encode()).digest()).decode()
 LIMITS = [
-    "Covers the selected export and the recorded viewports.",
-    "An absent ID or reply is a gap in what was shown, not a deletion notice; long intervals can be ordinary inactivity.",
+    "Only the selected export and recorded viewports are covered; full history is not established.",
+    "An absent ID or reply is not proof of deletion. Time intervals may be ordinary inactivity.",
     "Private chats and basic groups share an account-wide ID sequence; numeric gaps are not counted.",
-    "Visual observations are operator annotations linked to recorded frames.",
-    "Signatures bind the recorded bytes to the capture key; retained checkpoints fix them against later replacement.",
-    "Official clients, pacing and WARP reduce the risk of account restrictions.",
+    "Visual observations are operator annotations linked to frames, not Telegram-authenticated messages.",
+    "Signatures protect recorded bytes relative to trusted keys and retained checkpoints, not authorship or truth.",
+    "Official clients, pacing and WARP cannot guarantee account safety or legal admissibility.",
 ]
 
 
