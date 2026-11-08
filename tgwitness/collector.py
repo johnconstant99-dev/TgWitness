@@ -1487,7 +1487,6 @@ class Collector:
             if automatic:
                 await self.ensure_route()
                 await self.align(client)
-            # Route changes can close the old transport and release its lock.
             self.lock_key(client)
             try:
                 await asyncio.wait_for(client.connect(), 25)
@@ -1980,7 +1979,7 @@ class Collector:
             return
         role = "current" if client is self.client else "candidate" if client is self.login_client else "other"
         if state == "opened":
-            self.lock_key(client)  # A new login receives its auth key during connect.
+            self.lock_key(client)
         if state == "closed":
             self.unlock_key(client)
         self.note("connection." + state, {"role": role, "route": self.route_receipt(),
@@ -2445,8 +2444,6 @@ class Collector:
                 if ephemeral_media:
                     payload["media_capture"]["ephemeral_media"] = ephemeral_media
                     base = settings["types"][media_type]
-                    # Self-destructing media is fetched even where the type or duration rule would skip it;
-                    # the record says which rule was set aside and what still applies.
                     overridden = ([] if base["enabled"] else ["type_not_collected"]) + (
                         [] if duration_allowed(message, base) else ["duration_limit"])
                     if overridden and settings["preserve_ephemeral_media"]:

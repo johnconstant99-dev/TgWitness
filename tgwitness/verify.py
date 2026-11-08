@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: 022172c2f0208d31a9ae047b4916dbdea258c9425c79be7f08076e792216f3cf
+# TgWitness verifier sources SHA-256: e871627eed32bb3f8371732e6c07f9fea77aa7fd6a766f41aa7e20d38c8e6b6e
 """Standalone verifier"""
 import argparse
 import base64
@@ -687,7 +687,7 @@ def ots_summary(proof, digest, *, commitments=False):
                         try:
                             calculated = hashlib.new({0x02: "sha1", 0x03: "ripemd160", 0x08: "sha256"}[tag], message).digest()
                         except ValueError:
-                            pass  # Unsupported hash never produces a verified commitment.
+                            pass
                 node(size, depth + 1, calculated)
             if not more:
                 return
@@ -703,7 +703,6 @@ BITCOIN_SOURCES = ("https://blockstream.info/api", "https://mempool.space/api")
 
 
 def bitcoin_fetcher():
-    """TLS explorer consensus, explicitly not independent Bitcoin chain validation."""
     import urllib.request
     cache = {}
 
@@ -1126,7 +1125,6 @@ class Coverage:
                            "confirmation or recorded stop. Message-number gaps describe the observed numbering range."}
 
 
-# Channels have separate ID sequences; private chats, bots and basic groups share the account sequence.
 GAP_DEFAULTS = {"gap_analysis": True, "gap_account_sequence": True, "gap_cluster_min": 1, "gap_clusters_listed": 20,
             "gap_service_estimate": False}
 WIDE_TYPES = ("private", "groups", "bots")
@@ -1162,8 +1160,6 @@ NOTICE_KINDS = ("message.deleted", "message.missing_on_recheck")
 
 
 def summarize_gaps(times, settings, service=0, notices=()):
-    """times maps each observed message number to the time it was first observed; notices are numbers known
-    only from a deletion or recheck record, without saved content."""
     ordered = sorted(times)
     if len(ordered) < 2:
         return not_applicable("Fewer than two observed messages; there is no range to measure.")
@@ -1190,7 +1186,6 @@ def summarize_gaps(times, settings, service=0, notices=()):
 
 
 def wide(scope):
-    """Whether a collection scope records every message that takes a number from the account sequence."""
     if not isinstance(scope, dict) or scope.get("mode") != "account":
         return False
     types = scope.get("types") if isinstance(scope.get("types"), dict) else {}
@@ -1207,7 +1202,6 @@ def scope_reason(scope):
 
 
 class Sequences:
-    """Collects observed numbers from journal records in order and measures their gaps."""
 
     def __init__(self, settings=None, *, chats_selected=False, senders_selected=False):
         self.settings = gap_parameters(settings)
@@ -1237,7 +1231,6 @@ class Sequences:
             if isinstance(payload.get("scope"), dict):
                 self.set_scope(payload["scope"], event["observed_at"])
         elif kind == "deletion.unscoped":
-            # Account-level deletions name numbers without an attribution to an observed chat.
             for number in payload.get("message_ids") or []:
                 if type(number) is int and number > 0:
                     self.account.setdefault(number, event["observed_at"])
@@ -1257,7 +1250,6 @@ class Sequences:
                 if kind not in NOTICE_KINDS:
                     self.account_content.add(message_id)
                 if kind == "message.new" and self.wide_since is not None and not self.paused:
-                    # Only messages that arrived during whole-account collection bound the measured range.
                     low, high = self.window or (message_id, message_id)
                     self.window = (min(low, message_id), max(high, message_id))
             if service:
@@ -2374,11 +2366,6 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
 
 
 def verify_distributed_pages(stream, envelopes, job, task):
-    """Check a local acquisition prefix; unsigned trailing bytes are not observations.
-
-    Pages group decoded messages, not raw RPC responses. The final filtered ZIP
-    keeps its existing per-account signatures and does not disclose excluded pages.
-    """
     format_name = "tgwitness-distributed-pages-v1"
     if job.get("checkpoint_format") != format_name:
         raise ValueError("Unsupported distributed checkpoint format.")
@@ -2445,7 +2432,6 @@ def verify_distributed_pages(stream, envelopes, job, task):
 
 
 def verify_distributed_work(directory, expected_fingerprint=None, max_gib=None):
-    """Read-only inspection of a stopped distributed job; never opens its vault."""
     directory = Path(directory)
     def checked(path):
         if path.is_symlink() or getattr(path, "is_junction", lambda: False)():
@@ -2614,8 +2600,6 @@ def row_brief(row):
 
 
 def row_content(row):
-    # Preview shortening must never define equality. Include future fields too;
-    # canonical JSON preserves value types and array order, unlike dict equality.
     return canonical(row)
 
 
@@ -2856,8 +2840,6 @@ def chat_messages(archive):
             line = raw.strip()
             if not inside:
                 if line == '"messages": [':
-                    # The export wire format places one complete message on each line.
-                    # Reject other layouts instead of authenticating bytes but silently skipping records.
                     json.loads("".join(header) + '"messages": []}')
                     inside = True
                 else:
@@ -3308,7 +3290,6 @@ class AccountDisclosureCheck:
         self.manifest = read_manifest(self.archive)
         if self.manifest.get("format") not in DISCLOSURE_FORMATS:
             raise VerifierTooOld("Unsupported account disclosure format")
-        # Version 2 keeps records the selection left out as content-free markers, and replies say what they answer.
         self.marked = self.manifest["format"] == "tgwitness-account-disclosure-v2"
         self.public = self.manifest["public_key"]
         self.fp = fingerprint(self.public)
@@ -3405,7 +3386,6 @@ class AccountDisclosureCheck:
                         self.media.add(name)
                     self.messages += 1
             self.chats = seen.execute("SELECT COUNT(DISTINCT chat) FROM messages WHERE state='disclosed'").fetchone()[0]
-            # A reply to a disclosed or withheld message must point at that record; only not_in_source points nowhere.
             dangling = seen.execute("SELECT count(*) FROM replies r LEFT JOIN messages m ON m.chat=r.chat AND m.id=r.id "
                                     "WHERE (r.state!='not_in_source' AND (m.id IS NULL OR m.state!=r.state)) "
                                     "OR (r.state='not_in_source' AND m.id IS NOT NULL)").fetchone()[0]
@@ -3581,7 +3561,6 @@ def unb64url(text):
 
 
 class DailyJournal:
-    """One prefix boundary per UTC date; no full journal retained in memory."""
     def __init__(self):
         self.tree, self.dates = MerkleFrontier(), {}
         self.previous, self.last_date, self.latest = None, None, None
@@ -3808,7 +3787,6 @@ def verify_witness(path, expected_fingerprint=None, check_drand=False, check_bit
     if check_drand and bound:
         rounds = [{"round": a["freshness"]["drand_round"], "randomness": a["freshness"]["drand_randomness"],
                    "seq": a["seq"]} for a in bound]
-        # Every credited anchor is checked; sampling must not certify unchecked rounds.
         confirmation = confirm_drand(rounds, limit=len(rounds))
         if confirmation["confirmed"] == len(rounds):
             for anchor in bound:
@@ -3948,7 +3926,6 @@ ASSURANCE_TIERS = ("self_attested", "timestamped", "witnessed", "fresh", "witnes
 
 
 def assurance(result):
-    """Credit only checks performed by this verifier, with coverage of the export head."""
     witness = result.get("witness") or {}
     anchors = result.get("anchors") or []
     stamps = [a for a in anchors if a.get("event_count") == result.get("events") and (
@@ -4222,7 +4199,6 @@ def fingerprint_colors(value):
 
 
 # BEGIN GENERATED VERIFIER LANGUAGES
-# Source: verifier_languages.json; update with tools/sync_verifier_languages.py
 # Catalogue SHA-256: a21b43bf83711ac10a5f13dbe63ac08bf7222930880e6eb7954dd0800b0b0761
 VERIFIER_LANGUAGE_DATA = (
     "eNrsvd1zHMeVL/ivVHAfRt4Ltdf3ehyx4BNNUhZDFMklKW94XhyF7iLRQncXpj8ogw5vCCQBwpKuZGllanY8Fi1pLJAQKaBBQAT4AUUY9DvwBlJv"
@@ -5276,7 +5252,6 @@ def verifier_language(value):
         return known[value]
     if value.startswith("zh-") and any(part in ("hant", "tw", "hk", "mo") for part in value.split("-")[1:]):
         return "zh-Hant"
-    # Windows locale.getlocale() may use English language names instead of tags.
     windows = dict(zip(("english", "russian", "ukrainian", "spanish", "portuguese", "turkish", "arabic", "persian",
                         "urdu", "hindi", "indonesian", "vietnamese", "chinese", "french", "german", "italian",
                         "uzbek", "korean", "chinese (traditional)", "malay", "polish", "japanese", "thai", "hebrew", "bengali"),
@@ -5360,7 +5335,6 @@ class Console:
         text = safe_text(text)
         if not self.color or not style:
             return text
-        # Only formatting produced here may become terminal control sequences.
         if not hasattr(self, "_paints"):
             self._paints = {}
         token = "TGWSTYLE" + os.urandom(16).hex()
@@ -5403,7 +5377,6 @@ class Console:
         mark = {"ok": ("ok", "ok"), "bad": ("bad", "bad"), "warn": ("warn", "warn"), "wait": ("wait", "warn"),
                 "none": ("dot", "dim")}[state]
         detail = self.t(detail)
-        # Separate lines avoid broken columns for CJK and right-to-left scripts.
         self.say("  " + self.paint(self.glyph[mark[0]], mark[1]) + " " + self.t(label))
         if detail:
             self.say("    " + (self.paint(detail, "dim") if state == "none" else detail))
@@ -5414,7 +5387,6 @@ class Console:
         meanings = VERIFIER_LANGUAGES[self.lang]["explain"]
         if self.explain_enabled and label in meanings:
             import textwrap
-            # Preserve shaping clusters and bidirectional paragraphs; let the terminal wrap these scripts.
             lines = ([meanings[label]] if self.lang in ("zh", "zh-Hant", "ja", "th", "hi", "bn", "ar", "fa", "ur", "he")
                      else textwrap.wrap(meanings[label], self.WIDTH - 4))
             for line in lines:
@@ -5460,7 +5432,6 @@ class Console:
                  "File changed" if "File hash mismatch" in message or "ZIP changed during" in message else
                  "Signature mismatch" if isinstance(exc, InvalidSignature) else None)
         self.verdict(False, self.t(label) if label else reader_message("error", self.lang))
-        # Preserve the exact diagnostic for experts; do not translate source data or error identifiers.
         self.field("Technical details", type(exc).__name__ + ": " + message)
         self.say()
 
@@ -5554,7 +5525,6 @@ class Console:
                 self.check("none", "Account", self.t("Not checked") + " · " + str(account.get("reason") or ""))
 
     def coverage_reason(self, text):
-        # Keep arbitrary source/operator reasons verbatim; known software reasons use translated labels.
         mapping = {"observation restarted": "Observation started", "observation paused by the operator": "Paused",
                    "collector process stopped": "Stopped", "collector process ended without an orderly stop": "Interrupted",
                    "collector error: capture may be incomplete": "Error", "connection to Telegram closed": "Disconnected",
@@ -5750,7 +5720,6 @@ class Console:
             return VERIFIER_LANGUAGES[self.lang]["explain"]["Minimised records"]
         if note.startswith(("Source reference not checked:", "History report signature only:")):
             return self.t("Described archive") + ": " + self.t("not supplied (--evidence)")
-        # Protocol diagnostics, user-entered data and unknown future notes stay verbatim.
         return self.t("Technical details") + ": " + note if self.lang != "en" else note
 
 
@@ -5783,7 +5752,6 @@ class Spinner:
 
 
 def matching_archives(directory):
-    """Find by manifest, never by a guessed filename, key, or self-declared trust."""
     directory = Path(directory)
     try:
         manifest = directory / "manifest.json"
@@ -5825,7 +5793,6 @@ def file_sha256(path):
 
 
 class Transcript:
-    """Keep terminal colours on screen and plain UTF-8 in the saved copy."""
     def __init__(self, stream):
         self.stream, self.text = stream, io.StringIO()
 
@@ -5852,7 +5819,6 @@ def save_transcript(path, text):
 
 
 def interactive_verify(args):
-    """No shell commands, installations, key auto-pinning, or archive mutation."""
     from contextlib import redirect_stdout
     lang = console_language(args.lang)
     if args.choose_language:

@@ -2024,7 +2024,6 @@ def coverage_figure(say, coverage):
 
 
 def gap_overview(say, summary):
-    """Plain rows for missing message numbers, shared by the HTML and PDF reports."""
     if not summary or summary.get("status") != "on":
         return None
     sequences = [(c.get("title") or str(c["chat_id"]), c) for c in summary.get("chats") or []]

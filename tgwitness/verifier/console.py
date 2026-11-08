@@ -21,7 +21,6 @@ def verifier_language(value):
         return known[value]
     if value.startswith("zh-") and any(part in ("hant", "tw", "hk", "mo") for part in value.split("-")[1:]):
         return "zh-Hant"
-    # Windows locale.getlocale() may use English language names instead of tags.
     windows = dict(zip(("english", "russian", "ukrainian", "spanish", "portuguese", "turkish", "arabic", "persian",
                         "urdu", "hindi", "indonesian", "vietnamese", "chinese", "french", "german", "italian",
                         "uzbek", "korean", "chinese (traditional)", "malay", "polish", "japanese", "thai", "hebrew", "bengali"),
@@ -108,7 +107,6 @@ class Console:
         text = safe_text(text)
         if not self.color or not style:
             return text
-        # Only formatting produced here may become terminal control sequences.
         if not hasattr(self, "_paints"):
             self._paints = {}
         token = "TGWSTYLE" + os.urandom(16).hex()
@@ -151,7 +149,6 @@ class Console:
         mark = {"ok": ("ok", "ok"), "bad": ("bad", "bad"), "warn": ("warn", "warn"), "wait": ("wait", "warn"),
                 "none": ("dot", "dim")}[state]
         detail = self.t(detail)
-        # Separate lines avoid broken columns for CJK and right-to-left scripts.
         self.say("  " + self.paint(self.glyph[mark[0]], mark[1]) + " " + self.t(label))
         if detail:
             self.say("    " + (self.paint(detail, "dim") if state == "none" else detail))
@@ -163,7 +160,6 @@ class Console:
         meanings = VERIFIER_LANGUAGES[self.lang]["explain"]
         if self.explain_enabled and label in meanings:
             import textwrap
-            # Preserve shaping clusters and bidirectional paragraphs; let the terminal wrap these scripts.
             lines = ([meanings[label]] if self.lang in ("zh", "zh-Hant", "ja", "th", "hi", "bn", "ar", "fa", "ur", "he")
                      else textwrap.wrap(meanings[label], self.WIDTH - 4))
             for line in lines:
@@ -210,7 +206,6 @@ class Console:
                  "File changed" if "File hash mismatch" in message or "ZIP changed during" in message else
                  "Signature mismatch" if isinstance(exc, InvalidSignature) else None)
         self.verdict(False, self.t(label) if label else reader_message("error", self.lang))
-        # Preserve the exact diagnostic for experts; do not translate source data or error identifiers.
         self.field("Technical details", type(exc).__name__ + ": " + message)
         self.say()
 
@@ -304,7 +299,6 @@ class Console:
                 self.check("none", "Account", self.t("Not checked") + " · " + str(account.get("reason") or ""))
 
     def coverage_reason(self, text):
-        # Keep arbitrary source/operator reasons verbatim; known software reasons use translated labels.
         mapping = {"observation restarted": "Observation started", "observation paused by the operator": "Paused",
                    "collector process stopped": "Stopped", "collector process ended without an orderly stop": "Interrupted",
                    "collector error: capture may be incomplete": "Error", "connection to Telegram closed": "Disconnected",
@@ -505,7 +499,6 @@ class Console:
             return VERIFIER_LANGUAGES[self.lang]["explain"]["Minimised records"]
         if note.startswith(("Source reference not checked:", "History report signature only:")):
             return self.t("Described archive") + ": " + self.t("not supplied (--evidence)")
-        # Protocol diagnostics, user-entered data and unknown future notes stay verbatim.
         return self.t("Technical details") + ": " + note if self.lang != "en" else note
 
 

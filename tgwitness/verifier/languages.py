@@ -3,7 +3,6 @@ from .common import (
     json,
 )
 # BEGIN GENERATED VERIFIER LANGUAGES
-# Source: verifier_languages.json; update with tools/sync_verifier_languages.py
 # Catalogue SHA-256: a21b43bf83711ac10a5f13dbe63ac08bf7222930880e6eb7954dd0800b0b0761
 VERIFIER_LANGUAGE_DATA = (
     "eNrsvd1zHMeVL/ivVHAfRt4Ltdf3ehyx4BNNUhZDFMklKW94XhyF7iLRQncXpj8ogw5vCCQBwpKuZGllanY8Fi1pLJAQKaBBQAT4AUUY9DvwBlJv"

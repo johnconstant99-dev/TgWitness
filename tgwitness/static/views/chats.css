@@ -56,7 +56,6 @@ button.chat-setting-chip:hover { border-color: var(--accent); color: var(--accen
 .secret-reveal { margin-inline-start:6px; font-size:12px; vertical-align:baseline; }
 .secret-reveal-error { display:block; font-size:12px; color:var(--text-2); }
 #chat-history-feedback { flex-shrink:0; margin:8px 16px; }
-/* Focusing Send must not move it between pointerdown and pointerup. */
 .chat-compose:not(:focus-within) #chat-compose-hint { display:block; visibility:hidden; }
 .chat-newer { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; flex-shrink: 0; }
 .chat-media-notice { flex-shrink: 0; }

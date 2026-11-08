@@ -1,4 +1,3 @@
-/* Setup by goal and the two scales (views/setup.js). */
 .extra-card.extra-setup { grid-column: 1 / -1; }
 .extra-setup .level-scales { width: 100%; margin: 4px 0 18px; }
 

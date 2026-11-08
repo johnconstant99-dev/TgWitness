@@ -1,4 +1,3 @@
-"""Resumable observations of Telegram's available Recent Actions window."""
 from telethon import errors
 from telethon.tl import functions as f, types as t
 

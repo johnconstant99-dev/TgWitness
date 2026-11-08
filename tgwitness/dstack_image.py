@@ -1,8 +1,3 @@
-"""MRTD and RTMR0-2 of a dstack OS image, recomputed from the image Dstack-TEE publishes.
-
-The algorithms follow dstack-mr (Dstack-TEE/dstack, Apache-2.0; see dstack_measurement.LICENSE) for OVMF's
-pre-202505 layout; the ACPI tables QEMU builds for the VM's shape come from qemu_acpi.
-"""
 
 import gzip
 import hashlib
@@ -359,7 +354,6 @@ def fetch(name, digest, cache, session=None):
 
 
 def check(report, event_log, vm, image):
-    """Compare a quote's MRTD and RTMR0-2 with the image. Returns status, detail and the values compared."""
     meta, memory = image["metadata"], vm.get("memory_size")
     name = "dstack" + ("-dev" if meta.get("is_dev") else "") + "-" + str(meta.get("version"))
     if meta.get("ovmf_variant", "pre202505") != "pre202505":

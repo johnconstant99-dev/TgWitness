@@ -1,4 +1,3 @@
-"""Observed people, scoped to chats; derived indexes never replace source records."""
 import asyncio
 import json
 import time
@@ -284,7 +283,6 @@ def observe_entity(store, entity, chat):
 
 
 async def refresh_one(collector):
-    """One queued profile invalidation, within the account's monitoring task."""
     from .monitoring import capture_settings, monitoring_settings
     from telethon.tl import types
     store, client, now = collector.store, collector.client, time.time()
@@ -336,7 +334,6 @@ async def refresh_one(collector):
 
 
 def observed_names(db, chat, uids):
-    """Sender names recorded in this chat's journal, in record order."""
     found = {}
     for uid in uids:
         rows = db.execute("SELECT seq,hash,observed_at,kind,message_id,json_extract(payload,'$.source'),"

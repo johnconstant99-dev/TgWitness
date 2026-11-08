@@ -1,4 +1,3 @@
-"""Accessible SVG and PDF drawing commands from the same scene model."""
 from html import escape
 import hashlib
 
@@ -44,7 +43,6 @@ def diagrams(model, text):
     for index, (label, present) in enumerate(nodes):
         x, y = (20 + index * 195, 45) if index < 5 else (215 + (index - 5) * 300, 155)
         state = 'recorded' if present else 'absent'
-        # Node presence denotes recorded events, not independently proved infrastructure.
         flow.extend([('rect', x, y, 175, 70, '#eef3f3', ''), ('text', x + 8, y + 23, label, '#163844', ''),
                      ('text', x + 8, y + 48, glossary[state], '#374151', '')])
         if index in (1, 2, 3, 4) and present and nodes[index - 1][1]:

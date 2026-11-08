@@ -15,8 +15,7 @@ END = '# END GENERATED VERIFIER LANGUAGES\n'
 def embedded(catalogue):
     raw = json.dumps(catalogue, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
     payload = base64.b64encode(zlib.compress(raw, 9)).decode('ascii')
-    return (START + '# Source: verifier_languages.json; update with tools/sync_verifier_languages.py\n'
-            + '# Catalogue SHA-256: ' + hashlib.sha256(raw).hexdigest() + '\n'
+    return (START + '# Catalogue SHA-256: ' + hashlib.sha256(raw).hexdigest() + '\n'
             + 'VERIFIER_LANGUAGE_DATA = (\n'
             + ''.join('    "' + payload[n:n + 112] + '"\n' for n in range(0, len(payload), 112)) + ')\n'
             + END)

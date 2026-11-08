@@ -1,4 +1,3 @@
-"""Owned Linux display and process. No Telegram protocol, DOM or session imports."""
 import hashlib
 import ipaddress
 import os

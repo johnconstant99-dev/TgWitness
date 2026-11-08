@@ -1,8 +1,3 @@
-"""Read-only provider observations on an independent witness host.
-
-Cloudflare is a network observer, not a Telegram content oracle. No connector token
-endpoint, mutation endpoint, or collector signing key is used here.
-"""
 import ipaddress
 import re
 import urllib.request

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# TgWitness installer. Verified private Python; choose how to open the panel.
 
 fail() { printf 'TgWitness: %s\n' "$*" >&2; exit 1; }
 step() { printf '%s/4 %s\n' "$1" "$2"; }

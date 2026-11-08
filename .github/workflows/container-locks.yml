@@ -26,7 +26,7 @@ jobs:
         runner: [ubuntu-24.04, ubuntu-24.04-arm]
         profile: [runtime, media, build]
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
       - name: Resolve packages against the signed index and record candidate hashes
@@ -40,7 +40,7 @@ jobs:
             --mount type=bind,source="$RUNNER_TEMP/container-locks",target=/out \
             "$WOLFI_BASE" sh /src/deploy/containers/resolve-packages.sh "$PROFILE"
       - name: Retain candidates for review without changing checked-in locks
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: container-locks-${{ matrix.profile }}-${{ matrix.runner }}
           path: ${{ runner.temp }}/container-locks/

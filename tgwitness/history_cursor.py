@@ -1,4 +1,3 @@
-"""Bind mutable history progress to the latest matching signed journal record."""
 import json
 
 from .store import canonical
@@ -14,7 +13,6 @@ def state(row):
 
 
 def seal(store, run_id, chat_id):
-    """The caller's transaction includes message, media job, cursor and signature."""
     row = store.db.execute("SELECT * FROM history_sources WHERE run_id=? AND chat_id=?",
                            (run_id, chat_id)).fetchone()
     event = store.append("history.cursor", {"history_run_id": run_id, "state": state(row)}, chat_id)
@@ -59,7 +57,6 @@ def verify(store, vault, run):
 
 
 def migrate_legacy(store, run, row):
-    """Recover old progress from signed observations, never bless an unsigned offset."""
     upper, offset, captured, unavailable, phase, error = None, 0, 0, 0, "queued", None
     for raw in store.db.execute("SELECT * FROM events WHERE chat_id=? "
             "AND json_extract(payload,'$.history_run_id')=? ORDER BY seq", (row["chat_id"], run["id"])):

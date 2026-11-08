@@ -1,4 +1,3 @@
-"""Connection diagnostics, without inferring Telegram's abuse decisions."""
 import asyncio
 import time
 

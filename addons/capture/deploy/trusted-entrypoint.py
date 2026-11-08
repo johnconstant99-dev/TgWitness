@@ -1,4 +1,3 @@
-"""Linux container bootstrap: network policy first, then permanently drop privileges."""
 import ipaddress
 import json
 import os

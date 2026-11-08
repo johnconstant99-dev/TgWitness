@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
-# Prepare an otherwise empty Ubuntu 24.04 host for this repository's Linux CI.
-# Register separately with a short-lived GitHub runner registration token.
 set -euo pipefail
 
-# Keep this file with the reviewed checkout's hash lock when copying it to a host.
 repo_root=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 bootstrap_lock="$repo_root/deploy/site.lock"
 if [[ ! -r "$bootstrap_lock" ]]; then
@@ -49,12 +46,10 @@ if [[ ! -f /opt/actions-runner/config.sh ]]; then
 fi
 /opt/actions-runner/bin/installdependencies.sh
 
-# Install browser OS libraries once, outside unprivileged CI jobs.
 python3 -m venv /opt/tgwitness-ci-bootstrap
 /opt/tgwitness-ci-bootstrap/bin/python -m pip install --disable-pip-version-check --only-binary=:all: --require-hashes -r "$bootstrap_lock"
 /opt/tgwitness-ci-bootstrap/bin/python -m playwright install-deps chromium
 
-# This directory is shared only by runner-managed tool installations.
 if ! grep -q '^AGENT_TOOLSDIRECTORY=' /opt/actions-runner/.env 2>/dev/null; then
   printf 'AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache\n' >> /opt/actions-runner/.env
 fi

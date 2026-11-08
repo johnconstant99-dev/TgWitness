@@ -1,7 +1,3 @@
-"""Activity statistics computed on request from saved observations.
-
-Nothing here is stored. Every figure is derived from signed journal records when it is requested, and the
-result names the journal position it covers."""
 import json
 import re
 import time
@@ -48,7 +44,6 @@ def ranked(counter, top, name):
 
 
 def unconfirmed(db, start, end, deadline, limit=20):
-    """Intervals without a connected collector heartbeat; the collector's liveness, not complete capture."""
     rows = db.execute("SELECT observed_at, json_extract(payload,'$.connected'), json_extract(payload,'$.interval_seconds') "
                       "FROM events WHERE kind='collector.heartbeat' AND observed_at>=? AND observed_at<=? ORDER BY seq",
                       (bound(start), bound(end)))
@@ -97,7 +92,6 @@ def gap_records(db, chats, start, end, workspace):
 
 def activity(store, *, chat_id=None, sender_id=None, chat_ids=None, since=None, until=None, top=10,
              budget=BUDGET, workspace_gaps=True, now=None):
-    """Counts for one chat or every chat in scope; chat_ids=None means the whole workspace."""
     now = datetime.now(timezone.utc).timestamp() if now is None else now
     start, end = (since.timestamp() if since else None), (until.timestamp() if until else None)
     chats = {chat_id} if chat_id is not None else chat_ids

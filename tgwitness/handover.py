@@ -115,7 +115,6 @@ def moment(value):
 
 class Survey:
     def __init__(self, chats, gap_settings=None):
-        # A handover holds chosen chats, so the account-wide numbering is not measurable from it.
         self.chats, self.people = set(chats), {}
         self.coverage = Coverage(gap_settings, chats_selected=True)
         self.requests, self.result_chats, self.head = {}, {}, None

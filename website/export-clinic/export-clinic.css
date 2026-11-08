@@ -1,4 +1,3 @@
-/* Page-specific controls inherit the shared documentation typography and theme. */
 .export-clinic { min-width:0; }
 .export-clinic .clinic-facts { display:flex; flex-wrap:wrap; gap:16px 28px; padding:16px 0; border-block:1px solid var(--line); color:var(--muted); font-size:12px; }
 .export-clinic .clinic-facts strong { color:var(--ink); font-size:17px; margin-inline-end:5px; }

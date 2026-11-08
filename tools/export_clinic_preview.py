@@ -1,4 +1,3 @@
-"""Loopback media server for reviewing the page before external files are uploaded."""
 from contextlib import contextmanager
 from functools import partial
 from http.server import ThreadingHTTPServer

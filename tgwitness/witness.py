@@ -111,7 +111,6 @@ class InvalidAnswer(ValueError):
 
 
 async def drand_latest(network):
-    """Get a structurally valid beacon over TLS; independent verification is separate."""
     for relay in DRAND_RELAYS:
         try:
             _, _, body = await request("GET", relay + "/" + DRAND_CHAIN + "/public/latest", network,
@@ -227,7 +226,6 @@ class Witness:
         except TimeoutError:
             beacon = None
         if beacon is not None:
-            # The signature is indispensable: randomness is its one-way hash.
             self._freshness = {"drand_round": beacon["round"], "drand_randomness": beacon["randomness"],
                                "drand_signature": beacon["signature"], "nonce": nonce}
         challenge = witness_challenge(self._freshness) if self._freshness else nonce
@@ -423,7 +421,6 @@ class Witness:
 
     async def daily(self):
         date = (utc_date() - timedelta(days=1)).isoformat()
-        # The journal, rather than a mutable setting, is authoritative after a crash.
         with self.store.snapshot() as snapshot:
             events = list(snapshot.events())
         existing = [e for e in events if e["kind"] == "witness.daily" and e["payload"].get("date") == date]
@@ -460,7 +457,6 @@ class Witness:
         return results
 
     async def retry_daily_ots(self):
-        """Retry seals with no retained submission, including after restarts and date changes."""
         cursor = self.store.get_setting('witness_daily_retry_cursor', 0)
         with self.store.lock:
             rows = self.store.db.execute("SELECT * FROM events WHERE kind='witness.daily' AND seq>? ORDER BY seq LIMIT 32",
@@ -471,7 +467,6 @@ class Witness:
         for row in rows:
             event = self.store.decode(row)
             name = 'daily-' + str(event['payload']['date'])
-            # Existing submissions are handled by upgrade_pending_ots. Their existence is not a verdict.
             if any((self.store.root / 'anchors' / (name + '.' + service_name(url) + '.ots')).is_file()
                    for url in DEFAULT_OTS):
                 cursor = event['seq']

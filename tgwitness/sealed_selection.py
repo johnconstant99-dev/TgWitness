@@ -1,4 +1,3 @@
-"""The normalized, signed scope of a restricted runner capture."""
 import hashlib
 from typing import Literal
 
@@ -46,11 +45,6 @@ def selection_hash(settings):
 
 
 def checked_selection(events, internal, expected=None, require_complete=False):
-    """Only call after journal signatures, nested export and attestation are verified.
-
-    Old approved captures did not include the normalized selection/hash fields;
-    their signed selection event still contains the full effective settings.
-    """
     if len(events) != 1:
         raise ValueError("Expected exactly one signed capture selection")
     event = events[0]

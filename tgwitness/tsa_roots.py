@@ -109,7 +109,6 @@ def trusted_roots():
 
 
 def qualified(certificate):
-    """The trusted-list entry of a time-stamping unit whose certificate declares eIDAS QcCompliance, or None."""
     from cryptography.hazmat.primitives import hashes
     entry = QUALIFIED.get(certificate.fingerprint(hashes.SHA256()).hex())
     try:

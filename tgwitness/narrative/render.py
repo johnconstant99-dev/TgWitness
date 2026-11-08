@@ -1,4 +1,3 @@
-"""Escaped HTML and selectable-text PDF, with identical source-linked statements."""
 from html import escape
 import json
 from pathlib import Path
@@ -29,14 +28,12 @@ def jurisdiction(code):
 
 
 def commands(model):
-    # Never present a key extracted from the same archive as an independent trust decision.
     return ['python -m tgwitness.verify PACKAGE.zip --fingerprint TRUSTED_COLLECTOR_FP --strict --json',
             'python -m tgwitness.verify PACKAGE.zip --fingerprint TRUSTED_COLLECTOR_FP --check-drand --check-bitcoin --strict --plain',
             'python -m tgwitness.verify PACKAGE.zip --fingerprint TRUSTED_COLLECTOR_FP --witness WITNESS.zip --witness-fingerprint TRUSTED_WITNESS_FP --require-tier witness_anchored --strict']
 
 
 def local_rows(local):
-    """Render terminology substitutions with their sources, never procedural advice."""
     if not local:
         return []
     rows = [(local['code'], local['scope'], None)]
@@ -110,7 +107,6 @@ def html_report(model, text, pictures, local):
 
 def pdf_diagram(pdf, diagram):
     title, height, shapes = diagram
-    # Page slices retain a legible 7-point label size; the SVG has the full continuous view.
     scale, band = pdf.epw / 1000, 650
     for top in range(0, height, band):
         drawn_height = min(band, height - top) * scale + 20

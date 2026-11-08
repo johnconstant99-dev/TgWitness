@@ -1,4 +1,3 @@
-"""Private Takeout lifecycle for a public-chat history acquisition."""
 import copy
 
 from telethon import errors
@@ -51,7 +50,7 @@ class HistoryTakeout:
             self.secret.update(account_id=self.account_id, takeout_id=result.id)
             generations = self.secret.setdefault("generations", [])
             generations.append({"generation": len(generations) + 1, "opened_at": utcnow()})
-            self.save()  # Retain the handle even if the next request is interrupted.
+            self.save()
         wrapped = WrappedClient(client, self.secret["takeout_id"])
         try:
             ranges = await wrapped(f.messages.GetSplitRangesRequest())

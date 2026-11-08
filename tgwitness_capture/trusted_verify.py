@@ -1,4 +1,3 @@
-"""Recompute Trusted Live findings from preserved originals and frame annotations."""
 from .continuity import analyze, parse_export, render, report_version
 from .format import canonical, decode
 from .trusted_model import Choice, VisualNote

@@ -45,7 +45,6 @@ class DisclosurePolicy(BaseModel):
     identity_mode: Literal['keep', 'pseudonymize_third_parties', 'pseudonymize_all'] = 'pseudonymize_third_parties'
     disclose_user_ids: list[int] = Field(default_factory=list, max_length=10000)
     text_mode: Literal['keep', 'omit'] = 'keep'
-    # Messages left out by the selection stay visible as markers: one per run, or one per message.
     withheld_markers: Literal['collapsed', 'each'] = 'collapsed'
     include_media: bool = False
     include_profile: bool = False
@@ -166,7 +165,6 @@ MARKER_TEXT = '[withheld by selection \u2014 rule: {rules}]'
 
 
 def withheld_rule(row, policy):
-    """The selection rule that leaves a message out, or None when it is disclosed."""
     if policy.sender_ids and sender_id(row) not in policy.sender_ids:
         return 'sender'
     if policy.text_contains and not any(term in visible_text(row).casefold() for term in policy.text_contains):
@@ -188,13 +186,11 @@ def matches(row, policy):
 
 
 def reply_parent(row, chat_id):
-    """The message a row answers directly in the same chat, or None."""
     parent, peer, _topic, direct = reply_link(row, chat_id)
     return parent if direct and peer == chat_id else None
 
 
 class Withholding:
-    """Which chats keep disclosed messages, and the state of every message a disclosed reply answers."""
 
     def __init__(self, source, policy):
         self.chats, self.targets, self.states = set(), set(), {}
@@ -211,15 +207,10 @@ class Withholding:
                     self.states[key] = 'disclosed' if withheld_rule(row, policy) is None else 'withheld'
 
     def reply_state(self, key):
-        # A target absent from the source export may have been deleted or never exported; it is not guessed.
         return self.states.get(key, 'not_in_source')
 
 
 def entries(source, policy, projection, withholding):
-    """Disclosed messages in source order, with markers where the selection left messages out.
-
-    Chats with nothing disclosed are left out entirely. A withheld message that a disclosed reply answers
-    always gets its own marker, so the reply points at a record that says why it is empty."""
     run = None
     for chat, row in source_rows(source):
         rule, key = withheld_rule(row, policy), (chat['id'], row.get('id'))
@@ -322,7 +313,6 @@ class Projection:
         return self.alias('message', [chat['id'], ident]) if self.policy.identity_mode != 'keep' else ident
 
     def marker(self, chat, first, last, count, rules, single=False):
-        """A record that stands in for messages the selection left out; it carries no content."""
         if single:
             ident = self.message_id(chat, first['id'])
         elif self.policy.identity_mode != 'keep':

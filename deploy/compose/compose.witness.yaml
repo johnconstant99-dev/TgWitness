@@ -1,8 +1,3 @@
-# An independent witness on a server of its own (ideally run by someone else):
-#   docker compose --project-directory . -f deploy/compose/compose.witness.yaml up -d
-# Needs in .env: TGWITNESS_WITNESS_COLLECTOR (the collector's HTTPS address), TGWITNESS_WITNESS_TOKEN
-# (a read-only token from the collector's Witness page), TGWITNESS_WITNESS_BOT_TOKEN and
-# TGWITNESS_WITNESS_CHANNEL. It never receives the collector's session, vault or panel token.
 name: tgwitness-witness
 services:
   witness:

@@ -3,7 +3,6 @@ setlocal EnableExtensions
 cd /d "%~dp0"
 title TgWitness
 
-rem Use an existing Python 3.11+ or offer to install Python 3.12 for this Windows user.
 call :find_python
 if defined PYCMD goto run
 echo.
@@ -36,7 +35,6 @@ py -3 -c "import sys; sys.exit(sys.version_info < (3, 11))" >nul 2>&1
 if not errorlevel 1 (set "PYCMD=py -3" & exit /b 0)
 python -c "import sys; sys.exit(sys.version_info < (3, 11))" >nul 2>&1
 if not errorlevel 1 (set "PYCMD=python" & exit /b 0)
-rem A fresh installation is not on PATH until a new console is opened.
 for %%D in ("%LOCALAPPDATA%\Programs\Python" "%ProgramFiles%") do (
   for %%V in (313 312 311) do (
     if exist "%%~D\Python%%V\python.exe" (

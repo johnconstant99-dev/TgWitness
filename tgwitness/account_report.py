@@ -1,9 +1,3 @@
-"""Streaming, offline account/sharing reports. Signed JSONL remains authoritative.
-
-Labels use the existing panel dictionaries, with explicit English fallbacks. Message
-text is escaped, never translated. Sharing reports apply an additional display
-allowlist and never serialize source records or private selection criteria.
-"""
 import html
 import hashlib
 import json
@@ -93,7 +87,6 @@ def technical(value, say):
 
 
 def timestamp(value, say):
-    """Keep the recorded offset; never silently assume the reader's timezone."""
     raw = text(value)
     if not raw:
         return e(say('Not recorded'))
@@ -319,7 +312,6 @@ def withheld_card(message, say, reference, marker, page_path):
 
 
 def shared_row(row):
-    """Only the transformed schema can enter readable sharing output, including raw details."""
     chat = row.get('chat') if isinstance(row.get('chat'), dict) else {}
     message = row.get('message') if isinstance(row.get('message'), dict) else {}
     safe_chat = {key: chat[key] for key in ('id', 'title', 'kind') if type(chat.get(key)) in (str, int)}
@@ -403,11 +395,6 @@ CHAT_PAGE_DATA_BYTES = 512 * 1024
 
 
 def account_chat_pages(context, chat, rows):
-    """Render bounded pages from a repeatable iterator, without buffering a chat.
-
-    Count and source-data bounds limit each page; one unusually large record
-    remains intact. The signed JSONL is not changed or split by this renderer.
-    """
     counts, count, size = [], 0, 0
     for row in rows():
         length = len(canonical(row))
@@ -514,7 +501,6 @@ def sharing_report(context, rows):
 
 
 def text_keys():
-    """English labels for explicit dictionary fallback maintenance; message text is excluded."""
     import ast
     from pathlib import Path
     tree = ast.parse(Path(__file__).read_text(encoding='utf-8'))

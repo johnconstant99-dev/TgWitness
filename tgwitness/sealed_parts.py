@@ -1,4 +1,3 @@
-"""Bounded encrypted parts for one ZIP, bound by an attested signed manifest."""
 import argparse
 import base64
 import hashlib

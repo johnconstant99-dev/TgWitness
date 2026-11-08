@@ -137,7 +137,7 @@ class Transport:
                 entity = await self.collector.client.get_entity(cid)
                 peer = utils.get_input_peer(entity)
             except (ValueError, errors.PeerIdInvalidError, errors.ChannelPrivateError):
-                continue  # The ordinary inventory may still resolve an uncached peer.
+                continue
             if utils.get_peer_id(entity) != cid:
                 raise ValueError("Telegram resolved a different chat from the selected ID.")
             result = await self.client(f.messages.GetPeerDialogsRequest([t.InputDialogPeer(peer)]))

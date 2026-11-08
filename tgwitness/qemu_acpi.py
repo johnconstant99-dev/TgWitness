@@ -1,9 +1,3 @@
-"""The ACPI blobs QEMU's Q35 machine hands to OVMF, rebuilt byte for byte.
-
-OVMF measures etc/table-loader, etc/acpi/rsdp and etc/acpi/tables into RTMR0. This follows the qemu-acpi crate of
-Dstack-TEE/dstack (Apache-2.0) and the acpi_tables crate it builds on (rust-vmm, Apache-2.0/BSD-3-Clause), term
-for term (see dstack_measurement.LICENSE): the bytes are the measured artifact, so the order of every term matters.
-"""
 
 import struct
 import uuid
@@ -851,7 +845,6 @@ def validate(config):
 
 
 def machine(vm):
-    """The machine description dstack-mr derives from a dstack VM configuration."""
     version = vm.get("qemu_version") or "9.1.0"
     parts = tuple(int(p) for p in str(version).split("."))
     if len(parts) != 3:

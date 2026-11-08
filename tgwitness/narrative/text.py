@@ -1,4 +1,3 @@
-"""Bounded ICU plural forms used by the shipped catalogs; no executable templates."""
 from decimal import Decimal
 import json
 from pathlib import Path

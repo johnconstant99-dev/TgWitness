@@ -14,6 +14,4 @@ while [ ! -S /tmp/.X11-unix/X99 ]; do
   fi
   sleep 0.1
 done
-# Docker's init forwards signals to the application and reaps the display child.
-# exec also preserves stdin for isolated acceptance and offline helper commands.
 exec "$@"

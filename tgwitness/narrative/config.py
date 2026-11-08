@@ -1,4 +1,3 @@
-"""Explicit local profiles. Configuration changes presentation and requirements, never verdicts."""
 import json
 from pathlib import Path
 import re
@@ -105,7 +104,6 @@ def resolve(path=None, profile=None, overrides=None):
             if profile not in document.get('profiles', {}):
                 raise ValueError('Unknown narrative profile: ' + profile)
             selected.update(document['profiles'][profile])
-        # Paths in a saved profile belong to that profile's directory, not the invocation directory.
         for key in PATHS:
             if selected.get(key) is not None:
                 selected[key] = str((Path(path).resolve().parent / selected[key]).resolve())
@@ -124,7 +122,6 @@ def example():
 
 
 def write_example(path):
-    # Exclusive creation prevents a convenience command from replacing an existing trust profile.
     with Path(path).open('x', encoding='utf-8') as stream:
         json.dump(example(), stream, ensure_ascii=False, indent=2)
         stream.write('\n')

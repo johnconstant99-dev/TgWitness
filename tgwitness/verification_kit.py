@@ -1,4 +1,3 @@
-"""Signed launchers and instructions in every panel language, fully offline."""
 
 from .verify import VERIFIER_LANGUAGES, reader_message, verifier_language
 
@@ -78,7 +77,6 @@ def quickstart(lang="en"):
 
 
 def cmd_text(value):
-    # Translations are data, never batch syntax. Delayed expansion is disabled.
     value = value.replace("%", "%%")
     for char in "^&|<>()":
         value = value.replace(char, "^" + char)

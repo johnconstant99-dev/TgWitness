@@ -1,4 +1,3 @@
-"""Facts about received self-destructing media, without inferring human viewing."""
 
 VIEW_ONCE = 0x7FFFFFFF
 VIEWING_NOTE = "Saving this attachment does not establish that a person viewed it."
@@ -7,7 +6,6 @@ OPENED = {False: "Not opened by the observing account", True: "Opened by the obs
 
 
 def describe(media, unread=None):
-    """Accept a Telegram object or its recorded dictionary; never make requests."""
     if hasattr(media, "to_dict"):
         media = media.to_dict()
     if not isinstance(media, dict):

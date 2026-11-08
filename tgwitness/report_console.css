@@ -6,8 +6,6 @@ code{direction:ltr;unicode-bidi:isolate}
 .console:has(.v-detail[hidden]){grid-template-columns:280px minmax(0,1fr)}
 .v-filter-toggle{display:none!important}
 .console>*{min-width:0}
-
-/* Filters */
 .v-filters{position:sticky;top:calc(var(--bar-height,64px) + 16px);max-height:calc(100dvh - var(--bar-height,64px) - 32px);overflow:auto;padding:6px 18px 18px;border:1px solid var(--line);
   border-radius:12px;background:var(--card);box-shadow:none;scrollbar-width:thin}
 .v-group{padding:14px 0;border-bottom:1px solid var(--line)}.v-group:last-of-type{border-bottom:0}
@@ -28,7 +26,6 @@ code{direction:ltr;unicode-bidi:isolate}
 .v-checks label small{color:var(--muted)}
 .v-checks label b{color:var(--muted);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
 .v-checks .more{padding:6px 8px;color:var(--muted);font-size:12px}
-/* Checkboxes and switches drawn the same in every browser. */
 .v-filters input[type=checkbox],.pick{appearance:none;-webkit-appearance:none;flex:0 0 auto;width:18px;height:18px;margin:0;
   border:1.5px solid var(--line2);border-radius:6px;background:var(--card);cursor:pointer;display:grid;place-items:center;
   transition:background .15s,border-color .15s}
@@ -51,8 +48,6 @@ code{direction:ltr;unicode-bidi:isolate}
 .v-reset{display:block;width:100%;margin-top:6px;padding:9px;border:1px dashed var(--line2);border-radius:12px;background:none;
   color:var(--muted);font-family:inherit;font-weight:600;font-size:13px;line-height:1.4;cursor:pointer}
 .v-reset:hover{color:var(--accent-text);border-color:var(--tint-line)}
-
-/* Results head: the big search, the count and the check of the data */
 .v-results{min-width:0}
 .v-top{position:sticky;top:var(--bar-height,64px);z-index:6;padding:20px 0 12px;margin-top:-20px;background:linear-gradient(var(--bg) 82%,transparent)}
 .v-searchbar{display:flex;align-items:center;gap:10px;padding:5px 6px 5px 14px;border:1px solid var(--line);border-radius:16px;
@@ -76,8 +71,6 @@ code{direction:ltr;unicode-bidi:isolate}
 .v-link{padding:0;border:0;background:none;color:var(--accent-text);font-family:inherit;font-weight:600;font-size:13px;line-height:1.4;cursor:pointer}
 .v-link:hover{text-decoration:underline}
 .v-earlier{display:flex;margin:2px auto 10px}
-
-/* The feed */
 .v-feed{min-height:320px;padding:12px 18px 24px;border-radius:22px}
 .v-feed.chat{background-color:var(--bg2);background-image:radial-gradient(var(--dot) .7px,transparent 1px);
   background-size:22px 22px,auto}
@@ -143,8 +136,6 @@ code{direction:ltr;unicode-bidi:isolate}
 .rec-p{margin-top:4px;color:var(--muted);font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
 .rec-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
 .rec-seq{color:var(--muted);font:600 11.5px ui-monospace,Menlo,Consolas,monospace}
-
-/* One item in full */
 .v-detail{position:sticky;top:calc(var(--bar-height,64px) + 16px);max-height:calc(100dvh - var(--bar-height,64px) - 32px);overflow:auto;border:1px solid var(--line);border-radius:12px;
   background:var(--card);box-shadow:var(--shadow-md);scrollbar-width:thin}
 .d-head{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);
@@ -181,8 +172,6 @@ code{direction:ltr;unicode-bidi:isolate}
 .d-hist{display:grid;gap:6px;margin:0;padding:0;list-style:none}
 .d-hist li{padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:13px}
 .d-hist li div{margin-top:3px;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere}
-
-/* Buttons and the selection bar */
 .v-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 14px;border:1px solid transparent;border-radius:11px;
   background:linear-gradient(135deg,#4f8dff,#2156e0);color:#fff;font-family:inherit;font-weight:650;font-size:13px;line-height:1.2;white-space:nowrap;cursor:pointer;
   box-shadow:0 8px 18px -10px #2156e0;text-decoration:none}
@@ -194,8 +183,6 @@ code{direction:ltr;unicode-bidi:isolate}
   background:#0f172a;color:#e2e8f0;box-shadow:0 18px 40px -12px rgb(0 0 0 / .45);transform:translateX(-50%)}
 .v-selbar b{margin-inline-end:6px;font-size:14px;font-variant-numeric:tabular-nums}
 .v-selbar .v-btn.ghost{border-color:#334155;background:#1e293b;color:#e2e8f0}
-
-/* People, indicators, check */
 .v-page{max-width:1180px;margin:0 auto;padding:26px 24px 90px}
 .v-page-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
 .v-page-head h2{margin:0;color:var(--ink);font-size:28px;font-weight:780;letter-spacing:-.03em}

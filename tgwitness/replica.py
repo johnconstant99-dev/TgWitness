@@ -63,7 +63,6 @@ class ReplicaSettings(BaseModel):
                 raw = base64.b64decode(value, validate=True)
                 if len(raw) != 32 or base64.b64encode(raw).decode() != value:
                     raise ValueError
-                # Reject low-order public keys (including the all-zero key).
                 X25519PrivateKey.generate().exchange(X25519PublicKey.from_public_bytes(raw))
             except ValueError:
                 raise ValueError("Use a base64-encoded 32-byte X25519 recipient public key") from None

@@ -1,12 +1,3 @@
-"""Mermaid diagrams from the Markdown docs, drawn at build time as static SVG.
-
-Only what the docs use is supported: flowchart TD/LR with [labels], -->, -.-> and labelled
-edges, subgraphs, and sequenceDiagram with participants, ->> messages and notes. The SVG is
-readable without JavaScript; docs.js only adds the drawing animation.
-
-Layouts: a short left-to-right chain stays horizontal, a long chain is folded into rows that
-read like a path (a "snake"), anything wider is drawn top-down in layers.
-"""
 import html
 import math
 import re
@@ -26,12 +17,10 @@ def esc(value):
 
 
 def units(text):
-    """Width in Latin-character units: CJK characters are about twice as wide."""
     return sum(2 if ord(c) >= 0x2E80 else 1 for c in str(text))
 
 
 def wrap(text, limit):
-    """Lines of at most `limit` units, breaking at spaces, or between characters in CJK text."""
     words = []
     for word in str(text).split():
         while units(word) > limit:
@@ -53,7 +42,6 @@ def wrap(text, limit):
 
 
 def text_lines(lines, x, y, cls):
-    """<text> centred on x, its block vertically centred on y."""
     top = y - (len(lines) - 1) * LINE / 2
     spans = "".join(f'<tspan x="{x:.1f}" y="{top + i * LINE:.1f}">{esc(line)}</tspan>' for i, line in enumerate(lines))
     return f'<text class="{cls}" text-anchor="middle" dominant-baseline="central">{spans}</text>'
@@ -111,7 +99,6 @@ def parse_flowchart(source):
 
 
 def layers_of(nodes, edges):
-    """Longest-path layering without back edges; a source sits just before its first child."""
     children = {key: [] for key in nodes}
     for edge in edges:
         children[edge["from"]].append(edge)
@@ -148,7 +135,6 @@ def bezier_point(p, t):
 
 
 def curve(points, t=.5):
-    """Cubic Bezier: SVG path, length and midpoint."""
     previous, total = points[0], 0.0
     for i in range(1, 25):
         current = bezier_point(points, i / 24)
@@ -160,7 +146,6 @@ def curve(points, t=.5):
 
 
 def polyline(points, radius=10):
-    """Orthogonal route with rounded corners: SVG path, length and midpoint of its longest leg."""
     path, total = f"M{points[0][0]:.1f} {points[0][1]:.1f}", 0.0
     for i in range(1, len(points)):
         total += math.dist(points[i - 1], points[i])
@@ -187,7 +172,6 @@ def size_nodes(nodes, limit):
 
 
 def side(item, towards):
-    """The point on a node's border facing another node (left/right/top/bottom)."""
     dx, dy = towards["x"] - item["x"], towards["y"] - item["y"]
     if abs(dx) * item["h"] >= abs(dy) * item["w"]:
         return item["x"] + math.copysign(item["w"] / 2, dx), item["y"]
@@ -278,7 +262,6 @@ def layered(nodes, edges, groups, layer, forward, horizontal):
 
 
 def spot(edge, edges):
-    """Where along an edge its label goes: away from where several edges meet."""
     if sum(e["from"] == edge["from"] for e in edges) > 1:
         return .68
     if sum(e["to"] == edge["to"] for e in edges) > 1:
@@ -302,8 +285,6 @@ def overlaps(box, item):
 
 
 def snake(nodes, edges, layer):
-    """Layers left to right in rows of three; every other row runs back, so a row ends above
-    the next row's start. Edges that skip ahead run along the outer margin."""
     size_nodes(nodes, 22)
     count = max(layer.values()) + 1
     margin, lane, gap, row_gap, stack_gap = 8, 22, 46, 50, 12
@@ -475,7 +456,6 @@ WORDS = ("Flow diagram", "Sequence diagram", "Diagram as text", "Note on {name}"
 
 
 def labels_of(source):
-    """Every English text a diagram shows, for translation."""
     kind = source.strip().split()[0]
     found = []
     if kind == "sequenceDiagram":

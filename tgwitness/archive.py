@@ -17,7 +17,6 @@ TOOLS = ("list_workspaces", "list_chats", "search_messages", "get_message_versio
          "get_message_context", "get_journal_event", "get_capture_status", "get_activity_stats", "export_messages",
          "get_messages_by_date", "get_pinned_messages", "get_chat_stats", "get_topics", "get_media")
 CHAT_TOOLS = ("get_message_versions", "get_message_context", "get_messages_by_date", "get_pinned_messages", "get_topics")
-# A bulk export streams over HTTP for the command line; MCP results are limited to one 64 KiB page.
 MCP_TOOLS = tuple(tool for tool in TOOLS if tool != "export_messages")
 LEGACY_TOOLS = TOOLS[:7]
 MAX_RESPONSE = 65536
@@ -289,9 +288,6 @@ class ArchiveReader:
         return self.events(store, query, allowed)
 
     def export(self, query, page=EXPORT_PAGE):
-        """Saved observations in journal order. Access is checked before the first line is produced.
-
-        The last item is {"export_complete": summary}; a stream without it ended early."""
         if query.tool != "export_messages":
             raise ValueError("Choose the export_messages tool for an export.")
         state = self.workspace(query, chat=query.chat_id is not None)

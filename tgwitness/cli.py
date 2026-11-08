@@ -1,7 +1,3 @@
-"""Commands that run beside the panel. Results go to stdout; progress and errors go to stderr.
-
-Exit codes: 0 success, 1 failure, 2 usage error or invalid request, 3 unavailable now (the data directory is
-open in a running panel, or the panel asks to retry later), 4 access refused."""
 import argparse
 import json
 import os
@@ -24,7 +20,6 @@ class Failure(Exception):
 
 
 def default_root():
-    """TGWITNESS_DATA, ./data/live, or the data directory of the installation running this Python."""
     if os.environ.get("TGWITNESS_DATA"):
         return Path(os.environ["TGWITNESS_DATA"])
     local = Path("data/live")
@@ -53,7 +48,6 @@ def workspaces(root, selected=None):
 
 
 def labels(root):
-    """Workspace names read without opening the journal for writing."""
     result = {}
     try:
         journal = sqlite3.connect(root / "journal.sqlite3")
@@ -71,7 +65,6 @@ def labels(root):
 
 
 def stored_status(name, root):
-    """Index state read without opening the journal for writing; safe while the panel runs."""
     result = {"workspace": name}
     journal = sqlite3.connect(root / "journal.sqlite3")
     try:
@@ -154,9 +147,6 @@ def index(args):
 
 
 class Local:
-    """A stopped workspace read in this process with full local access.
-
-    Signed records are never changed; opening a workspace may bring its derived indexes up to date, as the panel does."""
 
     def __init__(self, root, workspace, budget):
         from .access import Principal
@@ -226,7 +216,6 @@ def validation_text(errors):
 
 
 class Remote:
-    """The panel's scoped archive API, read with an archive connection token."""
 
     def __init__(self, url, token):
         import requests

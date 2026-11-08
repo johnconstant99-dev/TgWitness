@@ -1,4 +1,3 @@
-"""Generate a labelled, offline account/disclosure sample in a fresh demo directory."""
 import asyncio
 from pathlib import Path
 

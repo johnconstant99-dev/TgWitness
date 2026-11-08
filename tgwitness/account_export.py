@@ -1,9 +1,3 @@
-"""Durable, resumable account acquisition with signed pages and a portable ZIP64 bundle.
-
-Only sealed pages advance a cursor. Cached progress is rebuilt from their signatures
-and bytes before resuming or packaging. Message/metadata JSONL is authoritative;
-HTML is an escaped readable derivative. No new Telegram authorization is created.
-"""
 import asyncio
 import base64
 import errno
@@ -203,7 +197,6 @@ def media_info(media):
 
 
 def attachment_policy(media, task, options):
-    """Decide from observed metadata; this performs no Telegram requests."""
     info = media_info(media)
     representation = file_hashes.representation(media)
     if representation:
@@ -370,7 +363,6 @@ class AccountExport:
         return self.public(job_id)
 
     async def finish(self, job_id, reason="Stopped before acquisition completed."):
-        """Start offline finalization without holding an HTTP request for a large ZIP."""
         from .account_finalization import finalize
         await self.pause(job_id)
         if self.busy():
@@ -412,7 +404,6 @@ class AccountExport:
         return self.public()
 
     async def finalize_partial(self, job_id, reason="Stopped before acquisition completed."):
-        """Wait for offline finalization before a disposable runner revokes the login."""
         state = await self.finish(job_id, reason)
         if not state.get("ready"):
             await asyncio.shield(self.task)

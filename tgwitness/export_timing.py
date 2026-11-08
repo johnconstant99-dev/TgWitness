@@ -1,4 +1,3 @@
-"""Monotonic timings for one start or resume, excluding previously saved messages."""
 import time
 
 from .store import utcnow

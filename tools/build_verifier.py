@@ -25,7 +25,6 @@ def sha256(path):
 
 
 def write_launchers(stage, language):
-    # Run in the newly built runtime: the build host need not have cryptography.
     from tgwitness.verification_kit import files, quickstart
 
     stage = Path(stage)
@@ -67,7 +66,7 @@ def main():
         stage = Path(temporary) / name
         (stage / "python").mkdir(parents=True)
         with zipfile.ZipFile(runtime) as archive:
-            archive.extractall(stage / "python")  # Runtime bytes checked against embedded_runtime's pinned hash.
+            archive.extractall(stage / "python")
         tag = "python" + PYTHON.replace(".", "")[:3]
         (stage / "python" / (tag + "._pth")).write_text(
             tag + ".zip\n.\nLib\\site-packages\nimport site\n", encoding="ascii")
@@ -76,7 +75,6 @@ def main():
                         "--target", str(stage / "python/Lib/site-packages"),
                         "-c", str(ROOT / "deploy/constraints.txt"), "cryptography"], check=True)
         shutil.copyfile(ROOT / "tgwitness/verify.py", stage / "verify.py")
-        # A short-lived child also releases its loaded Windows DLLs before cleanup.
         subprocess.run([str(stage / "python/python.exe"), "-I", "-B", "-X", "utf8", "-c",
                         "import sys; sys.path.insert(0, sys.argv[1]); "
                         "from tools.build_verifier import write_launchers; write_launchers(sys.argv[2], sys.argv[3])",
@@ -85,7 +83,6 @@ def main():
         menu_launcher = (stage.parent / "VERIFY-language-menu.cmd").read_bytes()
         for filename in ("LICENSE", "NOTICE"):
             shutil.copyfile(ROOT / filename, stage / filename)
-        # Test the actual bundled interpreter/dependencies against existing signed evidence.
         checked = subprocess.run([str(stage / "python/python.exe"), "-I", "-B", "-X", "utf8",
                                   str(stage / "verify.py"), str(args.validation_archive),
                                   "--json"], capture_output=True, text=True, encoding="utf-8")
@@ -107,7 +104,6 @@ def main():
         if len(list(Path(temporary).glob("verify-result-*.txt"))) != 2:
             raise SystemExit("Portable VERIFY.cmd did not save both verification transcripts")
         print("VERIFY.cmd: clean/tampered ZIP and saved transcripts passed with system Python absent from PATH.")
-        # Exercise every translation in the actual isolated recipient runtime.
         shutil.copyfile(args.validation_archive, probe)
         (stage / "VERIFY.cmd").write_bytes(menu_launcher)
         for lang, entry in VERIFIER_LANGUAGES.items():

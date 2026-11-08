@@ -144,7 +144,7 @@ COVERAGE_RANGES = 100_000
 
 
 class BundleSizeLimit(ValueError):
-    """The archive hit its configured uncompressed byte ceiling."""
+    pass
 
 
 def export_file(store, vault, fmt, options=None, *, include_board=True, compact=False, output_stream=None,

@@ -12,11 +12,6 @@ from .common import (
     read_json_file,
 )
 def verify_distributed_pages(stream, envelopes, job, task):
-    """Check a local acquisition prefix; unsigned trailing bytes are not observations.
-
-    Pages group decoded messages, not raw RPC responses. The final filtered ZIP
-    keeps its existing per-account signatures and does not disclose excluded pages.
-    """
     from .chain import canonical
     format_name = "tgwitness-distributed-pages-v1"
     if job.get("checkpoint_format") != format_name:
@@ -84,7 +79,6 @@ def verify_distributed_pages(stream, envelopes, job, task):
 
 
 def verify_distributed_work(directory, expected_fingerprint=None, max_gib=None):
-    """Read-only inspection of a stopped distributed job; never opens its vault."""
     from .chain import canonical, fingerprint
     directory = Path(directory)
     def checked(path):

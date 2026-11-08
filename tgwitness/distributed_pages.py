@@ -1,4 +1,3 @@
-"""Bounded, signed checkpoints of decoded history, independent of RPC page boundaries."""
 import hashlib
 import os
 import shutil
@@ -35,7 +34,6 @@ class RangePages:
     def verify(self):
         if linked(self.path):
             raise ValueError("Checkpoint data must not be a link.")
-        # Data without a receipt is an uncommitted tail, never reusable progress.
         with self.path.open("rb") if self.path.exists() else open(os.devnull, "rb") as stream:
             return verify_distributed_pages(stream, self.envelopes(), self.job, self.task)
 
@@ -49,7 +47,6 @@ class RangePages:
         receipt_path = self.root / (str(seq) + ".json")
         if receipt_path.exists():
             raise ValueError("Refusing to overwrite a committed checkpoint.")
-        # Trim only bytes beyond the verified prefix. Never rewrite a committed page.
         with self.path.open("r+b" if self.path.exists() else "w+b") as stream:
             stream.seek(before["byte_end"])
             stream.truncate()
@@ -98,7 +95,6 @@ class RangePages:
                 await complete_in_thread(self.commit, b"".join(pending), len(pending), cursor, terminal,
                                          profile, collector.vault, generation, captured_from)
             finally:
-                # complete_in_thread drains writes even when pause cancels the caller.
                 if self.state["pages"] != previous:
                     on_commit(self.state)
             pending, size, captured_from = [], 0, utcnow()
@@ -130,4 +126,4 @@ class RangePages:
         await collector.iterate_history(entity, write, min_id=self.task["low"] - 1,
             offset_id=self.state["cursor"], on_wait=on_wait, history_client=transport.client if transport else None,
             page_timeout=page_timeout, attempts=attempts, on_unparsed=unparsed)
-        await flush(True)  # Iterator exhaustion, even after an exactly full checkpoint.
+        await flush(True)

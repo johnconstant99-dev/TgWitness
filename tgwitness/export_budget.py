@@ -1,4 +1,3 @@
-"""Plan bounded captures from observed history counts and explicit rate assumptions."""
 import math
 
 MIB = 1024**2
@@ -8,7 +7,6 @@ SAFETY_FACTOR = 2
 
 
 def sealing_reserve(session_seconds, output_bytes=0, messages=0):
-    # Finalize the account ZIP, package the journal, encrypt and hand off the result.
     baseline = min(300, max(15, math.ceil(session_seconds * .05)))
     return baseline + math.ceil(3 * max(0, output_bytes) / PACKAGING_BYTES_PER_SECOND + max(0, messages) / 5000)
 
@@ -46,8 +44,6 @@ def estimate(sample, options=None):
         media = math.ceil(chat["download_bytes"] * scale)
         ranges = math.ceil(chat["hash_ranges"] * scale)
         metadata = math.ceil(chat["text_bytes"] * scale) + total * 2048
-        # Samples contain 25 messages; exports request up to 100, so this rate
-        # intentionally does not assume a fourfold improvement from bigger pages.
         rate = min(100, max(1, count) / max(.05, chat["request_seconds"]))
         seconds += total / rate + media / DOWNLOAD_BYTES_PER_SECOND + ranges / 10
         history_seconds += total / rate

@@ -44,7 +44,6 @@ def intel_check(raw, collateral, now=None):
 
 
 def image_loader(option, folder, session=None):
-    """The published dstack OS images, kept in folder/dstack-images ("auto"), in a given folder, or none."""
     if option in (None, "none"):
         return None
     cache = Path(folder) / "dstack-images" if option == "auto" else Path(option)

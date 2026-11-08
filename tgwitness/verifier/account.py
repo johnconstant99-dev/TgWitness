@@ -65,8 +65,6 @@ def chat_messages(archive):
             line = raw.strip()
             if not inside:
                 if line == '"messages": [':
-                    # The export wire format places one complete message on each line.
-                    # Reject other layouts instead of authenticating bytes but silently skipping records.
                     json.loads("".join(header) + '"messages": []}')
                     inside = True
                 else:
@@ -518,7 +516,6 @@ class AccountDisclosureCheck:
         self.manifest = read_manifest(self.archive)
         if self.manifest.get("format") not in DISCLOSURE_FORMATS:
             raise VerifierTooOld("Unsupported account disclosure format")
-        # Version 2 keeps records the selection left out as content-free markers, and replies say what they answer.
         self.marked = self.manifest["format"] == "tgwitness-account-disclosure-v2"
         self.public = self.manifest["public_key"]
         self.fp = fingerprint(self.public)
@@ -615,7 +612,6 @@ class AccountDisclosureCheck:
                         self.media.add(name)
                     self.messages += 1
             self.chats = seen.execute("SELECT COUNT(DISTINCT chat) FROM messages WHERE state='disclosed'").fetchone()[0]
-            # A reply to a disclosed or withheld message must point at that record; only not_in_source points nowhere.
             dangling = seen.execute("SELECT count(*) FROM replies r LEFT JOIN messages m ON m.chat=r.chat AND m.id=r.id "
                                     "WHERE (r.state!='not_in_source' AND (m.id IS NULL OR m.state!=r.state)) "
                                     "OR (r.state='not_in_source' AND m.id IS NOT NULL)").fetchone()[0]

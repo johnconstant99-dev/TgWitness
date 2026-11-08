@@ -1,5 +1,3 @@
-# Run from the repository root with --project-directory .
-# No service starts unless its optional profile is explicitly selected.
 name: tgwitness-capture
 services:
   browser-gateway:

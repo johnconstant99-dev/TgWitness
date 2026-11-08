@@ -1,4 +1,3 @@
-"""Bounded, read-only resource assessment. Estimates are never guarantees."""
 import asyncio
 import shutil
 import time
@@ -158,7 +157,6 @@ async def preview(exports, options, *, sample=True):
 
 
 async def preview_capture(collector, chat_id, settings, remaining_seconds):
-    """Preview the actual sealed collector policy; no downloads or setting writes."""
     from .monitoring import media_action, media_kind, duration_allowed, effective_media_rule
     from . import ephemeral
     free = shutil.disk_usage(collector.store.root).free

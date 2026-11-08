@@ -139,7 +139,6 @@ $OldTls = [Net.ServicePointManager]::SecurityProtocol
 $OldProgress = $ProgressPreference
 $ExitCode = 1
 try {
-    # A Windows PowerShell child can inherit PowerShell 7's PSModulePath.
     foreach ($Module in @('Microsoft.PowerShell.Security', 'Microsoft.PowerShell.Utility')) {
         Import-Module (Join-Path $PSHOME ("Modules\$Module\$Module.psd1")) -ErrorAction Stop
     }

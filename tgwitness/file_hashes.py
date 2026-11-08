@@ -1,9 +1,3 @@
-"""Telegram SHA-256 range manifests, collected without file payload downloads.
-
-File IDs and access hashes are not content hashes. A manifest identifies the
-exact document or photo size; its last range can extend beyond EOF, as Telegram
-hashes the bytes that actually exist. No access hash/file reference is exported.
-"""
 import argparse
 import hashlib
 import json
@@ -39,17 +33,11 @@ def location(media, info):
 
 
 def download_options(media):
-    """Keep photo payloads on the still variant identified by metadata/hashes.
-
-    Telethon otherwise prefers a Photo's animated video_sizes, even when the
-    observed file size and representation both describe its still image.
-    """
     info = representation(media)
     return {"thumb": info["variant"]} if info and info["kind"] == "photo" else {}
 
 
 async def collect(client, media, *, max_requests=4096):
-    """Return complete/partial/unavailable coverage; never call upload.getFile."""
     info = representation(media)
     result = {"format": FORMAT, "algorithm": "sha256", "representation": info,
               "status": "unavailable", "expected_bytes": info["bytes"] if info else None,
@@ -114,7 +102,6 @@ async def collect(client, media, *, max_requests=4096):
 
 
 def compare(path, manifest):
-    """Compare an existing local file; authenticity depends on trusted evidence."""
     from .verify import validate_server_hashes
     validate_server_hashes(manifest)
     path = Path(path)

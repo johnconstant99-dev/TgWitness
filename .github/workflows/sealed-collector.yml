@@ -40,17 +40,15 @@ jobs:
   capture:
     name: Capture and attest approved evidence
     permissions:
-      contents: read # Check out only the approved upstream collector commit.
-      id-token: write # Obtain the GitHub identity for the evidence attestation.
-      attestations: write # Store the attestation before encrypting the result.
+      contents: read
+      id-token: write
+      attestations: write
     runs-on: ubuntu-24.04
-    # Reserve time after the 120-minute capture for sealing, attestation and delivery.
     timeout-minutes: 220
     steps:
-      # NEVER use the default checkout here: it would load the caller's fork.
       - name: Checkout approved upstream collector
         timeout-minutes: 5
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: phishdestroy/TgWitness
           ref: abce365085bf28667d07bdf5955f05e92edd5f62
@@ -72,7 +70,7 @@ jobs:
         run: python3 -I scripts/sealed_runner.py start
       - name: Deliver encrypted connection
         timeout-minutes: 5
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: sealed-connection
           path: ${{ runner.temp }}/tgwitness-sealed-${{ github.run_id }}-${{ github.run_attempt }}/public/connection.tgwsealed
@@ -87,7 +85,7 @@ jobs:
       - name: Attest the fixed original archive
         timeout-minutes: 5
         id: attest
-        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
         with:
           subject-path: ${{ steps.capture.outputs.subject }}
       - name: Encrypt evidence and its attestation for the recipient
@@ -98,7 +96,7 @@ jobs:
         run: python3 -I scripts/sealed_runner.py pack
       - name: Deliver encrypted result
         timeout-minutes: 15
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: sealed-result
           path: ${{ runner.temp }}/tgwitness-sealed-${{ github.run_id }}-${{ github.run_attempt }}/public/delivery*.tgwsealed

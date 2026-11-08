@@ -1,5 +1,3 @@
-"""Read-only archive views for MCP and the command line: one calendar day, pinned messages, chat counts,
-forum topics and image previews. Every result names its source records; nothing here writes."""
 import base64
 import hashlib
 import io
@@ -28,7 +26,6 @@ def stamp(value):
 
 
 def day_bounds(day, zone):
-    """UTC start and end of one calendar day in a named time zone, daylight-saving changes included."""
     try:
         place = ZoneInfo(zone or "UTC")
     except (ZoneInfoNotFoundError, ValueError):
@@ -47,7 +44,6 @@ def day_bounds(day, zone):
 
 
 def message_time(event):
-    """Telegram's sending time of a first version, or the observation time when it is missing."""
     payload = event["payload"]
     sent = stamp(payload.get("sent_at") or event.get("source_at")) if isinstance(payload, dict) else None
     return (sent, "telegram") if sent else (stamp(event["observed_at"]), "observed")
@@ -87,7 +83,6 @@ def by_date(store, query, view, budget=BUDGET):
 
 
 def latest_state(store, chat_id):
-    """Reconstruct the latest signed snapshot using the collector's compact-state format."""
     from .chat_state import latest
     record, state, _base = latest(store, chat_id)
     return record, state

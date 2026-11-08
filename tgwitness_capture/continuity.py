@@ -1,4 +1,3 @@
-"""Analysis of an unchanged Desktop chat export, never a Telegram API client."""
 import html
 import base64
 import hashlib
@@ -124,7 +123,6 @@ def timestamp(message):
 
 
 def analyze(chat, visual=(), time_gap_seconds=86400, version=2):
-    """No per-ID expansion: huge gaps cost one record, not billions of entries."""
     text = (lambda message: text_of(message.get("text"))) if version == 1 else message_text
     messages = sorted(chat["messages"], key=lambda item: item["id"])
     by_id = {message["id"]: message for message in messages}

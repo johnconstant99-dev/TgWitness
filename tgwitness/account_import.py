@@ -126,8 +126,6 @@ def json_account(payload, include_password=False):
             raise ValueError("Conflicting account JSON fields.")
         if values:
             result[destination] = values[0]
-    # Explicit Telethon fields take precedence over a generic foreign-format
-    # `session` blob. Two recognizable authorizations must still agree.
     generic = raw.get("session")
     if generic not in (None, ""):
         if "session" not in result:

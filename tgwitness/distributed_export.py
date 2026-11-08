@@ -1,4 +1,3 @@
-"""Concurrent chat exports with per-account reservations and signed checkpoints."""
 import asyncio
 import base64
 import errno
@@ -180,14 +179,10 @@ class DistributedExport:
                         upper = await collector.number_before(peer, datetime.fromisoformat(scan_end))
                         count = None
                     if type(count) is int and count > 0:
-                        # Planning only: this is not a count for the selected dates,
-                        # nor evidence of deletion. Keep every ID in the plan.
                         densities.append(max(1, upper // count))
                         worker.update(planning_count=count, planning_count_scope="visible history estimate; precision unknown")
                     lower = 1
                     if upper and options.from_utc:
-                        # Telegram can include messages exactly at offset_date.
-                        # Read past the boundary; local selection applies [from, until).
                         lower = await collector.number_before(peer,
                             datetime.fromisoformat(options.from_utc) - timedelta(seconds=1)) + 1
                     if upper >= lower:
@@ -319,7 +314,6 @@ class DistributedExport:
 
 
 class Run:
-    """Keep one export's workers, progress and recovery state together."""
 
     def __init__(self, exports, state, job=None, *, timing=None):
         self.app_for, self.directory = exports.app_for, exports.directory

@@ -66,7 +66,6 @@ witness-token.txt
 .venv-capture/
 proxy-config/
 deployments/
-# Disposable capture keys and handoffs (never commit user material).
 sealed-key.json
 *.tgwsealed
 delivery.zip
@@ -87,3 +86,4 @@ delivery.zip
 /tools/minicheck.py
 /tools/prepare_media_test_model.py
 /scripts/secret_lab_*.py
+/tools/preview_trusted_live.py

@@ -118,7 +118,7 @@ PRESENTATION_MEDIA = {
 PRIVATE_DIRECTORIES = {"data", "proof-data", "proof-config", "proxy-config", "witness-data", "__pycache__", ".venv", "venv", "test-results", ".pytest_cache", ".ruff_cache", "build", "dist"}
 PRIVATE_VALIDATION_TOOLS = {
     "api_routes.py", "browser_fixtures.py", "browser_helpers.py", "capture_demo.py", "capture_screenshots.py", "case_board_i18n.py",
-    "cloud_world.py", "minicheck.py", "prepare_media_test_model.py", "run_checks.py",
+    "cloud_world.py", "minicheck.py", "prepare_media_test_model.py", "preview_trusted_live.py", "run_checks.py",
 }
 
 

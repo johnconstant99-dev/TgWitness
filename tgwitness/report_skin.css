@@ -51,8 +51,6 @@ a{color:var(--accent-text);text-underline-offset:3px;text-decoration-thickness:1
 .theme-pick button[aria-pressed=true]{background:var(--card);color:var(--accent-text);box-shadow:var(--shadow-sm)}
 .theme-pick .i{width:16px;height:16px}
 .icon-btn{width:34px;height:34px;border-radius:9px;border-color:var(--line);background:var(--th);color:var(--muted)}
-
-/* The report: a title card, then sections as cards. */
 main{max-width:1180px;margin:0 auto;padding:22px 20px 40px;background:none;border:0;box-shadow:none}
 .toc{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:22px 0 4px;padding:0;border:0}
 .toc a{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border:1px solid var(--line);border-radius:999px;

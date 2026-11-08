@@ -23,7 +23,6 @@ def capture_head(store, vault, status, challenge=None, consistency_from=None):
             "SELECT count(*) OVER() AS total,seq,payload FROM events WHERE kind='account.authorized' "
             "ORDER BY seq DESC LIMIT 1").fetchone()
         origin = json.loads(authorized["payload"]).get("key_origin") if authorized else None
-        # Count recorded Telegram authorizations, not secret key copies or signing-key rotations.
         keys = {"count": authorized["total"] if authorized else 0,
                 "origin": origin if origin in ("created", "imported") else "unknown",
                 "authorized_seq": authorized["seq"] if authorized else None}

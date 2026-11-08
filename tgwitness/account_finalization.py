@@ -1,4 +1,3 @@
-"""Close an interrupted acquisition using its already signed observations."""
 import json
 
 from .store import canonical, utcnow

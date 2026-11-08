@@ -1,4 +1,3 @@
-"""Versioned preparation guidance, separate from the evidence verification results."""
 from copy import deepcopy
 from functools import lru_cache
 from hashlib import sha256
@@ -18,7 +17,6 @@ NOTICE = ("Research draft for preparation, not a finding of admissibility or a c
 LOCAL_NOTICE = "Local-language summary; not a certified translation of the law or evidence."
 PROCEDURES = {"civil": "Civil / commercial", "criminal": "Criminal"}
 
-# These are explanations of possible safeguards, never assertions that they were used.
 METHODS = [
     {"id": "signing", "name": "Collector signature", "helps": "Detect changes to signed bytes when the trusted key is known independently.",
      "retain": "Original signed ZIP, verification output, separately retained key fingerprint and checkpoints.",
@@ -73,7 +71,6 @@ class Options(BaseModel):
 
 
 def package_review(assessment):
-    """Turn the existing export assessment into tasks, without inferring assurances."""
     if assessment is None:
         return None
     items = []
@@ -133,7 +130,6 @@ def build(options=None, *, assessment=None):
         "package_review": package_review(assessment),
         "law": profile["criminal_law"] if criminal else profile["law"],
         "basis": profile["criminal"] if criminal else profile["basis"],
-        # Civil formalities must not be presented as a criminal checklist.
         "preparation": profile["criminal"] if criminal else profile["prepare"],
         "tasks": [] if criminal else list(profile["tasks"]),
         "human": ("Ask a local criminal-procedure practitioner which witness, expert, certificate or official collection procedure is required. "
@@ -224,7 +220,6 @@ def pdf(lay, data):
     if local := data.get("local_summary"):
         lay.heading("Local-language summary")
         lay.text(local["notice"])
-        # Do not silently drop an optional summary's script in an English PDF.
         glyphs = set().union(*(font.cmap for font in lay.pdf.fonts.values() if hasattr(font, "cmap")))
         if any(ord(char) not in glyphs for char in local["text"]
                if not char.isspace() and unicodedata.category(char) != "Cf"):

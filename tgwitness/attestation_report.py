@@ -1,9 +1,3 @@
-"""The attestation certificate of a Phala Cloud deployment: the verify report as HTML and PDF, sealed.
-
-The seal binds the exact bytes of the JSON report: RFC 3161 time stamps over them (by default a qualified eIDAS
-time stamp from the Belgian federal government's time-stamping authority, and FreeTSA), and the verifier's Ed25519
-signature over a statement naming the report and each time stamp.
-"""
 
 import base64
 import hashlib
@@ -102,7 +96,6 @@ def service(url):
 
 
 def seal(base, vault=None, tsas=TIME_STAMPS, session=None, stamp=None):
-    """Seal base.json: time stamps over its bytes, then the verifier's signature naming them. Writes base.seal.json."""
     base = Path(base)
     data = base.with_suffix(".json").read_bytes()
     digest = hashlib.sha256(data).digest()
@@ -131,7 +124,6 @@ def seal(base, vault=None, tsas=TIME_STAMPS, session=None, stamp=None):
 
 
 def check(base, expected_fingerprint=None):
-    """Check base.json against base.seal.json and the time stamps beside them. Returns a list of findings."""
     base = Path(base)
     data = base.with_suffix(".json").read_bytes()
     sealed = json.loads(base.with_suffix(".seal.json").read_text(encoding="utf-8"))
@@ -506,7 +498,6 @@ def pdf_report(report, sealed=None, vault=None):
 
 
 def write(report, markdown, base, vault=None, tsas=TIME_STAMPS, session=None):
-    """Write base.md, base.json, then seal them and write base.html and base.pdf. Returns the seal."""
     base = Path(base)
     base.with_suffix(".md").write_bytes(markdown.encode())
     base.with_suffix(".json").write_bytes(json.dumps(report, indent=2, ensure_ascii=False).encode())

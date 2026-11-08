@@ -1,4 +1,3 @@
-"""One bounded initialization sequence after creating a Telegram authorization."""
 import asyncio
 import random
 
@@ -26,8 +25,6 @@ async def post_login(client):
             if isinstance(exc, FLOOD_ERRORS):
                 result["wait_seconds"] = exc.seconds
             results.append(result)
-            # Do not retry initialization, or continue making requests after a wait,
-            # transport failure or account restriction. The saved login remains usable.
             break
         results.append({**result, "status": "completed"})
     return results

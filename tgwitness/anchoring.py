@@ -319,7 +319,6 @@ async def ots_stamp(digest: bytes, calendars, folder, name: str, network) -> lis
     for url in calendars:
         target = folder / (name + "." + service_name(url) + ".ots")
         if target.exists():
-            # Recheck retained bytes before treating a previous attempt as covered.
             ots_summary(target.read_bytes(), digest)
             results.append({"service": url, "kind": "opentimestamps", "covered": True})
             continue

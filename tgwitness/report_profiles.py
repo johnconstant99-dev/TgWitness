@@ -1,4 +1,3 @@
-"""Reusable report presentation, deliberately excluding case material and scope."""
 import secrets
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator

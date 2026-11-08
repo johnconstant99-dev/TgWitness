@@ -22,8 +22,6 @@ services:
     read_only: true
     tmpfs:
       - /tmp:size=512m,mode=1777
-  # Optional independent witness: docker compose --profile witness up -d
-  # Its own key and journal in its own volume; only a read-only witness token for the collector.
   witness:
     build:
       context: .

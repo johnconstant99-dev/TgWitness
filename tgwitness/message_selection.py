@@ -1,4 +1,3 @@
-"""Reproducible selection over a disk-backed acquisition, before media retrieval."""
 import json
 import re
 import sqlite3

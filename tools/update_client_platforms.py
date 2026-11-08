@@ -1,4 +1,3 @@
-"""Snapshot non-Desktop profiles from opentele2 2.0.0 (MIT), without network access."""
 import hashlib
 import json
 import os
@@ -31,7 +30,6 @@ def main():
         "note": "Offline upstream versions; supplied and saved account values take precedence. API ID 4 is the Android source-build ID from DrKLO/Telegram BuildVars.java.",
         "android_source": "https://github.com/DrKLO/Telegram/blob/master/TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java",
         "profiles": profiles, "devices": devices}
-    # Keep the pre-existing Desktop snapshot and its deterministic choices intact.
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("Platform snapshot:", {key: len(value) for key, value in devices.items()})
     print("SHA-256:", hashlib.sha256(path.read_bytes()).hexdigest())

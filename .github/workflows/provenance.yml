@@ -19,17 +19,17 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-      id-token: write # Obtain a Sigstore certificate through GitHub OIDC.
-      attestations: write # Store the signed provenance and SBOM in GitHub.
+      id-token: write
+      attestations: write
     steps:
       - name: Checkout the triggering commit
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
           fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
         with:
           python-version: '3.12'
       - name: Validate the release version
@@ -54,7 +54,6 @@ jobs:
       - name: Build the public source archive
         run: python3 -I tools/build_source.py
       - name: Give the hosted build its own release asset name
-        # release.yml owns *-source.zip. Never race its self-hosted upload.
         run: |
           python3 -I - <<'PY'
           import hashlib
@@ -73,12 +72,10 @@ jobs:
           )
           PY
       - name: Expose the frozen Python declarations to Syft
-        # Syft1.55 recognizes *requirements*.txt and does not resolve -c includes.
-        # The source ZIP is already fixed; these derived files are scanner inputs only.
         run: |
           python3 -I tools/sbom_locks.py stage --output build/sbom-locks
       - name: Generate the repository and declared Python dependency SBOM
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c
         with:
           path: .
           format: spdx-json
@@ -90,7 +87,7 @@ jobs:
         run: python3 -I tools/sbom_locks.py verify --output build/sbom-locks --sbom sbom.spdx.json --archive-dir dist
       - name: Attest the build outputs
         id: provenance
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: |
             dist/*.zip
@@ -98,7 +95,7 @@ jobs:
             sbom.spdx.json
       - name: Bind the SBOM to the archive and checksum file
         id: sbom
-        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e
         with:
           subject-path: |
             dist/*.zip
@@ -113,7 +110,7 @@ jobs:
           cp "$PROVENANCE_BUNDLE" dist/provenance.sigstore.json
           cp "$SBOM_BUNDLE" dist/sbom.sigstore.json
       - name: Preserve the exact files for publication or manual verification
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: attested-source
           path: dist/*
@@ -127,10 +124,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write # Attach assets; this job cannot mint attestations.
+      contents: write
     steps:
       - name: Download only this run's signed files
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: attested-source
           path: dist
@@ -139,5 +136,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
-        # Refuse replacement: a rerun must not silently change released bytes.
         run: gh release upload "$RELEASE_TAG" dist/*

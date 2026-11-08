@@ -37,11 +37,10 @@ jobs:
   capture:
     name: Request approved sealed capture
     permissions:
-      contents: read # Let the approved collector check out its pinned source.
-      id-token: write # Pass OIDC identity to the approved attestation job.
-      attestations: write # Let the approved collector store its signed attestation.
-    # The user owns this caller, but the verifier requires the upstream signer below.
-    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@c4f734553f8de71350546aa73cc756714ee1d8a4 # zizmor: ignore[stale-action-refs] Internal signer commits are approved by sealed_policy.json and checked against Git history.
+      contents: read
+      id-token: write
+      attestations: write
+    uses: phishdestroy/TgWitness/.github/workflows/sealed-collector.yml@c4f734553f8de71350546aa73cc756714ee1d8a4
     with:
       recipient: ${{ inputs.recipient }}
       session_minutes: ${{ inputs.session_minutes }}

@@ -399,7 +399,7 @@ def ots_summary(proof, digest, *, commitments=False):
                         try:
                             calculated = hashlib.new({0x02: "sha1", 0x03: "ripemd160", 0x08: "sha256"}[tag], message).digest()
                         except ValueError:
-                            pass  # Unsupported hash never produces a verified commitment.
+                            pass
                 node(size, depth + 1, calculated)
             if not more:
                 return
@@ -415,7 +415,6 @@ BITCOIN_SOURCES = ("https://blockstream.info/api", "https://mempool.space/api")
 
 
 def bitcoin_fetcher():
-    """TLS explorer consensus, explicitly not independent Bitcoin chain validation."""
     from .chain import hash_bytes
     import urllib.request
     cache = {}

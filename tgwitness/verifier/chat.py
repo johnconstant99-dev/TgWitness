@@ -97,8 +97,6 @@ def row_brief(row):
 
 
 def row_content(row):
-    # Preview shortening must never define equality. Include future fields too;
-    # canonical JSON preserves value types and array order, unlike dict equality.
     from .chain import canonical
     return canonical(row)
 

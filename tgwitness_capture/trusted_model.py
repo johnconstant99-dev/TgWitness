@@ -1,4 +1,3 @@
-"""Strict, non-secret Trusted Live session choices."""
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator

@@ -1,4 +1,3 @@
-"""Bounded Telegram client descriptions, retained with account authorization."""
 import platform
 import re
 import unicodedata
@@ -21,7 +20,6 @@ FIELDS = {
 
 
 def language_defaults(language, accept_language=None):
-    """Use the panel choice and browser locale only where no account value exists."""
     valid = lambda value: len(value) <= 32 and re.fullmatch(r"[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*", value)
     language = language if isinstance(language, str) and valid(language) else "en"
     choices = []
@@ -93,7 +91,6 @@ def resolve(api_id, supplied=None, seed=""):
 
 
 def desktop_timezone(now=None):
-    """Desktop's quarter-hour offset; see opentele2-core/src/fingerprint.rs (MIT)."""
     offset = (now or datetime.now(timezone.utc).astimezone()).utcoffset()
     seconds = int(offset.total_seconds()) if offset is not None else 0
     while seconds < -43200:
@@ -121,7 +118,6 @@ def apply_init_params(client):
 
 
 def consistency_warnings(api_id, profile, layer):
-    """Advisory format checks, not Telegram's undocumented abuse decisions."""
     from .client_profiles import catalog
     expected = api_pool.device_for(api_id, supplied=profile)
     if not expected:

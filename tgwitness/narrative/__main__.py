@@ -16,7 +16,7 @@ from .config import DIAGRAMS, OUTPUTS, resolve, validate, write_example
 
 
 class RequirementsNotMet(ValueError):
-    """Evidence passed verification but did not satisfy the selected trust requirements."""
+    pass
 
 
 def read_events(package, limit):
@@ -51,7 +51,6 @@ def generate(package, out, lang='en', jurisdiction=None, fingerprint=None, witne
         scratch = Path(scratch)
         source = scratch / 'source.zip'
         shutil.copyfile(package, source)
-        # Verify the same bytes whose hashes are recorded in the run receipt.
         ca = None
         if tsa_ca:
             ca = scratch / 'tsa-ca.pem'
@@ -85,7 +84,6 @@ def generate(package, out, lang='en', jurisdiction=None, fingerprint=None, witne
         model['package_sha256'] = digest_file(source)
         rendered = scratch / 'rendered'
         write(model, rendered, lang, jurisdiction, outputs=settings['outputs'], diagram_names=settings['diagrams'])
-        # This unsigned receipt describes this run, not additional evidence. Keep local paths out of reports.
         public_settings = {key: value for key, value in settings.items() if key not in ('witness', 'tsa_ca')}
         receipt = {'format': 'tgwitness-narrative-run-v1', 'settings': public_settings,
                    'settings_sha256': hashlib.sha256(canonical(public_settings)).hexdigest(),

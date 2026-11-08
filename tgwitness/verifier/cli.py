@@ -38,7 +38,6 @@ from .presentation import producer_line
 from .reports import REPORT_JSON, verify_report, verify_selection
 from .witness import ASSURANCE_TIERS, assurance, assurance_line, check_channel, cross_check_witness, verify_dossier, verify_history_report, verify_public_proof, verify_witness
 def matching_archives(directory):
-    """Find by manifest, never by a guessed filename, key, or self-declared trust."""
     directory = Path(directory)
     try:
         manifest = directory / "manifest.json"
@@ -80,7 +79,6 @@ def file_sha256(path):
 
 
 class Transcript:
-    """Keep terminal colours on screen and plain UTF-8 in the saved copy."""
     def __init__(self, stream):
         self.stream, self.text = stream, io.StringIO()
 
@@ -107,7 +105,6 @@ def save_transcript(path, text):
 
 
 def interactive_verify(args):
-    """No shell commands, installations, key auto-pinning, or archive mutation."""
     from .console import Console, choose_verifier_language, console_language, reader_message
     from .languages import SAY
     from contextlib import redirect_stdout

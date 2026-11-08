@@ -1,4 +1,3 @@
-"""Registered metric processors for evidence reports."""
 from datetime import datetime, timezone
 from importlib import import_module
 

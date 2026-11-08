@@ -1,4 +1,3 @@
-"""Validate the immutable application source for a release or container recovery."""
 from dataclasses import dataclass
 import hashlib
 import json

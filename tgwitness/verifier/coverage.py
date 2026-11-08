@@ -140,7 +140,6 @@ class Coverage:
                            "confirmation or recorded stop. Message-number gaps describe the observed numbering range."}
 
 
-# Channels have separate ID sequences; private chats, bots and basic groups share the account sequence.
 GAP_DEFAULTS = {"gap_analysis": True, "gap_account_sequence": True, "gap_cluster_min": 1, "gap_clusters_listed": 20,
             "gap_service_estimate": False}
 WIDE_TYPES = ("private", "groups", "bots")
@@ -176,8 +175,6 @@ NOTICE_KINDS = ("message.deleted", "message.missing_on_recheck")
 
 
 def summarize_gaps(times, settings, service=0, notices=()):
-    """times maps each observed message number to the time it was first observed; notices are numbers known
-    only from a deletion or recheck record, without saved content."""
     ordered = sorted(times)
     if len(ordered) < 2:
         return not_applicable("Fewer than two observed messages; there is no range to measure.")
@@ -204,7 +201,6 @@ def summarize_gaps(times, settings, service=0, notices=()):
 
 
 def wide(scope):
-    """Whether a collection scope records every message that takes a number from the account sequence."""
     if not isinstance(scope, dict) or scope.get("mode") != "account":
         return False
     types = scope.get("types") if isinstance(scope.get("types"), dict) else {}
@@ -221,7 +217,6 @@ def scope_reason(scope):
 
 
 class Sequences:
-    """Collects observed numbers from journal records in order and measures their gaps."""
 
     def __init__(self, settings=None, *, chats_selected=False, senders_selected=False):
         self.settings = gap_parameters(settings)
@@ -251,7 +246,6 @@ class Sequences:
             if isinstance(payload.get("scope"), dict):
                 self.set_scope(payload["scope"], event["observed_at"])
         elif kind == "deletion.unscoped":
-            # Account-level deletions name numbers without an attribution to an observed chat.
             for number in payload.get("message_ids") or []:
                 if type(number) is int and number > 0:
                     self.account.setdefault(number, event["observed_at"])
@@ -271,7 +265,6 @@ class Sequences:
                 if kind not in NOTICE_KINDS:
                     self.account_content.add(message_id)
                 if kind == "message.new" and self.wide_since is not None and not self.paused:
-                    # Only messages that arrived during whole-account collection bound the measured range.
                     low, high = self.window or (message_id, message_id)
                     self.window = (min(low, message_id), max(high, message_id))
             if service:

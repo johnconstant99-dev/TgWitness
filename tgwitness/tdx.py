@@ -35,7 +35,6 @@ SGX_EXTENSION, TCB, PCEID, FMSPC = ("1.2.840.113741.1.13.1", "1.2.840.113741.1.1
 DSTACK_EVENT = 0x08000001
 STATUSES = ("UpToDate", "SWHardeningNeeded", "ConfigurationNeeded", "ConfigurationAndSWHardeningNeeded",
             "OutOfDate", "OutOfDateConfigurationNeeded", "Revoked")
-# Intel QVL IdentityTcbLevel accepts only these enclave identity statuses.
 QE_STATUSES = ("UpToDate", "OutOfDate", "Revoked")
 MODULE_STATUSES = ("UpToDate", "OutOfDate", "Revoked")
 RESERVED_ATTRIBUTES = sum(1 << bit for bit in (*range(1, 4), *range(7, 16), *range(23, 27), *range(32, 62)))
@@ -139,7 +138,6 @@ def pem_chain(text):
 
 
 def chain_summary(raw):
-    """The quote's PCK certificate chain as it is, for a report; verify_quote decides whether it is trusted."""
     return [{"subject": certificate.subject.rfc4514_string(), "issuer": certificate.issuer.rfc4514_string(),
              "serial": format(certificate.serial_number, "x"),
              "not_before": certificate.not_valid_before_utc.isoformat(),

@@ -1561,7 +1561,6 @@ function excerpt(e) {
   if (p.text) return p.text;
   if (e.kind==="message.deleted") return p.auto_delete?.expected?tr("Expected: the message's auto-delete timer expired when the deletion was seen."):tr("Earlier captured versions remain available. Telegram does not report who deleted the message.");
   if (e.kind==="message.missing_on_recheck") return p.auto_delete?.expected?tr("Expected: the message's auto-delete timer had expired before this check."):tr("Telegram no longer returns this message; no deletion notice was received.");
-  // Legacy batch labels and meanings inferred a history clear or actor not supplied by Telegram.
   if (e.kind==="history.cleared") return tr("Messages deleted together")+" · "+String(p.count??"");
   if (e.kind==="replica.completed") return p.error?tr("Stopped: {error}",{error:errorName(p.error)||p.error}):tr("{n} encrypted object(s), {size}",{n:p.objects,size:humanSize(p.bytes)});
   if (e.kind==="alerts.changed") return p.enabled?tr("On · {n} destination(s)",{n:p.destinations}):tr("Off");

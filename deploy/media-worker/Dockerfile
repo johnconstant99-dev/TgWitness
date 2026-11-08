@@ -15,7 +15,6 @@ COPY --from=ocr-build /out/tesseract.apk /tmp/tesseract.apk
 RUN apk add --no-network --repositories-file /dev/null /tmp/tesseract.apk && rm /tmp/tesseract.apk \
     && tesseract --version && tesseract --list-langs
 COPY deploy/media-worker/requirements.lock /requirements.lock
-# Install only reviewed wheel artifacts, including every transitive dependency.
 RUN pip install --no-cache-dir --only-binary=:all: --require-hashes -r /requirements.lock \
     && python -m pip check && python -m pip uninstall --yes pip
 COPY deploy/media-worker/worker.py /worker.py

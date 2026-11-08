@@ -1,4 +1,3 @@
-"""Fullwidth punctuation for homepage prose, after translation and rendering."""
 import html
 from html.parser import HTMLParser
 import re
@@ -32,7 +31,6 @@ def prose(text):
 
 
 class _Homepage(HTMLParser):
-    """Edit text spans only; retain markup, executable text and URL attributes."""
 
     def __init__(self, source):
         super().__init__(convert_charrefs=False)

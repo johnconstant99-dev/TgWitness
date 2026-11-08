@@ -1,5 +1,3 @@
-# Use AFTER compose.yaml and addons/capture/compose.yaml, from the repo root.
-# Keeps the main project's existing volume names. No sidecar profile is enabled here.
 name: tgwitness
 services:
   tgwitness:

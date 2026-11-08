@@ -1,7 +1,5 @@
 #!/bin/sh
-# Requires Docker Engine/Desktop and Compose v2.20 or newer; no host Python needed.
 set -eu
-# Compose files and .env live in the project root, one level up.
 cd -- "$(dirname -- "$0")/.."
 if ! docker info >/dev/null 2>&1; then
     printf '%s\n' 'Install and start Docker Engine/Desktop, then run sh scripts/docker-start.sh again.' >&2
@@ -26,7 +24,6 @@ else
 fi
 printf '%s\n' 'The collector runs in the background. Stop it with: docker compose stop'
 printf '%s\n' 'Follow logs with: docker compose logs -f'
-# Open the panel only in a desktop session; the token stays in this terminal.
 if [ -z "${TGWITNESS_NO_BROWSER:-}" ] && [ -n "$panel_address" ]; then
     if [ "$(uname -s)" = Darwin ] && command -v open >/dev/null 2>&1; then
         open "http://$panel_address" >/dev/null 2>&1 || true

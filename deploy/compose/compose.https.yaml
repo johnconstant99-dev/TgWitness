@@ -1,7 +1,5 @@
-# Add to either compose.yaml or deploy/compose/compose.image.yaml with a second -f argument.
 services:
   tgwitness:
-    # Caddy has a fixed address so the panel trusts X-Forwarded-For from it alone.
     environment:
       TGWITNESS_TRUSTED_PROXIES: ${TGWITNESS_EDGE_PREFIX:-172.30.87}.2/32
     networks:

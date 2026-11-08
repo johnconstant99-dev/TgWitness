@@ -1,4 +1,3 @@
-"""Deterministic scenes. Recorded claims never become independently verified facts."""
 from dataclasses import asdict, dataclass, field
 from datetime import timezone
 import hashlib
@@ -58,8 +57,6 @@ CATALOG = {
     "takedown": ("takedown.",),
 }
 
-# Only allowlisted metadata enters prose. Message bodies and dedicated credential fields are excluded;
-# free-form metadata can still contain personal names (see docs/NARRATIVE.md).
 FIELDS = ("key_origin", "session_kind", "session_origin", "source", "reason", "status", "name", "file",
           "sha256", "producer", "pages", "created_at", "modified_at", "signature_objects", "sig_objects",
           "signature_claimed", "dkim_status", "round", "record", "from_seq", "to_seq", "root", "account_masked")
@@ -67,7 +64,6 @@ FIELDS = ("key_origin", "session_kind", "session_origin", "source", "reason", "s
 
 def masked(value):
     text = safe_text(value)
-    # Use handover's contact detectors; expose only the final two phone digits / first email character.
     text = EMAIL.sub(lambda m: m[0][0] + "***@***", text)
     text = PHONE.sub(lambda m: "***" + re.sub(r"\D", "", m[0])[-2:], text)
     return ''.join(c for c in text if ord(c) not in range(0x202a, 0x202f) and ord(c) not in range(0x2066, 0x206a))
@@ -79,7 +75,6 @@ def scene_kind(kind):
 
 
 def build(events, verification, journal="collector", max_scene_records=2000):
-    """Call only after verifying the complete source archive; never accept a supplied verdict file."""
     scenes, groups, restarts = [], [], []
     if type(max_scene_records) is not int or not 1 <= max_scene_records <= 10000:
         raise ValueError('Scene record limit must be an integer from 1 to 10000')
@@ -110,7 +105,6 @@ def build(events, verification, journal="collector", max_scene_records=2000):
         scene.facts.append(Fact("scene.records", {"n": len(group), "from": scene.at_from, "to": scene.at_to}, refs))
         scene.limits.extend([Limit("limit.clock"), Limit("limit.recorded")])
         if kind == "collection":
-            # These are counts of signed event kinds, never reconstructed Telegram message counts.
             counts = {name: sum(e["kind"] == value for e in group) for name, value in (
                 ("messages", "message.new"), ("edits", "message.edited"),
                 ("deletions", "message.deleted"), ("missing", "message.missing_on_recheck"))}
@@ -127,7 +121,6 @@ def build(events, verification, journal="collector", max_scene_records=2000):
                     if isinstance(value, str) and len(value) > 2000:
                         scene.limits.append(Limit("limit.omitted"))
                         continue
-                    # A hash must remain intact; contact detectors must not rewrite digit-only hashes.
                     intact = not isinstance(value, str) or key in ('sha256', 'root') and re.fullmatch(r'[0-9a-f]{64}', value)
                     shown = value if intact else masked(value)
                     scene.facts.append(Fact("record.field", {"field": key, "value": shown}, [ref]))
@@ -143,7 +136,6 @@ def build(events, verification, journal="collector", max_scene_records=2000):
             scene.limits.append(Limit("limit.gap"))
         if kind == "other":
             scene.limits.append(Limit("limit.unknown"))
-        # Keep prose digestible without dropping source references from the machine model.
         scene.limits = list({(v.template_key, canonical(v.params)): v for v in scene.limits}.values())
         scenes.append(scene)
     gaps_by_seq = {r.seq: s for s in scenes if s.kind == 'gaps' for r in s.facts[0].evidence}
@@ -151,8 +143,6 @@ def build(events, verification, journal="collector", max_scene_records=2000):
         scene = gaps_by_seq[stopped['seq']]
         ref = Evidence(started['seq'], started['hash'], journal, started['observed_at'])
         scene.to_seq = started['seq']
-        # A later sequence can carry an earlier wall-clock time. Keep the
-        # summary's range covering every referenced record in this scene.
         scene.at_to = max(scene.at_to, started['observed_at'], key=parse_time)
         scene.facts[0].params['n'] += 1
         scene.facts[0].params['to'] = scene.at_to

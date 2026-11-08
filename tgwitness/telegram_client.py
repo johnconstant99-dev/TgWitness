@@ -64,7 +64,7 @@ def method_name(request):
 
 
 class ReadReceiptBlocked(ValueError):
-    """The API collector must not mark messages or their contents as read."""
+    pass
 
 
 def reject_read_receipts(request):
@@ -80,7 +80,6 @@ def reject_read_receipts(request):
 
 
 def request_method(request):
-    """Only TL method names: never serialize request arguments or error text."""
     wrappers = (functions.InvokeWithTakeoutRequest, functions.InvokeWithMessagesRangeRequest,
                 functions.InvokeWithLayerRequest, functions.InitConnectionRequest)
     names = []
@@ -116,7 +115,6 @@ class WitnessClient(TelegramClient):
                 LOG.exception("Recording an undelivered update interval failed")
 
     async def history_page(self, entity, *, limit, offset_id):
-        """One raw page, retaining MessageEmpty instead of SDK iterator filtering."""
         peer = await self.get_input_entity(entity)
         result = await self(functions.messages.GetHistoryRequest(peer, offset_id, None, 0, limit, 0, 0, 0))
         entities = {utils.get_peer_id(item): item for item in [*result.users, *result.chats]}
@@ -126,7 +124,6 @@ class WitnessClient(TelegramClient):
         return result.messages
 
     def rpc_activity(self):
-        # These count client calls, not packets or Telethon's internal retries.
         return copy.deepcopy(getattr(self, "_rpc_activity", None))
 
     async def connect(self):

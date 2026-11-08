@@ -1,4 +1,3 @@
-"""English research page and its explicitly selected, data-only review materials."""
 import json
 
 PATH = "docs/export-clinic/"

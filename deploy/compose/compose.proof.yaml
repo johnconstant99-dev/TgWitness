@@ -1,5 +1,3 @@
-# Overlay: docker compose -f compose.yaml -f deploy/compose/compose.proof.yaml up -d --build
-# Copy deploy/proof.config.example to proof-config/proof.json and set real key fingerprints.
 services:
   proof:
     build:

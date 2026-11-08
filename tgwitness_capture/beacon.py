@@ -1,4 +1,3 @@
-"""Public drand observations; an external comparison is separate from ZIP integrity."""
 import hashlib
 import json
 import re
@@ -47,10 +46,6 @@ def fetch(number):
 
 
 def confirm(values, request=fetch, limit=100):
-    """Compare pinned-chain rounds with a verifier's own TLS relay requests.
-
-    This is not local BLS verification and never establishes an upper time bound.
-    """
     if not values:
         return {"status": "INCOMPLETE", "checked": 0, "recorded": 0, "reason": "no_beacons"}
     import secrets

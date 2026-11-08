@@ -64,7 +64,6 @@ def private_key(record):
 
 
 class _EncryptingWriter:
-    """A bounded, non-seekable plaintext sink for streaming ZIP writers."""
 
     def __init__(self, outgoing, encryptor):
         self.outgoing, self.encryptor, self.total = outgoing, encryptor, 0
@@ -87,7 +86,6 @@ class _EncryptingWriter:
 
 @contextmanager
 def encrypt_stream(destination, recipient):
-    """Write a TGWSEAL1 envelope; remove incomplete output on any failure."""
     destination = Path(destination)
     key, nonce = os.urandom(32), os.urandom(12)
     header = json.dumps({"algorithm": ALGORITHM, "key": b64(public_key(recipient).encrypt(key, oaep())),

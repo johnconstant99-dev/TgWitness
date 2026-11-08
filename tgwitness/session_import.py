@@ -1,4 +1,3 @@
-"""Create an independent authorization using a briefly connected imported donor."""
 import asyncio
 import hashlib
 import secrets
@@ -81,8 +80,6 @@ async def create_session(collector, api_id, api_hash, session, expected_user_id=
                 retain(saved)
                 return saved
 
-            # Telethon saves negotiated keys before using them, including during
-            # QR data-centre migration. Retain that key before token acceptance.
             candidate.session.save = save_pending
             c.login_client = candidate
             c.pending_credentials = dict(credentials)
@@ -131,7 +128,6 @@ async def create_session(collector, api_id, api_hash, session, expected_user_id=
                                    "donor_api_id": api_id, "created_at": utcnow()}}}
             await prepare_candidate()
         qr = await candidate.qr_login()
-        # Telethon must install its UpdateLoginToken listener before acceptance.
         waiter = asyncio.create_task(qr.wait(timeout=60))
         await asyncio.sleep(0)
         try:

@@ -87,7 +87,6 @@ def terms(body):
 
 
 def ranked_query(body):
-    """Full-text query for a question; None keeps the chronological change listing."""
     if body.message_id or terms(body) == [""]:
         return None
     if body.query.strip():
@@ -113,7 +112,6 @@ def bounded(text, match):
 
 
 def ranked(reader, body):
-    """Best-matching saved messages across the chosen chats, or None when the index cannot answer fully."""
     from .fulltext import Query
     plan = ranked_query(body)
     if plan is None:

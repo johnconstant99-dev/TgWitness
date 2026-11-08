@@ -1,4 +1,3 @@
-"""Interpret verified official-client events without trusting their HTML report."""
 from .format import canonical, digest
 
 

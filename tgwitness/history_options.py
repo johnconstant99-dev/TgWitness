@@ -1,4 +1,3 @@
-"""Operator-selected API history scope; independent of official-client Trusted Live."""
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field

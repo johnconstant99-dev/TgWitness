@@ -1,5 +1,4 @@
 #!/bin/sh
-# Install reviewed APK bytes authenticated by the signed repository index.
 set -eu
 profile=${1:?Usage: install-packages.sh runtime|media|build}
 case "$profile" in runtime|media|build) ;; *) echo "Unknown profile" >&2; exit 2 ;; esac
@@ -34,8 +33,6 @@ while read -r digest name extra; do
     case "$digest" in *[!0-9a-f]*) echo "Invalid APK digest" >&2; exit 2 ;; esac
     case "$name" in ''|*[!a-zA-Z0-9+_.-]*|.*) echo "Invalid APK filename" >&2; exit 2 ;; esac
     case "$name" in *.apk) ;; *) echo "Invalid APK extension" >&2; exit 2 ;; esac
-    # APK filenames are package-name-upstream_version-rN.apk. The name can
-    # contain hyphens; split the two version components from the right.
     stem=${name%.apk}
     release=${stem##*-}
     prefix=${stem%-*}
@@ -46,8 +43,6 @@ while read -r digest name extra; do
     set -- "$@" "$package=$version-$release"
     printf '%s\n' "$name" >> "$cache/names"
 done < "$lock"
-# The index signature authenticates package control checksums and data hashes.
-# No fetched dependency may be installed without its reviewed SHA-256 as well.
 retry_fetch apk update --cache-dir "$cache/apks"
 for index in "$cache"/apks/APKINDEX.*.tar.gz; do apk verify "$index"; done
 retry_fetch apk cache --cache-dir "$cache/apks" download "$@"
@@ -66,6 +61,4 @@ cmp "$cache/expected" "$cache/actual"
     cd "$cache/verified"
     sha256sum -c "$lock"
 )
-# Preserve the authenticated index and cache during installation. Direct local
-# APK installation would require signatures absent from these repository files.
 apk add --no-network --cache-dir "$cache/apks" "$@"

@@ -32,7 +32,6 @@ def unb64url(text):
 
 
 class DailyJournal:
-    """One prefix boundary per UTC date; no full journal retained in memory."""
     def __init__(self):
         from .chain import MerkleFrontier
         self.tree, self.dates = MerkleFrontier(), {}
@@ -271,7 +270,6 @@ def verify_witness(path, expected_fingerprint=None, check_drand=False, check_bit
     if check_drand and bound:
         rounds = [{"round": a["freshness"]["drand_round"], "randomness": a["freshness"]["drand_randomness"],
                    "seq": a["seq"]} for a in bound]
-        # Every credited anchor is checked; sampling must not certify unchecked rounds.
         confirmation = confirm_drand(rounds, limit=len(rounds))
         if confirmation["confirmed"] == len(rounds):
             for anchor in bound:
@@ -414,7 +412,6 @@ ASSURANCE_TIERS = ("self_attested", "timestamped", "witnessed", "fresh", "witnes
 
 
 def assurance(result):
-    """Credit only checks performed by this verifier, with coverage of the export head."""
     witness = result.get("witness") or {}
     anchors = result.get("anchors") or []
     stamps = [a for a in anchors if a.get("event_count") == result.get("events") and (

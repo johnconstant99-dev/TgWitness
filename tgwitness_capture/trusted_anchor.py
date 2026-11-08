@@ -1,4 +1,3 @@
-"""Public drand observations through the selected connector, never direct fallback."""
 import hashlib
 import http.client
 import ipaddress
@@ -87,7 +86,6 @@ def observe(connector, fetch=via_connector):
 
 
 def confirm(events, online=False, fetch=None):
-    """Verifier-side public reads; no collector route or secret is used."""
     from .witness import NoRedirect
     rounds = {}
     for event in events:

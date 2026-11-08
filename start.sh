@@ -1,5 +1,4 @@
 #!/bin/sh
-# Run with: sh start.sh [--demo | --setup-only | --check]
 set -eu
 cd -- "$(dirname -- "$0")"
 for interpreter in python3.13 python3.12 python3.11 python3 python; do

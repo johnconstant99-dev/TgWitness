@@ -1,3 +1,2 @@
-# Optional, networkless OCR/transcription worker; Python 3.12 or newer.
 pillow>=13,<14
 faster-whisper>=1.2,<2

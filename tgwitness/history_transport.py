@@ -1,4 +1,3 @@
-"""Takeout transport for an already selected, account-pinned history run."""
 import json
 
 from telethon.tl import functions as f

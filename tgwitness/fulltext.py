@@ -1,8 +1,3 @@
-"""Morphology-aware full-text index over saved message text and machine recognition.
-
-The index is derived data: it is rebuilt from the signed journal, never signed itself and never
-part of an export. Every response names the journal position (seq and hash) the index covers,
-and every hit is read back from the journal, so a changed index cannot supply text of its own."""
 import json
 import logging
 import os
@@ -149,7 +144,6 @@ def plain_form(value):
 
 
 def ukrainian_stem(word):
-    """Light suffix stripping when the optional Ukrainian dictionary (GPL-3.0 data) is not installed."""
     for ending in UKRAINIAN_ENDINGS:
         if word.endswith(ending) and len(word) - len(ending) >= 3:
             return word[:-len(ending)]
@@ -169,7 +163,6 @@ def cyrillic_term(word, first="ru"):
 
 @lru_cache(maxsize=65536)
 def cyrillic_forms(word):
-    """Every lemma the index may have used for this word, plus close alternatives."""
     forms, raw = [cyrillic_term(word, "ru"), cyrillic_term(word, "uk")], []
     with LOCK:
         for lang in ("ru", "uk"):
@@ -223,7 +216,6 @@ def first_language(text):
 
 
 def grams(run, start=0):
-    """Overlapping pairs and the run's last character, so any substring is a phrase or a prefix."""
     if len(run) == 1:
         return [(run, start, start + 1)]
     pairs = [(run[i:i + 2], start + i, start + i + 2) for i in range(len(run) - 1)]
@@ -231,7 +223,6 @@ def grams(run, start=0):
 
 
 def tokens(text, normalized=False):
-    """Index terms of a text with offsets into its normalized form."""
     text = text if normalized else normalize(text)
     first, result = first_language(text), []
     for run in RUNS.finditer(text):
@@ -307,7 +298,6 @@ def message_urls(payload):
 
 
 def message_document(chat_id, kind, payload):
-    """(body, ref, meta): analyzed words, exact references, and filter tokens that never affect rank."""
     text = payload.get("text") if isinstance(payload.get("text"), str) else ""
     urls, labels = message_urls(payload)
     body = " ".join(term for term, _, _ in tokens(text + ("\n" + labels if labels else "")))
@@ -342,7 +332,6 @@ def segmented_clauses(run, split=True):
 
 
 def text_clauses(text, question=False, split=True):
-    """(expression, stopword, forms, original) for each searchable unit of a query text."""
     text, clauses = normalize(text), []
     for run in RUNS.finditer(text):
         if run.group(1):
@@ -357,7 +346,6 @@ def text_clauses(text, question=False, split=True):
 
 
 def phrase_units(units, limit=16):
-    """Adjacent word forms as FTS phrases, so an exact phrase is narrowed by the index before its literal check."""
     if len(units) < 2 or any(not e.startswith("body:(") for e, _, _, _ in units):
         return units
     combinations = [[]]
@@ -399,8 +387,6 @@ def moment(value, end=False):
 
 
 class Query:
-    """Search syntax: words, "exact phrase", -excluded, a OR b, domains, @username, #tag, wallets, phones,
-    chat:<id>, from:<id|@username>, id:<message id>, since:/until:<ISO date>, source:, kind:."""
 
     def __init__(self, text, match="all"):
         if match not in ("all", "any"):
@@ -531,10 +517,6 @@ class Query:
 
 
 def original_offset(text, offset):
-    """Position in the saved text of the character at an offset of its normalized form.
-
-    Normalization drops invisible characters and may change lengths, so offsets differ in texts that hide
-    zero-width characters between letters."""
     low, high = 0, len(text)
     while low < high:
         middle = (low + high) // 2
@@ -546,7 +528,6 @@ def original_offset(text, offset):
 
 
 def focus(text, query):
-    """Offset in the saved text of the first matching term, to centre excerpts of long texts."""
     normalized = normalize(text)
     found = [normalized.find(value) for value in query.literals + query.phrases]
     wanted = query.matched_terms()
@@ -679,7 +660,6 @@ class FullText:
                 self.stopping.wait(0.25)
 
     def step(self, batch=BATCH):
-        """Index the next committed journal events; True while more remain."""
         with self.lock:
             db = self.connection()
             if db is None:
@@ -721,7 +701,6 @@ class FullText:
         return head - self.state(db)["seq"]
 
     def current(self, public=False):
-        """Status after indexing a small backlog, so fresh records count as covered."""
         with self.lock:
             if self.connection() is not None and 0 < self.lag() <= CATCH_UP:
                 self.catch_up()
@@ -890,7 +869,6 @@ class FullText:
 
 
 def fused(lists, order, k=60):
-    """Reciprocal rank fusion: scores from separate indexes are not comparable, ranks are."""
     scored = {}
     for hits in lists:
         for rank, hit in enumerate(hits, 1):
@@ -902,7 +880,6 @@ def fused(lists, order, k=60):
 
 
 class DerivedIndex:
-    """Machine recognition is indexed in memory only; its artifacts stay encrypted at rest."""
 
     def __init__(self, store):
         self.store, self.lock = store, threading.Lock()
@@ -988,5 +965,4 @@ class DerivedIndex:
         return hits
 
     def matching(self, text):
-        """Job IDs whose recognized text matches a query, best first."""
         return [hit["job_id"] for hit in self.search(Query(text), None, None, None, {"ocr", "transcription"}, 100)]

@@ -1,8 +1,3 @@
-"""Opt-in control plane for separately deployed, separately signed recorders.
-
-No recorder starts here. Only explicit administrator requests contact endpoints.
-Tokens live in the workspace vault; private signing keys never leave recorders.
-"""
 import asyncio
 import hashlib
 import ipaddress

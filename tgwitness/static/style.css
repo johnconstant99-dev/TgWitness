@@ -2063,8 +2063,6 @@ button.primary[aria-busy=true]::after { color: #fff; }
 .pool-schedule { margin: -4px 0 12px; }
 .pool-save { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 14px; }
 @media (max-width: 860px) { .pool-source-grid, .pool-search-fields, .pool-country-fields { grid-template-columns: 1fr; } }
-
-/* Account groups and bulk import. */
 .fleet-import { margin-bottom: 18px; }
 .fleet-drop { min-height: 96px; }
 .fleet-import-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 14px; }
@@ -2159,7 +2157,6 @@ button.primary[aria-busy=true]::after { color: #fff; }
 .target-row>.source-select+div { flex:1; }
 @media(max-width:600px){.review-split{grid-template-columns:1fr}.chat-header .live-controls{width:100%;margin-inline-start:0}.review-diff-body{padding:10px}}
 @media(max-width:600px){.target-row>.source-select+div{flex-basis:calc(100% - 40px)}.target-row:has(.source-select)>.target-actions{width:100%;justify-content:flex-end}.target-row:has(.source-select)>.secondary{margin-inline-start:34px}}
-/* Full-account snapshot: separate from the observed journal export. */
 .account-export-card { margin-bottom: 18px; overflow: hidden; }
 .account-export-head { display: flex; align-items: center; justify-content: space-between; gap: 18px 28px; padding: 22px 24px;
   background: linear-gradient(125deg, var(--accent-soft), var(--surface) 62%); }

@@ -1,4 +1,3 @@
-"""Account-wide pacing for bulk reads, sharing the client's serialized RPC lane."""
 import asyncio
 import math
 import time
@@ -22,12 +21,6 @@ def bulk_request(request):
 
 
 class AccountPacer:
-    """Server cooldowns remain authoritative; local delay never shortens them.
-
-    Called for bulk history reads while WitnessClient holds its reentrant RPC
-    lock, including reads wrapped in Takeout. File chunks use the same account
-    server cooldown without the artificial history delay. State is account-bound.
-    """
     def __init__(self, store, *, clock=time.monotonic, sleep=asyncio.sleep):
         self.store, self.clock, self.sleep = store, clock, sleep
         self.next_request = 0.0

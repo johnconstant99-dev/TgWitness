@@ -1,4 +1,3 @@
-# One project per account/case. Run from repository root with --project-directory .
 services:
   trusted:
     build:

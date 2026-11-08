@@ -1,8 +1,3 @@
-"""Persist authenticated history pages before doing any attachment work.
-
-Public message metadata is signed; expiring Telegram file references stay in an
-encrypted queue. Final account archives retain their existing signed format.
-"""
 import asyncio
 import base64
 import bisect

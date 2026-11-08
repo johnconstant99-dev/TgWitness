@@ -1,4 +1,3 @@
-"""Signed attachment results survive a stop before their message page is sealed."""
 from .store import canonical
 
 

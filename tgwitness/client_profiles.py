@@ -37,7 +37,6 @@ def platform_profile(api_id, seed, supplied=None):
         return {}
     data = catalog()["platforms"]
     profile = data["profiles"][name]
-    # Pick a compatible pair; OS and model must not be drawn separately.
     devices = data["devices"][profile["catalog"]]
     slot = int.from_bytes(hashlib.sha256((name + ":" + str(seed)).encode()).digest(), "big")
     slot %= sum(device["weight"] for device in devices)

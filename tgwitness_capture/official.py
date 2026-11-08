@@ -1,8 +1,3 @@
-"""Owned official Web A browser. No Telegram protocol or client-internal calls.
-
-The control API exposes named UI operations, never arbitrary input, JavaScript,
-URLs, CDP or profiles. Host administrators remain outside this local trust boundary.
-"""
 import asyncio
 import ipaddress
 import os

@@ -1,6 +1,3 @@
-# Register only when explicitly executed by the operator. Does not store passwords.
-# Runs at logon in the current user's session; this is not an unattended Windows service.
-# Windowless startup/server diagnostics are retained in DataPath\logs\server.log.
 [CmdletBinding(SupportsShouldProcess)]
 param(
     [Parameter(Mandatory=$true)][string]$ProjectPath,

@@ -1,4 +1,3 @@
-"""Missing message numbers stored as intervals, without expanding large gaps."""
 from bisect import bisect_right
 from itertools import pairwise
 
@@ -21,7 +20,6 @@ class MissingNumbers:
         return index >= 0 and number < self.ranges[index][1]
 
     def sample(self, step=1):
-        """Yield every nth absent number, preserving the offset between gaps."""
         offset = 0
         for start, stop in self.ranges:
             yield from range(start + (-offset % step), stop, step)

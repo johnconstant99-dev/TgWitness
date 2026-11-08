@@ -1,4 +1,3 @@
-"""Trusted Live control plane; separate from TgWitness's API collector."""
 import asyncio
 import secrets
 import shutil

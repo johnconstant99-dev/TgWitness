@@ -1,4 +1,3 @@
-"""Built-in Telegram API pairs, used only when a workspace has no pair of its own."""
 import random
 
 from telethon.errors import ApiIdInvalidError, ApiIdPublishedFloodError, UpdateAppToLoginError
@@ -40,7 +39,6 @@ rejected = set()
 
 
 def device_for(api_id, seed="", supplied=None):
-    """Fill missing identity fields from the catalog for this API's platform."""
     if api_id == DESKTOP_ID:
         from .client_profiles import desktop
         return desktop(seed)
@@ -49,7 +47,6 @@ def device_for(api_id, seed="", supplied=None):
 
 
 def login_order(first=None):
-    """Retain a saved pair; prefer the known Desktop profile for a fresh login."""
     pairs = [pair for pair in POOL if pair[0] not in rejected and pair != first]
     random.shuffle(pairs)
     if first in POOL and first[0] not in rejected:

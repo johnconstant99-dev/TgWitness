@@ -182,7 +182,6 @@ def download_current(site, public, revision=None):
     prefix = "releases/" + release_id + "/"
     if fetch(prefix + "manifest.json", 128 * 1024) != raw:
         raise ValueError("Current and immutable installer manifests differ")
-    # Use the immutable signature so a concurrent publication cannot pair two builds.
     signature = fetch(prefix + "manifest.json.sig", 4096)
     key = serialization.load_pem_public_key(public)
     key.verify(signature, raw, padding.PKCS1v15(), hashes.SHA256())

@@ -1,4 +1,3 @@
-# Use on its own instead of compose.yaml. Both use the same service and volume names.
 name: tgwitness
 services:
   tgwitness:
@@ -20,7 +19,6 @@ services:
     read_only: true
     tmpfs:
       - /tmp:size=512m,mode=1777
-  # Optional independent witness: docker compose --project-directory . -f deploy/compose/compose.image.yaml --profile witness up -d
   witness:
     image: ${TGWITNESS_IMAGE:?Set TGWITNESS_IMAGE to a published version or digest in .env}
     profiles: ["witness"]

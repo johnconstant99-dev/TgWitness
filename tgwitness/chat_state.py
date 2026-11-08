@@ -1,9 +1,3 @@
-"""Periodic chat-state snapshots: title, description, counts, pinned messages, administrators and gifts.
-
-State that lives outside the message stream changes without a message: an unpin of every message leaves no
-message-level trace, a gift can be converted or upgraded without a service message. Each snapshot is a
-signed `chat.state` record of what Telegram returned to this account, with its differences from the
-previous snapshot of the same chat. Telegram does not say who changed anything or when between snapshots."""
 import asyncio
 import hashlib
 import json
@@ -22,7 +16,6 @@ GIFT_LIMIT = 100
 TIMEOUT = 30
 SCALARS = ("title", "usernames", "about", "participants_count", "admins_count", "linked_chat_id",
            "slowmode_seconds", "photo_id", "pinned_total", "gifts_total")
-# Counts change constantly; a record whose changes touch only these keeps the full state of an earlier record.
 VOLATILE = {"participants_count", "admins_count", "pinned_total", "gifts_total"}
 FULL_EVERY = timedelta(days=7)
 MEANING = ("What Telegram returned to this account about the chat at this time, and the differences from the "
@@ -65,7 +58,6 @@ def gift_entry(saved):
 
 
 async def read_state(client, entity, options, timeout=TIMEOUT):
-    """(state, errors). A part that fails is left out of the state and named in errors."""
     errors, state = {}, {}
 
     async def ask(part, request):
@@ -142,7 +134,6 @@ async def read_state(client, entity, options, timeout=TIMEOUT):
             state["gifts_total"] = getattr(answer, "count", None)
             completeness("gifts", type(state["gifts_total"]) is int and state["gifts_total"] == len(state["gifts"])
                          and not getattr(answer, "next_offset", None))
-    # Null descriptions/photos/linked chats are observed clearing; absent counts are unknown.
     return {k: v for k, v in state.items() if v is not None or k not in VOLATILE}, errors
 
 
@@ -151,7 +142,6 @@ def keyed(entries, key):
 
 
 def differences(before, after):
-    """Changes between two states. Parts missing from either state were not read and are not compared."""
     changes = {}
     for key in SCALARS:
         if key in before and key in after and before[key] != after[key]:
@@ -182,7 +172,6 @@ def differences(before, after):
 
 
 def latest(store, chat_id):
-    """(record, full state, seq of the record holding it) of the newest snapshot, or (None, None, None)."""
     records = store.events(chat_id=chat_id, kind=KIND, limit=1)
     if not records:
         return None, None, None
@@ -205,13 +194,10 @@ def latest(store, chat_id):
 
 
 def record(store, chat_id, state, errors, *, unchanged=True, now=None):
-    """Append a snapshot. Returns the record, or None when nothing changed and unchanged checks are not kept."""
     now = now or datetime.now(timezone.utc)
     previous, before, base = latest(store, chat_id)
     carried = []
     if before is not None:
-        # A part that could not be read keeps its earlier value, named in carried_forward, so it is not
-        # reported as removed and later snapshots compare with the last value actually read.
         carried = sorted(k for k in before if k not in state)
         if "parts_complete" in state:
             state = {**state, "parts_complete": {**before.get("parts_complete", {}), **state["parts_complete"]}}
@@ -241,7 +227,6 @@ def options(collector):
 
 
 def due(store, minutes, limit=100):
-    """Enabled sources without a snapshot in the last interval, the longest waiting first."""
     cutoff = (datetime.now(timezone.utc) - timedelta(minutes=minutes)).isoformat(timespec="milliseconds")
     with store.lock:
         rows = store.db.execute(
@@ -252,7 +237,6 @@ def due(store, minutes, limit=100):
 
 
 async def run_due(collector, attempted):
-    """Snapshot the sources that are due. attempted remembers chats that could not be read this interval."""
     minutes = collector.param("chat_state_minutes")
     if minutes <= 0:
         return 0

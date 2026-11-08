@@ -1,4 +1,3 @@
-"""Named official-client operations only; authentication is the recorder middleware."""
 import asyncio
 from typing import Literal
 
