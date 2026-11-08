@@ -23,7 +23,7 @@
 
 ## Unreleased
 
-- Refresh the pinned Wolfi base images and runtime/MCP dependencies, regenerate the corresponding hash locks, and allow OpenCV 5 for the optional QR reader.
+- Refresh the pinned Wolfi base images and runtime/MCP dependencies, regenerate root and capture hash locks, and require patched QR reader wheels. Exclude OpenCV 5.0.0.93, which bundles FFmpeg 8.1.1 affected by [CVE-2026-8461](https://github.com/advisories/GHSA-qff7-4q6c-m8h6).
 
 - Simplify the panel around six daily sections: Home, Chats, Journal, Exports, Accounts and Settings. Move secondary tools, collection diagnostics, chat actions and advanced filters into contextual menus. Open saved chats after sign-in, preserve drafts and filter selections, and give messages more space on phones and desktops. Update the Russian labels and panel guide.
 
