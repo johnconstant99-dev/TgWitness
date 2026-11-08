@@ -105,7 +105,7 @@
   $("ai-test").addEventListener("click",event=>busy(event.currentTarget,async()=>{if(!config?.enabled)return;const turn=generation;await call(scoped("provider/test"),{});if(current(turn))$("ai-test-result").textContent=tr("Connection checked with synthetic text. No messages were read.");}));
   function citation(ref,label){const button=node("button","text-link",label||"#"+ref.event_seq);button.type="button";button.title=tr("Open journal record #{seq}",{seq:ref.event_seq});button.addEventListener("click",()=>busy(button,()=>openRecord(ref.event_seq)));return button;}
   function coverage(data,target){
-    target.replaceChildren(node("p","hint",tr("Only saved observations are available. Gaps may exist; absence from the archive does not prove absence in Telegram.")));
+    target.replaceChildren(node("p","hint",tr("Only saved observations are available. Periods of confirmed collection are listed under Coverage.")));
     if(!data.workspace_events_visible)target.append(node("p","hint",tr("This access cannot read workspace-wide coverage events.")));
     for(const event of data.events){const line=node("p","hint",event.kind+" · "+fmtFull(event.observed_at)+" ");line.append(citation(event.source));target.append(line);}
   }

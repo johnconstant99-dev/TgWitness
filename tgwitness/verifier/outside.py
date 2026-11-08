@@ -137,7 +137,7 @@ def outside_lines(outside):
         if drand["clock_behind_seconds"] > 1:
             lines.append("Recorded observation times trail recorded drand round times by up to "
                          + str(drand["clock_behind_seconds"])
-                         + " s; this comparison does not authenticate either timestamp.")
+                         + " s.")
     gateway = outside.get("gateway") or {}
     if gateway.get("windows"):
         lines.append("Cloudflare Gateway DNS log copied in " + str(gateway["windows"]) + " window(s) from "

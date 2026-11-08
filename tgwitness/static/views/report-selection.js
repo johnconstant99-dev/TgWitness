@@ -172,7 +172,7 @@ export function createReportSelection({root,tr,json,getOwner,ready,options,activ
         String(row.chat_id),String(row.start)+' – '+String(row.end)+' ('+count(row.count)+')',message(row.before),message(row.after)
       ]),'report-gap-table'));
       if(gaps.truncated)target.append(make('p',tr('Preview shortened. The saved report lists the available gap details.'),'hint'));
-      target.append(make('p',tr('Missing numbers are gaps in the observed IDs, not proof of deletion. Neighboring records are context and may be outside the chosen authors, event types or dates.'),'hint'));
+      target.append(make('p',tr('Missing numbers are gaps in the observed IDs; deletions are recorded as separate notices. Neighboring records are context and may be outside the chosen authors, event types or dates.'),'hint'));
     }
   }
   async function preview(reveal=true){

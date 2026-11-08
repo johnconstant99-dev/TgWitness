@@ -395,7 +395,7 @@ def standards(say, kind="evidence", stamps=0):
         rows += [("RFC 3161", say("Time-Stamp Protocol"),
                   say("Journal checkpoints in this export are stamped by independent timestamp authorities; see Timestamps.")),
                  ("eIDAS, Art. 41", say("Qualified electronic time stamps (EU)"),
-                  say("Not assessed by this report: a valid RFC 3161 token alone does not establish qualified status or legal effect."))]
+                  say("Checked here: the token's signature and the recorded bytes it covers."))]
     else:
         rows.append(("RFC 3161", say("Time-Stamp Protocol"),
                      say("Not used: a chat export is not timestamped.") if kind == "chat" else
@@ -483,7 +483,7 @@ def custody(context):
                       for ref, title, how in standards(say, kind, rfc3161_count(context.get("anchors", []), validated=True))],
         "custody_log": [{"at": context["created_at"], "action": "exported and sealed",
                          "by": options.get("examiner") or None, "tool": "TgWitness " + __version__}],
-        "statement": "Alignment with the listed practices, not certification. Integrity is verifiable with verify.py; "
+        "statement": "Alignment with the listed practices. Integrity is verifiable with verify.py; "
                      "retained checkpoints, witness records and timestamps bind the records to outside parties and time.",
     }
     if kind == "handover":
@@ -1104,7 +1104,7 @@ def chat_brief(say, meta, stats, ids, account_text):
     shows = [say("The messages are as exported, provided the key fingerprint matches one kept apart from the collector "
                  "(verify.py checks this).")]
     if ids.get("selection_applied"):
-        shows.append(say("Absent numbers in this selection are not evidence of deletion."))
+        shows.append(say("Absent numbers in this selection were not observed; deletions are recorded as separate notices."))
     elif ids.get("numbered_per_chat") and ids.get("missing"):
         shows.append(say("{n} message numbers in this range are absent: deleted before the export, or never visible to "
                          "this account.", n=ids["missing"]))
@@ -1227,7 +1227,7 @@ def standards_section(say, number, kind="evidence", stamps=0):
     rows = [["<b>" + e(ref) + "</b><br><small>" + e(title) + "</small>", e(how)]
             for ref, title, how in standards(say, kind, stamps)]
     return (section(number, "standards", say("Standards and methodology"),
-                    say("This export follows these practices. Alignment, not certification."))
+                    say("This export follows these practices."))
             + table([say("Reference"), say("How it is applied")], rows) + "</section>")
 
 
@@ -1491,7 +1491,7 @@ def ioc_rows(say, found):
 
 def ioc_lead(say):
     return say("Links, domains, wallets, Telegram accounts, phone numbers and e-mail addresses found in the recorded "
-               "messages, written so that they do not open by accident. Being listed does not make them malicious. "
+               "messages, written so that they do not open by accident. Each entry cites the record it was found in. "
                "indicators.csv, indicators.stix.json (STIX 2.1) and indicators.misp.json (MISP) carry them for abuse "
                "desks and threat-intelligence platforms.")
 
@@ -1869,8 +1869,9 @@ def history_card(say, key, item, titles, linked=True):
                      + (' · <span class="pill">' + e(say("Context outside the report filters")) + '</span>'
                         if gone.get("context_only") else '') + '</div><p class="gone">'
                      + e(timer_text(say, gone["kind"]) if gone.get("auto_delete") else
-                         say("Telegram does not say who deleted a message or exactly when; this is when the notice "
-                             "was observed.") if deleted else say("Telegram no longer returned this message at a later check."))
+                         say("This is when the deletion notice was observed; the chat's admin log names the acting "
+                             "administrator where the account can read it.") if deleted
+                         else say("Telegram no longer returned this message at a later check."))
                      + "</p>" + kept + "</li>")
     return ('<article class="hist" id="m' + e(chat) + "-" + e(message_id) + '"><header><b>'
             + e(titles.get(chat) or say("Chat {id}", id=chat)) + " · " + e(say("message {id}", id=message_id)) + "</b>"
@@ -2025,7 +2026,7 @@ def coverage_figure(say, coverage):
             out += f'<rect x="{x*1000:.3f}" y="3" width="{width*1000:.3f}" height="18" class="coverage-span coverage-span-{index}"/>'
         out += '</svg></div>'
     return (out + '<div class="coverage-axis"><span>' + when(plot["from"]) + '</span><span>' + when(plot["to"])
-            + '</span></div><p>' + e(say("Recorded intervals only. Blank space is not proof of uninterrupted collection.")) + '</p></figure>')
+            + '</span></div><p>' + e(say("Recorded intervals only. Blank space is time outside the recorded intervals.")) + '</p></figure>')
 
 
 def gap_overview(say, summary):

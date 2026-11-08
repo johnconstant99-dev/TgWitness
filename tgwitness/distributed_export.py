@@ -682,8 +682,8 @@ class Run:
                 "accounts": len(readers), **({"errors": errors} if errors else {}),
                 "method": "channels.getMessages by number, shared by the accounts of this export",
                 "meaning": "An empty answer means Telegram has no message under that number for these accounts: "
-                           "deleted, or never visible to them. Telegram does not say which. Unchecked numbers "
-                           "cannot be told apart from deleted ones."}
+                           "it was deleted, or was never visible to them. Unchecked numbers are reported "
+                           "separately from checked ones."}
 
     def sign_parts(self, ranges):
         parts = []

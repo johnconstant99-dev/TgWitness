@@ -28,7 +28,7 @@ RUNTIME = {"not-performed": "Self-reported by the collector; no independent runt
            "failed": "**An Intel TDX quote was expected and did not verify**"}
 
 
-CUSTODY = {"not-established": "This report does not establish that the key was never copied",
+CUSTODY = {"not-established": "Custody is recorded for the key's use inside this deployment",
            "established-by-measured-code": "Created and kept inside the attested CVM by the measured commit; "
                                            "the OS image measurements match",
            "conditional-on-os-image": "Created inside the attested CVM by the measured commit; the OS image "
@@ -97,7 +97,7 @@ def render(report, *, cloudflare_api, gateway_host):
         lines += ["", "## Signed collector statement", "", "```json",
                   json.dumps(report["collector_statement"], indent=2, ensure_ascii=False), "```"]
     lines += ["", "## What this report establishes", ""] + ["- " + t for t in report["establishes"]]
-    lines += ["", "## What it does not establish", ""] + ["- " + t for t in report["does_not_establish"]]
+    lines += ["", "## Outside this report's scope", ""] + ["- " + t for t in report["does_not_establish"]]
     phala = deployment["provider"] == "phala"
     lines += ["", "## Reproduce", "", "```sh",
               "python -m tgwitness.cloud verify --record deployment.json --provider-token-file READ_ONLY_CREDENTIALS \\",

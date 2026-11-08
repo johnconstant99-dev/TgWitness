@@ -217,7 +217,7 @@ def describe(finding):
     if kind == "time_interval":
         return f'Time interval: {finding["seconds"] / 3600:.1f} hours between exported messages. This may be ordinary inactivity.'
     if kind == "source_mismatch":
-        return 'Exported text differs from the operator’s frame transcription. Review both sources; this alone does not prove an edit.'
+        return 'Exported text differs from the operator’s frame transcription. Review both sources.'
     if kind == "operator_match":
         return 'Exported text matches the operator’s frame transcription. This is an operator comparison, not Telegram authentication.'
     return f'Operator annotated message #{finding["before_id"]} is absent from the export. Cause unknown.'

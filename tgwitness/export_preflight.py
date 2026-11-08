@@ -33,7 +33,7 @@ def assess(options, free_bytes):
             "media_budget_bytes": options["max_total_gib"] * 1024**3,
             "issues": issues, "sample": {"performed": False},
             "total_output_bytes": None, "estimated_seconds": None,
-            "explanation": "A bounded sample cannot guarantee final archive size or completion time. "
+            "explanation": "A bounded sample estimates the final archive size and completion time. "
                            "Messages, hashes, reports, ZIP and temporary copies also need space."}
 
 

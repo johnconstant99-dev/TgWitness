@@ -49,8 +49,8 @@ MODES = (
              "to a Telegram channel.",
              "About 30 minutes: a bot, a channel and a second machine for the witness."),
     ModeInfo("court", "🔴", "Case preparation", "Prepare material for review by a lawyer, the police or a court.",
-             "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately; "
-             "this view does not establish admissibility.",
+             "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service "
+             "separately.",
              "About an hour: timestamps work at once; the copy needs S3 storage."),
     ModeInfo("github", "🟣", "GitHub-verified", "Records whose software anyone must be able to check.",
              "Everything in Case preparation, plus a check of the running code against a public GitHub commit "

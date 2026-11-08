@@ -20,7 +20,7 @@ ID_GAP_BASIS = (
     "Message numbers absent from all records in this snapshot, between the lowest and highest known "
     "message numbers observed in each selected chat during the selected UTC dates. Sender and event-kind "
     "filters do not create gaps. Neighboring records are context and may fall outside those filters or dates. "
-    "An absent message number is not proof that a message existed or was deleted."
+    "An absent message number is a number that was not observed in this snapshot."
 )
 Identifier = Annotated[int, Field(strict=True, gt=-(2**63), lt=2**63)]
 EventKind = Literal["message.new", "message.snapshot", "message.recovered", "message.edited",

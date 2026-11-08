@@ -443,4 +443,4 @@ def timeline(store, chat, uid, *, before=None, limit=100, quiet_days=7, now=None
                 "next_before": events[-1]["event_seq"] if more else None, "as_of": iso(now),
                 "last_message_gap_days": (activity[0][0] - activity[1][0]) / 86400 if len(activity) == 2 else None,
                 "coverage": coverage(db, chat, now - quiet_days * 86400, now),
-                "meaning": "Observed statuses and actions. Message silence is not proof of leaving or account deletion."}
+                "meaning": "Observed statuses and actions."}

@@ -32,9 +32,9 @@ MEANINGS = (
     ("image", "Screenshots and files",
      "Stored under their SHA-256 and listed in manifest-sha256.txt. A changed file no longer matches its name or the "
      "list."),
-    ("alert", "What this does not prove",
-     "A valid signature does not make statements true or the record complete. Times come from computer clocks and "
-     "Telegram servers. External time requires a verified timestamp bound to the recorded data."),
+    ("alert", "What binds this record to outside time",
+     "A signature binds these bytes to the collector key. Times come from computer clocks and Telegram servers; "
+     "a verified timestamp bound to the recorded data fixes them against an outside source."),
 )
 COMMANDS = (
     ("Check the signature and content",

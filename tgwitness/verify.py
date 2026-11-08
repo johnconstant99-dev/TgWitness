@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: 884f112536bafa6c37c4182c75a3f49ac7b6587fece77ef24ef12938cb189d50
+# TgWitness verifier sources SHA-256: eeed8cee326c2d2480defb279924c9109c041cae294fd4b2dc49c37e00f49215
 """Standalone verifier"""
 import argparse
 import base64
@@ -1156,8 +1156,7 @@ GAP_DEFAULTS = {"gap_analysis": True, "gap_account_sequence": True, "gap_cluster
             "gap_service_estimate": False}
 WIDE_TYPES = ("private", "groups", "bots")
 GAP_MEANING = ("A gap is a message number between two observed messages that this collector never saw. Telegram assigns "
-           "these numbers; a gap does not say who removed a message or why, and it may be a message Telegram never "
-           "showed to this account.")
+           "these numbers; a gap may be a message Telegram never showed to this account.")
 ESTIMATE_MEANING = ("Estimate from the share of service messages among observed numbers. It does not explain any "
                     "particular gap and is never subtracted from the missing count.")
 
@@ -1344,7 +1343,7 @@ def coverage_lines(coverage):
         if chat["not_observed"]:
             lines.append("Chat " + (chat["title"] or str(chat["chat_id"])) + ": IDs " + str(chat["observed_from"])
                          + "-" + str(chat["observed_to"]) + ", " + str(chat["not_observed"])
-                         + " ID(s) not observed in " + str(chat["ranges_total"]) + " range(s) (not evidence of deletion)")
+                         + " ID(s) not observed in " + str(chat["ranges_total"]) + " range(s)")
     gaps, extra = coverage.get("gap_summary") or {}, []
     account = gaps.get("account") if gaps.get("status") == "on" else None
     if account and account.get("status") == "applicable":
@@ -1481,7 +1480,7 @@ def outside_lines(outside):
         if drand["clock_behind_seconds"] > 1:
             lines.append("Recorded observation times trail recorded drand round times by up to "
                          + str(drand["clock_behind_seconds"])
-                         + " s; this comparison does not authenticate either timestamp.")
+                         + " s.")
     gateway = outside.get("gateway") or {}
     if gateway.get("windows"):
         lines.append("Cloudflare Gateway DNS log copied in " + str(gateway["windows"]) + " window(s) from "
@@ -1596,8 +1595,8 @@ def verify_events(events, public_key):
     result = {"events": count, "head_hash": previous, "fingerprint": fingerprint(public_key)}
     if chronology["regressions"] or chronology["unparseable"]:
         chronology["meaning"] = ("Observation times are collector-supplied. These anomalies do not invalidate "
-                                 "signatures, but chronological claims require independent time evidence. "
-                                 "An ordered journal does not prove its timestamps are accurate.")
+                                 "signatures; chronological claims rest on independent time evidence such as a "
+                                 "timestamp or a witness record.")
         result["chronology"] = chronology
     return result
 
@@ -2726,7 +2725,7 @@ def print_comparison(result, limit=50):
     if result["method"] == "number":
         print("Unchanged: " + str(result["unchanged"]))
     else:
-        print("Matched: " + str(result["matched"]) + " (possible correspondence, not proof of message identity)")
+        print("Matched: " + str(result["matched"]) + " (possible correspondence between the two exports)")
     if not (first["key_pinned"] and second["key_pinned"]):
         print("Signer identity is unpinned for at least one archive: compare the fingerprints with copies kept elsewhere.")
 
@@ -6592,7 +6591,7 @@ def verification_comparison(args, parser, mode):
         parser.exit(code, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + safe_text(exc) + "\n")
     pinned = bool(compared['first']['key_pinned'] and compared['second']['key_pinned'])
     compared['assurance'] = assurance(compared)
-    compared['assurance']['scope'] = 'two authenticated chat exports; comparison does not prove event history'
+    compared['assurance']['scope'] = 'two authenticated chat exports; the comparison covers their contents'
     if mode == "json":
         verification_print(json.dumps({"verified": True, "kind": "comparison", "result": compared,
                           "signer_pinned": pinned, "requirements_met": not args.strict or pinned},
