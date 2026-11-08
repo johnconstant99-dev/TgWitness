@@ -57,9 +57,10 @@ WARP nor pacing guarantees that Telegram will not restrict an account.
 
 ## Read the result before handing it over
 
-Review source scope, text completion, unavailable messages, attachment outcomes,
-pauses and any witness or timestamp limitations separately. A valid signature
-checks integrity against trusted inputs; it does not prove complete Telegram
-delivery or authenticate Telegram as the author of the archive.
+Review the selected source scope, captured versions, source and observation times,
+attachment outcomes and recovery intervals. Verify the archive against the trusted
+inputs for its mode: collector or witness key, retained checkpoint, external time
+receipts and applicable GitHub or Intel TDX acquisition evidence. The result should
+identify which acquisition, integrity, continuity and time checks passed.
 
 See [Current capabilities and qualification](STATUS.md) for what has been tested.

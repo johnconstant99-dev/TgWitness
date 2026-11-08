@@ -77,11 +77,13 @@ observation merely because it appears in a signed report.
 | A separately retained checkpoint or witness | The archive agrees with a previously retained journal state |
 | A verified external timestamp | The referenced bytes existed by the timestamp under the stated trust assumptions |
 | GitHub capture attestation | The archive matches the approved workflow, collector revision and recorded digest |
+| Intel TDX attestation | The quote, platform status, expected OS/application measurements, freshness and collector identity pass their configured checks |
 
-These checks support review of integrity and provenance. They do not turn the
-content of a message into a true statement or reconstruct unseen deleted
-messages. Use an independently obtained key fingerprint and the verification
-steps in [the trust guide](TRUST.md) and [evidence format](EVIDENCE.md).
+In attested acquisition, the approved collector's authenticated Telegram connection
+and output are bound to the checked execution environment. The archive retains the
+captured content and context; reports and analysis refer back to those records.
+Use the mode-specific verification steps and trusted inputs in
+[the trust guide](TRUST.md) and [evidence format](EVIDENCE.md).
 
 ## Published scale and measured performance
 
@@ -101,13 +103,26 @@ publishes the two real runs, hardware, durations, archive hashes and signed
 measurement files. They establish results for their recorded revisions and
 conditions, not a universal rate or capacity ceiling.
 
+The [public-history qualification](EXPORT-BENCHMARK-2026-11-06.md) also records
+**48 verified archives with 3,598,381 records** across a 50-source input list and
+40 account workspaces. Its eight-account Source A acquired **768,007 history
+records in 1,117.082 seconds**, including waits: **687.512 records/second**, with
+attachment downloads disabled. The complete attempt, including validation, took
+1,574.920 seconds. These measurements describe that workload, alongside the
+smaller fresh-export examples above.
+
 ### Testing history and duration
 
-The maintainer reports more than six months of testing as of 6 November 2026.
-This describes the project's testing history. The dated public measurements
-above document individual runs; they do not establish an independently verified,
-uninterrupted six-month collection run. The age of exported messages is also
-different from the time the collector has been running.
+The maintainers report more than six months of active development and testing
+before the November 2026 public release period. They describe cumulative
+development test workload on the order of 100 million, including earlier runs,
+failures, fixes and repeated validation. This is the project's development history;
+the dated public measurements document selected runs with their own methods and results.
+
+The cumulative figure describes exercised workload, not distinct automated test
+cases. The public repository's creation date records publication, not when that
+development began. Likewise, GitHub contributor accounts do not establish the
+number of people involved in development, testing or review.
 
 ## Read capability status precisely
 

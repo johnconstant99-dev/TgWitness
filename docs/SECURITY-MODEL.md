@@ -150,10 +150,16 @@ secrets in plaintext: use HTTPS or an SSH tunnel whenever leaving localhost.
 
 ## Integrity limits
 
-Local verification checks record signatures, the hash chain, attachments and the export manifest.
-The administrator holds the local signing key and can create another signed journal;
-an independently retained checkpoint detects replacement of the prefix it covers.
-Keep the key fingerprint and checkpoints with the recipient or an independent witness.
+Local verification checks record signatures, the hash chain, attachments and the
+export manifest. In a self-hosted workspace, the local administrator controls the
+data directory and signing key. SQLite triggers enforce append-only behavior for
+normal application writes; signatures and independently retained journal boundaries
+provide the recipient's integrity checks. A retained checkpoint fixes the prefix
+it covers, while a trusted key identifies the expected signer. Separate master-key
+storage protects a data-directory copy through `TGWITNESS_VAULT_KEY_FILE`.
+
+These are the local-workspace controls. The independently checked acquisition modes
+below use their own execution and verification policies.
 
 For independently checked collection, choose [GitHub Actions capture](SEALED-ACTIONS.md)
 or [Intel TDX deployment](HIGH-ASSURANCE.md#confidential-vm-on-phala-cloud-intel-tdx).

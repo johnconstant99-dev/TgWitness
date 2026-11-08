@@ -61,7 +61,7 @@
 - **Scope.** Chosen chats, a Telegram folder or the whole account, by type (channels, groups, private, bots). New chats get picked up as they appear ([collection](COLLECTION.md#observation-scope-chosen-chats-a-folder-or-the-whole-account)).
 - **Investigation mode.** For a dedicated account that joins groups and talks to bots: everything it sees and sends is recorded, bot buttons are kept, every new chat gets its profile and visible history saved ([details](COLLECTION.md#investigation-mode-joining-teams-and-talking-to-bots)). The panel's **Dedicated account guide** explains why never to use your main account.
 - **Act from Chats.** Send messages, press bot buttons, preview and join invites. All of it lands in the signed journal ([mini-client](COLLECTION.md#act-from-the-panel)).
-- **Honest coverage.** Reports say "observed from X to Y", list gaps and message IDs never seen, and never call those deleted.
+- **Recorded coverage and changes.** Reports retain observation intervals, captured versions, deletion notifications, recheck results and recovery gaps, each linked to its source records.
 - **People profiles** (opt-in per chat). Name/username history, avatars, activity, who replies to whom, mentioned wallets, phones and links. Every fact points to its record ([evidence model](EVIDENCE.md#people-profiles)).
 - **Independent witness.** Separate process with its own key and bot, posts journal heads to a channel ([witness](WITNESS.md)).
 - **Parameters page.** All limits and timings with ranges and defaults, every change goes into the journal ([below](#settings-and-parameters)).

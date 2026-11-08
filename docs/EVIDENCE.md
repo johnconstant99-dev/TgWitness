@@ -55,6 +55,31 @@ Readable HTML and PDF reports carry their own seals; standalone CSV is checked a
 part of a signed ZIP. Keep the ZIP to retain the attachment bytes and manifest,
 and a separate checkpoint to check the journal against an earlier boundary.
 
+## Formats and verification paths
+
+The acquisition mode and the output format answer different questions. The mode
+supplies collection and environment evidence; each format preserves or presents
+part of that record with the checks below.
+
+| Output | Verification and use |
+| --- | --- |
+| Evidence ZIP | Canonical events, signed manifest, coverage, custody entries, attachments and available external receipts; check the archive and its selected acquisition mode. |
+| HTML and JSON reports | Individually sealed views with source references, also listed in the ZIP manifest. Their recorded counts summarize journal event kinds. |
+| PDF reports | Ed25519 seal plus CMS PDF signature over the byte range. The TgWitness verifier uses the trusted Ed25519 key; a viewer's certificate-trust display is a separate check. |
+| CSV | A spreadsheet view covered by the ZIP manifest. Formula escaping protects spreadsheet use; original signed text remains in the journal. |
+| JSONL | Signed event records, including attachment references. The evidence ZIP additionally carries the preserved attachment bytes. |
+| Chat export and Desktop-compatible views | History acquisition and available admin-log records, with the requested rendering and signed archive. Live monitoring's saved versions are a separate acquisition path. |
+| Media and hash-only records | Saved bytes are checked against their SHA-256 and message reference. Hash-only acquisition preserves the available hash metadata for later comparison with file bytes. |
+| STIX/MISP and people profiles | Source-linked extracted observations, account IDs and analytical matches. Profile signatures and record hashes can be checked against the original evidence; avatar-cache provenance is labeled separately. |
+| Handover extract | Signed disclosure rules, unchanged records and marked minimized records retaining original hashes/signatures. Use the retained original for a comparison requiring withheld fields. |
+| Witness and time receipts | Earlier journal boundaries, continuity and the individual verified time claims. They accompany the acquisition and archive checks. |
+| Password-protected delivery | Protects the enclosed package during transfer. `.tgwpw` uses AES-GCM authenticated encryption, including an authenticated final record; the enclosed journal keeps its signatures and acquisition receipts. |
+
+A printout or screen capture is a presentation of the signed material. Its report
+ID, key fingerprint and QR reference help locate the original file for verification.
+Custody declarations record the supplied examiner and transfer information;
+verifier results and acquisition receipts are retained as separate evidence.
+
 ## Comparing chat exports
 
 Verify and compare two signed chat-export ZIPs with independently retained signer
@@ -262,8 +287,9 @@ It records the exporting account's place in the chat: role, join date, who invit
 admin, its rights. A request Telegram refuses is named instead.
 
 When the exporting account is an admin, the export reads the chat's admin log (Telegram keeps about
-48 hours) into `admin-log.json`: deletions and edits with the content and the account that acted. It
-is the one record of a deletion that names who deleted.
+48 hours) into `admin-log.json`: deletions and edits with the supplied content,
+acting account and source action date. These entries complement the live journal's
+captured versions and deletion reception records.
 
 ### Indicators
 
@@ -311,25 +337,33 @@ Raw Telegram dates are ISO strings; binary fields become objects containing
 bytes_base64. Message text, entities, media descriptors, reply metadata, reactions,
 and service actions are retained in raw message metadata when supplied.
 
-observed_at is the collector's UTC wall clock. source_at is a supplied Telegram date
-when available. Deletion notifications do not supply an exact deletion time, so
-source_at remains null. Transport reception order is not necessarily source-event
-order. History snapshots use older source dates but current observation times.
+`observed_at` is the collector's UTC observation time; `source_at` is the date
+supplied by that Telegram event. Live edits retain the supplied edit date, history
+snapshots retain the message date with a current observation time, and an ordinary
+deletion notification records reception time with a null source date. Admin-log
+entries retain their supplied action date separately. Reception order and source
+event order are distinct timelines, with clock observations and external receipts
+available for comparison.
 
 ## Actor semantics
 
-message.new actor_id is the message sender. message.edited has no inferred
-editor; payload.sender_id records the sender of the observed message. Deletion
-actor_id remains null. Membership service messages retain the sender and action
-type, without converting every removal into a voluntary leave. Raw participant
-updates retain actor_id as supplied. Reaction snapshots do not invent a change actor.
+Attribution follows the event source. `message.new.actor_id` and
+`message.edited.payload.sender_id` retain the message sender. Ordinary
+`message.deleted` notifications carry message IDs and have a null actor field;
+available admin-log entries carry their supplied action, actor and date.
+Membership service messages retain sender and action type, raw participant updates
+retain the supplied `actor_id`, and reaction snapshots preserve their supplied
+counts and visible identities. Read these records together with the captured
+versions and [panel interaction receipts](COLLECTION.md#own-actions).
 
 Deletion notifications for private chats and ordinary groups contain only message IDs.
 Those chats share one account-wide ID sequence, so an ID identifies a single message of
 this account. When a message with that ID was saved earlier in this journal, the
 deletion is recorded in that chat as message.deleted with payload.chat_resolution
-naming the method. IDs that were never saved are kept as deletion.unscoped with no
-chat_id; nothing is guessed. Channels and supergroups number messages per chat and are
+naming the method. IDs that were never saved are kept as `deletion.unscoped`: an
+actual deletion notification whose chat has not been correlated. This is distinct
+from `message.missing_on_recheck`, which records an unavailable query result, and
+from a gap in saved message IDs. Channels and supergroups number messages per chat and are
 never matched this way. When the deleted message was sent by the observed account,
 payload.deleted_message_was_outgoing is true; the deleter is still not supplied.
 
@@ -434,9 +468,12 @@ operation alone does not establish complete delivery of Telegram updates.
 
 The signed manifest of evidence ZIPs, chat exports, witness journals and the statement of
 people-profile files contain `producer`: software, version, project (PhishDestroy),
-homepage and source repository. The HTML report shows the same line, and `verify.py`
-prints it as part of what it verified. Archives made before this field existed verify as
-before and are reported as not naming a producer.
+homepage and source repository. The HTML report and verifier display this signed
+producer record. Source-file hashes identify the recorded source tree for comparison
+with a trusted checkout. Execution provenance is checked separately by
+[GitHub acquisition attestation](SEALED-ACTIONS.md) or
+[Intel TDX measurements](HIGH-ASSURANCE.md), where enabled. Archives made before
+the producer field existed remain supported and are identified as legacy records.
 
 Each `observation.started` record also names the Telegram client that observed: its `api_id`
 (never the hash), whether that is a built-in public pair or the operator's own application,
@@ -497,6 +534,28 @@ hash, and creation time. The verifier can check that a later archive contains th
 same prefix. Retain the checkpoint outside the collector, so later verification compares
 the archive with a reference held separately from it.
 
+## Reading a verification result
+
+The verifier reports archive integrity, signer pinning and assurance checks
+separately. Without independently supplied trust inputs, an internally consistent
+archive can pass its signature and format checks with `signer_pinned: false`.
+This is useful for checking the supplied bytes; signer and acquisition checks
+are separate results, selected below.
+
+For an automated local-archive policy that requires a pinned signer:
+
+```sh
+python -m tgwitness.verify evidence.zip --strict --json --fingerprint TRUSTED_KEY_SHA256 --checkpoint retained-checkpoint.json
+```
+
+Use a fingerprint retained through the recipient's trusted channel. A trusted
+witness can also pin the collector through a consistent witnessed journal; supply
+`--witness`, `--witness-fingerprint` and `--require-witness`. `--strict` exits with
+status 2 for an unpinned signer; an unmet `--require-tier` also exits with status 2.
+Read `signer_pinned`, `requirements_met` and the assurance results, not the exit
+code alone. [Sealed acquisition](TRUST.md#sealed-evidence) instead uses its
+attestation verifier and approved policy to authenticate the acquisition digest.
+
 ## Verification scope
 
 Verification checks the archive and the collection mode used to produce it. Choose the
@@ -521,11 +580,17 @@ The run receipt records the collector version, file hashes and startup settings.
 provenance and TDX measurements provide the environment checks; the
 [validation record](VERIFICATION.md) identifies tested configurations.
 
-TgWitness signs the observations it collects; Telegram and message authors do not issue
-these signatures. In a local workspace, material created before the first independent
-checkpoint still depends on the collector and its key holder. Coverage records describe
-the selected scope and collection outcomes, while verified external timestamps anchor
-the committed archive or journal boundary in time.
+Evaluate source attribution through the acquisition path in the table above:
+authenticated Telegram connection, recorded updates or captured frames, their binding
+to journal entries, and the verified execution environment where applicable. Archive
+signatures preserve that record for later checking. Retained checkpoints establish
+earlier journal boundaries; coverage records identify collection outcomes and verified
+external timestamps place the committed bytes in time.
+
+For a local workspace, the recipient supplies trusted collector or witness inputs.
+For sealed acquisition, the trusted policy and attestation bind the archive digest to
+the approved collector execution. These are different verification paths; report the
+checks completed for the selected path.
 
 ## Attachments
 

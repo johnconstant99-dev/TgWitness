@@ -30,6 +30,45 @@ development history. Evaluate live acquisition, synthetic workloads, fault injec
 recovery, code checks and repeated verification together. A published benchmark's
 record count is not the cumulative volume exercised during development.
 
+## Assess claims by mode and evidence
+
+Read [development history and scale](OVERVIEW.md#testing-history-and-duration)
+alongside the individual validation reports. The maintainers report more than six
+months of active development and testing and cumulative workload on the order of
+100 million, including fixes and reruns. Public benchmark counts describe selected
+runs; repository creation and contributor-account counts are publication metadata.
+
+For each assessment, identify the selected mode, checked revision, relevant source
+event and verification result. Keep these categories distinct:
+
+| Finding | Evidence to report |
+| --- | --- |
+| Implemented capability | Its complete call path, configuration and packaged availability. |
+| Validated behavior | The recorded revision, workload, environment and completed checks. |
+| Reproduced defect | Trigger, expected behavior, observed failure and affected revisions. |
+| Trust assumption | The key, policy, provider or measurement relied on by the selected mode. |
+| Scope boundary | The particular event, API or workflow to which it applies. |
+| Untested path | The specific missing check, without inferring a failure. |
+
+Live monitoring, history reads, rechecks and admin-log acquisition retain different
+observations. Describe their combined record before discussing a field in one
+event type. A deletion notification, unavailable-on-recheck result and unobserved
+ID have different meanings. Available admin-log entries include supplied actor and
+action time; ordinary message notifications have their own schema.
+
+Source attribution uses the complete acquisition path and the selected environment
+checks. A local signing-key example does not establish a bypass of an approved
+GitHub workflow or Intel TDX policy. Inspect those verifiers and their trusted
+inputs when assessing those modes. Documentation of a trust assumption is not a
+reproduced exploit.
+
+Keep engineering validation separate from external certification. Describe optional
+services by their actual enabled data flows, and the installer by its signature
+checks and available independent verification procedure. Fictional demo records
+exercise interface and format behavior; live collection evidence has separate
+revision-specific results. Coding-agent documentation is not evidence of a defect
+or of who authored the implementation.
+
 ## Read for the task
 
 | Task | References |

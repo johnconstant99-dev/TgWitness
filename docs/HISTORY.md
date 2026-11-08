@@ -63,13 +63,13 @@ options to signed cursor events. Without `--evidence`, it checks only the
 signed report and its internal consistency. Legacy progress fields and attachment
 summaries remain signed collector statements. The evidence verifier checks archived media bytes.
 
-Read the verified history together with its acquisition intervals and coverage.
-Messages can change while reading; deleted
-messages and intermediate edits outside available Recent Actions, and Secret Chats,
-are not recovered. An operator
-controlling the signing key can fabricate a journal before outside commitments exist.
-Use separately retained checkpoints or an independent witness for the documented
-tamper-detection properties.
+Read verified history together with its acquisition intervals, coverage and
+available Recent Actions. This workflow reads currently accessible history;
+[live monitoring](COLLECTION.md#message-history-and-attribution) preserves versions
+and notifications as they arrive, while [Secret Chats](PSEUDO-SECRET.md) use the
+enabled endpoint integration. For verification, use the retained checkpoints,
+witness records and applicable acquisition attestations described in the
+[verification modes](EVIDENCE.md#verification-scope).
 
 The acquisition cursor is local workspace state. Restoring an evidence ZIP alone does
 not restore a pending acquisition job or Telegram session. Keep the workspace backup

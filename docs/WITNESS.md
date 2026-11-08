@@ -11,6 +11,13 @@ collector's signature and journal continuity, signs the result with its own key,
 publishes it to a Telegram channel. Run it on a separate server with read-only access to
 the collector's witness endpoint.
 
+The technical result includes retained journal prefixes, challenge responses,
+signature checks, Merkle inclusion/consistency checks and signed continuity outcomes.
+For a witness operated by another custodian, retain the custodian and key-control
+record with its fingerprint. Separate keys and separate custody describe different
+parts of the setup. The verifier reports the supplied trusted key and witnessed
+journal boundary; the deployment record identifies who controlled that witness.
+
 ```mermaid
 flowchart LR
     C[Collector] -- signed checkpoint: record count + head hash --> W[Witness]

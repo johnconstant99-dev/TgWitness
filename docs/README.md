@@ -67,7 +67,7 @@ First time? Do it in this order:
 | I want to… | Read |
 | --- | --- |
 | Capture one chat from my fork | [GitHub Actions capture](SEALED-ACTIONS.md) (preview) |
-| Understand Secret Chat support and try its interface | [Secret Chat development status and demo](PSEUDO-SECRET.md) |
+| Understand Secret Chat support and try its interface | [Secret Chat installation and recording](PSEUDO-SECRET.md) |
 | Load older messages | [Source history](HISTORY.md) |
 | Export an account | [Account export](ACCOUNT-EXPORT.md) |
 | Ask questions, write a report | [Archive analysis](ANALYSIS.md) |

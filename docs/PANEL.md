@@ -155,9 +155,9 @@ apply to future activity; saved records stay.
 - **When a new chat or bot appears**: save its profile and up to the chosen number of
   its latest visible messages.
 
-Limits: the published cloud collector does not receive Secret Chats. The separate
-[Pseudo-secret interface and its demo](PSEUDO-SECRET.md) are documented with their
-development status and outstanding defects. Nothing is recorded while TgWitness is
+[Pseudo-secret](PSEUDO-SECRET.md) is the included Secret Chat interface, enabled
+per account after installing the optional protocol dependency. Cloud observation
+and history use their own settings. Nothing is recorded while TgWitness is
 not running; after a restart it catches up only what Telegram still returns, and the
 report shows the gap. Chats beyond the chat list limit (1,000 dialogs unless changed in
 Parameters) are added when they next become active. Inline bot buttons pressed in
