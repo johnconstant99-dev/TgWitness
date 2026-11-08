@@ -74,14 +74,14 @@ Sources → **Observation scope** decides which chats a workspace records.
   (at start and hourly) or `source.discovered` (a new chat while observing). Switching back
   to chosen chats pauses every automatically added source.
 
-What these modes cannot do:
+Scope of these modes:
 
 - **Secret Chats** use the included [Pseudo-secret integration](PSEUDO-SECRET.md),
   with its optional protocol dependency and per-account enable switch. Cloud history
   and Takeout use a separate acquisition path.
-- **Nothing is recorded while TgWitness is not running.** After a restart it asks Telegram
-  for missed updates and rechecks chats, but Telegram does not return everything after long
-  outages. Reports and `verify.py` show such periods as gaps (see [coverage](EVIDENCE.md#coverage-continuity-gaps-and-unobserved-ids)).
+- **Offline periods.** After a restart TgWitness resumes the saved update position, asks
+  Telegram for missed updates and rechecks chats. Telegram keeps a bounded backlog, so after
+  a long outage reports and `verify.py` list the remaining interval as a gap (see [coverage](EVIDENCE.md#coverage-continuity-gaps-and-unobserved-ids)).
 - Only the first 1,000 dialogs are listed at start (the limit is under **Parameters**); older
   chats are added when they next become active. The earlier history of an added chat is not fetched — take a history
   snapshot or a full chat export when you need it.

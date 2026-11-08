@@ -1552,7 +1552,7 @@ function excerpt(e) {
   if (p.ephemeral_media) return [excerpt({...e,payload:{...p,ephemeral_media:null}}),
     ephemeralMediaText(p.ephemeral_media)].filter(Boolean).join(" · ");
   if (p.text) return p.text;
-  if (e.kind==="message.deleted") return p.auto_delete?.expected?tr("Expected: the message's auto-delete timer expired when the deletion was seen."):tr("Earlier captured versions remain available. Telegram does not report who deleted the message.");
+  if (e.kind==="message.deleted") return p.auto_delete?.expected?tr("Expected: the message's auto-delete timer expired when the deletion was seen."):tr("Earlier captured versions remain available. The chat's admin log, read by an admin account in history or chat export, names the deleting administrator.");
   if (e.kind==="message.missing_on_recheck") return p.auto_delete?.expected?tr("Expected: the message's auto-delete timer had expired before this check."):tr("Telegram no longer returns this message; no deletion notice was received.");
   // Legacy batch labels and meanings inferred a history clear or actor not supplied by Telegram.
   if (e.kind==="history.cleared") return tr("Messages deleted together")+" · "+String(p.count??"");
@@ -1785,7 +1785,7 @@ async function openDetail(e,options={}) {
     [tr("Source"),sourceTitle(e.chat_id)],[tr("Record"),tr("Event #{seq}",{seq:e.seq})+(e.message_id ? " / "+tr("Message #{id}",{id:e.message_id}) : "")],
     [tr("Observed at (collector clock)"),formatTime(e.observed_at)],[tr("Source time"),formatTime(e.source_at)],
     [tr("Message sender / supplied actor"),sender ?? tr("No data")],
-    [tr("Action attribution"),tr(e.kind==="message.edited" ? "Telegram does not report who edited the message" : e.kind==="message.deleted" ? "Telegram does not report who deleted the message" : "See raw record and visibility notes")],
+    [tr("Action attribution"),tr(e.kind==="message.edited" ? "Message author; in channels also an administrator with edit rights" : e.kind==="message.deleted" ? "The chat's admin log, when read by an admin account" : "See raw record and visibility notes")],
     [tr("Technical sequence (seq)"),e.seq],
   ]) { const box=node("div");box.append(node("small","",label),node("strong","",String(value)));meta.append(box); }
   content.append(meta);
@@ -2280,7 +2280,7 @@ function accountDisclosureRecipientNote(item){
   return [tr('File: {filename}',{filename:accountDisclosureFilename(item)}),
     tr('Extract the ZIP and open index.html to read this sharing copy. Review its scope, omissions and disclosure settings.'),
     tr('Keep the ZIP unchanged. Follow README.txt to check its integrity using a signing-key fingerprint obtained independently from the sender.'),
-    tr('TgWitness signs these files; Telegram does not. An integrity check does not establish whether a message is true or who wrote it.')].join('\n\n');
+    tr('TgWitness signs these files with the collector key; any change to a file breaks the signature.')].join('\n\n');
 }
 function renderAccountExportJobs(){
   const box=$("account-export-jobs"),focused=document.activeElement,
@@ -3441,7 +3441,7 @@ async function loadExtras(){
 }
 
 let setupView=null;
-const setupReady=import("./views/setup.js?v=3").then(({createSetup,renderScales})=>{
+const setupReady=import("./views/setup.js?v=4").then(({createSetup,renderScales})=>{
   setupView=createSetup({root:$("extras-setup"),tr,json,node,toast,may,fmtFull,getState:()=>state,
     answered:()=>{if(state.status)state.status.setup_answered=true;renderSetupStart();renderSetupCard();},
     openExtra:name=>selectExtra(name)});
@@ -3959,9 +3959,28 @@ function renderVerification(){
   if(v.profile!==state.profile||v.fingerprint!==state.status.fingerprint){clearVerification();return;}
   const head=state.status.stats.head;
   const newer=head&&(head.seq>v.events||(head.seq===v.events&&head.hash!==v.head_hash));
-  $("verification-result").textContent=tr("Verified {n} event signatures and chain links through event #{n}. ",{n:v.events})+
-    (newer?tr("The journal has changed since this check; verify again to check newer records. "):"")+
-    tr("Attachments are checked when exporting a signed ZIP. Signer identity still requires an independently trusted fingerprint.");
+  const c=v.conditions||{},box=$("verification-result"),last=Math.max(head?.seq||0,v.events);
+  const stamped=!c.stamped_through?"off":c.stamped_through>=last?"ok":"part";
+  const groups=[
+    [tr("Required conditions"),[
+      ["ok",tr("Integrity"),tr("Verified {n} event signatures and chain links through event #{n}.",{n:v.events})+
+        (newer?" "+tr("The journal has changed since this check; verify again to check newer records."):"")+" "+
+        tr("Attachments are checked when exporting a signed ZIP.")],
+      ["step",tr("Signer key"),tr("Send the collector fingerprint to the recipient separately")]]],
+    [tr("At least one of these"),[
+      [c.witness_at?"ok":"off",tr("Independent binding of the last record"),c.witness_at?tr("A witness fetched the signed journal head at {time}.",{time:fmtFull(c.witness_at)})
+        :tr("Save a checkpoint and hand it to another party, or connect a witness bot.")],
+      [stamped,tr("External time"),stamped==="ok"?tr("The latest timestamp receipt covers records 1–{n}.",{n:c.stamped_through})
+        :stamped==="part"?tr("The latest timestamp receipt covers records 1–{n} of {total}; the next timestamped checkpoint covers the later ones.",{n:c.stamped_through,total:last})
+        :c.timestamps?tr("Evidence mode is on; the next checkpoint will be timestamped."):tr("Turn on Evidence mode to timestamp checkpoints.")]]],
+  ];
+  const rows=groups.flatMap(([title,lines])=>[node("div","verification-group",title),...lines.map(([state,name,text])=>{
+    const row=node("div","verification-line "+state);
+    row.append(node("strong","",({ok:"✓ ",off:"○ ",step:"→ ",part:"◐ "})[state]+name+": "),node("span","",text));return row;})]);
+  box.replaceChildren(...rows,node("div","hint",c.witness_at||stamped==="ok"
+    ?tr("With the fingerprint confirmed, a recipient can meet the minimum for evidence.")
+    :stamped==="part"?tr("With the fingerprint confirmed, the minimum covers records 1–{n}; later records need the next timestamp or a checkpoint handed to another party.",{n:c.stamped_through})
+    :tr("Integrity only: connect a witness bot, turn on Evidence mode or hand a checkpoint to another party.")));
 }
 $("verify-journal").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   const profile=state.profile,revision=state.workspaceRevision;clearVerification();
@@ -4906,7 +4925,7 @@ function messageRow(m,grouped,byId){
   if(m.has_media&&!m.media.length){const missing=node('span','media-missing');missing.title=tr('Attachment file not saved');missing.setAttribute('role','img');missing.setAttribute('aria-label',missing.title);missing.append(icon('clip'));bubble.append(missing);}
   const meta=node("div","bubble-meta");
   if(m.deleted&&m.auto_deleted){const d=node("span","pill pill-deleted",tr("Deleted"));d.title=tr("Deletion seen {time}, when the message's auto-delete timer expired: an expected removal by the timer.",{time:fmtFull(m.deleted_observed_at)});meta.append(d);}
-  else if(m.deleted){const d=node("span","pill pill-deleted",tr("Deleted"));d.title=tr("Deletion seen {time}. Telegram does not report who deleted it or exactly when.",{time:fmtFull(m.deleted_observed_at)});meta.append(d);}
+  else if(m.deleted){const d=node("span","pill pill-deleted",tr("Deleted"));d.title=tr("Deletion notice received {time}; the saved content stays.",{time:fmtFull(m.deleted_observed_at)});meta.append(d);}
   else if(m.missing&&m.auto_deleted){const d=node("span","pill pill-missing",tr("Not found at recheck"));d.title=tr("Telegram no longer returned this message at {time}; its auto-delete timer had expired before that check.",{time:fmtFull(m.missing_observed_at)});meta.append(d);}
   else if(m.missing){const d=node("span","pill pill-missing",tr("Not found at recheck"));d.title=tr("Telegram no longer returned this message at {time} and no deletion notice was received: deleted while notices were missed, removed by an auto-delete timer, or no longer visible to this account.",{time:fmtFull(m.missing_observed_at)});meta.append(d);}
   if(m.versions.length>1){const e=node("button","pill pill-edited",tr("Edited · {n} versions",{n:m.versions.length}));e.type="button";e.title=tr("Show every saved version");

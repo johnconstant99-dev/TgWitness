@@ -50,8 +50,12 @@ GATEWAY_FIELDS = ("at", "name", "type", "rcode", "decision", "colo")
 
 class VerifierTooOld(ValueError):
     def __init__(self, detail=""):
-        super().__init__("пакет подписан корректно, но этот верификатор старше формата пакета" +
+        super().__init__("The archive format is newer than this verifier; use the current verify.py" +
                          (": " + detail if detail else ""))
+
+
+class CheckUnavailable(Exception):
+    pass
 
 
 def safe_text(value):
@@ -177,4 +181,4 @@ def read_json_file(path):
     return strict_json(path.read_text(encoding="utf-8"))
 
 
-__all__ = ['DRAND_CHAIN', 'DRAND_CHECK_LIMIT', 'DRAND_GENESIS', 'DRAND_PERIOD', 'DRAND_RELAYS', 'Ed25519PublicKey', 'FIELDS', 'GATEWAY_FIELDS', 'InvalidSignature', 'MAX_JSON_BYTES', 'MAX_MANIFEST_BYTES', 'MAX_MEMBERS', 'MAX_RECORD_BYTES', 'MAX_SMALL_MEMBER_BYTES', 'MAX_UNCOMPRESSED_GIB', 'OTS_BITCOIN', 'OTS_MAGIC', 'OTS_PENDING', 'Path', 'SEAL_CLOSE', 'SEAL_OPEN', 'SEAL_WINDOW', 'VerifierTooOld', 'argparse', 'authenticate_statement', 'base64', 'bisect', 'bounded_lines', 'datetime', 'ec', 'hashes', 'hashlib', 'io', 'json', 'math', 'member_digest', 'open_archive', 'os', 'padding', 're', 'read_json_file', 'read_manifest', 'read_member', 'rsa', 'safe_text', 'shutil', 'sqlite3', 'strict_json', 'subprocess', 'sys', 'tempfile', 'timedelta', 'timezone', 'unicodedata', 'unique_keys', 'validate_server_hashes', 'x509', 'zipfile']
+__all__ = ['CheckUnavailable', 'DRAND_CHAIN', 'DRAND_CHECK_LIMIT', 'DRAND_GENESIS', 'DRAND_PERIOD', 'DRAND_RELAYS', 'Ed25519PublicKey', 'FIELDS', 'GATEWAY_FIELDS', 'InvalidSignature', 'MAX_JSON_BYTES', 'MAX_MANIFEST_BYTES', 'MAX_MEMBERS', 'MAX_RECORD_BYTES', 'MAX_SMALL_MEMBER_BYTES', 'MAX_UNCOMPRESSED_GIB', 'OTS_BITCOIN', 'OTS_MAGIC', 'OTS_PENDING', 'Path', 'SEAL_CLOSE', 'SEAL_OPEN', 'SEAL_WINDOW', 'VerifierTooOld', 'argparse', 'authenticate_statement', 'base64', 'bisect', 'bounded_lines', 'datetime', 'ec', 'hashes', 'hashlib', 'io', 'json', 'math', 'member_digest', 'open_archive', 'os', 'padding', 're', 'read_json_file', 'read_manifest', 'read_member', 'rsa', 'safe_text', 'shutil', 'sqlite3', 'strict_json', 'subprocess', 'sys', 'tempfile', 'timedelta', 'timezone', 'unicodedata', 'unique_keys', 'validate_server_hashes', 'x509', 'zipfile']

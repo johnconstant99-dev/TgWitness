@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="light dark">
 <title>TgWitness · Observation workspace</title>
 <link rel="icon" type="image/svg+xml" href="/mark.svg">
-<link rel="stylesheet" href="/style.css?v=0.8.0-report-studio4">
+<link rel="stylesheet" href="/style.css?v=0.8.0-evidence1">
 <link rel="stylesheet" href="/components/shell.css?v=1">
 <link rel="stylesheet" href="/components/health.css?v=1">
 <link rel="stylesheet" href="/components/collection.css?v=1">
@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="/views/parameters.css?v=21">
 <link rel="stylesheet" href="/views/accounts.css?v=30">
 <link rel="stylesheet" href="/views/group.css?v=1">
-<link rel="stylesheet" href="/views/setup.css?v=3">
+<link rel="stylesheet" href="/views/setup.css?v=4">
 <link rel="stylesheet" href="/views/settings-hub.css?v=3">
 <link rel="stylesheet" href="/views/connection.css?v=1">
 <link rel="stylesheet" href="/services.css?v=1">
@@ -38,7 +38,7 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.9.1-topology2"></script>
+<script defer src="/app.js?v=0.9.1-evidence1-topology2"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
 <script defer src="/investigate.js?v=7"></script>
@@ -255,7 +255,7 @@
     </div>
     <button class="text-link" id="setup-start-skip" type="button">Skip, I will set it up myself</button>
   </section>
-  <p class="hint">TgWitness signs the saved files. Telegram does not certify them. Export details explain what was collected and what is missing.</p>
+  <p class="hint">TgWitness signs the saved files. Export details explain what was collected and what is missing.</p>
 </section>
 
 <section class="view" id="view-observations">
@@ -336,7 +336,7 @@
     <div class="scope-exclude" id="scope-exclude"></div>
     <p class="notice warning" hidden id="scope-warning"></p>
     <div class="scope-actions"><button class="primary" type="submit">Save scope</button><span id="scope-unsaved" role="status"></span></div>
-    <details class="scope-limits"><summary>Limits of folder and whole-account modes</summary><p class="hint">Secret chats are end-to-end encrypted between two devices and never reach TgWitness. Nothing is recorded while TgWitness is not running: after a restart it catches up only what Telegram still returns, and the report shows the gap. Chats beyond the chat list limit (1,000 dialogs unless changed in Parameters) are added when they next become active, and the earlier history of an added chat is not fetched. Muted or read state of a folder is not applied: such chats stay observed. Inline bot buttons pressed in another app are invisible to TgWitness; the bot's reply or edit is recorded.</p></details>
+    <details class="scope-limits"><summary>Scope of folder and whole-account modes</summary><p class="hint">Secret chats are recorded in Sources → Pseudo-secret, where TgWitness itself opens or accepts the chat. After a restart TgWitness resumes the saved update position and catches up what Telegram returns; any remaining interval appears as a gap in the report. Chats beyond the chat list limit (1,000 dialogs unless changed in Parameters) are added when they next become active, and the earlier history of an added chat is not fetched. Muted or read state of a folder is not applied: such chats stay observed. Inline bot buttons pressed in another app are invisible to TgWitness; the bot's reply or edit is recorded.</p></details>
   </form>
   </div>
   <div id="sources-panel-chats" role="tabpanel" aria-labelledby="sources-tab-chats" hidden>
@@ -481,7 +481,7 @@
   <section class="card account-export-card" id="account-export-card" hidden aria-labelledby="account-export-title">
     <div class="account-export-head">
       <div><span class="eyebrow">TELEGRAM ACCOUNT SNAPSHOT</span><h2 id="account-export-title">Export this account</h2>
-        <p>Save the chats this account can read, including Saved Messages and archived chats, with optional media and account data. TgWitness signs this archive; Telegram does not. This reads Telegram now and cannot reconstruct deleted messages or past edits.</p></div>
+        <p>Save the chats this account can read, including Saved Messages and archived chats, with optional media and account data. TgWitness signs this archive with the collector key. It reads the history Telegram returns now; live recording keeps earlier versions and deletion notices.</p></div>
       <button class="primary" id="account-export-configure" type="button"><svg aria-hidden="true" class="icon"><use href="#i-archive"/></svg> Configure account export</button>
     </div>
     <div class="account-export-toolbar"><div><strong>Account export jobs</strong><span class="hint">Jobs remain available after a restart. A finished archive can be downloaded again until you delete it.</span></div><button class="quiet" id="account-export-refresh" type="button">Refresh jobs</button></div>
@@ -879,7 +879,7 @@
     <p class="hint" id="report-status" role="status"></p>
     <p class="hint">Every report is sealed: a signature inside the file covers each of its bytes. Readers check it in the browser by dropping the file onto the report, or with <code>python verify.py report.html --fingerprint …</code>. The archive also carries <code>custody.json</code> and <code>SHA256SUMS</code>.</p>
   </form>
-  <details class="verification-details" data-mode-anchor data-mode-feature="verification" id="verification-details"><summary>Verification &amp; limitations</summary>
+  <details class="verification-details" data-mode-anchor data-mode-feature="verification" id="verification-details"><summary>Verification and evidence</summary>
     <p class="hint">Automatic timestamps and an encrypted off-site copy: <a data-go-extra="evidence" href="#">Extras → Evidence that holds up</a>.</p>
     <p class="hint">Workspace ID: <code id="export-profile-id">default</code> · <a href="/guide.html#export" rel="noopener" target="_blank">Large downloads &amp; verification</a></p>
     <div class="card padded">
@@ -888,16 +888,43 @@
       <p class="hint">Retain this fingerprint and signed checkpoints outside the collector. A self-contained archive can verify its internal consistency; independently retained records help detect replacement or truncation.</p>
     </div>
     <div class="two-columns">
-      <div class="card padded"><h2>Acquisition process receipt</h2><p class="muted">The signed journal records program hashes, dependency versions, starting scope, account, settings, run identifier, and periodic heartbeats. Local checkpoints are saved at startup, every five minutes while observing (changeable in Parameters), and on orderly stop.</p><button class="secondary" id="save-run-receipt"><svg aria-hidden="true" class="icon"><use href="#i-receipt"/></svg> Download signed run receipt</button><p class="hint">This is a collector-signed process record. It is not independent attestation or a trusted timestamp. Copy checkpoints to a separately controlled location for a stronger chain of custody.</p></div>
+      <div class="card padded"><h2>Acquisition process receipt</h2><p class="muted">The signed journal records program hashes, dependency versions, starting scope, account, settings, run identifier, and periodic heartbeats. Local checkpoints are saved at startup, every five minutes while observing (changeable in Parameters), and on orderly stop.</p><button class="secondary" id="save-run-receipt"><svg aria-hidden="true" class="icon"><use href="#i-receipt"/></svg> Download signed run receipt</button><p class="hint">This is a collector-signed process record. Copy checkpoints to a separately controlled location: a checkpoint retained there binds the journal independently.</p></div>
       <div class="card padded" data-mode-feature="timestamps_backup"><h2>External time anchoring</h2><p class="muted">Prepare an RFC 3161 request for a signed checkpoint. Submit it to a timestamp authority you trust, then verify its response against independently obtained CA certificates.</p><button class="secondary" id="save-anchor-request"><svg aria-hidden="true" class="icon"><use href="#i-clock"/></svg> Prepare timestamp request</button><p class="hint">No external service is contacted by this button. A prepared request is not a timestamp proof. The package includes instructions for checking a TSA response with OpenSSL.</p></div>
     </div>
-    <div class="card padded"><h2>Clear boundaries make stronger evidence</h2><div class="limits-table">
-      <div><strong>Message edits</strong><p>Versions are preserved when received. Intermediate changes during downtime may be missing. The sender is not necessarily the editor.</p></div>
-      <div><strong>Deletions</strong><p>Earlier captured content remains. Telegram usually does not supply the deleter or exact deletion time. Unscoped notices remain account-level observations.</p></div>
-      <div><strong>Reactions &amp; membership</strong><p>Counts, recent reactors, service messages, and participant updates are recorded when delivered. These are not guaranteed complete lists.</p></div>
-      <div><strong>Coverage &amp; time</strong><p>Collector starts, stops, detected disconnects, and heartbeats are recorded. Brief outages can escape detection. Times depend on the collector's clock.</p></div>
-      <div><strong>Integrity &amp; authenticity</strong><p>Signatures bind saved bytes to this collector's key. They do not establish Telegram origin, truthfulness, trusted time, or protection from an operator controlling the signing key.</p></div>
-    </div></div>
+    <div class="card padded" id="evidence-boundaries"><h2>What is evidence and what is not</h2>
+      <p class="muted">Evidence is what a recipient verifies with verify.py and the collector fingerprint. Everything else supports it and cites the records it rests on.</p>
+      <div class="two-columns">
+        <div><h3>Evidence: signed and verifiable</h3><div class="limits-table">
+          <div><strong>Journal records</strong><p>Messages, edit versions, deletion notices, reactions and membership events, each signed at capture and chained to the previous record.</p></div>
+          <div><strong>Media</strong><p>Saved files, bound by their SHA-256 to the signed record that names them.</p></div>
+          <div><strong>Signed exports</strong><p>Evidence ZIP, chat export, account export and handover extract: the manifest signature covers the hash of every file.</p></div>
+          <div><strong>Independent confirmations</strong><p>Checkpoints retained by another party, witness records, RFC 3161 and OpenTimestamps receipts, and attested collection runs.</p></div>
+        </div></div>
+        <div><h3>Not evidence by itself</h3><div class="limits-table">
+          <div><strong>Analysis</strong><p>AI summaries, dossiers, charts, indicators and device hints are derived from records. Cite the record each statement rests on.</p></div>
+          <div><strong>Operator statements</strong><p>Case details, notes, Case Board comments and handover notes are the operator's statements; a signed report preserves them as written.</p></div>
+          <div><strong>Missing messages</strong><p>Message numbers not observed and messages missing on recheck are gaps in observation, not deletion notices.</p></div>
+          <div><strong>Reading copies</strong><p>HTML and PDF views and website demos are for reading. Verify the signed ZIP.</p></div>
+        </div></div>
+      </div>
+      <h3>Minimum for evidence</h3>
+      <p class="muted">Both required conditions and at least one of the next two, covering the last exported record. verify.py prints the same groups.</p>
+      <div class="limits-table">
+        <div><strong>Required · Integrity</strong><p>verify.py checks every signature, the record chain and all file hashes.</p></div>
+        <div><strong>Required · Signer key</strong><p>The recipient compares the collector fingerprint with a copy received separately.</p></div>
+        <div><strong>One of · Independent binding of the last record</strong><p>A checkpoint retained by another party or a confirmed witness covers the last exported record.</p></div>
+        <div><strong>One of · External time</strong><p>A verified RFC 3161 or OpenTimestamps receipt, a witness Bitcoin seal or a checked GitHub attestation covers the last exported record.</p></div>
+        <div><strong>Optional · Attested collection run</strong><p>A GitHub Actions run or an Intel TDX deployment shows that the signing key was created inside the attested collection run.</p></div>
+      </div>
+      <p class="hint" data-no-translate><code>python verify.py evidence.zip --fingerprint TRUSTED_SHA256 --checkpoint retained.json --require evidence</code></p>
+      <h3>Reading the records</h3>
+      <div class="limits-table">
+        <div><strong>Message edits</strong><p>Each edit Telegram delivers is a new signed version next to the earlier ones.</p></div>
+        <div><strong>Deletions</strong><p>A deletion is a separate notice next to the saved content. The chat's admin log, read by an admin account, names the deleting administrator.</p></div>
+        <div><strong>Reactions &amp; membership</strong><p>Counts, recent reactors, service messages and participant updates are recorded as Telegram shows them to this account.</p></div>
+        <div><strong>Coverage &amp; time</strong><p>Starts, stops, disconnects and heartbeats are recorded, and every report lists the gaps. Observed times come from the collector clock; timestamps and witness records bind the journal to outside time.</p></div>
+      </div>
+    </div>
   </details>
 </section>
 
@@ -1683,7 +1710,7 @@
     <button type="submit" class="primary">Find sources locally</button>
   </form>
   <section class="card padded" id="ask-preview" hidden>
-    <h2>Review selected sources</h2><p class="hint">Edits and deletion notices are separate records. Missing on recheck does not establish that Telegram sent a deletion notice.</p>
+    <h2>Review selected sources</h2><p class="hint">Edits and deletion notices are separate records. Missing on recheck is a separate observation, not a deletion notice.</p>
     <div class="storage-actions"><button type="button" class="secondary" id="ask-context-export" disabled>Download selected sources · Markdown + RAG JSONL</button></div><p class="hint">A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.</p><div id="ask-sources"></div><div id="ask-coverage"></div>
     <details><summary>Data sent to the model</summary><pre id="ask-transmission" class="analysis-data"></pre></details>
     <label class="check-label"><input id="ask-consent" type="checkbox"> Process the checked sources and my question at the endpoint shown above</label>

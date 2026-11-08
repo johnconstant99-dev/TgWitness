@@ -40,13 +40,62 @@ function score(scale, levels) {
   return {percent, level: levelOf(levels, percent)};
 }
 
+function evidenceState(scale) {
+  const on = id => scale.items.some(item => item.id === id && item.on);
+  const bound = on("timestamps") || on("witness");
+  return {on, bound, level: bound ? (on("server") ? "maximum" : "high") : "basic"};
+}
+
+function stateName(tr, state) {
+  return state.bound ? tr("Ready for evidence: the recipient confirms the fingerprint") : tr("Integrity only");
+}
+
+function renderEvidence(box, scale, before, {tr, node, compact}) {
+  const next = evidenceState(scale), now = before ? evidenceState(before) : next;
+  const wrap = node("div", "level-scale level-" + next.level), head = node("div", "level-head");
+  head.append(node("strong", "", tr("Conditions for evidence")), node("span", "level-name", stateName(tr, next)));
+  if (before && now.level !== next.level) head.append(node("span", "level-was", tr("now: {level}", {level: stateName(tr, now)})));
+  wrap.append(head);
+  const groups = [
+    [tr("Required conditions"), [
+      ["on", tr("Integrity"), itemName(tr, "journal")],
+      ["step", tr("Signer key"), tr("Send the collector fingerprint to the recipient separately")]]],
+    [tr("At least one of these"), [
+      [next.on("witness") ? "on" : "off", tr("Independent binding of the last record"),
+        itemName(tr, "witness") + " · " + tr("Checkpoint retained by another party")],
+      [next.on("timestamps") ? "on" : "off", tr("External time"), itemName(tr, "timestamps")]]],
+    [tr("Optional condition"), [
+      [next.on("server") ? "on" : "off", tr("Attested collection run"), itemName(tr, "server")]]],
+    [tr("Supporting records, not part of the minimum"),
+      ["drand", "devices", "code", "gateway_log"].map(id => [next.on(id) ? "on" : "off", itemName(tr, id), ""])],
+  ];
+  if (compact) {
+    wrap.append(node("p", "hint", groups.slice(0, 3).flatMap(([, rows]) => rows).filter(([state]) => state !== "step")
+      .map(([state, name]) => (state === "on" ? "✓ " : "○ ") + name).join(" · ")));
+    box.append(wrap);
+    return;
+  }
+  wrap.append(node("p", "hint", tr("Minimum for evidence: both required conditions and at least one of the next two. The rest strengthens the record.")));
+  const list = node("ul", "level-items");
+  for (const [title, rows] of groups) {
+    list.append(node("li", "level-group", title));
+    for (const [state, name, detail] of rows) {
+      const row = node("li", state === "off" ? "off" : "on");
+      row.append(node("span", "level-mark", {on: "✓", off: "○", step: "→"}[state]), node("span", "", detail ? name + " · " + detail : name));
+      list.append(row);
+    }
+  }
+  wrap.append(list);
+  box.append(wrap);
+}
+
 export function renderScales(box, data, {tr, node, after = null, compact = false}) {
   box.replaceChildren();
+  renderEvidence(box, (after || data.assessment).credibility, after ? data.assessment.credibility : null, {tr, node, compact});
   const describe = {
-    credibility: [tr("Credibility"), tr("What someone else can check: when the record existed, that it was written live and which program wrote it.")],
     reliability: [tr("Reliability"), tr("How likely collection keeps running and the record survives a lost or seized machine.")],
   };
-  for (const key of ["credibility", "reliability"]) {
+  for (const key of ["reliability"]) {
     const now = score(data.assessment[key], data.levels), next = after ? score(after[key], data.levels) : now;
     const wrap = node("div", "level-scale level-" + next.level);
     const head = node("div", "level-head");

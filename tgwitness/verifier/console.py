@@ -185,18 +185,30 @@ class Console:
                 blocks += "\033[38;5;" + str(code) + "m" + self.glyph["block"]
             self.say("  " + " " * 11 + blocks + "\033[0m")
 
-    def verdict(self, ok, reason="", pinned=True):
-        unconfirmed = ok and not pinned
-        text = " " + (self.glyph["warn"] if unconfirmed else self.glyph["ok"] if ok else self.glyph["bad"]) + "  " \
-               + self.t("INTEGRITY VERIFIED · SIGNER NOT CONFIRMED" if unconfirmed
-                        else "INTEGRITY VERIFIED" if ok else "VERIFICATION FAILED") + " "
+    def verdict(self, ok, reason="", evidence=None):
+        evidence = evidence or {}
+        state = "bad" if not ok else "ok" if evidence.get("minimum_met") else "warn"
+        if not ok:
+            label = self.t("VERIFICATION FAILED")
+        elif evidence.get("minimum_met"):
+            label = self.t("MINIMUM FOR EVIDENCE MET · ATTESTED COLLECTION RUN" if evidence["profile"] == "attested"
+                           else "MINIMUM FOR EVIDENCE MET")
+        elif evidence.get("bound_through"):
+            label = self.t("MINIMUM MET UP TO RECORD {through} OF {total}", through=self.number(evidence["bound_through"]),
+                           total=self.number(evidence["records"]))
+        else:
+            label = self.t("INTEGRITY ONLY · MINIMUM FOR EVIDENCE NOT MET")
+        import unicodedata
+        text = " " + self.glyph[state] + "  " + label + " "
+        width = sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
+        inner = max(self.WIDTH - 4, width)
         self.say()
         if self.color:
-            self.say("  " + self.paint(text.ljust(self.WIDTH - 2), "warnbar" if unconfirmed else "okbar" if ok else "badbar"))
+            self.say("  " + self.paint(text + " " * (inner + 2 - width), state + "bar"))
         else:
-            self.say("  " + self.glyph["tl"] + self.glyph["h"] * (self.WIDTH - 4) + self.glyph["tr"])
-            self.say("  " + self.glyph["v"] + text.ljust(self.WIDTH - 4) + self.glyph["v"])
-            self.say("  " + self.glyph["bl"] + self.glyph["h"] * (self.WIDTH - 4) + self.glyph["br"])
+            self.say("  " + self.glyph["tl"] + self.glyph["h"] * inner + self.glyph["tr"])
+            self.say("  " + self.glyph["v"] + text + " " * (inner - width) + self.glyph["v"])
+            self.say("  " + self.glyph["bl"] + self.glyph["h"] * inner + self.glyph["br"])
         if reason:
             self.say("  " + self.paint(reason, "bad"))
 
@@ -232,12 +244,6 @@ class Console:
             self.check("ok", "SHA256SUMS", self.t("matches the signed manifest"))
         else:
             self.check("none", "SHA256SUMS", self.t("not present (older export)"))
-
-    def pinning(self, pinned):
-        if pinned:
-            self.check("ok", "Key pinning", self.t("matches your trusted fingerprint"))
-        else:
-            self.check("warn", "Key pinning", self.t("not pinned: compare the fingerprint with a copy kept elsewhere"))
 
     def timestamps(self, anchors):
         self.heading("Timestamps")
@@ -280,13 +286,11 @@ class Console:
         self.heading("Coverage")
         self.explain("Coverage")
         periods, gaps = coverage["continuous"], coverage["gaps"]
-        self.check("none", "Continuous", self.number(len(periods)))
+        self.check("none", "Observation periods", self.number(len(periods)) if periods else "No observation period recorded.")
         for period in periods:
             self.say("    " + str(period["from"]) + " → " + str(period["to"]) + " · "
                      + self.t("Duration") + ": " + str(int(period["seconds"])) + " s")
-        if not periods:
-            self.say("    " + self.t("No observation period recorded."))
-        self.check("warn" if gaps else "none", "Gap", self.number(len(gaps)))
+        self.check("warn" if gaps else "none", "Observation gaps", self.number(len(gaps)))
         for gap in gaps:
             self.say("    " + str(gap["from"]) + " → " + str(gap["to"]))
             self.say("    " + self.t("Reason") + ": " + self.coverage_reason(str(gap["reason"])))
@@ -301,7 +305,7 @@ class Console:
                 self.check("warn" if account["missing"] else "none", "Account", self.t("Numbers not observed")
                            + ": " + str(account["missing"]) + " · ID " + str(account["observed_from"]) + "–" + str(account["observed_to"]))
             else:
-                self.check("none", "Account", self.t("Not checked") + " · " + str(account.get("reason") or ""))
+                self.check("none", "Account", self.t("Not checked") + " · " + self.t(str(account.get("reason") or "")))
 
     def coverage_reason(self, text):
         # Keep arbitrary source/operator reasons verbatim; known software reasons use translated labels.
@@ -364,12 +368,12 @@ class Console:
         for gap in coverage["gaps"]:
             self.check("warn", "Gap", str(gap))
 
-    def show(self, shown, path, result, notes, pinned):
+    def show(self, shown, path, result, notes):
         from .account import account_export_lines
         from .coverage import coverage_lines
         from .outside import outside_lines
-        from .witness import assurance_line
-        self.say(assurance_line(result))
+        from .witness import assurance_line, evidence_line
+        self.say(evidence_line(result["evidence"], self.t) if result.get("evidence") else assurance_line(result))
         self.banner()
         self.field("File", str(path))
         self.field("Type", self.t(KINDS[shown]) + self.paint("  " + str(result.get("format") or ""), "dim"))
@@ -382,11 +386,6 @@ class Console:
             self.check("ok", "Record chain", self.t("{n} records · head {hash}", n=self.number(result["events"]),
                                                     hash=head[:8] + "…" + head[-8:]))
             self.seal(result, "report.html")
-            if result.get("checkpoint_checked"):
-                self.check("ok", "Retained checkpoint", self.t("matches the journal"))
-            else:
-                self.check("warn", "Retained checkpoint", self.t("Not supplied" if self.explain_enabled else
-                                                                  "not supplied: removed trailing records would go unnoticed"))
             if result.get("witness"):
                 witness = result["witness"]
                 self.check("ok" if witness["consistent"] else "warn", "Witness",
@@ -447,7 +446,6 @@ class Console:
                 self.check("warn", "Described archive", self.t("not supplied (--evidence)"))
         else:
             self.check("ok", "Signature", self.t("Ed25519 · valid"))
-        self.pinning(pinned)
         if shown == "evidence":
             self.timestamps(result.get("anchors") or [])
             self.coverage(result["coverage"])
@@ -468,19 +466,46 @@ class Console:
             self.lines("Technical details", facts, limit=12)
         self.lines("Notes", [self.localized_note(note) for note in notes])
         self.case(result.get("case") or (result.get("report_seal") or {}).get("case") or {})
-        self.verdict(True, pinned=pinned)
+        self.conditions(result.get("evidence"))
+        self.verdict(True, evidence=result.get("evidence"))
         producer = result.get("producer")
         if producer:
             self.say("  " + self.paint(self.t("Produced by") + ": " + str(producer.get("software")) + " "
                                        + str(producer.get("version")) + " · " + str(producer.get("project")) + " · "
                                        + str(producer.get("homepage")), "dim"))
-        self.say("  " + self.paint(self.t("Source authenticity and clock accuracy are not established by this check."), "dim"))
-        self.explain("Limits")
         self.say()
+
+    def conditions(self, evidence):
+        if not evidence:
+            return
+        from .witness import CONDITION_LABELS, ROLE_LABELS, evidence_line, next_lines
+        self.heading("Conditions for evidence")
+        met = {row["id"] for row in evidence["conditions"] if row["status"] == "met"}
+        needed = {"required": True, "one_of": not {"head_binding", "external_time"} & met, "optional": False}
+        role = None
+        for row in evidence["conditions"]:
+            if row["role"] != role:
+                role = row["role"]
+                self.say("  " + self.paint(self.t(ROLE_LABELS[role]), "bold"))
+            mark = "ok" if row["status"] == "met" else "warn" if row["status"] != "missing" or needed[role] else "dot"
+            detail = self.t(row["text"], **row["values"])
+            if row.get("drand"):
+                detail += " · " + self.t("drand rounds confirmed by {relays}", relays=row["drand"])
+            self.say("  " + self.paint(self.glyph[mark], "dim" if mark == "dot" else mark) + " "
+                     + self.t(CONDITION_LABELS[row["id"]]) + self.paint(" · " + self.t(row["scope"]), "dim"))
+            self.say("    " + detail)
+            if row["status"] != "met":
+                self.say("    " + self.paint("→ " + self.t(row["how"]), "dim"))
+            self.explain({"signer": "Key pinning", "head_binding": "Retained checkpoint"}.get(row["id"], ""))
+        self.say()
+        self.say("  " + self.paint(evidence_line(evidence, self.t), "ok" if evidence["minimum_met"] else "warn"))
+        for line in next_lines(evidence, self.t):
+            self.say("  " + line)
 
     def localized_note(self, note):
         from .languages import VERIFIER_LANGUAGES
-        if note == "ключ не закреплён: результат зависит от ключа внутри самого пакета":
+        from .witness import UNPINNED_NOTE
+        if note == UNPINNED_NOTE:
             return reader_message("key_unconfirmed", self.lang)
         if note in self.words:
             return self.t(note)

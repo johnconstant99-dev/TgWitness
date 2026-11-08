@@ -271,7 +271,7 @@ def verify_witness(path, expected_fingerprint=None, check_drand=False, check_bit
                  "earliest_not_before": min((a["freshness"]["not_before"] for a in bound
                                               if a["freshness"]["verified"]), default=None),
                  "verification": "relay-confirmed" if confirmation["confirmed"] else "not-performed",
-                 "relays": confirmation["relays"]}
+                 "relays": confirmation["relays"], "unavailable": bool(confirmation.get("unavailable"))}
     return {"format": manifest["format"], "fingerprint": fp, "public_key": public, "events": result["events"],
             "head_hash": result["head_hash"], "interval_minutes": interval, "channel": manifest.get("channel"),
             "producer": manifest.get("producer"), "anchors": anchors, "no_response": silent, "posted": posted,
@@ -280,8 +280,9 @@ def verify_witness(path, expected_fingerprint=None, check_drand=False, check_bit
 
 
 def key_history_summary(keys):
-    return {**keys, "meaning": "Recorded Telegram authorizations; collector-signed claim, not proof that no key copies exist",
-            "note": "ключ импортирован: подтверждение зависит от доверия к источнику" if keys["origin"] == "imported" else None}
+    return {**keys, "meaning": "Telegram authorizations of the account as the collector recorded them",
+            "note": "Imported session: the acquisition starts from an authorization created outside this collector"
+            if keys["origin"] == "imported" else None}
 
 
 def witnessed_periods(witness, key=None):
@@ -372,6 +373,19 @@ def cross_check_witness(witness, bundle_path, bundle_result):
 
 
 ASSURANCE_TIERS = ("self_attested", "timestamped", "witnessed", "fresh", "witness_anchored", "sealed")
+EVIDENCE_PROFILES = ("integrity", "evidence", "attested")
+CONDITION_LABELS = {"integrity": "Integrity", "signer": "Signer key", "head_binding": "Independent binding of the last record",
+                    "external_time": "External time", "environment": "Attested collection run"}
+CONDITION_ROLE = {"integrity": "required", "signer": "required", "head_binding": "one_of", "external_time": "one_of",
+                  "environment": "optional"}
+ROLE_LABELS = {"required": "Required conditions", "one_of": "At least one of these", "optional": "Optional condition"}
+CONDITION_SCOPE = {"integrity": "The archive is unchanged since the collector signed it.",
+                   "signer": "The signing key is the collector key the recipient retained.",
+                   "head_binding": "Records up to the bound record were not removed or replaced after the binding.",
+                   "external_time": "The covered records existed by the stated time.",
+                   "environment": "The signing key was created inside the attested collection run."}
+MINIMUM_NAMES = {"signer": "confirmed signer key", "head_binding or external_time": "independent binding of the last record or external time"}
+UNPINNED_NOTE = "Signer key is not pinned: pass --fingerprint with the fingerprint you retained."
 
 
 def assurance(result):
@@ -421,7 +435,7 @@ def assurance(result):
 def assurance_line(result):
     value = result["assurance"]
     if value["tier"] == "self_attested":
-        return "ASSURANCE: self_attested — only the collector's own key vouches for this record"
+        return "ASSURANCE: self_attested · signatures, hashes and record chain"
     witness = result.get("witness") or {}
     detail = (" since #" + str(witness["head_witness_record"]) + " (" + str(witness["head_witnessed_at"]) + ")"
               if witness.get("head_witness_record") else "")
@@ -429,6 +443,131 @@ def assurance_line(result):
     limits = [text for tier, text in (("fresh", "not fresh"), ("witness_anchored", "witness not anchored"),
                                     ("sealed", "not sealed")) if tier in absent]
     return "ASSURANCE: " + value["tier"] + detail + (" · " + " · ".join(limits) if limits else "")
+
+
+def english(text, **values):
+    for name, value in values.items():
+        text = text.replace("{" + name + "}", str(value))
+    return text
+
+
+def condition(cid, status, how, text, **values):
+    return {"id": cid, "role": CONDITION_ROLE[cid], "status": status, "scope": CONDITION_SCOPE[cid], "how": how,
+            "detail": english(text, **values), "text": text, "values": values}
+
+
+def evidence_conditions(result, kind="evidence"):
+    events, fp = result.get("events"), result.get("fingerprint") or ""
+    witness, anchors = result.get("witness") or {}, result.get("anchors") or []
+    journal = kind == "evidence"
+    integrity = (("{records} records, {files} files", {"records": events, "files": result.get("files_checked")})
+                 if events is not None and result.get("files_checked") is not None else ("signature and content hashes", {}))
+    rows = [condition("integrity", "met", "record signatures, hash chain, manifest and file hashes", integrity[0], **integrity[1]),
+            condition("signer", "met" if result.get("key_pinned") else "missing",
+                      "--fingerprint with the collector fingerprint the recipient retained",
+                      "collector {fingerprint}… matches the trusted fingerprint" if result.get("key_pinned")
+                      else "collector {fingerprint}… not compared with a retained fingerprint", fingerprint=fp[:16])]
+    independent = bool(witness.get("witness_key_pinned") and witness.get("witness_fingerprint") not in (None, fp)
+                       and not witness.get("conflicts"))
+    retained = result.get("checkpoint_event_count")
+    through = max(retained or 0, (witness.get("verified_through_event") or 0) if independent else 0)
+    at_head = journal and (retained == events or independent and bool(witness.get("export_head_witnessed")))
+    if journal and through:
+        text, values = "records 1–{through} of {total} held by an independent party", {"through": through, "total": events}
+    elif journal:
+        text, values = "no retained checkpoint or confirmed witness", {}
+    else:
+        text, values = "this archive type carries no journal checkpoints; verify the evidence journal", {}
+    rows.append(condition("head_binding", "met" if at_head else "partial" if journal and through else "missing",
+                          "--checkpoint kept outside the collector, or --witness with --witness-fingerprint" if journal
+                          else "in the evidence journal ZIP: --checkpoint, or --witness with --witness-fingerprint", text, **values))
+    checked = [a for a in anchors if a.get("kind") == "rfc3161" and str(a.get("signature", "")).startswith("checked against")
+               or a.get("kind") == "opentimestamps" and a.get("status") == "confirmed"]
+    times = [a["time"] for a in checked if a.get("event_count") == events and a.get("time")]
+    if independent and witness.get("export_head_witnessed") and witness.get("head_bitcoin_block_time"):
+        times.append(witness["head_bitcoin_block_time"])
+    runtime = result.get("runtime_attestation") or {}
+    attested = runtime.get("verified") is True and runtime.get("key_origin") == "created"
+    if attested and runtime.get("attested_at"):
+        times.append(runtime["attested_at"])
+    unchecked = [a for a in anchors if a not in checked]
+    stamped = max((a.get("event_count") or 0 for a in checked), default=0)
+    if times:
+        status, text, values = "met", "last exported record existed by {time}", {"time": min(times)}
+    elif checked:
+        status, text, values = "partial", "records 1–{through} existed by {time}", {
+            "through": stamped, "time": min(a.get("time") or "?" for a in checked if (a.get("event_count") or 0) == stamped)}
+    elif unchecked:
+        status, text, values = ("unchecked", "{count} timestamp proof(s) present; check them with --tsa-ca or --check-bitcoin",
+                                {"count": len(unchecked)})
+    else:
+        status, text, values = "missing", "no external timestamp in this archive", {}
+    rows.append(condition("external_time", status,
+                          "RFC 3161 with --tsa-ca, OpenTimestamps with --check-bitcoin, witness Bitcoin seals or a checked GitHub attestation"
+                          if journal else "in the evidence journal ZIP: --tsa-ca or --check-bitcoin", text, **values))
+    drand = ((result.get("outside") or {}).get("drand") or {}).get("checked") or {}
+    if drand.get("confirmed"):
+        rows[-1]["drand"] = ", ".join(drand.get("relays") or [])
+        rows[-1]["detail"] += " · drand rounds confirmed by " + rows[-1]["drand"]
+    rows.append(condition("environment", "met" if attested else "missing",
+                          "--sealed-attestation with --sealed-policy for a GitHub Actions run; Intel TDX: python -m tgwitness.cloud verify"
+                          if journal else "in the evidence journal ZIP: --sealed-attestation with --sealed-policy",
+                          "collection ran in the attested workflow {workflow}" if attested
+                          else "no attested collection run checked here",
+                          **({"workflow": runtime.get("workflow")} if attested else {})))
+    met = {row["id"] for row in rows if row["status"] == "met"}
+    missing = ([] if "signer" in met else ["signer"]) + \
+              ([] if {"head_binding", "external_time"} & met else ["head_binding or external_time"])
+    minimum = not missing
+    bound = events if minimum else max(through if journal else 0, stamped)
+    options = [] if "signer" in met else ["--fingerprint FINGERPRINT"]
+    if journal and "head_binding or external_time" in missing:
+        options += sorted({"--tsa-ca TSA-ROOT.pem" if a.get("kind") == "rfc3161" else "--check-bitcoin" for a in unchecked
+                           if a.get("event_count") == events and (a.get("kind") == "rfc3161" or a.get("status") == "bitcoin-unverified")}) \
+            or ["--checkpoint CHECKPOINT.json"]
+    return {"profile": "attested" if minimum and "environment" in met else "evidence" if minimum else "integrity",
+            "minimum_met": minimum, "missing": missing, "records": events,
+            "bound_through": bound if "signer" in met else 0, "conditions": rows,
+            "next_options": options, "journal_needed": not journal and "head_binding or external_time" in missing,
+            "minimum": "integrity, confirmed signer key, and an independent checkpoint, confirmed witness or verified "
+                       "external timestamp covering the last exported record"}
+
+
+def next_lines(evidence, t=None):
+    t = t or english
+    lines = [t("Next step: run verify.py again with {options}", options=" ".join(evidence["next_options"]))] \
+        if evidence.get("next_options") else []
+    if evidence.get("journal_needed"):
+        lines.append(t("This archive type carries no checkpoints or timestamps: the last record is bound in the evidence "
+                       "journal of the same workspace. Verify that ZIP with --fingerprint and --checkpoint."))
+    return lines
+
+
+def evidence_line(evidence, t=None):
+    t = t or english
+    if evidence["minimum_met"]:
+        return t("EVIDENCE: minimum met · profile {profile}", profile=evidence["profile"])
+    if evidence.get("bound_through"):
+        return t("EVIDENCE: minimum met up to record {through} of {total} · later records need a binding",
+                 through=evidence["bound_through"], total=evidence.get("records"))
+    return t("EVIDENCE: minimum not met · missing: {items}",
+             items="; ".join(t(MINIMUM_NAMES.get(item, item)) for item in evidence["missing"]))
+
+
+def requested_checks_unavailable(args, result):
+    missing = []
+    witness = result.get("witness") or {}
+    if getattr(args, "check_drand", False):
+        drand = ((result.get("outside") or {}).get("drand") or {}).get("checked") or {}
+        if drand.get("unavailable") or (result.get("freshness") or {}).get("unavailable") \
+                or (witness.get("freshness") or {}).get("unavailable"):
+            missing.append("--check-drand: no drand relay answered")
+    if getattr(args, "check_bitcoin", False):
+        proofs = [a for a in result.get("anchors") or [] if a.get("kind") == "opentimestamps"]
+        proofs += [p for d in (witness.get("days") or result.get("days") or []) for p in d.get("proofs", [])]
+        if any(p.get("check") == "unavailable" for p in proofs):
+            missing.append("--check-bitcoin: Bitcoin header sources unreachable")
+    return missing
 
 
 def channel_texts(source):

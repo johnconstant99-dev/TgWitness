@@ -130,9 +130,9 @@ class History:
                 "sources": [t["chat_id"] for t in targets], "scope": scope_settings(self.store),
                 "dialog_list_limit": self.collector.param("dialog_limit"),
                 "capture": capture_settings(self.store),
-                "meaning": "History of the listed enabled sources; not proof all account dialogs were enumerated. "
-                           "Each source fixes its upper message ID on first read. Messages may change during reading; "
-                           "unseen deletions and intermediate edits cannot be recovered."})
+                "meaning": "History of the listed enabled sources. "
+                           "Each source fixes its upper message ID on first read and is read as Telegram returns it; "
+                           "live recording keeps earlier versions and deletion notices."})
             for target in targets:
                 history_cursor.seal(self.store, run_id, target["chat_id"])
         self.task = asyncio.create_task(self.run(run_id))
