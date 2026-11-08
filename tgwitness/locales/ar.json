@@ -1801,7 +1801,6 @@
   "Bot publishes to your channel": "ينشر البوت في قناتك",
   "Run the witness on another host, ideally with another operator. Its bot token and signing key stay there. The bot is the publisher; the separate witness process performs verification.": "شغّل الشاهد على خادم آخر، ويفضَّل مع مشغّل آخر. يبقى رمز البوت ومفتاح التوقيع هناك. البوت هو الناشر؛ أما التحقق فتؤديه عملية الشاهد المنفصلة.",
   "Deployment and verification commands": "أوامر النشر والتحقق",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "يسجّل الشاهد العامل إجابات أداة التجميع المفقودة أو غير الصالحة. يقارن التحقق نقاط التحقق المحفوظة بالتصدير الكامل ويكشف المنشورات الموقّعة المفقودة أو غير الصالحة في تصدير القناة. يترك توقف الشاهد وإخفاقات النشر فترات بلا تثبيت خارجي؛ ولا تثبت التواقيع اكتمال تسليم Telegram.",
   "Know which software made the record.": "اعرف أي برنامج أنشأ السجل.",
   "The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.": "سيربط اتصال GitHub المخطط الجمع ببنية معتمدة ويحتفظ بالإثباتات العامة في مستودع تتحكم فيه.",
   "Choose your fork and approve a specific version.": "اختر نسختك المتفرعة واعتمد إصدارًا محددًا.",
@@ -2436,7 +2435,6 @@
   "STEP": "الخطوة",
   "Processing locally…": "جاري المعالجة محليًّا…",
   "What does GitHub verify?": "ما الذي يتحقق منه GitHub؟",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "يربط التصديق الأرشيف بسير عمل جامع معتمد ويكتشف التغييرات اللاحقة. ولا يثبت أن كل رسالة صحيحة أو أن السجل كامل. ويظل GitHub ونفق HTTPS بنية تحتية موثوقة.",
   "Start a new capture": "بدء عملية التقاط جديدة",
   "Public encryption key": "مفتاح التشفير العام",
   "Save this key to open the connection and archive.": "احفظ هذا المفتاح لفتح الاتصال والأرشيف.",
@@ -7540,7 +7538,6 @@
   "No name": "بدون اسم",
   "No notes yet": "لا توجد ملاحظات حتى الآن",
   "No observations in this window.": "لا توجد ملاحظات في هذه النافذة.",
-  "No observations in this window. This is not proof of zero network traffic.": "لا توجد ملاحظات في هذه النافذة. وهذا لا يُعد دليلاً على انعدام حركة مرور الشبكة.",
   "No open sockets right now.": "لا توجد مقابس مفتوحة الآن.",
   "No profile photo": "لا توجد صورة للملف الشخصي",
   "No reply yet": "لا توجد ردود حتى الآن",
@@ -8667,5 +8664,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "يعرض الطابع الزمني، والنسخ الاحتياطي المشفر، وإعدادات تفاصيل القضية. قم بتمكين كل خدمة والتحقق منها على حدة.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "تم ملاحظة إشعار الحذف في هذا الوقت؛ ويذكر سجل إدارة الدردشة اسم المسؤول بالنيابة في المكان الذي يمكن للحساب قراءته فيه.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "لم يتم رصد أرقام الرسائل هذه في السجل الأصلي. أما الرسائل التي يُعرف أنها حُذفت والرسائل المفقودة عند إعادة الفحص فهي ملاحظات منفصلة.",
-"This export follows these practices.": "يتبع هذا التصدير هذه الممارسات."
+"This export follows these practices.": "يتبع هذا التصدير هذه الممارسات.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "يقوم الشاهد العامل بتسجيل إجابات المجمع المفقودة أو غير الصالحة. ويقوم نظام التحقق بمقارنة نقاط التحقق المحتفظ بها مع التصدير الكامل، ويكتشف المنشورات الموقعة المفقودة أو غير الصالحة في تصدير القناة. يؤدي تعطل الشاهد وفشل النشر إلى وجود فترات زمنية خالية من نقاط الربط الخارجية؛ وتقوم المنشورات التي تم نشرها بتثبيت رأس السجل في اللحظة التي تم فيها نشر كل منها.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "النفق هو مسار الدخول إلى اللوحة؛ وتظهر المنافذ الواردة ومسارات الوصول المباشر الأخرى في سجل جدار الحماية."
 }

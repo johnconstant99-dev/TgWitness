@@ -1746,7 +1746,6 @@
   "Bot publishes to your channel": "机器人发布到您的频道",
   "Run the witness on another host, ideally with another operator. Its bot token and signing key stay there. The bot is the publisher; the separate witness process performs verification.": "在另一台主机上运行见证人，最好由其他运营者管理。其机器人令牌和签名密钥都保留在那里。机器人只负责发布；验证由独立的见证人进程完成。",
   "Deployment and verification commands": "部署与验证命令",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "运行中的见证人会记录收集器缺失或无效的应答。验证会将保留的检查点与完整导出进行比较，并检测频道导出中缺失或无效的签名帖子。见证人停机和发帖失败会留下没有外部锚点的时间段；签名并不能证明 Telegram 已完整送达。",
   "Know which software made the record.": "了解是哪个软件生成了这份记录。",
   "The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.": "计划中的 GitHub 连接会把收集与已批准的构建关联起来，并将公开证明保存在由您控制的仓库中。",
   "Choose your fork and approve a specific version.": "选择您的分支并批准一个特定版本。",
@@ -2356,7 +2355,6 @@
   "STEP": "步骤",
   "Processing locally…": "正在本地处理……",
   "What does GitHub verify?": "GitHub 会验证什么？",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "该认证将存档与经批准的收集器工作流绑定，并能检测后续的更改。它并不能证明每条消息都是真实的，也不能证明历史记录是完整的。GitHub 和 HTTPS 隧道仍被视为可信基础设施。",
   "Start a new capture": "开始新的捕获",
   "Public encryption key": "公钥",
   "Save this key to open the connection and archive.": "保存此密钥以建立连接并生成存档。",
@@ -7345,7 +7343,6 @@
   "No name": "无名称",
   "No notes yet": "暂无注释",
   "No observations in this window.": "此窗口中无观察结果。",
-  "No observations in this window. This is not proof of zero network traffic.": "此窗口中无观察结果。这并不证明网络流量为零。",
   "No open sockets right now.": "当前没有打开的套接字。",
   "No profile photo": "无头像",
   "No reply yet": "暂无回复",
@@ -8472,5 +8469,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "显示时间戳、加密备份和案件详情设置。请分别启用并验证每项服务。",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "这是观察到删除通知的时间；聊天管理员日志中列出了代理管理员的名称，该账户可以查看该日志。",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "这些消息编号在源日志中未被观察到。已知的已删除消息和复查时缺失的消息属于不同的观察结果。",
-"This export follows these practices.": "此导出遵循以下规范。"
+"This export follows these practices.": "此导出遵循以下规范。",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "运行中的见证人会记录收集器缺失或无效的响应。验证过程会将保留的检查点与完整导出数据进行比对，并检测频道导出中是否存在缺失或无效的已签名帖子。见证人停机和发布失败会导致某些时间段缺乏外部锚点；已发布的帖子则以各自发布时的时刻为基准，锚定日志头。",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "隧道是通往控制面板的入口路径；入站端口和其他直接访问路径会显示在防火墙记录中。"
 }

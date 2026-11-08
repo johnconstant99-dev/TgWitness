@@ -84,7 +84,6 @@
   "A pattern is not a valid regular expression.": "このパターンは有効な正規表現ではありません。",
   "A prepaid SIM or eSIM when the account has to live long; a rental or a one-time activation for a short job. Services are listed below.": "アカウントを長期的に維持する必要がある場合はプリペイドSIMまたはeSIMを、短期的な作業の場合はレンタルまたは1回限りのアクティベーションをご利用ください。サービスの一覧は以下の通りです。",
   "A public GitHub repository · no token": "公開されている GitHub リポジトリ · トークン不要",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "稼働中のウィットネスは、コレクターからの回答が欠落しているか無効であるかを記録します。検証では、保持されているチェックポイントと完全なエクスポートデータを比較し、チャンネルエクスポート内の欠落または無効な署名付き投稿を検出します。ウィットネスのダウンタイムや投稿の失敗により、外部のアンカーがない間隔が生じることがあります。また、署名はTelegramでの完全な配信を証明するものではありません。",
   "A sealed 24/7 server": "24時間365日稼働の封印されたサーバー",
   "A sealed server, set up by commands you can check.": "確認可能なコマンドによって設定された、封印されたサーバーです。",
   "A self-contained report for offline review, sharing, and printing to PDF.": "オフラインでの確認、共有、およびPDFへの印刷が可能な、独立したレポートです。",
@@ -2356,7 +2355,6 @@
   "STEP": "手順",
   "Processing locally…": "ローカルで処理中…",
   "What does GitHub verify?": "GitHubでは何を検証するのでしょうか？",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "このアテステーションは、アーカイブを承認済みのコレクターワークフローに紐付け、その後の変更を検出します。ただし、すべてのメッセージが真実であること、または履歴が完全であることを証明するものではありません。GitHubおよびHTTPSトンネルは、引き続き信頼できるインフラストラクチャとして機能します。",
   "Start a new capture": "新しいキャプチャを開始する",
   "Public encryption key": "公開鍵",
   "Save this key to open the connection and archive.": "このキーを保存して、接続を開き、アーカイブを作成してください。",
@@ -7345,7 +7343,6 @@
   "No name": "名前なし",
   "No notes yet": "まだメモはありません",
   "No observations in this window.": "このウィンドウには観測結果がありません。",
-  "No observations in this window. This is not proof of zero network traffic.": "このウィンドウには観測結果がありません。これは、ネットワークトラフィックがゼロであることを証明するものではありません。",
   "No open sockets right now.": "現在開いているソケットはありません。",
   "No profile photo": "プロフィール写真なし",
   "No reply yet": "まだ返信はありません",
@@ -8472,5 +8469,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "タイムスタンプ、暗号化バックアップ、およびケース詳細の設定を表示します。各サービスを個別に有効化し、確認してください。",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "これは削除通知が確認された時点です。チャットの管理者ログには、そのアカウントが閲覧可能な場所で、代理管理者の名前が記載されています。",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "これらのメッセージ番号は、対象のジャーナルでは確認されませんでした。削除されたことが判明しているメッセージと、再確認時に欠落していたメッセージは、別個の観察項目として扱われます。",
-"This export follows these practices.": "このエクスポートは、以下のベストプラクティスに従っています。"
+"This export follows these practices.": "このエクスポートは、以下のベストプラクティスに従っています。",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "稼働中のウィットネスは、欠落または無効なコレクターの応答を記録します。検証では、保持されているチェックポイントと完全なエクスポートデータを比較し、チャンネルエクスポート内の欠落または無効な署名付き投稿を検出します。ウィットネスのダウンタイムや投稿の失敗により、外部アンカーのない間隔が生じますが、投稿された各投稿は、その投稿が行われた時点においてジャーナルの先頭をアンカーとして固定します。",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "トンネルはパネルへのインバウンド経路であり、インバウンドポートやその他の直接アクセス経路はファイアウォールレコードに表示されます。"
 }

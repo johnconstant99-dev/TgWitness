@@ -84,7 +84,6 @@
   "A pattern is not a valid regular expression.": "একটি প্যাটার্ন একটি বৈধ নিয়মিত অভিব্যক্তি নয়।",
   "A prepaid SIM or eSIM when the account has to live long; a rental or a one-time activation for a short job. Services are listed below.": "অ্যাকাউন্ট দীর্ঘমেয়াদে চললে প্রিপেইড সিম বা ই-সিম; স্বল্পমেয়াদী কাজের জন্য ভাড়া বা এককালীন সক্রিয়করণ। পরিষেবাগুলি নিচে তালিকাভুক্ত।",
   "A public GitHub repository · no token": "একটি পাবলিক গিটহাব রিপোজিটরি · কোনো টোকেন নেই",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "একটি চলমান সাক্ষী অনুপস্থিত বা অসিদ্ধ কালেক্টর উত্তরগুলি রেকর্ড করে। যাচাইকরণ সংরক্ষিত চেকপয়েন্টগুলিকে সম্পূর্ণ এক্সপোর্টের সাথে তুলনা করে এবং চ্যানেল এক্সপোর্টে অনুপস্থিত বা অসিদ্ধ স্বাক্ষরিত পোস্টগুলি সনাক্ত করে। সাক্ষীর ডাউনটাইম এবং পোস্ট করার ব্যর্থতা বাহ্যিক অ্যাঙ্করবিহীন ফাঁক সৃষ্টি করে; স্বাক্ষরগুলো সম্পূর্ণ টেলিগ্রাম ডেলিভারি প্রমাণ করে না।",
   "A sealed 24/7 server": "একটি সিল করা ২৪/৭ সার্ভার",
   "A sealed server, set up by commands you can check.": "একটি সিল করা সার্ভার, যা আপনি যাচাই করতে পারেন এমন কমান্ডের মাধ্যমে সেট আপ করা হয়েছে।",
   "A self-contained report for offline review, sharing, and printing to PDF.": "অফলাইনে পর্যালোচনা, শেয়ারিং এবং পিডিএফ-এ প্রিন্ট করার জন্য একটি স্বয়ংসম্পূর্ণ প্রতিবেদন।",
@@ -2372,7 +2371,6 @@
   "STEP": "ধাপ",
   "Processing locally…": "স্থানীয়ভাবে প্রক্রিয়াকরণ…",
   "What does GitHub verify?": "GitHub কী যাচাই করে?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "এই প্রত্যয়নপত্রটি আর্কাইভকে অনুমোদিত কালেক্টর ওয়ার্কফ্লোর সাথে আবদ্ধ করে এবং পরবর্তী পরিবর্তনগুলো সনাক্ত করে। এটি প্রমাণ করে না যে প্রতিটি বার্তা সত্য বা ইতিহাস সম্পূর্ণ। GitHub এবং HTTPS টানেল বিশ্বস্ত অবকাঠামো হিসেবে রয়ে যায়।",
   "Start a new capture": "নতুন ক্যাপচার শুরু করুন",
   "Public encryption key": "জনসাধারণের এনক্রিপশন কী",
   "Save this key to open the connection and archive.": "সংযোগ খুলতে এবং আর্কাইভ করতে এই কীটি সংরক্ষণ করুন।",
@@ -7384,7 +7382,6 @@
   "No name": "কোনও নাম নেই",
   "No notes yet": "এখনো কোনো নোট নেই",
   "No observations in this window.": "এই উইন্ডোতে কোনো পর্যবেক্ষণ নেই।",
-  "No observations in this window. This is not proof of zero network traffic.": "এই উইন্ডোতে কোনো পর্যবেক্ষণ নেই। এটি শূন্য নেটওয়ার্ক ট্র্যাফিকের প্রমাণ নয়।",
   "No open sockets right now.": "এই মুহূর্তে কোনো খোলা সকেট নেই।",
   "No profile photo": "কোনো প্রোফাইল ছবি নেই",
   "No reply yet": "এখনও কোনো উত্তর নেই",
@@ -8511,5 +8508,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "টাইমস্ট্যাম্প, এনক্রিপ্টেড ব্যাকআপ এবং কেস-বিবরণ সেটিংস দেখায়। প্রতিটি সেবা আলাদাভাবে সক্ষম করুন এবং যাচাই করুন।",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "এই সময় মুছে ফেলার বিজ্ঞপ্তিটি দেখা গিয়েছিল; চ্যাটের অ্যাডমিন লগ সেই কার্যনির্বাহী প্রশাসকের নাম উল্লেখ করে যার অ্যাকাউন্ট এটি পড়তে পারে।",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "এই বার্তা নম্বরগুলো উৎস জার্নালে দেখা যায়নি। পরিচিত মুছে ফেলা বার্তা এবং পুনরায় যাচাই করার সময় অনুপস্থিত বার্তাগুলো পৃথক পর্যবেক্ষণ।",
-"This export follows these practices.": "এই এক্সপোর্ট নিম্নলিখিত অনুশীলনগুলি অনুসরণ করে।"
+"This export follows these practices.": "এই এক্সপোর্ট নিম্নলিখিত অনুশীলনগুলি অনুসরণ করে।",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "একজন চলমান সাক্ষী অনুপস্থিত বা অসিদ্ধ সংগ্রাহকের উত্তরগুলি রেকর্ড করে। যাচাইকরণ সংরক্ষিত চেকপয়েন্টগুলোকে সম্পূর্ণ এক্সপোর্টের সাথে তুলনা করে এবং চ্যানেল এক্সপোর্টে অনুপস্থিত বা অসিদ্ধ স্বাক্ষরিত পোস্টগুলো সনাক্ত করে। সাক্ষীর ডাউনটাইম এবং পোস্ট করার ব্যর্থতা বাহ্যিক অ্যাঙ্করবিহীন ফাঁক তৈরি করে; প্রকাশিত প্রতিটি পোস্টই সেই মুহূর্তে জার্নাল হেডকে অ্যাঙ্কর করে।",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": " টানেল হল প্যানেলে প্রবেশের পথ; ইনবাউন্ড পোর্ট এবং অন্যান্য সরাসরি প্রবেশ পথ ফায়ারওয়াল রেকর্ডে প্রদর্শিত হয়।"
 }

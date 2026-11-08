@@ -84,7 +84,6 @@
   "A pattern is not a valid regular expression.": "Un motif n'est pas une expression régulière valide.",
   "A prepaid SIM or eSIM when the account has to live long; a rental or a one-time activation for a short job. Services are listed below.": "Une carte SIM prépayée ou une eSIM lorsque le compte doit être actif pendant une longue période ; une location ou une activation ponctuelle pour une mission de courte durée. Les services sont répertoriés ci-dessous.",
   "A public GitHub repository · no token": "Un dépôt GitHub public · aucun jeton",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "Un témoin en cours d’exécution enregistre les réponses manquantes ou non valides du collecteur. La vérification compare les points de contrôle conservés avec l’exportation complète et détecte les publications signées manquantes ou non valides dans l’exportation d’un canal. Les temps d’arrêt du témoin et les échecs de publication laissent des intervalles sans repères externes ; les signatures ne prouvent pas la livraison complète sur Telegram.",
   "A sealed 24/7 server": "Un serveur sécurisé fonctionnant 24 h/24 et 7 j/7",
   "A sealed server, set up by commands you can check.": "Un serveur sécurisé, configuré à l'aide de commandes que vous pouvez vérifier.",
   "A self-contained report for offline review, sharing, and printing to PDF.": "Un rapport autonome permettant la consultation hors ligne, le partage et l’impression au format PDF.",
@@ -2372,7 +2371,6 @@
   "STEP": "ÉTAPE",
   "Processing locally…": "Traitement en cours localement…",
   "What does GitHub verify?": "Que vérifie GitHub ?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "L'attestation lie l'archive à un workflow de collecte approuvé et détecte les modifications ultérieures. Elle ne prouve pas que chaque message est véridique ni que l'historique est complet. GitHub et le tunnel HTTPS restent des infrastructures de confiance.",
   "Start a new capture": "Lancer une nouvelle capture",
   "Public encryption key": "Clé de chiffrement publique",
   "Save this key to open the connection and archive.": "Enregistrez cette clé pour établir la connexion et archiver les données.",
@@ -7384,7 +7382,6 @@
   "No name": "Pas de nom",
   "No notes yet": "Aucune note pour l’instant",
   "No observations in this window.": "Aucune observation dans cette fenêtre.",
-  "No observations in this window. This is not proof of zero network traffic.": "Aucune observation dans cette fenêtre. Cela ne prouve pas l’absence totale de trafic réseau.",
   "No open sockets right now.": "Aucun socket ouvert pour le moment.",
   "No profile photo": "Pas de photo de profil",
   "No reply yet": "Pas encore de réponse",
@@ -8511,5 +8508,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "Affiche l'horodatage, la sauvegarde chiffrée et les paramètres relatifs aux détails de l'affaire. Activez et vérifiez chaque service séparément.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "C'est à ce moment-là que l'avis de suppression a été constaté ; le journal d'administration de la discussion mentionne le nom de l'administrateur en fonction, et le compte peut le consulter.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "Ces numéros de messages n'ont pas été relevés dans le journal source. Les messages supprimés connus et les messages manquants lors de la vérification sont des observations distinctes.",
-"This export follows these practices.": "Cette exportation respecte ces bonnes pratiques."
+"This export follows these practices.": "Cette exportation respecte ces bonnes pratiques.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "Un témoin actif enregistre les réponses manquantes ou invalides du collecteur. La vérification compare les points de contrôle conservés avec l'exportation complète et détecte les messages signés manquants ou invalides dans l'exportation d'un canal. Les périodes d'indisponibilité du témoin et les échecs de publication laissent des intervalles sans repères externes ; les messages qui ont été publiés ancrent l'en-tête du journal au moment où chacun d'entre eux a été publié.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "Le tunnel constitue la voie d'accès au panneau ; les ports entrants et les autres voies d'accès direct apparaissent dans l'enregistrement du pare-feu."
 }

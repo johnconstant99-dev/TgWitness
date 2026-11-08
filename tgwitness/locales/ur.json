@@ -1757,7 +1757,6 @@
   "Bot publishes to your channel": "بوٹ آپ کے چینل میں شائع کرتا ہے",
   "Run the witness on another host, ideally with another operator. Its bot token and signing key stay there. The bot is the publisher; the separate witness process performs verification.": "گواہ کو کسی اور ہوسٹ پر چلائیں، بہتر ہے کسی دوسرے آپریٹر کے پاس۔ اس کا بوٹ ٹوکن اور دستخطی کلید وہیں رہتی ہے۔ بوٹ صرف شائع کرتا ہے؛ تصدیق الگ گواہ پراسیس کرتا ہے۔",
   "Deployment and verification commands": "تعیناتی اور تصدیق کی کمانڈز",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "چلتا ہوا گواہ جمع کنندہ کے غائب یا غلط جوابات ریکارڈ کرتا ہے۔ تصدیق محفوظ چیک پوائنٹس کا مکمل ایکسپورٹ سے موازنہ کرتی ہے اور چینل ایکسپورٹ میں غائب یا غلط دستخط شدہ پوسٹس کا پتہ لگاتی ہے۔ گواہ کا بند رہنا اور پوسٹنگ کی ناکامیاں بیرونی اینکرز کے بغیر وقفے چھوڑ دیتی ہیں؛ دستخط ٹیلیگرام کی مکمل ترسیل ثابت نہیں کرتے۔",
   "Know which software made the record.": "جانیں کہ ریکارڈ کس سافٹ ویئر نے بنایا۔",
   "The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.": "منصوبہ بند GitHub کنکشن جمع آوری کو منظور شدہ بلڈ سے جوڑے گا اور عوامی ثبوت آپ کے کنٹرول والے ریپوزٹری میں رکھے گا۔",
   "Choose your fork and approve a specific version.": "اپنا فورک منتخب کریں اور ایک مخصوص ورژن منظور کریں۔",
@@ -2372,7 +2371,6 @@
   "STEP": "مرحلہ",
   "Processing locally…": "مقامی طور پر پراسیسنگ…",
   "What does GitHub verify?": "GitHub کیا تصدیق کرتا ہے؟",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "تصدیق آرکائیو کو ایک منظور شدہ کلیکٹر ورک فلو سے منسلک کرتی ہے اور بعد میں ہونے والی تبدیلیوں کا پتہ لگاتی ہے۔ یہ ثابت نہیں کرتی کہ ہر پیغام سچ ہے یا کہ تاریخ مکمل ہے۔ GitHub اور HTTPS سرنگ قابلِ اعتماد انفراسٹرکچر کے طور پر برقرار ہیں۔",
   "Start a new capture": "نئی کیپچر شروع کریں",
   "Public encryption key": "عوامی انکرپشن کلید",
   "Save this key to open the connection and archive.": "اس کلید کو محفوظ کریں تاکہ کنکشن کھولا اور آرکائیو کیا جا سکے۔",
@@ -7384,7 +7382,6 @@
   "No name": "کوئی نام نہیں",
   "No notes yet": "ابھی کوئی نوٹس نہیں",
   "No observations in this window.": "اس ونڈو میں کوئی مشاہدات نہیں ہیں۔",
-  "No observations in this window. This is not proof of zero network traffic.": "اس ونڈو میں کوئی مشاہدات نہیں ہیں۔ یہ صفر نیٹ ورک ٹریفک کا ثبوت نہیں ہے۔",
   "No open sockets right now.": "اس وقت کوئی کھلا ساکٹ نہیں۔",
   "No profile photo": "کوئی پروفائل تصویر نہیں",
   "No reply yet": "ابھی تک کوئی جواب نہیں",
@@ -8511,5 +8508,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "ٹائم اسٹیمپ، انکرپٹڈ بیک اپ اور کیس کی تفصیلی ترتیبات دکھاتا ہے۔ ہر سروس کو الگ الگ فعال کریں اور تصدیق کریں۔",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "یہ وہ وقت ہے جب حذف کرنے کا نوٹس دیکھا گیا؛ چیٹ کے ایڈمن لاگ میں اس عارضی منتظم کا نام درج ہوتا ہے جس کے اکاؤنٹ سے یہ پڑھا جا سکتا ہے۔",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "یہ پیغام نمبر ماخذ جرنل میں مشاہدہ نہیں ہوئے۔ معلوم حذف شدہ پیغامات اور دوبارہ جانچ پر غائب پیغامات الگ الگ مشاہدات ہیں۔",
-"This export follows these practices.": "یہ برآمد ان طریقہ کار کی پیروی کرتا ہے۔"
+"This export follows these practices.": "یہ برآمد ان طریقہ کار کی پیروی کرتا ہے۔",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "ایک چلنے والا گواہ جمع کرنے والے کے گمشدہ یا غیر معتبر جوابات کو ریکارڈ کرتا ہے۔ تصدیق محفوظ شدہ چیک پوائنٹس کا مکمل ایکسپورٹ سے موازنہ کرتی ہے اور چینل ایکسپورٹ میں گمشدہ یا غیر معتبر دستخط شدہ پوسٹس کا پتہ لگاتی ہے۔ گواہ کے غیر فعال اوقات اور پوسٹ کرنے میں ناکامیوں کی وجہ سے وقفے بیرونی لنگر کے بغیر رہ جاتے ہیں؛ جو پوسٹس کی گئی تھیں وہ ہر ایک کی اشاعت کے وقت جرنل ہیڈ کو لنگر انداز کرتی ہیں۔",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "سرنگ پینل تک داخلے کا راستہ ہے؛ آنے والی بندرگاہیں اور دیگر براہِ راست رسائی کے راستے فائر وال ریکارڈ میں ظاہر ہوتے ہیں۔"
 }

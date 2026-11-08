@@ -84,7 +84,6 @@
   "A pattern is not a valid regular expression.": "Nusxa haqiqiy muntazam ifoda emas.",
   "A prepaid SIM or eSIM when the account has to live long; a rental or a one-time activation for a short job. Services are listed below.": "Hisob uzoq muddat ishlashi kerak bo'lsa oldindan to'langan SIM yoki eSIM; qisqa muddatli ish uchun ijaraga olish yoki bir martalik faollashtirish. Xizmatlar quyida keltirilgan.",
   "A public GitHub repository · no token": "Ochiq GitHub ombori · token yo'q",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "Joriy guvoh yo'qolgan yoki nomaqbul yig'uvchi javoblarini qayd etadi. Verifikatsiya saqlangan tekshiruv nuqtalarini to'liq eksport bilan solishtiradi va kanal eksportida imzolangan postlarning yo'qolgan yoki nomaqbul ekanligini aniqlaydi. Guvohning ishlamay qolishi va post qilishdagi muvaffaqiyatsizliklar tashqi bog'lanishlarsiz bo'sh oraliklarni qoldiradi; imzo Telegram xabarlarining to'liq yetkazilganini isbotlamaydi.",
   "A sealed 24/7 server": "Muhrlangan 24/7 server",
   "A sealed server, set up by commands you can check.": "Tekshirishingiz mumkin bo'lgan buyruqlar orqali sozlangan muhrlangan server.",
   "A self-contained report for offline review, sharing, and printing to PDF.": "Oflayn ko'rib chiqish, ulashish va PDFga chop etish uchun mustaqil hisobot.",
@@ -2372,7 +2371,6 @@
   "STEP": "QADAM",
   "Processing locally…": "Mahalliy ravishda qayta ishlanmoqda…",
   "What does GitHub verify?": "GitHub nima tasdiqlaydi?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "Tasdiq arxivni tasdiqlangan yig'uvchi ish jarayoniga bog'laydi va keyingi o'zgarishlarni aniqlaydi. Bu har bir xabar rostligini yoki tarixning to'liqligini isbotlamaydi. GitHub va HTTPS tunneli ishonchli infratuzilma bo'lib qoladi.",
   "Start a new capture": "Yangi ushlashni boshlang",
   "Public encryption key": "Jamoat shifrlash kaliti",
   "Save this key to open the connection and archive.": "Ulanishni ochish va arxivni saqlash uchun ushbu kalitni saqlang.",
@@ -7384,7 +7382,6 @@
   "No name": "Nom yo'q",
   "No notes yet": "Hali izohlar yo'q",
   "No observations in this window.": "Ushbu oynada hech qanday kuzatuvlar yo'q.",
-  "No observations in this window. This is not proof of zero network traffic.": "Ushbu oynada hech qanday kuzatuvlar yo'q. Bu tarmoq trafigining nol ekanligini isbotlamaydi.",
   "No open sockets right now.": "Hozir ochiq soketlar yo'q.",
   "No profile photo": "Profil fotosiz",
   "No reply yet": "Hali javob yo'q",
@@ -8511,5 +8508,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "Vaqt shtampini, shifrlangan zaxira nusxasini va ish tafsilotlari sozlamalarini ko'rsatadi. Har bir xizmatni alohida yoqib, tekshiring.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "Bu o'chirish to'g'risidagi bildirishnoma kuzatilgan payt; chatning admin logida hisob bu xabarni o'qiy oladigan navbatdagi administratorni ko'rsatadi.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "Manba jurnalida ushbu xabar raqamlari kuzatilmagan. Ma'lum o'chirilgan xabarlar va qayta tekshirishda topilmagan xabarlar alohida kuzatuvlar hisoblanadi.",
-"This export follows these practices.": "Ushbu eksport quyidagi amaliyotlarga rioya qiladi."
+"This export follows these practices.": "Ushbu eksport quyidagi amaliyotlarga rioya qiladi.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "Davom etayotgan guvoh yig'uvchining yo'qolgan yoki noto'g'ri javoblarini qayd etadi. Verifikatsiya saqlangan tekshiruv nuqtalarini to'liq eksport bilan solishtiradi va kanal eksportida imzolangan postlarning yo'qolgan yoki noto'g'ri bo'lganlarini aniqlaydi. Guvohning ishlamay qolishi va post joylashtirishdagi xatoliklar tashqi ankralarsiz bo'sh oraliklarni qoldiradi; joylashtirilgan postlar har biri chop etilgan paytda jurnal boshini mahkamlaydi.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": " Tunnel — paneldagi kirish yo'li; kiruvchi portlar va boshqa to'g'ridan-to'g'ri kirish yo'llari firewall yozuvida ko'rsatiladi."
 }

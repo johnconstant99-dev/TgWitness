@@ -84,7 +84,6 @@
   "A pattern is not a valid regular expression.": "「模式」並非有效的正規表達式。",
   "A prepaid SIM or eSIM when the account has to live long; a rental or a one-time activation for a short job. Services are listed below.": "若帳戶需長期使用，請選用預付 SIM 卡或 eSIM；若僅需短期作業，則可選擇租用或一次性啟用方案。相關服務列表如下。",
   "A public GitHub repository · no token": "一個公開的 GitHub 儲存庫 · 無存取憑證",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "運行中的「見證者」會記錄收集器缺失或無效的回應。驗證過程會將保留的檢查點與完整匯出資料進行比對，並偵測頻道匯出資料中缺失或無效的簽名貼文。「見證者」停機及發文失敗會導致某些時間區間缺乏外部錨點；簽名並不能證明 Telegram 訊息已完整送達。",
   "A sealed 24/7 server": "一臺全天候運作且經過密封處理的伺服器",
   "A sealed server, set up by commands you can check.": "一個由您可查驗的指令所設定的密封伺服器。",
   "A self-contained report for offline review, sharing, and printing to PDF.": "一份獨立的報告，供離線檢視、分享及輸出為 PDF 檔案使用。",
@@ -2356,7 +2355,6 @@
   "STEP": "步驟",
   "Processing locally…": "正在本地處理中……",
   "What does GitHub verify?": "GitHub 會驗證哪些內容？",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "此認證將存檔與經核准的收集器工作流程綁定，並能偵測後續變更。它並不能證明每則訊息皆屬真實，亦無法保證歷史紀錄完整無缺。GitHub 與 HTTPS 隧道仍為可信賴的基礎架構。",
   "Start a new capture": "開始新的擷取",
   "Public encryption key": "公開加密金鑰",
   "Save this key to open the connection and archive.": "請儲存此金鑰以開啟連線並建立存檔。",
@@ -7345,7 +7343,6 @@
   "No name": "無名稱",
   "No notes yet": "尚無註解",
   "No observations in this window.": "此視窗中無任何觀察結果。",
-  "No observations in this window. This is not proof of zero network traffic.": "此視窗中無任何觀察結果。這並不代表網路流量為零。",
   "No open sockets right now.": "目前沒有開啟的通訊端。",
   "No profile photo": "無個人頭像",
   "No reply yet": "尚無回覆",
@@ -8472,5 +8469,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "顯示時間戳記、加密備份及案件詳細資訊設定。請分別啟用並驗證各項服務。",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "這是觀察到刪除通知的時間點；聊天室的管理員日誌會標明代理管理員的身份，該帳號可讀取該日誌。",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "這些訊息編號並未在原始期刊中被觀察到。已知已刪除的訊息以及重新檢查時缺失的訊息，均屬獨立的觀察項目。",
-"This export follows these practices.": "此匯出操作遵循以下規範。"
+"This export follows these practices.": "此匯出操作遵循以下規範。",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "運行中的見證人會記錄收集器遺漏或無效的回應。驗證程序會將保留的檢查點與完整匯出資料進行比對，並偵測頻道匯出資料中遺漏或無效的簽名貼文。見證人停機及發文失敗會導致某些區間缺乏外部錨點；此時，已發布的貼文將以各自發布的時刻為基準，錨定日誌的起點。",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "隧道是通往控制面板的入口路徑；入站埠及其他直接存取路徑會顯示在防火牆記錄中。"
 }

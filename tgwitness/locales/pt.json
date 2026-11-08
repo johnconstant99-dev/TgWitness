@@ -1757,7 +1757,6 @@
   "Bot publishes to your channel": "O bot publica no seu canal",
   "Run the witness on another host, ideally with another operator. Its bot token and signing key stay there. The bot is the publisher; the separate witness process performs verification.": "Execute a testemunha em outro servidor, de preferência com outro operador. O token do bot e a chave de assinatura ficam lá. O bot é quem publica; o processo separado da testemunha faz a verificação.",
   "Deployment and verification commands": "Comandos de implantação e verificação",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "Uma testemunha em execução registra respostas ausentes ou inválidas do coletor. A verificação compara os pontos de verificação guardados com a exportação completa e detecta publicações assinadas ausentes ou inválidas em uma exportação do canal. Quedas da testemunha e falhas de publicação deixam intervalos sem âncoras externas; as assinaturas não provam a entrega completa do Telegram.",
   "Know which software made the record.": "Saiba qual software criou o registro.",
   "The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.": "A conexão planejada com o GitHub vai vincular a coleta a uma build aprovada e guardar provas públicas em um repositório que você controla.",
   "Choose your fork and approve a specific version.": "Escolha seu fork e aprove uma versão específica.",
@@ -2372,7 +2371,6 @@
   "STEP": "PASSO",
   "Processing locally…": "Processando localmente…",
   "What does GitHub verify?": "O que o GitHub verifica?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "A certificação vincula o arquivo a um fluxo de trabalho de coleta aprovado e detecta alterações posteriores. Ela não comprova que todas as mensagens sejam verdadeiras nem que o histórico esteja completo. O GitHub e o túnel HTTPS continuam sendo uma infraestrutura confiável.",
   "Start a new capture": "Inicie uma nova captura",
   "Public encryption key": "Chave de criptografia pública",
   "Save this key to open the connection and archive.": "Salve esta chave para estabelecer a conexão e arquivar.",
@@ -7384,7 +7382,6 @@
   "No name": "Sem nome",
   "No notes yet": "Ainda não há notas",
   "No observations in this window.": "Não há observações nesta janela.",
-  "No observations in this window. This is not proof of zero network traffic.": "Não há observações nesta janela. Isso não é prova de tráfego de rede zero.",
   "No open sockets right now.": "Nenhum socket aberto no momento.",
   "No profile photo": "Sem foto de perfil",
   "No reply yet": "Ainda sem resposta",
@@ -8511,5 +8508,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "Mostra a data e hora, o backup criptografado e as configurações de detalhes do caso. Ative e verifique cada serviço separadamente.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "Foi nesse momento que o aviso de exclusão foi observado; o registro de administração do chat indica o administrador em exercício, e a conta pode acessá-lo.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "Esses números de mensagens não foram observados no diário de origem. Mensagens conhecidas como excluídas e mensagens ausentes na nova verificação constituem observações separadas.",
-"This export follows these practices.": "Esta exportação segue essas práticas."
+"This export follows these practices.": "Esta exportação segue essas práticas.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "Uma testemunha em funcionamento registra respostas ausentes ou inválidas do coletor. A verificação compara os pontos de verificação retidos com a exportação completa e detecta postagens assinadas ausentes ou inválidas em uma exportação de canal. O tempo de inatividade da testemunha e as falhas na publicação deixam intervalos sem âncoras externas; as postagens que foram feitas fixam o início do diário no momento em que cada uma foi publicada.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "O túnel é o caminho de entrada para o painel; as portas de entrada e outros caminhos de acesso direto aparecem no registro do firewall."
 }

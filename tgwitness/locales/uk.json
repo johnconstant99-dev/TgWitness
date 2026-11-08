@@ -1779,7 +1779,6 @@
   "Bot publishes to your channel": "Бот публікує у вашому каналі",
   "Run the witness on another host, ideally with another operator. Its bot token and signing key stay there. The bot is the publisher; the separate witness process performs verification.": "Запускайте свідка на іншому сервері, бажано в іншого оператора. Токен бота й ключ підпису залишаються там. Бот лише публікує, а перевірку виконує окремий процес свідка.",
   "Deployment and verification commands": "Команди розгортання й перевірки",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "Працюючий свідок фіксує відсутні або недійсні відповіді колектора. Перевірка звіряє збережені контрольні точки з повним експортом і виявляє відсутні або недійсні підписані публікації в експорті каналу. Простій свідка й збої публікації залишають проміжки без зовнішніх прив'язок; підписи не доводять повноти доставки Telegram.",
   "Know which software made the record.": "Знайте, яка програма створила запис.",
   "The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.": "Заплановане підключення GitHub пов'яже збір зі схваленою збіркою й зберігатиме публічні підтвердження у вашому репозиторії.",
   "Choose your fork and approve a specific version.": "Виберіть свій форк і схваліть конкретну версію.",
@@ -2404,7 +2403,6 @@
   "STEP": "КРОК",
   "Processing locally…": "Обробка на локальному комп'ютері…",
   "What does GitHub verify?": "Що перевіряє GitHub?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "Атестація пов’язує архів із затвердженим робочим процесом збору даних та виявляє подальші зміни. Вона не підтверджує, що кожне повідомлення є правдивим або що історія є повною. GitHub та HTTPS-тунель залишаються надійною інфраструктурою.",
   "Start a new capture": "Почати новий запис",
   "Public encryption key": "Відкритий ключ шифрування",
   "Save this key to open the connection and archive.": "Збережіть цей ключ, щоб відкрити з’єднання та архів.",
@@ -7471,7 +7469,6 @@
   "No name": "Без назви",
   "No notes yet": "Поки що немає приміток",
   "No observations in this window.": "У цьому вікні немає спостережень.",
-  "No observations in this window. This is not proof of zero network traffic.": "У цьому вікні немає спостережень. Це не є доказом відсутності мережевого трафіку.",
   "No open sockets right now.": "Зараз відкритих сокетів немає.",
   "No profile photo": "Відсутнє фото профілю",
   "No reply yet": "Відповідей ще немає",
@@ -8589,5 +8586,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "Відображає час запису, налаштування шифрованої резервної копії та деталей справи. Увімкніть та перевірте кожну послугу окремо.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "Саме тоді було помічено повідомлення про видалення; у журналі адміністратора чату вказано ім'я адміністратора, який виконує обов'язки, і цей обліковий запис може його прочитати.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "Ці номери повідомлень не були зафіксовані у вихідному журналі. Відомі видалені повідомлення та повідомлення, яких не виявлено під час повторної перевірки, є окремими спостереженнями.",
-"This export follows these practices.": "Цей експорт відповідає зазначеним рекомендаціям."
+"This export follows these practices.": "Цей експорт відповідає зазначеним рекомендаціям.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "Активний свідок фіксує відсутні або недійсні відповіді колектора. Верифікація порівнює збережені контрольні точки з повним експортом і виявляє відсутні або недійсні підписані публікації в експорті каналу. Простої свідка та збої при публікації залишають проміжки без зовнішніх прив’язок; опубліковані публікації фіксують початок журналу на момент публікації кожної з них.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "Тунель є вхідним шляхом до панелі; вхідні порти та інші шляхи прямого доступу відображаються у записі брандмауера."
 }

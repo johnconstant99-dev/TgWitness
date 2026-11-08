@@ -1746,7 +1746,6 @@
   "Bot publishes to your channel": "Bot menerbitkan ke saluran Anda",
   "Run the witness on another host, ideally with another operator. Its bot token and signing key stay there. The bot is the publisher; the separate witness process performs verification.": "Jalankan saksi di host lain, idealnya dengan operator lain. Token bot dan kunci penandatanganannya tetap di sana. Bot adalah penerbit; proses saksi yang terpisah yang melakukan verifikasi.",
   "Deployment and verification commands": "Perintah penerapan dan verifikasi",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "Saksi yang berjalan mencatat jawaban pengumpul yang hilang atau tidak valid. Verifikasi membandingkan titik pemeriksaan yang disimpan dengan ekspor lengkap dan mendeteksi postingan bertanda tangan yang hilang atau tidak valid dalam ekspor saluran. Saksi yang mati dan kegagalan posting meninggalkan jeda tanpa jangkar eksternal; tanda tangan tidak membuktikan pengiriman Telegram yang lengkap.",
   "Know which software made the record.": "Ketahui perangkat lunak mana yang membuat catatan.",
   "The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.": "Koneksi GitHub yang direncanakan akan menghubungkan pengumpulan dengan build yang disetujui dan menyimpan bukti publik di repositori yang Anda kendalikan.",
   "Choose your fork and approve a specific version.": "Pilih fork Anda dan setujui versi tertentu.",
@@ -2356,7 +2355,6 @@
   "STEP": "LANGKAH",
   "Processing locally…": "Sedang diproses secara lokal…",
   "What does GitHub verify?": "Apa yang diverifikasi oleh GitHub?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "Sertifikasi ini mengikat arsip ke alur kerja pengumpul yang disetujui dan mendeteksi perubahan yang terjadi kemudian. Sertifikasi ini tidak membuktikan bahwa setiap pesan benar atau bahwa riwayatnya lengkap. GitHub dan terowongan HTTPS tetap menjadi infrastruktur tepercaya.",
   "Start a new capture": "Mulai penangkapan baru",
   "Public encryption key": "Kunci enkripsi publik",
   "Save this key to open the connection and archive.": "Simpan kunci ini untuk membuka koneksi dan arsip.",
@@ -7345,7 +7343,6 @@
   "No name": "Tanpa nama",
   "No notes yet": "Belum ada catatan",
   "No observations in this window.": "Tidak ada pengamatan di jendela ini.",
-  "No observations in this window. This is not proof of zero network traffic.": "Tidak ada pengamatan di jendela ini. Hal ini bukan bukti bahwa lalu lintas jaringan nol.",
   "No open sockets right now.": "Saat ini tidak ada soket terbuka.",
   "No profile photo": "Tidak ada foto profil",
   "No reply yet": "Belum ada balasan",
@@ -8472,5 +8469,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "Menampilkan cap waktu, cadangan terenkripsi, dan pengaturan detail kasus. Aktifkan dan verifikasi setiap layanan secara terpisah.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "Inilah saat pemberitahuan penghapusan teramati; log admin obrolan mencantumkan nama administrator yang bertugas, di mana akun tersebut dapat membacanya.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "Nomor pesan ini tidak teramati dalam jurnal sumber. Pesan yang diketahui telah dihapus dan pesan yang hilang saat diperiksa ulang merupakan pengamatan terpisah.",
-"This export follows these practices.": "Ekspor ini mengikuti praktik-praktik berikut."
+"This export follows these practices.": "Ekspor ini mengikuti praktik-praktik berikut.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "Saksi yang aktif mencatat jawaban pengumpul yang hilang atau tidak valid. Verifikasi membandingkan titik pemeriksaan yang disimpan dengan ekspor lengkap dan mendeteksi posting yang ditandatangani yang hilang atau tidak valid dalam ekspor saluran. Waktu henti saksi dan kegagalan posting meninggalkan interval tanpa jangkar eksternal; posting yang dibuat menjadi jangkar kepala jurnal pada saat masing-masing dipublikasikan.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "Tunnel adalah jalur masuk ke panel; port masuk dan jalur akses langsung lainnya tercantum dalam catatan firewall."
 }

@@ -1,6 +1,9 @@
 import json
 import uuid
 
+COVERAGE_TITLE = "What this report covers"
+SCOPE_TITLE = "Outside this report's scope"
+
 
 class Report:
     ORDER = ("pass", "unavailable", "review", "fail")
@@ -96,8 +99,8 @@ def render(report, *, cloudflare_api, gateway_host):
     if report["collector_statement"]:
         lines += ["", "## Signed collector statement", "", "```json",
                   json.dumps(report["collector_statement"], indent=2, ensure_ascii=False), "```"]
-    lines += ["", "## What this report establishes", ""] + ["- " + t for t in report["establishes"]]
-    lines += ["", "## Outside this report's scope", ""] + ["- " + t for t in report["does_not_establish"]]
+    lines += ["", "## " + COVERAGE_TITLE, ""] + ["- " + t for t in report["establishes"]]
+    lines += ["", "## " + SCOPE_TITLE, ""] + ["- " + t for t in report["does_not_establish"]]
     phala = deployment["provider"] == "phala"
     lines += ["", "## Reproduce", "", "```sh",
               "python -m tgwitness.cloud verify --record deployment.json --provider-token-file READ_ONLY_CREDENTIALS \\",

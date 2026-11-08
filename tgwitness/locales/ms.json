@@ -84,7 +84,6 @@
   "A pattern is not a valid regular expression.": "Corak ini bukan ungkapan biasa yang sah.",
   "A prepaid SIM or eSIM when the account has to live long; a rental or a one-time activation for a short job. Services are listed below.": "SIM prabayar atau eSIM apabila akaun perlu bertahan lama; penyewaan atau pengaktifan sekali sahaja untuk kerja jangka pendek. Perkhidmatan disenaraikan di bawah.",
   "A public GitHub repository · no token": "Repositori GitHub awam · tiada token",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "Saksi yang sedang berjalan merekodkan jawapan pengumpul yang hilang atau tidak sah. Pengesahan membandingkan checkpoint yang disimpan dengan eksport penuh dan mengesan kiriman bertandatangan yang hilang atau tidak sah dalam eksport saluran. Waktu henti saksi dan kegagalan penghantaran meninggalkan selang tanpa jangkar luaran; tandatangan tidak membuktikan penghantaran Telegram yang lengkap.",
   "A sealed 24/7 server": "Pelayan 24/7 yang disegel",
   "A sealed server, set up by commands you can check.": "Pelayan tersegel, disediakan melalui arahan yang boleh anda semak.",
   "A self-contained report for offline review, sharing, and printing to PDF.": "Laporan berdiri sendiri untuk semakan luar talian, perkongsian, dan cetakan ke PDF.",
@@ -2356,7 +2355,6 @@
   "STEP": "LANGKAH",
   "Processing locally…": "Pemprosesan secara tempatan…",
   "What does GitHub verify?": "Apa yang disahkan oleh GitHub?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "Pengesahan mengikat arkib kepada aliran kerja pengumpul yang diluluskan dan mengesan perubahan kemudian. Ia tidak membuktikan bahawa setiap mesej adalah benar atau bahawa sejarah adalah lengkap. GitHub dan terowong HTTPS kekal sebagai infrastruktur yang dipercayai.",
   "Start a new capture": "Mulakan tangkapan baru",
   "Public encryption key": "Kunci penyulitan awam",
   "Save this key to open the connection and archive.": "Simpan kunci ini untuk membuka sambungan dan arkib.",
@@ -7345,7 +7343,6 @@
   "No name": "Tiada nama",
   "No notes yet": "Tiada nota lagi",
   "No observations in this window.": "Tiada pemerhatian dalam tetingkap ini.",
-  "No observations in this window. This is not proof of zero network traffic.": "Tiada pemerhatian dalam tetingkap ini. Ini bukan bukti tiada trafik rangkaian.",
   "No open sockets right now.": "Tiada soket terbuka sekarang.",
   "No profile photo": "Tiada foto profil",
   "No reply yet": "Tiada balasan lagi",
@@ -8472,5 +8469,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "Menunjukkan cap masa, sandaran disulitkan dan tetapan butiran kes. Aktifkan dan sahkan setiap perkhidmatan secara berasingan.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "Ini adalah apabila pemberitahuan pemadaman diperhatikan; log pentadbiran sembang menyenaraikan nama pentadbir bertindak yang boleh membacanya.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "Nombor mesej ini tidak diperhatikan dalam jurnal sumber. Mesej yang diketahui telah dipadam dan mesej yang hilang semasa semakan semula adalah pemerhatian berasingan.",
-"This export follows these practices.": "Pengeksportan ini mengikut amalan-amalan ini."
+"This export follows these practices.": "Pengeksportan ini mengikut amalan-amalan ini.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "Saksi yang sedang berjalan merekodkan jawapan pengumpul yang hilang atau tidak sah. Pengesahan membandingkan checkpoint yang disimpan dengan eksport penuh dan mengesan kiriman berasingan yang hilang atau tidak sah dalam eksport saluran. Masa henti saksi dan kegagalan penghantaran meninggalkan selang tanpa jangkar luaran; kiriman yang dibuat menjangkar kepala jurnal pada saat setiap satu diterbitkan.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "Terowong adalah laluan kemasukan ke panel; port masuk dan laluan akses langsung lain muncul dalam rekod tembok api."
 }
