@@ -114,8 +114,8 @@ async def inspect(collector, url, timeout=20):
               "fetched_at": utcnow(), "route": route.kind, "route_meaning": ROUTE_MEANING}
     collector.store.append("webapp.inspected", {
         "address": url, "status": status, "content_type": content, "bytes": record["bytes"],
-        "endpoints": len(found["endpoints"]), "hosts": found["hosts"], "route": route.kind,
-        "meaning": INSPECT_MEANING + " " + ROUTE_MEANING})
+        "endpoints": len(found["endpoints"]), "addresses": found["endpoints"], "hosts": found["hosts"],
+        "route": route.kind, "meaning": INSPECT_MEANING + " " + ROUTE_MEANING})
     return record
 
 
@@ -148,10 +148,12 @@ def register(app, authenticate, require_live, visible_chats):
             raise HTTPException(422, str(exc)) from None
 
 
-def note_indicators(found, result, source, ref, at):
-    for item in result["endpoints"]:
-        if item["scheme"] in ("http", "https"):
+def note_indicators(found, addresses, source, ref, at):
+    for item in addresses:
+        if not isinstance(item, dict) or not isinstance(item.get("url"), str):
+            continue
+        if item.get("scheme") in ("http", "https"):
             found.link(item["url"], source, ref, at)
-        elif item["host"]:
+        elif isinstance(item.get("host"), str) and item["host"]:
             found.domain(item["host"], source, ref, at)
     return found
