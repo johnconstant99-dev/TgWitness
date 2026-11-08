@@ -1746,7 +1746,6 @@
   "Bot publishes to your channel": "Bot công bố lên kênh của quý vị",
   "Run the witness on another host, ideally with another operator. Its bot token and signing key stay there. The bot is the publisher; the separate witness process performs verification.": "Chạy nhân chứng trên máy chủ khác, tốt nhất do người vận hành khác quản lý. Mã thông báo bot và khóa ký của nó ở lại đó. Bot là bên công bố; tiến trình nhân chứng riêng thực hiện việc xác minh.",
   "Deployment and verification commands": "Lệnh triển khai và xác minh",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "Nhân chứng đang chạy ghi lại các phản hồi bị thiếu hoặc không hợp lệ của bộ thu thập. Việc xác minh so sánh các điểm kiểm tra đã lưu với bản xuất đầy đủ và phát hiện bài đăng có chữ ký bị thiếu hoặc không hợp lệ trong bản xuất kênh. Thời gian nhân chứng ngừng hoạt động và lỗi đăng bài để lại các khoảng trống không có neo bên ngoài; chữ ký không chứng minh Telegram đã gửi đầy đủ.",
   "Know which software made the record.": "Biết phần mềm nào đã tạo ra bản ghi.",
   "The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.": "Kết nối GitHub dự kiến sẽ liên kết việc thu thập với một bản dựng đã phê duyệt và lưu bằng chứng công khai trong kho mã do quý vị kiểm soát.",
   "Choose your fork and approve a specific version.": "Chọn bản fork của quý vị và phê duyệt một phiên bản cụ thể.",
@@ -2356,7 +2355,6 @@
   "STEP": "BƯỚC",
   "Processing locally…": "Đang xử lý tại máy…",
   "What does GitHub verify?": "GitHub xác minh những thông tin nào?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "Giấy chứng nhận này liên kết kho lưu trữ với một quy trình làm việc thu thập dữ liệu đã được phê duyệt và phát hiện các thay đổi sau này. Giấy chứng nhận này không chứng minh rằng mọi tin nhắn đều chính xác hay lịch sử trò chuyện là đầy đủ. GitHub và đường hầm HTTPS vẫn là cơ sở hạ tầng đáng tin cậy.",
   "Start a new capture": "Bắt đầu quá trình trích xuất mới",
   "Public encryption key": "Khóa mã hóa công khai",
   "Save this key to open the connection and archive.": "Vui lòng lưu khóa này để thiết lập kết nối và tạo tệp lưu trữ.",
@@ -7345,7 +7343,6 @@
   "No name": "Không có tên",
   "No notes yet": "Chưa có ghi chú nào",
   "No observations in this window.": "Không có quan sát nào trong cửa sổ này.",
-  "No observations in this window. This is not proof of zero network traffic.": "Không có quan sát nào trong cửa sổ này. Điều này không phải là bằng chứng cho thấy lưu lượng mạng bằng không.",
   "No open sockets right now.": "Hiện không có socket nào mở.",
   "No profile photo": "Không có ảnh đại diện",
   "No reply yet": "Chưa có phản hồi nào",
@@ -8472,5 +8469,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "Hiển thị dấu thời gian, bản sao lưu được mã hóa và cài đặt chi tiết vụ việc. Kích hoạt và xác minh từng dịch vụ riêng biệt.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "Đây là thời điểm thông báo xóa được ghi nhận; nhật ký quản trị của cuộc trò chuyện ghi rõ tên người quản trị tạm thời, nơi tài khoản có thể xem thông báo này.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "Các số tin nhắn này không được ghi nhận trong tạp chí nguồn. Các tin nhắn đã bị xóa và các tin nhắn bị thiếu khi kiểm tra lại được xem là các quan sát riêng biệt.",
-"This export follows these practices.": "Việc xuất dữ liệu này tuân theo các nguyên tắc sau."
+"This export follows these practices.": "Việc xuất dữ liệu này tuân theo các nguyên tắc sau.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "Một nhân chứng đang hoạt động ghi lại các câu trả lời bị thiếu hoặc không hợp lệ từ bộ thu thập. Quá trình xác minh so sánh các điểm kiểm tra được lưu giữ với bản xuất đầy đủ và phát hiện các bài đăng đã ký bị thiếu hoặc không hợp lệ trong bản xuất kênh. Thời gian ngừng hoạt động của nhân chứng và các lỗi đăng bài để lại các khoảng thời gian không có điểm neo bên ngoài; các bài đăng đã được thực hiện sẽ neo đầu nhật ký tại thời điểm mỗi bài được xuất bản.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "Đường hầm là đường dẫn vào bảng điều khiển; các cổng vào và các đường dẫn truy cập trực tiếp khác xuất hiện trong bản ghi tường lửa."
 }

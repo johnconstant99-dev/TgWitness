@@ -1757,7 +1757,6 @@
   "Bot publishes to your channel": "ربات در کانال شما منتشر می‌کند",
   "Run the witness on another host, ideally with another operator. Its bot token and signing key stay there. The bot is the publisher; the separate witness process performs verification.": "شاهد را روی میزبانی دیگر اجرا کنید، ترجیحاً با گردانندهٔ دیگری. توکن ربات و کلید امضای آن همان‌جا می‌ماند. ربات منتشرکننده است؛ راستی‌آزمایی را فرایند جداگانهٔ شاهد انجام می‌دهد.",
   "Deployment and verification commands": "فرمان‌های استقرار و راستی‌آزمایی",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "شاهدِ در حال اجرا پاسخ‌های غایب یا نامعتبر گردآورنده را ثبت می‌کند. راستی‌آزمایی نقاط کنترل نگه‌داشته‌شده را با خروجی کامل مقایسه می‌کند و پست‌های امضاشدهٔ غایب یا نامعتبر را در خروجی کانال تشخیص می‌دهد. توقف شاهد و خطاهای انتشار بازه‌هایی بدون لنگر خارجی به جا می‌گذارند؛ امضاها کامل بودن تحویل تلگرام را ثابت نمی‌کنند.",
   "Know which software made the record.": "بدانید کدام نرم‌افزار این سابقه را ساخته است.",
   "The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.": "اتصال برنامه‌ریزی‌شدهٔ GitHub گردآوری را به یک بیلد تأییدشده پیوند می‌دهد و اثبات‌های عمومی را در مخزنی که خودتان کنترل می‌کنید نگه می‌دارد.",
   "Choose your fork and approve a specific version.": "فورک خود را انتخاب کنید و نسخهٔ مشخصی را تأیید کنید.",
@@ -2372,7 +2371,6 @@
   "STEP": "مرحله",
   "Processing locally…": "پردازش به‌صورت محلی…",
   "What does GitHub verify?": "گیت‌هاب چه چیزی را تأیید می‌کند؟",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "تصدیق، آرشیو را به یک جریان کاری جمع‌آوری تأییدشده متصل می‌کند و تغییرات بعدی را تشخیص می‌دهد. این امر اثبات نمی‌کند که هر پیام درست است یا تاریخچه کامل است. گیت‌هاب و تونل HTTPS همچنان به‌عنوان زیرساخت مورد اعتماد باقی می‌مانند.",
   "Start a new capture": "شروع ضبط جدید",
   "Public encryption key": "کلید رمزگذاری عمومی",
   "Save this key to open the connection and archive.": "این کلید را برای باز کردن اتصال و بایگانی ذخیره کنید.",
@@ -7384,7 +7382,6 @@
   "No name": "بدون نام",
   "No notes yet": "هنوز یادداشتی وجود ندارد",
   "No observations in this window.": "در این بازه زمانی هیچ مشاهده‌ای وجود ندارد.",
-  "No observations in this window. This is not proof of zero network traffic.": "در این پنجره هیچ مشاهداتی وجود ندارد. این اثبات عدم وجود ترافیک شبکه نیست.",
   "No open sockets right now.": "اکنون سوکت بازی وجود ندارد.",
   "No profile photo": "بدون عکس پروفایل",
   "No reply yet": "هنوز پاسخی داده نشده است",
@@ -8511,5 +8508,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "نشان‌دهندهٔ زمان‌مهر، پشتیبان رمزگذاری‌شده و تنظیمات جزئیات پرونده. هر سرویس را به‌طور جداگانه فعال و تأیید کنید.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "این زمانی است که اعلان حذف مشاهده شد؛ در لاگ ادمین چت، نام مدیر اجرایی که حساب می‌تواند آن را بخواند، ذکر شده است.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "این شماره‌های پیام در دفترچهٔ منبع مشاهده نشدند. پیام‌های حذف‌شدهٔ شناخته‌شده و پیام‌های مفقود در بازبینی مجدد، مشاهدات جداگانه‌ای هستند.",
-"This export follows these practices.": "این خروجی مطابق این شیوه‌ها است."
+"This export follows these practices.": "این خروجی مطابق این شیوه‌ها است.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "شاهد در حال اجرا پاسخ‌های مفقود یا نامعتبر گردآورنده را ثبت می‌کند. فرایند تأیید، نقاط کنترل نگهداری‌شده را با خروجی کامل مقایسه می‌کند و پست‌های امضا شده مفقود یا نامعتبر در خروجی کانال را شناسایی می‌کند. زمان‌های توقف شاهد و خطاهای ارسال، بازه‌های زمانی بدون لنگر خارجی ایجاد می‌کنند؛ پست‌هایی که ارسال شده‌اند، سر دفترچه را در لحظه انتشار هر یک لنگر می‌اندازند.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": " تونل مسیر ورود به پنل است؛ پورت‌های ورودی و سایر مسیرهای دسترسی مستقیم در رکورد فایروال ظاهر می‌شوند."
 }

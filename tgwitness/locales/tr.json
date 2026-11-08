@@ -1757,7 +1757,6 @@
   "Bot publishes to your channel": "Bot kanalınızda yayımlar",
   "Run the witness on another host, ideally with another operator. Its bot token and signing key stay there. The bot is the publisher; the separate witness process performs verification.": "Tanığı başka bir sunucuda, ideal olarak başka bir operatörle çalıştırın. Bot jetonu ve imzalama anahtarı orada kalır. Bot yayımcıdır; doğrulamayı ayrı tanık süreci yapar.",
   "Deployment and verification commands": "Dağıtım ve doğrulama komutları",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "Çalışan bir tanık, eksik veya geçersiz toplayıcı yanıtlarını kaydeder. Doğrulama, saklanan kontrol noktalarını tam dışa aktarımla karşılaştırır ve bir kanal dışa aktarımındaki eksik veya geçersiz imzalı gönderileri tespit eder. Tanık kesintileri ve gönderi hataları, harici sabitleme olmayan aralıklar bırakır; imzalar Telegram teslimatının eksiksiz olduğunu kanıtlamaz.",
   "Know which software made the record.": "Kaydı hangi yazılımın oluşturduğunu bilin.",
   "The planned GitHub connection will link collection to an approved build and keep public proofs in a repository you control.": "Planlanan GitHub bağlantısı, toplamayı onaylı bir derlemeye bağlayacak ve herkese açık kanıtları kontrolünüzdeki bir depoda tutacak.",
   "Choose your fork and approve a specific version.": "Fork'unuzu seçin ve belirli bir sürümü onaylayın.",
@@ -2372,7 +2371,6 @@
   "STEP": "ADIM",
   "Processing locally…": "Yerel olarak işleniyor…",
   "What does GitHub verify?": "GitHub neyi doğrular?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "Bu tasdik, arşivi onaylanmış bir toplayıcı iş akışına bağlar ve sonradan yapılan değişiklikleri algılar. Her mesajın doğru olduğunu veya geçmişin eksiksiz olduğunu kanıtlamaz. GitHub ve HTTPS tüneli, güvenilir altyapı olarak kalır.",
   "Start a new capture": "Yeni bir yakalama başlat",
   "Public encryption key": "Genel şifreleme anahtarı",
   "Save this key to open the connection and archive.": "Bağlantıyı açmak ve arşivlemek için bu anahtarı kaydedin.",
@@ -7384,7 +7382,6 @@
   "No name": "Ad yok",
   "No notes yet": "Henüz not yok",
   "No observations in this window.": "Bu pencerede herhangi bir gözlem bulunmamaktadır.",
-  "No observations in this window. This is not proof of zero network traffic.": "Bu pencerede herhangi bir gözlem bulunmamaktadır. Bu, ağ trafiğinin sıfır olduğunun kanıtı değildir.",
   "No open sockets right now.": "Şu anda açık soket yok.",
   "No profile photo": "Profil fotoğrafı yok",
   "No reply yet": "Henüz yanıt yok",
@@ -8511,5 +8508,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "Zaman damgası, şifreli yedekleme ve vaka ayrıntıları ayarlarını gösterir. Her hizmeti ayrı ayrı etkinleştirin ve doğrulayın.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "Silme bildirimi bu sırada gözlemlenmiştir; sohbetin yönetici günlüğünde, hesabın bunu okuyabileceği yerde görevli yönetici belirtilmiştir.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "Bu mesaj numaraları kaynak dergide gözlemlenmemiştir. Silindiği bilinen mesajlar ve yeniden kontrol edildiğinde eksik olan mesajlar ayrı gözlemlerdir.",
-"This export follows these practices.": "Bu dışa aktarma, aşağıdaki uygulamalara uygundur."
+"This export follows these practices.": "Bu dışa aktarma, aşağıdaki uygulamalara uygundur.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "Çalışır durumdaki bir tanık, eksik veya geçersiz toplayıcı yanıtlarını kaydeder. Doğrulama işlemi, saklanan kontrol noktalarını tam dışa aktarımla karşılaştırır ve bir kanal dışa aktarımında eksik veya geçersiz imzalı gönderileri tespit eder. Tanığın çalışmama süresi ve gönderim hataları, dış bağlantıları olmayan aralıklar bırakır; yapılan gönderiler, her birinin yayınlandığı anda günlük başlığını sabitler.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "Tünel, panele giden giriş yoludur; gelen bağlantı noktaları ve diğer doğrudan erişim yolları güvenlik duvarı kaydında görünür."
 }

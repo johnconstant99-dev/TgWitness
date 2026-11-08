@@ -1335,7 +1335,7 @@
     <h3>Docker, next to this collector</h3><pre id="witness-docker"></pre>
     <h3>On another server</h3><pre id="witness-remote"></pre>
     <h3>Check it later</h3><pre id="witness-verify"></pre>
-    <p class="hint">A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.</p>
+    <p class="hint">A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.</p>
     <h3>Witness options</h3><pre id="witness-options"></pre>
     <p class="hint">How often it checks, how long it waits, which checks it posts (all, only a new head or a problem, only problems) and the words of its posts are options of the witness itself: on its command line, in its environment or in a JSON file given with <code>--config</code>. Wording never affects verification: verify.py checks the signed token at the end of every post.</p>
   </details>

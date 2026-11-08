@@ -13,6 +13,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 from . import __version__, tsa_roots
 from .anchor import timestamp_request
+from .cloud_report import COVERAGE_TITLE, SCOPE_TITLE
 from .store import canonical, utcnow
 from .verify import fingerprint, read_pdf_seal, timestamp_reply_summary, timestamp_signature, timestamp_token
 
@@ -380,10 +381,10 @@ def html_report(report, sealed=None):
                        + esc(a.get("assessment")) + "'>" + esc(STATUS.get(a.get("assessment"), a.get("assessment")))
                        + "</span> " + esc(a.get("meaning")) + "</td></tr>")
         out.append("</table></section>")
-    out.append("<section><h2><span class=n>10</span>What this establishes, and what it does not</h2><div class=two>"
+    out.append("<section><h2><span class=n>10</span>" + COVERAGE_TITLE + "</h2><div class=two>"
                "<div class=yes><h3>Establishes</h3><ul class=list>")
     out += ["<li>" + esc(t) + "</li>" for t in report.get("establishes") or []]
-    out.append("</ul></div><div class=no><h3>Does not establish</h3><ul class=list>")
+    out.append("</ul></div><div class=no><h3>" + SCOPE_TITLE + "</h3><ul class=list>")
     out += ["<li>" + esc(t) + "</li>" for t in report.get("does_not_establish") or []]
     out.append("</ul></div></div></section>")
     out.append("<section><h2><span class=n>11</span>Repeat the verification</h2><pre>python -m tgwitness.cloud verify "
@@ -477,10 +478,10 @@ def pdf_report(report, sealed=None, vault=None):
     lay.section("All checks")
     lay.grid(["Result", "Check", "Detail"], [[STATUS.get(c["status"], c["status"]), c["title"], c["detail"][:500]]
                                              for c in report.get("checks") or []], widths=(18, 42, 70))
-    lay.section("What this establishes")
+    lay.section(COVERAGE_TITLE)
     lay.text("Establishes", size=9, style="B", color=OK)
     lay.bullets(report.get("establishes") or [], size=8.4)
-    lay.text("Does not establish", size=9, style="B", color=BAD)
+    lay.text(SCOPE_TITLE, size=9, style="B", color=BAD)
     lay.bullets(report.get("does_not_establish") or [], size=8.4)
     lay.section("Repeat the verification")
     lay.command("python -m tgwitness.cloud verify --record deployment.json --provider-token-file READ_ONLY_KEY "

@@ -137,8 +137,9 @@ COMMON_LIMITS = (
 )
 LIMITS = (
     "The initial installer is a trust boundary. A malicious bootstrap could copy the signing key and falsify "
-    "the collector's measurements without a later SSH login. Matching installer/source hashes reported by "
-    "that collector are not independent runtime attestation or proof that the key was never copied.",
+    "the collector's measurements without a later SSH login. The installer and source hashes reported by "
+    "that collector are its own account of its bootstrap; hardware attestation replaces that account "
+    "with a measurement signed outside the server.",
     "The collector's host measurements (SSH listeners, logins, boot) are self-reported: root on the server "
     "could falsify them. They support, not replace, the provider and Cloudflare records.",
     "The provider and its staff control the hypervisor, disks and network; nothing here excludes them.",

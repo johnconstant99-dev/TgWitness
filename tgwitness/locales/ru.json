@@ -1704,7 +1704,6 @@
   "Downloading prepares the setup. It does not start a witness or send a Telegram message.": "Загрузка подготавливает настройку. Она не запускает процесс наблюдения и не отправляет сообщение в Telegram.",
   "Configuration downloaded. Place the two token files beside it on the witness host, check the configuration, then start the witness. Keep its key fingerprint separately.": "Конфигурация загружена. Разместите два файла токенов рядом с ней на хосте-свидетеле, проверьте конфигурацию, а затем запустите хост-свидетель. Храните отпечаток его ключа отдельно.",
   "Deployment and verification commands": "Команды развертывания и проверки",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "Работающий свидетель фиксирует отсутствующие или недействительные ответы сборщика. Проверка сравнивает сохраненные контрольные точки с полным экспортом и выявляет отсутствующие или недействительные подписанные сообщения в экспорте канала. Простои свидетеля и сбои при отправке сообщений приводят к появлению интервалов без внешних ориентиров; подписи не подтверждают полную доставку сообщений в Telegram.",
   "Public MTProto proxies from this installation": "Общедоступные прокси MTProto из этой установки",
   "Available public servers": "Доступные общедоступные серверы",
   "Save selected public route": "Сохраните выбранный общедоступный маршрут",
@@ -2452,7 +2451,6 @@
   "STEP": "ШАГ",
   "Processing locally…": "Обработка выполняется локально…",
   "What does GitHub verify?": "Что проверяет GitHub?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "Аттестация привязывает архив к утверждённому рабочему процессу сборщика и выявляет последующие изменения. Она не доказывает, что каждое сообщение является достоверным или что история полна. GitHub и HTTPS-туннель остаются доверенной инфраструктурой.",
   "Start a new capture": "Начните новый процесс сбора данных",
   "Public encryption key": "Открытый ключ шифрования",
   "Save this key to open the connection and archive.": "Сохраните этот ключ для установления соединения и архивирования.",
@@ -7862,7 +7860,6 @@
   "No name": "Без названия",
   "No notes yet": "Пока нет заметок",
   "No observations in this window.": "В этом окне нет наблюдений.",
-  "No observations in this window. This is not proof of zero network traffic.": "В этом окне нет наблюдений. Это не является доказательством отсутствия сетевого трафика.",
   "No profile photo": "Нет фотографии профиля",
   "No reply yet": "Ответов пока нет",
   "No results · recorded as record #{seq}": "Результатов нет · записано как запись № {seq}",
@@ -8559,5 +8556,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "Отображает метку времени, зашифрованную резервную копию и настройки деталей дела. Включайте и проверяйте каждую службу отдельно.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "Именно в этот момент было замечено уведомление об удалении; в журнале администратора чата указан действующий администратор, и аккаунт может прочитать эту информацию.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "Эти номера сообщений не были обнаружены в исходном журнале. Известные удаленные сообщения и сообщения, отсутствующие при повторной проверке, представляют собой отдельные наблюдения.",
-"This export follows these practices.": "Данный экспорт соответствует следующим рекомендациям."
+"This export follows these practices.": "Данный экспорт соответствует следующим рекомендациям.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "Работающий свидетель фиксирует отсутствующие или недействительные ответы сборщика. Проверка сравнивает сохраненные контрольные точки с полным экспортом и обнаруживает отсутствующие или недействительные подписанные сообщения в экспорте канала. Простои свидетеля и сбои при публикации оставляют интервалы без внешних привязок; опубликованные сообщения фиксируют начало журнала на момент публикации каждого из них.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "Туннель представляет собой входной путь к панели; входящие порты и другие пути прямого доступа отображаются в записи брандмауэра."
 }

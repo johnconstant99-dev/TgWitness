@@ -84,7 +84,6 @@
   "A pattern is not a valid regular expression.": "รูปแบบนี้ไม่ใช่การแสดงออกตามกฎปกติที่ถูกต้อง",
   "A prepaid SIM or eSIM when the account has to live long; a rental or a one-time activation for a short job. Services are listed below.": "ใช้ SIM แบบเติมเงินหรือ eSIM เมื่อบัญชีต้องใช้งานในระยะยาว; ส่วนสำหรับงานระยะสั้น ให้เช่าหรือเปิดใช้งานครั้งเดียว บริการต่าง ๆ มีรายชื่ออยู่ด้านล่าง",
   "A public GitHub repository · no token": "ที่เก็บ GitHub สาธารณะ · ไม่มีโทเค็น",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "Witness ที่กำลังทำงานจะบันทึกคำตอบที่ขาดหายไปหรือไม่ถูกต้องจากผู้รวบรวมข้อมูล การตรวจสอบจะเปรียบเทียบจุดตรวจสอบที่เก็บไว้กับข้อมูลส่งออกทั้งหมด และตรวจพบโพสต์ที่ลงนามแล้วที่ขาดหายไปหรือไม่ถูกต้องในข้อมูลส่งออกของช่อง เวลาที่ Witness ไม่ทำงานและความล้มเหลวในการโพสต์จะก่อให้เกิดช่วงเวลาที่ไม่มีจุดอ้างอิงจากภายนอก; ลายเซ็นไม่สามารถพิสูจน์ได้ว่า Telegram ได้ส่งข้อความครบถ้วน",
   "A sealed 24/7 server": "เซิร์ฟเวอร์ที่ได้รับการรักษาความปลอดภัยและทำงานตลอด 24 ชั่วโมงทุกวัน",
   "A sealed server, set up by commands you can check.": "เซิร์ฟเวอร์ที่ได้รับการปิดผนึกอย่างปลอดภัย ซึ่งถูกตั้งค่าขึ้นด้วยคำสั่งที่คุณสามารถตรวจสอบได้",
   "A self-contained report for offline review, sharing, and printing to PDF.": "รายงานแบบครบวงจรสำหรับการตรวจสอบแบบออฟไลน์ การแชร์ และการพิมพ์เป็นไฟล์ PDF",
@@ -2356,7 +2355,6 @@
   "STEP": "ขั้นตอน",
   "Processing locally…": "กำลังประมวลผลในเครื่อง…",
   "What does GitHub verify?": "GitHub ตรวจสอบอะไร?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "การรับรองนี้ผูกไฟล์เก็บถาวรกับเวิร์กโฟลว์ของผู้รวบรวมที่ได้รับการอนุมัติ และตรวจจับการเปลี่ยนแปลงที่เกิดขึ้นในภายหลัง แต่ไม่รับรองว่าข้อความทุกข้อความเป็นความจริง หรือว่าประวัติการสนทนาครบถ้วน GitHub และอุโมงค์ HTTPS ยังคงเป็นโครงสร้างพื้นฐานที่เชื่อถือได้",
   "Start a new capture": "เริ่มการบันทึกใหม่",
   "Public encryption key": "กุญแจการเข้ารหัสสาธารณะ",
   "Save this key to open the connection and archive.": "บันทึกคีย์นี้เพื่อเปิดการเชื่อมต่อและไฟล์เก็บถาวร",
@@ -7345,7 +7343,6 @@
   "No name": "ไม่มีชื่อ",
   "No notes yet": "ยังไม่มีหมายเหตุ",
   "No observations in this window.": "ไม่มีข้อมูลการสังเกตในหน้าต่างนี้",
-  "No observations in this window. This is not proof of zero network traffic.": "ไม่มีข้อมูลการสังเกตในหน้าต่างนี้ นี่ไม่ใช่หลักฐานว่าไม่มีการส่งข้อมูลผ่านเครือข่าย",
   "No open sockets right now.": "ขณะนี้ไม่มีซ็อกเก็ตที่เปิดอยู่",
   "No profile photo": "ไม่มีรูปโปรไฟล์",
   "No reply yet": "ยังไม่มีคำตอบ",
@@ -8472,5 +8469,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "แสดงเวลาบันทึก, สำรองข้อมูลที่เข้ารหัส และการตั้งค่ารายละเอียดคดี ให้เปิดใช้งานและตรวจสอบแต่ละบริการแยกกัน",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "นี่คือช่วงเวลาที่พบการแจ้งเตือนการลบข้อความ; ในบันทึกของผู้ดูแลแชทจะระบุชื่อผู้ดูแลชั่วคราว ซึ่งบัญชีดังกล่าวสามารถอ่านได้",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "หมายเลขข้อความเหล่านี้ไม่ปรากฏในบันทึกต้นฉบับ ข้อความที่ทราบว่าถูกลบและข้อความที่ขาดหายไปเมื่อตรวจสอบซ้ำถือเป็นข้อมูลการสังเกตที่แยกต่างหาก",
-"This export follows these practices.": "การส่งออกนี้ปฏิบัติตามแนวทางดังต่อไปนี้"
+"This export follows these practices.": "การส่งออกนี้ปฏิบัติตามแนวทางดังต่อไปนี้",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "พยานที่กำลังทำงานจะบันทึกคำตอบที่ขาดหายไปหรือไม่ถูกต้องจากผู้เก็บรวบรวมข้อมูล การตรวจสอบจะเปรียบเทียบจุดตรวจสอบที่เก็บไว้กับไฟล์ส่งออกทั้งหมด และตรวจพบโพสต์ที่ลงนามแล้วซึ่งขาดหายไปหรือไม่ถูกต้องในไฟล์ส่งออกของช่อง พยานที่หยุดทำงานและความล้มเหลวในการโพสต์จะทิ้งช่วงเวลาที่ไม่มีจุดยึดจากภายนอก; โพสต์ที่สร้างขึ้นจะยึดหัวของบันทึก ณ เวลาที่แต่ละโพสต์ถูกเผยแพร่",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "ทunnel เป็นเส้นทางเข้าสู่อุปกรณ์ควบคุม; พอร์ตเข้าและเส้นทางเข้าถึงโดยตรงอื่น ๆ จะปรากฏในบันทึกของไฟร์วอลล์"
 }

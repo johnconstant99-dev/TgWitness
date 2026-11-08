@@ -84,7 +84,6 @@
   "A pattern is not a valid regular expression.": "תבנית אינה ביטוי רגולרי תקף.",
   "A prepaid SIM or eSIM when the account has to live long; a rental or a one-time activation for a short job. Services are listed below.": "כרטיס SIM מראש תשלום או eSIM כאשר החשבון צריך להיות פעיל לאורך זמן; כרטיס שכור או הפעלה חד-פעמית למשימה קצרה. השירותים מפורטים להלן.",
   "A public GitHub repository · no token": "מאגר GitHub ציבורי · ללא אסימון",
-  "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; signatures do not prove complete Telegram delivery.": "\"עדה\" הפועלת ברקע מתעדת תשובות חסרות או לא חוקיות של האספן. תהליך האימות משווה את נקודות הבקרה שנשמרו עם הייצוא המלא ומזהה פוסטים חתומים חסרים או לא חוקיים בייצוא הערוץ. השבתות של ה\"עדה\" וכשלים בהעלאת פוסטים מותירים מרווחים ללא נקודות ייחוס חיצוניות; חתימות אינן מהוות הוכחה למסירה מלאה ב-Telegram.",
   "A sealed 24/7 server": "שרת מאובטח הפועל 24/7",
   "A sealed server, set up by commands you can check.": "שרת מאובטח, שהוקם באמצעות פקודות שניתן לבדוק.",
   "A self-contained report for offline review, sharing, and printing to PDF.": "דוח עצמאי לבדיקה במצב לא מקוון, לשיתוף ולהדפסה כקובץ PDF.",
@@ -2388,7 +2387,6 @@
   "STEP": "שלב",
   "Processing locally…": "עיבוד מקומי...",
   "What does GitHub verify?": "מה GitHub מאמת?",
-  "The attestation binds the archive to an approved collector workflow and detects later changes. It does not prove that every message is true or that the history is complete. GitHub and the HTTPS tunnel remain trusted infrastructure.": "האישור מקשר את הארכיון לתהליך עבודה מאושר של האספן ומזהה שינויים שבוצעו מאוחר יותר. הוא אינו מוכיח שכל הודעה נכונה או שההיסטוריה שלמה. GitHub ומנהרת ה-HTTPS נותרים תשתית מהימנה.",
   "Start a new capture": "התחל לכידה חדשה",
   "Public encryption key": "מפתח הצפנה ציבורי",
   "Save this key to open the connection and archive.": "שמור מפתח זה כדי לפתוח את החיבור ואת הארכיון.",
@@ -7423,7 +7421,6 @@
   "No name": "ללא שם",
   "No notes yet": "עדיין אין הערות",
   "No observations in this window.": "אין תצפיות בחלון זה.",
-  "No observations in this window. This is not proof of zero network traffic.": "אין תצפיות בחלון זה. אין זה מהווה הוכחה לתעבורת רשת אפסית.",
   "No open sockets right now.": "אין כרגע שקעים פתוחים.",
   "No profile photo": "אין תמונת פרופיל",
   "No reply yet": "עדיין אין תשובה",
@@ -8550,5 +8547,7 @@
 "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately.": "מציג חותמת זמן, גיבוי מוצפן והגדרות לפרטי התיק. יש להפעיל ולאמת כל שירות בנפרד.",
 "This is when the deletion notice was observed; the chat's admin log names the acting administrator where the account can read it.": "זהו הרגע שבו נצפתה הודעת המחיקה; ביומן הניהול של הצ'אט מצוין שם המנהל בפועל, והחשבון יכול לקרוא זאת.",
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "מספרי הודעות אלה לא נצפו ביומן המקור. הודעות שנמחקו באופן ידוע והודעות שנעלמו בבדיקה חוזרת מהוות תצפיות נפרדות.",
-"This export follows these practices.": "ייצוא זה נעשה בהתאם לנהלים הבאים."
+"This export follows these practices.": "ייצוא זה נעשה בהתאם לנהלים הבאים.",
+"A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "עד פעיל מתעד תשובות חסרות או לא חוקיות של האספן. תהליך האימות משווה את נקודות הבקרה שנשמרו עם הייצוא המלא ומזהה פוסטים חתומים חסרים או לא חוקיים בייצוא הערוץ. השבתות של העד וכשלים בפרסום מותירים מרווחים ללא נקודות עיגון חיצוניות; הפוסטים שפורסמו מעגנים את ראש היומן ברגע פרסומו של כל אחד מהם.",
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "ה\"מנהרה\" היא נתיב הכניסה ללוח הבקרה; יציאות נכנסות ונתיבי גישה ישירים אחרים מופיעים ברשומת חומת האש."
 }
