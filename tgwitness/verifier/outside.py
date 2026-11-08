@@ -182,7 +182,8 @@ def confirm_drand(rounds, relays=DRAND_RELAYS, limit=DRAND_CHECK_LIMIT, fetch=No
                                      + " differs from " + relay + ": the recorded value is not drand's")
             used.append(relay)
             break
-    return {"asked": len(chosen), "confirmed": len(chosen) if used else 0, "relays": used}
+    return {"asked": len(chosen), "confirmed": len(chosen) if used else 0, "relays": used,
+            "unavailable": bool(chosen) and not used}
 
 
 def drand_fetcher():

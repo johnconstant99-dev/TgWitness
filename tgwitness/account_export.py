@@ -35,11 +35,11 @@ KINDS = ("private", "bot", "group", "supergroup", "channel")
 MEDIA = ("photo", "video", "video_message", "voice", "audio", "document", "sticker", "animation")
 JOB_ID = re.compile(r"[a-f0-9]{32}")
 LIMITATIONS = [
-    "A snapshot of data visible to this account during the recorded acquisition intervals.",
-    "Deleted data, inaccessible history, previous edits and secret chats may be unavailable.",
-    "Capture times are the collector's clock, not an independent timestamp. Pin the signing fingerprint independently.",
-    "Options and inventory are frozen. Resume retains earlier observations; it does not make an atomic account snapshot.",
-    "Media exclusions and acquisition failures are recorded. A valid signature does not establish completeness.",
+    "A snapshot of the data Telegram returned to this account during the recorded acquisition intervals, signed with the collector key in the manifest.",
+    "Messages appear in the version Telegram returned at acquisition; live recording keeps earlier versions and deletion notices, and Sources → Pseudo-secret keeps Secret Chats.",
+    "Capture times are the collector clock and message dates come from Telegram. Verify with the collector fingerprint you retained.",
+    "Options and inventory are fixed at the start; a resumed acquisition keeps earlier observations and records each interval.",
+    "Media exclusions and acquisition failures are recorded and signed together with the archive.",
 ]
 
 

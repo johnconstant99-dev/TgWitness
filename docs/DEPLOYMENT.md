@@ -304,7 +304,8 @@ or Python versions. For native updates, stop TgWitness, back up its full data
 directory, replace source files, and run `python start.py --setup-only` before launch.
 
 Check panel access, account identity, observation state, and coverage after an
-update. Restarting does not reconstruct missed Telegram updates. A rollback may
+update. After the restart TgWitness resumes the saved Telegram update position and
+requests the updates missed during the update. A rollback may
 require the pre-update backup if a future version changes storage formats.
 
 ## Remote server
@@ -331,14 +332,16 @@ The last requested observation state is persisted. If observation was active,
 startup attempts to reconnect and resume selected sources. Manual pause clears
 that intention. A failed restart is recorded and shown in the panel.
 
-StringSession retains authorization but not Telethon's durable update/entity state.
-Dialogs are reloaded on start. Telegram/Telethon can recover some transport interruptions
-while running, but TgWitness does not claim durable replay across process restarts.
-Every startup records the preceding journal head and the offline boundary.
+TgWitness stores Telegram's update position for the account and for each channel
+(pts, qts, seq and date) in the workspace vault and restores it at the next start.
+The client then requests the updates missed while the process was stopped, and the
+periodic recheck recovers missed messages and records saved ones that Telegram no
+longer returns. Dialogs are reloaded on start. Every startup records the preceding
+journal head, the offline boundary and the update position it resumed from.
 The monitor checks connectivity every 10 seconds and adds a heartbeat every minute
 (**Parameters → Liveness record every**).
-Brief interruptions can be missed; a connected transport does not guarantee complete
-update delivery. Snapshots are explicit current-history observations, never gap repair.
+Disconnections and silent periods are recorded as coverage gaps with their reason.
+History snapshots are stored as separate current-history observations next to live records.
 
 The media queue is stored in each workspace's SQLite database. A message and its job
 are committed atomically. Interrupted running jobs are recovered for retry on start.

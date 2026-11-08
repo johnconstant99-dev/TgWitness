@@ -13,9 +13,9 @@ Account connections, notifications, timestamps, off-site copies and witnesses ha
 | --- | --- |
 | Access | Administrator key plus scoped access to accounts/chats, seven permissions and revocable sessions; localhost by default |
 | Secrets at rest | Session, API pair, signing key and proxy settings are encrypted with Fernet |
-| Messages and media | Stored unencrypted: use disk encryption and strict permissions |
+| Messages and media | Files in the workspace, protected by disk or volume encryption and file permissions of the host |
 | Integrity | SHA-256 hash chain and an Ed25519 signature on every record |
-| Local trust boundary | The host administrator controls the workspace and its signing key; independent checkpoints retain an earlier journal boundary |
+| Independent binding | Retained checkpoints, witness records, RFC 3161 and OpenTimestamps receipts, GitHub attestation and Intel TDX measurements; the verifier reports which evidence conditions they meet |
 
 For vulnerability reports, see the [security policy](../.github/SECURITY.md).
 
@@ -28,7 +28,7 @@ For vulnerability reports, see the [security policy](../.github/SECURITY.md).
 - [Proxies and network routes](#proxies-and-network-routes)
 - [Sign-in and session imports](#sign-in-and-session-imports)
 - [Logs and transport](#logs-and-transport)
-- [Integrity limits](#integrity-limits)
+- [Integrity and independent binding](#integrity-and-independent-binding)
 - [If you suspect a problem](#if-you-suspect-a-problem)
 
 </details>
@@ -39,7 +39,8 @@ The main panel token grants full control. Other people can receive their own
 [scoped access](ACCESS.md): chosen workspaces and chats, permissions, expiry,
 IP restrictions, sign-in limits and revocable sessions. A chat-limited access
 cannot perform whole-workspace operations even if their permission is ticked.
-Workspaces share a process and do not isolate data from the host administrator.
+Each workspace has its own journal, vault and signing key inside one process;
+separation between people on the host comes from operating-system accounts.
 
 The panel listens on localhost by default. Browser sign-in exchanges an access
 token for a session credential; the browser sends it as a bearer token. It is kept
@@ -145,27 +146,46 @@ upload a data directory, session, token, vault key, or private signing key to Gi
 
 The default API validation response is replaced so it does not echo credential
 values. Application access logging is disabled. Do not configure a reverse proxy
-to log Authorization headers or request bodies. HTTP carries tokens and login
-secrets in plaintext: use HTTPS or an SSH tunnel whenever leaving localhost.
+to log Authorization headers or request bodies. The panel listens on localhost;
+remote access goes through the supplied SSH tunnel, Cloudflare Tunnel or Caddy HTTPS,
+so tokens and login secrets travel inside SSH or TLS.
 
-## Integrity limits
+## Integrity and independent binding
 
-Local verification checks record signatures, the hash chain, attachments and the
-export manifest. In a self-hosted workspace, the local administrator controls the
-data directory and signing key. SQLite triggers enforce append-only behavior for
-normal application writes; signatures and independently retained journal boundaries
-provide the recipient's integrity checks. A retained checkpoint fixes the prefix
-it covers, while a trusted key identifies the expected signer. Separate master-key
-storage protects a data-directory copy through `TGWITNESS_VAULT_KEY_FILE`.
+Verification checks record signatures, the hash chain, attachments and the export manifest
+against the collector key. Each workspace creates its signing key at first start and
+shows its fingerprint in the panel and in every export; the fingerprint retained by
+the recipient pins that key. SQLite triggers enforce append-only behavior for normal
+application writes, and separate master-key storage protects a data-directory copy
+through `TGWITNESS_VAULT_KEY_FILE`.
+Checkpoints retained outside the collector and a separate witness bind the journal
+prefix they cover, RFC 3161 and OpenTimestamps receipts bind it to an external time,
+and [GitHub Actions capture](SEALED-ACTIONS.md) or an
+[Intel TDX deployment](HIGH-ASSURANCE.md#confidential-vm-on-phala-cloud-intel-tdx)
+add workflow provenance or hardware measurements of the collection environment. A
+checked GitHub attestation also carries the verified time of its signature, which
+binds the whole archive to an external time.
 
-These are the local-workspace controls. The independently checked acquisition modes
-below use their own execution and verification policies.
+Every verification answer lists five evidence conditions with how each was checked,
+grouped by their role in the minimum:
 
-For independently checked collection, choose [GitHub Actions capture](SEALED-ACTIONS.md)
-or [Intel TDX deployment](HIGH-ASSURANCE.md#confidential-vm-on-phala-cloud-intel-tdx).
-Their verifiers check workflow provenance or hardware measurements in addition to archive integrity.
-Optional timestamps and encrypted off-site copies provide time anchors and recoverable copies;
-the [evidence format](EVIDENCE.md#verification-scope) describes the checks for each mode.
+| Role | Condition |
+| --- | --- |
+| Required | Integrity; signer key pinned with `--fingerprint` |
+| At least one of these | Independent binding of the last record (retained checkpoint or confirmed witness); external time (verified RFC 3161 or OpenTimestamps receipt, witness Bitcoin seal or checked GitHub attestation) |
+| Optional | Attested collection run |
+
+The **minimum for evidence** is both required conditions and one of the next two covering
+the last exported record; a verified attested collection run adds the `attested` profile.
+The final line states the result, and the answer names the options that would meet the
+missing conditions.
+When the bindings cover only earlier records, the answer states the record up to which
+the minimum holds. `--require evidence` or `--require attested` exits with code 2 when
+the profile is not reached for the whole export, and a check requested on the command
+line that cannot run is reported as not performed with the same code. Every report
+carries the same conditions with their state in that copy and the command that checks
+them. The assurance tiers and `--strict` remain available; the
+[evidence format](EVIDENCE.md#verification-scope) lists the checks for each collection mode.
 
 ## If you suspect a problem
 

@@ -162,7 +162,7 @@ def verify_distributed_work(directory, expected_fingerprint=None, max_gib=None):
             "chat_id": job["chat_id"], "captured": captured, "pages": sum(s["pages"] for s in states.values()),
             "ranges_done": completed, "ranges_total": len(tasks), "unsigned_tail_bytes": tails,
             "complete_within_plan": completed == len(tasks),
-            "meaning": "Verified committed acquisition prefix, with collection intervals and completed ranges. "
+            "meaning": "Verified local acquisition prefix of the pages Telegram returned, signed per range. "
                        "Unsigned tails are excluded. Keep receipt heads independently to detect removal of a suffix."}
 
 
