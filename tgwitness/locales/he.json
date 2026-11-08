@@ -4954,7 +4954,6 @@
   "Place and date:": "מקום ותאריך:",
   "Signature:": "חתימה:",
   "For a notary or court expert": "עבור נוטריון או מומחה מטעם בית המשפט",
-  "Steps that let an inspection record stand on its own. Local rules decide the form of the record; this list is not legal advice.": "צעדים המאפשרים לתיעוד הבדיקה לעמוד בפני עצמו. הכללים המקומיים קובעים את צורת התיעוד; רשימה זו אינה מהווה ייעוץ משפטי.",
   "Receive the archive and the key fingerprint by separate channels and write both in the record.": "קבל את הארכיון ואת טביעת האצבע של המפתח בערוצים נפרדים ורשום את שניהם בתיעוד.",
   "Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record.": "חשב את ה-SHA-256 של הארכיון (sha256sum, או Get-FileHash ב-Windows) ורשום אותו ברשומה.",
   "Run verify.py with the fingerprint on a computer you trust and attach its complete output.": "הפעל את `verify.py` עם טביעת האצבע במחשב שאתה סומך עליו וצרף את הפלט המלא שלו.",
@@ -5574,7 +5573,6 @@
   "Case fields supplied by the operator": "שדות מקרה המסופקים על ידי המפעיל",
   "Checked during export": "נבדק במהלך הייצוא",
   "Checked {n} signed journal records; the key still needs independent confirmation.": "נבדקו {n} רשומות יומן חתומות; המפתח עדיין זקוק לאישור עצמאי.",
-  "Checkpoint or timestamp trust not established": "אמינות נקודת הבדיקה או חותמת הזמן לא הוכחה",
   "Compare an independently retained witness ZIP using --witness. Confirm beacon rounds using --check-drand. For TDX, check the quote, challenge, Intel trust chain, measurements and exact deployed source with the assurance verifier.": "השוו קובץ ZIP של עד שנשמר באופן עצמאי באמצעות --witness. אמתו סבבי ביקון באמצעות --check-drand. עבור TDX, בדקו את הציטוט, האתגר, שרשרת האמון של Intel, המדידות והמקור המדויק שהוטמע באמצעות בודק ההבטחה.",
   "Compare coverage.json and the selection in manifest.json with the period and chats relevant to the case. Explain each material gap before drawing conclusions from absence.": "השוו את הקובץ `coverage.json` ואת הבחירה בקובץ `manifest.json` לתקופה ולצ'אטים הרלוונטיים למקרה. הסבירו כל פער מהותי לפני שתסיקו מסקנות מהיעדרות.",
   "Continuous observation periods": "תקופות תצפית רציפות",
@@ -8527,7 +8525,6 @@
   "With the fingerprint confirmed this archive meets integrity and the signer key; independent binding comes from the evidence journal.": "לאחר אימות טביעת האצבע, ארכיון זה עומד בדרישות השלמות ומפתח החותם; ההתקשרות העצמאית נובעת מיומן הראיות.",
   "Operator declarations supplied: {n}. Identity and custody still need confirmation.": "הצהרות המפעיל שסופקו: {n}. זהות ואחריות עדיין זקוקות לאישור.",
   "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim.": "יש לאמת תוכן שנוי במחלוקת, זהות המחבר ותנאי האיסוף באמצעות חומר עצמאי. יש לצטט את הארכיון, הקובץ והפניה לתיעוד עבור כל טענה.",
-  "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "בדיקה חתומה שנשמרה מאפשרת לכם להשוות ייצוא מאוחר יותר עם היומן כפי שנצפה. היא אינה קובעת שכל אירוע ב-Telegram נמסר. יש לשים לב לבדיקות שאינן זמינות ולפרסומים שנכשלו; אין ערובה לפרסום רציף ללא הפרעות.",
 "A GitHub token grants repository access. Build verification and independent witnesses check whether the running server is unchanged. No GitHub token is needed on this page.": "אסימון GitHub מעניק גישה למאגר. אימות הבנייה ועדים בלתי תלויים בודקים אם השרת הפועל נותר ללא שינוי. אין צורך באסימון GitHub בעמוד זה.",
 "A running SSH process or an open port shows the service state; logins appear in the server's own records.": "תהליך SSH פועל או יציאה פתוחה מציגים את מצב השירות; כניסות מופיעות ברישומי השרת עצמו.",
 "A signature protects this derivative and names the source archive and the collector key.": "חתימה מגנה על נגזרת זו ומציינת את שם ארכיון המקור ואת מפתח האספן.",
@@ -8549,5 +8546,7 @@
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "מספרי הודעות אלה לא נצפו ביומן המקור. הודעות שנמחקו באופן ידוע והודעות שנעלמו בבדיקה חוזרת מהוות תצפיות נפרדות.",
 "This export follows these practices.": "ייצוא זה נעשה בהתאם לנהלים הבאים.",
 "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "עד פעיל מתעד תשובות חסרות או לא חוקיות של האספן. תהליך האימות משווה את נקודות הבקרה שנשמרו עם הייצוא המלא ומזהה פוסטים חתומים חסרים או לא חוקיים בייצוא הערוץ. השבתות של העד וכשלים בפרסום מותירים מרווחים ללא נקודות עיגון חיצוניות; הפוסטים שפורסמו מעגנים את ראש היומן ברגע פרסומו של כל אחד מהם.",
-"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "ה\"מנהרה\" היא נתיב הכניסה ללוח הבקרה; יציאות נכנסות ונתיבי גישה ישירים אחרים מופיעים ברשומת חומת האש."
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "ה\"מנהרה\" היא נתיב הכניסה ללוח הבקרה; יציאות נכנסות ונתיבי גישה ישירים אחרים מופיעים ברשומת חומת האש.",
+"Checkpoint or timestamp awaiting verification": "נקודת ביקורת או חותמת זמן הממתינה לאימות",
+"Steps that let an inspection record stand on its own. Local rules decide the form of the record.": "שלבים המאפשרים לתיעוד הבדיקה לעמוד בפני עצמו. הכללים המקומיים קובעים את צורת התיעוד."
 }

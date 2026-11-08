@@ -4927,7 +4927,6 @@
   "Place and date:": "جگہ اور تاریخ:",
   "Signature:": "دستخط:",
   "For a notary or court expert": "نوٹری یا عدالتی ماہر کے لیے",
-  "Steps that let an inspection record stand on its own. Local rules decide the form of the record; this list is not legal advice.": "وہ اقدامات جو معائنہ ریکارڈ کو خود کفیل بناتے ہیں۔ مقامی قواعد ریکارڈ کی شکل کا تعین کرتے ہیں؛ یہ فہرست قانونی مشورہ نہیں ہے۔",
   "Receive the archive and the key fingerprint by separate channels and write both in the record.": "آرکائیو اور کلید کے فنگر پرنٹ کو الگ الگ چینلز کے ذریعے وصول کریں اور دونوں کو ریکارڈ میں درج کریں۔",
   "Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record.": "آرکائیو کا ہیش (SHA-256، یا ونڈوز پر Get-FileHash) نکالیں اور اسے ریکارڈ میں درج کریں۔",
   "Run verify.py with the fingerprint on a computer you trust and attach its complete output.": "verify.py کو فنگر پرنٹ کے ساتھ اُس کمپیوٹر پر چلائیں جس پر آپ بھروسہ کرتے ہیں اور اس کا مکمل آؤٹ پٹ منسلک کریں۔",
@@ -5547,7 +5546,6 @@
   "Case fields supplied by the operator": "آپریٹر کی فراہم کردہ کیس فیلڈز",
   "Checked during export": "برآمد کے دوران چیک کیا گیا",
   "Checked {n} signed journal records; the key still needs independent confirmation.": "{n}تعداد کے تصدیق شدہ دستخط شدہ جرنل ریکارڈز؛ کلید کی اب بھی آزادانہ تصدیق درکار ہے۔",
-  "Checkpoint or timestamp trust not established": "چیک پوائنٹ یا ٹائم اسٹیمپ پر اعتماد قائم نہیں ہوا",
   "Compare an independently retained witness ZIP using --witness. Confirm beacon rounds using --check-drand. For TDX, check the quote, challenge, Intel trust chain, measurements and exact deployed source with the assurance verifier.": "--witness کے ساتھ ایک آزادانہ طور پر محفوظ کردہ گواہ ZIP کا موازنہ کریں۔ --check-drand استعمال کرتے ہوئے بیکن راؤنڈز کی تصدیق کریں۔ TDX کے لیے، کوٹ، چیلنج، Intel ٹرسٹ چین، پیمائشیں اور بالکل تعینات کردہ ماخذ کو ایشورنس ویریفائر کے ساتھ چیک کریں۔",
   "Compare coverage.json and the selection in manifest.json with the period and chats relevant to the case. Explain each material gap before drawing conclusions from absence.": "coverage.json اور manifest.json میں کی گئی منتخب اشاریہ کو کیس سے متعلق دورانیے اور چیٹس کے ساتھ موازنہ کریں۔ عدم موجودگی سے نتائج اخذ کرنے سے پہلے ہر اہم خلا کی وضاحت کریں۔",
   "Continuous observation periods": "مسلسل مشاہداتی ادوار",
@@ -8488,7 +8486,6 @@
   "With the fingerprint confirmed this archive meets integrity and the signer key; independent binding comes from the evidence journal.": "فنگر پرنٹ کی تصدیق کے ساتھ یہ آرکائیو سالمیت اور دستخط کنندہ کی کلید کے معیار پر پورا اترتا ہے؛ آزاد وابستگی ثبوت جرنل سے حاصل ہوتی ہے۔",
   "Operator declarations supplied: {n}. Identity and custody still need confirmation.": "آپریٹر کے اعلانات فراہم کیے گئے: {n}۔ شناخت اور تحویل کی تصدیق ابھی باقی ہے۔",
   "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim.": "متنازع مواد، مصنفیت اور مجموعہ کی شرائط کی تصدیق آزادانہ مواد کے ساتھ کریں۔ ہر دعوے کے لیے آرکائیو، فائل اور ریکارڈ کے حوالہ جات کا حوالہ دیں۔",
-  "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "محفوظ دستخط شدہ جانچ آپ کو بعد کے ایکسپورٹ کا جرنل کی اس حالت سے موازنہ کرنے دیتی ہے جس میں اس کا مشاہدہ ہوا تھا۔ یہ ثابت نہیں کرتی کہ ٹیلیگرام کا ہر واقعہ پہنچا۔ دستیاب نہ ہونے والی جانچوں اور ناکام پوسٹس پر توجہ درکار ہے؛ بلا تعطل اشاعت کی کوئی ضمانت نہیں۔",
 "A GitHub token grants repository access. Build verification and independent witnesses check whether the running server is unchanged. No GitHub token is needed on this page.": "ایک GitHub ٹوکن ریپوزیٹری تک رسائی فراہم کرتا ہے۔ بلڈ کی تصدیق اور آزاد گواہ یہ چیک کرتے ہیں کہ چلنے والا سرور بغیر تبدیلی کے ہے۔ اس صفحے پر GitHub ٹوکن کی ضرورت نہیں ہے۔",
 "A running SSH process or an open port shows the service state; logins appear in the server's own records.": "چلتی ہوئی SSH پراسیس یا کھلا ہوا پورٹ سروس کی حالت ظاہر کرتا ہے؛ لاگ انز سرور کے اپنے ریکارڈز میں درج ہوتے ہیں۔",
 "A signature protects this derivative and names the source archive and the collector key.": "ایک دستخط اس مشتق کو محفوظ کرتا ہے اور ماخذ آرکائیو اور جمع کرنے والی کلید کا نام بتاتا ہے۔",
@@ -8510,5 +8507,7 @@
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "یہ پیغام نمبر ماخذ جرنل میں مشاہدہ نہیں ہوئے۔ معلوم حذف شدہ پیغامات اور دوبارہ جانچ پر غائب پیغامات الگ الگ مشاہدات ہیں۔",
 "This export follows these practices.": "یہ برآمد ان طریقہ کار کی پیروی کرتا ہے۔",
 "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "ایک چلنے والا گواہ جمع کرنے والے کے گمشدہ یا غیر معتبر جوابات کو ریکارڈ کرتا ہے۔ تصدیق محفوظ شدہ چیک پوائنٹس کا مکمل ایکسپورٹ سے موازنہ کرتی ہے اور چینل ایکسپورٹ میں گمشدہ یا غیر معتبر دستخط شدہ پوسٹس کا پتہ لگاتی ہے۔ گواہ کے غیر فعال اوقات اور پوسٹ کرنے میں ناکامیوں کی وجہ سے وقفے بیرونی لنگر کے بغیر رہ جاتے ہیں؛ جو پوسٹس کی گئی تھیں وہ ہر ایک کی اشاعت کے وقت جرنل ہیڈ کو لنگر انداز کرتی ہیں۔",
-"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "سرنگ پینل تک داخلے کا راستہ ہے؛ آنے والی بندرگاہیں اور دیگر براہِ راست رسائی کے راستے فائر وال ریکارڈ میں ظاہر ہوتے ہیں۔"
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "سرنگ پینل تک داخلے کا راستہ ہے؛ آنے والی بندرگاہیں اور دیگر براہِ راست رسائی کے راستے فائر وال ریکارڈ میں ظاہر ہوتے ہیں۔",
+"Checkpoint or timestamp awaiting verification": "تصدیق کے منتظر چیک پوائنٹ یا ٹائم اسٹیمپ",
+"Steps that let an inspection record stand on its own. Local rules decide the form of the record.": "وہ اقدامات جو معائنہ ریکارڈ کو خود مختار طور پر قائم رہنے کی اجازت دیتے ہیں۔ مقامی قواعد ریکارڈ کی شکل کا تعین کرتے ہیں۔"
 }

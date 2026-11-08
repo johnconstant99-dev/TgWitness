@@ -184,6 +184,34 @@ def check_catalogues(root):
     return findings
 
 
+DISCLAIMER = re.compile(r"\b(?:does|do) not (?:prove|establish)\b|\bnot (?:proof|evidence) of\b|\bnot established\b|"
+                        r"\bcannot guarantee\b|\bnot certification\b|\bnot legal advice\b|\bdoes not assess\b", re.I)
+TRANSLATED = re.compile(r"tgwitness/(?:locales|guide_locales)/(?!keys\.json)[^/]+\.json|"
+                        r"tgwitness/narrative/texts/(?!(?:glossary\.)?en\.json)[^/]+\.json|tgwitness/verify\.py|"
+                        r"tgwitness/static/[^/]*-locales\.js")
+
+
+def check_wording(root):
+    root = Path(root)
+    findings = []
+    for path in sorted((root / "tgwitness").rglob("*")) + sorted((root / "tgwitness_capture").rglob("*")):
+        name = path.relative_to(root).as_posix()
+        if not path.is_file() or path.suffix not in {".py", ".js", ".html", ".json"} or TRANSLATED.fullmatch(name):
+            continue
+        source = path.read_text(encoding="utf-8")
+        if path.suffix == ".py":
+            texts = [node.value for node in ast.walk(ast.parse(source)) if isinstance(node, ast.Constant)
+                     and isinstance(node.value, str)]
+        elif path.suffix == ".json":
+            texts = re.findall(r'"((?:[^"\\]|\\.)*)"', source)
+        else:
+            texts = [source]
+        for text in texts:
+            for match in DISCLAIMER.finditer(text):
+                findings.append(f"{name}: describe what the check covers instead of \"{match.group(0)}\"")
+    return findings
+
+
 def check_git_index(root, sources):
     root = Path(root).resolve()
 
@@ -245,6 +273,7 @@ def main():
     sources, links, findings = check_sources(ROOT)
     findings.extend(check_version_labels(ROOT))
     findings.extend(check_catalogues(ROOT))
+    findings.extend(check_wording(ROOT))
     if args.git_index:
         findings.extend(check_git_index(ROOT, sources))
     print(f"Checked {len(sources)} public files and {links} local documentation links.")

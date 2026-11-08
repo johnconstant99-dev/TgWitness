@@ -4900,7 +4900,6 @@
   "Place and date:": "สถานที่และวันที่:",
   "Signature:": "ลายเซ็น:",
   "For a notary or court expert": "สำหรับผู้รับรองเอกสารหรือผู้เชี่ยวชาญทางศาล",
-  "Steps that let an inspection record stand on its own. Local rules decide the form of the record; this list is not legal advice.": "ขั้นตอนที่ทำให้บันทึกการตรวจสอบสามารถใช้ได้ด้วยตัวเอง กฎระเบียบท้องถิ่นเป็นปัจจัยที่กำหนดรูปแบบของบันทึก; รายการนี้ไม่ใช่คำปรึกษาทางกฎหมาย",
   "Receive the archive and the key fingerprint by separate channels and write both in the record.": "รับไฟล์เก็บถาวรและลายนิ้วมือของกุญแจผ่านช่องทางที่แยกกัน และบันทึกทั้งสองลงในบันทึก",
   "Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record.": "คำนวณค่าSHA-256ของไฟล์เก็บถาวร (sha256sum หรือ Get-FileHash บน Windows) และบันทึกลงในบันทึก",
   "Run verify.py with the fingerprint on a computer you trust and attach its complete output.": "รัน verify.py ด้วยลายนิ้วมือบนคอมพิวเตอร์ที่คุณเชื่อถือได้ และแนบผลลัพธ์ทั้งหมดมาด้วย",
@@ -5520,7 +5519,6 @@
   "Case fields supplied by the operator": "สนามตัวอักษรที่ผู้ดำเนินการกำหนด",
   "Checked during export": "ตรวจสอบระหว่างการส่งออก",
   "Checked {n} signed journal records; the key still needs independent confirmation.": "ตรวจสอบบันทึก{n} ฉบับในสมุดบันทึกที่ลงนามแล้ว; กุญแจยังต้องการการยืนยันจากฝ่ายอิสระ",
-  "Checkpoint or timestamp trust not established": "ความน่าเชื่อถือของจุดตรวจสอบหรือเวลาประทับยังไม่ได้รับการยืนยัน",
   "Compare an independently retained witness ZIP using --witness. Confirm beacon rounds using --check-drand. For TDX, check the quote, challenge, Intel trust chain, measurements and exact deployed source with the assurance verifier.": "เปรียบเทียบไฟล์ZIPของพยานที่เก็บรักษาไว้อย่างอิสระโดยใช้ตัวเลือก --witness ยืนยันรอบสัญญาณบีคอนโดยใช้ตัวเลือก --check-drand สำหรับ TDX ให้ตรวจสอบคำเสนอราคา (quote), การท้าทาย (challenge), ห่วงโซ่ความเชื่อถือของ Intel, การวัดผล และแหล่งที่มาที่ติดตั้งไว้อย่างแม่นยำด้วยเครื่องมือตรวจสอบความมั่นใจ (assurance verifier)",
   "Compare coverage.json and the selection in manifest.json with the period and chats relevant to the case. Explain each material gap before drawing conclusions from absence.": "เปรียบเทียบไฟล์ coverage.json และส่วนที่เลือกใน manifest.json กับช่วงเวลาและแชทที่เกี่ยวข้องกับคดี อธิบายช่องว่างสำคัญแต่ละจุดก่อนที่จะสรุปผลจากความขาดหายไป",
   "Continuous observation periods": "ช่วงเวลาการสังเกตการณ์ต่อเนื่อง",
@@ -8449,7 +8447,6 @@
   "With the fingerprint confirmed this archive meets integrity and the signer key; independent binding comes from the evidence journal.": "เมื่อลายนิ้วมือได้รับการยืนยันแล้ว แฟ้มเก็บนี้จึงตรงตามข้อกำหนดด้านความสมบูรณ์และกุญแจของผู้ลงนาม; การผูกมัดแบบอิสระมาจากบันทึกหลักฐาน",
   "Operator declarations supplied: {n}. Identity and custody still need confirmation.": "คำประกาศของผู้ดำเนินการที่ให้มา: {n}. ความเป็นบุคคลและความรับผิดชอบในการดูแลยังต้องได้รับการยืนยัน",
   "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim.": "ยืนยันเนื้อหาที่ขัดแย้ง ความเป็นเจ้าของ และเงื่อนไขการเก็บรวบรวมด้วยข้อมูลจากแหล่งอิสระ อ้างอิงถึงข้อมูลอ้างอิงของคลังข้อมูล ไฟล์ และบันทึกสำหรับแต่ละข้ออ้าง",
-  "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "การเก็บรักษาใบตรวจสอบที่ลงนามไว้ช่วยให้คุณสามารถเปรียบเทียบการส่งออกข้อมูลในภายหลังกับบันทึกตามที่ได้สังเกตเห็นได้ แต่สิ่งนี้ไม่ได้ยืนยันว่าทุกเหตุการณ์ใน Telegram ได้ถูกส่งถึงผู้รับแล้ว ใบตรวจสอบที่ไม่มีอยู่และโพสต์ที่ล้มเหลวจำเป็นต้องได้รับการตรวจสอบอย่างละเอียด; ไม่มีการรับประกันว่าการเผยแพร่จะดำเนินไปโดยไม่ถูกขัดจังหวะ",
 "A GitHub token grants repository access. Build verification and independent witnesses check whether the running server is unchanged. No GitHub token is needed on this page.": "โทเค็น GitHub ให้สิทธิ์เข้าถึงรีโพสิตอรี การตรวจสอบการสร้างและพยานอิสระจะตรวจสอบว่าเซิร์ฟเวอร์ที่กำลังทำงานอยู่ยังไม่มีการเปลี่ยนแปลง ไม่จำเป็นต้องใช้โทเค็น GitHub บนหน้านี้",
 "A running SSH process or an open port shows the service state; logins appear in the server's own records.": "กระบวนการ SSH ที่กำลังทำงานหรือพอร์ตที่เปิดอยู่จะแสดงสถานะของบริการ; การเข้าสู่ระบบจะปรากฏในบันทึกของเซิร์ฟเวอร์เอง",
 "A signature protects this derivative and names the source archive and the collector key.": "ลายเซ็นนี้ปกป้องผลงานที่ดัดแปลงนี้ และระบุชื่อไฟล์ต้นฉบับและกุญแจผู้เก็บรวบรวม",
@@ -8471,5 +8468,7 @@
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "หมายเลขข้อความเหล่านี้ไม่ปรากฏในบันทึกต้นฉบับ ข้อความที่ทราบว่าถูกลบและข้อความที่ขาดหายไปเมื่อตรวจสอบซ้ำถือเป็นข้อมูลการสังเกตที่แยกต่างหาก",
 "This export follows these practices.": "การส่งออกนี้ปฏิบัติตามแนวทางดังต่อไปนี้",
 "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "พยานที่กำลังทำงานจะบันทึกคำตอบที่ขาดหายไปหรือไม่ถูกต้องจากผู้เก็บรวบรวมข้อมูล การตรวจสอบจะเปรียบเทียบจุดตรวจสอบที่เก็บไว้กับไฟล์ส่งออกทั้งหมด และตรวจพบโพสต์ที่ลงนามแล้วซึ่งขาดหายไปหรือไม่ถูกต้องในไฟล์ส่งออกของช่อง พยานที่หยุดทำงานและความล้มเหลวในการโพสต์จะทิ้งช่วงเวลาที่ไม่มีจุดยึดจากภายนอก; โพสต์ที่สร้างขึ้นจะยึดหัวของบันทึก ณ เวลาที่แต่ละโพสต์ถูกเผยแพร่",
-"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "ทunnel เป็นเส้นทางเข้าสู่อุปกรณ์ควบคุม; พอร์ตเข้าและเส้นทางเข้าถึงโดยตรงอื่น ๆ จะปรากฏในบันทึกของไฟร์วอลล์"
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "ทunnel เป็นเส้นทางเข้าสู่อุปกรณ์ควบคุม; พอร์ตเข้าและเส้นทางเข้าถึงโดยตรงอื่น ๆ จะปรากฏในบันทึกของไฟร์วอลล์",
+"Checkpoint or timestamp awaiting verification": "จุดตรวจสอบหรือเวลาที่รอการยืนยัน",
+"Steps that let an inspection record stand on its own. Local rules decide the form of the record.": "ขั้นตอนที่ทำให้บันทึกการตรวจสอบสามารถใช้ได้อย่างอิสระ รูปแบบของบันทึกจะขึ้นอยู่กับกฎท้องถิ่น"
 }

@@ -4927,7 +4927,6 @@
   "Place and date:": "স্থান ও তারিখ:",
   "Signature:": "স্বাক্ষর:",
   "For a notary or court expert": "নোটারি বা আদালতের বিশেষজ্ঞের জন্য",
-  "Steps that let an inspection record stand on its own. Local rules decide the form of the record; this list is not legal advice.": "এমন ধাপগুলো যা একটি পরিদর্শন রেকর্ডকে স্বতন্ত্রভাবে টিকে থাকতে দেয়। স্থানীয় নিয়মগুলো রেকর্ডের ফর্ম নির্ধারণ করে; এই তালিকাটি কোনো আইনি পরামর্শ নয়।",
   "Receive the archive and the key fingerprint by separate channels and write both in the record.": "আর্কাইভ এবং কী ফিঙ্গারপ্রিন্ট পৃথক চ্যানেলের মাধ্যমে গ্রহণ করুন এবং উভয়ই রেকর্ডে লিখুন।",
   "Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record.": "আর্কাইভের SHA-256 গণনা করুন (sha256sum অথবা Windows-এ Get-FileHash) এবং তা রেকর্ডে লিখুন।",
   "Run verify.py with the fingerprint on a computer you trust and attach its complete output.": "verify.py-কে ফিংগারপ্রিন্টসহ আপনার বিশ্বাসযোগ্য কম্পিউটারে চালান এবং এর সম্পূর্ণ আউটপুট সংযুক্ত করুন।",
@@ -5547,7 +5546,6 @@
   "Case fields supplied by the operator": "অপারেটর দ্বারা সরবরাহিত কেস ক্ষেত্রসমূহ",
   "Checked during export": "রপ্তানির সময় যাচাই করা হয়েছে",
   "Checked {n} signed journal records; the key still needs independent confirmation.": "{n}টি স্বাক্ষরিত জার্নাল রেকর্ড যাচাই করা হয়েছে; কীটির জন্য এখনও স্বাধীন নিশ্চিতকরণের প্রয়োজন।",
-  "Checkpoint or timestamp trust not established": "চেকপয়েন্ট বা টাইমস্ট্যাম্পের বিশ্বাস প্রতিষ্ঠিত নয়",
   "Compare an independently retained witness ZIP using --witness. Confirm beacon rounds using --check-drand. For TDX, check the quote, challenge, Intel trust chain, measurements and exact deployed source with the assurance verifier.": "--witness ব্যবহার করে স্বাধীনভাবে সংরক্ষিত একটি সাক্ষী ZIP তুলনা করুন। --check-drand ব্যবহার করে বীকন রাউন্ডগুলি নিশ্চিত করুন। TDX-এর জন্য, উদ্ধৃতি, চ্যালেঞ্জ, Intel ট্রাস্ট চেইন, পরিমাপ এবং সঠিক মোতায়েনকৃত উৎস অ্যাসুরেন্স ভেরিফায়ারের সাথে যাচাই করুন।",
   "Compare coverage.json and the selection in manifest.json with the period and chats relevant to the case. Explain each material gap before drawing conclusions from absence.": "coverage.json এবং manifest.json-এ থাকা নির্বাচনকে মামলার প্রাসঙ্গিক সময়কাল ও চ্যাটগুলোর সাথে তুলনা করুন। অনুপস্থিতি থেকে উপসংহার টানার আগে প্রতিটি গুরুত্বপূর্ণ ফাঁক ব্যাখ্যা করুন।",
   "Continuous observation periods": "অবিচ্ছিন্ন পর্যবেক্ষণ সময়কাল",
@@ -8488,7 +8486,6 @@
   "With the fingerprint confirmed this archive meets integrity and the signer key; independent binding comes from the evidence journal.": "ফিঙ্গারপ্রিন্ট নিশ্চিত হওয়ার পর এই আর্কাইভ অখণ্ডতা এবং স্বাক্ষরকারী কী-এর শর্ত পূরণ করে; স্বাধীন সংযুক্তি প্রমাণ জার্নাল থেকে আসে।",
   "Operator declarations supplied: {n}. Identity and custody still need confirmation.": "অপারেটর ঘোষণাসমূহ সরবরাহিত: {n}। পরিচয় এবং হেফাজত এখনও নিশ্চিতকরণের অপেক্ষায়।",
   "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim.": "বিবাদিত বিষয়বস্তু, লেখকত্ব এবং সংগ্রহের শর্তাবলী স্বাধীন উপকরণ দিয়ে যাচাই করুন। প্রতিটি দাবির জন্য আর্কাইভ, ফাইল এবং রেকর্ড রেফারেন্স উদ্ধৃত করুন।",
-  "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "একটি সংরক্ষিত স্বাক্ষরিত চেক আপনাকে পরবর্তীতে এক্সপোর্ট করা ডেটাকে পর্যবেক্ষিত জার্নালের সাথে তুলনা করার সুযোগ দেয়। এটি নিশ্চিত করে না যে প্রতিটি টেলিগ্রাম ইভেন্ট পৌঁছেছে। অনুপলব্ধ চেক এবং ব্যর্থ পোস্টগুলোর প্রতি খেয়াল রাখতে হবে; নিরবচ্ছিন্ন প্রকাশের কোনো নিশ্চয়তা নেই।",
 "A GitHub token grants repository access. Build verification and independent witnesses check whether the running server is unchanged. No GitHub token is needed on this page.": "একটি GitHub টোকেন রিপোজিটরিতে অ্যাক্সেস প্রদান করে। বিল্ড যাচাইকরণ এবং স্বাধীন সাক্ষীরা পরীক্ষা করে যে চলমান সার্ভার অপরিবর্তিত আছে কিনা। এই পৃষ্ঠায় কোনো GitHub টোকেনের প্রয়োজন নেই।",
 "A running SSH process or an open port shows the service state; logins appear in the server's own records.": "একটি চলমান SSH প্রক্রিয়া বা একটি খোলা পোর্ট পরিষেবার অবস্থা নির্দেশ করে; লগইনগুলো সার্ভারের নিজস্ব রেকর্ডে দেখা যায়।",
 "A signature protects this derivative and names the source archive and the collector key.": "একটি স্বাক্ষর এই ডেরিভেটিভকে সুরক্ষিত করে এবং উৎস আর্কাইভ ও সংগ্রাহক কী-এর নাম উল্লেখ করে।",
@@ -8510,5 +8507,7 @@
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "এই বার্তা নম্বরগুলো উৎস জার্নালে দেখা যায়নি। পরিচিত মুছে ফেলা বার্তা এবং পুনরায় যাচাই করার সময় অনুপস্থিত বার্তাগুলো পৃথক পর্যবেক্ষণ।",
 "This export follows these practices.": "এই এক্সপোর্ট নিম্নলিখিত অনুশীলনগুলি অনুসরণ করে।",
 "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "একজন চলমান সাক্ষী অনুপস্থিত বা অসিদ্ধ সংগ্রাহকের উত্তরগুলি রেকর্ড করে। যাচাইকরণ সংরক্ষিত চেকপয়েন্টগুলোকে সম্পূর্ণ এক্সপোর্টের সাথে তুলনা করে এবং চ্যানেল এক্সপোর্টে অনুপস্থিত বা অসিদ্ধ স্বাক্ষরিত পোস্টগুলো সনাক্ত করে। সাক্ষীর ডাউনটাইম এবং পোস্ট করার ব্যর্থতা বাহ্যিক অ্যাঙ্করবিহীন ফাঁক তৈরি করে; প্রকাশিত প্রতিটি পোস্টই সেই মুহূর্তে জার্নাল হেডকে অ্যাঙ্কর করে।",
-"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": " টানেল হল প্যানেলে প্রবেশের পথ; ইনবাউন্ড পোর্ট এবং অন্যান্য সরাসরি প্রবেশ পথ ফায়ারওয়াল রেকর্ডে প্রদর্শিত হয়।"
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": " টানেল হল প্যানেলে প্রবেশের পথ; ইনবাউন্ড পোর্ট এবং অন্যান্য সরাসরি প্রবেশ পথ ফায়ারওয়াল রেকর্ডে প্রদর্শিত হয়।",
+"Checkpoint or timestamp awaiting verification": "যাচাইয়ের অপেক্ষায় চেকপয়েন্ট বা টাইমস্ট্যাম্প",
+"Steps that let an inspection record stand on its own. Local rules decide the form of the record.": " এমন ধাপগুলো যা একটি পরিদর্শন রেকর্ডকে স্বতন্ত্রভাবে টিকে থাকতে দেয়। স্থানীয় নিয়মাবলী রেকর্ডের ফর্ম নির্ধারণ করে।"
 }

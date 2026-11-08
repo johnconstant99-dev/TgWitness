@@ -4900,7 +4900,6 @@
   "Place and date:": "場所および日付：",
   "Signature:": "署名：",
   "For a notary or court expert": "公証人または裁判所鑑定人向け",
-  "Steps that let an inspection record stand on its own. Local rules decide the form of the record; this list is not legal advice.": "検査記録が単独で成立するための手順。記録の形式は現地の規則によって決定されます。このリストは法的助言ではありません。",
   "Receive the archive and the key fingerprint by separate channels and write both in the record.": "アーカイブと鍵のフィンガープリントを別々のチャネルで受信し、両方をレコードに記録してください。",
   "Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record.": "アーカイブのSHA-256（sha256sum、またはWindowsではGet-FileHash）を算出し、レコードに書き込んでください。",
   "Run verify.py with the fingerprint on a computer you trust and attach its complete output.": "信頼できるコンピュータ上で、フィンガープリント付きのverify.pyを実行し、その完全な出力を添付してください。",
@@ -5520,7 +5519,6 @@
   "Case fields supplied by the operator": "オペレーターによって提供されたケースフィールド",
   "Checked during export": "エクスポート時に確認済み",
   "Checked {n} signed journal records; the key still needs independent confirmation.": "{n}件の署名付きジャーナル記録を確認しました。鍵については、依然として独立した確認が必要です。",
-  "Checkpoint or timestamp trust not established": "チェックポイントまたはタイムスタンプの信頼性が確立されていません",
   "Compare an independently retained witness ZIP using --witness. Confirm beacon rounds using --check-drand. For TDX, check the quote, challenge, Intel trust chain, measurements and exact deployed source with the assurance verifier.": "--witness オプションを使用して、独立して保持されているウィットネス ZIP と照合してください。--check-drand オプションを使用して、ビーコンラウンドを確認してください。TDX については、アシュアランス検証ツールを使用して、クオート、チャレンジ、Intel 信頼チェーン、測定値、および正確に展開されたソースを確認してください。",
   "Compare coverage.json and the selection in manifest.json with the period and chats relevant to the case. Explain each material gap before drawing conclusions from absence.": "coverage.jsonおよびmanifest.json内の選択内容を、本件に関連する期間およびチャットと比較してください。欠落から結論を導き出す前に、各重要な欠落箇所について説明してください。",
   "Continuous observation periods": "継続的な観測期間",
@@ -8449,7 +8447,6 @@
   "With the fingerprint confirmed this archive meets integrity and the signer key; independent binding comes from the evidence journal.": "フィンガープリントにより、このアーカイブが完全性を満たし、署名者の鍵と一致していることが確認されています。独立したバインディングは証拠ジャーナルから得られます。",
   "Operator declarations supplied: {n}. Identity and custody still need confirmation.": "提供されたオペレーター宣言：{n}。身元および保管状況については、依然として確認が必要です。",
   "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim.": "争点となっている内容、著作者、および収集状況については、独立した資料を用いて裏付けを行ってください。各主張について、アーカイブ、ファイル、および記録の参照情報を明記してください。",
-  "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "保存された署名付きチェックにより、後日のエクスポートデータを、観測された時点のジャーナルと比較することができます。ただし、これはすべてのTelegramイベントが確実に配信されたことを証明するものではありません。利用不可のチェックや投稿の失敗には注意が必要です。配信が中断されないという保証はありません。",
 "A GitHub token grants repository access. Build verification and independent witnesses check whether the running server is unchanged. No GitHub token is needed on this page.": "GitHubトークンによりリポジトリへのアクセスが許可されます。ビルドの検証と独立した証人によるチェックにより、稼働中のサーバーが改変されていないことが確認されます。このページではGitHubトークンは必要ありません。",
 "A running SSH process or an open port shows the service state; logins appear in the server's own records.": "実行中のSSHプロセスや開いているポートはサービスの状態を示しており、ログイン情報はサーバー自身の記録に表示されます。",
 "A signature protects this derivative and names the source archive and the collector key.": "この派生ファイルは署名によって保護されており、ソースアーカイブとコレクターキーの名称が記載されています。",
@@ -8471,5 +8468,7 @@
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "これらのメッセージ番号は、対象のジャーナルでは確認されませんでした。削除されたことが判明しているメッセージと、再確認時に欠落していたメッセージは、別個の観察項目として扱われます。",
 "This export follows these practices.": "このエクスポートは、以下のベストプラクティスに従っています。",
 "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "稼働中のウィットネスは、欠落または無効なコレクターの応答を記録します。検証では、保持されているチェックポイントと完全なエクスポートデータを比較し、チャンネルエクスポート内の欠落または無効な署名付き投稿を検出します。ウィットネスのダウンタイムや投稿の失敗により、外部アンカーのない間隔が生じますが、投稿された各投稿は、その投稿が行われた時点においてジャーナルの先頭をアンカーとして固定します。",
-"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "トンネルはパネルへのインバウンド経路であり、インバウンドポートやその他の直接アクセス経路はファイアウォールレコードに表示されます。"
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "トンネルはパネルへのインバウンド経路であり、インバウンドポートやその他の直接アクセス経路はファイアウォールレコードに表示されます。",
+"Checkpoint or timestamp awaiting verification": "検証待ちのチェックポイントまたはタイムスタンプ",
+"Steps that let an inspection record stand on its own. Local rules decide the form of the record.": "検査記録を単独で成立させる手順。記録の形式は各地域の規則によって決まります。"
 }

@@ -799,7 +799,7 @@ def declaration(lay, say, case):
     lay.blank(say("Place and date:"))
     lay.blank(say("Signature:"))
     lay.section(say("For a notary or court expert"), say("Steps that let an inspection record stand on its own. Local "
-                                                         "rules decide the form of the record; this list is not legal advice."))
+                                                         "rules decide the form of the record."))
     lay.bullets([say("Receive the archive and the key fingerprint by separate channels and write both in the record."),
                  say("Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record."),
                  say("Run verify.py with the fingerprint on a computer you trust and attach its complete output."),
@@ -1058,7 +1058,7 @@ class EvidencePDF:
                     rows.append([anchor.get("event_count"), anchor.get("service"), "RFC 3161", report.utc_text(anchor.get("time")),
                                  say("Token valid") + " · " + (name.group(1).replace("\\,", ",") if name else signer)
                                  if report.case_assessment.verified_stamp(anchor, 2**63 - 1)
-                                 else say("Checkpoint or timestamp trust not established")])
+                                 else say("Checkpoint or timestamp awaiting verification")])
                 elif anchor.get("kind") == "opentimestamps":
                     rows.append([anchor.get("event_count"), anchor.get("service"), "OpenTimestamps · Bitcoin", "—",
                                  say("Waiting for Bitcoin confirmation") if anchor.get("status") == "pending"

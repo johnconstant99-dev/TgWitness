@@ -21,7 +21,7 @@
         "Preserve originals and custody",
         "Explain the basis of any claimed presumption"
       ],
-      "local": "Keep original data, recordings and an explanation of the system and process. Device/process presumptions can be challenged. Confirm the applicable federal, state or territory evidence law; software verification does not establish message authorship or truth.",
+      "local": "Keep original data, recordings and an explanation of the system and process. Device/process presumptions can be challenged. Confirm the applicable federal, state or territory evidence law.",
       "local_criminal": "Identify the court and applicable Commonwealth, state or territory law. Preserve originals and document acquisition, system operation and custody. Device-related presumptions do not settle every objection to admissibility or the lawfulness of obtaining the material.",
       "sources": [
         {
@@ -259,7 +259,7 @@
       "criminal_law": "BSA 2023, sections 63 and 170; Schedule",
       "basis": "Computer output submitted through section 63 has statutory conditions and a Schedule certificate. Software signatures do not replace the required statements and signatures.",
       "prepare": "Determine whether the submission is an original or computer output, and whether transitional rules apply. Prepare the applicable Schedule parts, device details and hash report for review and signature.",
-      "criminal": "Apply BSA within its scope and transitional rules. Lawful acquisition and procedural custody remain separate; a certificate does not establish guilt.",
+      "criminal": "Apply BSA within its scope and transitional rules. Lawful acquisition and procedural custody remain separate.",
       "human": "The relevant person and expert for the applicable Schedule certificate.",
       "tasks": [
         "Determine the applicable evidence regime",
@@ -535,7 +535,7 @@
       "criminal_law": "Código de Processo Penal, article 167",
       "basis": "Qualified services have specific legal effects. Ordinary electronic documents remain subject to applicable evidential rules; a software signature is not automatically qualified.",
       "prepare": "Preserve originals and explain collection. If relying on a qualified signature or timestamp, verify the actual service and certificate.",
-      "criminal": "CPP article 167 ties use of reproductions to their lawfulness under criminal law. A TEE attestation does not establish authority to record.",
+      "criminal": "CPP article 167 ties use of reproductions to their lawfulness under criminal law.",
       "human": "Collector or competent witness; local review of recording law where applicable.",
       "tasks": [
         "Preserve the original recording",
@@ -649,7 +649,7 @@
         "Identify the claimed presumption",
         "Make acquisition and custody examinable"
       ],
-      "local": "Retain original records, video and evidence of how the system operated. Identify the basis for any section 116A presumption and allow it to be tested. Explain acquisition and custody; the exporter’s signature does not establish the sender’s identity.",
+      "local": "Retain original records, video and evidence of how the system operated. Identify the basis for any section 116A presumption and allow it to be tested. Explain acquisition and custody.",
       "local_criminal": "Identify the applicable basis for any electronic-record presumption and preserve evidence of system operation. Keep originals and acquisition and custody records available for examination.",
       "sources": [
         {

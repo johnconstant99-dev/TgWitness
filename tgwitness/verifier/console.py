@@ -390,7 +390,7 @@ class Console:
             self.check("ok", "File hashes", self.t("{n} files · SHA-256 match", n=self.number(result["files_checked"])))
             self.check("ok" if result["source_reference_checked"] else "warn", "Source reference",
                        "archive hash and collector key checked" if result["source_reference_checked"] else "not supplied (--evidence)")
-            self.check("none", "Derivation", "filtering and redaction correctness are not established")
+            self.check("none", "Derivation", "review filtering and redaction against the source archive")
         elif shown == "account":
             self.check("ok", "Manifest signature", self.t("Ed25519 · valid"))
             self.check("ok", "File hashes", self.t("{n} files · SHA-256 match", n=self.number(result["files_checked"])))

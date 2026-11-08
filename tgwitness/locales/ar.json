@@ -5035,7 +5035,6 @@
   "Place and date:": "المكان والتاريخ:",
   "Signature:": "التوقيع:",
   "For a notary or court expert": "للكاتب العدل أو الخبير القضائي",
-  "Steps that let an inspection record stand on its own. Local rules decide the form of the record; this list is not legal advice.": "خطوات تجعل سجل الفحص قائماً بذاته. تحدد القواعد المحلية شكل السجل؛ ولا تُعد هذه القائمة مشورة قانونية.",
   "Receive the archive and the key fingerprint by separate channels and write both in the record.": "استلام الأرشيف وبصمة المفتاح عبر قنوات منفصلة وتدوين كليهما في السجل.",
   "Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record.": "احسب قيمة SHA-256 للأرشيف (sha256sum، أو Get-FileHash في نظام Windows) واكتبها في السجل.",
   "Run verify.py with the fingerprint on a computer you trust and attach its complete output.": "قم بتشغيل «verify.py» باستخدام البصمة على جهاز كمبيوتر تثق به وأرفق ناتجه الكامل.",
@@ -5655,7 +5654,6 @@
   "Case fields supplied by the operator": "حقول الحالة التي يوفرها المشغل",
   "Checked during export": "تم التحقق منها أثناء التصدير",
   "Checked {n} signed journal records; the key still needs independent confirmation.": "تم فحص {n} سجلًا موقّعًا من السجل؛ ولا يزال المفتاح بحاجة إلى تأكيد مستقل.",
-  "Checkpoint or timestamp trust not established": "لم يتم إثبات موثوقية نقطة التحقق أو الطابع الزمني",
   "Compare an independently retained witness ZIP using --witness. Confirm beacon rounds using --check-drand. For TDX, check the quote, challenge, Intel trust chain, measurements and exact deployed source with the assurance verifier.": "قارن ملف ZIP الشاهد المحفوظ بشكل مستقل باستخدام --witness. تأكد من جولات الإشارات باستخدام --check-drand. بالنسبة لـ TDX، تحقق من الاقتباس والتحدي وسلسلة ثقة Intel والقياسات والمصدر المنشور بالضبط باستخدام أداة التحقق من الضمان.",
   "Compare coverage.json and the selection in manifest.json with the period and chats relevant to the case. Explain each material gap before drawing conclusions from absence.": "قارن ملف «coverage.json» والاختيار الموجود في ملف «manifest.json» مع الفترة والمحادثات ذات الصلة بالقضية. اشرح كل فجوة جوهرية قبل استخلاص استنتاجات من الغياب.",
   "Continuous observation periods": "فترات المراقبة المستمرة",
@@ -8644,7 +8642,6 @@
   "With the fingerprint confirmed this archive meets integrity and the signer key; independent binding comes from the evidence journal.": "مع تأكيد البصمة، فإن هذا الأرشيف يفي بمتطلبات السلامة ومفتاح الموقّع؛ ويأتي الربط المستقل من سجل الأدلة.",
   "Operator declarations supplied: {n}. Identity and custody still need confirmation.": "تم توفير إعلانات المشغل: {n}. لا تزال الهوية والحراسة بحاجة إلى تأكيد.",
   "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim.": "تأكد من صحة المحتوى المتنازع عليه، وملكية التأليف، وظروف التجميع باستخدام مواد مستقلة. اذكر مرجع الأرشيف والملف والسجل لكل ادعاء.",
-  "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "يتيح لك الفحص الموقّع المحفوظ مقارنة تصدير لاحق بالسجل كما تمت مراقبته. ولا يثبت أن كل حدث في Telegram قد سُلّم. تحتاج الفحوص غير المتاحة والمنشورات الفاشلة إلى اهتمام؛ ولا يوجد ضمان لنشر متواصل.",
 "A GitHub token grants repository access. Build verification and independent witnesses check whether the running server is unchanged. No GitHub token is needed on this page.": "يمنح رمز GitHub حق الوصول إلى المستودع. تتحقق عملية التحقق من البنية والشهود المستقلون مما إذا كان الخادم قيد التشغيل لم يتغير. لا حاجة إلى رمز GitHub في هذه الصفحة.",
 "A running SSH process or an open port shows the service state; logins appear in the server's own records.": "تشير عملية SSH قيد التشغيل أو المنفذ المفتوح إلى حالة الخدمة؛ وتظهر عمليات تسجيل الدخول في سجلات الخادم نفسه.",
 "A signature protects this derivative and names the source archive and the collector key.": "يحمي التوقيع هذا المشتق ويحدد اسم الأرشيف المصدر ومفتاح الجامع.",
@@ -8666,5 +8663,7 @@
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "لم يتم رصد أرقام الرسائل هذه في السجل الأصلي. أما الرسائل التي يُعرف أنها حُذفت والرسائل المفقودة عند إعادة الفحص فهي ملاحظات منفصلة.",
 "This export follows these practices.": "يتبع هذا التصدير هذه الممارسات.",
 "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "يقوم الشاهد العامل بتسجيل إجابات المجمع المفقودة أو غير الصالحة. ويقوم نظام التحقق بمقارنة نقاط التحقق المحتفظ بها مع التصدير الكامل، ويكتشف المنشورات الموقعة المفقودة أو غير الصالحة في تصدير القناة. يؤدي تعطل الشاهد وفشل النشر إلى وجود فترات زمنية خالية من نقاط الربط الخارجية؛ وتقوم المنشورات التي تم نشرها بتثبيت رأس السجل في اللحظة التي تم فيها نشر كل منها.",
-"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "النفق هو مسار الدخول إلى اللوحة؛ وتظهر المنافذ الواردة ومسارات الوصول المباشر الأخرى في سجل جدار الحماية."
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "النفق هو مسار الدخول إلى اللوحة؛ وتظهر المنافذ الواردة ومسارات الوصول المباشر الأخرى في سجل جدار الحماية.",
+"Checkpoint or timestamp awaiting verification": "نقطة تفتيش أو طابع زمني في انتظار التحقق",
+"Steps that let an inspection record stand on its own. Local rules decide the form of the record.": "الخطوات التي تجعل سجل الفحص مستقلاً بذاته. وتحدد القواعد المحلية شكل السجل."
 }

@@ -137,7 +137,7 @@ def subjects(model):
 
 
 REQUEST_NOTES = (
-    "Informational, not legal advice. Check the procedure that applies to the case.",
+    "Check the procedure that applies to the case.",
     "Telegram states that, on a valid order from a judicial authority, it may disclose the IP address and phone number "
     "of an account suspected in a criminal case, and does not disclose message content. Requests key on the numeric ID.",
     "Usernames can be changed and reused; the numeric ID stays with the account. Cite IDs with the times the usernames "

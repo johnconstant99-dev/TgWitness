@@ -164,7 +164,7 @@ class Recorder:
                 "last_error": self.last_error or self.video.error, "video_available": self.video.available,
                 "video_running": self.video.process is not None, "last_video_segment": self.video.last_segment_at,
                 "selected_target": self.browser.target_id, "route_label": self.config.route_label,
-                "external_anchor": "not established by this service; retain checkpoints or use a separate witness",
+                "external_anchor": "retain checkpoints or use a separate witness for an external anchor",
                 "official": self.official.status() if self.official else None}
 
     async def configure(self, patch):
