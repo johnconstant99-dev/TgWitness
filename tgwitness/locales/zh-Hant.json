@@ -4900,7 +4900,6 @@
   "Place and date:": "地點與日期：",
   "Signature:": "簽名：",
   "For a notary or court expert": "適用於公證人或法院鑑定人",
-  "Steps that let an inspection record stand on its own. Local rules decide the form of the record; this list is not legal advice.": "讓檢查記錄能夠獨立成立的步驟。記錄的形式由當地法規決定；本清單不構成法律建議。",
   "Receive the archive and the key fingerprint by separate channels and write both in the record.": "透過獨立的通道接收存檔及金鑰指紋，並將兩者皆記錄於報告中。",
   "Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record.": "計算檔案的 SHA-256（sha256sum，或在 Windows 上使用 Get-FileHash），並將其寫入記錄中。",
   "Run verify.py with the fingerprint on a computer you trust and attach its complete output.": "請在您信任的電腦上執行帶有該指紋的 `verify.py`，並附上其完整輸出結果。",
@@ -5520,7 +5519,6 @@
   "Case fields supplied by the operator": "由操作員提供的案例欄位",
   "Checked during export": "於匯出過程中已進行檢查",
   "Checked {n} signed journal records; the key still needs independent confirmation.": "已檢查{n}筆簽署日誌記錄；該金鑰仍需獨立確認。",
-  "Checkpoint or timestamp trust not established": "尚未建立對檢查點或時間戳記的信任",
   "Compare an independently retained witness ZIP using --witness. Confirm beacon rounds using --check-drand. For TDX, check the quote, challenge, Intel trust chain, measurements and exact deployed source with the assurance verifier.": "使用 --witness 參數比對獨立保留的見證 ZIP 檔案。使用 --check-drand 參數確認信標輪次。針對 TDX，請使用保證驗證器檢查引述、挑戰、Intel 信任鏈、測量結果以及確切的部署來源。",
   "Compare coverage.json and the selection in manifest.json with the period and chats relevant to the case. Explain each material gap before drawing conclusions from absence.": "請將 `coverage.json` 及 `manifest.json` 中的選取內容，與本案相關的期間及聊天記錄進行比對。在根據資料缺失得出結論之前，須針對每項實質性缺口進行說明。",
   "Continuous observation periods": "連續的觀察期間",
@@ -8449,7 +8447,6 @@
   "With the fingerprint confirmed this archive meets integrity and the signer key; independent binding comes from the evidence journal.": "經指紋驗證後，確認此歸檔檔案符合完整性要求且簽署者金鑰無誤；獨立綁定關係源自證據日誌。",
   "Operator declarations supplied: {n}. Identity and custody still need confirmation.": "操作員聲明如下：{n}。身分與保管狀況仍需確認。",
   "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim.": "應透過獨立資料佐證有爭議的內容、作者身分及蒐集條件。針對每一項主張，均須引用檔案庫、檔案及紀錄的參考資料。",
-  "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "保留的簽名檢查可讓您將後續匯出的內容與當初觀察到的日誌進行比對。這並不能證明每個 Telegram 事件都已成功傳送。無法送達的檢查與發文失敗的情況需要特別留意；無法保證發佈過程不會中斷。",
 "A GitHub token grants repository access. Build verification and independent witnesses check whether the running server is unchanged. No GitHub token is needed on this page.": "GitHub 憑證可授予儲存庫存取權限。建置驗證與獨立見證機制會檢查運作中的伺服器是否未經變更。此頁面無需 GitHub 憑證。",
 "A running SSH process or an open port shows the service state; logins appear in the server's own records.": "正在運行的 SSH 程序或開啟的埠號會顯示服務狀態；登入紀錄則會出現在伺服器自身的記錄中。",
 "A signature protects this derivative and names the source archive and the collector key.": "此衍生檔受簽名保護，並標示來源檔案及收集者金鑰。",
@@ -8471,5 +8468,7 @@
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "這些訊息編號並未在原始期刊中被觀察到。已知已刪除的訊息以及重新檢查時缺失的訊息，均屬獨立的觀察項目。",
 "This export follows these practices.": "此匯出操作遵循以下規範。",
 "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "運行中的見證人會記錄收集器遺漏或無效的回應。驗證程序會將保留的檢查點與完整匯出資料進行比對，並偵測頻道匯出資料中遺漏或無效的簽名貼文。見證人停機及發文失敗會導致某些區間缺乏外部錨點；此時，已發布的貼文將以各自發布的時刻為基準，錨定日誌的起點。",
-"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "隧道是通往控制面板的入口路徑；入站埠及其他直接存取路徑會顯示在防火牆記錄中。"
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "隧道是通往控制面板的入口路徑；入站埠及其他直接存取路徑會顯示在防火牆記錄中。",
+"Checkpoint or timestamp awaiting verification": "待驗證的檢查點或時間戳記",
+"Steps that let an inspection record stand on its own. Local rules decide the form of the record.": "讓檢查記錄能夠獨立存在的步驟。記錄的形式由當地規則決定。"
 }

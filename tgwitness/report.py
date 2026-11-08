@@ -2135,7 +2135,7 @@ def timestamps_section(say, number, anchors, archive_name, fp):
             signer = (anchor.get("signed") or {}).get("signer")
             status = ('<span class="pill ok">' + e(say("Token valid")) + "</span> <small>" + e(signer) + "</small>"
                       if case_assessment.verified_stamp(anchor, 2**63 - 1)
-                      else '<span class="pill warn">' + e(say("Checkpoint or timestamp trust not established")) + "</span>")
+                      else '<span class="pill warn">' + e(say("Checkpoint or timestamp awaiting verification")) + "</span>")
             rows.append([num(anchor.get("event_count")), e(anchor["service"]), "RFC 3161", when(anchor.get("time")), status])
         elif anchor.get("kind") == "opentimestamps":
             pending = anchor.get("status") == "pending"

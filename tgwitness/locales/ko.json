@@ -4900,7 +4900,6 @@
   "Place and date:": "장소 및 날짜:",
   "Signature:": "서명:",
   "For a notary or court expert": "공증인 또는 법원 감정인을 위한",
-  "Steps that let an inspection record stand on its own. Local rules decide the form of the record; this list is not legal advice.": "검사 기록이 그 자체로 완결성을 갖출 수 있도록 하는 단계들입니다. 기록의 형식은 현지 규정에 따라 결정되며, 이 목록은 법적 조언이 아닙니다.",
   "Receive the archive and the key fingerprint by separate channels and write both in the record.": "아카이브와 키 지문을 별도의 채널을 통해 수신하고, 두 가지 모두를 기록에 기재하십시오.",
   "Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record.": "아카이브의 SHA-256(sha256sum 또는 Windows의 Get-FileHash)를 계산하여 기록에 기재하십시오.",
   "Run verify.py with the fingerprint on a computer you trust and attach its complete output.": "신뢰할 수 있는 컴퓨터에서 지문 정보가 포함된 `verify.py`를 실행하고, 그 전체 출력 결과를 첨부하십시오.",
@@ -5520,7 +5519,6 @@
   "Case fields supplied by the operator": "운영자가 제공한 대소문자 구분 필드",
   "Checked during export": "내보내기 과정에서 확인됨",
   "Checked {n} signed journal records; the key still needs independent confirmation.": "{n}개의 서명된 저널 기록을 확인했습니다. 키에 대해서는 여전히 독립적인 확인이 필요합니다.",
-  "Checkpoint or timestamp trust not established": "체크포인트 또는 타임스탬프에 대한 신뢰가 확립되지 않음",
   "Compare an independently retained witness ZIP using --witness. Confirm beacon rounds using --check-drand. For TDX, check the quote, challenge, Intel trust chain, measurements and exact deployed source with the assurance verifier.": "--witness 옵션을 사용하여 독립적으로 보관된 증인 ZIP 파일을 비교하십시오. --check-drand 옵션을 사용하여 비콘 라운드를 확인하십시오. TDX의 경우, 보증 검증기를 통해 쿼트, 챌린지, Intel 신뢰 체인, 측정값 및 정확한 배포 소스를 확인하십시오.",
   "Compare coverage.json and the selection in manifest.json with the period and chats relevant to the case. Explain each material gap before drawing conclusions from absence.": "coverage.json과 manifest.json의 선택 항목을 사건과 관련된 기간 및 채팅 내용과 비교하십시오. 누락된 사항에 대해 결론을 내리기 전에 각 중요한 공백에 대해 설명하십시오.",
   "Continuous observation periods": "지속적인 관측 기간",
@@ -8449,7 +8447,6 @@
   "With the fingerprint confirmed this archive meets integrity and the signer key; independent binding comes from the evidence journal.": "지문 확인을 통해 이 아카이브는 무결성 및 서명자 키 요건을 충족하며, 독립적인 바인딩은 증거 저널에서 비롯됩니다.",
   "Operator declarations supplied: {n}. Identity and custody still need confirmation.": "제공된 운영자 선언: {n}. 신원 및 관리 권한은 여전히 확인이 필요합니다.",
   "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim.": "논란의 여지가 있는 내용, 저작자 및 수집 조건은 독립적인 자료를 통해 뒷받침해야 합니다. 각 주장에 대해 아카이브, 파일 및 기록 참조 정보를 인용하십시오.",
-  "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "보관된 서명된 확인 내역을 통해 나중에 내보낸 내용을 관찰 당시의 기록부와 비교할 수 있습니다. 이는 모든 텔레그램 이벤트가 전달되었음을 입증하지는 않습니다. 이용 불가능한 확인 내역과 게시 실패 사례에는 주의가 필요하며, 중단 없는 게시를 보장할 수는 없습니다.",
 "A GitHub token grants repository access. Build verification and independent witnesses check whether the running server is unchanged. No GitHub token is needed on this page.": "GitHub 토큰을 통해 저장소에 접근할 수 있습니다. 빌드 검증 및 독립적인 검증자를 통해 실행 중인 서버가 변경되지 않았는지 확인합니다. 이 페이지에서는 GitHub 토큰이 필요하지 않습니다.",
 "A running SSH process or an open port shows the service state; logins appear in the server's own records.": "실행 중인 SSH 프로세스나 열린 포트는 서비스 상태를 나타내며, 로그인 내역은 서버 자체 기록에 표시됩니다.",
 "A signature protects this derivative and names the source archive and the collector key.": "이 파생본은 서명으로 보호되며, 원본 아카이브와 수집자 키의 이름을 명시합니다.",
@@ -8471,5 +8468,7 @@
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "이러한 메시지 번호는 원본 저널에서 확인되지 않았습니다. 삭제된 것으로 확인된 메시지와 재확인 시 누락된 메시지는 별도의 관찰 항목으로 구분됩니다.",
 "This export follows these practices.": "이 내보내기 작업은 다음 지침을 따릅니다.",
 "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "실행 중인 위트니스는 누락되거나 유효하지 않은 수집기 응답을 기록합니다. 검증 과정에서는 보존된 체크포인트와 전체 내보내기 데이터를 비교하여, 채널 내보내기에서 누락되거나 유효하지 않은 서명된 게시물을 감지합니다. 위트니스의 가동 중단 및 게시 실패로 인해 외부 앵커가 없는 구간이 발생하며, 게시된 각 게시물은 게시된 시점을 기준으로 저널 헤드를 앵커링합니다.",
-"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "터널은 패널로 연결되는 진입 경로이며, 인바운드 포트 및 기타 직접 액세스 경로는 방화벽 레코드에 표시됩니다."
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "터널은 패널로 연결되는 진입 경로이며, 인바운드 포트 및 기타 직접 액세스 경로는 방화벽 레코드에 표시됩니다.",
+"Checkpoint or timestamp awaiting verification": "검증이 필요한 체크포인트 또는 타임스탬프",
+"Steps that let an inspection record stand on its own. Local rules decide the form of the record.": "검사 기록이 독립적으로 성립될 수 있도록 하는 단계들. 기록의 형식은 현지 규정에 따라 결정됩니다."
 }

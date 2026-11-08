@@ -5022,7 +5022,6 @@
   "Place and date:": "Место и дата:",
   "Signature:": "Подпись:",
   "For a notary or court expert": "Для нотариуса или судебного эксперта",
-  "Steps that let an inspection record stand on its own. Local rules decide the form of the record; this list is not legal advice.": "Действия для составления самостоятельного протокола осмотра. Форму протокола определяют применимые правила; список не является юридической консультацией.",
   "Receive the archive and the key fingerprint by separate channels and write both in the record.": "Получите архив и отпечаток ключа по разным каналам и укажите их в протоколе.",
   "Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record.": "Вычислите SHA-256 архива командой sha256sum или Get-FileHash в Windows и внесите его в протокол.",
   "Run verify.py with the fingerprint on a computer you trust and attach its complete output.": "На доверенном компьютере запустите verify.py с отпечатком ключа и приложите полный вывод.",
@@ -5596,7 +5595,6 @@
   "Acquisition is incomplete or its completion cannot be established from this copy.": "Сбор неполон либо его завершение нельзя установить по этой копии.",
   "This is a transformed selection; original completeness cannot be inferred.": "Это преобразованная выборка; полнота оригинала из неё не следует.",
   "No independently validated checkpoint timestamp in this copy.": "В этой копии нет независимо проверенной метки времени контрольной точки.",
-  "Checkpoint or timestamp trust not established": "Доверие к контрольной точке или метке времени не установлено",
   "This is a standalone report. Obtain the signed ZIP to verify the authoritative records and supporting proofs.": "Это отдельный отчёт. Для проверки исходных записей и подтверждающих материалов получите подписанный ZIP.",
   "Evidence dossier": "Досье доказательств",
   "Evidence at a glance": "Карта доказательств",
@@ -8534,7 +8532,6 @@
   "Operator declarations supplied: {n}. Identity and custody still need confirmation.": "Заявленных оператором реквизитов: {n}. Личность и передачу материалов ещё нужно подтвердить.",
   "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim.": "Подкрепите спорное содержание, авторство и условия сбора независимыми материалами. Для каждого вывода укажите архив, файл и ссылку на запись.",
   "Telegram does not report who deleted the message": "Кто удалил — Telegram не сообщает",
-  "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "Сохраненная подписанная проверка позволяет сравнить последующий экспорт с журналом в том виде, в каком он был зафиксирован. Она не подтверждает, что каждое событие в Telegram было доставлено. Недоступные проверки и неудачные публикации требуют внимания; гарантии бесперебойной публикации нет.",
   "Telegram does not report who edited the message": "Кто изменил — Telegram не сообщает",
   "Earlier captured versions remain available. Telegram does not report who deleted the message.": "Ранее сохранённые версии доступны. Кто удалил — Telegram не сообщает.",
 "A GitHub token grants repository access. Build verification and independent witnesses check whether the running server is unchanged. No GitHub token is needed on this page.": "Доступ к репозиторию предоставляется с помощью токена GitHub. Проверка сборки и независимые свидетели контролируют, не был ли изменен работающий сервер. На этой странице токен GitHub не требуется.",
@@ -8558,5 +8555,7 @@
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "Эти номера сообщений не были обнаружены в исходном журнале. Известные удаленные сообщения и сообщения, отсутствующие при повторной проверке, представляют собой отдельные наблюдения.",
 "This export follows these practices.": "Данный экспорт соответствует следующим рекомендациям.",
 "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "Работающий свидетель фиксирует отсутствующие или недействительные ответы сборщика. Проверка сравнивает сохраненные контрольные точки с полным экспортом и обнаруживает отсутствующие или недействительные подписанные сообщения в экспорте канала. Простои свидетеля и сбои при публикации оставляют интервалы без внешних привязок; опубликованные сообщения фиксируют начало журнала на момент публикации каждого из них.",
-"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "Туннель представляет собой входной путь к панели; входящие порты и другие пути прямого доступа отображаются в записи брандмауэра."
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": "Туннель представляет собой входной путь к панели; входящие порты и другие пути прямого доступа отображаются в записи брандмауэра.",
+"Checkpoint or timestamp awaiting verification": "Контрольная точка или временная метка, ожидающая проверки",
+"Steps that let an inspection record stand on its own. Local rules decide the form of the record.": "Действия, позволяющие сформировать самостоятельную запись о проверке. Формат записи определяется локальными правилами."
 }

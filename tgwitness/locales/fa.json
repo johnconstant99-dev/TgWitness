@@ -4927,7 +4927,6 @@
   "Place and date:": "محل و تاریخ:",
   "Signature:": "امضا:",
   "For a notary or court expert": "برای یک سردفتر یا کارشناس دادگاه",
-  "Steps that let an inspection record stand on its own. Local rules decide the form of the record; this list is not legal advice.": "مراحلی که اجازه می‌دهند یک سوابق بازرسی به‌طور مستقل باقی بماند. قوانین محلی شکل سوابق را تعیین می‌کنند؛ این فهرست مشاوره حقوقی نیست.",
   "Receive the archive and the key fingerprint by separate channels and write both in the record.": "آرشیو و اثر انگشت کلید را از طریق کانال‌های جداگانه دریافت کرده و هر دو را در سوابق ثبت کنید.",
   "Compute the archive's SHA-256 (sha256sum, or Get-FileHash on Windows) and write it in the record.": "SHA-256 آرشیو را محاسبه کنید (sha256sum یا Get-FileHash در ویندوز) و آن را در رکورد ثبت کنید.",
   "Run verify.py with the fingerprint on a computer you trust and attach its complete output.": "verify.py را با اثر انگشت روی کامپیوتری که به آن اعتماد دارید اجرا کنید و خروجی کامل آن را پیوست کنید.",
@@ -5547,7 +5546,6 @@
   "Case fields supplied by the operator": "میدان‌های پرونده ارائه‌شده توسط اپراتور",
   "Checked during export": "در حین خروجی‌گیری بررسی شده",
   "Checked {n} signed journal records; the key still needs independent confirmation.": "{n} رکوردهای دفترچه یادداشت امضا شده را بررسی کرد؛ کلید هنوز به تأیید مستقل نیاز دارد.",
-  "Checkpoint or timestamp trust not established": "اعتماد به نقطهٔ کنترل یا مهر زمانی برقرار نشده است",
   "Compare an independently retained witness ZIP using --witness. Confirm beacon rounds using --check-drand. For TDX, check the quote, challenge, Intel trust chain, measurements and exact deployed source with the assurance verifier.": "با استفاده از --witness، یک ZIP شاهدی را که به‌طور مستقل نگهداری شده است، مقایسه کنید. با استفاده از --check-drand، دورهای بیکن را تأیید کنید. برای TDX، نقل‌قول، چالش، زنجیره اعتماد Intel، اندازه‌گیری‌ها و منبع دقیق استقرار یافته را با اعتبارسنج اطمینان بررسی کنید.",
   "Compare coverage.json and the selection in manifest.json with the period and chats relevant to the case. Explain each material gap before drawing conclusions from absence.": "فایل coverage.json و انتخاب در manifest.json را با دوره زمانی و گفتگوهای مرتبط با پرونده مقایسه کنید. هر شکاف مادی را پیش از استنتاج از عدم وجود، توضیح دهید. اصطلاحات فنی محافظت‌شده و نگارگاه‌ها را دقیقاً حفظ کنید. پیش‌نویس‌های پیش‌نمایش امضا نشده‌اند؛ سوابق منبع بدون تغییر باقی می‌مانند.",
   "Continuous observation periods": "دوره‌های مشاهده پیوسته",
@@ -8488,7 +8486,6 @@
   "With the fingerprint confirmed this archive meets integrity and the signer key; independent binding comes from the evidence journal.": "با تأیید اثر انگشت، این آرشیو از نظر یکپارچگی و کلید امضاکننده معتبر است؛ پیوند مستقل از طریق دفترچه شواهد برقرار می‌شود.",
   "Operator declarations supplied: {n}. Identity and custody still need confirmation.": "اعلامیه‌های اپراتور ارائه‌شده: {n}. هویت و حضانت هنوز نیاز به تأیید دارند.",
   "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim.": "محتوای مورد مناقشه، انتساب و شرایط گردآوری را با مطالب مستقل تأیید کنید. برای هر ادعا، به بایگانی، فایل و شماره ثبت ارجاع دهید.",
-  "A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.": "یک بررسی امضاشدهٔ نگه‌داشته‌شده به شما امکان می‌دهد خروجی بعدی را با دفترچه همان‌گونه که مشاهده شده بود مقایسه کنید. این بررسی ثابت نمی‌کند که همهٔ رویدادهای تلگرام تحویل شده‌اند. بررسی‌های در دسترس‌نبوده و پست‌های ناموفق نیازمند توجه‌اند؛ تضمینی برای انتشار بی‌وقفه وجود ندارد.",
 "A GitHub token grants repository access. Build verification and independent witnesses check whether the running server is unchanged. No GitHub token is needed on this page.": "یک توکن گیت‌هاب دسترسی به مخزن را فراهم می‌کند. تأیید ساخت و شاهدان مستقل بررسی می‌کنند که سرور در حال اجرا دست‌نخورده باقی مانده است. در این صفحه نیازی به توکن گیت‌هاب نیست.",
 "A running SSH process or an open port shows the service state; logins appear in the server's own records.": "یک فرآیند SSH در حال اجرا یا یک پورت باز وضعیت سرویس را نشان می‌دهد؛ ورودها در سوابق خود سرور ثبت می‌شوند.",
 "A signature protects this derivative and names the source archive and the collector key.": "یک امضا از این مشتق محافظت می‌کند و نام آرشیو منبع و کلید گردآورنده را مشخص می‌کند.",
@@ -8510,5 +8507,7 @@
 "These message numbers were not observed in the source journal. Known deleted messages and messages missing on recheck are separate observations.": "این شماره‌های پیام در دفترچهٔ منبع مشاهده نشدند. پیام‌های حذف‌شدهٔ شناخته‌شده و پیام‌های مفقود در بازبینی مجدد، مشاهدات جداگانه‌ای هستند.",
 "This export follows these practices.": "این خروجی مطابق این شیوه‌ها است.",
 "A running witness records missing or invalid collector answers. Verification compares retained checkpoints with the full export and detects missing or invalid signed posts in a channel export. Witness downtime and posting failures leave intervals without external anchors; the posts that were made anchor the journal head at the moment each one was published.": "شاهد در حال اجرا پاسخ‌های مفقود یا نامعتبر گردآورنده را ثبت می‌کند. فرایند تأیید، نقاط کنترل نگهداری‌شده را با خروجی کامل مقایسه می‌کند و پست‌های امضا شده مفقود یا نامعتبر در خروجی کانال را شناسایی می‌کند. زمان‌های توقف شاهد و خطاهای ارسال، بازه‌های زمانی بدون لنگر خارجی ایجاد می‌کنند؛ پست‌هایی که ارسال شده‌اند، سر دفترچه را در لحظه انتشار هر یک لنگر می‌اندازند.",
-"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": " تونل مسیر ورود به پنل است؛ پورت‌های ورودی و سایر مسیرهای دسترسی مستقیم در رکورد فایروال ظاهر می‌شوند."
+"The tunnel is the ingress path to the panel; inbound ports and other direct access paths appear in the firewall record.": " تونل مسیر ورود به پنل است؛ پورت‌های ورودی و سایر مسیرهای دسترسی مستقیم در رکورد فایروال ظاهر می‌شوند.",
+"Checkpoint or timestamp awaiting verification": "نقطهٔ کنترل یا مهر زمانی در انتظار تأیید",
+"Steps that let an inspection record stand on its own. Local rules decide the form of the record.": "مراحلی که اجازه می‌دهند یک سوابق بازرسی به‌طور مستقل باقی بماند. قوانین محلی شکل سوابق را تعیین می‌کنند."
 }
