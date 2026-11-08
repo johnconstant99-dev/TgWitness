@@ -106,9 +106,8 @@ receipts, so treat it as a private key backup. Keep the original remote configur
 and destination credentials separately as well. A recovery file taken before a
 later copy does not contain that later file's receipt.
 
-The signing-key fingerprint should already be recorded independently. A signature
-checked only against the key supplied inside the same file does not establish whose
-recovery file it is.
+Record the signing-key fingerprint independently: checking the signature against
+that fingerprint identifies whose recovery file it is.
 
 To repair missing storage receipts in an existing workspace, open **Recover files
 from a saved recovery file** and select the file. The panel checks the signature and requires the same workspace

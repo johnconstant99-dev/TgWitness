@@ -101,13 +101,13 @@ can be used with all of your accounts; each account still has its own authorizat
 | TDLib / Pyrogram StringSession | Other library-specific formats | Unsupported |
 | Bot token | A bot with its own access/update model | Not used by this collector |
 
-Telegram chooses code delivery; SMS is not guaranteed. An API hash cannot repair
+Telegram chooses code delivery, including whether to send SMS. An API hash cannot repair
 a revoked session or replace a forgotten 2FA password. TgWitness does not persist
 login codes or the Telegram 2FA password to disk.
 
 For a private source, the account must already have access. A group username is
 unnecessary. A proxy or session import grants neither membership nor administrator
-rights. Current membership does not guarantee access to pre-join history.
+rights. The chat's settings decide whether members see history from before they joined.
 
 ## Import a Telethon session file
 
@@ -191,11 +191,11 @@ The built-in list combines four sources:
 [kort0881/telegram-proxy-collector](https://github.com/kort0881/telegram-proxy-collector)
 and [3yed-61/MTP-Collector](https://github.com/3yed-61/MTP-Collector).
 The bundled snapshot contains endpoint facts, source attribution and download dates.
-A provider's listing is not proof that the proxy works or delivers every Telegram update.
+Listings are inputs; the connectivity checks below decide which proxies are used.
 
 **Automatic MTProxy** checks Telegram transport connectivity, keeps a working proxy
 and switches to another when it fails. Workspaces prefer different proxies when enough
-working entries are available; a unique exit address is not guaranteed. Failed proxies
+working entries are available; proxies can share an exit address. Failed proxies
 rest before another attempt. If none works, the IP mode determines whether collection
 must wait or may use a direct connection. Changing proxies does not change the account
 or erase its journal. Route choices and changes are recorded in the signed journal.
@@ -242,8 +242,7 @@ planned rotation, proxy sharing and permitted fallback delay.
 | Delay before permitted Direct fallback | 10 minutes; Hide the address still refuses Direct |
 | Feed refresh / transport checks | 60 / 10 minutes; main workspace values apply to the shared pool |
 
-Different proxies do not guarantee different exit addresses. These settings do not
-override Telegram limits or prove anonymity.
+Different proxies can share an exit address. Telegram's limits apply on every route.
 
 </details>
 

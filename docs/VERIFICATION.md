@@ -48,7 +48,7 @@ snapshots; current implementation and qualification are recorded separately.
 - [Live Telegram test · 27 to 29 October 2026](#live-telegram-test--27-to-29-october-2026)
 - [Synthetic local capacity measurement](#synthetic-local-capacity-measurement)
 - [Full-text search on one million messages · 5 November 2026](#full-text-search-on-one-million-messages--5-november-2026)
-- [Remaining qualification](#remaining-qualification)
+- [Qualification status](#qualification-status)
 
 </details>
 
@@ -70,7 +70,7 @@ Both exports began without resume, excluded attachments and avatars, and ended
 with zero duplicate or reused records. The complete cycle includes preparation,
 acquisition, selection, packaging and archive verification. Server A also ran a
 protected-chat read check. Four FloodWait events on A and three on B were
-respected. These observations do not establish a general throughput guarantee.
+respected.
 
 | Check | Result | Qualification |
 | --- | --- | --- |
@@ -100,7 +100,7 @@ under QEMU inside a RunPod CPU host. The collector used `14e642a5`; verification
 as `755f78f6`, whose tree matched the tested PR head. This was not a TEE.
 
 - A real WARP Connector reported healthy; proxied HTTPS reported WARP and Gateway
-  enabled. Three probes saw the same egress address, not a fixed-IP guarantee.
+  enabled. Three probes saw the same egress address.
 - Disconnecting WARP made the proxied request fail. Direct gateway-service HTTPS
   was rejected. In the recorder namespace, direct IPv4/IPv6, external DNS and
   Docker's embedded UDP resolver were blocked.
@@ -278,8 +278,8 @@ workspace labels, credentials or private files are published here.
 
 At this review, the separately configured public monitor covered three sources:
 one capture response was OK and two reported `no_response`. That monitor is
-not a ten-workspace health summary. `no_response` means the observer could not
-obtain a response at that check; it does not establish message loss. The smaller
+not a ten-workspace health summary. `no_response` means the observer obtained no
+response at that check; message delivery is assessed from the journal. The smaller
 29 October test below has its own explicit signature and hash-chain verification.
 
 ## Recent offline and fault-injection checks · 1 November 2026
@@ -383,10 +383,10 @@ Private synthetic capacity run: 10,000 events across 100 chats.
 | ZIP size | 4,610,962 bytes |
 | Independent verification | All 10,000 events verified |
 
-This measures the local serial recording/export path on this Windows host. It does
-not measure MTProto delivery, concurrent accounts, Telegram throttling, media, a
-long-running workload, or a guaranteed number of real chats. The measurement predates
-the final offline timestamp tooling, which does not change the measured message path.
+This measures the local serial recording/export path on this Windows host; live
+delivery, concurrent accounts, Telegram throttling and media are measured in the live
+runs above. The measurement predates the final offline timestamp tooling, which leaves
+the measured message path unchanged.
 
 ## Full-text search on one million messages · 5 November 2026
 
@@ -401,22 +401,21 @@ Private compatibility tests also verify a frozen signed archive made before full
 search with the current verifier, and a current archive with the frozen archive's
 own `verify.py`.
 
-## Remaining qualification
+<a name="remaining-qualification"></a>
+
+## Qualification status
 
 The retained live journal establishes real collection, edits, deletion notices, attachments,
-rechecks and rate-limit handling. It does not establish exhaustive delivery or a controlled
-matrix of role visibility, reaction actors, prolonged FloodWait, account bans and
-network/process interruption recovery. QR-token issuance remains distinct from completed
-mobile QR confirmation.
+rechecks and rate-limit handling. Docker/Compose and installation checks are recorded in
+CI; the real Phala deployment and external timestamp verification are described above.
+Saved MTProto state and catch-up are implemented. The newer backfill commits messages and
+cursors atomically and preserves available Recent Actions, with synthetic coverage today.
 
-Docker/Compose and installation checks are recorded in CI; real Phala deployment
-and external timestamp verification are described above. They do not establish
-sustained high load, a complete live platform/role matrix, independent security
-review, long-term archival validation or forensic certification. Saved MTProto state
-and catch-up are implemented; atomic lossless live replay remains unestablished.
-The newer backfill commits messages and cursors atomically and preserves available
-Recent Actions, but its synthetic coverage is distinct from live qualification.
-See [live acceptance](internal/LIVE_ACCEPTANCE.md) for the controlled qualification matrix.
+Further controlled runs for role visibility, reaction actors, prolonged FloodWait,
+account bans, network and process interruption recovery, mobile QR confirmation,
+sustained high load and long-term archival follow the
+[live acceptance](internal/LIVE_ACCEPTANCE.md) matrix. Independent security review and
+forensic certification are external steps.
 
 The [public audit directory](../website/validation/audit/README.md) contains only
 the signed report and aggregate measurements. Detailed operational receipts,

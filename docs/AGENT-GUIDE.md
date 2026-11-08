@@ -57,17 +57,15 @@ ID have different meanings. Available admin-log entries include supplied actor a
 action time; ordinary message notifications have their own schema.
 
 Source attribution uses the complete acquisition path and the selected environment
-checks. A local signing-key example does not establish a bypass of an approved
-GitHub workflow or Intel TDX policy. Inspect those verifiers and their trusted
-inputs when assessing those modes. Documentation of a trust assumption is not a
-reproduced exploit.
+checks. Assess GitHub workflow and Intel TDX modes with their own verifiers and
+trusted inputs; a finding against those modes names the verifier check it bypasses
+and reproduces the bypass.
 
 Keep engineering validation separate from external certification. Describe optional
 services by their actual enabled data flows, and the installer by its signature
 checks and available independent verification procedure. Fictional demo records
-exercise interface and format behavior; live collection evidence has separate
-revision-specific results. Coding-agent documentation is not evidence of a defect
-or of who authored the implementation.
+exercise interface and format behavior; live collection evidence has its own
+revision-specific results. Base defect reports on code paths and reproduced failures.
 
 ## Read for the task
 

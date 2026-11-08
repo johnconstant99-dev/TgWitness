@@ -1768,7 +1768,7 @@ function detailBlock(label,text,cls="") {
   const n=node("div","detail-block "+cls); n.append(node("small","",label),window.TgWitnessPrivacy.render(text||tr("(No text in this version)"),{className:"message-text",tr})); return n;
 }
 function ephemeralMediaText(facts) {
-  const title=facts.mode==="view_once"?tr("View-once media"):tr("Self-destructing media：{n} s",{n:facts.ttl_seconds});
+  const title=facts.mode==="view_once"?tr("View-once media"):tr("Self-destructing media: {n} s",{n:facts.ttl_seconds});
   const outcomes={saved:"File preserved",unavailable:"Attachment unavailable when observed",not_saved:"File not preserved",
     retry:"Preservation pending",hashed:"File hashes; content not downloaded"};
   const detail=outcomes[facts.outcome]||(facts.availability==="unavailable_at_observation"?outcomes.unavailable:null);
@@ -2272,7 +2272,7 @@ function accountExportNextStep(job){
     'Progress is saved. Choose Resume to continue this job.');
   if(job.phase==='waiting')return tr(job.active!==false?
     'Telegram has asked this job to wait. It will continue automatically while TgWitness is running.':accountExportWaiting(job)?
-    'Open Telegram on another device that was signed in before this request and allow this export．The requesting session and a fresh login cannot approve it．Then choose Check approval，or keep this session and resume after the displayed deadline．':
+    'Open Telegram on another device that was signed in before this request and allow this export. The requesting session and a fresh login cannot approve it. Then choose Check approval, or keep this session and resume after the displayed deadline.':
     'Progress is saved. Choose Resume to continue this job.');
   if(job.phase==='paused')return tr('Progress is saved. Choose Resume to continue this job.');
   if(job.phase==='failed')return tr('Review the error below, then choose Resume to retry from saved progress.');
@@ -2348,7 +2348,7 @@ function renderAccountExportJobs(){
     const transfer=job.active!==false&&job.transfer;
     if(transfer){
       const received=humanSize(transfer.received_bytes),total=transfer.total_bytes==null?tr('Unknown'):humanSize(transfer.total_bytes);
-      card.append(node('p','account-export-transfer',tr('Current file：{received} received of {total}．Preserved after the download completes．',{received,total})));
+      card.append(node('p','account-export-transfer',tr('Current file: {received} received of {total}. Preserved after the download completes.',{received,total})));
     }
     const current=job.current_chat;
     if(current)card.append(node("p","account-export-job-note",tr("Current chat: {name}",
@@ -2499,7 +2499,7 @@ $("account-export-preflight").addEventListener("click",event=>busy(event.current
   if(profile!==state.profile||revision!==state.workspaceRevision)return;
   try{if(JSON.stringify(accountExportOptions())!==stamp)return;}catch{return;}
   const sample=result.sample||{},mib=bytes=>(Number(bytes||0)/1048576).toFixed(2);
-  const lines=[tr(result.can_start?"Settings checked. This is not a guarantee that the full export will fit.":"Review the blocking issues before starting."),
+  const lines=[tr(result.can_start?"Settings checked.":"Review the blocking issues before starting."),
     tr("Free disk: {n} MiB.",{n:mib(result.free_disk_bytes)})];
   if(sample.messages_examined)lines.push(tr("Sample: {messages} messages in {chats} chats. Selected file bytes: {files} MiB. Estimated hash manifest: {hashes} MiB.",
     {messages:sample.messages_examined,chats:sample.sampled_chats,files:mib(sample.known_download_bytes),hashes:mib(sample.hash_manifest_estimate_bytes)}));

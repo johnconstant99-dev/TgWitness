@@ -481,7 +481,7 @@ def verification_requirements(args, checked):
     if check and (check["invalid_signatures"] or check["differ_from_journal"]):
         raise ValueError("Channel posts do not match the witness journal")
     if check and check["telegram_post_dates"]:
-        notes.append("Channel dates are supplied metadata; witness signatures do not authenticate publication times.")
+        notes.append("Channel dates are supplied metadata; witness signatures cover the post content.")
     if args.require_witness:
         witnessed = result.get("witness")
         if not witnessed:

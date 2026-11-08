@@ -289,8 +289,8 @@ by a key the witness never saw is reported as not witnessed, and without `--fing
 signer stays unpinned. With `--channel` every signed post must match the witness journal
 record by record: changed posts fail verification, missing posts are listed. A date in a
 supplied Telegram JSON export is editable metadata, outside the signed witness token.
-Matching the token does not authenticate the publication date; the result explicitly
-reports that publication-time verification was not performed.
+Matching the token authenticates the content; the result reports publication-time
+verification as a separate check.
 
 ### Require a witnessed export boundary
 

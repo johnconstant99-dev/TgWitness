@@ -35,7 +35,7 @@ def label(say, facts):
     if not facts:
         return ""
     title = say("View-once media") if facts.get("mode") == "view_once" else say(
-        "Self-destructing media：{n} s", n=facts["ttl_seconds"])
+        "Self-destructing media: {n} s", n=facts["ttl_seconds"])
     status = facts.get("outcome")
     detail = {"saved": "File preserved", "unavailable": "Attachment unavailable when observed",
               "not_saved": "File not preserved", "retry": "Preservation pending",

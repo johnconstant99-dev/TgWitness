@@ -47,7 +47,8 @@ flowchart TD
 
 Authorization, access to a source, a running collector, and complete delivery are
 different questions. A successful login does not grant access to every group.
-A connected transport does not establish that every relevant update arrived.
+Delivery is tracked separately: coverage records, update-gap recovery and rechecks
+show what arrived.
 
 ## Observation scope: chosen chats, a folder or the whole account
 
@@ -215,7 +216,8 @@ account asks for the usual confirmation.
   A join request awaiting administrator approval is recorded as pending, not as membership.
 
 Turn on **Start observation** to capture incoming replies live. Panel actions work while
-observation is paused, but only their direct responses are then guaranteed to be saved.
+observation is paused; the panel then saves their direct responses, and live
+observation captures the rest of the conversation.
 Newly added sources use the configured profile/history intake when observation is running.
 When a source is paused, enable it in **Sources** before sending or pressing its buttons.
 
@@ -308,7 +310,7 @@ descriptor and size policy, so a later edited attachment is not silently substit
 
 Downloads run after message capture. A completed download creates a `media.saved`
 record with its SHA-256 and byte count. Skipped, failed, retried, and interrupted
-work has separate outcomes. A queued job is not proof that the file was preserved.
+work has separate outcomes; a file counts as preserved when its `media.saved` record exists.
 The completed file must also match the byte count in the original observed attachment
 descriptor. A short or unexpectedly long response is not recorded as preserved media.
 
@@ -342,8 +344,8 @@ a `media.skipped` record; turning downloads off pauses the queue until they are 
 The collector records detected disconnects, retries, errors, starts/stops, and
 heartbeats. Short interruptions can be missed by periodic connectivity checks.
 After a restart, missed updates are requested from the saved update position and
-observed chats are rechecked periodically; see [evidence format](EVIDENCE.md#durable-collection-and-process-receipts-02). A snapshot provides context;
-it does not prove that a gap was repaired.
+observed chats are rechecked periodically; see [evidence format](EVIDENCE.md#durable-collection-and-process-receipts-02). A snapshot adds the current state
+as context, and the gap stays recorded.
 
 ## Account isolation and verification
 

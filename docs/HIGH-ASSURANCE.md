@@ -79,7 +79,7 @@ read-only access then shows only this deployment. Credentials are read from
 `--provider-token-file` or the variable above, never from the command line. For AWS the file
 holds `ACCESS_KEY_ID SECRET_ACCESS_KEY [SESSION_TOKEN]`; the region is `--location`.
 
-What each provider's records cannot show is printed in every report. In short: Hetzner
+Every report states the scope of each provider's records. In short: Hetzner
 logs console requests; DigitalOcean's Recovery Console, Linode's Lish/Glish and Vultr's web
 console are not logged as such, so root is locked at the first boot and a console login
 would need a password reset or a boot change, which are logged. Vultr returns the console
@@ -156,7 +156,7 @@ each time stamp to a trusted root and its qualified status, and the PDF's signat
 weight of a qualified time stamp outside the EU, and of the report as a whole, is for the court
 or authority that receives it; the seal shows when the report existed and that it has not changed.
 
-An attestation cannot rule out a flaw in Intel's TDX module or microcode, or physical access to
+The attestation relies on Intel's TDX module and microcode and on the physical integrity of
 the memory bus. Whoever controls the application in Phala's account can deploy another compose;
 it appears as a new revision with a new compose hash. The host controls the machine's time
 source and network.
@@ -239,7 +239,7 @@ Cloud the check passes instead: the connector runs inside the measured compose);
 provider records, firewall, signed statement, host measurements and installer comparison are
 checked as usual. The byte comparison with the reference installer needs a deployed commit
 that already knows `--quick-tunnel`; a 0.7.0 checkout builds the domain installer and reports
-the difference. Cloudflare gives quick tunnels no uptime guarantee, allows 200 requests in
+the difference. Cloudflare offers quick tunnels for trials, allows 200 requests in
 flight and does not carry Server-Sent Events, so the panel's live updates (versions after 0.7.0)
 may not arrive through one and a view needs reloading; that part has not been tried. For a case
 that has to stand, use your own domain.
@@ -408,7 +408,7 @@ are marked for review. An unknown action never passes silently.
 3. the provider log with each action's assessment and, where the provider records it, the actor;
 4. the Cloudflare endpoints holding the tunnel's connections, configuration and audit log;
 5. the signed collector statement;
-6. what the report establishes and what it does not;
+6. what the report covers and what lies outside its scope;
 7. commands to reproduce it, and the SHA-256 of every file it was given.
 
 Hand over the report, `report.json`, `deployment.json`, the published installer and the

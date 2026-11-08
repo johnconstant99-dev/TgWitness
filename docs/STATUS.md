@@ -7,7 +7,7 @@
 [Start, scale and evidence](OVERVIEW.md) explains the one-command installation,
 temporary GitHub capture, investigation options and published measurements.
 
-Source version：**0.9.1 preview**. The [installer](https://get.destroy.tools/)
+Source version: **0.9.1 preview**. The [installer](https://get.destroy.tools/)
 includes the exact source revision in its signed manifest. Tagged packages are
 available under [Releases](https://github.com/phishdestroy/TgWitness/releases).
 

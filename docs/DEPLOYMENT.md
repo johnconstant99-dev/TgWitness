@@ -132,8 +132,8 @@ docker compose up -d --build --wait
 This creates a named persistent volume for /data.
 The web port is mapped to 127.0.0.1:8787. The process runs as UID 10001 with dropped
 capabilities, a read-only root filesystem, and writable /data and /tmp.
-`--wait` checks web-server health before returning; it does not establish Telegram
-authorization or delivery. The supplied helpers use a 180-second readiness timeout
+`--wait` checks web-server health before returning; Telegram authorization and
+delivery appear in the panel. The supplied helpers use a 180-second readiness timeout
 after building. Initial dependency downloads can take longer than that.
 
 Both base Compose files use the project name `tgwitness`, so extracting a new release
@@ -257,8 +257,8 @@ its own persistent volume. The collector's direct host port remains loopback-onl
 The supplied Caddy configuration does not enable access logging.
 
 Open `https://watch.your-domain.org` and enter the panel token. Compose readiness
-does not confirm certificate issuance or external reachability. If HTTPS is not
-ready, inspect DNS, firewall rules, and:
+covers the containers; certificate issuance and external reachability depend on DNS
+and the firewall. If HTTPS is not ready, inspect DNS, firewall rules, and:
 
 ```sh
 docker compose -f compose.yaml -f deploy/compose/compose.https.yaml logs --tail 100 caddy

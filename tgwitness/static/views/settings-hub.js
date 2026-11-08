@@ -500,7 +500,7 @@ export function createSettingsHub(ctx) {
             row.dataset.title=chat.title.toLocaleLowerCase();row.append(check,document.createTextNode(chat.title));list.append(row);}
           filter.oninput=()=>{for(const row of list.children)row.hidden=!row.dataset.title.includes(filter.value.toLocaleLowerCase());};
         }
-        body.append(message(tr('{n} chats loaded. File size and duration are estimates, not a guarantee.',{n:dialogs.dialogs.length})));
+        body.append(message(tr('{n} chats loaded. File size and duration are estimates.',{n:dialogs.dialogs.length})));
         if(dialogs.may_be_truncated)body.append(message('The chat list is limited. Increase the chat list limit in Settings.','notice warning'));
         if(draft.completed)body.append(button('Save chat selection',async()=>{const action=owner();data=await request(action,'settings/scope',draftBody());await navigate('settings');requireOwner(action);toast(tr('Settings saved.'));},'primary'));
         body.append(button('Estimate size and time',async()=>{const estimate=await request(owner(),'first-run/estimate',draftBody());

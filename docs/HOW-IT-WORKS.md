@@ -149,9 +149,8 @@ flowchart LR
 ```
 
 The witness records rollback, a different head at the same count, changed keys,
-invalid answers and missing responses. A larger count alone does not establish
-that every earlier record remains unchanged; compare the export with retained
-checkpoints. A witness on another host avoids sharing the collector's host outage;
+invalid answers and missing responses. To confirm that every earlier record is
+unchanged, compare the export with retained checkpoints. A witness on another host avoids sharing the collector's host outage;
 a separate operator gives additional independence.
 
 The witness attests to the collector's reported journal state. Use a controlled

@@ -12,13 +12,11 @@ Session files, session strings and Auth Keys are **account authorizations**: who
 holds one can act as that account. They do not contain message history.
 
 > [!WARNING]
-> **Do not use anything you cannot afford to lose.** We strongly advise against connecting
-> personal or otherwise valuable accounts, and against creating an API ID / API hash on an
-> account you value. This is not about TgWitness being untested: Telegram restricts and
-> permanently bans accounts unpredictably — for request volumes it happens to consider
-> excessive, regardless of the client or purpose, with no adequate documentation. Many bans
-> are irreversible. Use dedicated accounts. Smooth test runs depend on Telegram, not on the
-> software, and guarantee nothing for later.
+> **Use dedicated accounts.** Telegram restricts and can permanently ban accounts for
+> request volumes it considers excessive, whatever the client or purpose, and documents
+> those limits only in part. Connect accounts prepared for observation rather than
+> personal or otherwise valuable ones, and create an API ID / API hash on a dedicated
+> account.
 
 - [At a glance](#at-a-glance)
 - [Before you start: API ID and API hash](#before-you-start-api-id-and-api-hash)
@@ -81,7 +79,7 @@ briefly marks the account online. This sequence runs once at login completion,
 not on imports, reconnects or restarts. The authorization is saved first; a failed
 request stops the sequence without retrying or discarding the login. Results are
 recorded as `account.initialized`, with error names rather than response bodies.
-The sequence is not a guarantee against account restrictions.
+Telegram's own policies decide account restrictions.
 
 For `tdesktop`, a missing `tz_offset` uses the server's local UTC offset, rounded
 to 900 seconds using the [opentele2 algorithm](https://github.com/DedInc/opentele2/blob/7e973bc71cd7a714ad13ac703c0895a90d36a735/crates/opentele2-core/src/fingerprint.rs)
@@ -129,9 +127,9 @@ Before connection, advisory checks compare the API platform, language pack,
 device/OS and app-version formats, mobile system locale, and Telethon's actual
 schema layer against the reviewed catalog baseline. Warnings appear in the server
 log and account status metadata; they never replace imported values or change the
-schema layer. A different layer is a compatibility review signal, not proof of a
-broken or restricted account. These checks and `official_app` do not certify that
-Telegram considers the account safe from restrictions. Disconnected account status
+schema layer. A different layer is a signal to review compatibility; the account's
+own connection status shows whether it works. Telegram decides restrictions on its
+side, whichever client profile is used. Disconnected account status
 uses the saved profile instead of generating another device description.
 
 To use your own application instead (the account that registers it is the one at risk; see
@@ -165,7 +163,7 @@ If Telegram must be reached through a proxy, set it first under
 1. Open **Account**, tab **Phone**, and enter the number in international format,
    for example `+44 7700 900123`. Spaces and dashes are removed automatically.
 2. Press **Continue**. API ID + Hash can stay empty.
-3. Enter the code Telegram sends (usually to the Telegram app; SMS is not guaranteed).
+3. Enter the code Telegram sends, usually to the Telegram app; Telegram decides whether to send SMS.
 4. If the account has two-step verification, enter that password. It is not the panel
    token and not a device passcode.
 5. Check the account ID shown after login, then choose sources.

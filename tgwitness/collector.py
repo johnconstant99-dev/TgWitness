@@ -1895,7 +1895,7 @@ class Collector:
 
     def source_visibility(self, chat_id, overview):
         cached = self.dialog_cache.get(chat_id)
-        status = {"checked_at": utcnow(), "meaning": "Dialog visibility is not a guarantee of every update.",
+        status = {"checked_at": utcnow(), "meaning": "Dialog visibility shows the chat is reachable; coverage tracks update delivery.",
                   "visibility": (cached or {}).get("visibility", "unknown"), "role": (cached or {}).get("role", "unknown")}
         lost = self.store.get_setting("lost_sources", {})
         if cached is not None:

@@ -127,8 +127,8 @@ These choices follow Google's documentation on [page titles](https://developers.
 [descriptions](https://developers.google.com/search/docs/appearance/snippet),
 [canonical URLs](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls)
 and [breadcrumbs](https://developers.google.com/search/docs/appearance/structured-data/breadcrumb).
-Metadata helps describe and discover pages; it does not guarantee indexing, a
-particular snippet, a rich result or a ranking.
+Metadata helps describe and discover pages; search engines decide indexing,
+snippets, rich results and ranking.
 
 ## Maintain the site
 

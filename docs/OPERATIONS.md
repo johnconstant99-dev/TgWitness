@@ -246,8 +246,8 @@ panel across separate instances. Never point several workers at one database.
 Run `python start.py --check` before starting a prepared environment. Add `--json`
 for machine-readable checks or pass the intended `--data-dir`, `--host` and `--port`.
 The command checks prerequisites without Telegram login or creating a journal.
-It does not verify a journal or prove capture readiness; journal verification runs
-during application startup. An occupied port may simply be an existing instance.
+Journal verification runs during application startup, and capture readiness shows
+in the panel. An occupied port may simply be an existing instance.
 
 Browsers supporting the File System Access API save exports through a writable
 stream. Other browsers buffer at most 128 MiB. Use the streaming CLI for larger
@@ -274,8 +274,8 @@ ZIP separately with a trusted fingerprint/checkpoint.
    `vault.external.json`. Generating a new key cannot recover the old secrets.
 4. Restore while the destination is stopped; configure the original key, restrict
    access, and verify integrity before resuming.
-5. Record downtime and verification results. A history snapshot cannot prove that
-   no deletions happened during the interruption.
+5. Record downtime and verification results. The downtime stays a recorded gap;
+   a history snapshot adds the state after it.
 
 Evidence ZIPs exclude sessions/private keys and are not full service backups.
 Four things are protected differently:
@@ -292,8 +292,8 @@ Use protected storage and a deliberate transfer mechanism for both. Temporary se
 `temporary-exports/`; completed responses are cleaned up, and interrupted export
 files are removed on the next startup while that workspace's instance lock is held.
 
-A connection-restored event does not guarantee recovery of intermediate changes.
-Persistent media jobs and the Telegram update position survive restart; see
+After a connection-restored event, the collector requests missed updates from the
+saved update position. Persistent media jobs and the Telegram update position survive restart; see
 [evidence format](EVIDENCE.md#durable-collection-and-process-receipts-02).
 
 ## Capacity and retention
@@ -306,7 +306,7 @@ lower limit. Reserve space for journals, media, WAL, temporary exports and backu
 Exports use the data volume rather than Compose's 512 MiB `/tmp`.
 
 Measure events/second, queue age, media bytes and disk latency rather than counting
-groups alone. Synthetic local benchmarks do not guarantee Telegram delivery.
+groups alone. Live delivery is measured on the running collector.
 There is no automatic retention deletion. Removing a journal tail invalidates its
 relationship to retained checkpoints.
 

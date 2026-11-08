@@ -54,7 +54,7 @@ Read the introduction, chronology, assurance checks, limitations and verificatio
 
 A recorded claim is described as a recorded claim. A document event containing `signature_claimed: qualified` and `signature_objects: 0` does **not** become a finding that the PDF is unsigned, forged or legally invalid. The renderer does not independently inspect PDF signatures, validate QES or DKIM, or reconstruct an earlier receipt date. External anchor files receive credit only when the verifier actually checks them. A pending OTS submission remains unconfirmed.
 
-Counts describe event kinds. New messages, edits, deletion notices and absence on recheck remain distinct. Counts do not establish continuous coverage. Unknown events retain their source references and an interpretation limitation. Dates in scenes come from signed event metadata, not an authenticated wall clock. Bitcoin dates are block-header dates, not exact receipt times.
+Counts describe event kinds. New messages, edits, deletion notices and absence on recheck remain distinct, and coverage records describe continuity. Unknown events retain their source references and an interpretation note. Dates in scenes come from signed event metadata; verified timestamps bound them externally. Bitcoin dates are block-header dates.
 
 The HTML timeline has keyboard-focusable and hoverable event references. Every SVG has a title and description. The PDF uses selectable text and the same drawing geometry; it does not depend on a browser or an SVG conversion service. Japanese PDF generation uses the project's existing CJK font discovery; a suitable installed font is required. No new package dependency was added.
 

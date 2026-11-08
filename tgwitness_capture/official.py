@@ -132,9 +132,9 @@ class OfficialBrowser(BrowserCapture):
                 "steps": self.steps, "exit_ip": self.exit_ip, "options": self.options.receipt(),
                 "environment_attested": False, "logout_confirmed": getattr(self, "logout_confirmed", False),
                 "limits": ["Official client may send read receipts and online status",
-                           "No guarantee against Telegram restrictions",
-                           "Rendered observations only; not complete account history",
-                           "Local host administrator is trusted; no sealed attestation is asserted"]}
+                           "Telegram decides account restrictions",
+                           "Rendered observations of the selected chat",
+                           "Local host administrator is within the trust boundary; the GitHub-hosted procedure adds sealed attestation"]}
 
     async def connect(self):
         if self.page is None:

@@ -55,8 +55,8 @@ is deliberate.
 - Edits (`message.edited`), deletion notices (`deletion_notice`) and
   `missing_on_recheck` are different observations. Do not call a missing message
   deleted.
-- A missing record does not prove that something never happened. Check
-  `stats` → `coverage` for periods without confirmed collection.
+- Read absence through coverage: `stats` → `coverage` lists the periods without
+  confirmed collection, and a statement about absence applies to covered periods.
 - `stats` counts are computed from saved records. Hour and weekday figures are in
   UTC and only suggest a time zone. If `complete` is false, say the figures are
   partial.

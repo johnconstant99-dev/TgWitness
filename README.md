@@ -20,19 +20,14 @@
   <a href="LICENSE"><img src="docs/assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a>
 </p>
 
-## Development and validation
+## Published results
 
-The maintainers report **more than six months of active development and testing**
-before the November 2026 public release period, with cumulative development test
-workload **on the order of 100 million**, including failures, fixes and repeated
-validation. The public repository's age describes publication, not the start of
-that work. [Development history and measured scale](docs/OVERVIEW.md#testing-history-and-duration).
-
-Published results include **48 verified archives with 3,598,381 records** and an
-eight-account acquisition of **768,007 history records at 687.512 records/s**, with
-waits included and attachment downloads disabled. See the
-[workload, timings and verification](docs/EXPORT-BENCHMARK-2026-11-06.md).
-These and the examples below are selected measurements from the development history.
+**48 verified archives with 3,598,381 records** and an eight-account acquisition of
+**768,007 history records at 687.512 records/s**, with waits included and attachment
+downloads disabled. Each run lists its source revision, workload, timings and
+verification result: [workload, timings and verification](docs/EXPORT-BENCHMARK-2026-11-06.md).
+Changes to `main` run the public [CI workflows](.github/workflows/README.md),
+including Linux and Windows installer tests and the standalone verifier build.
 
 ## Measured exports · 6 November 2026
 
@@ -46,7 +41,7 @@ These and the examples below are selected measurements from the development hist
 | Server B | 29,299 | 182.513 s | **160.531 messages/s** | 206.650 s | 141.781 messages/s |
 
 Text and metadata through WARP, two accounts per server, no attachments or reused records.
-These are individual runs on [`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e), not a capacity guarantee.
+Measured on revision [`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e).
 
 [**Explore the English demo →**](https://phishdestroy.github.io/TgWitness/demo/?lang=en) ·
 [**Measurements, dates and method →**](https://phishdestroy.github.io/TgWitness/docs/validation/) ·
@@ -64,9 +59,6 @@ The version badge describes this source tree. Installable builds are listed unde
 ## Install
 
 Python included. Use the same commands to update.
-The download site automatically receives checked builds from `main` after Linux
-and Windows installation tests pass. Failed builds leave the previous download
-available; already installed panels update only when you rerun the installer.
 
 **Linux / macOS**
 
@@ -80,13 +72,38 @@ curl -fsSL https://get.destroy.tools/install.sh | bash
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
 ```
 
-<sub>Ubuntu server: run as root. Desktop: run as your normal user.</sub>
+<sub>Ubuntu server: run as root. Desktop: run as your normal user. `-ExecutionPolicy Bypass` applies to this one PowerShell process.</sub>
+
+`get.destroy.tools` is the project's download site. The public
+[Installer workflow](.github/workflows/installer.yml) builds it from
+[`deploy/installer/`](deploy/installer/README.md) for the exact `main` revision,
+publishes it after the Linux and Windows installation tests pass, and signs the
+installer scripts and application packages with the release key in
+[`release-signing.pub`](deploy/installer/release-signing.pub). The installer checks
+the SHA-256 and RSA signature of the package and dependency lock before installing.
+To check the script itself first, download it with its signature and run the
+[verify-first commands](docs/INSTALLATION.md#verify-before-running). A failed build
+keeps the previous download; installed panels update when you rerun the installer.
+GitHub [Releases](https://github.com/phishdestroy/TgWitness/releases), source and
+[Docker](docs/DEPLOYMENT.md) are the other ways to install.
 
 [First setup](docs/SETTINGS.md) ·
 [Setup & panel access](docs/INSTALLATION.md) ·
 [Signatures & SHA-256](https://get.destroy.tools/#verification) ·
 [Update](docs/INSTALLATION.md#update-an-existing-installation) ·
 [ZIP downloads](https://github.com/phishdestroy/TgWitness/releases)
+
+### Your sessions and data
+
+TgWitness runs on your computer or server, and the panel listens on localhost by
+default. Telegram sessions, proxy credentials and access-token hashes are stored in
+each workspace's encrypted vault, with an optional
+[external master key](docs/SECURITY-MODEL.md#external-master-key). The application
+has no telemetry. It connects to Telegram and to the services its settings use:
+public MTProxy lists, your proxies, S3 storage, a witness bot, timestamp
+authorities, AI providers and webhooks. The [System map](docs/SYSTEM-MAP.md) lists
+the connections the application process makes.
+Observe with a [dedicated Telegram account](https://phishdestroy.github.io/TgWitness/docs/dedicated-account/).
 
 <a name="screenshots"></a>
 
@@ -269,6 +286,15 @@ The verifier checks signatures, the journal chain, the file manifest and attachm
 against your trusted inputs. With a retained checkpoint it also checks the archive
 against an earlier journal state.
 
+**Where the messages come from.** Telegram delivers messages to every client,
+official apps included, through an MTProto session rather than with per-message
+signatures. The session key is negotiated against Telegram's pinned server key, and
+every update arrives encrypted and integrity-checked under it. TgWitness receives
+messages through that authenticated session and signs each observation into the
+journal as it arrives. [GitHub Actions capture](docs/SEALED-ACTIONS.md) and
+[Phala Intel TDX](docs/HIGH-ASSURANCE.md) add attestation of the collector that
+received and signed them.
+
 [Archive verification](docs/wiki/Exports-and-Verification.md) · [Checks and tested scale](docs/VERIFICATION.md)
 
 <picture>
@@ -401,33 +427,8 @@ for history, live observation and sealed acquisition.
 
 <!-- operator-notice:start -->
 
-<details>
-<summary><strong>⚖️ Ethical Notice &amp; Historical Continuity</strong></summary>
+[Author's position](docs/OPERATOR-INCOMPATIBILITY.md) · [Source record](https://phishdestroy.io/steam_dossier/taylor_wessing) · [MIT License](LICENSE)
 
-We have recently learned that for certain law firms—and specifically Dr. Tobias Schelinski and Dr. Patrick Vincent Zurheide—mathematics and objective facts are irrelevant.
-
-Selling GDPR non-compliance to corporations as a commercial service while failing at basic data handling yourselves is not legal expertise.
-
-Operating under the delusion that you are the law, or that an elite signature on a falsified claim magically turns a lie into truth, does not mask technical incompetence.
-
-This tool is incompatible with jurisdictions where the following prevail:
-
-- Corporatocracy
-- Privatized or commercial justice
-- Plutocracy
-- Kleptocracy and institutional corruption
-
-A special mention to Dr. Patrick Zurheide, Dr. Tobias Schelinski, and those attempting to weaponize the "Right to be Forgotten" to bury their own data-processing failures, sanitize their institutional lineage, and erase the historical record:
-
-> Taylor Wessing (Dr. Tobias Schelinski & Dr. Patrick Vincent Zurheide) → Wessing & Berenberg-Gossler → Stonewall Top 100 → Dr. Graf von der Goltz Dr. Wessing & Partner (since 1957) → Rüdiger Graf von der Goltz → Paragraph 175 in its 1935 revision
-
-To strictly comply with the MIT License, we do not restrict the use of this software. However, let it be clear: corporate retainers, legal intimidation, and demands for digital erasure cannot override history, rewrite lineage, or conceal the truth.
-
-[Source record](https://phishdestroy.io/steam_dossier/taylor_wessing)
-
-[MIT License](LICENSE) · [Technical notice](docs/OPERATOR-INCOMPATIBILITY.md) · [Original NOTICE](NOTICE)
-
-</details>
 
 <!-- operator-notice:end -->
 

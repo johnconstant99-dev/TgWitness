@@ -127,7 +127,7 @@ zone, and recent online stretches.
 Asking Telegram is an action by the investigating account and every check is
 journaled. A person who hides last seen shows only a coarse state such as
 *recently*, and an exact time of going offline is given only when they allow it.
-No change between two checks does not prove the person was offline.
+Each check records the state Telegram showed at that moment.
 
 ## Codes in images
 
@@ -237,7 +237,7 @@ folder:
   process in plain words, the SHA-256 of every file in the package, the
   disclosed limitations, and blank fields for the declarant. It states that a
   certification establishes authenticity only and that the adverse party must be
-  given notice. It is a template to review before signing, not legal advice.
+  given notice. The declarant reviews and completes the template before signing.
 - **Exhibit index**, numbering every cited file with its hash, size, type, the
   steps that cite it and their journal records, as CSV and HTML.
 - **Annex for official requests**: numeric IDs, usernames with the times they

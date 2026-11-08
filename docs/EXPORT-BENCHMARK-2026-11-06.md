@@ -67,8 +67,8 @@ Resumed pages are excluded from current-attempt history throughput.
   found only photo `file_reference`/`access_hash` changes within reply metadata.
   Original byte-level differences remain retained. The remaining record
   was saved successfully but was not returned on the final
-  ID recheck. That later result was not a parser exception and does not establish
-  why the message became unavailable to the observing account.
+  ID recheck. That later result was a Telegram response rather than a parser
+  exception; the saved record keeps the message as observed.
 - File references can expire and be refreshed by fetching their source again;
   see [Telegram's documentation](https://core.telegram.org/api/file-references).
   Media bytes were not compared.
@@ -83,8 +83,8 @@ Resumed pages are excluded from current-attempt history throughput.
   local exports. The independent API checks are not a Desktop-export comparison.
 - Sequential final checks found all 40 accounts authorized, with matching account
   identities and no frozen, restricted or deleted flags in the inspected API
-  responses. All clients disconnected after checking. This states their observed
-  condition at that time, not a guarantee against future restrictions.
+  responses. All clients disconnected after checking. This records their observed
+  condition at that time.
 
 Recorded backoffs, including pilots and interrupted runs, comprised 690 events
 with requested waits from 3 to 31 seconds. Full deadlines were retained. Saved

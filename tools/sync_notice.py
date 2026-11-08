@@ -41,21 +41,6 @@ def quoted_html(text):
     return '<blockquote>\n' + '\n'.join(blocks) + '\n</blockquote>'
 
 
-def ethical_excerpt(ethical):
-    heading, body = ethical.split('\n', 1)
-    title = html.escape(heading.removeprefix('## '))
-    return f'''<details>
-<summary><strong>{title}</strong></summary>
-
-{body.strip()}
-
-[Source record]({SOURCE})
-
-[MIT License](LICENSE) · [Technical notice](docs/OPERATOR-INCOMPATIBILITY.md) · [Original NOTICE](NOTICE)
-
-</details>'''
-
-
 def excerpt(notice, licence, raw):
     return f"[Author's position]({notice}) · [Source record]({SOURCE}) · [MIT License]({licence})\n"
 
@@ -118,8 +103,7 @@ def outputs(root):
             raise ValueError('Exactly one notice slot is required in ' + name)
         before, tail = source.split(START, 1)
         _, after = tail.split(END, 1)
-        content = ethical_excerpt(ethical) if name == 'README.md' else excerpt(notice, licence, raw)
-        result[name] = before + START + '\n\n' + content + '\n\n' + END + after
+        result[name] = before + START + '\n\n' + excerpt(notice, licence, raw) + '\n\n' + END + after
     return result
 
 

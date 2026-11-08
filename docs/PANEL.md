@@ -228,7 +228,7 @@ Progress survives a restart; attachments follow your media settings. See
   AES-256 ZIP that 7-Zip or WinRAR opens. The signed file inside is unchanged. The
   password is not stored.
 - **Prepared exports** keeps up to 20 files within 2 GiB, plus the latest one, for
-  repeat downloads, each with its SHA-256. Preparing a file does not prove delivery.
+  repeat downloads, each with its SHA-256 for the recipient to compare.
 - When the browser refuses its save dialog, the panel falls back to an ordinary download.
 - **Your signing identity** shows the key fingerprint. **Save checkpoint** and
   **Download signed run receipt** give you records to keep outside the collector.

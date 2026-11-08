@@ -106,7 +106,7 @@ Suggested topics: `telegram`, `telethon`, `self-hosted`, `python`, `fastapi`,
 
 Pull requests build and test the site, but cannot deploy it. Only the deploy job has
 `pages: write` and `id-token: write`; no personal token is needed for Pages.
-A workflow definition is not evidence of a successful hosted run.
+Confirm a hosted run from its Actions result.
 
 ## What gets published to Pages
 

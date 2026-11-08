@@ -63,8 +63,8 @@ the filters. Unrelated messages are not added to these histories.
 date-derived ID span. Every known source record is checked before declaring a
 number unobserved: filtering out another author, an event type or a date cannot
 create a false gap. Neighboring saved messages are labelled as context. A missing
-number does not establish that a message existed or was deleted; deletion notices
-and unsuccessful rechecks remain separate event types.
+number marks an unobserved position; deletion notices and unsuccessful rechecks are
+reported as their own event types.
 
 ### Choose a design
 
@@ -239,9 +239,9 @@ account, external timestamp service or network connection is used to create it.
 ## Reading a concrete case
 
 For a journal of 1,200 entries with a validated timestamp at entry 1,000, the
-report identifies 200 later entries outside that timestamp's bound. This is an
-upper bound on the existence of a checkpoint, not proof of each message's send
-time. If three other timestamp files fail validation or cannot be validated,
+report identifies 200 later entries outside that timestamp's bound. The timestamp
+fixes an upper bound on when the checkpoint existed; each message keeps its own
+send time from Telegram. If three other timestamp files fail validation or cannot be validated,
 they are counted separately and cannot supply a positive conclusion.
 
 A usable timestamp must satisfy all of these checks: its imprint matches the

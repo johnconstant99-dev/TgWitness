@@ -66,10 +66,10 @@ Demo messages are fictional. Demo mode cannot connect a real Telegram account.
 ## Connect Telegram
 
 > [!WARNING]
-> **Do not use anything you cannot afford to lose.** We strongly advise against connecting
-> personal or valuable accounts and against creating an API ID / hash on an account you value.
-> Telegram bans accounts unpredictably and often permanently, regardless of the client.
-> A smooth test run depends on Telegram, not on TgWitness, and guarantees nothing for later.
+> **Use dedicated accounts.** Telegram can restrict or permanently ban accounts for request
+> volumes it considers excessive, whatever the client. Connect accounts prepared for
+> observation rather than personal or valuable ones, and create an API ID / hash on a
+> dedicated account.
 
 1. If the native demo is running, stop it and run **Start.cmd** or `sh start.sh`.
    Otherwise, keep the live installation started above running.

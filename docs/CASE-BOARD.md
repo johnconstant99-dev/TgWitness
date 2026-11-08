@@ -202,8 +202,8 @@ investigator labels with R01, R02… in metadata and known occurrences in notes.
 `annotations.jsonl` is disclosed. The signed `tgwitness-case-board-handover-v1` sidecar and report
 contain the same minimized material. Slice counts describe disclosed records only, with original
 snapshot/query actor details withheld. Free-text names not known to the minimizer still require
-review, as they do in ordinary handovers. This derivative does not claim to preserve original
-annotation signatures after redaction.
+review, as they do in ordinary handovers. The derivative carries its own signature;
+the original annotations keep theirs in the full archive.
 
 ## Operating limits
 

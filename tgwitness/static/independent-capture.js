@@ -121,7 +121,7 @@
       for (const input of Object.values(flags)) input.parentElement.hidden = official;
       saveOptions.hidden = toggle.hidden = snapshot.hidden = official;
       videoHelp.textContent = tr(remote.video_available ? 'Video is available. It is recorded only while capture is running.' : 'Video is unavailable until an operator configures a screen source and FFmpeg.');
-      if (official) videoHelp.textContent = LANG === 'ru' ? 'Этот рекордер управляет официальным Telegram Web．Откройте его панель для входа，выбора чата，темпа и завершения сессии，используйте токен управления рекордером．' : 'This recorder owns the official Telegram Web client．Open its panel to log in，select a chat，set the pace and finish the session，using the recorder control token．';
+      if (official) videoHelp.textContent = LANG === 'ru' ? 'Этот рекордер управляет официальным Telegram Web. Откройте его панель для входа, выбора чата, темпа и завершения сессии, используйте токен управления рекордером.' : 'This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.';
       toggle.textContent = tr(remote.settings.enabled ? 'Pause capture' : 'Start capture');
       snapshot.disabled = !remote.settings.enabled; zip.disabled = !!remote.settings.enabled;
       refreshTabs.disabled = selectTab.disabled = !!remote.settings.enabled;

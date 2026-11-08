@@ -11,7 +11,7 @@
     }
     if (armed && reason && document.body && !document.getElementById('tgwitness-stop-cover')) {
       const cover = document.createElement('div'); cover.id = 'tgwitness-stop-cover';
-      cover.textContent = 'TgWitness：observation stopped';
+      cover.textContent = 'TgWitness: observation stopped';
       Object.assign(cover.style, {position:'fixed',inset:'0',zIndex:'2147483647',background:'#101827',color:'#fff',display:'grid',placeItems:'center',font:'24px system-ui'});
       document.body.append(cover);
     }

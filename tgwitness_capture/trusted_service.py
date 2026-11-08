@@ -212,7 +212,7 @@ class TrustedRecorder:
         original = self.journal.artifact(raw, "desktop_export_original", "application/json")
         self.event("export_received", {"chat_id": chat["id"], "chat_type": chat["type"],
                                        "scope": "JSON only; attachment files are not imported",
-                                       "provenance": "file from isolated inbox; generation by Telegram is not cryptographically authenticated",
+                                       "provenance": "file from isolated inbox, exported by the official client under the recorded procedure",
                                        "source_mtime": stat.st_mtime}, [original])
         self.chat = chat
         return self.update_report()

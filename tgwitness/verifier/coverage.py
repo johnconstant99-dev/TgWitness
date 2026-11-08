@@ -211,8 +211,8 @@ def scope_reason(scope):
     if not isinstance(scope, dict) or scope.get("mode") != "account":
         return ("Private chats, bots and ordinary groups share one account-wide numbering. It can be measured only "
                 "while whole-account collection is on; this journal has no such period.")
-    return ("The scope does not confirm that private chats, bots, ordinary groups and the account's own messages "
-            "were all included without excluded chats; those messages take numbers from the same sequence.")
+    return ("Private chats, bots, ordinary groups and the account's own messages take numbers from the same "
+            "sequence, so the measurement needs a scope recorded as including all of them without excluded chats.")
 
 
 class Sequences:

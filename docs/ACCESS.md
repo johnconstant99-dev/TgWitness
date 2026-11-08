@@ -178,8 +178,8 @@ unknown, mismatching and duplicate selectors are rejected with 404.
 Panel scripts and styles carry SHA-384 integrity metadata. An import map also
 covers locally imported JS modules in browsers that support import-map integrity.
 The dynamically generated language response is separate. These checks detect
-asset substitution relative to the delivered page; they do not establish trust
-in a compromised server that can replace both the page and its hashes.
+asset substitution relative to the delivered page; the page itself and its hashes
+come from the panel server, so protect that server and its delivery path.
 
 **Log since this start** combines process logs with journal activity from every
 workspace: sign-ins, refusals, route changes and operator actions. It is an
