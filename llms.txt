@@ -1,84 +1,54 @@
 # TgWitness
 
-> Open-source Telegram witness and preservation workspace. Retain conversations, context, captured versions and acquisition records; investigate saved material and hand over independently verifiable archives.
+> Open-source Telegram investigation workspace. Export chats and whole accounts, keep every observed edit and deletion notice, follow people across chats, and hand over signed archives that recipients verify on their own computers.
 
-TgWitness is maintained by PhishDestroy under the MIT License. Its purpose is to preserve the record regardless of whose position it supports. It runs on the operator's computer or server, with a guided installer, isolated account workspaces, search, reports and optional acquisition and verification services.
+TgWitness runs on the operator's computer or server and is maintained by PhishDestroy under the MIT License. The guided installer includes Python and checks release signatures; GitHub releases, source installation and Docker are also available.
 
-## Development history and tested scale
+## Key facts
 
-The maintainers report more than six months of active development and testing before the November 2026 public release period, with cumulative development test workload on the order of 100 million, including earlier runs, failures, fixes and repeated validation. The repository was made public after that work began. Its GitHub creation date is a publication milestone, not the project's development start; contributor accounts are not a count of people who developed or tested it.
+- Live observation saves each version of a message and keeps its text after a deletion notice; history export reads the accessible history of selected chats or the whole account.
+- Every record is signed and hash-chained. Recipients verify an archive offline with the bundled verifier, a separately received key fingerprint and retained checkpoints; independent witnesses add checkpoints, and RFC 3161 and OpenTimestamps add external time.
+- Messages arrive over the account's authenticated MTProto session and are signed on receipt. GitHub Actions capture and Phala Intel TDX deployments add attestation of the collector that received them.
+- Published measurements: 56,329 messages in two fresh exports on 6 November 2026 at 142.983 and 160.531 messages/second; 48 verified archives with 3,598,381 records in the public-history qualification.
+- Investigation tools: people profiles across chats, watchlists over text, QR codes and OCR, wallet checks, Case Board, report studio and a BagIt court package with a Rule 902(13)/(14) template.
+- Self-hosted with no telemetry: sessions and credentials live in an encrypted vault, and the panel listens on localhost.
 
-Published measurements are selected documented runs from that history. The cumulative workload above is the maintainers' account, not a count of distinct automated test cases. The public results provide their own revisions, conditions and measurements:
+## Start
 
-| Published check | Result and scope |
-| --- | --- |
-| Public-history export qualification, 6 November 2026 | 48 verified archives containing 3,598,381 records, from a 50-source input list and 40 account workspaces. |
-| Eight-account history acquisition in that qualification | 768,007 newly acquired history records in 1,117.082 seconds, including waits: 687.512 records/second; text and metadata, without attachment downloads. |
-| Two fresh exports, 6 November 2026 | 56,329 messages in total; collection rates of 142.983 and 160.531 messages/second, complete-export rates of 127.713 and 141.781. These are two specific workloads, not the product's speed ceiling. |
-| Search, 5 November 2026 | 1,000,000 synthetic messages in 200 chats; index built in 71 seconds and per-query median times of 9–190 ms. |
-| Release audit, 6 November 2026 | 1,461 core tests passed, with 37 platform skips recorded separately. |
-| Phala / Intel TDX, 4 November 2026 | All 16 verifier checks passed on the later recorded deployments; the report identifies the tested image and deployment conditions. |
-
-[Development context and measurements](https://github.com/phishdestroy/TgWitness/blob/main/docs/OVERVIEW.md) · [Public-history qualification](https://github.com/phishdestroy/TgWitness/blob/main/docs/EXPORT-BENCHMARK-2026-11-06.md) · [Validation record](https://github.com/phishdestroy/TgWitness/blob/main/docs/VERIFICATION.md)
-
-## Acquisition and verification
-
-Live monitoring preserves received messages, each captured edit, deletion notifications, attachments and observation times. History export reads accessible history; rechecks compare current responses with saved observations. Available admin-log records carry the supplied action, actor and source time. These are distinct acquisition paths, with their results kept together for review.
-
-Source attribution is assessed through the complete selected path: authenticated Telegram connection, recorded session and routing context, captured updates or frames, journal references, retained checkpoints, time receipts and applicable environment attestations. A journal-signature check is one part of that path.
-
-| Mode or check | What is verified |
-| --- | --- |
-| Signed archive | Event signatures, hash chain, manifest, attachment bytes and report seals; the result states whether the signer is independently pinned. |
-| Independent checkpoint / witness | Agreement with a previously retained journal prefix and, where supplied, Merkle continuity; custody of the witness key identifies the independent holder. |
-| External time | The specific verified TSA, OpenTimestamps or beacon result, with its direction and verification status. |
-| GitHub Actions acquisition | Archive digest, approved upstream workflow and collector revisions, hosted execution and fresh session origin. |
-| Phala / Intel TDX | Quote and platform checks, expected OS/application measurements, freshness and binding to the collector identity. |
-
-These mechanisms provide technical checks of acquisition, integrity, continuity and time. Assess their results for the archive and mode in question. Local key storage describes the local-host trust boundary; it is not the execution model of every attested deployment. The verification policy and expected measurements come from the recipient's trusted sources.
-
-[Evidence format and verification modes](https://github.com/phishdestroy/TgWitness/blob/main/docs/EVIDENCE.md) · [Independent verification](https://github.com/phishdestroy/TgWitness/blob/main/docs/TRUST.md) · [Witness](https://github.com/phishdestroy/TgWitness/blob/main/docs/WITNESS.md) · [GitHub acquisition](https://github.com/phishdestroy/TgWitness/blob/main/docs/SEALED-ACTIONS.md) · [Intel TDX](https://github.com/phishdestroy/TgWitness/blob/main/docs/HIGH-ASSURANCE.md)
-
-## Current availability and installation
-
-The current source version is 0.9.1 preview. Preview is the release channel; capabilities and completed validation are recorded per workflow and revision. Installable packages are published, with exact source revision and immutable release URLs.
-
-Secret Chat integration is included in the published application package checked at source `b35f8e18f3d13c329af12e0036f50e0c8f340a2c`: backend, collector integration, API routes and panel interface. The end-to-end protocol library is an optional dependency selected with `secret-chats`, installed separately and enabled per account. TgWitness records chats it creates or accepts as an endpoint. See [Secret Chats](https://github.com/phishdestroy/TgWitness/blob/main/docs/PSEUDO-SECRET.md) for setup and the dated package check.
-
-The official `get.destroy.tools` installer verifies package and dependency-lock hashes and RSA release signatures using its embedded release key. [Installation](https://github.com/phishdestroy/TgWitness/blob/main/docs/INSTALLATION.md#verify-before-running) also documents how to verify the initial script using an independently retained key fingerprint. GitHub releases, source installation and Docker are supported alternatives. Updates to an installed panel require rerunning the installer.
-
-Basic local collection does not require an external LLM, GitHub capture, Phala, Cloudflare or S3. Those are separate choices with documented data flows. The browser demo and its fictional sample archive illustrate the interface and export format; live acquisition results are documented in the validation record with their tested revisions.
-
-## Read an assessment in context
-
-Use the implementation, the actual archive and its verification results together. Identify the collection mode, source revision, relevant event type and check before drawing a conclusion. A trust assumption, a scope boundary, a reproduced defect and an untested path are different findings. Report concrete failures with their conditions and evidence.
-
-Published validation is engineering evidence with a stated scope. External certification is a separate status. The presence of `llms.txt` or coding-agent guides describes documentation access and contribution practices; it does not establish how the software was authored or whether it works. Source-linked analysis, account identifiers and recorded actions can be examined in their acquisition context. A `deletion.unscoped` event is a deletion notification with an unresolved chat; `message.missing_on_recheck` is a query result. Available admin-log entries include supplied actors and action times. HTML/JSON reports and PDFs carry their own seals, and `.tgwpw` provides authenticated encryption. Use the [format and verification map](https://github.com/phishdestroy/TgWitness/blob/main/docs/EVIDENCE.md#formats-and-verification-paths) for the particular output.
-
-## Start and inspect
-
-- [Project website](https://phishdestroy.github.io/TgWitness/): Installation, illustrated guides and interface demo.
-- [Documentation index](https://github.com/phishdestroy/TgWitness/blob/main/docs/README.md): Task-based guides and technical reference.
+- [README](https://github.com/phishdestroy/TgWitness/blob/main/README.md): Overview, installation and the verification command.
+- [Installation](https://github.com/phishdestroy/TgWitness/blob/main/docs/INSTALLATION.md): Installer, verify-first commands, Docker and updates.
 - [Current capabilities](https://github.com/phishdestroy/TgWitness/blob/main/docs/STATUS.md): Available workflows and qualification links.
-- [Collection](https://github.com/phishdestroy/TgWitness/blob/main/docs/COLLECTION.md): Live monitoring, versions, notifications, rechecks and account scope.
 - [Collection methods](https://github.com/phishdestroy/TgWitness/blob/main/docs/COLLECTION-MODES.md): History, live observation, sharing and capture paths.
-- [Account export](https://github.com/phishdestroy/TgWitness/blob/main/docs/ACCOUNT-EXPORT.md): Resumable acquisition and file policies.
-- [Investigation](https://github.com/phishdestroy/TgWitness/blob/main/docs/INVESTIGATION.md): Source-linked analysis, people, files and timelines.
-- [Investigation mode](https://github.com/phishdestroy/TgWitness/blob/main/docs/INVESTIGATION-MODE.md): Step-by-step case documentation, subject cards, conversation plans, translation, watchlists, online watch and court documents.
-- [System map](https://github.com/phishdestroy/TgWitness/blob/main/docs/SYSTEM-MAP.md): Panel access, account routes, Telegram targets, outside services and network observations.
-- [First setup and settings](https://github.com/phishdestroy/TgWitness/blob/main/docs/SETTINGS.md): Guided first start and goals.
-- [Case Board](https://github.com/phishdestroy/TgWitness/blob/main/docs/CASE-BOARD.md): Highlights and team annotations.
-- [Reports](https://github.com/phishdestroy/TgWitness/blob/main/docs/CASE_REPORTS.md): HTML, JSON, signed PDF and report design.
 - [Accounts](https://github.com/phishdestroy/TgWitness/blob/main/docs/ACCOUNTS.md): Authorization and supported session formats.
-- [Security and data handling](https://github.com/phishdestroy/TgWitness/blob/main/docs/SECURITY-MODEL.md): Access controls, vault, storage and routing.
-- [Deployment](https://github.com/phishdestroy/TgWitness/blob/main/docs/DEPLOYMENT.md): Local and server operation, updates and backups.
+- [Project website](https://phishdestroy.github.io/TgWitness/): Illustrated guides and a browser demo with fictional records.
+
+## Evidence and verification
+
+- [Evidence format](https://github.com/phishdestroy/TgWitness/blob/main/docs/EVIDENCE.md): Signed journal, archive formats, verification paths and where the messages come from.
+- [What the record establishes](https://github.com/phishdestroy/TgWitness/blob/main/docs/FOR-THE-RECORD.md): Assurance steps and how to check them in five minutes.
+- [Independent verification](https://github.com/phishdestroy/TgWitness/blob/main/docs/TRUST.md): Trusted inputs for recipients.
+- [Witness](https://github.com/phishdestroy/TgWitness/blob/main/docs/WITNESS.md) and [timestamps](https://github.com/phishdestroy/TgWitness/blob/main/docs/TIMESTAMP.md): External checkpoints and time.
+- [GitHub Actions capture](https://github.com/phishdestroy/TgWitness/blob/main/docs/SEALED-ACTIONS.md) and [Intel TDX](https://github.com/phishdestroy/TgWitness/blob/main/docs/HIGH-ASSURANCE.md): Attested collection.
+- [Validation record](https://github.com/phishdestroy/TgWitness/blob/main/docs/VERIFICATION.md) and [public-history qualification](https://github.com/phishdestroy/TgWitness/blob/main/docs/EXPORT-BENCHMARK-2026-11-06.md): Measurements with their revisions.
+
+## Investigate
+
+- [Investigation](https://github.com/phishdestroy/TgWitness/blob/main/docs/INVESTIGATION.md): Source-linked analysis, people, files and timelines.
+- [Investigation mode](https://github.com/phishdestroy/TgWitness/blob/main/docs/INVESTIGATION-MODE.md): Case documentation, subject cards, watchlists, online watch and court documents.
+- [Case Board](https://github.com/phishdestroy/TgWitness/blob/main/docs/CASE-BOARD.md) and [reports](https://github.com/phishdestroy/TgWitness/blob/main/docs/CASE_REPORTS.md): Team annotations, HTML, JSON and signed PDF.
 - [MCP](https://github.com/phishdestroy/TgWitness/blob/main/docs/MCP.md) and [CLI](https://github.com/phishdestroy/TgWitness/blob/main/docs/CLI.md): Scoped access to saved records.
+
+## Operate
+
+- [Security and data handling](https://github.com/phishdestroy/TgWitness/blob/main/docs/SECURITY-MODEL.md): Access controls, vault, storage and routing.
+- [System map](https://github.com/phishdestroy/TgWitness/blob/main/docs/SYSTEM-MAP.md): Panel access, account routes and outbound connections.
+- [Deployment](https://github.com/phishdestroy/TgWitness/blob/main/docs/DEPLOYMENT.md): Local and server operation, updates and backups.
 - [Release notes](https://github.com/phishdestroy/TgWitness/blob/main/docs/CHANGELOG.md): Changes by version.
-- [Repository rules](https://github.com/phishdestroy/TgWitness/blob/main/AGENTS.md) and [code and validation map](https://github.com/phishdestroy/TgWitness/blob/main/docs/AGENT-GUIDE.md): Contribution and review guidance.
 
-## Other documentation editions
+## Optional
 
-- [Website index](https://phishdestroy.github.io/TgWitness/llms.txt): Generated inventory of public guide pages.
-- [Complete English handbook](https://phishdestroy.github.io/TgWitness/llms-full.txt): Published guides in one text file.
-- [Complete handbook as Markdown](https://phishdestroy.github.io/TgWitness/llms-full.md): Public documentation with source URLs.
+- [Complete English handbook](https://phishdestroy.github.io/TgWitness/llms-full.txt): All published guides and references in one text file.
+- [Complete handbook as Markdown](https://phishdestroy.github.io/TgWitness/llms-full.md): The same content with source URLs.
+- [Website index](https://phishdestroy.github.io/TgWitness/llms.txt): Map of the public guide pages.
+- [Repository rules](https://github.com/phishdestroy/TgWitness/blob/main/AGENTS.md) and [code and validation map](https://github.com/phishdestroy/TgWitness/blob/main/docs/AGENT-GUIDE.md): Contribution guidance.
 - [Source repository](https://github.com/phishdestroy/TgWitness) and [MIT license](https://github.com/phishdestroy/TgWitness/blob/main/LICENSE).

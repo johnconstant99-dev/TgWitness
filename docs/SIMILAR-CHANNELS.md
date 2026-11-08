@@ -8,10 +8,9 @@ Telegram keeps a list of channels it considers similar to a given channel and
 offers it to readers. TgWitness can walk that list from one or more starting
 channels and record what Telegram returned.
 
-A suggestion is produced by Telegram from its own usage signals. It does not
-establish a shared operator, owner, author or purpose, and the absence of a
-suggestion does not establish that two channels are unrelated. Treat the result
-as a lead list, not as a finding.
+A suggestion is produced by Telegram from its own usage signals. Treat the result
+as a lead list: a shared operator, owner, author or purpose is established from
+the channels' own records.
 
 ## Run a walk
 

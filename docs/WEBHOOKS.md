@@ -47,8 +47,8 @@ retry window; retain them longer if the receiver can reprocess stored events.
 Deliveries are queued durably before HTTP requests. They use at-least-once
 semantics: a lost acknowledgement or restart may deliver an event again with the
 same ID. There are eight attempts with exponential backoff, starting at 15
-seconds and capped at one hour. Success requires a 2xx response. Exhausted jobs
-leave a visible error; delivery is not guaranteed after retries end.
+seconds and capped at one hour. Success requires a 2xx response. A job that exhausts
+its retries stays visible with its error for review.
 
 The queue holds 1,000 deliveries. When full, scanning journal events pauses and
 resumes after space is available. A full-export completion that cannot be queued

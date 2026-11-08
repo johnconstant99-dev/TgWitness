@@ -46,8 +46,8 @@ checked excerpts, event kinds, observation times and coverage markers. Telegram
 sessions, raw fields, provider keys, attachment bytes and the full journal are
 not part of that context. Uncheck unwanted sources, then explicitly approve
 processing. External providers may retain submitted content under their own
-policies. Local execution means the endpoint is local; it is not a guarantee
-about an independently configured service's behavior.
+policies. Local execution means the endpoint is local; a separately configured
+service follows its own configuration.
 
 There are at most two concurrent provider requests globally and one per
 workspace. A preview expires after ten minutes and can generate one answer.

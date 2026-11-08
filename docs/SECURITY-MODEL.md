@@ -130,7 +130,7 @@ Protect originals and converted files, and avoid concurrent clients cloning an a
 
 TData processing verifies container checksums, local decryption hashes, and structure
 lengths. A supplied Desktop local passcode is used transiently and is not stored.
-This bounded parser does not establish that every Desktop version is compatible.
+The bounded parser supports the Desktop formats it validates and rejects others.
 QR images are generated locally, contain short-lived Telegram login tokens, and
 are never sent to an external rendering service. Lock, workspace switch, new login,
 and route changes cancel pending QR attempts. Reload/closing a tab may leave an

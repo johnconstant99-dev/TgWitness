@@ -52,9 +52,9 @@ exclude the channel. Refresh source profiles when public visibility changes.
 Readers may already have saved material they previously received.
 
 The original signed records stay unchanged. The displayed projection is signed
-separately and carries hashes referencing its original records. A projection
-signature authenticates the displayed statement; it is not the original event's
-signature over redacted bytes.
+separately and carries hashes referencing its original records. The projection
+signature authenticates the displayed statement, and the referenced original records
+keep their own signatures.
 
 ## Check signatures and continuity
 

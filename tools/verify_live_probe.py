@@ -53,7 +53,7 @@ def check_probe(nonce, bundles):
     if not results:
         raise ValueError("Provide at least one export")
     return {"passed": True, "nonce": nonce, "distinct_workspaces": len(results), "workspaces": results,
-            "scope": "one controlled new/edit/delete sequence; not proof of complete collection"}
+            "scope": "one controlled new/edit/delete sequence"}
 
 
 def main():

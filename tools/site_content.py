@@ -1,6 +1,6 @@
 GUIDES = {
     "archive": ("Work the archive", "Load history, search saved records, review AI sources and connect your tools.", "archive history search AI MCP OCR transcription webhooks reports integrations", "docs/ANALYSIS.md"),
-    "capture": ("GitHub Actions capture", "Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．", "github actions capture takeout account export encrypted archive", "docs/SEALED-ACTIONS.md"),
+    "capture": ("GitHub Actions capture", "Choose Takeout, regular API export or a chat journal on a temporary GitHub runner.", "github actions capture takeout account export encrypted archive", "docs/SEALED-ACTIONS.md"),
     "dedicated-account": ("Dedicated account", "Prepare a separate Telegram account for collection.", "dedicated telegram account session api login", "docs/ACCOUNTS.md"),
     "start": ("Start in minutes", "Install with one command, connect a Telegram account and export a verifiable archive on Windows, Linux or macOS.", "demo install setup windows linux macos python", "docs/QUICKSTART.md"),
     "accounts": ("Connect an account", "Connect Telegram by QR code, phone number or session import. Choose sources and check that new messages reach your journal.", "qr phone session tdata api id hash account sources", "docs/ACCOUNTS.md"),
@@ -28,7 +28,7 @@ GROUPS = (
 
 
 REFERENCE = {
-    "secret-chats": ("Secret Chats: implementation and demo", "Understand the separate Secret Chat implementation, try the fictional interface and review outstanding defects.", "secret chats pseudo-secret end-to-end KiaroSama demo development", "docs/PSEUDO-SECRET.md"),
+    "secret-chats": ("Secret Chats: setup and recording", "Install the Secret Chat protocol extra, enable it per account and record the chats TgWitness creates or accepts.", "secret chats pseudo-secret end-to-end KiaroSama recording setup", "docs/PSEUDO-SECRET.md"),
     "overview": ("TgWitness: start, scale and evidence", "Install with one command or capture on GitHub Actions. Understand investigation options, published scale and what an archive verifies.", "overview simple install github capture scale benchmark maturity evidence truth llms", "docs/OVERVIEW.md"),
     "history": ("Load source history", "Load past messages from enabled sources, pause and resume, and verify a signed progress report.", "history acquisition sources pause resume progress report", "docs/HISTORY.md"),
     "analysis": ("Archive analysis", "Search saved messages, review AI inputs and keep analytical reports with their source references.", "analysis AI Ollama sources citations reports review", "docs/ANALYSIS.md"),
@@ -49,14 +49,14 @@ REFERENCE = {
     "investigation": ("Investigation mode", "Whole-account investigations across channels, groups, private chats and bots, from scope to a verified case package.", "investigation whole account bots people timeline case", "docs/INVESTIGATION.md"),
     "case-board": ("Case Board reference", "Bookmarks, exact highlights, action slices, discussions, scoped access and the signed annotation history used by Case Board.", "case board annotations revisions highlights slices permissions collections", "docs/CASE-BOARD.md"),
     "case-reports": ("Report configuration and verification", "Report filters, eight designs, contents presets, saved change histories and the assessment included in signed exports.", "report configuration designs assessment trust verification signed PDF HTML", "docs/CASE_REPORTS.md"),
-    "features": ("Features and limits", "The current collection model, multi-account workflows, exports and operational boundaries of TgWitness.", "features product status collection accounts exports limits platform", "docs/PRODUCT.md"),
+    "features": ("Features and scope", "The current collection model, multi-account workflows, exports and operational boundaries of TgWitness.", "features product status collection accounts exports limits platform", "docs/PRODUCT.md"),
     "how-it-works": ("How the evidence works", "Hash chain, signatures, checkpoints and witnesses explained with the exact formulas the verifier uses.", "hash chain sha256 ed25519 canonical json checkpoint formula", "docs/HOW-IT-WORKS.md"),
     "evidence": ("Evidence format", "Contents of the signed ZIP, record kinds, process receipts, people profiles, off-site copies and offline verification.", "evidence zip manifest events jsonl verify dossier replica s3", "docs/EVIDENCE.md"),
     "witness": ("Independent witness", "Run a witness with its own key and bot, publish signed checkpoints to a channel and check exports against it.", "witness bot channel checkpoint tgw1 verify continuity", "docs/WITNESS.md"),
     "timestamp": ("Timestamps", "RFC 3161 timestamps for signed checkpoints: what is sent to the authority and how a response is verified.", "rfc 3161 tsa timestamp authority nonce checkpoint", "docs/TIMESTAMP.md"),
     "security": ("Security and data handling", "Threat model, access model, secrets at rest, network exposure, session imports and how to report a vulnerability.", "security threat model token vault fernet encryption report vulnerability", "docs/SECURITY-MODEL.md"),
     "architecture": ("Architecture", "Components of the collector, panel, journal, workers and witness, and how data moves between them.", "architecture components journal workers sqlite telethon fastapi", "docs/ARCHITECTURE.md"),
-    "verification": ("What has been tested", "The live Telegram test, automated checks, browser checks and what remains unverified.", "tests verification live test coverage limitations", "docs/VERIFICATION.md"),
+    "verification": ("What has been tested", "The live Telegram test, automated checks, browser checks and the next qualification runs.", "tests verification live test coverage limitations", "docs/VERIFICATION.md"),
     "changelog": ("Changelog", "Every change by version, including the changes not yet released.", "changelog release notes versions history", "docs/CHANGELOG.md"),
     "panel": ("Panel guide", "Every screen of the panel: chats, journal, sources, exports, Extras, protection modes and the code check.", "panel screens chats journal sources exports extras protection mode code check quick search", "docs/PANEL.md"),
     "settings": ("First setup and settings", "The setup wizard, goals, interface levels, connection routes and settings shared by an account group.", "setup wizard settings goal interface level connection group shared", "docs/SETTINGS.md"),

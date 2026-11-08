@@ -40,13 +40,10 @@
       <div class="hero-copy">
         <a class="release-label" href="@@REPO_URL@@/blob/@@BRANCH@@/docs/CHANGELOG.md"><span class="status-dot"></span> Open source <span class="label-divider">/</span> v@@VERSION@@ <span aria-hidden="true">→</span></a>
         <h1 id="hero-title">Messages change,<br><span>keep what<br>you saw.</span></h1>
-        <p class="hero-description">Export Telegram chats，preserve their history，and share a signed archive others can verify．</p>
+        <p class="hero-description">Export Telegram chats, preserve their history, and share a signed archive others can verify.</p>
         <p class="hero-footnote">One-command install. Connect an account. Choose what to save.</p>
         <div class="actions"><a class="button primary" data-home-action="demo" href="@@ROOT@@demo/?lang=@@LANG_CODE@@">Open demo <span aria-hidden="true">→</span></a><a class="button secondary" data-home-action="setup" href="@@ROOT@@demo/guide.html?lang=@@LANG_CODE@@">Setup guide <span aria-hidden="true">↗</span></a></div>
         <p class="hero-footnote">Explore a fictional case without logging in to Telegram.</p>
-        <a class="hero-capture-link" data-home-action="account-export" href="docs/reference/account-export/">Export an account or selected chats</a>
-        <a class="hero-capture-link" data-home-action="sealed" href="docs/capture/">GitHub Actions capture (preview)</a>
-        <a class="hero-retention-link" href="#s3">S3 off-site copy: setup and recovery <span aria-hidden="true">↓</span></a>
       </div>
       <div class="record" aria-label="Illustrated example of a message history, using fictional data">
         <div class="record-heading"><span><span class="record-dot"></span> A MESSAGE, THROUGH TIME</span><span class="mono">#0042</span></div>
@@ -101,6 +98,17 @@
       <div class="section-actions"><p>Follow a saved record through <a href="@@GUIDE_CASE_BOARD@@">Case Board</a>, <a href="@@GUIDE_REPORTS@@">report design</a> and a <a href="@@GUIDE_HANDOVER@@">sharing copy</a>, or <a href="@@GUIDE_GROUPS@@">review account groups</a> together.</p></div>
     </section>
 
+    <section class="modes wrap" id="modes" aria-labelledby="modes-title">
+      <div class="section-heading"><div><p class="eyebrow">WHAT YOU COLLECT</p><h2 id="modes-title">Pick the scope,<br>keep the proof.</h2></div><p>Four collection modes and eight evidence levels: choose how much to save and how strongly it verifies.</p></div>
+      <div class="doc-links">
+        <a href="guides/modes.html#scope"><span>01</span><div><h3>Chosen chats or a folder</h3><p>Follow a few conversations or a Telegram folder, each in its own workspace.</p></div><span aria-hidden="true">↗</span></a>
+        <a href="guides/modes.html#scope"><span>02</span><div><h3>A whole account</h3><p>Capture everything the connected account can read, with its own session and signing key.</p></div><span aria-hidden="true">↗</span></a>
+        <a href="guides/modes.html#events"><span>03</span><div><h3>History and live updates</h3><p>Load past messages, then keep edits, deletions and coverage gaps as they happen.</p></div><span aria-hidden="true">↗</span></a>
+        <a href="docs/capture/"><span>04</span><div><h3>GitHub Actions capture</h3><p>Run a chat or account export on a temporary runner with provenance. (Preview)</p></div><span aria-hidden="true">↗</span></a>
+      </div>
+      <a class="capability-link" href="guides/modes.html#levels"><svg viewBox="0 0 32 32" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 27h22M9 27V18m7 9V12m7 15V6" stroke-linecap="round"/></svg><div><h3>Eight evidence levels, one ladder</h3><p>From a local signed journal to an independent witness and Intel TDX attestation, see exactly what each level proves.</p></div><span aria-hidden="true">↗</span></a>
+    </section>
+
     <section class="principles wrap" aria-label="Designed around your observations">
       <article><svg class="feature-illustration" viewBox="0 0 300 112" fill="none" aria-hidden="true"><path d="M69 29h62l32 27h66M69 83h62l32-27" stroke="#b5c7e5" stroke-width="2"/><rect x="19" y="11" width="52" height="36" rx="9" fill="#edf3ff" stroke="#acc2ee"/><rect x="19" y="65" width="52" height="36" rx="9" fill="#edf3ff" stroke="#acc2ee"/><path d="M33 24h24M33 32h16M33 78h24M33 86h16" stroke="#5b7fbe" stroke-width="2" stroke-linecap="round"/><rect x="173" y="22" width="105" height="68" rx="12" fill="#fff" stroke="#b5c7e5"/><circle cx="193" cy="45" r="5" fill="#2563eb"/><path d="M207 44h48M207 53h33M188 71h67" stroke="#adc0df" stroke-width="3" stroke-linecap="round"/><circle class="route-signal" cx="145" cy="41" r="4" fill="#2563eb"/></svg><span class="feature-number">01 / CAPTURE</span><h3>You choose the scope.</h3><p>Choose a few chats, a folder or the whole account, with a separate workspace for each account you connect.</p><a class="text-link" href="guides/modes.html#scope">Compare collection modes <span aria-hidden="true">→</span></a></article>
       <article><svg class="feature-illustration" viewBox="0 0 300 112" fill="none" aria-hidden="true"><rect x="31" y="10" width="168" height="78" rx="10" fill="#eff2f7" stroke="#c8d3e3"/><path d="M47 28h89M47 41h124M47 54h76" stroke="#aabbd3" stroke-width="3" stroke-linecap="round"/><rect class="version-layer" x="77" y="30" width="190" height="74" rx="10" fill="#fff" stroke="#adc3ea"/><path d="M94 48h103" stroke="#aabbd3" stroke-width="3" stroke-linecap="round"/><rect x="94" y="60" width="63" height="12" rx="3" fill="#f6e9e8"/><path d="M100 66h51" stroke="#b97770"/><rect x="164" y="60" width="77" height="12" rx="3" fill="#dcefe5"/><path d="M170 66h65" stroke="#2c7c56"/><path d="M94 86h92" stroke="#aabbd3" stroke-width="3" stroke-linecap="round"/></svg><span class="feature-number">02 / PRESERVE</span><h3>Changes add to the story.</h3><p>Versions, deletions and gaps all stay in the journal.</p><a class="text-link" href="guides/modes.html#events">See the event matrix <span aria-hidden="true">→</span></a></article>
@@ -122,10 +130,31 @@
       <div class="section-actions"><p>Follow the checks from a file hash to a separately retained checkpoint.</p><a class="button outline" href="guides/modes.html#levels">Explore eight evidence levels <span aria-hidden="true">→</span></a></div>
     </section>
 
+    <section class="speed wrap" id="speed" aria-labelledby="speed-title">
+      <div class="section-heading"><div><p class="eyebrow">MEASURED, NOT PROMISED</p><h2 id="speed-title">Fast enough for<br>real caseloads.</h2></div><p>Two signed runs on 6 November 2026: text and metadata over WARP, no attachments.</p></div>
+      <ul class="speed-stats">
+        <li><strong>56,329</strong><span>messages across two fresh runs</span></li>
+        <li><strong>142–160</strong><span>messages per second collected</span></li>
+        <li><strong>2 / 2</strong><span>signed archives verified</span></li>
+        <li><strong>51,285</strong><span>backup files checked · 0 failed</span></li>
+      </ul>
+      <div class="section-actions"><p>Both archives passed verification with pinned collector keys.</p><a class="button outline" href="docs/validation/">See measurements, dates and method <span aria-hidden="true">→</span></a></div>
+    </section>
+
     <section class="integrity" aria-labelledby="integrity-title"><div class="wrap integrity-layout">
       <div><p class="eyebrow">BUILT FOR REVIEW</p><h2 id="integrity-title">Ready for<br>another pair<br><span>of eyes.</span></h2><p>Messages, files and an offline report in one signed bundle.</p><a class="text-link" href="@@REPO_URL@@/blob/@@BRANCH@@/docs/EVIDENCE.md">Read the evidence model <span aria-hidden="true">↗</span></a></div>
       <div class="bundle"><div class="bundle-heading"><span class="mono">tgwitness-evidence.zip</span><span class="bundle-tag">SIGNED BUNDLE</span></div><ul><li><span>01</span><div>Original observations<small>JSONL records + CSV table</small></div></li><li><span>02</span><div>Readable context<small>Offline HTML report + preserved media</small></div></li><li><span>03</span><div>Independent verification<small>Signed manifest + standalone verifier</small></div></li></ul><p class="bundle-note">The recipient checks the signed records and files against your trusted key, then compares them with a checkpoint kept elsewhere to check for changes since that observation. <a href="docs/concepts/#layers">How the checks work.</a></p></div>
     </div></section>
+
+    <section class="capture wrap" id="capture" aria-labelledby="capture-title">
+      <div class="section-heading"><div><p class="eyebrow">CAPTURE WITH PROVENANCE · PREVIEW</p><h2 id="capture-title">Collect on a fresh<br>GitHub runner.</h2></div><p>Run a chat or account export on a temporary GitHub-hosted runner with a pinned TgWitness and a fresh session, then download an encrypted archive with its attestation.</p></div>
+      <div class="doc-links">
+        <a href="docs/capture/"><span>01</span><div><h3>Approved hosted workflow</h3><p>A pinned collector version runs on a disposable runner, with no persisted credentials.</p></div><span aria-hidden="true">↗</span></a>
+        <a href="docs/capture/"><span>02</span><div><h3>Encrypted, split delivery</h3><p>Partial results are recorded at the deadline; large archives are split and encrypted.</p></div><span aria-hidden="true">↗</span></a>
+        <a href="docs/capture/"><span>03</span><div><h3>Verified attestation</h3><p>The verifier checks the workflow, collector version, archive digest, journal and files.</p></div><span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="section-actions"><p>Also available under <strong>Exports</strong> in the panel.</p><a class="button outline" href="docs/capture/">Open the capture page <span aria-hidden="true">→</span></a></div>
+    </section>
 
     <section class="retention wrap" id="retention" aria-labelledby="retention-title">
       <div class="section-heading"><div><p class="eyebrow">STORAGE, CONTINUITY AND VERIFICATION</p><h2 id="retention-title">S3 copies<br>and external checks.</h2></div><p>Keep encrypted copies and add independent checks.</p></div>
@@ -208,7 +237,7 @@ docker compose exec tgwitness cat /data/panel-token.txt</code></pre><button clas
 
     <section class="docs wrap" id="docs" aria-labelledby="docs-title"><div class="section-heading"><div><p class="eyebrow">ONE TASK AT A TIME</p><h2 id="docs-title">Clear instructions<br>for your next step.</h2></div><a class="text-link" href="docs/">Explore the guides ↗</a></div><a class="capability-link" href="guides/modes.html"><svg viewBox="0 0 32 32" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="2"/><rect x="19" y="3" width="10" height="10" rx="2"/><rect x="3" y="19" width="10" height="10" rx="2"/><path d="m19 25 4 4 7-10" stroke-linecap="round" stroke-linejoin="round"/></svg><div><h3>Modes, scenarios and evidence levels</h3><p>Compare four collection modes and eight verification levels to find the workflow that fits your case.</p></div><span aria-hidden="true">↗</span></a><div class="doc-links"><a href="docs/accounts/"><span>01</span><div><h3>Connect an account</h3><p>Phone, QR, and supported session imports.</p></div><span aria-hidden="true">↗</span></a><a href="docs/proxies/"><span>02</span><div><h3>Choose a proxy</h3><p>Public MTProxy lists or your own route.</p></div><span aria-hidden="true">↗</span></a><a href="docs/witness/"><span>03</span><div><h3>Set up a witness bot</h3><p>Signed checkpoints in your Telegram channel.</p></div><span aria-hidden="true">↗</span></a><a href="docs/exports/"><span>04</span><div><h3>Export and verify</h3><p>Share captured history and check its integrity.</p></div><span aria-hidden="true">↗</span></a></div></section>
 
-    <section class="archive-tools wrap" aria-labelledby="archive-tools-title"><h2 id="archive-tools-title">Work the archive.</h2><p>History, AI with sources, MCP, OCR and signed webhooks.</p><p><a class="text-link" href="@@GUIDE_ARCHIVE@@">Explore the workflow <span aria-hidden="true">↗</span></a></p></section>
+    <section class="archive-tools wrap" aria-labelledby="archive-tools-title"><h2 id="archive-tools-title">Work the archive.</h2><p>Load older history, search saved messages, review AI with checkable sources, connect read-only MCP clients, run local OCR and transcription, and send signed webhooks.</p><p><a class="text-link" href="@@GUIDE_ARCHIVE@@">Explore the archive workflow <span aria-hidden="true">↗</span></a></p></section>
 
     <section class="faq wrap" aria-labelledby="faq-title"><h2 id="faq-title">Before you start.</h2><div><details><summary>Does this page connect to Telegram?</summary><p>This static page uses fictional examples, while the application runs on your own machine, where you sign in to Telegram.</p></details><details><summary>Can it recover messages deleted before capture?</summary><p>It keeps what your account saw while collection was running, so a later snapshot cannot reconstruct edits or deleted messages that were missed.</p></details><details><summary>Is my whole journal encrypted?</summary><p>Sessions and keys are encrypted, while stored messages and files need disk encryption, and you can protect exported archives with an AES-256 password.</p></details><details><summary>Is this affiliated with Telegram?</summary><p>TgWitness is an independent project built on Telethon and released under the MIT license, with your own accounts used to connect to Telegram.</p></details></div></section>
     <section class="operator-notice wrap" aria-labelledby="operator-notice-title" lang="en" dir="ltr" translate="no">

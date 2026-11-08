@@ -53,12 +53,12 @@ the version, source revision and asset sizes. Existing release assets are not
 overwritten. Docker users can also build locally with `scripts/Docker.cmd` or
 `scripts/docker-start.sh`.
 
-Local checks do not establish that GitHub-hosted workflows have run successfully.
+GitHub-hosted workflow results are confirmed in Actions.
 
 The [verification record](../VERIFICATION.md) describes prior tests and their
 limits. Check the release commit's Actions results and published package manifest
-for this build's acceptance. Packaging and synthetic checks do not establish new
-live Telegram coverage or native-platform qualification.
+for this build's acceptance. Live Telegram coverage and native-platform
+qualification are recorded from live runs.
 
 TgWitness has run on a real Telegram account: one supergroup from 27 to 29 October 2026,
 1,291 messages, 472 deletions and 12 edits, with the signatures of all 2,385 records

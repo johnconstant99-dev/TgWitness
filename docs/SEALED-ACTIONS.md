@@ -83,8 +83,8 @@ substitution on sample data. **Start my capture** opens the wizard.
    `delivery.tgwsealed` then contains `evidence.parts.json` and the attestation.
    Download every part and assemble locally as described below.
 8. End the temporary session in Telegram Settings → Devices if revocation was
-   not confirmed or the runner was killed. Normal completion attempts logout;
-   network failures and forced runner termination prevent an absolute guarantee.
+   not confirmed or the runner was killed. Normal completion requests logout, and
+   the run records whether revocation was confirmed.
 
 The repository must contain the published pinned source and reusable-workflow
 commits. A local branch alone cannot be invoked by another GitHub repository.
@@ -144,11 +144,10 @@ python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo
 ```
 
 `--expected-selection` rejects a different transport, chat scope, filter or
-attachment policy. `--require-complete` rejects partial account exports and chat
-journals, whose overall completeness is not established. Without these flags,
-verification still checks provenance and integrity while reporting the recorded
-settings and gaps. A file supplied only with the finished archive cannot establish
-what was agreed beforehand. The scope and acquisition intervals identify the material captured during
+attachment policy. `--require-complete` accepts only account exports and chat
+journals recorded as complete. Without these flags, verification still checks provenance and
+integrity while reporting the recorded settings and gaps. Agree the expected
+selection before the run and keep it separately from the archive. The scope and acquisition intervals identify the material captured during
 the run; use retained earlier observations when comparing previous versions.
 
 | Need | Mode |
@@ -208,7 +207,7 @@ Before relying on this preview, try a small chat you control: create a message
 and attachment, collect them, decrypt the result, run the verifier, check the
 coverage/media outcomes and confirm Telegram session revocation. Automated
 checks use a synthetic Telegram client plus a separate real GitHub certificate
-test; they do not establish live account acceptance.
+test; live account acceptance is recorded separately.
 
 ## Local decryption and verification
 

@@ -47,7 +47,7 @@ async def page(history, job, entity, stage):
             observation = history.store.append("history.admin_log.observed", {
                 "history_run_id": job["run_id"], "source": "admin_log", "source_mode": "standard",
                 "stage": stage, "provider_event_id": event.id, "event": admin_event(event),
-                "meaning": "Server-reported historical action; availability of the entire recent window is not guaranteed."},
+                "meaning": "Server-reported historical action from Telegram's recent-actions window."},
                 job["chat_id"])
             history.store.db.execute("INSERT INTO history_admin_items VALUES (?,?,?,?)",
                 (job["run_id"], job["chat_id"], event.id, observation["seq"]))

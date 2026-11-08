@@ -18,8 +18,8 @@ limits that still applied.
 
 The signed message observation retains the original Telegram media descriptor,
 TTL and availability. A positive TTL is distinguished from Telegram's
-`0x7FFFFFFF` view-once value; a chat's `ttl_period` is an auto-delete setting,
-not evidence of a view-once attachment. The saved file is content-addressed by
+`0x7FFFFFFF` view-once value; a chat's `ttl_period` is recorded as the chat's
+auto-delete setting. The saved file is content-addressed by
 SHA-256, with its size and reference to the signed message observation.
 
 - `media.saved` with `ephemeral_media.outcome=saved` means bytes were preserved.
@@ -28,8 +28,8 @@ SHA-256, with its size and reference to the signed message observation.
   records the self-destructing-media marker supplied by Telegram, not why the
   file disappeared or whether anyone viewed it.
 - Policy exclusions, unknown/excessive size, download errors and cancellation
-  retain an explicit not-saved outcome and a warning that another chance is
-  not guaranteed. Transient failures retain the normal retry outcome.
+  retain an explicit not-saved outcome and a warning that Telegram may not offer
+  the media again. Transient failures retain the normal retry outcome.
 - Offline intervals remain `coverage.gap` records. They do not invent unseen
   media, its content or its time of delivery.
 
@@ -47,7 +47,7 @@ it. Reports explicitly retain that distinction.
 This priority worker belongs to live monitoring and the single-chat journal.
 Account-wide exports retain their separate configured attachment processing;
 official-client capture remains limited to what the official UI exposes.
-No mode guarantees retrieval after Telegram makes media unavailable.
+Retrieval works while Telegram still serves the media.
 
 Telegram documents the independent [content read acknowledgment](https://core.telegram.org/method/messages.readMessageContents)
 and [history read acknowledgment](https://core.telegram.org/method/messages.readHistory),

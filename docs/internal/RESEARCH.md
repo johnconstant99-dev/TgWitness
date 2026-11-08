@@ -31,8 +31,7 @@ Source: https://core.telegram.org/api/updates
   separate sequences; ordinary groups and private dialogs share account scope.
 - `getDifference` and `getChannelDifference` retrieve differences, potentially in
   slices whose boundaries need handling.
-- Server difference retention is finite. Internal sizes are not a guaranteed
-  retention duration.
+- Server difference retention is finite, and Telegram sets its duration.
 - `updateChannelTooLong` and `channelDifferenceTooLong` mean different things;
   the first does not automatically establish irrecoverable loss.
 - Passive updates for channels/supergroups can be limited; additional short polling
@@ -56,8 +55,8 @@ Sources:
   `_save_states_and_entities`, `UpdateMethods._update_loop` and `_keepalive_loop`.
 
 StringSession serializes authorization/connection data, not durable update states
-or the entity cache. `catch_up=True` without retained state cannot guarantee replay
-after a restart. Telethon sequence state advances separately from the application
+or the entity cache. Replay after a restart relies on retained update state, which
+TgWitness saves. Telethon sequence state advances separately from the application
 journal callbacks; periodic state persistence alone is not atomic journal acceptance.
 
 `NewMessage.build` excludes MessageService. TgWitness handles relevant service
@@ -72,8 +71,8 @@ Sources:
 - https://docs.telethon.dev/en/stable/modules/events.html
 
 `updateDeleteMessages` has no peer; the channel variant has `channel_id`. Notices
-usually lack the actor and precise action time. Telethon warns that deletion events
-are not guaranteed for every deletion.
+usually lack the actor and precise action time. Telethon notes that Telegram sends
+deletion events for some deletions only, so rechecks complement them.
 
 Ordinary-group message IDs may be correlated against previously captured IDs in the
 same account scope, but this needs a strict ID model. Current TgWitness preserves the
@@ -105,7 +104,7 @@ Admin-log events can provide an event ID, time, actor and action content. Access
 may fail with `CHAT_ADMIN_REQUIRED` or `CHANNEL_PRIVATE`. A deletion action may
 contain the original message. These would be separately labeled admin-log
 observations, rather than silently treated as live updates. Polling is not yet
-implemented. No universal retention guarantee is inferred from these references.
+implemented. Telegram sets the retention of these records.
 
 ## API terms
 

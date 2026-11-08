@@ -12,7 +12,7 @@
 [Configuration examples](config/README.md) · [Container files](deploy/README.md) ·
 [Package source](../../tgwitness_capture/README.md)
 
-For the owned official Telegram Web browser，required video，guarded actions and the GitHub-hosted procedure，see [Official client witness](../../docs/OFFICIAL-WITNESS.md)．That mode uses `compose.official.yaml` and a fresh temporary profile．The generic recorders described below retain their existing behavior．
+For the owned official Telegram Web browser, required video, guarded actions and the GitHub-hosted procedure, see [Official client witness](../../docs/OFFICIAL-WITNESS.md). That mode uses `compose.official.yaml` and a fresh temporary profile. The generic recorders described below retain their existing behavior.
 
 This preview adds two independently operated recorders. It is a separate Python
 package and optional Compose deployment, controlled from **Extras → Independent capture**
@@ -155,7 +155,7 @@ deployed isolation before treating it as a security boundary.
 
 The GUI's WebRTC transport is distinct from the browser's target-site proxy. Local
 bindings are the default. Remote access needs HTTPS and a deliberately configured
-WebRTC/NAT or fallback transport; an HTTP tunnel alone does not establish UDP media.
+WebRTC/NAT or fallback transport; UDP media needs that transport in addition to an HTTP tunnel.
 The X11 recording adapter assumes display `:99.0` and 1280×720; adjust `video_input_args`
 if the pinned Neko image differs. No X11 socket is mounted from the host desktop.
 Video is silent; this version does not promise audio or a complete frame-by-frame
@@ -173,8 +173,8 @@ docker compose --project-directory . -f addons/capture/compose.yaml exec ayugram
 
 That recorder listens on local port 8792 and has its own volume and internal network.
 Its source client's proxy/WARP route is separate from the browser gateway and must be
-configured and tested on that client. The observer records the supplied route label;
-it does not attest that the client actually used it. Stop profiles independently with
+configured and tested on that client. The observer records the supplied route label
+as the operator's configuration; the client's own route test confirms its use. Stop profiles independently with
 the same Compose command and `stop`; retain the named volumes.
 
 ## Independent verification and witness
@@ -203,9 +203,9 @@ python -m tgwitness_capture verify capture-browser.zip --fingerprint TRUSTED_REC
 Remote witness connections require HTTPS and never follow redirects with credentials.
 `--once` performs one observation. Keep witness keys and receipts independently;
 running the witness on the same host/operator does not create organizational
-independence. The witness checks fresh heads, rollback and equal-length conflicts;
-without intermediate records it cannot prove that every longer head extends the last
-one. The ZIP verifier checks an included receipt against the actual journal prefix.
+independence. The witness checks fresh heads, rollback and equal-length conflicts.
+The ZIP verifier checks each included receipt against the actual journal prefix,
+which confirms that the exported journal extends the receipted head.
 Witness times are local clock assertions, not RFC 3161 tokens. A dedicated RFC 3161
 integration is not included in this preview.
 

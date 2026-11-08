@@ -241,7 +241,7 @@
     const views = {
       all:{sources:['channel', 'group', 'bot', 'private'], text:T('Four chats contribute different observations. Follow the source records for every connection; do not assign the channel post to user 71001 without an attributed sender.')},
       person:{sources:['group', 'private'], text:T('Records #146 and #205 supply the same sender ID, 71001. That connects a Telegram account’s observed posts across two chats. It does not identify a real-world person or attribute the channel post.')},
-      link:{sources:['channel', 'group', 'bot', 'private'], text:T('The destination pay.example.invalid/new appears in group record #146, bot keyboard #173, channel edit #188 and private message #205. A repeated destination connects the material; it does not prove common control of those accounts.')},
+      link:{sources:['channel', 'group', 'bot', 'private'], text:T('The destination pay.example.invalid/new appears in group record #146, bot keyboard #173, channel edit #188 and private message #205. A repeated destination connects the material across those records.')},
       file:{sources:['group', 'private'], text:T('Completed media receipts #151 and #209 have equal full SHA-256 values in this fictional case. Compare the actual bytes and their associated message records. The matching file does not identify its creator or prove who forwarded it.')},
     };
     lab.querySelectorAll('[data-case-mode]').forEach(button => {

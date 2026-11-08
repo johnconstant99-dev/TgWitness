@@ -55,8 +55,7 @@ the project runner, then ran for 2m58s; the rest of CI continued during that wai
 
 The [hosted Wiki trial](https://github.com/phishdestroy/TgWitness/actions/runs/41337210120)
 ran for 14s, compared with 13s of execution plus 12m40s of queueing in the earlier
-run. These are observed runs with different cache states and commits, not a
-fixed runtime guarantee.
+run. These are observed runs with different cache states and commits.
 
 Synthetic checks must also be independent of machine speed and external services.
 Wait for the filtered journal table and enabled import controls before using

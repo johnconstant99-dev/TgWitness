@@ -26,8 +26,8 @@ an ordinary code or documentation task.
 
 Preserve other sessions' changes. Stop only processes started by the agent, using
 their recorded process IDs; never terminate every Python, Node or browser process.
-Report which checks actually ran and where. A passing mock or demo does not prove
-live Telegram support. Keep private workspace instructions, credentials and local
+Report which checks actually ran and where. Mocks and demos qualify the synthetic
+path; live runs qualify Telegram support. Keep private workspace instructions, credentials and local
 machine details out of published files.
 
 ## Development setup
@@ -119,5 +119,5 @@ Python/zlib toolchain. Preserve checkout line endings when comparing archives.
 Private release validation checks repeatability, exact source bytes, private-file
 exclusions and preservation of the previous ZIP after a failed write.
 
-Workflow definitions are not evidence that validation ran for a revision.
+Confirm that validation ran for a revision from its Actions results.
 See [release readiness](../docs/internal/READINESS.md).

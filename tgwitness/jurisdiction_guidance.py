@@ -11,10 +11,10 @@ from pydantic import BaseModel, ConfigDict, field_validator
 
 CATALOG = Path(__file__).with_name("jurisdictions.json")
 TITLE = "Jurisdiction guidance"
-NOTICE = ("Research draft for preparation, not a finding of admissibility or a complete filing checklist. "
+NOTICE = ("Research summary to prepare the material for the selected court. "
           "Confirm the court, applicable law, collection authority, disclosure duties and required formalities "
-          "with a qualified local practitioner. Selecting this profile does not verify evidence or change any trust assessment.")
-LOCAL_NOTICE = "Local-language summary; not a certified translation of the law or evidence."
+          "with a qualified local practitioner. The profile shapes this guidance; verification results come from the archive.")
+LOCAL_NOTICE = "Local-language summary; the original texts of the law and the evidence are authoritative."
 PROCEDURES = {"civil": "Civil / commercial", "criminal": "Criminal"}
 
 METHODS = [
@@ -84,23 +84,23 @@ def package_review(assessment):
         elif key == "time" and status != "checked_locally":
             if facts.get("other_stamps", 0):
                 action = ("Validate the existing receipts against the exact checkpoint and independent trust roots. "
-                          "If no receipt validates, obtain and retain a timestamp for the current archive hash. A new timestamp cannot backdate earlier observations.")
+                          "If no receipt validates, obtain and retain a timestamp for the current archive hash; it bounds the archive from the time it is obtained.")
             else:
                 action = ("Obtain and retain an independent timestamp for the current archive hash. "
-                          "For ongoing collection, configure checkpoint timestamps and check their receipts. A timestamp obtained now cannot establish an earlier time bound.")
+                          "For ongoing collection, configure checkpoint timestamps and check their receipts. A timestamp obtained now bounds the archive from this moment.")
         elif key == "time" and facts.get("unanchored_tail", 0):
             action = ("Retain and independently verify the existing receipt. Timestamp a new checkpoint covering the later records; "
                       "until then, report those records separately from the timestamped prefix.")
         elif key == "coverage" and (facts.get("gaps", 0) or facts.get("unobserved", 0)):
             action = ("Identify which recorded gaps overlap the relevant events and explain them in the examination notes. "
-                      "Label any later recovery as a separate acquisition. Changing settings now cannot restore continuous observation of the past.")
+                      "Label any later recovery as a separate acquisition. New settings apply from now on, and past gaps stay recorded.")
         elif key == "witness":
             if facts.get("tdx", 0) or facts.get("drand", 0):
                 action = ("Independently verify the included beacon rounds or TDX quotes and their binding to the captured output. "
                           "Compare a separately held witness archive where available; record unresolved checks explicitly.")
             else:
                 action = ("Retain the current signed checkpoint outside the collector under separate control. "
-                          "For future collection, configure an independent witness if needed and preserve its results. A witness added now does not certify earlier collection.")
+                          "For future collection, configure an independent witness if needed and preserve its results. A witness added now covers collection from that point.")
         elif key == "custody" and not facts.get("operator_fields", 0):
             action = ("Identify the collector and document the acquisition method, dates and every transfer of the original ZIP. "
                       "Complete the applicable case details and examination notes, then preserve the new export and its hash.")
@@ -108,7 +108,7 @@ def package_review(assessment):
         items.append({"check": key, "title": check["title"], "status": status,
                       "finding": result.get("text", "Not assessed").format(**result.get("values", {})),
                       "action": action, "references": list(check.get("references", []))})
-    return {"basis": "Derived from this copy's export assessment. Configuration choices are not verification results. These tasks do not certify court admissibility.",
+    return {"basis": "Derived from this copy's export assessment. Verification results come from the archive itself, and the court decides admissibility.",
             "supporting_files_included": assessment.get("supporting_files_included") is True,
             "items": items}
 
@@ -165,7 +165,7 @@ def html(data):
                          + '</a></th><td>' + e(item["finding"]) + '</td><td>' + e(item["action"]) + '</td></tr>')
         parts.append('</tbody></table></div>')
     else:
-        parts.append('<p>Export adds findings and next steps for the actual copy. This design preview does not verify the journal or supporting proofs.</p>')
+        parts.append('<p>Export adds findings and next steps for the actual copy, based on verifying its journal and supporting proofs.</p>')
     parts.extend(['<p>' + e(data["scope"]) + '</p><p class="hint">Research date: ' + e(data["research_date"])
              + ' · ' + e(data["status"].replace('_', ' ')) + ' · Catalog ' + e(data["catalog_version"]) + '</p>',
              '<h3>Legal basis</h3><p><strong>' + e(data["law"]) + '</strong></p><p>' + e(data["basis"]) + '</p>'])

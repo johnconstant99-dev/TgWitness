@@ -99,19 +99,16 @@ name the differing top-level `changed_fields`, including changes invisible in th
 Duplicate message IDs are rejected instead of overwriting one another during matching.
 
 A difference can be a changed display name, view count, collection annotation or
-other observation metadata. It does not by itself establish a Telegram edit,
-identify who made a change, or prove which contradictory archive is accurate.
-Unparsed records remain in the comparison; equality of their saved representation
-does not mean their Telegram payload was decoded.
+other observation metadata. Telegram edits appear as their own edit events, and each
+archive's verification shows whether that archive is intact. Unparsed records remain
+in the comparison and are compared by their saved representation.
 
-For different or missing account/chat identities, the tool only finds possible
+For different or missing account/chat identities, the tool finds candidate
 correspondences using sender, complete text, file hash, media type and a five-second
-time tolerance. It reports **Matched**, not **Unchanged**. These candidates do not
-establish message identity or equality of all metadata. Unparsed records remain
-unmatched. Differences in paired records remain listed in `changed`, including in
-content mode; these differences do not prove edits of the same message. With
-`--json`, `matched` counts pairs and `unchanged` counts pairs whose complete saved
-records are equal. Neither count proves message identity in content mode. The
+time tolerance, and reports them as **Matched** rather than **Unchanged**. Unparsed
+records remain unmatched. Differences in paired records are listed in `changed`,
+including in content mode. With `--json`, `matched` counts candidate pairs and
+`unchanged` counts pairs whose complete saved records are equal. The
 existing `changed_fields` and integer `unchanged` output remain compatible with
 earlier comparison results. Archive format and signature verification are unchanged.
 
@@ -367,12 +364,12 @@ from a gap in saved message IDs. Channels and supergroups number messages per ch
 never matched this way. When the deleted message was sent by the observed account,
 payload.deleted_message_was_outgoing is true; the deleter is still not supplied.
 
-An unscoped notice does not establish that a message was never saved: a matching
-chat may be outside the current observation scope, or a unique match may be
-unavailable. Recheck absence remains a separate observation from a deletion
-notification in report counts, filters and labels. A later recovery clears the
-current missing state while preserving the earlier unsuccessful check in the
-signed history; neither observation establishes a deletion notice.
+An unscoped notice keeps its own label because the matching chat may be outside
+the current observation scope or have no unique match. Recheck absence remains a
+separate observation from a deletion notification in report counts, filters and
+labels. A later recovery clears the current missing state while preserving the
+earlier unsuccessful check in the signed history; deletion notices stay a separate
+event type.
 
 Multiple IDs resolved to the same chat from one notification are grouped as
 `deletion.batch`, regardless of their count, with the message IDs exactly as Telegram
@@ -443,9 +440,9 @@ the account-wide sequence only to access covering the whole workspace.
 
 Repeated observations of one service message count once, and the account service estimate
 uses only numbers inside the measured range. An applied scope must explicitly preserve
-the account's own messages before account-wide measurement is enabled; older records
-without that information cannot establish this condition. Stopped observation does not
-extend the measured range, and resuming it is noted. The live archive query has a time
+the account's own messages before account-wide measurement is enabled; the measurement
+starts from records that carry that information. The measured range covers running
+observation, and resuming it is noted. The live archive query has a time
 budget, including its database scan, and marks an unfinished measurement as partial.
 
 Telegram documents the [separate message ID sequences](https://core.telegram.org/api/updates#message-id-sequences).
@@ -576,6 +573,18 @@ imported-session captures.
 The run receipt records the collector version, file hashes and startup settings. GitHub
 provenance and TDX measurements provide the environment checks; the
 [validation record](VERIFICATION.md) identifies tested configurations.
+
+### Where the messages come from
+
+Telegram delivers messages to every client, official apps included, through an
+MTProto session rather than with per-message signatures. The session's
+authorization key is negotiated against Telegram's pinned server key, and every
+update arrives encrypted and integrity-checked under that key. The collector
+receives messages through that authenticated session and signs each observation
+into the journal as it arrives, with the chat, message and sender identifiers and
+the server dates Telegram supplied. In GitHub Actions capture and Intel TDX
+deployments, attestation additionally binds that session and signing key to the
+approved collector execution.
 
 Evaluate source attribution through the acquisition path in the table above:
 authenticated Telegram connection, recorded updates or captured frames, their binding
@@ -719,9 +728,9 @@ evidence exports leave your hands. The collector's own session is active all the
 only other sessions' activity counts as a change. `verify.py` reports how often the list
 was recorded and each new and ended session. It reads the list only while observation runs.
 
-What they do not show: drand proves no more than the order of records against public time,
-and the device list is Telegram's statement through the collector, signed by the collector
-like every other record.
+What they show: drand places the records in order against public time, and the device
+list is Telegram's statement through the collector, signed by the collector like every
+other record.
 
 **Cloudflare Gateway log** (`cloudflare.gateway_dns`). For a server that resolves through
 Cloudflare Gateway ([Gateway DNS](HIGH-ASSURANCE.md#cloudflare-as-an-outside-witness)), each

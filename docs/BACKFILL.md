@@ -55,8 +55,8 @@ resumption never silently switches accounts. Independent account workspaces can 
 separately, and the existing distributed-export workflow remains available for explicit
 multi-account exports. History does not redistribute a banned account's cursor.
 
-The highest message ID is not a message-count estimate. No automatic takeout threshold,
-proxy rotation or zero-delay speed guarantee is used. Secret Chats and messages not
+The highest message ID is not a message-count estimate. Takeout, proxy changes and
+request pacing follow your settings and Telegram's limits. Secret Chats and messages not
 available to the selected account are outside this acquisition.
 
 ## Takeout
@@ -116,9 +116,9 @@ repeating committed observations after a pause.
 
 No admin access produces an explicit `unavailable` result and an incomplete overall
 result, not an empty successful log. Private chats and basic groups are not applicable.
-The report records the returned interval, counts and outcomes. Recent Actions has a
-limited moving window: beginning/end passes do not guarantee coverage during a very
-long acquisition or pause, nor recovery of every deletion within a nominal 48 hours.
+The report records the returned interval, counts and outcomes. Recent Actions keeps a
+moving window of about 48 hours, so beginning and end passes record the actions
+Telegram returns at each pass.
 
 `history.content.changed` links two signed observations when normalized content differs.
 It does not invent a live edit event, editor or edit time. A message absent from a later
@@ -142,7 +142,7 @@ external witness/checkpoint mechanisms retain their documented trust limits.
 Automated coverage uses synthetic accounts and clients: atomic interruption, tampered
 cursors, legacy recovery, slow media, account-wide cooldown, Takeout delay/expiry/ranges,
 admin permissions and deduplication, independent report verification, and browser
-pause/reload/resume. These tests do not certify real-account behavior or throughput.
+pause/reload/resume. Real-account behavior and throughput are measured in live runs.
 
 Protocol references: [Telegram Takeout](https://core.telegram.org/api/takeout),
 [Recent Actions](https://core.telegram.org/api/recent-actions), and

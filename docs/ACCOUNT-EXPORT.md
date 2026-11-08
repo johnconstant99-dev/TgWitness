@@ -16,8 +16,8 @@ This workflow exports data currently accessible to the connected account. The de
 Takeout is the official export API also used by Telegram Desktop. TgWitness can write
 Desktop-compatible JSON directly from its own acquisition; importing someone else's
 archive is not required. Chat and message IDs are available through both transports.
-A public chat or permission to forward does not guarantee a faster export or remove
-Takeout's approval delay. Measure the same scope and media settings before comparing speed.
+Export speed and Takeout's approval delay depend on Telegram's limits for the account,
+whether a chat is public or forwardable. Measure the same scope and media settings before comparing speed.
 
 For up to 20 explicitly selected chat IDs, regular-API export resolves those peers
 directly before considering the account's complete dialog inventory. A readable

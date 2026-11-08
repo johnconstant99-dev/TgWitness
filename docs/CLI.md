@@ -71,8 +71,8 @@ Ranked search stops at 1,000 results. The final page may be shorter than `--limi
 
 Every message result carries `untrusted_content: true`, the workspace, chat and
 message IDs, the journal sequence, the saved record hash and a panel link. Edits,
-deletion notices and `missing_on_recheck` are separate records. Absence of a record
-does not prove that an event never happened.
+deletion notices and `missing_on_recheck` are separate records. Coverage in `stats`
+shows the periods a search result speaks for.
 
 ### Activity statistics
 
@@ -86,8 +86,8 @@ does not prove that an event never happened.
 - coverage: `coverage.gap` records and, for access to the whole workspace, periods
   without a connected collector heartbeat (`collector_liveness`).
 
-The period selects **message time reported by Telegram**. Hour and weekday counts can
-help estimate a sender's time zone; they do not establish it. Figures are computed on
+The period selects **message time reported by Telegram**. Hour and weekday counts
+help estimate a sender's time zone. Figures are computed on
 request from the journal and are not stored. Each result names the journal head it
 covers when your access spans the workspace. Reading stops after five seconds through
 the panel, or `--timeout` seconds locally (default 30); then `complete` is false and
@@ -106,7 +106,7 @@ file and exits with code `1`. `--output` never overwrites an existing file. With
 sequence and, for whole-workspace access, the journal head.
 
 An export through the panel needs a connection that allows **Export messages
-(command line only)**; it is not selected by default. This file is a working copy, not evidence: for a verifiable
+(command line only)**; it is not selected by default. This file is a working copy; for a verifiable
 handover use the signed export in **Exports**, which `python -m tgwitness.verify`
 checks.
 

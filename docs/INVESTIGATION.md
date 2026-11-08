@@ -154,14 +154,14 @@ In a relevant chat, open **People → Turn on profiles** and inspect a person:
 Open the cited records before using a derived profile in a finding. Profiles cover
 people with saved messages, not every member of the group. **Parameters → Records
 cited per fact** limits the reference list, not the underlying activity count.
-Mentions and avatar similarity are leads; they do not establish ownership or identity.
+Mentions and avatar similarity are leads; ownership and identity rest on numeric IDs and attributed senders.
 
 In the worked example:
 
 | Link | Records | Supported observation |
 | --- | --- | --- |
 | Same sender account | Group #146 and private follow-up #205 | Both supply Telegram sender ID 71001 |
-| Same destination | #146, bot keyboard #173, channel edit #188, private message #205 | All contain `pay.example.invalid/new`; ownership/control is not established |
+| Same destination | #146, bot keyboard #173, channel edit #188, private message #205 | All contain `pay.example.invalid/new`; a repeated destination links the material |
 | Same saved file | Completed media receipts #151 and #209 | The full SHA-256 values agree for the preserved bytes |
 | Channel attribution | #101 and #188 | Do not attribute a channel post to user 71001 without an attributed sender |
 
@@ -246,7 +246,7 @@ signature and verification procedure.
 
 | Case | Trace | Deliver |
 | --- | --- | --- |
-| Bot-driven order/payment dispute | Entry announcement → saved link preview → bot start parameter → message and keyboard versions → panel callback receipts → private/group follow-up | Observed offer/response timeline and verified sources; a payment link alone does not prove a payment |
+| Bot-driven order/payment dispute | Entry announcement → saved link preview → bot start parameter → message and keyboard versions → panel callback receipts → private/group follow-up | Observed offer/response timeline and verified sources; payment confirmation comes from the payment record |
 | Removed messages after an incident | All affected chats → saved originals/edits → deletion or missing-on-recheck outcomes → preserved media → coverage and other account perspectives | Preserved versions and explicit unknown intervals; no invented deletion actor |
 | A participant changes names across chats | Numeric sender ID → name/username history → replies → other observed chats → cited destinations/files | A Telegram-account activity timeline with links to its source records |
 

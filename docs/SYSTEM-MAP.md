@@ -23,9 +23,9 @@ ports or change routes. The connection-settings button opens the selected accoun
 The host boundary contains this application process and its workspaces. A container
 marker identifies the current container environment, not a Docker inventory. Computer
 and server choices reflect saved setup preferences. Cloudflare configuration comes
-from the recorded deployment, and does not establish current tunnel health. A missing
-observation is labelled explicitly. The map does not assert host-wide Telegram-only
-egress, kernel enforcement or zero traffic leakage without telemetry for those checks.
+from the recorded deployment; tunnel health appears in its own observations. A missing
+observation is labelled explicitly. The map reports what this process observes;
+host-wide egress rules and kernel enforcement are checked on the host itself.
 
 ## Storage and independent records
 
@@ -40,8 +40,8 @@ drand rounds, Cloudflare Gateway DNS records, Telegram session records, proxy li
 source verification, notifications, the operator bot, webhooks, archive
 analysis and separately configured recorders. Available but disabled services remain
 visible. Configuration, observed delivery, stale or failed health and startup attestation
-records are distinct. A witness poll is an incoming checkpoint read; it is not proof
-that the witness retained or independently verified that checkpoint.
+records are distinct. A witness poll is an incoming checkpoint read; the witness's
+own export shows what it retained and verified.
 
 ## Network observations
 
@@ -54,9 +54,8 @@ link back to their application request. The visible filtered window can be downl
   failures. Proxy-list downloads, DNS-over-HTTPS, timestamp requests, S3 operations
   and other calls through this client use the same observation boundary.
 - Python audit events record socket connection attempts, DNS lookup requests,
-  UDP send attempts and standard-library HTTP sends. An attempt does not establish
-  a successful connection or delivery. Standard-library HTTP response status is not
-  captured by that audit event.
+  UDP send attempts and standard-library HTTP sends. These record attempts; the
+  application HTTP client records the outcomes of its own requests.
 - Purpose is attributed from the originating application component. Workspace identity
   is included only when available; shared or unattributed activity stays visible.
 - MTProto route pulses reflect changes in existing RPC counters or update timestamps.
@@ -64,12 +63,11 @@ link back to their application request. The visible filtered window can be downl
 - URL paths, queries, credentials, headers and bodies are excluded. Destinations may
   still contain private hostnames or addresses; this is administrator-only information.
 
-The buffer starts when the observer attaches to this application process. It is not
-persisted or signed, and resets with the process. It does not observe other processes,
-containers, cloudflared, VPN helpers, rclone traffic, OS resolver internals or host
-firewall decisions. Those components require separate telemetry. Missing records are
-not evidence of absent network traffic. The page does not contact configured services
-to refresh its status, start a recorder or change network policy.
+The buffer starts when the observer attaches to this application process, stays in
+memory and resets with the process. It covers this application process; other
+processes, containers, cloudflared, VPN helpers, rclone, the OS resolver and the host
+firewall have their own logs. The page reads local state only: it does not contact
+configured services to refresh its status, start a recorder or change network policy.
 
 The website example uses a fixed synthetic snapshot, labelled as a demo. Its values
 are not measurements of an installed system. Animation illustrates direction in that

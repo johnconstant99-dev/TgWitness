@@ -5,8 +5,7 @@
 # Export pacing and Telegram limits
 
 Reviewed on 6 November 2026 UTC. This compares implementation paths, not advertised
-throughput. Source inspection and synthetic tests do not establish a safe Telegram
-quota. Exact limits depend on the request and account circumstances; Telethon's
+throughput. Telegram sets its quotas per request and account circumstances; Telethon's
 [error documentation](https://docs.telethon.dev/en/stable/concepts/errors.html#avoiding-limits)
 does not provide a universal request rate.
 
@@ -17,7 +16,7 @@ thousands of pages from one known chat. Measure `contacts.resolveUsername`,
 `messages.getHistory`, participant requests and Takeout initialization separately.
 Access hashes belong to the account that obtained them. A stored peer can reduce
 repeat resolution, but another account must obtain its own access information.
-Username reassignment also means a cached username is not proof of its current owner.
+Usernames can be reassigned, so records identify accounts by numeric ID.
 
 Telethon's [`get_entity` implementation](https://github.com/LonamiWebs/Telethon/blob/v1/telethon/client/users.py)
 explicitly warns about repeated username resolution (roughly 50 usernames in a
@@ -28,16 +27,16 @@ account-local cache. The first pass over unknown usernames still needs resolutio
 Takeout uses Telegram's [export API](https://core.telegram.org/api/takeout), with
 explicit scope flags and wrapped requests. It can require an approval delay.
 It is not an exemption from every limit and does not grant access to hidden members.
-The absence of forwarding protection does not prove Takeout eligibility. JSON is
+Telegram decides Takeout eligibility separately from forwarding protection. JSON is
 an output format; writing JSON itself does not make API acquisition faster.
 
 ## Reviewed implementations
 
 | Tool and pinned source | Actual behavior | Applicable lesson and limits |
 | --- | --- | --- |
-| [tg-chat-dump `b496a89`](https://github.com/renkagod/tg-chat-dump/tree/b496a89d154076c55e5abd707370ad88c44cbeb7), MIT | `accounts.py` sets Telethon's flood sleep threshold to 24 hours. `fetch.py` runs three workers per account by default and sets `wait_time=0`. It reuses Takeout across chats. `store.py` commits rows and cursor together every 100 messages; ID tasks are up to 5,000 IDs. | Page-level checkpoints reduce restart work. Zero iterator delay and three workers are performance choices, not rate-limit protection. After Takeout approval delay, ordinary acquisition is allowed and initialization can be tried again on a later dump. Do not copy that behavior as a safety guarantee. |
+| [tg-chat-dump `b496a89`](https://github.com/renkagod/tg-chat-dump/tree/b496a89d154076c55e5abd707370ad88c44cbeb7), MIT | `accounts.py` sets Telethon's flood sleep threshold to 24 hours. `fetch.py` runs three workers per account by default and sets `wait_time=0`. It reuses Takeout across chats. `store.py` commits rows and cursor together every 100 messages; ID tasks are up to 5,000 IDs. | Page-level checkpoints reduce restart work. Zero iterator delay and three workers are performance choices, not rate-limit protection. After Takeout approval delay, ordinary acquisition is allowed and initialization can be tried again on a later dump. TgWitness paces requests from persisted server waits instead. |
 | [tg-archive `b8f3feb`](https://github.com/knadh/tg-archive/blob/b8f3febaad1180cd581bed0ff07d582d012e8c0b/tgarchive/sync.py), MIT | Incremental SQLite sync, default batches of 2,000 messages, five seconds between batches. Takeout uses zero iterator wait. `_fetch_messages()` logs an escaping FloodWait but returns no messages or retry state. | Useful incremental acquisition pattern. The escaping error path returns `None`; its caller then iterates it. It is not a robust long-wait implementation. |
-| [tdl `70c561c`](https://github.com/iyear/tdl/tree/70c561c0a6d44d8d7fffdea14988fc4104bc56d2), AGPL-3.0 | `app/chat/export.go` pages history by 100. Default middleware includes gotd's [`SimpleWaiter` v0.20.0](https://github.com/gotd/contrib/blob/v0.20.0/middleware/floodwait/simple_waiter.go), which waits for the returned duration and retries until cancellation by default. Participant export skips filters requiring admin permission. | Separate permission failures from rate limits. File-download threads do not establish message-export concurrency. The chat-export path calls the ordinary API; the reviewed Takeout pool is used by the file downloader. |
+| [tdl `70c561c`](https://github.com/iyear/tdl/tree/70c561c0a6d44d8d7fffdea14988fc4104bc56d2), AGPL-3.0 | `app/chat/export.go` pages history by 100. Default middleware includes gotd's [`SimpleWaiter` v0.20.0](https://github.com/gotd/contrib/blob/v0.20.0/middleware/floodwait/simple_waiter.go), which waits for the returned duration and retries until cancellation by default. Participant export skips filters requiring admin permission. | Separate permission failures from rate limits. File-download threads and message-export concurrency are separate settings. The chat-export path calls the ordinary API; the reviewed Takeout pool is used by the file downloader. |
 | [Telegram Desktop `6d7e0ab`](https://github.com/telegramdesktop/tdesktop/blob/6d7e0ab348cb2a5520776de442e215833f4573c0/Telegram/SourceFiles/export/export_api_wrap.cpp), GPL-3.0 | Export history uses pages of 100 and advances its cursor after handling a slice. It obtains Telegram split ranges; public-only exports can use the final range. | Follow the supported export procedure and avoid unnecessary ranges. The slice size is not a published requests-per-second allowance. |
 
 No source code from these projects was incorporated for this review.
@@ -54,7 +53,7 @@ changes how an already received wait is handled.
 | [gotd/contrib `2ae3c55`](https://github.com/gotd/contrib/blob/2ae3c554730a955ed6cd10b358f8466e29b5e770/middleware/ratelimit/ratelimit.go), MIT | A token bucket reserves capacity before invoking a request; the caller supplies the rate and burst size. Its separate [FloodWait scheduler](https://github.com/gotd/contrib/blob/2ae3c554730a955ed6cd10b358f8466e29b5e770/middleware/floodwait/scheduler.go) delays queued requests of the affected type. | Use admission control before sending, in addition to recovery after failure. There is no universal safe rate in this implementation. The scheduler keys on the request constructor; TgWitness must retain the inner method and Takeout wrapper distinction. |
 | [mtcute `8def99b`](https://github.com/mtcute/mtcute/blob/8def99b4f5c831cdbc55527e3096a80c790e1409/packages/core/src/network/middlewares/flood-waiter.ts), MIT | Caches method-specific deadlines in memory. A cached wait exceeding the caller's threshold returns a local error without sending another request. Cancellation is supported. SLOWMODE_WAIT is excluded from the method-wide cache. | Avoid repeated calls while a known deadline is active. Its cache is not durable, and the default ignores the last two seconds of a cached wait; do not replace TgWitness's persisted full deadline with that behavior. |
 | [Telegram-Archive `18b629b`](https://github.com/GeiserX/Telegram-Archive/blob/18b629b6c7d31cb1217b2275487a160e79b0a461/telegram_archive/telegram_backup.py), GPL-3.0 | `_resweep_pace()` spaces reaction-refresh requests across chat boundaries. `_register_resweep_flood()` parks progress until the requested wait plus two seconds; the third flood defers the rest of that run. | Keep pacing state across chats and bound automatic recovery. These controls govern reaction refresh, not a measured history-export quota. Preserve unfinished cursors so deferral does not permanently starve later chats. |
-| [telegram-migrator `ad01288`](https://github.com/warl0ckwraith/telegram-migrator/blob/ad012889302de4be7ce8d90b3ef879aa8a8852e9/src/transfer_engine.py), MIT | `AdaptiveThrottle` reduces the batch and increases delay after a flood; it only starts increasing throughput after eight stable batches. | Feedback-driven pacing is useful. This class governs forwarding/copying messages; its numerical presets are not evidence of safe read limits. |
+| [telegram-migrator `ad01288`](https://github.com/warl0ckwraith/telegram-migrator/blob/ad012889302de4be7ce8d90b3ef879aa8a8852e9/src/transfer_engine.py), MIT | `AdaptiveThrottle` reduces the batch and increases delay after a flood; it only starts increasing throughput after eight stable batches. | Feedback-driven pacing is useful. This class governs forwarding/copying messages, and its numerical presets apply to that workload. |
 | [tg-export `e8ed303`](https://github.com/deathmaz/tg-export/blob/e8ed30306b8f46cb9521121567b0ed0b62e33b8a/src/tg_export/fetcher.py), MIT | `wait_time` is selected from the requested mode before opening Takeout. `_takeout_or_client()` falls back to the ordinary client on TakeoutInitDelayError without changing that selection. | A reproduced fallback can use the ordinary client with `wait_time=0`. Select pacing from the actual transport, not just the requested flag. TgWitness's distributed Takeout mode already pauses for approval instead of silently falling back. |
 
 The reviewed gotd waiter also clamps parsed wait durations to fourteen days in
@@ -115,11 +114,10 @@ It does not coordinate independent installations on separate servers.
 A 50-source benchmark pilot exposed a 31-second `channels.getMessages` FloodWait
 while rechecking missing IDs. Those calls previously shared the account's server
 cooldown but bypassed the local bulk interval. ID rechecks and participant pages
-now use that interval too. This prevents that unpaced burst; it does not establish
-a flood-free quota. The completed qualification retained 690 backoff events across
-pilots and interrupted runs, with requested waits of 3–31 seconds. Both history
-and ID rechecks triggered waits. These observations do not establish a universal
-quota; the qualification identifies the source revisions and counter coverage.
+now use that interval too, which removes that unpaced burst. The completed
+qualification retained 690 backoff events across pilots and interrupted runs, with
+requested waits of 3–31 seconds. Both history and ID rechecks triggered
+waits; the qualification identifies the source revisions and counter coverage.
 
 The next pacing change should:
 
@@ -168,19 +166,19 @@ on bounded batches after all waits expire. Report committed messages, elapsed ti
 including waits, requests by method, inaccessible sources and partial membership.
 For sparse numeric ID ranges, compare cursor-based history with fixed-ID chunking:
 empty chunks can add requests without yielding messages. Keep this comparison
-separate from evidence of deletion. No 10/50/100-account scaling guarantee follows
-from the current pilot.
+separate from deletion analysis. Scaling to 10, 50 or 100 accounts is measured
+separately from the current pilot.
 
 ## Counts and ID boundaries
 
 Keep server-reported counts, observed unique messages and numeric ID spans separate.
 Telegram's [channel history response](https://core.telegram.org/constructor/messages.channelMessages)
-can mark results `inexact`. A pagination offset does not establish a count for a
-selected date range. In the reviewed tg-chat-dump code, `id_bounds` narrows dates
+can mark results `inexact`. A count for a selected date range comes from the
+messages read in that range, not from a pagination offset. In the reviewed tg-chat-dump code, `id_bounds` narrows dates
 but retains the total from the initial history response. Telethon's history
 `get_messages(limit=0)` obtains the total using a raw request with `limit=1`.
 
-Matching counts do not prove that no messages were deleted before observation.
+Matching counts describe the history visible at observation time.
 If IDs 6 through 10 disappear before a first observation, a visible history of
 IDs 1 through 5 can have server count, acquired count and ID span all equal to five.
 Different account totals also need measurement times, filters, response precision

@@ -56,8 +56,7 @@ embedded official Python runtime, and the pinned cryptography dependencies and
 their licences. It does not include the panel or start a server. Use its own
 `VERIFY.cmd` with any supported original ZIP, or copy its `python/` directory
 beside a bundled launcher. Obtain the distribution and authenticate its checksum
-through a trusted channel: a checksum delivered alongside untrusted software
-does not by itself authenticate that software. The build uses the repository's
+through a trusted channel, separate from the download itself. The build uses the repository's
 existing pinned Python runtime and `deploy/constraints.txt`.
 
 Build on Windows with Python 3.12. The build host needs no preinstalled application

@@ -41,8 +41,8 @@ See the [installer publication guide](../../deploy/installer/README.md#automatic
 
 Dependency changes must regenerate the reviewed hash locks. CI checks lock inputs,
 installs locked dependencies and installs the local wheel without dependency
-resolution. CodeQL, pip-audit and Trivy identify supported patterns and known
-advisories; they do not establish the absence of vulnerabilities. Image audits fail
+resolution. CodeQL, pip-audit and Trivy report supported code patterns and known
+advisories. Image audits fail
 on high/critical findings, including findings without an available fix.
 
 Inspect each run and its artifacts before claiming a build or deployment succeeded.

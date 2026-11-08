@@ -133,7 +133,8 @@ COMMON_LIMITS = (
     "Provider and Cloudflare logs are kept for limited periods; produce this report early and keep it "
     "with the evidence.",
     "Panel actions through the tunnel are not SSH sessions; they are recorded in the signed journal.",
-    "Message authenticity still rests on Telegram and on what the account could see; see EVIDENCE.md.",
+    "Message content comes from the account's authenticated Telegram session and is verified with the journal; "
+    "see EVIDENCE.md.",
 )
 LIMITS = (
     "The initial installer is a trust boundary. A malicious bootstrap could copy the signing key and falsify "

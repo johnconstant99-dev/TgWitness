@@ -20,7 +20,7 @@ remain separate live checks.
 <summary>On this page</summary>
 
 - [What is implemented](#what-is-implemented)
-- [Limits that remain visible](#limits-that-remain-visible)
+- [What each record covers](#what-each-record-covers)
 - [Linux deployment, local or remote](#linux-deployment-local-or-remote)
 - [Independent witness and verification](#independent-witness-and-verification)
 - [Tests](#tests)
@@ -46,36 +46,35 @@ remain separate live checks.
 | Provider witness | Optional independent read-only polling of Cloudflare WARP Connector status/connections and scoped Gateway DNS observations; raw responses are signed as artifacts in the witness journal. |
 | Cleanup | Stop the process group and remove the created profile. Server-side logout is never claimed without confirmation; the operator logs out or revokes the session in Telegram Devices. |
 
-## Limits that remain visible
+## What each record covers
 
-- No guarantee against account restriction, new-device checks or bans. Delays do not
-  make automation undetectable. Read receipts and presence can change even while viewing.
-- The guard covers inputs **through this recorder** during capture. Host administrators
-  can bypass it. Manual setup is unrestricted and intentionally not recorded. Selecting
-  export options or logging out requires pausing; those intervals are coverage gaps.
+- Telegram decides account restrictions, new-device checks and bans. Read receipts and
+  presence can change while viewing.
+- The guard covers inputs **through this recorder** during capture; host administration
+  sits outside it. Manual setup is not recorded. Selecting export options or logging
+  out requires pausing, and those intervals are recorded as coverage gaps.
 - Native export generation is manual. This version preserves the selected JSON and
-  recorded procedure; linked attachments are outside this mode's package. Verify the
-  saved file together with that procedure.
-- Unknown gaps are never labelled proven deletions. Private/basic-group IDs share an
-  account-wide sequence; channel/supergroup intervals are only candidates. Export date
-  filters and visibility can explain absent records. Silence may be ordinary inactivity.
-- Video-only collection supplies no structured message IDs. Hybrid comparison requires
-  annotations; it does not certify that every export message appeared on screen.
-- Hash chains need a trusted key and independently retained checkpoints to detect a
-  complete rebuild or truncation. Drand alone has no upper time bound; old rounds remain
-  retrievable. `--check-drand` compares relays, not BLS signatures.
-- WARP is operator-provisioned; an ordinary WARP subscription is not a fixed-IP guarantee.
-  For HTTP/SOCKS gateways the collector samples Cloudflare's HTTPS trace, requires
-  `warp=on`/`plus` for a WARP-labelled route, and stops on an observed egress-IP change.
-  This checks that probe's route, not WARP enrollment identity or Telegram destination
-  routing. Configure the gateway to route all destinations consistently. MTProxy-only
-  routes cannot perform this probe and report the limitation.
-  Cloudflare samples cannot prove continuous reading or message content. Missing,
-  inaccessible or truncated DNS logs remain unknown. MTProxy cannot carry public drand
-  HTTPS requests; these intervals are explicitly marked unavailable.
-- The container is **not** a TEE. Existing `Dockerfile.sealed`, GitHub sealed workflows
-  and Phala deployment measurements do not attest this new image. TDX support requires
-  a separate measured build, attestation policy and live qualification.
+  recorded procedure; linked attachments are packaged by the other export modes.
+  Verify the saved file together with that procedure.
+- Gaps keep their own label, separate from deletions. Private/basic-group IDs share an
+  account-wide sequence; channel/supergroup intervals are listed as candidates. Export
+  date filters and visibility explain many absent records.
+- Video-only collection records what appeared on screen. Hybrid comparison links the
+  export's messages to the video through annotations.
+- With a trusted key and independently retained checkpoints, the hash chain detects a
+  complete rebuild or truncation. Drand supplies a lower time bound; `--check-drand`
+  compares the rounds across relays.
+- WARP is operator-provisioned and can change its public IP. For HTTP/SOCKS gateways
+  the collector samples Cloudflare's HTTPS trace, requires `warp=on`/`plus` for a
+  WARP-labelled route, and stops on an observed egress-IP change. This checks the
+  probe's route; configure the gateway to route all destinations consistently.
+  MTProxy-only routes report that the probe is unavailable.
+  Cloudflare samples record network activity; message content comes from the client
+  capture. Missing, inaccessible or truncated DNS logs are labelled. MTProxy cannot
+  carry public drand HTTPS requests; these intervals are explicitly marked unavailable.
+- This container runs as a hardened Docker recorder. Intel TDX attestation applies to
+  the separately measured sealed image; TDX for this recorder needs its own measured
+  build, attestation policy and live qualification.
 
 ## Linux deployment, local or remote
 
@@ -154,8 +153,8 @@ Omit both optional Gateway fields if DNS observations are not available. Scope t
 token to connector reads and, where used, Analytics/PII reads. The implementation
 never requests the WARP connector's deployment token or mutates provider resources.
 Gateway queries cover the preceding five minutes, capped at 1,000 rows; saturation
-is reported as possible truncation. Source IP and resource-to-case attribution need
-independent review; an operator's configuration is not proof of that relationship.
+is reported as possible truncation. Source IP and resource-to-case attribution are
+reviewed independently of the operator's configuration.
 
 Stop the witness cleanly to package its signed network observations:
 

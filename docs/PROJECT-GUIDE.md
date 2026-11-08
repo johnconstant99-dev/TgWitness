@@ -318,8 +318,8 @@ Still a pre-release. What's been tested and what hasn't: [verification record](V
 TgWitness is a tool. Whoever runs it decides what is collected, why and for how long, and is
 responsible for it — under the EU/UK GDPR usually as the *controller* of that personal data.
 Telegram messages contain personal data of people who never agreed to be recorded: names,
-usernames, IDs, photos, phone numbers, opinions. This section is not legal advice; check the
-law that applies to you and Telegram's terms.
+usernames, IDs, photos, phone numbers, opinions. Apply the law that governs your work and
+Telegram's terms; the points below summarize common practice.
 
 - **Have a lawful basis and a purpose.** Fraud prevention, network and information security
   and the defence of legal claims are commonly relied on as legitimate interests

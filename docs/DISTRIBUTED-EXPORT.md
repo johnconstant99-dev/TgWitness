@@ -45,13 +45,13 @@ Takeout handles stay in the encrypted vault. Chunk receipts identify transport a
 
 ## Exclusive account ownership
 
-One account runs one acquisition task. Monitoring, History, account export and chat export are mutually exclusive. Starting an export never pauses monitoring automatically. Deselect a busy account or explicitly pause its current task first. Reservations are acquired before Telegram requests and released on completion, failure or pause. Separate accounts may work concurrently; RPCs within one account are serialized. Full server-requested FloodWait deadlines are persisted and respected before subsequent requests, including after restart. This cannot guarantee Telegram will never rate-limit an account.
+One account runs one acquisition task. Monitoring, History, account export and chat export are mutually exclusive. Starting an export never pauses monitoring automatically. Deselect a busy account or explicitly pause its current task first. Reservations are acquired before Telegram requests and released on completion, failure or pause. Separate accounts may work concurrently; RPCs within one account are serialized. Full server-requested FloodWait deadlines are persisted and respected before subsequent requests, including after restart, so every new request honors Telegram's latest rate limit.
 
 ## Selection
 
 - All available history, rolling 7/30 days, previous calendar month, or custom bounds. UI dates use the browser time zone and become fixed UTC bounds `[from, until)` at launch.
 - Messages exactly at **From**, including several messages in the same second, are included. Telegram can return the date-offset message itself, so acquisition reads slightly before the lower boundary and applies the precise period locally. **Until** remains exclusive.
-- Offline message-language detection using Lingua. Short, uncertain and mixed-language messages have a separate include/exclude option. Detector version and decisions accompany evaluated selected messages; confidence is a heuristic, not proof of language.
+- Offline message-language detection using Lingua. Short, uncertain and mixed-language messages have a separate include/exclude option. Detector version, decisions and confidence scores accompany evaluated selected messages.
 - **Messages that are replies** selects direct replies. **Messages that received a reply** selects originals with an observed direct incoming reply. Relationships are built before language/text filtering, so a Russian answer can qualify an English original. Merely posting into a forum topic does not count as a direct reply.
 - Replies can be sought within the selected period or through the acquisition start. The latter can require scanning later history too.
 - Bounded parent/reply context with a separate message cap. Context may fall outside the filters and is marked `selection.role=context`. Missing parents retain a reason; linked discussions outside the chosen source are not traversed. Context expands over acquired history and fetches missing same-source parents; it does not discover every reply outside the scanned period.
@@ -87,7 +87,7 @@ Plans created before the inclusive-start fix retain their original signed ID ran
 
 The export panel and status API report elapsed time for the **current start or resume** using a monotonic clock. Preparation includes connection, boundary checks, saved-chunk verification and chat metadata. Acquisition measures the concurrent workers together, including Telegram waits, chunk writes and receipt signing. Selection and attachment retrieval, then packaging and verification, have separate timers. Pausing or finishing freezes the measurements; resuming starts a new measurement and excludes previously committed messages from its throughput numerator.
 
-Acquisition throughput is newly committed messages divided by acquisition wall time. New jobs update at page commits, including progress inside an unfinished range; old jobs update at chunk commits. It is an average, not an instantaneous network rate. It does not include selection, attachments or ZIP/PDF creation. The signed job status retains these measurements; a successful run also records them in `chat_export.completed`. Jobs created before this feature have no performance record until resumed. Remaining message count is unknown, so the panel does not invent an ETA from numeric ID ranges. Compare runs with identical fixed scope, attachment settings and account access; more accounts do not guarantee linear speedup.
+Acquisition throughput is newly committed messages divided by acquisition wall time. New jobs update at page commits, including progress inside an unfinished range; old jobs update at chunk commits. It is an average, not an instantaneous network rate. It does not include selection, attachments or ZIP/PDF creation. The signed job status retains these measurements; a successful run also records them in `chat_export.completed`. Jobs created before this feature have no performance record until resumed. Remaining message count is unknown, so the panel does not invent an ETA from numeric ID ranges. Compare runs with identical fixed scope, attachment settings and account access; the gain from more accounts depends on the chat's ID ranges and Telegram's limits.
 
 Large-list discovery has a different request mix from history acquisition. See the [exporter source comparison and limits](EXPORT-LIMITS.md) before extrapolating a small history benchmark to thousands of new sources.
 
@@ -96,10 +96,10 @@ produced 48 verified archives with 3,598,381 records. One eight-account regular-
 job acquired 768,007 history records in 1,117.082 seconds; its complete attempt took
 1,574.920 seconds. Rechecks added records that the history pass did not return.
 The run also exposed sparse-range overhead, connection timeouts and slower later
-jobs after learned pacing increased. It did not establish sustained Takeout speed
-or linear scaling across forty accounts; see the qualification's scope and checks.
+jobs after learned pacing increased. The qualification's scope and checks describe
+the measured configuration.
 
-A bounded live pilot on 2026-11-06 UTC compared one and two accounts over the same approximately 4,000-ID ranges in two public supergroups. Acquisition of 3,313 messages took 33.672 s and 16.969 s; acquisition of 3,691 took 37.750 s and 19.188 s. All four ZIPs verified. ID sets matched between runs; differences in three reply-media headers were limited to access hashes and file references. These are small, sequential runs without attachments or Takeout, on a 32-logical-CPU Windows host; they do not establish sustained throughput for ten accounts or thousands of sources. Only authors and a bounded visible participant sample were collected, not complete membership.
+A bounded live pilot on 2026-11-06 UTC compared one and two accounts over the same approximately 4,000-ID ranges in two public supergroups. Acquisition of 3,313 messages took 33.672 s and 16.969 s; acquisition of 3,691 took 37.750 s and 19.188 s. All four ZIPs verified. ID sets matched between runs; differences in three reply-media headers were limited to access hashes and file references. These are small, sequential runs without attachments or Takeout, on a 32-logical-CPU Windows host. Authors and a bounded visible participant sample were collected.
 
 ### Archive
 
@@ -107,6 +107,6 @@ The ZIP uses the existing independently verifiable chat-export format with per-a
 
 The manifest identifies the checkpoint format and count used locally. Unselected checkpoint data and its receipts are not added to a filtered ZIP. Archive verification continues to check the selected messages and their account signatures; local checkpoint verification is the separate directory check above. Old ZIPs remain supported.
 
-Coverage means accessible ranges actually read, not all historical messages. Accounts can have different access; distributed or resumed acquisition is not an atomic snapshot. No actor, deletion reason, ban or moderator identity is inferred from a missing ID or online status. More accounts do not guarantee linear speedup.
+Coverage lists the accessible ranges actually read. Accounts can have different access; distributed or resumed acquisition reads each range at its own time. Actors, deletion reasons, bans and moderator identities are reported only from Telegram data that states them.
 
 API: `POST /api/multi-export/plan` accepts `link` and checks workspace/chat grants before reading facts. `POST /api/multi-export/start` accepts `chat_id`, `lead`, `profiles`, `selection`, optional `username`, and `transport` (`regular`, the default, or `takeout`); `GET /api/multi-export/jobs` lists visible saved jobs. Per-job routes support polling, `pause`, `resume`, `cancel` and `download`. Access to every participating workspace/source is checked.

@@ -35,10 +35,9 @@ on one account. Starting a new task does not automatically pause another task.
 Separate account workspaces can operate concurrently, with separate identities
 and access rights.
 
-During full history loading, new live changes are not recorded by that account's
-live handlers. A later catch-up or history read cannot guarantee recovery of every
-intermediate edit or vanished message. Comparing saved versions compares existing
-observations; it does not establish simultaneous live coverage.
+During full history loading, that account's live handlers are paused. A later
+catch-up or history read returns the current state of each message. Comparing saved
+versions compares the observations each pass recorded.
 
 Pause, resume and account identity rules are described in [History](HISTORY.md),
 [Account export](ACCOUNT-EXPORT.md) and [Distributed export](DISTRIBUTED-EXPORT.md).
@@ -52,8 +51,8 @@ attachment tree. Video-only capture has no structured message IDs. Hybrid compar
 requires operator annotations linked to preserved frames.
 
 Continuity annotations appear in a separate chat view. Missing IDs or replies are
-observations to investigate, not proof that Telegram deleted a message. Neither
-WARP nor pacing guarantees that Telegram will not restrict an account.
+observations to investigate; deletion is reported from Telegram's deletion notices.
+WARP and pacing reduce request pressure, and Telegram decides account restrictions.
 
 ## Read the result before handing it over
 

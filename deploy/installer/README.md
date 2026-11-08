@@ -41,8 +41,8 @@ terminal, so they work when the installer is piped into Bash.
   panel in the foreground; keep its terminal open.
 - **Temporary HTTPS link (Ubuntu):** a checked cloudflared binary provides a
   trycloudflare.com address. No domain or Cloudflare account is needed. The panel
-  still requires its own access key. Cloudflare carries the panel traffic; this is
-  a temporary service without an uptime guarantee. After a tunnel restart,
+  still requires its own access key. Cloudflare carries the panel traffic through
+  a temporary tunnel intended for trials. After a tunnel restart,
   `tgwitness open` shows its current address.
 - **Own domain (Ubuntu, root):** point DNS at the server and allow inbound TCP 80
   and 443. A checked Caddy binary configures HTTPS and renews certificates.

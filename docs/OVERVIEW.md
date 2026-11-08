@@ -55,8 +55,7 @@ selected procedure and preparation steps. See [account export](ACCOUNT-EXPORT.md
 The application runs on the chosen computer or server. Basic collection does not
 require a GPU or an LLM. Optional OCR, transcription and AI analysis have their
 own resource requirements. Size a deployment for message rate, attachments,
-retained history and concurrent accounts; an easy installation is not a promise
-of a fixed memory footprint for every workload.
+retained history and concurrent accounts.
 
 ## Preserve the record, whoever it helps
 
@@ -92,16 +91,15 @@ interchangeable: a journal event is not necessarily a unique Telegram message.
 
 | Date | Workload | Published result | What was measured |
 | --- | --- | --- | --- |
-| 1 November 2026 | Running server, ten workspace databases | 1,610,818 journal records; 900,232 new-message events, 80,683 edit events and 400,536 deletion events | Read-only inventory; not a throughput test or a new full-chain verification |
-| 5 November 2026 | Search over 1,000,000 synthetic messages in 200 chats | Index built in 71 seconds; per-query median search times of 9–190 ms | Local search benchmark; not live Telegram delivery |
+| 1 November 2026 | Running server, ten workspace databases | 1,610,818 journal records; 900,232 new-message events, 80,683 edit events and 400,536 deletion events | Read-only inventory of the stored journals |
+| 5 November 2026 | Search over 1,000,000 synthetic messages in 200 chats | Index built in 71 seconds; per-query median search times of 9–190 ms | Local search benchmark |
 | 6 November 2026 | Two fresh real Telegram exports | 27,030 and 29,299 messages; 56,329 across both runs | Two accounts per run through WARP, text and metadata, no attachment downloads |
 | 6 November 2026 | The same two exports, including preparation and packaging | 127.713 and 141.781 messages/second | Measured complete-export rates; both archives verified against pinned keys |
 
 The [verification record](VERIFICATION.md) gives the server inventory, live
 collection checks and search measurement. [Export performance](https://phishdestroy.github.io/TgWitness/docs/validation/)
 publishes the two real runs, hardware, durations, archive hashes and signed
-measurement files. They establish results for their recorded revisions and
-conditions, not a universal rate or capacity ceiling.
+measurement files, each with its recorded revision and conditions.
 
 The [public-history qualification](EXPORT-BENCHMARK-2026-11-06.md) also records
 **48 verified archives with 3,598,381 records** across a 50-source input list and
@@ -114,15 +112,10 @@ smaller fresh-export examples above.
 ### Testing history and duration
 
 The maintainers report more than six months of active development and testing
-before the November 2026 public release period. They describe cumulative
-development test workload on the order of 100 million, including earlier runs,
-failures, fixes and repeated validation. This is the project's development history;
-the dated public measurements document selected runs with their own methods and results.
-
-The cumulative figure describes exercised workload, not distinct automated test
-cases. The public repository's creation date records publication, not when that
-development began. Likewise, GitHub contributor accounts do not establish the
-number of people involved in development, testing or review.
+before the public repository opened in November 2026, with cumulative exercised
+workload on the order of 100 million, including earlier runs, failures, fixes and
+repeated validation. The dated public measurements document selected runs with
+their own revisions, methods and results.
 
 ## Read capability status precisely
 

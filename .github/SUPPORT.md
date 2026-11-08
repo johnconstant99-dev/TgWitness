@@ -32,6 +32,6 @@ Security reports use the private process in [SECURITY.md](SECURITY.md). If priva
 
 ## Scope of support
 
-TgWitness is a self-hosted project. There is no hosted collector, managed account service or guaranteed response time. The [verification record](../docs/VERIFICATION.md) distinguishes completed checks from remaining qualification work.
+TgWitness is a self-hosted project: you run the collector on your own computer or server with your own accounts, and the project answers issues as maintainers are available. The [verification record](../docs/VERIFICATION.md) lists completed checks and the next qualification runs.
 
 For code or documentation changes, see [CONTRIBUTING.md](CONTRIBUTING.md).

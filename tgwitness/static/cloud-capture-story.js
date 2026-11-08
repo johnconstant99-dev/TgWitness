@@ -20,7 +20,7 @@
   const steps = () => [t("Your key"), t("Capture"), t("Attestation"), t("Encryption"), t("Verification")];
   const scenes = () => [
     [t("Save your key"), t("Keep the private key on your device. Copy the public key to GitHub to encrypt the archive."), "sealed-key.json"],
-    [t("Choose export settings"), t("Start the collector in your fork，then sign in to Telegram in the temporary panel and configure your export．"), t("Available messages and media")],
+    [t("Choose export settings"), t("Start the collector in your fork, then sign in to Telegram in the temporary panel and configure your export."), t("Available messages and media")],
     [t("GitHub attests the archive"), t("The attestation binds the archive hash to the workflow. It does not contain the chat."), "evidence.zip + attestation.jsonl"],
     [t("Download the result"), t("Download the encrypted package and open it with your key. GitHub removes the temporary machine after the job."), "delivery.tgwsealed"],
     [t("Verify its origin"), t("Share the archive and attestation with a reviewer. They can check the hash, workflow and collector version."), t("Try the example below ↓")]

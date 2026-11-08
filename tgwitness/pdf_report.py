@@ -1355,8 +1355,7 @@ class ChatPDF:
         say = self.say
         if self.ids:
             self.lay.section(say("Message numbers"), say(
-                "This export contains a selection. Absent message numbers may have been excluded by the filters. "
-                "They are not evidence that a message was deleted or inaccessible."
+                "This export contains a selection. Absent message numbers may have been excluded by the filters."
                 if self.ids.get("selection_applied") else
                 "Telegram numbers the messages of a channel or supergroup 1, 2, 3… in order, service messages included. A "
                 "number between the first and the last exported message that is absent belongs to a message Telegram did "

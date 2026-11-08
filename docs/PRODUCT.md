@@ -147,7 +147,7 @@ separate-update switches. There are no per-group category overrides yet.
 | Deletion | Telegram notification, reception time and previously captured content | Actor and source action time are retained when supplied by a separate admin-log record |
 | Account-level deletion notice | Original notice; resolved records include the saved chat and correlation method | Requires exactly one previously saved private-chat or ordinary-group match in scope; other IDs stay `deletion.unscoped`. Channel and supergroup IDs are excluded from this correlation |
 | Reaction | Delivered counters and visible recent identities | A complete available reactor list requires separate queries; channels may hide identities |
-| Membership | Service messages and delivered participant updates | Visibility depends on role and chat type; missing events do not establish absence |
+| Membership | Service messages and delivered participant updates | Visibility depends on role and chat type; membership is reported from delivered events |
 | Admin actions | Relevant delivered updates and an admin-log snapshot in channel/supergroup chat exports | The export reads the log when available to the exporting admin account; continuous admin-log polling is outside this path |
 | Attachment | Original version descriptor, downloaded bytes/SHA-256 and attempt outcomes | A vanished file may be unrecoverable; the latest version is not substituted |
 | History | Explicit snapshot of current visible messages | Does not reconstruct all edits or deleted content |
@@ -158,15 +158,14 @@ names and usernames. When the event omits its actor, the report leaves that fiel
 
 ## Capacity and Telegram limits
 
-There is no universal number of chats that can be monitored with guaranteed quality.
-Capacity depends on peak events per second, attachment volume and sizes, additional
+Capacity is sized per deployment. It depends on peak events per second, attachment volume and sizes, additional
 RPCs, active accounts, disk latency/free space, network conditions, Telegram limits,
 acceptable lag and queue depth.
 
 Telegram distinguishes passive delivery from active short polling. Its update
 documentation describes additional `updates.getChannelDifference` calls for open
 channels/supergroups and recommends at most **ten simultaneously short-polled
-sources**. This is not a limit of ten selected groups or a completeness guarantee.
+sources**. This applies to short polling; the number of selected groups is set separately.
 
 | Mode | Purpose | Status |
 | --- | --- | --- |

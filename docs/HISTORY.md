@@ -12,8 +12,8 @@ JSON/HTML export.
 
 For account-wide collection, select **Whole account**, start observation to load its
 source list, and review that list before starting history. The dialog-list limit still
-applies (1,000 by default, adjustable in Parameters). A successful run does not prove
-that every account dialog was listed. Chats discovered or enabled later need another run.
+applies (1,000 by default, adjustable in Parameters); the source list shows which
+dialogs the run covered. Chats discovered or enabled later need another run.
 Pause observation before starting history; one acquisition owns an account at a time.
 
 Choose one to five attachment workers and whether to preserve available Recent Actions

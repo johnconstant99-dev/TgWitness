@@ -189,11 +189,22 @@ DISCLAIMER = re.compile(r"\b(?:does|do) not (?:prove|establish)\b|\bnot (?:proof
 TRANSLATED = re.compile(r"tgwitness/(?:locales|guide_locales)/(?!keys\.json)[^/]+\.json|"
                         r"tgwitness/narrative/texts/(?!(?:glossary\.)?en\.json)[^/]+\.json|tgwitness/verify\.py|"
                         r"tgwitness/static/[^/]*-locales\.js")
+DOCUMENT = re.compile(r"(?!docs/(?:am|ar|bn|de|es|fa|fr|he|hi|id|it|ja|ko|ms|pl|pt|ru|th|tr|uk|ur|uz|vi|zh|zh-Hant)/"
+                      r"|website/validation/audit/|website/export-clinic/media/).+\.(?:md|txt)")
+RUSSIAN = re.compile(r"\bне (?:доказыва|гарантиру|удостоверя)\w*|\bне является (?:доказательств|юридическ)\w*|"
+                     r"\bгарантий нет\b", re.I)
 
 
-def check_wording(root):
+def check_wording(root, sources=()):
     root = Path(root)
     findings = []
+    for path in sorted(sources):
+        name = path.relative_to(root).as_posix()
+        pattern = (RUSSIAN if name.startswith("docs/ru/") and name.endswith(".md")
+                   else DISCLAIMER if DOCUMENT.fullmatch(name) else None)
+        if pattern is not None:
+            for match in pattern.finditer(path.read_text(encoding="utf-8")):
+                findings.append(f"{name}: describe what the check covers instead of \"{match.group(0)}\"")
     for path in sorted((root / "tgwitness").rglob("*")) + sorted((root / "tgwitness_capture").rglob("*")):
         name = path.relative_to(root).as_posix()
         if not path.is_file() or path.suffix not in {".py", ".js", ".html", ".json"} or TRANSLATED.fullmatch(name):
@@ -273,7 +284,7 @@ def main():
     sources, links, findings = check_sources(ROOT)
     findings.extend(check_version_labels(ROOT))
     findings.extend(check_catalogues(ROOT))
-    findings.extend(check_wording(ROOT))
+    findings.extend(check_wording(ROOT, sources))
     if args.git_index:
         findings.extend(check_git_index(ROOT, sources))
     print(f"Checked {len(sources)} public files and {links} local documentation links.")
