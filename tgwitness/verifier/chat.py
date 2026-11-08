@@ -4,12 +4,12 @@ from .common import (
     VerifierTooOld,
     base64,
     datetime,
-    json,
     member_digest,
     open_archive,
     read_manifest,
     read_member,
     safe_text,
+    strict_json,
 )
 def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
     from .account import check_attachments, verify_parts
@@ -212,7 +212,7 @@ def message_id_summary(chat_id, ids):
 
 def check_message_ids(archive, manifest):
     from .account import chat_messages
-    claimed = json.loads(read_member(archive, "message-ids.json", MAX_JSON_BYTES))
+    claimed = strict_json(read_member(archive, "message-ids.json", MAX_JSON_BYTES))
     ids = sorted({m["id"] for m in chat_messages(archive) if type(m.get("id")) is int})
     counted = message_id_summary((manifest.get("chat") or {}).get("id"), ids)
     if {k: claimed.get(k) for k in counted} != counted:
