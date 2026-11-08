@@ -19,6 +19,7 @@ from .history_transport import HistoryTransport
 from .workers import complete_in_thread
 
 PAGE_SIZE = 100
+COMMIT_BATCH = 32
 
 
 class History:
@@ -422,37 +423,39 @@ class History:
                     meta["text_done"] = True
                 self.save_metadata(job, meta)
             return
-        for message in messages:
+        for start in range(0, len(messages), COMMIT_BATCH):
             if not self.collector.selected(chat_id):
                 self.finish_source(job, "skipped", "source_disabled")
                 return
+            chunk = messages[start:start + COMMIT_BATCH]
+            saved = missing = 0
             with self.store.transaction():
-
-                unavailable = (isinstance(message, types.MessageEmpty) or not hasattr(message, "message")
-                               or getattr(message, "peer_id", None) is None)
-                if unavailable:
-                    event = self.store.append("history.message.unavailable", {"history_run_id": run_id},
-                                              chat_id, message.id)
-                else:
-                    previous = self.store.message_state(chat_id, message.id)["content"]
-                    event = await self.collector.capture_message(message, "message.snapshot", chat_id,
-                        source="history_acquisition", history_run_id=run_id, acquisition={
-                            "source_mode": options.transport, "source": "backfill",
-                            "telegram_range": self.transport.ranges[index] if self.transport else None})
-                    if (options.compare_saved and previous
-                            and previous["observable"] != message_content.of_payload(event["payload"])):
-                        self.store.append("history.content.changed", {
-                            "history_run_id": run_id, "source": "backfill_comparison",
-                            "previous_event": previous["seq"], "previous_hash": previous["hash"],
-                            "current_event": event["seq"], "current_hash": event["hash"],
-                            "meaning": "Observed content differs; change time, actor and intermediate versions are unknown."},
-                            chat_id, message.id)
-                self.store.db.execute("INSERT INTO history_items VALUES (?,?)", (run_id, event["seq"]))
+                for message in chunk:
+                    unavailable = (isinstance(message, types.MessageEmpty) or not hasattr(message, "message")
+                                   or getattr(message, "peer_id", None) is None)
+                    if unavailable:
+                        event = self.store.append("history.message.unavailable", {"history_run_id": run_id},
+                                                  chat_id, message.id)
+                    else:
+                        previous = self.store.message_state(chat_id, message.id)["content"]
+                        event = await self.collector.capture_message(message, "message.snapshot", chat_id,
+                            source="history_acquisition", history_run_id=run_id, acquisition={
+                                "source_mode": options.transport, "source": "backfill",
+                                "telegram_range": self.transport.ranges[index] if self.transport else None})
+                        if (options.compare_saved and previous
+                                and previous["observable"] != message_content.of_payload(event["payload"])):
+                            self.store.append("history.content.changed", {
+                                "history_run_id": run_id, "source": "backfill_comparison",
+                                "previous_event": previous["seq"], "previous_hash": previous["hash"],
+                                "current_event": event["seq"], "current_hash": event["hash"],
+                                "meaning": "Observed content differs; change time, actor and intermediate versions are unknown."},
+                                chat_id, message.id)
+                    self.store.db.execute("INSERT INTO history_items VALUES (?,?)", (run_id, event["seq"]))
+                    saved, missing = saved + int(not unavailable), missing + int(unavailable)
                 self.store.db.execute("UPDATE history_sources SET offset_id=?,captured=captured+?,"
                                       "unavailable=unavailable+? WHERE run_id=? AND chat_id=?",
-                                      (message.id, int(not unavailable), int(unavailable), run_id, chat_id))
+                                      (chunk[-1].id, saved, missing, run_id, chat_id))
                 history_cursor.seal(self.store, run_id, chat_id)
-
             await asyncio.sleep(0)
 
     def report(self):
