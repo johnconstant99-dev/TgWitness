@@ -298,7 +298,8 @@ Telegram often supplies numeric DC IPs.
 SOCKS5 and plain HTTP CONNECT do not themselves encrypt proxy credentials or the
 client-to-proxy tunnel. MTProto separately protects Telegram traffic. Use an
 appropriate secure channel to the proxy on an untrusted network. Private groups
-are cloud chats; MTProto does not turn them into end-to-end encrypted Secret Chats.
+are cloud chats protected by MTProto in transit; end-to-end Secret Chats are a separate chat
+type, recorded by the [Secret Chat module](PSEUDO-SECRET.md).
 
 ## Encryption and signatures
 

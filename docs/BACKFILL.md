@@ -56,8 +56,8 @@ separately, and the existing distributed-export workflow remains available for e
 multi-account exports. History does not redistribute a banned account's cursor.
 
 The highest message ID is not a message-count estimate. Takeout, proxy changes and
-request pacing follow your settings and Telegram's limits. Secret Chats and messages not
-available to the selected account are outside this acquisition.
+request pacing follow your settings and Telegram's limits. This acquisition reads the history
+available to the selected account; Secret Chats are recorded live by the [Secret Chat module](PSEUDO-SECRET.md).
 
 ## Takeout
 
