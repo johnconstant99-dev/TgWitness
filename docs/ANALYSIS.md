@@ -71,7 +71,7 @@ The model receives no tools. Its source IDs are resolved against the selected
 records, hashes are rechecked, and quoted strings must occur in those records.
 Unknown IDs, changed quotes and uncited claims reject the answer. The application
 creates links; model-generated URLs are not used as citations. These checks
-establish source existence and quote accuracy, not the truth of an inference.
+establish source existence and quote accuracy.
 Review inferences against the records before relying on them.
 
 ## Reports

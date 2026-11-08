@@ -48,9 +48,8 @@ external timestamps and off-site storage serve different investigation and
 handoff requirements. Configure those features when they are relevant.
 
 Scope, permissions and minimized sharing copies help operators choose what to
-collect and disclose. Jurisdiction guidance and report settings support that
-decision; selecting a profile does not itself establish legal compliance or
-admissibility. See [account export](ACCOUNT-EXPORT.md), [access](ACCESS.md) and
+collect and disclose. Jurisdiction guidance and report settings record the
+selected procedure and preparation steps. See [account export](ACCOUNT-EXPORT.md), [access](ACCESS.md) and
 [report configuration](CASE_REPORTS.md).
 
 The application runs on the chosen computer or server. Basic collection does not

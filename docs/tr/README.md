@@ -215,7 +215,9 @@ python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_K
 
 Doğrulayıcı, imzalanmış üreticiyi, sürekli gözlem dönemlerini, boşlukları ve hiç gözlemlenmemiş mesaj kimliklerini yazdırır; günlük, tanığın gördüğü herhangi bir başlık ile farklılık gösteriyorsa işlem başarısız olur.
 
-İmzalar, güvenilir bir imzalama anahtarıyla ilgili olarak tahrifat kanıtı sağlar. Telegram kaynağını, içeriğin doğruluğunu veya güvenilir zamanı kanıtlamazlar ve toplayıcıyı ve anahtarını kontrol eden bir operatöre karşı koruma sağlamazlar. Güvenilir zaman için, kanıt modu (varsayılan olarak kapalıdır) kontrol noktalarını RFC 3161 yetkilileri ve OpenTimestamps takvimleriyle zaman damgalar veya panel çevrimdışı bir RFC 3161 isteği hazırlar ([zaman damgası prosedürü](../TIMESTAMP.md)). Her ikisi de henüz kamuya açık hizmetlere karşı değil, yerel test sunucularına karşı test edilmiştir. [Kanıt model](../EVIDENCE.md)ine ve [soruşturma devri](../EVIDENCE.md#investigation-handoff) kontrol listesine bakınız.
+Günlük imzalarını, hash zincirini ve ekleri güvenilir bir anahtarla doğrulayın; kontrol noktalarını ayrı bir yerde saklayın. Seçilen modun toplama kapsamını ve zaman aralıklarını, harici zaman kayıtlarını ve toplama ortamı için mevcut doğrulama sonuçlarını birlikte inceleyin.
+
+[zaman damgası prosedürü](../TIMESTAMP.md) · [Kanıt model](../EVIDENCE.md) · [soruşturma devri](../EVIDENCE.md#investigation-handoff)
 
 ## Dağıtım
 

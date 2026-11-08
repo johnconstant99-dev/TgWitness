@@ -100,7 +100,7 @@ Sebuah basis data Telethon SQLite yang tertutup dan konsisten `.session` dapat d
 
 **Menjeda pemantauan** akan menghentikan pengumpulan data. **Mengunci** hanya akan menutup akses browser. Menutup tab akan membiarkan proses pengumpul tetap berjalan. Menghentikan proses akan menghentikan pengumpulan data; cuplikan riwayat tidak dapat merekonstruksi semua pengeditan atau penghapusan yang terlewatkan. Lihat [cara kerja pengumpulan data](../COLLECTION.md) untuk kebijakan peristiwa, antrian lampiran, isolasi akun, dan perilaku saat dimulai ulang.
 
-Sesi dan rahasia dienkripsi. Isi pesan, media, dan ekspor memerlukan disk atau volume yang dienkripsi. Tanda tangan memastikan integritas relatif terhadap kunci tepercaya; tanda tangan tersebut tidak memastikan asal Telegram atau mencegah pemalsuan oleh operator yang mengendalikan pengumpul dan kuncinya.
+Sesi dan rahasia dienkripsi. Isi pesan, media, dan ekspor memerlukan disk atau volume yang dienkripsi. Verifikasi tanda tangan jurnal, rantai hash, dan lampiran menggunakan kunci tepercaya, lalu simpan titik pemeriksaan secara terpisah. Tinjau cakupan dan interval pengumpulan, bukti waktu eksternal, serta hasil pemeriksaan lingkungan pengumpulan yang tersedia untuk mode yang dipilih.
 
 Baca [berkas OPERATIONS.md](../OPERATIONS.md) untuk pencadangan/pemulihan, [DEPLOYMENT.md](DEPLOYMENT.md) untuk hosting, dan [direktori deploy/](../../deploy/README.md) untuk contoh layanan. Panel yang telah diinstal juga menyertakan panduan pengaturan offline di `/guide.html`.
 

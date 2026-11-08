@@ -25,8 +25,8 @@ flowchart LR
 
 The collector signature binds records to its key. A trusted TSA response can
 establish that a particular checkpoint existed by the TSA's stated time. The
-checkpoint can then bind the journal prefix. This does not establish the time of
-each Telegram action or the truth of the captured content.
+checkpoint can then bind the journal prefix. This upper time bound applies to
+that committed prefix; individual Telegram actions retain their recorded event times.
 
 ## Procedure
 
@@ -90,9 +90,10 @@ original nonce. For this full procedure, the result's `request_checked` must be 
 Certificate verification follows the installed OpenSSL's rules and verification time.
 Long-term preservation needs a separate certificate/revocation evidence policy.
 
-A valid cryptographic signature is not automatically a qualified timestamp or a
-legal admissibility determination. If an operator fabricated observations before
-timestamping, the TSA anchors those bytes; it does not establish their truth.
+The TSA response anchors the submitted checkpoint bytes to its stated time.
+Review that result with the acquisition records and environment verification for
+the selected mode. Where a qualified timestamp is required, check the provider
+and certificate policy against that requirement.
 
 ## Handoff record
 

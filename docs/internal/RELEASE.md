@@ -79,8 +79,8 @@ is unavailable, the export keeps its HTML and JSON reports and records the limit
   rate limits, reconnects and sustained operation.
 - Successful checks for this candidate on Linux, Windows and macOS, including the portable package.
   Prior platform results do not qualify a newer revision; use its Actions run and manifest.
-- Independent security review, operator-resistant capture, legal admissibility and guaranteed
-  event completeness. Signatures verify the journal; they do not certify Telegram's content.
+- Record independent security reviews and validate each capture mode's acquisition,
+  coverage and environment checks against the release revision.
 
 The main panel token controls all workspaces. Issue scoped tokens for reviewers and analysts; see [access and permissions](../ACCESS.md). Keep dedicated
 account credentials and collected data out of the repository. See [readiness](READINESS.md)

@@ -215,7 +215,9 @@ python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_K
 
 Trình xác minh sẽ hiển thị thông tin về nhà sản xuất đã được ký tên, các khoảng thời gian quan sát liên tục, các khoảng trống và các ID tin nhắn chưa từng được ghi nhận; đồng thời sẽ báo lỗi nếu nhật ký này có sự khác biệt so với bất kỳ bản gốc nào mà nhân chứng đã quan sát được.
 
-Chữ ký cung cấp bằng chứng chống giả mạo liên quan đến khóa ký đáng tin cậy. Chúng **không** chứng minh nguồn gốc từ Telegram, tính xác thực của nội dung hay thời gian đáng tin cậy, và cũng không bảo vệ trước một nhà điều hành kiểm soát bộ thu thập dữ liệu cùng khóa của nó. Đối với thời gian đáng tin cậy, chế độ bằng chứng (tắt theo mặc định) sẽ đóng dấu thời gian các điểm kiểm tra bằng các cơ quan có thẩm quyền theo RFC 3161 và lịch OpenTimestamps, hoặc ban điều hành sẽ chuẩn bị một yêu cầu RFC 3161 ngoại tuyến ([quy trình đóng dấu thời gian](../TIMESTAMP.md)). Cả hai phương án này đều đã được kiểm thử trên các máy chủ thử nghiệm nội bộ, nhưng chưa được kiểm thử trên các dịch vụ công cộng. Xin tham khảo [mô hình bằng chứng](../EVIDENCE.md) và danh sách kiểm tra [bàn giao điều tra](../EVIDENCE.md#investigation-handoff).
+Xác minh chữ ký nhật ký, chuỗi băm và tệp đính kèm bằng khóa tin cậy, đồng thời lưu các điểm kiểm tra ở nơi độc lập. Đối chiếu phạm vi và khoảng thời gian thu thập, biên nhận thời gian bên ngoài và kết quả kiểm tra môi trường thu thập có trong chế độ đã chọn.
+
+[quy trình đóng dấu thời gian](../TIMESTAMP.md) · [mô hình bằng chứng](../EVIDENCE.md) · [bàn giao điều tra](../EVIDENCE.md#investigation-handoff)
 
 ## Triển khai
 

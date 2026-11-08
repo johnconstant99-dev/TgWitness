@@ -13,8 +13,8 @@ Counts are not interpolated. Reduced-motion mode keeps manual timeline controls.
 Fixed excerpts are separate from replay and expose their full event hashes.
 
 The browser verifies receipt signatures and supplied journal checkpoints.
-The supplied signing keys identify the measurement; they do not establish an
-independent audit, message authorship or complete collection.
+The supplied signing keys identify the measurement. Review the stated workload,
+acquisition intervals and linked verification records with those results.
 
 Keep operational receipts and source messages outside the repository. Public
 examples must use fictional data. Run the synthetic browser regressions with

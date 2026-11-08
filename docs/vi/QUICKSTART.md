@@ -100,7 +100,7 @@ Một cơ sở dữ liệu Telethon SQLite khép kín và nhất quán `.session
 
 **Tạm dừng quan sát** sẽ ngừng quá trình thu thập dữ liệu. **Chế độ Khóa** chỉ chặn quyền truy cập qua trình duyệt. Việc đóng một tab sẽ không làm dừng quá trình thu thập; quá trình này vẫn tiếp tục chạy. Việc dừng quá trình mới thực sự ngắt quá trình thu thập; bản chụp lịch sử không thể khôi phục lại toàn bộ các chỉnh sửa hoặc xóa bỏ đã bị bỏ lỡ. Vui lòng tham khảo [cách thức hoạt động của quá trình thu thập](../COLLECTION.md) đối với các chính sách sự kiện, hàng đợi tệp đính kèm, cách ly tài khoản và hành vi khởi động lại.
 
-Các phiên làm việc và thông tin bí mật đều được mã hóa. Nội dung tin nhắn, tệp đa phương tiện và các tệp xuất ra yêu cầu phải được lưu trữ trên đĩa hoặc phân vùng được mã hóa. Chữ ký số xác nhận tính toàn vẹn dựa trên một khóa tin cậy; chúng không xác nhận nguồn gốc từ Telegram cũng như không ngăn chặn việc làm giả bởi người vận hành kiểm soát bộ thu thập dữ liệu và khóa của nó.
+Các phiên làm việc và thông tin bí mật đều được mã hóa. Nội dung tin nhắn, tệp đa phương tiện và các tệp xuất ra yêu cầu phải được lưu trữ trên đĩa hoặc phân vùng được mã hóa. Xác minh chữ ký nhật ký, chuỗi băm và tệp đính kèm bằng khóa tin cậy, đồng thời lưu các điểm kiểm tra ở nơi độc lập. Đối chiếu phạm vi và khoảng thời gian thu thập, biên nhận thời gian bên ngoài và kết quả kiểm tra môi trường thu thập có trong chế độ đã chọn.
 
 Vui lòng tham khảo [tệp OPERATIONS.md](../OPERATIONS.md) để biết thông tin về sao lưu/khôi phục, [tệp DEPLOYMENT.md](DEPLOYMENT.md) để biết về việc lưu trữ, và [thư mục deploy/](../../deploy/README.md) để xem các ví dụ về dịch vụ. Bảng điều khiển đã cài đặt cũng bao gồm hướng dẫn thiết lập ngoại tuyến tại `/guide.html`.
 

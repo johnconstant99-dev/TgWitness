@@ -100,7 +100,7 @@ Um Telethon SQLite fechado e consistente `.session` pode ser convertido localmen
 
 **A pausa na observação** interrompe a coleta. **O bloqueio** apenas interrompe o acesso pelo navegador. Fechar uma aba mantém o processo de coleta em execução. Interromper o processo interrompe a coleta; um instantâneo do histórico não consegue reconstruir todas as edições ou exclusões perdidas. Veja [como funciona a coleta](../COLLECTION.md) para políticas de eventos, filas de anexos, isolamento de contas e comportamento de reinício.
 
-As sessões e os segredos são criptografados. O conteúdo das mensagens, as mídias e as exportações exigem um disco ou volume criptografado. As assinaturas garantem a integridade em relação a uma chave confiável; elas não comprovam a origem do Telegram nem impedem a falsificação por parte de um operador que controle o coletor e sua chave.
+As sessões e os segredos são criptografados. O conteúdo das mensagens, as mídias e as exportações exigem um disco ou volume criptografado. Verifique as assinaturas do diário, a cadeia de hashes e os anexos com uma chave confiável, e guarde os pontos de verificação separadamente. Analise o escopo e os intervalos de coleta, os comprovantes de tempo externos e as verificações do ambiente disponíveis para o modo selecionado.
 
 Consulte [o arquivo OPERATIONS.md](../OPERATIONS.md) para obter informações sobre backup/restauração, [o arquivo DEPLOYMENT.md](DEPLOYMENT.md) para hospedagem e [a pasta deploy/](../../deploy/README.md) para exemplos de serviço. O painel instalado também inclui um guia de configuração offline em `/guide.html`.
 
