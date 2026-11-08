@@ -147,11 +147,10 @@ Sign in by phone, QR or a session file, pick sources, save the policy and press
 <details>
 <summary>Sign-in formats and the built-in API pool</summary>
 
-You don't need your own API ID. Creating one on [my.telegram.org](https://my.telegram.org) is
-known to get accounts restricted, and Telegram's own
-[docs](https://core.telegram.org/api/obtaining_api_id) say unofficial clients are watched.
-So TgWitness ships 50 public API pairs already used by other open-source clients and tries
-the next one if Telegram refuses. Have your own? Enter it under **API ID + Hash**.
+You don't need your own API ID. TgWitness ships 50 public API pairs already used by
+other open-source clients and tries the next one if Telegram refuses. Have your own?
+Enter it under **API ID + Hash**; Telegram's
+[API terms](https://core.telegram.org/api/obtaining_api_id) apply to every client.
 
 | What you have | Where |
 | --- | --- |

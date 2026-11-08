@@ -23,13 +23,15 @@ ID_MEANING = ("Channels and supergroups number their messages 1, 2, 3... per cha
               "are shared by all of the account's chats, so absent numbers say nothing there.")
 
 EXPORT_LIMITS = [
-    "This export is a current history snapshot taken by a Telegram client.",
-    "Messages deleted before export, and past edits, cannot be recovered and are not present.",
+    "This export is the chat history Telegram returned to this workspace's client at export time, signed with the "
+    "collector key in the manifest.",
+    "Each message appears in its current version; the evidence journal of the workspace holds earlier versions and "
+    "deletion notices observed live.",
     "Message times come from Telegram; the export time uses the collector's system clock.",
     "chat.json gives each sender's name at export and its source: the account's contacts or the Telegram profile. "
     "Where the journal recorded the name at the time of a message, sender-names.json and the readable copies use it; "
     "names and usernames are mutable.",
-    "The signature detects changes relative to a trusted key. Retain the fingerprint elsewhere.",
+    "Verify with the collector fingerprint you retained; any change to the export breaks its signature.",
 ]
 JOURNAL_LIMIT = ("This snapshot holds only what Telegram returned at export. The journal of this workspace also "
                  "holds deletions or earlier versions observed in this chat; export the evidence journal to include them.")
