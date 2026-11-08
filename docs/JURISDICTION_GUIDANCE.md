@@ -81,7 +81,7 @@ a timestamp covering only a prefix produce different instructions. Recorded gaps
 lead to an explanation of the affected period, not a claim that a setting can
 repair past collection. Included TDX quotes still require independent validation.
 The design preview does not invent these findings; they are added during export.
-This task list is software guidance, not an assessment of legal admissibility.
+This task list guides package preparation and records the checks performed.
 
 ## Research status and trust limits
 
@@ -106,7 +106,8 @@ encryption, an S3 endpoint or versioning alone is insufficient. See
 [AWS Object Lock](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html).
 TEE claims require verification of the relevant deployment and output bindings;
 the framework's scope is documented by [dstack](https://github.com/Dstack-TEE/dstack).
-Video supplies visible context, not proof that every input or scene is authentic.
+Review video with the recorded acquisition route, observation intervals and
+recorder verification results.
 
 ## Validation
 

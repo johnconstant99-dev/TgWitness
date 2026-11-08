@@ -67,7 +67,8 @@ python -m tgwitness_capture serve --data data/ayugram-recorder --config /private
 Use distinct data directories, profiles, sessions, keys and routes. Two containers
 on the same host still share the kernel and administrator; separate VMs or hosts
 provide stronger separation. Two sessions of one Telegram account still depend on
-the same account. Neither record is a third-party attestation of Telegram origin.
+the same account. Compare the records with their acquisition routes, retained
+checkpoints and the environment checks available for each recorder.
 
 For a local browser adapter, launch a **separate profile** with
 `--remote-debugging-port=9222 --user-data-dir=/private/capture-browser-profile` and

@@ -148,8 +148,8 @@ attachment policy. `--require-complete` rejects partial account exports and chat
 journals, whose overall completeness is not established. Without these flags,
 verification still checks provenance and integrity while reporting the recorded
 settings and gaps. A file supplied only with the finished archive cannot establish
-what was agreed beforehand. A valid signature never turns omitted data into data
-that was collected, or proves the owner did not edit/delete messages before capture.
+what was agreed beforehand. The scope and acquisition intervals identify the material captured during
+the run; use retained earlier observations when comparing previous versions.
 
 | Need | Mode |
 | --- | --- |

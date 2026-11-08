@@ -16,7 +16,7 @@ There is no guaranteed response time or independent security certification.
 | --- | --- |
 | Access | One panel token controls every workspace. Keep the panel on localhost, or use HTTPS or an SSH tunnel. |
 | Stored data | Credentials are encrypted; messages and media are not. Protect the data directory with disk encryption and restrictive permissions. |
-| Evidence | Signatures detect changes against a trusted key. They do not establish truth or complete capture. Keep checkpoints separately. |
+| Evidence | Signatures detect changes against a trusted key. Review acquisition scope, coverage and external verification records together. Keep checkpoints separately. |
 | Exports | Archives contain collected content and identifiers. Treat them as sensitive. |
 
 [Security model and data handling](../docs/SECURITY-MODEL.md) · [Deployment](../docs/DEPLOYMENT.md) · [Hardening](../docs/HIGH-ASSURANCE.md)

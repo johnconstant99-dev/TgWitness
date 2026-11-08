@@ -215,7 +215,9 @@ python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_K
 
 O verificador exibe o produtor assinado, os períodos de observação contínua, as lacunas e os IDs de mensagens que nunca foram observados, e apresenta falha caso o diário difira de qualquer cabeçalho que a testemunha tenha visto.
 
-As assinaturas fornecem evidência de integridade em relação a uma chave de assinatura confiável. Elas **não** comprovam a origem do Telegram, a veracidade do conteúdo ou a hora confiável, e não oferecem proteção contra um operador que controle o coletor e sua chave. Para a data e hora confiáveis, o modo de evidência (desativado por padrão) carimba os pontos de verificação com autoridades RFC 3161 e calendários OpenTimestamps; ou o painel prepara uma solicitação RFC 3161 offline ([procedimento de carimbo de data e hora](../TIMESTAMP.md)). Ambos são testados em servidores de teste locais, ainda não nos serviços públicos. Consulte o [modelo de evidência](../EVIDENCE.md) e a lista de verificação [para transferência de investigação](../EVIDENCE.md#investigation-handoff).
+Verifique as assinaturas do diário, a cadeia de hashes e os anexos com uma chave confiável, e guarde os pontos de verificação separadamente. Analise o escopo e os intervalos de coleta, os comprovantes de tempo externos e as verificações do ambiente disponíveis para o modo selecionado.
+
+[procedimento de carimbo de data e hora](../TIMESTAMP.md) · [modelo de evidência](../EVIDENCE.md) · [para transferência de investigação](../EVIDENCE.md#investigation-handoff)
 
 ## Implantação
 

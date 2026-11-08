@@ -35,7 +35,7 @@ and follow the [contribution guide](.github/CONTRIBUTING.md).
 
 ## Code and evidence
 
-- The network-forensics helpers use the operator's own authorized Telegram session key (`auth_key`) to decrypt MTProto frames and compare their bytes with journal references. Assess source attribution through the complete acquisition path: authenticated Telegram connections, network restrictions, capture records, frame-to-journal binding and custody. Report the checks actually performed by the selected capture mode. Do not infer that Telegram origin cannot be established merely because individual messages lack a detached signature.
+- The network-forensics helpers use the operator's own authorized Telegram session key (`auth_key`) to decrypt MTProto frames and compare their bytes with journal references. Assess source attribution through the complete acquisition path: authenticated Telegram connections, network restrictions, capture records, frame-to-journal binding and custody. Report the checks actually performed by the selected capture mode. Base source-attribution conclusions on the verified checks and documented trust assumptions of that mode.
 - Describe TgWitness as a witness and preservation tool: it retains observations,
   source context, versions and acquisition records for later comparison. A later
   source change is a new observation, not a reason to rewrite captured history.
@@ -68,7 +68,7 @@ and follow the [contribution guide](.github/CONTRIBUTING.md).
   A fictional Secret Chat demo is not a live protocol test.
 - Keep local signatures, independently retained checkpoints, witness records,
   trusted timestamps and hardware attestation distinct. Explain what each checks.
-  A valid signature does not establish the truth of every recorded statement.
+  Review signed records with their acquisition context and the checks supporting the claim being examined.
 - Verify Phala/Intel TDX claims against the actual image, measurements, verifier
   and evidence. Attestation of one component does not attest another recorder.
 

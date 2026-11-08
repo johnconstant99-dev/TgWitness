@@ -31,9 +31,9 @@ The archive hash is checked again after verification to detect changes during
 the run. A verifier supplied by an adversarial sender can still lie: obtain
 the code and runtime independently when independent verification is needed.
 
-Exit status 0 means the requested integrity checks passed. It does not mean
-the signer is pinned, every message was observed, timestamps were authenticated,
-or a court will accept the evidence. Status 1 means verification failed; 2 means
+Exit status 0 means the requested integrity checks passed. Read signer pinning,
+coverage and timestamp verification from their individual results in the report.
+Status 1 means verification failed; 2 means
 the workflow did not complete (for example no runtime, cancellation, invalid
 input, or inability to save the transcript). A missing fingerprint produces an
 amber verdict. A pinned key can produce a green **integrity** verdict while

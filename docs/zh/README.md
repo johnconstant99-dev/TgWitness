@@ -215,7 +215,9 @@ python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_K
 
 验证器会输出已签名的生成者、连续观察时段、观察间隙以及从未被观察到的消息 ID；如果日志与见证者所见到的任何主节点存在差异，则验证失败。
 
-签名可提供相对于可信签名密钥的篡改证据。但它们无法证明消息源自 Telegram、内容真实或时间可信，也无法防范控制收集器及其密钥的操作员。 关于可信时间，证据模式（默认关闭）会使用 RFC 3161 权威机构和 OpenTimestamps 日历对检查点进行时间戳，或者由控制面板准备一个离线的 RFC 3161 请求（[时间戳流程](../TIMESTAMP.md)）。这两种方式均已在本地测试服务器上经过测试，但尚未在公共服务上进行测试。 请参阅[证据模型](../EVIDENCE.md)和[调查移交](../EVIDENCE.md#investigation-handoff)检查清单。
+使用可信密钥验证日志签名、哈希链和附件，并独立保存检查点。结合所选模式的采集范围、采集时间段、外部时间凭证及采集环境验证结果进行审查。
+
+[时间戳流程](../TIMESTAMP.md) · [证据模型](../EVIDENCE.md) · [调查移交](../EVIDENCE.md#investigation-handoff)
 
 ## 部署
 

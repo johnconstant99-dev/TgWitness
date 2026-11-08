@@ -28,5 +28,8 @@ The five original files retain their signed bytes. This directory guide is
 outside that signed package. The report records the state at audit time;
 later changes to deployment state do not amend it.
 
-These are operator measurements with an integrity signature. They do not
-establish independent attestation, Telegram authorship or GDPR certification.
+The signature binds the published measurements to the audit key. Use the
+report's revision, workload, environment and recorded check results when citing it.
+Its historical wording remains in the signed original; the current
+[acquisition and verification guide](../../../docs/AGENT-GUIDE.md#product-purpose-and-strengths)
+describes the product's supported verification paths.

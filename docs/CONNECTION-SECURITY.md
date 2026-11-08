@@ -40,8 +40,9 @@ account's session. For HTTP-capable routes it also requests Cloudflare's HTTPS
 trace through that route and displays its reported exit IP, country, WARP state
 and check time. The measured latency is the Telegram connection setup time,
 not an ICMP ping. WARP preparation fails unless the trace reports WARP active.
-These checks establish connectivity, not the authenticity or completeness of
-captured messages. A running local process alone is not a successful exit check.
+These preflight checks report route connectivity and the observed exit. Review
+captured records through the archive's acquisition and verification results. A
+running local process alone is not a successful exit check.
 
 ### Portable WARP and WireGuard
 

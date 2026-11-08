@@ -215,7 +215,9 @@ python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_K
 
 El verificador muestra el productor firmado, los periodos de observación continuos, las lagunas y los ID de los mensajes que nunca se observaron, y da un error si el diario difiere de cualquier registro que haya visto el testigo.
 
-Las firmas proporcionan evidencia de manipulación en relación con una clave de firma de confianza. **No** acreditan el origen de Telegram, la veracidad del contenido ni la hora de confianza, y no protegen frente a un operador que controle el recopilador y su clave. En cuanto a la hora fiable, el modo de evidencia (desactivado por defecto) marca con sellos de tiempo los puntos de control mediante autoridades RFC 3161 y calendarios OpenTimestamps, o bien el panel prepara una solicitud RFC 3161 sin conexión ([procedimiento de sellado de tiempo](../TIMESTAMP.md)). Ambos se prueban con servidores de prueba locales, pero aún no con los servicios públicos. Consulte el [modelo de evidencia](../EVIDENCE.md) y la lista de comprobación para [el traspaso de la investigación](../EVIDENCE.md#investigation-handoff).
+Verifique las firmas del diario, la cadena de hashes y los archivos adjuntos con una clave de confianza, y conserve los puntos de control por separado. Revise el alcance y los intervalos de adquisición, los comprobantes de tiempo externos y las verificaciones del entorno disponibles para el modo seleccionado.
+
+[procedimiento de sellado de tiempo](../TIMESTAMP.md) · [modelo de evidencia](../EVIDENCE.md) · [el traspaso de la investigación](../EVIDENCE.md#investigation-handoff)
 
 ## Implementación
 

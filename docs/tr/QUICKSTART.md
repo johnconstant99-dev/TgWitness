@@ -100,7 +100,7 @@ Kapalı, tutarlı bir Telethon SQLite `.session` dosyası, `python -m tgwitness.
 
 **Gözlemi duraklatmak**, veri toplama işlemini durdurur. **Kilitleme** yalnızca tarayıcı erişimini kapatır. Sekmeyi kapatmak, toplayıcı sürecinin çalışmaya devam etmesine neden olur. Süreci durdurmak, veri toplama işlemini kesintiye uğratır; geçmiş anlık görüntüsü, kaçırılan tüm düzenlemeleri veya silme işlemlerini yeniden oluşturamaz. Olay politikaları, ek kuyrukları, hesap izolasyonu ve yeniden başlatma davranışı için [veri toplama işleminin nasıl çalıştığını](../COLLECTION.md) inceleyin.
 
-Oturumlar ve gizli bilgiler şifrelenmiştir. Mesaj içeriği, medya dosyaları ve dışa aktarımlar için şifrelenmiş bir disk veya birim gereklidir. İmzalar, güvenilir bir anahtara göre bütünlüğü sağlar; Telegram'ın kaynağını doğrulamaz veya toplayıcıyı ve anahtarını kontrol eden bir operatör tarafından sahte içerik oluşturulmasını engellemez.
+Oturumlar ve gizli bilgiler şifrelenmiştir. Mesaj içeriği, medya dosyaları ve dışa aktarımlar için şifrelenmiş bir disk veya birim gereklidir. Günlük imzalarını, hash zincirini ve ekleri güvenilir bir anahtarla doğrulayın; kontrol noktalarını ayrı bir yerde saklayın. Seçilen modun toplama kapsamını ve zaman aralıklarını, harici zaman kayıtlarını ve toplama ortamı için mevcut doğrulama sonuçlarını birlikte inceleyin.
 
 Yedekleme/geri yükleme için [OPERATIONS.md dosyasını](../OPERATIONS.md), barındırma için [DEPLOYMENT.md dosyasını](DEPLOYMENT.md) ve hizmet örnekleri için [deploy/ dizinini](../../deploy/README.md) inceleyin. Yüklenen panelde ayrıca `/guide.html` adresinde bir çevrimdışı kurulum kılavuzu da bulunmaktadır.
 

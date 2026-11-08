@@ -215,7 +215,9 @@ python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_K
 
 Verifikator mencetak produsen yang ditandatangani, periode pengamatan berkelanjutan, celah, dan ID pesan yang tidak pernah teramati, serta akan gagal jika jurnal tersebut berbeda dari salah satu head yang dilihat oleh saksi.
 
-Tanda tangan memberikan bukti integritas terkait dengan kunci penandatanganan tepercaya. Tanda tangan tersebut **tidak** membuktikan asal Telegram, kebenaran konten, atau waktu yang tepercaya, dan tidak melindungi dari operator yang mengendalikan pengumpul data dan kuncinya. Untuk waktu tepercaya, mode bukti (dinonaktifkan secara default) menandai titik pemeriksaan dengan otoritas RFC 3161 dan kalender OpenTimestamps, atau panel menyiapkan permintaan RFC 3161 offline ([prosedur penandaan waktu](../TIMESTAMP.md)). Keduanya diuji terhadap server uji lokal, belum terhadap layanan publik. Lihat [model bukti](../EVIDENCE.md) dan daftar periksa [serah terima investigasi](../EVIDENCE.md#investigation-handoff).
+Verifikasi tanda tangan jurnal, rantai hash, dan lampiran menggunakan kunci tepercaya, lalu simpan titik pemeriksaan secara terpisah. Tinjau cakupan dan interval pengumpulan, bukti waktu eksternal, serta hasil pemeriksaan lingkungan pengumpulan yang tersedia untuk mode yang dipilih.
+
+[prosedur penandaan waktu](../TIMESTAMP.md) · [model bukti](../EVIDENCE.md) · [serah terima investigasi](../EVIDENCE.md#investigation-handoff)
 
 ## Penerapan
 
