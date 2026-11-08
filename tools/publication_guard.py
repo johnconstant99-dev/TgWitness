@@ -1,5 +1,6 @@
 """Check public source, local Markdown links and recognizable secret formats."""
 import argparse
+import importlib.util
 import io
 from pathlib import Path
 from pathlib import PurePosixPath
@@ -10,10 +11,15 @@ import xml.etree.ElementTree as ET
 import zipfile
 from urllib.parse import unquote, urlsplit
 
-try:
+if __package__:
     from .build_source import ROOT, public_sources
-except ImportError:
-    from build_source import ROOT, public_sources
+else:
+    spec = importlib.util.spec_from_file_location("build_source", Path(__file__).resolve().with_name("build_source.py"))
+    if spec is None or spec.loader is None:
+        raise ImportError("Could not load the public source builder")
+    builder = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(builder)
+    ROOT, public_sources = builder.ROOT, builder.public_sources
 
 BINARY = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".mp4", ".bin", ".tsq", ".tsr", ".ttf"}
 DEEPL_UUID = r"[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}"
