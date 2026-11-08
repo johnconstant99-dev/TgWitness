@@ -72,7 +72,8 @@ SHA-256 sidecar. `VERIFY.cmd` lists all language names and accepts a language
 number or code. Enter selects the detected system language. `--language de`,
 for example, builds with a fixed default; every build still contains all
 languages. Localized instructions are also in `languages/START_HERE-<code>.txt`.
-The build checks a signed fixture with the embedded runtime, runs the real bat
+The build checks the public fictional demo archive with the embedded runtime;
+`--validation-archive PATH` selects another retained archive. It runs the real bat
 launcher against clean and tampered ZIPs, and then runs it in every language
 with system Python absent from PATH. Building does not publish a release. Publishing at
 GitHub Releases or get.destroy.tools remains a separate release operation.

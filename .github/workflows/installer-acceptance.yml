@@ -1,4 +1,4 @@
-name: First-run installer acceptance
+name: Installer artifact and wheel smoke
 on:
   pull_request:
     branches: [main]
@@ -11,13 +11,12 @@ on:
       - tgwitness/panelctl.py
       - tgwitness/operator_guide.py
       - tools/build_installer.py
-      - tools/check_installer*.py
-      - tools/check_panel_setup.py
+      - tools/installer_publication.py
       - .github/workflows/installer-acceptance.yml
   workflow_dispatch:
     inputs:
       published:
-        description: Install the current public downloads over HTTPS, requiring this exact main commit
+        description: Authenticate and install the public wheel from this exact main commit
         type: boolean
         default: false
   workflow_call:
@@ -27,7 +26,7 @@ on:
         type: string
         required: true
       published:
-        description: Exercise authenticated public HTTPS downloads
+        description: Authenticate current public HTTPS downloads
         type: boolean
         default: false
 permissions:
@@ -43,14 +42,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-24.04
-            mode: local
-          - os: ubuntu-24.04
-            mode: quick
-          - os: windows-latest
-            mode: local
+        os: [ubuntu-24.04, windows-latest]
+        mode: [local]
     steps:
+      - name: Record the installed-wheel smoke scope
+        shell: bash
+        run: printf '%s\n' 'This job authenticates installer artifacts and checks the installed wheel. Service setup, tunnels and bootstrap regressions run privately.' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -59,7 +56,6 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install --require-hashes -r deploy/build.lock
       - run: 'python -m pip install --require-hashes --only-binary=:all: -r deploy/installer.lock'
-      - run: python -I tools/check_panel_setup.py
       - name: Build with an ephemeral test key, without release credentials
         if: ${{ !inputs.artifact && !inputs.published }}
         run: python tools/build_installer.py --base-url https://installer.invalid --test-signing-key
@@ -75,20 +71,32 @@ jobs:
           EXPECTED_REVISION: ${{ github.sha }}
         shell: bash
         run: python tools/installer_publication.py download-current --site dist/installer-site --revision "$EXPECTED_REVISION"
-      - name: Install and exercise an empty systemd panel
-        if: runner.os == 'Linux'
+      - name: Verify artifact signatures and the source revision
+        shell: bash
         env:
-          PANEL_TEST_MODE: ${{ matrix.mode }}
-          PUBLIC_DOWNLOADS: ${{ inputs.published }}
+          EXPECTED_REVISION: ${{ github.sha }}
+          EPHEMERAL_BUILD: ${{ !inputs.artifact && !inputs.published }}
         run: |
           options=()
-          if [ "$PUBLIC_DOWNLOADS" = true ]; then options+=(--public); fi
-          sudo "$(command -v python)" tools/check_installer.py --service "$PANEL_TEST_MODE" "${options[@]}"
-      - name: Install with Windows PowerShell and exercise the actual panel
-        if: runner.os == 'Windows'
-        env:
-          PUBLIC_DOWNLOADS: ${{ inputs.published }}
+          if [ "$EPHEMERAL_BUILD" = true ]; then options+=(--allow-test-key); fi
+          python -I tools/installer_publication.py verify-local --revision "$EXPECTED_REVISION" "${options[@]}"
+      - name: Install the verified wheel with its hash-locked dependencies
+        shell: bash
         run: |
-          $options = @()
-          if ($env:PUBLIC_DOWNLOADS -eq 'true') { $options += '--public' }
-          python tools/check_installer_windows.py @options
+          python -I - <<'PY'
+          import json, subprocess, sys
+          from pathlib import Path
+          site = Path("dist/installer-site")
+          manifest = json.loads((site / "manifest.json").read_bytes())
+          release = site / "releases" / manifest["release_id"]
+          wheel, = (name for name in manifest["files"] if name.endswith(".whl"))
+          subprocess.run([sys.executable, "-m", "pip", "install", "--require-hashes",
+                          "--no-build-isolation", "-r", str(release / "requirements.lock")], check=True)
+          subprocess.run([sys.executable, "-m", "pip", "install", "--no-deps", str(release / wheel)], check=True)
+          PY
+          python -m pip check
+      - name: Check installed imports and empty-workspace readiness
+        shell: bash
+        run: |
+          python -I -c "import tgwitness.app, tgwitness.verify, tgwitness_capture.service"
+          python -I -m tgwitness --check --json --data-dir "$RUNNER_TEMP/installer-readiness"

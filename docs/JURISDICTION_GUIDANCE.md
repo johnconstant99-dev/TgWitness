@@ -110,9 +110,7 @@ Video supplies visible context, not proof that every input or scene is authentic
 
 ## Validation
 
-`python -m pytest tools/test_jurisdiction_guidance.py tools/test_case_assessment.py tools/test_report_profiles.py -q`
-
-Tests cover defaults, input rejection, every civil/criminal catalog branch,
+Private regression tests cover defaults, input rejection, every civil/criminal catalog branch,
 unchanged trust checks, workspace and permission boundaries, sharing defaults,
 layout exclusion, all eight HTML/PDF designs, manifest/JSON agreement and
 signature failure after altering the guidance text. Browser review uses synthetic

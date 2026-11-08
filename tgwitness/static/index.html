@@ -22,6 +22,7 @@
 <link rel="stylesheet" href="/views/connection.css?v=1">
 <link rel="stylesheet" href="/services.css?v=1">
 <link rel="stylesheet" href="/independent-capture.css?v=1">
+<link rel="stylesheet" href="/investigate.css?v=7">
 <link rel="stylesheet" href="/workspace-safety.css?v=1">
 <link rel="stylesheet" href="/account-import.css?v=1">
 <link rel="stylesheet" href="/views/access.css?v=30">
@@ -39,6 +40,7 @@
 <script defer src="/app.js?v=0.9.1-collection1"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
+<script defer src="/investigate.js?v=7"></script>
 <script defer src="/account-import.js?v=2"></script>
 <script defer src="/integrations.js?v=5"></script>
 <script defer src="/analysis.js?v=4"></script>
@@ -236,6 +238,7 @@
 <section class="view" hidden id="view-start">
   <div class="workflow-intro"><span class="eyebrow">YOUR WORKSPACE</span><h1>What would you like to do?</h1><p>Save a copy of your Telegram account, or keep a record of conversations as they change.</p></div>
   <div class="workflow-choices">
+    <article class="card workflow-card workflow-link" hidden id="workflow-link-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export a chat by link</h2><p>Paste a public username or a t.me link. TgWitness reads the chat's facts, picks idle accounts and estimates the time before anything starts.</p><form class="link-export-form" id="link-export-form"><label for="link-export-input">Chat link or @username</label><input autocomplete="off" id="link-export-input" maxlength="300" placeholder="@channel or https://t.me/…" spellcheck="false"><button class="primary" type="submit">Plan the export</button></form><div class="link-export-plan" hidden id="link-export-plan" role="status"></div><p class="hint">Checking briefly uses one permitted account. Starting an export requires a separate click.</p></article>
     <article class="card workflow-card" id="workflow-account-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export my account</h2><p>Download the chats and history your account can read now. Choose dates, messages and files before starting.</p><ol><li>Connect your account</li><li>Choose what to include</li><li>Download a signed archive</li></ol><button class="primary" data-workflow="account" type="button">Export my account</button><p class="hint">No continuous observation needed. Earlier deletions and edits cannot be recovered.</p></article>
     <article class="card workflow-card" id="workflow-investigation-card"><svg aria-hidden="true" class="icon"><use href="#i-journal"/></svg><h2>Follow an investigation</h2><p>Keep new messages, observed edits and deletion notices from the chats you choose.</p><ol><li>Choose sources</li><li>Start observation explicitly</li><li>Review and export saved records</li></ol><button class="secondary" data-workflow="investigation" type="button">Set up observation</button><p class="hint">Previously saved records stay available when observation is paused.</p></article>
   </div>
@@ -305,6 +308,7 @@
     <button type="button" id="sources-tab-scope" role="tab" aria-controls="sources-panel-scope" aria-selected="true" data-source-tab="scope">Scope</button>
     <button type="button" id="sources-tab-chats" role="tab" aria-controls="sources-panel-chats" aria-selected="false" tabindex="-1" data-source-tab="chats">Chats in scope <span id="sources-tab-count" class="tab-count">0</span></button>
     <button type="button" id="sources-tab-recording" role="tab" aria-controls="sources-panel-recording" aria-selected="false" tabindex="-1" data-source-tab="recording">Recording <span id="recording-tab-dirty" class="tab-count" hidden></span></button>
+    <button type="button" id="sources-tab-secret" role="tab" aria-controls="sources-panel-secret" aria-selected="false" tabindex="-1" data-source-tab="secret">Pseudo-secret</button>
   </div>
   <div id="sources-panel-scope" role="tabpanel" aria-labelledby="sources-tab-scope">
   <form class="card padded scope-card" id="scope-form"><div class="eyebrow">Observation scope</div><h2>What this account records</h2>
@@ -427,6 +431,19 @@
       <div class="recording-actions"><button class="quiet" type="button" id="recording-discard" disabled>Discard changes</button><button class="primary" type="submit" id="recording-save" disabled>Save recording settings</button></div>
     </div>
   </form>
+  </div>
+  <div id="sources-panel-secret" role="tabpanel" aria-labelledby="sources-tab-secret" hidden>
+  <section class="card padded secret-chats" id="secret-chats"><div class="eyebrow">Pseudo-secret</div><h2>Telegram end-to-end chats of this account, kept in the journal</h2>
+    <p class="hint">Telegram keeps these chats on one device only. TgWitness takes part with this account's own authorization and records every message, timer, file and deletion notice in the signed journal, also after the other side deletes them. It never sends read receipts, typing or screenshot notices.</p>
+    <p class="notice warning" id="secret-unavailable" hidden></p>
+    <div class="secret-settings"><label class="check-label"><input id="secret-enabled" type="checkbox"> Turn on pseudo-secret for this account</label>
+    <label class="check-label"><input id="secret-accept" type="checkbox"> Accept incoming requests automatically</label>
+    <p class="hint">An accepted chat moves to TgWitness: this account's other devices, such as the phone, do not get it. Without this option a request waits here for your decision. While pseudo-secret is on, the account stays connected so messages arrive.</p></div>
+    <p class="hint" id="secret-status" role="status"></p>
+    <form class="secret-start" id="secret-start"><label for="secret-user">Start a chat with</label><input autocomplete="off" id="secret-user" maxlength="64" placeholder="@username or user ID" spellcheck="false"><button class="primary" type="submit">Start chat</button></form>
+    <p class="hint">The other side sees the request and must accept it on their device. Starting a chat and sending are actions of this account and are recorded.</p>
+    <div class="secret-layout"><div class="secret-list" id="secret-list"></div><div class="secret-thread" id="secret-thread"></div></div>
+  </section>
   </div>
 </section>
 
@@ -604,7 +621,7 @@
   <div class="card padded" id="export-encrypt">
     <label class="check-label"><input id="export-encrypt-on" type="checkbox"> Encrypt the downloads above with a password</label>
     <div hidden id="export-password-field"><label for="export-password">Password, at least 12 characters</label><input autocomplete="new-password" id="export-password" maxlength="256" spellcheck="false" type="password"></div>
-    <p class="hint">The file is saved as an AES-256 ZIP that 7-Zip or WinRAR opens with this password. Inside is the unchanged signed file, so <code>verify.py</code> works as before. The password is not stored; without it the file cannot be opened.</p>
+    <p class="hint">Encryption wraps the unchanged signed file. The password is not stored; without it the file cannot be opened.</p>
   </div>
   <details class="source-options" id="export-chat-tools"><summary>Capture or export one chat</summary>
     <form class="card padded" id="snapshot-form"><div class="eyebrow">History snapshot</div><h2>Start with visible context</h2><p class="muted">Save the latest visible messages as a labeled snapshot. This cannot reconstruct deleted messages or changes missed while offline.</p><label for="snapshot-source">Selected source</label><select id="snapshot-source" required></select><label for="snapshot-limit">Most recent messages</label><input id="snapshot-limit" max="500" min="1" required step="1" type="number" value="100"><p class="hint" id="snapshot-limit-hint"></p><button class="secondary" type="submit">Capture history snapshot</button></form>  <form class="card padded" id="chat-export-form"><div class="eyebrow">Full chat export</div><h2>Export a whole chat, signed</h2><p class="muted">Download the entire visible history of one chat as a signed bundle: <code>chat.json</code> (Telegram-style) and a readable <code>chat.html</code>, with an Ed25519 signature so a copy can be checked for changes against your key. Private chats work when the account is a member. A current snapshot only: deleted or past-edited messages are not reconstructed. Large chats can take a long time and depend on Telegram's rate limits.</p><label for="chat-export-source">Selected source</label><select id="chat-export-source" required></select><label for="chat-export-files">Files</label><select id="chat-export-files"><option value="">As in Sources → Recording</option><option value="download">Download files</option><option value="hashes">Only file fingerprints (fast)</option><option value="skip">Messages only, no files</option></select><p class="hint">Messages are read first; files follow in a second stage with their own progress.</p><div class="chat-export-actions"><button class="secondary" type="submit">Export full chat</button><button class="quiet" hidden id="chat-export-cancel" type="button">Cancel</button><button class="primary" hidden id="chat-export-download" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Download signed bundle</button></div><p id="chat-export-progress" role="status"></p><p class="hint">Language and case details of <code>chat.html</code>: <a data-go-reports="settings" href="#">Exports → Report settings</a>.</p><p class="hint">Attachments follow Sources → Recording: with downloads on, files within those limits are saved into the export by their SHA-256; for any other file the export names the reason.</p></form>

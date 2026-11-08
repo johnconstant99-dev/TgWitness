@@ -30,6 +30,7 @@ from .distributed_pages import FORMAT as PAGE_FORMAT, RangePages
 from .message_selection import Selection, SelectionIndex, utc
 from .message_numbers import MissingNumbers
 from .monitoring import capture_settings
+from .scope import kind_of, public_username
 from .store import canonical, utcnow
 from .verify import fingerprint, verify_chat_export
 from .workers import complete_in_thread
@@ -140,7 +141,7 @@ class DistributedExport:
                 collector.release_export(owner)
                 del self.reserved[profile]
 
-    async def start(self, chat_id, profile_ids, lead_id, language="en", selection=None, transport="regular"):
+    async def start(self, chat_id, profile_ids, lead_id, language="en", selection=None, transport="regular", username=None):
         if transport not in ("regular", "takeout"):
             raise ValueError("Unknown export transport.")
         options = Selection.model_validate(selection or {})
@@ -151,15 +152,15 @@ class DistributedExport:
         try:
             lead_app = self.app_for(lead_id)
             lead = lead_app.state.collector
-            entity = await lead.resolve_for_export(chat_id)
-            if transport == "takeout" and (not isinstance(entity, types.Channel) or not getattr(entity, "username", None)):
+            entity = await lead.resolve_for_export(chat_id, username)
+            if transport == "takeout" and (not isinstance(entity, types.Channel) or not public_username(entity)):
                 raise ValueError("Distributed Takeout currently supports public channels and supergroups only.")
             if len(chosen) > 1 and not isinstance(entity, types.Channel):
                 raise ValueError("Only one account can export an ordinary group or private chat.")
             now = utc(utcnow())
             scan_end = options.to_utc if options.reply_scope == "period" else None
             scan_end = min(scan_end, now) if scan_end else now
-            username = getattr(entity, "username", None)
+            username = public_username(entity)
             workers, bounds, densities, entities = [], [], [], {}
             for profile in chosen:
                 app = self.app_for(profile)
@@ -224,7 +225,7 @@ class DistributedExport:
             free = shutil.disk_usage(self.root).free
             if free < needed:
                 raise ValueError("Not enough free disk space for this export. Free up space or choose a shorter period.")
-            info = lead.dialog_cache.get(chat_id, {})
+            info = lead.dialog_cache.get(chat_id) or {"title": utils.get_display_name(entity), "kind": kind_of(entity)}
             chunk_size = CHUNK * min(50, min(densities, default=1))
             state = {"id": export_id, "chat_id": chat_id, "title": info.get("title"), "lead": lead_id,
                           "phase": "preparing", "started_at": now, "workers": workers,

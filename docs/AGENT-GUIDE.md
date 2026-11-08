@@ -34,13 +34,15 @@ Telegram behavior. Keep implementation, revision and test evidence attached to c
 | Area | Starting points |
 | --- | --- |
 | Application entry and commands | [__main__.py](../tgwitness/__main__.py), [cli.py](../tgwitness/cli.py) |
-| HTTP API and panel | [app.py](../tgwitness/app.py), [static/](../tgwitness/static/README.md) |
-| Collection and storage | [collector.py](../tgwitness/collector.py), [store.py](../tgwitness/store.py) |
-| Evidence and verification | [evidence.py](../tgwitness/evidence.py), [verify.py](../tgwitness/verify.py) |
-| TDX, OS measurements and providers | [tdx.py](../tgwitness/tdx.py), [dstack_image.py](../tgwitness/dstack_image.py), [providers/](../tgwitness/providers/README.md) |
+| HTTP API and panel | [app.py](../tgwitness/app.py), [API routes and context](../tgwitness/api/), [static/](../tgwitness/static/README.md) |
+| Collection and storage | [collector.py](../tgwitness/collector.py), [media job policies](../tgwitness/media_jobs.py), [store.py](../tgwitness/store.py) |
+| Evidence and verification | [evidence.py](../tgwitness/evidence.py), [verifier sources](../tgwitness/verifier/README.md), assembled [verify.py](../tgwitness/verify.py) |
+| Evidence presentation | [render input boundary](../tgwitness/render_data.py), [HTML reports](../tgwitness/report.py), [PDF reports](../tgwitness/pdf_report.py) |
+| Cloud commands and reports | [cloud.py](../tgwitness/cloud.py), [CLI](../tgwitness/cloud_cli.py), [report rendering](../tgwitness/cloud_report.py) |
+| TDX, OS measurements and providers | [cloud attestation](../tgwitness/cloud_attestation.py), [tdx.py](../tgwitness/tdx.py), [dstack_image.py](../tgwitness/dstack_image.py), [providers/](../tgwitness/providers/README.md) |
 | Separate capture recorder | [tgwitness_capture/](../tgwitness_capture/README.md) |
 | Translations | [Panel locales](../tgwitness/locales/README.md), [setup guides](../tgwitness/guide_locales/README.md), [website locales](../website/i18n/README.md) |
-| Site generation and checks | [tools/](../tools/README.md), [website/](../website/README.md) |
+| Site generation | [tools/](../tools/README.md), [website/](../website/README.md) |
 | Deployment templates | [deploy/](../deploy/README.md) |
 
 Follow imports and callers from these entry points. Collection, authorization and
@@ -53,15 +55,19 @@ in [Contributing](../.github/CONTRIBUTING.md#development-setup). The project req
 Python 3.11 or newer. Respect the operator's host restrictions: a command listed
 here is not permission to run it on a machine reserved for editing source.
 
-| Change | Relevant check |
+Regression tests, fixtures and validation runners are maintained privately and are
+excluded from the public repository and source archive. Use the private validation
+workspace for the checks below; preserve it when publishing source changes.
+
+| Change | Required validation |
 | --- | --- |
 | Python source | `python -m ruff check .` and the regression for the changed behavior |
-| Public docs or packaging | `python tools/check_publication.py`; before publication, use `--git-index` to inspect staged files too |
-| CLI behavior | `python -m pytest tools/test_cli.py -q` |
-| Evidence boundaries | `python -m pytest tools/test_assurance_boundaries.py -q` |
-| Panel behavior | `python tools/check_browser.py` and the affected browser check listed in [tools/](../tools/README.md) |
-| Website | `python tools/build_site.py`, `python tools/check_site.py`, `python tools/check_docs_site.py` |
-| Source archive | `python -I tools/check_source_archive.py` |
+| Public docs or packaging | `python tools/publication_guard.py --git-index` and review of the selected source |
+| CLI behavior | Command output, exit codes and access scope |
+| Evidence boundaries | Signed-byte preservation and verifier compatibility |
+| Panel behavior | Affected browser flows using synthetic accounts |
+| Website | `python tools/build_site.py`, then rendered pages, local links and narrow-screen layout |
+| Source archive | Exact bytes, private-file exclusions, repeatability and failed-write recovery |
 
 Choose checks that exercise the change. A documentation-only edit needs verified
 links and claims; it does not need a connected Telegram account. Browser acceptance
@@ -69,10 +75,9 @@ uses synthetic accounts and fake transport. Tests with live options have a diffe
 scope and require an authorized environment and task.
 
 For an isolated site build, pass `--output PATH` to `tools/build_site.py`.
-Some checks use fixed `test-results/` or `dist/` locations, so inspect their output
-paths before running concurrently. `tools/run_checks.py --output PATH` changes the
-runner's logs, not the output directories embedded in its child checks. A pytest
-`--basetemp` directory is cleared on use; give each run a fresh path.
+Inspect validation output paths before running concurrently. A private runner's log
+directory does not necessarily change the output locations of its child checks.
+Give each run a fresh temporary path.
 
 ## Public and private material
 

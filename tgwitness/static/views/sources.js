@@ -45,6 +45,7 @@ export function createSources(context) {
     }
     if (name === "recording") updateStatus(getState().status);
     if (name === "chats") {renderTargets(); renderDialogs();}
+    context.onTab?.(name);
   }
   for (const button of tabs) {
     on(button, "click", () => showTab(button.dataset.sourceTab));
@@ -543,6 +544,7 @@ export function createSources(context) {
 
   function updateStatus(status) {
     if (!status) return;
+    find("sources-tab-secret").hidden = !!status.demo;
     if (session !== getSession()) resetSession();
     const latest = {
       monitoring: Object.fromEntries(monitoring.map(key => [key, status.monitoring?.[key] ?? (key !== "presence")])),

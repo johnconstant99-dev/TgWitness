@@ -19,6 +19,7 @@ explore the workspace without signing in to Telegram.
 | [`secret-chats.html`](secret-chats.html), [`secret-chats.js`](secret-chats.js), [`secret-chats.css`](secret-chats.css) | Fictional Secret Chat interaction, kept in browser memory |
 | [downloads/](downloads/README.md) | Example exports and verification files |
 | [report/](report/README.md) | Example report and sharing copy |
+| [scale/](scale/README.md) | Signed measurement renderer; run data supplied separately |
 
 ## Build and preview
 
@@ -38,5 +39,5 @@ Follow the [local preview instructions](../../docs/internal/PUBLISHING.md#previe
 and open the generated demo. The builder combines these files with the application
 interface; this directory is not a standalone copy of that interface.
 
-Use [`capture_demo.py`](../../tools/capture_demo.py) when refreshing the synthetic
-fixtures. Keep mock behavior aligned with the [panel guide](../../docs/PANEL.md).
+Refresh synthetic fixtures using the private capture tools. Keep mock behavior
+aligned with the [panel guide](../../docs/PANEL.md).

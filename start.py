@@ -46,10 +46,11 @@ def main():
 
         step([str(python), "-m", "ensurepip", "--upgrade"], "Could not set up pip in .venv. " + VENV_HINT)
         print("Installing TgWitness dependencies…", flush=True)
-        step([str(python), "-m", "pip", "install", "--disable-pip-version-check", "-c", str(ROOT / "deploy/constraints.txt"),
-              "-e", str(ROOT)],
-             "Installing dependencies failed (details above). Check the Internet connection or proxy "
-             "(pip honours HTTPS_PROXY) and run the launcher again.")
+        failed = ("Installing dependencies failed (details above). Check the Internet connection or proxy "
+                  "(pip honours HTTPS_PROXY) and run the launcher again.")
+        step([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--require-hashes",
+              "-r", str(ROOT / "deploy/requirements.lock")], failed)
+        step([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-deps", "-e", str(ROOT)], failed)
         marker.write_text(VERSION, encoding="utf-8")
     if not setup:
         raise SystemExit(serve([str(python), "-m", "tgwitness", *sys.argv[1:]]))

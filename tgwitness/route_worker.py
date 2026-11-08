@@ -18,6 +18,7 @@ def main():
     child = subprocess.Popen(sys.argv[1:], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL, shell=False,
                              creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+    print(child.pid, flush=True)
     try:
         while child.poll() is None and not closed.wait(.2):
             pass

@@ -425,6 +425,12 @@
 "notice operator incompatibility Taylor Wessing statement licence": "ማስታወቂያ ኦፕሬተር አለመጣጣም Taylor Wessing መግለጫ ፈቃድ",
 "GitHub Actions capture (preview)": "በGitHub Actions መሰብሰብ (ቅድመ እይታ)",
 "A fresh Telegram login, one chat, an encrypted archive and GitHub provenance.": "አዲስ የTelegram መግቢያ፣ አንድ ውይይት፣ የተመሰጠረ ማህደር እና የGitHub ምንጭ ማረጋገጫ።",
-"Open capture helper": "የመሰብሰቢያ ረዳትን ክፈት"
+"Open capture helper": "የመሰብሰቢያ ረዳትን ክፈት",
+"Export and verify": "ላክና አረጋግጥ",
+"GitHub Actions capture": "በGitHub Actions መሰብሰብ",
+"Published checks and measurements": "የታተሙ ፍተሻዎችና መለኪያዎች",
+"Start in minutes": "በደቂቃዎች ውስጥ ይጀምሩ",
+"Start with one command and a Telegram account. Add investigation tools when you need them; preserve the source record, its context and known gaps.": "በአንድ ትእዛዝና በTelegram መለያ ይጀምሩ። የምርመራ መሣሪያዎችን እንደ አስፈላጊነቱ ይጨምሩ፤ ዋናውን መዝገብ፣ ዐውደ ጽሑፉንና የታወቁ ክፍተቶችን ያስቀምጡ።",
+"Start, scale and evidence": "መጀመሪያ፣ መጠንና ማስረጃ"
 }
 }

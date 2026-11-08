@@ -79,7 +79,7 @@ After pushing, open Home, test sidebar navigation, confirm images load and inspe
 4. Run the checks below, build, inspect the rendered Markdown and publish the reviewed result.
 
 ~~~sh
-python tools/check_publication.py
+python tools/publication_guard.py
 python tools/build_wiki.py
 ~~~
 

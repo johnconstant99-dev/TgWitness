@@ -322,7 +322,8 @@ def period(args):
 
 
 def compact(text, size=300):
-    text = " ".join((text or "").split())
+    from .verify import safe_text
+    text = safe_text(" ".join((text or "").split()))
     return text if len(text) <= size else text[:size] + "…"
 
 
@@ -341,7 +342,7 @@ def item_line(item):
     if item.get("media_sha256"):
         marks.append("media " + item["media_sha256"][:16])
     line = ("#" + str(source["event_seq"]) + "  " + when(item.get("observed_at")) + "  chat " + str(source["chat_id"])
-            + " · message " + str(source["message_id"]) + " · " + who)
+            + " · message " + str(source["message_id"]) + " · " + compact(who))
     if marks:
         line += " [" + ", ".join(marks) + "]"
     return line + "\n    " + (compact(item.get("text")) or "(no text)")
@@ -381,11 +382,12 @@ def print_stats(result):
         for person in result["participants"]:
             name = " ".join(filter(None, (person.get("name"), "@" + person["username"] if person.get("username") else None)))
             print("  " + str(person["sender_id"] if person["sender_id"] is not None else "unknown") + "  "
-                  + (name or "(no name observed)") + " — " + str(person["messages"]) + " messages, "
+                  + (compact(name) or "(no name observed)") + " — " + str(person["messages"]) + " messages, "
                   + str(person["edited"]) + " edited, " + str(person["deleted"]) + " deleted")
     for key, label in (("domains", "Domains"), ("handles", "@handles")):
         if result[key]:
-            print(label + ": " + ", ".join(entry[key[:-1]] + " (" + str(entry["messages"]) + ")" for entry in result[key]))
+            print(label + ": " + ", ".join(compact(entry[key[:-1]]) + " (" + str(entry["messages"]) + ")"
+                                           for entry in result[key]))
     coverage = result["coverage"]
     print("Gap records: " + str(coverage["gap_records"]["count"]))
     liveness = coverage.get("collector_liveness")
@@ -416,11 +418,11 @@ def context(archive, args):
 def messages(archive, args):
     if args.workspaces:
         result = archive.query({"tool": "list_workspaces", "offset": args.offset, "limit": args.limit})
-        return result, lambda r: [print(w["workspace"] + "\t" + w["name"]) for w in r["items"]]
+        return result, lambda r: [print(w["workspace"] + "\t" + compact(w["name"])) for w in r["items"]]
     if args.chat_id is None:
         result = archive.query({"tool": "list_chats", "workspace": args.workspace, "offset": args.offset,
                                 "limit": args.limit})
-        return result, lambda r: [print(str(c["chat_id"]) + "\t" + (c["title"] or "(no title saved)") + "\t"
+        return result, lambda r: [print(str(c["chat_id"]) + "\t" + (compact(c["title"]) or "(no title saved)") + "\t"
                                         + (c["kind"] or "") + ("" if c["enabled"] else "\tnot collected")) for c in r["items"]]
     if args.message is not None:
         return archive.query({"tool": "get_message_versions", "workspace": args.workspace, "chat_id": args.chat_id,

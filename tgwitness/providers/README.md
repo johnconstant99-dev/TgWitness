@@ -28,6 +28,5 @@ For the operator workflow and verification inputs, read
 Adapter definitions include credentials, defaults, access descriptions and
 provider-specific limits; inspect those before changing a deployment path.
 
-The [cloud wizard checks](../../tools/check_cloud_wizard.py) and
-[Phala checks](../../tools/check_phala.py) use simulated services for their
+Private cloud-wizard and Phala regressions use simulated services for their
 configured scenarios. Running a provider deployment is a separate operation.

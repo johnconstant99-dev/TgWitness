@@ -24,12 +24,6 @@ Application screenshots use fictional demonstration data.
 
 ## Refresh screenshots
 
-From the project root:
-
-```sh
-python tools/capture_screenshots.py
-```
-
-Inspect `test-results/screens/` first. The explicit `--docs` option refreshes the
-documentation assets. Keep screenshots and illustrative artwork distinguishable;
+Use the private capture tools with synthetic records and inspect the output before
+replacing documentation assets. Keep screenshots and illustrative artwork distinguishable;
 an illustration is not an application screen or a verification result.

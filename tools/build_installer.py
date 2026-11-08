@@ -109,17 +109,27 @@ def verify_wheel(path, version):
                 raise ValueError("Wheel RECORD mismatch: " + name)
 
 
-def constraints():
-    lines = []
-    for name in ("constraints.txt", "constraints-mcp.txt"):
-        for line in (ROOT / "deploy" / name).read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line and not line.startswith(("#", "-c ")):
-                if "==" not in line or line.startswith("-") or "://" in line:
-                    raise ValueError("Unexpected dependency constraint")
-                if line not in lines:
-                    lines.append(line)
-    return ("# TgWitness panel + MCP: qualified dependency versions.\n" + "\n".join(lines) + "\n").encode()
+def requirements_lock():
+    text = (ROOT / "deploy" / "mcp.lock").read_text(encoding="utf-8").replace("\r\n", "\n")
+    packages = hashes = 0
+    for line in text.splitlines():
+        entry = line.strip()
+        if not entry or entry.startswith("#"):
+            continue
+        if line[0].isspace():
+            if not packages or not re.fullmatch(r"--hash=sha256:[0-9a-f]{64}(?:\s*\\)?", entry):
+                raise ValueError("deploy/mcp.lock contains an invalid dependency hash")
+            hashes += 1
+        else:
+            pin = entry.removesuffix("\\").strip()
+            if (packages and not hashes) or not re.fullmatch(
+                    r"[A-Za-z0-9][A-Za-z0-9_.-]*==[A-Za-z0-9_.+!-]+(?:\s*;[^\\\r\n]+)?", pin):
+                raise ValueError("deploy/mcp.lock must pin every dependency with SHA-256 hashes")
+            packages += 1
+            hashes = 0
+    if not packages or not hashes:
+        raise ValueError("deploy/mcp.lock must pin every dependency with SHA-256 hashes")
+    return text.encode()
 
 
 def main():
@@ -156,7 +166,7 @@ def main():
     revision = git("rev-parse", "HEAD")
     if not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise ValueError("Expected a committed source revision")
-    if git("status", "--porcelain", "--", "tgwitness", "tgwitness_capture", "pyproject.toml", "README.md", "deploy/constraints.txt", "deploy/constraints-mcp.txt"):
+    if git("status", "--porcelain", "--", "tgwitness", "tgwitness_capture", "pyproject.toml", "README.md", "deploy/mcp.lock"):
         raise ValueError("Commit application and dependency changes before building a published installer")
     version = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
     if args.output.is_symlink():
@@ -182,13 +192,13 @@ def main():
         wheel_hash = digest(wheel_bytes)
         release_id = revision[:12] + "-" + wheel_hash[:12]
         release = output / "releases" / release_id
-        locked = constraints()
+        locked = requirements_lock()
         values = {"BASE_URL": base, "VERSION": version, "REVISION": revision, "RELEASE_ID": release_id,
-                  "WHEEL_NAME": wheel.name, "WHEEL_SHA256": wheel_hash, "CONSTRAINTS_SHA256": digest(locked),
+                  "WHEEL_NAME": wheel.name, "WHEEL_SHA256": wheel_hash, "LOCK_SHA256": digest(locked),
                   "SIGNING_PUBLIC_KEY": public_key.decode().strip(), "SIGNING_MODULUS": public_modulus,
                   "SIGNING_EXPONENT": public_exponent, "SIGNING_KEY_SHA256": digest(public_key),
                   "WHEEL_SIGNATURE_SHA256": digest(signing_key.sign(wheel_bytes, padding.PKCS1v15(), hashes.SHA256())),
-                  "CONSTRAINTS_SIGNATURE_SHA256": digest(signing_key.sign(locked, padding.PKCS1v15(), hashes.SHA256()))}
+                  "LOCK_SIGNATURE_SHA256": digest(signing_key.sign(locked, padding.PKCS1v15(), hashes.SHA256()))}
         values["SITE_SCRIPT_SRI"] = "sha256-" + base64.b64encode(hashlib.sha256((TEMPLATES / "site.js").read_bytes()).digest()).decode()
         scripts = {}
         for name in ("install.sh", "install.ps1"):
@@ -196,7 +206,7 @@ def main():
             scripts[name] = content.replace("\n", "\r\n").encode() if name.endswith(".ps1") else content.encode()
         values["POWERSHELL_SHA256"] = digest(scripts["install.ps1"])
         scripts["install.cmd"] = render("install.cmd.in", values).replace("\n", "\r\n").encode()
-        artifacts = {wheel.name: wheel_bytes, "constraints.txt": locked, **scripts, "release-signing.pub": public_key}
+        artifacts = {wheel.name: wheel_bytes, "requirements.lock": locked, **scripts, "release-signing.pub": public_key}
         for name, content in list(artifacts.items()):
             if name != "release-signing.pub":
                 artifacts[name + ".sig"] = signing_key.sign(content, padding.PKCS1v15(), hashes.SHA256())

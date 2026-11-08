@@ -9,7 +9,6 @@
 ```sh
 python -m tgwitness.narrative evidence.zip --lang de --jurisdiction DE --out narrative-de/
 python -m tgwitness.narrative evidence.zip --lang ru --fingerprint COLLECTOR_FP --witness witness.zip --witness-fingerprint WITNESS_FP --check-drand --check-bitcoin --out narrative-ru/
-python tools/check_narrative_texts.py
 ```
 
 Obtain fingerprints independently. An unpinned package can be described, but its missing pin is visible as a limitation. Instructions in the report use `TRUSTED_COLLECTOR_FP` and `TRUSTED_WITNESS_FP`; they never turn an embedded key into an independent trust decision. `--tsa-ca ROOT.pem` enables the existing RFC 3161 root check. External checks use the verifier's existing trust model; see [FOR-THE-RECORD.md](FOR-THE-RECORD.md).
@@ -73,7 +72,7 @@ Changing jurisdiction affects only the jurisdiction section and its source refer
 
 The T7 forbidden-word lists and T13 custody/spec schema have not been supplied. Existing `custody.*` events receive source-linked generic descriptions; compatibility with an absent schema is not asserted. The narrative glossary is ready for reuse, but a shared T7/T14 interface cannot be tested without those specifications.
 
-`python tools/check_narrative_texts.py --for-release` intentionally fails until T7 and T13 integration and native legal review of en/de/fr/uk/ru are documented. No human read-aloud test or ten-minute comprehension study has been performed. The feature is a review draft, not a release-complete implementation of those dependencies.
+Release validation remains incomplete until T7 and T13 integration and native legal review of en/de/fr/uk/ru are documented. No human read-aloud test or ten-minute comprehension study has been performed. The feature is a review draft, not a release-complete implementation of those dependencies.
 
 The requested sample includes six distinct scene kinds and collection on both sides of an interruption. Preserving that catalog produces seven chronological scenes, not five. The golden fixture records this explicitly instead of merging unrelated events to force an arbitrary count. Recorded stop/start pairs extend the gap scene to the next recorded start; their dates remain computer-clock claims, not independently proved downtime.
 

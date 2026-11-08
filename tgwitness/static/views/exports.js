@@ -6,6 +6,16 @@ export function createExports({root, tr, json, getSession, fmtTime, toast,downlo
   const make = (tag, text='', cls='') => {
     const el = document.createElement(tag);el.textContent=text;if(cls)el.className=cls;return el;
   };
+  const encryptionLabel=make('label',tr('Password encryption')),encryption=make('select'),encryptionHint=make('p','','hint');
+  encryption.id='export-encryption';encryptionLabel.htmlFor=encryption.id;
+  encryption.append(new Option(tr('ZIP (7-Zip / WinRAR)'),'zip'),
+    new Option(tr('Stronger encryption (scrypt + AES-GCM, requires verify.py to open)'),'tgwpw'));
+  encryptionHint.id='export-encryption-hint';encryption.setAttribute('aria-describedby',encryptionHint.id);
+  const encryptionText=()=>{encryptionHint.textContent=tr(encryption.value==='tgwpw'
+    ? 'Open with an independently obtained verify.py: python verify.py unseal-password export.tgwpw --out output-file. Then verify the decrypted evidence.'
+    : 'ZIP password protection uses WinZip AES (weak key stretching). Use a long random passphrase of 20+ characters, or sealed delivery for sensitive exports.');};
+  encryption.addEventListener('change',encryptionText);encryptionText();
+  find('export-password-field').append(encryptionLabel,encryption,encryptionHint);
   const retryButton=make('button',tr('Retry export'),'secondary');retryButton.type='button';retryButton.hidden=true;
   retryButton.id='exports-retry';find('exports-progress').append(retryButton);
   function renderTimes() {
@@ -65,7 +75,7 @@ export function createExports({root, tr, json, getSession, fmtTime, toast,downlo
     }finally{if(owner===getSession()&&mine===request)find('exports-history-refresh').disabled=false;}
   }
   find('exports-history-refresh').addEventListener('click',()=>load());
-  function begin({format='zip',encrypted=false,retry=null}={}) {
+  function begin({format='zip',encrypted=false,encryption='zip',retry=null}={}) {
     const owner=getSession(), mine=++transfer;
     retryButton.hidden=true;retryButton.onclick=()=>{if(owner===getSession()&&mine===transfer)retry?.();};
     select('downloads');find('exports-progress').hidden=false;
@@ -88,6 +98,9 @@ export function createExports({root, tr, json, getSession, fmtTime, toast,downlo
           : format==='html'
           ? 'Open the HTML report in your browser. Review coverage gaps and personal information before sending the unchanged file.'
           : 'Review this data file in a compatible tool. Download the signed ZIP when your recipient also needs the readable report and verification tools.');
+        find('exports-next-encrypted').textContent=tr(encryption==='tgwpw'
+          ? 'Open with an independently obtained verify.py: python verify.py unseal-password export.tgwpw --out output-file. Then verify the decrypted evidence.'
+          : 'Open the encrypted ZIP with 7-Zip or WinRAR and the password. Keep the password separate from the file.');
         find('exports-next-encrypted').hidden=!encrypted;find('exports-next').hidden=false;
       }
       if(['failed','cancelled'].includes(update.phase)){bar.hidden=true;if(update.error)find('exports-progress-bytes').textContent=update.error;void load();}

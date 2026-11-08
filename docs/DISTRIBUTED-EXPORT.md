@@ -11,6 +11,11 @@ result and are not treated as proof of deletion.
 
 Open a chat and choose **Export chat**. Select idle account workspaces that already have access to the source. Every account keeps its configured connection. This feature does not change WARP or choose an exit IP.
 
+On **Start → Export a chat by link**, enter a public username or invite link to preview
+accessible chat facts and eligible accounts. Checking briefly reserves an idle reader;
+it does not join the chat or start an export. Time estimates identify measured or default
+reading rates and exclude attachments and Telegram waits. Start the export explicitly.
+
 <details>
 <summary>On this page</summary>
 
@@ -70,7 +75,7 @@ python tgwitness/verify.py /path/to/distributed-exports/JOB_ID --fingerprint RET
 
 This read-only check reports committed messages/pages, completed ranges and unsigned tail bytes. Pin the lead fingerprint independently. Like any local receipt chain, removal of its tail and all corresponding local progress cannot be detected without a separately retained receipt head. The verifier establishes local integrity, not Telegram signatures or an atomic snapshot.
 
-Intermediate chunks include messages needed to evaluate filters, including rejected messages. Filters limit the final archive. A paused, cancelled or failed job retains those chunks and checkpoint receipts for recovery. After the ZIP passes verification, the app removes chunks, receipts, temporary media and indexes. The job directory retains `export.zip`, the signed `job.json` plan and `status.json`; use the ZIP verifier for completed jobs. The configured free-space reserve is checked before new chunks and each checkpoint.
+Intermediate chunks include messages needed to evaluate filters, including rejected messages. Filters limit the final archive. A paused, cancelled or failed job retains those chunks and checkpoint receipts for recovery. After archive verification and job completion succeed, the app removes chunks, receipts, temporary media and indexes. The job directory retains `export.zip`, the signed `job.json` plan and `status.json`; use the ZIP verifier for completed jobs. The configured free-space reserve is checked before new chunks and each checkpoint.
 
 Wider ranges still reduce requests across sparse histories. New checkpoints bound interrupted-range rereading independently of that width. Cross-account overlap coverage checks remain separate future work. Signing and syncing more often costs local I/O; checkpointing improves recovery, not the speed of a successful uninterrupted network read.
 
@@ -104,4 +109,4 @@ The manifest identifies the checkpoint format and count used locally. Unselected
 
 Coverage means accessible ranges actually read, not all historical messages. Accounts can have different access; distributed or resumed acquisition is not an atomic snapshot. No actor, deletion reason, ban or moderator identity is inferred from a missing ID or online status. More accounts do not guarantee linear speedup.
 
-API: `POST /api/multi-export/start` accepts `chat_id`, `lead`, `profiles`, `selection`, and `transport` (`regular`, the default, or `takeout`); `GET /api/multi-export/jobs` lists visible saved jobs. Per-job routes support polling, `pause`, `resume`, `cancel` and `download`. Access to every participating workspace/source is checked.
+API: `POST /api/multi-export/plan` accepts `link` and checks workspace/chat grants before reading facts. `POST /api/multi-export/start` accepts `chat_id`, `lead`, `profiles`, `selection`, optional `username`, and `transport` (`regular`, the default, or `takeout`); `GET /api/multi-export/jobs` lists visible saved jobs. Per-job routes support polling, `pause`, `resume`, `cancel` and `download`. Access to every participating workspace/source is checked.

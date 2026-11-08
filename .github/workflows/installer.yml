@@ -31,9 +31,6 @@ jobs:
           echo "VIRTUAL_ENV=$RUNNER_TEMP/tgwitness-installer-builder" >> "$GITHUB_ENV"
       - run: python -m pip install --require-hashes -r deploy/build.lock
       - run: 'python -m pip install --require-hashes --only-binary=:all: -r deploy/installer.lock'
-      - run: python -I tools/check_panel_setup.py
-      - run: python -I tools/check_installer_publication.py
-      - run: python -I tools/test_installer_checks.py
       - name: Build installers and download page
         env:
           INSTALLER_SIGNING_KEY: ${{ secrets.TGWITNESS_INSTALLER_SIGNING_KEY }}
@@ -45,8 +42,10 @@ jobs:
       - name: Remove the private build key
         if: always()
         run: rm -f -- "$RUNNER_TEMP/tgwitness-release.pem"
-      - name: Verify artifacts and perform an isolated Linux installation
-        run: python tools/check_installer.py --install
+      - name: Authenticate the signed artifact and its source revision
+        env:
+          EXPECTED_REVISION: ${{ github.sha }}
+        run: python -I tools/installer_publication.py verify-local --revision "$EXPECTED_REVISION"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: tgwitness-installer-site
@@ -73,14 +72,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Wait for application and security checks; retain the previous download on failure
+      - name: Wait for package and security checks; retain the previous download on failure
         id: checks
         env:
           GH_TOKEN: ${{ github.token }}
           EXPECTED_REVISION: ${{ github.sha }}
         run: python3 tools/installer_checks.py --revision "$EXPECTED_REVISION"
   publish:
-    name: Publish verified installer to Cloudflare
+    name: Publish authenticated installer to Cloudflare
     needs: [build, qualify, acceptance]
     # Forks, PRs and old release tags cannot replace the current preview installer.
     if: needs.qualify.outputs.publish == 'true'
@@ -106,9 +105,7 @@ jobs:
       - name: Check the artifact belongs to this exact source
         env:
           EXPECTED_REVISION: ${{ github.sha }}
-        run: |
-          python -c 'import json, os; m=json.load(open("dist/installer-site/manifest.json")); assert m["source_revision"] == os.environ["EXPECTED_REVISION"] and m["test_only"] is False'
-          python tools/check_installer.py
+        run: python -I tools/installer_publication.py verify-local --revision "$EXPECTED_REVISION"
       - name: Retain and authenticate previously published downloads
         run: python tools/installer_publication.py retain
       - name: Refuse an obsolete build

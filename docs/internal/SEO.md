@@ -143,16 +143,16 @@ particular snippet, a rich result or a ranking.
 | Metadata, relative URLs, sitemap and publication allowlist | `tools/build_site.py` |
 | LLM task index and Markdown extraction | `tools/site_llms.py` |
 | Page search intent, titles and consistent metadata | `tools/site_seo.py` |
-| Static checks of every sitemap page and text-edition links | `tools/check_site_seo.py` |
+| Sitemap pages and text-edition links | Private validation workspace |
 
-The website CI runs the metadata transformation regressions and checks every URL
-in the built sitemap. It rejects missing or duplicate titles/descriptions, mismatched
+Private website validation covers metadata transformations and every URL
+in the built sitemap. It checks missing or duplicate titles/descriptions, mismatched
 social/schema metadata, missing H1s, broken language alternates and broken local
-links in the generated LLM files. The artifact `test-results/site/seo.json` records
-each canonical URL, language, title, description and primary query for review.
+links in the generated LLM files. Retain the canonical URL, language, title,
+description and primary query in the private validation record.
 These are build checks; verify the deployed pages separately before claiming that
-new metadata is live. On a workstation restricted to editing, use CI for builds
-and runtime checks.
+new metadata is live. On a workstation restricted to editing, use the authorized
+validation environment for builds and runtime checks.
 
 Add a guide to the explicit guide inventory and its navigation group. Do not copy
 private files into these presentation directories. The builder rejects linked
@@ -160,8 +160,6 @@ inputs and unexpected output files; it does not recursively copy the repository.
 
 ```sh
 python tools/build_site.py
-python tools/check_site.py
-python tools/check_docs_site.py
 ```
 
 ## After deployment

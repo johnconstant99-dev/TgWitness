@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 import sqlite3
 import threading
 import time
@@ -15,6 +16,8 @@ from .journal_index import CHAT_KINDS, MEDIA_KINDS, TEXT_KINDS, JournalIndex, mi
 from .journal_index import GONE_KINDS as GONE_KINDS
 from .journal_index import NUL_PAYLOAD
 from .people import observed_names
+
+LOG = logging.getLogger("tgwitness.store")
 
 ZERO = "0" * 64
 ADMIN_RECORDS = "kind NOT GLOB 'access.*' AND kind NOT GLOB 'profile.*'"
@@ -144,7 +147,8 @@ class Store:
                 try:
                     listen(event)
                 except Exception:
-                    pass
+                    LOG.exception("Journal listener %s failed for event #%d",
+                                  getattr(listen, "__qualname__", type(listen).__qualname__), event["seq"])
             return event
 
     @staticmethod

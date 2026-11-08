@@ -8,6 +8,16 @@
 .workflow-card p { color: var(--muted); line-height: 1.6; }
 .workflow-card ol { margin: 0 0 8px; padding-inline-start: 20px; color: var(--text-2); line-height: 1.9; }
 .workflow-card button { margin-top: auto; min-height: 44px; }
+.workflow-link { grid-column: 1 / -1; }
+.workflow-link button { margin-top: 0; }
+.link-export-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; width: 100%; max-width: 720px; align-items: end; }
+.link-export-form label { grid-column: 1 / -1; font-weight: 600; }
+.link-export-plan { width: 100%; max-width: 720px; display: grid; gap: 10px; }
+.link-export-plan .export-accounts { margin: 0; }
+.link-export-plan .export-accounts { max-height: 340px; overflow: auto; }
+.link-export-facts { display: grid; gap: 4px; }
+.link-export-plan > button, .link-export-plan > label { justify-self: start; }
+.link-export-plan .route-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .workflow-status { margin-top: 20px; padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
 .workflow-status > div { flex: 1 1 260px; }
 .workflow-status p { margin: 5px 0 0; color: var(--muted); }
@@ -60,6 +70,7 @@
   .workflow-intro { margin: 8px 0 20px; }
   .workflow-status { padding: 18px; }
   .workflow-status button, .workflow-card button { width: 100%; }
+  .link-export-form { grid-template-columns: 1fr; }
   .export-task-choices button { padding: 14px 16px; }
   .account-export-original, .account-disclosure-item { padding: 12px; }
   .account-export-original .account-export-job-actions > button, .account-disclosure-item-head > button { width: 100%; }

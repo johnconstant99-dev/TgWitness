@@ -345,7 +345,7 @@ class Minimiser:
         entities = []
         for item in (found.get("text_entities") or []) if show_text else []:
             item = {k: self.clean(v) if isinstance(v, str) else v for k, v in item.items()
-                    if k in ("type", "text", "href", "user_id", "language", "document_id", "deceptive")}
+                    if k in ("type", "text", "href", "user_id", "language", "document_id", "deceptive", "risk")}
             if isinstance(item.get("user_id"), dict):
                 item["user_id"] = item["user_id"].get("user_id")
             hidden = item.get("user_id") is not None and not self.shown(item["user_id"])

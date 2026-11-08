@@ -1,7 +1,13 @@
 import re
+import unicodedata
 
 from . import keyboard
 from . import ephemeral
+
+PROXY_LINK = re.compile(r"(?i)^(?:(?:https?://)?(?:www\.)?(?:t\.me|telegram\.me|telegram\.dog)/(?:proxy|socks)(?:[/?#]|$)"
+                        r"|tg://(?:proxy|socks)(?:[/?#]|$))")
+STORY_LINK = re.compile(r"(?i)^(?:(?:https?://)?(?:www\.)?(?:t\.me|telegram\.me|telegram\.dog)/[A-Za-z][A-Za-z0-9_]{3,31}/s/\d+"
+                        r"|tg://resolve\?\S*\bstory=)")
 
 ENTITY_TYPES = {"MessageEntityTextUrl": "text_link", "MessageEntityUrl": "link", "MessageEntityMention": "mention",
                 "MessageEntityMentionName": "mention_name", "MessageEntityEmail": "email",
@@ -50,6 +56,10 @@ def entities(text, raw_entities):
                 item[key] = entity[field]
         if item["type"] == "text_link" and deceptive(item["text"], item.get("href")):
             item["deceptive"] = True
+        if item["type"] in ("text_link", "link"):
+            risk = link_risk(item.get("href")) or link_risk(item["text"])
+            if risk:
+                item["risk"] = risk
         result.append(item)
     return result
 
@@ -60,8 +70,36 @@ def host(value):
     return name[4:] if name.startswith("www.") else name
 
 
+def comparable(value):
+    value = (value or "").strip().lower()
+    value = re.sub(r"^[a-z][a-z0-9+.-]*://", "", value)
+    return value[4:].rstrip("/") if value.startswith("www.") else value.rstrip("/")
+
+
+def mixed_script(name):
+    if "xn--" in name:
+        try:
+            name = name.encode("ascii").decode("idna")
+        except UnicodeError:
+            return True
+    return any(len({unicodedata.name(char, "UNKNOWN").split(" ")[0] for char in label if char.isalpha()}) > 1
+               for label in name.split("."))
+
+
+def link_risk(value):
+    value = (value or "").strip()
+    if PROXY_LINK.match(value):
+        return "telegram_proxy"
+    if STORY_LINK.match(value):
+        return "telegram_story"
+    found = host(value)
+    return "mixed_script" if found and mixed_script(found) else None
+
+
 def deceptive(text, href):
     shown, target = host(text), host(href)
+    if link_risk(href) in ("telegram_proxy", "telegram_story") and comparable(text) != comparable(href):
+        return True
     return bool(shown and target and shown != target and not target.endswith("." + shown))
 
 

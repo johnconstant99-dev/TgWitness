@@ -12,7 +12,7 @@ from telethon.errors import FloodWaitError, InviteRequestSentError, RPCError, Us
 from .telegram_client import FLOOD_ERRORS
 from telethon.tl import functions, types
 
-from . import keyboard, tuning
+from . import keyboard, opsec, tuning
 from .collector import buttons_of, plain
 from .scope import kind_of, scope_settings, unexclude, visibility
 from .store import canonical
@@ -45,6 +45,7 @@ class Action(BaseModel):
     keyboard_event: int | None = Field(default=None, gt=0)
     row: int | None = Field(default=None, ge=0, le=99)
     column: int | None = Field(default=None, ge=0, le=99)
+    planned_at: float | None = Field(default=None, gt=0)
 
     @model_validator(mode="after")
     def complete(self):
@@ -58,6 +59,8 @@ class Action(BaseModel):
         if self.action == "press" and any(v is None for v in (
                 self.message_id, self.keyboard_event, self.row, self.column)):
             raise ValueError("Select a saved message button.")
+        if self.planned_at is not None and self.planned_at > time.time() + 14 * 86400:
+            raise ValueError("Plan actions within the next 14 days.")
         return self
 
 
@@ -168,16 +171,30 @@ def permitted(collector):
         raise AccountRestricted(READ_ONLY)
 
 
-def reserve(store, category):
+def free_slot(taken, slot, gap, hourly):
+    for _ in range(4 * len(taken) + 4):
+        close = [t for t in taken if abs(t - slot) < gap]
+        if close:
+            slot = max(close) + gap
+            continue
+        merged = sorted(taken + [slot])
+        index = merged.index(slot)
+        crowded = next((merged[j] for j in range(max(0, index - hourly), index + 1)
+                        if j + hourly < len(merged) and merged[j + hourly] - merged[j] < 3600), None)
+        if crowded is None:
+            return slot
+        slot = crowded + 3600
+    return max([slot, *taken]) + max(gap, 3600)
+
+
+def reserve(store, category, not_before=None):
     gap, hourly = (tuning.value(store, key) for key in PACE[category])
     now = time.time()
     with store.transaction():
         pace = store.get_setting("action_pace", None) or {}
         taken = sorted(t for t in pace.get(category, []) if t > now - max(gap, 3600))
-        slot = max(now, taken[-1] + gap) if taken else now
-        if len(taken) >= hourly:
-            slot = max(slot, taken[-hourly] + 3600)
-        store.set_setting("action_pace", {**pace, category: taken + [slot]})
+        slot = free_slot(taken, max(now, not_before or now), gap, hourly)
+        store.set_setting("action_pace", {**pace, category: sorted(taken + [slot])})
     return slot
 
 
@@ -316,12 +333,14 @@ def prepare(collector, body, account, fresh=True):
     return None, saved, selected
 
 
-def record(collector, body, account, prepared, selected, run_at=None):
+def record(collector, body, account, prepared, selected, run_at=None, operator=None):
     store = collector.store
     request = body.model_dump()
     details = {"request": request, "account_id": account, "observation_running": collector.running,
                "own_actions": scope_settings(store)["own_actions"], "button": selected,
                "preview_event": prepared["preview_event"] if prepared else None}
+    if operator:
+        details["operator"] = {key: operator.get(key) for key in ("label", "owner", "admin") if operator.get(key) is not None}
     pending = {"request": request, "account_id": account}
     if run_at:
         details["queued_until"] = pending["queued_until"] = run_at
@@ -334,7 +353,7 @@ def record(collector, body, account, prepared, selected, run_at=None):
     return pending
 
 
-async def execute(collector, body, queue=None):
+async def execute(collector, body, queue=None, operator=None):
     store = collector.store
     prior = store.get_setting(ACTION + body.request_id, None)
     if prior:
@@ -346,15 +365,15 @@ async def execute(collector, body, queue=None):
     prepared, saved, selected = prepare(collector, body, account)
     category = ("bot" if body.action == "press" else "message" if body.action == "send" or prepared["kind"] == "bot"
                 else "join")
-    run_at = reserve(store, category)
+    run_at = reserve(store, category, body.planned_at)
     if run_at > time.time():
         if queue:
-            pending = record(collector, body, account, prepared, selected, run_at)
+            pending = record(collector, body, account, prepared, selected, run_at, operator)
             queue(run_at, body)
             return progress(pending)
         await asyncio.sleep(run_at - time.time())
     await collector.restore()
-    return await perform(collector, body, account, prepared, saved, selected)
+    return await perform(collector, body, account, prepared, saved, selected, operator=operator)
 
 
 async def run_queued(collector, body):
@@ -377,7 +396,7 @@ async def run_queued(collector, body):
         return progress(store.get_setting(ACTION + body.request_id, None))
 
 
-async def perform(collector, body, account, prepared, saved, selected, pending=None):
+async def perform(collector, body, account, prepared, saved, selected, pending=None, operator=None):
     store = collector.store
     entity = None
     if body.action != "open":
@@ -391,7 +410,7 @@ async def perform(collector, body, account, prepared, saved, selected, pending=N
                                                 source="panel_button_check")
             raise ValueError("The buttons changed or the message disappeared. Refresh the chat.")
     if pending is None:
-        pending = record(collector, body, account, prepared, selected)
+        pending = record(collector, body, account, prepared, selected, operator=operator)
     result = {"request_id": body.request_id, "request_event": pending["request_event"], "status": "succeeded"}
     cancelled, dispatched = False, False
     try:
@@ -454,4 +473,6 @@ async def perform(collector, body, account, prepared, saved, selected, pending=N
     finish(store, pending, result)
     if cancelled:
         raise asyncio.CancelledError
+    if dispatched and result["status"] in ("succeeded", "approval_pending"):
+        await opsec.hide_presence(collector, pending["request_event"])
     return result

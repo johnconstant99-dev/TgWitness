@@ -23,6 +23,7 @@
 
 ## Unreleased
 
+- Isolate request-body capacity and token-family lockouts, set Secure download cookies behind trusted HTTPS proxies, limit pending tickets per access, and expose journal write failures.
 - Add an English Secret Chat demo with fictional requests, replies, attachments and retained deletion notices. Document the separate development implementation and its open defects; the demo does not enable Telegram connections.
 
 - Remove the unused one-shot exporter and check recovery against the current exporter. Reject unexpected or repeated message IDs in recheck responses.
@@ -132,7 +133,7 @@
   compose carries its name, Phala's own pre-launch script is kept out of the measured
   app-compose, the production OS image is chosen instead of Phala's development default, the
   instance ID is read from the CVM state, and restarts from the CVM's operations count in
-  `provider_actions`. `tools/check_phala.py` simulates each of these.
+  `provider_actions`. Private Phala regressions simulate each of these.
 - `tdx_os` without outside tools: the verifier downloads the published dstack OS image once,
   matches it to the hash the CVM reports and computes MRTD and RTMR0-2 itself, the ACPI tables
   QEMU builds for the VM's shape included. A development image, other firmware, kernel, command

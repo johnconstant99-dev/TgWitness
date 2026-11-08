@@ -367,13 +367,9 @@ python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\A
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
 python -m ruff check .
 python -m playwright install chromium
-python tools/check_browser.py                          # end-to-end UI
-python tools/check_account_browser.py                  # sign-in flows
-python tools/capture_screenshots.py --docs             # refresh README images
 python tools/build_portable.py                         # Windows portable ZIP
 python tools/build_source.py                           # source ZIP + SHA-256 manifest
 python tools/build_site.py                             # site in dist/site
-python tools/check_site.py                             # site browser checks
 ```
 
 Browser checks use synthetic Telegram data.

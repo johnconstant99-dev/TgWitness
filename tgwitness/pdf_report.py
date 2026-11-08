@@ -1,3 +1,4 @@
+from . import render_data
 import difflib
 import hashlib
 import logging
@@ -830,350 +831,378 @@ def signatures_section(lay, say, certificate, fp, name):
                         "PDF. The HTML and JSON reports and the journal carry the exact text."), WARN)
 
 
+class EvidencePDF:
+    def __init__(self, data, context, events, certificate):
+        self.data = data
+        self.context = context
+        self.events = events
+        self.certificate = certificate
+
+    def render(self):
+        self.options = {**report.ReportOptions().model_dump(), "language": "en", **(self.context.get("options") or {})}
+        self.say = report.Words(self.options["language"])
+        say = self.say
+        self.handover, self.case = self.data.get("minimisation"), self.data["case"]
+        self.filtered = bool((self.data.get("selection") or {}).get("selection", {}).get("enabled"))
+        self.report_id, self.fp = self.data["report_id"], self.data["subject"].get("fingerprint") or ""
+        footer = " · ".join(x for x in ((say("Case ID") + " " + self.case["id"]) if self.case.get("id") else "",
+                                        say("Report ID") + " " + self.report_id[:8]) if x)
+        pdf = document(say, footer, self.options.get("design", "classic"))
+        found = MissingGlyphs(pdf.missing)
+        logging.getLogger("fpdf").addHandler(found)
+        logging.getLogger("fontTools.subset").setLevel(logging.ERROR)
+        try:
+            self.lay = Layout(pdf, say)
+            label = say("Handover extract") if self.handover else say("Evidence report")
+            title = self.case.get("title") or (say("Handover extract") if self.handover else say("Telegram observation journal"))
+            pdf.set_title(title)
+            pdf.set_author(self.case.get("examiner") or self.case.get("organization") or "TgWitness")
+            pdf.set_subject(label + " · " + self.report_id)
+            cats, summary, self.coverage = self.data["summary"]["categories"], self.data["summary"], self.data.get("coverage") or {}
+            self.lay.title_block(label + " · " + say("Signed"), title, [
+                (say("Case ID"), self.case.get("id")), (say("Examiner"), self.case.get("examiner")),
+                (say("Organization"), self.case.get("organization")), (say("Created"), report.utc_text(self.data["created_at"])),
+                (say("Report ID"), self.report_id)],
+                say("Signed PDF: a PDF signature that PDF readers show, and the Ed25519 seal of key {fp}. Check both with "
+                    "verify.py; the last section explains how.", fp=report.grouped(self.fp)))
+            self.records_total = (self.handover["counts"]["unchanged"] + self.handover["counts"]["minimised"]) if self.handover \
+                else self.data["subject"].get("event_count")
+            if self.data.get("selection"):
+                self.records_total = self.data["selection"]["counts"]["selected_records"]
+            self.directory_index = None
+            if report_composition_pdf.active(self.lay):
+                self.events, self.directory_index = report_composition_pdf.indexed_events(self.events, self.records_total or 0)
+            self.lay.figures([(say("Records"), self.records_total), (say("Chats"), summary["chats"]), (say("Messages"), cats["message"]),
+                         (say("Edits"), cats["edited"]), (say("Deletions"), cats["deleted"]),
+                         *([(say("Missing on recheck"), cats["missing"])] if cats.get("missing") else []),
+                         (say("Files"), summary["files"]),
+                         (say("Timestamps"), summary["timestamps"]),
+                         (say("Observation period"), report.span_text(say, summary["first_record_at"], summary["last_record_at"]))])
+            data_name = "records.jsonl" if self.handover else "events.jsonl"
+            self.lay.gap(5)
+            self.lay.qr(paper_lines(self.report_id, self.fp, data_name, self.data["subject"].get("records_sha256" if self.handover else "events_sha256")))
+            self.acquisition = self.data["custody"]["acquisition"]
+            self.account = self.acquisition.get("account") or {}
+            self.account_text = " · ".join(x for x in (("@" + self.account["username"]) if self.account.get("username") else "",
+                                                  ("id " + str(self.account["id"])) if self.account.get("id") else "") if x)
+            self.digest = {"categories": cats, "chats": [None] * summary["chats"], "media": [None] * summary["files"],
+                      "first": summary["first_record_at"], "last": summary["last_record_at"]}
+            self.titles = {str(c["chat_id"]): c["title"] for c in self.data["chats"] if c.get("title")}
+
+            self.actions = self.data["actions"]
+
+            callbacks = {
+                "brief": self.render_brief,
+                "selection": self.render_selection,
+                "assessment": self.render_assessment,
+                "case": self.render_case,
+                "minimisation": self.render_minimisation,
+                "histories": self.render_histories,
+                "indicators": self.render_indicators,
+                "actions": self.render_actions,
+                "integrity": self.render_integrity,
+                "timestamps": self.render_timestamps,
+                "coverage": self.render_coverage,
+                "custody": self.render_custody,
+                "verify": self.render_verify,
+                "files": self.render_files,
+                "standards": self.render_standards,
+                "limitations": self.render_limitations,
+                "journal": self.render_journal,
+                "examination": self.render_examination,
+                "case_board": self.render_case_board,
+                "analytics": self.render_analytics,
+                "directory": self.render_directory,
+                "relations": self.render_relations,
+            }
+            default_order = ['brief', 'selection', 'examination', 'analytics', 'assessment', 'case', 'minimisation', 'case_board', 'histories', 'indicators', 'actions', 'integrity', 'timestamps', 'coverage', 'custody', 'verify', 'files', 'standards', 'limitations', 'journal']
+            if self.options.get("template") == "activity":
+                default_order[2:4] = ["analytics", "examination"]
+            visible = {
+                "selection": bool(self.data.get("selection")), "minimisation": bool(self.handover),
+                "case_board": bool((self.data.get("case_board") or {}).get("cards")),
+                "examination": bool(self.data.get("examination")),
+                "analytics": bool(self.data.get("analytics") or self.data.get("processors")),
+                "histories": bool(self.options.get("show_changes", True) and self.data["changes"]["messages"]),
+                "indicators": bool(self.options.get("show_indicators", True) and (self.data.get("indicators") or {}).get("items")),
+                "actions": not self.filtered or bool(self.actions["listed"]), "timestamps": not self.handover,
+                "files": bool(self.data.get("files")),
+                "journal": bool(self.options.get("timeline") and self.records_total),
+                "directory": bool(self.data.get("chats") or (self.directory_index or {}).get("senders")),
+                "relations": bool((self.directory_index or {}).get("relations")),
+            }
+            report_composition_pdf.render(self.lay, callbacks, default_order, 'journal', visible)
+            declaration(self.lay, say, self.case)
+            self.lay.qr(paper_lines(self.report_id, self.fp, data_name, self.data["subject"].get("records_sha256" if self.handover else "events_sha256")))
+            if self.certificate is not None:
+                signatures_section(self.lay, say, self.certificate, self.fp, "report.pdf")
+            return add_signature_field(pdf, say)
+        finally:
+            logging.getLogger("fpdf").removeHandler(found)
+
+    def render_brief(self):
+        say = self.say
+        self.lay.brief(*report.evidence_brief(say, self.digest, self.records_total, self.data["timestamps"], self.coverage, self.account_text,
+                                         self.handover, self.filtered))
+
+    def render_selection(self):
+        report.report_selection_view.pdf(self.lay, self.data.get("selection"))
+
+    def render_assessment(self):
+        report.case_assessment.pdf(self.lay, self.data.get("case_assessment") or report.case_assessment.journal(self.context, self.coverage))
+
+    def render_case(self):
+        say = self.say
+        self.lay.section(say("Case"))
+        self.lay.kv([(say("Case title"), self.case.get("title")), (say("Case ID"), self.case.get("id")),
+                (say("Examiner"), self.case.get("examiner")), (say("Organization"), self.case.get("organization")),
+                (say("Observing account"), " · ".join(x for x in (("@" + self.account["username"]) if self.account.get("username")
+                                                                  else "", ("id " + str(self.account["id"])) if self.account.get("id")
+                                                                  else "") if x)),
+                (say("Report language"), self.data["language"]), (say("Report ID"), Mono(self.report_id)),
+                (say("Created"), report.utc_text(self.data["created_at"])),
+                (say("Produced by"), "TgWitness " + str((self.data.get("producer") or {}).get("version")) + " · "
+                 + str((self.data.get("producer") or {}).get("project")))])
+        if self.case.get("notes"):
+            self.lay.heading(say("Notes"))
+            self.lay.text(self.case["notes"], size=9)
+
+    def render_minimisation(self):
+        say = self.say
+        if self.handover:
+            self.lay.section(say("Minimisation"))
+            counts, selection = self.handover["counts"], self.handover["selection"]
+            self.lay.kv([(say("Purpose"), self.handover["purpose"]),
+                    (say("Shown unchanged, verified in full"), counts["unchanged"]),
+                    (say("Minimised, signature verified"), counts["minimised"]), (say("Left out"), counts["left_out"])])
+            if isinstance(selection, dict):
+                self.lay.kv([(str(k), ", ".join(map(str, v)) if isinstance(v, list) else str(v)) for k, v in selection.items()])
+
+    def render_histories(self):
+        say = self.say
+        if self.options.get("show_changes", True) and self.data["changes"]["messages"]:
+            self.lay.section(say("Selected message histories") if self.filtered else say("Changed and deleted messages"),
+                        say("Selected changes with saved message history. Versions outside the filters are marked as context.")
+                        if self.filtered else say(
+                "Every saved version of each message that was edited, deleted or not found at a later check. Removed "
+                "words are struck through and added words are marked; each step names its signed record."))
+            changes(self.lay, say, self.data["changes"], self.titles)
+
+    def render_indicators(self):
+        say = self.say
+        if self.options.get("show_indicators", True) and (self.data.get("indicators") or {}).get("items"):
+            indicators_section(self.lay, say, self.data["indicators"])
+
+    def render_actions(self):
+        say = self.say
+        if not self.filtered:
+            self.lay.section(say("Actions by the observing account"), say(
+            "Actions taken with the observing account change what others in the chat see. They are listed here so "
+            "that the records around them can be read with that in mind."))
+        if self.actions["listed"]:
+            rows = []
+            for action in self.actions["listed"]:
+                request, result = action.get("request") or {}, action.get("result") or {}
+                kind = request.get("action")
+                detail = (action.get("preview") or {}).get("title") or "" if kind == "open" else \
+                    request.get("text") or "" if kind == "send" else (action.get("button") or {}).get("text") or ""
+                if kind == "open" and (action.get("preview") or {}).get("link"):
+                    detail += " " + action["preview"]["link"]
+                if result.get("answer"):
+                    detail += " · " + say("bot answered: {answer}", answer=result["answer"])
+                rows.append([report.utc_text(action["at"]), say(report.ACTION_NAMES.get(kind, "Action")),
+                             self.titles.get(str(result.get("chat") or action.get("chat"))) or str(action.get("chat") or "—"),
+                             detail, say(report.OUTCOMES.get(result.get("status"), ("", "no result recorded"))[1]),
+                             "#" + str(action["seq"])])
+            self.lay.grid([say("Time"), say("Action"), say("Chat"), say("Details"), say("Outcome"), say("Records")], rows,
+                     (15, 17, 14, 33, 10, 11))
+        elif not self.filtered:
+            self.lay.callout(say("No action through the panel is recorded in this journal."), OK)
+
+    def render_integrity(self):
+        say = self.say
+        self.lay.section(say("Integrity"), say("Every record is linked to the previous one by SHA-256 and signed with Ed25519 "
+                                          "when it is captured. The manifest lists the SHA-256 of every file and is "
+                                          "signed with the same key."))
+        self.lay.kv([(say("Signing key fingerprint (SHA-256)"), Mono(report.grouped(self.fp))),
+                (say("Records"), self.data["subject"].get("event_count") or self.records_total),
+                (say("Head hash"), Mono(self.data["subject"].get("head_hash") or "")),
+                (say("Independent timestamps"), "" if self.handover else report.stamps_text(say, self.data["timestamps"])),
+                (say("Independent witness"), "" if self.handover else say(
+                    "Not part of this archive. A witness that kept the journal head is checked with verify.py --witness.")),
+                (say("Hash algorithm"), "SHA-256 (FIPS 180-4)"), (say("Signature algorithm"), "Ed25519 (RFC 8032)"),
+                (say("Public key"), Mono(self.data["subject"].get("public_key") or "")),
+                ("events.jsonl SHA-256", Mono(self.data["subject"].get("events_sha256") or "")),
+                ("records.jsonl SHA-256", Mono(self.data["subject"].get("records_sha256") or ""))])
+
+    def render_timestamps(self):
+        say = self.say
+        if not self.handover:
+            self.lay.section(say("Timestamps"), say(
+                "A timestamp shows that a checkpoint, and every record before it, existed no later than the stamped "
+                "time. Records after the latest stamped checkpoint rely on the collector's clock."))
+            anchors = self.data["timestamps"]
+            latest = report.latest_stamp(anchors)
+            if latest:
+                self.lay.callout(say("Latest independently timestamped record: #{n}", n=latest.get("event_count")) + " · "
+                            + report.utc_text(latest.get("time")) + " · " + latest["service"], OK)
+            else:
+                self.lay.callout(say("No independent timestamps in this export: times come from the collector's clock. Turn "
+                                "on Evidence mode to stamp checkpoints automatically."))
+            rows = []
+            for anchor in anchors:
+                if anchor.get("kind") == "rfc3161":
+                    signer = (anchor.get("signed") or {}).get("signer")
+                    name = re.search(r"(?:^|,)CN=((?:\\,|[^,])+)", signer or "")
+                    rows.append([anchor.get("event_count"), anchor.get("service"), "RFC 3161", report.utc_text(anchor.get("time")),
+                                 say("Token valid") + " · " + (name.group(1).replace("\\,", ",") if name else signer)
+                                 if report.case_assessment.verified_stamp(anchor, 2**63 - 1)
+                                 else say("Checkpoint or timestamp trust not established")])
+                elif anchor.get("kind") == "opentimestamps":
+                    rows.append([anchor.get("event_count"), anchor.get("service"), "OpenTimestamps · Bitcoin", "—",
+                                 say("Waiting for Bitcoin confirmation") if anchor.get("status") == "pending"
+                                 else say("In Bitcoin; confirm with ots verify")])
+            self.lay.grid([say("Records covered"), say("Service"), say("Type"), say("Stamped at"), say("Status")], rows,
+                     (10, 26, 18, 17, 29))
+
+    def render_coverage(self):
+        say = self.say
+        self.lay.section(say("Coverage"), (self.coverage or {}).get("meaning") or
+                    say("Recorded observation intervals."))
+        if self.coverage:
+            self.lay.coverage_figure(self.coverage)
+            self.lay.grid([say("Interval start"), say("Interval end"), say("Duration")],
+                     [[report.utc_text(p["from"]), report.utc_text(p["to"]), report.span_text(say, p["from"], p["to"])]
+                      for p in self.coverage.get("continuous") or []], (38, 38, 24))
+            if self.coverage.get("gaps"):
+                self.lay.heading(say("Gaps"))
+                self.lay.grid([say("Interval start"), say("Interval end"), say("Reason")],
+                         [[report.utc_text(g["from"]), report.utc_text(g["to"]), str(g.get("reason"))] for g in self.coverage["gaps"]],
+                         (26, 26, 48))
+            if self.coverage.get("unobserved_ids"):
+                self.lay.heading(say("Message IDs per chat"))
+                self.lay.grid([say("Chat"), say("Observed range"), say("Observed"), say("Not observed"), say("Numbers not observed")],
+                         [[c.get("title") or c["chat_id"], str(c["observed_from"]) + " – " + str(c["observed_to"]),
+                           c["observed"], c["not_observed"], ranges_line(c.get("ranges") or [], c.get("ranges_total", 0))]
+                          for c in self.coverage["unobserved_ids"]], (26, 18, 12, 12, 32))
+            view = report.gap_overview(say, self.coverage.get("gap_summary"))
+            if view is not None:
+                self.lay.heading(say("Missing message numbers"))
+                self.lay.text(view["lead"], size=8, color=MUTED)
+                if view["measured"]:
+                    widths = (28, 18, 11, 11, 10, 11, 11) if len(view["headers"]) == 7 else (30, 20, 12, 12, 12, 14)
+                    self.lay.grid(view["headers"], [[str(value) for value in row] for row in view["measured"]], widths)
+                if view["listed"]:
+                    self.lay.heading(say("Listed gaps"))
+                    self.lay.grid(view["listed_headers"], [
+                        [name, numbers, str(count), str(after), report.utc_text(after_at), str(before),
+                         report.utc_text(before_at)]
+                        for name, numbers, count, after, after_at, before, before_at in view["listed"]],
+                        (20, 16, 8, 11, 17, 11, 17))
+                if view["skipped"]:
+                    self.lay.grid(view["skipped_headers"], view["skipped"], (30, 70))
+                self.lay.text(view["note"], size=7.5, color=MUTED)
+            self.lay.heading(say("Verifier summary"))
+            for line in coverage_lines(self.coverage):
+                self.lay.text(line, size=7.2, family="Mono")
+
+    def render_custody(self):
+        say = self.say
+        self.lay.section(say("Chain of custody"), say("How this material was acquired, preserved and handed over. "
+                                                 "custody.json carries the same record for case-management systems."))
+        for step, detail in custody_steps(say, self.data):
+            self.lay.text(step, size=9, style="B")
+            self.lay.text(detail, size=8.5, color=MUTED)
+            self.lay.gap(0.8)
+        self.lay.kv([(say("Acquisition tool"), "TgWitness " + str((self.data.get("producer") or {}).get("version"))),
+                (say("Program build"), Mono(report.build_text(say, self.data.get("producer") or {}))),
+                (say("Acquisition method"), say("Telegram client observing the account; records chained by SHA-256 and "
+                                                "signed with Ed25519 as they are written.")),
+                (say("Telegram client"), "; ".join(report.client_text(say, c["client"])
+                                                    for c in self.acquisition.get("clients") or []) or say("Not recorded in this journal")),
+                (say("Connection route"), "; ".join(report.route_text(say, r["route"])
+                                                     for r in self.acquisition.get("routes") or []) or say("Not recorded in this journal")),
+                (say("Direct connections while no proxy answered: {n}", n=(self.acquisition.get("direct_fallbacks") or {}).get("count")),
+                 say("Telegram saw this server's address at those times.")) if (self.acquisition.get("direct_fallbacks") or {}).get("count")
+                else ("", ""),
+                (say("Collector clock against Telegram"), clocks_lines(say, self.acquisition.get("clock_checks"),
+                                                                       "Not recorded in this journal")),
+                (say("Time standard"), "UTC · ISO 8601")])
+        transfers(self.lay, say)
+
+    def render_verify(self):
+        say = self.say
+        archive = "tgwitness-handover.zip" if self.handover else "tgwitness-evidence.zip"
+        self.lay.section(say("Verify"), say("Get the signer's key fingerprint from a trusted channel, not from this archive."))
+        self.lay.command("python verify.py " + archive + " --fingerprint " + self.fp)
+        self.lay.command("python verify.py report.pdf --fingerprint " + self.fp + " --evidence " + archive)
+
+    def render_files(self):
+        say = self.say
+        files = self.data.get("files") or {}
+        if files:
+            self.lay.section(say("Files in this archive"), say("manifest.json lists the SHA-256 of every file and is signed in "
+                                                          "manifest.sig."))
+            names = sorted(files)
+            self.lay.grid([say("File"), say("Purpose"), "SHA-256"],
+                     [[Mono(n), report.file_purpose(say, n), Mono(files[n])] for n in names[:300]], (26, 30, 44))
+
+    def render_standards(self):
+        say = self.say
+        self.lay.section(say("Standards and methodology"), say("This export follows these practices. Alignment, not certification."))
+        self.lay.grid([say("Reference"), say("How it is applied")],
+                 [[s["reference"] + " — " + s["title"], s["how"]] for s in self.data["custody"].get("standards") or []], (34, 66))
+
+    def render_limitations(self):
+        say = self.say
+        self.lay.section(say("Limitations"), say("Read these before relying on the material."))
+        self.lay.bullets([say(x) for x in self.data.get("limitations") or []])
+
+    def render_journal(self):
+        say = self.say
+        parts, limit = self.data.get("parts") or [], self.options.get("part_size") or report.ReportOptions().part_size
+        if self.options.get("timeline") and parts:
+            self.lay.section(say("Records"), say("{n} records in {m} parts. Each part is a page of its own with its own seal; "
+                                            "manifest.json lists its SHA-256.", n=self.records_total, m=len(parts)))
+            self.lay.grid([say("Part"), say("Records"), say("Count"), say("Period"), "SHA-256"],
+                     [[say("Part {n} of {m}", n=p["index"], m=len(parts)) + "\n" + p["file"], "#" + str(p["from"]) + " – #"
+                       + str(p["to"]), p["count"], report.utc_text(p["first_at"]) + " — " + report.utc_text(p["last_at"]),
+                       Mono(p.get("sha256") or "")] for p in parts], (22, 16, 8, 26, 28))
+        elif self.options.get("timeline") and self.events is not None and self.records_total and self.records_total <= limit:
+            self.lay.section(say("Records"), say("Records matching the report filters, in journal order.") if self.filtered else
+                        say("Every record of the journal in order. Filters only change what is shown.")
+                        if not self.handover else say("Every record in this extract, in journal order. Minimised records name "
+                                                 "what was withheld."))
+            records(self.lay, say, self.events, {**self.titles, **{int(k): v for k, v in self.titles.items() if k.lstrip("-").isdigit()}},
+                    self.options)
+        elif self.options.get("timeline") and self.records_total:
+            self.lay.section(say("Records"))
+            self.lay.callout(say("This journal has {n} records, exceeding the PDF transcript limit of {limit}. "
+                            "Every record remains in the signed source files and the HTML viewer.",
+                            n=self.records_total, limit=limit), WARN)
+
+    def render_examination(self):
+        report.report_charts.examination_pdf(self.lay, self.data.get("examination"))
+
+    def render_case_board(self):
+        if self.data.get("case_board"):
+            from . import board_report
+            board_report.pdf(self.lay, self.data["case_board"])
+
+    def render_analytics(self):
+        report.report_charts.pdf(self.lay, self.data.get("analytics"))
+        report.report_charts.metrics_pdf(self.lay, self.data.get("processors"))
+
+    def render_directory(self):
+        report_composition_pdf.directory(self.lay, self.data, self.directory_index)
+
+    def render_relations(self):
+        report_composition_pdf.relations(self.lay, self.directory_index)
+
+
 def evidence_pdf(data, context, events=None, certificate=None):
-    options = {**report.ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
-    say = report.Words(options["language"])
-    handover, case = data.get("minimisation"), data["case"]
-    filtered = bool((data.get("selection") or {}).get("selection", {}).get("enabled"))
-    report_id, fp = data["report_id"], data["subject"].get("fingerprint") or ""
-    footer = " · ".join(x for x in ((say("Case ID") + " " + case["id"]) if case.get("id") else "",
-                                    say("Report ID") + " " + report_id[:8]) if x)
-    pdf = document(say, footer, options.get("design", "classic"))
-    found = MissingGlyphs(pdf.missing)
-    logging.getLogger("fpdf").addHandler(found)
-    logging.getLogger("fontTools.subset").setLevel(logging.ERROR)
-    try:
-        lay = Layout(pdf, say)
-        label = say("Handover extract") if handover else say("Evidence report")
-        title = case.get("title") or (say("Handover extract") if handover else say("Telegram observation journal"))
-        pdf.set_title(title)
-        pdf.set_author(case.get("examiner") or case.get("organization") or "TgWitness")
-        pdf.set_subject(label + " · " + report_id)
-        cats, summary, coverage = data["summary"]["categories"], data["summary"], data.get("coverage") or {}
-        lay.title_block(label + " · " + say("Signed"), title, [
-            (say("Case ID"), case.get("id")), (say("Examiner"), case.get("examiner")),
-            (say("Organization"), case.get("organization")), (say("Created"), report.utc_text(data["created_at"])),
-            (say("Report ID"), report_id)],
-            say("Signed PDF: a PDF signature that PDF readers show, and the Ed25519 seal of key {fp}. Check both with "
-                "verify.py; the last section explains how.", fp=report.grouped(fp)))
-        records_total = (handover["counts"]["unchanged"] + handover["counts"]["minimised"]) if handover \
-            else data["subject"].get("event_count")
-        if data.get("selection"):
-            records_total = data["selection"]["counts"]["selected_records"]
-        directory_index = None
-        if report_composition_pdf.active(lay):
-            events, directory_index = report_composition_pdf.indexed_events(events, records_total or 0)
-        lay.figures([(say("Records"), records_total), (say("Chats"), summary["chats"]), (say("Messages"), cats["message"]),
-                     (say("Edits"), cats["edited"]), (say("Deletions"), cats["deleted"]),
-                     *([(say("Missing on recheck"), cats["missing"])] if cats.get("missing") else []),
-                     (say("Files"), summary["files"]),
-                     (say("Timestamps"), summary["timestamps"]),
-                     (say("Observation period"), report.span_text(say, summary["first_record_at"], summary["last_record_at"]))])
-        data_name = "records.jsonl" if handover else "events.jsonl"
-        lay.gap(5)
-        lay.qr(paper_lines(report_id, fp, data_name, data["subject"].get("records_sha256" if handover else "events_sha256")))
-        acquisition = data["custody"]["acquisition"]
-        account = acquisition.get("account") or {}
-        account_text = " · ".join(x for x in (("@" + account["username"]) if account.get("username") else "",
-                                              ("id " + str(account["id"])) if account.get("id") else "") if x)
-        digest = {"categories": cats, "chats": [None] * summary["chats"], "media": [None] * summary["files"],
-                  "first": summary["first_record_at"], "last": summary["last_record_at"]}
-        titles = {str(c["chat_id"]): c["title"] for c in data["chats"] if c.get("title")}
-
-        actions = data["actions"]
-
-        def render_brief():
-            lay.brief(*report.evidence_brief(say, digest, records_total, data["timestamps"], coverage, account_text,
-                                             handover, filtered))
-
-        def render_selection():
-            report.report_selection_view.pdf(lay, data.get("selection"))
-
-        def render_assessment():
-            report.case_assessment.pdf(lay, data.get("case_assessment") or report.case_assessment.journal(context, coverage))
-
-        def render_case():
-            lay.section(say("Case"))
-            lay.kv([(say("Case title"), case.get("title")), (say("Case ID"), case.get("id")),
-                    (say("Examiner"), case.get("examiner")), (say("Organization"), case.get("organization")),
-                    (say("Observing account"), " · ".join(x for x in (("@" + account["username"]) if account.get("username")
-                                                                      else "", ("id " + str(account["id"])) if account.get("id")
-                                                                      else "") if x)),
-                    (say("Report language"), data["language"]), (say("Report ID"), Mono(report_id)),
-                    (say("Created"), report.utc_text(data["created_at"])),
-                    (say("Produced by"), "TgWitness " + str((data.get("producer") or {}).get("version")) + " · "
-                     + str((data.get("producer") or {}).get("project")))])
-            if case.get("notes"):
-                lay.heading(say("Notes"))
-                lay.text(case["notes"], size=9)
-
-        def render_minimisation():
-            if handover:
-                lay.section(say("Minimisation"))
-                counts, selection = handover["counts"], handover["selection"]
-                lay.kv([(say("Purpose"), handover["purpose"]),
-                        (say("Shown unchanged, verified in full"), counts["unchanged"]),
-                        (say("Minimised, signature verified"), counts["minimised"]), (say("Left out"), counts["left_out"])])
-                if isinstance(selection, dict):
-                    lay.kv([(str(k), ", ".join(map(str, v)) if isinstance(v, list) else str(v)) for k, v in selection.items()])
-
-        def render_histories():
-            if options.get("show_changes", True) and data["changes"]["messages"]:
-                lay.section(say("Selected message histories") if filtered else say("Changed and deleted messages"),
-                            say("Selected changes with saved message history. Versions outside the filters are marked as context.")
-                            if filtered else say(
-                    "Every saved version of each message that was edited, deleted or not found at a later check. Removed "
-                    "words are struck through and added words are marked; each step names its signed record."))
-                changes(lay, say, data["changes"], titles)
-
-        def render_indicators():
-            if options.get("show_indicators", True) and (data.get("indicators") or {}).get("items"):
-                indicators_section(lay, say, data["indicators"])
-
-        def render_actions():
-            if not filtered:
-                lay.section(say("Actions by the observing account"), say(
-                "Actions taken with the observing account change what others in the chat see. They are listed here so "
-                "that the records around them can be read with that in mind."))
-            if actions["listed"]:
-                rows = []
-                for action in actions["listed"]:
-                    request, result = action.get("request") or {}, action.get("result") or {}
-                    kind = request.get("action")
-                    detail = (action.get("preview") or {}).get("title") or "" if kind == "open" else \
-                        request.get("text") or "" if kind == "send" else (action.get("button") or {}).get("text") or ""
-                    if kind == "open" and (action.get("preview") or {}).get("link"):
-                        detail += " " + action["preview"]["link"]
-                    if result.get("answer"):
-                        detail += " · " + say("bot answered: {answer}", answer=result["answer"])
-                    rows.append([report.utc_text(action["at"]), say(report.ACTION_NAMES.get(kind, "Action")),
-                                 titles.get(str(result.get("chat") or action.get("chat"))) or str(action.get("chat") or "—"),
-                                 detail, say(report.OUTCOMES.get(result.get("status"), ("", "no result recorded"))[1]),
-                                 "#" + str(action["seq"])])
-                lay.grid([say("Time"), say("Action"), say("Chat"), say("Details"), say("Outcome"), say("Records")], rows,
-                         (15, 17, 14, 33, 10, 11))
-            elif not filtered:
-                lay.callout(say("No action through the panel is recorded in this journal."), OK)
-
-        def render_integrity():
-            lay.section(say("Integrity"), say("Every record is linked to the previous one by SHA-256 and signed with Ed25519 "
-                                              "when it is captured. The manifest lists the SHA-256 of every file and is "
-                                              "signed with the same key."))
-            lay.kv([(say("Signing key fingerprint (SHA-256)"), Mono(report.grouped(fp))),
-                    (say("Records"), data["subject"].get("event_count") or records_total),
-                    (say("Head hash"), Mono(data["subject"].get("head_hash") or "")),
-                    (say("Independent timestamps"), "" if handover else report.stamps_text(say, data["timestamps"])),
-                    (say("Independent witness"), "" if handover else say(
-                        "Not part of this archive. A witness that kept the journal head is checked with verify.py --witness.")),
-                    (say("Hash algorithm"), "SHA-256 (FIPS 180-4)"), (say("Signature algorithm"), "Ed25519 (RFC 8032)"),
-                    (say("Public key"), Mono(data["subject"].get("public_key") or "")),
-                    ("events.jsonl SHA-256", Mono(data["subject"].get("events_sha256") or "")),
-                    ("records.jsonl SHA-256", Mono(data["subject"].get("records_sha256") or ""))])
-
-        def render_timestamps():
-            if not handover:
-                lay.section(say("Timestamps"), say(
-                    "A timestamp shows that a checkpoint, and every record before it, existed no later than the stamped "
-                    "time. Records after the latest stamped checkpoint rely on the collector's clock."))
-                anchors = data["timestamps"]
-                latest = report.latest_stamp(anchors)
-                if latest:
-                    lay.callout(say("Latest independently timestamped record: #{n}", n=latest.get("event_count")) + " · "
-                                + report.utc_text(latest.get("time")) + " · " + latest["service"], OK)
-                else:
-                    lay.callout(say("No independent timestamps in this export: times come from the collector's clock. Turn "
-                                    "on Evidence mode to stamp checkpoints automatically."))
-                rows = []
-                for anchor in anchors:
-                    if anchor.get("kind") == "rfc3161":
-                        signer = (anchor.get("signed") or {}).get("signer")
-                        name = re.search(r"(?:^|,)CN=((?:\\,|[^,])+)", signer or "")
-                        rows.append([anchor.get("event_count"), anchor.get("service"), "RFC 3161", report.utc_text(anchor.get("time")),
-                                     say("Token valid") + " · " + (name.group(1).replace("\\,", ",") if name else signer)
-                                     if report.case_assessment.verified_stamp(anchor, 2**63 - 1)
-                                     else say("Checkpoint or timestamp trust not established")])
-                    elif anchor.get("kind") == "opentimestamps":
-                        rows.append([anchor.get("event_count"), anchor.get("service"), "OpenTimestamps · Bitcoin", "—",
-                                     say("Waiting for Bitcoin confirmation") if anchor.get("status") == "pending"
-                                     else say("In Bitcoin; confirm with ots verify")])
-                lay.grid([say("Records covered"), say("Service"), say("Type"), say("Stamped at"), say("Status")], rows,
-                         (10, 26, 18, 17, 29))
-
-        def render_coverage():
-            lay.section(say("Coverage"), (coverage or {}).get("meaning") or
-                        say("Recorded observation intervals."))
-            if coverage:
-                lay.coverage_figure(coverage)
-                lay.grid([say("Interval start"), say("Interval end"), say("Duration")],
-                         [[report.utc_text(p["from"]), report.utc_text(p["to"]), report.span_text(say, p["from"], p["to"])]
-                          for p in coverage.get("continuous") or []], (38, 38, 24))
-                if coverage.get("gaps"):
-                    lay.heading(say("Gaps"))
-                    lay.grid([say("Interval start"), say("Interval end"), say("Reason")],
-                             [[report.utc_text(g["from"]), report.utc_text(g["to"]), str(g.get("reason"))] for g in coverage["gaps"]],
-                             (26, 26, 48))
-                if coverage.get("unobserved_ids"):
-                    lay.heading(say("Message IDs per chat"))
-                    lay.grid([say("Chat"), say("Observed range"), say("Observed"), say("Not observed"), say("Numbers not observed")],
-                             [[c.get("title") or c["chat_id"], str(c["observed_from"]) + " – " + str(c["observed_to"]),
-                               c["observed"], c["not_observed"], ranges_line(c.get("ranges") or [], c.get("ranges_total", 0))]
-                              for c in coverage["unobserved_ids"]], (26, 18, 12, 12, 32))
-                view = report.gap_overview(say, coverage.get("gap_summary"))
-                if view is not None:
-                    lay.heading(say("Missing message numbers"))
-                    lay.text(view["lead"], size=8, color=MUTED)
-                    if view["measured"]:
-                        widths = (28, 18, 11, 11, 10, 11, 11) if len(view["headers"]) == 7 else (30, 20, 12, 12, 12, 14)
-                        lay.grid(view["headers"], [[str(value) for value in row] for row in view["measured"]], widths)
-                    if view["listed"]:
-                        lay.heading(say("Listed gaps"))
-                        lay.grid(view["listed_headers"], [
-                            [name, numbers, str(count), str(after), report.utc_text(after_at), str(before),
-                             report.utc_text(before_at)]
-                            for name, numbers, count, after, after_at, before, before_at in view["listed"]],
-                            (20, 16, 8, 11, 17, 11, 17))
-                    if view["skipped"]:
-                        lay.grid(view["skipped_headers"], view["skipped"], (30, 70))
-                    lay.text(view["note"], size=7.5, color=MUTED)
-                lay.heading(say("Verifier summary"))
-                for line in coverage_lines(coverage):
-                    lay.text(line, size=7.2, family="Mono")
-
-        def render_custody():
-            lay.section(say("Chain of custody"), say("How this material was acquired, preserved and handed over. "
-                                                     "custody.json carries the same record for case-management systems."))
-            for step, detail in custody_steps(say, data):
-                lay.text(step, size=9, style="B")
-                lay.text(detail, size=8.5, color=MUTED)
-                lay.gap(0.8)
-            lay.kv([(say("Acquisition tool"), "TgWitness " + str((data.get("producer") or {}).get("version"))),
-                    (say("Program build"), Mono(report.build_text(say, data.get("producer") or {}))),
-                    (say("Acquisition method"), say("Telegram client observing the account; records chained by SHA-256 and "
-                                                    "signed with Ed25519 as they are written.")),
-                    (say("Telegram client"), "; ".join(report.client_text(say, c["client"])
-                                                        for c in acquisition.get("clients") or []) or say("Not recorded in this journal")),
-                    (say("Connection route"), "; ".join(report.route_text(say, r["route"])
-                                                         for r in acquisition.get("routes") or []) or say("Not recorded in this journal")),
-                    (say("Direct connections while no proxy answered: {n}", n=(acquisition.get("direct_fallbacks") or {}).get("count")),
-                     say("Telegram saw this server's address at those times.")) if (acquisition.get("direct_fallbacks") or {}).get("count")
-                    else ("", ""),
-                    (say("Collector clock against Telegram"), clocks_lines(say, acquisition.get("clock_checks"),
-                                                                           "Not recorded in this journal")),
-                    (say("Time standard"), "UTC · ISO 8601")])
-            transfers(lay, say)
-
-        def render_verify():
-            archive = "tgwitness-handover.zip" if handover else "tgwitness-evidence.zip"
-            lay.section(say("Verify"), say("Get the signer's key fingerprint from a trusted channel, not from this archive."))
-            lay.command("python verify.py " + archive + " --fingerprint " + fp)
-            lay.command("python verify.py report.pdf --fingerprint " + fp + " --evidence " + archive)
-
-        def render_files():
-            files = data.get("files") or {}
-            if files:
-                lay.section(say("Files in this archive"), say("manifest.json lists the SHA-256 of every file and is signed in "
-                                                              "manifest.sig."))
-                names = sorted(files)
-                lay.grid([say("File"), say("Purpose"), "SHA-256"],
-                         [[Mono(n), report.file_purpose(say, n), Mono(files[n])] for n in names[:300]], (26, 30, 44))
-
-        def render_standards():
-            lay.section(say("Standards and methodology"), say("This export follows these practices. Alignment, not certification."))
-            lay.grid([say("Reference"), say("How it is applied")],
-                     [[s["reference"] + " — " + s["title"], s["how"]] for s in data["custody"].get("standards") or []], (34, 66))
-
-        def render_limitations():
-            lay.section(say("Limitations"), say("Read these before relying on the material."))
-            lay.bullets([say(x) for x in data.get("limitations") or []])
-
-        def render_journal():
-            parts, limit = data.get("parts") or [], options.get("part_size") or report.ReportOptions().part_size
-            if options.get("timeline") and parts:
-                lay.section(say("Records"), say("{n} records in {m} parts. Each part is a page of its own with its own seal; "
-                                                "manifest.json lists its SHA-256.", n=records_total, m=len(parts)))
-                lay.grid([say("Part"), say("Records"), say("Count"), say("Period"), "SHA-256"],
-                         [[say("Part {n} of {m}", n=p["index"], m=len(parts)) + "\n" + p["file"], "#" + str(p["from"]) + " – #"
-                           + str(p["to"]), p["count"], report.utc_text(p["first_at"]) + " — " + report.utc_text(p["last_at"]),
-                           Mono(p.get("sha256") or "")] for p in parts], (22, 16, 8, 26, 28))
-            elif options.get("timeline") and events is not None and records_total and records_total <= limit:
-                lay.section(say("Records"), say("Records matching the report filters, in journal order.") if filtered else
-                            say("Every record of the journal in order. Filters only change what is shown.")
-                            if not handover else say("Every record in this extract, in journal order. Minimised records name "
-                                                     "what was withheld."))
-                records(lay, say, events, {**titles, **{int(k): v for k, v in titles.items() if k.lstrip("-").isdigit()}},
-                        options)
-            elif options.get("timeline") and records_total:
-                lay.section(say("Records"))
-                lay.callout(say("This journal has {n} records, exceeding the PDF transcript limit of {limit}. "
-                                "Every record remains in the signed source files and the HTML viewer.",
-                                n=records_total, limit=limit), WARN)
-
-        def render_examination():
-            report.report_charts.examination_pdf(lay, data.get("examination"))
-
-        def render_case_board():
-            if data.get("case_board"):
-                from . import board_report
-                board_report.pdf(lay, data["case_board"])
-
-        def render_analytics():
-            report.report_charts.pdf(lay, data.get("analytics"))
-            report.report_charts.metrics_pdf(lay, data.get("processors"))
-
-        def render_directory():
-            report_composition_pdf.directory(lay, data, directory_index)
-
-        def render_relations():
-            report_composition_pdf.relations(lay, directory_index)
-
-        callbacks = {
-            "brief": render_brief,
-            "selection": render_selection,
-            "assessment": render_assessment,
-            "case": render_case,
-            "minimisation": render_minimisation,
-            "histories": render_histories,
-            "indicators": render_indicators,
-            "actions": render_actions,
-            "integrity": render_integrity,
-            "timestamps": render_timestamps,
-            "coverage": render_coverage,
-            "custody": render_custody,
-            "verify": render_verify,
-            "files": render_files,
-            "standards": render_standards,
-            "limitations": render_limitations,
-            "journal": render_journal,
-            "examination": render_examination,
-            "case_board": render_case_board,
-            "analytics": render_analytics,
-            "directory": render_directory,
-            "relations": render_relations,
-        }
-        default_order = ['brief', 'selection', 'examination', 'analytics', 'assessment', 'case', 'minimisation', 'case_board', 'histories', 'indicators', 'actions', 'integrity', 'timestamps', 'coverage', 'custody', 'verify', 'files', 'standards', 'limitations', 'journal']
-        if options.get("template") == "activity":
-            default_order[2:4] = ["analytics", "examination"]
-        visible = {
-            "selection": bool(data.get("selection")), "minimisation": bool(handover),
-            "case_board": bool((data.get("case_board") or {}).get("cards")),
-            "examination": bool(data.get("examination")),
-            "analytics": bool(data.get("analytics") or data.get("processors")),
-            "histories": bool(options.get("show_changes", True) and data["changes"]["messages"]),
-            "indicators": bool(options.get("show_indicators", True) and (data.get("indicators") or {}).get("items")),
-            "actions": not filtered or bool(actions["listed"]), "timestamps": not handover,
-            "files": bool(data.get("files")),
-            "journal": bool(options.get("timeline") and records_total),
-            "directory": bool(data.get("chats") or (directory_index or {}).get("senders")),
-            "relations": bool((directory_index or {}).get("relations")),
-        }
-        report_composition_pdf.render(lay, callbacks, default_order, 'journal', visible)
-        declaration(lay, say, case)
-        lay.qr(paper_lines(report_id, fp, data_name, data["subject"].get("records_sha256" if handover else "events_sha256")))
-        if certificate is not None:
-            signatures_section(lay, say, certificate, fp, "report.pdf")
-        return add_signature_field(pdf, say)
-    finally:
-        logging.getLogger("fpdf").removeHandler(found)
+    return EvidencePDF(render_data.detached(data), render_data.context(context),
+                      render_data.records(events), certificate).render()
 
 
 def indicators_section(lay, say, found, shown=300):
@@ -1198,234 +1227,261 @@ def ranges_line(ranges, total, limit=8):
     return (", ".join(shown) + (" … +" + str(more) if more > 0 else "")) if shown else "—"
 
 
-def chat_pdf(meta, context, messages=None, certificate=None):
-    options = {**report.ReportOptions().model_dump(), "language": "en", **(context.get("options") or {})}
-    say = report.Words(options["language"])
-    chat, stats, people = meta.get("chat") or {}, context["stats"], context["people"]
-    ids, parts, fp = context.get("message_ids") or {}, context.get("parts") or [], context["fingerprint"]
-    case, report_id = report.case_of(options), context["report_id"]
-    chat_title = chat.get("title") or say("Chat {id}", id=chat.get("id"))
-    footer = " · ".join(x for x in ((say("Case ID") + " " + case["id"]) if case.get("id") else "",
-                                    say("Report ID") + " " + report_id[:8]) if x)
-    pdf = document(say, footer, options.get("design", "classic"))
-    found = MissingGlyphs(pdf.missing)
-    logging.getLogger("fpdf").addHandler(found)
-    logging.getLogger("fontTools.subset").setLevel(logging.ERROR)
-    try:
-        lay = Layout(pdf, say)
-        title = case.get("title") or chat_title
-        pdf.set_title(title)
-        pdf.set_author(case.get("examiner") or case.get("organization") or "TgWitness")
-        pdf.set_subject(say("Chat export") + " · " + report_id)
-        lay.title_block(say("Chat export") + " · " + say("Signed"), title, [
-            (say("Chat"), chat_title), (say("Case ID"), case.get("id")), (say("Examiner"), case.get("examiner")),
-            (say("Organization"), case.get("organization")), (say("Created"), report.utc_text(context["created_at"])),
-            (say("Report ID"), report_id)],
-            say("Signed PDF: a PDF signature that PDF readers show, and the Ed25519 seal of key {fp}. Check both with "
-                "verify.py; the last section explains how.", fp=report.grouped(fp)))
-        lay.figures([(say("Messages"), meta.get("message_count")), (say("Participants"), len(people)),
-                     (say("With media"), stats["media"]), (say("Edited"), stats["edited"]), (say("Service"), stats["service"])]
-                    + ([(say("Numbers absent"), ids["missing"])] if ids.get("numbered_per_chat") else [])
-                    + [(say("Period"), report.span_text(say, stats["first_at"], stats["last_at"]))])
-        lay.gap(5)
-        lay.qr(paper_lines(report_id, fp, "chat.json", context.get("chat_json_sha256")))
-        account = meta.get("account") or {}
-        account_text = " · ".join(x for x in (("@" + account["username"]) if account.get("username") else "",
-                                              ("id " + str(account["id"])) if account.get("id") else "") if x)
-        def render_brief():
-            lay.brief(*report.chat_brief(say, meta, stats, ids, account_text))
+class ChatPDF:
+    def __init__(self, meta, context, messages, certificate):
+        self.meta = meta
+        self.context = context
+        self.messages = messages
+        self.certificate = certificate
 
-        def render_analytics():
-            report.snapshot_analytics.pdf_section(lay, context.get("analytics"), options)
+    def render(self):
+        self.options = {**report.ReportOptions().model_dump(), "language": "en", **(self.context.get("options") or {})}
+        self.say = report.Words(self.options["language"])
+        say = self.say
+        self.chat, self.stats, self.people = self.meta.get("chat") or {}, self.context["stats"], self.context["people"]
+        self.ids, self.parts, self.fp = self.context.get("message_ids") or {}, self.context.get("parts") or [], self.context["fingerprint"]
+        self.case, self.report_id = report.case_of(self.options), self.context["report_id"]
+        self.chat_title = self.chat.get("title") or say("Chat {id}", id=self.chat.get("id"))
+        footer = " · ".join(x for x in ((say("Case ID") + " " + self.case["id"]) if self.case.get("id") else "",
+                                        say("Report ID") + " " + self.report_id[:8]) if x)
+        pdf = document(say, footer, self.options.get("design", "classic"))
+        found = MissingGlyphs(pdf.missing)
+        logging.getLogger("fpdf").addHandler(found)
+        logging.getLogger("fontTools.subset").setLevel(logging.ERROR)
+        try:
+            self.lay = Layout(pdf, say)
+            title = self.case.get("title") or self.chat_title
+            pdf.set_title(title)
+            pdf.set_author(self.case.get("examiner") or self.case.get("organization") or "TgWitness")
+            pdf.set_subject(say("Chat export") + " · " + self.report_id)
+            self.lay.title_block(say("Chat export") + " · " + say("Signed"), title, [
+                (say("Chat"), self.chat_title), (say("Case ID"), self.case.get("id")), (say("Examiner"), self.case.get("examiner")),
+                (say("Organization"), self.case.get("organization")), (say("Created"), report.utc_text(self.context["created_at"])),
+                (say("Report ID"), self.report_id)],
+                say("Signed PDF: a PDF signature that PDF readers show, and the Ed25519 seal of key {fp}. Check both with "
+                    "verify.py; the last section explains how.", fp=report.grouped(self.fp)))
+            self.lay.figures([(say("Messages"), self.meta.get("message_count")), (say("Participants"), len(self.people)),
+                         (say("With media"), self.stats["media"]), (say("Edited"), self.stats["edited"]), (say("Service"), self.stats["service"])]
+                        + ([(say("Numbers absent"), self.ids["missing"])] if self.ids.get("numbered_per_chat") else [])
+                        + [(say("Period"), report.span_text(say, self.stats["first_at"], self.stats["last_at"]))])
+            self.lay.gap(5)
+            self.lay.qr(paper_lines(self.report_id, self.fp, "chat.json", self.context.get("chat_json_sha256")))
+            self.account = self.meta.get("account") or {}
+            self.account_text = " · ".join(x for x in (("@" + self.account["username"]) if self.account.get("username") else "",
+                                                  ("id " + str(self.account["id"])) if self.account.get("id") else "") if x)
 
-        def render_assessment():
-            report.case_assessment.pdf(lay, report.case_assessment.snapshot(context, "chat", meta))
+            callbacks = {
+                "brief": self.render_brief,
+                "analytics": self.render_analytics,
+                "assessment": self.render_assessment,
+                "case": self.render_case,
+                "source": self.render_source,
+                "participants": self.render_participants,
+                "message_numbers": self.render_message_numbers,
+                "admin_log": self.render_admin_log,
+                "indicators": self.render_indicators,
+                "journal": self.render_journal,
+                "integrity": self.render_integrity,
+                "custody": self.render_custody,
+                "verify": self.render_verify,
+                "files": self.render_files,
+                "limitations": self.render_limitations,
+            }
+            default_order = ['brief', 'analytics', 'assessment', 'case', 'source', 'participants', 'message_numbers', 'admin_log', 'indicators', 'journal', 'integrity', 'custody', 'verify', 'files', 'limitations']
+            visible = {
+                "analytics": bool(self.context.get("analytics") and report.snapshot_analytics.selected(self.options)),
+                "source": bool(report.source_rows(say, self.meta, self.stats)), "message_numbers": bool(self.ids),
+                "admin_log": self.context.get("admin_events") is not None,
+                "indicators": bool(self.options.get("show_indicators", True) and (self.context.get("indicators") or {}).get("items")),
+                "files": bool(self.context.get("files")),
+            }
+            report_composition_pdf.render(self.lay, callbacks, default_order, 'chat', visible)
+            declaration(self.lay, say, self.case)
+            self.lay.qr(paper_lines(self.report_id, self.fp, "chat.json", self.context.get("chat_json_sha256")))
+            if self.certificate is not None:
+                signatures_section(self.lay, say, self.certificate, self.fp, "chat.pdf")
+            return add_signature_field(pdf, say)
+        finally:
+            logging.getLogger("fpdf").removeHandler(found)
 
-        def render_case():
-            lay.section(say("Case"))
-            lay.kv([(say("Case title"), case.get("title")), (say("Case ID"), case.get("id")),
-                    (say("Examiner"), case.get("examiner")), (say("Organization"), case.get("organization")),
-                    (say("Chat"), chat_title + " · " + str(chat.get("kind") or "") + " · id " + str(chat.get("id"))),
-                    (say("First message"), report.utc_text(stats["first_at"])), (say("Last message"), report.utc_text(stats["last_at"])),
-                    (say("Exporting account"), " · ".join(x for x in (("@" + account["username"]) if account.get("username") else "",
-                                                                      ("id " + str(account["id"])) if account.get("id") else "") if x)),
-                    (say("Report language"), say.language), (say("Report ID"), Mono(report_id))])
-            if case.get("notes"):
-                lay.heading(say("Notes"))
-                lay.text(case["notes"], size=9)
+    def render_brief(self):
+        say = self.say
+        self.lay.brief(*report.chat_brief(say, self.meta, self.stats, self.ids, self.account_text))
 
-        def render_source():
-            source = report.source_rows(say, meta, stats)
-            if source:
-                lay.section(say("The chat at export time"), say(
-                    "What Telegram said about the chat when the export began, and the exporting account's place in it. "
-                    "Labels such as scam and fake are Telegram's own."))
-                warned = [text for _, text, tone in source if tone == "bad"]
-                if warned:
-                    lay.callout(" · ".join(warned), BAD)
-                lay.kv([(label, text) for label, text, _ in source])
+    def render_analytics(self):
+        report.snapshot_analytics.pdf_section(self.lay, self.context.get("analytics"), self.options)
 
-        def render_participants():
-            lay.section(say("Participants"), say("Everyone who posted in the exported history, most active first. Names are "
-                                                 "the profile at export time."))
-            lay.grid([say("Participant"), "ID", say("Messages"), say("First message"), say("Last message")],
-                     [["\n".join([(p["name"] or say("Unknown")) + (" @" + p["username"] if p.get("username") else "")]
-                                  + report.poster_notes(say, p, chat)), Mono(str(p["user_id"])),
-                       p["messages"], report.utc_text(p["first_message_at"]), report.utc_text(p["last_message_at"])]
-                      for p in people[:100]], (32, 18, 10, 20, 20))
+    def render_assessment(self):
+        report.case_assessment.pdf(self.lay, report.case_assessment.snapshot(self.context, "chat", self.meta))
 
-        def render_message_numbers():
-            if ids:
-                lay.section(say("Message numbers"), say(
-                    "This export contains a selection. Absent message numbers may have been excluded by the filters. "
-                    "They are not evidence that a message was deleted or inaccessible."
-                    if ids.get("selection_applied") else
-                    "Telegram numbers the messages of a channel or supergroup 1, 2, 3… in order, service messages included. A "
-                    "number between the first and the last exported message that is absent belongs to a message Telegram did "
-                    "not return: deleted before the export, or not visible to this account. If only part of the chat was "
-                    "exported, numbers outside that part are absent too."))
-                if ids.get("recheck"):
-                    lay.callout(report.recheck_text(say, ids["recheck"]), MUTED)
-                if ids.get("numbered_per_chat"):
-                    span = ids["last_id"] - ids["first_id"] + 1 if isinstance(ids.get("first_id"), int) else 0
-                    lay.kv([(say("First message number"), ids["first_id"]), (say("Last message number"), ids["last_id"]),
-                            (say("Numbers in this range"), span), (say("Messages present"), ids["present"]),
-                            (say("Numbers absent"), ids["missing"]), (say("Runs of absent numbers"), len(ids["missing_ranges"]))])
-                    if ids["missing_ranges"]:
-                        shown = ids["missing_ranges"][:200]
-                        lay.grid([say("Message numbers"), say("Count")],
-                                 [[str(low) if low == high else str(low) + " – " + str(high), high - low + 1] for low, high in shown],
-                                 (60, 40))
-                        lay.text(say("message-ids.json lists every absent number; verify.py recounts them from chat.json."),
-                                 size=8.5, color=MUTED)
-                else:
-                    lay.text(say("In private chats and basic groups the numbers are shared by all of the account's chats, so "
-                                 "gaps say nothing about this chat."), size=9)
+    def render_case(self):
+        say = self.say
+        self.lay.section(say("Case"))
+        self.lay.kv([(say("Case title"), self.case.get("title")), (say("Case ID"), self.case.get("id")),
+                (say("Examiner"), self.case.get("examiner")), (say("Organization"), self.case.get("organization")),
+                (say("Chat"), self.chat_title + " · " + str(self.chat.get("kind") or "") + " · id " + str(self.chat.get("id"))),
+                (say("First message"), report.utc_text(self.stats["first_at"])), (say("Last message"), report.utc_text(self.stats["last_at"])),
+                (say("Exporting account"), " · ".join(x for x in (("@" + self.account["username"]) if self.account.get("username") else "",
+                                                                  ("id " + str(self.account["id"])) if self.account.get("id") else "") if x)),
+                (say("Report language"), say.language), (say("Report ID"), Mono(self.report_id))])
+        if self.case.get("notes"):
+            self.lay.heading(say("Notes"))
+            self.lay.text(self.case["notes"], size=9)
 
-        def render_admin_log():
-            if context.get("admin_events") is not None:
-                summary = meta.get("admin_log") or {}
-                lay.section(say("Admin log"), say(
-                    "Telegram keeps a chat's admin log for about 48 hours and shows it to its admins. It names the account "
-                    "that deleted or edited a message, with the content: the one record of a deletion that says who did it."))
-                lay.kv([(say("Read at"), report.utc_text(summary.get("read_at"))), (say("Events"), summary.get("events")),
-                        (say("Not answered by Telegram"), summary.get("error_type") or "")])
-                lay.grid([say("Time"), say("Account"), say("Action"), say("Message"), say("Content")],
-                         [list(row) for row in report.admin_rows(say, context["admin_events"], 300)], (17, 13, 16, 8, 46))
+    def render_source(self):
+        say = self.say
+        source = report.source_rows(say, self.meta, self.stats)
+        if source:
+            self.lay.section(say("The chat at export time"), say(
+                "What Telegram said about the chat when the export began, and the exporting account's place in it. "
+                "Labels such as scam and fake are Telegram's own."))
+            warned = [text for _, text, tone in source if tone == "bad"]
+            if warned:
+                self.lay.callout(" · ".join(warned), BAD)
+            self.lay.kv([(label, text) for label, text, _ in source])
 
-        def render_indicators():
-            if options.get("show_indicators", True) and (context.get("indicators") or {}).get("items"):
-                indicators_section(lay, say, context["indicators"])
+    def render_participants(self):
+        say = self.say
+        self.lay.section(say("Participants"), say("Everyone who posted in the exported history, most active first. Names are "
+                                             "the profile at export time."))
+        self.lay.grid([say("Participant"), "ID", say("Messages"), say("First message"), say("Last message")],
+                 [["\n".join([(p["name"] or say("Unknown")) + (" @" + p["username"] if p.get("username") else "")]
+                              + report.poster_notes(say, p, self.chat)), Mono(str(p["user_id"])),
+                   p["messages"], report.utc_text(p["first_message_at"]), report.utc_text(p["last_message_at"])]
+                  for p in self.people[:100]], (32, 18, 10, 20, 20))
 
-        def render_journal():
-            limit = options.get("part_size") or report.ReportOptions().part_size
-            if parts:
-                lay.section(say("Messages"), say("{n} messages in {m} parts, oldest first. Each part is a page of its own "
-                                                 "with its own seal; manifest.json lists its SHA-256.",
-                                                 n=meta.get("message_count"), m=len(parts)))
-                lay.grid([say("Part"), say("Message numbers"), say("Count"), say("Period"), "SHA-256"],
-                         [[say("Part {n} of {m}", n=p["index"], m=len(parts)) + "\n" + p["file"], "#" + str(p["from"]) + " – #"
-                           + str(p["to"]), p["count"], report.utc_text(p["first_at"]) + " — " + report.utc_text(p["last_at"]),
-                           Mono(p.get("sha256") or "")] for p in parts], (22, 16, 8, 26, 28))
-            elif messages is not None and (meta.get("message_count") or 0) <= limit:
-                lay.section(say("Messages"), say("The visible history at export time, oldest first."))
-                if stats.get("edited"):
-                    lay.callout(say("An edited message shows when it was last edited. A history snapshot holds only the "
-                                    "current text; earlier versions exist only where the observation journal recorded them."),
-                                MUTED)
-                transcript(lay, say, messages, bool(ids.get("numbered_per_chat") and not ids.get("selection_applied")))
+    def render_message_numbers(self):
+        say = self.say
+        if self.ids:
+            self.lay.section(say("Message numbers"), say(
+                "This export contains a selection. Absent message numbers may have been excluded by the filters. "
+                "They are not evidence that a message was deleted or inaccessible."
+                if self.ids.get("selection_applied") else
+                "Telegram numbers the messages of a channel or supergroup 1, 2, 3… in order, service messages included. A "
+                "number between the first and the last exported message that is absent belongs to a message Telegram did "
+                "not return: deleted before the export, or not visible to this account. If only part of the chat was "
+                "exported, numbers outside that part are absent too."))
+            if self.ids.get("recheck"):
+                self.lay.callout(report.recheck_text(say, self.ids["recheck"]), MUTED)
+            if self.ids.get("numbered_per_chat"):
+                span = self.ids["last_id"] - self.ids["first_id"] + 1 if isinstance(self.ids.get("first_id"), int) else 0
+                self.lay.kv([(say("First message number"), self.ids["first_id"]), (say("Last message number"), self.ids["last_id"]),
+                        (say("Numbers in this range"), span), (say("Messages present"), self.ids["present"]),
+                        (say("Numbers absent"), self.ids["missing"]), (say("Runs of absent numbers"), len(self.ids["missing_ranges"]))])
+                if self.ids["missing_ranges"]:
+                    shown = self.ids["missing_ranges"][:200]
+                    self.lay.grid([say("Message numbers"), say("Count")],
+                             [[str(low) if low == high else str(low) + " – " + str(high), high - low + 1] for low, high in shown],
+                             (60, 40))
+                    self.lay.text(say("message-ids.json lists every absent number; verify.py recounts them from chat.json."),
+                             size=8.5, color=MUTED)
             else:
-                lay.section(say("Messages"))
-                lay.callout(say("This chat has {n} messages, exceeding the PDF transcript limit of {limit}. "
-                                "Every message remains in chat.json and the HTML viewer.",
-                                n=meta.get("message_count") or 0, limit=limit), WARN)
+                self.lay.text(say("In private chats and basic groups the numbers are shared by all of the account's chats, so "
+                             "gaps say nothing about this chat."), size=9)
 
-        def render_integrity():
-            lay.section(say("Integrity"), say("chat.json is authoritative. The manifest lists the SHA-256 of every file and is "
-                                              "signed with Ed25519; this page carries its own signed seal."))
-            lay.kv([(say("Signing key fingerprint (SHA-256)"), Mono(report.grouped(fp))),
-                    ("chat.json SHA-256", Mono(context.get("chat_json_sha256") or "")),
-                    (say("Independent timestamps"), say("None: a chat export is not timestamped.")),
-                    (say("Independent witness"), say("None: a chat export is not witnessed.")),
-                    (say("Messages"), meta.get("message_count")), (say("Hash algorithm"), "SHA-256 (FIPS 180-4)"),
-                    (say("Signature algorithm"), "Ed25519 (RFC 8032)"), (say("Public key"), Mono(context.get("public_key") or ""))])
+    def render_admin_log(self):
+        say = self.say
+        if self.context.get("admin_events") is not None:
+            summary = self.meta.get("admin_log") or {}
+            self.lay.section(say("Admin log"), say(
+                "Telegram keeps a chat's admin log for about 48 hours and shows it to its admins. It names the account "
+                "that deleted or edited a message, with the content: the one record of a deletion that says who did it."))
+            self.lay.kv([(say("Read at"), report.utc_text(summary.get("read_at"))), (say("Events"), summary.get("events")),
+                    (say("Not answered by Telegram"), summary.get("error_type") or "")])
+            self.lay.grid([say("Time"), say("Account"), say("Action"), say("Message"), say("Content")],
+                     [list(row) for row in report.admin_rows(say, self.context["admin_events"], 300)], (17, 13, 16, 8, 46))
 
-        def render_custody():
-            lay.section(say("Chain of custody"), say("How this material was acquired, preserved and handed over. "
-                                                     "custody.json carries the same record for case-management systems."))
-            read = report.reading(meta)
-            for step, detail in ((say("History read through the Telegram API"),
-                                  report.utc_text(read["read_started_at"]) + " — " + report.utc_text(read["read_finished_at"])
-                                  if read["read_started_at"] else say("Time of reading not recorded in this export")),
-                                 (say("Period of the messages"), report.utc_text(stats["first_at"]) + " — "
-                                  + report.utc_text(stats["last_at"])),
-                                 (say("Messages written to chat.json and hashed"), say("Messages: {n}", n=meta.get("message_count"))),
-                                 (say("Archive signed and report sealed"), report.utc_text(context["created_at"]) + " · "
-                                  + (options.get("examiner") or ""))):
-                lay.text(step, size=9, style="B")
-                lay.text(detail, size=8.5, color=MUTED)
-                lay.gap(0.8)
-            lay.kv([(say("Acquisition tool"), "TgWitness " + str(context["producer"].get("version"))),
-                    (say("Program build"), Mono(report.build_text(say, context["producer"]))),
-                    (say("Acquisition method"), say("Full visible history read through the Telegram API; a current snapshot, "
-                                                    "not a reconstruction of deleted or earlier edited messages.")),
-                    (say("Telegram client"), report.client_text(say, meta["client"]) if isinstance(meta.get("client"), dict)
-                     else say("Not recorded in this export")),
-                    (say("Connection route"), report.route_text(say, meta["route"]) if isinstance(meta.get("route"), dict)
-                     else say("Not recorded in this export")),
-                    (say("Collector clock against Telegram"), clocks_lines(say, read["clock_checks"], "Not recorded in this export")),
-                    (say("Time standard"), "UTC · ISO 8601")])
-            transfers(lay, say)
+    def render_indicators(self):
+        say = self.say
+        if self.options.get("show_indicators", True) and (self.context.get("indicators") or {}).get("items"):
+            indicators_section(self.lay, say, self.context["indicators"])
 
-        def render_verify():
-            lay.section(say("Verify"), say("Get the signer's key fingerprint from a trusted channel, not from this archive."))
-            lay.command("python verify.py tgwitness-chat-export.zip --fingerprint " + fp)
+    def render_journal(self):
+        say = self.say
+        limit = self.options.get("part_size") or report.ReportOptions().part_size
+        if self.parts:
+            self.lay.section(say("Messages"), say("{n} messages in {m} parts, oldest first. Each part is a page of its own "
+                                             "with its own seal; manifest.json lists its SHA-256.",
+                                             n=self.meta.get("message_count"), m=len(self.parts)))
+            self.lay.grid([say("Part"), say("Message numbers"), say("Count"), say("Period"), "SHA-256"],
+                     [[say("Part {n} of {m}", n=p["index"], m=len(self.parts)) + "\n" + p["file"], "#" + str(p["from"]) + " – #"
+                       + str(p["to"]), p["count"], report.utc_text(p["first_at"]) + " — " + report.utc_text(p["last_at"]),
+                       Mono(p.get("sha256") or "")] for p in self.parts], (22, 16, 8, 26, 28))
+        elif self.messages is not None and (self.meta.get("message_count") or 0) <= limit:
+            self.lay.section(say("Messages"), say("The visible history at export time, oldest first."))
+            if self.stats.get("edited"):
+                self.lay.callout(say("An edited message shows when it was last edited. A history snapshot holds only the "
+                                "current text; earlier versions exist only where the observation journal recorded them."),
+                            MUTED)
+            transcript(self.lay, say, self.messages, bool(self.ids.get("numbered_per_chat") and not self.ids.get("selection_applied")))
+        else:
+            self.lay.section(say("Messages"))
+            self.lay.callout(say("This chat has {n} messages, exceeding the PDF transcript limit of {limit}. "
+                            "Every message remains in chat.json and the HTML viewer.",
+                            n=self.meta.get("message_count") or 0, limit=limit), WARN)
 
-        def render_files():
-            files = context.get("files") or {}
-            if files:
-                lay.section(say("Files in this archive"), say("manifest.json lists the SHA-256 of every file and is signed in "
-                                                              "manifest.sig."))
-                lay.grid([say("File"), say("Purpose"), "SHA-256"],
-                         [[Mono(n), report.file_purpose(say, n), Mono(files[n])] for n in sorted(files)[:300]], (26, 30, 44))
+    def render_integrity(self):
+        say = self.say
+        self.lay.section(say("Integrity"), say("chat.json is authoritative. The manifest lists the SHA-256 of every file and is "
+                                          "signed with Ed25519; this page carries its own signed seal."))
+        self.lay.kv([(say("Signing key fingerprint (SHA-256)"), Mono(report.grouped(self.fp))),
+                ("chat.json SHA-256", Mono(self.context.get("chat_json_sha256") or "")),
+                (say("Independent timestamps"), say("None: a chat export is not timestamped.")),
+                (say("Independent witness"), say("None: a chat export is not witnessed.")),
+                (say("Messages"), self.meta.get("message_count")), (say("Hash algorithm"), "SHA-256 (FIPS 180-4)"),
+                (say("Signature algorithm"), "Ed25519 (RFC 8032)"), (say("Public key"), Mono(self.context.get("public_key") or ""))])
 
-        def render_limitations():
-            lay.section(say("Limitations"), say("Read these before relying on the material."))
-            lay.bullets([say(x) for x in context.get("limits") or []])
+    def render_custody(self):
+        say = self.say
+        self.lay.section(say("Chain of custody"), say("How this material was acquired, preserved and handed over. "
+                                                 "custody.json carries the same record for case-management systems."))
+        read = report.reading(self.meta)
+        for step, detail in ((say("History read through the Telegram API"),
+                              report.utc_text(read["read_started_at"]) + " — " + report.utc_text(read["read_finished_at"])
+                              if read["read_started_at"] else say("Time of reading not recorded in this export")),
+                             (say("Period of the messages"), report.utc_text(self.stats["first_at"]) + " — "
+                              + report.utc_text(self.stats["last_at"])),
+                             (say("Messages written to chat.json and hashed"), say("Messages: {n}", n=self.meta.get("message_count"))),
+                             (say("Archive signed and report sealed"), report.utc_text(self.context["created_at"]) + " · "
+                              + (self.options.get("examiner") or ""))):
+            self.lay.text(step, size=9, style="B")
+            self.lay.text(detail, size=8.5, color=MUTED)
+            self.lay.gap(0.8)
+        self.lay.kv([(say("Acquisition tool"), "TgWitness " + str(self.context["producer"].get("version"))),
+                (say("Program build"), Mono(report.build_text(say, self.context["producer"]))),
+                (say("Acquisition method"), say("Full visible history read through the Telegram API; a current snapshot, "
+                                                "not a reconstruction of deleted or earlier edited messages.")),
+                (say("Telegram client"), report.client_text(say, self.meta["client"]) if isinstance(self.meta.get("client"), dict)
+                 else say("Not recorded in this export")),
+                (say("Connection route"), report.route_text(say, self.meta["route"]) if isinstance(self.meta.get("route"), dict)
+                 else say("Not recorded in this export")),
+                (say("Collector clock against Telegram"), clocks_lines(say, read["clock_checks"], "Not recorded in this export")),
+                (say("Time standard"), "UTC · ISO 8601")])
+        transfers(self.lay, say)
 
-        callbacks = {
-            "brief": render_brief,
-            "analytics": render_analytics,
-            "assessment": render_assessment,
-            "case": render_case,
-            "source": render_source,
-            "participants": render_participants,
-            "message_numbers": render_message_numbers,
-            "admin_log": render_admin_log,
-            "indicators": render_indicators,
-            "journal": render_journal,
-            "integrity": render_integrity,
-            "custody": render_custody,
-            "verify": render_verify,
-            "files": render_files,
-            "limitations": render_limitations,
-        }
-        default_order = ['brief', 'analytics', 'assessment', 'case', 'source', 'participants', 'message_numbers', 'admin_log', 'indicators', 'journal', 'integrity', 'custody', 'verify', 'files', 'limitations']
-        visible = {
-            "analytics": bool(context.get("analytics") and report.snapshot_analytics.selected(options)),
-            "source": bool(report.source_rows(say, meta, stats)), "message_numbers": bool(ids),
-            "admin_log": context.get("admin_events") is not None,
-            "indicators": bool(options.get("show_indicators", True) and (context.get("indicators") or {}).get("items")),
-            "files": bool(context.get("files")),
-        }
-        report_composition_pdf.render(lay, callbacks, default_order, 'chat', visible)
-        declaration(lay, say, case)
-        lay.qr(paper_lines(report_id, fp, "chat.json", context.get("chat_json_sha256")))
-        if certificate is not None:
-            signatures_section(lay, say, certificate, fp, "chat.pdf")
-        return add_signature_field(pdf, say)
-    finally:
-        logging.getLogger("fpdf").removeHandler(found)
+    def render_verify(self):
+        say = self.say
+        self.lay.section(say("Verify"), say("Get the signer's key fingerprint from a trusted channel, not from this archive."))
+        self.lay.command("python verify.py tgwitness-chat-export.zip --fingerprint " + self.fp)
+
+    def render_files(self):
+        say = self.say
+        files = self.context.get("files") or {}
+        if files:
+            self.lay.section(say("Files in this archive"), say("manifest.json lists the SHA-256 of every file and is signed in "
+                                                          "manifest.sig."))
+            self.lay.grid([say("File"), say("Purpose"), "SHA-256"],
+                     [[Mono(n), report.file_purpose(say, n), Mono(files[n])] for n in sorted(files)[:300]], (26, 30, 44))
+
+    def render_limitations(self):
+        say = self.say
+        self.lay.section(say("Limitations"), say("Read these before relying on the material."))
+        self.lay.bullets([say(x) for x in self.context.get("limits") or []])
+
+
+def chat_pdf(meta, context, messages=None, certificate=None):
+    return ChatPDF(render_data.detached(meta), render_data.context(context),
+                      render_data.records(messages), certificate).render()
 
 
 def clocks_lines(say, clocks, empty):

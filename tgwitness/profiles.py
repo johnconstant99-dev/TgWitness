@@ -164,7 +164,7 @@ class Profiles:
             with self.app.state.store.transaction():
                 items = self.app.state.store.get_setting("profiles", [])
                 self.app.state.store.set_setting("profiles", [*items, entry])
-                self.app.state.store.append("profile.created", entry)
+                self.app.state.store.append("profile.created", {k: v for k, v in entry.items() if k != "label"})
             if group is not None:
                 from .group_settings import adopt_all
                 await adopt_all(self, entry["id"], self._group(group))

@@ -317,13 +317,9 @@ python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\A
 python -m pip install -c deploy/constraints.txt -e ".[dev]"
 python -m ruff check .                                 # source checks
 python -m playwright install chromium
-python tools/check_browser.py                          # end-to-end UI acceptance
-python tools/check_account_browser.py                  # sign-in flows
-python tools/capture_screenshots.py --docs             # refresh README images
 python tools/build_portable.py                         # Windows portable ZIP (Windows + Python 3.12)
 python tools/build_source.py                          # source ZIP with SHA-256 manifest
 python tools/build_site.py                             # static project site in dist/site
-python tools/check_site.py                             # website browser acceptance
 ```
 
 As verificações do navegador usam dados sintéticos. Os processos atuais de compilação e publicação estão definidos em `.github/workflows/`. Leia [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) antes de abrir um pull request.

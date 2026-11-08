@@ -43,7 +43,7 @@ python website/render_directory_headers.py --font /path/to/Manrope.ttf
 
 `render_identity.py` reads the version and language counts from source.
 After a version change, use `--metadata-only` to refresh its badges, update the
-README alt text and `docs/STATUS.md`, then run `python tools/check_publication.py`.
+README alt text and `docs/STATUS.md`, then run `python tools/publication_guard.py`.
 
 Directory covers use layered illustrations: reference pages, capture frames,
 linked components, server racks and project artwork. The main cover connects

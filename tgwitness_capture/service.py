@@ -9,12 +9,12 @@ from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
-from pydantic import BaseModel, ConfigDict, StrictBool
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator
 
 from . import __version__
 from .adapters import BrowserCapture, sqlite_snapshot
 from .export import export_zip
-from .format import canonical, decode, digest
+from .format import HEX, canonical, decode, digest
 from .journal import Journal, durable_write
 from .official import OfficialBrowser, OfficialOptions
 from .video import VideoCapture
@@ -88,6 +88,23 @@ class SettingsPatch(BaseModel):
 class TargetChoice(BaseModel):
     model_config = ConfigDict(extra="forbid")
     target_id: str
+
+
+class OpenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    url: str = Field(min_length=8, max_length=2048)
+    wait_seconds: float = Field(default=5, ge=0, le=30)
+    keep_open: StrictBool = False
+    purpose: str = Field(default="", max_length=500)
+
+    @field_validator("url")
+    @classmethod
+    def web_address(cls, value):
+        parts = urlsplit(value)
+        if (parts.scheme not in {"http", "https"} or not parts.hostname or parts.username is not None
+                or parts.password is not None or any(c.isspace() or ord(c) < 32 for c in value)):
+            raise ValueError("Use an http(s) address without credentials or spaces")
+        return value
 
 
 class Recorder:
@@ -228,6 +245,25 @@ class Recorder:
             self.journal.append("capture.failed", {"capture_id": attempt, "error": self.last_error,
                                 "coverage": "attempt did not produce a complete capture"})
             raise
+
+    async def open(self, request):
+        if self.config.kind != "browser" or self.official:
+            raise ValueError("Only the browser recorder opens addresses")
+        attempt = uuid.uuid4().hex
+        self.journal.append("capture.open_requested", {"capture_id": attempt, "url": request.url[:8192],
+                            "purpose": request.purpose, "operator_label": self.config.operator})
+        try:
+            metadata, artifacts, observed = await asyncio.wait_for(
+                self.browser.open(self.journal, request.url, request.wait_seconds, request.keep_open), timeout=90)
+        except Exception as exc:
+            self.last_error = type(exc).__name__
+            self.journal.append("capture.failed", {"capture_id": attempt, "error": self.last_error,
+                                "coverage": "the requested address was not captured"})
+            raise
+        event = self.journal.append("capture.opened", {**metadata, "capture_id": attempt, "purpose": request.purpose},
+                                    artifacts, observed)
+        self.last_success, self.last_error = event["recorded_at"], None
+        return event
 
     async def tick(self):
         async with self.lock:
@@ -396,6 +432,27 @@ def create_app(root, config=None):
             except Exception:
                 raise HTTPException(503, "Capture failed; the journal records the failed attempt") from None
             return {"event": event, "status": recorder.status()}
+
+    @app.post("/api/open")
+    async def open_address(request: OpenRequest):
+        recorder = app.state.recorder
+        async with recorder.lock:
+            try:
+                event = await recorder.open(request)
+            except ValueError as exc:
+                raise HTTPException(400, str(exc)) from None
+            except Exception:
+                raise HTTPException(503, "The address could not be captured; the journal records the attempt") from None
+            return {"event": event, "status": recorder.status()}
+
+    @app.get("/api/object/{sha256}")
+    async def stored_object(sha256: str):
+        if not HEX.fullmatch(sha256):
+            raise HTTPException(400, "Use a SHA-256 object name")
+        path = app.state.recorder.journal.objects / sha256
+        if not path.is_file():
+            raise HTTPException(404, "Object not found")
+        return FileResponse(path, media_type="application/octet-stream")
 
     @app.get("/api/events")
     async def events():

@@ -149,7 +149,10 @@ class Connections:
             raise Refused("Invalid archive credential.")
         digest, now = hashlib.sha256(token.encode()).hexdigest(), time.time()
         with self.lock:
-            entry = next((e for e in self.entries if secrets.compare_digest(e["sha256"], digest)), None)
+            entry = None
+            for candidate in self.entries:
+                if secrets.compare_digest(candidate["sha256"], digest):
+                    entry = candidate
             if not entry or entry["revoked_at"] or entry["expires_at"] <= now:
                 raise Refused("Archive access has expired or been revoked.")
             tools = entry.get("tools", LEGACY_TOOLS)

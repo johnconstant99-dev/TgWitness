@@ -1,10 +1,10 @@
 name: Optional independent capture
 on:
   pull_request:
-    paths: ["addons/capture/**", "tgwitness_capture/**", "tgwitness/capture_*.py", "tgwitness/static/independent-capture.*", ".github/workflows/optional-capture.yml", "tools/check_trusted_container.py", "deploy/browser.lock", "deploy/compose/compose.capture-panel.yaml", "pyproject.toml"]
+    paths: ["addons/capture/**", "tgwitness_capture/**", "tgwitness/capture_*.py", "tgwitness/static/independent-capture.*", ".github/workflows/optional-capture.yml", "deploy/browser.lock", "deploy/compose/compose.capture-panel.yaml", "pyproject.toml"]
   push:
     branches: [main]
-    paths: ["addons/capture/**", "tgwitness_capture/**", "tgwitness/capture_*.py", "tgwitness/static/independent-capture.*", ".github/workflows/optional-capture.yml", "tools/check_trusted_container.py", "deploy/browser.lock", "deploy/compose/compose.capture-panel.yaml", "pyproject.toml"]
+    paths: ["addons/capture/**", "tgwitness_capture/**", "tgwitness/capture_*.py", "tgwitness/static/independent-capture.*", ".github/workflows/optional-capture.yml", "deploy/browser.lock", "deploy/compose/compose.capture-panel.yaml", "pyproject.toml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   official-container:
-    name: Official client container and video
+    name: Official client image build and audit
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -23,16 +23,8 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
-      - run: python -m pip install --require-hashes -r deploy/browser.lock
-      - name: Permit Chromium user namespaces on the temporary hosted runner
-        run: |
-          if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
-            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-          fi
       - run: docker compose --project-directory . -f addons/capture/compose.official.yaml --profile official config --quiet
       - run: docker build -f addons/capture/deploy/Dockerfile.official -t tgwitness-official-check .
-      - run: python tools/check_official_container.py
-      - run: python tools/check_official_container.py --direct
       - name: Audit the official-client image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -56,7 +48,7 @@ jobs:
           path: official-image-audit.json
           retention-days: 7
   capture:
-    name: Independent capture and Trusted Live
+    name: Capture image builds and installed recorder smoke
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -66,32 +58,7 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
-      - run: python -m pip install --require-hashes -r deploy/browser.lock
-      - name: Install browser and video dependencies
-        timeout-minutes: 10
-        run: |
-          # Avoid the Azure mirror that exhausted the job while downloading FFmpeg.
-          sudo python3 - <<'PY'
-          from pathlib import Path
-          for path in [Path('/etc/apt/sources.list'), *Path('/etc/apt').glob('*mirrors*.txt'),
-                       *Path('/etc/apt/sources.list.d').glob('*.sources'), *Path('/etc/apt/sources.list.d').glob('*.list')]:
-              if path.exists():
-                  text = path.read_text()
-                  for scheme in ('http', 'https'):
-                      text = text.replace(scheme + '://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
-                  path.write_text(text)
-          Path('/etc/apt/apt.conf.d/80-tgwitness-ci').write_text('Acquire::Retries "2";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n')
-          PY
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ffmpeg
-          python -m playwright install --with-deps chromium
-      - name: Permit Chromium user namespaces on the temporary hosted runner
-        run: |
-          if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
-            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-          fi
       - run: python addons/capture/lock_from_project.py && git diff --exit-code -- addons/capture/requirements.lock
-      - run: python -m pytest addons/capture/tests -q --capture-browser
       - run: docker compose --project-directory . -f addons/capture/compose.yaml --profile capture-browser --profile capture-ayugram config --quiet
       - run: docker compose --project-directory . -f compose.yaml -f addons/capture/compose.yaml -f deploy/compose/compose.capture-panel.yaml --profile capture-browser --profile capture-ayugram config --quiet
       - run: docker compose --project-directory . -f addons/capture/compose.yaml --profile capture-browser build browser-recorder browser-gateway
@@ -99,11 +66,9 @@ jobs:
         run: |
           recorder_image=$(docker compose --project-directory . -f addons/capture/compose.yaml --profile capture-browser images -q browser-recorder)
           if [ -z "$recorder_image" ]; then recorder_image=tgwitness-capture-browser-recorder; fi
-          docker run --rm --entrypoint python "$recorder_image" -c 'import tgwitness_capture; from pathlib import Path; from tgwitness_capture.service import Config, Recorder; import tempfile; r=Recorder(Path(tempfile.mkdtemp()), Config()); assert not r.settings["enabled"]; assert "lang=\"en\"" in (Path(tgwitness_capture.__file__).parent/"static/index.html").read_text(); r.journal.close()'
+          docker run --rm --network none --read-only --cap-drop=ALL --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777 --entrypoint python "$recorder_image" -c 'import tgwitness_capture; from pathlib import Path; from tgwitness_capture.service import Config, Recorder; import tempfile; r=Recorder(Path(tempfile.mkdtemp()), Config()); assert not r.settings["enabled"]; assert "lang=\"en\"" in (Path(tgwitness_capture.__file__).parent/"static/index.html").read_text(); r.journal.close()'
       - name: Build pinned official-client Trusted Live image
         run: docker build -f addons/capture/deploy/Dockerfile.trusted -t tgwitness-trusted-ci .
-      - name: Exercise official client, video and fail-closed namespace without an account
-        run: python tools/check_trusted_container.py --image tgwitness-trusted-ci
       - name: Audit the Desktop and Web image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -115,7 +80,7 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: false
           format: json
-          output: test-results/trusted-container/image-audit.json
+          output: build/trusted-container-audit/image-audit.json
           exit-code: '1'
           timeout: 15m
           cache: false
@@ -123,6 +88,6 @@ jobs:
         if: always()
         with:
           name: trusted-live-container
-          path: test-results/trusted-container/
+          path: build/trusted-container-audit/
           if-no-files-found: warn
           retention-days: 7

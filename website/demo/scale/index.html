@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>TgWitness · Collection at scale</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="scale.css">
+  <script src="run-data.js" defer></script>
+  <script src="scale.js" defer></script>
+</head>
+<body>
+<div class="shell">
+  <header><a class="brand" href="#main"><span class="brand-mark" aria-hidden="true">T</span> TgWitness <span class="brand-detail">/ FIELD TEST</span></a><div class="header-actions"><span class="private">Private preview</span><button id="theme" aria-label="Switch color theme">◐</button></div></header>
+  <main id="main">
+    <section class="intro"><div class="eyebrow"><span class="dot"></span><span id="run-state">Awaiting measurement</span><span class="rule"></span><span>01 / COLLECTION</span></div><h1>Collection speed.<br><em>Signed records.</em></h1><p>Inspect throughput, worker progress and linked receipts.<br>Replay the recorded measurements.</p></section>
+    <section class="campaign panel" id="campaign" hidden aria-label="Combined verified measurements"><div class="section-heading"><div><span class="eyebrow">TOTAL ACROSS COMPLETED RUNS</span><h2 id="campaign-messages">—</h2></div><span class="worker-summary" id="campaign-detail"></span></div><div class="campaign-table"><table><caption>Each run keeps its own duration and throughput.</caption><thead><tr><th scope="col">Run</th><th scope="col">Messages</th><th scope="col">Elapsed</th><th scope="col">Messages / second</th></tr></thead><tbody id="campaign-runs"></tbody></table></div><p class="proof-note">The operator checked the private journals for overlap. These signatures bind that statement and the totals to the supplied keys.</p><p class="proof-note" id="campaign-verification" role="status">Combined totals not checked</p></section>
+    <section class="dashboard" aria-label="Collection measurements">
+      <div class="measurement panel"><div class="panel-top"><span>MESSAGES CAPTURED</span><span id="source-scope">PUBLIC BROADCASTS</span></div><div class="counter" id="messages">—</div><div class="counter-caption">Distinct message keys within this run<span id="duplicates">Duplicates: —</span></div><div class="metrics"><div><span>Average · elapsed</span><strong id="rate">—</strong><small>messages / second</small></div><div><span>Elapsed time</span><strong id="elapsed">—</strong><small>includes waits and verification</small></div><div><span>Signed journal events</span><strong id="events">—</strong><small>messages + observation records</small></div></div><div class="chart-head"><span>OBSERVED THROUGHPUT</span><span id="chart-label">Actual sample intervals</span></div><svg id="chart" viewBox="0 0 700 130" preserveAspectRatio="none" role="img" aria-label="Messages captured per second over recorded intervals"><path class="grid" d="M0 20H700M0 65H700M0 110H700"/><path id="chart-area"/><path id="chart-line"/><path id="chart-cursor"/></svg><div class="chart-foot"><span>START</span><span id="sample-time">No receipt loaded</span><span>LATEST</span></div>
+        <div class="replay-panel">
+          <div class="replay-heading"><span id="replay-state">Recorded timeline · paused</span><strong id="interval-rate">No preceding interval</strong></div>
+          <label class="timeline-label" for="timeline"><span>Inspect a signed sample</span><output id="timeline-position" for="timeline">—</output></label>
+          <input id="timeline" type="range" min="0" max="0" step="1" value="0" disabled>
+          <div class="replay-controls"><button id="replay" disabled>Replay run</button><label for="playback-speed">Playback <select id="playback-speed" disabled><option value="10">10×</option><option value="60" selected>60×</option><option value="120">120×</option></select></label><button id="latest" disabled>Latest sample</button></div>
+          <p class="proof-note">Recorded samples, without interpolated counts. Rates use the original elapsed time. Replay does not collect new messages.</p>
+        </div>
+      </div>
+      <aside class="integrity panel"><div class="panel-top"><span>02 / CONTINUITY</span><span class="seal" aria-hidden="true">◇</span></div><h2>Receipt chain</h2><p>Each public receipt links to the previous one and to the private journals’ checkpoints.</p><div class="chain-visual" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i><b></b><i class="last"></i></div><div class="hash-label" id="hash-label">SELECTED RECEIPT · SHA-256</div><code id="head">Awaiting signed receipt</code><button class="copy" id="copy" disabled>Copy full hash <span aria-hidden="true">↗</span></button><details class="previous-receipt"><summary>Link to the previous receipt</summary><code id="previous-head">—</code><button class="copy" id="copy-previous" disabled>Copy previous hash ↗</button><p class="proof-note">The selected receipt signs this previous hash. The first receipt starts with 64 zeros.</p></details><div class="verification"><span class="status-light" id="verify-light"></span><span id="verify-state" role="status">Not checked</span></div><button class="verify-button" id="verify" disabled>Verify receipt chain</button><div class="proof-note">Verifies the public chain and its signatures. The key is supplied with this operator’s measurement; this is not an independent audit.</div></aside>
+    </section>
+    <section class="workers panel"><div class="section-heading"><div><span class="eyebrow">03 / WORKERS</span><h2>Progress by worker</h2></div><span class="worker-summary" id="worker-summary">Awaiting qualification</span></div><div id="workers" class="worker-grid"></div><div class="worker-legend"><span><i class="collecting"></i>Collecting</span><span><i class="exporting"></i>Export / verification</span><span><i class="complete"></i>Verified archive</span><span><i class="partial"></i>Verified · partial range</span><span><i class="failed"></i>Stopped / needs review</span></div></section>
+    <section class="excerpts panel" id="excerpts" hidden><div class="section-heading"><div><span class="eyebrow">04 / SELECTED MESSAGES</span><h2>Selected message excerpts</h2></div><span class="worker-summary">Fixed samples · independent of replay</span></div><div class="excerpt-grid" id="excerpt-grid"></div><p class="excerpt-note">Reviewed openings from public posts, shortened to six words; authors and IDs omitted. These samples are signed separately; full messages remain private.</p></section>
+    <section class="details"><article><span class="eyebrow">WHAT IS COUNTED</span><h3>Captured message counts</h3><p id="scope">Counts come from received records assigned to disjoint source ranges. Retries and duplicate keys do not increase the message count. Events are shown separately.</p></article><article><span class="eyebrow">WHAT STAYS PRIVATE</span><h3>Private source archives</h3><p>Full message bodies, authors, source IDs, account identifiers and original archives remain on the private test host. Only reviewed short excerpts, aggregate measurements and signed checkpoints are shown here.</p></article><article><span class="eyebrow">WHAT THIS ESTABLISHES</span><h3>Signature verification</h3><p>Signatures bind receipts to the supplied key. They do not certify message origin, completeness or legal admissibility. Collection uses text and metadata; attachment bytes are excluded.</p></article></section>
+    <section class="receipt-bar"><div><span class="eyebrow">RECHECK THE NUMBERS</span><p id="receipt-summary">The signed receipt will be available when a run starts.</p></div><button id="download" disabled>Download public receipts <span aria-hidden="true">↓</span></button></section>
+    <p class="error" id="error" role="alert" hidden></p>
+  </main><footer><span>TgWitness / Collection at scale</span><span>Recorded runs · Text and metadata</span></footer>
+</div>
+</body>
+</html>

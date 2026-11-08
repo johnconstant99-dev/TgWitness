@@ -78,6 +78,38 @@ are real actions by the selected account and they're journaled with their result
 If an outcome is unknown, check before retrying. Button presses in another Telegram app
 aren't visible to the collector. Payments, phone/location and web apps aren't supported.
 
+## Document as you go
+
+The **Documentation** button opens a drawer that writes the steps for you: what the account
+did, what came back and how many seconds later, by the collector's clock and by Telegram's
+server time. Messages sent from another app appear too. Press **M** to add a note; label it
+as important, a conclusion, an open question, 18+, obscene language, violence or personal
+data, and optionally tie it to a step. The last four labels hide that step's content in the
+document; the signed journal keeps the record and the document cites it.
+
+A draft can be paused, started over, edited or deleted completely; nothing is signed yet.
+**Fix document** signs the whole document with a list of every step, note and conclusion
+and records its digest in the journal. After that only a new revision can change it, and a
+copy missing a listed item is detectable. Open it as a page or download Markdown or JSON.
+
+Hidden steps are not cut out. When you fix the document, each hidden journal record is
+encrypted (AES-256-GCM) inside the signed statement, with one key per reason and a master
+key. A board manager can release all keys or only chosen reasons, for example 18+ but not
+personal data; every release is recorded in the journal. Hand keys over separately from the
+document. A recipient checks the copy and opens what their keys allow:
+
+```sh
+python -m tgwitness.documentation_verify documentation.json --fingerprint WORKSPACE_FP \
+  --keys documentation-keys.json --reveal opened-records.json
+```
+
+Each opened record must match the journal hash listed in the signed document.
+
+**Open in isolation** sends an address, or a Telegram `@username` for Telegram Web, to the
+[browser recorder](../OPTIONAL-CAPTURE.md). The screenshot, final address, HTTP status,
+server address and certificate issuer become a step. A caption with the requested
+username or ID comes from this workspace's records and is shown outside the picture.
+
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
 ## Work with the saved archive

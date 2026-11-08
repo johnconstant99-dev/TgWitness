@@ -21,6 +21,7 @@ from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_ope
 
 from . import netclient
 from .network import NetworkConfig
+from .panelctl import listening_pid
 from .security import owner_only, private_write
 
 
@@ -289,16 +290,20 @@ class PortableRoutes:
             await run_helper(executable, ["-n", "-c", str(path.resolve())], self.root, timeout=10)
             worker = Path(__file__).with_name("route_worker.py").resolve()
             process = await asyncio.create_subprocess_exec(sys.executable, str(worker), str(executable),
-                "-s", "-c", str(path.resolve()), stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,
+                "-s", "-c", str(path.resolve()), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL, creationflags=CREATE_FLAGS)
             self.processes[identifier] = process
             self.configs[identifier] = saved
+            tunnel = int((await asyncio.wait_for(process.stdout.readline(), 10)).strip() or 0)
             for _ in range(50):
                 if process.returncode is not None:
                     break
                 try:
                     reader, writer = await asyncio.wait_for(asyncio.open_connection("127.0.0.1", route.port), 1)
                     try:
+                        if await asyncio.to_thread(listening_pid, route.port) != tunnel:
+                            raise ValueError("Another program holds the local tunnel port, so the route was not started. "
+                                             "Restart the route to choose it again.")
                         writer.write(b"\x05\x01\x02")
                         await writer.drain()
                         if await asyncio.wait_for(reader.readexactly(2), 1) != b"\x05\x02":

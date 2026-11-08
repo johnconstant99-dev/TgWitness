@@ -18,9 +18,9 @@ Separate components for capture workflows beyond the main Telegram collector.
 | Trusted Live | [Desktop and Web session procedure](../docs/TRUSTED-LIVE.md) |
 
 The package source is in [`tgwitness_capture/`](../tgwitness_capture/README.md).
-Its [configuration examples](capture/config/README.md),
-[container definitions](capture/deploy/README.md) and
-[tests](capture/tests/README.md) live beside the add-on packaging.
+Its [configuration examples](capture/config/README.md) and
+[container definitions](capture/deploy/README.md) live beside the add-on packaging.
+Capture regressions are maintained in the private validation workspace.
 
 Start with the procedure for the mode you need: its client, recording policy and
 verification inputs determine the setup.

@@ -63,20 +63,13 @@ HTTPS CONNECT проверяет сертификат прокси до пере
 каждого. Это приблизительная оценка: она не предсказывает ограничения Telegram,
 скорость конкретного сервера и распределение файлов во всех чатах.
 
-Проверки с синтетическими Telegram-клиентами:
+Проверка зафиксированных зависимостей:
 
 ```powershell
-python tools/test_settings_hub.py
-python tools/check_guided_connection.py
-python tools/check_guided_connection_browser.py
-python tools/check_time_browser.py
-python tools/check_sources_browser.py
-python tools/check_account_export_recovery.py
-python tools/check_operator_security.py
 python tools/lock_requirements.py --check
 ```
 
-Новый набор тестов входит в браузерный CI. Он проверяет мастер, QR, повторный запуск,
+Приватные тесты с синтетическими Telegram-клиентами проверяют мастер, QR, повторный запуск,
 сохранение языка и сессии, уровни, поиск, встроенные формы, права доступа, зависимости,
 устаревшие проверки маршрута, ограничения файлов и TLS к локальному тестовому прокси.
 Тесты не регистрируют WARP и не отправляют сообщения настоящим пользователям Telegram.

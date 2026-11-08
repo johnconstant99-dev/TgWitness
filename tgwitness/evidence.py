@@ -300,7 +300,7 @@ def export_file(store, vault, fmt, options=None, *, include_board=True, compact=
                         name = "hashes/" + hashlib.sha256(data).hexdigest() + ".json"
                         if name not in hashes:
                             write_member(name, [data])
-                    digest = event["payload"].get("media_sha256") if event["kind"] in ("media.saved", "actor.avatar_saved") else None
+                    digest = event["payload"].get("media_sha256") if event["kind"] in ("media.saved", "actor.avatar_saved", "secret_chat.file") else None
                     if not digest:
                         continue
                     if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
@@ -440,18 +440,32 @@ def report_entry(context, options, file="report.html"):
     return entry
 
 
-def encrypt_export(path, fmt, password, inner_name=None):
+def encrypt_export(path, fmt, password, inner_name=None, mode="zip"):
+    if mode == "tgwpw":
+        from .verifier.password import encrypt_password_file
+
+        try:
+            return encrypt_password_file(path, path.with_name(path.name + ".tgwpw"), password,
+                                         inner_name or "tgwitness-evidence." + fmt)
+        finally:
+            path.unlink(missing_ok=True)
+    if mode != "zip":
+        raise ValueError("Unknown password-encryption format")
     import pyzipper
     out = path.with_name(path.name + ".zip")
+    created = False
     try:
-        with pyzipper.AESZipFile(out, "w", compression=pyzipper.ZIP_STORED if fmt == "zip" else pyzipper.ZIP_DEFLATED,
-                                 encryption=pyzipper.WZ_AES) as archive:
-            archive.setpassword(password.encode("utf-8"))
-            archive.setencryption(pyzipper.WZ_AES, nbits=256)
-            archive.write(path, inner_name or "tgwitness-evidence." + fmt)
+        with out.open("xb") as target:
+            created = True
+            with pyzipper.AESZipFile(target, "w", compression=pyzipper.ZIP_STORED if fmt == "zip" else pyzipper.ZIP_DEFLATED,
+                                     encryption=pyzipper.WZ_AES) as archive:
+                archive.setpassword(password.encode("utf-8"))
+                archive.setencryption(pyzipper.WZ_AES, nbits=256)
+                archive.write(path, inner_name or "tgwitness-evidence." + fmt)
         return out
     except BaseException:
-        out.unlink(missing_ok=True)
+        if created:
+            out.unlink(missing_ok=True)
         raise
     finally:
         path.unlink(missing_ok=True)
@@ -461,6 +475,8 @@ def cleanup_exports(root):
     directory = root / "temporary-exports"
     if directory.is_symlink() or not directory.is_dir() or directory.resolve().parent != root.resolve():
         return
-    for item in directory.glob("tgwitness-export-*"):
-        if item.is_file() and not item.is_symlink() and item.suffix in (".zip", ".jsonl", ".csv", ".html", ".json"):
+    for item in directory.iterdir():
+        if not item.name.startswith(("tgwitness-export-", "tgwitness-handover-")):
+            continue
+        if item.is_file() and not item.is_symlink() and item.suffix in (".zip", ".jsonl", ".csv", ".html", ".json", ".tgwpw"):
             item.unlink()

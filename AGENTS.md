@@ -68,6 +68,8 @@ and follow the [contribution guide](.github/CONTRIBUTING.md).
 
 ## Validation
 
+- Keep regression tests, fixtures and validation runners in the private validation workspace.
+- Preserve local checks when publishing; test files are excluded from Git and public source archives.
 - Choose checks for the changed behavior using the
   [validation map](docs/AGENT-GUIDE.md#validation).
   Respect host execution limits even when a command appears in a guide.
@@ -77,6 +79,7 @@ and follow the [contribution guide](.github/CONTRIBUTING.md).
 - Normal checks use synthetic accounts and fake Telegram transport.
   Live options and real credentials require a task that authorizes their use.
 - Review both Git changes and the public source allowlist before publication.
+  Use `python tools/publication_guard.py --git-index` to check the selected content and index.
   Recognized-secret scans do not replace reviewing the selected content.
 - State which checks ran, where they ran and what remains unverified.
   Passing fixtures do not establish live-service qualification.

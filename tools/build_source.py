@@ -18,7 +18,7 @@ CONTAINER_INPUTS = (
 FILES = [
     "AGENTS.md", "CLAUDE.md", "GEMINI.md", "llms.txt",
     "addons/README.md", "addons/capture/config/README.md",
-    "addons/capture/deploy/README.md", "addons/capture/tests/README.md",
+    "addons/capture/deploy/README.md",
     "examples/README.md", "integrations/README.md",
     "tgwitness_capture/README.md", "tgwitness_capture/static/README.md",
     "tgwitness/client_profiles.LICENSE",
@@ -30,8 +30,7 @@ FILES = [
     "deploy/installer/index.html", "deploy/installer/style.css", "deploy/installer/site.js", "deploy/installer/wrangler.toml",
     "deploy/media-worker/Dockerfile", "deploy/media-worker/worker.py",
     "deploy/media-worker/requirements.in", "deploy/media-worker/requirements.lock",
-    "integrations/webhook.schema.json", "integrations/n8n-tgwitness.json", "tools/check_webhook_example.cjs", "tools/check_privacy_js.cjs",
-    "tools/check_writeonly_drafts.mjs", "deploy/constraints-mcp.txt",
+    "integrations/webhook.schema.json", "integrations/n8n-tgwitness.json", "deploy/constraints-mcp.txt",
     "deploy/Dockerfile.sealed", "scripts/sealed_runner.py",
     "examples/export-hashes.json", "examples/sealed-hashes.json", "examples/sealed-account.json",
     "README.md", "docs/QUICKSTART.md", "LICENSE", "NOTICE", ".github/SECURITY.md", ".github/SUPPORT.md", ".github/CONTRIBUTING.md", "docs/CHANGELOG.md", "pyproject.toml",
@@ -39,8 +38,6 @@ FILES = [
     "deploy/Dockerfile", "compose.yaml", "deploy/compose/compose.image.yaml", "deploy/compose/compose.https.yaml", "deploy/compose/compose.witness.yaml", "deploy/compose/compose.proof.yaml", "deploy/compose/compose.proxies.yaml", "deploy/compose/compose.capture-panel.yaml",
     ".gitignore", ".gitattributes", ".dockerignore", "deploy/env.example", "deploy/constraints.txt", "deploy/requirements.lock", "deploy/build.lock",
     "deploy/audit.lock", "deploy/browser.lock", "deploy/mcp.lock", "deploy/site.lock", "deploy/installer.lock",
-    "tools/tsa/time-stamps.json", "tools/fixtures/evidence-before-fulltext.zip",
-    "tools/fixtures/narrative-events.json", "tools/fixtures/narrative-golden.json",
     "docs/examples/narrative.json",
     ".agents/skills/tgwitness-cli/SKILL.md",
     ".agents/README.md", ".agents/skills/README.md", ".agents/skills/tgwitness-cli/README.md",
@@ -75,11 +72,6 @@ EXPORT_CLINIC_ASSETS = (
       for version in ("before", "modified")),
 )
 FILES.extend("website/export-clinic/media/" + name for name in EXPORT_CLINIC_ASSETS)
-FILES.extend("tools/tdx/" + name for name in (
-    "intel-v4.quote.hex", "intel-v4.collateral.json", "intel-v5-td15ex.quote.hex", "intel-v5-td15ex.collateral.json",
-    "intel-outdated.collateral.json", "dstack-v4.json", "dstack-v4.collateral.json",
-    "phala-dstack-0.5.12.json", "phala-dstack-0.5.12.collateral.json",
-))
 FILES.extend("addons/capture/" + name for name in (
     "README.md", "pyproject.toml", "requirements.lock", "lock_from_project.py", "compose.yaml", "compose.official.yaml",
     "config/browser.example.json", "config/ayugram.example.json", "config/official.example.json", "config/official-upstream.example.json",
@@ -87,15 +79,12 @@ FILES.extend("addons/capture/" + name for name in (
     "deploy/Dockerfile.official", "deploy/official-start.sh", "deploy/official-seccomp.json",
     "deploy/official-seccomp.README.md", "deploy/PLAYWRIGHT-LICENSE.txt",
     "deploy/chromium.conf", "deploy/chromium-policy.json", "deploy/neko-start.sh", "deploy/upstream-proxy.example.conf",
-    "tests/conftest.py", "tests/test_capture.py", "tests/test_browser.py", "tests/test_video.py",
-    "tests/test_panel.py", "tests/test_witness.py", "tests/test_deployment.py", "tests/test_integration.py",
-    "tests/test_official.py", "tests/test_gateway.py", "tests/test_official_proof.py", "tests/test_beacon.py",
     "compose.trusted.yaml", "config/trusted.example.json", "deploy/Dockerfile.trusted",
     "deploy/trusted-entrypoint.py", "deploy/trusted-display.py",
-    "tests/test_trusted.py", "tests/test_trusted_anchors.py",
 ))
 DIRECTORIES = {
     "tgwitness_capture": {".py", ".html", ".css", ".js"},
+    "tgwitness_analyzer": {".py"},
     "tgwitness": {".md", ".py", ".html", ".css", ".js", ".svg", ".json"},
     "docs": {".md", ".png", ".webp", ".svg", ".txt", ".gif", ".mp4"}, "tools": {".py", ".md"},
     "deploy": {".md", ".ps1", ".service", ".example", ".docker"},
@@ -127,11 +116,18 @@ PRESENTATION_MEDIA = {
     "assets/presentation/message-history.mp4", "assets/presentation/message-history.gif",
 }
 PRIVATE_DIRECTORIES = {"data", "proof-data", "proof-config", "proxy-config", "witness-data", "__pycache__", ".venv", "venv", "test-results", ".pytest_cache", ".ruff_cache", "build", "dist"}
+PRIVATE_VALIDATION_TOOLS = {
+    "api_routes.py", "browser_fixtures.py", "browser_helpers.py", "capture_demo.py", "capture_screenshots.py",
+    "cloud_world.py", "minicheck.py", "prepare_media_test_model.py", "run_checks.py",
+}
 
 
 def is_public_file(path, directory):
     relative = path.relative_to(directory)
     parts = tuple(part.casefold() for part in relative.parts)
+    if directory.name == "tools" and (parts[0] in {"fixtures", "tdx", "tsa"} or parts[-1] in PRIVATE_VALIDATION_TOOLS
+                                      or parts[-1].startswith(("test_", "check_"))):
+        return False
     if any(part in PRIVATE_DIRECTORIES or part.startswith("tgwitness-backup") for part in parts[:-1]):
         return False
     if any(part == ".tmp" or part.startswith(".tmp-") for part in parts):

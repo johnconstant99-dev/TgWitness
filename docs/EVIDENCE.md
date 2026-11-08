@@ -124,13 +124,25 @@ earlier comparison results. Archive format and signature verification are unchan
    recipient in your custody record. Keep the original package intact and work
    from copies. Share evidence files rather than the application's private data
    directory, which also contains account sessions and signing secrets.
-   For transfer, an export can be put into a password-protected AES-256 ZIP. The
-   password only protects confidentiality and is not stored; the recipient extracts
+   For transfer, choose a password-protected AES-256 ZIP or the stronger `.tgwpw`
+   container. ZIP uses WinZip's low-cost password derivation; use a long random
+   passphrase. `.tgwpw` uses scrypt and AES-256-GCM and opens with the standalone
+   verifier's `unseal-password` command. The password is not stored and only protects
+   confidentiality; the recipient decrypts
    the archive and verifies the signed export inside, which is unchanged.
 6. If independent time anchoring is required, follow the
    [RFC 3161 procedure](TIMESTAMP.md) and retain the request, checkpoint, trusted
    CA information, and verified authority response. Preparing a request alone
    does not obtain a timestamp.
+
+For `.tgwpw`, use an independently obtained verifier and choose a new output file
+with the original extension: `python verify.py unseal-password export.tgwpw --out evidence.zip`.
+The command prompts for the password; `--password-stdin` reads one line for automation.
+It never overwrites an existing file and publishes plaintext only after all records
+authenticate. Run normal signature verification on the decrypted file afterwards.
+The container uses scrypt (`N=131072`, `r=8`, `p=1`, 16-byte salt; about 128 MiB RAM)
+and AES-256-GCM with 1 MiB records and an authenticated final record. An encrypted
+metadata record stores the inner filename, so downloaded containers can be renamed.
 
 Successful verification establishes integrity relative to the trusted collector
 key and retained boundary. See [verification scope](#verification-scope) for the

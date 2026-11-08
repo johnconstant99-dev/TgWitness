@@ -51,7 +51,7 @@ def main():
     args = parser.parse_args()
     catalogue = json.loads((ROOT / 'tgwitness/verifier_languages.json').read_text(encoding='utf-8'))
     validate(catalogue)
-    path = ROOT / 'tgwitness/verify.py'
+    path = ROOT / 'tgwitness/verifier/languages.py'
     source = path.read_text(encoding='utf-8')
     a, b = source.index(START), source.index(END) + len(END)
     expected = source[:a] + embedded(catalogue) + source[b:]
@@ -61,6 +61,9 @@ def main():
         print('Verifier catalogue complete and synchronized:', len(catalogue), 'languages')
     else:
         path.write_text(expected, encoding='utf-8')
+        import subprocess
+        import sys
+        subprocess.run([sys.executable, '-I', str(ROOT / 'tools/build_standalone_verifier.py')], check=True)
 
 
 if __name__ == '__main__':

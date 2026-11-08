@@ -14,13 +14,15 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 import requests
+from cryptography.exceptions import InvalidSignature
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator
 
-from tgwitness_capture.format import check_checkpoint, decode
+from tgwitness_capture.format import HEX, check_checkpoint, check_event, decode
 from tgwitness_capture.verify import verify_zip
 
 KINDS = ("browser", "ayugram", "trusted")
 MAX_EXPORT = 512 * 1024 * 1024
+MAX_OBJECT = 16 * 1024 * 1024
 LOCAL_SERVICES = {"capture-browser", "capture-ayugram", "capture-trusted"}
 
 
@@ -114,17 +116,17 @@ class CaptureConnections:
             raise ValueError("Enable this recorder connection first. This does not start capture.")
         return connection
 
-    def _request(self, connection, method, path, body=None, *, destination=None):
+    def _request(self, connection, method, path, body=None, *, destination=None, raw=False, timeout=30):
         with requests.Session() as client:
             client.trust_env = False
             deadline = time.monotonic() + 120
             with client.request(method, connection["url"] + "/api/" + path,
                                 headers={"Authorization": "Bearer " + connection["token"]},
-                                json=body, timeout=(5, 30), allow_redirects=False, stream=True) as response:
+                                json=body, timeout=(5, timeout), allow_redirects=False, stream=True) as response:
                 if response.status_code != 200:
                     raise ValueError("Recorder request refused (HTTP " + str(response.status_code)
                                      + "). Check its token, selected tab and capture state.")
-                limit = MAX_EXPORT if destination else 8 * 1024 * 1024
+                limit = MAX_EXPORT if destination else MAX_OBJECT if raw else 8 * 1024 * 1024
                 result, size = bytearray(), 0
                 for chunk in response.iter_content(65536):
                     size += len(chunk)
@@ -134,6 +136,8 @@ class CaptureConnections:
                         destination.write(chunk)
                     else:
                         result.extend(chunk)
+                if raw:
+                    return bytes(result)
                 if destination is None:
                     return decode(bytes(result))
 
@@ -161,15 +165,52 @@ class CaptureConnections:
         saved[kind]["checkpoint"] = checkpoint
         self.vault.save("capture_connections", saved)
 
+    def _identified(self, kind):
+        connection = self._connection(kind)
+        checkpoint = self._checkpoint(kind, connection)
+        status = self._request(connection, "GET", "status")
+        if (status.get("kind") != kind or status.get("fingerprint") != connection["fingerprint"]
+                or status.get("observer_id") != checkpoint["body"]["observer_id"]):
+            raise ValueError("This endpoint is not the configured recorder kind and identity.")
+        self._remember(kind, checkpoint)
+        return connection, checkpoint, status
+
+    def open(self, kind, url, wait_seconds=5, purpose="", subject=None, chat_id=None):
+        if kind != "browser":
+            raise ValueError("Only the browser recorder opens addresses.")
+        with self.guard:
+            connection, checkpoint, _ = self._identified(kind)
+            answer = self._request(connection, "POST", "open",
+                                   {"url": url, "wait_seconds": wait_seconds, "purpose": purpose}, timeout=120)
+            event = answer.get("event") if isinstance(answer, dict) else None
+            try:
+                check_event(event, checkpoint["body"]["public_key"], checkpoint["body"]["observer_id"])
+                if event["kind"] != "capture.opened" or event["seq"] <= checkpoint["body"]["seq"]:
+                    raise ValueError
+            except (KeyError, TypeError, ValueError, InvalidSignature):
+                raise ValueError("The recorder answer is not a valid signed capture from the pinned recorder.") from None
+            payload = event["payload"]
+            record = {"kind": kind, "fingerprint": connection["fingerprint"],
+                      "observer_id": checkpoint["body"]["observer_id"], "recorder_seq": event["seq"],
+                      "recorder_event_hash": event["hash"], "requested_url": url,
+                      **{key: payload.get(key) for key in ("final_url", "title", "http_status", "server", "tls", "errors")},
+                      "artifacts": event["artifacts"], "purpose": purpose, "subject": subject,
+                      "meaning": "The pinned browser recorder signed this capture; this record links to its event"}
+            main = self.store.append("capture.opened", record, chat_id)
+            return {"event": main, "recorder_event": event}
+
+    def object(self, kind, sha256):
+        if not isinstance(sha256, str) or not HEX.fullmatch(sha256):
+            raise ValueError("Use a SHA-256 object name.")
+        with self.guard:
+            data = self._request(self._connection(kind), "GET", "object/" + sha256, raw=True)
+        if hashlib.sha256(data).hexdigest() != sha256:
+            raise ValueError("The recorder returned bytes that differ from the requested hash.")
+        return data
+
     def request(self, kind, path="status", body=None):
         with self.guard:
-            connection = self._connection(kind)
-            checkpoint = self._checkpoint(kind, connection)
-            status = self._request(connection, "GET", "status")
-            if (status.get("kind") != kind or status.get("fingerprint") != connection["fingerprint"]
-                    or status.get("observer_id") != checkpoint["body"]["observer_id"]):
-                raise ValueError("This endpoint is not the configured recorder kind and identity.")
-            self._remember(kind, checkpoint)
+            connection, checkpoint, status = self._identified(kind)
             if path == "status":
                 return {"status": status, "checkpoint": checkpoint}
             if path == "checkpoint":

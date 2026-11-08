@@ -20,5 +20,4 @@ Browser interfaces served by the independent capture package.
 
 Run the interfaces through their recorder service so authentication and controls
 use the correct API. The [add-on guide](../../addons/capture/README.md) describes
-startup and login; the [capture tests](../../addons/capture/tests/README.md)
-cover the synthetic browser flows.
+startup and login; private capture regressions cover the synthetic browser flows.

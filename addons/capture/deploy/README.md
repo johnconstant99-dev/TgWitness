@@ -25,5 +25,5 @@ working with an individual Dockerfile.
 
 Mode-specific setup lives in [Optional capture](../../../docs/OPTIONAL-CAPTURE.md),
 [Official Web witness](../../../docs/OFFICIAL-WITNESS.md) and
-[Trusted Live](../../../docs/TRUSTED-LIVE.md). The
-[capture tests](../tests/README.md) describe the available local checks.
+[Trusted Live](../../../docs/TRUSTED-LIVE.md). Capture regressions are maintained
+in the private validation workspace.
