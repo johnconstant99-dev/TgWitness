@@ -174,9 +174,8 @@ def index(base_url, repo_url, branch, version, guides, references):
         "collection, signed exports and measured workloads. Published results include a 1 November 2026 inventory "
         "of 1,610,818 journal events (900,232 new-message events), a 5 November search benchmark on 1,000,000 "
         "synthetic messages, and two real exports totalling 56,329 messages on 6 November. These measure inventory, "
-        "search and export respectively; they are not interchangeable capacity or completeness guarantees. "
-        "The maintainer reports more than six months of testing; that history is separate from the dated runs "
-        "and does not establish uninterrupted six-month collection. The overview links the methods and results.",
+        "search and export respectively, each with its own method and revision. "
+        "The overview links the methods and results.",
         "Choose an entry below for the exact workflow, commands and limits. Each guide has a Markdown edition; "
         "its canonical HTML page retains diagrams, animations and interactive examples. Translated pages also expose "
         "Markdown through `rel=alternate` links.",

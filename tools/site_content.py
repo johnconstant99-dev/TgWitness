@@ -1,6 +1,6 @@
 GUIDES = {
     "archive": ("Work the archive", "Load history, search saved records, review AI sources and connect your tools.", "archive history search AI MCP OCR transcription webhooks reports integrations", "docs/ANALYSIS.md"),
-    "capture": ("GitHub Actions capture", "Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．", "github actions capture takeout account export encrypted archive", "docs/SEALED-ACTIONS.md"),
+    "capture": ("GitHub Actions capture", "Choose Takeout, regular API export or a chat journal on a temporary GitHub runner.", "github actions capture takeout account export encrypted archive", "docs/SEALED-ACTIONS.md"),
     "dedicated-account": ("Dedicated account", "Prepare a separate Telegram account for collection.", "dedicated telegram account session api login", "docs/ACCOUNTS.md"),
     "start": ("Start in minutes", "Install with one command, connect a Telegram account and export a verifiable archive on Windows, Linux or macOS.", "demo install setup windows linux macos python", "docs/QUICKSTART.md"),
     "accounts": ("Connect an account", "Connect Telegram by QR code, phone number or session import. Choose sources and check that new messages reach your journal.", "qr phone session tdata api id hash account sources", "docs/ACCOUNTS.md"),

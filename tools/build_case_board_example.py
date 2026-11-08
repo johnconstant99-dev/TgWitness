@@ -46,7 +46,7 @@ def seed_board(store):
     with patch('tgwitness.board.utcnow', return_value='2026-11-02T14:10:00.000+00:00'):
         collection = board.append('collection', {'title':'01 · Delivery timeline', 'description':'Saved observations and the team’s reasoning, with unresolved questions kept visible.', 'chat_ids':[chat]}, a)
         bookmark = board.append('bookmark', {'target':{'event_hash':original['hash']}, 'title':'The original commitment',
-            'labels':['schedule','primary observation'], 'note':'This record preserves what the observing account received at 14:00 UTC. The signature protects the saved record; it does not independently authenticate the sender’s real-world identity.'}, a)
+            'labels':['schedule','primary observation'], 'note':'This record preserves what the observing account received at 14:00 UTC. The signature protects the saved record, and the sender is identified by Telegram account ID.'}, a)
         board.append('move', {'card_id':bookmark['payload']['id'], 'collection_id':collection['payload']['id']}, a)
         board.append('comment', {'parent_id':bookmark['payload']['id'], 'text':'The journal contains a later saved edit. Compare both versions before describing the agreement. We have no independent statement from Telegram confirming authorship.'}, b)
         quote = 'Friday, 17:00 UTC'
@@ -80,7 +80,7 @@ def build(output):
                 'theme':'light', 'timeline':False, 'case_board':'comments', 'chart_limit':6,
                 'case_title':'Project Meridian — Evidence & interpretation', 'case_id':'DEMO / MRD–2026.11',
                 'organization':'Fictional Research Office', 'examiner':'Avery Chen · Synthetic investigator',
-                'notes':'SYNTHETIC EXAMPLE · All people, messages and actions are fictional. No Telegram connection, external timestamp or independent witness was used. Team notes are opinions. Signature verification establishes integrity relative to the signing key; it does not establish the truth of a statement or guarantee court acceptance.',
+                'notes':'SYNTHETIC EXAMPLE · All people, messages and actions are fictional. No Telegram connection, external timestamp or independent witness was used. Team notes are opinions. Signature verification establishes integrity relative to the signing key; the court weighs the statements themselves.',
                 'selection':{'id_gaps':False}}
             bundle = evidence.export_file(store,vault,'zip',options)
             verified = verify_bundle(bundle,fingerprint(vault.public_key))
