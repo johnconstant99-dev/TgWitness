@@ -8,7 +8,7 @@ The maintained catalog is [site_seo.py](../../tools/site_seo.py). The built CI r
 
 | Page | Primary query | English page title |
 | --- | --- | --- |
-| [/](https://phishdestroy.github.io/TgWitness/) | Telegram chat export | Telegram Chat Export & OSINT Evidence |
+| [/](https://phishdestroy.github.io/TgWitness/) | Telegram chat export | Telegram Chat Export, Edits & Deleted Messages |
 | [docs/](https://phishdestroy.github.io/TgWitness/docs/) | Telegram export guide | Telegram Export, OSINT & Evidence Guides |
 | [docs/access/](https://phishdestroy.github.io/TgWitness/docs/access/) | Telegram evidence reviewer access | Share Telegram Case Access with Reviewers |
 | [docs/accounts/](https://phishdestroy.github.io/TgWitness/docs/accounts/) | Telegram session import | Connect Telegram: QR, Phone & Session Import |
@@ -33,11 +33,11 @@ The maintained catalog is [site_seo.py](../../tools/site_seo.py). The built CI r
 | [docs/reference/case-reports/](https://phishdestroy.github.io/TgWitness/docs/reference/case-reports/) | Telegram signed PDF report verification | Telegram Report Formats & Signed PDF Verification |
 | [docs/reference/changelog/](https://phishdestroy.github.io/TgWitness/docs/reference/changelog/) | TgWitness changelog release notes | TgWitness Changelog & Release Notes |
 | [docs/reference/cli/](https://phishdestroy.github.io/TgWitness/docs/reference/cli/) | Telegram archive CLI JSONL export | Telegram Archive CLI: Search & JSONL Export |
-| [docs/reference/collection/](https://phishdestroy.github.io/TgWitness/docs/reference/collection/) | Telegram edited deleted message logger | Telegram Collection: Updates, Edits & Deletions |
+| [docs/reference/collection/](https://phishdestroy.github.io/TgWitness/docs/reference/collection/) | save deleted Telegram messages | Save Edited & Deleted Telegram Messages |
 | [docs/reference/connection/](https://phishdestroy.github.io/TgWitness/docs/reference/connection/) | Telegram proxy connection security | Telegram Proxy Routing & Connection Security |
 | [docs/reference/deployment/](https://phishdestroy.github.io/TgWitness/docs/reference/deployment/) | TgWitness Docker deployment | Deploy TgWitness with Docker, HTTPS & Backups |
 | [docs/reference/evidence/](https://phishdestroy.github.io/TgWitness/docs/reference/evidence/) | Telegram evidence archive format | Telegram Evidence Archive Format & Verification |
-| [docs/reference/features/](https://phishdestroy.github.io/TgWitness/docs/reference/features/) | TgWitness features Telegram limits | TgWitness Features & Telegram Collection Limits |
+| [docs/reference/features/](https://phishdestroy.github.io/TgWitness/docs/reference/features/) | TgWitness features | TgWitness Features & Telegram Collection Scope |
 | [docs/reference/high-assurance/](https://phishdestroy.github.io/TgWitness/docs/reference/high-assurance/) | Phala Intel TDX attestation | Phala Intel TDX: Attested Telegram Collection |
 | [docs/reference/history/](https://phishdestroy.github.io/TgWitness/docs/reference/history/) | Telegram history backfill | Telegram History Backfill & Signed Progress |
 | [docs/reference/how-it-works/](https://phishdestroy.github.io/TgWitness/docs/reference/how-it-works/) | SHA-256 Ed25519 evidence verification | Evidence Verification: SHA-256 & Ed25519 |
@@ -51,13 +51,13 @@ The maintained catalog is [site_seo.py](../../tools/site_seo.py). The built CI r
 | [docs/reference/panel/](https://phishdestroy.github.io/TgWitness/docs/reference/panel/) | TgWitness Telegram panel | TgWitness Panel: Chats, Journal & Exports |
 | [docs/reference/quickstart/](https://phishdestroy.github.io/TgWitness/docs/reference/quickstart/) | TgWitness installation | TgWitness Setup: Windows, Linux, macOS & Docker |
 | [docs/reference/search/](https://phishdestroy.github.io/TgWitness/docs/reference/search/) | Telegram archive full text search | Telegram Archive Full-Text Search |
-| [docs/reference/secret-chats/](https://phishdestroy.github.io/TgWitness/docs/reference/secret-chats/) | Telegram Secret Chats implementation | Telegram Secret Chats: Implementation Status |
-| [docs/reference/security/](https://phishdestroy.github.io/TgWitness/docs/reference/security/) | TgWitness security model | TgWitness Security Model & Telegram Session Storage |
+| [docs/reference/secret-chats/](https://phishdestroy.github.io/TgWitness/docs/reference/secret-chats/) | Telegram Secret Chats recording | Record Telegram Secret Chats in TgWitness |
+| [docs/reference/security/](https://phishdestroy.github.io/TgWitness/docs/reference/security/) | TgWitness security model | TgWitness Security Model & Session Storage |
 | [docs/reference/settings/](https://phishdestroy.github.io/TgWitness/docs/reference/settings/) | Telegram collection settings | Telegram Collection Setup & TgWitness Settings |
 | [docs/reference/showcase/](https://phishdestroy.github.io/TgWitness/docs/reference/showcase/) | Telegram channel evidence showcase | Publish Captured Telegram Channel Evidence |
 | [docs/reference/storage/](https://phishdestroy.github.io/TgWitness/docs/reference/storage/) | Telegram evidence backup S3 Object Lock | Telegram Evidence Backups, S3 & Object Lock |
 | [docs/reference/timestamp/](https://phishdestroy.github.io/TgWitness/docs/reference/timestamp/) | RFC 3161 Telegram evidence timestamp | RFC 3161 Timestamps for Telegram Evidence |
-| [docs/reference/verification/](https://phishdestroy.github.io/TgWitness/docs/reference/verification/) | TgWitness verification test results | TgWitness Test Evidence & Qualification Limits |
+| [docs/reference/verification/](https://phishdestroy.github.io/TgWitness/docs/reference/verification/) | TgWitness verification test results | TgWitness Test Results & Qualification Record |
 | [docs/reference/webhooks/](https://phishdestroy.github.io/TgWitness/docs/reference/webhooks/) | Telegram evidence webhook HMAC | Telegram Evidence Webhooks: HMAC & Delivery |
 | [docs/reference/witness/](https://phishdestroy.github.io/TgWitness/docs/reference/witness/) | independent evidence witness | Independent Evidence Witness & Journal Continuity |
 | [docs/reports/](https://phishdestroy.github.io/TgWitness/docs/reports/) | Telegram evidence report | Telegram Evidence Reports: HTML & Signed PDF |
