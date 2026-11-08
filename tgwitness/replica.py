@@ -163,7 +163,7 @@ def decrypt(key, name, read, recipient_key=None):
     magic = read(len(MAGIC))
     if magic == RECIPIENT_MAGIC:
         if recipient_key is None:
-            raise ValueError("нужен ключ получателя (use --recipient-key FILE)")
+            raise ValueError("Recipient key required (use --recipient-key FILE)")
         header = read(92)
         if len(header) != 92:
             raise ValueError("Truncated recipient envelope")
@@ -315,7 +315,7 @@ def lock_headers(settings, days=None):
 async def require_evidence_lock(s3, settings):
     if not settings.get("evidence"):
         return
-    message = "Доказательственная реплика требует Object Lock в режиме Compliance"
+    message = "An evidential replica requires Object Lock in Compliance mode"
     if settings.get("retention_mode") != "COMPLIANCE" or settings.get("retention_days", 0) < 1:
         raise ValueError(message)
     try:

@@ -2,6 +2,7 @@ from .common import (
     MAX_MANIFEST_BYTES,
     MAX_UNCOMPRESSED_GIB,
     Path,
+    UNPINNED_NOTE,
     VerifierTooOld,
     argparse,
     authenticate_statement,
@@ -512,7 +513,7 @@ def verification_output(args, checked, console, mode):
     unmet = bool(args.require_tier and ASSURANCE_TIERS.index(result["assurance"]["tier"]) < ASSURANCE_TIERS.index(args.require_tier))
     unpinned = args.strict and not pinned
     if not pinned:
-        notes.append("ключ не закреплён: результат зависит от ключа внутри самого пакета")
+        notes.append(UNPINNED_NOTE)
     if unmet:
         notes.append("Required assurance tier was not reached: " + args.require_tier)
     if console:

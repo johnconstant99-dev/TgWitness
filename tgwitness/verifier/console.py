@@ -1,5 +1,6 @@
 from .common import (
     InvalidSignature,
+    UNPINNED_NOTE,
     json,
     os,
     re,
@@ -474,7 +475,7 @@ class Console:
 
     def localized_note(self, note):
         from .languages import VERIFIER_LANGUAGES
-        if note == "ключ не закреплён: результат зависит от ключа внутри самого пакета":
+        if note == UNPINNED_NOTE:
             return reader_message("key_unconfirmed", self.lang)
         if note in self.words:
             return self.t(note)
