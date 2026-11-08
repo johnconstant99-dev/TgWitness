@@ -2889,9 +2889,25 @@ class Collector:
         ids = newest + older
         if not ids:
             return result
-        messages = await self.client.get_messages(entity, ids=ids)
+        unreadable = set()
+        try:
+            messages = await self.client.get_messages(entity, ids=ids)
+        except TypeNotFoundError:
+            found = await self.read_numbers(entity, ids)
+            unreadable = {number for number, value in found.items() if isinstance(value, TypeNotFoundError)}
+            messages = [None if number in unreadable else found.get(number) for number in ids]
+            self.store.append("coverage.gap", {
+                "reason": "recheck_unparsed", "numbers": sorted(unreadable),
+                "constructors": sorted({format(found[number].invalid_constructor_id, "08x")
+                                        for number in unreadable}),
+                "telethon_layer": LAYER, "completeness": "incomplete",
+                "meaning": UNPARSED_MEANING.format(layer=LAYER) + " Edits and deletions of these messages are "
+                           "not detected until the schema is updated; they are not reported missing."}, chat_id)
+            result["unparsed"] = len(unreadable)
         missing = []
         for message_id, message in zip(ids, messages):
+            if message_id in unreadable:
+                continue
             if message is None:
                 missing.append(message_id)
             elif not self.own_skipped(message):
