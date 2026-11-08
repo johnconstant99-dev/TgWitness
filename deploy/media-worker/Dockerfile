@@ -1,10 +1,10 @@
-FROM cgr.dev/chainguard/wolfi-base@sha256:fd50bd0cdeb808cf4f45c9c9189e0cc7f7fcc27195d69abd6622c80527e7e021 AS ocr-build
+FROM cgr.dev/chainguard/wolfi-base@sha256:24f549a7fcace88e69b9557941168c74645688ecc4acf7fb6d734a6b74e9019d AS ocr-build
 COPY deploy/containers /build/containers
 RUN sh /build/containers/install-packages.sh build
 COPY deploy/media-worker/build-tesseract.sh deploy/media-worker/fetch-sources.py deploy/media-worker/tesseract.nfpm.yaml deploy/media-worker/sources.lock.json /build/ocr/
 RUN sh /build/ocr/build-tesseract.sh
 
-FROM cgr.dev/chainguard/wolfi-base@sha256:fd50bd0cdeb808cf4f45c9c9189e0cc7f7fcc27195d69abd6622c80527e7e021
+FROM cgr.dev/chainguard/wolfi-base@sha256:24f549a7fcace88e69b9557941168c74645688ecc4acf7fb6d734a6b74e9019d
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONUTF8=1 PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PATH="/opt/venv/bin:$PATH" TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 COPY deploy/containers /usr/share/tgwitness-build/containers
