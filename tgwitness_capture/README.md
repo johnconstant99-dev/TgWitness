@@ -39,5 +39,5 @@ python -m tgwitness_capture verify --help
 ```
 
 The CLI exposes `serve`, `identity`, `export`, `verify` and `witness`.
-[Configuration examples](../addons/capture/config/README.md) and
-[tests](../addons/capture/tests/README.md) are maintained with the add-on.
+[Configuration examples](../addons/capture/config/README.md) are maintained with
+the add-on; capture regressions remain in the private validation workspace.

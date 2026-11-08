@@ -48,12 +48,12 @@ MODES = (
              "Everything in Signed, plus an independent witness that posts signed copies of the journal head "
              "to a Telegram channel.",
              "About 30 minutes: a bot, a channel and a second machine for the witness."),
-    ModeInfo("court", "🔴", "Court-ready", "Evidence for a lawyer, the police or a court.",
-             "Everything in Witnessed, plus trusted timestamps (RFC 3161 and OpenTimestamps), an encrypted "
-             "off-site copy and case details in reports.",
+    ModeInfo("court", "🔴", "Case preparation", "Prepare material for review by a lawyer, the police or a court.",
+             "Shows timestamp, encrypted backup and case-detail settings. Enable and verify each service separately; "
+             "this view does not establish admissibility.",
              "About an hour: timestamps work at once; the copy needs S3 storage."),
     ModeInfo("github", "🟣", "GitHub-verified", "Records whose software anyone must be able to check.",
-             "Everything in Court-ready, plus a check of the running code against a public GitHub commit "
+             "Everything in Case preparation, plus a check of the running code against a public GitHub commit "
              "and the GitHub Actions capture.",
              "A public repository or fork; no token."),
     ModeInfo("mossad", "⚫", "Mossad", "High-stakes cases against a well-funded adversary.",

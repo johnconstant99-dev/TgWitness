@@ -130,7 +130,7 @@ No Telegram account was connected to these CVMs.
 <summary>Deployments 1–2 · provider differences and regression checks</summary>
 
 The first two deployments found five differences from the simulated Phala Cloud.
-[`tools/check_phala.py`](../tools/check_phala.py) now reproduces each, and fails without its fix:
+Private Phala regressions reproduce each difference and fail without its fix:
 
 | On Phala Cloud | Before the fix | Fix |
 | --- | --- | --- |
@@ -175,7 +175,7 @@ The first two deployments found five differences from the simulated Phala Cloud.
   third-party verification, for up to 12 hours with a forged future timestamp. The collector now
   also posts its address signed with its own key, `verify` accepts only such posts when the
   collector makes them, and posts are ordered by ntfy.sh's receive time.
-  [`tools/check_cloud_wizard.py`](../tools/check_cloud_wizard.py) replays the forged posts. A CVM
+  A private cloud-wizard regression replays the forged posts. A CVM
   runs this only from a commit that contains it, so this run's collector did not sign its address
   yet and `verify` said so.
 - `tdx_os` could not run without `dstack-mr`, whose current version has `measure-os` rather than
@@ -274,10 +274,10 @@ the current source, not another live Telegram delivery measurement:
 
 | Check | What it exercised |
 | --- | --- |
-| [Source archive](../tools/check_source_archive.py) | Two builds with identical source bytes but changed file times produced the same ZIP and checksum. Exact archived bytes and file hashes matched; private test files stayed out. A simulated write failure left the previous archive and checksum intact. |
-| [Account export recovery](../tools/check_account_export_recovery.py) | A simulated disk error on the second ZIP member left no published or partial ZIP. Resume kept every signed receipt byte-identical, produced an independently verifiable archive using the expected signing fingerprint, and retained the synthetic coverage gap as a partial result. Scale assertions guard against repeated task and receipt scans as histories grow. |
-| [Minimized disclosure privacy](../tools/check_disclosure_privacy.py) | Synthetic Unicode names and aliases, nested metadata, unknown senders and media fields were checked in all three identity modes and with text omission. A masking-limit failure did not silently weaken redaction; the original signed account export stayed unchanged. |
-| [Linux media decoder and OCR](../tools/check_media_worker.py) | A [Linux Docker CI check](https://github.com/phishdestroy/TgWitness/actions/runs/41341200341/job/124951395192) at commit `5a9e0814` passed generated Ogg/Opus, MP3, M4A, MP4 with video, WAV and FLAC inputs; forged-duration and secondary-file-reference controls; and 48 mutated parser fixtures (34 rejected, 14 decoded within bounds). Real Tesseract OCR ran with original bytes unchanged. The decoder and OCR ran in network-isolated containers without a Whisper model. |
+| Source archive | Two builds with identical source bytes but changed file times produced the same ZIP and checksum. Exact archived bytes and file hashes matched; private test files stayed out. A simulated write failure left the previous archive and checksum intact. |
+| Account export recovery | A simulated disk error on the second ZIP member left no published or partial ZIP. Resume kept every signed receipt byte-identical, produced an independently verifiable archive using the expected signing fingerprint, and retained the synthetic coverage gap as a partial result. Scale assertions guard against repeated task and receipt scans as histories grow. |
+| Minimized disclosure privacy | Synthetic Unicode names and aliases, nested metadata, unknown senders and media fields were checked in all three identity modes and with text omission. A masking-limit failure did not silently weaken redaction; the original signed account export stayed unchanged. |
+| Linux media decoder and OCR | A [Linux Docker CI check](https://github.com/phishdestroy/TgWitness/actions/runs/41341200341/job/124951395192) at commit `5a9e0814` passed generated Ogg/Opus, MP3, M4A, MP4 with video, WAV and FLAC inputs; forged-duration and secondary-file-reference controls; and 48 mutated parser fixtures (34 rejected, 14 decoded within bounds). Real Tesseract OCR ran with original bytes unchanged. The decoder and OCR ran in network-isolated containers without a Whisper model. |
 
 The checks run in the [pull-request](../.github/workflows/pr-check.yml) and
 [full Checks](../.github/workflows/checks.yml) workflows.
@@ -355,7 +355,7 @@ credentials.
 
 ## Synthetic local capacity measurement
 
-Command: `python tools/check_capacity.py --events 10000 --chats 100`
+Private synthetic capacity run: 10,000 events across 100 chats.
 
 | Metric | Observed |
 | --- | --- |
@@ -382,9 +382,9 @@ word forms, Ukrainian, English, Chinese, Japanese, links and handles) was indexe
 71 seconds; the index took 58 MiB beside a 1.50 GiB journal. Best-match
 searches took 9 to 190 ms (median), against 2.4 to 3.2 seconds for the previous substring
 search. Full results, hardware and limits: [Full-text search](SEARCH.md#benchmark).
-`tools/test_fulltext.py` also verifies a signed archive made before full-text search
-(`tools/fixtures/evidence-before-fulltext.zip`) with the current verifier, and a current
-archive with that archive's own `verify.py`.
+Private compatibility tests also verify a frozen signed archive made before full-text
+search with the current verifier, and a current archive with the frozen archive's
+own `verify.py`.
 
 ## Remaining qualification
 

@@ -10,7 +10,7 @@
 # Optional independent capture
 
 [Configuration examples](config/README.md) · [Container files](deploy/README.md) ·
-[Package source](../../tgwitness_capture/README.md) · [Tests](tests/README.md)
+[Package source](../../tgwitness_capture/README.md)
 
 For the owned official Telegram Web browser，required video，guarded actions and the GitHub-hosted procedure，see [Official client witness](../../docs/OFFICIAL-WITNESS.md)．That mode uses `compose.official.yaml` and a fresh temporary profile．The generic recorders described below retain their existing behavior．
 
@@ -102,6 +102,23 @@ Pausing waits for in-flight work. The journal contains settings, capture failure
 heartbeats; a heartbeat alone does not mean a new page was successfully preserved.
 There is no operator keystroke logger or automatic secret redaction. An enabled
 capture can include visible secrets, so input credentials only during a pause.
+
+### Open an address in isolation
+
+`POST /api/open` with `{"url": "https://…", "wait_seconds": 5, "purpose": "…"}` opens the
+address in a new tab of the recorder's own browser, waits, and saves a viewport PNG,
+rendered MHTML and text. The signed `capture.opened` event also records the final URL,
+HTTP status, server address and TLS issuer as the browser reported them. A preceding
+`capture.open_requested` event and, on failure, `capture.failed` keep the attempt visible.
+Only `http` and `https` addresses without credentials are accepted. This does not need
+capture to be enabled and does not change the selected tab. `GET /api/object/SHA256`
+returns a stored artifact by its hash.
+
+Pages opened this way see the recorder's network route and browser profile, never the
+observing Telegram account. A Telegram Web address shows what that browser profile is
+logged in to; prepare it during a pause like any other login. In the main panel the
+documentation drawer offers this as **Open in isolation**; the panel accepts the result
+only if the pinned recorder signed it after the latest verified checkpoint.
 
 Behind HTTPS set `public_origin` to the exact external origin, e.g.
 `https://browser-capture.example.org`. Keep the backend private. Cross-origin control
@@ -219,9 +236,7 @@ periodic backups can miss transient states and do not reconstruct unobserved his
 
 ## Validation
 
-```sh
-python -m pytest addons/capture/tests -q --capture-browser
-```
+Capture regressions are maintained in the private validation workspace.
 
 Real Chromium tests use only a localhost synthetic page. Video tests use FFmpeg's
 synthetic source; set `CAPTURE_TEST_FFMPEG` to an installed executable if needed.

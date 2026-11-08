@@ -57,6 +57,27 @@ def metadata_request(url, method="GET", headers=None, timeout=2):
         return response.read(256 * 1024).decode()
 
 
+PROVIDER_RECORD = Path("/run/tgwitness-metadata/provider.json")
+
+
+def current_provider_record(selected, path=PROVIDER_RECORD):
+    try:
+        saved = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return provider_record(selected)
+    return saved if isinstance(saved, dict) and saved.get("provider") == selected else provider_record(selected)
+
+
+def write_provider_record(selected, out):
+    record = provider_record(selected)
+    out.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
+    temporary = out.with_name(out.name + ".tmp")
+    temporary.write_text(json.dumps(record, sort_keys=True) + "\n")
+    temporary.chmod(0o644)
+    os.replace(temporary, out)
+    return record
+
+
 def provider_record(selected, request=metadata_request, root=Path("/")):
     record = {"provider": selected}
     try:
@@ -259,12 +280,20 @@ def install_record(script, preinstall, out):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="python -m tgwitness.assurance",
-                                     description="Record a hand-installed server's installer for self-attested mode")
-    parser.add_argument("command", choices=["install-record"])
-    parser.add_argument("script", type=Path)
-    parser.add_argument("preinstall", type=Path)
-    parser.add_argument("out", type=Path)
+                                     description="Record installer and provider facts for self-attested mode")
+    commands = parser.add_subparsers(dest="command", required=True)
+    install = commands.add_parser("install-record", help="Record a hand-installed server's installer")
+    install.add_argument("script", type=Path)
+    install.add_argument("preinstall", type=Path)
+    install.add_argument("out", type=Path)
+    record = commands.add_parser("provider-record", help="Read the provider's metadata for the collector")
+    record.add_argument("provider", choices=MODES)
+    record.add_argument("out", type=Path)
     args = parser.parse_args(argv)
+    if args.command == "provider-record":
+        found = write_provider_record(args.provider, args.out)
+        print(json.dumps({k: v for k, v in found.items() if k != "user_data_redacted"}))
+        return
     print(json.dumps({k: v for k, v in install_record(args.script, args.preinstall, args.out).items() if k != "redacted"}))
 
 

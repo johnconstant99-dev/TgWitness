@@ -175,11 +175,10 @@ The provider observations are in the separate witness ZIP; keep it with its rece
 ## Tests
 
 ```sh
-python -m pytest addons/capture/tests -q --capture-browser
 python -m ruff check .
 ```
 
-The suite covers malformed/duplicate JSON, chat ID scope, huge bounded intervals,
+The private capture suite covers malformed/duplicate JSON, chat ID scope, huge bounded intervals,
 unknown replies, HTML injection, guarded inputs, pacing, lost route/focus, token roles,
 cross-origin requests, file boundaries, frame attribution, report recomputation,
 truncation versus retained checkpoints, provider failures, and real FFmpeg encoding.
@@ -188,12 +187,11 @@ These local fixture tests do **not** qualify a live Telegram/WARP session or the
 The later [CPU Ubuntu and WARP integration run](VERIFICATION.md#trusted-live-cpu-ubuntu-and-warp--5-november-2026)
 records actual route isolation, provider reads, official-client startup and video verification.
 
-The optional-capture GitHub Actions workflow additionally builds the pinned image and
-runs `python tools/check_trusted_container.py --image tgwitness-trusted-ci` on Linux.
+Private container acceptance builds the pinned image on Linux.
 It launches the unauthenticated official Desktop against a TCP sink that forwards
 nothing, checks direct IPv4/IPv6/DNS blocking, captures real display video, imports a
 generated JSON fixture, verifies the signed ZIP and checks profile cleanup. The
-workflow retains its screenshot, logs and synthetic evidence as artifacts. It does
+validation workspace retains its screenshot, logs and synthetic evidence. It does
 not sign in to Telegram or exercise a WARP deployment.
 
 Local validation on 2026-11-05 (Windows, Python 3.12): **77 tests passed, none skipped**

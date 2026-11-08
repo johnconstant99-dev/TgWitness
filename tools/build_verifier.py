@@ -49,7 +49,11 @@ def main():
     parser.add_argument("--language", choices=("auto", *VERIFIER_LANGUAGES), default="auto",
                         help="Default language; auto shows a language menu. Every build includes all languages.")
     parser.add_argument("--output", type=Path, default=ROOT / "dist")
+    parser.add_argument("--validation-archive", type=Path, default=ROOT / "website/demo/downloads/tgwitness-demo.zip",
+                        help="Signed synthetic evidence archive used to validate the packaged runtime and launchers")
     args = parser.parse_args()
+    if not args.validation_archive.is_file():
+        raise SystemExit("Validation archive not found: " + str(args.validation_archive))
     validate(VERIFIER_LANGUAGES)
     subprocess.run([sys.executable, str(ROOT / "tools/sync_verifier_languages.py"), "--check"], check=True)
     arch = HOST_ARCH.get(platform.machine().upper())
@@ -83,12 +87,12 @@ def main():
             shutil.copyfile(ROOT / filename, stage / filename)
         # Test the actual bundled interpreter/dependencies against existing signed evidence.
         checked = subprocess.run([str(stage / "python/python.exe"), "-I", "-B", "-X", "utf8",
-                                  str(stage / "verify.py"), str(ROOT / "tools/fixtures/evidence-before-fulltext.zip"),
+                                  str(stage / "verify.py"), str(args.validation_archive),
                                   "--json"], capture_output=True, text=True, encoding="utf-8")
         if checked.returncode or not json.loads(checked.stdout).get("verified"):
-            raise SystemExit("Portable verifier failed its signed-fixture check: " + checked.stdout + checked.stderr)
+            raise SystemExit("Portable verifier failed its signed-archive check: " + checked.stdout + checked.stderr)
         probe = Path(temporary) / "Renamed (synthetic).zip"
-        shutil.copyfile(ROOT / "tools/fixtures/evidence-before-fulltext.zip", probe)
+        shutil.copyfile(args.validation_archive, probe)
         env = {**os.environ, "PATH": str(Path(os.environ["SystemRoot"]) / "System32"),
                "TGWITNESS_VERIFY_NO_PAUSE": "1"}
         command = '"' + os.environ["COMSPEC"] + '" /d /s /c ""' + str(stage / "VERIFY.cmd") + '" "' + str(probe) + '""'
@@ -104,7 +108,7 @@ def main():
             raise SystemExit("Portable VERIFY.cmd did not save both verification transcripts")
         print("VERIFY.cmd: clean/tampered ZIP and saved transcripts passed with system Python absent from PATH.")
         # Exercise every translation in the actual isolated recipient runtime.
-        shutil.copyfile(ROOT / "tools/fixtures/evidence-before-fulltext.zip", probe)
+        shutil.copyfile(args.validation_archive, probe)
         (stage / "VERIFY.cmd").write_bytes(menu_launcher)
         for lang, entry in VERIFIER_LANGUAGES.items():
             checked = subprocess.run(command, input=lang + "\n\n", env=env, cwd=stage, capture_output=True,

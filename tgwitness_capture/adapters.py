@@ -1,3 +1,4 @@
+import asyncio
 import sqlite3
 import tempfile
 import time
@@ -84,6 +85,69 @@ class BrowserCapture:
         if not artifacts:
             raise ValueError("No browser material could be captured")
         self.last_state, self.last_capture = state, time.monotonic()
+        return metadata, artifacts, observed
+
+    async def open(self, journal, url, wait_seconds, keep_open=False):
+        await self.connect()
+        if not self.browser.contexts:
+            raise ValueError("The isolated browser has no profile context")
+        page = await self.browser.contexts[0].new_page()
+        observed = utcnow()
+        metadata = {"source": "browser", "method": "chromium-cdp", "requested_url": url[:8192],
+                    "browser_version": self.browser.version, "opened_at": observed,
+                    "scope": "new tab in the isolated recorder browser; viewport PNG; rendered MHTML",
+                    "errors": []}
+        artifacts = []
+        try:
+            page.set_default_timeout(30000)
+            response = None
+            try:
+                response = await page.goto(url, wait_until="load", timeout=30000)
+            except Exception as exc:
+                metadata["errors"].append({"component": "navigation", "error": type(exc).__name__})
+            if wait_seconds:
+                await asyncio.sleep(wait_seconds)
+            metadata["final_url"] = page.url[:8192]
+            try:
+                metadata["title"] = (await page.title())[:4096]
+            except Exception as exc:
+                metadata["errors"].append({"component": "title", "error": type(exc).__name__})
+            if response is not None:
+                metadata["http_status"] = response.status
+                try:
+                    server = await response.server_addr()
+                    if server:
+                        metadata["server"] = {"ip": server.get("ipAddress"), "port": server.get("port")}
+                    security = await response.security_details()
+                    if security:
+                        metadata["tls"] = {key: security.get(key) for key in
+                                           ("issuer", "subjectName", "protocol", "validFrom", "validTo")}
+                except Exception as exc:
+                    metadata["errors"].append({"component": "connection", "error": type(exc).__name__})
+            try:
+                png = await page.screenshot(type="png", full_page=False, timeout=15000)
+                artifacts.append(journal.artifact(png, "viewport", "image/png"))
+            except Exception as exc:
+                metadata["errors"].append({"component": "png", "error": type(exc).__name__})
+            try:
+                session = await page.context.new_cdp_session(page)
+                try:
+                    snapshot = await session.send("Page.captureSnapshot", {"format": "mhtml"})
+                    artifacts.append(journal.artifact(snapshot["data"].encode(), "rendered_page", "multipart/related"))
+                    text = await self.rendered_text(page)
+                    artifacts.append(journal.artifact(text.encode(), "derived_rendered_text", "text/plain"))
+                    metadata["text_sha256"] = digest(text.encode())
+                finally:
+                    await session.detach()
+            except Exception as exc:
+                metadata["errors"].append({"component": "mhtml", "error": type(exc).__name__})
+        finally:
+            if not keep_open:
+                await page.close()
+        metadata["captured_at"] = utcnow()
+        metadata["representations_are_atomic"] = False
+        if not artifacts:
+            raise ValueError("The page could not be captured")
         return metadata, artifacts, observed
 
     async def close(self):

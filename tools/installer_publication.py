@@ -36,31 +36,33 @@ def fetch(path, limit=MAX_BYTES):
         return data
 
 
-def validate_manifest(raw, release_id, public):
+def validate_manifest(raw, release_id, public, *, allow_test=False):
     manifest = json.loads(raw)
+    origin = "https://installer.invalid" if allow_test else ORIGIN
     if (not RELEASE.fullmatch(release_id) or manifest.get("release_id") != release_id
             or manifest.get("schema") != "tgwitness-installer-v1"
-            or manifest.get("base_url") != ORIGIN or manifest.get("test_only") is not False
+            or manifest.get("base_url") != origin or manifest.get("test_only") is not allow_test
             or manifest.get("signing_key_sha256") != hashlib.sha256(public).hexdigest()):
         raise ValueError("Untrusted installer manifest")
     files = manifest["files"]
     if not isinstance(files, dict) or not 10 <= len(files) <= 40:
         raise ValueError("Invalid installer inventory")
     wheels = [name for name in files if name.endswith(".whl")]
-    expected = {"install.sh", "install.ps1", "install.cmd", "constraints.txt", "release-signing.pub", *wheels}
+    dependency_file = "requirements.lock" if "requirements.lock" in files else "constraints.txt"
+    expected = {"install.sh", "install.ps1", "install.cmd", dependency_file, "release-signing.pub", *wheels}
     expected.update(name + ".sig" for name in tuple(expected) if name != "release-signing.pub")
     if len(wheels) != 1 or set(files) != expected:
         raise ValueError("Unexpected installer inventory")
     for name, entry in files.items():
         if (not NAME.fullmatch(name) or not re.fullmatch(r"[0-9a-f]{64}", entry.get("sha256", ""))
                 or type(entry.get("bytes")) is not int or not 0 < entry["bytes"] <= MAX_BYTES
-                or entry.get("url") != f"{ORIGIN}/releases/{release_id}/{name}"):
+                or entry.get("url") != f"{origin}/releases/{release_id}/{name}"):
             raise ValueError("Invalid installer artifact")
     return manifest
 
 
-def verify_release(raw, release_id, read, public):
-    manifest = validate_manifest(raw, release_id, public)
+def verify_release(raw, release_id, read, public, *, allow_test=False):
+    manifest = validate_manifest(raw, release_id, public, allow_test=allow_test)
     files = {name: read(name) for name in manifest["files"]}
     if files["release-signing.pub"] != public:
         raise ValueError("Release public key differs from the trusted key")
@@ -72,6 +74,45 @@ def verify_release(raw, release_id, read, public):
         if not name.endswith(".sig") and name != "release-signing.pub":
             key.verify(files[name + ".sig"], data, padding.PKCS1v15(), hashes.SHA256())
     return files
+
+
+def verify_local(site, public, revision=None, *, allow_test=False):
+    site = Path(site).resolve(strict=True)
+    if any(path.is_symlink() for path in site.rglob("*")):
+        raise ValueError("Linked publication paths are not allowed")
+    raw = (site / "manifest.json").read_bytes()
+    key = serialization.load_pem_public_key(public)
+    key.verify((site / "manifest.json.sig").read_bytes(), raw, padding.PKCS1v15(), hashes.SHA256())
+    manifest = json.loads(raw)
+    release_id = manifest.get("release_id", "")
+    validate_manifest(raw, release_id, public, allow_test=allow_test)
+    source = manifest.get("source_revision", "")
+    if not re.fullmatch(r"[0-9a-f]{40}", source) or (revision is not None and source != revision):
+        raise ValueError("Installer source revision differs from the requested revision")
+    release = site / "releases" / release_id
+    files = verify_release(raw, release_id, lambda name: (release / name).read_bytes(),
+                           public, allow_test=allow_test)
+    for name, data in files.items():
+        expected = (hashlib.sha256(data).hexdigest() + "  " + name).encode()
+        if (release / (name + ".sha256")).read_bytes().strip() != expected:
+            raise ValueError("Installer checksum sidecar differs: " + name)
+    for name in ("manifest.json", "manifest.json.sig", "release-signing.pub"):
+        if (site / name).read_bytes() != (release / name).read_bytes():
+            raise ValueError("Mutable and immutable installer files differ: " + name)
+    scripts = ("install.sh", "install.ps1", "install.cmd")
+    for name in scripts:
+        if (site / name).read_bytes() != files[name] or (site / (name + ".sig")).read_bytes() != files[name + ".sig"]:
+            raise ValueError("Mutable and immutable installer scripts differ: " + name)
+        if b"@@" in files[name]:
+            raise ValueError("Unresolved installer template: " + name)
+    sums = (site / "SHA256SUMS.txt").read_bytes()
+    key.verify((site / "SHA256SUMS.txt.sig").read_bytes(), sums, padding.PKCS1v15(), hashes.SHA256())
+    expected = "".join(hashlib.sha256(files[name]).hexdigest() + "  " + name + "\n" for name in scripts).encode()
+    if sums != expected:
+        raise ValueError("Installer bootstrap checksum inventory differs")
+    if hashlib.sha256(files["install.ps1"]).hexdigest().encode() not in files["install.cmd"]:
+        raise ValueError("CMD bootstrap does not pin the PowerShell installer")
+    return manifest
 
 
 def release_ids(raw):
@@ -162,6 +203,8 @@ def download_current(site, public, revision=None):
         if current != files[name]:
             raise ValueError("Public installer changed during the check; download a fresh snapshot")
         (site / name).write_bytes(current)
+        (site / (name + ".sig")).write_bytes(files[name + ".sig"])
+    (site / "release-signing.pub").write_bytes(public)
     sums, sums_signature = fetch("SHA256SUMS.txt", 4096), fetch("SHA256SUMS.txt.sig", 4096)
     key.verify(sums_signature, sums, padding.PKCS1v15(), hashes.SHA256())
     expected = "".join(hashlib.sha256(files[name]).hexdigest() + "  " + name + "\n"
@@ -209,10 +252,13 @@ def verify_public(site, *, attempts=7, delay=5):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("retain", "index", "verify-public", "download-current"))
+    parser.add_argument("action", choices=("retain", "index", "verify-public", "verify-local", "download-current"))
     parser.add_argument("--site", type=Path, default=ROOT / "dist/installer-site")
-    parser.add_argument("--revision", help="Require this source commit when downloading the current installer")
+    parser.add_argument("--revision", help="Require this source commit when downloading or verifying the installer")
+    parser.add_argument("--allow-test-key", action="store_true", help="Verify only an ephemeral-key build for https://installer.invalid")
     args = parser.parse_args()
+    if args.allow_test_key and args.action != "verify-local":
+        raise ValueError("Ephemeral keys are accepted only by verify-local")
     if args.action == "download-current":
         download_current(args.site.resolve(), (ROOT / "deploy/installer/release-signing.pub").read_bytes(), args.revision)
         return
@@ -222,7 +268,11 @@ def main():
     if any(path.is_symlink() for path in site.rglob("*")):
         raise ValueError("Linked publication paths are not allowed")
     public = (ROOT / "deploy/installer/release-signing.pub").read_bytes()
-    if args.action == "verify-public":
+    if args.action == "verify-local":
+        if args.allow_test_key:
+            public = (site / "release-signing.pub").read_bytes()
+        verify_local(site, public, args.revision, allow_test=args.allow_test_key)
+    elif args.action == "verify-public":
         verify_public(site)
     elif args.action == "retain":
         retain(site, public)

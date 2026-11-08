@@ -34,7 +34,10 @@ def unexported(db):
                       + " LIMIT 1", (exported, *SETUP_KINDS)).fetchone() is not None
 
 
-def prepared(store, path, fmt, encrypted, *, owner=None, workspace=None, required_permissions=None, chat_ids=None):
+def prepared(store, path, fmt, encrypted, *, owner=None, workspace=None, required_permissions=None, chat_ids=None,
+             encryption="zip"):
+    if encryption not in ("zip", "tgwpw"):
+        raise ValueError("Unknown password-encryption format")
     with path.open("rb") as source:
         digest = hashlib.file_digest(source, "sha256").hexdigest()
         size = os.fstat(source.fileno()).st_size
@@ -46,6 +49,8 @@ def prepared(store, path, fmt, encrypted, *, owner=None, workspace=None, require
     cached = folder / ident
     entry = {"id": ident, "format": fmt, "encrypted": bool(encrypted), "bytes": size, "sha256": digest,
              "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    if encrypted and encryption == "tgwpw":
+        entry["encryption"] = encryption
     if owner is not None and workspace is not None and required_permissions:
         entry.update(owner=owner, workspace=workspace, required_permissions=sorted(set(required_permissions)),
                      chat_ids=sorted(set(chat_ids)) if chat_ids is not None else None)

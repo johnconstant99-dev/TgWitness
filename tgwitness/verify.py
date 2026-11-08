@@ -1,3 +1,4 @@
+# TgWitness verifier sources SHA-256: 4ef0aeb3b47211c51fbc0d3fb2404131ac09269ee4a0d4106519b54dfcf882a2
 """Standalone verifier"""
 import argparse
 import base64
@@ -175,6 +176,138 @@ def read_json_file(path):
     return strict_json(path.read_text(encoding="utf-8"))
 
 
+import getpass
+
+
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+
+
+PW_MAGIC = b"TGWPW1\n"
+PW_CHUNK = 1024 * 1024
+PW_CONTEXT = b"tgwitness-password-v1|"
+PW_NAME_LIMIT = 1024
+
+
+def _pw_key(password, salt):
+    return Scrypt(salt=salt, length=32, n=2**17, r=8, p=1).derive(password.encode("utf-8"))
+
+
+def _pw_read(stream, size):
+    value = stream.read(size)
+    if len(value) != size:
+        raise ValueError("Truncated password-encrypted file")
+    return value
+
+
+def _pw_record(stream, limit):
+    size = int.from_bytes(_pw_read(stream, 4), "big")
+    if not 16 <= size <= limit + 16:
+        raise ValueError("Invalid password-encrypted record length")
+    return _pw_read(stream, size)
+
+
+def _pw_nonce(prefix, counter):
+    if counter >= 2**32:
+        raise ValueError("Password-encrypted file exceeds the chunk limit")
+    return prefix + counter.to_bytes(4, "big")
+
+
+def _pw_name(value):
+    name = value.encode("utf-8")
+    if (not name or len(name) > PW_NAME_LIMIT or value in (".", "..")
+            or any(ord(char) < 32 or ord(char) == 127 or char in "/\\" for char in value)):
+        raise ValueError("Use a plain filename for the password-encrypted content")
+    return name
+
+
+def _pw_output(path):
+    return os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "wb")
+
+
+def encrypt_password_file(source, destination, password, inner_name=None):
+    source, destination = Path(source), Path(destination)
+    if not 12 <= len(password) <= 256:
+        raise ValueError("Use a password of 12 to 256 characters")
+    name = _pw_name(inner_name or source.name)
+    salt, prefix = os.urandom(16), os.urandom(8)
+    cipher = AESGCM(_pw_key(password, salt))
+    created = False
+    try:
+        with source.open("rb") as plain, _pw_output(destination) as output:
+            created = True
+            output.write(PW_MAGIC + salt + prefix)
+            metadata = cipher.encrypt(_pw_nonce(prefix, 0), name, PW_CONTEXT + b"name")
+            output.write(len(metadata).to_bytes(4, "big") + metadata)
+            counter = 1
+            while True:
+                data = plain.read(PW_CHUNK)
+                last = len(data) < PW_CHUNK
+                aad = PW_CONTEXT + name + (b"|last" if last else b"|more")
+                record = cipher.encrypt(_pw_nonce(prefix, counter), data, aad)
+                output.write(len(record).to_bytes(4, "big") + record)
+                if last:
+                    break
+                counter += 1
+        return destination
+    except BaseException:
+        if created:
+            destination.unlink(missing_ok=True)
+        raise
+
+
+def decrypt_password_file(source, destination, password):
+    source, destination = Path(source), Path(destination)
+    with source.open("rb") as encrypted, tempfile.TemporaryFile(dir=destination.parent) as plain:
+        if _pw_read(encrypted, len(PW_MAGIC)) != PW_MAGIC:
+            raise ValueError("Not a TgWitness password-encrypted file")
+        salt, prefix = _pw_read(encrypted, 16), _pw_read(encrypted, 8)
+        cipher = AESGCM(_pw_key(password, salt))
+        name = cipher.decrypt(_pw_nonce(prefix, 0), _pw_record(encrypted, PW_NAME_LIMIT), PW_CONTEXT + b"name")
+        try:
+            _pw_name(name.decode("utf-8"))
+        except UnicodeDecodeError as exc:
+            raise ValueError("Invalid encrypted filename") from exc
+        counter = 1
+        while True:
+            record = _pw_record(encrypted, PW_CHUNK)
+            last = len(record) < PW_CHUNK + 16
+            aad = PW_CONTEXT + name + (b"|last" if last else b"|more")
+            data = cipher.decrypt(_pw_nonce(prefix, counter), record, aad)
+            plain.write(data)
+            if last:
+                if encrypted.read(1):
+                    raise ValueError("Trailing data after password-encrypted content")
+                break
+            counter += 1
+        plain.seek(0)
+        created = False
+        try:
+            with _pw_output(destination) as output:
+                created = True
+                shutil.copyfileobj(plain, output, PW_CHUNK)
+        except BaseException:
+            if created:
+                destination.unlink(missing_ok=True)
+            raise
+    return destination
+
+
+def password_command(argv):
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(prog="verify.py unseal-password", description="Open a .tgwpw export; verify the decrypted evidence separately.")
+    parser.add_argument("source", type=Path)
+    parser.add_argument("--out", type=Path, required=True, help="New output file; existing files are never overwritten.")
+    parser.add_argument("--password-stdin", action="store_true", help="Read one UTF-8 password line from standard input instead of prompting.")
+    args = parser.parse_args(argv)
+    password = sys.stdin.readline().rstrip("\r\n") if args.password_stdin else getpass.getpass("Export password: ")
+    try:
+        decrypt_password_file(args.source, args.out, password)
+    except Exception as exc:
+        parser.exit(1, "Could not decrypt the export: " + type(exc).__name__ + "\n")
+    print("Export decrypted. Run verification on the resulting evidence separately.")
 def der(data, offset):
     tag, length, start = data[offset], data[offset + 1], offset + 2
     if length & 0x80:
@@ -327,10 +460,25 @@ def signing_certificate_hash(reply, attributes):
         identifiers = identifiers[1:]
     if algorithm is None or identifiers[0][0] != 0x04:
         raise ValueError("Unsupported signing certificate reference")
-    return algorithm, reply[identifiers[0][2]:identifiers[0][3]]
+    return algorithm, reply[identifiers[0][2]:identifiers[0][3]], algorithm().name
 
 
-def timestamp_signature(reply, roots):
+def certificate_reference_details(algorithm):
+    warning = ("The timestamp names its signing certificate by SHA-1 (RFC 2634 SigningCertificate); "
+               "prefer authorities that return SigningCertificateV2")
+    return {"certificate_reference": algorithm, "warnings": [warning] if algorithm == "sha1" else []}
+
+
+def timestamp_certificate_reference(reply):
+    token = timestamp_token(reply)
+    _, _, start, end = token["signer"]
+    items = children(reply, start, end)
+    attributes = signed_attributes(reply, items[3][2], items[3][3])
+    _, _, algorithm = signing_certificate_hash(reply, attributes)
+    return certificate_reference_details(algorithm)
+
+
+def timestamp_signature(reply, roots, *, include_reference=False):
     token = timestamp_token(reply)
     when = tst_info(token["tst"])["time"]
     _, _, start, end = token["signer"]
@@ -348,7 +496,7 @@ def timestamp_signature(reply, roots):
     hasher.update(token["tst"])
     if not message_digest or reply[message_digest[0][2]:message_digest[0][3]] != hasher.finalize():
         raise ValueError("The signature does not cover this TSTInfo")
-    algorithm, named = signing_certificate_hash(reply, attributes)
+    algorithm, named, reference = signing_certificate_hash(reply, attributes)
     raw = {}
     for data in token["certificates"]:
         raw[data] = x509.load_der_x509_certificate(data)
@@ -427,7 +575,8 @@ def timestamp_signature(reply, roots):
     root = chain[-1]
     return {"signer": signer.subject.rfc4514_string(), "root": root.subject.rfc4514_string(),
             "root_sha256": root.fingerprint(hashes.SHA256()).hex(),
-            "signer_sha256": signer.fingerprint(hashes.SHA256()).hex()}
+            "signer_sha256": signer.fingerprint(hashes.SHA256()).hex(),
+            **(certificate_reference_details(reference) if include_reference else {})}
 
 
 def ots_summary(proof, digest, *, commitments=False):
@@ -664,6 +813,10 @@ def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None
                 if tsa_ca:
                     openssl_verify_timestamp(data, reply, query, tsa_ca)
                 entry["signature"] = "checked against the given root" if tsa_ca else "not checked (use --tsa-ca)"
+                try:
+                    entry.update(timestamp_certificate_reference(reply))
+                except (ValueError, IndexError, TypeError):
+                    entry["certificate_reference"] = "unavailable"
             elif proof_name.endswith(".ots"):
                 proof = read_member(archive, proof_name)
                 entry.update(kind="opentimestamps", **(confirm_ots(proof, digest) if check_bitcoin else ots_summary(proof, digest)))
@@ -1404,7 +1557,7 @@ def verify_events(events, public_key):
 
 
 def media_reference(event):
-    if event["kind"] not in ("media.saved", "actor.avatar_saved"):
+    if event["kind"] not in ("media.saved", "actor.avatar_saved", "secret_chat.file"):
         return None
     payload = event["payload"]
     digest, size = payload.get("media_sha256"), payload.get("size")
@@ -2608,7 +2761,7 @@ def verify_handover(path, expected_fingerprint=None):
                 key.verify(base64.b64decode(record["signature"], validate=True), bytes.fromhex(record["hash"]))
                 if seq == count and record["hash"] != head:
                     raise ValueError("The last record differs from the journal head")
-                if record["kind"] in ("media.saved", "actor.avatar_saved"):
+                if record["kind"] in ("media.saved", "actor.avatar_saved", "secret_chat.file"):
                     digest = (record["payload"] or {}).get("media_sha256")
                     if "media/" + str(digest) in files:
                         referenced.add("media/" + digest)
@@ -2744,324 +2897,356 @@ def verify_parts(archive, manifest):
     return list(accounts.values())
 
 
-def verify_account_export(path, expected_fingerprint=None, max_gib=None):
-    def integer(value, name, minimum=0):
-        if type(value) is not int or value < minimum:
-            raise ValueError("Invalid account export " + name)
-        return value
+def account_export_integer(value, name, minimum=0):
+    if type(value) is not int or value < minimum:
+        raise ValueError("Invalid account export " + name)
+    return value
 
-    def digest(value, name):
-        if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
-            raise ValueError("Invalid account export " + name)
-        return value
+def account_export_digest(value, name):
+    if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
+        raise ValueError("Invalid account export " + name)
+    return value
 
-    def timestamp(value, name):
-        if not isinstance(value, str):
-            raise ValueError("Invalid account export " + name)
-        parsed = parse_time(value)
-        if parsed.tzinfo is None or parsed.utcoffset().total_seconds() != 0:
-            raise ValueError("Account export times must have an explicit UTC offset: " + name)
-        return parsed
+def account_export_timestamp(value, name):
+    if not isinstance(value, str):
+        raise ValueError("Invalid account export " + name)
+    parsed = parse_time(value)
+    if parsed.tzinfo is None or parsed.utcoffset().total_seconds() != 0:
+        raise ValueError("Account export times must have an explicit UTC offset: " + name)
+    return parsed
 
-    with open_archive(path, max_gib=max_gib) as archive, tempfile.TemporaryDirectory() as temporary:
-        names = archive.namelist()
-        manifest = read_manifest(archive)
-        if manifest.get("format") != "tgwitness-account-export-v1":
+class AccountExportCheck:
+    def __init__(self, archive, expected_fingerprint):
+        self.archive = archive
+        self.expected_fingerprint = expected_fingerprint
+
+    def verify_manifest(self):
+        names = self.archive.namelist()
+        self.manifest = read_manifest(self.archive)
+        if self.manifest.get("format") != "tgwitness-account-export-v1":
             raise VerifierTooOld("Unsupported account export format")
-        public = manifest["public_key"]
-        fp = fingerprint(public)
-        if manifest.get("fingerprint") != fp:
+        self.public = self.manifest["public_key"]
+        self.fp = fingerprint(self.public)
+        if self.manifest.get("fingerprint") != self.fp:
             raise ValueError("Account export fingerprint does not match the signing key")
-        if expected_fingerprint and fp != expected_fingerprint:
+        if self.expected_fingerprint and self.fp != self.expected_fingerprint:
             raise ValueError("Public key differs from the independently trusted fingerprint")
-        key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True))
-        key.verify(base64.b64decode(read_member(archive, "manifest.sig"), validate=True), canonical(manifest))
-        files = manifest["files"]
-        if not isinstance(files, dict) or set(names) != set(files) | {"manifest.json", "manifest.sig"}:
+        self.key = Ed25519PublicKey.from_public_bytes(base64.b64decode(self.public, validate=True))
+        self.key.verify(base64.b64decode(read_member(self.archive, "manifest.sig"), validate=True), canonical(self.manifest))
+        self.files = self.manifest["files"]
+        if not isinstance(self.files, dict) or set(names) != set(self.files) | {"manifest.json", "manifest.sig"}:
             raise ValueError("Unexpected or missing account export members")
-        for name, checksum in files.items():
+        for name, checksum in self.files.items():
             if (not name or "\\" in name or ":" in name or name.startswith("/")
                     or any(part in ("", ".", "..") for part in name.split("/"))):
                 raise ValueError("Unsafe account export member name")
-            if member_digest(archive, name) != digest(checksum, "file hash"):
+            if member_digest(self.archive, name) != account_export_digest(checksum, "file hash"):
                 raise ValueError("File hash mismatch: " + name)
         for required in ("job.json", "inventory.json", "SHA256SUMS", "verify.py", "README.txt"):
-            if required not in files:
+            if required not in self.files:
                 raise ValueError("Missing account export member: " + required)
-        sums = check_sums(archive, manifest)
-        account_id = integer(manifest["account_id"], "account ID", 1)
-        job_id = manifest["job_id"]
-        if not isinstance(job_id, str) or not job_id:
+        self.sums = check_sums(self.archive, self.manifest)
+        self.account_id = account_export_integer(self.manifest["account_id"], "account ID", 1)
+        self.job_id = self.manifest["job_id"]
+        if not isinstance(self.job_id, str) or not self.job_id:
             raise ValueError("Invalid account export job ID")
-        options = manifest["options"]
-        if not isinstance(options, dict):
+        self.options = self.manifest["options"]
+        if not isinstance(self.options, dict):
             raise ValueError("Invalid account export options")
-        options_hash = hashlib.sha256(canonical(options)).hexdigest()
-        if digest(manifest["options_sha256"], "options hash") != options_hash:
+        self.options_hash = hashlib.sha256(canonical(self.options)).hexdigest()
+        if account_export_digest(self.manifest["options_sha256"], "options hash") != self.options_hash:
             raise ValueError("Account export options hash mismatch")
 
-        def signed(name, kind):
-            envelope = json.loads(read_member(archive, name))
-            statement = envelope["statement"]
-            if (statement.get("format") != "tgwitness-account-export-" + kind + "-v1"
-                    or statement.get("public_key") != public or statement.get("job_id") != job_id
-                    or type(statement.get("account_id")) is not int or statement["account_id"] != account_id
-                    or statement.get("options_sha256") != options_hash):
-                raise ValueError("Account export signed identity/options mismatch: " + name)
-            key.verify(base64.b64decode(envelope["signature"], validate=True), canonical(statement))
-            return statement, hashlib.sha256(canonical(envelope)).hexdigest()
 
-        job, _ = signed("job.json", "job")
-        if job.get("options") != options or job.get("created_at") != manifest.get("created_at"):
+    def signed(self, name, kind):
+        envelope = json.loads(read_member(self.archive, name))
+        statement = envelope["statement"]
+        if (statement.get("format") != "tgwitness-account-export-" + kind + "-v1"
+                or statement.get("public_key") != self.public or statement.get("job_id") != self.job_id
+                or type(statement.get("account_id")) is not int or statement["account_id"] != self.account_id
+                or statement.get("options_sha256") != self.options_hash):
+            raise ValueError("Account export signed identity/options mismatch: " + name)
+        self.key.verify(base64.b64decode(envelope["signature"], validate=True), canonical(statement))
+        return statement, hashlib.sha256(canonical(envelope)).hexdigest()
+
+
+    def verify_inventory(self):
+        job, _ = self.signed("job.json", "job")
+        if job.get("options") != self.options or job.get("created_at") != self.manifest.get("created_at"):
             raise ValueError("Account export job does not match the manifest")
-        timestamp(job["created_at"], "created_at")
-        timestamp(manifest["completed_at"], "completed_at")
-        inventory, inventory_hash = signed("inventory.json", "inventory")
-        if inventory_hash != digest(manifest["inventory_sha256"], "inventory hash"):
+        account_export_timestamp(job["created_at"], "created_at")
+        account_export_timestamp(self.manifest["completed_at"], "completed_at")
+        self.inventory, self.inventory_hash = self.signed("inventory.json", "inventory")
+        if self.inventory_hash != account_export_digest(self.manifest["inventory_sha256"], "inventory hash"):
             raise ValueError("Account export inventory hash mismatch")
-        timestamp(inventory["observed_at"], "inventory observed_at")
-        if (type(inventory.get("discovery_complete")) is not bool or not isinstance(inventory.get("gaps"), list)
-                or any(not isinstance(gap, str) for gap in inventory["gaps"])):
+        account_export_timestamp(self.inventory["observed_at"], "inventory observed_at")
+        if (type(self.inventory.get("discovery_complete")) is not bool or not isinstance(self.inventory.get("gaps"), list)
+                or any(not isinstance(gap, str) for gap in self.inventory["gaps"])):
             raise ValueError("Invalid account export discovery coverage")
-        if not isinstance(inventory.get("chats"), list) or not isinstance(inventory.get("tasks"), list):
+        if not isinstance(self.inventory.get("chats"), list) or not isinstance(self.inventory.get("tasks"), list):
             raise ValueError("Invalid account export task inventory")
-        tasks = {}
-        chats = {}
-        for chat in inventory["chats"]:
+        self.tasks = {}
+        self.chats = {}
+        for chat in self.inventory["chats"]:
             cid = chat.get("id")
-            if type(cid) is not int or not cid or cid in chats or type(chat.get("selected")) is not bool:
+            if type(cid) is not int or not cid or cid in self.chats or type(chat.get("selected")) is not bool:
                 raise ValueError("Invalid or duplicate account export inventory chat")
             if chat["selected"]:
-                if options.get("chat_ids") and cid not in options["chat_ids"]:
+                if self.options.get("chat_ids") and cid not in self.options["chat_ids"]:
                     raise ValueError("Account export selected a chat outside its frozen options")
-                if options.get("chat_kinds") is not None and chat.get("kind") not in options["chat_kinds"]:
+                if self.options.get("chat_kinds") is not None and chat.get("kind") not in self.options["chat_kinds"]:
                     raise ValueError("Account export selected a chat kind outside its frozen options")
-                if options.get("include_archived") is False and chat.get("archived"):
+                if self.options.get("include_archived") is False and chat.get("archived"):
                     raise ValueError("Account export selected an excluded archived chat")
-            chats[cid] = chat
+            self.chats[cid] = chat
         metadata_categories = {"profile", "contacts", "sessions", "profile_photos", "stories", "other_data"}
-        for task in inventory["tasks"]:
+        for task in self.inventory["tasks"]:
             task_id, category = task["id"], task["category"]
-            if not isinstance(task_id, str) or not task_id or task_id in tasks:
+            if not isinstance(task_id, str) or not task_id or task_id in self.tasks:
                 raise ValueError("Duplicate or invalid account export task ID")
-            integer(task["cursor_start"], "initial cursor")
+            account_export_integer(task["cursor_start"], "initial cursor")
             if category == "messages":
                 if type(task.get("chat_id")) is not int or task["chat_id"] == 0:
                     raise ValueError("Invalid message task chat ID")
-                if task["chat_id"] not in chats or not chats[task["chat_id"]]["selected"]:
+                if task["chat_id"] not in self.chats or not self.chats[task["chat_id"]]["selected"]:
                     raise ValueError("Account export message task is outside the selected inventory")
-                newest = integer(task["newest_message_id"], "newest message ID")
+                newest = account_export_integer(task["newest_message_id"], "newest message ID")
                 if task["cursor_start"] != newest + 1 or type(task.get("own_only")) is not bool:
                     raise ValueError("Invalid message task boundary")
             elif category not in metadata_categories or task.get("chat_id") is not None:
                 raise ValueError("Invalid account export task category")
-            tasks[task_id] = {"statement": task, "cursor": task["cursor_start"], "terminal": False, "ok": True}
+            self.tasks[task_id] = {"statement": task, "cursor": task["cursor_start"], "terminal": False, "ok": True}
 
-        inventory_omissions = ["Selected chat has no history task: " + str(cid) for cid, chat in chats.items()
-                               if chat["selected"] and not any(t["statement"].get("chat_id") == cid for t in tasks.values())]
+        self.inventory_omissions = ["Selected chat has no history task: " + str(cid) for cid, chat in self.chats.items()
+                               if chat["selected"] and not any(t["statement"].get("chat_id") == cid for t in self.tasks.values())]
         category_options = {"profile": "include_profile", "contacts": "include_contacts",
                             "sessions": "include_session_metadata", "profile_photos": "include_profile_photos",
                             "stories": "include_stories", "other_data": "include_other_data"}
         for category, option in category_options.items():
-            present = any(t["statement"]["category"] == category for t in tasks.values())
-            if options.get(option) is True and not present:
-                inventory_omissions.append("Selected category has no acquisition task: " + category)
-            if options.get(option) is False and present:
+            present = any(t["statement"]["category"] == category for t in self.tasks.values())
+            if self.options.get(option) is True and not present:
+                self.inventory_omissions.append("Selected category has no acquisition task: " + category)
+            if self.options.get(option) is False and present:
                 raise ValueError("Account export task is excluded by its frozen options")
 
-        receipts = []
-        for name in files:
+
+    def verify_pages(self, temporary):
+        self.receipts = []
+        for name in self.files:
             if name.startswith("receipts/"):
                 found = re.fullmatch(r"receipts/(\d+)\.json", name)
                 if not found:
                     raise ValueError("Unexpected account export receipt name")
-                receipts.append((int(found[1]), name))
-        receipts.sort()
-        counts = dict.fromkeys(("records", "messages", "media_saved", "media_skipped", "bytes_saved"), 0)
-        media_hashed = 0
-        hash_manifests, hash_index = set(), hashlib.sha256()
+                self.receipts.append((int(found[1]), name))
+        self.receipts.sort()
+        self.counts = dict.fromkeys(("records", "messages", "media_saved", "media_skipped", "bytes_saved"), 0)
+        self.media_hashed = 0
+        self.hash_manifests, self.hash_index = set(), hashlib.sha256()
         seen = sqlite3.connect(Path(temporary) / "seen.sqlite3")
         seen.execute("CREATE TABLE messages (chat INTEGER, id INTEGER, PRIMARY KEY (chat, id)) WITHOUT ROWID")
-        data_files, media_files, failed_attachments, failed_pages, messages_seen = set(), set(), 0, 0, 0
-        previous = "0" * 64
-        since = timestamp(options["from_utc"], "from_utc") if options.get("from_utc") else None
-        until = timestamp(options["to_utc"], "to_utc") if options.get("to_utc") else None
+        self.data_files, self.media_files, self.failed_attachments, self.failed_pages, self.messages_seen = set(), set(), 0, 0, 0
+        self.previous = "0" * 64
+        self.since = account_export_timestamp(self.options["from_utc"], "from_utc") if self.options.get("from_utc") else None
+        self.until = account_export_timestamp(self.options["to_utc"], "to_utc") if self.options.get("to_utc") else None
         try:
-            for seq, (number, name) in enumerate(receipts, 1):
-                receipt, receipt_hash = signed(name, "page")
-                if (number != seq or type(receipt.get("seq")) is not int or receipt["seq"] != seq
-                        or receipt.get("previous_receipt_sha256") != previous
-                        or receipt.get("inventory_sha256") != inventory_hash):
-                    raise ValueError("Broken account export receipt chain at " + str(seq))
-                previous = receipt_hash
-                state = tasks.get(receipt.get("task_id"))
-                if state is None or state["terminal"]:
-                    raise ValueError("Unknown or already terminal account export task")
-                task = state["statement"]
-                if (receipt.get("category") != task["category"] or receipt.get("chat_id") != task.get("chat_id")
-                        or type(receipt.get("chat_id")) is not type(task.get("chat_id"))):
-                    raise ValueError("Account export receipt task scope mismatch")
-                before = integer(receipt["cursor_before"], "page cursor before")
-                after = integer(receipt["cursor_after"], "page cursor after")
-                if before != state["cursor"] or type(receipt.get("terminal")) is not bool:
-                    raise ValueError("Broken account export task cursor continuity")
-                if receipt.get("outcome") not in ("ok", "failed"):
-                    raise ValueError("Invalid account export receipt outcome")
-                timestamp(receipt["captured_from"], "captured_from")
-                timestamp(receipt["captured_until"], "captured_until")
-                count = integer(receipt["count"], "page record count")
-                page_seen = integer(receipt["seen_count"], "page seen count")
-                if page_seen < count:
-                    raise ValueError("Account export seen count is shorter than the saved page")
-                if task["category"] == "messages":
-                    messages_seen += page_seen
-                if task["category"] == "messages" and (after > before or (after == before and not receipt["terminal"])):
-                    raise ValueError("Invalid account export message pagination boundary")
-                data_name = receipt["data_file"]
-                matched = re.fullmatch(r"data/(\d+)\.jsonl", data_name) if isinstance(data_name, str) else None
-                if not matched or int(matched[1]) != seq or data_name in data_files or data_name not in files:
-                    raise ValueError("Missing, reused or mismatched account export page data")
-                data_files.add(data_name)
-                if files[data_name] != digest(receipt["data_sha256"], "page data hash"):
-                    raise ValueError("Account export receipt data hash mismatch")
-                actual, last_id = 0, before
-                with archive.open(data_name) as stream:
-                    for line in bounded_lines(stream):
-                        record = json.loads(line)
-                        if not isinstance(record, dict) or line != canonical(record) + b"\n":
-                            raise ValueError("Account export records must be canonical JSONL")
-                        if record.get("category") != task["category"]:
-                            raise ValueError("Account export record category mismatch")
-                        if task["category"] == "messages":
-                            message_id = integer(record["id"], "message ID", 1)
-                            if (type(record.get("chat_id")) is not int or record["chat_id"] != task["chat_id"]
-                                    or message_id > task["newest_message_id"]
-                                    or not after <= message_id < last_id):
-                                raise ValueError("Account export message outside the signed pagination boundary")
-                            last_id = message_id
-                            if (task["own_only"] or options.get("own_messages_only")) and record.get("outgoing") is not True:
-                                raise ValueError("Account export own-message scope mismatch")
-                            at = timestamp(record["date"], "message date")
-                            if (since and at < since) or (until and at >= until):
-                                raise ValueError("Account export message outside the selected date range")
-                            if options.get("sender_ids") and record.get("from_id") not in options["sender_ids"]:
-                                raise ValueError("Account export sender selection mismatch")
-                            if options.get("text_contains") and not any(term.casefold() in (record.get("text") or "").casefold()
-                                                                         for term in options["text_contains"]):
-                                raise ValueError("Account export text selection mismatch")
-                            try:
-                                seen.execute("INSERT INTO messages VALUES (?, ?)", (task["chat_id"], message_id))
-                            except sqlite3.IntegrityError:
-                                raise ValueError("Duplicate account export message") from None
-                            counts["messages"] += 1
-                        attachments = record.get("attachments", [])
-                        if not isinstance(attachments, list):
-                            raise ValueError("Invalid account export attachments")
-                        for attachment_index, attachment in enumerate(attachments):
-                            outcome = attachment.get("outcome")
-                            server_hashes = attachment.get("server_hashes")
-                            if server_hashes is not None:
-                                validate_server_hashes(server_hashes)
-                                manifest_digest = hashlib.sha256(canonical(server_hashes)).hexdigest()
-                                hash_file = "hashes/" + manifest_digest + ".json"
-                                if files.get(hash_file) != manifest_digest:
-                                    raise ValueError("File-hash manifest differs from its signed message record")
-                                hash_manifests.add(hash_file)
-                                hash_index.update(canonical({"category": record["category"], "chat_id": record.get("chat_id"),
-                                    "message_id": record.get("id"), "attachment_index": attachment_index, "manifest": hash_file}) + b"\n")
-                            if outcome == "saved":
-                                checksum = digest(attachment["sha256"], "attachment hash")
-                                media_name = "media/" + checksum
-                                size = integer(attachment["bytes"], "attachment byte count")
-                                if (attachment.get("file") != media_name or files.get(media_name) != checksum
-                                        or archive.getinfo(media_name).file_size != size):
-                                    raise ValueError("Account export attachment bytes/hash mismatch")
-                                expected = attachment.get("expected_bytes")
-                                if expected is not None and integer(expected, "expected attachment bytes") != size:
-                                    raise ValueError("Account export attachment size differs from observation")
-                                representation = attachment.get("representation")
-                                if representation is not None and (not isinstance(representation, dict)
-                                        or integer(representation.get("bytes"), "attachment representation bytes") != size):
-                                    raise ValueError("Account export attachment size differs from its representation")
-                                media_files.add(media_name)
-                                counts["media_saved"] += 1
-                                counts["bytes_saved"] += size
-                            elif outcome == "hashed":
-                                if (attachment.get("file") or attachment.get("sha256") or not server_hashes
-                                        or server_hashes["status"] != "complete"):
-                                    raise ValueError("Hash-only attachment claims saved bytes or incomplete coverage")
-                                media_hashed += 1
-                            elif outcome in ("excluded", "failed"):
-                                if attachment.get("file") or attachment.get("sha256"):
-                                    raise ValueError("Unsaved account export attachment claims saved bytes")
-                                counts["media_skipped"] += 1
-                                failed_attachments += outcome == "failed"
-                            else:
-                                raise ValueError("Invalid account export attachment outcome")
-                        actual += 1
-                if actual != count:
-                    raise ValueError("Account export page record count mismatch")
-                counts["records"] += actual
-                state.update(cursor=after, terminal=receipt["terminal"], ok=state["ok"] and receipt["outcome"] == "ok")
-                failed_pages += receipt["outcome"] == "failed"
+            for seq, (number, name) in enumerate(self.receipts, 1):
+                self.verify_page(seq, number, name, seen)
         finally:
             seen.close()
-        if {name for name in files if name.startswith("data/")} != data_files:
+
+    def verify_page(self, seq, number, name, seen):
+        receipt, receipt_hash = self.signed(name, "page")
+        if (number != seq or type(receipt.get("seq")) is not int or receipt["seq"] != seq
+                or receipt.get("previous_receipt_sha256") != self.previous
+                or receipt.get("inventory_sha256") != self.inventory_hash):
+            raise ValueError("Broken account export receipt chain at " + str(seq))
+        self.previous = receipt_hash
+        state = self.tasks.get(receipt.get("task_id"))
+        if state is None or state["terminal"]:
+            raise ValueError("Unknown or already terminal account export task")
+        task = state["statement"]
+        if (receipt.get("category") != task["category"] or receipt.get("chat_id") != task.get("chat_id")
+                or type(receipt.get("chat_id")) is not type(task.get("chat_id"))):
+            raise ValueError("Account export receipt task scope mismatch")
+        before = account_export_integer(receipt["cursor_before"], "page cursor before")
+        after = account_export_integer(receipt["cursor_after"], "page cursor after")
+        if before != state["cursor"] or type(receipt.get("terminal")) is not bool:
+            raise ValueError("Broken account export task cursor continuity")
+        if receipt.get("outcome") not in ("ok", "failed"):
+            raise ValueError("Invalid account export receipt outcome")
+        account_export_timestamp(receipt["captured_from"], "captured_from")
+        account_export_timestamp(receipt["captured_until"], "captured_until")
+        count = account_export_integer(receipt["count"], "page record count")
+        page_seen = account_export_integer(receipt["seen_count"], "page seen count")
+        if page_seen < count:
+            raise ValueError("Account export seen count is shorter than the saved page")
+        if task["category"] == "messages":
+            self.messages_seen += page_seen
+        if task["category"] == "messages" and (after > before or (after == before and not receipt["terminal"])):
+            raise ValueError("Invalid account export message pagination boundary")
+        data_name = receipt["data_file"]
+        matched = re.fullmatch(r"data/(\d+)\.jsonl", data_name) if isinstance(data_name, str) else None
+        if not matched or int(matched[1]) != seq or data_name in self.data_files or data_name not in self.files:
+            raise ValueError("Missing, reused or mismatched account export page data")
+        self.data_files.add(data_name)
+        if self.files[data_name] != account_export_digest(receipt["data_sha256"], "page data hash"):
+            raise ValueError("Account export receipt data hash mismatch")
+        actual, last_id = 0, before
+        with self.archive.open(data_name) as stream:
+            for line in bounded_lines(stream):
+                last_id = self.verify_record(line, task, after, last_id, seen)
+                actual += 1
+        if actual != count:
+            raise ValueError("Account export page record count mismatch")
+        self.counts["records"] += actual
+        state.update(cursor=after, terminal=receipt["terminal"], ok=state["ok"] and receipt["outcome"] == "ok")
+        self.failed_pages += receipt["outcome"] == "failed"
+
+    def verify_record(self, line, task, after, last_id, seen):
+        record = json.loads(line)
+        if not isinstance(record, dict) or line != canonical(record) + b"\n":
+            raise ValueError("Account export records must be canonical JSONL")
+        if record.get("category") != task["category"]:
+            raise ValueError("Account export record category mismatch")
+        if task["category"] == "messages":
+            message_id = account_export_integer(record["id"], "message ID", 1)
+            if (type(record.get("chat_id")) is not int or record["chat_id"] != task["chat_id"]
+                    or message_id > task["newest_message_id"]
+                    or not after <= message_id < last_id):
+                raise ValueError("Account export message outside the signed pagination boundary")
+            last_id = message_id
+            if (task["own_only"] or self.options.get("own_messages_only")) and record.get("outgoing") is not True:
+                raise ValueError("Account export own-message scope mismatch")
+            at = account_export_timestamp(record["date"], "message date")
+            if (self.since and at < self.since) or (self.until and at >= self.until):
+                raise ValueError("Account export message outside the selected date range")
+            if self.options.get("sender_ids") and record.get("from_id") not in self.options["sender_ids"]:
+                raise ValueError("Account export sender selection mismatch")
+            if self.options.get("text_contains") and not any(term.casefold() in (record.get("text") or "").casefold()
+                                                         for term in self.options["text_contains"]):
+                raise ValueError("Account export text selection mismatch")
+            try:
+                seen.execute("INSERT INTO messages VALUES (?, ?)", (task["chat_id"], message_id))
+            except sqlite3.IntegrityError:
+                raise ValueError("Duplicate account export message") from None
+            self.counts["messages"] += 1
+        self.verify_attachments(record)
+        return last_id
+
+    def verify_attachments(self, record):
+        attachments = record.get("attachments", [])
+        if not isinstance(attachments, list):
+            raise ValueError("Invalid account export attachments")
+        for attachment_index, attachment in enumerate(attachments):
+            outcome = attachment.get("outcome")
+            server_hashes = attachment.get("server_hashes")
+            if server_hashes is not None:
+                validate_server_hashes(server_hashes)
+                manifest_digest = hashlib.sha256(canonical(server_hashes)).hexdigest()
+                hash_file = "hashes/" + manifest_digest + ".json"
+                if self.files.get(hash_file) != manifest_digest:
+                    raise ValueError("File-hash manifest differs from its signed message record")
+                self.hash_manifests.add(hash_file)
+                self.hash_index.update(canonical({"category": record["category"], "chat_id": record.get("chat_id"),
+                    "message_id": record.get("id"), "attachment_index": attachment_index, "manifest": hash_file}) + b"\n")
+            if outcome == "saved":
+                checksum = account_export_digest(attachment["sha256"], "attachment hash")
+                media_name = "media/" + checksum
+                size = account_export_integer(attachment["bytes"], "attachment byte count")
+                if (attachment.get("file") != media_name or self.files.get(media_name) != checksum
+                        or self.archive.getinfo(media_name).file_size != size):
+                    raise ValueError("Account export attachment bytes/hash mismatch")
+                expected = attachment.get("expected_bytes")
+                if expected is not None and account_export_integer(expected, "expected attachment bytes") != size:
+                    raise ValueError("Account export attachment size differs from observation")
+                representation = attachment.get("representation")
+                if representation is not None and (not isinstance(representation, dict)
+                        or account_export_integer(representation.get("bytes"), "attachment representation bytes") != size):
+                    raise ValueError("Account export attachment size differs from its representation")
+                self.media_files.add(media_name)
+                self.counts["media_saved"] += 1
+                self.counts["bytes_saved"] += size
+            elif outcome == "hashed":
+                if (attachment.get("file") or attachment.get("sha256") or not server_hashes
+                        or server_hashes["status"] != "complete"):
+                    raise ValueError("Hash-only attachment claims saved bytes or incomplete coverage")
+                self.media_hashed += 1
+            elif outcome in ("excluded", "failed"):
+                if attachment.get("file") or attachment.get("sha256"):
+                    raise ValueError("Unsaved account export attachment claims saved bytes")
+                self.counts["media_skipped"] += 1
+                self.failed_attachments += outcome == "failed"
+            else:
+                raise ValueError("Invalid account export attachment outcome")
+
+    def finish(self):
+        if {name for name in self.files if name.startswith("data/")} != self.data_files:
             raise ValueError("Unreceipted account export page data")
-        if {name for name in files if name.startswith("media/")} != media_files:
+        if {name for name in self.files if name.startswith("media/")} != self.media_files:
             raise ValueError("Unreferenced account export media")
-        if hash_manifests:
-            if files.get("hashes/index.jsonl") != hash_index.hexdigest():
+        if self.hash_manifests:
+            if self.files.get("hashes/index.jsonl") != self.hash_index.hexdigest():
                 raise ValueError("File-hash index differs from signed message references")
-            hash_manifests.add("hashes/index.jsonl")
-        if {name for name in files if name.startswith("hashes/")} != hash_manifests:
+            self.hash_manifests.add("hashes/index.jsonl")
+        if {name for name in self.files if name.startswith("hashes/")} != self.hash_manifests:
             raise ValueError("Unreferenced account export file-hash manifest")
-        if (integer(manifest["receipt_count"], "receipt count") != len(receipts)
-                or digest(manifest["receipt_head_sha256"], "receipt head") != previous):
+        if (account_export_integer(self.manifest["receipt_count"], "receipt count") != len(self.receipts)
+                or account_export_digest(self.manifest["receipt_head_sha256"], "receipt head") != self.previous):
             raise ValueError("Account export manifest receipt boundary mismatch")
-        declared_counts = manifest["counts"]
+        declared_counts = self.manifest["counts"]
         if "unique_media_bytes" in declared_counts:
-            counts["unique_media_bytes"] = sum(archive.getinfo(name).file_size for name in media_files)
-        if declared_counts.get("media_hashed", 0) != media_hashed:
+            self.counts["unique_media_bytes"] = sum(self.archive.getinfo(name).file_size for name in self.media_files)
+        if declared_counts.get("media_hashed", 0) != self.media_hashed:
             raise ValueError("Account export hash-only attachment count mismatch")
-        if any(type(declared_counts.get(name)) is not int or declared_counts[name] != count for name, count in counts.items()):
+        if any(type(declared_counts.get(name)) is not int or declared_counts[name] != count for name, count in self.counts.items()):
             raise ValueError("Account export manifest counts mismatch")
-        if "messages_exported" in declared_counts and declared_counts["messages_exported"] != counts["messages"]:
+        if "messages_exported" in declared_counts and declared_counts["messages_exported"] != self.counts["messages"]:
             raise ValueError("Account export message summary mismatch")
-        if "messages_seen" in declared_counts and declared_counts["messages_seen"] != messages_seen:
+        if "messages_seen" in declared_counts and declared_counts["messages_seen"] != self.messages_seen:
             raise ValueError("Account export seen-message summary mismatch")
         if "media_hashed" in declared_counts:
-            counts["media_hashed"] = media_hashed
-        done = sum(state["terminal"] and state["ok"] for state in tasks.values())
-        failed_tasks = [name for name, state in tasks.items() if not state["ok"]]
-        coverage = manifest["coverage"]
+            self.counts["media_hashed"] = self.media_hashed
+        done = sum(state["terminal"] and state["ok"] for state in self.tasks.values())
+        failed_tasks = [name for name, state in self.tasks.items() if not state["ok"]]
+        coverage = self.manifest["coverage"]
         if (type(coverage.get("inventory_complete")) is not bool
-                or coverage["inventory_complete"] != inventory["discovery_complete"]
-                or type(coverage.get("tasks_total")) is not int or coverage["tasks_total"] != len(tasks)
+                or coverage["inventory_complete"] != self.inventory["discovery_complete"]
+                or type(coverage.get("tasks_total")) is not int or coverage["tasks_total"] != len(self.tasks)
                 or type(coverage.get("tasks_done")) is not int or coverage["tasks_done"] != done
                 or type(coverage.get("failures")) is not int
-                or coverage["failures"] != len(failed_tasks) + failed_attachments + len(inventory["gaps"])):
+                or coverage["failures"] != len(failed_tasks) + self.failed_attachments + len(self.inventory["gaps"])):
             raise ValueError("Account export coverage summary mismatch")
-        complete = (inventory["discovery_complete"] and done == len(tasks)
-                    and not inventory["gaps"] and not inventory_omissions and not failed_attachments and not failed_pages)
-        if type(manifest.get("complete_within_scope")) is not bool or manifest["complete_within_scope"] != complete:
+        complete = (self.inventory["discovery_complete"] and done == len(self.tasks)
+                    and not self.inventory["gaps"] and not self.inventory_omissions and not self.failed_attachments and not self.failed_pages)
+        if type(self.manifest.get("complete_within_scope")) is not bool or self.manifest["complete_within_scope"] != complete:
             raise ValueError("Account export completeness claim disagrees with acquisition receipts")
-        if not isinstance(manifest.get("status"), str) or (manifest["status"] in ("done", "complete") and not complete):
+        if not isinstance(self.manifest.get("status"), str) or (self.manifest["status"] in ("done", "complete") and not complete):
             raise ValueError("Account export status contradicts its partial acquisition coverage")
-        return {"format": manifest["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
-                "job_id": job_id, "account_id": account_id, "status": manifest["status"], "counts": counts,
-                "options": options, "options_sha256": manifest["options_sha256"],
-                "receipt_count": len(receipts), "receipt_head_sha256": previous, "files_checked": len(files),
-                "sha256sums": sums, "producer": manifest.get("producer"), "coverage": {
-                    "inventory_complete": inventory["discovery_complete"], "tasks_total": len(tasks), "tasks_done": done,
-                    "unfinished_tasks": [name for name, state in tasks.items() if not state["terminal"]],
+        return {"format": self.manifest["format"], "fingerprint": self.fp, "key_pinned": bool(self.expected_fingerprint),
+                "job_id": self.job_id, "account_id": self.account_id, "status": self.manifest["status"], "counts": self.counts,
+                "options": self.options, "options_sha256": self.manifest["options_sha256"],
+                "receipt_count": len(self.receipts), "receipt_head_sha256": self.previous, "files_checked": len(self.files),
+                "sha256sums": self.sums, "producer": self.manifest.get("producer"), "coverage": {
+                    "inventory_complete": self.inventory["discovery_complete"], "tasks_total": len(self.tasks), "tasks_done": done,
+                    "unfinished_tasks": [name for name, state in self.tasks.items() if not state["terminal"]],
                     "failed_tasks": failed_tasks,
-                    "failed_pages": failed_pages, "failed_attachments": failed_attachments,
-                    "gaps": inventory["gaps"] + inventory_omissions},
+                    "failed_pages": self.failed_pages, "failed_attachments": self.failed_attachments,
+                    "gaps": self.inventory["gaps"] + self.inventory_omissions},
                 "complete_within_scope": complete, "source_completeness_established": False,
-                "html_index_signed_by_manifest": "index.html" in files,
+                "html_index_signed_by_manifest": "index.html" in self.files,
                 "meaning": "Integrity is checked relative to the signing key. Completion covers the frozen selected "
                            "tasks and observed outcomes, not all Telegram data, a simultaneous snapshot or trusted time."}
+
+
+
+
+def verify_account_export(path, expected_fingerprint=None, max_gib=None):
+    with open_archive(path, max_gib=max_gib) as archive, tempfile.TemporaryDirectory() as temporary:
+        checked = AccountExportCheck(archive, expected_fingerprint)
+        checked.verify_manifest()
+        checked.verify_inventory()
+        checked.verify_pages(temporary)
+        return checked.finish()
 
 
 def account_export_lines(result):
@@ -3086,47 +3271,55 @@ WITHHELD_FIELDS = {"id", "state", "rules", "count", "text", "attachments", "reda
 REPLY_STATES = ("disclosed", "withheld", "not_in_source")
 
 
-def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_gib=None):
-    with open_archive(path, max_gib=max_gib) as archive, tempfile.TemporaryDirectory() as temporary:
-        manifest = read_manifest(archive)
-        if manifest.get("format") not in DISCLOSURE_FORMATS:
+class AccountDisclosureCheck:
+    def __init__(self, archive, expected_fingerprint, source, max_gib):
+        self.archive = archive
+        self.expected_fingerprint = expected_fingerprint
+        self.source = source
+        self.max_gib = max_gib
+
+    def verify_manifest(self):
+        self.manifest = read_manifest(self.archive)
+        if self.manifest.get("format") not in DISCLOSURE_FORMATS:
             raise VerifierTooOld("Unsupported account disclosure format")
         # Version 2 keeps records the selection left out as content-free markers, and replies say what they answer.
-        marked = manifest["format"] == "tgwitness-account-disclosure-v2"
-        public = manifest["public_key"]
-        fp = fingerprint(public)
-        if manifest.get("fingerprint") != fp:
+        self.marked = self.manifest["format"] == "tgwitness-account-disclosure-v2"
+        self.public = self.manifest["public_key"]
+        self.fp = fingerprint(self.public)
+        if self.manifest.get("fingerprint") != self.fp:
             raise ValueError("Disclosure fingerprint does not match its signing key")
-        if expected_fingerprint and fp != expected_fingerprint:
+        if self.expected_fingerprint and self.fp != self.expected_fingerprint:
             raise ValueError("Public key differs from the independently trusted fingerprint")
-        key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True))
-        key.verify(base64.b64decode(read_member(archive, "manifest.sig"), validate=True), canonical(manifest))
-        files = manifest["files"]
-        if not isinstance(files, dict) or set(archive.namelist()) != set(files) | {"manifest.json", "manifest.sig"}:
+        self.key = Ed25519PublicKey.from_public_bytes(base64.b64decode(self.public, validate=True))
+        self.key.verify(base64.b64decode(read_member(self.archive, "manifest.sig"), validate=True), canonical(self.manifest))
+        self.files = self.manifest["files"]
+        if not isinstance(self.files, dict) or set(self.archive.namelist()) != set(self.files) | {"manifest.json", "manifest.sig"}:
             raise ValueError("Unexpected or missing disclosure archive members")
         allowed = {"messages.jsonl", "index.html", "analytics.json", "README.txt", "verify.py", "SHA256SUMS",
                    "VERIFY.cmd", "VERIFY.sh", "START_HERE.txt"}
-        for name, checksum in files.items():
+        for name, checksum in self.files.items():
             if name not in allowed and not re.fullmatch(r"media/[0-9a-f]{64}", name):
                 raise ValueError("Unexpected disclosure content: " + name)
             if not isinstance(checksum, str) or not re.fullmatch(r"[0-9a-f]{64}", checksum):
                 raise ValueError("Invalid disclosure file hash")
-            if member_digest(archive, name) != checksum:
+            if member_digest(self.archive, name) != checksum:
                 raise ValueError("File hash mismatch: " + name)
-        if "messages.jsonl" not in files or "index.html" not in files:
+        if "messages.jsonl" not in self.files or "index.html" not in self.files:
             raise ValueError("Missing authoritative disclosure messages or readable index")
-        sums = check_sums(archive, manifest)
+        self.sums = check_sums(self.archive, self.manifest)
         for field in ("source_archive_sha256", "source_collector_fingerprint"):
-            if not isinstance(manifest.get(field), str) or not re.fullmatch(r"[0-9a-f]{64}", manifest[field]):
+            if not isinstance(self.manifest.get(field), str) or not re.fullmatch(r"[0-9a-f]{64}", self.manifest[field]):
                 raise ValueError("Invalid disclosure source reference")
-        if not isinstance(manifest.get("policy"), dict):
+        if not isinstance(self.manifest.get("policy"), dict):
             raise ValueError("Disclosure must record its applied policy")
+
+    def verify_messages(self, temporary):
         seen = sqlite3.connect(Path(temporary) / "disclosure.sqlite3")
         seen.execute("CREATE TABLE messages (chat TEXT, id TEXT, state TEXT, PRIMARY KEY(chat,id)) WITHOUT ROWID")
         seen.execute("CREATE TABLE replies (chat TEXT, id TEXT, state TEXT)")
-        media, messages, withheld = set(), 0, 0
+        self.media, self.messages, self.withheld = set(), 0, 0
         try:
-            with archive.open("messages.jsonl") as stream:
+            with self.archive.open("messages.jsonl") as stream:
                 for line in bounded_lines(stream):
                     row = json.loads(line)
                     if not isinstance(row, dict) or set(row) != {"chat", "message"}:
@@ -3137,8 +3330,8 @@ def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_
                     for value in (chat.get("id"), message.get("id")):
                         if type(value) not in (str, int) or not value:
                             raise ValueError("Invalid disclosure chat/message ID")
-                    state = message.get("state", "disclosed") if marked else "disclosed"
-                    if marked and state not in ("disclosed", "withheld"):
+                    state = message.get("state", "disclosed") if self.marked else "disclosed"
+                    if self.marked and state not in ("disclosed", "withheld"):
                         raise ValueError("Invalid disclosure record state")
                     try:
                         seen.execute("INSERT INTO messages VALUES (?,?,?)",
@@ -3155,9 +3348,9 @@ def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_
                                 or message.get("text") != "[withheld by selection \u2014 rule: " + ", ".join(rules) + "]"
                                 or type(count) is not int or count < 1):
                             raise ValueError("Invalid withheld-by-selection marker")
-                        withheld += count
+                        self.withheld += count
                         continue
-                    reply = message.get("reply_to") if marked else None
+                    reply = message.get("reply_to") if self.marked else None
                     if reply is not None:
                         if (not isinstance(reply, dict) or set(reply) != {"id", "state"}
                                 or type(reply.get("id")) not in (str, int) or not reply["id"]
@@ -3181,11 +3374,11 @@ def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_
                         name = "media/" + checksum
                         size = item.get("bytes")
                         if (type(size) is not int or size < 0 or item.get("file") != name
-                                or files.get(name) != checksum or archive.getinfo(name).file_size != size):
+                                or self.files.get(name) != checksum or self.archive.getinfo(name).file_size != size):
                             raise ValueError("Disclosure attachment bytes/hash mismatch")
-                        media.add(name)
-                    messages += 1
-            chats = seen.execute("SELECT COUNT(DISTINCT chat) FROM messages WHERE state='disclosed'").fetchone()[0]
+                        self.media.add(name)
+                    self.messages += 1
+            self.chats = seen.execute("SELECT COUNT(DISTINCT chat) FROM messages WHERE state='disclosed'").fetchone()[0]
             # A reply to a disclosed or withheld message must point at that record; only not_in_source points nowhere.
             dangling = seen.execute("SELECT count(*) FROM replies r LEFT JOIN messages m ON m.chat=r.chat AND m.id=r.id "
                                     "WHERE (r.state!='not_in_source' AND (m.id IS NULL OR m.state!=r.state)) "
@@ -3194,35 +3387,45 @@ def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_
                 raise ValueError("A disclosed reply points at a record that is not in this disclosure")
         finally:
             seen.close()
-        if {name for name in files if name.startswith("media/")} != media:
+
+    def finish(self):
+        if {name for name in self.files if name.startswith("media/")} != self.media:
             raise ValueError("Unreferenced disclosure media")
-        counts = {"messages": messages, "chats": chats, "media": len(media)}
-        if marked:
-            counts["withheld"] = withheld
-        if (not isinstance(manifest.get("counts"), dict) or set(manifest["counts"]) != set(counts)
-                or any(type(manifest["counts"][name]) is not int or manifest["counts"][name] != count
+        counts = {"messages": self.messages, "chats": self.chats, "media": len(self.media)}
+        if self.marked:
+            counts["withheld"] = self.withheld
+        if (not isinstance(self.manifest.get("counts"), dict) or set(self.manifest["counts"]) != set(counts)
+                or any(type(self.manifest["counts"][name]) is not int or self.manifest["counts"][name] != count
                        for name, count in counts.items())):
             raise ValueError("Disclosure manifest counts mismatch")
         source_checked = False
-        if source is not None:
-            with open(source, "rb") as stream:
+        if self.source is not None:
+            with open(self.source, "rb") as stream:
                 checksum = hashlib.file_digest(stream, "sha256").hexdigest()
-            if checksum != manifest["source_archive_sha256"]:
+            if checksum != self.manifest["source_archive_sha256"]:
                 raise ValueError("Disclosure source archive hash mismatch")
-            verify_account_export(source, manifest["source_collector_fingerprint"], max_gib=max_gib)
+            verify_account_export(self.source, self.manifest["source_collector_fingerprint"], max_gib=self.max_gib)
             source_checked = True
-        return {"format": manifest["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
-                "disclosure_id": manifest.get("disclosure_id"), "created_at": manifest.get("created_at"),
-                "counts": counts, "policy": manifest["policy"], "files_checked": len(files), "sha256sums": sums,
-                "source_archive_sha256": manifest["source_archive_sha256"],
-                "source_collector_fingerprint": manifest["source_collector_fingerprint"],
+        return {"format": self.manifest["format"], "fingerprint": self.fp, "key_pinned": bool(self.expected_fingerprint),
+                "disclosure_id": self.manifest.get("disclosure_id"), "created_at": self.manifest.get("created_at"),
+                "counts": counts, "policy": self.manifest["policy"], "files_checked": len(self.files), "sha256sums": self.sums,
+                "source_archive_sha256": self.manifest["source_archive_sha256"],
+                "source_collector_fingerprint": self.manifest["source_collector_fingerprint"],
                 "source_reference_checked": source_checked, "derivation_correctness_established": False,
-                "html_index_signed_by_manifest": True, "producer": manifest.get("producer"),
+                "html_index_signed_by_manifest": True, "producer": self.manifest.get("producer"),
                 "meaning": "The signature protects this disclosure's bytes and policy statement. "
                            "Source linkage does not establish correct filtering, redaction, legal compliance or completeness."}
 
 
 
+
+
+def verify_account_disclosure(path, expected_fingerprint=None, source=None, max_gib=None):
+    with open_archive(path, max_gib=max_gib) as archive, tempfile.TemporaryDirectory() as temporary:
+        checked = AccountDisclosureCheck(archive, expected_fingerprint, source, max_gib)
+        checked.verify_manifest()
+        checked.verify_messages(temporary)
+        return checked.finish()
 def bundle_format(path):
     with open_archive(path) as archive:
         return read_manifest(archive).get("format")
@@ -5265,6 +5468,10 @@ class Console:
                            point + " · " + anchor.get("time", "?").replace("T", " ").replace("Z", " UTC"))
                 self.say("  " + " " * 27 + self.paint(self.t("signature chained to your root" if checked
                                                                else "signature not checked: add --tsa-ca"), "dim"))
+                if anchor.get("certificate_reference"):
+                    self.say("  " + self.t("Signing certificate reference") + ": " + anchor["certificate_reference"])
+                for warning in anchor.get("warnings") or []:
+                    self.check("warn", "Timestamp warning", self.t(warning))
             else:
                 status = anchor.get("status")
                 detail = {"pending": "pending: run ots upgrade, then ots verify",
@@ -5535,6 +5742,7 @@ class Spinner:
             self.stream.flush()
 
 
+
 def matching_archives(directory):
     """Find by manifest, never by a guessed filename, key, or self-declared trust."""
     directory = Path(directory)
@@ -5679,13 +5887,22 @@ def interactive_verify(args):
     return code
 
 
-def main(argv=None):
+class CheckResult:
+    def __init__(self, kind, details, signer_pinned, notes=None):
+        self.kind = kind
+        self.details = details
+        self.signer_pinned = signer_pinned
+        self.notes = notes if notes is not None else []
+
+
+def verification_print(*values, **kwargs):
     import builtins
+    builtins.print(*(safe_text(value) if isinstance(value, str) else value for value in values), **kwargs)
 
-    def print(*values, **kwargs):
-        builtins.print(*(safe_text(v) if isinstance(v, str) else v for v in values), **kwargs)
 
-    parser = argparse.ArgumentParser(description=__doc__)
+def verification_parser():
+    parser = argparse.ArgumentParser(description=__doc__, epilog=
+        "For a .tgwpw export: verify.py unseal-password SOURCE --out DESTINATION")
     parser.add_argument("bundle", nargs="?",
                         help="Evidence/chat/account/disclosure/witness ZIP, report JSON/HTML, or a stopped distributed acquisition directory")
     parser.add_argument("--fingerprint", help="Public key fingerprint retained independently")
@@ -5724,6 +5941,10 @@ def main(argv=None):
     parser.add_argument("--pause", action="store_true", help="Wait for Enter after an interactive check (for launchers)")
     parser.add_argument("--explain", action="store_true", help="Explain what the readable checks mean and do not mean")
     parser.add_argument("--interactive", action="store_true", help="Ask for the original ZIP and trusted key; save a readable transcript")
+    return parser
+
+
+def verification_arguments(parser, argv):
     args = parser.parse_args(argv)
     if bool(args.sealed_attestation) != bool(args.sealed_policy):
         parser.error("--sealed-attestation and --sealed-policy must be supplied together")
@@ -5735,239 +5956,254 @@ def main(argv=None):
         sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
     if args.choose_language and not args.interactive:
         parser.error("--choose-language requires --interactive")
-    if args.interactive:
-        if args.compare or args.compare_fingerprint or args.json or args.plain:
-            parser.error("--interactive produces a readable single-archive check; comparison/JSON/plain options do not apply")
-        if args.require_witness and (not args.witness or not args.witness_fingerprint):
-            parser.error("--require-witness requires --witness and --witness-fingerprint")
-        try:
-            code = interactive_verify(args)
-        except (EOFError, KeyboardInterrupt):
-            print(reader_message("cancelled", console_language(args.lang)))
-            code = 2
-        if args.pause and not os.environ.get("TGWITNESS_VERIFY_NO_PAUSE"):
-            try:
-                input(reader_message("pause", console_language(args.lang)) + " ")
-            except (EOFError, KeyboardInterrupt):
-                pass
-        raise SystemExit(code)
-    if not args.bundle:
-        parser.error("bundle is required (or use --interactive)")
-    args.bundle = Path(args.bundle)
+    return args
+
+
+def verification_interactive(args, parser):
+    if args.compare or args.compare_fingerprint or args.json or args.plain:
+        parser.error("--interactive produces a readable single-archive check; comparison/JSON/plain options do not apply")
     if args.require_witness and (not args.witness or not args.witness_fingerprint):
         parser.error("--require-witness requires --witness and --witness-fingerprint")
-    globals()["MAX_UNCOMPRESSED_GIB"] = max(1, args.max_gib)
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(errors="backslashreplace")
-    mode = "json" if args.json else "pretty" if args.pretty or (not args.plain and sys.stdout.isatty()) else "plain"
-    if args.compare:
-        unsupported = ["--" + name.replace("_", "-") for name in
-                       ("checkpoint", "tsa_ca", "witness", "witness_fingerprint", "require_witness", "channel",
-                        "evidence", "check_drand", "check_bitcoin", "require_tier", "sealed_attestation", "board") if getattr(args, name)]
-        if unsupported:
-            parser.error(", ".join(unsupported) + " cannot be used with --compare; verify the evidence archive separately")
-        try:
-            compared = compare_chat_exports(args.bundle, args.compare, args.fingerprint, args.compare_fingerprint, args.max_gib)
-        except Exception as exc:
-            code = 3 if args.strict and isinstance(exc, VerifierTooOld) else 1
-            if mode == "json":
-                print(json.dumps({"verified": False, "error": type(exc).__name__ + ": " + str(exc)}, indent=2))
-                raise SystemExit(code)
-            print("ASSURANCE: fail")
-            parser.exit(code, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + safe_text(exc) + "\n")
-        pinned = bool(compared['first']['key_pinned'] and compared['second']['key_pinned'])
-        compared['assurance'] = assurance(compared)
-        compared['assurance']['scope'] = 'two authenticated chat exports; comparison does not prove event history'
-        if mode == "json":
-            print(json.dumps({"verified": True, "kind": "comparison", "result": compared,
-                              "signer_pinned": pinned, "requirements_met": not args.strict or pinned},
-                             indent=2, ensure_ascii=True))
-        else:
-            print(assurance_line(compared))
-            print_comparison(compared)
-        if args.strict and not pinned:
-            raise SystemExit(2)
-        return
-    console = Console(sys.stdout, console_language(args.lang),
-                      mode == "pretty" and not args.no_color and not os.environ.get("NO_COLOR"), args.explain) \
-        if mode == "pretty" or args.explain and mode == "plain" else None
-    notes = []
-
-    pinned = bool(args.fingerprint or args.witness_fingerprint)
-    shown = "evidence"
-    spinner = console.spinner() if console else None
-    if spinner:
-        spinner.__enter__()
     try:
-        if args.bundle.is_dir():
-            if args.checkpoint or args.witness or args.tsa_ca or args.channel or args.evidence:
-                raise ValueError("Journal/report options do not apply to a distributed acquisition directory")
-            shown = "distributed"
-            result = verify_distributed_work(args.bundle, args.fingerprint, args.max_gib)
-            pinned = bool(args.fingerprint)
-            notes.append(result["meaning"])
-        elif args.bundle.suffix.lower() in (".html", ".htm", ".pdf"):
-            shown, result = "report", verify_report(args.bundle, args.fingerprint, args.evidence)
-            pinned = bool(args.fingerprint)
-        elif args.bundle.suffix.lower() == ".json":
-            data = read_json_file(args.bundle)
-            kind = data.get("statement", {}).get("format")
-            if "statement" in data and "signature" in data:
-                authenticate_statement(data, "public_key" if "public_key" in data["statement"] else "witness_public_key")
-                known = {"tgwitness-board-selection-v1", "tgwitness-case-board-v1", "tgwitness-case-board-disclosure-v1",
-                         "tgwitness-case-board-handover-v1"}
-                if kind not in known and not any(is_format(kind, name) for name in (
-                        "public-proof-v1", "history-report-v1", "dossier-v1")):
-                    raise VerifierTooOld("Unsupported signed JSON format")
-            if kind == "tgwitness-board-selection-v1":
-                shown, result = "selection", verify_selection(args.bundle, args.fingerprint, args.evidence)
-                pinned = bool(args.fingerprint)
-                notes.append("Signed Case Board selection; exact records matched against the signed journal archive.")
-            elif kind in {"tgwitness-case-board-v1", "tgwitness-case-board-disclosure-v1", "tgwitness-case-board-handover-v1"}:
-                shown, result = "board", verify_board_document(args.bundle, args.fingerprint, args.evidence)
-                pinned = bool(args.fingerprint)
-                notes.append(result["meaning"])
-            elif data.get("format") == "tgwitness-selection-v1":
-                shown, result = "selection", verify_selection(args.bundle, args.fingerprint, args.evidence)
-                pinned = bool(args.fingerprint)
-                notes.append("The selection is unsigned. Its items match the verified archive; selection time and notes are not authenticated.")
-            elif is_format(data.get("format"), REPORT_JSON):
-                shown, result = "report", verify_report(args.bundle, args.fingerprint, args.evidence)
-                pinned = bool(args.fingerprint)
-            elif is_format(kind, "public-proof-v1"):
-                shown = "proof"
-                result = verify_public_proof(args.bundle, args.fingerprint, args.witness_fingerprint, args.evidence)
-                pinned = bool(args.witness_fingerprint)
-                if not pinned:
-                    notes.append("A public proof is signed by its witness: pass --witness-fingerprint to pin that key.")
-            elif is_format(kind, "history-report-v1"):
-                shown = "history"
-                result = verify_history_report(args.bundle, args.fingerprint, args.evidence)
-                pinned = bool(args.fingerprint)
-                if not args.evidence:
-                    notes.append("History report signature only: pass --evidence to cross-check the journal and counts.")
-            else:
-                shown = "dossier"
-                result = verify_dossier(args.bundle, args.fingerprint, args.evidence)
-                pinned = bool(args.fingerprint)
-        elif (archive_format := bundle_format(args.bundle)) in DISCLOSURE_FORMATS:
-            if args.checkpoint or args.witness or args.tsa_ca or args.channel:
-                raise ValueError("Journal checkpoint/witness/timestamp options do not apply to disclosure archives")
-            shown = "account_disclosure"
-            result = verify_account_disclosure(args.bundle, args.fingerprint, args.evidence)
-            pinned = bool(args.fingerprint)
-            notes.append(result["meaning"])
-            if not result["source_reference_checked"]:
-                notes.append("Source reference not checked: supply the original account archive with --evidence.")
-        elif archive_format == "tgwitness-account-export-v1":
-            if args.checkpoint or args.witness or args.tsa_ca or args.channel or args.evidence:
-                raise ValueError("Journal checkpoint/witness/timestamp options do not apply to account export receipts")
-            shown = "account"
-            result = verify_account_export(args.bundle, args.fingerprint)
-            pinned = bool(args.fingerprint)
-            notes += account_export_lines(result)
-        elif is_format(archive_format, "chat-export-v1"):
-            shown = "chat"
-            result = verify_chat_export(args.bundle, args.fingerprint)
-            pinned = bool(args.fingerprint)
-        elif is_format(archive_format, "handover-v1"):
-            shown = "handover"
-            result = verify_handover(args.bundle, args.fingerprint)
-            pinned = bool(args.fingerprint)
-            notes.append("Minimised records are authenticated by the signature over the original record's hash; "
-                         "confirm their content against the complete journal by that hash.")
-        elif is_format(archive_format, "witness-v1"):
-            shown = "witness"
-            result = verify_witness(args.bundle, args.witness_fingerprint or args.fingerprint, args.check_drand, args.check_bitcoin)
-            if args.channel:
-                result["channel_check"] = check_channel(result, args.channel)
-            result.pop("statements")
-        else:
-            result = verify_bundle(args.bundle, args.fingerprint,
-                                   read_json_file(args.checkpoint) if args.checkpoint else None, args.tsa_ca,
-                                   args.check_drand, check_bitcoin=args.check_bitcoin)
-            notes += coverage_lines(result["coverage"]) + outside_lines(result["outside"])
-            pinned = bool(args.fingerprint)
-            if not args.checkpoint:
-                notes.append("No retained checkpoint supplied: records removed from the end of this journal are not "
-                             "detected. Pass --checkpoint with a checkpoint kept away from the collector.")
-            if any(a.get("kind") == "opentimestamps" and a.get("status") != "confirmed" for a in result.get("anchors", [])):
-                notes.append("OpenTimestamps structure only: run ots verify to authenticate the Bitcoin timestamp.")
-            if args.witness and not args.witness_fingerprint:
-                notes.append("The witness key is not pinned: the witness journal is checked only against itself.")
-            if args.witness:
-                witness = verify_witness(args.witness, args.witness_fingerprint, args.check_drand, args.check_bitcoin)
-                result["witness"] = cross_check_witness(witness, args.bundle, result)
-                if args.channel:
-                    result["witness"]["channel_check"] = check_channel(witness, args.channel)
-                if result["witness"]["conflicts"]:
-                    raise ValueError("The journal differs from what the witness saw at "
-                                     + result["witness"]["conflicts"][0]["at"] + " (record "
-                                     + str(result["witness"]["conflicts"][0]["event_count"]) + ")")
-                notes += ["Witnessed from " + p["from"] + " to " + p["to"] for p in result["witness"]["witnessed"]]
-                if not result["witness"]["consistent"]:
-                    notes.append("The witness has no answer signed by this export's key: nothing here is witnessed.")
-                notes.append("Witness checkpoints match through record "
-                             + str(result["witness"]["verified_through_event"]) + " of " + str(result["events"]) + ".")
-                if result["witness"]["unwitnessed_events"]:
-                    notes.append(str(result["witness"]["unwitnessed_events"])
-                                 + " trailing record(s) have no matching witness checkpoint.")
+        code = interactive_verify(args)
+    except (EOFError, KeyboardInterrupt):
+        verification_print(reader_message("cancelled", console_language(args.lang)))
+        code = 2
+    if args.pause and not os.environ.get("TGWITNESS_VERIFY_NO_PAUSE"):
+        try:
+            input(reader_message("pause", console_language(args.lang)) + " ")
+        except (EOFError, KeyboardInterrupt):
+            pass
+    raise SystemExit(code)
 
-                pinned = pinned or bool(args.witness_fingerprint and result["witness"]["consistent"])
-        if args.board and result.get("board"):
-            notes.append("Case Board annotations: " + str(result["board"]["annotations_head"]["seq"]))
-            notes.extend("Collection: " + item["title"] for item in result["board"]["collections"])
-            notes.extend(item["message"] for item in result["board"]["slice_changes"])
-            notes.extend("Dangling board target: " + item["id"] + " / " + item["event_hash"] for item in result["board"]["dangling"])
-        check = result.get("channel_check") or (result.get("witness") or {}).get("channel_check")
-        if check and (check["invalid_signatures"] or check["differ_from_journal"]):
-            raise ValueError("Channel posts do not match the witness journal")
-        if check and check["telegram_post_dates"]:
-            notes.append("Channel dates are supplied metadata; witness signatures do not authenticate publication times.")
-        if args.require_witness:
-            witnessed = result.get("witness")
-            if not witnessed:
-                raise ValueError("--require-witness requires a full evidence ZIP and its witness journal")
-            if not witnessed["witness_key_pinned"] or not witnessed["export_head_witnessed"]:
-                raise ValueError("No pinned witness checkpoint matches the exported journal head; "
-                                 "retain a witness checkpoint at the export boundary")
-            if witnessed["witness_fingerprint"] == result["fingerprint"]:
-                raise ValueError("Collector and independent witness must use different trusted signing keys")
-            if check and (check["posted_but_not_found"] or not
-                          set(check["matching_records"]).intersection(witnessed["export_head_witness_records"])):
-                raise ValueError("Requested channel evidence is missing signed witness posts at the export boundary")
-            result["witness_required"] = True
-        if args.sealed_attestation:
-            if shown != "evidence":
-                raise ValueError("Runtime attestation requires a full evidence ZIP")
-            try:
-                from tgwitness.sealed_verify import verify as verify_runtime
-            except ImportError:
-                raise ValueError("Runtime verification needs the installed TgWitness sealed verifier and gh") from None
-            checked_runtime = verify_runtime(args.bundle, args.sealed_attestation, args.sealed_repo,
-                                             policy=args.sealed_policy, max_gib=args.max_gib)
-            if checked_runtime["journal"]["fingerprint"] != result["fingerprint"]:
-                raise ValueError("Runtime attestation names another collector key")
-            result["runtime_attestation"] = {k: checked_runtime[k] for k in ("verified", "sha256", "workflow", "limitation")}
-            result["runtime_attestation"]["key_origin"] = "created"
-        result["assurance"] = assurance(result)
-        if any(row["status"] == "fail" for row in result["assurance"]["ladder"]):
-            raise ValueError("Assurance checks found contradictory witness evidence")
+
+def verification_comparison(args, parser, mode):
+    unsupported = ["--" + name.replace("_", "-") for name in
+                   ("checkpoint", "tsa_ca", "witness", "witness_fingerprint", "require_witness", "channel",
+                    "evidence", "check_drand", "check_bitcoin", "require_tier", "sealed_attestation", "board") if getattr(args, name)]
+    if unsupported:
+        parser.error(", ".join(unsupported) + " cannot be used with --compare; verify the evidence archive separately")
+    try:
+        compared = compare_chat_exports(args.bundle, args.compare, args.fingerprint, args.compare_fingerprint, args.max_gib)
     except Exception as exc:
         code = 3 if args.strict and isinstance(exc, VerifierTooOld) else 1
-        if spinner:
-            spinner.__exit__(None, None, None)
-        if console:
-            console.say("ASSURANCE: fail")
-            console.failure(args.bundle, exc)
-            raise SystemExit(code)
         if mode == "json":
-            print(json.dumps({"verified": False, "error": type(exc).__name__ + ": " + str(exc)}, indent=2))
+            verification_print(json.dumps({"verified": False, "error": type(exc).__name__ + ": " + str(exc)}, indent=2))
             raise SystemExit(code)
-        print("ASSURANCE: fail")
+        verification_print("ASSURANCE: fail")
         parser.exit(code, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + safe_text(exc) + "\n")
-    if spinner:
-        spinner.__exit__(None, None, None)
+    pinned = bool(compared['first']['key_pinned'] and compared['second']['key_pinned'])
+    compared['assurance'] = assurance(compared)
+    compared['assurance']['scope'] = 'two authenticated chat exports; comparison does not prove event history'
+    if mode == "json":
+        verification_print(json.dumps({"verified": True, "kind": "comparison", "result": compared,
+                          "signer_pinned": pinned, "requirements_met": not args.strict or pinned},
+                         indent=2, ensure_ascii=True))
+    else:
+        verification_print(assurance_line(compared))
+        print_comparison(compared)
+    if args.strict and not pinned:
+        raise SystemExit(2)
+    return
+
+
+def verification_json(args):
+    notes = []
+    data = read_json_file(args.bundle)
+    kind = data.get("statement", {}).get("format")
+    if "statement" in data and "signature" in data:
+        authenticate_statement(data, "public_key" if "public_key" in data["statement"] else "witness_public_key")
+        known = {"tgwitness-board-selection-v1", "tgwitness-case-board-v1", "tgwitness-case-board-disclosure-v1",
+                 "tgwitness-case-board-handover-v1"}
+        if kind not in known and not any(is_format(kind, name) for name in (
+                "public-proof-v1", "history-report-v1", "dossier-v1")):
+            raise VerifierTooOld("Unsupported signed JSON format")
+    if kind == "tgwitness-board-selection-v1":
+        shown, result = "selection", verify_selection(args.bundle, args.fingerprint, args.evidence)
+        pinned = bool(args.fingerprint)
+        notes.append("Signed Case Board selection; exact records matched against the signed journal archive.")
+    elif kind in {"tgwitness-case-board-v1", "tgwitness-case-board-disclosure-v1", "tgwitness-case-board-handover-v1"}:
+        shown, result = "board", verify_board_document(args.bundle, args.fingerprint, args.evidence)
+        pinned = bool(args.fingerprint)
+        notes.append(result["meaning"])
+    elif data.get("format") == "tgwitness-selection-v1":
+        shown, result = "selection", verify_selection(args.bundle, args.fingerprint, args.evidence)
+        pinned = bool(args.fingerprint)
+        notes.append("The selection is unsigned. Its items match the verified archive; selection time and notes are not authenticated.")
+    elif is_format(data.get("format"), REPORT_JSON):
+        shown, result = "report", verify_report(args.bundle, args.fingerprint, args.evidence)
+        pinned = bool(args.fingerprint)
+    elif is_format(kind, "public-proof-v1"):
+        shown = "proof"
+        result = verify_public_proof(args.bundle, args.fingerprint, args.witness_fingerprint, args.evidence)
+        pinned = bool(args.witness_fingerprint)
+        if not pinned:
+            notes.append("A public proof is signed by its witness: pass --witness-fingerprint to pin that key.")
+    elif is_format(kind, "history-report-v1"):
+        shown = "history"
+        result = verify_history_report(args.bundle, args.fingerprint, args.evidence)
+        pinned = bool(args.fingerprint)
+        if not args.evidence:
+            notes.append("History report signature only: pass --evidence to cross-check the journal and counts.")
+    else:
+        shown = "dossier"
+        result = verify_dossier(args.bundle, args.fingerprint, args.evidence)
+        pinned = bool(args.fingerprint)
+    return CheckResult(shown, result, pinned, notes)
+
+
+def verification_archive(args):
+    notes = []
+    pinned = bool(args.fingerprint or args.witness_fingerprint)
+    if (archive_format := bundle_format(args.bundle)) in DISCLOSURE_FORMATS:
+        if args.checkpoint or args.witness or args.tsa_ca or args.channel:
+            raise ValueError("Journal checkpoint/witness/timestamp options do not apply to disclosure archives")
+        shown = "account_disclosure"
+        result = verify_account_disclosure(args.bundle, args.fingerprint, args.evidence)
+        pinned = bool(args.fingerprint)
+        notes.append(result["meaning"])
+        if not result["source_reference_checked"]:
+            notes.append("Source reference not checked: supply the original account archive with --evidence.")
+    elif archive_format == "tgwitness-account-export-v1":
+        if args.checkpoint or args.witness or args.tsa_ca or args.channel or args.evidence:
+            raise ValueError("Journal checkpoint/witness/timestamp options do not apply to account export receipts")
+        shown = "account"
+        result = verify_account_export(args.bundle, args.fingerprint)
+        pinned = bool(args.fingerprint)
+        notes += account_export_lines(result)
+    elif is_format(archive_format, "chat-export-v1"):
+        shown = "chat"
+        result = verify_chat_export(args.bundle, args.fingerprint)
+        pinned = bool(args.fingerprint)
+    elif is_format(archive_format, "handover-v1"):
+        shown = "handover"
+        result = verify_handover(args.bundle, args.fingerprint)
+        pinned = bool(args.fingerprint)
+        notes.append("Minimised records are authenticated by the signature over the original record's hash; "
+                     "confirm their content against the complete journal by that hash.")
+    elif is_format(archive_format, "witness-v1"):
+        shown = "witness"
+        result = verify_witness(args.bundle, args.witness_fingerprint or args.fingerprint, args.check_drand, args.check_bitcoin)
+        if args.channel:
+            result["channel_check"] = check_channel(result, args.channel)
+        result.pop("statements")
+    else:
+        return verification_evidence(args)
+    return CheckResult(shown, result, pinned, notes)
+
+
+def verification_evidence(args):
+    notes = []
+    result = verify_bundle(args.bundle, args.fingerprint,
+                           read_json_file(args.checkpoint) if args.checkpoint else None, args.tsa_ca,
+                           args.check_drand, check_bitcoin=args.check_bitcoin)
+    notes += coverage_lines(result["coverage"]) + outside_lines(result["outside"])
+    pinned = bool(args.fingerprint)
+    if not args.checkpoint:
+        notes.append("No retained checkpoint supplied: records removed from the end of this journal are not "
+                     "detected. Pass --checkpoint with a checkpoint kept away from the collector.")
+    if any(a.get("kind") == "opentimestamps" and a.get("status") != "confirmed" for a in result.get("anchors", [])):
+        notes.append("OpenTimestamps structure only: run ots verify to authenticate the Bitcoin timestamp.")
+    if args.witness and not args.witness_fingerprint:
+        notes.append("The witness key is not pinned: the witness journal is checked only against itself.")
+    if args.witness:
+        witness = verify_witness(args.witness, args.witness_fingerprint, args.check_drand, args.check_bitcoin)
+        result["witness"] = cross_check_witness(witness, args.bundle, result)
+        if args.channel:
+            result["witness"]["channel_check"] = check_channel(witness, args.channel)
+        if result["witness"]["conflicts"]:
+            raise ValueError("The journal differs from what the witness saw at "
+                             + result["witness"]["conflicts"][0]["at"] + " (record "
+                             + str(result["witness"]["conflicts"][0]["event_count"]) + ")")
+        notes += ["Witnessed from " + p["from"] + " to " + p["to"] for p in result["witness"]["witnessed"]]
+        if not result["witness"]["consistent"]:
+            notes.append("The witness has no answer signed by this export's key: nothing here is witnessed.")
+        notes.append("Witness checkpoints match through record "
+                     + str(result["witness"]["verified_through_event"]) + " of " + str(result["events"]) + ".")
+        if result["witness"]["unwitnessed_events"]:
+            notes.append(str(result["witness"]["unwitnessed_events"])
+                         + " trailing record(s) have no matching witness checkpoint.")
+
+        pinned = pinned or bool(args.witness_fingerprint and result["witness"]["consistent"])
+    return CheckResult("evidence", result, pinned, notes)
+
+
+def verification_requirements(args, checked):
+    result, notes, shown = checked.details, checked.notes, checked.kind
+    if args.board and result.get("board"):
+        notes.append("Case Board annotations: " + str(result["board"]["annotations_head"]["seq"]))
+        notes.extend("Collection: " + item["title"] for item in result["board"]["collections"])
+        notes.extend(item["message"] for item in result["board"]["slice_changes"])
+        notes.extend("Dangling board target: " + item["id"] + " / " + item["event_hash"] for item in result["board"]["dangling"])
+    check = result.get("channel_check") or (result.get("witness") or {}).get("channel_check")
+    if check and (check["invalid_signatures"] or check["differ_from_journal"]):
+        raise ValueError("Channel posts do not match the witness journal")
+    if check and check["telegram_post_dates"]:
+        notes.append("Channel dates are supplied metadata; witness signatures do not authenticate publication times.")
+    if args.require_witness:
+        witnessed = result.get("witness")
+        if not witnessed:
+            raise ValueError("--require-witness requires a full evidence ZIP and its witness journal")
+        if not witnessed["witness_key_pinned"] or not witnessed["export_head_witnessed"]:
+            raise ValueError("No pinned witness checkpoint matches the exported journal head; "
+                             "retain a witness checkpoint at the export boundary")
+        if witnessed["witness_fingerprint"] == result["fingerprint"]:
+            raise ValueError("Collector and independent witness must use different trusted signing keys")
+        if check and (check["posted_but_not_found"] or not
+                      set(check["matching_records"]).intersection(witnessed["export_head_witness_records"])):
+            raise ValueError("Requested channel evidence is missing signed witness posts at the export boundary")
+        result["witness_required"] = True
+    if args.sealed_attestation:
+        if shown != "evidence":
+            raise ValueError("Runtime attestation requires a full evidence ZIP")
+        try:
+            from tgwitness.sealed_verify import verify as verify_runtime
+        except ImportError:
+            raise ValueError("Runtime verification needs the installed TgWitness sealed verifier and gh") from None
+        checked_runtime = verify_runtime(args.bundle, args.sealed_attestation, args.sealed_repo,
+                                         policy=args.sealed_policy, max_gib=args.max_gib)
+        if checked_runtime["journal"]["fingerprint"] != result["fingerprint"]:
+            raise ValueError("Runtime attestation names another collector key")
+        result["runtime_attestation"] = {k: checked_runtime[k] for k in ("verified", "sha256", "workflow", "limitation")}
+        result["runtime_attestation"]["key_origin"] = "created"
+    result["assurance"] = assurance(result)
+    if any(row["status"] == "fail" for row in result["assurance"]["ladder"]):
+        raise ValueError("Assurance checks found contradictory witness evidence")
+    return checked
+
+
+def verify_input(path, policy):
+    args = argparse.Namespace(**{**vars(policy), "bundle": Path(path)})
+    if args.bundle.is_dir():
+        if args.checkpoint or args.witness or args.tsa_ca or args.channel or args.evidence:
+            raise ValueError("Journal/report options do not apply to a distributed acquisition directory")
+        result = verify_distributed_work(args.bundle, args.fingerprint, args.max_gib)
+        checked = CheckResult("distributed", result, bool(args.fingerprint), [result["meaning"]])
+    elif args.bundle.suffix.lower() in (".html", ".htm", ".pdf"):
+        result = verify_report(args.bundle, args.fingerprint, args.evidence)
+        checked = CheckResult("report", result, bool(args.fingerprint))
+    elif args.bundle.suffix.lower() == ".json":
+        checked = verification_json(args)
+    else:
+        checked = verification_archive(args)
+    return verification_requirements(args, checked)
+
+
+def verification_failure(args, parser, mode, console, exc):
+    code = 3 if args.strict and isinstance(exc, VerifierTooOld) else 1
+    if console:
+        console.say("ASSURANCE: fail")
+        console.failure(args.bundle, exc)
+        raise SystemExit(code)
+    if mode == "json":
+        verification_print(json.dumps({"verified": False, "error": type(exc).__name__ + ": " + str(exc)}, indent=2))
+        raise SystemExit(code)
+    verification_print("ASSURANCE: fail")
+    parser.exit(code, "VERIFICATION FAILED: " + type(exc).__name__ + ": " + safe_text(exc) + "\n")
+
+
+def verification_output(args, checked, console, mode):
+    shown, result, pinned, notes = checked.kind, checked.details, checked.signer_pinned, checked.notes
     unmet = bool(args.require_tier and ASSURANCE_TIERS.index(result["assurance"]["tier"]) < ASSURANCE_TIERS.index(args.require_tier))
     unpinned = args.strict and not pinned
     if not pinned:
@@ -5980,41 +6216,77 @@ def main(argv=None):
             raise SystemExit(2)
         return
     if mode == "json":
-        print(json.dumps({"verified": True, "kind": shown, "signer_pinned": pinned, "notes": notes, "result": result,
+        verification_print(json.dumps({"verified": True, "kind": shown, "signer_pinned": pinned, "notes": notes, "result": result,
                           "requirements_met": not (unmet or unpinned)},
                          indent=2, ensure_ascii=True))
         if unmet or unpinned:
             raise SystemExit(2)
         return
-    print(assurance_line(result))
-    print(json.dumps(result, indent=2))
-    print(producer_line(result.get("producer")))
+    verification_print(assurance_line(result))
+    verification_print(json.dumps(result, indent=2))
+    verification_print(producer_line(result.get("producer")))
     seal = result.get("report_seal")
     if seal:
-        print("Report seal verified: " + ("chat.html" if shown == "chat" else "report.html" if shown == "evidence"
+        verification_print("Report seal verified: " + ("chat.html" if shown == "chat" else "report.html" if shown == "evidence"
                                           else args.bundle.name) + ", language " + str(seal["language"]) + ".")
     if result.get("report_json"):
-        print("JSON report seal verified: report.json.")
+        verification_print("JSON report seal verified: report.json.")
     pdf = result.get("report_pdf") or (result if result.get("pdf_signature") else None)
     if pdf:
-        print("PDF signature and Ed25519 seal verified: " + str(pdf.get("file") or args.bundle.name)
+        verification_print("PDF signature and Ed25519 seal verified: " + str(pdf.get("file") or args.bundle.name)
               + " (certificate " + pdf["pdf_signature"]["certificate"] + ").")
     if result.get("report_parts"):
-        print("Report parts verified: " + str(result["report_parts"]) + ", each sealed over this export.")
+        verification_print("Report parts verified: " + str(result["report_parts"]) + ", each sealed over this export.")
     ids = result.get("message_ids")
     if ids and ids["numbered_per_chat"]:
-        print("Message IDs " + str(ids["first_id"]) + "-" + str(ids["last_id"]) + ": " + str(ids["present"])
+        verification_print("Message IDs " + str(ids["first_id"]) + "-" + str(ids["last_id"]) + ": " + str(ids["present"])
               + " present, " + str(ids["missing"]) + " absent in " + str(ids["missing_ranges"])
               + " range(s); message-ids.json matches chat.json.")
     if result.get("sha256sums"):
-        print("SHA256SUMS matches the signed manifest.")
+        verification_print("SHA256SUMS matches the signed manifest.")
     for line in notes:
-        print(line)
-    print("Integrity verified. Source authenticity and clock accuracy are not established.")
+        verification_print(line)
+    verification_print("Integrity verified. Source authenticity and clock accuracy are not established.")
     if not pinned:
-        print("Signer identity is unpinned: retain and compare the fingerprint independently.")
+        verification_print("Signer identity is unpinned: retain and compare the fingerprint independently.")
     if unmet or unpinned:
         raise SystemExit(2)
+
+
+def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "unseal-password":
+        return password_command(argv[1:])
+    parser = verification_parser()
+    args = verification_arguments(parser, argv)
+    if args.interactive:
+        verification_interactive(args, parser)
+    if not args.bundle:
+        parser.error("bundle is required (or use --interactive)")
+    args.bundle = Path(args.bundle)
+    if args.require_witness and (not args.witness or not args.witness_fingerprint):
+        parser.error("--require-witness requires --witness and --witness-fingerprint")
+    globals()["MAX_UNCOMPRESSED_GIB"] = max(1, args.max_gib)
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(errors="backslashreplace")
+    mode = "json" if args.json else "pretty" if args.pretty or (not args.plain and sys.stdout.isatty()) else "plain"
+    if args.compare:
+        return verification_comparison(args, parser, mode)
+    console = Console(sys.stdout, console_language(args.lang),
+                      mode == "pretty" and not args.no_color and not os.environ.get("NO_COLOR"), args.explain) \
+        if mode == "pretty" or args.explain and mode == "plain" else None
+    spinner = console.spinner() if console else None
+    if spinner:
+        spinner.__enter__()
+    try:
+        checked = verify_input(args.bundle, args)
+    except Exception as exc:
+        if spinner:
+            spinner.__exit__(None, None, None)
+        verification_failure(args, parser, mode, console, exc)
+    if spinner:
+        spinner.__exit__(None, None, None)
+    return verification_output(args, checked, console, mode)
 
 
 if __name__ == "__main__":

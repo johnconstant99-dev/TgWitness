@@ -51,6 +51,9 @@ research = ["requests>=2.33.0,<3", "beautifulsoup4>=4.12,<5"]
 mcp = ["mcp>=2.3,<3", "httpx>=0.28,<1"]
 # Ukrainian dictionary for full-text lemmas; GPL-3.0 data, so it is opt-in. Without it a light stemmer is used.
 uk-dictionary = ["pymorphy3-dicts-uk>=2.4.1.1.1663094765,<3"]
+secret-chats = ["kiaro-telethon-secret-chat @ git+https://github.com/KiaroSama/Telethon-Secret-Chat.git@d87bf037b90060383c7b704d8a06ebb98c621c6f"]
+forensics = ["scapy>=2.5,<3", "aiohttp>=3.9,<4"]
+qr = ["opencv-python-headless>=4.10,<5", "numpy>=1.26,<3"]
 
 [project.urls]
 Homepage = "https://phishdestroy.github.io/TgWitness/"

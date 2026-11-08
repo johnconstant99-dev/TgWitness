@@ -41,6 +41,7 @@
         <a class="release-label" href="@@REPO_URL@@/blob/@@BRANCH@@/docs/CHANGELOG.md"><span class="status-dot"></span> Open source <span class="label-divider">/</span> v@@VERSION@@ <span aria-hidden="true">→</span></a>
         <h1 id="hero-title">Messages change,<br><span>keep what<br>you saw.</span></h1>
         <p class="hero-description">Export Telegram chats，preserve their history，and share a signed archive others can verify．</p>
+        <p class="hero-footnote">One-command install. Connect an account. Choose what to save.</p>
         <div class="actions"><a class="button primary" data-home-action="demo" href="@@ROOT@@demo/?lang=@@LANG_CODE@@">Open demo <span aria-hidden="true">→</span></a><a class="button secondary" data-home-action="setup" href="@@ROOT@@demo/guide.html?lang=@@LANG_CODE@@">Setup guide <span aria-hidden="true">↗</span></a></div>
         <p class="hero-footnote">Explore a fictional case without logging in to Telegram.</p>
         <a class="hero-capture-link" data-home-action="account-export" href="docs/reference/account-export/">Export an account or selected chats</a>
@@ -71,6 +72,17 @@
       </ol>
     </nav>
     </div>
+
+    <section class="archive-tools wrap" id="purpose" aria-labelledby="purpose-title">
+      <h2 id="purpose-title">Preserve the record, whoever it helps.</h2>
+      <p>Keep observed messages, context and changes so another person can check the material and reach their own conclusions.</p>
+      <div class="doc-links">
+        <a href="#start"><span>01</span><div><h3>Save a chat</h3><p>One command installs the app and Python. Connect an account, choose the scope and export.</p></div><span aria-hidden="true">↗</span></a>
+        <a href="docs/capture/"><span>02</span><div><h3>Capture on GitHub</h3><p>Run the guided workflow on a temporary runner and download an encrypted archive with provenance.</p></div><span aria-hidden="true">↗</span></a>
+        <a href="docs/cases/"><span>03</span><div><h3>Keep investigating</h3><p>Add observation, search, reports, reviewer access and independent checks as your task requires.</p></div><span aria-hidden="true">↗</span></a>
+      </div>
+      <p><a class="text-link" href="docs/reference/overview/">Start, scale and evidence →</a> · <a class="text-link" href="@@ROOT@@docs/validation/">Measured export performance →</a></p>
+    </section>
 
     <section class="workspace wrap" id="workspace" aria-labelledby="workspace-title">
       <div class="section-heading"><div><p class="eyebrow"><span class="section-index">01</span> THE WORKSPACE</p><h2 id="workspace-title">Every captured change,<br>right where you need it.</h2></div><p>Explore the real interface using a fictional investigation.</p></div>
@@ -172,6 +184,10 @@
 
     <section class="start wrap" id="start" aria-labelledby="start-title">
       <div class="section-heading"><div><p class="eyebrow">ON YOUR MACHINE</p><h2 id="start-title">Your first workspace starts here.</h2></div><div class="section-intro"><p>Try the demo first, then connect a spare account when you’re ready to run TgWitness on Windows, Linux, macOS or Docker.</p><a class="text-link" href="@@ROOT@@demo/guide.html?lang=@@LANG_CODE@@">Read the setup guide <span aria-hidden="true">→</span></a></div></div>
+      <div class="start-layout" id="one-command">
+        <div class="start-intro"><h3>Install with one command.</h3><p>Python and dependencies are included. Open the panel, connect an account and select what to collect.</p><p><a class="text-link" href="docs/reference/installation/">Installation, signatures and updates →</a></p></div>
+        <div class="start-run"><h3>Linux / macOS</h3><div class="code-block"><pre><code id="installer-unix">curl -fsSL https://get.destroy.tools/install.sh | bash</code></pre><button class="copy-button" type="button" data-copy="installer-unix" hidden>Copy</button></div><h3>Windows · PowerShell / CMD</h3><div class="code-block"><pre><code id="installer-windows">powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"</code></pre><button class="copy-button" type="button" data-copy="installer-windows" hidden>Copy</button></div><p class="small-note">Ubuntu server: run as root. Desktop: run as your normal user.</p></div>
+      </div>
       <aside class="session-warning" id="session-warning" aria-labelledby="session-warning-title"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.2 2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z"/><path d="M12 9.5v4M12 17h.01"/></svg><div><strong id="session-warning-title">One imported session, one running client.</strong><p>Running the same imported TData or session in Telegram Desktop and TgWitness at once can cause Telegram to revoke both (AUTH_KEY_DUPLICATED), so use a separate phone or QR login in TgWitness if you need both clients.</p><a href="@@ROOT@@demo/guide.html?lang=@@LANG_CODE@@#session-warning">Read the session import warning</a></div></aside>
       <div class="demo-callout"><span class="demo-symbol" aria-hidden="true">↗</span><div><strong>Take a look before you connect.</strong><p>Try the fictional workspace without a Telegram account.</p><p><a class="demo-link" href="@@ROOT@@demo/?lang=@@LANG_CODE@@">Open the online demo →</a></p></div><div class="demo-commands"><span>Windows <code>scripts\Demo.cmd</code></span><span>Linux / macOS <code>sh start.sh --demo</code></span></div></div>
       <details class="presentation-details installation-details"><summary>Local installation commands</summary>

@@ -4,6 +4,9 @@
 
 # Current capabilities
 
+[Start, scale and evidence](OVERVIEW.md) explains the one-command installation,
+temporary GitHub capture, investigation options and published measurements.
+
 Source version：**0.9.1 preview**. The [installer](https://get.destroy.tools/)
 includes the exact source revision in its signed manifest. Tagged packages are
 available under [Releases](https://github.com/phishdestroy/TgWitness/releases).
@@ -25,3 +28,7 @@ its simulated website interface and the defects that remain before integration.
 [Actions](https://github.com/phishdestroy/TgWitness/actions) records automated checks
 for each revision; [Verification](VERIFICATION.md) records completed deployment and
 live-account tests. See the [changelog](CHANGELOG.md) for changes.
+
+The optional forensics helpers accept complete MTProto frames for offline digest matching;
+generic PCAP import is unqualified and rejected. These matches do not establish Telegram
+origin, capture completeness, a viewer's identity or prior viewing; raw PCAP attachments are retained without verification.

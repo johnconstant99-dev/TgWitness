@@ -62,10 +62,10 @@ configuration() {
     BASE_URL='@@BASE_URL@@'
     WHEEL_NAME='@@WHEEL_NAME@@'
     WHEEL_SHA256='@@WHEEL_SHA256@@'
-    CONSTRAINTS_SHA256='@@CONSTRAINTS_SHA256@@'
+    LOCK_SHA256='@@LOCK_SHA256@@'
     UV_VERSION=0.13.6
     [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]] || fail 'Invalid release revision.'
-    [[ "$WHEEL_SHA256" =~ ^[0-9a-f]{64}$ && "$CONSTRAINTS_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail 'Invalid release checksums.'
+    [[ "$WHEEL_SHA256" =~ ^[0-9a-f]{64}$ && "$LOCK_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail 'Invalid release checksums.'
     [[ "$RELEASE_ID" == "${REVISION:0:12}-${WHEEL_SHA256:0:12}" ]] || fail 'Invalid immutable release ID.'
     [[ "$VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9.+_-]*$ ]] || fail 'Invalid release version.'
     [[ "$WHEEL_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*\.whl$ ]] || fail 'Invalid wheel filename.'
@@ -153,7 +153,7 @@ prepare_root() {
             fail "Refusing to overwrite an unrelated launcher: $LAUNCHER"
     fi
     [[ ! -L "$VERSION_DIR" ]] || fail "Refusing a linked version directory: $VERSION_DIR"
-    READY_CONTENT=$(printf '%s\n%s\n%s\n%s' "$RELEASE_ID" "$REVISION" "$WHEEL_SHA256" "$CONSTRAINTS_SHA256")
+    READY_CONTENT=$(printf '%s\n%s\n%s\n%s' "$RELEASE_ID" "$REVISION" "$WHEEL_SHA256" "$LOCK_SHA256")
     PYTHON="$VERSION_DIR/venv/bin/python"
 }
 
@@ -179,7 +179,7 @@ verify_signatures() {
 @@SIGNING_PUBLIC_KEY@@
 PUBLIC_KEY
     local artifact
-    for artifact in "$WHEEL_NAME" constraints.txt; do
+    for artifact in "$WHEEL_NAME" requirements.lock; do
         openssl dgst -sha256 -verify "$STAGING/release-signing.pub" \
             -signature "$STAGING/$artifact.sig" "$STAGING/$artifact" >/dev/null ||
             fail "Release signature rejected: $artifact. Nothing from this download was executed."
@@ -298,13 +298,13 @@ install() {
     release="$BASE_URL/releases/$RELEASE_ID"
     download "https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-$TARGET.tar.gz" "$STAGING/uv.tar.gz"
     download "$release/$WHEEL_NAME" "$STAGING/$WHEEL_NAME"
-    download "$release/constraints.txt" "$STAGING/constraints.txt"
+    download "$release/requirements.lock" "$STAGING/requirements.lock"
     download "$release/$WHEEL_NAME.sig" "$STAGING/$WHEEL_NAME.sig"
-    download "$release/constraints.txt.sig" "$STAGING/constraints.txt.sig"
+    download "$release/requirements.lock.sig" "$STAGING/requirements.lock.sig"
     step 2 Verify
     verify "$STAGING/uv.tar.gz" "$UV_SHA256"
     verify "$STAGING/$WHEEL_NAME" "$WHEEL_SHA256"
-    verify "$STAGING/constraints.txt" "$CONSTRAINTS_SHA256"
+    verify "$STAGING/requirements.lock" "$LOCK_SHA256"
     verify_signatures
     unpack_uv
     step 3 Install
@@ -316,7 +316,8 @@ install() {
     export UV_PYTHON_BIN_DIR="$INSTALL_ROOT/tools/python-bin"
     export UV_HTTP_TIMEOUT=180
     "$UV" --no-config venv --python 3.12 --managed-python "$VERSION_DIR/venv"
-    "$UV" --no-config pip install --python "$PYTHON" --constraint "$STAGING/constraints.txt" "$STAGING/$WHEEL_NAME[mcp]"
+    "$UV" --no-config pip install --python "$PYTHON" --require-hashes -r "$STAGING/requirements.lock"
+    "$UV" --no-config pip install --python "$PYTHON" --no-deps "$STAGING/$WHEEL_NAME"
     probe
     printf '%s\n' "$READY_CONTENT" > "$VERSION_DIR/.ready.tmp"
     mv -- "$VERSION_DIR/.ready.tmp" "$VERSION_DIR/.ready"

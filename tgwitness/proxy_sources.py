@@ -1,9 +1,7 @@
 import asyncio
 import hashlib
-import ipaddress
 import json
 import re
-import socket
 import time
 from pathlib import Path
 from typing import Literal
@@ -159,16 +157,19 @@ class Countries:
         entry = self.cache.get(host)
         return entry.get("country") if isinstance(entry, dict) else None
 
-    async def address(self, host):
+    async def address(self, host, network):
+        if network.kind not in ("direct", "socks5", "http"):
+            return None
         try:
-            ipaddress.ip_address(host)
-            return host
-        except ValueError:
-            pass
-        try:
-            answers = await asyncio.wait_for(asyncio.get_running_loop().getaddrinfo(host, 443, type=socket.SOCK_STREAM), 6)
-            return answers[0][4][0] if answers else None
-        except (OSError, TimeoutError):
+            if address := netclient.literal(host):
+                answers = [address]
+            elif network.kind == "direct":
+                answers = await asyncio.wait_for(netclient.resolve(host, 443), 6)
+            else:
+                answers = await netclient.public_proxy_addresses(host, network, 6)
+            netclient.refuse_internal(host, answers)
+            return answers[0] if answers else None
+        except (OSError, TimeoutError, ValueError, netclient.RouteError):
             return None
 
     async def lookup(self, ip, network):
@@ -196,7 +197,7 @@ class Countries:
             async def one(host):
                 nonlocal found
                 async with gate:
-                    ip = await self.address(host)
+                    ip = await self.address(host, network)
                     code = await self.lookup(ip, network) if ip else None
                 self.cache[host] = {"country": code, "at": now}
                 found += bool(code)

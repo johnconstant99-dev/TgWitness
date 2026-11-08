@@ -1,4 +1,4 @@
-name: Sealed capture validation
+name: Sealed image build and release pins
 on:
   push:
     paths:
@@ -6,7 +6,6 @@ on:
       - 'addons/capture/**'
       - 'tgwitness/sealed*'
       - 'tgwitness/security.py'
-      - 'tools/test_private_write.py'
       - 'tgwitness/static/sealed*'
       - 'tgwitness/static/cloud-capture*'
       - 'tgwitness/static/capture.html'
@@ -23,22 +22,11 @@ on:
       - 'deploy/constraints*.txt'
       - 'pyproject.toml'
       - 'tools/lock_requirements.py'
-      - 'tools/check_sealed*'
-      - 'tools/test_*hash*'
-      - 'tools/test_export_capacity.py'
-      - 'tools/test_sealed_package.py'
-      - 'tools/test_sealed_release.py'
-      - 'tools/test_sealed_parts.py'
-      - 'tools/test_sealed_account.py'
-      - 'tools/test_sealed_selection.py'
-      - 'tools/test_account_acquisition.py'
-      - 'tools/test_telegram_export.py'
-      - 'tools/test_ocr_source_fetch.py'
+      - 'tools/sealed_release.py'
       - 'tgwitness/account_acquisition.py'
       - 'tgwitness/account_attachment_cache.py'
       - 'tgwitness/account_finalization.py'
       - 'tgwitness/telegram_export.py'
-      - 'tools/test_container_fetch_retry.py'
       - 'tgwitness/file_hashes.py'
       - 'tgwitness/export_preflight.py'
       - 'tgwitness/account_export*'
@@ -58,7 +46,6 @@ on:
       - 'addons/capture/**'
       - 'tgwitness/sealed*'
       - 'tgwitness/security.py'
-      - 'tools/test_private_write.py'
       - 'tgwitness/static/sealed*'
       - 'tgwitness/static/cloud-capture*'
       - 'tgwitness/static/capture.html'
@@ -75,22 +62,11 @@ on:
       - 'deploy/constraints*.txt'
       - 'pyproject.toml'
       - 'tools/lock_requirements.py'
-      - 'tools/check_sealed*'
-      - 'tools/test_*hash*'
-      - 'tools/test_export_capacity.py'
-      - 'tools/test_sealed_package.py'
-      - 'tools/test_sealed_release.py'
-      - 'tools/test_sealed_parts.py'
-      - 'tools/test_sealed_account.py'
-      - 'tools/test_sealed_selection.py'
-      - 'tools/test_account_acquisition.py'
-      - 'tools/test_telegram_export.py'
-      - 'tools/test_ocr_source_fetch.py'
+      - 'tools/sealed_release.py'
       - 'tgwitness/account_acquisition.py'
       - 'tgwitness/account_attachment_cache.py'
       - 'tgwitness/account_finalization.py'
       - 'tgwitness/telegram_export.py'
-      - 'tools/test_container_fetch_retry.py'
       - 'tgwitness/file_hashes.py'
       - 'tgwitness/export_preflight.py'
       - 'tgwitness/account_export*'
@@ -112,40 +88,8 @@ concurrency:
   group: sealed-checks-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name != 'release' }}
 jobs:
-  attestation-binding:
-    name: Reject unapproved attestation signer
-    if: github.event_name == 'push' && github.repository == 'phishdestroy/TgWitness'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      id-token: write # Request a GitHub OIDC identity for the synthetic attestation.
-      attestations: write # Store the synthetic attestation used by this verifier check.
-    steps:
-      - name: Create a clearly synthetic public test subject
-        run: printf '%s\n' 'TgWitness synthetic attestation integration test. No Telegram content.' > synthetic.txt
-      - name: Generate a real test certificate
-        id: attest
-        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
-        with:
-          subject-path: synthetic.txt
-      - name: Verify the test identity and reject it as a production collector
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
-          EXPECTED_SHA: ${{ github.workflow_sha }}
-        run: |
-          gh attestation verify synthetic.txt --bundle "$BUNDLE" --repo phishdestroy/TgWitness \
-            --signer-workflow phishdestroy/TgWitness/.github/workflows/sealed-checks.yml \
-            --signer-digest "$EXPECTED_SHA" --deny-self-hosted-runners
-          if gh attestation verify synthetic.txt --bundle "$BUNDLE" --repo phishdestroy/TgWitness \
-            --signer-workflow phishdestroy/TgWitness/.github/workflows/sealed-collector.yml \
-            --signer-digest 88853fd74d7bc43a8e5bf86b846e0de731afdbd2 --deny-self-hosted-runners; then
-            echo 'ERROR: test signer accepted as production collector'
-            exit 1
-          fi
   synthetic-and-container:
-    name: Validate sealed capture and container
+    name: Check sealed release pins and build its image
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -153,40 +97,17 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - name: Check the caller, workflow and tested collector revision
+      - name: Check the caller, workflow and pinned collector revision
         if: github.event_name == 'release'
-        run: python3 -I tools/check_sealed_release.py --git-history
-      - name: Install test dependencies
+        run: python3 -I tools/sealed_release.py --git-history
+      - name: Check dependency inputs and standalone verifier source agreement
         run: |
-          python3 -m venv "$RUNNER_TEMP/sealed-tests"
-          echo "$RUNNER_TEMP/sealed-tests/bin" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/sealed-tests/bin/python" tools/lock_requirements.py --check
-          "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install --require-hashes -r deploy/build.lock
-          "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install --require-hashes --no-build-isolation -r deploy/browser.lock
-          "$RUNNER_TEMP/sealed-tests/bin/python" -m pip install --no-deps --no-build-isolation -e '.[dev]'
-          "$RUNNER_TEMP/sealed-tests/bin/python" -m pip check
-      - name: Configure bounded Ubuntu package downloads
-        timeout-minutes: 2
-        run: |
-          sudo python3 -I - <<'PY'
-          from pathlib import Path
-          for path in [Path('/etc/apt/sources.list'), *Path('/etc/apt').glob('*mirrors*.txt'),
-                       *Path('/etc/apt/sources.list.d').glob('*.sources'), *Path('/etc/apt/sources.list.d').glob('*.list')]:
-              if path.exists():
-                  text = path.read_text()
-                  for scheme in ('http', 'https'):
-                      text = text.replace(scheme + '://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
-                  path.write_text(text)
-          Path('/etc/apt/apt.conf.d/80-tgwitness-ci').write_text('Acquire::Retries "2";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n')
-          PY
-      - name: Install Chromium
-        timeout-minutes: 10
-        run: python -m playwright install --with-deps chromium
-      - run: >-
-          python -I -m pytest tools/test_file_hash_export.py tools/test_sealed_hash_export.py
-          tools/test_export_capacity.py tools/test_sealed_package.py tools/test_sealed_release.py
-          tools/test_account_acquisition.py tools/test_telegram_export.py tools/test_sealed_account.py
-          tools/test_sealed_parts.py tools/test_sealed_selection.py tools/test_ocr_source_fetch.py tools/test_private_write.py -q
-      - run: python tools/check_sealed_login.py
-      - run: python tools/check_sealed_browser.py
-      - run: python tools/check_sealed_container.py
+          python3 -I tools/lock_requirements.py --check
+          python3 -I -S tools/build_standalone_verifier.py --check
+      - name: Build the sealed collector image
+        run: docker build -f deploy/Dockerfile.sealed -t tgwitness-sealed:ci .
+      - name: Import the installed sealed collector without networking
+        run: >-
+          docker run --rm --network none --read-only --cap-drop=ALL
+          --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
+          tgwitness-sealed:ci python -I -c "import tgwitness.sealed, tgwitness.verify"

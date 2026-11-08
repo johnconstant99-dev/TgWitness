@@ -1,6 +1,6 @@
 """Recompute Trusted Live findings from preserved originals and frame annotations."""
-from .continuity import analyze, parse_export, render
-from .format import canonical
+from .continuity import analyze, parse_export, render, report_version
+from .format import canonical, decode
 from .trusted_model import Choice, VisualNote
 
 
@@ -50,8 +50,9 @@ def verify_analysis(events, read):
         elif event["kind"] == "trusted.continuity_analyzed":
             if state["chat"] is None:
                 raise ValueError("Continuity report has no source export")
-            report = analyze(state["chat"], state["visual"])
-            if one("continuity_report") != canonical(report) or one("annotated_chat") != render(state["chat"], report):
+            stored = one("continuity_report")
+            report = analyze(state["chat"], state["visual"], version=report_version(decode(stored)))
+            if stored != canonical(report) or one("annotated_chat") != render(state["chat"], report):
                 raise ValueError("Continuity report differs from preserved observations")
             checked += 1
     return checked

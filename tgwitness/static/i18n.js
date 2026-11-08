@@ -11,6 +11,7 @@ const LANGUAGES=window.TGW_SCOPE==="guide"?GUIDE_LANGUAGES:PANEL_LANGUAGES;
 const RTL=new Set(["ar","fa","ur","he"]);
 function fill(text,vars){return vars?text.replace(/\{(\w+)\}/g,(m,k)=>k in vars?String(vars[k]):m):text;}
 function tr(text,vars){const out=DICT[text];return fill(typeof out==="string"?out:text,vars);}
+function errorName(name){const text=(window.TGW_ERRORS||{})[name];return typeof text==="string"?tr(text):"";}
 
 function trn(one,other,n,vars){
   const all={n:Number(n).toLocaleString(),...vars},forms=DICT[other];

@@ -18,7 +18,7 @@ The English page presents dated measurements and links to the signed audit.
 | [audit/](audit/README.md) | Signed English report, measurements, checksums and verifier |
 
 The [site integration](../../tools/site_validation.py) copies the public files.
-[Verification checks](../../tools/test_site_validation.py) compare page figures
+Private validation checks compare page figures
 with the signed measurements and validate the pinned signature.
 
 Measurements apply to their recorded workload and revision. A report signature

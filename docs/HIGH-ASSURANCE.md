@@ -107,8 +107,8 @@ The OS image (about 180 MB, of which 21 MB are kept) is downloaded once from
 [Dstack-TEE/meta-dstack](https://github.com/Dstack-TEE/meta-dstack/releases) into
 `dstack-images` beside the record; `--tdx-image FOLDER` uses another folder or an unpacked image,
 `--tdx-image none` skips the comparison. The measurement follows `dstack-mr` and the `qemu-acpi`
-crate of Dstack-TEE/dstack; `tools/check_dstack_image.py` checks it against QEMU's own ACPI
-output and against a real Phala Cloud quote, `--live` also against the published image.
+crate of Dstack-TEE/dstack. Private measurement regressions compare QEMU's own ACPI
+output and a retained Phala Cloud quote; live qualification also needs the published image.
 `--tdx-measurements` still compares MRTD and RTMR0-2 given as JSON instead.
 
 Every start of the collector recorded in the journal carries such an attestation, so

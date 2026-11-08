@@ -1,11 +1,13 @@
 import hashlib
 import json
 import math
+import os
 import re
 import secrets
+import stat
 from datetime import datetime, timezone
 
-from . import tuning
+from . import device_attribution, tuning
 from .avatar_history import history_events, history_index
 from .security import private_write
 from .store import GONE_KINDS, TEXT_KINDS, canonical, utcnow
@@ -15,9 +17,13 @@ FORMAT = "tgwitness-dossier-v1"
 
 
 MENTION_TYPES = ("wallets", "phones", "usernames", "links")
+VOICE_HEADER = 65536
+VOICE_SCAN_LIMIT = 64 * 1024**2
 LIMITS = [
     "Built only from records this workspace saved; people who never wrote in the observed time are absent.",
     "Names, usernames and flags are the profile Telegram showed when a message was saved; they are mutable.",
+    "A client is guessed from how a file was encoded, never from what Telegram says about the sender's device. "
+    "Forwarded and re-uploaded files carry the encoder of whoever produced them first.",
     "Deleted and edited counts cover saved messages only. Telegram does not say who deleted a message.",
     "Mentions are found by patterns in saved text and links; they are leads to check, not verified facts.",
     "The legacy cached avatar field comes from the panel cache, not journal records.",
@@ -274,6 +280,61 @@ class Facts:
         return sorted(self.items.values(), key=lambda i: i["first_at"])
 
 
+def voice_files(store, chat_id):
+    from .replica import filesystem_link
+
+    found = {}
+    root = store.root / "media"
+    if not root.is_dir() or filesystem_link(root) or root.resolve().parent != store.root.resolve():
+        return found
+    directory = None
+    remaining = VOICE_SCAN_LIMIT
+    try:
+        if os.open in os.supports_dir_fd:
+            directory = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        for event in store.events(chat_id=chat_id, kind="media.saved", limit=2000):
+            if remaining <= 0:
+                break
+            payload = event.get("payload") or {}
+            digest, message_id = payload.get("media_sha256"), event.get("message_id")
+            if (not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest) or message_id is None
+                    or str(payload.get("mime_type") or "").partition(";")[0].strip().lower() != "audio/ogg"):
+                continue
+            path = root / digest
+            try:
+                if filesystem_link(path) or path.resolve().parent != root.resolve():
+                    continue
+                before = path.stat()
+                if not stat.S_ISREG(before.st_mode) or not 0 < before.st_size <= remaining:
+                    continue
+                flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+                descriptor = os.open(digest, flags, dir_fd=directory) if directory is not None else os.open(path, flags)
+                with os.fdopen(descriptor, "rb") as handle:
+                    current = os.fstat(handle.fileno())
+                    if (not stat.S_ISREG(current.st_mode) or (current.st_dev, current.st_ino) != (before.st_dev, before.st_ino)
+                            or filesystem_link(root) or filesystem_link(path) or path.resolve().parent != root.resolve()
+                            or not 0 < current.st_size <= remaining):
+                        continue
+                    hashed, header, count = hashlib.sha256(), bytearray(), 0
+                    while chunk := handle.read(min(VOICE_HEADER, remaining + 1)):
+                        remaining -= len(chunk)
+                        if remaining < 0:
+                            break
+                        hashed.update(chunk)
+                        count += len(chunk)
+                        header.extend(chunk[:max(0, VOICE_HEADER - len(header))])
+                    if remaining >= 0 and count == current.st_size and hashed.hexdigest() == digest:
+                        found[message_id] = bytes(header)
+            except OSError:
+                continue
+    except OSError:
+        return found
+    finally:
+        if directory is not None:
+            os.close(directory)
+    return found
+
+
 def build(store, chat_id, title=None, *, allowed_chats=None):
     allowed_chats = None if allowed_chats is None else set(allowed_chats)
     if allowed_chats is not None and chat_id not in allowed_chats:
@@ -283,6 +344,7 @@ def build(store, chat_id, title=None, *, allowed_chats=None):
     records = store.chat_records(chat_id, TEXT_KINDS + GONE_KINDS)
     people, owner, message_seq = {}, {}, {}
     gone = {}
+    voices = voice_files(store, chat_id)
     for event in records:
         if event["kind"] in GONE_KINDS:
             gone.setdefault(event["message_id"], []).append(event)
@@ -298,6 +360,7 @@ def build(store, chat_id, title=None, *, allowed_chats=None):
             "id": sender, "names": Facts(refs), "usernames": Facts(refs), "photo_ids": Facts(refs), "flags": {},
             "messages": set(), "edited": set(), "first": None, "last": None, "hours": [0] * 24,
             "replies_to": {}, "replied_by": {},
+            "clients": Facts(refs), "sticker_sets": Facts(refs), "media_timing": [],
             "mentions": {kind: Facts(refs) for kind in MENTION_TYPES + ("patterns",)}})
         person["names"].add(observed.get("display_name"), event)
         person["usernames"].add(("@" + observed["username"].lower()) if observed.get("username") else None, event)
@@ -329,6 +392,19 @@ def build(store, chat_id, title=None, *, allowed_chats=None):
             person["replies_to"].setdefault(reply, {}).setdefault(message_id, []).append(event["seq"])
         for category, value, extra in mentions(payload, find, patterns):
             person["mentions"][category].add(value, event, extra)
+        found = device_attribution.describe(payload.get("raw") or {}, voices.get(message_id))
+        client = found.get("client")
+        if client and client.get("client"):
+            person["clients"].add(client["client"], event, {"basis": client["basis"], "confidence": client["confidence"]})
+        for entry in found.get("sticker_sets") or []:
+            person["sticker_sets"].add(entry.get("set_id") or entry.get("custom_emoji_id"), event,
+                                       {"from": entry["from"], "alt": entry.get("alt")})
+        timing = found.get("media_timing")
+        if timing and len(person["media_timing"]) < refs:
+            person["media_timing"].append({"message_id": message_id, "record": event["seq"],
+                                           "status": timing["status"],
+                                           "uploaded_before_seconds": timing["uploaded_before_seconds"],
+                                           "uploaded_at": timing["uploaded_at"], "sent_at": timing["sent_at"]})
     avatars = avatar_index(store.root) if allowed_chats is None else {}
     avatar_records = history_events(store, chat_id)
     histories = history_index(store, chat_id, avatar_records)
@@ -402,6 +478,11 @@ def build(store, chat_id, title=None, *, allowed_chats=None):
                 "other_chats": sorted(({"chat_id": c, "title": titles.get(c), "messages": n}
                                        for c, n in elsewhere.get(person["id"], {}).items() if c != chat_id),
                                       key=lambda r: -r["messages"])},
+            "clients": {"observed": person["clients"].out(), "meaning": device_attribution.MEANING},
+            "sticker_sets": person["sticker_sets"].out(),
+            "media_timing": {"pre_existing": [t for t in person["media_timing"] if t["status"] == "uploaded_earlier"],
+                             "other": [t for t in person["media_timing"] if t["status"] != "uploaded_earlier"],
+                             "meaning": device_attribution.PROVENANCE_MEANING},
             "mentions": mentioned,
         }
         for facts in (profile["names"], profile["usernames"], profile["avatar"]["photo_ids"], history, profile["avatar"]["changes"],

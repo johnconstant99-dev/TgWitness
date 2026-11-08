@@ -82,13 +82,9 @@ journal edits.
 
 ```sh
 python -m ruff check .
-python tools/check_router_browser.py
-python tools/check_polling_browser.py
-python tools/check_sources_browser.py
-python tools/check_journal_browser.py
-python tools/check_controls_browser.py
-python tools/check_publication.py --git-index
-node tools/check_writeonly_drafts.mjs
+python tools/publication_guard.py --git-index
 ```
 
-Synthetic data only. Don't commit generated journals, sessions or screenshots of real accounts.
+Use the private browser regressions for routing, stale polling responses, source
+selection, journal rendering, controls and write-only drafts. Use synthetic data;
+keep generated journals, sessions and real-account screenshots out of Git.

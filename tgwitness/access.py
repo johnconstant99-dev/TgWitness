@@ -37,6 +37,69 @@ POLICY = {
     "POST /api/capture/{kind}/settings": ("settings", None),
     "POST /api/capture/{kind}/snapshot": ("settings", None),
     "POST /api/capture/{kind}/export": ("settings", None),
+    "POST /api/capture/{kind}/open": ("settings", None),
+    "GET /api/capture/{kind}/object/{sha256}": ("settings", None),
+    "GET /api/extensions": ("view", "filter"),
+    "POST /api/search/record": ("view", "body"),
+    "POST /api/subjects/{chat_id}/snapshot": ("collect", "path"),
+    "GET /api/qr": ("view", "body"),
+    "POST /api/qr/scan": ("view", "body"),
+    "GET /api/presence": ("view", None),
+    "GET /api/presence/pattern": ("view", None),
+    "POST /api/presence/check": ("collect", None),
+    "POST /api/presence/settings": ("settings", None),
+    "POST /api/presence/watches": ("collect", None),
+    "PUT /api/presence/watches/{ident}": ("collect", None),
+    "DELETE /api/presence/watches/{ident}": ("collect", None),
+    "GET /api/undercover": ("account", None),
+    "POST /api/undercover/personas": ("account", None),
+    "PUT /api/undercover/personas/{ident}": ("account", None),
+    "POST /api/undercover/authorisations": ("account", None),
+    "PUT /api/undercover/authorisations/{ident}": ("account", None),
+    "POST /api/undercover/authorisations/{ident}/withdraw": ("account", None),
+    "GET /api/translations": ("view", "body"),
+    "GET /api/translations/languages": ("view", "body"),
+    "POST /api/translations/preview": ("view", "body"),
+    "POST /api/translations": ("view", "body"),
+    "GET /api/conversation": ("interact", "filter"),
+    "POST /api/conversation": ("interact", "body"),
+    "GET /api/conversation/{plan_id}": ("interact", "body"),
+    "PUT /api/conversation/{plan_id}": ("interact", "body"),
+    "DELETE /api/conversation/{plan_id}": ("interact", "body"),
+    "POST /api/conversation/{plan_id}/goals": ("interact", "body"),
+    "PUT /api/conversation/{plan_id}/goals/{goal_id}": ("interact", "body"),
+    "DELETE /api/conversation/{plan_id}/goals/{goal_id}": ("interact", "body"),
+    "POST /api/conversation/{plan_id}/steps": ("interact", "body"),
+    "PUT /api/conversation/{plan_id}/steps/{step_id}": ("interact", "body"),
+    "POST /api/conversation/{plan_id}/steps/{step_id}/move": ("interact", "body"),
+    "DELETE /api/conversation/{plan_id}/steps/{step_id}": ("interact", "body"),
+    "POST /api/conversation/{plan_id}/assist/preview": ("interact", "body"),
+    "POST /api/conversation/{plan_id}/assist": ("interact", "body"),
+    "GET /api/account/profile": ("account", None),
+    "POST /api/account/profile": ("account", None),
+    "POST /api/account/privacy": ("account", None),
+    "POST /api/account/avatar": ("account", None),
+    "DELETE /api/account/avatar": ("account", None),
+    "GET /api/account/avatar": ("account", None),
+    "POST /api/account/global-privacy": ("account", None),
+    "GET /api/opsec": ("account", None),
+    "POST /api/opsec/check": ("account", None),
+    "POST /api/opsec/settings": ("settings", None),
+    "GET /api/protocol": ("view", "filter"),
+    "GET /api/protocol.html": ("view", "filter"),
+    "GET /api/documentation": ("board.read", "filter"),
+    "POST /api/documentation": ("board.write", "body"),
+    "GET /api/documentation/{session_id}": ("board.read", "body"),
+    "GET /api/documentation/{session_id}/document.{suffix}": ("board.read", "body"),
+    "GET /api/documentation/{session_id}/keys.json": ("board.manage", "body"),
+    "GET /api/documentation/{session_id}/package.zip": ("board.read", "body"),
+    "POST /api/documentation/{session_id}/package": ("board.read", "body"),
+    "PUT /api/documentation/{session_id}/appearance": ("board.write", "body"),
+    "POST /api/documentation/{session_id}/{action}": ("board.write", "body"),
+    "DELETE /api/documentation/{session_id}": ("board.write", "body"),
+    "POST /api/documentation/{session_id}/marks/new": ("board.write", "body"),
+    "PUT /api/documentation/{session_id}/marks/{mark_id}": ("board.write", "body"),
+    "DELETE /api/documentation/{session_id}/marks/{mark_id}": ("board.write", "body"),
     "GET /api/board": ("board.read", "filter"),
     "GET /api/board/card/{identifier}": ("board.read", "body"),
     "GET /api/board/card/{identifier}/participants": ("board.read", "body"),
@@ -118,6 +181,7 @@ POLICY = {
     "POST /api/chat-export/{export_id}/cancel": ("export", "body"),
     "GET /api/chat-export/{export_id}/download": ("export", "body"),
     "POST /api/multi-export/start": ("export", "root"),
+    "POST /api/multi-export/plan": ("export", "root"),
     "GET /api/multi-export/current": ("export", "root"),
     "GET /api/multi-export/{export_id}": ("export", "root"),
     "POST /api/multi-export/{export_id}/cancel": ("export", "root"),
@@ -137,6 +201,12 @@ POLICY = {
     "POST /api/chats/{chat_id}/profile": ("sources", "path"),
     "POST /api/chats/{chat_id}/dossier": ("sources", "path"),
     "POST /api/collector/{action}": ("collect", None),
+    "GET /api/secret-chats": ("view", None),
+    "POST /api/secret-chats/settings": ("settings", None),
+    "POST /api/secret-chats": ("interact", None),
+    "POST /api/secret-chats/{chat_id}/accept": ("interact", None),
+    "POST /api/secret-chats/{chat_id}/messages": ("interact", None),
+    "POST /api/secret-chats/{chat_id}/close": ("interact", None),
     "POST /api/interactions/preview": ("interact", None),
     "POST /api/interactions": ("interact", "body"),
     "GET /api/interactions/{request_id}": ("interact", "body"),
@@ -151,7 +221,6 @@ POLICY = {
     "POST /api/replica": ("settings", None),
     "POST /api/replica/sync": ("settings", None),
     "POST /api/replica/test": ("settings", None),
-    "GET /api/replica/key": ("settings", None),
     "POST /api/alerts": ("settings", None),
     "POST /api/alerts/test": ("settings", None),
     "POST /api/parameters": ("settings", None),
@@ -383,6 +452,7 @@ class AccessControl:
         self.vault, self.store = vault, store
         saved = vault.read("access")
         self.grants = saved.get("grants", [])
+        self.names = {**saved.get("names", {}), **{g["id"]: g["label"] for g in self.grants}}
         now = time.time()
         saved_sessions = saved.get("sessions", []) if saved.get("panel_key") == digest(vault.token) else []
         self.sessions = {s["sha256"]: {**s, "agent": "", "requests": 0}
@@ -397,7 +467,8 @@ class AccessControl:
 
     def save(self):
         sessions = [{k: v for k, v in s.items() if k != "requests"} for s in self.sessions.values()]
-        self.vault.save("access", {"grants": self.grants, "sessions": sessions, "panel_key": digest(self.vault.token)})
+        self.vault.save("access", {"grants": self.grants, "sessions": sessions, "names": self.names,
+                                   "panel_key": digest(self.vault.token)})
 
     def rotate_token(self):
         from .security import private_write
@@ -490,8 +561,7 @@ class AccessControl:
                        "expires": now + settings["session_minutes"] * 60, "requests": 0}
             self.sessions[session["sha256"]] = session
             self.save()
-        self.store.append("access.session_started", {"access_id": owner, "label": label,
-                                                    "session_id": session["id"]})
+        self.store.append("access.session_started", {"access_id": owner, "session_id": session["id"]})
         LOG.info("Session %s started for %s from %s", session["id"], label, address)
         return session_token, self.principal(session)
 
@@ -538,15 +608,15 @@ class AccessControl:
             self.save()
         label = "Main administrator" if found["owner"] == "admin" else (self.grant(found["owner"]) or {}).get("label")
         if reason:
-            self.store.append("access.session_ended", {"access_id": found["owner"], "label": label,
-                                                      "session_id": session_id, "reason": reason})
+            self.store.append("access.session_ended", {"access_id": found["owner"], "session_id": session_id,
+                                                      "reason": reason})
         LOG.info("Session %s of %s ended: %s", session_id, label, reason or "expired")
         return True
 
 
     def journal_view(self, grant):
         return {"access_id": grant["id"], "showcase": bool(grant.get("showcase")), **{k: grant[k] for k in (
-            "label", "permissions", "all_workspaces", "workspaces", "bind_first_ip", "max_uses",
+            "permissions", "all_workspaces", "workspaces", "bind_first_ip", "max_uses",
             "max_sessions", "on_limit", "session_minutes")}, "groups": grant.get("groups") or [],
             "ip_restrictions": len(grant["ips"]), "expires_at": unix_iso(grant["expires_at"])}
 
@@ -558,6 +628,7 @@ class AccessControl:
                  "bound_ip": None, "last_login_at": None, "last_address": None, **settings.model_dump()}
         with self.lock:
             self.grants.append(grant)
+            self.names[grant["id"]] = grant["label"]
             self.save()
         self.store.append("access.granted", self.journal_view(grant))
         LOG.info("Access %s issued (%s)", grant["label"], ", ".join(grant["permissions"]))
@@ -575,6 +646,7 @@ class AccessControl:
             if not settings.bind_first_ip:
                 grant["bound_ip"] = None
             grant.update(settings.model_dump())
+            self.names[grant_id] = grant["label"]
             self.save()
             extra = self.live(grant_id, time.time())[:-grant["max_sessions"]] if grant["max_sessions"] else []
         for old in extra:
@@ -594,7 +666,7 @@ class AccessControl:
         with self.lock:
             self.grants = [g for g in self.grants if g["id"] != grant_id]
             self.save()
-        self.store.append("access.revoked", {"access_id": grant_id, "label": grant["label"]})
+        self.store.append("access.revoked", {"access_id": grant_id})
         LOG.info("Access %s revoked", grant["label"])
 
     def forget_group(self, group_id):
@@ -636,8 +708,9 @@ class AccessControl:
                 view["used_up"] = g["max_uses"] is not None and g["uses"] >= g["max_uses"]
                 view["sessions"] = sum(1 for s in sessions if s["owner"] == g["id"])
                 grants.append(view)
+            names = dict(self.names)
         return {"grants": grants, "sessions": listed, "admin": self.admin_settings(),
-                "permissions": list(PERMISSIONS)}
+                "permissions": list(PERMISSIONS), "names": names}
 
     def journal_listener(self, profile_id):
         def listen(event):

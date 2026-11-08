@@ -32,7 +32,8 @@ if exist install.cmd (echo install.cmd already exists. Choose another folder.) e
 ```
 
 The installer verifies pinned SHA-256 checksums and RSA release signatures before
-installing the application and dependency constraints. It brings Python 3.12 through
+installing the application. Dependencies come only from a signed lock with a SHA-256 for every file
+(`--require-hashes`), so a file added to a pinned version on PyPI is refused. It brings Python 3.12 through
 a pinned uv build, then asks how to open the panel. Questions are read from the
 terminal, so they work when the installer is piped into Bash.
 
@@ -85,7 +86,7 @@ python tools/check_installer.py --install
 ```
 
 The output is `dist/installer-site/`. Each release path contains a wheel,
-dependency constraints, installer copies, SHA-256 sidecars and a manifest linking
+the hash-locked `requirements.lock`, installer copies, SHA-256 sidecars and a manifest linking
 the build to its source commit. `install.cmd` pins the PowerShell child's hash.
 The wheel inventory and RECORD are checked against the checkout before release.
 
@@ -224,8 +225,8 @@ after building. The builder refuses an unsigned release or a key that does not
 match the reviewed public key. Test builds use an ephemeral key and are restricted
 to `.invalid` origins.
 
-The wheel, constraints, manifest, checksum list and all three installer scripts have detached RSA-3072
-PKCS#1 v1.5 / SHA-256 signatures. Bash verifies application and constraint signatures
+The wheel, `requirements.lock`, manifest, checksum list and all three installer scripts have detached RSA-3072
+PKCS#1 v1.5 / SHA-256 signatures. Bash verifies application and lock signatures
 with OpenSSL; Windows uses the operating system's RSA implementation. A signature
 failure stops before the application is installed or run. Native uv/Python and
 optional bridge downloads retain their separate toolchain trust boundaries; these

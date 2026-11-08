@@ -31,6 +31,15 @@ def bucket(address):
     return str(ipaddress.ip_network((ip, 64), strict=False))
 
 
+def family(path):
+    path = path.rstrip("/")
+    if "/api/archive/" in path or (path.endswith("/mcp") and "/api/" not in path):
+        return "archive"
+    if path.endswith("/api/witness/head"):
+        return "witness"
+    return "panel"
+
+
 class RequestSecurity:
     def __init__(self, app, trusted=None, header=None, allowed=None, clock=time.monotonic):
         self.app, self.clock = app, clock
@@ -68,6 +77,17 @@ class RequestSecurity:
             address = candidate
         return str(address)
 
+    def forwarded_https(self, scope):
+        peer = (scope.get("client") or ("unknown", 0))[0]
+        try:
+            address = unmapped(ipaddress.ip_address(peer))
+        except ValueError:
+            return False
+        if not any(address in net for net in self.trusted):
+            return False
+        values = [value for name, value in scope.get("headers", []) if name.lower() == b"x-forwarded-proto"]
+        return values == [b"https"]
+
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http" or scope.get("tgwitness.request_checked"):
             return await self.app(scope, receive, send)
@@ -77,6 +97,8 @@ class RequestSecurity:
         except ValueError:
             return await JSONResponse({"detail": "Invalid forwarded client address."}, status_code=400,
                                       headers={"Cache-Control": "no-store"})(scope, receive, send)
+        if self.forwarded_https(scope):
+            scope["scheme"] = "https"
         scope["client"] = (address, (scope.get("client") or (None, 0))[1])
         if self.allowed and scope.get("path") != "/_tgwitness/ready":
             try:
@@ -86,10 +108,12 @@ class RequestSecurity:
             if not permitted:
                 return await JSONResponse({"detail": "This address is not allowed."}, status_code=403,
                                           headers={"Cache-Control": "no-store"})(scope, receive, send)
-        if "/api/" not in scope.get("path", ""):
+        path = scope.get("path", "")
+        token_family = family(path)
+        if "/api/" not in path and token_family != "archive":
             return await self.app(scope, receive, send)
         now = self.clock()
-        key = bucket(address)
+        key = (bucket(address), token_family)
         row = self.clients.get(key)
         if row is None:
             if len(self.clients) >= 4096:

@@ -205,6 +205,11 @@ def connection(c, now):
 def intake(c, heartbeat_seconds, now):
     detail = {"last_heartbeat": c.get("last_heartbeat"), "last_event_at": c.get("last_update_at"),
               "heartbeat_seconds": heartbeat_seconds}
+    failures = c.get("journal_write_failures", 0)
+    if failures > 0:
+        return part("failed", "journal_write_failures", journal_write_failures=failures,
+                    error=f"{failures} journal records could not be written; check disk space and the data directory",
+                    **detail)
     if not c.get("running"):
         return part("off", "paused", **detail)
     beat = age(c.get("last_heartbeat"), now)

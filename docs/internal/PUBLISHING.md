@@ -135,15 +135,8 @@ From the project environment:
 
 ```sh
 python tools/sync_notice.py --check
-python tools/check_publication.py --git-index
+python tools/publication_guard.py --git-index
 python tools/build_site.py
-python tools/check_site.py
-python tools/check_docs_site.py
-python tools/check_browser.py
-python tools/check_account_browser.py
-python tools/check_interactions_browser.py
-python tools/check_workspace_browser.py
-python tools/check_quick_browser.py
 python tools/build_source.py
 ```
 
@@ -153,7 +146,8 @@ Run `python tools/sync_notice.py` after editing either source to update
 its full-text copies in README, SECURITY, documentation and Wiki. Rebuild both the
 site and Wiki bundles before publishing; the check rejects inconsistent copies.
 
-Browser checks require Playwright Chromium (`python -m playwright install chromium`).
+Run the relevant private browser regressions on the authorized validation host
+before publication; keep their raw logs and fixtures outside Git.
 The publication check scans the public source allowlist for recognizable secret formats
 and checks that local Markdown link targets are included. With `--git-index`, it also
 scans the staged text, rejects non-public paths and unresolved merges, and requires every

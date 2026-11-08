@@ -1,0 +1,28 @@
+.project-context {
+  box-sizing: border-box;
+  width: calc(100% - 32px);
+  max-width: 900px;
+  margin: 48px auto 32px;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid currentColor;
+  border-color: color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 16px;
+  font: 15px/1.65 "Segoe UI", system-ui, sans-serif;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.project-context .project-context-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  margin: 0;
+}
+.project-context-heading strong { font-size: 18px; }
+.project-context-heading span { font-size: 12px; }
+.project-context p { margin: 12px 0 18px; max-width: 72ch; }
+.project-context nav { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+.project-context a { color: inherit; text-decoration: underline; text-underline-offset: 4px; }
+.project-context a:focus-visible { outline: 2px solid currentColor; outline-offset: 5px; }
+.project-context .project-context-formats { margin-top: 20px; font: 13px/1.8 ui-monospace, Consolas, monospace; }
+@media print { .project-context { break-inside: avoid; margin: 24px 0; width: 100%; } }

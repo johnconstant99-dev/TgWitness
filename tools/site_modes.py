@@ -58,7 +58,8 @@ def render_page(template, words, *, lang, base_url, values, dictionary, render, 
              '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="8" '
              'fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor"/></svg></button>')
     head = seo(base_url, path, words["modes.eyebrow"] + " | TgWitness", words["modes.seo"], lang,
-               [(code, ("" if code == "en" else code + "/") + LOCAL) for code in LANGUAGES], languages=LANGUAGES)
+               [(code, ("" if code == "en" else code + "/") + LOCAL) for code in LANGUAGES], languages=LANGUAGES,
+               software=html.unescape(values["REPO_URL"]), version=html.unescape(values["VERSION"]))
     head = re.sub(r'(<meta property="og:image:alt" content=")[^"]*', lambda m: m[1] + text("eyebrow"), head)
     rendered = render(translated, {
         **values, "LANG": LANGUAGES[lang][1], "DIR": LANGUAGES[lang][2], "HEAD": head,

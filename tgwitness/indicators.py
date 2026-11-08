@@ -8,10 +8,13 @@ import uuid
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
+from . import crypto_ids
+
 NAMESPACE = uuid.uuid5(uuid.NAMESPACE_URL, "https://github.com/phishdestroy/TgWitness#indicators")
 MAX_INDICATORS = 20000
 MAX_REFS = 50
-KINDS = ("url", "domain", "wallet", "telegram", "telegram-invite", "email", "phone", "image")
+KINDS = ("url", "domain", "wallet", "telegram", "telegram-invite", "email", "phone", "image", "transaction",
+         "payment-uri")
 B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 BECH32 = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 BASE58_CHAINS = {0x00: "Bitcoin", 0x05: "Bitcoin", 0x30: "Litecoin", 0x32: "Litecoin", 0x1E: "Dogecoin",
@@ -33,6 +36,7 @@ PHONE = re.compile(r"(?<![\w+])\+\d[\d\s().-]{6,20}\d")
 BASE58_WORD = re.compile(r"(?<![A-Za-z0-9])[1-9A-HJ-NP-Za-km-z]{25,44}(?![A-Za-z0-9])")
 BECH32_WORD = re.compile(r"(?i)(?<![A-Za-z0-9])(?:bc|ltc)1[ac-hj-np-z02-9]{8,87}(?![A-Za-z0-9])")
 EVM = re.compile(r"(?<![A-Za-z0-9])0x[0-9a-fA-F]{40}(?![A-Za-z0-9])")
+WORD = re.compile(r"\S+")
 TON = re.compile(r"(?<![A-Za-z0-9_+/-])[EUk0]Q[A-Za-z0-9_+/-]{46}(?![A-Za-z0-9_+/-])")
 TON_RAW = re.compile(r"(?<![\w:-])(?:0|-1):[0-9a-fA-F]{64}(?![0-9a-fA-F])")
 
@@ -86,6 +90,12 @@ def ton_valid(text):
     except ValueError:
         return False
     return len(data) == 36 and crc16(data[:34]).to_bytes(2, "big") == data[34:]
+
+
+def by_word(pattern, text, longest=1024):
+    for word in WORD.finditer(text):
+        if word.end() - word.start() <= longest:
+            yield from pattern.finditer(text, word.start(), word.end())
 
 
 def image_hash(path):
@@ -199,12 +209,12 @@ class Indicators:
         for match in URL.finditer(text):
             self.link(match.group(0), source, ref, at)
             taken.append(match.span())
-        for match in EMAIL.finditer(text):
+        for match in by_word(EMAIL, text):
             self.note("email", match.group(0).lower(), source, ref, at)
             self.domain(match.group(0).split("@", 1)[1], source, ref, at)
             taken.append(match.span())
         inside = lambda span: any(a <= span[0] and span[1] <= b for a, b in taken)
-        for match in HOST.finditer(text):
+        for match in by_word(HOST, text):
             if inside(match.span()):
                 continue
             host, path = match.group(1).lower(), match.group(2) or ""
@@ -236,13 +246,35 @@ class Indicators:
                     and re.search(r"\d", word) and re.search(r"[a-z]", word) and re.search(r"[A-Z]", word):
                 self.note("wallet", word, source, ref, at, chain="Solana", checksum="none")
         for match in EVM.finditer(text):
-            self.note("wallet", match.group(0), source, ref, at, chain="EVM (Ethereum, BNB Chain, Polygon…)",
-                      checksum="not checked")
+            address = match.group(0)
+            checksum = crypto_ids.evm_checksum(address)
+            if checksum == "failed":
+                continue
+            self.note("wallet", address, source, ref, at, chain="EVM (Ethereum, BNB Chain, Polygon…)",
+                      checksum=checksum, normalized=address.lower(),
+                      chain_note="The same address exists on every EVM network; the chain follows from the context.")
         for match in TON.finditer(text):
             if ton_valid(match.group(0)):
-                self.note("wallet", match.group(0), source, ref, at, chain="TON", checksum="valid")
+                self.note("wallet", match.group(0), source, ref, at, chain="TON", checksum="valid",
+                          normalized=crypto_ids.normalise(match.group(0), "TON"),
+                          chain_note="One TON account has several spellings; the raw form identifies it.")
         for match in TON_RAW.finditer(text):
-            self.note("wallet", match.group(0).lower(), source, ref, at, chain="TON", checksum="none")
+            self.note("wallet", match.group(0).lower(), source, ref, at, chain="TON", checksum="none",
+                      normalized=crypto_ids.normalise(match.group(0), "TON"))
+        for match in crypto_ids.XRP_WORD.finditer(text):
+            if crypto_ids.xrp_valid(match.group(0)):
+                self.note("wallet", match.group(0), source, ref, at, chain="XRP Ledger", checksum="valid",
+                          chain_note="Exchange deposits on the XRP Ledger also need the destination tag.")
+        for item in crypto_ids.transactions(text):
+            self.note("transaction", item["value"], source, ref, at,
+                      **{key: item[key] for key in ("chain", "form", "explorer", "note") if item.get(key)})
+        for item in crypto_ids.payment_uris(text):
+            self.note("payment-uri", item["uri"], source, ref, at,
+                      **{key: item[key] for key in ("chain", "address", "amount", "token", "token_contract", "label")
+                         if item.get(key)})
+            if item.get("address") and len(item["address"]) >= 20:
+                self.note("wallet", item["address"], source, ref, at, chain=item.get("chain"), checksum="from payment link",
+                          chain_note="Taken from a payment link in the message.")
 
     def image(self, sha256, path, ref, at):
         dhash = image_hash(path)

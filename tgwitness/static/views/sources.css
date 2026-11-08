@@ -118,3 +118,33 @@
   #view-sources #target-select-matching { width: 100%; text-align: start; padding-inline: 0; }
   #view-sources .source-pagination > div { margin-inline-start: auto; }
 }
+  #view-sources #target-select-matching { width: 100%; text-align: start; padding-inline: 0; }
+  #view-sources .source-pagination > div { margin-inline-start: auto; }
+}
+
+#view-sources .secret-chats { display: grid; gap: 12px; }
+#view-sources .secret-chats h2, #view-sources .secret-chats p { margin: 0; }
+#view-sources .secret-settings { display: grid; gap: 6px; }
+#view-sources .secret-start { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; max-width: 640px; align-items: end; }
+#view-sources .secret-start label { grid-column: 1 / -1; font-weight: 600; }
+#view-sources .secret-layout { display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 16px; margin-top: 4px; }
+#view-sources .secret-list { display: grid; gap: 6px; align-content: start; }
+#view-sources .secret-chat-row { display: grid; gap: 2px; text-align: start; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); white-space: normal; }
+#view-sources .secret-chat-row.selected { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+#view-sources .secret-chat-row small { color: var(--muted); font-weight: 400; }
+#view-sources .secret-thread { display: grid; gap: 10px; min-width: 0; align-content: start; }
+#view-sources .secret-thread-head { display: grid; gap: 4px; }
+#view-sources .secret-key { font-size: 12px; overflow-wrap: anywhere; color: var(--text-2); }
+#view-sources .secret-feed { display: grid; gap: 8px; max-height: 480px; overflow: auto; padding: 4px; border: 1px solid var(--border); border-radius: var(--radius); }
+#view-sources .secret-message { max-width: 80%; padding: 8px 10px; border-radius: var(--radius); background: var(--surface-2); display: grid; gap: 4px; }
+#view-sources .secret-message.out { justify-self: end; background: var(--accent-soft); }
+#view-sources .secret-message.deleted { outline: 1px dashed var(--warning-border); }
+#view-sources .secret-message p { overflow-wrap: anywhere; white-space: pre-wrap; }
+#view-sources .secret-message small, #view-sources .secret-event { color: var(--muted); font-size: 12px; }
+#view-sources .secret-note { color: var(--warning-text, var(--muted)); }
+#view-sources .secret-send { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+#view-sources .secret-send textarea { width: 100%; resize: vertical; }
+@media (max-width: 767px) {
+  #view-sources .secret-layout, #view-sources .secret-start, #view-sources .secret-send { grid-template-columns: 1fr; }
+  #view-sources .secret-message { max-width: 100%; }
+}

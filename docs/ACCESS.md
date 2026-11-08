@@ -38,6 +38,9 @@ case should stay limited to them.
 Open the panel with the issued token in a separate browser session and check the
 visible chats and permitted actions before handing it over.
 
+Access names remain in encrypted local storage and are resolved by the administrator's panel.
+Names are omitted from new access and workspace-creation audit records; existing signed records keep their original fields.
+
 ## Choose the permissions
 
 For a text-only public demonstration, use **Public showcase** instead of ordinary
@@ -57,6 +60,9 @@ the API boundary. [Create and verify a showcase](LIVE-SHOWCASE.md).
 | `board.read` | Read Case Board notes only within the permitted workspace and chats. |
 | `board.write` | Add bookmarks, highlights, slices, comments and open/review statuses. Also needs `board.read`. |
 | `board.manage` | Manage collections, final team statuses and other participants' cards. Also needs board read/write. |
+
+Only the main administrator can download the off-site replica recovery key.
+Delegated `settings` or `account` access does not grant that key.
 
 Permissions and scope are checked together. Ticking a permission does not open
 other chats or unlock a workspace-wide operation for a chat-limited access.
@@ -104,6 +110,8 @@ An issued access can list or download its own copies only while those permission
 copies containing Case Board also require `board.read`. The administrator can retrieve all copies.
 Older copies without this metadata and group bundles are administrator-only. Download tickets
 and prepared file responses recheck access after preparing the file, before sending its bytes.
+Each access, including the administrator, can hold ten pending download tickets per workspace;
+the workspace-wide limit is 1,000. Tickets expire after 120 seconds and are single-use.
 
 Revocation cannot recall files that someone already downloaded. Signing out,
 locking the panel or ending a session does not stop a running collector.
@@ -132,17 +140,21 @@ An installation using `TGWITNESS_TOKEN` must change that environment setting and
 
 ### Request and proxy boundaries
 
-The API admits up to 600 requests per minute per client IP. Ten rejected
-authentications within a minute start an exponential cooldown, from one second
+The API admits up to 600 requests per minute per client and credential family:
+panel, archive/MCP or witness. Authentication cooldowns are separate for these families.
+Ten rejected authentications within a minute start an exponential cooldown, from one second
 up to five minutes. A failed attempt after the cooldown increases it; ten minutes
 without a failed attempt resets escalation. Rejections return HTTP 429 and
 `Retry-After`. Limits are in memory, shared across workspaces in one panel process;
 restart clears them. Live streams are limited to four per bearer token and 32
 for the panel process. Opening a stream also consumes the API request budget.
 
-Request bodies have a 60-second receive deadline (8 seconds for MCP). Each application bounds
-unfinished bodies to 32 requests and 64 MiB of reserved route allowances. Oversized bodies return
-413, timed-out bodies return 408, and exhausted body capacity returns 503 with `Retry-After`.
+Request bodies have a 60-second receive deadline, reduced to 10 seconds for login, demo access,
+archive API and witness-head paths, or 8 seconds for MCP transport. Each application permits
+four unfinished bodies per client address, with overall limits of 32 and 64 MiB of reserved
+route allowances. Requests without bodies do not consume these slots. Oversized bodies return
+413, timed-out bodies return 408, and exceeded client capacity returns 429 with `Retry-After: 1`.
+Exhausted overall body capacity returns 503 with `Retry-After`.
 
 Forwarded IP headers are ignored unless the actual TCP peer belongs to
 `TGWITNESS_TRUSTED_PROXIES` (comma-separated IPs or CIDRs). Set

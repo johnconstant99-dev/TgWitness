@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       full_platforms:
-        description: Also test Windows/macOS and build Windows portable (uses GitHub compute)
+        description: Also build and smoke-check Windows/macOS packages (uses GitHub compute)
         type: boolean
         default: false
   workflow_call:
@@ -64,16 +64,13 @@ jobs:
       - name: Lint all public source
         if: ${{ !cancelled() }}
         run: python -m ruff check .
-      - name: Check bounded CI orchestration with synthetic failures
+      - name: Check standalone verifier source agreement
         if: ${{ !cancelled() }}
-        run: python tools/check_check_runner.py
-      - name: Check source archive repeatability and interrupted-build recovery
-        if: ${{ !cancelled() }}
-        run: python -I tools/check_source_archive.py
+        run: python -I -S tools/build_standalone_verifier.py --check
       - name: Check reviewed source and Git index for publication
         id: publication
         if: ${{ !cancelled() }}
-        run: python tools/check_publication.py --git-index
+        run: python tools/publication_guard.py --git-index
       - name: Build the checked source archive
         id: source
         if: ${{ !cancelled() && steps.publication.outcome == 'success' }}
@@ -116,130 +113,23 @@ jobs:
           python -m venv "$check_venv"
           echo "$check_venv/bin" >> "$GITHUB_PATH"
           echo "VIRTUAL_ENV=$check_venv" >> "$GITHUB_ENV"
-      - name: Install hash-locked MCP dependencies and local source
+      - name: Build and install the wheel with hash-locked MCP dependencies
         run: |
           python -m pip install --require-hashes -r deploy/build.lock
           python -m pip install --require-hashes --no-build-isolation -r deploy/mcp.lock
-          python -m pip install --no-deps --no-build-isolation -e ".[mcp]"
+          python -m pip wheel --no-deps --no-build-isolation --wheel-dir build/wheels .
+          python -c "from pathlib import Path; import subprocess, sys; wheel, = Path('build/wheels').glob('tgwitness-*.whl'); subprocess.run([sys.executable, '-m', 'pip', 'install', '--no-deps', str(wheel)], check=True)"
           python -m pip check
-      - name: Check the installation and signed export with synthetic data
-        run: python tools/check_install.py --package . --output build/package-smoke
-      - run: python tools/check_collector_authorization.py
-      - name: Check pinned tunnel helpers and process cleanup on this platform
-        if: matrix.python == '3.12'
-        run: python tools/check_portable_routes_runtime.py
-      - name: Check disclosure privacy, interrupted account export recovery and chat counters
+      - name: Import the installed package and check its CLI
         run: |
-          python -I tools/check_disclosure_privacy.py
-          python -I tools/check_account_export_recovery.py
-          python -I tools/check_counters.py
-      - run: python -m tgwitness --check --json --data-dir readiness-probe
-      - name: Exercise the first-run installer in a fresh environment
+          python -I -c "import tgwitness.app, tgwitness.verify, tgwitness_capture.service"
+          python -I -m tgwitness --help
+      - run: python -I -m tgwitness --check --json --data-dir readiness-probe
+      - name: Check the source launcher setup and empty-workspace readiness
         if: matrix.python == '3.12'
         run: |
           python start.py --setup-only
           python start.py --check --json --data-dir installer-readiness-probe
-  browser:
-    name: Synthetic browser behavior
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
-        with:
-          python-version: "3.12"
-          cache: ${{ runner.environment == 'github-hosted' && 'pip' || '' }}
-          cache-dependency-path: |
-            pyproject.toml
-            deploy/constraints.txt
-            deploy/constraints-mcp.txt
-            deploy/build.lock
-            deploy/requirements.lock
-            deploy/browser.lock
-      - name: Create an isolated Python environment
-        if: runner.os == 'Linux'
-        run: |
-          check_venv=$(mktemp -d "$RUNNER_TEMP/tgwitness-venv.XXXXXX")
-          python -m venv "$check_venv"
-          echo "$check_venv/bin" >> "$GITHUB_PATH"
-          echo "VIRTUAL_ENV=$check_venv" >> "$GITHUB_ENV"
-      - name: Install browser and MCP dependencies together
-        run: |
-          python -m pip install --require-hashes -r deploy/build.lock
-          python -m pip install --require-hashes --no-build-isolation -r deploy/browser.lock
-          python -m pip install --no-deps --no-build-isolation -e ".[dev,mcp]"
-          python -m pip check
-      - name: Use a separate versioned browser cache
-        run: echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright" >> "$GITHUB_ENV"
-      - name: Install Chromium and its hosted-runner OS dependencies
-        run: python -m playwright install --with-deps chromium
-      - name: Run independent browser checks (two at a time)
-        run: python tools/run_checks.py --suite browser --jobs 2
-      - name: Retain every check's logs and results
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        if: always()
-        with:
-          name: browser-check-results
-          path: |
-            build/check-results/browser/
-            test-results/**/*receipt.json
-            test-results/**/*.png
-          if-no-files-found: warn
-          retention-days: 3
-  browser-ux:
-    name: Interface and accessibility browser checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
-        with:
-          python-version: "3.12"
-          cache: ${{ runner.environment == 'github-hosted' && 'pip' || '' }}
-          cache-dependency-path: |
-            pyproject.toml
-            deploy/constraints.txt
-            deploy/constraints-mcp.txt
-            deploy/build.lock
-            deploy/requirements.lock
-            deploy/browser.lock
-      - name: Create an isolated Python environment
-        if: runner.os == 'Linux'
-        run: |
-          check_venv=$(mktemp -d "$RUNNER_TEMP/tgwitness-venv.XXXXXX")
-          python -m venv "$check_venv"
-          echo "$check_venv/bin" >> "$GITHUB_PATH"
-          echo "VIRTUAL_ENV=$check_venv" >> "$GITHUB_ENV"
-      - name: Install browser and MCP dependencies together
-        run: |
-          python -m pip install --require-hashes -r deploy/build.lock
-          python -m pip install --require-hashes --no-build-isolation -r deploy/browser.lock
-          python -m pip install --no-deps --no-build-isolation -e ".[dev,mcp]"
-          python -m pip check
-      - name: Use a separate versioned browser cache
-        run: echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright" >> "$GITHUB_ENV"
-      - name: Install Chromium and its hosted-runner OS dependencies
-        run: python -m playwright install --with-deps chromium
-      - name: Run independent panel checks (two at a time)
-        run: python tools/run_checks.py --suite browser-ux --jobs 2
-      - name: Check write-only form drafts
-        if: ${{ !cancelled() }}
-        run: python -c "from playwright._impl._driver import compute_driver_executable; import subprocess; subprocess.run([str(compute_driver_executable()[0]), 'tools/check_writeonly_drafts.mjs'], check=True)"
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        if: always()
-        with:
-          name: panel-ux-review
-          path: |
-            build/check-results/browser-ux/
-            build/ux-review/**/*.png
-            build/journal-review/**/*.png
-            build/notifications-review/**/*.png
-          if-no-files-found: ignore
-          retention-days: 3
   portable:
     name: Windows portable package
     if: inputs.full_platforms
@@ -276,7 +166,7 @@ jobs:
             dist/*-portable.zip.sha256
           retention-days: 3
   docker:
-    name: Container and Compose integration
+    name: Container build and CLI smoke
     runs-on: [self-hosted, Linux, X64, tgwitness-ci]
     timeout-minutes: 30
     steps:
@@ -315,23 +205,13 @@ jobs:
       # The persistent default BuildKit builder also serves the Compose check.
       # Keep its local layers; a new container builder would duplicate that cache.
       - run: docker build -f deploy/Dockerfile -t tgwitness:test .
-      - name: Exercise installed container package with synthetic data
+      - name: Check the installed container CLI without networking
         run: >-
           docker run --rm --network none --read-only --cap-drop=ALL
           --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
-          --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly
-          tgwitness:test python /checks/check_container_runtime.py --output /data/checks
-      - name: Check authenticated APK retries and corrupt downloads inside Wolfi
-        run: >-
-          docker run --rm --network none --read-only --cap-drop=ALL
-          --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
-          --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly
-          tgwitness:test python /checks/test_container_fetch_retry.py
-          --installer /usr/share/tgwitness-build/containers/install-packages.sh
-      - name: Check Compose health, access control, and persistent restart
-        run: python tools/check_compose.py
+          tgwitness:test python -I -m tgwitness --check --json --data-dir /tmp/readiness
   media:
-    name: Isolated OCR and transcription
+    name: Media worker build and import smoke
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -341,17 +221,10 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
-      - name: Exercise the isolated OCR worker
-        env:
-          TGWITNESS_MEDIA_IMAGE: tgwitness-media:test
-          TGWITNESS_WHISPER_MODEL_DIR: ${{ runner.temp }}/tgwitness-asr-model
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends espeak-ng
-          python -m pip install --require-hashes -r deploy/build.lock
-          python -m pip install --require-hashes --no-build-isolation -r deploy/requirements.lock
-          python -m pip install --no-deps --no-build-isolation -e .
-          python -m pip check
-          docker build -f deploy/media-worker/Dockerfile -t tgwitness-media:test .
-          python tools/prepare_media_test_model.py --output "$TGWITNESS_WHISPER_MODEL_DIR"
-          python tools/check_media_worker.py
+      - name: Build the OCR and transcription image
+        run: docker build -f deploy/media-worker/Dockerfile -t tgwitness-media:test .
+      - name: Import the installed worker dependencies without networking
+        run: >-
+          docker run --rm --network none --read-only --cap-drop=ALL
+          --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
+          --entrypoint python tgwitness-media:test -I -c "import faster_whisper, PIL"

@@ -472,11 +472,9 @@ class Storage:
         secret = self.vault.read("replica")
         if not secret.get("key"):
             return False
-        key = base64.b64decode(secret["key"], validate=True)
-        base = replica.workspace_prefix(cfg, self.vault.public_key)
-        identity = {k: cfg[k] for k in ("endpoint", "region", "bucket", "path_style")}
-        identity.update(prefix=base, encryption_key_hash=hashlib.sha256(key).hexdigest())
-        sent = replica.Sent(self.store.root, hashlib.sha256(canonical(identity)).hexdigest())
+        key, base, namespace = replica.replica_context(
+            cfg, base64.b64decode(secret["key"], validate=True), replica.fingerprint(self.vault.public_key))
+        sent = replica.Sent(self.store.root, namespace)
         try:
             return sent.has(base + "/media/" + hmac.new(key, digest.encode(), hashlib.sha256).hexdigest()[:40] + ".tgwr")
         finally:

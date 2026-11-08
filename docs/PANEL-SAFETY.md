@@ -119,23 +119,7 @@ sent to a model after you approve it.
 
 ## Checks
 
-```sh
-python tools/check_import_preflight.py
-python tools/check_chat_safety_browser.py
-python tools/check_workspace_downloads_browser.py
-python tools/check_prepared_export_access.py
-python tools/check_services_browser.py
-python tools/check_storage_services.py
-python tools/test_settings_hub.py
-node tools/check_privacy_js.cjs
-```
-
-Other engines:
-
-```sh
-python tools/check_workspace_downloads_browser.py --browser firefox
-python tools/check_workspace_downloads_browser.py --browser webkit
-```
-
-WebKit via Playwright isn't the same as a real iPhone. Screenshots land in
-`test-results/` and `build/ux-review/`. Telegram and storage are fake in these checks.
+The private validation workspace covers import preflight, chat safety, workspace
+downloads, prepared-export access, services, settings and privacy controls using
+synthetic Telegram and storage clients. Browser coverage includes Chromium,
+Firefox and WebKit; Playwright WebKit does not qualify a real iPhone.

@@ -219,9 +219,9 @@ def main():
 
     print("Installing TgWitness and pinned dependencies", flush=True)
     site_packages = stage / "python/Lib/site-packages"
-    subprocess.run([sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "--no-warn-script-location",
-                    "--no-compile", "--target", str(site_packages), "-c", str(ROOT / "deploy/constraints.txt"), str(ROOT)],
-                   check=True, cwd=ROOT)
+    for packages in (["--require-hashes", "-r", str(ROOT / "deploy/requirements.lock")], ["--no-deps", str(ROOT)]):
+        subprocess.run([sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "--no-warn-script-location",
+                        "--no-compile", "--target", str(site_packages), *packages], check=True, cwd=ROOT)
     shutil.rmtree(site_packages / "bin", ignore_errors=True)
     clean_app_install_metadata(site_packages)
 

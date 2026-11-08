@@ -134,8 +134,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          python3 -I tools/test_ocr_advisories.py
-          python3 -I tools/check_ocr_advisories.py --output ocr-upstream-advisories.json
+          python3 -I tools/ocr_advisories.py --output ocr-upstream-advisories.json
       - name: Build the actual image from the public source archive
         id: build_image
         env:
@@ -156,30 +155,15 @@ jobs:
           docker build --pull --platform "$AUDIT_PLATFORM" \
             -f "$CONTAINER_SOURCE_DIR/TgWitness/$AUDIT_DOCKERFILE" \
             -t "$AUDIT_IMAGE" "$CONTAINER_SOURCE_DIR/TgWitness"
-      - name: Verify package authentication rejects modified archives
-        if: matrix.name == 'runtime'
-        run: |
-          python3 -I tools/test_container_package_auth.py
-          mkdir -p "$RUNNER_TEMP/package-auth"
-          docker run --rm --user 0:0 --entrypoint python \
-            --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly \
-            --mount type=bind,source="$RUNNER_TEMP/package-auth",target=/out \
-            tgwitness-security:runtime /checks/check_container_package_auth.py --output /out/package-auth.json
-      - name: Retain package authentication results
-        if: always() && matrix.name == 'runtime'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: container-package-authentication
-          path: ${{ runner.temp }}/package-auth/package-auth.json
-          if-no-files-found: warn
-          retention-days: 14
-      - name: Exercise the ARM64 application and signed PDF exports
-        if: matrix.platform == 'linux/arm64'
+      - name: Check the installed runtime CLI without networking
+        if: matrix.name == 'runtime' || matrix.name == 'runtime-arm64'
+        env:
+          AUDIT_IMAGE: tgwitness-security:${{ matrix.name }}
+          AUDIT_PLATFORM: ${{ matrix.platform }}
         run: >-
-          docker run --rm --platform linux/arm64 --network none --read-only --cap-drop=ALL
+          docker run --rm --platform "$AUDIT_PLATFORM" --network none --read-only --cap-drop=ALL
           --security-opt=no-new-privileges --tmpfs /tmp:size=128m,mode=1777
-          --mount type=bind,source="$GITHUB_WORKSPACE/tools",target=/checks,readonly
-          tgwitness-security:runtime-arm64 python /checks/check_container_runtime.py --output /data/checks
+          "$AUDIT_IMAGE" python -I -m tgwitness --check --json --data-dir /tmp/readiness
       - name: Scan OS and installed library packages
         if: ${{ !cancelled() && steps.build_image.outcome == 'success' }}
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0

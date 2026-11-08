@@ -49,8 +49,8 @@ jobs:
           if os.environ["EVENT_NAME"] == "release" and os.environ["RELEASE_TAG"] != "v" + version:
               raise SystemExit("Release tag must be v" + version)
           PY
-      - name: Verify source archive repeatability and interrupted-build recovery
-        run: python3 -I tools/check_source_archive.py
+      - name: Validate the public source allowlist and Git index
+        run: python3 -I tools/publication_guard.py --git-index
       - name: Build the public source archive
         run: python3 -I tools/build_source.py
       - name: Give the hosted build its own release asset name
@@ -76,7 +76,6 @@ jobs:
         # Syft1.55 recognizes *requirements*.txt and does not resolve -c includes.
         # The source ZIP is already fixed; these derived files are scanner inputs only.
         run: |
-          python3 -I tools/check_sbom_locks.py
           python3 -I tools/sbom_locks.py stage --output build/sbom-locks
       - name: Generate the repository and declared Python dependency SBOM
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3

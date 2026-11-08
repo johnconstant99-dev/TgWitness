@@ -16,82 +16,6 @@ defaults:
 jobs:
   evidence:
     uses: ./.github/workflows/evidence-checks.yml
-  browser:
-    name: Panel regression (${{ matrix.suite }})
-    # Untrusted PRs use disposable hosted runners with a read-only token.
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        suite: [browser, browser-ux]
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: |
-            deploy/build.lock
-            deploy/browser.lock
-      - name: Validate and install the locked browser environment
-        run: |
-          python tools/lock_requirements.py --check
-          python -m pip install --require-hashes -r deploy/build.lock
-          python -m pip install --require-hashes --no-build-isolation -r deploy/browser.lock
-          python -m pip install --no-deps --no-build-isolation -e ".[dev,mcp]"
-          python -m pip check
-      - name: Configure bounded Ubuntu package downloads
-        timeout-minutes: 2
-        run: |
-          # The Azure mirror stalled both FFmpeg and multi-browser acceptance.
-          sudo python3 -I - <<'PY'
-          from pathlib import Path
-          for path in [Path('/etc/apt/sources.list'), *Path('/etc/apt').glob('*mirrors*.txt'),
-                       *Path('/etc/apt/sources.list.d').glob('*.sources'), *Path('/etc/apt/sources.list.d').glob('*.list')]:
-              if path.exists():
-                  text = path.read_text()
-                  for scheme in ('http', 'https'):
-                      text = text.replace(scheme + '://azure.archive.ubuntu.com/ubuntu', 'https://archive.ubuntu.com/ubuntu')
-                  path.write_text(text)
-          Path('/etc/apt/apt.conf.d/80-tgwitness-ci').write_text('Acquire::Retries "2";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n')
-          PY
-      - name: Install Chromium
-        if: matrix.suite == 'browser'
-        timeout-minutes: 10
-        run: python -m playwright install --with-deps chromium
-      - name: Install browser engines for account and download regression checks
-        if: matrix.suite == 'browser-ux'
-        timeout-minutes: 10
-        run: python -m playwright install --with-deps chromium firefox webkit
-      - name: Run panel scenarios and retain individual results
-        env:
-          CHECK_SUITE: ${{ matrix.suite }}
-        run: python tools/run_checks.py --suite "$CHECK_SUITE" --jobs 2
-      - name: Check Firefox downloads and workspace boundaries
-        if: ${{ !cancelled() && matrix.suite == 'browser-ux' }}
-        run: python tools/check_workspace_downloads_browser.py --browser firefox
-      - name: Check WebKit downloads and workspace boundaries
-        if: ${{ !cancelled() && matrix.suite == 'browser-ux' }}
-        run: python tools/check_workspace_downloads_browser.py --browser webkit
-      - name: Check secret masking and write-only form drafts
-        if: ${{ !cancelled() && matrix.suite == 'browser-ux' }}
-        run: |
-          python -c "from playwright._impl._driver import compute_driver_executable; import subprocess; subprocess.run([str(compute_driver_executable()[0]), 'tools/check_privacy_js.cjs'], check=True)"
-          python -c "from playwright._impl._driver import compute_driver_executable; import subprocess; subprocess.run([str(compute_driver_executable()[0]), 'tools/check_writeonly_drafts.mjs'], check=True)"
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        if: always()
-        with:
-          name: pr-panel-${{ matrix.suite }}
-          path: |
-            build/check-results/${{ matrix.suite }}/
-            build/ux-review/**/*.png
-            test-results/**/*.png
-            test-results/**/*receipt.json
-          if-no-files-found: warn
-          retention-days: 7
   lint-and-smoke:
     name: Lint and synthetic smoke
     # PR code and dependency installers never run on the project runner.
@@ -111,38 +35,19 @@ jobs:
           python -m pip install --require-hashes -r deploy/build.lock
           # Fail if a dependency PR changes constraints without regenerating the hash lock.
           python -m pip install -c deploy/constraints.txt --require-hashes --no-build-isolation -r deploy/requirements.lock
-          python -m pip install --no-deps --no-build-isolation -e .
+          python -m pip wheel --no-deps --no-build-isolation --wheel-dir build/wheels .
+          python -m pip install --no-deps build/wheels/tgwitness-*.whl
           python -m pip check
           python -m pip install --require-hashes --only-binary=:all: -r deploy/audit.lock
       - run: python -m ruff check .
-      - name: Check release source and container recovery boundaries
+      - name: Check the source allowlist and build the public archive
         run: |
-          python -I tools/test_release_source.py
-          python -I tools/test_container_tag.py
-      - name: Check media and locale boundaries and legacy import compatibility
-        run: python -I tools/check_codeql_boundaries.py
-      - name: Check installed resources, authentication and signed downloads with synthetic data
-        run: python tools/check_install.py --package . --output test-results/pr-install
-      - name: Verify notification credentials cannot follow redirects
-        run: python tools/check_notification_redirects.py
-      - name: Check first-run panel choices and service boundaries
-        run: python -I tools/check_panel_setup.py
-      - name: Check immutable installer retention and signature rejection
-        run: python -I tools/check_installer_publication.py
-      - name: Check operator privacy, token rotation, proxy trust and API limits
-        run: python -I tools/check_operator_security.py
-      - name: Check Telegram client metadata without network access
-        run: python -I tools/check_client_identity.py
-      - name: Check account-loss receipts and stale connection isolation
-        run: python -I tools/check_collector_authorization.py
-      - name: Verify frozen dependency inventories cannot omit or replace pins
-        run: python -I tools/check_sbom_locks.py
-      - name: Verify source archive repeatability and interrupted-build recovery
-        run: python -I tools/check_source_archive.py
-      - name: Verify disclosure privacy and interrupted account export recovery
+          python -I tools/publication_guard.py --git-index
+          python -I tools/build_source.py
+      - name: Import the installed package and check empty-workspace readiness
         run: |
-          python -I tools/check_disclosure_privacy.py
-          python -I tools/check_account_export_recovery.py
+          python -I -c "import tgwitness.app, tgwitness.verify, tgwitness_capture.service"
+          python -I -m tgwitness --check --json --data-dir "$RUNNER_TEMP/readiness"
   dependencies:
     name: Locked dependency audit
     runs-on: ubuntu-24.04

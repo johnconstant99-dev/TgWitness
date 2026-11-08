@@ -91,6 +91,28 @@ def check_events(events, public_key, observer_id):
     return previous
 
 
+def check_event(event, public_key, observer_id):
+    fields = {"format", "observer_id", "session_id", "seq", "kind", "observed_at",
+              "recorded_at", "monotonic_ns", "previous_hash", "payload", "artifacts"}
+    if not isinstance(event, dict) or set(event) != fields | {"hash", "signature"}:
+        raise ValueError("Unexpected event fields")
+    body = {key: value for key, value in event.items() if key in fields}
+    if (body["format"] != FORMAT or body["observer_id"] != observer_id or type(body["seq"]) is not int
+            or body["seq"] < 1 or not isinstance(body["payload"], dict) or not isinstance(body["artifacts"], list)):
+        raise ValueError("Invalid event contents")
+    expected = digest(DOMAIN + b"event\x00" + canonical(body))
+    if event["hash"] != expected:
+        raise ValueError("Event hash mismatch")
+    check_seal(public_key, "event-hash", expected, event["signature"])
+    for artifact in body["artifacts"]:
+        if (not isinstance(artifact, dict) or set(artifact) != {"sha256", "size", "role", "media_type"}
+                or not isinstance(artifact["sha256"], str) or not HEX.fullmatch(artifact["sha256"])
+                or type(artifact["size"]) is not int or artifact["size"] < 0
+                or not isinstance(artifact["role"], str) or not isinstance(artifact["media_type"], str)):
+            raise ValueError("Invalid artifact descriptor")
+    return body
+
+
 def check_checkpoint(checkpoint, public_key, observer_id):
     body = checkpoint["body"]
     if (set(body) != {"format", "observer_id", "public_key", "seq", "head_hash", "created_at", "challenge"}

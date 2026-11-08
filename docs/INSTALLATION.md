@@ -71,6 +71,8 @@ are separate. The installer does not upload your accounts, messages or keys to
 the download site. Choosing a Cloudflare tunnel sends panel traffic through
 Cloudflare; using your own domain points to your own server.
 
+With `TGWITNESS_TRUSTED_PROXIES`, the panel accepts a single `X-Forwarded-Proto: https` from a trusted proxy to set Secure download cookies.
+
 Every installation includes **START-HERE.html** and **START-HERE.txt**, with local
 paths, commands and links to the repository. Run `tgwitness guide` to open the guide.
 On Windows, use `& "$env:LOCALAPPDATA\TgWitness\bin\tgwitness.cmd" guide` in PowerShell.

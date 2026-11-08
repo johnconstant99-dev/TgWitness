@@ -73,11 +73,15 @@ def kind_of(entity):
     return None
 
 
-def visibility(entity):
+def public_username(entity):
     names = [getattr(entity, "username", None)] + [getattr(u, "username", None)
                                                    for u in getattr(entity, "usernames", None) or []
                                                    if getattr(u, "active", False)]
-    return "public_username" if any(names) else "private_or_unlisted"
+    return next((name for name in names if name), None)
+
+
+def visibility(entity):
+    return "public_username" if public_username(entity) else "private_or_unlisted"
 
 
 def allowed(scope, kind):

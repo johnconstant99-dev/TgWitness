@@ -4,6 +4,7 @@ The algorithms follow dstack-mr (Dstack-TEE/dstack, Apache-2.0; see dstack_measu
 pre-202505 layout; the ACPI tables QEMU builds for the VM's shape come from qemu_acpi.
 """
 
+import gzip
 import hashlib
 import json
 import re
@@ -22,6 +23,9 @@ RELEASES = "https://github.com/Dstack-TEE/meta-dstack/releases/download/"
 NAME = re.compile(r"dstack(-nvidia)?(-dev)?-(\d{1,3}\.\d{1,3}\.\d{1,3})")
 FILES = ("metadata.json", "sha256sum.txt", "digest.txt", "ovmf.fd", "bzImage", "initramfs.cpio.gz")
 DOWNLOAD_LIMIT = 1024 ** 3
+UNPACKED_LIMIT = 4 * 1024 ** 3
+MEMBER_LIMIT = 1024 ** 3
+MEMBER_COUNT_LIMIT = 256
 PAGE, CHUNK = 0x1000, 0x100
 MR_EXTEND, PAGE_AUG = 1, 2
 TD_HOB, TEMP_MEM = 2, 3
@@ -47,6 +51,19 @@ class ImageError(ValueError):
 
 class ImageMismatch(ImageError):
     pass
+
+
+class ImageStream:
+    def __init__(self, source):
+        self.source, self.remaining = source, UNPACKED_LIMIT
+
+    def read(self, size=-1):
+        size = self.remaining + 1 if size < 0 else min(size, self.remaining + 1)
+        data = self.source.read(size)
+        self.remaining -= len(data)
+        if self.remaining < 0:
+            raise ImageError("OS image archive exceeds the unpacked size limit")
+        return data
 
 
 def sha384(data):
@@ -310,11 +327,27 @@ def fetch(name, digest, cache, session=None):
         except requests.RequestException as exc:
             raise ImageError(url + ": " + type(exc).__name__) from None
         staging.mkdir()
-        with tarfile.open(archive, "r:gz") as bundle:
-            for member in bundle:
-                parts = member.name.split("/")
-                if member.isfile() and len(parts) == 2 and parts[0] == name and parts[1] in FILES:
-                    (staging / parts[1]).write_bytes(bundle.extractfile(member).read())
+        try:
+            with gzip.open(archive, "rb") as compressed, tarfile.open(fileobj=ImageStream(compressed), mode="r|") as bundle:
+                seen = set()
+                for count, member in enumerate(bundle, 1):
+                    if count > MEMBER_COUNT_LIMIT:
+                        raise ImageError("OS image archive has too many members")
+                    parts = member.name.split("/")
+                    if len(parts) != 2 or parts[0] != name or parts[1] not in FILES:
+                        continue
+                    if not member.isfile() or member.issparse():
+                        raise ImageError("OS image member must be a regular file: " + parts[1])
+                    if parts[1] in seen:
+                        raise ImageError("OS image archive repeats " + parts[1])
+                    seen.add(parts[1])
+                    limit = 1 << 20 if parts[1] in ("metadata.json", "sha256sum.txt", "digest.txt") else MEMBER_LIMIT
+                    if member.size < 0 or member.size > limit:
+                        raise ImageError("OS image member exceeds the size limit: " + parts[1])
+                    with bundle.extractfile(member) as source, (staging / parts[1]).open("xb") as target:
+                        shutil.copyfileobj(source, target, length=1 << 20)
+        except (tarfile.TarError, EOFError, gzip.BadGzipFile) as exc:
+            raise ImageError("invalid OS image archive: " + type(exc).__name__) from None
         image = load(staging)
         if image["digest"] != digest:
             raise ImageMismatch("the published " + name + " has OS image hash " + image["digest"] + ", not the CVM's "

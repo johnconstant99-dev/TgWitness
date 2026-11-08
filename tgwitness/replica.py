@@ -37,6 +37,8 @@ RECIPIENT_MAGIC = b"TGWR2"
 CHUNK = 1024 * 1024
 SEGMENT_EVENTS = 5000
 LOOP_SECONDS = 30
+KEY_DERIVATION = "v2"
+LEGACY_DERIVATION = "v1"
 
 
 class ReplicaSettings(BaseModel):
@@ -86,6 +88,40 @@ def workspace_prefix(settings, public_key):
     base = settings["prefix"].strip("/") + "/" + fingerprint(public_key)[:16]
     recipient = settings.get("recipient_public_key")
     return base + "/recipient-" + hashlib.sha256(base64.b64decode(recipient)).hexdigest()[:16] if recipient else base
+
+
+def replica_prefix(settings, workspace_fingerprint):
+    if settings.get("recipient_public_key"):
+        recipient = base64.b64decode(settings["recipient_public_key"], validate=True)
+        return (settings["prefix"].strip("/") + "/" + workspace_fingerprint[:16]
+                + "/recipient-" + hashlib.sha256(recipient).hexdigest()[:16])
+    return settings["prefix"].strip("/") + "/hkdf-v2/" + workspace_fingerprint
+
+
+def derive_key(root_key, workspace_fingerprint, derivation=KEY_DERIVATION):
+    if len(root_key) != 32:
+        raise ValueError("Replica root key must contain 32 bytes")
+    if not isinstance(workspace_fingerprint, str) or not re.fullmatch(r"[0-9a-f]{64}", workspace_fingerprint):
+        raise ValueError("Invalid replica workspace fingerprint")
+    if derivation == LEGACY_DERIVATION:
+        return root_key
+    if derivation != KEY_DERIVATION:
+        raise ValueError("Unsupported replica key derivation")
+    return HKDF(algorithm=hashes.SHA256(), length=32, salt=None,
+                info=b"tgwitness-replica-v2|" + workspace_fingerprint.encode()).derive(root_key)
+
+
+def replica_context(settings, root_key, workspace_fingerprint):
+    derivation = LEGACY_DERIVATION if settings.get("recipient_public_key") else KEY_DERIVATION
+    key = derive_key(root_key, workspace_fingerprint, derivation)
+    base = replica_prefix(settings, workspace_fingerprint)
+    identity = {k: settings[k] for k in ("endpoint", "region", "bucket", "path_style")}
+    identity.update(prefix=base, encryption_key_hash=hashlib.sha256(key).hexdigest())
+    if settings["recipient_public_key"] or settings["evidence"]:
+        identity.update(recipient_public_key=settings["recipient_public_key"], evidence=settings["evidence"])
+    if derivation != LEGACY_DERIVATION:
+        identity["key_derivation"] = derivation
+    return key, base, hashlib.sha256(canonical(identity)).hexdigest()
 
 
 def recipient_envelope(public_key, name):
@@ -332,14 +368,11 @@ async def sync(store, vault, network):
     settings, secrets = replica_settings(store), vault.read("replica")
     if not (settings["enabled"] and settings["endpoint"] and settings["bucket"] and secrets.get("access_key")):
         return None
-    s3, key = client(settings, secrets, network), base64.b64decode(secrets["key"])
+    s3 = client(settings, secrets, network)
     await require_evidence_lock(s3, settings)
-    base = workspace_prefix(settings, vault.public_key)
-    identity = {k: settings[k] for k in ("endpoint", "region", "bucket", "path_style")}
-    identity.update(prefix=base, encryption_key_hash=hashlib.sha256(key).hexdigest())
-    if settings["recipient_public_key"] or settings["evidence"]:
-        identity.update(recipient_public_key=settings["recipient_public_key"], evidence=settings["evidence"])
-    sent = Sent(store.root, hashlib.sha256(canonical(identity)).hexdigest())
+    key, base, namespace = replica_context(settings, base64.b64decode(secrets["key"], validate=True),
+                                          fingerprint(vault.public_key))
+    sent = Sent(store.root, namespace)
     extra = lock_headers(settings)
     done, uploaded, receipts = {"objects": 0, "bytes": 0}, [], []
     started_at = datetime.now(timezone.utc)
@@ -451,15 +484,20 @@ async def replica_loop(store, vault, network_config, wakeup, status):
 
 def key_file(store, vault):
     settings, secrets = replica_settings(store), vault.read("replica")
+    workspace_fingerprint = fingerprint(vault.public_key)
+    derivation = LEGACY_DERIVATION if settings.get("recipient_public_key") else KEY_DERIVATION
     return {"format": "tgwitness-replica-key-v1", "key": secrets["key"], "endpoint": settings["endpoint"],
             "region": settings["region"], "bucket": settings["bucket"], "path_style": settings["path_style"],
-            "prefix": workspace_prefix(settings, vault.public_key), "fingerprint": fingerprint(vault.public_key)}
+            "prefix": replica_prefix(settings, workspace_fingerprint), "fingerprint": workspace_fingerprint,
+            "key_derivation": derivation}
 
 
 async def restore(keyinfo, access_key, secret_key, out, network=None, recipient_key=None):
+    key = derive_key(base64.b64decode(keyinfo["key"], validate=True), keyinfo["fingerprint"],
+                     keyinfo.get("key_derivation", LEGACY_DERIVATION))
     s3 = S3(keyinfo["endpoint"], keyinfo["region"], keyinfo["bucket"], access_key, secret_key,
             network or NetworkConfig(kind="direct"), keyinfo["path_style"])
-    key, base, out = base64.b64decode(keyinfo["key"]), keyinfo["prefix"], Path(out)
+    base, out = keyinfo["prefix"], Path(out)
     if filesystem_link(out):
         raise ValueError("Restore requires an ordinary empty output directory")
     out.mkdir(parents=True, exist_ok=True)

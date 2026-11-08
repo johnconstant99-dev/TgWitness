@@ -2,7 +2,7 @@ GUIDES = {
     "archive": ("Work the archive", "Load history, search saved records, review AI sources and connect your tools.", "archive history search AI MCP OCR transcription webhooks reports integrations", "docs/ANALYSIS.md"),
     "capture": ("GitHub Actions capture", "Choose Takeout，regular API export or a chat journal on a temporary GitHub runner．", "github actions capture takeout account export encrypted archive", "docs/SEALED-ACTIONS.md"),
     "dedicated-account": ("Dedicated account", "Prepare a separate Telegram account for collection.", "dedicated telegram account session api login", "docs/ACCOUNTS.md"),
-    "start": ("Start in minutes", "Try TgWitness with sample data, then launch your own Telegram observation workspace on Windows, Linux or macOS.", "demo install setup windows linux macos python", "docs/QUICKSTART.md"),
+    "start": ("Start in minutes", "Install with one command, connect a Telegram account and export a verifiable archive on Windows, Linux or macOS.", "demo install setup windows linux macos python", "docs/QUICKSTART.md"),
     "accounts": ("Connect an account", "Connect Telegram by QR code, phone number or session import. Choose sources and check that new messages reach your journal.", "qr phone session tdata api id hash account sources", "docs/ACCOUNTS.md"),
     "proxies": ("Choose a proxy", "Maintain automatic MTProxy routes or use your own proxy. Choose IP modes, fallback rules and the route for external requests.", "mtproto mtproxy socks5 http automatic pool IP modes fallback network public lists", "docs/CONNECTION-SECURITY.md"),
     "exports": ("Export and verify", "Export captured Telegram history, verify signatures and compare a journal with a checkpoint retained by an independent witness.", "evidence signature hash integrity verify zip fingerprint checkpoint s3 backup restore recovery object lock", "docs/EVIDENCE.md"),
@@ -29,6 +29,7 @@ GROUPS = (
 
 REFERENCE = {
     "secret-chats": ("Secret Chats: implementation and demo", "Understand the separate Secret Chat implementation, try the fictional interface and review outstanding defects.", "secret chats pseudo-secret end-to-end KiaroSama demo development", "docs/PSEUDO-SECRET.md"),
+    "overview": ("TgWitness: start, scale and evidence", "Install with one command or capture on GitHub Actions. Understand investigation options, published scale and what an archive verifies.", "overview simple install github capture scale benchmark maturity evidence truth llms", "docs/OVERVIEW.md"),
     "history": ("Load source history", "Load past messages from enabled sources, pause and resume, and verify a signed progress report.", "history acquisition sources pause resume progress report", "docs/HISTORY.md"),
     "analysis": ("Archive analysis", "Search saved messages, review AI inputs and keep analytical reports with their source references.", "analysis AI Ollama sources citations reports review", "docs/ANALYSIS.md"),
     "cli": ("Command line", "Search, read context, count activity and export saved messages from scripts and agents, with --json output, stable exit codes and scoped read-only tokens.", "command line cli terminal script agent json jsonl export statistics activity token skill", "docs/CLI.md"),
@@ -67,7 +68,7 @@ REFERENCE = {
 }
 
 REFERENCE_GROUPS = (
-    ("Set up", ("quickstart", "installation", "settings", "accounts", "access", "connection", "deployment", "high-assurance")),
+    ("Set up", ("overview", "quickstart", "installation", "settings", "accounts", "access", "connection", "deployment", "high-assurance")),
     ("Collect", ("panel", "collection", "secret-chats", "history", "operations", "investigation", "features")),
     ("Archive & integrations", ("case-board", "analysis", "search", "mcp", "cli", "media-analysis", "webhooks", "showcase")),
     ("Evidence", ("how-it-works", "case-reports", "account-export", "evidence", "witness", "timestamp", "storage")),

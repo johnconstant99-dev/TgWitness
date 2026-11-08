@@ -89,9 +89,9 @@ def time_stamp(data, url, session=None):
     return query, response.content
 
 
-def described(reply, digest, query):
+def described(reply, digest, query, *, include_reference=False):
     summary = timestamp_reply_summary(reply, digest, query)
-    signed = timestamp_signature(reply, tsa_roots.trusted_roots())
+    signed = timestamp_signature(reply, tsa_roots.trusted_roots(), include_reference=include_reference)
     signer = next(x509.load_der_x509_certificate(c) for c in timestamp_token(reply)["certificates"]
                   if hashlib.sha256(c).hexdigest() == signed["signer_sha256"])
     return {"time": summary["time"], **signed, "qualified": tsa_roots.qualified(signer)}
@@ -159,12 +159,14 @@ def check(base, expected_fingerprint=None):
         query = base.with_name(stamp["query"]).read_bytes()
         if hashlib.sha256(reply).hexdigest() != stamp["reply_sha256"]:
             raise SealError(stamp["reply"] + " is not the time stamp the seal names")
-        info = described(reply, bytes.fromhex(statement["report_sha256"]), query)
+        info = described(reply, bytes.fromhex(statement["report_sha256"]), query, include_reference=True)
         found.append(("time stamp", readable(info["time"]) + " by " + common_name(info["signer"]) + ", root "
                       + common_name(info["root"])
                       + ("; qualified eIDAS time stamp, " + info["qualified"]["service"] + " granted on the "
                          + info["qualified"]["trusted_list"]["territory"] + " trusted list since "
                          + info["qualified"]["since"] if info["qualified"] else "")))
+        found.append(("certificate reference", info["certificate_reference"]))
+        found.extend(("time stamp warning", warning) for warning in info["warnings"])
     pdf = base.with_suffix(".pdf")
     if pdf.exists() and sealed.get("signature"):
         content, pdf_seal, info = read_pdf_seal(pdf.read_bytes())
