@@ -279,7 +279,7 @@ def matches(entry, texts, found, event):
 
 
 def excerpt(texts, entry):
-    joined = " ".join(texts)
+    joined = " ".join(texts)[:MAX_TEXT]
     if entry["kind"] in ("term", "regex"):
         found = re.search(entry["value"] if entry["kind"] == "regex" else re.escape(entry["value"]), joined, re.IGNORECASE)
         if found:
@@ -298,9 +298,7 @@ def scan(store, since=None, limit=BATCH, chats=None):
         return {"scanned": 0, "hits": 0, "cursor": head}
     kinds = ",".join(TEXT_KINDS + DERIVED_KINDS)
     events = sorted(store.events(kind=kinds, after=start, limit=limit), key=lambda event: event["seq"])
-    seen = {(hit["payload"]["entry_id"], hit["payload"]["record"])
-            for hit in store.events(kind="watchlist.hit", limit=5000)
-            if isinstance((hit.get("payload") or {}).get("entry_id"), str)}
+    seen = store.watchlist_hits(events[0]["seq"], events[-1]["seq"]) if events else set()
     hits, cursor = 0, start
     for event in events:
         cursor = event["seq"]

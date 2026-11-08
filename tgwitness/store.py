@@ -233,6 +233,15 @@ class Store:
                     "AND message_id IN (" + ",".join("?" * len(part)) + ")", (chat_id, *part)))
         return found
 
+    def watchlist_hits(self, lowest, highest):
+        with self.lock:
+            rows = self.db.execute(
+                "SELECT json_extract(payload,'$.entry_id') AS entry_id,"
+                "json_extract(payload,'$.record') AS record FROM events INDEXED BY event_kind "
+                "WHERE kind='watchlist.hit' AND json_extract(payload,'$.record') BETWEEN ? AND ?",
+                (lowest, highest)).fetchall()
+        return {(row["entry_id"], row["record"]) for row in rows if isinstance(row["entry_id"], str)}
+
     def message_state(self, chat_id, message_id):
         with self.lock:
             row = self.db.execute(
