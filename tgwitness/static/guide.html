@@ -345,7 +345,7 @@
     </li>
     <li>
       <h3>Keep the fingerprint</h3>
-      <p>A signature establishes integrity relative to the trusted key, not Telegram origin. Retain the fingerprint and checkpoint independently. An RFC 3161 request alone is not a trusted timestamp; obtain and verify the authority's reply.</p>
+      <p>A signature shows that the records are unchanged since the collector key signed them; the recipient confirms that key with the fingerprint. Retain the fingerprint and checkpoints independently. An RFC 3161 request becomes a timestamp once the authority's reply is obtained and verified.</p>
     </li>
   </ol>
 </section>
@@ -414,7 +414,7 @@
     <li>Install TgWitness on the witness host, add your BotFather token or Discord webhook and follow the launch commands in step 3.</li>
   </ol>
   <p>After launch, check the first signed post in your channel. The host runs the checks; the bot publishes their result. Another host and operator make the witness more independent.</p>
-  <details><summary>What does the bot actually prove?</summary><p>A retained signed check lets you compare a later export with the journal as it was observed. It does not establish that every Telegram event was delivered. Unavailable checks and failed posts need attention; there is no guarantee of uninterrupted publication.</p></details>
+  <details><summary>What does the bot actually prove?</summary><p>A retained signed check lets you compare a later export with the journal as it was observed: records up to the check were not removed or replaced afterwards. Unavailable checks and failed posts are listed and need attention.</p></details>
 </section>
 
 <section id="github">

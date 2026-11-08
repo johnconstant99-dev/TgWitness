@@ -32,7 +32,7 @@ public release timeline and selected measurements in context.
 for each revision; [Verification](VERIFICATION.md) records completed deployment and
 live-account tests. See the [changelog](CHANGELOG.md) for changes.
 
-The optional forensics helpers accept complete MTProto frames for offline digest matching;
+The optional forensics helpers match complete MTProto frames against the journal offline:
 the frame helper verifies payload digests and message identifiers against journal references.
-Generic PCAP import is currently rejected; raw PCAP attachments are retained without parsing.
-Review the acquisition path, capture records and custody together with the frame-match result.
+Frames are supplied explicitly; a PCAP file travels in the bundle as an attachment.
+The frame-match result is reviewed together with the acquisition path, capture records and custody.
