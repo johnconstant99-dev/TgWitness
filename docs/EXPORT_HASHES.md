@@ -49,7 +49,7 @@ Run:
 python -m tgwitness.file_hashes path/to/hash-manifest.json path/to/local-file.jpg
 ```
 
-The result distinguishes `match`, `different`, `missing`, `different_size_or_representation` and `incomplete_hash_coverage`. This command reads the local file, not Telegram. A match concerns the recorded ranges; it is not a Telegram-signed attestation or a claim about who authored the content.
+The result distinguishes `match`, `different`, `missing`, `different_size_or_representation` and `incomplete_hash_coverage`. This command reads the local file, not Telegram. A match confirms that the checked local byte ranges agree with the recorded Telegram file hashes.
 
 ## Check settings before starting
 

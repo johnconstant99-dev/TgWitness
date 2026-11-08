@@ -133,8 +133,8 @@ commitments against the report's journal prefix. Attachment outcomes are separat
 text completion. Preserve a workspace backup to resume; an evidence ZIP is not a session
 or acquisition-state backup.
 
-Signatures prove integrity relative to the collector's trusted key and retained external
-commitments, not Telegram authorship, legal admissibility or exhaustive delivery.
+Signatures verify the retained records against the collector's trusted key and external
+commitments. Review the acquisition intervals and recorded coverage alongside that result.
 Backfill is a series of observations of available state, not an atomic historical
 snapshot. It cannot reconstruct unobserved past versions or expired content. Existing
 external witness/checkpoint mechanisms retain their documented trust limits.

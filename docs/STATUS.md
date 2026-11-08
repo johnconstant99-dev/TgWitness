@@ -30,5 +30,6 @@ for each revision; [Verification](VERIFICATION.md) records completed deployment 
 live-account tests. See the [changelog](CHANGELOG.md) for changes.
 
 The optional forensics helpers accept complete MTProto frames for offline digest matching;
-generic PCAP import is unqualified and rejected. These matches do not establish Telegram
-origin, capture completeness, a viewer's identity or prior viewing; raw PCAP attachments are retained without verification.
+the frame helper verifies payload digests and message identifiers against journal references.
+Generic PCAP import is currently rejected; raw PCAP attachments are retained without parsing.
+Review the acquisition path, capture records and custody together with the frame-match result.

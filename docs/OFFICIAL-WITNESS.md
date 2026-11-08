@@ -77,7 +77,7 @@ For a local ZIP, verify the independently retained recorder identity and expecte
 python -m tgwitness_capture verify official-evidence.zip --fingerprint RECORDER_SHA256 --expected-settings official-settings.json --confirm-drand
 ```
 
-The report separates procedure completion, environment attestation and Cloudflare verification.`--require-complete` rejects a visual session as a full-account export. Video shows the process and signed files detect later changes; neither video nor Cloudflare certifies the truth of a message or completeness beyond material actually observed.
+The report lists procedure completion, environment attestation and Cloudflare verification separately. `--require-complete` rejects a visual session as a full-account export. Video records the observed process, signed files detect later changes, and the acquisition record identifies the captured material and observation intervals.
 
 ## Validation
 

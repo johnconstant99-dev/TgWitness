@@ -191,4 +191,4 @@ scope with any count comparison. Count observed service messages separately;
 subtracting an estimated service-message ratio cannot yield an exact deletion
 count. Describe unexplained missing IDs as absence within the measured scope.
 The collector's signature protects the recorded observation against later changes;
-it does not turn the count into a publicly verifiable Telegram signature.
+retain the request context and acquisition interval alongside the count.

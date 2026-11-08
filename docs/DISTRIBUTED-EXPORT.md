@@ -73,7 +73,7 @@ Inspect a **paused or failed** new-format working directory without the app, SQL
 python tgwitness/verify.py /path/to/distributed-exports/JOB_ID --fingerprint RETAINED_FINGERPRINT --json
 ```
 
-This read-only check reports committed messages/pages, completed ranges and unsigned tail bytes. Pin the lead fingerprint independently. Like any local receipt chain, removal of its tail and all corresponding local progress cannot be detected without a separately retained receipt head. The verifier establishes local integrity, not Telegram signatures or an atomic snapshot.
+This read-only check reports committed messages/pages, completed ranges and unsigned tail bytes. Pin the lead fingerprint independently. Like any local receipt chain, removal of its tail and all corresponding local progress cannot be detected without a separately retained receipt head. The verifier checks the committed acquisition records. Consult their intervals and coverage when comparing the collected state.
 
 Intermediate chunks include messages needed to evaluate filters, including rejected messages. Filters limit the final archive. A paused, cancelled or failed job retains those chunks and checkpoint receipts for recovery. After archive verification and job completion succeed, the app removes chunks, receipts, temporary media and indexes. The job directory retains `export.zip`, the signed `job.json` plan and `status.json`; use the ZIP verifier for completed jobs. The configured free-space reserve is checked before new chunks and each checkpoint.
 

@@ -8,6 +8,28 @@ Start here to locate the code, understand its limits and choose the right checks
 The shared working rules live in [AGENTS.md](../AGENTS.md).
 [Contributing](../.github/CONTRIBUTING.md) covers development setup and pull requests.
 
+## Product purpose and strengths
+
+TgWitness is a witness and preservation tool. It retains received material with its
+context, captured versions, acquisition times and verification records so that people
+can compare later accounts of events with what was preserved. Accessibility, speed
+and flexible deployment are part of that purpose.
+
+| Strength | Implementation and evidence |
+| --- | --- |
+| Preserve context and changes | [Collection](COLLECTION.md), [event records](EVIDENCE.md) and [history](HISTORY.md) retain observations, versions and acquisition boundaries. |
+| Independent archive verification | [Verification](VERIFICATION.md) checks signed journals, manifests, attachments, retained checkpoints and supported external receipts. |
+| Verifiable collection environments | [GitHub acquisition](SEALED-ACTIONS.md) binds the archive to the approved workflow and source; [Phala / Intel TDX](HIGH-ASSURANCE.md) verifies measurements, freshness and collector identity. |
+| Several acquisition paths | [Collection modes](COLLECTION-MODES.md), [official-client capture](TRUSTED-LIVE.md), [Secret Chat integration](PSEUDO-SECRET.md) and the MTProto frame helpers provide distinct ways to collect and examine records. |
+| Large workloads and recovery | [Public-history qualification](EXPORT-BENCHMARK-2026-11-06.md) documents multi-account collection, verified archives, pauses, resumed jobs and independent comparisons. |
+| Fast work with saved material | [Full-text search](SEARCH.md#benchmark) documents indexing and query measurements on a million-message journal; [analysis](ANALYSIS.md) and [investigation tools](INVESTIGATION.md) keep results linked to their sources. |
+| Accessible installation | The [guided installer](INSTALLATION.md) checks hashes and release signatures using its embedded key. [Releases, source and Docker](QUICKSTART.md) provide alternative installation paths. |
+
+Published validation pages are selected reproducible measurements from a longer
+development history. Evaluate live acquisition, synthetic workloads, fault injection,
+recovery, code checks and repeated verification together. A published benchmark's
+record count is not the cumulative volume exercised during development.
+
 ## Read for the task
 
 | Task | References |

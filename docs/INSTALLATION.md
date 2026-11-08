@@ -22,9 +22,15 @@
 
 ## Install with one command
 
-The guided installer includes a private Python runtime. Use the same address for
-future installations: each publication updates the installer, hashes, signatures
-and build information together.
+The project's official download service, `get.destroy.tools`, provides the guided
+installer and its signed release files. It includes a private Python runtime and
+checks package hashes and release signatures before installation. Each publication
+updates the entry scripts, hashes, signatures and build information together;
+each build also has an immutable release URL.
+
+Choose the guided installer for a short setup, or use
+[GitHub releases, source or Docker](QUICKSTART.md). These are supported installation
+paths for the same open-source project.
 
 **Linux / macOS (Bash):**
 
@@ -108,9 +114,11 @@ The [command line](CLI.md) (preview) reads the archive for scripts and agents.
 
 ## Verify before running
 
-The one-line command trusts HTTPS for its initial script. That script checks
-SHA-256 and the project's RSA signature on the application and constraints before
-installation. You can also download and verify the initial script first.
+The installer embeds the project's release public key and checks SHA-256 and RSA
+signatures on the application package and dependency lock before installing them.
+Both Bash and PowerShell stop when a required check fails. The initial script is
+delivered over HTTPS and has its own detached signature; the commands below also
+let you verify that script before executing it.
 
 The public release key is [release-signing.pub](../deploy/installer/release-signing.pub).
 Its SHA-256 is:

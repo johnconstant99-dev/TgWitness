@@ -60,8 +60,7 @@ Resumed pages are excluded from current-attempt history throughput.
 ## Verification and limits
 
 - All 48 ZIPs verified against separately pinned workspace keys, with no duplicate
-  IDs or unfinished ranges in completed results. Workspace signatures are not
-  Telegram-issued signatures.
+  IDs or unfinished ranges in completed results.
 - Ten small archives matched complete independent GetHistory ID traversals.
 - Of 4,508 sampled later reads, 4,471 matched all compared core fields: full text,
   author, date, reply, edit time and media type. Later diagnostics for 36 differences
