@@ -102,7 +102,7 @@ def verify_timestamp(checkpoint_path, response_path, ca_path, request_path=None,
     return {"verified": True, "checkpoint_sha256": hashlib.sha256(Path(checkpoint_path).read_bytes()).hexdigest(),
             "request_checked": request_path is not None, "trust_store": "explicit CA file",
             "tsa_statement": detail.stdout.decode(errors="replace"),
-            "limitation": "Timestamping does not establish Telegram origin or truthfulness. "
+            "limitation": "The timestamp shows that the checkpoint existed by its time. "
                           "No online revocation or long-term archival validation was performed."}
 
 

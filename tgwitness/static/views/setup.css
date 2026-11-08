@@ -19,6 +19,8 @@
 .level-items li { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 6px; color: var(--muted); }
 .level-items li.on { color: var(--text); }
 .level-items li.on .level-mark { color: var(--success); }
+.level-items li.level-group { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.level-items li.level-group:first-child { margin-top: 0; }
 .level-weight { color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .setup-form fieldset { min-width: 0; margin: 0 0 18px; padding: 0; border: 0; }

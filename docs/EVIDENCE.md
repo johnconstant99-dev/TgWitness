@@ -375,13 +375,10 @@ current missing state while preserving the earlier unsuccessful check in the
 signed history; neither observation establishes a deletion notice.
 
 Multiple IDs resolved to the same chat from one notification are grouped as
-`deletion.batch`, regardless of their count. The notification does not establish that the entire history was
-cleared, who performed the deletion, or whether it applied to all participants.
-Saved outgoing messages do not change these limits. Older journals may contain
-`history.cleared` events inferred from batches of ten or more IDs, with explanatory
-text attributing the deletion to the other participant. Those inferences are not
-supported by the update. Preserve those original signed records, but treat them
-as grouped deletion notifications; the current interface labels them accordingly.
+`deletion.batch`, regardless of their count, with the message IDs exactly as Telegram
+sent them and how many of them this account had sent. Telegram's notification lists
+the messages; the chat's admin log names the acting administrator where the account
+can read it.
 
 ## Coverage: continuity, gaps and unobserved IDs
 
@@ -452,8 +449,8 @@ extend the measured range, and resuming it is noted. The live archive query has 
 budget, including its database scan, and marks an unfinished measurement as partial.
 
 Telegram documents the [separate message ID sequences](https://core.telegram.org/api/updates#message-id-sequences).
-These numbers describe observations; they do not identify a deletion actor or establish
-why a number is absent.
+These numbers describe observations; deletion notices, rechecks and the admin log record
+why a number is absent where Telegram reports it.
 
 When Telegram stops accepting the account, the `coverage.gap` record that ends observation
 carries `cause` (`account_banned`, `account_frozen`, `account_deleted`, `session_duplicated`,
@@ -461,8 +458,8 @@ carries `cause` (`account_banned`, `account_frozen`, `account_deleted`, `session
 error; `verify.py` names the cause where the period ends.
 
 Coverage combines recorded observation periods, interruptions and message outcomes.
-Assess it together with the selected chats, period and attachment policy; continuous
-operation alone does not establish complete delivery of Telegram updates.
+Assess it together with the selected chats, period and attachment policy; recheck
+results and recorded gaps show how completely the account's updates were observed.
 
 ## Producer
 
@@ -563,7 +560,7 @@ mode whose trust boundary matches the case, then retain its verification inputs.
 
 | Collection mode | What the verifier checks | Verification inputs and trust boundary |
 | --- | --- | --- |
-| Local workspace | Record signatures, hash chain, manifest and attachment bytes | Independently retained collector fingerprint; the host administrator controls the local signing key |
+| Local workspace | Record signatures, hash chain, manifest and attachment bytes | Collector fingerprint retained by the recipient; retained checkpoints, witness records and timestamps bind the journal beyond the local key |
 | Local workspace with an independent witness | The archive checks plus agreement with an earlier journal prefix retained by the witness | Separately trusted witness key and records; the checkpoint binds the prefix already observed |
 | [GitHub Actions capture](SEALED-ACTIONS.md) | GitHub attestation of the archive digest, approved workflow and collector commits, hosted runner, fresh session/key origin and internal archive integrity | Trusted verifier policy, caller repository and GitHub attestation bundle; collection runs under the pinned workflow |
 | [Cloud deployment](HIGH-ASSURANCE.md) | Provider lifecycle and access records, firewall and Cloudflare state, plus the collector's signed run record | Read-only queries to the provider and Cloudflare; availability of individual checks depends on the provider |
@@ -678,7 +675,7 @@ the TSA signature; confirm OpenTimestamps proofs with `ots upgrade` and `ots ver
 
 The panel prepares a request archive containing canonical checkpoint.json bytes,
 a SHA-256 message imprint and random nonce in timestamp.tsq, checksums, and instructions.
-No network request is made. Preparation is not a trusted timestamp.
+No network request is made; the token the authority returns for this request is the timestamp.
 
 `python -m tgwitness.anchor verify` calls OpenSSL ts twice: once against checkpoint
 bytes and once against the original request. A trusted CA file is required explicitly;
