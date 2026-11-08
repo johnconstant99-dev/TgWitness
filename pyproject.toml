@@ -52,7 +52,7 @@ mcp = ["mcp>=2.3,<3", "httpx>=0.28,<1"]
 uk-dictionary = ["pymorphy3-dicts-uk>=2.4.1.1.1663094765,<3"]
 secret-chats = ["kiaro-telethon-secret-chat @ git+https://github.com/KiaroSama/Telethon-Secret-Chat.git@d87bf037b90060383c7b704d8a06ebb98c621c6f"]
 forensics = ["scapy>=2.5,<3", "aiohttp>=3.9,<4"]
-qr = ["opencv-python-headless>=4.10,<5", "numpy>=1.26,<3"]
+qr = ["opencv-python-headless>=4.10,<6", "numpy>=1.26,<3"]
 
 [project.urls]
 Homepage = "https://phishdestroy.github.io/TgWitness/"
