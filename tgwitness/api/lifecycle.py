@@ -110,6 +110,9 @@ class LifecycleOperations:
                 )
             app.state.disclosures = Disclosures(app.state.account_export, vault)
             app.state.access = self.access or AccessControl(vault, store, self.console)
+            from ..network_observer import attach
+
+            app.state.network_observer = attach(app.state.access, collector, self.profile_id)
             if not self.access:
 
                 def workspace_label(pid):
@@ -321,6 +324,9 @@ class LifecycleOperations:
                     store.append("process.stopped", {"reason": "graceful shutdown"})
                     retain_checkpoint(store, vault)
             finally:
+                from ..network_observer import detach
+
+                detach(collector)
                 if store:
                     store.close()
                 instance.close()
