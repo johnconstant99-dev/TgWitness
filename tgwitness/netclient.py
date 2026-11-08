@@ -204,6 +204,13 @@ async def open_stream(url, network, timeout, private=False):
 
 async def request(method, url, network, headers=None, body=b"", length=None, sink=None,
                   timeout=60, limit=1024 * 1024, private=False):
+    from .network_observer import observe_request
+
+    return await observe_request(_request, method, url, network, headers, body, length, sink, timeout, limit, private)
+
+
+async def _request(method, url, network, headers=None, body=b"", length=None, sink=None,
+                   timeout=60, limit=1024 * 1024, private=False):
     parts = urlsplit(url)
     reader, writer = await open_stream(url, network, timeout, private)
     try:

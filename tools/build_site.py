@@ -92,6 +92,9 @@ DEMO_STATIC.update({"demo/components/" + name: "tgwitness/static/components/" + 
 DEMO_STATIC.update({"demo/views/" + name: "tgwitness/static/views/" + name
                     for name in ("sources.js", "sources.css", "parameters.js", "parameters.css", "exports.js", "exports.css", "accounts.js", "accounts.css", "access.js", "access.css", "system-log.js", "chats.css", "chat-list.js", "chat-list.css", "workflows.css", "setup.js", "setup.css", "disclosure-preview.js", "disclosure-preview.css", "connection.js", "connection.css", "settings-hub.js", "settings-hub.css", "group-settings.js", "group.js", "group.css", "board.js", "board.css", "report-selection.js", "report-profiles.js", "people-timeline.js", "secret-chats.js")})
 DEMO_STATIC.update({"demo/mock.js": "website/demo/mock.js", "demo/fixtures.json": "website/demo/fixtures.json"})
+DEMO_STATIC.update({"demo/views/topology.js": "tgwitness/static/views/topology.js",
+                    "demo/views/topology.css": "tgwitness/static/views/topology.css",
+                    "demo/topology-data.js": "website/demo/topology-data.js"})
 DEMO_STATIC.update({"demo/" + name: "website/demo/" + name for name in ("secret-chats.js", "secret-chats.css")})
 DEMO_STATIC.update({"demo/views/report-guidance.js": "tgwitness/static/views/report-guidance.js",
                     "demo/jurisdictions.json": "tgwitness/jurisdictions.json"})

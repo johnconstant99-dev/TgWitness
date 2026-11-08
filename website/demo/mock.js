@@ -95,6 +95,10 @@
     if (!found) return realFetch(input, init);
     const method = (init.method || (typeof input === "string" ? "GET" : input.method) || "GET").toUpperCase();
     const path = "/" + found[1];
+    if (method === "GET" && path === "/api/topology") {
+      const {topologyExample} = await import(new URL('topology-data.js', base));
+      return json(200, topologyExample());
+    }
     if (method === "POST" && path === "/api/verify") {
       const all = await answers;
       if (all[path]) return recorded(all[path]);

@@ -30,6 +30,7 @@
 <link rel="stylesheet" href="/views/chats.css?v=11">
 <link rel="stylesheet" href="/views/chat-list.css?v=12">
 <link rel="stylesheet" href="/views/board.css?v=1">
+<link rel="stylesheet" href="/views/topology.css?v=2">
 <link rel="stylesheet" href="/cloud-capture.css?v=5"><link rel="stylesheet" href="/cloud-capture-story.css?v=3">
 <script src="/theme.js?v=0.7.0"></script>
 <script src="/guide-locale.js" data-scope="panel"></script>
@@ -37,7 +38,7 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.9.1-evidence1"></script>
+<script defer src="/app.js?v=0.9.1-evidence1-topology2"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
 <script defer src="/investigate.js?v=7"></script>
@@ -157,6 +158,7 @@
     <button class="nav" data-view="evidence"><svg aria-hidden="true" class="nav-icon"><use href="#i-export"/></svg> Exports</button>
     <button class="nav" data-view="settings" data-level="simple"><svg aria-hidden="true" class="nav-icon"><use href="#i-settings"/></svg> Settings</button>
     <div class="nav-section">Workspace</div>
+    <button class="nav" data-view="topology" data-level="simple"><svg aria-hidden="true" class="nav-icon"><use href="#i-activity"/></svg> Network topology</button>
     <button class="nav" data-view="accounts"><svg aria-hidden="true" class="nav-icon"><use href="#i-users"/></svg> Accounts <b id="nav-accounts">1</b></button>
     <details class="nav-more" id="nav-more"><summary>More tools &amp; settings</summary>
     <button class="nav" data-view="witness"><svg aria-hidden="true" class="nav-icon"><use href="#i-sparkle"/></svg> Extras</button>
@@ -1575,6 +1577,7 @@
 
 <section class="view" hidden id="view-settings"></section>
 <section class="view" hidden id="view-board"></section>
+<section class="view" hidden id="view-topology" aria-label="Network topology"></section>
 <section class="view" hidden id="view-first-run"></section>
 <section class="view" hidden id="view-chats">
   <div class="chats-shell" data-panel="chat">

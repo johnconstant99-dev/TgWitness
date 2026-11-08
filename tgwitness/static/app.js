@@ -138,6 +138,7 @@ const viewReady=Promise.all([
         if(name==='system-log')systemLogView?.leave();
         if(name==='observations')window.TgWitnessJournal?.leave();
         if(name==='board')boardView?.leave();
+        if(name==='topology')topologyView?.leave();
       },
       resetSession(){top=0;scrolls=[];viewContexts.delete(name);resetViewContent(name);},
     });
@@ -145,6 +146,7 @@ const viewReady=Promise.all([
 });
 function resetViewContent(view){
   if(view==='board')boardView?.reset();
+  if(view==='topology')topologyView?.resetSession();
   const root=panelRoots.get(view);for(const form of root.querySelectorAll('form'))form.reset();
   for(const field of root.querySelectorAll('input,textarea'))if(!field.form){field.value=field.defaultValue;field.checked=field.defaultChecked;}
   if(view==='connection'){networkLoadedFor=null;policyOutsideDirty=false;policyFormDirty=false;state.policy=null;connectionView?.reset();}
@@ -167,6 +169,7 @@ function resetViewContent(view){
   for(const id of clear)$(id)?.replaceChildren();
 }
 async function loadPanelView(view){
+  if(view==='topology'){await topologyReady;await topologyView.enter();return;}
   if(view==='board'){await boardReady;await boardView.load();return;}
   if(view==='settings'||view==='first-run'){await settingsHubReady;await settingsHub.load();}
   else if(view==='start')renderWorkflowControls();
@@ -194,7 +197,7 @@ function routeSnapshot(){return {view:state.drawerSeq!==null?"observations":stat
   since:state.eventSince,until:state.eventUntil,system:state.eventSystem,before:state.eventBefore,extra:state.extra||null,section:state.parameterSection||null,
   step:state.view==="first-run"?settingsHub?.step||null:null,group:state.view==="group"?state.groupId:null};}
 function ensureRouter(){
-  if(!routerTask)routerTask=import("./router.js?v=7").then(({createRouter})=>{
+  if(!routerTask)routerTask=import("./router.js?v=8").then(({createRouter})=>{
     window.TgWitnessRouter=createRouter({snapshot:routeSnapshot,ready:()=>!!state.me&&!$("workspace").hidden,
       error:message=>toast(tr(message),true),apply:applyRouteToPanel});return window.TgWitnessRouter;
   });
@@ -218,6 +221,7 @@ async function applyRouteToPanel(route,current){
   if(route.view==="group")state.groupId=route.group;
   navigate(route.view,{history:false,load:false});
   const view=state.view;
+  if(view==='topology'){await topologyReady;if(current())await topologyView.enter();return;}
   if(view==='board'){await boardReady;await boardView.load();return;}
   if(view==='settings'||view==='first-run'){await settingsHubReady;await settingsHub.load(route.step);}
   else if(view==="chats"){
@@ -688,6 +692,7 @@ $("unlock-form").addEventListener("submit", async event => {
 function may(permission){return !!state.me&&(state.me.admin||state.me.permissions.includes(permission));}
 
 function viewAllowed(view){
+  if(view==='topology')return !!state.me?.admin;
   if(view==='board')return may('board.read');
   const limited=!!state.status?.chats_limited;
   return {settings:!!state.me?.admin,'first-run':!!state.me?.admin,start:!!state.me&&!limited,sources:may("sources")&&!limited,evidence:may("export")&&!limited,sealed:may("export")&&!limited,witness:may("settings")&&!limited,
@@ -789,7 +794,7 @@ function navigate(view,options={}) {
     n.classList.toggle("active",selected);
     if(selected)n.setAttribute("aria-current","page");else n.removeAttribute("aria-current");
   });
-  $("view-label").textContent=tr({settings:'Settings','first-run':'First setup',start:"Start here",chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",group:"Group",access:"Access","system-log":"System log",integrations:"Integrations",analysis:state.status?.analysis?.enabled?"Ask the archive":"Machine recognition"}[view]);
+  $("view-label").textContent=tr({topology:'Network topology',settings:'Settings','first-run':'First setup',start:"Start here",chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",group:"Group",access:"Access","system-log":"System log",integrations:"Integrations",analysis:state.status?.analysis?.enabled?"Ask the archive":"Machine recognition"}[view]);
   show("entry-header",view==="connection");
   if(view==="connection")connectionSettings(false);
   if(state.status){renderSetup();renderWorkflowControls();}
@@ -5816,6 +5821,16 @@ function renderAccess(){
   }
   placeChildren(sessions,sessionRows);
 }
+let topologyView=null;
+const topologyReady=import('./views/topology.js?v=2').then(({createTopology})=>{
+  topologyView=createTopology({root:$('view-topology'),tr,json,getState:()=>state,options:()=>viewOptions('topology'),toast,
+    openSettings:async (profile,card)=>{
+      if(profile&&state.profile!==profile&&await switchProfile(profile)===false)return;
+      await navigate(card||'connection');
+    }});
+  return topologyView;
+});
+topologyReady.catch(error=>toast(error.message,true));
 let accessView=null,systemLogView=null;
 const accessReady=import("./views/access.js").then(({createAccessView})=>{
   accessView=createAccessView({root:$("view-access"),tr,navigate,localInput,getState:()=>state});return accessView;

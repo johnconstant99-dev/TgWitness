@@ -8,6 +8,7 @@ from . import export as routes_export
 from . import network as routes_network
 from . import secret_chats as routes_secret_chats
 from . import system as routes_system
+from .topology import topology
 from . import witness as routes_witness
 from .. import cloud_wizard
 from .. import extensions
@@ -55,6 +56,7 @@ def register(app, ctx):
     router.get("/api/status", dependencies=[Depends(authenticate)])(
         routes_system.status
     )
+    router.get("/api/topology", dependencies=[Depends(authenticate)])(topology)
     app.include_router(router)
     router = APIRouter()
     if ctx.allow_profiles:
