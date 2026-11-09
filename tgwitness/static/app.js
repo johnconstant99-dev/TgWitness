@@ -3983,9 +3983,10 @@ function renderVerification(){
   const rows=groups.flatMap(([title,lines])=>[node("div","verification-group",title),...lines.map(([state,name,text])=>{
     const row=node("div","verification-line "+state);
     row.append(node("strong","",({ok:"✓ ",off:"○ ",step:"→ ",part:"◐ "})[state]+name+": "),node("span","",text));return row;})]);
-  box.replaceChildren(...rows,node("div","hint",c.witness_at||stamped==="ok"
-    ?tr("With the fingerprint confirmed, a recipient can meet the minimum for evidence.")
-    :stamped==="part"?tr("With the fingerprint confirmed, the minimum covers records 1–{n}; later records need the next timestamp or a checkpoint handed to another party.",{n:c.stamped_through})
+  box.replaceChildren(...rows,node("div","hint",stamped==="ok"
+    ?tr("With the collector fingerprint and the timestamp authority's root certificate (--tsa-ca), a recipient can meet the minimum for evidence.")
+    :c.witness_at?tr("With the collector fingerprint, the witness journal export and the witness fingerprint, a recipient can meet the minimum for the records the witness has fetched.")
+    :stamped==="part"?tr("With the collector fingerprint and the timestamp authority's root certificate (--tsa-ca), the minimum covers records 1–{n}; later records need the next timestamp or a checkpoint handed to another party.",{n:c.stamped_through})
     :tr("Integrity only: connect a witness bot, turn on Evidence mode or hand a checkpoint to another party.")));
 }
 $("verify-journal").addEventListener("click",e=>busy(e.currentTarget,async()=>{
