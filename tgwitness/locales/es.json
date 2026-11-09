@@ -2035,7 +2035,6 @@
   "Open a Mini App or a web-app button": "Botón para abrir una miniaplicación o una aplicación web",
   "Open a link or a “Log in” button": "Abrir un enlace o un botón «Iniciar sesión»",
   "Open an invite link": "Abrir un enlace de invitación",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "Al abrir un enlace o una miniaplicación, se carga una página desde el servidor de los estafadores: este detecta su dirección IP y su navegador, y la miniaplicación también obtiene su perfil de Telegram.",
   "Our reasoning: an account behind a pair that over a million accounts were registered with and that many programs have used for years is less likely to be banned than one that talks to Telegram through a fresh personal pair. That is why the pool is the default. Your own pair still works if you enter it under <strong>Account → API ID + Hash</strong>.": "Nuestro razonamiento: es menos probable que se bloquee una cuenta que utilice un par con el que se hayan registrado más de un millón de cuentas y que muchos programas hayan utilizado durante años, que una que se comunique con Telegram a través de un par personal nuevo. Por eso, el par compartido es la opción predeterminada. Su propio par seguirá funcionando si lo introduce en <strong>Cuenta → ID de API + Hash</strong>.",
   "Partly": "En parte",
   "Phone number button": "Botón de número de teléfono",

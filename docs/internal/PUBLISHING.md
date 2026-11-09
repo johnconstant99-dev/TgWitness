@@ -4,7 +4,7 @@
 
 # Publish the project and website
 
-Publish TgWitness **0.9.1** with the project website and release packages. See
+Publish TgWitness **0.9.2** with the project website and release packages. See
 [readiness](READINESS.md) for tested environments and known limitations.
 
 The [investigation presentation kit](../assets/presentation/README.md) contains the

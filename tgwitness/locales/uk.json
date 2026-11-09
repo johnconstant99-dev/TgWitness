@@ -2057,7 +2057,6 @@
   "Open a Mini App or a web-app button": "Кнопка «Відкрити міні-додаток» або «Відкрити веб-додаток»",
   "Open a link or a “Log in” button": "Відкрити посилання або кнопку «Увійти»",
   "Open an invite link": "Відкрити посилання на запрошення",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "При відкритті посилання або міні-додатку завантажується сторінка з сервера шахраїв: вона бачить вашу IP-адресу та браузер, а міні-додаток також отримує ваш профіль у Telegram.",
   "Our reasoning: an account behind a pair that over a million accounts were registered with and that many programs have used for years is less likely to be banned than one that talks to Telegram through a fresh personal pair. That is why the pool is the default. Your own pair still works if you enter it under <strong>Account → API ID + Hash</strong>.": "Наше міркування: обліковий запис, пов’язаний із ключовою парою, за допомогою якої було зареєстровано понад мільйон облікових записів і яку багато програм використовують роками, має меншу ймовірність бути заблокованим, ніж той, що взаємодіє з Telegram через нову особисту ключову пару. Саме тому пул є налаштуванням за замовчуванням. Ваша власна ключова пара все одно працюватиме, якщо ви введете її в розділі <strong>«Обліковий запис» → «API ID + Hash</strong>».",
   "Partly": "Частково",
   "Phone number button": "Кнопка «Номер телефону»",

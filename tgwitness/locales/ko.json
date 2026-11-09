@@ -1069,7 +1069,6 @@
   "Open your workspace": "작업 공간 열기",
   "Open {label} event {seq}": "{label} 이벤트 열기 {seq}",
   "OpenTimestamps calendars, one address per line": "OpenTimestamps 캘린더, 한 줄에 하나의 주소",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "링크나 미니 앱을 열면 사기꾼의 서버에서 페이지가 로드됩니다. 이 서버는 사용자의 IP 주소와 브라우저 정보를 파악하며, 미니 앱은 사용자의 텔레그램 프로필 정보도 수신합니다.",
   "Operational records and other group service events remain separate from the event switches. Captured messages can retain embedded reaction or membership metadata. Some deletion notices do not identify a chat; they are saved as unscoped account-level notices without guessing a source.": "운영 기록 및 기타 그룹 서비스 이벤트는 이벤트 스위치와 별도로 유지됩니다. 캡처된 메시지는 포함된 반응 또는 멤버십 메타데이터를 유지할 수 있습니다. 일부 삭제 알림은 채팅 대상을 식별하지 않으며, 출처를 추측하지 않은 채 범위 지정되지 않은 계정 수준 알림으로 저장됩니다.",
   "Optional · your account and sources are enough to start collecting.": "선택 사항 · 계정과 소스만 있으면 수집을 시작할 수 있습니다.",
   "Optional. Leave empty: TgWitness picks a working pair from its built-in pool, or uses the pair from your account file. To use your own app, <a href=\"https://my.telegram.org\" rel=\"noopener noreferrer\" target=\"_blank\">get it at my.telegram.org ↗</a>": "선택 사항. 비워 두면: TgWitness가 내장된 풀에서 정상 작동하는 쌍을 선택하거나, 계정 파일의 쌍을 사용합니다. 자체 앱을 사용하려면 <a href=\"https://my.telegram.org\" rel=\"noopener noreferrer\" target=\"_blank\">my.telegram.org ↗에서 다운로드하세요.</a>",

@@ -2024,7 +2024,6 @@
   "Open a Mini App or a web-app button": "打开迷你应用或网页应用按钮",
   "Open a link or a “Log in” button": "打开链接或“登录”按钮",
   "Open an invite link": "打开邀请链接",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "点击链接或打开 Mini App 会加载来自诈骗者服务器的页面：该服务器会获取您的 IP 地址和浏览器信息，而 Mini App 还会获取您的 Telegram 个人资料。",
   "Our reasoning: an account behind a pair that over a million accounts were registered with and that many programs have used for years is less likely to be banned than one that talks to Telegram through a fresh personal pair. That is why the pool is the default. Your own pair still works if you enter it under <strong>Account → API ID + Hash</strong>.": "我们的理由是：使用一对已注册超过一百万个账户、且被众多程序沿用多年的密钥对的账户，其被封禁的概率，要低于通过全新个人密钥对与 Telegram 通信的账户。因此，该密钥池被设为默认选项。如果您在<strong>“账户 → API ID + 哈希</strong>”下输入自己的密钥对，它仍然有效。",
   "Partly": "部分",
   "Phone number button": "电话号码按钮",

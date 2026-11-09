@@ -45,8 +45,8 @@ EMOJI = re.compile("[\U0001F1E6-\U0001F1FF\U0001F300-\U0001FAFF☀-➿⭐⭕‼�
                    "[️\U0001F3FB-\U0001F3FF]?")
 WORD = re.compile(r"[^\W\d_]{4,}", re.UNICODE)
 SYSTEM = (
-    "You help a fraud investigator keep a conversation going with a suspected scammer in order to document evidence "
-    "such as wallets, links, contacts and the scheme itself. Write the next message for the investigator. "
+    "You help keep a conversation going in order to document evidence "
+    "such as wallets, links and contacts. Write the next message for the investigator. "
     "Match the other side's language, register, slang, abbreviations, punctuation habits, emoji use and typical "
     "message length, and stay consistent with what the investigator has already written in this chat. "
     "Keep the investigator's cover: never mention an investigation, the police or evidence. Do not invent personal "

@@ -1708,7 +1708,6 @@
   "OpenTimestamps proofs received; Bitcoin confirms them within hours.",
   "OpenTimestamps proofs: ots upgrade, then ots verify -f CHECKPOINT.json PROOF.ots",
   "Opened a link: joined the chat or started the bot",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.",
   "Operating system",
   "Operation in progress",
   "Operator and custody",

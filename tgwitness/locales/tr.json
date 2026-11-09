@@ -2035,7 +2035,6 @@
   "Open a Mini App or a web-app button": "Bir Mini Uygulama veya web uygulaması düğmesini aç",
   "Open a link or a “Log in” button": "Bir bağlantıyı veya “Giriş yap” düğmesini açın",
   "Open an invite link": "Davet bağlantısını aç",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "Bir bağlantıyı veya Mini Uygulamayı açtığınızda dolandırıcıların sunucusundan bir sayfa yüklenir: bu sayfa IP adresinizi ve tarayıcınızı görür; ayrıca Mini Uygulama, Telegram profilinizi de alır.",
   "Our reasoning: an account behind a pair that over a million accounts were registered with and that many programs have used for years is less likely to be banned than one that talks to Telegram through a fresh personal pair. That is why the pool is the default. Your own pair still works if you enter it under <strong>Account → API ID + Hash</strong>.": "Gerekçemiz: Bir milyondan fazla hesabın kayıtlı olduğu ve birçok programın yıllardır kullandığı bir anahtar çifti arkasındaki hesabın, yeni bir kişisel anahtar çifti aracılığıyla Telegram ile iletişim kuran bir hesaba kıyasla yasaklanma olasılığı daha düşüktür. Bu nedenle havuz varsayılan ayardır. <strong>Hesap → API Kimliği + Hash</strong> altından kendi anahtar çiftinizi girerseniz, bu da yine çalışır.",
   "Partly": "Kısmen",
   "Phone number button": "Telefon numarası düğmesi",

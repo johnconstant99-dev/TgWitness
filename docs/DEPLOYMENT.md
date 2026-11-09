@@ -206,7 +206,7 @@ Copy `deploy/env.example` to `.env`. Set `TGWITNESS_IMAGE` to the published vers
 the **lowercase** repository path, for example:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.1
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.2
 TGWITNESS_PORT=8787
 ```
 

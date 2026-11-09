@@ -2024,7 +2024,6 @@
   "Open a Mini App or a web-app button": "Tombol \"Buka Mini App\" atau \"Buka Aplikasi Web\"",
   "Open a link or a “Log in” button": "Buka tautan atau tombol “Masuk”",
   "Open an invite link": "Buka tautan undangan",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "Membuka tautan atau Mini App akan memuat halaman dari server penipu: server tersebut mendeteksi alamat IP dan browser Anda, dan Mini App juga menerima profil Telegram Anda.",
   "Our reasoning: an account behind a pair that over a million accounts were registered with and that many programs have used for years is less likely to be banned than one that talks to Telegram through a fresh personal pair. That is why the pool is the default. Your own pair still works if you enter it under <strong>Account → API ID + Hash</strong>.": "Alasan kami: akun yang menggunakan pasangan kunci yang telah digunakan untuk mendaftarkan lebih dari satu juta akun dan telah digunakan oleh banyak program selama bertahun-tahun cenderung lebih kecil kemungkinannya untuk diblokir dibandingkan akun yang berkomunikasi dengan Telegram melalui pasangan kunci pribadi yang baru. Itulah mengapa pool ditetapkan sebagai pengaturan default. Pasangan kunci Anda sendiri tetap berfungsi jika Anda memasukkannya di bawah <strong>Akun → API ID + Hash</strong>.",
   "Partly": "Sebagian",
   "Phone number button": "Tombol nomor telepon",

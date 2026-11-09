@@ -894,7 +894,8 @@ def build_demo(read_public, write):
         if lang == "en":
             words = {}
         elif lang in site_modes.EXTRA_LANGUAGES:
-            words = json.loads(read_public(f"tgwitness/guide_locales/{lang}.json"))
+            words = {**{text: text for text in fallbacks},
+                     **json.loads(read_public(f"tgwitness/guide_locales/{lang}.json"))}
         else:
             words = {**{text: text for text in fallbacks}, **json.loads(read_public(f"tgwitness/locales/{lang}.json"))}
         if guide and lang != "en" and any(not words.get(key) for key in required):

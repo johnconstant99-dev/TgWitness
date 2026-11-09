@@ -2035,7 +2035,6 @@
   "Open a Mini App or a web-app button": "एक मिनी ऐप या वेब-ऐप बटन खोलें",
   "Open a link or a “Log in” button": "एक लिंक या \"लॉग इन\" बटन खोलें",
   "Open an invite link": "एक निमंत्रण लिंक खोलें",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "एक लिंक या मिनी ऐप खोलने पर स्कैमर्स के सर्वर से एक पेज लोड होता है: यह आपका आईपी पता और ब्राउज़र देखता है, और मिनी ऐप को आपका टेलीग्राम प्रोफ़ाइल भी प्राप्त होता है।",
   "Our reasoning: an account behind a pair that over a million accounts were registered with and that many programs have used for years is less likely to be banned than one that talks to Telegram through a fresh personal pair. That is why the pool is the default. Your own pair still works if you enter it under <strong>Account → API ID + Hash</strong>.": "हमारा तर्क: एक ऐसी जोड़ी के पीछे का खाता, जिसके साथ दस लाख से अधिक खाते पंजीकृत हैं और जिसे कई प्रोग्राम वर्षों से उपयोग कर रहे हैं, ताज़ा व्यक्तिगत जोड़ी के माध्यम से टेलीग्राम से जुड़ने वाले खाते की तुलना में प्रतिबंधित होने की संभावना कम होती है। इसलिए पूल डिफ़ॉल्ट है। यदि आप इसे <strong>Account → API ID + Hash</strong> में दर्ज करते हैं तो आपकी अपनी जोड़ी अभी भी काम करती है।",
   "Partly": "आंशिक रूप से",
   "Phone number button": "फ़ोन नंबर बटन",

@@ -68,4 +68,5 @@ def guide_words(lang):
     path = GUIDE_FILES.get(lang)
     if path is None:
         raise ValueError("Unsupported guide language")
-    return json.loads(path.read_text(encoding="utf-8"))
+    fallback = {text: text for text in json.loads(ENGLISH_FALLBACKS.read_text(encoding="utf-8"))}
+    return {**fallback, **json.loads(path.read_text(encoding="utf-8"))}

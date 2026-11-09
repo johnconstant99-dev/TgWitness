@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="CHANGELOG.md">v0.9.1</a> &nbsp; · &nbsp;
+  <a href="CHANGELOG.md">v0.9.2</a> &nbsp; · &nbsp;
   <a href="QUICKSTART.md">Python 3.11+</a> &nbsp; · &nbsp;
   <a href="../LICENSE">MIT license</a>
 </p>

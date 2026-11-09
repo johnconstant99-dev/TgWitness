@@ -2024,7 +2024,6 @@
   "Open a Mini App or a web-app button": "Nút “Mở Ứng dụng nhỏ” hoặc “Mở ứng dụng web”",
   "Open a link or a “Log in” button": "Mở một liên kết hoặc nút “Đăng nhập”",
   "Open an invite link": "Mở liên kết mời",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "Khi mở một liên kết hoặc một Ứng dụng nhỏ (Mini App), trang web sẽ được tải từ máy chủ của những kẻ lừa đảo: chúng có thể xác định địa chỉ IP và trình duyệt của quý vị, đồng thời Ứng dụng nhỏ này cũng thu thập thông tin hồ sơ Telegram của quý vị.",
   "Our reasoning: an account behind a pair that over a million accounts were registered with and that many programs have used for years is less likely to be banned than one that talks to Telegram through a fresh personal pair. That is why the pool is the default. Your own pair still works if you enter it under <strong>Account → API ID + Hash</strong>.": "Lý do của chúng tôi: một tài khoản sử dụng cặp khóa đã được đăng ký cho hơn một triệu tài khoản khác và được nhiều chương trình sử dụng trong nhiều năm qua sẽ ít có khả năng bị cấm hơn so với tài khoản giao tiếp với Telegram thông qua một cặp khóa cá nhân mới. Đó là lý do tại sao cặp khóa chung được đặt làm mặc định. Cặp khóa của riêng quý vị vẫn hoạt động bình thường nếu quý vị nhập thông tin này tại mục <strong>Tài khoản → ID API + Băm</strong>.",
   "Partly": "Một phần",
   "Phone number button": "Nút số điện thoại",

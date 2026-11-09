@@ -2035,7 +2035,6 @@
   "Open a Mini App or a web-app button": "دکمهٔ Mini App یا وب‌اپ را باز کنید",
   "Open a link or a “Log in” button": "باز کردن یک لینک یا دکمه «ورود»",
   "Open an invite link": "لینک دعوت را باز کنید",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "باز کردن یک لینک یا یک مینی اپ یک صفحه را از سرور کلاهبرداران بارگذاری می‌کند: این صفحه آدرس IP و مرورگر شما را می‌بیند و مینی اپ همچنین پروفایل تلگرام شما را دریافت می‌کند.",
   "Our reasoning: an account behind a pair that over a million accounts were registered with and that many programs have used for years is less likely to be banned than one that talks to Telegram through a fresh personal pair. That is why the pool is the default. Your own pair still works if you enter it under <strong>Account → API ID + Hash</strong>.": "دلیل ما: حسابی که پشت یک جفت قرار دارد و بیش از یک میلیون حساب با آن ثبت شده‌اند و بسیاری از برنامه‌ها سال‌ها از آن استفاده کرده‌اند، کمتر احتمال دارد مسدود شود تا حسابی که از طریق یک جفت شخصی جدید با تلگرام ارتباط برقرار می‌کند. به همین دلیل استخر به‌صورت پیش‌فرض فعال است. جفت خودتان همچنان کار می‌کند اگر آن را در بخش <strong>حساب → شناسه API + هش</strong> وارد کنید.",
   "Partly": "تا حدی",
   "Phone number button": "دکمه شماره تلفن",

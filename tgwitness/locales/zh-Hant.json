@@ -1069,7 +1069,6 @@
   "Open your workspace": "開啟您的工作區",
   "Open {label} event {seq}": "開啟 {label} 事件 {seq}",
   "OpenTimestamps calendars, one address per line": "OpenTimestamps 日曆，每行一個地址",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "點擊連結或開啟 Mini App 會從詐騙者的伺服器載入頁面：該伺服器會偵測到您的 IP 位址和瀏覽器，而 Mini App 還會取得您的 Telegram 個人檔案。",
   "Operational records and other group service events remain separate from the event switches. Captured messages can retain embedded reaction or membership metadata. Some deletion notices do not identify a chat; they are saved as unscoped account-level notices without guessing a source.": "操作記錄及其他群組服務事件與事件開關相互獨立。擷取的訊息可保留內嵌的反應或成員資格元資料。部分刪除通知並未標示對話群組；它們會以無範圍的帳戶層級通知形式儲存，且不會推測來源。",
   "Optional · your account and sources are enough to start collecting.": "可選 · 只需您的帳戶和資料來源，即可開始收集資料。",
   "Optional. Leave empty: TgWitness picks a working pair from its built-in pool, or uses the pair from your account file. To use your own app, <a href=\"https://my.telegram.org\" rel=\"noopener noreferrer\" target=\"_blank\">get it at my.telegram.org ↗</a>": "可選。若留空：TgWitness 會從其內建池中選取一組可用的密鑰對，或使用您帳戶檔案中的密鑰對。若要使用您自己的應用程式，<a href=\"https://my.telegram.org\" rel=\"noopener noreferrer\" target=\"_blank\">請至 my.telegram.org ↗ 取得</a>",

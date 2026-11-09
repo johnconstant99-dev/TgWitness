@@ -1847,7 +1847,6 @@
   "Open a Mini App or a web-app button": "Кнопка «Открыть мини-приложение» или «Открыть веб-приложение»",
   "Open a link or a “Log in” button": "Откройте ссылку или нажмите кнопку «Войти»",
   "Open an invite link": "Откройте ссылку с приглашением",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "При открытии ссылки или мини-приложения загружается страница с сервера мошенников: он видит ваш IP-адрес и браузер, а мини-приложение также получает доступ к вашему профилю в Telegram.",
   "Our reasoning: an account behind a pair that over a million accounts were registered with and that many programs have used for years is less likely to be banned than one that talks to Telegram through a fresh personal pair. That is why the pool is the default. Your own pair still works if you enter it under <strong>Account → API ID + Hash</strong>.": "Наше обоснование: аккаунт, связанный с ключевой парой, с помощью которой было зарегистрировано более миллиона аккаунтов и которую многие программы используют на протяжении многих лет, с меньшей вероятностью будет заблокирован, чем аккаунт, взаимодействующий с Telegram через новую личную ключевую пару. Именно поэтому по умолчанию используется общий пул. Ваша собственная ключевая пара по-прежнему будет работать, если вы введете её в разделе <strong>«Аккаунт» → «API-ID + хэш</strong>».",
   "Partly": "Частично",
   "Phone number button": "Кнопка «Номер телефона»",

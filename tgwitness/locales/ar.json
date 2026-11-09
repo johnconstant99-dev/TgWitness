@@ -2079,7 +2079,6 @@
   "Open a Mini App or a web-app button": "زر لفتح تطبيق مصغر أو تطبيق ويب",
   "Open a link or a “Log in” button": "افتح رابطًا أو زر «تسجيل الدخول»",
   "Open an invite link": "فتح رابط الدعوة",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "يؤدي فتح رابط أو تطبيق مصغر إلى تحميل صفحة من خادم المحتالين: حيث يرى عنوان IP الخاص بك ومتصفحك، كما يتلقى التطبيق المصغر أيضًا ملفك الشخصي على Telegram.",
   "Our reasoning: an account behind a pair that over a million accounts were registered with and that many programs have used for years is less likely to be banned than one that talks to Telegram through a fresh personal pair. That is why the pool is the default. Your own pair still works if you enter it under <strong>Account → API ID + Hash</strong>.": "منطقنا في ذلك: الحساب الذي يستخدم زوجًا تم تسجيل أكثر من مليون حساب به واستخدمته العديد من البرامج لسنوات، أقل عرضة للحظر مقارنةً بالحساب الذي يتواصل مع Telegram عبر زوج شخصي جديد. ولهذا السبب يُعد المجمع هو الإعداد الافتراضي. ولا يزال زوجك الخاص يعمل إذا أدخلته ضمن <strong>«الحساب» → «معرف API + التجزئة</strong>».",
   "Partly": "جزئيًا",
   "Phone number button": "زر رقم الهاتف",

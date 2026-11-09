@@ -2,7 +2,7 @@
 
 # Investigation mode
 
-A workspace for documenting a scam conversation: what the investigator did, what
+A workspace for documenting a conversation: what the investigator did, what
 the other side answered, and a package a prosecutor can read and check. The mode
 lives in the **Documentation** drawer of the panel. The signed journal underneath
 is unchanged; everything here cites it.

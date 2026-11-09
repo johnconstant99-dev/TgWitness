@@ -1069,7 +1069,6 @@
   "Open your workspace": "ワークスペースを開く",
   "Open {label} event {seq}": "{label}イベントを開く {seq}",
   "OpenTimestamps calendars, one address per line": "OpenTimestampsのカレンダー（1行につき1つのアドレス）",
-  "Opening a link or a Mini App loads a page from the scammers' server: it sees your IP address and browser, and a Mini App also receives your Telegram profile.": "リンクやミニアプリを開くと、詐欺師のサーバーからページが読み込まれます。これにより、ユーザーのIPアドレスやブラウザ情報が取得され、ミニアプリではTelegramのプロフィール情報も取得されます。",
   "Operational records and other group service events remain separate from the event switches. Captured messages can retain embedded reaction or membership metadata. Some deletion notices do not identify a chat; they are saved as unscoped account-level notices without guessing a source.": "運用記録やその他のグループサービスイベントは、イベントスイッチとは別個に扱われます。キャプチャされたメッセージには、埋め込まれた反応やメンバーシップに関するメタデータが残る場合があります。一部の削除通知にはチャットの特定情報が含まれておらず、送信元を推測することなく、スコープのないアカウントレベルの通知として保存されます。",
   "Optional · your account and sources are enough to start collecting.": "オプション · 収集を開始するには、アカウントと情報源さえあれば十分です。",
   "Optional. Leave empty: TgWitness picks a working pair from its built-in pool, or uses the pair from your account file. To use your own app, <a href=\"https://my.telegram.org\" rel=\"noopener noreferrer\" target=\"_blank\">get it at my.telegram.org ↗</a>": "オプションです。空欄のままにしておくと、TgWitnessは組み込みのプールから動作するペアを選択するか、アカウントファイルからペアを使用します。独自のアプリを使用する場合は、<a href=\"https://my.telegram.org\" rel=\"noopener noreferrer\" target=\"_blank\">my.telegram.org ↗から入手してください。</a>",

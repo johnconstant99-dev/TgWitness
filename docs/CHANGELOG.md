@@ -7,7 +7,7 @@
 <details>
 <summary>On this page</summary>
 
-- [Unreleased](#unreleased)
+- [0.9.2 preview · 9 November 2026](#092-preview--9-november-2026)
 - [0.9.1 preview · 5 November 2026](#091-preview--5-november-2026)
 - [0.9.0 preview · 4 November 2026](#090-preview--4-november-2026)
 - [0.8.1 preview · 2 November 2026](#081-preview--2-november-2026)
@@ -21,7 +21,7 @@
 
 </details>
 
-## Unreleased
+## 0.9.2 preview · 9 November 2026
 
 - Refresh the pinned Wolfi base images and runtime/MCP dependencies, regenerate root and capture hash locks, and require patched QR reader wheels. Exclude OpenCV 5.0.0.93, which bundles FFmpeg 8.1.1 affected by [CVE-2026-8461](https://github.com/advisories/GHSA-qff7-4q6c-m8h6).
 

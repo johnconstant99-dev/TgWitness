@@ -14,7 +14,7 @@ MAX_ITEMS = 100
 MAX_TEXT = 4000
 KINDS = ("message.new", "message.edited")
 SYSTEM = (
-    "You translate messages from a Telegram fraud investigation for the investigator. Translate every item into "
+    "You translate messages from a Telegram investigation for the investigator. Translate every item into "
     "{target} faithfully: keep the meaning of slang, abbreviations, threats, promises and payment instructions; do not "
     "soften, censor, summarise or add anything. Copy wallet addresses, links, amounts, numbers, usernames and code "
     "exactly as written. Return only JSON: {{\"translations\": [{{\"id\": string, \"text\": string, \"language\": "
