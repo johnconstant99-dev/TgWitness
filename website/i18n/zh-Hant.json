@@ -5900,7 +5900,10 @@
 "d018db6585dad1c8d0a9d2a0f3acbade60645e4fb3df6414f2daf8ff9d25f6f6": "亦可於面板的「<strong>匯出」</strong>選項中取得。",
 "3978798f210da93d2e6d040715ad5c15bfa1105709de36a51e5d8306adcdd445": "開啟擷取頁面 <span aria-hidden=\"true\">→</span>",
 "ad52082048c9660f3ae4d22c06dd3b15cdad1cc0c2f3eb630a4b784549c6f57b": "載入較早的歷史紀錄、搜尋已儲存的訊息、透過可驗證的來源審查 AI、連接唯讀 MCP 客戶端、執行本機 OCR 與轉錄，以及傳送經簽名的 webhook。",
-"e8c321804377c92694849c6fda58d608b71431312bcc2a5bb84813adcf8257ca": "<a class=\"text-link\" href=\"@@GUIDE_ARCHIVE@@\">探索歸檔工作流程 <span aria-hidden=\"true\">↗</span></a>"
+"e8c321804377c92694849c6fda58d608b71431312bcc2a5bb84813adcf8257ca": "<a class=\"text-link\" href=\"@@GUIDE_ARCHIVE@@\">探索歸檔工作流程 <span aria-hidden=\"true\">↗</span></a>",
+"de63af0be0d306d8bff1612444e3008ccaf2040eb167d8edd63de2dc15b9ac62": "請將工作區金鑰指紋記錄在收集器以外的其他位置。在收集過程中，請開啟證據模式，以便檢查點能取得符合 RFC 3161 標準及 OpenTimestamps 規格的時間戳記；或者執行一個會向公開頻道發佈訊息的<a href=\"@@GUIDE_WITNESS@@\">見證者</a>。請將簽署過的檢查點也存放在其他地方：接收方會根據這些檢查點，核對金鑰、時間以及較早的日誌狀態。",
+"fdb37301a4b3a31d91e5ba8b16e6954fe9cb5112805f2bb32f6069596764c051": "通過驗證時會顯示 <code>key_pinned: true</code> 和 <code>checkpoint_checked: true</code>。<code>--require evidence</code> 還需要最後一筆記錄的第三方時間戳記，例如已驗證的時間戳記：由於檢查點是用您自己的金鑰簽署的，因此僅憑檢查點本身並不足夠。請將該輸出結果與檔案存檔一併保留。檢查點必須位於匯出檔案的結尾處或之前。",
+"27f3f9cc5f1038a3513bbc5a3320f1ad1c8c0bbb2f5b8891bcf9acdf1e1419fa": "檢查點已使用收集器金鑰簽署，因此單憑此檢查點並不符合證據的最低要求；<code>--require evidence</code> 還需要一個經過驗證的時間戳記，或涵蓋最後一筆記錄的見證貼文。"
 },
 "modes": {
 "modes.actions.body": "預覽、請求及結果回執均經簽署。按下按鈕前，伺服器會再次擷取訊息，並拒絕已變更的鍵盤輸入。回傳的回呼文字與網址仍屬已記錄的上下文。",

@@ -104,7 +104,7 @@ First time? Do it in this order:
 | Fix a problem | [Operations](OPERATIONS.md) |
 
 Also: [panel safeguards](PANEL-SAFETY.md), [storage and recovery](STORAGE.md),
-[what's been tested](VERIFICATION.md), [wiki](wiki/Home.md), [glossary](wiki/Glossary.md).
+[what's been tested](VERIFICATION.md), [limits and objections](LIMITS-AND-OBJECTIONS.md), [wiki](wiki/Home.md), [glossary](wiki/Glossary.md).
 
 <details>
 <summary>Technical reference</summary>

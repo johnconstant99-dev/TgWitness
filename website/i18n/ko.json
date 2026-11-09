@@ -5900,7 +5900,10 @@
 "d018db6585dad1c8d0a9d2a0f3acbade60645e4fb3df6414f2daf8ff9d25f6f6": "패널의 <strong>내보내기</strong> 항목에서도 이용할 수 있습니다.",
 "3978798f210da93d2e6d040715ad5c15bfa1105709de36a51e5d8306adcdd445": "캡처 페이지 열기 <span aria-hidden=\"true\">→</span>",
 "ad52082048c9660f3ae4d22c06dd3b15cdad1cc0c2f3eb630a4b784549c6f57b": "이전 기록을 불러오고, 저장된 메시지를 검색하며, 검증 가능한 출처를 바탕으로 AI를 검토하고, 읽기 전용 MCP 클라이언트를 연결하고, 로컬 OCR 및 전사 처리를 실행하며, 서명된 웹훅을 전송할 수 있습니다.",
-"e8c321804377c92694849c6fda58d608b71431312bcc2a5bb84813adcf8257ca": "<a class=\"text-link\" href=\"@@GUIDE_ARCHIVE@@\">아카이브 워크플로우 살펴보기 <span aria-hidden=\"true\">↗</span></a>"
+"e8c321804377c92694849c6fda58d608b71431312bcc2a5bb84813adcf8257ca": "<a class=\"text-link\" href=\"@@GUIDE_ARCHIVE@@\">아카이브 워크플로우 살펴보기 <span aria-hidden=\"true\">↗</span></a>",
+"de63af0be0d306d8bff1612444e3008ccaf2040eb167d8edd63de2dc15b9ac62": "컬렉터 이외의 다른 곳에 워크스페이스 키 지문을 기록해 두십시오. 수집 시 증거 모드를 켜서 체크포인트에 RFC 3161 및 OpenTimestamps 타임스탬프가 부여되도록 하거나, 공개 채널에 게시하는 <a href=\"@@GUIDE_WITNESS@@\">위트니스를</a> 실행하십시오. 서명된 체크포인트도 별도의 장소에 보관하십시오. 수신자는 키, 시간 및 이전 저널 상태를 이 체크포인트와 대조하여 확인합니다.",
+"fdb37301a4b3a31d91e5ba8b16e6954fe9cb5112805f2bb32f6069596764c051": "검증에 성공하면 <code>key_pinned: true</code>와 <code>checkpoint_checked: true</code>가 표시됩니다. <code>--require evidence</code>는 또한 확인된 타임스탬프와 같이 마지막 기록에 대한 제3자 시간 정보가 필요합니다. 체크포인트는 사용자의 키로 서명되어 있으므로, 체크포인트만으로는 충분하지 않습니다. 해당 출력 결과를 아카이브와 함께 보관하십시오. 체크포인트는 내보내기 파일의 끝 부분이나 그 이전 위치에 있어야 합니다.",
+"27f3f9cc5f1038a3513bbc5a3320f1ad1c8c0bbb2f5b8891bcf9acdf1e1419fa": "체크포인트는 수집자 키로 서명되어 있으므로, 이 자체만으로는 증거의 최소 요건을 충족하지 못합니다. <code>--require evidence</code>를 사용하려면 마지막 기록을 포함하는 검증된 타임스탬프나 위트니스 게시물도 필요합니다."
 },
 "modes": {
 "modes.actions.body": "미리보기, 요청 및 결과 수신 확인은 서명됩니다. 버튼을 누르기 전에 서버는 메시지를 다시 가져오고, 변경된 키보드는 거부합니다. 반환된 콜백 텍스트와 URL은 기록된 컨텍스트로 유지됩니다.",

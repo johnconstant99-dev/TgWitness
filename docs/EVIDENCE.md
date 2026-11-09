@@ -6,7 +6,8 @@
 
 TgWitness preserves account-visible Telegram observations in a signed journal.
 Recipients can verify the saved records, attachments and reports against a trusted
-collector key, then compare the journal with an independently retained checkpoint.
+collector key, check external time from a third party for the last record, and compare
+the journal with a checkpoint they retained earlier.
 This page describes the formats, the checks and the material to keep for handover.
 
 Recipients can start with **VERIFY.cmd** on Windows: it asks for the original
@@ -121,26 +122,33 @@ earlier comparison results. Archive format and signature verification are unchan
    materials. Check the intended collection setup with the
    [live acceptance procedure](internal/LIVE_ACCEPTANCE.md).
 2. Retain the workspace's public-key fingerprint independently before relying on
-   its exports. Save signed checkpoints outside the collector during collection.
-   Record interruptions and the limits of the account's visibility.
+   its exports. Turn on evidence mode so checkpoints receive RFC 3161 and
+   OpenTimestamps receipts. Save signed checkpoints outside the collector during
+   collection. Record interruptions and the limits of the account's visibility.
 3. Export a **signed ZIP** and retain the signed run receipt. Use a checkpoint at
    or before the exported journal boundary. A later checkpoint can correctly reject
    an earlier export as too short. Exports include the full workspace journal,
    regardless of panel filters; review the material before sharing it.
-4. Have the recipient verify the ZIP with a trusted copy of the verifier and the
-   independently supplied fingerprint/checkpoint. From a trusted checkout with
-   its Python environment active:
+4. Have the recipient verify the ZIP with a trusted copy of the verifier, the
+   independently supplied fingerprint and the timestamp authority's root
+   certificate obtained separately. From a trusted checkout with its Python
+   environment active:
 
    ```sh
-   python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint retained-checkpoint.json
+   python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --tsa-ca TSA-ROOT.pem --checkpoint retained-checkpoint.json --require evidence
    ```
 
-   Successful output reports `key_pinned: true` and `checkpoint_checked: true`
-   when both inputs are supplied and accepted. Preserve the verification result.
+   The fingerprint and a checked timestamp of the last record meet the minimum for
+   evidence; `--require evidence` exits with code 2 otherwise. The checkpoint is a
+   supporting check, because it is signed with the collector key. Successful output
+   reports `key_pinned: true` and `checkpoint_checked: true` when both inputs are
+   supplied and accepted. Preserve the verification result.
 
     For a handover requiring the final exported record to be witnessed, use
     `--witness witness.zip --witness-fingerprint TRUSTED_WITNESS_SHA256 --require-witness`.
-    This refuses an export with an unwitnessed tail. See the
+    This refuses an export with an unwitnessed tail. Add
+    `--channel https://t.me/s/WITNESS_CHANNEL` to read the dates Telegram set on the
+    witness posts as external time. See the
     [witness handover procedure](WITNESS.md#require-a-witnessed-export-boundary).
 5. Record the archive's SHA-256, export boundary, transfer date, sender, and
    recipient in your custody record. Keep the original package intact and work
@@ -152,7 +160,7 @@ earlier comparison results. Archive format and signature verification are unchan
    verifier's `unseal-password` command. The password is not stored and only protects
    confidentiality; the recipient decrypts
    the archive and verifies the signed export inside, which is unchanged.
-6. If independent time anchoring is required, follow the
+6. To timestamp a checkpoint outside evidence mode, follow the
    [RFC 3161 procedure](TIMESTAMP.md) and retain the request, checkpoint, trusted
    CA information, and verified authority response. Preparing a request alone
    does not obtain a timestamp.
@@ -507,6 +515,9 @@ are deleted when switched off or when the chat is removed from sources.
 
 A witness journal (`tgwitness-witness-v1`) and its channel posts are checked against an
 evidence export with `verify.py --witness … --channel …`; see [independent witness](WITNESS.md).
+With a public `https://t.me/s/…` or `https://telegram.me/s/…` address the verifier reads
+each post's date from Telegram, and the earliest such date of a post at the export head
+is external time for the last record. Dates from any other source are supplied metadata.
 
 ## Manifest and checkpoints
 
@@ -526,7 +537,9 @@ trusted installation before executing it.
 A checkpoint signs a statement containing the public key, journal length, head
 hash, and creation time. The verifier can check that a later archive contains the
 same prefix. Retain the checkpoint outside the collector, so later verification compares
-the archive with a reference held separately from it.
+the archive with a reference held separately from it. The collector key signs it, so it
+binds the records up to it only if the recipient obtained it before the archive, through
+another channel; on its own it does not meet the minimum for evidence.
 
 ## Reading a verification result
 
@@ -536,16 +549,19 @@ archive can pass its signature and format checks with `signer_pinned: false`.
 This is useful for checking the supplied bytes; signer and acquisition checks
 are separate results, selected below.
 
-For an automated local-archive policy that requires a pinned signer:
+For an automated local-archive policy that requires a pinned signer and the minimum
+for evidence:
 
 ```sh
-python -m tgwitness.verify evidence.zip --strict --json --fingerprint TRUSTED_KEY_SHA256 --checkpoint retained-checkpoint.json
+python -m tgwitness.verify evidence.zip --strict --json --fingerprint TRUSTED_KEY_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
 ```
 
 Use a fingerprint retained through the recipient's trusted channel. A trusted
 witness can also pin the collector through a consistent witnessed journal; supply
 `--witness`, `--witness-fingerprint` and `--require-witness`. `--strict` exits with
-status 2 for an unpinned signer; an unmet `--require-tier` also exits with status 2.
+status 2 for an unpinned signer; an unmet `--require-tier` or `--require evidence` also
+exits with status 2. `--require evidence` needs `--fingerprint` and external time from a
+third party covering the last record.
 Read `signer_pinned`, `requirements_met` and the assurance results, not the exit
 code alone. [Sealed acquisition](TRUST.md#sealed-evidence) instead uses its
 attestation verifier and approved policy to authenticate the acquisition digest.
@@ -557,8 +573,8 @@ mode whose trust boundary matches the case, then retain its verification inputs.
 
 | Collection mode | What the verifier checks | Verification inputs and trust boundary |
 | --- | --- | --- |
-| Local workspace | Record signatures, hash chain, manifest and attachment bytes | Collector fingerprint retained by the recipient; retained checkpoints, witness records and timestamps bind the journal beyond the local key |
-| Local workspace with an independent witness | The archive checks plus agreement with an earlier journal prefix retained by the witness | Separately trusted witness key and records; the checkpoint binds the prefix already observed |
+| Local workspace | Record signatures, hash chain, manifest and attachment bytes | Collector fingerprint retained by the recipient and external time from a third party: verified RFC 3161 or OpenTimestamps receipts, or witness posts read from t.me. Retained checkpoints and witness records are supporting checks |
+| Local workspace with an independent witness | The archive checks plus agreement with an earlier journal prefix retained by the witness | Witness fingerprint and records; who controls the witness key is a custody fact recorded outside the verifier. With `--channel https://t.me/s/…`, the dates Telegram set on the posts give external time |
 | [GitHub Actions capture](SEALED-ACTIONS.md) | GitHub attestation of the archive digest, approved workflow and collector commits, hosted runner, fresh session/key origin and internal archive integrity | Trusted verifier policy, caller repository and GitHub attestation bundle; collection runs under the pinned workflow |
 | [Cloud deployment](HIGH-ASSURANCE.md) | Provider lifecycle and access records, firewall and Cloudflare state, plus the collector's signed run record | Read-only queries to the provider and Cloudflare; availability of individual checks depends on the provider |
 | [Intel TDX confidential VM](HIGH-ASSURANCE.md#confidential-vm-on-phala-cloud-intel-tdx) | Quote signature and platform status, binding to the collector statement, compose and OS measurements | Intel trust chain and expected deployment measurements; retain the results of every required TDX check |

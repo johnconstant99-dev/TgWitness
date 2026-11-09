@@ -13,6 +13,8 @@
 
 <p align="center"><strong>Self-hosted workspace for Telegram investigations.</strong><br>Save chats, keep edits and deletions, see who's connected to whom<br>and hand over signed exports anyone can check.</p>
 
+<p align="center"><strong>ZERO TRUST.</strong> TgWitness takes no side: the same checks apply to the operator, to PhishDestroy and to anyone else.<br>Only what a third party or the math confirms counts. <a href="docs/LIMITS-AND-OBJECTIONS.md">Limits and objections</a></p>
+
 <p align="center">
   <a href="docs/CHANGELOG.md"><img src="docs/assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · pre-release"></a>
   <a href="docs/VERIFICATION.md"><img src="docs/assets/presentation/identity-meta-verification.svg" width="158" height="30" alt="Tested environments"></a>
@@ -120,16 +122,17 @@ The version badge describes this source tree. Installable builds are listed unde
 ## A record someone else can check
 
 An export carries the messages, files and the verifier. Send the recipient your
-key fingerprint and a checkpoint through another channel and they can check it
-themselves:
+key fingerprint through another channel and they can check it themselves:
 
 ```sh
-python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --checkpoint checkpoint.json
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
 ```
 
 The verifier checks signatures, the journal chain, the file manifest and attachments
-against your trusted inputs. With a retained checkpoint it also checks the archive
-against an earlier journal state.
+against your trusted inputs. The minimum for evidence is the fingerprint plus time from
+a third party covering the last record, here an evidence-mode RFC 3161 timestamp checked
+against the authority's root certificate; a checkpoint is signed with your own key, so
+it is not enough on its own.
 
 **Where the messages come from.** Telegram delivers messages to every client,
 official apps included, through an MTProto session rather than with per-message

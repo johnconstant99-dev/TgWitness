@@ -149,8 +149,9 @@ For another workspace, add `--profile ID` using **Exports → Workspace ID**.
 For a remote server, add `--url https://your-server`. The default transfer limit is
 5 GiB; `--max-mib` changes it. Signed ZIP content has a separate 4 GiB uncompressed
 verification limit by default (**Parameters** raises it; verify such archives with
-`verify.py --max-gib N`). Verify the archive using a trusted copy of the verifier and
-an independently retained key fingerprint/checkpoint.
+`verify.py --max-gib N`). Verify the archive using a trusted copy of the verifier, an
+independently retained key fingerprint and, for the minimum for evidence, the timestamp
+authority's root certificate (`--tsa-ca`).
 
 ## Check the installation
 

@@ -3,14 +3,14 @@
 <p>New to signatures and checkpoints? <a href="@@GUIDE_CONCEPTS@@#chain">Change a sample record</a> and see which checks catch it.</p>
 <p>Keeping a copy away from the collector? Go to <a href="#s3">S3 setup</a>, <a href="#s3-retention">Object Lock</a> or <a href="#s3-restore">verified recovery</a>.</p>
 <h2 id="retain">Retain a trusted reference</h2>
-<p>Write down the workspace key fingerprint somewhere other than the collector. While collecting, keep signed checkpoints elsewhere too, or run an <a href="@@GUIDE_WITNESS@@">independent witness</a>. That's what the recipient checks the key and an earlier journal state against.</p>
+<p>Write down the workspace key fingerprint somewhere other than the collector. While collecting, turn on evidence mode so checkpoints get RFC 3161 and OpenTimestamps timestamps, or run a <a href="@@GUIDE_WITNESS@@">witness</a> that posts to a public channel. Keep signed checkpoints elsewhere too: the recipient checks the key, the time and an earlier journal state against them.</p>
 <h2 id="export">Download the signed ZIP</h2>
 <p><strong>Exports</strong> → signed evidence ZIP. It has the whole journal and a signed file manifest. Shape the readable report in <a href="@@GUIDE_REPORTS@@">Report studio</a>, or send only selected data as a <a href="@@GUIDE_HANDOVER@@">handover extract</a>.</p>
 <p>HTML, PDF and JSON reports carry their own seals. CSV is just a working copy; for integrity use the CSV inside the verified ZIP.</p>
 <h2 id="verify">Verify with a trusted copy of TgWitness</h2>
 <p>In the project environment, with your own fingerprint and paths:</p>
-<pre><code>python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint retained-checkpoint.json</code></pre>
-<p>A pass shows <code>key_pinned: true</code> and <code>checkpoint_checked: true</code>. Keep that output next to the archive. The checkpoint has to be at or before the end of the export.</p>
+<pre><code>python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --tsa-ca TSA-ROOT.pem --checkpoint retained-checkpoint.json --require evidence</code></pre>
+<p>A pass shows <code>key_pinned: true</code> and <code>checkpoint_checked: true</code>. <code>--require evidence</code> also needs third-party time for the last record, such as a checked timestamp: the checkpoint is signed with your own key, so on its own it is not enough. Keep that output next to the archive. The checkpoint has to be at or before the end of the export.</p>
 <h2 id="meaning">Use the verification result</h2>
 <ul><li><strong>Files:</strong> the manifest binds their hashes, the signatures bind the journal. Any change shows up.</li><li><strong>Identity:</strong> the fingerprint you kept proves it's the key you expected.</li><li><strong>Earlier state:</strong> a checkpoint compares the export with a journal prefix saved before the handoff.</li><li><strong>Coverage:</strong> gaps, acquisition results and a send → edit → delete test show what this setup actually caught.</li></ul>
 <p>Details: <a href="@@REF_EVIDENCE@@#verification-scope">what verification proves and what it doesn't</a>.</p>

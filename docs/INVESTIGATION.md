@@ -224,18 +224,21 @@ Keep these together in an analyst-assembled case directory:
 | Signed evidence ZIP per workspace | Complete recorded journal, manifest and included preserved media; panel filters do not narrow the journal export |
 | Separately signed people-profile files | Derived references checked against the matching workspace evidence |
 | Signed full chat exports | Current visible-history acquisition, separate from the observation journal |
-| Trusted fingerprints and earlier checkpoints | Key identity and retained journal boundaries |
+| Trusted fingerprints, TSA root certificates and earlier checkpoints | Key identity, external time of the last record and retained journal boundaries |
 | Witness artifacts, if configured | Separate journal, signed posts and witness fingerprint |
 | Verification results and delivered-file hashes | What was checked, which bytes were transferred and to whom |
 
 From a trusted installation, with filenames and each workspace's actual fingerprint:
 
 ```sh
-python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint retained-checkpoint.json
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --tsa-ca TSA-ROOT.pem --checkpoint retained-checkpoint.json --require evidence
 python -m tgwitness.verify profiles-operations.json --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --evidence evidence.zip
 python -m tgwitness.verify history-channel.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256
 python -m tgwitness.verify board-slice.json --evidence evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256
 ```
+
+`--require evidence` exits with code 2 unless the fingerprint matches and external time
+from a third party covers the last record; the checkpoint is a supporting check.
 
 Retain the actual verification results and original artifacts. Export workspace
 notes from Case Board alongside the cited source material. Assemble cross-workspace

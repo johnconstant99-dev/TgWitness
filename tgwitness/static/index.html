@@ -925,15 +925,16 @@
         </div></div>
       </div>
       <h3>Minimum for evidence</h3>
-      <p class="muted">Both required conditions and at least one of the next two, covering the last exported record. verify.py prints the same groups.</p>
+      <p class="muted">All three required conditions, covering the last exported record. verify.py prints the same groups.</p>
       <div class="limits-table">
         <div><strong>Required · Integrity</strong><p>verify.py checks every signature, the record chain and all file hashes.</p></div>
         <div><strong>Required · Signer key</strong><p>The recipient compares the collector fingerprint with a copy received separately.</p></div>
-        <div><strong>One of · Independent binding of the last record</strong><p>A checkpoint retained by another party or a confirmed witness covers the last exported record.</p></div>
-        <div><strong>One of · External time</strong><p>A verified RFC 3161 or OpenTimestamps receipt, a witness Bitcoin seal or a checked GitHub attestation covers the last exported record.</p></div>
-        <div><strong>Optional · Attested collection run</strong><p>A GitHub Actions run or an Intel TDX deployment shows that the signing key was created inside the attested collection run.</p></div>
+        <div><strong>Required · External time</strong><p>A third party dates the last exported record: a verified RFC 3161 or OpenTimestamps receipt, a witness post read from t.me, a witness Bitcoin seal or a checked GitHub attestation.</p></div>
+        <div><strong>Supporting · Witness with its own key</strong><p>A second key retained the journal head. Who controls that key is a custody fact the verifier cannot check.</p></div>
+        <div><strong>Supporting · Retained checkpoint</strong><p>A checkpoint the recipient received earlier, through another channel, shows that the records up to it were not changed afterwards.</p></div>
+        <div><strong>Supporting · Attested collection run</strong><p>A GitHub Actions run or an Intel TDX deployment shows that the signing key was created inside the attested collection run.</p></div>
       </div>
-      <p class="hint" data-no-translate><code>python verify.py evidence.zip --fingerprint TRUSTED_SHA256 --checkpoint retained.json --require evidence</code></p>
+      <p class="hint" data-no-translate><code>python verify.py evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TSA-ROOT.pem --require evidence</code></p>
       <h3>Reading the records</h3>
       <div class="limits-table">
         <div><strong>Message edits</strong><p>Each edit Telegram delivers is a new signed version next to the earlier ones.</p></div>

@@ -475,8 +475,7 @@ class Console:
             return
         from .witness import CONDITION_LABELS, ROLE_LABELS, evidence_line, next_lines
         self.heading("Conditions for evidence")
-        met = {row["id"] for row in evidence["conditions"] if row["status"] == "met"}
-        needed = {"required": True, "one_of": not {"head_binding", "external_time"} & met, "optional": False}
+        needed = {"required": True, "supporting": False}
         role = None
         for row in evidence["conditions"]:
             if row["role"] != role:
@@ -491,7 +490,7 @@ class Console:
             self.say("    " + detail)
             if row["status"] != "met":
                 self.say("    " + self.paint("→ " + self.t(row["how"]), "dim"))
-            self.explain({"signer": "Key pinning", "head_binding": "Retained checkpoint"}.get(row["id"], ""))
+            self.explain({"signer": "Key pinning", "head_binding": "Witness", "checkpoint": "Retained checkpoint"}.get(row["id"], ""))
         self.say()
         self.say("  " + self.paint(evidence_line(evidence, self.t), "ok" if evidence["minimum_met"] else "warn"))
         for line in next_lines(evidence, self.t):

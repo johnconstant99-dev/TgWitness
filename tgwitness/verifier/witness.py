@@ -21,6 +21,11 @@ from .common import (
     timezone,
 )
 WITNESS_TOKEN = re.compile(r"TGW1\.([A-Za-z0-9_-]{20,})\.([A-Za-z0-9_-]{40,})")
+CHANNEL_POST = re.compile(r'[^"/]+/(\d+)"')
+CHANNEL_TEXT = re.compile(r'class="tgme_widget_message_text js-message_text"[^>]*>(.*?)</div>', re.S)
+CHANNEL_META = re.compile(r'class="tgme_widget_message_meta"[^>]*>(.*?)</time>', re.S)
+CHANNEL_TIME = re.compile(r'<time datetime="([^"]+)"')
+TELEGRAM_PAGES = ("t.me", "telegram.me")
 
 
 def b64url(data):
@@ -411,17 +416,20 @@ def cross_check_witness(witness, bundle_path, bundle_result):
 
 ASSURANCE_TIERS = ("self_attested", "timestamped", "witnessed", "fresh", "witness_anchored", "sealed")
 EVIDENCE_PROFILES = ("integrity", "evidence", "attested")
-CONDITION_LABELS = {"integrity": "Integrity", "signer": "Signer key", "head_binding": "Independent binding of the last record",
-                    "external_time": "External time", "environment": "Attested collection run"}
-CONDITION_ROLE = {"integrity": "required", "signer": "required", "head_binding": "one_of", "external_time": "one_of",
-                  "environment": "optional"}
-ROLE_LABELS = {"required": "Required conditions", "one_of": "At least one of these", "optional": "Optional condition"}
+CONDITION_LABELS = {"integrity": "Integrity", "signer": "Signer key", "external_time": "External time",
+                    "head_binding": "Witness with its own key", "checkpoint": "Retained checkpoint",
+                    "environment": "Attested collection run"}
+CONDITION_ROLE = {"integrity": "required", "signer": "required", "external_time": "required",
+                  "head_binding": "supporting", "checkpoint": "supporting", "environment": "supporting"}
+ROLE_LABELS = {"required": "Required conditions", "supporting": "Supporting records, not part of the minimum"}
 CONDITION_SCOPE = {"integrity": "The archive is unchanged since the collector signed it.",
                    "signer": "The signing key is the collector key the recipient retained.",
-                   "head_binding": "Records up to the bound record were not removed or replaced after the binding.",
-                   "external_time": "The covered records existed by the stated time.",
+                   "external_time": "A third party confirms that the covered records existed by the stated time.",
+                   "head_binding": "A second key retained the journal head. Who controls that key is a custody fact this verifier cannot check.",
+                   "checkpoint": "Records up to the checkpoint match a journal state signed with the collector key. "
+                                 "They are bound only if the recipient obtained it before this archive, through another channel.",
                    "environment": "The signing key was created inside the attested collection run."}
-MINIMUM_NAMES = {"signer": "confirmed signer key", "head_binding or external_time": "independent binding of the last record or external time"}
+MINIMUM_NAMES = {"signer": "confirmed signer key", "external_time": "external time from a third party covering the last record"}
 
 
 def assurance(result):
@@ -431,8 +439,7 @@ def assurance(result):
         a.get("kind") == "rfc3161" and a.get("signature", "").startswith("checked against") or
         a.get("kind") == "opentimestamps" and a.get("status") == "confirmed")]
     times = [a["time"] for a in stamps]
-    if witness.get("head_bitcoin_block_time"):
-        times.append(witness["head_bitcoin_block_time"])
+    times += [witness[name] for name in ("head_bitcoin_block_time", "head_telegram_post_time") if witness.get(name)]
     independent = bool(witness.get("witness_key_pinned") and witness.get("export_head_witnessed")
                        and witness.get("witness_fingerprint") != result.get("fingerprint"))
     days = witness.get("days", result.get("days", []))
@@ -449,7 +456,7 @@ def assurance(result):
                    if times else "no authenticated external time covering the export head"},
         {"tier": "witnessed", "status": "fail" if bad_witness else "pass" if independent else "absent",
          "detail": ("witness " + str(witness.get("witness_fingerprint")) + "; records 1.." + str(result.get("events"))
-                    + "; witness clock " + str(witness.get("head_witnessed_at"))) if independent else "no pinned independent witness at the export head"},
+                    + "; witness clock " + str(witness.get("head_witnessed_at"))) if independent else "no pinned witness with its own key at the export head"},
         {"tier": "fresh", "status": "pass" if independent and witness.get("head_not_before") else "absent",
          "detail": "relay-confirmed drand challenge; not before " + str(witness.get("head_not_before"))
                    if witness.get("head_not_before") else "no independently checked drand binding for the export head"},
@@ -500,34 +507,24 @@ def evidence_conditions(result, kind="evidence"):
     rows = [condition("integrity", "met", "record signatures, hash chain, manifest and file hashes", integrity[0], **integrity[1]),
             condition("signer", "met" if result.get("key_pinned") else "missing",
                       "--fingerprint with the collector fingerprint the recipient retained",
-                      "collector {fingerprint}… matches the trusted fingerprint" if result.get("key_pinned")
+                      "collector {fingerprint}… matches the fingerprint you supplied" if result.get("key_pinned")
                       else "collector {fingerprint}… not compared with a retained fingerprint", fingerprint=fp[:16])]
-    independent = bool(witness.get("witness_key_pinned") and witness.get("witness_fingerprint") not in (None, fp)
-                       and not witness.get("conflicts"))
-    retained = result.get("checkpoint_event_count")
-    through = max(retained or 0, (witness.get("verified_through_event") or 0) if independent else 0)
-    at_head = journal and (retained == events or independent and bool(witness.get("export_head_witnessed")))
-    if journal and through:
-        text, values = "records 1–{through} of {total} held by an independent party", {"through": through, "total": events}
-    elif journal:
-        text, values = "no retained checkpoint or confirmed witness", {}
-    else:
-        text, values = "this archive type carries no journal checkpoints; verify the evidence journal", {}
-    rows.append(condition("head_binding", "met" if at_head else "partial" if journal and through else "missing",
-                          "--checkpoint kept outside the collector, or --witness with --witness-fingerprint" if journal
-                          else "in the evidence journal ZIP: --checkpoint, or --witness with --witness-fingerprint", text, **values))
     checked = [a for a in anchors if a.get("kind") == "rfc3161" and str(a.get("signature", "")).startswith("checked against")
                or a.get("kind") == "opentimestamps" and a.get("status") == "confirmed"]
     times = [a["time"] for a in checked if a.get("event_count") == events and a.get("time")]
-    if independent and witness.get("export_head_witnessed") and witness.get("head_bitcoin_block_time"):
-        times.append(witness["head_bitcoin_block_time"])
+    if witness.get("export_head_witnessed") and not witness.get("conflicts"):
+        times += [witness[name] for name in ("head_bitcoin_block_time", "head_telegram_post_time") if witness.get(name)]
     runtime = result.get("runtime_attestation") or {}
     attested = runtime.get("verified") is True and runtime.get("key_origin") == "created"
     if attested and runtime.get("attested_at"):
         times.append(runtime["attested_at"])
     unchecked = [a for a in anchors if a not in checked]
     stamped = max((a.get("event_count") or 0 for a in checked), default=0)
-    if times:
+    qualified = next((a["qualified"] for a in checked if a.get("event_count") == events and a.get("qualified")), None)
+    if times and qualified:
+        status, text, values = ("met", "last exported record existed by {time}; qualified eIDAS time stamp from {service}",
+                                {"time": min(times), "service": qualified["service"]})
+    elif times:
         status, text, values = "met", "last exported record existed by {time}", {"time": min(times)}
     elif checked:
         status, text, values = "partial", "records 1–{through} existed by {time}", {
@@ -538,12 +535,32 @@ def evidence_conditions(result, kind="evidence"):
     else:
         status, text, values = "missing", "no external timestamp in this archive", {}
     rows.append(condition("external_time", status,
-                          "RFC 3161 with --tsa-ca, OpenTimestamps with --check-bitcoin, witness Bitcoin seals or a checked GitHub attestation"
+                          "RFC 3161 with --tsa-ca, OpenTimestamps with --check-bitcoin, a witness post read from t.me with --channel, "
+                          "witness Bitcoin seals or a checked GitHub attestation"
                           if journal else "in the evidence journal ZIP: --tsa-ca or --check-bitcoin", text, **values))
     drand = ((result.get("outside") or {}).get("drand") or {}).get("checked") or {}
     if drand.get("confirmed"):
         rows[-1]["drand"] = ", ".join(drand.get("relays") or [])
         rows[-1]["detail"] += " · drand rounds confirmed by " + rows[-1]["drand"]
+    own_key = bool(witness.get("witness_key_pinned") and witness.get("witness_fingerprint") not in (None, fp)
+                   and not witness.get("conflicts"))
+    through = (witness.get("verified_through_event") or 0) if own_key else 0
+    if journal and through:
+        text, values = "records 1–{through} of {total} retained by a witness with its own key", {"through": through, "total": events}
+    elif journal:
+        text, values = "no witness with its own key", {}
+    else:
+        text, values = "this archive type carries no journal checkpoints; verify the evidence journal", {}
+    rows.append(condition("head_binding", "met" if journal and own_key and witness.get("export_head_witnessed")
+                          else "partial" if journal and through else "missing",
+                          "--witness with --witness-fingerprint of a key other than the collector key" if journal
+                          else "in the evidence journal ZIP: --witness with --witness-fingerprint", text, **values))
+    if journal:
+        retained = result.get("checkpoint_event_count")
+        rows.append(condition("checkpoint", "met" if retained and retained == events else "partial" if retained else "missing",
+                              "--checkpoint received before this archive, through another channel",
+                              "records 1–{through} of {total} match the checkpoint you supplied" if retained
+                              else "no checkpoint supplied", **({"through": retained, "total": events} if retained else {})))
     rows.append(condition("environment", "met" if attested else "missing",
                           "--sealed-attestation with --sealed-policy for a GitHub Actions run; Intel TDX: python -m tgwitness.cloud verify"
                           if journal else "in the evidence journal ZIP: --sealed-attestation with --sealed-policy",
@@ -551,21 +568,20 @@ def evidence_conditions(result, kind="evidence"):
                           else "no attested collection run checked here",
                           **({"workflow": runtime.get("workflow")} if attested else {})))
     met = {row["id"] for row in rows if row["status"] == "met"}
-    missing = ([] if "signer" in met else ["signer"]) + \
-              ([] if {"head_binding", "external_time"} & met else ["head_binding or external_time"])
+    missing = [item for item in ("signer", "external_time") if item not in met]
     minimum = not missing
-    bound = events if minimum else max(through if journal else 0, stamped)
+    bound = events if minimum else stamped
     options = [] if "signer" in met else ["--fingerprint FINGERPRINT"]
-    if journal and "head_binding or external_time" in missing:
+    if journal and "external_time" in missing:
         options += sorted({"--tsa-ca TSA-ROOT.pem" if a.get("kind") == "rfc3161" else "--check-bitcoin" for a in unchecked
                            if a.get("event_count") == events and (a.get("kind") == "rfc3161" or a.get("status") == "bitcoin-unverified")}) \
-            or ["--checkpoint CHECKPOINT.json"]
+            or ["--witness WITNESS.zip", "--channel https://t.me/s/WITNESS_CHANNEL"]
     return {"profile": "attested" if minimum and "environment" in met else "evidence" if minimum else "integrity",
             "minimum_met": minimum, "missing": missing, "records": events,
             "bound_through": bound if "signer" in met else 0, "conditions": rows,
-            "next_options": options, "journal_needed": not journal and "head_binding or external_time" in missing,
-            "minimum": "integrity, confirmed signer key, and an independent checkpoint, confirmed witness or verified "
-                       "external timestamp covering the last exported record"}
+            "next_options": options, "journal_needed": not journal and "external_time" in missing,
+            "minimum": "integrity, confirmed signer key, and external time from a third party covering the last exported "
+                       "record: RFC 3161, Bitcoin, a witness post read from t.me or an attested collection run"}
 
 
 def next_lines(evidence, t=None):
@@ -574,7 +590,8 @@ def next_lines(evidence, t=None):
         if evidence.get("next_options") else []
     if evidence.get("journal_needed"):
         lines.append(t("This archive type carries no checkpoints or timestamps: the last record is bound in the evidence "
-                       "journal of the same workspace. Verify that ZIP with --fingerprint and --checkpoint."))
+                       "journal of the same workspace. Verify that ZIP with --fingerprint and --tsa-ca, --check-bitcoin "
+                       "or --witness with --channel."))
     return lines
 
 
@@ -613,10 +630,18 @@ def channel_texts(source):
         posts, before = [], None
         for _ in range(200):
             url = source + (("&" if "?" in source else "?") + "before=" + str(before) if before else "")
-            page = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "TgWitness-verify"}),
-                                          timeout=30).read(MAX_SMALL_MEMBER_BYTES).decode("utf-8", "replace")
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "TgWitness-verify",
+                                                                             "Accept-Language": "en"}),
+                                        timeout=30) as response:
+                live = all(telegram_page(address) for address in (url, response.geturl()))
+                page = response.read(MAX_SMALL_MEMBER_BYTES).decode("utf-8", "replace")
             ids = [int(n) for n in re.findall(r'data-post="[^"/]+/(\d+)"', page)]
-            posts += [(None, None, block) for block in re.split(r'data-post="', page)[1:]]
+            for block in re.split(r'data-post="', page)[1:]:
+                number, text, meta = CHANNEL_POST.match(block), CHANNEL_TEXT.search(block), CHANNEL_META.search(block)
+                stamp = CHANNEL_TIME.search(meta.group(1)) if live and meta else None
+                posts.append((int(number.group(1)) if number else None, stamp.group(1) if stamp else None,
+                              (text.group(1) if text else "") if live else block,
+                              ("edited" if post_edited(meta.group(1)) else "telegram") if stamp else None))
             if not ids or (before is not None and min(ids) >= before):
                 break
             before = min(ids)
@@ -631,15 +656,15 @@ def channel_texts(source):
             body = message.get("text", "")
             if isinstance(body, list):
                 body = "".join(part if isinstance(part, str) else part.get("text", "") for part in body)
-            found.append((message.get("id"), message.get("date"), body))
+            found.append((message.get("id"), message.get("date"), body, "supplied"))
         return found
-    return [(None, None, text)]
+    return [(None, None, text, None)]
 
 
 def check_channel(witness, source):
     key = Ed25519PublicKey.from_public_bytes(base64.b64decode(witness["public_key"], validate=True))
-    matching, invalid, differing, foreign, dates = set(), [], [], 0, {}
-    for message_id, date, text in channel_texts(source):
+    matching, invalid, differing, foreign, dates, live, edited = set(), [], [], 0, {}, {}, set()
+    for message_id, date, text, origin in channel_texts(source):
         for body, signature in WITNESS_TOKEN.findall(text):
             try:
                 raw = unb64url(body)
@@ -656,16 +681,48 @@ def check_channel(witness, source):
                 differing.append(statement.get("seq"))
             else:
                 matching.add(statement["seq"])
-                if date:
+                if origin == "edited":
+                    edited.add(statement["seq"])
+                elif date:
                     dates[statement["seq"]] = date
+                    moment = telegram_time(date) if origin == "telegram" else None
+                    if moment:
+                        live[statement["seq"]] = min(live.get(statement["seq"]) or "~", moment)
     posted = set(witness["posted"])
     return {"matching": len(matching), "matching_records": sorted(matching),
             "invalid_signatures": invalid, "differ_from_journal": differing,
             "other_witnesses": foreign,
             "posted_but_not_found": sorted(posted - matching),
             "never_posted": sorted(set(witness["statements"]) - posted),
-            "telegram_post_dates": dates,
-            "post_date_verification": "not-performed"}
+            "telegram_post_dates": dates, "telegram_live_dates": live, "edited_posts": sorted(edited),
+            "post_date_verification": "read-from-telegram" if live else "supplied" if dates else "not-performed"}
+
+
+def post_edited(meta):
+    head = re.sub(r'<span class="tgme_widget_message_from_author".*?</span>', "",
+                  meta.split('<a class="tgme_widget_message_date"')[0], flags=re.S)
+    return bool(re.sub(r"<[^>]+>|&nbsp;|[\s,]", "", head))
+
+
+def telegram_page(address):
+    import urllib.parse
+    parts = urllib.parse.urlsplit(address)
+    return parts.scheme == "https" and parts.hostname in TELEGRAM_PAGES and parts.path.startswith("/s/")
+
+
+def telegram_time(value):
+    try:
+        moment = datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
+    return moment.astimezone(timezone.utc).isoformat() if moment.tzinfo else None
+
+
+def channel_head_time(witnessed, check):
+    live = (check or {}).get("telegram_live_dates") or {}
+    floor = witnessed.get("head_not_before")
+    return min((live[seq] for seq in witnessed.get("export_head_witness_records") or []
+                if seq in live and not (floor and witness_moment(live[seq]) < witness_moment(floor))), default=None)
 
 
 def verify_dossier(path, expected_fingerprint=None, bundle=None):

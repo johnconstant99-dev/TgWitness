@@ -70,7 +70,8 @@
   witness/                        # retained checks, journal and signed posts
   SHA256SUMS                      # hashes of the delivered files</code></pre>
 <p>Send fingerprints separately. Verify everything against its own workspace:</p>
-<pre><code>python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint retained-checkpoint.json
+<pre><code>python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --tsa-ca TSA-ROOT.pem --checkpoint retained-checkpoint.json --require evidence
 python -m tgwitness.verify profiles-operations.json --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --evidence evidence.zip
 python -m tgwitness.verify history-channel.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256</code></pre>
+<p>The checkpoint is signed with the collector key, so on its own it does not meet the minimum for evidence; <code>--require evidence</code> also needs a checked timestamp or witness post covering the last record.</p>
 <p>Keep the verifier output, originals, coverage and transfer record with your findings. Write it up in Report studio. If the recipient needs less, make a <a href="@@GUIDE_HANDOVER@@">minimized handover</a>.</p>

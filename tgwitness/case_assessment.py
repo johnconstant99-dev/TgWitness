@@ -17,13 +17,17 @@ CONDITIONS_TITLE = "Conditions for evidence"
 CONDITIONS_INTRO = "verify.py checks the same conditions. Each row states what the condition establishes and how the recipient checks it."
 CONDITIONS = {"integrity": ("Integrity", "The archive is unchanged since the collector signed it."),
               "signer": ("Signer key", "The signing key is the collector key the recipient retained."),
-              "head_binding": ("Independent binding of the last record", "Records up to the bound record were not removed or replaced after the binding."),
-              "external_time": ("External time", "The covered records existed by the stated time."),
+              "external_time": ("External time", "A third party confirms that the covered records existed by the stated time."),
+              "head_binding": ("Witness with its own key", "A second key retained the journal head. Who controls that key is a custody "
+                               "fact the verifier cannot check."),
+              "checkpoint": ("Retained checkpoint", "Records up to the checkpoint match a journal state signed with the collector key. "
+                             "They are bound only if the recipient obtained it before this archive, through another channel."),
               "environment": ("Attested collection run", "The signing key was created inside the attested collection run.")}
-ROLES = {"integrity": "Required conditions", "signer": "Required conditions", "head_binding": "At least one of these",
-         "external_time": "At least one of these", "environment": "Optional condition"}
-MINIMUM = ("Minimum for evidence: integrity, the signer key, and a retained checkpoint, confirmed witness or validated timestamp "
-           "covering the last record.")
+SUPPORTING = "Supporting records, not part of the minimum"
+ROLES = {"integrity": "Required conditions", "signer": "Required conditions", "external_time": "Required conditions",
+         "head_binding": SUPPORTING, "checkpoint": SUPPORTING, "environment": SUPPORTING}
+MINIMUM = ("Minimum for evidence: integrity, the signer key, and external time from a third party covering the last record: "
+           "a validated RFC 3161 timestamp, a Bitcoin proof, a witness post read from t.me or an attested collection run.")
 ARCHIVES = {"evidence": "tgwitness-evidence.zip", "handover": "tgwitness-handover.zip", "chat": "tgwitness-chat-export.zip",
             "account": "account-export.zip", "account_chat": "account-export.zip", "sharing": "disclosure.zip"}
 LABELS = {"records": "Records", "first": "First record", "last": "Last record", "fingerprint": "Signing key fingerprint (SHA-256)",
@@ -105,14 +109,6 @@ def evidence_conditions(kind, context, count=0, latest=None, signals=None):
                       "python verify.py " + archive, n=count),
             condition("signer", "recipient", "The recipient compares the collector fingerprint with a copy received separately.",
                       "--fingerprint " + fp)]
-    if journal:
-        rows.append(condition("head_binding", "recipient",
-                              "A checkpoint retained outside the collector, or a witness archive, binds the records up to it.",
-                              "--checkpoint retained.json · --witness witness.zip --witness-fingerprint WITNESS_SHA256"))
-    else:
-        rows.append(condition("head_binding", "not_included",
-                              "This archive carries no journal checkpoints; it is bound through the evidence journal of the same workspace.",
-                              "python verify.py tgwitness-evidence.zip --checkpoint retained.json"))
     if latest and latest.get("event_count") == count:
         status, detail = "checked_locally", "A validated timestamp covers records 1–{n} of {total}."
     elif latest:
@@ -121,22 +117,36 @@ def evidence_conditions(kind, context, count=0, latest=None, signals=None):
         status, detail = "recorded", "Timestamp receipts are included; the recipient validates them."
     else:
         status, detail = "not_included", "No timestamp receipt in this archive."
-    rows.append(condition("external_time", status, detail, "--tsa-ca tsa-root.pem · --check-bitcoin",
+    rows.append(condition("external_time", status, detail,
+                          "--tsa-ca tsa-root.pem · --check-bitcoin · --witness witness.zip --channel https://t.me/s/WITNESS_CHANNEL",
                           n=(latest or {}).get("event_count", 0), total=count))
+    if journal:
+        rows.append(condition("head_binding", "recipient",
+                              "A witness archive with a key other than the collector key shows that a second key retained the journal head.",
+                              "--witness witness.zip --witness-fingerprint WITNESS_SHA256"))
+        rows.append(condition("checkpoint", "recipient",
+                              "A checkpoint the recipient received earlier, through another channel, shows that the records up to it "
+                              "were not changed afterwards.", "--checkpoint retained.json"))
+    else:
+        rows.append(condition("head_binding", "not_included",
+                              "This archive carries no journal checkpoints; it is bound through the evidence journal of the same workspace.",
+                              "python verify.py tgwitness-evidence.zip --witness witness.zip --witness-fingerprint WITNESS_SHA256"))
     tdx = (signals or {}).get("tdx", 0)
     rows.append(condition("environment", "recorded" if tdx else "not_included",
                           "TDX quotes were recorded at {n} process starts." if tdx else "No attested collection run in this archive.",
                           "python -m tgwitness.cloud verify · --sealed-attestation", n=tdx))
-    stamped = rows[3]["status"] == "checked_locally"
+    stamped = rows[2]["status"] == "checked_locally"
     command = ("python verify.py " + archive + " --fingerprint " + fp
-               + (" --tsa-ca tsa-root.pem" if stamped else " --checkpoint retained.json" if journal else "")
+               + (" --tsa-ca tsa-root.pem" if rows[2]["status"] in ("checked_locally", "partial", "recorded")
+                  else " --witness witness.zip --channel https://t.me/s/WITNESS_CHANNEL" if journal else "")
                + (" --require evidence" if journal else ""))
     return {"conditions": rows, "minimum": MINIMUM,
             "outcome": ("This archive carries a validated timestamp of its last record: with the fingerprint confirmed it meets the minimum."
                         if stamped else
-                        "The recipient adds a checkpoint retained outside the collector or a witness archive covering the last record."
+                        "The recipient needs external time from a third party covering the last record: a validated timestamp, "
+                        "a witness post read from t.me or an attested collection run."
                         if journal else
-                        "With the fingerprint confirmed this archive meets integrity and the signer key; independent binding comes from the evidence journal."),
+                        "With the fingerprint confirmed this archive meets integrity and the signer key; external time comes from the evidence journal."),
             "command": command}
 
 

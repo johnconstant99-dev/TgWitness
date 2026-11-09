@@ -16,12 +16,12 @@ from .evidence import retain_checkpoint
 from .health import next_at
 from .security import private_write
 from .store import canonical, utcnow
-from .tsa_roots import trusted_roots
+from .tsa_roots import QUALIFIED_TSA, trusted_roots
 from .verify import (DRAND_CHAIN, DRAND_GENESIS, DRAND_PERIOD, DRAND_RELAYS, OTS_BITCOIN, OTS_MAGIC, OTS_PENDING,
                      drand_beacon, drand_time, ots_summary, timestamp_reply_summary, timestamp_signature)
 
 
-DEFAULT_TSA = ["https://freetsa.org/tsr", "https://timestamp.sectigo.com"]
+DEFAULT_TSA = [QUALIFIED_TSA, "https://freetsa.org/tsr", "https://timestamp.sectigo.com"]
 
 REPLACED_TSA = {"http://timestamp.digicert.com": "https://timestamp.sectigo.com"}
 
@@ -267,8 +267,8 @@ class EvidenceMode(BaseModel):
         for value in values:
             value = value.strip().rstrip("/")
             parts = urlsplit(value)
-            if (parts.scheme != "https" or not parts.hostname or parts.username
-                    or parts.password or parts.fragment or len(value) > 300):
+            if value != QUALIFIED_TSA and (parts.scheme != "https" or not parts.hostname or parts.username
+                                           or parts.password or parts.fragment or len(value) > 300):
                 raise ValueError("Use https:// addresses without credentials.")
             if value not in clean:
                 clean.append(value)
@@ -281,7 +281,8 @@ def evidence_settings(store):
     for key in ("tsa_urls", "ots_calendars"):
         if isinstance(saved.get(key), list):
             saved[key] = [REPLACED_TSA.get(url.strip().rstrip("/"), "https://" + url.strip()[7:])
-                          if isinstance(url, str) and url.strip().startswith("http://") else url for url in saved[key]]
+                          if isinstance(url, str) and url.strip().startswith("http://")
+                          and url.strip().rstrip("/") != QUALIFIED_TSA else url for url in saved[key]]
     return EvidenceMode.model_validate(saved).model_dump()
 
 

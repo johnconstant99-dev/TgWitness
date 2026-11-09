@@ -15,7 +15,7 @@ Account connections, notifications, timestamps, off-site copies and witnesses ha
 | Secrets at rest | Session, API pair, signing key and proxy settings are encrypted with Fernet |
 | Messages and media | Files in the workspace, protected by disk or volume encryption and file permissions of the host |
 | Integrity | SHA-256 hash chain and an Ed25519 signature on every record |
-| Independent binding | Retained checkpoints, witness records, RFC 3161 and OpenTimestamps receipts, GitHub attestation and Intel TDX measurements; the verifier reports which evidence conditions they meet |
+| External time | RFC 3161 and OpenTimestamps receipts, witness posts dated by Telegram and GitHub attestation; retained checkpoints, witness records and Intel TDX measurements are supporting checks. The verifier reports which evidence conditions they meet |
 
 For vulnerability reports, see the [security policy](../.github/SECURITY.md).
 
@@ -28,7 +28,7 @@ For vulnerability reports, see the [security policy](../.github/SECURITY.md).
 - [Proxies and network routes](#proxies-and-network-routes)
 - [Sign-in and session imports](#sign-in-and-session-imports)
 - [Logs and transport](#logs-and-transport)
-- [Integrity and independent binding](#integrity-and-independent-binding)
+- [Integrity and external time](#integrity-and-external-time)
 - [If you suspect a problem](#if-you-suspect-a-problem)
 
 </details>
@@ -150,7 +150,7 @@ to log Authorization headers or request bodies. The panel listens on localhost;
 remote access goes through the supplied SSH tunnel, Cloudflare Tunnel or Caddy HTTPS,
 so tokens and login secrets travel inside SSH or TLS.
 
-## Integrity and independent binding
+## Integrity and external time
 
 Verification checks record signatures, the hash chain, attachments and the export manifest
 against the collector key. Each workspace creates its signing key at first start and
@@ -158,29 +158,33 @@ shows its fingerprint in the panel and in every export; the fingerprint retained
 the recipient pins that key. SQLite triggers enforce append-only behavior for normal
 application writes, and separate master-key storage protects a data-directory copy
 through `TGWITNESS_VAULT_KEY_FILE`.
-Checkpoints retained outside the collector and a separate witness bind the journal
-prefix they cover, RFC 3161 and OpenTimestamps receipts bind it to an external time,
-and [GitHub Actions capture](SEALED-ACTIONS.md) or an
-[Intel TDX deployment](HIGH-ASSURANCE.md#confidential-vm-on-phala-cloud-intel-tdx)
-add workflow provenance or hardware measurements of the collection environment. A
-checked GitHub attestation also carries the verified time of its signature, which
+RFC 3161 and OpenTimestamps receipts, and witness posts whose dates the verifier reads
+from Telegram, bind the journal prefix they cover to a time set by a third party.
+A checked GitHub attestation also carries the verified time of its signature, which
 binds the whole archive to an external time.
+A checkpoint is signed with the collector key and binds the records up to it only if
+the recipient obtained it before the archive, through another channel. A witness shows
+that a second key retained the journal head; who controls that key is a custody fact
+the verifier cannot check. The collector could create both alone, so they are
+supporting checks.
+[GitHub Actions capture](SEALED-ACTIONS.md) or an
+[Intel TDX deployment](HIGH-ASSURANCE.md#confidential-vm-on-phala-cloud-intel-tdx)
+add workflow provenance or hardware measurements of the collection environment.
 
-Every verification answer lists five evidence conditions with how each was checked,
+Every verification answer lists the evidence conditions with how each was checked,
 grouped by their role in the minimum:
 
 | Role | Condition |
 | --- | --- |
-| Required | Integrity; signer key pinned with `--fingerprint` |
-| At least one of these | Independent binding of the last record (retained checkpoint or confirmed witness); external time (verified RFC 3161 or OpenTimestamps receipt, witness Bitcoin seal or checked GitHub attestation) |
-| Optional | Attested collection run |
+| Required | Integrity; signer key pinned with `--fingerprint`; external time covering the last record (RFC 3161 receipt checked with `--tsa-ca`, OpenTimestamps receipt confirmed with `--check-bitcoin`, witness post read from t.me with `--channel`, witness Bitcoin seal or checked GitHub attestation) |
+| Supporting, not part of the minimum | Witness with its own key; retained checkpoint; attested collection run |
 
-The **minimum for evidence** is both required conditions and one of the next two covering
-the last exported record; a verified attested collection run adds the `attested` profile.
+The **minimum for evidence** is all three required conditions covering the last exported
+record; a verified attested collection run adds the `attested` profile.
 The final line states the result, and the answer names the options that would meet the
 missing conditions.
-When the bindings cover only earlier records, the answer states the record up to which
-the minimum holds. `--require evidence` or `--require attested` exits with code 2 when
+When verified timestamps cover only earlier records, the answer states the record up to
+which the minimum holds. `--require evidence` or `--require attested` exits with code 2 when
 the profile is not reached for the whole export, and a check requested on the command
 line that cannot run is reported as not performed with the same code. Every report
 carries the same conditions with their state in that copy and the command that checks

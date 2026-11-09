@@ -36,7 +36,7 @@ from .languages import VERIFIER_LANGUAGES
 from .outside import outside_lines
 from .presentation import producer_line
 from .reports import REPORT_JSON, verify_report, verify_selection
-from .witness import ASSURANCE_TIERS, assurance, assurance_line, check_channel, cross_check_witness, verify_dossier, verify_history_report, verify_public_proof, verify_witness
+from .witness import ASSURANCE_TIERS, assurance, assurance_line, channel_head_time, check_channel, cross_check_witness, verify_dossier, verify_history_report, verify_public_proof, verify_witness
 from .witness import (
     CONDITION_LABELS,
     EVIDENCE_PROFILES,
@@ -213,7 +213,7 @@ def verification_parser():
     parser.add_argument("--witness-fingerprint", help="Witness key fingerprint retained independently")
     parser.add_argument("--require-witness", action="store_true",
                         help="Require a pinned witness checkpoint matching the full evidence ZIP's final record")
-    parser.add_argument("--channel", help="Witness channel posts: Telegram Desktop result.json, saved page or t.me/s URL")
+    parser.add_argument("--channel", help="Witness channel posts: Telegram Desktop result.json, saved page or t.me/s URL; post dates count as external time only from a live https://t.me/s/ page")
     parser.add_argument("--evidence", type=Path,
                         help="With a profile/proof/history JSON, sealed report or disclosure: verify the referenced original archive")
     parser.add_argument("--check-drand", action="store_true",
@@ -415,6 +415,7 @@ def verification_evidence(args):
         result["witness"] = cross_check_witness(witness, args.bundle, result)
         if args.channel:
             result["witness"]["channel_check"] = check_channel(witness, args.channel)
+            result["witness"]["head_telegram_post_time"] = channel_head_time(result["witness"], result["witness"]["channel_check"])
         conflict = (result["witness"]["conflicts"] or [None])[0]
         if conflict and conflict["event_count"] > result["events"]:
             raise ValueError("The witness saw record " + str(conflict["event_count"]) + " at " + conflict["at"]
@@ -480,7 +481,9 @@ def verification_requirements(args, checked):
     check = result.get("channel_check") or (result.get("witness") or {}).get("channel_check")
     if check and (check["invalid_signatures"] or check["differ_from_journal"]):
         raise ValueError("Channel posts do not match the witness journal")
-    if check and check["telegram_post_dates"]:
+    if check and check["telegram_live_dates"]:
+        notes.append("Channel post dates were read from Telegram at verification time; edited posts are not counted.")
+    elif check and check["telegram_post_dates"]:
         notes.append("Channel dates are supplied metadata; witness signatures cover the post content.")
     if args.require_witness:
         witnessed = result.get("witness")
@@ -490,7 +493,7 @@ def verification_requirements(args, checked):
             raise ValueError("No pinned witness checkpoint matches the exported journal head; "
                              "retain a witness checkpoint at the export boundary")
         if witnessed["witness_fingerprint"] == result["fingerprint"]:
-            raise ValueError("Collector and independent witness must use different trusted signing keys")
+            raise ValueError("The collector and the witness must use different trusted signing keys")
         if check and (check["posted_but_not_found"] or not
                       set(check["matching_records"]).intersection(witnessed["export_head_witness_records"])):
             raise ValueError("Requested channel evidence is missing signed witness posts at the export boundary")

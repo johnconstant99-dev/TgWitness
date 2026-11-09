@@ -111,8 +111,9 @@ Every observed change becomes a record linked to the previous one by its hash an
 3. **Verify** an export with a key fingerprint you kept somewhere else.
 
 The signed journal keeps what the account received, source IDs and every captured
-version. A recipient checks signatures and file hashes, then compares the journal
-with checkpoints kept elsewhere. [More on the evidence model →](HOW-IT-WORKS.md)
+version. A recipient checks signatures and file hashes, external time from a third
+party for the last record, and compares the journal with checkpoints kept elsewhere.
+[More on the evidence model →](HOW-IT-WORKS.md)
 
 <details>
 <summary>What each observation keeps</summary>
@@ -191,10 +192,10 @@ Exports always contain the full journal up to a fixed point, filters only affect
 
 ```sh
 python -m pip install cryptography
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint tgwitness-checkpoint.json
-# with a witness and its channel (Telegram Desktop export)
+python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
+# with a witness and its public channel (post dates read from Telegram)
 python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 \
-    --witness witness.zip --witness-fingerprint WITNESS_SHA256 --channel result.json
+    --witness witness.zip --witness-fingerprint WITNESS_SHA256 --channel https://t.me/s/WITNESS_CHANNEL
 ```
 
 The verifier prints who signed, observed periods, gaps and never-seen message IDs, and
@@ -204,8 +205,11 @@ Keep the key fingerprint and checkpoints outside the collector, so the recipient
 independent reference. [GitHub Actions capture](SEALED-ACTIONS.md) also checks the archive
 against the approved hosted workflow and collector version.
 
-For trusted time, evidence mode stamps checkpoints with RFC 3161 and OpenTimestamps, or the
-panel prepares an offline RFC 3161 request. See [timestamps](TIMESTAMP.md), the
+The minimum for evidence is the confirmed fingerprint plus time from a third party
+covering the last record; a checkpoint is signed with the collector key and does not
+meet it alone. Evidence mode stamps checkpoints with RFC 3161 and OpenTimestamps, and
+witness posts read from t.me also count. The panel can also prepare
+an offline RFC 3161 request. See [timestamps](TIMESTAMP.md), the
 [verification record](VERIFICATION.md) and the [handoff checklist](EVIDENCE.md#investigation-handoff).
 
 </details>

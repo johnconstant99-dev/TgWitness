@@ -23,6 +23,8 @@
 
 ## 0.9.2 preview · 9 November 2026
 
+- The minimum for evidence is now integrity, the confirmed signer key and external time from a third party covering the last exported record: a validated RFC 3161 timestamp, a confirmed OpenTimestamps proof, a witness post read live from t.me, a witness Bitcoin seal or a checked GitHub attestation. A retained checkpoint and a witness with its own key are supporting checks, because the collector could create both alone. `verify.py --channel https://t.me/s/…` reads post dates from Telegram and skips the dates of edited posts; dates from a supplied `result.json` or any other source remain supplied metadata.
+
 - Refresh the pinned Wolfi base images and runtime/MCP dependencies, regenerate root and capture hash locks, and require patched QR reader wheels. Exclude OpenCV 5.0.0.93, which bundles FFmpeg 8.1.1 affected by [CVE-2026-8461](https://github.com/advisories/GHSA-qff7-4q6c-m8h6).
 
 - Simplify the panel around six daily sections: Home, Chats, Journal, Exports, Accounts and Settings. Move secondary tools, collection diagnostics, chat actions and advanced filters into contextual menus. Open saved chats after sign-in, preserve drafts and filter selections, and give messages more space on phones and desktops. Update the Russian labels and panel guide.

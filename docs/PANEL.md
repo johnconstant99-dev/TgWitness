@@ -319,7 +319,8 @@ bot if another application already receives its commands. See
 ### Evidence and backups
 
 - **Independent timestamps** send only the SHA-256 of each signed checkpoint to RFC 3161
-  authorities and OpenTimestamps calendars, every 5 to 1,440 minutes. **Anchor now**
+  authorities and OpenTimestamps calendars, every 5 to 1,440 minutes. A recipient needs
+  such third-party time for the minimum for evidence. **Anchor now**
   runs a pass. See [timestamps](TIMESTAMP.md).
 - **More witnesses**, each off until chosen: the newest drand round, Telegram's list of
   signed-in devices without IP addresses, and Cloudflare Gateway's log of the server's

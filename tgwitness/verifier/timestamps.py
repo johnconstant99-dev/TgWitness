@@ -20,6 +20,17 @@ from .common import (
     timezone,
     x509,
 )
+QUALIFIED_TSU = {
+    "8751fca3d49938f02aaea3d69983adf3d9f324447b4c00b817c3900198c0fbfd": "EC1 TSU 2021",
+    "3917e4995093954bc162568c7188c00a222023166824480e8f84a4e1f3441dc1": "EC2 TSU 2021",
+    "61726c187889a606dda86821a1faf3c5ff5f4a116254a2325893655c7e45f64f": "TSU 202301",
+    "e69a32ea707c71c1633f7c9cbfc60f902c50081d97473163ebf7098d5df36f30": "TSU 202302",
+}
+QUALIFIED_PROVIDER = "FPS Policy and Support - BOSA, Kingdom of Belgium"
+QUALIFIED_LIST = "https://tsl.belgium.be/tsl-be.xml"
+QC_STATEMENTS, QC_COMPLIANCE = "1.3.6.1.5.5.7.1.3", bytes.fromhex("0604008e460101")
+
+
 def der(data, offset):
     tag, length, start = data[offset], data[offset + 1], offset + 2
     if length & 0x80:
@@ -512,6 +523,21 @@ def openssl_verify_timestamp(data, reply, query, ca_path):
                 raise ValueError("Timestamp signature check failed: " + done.stderr.decode(errors="replace")[-500:])
 
 
+def qualified_timestamp(reply):
+    for data in timestamp_token(reply)["certificates"]:
+        certificate = x509.load_der_x509_certificate(data)
+        service = QUALIFIED_TSU.get(certificate.fingerprint(hashes.SHA256()).hex())
+        if not service:
+            continue
+        try:
+            statements = certificate.extensions.get_extension_for_oid(x509.ObjectIdentifier(QC_STATEMENTS)).value.value
+        except x509.ExtensionNotFound:
+            continue
+        if QC_COMPLIANCE in statements:
+            return {"qualified": {"service": service, "provider": QUALIFIED_PROVIDER, "trusted_list": QUALIFIED_LIST}}
+    return {}
+
+
 def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None, check_bitcoin=False):
     from .journal import verify_checkpoint
     results = []
@@ -532,6 +558,8 @@ def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None
                 if tsa_ca:
                     openssl_verify_timestamp(data, reply, query, tsa_ca)
                 entry["signature"] = "checked against the given root" if tsa_ca else "not checked (use --tsa-ca)"
+                if tsa_ca:
+                    entry.update(qualified_timestamp(reply))
                 try:
                     entry.update(timestamp_certificate_reference(reply))
                 except (ValueError, IndexError, TypeError):

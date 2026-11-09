@@ -287,10 +287,12 @@ Use a trusted installation of TgWitness and an independently obtained fingerprin
 ```sh
 python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256
 python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca tsa-root.pem
-python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --witness witness.zip --witness-fingerprint WITNESS_SHA256 --require-witness
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --witness witness.zip --witness-fingerprint WITNESS_SHA256 --channel https://t.me/s/WITNESS_CHANNEL --require-witness
 python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --check-drand
 ```
 
+The second and third commands can meet the minimum for evidence: a checked timestamp,
+or the dates Telegram set on the witness posts, gives external time for the last record.
 The witness ZIP must come from an independently trusted source; preserve its key
 and provenance too. Retain the commands, tool version, outputs, reviewed input
 hashes and unresolved questions. Beacon verification is a separate online check;
