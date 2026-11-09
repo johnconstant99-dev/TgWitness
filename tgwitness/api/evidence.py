@@ -463,7 +463,7 @@ def evidence_status(store, vault):
     stamped = [
         int(proof.name.split(".", 1)[0][11:])
         for proof in (folder.iterdir() if folder.is_dir() else [])
-        if proof.suffix in (".tsr", ".ots")
+        if proof.suffix == ".tsr"
         and proof.name.startswith("checkpoint-")
         and proof.name.split(".", 1)[0][11:].isdigit()
     ]

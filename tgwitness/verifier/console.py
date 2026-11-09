@@ -196,7 +196,8 @@ class Console:
         else:
             label = self.t("INTEGRITY ONLY · MINIMUM FOR EVIDENCE NOT MET")
         text = " " + self.glyph[state] + "  " + label + " "
-        width = sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
+        width = sum(0 if unicodedata.category(c) in ("Mn", "Me", "Cf") else 2 if unicodedata.east_asian_width(c) in "WF" else 1
+                    for c in text)
         inner = max(self.WIDTH - 4, width)
         self.say()
         if self.color:

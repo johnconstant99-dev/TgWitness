@@ -74,9 +74,9 @@ flowchart TD
 5. Start observation. Validate a controlled new message, edit and deletion, then
    retain the test references and any failures.
 
-Whole-account scope records account-visible activity within the saved settings.
-It does not access secret chats or automatically join every linked group. It also
-does not backfill every existing conversation. See [collection scope](COLLECTION.md#observation-scope-chosen-chats-a-folder-or-the-whole-account).
+Whole-account scope records account-visible activity within the saved settings, in the
+chats the account has joined. Secret Chats are recorded by the [Secret Chat module](PSEUDO-SECRET.md),
+and existing conversations are backfilled through [History](HISTORY.md). See [collection scope](COLLECTION.md#observation-scope-chosen-chats-a-folder-or-the-whole-account).
 
 ## 2. Inventory every source and acquire historical context
 
