@@ -537,7 +537,8 @@
 "Evidence & verification": "Доказательства и верификация",
 "Development": "Разработка",
 "Acquisition and complete export rates for two fresh workloads": "Показатели сбора данных и полного экспорта для двух новых рабочих нагрузок",
-"t.me/s page read live, or Desktop export": "t.me/s — просмотр страницы в режиме реального времени или экспорт на рабочий стол"
+"t.me/s page read live, or Desktop export": "t.me/s — просмотр страницы в режиме реального времени или экспорт на рабочий стол",
+"The 106-day GDPR file": "Разбор GDPR-файла: 106 дней"
 },
 "blocks": {
 "01b10dac1fa0afb8f0599bf68ea7b236f62983a1bdd7747105158d1661acc4c0": "Просто знакомитесь с проектом? Дважды щелкните по ссылке <code>scripts\\Demo.cmd</code>, чтобы перейти к автономной демо-версии. Вход в Telegram не требуется.",

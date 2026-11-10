@@ -529,7 +529,8 @@
 "Evidence & verification": "الأدلة والتحقق",
 "Development": "التطوير",
 "Acquisition and complete export rates for two fresh workloads": "معدلات الاستحواذ والتصدير الكامل لحملتي عمل جديدتين",
-"t.me/s page read live, or Desktop export": "قراءة صفحة t.me/s مباشرةً، أو تصديرها إلى سطح المكتب"
+"t.me/s page read live, or Desktop export": "قراءة صفحة t.me/s مباشرةً، أو تصديرها إلى سطح المكتب",
+"The 106-day GDPR file": "ملف GDPR: 106 أيام"
 },
 "blocks": {
 "01b10dac1fa0afb8f0599bf68ea7b236f62983a1bdd7747105158d1661acc4c0": "هل تريد الاستكشاف فقط؟ انقر نقرًا مزدوجًا على <code>scripts\\Demo.cmd</code> للحصول على نسخة تجريبية منفصلة. لا حاجة لتسجيل الدخول إلى Telegram.",

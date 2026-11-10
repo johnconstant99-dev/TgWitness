@@ -67,6 +67,7 @@
 <li><strong>Điều này không có gì đáng cười cả. Điều đáng cười là chứng kiến các luật sư hàng đầu phải mất hàng tháng trời để cố gắng xóa các đề cập về lỗ hổng bảo mật này khỏi Google. Zero Trust.</strong></li>
 <li>Nếu quý vị đọc thông báo này sau <strong>ngày 1 tháng 12 năm 2026</strong>: các hồ sơ này đã được lưu trữ vĩnh viễn tại Kho <strong>lưu trữ Nhà nước Đức (<em>Staatsarchiv / Bundesarchiv</em>)</strong> và các kho lưu trữ tư pháp nước ngoài, nơi mà không có biểu mẫu trực tuyến nào về “Quyền được lãng quên” có thể xóa bỏ chúng.</li>
 </ul>
-<p><a href="../../LICENSE">Giấy phép MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Quan điểm của chúng tôi về Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Mô hình bằng chứng</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Hồ sơ GDPR 106 ngày" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Giấy phép MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Hồ sơ GDPR 106 ngày</a> · <a href="../HOW-IT-WORKS.md">Mô hình bằng chứng</a></p>
 <p><a href="README.md">Dự án</a> · <a href="README.md">Tài liệu</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

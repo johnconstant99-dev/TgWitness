@@ -459,7 +459,7 @@ TgWitness সংযুক্ত Telegram অ্যাকাউন্টে প�
 
 লেখকদের অবস্থান ও অপারেটর বিজ্ঞপ্তি, এই ভাষায়:
 
-[লাইসেন্স এবং স্থাপত্যগত অসামঞ্জস্যতা বিজ্ঞপ্তি](TAYLOR-WESSING-EXCLUSION.md) · [অপারেটর বিজ্ঞপ্তি](OPERATOR-INCOMPATIBILITY.md) · [MIT লাইসেন্স](../../LICENSE) · [মূল NOTICE](../../NOTICE)
+[অপারেটর বিজ্ঞপ্তি](OPERATOR-INCOMPATIBILITY.md) · [MIT লাইসেন্স](../../LICENSE) · [মূল NOTICE](../../NOTICE)
 
 </details>
 

@@ -459,7 +459,7 @@ TgWitness записывает содержимое, доставленное в
 
 Позиция авторов и уведомление для операторов на русском языке:
 
-[Уведомление о несовместимости лицензий и архитектур](TAYLOR-WESSING-EXCLUSION.md) · [Уведомление для операторов](OPERATOR-INCOMPATIBILITY.md) · [Лицензия MIT](../../LICENSE) · [Оригинальный NOTICE](../../NOTICE)
+[Уведомление для операторов](OPERATOR-INCOMPATIBILITY.md) · [Лицензия MIT](../../LICENSE) · [Оригинальный NOTICE](../../NOTICE)
 
 </details>
 

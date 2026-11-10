@@ -453,16 +453,14 @@ verification steps for a signed TgWitness archive.
 
 <!-- operator-notice:start -->
 
-<a href="docs/TAYLOR-WESSING-GDPR-FILE.md"><picture>
-  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-gdpr-price-mobile-static.svg">
-  <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-gdpr-price-static.svg">
-  <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-gdpr-price-mobile.svg">
-  <img src="docs/assets/presentation/readme-gdpr-price.svg" width="1200" alt="What does GDPR non-compliance cost? Read the case file.">
+<a href="docs/OPERATOR-INCOMPATIBILITY.md"><picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-gdpr-impunity-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-gdpr-impunity-static.svg">
+  <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-gdpr-impunity-mobile.svg">
+  <img src="docs/assets/presentation/readme-gdpr-impunity.svg" width="1200" alt="GDPR, violated. Doctors, unpunished. Read the operator notice.">
 </picture></a>
 
-**What does GDPR non-compliance cost?** Elite lawyers hide history and sell GDPR non-compliance in Germany:
-a GDPR access request that took 106 days, and a PDF whose black boxes hid nothing.
-[Read the case file →](docs/TAYLOR-WESSING-GDPR-FILE.md) · [Operator notice](docs/OPERATOR-INCOMPATIBILITY.md) · [Source record](https://phishdestroy.io/steam_dossier/taylor_wessing)
+[Read the operator notice →](docs/OPERATOR-INCOMPATIBILITY.md) · [Source record](https://phishdestroy.io/steam_dossier/taylor_wessing)
 
 <!-- operator-notice:end -->
 

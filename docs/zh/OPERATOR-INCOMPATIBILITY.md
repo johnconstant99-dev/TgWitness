@@ -67,6 +67,7 @@
 <li><strong>这没什么好笑的。真正好笑的是，看着那些精英律师花数月时间试图从谷歌上删除关于此漏洞的提及。零信任。</strong></li>
 <li>如果您<strong>在2026年12月1日之后</strong>阅读本文：这些记录已永久存入<strong>德国国家档案馆（<em>Staatsarchiv / Bundesarchiv</em>）</strong>及国外司法档案馆，任何“被遗忘权”网络表单均无法将其删除。</li>
 </ul>
-<p><a href="../../LICENSE">MIT 许可协议</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">我们对 Taylor Wessing 的立场</a> · <a href="../HOW-IT-WORKS.md">证据模型</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 天的 GDPR 文件" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MIT 许可协议</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 天的 GDPR 文件</a> · <a href="../HOW-IT-WORKS.md">证据模型</a></p>
 <p><a href="README.md">项目</a> · <a href="README.md">文档</a> · <a href="../wiki/Home.md">维基</a></p>
 </div>

@@ -383,7 +383,7 @@ TgWitness 會記錄傳送到所連接 Telegram 帳戶的內容，包括聊天、
 
 作者立場聲明與營運者聲明的繁體中文版本：
 
-[授權說明及架構不相容聲明](TAYLOR-WESSING-EXCLUSION.md) · [營運者聲明](OPERATOR-INCOMPATIBILITY.md) · [MIT 授權條款](../../LICENSE) · [原始 NOTICE](../../NOTICE)
+[營運者聲明](OPERATOR-INCOMPATIBILITY.md) · [MIT 授權條款](../../LICENSE) · [原始 NOTICE](../../NOTICE)
 
 </details>
 

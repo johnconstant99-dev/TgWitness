@@ -453,7 +453,7 @@ TgWitness บันทึกเนื้อหาที่ส่งถึงบ�
 
 จุดยืนของผู้เขียนและประกาศถึงผู้ดำเนินการ ในภาษานี้:
 
-[ประกาศเรื่องใบอนุญาตและความไม่เข้ากันทางสถาปัตยกรรม](TAYLOR-WESSING-EXCLUSION.md) · [ประกาศถึงผู้ดำเนินการ](OPERATOR-INCOMPATIBILITY.md) · [สัญญาอนุญาต MIT](../../LICENSE) · [NOTICE ฉบับดั้งเดิม](../../NOTICE)
+[ประกาศถึงผู้ดำเนินการ](OPERATOR-INCOMPATIBILITY.md) · [สัญญาอนุญาต MIT](../../LICENSE) · [NOTICE ฉบับดั้งเดิม](../../NOTICE)
 
 </details>
 

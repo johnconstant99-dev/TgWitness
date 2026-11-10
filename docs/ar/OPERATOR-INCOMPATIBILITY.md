@@ -67,6 +67,7 @@
 <li><strong>هذا ليس مضحكًا. المضحك هو مشاهدة محامين من النخبة يقضون شهورًا في محاولة حذف أي إشارة إلى هذه الثغرة الأمنية من جوجل. الثقة الصفرية.</strong></li>
 <li>إذا قرأت هذا بعد <strong>1 ديسمبر 2026</strong>: فإن هذه السجلات محفوظة بشكل دائم في <strong>الأرشيفات الحكومية الألمانية (<em>Staatsarchiv / Bundesarchiv</em>)</strong> والأرشيفات القضائية الأجنبية، حيث لا يمكن لأي نموذج إلكتروني لـ«الحق في النسيان» حذفها.</li>
 </ul>
-<p><a href="../../LICENSE">رخصة MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">موقفنا بشأن شركة Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">نموذج الأدلة</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="ملف GDPR: 106 أيام" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">رخصة MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">ملف GDPR: 106 أيام</a> · <a href="../HOW-IT-WORKS.md">نموذج الأدلة</a></p>
 <p><a href="README.md">المشروع</a> · <a href="README.md">التوثيق</a> · <a href="../wiki/Home.md">ويكي</a></p>
 </div>

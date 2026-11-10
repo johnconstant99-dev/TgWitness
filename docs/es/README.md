@@ -459,7 +459,7 @@ verificación de un archivo firmado de TgWitness.
 
 La postura de los autores y el aviso sobre el operador, en este idioma:
 
-[Aviso sobre incompatibilidad de licencia y arquitectura](TAYLOR-WESSING-EXCLUSION.md) · [Aviso sobre el operador](OPERATOR-INCOMPATIBILITY.md) · [Licencia MIT](../../LICENSE) · [NOTICE original](../../NOTICE)
+[Aviso sobre el operador](OPERATOR-INCOMPATIBILITY.md) · [Licencia MIT](../../LICENSE) · [NOTICE original](../../NOTICE)
 
 </details>
 

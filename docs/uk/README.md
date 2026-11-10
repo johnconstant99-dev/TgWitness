@@ -459,7 +459,7 @@ TgWitness записує вміст, доставлений до підключ�
 
 Позиція авторів і повідомлення для операторів українською:
 
-[Повідомлення про несумісність ліцензії та архітектури](TAYLOR-WESSING-EXCLUSION.md) · [Повідомлення для операторів](OPERATOR-INCOMPATIBILITY.md) · [Ліцензія MIT](../../LICENSE) · [Оригінальний NOTICE](../../NOTICE)
+[Повідомлення для операторів](OPERATOR-INCOMPATIBILITY.md) · [Ліцензія MIT](../../LICENSE) · [Оригінальний NOTICE](../../NOTICE)
 
 </details>
 

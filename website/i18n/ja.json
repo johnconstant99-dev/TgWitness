@@ -477,7 +477,8 @@
 "Evidence & verification": "証拠と検証",
 "Development": "開発",
 "Acquisition and complete export rates for two fresh workloads": "2つの新しいワークロードにおける取得率および完全エクスポート率",
-"t.me/s page read live, or Desktop export": "t.me/s ページをリアルタイムで閲覧、またはデスクトップへエクスポート"
+"t.me/s page read live, or Desktop export": "t.me/s ページをリアルタイムで閲覧、またはデスクトップへエクスポート",
+"The 106-day GDPR file": "106日間のGDPRファイル"
 },
 "blocks": {
 "01b10dac1fa0afb8f0599bf68ea7b236f62983a1bdd7747105158d1661acc4c0": "まずは試してみたいですか？「<code>scripts\\Demo.cmd</code>」をダブルクリックすると、独立したデモ環境をご利用いただけます。Telegramへのログインは不要です。",

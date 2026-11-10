@@ -383,7 +383,7 @@ TgWitness 记录投递到所连接 Telegram 账户的内容，包括聊天、消
 
 作者立场声明和操作员声明的中文版本：
 
-[许可与架构不兼容声明](TAYLOR-WESSING-EXCLUSION.md) · [操作员声明](OPERATOR-INCOMPATIBILITY.md) · [MIT 许可证](../../LICENSE) · [原始 NOTICE](../../NOTICE)
+[操作员声明](OPERATOR-INCOMPATIBILITY.md) · [MIT 许可证](../../LICENSE) · [原始 NOTICE](../../NOTICE)
 
 </details>
 

@@ -459,7 +459,7 @@ vérification d'une archive TgWitness signée.
 
 La position des auteurs et l'avis aux opérateurs, en français :
 
-[Avis relatif à la licence et à l’incompatibilité architecturale](TAYLOR-WESSING-EXCLUSION.md) · [Avis aux opérateurs](OPERATOR-INCOMPATIBILITY.md) · [Licence MIT](../../LICENSE) · [NOTICE d'origine](../../NOTICE)
+[Avis aux opérateurs](OPERATOR-INCOMPATIBILITY.md) · [Licence MIT](../../LICENSE) · [NOTICE d'origine](../../NOTICE)
 
 </details>
 

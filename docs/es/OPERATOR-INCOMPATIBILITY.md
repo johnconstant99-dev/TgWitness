@@ -67,6 +67,7 @@
 <li><strong>Esto no tiene nada de gracioso. Lo que sí resulta gracioso es ver cómo abogados de élite se pasan meses intentando eliminar de Google cualquier mención a esta vulnerabilidad. Zero Trust.</strong></li>
 <li>Si lee esto después <strong>del 1 de diciembre de 2026</strong>: estos registros se encuentran depositados de forma permanente en los <strong>Archivos Estatales alemanes (<em>Staatsarchiv / Bundesarchiv</em>)</strong> y en archivos judiciales extranjeros, donde ningún formulario web de «derecho al olvido» podrá eliminarlos.</li>
 </ul>
-<p><a href="../../LICENSE">Licencia MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Nuestra postura respecto a Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Modelo de pruebas</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="El expediente RGPD de 106 días" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Licencia MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">El expediente RGPD de 106 días</a> · <a href="../HOW-IT-WORKS.md">Modelo de pruebas</a></p>
 <p><a href="README.md">Proyecto</a> · <a href="README.md">Documentación</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

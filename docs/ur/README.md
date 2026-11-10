@@ -459,7 +459,7 @@ Telegram Desktop سے مطابقت رکھنے والے JSON/HTML ویوز شام
 
 مصنفین کا موقف اور آپریٹر نوٹس، اسی زبان میں:
 
-[لائسنس اور فنِ تعمیر کی عدم مطابقت کا نوٹس](TAYLOR-WESSING-EXCLUSION.md) · [آپریٹر نوٹس](OPERATOR-INCOMPATIBILITY.md) · [MIT لائسنس](../../LICENSE) · [اصل NOTICE فائل](../../NOTICE)
+[آپریٹر نوٹس](OPERATOR-INCOMPATIBILITY.md) · [MIT لائسنس](../../LICENSE) · [اصل NOTICE فائل](../../NOTICE)
 
 </details>
 

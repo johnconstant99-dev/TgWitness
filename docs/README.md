@@ -36,7 +36,7 @@ Python comes bundled. Everything runs on your machine, only the download files s
 on Cloudflare. [Signatures, panel access, updates and removal](INSTALLATION.md).
 
 **Licence:** [MIT License](../LICENSE). Our
-[position on Taylor Wessing](TAYLOR-WESSING-EXCLUSION.md) adds no condition to it.
+[position on Taylor Wessing](OPERATOR-INCOMPATIBILITY.md) adds no condition to it.
 
 > **Ethical Notice & Historical Continuity**
 > [Read our author statement](ETHICAL-NOTICE.md) and its source record.

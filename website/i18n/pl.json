@@ -477,7 +477,8 @@
 "Evidence & verification": "Dowody i weryfikacja",
 "Development": "Rozwój",
 "Acquisition and complete export rates for two fresh workloads": "Wskaźniki pozyskiwania i pełnego eksportu dla dwóch nowych obciążeń roboczych",
-"t.me/s page read live, or Desktop export": "t.me/s – strona do przeglądania na żywo lub eksport na komputer stacjonarny"
+"t.me/s page read live, or Desktop export": "t.me/s – strona do przeglądania na żywo lub eksport na komputer stacjonarny",
+"The 106-day GDPR file": "Akta RODO: 106 dni"
 },
 "blocks": {
 "01b10dac1fa0afb8f0599bf68ea7b236f62983a1bdd7747105158d1661acc4c0": "Chce Pan/Pani tylko zapoznać się z serwisem? Proszę dwukrotnie kliknąć <code>scripts\\Demo.cmd</code>, aby uruchomić izolowaną wersję demonstracyjną. Nie jest wymagane logowanie do serwisu Telegram.",

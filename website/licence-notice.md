@@ -10,6 +10,6 @@ TgWitness is distributed under the [MIT License](../LICENSE). Our position adds 
 <p>Mathematik verhandelt nicht.</p>
 </blockquote>
 
-[Source record](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Ethical Notice & Historical Continuity](OPERATOR-INCOMPATIBILITY.md)
+[Source record](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Ethical Notice & Historical Continuity](../docs/OPERATOR-INCOMPATIBILITY.md)
 
-[Full MIT Licence](../LICENSE) · [Project](../README.md) · [Documentation](README.md) · [Wiki](wiki/Home.md)
+[Full MIT Licence](../LICENSE) · [Project](../README.md) · [Documentation](../docs/README.md) · [Wiki](../docs/wiki/Home.md)

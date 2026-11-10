@@ -67,6 +67,7 @@
 <li><strong>Ini bukan kelakar. Yang kelakar ialah melihat peguam elit menghabiskan berbulan-bulan cuba memadam sebutan kerentanan ini daripada Google. Amanah Sifar.</strong></li>
 <li>Jika anda membaca ini selepas <strong>1 Disember 2026</strong>: rekod-rekod ini telah disimpan secara kekal di <strong>Arkib Negeri Jerman (<em>Staatsarchiv / Bundesarchiv</em>)</strong> dan arkib kehakiman asing, di mana tiada borang web &quot;Hak untuk Dilupakan&quot; boleh memadamnya.</li>
 </ul>
-<p><a href="../../LICENSE">Lesen MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Pendapat kami mengenai Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Model bukti</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Fail GDPR 106 hari" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Lesen MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Fail GDPR 106 hari</a> · <a href="../HOW-IT-WORKS.md">Model bukti</a></p>
 <p><a href="README.md">Projek</a> · <a href="README.md">Dokumentasi</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

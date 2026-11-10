@@ -529,7 +529,8 @@
 "Evidence & verification": "Kanıt ve doğrulama",
 "Development": "Geliştirme",
 "Acquisition and complete export rates for two fresh workloads": "İki yeni iş yükü için veri toplama ve tam dışa aktarma oranları",
-"t.me/s page read live, or Desktop export": "t.me/s sayfası canlı olarak okunabilir veya masaüstü sürümüne aktarılabilir"
+"t.me/s page read live, or Desktop export": "t.me/s sayfası canlı olarak okunabilir veya masaüstü sürümüne aktarılabilir",
+"The 106-day GDPR file": "106 günlük GDPR dosyası"
 },
 "blocks": {
 "01b10dac1fa0afb8f0599bf68ea7b236f62983a1bdd7747105158d1661acc4c0": "Sadece göz atıyor musunuz? <code>scripts\\Demo.cmd</code>&#x27;ye çift tıklayarak izole bir demoyu deneyin. Telegram ile giriş yapmanıza gerek yoktur.",

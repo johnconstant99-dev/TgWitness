@@ -459,7 +459,7 @@ TgWitness जुड़े हुए Telegram खाते तक पहुँच
 
 लेखकों की स्थिति और ऑपरेटर सूचना, इस भाषा में:
 
-[लाइसेंस और वास्तुशिल्प असंगति सूचना](TAYLOR-WESSING-EXCLUSION.md) · [ऑपरेटर सूचना](OPERATOR-INCOMPATIBILITY.md) · [MIT लाइसेंस](../../LICENSE) · [मूल NOTICE](../../NOTICE)
+[ऑपरेटर सूचना](OPERATOR-INCOMPATIBILITY.md) · [MIT लाइसेंस](../../LICENSE) · [मूल NOTICE](../../NOTICE)
 
 </details>
 

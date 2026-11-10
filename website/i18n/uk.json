@@ -529,7 +529,8 @@
 "Evidence & verification": "Докази та верифікація",
 "Development": "Розробка",
 "Acquisition and complete export rates for two fresh workloads": "Показники збору даних та повного експорту для двох нових робочих навантажень",
-"t.me/s page read live, or Desktop export": "t.me/s — читання сторінки в режимі реального часу або експорт на робочий стіл"
+"t.me/s page read live, or Desktop export": "t.me/s — читання сторінки в режимі реального часу або експорт на робочий стіл",
+"The 106-day GDPR file": "Розбір GDPR-файлу: 106 днів"
 },
 "blocks": {
 "01b10dac1fa0afb8f0599bf68ea7b236f62983a1bdd7747105158d1661acc4c0": "Просто ознайомлюєтеся? Двічі клацніть на <code>scripts\\Demo.cmd</code>, щоб перейти до ізольованої демоверсії. Вхід у Telegram не потрібен.",

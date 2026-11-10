@@ -79,6 +79,8 @@ We do not know by what right the corporation was exempt from GDPR, but their eli
 - **This is not funny. What is funny is watching elite lawyers spend months trying to delete mentions of this vulnerability from Google. Zero Trust.**
 - If you read this after **December 1, 2026**: these records are permanently deposited in the **German State Archives (*Staatsarchiv / Bundesarchiv*)** and foreign judicial archives, where no "Right to be Forgotten" web form can delete them.
 
-[MIT License](../LICENSE) · [Our position on Taylor Wessing](TAYLOR-WESSING-EXCLUSION.md) · [Evidence model](HOW-IT-WORKS.md)
+[![The 106-day GDPR file](assets/presentation/chapter-case.svg)](TAYLOR-WESSING-GDPR-FILE.md)
+
+[MIT License](../LICENSE) · [The 106-day GDPR file](TAYLOR-WESSING-GDPR-FILE.md) · [Evidence model](HOW-IT-WORKS.md)
 
 [Project](../README.md) · [Documentation](README.md) · [Wiki](wiki/Home.md)

@@ -477,7 +477,8 @@
 "Evidence & verification": "Dalil va tasdiqlash",
 "Development": "Rivojlantirish",
 "Acquisition and complete export rates for two fresh workloads": "Ikki yangi ish yuklamasi uchun olish va to'liq eksport stavkalari",
-"t.me/s page read live, or Desktop export": "t.me/s sahifasini jonli o'qish yoki ish stoli uchun eksport"
+"t.me/s page read live, or Desktop export": "t.me/s sahifasini jonli o'qish yoki ish stoli uchun eksport",
+"The 106-day GDPR file": "106 kunlik GDPR fayli"
 },
 "blocks": {
 "01b10dac1fa0afb8f0599bf68ea7b236f62983a1bdd7747105158d1661acc4c0": "Faqatgina o&#x27;rganmoqchimisiz? Ajratilgan demo uchun <code>scripts\\Demo.cmd</code> ustiga ikki marta bosing. Telegramga kirish shart emas.",

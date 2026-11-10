@@ -67,6 +67,7 @@
 <li><strong>To nie jest śmieszne. Śmieszne jest natomiast obserwowanie, jak elitarni prawnicy spędzają miesiące, próbując usunąć wzmianki o tej luce w zabezpieczeniach z wyszukiwarki Google. Zero Trust.</strong></li>
 <li>Jeśli czyta Pan/Pani niniejszy tekst po <strong>1 grudnia 2026 r</strong>.: dokumenty te zostały trwale zdeponowane w <strong>niemieckich archiwach państwowych (<em>Staatsarchiv / Bundesarchiv</em>)</strong> oraz zagranicznych archiwach sądowych, gdzie nie można ich usunąć za pomocą internetowego formularza „prawa do bycia zapomnianym”.</li>
 </ul>
-<p><a href="../../LICENSE">Licencja MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Nasze stanowisko w sprawie Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Model dowodowy</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Akta RODO: 106 dni" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Licencja MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Akta RODO: 106 dni</a> · <a href="../HOW-IT-WORKS.md">Model dowodowy</a></p>
 <p><a href="README.md">Projekt</a> · <a href="README.md">Dokumentacja</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

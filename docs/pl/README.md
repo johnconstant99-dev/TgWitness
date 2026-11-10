@@ -459,7 +459,7 @@ weryfikacji podpisanego archiwum TgWitness.
 
 Stanowisko autorów i informacja dla operatorów po polsku:
 
-[Informacja o licencji i niezgodności architektonicznej](TAYLOR-WESSING-EXCLUSION.md) · [Informacja dla operatorów](OPERATOR-INCOMPATIBILITY.md) · [Licencja MIT](../../LICENSE) · [Oryginalny NOTICE](../../NOTICE)
+[Informacja dla operatorów](OPERATOR-INCOMPATIBILITY.md) · [Licencja MIT](../../LICENSE) · [Oryginalny NOTICE](../../NOTICE)
 
 </details>
 

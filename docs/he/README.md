@@ -459,7 +459,7 @@ python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TS
 
 עמדת המחברים והודעת המפעיל, בשפה זו:
 
-[הודעה בנושא הרישיון ואי־תאימות ארכיטקטונית](TAYLOR-WESSING-EXCLUSION.md) · [הודעת המפעיל](OPERATOR-INCOMPATIBILITY.md) · [רישיון MIT](../../LICENSE) · [קובץ NOTICE המקורי](../../NOTICE)
+[הודעת המפעיל](OPERATOR-INCOMPATIBILITY.md) · [רישיון MIT](../../LICENSE) · [קובץ NOTICE המקורי](../../NOTICE)
 
 </details>
 

@@ -67,6 +67,7 @@
 <li><strong>これは笑える話ではありません。笑えるのは、一流の弁護士たちが、この脆弱性に関する言及をGoogleから削除しようと何ヶ月も費やしている様子を見ることです。ゼロトラスト。</strong></li>
 <li><strong>2026年12月1日以降に</strong>本声明をお読みになる場合：これらの記録は、<strong>ドイツの州公文書館（<em>Staatsarchiv / Bundesarchiv</em>）</strong>および海外の司法公文書館に恒久的に保管されており、「忘れられる権利」のウェブフォームによって削除されることはありません。</li>
 </ul>
-<p><a href="../../LICENSE">MITライセンス</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing に関する当社の立場</a> · <a href="../HOW-IT-WORKS.md">証拠モデル</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106日間のGDPRファイル" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MITライセンス</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106日間のGDPRファイル</a> · <a href="../HOW-IT-WORKS.md">証拠モデル</a></p>
 <p><a href="README.md">プロジェクト</a> · <a href="README.md">ドキュメント</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

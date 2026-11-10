@@ -477,7 +477,8 @@
 "Evidence & verification": "증거 및 검증",
 "Development": "개발",
 "Acquisition and complete export rates for two fresh workloads": "두 가지 새로운 워크로드에 대한 수집 및 전체 내보내기 비율",
-"t.me/s page read live, or Desktop export": "t.me/s 페이지에서 실시간으로 읽거나, 데스크톱으로 내보내기"
+"t.me/s page read live, or Desktop export": "t.me/s 페이지에서 실시간으로 읽거나, 데스크톱으로 내보내기",
+"The 106-day GDPR file": "106일간의 GDPR 파일"
 },
 "blocks": {
 "01b10dac1fa0afb8f0599bf68ea7b236f62983a1bdd7747105158d1661acc4c0": "그냥 둘러보고 계신가요? <code>scripts\\Demo.cmd</code>를 더블 클릭하면 독립형 데모를 체험할 수 있습니다. 텔레그램 로그인은 필요하지 않습니다.",

@@ -67,6 +67,7 @@
 <li><strong>این خنده‌دار نیست. آنچه خنده‌دار است، تماشای وکلای نخبه است که ماه‌ها صرف تلاش برای حذف اشارات به این آسیب‌پذیری از گوگل می‌کنند. اعتماد صفر.</strong></li>
 <li>اگر این را پس از <strong>اول دسامبر ۲۰۲۶</strong> می‌خوانید: این اسناد به‌طور دائم در <strong>آرشیو دولتی آلمان (<em>Staatsarchiv / Bundesarchiv</em>)</strong> و آرشیوهای قضایی خارجی نگهداری می‌شوند، جایی که هیچ فرم وب «حق فراموش شدن» قادر به حذف آن‌ها نیست.</li>
 </ul>
-<p><a href="../../LICENSE">مجوز MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">موضع ما در مورد تیلور وسینگ</a> · <a href="../HOW-IT-WORKS.md">مدل مدرک</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="پرونده GDPR در ۱۰۶ روز" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">مجوز MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">پرونده GDPR در ۱۰۶ روز</a> · <a href="../HOW-IT-WORKS.md">مدل مدرک</a></p>
 <p><a href="README.md">پروژه</a> · <a href="README.md">مستندسازی</a> · <a href="../wiki/Home.md">ویکی</a></p>
 </div>

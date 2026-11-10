@@ -459,7 +459,7 @@ Telegram Desktop را پوشش می‌دهد. [خروجی توزیع‌شده گ
 
 موضع نویسندگان و اطلاعیه اپراتور، به همین زبان:
 
-[اعلامیه عدم سازگاری مجوز و معماری](TAYLOR-WESSING-EXCLUSION.md) · [اطلاعیه اپراتور](OPERATOR-INCOMPATIBILITY.md) · [مجوز MIT](../../LICENSE) · [فایل NOTICE اصلی](../../NOTICE)
+[اطلاعیه اپراتور](OPERATOR-INCOMPATIBILITY.md) · [مجوز MIT](../../LICENSE) · [فایل NOTICE اصلی](../../NOTICE)
 
 </details>
 

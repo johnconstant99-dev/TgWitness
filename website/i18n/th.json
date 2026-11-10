@@ -477,7 +477,8 @@
 "Evidence & verification": "หลักฐานและการตรวจสอบ",
 "Development": "การพัฒนา",
 "Acquisition and complete export rates for two fresh workloads": "อัตราการรับข้อมูลและอัตราการส่งออกข้อมูลครบถ้วนสำหรับสองชุดงานใหม่",
-"t.me/s page read live, or Desktop export": "t.me/s: อ่านหน้าแบบสด หรือ ส่งออกสู่เดสก์ท็อป"
+"t.me/s page read live, or Desktop export": "t.me/s: อ่านหน้าแบบสด หรือ ส่งออกสู่เดสก์ท็อป",
+"The 106-day GDPR file": "แฟ้ม GDPR 106 วัน"
 },
 "blocks": {
 "01b10dac1fa0afb8f0599bf68ea7b236f62983a1bdd7747105158d1661acc4c0": "กำลังสำรวจอยู่ใช่ไหม? คลิกสองครั้งที่ <code>scripts\\Demo.cmd</code> เพื่อดูเดโมแบบแยกส่วน ไม่จำเป็นต้องเข้าสู่ระบบ Telegram",

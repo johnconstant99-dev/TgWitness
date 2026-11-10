@@ -67,6 +67,7 @@
 <li><strong>এটা মজার নয়। মজার বিষয় হল, শীর্ষস্থানীয় আইনজীবীরা কয়েক মাস ধরে গুগল থেকে এই দুর্বলতার উল্লেখ মুছে ফেলার চেষ্টা করছে। জিরো ট্রাস্ট।</strong></li>
 <li>যদি আপনি এটি <strong>১ ডিসেম্বর, ২০২৬-এর</strong> পরে পড়েন: এই রেকর্ডগুলো স্থায়ীভাবে <strong>জার্মান রাষ্ট্রীয় নথিপঞ্জ (<em>Staatsarchiv / Bundesarchiv</em>)</strong> এবং বিদেশি বিচারিক নথিপঞ্জে সংরক্ষিত আছে, যেখানে কোনো &quot;ভুলে যাওয়ার অধিকার&quot; ওয়েব ফর্ম এগুলো মুছে ফেলতে পারবে না।</li>
 </ul>
-<p><a href="../../LICENSE">MIT লাইসেন্স</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">টেইলর ওয়েসিং সম্পর্কে আমাদের অবস্থান</a> · <a href="../HOW-IT-WORKS.md">প্রমাণ মডেল</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="১০৬ দিনের GDPR ফাইল" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MIT লাইসেন্স</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">১০৬ দিনের GDPR ফাইল</a> · <a href="../HOW-IT-WORKS.md">প্রমাণ মডেল</a></p>
 <p><a href="README.md">প্রকল্প</a> · <a href="README.md">ডকুমেন্টেশন</a> · <a href="../wiki/Home.md">উইকি</a></p>
 </div>

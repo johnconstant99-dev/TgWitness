@@ -459,7 +459,7 @@ toplama ve doğrulama adımlarını izleyin.
 
 Yazarların tutumu ve operatör bildirimi, bu dilde:
 
-[Lisans ve Mimari Uyumsuzluk Bildirimi](TAYLOR-WESSING-EXCLUSION.md) · [Operatör bildirimi](OPERATOR-INCOMPATIBILITY.md) · [MIT Lisansı](../../LICENSE) · [Orijinal NOTICE](../../NOTICE)
+[Operatör bildirimi](OPERATOR-INCOMPATIBILITY.md) · [MIT Lisansı](../../LICENSE) · [Orijinal NOTICE](../../NOTICE)
 
 </details>
 

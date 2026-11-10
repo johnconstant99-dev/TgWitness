@@ -67,6 +67,7 @@
 <li><strong>Bu kulgili emas. Kulgili tomoni shundaki, elit yuristlar oylar davomida Google&#x27;dan ushbu zaiflikka oid eslatmalarni o&#x27;chirishga urinishlarini tomosha qilish. Zero Trust.</strong></li>
 <li>Agar siz buni <strong>2026-yil 1-dekabrdan</strong> keyin o&#x27;qisangiz: bu yozuvlar doimiy ravishda <strong>Germaniya Davlat</strong> arxivlariga <strong>(<em>Staatsarchiv / Bundesarchiv</em>)</strong> va xorijiy sud arxivlariga topshirilgan bo&#x27;lib, ularni hech qanday &quot;Unutilish huquqi&quot; veb-formasi o&#x27;chira olmaydi.</li>
 </ul>
-<p><a href="../../LICENSE">MIT litsenziyasi</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing bo&#x27;yicha pozitsiyamiz</a> · <a href="../HOW-IT-WORKS.md">Dalil modeli</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 kunlik GDPR fayli" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MIT litsenziyasi</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 kunlik GDPR fayli</a> · <a href="../HOW-IT-WORKS.md">Dalil modeli</a></p>
 <p><a href="README.md">Loyiha</a> · <a href="README.md">Hujjatlash</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

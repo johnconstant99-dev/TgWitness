@@ -459,7 +459,7 @@ TgWitness ወደ ተገናኘው የTelegram መለያ የደረሰውን ይዘ
 
 የደራሲዎቹ አቋምና የኦፕሬተር ማስታወቂያ፣ በዚህ ቋንቋ፦
 
-[ስለ ፈቃድና ስለ ሥነ ሕንፃ አለመጣጣም ማስታወቂያ](TAYLOR-WESSING-EXCLUSION.md) · [የኦፕሬተር ማስታወቂያ](OPERATOR-INCOMPATIBILITY.md) · [MIT ፈቃድ](../../LICENSE) · [የመጀመሪያው NOTICE](../../NOTICE)
+[የኦፕሬተር ማስታወቂያ](OPERATOR-INCOMPATIBILITY.md) · [MIT ፈቃድ](../../LICENSE) · [የመጀመሪያው NOTICE](../../NOTICE)
 
 </details>
 

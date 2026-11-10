@@ -383,7 +383,7 @@ TgWitness は、接続した Telegram アカウントに届いたコンテンツ
 
 作者の立場とオペレーターに関する通知の日本語版：
 
-[ライセンスに関する説明とアーキテクチャ上の非互換性の通知](TAYLOR-WESSING-EXCLUSION.md) · [オペレーターに関する通知](OPERATOR-INCOMPATIBILITY.md) · [MIT ライセンス](../../LICENSE) · [元の NOTICE](../../NOTICE)
+[オペレーターに関する通知](OPERATOR-INCOMPATIBILITY.md) · [MIT ライセンス](../../LICENSE) · [元の NOTICE](../../NOTICE)
 
 </details>
 

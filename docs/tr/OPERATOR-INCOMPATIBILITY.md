@@ -67,6 +67,7 @@
 <li><strong>Bu komik değil. Komik olan, seçkin avukatların bu güvenlik açığına ilişkin bahisleri Google&#x27;dan silmek için aylarca uğraşmalarını izlemek. Sıfır Güven.</strong></li>
 <li>Bunu <strong>1 Aralık 2026&#x27;dan</strong> sonra okuyorsanız: bu kayıtlar, &quot;Unutulma Hakkı&quot; web formu ile silinemeyecek şekilde <strong>Alman Devlet</strong> Arşivleri&#x27;ne <strong>(<em>Staatsarchiv / Bundesarchiv</em>)</strong> ve yabancı adli arşivlere kalıcı olarak teslim edilmiştir.</li>
 </ul>
-<p><a href="../../LICENSE">MIT Lisansı</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing hakkındaki tutumumuz</a> · <a href="../HOW-IT-WORKS.md">Kanıt modeli</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 günlük GDPR dosyası" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MIT Lisansı</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 günlük GDPR dosyası</a> · <a href="../HOW-IT-WORKS.md">Kanıt modeli</a></p>
 <p><a href="README.md">Proje</a> · <a href="README.md">Belgeler</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

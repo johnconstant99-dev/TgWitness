@@ -459,7 +459,7 @@ pengesahan untuk arkib TgWitness bertandatangan.
 
 Pendirian pengarang dan notis operator, dalam bahasa ini:
 
-[Notis Lesen dan Ketidakserasian Arkitektur](TAYLOR-WESSING-EXCLUSION.md) · [Notis operator](OPERATOR-INCOMPATIBILITY.md) · [Lesen MIT](../../LICENSE) · [NOTICE asal](../../NOTICE)
+[Notis operator](OPERATOR-INCOMPATIBILITY.md) · [Lesen MIT](../../LICENSE) · [NOTICE asal](../../NOTICE)
 
 </details>
 

@@ -97,7 +97,7 @@ Then verify the export and keep the result with the test archive.
 > statement on Taylor Wessing PartG mbB — German core, Hamburg office.
 
 TgWitness is [MIT-licensed](../../LICENSE). Our
-[position on Taylor Wessing](../TAYLOR-WESSING-EXCLUSION.md) is a statement, not a licence condition.
+[position on Taylor Wessing](Operator-Incompatibility.md) is a statement, not a licence condition.
 
 Use an account you can afford to lose. A session is full access to that account, so keep
 sessions, panel tokens and keys to yourself. Messages and files on disk aren't encrypted

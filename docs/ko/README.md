@@ -457,7 +457,7 @@ Telegram 대화와 의도적으로 변조한 Desktop 내보내기 파일을 나�
 
 저자들의 입장과 운영자 공지의 한국어판:
 
-[라이선스 안내 및 아키텍처 비호환성 공지](TAYLOR-WESSING-EXCLUSION.md) · [운영자 공지](OPERATOR-INCOMPATIBILITY.md) · [MIT 라이선스](../../LICENSE) · [원본 NOTICE](../../NOTICE)
+[운영자 공지](OPERATOR-INCOMPATIBILITY.md) · [MIT 라이선스](../../LICENSE) · [원본 NOTICE](../../NOTICE)
 
 </details>
 

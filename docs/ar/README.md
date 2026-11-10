@@ -459,7 +459,7 @@ Telegram Desktop بصيغتي JSON/HTML. ويوفر [التصدير الموزّ
 
 موقف المؤلفين وإشعار المشغّل، بهذه اللغة:
 
-[إشعار عدم التوافق بين الترخيص والبنية](TAYLOR-WESSING-EXCLUSION.md) · [إشعار المشغّل](OPERATOR-INCOMPATIBILITY.md) · [ترخيص MIT](../../LICENSE) · [ملف NOTICE الأصلي](../../NOTICE)
+[إشعار المشغّل](OPERATOR-INCOMPATIBILITY.md) · [ترخيص MIT](../../LICENSE) · [ملف NOTICE الأصلي](../../NOTICE)
 
 </details>
 

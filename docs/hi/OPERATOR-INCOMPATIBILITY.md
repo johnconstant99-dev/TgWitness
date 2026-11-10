@@ -67,6 +67,7 @@
 <li><strong>यह मज़ेदार नहीं है। मज़ेदार बात यह है कि शीर्ष वकील महीनों तक इस भेद्यता के उल्लेख को Google से हटाने की कोशिश करते रहते हैं। जीरो ट्रस्ट।</strong></li>
 <li>यदि आप इसे <strong>1 दिसंबर, 2026</strong> के बाद पढ़ रहे हैं: ये अभिलेख स्थायी रूप से <strong>जर्मन राज्य अभिलेखागार (<em>Staatsarchiv / Bundesarchiv</em>)</strong> और विदेशी न्यायिक अभिलेखागारों में जमा किए गए हैं, जहाँ कोई &quot;भुलाए जाने का अधिकार&quot; वेब फॉर्म उन्हें मिटा नहीं सकता।</li>
 </ul>
-<p><a href="../../LICENSE">एमआईटी लाइसेंस</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">टेलर वेसिंग पर हमारी स्थिति</a> · <a href="../HOW-IT-WORKS.md">साक्ष्य मॉडल</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 दिनों की GDPR फ़ाइल" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">एमआईटी लाइसेंस</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 दिनों की GDPR फ़ाइल</a> · <a href="../HOW-IT-WORKS.md">साक्ष्य मॉडल</a></p>
 <p><a href="README.md">परियोजना</a> · <a href="README.md">दस्तावेज़ीकरण</a> · <a href="../wiki/Home.md">विकी</a></p>
 </div>

@@ -67,6 +67,7 @@
 <li><strong>Это не смешно. Смешно то, что юристы тратят месяцы, пытаясь удалить упоминания об этой уязвимости из Google. Zero Trust.</strong></li>
 <li>Если вы читаете это после <strong>1 декабря 2026 года</strong>: материалы дела уже на постоянном хранении в <strong>Государственном архиве Германии (<em>Staatsarchiv / Bundesarchiv</em>)</strong> и судебных архивах других стран, откуда их невозможно удалить «правом на забвение».</li>
 </ul>
-<p><a href="../../LICENSE">Лицензия MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Наша позиция в отношении Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Модель доказательств</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Разбор GDPR-файла: 106 дней" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Лицензия MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Разбор GDPR-файла: 106 дней</a> · <a href="../HOW-IT-WORKS.md">Модель доказательств</a></p>
 <p><a href="README.md">Проект</a> · <a href="README.md">Документация</a> · <a href="../wiki/Home.md">Вики</a></p>
 </div>

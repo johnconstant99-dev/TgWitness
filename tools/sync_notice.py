@@ -42,17 +42,15 @@ def quoted_html(text):
 
 
 def readme_excerpt():
-    art = 'docs/assets/presentation/readme-gdpr-price'
-    return f'''<a href="docs/TAYLOR-WESSING-GDPR-FILE.md"><picture>
+    art = 'docs/assets/presentation/readme-gdpr-impunity'
+    return f'''<a href="docs/OPERATOR-INCOMPATIBILITY.md"><picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="{art}-mobile-static.svg">
   <source media="(prefers-reduced-motion: reduce)" srcset="{art}-static.svg">
   <source media="(max-width: 640px)" srcset="{art}-mobile.svg">
-  <img src="{art}.svg" width="1200" alt="What does GDPR non-compliance cost? Read the case file.">
+  <img src="{art}.svg" width="1200" alt="GDPR, violated. Doctors, unpunished. Read the operator notice.">
 </picture></a>
 
-**What does GDPR non-compliance cost?** Elite lawyers hide history and sell GDPR non-compliance in Germany:
-a GDPR access request that took 106 days, and a PDF whose black boxes hid nothing.
-[Read the case file →](docs/TAYLOR-WESSING-GDPR-FILE.md) · [Operator notice](docs/OPERATOR-INCOMPATIBILITY.md) · [Source record]({SOURCE})'''
+[Read the operator notice →](docs/OPERATOR-INCOMPATIBILITY.md) · [Source record]({SOURCE})'''
 
 
 def excerpt(notice, licence, raw):
@@ -74,7 +72,9 @@ def document(ethical, *, wiki=False):
 
 {ethical}
 
-[MIT License]({root}LICENSE) · [Our position on Taylor Wessing]({prefix}TAYLOR-WESSING-EXCLUSION.md) · [Evidence model]({prefix}HOW-IT-WORKS.md)
+[![The 106-day GDPR file]({prefix}assets/presentation/chapter-case.svg)]({prefix}TAYLOR-WESSING-GDPR-FILE.md)
+
+[MIT License]({root}LICENSE) · [The 106-day GDPR file]({prefix}TAYLOR-WESSING-GDPR-FILE.md) · [Evidence model]({prefix}HOW-IT-WORKS.md)
 
 [Project]({root}README.md) · [Documentation]({prefix}README.md) · [Wiki]({'Home.md' if wiki else 'wiki/Home.md'})
 '''
@@ -87,9 +87,9 @@ TgWitness is distributed under the [MIT License](../LICENSE). Our position adds 
 
 {full}
 
-[Source record]({SOURCE}) · [Ethical Notice & Historical Continuity](OPERATOR-INCOMPATIBILITY.md)
+[Source record]({SOURCE}) · [Ethical Notice & Historical Continuity](../docs/OPERATOR-INCOMPATIBILITY.md)
 
-[Full MIT Licence](../LICENSE) · [Project](../README.md) · [Documentation](README.md) · [Wiki](wiki/Home.md)
+[Full MIT Licence](../LICENSE) · [Project](../README.md) · [Documentation](../docs/README.md) · [Wiki](../docs/wiki/Home.md)
 '''
 
 
@@ -100,7 +100,7 @@ def outputs(root):
         raise ValueError('The ethical statement must start with its named heading')
     result = {
         'docs/OPERATOR-INCOMPATIBILITY.md': document(ethical),
-        'docs/TAYLOR-WESSING-EXCLUSION.md': licence_document(full),
+        'website/licence-notice.md': licence_document(full),
         'docs/wiki/Operator-Incompatibility.md': ethical + f'''
 
 [Source record]({SOURCE})

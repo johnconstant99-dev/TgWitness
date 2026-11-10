@@ -67,6 +67,7 @@
 <li><strong>เรื่องนี้ไม่ตลกเลย สิ่งที่ตลกคือการได้เห็นทนายความระดับสูงใช้เวลาหลายเดือนเพื่อพยายามลบการกล่าวถึงจุดอ่อนนี้ออกจาก Google Zero Trust.</strong></li>
 <li>หากท่านอ่านข้อความนี้หลังจากวันที่ <strong>1 ธันวาคม 2026</strong>: บันทึกเหล่านี้ถูกเก็บรักษาอย่างถาวรในหอ<strong>จดหมายเหตุรัฐเยอรมัน (<em>Staatsarchiv / Bundesarchiv</em>)</strong> และหอจดหมายเหตุทางกฎหมายต่างประเทศ ซึ่งไม่มีแบบฟอร์มออนไลน์ &quot;สิทธิที่จะถูกลืม&quot; ใดที่สามารถลบข้อมูลเหล่านี้ได้</li>
 </ul>
-<p><a href="../../LICENSE">ใบอนุญาต MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">ท่าทีของเราต่อ Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">แบบจำลองหลักฐาน</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="แฟ้ม GDPR 106 วัน" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">ใบอนุญาต MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">แฟ้ม GDPR 106 วัน</a> · <a href="../HOW-IT-WORKS.md">แบบจำลองหลักฐาน</a></p>
 <p><a href="README.md">โครงการ</a> · <a href="README.md">เอกสารประกอบ</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

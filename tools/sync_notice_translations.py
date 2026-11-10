@@ -16,7 +16,7 @@ else:
     from site_content import REFERENCE
 
 ROOT = Path(__file__).resolve().parents[1]
-SLUGS = ('license', 'notice')
+SLUGS = ('notice',)
 
 
 def outputs(root=ROOT):
@@ -80,17 +80,6 @@ def outputs(root=ROOT):
                 f'<p><a href="../{Path(source).name}" lang="en">English</a></p>\n\n'
                 + translated + '\n</div>\n'
             )
-        readme = f'docs/{lang}/README.md'
-        if not (root / readme).is_file():
-            continue
-        content = (root / readme).read_text(encoding='utf-8')
-        title = site_wiki.split_title((root / sources['license']).read_text(encoding='utf-8'))[0]
-        label = data['strings'][title]
-        content, count = re.subn(r'\[[^\]\n]+\]\((?:\.\./)?TAYLOR-WESSING-EXCLUSION\.md\)',
-                                lambda _: f'[{label}](TAYLOR-WESSING-EXCLUSION.md)', content)
-        if count != 1:
-            raise ValueError(f'Expected one notice link in {readme}, found {count}')
-        result[readme] = content
     return result
 
 
@@ -110,7 +99,7 @@ def main():
             path.write_text(text, encoding='utf-8')
     if stale:
         parser.exit(1, 'Notice translations need regeneration: ' + ', '.join(stale) + '\n')
-    print('Notice translations are consistent.' if args.check else 'Updated translated notices and README links.')
+    print('Notice translations are consistent.' if args.check else 'Updated translated notices.')
 
 
 if __name__ == '__main__':

@@ -459,7 +459,7 @@ yig‘ish hamda tekshirish bosqichlarini kuzating.
 
 Mualliflarning pozitsiyasi va operator haqidagi bildirishnoma, shu tilda:
 
-[Litsenziya va arxitektura nomuvofiqligi to'g'risidagi bildirishnoma](TAYLOR-WESSING-EXCLUSION.md) · [Operator haqida bildirishnoma](OPERATOR-INCOMPATIBILITY.md) · [MIT litsenziyasi](../../LICENSE) · [Asl NOTICE](../../NOTICE)
+[Operator haqida bildirishnoma](OPERATOR-INCOMPATIBILITY.md) · [MIT litsenziyasi](../../LICENSE) · [Asl NOTICE](../../NOTICE)
 
 </details>
 

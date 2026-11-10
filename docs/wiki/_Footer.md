@@ -4,6 +4,6 @@
 
 Examples use fictional data. Keep account sessions, tokens, keys and real evidence out of public reports.
 
-TgWitness is MIT-licensed. [Our position on Taylor Wessing](../TAYLOR-WESSING-EXCLUSION.md) adds no licence condition.
+TgWitness is MIT-licensed. [Our position on Taylor Wessing](Operator-Incompatibility.md) adds no licence condition.
 
 [NOTICE — Operator Incompatibility](Operator-Incompatibility.md) · [Original statement](../../NOTICE)

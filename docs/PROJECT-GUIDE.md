@@ -403,7 +403,7 @@ Browser checks use synthetic Telegram data.
 ## License
 
 [MIT License](../LICENSE). Our
-[position on Taylor Wessing](TAYLOR-WESSING-EXCLUSION.md) is a statement, not a licence condition.
+[position on Taylor Wessing](OPERATOR-INCOMPATIBILITY.md) is a statement, not a licence condition.
 
 ## Repository map
 

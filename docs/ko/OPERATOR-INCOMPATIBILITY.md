@@ -67,6 +67,7 @@
 <li><strong>이건 웃을 일이 아닙니다. 웃긴 건 엘리트 변호사들이 구글에서 이 취약점에 대한 언급을 삭제하려고 몇 달을 허비하는 모습을 지켜보는 것입니다. 제로 트러스트.</strong></li>
 <li><strong>2026년 12월 1일</strong> 이후에 이 글을 읽으신다면: 이 기록들은 <strong>독일 국가 기록원(<em>Staatsarchiv / Bundesarchiv</em>)</strong> 및 해외 사법 기록원에 영구적으로 보관되어 있으며, 그곳에서는 ‘잊혀질 권리’ 웹 양식을 통해 삭제할 수 없습니다.</li>
 </ul>
-<p><a href="../../LICENSE">MIT 라이선스</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing에 대한 당사의 입장</a> · <a href="../HOW-IT-WORKS.md">증거 모델</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106일간의 GDPR 파일" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MIT 라이선스</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106일간의 GDPR 파일</a> · <a href="../HOW-IT-WORKS.md">증거 모델</a></p>
 <p><a href="README.md">프로젝트</a> · <a href="README.md">문서</a> · <a href="../wiki/Home.md">위키</a></p>
 </div>

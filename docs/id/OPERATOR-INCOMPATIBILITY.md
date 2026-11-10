@@ -67,6 +67,7 @@
 <li><strong>Ini tidak lucu. Yang lucu adalah melihat para pengacara elit menghabiskan berbulan-bulan berusaha menghapus penyebutan kerentanan ini dari Google. Zero Trust.</strong></li>
 <li>Jika Anda membaca ini setelah <strong>1 Desember 2026</strong>: catatan-catatan ini telah disimpan secara permanen di <strong>Arsip Negara Jerman (<em>Staatsarchiv / Bundesarchiv</em>)</strong> dan arsip peradilan asing, di mana formulir web &quot;Hak untuk Dilupakan&quot; tidak dapat menghapusnya.</li>
 </ul>
-<p><a href="../../LICENSE">Lisensi MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Sikap kami terhadap Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Model bukti</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Berkas GDPR 106 hari" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Lisensi MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Berkas GDPR 106 hari</a> · <a href="../HOW-IT-WORKS.md">Model bukti</a></p>
 <p><a href="README.md">Proyek</a> · <a href="README.md">Dokumentasi</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

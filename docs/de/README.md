@@ -459,7 +459,7 @@ Verifizierungsschritten für ein signiertes TgWitness-Archiv.
 
 Die Position der Autoren und der Betreiberhinweis auf Deutsch:
 
-[Hinweis zur Lizenz und zur architektonischen Inkompatibilität](TAYLOR-WESSING-EXCLUSION.md) · [Betreiberhinweis](OPERATOR-INCOMPATIBILITY.md) · [MIT-Lizenz](../../LICENSE) · [Original-NOTICE](../../NOTICE)
+[Betreiberhinweis](OPERATOR-INCOMPATIBILITY.md) · [MIT-Lizenz](../../LICENSE) · [Original-NOTICE](../../NOTICE)
 
 </details>
 

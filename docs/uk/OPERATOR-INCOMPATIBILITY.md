@@ -67,6 +67,7 @@
 <li><strong>Це не смішно. Смішно спостерігати, як елітні юристи місяцями намагаються видалити з Google згадки про цю вразливість. Zero Trust.</strong></li>
 <li>Якщо ви читаєте це після <strong>1 грудня 2026 року</strong>: ці записи назавжди зберігаються в <strong>Державному архіві Німеччини (<em>Staatsarchiv / Bundesarchiv</em>)</strong> та іноземних судових архівах, де їх неможливо видалити за допомогою веб-форми «Право на забуття».</li>
 </ul>
-<p><a href="../../LICENSE">Ліцензія MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Наша позиція щодо Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Модель доказів</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Розбір GDPR-файлу: 106 днів" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Ліцензія MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Розбір GDPR-файлу: 106 днів</a> · <a href="../HOW-IT-WORKS.md">Модель доказів</a></p>
 <p><a href="README.md">Проєкт</a> · <a href="README.md">Документація</a> · <a href="../wiki/Home.md">Вікі</a></p>
 </div>

@@ -67,6 +67,7 @@
 <li><strong>זה לא מצחיק. מה שמצחיק זה לראות עורכי דין מובחרים משקיעים חודשים בניסיון למחוק אזכורים של פגיעות זו מגוגל. Zero Trust.</strong></li>
 <li>אם אתם קוראים זאת לאחר <strong>ה-1 בדצמבר 2026</strong>: מסמכים אלה מופקדים לצמיתות בארכיון <strong>המדינה הגרמני (<em>Staatsarchiv / Bundesarchiv</em>)</strong> ובארכיונים משפטיים זרים, שם לא ניתן למחוק אותם באמצעות טופס מקוון של &quot;הזכות להישכח&quot;.</li>
 </ul>
-<p><a href="../../LICENSE">רישיון MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">עמדתנו בנוגע ל-Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">מודל הראיות</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="תיק ה-GDPR של 106 הימים" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">רישיון MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">תיק ה-GDPR של 106 הימים</a> · <a href="../HOW-IT-WORKS.md">מודל הראיות</a></p>
 <p><a href="README.md">פרויקט</a> · <a href="README.md">תיעוד</a> · <a href="../wiki/Home.md">ויקי</a></p>
 </div>

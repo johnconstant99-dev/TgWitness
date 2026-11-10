@@ -459,7 +459,7 @@ verifikasi untuk arsip TgWitness bertanda tangan.
 
 Posisi para penulis dan pemberitahuan untuk operator, dalam bahasa ini:
 
-[Pemberitahuan Ketidakcocokan Lisensi dan Arsitektur](TAYLOR-WESSING-EXCLUSION.md) · [Pemberitahuan operator](OPERATOR-INCOMPATIBILITY.md) · [Lisensi MIT](../../LICENSE) · [NOTICE asli](../../NOTICE)
+[Pemberitahuan operator](OPERATOR-INCOMPATIBILITY.md) · [Lisensi MIT](../../LICENSE) · [NOTICE asli](../../NOTICE)
 
 </details>
 

@@ -67,6 +67,7 @@
 <li><strong>ይህ አስቂኝ አይደለም። አስቂኙ ነገር ታዋቂ ጠበቆች ስለዚህ ተጋላጭነት የሚጠቅሱ ጽሑፎችን ከGoogle ለማስወገድ ወራትን ሲያጠፉ ማየት ነው። Zero Trust።</strong></li>
 <li>ይህን ከ<strong>ዲሴምበር 1 ቀን 2026</strong> በኋላ እያነበቡ ከሆነ፦ እነዚህ መዛግብት በ<strong>ጀርመን የመንግሥት ቤተ መዛግብት (<em>Staatsarchiv / Bundesarchiv</em>)</strong> እና በውጭ የፍትሕ ቤተ መዛግብት ውስጥ ለዘለቄታው ተቀምጠዋል፤ ማንኛውም የ«የመረሳት መብት» የድር ቅጽ ሊያስወግዳቸው አይችልም።</li>
 </ul>
-<p><a href="../../LICENSE">የMIT ፈቃድ</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">በTaylor Wessing ላይ ያለን አቋም</a> · <a href="../HOW-IT-WORKS.md">የማስረጃ ሞዴል</a></p>
+<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="የ106 ቀናት የGDPR ፋይል" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">የMIT ፈቃድ</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">የ106 ቀናት የGDPR ፋይል</a> · <a href="../HOW-IT-WORKS.md">የማስረጃ ሞዴል</a></p>
 <p><a href="README.md">ፕሮጀክት</a> · <a href="README.md">ሰነዶች</a> · <a href="../wiki/Home.md">ዊኪ</a></p>
 </div>

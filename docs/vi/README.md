@@ -459,7 +459,7 @@ xác minh cho một tệp lưu trữ TgWitness có chữ ký.
 
 Quan điểm của các tác giả và thông báo cho nhà vận hành, bằng tiếng Việt:
 
-[Thông báo về sự không tương thích giữa giấy phép và kiến trúc](TAYLOR-WESSING-EXCLUSION.md) · [Thông báo cho nhà vận hành](OPERATOR-INCOMPATIBILITY.md) · [Giấy phép MIT](../../LICENSE) · [NOTICE gốc](../../NOTICE)
+[Thông báo cho nhà vận hành](OPERATOR-INCOMPATIBILITY.md) · [Giấy phép MIT](../../LICENSE) · [NOTICE gốc](../../NOTICE)
 
 </details>
 

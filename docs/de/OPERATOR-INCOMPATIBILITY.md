@@ -67,6 +67,7 @@
 <li><strong>Das ist nicht lustig. Lustig ist es hingegen, zu beobachten, wie Spitzenanwälte monatelang versuchen, Erwähnungen dieser Sicherheitslücke aus Google zu löschen. Zero Trust.</strong></li>
 <li>Falls Sie dies nach <strong>dem 1. Dezember 2026</strong> lesen: Diese Unterlagen sind dauerhaft im <strong>deutschen Staatsarchiv (<em>Staatsarchiv / Bundesarchiv</em>)</strong> sowie in ausländischen Justizarchiven hinterlegt, wo sie durch kein Webformular zum „Recht auf Vergessenwerden“ gelöscht werden können.</li>
 </ul>
-<p><a href="../../LICENSE">MIT-Lizenz</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Unsere Stellungnahme zu Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Beweismodell</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="Die DSGVO-Akte: 106 Tage" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MIT-Lizenz</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Die DSGVO-Akte: 106 Tage</a> · <a href="../HOW-IT-WORKS.md">Beweismodell</a></p>
 <p><a href="README.md">Projekt</a> · <a href="README.md">Dokumentation</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

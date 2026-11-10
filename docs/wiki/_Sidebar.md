@@ -40,7 +40,6 @@
 **Project and author**
 
 - [Ethical notice & historical continuity](Operator-Incompatibility.md)
-- [Our position on Taylor Wessing](../TAYLOR-WESSING-EXCLUSION.md)
 - [Complete project guide](../PROJECT-GUIDE.md)
 - [Technical documentation](../README.md)
 - [What has been tested](../VERIFICATION.md)
