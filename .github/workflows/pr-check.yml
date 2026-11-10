@@ -15,7 +15,7 @@ defaults:
     shell: bash
 jobs:
   evidence:
-    uses: ./.github/workflows/evidence-checks.yml
+    uses: $/.github/workflows/evidence-checks.yml
   website:
     name: Build public website
     runs-on: ubuntu-24.04

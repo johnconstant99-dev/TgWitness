@@ -48,7 +48,7 @@ jobs:
   checks:
     name: Release build and package smoke
     needs: version
-    uses: ./.github/workflows/checks.yml
+    uses: $/.github/workflows/checks.yml
     with:
       full_platforms: true
   security:
@@ -57,7 +57,7 @@ jobs:
     permissions:
       contents: read
       security-events: write  # upload SARIF results
-    uses: ./.github/workflows/security-audit.yml
+    uses: $/.github/workflows/security-audit.yml
   sealed:
     name: Build sealed image and verify release pins
     needs: version
@@ -65,7 +65,7 @@ jobs:
       contents: read
       id-token: write  # OIDC token for Sigstore signing
       attestations: write  # store the sealed image attestation
-    uses: ./.github/workflows/sealed-checks.yml
+    uses: $/.github/workflows/sealed-checks.yml
   portable:
     name: Publish Windows portable package
     if: github.event_name == 'release'

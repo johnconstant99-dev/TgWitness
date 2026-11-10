@@ -52,7 +52,7 @@ jobs:
   acceptance:
     name: Qualify the signed installer on Linux and Windows
     needs: build
-    uses: ./.github/workflows/installer-acceptance.yml
+    uses: $/.github/workflows/installer-acceptance.yml
     with:
       artifact: tgwitness-installer-site
   qualify:

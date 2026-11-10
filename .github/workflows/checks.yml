@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name != 'release' }}
 jobs:
   evidence:
-    uses: ./.github/workflows/evidence-checks.yml
+    uses: $/.github/workflows/evidence-checks.yml
   quality:
     name: Dependencies, lint and source
     runs-on: ubuntu-latest
