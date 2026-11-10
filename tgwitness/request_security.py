@@ -131,8 +131,11 @@ class RequestSecurity:
             return await JSONResponse({"detail": "Too many requests. Wait before trying again."}, status_code=429,
                                       headers={"Retry-After": str(max(1, math.ceil(wait))), "Cache-Control": "no-store"})(scope, receive, send)
         row["requests"].append(now)
-        headers = dict(scope.get("headers") or [])
-        presented = b"authorization" in headers or headers.get(b"content-type", b"").startswith(b"application/json")
+        headers = scope.get("headers") or []
+        kinds = [value.split(b";")[0].strip().lower() for name, value in headers if name.lower() == b"content-type"]
+        presented = any(name.lower() == b"authorization" for name, _ in headers) or (
+            scope.get("method") not in ("GET", "HEAD")
+            and (not kinds or any(kind == b"application/json" or kind.endswith(b"+json") for kind in kinds)))
 
         async def checked_send(message):
             if presented and message["type"] == "http.response.start" and message["status"] == 401:
